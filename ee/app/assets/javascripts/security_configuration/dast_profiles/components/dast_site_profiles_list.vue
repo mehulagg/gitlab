@@ -100,12 +100,8 @@ export default {
     :fields="fields"
     :full-path="fullPath"
     @load-more-profiles="$emit('load-more-profiles')"
-    @delete-profile="$emit('delete-profile')"
+    @delete-profile="$emit('delete-profile', $event)"
   >
-    <!-- <template #cell(profileName)="{ value }">
-      <strong>hello {{ value }}</strong>
-    </template> -->
-
     <template #cell(validationStatus)="{ value }">
       <template v-if="shouldShowValidationStatus(value)">
         <span :class="$options.statuses[value].cssClass">
