@@ -6,12 +6,14 @@ RSpec.describe 'registrations/welcome/show' do
   using RSpec::Parameterized::TableSyntax
 
   let_it_be(:user) { User.new }
+  let_it_be(:user_other_role_details_enabled) { false }
 
   before do
     allow(view).to receive(:current_user).and_return(user)
     allow(view).to receive(:redirect_path).and_return(redirect_path)
     allow(view).to receive(:onboarding_issues_experiment_enabled?).and_return(onboarding_issues_experiment_enabled)
     allow(Gitlab).to receive(:com?).and_return(true)
+    stub_feature_flags(user_other_role_details: user_other_role_details_enabled)
 
     render
   end
@@ -48,6 +50,20 @@ RSpec.describe 'registrations/welcome/show' do
       it { is_expected.to have_selector('#progress-bar') }
     else
       it { is_expected.not_to have_selector('#progress-bar') }
+    end
+
+    it 'has a hidden field for other role' do
+      is_expected.not_to have_selector('input[type="text"][name="user[other_role]"]')
+      is_expected.to have_selector('input[type="hidden"][name="user[other_role]"]', visible: false)
+    end
+
+    context 'feature flag other_role_details is enabled' do
+      let_it_be(:user_other_role_details_enabled) { true }
+
+      it 'has a text field for other role' do
+        is_expected.not_to have_selector('input[type="hidden"][name="user[other_role]"]', visible: false)
+        is_expected.to have_selector('input[type="text"][name="user[other_role]"]')
+      end
     end
   end
 end

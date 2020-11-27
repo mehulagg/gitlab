@@ -16,6 +16,13 @@
             = f.label :role, _('Role'), class: 'label-bold'
             = f.select :role, ::User.roles.keys.map { |role| [role.titleize, role] }, {}, class: 'form-control', autofocus: true
             .form-text.gl-text-gray-500.gl-mt-3= _('This will help us personalize your onboarding experience.')
+            - if Feature.enabled?(:user_other_role_details)
+              .row
+                #other_role_group.form-group.col-sm-12{ class: ("hidden") }
+                  = f.label :other_role, _('What is your job title? (optional)'), class: 'label-bold'
+                  = f.text_field :other_role, class: 'form-control'
+            - else
+              = f.hidden_field :other_role, value: ''
         = render_if_exists "registrations/welcome/setup_for_company", f: f
         .row
           .form-group.col-sm-12.gl-mb-0
