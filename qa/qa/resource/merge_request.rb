@@ -34,7 +34,7 @@ module QA
       attribute :target do
         Repository::ProjectPush.fabricate! do |resource|
           resource.project = project
-          resource.branch_name = 'master'
+          resource.branch_name = Runtime::Env.default_branch
           resource.new_branch = @target_new_branch
           resource.remote_branch = target_branch
         end
@@ -56,7 +56,7 @@ module QA
         @title = 'QA test - merge request'
         @description = 'This is a test merge request'
         @source_branch = "qa-test-feature-#{SecureRandom.hex(8)}"
-        @target_branch = "master"
+        @target_branch = Runtime::Env.default_branch
         @assignee = nil
         @milestone = nil
         @labels = []
