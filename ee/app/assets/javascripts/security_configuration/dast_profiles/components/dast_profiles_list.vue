@@ -3,7 +3,6 @@ import { uniqueId } from 'lodash';
 import {
   GlAlert,
   GlButton,
-  GlIcon,
   GlModal,
   GlSkeletonLoader,
   GlTable,
@@ -14,7 +13,6 @@ export default {
   components: {
     GlAlert,
     GlButton,
-    GlIcon,
     GlModal,
     GlSkeletonLoader,
     GlTable,

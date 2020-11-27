@@ -1,12 +1,11 @@
 <script>
-import { uniqueId } from 'lodash';
 import { GlButton, GlIcon, GlTooltipDirective } from '@gitlab/ui';
-import ProfilesList from './dast_profiles_list.vue';
-import DastSiteValidationModal from 'ee/security_configuration/dast_site_validation/components/dast_site_validation_modal.vue';
 import {
   DAST_SITE_VALIDATION_STATUS,
   DAST_SITE_VALIDATION_STATUS_PROPS,
 } from 'ee/security_configuration/dast_site_validation/constants';
+import DastSiteValidationModal from 'ee/security_configuration/dast_site_validation/components/dast_site_validation_modal.vue';
+import ProfilesList from './dast_profiles_list.vue';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
 const { PENDING, FAILED } = DAST_SITE_VALIDATION_STATUS;
@@ -15,46 +14,14 @@ export default {
   components: {
     GlButton,
     GlIcon,
-    ProfilesList,
     DastSiteValidationModal,
+    ProfilesList,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
   },
   mixins: [glFeatureFlagsMixin()],
   props: {
-    profiles: {
-      type: Array,
-      required: true,
-    },
-    fields: {
-      type: Array,
-      required: true,
-    },
-    errorMessage: {
-      type: String,
-      required: false,
-      default: '',
-    },
-    errorDetails: {
-      type: Array,
-      required: false,
-      default: () => [],
-    },
-    isLoading: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    profilesPerPage: {
-      type: Number,
-      required: true,
-    },
-    hasMoreProfilesToLoad: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
     fullPath: {
       type: String,
       required: true,
@@ -89,19 +56,7 @@ export default {
 };
 </script>
 <template>
-  <profiles-list
-    data-testid="siteProfilesList"
-    :error-message="errorMessage"
-    :error-details="errorDetails"
-    :has-more-profiles-to-load="hasMoreProfilesToLoad"
-    :is-loading="isLoading"
-    :profiles-per-page="profilesPerPage"
-    :profiles="profiles"
-    :fields="fields"
-    :full-path="fullPath"
-    @load-more-profiles="$emit('load-more-profiles')"
-    @delete-profile="$emit('delete-profile', $event)"
-  >
+  <profiles-list :full-path="fullPath" v-bind="$attrs" v-on="$listeners">
     <template #cell(validationStatus)="{ value }">
       <template v-if="shouldShowValidationStatus(value)">
         <span :class="$options.statuses[value].cssClass">
