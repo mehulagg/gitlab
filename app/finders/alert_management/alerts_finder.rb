@@ -43,7 +43,12 @@ module AlertManagement
     end
 
     def by_search(collection)
-      params[:search].present? ? collection.search(params[:search]) : collection
+      if params[:monitoring_tool].present?
+        collection = collection.by_monitoring_tool(params[:monitoring_tool])
+        params[:search].present? ? collection.fuzzy_search(params[:search], [:title, :description, :service]) : collection
+      else
+        params[:search].present? ? collection.search(params[:search]) : collection
+      end
     end
 
     def sort(collection)

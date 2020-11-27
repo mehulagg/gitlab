@@ -121,6 +121,7 @@ module AlertManagement
     scope :search, -> (query) { fuzzy_search(query, [:title, :description, :monitoring_tool, :service]) }
     scope :open, -> { with_status(open_statuses) }
     scope :not_resolved, -> { without_status(:resolved) }
+    scope :by_monitoring_tool, -> (tool) { where(monitoring_tool: tool) }
     scope :with_prometheus_alert, -> { includes(:prometheus_alert) }
 
     scope :order_start_time,    -> (sort_order) { order(started_at: sort_order) }

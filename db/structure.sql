@@ -9327,13 +9327,14 @@ CREATE TABLE application_settings (
     require_admin_approval_after_user_signup boolean DEFAULT true NOT NULL,
     help_page_documentation_base_url text,
     automatic_purchased_storage_allocation boolean DEFAULT false NOT NULL,
+    container_registry_expiration_policies_worker_capacity integer DEFAULT 0 NOT NULL,
     encrypted_ci_jwt_signing_key text,
     encrypted_ci_jwt_signing_key_iv text,
-    container_registry_expiration_policies_worker_capacity integer DEFAULT 0 NOT NULL,
     elasticsearch_analyzers_smartcn_enabled boolean DEFAULT false NOT NULL,
     elasticsearch_analyzers_smartcn_search boolean DEFAULT false NOT NULL,
     elasticsearch_analyzers_kuromoji_enabled boolean DEFAULT false NOT NULL,
     elasticsearch_analyzers_kuromoji_search boolean DEFAULT false NOT NULL,
+    new_user_signups_cap integer,
     secret_detection_token_revocation_enabled boolean DEFAULT false NOT NULL,
     secret_detection_token_revocation_url text,
     encrypted_secret_detection_token_revocation_token text,
@@ -9341,7 +9342,6 @@ CREATE TABLE application_settings (
     domain_denylist_enabled boolean DEFAULT false,
     domain_denylist text,
     domain_allowlist text,
-    new_user_signups_cap integer,
     encrypted_cloud_license_auth_token text,
     encrypted_cloud_license_auth_token_iv text,
     secret_detection_revocation_token_types_url text,
@@ -16973,6 +16973,9 @@ CREATE TABLE user_statuses (
     emoji character varying DEFAULT 'speech_balloon'::character varying NOT NULL,
     message character varying(100),
     message_html character varying,
+    new_column_name integer NOT NULL,
+    new_column_name2 integer DEFAULT 0 NOT NULL,
+    new_column_name3 integer DEFAULT 0 NOT NULL,
     availability smallint DEFAULT 0 NOT NULL
 );
 
@@ -17400,7 +17403,7 @@ CREATE TABLE vulnerability_occurrences (
     primary_identifier_id bigint NOT NULL,
     project_fingerprint bytea NOT NULL,
     location_fingerprint bytea NOT NULL,
-    uuid character varying(36) NOT NULL,
+    uuid character varying(36),
     name character varying NOT NULL,
     metadata_version character varying NOT NULL,
     raw_metadata text NOT NULL,
@@ -17551,8 +17554,8 @@ CREATE TABLE web_hooks (
     encrypted_url character varying,
     encrypted_url_iv character varying,
     deployment_events boolean DEFAULT false NOT NULL,
-    releases_events boolean DEFAULT false NOT NULL,
-    feature_flag_events boolean DEFAULT false NOT NULL
+    feature_flag_events boolean DEFAULT false NOT NULL,
+    releases_events boolean DEFAULT false NOT NULL
 );
 
 CREATE SEQUENCE web_hooks_id_seq
