@@ -1670,7 +1670,8 @@ isn't available from `docs.gitlab.com`, use one of the following methods to view
 tagged and released set of documentation for your installed version:
 
 - In the [documentation archives](https://docs.gitlab.com/archives/).
-- At the `/help` URL for any GitLab installation.
+- At the `/help` URL of your GitLab instance.
+- In the documentation repository based on the respective branch ([13.2](https://gitlab.com/gitlab-org/gitlab/-/tree/13-2-stable-ee/doc) for example).
 
 ### Where to put version text
 
