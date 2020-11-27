@@ -2,6 +2,7 @@
 
 require_relative File.expand_path('../../lib/gitlab/danger/commit_linter', __dir__)
 
+GITLAB_INITIAL_COMMIT = '93efff945215a4407afcaf0cba15ac601b56df0d'
 COMMIT_MESSAGE_GUIDELINES = "https://docs.gitlab.com/ee/development/contributing/merge_request_workflow.html#commit-messages-guidelines"
 MORE_INFO = "For more information, take a look at our [Commit message guidelines](#{COMMIT_MESSAGE_GUIDELINES})."
 THE_DANGER_JOB_TEXT = "the `danger-review` job"
@@ -54,6 +55,11 @@ end
 # very helpful, and it doesn't offer the means of ignoring merge commits.
 def lint_commit(commit)
   linter = Gitlab::Danger::CommitLinter.new(commit)
+
+  # Do not lint commits in subtrees such as workhorse
+  unless system(*%W[git merge-base --is-ancestor #{GITLAB_INITIAL_COMMIT} #{commit.sha}])
+    return linter
+  end
 
   # For now we'll ignore merge commits, as getting rid of those is a problem
   # separate from enforcing good commit messages.
