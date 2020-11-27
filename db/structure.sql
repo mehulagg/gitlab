@@ -11873,6 +11873,41 @@ CREATE SEQUENCE environments_id_seq
 
 ALTER SEQUENCE environments_id_seq OWNED BY environments.id;
 
+CREATE TABLE epic_board_labels (
+    id bigint NOT NULL,
+    epic_board_id bigint NOT NULL,
+    label_id bigint NOT NULL
+);
+
+CREATE SEQUENCE epic_board_labels_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE epic_board_labels_id_seq OWNED BY epic_board_labels.id;
+
+CREATE TABLE epic_boards (
+    id bigint NOT NULL,
+    group_id bigint NOT NULL,
+    hide_backlog_list boolean DEFAULT false NOT NULL,
+    hide_closed_list boolean DEFAULT false NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    name text DEFAULT 'Development'::text,
+    CONSTRAINT check_7ab53df0e5 CHECK ((char_length(name) <= 255))
+);
+
+CREATE SEQUENCE epic_boards_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE epic_boards_id_seq OWNED BY epic_boards.id;
+
 CREATE TABLE epic_issues (
     id integer NOT NULL,
     epic_id integer NOT NULL,
@@ -17962,6 +17997,10 @@ ALTER TABLE ONLY emails ALTER COLUMN id SET DEFAULT nextval('emails_id_seq'::reg
 
 ALTER TABLE ONLY environments ALTER COLUMN id SET DEFAULT nextval('environments_id_seq'::regclass);
 
+ALTER TABLE ONLY epic_board_labels ALTER COLUMN id SET DEFAULT nextval('epic_board_labels_id_seq'::regclass);
+
+ALTER TABLE ONLY epic_boards ALTER COLUMN id SET DEFAULT nextval('epic_boards_id_seq'::regclass);
+
 ALTER TABLE ONLY epic_issues ALTER COLUMN id SET DEFAULT nextval('epic_issues_id_seq'::regclass);
 
 ALTER TABLE ONLY epic_metrics ALTER COLUMN id SET DEFAULT nextval('epic_metrics_id_seq'::regclass);
@@ -19094,6 +19133,12 @@ ALTER TABLE ONLY emails
 
 ALTER TABLE ONLY environments
     ADD CONSTRAINT environments_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY epic_board_labels
+    ADD CONSTRAINT epic_board_labels_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY epic_boards
+    ADD CONSTRAINT epic_boards_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY epic_issues
     ADD CONSTRAINT epic_issues_pkey PRIMARY KEY (id);
@@ -20892,6 +20937,12 @@ CREATE UNIQUE INDEX index_environments_on_project_id_and_slug ON environments US
 CREATE INDEX index_environments_on_project_id_state_environment_type ON environments USING btree (project_id, state, environment_type);
 
 CREATE INDEX index_environments_on_state_and_auto_stop_at ON environments USING btree (state, auto_stop_at) WHERE ((auto_stop_at IS NOT NULL) AND ((state)::text = 'available'::text));
+
+CREATE INDEX index_epic_board_labels_on_epic_board_id ON epic_board_labels USING btree (epic_board_id);
+
+CREATE INDEX index_epic_board_labels_on_label_id ON epic_board_labels USING btree (label_id);
+
+CREATE INDEX index_epic_boards_on_group_id ON epic_boards USING btree (group_id);
 
 CREATE INDEX index_epic_issues_on_epic_id ON epic_issues USING btree (epic_id);
 
@@ -23655,6 +23706,9 @@ ALTER TABLE ONLY service_desk_settings
 ALTER TABLE ONLY saml_group_links
     ADD CONSTRAINT fk_rails_22e312c530 FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY epic_board_labels
+    ADD CONSTRAINT fk_rails_238e8c8708 FOREIGN KEY (label_id) REFERENCES labels(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY group_custom_attributes
     ADD CONSTRAINT fk_rails_246e0db83a FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE;
 
@@ -23693,6 +23747,9 @@ ALTER TABLE ONLY group_group_links
 
 ALTER TABLE ONLY geo_repository_updated_events
     ADD CONSTRAINT fk_rails_2b70854c08 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY epic_boards
+    ADD CONSTRAINT fk_rails_2be2318008 FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY protected_branch_unprotect_access_levels
     ADD CONSTRAINT fk_rails_2d2aba21ef FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
@@ -23807,6 +23864,9 @@ ALTER TABLE ONLY geo_node_namespace_links
 
 ALTER TABLE ONLY epic_issues
     ADD CONSTRAINT fk_rails_4209981af6 FOREIGN KEY (issue_id) REFERENCES issues(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY epic_board_labels
+    ADD CONSTRAINT fk_rails_4235890607 FOREIGN KEY (epic_board_id) REFERENCES epic_boards(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY ci_refs
     ADD CONSTRAINT fk_rails_4249db8cc3 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
