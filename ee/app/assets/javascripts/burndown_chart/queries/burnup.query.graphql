@@ -1,7 +1,6 @@
 query IterationBurnupTimesSeriesData($id: ID!, $isIteration: Boolean = false) {
   milestone(id: $id) @skip(if: $isIteration) {
     title
-    id
     report {
       burnupTimeSeries {
         date
@@ -10,11 +9,24 @@ query IterationBurnupTimesSeriesData($id: ID!, $isIteration: Boolean = false) {
         completedCount
         completedWeight
       }
+      stats {
+        total {
+          weight
+          count
+        }
+        complete {
+          weight
+          count
+        }
+        incomplete {
+          weight
+          count
+        }
+      }
     }
   }
   iteration(id: $id) @include(if: $isIteration) {
     title
-    id
     report {
       burnupTimeSeries {
         date
@@ -22,6 +34,20 @@ query IterationBurnupTimesSeriesData($id: ID!, $isIteration: Boolean = false) {
         scopeWeight
         completedCount
         completedWeight
+      }
+      stats {
+        total {
+          weight
+          count
+        }
+        complete {
+          weight
+          count
+        }
+        incomplete {
+          weight
+          count
+        }
       }
     }
   }

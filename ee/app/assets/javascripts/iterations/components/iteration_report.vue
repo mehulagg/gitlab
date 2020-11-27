@@ -13,8 +13,6 @@ import BurnCharts from 'ee/burndown_chart/components/burn_charts.vue';
 import { formatDate } from '~/lib/utils/datetime_utility';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { __ } from '~/locale';
-import IterationReportSummaryClosed from './iteration_report_summary_closed.vue';
-import IterationReportSummaryOpen from './iteration_report_summary_open.vue';
 import IterationForm from './iteration_form.vue';
 import IterationReportTabs from './iteration_report_tabs.vue';
 import query from '../queries/iteration.query.graphql';
@@ -42,8 +40,6 @@ export default {
     GlEmptyState,
     GlLoadingIcon,
     IterationForm,
-    IterationReportSummaryClosed,
-    IterationReportSummaryOpen,
     IterationReportTabs,
   },
   apollo: {
@@ -219,20 +215,13 @@ export default {
       </div>
       <h3 ref="title" class="page-title">{{ iteration.title }}</h3>
       <div ref="description" v-html="iteration.descriptionHtml"></div>
-      <iteration-report-summary-closed
-        v-if="iteration.state === 'closed'"
-        :iteration-id="iteration.id"
-      />
-      <iteration-report-summary-open
-        v-else
-        :full-path="fullPath"
-        :iteration-id="iteration.id"
-        :namespace-type="namespaceType"
-      />
       <burn-charts
         :start-date="iteration.startDate"
         :due-date="iteration.dueDate"
         :iteration-id="iteration.id"
+        :iteration-state="iteration.state"
+        :full-path="fullPath"
+        :namespace-type="namespaceType"
       />
       <iteration-report-tabs
         :full-path="fullPath"

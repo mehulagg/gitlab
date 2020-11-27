@@ -16,9 +16,9 @@ export default {
       },
       update(data) {
         return {
-          open: data[this.namespaceType]?.openIssues?.count || 0,
-          assigned: data[this.namespaceType]?.assignedIssues?.count || 0,
-          closed: data[this.namespaceType]?.closedIssues?.count || 0,
+          open: data[this.namespaceType]?.openIssues?.[this.displayValue] || 0,
+          assigned: data[this.namespaceType]?.assignedIssues?.[this.displayValue] || 0,
+          closed: data[this.namespaceType]?.closedIssues?.[this.displayValue] || 0,
         };
       },
       error() {
@@ -40,6 +40,11 @@ export default {
       required: false,
       default: Namespace.Group,
       validator: value => Object.values(Namespace).includes(value),
+    },
+    displayValue: {
+      type: String, // TODO enum
+      required: false,
+      default: 'count',
     },
   },
   data() {
