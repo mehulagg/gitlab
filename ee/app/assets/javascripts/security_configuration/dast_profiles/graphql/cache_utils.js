@@ -57,14 +57,8 @@ export const dastProfilesDeleteResponse = ({ mutationName, payloadTypeName }) =>
   },
 });
 
-export const updateSiteProfilesStatuses = ({
-  fullPath,
-  // TODO: replace with actual values. This helper will most
-  // likely have to handle multiple normalized URLs/statuses at once.
-  normalizedUrl = 'https://paulgv.com',
-  validationStatus,
-  store,
-}) => {
+// TODO: should this helper handle multiple values at once?
+export const updateSiteProfilesStatuses = ({ fullPath, normalizedTargetUrl, status, store }) => {
   const queryBody = {
     query: dastSiteProfilesQuery,
     variables: {
@@ -75,12 +69,13 @@ export const updateSiteProfilesStatuses = ({
   const data = produce(sourceData, draftState => {
     // eslint-disable-next-line no-param-reassign
     draftState.project.siteProfiles.edges = draftState.project.siteProfiles.edges.map(edge => {
-      if (edge.node.targetUrl === normalizedUrl) {
+      // TODO: make sure we match against normalized URLs here
+      if (edge.node.targetUrl === normalizedTargetUrl) {
         return {
           ...edge,
           node: {
             ...edge.node,
-            validationStatus,
+            validationStatus: status,
           },
         };
       }

@@ -1,17 +1,16 @@
 <script>
-import gql from 'graphql-tag';
 import { GlButton, GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import {
   DAST_SITE_VALIDATION_STATUS,
   DAST_SITE_VALIDATION_STATUS_PROPS,
 } from 'ee/security_configuration/dast_site_validation/constants';
 import DastSiteValidationModal from 'ee/security_configuration/dast_site_validation/components/dast_site_validation_modal.vue';
-// import dastSiteValidationsQuery from 'ee/security_configuration/dast_site_profiles_form/graphql/dast_site_validation.query.graphql';
+import dastSiteValidationsQuery from 'ee/security_configuration/dast_site_validation/graphql/dast_site_validations.query.graphql';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import ProfilesList from './dast_profiles_list.vue';
 import { updateSiteProfilesStatuses } from '../graphql/cache_utils';
 
-const { PENDING, FAILED } = DAST_SITE_VALIDATION_STATUS;
+const { PENDING, INPROGRESS, FAILED, PASSED } = DAST_SITE_VALIDATION_STATUS;
 
 export default {
   components: {
@@ -22,34 +21,38 @@ export default {
   },
   apollo: {
     validation: {
-      // Since this is only to showcase how we could write to the cache after a query, I've reused the existing
-      // dast_site_validation query here, but we'd need to adapt this to work with the newer dast_site_validations query
-      query: gql`
-        query DastSiteValidation {
-          DastSiteValidation @client {
-            validationStatus
-          }
-        }
-      `,
+      query: dastSiteValidationsQuery,
       manual: true,
-      // variables() {
-      //   return {
-      //     fullPath: this.fullPath,
-      //     targetUrl: 'http://gdk.test/',
-      //   };
-      // },
+      variables() {
+        return {
+          fullPath: this.fullPath,
+          urls: this.urlsPendingValidation,
+        };
+      },
       pollInterval: 1500, // todo: make it a constant
       skip() {
-        return false;
+        return !this.urlsPendingValidation.length;
       },
       result(response) {
         const {
           data: {
-            DastSiteValidation: { validationStatus },
+            validations: { edges },
           },
         } = response;
         const store = this.$apolloProvider.defaultClient;
-        updateSiteProfilesStatuses({ fullPath: this.fullPath, validationStatus, store });
+        edges.forEach(({ node: { normalizedTargetUrl, status } }) => {
+          updateSiteProfilesStatuses({
+            fullPath: this.fullPath,
+            normalizedTargetUrl,
+            status,
+            store,
+          });
+          if ([PASSED, FAILED].includes(status)) {
+            this.urlsPendingValidation = this.urlsPendingValidation.filter(
+              url => url !== normalizedTargetUrl,
+            );
+          }
+        });
       },
     },
   },
@@ -70,7 +73,7 @@ export default {
   data() {
     return {
       validatingProfile: null,
-      urlsPendingValidation: new Set(),
+      urlsPendingValidation: [],
     };
   },
   statuses: DAST_SITE_VALIDATION_STATUS_PROPS,
@@ -79,8 +82,11 @@ export default {
       immediate: true,
       handler(profiles = []) {
         profiles.forEach(profile => {
-          if (profile.validationStatus === PENDING) {
-            this.urlsPendingValidation.add(profile.targetUrl); // TODO: Use normalizedUrl here
+          if (
+            [PENDING, INPROGRESS].includes(profile.validationStatus) &&
+            !this.urlsPendingValidation.includes(profile.targetUrl)
+          ) {
+            this.urlsPendingValidation.push(profile.targetUrl); // TODO: Use normalizedUrl here
           }
         });
       },

@@ -6,17 +6,26 @@ Vue.use(VueApollo);
 
 const resolvers = {
   Query: {
-    DastSiteValidation: () => {
-      const randNumber = Math.random();
-      let validationStatus = 'INPROGRESS_VALIDATION';
-      if (randNumber < 0.3) {
-        validationStatus = 'PASSED_VALIDATION';
-      } else if (randNumber > 0.7) {
-        validationStatus = 'FAILED_VALIDATION';
-      }
+    dastSiteValidations: (_, { normalizedTargetUrls }) => {
       return {
-        validationStatus,
-        __typename: 'DastSiteValidation',
+        edges: normalizedTargetUrls.map(url => {
+          const randNumber = Math.random();
+          let validationStatus = 'INPROGRESS_VALIDATION';
+          if (randNumber < 0.3) {
+            validationStatus = 'PASSED_VALIDATION';
+          } else if (randNumber > 0.7) {
+            validationStatus = 'FAILED_VALIDATION';
+          }
+          return {
+            node: {
+              normalizedTargetUrl: url,
+              status: validationStatus,
+              __typename: 'DastSiteValidation',
+            },
+            __typename: 'DastSiteValidationEdge',
+          };
+        }),
+        __typename: 'DastSiteValidations',
       };
     },
   },
