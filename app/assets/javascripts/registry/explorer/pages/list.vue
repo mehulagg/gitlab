@@ -240,6 +240,7 @@ export default {
     </gl-empty-state>
 
     <template v-else>
+      <!-- TODO: fix this when value is ready from API -->
       <registry-header
         :images-count="0"
         :expiration-policy="config.expirationPolicy"
