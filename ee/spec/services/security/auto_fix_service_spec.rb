@@ -73,5 +73,22 @@ RSpec.describe Security::AutoFixService do
         end
       end
     end
+
+    context 'with disabled auto-fix' do
+      before do
+        create(:project_security_setting, project: project, auto_fix_dependency_scanning: false)
+
+        create(:vulnerabilities_finding_with_remediation, :yarn_remediation,
+               project: project,
+               pipelines: [pipeline],
+               report_type: :dependency_scanning,
+               summary: 'Test remediation')
+      end
+
+      it 'does not create MR' do
+        expect{execute_service}.not_to change{MergeRequest.count}
+        expect{execute_service}.not_to change{Vulnerabilities::Feedback.count}
+      end
+    end
   end
 end
