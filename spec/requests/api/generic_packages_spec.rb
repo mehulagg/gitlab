@@ -34,6 +34,11 @@ RSpec.describe API::GenericPackages do
       user_basic_auth_header(user)
     when :invalid_user_basic_auth
       basic_auth_header('invalid user', 'invalid password')
+    end
+  end
+
+  def deploy_token_auth_header
+    case authenticate_with
     when :deploy_token_rw
       deploy_token_header(deploy_token_rw.token)
     when :deploy_token_ro
@@ -140,7 +145,7 @@ RSpec.describe API::GenericPackages do
 
       with_them do
         it "responds with #{params[:expected_status]}" do
-          authorize_upload_file(workhorse_header.merge(auth_header))
+          authorize_upload_file(workhorse_header.merge(deploy_token_auth_header))
 
           expect(response).to have_gitlab_http_status(expected_status)
         end
@@ -252,7 +257,7 @@ RSpec.describe API::GenericPackages do
 
       with_them do
         it "responds with #{params[:expected_status]}" do
-          headers = workhorse_header.merge(auth_header)
+          headers = workhorse_header.merge(deploy_token_auth_header)
 
           upload_file(params, headers)
 
@@ -497,7 +502,7 @@ RSpec.describe API::GenericPackages do
 
       with_them do
         it "responds with #{params[:expected_status]}" do
-          download_file(auth_header)
+          download_file(deploy_token_auth_header)
 
           expect(response).to have_gitlab_http_status(expected_status)
         end
