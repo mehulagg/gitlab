@@ -21,7 +21,7 @@ import DependencyRow from './dependency_row.vue';
 import AdditionalMetadata from './additional_metadata.vue';
 import InstallationCommands from './installation_commands.vue';
 import PackageFiles from './package_files.vue';
-import { __, s__ } from '~/locale';
+import { s__ } from '~/locale';
 import { PackageType, TrackingActions, SHOW_DELETE_SUCCESS_ALERT } from '../../shared/constants';
 import { packageTypeToTrackCategory } from '../../shared/utils';
 import { objectToQueryString } from '~/lib/utils/common_utils';
