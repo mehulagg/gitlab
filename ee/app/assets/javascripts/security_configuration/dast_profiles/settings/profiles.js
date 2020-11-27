@@ -4,7 +4,7 @@ import dastScannerProfilesQuery from 'ee/security_configuration/dast_profiles/gr
 import dastScannerProfilesDelete from 'ee/security_configuration/dast_profiles/graphql/dast_scanner_profiles_delete.mutation.graphql';
 import { dastProfilesDeleteResponse } from 'ee/security_configuration/dast_profiles/graphql/cache_utils';
 import DastSiteProfileList from 'ee/security_configuration/dast_profiles/components/dast_site_profiles_list.vue';
-import DastScannerProfileList from 'ee/security_configuration/dast_profiles/components/dast_scanner_profiles_list.vue';
+import DastScannerProfileList from 'ee/security_configuration/dast_profiles/components/dast_profiles_list.vue';
 import { s__ } from '~/locale';
 
 export const getProfileSettings = ({ createNewProfilePaths }) => ({
