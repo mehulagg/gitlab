@@ -134,6 +134,8 @@ module Auth
       return false unless requested_project.container_registry_enabled?
       return false if requested_project.repository_access_level == ::ProjectFeature::DISABLED
 
+      return requested_action == 'pull' if ::Gitlab.maintenance_mode?
+
       case requested_action
       when 'pull'
         build_can_pull?(requested_project) || user_can_pull?(requested_project) || deploy_token_can_pull?(requested_project)

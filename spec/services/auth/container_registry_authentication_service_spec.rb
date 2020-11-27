@@ -136,6 +136,22 @@ RSpec.describe Auth::ContainerRegistryAuthenticationService do
     end
   end
 
+  shared_examples 'logs an auth warning' do |requested_actions|
+    it do
+      expect(Gitlab::AuthLogger).to receive(:warn).with(
+        message: 'Denied container registry permissions',
+        scope_type: 'repository',
+        requested_project_path: project.full_path,
+        requested_actions: requested_actions,
+        authorized_actions: [],
+        user_id: current_user.id,
+        username: current_user.username
+      )
+
+      subject
+    end
+  end
+
   describe '#full_access_token' do
     let_it_be(:project) { create(:project) }
     let(:token) { described_class.full_access_token(project.full_path) }
@@ -208,19 +224,7 @@ RSpec.describe Auth::ContainerRegistryAuthenticationService do
         it_behaves_like 'an inaccessible'
         it_behaves_like 'not a container repository factory'
 
-        it 'logs an auth warning' do
-          expect(Gitlab::AuthLogger).to receive(:warn).with(
-            message: 'Denied container registry permissions',
-            scope_type: 'repository',
-            requested_project_path: project.full_path,
-            requested_actions: ['*'],
-            authorized_actions: [],
-            user_id: current_user.id,
-            username: current_user.username
-          )
-
-          subject
-        end
+        it_behaves_like 'logs an auth warning', ['*']
       end
 
       context 'disallow developer to delete images since registry 2.7' do
@@ -992,6 +996,57 @@ RSpec.describe Auth::ContainerRegistryAuthenticationService do
         it_behaves_like 'a pushable'
         it_behaves_like 'container repository factory'
       end
+    end
+  end
+
+  context 'in maintenance mode' do
+    let_it_be(:current_user) { create(:user) }
+    let_it_be(:project) { create(:project) }
+
+    before do
+      stub_application_setting(maintenance_mode: true)
+    end
+
+    context 'allows developer to pull images' do
+      before_all do
+        project.add_developer(current_user)
+      end
+
+      let(:current_params) do
+        { scopes: ["repository:#{project.full_path}:pull"] }
+      end
+
+      it_behaves_like 'a pullable'
+    end
+
+    context 'does not allow developer to push images' do
+      before_all do
+        project.add_developer(current_user)
+      end
+
+      let(:current_params) do
+        { scopes: ["repository:#{project.full_path}:push"] }
+      end
+
+      it_behaves_like 'an inaccessible'
+      it_behaves_like 'not a container repository factory'
+
+      it_behaves_like 'logs an auth warning', ['push']
+    end
+
+    context 'does not allow developer to delete images' do
+      before_all do
+        project.add_developer(current_user)
+      end
+
+      let(:current_params) do
+        { scopes: ["repository:#{project.full_path}:delete"] }
+      end
+
+      it_behaves_like 'an inaccessible'
+      it_behaves_like 'not a container repository factory'
+
+      it_behaves_like 'logs an auth warning', ['delete']
     end
   end
 end
