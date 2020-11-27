@@ -61,19 +61,19 @@ verify-tests-yml:
     - scripts/verify-tff-mapping
 
 .detect-test-base:
-  image: ruby:2.7-alpine
+  image: ruby:2.7
   needs: []
   stage: prepare
-  script:
-    - source scripts/utils.sh
-    - install_gitlab_gem
-    - install_tff_gem
-    - tooling/bin/find_foss_tests ${MATCHED_TESTS_FILE}
-    - 'echo "test files affected: $(cat $MATCHED_TESTS_FILE)"'
   artifacts:
     expire_in: 7d
     paths:
       - ${MATCHED_TESTS_FILE}
+
+.shared-script: &shared-script
+  - source ./scripts/utils.sh
+  - source ./scripts/rspec_helpers.sh
+  - install_gitlab_gem
+  - install_tff_gem
 
 detect-tests:
   extends:
@@ -81,6 +81,11 @@ detect-tests:
     - .rails:rules:detect-tests
   variables:
     MATCHED_TESTS_FILE: tmp/matching_tests.txt
+  script:
+    - *shared-script
+    - retrieve_tests_mapping
+    - tooling/bin/find_tests ${MATCHED_TESTS_FILE}
+    - 'echo "test files affected: $(cat $MATCHED_TESTS_FILE)"'
 
 detect-tests as-if-foss:
   extends:
@@ -89,5 +94,9 @@ detect-tests as-if-foss:
     - .as-if-foss
   variables:
     MATCHED_TESTS_FILE: tmp/matching_foss_tests.txt
+  script:
+    - *shared-script
+    - tooling/bin/find_foss_tests ${MATCHED_TESTS_FILE}
+    - 'echo "test files affected: $(cat $MATCHED_TESTS_FILE)"'
   before_script:
     - '[ "$FOSS_ONLY" = "1" ] && rm -rf ee/ qa/spec/ee/ qa/qa/specs/features/ee/ qa/qa/ee/ qa/qa/ee.rb'

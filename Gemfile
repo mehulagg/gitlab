@@ -382,6 +382,7 @@ group :development, :test do
 
   gem 'knapsack', '~> 1.17'
   gem 'crystalball', '~> 0.7.0', require: false
+  gem 'test_file_finder', '~> 0.1.1', require: false
 
   gem 'simple_po_parser', '~> 1.1.2', require: false
 
