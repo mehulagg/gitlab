@@ -295,6 +295,9 @@ module Types
           description: 'Container repositories of the project',
           resolver: Resolvers::ContainerRepositoriesResolver
 
+    field :container_repositories_count, GraphQL::INT_TYPE, null: false,
+          description: 'Number of container repositories in the project'
+
     field :label,
           Types::LabelType,
           null: true,
@@ -332,6 +335,10 @@ module Types
       LabelsFinder
         .new(current_user, project: project, search: search_term)
         .execute
+    end
+
+    def container_repositories_count
+      project.container_repositories.size
     end
 
     private
