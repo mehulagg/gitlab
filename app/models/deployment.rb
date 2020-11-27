@@ -37,6 +37,7 @@ class Deployment < ApplicationRecord
   end
 
   scope :for_status, -> (status) { where(status: status) }
+  scope :for_project, -> (project) { where(project: project) }
 
   scope :visible, -> { where(status: %i[running success failed canceled]) }
   scope :stoppable, -> { where.not(on_stop: nil).where.not(deployable_id: nil).success }

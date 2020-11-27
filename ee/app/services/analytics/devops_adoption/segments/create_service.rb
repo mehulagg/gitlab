@@ -31,7 +31,7 @@ module Analytics
         attr_reader :segment, :params, :current_user
 
         def response_payload
-          { segment: @segment }
+          { segment: segment }
         end
 
         def attributes
