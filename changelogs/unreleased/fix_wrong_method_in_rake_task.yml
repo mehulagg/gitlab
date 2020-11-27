@@ -1,0 +1,5 @@
+---
+title: Fix wrong method in rake task
+merge_request: 48703
+author:
+type: fixed
