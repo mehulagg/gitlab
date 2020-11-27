@@ -9,7 +9,6 @@ import {
   GlTable,
   GlTooltipDirective,
 } from '@gitlab/ui';
-import { DAST_SITE_VALIDATION_STATUS_PROPS } from 'ee/security_configuration/dast_site_validation/constants';
 
 export default {
   components: {
@@ -64,10 +63,8 @@ export default {
   data() {
     return {
       toBeDeletedProfileId: null,
-      validatingProfile: null,
     };
   },
-  statuses: DAST_SITE_VALIDATION_STATUS_PROPS,
   computed: {
     hasError() {
       return this.errorMessage !== '';
@@ -138,10 +135,10 @@ export default {
         <template #cell(profileName)="{ value }">
           <strong>{{ value }}</strong>
         </template>
-        <!-- 
-        <template v-for="slotName in Object.keys($scopedSlots)" v-slot:[slotName]="slotScope">
+
+        <template v-for="slotName in Object.keys($scopedSlots)" #[slotName]="slotScope">
           <slot :name="slotName" v-bind="slotScope"></slot>
-        </template> -->
+        </template>
 
         <template #cell(actions)="{ item }">
           <div class="gl-text-right">
