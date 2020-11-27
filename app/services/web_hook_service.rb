@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# Dummy commit
+
 class WebHookService
   class InternalErrorResponse
     ERROR_MESSAGE = 'internal error'
