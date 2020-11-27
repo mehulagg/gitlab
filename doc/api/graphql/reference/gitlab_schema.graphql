@@ -8809,6 +8809,11 @@ type Group {
   ): ContainerRepositoryConnection
 
   """
+  Number of container repositories in the project
+  """
+  containerRepositoriesCount: Int!
+
+  """
   Includes at least one project where the repository size exceeds the limit
   """
   containsLockedProjects: Boolean!
@@ -15574,6 +15579,11 @@ type Project {
     """
     name: String
   ): ContainerRepositoryConnection
+
+  """
+  Number of container repositories in the project
+  """
+  containerRepositoriesCount: Int!
 
   """
   Timestamp of the project creation
