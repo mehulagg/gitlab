@@ -165,7 +165,10 @@ module EE
         enable :change_prevent_group_forking
       end
 
-      rule { can?(:read_group) & epics_available }.enable :read_epic
+      rule { can?(:read_group) & epics_available }.policy do
+        enable :read_epic
+        enable :read_epic_board
+      end
 
       rule { can?(:read_group) & iterations_available }.enable :read_iteration
 
