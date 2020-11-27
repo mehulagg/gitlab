@@ -24,12 +24,12 @@ module QA
 
         Resource::ProtectedBranch.unprotect_via_api! do |branch|
           branch.project = @project
-          branch.branch_name = 'master'
+          branch.branch_name = Runtime::Env.default_branch
         end
       end
 
       it 'locks a directory and tries to push as a second user', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/557' do
-        push branch: 'master', file: 'directory/file', as_user: @user_one
+        push branch: Runtime::Env.default_branch, file: 'directory/file', as_user: @user_one
 
         sign_out_and_sign_in_as user: @user_one
         go_to_directory
@@ -65,7 +65,7 @@ module QA
         merge_request = Resource::MergeRequest.fabricate_via_api! do |merge_request|
           merge_request.project = @project
           merge_request.source_branch = 'test'
-          merge_request.target_branch = 'master'
+          merge_request.target_branch = Runtime::Env.default_branch
           merge_request.no_preparation = true
         end
 
@@ -131,10 +131,10 @@ module QA
         end
       end
 
-      def push(branch: 'master', file: 'file', as_user:)
+      def push(branch: Runtime::Env.default_branch, file: 'file', as_user:)
         Resource::Repository::ProjectPush.fabricate! do |push|
           push.project = @project
-          push.new_branch = false unless branch != 'master'
+          push.new_branch = false unless branch != Runtime::Env.default_branch
           push.file_name = file
           push.file_content = SecureRandom.hex(100000)
           push.user = as_user
@@ -143,12 +143,12 @@ module QA
       end
 
       def expect_error_on_push(for_file: 'file', as_user:)
-        expect { push branch: 'master', file: for_file, as_user: as_user }.to raise_error(
+        expect { push branch: Runtime::Env.default_branch, file: for_file, as_user: as_user }.to raise_error(
           QA::Support::Run::CommandError)
       end
 
       def expect_no_error_on_push(for_file: 'file', as_user:)
-        expect { push branch: 'master', file: for_file, as_user: as_user }.not_to raise_error
+        expect { push branch: Runtime::Env.default_branch, file: for_file, as_user: as_user }.not_to raise_error
       end
 
       def admin_username

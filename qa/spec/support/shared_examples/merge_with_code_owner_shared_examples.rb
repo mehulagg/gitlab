@@ -30,10 +30,10 @@ module QA
         )
       end
 
-      # Require approval from code owners on master
+      # Require approval from code owners on the default branch
       Resource::ProtectedBranch.fabricate! do |protected_branch|
         protected_branch.project = project
-        protected_branch.branch_name = 'master'
+        protected_branch.branch_name = Runtime::Env.default_branch
         protected_branch.new_branch = false
         protected_branch.require_code_owner_approval = true
       end

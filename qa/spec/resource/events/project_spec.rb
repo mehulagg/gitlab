@@ -20,7 +20,7 @@ RSpec.describe QA::Resource::Events::Project do
       {
         "action_name": "pushed",
         "push_data": {
-          "ref": "master"
+          "ref": "main"
         }
       },
       {
@@ -53,7 +53,7 @@ RSpec.describe QA::Resource::Events::Project do
   end
 
   describe "#wait_for_push_new_branch" do
-    it 'waits for a push to master if no branch is given' do
+    it 'waits for a push to main if no branch is given' do
       expect(subject).to receive(:api_get_from).with('/foo/events?action=pushed')
       expect { subject.wait_for_push_new_branch }.not_to raise_error
     end

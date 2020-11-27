@@ -16,7 +16,7 @@ module QA
         Page::Project::Activity.perform do |activity|
           activity.click_push_events
 
-          expect(activity).to have_content('pushed new branch master')
+          expect(activity).to have_content("pushed new branch #{Runtime::Env.default_branch}")
         end
       end
     end
