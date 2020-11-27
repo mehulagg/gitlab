@@ -1005,13 +1005,10 @@ RSpec.describe Auth::ContainerRegistryAuthenticationService do
 
     before do
       stub_application_setting(maintenance_mode: true)
+      project.add_developer(current_user)
     end
 
     context 'allows developer to pull images' do
-      before_all do
-        project.add_developer(current_user)
-      end
-
       let(:current_params) do
         { scopes: ["repository:#{project.full_path}:pull"] }
       end
@@ -1020,32 +1017,22 @@ RSpec.describe Auth::ContainerRegistryAuthenticationService do
     end
 
     context 'does not allow developer to push images' do
-      before_all do
-        project.add_developer(current_user)
-      end
-
       let(:current_params) do
         { scopes: ["repository:#{project.full_path}:push"] }
       end
 
       it_behaves_like 'an inaccessible'
       it_behaves_like 'not a container repository factory'
-
       it_behaves_like 'logs an auth warning', ['push']
     end
 
     context 'does not allow developer to delete images' do
-      before_all do
-        project.add_developer(current_user)
-      end
-
       let(:current_params) do
         { scopes: ["repository:#{project.full_path}:delete"] }
       end
 
       it_behaves_like 'an inaccessible'
       it_behaves_like 'not a container repository factory'
-
       it_behaves_like 'logs an auth warning', ['delete']
     end
   end
