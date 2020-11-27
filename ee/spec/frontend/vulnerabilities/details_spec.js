@@ -88,23 +88,38 @@ describe('Vulnerability Details', () => {
   });
 
   it('shows the vulnerability identifiers if they exist', () => {
+    const identifiersData = [
+      { url: '0', name: '00' },
+      { url: '1', name: '11' },
+      { url: '2', name: '22' },
+      { name: '33' },
+      { name: '44' },
+      { name: '55' },
+    ];
+
     createWrapper({
-      identifiers: [{ url: '0', name: '00' }, { url: '1', name: '11' }, { url: '2', name: '22' }],
+      identifiers: identifiersData,
     });
 
     const identifiers = getAllById('identifier');
-    expect(identifiers).toHaveLength(3);
+    expect(identifiers).toHaveLength(6);
 
-    const checkIdentifier = index => {
+    const checkIdentifier = (identifierData, index) => {
       const identifier = identifiers.at(index);
-      expect(identifier.attributes('target')).toBe('_blank');
-      expect(identifier.attributes('href')).toBe(index.toString());
-      expect(identifier.text()).toBe(`${index}${index}`);
+      const identifierLink = identifier.find('a');
+
+      expect(identifier.text()).toBe(identifierData.name);
+
+      if (identifierData.url) {
+        expect(identifierLink.exists()).toBe(true);
+        expect(identifierLink.attributes('target')).toBe('_blank');
+        expect(identifierLink.attributes('href')).toBe(index.toString());
+      } else {
+        expect(identifierLink.exists()).toBe(false);
+      }
     };
 
-    for (let i = 0; i < identifiers.length; i += 1) {
-      checkIdentifier(i);
-    }
+    identifiersData.forEach(checkIdentifier);
   });
 
   describe('file link', () => {

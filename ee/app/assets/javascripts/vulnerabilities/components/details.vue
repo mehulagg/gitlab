@@ -281,10 +281,14 @@ export default {
           v-for="(identifier, index) in vulnerability.identifiers"
           :key="`${index}:${identifier.url}`"
           class="gl-ml-0! gl-list-style-position-inside"
+          data-testid="identifiers"
         >
-          <gl-link :href="identifier.url" data-testid="identifier" target="_blank">
-            {{ identifier.name }}
-          </gl-link>
+          <span data-testid="identifier">
+            <gl-link v-if="identifier.url" :href="identifier.url" target="_blank">
+              {{ identifier.name }}
+            </gl-link>
+            <template v-else>{{ identifier.name }}</template>
+          </span>
         </li>
       </ul>
     </template>
