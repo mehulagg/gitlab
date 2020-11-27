@@ -21,6 +21,7 @@ class JobFinder
     @job_query = options.delete(:job_query)
     @pipeline_id = options.delete(:pipeline_id)
     @job_name = options.delete(:job_name)
+    @artifact_path = options.delete(:artifact_path)
     @api_token = options.delete(:api_token)
 
     Gitlab.configure do |config|
@@ -32,27 +33,31 @@ class JobFinder
   end
 
   def execute
-    find_job_with_filtered_pipelines || find_job_in_pipeline
+    find_job_with_artifact || find_job_with_filtered_pipelines || find_job_in_pipeline
   end
 
   private
 
-  attr_reader :project, :pipeline_query, :job_query, :pipeline_id, :job_name, :api_token
+  attr_reader :project, :pipeline_query, :job_query, :pipeline_id, :job_name, :artifact_path, :api_token
+
+  def find_job_with_artifact
+    return if artifact_path.nil?
+
+    paginate_pipelines do |pipeline|
+      paginate_pipeline_jobs(pipeline.id) do |job|
+        return job if found_job_with_artifact?(job) # rubocop:disable Cop/AvoidReturnFromBlocks
+      end
+    end
+
+    raise 'Job not found!'
+  end
 
   def find_job_with_filtered_pipelines
     return if pipeline_query.empty?
 
-    Gitlab.get(
-      "/projects/#{CGI.escape(project)}/pipelines",
-      query: pipeline_query_params,
-      unauthenticated: api_token.nil?
-    ).auto_paginate do |pipeline|
-      Gitlab.get(
-        "/projects/#{CGI.escape(project)}/pipelines/#{pipeline.id}/jobs",
-        query: job_query_params,
-        unauthenticated: api_token.nil?
-      ).auto_paginate do |job|
-        return job if job.name == job_name # rubocop:disable Cop/AvoidReturnFromBlocks
+    paginate_pipelines do |pipeline|
+      paginate_pipeline_jobs(pipeline.id) do |job|
+        return job if found_job_by_name?(job) # rubocop:disable Cop/AvoidReturnFromBlocks
       end
     end
 
@@ -62,16 +67,42 @@ class JobFinder
   def find_job_in_pipeline
     return unless pipeline_id
 
+    paginate_pipeline_jobs(pipeline_id) do |job|
+      return job if found_job_by_name?(job) # rubocop:disable Cop/AvoidReturnFromBlocks
+    end
+
+    raise 'Job not found!'
+  end
+
+  def paginate_pipelines
+    Gitlab.get(
+      "/projects/#{CGI.escape(project)}/pipelines",
+      query: pipeline_query_params,
+      unauthenticated: api_token.nil?
+    ).auto_paginate do |pipeline|
+      yield pipeline
+    end
+  end
+
+  def paginate_pipeline_jobs(pipeline_id)
     Gitlab.get(
       "/projects/#{CGI.escape(project)}/pipelines/#{pipeline_id}/jobs",
       query: job_query_params,
       unauthenticated: api_token.nil?
     ).auto_paginate do |job|
-      return job if job.name == job_name # rubocop:disable Cop/AvoidReturnFromBlocks
+      yield job
     end
-
-    raise 'Job not found!'
   end
+
+  def found_job_with_artifact?(job)
+    response = HTTParty.head("https://gitlab.com/api/v4/projects/#{CGI.escape(project)}/jobs/#{job.id}/artifacts/#{artifact_path}")
+    response.success?
+  end
+
+  def found_job_by_name?(job)
+    job.name == job_name
+  end
+
 
   def pipeline_query_params
     @pipeline_query_params ||= { per_page: 100, **pipeline_query }
@@ -104,6 +135,10 @@ if $0 == __FILE__
 
     opts.on("-j", "--job-name job_name", String, "A job name that needs to exist in the found pipeline") do |value|
       options[:job_name] = value
+    end
+
+    opts.on("-a", "--artifact-path ARTIFACT_PATH", String, "A valid artifact path") do |value|
+      options[:artifact_path] = value
     end
 
     opts.on("-t", "--api-token API_TOKEN", String, "A value API token with the `read_api` scope") do |value|

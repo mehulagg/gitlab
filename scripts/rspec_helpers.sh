@@ -17,12 +17,14 @@ function retrieve_tests_metadata() {
     scripts/api/download_job_artifact --project "${project_path}" --job-id "${test_metadata_job_id}" --artifact-path "${FLAKY_RSPEC_SUITE_REPORT_PATH}" || echo "{}" > "${FLAKY_RSPEC_SUITE_REPORT_PATH}"
   fi
 
-  # FIXME: We will need to find a pipeline where the $RSPEC_PACKED_TESTS_MAPPING_PATH.gz actually exists (Crystalball only runs every two-hours, but the `update-tests-metadata` runs for all `master` pipelines...).
-  # if [[ ! -f "${RSPEC_PACKED_TESTS_MAPPING_PATH}" ]]; then
-  #   (scripts/api/download_job_artifact --project "${project_path}" --job-id "${test_metadata_job_id}" --artifact-path "${RSPEC_PACKED_TESTS_MAPPING_PATH}.gz" && gzip -d "${RSPEC_PACKED_TESTS_MAPPING_PATH}.gz") || echo "{}" > "${RSPEC_PACKED_TESTS_MAPPING_PATH}"
-  # fi
-  #
-  # scripts/unpack-test-mapping "${RSPEC_PACKED_TESTS_MAPPING_PATH}" "${RSPEC_TESTS_MAPPING_PATH}"
+  local test_metadata_with_mapping_job_id
+  test_metadata_with_mapping_job_id=$(scripts/api/get_job_id --project "${project_path}" -q "status=success" -q "ref=master" -q "username=gitlab-bot" -Q "scope=success" --job-name "update-tests-metadata" --artifact-path "${RSPEC_PACKED_TESTS_MAPPING_PATH}.gz")
+
+  if [[ ! -f "${RSPEC_PACKED_TESTS_MAPPING_PATH}" ]]; then
+   (scripts/api/download_job_artifact --project "${project_path}" --job-id "${test_metadata_job_id}" --artifact-path "${RSPEC_PACKED_TESTS_MAPPING_PATH}.gz" && gzip -d "${RSPEC_PACKED_TESTS_MAPPING_PATH}.gz") || echo "{}" > "${RSPEC_PACKED_TESTS_MAPPING_PATH}"
+  fi
+
+  scripts/unpack-test-mapping "${RSPEC_PACKED_TESTS_MAPPING_PATH}" "${RSPEC_TESTS_MAPPING_PATH}"
 }
 
 function update_tests_metadata() {
