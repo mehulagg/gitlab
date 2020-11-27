@@ -13,18 +13,34 @@ export default {
       type: Array,
       required: true,
     },
-    pagination: {
+    pageInfo: {
       type: Object,
       required: true,
     },
   },
   computed: {
+    showPagination() {
+      return this.pageInfo?.hasPreviousPage || this.pageInfo?.hasNextPage;
+    },
+    previousPage() {
+      return this.pageInfo.hasPreviousPage ? 1 : null;
+    },
+    nextPage() {
+      return this.pageInfo.hasNextPage ? 2 : null;
+    },
     currentPage: {
       get() {
-        return this.pagination.page;
+        if (this.pageInfo.hasPreviousPage) {
+          return 2;
+        }
+        return 1;
       },
       set(page) {
-        this.$emit('pageChange', page);
+        if (page === 1) {
+          this.$emit('prev-page');
+        } else {
+          this.$emit('next-page');
+        }
       },
     },
   },
@@ -42,11 +58,12 @@ export default {
     />
 
     <gl-pagination
+      v-if="showPagination"
       v-model="currentPage"
-      :per-page="pagination.perPage"
-      :total-items="pagination.total"
+      :prev-page="previousPage"
+      :next-page="nextPage"
       align="center"
-      class="w-100 gl-mt-3"
+      class="gl-mt-3"
     />
   </div>
 </template>
