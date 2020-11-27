@@ -7,6 +7,10 @@ RSpec.describe Gitlab::Ci::Reports::Security::FindingKey do
 
   describe '#==' do
     where(:location_fp_1, :location_fp_2, :identifier_fp_1, :identifier_fp_2, :equals?) do
+      nil           | 'different location fp' | 'identifier fp' | 'different identifier fp' | false
+      'location fp' | nil                     | 'identifier fp' | 'different identifier fp' | false
+      'location fp' | 'different location fp' | nil             | 'different identifier fp' | false
+      'location fp' | 'different location fp' | 'identifier fp' | nil                       | false
       'location fp' | 'different location fp' | 'identifier fp' | 'different identifier fp' | false
       'location fp' | 'different location fp' | 'identifier fp' | 'identifier fp'           | false
       'location fp' | 'location fp'           | 'identifier fp' | 'different identifier fp' | false

@@ -70,38 +70,14 @@ module Security
       @target_report.scanned_resources.concat(source_report.scanned_resources).uniq!
     end
 
-    # this method mutates the passed seen_identifiers set
-    def check_or_mark_seen_identifier!(identifier, location_fingerprint, seen_identifiers)
-      key = IdentifierKey.new(location_fingerprint, identifier.external_type, identifier.external_id)
-
-      if seen_identifiers.include?(key)
-        true
-      else
-        seen_identifiers.add(key)
-        false
-      end
-    end
-
     def deduplicate_findings!
       seen_identifiers = Set.new
       deduplicated = []
 
+      # We are looping through all the finding "key"s in order to find the same vulnerabilities reported for the same location
+      # but from different source reports and keeping only first of them
       @findings.each do |finding|
-        seen = false
-
-        # We are looping through all identifiers in order to find the same vulnerabilities reported for the same location
-        # but from different source reports and keeping only first of them
-        finding.identifiers.each do |identifier|
-          # TODO: remove .downcase here after the DAST parser is harmonized to the common library identifiers' keys format
-          # See https://gitlab.com/gitlab-org/gitlab/issues/11976#note_191257912
-          next if %w[cwe wasc].include?(identifier.external_type.downcase) # ignored because these describe a class of vulnerabilities
-
-          seen = check_or_mark_seen_identifier!(identifier, finding.location.fingerprint, seen_identifiers)
-
-          break if seen
-        end
-
-        deduplicated << finding unless seen
+        deduplicated << finding if seen_identifiers.add?(finding.key)
       end
 
       @findings = deduplicated

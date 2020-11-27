@@ -53,11 +53,7 @@ module Security
     # This method registers all finding keys and
     # returns the positions of unique findings
     def register_finding_keys
-      @register_finding_keys ||= security_report.findings.map.with_index { |finding, index| register_keys(finding.keys) && index }.compact
-    end
-
-    def register_keys(keys)
-      keys.all? { |key| known_keys.add?(key) }
+      @register_finding_keys ||= security_report.findings.map.with_index { |finding, index| known_keys.add?(finding.key) && index }.compact
     end
   end
 end

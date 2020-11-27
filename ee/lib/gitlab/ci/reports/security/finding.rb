@@ -91,10 +91,9 @@ module Gitlab
             scanner.present? && primary_identifier.present? && location.present?
           end
 
-          def keys
-            @keys ||= identifiers.map do |identifier|
-              FindingKey.new(location_fingerprint: location&.fingerprint, identifier_fingerprint: identifier.fingerprint)
-            end
+          # Return value of this method is used to identify findings until we have the `UUID`s in place.
+          def key
+            FindingKey.new(location_fingerprint: location&.fingerprint, identifier_fingerprint: primary_fingerprint)
           end
 
           def primary_fingerprint

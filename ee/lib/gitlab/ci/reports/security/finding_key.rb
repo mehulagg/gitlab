@@ -11,8 +11,9 @@ module Gitlab
           end
 
           def ==(other)
-            location_fingerprint == other.location_fingerprint &&
-              identifier_fingerprint == other.identifier_fingerprint
+            has_fingerprints? && other.has_fingerprints?
+              location_fingerprint == other.location_fingerprint &&
+                identifier_fingerprint == other.identifier_fingerprint
           end
 
           def hash
@@ -24,6 +25,10 @@ module Gitlab
           protected
 
           attr_reader :location_fingerprint, :identifier_fingerprint
+
+          def has_fingerprints?
+            location_fingerprint && identifier_fingerprint
+          end
         end
       end
     end
