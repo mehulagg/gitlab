@@ -85,6 +85,7 @@ detect-tests:
     - *shared-script
     - retrieve_tests_mapping
     - tooling/bin/find_tests ${MATCHED_TESTS_FILE}
+    - sed -i 's+\./++g' ${MATCHED_TESTS_FILE} # TODO: remove ./ from ./spec and ./ee/spec
     - 'echo "test files affected: $(cat $MATCHED_TESTS_FILE)"'
 
 detect-tests as-if-foss:
