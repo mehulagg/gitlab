@@ -252,7 +252,8 @@ export default {
           <span>{{ settings.i18n.tabName }}</span>
         </template>
 
-        <profiles-list
+        <component
+          :is="profileSettings[profileType].component"
           :data-testid="`${profileType}List`"
           :error-message="profileTypes[profileType].errorMessage"
           :error-details="profileTypes[profileType].errorDetails"
