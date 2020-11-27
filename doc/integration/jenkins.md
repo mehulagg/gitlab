@@ -6,10 +6,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Jenkins CI service
 
-NOTE: **Note:**
-This documentation focuses only on how to **configure** a Jenkins *integration* with
-GitLab. Learn how to **migrate** from Jenkins to GitLab CI/CD in our
-[Migrating from Jenkins](../ci/migration/jenkins.md) documentation.
+> [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/246756) to Core in GitLab 13.7.
 
 From GitLab, you can trigger a Jenkins build when you push code to a repository, or when a merge
 request is created. In return, the Jenkins pipeline status is shown on merge requests widgets and
@@ -31,6 +28,11 @@ For a real use case, read the blog post [Continuous integration: From Jenkins to
 Moving from a traditional CI plug-in to a single application for the entire software development
 life cycle can decrease hours spent on maintaining toolchains by 10% or more. For more details, see
 the ['GitLab vs. Jenkins' comparison page](https://about.gitlab.com/devops-tools/jenkins-vs-gitlab.html).
+
+NOTE: **Note:**
+This documentation focuses only on how to **configure** a Jenkins *integration* with
+GitLab. Learn how to **migrate** from Jenkins to GitLab CI/CD in our
+[Migrating from Jenkins](../ci/migration/jenkins.md) documentation.
 
 ## Configure GitLab integration with Jenkins
 
