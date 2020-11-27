@@ -182,14 +182,7 @@ export default {
 
         <template #cell(actions)="{ item }">
           <div class="gl-text-right">
-            <gl-button
-              v-if="shouldShowValidationBtn(item.validationStatus)"
-              variant="info"
-              category="secondary"
-              size="small"
-              @click="setValidatingProfile(item)"
-              >{{ s__('DastSiteValidation|Validate target site') }}</gl-button
-            >
+            <slot name="actions" :profile="item"></slot>
 
             <gl-button v-if="item.editPath" :href="item.editPath" class="gl-mx-5" size="small">{{
               __('Edit')
@@ -248,11 +241,6 @@ export default {
       @cancel="handleCancel"
     />
 
-    <dast-site-validation-modal
-      v-if="validatingProfile"
-      ref="dast-site-validation-modal"
-      :full-path="fullPath"
-      :target-url="validatingProfile.targetUrl"
-    />
+    <slot></slot>
   </section>
 </template>
