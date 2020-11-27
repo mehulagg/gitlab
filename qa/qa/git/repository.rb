@@ -123,7 +123,7 @@ module QA
         run_git("git rev-parse --abbrev-ref HEAD").to_s
       end
 
-      def push_changes(branch = 'master', push_options: nil)
+      def push_changes(branch = Runtime::Env.default_branch, push_options: nil)
         cmd = ['git push']
         cmd << push_options_hash_to_string(push_options)
         cmd << uri

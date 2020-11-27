@@ -22,7 +22,7 @@ module QA
       attribute :variables
 
       def initialize
-        @ref = 'master'
+        @ref = Runtime::Env.default_branch
         @variables = []
       end
 

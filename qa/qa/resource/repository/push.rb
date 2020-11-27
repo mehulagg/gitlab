@@ -17,7 +17,7 @@ module QA
           @file_name = "file-#{SecureRandom.hex(8)}.txt"
           @file_content = '# This is test file'
           @commit_message = "This is a test commit"
-          @branch_name = 'master'
+          @branch_name = Runtime::Env.default_branch
           @new_branch = true
           @repository_http_uri = ""
           @ssh_key = nil
