@@ -34,6 +34,23 @@ RSpec.describe Gitlab::Ci::Pipeline::Chain::Skip do
     end
   end
 
+  context 'when pipeline has been skipped via keyword' do
+    before do
+      allow(pipeline).to receive(:git_commit_message)
+        .and_return('commit message [yolo]')
+
+      step.perform!
+    end
+
+    it 'breaks the chain' do
+      expect(step.break?).to be true
+    end
+
+    it 'skips the pipeline' do
+      expect(pipeline.reload).to be_skipped
+    end
+  end
+
   context 'when pipeline has not been skipped' do
     before do
       step.perform!
