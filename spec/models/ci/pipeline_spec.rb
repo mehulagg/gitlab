@@ -3953,4 +3953,60 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
       bridge
     end
   end
+
+  describe 'test failure history processing' do
+    it 'performs the worker task asynchronously when the pipeline is completed' do
+      expect(Ci::TestFailureHistoryWorker). to receive(:perform_async).with(pipeline.id)
+
+      pipeline.succeed!
+    end
+  end
+
+  describe '#latest_test_report_builds' do
+    it 'returns pipeline builds with test report artifacts' do
+      test_build = create(:ci_build, :test_reports, pipeline: pipeline, project: project)
+      create(:ci_build, :artifacts, pipeline: pipeline, project: project)
+
+      expect(pipeline.latest_test_report_builds).to contain_exactly(test_build)
+    end
+
+    it 'preloads project on each build to avoid N+1 queries' do
+      create(:ci_build, :test_reports, pipeline: pipeline, project: project)
+
+      control_count = ActiveRecord::QueryRecorder.new do
+        pipeline.latest_test_report_builds.map(&:project).map(&:full_path)
+      end
+
+      multi_build_pipeline = create(:ci_empty_pipeline, status: :created, project: project)
+      create(:ci_build, :test_reports, pipeline: multi_build_pipeline, project: project)
+      create(:ci_build, :test_reports, pipeline: multi_build_pipeline, project: project)
+
+      expect { multi_build_pipeline.latest_test_report_builds.map(&:project).map(&:full_path) }
+        .not_to exceed_query_limit(control_count)
+    end
+  end
+
+  describe '#builds_with_failed_tests' do
+    it 'returns pipeline builds with test report artifacts' do
+      failed_build = create(:ci_build, :failed, :test_reports, pipeline: pipeline, project: project)
+      create(:ci_build, :success, :test_reports, pipeline: pipeline, project: project)
+
+      expect(pipeline.builds_with_failed_tests).to contain_exactly(failed_build)
+    end
+
+    it 'preloads project on each build to avoid N+1 queries' do
+      create(:ci_build, :failed, :test_reports, pipeline: pipeline, project: project)
+
+      control_count = ActiveRecord::QueryRecorder.new do
+        pipeline.builds_with_failed_tests.map(&:project).map(&:full_path)
+      end
+
+      multi_build_pipeline = create(:ci_empty_pipeline, status: :created, project: project)
+      create(:ci_build, :failed, :test_reports, pipeline: multi_build_pipeline, project: project)
+      create(:ci_build, :failed, :test_reports, pipeline: multi_build_pipeline, project: project)
+
+      expect { multi_build_pipeline.builds_with_failed_tests.map(&:project).map(&:full_path) }
+        .not_to exceed_query_limit(control_count)
+    end
+  end
 end

@@ -259,6 +259,12 @@ module Ci
         end
       end
 
+      after_transition any => ::Ci::Pipeline.completed_statuses do |pipeline|
+        pipeline.run_after_commit do
+          ::Ci::TestFailureHistoryWorker.perform_async(pipeline.id)
+        end
+      end
+
       after_transition any => [:success, :failed] do |pipeline|
         ref_status = pipeline.ci_ref&.update_status_by!(pipeline)
 
@@ -935,8 +941,16 @@ module Ci
       builds.latest.with_reports(reports_scope)
     end
 
+    def latest_test_report_builds
+      latest_report_builds(Ci::JobArtifact.test_reports).preload(:project)
+    end
+
     def builds_with_coverage
       builds.latest.with_coverage
+    end
+
+    def builds_with_failed_tests
+      latest_test_report_builds.failed
     end
 
     def has_reports?(reports_scope)
@@ -959,7 +973,7 @@ module Ci
 
     def test_reports
       Gitlab::Ci::Reports::TestReports.new.tap do |test_reports|
-        latest_report_builds(Ci::JobArtifact.test_reports).preload(:project).find_each do |build|
+        latest_test_report_builds.find_each do |build|
           build.collect_test_reports!(test_reports)
         end
       end
