@@ -2,6 +2,8 @@
 
 require 'carrierwave/orm/activerecord'
 
+# FIXME: Dummy commit
+
 class User < ApplicationRecord
   extend Gitlab::ConfigHelper
 
