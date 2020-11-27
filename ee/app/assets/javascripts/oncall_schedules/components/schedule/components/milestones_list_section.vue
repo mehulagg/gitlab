@@ -1,118 +1,118 @@
 <script>
-  import { GlButton, GlIcon, GlTooltipDirective } from '@gitlab/ui';
-  import { mapState, mapActions } from 'vuex';
-  import { __, n__ } from '~/locale';
-  import { EPIC_DETAILS_CELL_WIDTH, EPIC_ITEM_HEIGHT, TIMELINE_CELL_MIN_WIDTH } from '../constants';
-  import eventHub from '../event_hub';
-  import MilestoneTimeline from './milestone_timeline.vue';
+import { GlButton, GlIcon, GlTooltipDirective } from '@gitlab/ui';
+import { mapState, mapActions } from 'vuex';
+import { __, n__ } from '~/locale';
+import { EPIC_DETAILS_CELL_WIDTH, EPIC_ITEM_HEIGHT, TIMELINE_CELL_MIN_WIDTH } from '../constants';
+import eventHub from '../event_hub';
+import MilestoneTimeline from './milestone_timeline.vue';
 
-  const EXPAND_BUTTON_EXPANDED = {
-    name: 'chevron-down',
-    iconLabel: __('Collapse milestones'),
-    tooltip: __('Collapse'),
-  };
+const EXPAND_BUTTON_EXPANDED = {
+  name: 'chevron-down',
+  iconLabel: __('Collapse milestones'),
+  tooltip: __('Collapse'),
+};
 
-  const EXPAND_BUTTON_COLLAPSED = {
-    name: 'chevron-right',
-    iconLabel: __('Expand milestones'),
-    tooltip: __('Expand'),
-  };
+const EXPAND_BUTTON_COLLAPSED = {
+  name: 'chevron-right',
+  iconLabel: __('Expand milestones'),
+  tooltip: __('Expand'),
+};
 
-  export default {
-    components: {
-      MilestoneTimeline,
-      GlButton,
-      GlIcon,
+export default {
+  components: {
+    MilestoneTimeline,
+    GlButton,
+    GlIcon,
+  },
+  directives: {
+    GlTooltip: GlTooltipDirective,
+  },
+  props: {
+    presetType: {
+      type: String,
+      required: true,
     },
-    directives: {
-      GlTooltip: GlTooltipDirective,
+    milestones: {
+      type: Array,
+      required: true,
     },
-    props: {
-      presetType: {
-        type: String,
-        required: true,
-      },
-      milestones: {
-        type: Array,
-        required: true,
-      },
-      timeframe: {
-        type: Array,
-        required: true,
-      },
-      currentGroupId: {
-        type: Number,
-        required: true,
-      },
+    timeframe: {
+      type: Array,
+      required: true,
     },
-    data() {
+    currentGroupId: {
+      type: Number,
+      required: true,
+    },
+  },
+  data() {
+    return {
+      offsetLeft: 0,
+      showBottomShadow: false,
+      roadmapShellEl: null,
+      milestonesExpanded: true,
+      bufferSize: 0,
+    };
+  },
+  computed: {
+    // ...mapState(['bufferSize']),
+    emptyRowContainerVisible() {
+      return this.milestones.length < this.bufferSize;
+    },
+    sectionContainerStyles() {
       return {
-        offsetLeft: 0,
-        showBottomShadow: false,
-        roadmapShellEl: null,
-        milestonesExpanded: true,
-        bufferSize: 0,
+        width: `${EPIC_DETAILS_CELL_WIDTH + TIMELINE_CELL_MIN_WIDTH * this.timeframe.length}px`,
       };
     },
-    computed: {
-     // ...mapState(['bufferSize']),
-      emptyRowContainerVisible() {
-        return this.milestones.length < this.bufferSize;
-      },
-      sectionContainerStyles() {
-        return {
-          width: `${EPIC_DETAILS_CELL_WIDTH + TIMELINE_CELL_MIN_WIDTH * this.timeframe.length}px`,
-        };
-      },
-      shadowCellStyles() {
-        return {
-          left: `${this.offsetLeft}px`,
-        };
-      },
-      expandButton() {
-        return this.milestonesExpanded ? EXPAND_BUTTON_EXPANDED : EXPAND_BUTTON_COLLAPSED;
-      },
-      milestonesCount() {
-        return this.milestones.length;
-      },
-      milestonesCountText() {
-        return Number.isInteger(this.milestonesCount)
-          ? n__(`%d milestone`, `%d milestones`, this.milestonesCount)
-          : '';
-      },
+    shadowCellStyles() {
+      return {
+        left: `${this.offsetLeft}px`,
+      };
     },
-    mounted() {
-      eventHub.$on('epicsListScrolled', this.handleEpicsListScroll);
-      this.initMounted();
+    expandButton() {
+      return this.milestonesExpanded ? EXPAND_BUTTON_EXPANDED : EXPAND_BUTTON_COLLAPSED;
     },
-    beforeDestroy() {
-      eventHub.$off('epicsListScrolled', this.handleEpicsListScroll);
+    milestonesCount() {
+      return this.milestones.length;
     },
-    methods: {
-      ...mapActions(['setBufferSize']),
-      initMounted() {
-        this.roadmapShellEl = this.$root.$el && this.$root.$el.firstChild;
-        this.bufferSize = Math.ceil((window.innerHeight - this.$el.offsetTop) / EPIC_ITEM_HEIGHT);
+    milestonesCountText() {
+      return Number.isInteger(this.milestonesCount)
+        ? n__(`%d milestone`, `%d milestones`, this.milestonesCount)
+        : '';
+    },
+  },
+  mounted() {
+    eventHub.$on('epicsListScrolled', this.handleEpicsListScroll);
+    this.initMounted();
+  },
+  beforeDestroy() {
+    eventHub.$off('epicsListScrolled', this.handleEpicsListScroll);
+  },
+  methods: {
+    ...mapActions(['setBufferSize']),
+    initMounted() {
+      this.roadmapShellEl = this.$root.$el && this.$root.$el.firstChild;
+      this.bufferSize = Math.ceil((window.innerHeight - this.$el.offsetTop) / EPIC_ITEM_HEIGHT);
+
+      this.$nextTick(() => {
+        this.offsetLeft = (this.$el.parentElement && this.$el.parentElement.offsetLeft) || 0;
 
         this.$nextTick(() => {
-          this.offsetLeft = (this.$el.parentElement && this.$el.parentElement.offsetLeft) || 0;
-
-          this.$nextTick(() => {
-            this.scrollToTodayIndicator();
-          });
+          this.scrollToTodayIndicator();
         });
-      },
-      scrollToTodayIndicator() {
-        if (this.$el.parentElement) this.$el.parentElement.scrollBy(TIMELINE_CELL_MIN_WIDTH / 2, 0);
-      },
-      handleEpicsListScroll({ scrollTop, clientHeight, scrollHeight }) {
-        this.showBottomShadow = Math.ceil(scrollTop) + clientHeight < scrollHeight;
-      },
-      toggleMilestonesExpanded() {
-        this.milestonesExpanded = !this.milestonesExpanded;
-      },
+      });
     },
-  };
+    scrollToTodayIndicator() {
+      if (this.$el.parentElement) this.$el.parentElement.scrollBy(TIMELINE_CELL_MIN_WIDTH / 2, 0);
+    },
+    handleEpicsListScroll({ scrollTop, clientHeight, scrollHeight }) {
+      this.showBottomShadow = Math.ceil(scrollTop) + clientHeight < scrollHeight;
+    },
+    toggleMilestonesExpanded() {
+      this.milestonesExpanded = !this.milestonesExpanded;
+    },
+  },
+};
 </script>
 
 <template>

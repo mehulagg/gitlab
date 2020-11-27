@@ -1,0 +1,11 @@
+mutation oncallScheduleDestroy($oncallScheduleDestroyInput: oncallScheduleDestroyInput!) {
+  oncallScheduleDestroy(input: $oncallScheduleDestroyInput) {
+    errors
+    oncallSchedule {
+      iid
+      name
+      description
+      timezone
+    }
+  }
+}

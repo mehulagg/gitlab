@@ -1,166 +1,166 @@
 <script>
-  import VirtualList from 'vue-virtual-scroll-list';
-  import {mapState, mapActions} from 'vuex';
-  import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import VirtualList from 'vue-virtual-scroll-list';
+import { mapState, mapActions } from 'vuex';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
-  import {EPIC_DETAILS_CELL_WIDTH, TIMELINE_CELL_MIN_WIDTH, EPIC_ITEM_HEIGHT} from '../constants';
-  import eventHub from '../event_hub';
-  import {generateKey} from '../utils/epic_utils';
+import { EPIC_DETAILS_CELL_WIDTH, TIMELINE_CELL_MIN_WIDTH, EPIC_ITEM_HEIGHT } from '../constants';
+import eventHub from '../event_hub';
+import { generateKey } from '../utils/epic_utils';
 
-  import CurrentDayIndicator from './current_day_indicator.vue';
-  import EpicItem from './epic_item.vue';
+import CurrentDayIndicator from './current_day_indicator.vue';
+import EpicItem from './epic_item.vue';
 
-  export default {
+export default {
+  EpicItem,
+  epicItemHeight: EPIC_ITEM_HEIGHT,
+  components: {
+    VirtualList,
     EpicItem,
-    epicItemHeight: EPIC_ITEM_HEIGHT,
-    components: {
-      VirtualList,
-      EpicItem,
-      CurrentDayIndicator,
+    CurrentDayIndicator,
+  },
+  mixins: [glFeatureFlagsMixin()],
+  props: {
+    presetType: {
+      type: String,
+      required: true,
     },
-    mixins: [glFeatureFlagsMixin()],
-    props: {
-      presetType: {
-        type: String,
-        required: true,
-      },
-      epics: {
-        type: Array,
-        required: true,
-      },
-      timeframe: {
-        type: Array,
-        required: true,
-      },
-      currentGroupId: {
-        type: Number,
-        required: true,
-      },
-      hasFiltersApplied: {
-        type: Boolean,
-        required: true,
-      },
+    epics: {
+      type: Array,
+      required: true,
     },
-    data() {
+    timeframe: {
+      type: Array,
+      required: true,
+    },
+    currentGroupId: {
+      type: Number,
+      required: true,
+    },
+    hasFiltersApplied: {
+      type: Boolean,
+      required: true,
+    },
+  },
+  data() {
+    return {
+      clientWidth: 0,
+      offsetLeft: 0,
+      emptyRowContainerStyles: {},
+      showBottomShadow: false,
+      roadmapShellEl: null,
+      bufferSize: 0,
+    };
+  },
+  computed: {
+    //...mapState(['bufferSize', 'epicIid', 'childrenEpics', 'childrenFlags', 'epicIds']),
+    emptyRowContainerVisible() {
+      return this.displayedEpics.length < this.bufferSize;
+    },
+    sectionContainerStyles() {
       return {
-        clientWidth: 0,
-        offsetLeft: 0,
-        emptyRowContainerStyles: {},
-        showBottomShadow: false,
-        roadmapShellEl: null,
-        bufferSize: 0,
+        width: `${EPIC_DETAILS_CELL_WIDTH + TIMELINE_CELL_MIN_WIDTH * this.timeframe.length}px`,
       };
     },
-    computed: {
-      //...mapState(['bufferSize', 'epicIid', 'childrenEpics', 'childrenFlags', 'epicIds']),
-      emptyRowContainerVisible() {
-        return this.displayedEpics.length < this.bufferSize;
-      },
-      sectionContainerStyles() {
-        return {
-          width: `${EPIC_DETAILS_CELL_WIDTH + TIMELINE_CELL_MIN_WIDTH * this.timeframe.length}px`,
-        };
-      },
-      shadowCellStyles() {
-        return {
-          left: `${this.offsetLeft}px`,
-        };
-      },
-      epicsWithAssociatedParents() {
-        return this.epics.filter(
-          epic => !epic.hasParent || (epic.hasParent && this.epicIds.indexOf(epic.parent.id) < 0),
-        );
-      },
-      displayedEpics() {
-        // If roadmap is accessed from epic, return all epics
-        if (this.epicIid) {
-          return this.epics;
-        }
+    shadowCellStyles() {
+      return {
+        left: `${this.offsetLeft}px`,
+      };
+    },
+    epicsWithAssociatedParents() {
+      return this.epics.filter(
+        epic => !epic.hasParent || (epic.hasParent && this.epicIds.indexOf(epic.parent.id) < 0),
+      );
+    },
+    displayedEpics() {
+      // If roadmap is accessed from epic, return all epics
+      if (this.epicIid) {
+        return this.epics;
+      }
 
-        // Return epics with correct parent associations.
-        return this.epicsWithAssociatedParents;
-      },
+      // Return epics with correct parent associations.
+      return this.epicsWithAssociatedParents;
     },
-    mounted() {
-      eventHub.$on('epicsListScrolled', this.handleEpicsListScroll);
-      eventHub.$on('toggleIsEpicExpanded', this.toggleIsEpicExpanded);
-      window.addEventListener('resize', this.syncClientWidth);
-      this.initMounted();
-    },
-    beforeDestroy() {
-      eventHub.$off('epicsListScrolled', this.handleEpicsListScroll);
-      eventHub.$off('toggleIsEpicExpanded', this.toggleIsEpicExpanded);
-      window.removeEventListener('resize', this.syncClientWidth);
-    },
-    methods: {
-      // ...mapActions(['setBufferSize', 'toggleEpic']),
-      initMounted() {
-        this.roadmapShellEl = this.$root.$el && this.$root.$el.querySelector('.js-roadmap-shell');
-        this.bufferSize = Math.ceil((window.innerHeight - this.$el.offsetTop) / EPIC_ITEM_HEIGHT);
+  },
+  mounted() {
+    eventHub.$on('epicsListScrolled', this.handleEpicsListScroll);
+    eventHub.$on('toggleIsEpicExpanded', this.toggleIsEpicExpanded);
+    window.addEventListener('resize', this.syncClientWidth);
+    this.initMounted();
+  },
+  beforeDestroy() {
+    eventHub.$off('epicsListScrolled', this.handleEpicsListScroll);
+    eventHub.$off('toggleIsEpicExpanded', this.toggleIsEpicExpanded);
+    window.removeEventListener('resize', this.syncClientWidth);
+  },
+  methods: {
+    // ...mapActions(['setBufferSize', 'toggleEpic']),
+    initMounted() {
+      this.roadmapShellEl = this.$root.$el && this.$root.$el.querySelector('.js-roadmap-shell');
+      this.bufferSize = Math.ceil((window.innerHeight - this.$el.offsetTop) / EPIC_ITEM_HEIGHT);
 
-        // Wait for component render to complete
+      // Wait for component render to complete
+      this.$nextTick(() => {
+        this.offsetLeft = (this.$el.parentElement && this.$el.parentElement.offsetLeft) || 0;
+
+        // We cannot scroll to the indicator immediately
+        // on render as it will trigger scroll event leading
+        // to timeline expand, so we wait for another render
+        // cycle to complete.
         this.$nextTick(() => {
-          this.offsetLeft = (this.$el.parentElement && this.$el.parentElement.offsetLeft) || 0;
-
-          // We cannot scroll to the indicator immediately
-          // on render as it will trigger scroll event leading
-          // to timeline expand, so we wait for another render
-          // cycle to complete.
-          this.$nextTick(() => {
-            this.scrollToTodayIndicator();
-          });
-
-          if (!Object.keys(this.emptyRowContainerStyles).length) {
-            this.emptyRowContainerStyles = this.getEmptyRowContainerStyles();
-          }
+          this.scrollToTodayIndicator();
         });
 
-        this.syncClientWidth();
-      },
-      syncClientWidth() {
-        this.clientWidth = this.$root.$el?.clientWidth || 0;
-      },
-      getEmptyRowContainerStyles() {
-        if (this.$refs.epicItems && this.$refs.epicItems.length) {
-          return {
-            height: `${this.$el.clientHeight -
-            this.displayedEpics.length * this.$refs.epicItems[0].$el.clientHeight}px`,
-          };
+        if (!Object.keys(this.emptyRowContainerStyles).length) {
+          this.emptyRowContainerStyles = this.getEmptyRowContainerStyles();
         }
-        return {};
-      },
-      /**
-       * Scroll timeframe to the right of the timeline
-       * by half the column size
-       */
-      scrollToTodayIndicator() {
-        if (this.$el.parentElement) this.$el.parentElement.scrollBy(TIMELINE_CELL_MIN_WIDTH / 2, 0);
-      },
-      handleEpicsListScroll({scrollTop, clientHeight, scrollHeight}) {
-        this.showBottomShadow = Math.ceil(scrollTop) + clientHeight < scrollHeight;
-      },
-      getEpicItemProps(index) {
-        return {
-          key: generateKey(this.displayedEpics[index]),
-          props: {
-            epic: this.displayedEpics[index],
-            presetType: this.presetType,
-            timeframe: this.timeframe,
-            currentGroupId: this.currentGroupId,
-            clientWidth: this.clientWidth,
-            childLevel: 0,
-            childrenEpics: this.childrenEpics,
-            childrenFlags: this.childrenFlags,
-            hasFiltersApplied: this.hasFiltersApplied,
-          },
-        };
-      },
-      toggleIsEpicExpanded(epic) {
-        this.toggleEpic({parentItem: epic});
-      },
-      generateKey,
+      });
+
+      this.syncClientWidth();
     },
-  };
+    syncClientWidth() {
+      this.clientWidth = this.$root.$el?.clientWidth || 0;
+    },
+    getEmptyRowContainerStyles() {
+      if (this.$refs.epicItems && this.$refs.epicItems.length) {
+        return {
+          height: `${this.$el.clientHeight -
+            this.displayedEpics.length * this.$refs.epicItems[0].$el.clientHeight}px`,
+        };
+      }
+      return {};
+    },
+    /**
+     * Scroll timeframe to the right of the timeline
+     * by half the column size
+     */
+    scrollToTodayIndicator() {
+      if (this.$el.parentElement) this.$el.parentElement.scrollBy(TIMELINE_CELL_MIN_WIDTH / 2, 0);
+    },
+    handleEpicsListScroll({ scrollTop, clientHeight, scrollHeight }) {
+      this.showBottomShadow = Math.ceil(scrollTop) + clientHeight < scrollHeight;
+    },
+    getEpicItemProps(index) {
+      return {
+        key: generateKey(this.displayedEpics[index]),
+        props: {
+          epic: this.displayedEpics[index],
+          presetType: this.presetType,
+          timeframe: this.timeframe,
+          currentGroupId: this.currentGroupId,
+          clientWidth: this.clientWidth,
+          childLevel: 0,
+          childrenEpics: this.childrenEpics,
+          childrenFlags: this.childrenFlags,
+          hasFiltersApplied: this.hasFiltersApplied,
+        },
+      };
+    },
+    toggleIsEpicExpanded(epic) {
+      this.toggleEpic({ parentItem: epic });
+    },
+    generateKey,
+  },
+};
 </script>
 
 <template>
@@ -197,7 +197,7 @@
     >
       <span class="epic-details-cell"></span>
       <span v-for="(timeframeItem, index) in timeframe" :key="index" class="epic-timeline-cell">
-        <current-day-indicator :preset-type="presetType" :timeframe-item="timeframeItem"/>
+        <current-day-indicator :preset-type="presetType" :timeframe-item="timeframeItem" />
       </span>
     </div>
     <div
