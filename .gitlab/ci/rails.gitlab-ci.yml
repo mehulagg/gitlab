@@ -22,6 +22,7 @@
     RUBY_GC_MALLOC_LIMIT_MAX: 134217728
     CRYSTALBALL: "true"
     RECORD_DEPRECATIONS: "true"
+    RSPEC_MATCHING_TESTS_ENABLED: "true"
   needs: ["setup-test-env", "retrieve-tests-metadata", "compile-test-assets", "detect-tests"]
   script:
     - *base-script
