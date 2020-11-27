@@ -3,7 +3,7 @@
 module QA
   RSpec.describe 'Create' do
     describe 'Create, list, and delete branches via web' do
-      master_branch = 'master'
+      master_branch = Runtime::Env.default_branch
       second_branch = 'second-branch'
       third_branch = 'third-branch'
       file_1_master = 'file.txt'
@@ -21,6 +21,7 @@ module QA
         project = Resource::Project.fabricate_via_api! do |proj|
           proj.name = 'project-qa-test'
           proj.description = 'project for qa test'
+          proj.initialize_with_readme = true
         end
 
         Git::Repository.perform do |repository|
