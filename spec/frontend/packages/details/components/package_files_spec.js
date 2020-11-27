@@ -9,10 +9,11 @@ import { npmFiles, mavenFiles } from '../../mock_data';
 describe('Package Files', () => {
   let wrapper;
 
-  const findAllRows = () => wrapper.findAll('[data-testid="download-link"');
-  const findDownloadLink = () => wrapper.find('[data-testid="download-link"');
-  const findFileIcon = () => wrapper.find(FileIcon);
-  const findCreatedAt = () => wrapper.find(TimeAgoTooltip);
+  const findAllRows = () => wrapper.findAll('[data-testid="file-row"');
+  const findFirstRow = () => findAllRows().at(0);
+  const findFirstRowDownloadLink = () => findFirstRow().find('[data-testid="download-link"');
+  const findFirstRowFileIcon = () => findFirstRow().find(FileIcon);
+  const findFirstRowCreatedAt = () => findFirstRow().find(TimeAgoTooltip);
 
   const createComponent = (packageFiles = npmFiles) => {
     wrapper = mount(component, {
@@ -50,19 +51,19 @@ describe('Package Files', () => {
     it('exists', () => {
       createComponent();
 
-      expect(findDownloadLink().exists()).toBe(true);
+      expect(findFirstRowDownloadLink().exists()).toBe(true);
     });
 
     it('has the correct attrs bound', () => {
       createComponent();
 
-      expect(findDownloadLink().attributes('href')).toBe(npmFiles[0].download_path);
+      expect(findFirstRowDownloadLink().attributes('href')).toBe(npmFiles[0].download_path);
     });
 
     it('emits "download-file" event on click', () => {
       createComponent();
 
-      findDownloadLink().vm.$emit('click');
+      findFirstRowDownloadLink().vm.$emit('click');
 
       expect(wrapper.emitted('download-file')).toEqual([[]]);
     });
@@ -72,13 +73,13 @@ describe('Package Files', () => {
     it('exists', () => {
       createComponent();
 
-      expect(findFileIcon().exists()).toBe(true);
+      expect(findFirstRowFileIcon().exists()).toBe(true);
     });
 
     it('has the correct props bound', () => {
       createComponent();
 
-      expect(findFileIcon().props('fileName')).toBe(npmFiles[0].file_name);
+      expect(findFirstRowFileIcon().props('fileName')).toBe(npmFiles[0].file_name);
     });
   });
 
@@ -86,13 +87,13 @@ describe('Package Files', () => {
     it('exists', () => {
       createComponent();
 
-      expect(findCreatedAt().exists()).toBe(true);
+      expect(findFirstRowCreatedAt().exists()).toBe(true);
     });
 
     it('has the correct props bound', () => {
       createComponent();
 
-      expect(findCreatedAt().props('time')).toBe(npmFiles[0].created_at);
+      expect(findFirstRowCreatedAt().props('time')).toBe(npmFiles[0].created_at);
     });
   });
 });

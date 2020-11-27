@@ -57,7 +57,11 @@ export default {
 <template>
   <div>
     <h3 class="gl-font-lg gl-mt-5">{{ __('Files') }}</h3>
-    <gl-table :fields="$options.filesTableHeaderFields" :items="filesTableRows">
+    <gl-table
+      :fields="$options.filesTableHeaderFields"
+      :items="filesTableRows"
+      :tbody-tr-attr="{ 'data-testid': 'file-row' }"
+    >
       <template #cell(name)="{ item }">
         <gl-link
           :href="item.download_path"
