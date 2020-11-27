@@ -26,8 +26,7 @@ class Admin::AuditLogReportsController < Admin::ApplicationController
   private
 
   def validate_audit_log_reports_available!
-    render_404 unless Feature.enabled?(:audit_log_export_csv) &&
-      License.feature_available?(:admin_audit_log)
+    render_404 unless License.feature_available?(:admin_audit_log)
   end
 
   def csv_filename

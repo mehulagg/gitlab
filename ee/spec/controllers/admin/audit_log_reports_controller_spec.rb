@@ -34,9 +34,8 @@ RSpec.describe Admin::AuditLogReportsController do
         sign_in(admin)
       end
 
-      context 'when licensed and feature flag is enabled' do
+      context 'when licensed' do
         before do
-          stub_feature_flags(audit_log_export_csv: true)
           stub_licensed_features(admin_audit_log: true)
 
           allow(AuditEvents::ExportCsvService).to receive(:new).and_return(export_csv_service)
@@ -106,14 +105,6 @@ RSpec.describe Admin::AuditLogReportsController do
             end
           end
         end
-      end
-
-      context 'when feature flag is disabled' do
-        before do
-          stub_feature_flags(audit_log_export_csv: false)
-        end
-
-        it { is_expected.to have_gitlab_http_status(:not_found) }
       end
 
       context 'when unlicensed' do
