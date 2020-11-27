@@ -309,7 +309,7 @@ describe('PackagesApp', () => {
       it(`file download link call event with ${TrackingActions.PULL_PACKAGE}`, () => {
         createComponent({ packageEntity: conanPackage });
 
-        findPackageFiles().vm.$emit('file-download');
+        findPackageFiles().vm.$emit('download-file');
         expect(eventSpy).toHaveBeenCalledWith(
           category,
           TrackingActions.PULL_PACKAGE,

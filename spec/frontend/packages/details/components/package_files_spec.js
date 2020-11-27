@@ -47,7 +47,7 @@ describe('Package Files', () => {
   });
 
   describe('link', () => {
-    it('exist', () => {
+    it('exists', () => {
       createComponent();
 
       expect(findDownloadLink().exists()).toBe(true);
@@ -59,12 +59,12 @@ describe('Package Files', () => {
       expect(findDownloadLink().attributes('href')).toBe(npmFiles[0].download_path);
     });
 
-    it('on click emits "file-download" event', () => {
+    it('emits "download-file" event on click', () => {
       createComponent();
 
       findDownloadLink().vm.$emit('click');
 
-      expect(wrapper.emitted('file-download')).toEqual([[]]);
+      expect(wrapper.emitted('download-file')).toEqual([[]]);
     });
   });
 
@@ -83,7 +83,7 @@ describe('Package Files', () => {
   });
 
   describe('time-ago tooltip', () => {
-    it('exist', () => {
+    it('exists', () => {
       createComponent();
 
       expect(findCreatedAt().exists()).toBe(true);

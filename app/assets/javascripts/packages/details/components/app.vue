@@ -67,14 +67,6 @@ export default {
     isValidPackage() {
       return Boolean(this.packageEntity.name);
     },
-    filesTableRows() {
-      return this.packageFiles.map(x => ({
-        name: x.file_name,
-        downloadPath: x.download_path,
-        size: this.formatSize(x.size),
-        created: x.created_at,
-      }));
-    },
     tracking() {
       return {
         category: packageTypeToTrackCategory(this.packageEntity.package_type),
@@ -123,22 +115,6 @@ export default {
       `PackageRegistry|You are about to delete version %{version} of %{name}. Are you sure?`,
     ),
   },
-  filesTableHeaderFields: [
-    {
-      key: 'name',
-      label: __('Name'),
-      tdClass: 'd-flex align-items-center',
-    },
-    {
-      key: 'size',
-      label: __('Size'),
-    },
-    {
-      key: 'created',
-      label: __('Created'),
-      class: 'text-right',
-    },
-  ],
 };
 </script>
 
@@ -183,7 +159,7 @@ export default {
         <package-files
           v-if="showFiles"
           :package-files="packageFiles"
-          @file-download="track($options.trackingActions.PULL_PACKAGE)"
+          @download-file="track($options.trackingActions.PULL_PACKAGE)"
         />
       </gl-tab>
 

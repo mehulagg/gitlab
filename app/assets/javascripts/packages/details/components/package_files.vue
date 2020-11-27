@@ -64,7 +64,7 @@ export default {
           :href="item.download_path"
           class="gl-relative"
           data-testid="download-link"
-          @click="$emit('file-download')"
+          @click="$emit('download-file')"
         >
           <file-icon
             :file-name="item.file_name"
