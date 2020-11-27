@@ -1,6 +1,5 @@
 <script>
 import { mapState } from 'vuex';
-import { GlDeprecatedSkeletonLoading as GlSkeletonLoading } from '@gitlab/ui';
 
 import { isInViewport } from '~/lib/utils/common_utils';
 import { EXTEND_AS } from '../constants';
@@ -12,7 +11,6 @@ import roadmapTimelineSection from './roadmap_timeline_section.vue';
 
 export default {
   components: {
-    GlSkeletonLoading,
     epicsListSection,
     milestonesListSection,
     roadmapTimelineSection,
@@ -92,7 +90,7 @@ export default {
 
 <template>
   <div
-    class="roadmap-shell js-roadmap-shell"
+    class="js-roadmap-shell gl-relative gl-h-full gl-w-full gl-overflow-x-auto"
     data-qa-selector="roadmap_shell"
     @scroll="handleScroll"
   >
@@ -109,13 +107,7 @@ export default {
       :timeframe="timeframe"
       :current-group-id="currentGroupId"
     />
-    <div v-if="!epics.length" class="skeleton-loader js-skeleton-loader">
-      <div v-for="n in 10" :key="n" class="mt-2">
-        <gl-skeleton-loading :lines="2" />
-      </div>
-    </div>
     <epics-list-section
-      v-else
       :preset-type="presetType"
       :epics="epics"
       :timeframe="timeframe"

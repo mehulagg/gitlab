@@ -100,16 +100,5 @@ describe('RoadmapShellComponent', () => {
     it('renders component container element with class `roadmap-shell`', () => {
       expect(vm.$el.classList.contains('roadmap-shell')).toBe(true);
     });
-
-    it('renders skeleton loader element when Epics list is empty', done => {
-      vm.epics = [];
-
-      vm.$nextTick()
-        .then(() => {
-          expect(vm.$el.querySelector('.js-skeleton-loader')).not.toBeNull();
-        })
-        .then(done)
-        .catch(done.fail);
-    });
   });
 });
