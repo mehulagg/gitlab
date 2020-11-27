@@ -1,7 +1,7 @@
 <script>
+import { GlModal } from '@gitlab/ui';
 import { __ } from '~/locale';
 import { deprecatedCreateFlash as Flash } from '~/flash';
-import DeprecatedModal from '~/vue_shared/components/deprecated_modal.vue';
 import { visitUrl } from '~/lib/utils/url_utility';
 import boardsStore from '~/boards/stores/boards_store';
 
@@ -22,7 +22,7 @@ const boardDefaults = {
 export default {
   components: {
     BoardScope: () => import('ee_component/boards/components/board_scope.vue'),
-    DeprecatedModal,
+    GlModal,
     BoardConfigurationOptions,
   },
   props: {
@@ -82,9 +82,6 @@ export default {
     isEditForm() {
       return this.currentPage === 'edit';
     },
-    isVisible() {
-      return this.currentPage !== '';
-    },
     buttonText() {
       if (this.isNewForm) {
         return __('Create board');
@@ -120,6 +117,17 @@ export default {
     },
     submitDisabled() {
       return this.isLoading || this.board.name.length === 0;
+    },
+    primaryProps() {
+      return {
+        text: this.buttonText,
+        attributes: [{ variant: this.buttonKind, disabled: this.submitDisabled }],
+      };
+    },
+    cancelProps() {
+      return {
+        text: __('Cancel'),
+      };
     },
   },
   mounted() {
@@ -181,53 +189,51 @@ export default {
 </script>
 
 <template>
-  <deprecated-modal
-    v-show="isVisible"
+  <gl-modal
+    modal-id="board-config-modal"
+    visible
     :hide-footer="readonly"
     :title="title"
-    :primary-button-label="buttonText"
-    :kind="buttonKind"
-    :submit-disabled="submitDisabled"
-    modal-dialog-class="board-config-modal"
+    :action-primary="primaryProps"
+    :action-cancel="cancelProps"
+    @primary="submit"
     @cancel="cancel"
-    @submit="submit"
+    @close="cancel"
   >
-    <template #body>
-      <p v-if="isDeleteForm">{{ __('Are you sure you want to delete this board?') }}</p>
-      <form v-else class="js-board-config-modal" @submit.prevent>
-        <div v-if="!readonly" class="append-bottom-20">
-          <label class="label-bold gl-font-lg" for="board-new-name">{{ __('Title') }}</label>
-          <input
-            id="board-new-name"
-            ref="name"
-            v-model="board.name"
-            class="form-control"
-            data-qa-selector="board_name_field"
-            type="text"
-            :placeholder="__('Enter board name')"
-            @keyup.enter="submit"
-          />
-        </div>
-
-        <board-configuration-options
-          :is-new-form="isNewForm"
-          :board="board"
-          :current-board="currentBoard"
+    <p v-if="isDeleteForm">{{ __('Are you sure you want to delete this board?') }}</p>
+    <form v-else class="js-board-config-modal" @submit.prevent>
+      <div v-if="!readonly" class="append-bottom-20">
+        <label class="label-bold gl-font-lg" for="board-new-name">{{ __('Title') }}</label>
+        <input
+          id="board-new-name"
+          ref="name"
+          v-model="board.name"
+          class="form-control"
+          data-qa-selector="board_name_field"
+          type="text"
+          :placeholder="__('Enter board name')"
+          @keyup.enter="submit"
         />
+      </div>
 
-        <board-scope
-          v-if="scopedIssueBoardFeatureEnabled"
-          :collapse-scope="isNewForm"
-          :board="board"
-          :can-admin-board="canAdminBoard"
-          :labels-path="labelsPath"
-          :labels-web-url="labelsWebUrl"
-          :enable-scoped-labels="enableScopedLabels"
-          :project-id="projectId"
-          :group-id="groupId"
-          :weights="weights"
-        />
-      </form>
-    </template>
-  </deprecated-modal>
+      <board-configuration-options
+        :is-new-form="isNewForm"
+        :board="board"
+        :current-board="currentBoard"
+      />
+
+      <board-scope
+        v-if="scopedIssueBoardFeatureEnabled"
+        :collapse-scope="isNewForm"
+        :board="board"
+        :can-admin-board="canAdminBoard"
+        :labels-path="labelsPath"
+        :labels-web-url="labelsWebUrl"
+        :enable-scoped-labels="enableScopedLabels"
+        :project-id="projectId"
+        :group-id="groupId"
+        :weights="weights"
+      />
+    </form>
+  </gl-modal>
 </template>
