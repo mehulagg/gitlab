@@ -18,19 +18,11 @@ module QA
 
       context 'when disabled' do
         before do
-          Flow::Login.sign_in
-          project.group.sandbox.visit!
-          Page::Group::Menu.perform(&:click_group_general_settings_item)
-          Page::Group::Settings::General.perform(&:set_prevent_forking_outside_group_disabled)
+          set_prevent_forking_outside_group('disabled')
         end
 
         it 'allows forking outside of group', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1070' do
-          project.visit!
-          Page::Project::Show.perform(&:fork_project)
-
-          Page::Project::Fork::New.perform do |fork_new|
-            fork_new.search_for_group(group_for_fork.path)
-          end
+          visit_project_and_search_group_for_fork
 
           expect(page).to have_text(group_for_fork.path)
           expect(page).to have_text('Select a namespace to fork the project')
@@ -39,20 +31,12 @@ module QA
 
       context 'when enabled' do
         before do
-          Flow::Login.sign_in
-          project.group.sandbox.visit!
-          Page::Group::Menu.perform(&:click_group_general_settings_item)
-          Page::Group::Settings::General.perform(&:set_prevent_forking_outside_group_enabled)
+          set_prevent_forking_outside_group('enabled')
         end
 
         it 'does not allow forking outside of group', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1107' do
-          project.visit!
-          Page::Project::Show.perform(&:fork_project)
-
-          Page::Project::Fork::New.perform do |fork_new|
-            fork_new.search_for_group(group_for_fork.path)
-          end
-
+          visit_project_and_search_group_for_fork
+          
           expect(page).not_to have_text(group_for_fork.path)
           expect(page).not_to have_text('Select a namespace to fork the project')
         end
@@ -62,6 +46,24 @@ module QA
         project.group.sandbox.update_group_setting(group_setting: 'prevent_forking_outside_group', value: false)
         project.remove_via_api!
         group_for_fork.remove_via_api!
+      end
+
+      def set_prevent_forking_outside_group(enabled_or_disabled)
+        Flow::Login.sign_in
+        project.group.sandbox.visit!
+        Page::Group::Menu.perform(&:click_group_general_settings_item)
+        Page::Group::Settings::General.perform do |general_setting|
+          general_setting.send("set_prevent_forking_outside_group_#{enabled_or_disabled}")
+        end
+      end
+
+      def visit_project_and_search_group_for_fork
+        project.visit!
+        Page::Project::Show.perform(&:fork_project)
+
+        Page::Project::Fork::New.perform do |fork_new|
+          fork_new.search_for_group(group_for_fork.path)
+        end
       end
     end
   end
