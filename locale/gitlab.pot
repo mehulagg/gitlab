@@ -9621,6 +9621,9 @@ msgstr ""
 msgid "Disable"
 msgstr ""
 
+msgid "Disable feed token"
+msgstr ""
+
 msgid "Disable for this project"
 msgstr ""
 
