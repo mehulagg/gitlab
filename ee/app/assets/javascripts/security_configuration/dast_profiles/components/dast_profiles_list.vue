@@ -9,14 +9,7 @@ import {
   GlTable,
   GlTooltipDirective,
 } from '@gitlab/ui';
-import DastSiteValidationModal from 'ee/security_configuration/dast_site_validation/components/dast_site_validation_modal.vue';
-import {
-  DAST_SITE_VALIDATION_STATUS,
-  DAST_SITE_VALIDATION_STATUS_PROPS,
-} from 'ee/security_configuration/dast_site_validation/constants';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-
-const { PENDING, FAILED } = DAST_SITE_VALIDATION_STATUS;
+import { DAST_SITE_VALIDATION_STATUS_PROPS } from 'ee/security_configuration/dast_site_validation/constants';
 
 export default {
   components: {
@@ -26,12 +19,10 @@ export default {
     GlModal,
     GlSkeletonLoader,
     GlTable,
-    DastSiteValidationModal,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
   },
-  mixins: [glFeatureFlagsMixin()],
   props: {
     profiles: {
       type: Array,
@@ -115,24 +106,6 @@ export default {
     handleCancel() {
       this.toBeDeletedProfileId = null;
     },
-    shouldShowValidationBtn(status) {
-      return (
-        this.glFeatures.securityOnDemandScansSiteValidation &&
-        (status === PENDING || status === FAILED)
-      );
-    },
-    shouldShowValidationStatus(status) {
-      return this.glFeatures.securityOnDemandScansSiteValidation && status !== PENDING;
-    },
-    showValidationModal() {
-      this.$refs['dast-site-validation-modal'].show();
-    },
-    setValidatingProfile(profile) {
-      this.validatingProfile = profile;
-      this.$nextTick(() => {
-        this.showValidationModal();
-      });
-    },
   },
 };
 </script>
@@ -140,7 +113,7 @@ export default {
   <section>
     <div v-if="shouldShowTable">
       <gl-table
-        :aria-label="s__('DastProfiles|Site Profiles')"
+        :aria-label="s__('DastProfiles|Profiles')"
         :busy="isLoadingInitialProfiles"
         :fields="tableFields"
         :items="profiles"
@@ -165,20 +138,10 @@ export default {
         <template #cell(profileName)="{ value }">
           <strong>{{ value }}</strong>
         </template>
-
-        <template #cell(validationStatus)="{ value }">
-          <template v-if="shouldShowValidationStatus(value)">
-            <span :class="$options.statuses[value].cssClass">
-              {{ $options.statuses[value].label }}
-            </span>
-            <gl-icon
-              v-gl-tooltip
-              name="question-o"
-              class="gl-vertical-align-text-bottom gl-text-gray-300 gl-ml-2"
-              :title="$options.statuses[value].tooltipText"
-            />
-          </template>
-        </template>
+        <!-- 
+        <template v-for="slotName in Object.keys($scopedSlots)" v-slot:[slotName]="slotScope">
+          <slot :name="slotName" v-bind="slotScope"></slot>
+        </template> -->
 
         <template #cell(actions)="{ item }">
           <div class="gl-text-right">

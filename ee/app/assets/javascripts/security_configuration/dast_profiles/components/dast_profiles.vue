@@ -4,7 +4,6 @@ import { camelCase, kebabCase } from 'lodash';
 import * as Sentry from '~/sentry/wrapper';
 import { s__ } from '~/locale';
 import { getLocationHash } from '~/lib/utils/url_utility';
-import ProfilesList from './dast_profiles_list.vue';
 import * as cacheUtils from '../graphql/cache_utils';
 import { getProfileSettings } from '../settings/profiles';
 
@@ -14,7 +13,6 @@ export default {
     GlDropdownItem,
     GlTab,
     GlTabs,
-    ProfilesList,
   },
   props: {
     createNewProfilePaths: {

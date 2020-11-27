@@ -1,6 +1,6 @@
 <script>
 import { uniqueId } from 'lodash';
-import { GlButton, GlTooltipDirective } from '@gitlab/ui';
+import { GlButton, GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import ProfilesList from './dast_profiles_list.vue';
 import DastSiteValidationModal from 'ee/security_configuration/dast_site_validation/components/dast_site_validation_modal.vue';
 import {
@@ -14,6 +14,7 @@ const { PENDING, FAILED } = DAST_SITE_VALIDATION_STATUS;
 export default {
   components: {
     GlButton,
+    GlIcon,
     ProfilesList,
     DastSiteValidationModal,
   },
@@ -65,7 +66,6 @@ export default {
     };
   },
   statuses: DAST_SITE_VALIDATION_STATUS_PROPS,
-  computed: {},
   methods: {
     shouldShowValidationBtn(status) {
       return (
@@ -80,7 +80,6 @@ export default {
       this.$refs['dast-site-validation-modal'].show();
     },
     setValidatingProfile(profile) {
-      debugger;
       this.validatingProfile = profile;
       this.$nextTick(() => {
         this.showValidationModal();
@@ -103,8 +102,27 @@ export default {
     @load-more-profiles="$emit('load-more-profiles')"
     @delete-profile="$emit('delete-profile')"
   >
-    <template #actions="{profile}">
+    <!-- <template #cell(profileName)="{ value }">
+      <strong>hello {{ value }}</strong>
+    </template> -->
+
+    <template #cell(validationStatus)="{ value }">
+      <template v-if="shouldShowValidationStatus(value)">
+        <span :class="$options.statuses[value].cssClass">
+          {{ $options.statuses[value].label }}
+        </span>
+        <gl-icon
+          v-gl-tooltip
+          name="question-o"
+          class="gl-vertical-align-text-bottom gl-text-gray-300 gl-ml-2"
+          :title="$options.statuses[value].tooltipText"
+        />
+      </template>
+    </template>
+
+    <template #actions="{ profile }">
       <gl-button
+        v-if="shouldShowValidationBtn(profile.validationStatus)"
         variant="info"
         category="secondary"
         size="small"
