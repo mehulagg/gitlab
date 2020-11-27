@@ -1015,3 +1015,15 @@ This will also refresh the cached usage ping displayed in the admin area
 ```ruby
 Gitlab::UsageData.to_json(force_refresh: true)
 ```
+
+#### Generate and send print
+
+```shell
+rake gitlab:usage_data:generate
+```
+
+#### Generate and send usage ping
+
+```shell
+rake gitlab:usage_data:generate_and_send
+```
