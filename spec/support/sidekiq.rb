@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# FIXME: Dummy commit
+
 RSpec.configure do |config|
   def gitlab_sidekiq_inline(&block)
     # We need to cleanup the queues before running jobs in specs because the
