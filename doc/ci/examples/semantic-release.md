@@ -16,7 +16,7 @@ Inside the project's repo, run `npm init`. Name the module according to [the Git
 
 Install the following NPM packages:
 
-```bash
+```shell
 npm install semantic-release @semantic-release/git @semantic-release/gitlab @semantic-release/npm --save-dev
 ```
 
@@ -38,7 +38,7 @@ Update the `files` key with glob pattern(s) that selects all files that should b
 
 Add a `.gitignore` file to the project to avoid committing `node_modules`:
 
-```
+```plaintext
 node_modules
 ```
 
@@ -121,7 +121,7 @@ semantic-release pulls its configuration info from a `.releaserc.json` file in t
 
 Test the pipeline by creating a commit with a message like:
 
-```
+```plaintext
 fix: testing patch releases
 ```
 
@@ -129,13 +129,13 @@ and pushing the commit to `master`. The pipeline should create a new release (`v
 
 To create a minor release, use a commit message like:
 
-```
+```plaintext
 feat: testing minor releases
 ```
 
 Or, for a breaking change:
 
-```
+```plaintext
 feat: testing major releases
 
 BREAKING CHANGE: This is a breaking change.
@@ -147,12 +147,12 @@ More information about how commit messages are mapped to releases can be found i
 
 To use the published module, add an `.npmrc` file to the project that will depend on the module. For example, to use [the example project](https://gitlab.com/gitlab-examples/semantic-release-npm)'s module:
 
-```
+```plaintext
 @gitlab-examples:registry=https://gitlab.com/api/v4/packages/npm/
 ```
 
 Then, install the module:
 
-```
+```shell
 npm install --save @gitlab-examples/semantic-release-npm
 ```
