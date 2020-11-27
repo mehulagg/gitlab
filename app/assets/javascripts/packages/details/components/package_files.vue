@@ -15,7 +15,6 @@ export default {
     TimeAgoTooltip,
   },
   mixins: [Tracking.mixin()],
-
   props: {
     packageFiles: {
       type: Array,
@@ -49,7 +48,7 @@ export default {
     {
       key: 'created',
       label: __('Created'),
-      class: 'text-right',
+      class: 'gl-text-right',
     },
   ],
 };
