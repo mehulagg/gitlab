@@ -30,7 +30,7 @@ module QA
       end
 
       def branch
-        @branch ||= "master"
+        @branch ||= Runtime::Env.default_branch
       end
 
       def fabricate!

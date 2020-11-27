@@ -16,7 +16,7 @@ module QA
           @file_name = 'Home.md'
           @file_content = 'This line was created using git push'
           @commit_message = 'Updating using git push'
-          @branch_name = 'master'
+          @branch_name = Runtime::Env.default_branch
           @new_branch = false
         end
 

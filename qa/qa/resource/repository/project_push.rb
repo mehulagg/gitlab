@@ -23,7 +23,7 @@ module QA
           @file_name = "file-#{SecureRandom.hex(8)}.txt"
           @file_content = '# This is test project'
           @commit_message = "This is a test commit"
-          @branch_name = 'master'
+          @branch_name = Runtime::Env.default_branch
           @new_branch = true
           @project_name = 'project-with-code'
           @wait_for_push = true
