@@ -8,11 +8,11 @@ module Projects
       @noteable = noteable
 
       participants =
-        noteable_owner +
-        participants_in_noteable +
-        all_members +
-        groups +
-        project_members
+        noteable_owner.lazy +
+        participants_in_noteable.lazy +
+        all_members.lazy +
+        groups.lazy +
+        project_members.lazy
 
       participants.uniq
     end

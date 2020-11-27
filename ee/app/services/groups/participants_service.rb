@@ -7,7 +7,13 @@ module Groups
     def execute(noteable)
       @noteable = noteable
 
-      participants = noteable_owner + participants_in_noteable + all_members + groups + group_members
+      participants =
+        noteable_owner.lazy +
+        participants_in_noteable.lazy +
+        all_members.lazy +
+        groups.lazy +
+        group_members.lazy
+
       participants.uniq
     end
 

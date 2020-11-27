@@ -22,7 +22,10 @@ module Users
     end
 
     def sorted(users)
-      users.uniq.to_a.compact.sort_by(&:username).map do |user|
+      preload_status(users)
+
+      # using lazy to delay the hash conversion
+      users.uniq.to_a.compact.sort_by(&:username).lazy.map do |user|
         user_as_hash(user)
       end
     end
@@ -46,7 +49,7 @@ module Users
         username: user.username,
         name: user.name,
         avatar_url: user.avatar_url,
-        availability: nil
+        availability: availability_for(user)
       }
       # Return nil for availability for now due to https://gitlab.com/gitlab-org/gitlab/-/issues/285442
     end
@@ -60,6 +63,24 @@ module Users
         count: group_counts.fetch(group.id, 0),
         mentionsDisabled: group.mentions_disabled
       }
+    end
+
+    def preload_status(users)
+      users.each { |u| lazy_user_status(u) }
+    end
+
+    # rubocop: disable CodeReuse/ActiveRecord
+    def lazy_user_status(user)
+      BatchLoader.for(user.id).batch do |user_ids, loader|
+        user_ids.each_slice(1_000) do |sliced_user_ids|
+          UserStatus.where(user_id: sliced_user_ids).each { |status| loader.call(status.user_id, status) }
+        end
+      end
+    end
+    # rubocop: enable CodeReuse/ActiveRecord
+
+    def availability_for(user)
+      lazy_user_status(user).try(:availability)
     end
   end
 end
