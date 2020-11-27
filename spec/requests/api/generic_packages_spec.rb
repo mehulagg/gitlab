@@ -116,22 +116,6 @@ RSpec.describe API::GenericPackages do
         'PRIVATE' | :developer | true  | :invalid_job_token             | :unauthorized
         'PRIVATE' | :developer | false | :job_token                     | :not_found
         'PRIVATE' | :developer | false | :invalid_job_token             | :unauthorized
-        'PUBLIC'  | :developer | true  | :deploy_token_rw               | :success
-        'PUBLIC'  | :developer | true  | :deploy_token_wo               | :success
-        'PUBLIC'  | :developer | true  | :deploy_token_ro               | :forbidden
-        'PUBLIC'  | :developer | true  | :invalid_deploy_token          | :unauthorized
-        'PUBLIC'  | :developer | false | :deploy_token_rw               | :forbidden
-        'PUBLIC'  | :developer | false | :deploy_token_wo               | :forbidden
-        'PUBLIC'  | :developer | false | :deploy_token_ro               | :forbidden
-        'PUBLIC'  | :developer | false | :invalid_deploy_token          | :unauthorized
-        'PRIVATE' | :developer | true  | :deploy_token_rw               | :success
-        'PRIVATE' | :developer | true  | :deploy_token_wo               | :success
-        'PRIVATE' | :developer | true  | :deploy_token_ro               | :forbidden
-        'PRIVATE' | :developer | true  | :invalid_deploy_token          | :unauthorized
-        'PRIVATE' | :developer | false | :deploy_token_rw               | :not_found
-        'PRIVATE' | :developer | false | :deploy_token_wo               | :not_found
-        'PRIVATE' | :developer | false | :deploy_token_ro               | :not_found
-        'PRIVATE' | :developer | false | :invalid_deploy_token          | :unauthorized
       end
 
       with_them do
@@ -140,6 +124,21 @@ RSpec.describe API::GenericPackages do
           project.send("add_#{user_role}", user) if member? && user_role != :anonymous
         end
 
+        it "responds with #{params[:expected_status]}" do
+          authorize_upload_file(workhorse_header.merge(auth_header))
+
+          expect(response).to have_gitlab_http_status(expected_status)
+        end
+      end
+
+      where(:authenticate_with, :expected_status) do
+        :deploy_token_rw      | :success
+        :deploy_token_wo      | :success
+        :deploy_token_ro      | :forbidden
+        :invalid_deploy_token | :unauthorized
+      end
+
+      with_them do
         it "responds with #{params[:expected_status]}" do
           authorize_upload_file(workhorse_header.merge(auth_header))
 
@@ -229,18 +228,6 @@ RSpec.describe API::GenericPackages do
         'PRIVATE' | :developer | true  | :invalid_job_token             | :unauthorized
         'PRIVATE' | :developer | false | :job_token                     | :not_found
         'PRIVATE' | :developer | false | :invalid_job_token             | :unauthorized
-        'PUBLIC'  | :developer | true  | :deploy_token_ro               | :forbidden
-        'PUBLIC'  | :developer | true  | :invalid_deploy_token          | :unauthorized
-        'PUBLIC'  | :developer | false | :deploy_token_rw               | :forbidden
-        'PUBLIC'  | :developer | false | :deploy_token_wo               | :forbidden
-        'PUBLIC'  | :developer | false | :deploy_token_ro               | :forbidden
-        'PUBLIC'  | :developer | false | :invalid_deploy_token          | :unauthorized
-        'PRIVATE' | :developer | true  | :deploy_token_ro               | :forbidden
-        'PRIVATE' | :developer | true  | :invalid_deploy_token          | :unauthorized
-        'PRIVATE' | :developer | false | :deploy_token_rw               | :not_found
-        'PRIVATE' | :developer | false | :deploy_token_wo               | :not_found
-        'PRIVATE' | :developer | false | :deploy_token_ro               | :not_found
-        'PRIVATE' | :developer | false | :invalid_deploy_token          | :unauthorized
       end
 
       with_them do
@@ -249,6 +236,21 @@ RSpec.describe API::GenericPackages do
           project.send("add_#{user_role}", user) if member? && user_role != :anonymous
         end
 
+        it "responds with #{params[:expected_status]}" do
+          headers = workhorse_header.merge(auth_header)
+
+          upload_file(params, headers)
+
+          expect(response).to have_gitlab_http_status(expected_status)
+        end
+      end
+
+      where(:authenticate_with, :expected_status) do
+        :deploy_token_ro      | :forbidden
+        :invalid_deploy_token | :unauthorized
+      end
+
+      with_them do
         it "responds with #{params[:expected_status]}" do
           headers = workhorse_header.merge(auth_header)
 
@@ -471,22 +473,6 @@ RSpec.describe API::GenericPackages do
         'PRIVATE' | :developer | true  | :invalid_job_token             | :unauthorized
         'PRIVATE' | :developer | false | :job_token                     | :not_found
         'PRIVATE' | :developer | false | :invalid_job_token             | :unauthorized
-        'PUBLIC'  | :developer | true  | :deploy_token_rw               | :success
-        'PUBLIC'  | :developer | true  | :deploy_token_wo               | :success
-        'PUBLIC'  | :developer | true  | :deploy_token_ro               | :success
-        'PUBLIC'  | :developer | true  | :invalid_deploy_token          | :unauthorized
-        'PUBLIC'  | :developer | false | :deploy_token_rw               | :success
-        'PUBLIC'  | :developer | false | :deploy_token_wo               | :success
-        'PUBLIC'  | :developer | false | :deploy_token_ro               | :success
-        'PUBLIC'  | :developer | false | :invalid_deploy_token          | :unauthorized
-        'PRIVATE' | :developer | true  | :deploy_token_rw               | :success
-        'PRIVATE' | :developer | true  | :deploy_token_wo               | :success
-        'PRIVATE' | :developer | true  | :deploy_token_ro               | :success
-        'PRIVATE' | :developer | true  | :invalid_deploy_token          | :unauthorized
-        'PRIVATE' | :developer | false | :deploy_token_rw               | :not_found
-        'PRIVATE' | :developer | false | :deploy_token_wo               | :not_found
-        'PRIVATE' | :developer | false | :deploy_token_ro               | :not_found
-        'PRIVATE' | :developer | false | :invalid_deploy_token          | :unauthorized
       end
 
       with_them do
@@ -495,6 +481,21 @@ RSpec.describe API::GenericPackages do
           project.send("add_#{user_role}", user) if member? && user_role != :anonymous
         end
 
+        it "responds with #{params[:expected_status]}" do
+          download_file(auth_header)
+
+          expect(response).to have_gitlab_http_status(expected_status)
+        end
+      end
+
+      where(:authenticate_with, :expected_status) do
+        :deploy_token_rw      | :success
+        :deploy_token_wo      | :success
+        :deploy_token_ro      | :success
+        :invalid_deploy_token | :unauthorized
+      end
+
+      with_them do
         it "responds with #{params[:expected_status]}" do
           download_file(auth_header)
 
