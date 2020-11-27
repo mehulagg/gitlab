@@ -7,19 +7,19 @@ module IncidentManagement
       # @param project [Project]
       # @param user [User]
       # @param params [Hash]
-      def initialize(schedule, project, user, params, participants)
+      def initialize(schedule, project, user, params)
         @schedule = schedule
         @project = project
         @user = user
         @params = params
-        @participants = participants
       end
 
       def execute
         return error_no_license unless available?
         return error_no_permissions unless allowed?
 
-        oncall_rotation = schedule.oncall_rotations.create(params.merge(participants: participants))
+        oncall_rotation = schedule.oncall_rotations.create(params)
+
         return error_in_create(oncall_rotation) unless oncall_rotation.persisted?
 
         success(oncall_rotation)

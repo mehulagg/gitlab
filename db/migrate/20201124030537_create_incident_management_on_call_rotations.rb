@@ -17,7 +17,6 @@ class CreateIncidentManagementOnCallRotations < ActiveRecord::Migration[6.0]
           t.integer :rotation_length
           t.integer :rotation_length_unit
           t.datetime_with_timezone :starts_at
-          t.text :timezone
 
           t.index %w(oncall_schedule_id id), name: 'index_im_oncall_schedules_on_schedule_id_and_id', unique: true, using: :btree
         end

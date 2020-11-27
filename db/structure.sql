@@ -12882,7 +12882,6 @@ CREATE TABLE incident_management_oncall_rotations (
     rotation_length integer,
     rotation_length_unit integer,
     starts_at timestamp with time zone,
-    timezone text,
     CONSTRAINT check_5209fb5d02 CHECK ((char_length(name) <= 200))
 );
 
