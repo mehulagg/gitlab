@@ -54,7 +54,7 @@ module QA
                                         script:
                                         - 'gradle publish'
                                         only:
-                                        - master
+                                        - "#{Runtime::Env.default_branch}"
                                         tags:
                                         - "runner-for-#{project.name}"
                                     YAML

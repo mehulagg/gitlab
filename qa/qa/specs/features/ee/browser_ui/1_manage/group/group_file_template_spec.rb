@@ -29,7 +29,7 @@ module QA
               job:
                 script: echo "Skipped"
                 except:
-                  - master
+                  - "#{Runtime::Env.default_branch}"
             CI
         },
         {
