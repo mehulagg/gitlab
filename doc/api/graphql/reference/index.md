@@ -1571,7 +1571,7 @@ Describes an incident management on-call rotation.
 | ----- | ---- | ----------- |
 | `id` | ID! | ID of the on-call rotation |
 | `name` | String! | Name of the on-call rotation |
-| `participants` | User! => Array | Participants of the on-call rotation |
+| `participants` | UserConnection | Participants of the on-call rotation |
 | `rotationLength` | Int | Time zone of the on-call schedule |
 | `rotationLengthUnit` | String | Unit of the on-call rotation length |
 | `startsAt` | Time | Start date of the on-call rotation |
