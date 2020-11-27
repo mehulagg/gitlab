@@ -1671,7 +1671,8 @@ tagged and released set of documentation for your installed version:
 
 - In the [documentation archives](https://docs.gitlab.com/archives/).
 - At the `/help` URL of your GitLab instance.
-- In the documentation repository based on the respective branch ([13.2](https://gitlab.com/gitlab-org/gitlab/-/tree/13-2-stable-ee/doc) for example).
+- In the documentation repository based on the respective branch (for example,
+  the [13.2 branch](https://gitlab.com/gitlab-org/gitlab/-/tree/13-2-stable-ee/doc)).
 
 ### Where to put version text
 
