@@ -33,8 +33,8 @@ class UsersController < ApplicationController
       end
 
       format.json do
-        load_events
-        pager_json("events/_events", @events.count, events: @events)
+        msg = "This endpoint is deprecated. Use %s instead" % user_activity_path
+        render json: { message: msg }, status: :not_found, content_type: 'application/json'
       end
     end
   end
@@ -42,6 +42,11 @@ class UsersController < ApplicationController
   def activity
     respond_to do |format|
       format.html { render 'show' }
+
+      format.json do
+        load_events
+        pager_json("events/_events", @events.count, events: @events)
+      end
     end
   end
 

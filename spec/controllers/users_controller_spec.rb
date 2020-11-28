@@ -79,6 +79,97 @@ RSpec.describe UsersController do
       end
     end
 
+    context 'requested in json format' do
+      let(:project) { create(:project) }
+
+      before do
+        project.add_developer(user)
+        Gitlab::DataBuilder::Push.build_sample(project, user)
+
+        sign_in(user)
+      end
+
+      it 'returns 404 with deprecation message' do
+        get :show, params: { username: user }, format: :json
+
+        expect(response).to have_gitlab_http_status(:not_found)
+        expect(Gitlab::Json.parse(response.body)['message']).to inlcude('This endpoint is deprecated.')
+      end
+    end
+  end
+
+  describe 'GET #activity' do
+    context 'with rendered views' do
+      render_views
+
+      describe 'when logged in' do
+        before do
+          sign_in(user)
+        end
+
+        it 'renders the show template' do
+          get :show, params: { username: user.username }
+
+          expect(response).to be_successful
+          expect(response).to render_template('show')
+        end
+      end
+
+      describe 'when logged out' do
+        it 'renders the show template' do
+          get :activity, params: { username: user.username }
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(response).to render_template('show')
+        end
+      end
+    end
+
+    context 'when public visibility level is restricted' do
+      before do
+        stub_application_setting(restricted_visibility_levels: [Gitlab::VisibilityLevel::PUBLIC])
+      end
+
+      context 'when logged out' do
+        it 'redirects to login page' do
+          get :activity, params: { username: user.username }
+          expect(response).to redirect_to new_user_session_path
+        end
+      end
+
+      context 'when logged in' do
+        before do
+          sign_in(user)
+        end
+
+        it 'renders show' do
+          get :activity, params: { username: user.username }
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(response).to render_template('show')
+        end
+      end
+    end
+
+    context 'when a user by that username does not exist' do
+      context 'when logged out' do
+        it 'redirects to login page' do
+          get :activity, params: { username: 'nonexistent' }
+          expect(response).to redirect_to new_user_session_path
+        end
+      end
+
+      context 'when logged in' do
+        before do
+          sign_in(user)
+        end
+
+        it 'renders 404' do
+          get :activity, params: { username: 'nonexistent' }
+          expect(response).to have_gitlab_http_status(:not_found)
+        end
+      end
+    end
+
     context 'json with events' do
       let(:project) { create(:project) }
 
@@ -90,7 +181,7 @@ RSpec.describe UsersController do
       end
 
       it 'loads events' do
-        get :show, params: { username: user }, format: :json
+        get :activity, params: { username: user }, format: :json
 
         expect(assigns(:events)).not_to be_empty
       end
@@ -99,7 +190,7 @@ RSpec.describe UsersController do
         allow(Ability).to receive(:allowed?).and_call_original
         expect(Ability).to receive(:allowed?).with(user, :read_cross_project) { false }
 
-        get :show, params: { username: user }, format: :json
+        get :activity, params: { username: user }, format: :json
 
         expect(assigns(:events)).to be_empty
       end
@@ -107,7 +198,7 @@ RSpec.describe UsersController do
       it 'hides events if the user has a private profile' do
         Gitlab::DataBuilder::Push.build_sample(project, private_user)
 
-        get :show, params: { username: private_user.username }, format: :json
+        get :activity, params: { username: private_user.username }, format: :json
 
         expect(assigns(:events)).to be_empty
       end
