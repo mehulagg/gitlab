@@ -7,7 +7,8 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 # Requirements for Auto DevOps
 
 You can set up Auto DevOps for [Kubernetes](#auto-devops-requirements-for-kubernetes)
-or [Amazon Elastic Container Service (ECS)](#auto-devops-requirements-for-amazon-ecs).
+or [Amazon Elastic Container Service (ECS)](#auto-devops-requirements-for-amazon-ecs)
+or [Amazon Cloud Compute](#auto-devops-requirements-for-amazon-ecs).
 For more information about Auto DevOps, see [the main Auto DevOps page](index.md)
 or the [quick start guide](quick_start_guide.md).
 
@@ -140,3 +141,39 @@ it on its own. This template is designed to be used with Auto DevOps only. It ma
 unexpectedly causing your pipeline to fail if included on its own. Also, the job
 names within this template may also change. Do not override these jobs' names in your
 own pipeline, as the override stops working when the name changes.
+
+
+## Auto DevOps requirements for Amazon EC2
+
+[Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/216008) in GitLab 13.6.
+
+You can choose to target [AWS EC2](../../ci/cloud_deployment/index.md) as a deployment platform instead of using Kubernetes.
+
+To get started on Auto DevOps to AWS EC2, you must add a specific Environment
+Variable. To do so, follow these steps:
+
+1. To leverage Auto DevOps for your project when deploying to AWS EC2, first you must define your [AWS credentials as environment variables](https://docs.gitlab.com/ee/ci/cloud_deployment/#run-aws-commands-from-gitlab-cicd).
+
+1. Specify which AWS platform to target during the Auto DevOps deployment
+   by adding  `AUTO_DEVOPS_PLATFORM_TARGET: EC2` 
+
+1. Define a job for the build stage. To do so, you must reference the Auto-DevOps.gitlab-ci.yml template and include a job named build_artifact in your .gitlab-ci.yml file.
+For example:
+
+# .gitlab-ci.yml
+
+```
+include:
+  - template: Auto-DevOps.gitlab-ci.yml
+
+variables:
+  - AUTO_DEVOPS_PLATFORM_TARGET: EC2
+
+build_artifact:
+  stage: build
+  script:
+    - <your build script goes here>
+  artifacts:
+    paths:
+      - <built artifact>
+```
