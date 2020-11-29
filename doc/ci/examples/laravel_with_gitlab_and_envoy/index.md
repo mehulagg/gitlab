@@ -1,7 +1,7 @@
 ---
 stage: Verify
 group: Continuous Integration
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: tutorial
 ---
 
@@ -632,7 +632,7 @@ After our code passed through the pipeline successfully, we can deploy to our pr
 
 ![pipelines page deploy button](img/pipelines_page_deploy_button.png)
 
-Once the deploy pipeline passed successfully, navigate to **Pipelines > Environments**.
+After the deploy pipeline passed successfully, navigate to **Pipelines > Environments**.
 
 ![environments page](img/environments_page.png)
 

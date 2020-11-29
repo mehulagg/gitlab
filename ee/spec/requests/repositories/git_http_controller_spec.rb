@@ -17,7 +17,7 @@ RSpec.describe Repositories::GitHttpController, type: :request do
 
   describe 'GET #info_refs' do
     context 'smartcard session required' do
-      subject { clone_get(path, env) }
+      subject { clone_get(path, **env) }
 
       before do
         stub_licensed_features(smartcard_auth: true)
@@ -70,7 +70,7 @@ RSpec.describe Repositories::GitHttpController, type: :request do
   end
 
   describe 'POST #git_receive_pack' do
-    subject { push_post(path, env) }
+    subject { push_post(path, **env) }
 
     context 'when node is a primary Geo one' do
       before do

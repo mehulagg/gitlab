@@ -55,6 +55,8 @@ module Elastic
       end
 
       def basic_query_hash(fields, query)
+        fields = CustomLanguageAnalyzers.add_custom_analyzers_fields(fields)
+
         query_hash =
           if query.present?
             {
@@ -135,14 +137,16 @@ module Elastic
       end
 
       def apply_sort(query_hash, options)
-        case options[:sort]
-        when 'created_asc'
+        # Due to different uses of sort param we prefer order_by when
+        # present
+        case ::Gitlab::Search::SortOptions.sort_and_direction(options[:order_by], options[:sort])
+        when :created_at_asc
           query_hash.merge(sort: {
             created_at: {
               order: 'asc'
             }
           })
-        when 'created_desc'
+        when :created_at_desc
           query_hash.merge(sort: {
             created_at: {
               order: 'desc'

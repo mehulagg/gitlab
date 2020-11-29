@@ -53,4 +53,14 @@ RSpec.describe Projects::TransferService do
       end
     end
   end
+
+  context 'missing epics applied to issues' do
+    it 'delegates transfer to Epics::TransferService' do
+      expect_next_instance_of(Epics::TransferService, user, project.group, project) do |epics_transfer_service|
+        expect(epics_transfer_service).to receive(:execute).once.and_call_original
+      end
+
+      subject.execute(group)
+    end
+  end
 end

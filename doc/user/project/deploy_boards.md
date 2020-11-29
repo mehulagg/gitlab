@@ -1,7 +1,7 @@
 ---
 stage: Release
 group: Progressive Delivery
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: howto, reference
 ---
 
@@ -41,9 +41,9 @@ knowledge. In particular, you should be familiar with:
 - [Kubernetes namespaces](https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/)
 - [Kubernetes canary deployments](https://kubernetes.io/docs/concepts/cluster-administration/manage-deployment/#canary-deployments)
 
-NOTE: **Note:**
-Apps that consist of multiple deployments are shown as duplicates on the deploy board.
-Follow [this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/8463) for details.
+In GitLab 13.5 and earlier, apps that consist of multiple deployments are shown as
+duplicates on the deploy board. This is [fixed](https://gitlab.com/gitlab-org/gitlab/-/issues/8463)
+in GitLab 13.6.
 
 ## Use cases
 

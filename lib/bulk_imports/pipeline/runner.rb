@@ -5,34 +5,39 @@ module BulkImports
     module Runner
       extend ActiveSupport::Concern
 
-      included do
-        attr_reader :extractors, :transformers, :loaders
+      def run(context)
+        info(context, message: "Pipeline started", pipeline: pipeline_name)
 
-        def initialize
-          @extractors = self.class.extractors.map(&method(:instantiate))
-          @transformers = self.class.transformers.map(&method(:instantiate))
-          @loaders = self.class.loaders.map(&method(:instantiate))
+        extractors.each do |extractor|
+          extractor.extract(context).each do |entry|
+            info(context, extractor: extractor.class.name)
 
-          super
-        end
+            transformers.each do |transformer|
+              info(context, transformer: transformer.class.name)
+              entry = transformer.transform(context, entry)
+            end
 
-        def run(context)
-          extractors.each do |extractor|
-            extractor.extract(context).each do |entry|
-              transformers.each do |transformer|
-                entry = transformer.transform(context, entry)
-              end
-
-              loaders.each do |loader|
-                loader.load(context, entry)
-              end
+            loaders.each do |loader|
+              info(context, loader: loader.class.name)
+              loader.load(context, entry)
             end
           end
         end
 
-        def instantiate(class_config)
-          class_config[:klass].new(class_config[:options])
-        end
+        after_run.call(context) if after_run.present?
+      end
+
+      private # rubocop:disable Lint/UselessAccessModifier
+
+      def info(context, extra = {})
+        logger.info({
+          entity: context.entity.id,
+          entity_type: context.entity.source_type
+        }.merge(extra))
+      end
+
+      def logger
+        @logger ||= Gitlab::Import::Logger.build
       end
     end
   end

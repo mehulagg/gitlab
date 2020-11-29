@@ -15,7 +15,7 @@ FactoryBot.define do
     end
 
     factory :conan_package_file do
-      package { create(:conan_package, without_package_files: true) }
+      package { association(:conan_package, without_package_files: true) }
 
       transient do
         without_loaded_metadatum { false }
@@ -150,14 +150,6 @@ FactoryBot.define do
 
     trait(:object_storage) do
       file_store { Packages::PackageFileUploader::Store::REMOTE }
-    end
-
-    trait(:checksummed) do
-      verification_checksum { 'abc' }
-    end
-
-    trait(:checksum_failure) do
-      verification_failure { 'Could not calculate the checksum' }
     end
 
     factory :package_file_with_file, traits: [:jar]

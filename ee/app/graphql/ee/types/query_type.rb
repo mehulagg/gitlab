@@ -51,6 +51,11 @@ module EE
               null: true,
               resolver: ::Resolvers::InstanceSecurityDashboardResolver,
               description: 'Fields related to Instance Security Dashboard'
+
+        field :devops_adoption_segments, ::Types::Admin::Analytics::DevopsAdoption::SegmentType.connection_type,
+              null: true,
+              description: 'Get configured DevOps adoption segments on the instance',
+              resolver: ::Resolvers::Admin::Analytics::DevopsAdoption::SegmentsResolver
       end
 
       def vulnerability(id:)

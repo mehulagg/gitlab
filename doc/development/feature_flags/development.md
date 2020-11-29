@@ -23,6 +23,12 @@ All newly-introduced feature flags should be [disabled by default](process.md#fe
 NOTE: **Note:**
 This document is the subject of continued work as part of an epic to [improve internal usage of Feature Flags](https://gitlab.com/groups/gitlab-org/-/epics/3551). Raise any suggestions as new issues and attach them to the epic.
 
+## Risk of a broken master (main) branch
+
+Feature flags **must** be used in the MR that introduces them. Not doing so causes a
+[broken master](https://about.gitlab.com/handbook/engineering/workflow/#broken-master) scenario due
+to the `rspec:feature-flags` job that only runs on the `master` branch.
+
 ## Types of feature flags
 
 Choose a feature flag type that matches the expected usage.
@@ -35,7 +41,6 @@ used so that unfinished code can be deployed in production.
 A `development` feature flag should have a rollout issue,
 ideally created using the [Feature Flag Roll Out template](https://gitlab.com/gitlab-org/gitlab/-/blob/master/.gitlab/issue_templates/Feature%20Flag%20Roll%20Out.md).
 
-NOTE: **Note:**
 This is the default type used when calling `Feature.enabled?`.
 
 ### `ops` type
@@ -104,7 +109,7 @@ a YAML definition in `config/feature_flags` or `ee/config/feature_flags`.
 Only feature flags that have a YAML definition file can be used when running the development or testing environments.
 
 ```shell
-$ bin/feature-flag my-feature-flag
+$ bin/feature-flag my_feature_flag
 >> Specify the group introducing the feature flag, like `group::apm`:
 ?> group::memory
 
@@ -116,9 +121,9 @@ https://gitlab.com/gitlab-org/gitlab/-/issues/new?issue%5Btitle%5D=%5BFeature+fl
 
 >> URL of the rollout issue (enter to skip):
 ?> https://gitlab.com/gitlab-org/gitlab/-/issues/232533
-create config/feature_flags/development/test-flag.yml
+create config/feature_flags/development/my_feature_flag.yml
 ---
-name: test-flag
+name: my_feature_flag
 introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/38602
 rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/232533
 group: group::memory
@@ -356,7 +361,6 @@ Introducing a feature flag into the codebase creates an additional code path tha
 It is strongly advised to test all code affected by a feature flag, both when **enabled** and **disabled**
 to ensure the feature works properly.
 
-NOTE: **Note:**
 When using the testing environment, all feature flags are enabled by default.
 
 To disable a feature flag in a test, use the `stub_feature_flags`

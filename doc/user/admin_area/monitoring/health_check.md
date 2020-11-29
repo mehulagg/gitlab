@@ -1,4 +1,7 @@
 ---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: concepts, howto
 ---
 
@@ -67,7 +70,7 @@ The readiness probe checks whether the GitLab instance is ready
 to accept traffic via Rails Controllers. The check by default
 does validate only instance-checks.
 
-If the `all=1` parameter is specified, the check will also validate
+If the `all=1` parameter is specified, the check also validates
 the dependent services (Database, Redis, Gitaly etc.)
 and gives a status for each.
 
@@ -94,7 +97,7 @@ Example response:
 }
 ```
 
-On failure, the endpoint will return a `503` HTTP status code.
+On failure, the endpoint returns a `503` HTTP status code.
 
 This check does hit the database and Redis if authenticated via `token`.
 
@@ -123,7 +126,7 @@ curl 'https://gitlab.example.com/-/liveness'
 
 Example response:
 
-On success, the endpoint will return a `200` HTTP status code, and a response like below.
+On success, the endpoint returns a `200` HTTP status code, and a response like below.
 
 ```json
 {
@@ -131,7 +134,7 @@ On success, the endpoint will return a `200` HTTP status code, and a response li
 }
 ```
 
-On failure, the endpoint will return a `503` HTTP status code.
+On failure, the endpoint returns a `503` HTTP status code.
 
 This check is being exempt from Rack Attack.
 

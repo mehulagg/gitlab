@@ -7,12 +7,12 @@ module Types
 
     authorize :create_on_demand_dast_scan
 
-    field :id, GraphQL::ID_TYPE, null: false,
-          description: 'ID of the DAST scanner profile',
-          deprecated: { reason: 'Use `global_id`', milestone: '13.4' }
+    field :id, ::Types::GlobalIDType[::DastScannerProfile], null: false,
+          description: 'ID of the DAST scanner profile'
 
     field :global_id, ::Types::GlobalIDType[::DastScannerProfile], null: false,
           description: 'ID of the DAST scanner profile',
+          deprecated: { reason: 'Use `id`', milestone: '13.6' },
           method: :id
 
     field :profile_name, GraphQL::STRING_TYPE, null: true,

@@ -47,6 +47,10 @@ RSpec.describe 'getting container repositories in a project' do
     before do
       subject
     end
+
+    it 'matches the JSON schema' do
+      expect(container_repositories_response).to match_schema('graphql/container_repositories')
+    end
   end
 
   context 'with different permissions' do
@@ -87,9 +91,9 @@ RSpec.describe 'getting container repositories in a project' do
   end
 
   context 'limiting the number of repositories' do
-    let(:issue_limit) { 1 }
+    let(:limit) { 1 }
     let(:variables) do
-      { path: project.full_path, n: issue_limit }
+      { path: project.full_path, n: limit }
     end
 
     let(:query) do
@@ -102,10 +106,10 @@ RSpec.describe 'getting container repositories in a project' do
       GQL
     end
 
-    it 'only returns N issues' do
+    it 'only returns N repositories' do
       subject
 
-      expect(container_repositories_response.size).to eq(issue_limit)
+      expect(container_repositories_response.size).to eq(limit)
     end
   end
 

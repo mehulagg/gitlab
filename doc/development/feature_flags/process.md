@@ -32,7 +32,8 @@ should be leveraged:
   requests, you can use the following workflow:
 
   1. [Create a new feature flag](development.md#create-a-new-feature-flag)
-     which is **off** by default, in the first merge request.
+     which is **off** by default, in the first merge request which uses the flag.
+     Flags [should not be added separately](development.md#risk-of-a-broken-master-main-branch).
   1. Submit incremental changes via one or more merge requests, ensuring that any
      new code added can only be reached if the feature flag is **on**.
      You can keep the feature flag enabled on your local GDK during development.
@@ -80,7 +81,7 @@ In order to build a final release and present the feature for self-managed
 users, the feature flag should be at least defaulted to **on**. If the feature
 is deemed stable and there is confidence that removing the feature flag is safe,
 consider removing the feature flag altogether. It's _strongly_ recommended that
-the feature flag is [enabled **globally** on **production**](./controls.md#enabling-a-feature-for-gitlabcom) for **at least one day**
+the feature flag is [enabled **globally** on **production**](controls.md#enabling-a-feature-for-gitlabcom) for **at least one day**
 before making this decision. Unexpected bugs are sometimes discovered during this period.
 
 The process for enabling features that are disabled by default can take 5-6 days

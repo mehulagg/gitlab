@@ -1,5 +1,5 @@
 .auto-deploy:
-  image: "registry.gitlab.com/gitlab-org/cluster-integration/auto-deploy-image:v2.0.0-beta.2"
+  image: "registry.gitlab.com/gitlab-org/cluster-integration/auto-deploy-image:v2.0.0"
   dependencies: []
 
 review:
@@ -183,7 +183,7 @@ production_manual:
       when: never
     - if: '$CI_COMMIT_BRANCH != "master"'
       when: never
-    # $INCREMENTAL_ROLLOUT_ENABLED is for compamtibilty with pre-GitLab 11.4 syntax
+    # $INCREMENTAL_ROLLOUT_ENABLED is for compatibility with pre-GitLab 11.4 syntax
     - if: '$INCREMENTAL_ROLLOUT_MODE == "manual" || $INCREMENTAL_ROLLOUT_ENABLED'
       when: manual
 

@@ -28,6 +28,8 @@ module EE
       validate :auditor_requires_license_add_on, if: :auditor
       validate :cannot_be_admin_and_auditor
 
+      after_create :perform_user_cap_check
+
       delegate :shared_runners_minutes_limit, :shared_runners_minutes_limit=,
                :extra_shared_runners_minutes_limit, :extra_shared_runners_minutes_limit=,
                to: :namespace
@@ -66,6 +68,8 @@ module EE
 
       belongs_to :managing_group, class_name: 'Group', optional: true, inverse_of: :managed_users
 
+      has_many :user_permission_export_uploads
+
       scope :not_managed, ->(group: nil) {
         scope = where(managing_group_id: nil)
         scope = scope.or(where.not(managing_group_id: group.id)) if group
@@ -74,7 +78,14 @@ module EE
 
       scope :managed_by, ->(group) { where(managing_group: group) }
 
-      scope :excluding_guests, -> { joins(:members).merge(::Member.non_guests).distinct }
+      scope :excluding_guests, -> do
+        subquery = ::Member
+          .select(1)
+          .where(::Member.arel_table[:user_id].eq(::User.arel_table[:id]))
+          .merge(::Member.non_guests)
+
+        where('EXISTS (?)', subquery)
+      end
 
       scope :subscribed_for_admin_email, -> { where(admin_email_unsubscribed_at: nil) }
       scope :ldap, -> { joins(:identities).where('identities.provider LIKE ?', 'ldap%') }
@@ -139,6 +150,16 @@ module EE
         else
           all
         end
+      end
+
+      def billable
+        scope = active.without_bots
+
+        License.with_valid_license do |license|
+          scope = scope.excluding_guests if license.exclude_guests_from_active_count?
+        end
+
+        scope
       end
     end
 
@@ -346,9 +367,8 @@ module EE
     def authorized_groups
       ::Group.unscoped do
         ::Group.from_union([
-          groups,
-          available_minimal_access_groups,
-          authorized_projects.joins(:namespace).select('namespaces.*')
+          super,
+          available_minimal_access_groups
         ])
       end
     end
@@ -394,6 +414,14 @@ module EE
       return minimal_access_groups unless ::Gitlab::CurrentSettings.should_check_namespace_plan?
 
       minimal_access_groups.with_feature_available_in_plan(:minimal_access_role)
+    end
+
+    def perform_user_cap_check
+      return unless ::Gitlab::CurrentSettings.should_apply_user_signup_cap?
+
+      run_after_commit do
+        SetUserStatusBasedOnUserCapSettingWorker.perform_async(id)
+      end
     end
   end
 end

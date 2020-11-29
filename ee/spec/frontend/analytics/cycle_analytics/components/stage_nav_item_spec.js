@@ -1,7 +1,7 @@
 // NOTE: more tests will be added in https://gitlab.com/gitlab-org/gitlab/issues/121613
-import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 import { shallowMount } from '@vue/test-utils';
 import StageNavItem from 'ee/analytics/cycle_analytics/components/stage_nav_item.vue';
+import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 import { approximateDuration } from '~/lib/utils/datetime_utility';
 
 describe('StageNavItem', () => {

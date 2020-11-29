@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Upgrading PostgreSQL Using Slony
 
 This guide describes the steps one can take to upgrade their PostgreSQL database

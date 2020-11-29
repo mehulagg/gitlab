@@ -39,6 +39,14 @@ RSpec.describe Gitlab::Kubernetes::Ingress do
     end
   end
 
+  describe '#name' do
+    subject { ingress.name }
+
+    let(:params) { stable_metadata }
+
+    it { is_expected.to eq('production-auto-deploy') }
+  end
+
   def stable_metadata
     kube_ingress(track: :stable)
   end

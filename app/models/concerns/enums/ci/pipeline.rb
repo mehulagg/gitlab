@@ -9,7 +9,8 @@ module Enums
         {
           unknown_failure: 0,
           config_error: 1,
-          external_validation_failure: 2
+          external_validation_failure: 2,
+          deployments_limit_exceeded: 23
         }
       end
 
@@ -51,6 +52,10 @@ module Enums
       # they run for. By definition it excludes dangling pipelines.
       def self.ci_sources
         sources.except(*dangling_sources.keys)
+      end
+
+      def self.ci_and_parent_sources
+        ci_sources.merge(sources.slice(:parent_pipeline))
       end
 
       # Returns the `Hash` to use for creating the `config_sources` enum for

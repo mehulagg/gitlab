@@ -39,6 +39,10 @@ module EE
         def send_unsubscribed_notification
           ::Notify.send_unsubscribed_notification(user.id).message
         end
+
+        def import_requirements_csv_email
+          Notify.import_requirements_csv_email(user.id, project.id, { success: 3, errors: [5, 6, 7], valid_file: true })
+        end
       end
 
       private

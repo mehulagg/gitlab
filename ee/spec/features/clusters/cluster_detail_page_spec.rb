@@ -52,6 +52,10 @@ RSpec.describe 'Clusterable > Show page' do
     let(:cluster_path) { admin_cluster_path(cluster) }
     let(:cluster) { create(:cluster, :provided_by_gcp, :instance) }
 
+    before do
+      gitlab_enable_admin_mode_sign_in(current_user)
+    end
+
     it 'shows the environments tab' do
       visit cluster_path
 

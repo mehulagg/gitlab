@@ -1,9 +1,9 @@
-import Vuex from 'vuex';
 import { GlEmptyState } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
+import Vuex from 'vuex';
 import PipelineSecurityDashboard from 'ee/security_dashboard/components/pipeline_security_dashboard.vue';
-import SecurityReportsSummary from 'ee/security_dashboard/components/security_reports_summary.vue';
 import SecurityDashboard from 'ee/security_dashboard/components/security_dashboard_vuex.vue';
+import SecurityReportsSummary from 'ee/security_dashboard/components/security_reports_summary.vue';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -88,7 +88,6 @@ describe('Pipeline Security Dashboard component', () => {
       const dashboard = wrapper.find(SecurityDashboard);
       expect(dashboard.exists()).toBe(true);
       expect(dashboard.props()).toMatchObject({
-        lockToProject: { id: projectId },
         pipelineId,
         vulnerabilitiesEndpoint,
       });
@@ -99,7 +98,7 @@ describe('Pipeline Security Dashboard component', () => {
     beforeEach(() => {
       factory({
         stubs: {
-          'security-dashboard': { template: '<div><slot name="emptyState"></slot></div>' },
+          'security-dashboard': { template: '<div><slot name="empty-state"></slot></div>' },
         },
       });
     });

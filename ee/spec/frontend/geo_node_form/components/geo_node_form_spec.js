@@ -1,9 +1,9 @@
-import Vuex from 'vuex';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
+import Vuex from 'vuex';
 import GeoNodeForm from 'ee/geo_node_form/components/geo_node_form.vue';
+import GeoNodeFormCapacities from 'ee/geo_node_form/components/geo_node_form_capacities.vue';
 import GeoNodeFormCore from 'ee/geo_node_form/components/geo_node_form_core.vue';
 import GeoNodeFormSelectiveSync from 'ee/geo_node_form/components/geo_node_form_selective_sync.vue';
-import GeoNodeFormCapacities from 'ee/geo_node_form/components/geo_node_form_capacities.vue';
 import store from 'ee/geo_node_form/store';
 import { visitUrl } from '~/lib/utils/url_utility';
 import { MOCK_NODE, MOCK_SELECTIVE_SYNC_TYPES, MOCK_SYNC_SHARDS } from '../mock_data';

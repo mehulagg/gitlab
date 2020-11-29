@@ -1,7 +1,7 @@
 ---
 stage: Protect
 group: Container Security
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Getting started with the Web Application Firewall
@@ -107,7 +107,7 @@ the scenes. Make sure to switch the toggle to the enabled position before instal
 Both logging and blocking modes are available for WAF. While logging mode is useful for
 auditing anomalous traffic, blocking mode ensures the traffic doesn't reach past Ingress.
 
-![Cluster applications](./img/guide_waf_ingress_installation_v12_10.png)
+![Cluster applications](img/guide_waf_ingress_installation_v12_10.png)
 
 After Ingress is installed, wait a few seconds and copy the IP address that
 is displayed in order to add in your base **Domain** at the top of the page. For

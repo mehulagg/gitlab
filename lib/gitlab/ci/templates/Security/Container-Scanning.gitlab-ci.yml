@@ -4,12 +4,11 @@ variables:
   # Setting this variable will affect all Security templates
   # (SAST, Dependency Scanning, ...)
   SECURE_ANALYZERS_PREFIX: "registry.gitlab.com/gitlab-org/security-products/analyzers"
-
-  CS_MAJOR_VERSION: 2
+  CS_MAJOR_VERSION: 3
 
 container_scanning:
   stage: test
-  image: $SECURE_ANALYZERS_PREFIX/klar:$CS_MAJOR_VERSION
+  image: "$CS_ANALYZER_IMAGE"
   variables:
     # By default, use the latest clair vulnerabilities database, however, allow it to be overridden here with a specific image
     # to enable container scanning to run offline, or to provide a consistent list of vulnerabilities for integration testing purposes
@@ -19,6 +18,7 @@ container_scanning:
     # file. See https://docs.gitlab.com/ee/user/application_security/container_scanning/index.html#overriding-the-container-scanning-template
     # for details
     GIT_STRATEGY: none
+    CS_ANALYZER_IMAGE: $SECURE_ANALYZERS_PREFIX/klar:$CS_MAJOR_VERSION
   allow_failure: true
   services:
     - name: $CLAIR_DB_IMAGE

@@ -1,10 +1,10 @@
-import Vuex from 'vuex';
+import { GlButton, GlLoadingIcon } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
+import Vuex from 'vuex';
 import Api from 'ee/api';
+import Component from 'ee/subscriptions/new/components/checkout/confirm_order.vue';
 import createStore from 'ee/subscriptions/new/store';
 import * as types from 'ee/subscriptions/new/store/mutation_types';
-import { GlButton, GlLoadingIcon } from '@gitlab/ui';
-import Component from 'ee/subscriptions/new/components/checkout/confirm_order.vue';
 
 describe('Confirm Order', () => {
   const localVue = createLocalVue();

@@ -189,6 +189,10 @@ module IssuablesHelper
     output = []
     output << "Opened #{time_ago_with_tooltip(issuable.created_at)} by ".html_safe
 
+    if issuable.is_a?(Issue) && issuable.service_desk_reply_to
+      output << "#{html_escape(issuable.service_desk_reply_to)} via "
+    end
+
     output << content_tag(:strong) do
       author_output = link_to_member(project, issuable.author, size: 24, mobile_classes: "d-none d-sm-inline")
       author_output << link_to_member(project, issuable.author, size: 24, by_username: true, avatar: false, mobile_classes: "d-inline d-sm-none")
@@ -210,7 +214,7 @@ module IssuablesHelper
 
     output << content_tag(:span, (sprite_icon('first-contribution', css_class: 'gl-icon gl-vertical-align-middle') if issuable.first_contribution?), class: 'has-tooltip gl-ml-2', title: _('1st contribution!'))
 
-    output << content_tag(:span, (issuable.task_status if issuable.tasks?), id: "task_status", class: "d-none d-sm-none d-md-inline-block gl-ml-3")
+    output << content_tag(:span, (issuable.task_status if issuable.tasks?), id: "task_status", class: "d-none d-md-inline-block gl-ml-3")
     output << content_tag(:span, (issuable.task_status_short if issuable.tasks?), id: "task_status_short", class: "d-md-none")
 
     output.join.html_safe
@@ -489,6 +493,21 @@ module IssuablesHelper
       iid: issuable[:iid],
       severity: issuable[:severity],
       timeTrackingLimitToHours: Gitlab::CurrentSettings.time_tracking_limit_to_hours
+    }
+  end
+
+  def sidebar_labels_data(issuable_sidebar, project)
+    {
+      allow_label_create: issuable_sidebar.dig(:current_user, :can_admin_label).to_s,
+      allow_scoped_labels: issuable_sidebar[:scoped_labels_available].to_s,
+      can_edit: issuable_sidebar.dig(:current_user, :can_edit).to_s,
+      iid: issuable_sidebar[:iid],
+      issuable_type: issuable_sidebar[:type],
+      labels_fetch_path: issuable_sidebar[:project_labels_path],
+      labels_manage_path: project_labels_path(project),
+      project_issues_path: issuable_sidebar[:project_issuables_path],
+      project_path: project.full_path,
+      selected_labels: issuable_sidebar[:labels].to_json
     }
   end
 

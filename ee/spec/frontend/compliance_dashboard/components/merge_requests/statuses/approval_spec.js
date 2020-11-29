@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlLink } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 
 import Approval from 'ee/compliance_dashboard/components/merge_requests/statuses/approval.vue';
 

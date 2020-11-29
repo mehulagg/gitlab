@@ -195,7 +195,7 @@ RSpec.describe Gitlab::Database::LoadBalancing::Host do
     end
 
     it 'returns false when we do not need to check the replica status' do
-      Timecop.freeze do
+      freeze_time do
         allow(host)
           .to receive(:last_checked_at)
           .and_return(Time.zone.now)

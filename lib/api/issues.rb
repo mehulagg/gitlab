@@ -6,9 +6,9 @@ module API
     helpers Helpers::IssuesHelpers
     helpers Helpers::RateLimiter
 
-    feature_category :issue_tracking
-
     before { authenticate_non_get! }
+
+    feature_category :issue_tracking
 
     helpers do
       params :negatable_issue_filter_params do
@@ -28,6 +28,8 @@ module API
                  coerce_with: Validations::Validators::CheckAssigneesCount.coerce,
                  desc: 'Return issues which are assigned to the user with the given username'
         mutually_exclusive :assignee_id, :assignee_username
+
+        use :negatable_issue_filter_params_ee
       end
 
       params :issues_stats_params do
@@ -433,3 +435,5 @@ module API
     end
   end
 end
+
+API::Issues.prepend_if_ee('EE::API::Issues')

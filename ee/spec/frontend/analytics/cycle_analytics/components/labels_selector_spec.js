@@ -1,12 +1,12 @@
-import Vuex from 'vuex';
+import { GlDropdownSectionHeader } from '@gitlab/ui';
 import { mount, shallowMount, createLocalVue } from '@vue/test-utils';
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
-import { GlDropdownSectionHeader } from '@gitlab/ui';
-import waitForPromises from 'helpers/wait_for_promises';
+import Vuex from 'vuex';
+import LabelsSelector from 'ee/analytics/cycle_analytics/components/labels_selector.vue';
 import createStore from 'ee/analytics/cycle_analytics/store';
 import * as getters from 'ee/analytics/cycle_analytics/store/getters';
-import LabelsSelector from 'ee/analytics/cycle_analytics/components/labels_selector.vue';
+import waitForPromises from 'helpers/wait_for_promises';
 import { groupLabels } from '../mock_data';
 
 const selectedLabel = groupLabels[groupLabels.length - 1];

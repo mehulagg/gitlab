@@ -1,12 +1,12 @@
+import { GlEmptyState, GlLoadingIcon } from '@gitlab/ui';
+import { createLocalVue, shallowMount } from '@vue/test-utils';
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 import Vuex from 'vuex';
-import { TEST_HOST } from 'helpers/test_constants';
 import IssuesAnalytics from 'ee/issues_analytics/components/issues_analytics.vue';
 import IssuesAnalyticsTable from 'ee/issues_analytics/components/issues_analytics_table.vue';
-import { createLocalVue, shallowMount } from '@vue/test-utils';
-import { GlEmptyState, GlLoadingIcon } from '@gitlab/ui';
 import { createStore } from 'ee/issues_analytics/stores';
+import { TEST_HOST } from 'helpers/test_constants';
 
 const mockFilterManagerSetup = jest.fn();
 jest.mock('ee/issues_analytics/filtered_search_issues_analytics', () =>

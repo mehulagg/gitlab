@@ -1,6 +1,6 @@
 import { shallowMount } from '@vue/test-utils';
-import { trimText } from 'helpers/text_helper';
 import MergeTrainPositionIndicator from 'ee/vue_merge_request_widget/components/merge_train_position_indicator.vue';
+import { trimText } from 'helpers/text_helper';
 
 describe('MergeTrainPositionIndicator', () => {
   let wrapper;

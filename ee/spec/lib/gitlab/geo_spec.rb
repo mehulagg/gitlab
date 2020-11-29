@@ -143,12 +143,24 @@ RSpec.describe Gitlab::Geo, :geo, :request_store do
   end
 
   describe '.oauth_authentication' do
-    before do
-      stub_secondary_node
-      stub_current_geo_node(secondary_node)
+    context 'for Geo secondary' do
+      before do
+        stub_secondary_node
+        stub_current_geo_node(secondary_node)
+      end
+
+      it_behaves_like 'a Geo cached value', :oauth_authentication, :oauth_application
     end
 
-    it_behaves_like 'a Geo cached value', :oauth_authentication, :oauth_application
+    context 'for Geo primary' do
+      before do
+        stub_current_geo_node(primary_node)
+      end
+
+      it 'returns nil' do
+        expect(described_class.oauth_authentication).to be_nil
+      end
+    end
   end
 
   describe '.connected?' do

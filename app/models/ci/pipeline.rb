@@ -42,9 +42,16 @@ module Ci
     belongs_to :external_pull_request
     belongs_to :ci_ref, class_name: 'Ci::Ref', foreign_key: :ci_ref_id, inverse_of: :pipelines
 
-    has_internal_id :iid, scope: :project, presence: false, track_if: -> { !importing? }, ensure_if: -> { !importing? }, init: ->(s) do
-      s&.project&.all_pipelines&.maximum(:iid) || s&.project&.all_pipelines&.count
-    end
+    has_internal_id :iid, scope: :project, presence: false,
+      track_if: -> { !importing? },
+      ensure_if: -> { !importing? },
+      init: ->(pipeline, scope) do
+        if pipeline
+          pipeline.project&.all_pipelines&.maximum(:iid) || pipeline.project&.all_pipelines&.count
+        elsif scope
+          ::Ci::Pipeline.where(**scope).maximum(:iid)
+        end
+      end
 
     has_many :stages, -> { order(position: :asc) }, inverse_of: :pipeline
     has_many :statuses, class_name: 'CommitStatus', foreign_key: :commit_id, inverse_of: :pipeline
@@ -270,6 +277,7 @@ module Ci
     scope :internal, -> { where(source: internal_sources) }
     scope :no_child, -> { where.not(source: :parent_pipeline) }
     scope :ci_sources, -> { where(source: Enums::Ci::Pipeline.ci_sources.values) }
+    scope :ci_and_parent_sources, -> { where(source: Enums::Ci::Pipeline.ci_and_parent_sources.values) }
     scope :for_user, -> (user) { where(user: user) }
     scope :for_sha, -> (sha) { where(sha: sha) }
     scope :for_source_sha, -> (source_sha) { where(source_sha: source_sha) }
@@ -345,6 +353,14 @@ module Ci
       relation.each_with_object({}) do |pipeline, hash|
         hash[pipeline.ref] ||= pipeline
       end
+    end
+
+    def self.latest_running_for_ref(ref)
+      newest_first(ref: ref).running.take
+    end
+
+    def self.latest_failed_for_ref(ref)
+      newest_first(ref: ref).failed.take
     end
 
     # Returns a Hash containing the latest pipeline for every given
@@ -758,6 +774,15 @@ module Ci
           variables.append(key: 'CI_MERGE_REQUEST_EVENT_TYPE', value: merge_request_event_type.to_s)
           variables.append(key: 'CI_MERGE_REQUEST_SOURCE_BRANCH_SHA', value: source_sha.to_s)
           variables.append(key: 'CI_MERGE_REQUEST_TARGET_BRANCH_SHA', value: target_sha.to_s)
+
+          if Feature.enabled?(:ci_mr_diff_variables, project)
+            diff = self.merge_request_diff
+            if diff.present?
+              variables.append(key: 'CI_MERGE_REQUEST_DIFF_ID', value: diff.id.to_s)
+              variables.append(key: 'CI_MERGE_REQUEST_DIFF_BASE_SHA', value: diff.base_commit_sha)
+            end
+          end
+
           variables.concat(merge_request.predefined_variables)
         end
 
@@ -829,9 +854,15 @@ module Ci
     end
 
     def same_family_pipeline_ids
-      ::Gitlab::Ci::PipelineObjectHierarchy.new(
-        base_and_ancestors(same_project: true), options: { same_project: true }
-      ).base_and_descendants.select(:id)
+      if Feature.enabled?(:ci_root_ancestor_for_pipeline_family, project, default_enabled: false)
+        ::Gitlab::Ci::PipelineObjectHierarchy.new(
+          self.class.where(id: root_ancestor), options: { same_project: true }
+        ).base_and_descendants.select(:id)
+      else
+        ::Gitlab::Ci::PipelineObjectHierarchy.new(
+          base_and_ancestors(same_project: true), options: { same_project: true }
+        ).base_and_descendants.select(:id)
+      end
     end
 
     def build_with_artifacts_in_self_and_descendants(name)
@@ -853,6 +884,15 @@ module Ci
         .base_and_descendants
     end
 
+    def root_ancestor
+      return self unless child?
+
+      Gitlab::Ci::PipelineObjectHierarchy
+        .new(self.class.unscoped.where(id: id), options: { same_project: true })
+        .base_and_ancestors(hierarchy_order: :desc)
+        .first
+    end
+
     def bridge_triggered?
       source_bridge.present?
     end
@@ -862,7 +902,8 @@ module Ci
     end
 
     def child?
-      parent_pipeline.present?
+      parent_pipeline? && # child pipelines have `parent_pipeline` source
+        parent_pipeline.present?
     end
 
     def parent?
@@ -926,7 +967,7 @@ module Ci
 
     def accessibility_reports
       Gitlab::Ci::Reports::AccessibilityReports.new.tap do |accessibility_reports|
-        builds.latest.with_reports(Ci::JobArtifact.accessibility_reports).each do |build|
+        latest_report_builds(Ci::JobArtifact.accessibility_reports).each do |build|
           build.collect_accessibility_reports!(accessibility_reports)
         end
       end
@@ -936,6 +977,14 @@ module Ci
       Gitlab::Ci::Reports::CoverageReports.new.tap do |coverage_reports|
         latest_report_builds(Ci::JobArtifact.coverage_reports).each do |build|
           build.collect_coverage_reports!(coverage_reports)
+        end
+      end
+    end
+
+    def codequality_reports
+      Gitlab::Ci::Reports::CodequalityReports.new.tap do |codequality_reports|
+        latest_report_builds(Ci::JobArtifact.codequality_reports).each do |build|
+          build.collect_codequality_reports!(codequality_reports)
         end
       end
     end
@@ -1113,6 +1162,22 @@ module Ci
 
     def pipeline_data
       Gitlab::DataBuilder::Pipeline.build(self)
+    end
+
+    def merge_request_diff_sha
+      return unless merge_request?
+
+      if merge_request_pipeline?
+        source_sha
+      else
+        sha
+      end
+    end
+
+    def merge_request_diff
+      return unless merge_request?
+
+      merge_request.merge_request_diff_for(merge_request_diff_sha)
     end
 
     def push_details

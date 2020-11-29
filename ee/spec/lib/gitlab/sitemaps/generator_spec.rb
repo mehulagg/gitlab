@@ -40,14 +40,12 @@ RSpec.describe Gitlab::Sitemaps::Generator do
         let_it_be(:public_subgroup_internal_project) { create(:project, :internal, namespace: public_subgroup) }
         let_it_be(:internal_subgroup_private_project) { create(:project, :private, namespace: internal_subgroup) }
         let_it_be(:internal_subgroup_internal_project) { create(:project, :internal, namespace: internal_subgroup) }
+        let_it_be(:other_project) { create(:project, :public) }
 
         it 'includes default explore routes and gitlab-org group routes' do
-          new_path = Rails.root.join('tmp/tests/sitemap.xml')
-          stub_const('Gitlab::Sitemaps::SitemapFile::SITEMAP_FILE_PATH', new_path)
+          create(:project_group_link, project: other_project, group: gitlab_org_group)
 
-          subject
-
-          content = File.read(new_path)
+          content = subject.render
 
           expect(content).to include('/explore/projects')
           expect(content).to include('/explore/groups')
@@ -60,11 +58,10 @@ RSpec.describe Gitlab::Sitemaps::Generator do
           expect(content).not_to include(internal_gitlab_org_project.full_path)
           expect(content).not_to include(private_gitlab_org_project.full_path)
           expect(content).not_to include(internal_subgroup.full_path)
+          expect(content).not_to include(other_project.full_path)
           expect(content).not_to include(public_subgroup_internal_project.full_path)
           expect(content).not_to include(internal_subgroup_private_project.full_path)
           expect(content).not_to include(internal_subgroup_internal_project.full_path)
-
-          File.delete(new_path)
         end
       end
     end

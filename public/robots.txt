@@ -36,6 +36,7 @@ User-Agent: *
 Disallow: /*/new
 Disallow: /*/edit
 Disallow: /*/raw
+Disallow: /*/realtime_changes
 
 # Group details
 User-Agent: *
@@ -67,3 +68,16 @@ Disallow: /*/protected_branches
 Disallow: /*/uploads/
 Disallow: /*/project_members
 Disallow: /*/settings
+Disallow: /*/-/import
+Disallow: /*/-/environments
+Disallow: /*/-/jobs
+Disallow: /*/-/requirements_management
+Disallow: /*/-/pipelines
+Disallow: /*/-/pipeline_schedules
+Disallow: /*/-/dependencies
+Disallow: /*/-/licenses
+Disallow: /*/-/metrics
+Disallow: /*/-/incidents
+Disallow: /*/-/value_stream_analytics
+Disallow: /*/-/analytics
+Disallow: /*/insights

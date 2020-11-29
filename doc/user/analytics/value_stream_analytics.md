@@ -1,7 +1,7 @@
 ---
 stage: Manage
-group: Analytics
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+group: Optimize
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Value Stream Analytics
@@ -105,7 +105,7 @@ Each stage of Value Stream Analytics is further described in the table below.
 | --------- | --------------- |
 | Issue     | Measures the median time between creating an issue and taking action to solve it, by either labeling it or adding it to a milestone, whatever comes first. The label will be tracked only if it already has an [Issue Board list](../project/issue_board.md) created for it. |
 | Plan      | Measures the median time between the action you took for the previous stage, and pushing the first commit to the branch. The very first commit of the branch is the one that triggers the separation between **Plan** and **Code**, and at least one of the commits in the branch needs to contain the related issue number (e.g., `#42`). If none of the commits in the branch mention the related issue number, it is not considered to the measurement time of the stage. |
-| Code      | Measures the median time between pushing a first commit (previous stage) and creating a merge request (MR) related to that commit. The key to keep the process tracked is to include the [issue closing pattern](../project/issues/managing_issues.md#closing-issues-automatically) to the description of the merge request (for example, `Closes #xxx`, where `xxx` is the number of the issue related to this merge request). If the issue closing pattern is not present in the merge request description, the MR is not considered to the measurement time of the stage. |
+| Code      | Measures the median time between pushing a first commit (previous stage) and creating a merge request (MR) related to that commit. The key to keep the process tracked is to include the [issue closing pattern](../project/issues/managing_issues.md#closing-issues-automatically) to the description of the merge request (for example, `Closes #xxx`, where `xxx` is the number of the issue related to this merge request). If the closing pattern is not present, then the calculation takes the creation time of the first commit in the merge request as the start time. |
 | Test      | Measures the median time to run the entire pipeline for that project. It's related to the time GitLab CI/CD takes to run every job for the commits pushed to that merge request defined in the previous stage. It is basically the start->finish time for all pipelines. |
 | Review    | Measures the median time taken to review the merge request that has a closing issue pattern, between its creation and until it's merged. |
 | Staging   | Measures the median time between merging the merge request with a closing issue pattern until the very first deployment to a [production environment](#how-the-production-environment-is-identified). If there isn't a production environment, this is not tracked. |
@@ -299,7 +299,7 @@ To recover a default stage that was previously hidden:
 
 A default value stream is readily available for each group. You can create additional value streams based on the different areas of work that you would like to measure.
 
-Once created, a new value stream includes the [seven stages](#overview) that follow
+Once created, a new value stream includes the [seven stages](#default-stages) that follow
 [GitLab workflow](../../topics/gitlab_flow.md)
 best practices. You can customize this flow by adding, hiding or re-ordering stages.
 
@@ -379,7 +379,7 @@ The current permissions on the Project Value Stream Analytics dashboard are:
 
 You can [read more about permissions](../../user/permissions.md) in general.
 
-For Value Stream Analytics functionality introduced in GitLab 12.3 and later, 
+For Value Stream Analytics functionality introduced in GitLab 12.3 and later,
 users must have Reporter access or above.
 
 ## More resources

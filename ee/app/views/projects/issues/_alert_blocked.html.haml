@@ -1,7 +1,7 @@
-- blocked_by_issues = @issue.blocked_by_issues(current_user)
+- blocked_by_issues = @issue.blocked_by_issues_for(current_user)
 - blocked_by_issues_links = blocked_by_issues.map { |blocking_issue| link_to "\##{blocking_issue.iid}", project_issue_path(blocking_issue.project, blocking_issue), class: 'gl-link' }.join(', ').html_safe
 
-- if @issue.blocked? && @issue.blocked_by_issues(current_user).length > 0
+- if @issue.blocked? && @issue.blocked_by_issues_for(current_user).length > 0
   .hidden.js-close-blocked-issue-warning.js-issuable-buttons.gl-alert.gl-alert-warning.gl-mt-5{ role: 'alert', data: { 'action': "close-reopen" } }
     = sprite_icon('warning', css_class: 'gl-icon gl-alert-icon')
     %h4.gl-alert-title

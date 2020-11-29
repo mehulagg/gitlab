@@ -27,6 +27,16 @@ module Security
       api_fuzzing: 7
     }
 
+    scope :by_scan_types, -> (scan_types) { where(scan_type: scan_types) }
+    scope :has_dismissal_feedback, -> do
+      # The `category` enum on `vulnerability_feedback` table starts from 0 but the `scan_type` enum
+      # on `security_scans` from 1. For this reason, we have to decrease the value of `scan_type` by one
+      # to match with category values on `vulnerability_feedback` table.
+      joins(build: { project: :vulnerability_feedback })
+        .where('vulnerability_feedback.category = (security_scans.scan_type - 1)')
+        .merge(Vulnerabilities::Feedback.for_dismissal)
+    end
+
     delegate :project, to: :build
   end
 end

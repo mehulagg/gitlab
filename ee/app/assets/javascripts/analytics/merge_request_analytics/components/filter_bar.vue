@@ -169,6 +169,7 @@ export default {
       :search-input-placeholder="__('Filter results')"
       :tokens="tokens"
       :initial-filter-value="initialFilterValue"
+      suggestions-list-class="gl-z-index-9999"
       @onFilter="handleFilter"
     />
     <url-sync :query="query" />

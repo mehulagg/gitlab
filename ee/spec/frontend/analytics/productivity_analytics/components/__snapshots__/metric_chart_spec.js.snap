@@ -38,6 +38,7 @@ exports[`MetricChart component template when isLoading is false and chartData is
       class="w-100"
       iconcolor=""
       iconname=""
+      iconrightarialabel=""
       iconrightname=""
       secondarytext=""
     >
@@ -45,7 +46,7 @@ exports[`MetricChart component template when isLoading is false and chartData is
         class="d-flex"
       >
         <gl-icon-stub
-          aria-label="Selected"
+          arialabel="Selected"
           class="flex-shrink-0 gl-mr-2 invisible"
           name="mobile-issue-close"
           size="16"
@@ -62,6 +63,7 @@ exports[`MetricChart component template when isLoading is false and chartData is
       class="w-100"
       iconcolor=""
       iconname=""
+      iconrightarialabel=""
       iconrightname=""
       secondarytext=""
     >
@@ -69,7 +71,7 @@ exports[`MetricChart component template when isLoading is false and chartData is
         class="d-flex"
       >
         <gl-icon-stub
-          aria-label="Selected"
+          arialabel="Selected"
           class="flex-shrink-0 gl-mr-2 invisible"
           name="mobile-issue-close"
           size="16"
@@ -96,7 +98,7 @@ exports[`MetricChart component template when isLoading is true matches the snaps
    
   <gl-loading-icon-stub
     class="my-4 py-4"
-    color="orange"
+    color="dark"
     label="Loading"
     size="md"
   />

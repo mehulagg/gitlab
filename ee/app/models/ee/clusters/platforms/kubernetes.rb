@@ -14,7 +14,7 @@ module EE
           if result
             deployments = read_deployments(environment.deployment_namespace)
 
-            ingresses = if ::Feature.enabled?(:canary_ingress_weight_control, environment.project)
+            ingresses = if ::Feature.enabled?(:canary_ingress_weight_control, environment.project, default_enabled: true)
                           read_ingresses(environment.deployment_namespace)
                         else
                           []
@@ -36,6 +36,15 @@ module EE
           ingresses = data[:ingresses].presence || []
 
           ::Gitlab::Kubernetes::RolloutStatus.from_deployments(*deployments, pods_attrs: pods, ingresses: ingresses)
+        end
+
+        def ingresses(namespace)
+          ingresses = read_ingresses(namespace)
+          ingresses.map { |ingress| ::Gitlab::Kubernetes::Ingress.new(ingress) }
+        end
+
+        def patch_ingress(namespace, ingress, data)
+          kubeclient.patch_ingress(ingress.name, data, namespace)
         end
 
         private

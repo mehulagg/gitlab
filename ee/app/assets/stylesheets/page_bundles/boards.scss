@@ -69,12 +69,6 @@
   white-space: nowrap;
 }
 
-.board-type-assignee {
-  .board-title-sub-text {
-    color: var(--gl-text-color-secondary, $gl-text-color-secondary);
-  }
-}
-
 .boards-selector-wrapper > .show.dropdown .dropdown-menu {
   // we cannot use d-flex from Bootstrap because of !important
   // see https://gitlab.com/gitlab-org/gitlab-ui/issues/38
@@ -117,5 +111,17 @@ $epic-icons-spacing: 40px;
 
   .is-compact & {
     max-width: calc(100vw - #{$contextual-sidebar-width} - #{$gutter-width} - #{$epic-icons-spacing});
+  }
+}
+
+.swimlanes-sidebar-time-tracker {
+  .time-tracking-help-state {
+    margin: 16px -24px 0;
+    @include gl-px-6;
+    @include gl-py-2;
+    @include gl-border-gray-100;
+    @include gl-border-t-solid;
+    @include gl-border-t-1;
+    @include gl-border-b-0;
   }
 }

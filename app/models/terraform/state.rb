@@ -3,7 +3,6 @@
 module Terraform
   class State < ApplicationRecord
     include UsageStatistics
-    include FileStoreMounter
     include IgnorableColumns
     # These columns are being removed since geo replication falls to the versioned state
     # Tracking in https://gitlab.com/gitlab-org/gitlab/-/issues/258262
@@ -17,8 +16,15 @@ module Terraform
     belongs_to :project
     belongs_to :locked_by_user, class_name: 'User'
 
-    has_many :versions, class_name: 'Terraform::StateVersion', foreign_key: :terraform_state_id
-    has_one :latest_version, -> { ordered_by_version_desc }, class_name: 'Terraform::StateVersion', foreign_key: :terraform_state_id
+    has_many :versions,
+      class_name: 'Terraform::StateVersion',
+      foreign_key: :terraform_state_id,
+      inverse_of: :terraform_state
+
+    has_one :latest_version, -> { ordered_by_version_desc },
+      class_name: 'Terraform::StateVersion',
+      foreign_key: :terraform_state_id,
+      inverse_of: :terraform_state
 
     scope :versioning_not_enabled, -> { where(versioning_enabled: false) }
     scope :ordered_by_name, -> { order(:name) }
@@ -28,20 +34,9 @@ module Terraform
               format: { with: HEX_REGEXP, message: 'only allows hex characters' }
 
     default_value_for(:uuid, allows_nil: false) { SecureRandom.hex(UUID_LENGTH / 2) }
-    default_value_for(:versioning_enabled, true)
-
-    mount_file_store_uploader StateUploader
-
-    def file_store
-      super || StateUploader.default_store
-    end
 
     def latest_file
-      if versioning_enabled?
-        latest_version&.file
-      else
-        latest_version&.file || file
-      end
+      latest_version&.file
     end
 
     def locked?
@@ -49,13 +44,14 @@ module Terraform
     end
 
     def update_file!(data, version:, build:)
+      # This check is required to maintain backwards compatibility with
+      # states that were created prior to versioning being supported.
+      # This can be removed in 14.0 when support for these states is dropped.
+      # See https://gitlab.com/gitlab-org/gitlab/-/issues/258960
       if versioning_enabled?
         create_new_version!(data: data, version: version, build: build)
-      elsif latest_version.present?
-        migrate_legacy_version!(data: data, version: version, build: build)
       else
-        self.file = data
-        save!
+        migrate_legacy_version!(data: data, version: version, build: build)
       end
     end
 

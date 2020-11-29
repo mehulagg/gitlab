@@ -1,4 +1,7 @@
 ---
+stage: secure
+group: secure
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference, howto
 ---
 
@@ -18,7 +21,7 @@ For an overview of application security with GitLab, see
 ## Quick start
 
 Get started quickly with Dependency Scanning, License Scanning, Static Application Security
-Testing (SAST), and Secret Detection by adding the following to your `.gitlab-ci.yml`:
+Testing (SAST), and Secret Detection by adding the following to your [`.gitlab-ci.yml`](../../ci/yaml/README.md):
 
 ```yaml
 include:
@@ -67,15 +70,29 @@ GitLab uses the following tools to scan and report known vulnerabilities found i
 | [Dependency List](dependency_list/index.md) **(ULTIMATE)**                   | View your project's dependencies and their known vulnerabilities.      |
 | [Dependency Scanning](dependency_scanning/index.md) **(ULTIMATE)**           | Analyze your dependencies for known vulnerabilities.                   |
 | [Dynamic Application Security Testing (DAST)](dast/index.md) **(ULTIMATE)**  | Analyze running web applications for known vulnerabilities.            |
-| [API fuzzing](api_fuzzing/index.md) **(ULTIMATE)**                 | Find unknown bugs and vulnerabilities in web APIs with fuzzing.    |
-| [Secret Detection](secret_detection/index.md) **(ULTIMATE)**                 | Analyze Git history for leaked secrets.                                |
+| [API fuzzing](api_fuzzing/index.md) **(ULTIMATE)**                           | Find unknown bugs and vulnerabilities in web APIs with fuzzing.        |
+| [Secret Detection](secret_detection/index.md)                                | Analyze Git history for leaked secrets.                                |
 | [Security Dashboard](security_dashboard/index.md) **(ULTIMATE)**             | View vulnerabilities in all your projects and groups.                  |
 | [Static Application Security Testing (SAST)](sast/index.md)                  | Analyze source code for known vulnerabilities.                         |
 | [Coverage fuzzing](coverage_fuzzing/index.md) **(ULTIMATE)**                 | Find unknown bugs and vulnerabilities with coverage-guided fuzzing.    |
 
+### Use security scanning tools with Pipelines for Merge Requests
+
+The security scanning tools can all be added to pipelines with [templates](https://gitlab.com/gitlab-org/gitlab/-/tree/master/lib/gitlab/ci/templates/Security).
+See each tool for details on how to use include each template in your CI/CD configuration.
+
+By default, the application security jobs are configured to run for branch pipelines only.
+To use them with [pipelines for merge requests](../../ci/merge_request_pipelines/index.md),
+you may need to override the default `rules:` configuration to add:
+
+```yaml
+rules:
+  - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+```
+
 ## Security Scanning with Auto DevOps
 
-When [Auto DevOps](../../topics/autodevops/) is enabled, all GitLab Security scanning tools will be configured using default settings.
+When [Auto DevOps](../../topics/autodevops/) is enabled, all GitLab Security scanning tools are configured using default settings.
 
 - [Auto SAST](../../topics/autodevops/stages.md#auto-sast)
 - [Auto Secret Detection](../../topics/autodevops/stages.md#auto-secret-detection)
@@ -93,7 +110,7 @@ The scanning tools and vulnerabilities database are updated regularly.
 | Secure scanning tool                                         | Vulnerabilities database updates          |
 |:-------------------------------------------------------------|-------------------------------------------|
 | [Container Scanning](container_scanning/index.md)            | Uses `clair`. The latest `clair-db` version is used for each job by running the [`latest` Docker image tag](https://gitlab.com/gitlab-org/gitlab/blob/438a0a56dc0882f22bdd82e700554525f552d91b/lib/gitlab/ci/templates/Security/Container-Scanning.gitlab-ci.yml#L37). The `clair-db` database [is updated daily according to the author](https://github.com/arminc/clair-local-scan#clair-server-or-local). |
-| [Dependency Scanning](dependency_scanning/index.md)          | Relies on `bundler-audit` (for Ruby gems), `retire.js` (for NPM packages), and `gemnasium` (GitLab's own tool for all libraries). Both `bundler-audit` and `retire.js` fetch their vulnerabilities data from GitHub repositories, so vulnerabilities added to `ruby-advisory-db` and `retire.js` are immediately available. The tools themselves are updated once per month if there's a new version. The [Gemnasium DB](https://gitlab.com/gitlab-org/security-products/gemnasium-db) is updated at least once a week. See our [current measurement of time from CVE being issued to our product being updated](https://about.gitlab.com/handbook/engineering/development/performance-indicators/#cve-issue-to-update). |
+| [Dependency Scanning](dependency_scanning/index.md)          | Relies on `bundler-audit` (for Ruby gems), `retire.js` (for NPM packages), and `gemnasium` (GitLab's own tool for all libraries). Both `bundler-audit` and `retire.js` fetch their vulnerabilities data from GitHub repositories, so vulnerabilities added to `ruby-advisory-db` and `retire.js` are immediately available. The tools themselves are updated once per month if there's a new version. The [Gemnasium DB](https://gitlab.com/gitlab-org/security-products/gemnasium-db) is updated at least once a week. See our [current measurement of time from CVE being issued to our product being updated](https://about.gitlab.com/handbook/engineering/development/performance-indicators/#cve-issue-to-update). |
 | [Dynamic Application Security Testing (DAST)](dast/index.md) | The scanning engine is updated on a periodic basis. See the [version of the underlying tool `zaproxy`](https://gitlab.com/gitlab-org/security-products/dast/blob/master/Dockerfile#L1). The scanning rules are downloaded at scan runtime. |
 | [Static Application Security Testing (SAST)](sast/index.md)  | Relies exclusively on [the tools GitLab wraps](sast/index.md#supported-languages-and-frameworks). The underlying analyzers are updated at least once per month if a relevant update is available. The vulnerabilities database is updated by the upstream tools. |
 
@@ -105,6 +122,24 @@ The Docker images are updated to match the previous GitLab releases, so users au
 latest versions of the scanning tools without having to do anything. There are some known issues
 with this approach, however, and there is a
 [plan to resolve them](https://gitlab.com/gitlab-org/gitlab/-/issues/9725).
+
+## Viewing security scan information in merge requests **(CORE)**
+
+> - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/4393) in GitLab Core 13.5.
+> - Made [available in all tiers](https://gitlab.com/gitlab-org/gitlab/-/issues/273205) in 13.6.
+> - It's [deployed behind a feature flag](../feature_flags.md), enabled by default.
+> - It's enabled on GitLab.com.
+> - It can be enabled or disabled for a single project.
+> - It's recommended for production use.
+> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-the-basic-security-widget). **(CORE ONLY)**
+
+CAUTION: **Warning:**
+This feature might not be available to you. Check the **version history** note above for details.
+
+Merge requests which have run security scans let you know that the generated
+reports are available to download.
+
+![Security widget](img/security_widget_v13_6.png)
 
 ## Interacting with the vulnerabilities
 
@@ -141,21 +176,21 @@ To view details of DAST vulnerabilities:
 
 1. Click on the vulnerability's description. The following details are provided:
 
-   | Field            | Description                                                                                                                                                                   |
-|:-----------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Description      | Description of the vulnerability.                                                                                                                                             |
-| Project          | Namespace and project in which the vulnerability was detected.                                                                                                                |
-| Method           | HTTP method used to detect the vulnerability.                                                                                                                                 |
-| URL              | URL at which the vulnerability was detected.                                                                                                                                  |
-| Request Headers  | Headers of the request.                                                                                                                                                       |
-| Response Status  | Response status received from the application.                                                                                                                                |
-| Response Headers | Headers of the response received from the application.                                                                                                                        |
+| Field            | Description                                                        |
+|:-----------------|:------------------------------------------------------------------ |
+| Description      | Description of the vulnerability.                                  |
+| Project          | Namespace and project in which the vulnerability was detected.     |
+| Method           | HTTP method used to detect the vulnerability.                      |
+| URL              | URL at which the vulnerability was detected.                       |
+| Request Headers  | Headers of the request.                                            |
+| Response Status  | Response status received from the application.                     |
+| Response Headers | Headers of the response received from the application.             |
 | Evidence         | Evidence of the data found that verified the vulnerability. Often a snippet of the request or response, this can be used to help verify that the finding is a vulnerability. |
-| Identifiers      | Identifiers of the vulnerability.                                                                                                                                             |
-| Severity         | Severity of the vulnerability.                                                                                                                                                |
-| Scanner Type     | Type of vulnerability report.                                                                                                                                                 |
-| Links            | Links to further details of the detected vulnerability.                                                                                                                       |
-| Solution         | Details of a recommended solution to the vulnerability (optional).                                                                                                            |
+| Identifiers      | Identifiers of the vulnerability.                                  |
+| Severity         | Severity of the vulnerability.                                     |
+| Scanner Type     | Type of vulnerability report.                                      |
+| Links            | Links to further details of the detected vulnerability.            |
+| Solution         | Details of a recommended solution to the vulnerability (optional). |
 
 #### Hide sensitive information in headers
 
@@ -190,11 +225,11 @@ vulnerability as you learn more over time.
 > Introduced in [GitLab Ultimate](https://about.gitlab.com/pricing/) 12.9.
 
 You can dismiss multiple vulnerabilities at once, providing an optional reason.
-Selecting the checkboxes on the side of each vulnerability in the list will select that individual vulnerability.
+Selecting the checkboxes on the side of each vulnerability in the list selects that individual vulnerability.
 Alternatively, you can select all the vulnerabilities in the list by selecting the checkbox in the table header.
-Deselecting the checkbox in the header will deselect all the vulnerabilities in the list.
+Deselecting the checkbox in the header deselects all the vulnerabilities in the list.
 Once you have selected some vulnerabilities, a menu appears at the top of the table that allows you to select a dismissal reason.
-Pressing the "Dismiss Selected" button will dismiss all the selected vulnerabilities at once, with the reason you chose.
+Pressing the "Dismiss Selected" button dismisses all the selected vulnerabilities at once, with the reason you chose.
 
 ![Multiple vulnerability dismissal](img/multi_select_v12_9.png)
 
@@ -220,7 +255,7 @@ to the name.
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/5656) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 11.7.
 
 Some vulnerabilities can be fixed by applying the solution that GitLab
-automatically generates. The following scanners are supported:
+automatically generates. Although the feature name is Automatic Remediation, this feature is also commonly called Auto-Remediation, Auto Remediation, or Suggested Solutions. The following scanners are supported:
 
 - [Dependency Scanning](dependency_scanning/index.md):
   Automatic Patch creation is only available for Node.js projects managed with
@@ -235,14 +270,11 @@ Selecting the button creates a merge request with the solution.
 
 #### Manually applying the suggested patch
 
-1. To manually apply the patch that was generated by GitLab for a vulnerability, select the dropdown arrow on the **Resolve
-with merge request** button, then select **Download patch to resolve**:
+To manually apply the patch that GitLab generated for a vulnerability:
 
-![Resolve with Merge Request button dropdown](img/vulnerability_page_merge_request_button_dropdown_v13_1.png)
+1. Select the **Resolve with merge request** dropdown, then select **Download patch to resolve**:
 
-1. The button's text changes to **Download patch to resolve**. Click on it to download the patch:
-
-![Download patch button](img/vulnerability_page_download_patch_button_v13_1.png)
+   ![Resolve with Merge Request button dropdown](img/vulnerability_page_merge_request_button_dropdown_v13_1.png)
 
 1. Ensure your local project has the same commit checked out that was used to generate the patch.
 1. Run `git apply remediation.patch`.
@@ -576,7 +608,32 @@ Instructions are available in the [legacy template project](https://gitlab.com/g
 #### Vulnerabilities are found, but the job succeeds. How can I have a pipeline fail instead?
 
 This is the current default behavior, because the job's status indicates success or failure of the analyzer itself.
-Analyzer results are displayed in the [job logs](../../ci/pipelines/#expand-and-collapse-job-log-sections),
-[Merge Request widget](sast/index.md#overview)
+Analyzer results are displayed in the [job logs](../../ci/jobs/index.md#expand-and-collapse-job-log-sections),
+[Merge Request widget](sast/index.md)
 or [Security Dashboard](security_dashboard/index.md).
 There is [an open issue](https://gitlab.com/gitlab-org/gitlab/-/issues/235772) in which changes to this behavior are being discussed.
+
+### Enable or disable the basic security widget **(CORE ONLY)**
+
+The basic security widget is under development but ready for production use.
+It is deployed behind a feature flag that is **enabled by default**.
+[GitLab administrators with access to the GitLab Rails console](../feature_flags.md)
+can opt to disable it.
+
+To enable it:
+
+```ruby
+# For the instance
+Feature.enable(:core_security_mr_widget)
+# For a single project
+Feature.enable(:core_security_mr_widget, Project.find(<project id>))
+```
+
+To disable it:
+
+```ruby
+# For the instance
+Feature.disable(:core_security_mr_widget)
+# For a single project
+Feature.disable(:core_security_mr_widget, Project.find(<project id>))
+```

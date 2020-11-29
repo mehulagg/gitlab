@@ -1,5 +1,5 @@
-import * as getters from 'ee/subscriptions/new/store/getters';
 import * as constants from 'ee/subscriptions/new/constants';
+import * as getters from 'ee/subscriptions/new/store/getters';
 
 constants.STEPS = ['firstStep', 'secondStep'];
 

@@ -1,7 +1,7 @@
 ---
 stage: Monitor
 group: Health
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Monitoring GitHub imports
@@ -17,11 +17,10 @@ monitor the health and progress of the importer.
 |------------------------------------------|-----------|
 | `github_importer_total_duration_seconds` | histogram |
 
-This metric tracks the total time spent (in seconds) importing a project (from
+This metric tracks the total time, in seconds, spent importing a project (from
 project creation until the import process finishes), for every imported project.
-
 The name of the project is stored in the `project` label in the format
-`namespace/name` (e.g. `gitlab-org/gitlab`).
+`namespace/name` (such as `gitlab-org/gitlab`).
 
 ## Number of imported projects
 
@@ -59,7 +58,7 @@ projects. This metric does not expose any labels.
 This metric tracks the number of imported issues across all projects.
 
 The name of the project is stored in the `project` label in the format
-`namespace/name` (e.g. `gitlab-org/gitlab`).
+`namespace/name` (such as `gitlab-org/gitlab`).
 
 ## Number of imported pull requests
 
@@ -70,7 +69,7 @@ The name of the project is stored in the `project` label in the format
 This metric tracks the number of imported pull requests across all projects.
 
 The name of the project is stored in the `project` label in the format
-`namespace/name` (e.g. `gitlab-org/gitlab`).
+`namespace/name` (such as `gitlab-org/gitlab`).
 
 ## Number of imported comments
 
@@ -81,7 +80,7 @@ The name of the project is stored in the `project` label in the format
 This metric tracks the number of imported comments across all projects.
 
 The name of the project is stored in the `project` label in the format
-`namespace/name` (e.g. `gitlab-org/gitlab`).
+`namespace/name` (such as `gitlab-org/gitlab`).
 
 ## Number of imported pull request review comments
 
@@ -92,7 +91,7 @@ The name of the project is stored in the `project` label in the format
 This metric tracks the number of imported comments across all projects.
 
 The name of the project is stored in the `project` label in the format
-`namespace/name` (e.g. `gitlab-org/gitlab`).
+`namespace/name` (such as `gitlab-org/gitlab`).
 
 ## Number of imported repositories
 

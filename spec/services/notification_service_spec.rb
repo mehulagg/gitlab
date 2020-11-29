@@ -353,7 +353,7 @@ RSpec.describe NotificationService, :mailer do
 
         context 'a service-desk issue' do
           before do
-            issue.update!(service_desk_reply_to: 'service.desk@example.com')
+            issue.update!(external_author: 'service.desk@example.com')
             project.update!(service_desk_enabled: true)
           end
 
@@ -834,53 +834,47 @@ RSpec.describe NotificationService, :mailer do
       end
     end
 
-    context 'when notified of a new design diff note' do
+    context 'design diff note', :deliver_mails_inline do
       include DesignManagementTestHelpers
 
       let_it_be(:design) { create(:design, :with_file) }
       let_it_be(:project) { design.project }
-      let_it_be(:dev) { create(:user) }
-      let_it_be(:stranger) { create(:user) }
+      let_it_be(:member_and_mentioned) { create(:user, developer_projects: [project]) }
+      let_it_be(:member_and_author_of_second_note) { create(:user, developer_projects: [project]) }
+      let_it_be(:member_and_not_mentioned) { create(:user, developer_projects: [project]) }
+      let_it_be(:non_member_and_mentioned) { create(:user) }
       let_it_be(:note) do
         create(:diff_note_on_design,
            noteable: design,
-           note: "Hello #{dev.to_reference}, G'day #{stranger.to_reference}")
+           note: "Hello #{member_and_mentioned.to_reference}, G'day #{non_member_and_mentioned.to_reference}")
       end
-      let(:mailer) { double(deliver_later: true) }
+
+      let_it_be(:note_2) do
+        create(:diff_note_on_design, noteable: design, author: member_and_author_of_second_note)
+      end
 
       context 'design management is enabled' do
         before do
           enable_design_management
-          project.add_developer(dev)
-          allow(Notify).to receive(:note_design_email) { mailer }
         end
 
-        it 'sends new note notifications' do
-          expect(subject).to receive(:send_new_note_notifications).with(note)
+        it 'sends new note notifications', :aggregate_failures do
+          notification.new_note(note)
 
-          subject.new_note(note)
-        end
-
-        it 'sends a mail to the developer' do
-          expect(Notify)
-            .to receive(:note_design_email).with(dev.id, note.id, 'mentioned')
-
-          subject.new_note(note)
-        end
-
-        it 'does not notify non-developers' do
-          expect(Notify)
-            .not_to receive(:note_design_email).with(stranger.id, note.id)
-
-          subject.new_note(note)
+          should_email(design.authors.first)
+          should_email(member_and_mentioned)
+          should_email(member_and_author_of_second_note)
+          should_not_email(member_and_not_mentioned)
+          should_not_email(non_member_and_mentioned)
+          should_not_email(note.author)
         end
       end
 
       context 'design management is disabled' do
-        it 'does not notify the user' do
-          expect(Notify).not_to receive(:note_design_email)
+        it 'does not notify anyone' do
+          notification.new_note(note)
 
-          subject.new_note(note)
+          should_not_email_anyone
         end
       end
     end
@@ -2312,6 +2306,26 @@ RSpec.describe NotificationService, :mailer do
     end
   end
 
+  describe '#new_instance_access_request', :deliver_mails_inline do
+    let_it_be(:user) { create(:user, :blocked_pending_approval) }
+    let_it_be(:admins) { create_list(:admin, 12, :with_sign_ins) }
+
+    subject { notification.new_instance_access_request(user) }
+
+    before do
+      reset_delivered_emails!
+      stub_application_setting(require_admin_approval_after_user_signup: true)
+    end
+
+    it 'sends notification only to a maximum of ten most recently active instance admins' do
+      ten_most_recently_active_instance_admins = User.admins.active.sort_by(&:current_sign_in_at).last(10)
+
+      subject
+
+      should_only_email(*ten_most_recently_active_instance_admins)
+    end
+  end
+
   describe 'GroupMember', :deliver_mails_inline do
     let(:added_user) { create(:user) }
 
@@ -3089,37 +3103,51 @@ RSpec.describe NotificationService, :mailer do
         subject.new_issue(issue, member)
       end
 
-      it 'still delivers email to admins' do
-        member.update!(admin: true)
+      context 'with admin user' do
+        before do
+          member.update!(admin: true)
+        end
 
-        expect(Notify).to receive(:new_issue_email).at_least(:once).with(member.id, issue.id, nil).and_call_original
+        context 'when admin mode is enabled', :enable_admin_mode do
+          it 'still delivers email to admins' do
+            expect(Notify).to receive(:new_issue_email).at_least(:once).with(member.id, issue.id, nil).and_call_original
 
-        subject.new_issue(issue, member)
+            subject.new_issue(issue, member)
+          end
+        end
+
+        context 'when admin mode is disabled' do
+          it 'does not send an email' do
+            expect(Notify).not_to receive(:new_issue_email)
+
+            subject.new_issue(issue, member)
+          end
+        end
       end
     end
   end
 
   describe '#prometheus_alerts_fired' do
-    let!(:project) { create(:project) }
-    let!(:master) { create(:user) }
-    let!(:developer) { create(:user) }
-    let(:alert_attributes) { build(:alert_management_alert, project: project).attributes }
+    let_it_be(:project) { create(:project) }
+    let_it_be(:master) { create(:user) }
+    let_it_be(:developer) { create(:user) }
+    let_it_be(:alert) { create(:alert_management_alert, project: project) }
 
     before do
       project.add_maintainer(master)
     end
 
     it 'sends the email to owners and masters' do
-      expect(Notify).to receive(:prometheus_alert_fired_email).with(project.id, master.id, alert_attributes).and_call_original
-      expect(Notify).to receive(:prometheus_alert_fired_email).with(project.id, project.owner.id, alert_attributes).and_call_original
-      expect(Notify).not_to receive(:prometheus_alert_fired_email).with(project.id, developer.id, alert_attributes)
+      expect(Notify).to receive(:prometheus_alert_fired_email).with(project, master, alert).and_call_original
+      expect(Notify).to receive(:prometheus_alert_fired_email).with(project, project.owner, alert).and_call_original
+      expect(Notify).not_to receive(:prometheus_alert_fired_email).with(project, developer, alert)
 
-      subject.prometheus_alerts_fired(project, [alert_attributes])
+      subject.prometheus_alerts_fired(project, [alert])
     end
 
     it_behaves_like 'project emails are disabled' do
       let(:notification_target)  { project }
-      let(:notification_trigger) { subject.prometheus_alerts_fired(project, [alert_attributes]) }
+      let(:notification_trigger) { subject.prometheus_alerts_fired(project, [alert]) }
 
       around do |example|
         perform_enqueued_jobs { example.run }

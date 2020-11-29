@@ -4,6 +4,7 @@ require 'base64'
 
 module API
   class Geo < ::API::Base
+    feature_category :geo_replication
     resource :geo do
       helpers do
         def sanitized_node_status_params

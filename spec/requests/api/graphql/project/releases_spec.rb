@@ -10,6 +10,11 @@ RSpec.describe 'Query.project(fullPath).releases()' do
   let_it_be(:reporter) { create(:user) }
   let_it_be(:developer) { create(:user) }
 
+  let(:base_url_params) { { scope: 'all', release_tag: release.tag } }
+  let(:opened_url_params) { { state: 'opened', **base_url_params } }
+  let(:merged_url_params) { { state: 'merged', **base_url_params } }
+  let(:closed_url_params) { { state: 'closed', **base_url_params } }
+
   let(:query) do
     graphql_query_for(:project, { fullPath: project.full_path },
     %{
@@ -37,8 +42,11 @@ RSpec.describe 'Query.project(fullPath).releases()' do
           }
           links {
             selfUrl
-            mergeRequestsUrl
-            issuesUrl
+            openedMergeRequestsUrl
+            mergedMergeRequestsUrl
+            closedMergeRequestsUrl
+            openedIssuesUrl
+            closedIssuesUrl
           }
         }
       }
@@ -101,8 +109,11 @@ RSpec.describe 'Query.project(fullPath).releases()' do
           },
           'links' => {
             'selfUrl' => project_release_url(project, release),
-            'mergeRequestsUrl' => project_merge_requests_url(project, params_for_issues_and_mrs),
-            'issuesUrl' => project_issues_url(project, params_for_issues_and_mrs)
+            'openedMergeRequestsUrl' => project_merge_requests_url(project, opened_url_params),
+            'mergedMergeRequestsUrl' => project_merge_requests_url(project, merged_url_params),
+            'closedMergeRequestsUrl' => project_merge_requests_url(project, closed_url_params),
+            'openedIssuesUrl' => project_issues_url(project, opened_url_params),
+            'closedIssuesUrl' => project_issues_url(project, closed_url_params)
           }
         )
       end

@@ -19,7 +19,7 @@ export const getProfileSettings = ({ createNewProfilePaths }) => ({
         }),
       },
     },
-    tableFields: ['profileName', 'targetUrl'],
+    tableFields: ['profileName', 'targetUrl', 'validationStatus'],
     i18n: {
       createNewLinkText: s__('DastProfiles|Site Profile'),
       tabName: s__('DastProfiles|Site Profiles'),

@@ -32,7 +32,7 @@ RSpec.describe Gitlab::GitalyClient::CommitService do
           safe_max_files: 100,
           safe_max_lines: 5000,
           safe_max_bytes: 512000,
-          max_patch_bytes: 102400
+          max_patch_bytes: 204800
         )
 
         expect_any_instance_of(Gitaly::DiffService::Stub).to receive(:commit_diff).with(request, kind_of(Hash))
@@ -57,7 +57,7 @@ RSpec.describe Gitlab::GitalyClient::CommitService do
           safe_max_files: 100,
           safe_max_lines: 5000,
           safe_max_bytes: 512000,
-          max_patch_bytes: 102400
+          max_patch_bytes: 204800
         )
 
         expect_any_instance_of(Gitaly::DiffService::Stub).to receive(:commit_diff).with(request, kind_of(Hash))
@@ -357,7 +357,7 @@ RSpec.describe Gitlab::GitalyClient::CommitService do
       end
 
       it 'sends an RPC request with the correct payload' do
-        expect(client.commits_by_message(query, options)).to match_array(wrap_commits(commits))
+        expect(client.commits_by_message(query, **options)).to match_array(wrap_commits(commits))
       end
     end
 

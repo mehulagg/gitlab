@@ -283,6 +283,7 @@ RSpec.describe API::Internal::Base do
 
     context 'for a secondary node' do
       before do
+        stub_lfs_setting(enabled: true)
         stub_current_geo_node(secondary_node)
         project.add_developer(user)
       end

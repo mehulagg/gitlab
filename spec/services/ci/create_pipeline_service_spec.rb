@@ -6,7 +6,7 @@ RSpec.describe Ci::CreatePipelineService do
   include ProjectForksHelper
 
   let_it_be(:project, reload: true) { create(:project, :repository) }
-  let(:user) { create(:admin) }
+  let_it_be(:user, reload: true) { project.owner }
   let(:ref_name) { 'refs/heads/master' }
 
   before do
@@ -155,6 +155,11 @@ RSpec.describe Ci::CreatePipelineService do
         context 'when merge request target project is different from source project' do
           let!(:project) { fork_project(target_project, nil, repository: true) }
           let!(:target_project) { create(:project, :repository) }
+          let!(:user) { create(:user) }
+
+          before do
+            project.add_developer(user)
+          end
 
           it 'updates head pipeline for merge request', :sidekiq_might_not_need_inline do
             merge_request = create(:merge_request, source_branch: 'feature',
@@ -1442,6 +1447,11 @@ RSpec.describe Ci::CreatePipelineService do
               let(:ref_name) { 'refs/heads/feature' }
               let!(:project) { fork_project(target_project, nil, repository: true) }
               let!(:target_project) { create(:project, :repository) }
+              let!(:user) { create(:user) }
+
+              before do
+                project.add_developer(user)
+              end
 
               it 'creates a legacy detached merge request pipeline in the forked project', :sidekiq_might_not_need_inline do
                 expect(pipeline).to be_persisted
@@ -1860,6 +1870,12 @@ RSpec.describe Ci::CreatePipelineService do
                 - changes:
                   - README.md
                   allow_failure: true
+
+            README:
+              script: "I use variables for changes!"
+              rules:
+                - changes:
+                  - $CI_JOB_NAME*
           EOY
         end
 
@@ -1869,10 +1885,10 @@ RSpec.describe Ci::CreatePipelineService do
               .to receive(:modified_paths).and_return(%w[README.md])
           end
 
-          it 'creates two jobs' do
+          it 'creates five jobs' do
             expect(pipeline).to be_persisted
             expect(build_names)
-              .to contain_exactly('regular-job', 'rules-job', 'delayed-job', 'negligible-job')
+              .to contain_exactly('regular-job', 'rules-job', 'delayed-job', 'negligible-job', 'README')
           end
 
           it 'sets when: for all jobs' do

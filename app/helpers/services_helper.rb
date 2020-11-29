@@ -93,7 +93,8 @@ module ServicesHelper
       editable: integration.editable?.to_s,
       cancel_path: scoped_integrations_path,
       can_test: integration.can_test?.to_s,
-      test_path: scoped_test_integration_path(integration)
+      test_path: scoped_test_integration_path(integration),
+      reset_path: ''
     }
   end
 
@@ -114,7 +115,7 @@ module ServicesHelper
   end
 
   def group_level_integrations?
-    @group.present? && Feature.enabled?(:group_level_integrations, @group)
+    @group.present? && Feature.enabled?(:group_level_integrations, @group, default_enabled: true)
   end
 
   def instance_level_integrations?

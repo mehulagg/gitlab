@@ -8,7 +8,7 @@ module EE
 
       return message if raw_message
 
-      message = icon('warning') + ' ' + message
+      message = sprite_icon('warning-solid') + ' ' + message
 
       if can?(current_user, :admin_project, @project)
         link_to message, project_mirror_path(@project)

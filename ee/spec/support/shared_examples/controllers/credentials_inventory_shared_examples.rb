@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.shared_examples_for 'credentials inventory controller delete SSH key' do |group_managed_account: false|
-  let_it_be(:user) { group_managed_account ? managed_users.last : create(:user, name: 'David') }
+  let_it_be(:user) { group_managed_account ? managed_users.last : create(:user, name: 'abc') }
   let_it_be(:ssh_key) { create(:personal_key, user: user) }
 
   let(:ssh_key_id) { ssh_key.id }
@@ -35,20 +35,8 @@ RSpec.shared_examples_for 'credentials inventory controller delete SSH key' do |
           end
 
           it 'notifies the key owner' do
-            expect(CredentialsInventoryMailer).to receive_message_chain(:ssh_key_deleted_email, :deliver_later)
-
-            subject
-          end
-
-          context 'when credentials_inventory_revocation_emails is disabled' do
-            before do
-              stub_feature_flags(credentials_inventory_revocation_emails: false)
-            end
-
-            it 'does not notify the key owner' do
-              expect(CredentialsInventoryMailer).not_to receive(:ssh_key_deleted_email)
-
-              subject
+            perform_enqueued_jobs do
+              expect { subject }.to change { ActionMailer::Base.deliveries.size }.by(1)
             end
           end
         end
@@ -75,8 +63,7 @@ RSpec.shared_examples_for 'credentials inventory controller delete SSH key' do |
         it 'renders a not found message' do
           subject
 
-          expect(response).to redirect_to(credentials_path)
-          expect(flash[:notice]).to eql 'Cannot find user key.'
+          expect(response).to have_gitlab_http_status(:not_found)
         end
       end
     end

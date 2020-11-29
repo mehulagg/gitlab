@@ -99,6 +99,8 @@ RSpec.describe User do
     it { is_expected.to have_many(:releases).dependent(:nullify) }
     it { is_expected.to have_many(:metrics_users_starred_dashboards).inverse_of(:user) }
     it { is_expected.to have_many(:reviews).inverse_of(:author) }
+    it { is_expected.to have_many(:merge_request_assignees).inverse_of(:assignee) }
+    it { is_expected.to have_many(:merge_request_reviewers).inverse_of(:reviewer) }
 
     describe "#user_detail" do
       it 'does not persist `user_detail` by default' do
@@ -319,7 +321,7 @@ RSpec.describe User do
         expect(subject).to validate_presence_of(:username)
       end
 
-      it 'rejects blacklisted names' do
+      it 'rejects denied names' do
         user = build(:user, username: 'dashboard')
 
         expect(user).not_to be_valid
@@ -442,9 +444,9 @@ RSpec.describe User do
     end
 
     describe 'email' do
-      context 'when no signup domains whitelisted' do
+      context 'when no signup domains allowed' do
         before do
-          allow_any_instance_of(ApplicationSetting).to receive(:domain_whitelist).and_return([])
+          allow_any_instance_of(ApplicationSetting).to receive(:domain_allowlist).and_return([])
         end
 
         it 'accepts any email' do
@@ -455,7 +457,7 @@ RSpec.describe User do
 
       context 'bad regex' do
         before do
-          allow_any_instance_of(ApplicationSetting).to receive(:domain_whitelist).and_return(['([a-zA-Z0-9]+)+\.com'])
+          allow_any_instance_of(ApplicationSetting).to receive(:domain_allowlist).and_return(['([a-zA-Z0-9]+)+\.com'])
         end
 
         it 'does not hang on evil input' do
@@ -467,9 +469,9 @@ RSpec.describe User do
         end
       end
 
-      context 'when a signup domain is whitelisted and subdomains are allowed' do
+      context 'when a signup domain is allowed and subdomains are allowed' do
         before do
-          allow_any_instance_of(ApplicationSetting).to receive(:domain_whitelist).and_return(['example.com', '*.example.com'])
+          allow_any_instance_of(ApplicationSetting).to receive(:domain_allowlist).and_return(['example.com', '*.example.com'])
         end
 
         it 'accepts info@example.com' do
@@ -488,9 +490,9 @@ RSpec.describe User do
         end
       end
 
-      context 'when a signup domain is whitelisted and subdomains are not allowed' do
+      context 'when a signup domain is allowed and subdomains are not allowed' do
         before do
-          allow_any_instance_of(ApplicationSetting).to receive(:domain_whitelist).and_return(['example.com'])
+          allow_any_instance_of(ApplicationSetting).to receive(:domain_allowlist).and_return(['example.com'])
         end
 
         it 'accepts info@example.com' do
@@ -514,15 +516,15 @@ RSpec.describe User do
         end
       end
 
-      context 'domain blacklist' do
+      context 'domain denylist' do
         before do
-          allow_any_instance_of(ApplicationSetting).to receive(:domain_blacklist_enabled?).and_return(true)
-          allow_any_instance_of(ApplicationSetting).to receive(:domain_blacklist).and_return(['example.com'])
+          allow_any_instance_of(ApplicationSetting).to receive(:domain_denylist_enabled?).and_return(true)
+          allow_any_instance_of(ApplicationSetting).to receive(:domain_denylist).and_return(['example.com'])
         end
 
         context 'bad regex' do
           before do
-            allow_any_instance_of(ApplicationSetting).to receive(:domain_blacklist).and_return(['([a-zA-Z0-9]+)+\.com'])
+            allow_any_instance_of(ApplicationSetting).to receive(:domain_denylist).and_return(['([a-zA-Z0-9]+)+\.com'])
           end
 
           it 'does not hang on evil input' do
@@ -534,7 +536,7 @@ RSpec.describe User do
           end
         end
 
-        context 'when a signup domain is blacklisted' do
+        context 'when a signup domain is denied' do
           it 'accepts info@test.com' do
             user = build(:user, email: 'info@test.com')
             expect(user).to be_valid
@@ -551,13 +553,13 @@ RSpec.describe User do
           end
         end
 
-        context 'when a signup domain is blacklisted but a wildcard subdomain is allowed' do
+        context 'when a signup domain is denied but a wildcard subdomain is allowed' do
           before do
-            allow_any_instance_of(ApplicationSetting).to receive(:domain_blacklist).and_return(['test.example.com'])
-            allow_any_instance_of(ApplicationSetting).to receive(:domain_whitelist).and_return(['*.example.com'])
+            allow_any_instance_of(ApplicationSetting).to receive(:domain_denylist).and_return(['test.example.com'])
+            allow_any_instance_of(ApplicationSetting).to receive(:domain_allowlist).and_return(['*.example.com'])
           end
 
-          it 'gives priority to whitelist and allow info@test.example.com' do
+          it 'gives priority to allowlist and allow info@test.example.com' do
             user = build(:user, email: 'info@test.example.com')
             expect(user).to be_valid
           end
@@ -565,7 +567,7 @@ RSpec.describe User do
 
         context 'with both lists containing a domain' do
           before do
-            allow_any_instance_of(ApplicationSetting).to receive(:domain_whitelist).and_return(['test.com'])
+            allow_any_instance_of(ApplicationSetting).to receive(:domain_allowlist).and_return(['test.com'])
           end
 
           it 'accepts info@test.com' do
@@ -1740,6 +1742,16 @@ RSpec.describe User do
     end
   end
 
+  describe '.instance_access_request_approvers_to_be_notified' do
+    let_it_be(:admin_list) { create_list(:user, 12, :admin, :with_sign_ins) }
+
+    it 'returns up to the ten most recently active instance admins' do
+      active_admins_in_recent_sign_in_desc_order = User.admins.active.order_recent_sign_in.limit(10)
+
+      expect(User.instance_access_request_approvers_to_be_notified).to eq(active_admins_in_recent_sign_in_desc_order)
+    end
+  end
+
   describe '.filter_items' do
     let(:user) { double }
 
@@ -2014,9 +2026,10 @@ RSpec.describe User do
   end
 
   describe '.search' do
-    let!(:user) { create(:user, name: 'user', username: 'usern', email: 'email@gmail.com') }
-    let!(:user2) { create(:user, name: 'user name', username: 'username', email: 'someemail@gmail.com') }
-    let!(:user3) { create(:user, name: 'us', username: 'se', email: 'foo@gmail.com') }
+    let_it_be(:user) { create(:user, name: 'user', username: 'usern', email: 'email@example.com') }
+    let_it_be(:user2) { create(:user, name: 'user name', username: 'username', email: 'someemail@example.com') }
+    let_it_be(:user3) { create(:user, name: 'us', username: 'se', email: 'foo@example.com') }
+    let_it_be(:email) { create(:email, user: user, email: 'alias@example.com') }
 
     describe 'name matching' do
       it 'returns users with a matching name with exact match first' do
@@ -2046,11 +2059,41 @@ RSpec.describe User do
       end
 
       it 'does not return users with a partially matching Email' do
-        expect(described_class.search(user.email[0..2])).not_to include(user, user2)
+        expect(described_class.search(user.email[1...-1])).to be_empty
       end
 
       it 'returns users with a matching Email regardless of the casing' do
         expect(described_class.search(user2.email.upcase)).to eq([user2])
+      end
+    end
+
+    describe 'secondary email matching' do
+      context 'feature flag :user_search_secondary_email is enabled' do
+        it 'returns users with a matching secondary email' do
+          expect(described_class.search(email.email)).to include(email.user)
+        end
+
+        it 'does not return users with a matching part of secondary email' do
+          expect(described_class.search(email.email[1...-1])).to be_empty
+        end
+
+        it 'returns users with a matching secondary email regardless of the casing' do
+          expect(described_class.search(email.email.upcase)).to include(email.user)
+        end
+      end
+
+      context 'feature flag :user_search_secondary_email is disabled' do
+        before do
+          stub_feature_flags(user_search_secondary_email: false)
+        end
+
+        it 'does not return users with a matching secondary email' do
+          expect(described_class.search(email.email)).not_to include(email.user)
+        end
+
+        it 'does not return users with a matching part of secondary email' do
+          expect(described_class.search(email.email[1...-1])).to be_empty
+        end
       end
     end
 
@@ -2093,65 +2136,119 @@ RSpec.describe User do
     end
   end
 
-  describe '.search_with_secondary_emails' do
-    delegate :search_with_secondary_emails, to: :described_class
-
-    let!(:user) { create(:user, name: 'John Doe', username: 'john.doe', email: 'john.doe@example.com' ) }
-    let!(:another_user) { create(:user, name: 'Albert Smith', username: 'albert.smith', email: 'albert.smith@example.com' ) }
-    let!(:email) do
-      create(:email, user: another_user, email: 'alias@example.com')
-    end
+  describe '.search_without_secondary_emails' do
+    let_it_be(:user) { create(:user, name: 'John Doe', username: 'john.doe', email: 'someone.1@example.com' ) }
+    let_it_be(:another_user) { create(:user, name: 'Albert Smith', username: 'albert.smith', email: 'another.2@example.com' ) }
+    let_it_be(:email) { create(:email, user: another_user, email: 'alias@example.com') }
 
     it 'returns users with a matching name' do
-      expect(search_with_secondary_emails(user.name)).to eq([user])
+      expect(described_class.search_without_secondary_emails(user.name)).to eq([user])
     end
 
     it 'returns users with a partially matching name' do
-      expect(search_with_secondary_emails(user.name[0..2])).to eq([user])
+      expect(described_class.search_without_secondary_emails(user.name[0..2])).to eq([user])
     end
 
     it 'returns users with a matching name regardless of the casing' do
-      expect(search_with_secondary_emails(user.name.upcase)).to eq([user])
+      expect(described_class.search_without_secondary_emails(user.name.upcase)).to eq([user])
     end
 
     it 'returns users with a matching email' do
-      expect(search_with_secondary_emails(user.email)).to eq([user])
+      expect(described_class.search_without_secondary_emails(user.email)).to eq([user])
     end
 
     it 'does not return users with a partially matching email' do
-      expect(search_with_secondary_emails(user.email[0..2])).not_to include([user])
+      expect(described_class.search_without_secondary_emails(user.email[1...-1])).to be_empty
     end
 
     it 'returns users with a matching email regardless of the casing' do
-      expect(search_with_secondary_emails(user.email.upcase)).to eq([user])
+      expect(described_class.search_without_secondary_emails(user.email.upcase)).to eq([user])
     end
 
     it 'returns users with a matching username' do
-      expect(search_with_secondary_emails(user.username)).to eq([user])
+      expect(described_class.search_without_secondary_emails(user.username)).to eq([user])
     end
 
     it 'returns users with a partially matching username' do
-      expect(search_with_secondary_emails(user.username[0..2])).to eq([user])
+      expect(described_class.search_without_secondary_emails(user.username[0..2])).to eq([user])
     end
 
     it 'returns users with a matching username regardless of the casing' do
-      expect(search_with_secondary_emails(user.username.upcase)).to eq([user])
+      expect(described_class.search_without_secondary_emails(user.username.upcase)).to eq([user])
     end
 
-    it 'returns users with a matching whole secondary email' do
-      expect(search_with_secondary_emails(email.email)).to eq([email.user])
+    it 'does not return users with a matching whole secondary email' do
+      expect(described_class.search_without_secondary_emails(email.email)).not_to include(email.user)
     end
 
     it 'does not return users with a matching part of secondary email' do
-      expect(search_with_secondary_emails(email.email[1..4])).not_to include([email.user])
+      expect(described_class.search_without_secondary_emails(email.email[1...-1])).to be_empty
     end
 
     it 'returns no matches for an empty string' do
-      expect(search_with_secondary_emails('')).to be_empty
+      expect(described_class.search_without_secondary_emails('')).to be_empty
     end
 
     it 'returns no matches for nil' do
-      expect(search_with_secondary_emails(nil)).to be_empty
+      expect(described_class.search_without_secondary_emails(nil)).to be_empty
+    end
+  end
+
+  describe '.search_with_secondary_emails' do
+    let_it_be(:user) { create(:user, name: 'John Doe', username: 'john.doe', email: 'someone.1@example.com' ) }
+    let_it_be(:another_user) { create(:user, name: 'Albert Smith', username: 'albert.smith', email: 'another.2@example.com' ) }
+    let_it_be(:email) { create(:email, user: another_user, email: 'alias@example.com') }
+
+    it 'returns users with a matching name' do
+      expect(described_class.search_with_secondary_emails(user.name)).to eq([user])
+    end
+
+    it 'returns users with a partially matching name' do
+      expect(described_class.search_with_secondary_emails(user.name[0..2])).to eq([user])
+    end
+
+    it 'returns users with a matching name regardless of the casing' do
+      expect(described_class.search_with_secondary_emails(user.name.upcase)).to eq([user])
+    end
+
+    it 'returns users with a matching email' do
+      expect(described_class.search_with_secondary_emails(user.email)).to eq([user])
+    end
+
+    it 'does not return users with a partially matching email' do
+      expect(described_class.search_with_secondary_emails(user.email[1...-1])).to be_empty
+    end
+
+    it 'returns users with a matching email regardless of the casing' do
+      expect(described_class.search_with_secondary_emails(user.email.upcase)).to eq([user])
+    end
+
+    it 'returns users with a matching username' do
+      expect(described_class.search_with_secondary_emails(user.username)).to eq([user])
+    end
+
+    it 'returns users with a partially matching username' do
+      expect(described_class.search_with_secondary_emails(user.username[0..2])).to eq([user])
+    end
+
+    it 'returns users with a matching username regardless of the casing' do
+      expect(described_class.search_with_secondary_emails(user.username.upcase)).to eq([user])
+    end
+
+    it 'returns users with a matching whole secondary email' do
+      expect(described_class.search_with_secondary_emails(email.email)).to eq([email.user])
+    end
+
+    it 'does not return users with a matching part of secondary email' do
+      expect(described_class.search_with_secondary_emails(email.email[1...-1])).to be_empty
+    end
+
+    it 'returns no matches for an empty string' do
+      expect(described_class.search_with_secondary_emails('')).to be_empty
+    end
+
+    it 'returns no matches for nil' do
+      expect(described_class.search_with_secondary_emails(nil)).to be_empty
     end
   end
 
@@ -2868,6 +2965,49 @@ RSpec.describe User do
     end
   end
 
+  describe '#solo_owned_groups' do
+    let_it_be_with_refind(:user) { create(:user) }
+
+    subject(:solo_owned_groups) { user.solo_owned_groups }
+
+    context 'no owned groups' do
+      it { is_expected.to be_empty }
+    end
+
+    context 'has owned groups' do
+      let_it_be(:group) { create(:group) }
+
+      before do
+        group.add_owner(user)
+      end
+
+      context 'not solo owner' do
+        let_it_be(:user2) { create(:user) }
+
+        before do
+          group.add_owner(user2)
+        end
+
+        it { is_expected.to be_empty }
+      end
+
+      context 'solo owner' do
+        it { is_expected.to include(group) }
+
+        it 'avoids N+1 queries' do
+          fresh_user = User.find(user.id)
+          control_count = ActiveRecord::QueryRecorder.new do
+            fresh_user.solo_owned_groups
+          end.count
+
+          create(:group).add_owner(user)
+
+          expect { solo_owned_groups }.not_to exceed_query_limit(control_count)
+        end
+      end
+    end
+  end
+
   describe "#recent_push" do
     let(:user) { build(:user) }
     let(:project) { build(:project) }
@@ -2906,6 +3046,34 @@ RSpec.describe User do
     subject { user.authorized_groups }
 
     it { is_expected.to contain_exactly private_group, project_group }
+
+    context 'with shared memberships' do
+      let!(:shared_group) { create(:group) }
+      let!(:other_group) { create(:group) }
+
+      before do
+        create(:group_group_link, shared_group: shared_group, shared_with_group: private_group)
+        create(:group_group_link, shared_group: private_group, shared_with_group: other_group)
+      end
+
+      context 'when shared_group_membership_auth is enabled' do
+        before do
+          stub_feature_flags(shared_group_membership_auth: user)
+        end
+
+        it { is_expected.to include shared_group }
+        it { is_expected.not_to include other_group }
+      end
+
+      context 'when shared_group_membership_auth is disabled' do
+        before do
+          stub_feature_flags(shared_group_membership_auth: false)
+        end
+
+        it { is_expected.not_to include shared_group }
+        it { is_expected.not_to include other_group }
+      end
+    end
   end
 
   describe '#membership_groups' do
@@ -3637,9 +3805,9 @@ RSpec.describe User do
       end
     end
 
-    context 'when a domain whitelist is in place' do
+    context 'when a domain allowlist is in place' do
       before do
-        stub_application_setting(domain_whitelist: ['gitlab.com'])
+        stub_application_setting(domain_allowlist: ['gitlab.com'])
       end
 
       it 'creates a ghost user' do

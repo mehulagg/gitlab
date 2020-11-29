@@ -40,20 +40,38 @@ function initStatusTriggers() {
           new Vue({
             el: statusModalElement,
             data() {
-              const { currentEmoji, currentMessage } = setStatusModalWrapperEl.dataset;
+              const {
+                currentEmoji,
+                defaultEmoji,
+                currentMessage,
+                currentAvailability,
+                canSetUserAvailability,
+              } = setStatusModalWrapperEl.dataset;
 
               return {
                 currentEmoji,
+                defaultEmoji,
                 currentMessage,
+                currentAvailability,
+                canSetUserAvailability,
               };
             },
             render(createElement) {
-              const { currentEmoji, currentMessage } = this;
+              const {
+                currentEmoji,
+                defaultEmoji,
+                currentMessage,
+                currentAvailability,
+                canSetUserAvailability,
+              } = this;
 
               return createElement(SetStatusModalWrapper, {
                 props: {
                   currentEmoji,
+                  defaultEmoji,
                   currentMessage,
+                  currentAvailability,
+                  canSetUserAvailability,
                 },
               });
             },

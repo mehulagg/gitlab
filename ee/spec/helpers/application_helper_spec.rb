@@ -105,29 +105,39 @@ RSpec.describe ApplicationHelper do
       it 'returns paths for autocomplete_sources_controller' do
         expect_autocomplete_data_sources(object, noteable_type, [:members, :issues, :mergeRequests, :labels, :epics, :commands, :milestones])
       end
+
+      context 'when vulnerabilities are enabled' do
+        before do
+          stub_licensed_features(security_dashboard: true)
+        end
+
+        it 'returns paths for autocomplete_sources_controller with vulnerabilities' do
+          expect_autocomplete_data_sources(object, noteable_type, [:members, :issues, :mergeRequests, :labels, :epics, :vulnerabilities, :commands, :milestones])
+        end
+      end
     end
 
     context 'project' do
       let(:object) { create(:project) }
       let(:noteable_type) { Issue }
 
-      context 'when epics are enabled' do
+      context 'when epics and vulnerabilities are enabled' do
         before do
-          stub_licensed_features(epics: true)
+          stub_licensed_features(epics: true, security_dashboard: true)
         end
 
         it 'returns paths for autocomplete_sources_controller for personal projects' do
-          expect_autocomplete_data_sources(object, noteable_type, [:members, :issues, :mergeRequests, :labels, :milestones, :commands, :snippets])
+          expect_autocomplete_data_sources(object, noteable_type, [:members, :issues, :mergeRequests, :labels, :milestones, :commands, :snippets, :vulnerabilities])
         end
 
-        it 'returns paths for autocomplete_sources_controller including epics for group projects' do
+        it 'returns paths for autocomplete_sources_controller including epics and vulnerabilities for group projects' do
           object.update!(group: create(:group))
 
-          expect_autocomplete_data_sources(object, noteable_type, [:members, :issues, :mergeRequests, :labels, :milestones, :commands, :snippets, :epics])
+          expect_autocomplete_data_sources(object, noteable_type, [:members, :issues, :mergeRequests, :labels, :milestones, :commands, :snippets, :epics, :vulnerabilities])
         end
       end
 
-      context 'when epics are disabled' do
+      context 'when epics and vulnerabilities are disabled' do
         it 'returns paths for autocomplete_sources_controller' do
           expect_autocomplete_data_sources(object, noteable_type, [:members, :issues, :mergeRequests, :labels, :milestones, :commands, :snippets])
         end

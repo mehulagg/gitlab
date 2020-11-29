@@ -66,6 +66,18 @@ module EE
               null: false,
               description: 'Represents vulnerable project counts for each grade',
               resolver: ::Resolvers::VulnerabilitiesGradeResolver
+
+        field :code_coverage_activities,
+              ::Types::Ci::CodeCoverageActivityType.connection_type,
+              null: true,
+              description: 'Represents the code coverage activity for this group',
+              resolver: ::Resolvers::Ci::CodeCoverageActivitiesResolver
+
+        field :stats,
+              ::Types::GroupStatsType,
+              null: true,
+              description: 'Group statistics',
+              method: :itself
       end
     end
   end

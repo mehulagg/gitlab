@@ -20,7 +20,7 @@ RSpec.describe 'User adds a merge request to a merge train', :js do
     stub_feature_flags(disable_merge_trains: false)
     stub_licensed_features(merge_pipelines: true, merge_trains: true)
     project.add_maintainer(user)
-    project.update!(merge_pipelines_enabled: true)
+    project.update!(merge_pipelines_enabled: true, merge_trains_enabled: true)
     merge_request.all_pipelines.first.succeed!
     merge_request.update_head_pipeline
     stub_ci_pipeline_yaml_file(YAML.dump(ci_yaml))

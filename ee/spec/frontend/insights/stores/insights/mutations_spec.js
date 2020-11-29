@@ -1,7 +1,7 @@
-import createState from 'ee/insights/stores/modules/insights/state';
-import mutations from 'ee/insights/stores/modules/insights/mutations';
-import * as types from 'ee/insights/stores/modules/insights/mutation_types';
 import { CHART_TYPES } from 'ee/insights/constants';
+import * as types from 'ee/insights/stores/modules/insights/mutation_types';
+import mutations from 'ee/insights/stores/modules/insights/mutations';
+import createState from 'ee/insights/stores/modules/insights/state';
 
 import { configData } from 'ee_jest/insights/mock_data';
 
@@ -107,11 +107,11 @@ describe('Insights mutations', () => {
     };
 
     const transformedData = {
-      datasets: [[1], [2]],
+      datasets: [{ name: 'Dataset 1', data: [1] }, { name: 'Dataset 2', data: [2] }],
       labels: ['January', 'February'],
       xAxisTitle: 'Months',
       yAxisTitle: 'Issues',
-      seriesNames: ['Dataset 1', 'Dataset 2'],
+      seriesNames: [],
     };
 
     beforeEach(() => {

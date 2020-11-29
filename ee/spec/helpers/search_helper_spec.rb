@@ -49,6 +49,57 @@ RSpec.describe SearchHelper do
         expect(options[:data][:'multiple-assignees']).to eq('true')
       end
     end
+
+    describe 'iterations-endpoint' do
+      let_it_be(:group, refind: true) { create(:group) }
+      let_it_be(:project_under_group, refind: true) { create(:project, group: group) }
+
+      context 'when iterations are available' do
+        before do
+          stub_licensed_features(iterations: true)
+        end
+
+        it 'includes iteration endpoint in project context' do
+          @project = project_under_group
+
+          expect(options[:data]['iterations-endpoint']).to eq(expose_path(api_v4_projects_iterations_path(id: @project.id)))
+        end
+
+        it 'includes iteration endpoint in group context' do
+          @group = group
+
+          expect(options[:data]['iterations-endpoint']).to eq(expose_path(api_v4_groups_iterations_path(id: @group.id)))
+        end
+
+        it 'does not include iterations endpoint for projects under a namespace' do
+          @project = create(:project, namespace: create(:namespace))
+
+          expect(options[:data]['iterations-endpoint']).to be(nil)
+        end
+
+        it 'does not include iterations endpoint in dashboard context' do
+          expect(options[:data]['iterations-endpoint']).to be(nil)
+        end
+      end
+
+      context 'when iterations are not available' do
+        before do
+          stub_licensed_features(iterations: false)
+        end
+
+        it 'does not include iterations endpoint in project context' do
+          @project = project_under_group
+
+          expect(options[:data]['iterations-endpoint']).to be(nil)
+        end
+
+        it 'does not include iterations endpoint in group context' do
+          @group = group
+
+          expect(options[:data]['iterations-endpoint']).to be(nil)
+        end
+      end
+    end
   end
 
   describe 'search_autocomplete_opts' do
@@ -88,21 +139,6 @@ RSpec.describe SearchHelper do
           url: Gitlab::Routing.url_helpers.group_epic_path(epic2.group, epic2),
           avatar_url: '' # This group didn't have an avatar so set this to ''
         })
-      end
-    end
-  end
-
-  describe '#project_autocomplete' do
-    let(:user) { create(:user) }
-
-    before do
-      @project = create(:project, :repository)
-      allow(self).to receive(:current_user).and_return(user)
-    end
-
-    context 'with a licensed user' do
-      it "does include feature flags" do
-        expect(project_autocomplete.find { |i| i[:label] == 'Feature Flags' }).to be_present
       end
     end
   end
@@ -163,7 +199,7 @@ RSpec.describe SearchHelper do
     end
   end
 
-  describe '#highlight_and_truncate_issue' do
+  describe '#highlight_and_truncate_issuable' do
     let(:description) { 'hello world' }
     let(:issue) { create(:issue, description: description) }
     let(:user) { create(:user) }
@@ -175,7 +211,7 @@ RSpec.describe SearchHelper do
     end
 
     # Elasticsearch returns Elasticsearch::Model::HashWrapper class for the highlighting
-    subject { highlight_and_truncate_issue(issue, 'test', Elasticsearch::Model::HashWrapper.new(search_highlight)) }
+    subject { highlight_and_truncate_issuable(issue, 'test', Elasticsearch::Model::HashWrapper.new(search_highlight)) }
 
     context 'when description is not present' do
       let(:description) { nil }

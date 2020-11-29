@@ -72,31 +72,6 @@ RSpec.describe EE::NamespaceStorageLimitAlertHelper do
     end
   end
 
-  describe '#can_purchase_storage?' do
-    subject { helper.can_purchase_storage? }
-
-    where(:is_dot_com, :enforcement_setting_enabled, :feature_enabled, :result) do
-      false | false | false | false
-      false | false | true  | false
-      false | true  | false | false
-      true  | false | false | false
-      false | true  | true  | false
-      true  | true  | false | false
-      true  | false | true  | false
-      true  | true  | true  | true
-    end
-
-    with_them do
-      before do
-        allow(::Gitlab).to receive(:com?).and_return(is_dot_com)
-        stub_application_setting(enforce_namespace_storage_limit: enforcement_setting_enabled)
-        stub_feature_flags(buy_storage_link: feature_enabled)
-      end
-
-      it { is_expected.to eq(result) }
-    end
-  end
-
   describe '#purchase_storage_url' do
     subject { helper.purchase_storage_url }
 
@@ -117,17 +92,15 @@ RSpec.describe EE::NamespaceStorageLimitAlertHelper do
       }
     end
 
-    where(:namespace_storage_limit_enabled, :additional_repo_storage_by_namespace_enabled, :service_class_name) do
-      true  | false | Namespaces::CheckStorageSizeService
-      true  | true  | Namespaces::CheckStorageSizeService
-      false | true  | Namespaces::CheckExcessStorageSizeService
-      false | false | Namespaces::CheckStorageSizeService
+    where(:additional_repo_storage_by_namespace_enabled, :service_class_name) do
+      false | Namespaces::CheckStorageSizeService
+      true  | Namespaces::CheckExcessStorageSizeService
     end
 
     with_them do
       before do
-        stub_feature_flags(namespace_storage_limit: namespace_storage_limit_enabled)
-        stub_feature_flags(additional_repo_storage_by_namespace: additional_repo_storage_by_namespace_enabled)
+        allow(namespace).to receive(:additional_repo_storage_by_namespace_enabled?)
+          .and_return(additional_repo_storage_by_namespace_enabled)
 
         allow(helper).to receive(:current_user).and_return(admin)
         allow_next_instance_of(service_class_name, namespace, admin) do |service|
@@ -203,36 +176,23 @@ RSpec.describe EE::NamespaceStorageLimitAlertHelper do
     end
   end
 
-  describe '#can_purchase_storage_for_namespace?' do
-    subject { helper.can_purchase_storage_for_namespace?(namespace) }
+  describe '#purchase_storage_link_enabled?' do
+    subject { helper.purchase_storage_link_enabled?(namespace) }
 
     let_it_be(:namespace) { build(:namespace) }
 
-    where(
-      is_dev_or_com: [true, false],
-      auto_storage_allocation_enabled: [true, false],
-      buy_storage_link_enabled: [true, false],
-      namespace_storage_limit_enabled: [true, false],
-      additional_storage_enabled: [true, false]
-    )
+    where(:buy_storage_link_enabled, :additional_repo_storage_by_namespace_enabled, :result) do
+      false | false | false
+      false | true  | false
+      true  | false | false
+      true  | true  | true
+    end
 
     with_them do
-      let(:result) do
-        is_dev_or_com &&
-          auto_storage_allocation_enabled &&
-          buy_storage_link_enabled &&
-          !namespace_storage_limit_enabled &&
-          additional_storage_enabled
-      end
-
       before do
-        allow(::Gitlab).to receive(:dev_env_or_com?).and_return(is_dev_or_com)
-        stub_application_setting(automatic_purchased_storage_allocation: auto_storage_allocation_enabled)
-        stub_feature_flags(
-          namespace_storage_limit: namespace_storage_limit_enabled,
-          additional_repo_storage_by_namespace: additional_storage_enabled,
-          buy_storage_link: buy_storage_link_enabled
-        )
+        stub_feature_flags(buy_storage_link: buy_storage_link_enabled)
+        allow(namespace).to receive(:additional_repo_storage_by_namespace_enabled?)
+          .and_return(additional_repo_storage_by_namespace_enabled)
       end
 
       it { is_expected.to eq(result) }

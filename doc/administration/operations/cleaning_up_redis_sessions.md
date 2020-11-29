@@ -1,7 +1,7 @@
 ---
 stage: none
 group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Cleaning up stale Redis sessions
@@ -34,7 +34,7 @@ rcli() {
   # This example works for Omnibus installations of GitLab 7.3 or newer. For an
   # installation from source you will have to change the socket path and the
   # path to redis-cli.
-  sudo /opt/gitlab/embedded/bin/redis-cli -s /var/opt/gitlab/redis/redis.shared_state.socket "$@"
+  sudo /opt/gitlab/embedded/bin/redis-cli -s /var/opt/gitlab/redis/redis.socket "$@"
 }
 
 # test the new shell function; the response should be PONG

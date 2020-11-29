@@ -1,7 +1,7 @@
 ---
 stage: Package
 group: Package
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Maven packages in the Package Repository
@@ -189,7 +189,7 @@ published to the GitLab Package Registry.
 To authenticate to the Package Registry, you need either a personal access token or deploy token.
 
 - If you use a [personal access token](../../../user/profile/personal_access_tokens.md), set the scope to `api`.
-- If you use a [deploy token](./../../project/deploy_tokens/index.md), set the scope to `read_package_registry`, `write_package_registry`, or both.
+- If you use a [deploy token](../../project/deploy_tokens/index.md), set the scope to `read_package_registry`, `write_package_registry`, or both.
 
 ### Authenticate with a personal access token in Maven
 
@@ -276,7 +276,7 @@ Read more about [how to create Maven packages using GitLab CI/CD](#create-maven-
 To authenticate to the Package Registry, you need either a personal access token or deploy token.
 
 - If you use a [personal access token](../../../user/profile/personal_access_tokens.md), set the scope to `api`.
-- If you use a [deploy token](./../../project/deploy_tokens/index.md), set the scope to `read_package_registry`, `write_package_registry`, or both.
+- If you use a [deploy token](../../project/deploy_tokens/index.md), set the scope to `read_package_registry`, `write_package_registry`, or both.
 
 ### Authenticate with a personal access token in Gradle
 
@@ -614,7 +614,7 @@ When this is completed, there are two ways to install a package.
 
 To install a package by using `mvn install`:
 
-1. Add the dependency manually to your project `pom.xml` file. 
+1. Add the dependency manually to your project `pom.xml` file.
    To add the example created earlier, the XML would be:
 
    ```xml
@@ -705,25 +705,25 @@ You can create a new package each time the `master` branch is updated.
    </settings>
    ```
 
-1. Make sure your `pom.xml` file includes the following. 
+1. Make sure your `pom.xml` file includes the following.
    You can either let Maven use the CI environment variables, as shown in this example,
-   or you can hard code your project's ID.
+   or you can hard code your server's hostname and project's ID.
 
    ```xml
    <repositories>
      <repository>
        <id>gitlab-maven</id>
-       <url>https://gitlab.example.com/api/v4/projects/${env.CI_PROJECT_ID}/packages/maven</url>
+       <url>${env.CI_SERVER_URL}/api/v4/projects/${env.CI_PROJECT_ID}/packages/maven</url>
      </repository>
    </repositories>
    <distributionManagement>
      <repository>
        <id>gitlab-maven</id>
-       <url>https://gitlab.example.com/api/v4/projects/${env.CI_PROJECT_ID}/packages/maven</url>
+       <url>${env.CI_SERVER_URL}/api/v4/projects/${env.CI_PROJECT_ID}/packages/maven</url>
      </repository>
      <snapshotRepository>
        <id>gitlab-maven</id>
-       <url>https://gitlab.example.com/api/v4/projects/${env.CI_PROJECT_ID}/packages/maven</url>
+       <url>${env.CI_SERVER_URL}/api/v4/projects/${env.CI_PROJECT_ID}/packages/maven</url>
      </snapshotRepository>
    </distributionManagement>
    ```

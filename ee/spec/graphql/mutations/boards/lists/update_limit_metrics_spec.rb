@@ -18,11 +18,11 @@ RSpec.describe Mutations::Boards::Lists::UpdateLimitMetrics do
     group.add_guest(guest)
   end
 
-  subject { mutation.resolve(list_id: list.to_global_id.to_s, **list_update_params) }
+  subject { mutation.resolve(list_id: list.to_global_id, **list_update_params) }
 
   describe '#ready?' do
     it 'raises an error if required arguments are missing' do
-      expect { mutation.ready?({ list_id: 'some id' }) }.to raise_error(Gitlab::Graphql::Errors::ArgumentError, "At least one of the arguments " \
+      expect { mutation.ready?(list_id: 'some id') }.to raise_error(Gitlab::Graphql::Errors::ArgumentError, "At least one of the arguments " \
         "limitMetric, maxIssueCount or maxIssueWeight is required")
     end
   end

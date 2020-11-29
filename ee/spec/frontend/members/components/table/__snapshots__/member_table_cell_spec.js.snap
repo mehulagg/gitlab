@@ -1,0 +1,15 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`MemberTableCell exposes CE scoped slot props 1`] = `
+Object {
+  "isCurrentUser": false,
+  "isDirectMember": false,
+  "memberType": "user",
+  "permissions": Object {
+    "canOverride": false,
+    "canRemove": false,
+    "canResend": false,
+    "canUpdate": false,
+  },
+}
+`;

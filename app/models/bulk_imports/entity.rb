@@ -26,6 +26,10 @@ class BulkImports::Entity < ApplicationRecord
   belongs_to :project, optional: true
   belongs_to :group, foreign_key: :namespace_id, optional: true
 
+  has_many :trackers,
+    class_name: 'BulkImports::Tracker',
+    foreign_key: :bulk_import_entity_id
+
   validates :project, absence: true, if: :group
   validates :group, absence: true, if: :project
   validates :source_type, :source_full_path, :destination_name,
@@ -53,6 +57,25 @@ class BulkImports::Entity < ApplicationRecord
     event :fail_op do
       transition any => :failed
     end
+  end
+
+  def update_tracker_for(relation:, has_next_page:, next_page: nil)
+    attributes = {
+      relation: relation,
+      has_next_page: has_next_page,
+      next_page: next_page,
+      bulk_import_entity_id: id
+    }
+
+    trackers.upsert(attributes, unique_by: %i[bulk_import_entity_id relation])
+  end
+
+  def has_next_page?(relation)
+    trackers.find_by(relation: relation)&.has_next_page
+  end
+
+  def next_page_for(relation)
+    trackers.find_by(relation: relation)&.next_page
   end
 
   private

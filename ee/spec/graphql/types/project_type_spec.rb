@@ -27,7 +27,7 @@ RSpec.describe GitlabSchema.types['Project'] do
   describe 'sast_ci_configuration' do
     include_context 'read ci configuration for sast enabled project'
 
-    let_it_be(:query) do
+    let(:query) do
       %(
         query {
             project(fullPath: "#{project.full_path}") {
@@ -109,6 +109,72 @@ RSpec.describe GitlabSchema.types['Project'] do
       expect(analyzer['name']).to eq('brakeman')
       expect(analyzer['label']).to eq('Brakeman')
       expect(analyzer['enabled']).to eq(true)
+    end
+
+    context "with guest user" do
+      before do
+        project.add_guest(user)
+      end
+
+      context 'when project is private' do
+        let(:project) { create(:project, :private, :repository) }
+
+        it "returns no configuration" do
+          secure_analyzers_prefix = subject.dig('data', 'project', 'sastCiConfiguration')
+          expect(secure_analyzers_prefix).to be_nil
+        end
+      end
+
+      context 'when project is public' do
+        let(:project) { create(:project, :public, :repository) }
+
+        context 'when repository is accessible by everyone' do
+          it "returns the project's sast configuration for global variables" do
+            secure_analyzers_prefix = subject.dig('data', 'project', 'sastCiConfiguration', 'global', 'nodes').first
+
+            expect(secure_analyzers_prefix['type']).to eq('string')
+            expect(secure_analyzers_prefix['field']).to eq('SECURE_ANALYZERS_PREFIX')
+          end
+        end
+      end
+    end
+
+    context "with non-member user" do
+      before do
+        project.team.truncate
+      end
+
+      context 'when project is private' do
+        let(:project) { create(:project, :private, :repository) }
+
+        it "returns no configuration" do
+          secure_analyzers_prefix = subject.dig('data', 'project', 'sastCiConfiguration')
+          expect(secure_analyzers_prefix).to be_nil
+        end
+      end
+
+      context 'when project is public' do
+        let(:project) { create(:project, :public, :repository) }
+
+        context 'when repository is accessible by everyone' do
+          it "returns the project's sast configuration for global variables" do
+            secure_analyzers_prefix = subject.dig('data', 'project', 'sastCiConfiguration', 'global', 'nodes').first
+            expect(secure_analyzers_prefix['type']).to eq('string')
+            expect(secure_analyzers_prefix['field']).to eq('SECURE_ANALYZERS_PREFIX')
+          end
+        end
+
+        context 'when repository is accessible only by team members' do
+          it "returns no configuration" do
+            project.project_feature.update!(merge_requests_access_level: ProjectFeature::DISABLED,
+                                                   builds_access_level: ProjectFeature::DISABLED,
+                                                   repository_access_level: ProjectFeature::PRIVATE)
+
+            secure_analyzers_prefix = subject.dig('data', 'project', 'sastCiConfiguration')
+            expect(secure_analyzers_prefix).to be_nil
+          end
+        end
+      end
     end
   end
 

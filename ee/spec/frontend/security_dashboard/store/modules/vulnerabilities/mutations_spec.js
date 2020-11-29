@@ -1,9 +1,9 @@
-import createState from 'ee/security_dashboard/store/modules/vulnerabilities/state';
+import { DAYS } from 'ee/security_dashboard/store/modules/vulnerabilities/constants';
 import * as types from 'ee/security_dashboard/store/modules/vulnerabilities/mutation_types';
 import mutations from 'ee/security_dashboard/store/modules/vulnerabilities/mutations';
-import { DAYS } from 'ee/security_dashboard/store/modules/vulnerabilities/constants';
-import mockData from './data/mock_data_vulnerabilities';
+import createState from 'ee/security_dashboard/store/modules/vulnerabilities/state';
 import { visitUrl } from '~/lib/utils/url_utility';
+import mockData from './data/mock_data_vulnerabilities';
 
 jest.mock('~/lib/utils/url_utility');
 
@@ -110,56 +110,6 @@ describe('vulnerabilities module mutations', () => {
 
     it('should set `loadingVulnerabilitiesErrorCode`', () => {
       expect(state.loadingVulnerabilitiesErrorCode).toBe(errorCode);
-    });
-  });
-
-  describe('SET_VULNERABILITIES_COUNT_ENDPOINT', () => {
-    it('should set `vulnerabilitiesCountEndpoint` to `fakepath.json`', () => {
-      const endpoint = 'fakepath.json';
-
-      mutations[types.SET_VULNERABILITIES_COUNT_ENDPOINT](state, endpoint);
-
-      expect(state.vulnerabilitiesCountEndpoint).toBe(endpoint);
-    });
-  });
-
-  describe('REQUEST_VULNERABILITIES_COUNT', () => {
-    beforeEach(() => {
-      state.errorLoadingVulnerabilitiesCount = true;
-      mutations[types.REQUEST_VULNERABILITIES_COUNT](state);
-    });
-
-    it('should set `isLoadingVulnerabilitiesCount` to `true`', () => {
-      expect(state.isLoadingVulnerabilitiesCount).toBeTruthy();
-    });
-
-    it('should set `errorLoadingVulnerabilitiesCount` to `false`', () => {
-      expect(state.errorLoadingVulnerabilitiesCount).toBeFalsy();
-    });
-  });
-
-  describe('RECEIVE_VULNERABILITIES_COUNT_SUCCESS', () => {
-    let payload;
-
-    beforeEach(() => {
-      payload = mockData;
-      mutations[types.RECEIVE_VULNERABILITIES_COUNT_SUCCESS](state, payload);
-    });
-
-    it('should set `isLoadingVulnerabilitiesCount` to `false`', () => {
-      expect(state.isLoadingVulnerabilitiesCount).toBeFalsy();
-    });
-
-    it('should set `vulnerabilitiesCount`', () => {
-      expect(state.vulnerabilitiesCount).toBe(payload);
-    });
-  });
-
-  describe('RECEIVE_VULNERABILITIES_COUNT_ERROR', () => {
-    it('should set `isLoadingVulnerabilitiesCount` to `false`', () => {
-      mutations[types.RECEIVE_VULNERABILITIES_COUNT_ERROR](state);
-
-      expect(state.isLoadingVulnerabilitiesCount).toBeFalsy();
     });
   });
 

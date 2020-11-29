@@ -1,6 +1,6 @@
-import Vue from 'vue';
 import { GlFormRadio, GlFormRadioGroup } from '@gitlab/ui';
 import { shallowMount, mount } from '@vue/test-utils';
+import Vue from 'vue';
 import LicenseIssueBody from 'ee/vue_shared/license_compliance/components/add_license_form.vue';
 import { LICENSE_APPROVAL_STATUS } from 'ee/vue_shared/license_compliance/constants';
 

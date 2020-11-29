@@ -33,6 +33,7 @@ RSpec.describe Project, factory_default: :keep do
     it { is_expected.to have_many(:deploy_keys) }
     it { is_expected.to have_many(:hooks) }
     it { is_expected.to have_many(:protected_branches) }
+    it { is_expected.to have_many(:exported_protected_branches) }
     it { is_expected.to have_one(:slack_service) }
     it { is_expected.to have_one(:microsoft_teams_service) }
     it { is_expected.to have_one(:mattermost_service) }
@@ -3023,6 +3024,17 @@ RSpec.describe Project, factory_default: :keep do
 
       expect { project.set_repository_read_only! }.to raise_error(described_class::RepositoryReadOnlyError, /in progress/)
     end
+
+    context 'skip_git_transfer_check is true' do
+      it 'makes the project read-only when git transfers are in progress' do
+        allow(project).to receive(:git_transfer_in_progress?) { true }
+
+        expect { project.set_repository_read_only!(skip_git_transfer_check: true) }
+          .to change(project, :repository_read_only?)
+          .from(false)
+          .to(true)
+      end
+    end
   end
 
   describe '#set_repository_writable!' do
@@ -3668,7 +3680,7 @@ RSpec.describe Project, factory_default: :keep do
     let(:project) { create(:project) }
 
     before do
-      project.namespace_id = 7
+      project.namespace_id = project.namespace_id + 1
     end
 
     it { expect(project.parent_changed?).to be_truthy }
@@ -3996,8 +4008,16 @@ RSpec.describe Project, factory_default: :keep do
       context 'when feature is private' do
         let(:project) { create(:project, :public, :merge_requests_private) }
 
-        it 'returns projects with the project feature private' do
-          is_expected.to include(project)
+        context 'when admin mode is enabled', :enable_admin_mode do
+          it 'returns projects with the project feature private' do
+            is_expected.to include(project)
+          end
+        end
+
+        context 'when admin mode is disabled' do
+          it 'does not return projects with the project feature private' do
+            is_expected.not_to include(project)
+          end
         end
       end
     end
@@ -4020,7 +4040,7 @@ RSpec.describe Project, factory_default: :keep do
     end
   end
 
-  describe '.filter_by_feature_visibility', :enable_admin_mode do
+  describe '.filter_by_feature_visibility' do
     include_context 'ProjectPolicyTable context'
     include ProjectHelpers
     using RSpec::Parameterized::TableSyntax
@@ -4032,12 +4052,13 @@ RSpec.describe Project, factory_default: :keep do
     context 'reporter level access' do
       let(:feature) { MergeRequest }
 
-      where(:project_level, :feature_access_level, :membership, :expected_count) do
+      where(:project_level, :feature_access_level, :membership, :admin_mode, :expected_count) do
         permission_table_for_reporter_feature_access
       end
 
       with_them do
         it "respects visibility" do
+          enable_admin_mode!(user) if admin_mode
           update_feature_access_level(project, feature_access_level)
 
           expected_objects = expected_count == 1 ? [project] : []
@@ -4052,12 +4073,13 @@ RSpec.describe Project, factory_default: :keep do
     context 'issues' do
       let(:feature) { Issue }
 
-      where(:project_level, :feature_access_level, :membership, :expected_count) do
+      where(:project_level, :feature_access_level, :membership, :admin_mode, :expected_count) do
         permission_table_for_guest_feature_access
       end
 
       with_them do
         it "respects visibility" do
+          enable_admin_mode!(user) if admin_mode
           update_feature_access_level(project, feature_access_level)
 
           expected_objects = expected_count == 1 ? [project] : []
@@ -4072,12 +4094,13 @@ RSpec.describe Project, factory_default: :keep do
     context 'wiki' do
       let(:feature) { :wiki }
 
-      where(:project_level, :feature_access_level, :membership, :expected_count) do
+      where(:project_level, :feature_access_level, :membership, :admin_mode, :expected_count) do
         permission_table_for_guest_feature_access
       end
 
       with_them do
         it "respects visibility" do
+          enable_admin_mode!(user) if admin_mode
           update_feature_access_level(project, feature_access_level)
 
           expected_objects = expected_count == 1 ? [project] : []
@@ -4092,12 +4115,13 @@ RSpec.describe Project, factory_default: :keep do
     context 'code' do
       let(:feature) { :repository }
 
-      where(:project_level, :feature_access_level, :membership, :expected_count) do
+      where(:project_level, :feature_access_level, :membership, :admin_mode, :expected_count) do
         permission_table_for_guest_feature_access_and_non_private_project_only
       end
 
       with_them do
         it "respects visibility" do
+          enable_admin_mode!(user) if admin_mode
           update_feature_access_level(project, feature_access_level)
 
           expected_objects = expected_count == 1 ? [project] : []
@@ -4219,6 +4243,27 @@ RSpec.describe Project, factory_default: :keep do
 
       expect { project.destroy }.not_to raise_error
     end
+
+    context 'when there is an old pages deployment' do
+      let!(:old_deployment_from_another_project) { create(:pages_deployment) }
+      let!(:old_deployment) { create(:pages_deployment, project: project) }
+
+      it 'schedules a destruction of pages deployments' do
+        expect(DestroyPagesDeploymentsWorker).to(
+          receive(:perform_async).with(project.id)
+        )
+
+        project.remove_pages
+      end
+
+      it 'removes pages deployments', :sidekiq_inline do
+        expect do
+          project.remove_pages
+        end.to change { PagesDeployment.count }.by(-1)
+
+        expect(PagesDeployment.find_by_id(old_deployment.id)).to be_nil
+      end
+    end
   end
 
   describe '#remove_export' do
@@ -4248,29 +4293,33 @@ RSpec.describe Project, factory_default: :keep do
   end
 
   describe '#git_transfer_in_progress?' do
+    using RSpec::Parameterized::TableSyntax
+
     let(:project) { build(:project) }
 
     subject { project.git_transfer_in_progress? }
 
-    it 'returns false when repo_reference_count and wiki_reference_count are 0' do
-      allow(project).to receive(:repo_reference_count) { 0 }
-      allow(project).to receive(:wiki_reference_count) { 0 }
-
-      expect(subject).to be_falsey
+    where(:project_reference_counter, :wiki_reference_counter, :design_reference_counter, :result) do
+      0 | 0 | 0 | false
+      2 | 0 | 0 | true
+      0 | 2 | 0 | true
+      0 | 0 | 2 | true
     end
 
-    it 'returns true when repo_reference_count is > 0' do
-      allow(project).to receive(:repo_reference_count) { 2 }
-      allow(project).to receive(:wiki_reference_count) { 0 }
+    with_them do
+      before do
+        allow(project).to receive(:reference_counter).with(type: Gitlab::GlRepository::PROJECT) do
+          double(:project_reference_counter, value: project_reference_counter)
+        end
+        allow(project).to receive(:reference_counter).with(type: Gitlab::GlRepository::WIKI) do
+          double(:wiki_reference_counter, value: wiki_reference_counter)
+        end
+        allow(project).to receive(:reference_counter).with(type: Gitlab::GlRepository::DESIGN) do
+          double(:design_reference_counter, value: design_reference_counter)
+        end
+      end
 
-      expect(subject).to be_truthy
-    end
-
-    it 'returns true when wiki_reference_count is > 0' do
-      allow(project).to receive(:repo_reference_count) { 0 }
-      allow(project).to receive(:wiki_reference_count) { 2 }
-
-      expect(subject).to be_truthy
+      specify { expect(subject).to be result }
     end
   end
 
@@ -5518,15 +5567,36 @@ RSpec.describe Project, factory_default: :keep do
   end
 
   describe '#find_or_initialize_services' do
-    it 'returns only enabled services' do
+    before do
       allow(Service).to receive(:available_services_names).and_return(%w[prometheus pushover teamcity])
-      allow(Service).to receive(:project_specific_services_names).and_return(%w[asana])
       allow(subject).to receive(:disabled_services).and_return(%w[prometheus])
+    end
 
+    it 'returns only enabled services' do
       services = subject.find_or_initialize_services
 
-      expect(services.count).to eq(3)
-      expect(services.map(&:title)).to eq(['Asana', 'JetBrains TeamCity CI', 'Pushover'])
+      expect(services.count).to eq(2)
+      expect(services.map(&:title)).to eq(['JetBrains TeamCity CI', 'Pushover'])
+    end
+  end
+
+  describe '#disabled_services' do
+    subject { build(:project).disabled_services }
+
+    context 'without datadog_ci_integration' do
+      before do
+        stub_feature_flags(datadog_ci_integration: false)
+      end
+
+      it { is_expected.to include('datadog') }
+    end
+
+    context 'with datadog_ci_integration' do
+      before do
+        stub_feature_flags(datadog_ci_integration: true)
+      end
+
+      it { is_expected.not_to include('datadog') }
     end
   end
 
@@ -5903,6 +5973,26 @@ RSpec.describe Project, factory_default: :keep do
         project.mark_pages_as_not_deployed
       end.to change { pages_metadatum.reload.deployed }.from(true).to(false)
                .and change { pages_metadatum.reload.artifacts_archive }.from(artifacts_archive).to(nil)
+    end
+  end
+
+  describe '#update_pages_deployment!' do
+    let(:project) { create(:project) }
+    let(:deployment) { create(:pages_deployment, project: project) }
+
+    it "creates new metadata record if none exists yet and sets deployment" do
+      project.pages_metadatum.destroy!
+      project.reload
+
+      project.update_pages_deployment!(deployment)
+
+      expect(project.pages_metadatum.pages_deployment).to eq(deployment)
+    end
+
+    it "updates the existing metadara record with deployment" do
+      expect do
+        project.update_pages_deployment!(deployment)
+      end.to change { project.pages_metadatum.reload.pages_deployment }.from(nil).to(deployment)
     end
   end
 

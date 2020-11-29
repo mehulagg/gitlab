@@ -4,6 +4,8 @@ module API
   class Scim < ::API::Base
     include ::Gitlab::Utils::StrongMemoize
 
+    feature_category :authentication_and_authorization
+
     prefix 'api/scim'
     version 'v2'
     content_type :json, 'application/scim+json'

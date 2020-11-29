@@ -488,6 +488,7 @@ RSpec.describe ProjectsHelper do
   describe '#can_view_operations_tab?' do
     before do
       allow(helper).to receive(:current_user).and_return(user)
+      allow(helper).to receive(:can?).and_return(false)
     end
 
     subject { helper.send(:can_view_operations_tab?, user, project) }
@@ -501,10 +502,18 @@ RSpec.describe ProjectsHelper do
       :read_cluster
     ].each do |ability|
       it 'includes operations tab' do
-        allow(helper).to receive(:can?).and_return(false)
         allow(helper).to receive(:can?).with(user, ability, project).and_return(true)
 
         is_expected.to be(true)
+      end
+
+      context 'when operations feature is disabled' do
+        it 'does not include operations tab' do
+          allow(helper).to receive(:can?).with(user, ability, project).and_return(true)
+          project.project_feature.update_attribute(:operations_access_level, ProjectFeature::DISABLED)
+
+          is_expected.to be(false)
+        end
       end
     end
   end
@@ -997,6 +1006,17 @@ RSpec.describe ProjectsHelper do
 
         it_behaves_like 'returns nil and tracks exception'
       end
+    end
+  end
+
+  describe '#project_title' do
+    subject { helper.project_title(project) }
+
+    it 'enqueues the elements in the breadcrumb schema list' do
+      expect(helper).to receive(:push_to_schema_breadcrumb).with(project.namespace.name, user_path(project.owner))
+      expect(helper).to receive(:push_to_schema_breadcrumb).with(project.name, project_path(project))
+
+      subject
     end
   end
 end

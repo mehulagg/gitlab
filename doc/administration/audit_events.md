@@ -1,7 +1,7 @@
 ---
 stage: Manage
 group: Compliance
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Audit Events **(STARTER)**
@@ -10,6 +10,8 @@ GitLab offers a way to view the changes made within the GitLab server for owners
 
 GitLab system administrators can also take advantage of the logs located on the
 file system. See [the logs system documentation](logs.md) for more details.
+
+You can generate an [Audit report](audit_reports.md) of audit events.
 
 ## Overview
 
@@ -97,6 +99,7 @@ From there, you can see the following actions:
 - Number of required approvals was updated ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/7531) in GitLab 12.9)
 - Added or removed users and groups from project approval groups ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/213603) in GitLab 13.2)
 - Project CI/CD variable added, removed, or protected status changed ([Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/30857) in GitLab 13.4)
+- User was approved via Admin Area ([Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/276250) in GitLab 13.6)
 
 Project events can also be accessed via the [Project Audit Events API](../api/audit_events.md#project-audit-events).
 
@@ -127,12 +130,8 @@ recorded:
 - User was blocked via Admin Area ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/251) in GitLab 12.8)
 - User was blocked via API ([introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/25872) in GitLab 12.9)
 - Failed second-factor authentication attempt ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/16826) in GitLab 13.5)
-
-It's possible to filter particular actions by choosing an audit data type from
-the filter dropdown box. You can further filter by specific group, project, or user
-(for authentication events).
-
-![audit log](img/audit_log.png)
+- A user's personal access token was successfully created or revoked ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/276921) in GitLab 13.6)
+- A failed attempt to create or revoke a user's personal access token ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/276921) in GitLab 13.6)
 
 Instance events can also be accessed via the [Instance Audit Events API](../api/audit_events.md#instance-audit-events).
 
@@ -175,6 +174,19 @@ the steps bellow.
    Feature.enable(:repository_push_audit_event)
    ```
 
+## Search
+
+The search filters you can see depends on which audit level you are at.
+
+| Filter | Available options |
+| ------ | ----------------- |
+| Scope (Project level) | A specific user who performed the action. |
+| Scope (Group level) | A specific user (in a group) who performed the action. |
+| Scope (Instance level) | A specific group, project, or user that the action was scoped to. |
+| Date range | Either via the date range buttons or pickers (maximum range of 31 days). Default is from the first day of the month to today's date. |
+
+![audit log](img/audit_log_v13_6.png)
+
 ## Export to CSV **(PREMIUM ONLY)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/1449) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.4.
@@ -188,23 +200,18 @@ This feature might not be available to you. Check the **version history** note a
 If available, you can enable it with a [feature flag](#enable-or-disable-audit-log-export-to-csv).
 
 Export to CSV allows customers to export the current filter view of your audit log as a
-CSV file,
-which stores tabular data in plain text. The data provides a comprehensive view with respect to
+CSV file, which stores tabular data in plain text. The data provides a comprehensive view with respect to
 audit events.
 
 To export the Audit Log to CSV, navigate to
 **{monitor}** **Admin Area > Monitoring > Audit Log**
 
-1. Click in the field **Search**.
-1. In the dropdown menu that appears, select the event type that you want to filter by.
-1. Select the preferred date range.
+1. Select the available search [filters](#search).
 1. Click **Export as CSV**.
-
-![Export Audit Log](img/export_audit_log_v13_4.png)
 
 ### Sort
 
-Exported events are always sorted by `ID` in ascending order.
+Exported events are always sorted by `created_at` in ascending order.
 
 ### Format
 
@@ -217,8 +224,8 @@ The first row contains the headers, which are listed in the following table alon
 | Author ID | ID of the author |
 | Author Name | Full name of the author |
 | Entity ID | ID of the scope |
-| Entity Type | Type of the entity (`Project`/`Group`/`User`) |
-| Entity Path | Path of the entity |
+| Entity Type | Type of the scope (`Project`/`Group`/`User`) |
+| Entity Path | Path of the scope |
 | Target ID | ID of the target |
 | Target Type | Type of the target |
 | Target Details | Details of the target |
@@ -228,7 +235,7 @@ The first row contains the headers, which are listed in the following table alon
 
 ### Limitation
 
-The Audit Log CSV file size is limited to a maximum of `15 MB`.
+The Audit Log CSV file is limited to a maximum of `100,000` events.
 The remaining records are truncated when this limit is reached.
 
 ### Enable or disable Audit Log Export to CSV

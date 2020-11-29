@@ -21,5 +21,5 @@ export const tasksByTypeChartData = ({ data = [] } = {}, _, rootState = {}) => {
         startDate,
         endDate,
       })
-    : { groupBy: [], data: [], seriesNames: [] };
+    : { groupBy: [], data: [] };
 };

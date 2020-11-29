@@ -14,7 +14,9 @@ module Enums
         operations_feature_flags: 6,
         operations_user_lists: 7,
         alert_management_alerts: 8,
-        sprints: 9 # iterations
+        sprints: 9, # iterations
+        design_management_designs: 10,
+        incident_management_oncall_schedules: 11
       }
     end
   end

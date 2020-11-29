@@ -1,7 +1,7 @@
 ---
 stage: Create
 group: Source Code
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 type: reference
 ---
 
@@ -78,7 +78,7 @@ CAUTION: **Warning:**
 The default behavior of [Delayed Project deletion](https://gitlab.com/gitlab-org/gitlab/-/issues/32935) in GitLab 12.6 was changed to
 [Immediate deletion](https://gitlab.com/gitlab-org/gitlab/-/issues/220382) in GitLab 13.2.
 
-Projects within a group can be deleted after a delayed period, by [configuring in Group Settings](../../group/index.md#enabling-delayed-project-removal).
+Projects within a group (but not a personal namespace) can be deleted after a delayed period, by [configuring in Group Settings](../../group/index.md#enabling-delayed-project-removal).
 
 The default period is 7 days, and can be changed. Setting this period to 0 will enable immediate removal
 of projects or groups.

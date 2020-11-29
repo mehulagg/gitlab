@@ -12,14 +12,20 @@ module LicenseMonitoringHelper
     current_user&.admin? && current_license.active_user_count_threshold_reached?
   end
 
+  def users_over_license
+    strong_memoize(:users_over_license) do
+      license_is_over_capacity? ? current_license_overage : 0
+    end
+  end
+
+  private
+
   def license_is_over_capacity?
     return if ::Gitlab.com?
     return if license_not_available_or_trial?
 
     current_license_overage > 0
   end
-
-  private
 
   def license_not_available_or_trial?
     current_license.nil? || current_license.trial?

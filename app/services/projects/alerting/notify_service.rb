@@ -25,7 +25,6 @@ module Projects
       private
 
       attr_reader :integration
-      delegate :alerts_service, :alerts_service_activated?, to: :project
 
       def process_alert
         if alert.persisted?
@@ -73,7 +72,7 @@ module Projects
       end
 
       def process_incident_issues
-        return if alert.issue
+        return if alert.issue || alert.resolved?
 
         ::IncidentManagement::ProcessAlertWorker.perform_async(nil, nil, alert.id)
       end
@@ -81,7 +80,7 @@ module Projects
       def send_alert_email
         notification_service
           .async
-          .prometheus_alerts_fired(project, [alert.attributes])
+          .prometheus_alerts_fired(project, [alert])
       end
 
       def alert
@@ -115,19 +114,11 @@ module Projects
       end
 
       def active_integration?
-        if Feature.enabled?(:multiple_http_integrations, project)
-          return true if integration
-        end
-
-        alerts_service_activated?
+        integration&.active?
       end
 
       def valid_token?(token)
-        if Feature.enabled?(:multiple_http_integrations, project)
-          return token == integration.token if integration
-        end
-
-        token == alerts_service.token
+        token == integration.token
       end
 
       def bad_request

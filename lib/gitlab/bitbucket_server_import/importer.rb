@@ -4,11 +4,14 @@ module Gitlab
   module BitbucketServerImport
     class Importer
       attr_reader :recover_missing_commits
-      attr_reader :project, :project_key, :repository_slug, :client, :errors, :users
+      attr_reader :project, :project_key, :repository_slug, :client, :errors, :users, :already_imported_cache_key
       attr_accessor :logger
 
       REMOTE_NAME = 'bitbucket_server'
       BATCH_SIZE = 100
+      # The base cache key to use for tracking already imported objects.
+      ALREADY_IMPORTED_CACHE_KEY =
+        'bitbucket_server-importer/already-imported/%{project}/%{collection}'
 
       TempBranch = Struct.new(:name, :sha)
 
@@ -36,6 +39,12 @@ module Gitlab
         @users = {}
         @temp_branches = []
         @logger = Gitlab::Import::Logger.build
+        @already_imported_cache_key = ALREADY_IMPORTED_CACHE_KEY %
+          { project: project.id, collection: collection_method }
+      end
+
+      def collection_method
+        :pull_requests
       end
 
       def execute
@@ -48,6 +57,7 @@ module Gitlab
 
         log_info(stage: "complete")
 
+        Gitlab::Cache::Import::Caching.expire(already_imported_cache_key, 15.minutes.to_i)
         true
       end
 
@@ -167,16 +177,29 @@ module Gitlab
       # on the remote server. Then we have to issue a `git fetch` to download these
       # branches.
       def import_pull_requests
-        pull_requests = client.pull_requests(project_key, repository_slug).to_a
+        page = 0
 
-        # Creating branches on the server and fetching the newly-created branches
-        # may take a number of network round-trips. Do this in batches so that we can
-        # avoid doing a git fetch for every new branch.
-        pull_requests.each_slice(BATCH_SIZE) do |batch|
-          restore_branches(batch) if recover_missing_commits
+        log_info(stage: 'import_pull_requests', message: "starting")
 
-          batch.each do |pull_request|
-            import_bitbucket_pull_request(pull_request)
+        loop do
+          log_debug(stage: 'import_pull_requests', message: "importing page #{page} and batch-size #{BATCH_SIZE} from #{page * BATCH_SIZE} to #{(page + 1) * BATCH_SIZE}")
+
+          pull_requests = client.pull_requests(project_key, repository_slug, page_offset: page, limit: BATCH_SIZE).to_a
+
+          break if pull_requests.empty?
+
+          # Creating branches on the server and fetching the newly-created branches
+          # may take a number of network round-trips. This used to be done in batches to
+          # avoid doing a git fetch for every new branch, as the whole process is now
+          # batched, we do not need to separately do this in batches.
+          restore_branches(pull_requests) if recover_missing_commits
+
+          pull_requests.each do |pull_request|
+            if already_imported?(pull_request)
+              log_info(stage: 'import_pull_requests', message: 'already imported', iid: pull_request.iid)
+            else
+              import_bitbucket_pull_request(pull_request)
+            end
           rescue StandardError => e
             Gitlab::ErrorTracking.log_exception(
               e,
@@ -186,7 +209,23 @@ module Gitlab
             backtrace = Gitlab::BacktraceCleaner.clean_backtrace(e.backtrace)
             errors << { type: :pull_request, iid: pull_request.iid, errors: e.message, backtrace: backtrace.join("\n"), raw_response: pull_request.raw }
           end
+
+          log_debug(stage: 'import_pull_requests', message: "finished page #{page} and batch-size #{BATCH_SIZE}")
+          page += 1
         end
+      end
+
+      # Returns true if the given object has already been imported, false
+      # otherwise.
+      #
+      # object - The object to check.
+      def already_imported?(pull_request)
+        Gitlab::Cache::Import::Caching.set_includes?(already_imported_cache_key, pull_request.iid)
+      end
+
+      # Marks the given object as "already imported".
+      def mark_as_imported(pull_request)
+        Gitlab::Cache::Import::Caching.set_add(already_imported_cache_key, pull_request.iid)
       end
 
       def delete_temp_branches
@@ -236,6 +275,7 @@ module Gitlab
         end
 
         log_info(stage: 'import_bitbucket_pull_requests', message: 'finished', iid: pull_request.iid)
+        mark_as_imported(pull_request)
       end
 
       def import_pull_request_comments(pull_request, merge_request)
@@ -385,6 +425,10 @@ module Gitlab
           created_at: comment.created_at,
           updated_at: comment.updated_at
         }
+      end
+
+      def log_debug(details)
+        logger.debug(log_base_data.merge(details))
       end
 
       def log_info(details)

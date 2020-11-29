@@ -46,6 +46,9 @@
 .if-security-merge-request: &if-security-merge-request
   if: '$CI_PROJECT_NAMESPACE == "gitlab-org/security" && $CI_MERGE_REQUEST_IID'
 
+.if-security-schedule: &if-security-schedule
+  if: '$CI_PROJECT_NAMESPACE == "gitlab-org/security" && $CI_PIPELINE_SOURCE == "schedule"'
+
 .if-dot-com-gitlab-org-schedule: &if-dot-com-gitlab-org-schedule
   if: '$CI_SERVER_HOST == "gitlab.com" && $CI_PROJECT_NAMESPACE == "gitlab-org" && $CI_PIPELINE_SOURCE == "schedule"'
 
@@ -103,8 +106,11 @@
   - ".gitlab/ci/build-images.gitlab-ci.yml"
   - ".gitlab/ci/qa.gitlab-ci.yml"
 
-.yaml-patterns: &yaml-patterns
-  - "**/*.yml"
+.yaml-lint-patterns: &yaml-lint-patterns
+  - ".gitlab-ci.yml"
+  - ".gitlab/ci/**/*.yml"
+  - "lib/gitlab/ci/templates/**/*.yml"
+  - "{,ee/}changelogs/**/*.yml"
 
 .docs-patterns: &docs-patterns
   - ".gitlab/route-map.yml"
@@ -142,8 +148,8 @@
   - "{,ee/}{,spec/}lib/{,ee/}gitlab/database{,_spec}.rb"
   - "{,ee/}{,spec/}lib/{,ee/}gitlab/background_migration/**/*"
   - "{,ee/}{,spec/}lib/{,ee/}gitlab/background_migration{,_spec}.rb"
-  - "config/prometheus/common_metrics.yml" # Used by Gitlab::DatabaseImporters::CommonMetrics::Importer
-  - "{,ee/}app/models/project_statistics.rb" # Used to calculate sizes in migration specs
+  - "config/prometheus/common_metrics.yml"  # Used by Gitlab::DatabaseImporters::CommonMetrics::Importer
+  - "{,ee/}app/models/project_statistics.rb"  # Used to calculate sizes in migration specs
 
 .backstage-patterns: &backstage-patterns
   - "Dangerfile"
@@ -151,6 +157,7 @@
   - "{,ee/}fixtures/**/*"
   - "{,ee/}rubocop/**/*"
   - "{,ee/}spec/**/*"
+  - "{,spec/}tooling/**/*"
 
 .code-patterns: &code-patterns
   - "{package.json,yarn.lock}"
@@ -161,7 +168,7 @@
   - "vendor/assets/**/*"
   - ".gitlab/ci/**/*"
   - ".{eslintignore,gitattributes,nvmrc,prettierrc,stylelintrc,yamllint}"
-  - ".{codeclimate,eslintrc,gitlab-ci,haml-lint,haml-lint_todo,rubocop,rubocop_todo,scss-lint}.yml"
+  - ".{codeclimate,eslintrc,gitlab-ci,haml-lint,haml-lint_todo,rubocop,rubocop_todo,rubocop_manual_todo,scss-lint}.yml"
   - "*_VERSION"
   - "Gemfile{,.lock}"
   - "Rakefile"
@@ -183,7 +190,7 @@
   - "vendor/assets/**/*"
   - ".gitlab/ci/**/*"
   - ".{eslintignore,gitattributes,nvmrc,prettierrc,stylelintrc,yamllint}"
-  - ".{codeclimate,eslintrc,gitlab-ci,haml-lint,haml-lint_todo,rubocop,rubocop_todo,scss-lint}.yml"
+  - ".{codeclimate,eslintrc,gitlab-ci,haml-lint,haml-lint_todo,rubocop,rubocop_todo,rubocop_manual_todo,scss-lint}.yml"
   - "*_VERSION"
   - "Gemfile{,.lock}"
   - "Rakefile"
@@ -197,6 +204,7 @@
   - "{,ee/}fixtures/**/*"
   - "{,ee/}rubocop/**/*"
   - "{,ee/}spec/**/*"
+  - "{,spec/}tooling/**/*"
 
 .code-qa-patterns: &code-qa-patterns
   - "{package.json,yarn.lock}"
@@ -207,7 +215,7 @@
   - "vendor/assets/**/*"
   - ".gitlab/ci/**/*"
   - ".{eslintignore,gitattributes,nvmrc,prettierrc,stylelintrc,yamllint}"
-  - ".{codeclimate,eslintrc,gitlab-ci,haml-lint,haml-lint_todo,rubocop,rubocop_todo,scss-lint}.yml"
+  - ".{codeclimate,eslintrc,gitlab-ci,haml-lint,haml-lint_todo,rubocop,rubocop_todo,rubocop_manual_todo,scss-lint}.yml"
   - "*_VERSION"
   - "Gemfile{,.lock}"
   - "Rakefile"
@@ -228,7 +236,7 @@
   - "vendor/assets/**/*"
   - ".gitlab/ci/**/*"
   - ".{eslintignore,gitattributes,nvmrc,prettierrc,stylelintrc,yamllint}"
-  - ".{codeclimate,eslintrc,gitlab-ci,haml-lint,haml-lint_todo,rubocop,rubocop_todo,scss-lint}.yml"
+  - ".{codeclimate,eslintrc,gitlab-ci,haml-lint,haml-lint_todo,rubocop,rubocop_todo,rubocop_manual_todo,scss-lint}.yml"
   - "*_VERSION"
   - "Gemfile{,.lock}"
   - "Rakefile"
@@ -242,6 +250,7 @@
   - "{,ee/}fixtures/**/*"
   - "{,ee/}rubocop/**/*"
   - "{,ee/}spec/**/*"
+  - "{,spec/}tooling/**/*"
   # QA changes
   - ".dockerignore"
   - "qa/**/*"
@@ -252,6 +261,7 @@
 .shared:rules:update-cache:
   rules:
     - <<: *if-master-schedule-2-hourly
+    - <<: *if-security-schedule
     - <<: *if-merge-request-title-update-caches
 
 ######################
@@ -392,6 +402,7 @@
       when: never
     - <<: *if-merge-request
       changes: *code-backstage-patterns
+      when: always
     - <<: *if-master-refs
       changes: *code-backstage-patterns
 
@@ -644,8 +655,10 @@
       when: never
     - <<: *if-merge-request
       changes: *code-backstage-patterns
+      when: always
     - <<: *if-master-schedule-2-hourly
     - <<: *if-merge-request-title-run-all-rspec
+      when: always
 
 .rails:rules:rspec-feature-flags:
   rules:
@@ -673,10 +686,14 @@
 ##################
 .releases:rules:canonical-dot-com-gitlab-stable-branch-only:
   rules:
+    - if: '$CI_COMMIT_MESSAGE =~ /\[merge-train skip\]/'
+      when: never
     - if: '$CI_SERVER_HOST == "gitlab.com" && $CI_PROJECT_PATH == "gitlab-org/gitlab" && $CI_COMMIT_REF_NAME =~ /^[\d-]+-stable-ee$/'
 
 .releases:rules:canonical-dot-com-security-gitlab-stable-branch-only:
   rules:
+    - if: '$CI_COMMIT_MESSAGE =~ /\[merge-train skip\]/'
+      when: never
     - if: '$CI_SERVER_HOST == "gitlab.com" && $CI_PROJECT_PATH == "gitlab-org/security/gitlab" && $CI_COMMIT_REF_NAME =~ /^[\d-]+-stable-ee$/'
 
 #################
@@ -771,7 +788,7 @@
 
 .review:rules:review-performance:
   rules:
-    - if: '$DAST_RUN == "true"' # Skip this job when DAST is run
+    - if: '$DAST_RUN == "true"'  # Skip this job when DAST is run
       when: never
     - <<: *if-not-ee
       when: never
@@ -905,10 +922,10 @@
     - <<: *if-dot-com-ee-schedule
       changes: *code-backstage-patterns
 
-##############
-# YAML rules #
-##############
-.yaml:rules:
+###################
+# yaml-lint rules #
+###################
+.yaml-lint:rules:
   rules:
     - <<: *if-default-refs
-      changes: *yaml-patterns
+      changes: *yaml-lint-patterns

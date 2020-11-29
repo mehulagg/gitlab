@@ -1,7 +1,7 @@
 .dropdown.inline.dropdown-epics-state
   %button.dropdown-toggle{ type: 'button', data: { toggle: 'dropdown' } }
     = epic_state_title(@epics_state)
-    = icon('chevron-down')
+    = sprite_icon('chevron-down', css_class: 'gl-text-gray-200')
   %ul.dropdown-menu.dropdown-menu-selectable
     %li
       = epic_state_dropdown_link('all', @epics_state)

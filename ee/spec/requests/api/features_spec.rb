@@ -18,7 +18,10 @@ RSpec.describe API::Features, stub_feature_flags: false do
   end
 
   describe 'POST /feature' do
-    let(:feature_name) { 'my_feature' }
+    let(:feature_name) do
+      Feature::Definition.definitions
+        .values.find(&:development?).name
+    end
 
     context 'when running on a Geo primary node' do
       before do
@@ -42,6 +45,14 @@ RSpec.describe API::Features, stub_feature_flags: false do
         post api("/features/#{feature_name}", admin), params: { value: 'true' }
 
         expect(response).to have_gitlab_http_status(:bad_request)
+      end
+
+      context 'when force=1 is set' do
+        it 'allows to change state' do
+          post api("/features/#{feature_name}", admin), params: { value: 'true', force: true }
+
+          expect(response).to have_gitlab_http_status(:created)
+        end
       end
     end
   end

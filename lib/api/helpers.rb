@@ -387,8 +387,8 @@ module API
       render_api_error!('401 Unauthorized', 401)
     end
 
-    def not_allowed!
-      render_api_error!('405 Method Not Allowed', 405)
+    def not_allowed!(message = nil)
+      render_api_error!(message || '405 Method Not Allowed', :method_not_allowed)
     end
 
     def not_acceptable!
@@ -534,6 +534,15 @@ module API
       Gitlab::AppLogger.warn(
         "Tracking event failed for action: #{action}, category: #{category}, message: #{error.message}"
       )
+    end
+
+    def increment_counter(event_name)
+      feature_name = "usage_data_#{event_name}"
+      return unless Feature.enabled?(feature_name)
+
+      Gitlab::UsageDataCounters.count(event_name)
+    rescue => error
+      Gitlab::AppLogger.warn("Redis tracking event failed for event: #{event_name}, message: #{error.message}")
     end
 
     # @param event_name [String] the event name

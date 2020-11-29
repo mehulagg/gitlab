@@ -108,17 +108,15 @@ RSpec.describe PostReceiveService, :geo do
 
     let(:check_storage_size_response) { ServiceResponse.success }
 
-    where(:namespace_storage_limit_enabled, :additional_repo_storage_by_namespace_enabled, :service_class_name) do
-      true  | false | Namespaces::CheckStorageSizeService
-      true  | true  | Namespaces::CheckStorageSizeService
-      false | true  | Namespaces::CheckExcessStorageSizeService
-      false | false | Namespaces::CheckStorageSizeService
+    where(:additional_repo_storage_by_namespace_enabled, :service_class_name) do
+      true  | Namespaces::CheckExcessStorageSizeService
+      false | Namespaces::CheckStorageSizeService
     end
 
     with_them do
       before do
-        stub_feature_flags(namespace_storage_limit: namespace_storage_limit_enabled)
-        stub_feature_flags(additional_repo_storage_by_namespace: additional_repo_storage_by_namespace_enabled)
+        allow(project.namespace).to receive(:additional_repo_storage_by_namespace_enabled?)
+          .and_return(additional_repo_storage_by_namespace_enabled)
 
         allow_next_instance_of(service_class_name, project.namespace, user) do |service|
           expect(service).to receive(:execute).and_return(check_storage_size_response)

@@ -1,0 +1,18 @@
+- type = local_assigns.fetch(:type)
+- return unless type == :issues || type == :boards || type == :boards_modal
+
+#js-dropdown-iteration.filtered-search-input-dropdown-menu.dropdown-menu
+  %ul{ 'data-dropdown' => true }
+    %li.filter-dropdown-item{ 'data-value' => 'None' }
+      %button.btn.btn-link
+        = _('None')
+    %li.filter-dropdown-item{ 'data-value' => 'Any' }
+      %button.btn.btn-link
+        = _('Any')
+    %li.divider.droplab-item-ignore
+  %ul.filter-dropdown{ data: { dropdown: true, dynamic: true } }
+    %li.filter-dropdown-item
+      %button.btn.btn-link{ type: 'button' }
+        -# haml-lint:disable NoPlainNodes
+        %span.dropdown-light-content
+          {{title}}

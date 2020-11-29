@@ -1,13 +1,13 @@
-import { shallowMount } from '@vue/test-utils';
-import { TEST_HOST } from 'jest/helpers/test_constants';
 import { GlLoadingIcon } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import DashboardNotConfigured from 'ee/security_dashboard/components/empty_states/group_dashboard_not_configured.vue';
-import GroupSecurityCharts from 'ee/security_dashboard/components/group_security_charts.vue';
-import SecurityChartsLayout from 'ee/security_dashboard/components/security_charts_layout.vue';
 import VulnerabilityChart from 'ee/security_dashboard/components/first_class_vulnerability_chart.vue';
 import VulnerabilitySeverities from 'ee/security_dashboard/components/first_class_vulnerability_severities.vue';
-import vulnerabilityHistoryQuery from 'ee/security_dashboard/graphql/group_vulnerability_history.query.graphql';
+import GroupSecurityCharts from 'ee/security_dashboard/components/group_security_charts.vue';
+import SecurityChartsLayout from 'ee/security_dashboard/components/security_charts_layout.vue';
 import vulnerabilityGradesQuery from 'ee/security_dashboard/graphql/group_vulnerability_grades.query.graphql';
+import vulnerabilityHistoryQuery from 'ee/security_dashboard/graphql/group_vulnerability_history.query.graphql';
+import { TEST_HOST } from 'jest/helpers/test_constants';
 
 jest.mock('ee/security_dashboard/graphql/group_vulnerability_grades.query.graphql', () => ({
   mockGrades: true,

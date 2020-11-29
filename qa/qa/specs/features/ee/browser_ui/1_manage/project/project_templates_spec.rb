@@ -4,6 +4,8 @@ require 'securerandom'
 module QA
   RSpec.describe 'Manage' do
     describe 'Project templates' do
+      include Support::Api
+
       before(:all) do
         @files = [
           {
@@ -163,11 +165,17 @@ module QA
 
           Page::Project::Show.perform do |project|
             project.wait_for_import_success
+            @project_id = project.project_id
 
             @files.each do |file|
               expect(project).to have_file(file[:name])
             end
           end
+        end
+
+        after do
+          api_client = Runtime::API::Client.new(:gitlab)
+          delete Runtime::API::Request.new(api_client, "/projects/#{@project_id}").url
         end
       end
 

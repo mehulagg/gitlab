@@ -1,5 +1,0 @@
----
-title: 'Geo: Better error handling of geo:set_secondary_as_primary rake task'
-merge_request: 45568
-author:
-type: changed

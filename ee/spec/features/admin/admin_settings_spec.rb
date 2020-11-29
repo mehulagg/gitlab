@@ -7,7 +7,9 @@ RSpec.describe 'Admin updates EE-only settings' do
 
   before do
     stub_env('IN_MEMORY_APPLICATION_SETTINGS', 'false')
-    sign_in(create(:admin))
+    admin = create(:admin)
+    sign_in(admin)
+    gitlab_enable_admin_mode_sign_in(admin)
     allow(License).to receive(:feature_available?).and_return(true)
     allow(Gitlab::Elastic::Helper.default).to receive(:index_exists?).and_return(true)
   end
@@ -257,7 +259,7 @@ RSpec.describe 'Admin updates EE-only settings' do
 
     it 'loads seat link payload on click', :js do
       page.within('#js-seat-link-settings') do
-        expected_payload_content = /(?=.*"date")(?=.*"license_key")(?=.*"max_historical_user_count")(?=.*"active_users")/m
+        expected_payload_content = /(?=.*"date")(?=.*"timestamp")(?=.*"license_key")(?=.*"max_historical_user_count")(?=.*"active_users")/m
 
         expect(page).not_to have_content expected_payload_content
 
@@ -268,6 +270,75 @@ RSpec.describe 'Admin updates EE-only settings' do
         expect(page).to have_selector '.js-seat-link-payload'
         expect(page).to have_button 'Hide payload'
         expect(page).to have_content expected_payload_content
+      end
+    end
+  end
+
+  context 'sign up settings' do
+    context 'when feature flag is disabled' do
+      before do
+        stub_feature_flags(admin_new_user_signups_cap: false)
+      end
+
+      it 'does not render user cap form group' do
+        visit general_admin_application_settings_path
+
+        expect(page).not_to have_field('User cap')
+      end
+    end
+
+    context 'when feature flag is enabled' do
+      before do
+        stub_feature_flags(admin_new_user_signups_cap: true)
+      end
+
+      context 'when license has active user count' do
+        let(:license) { create(:license, restrictions: { active_user_count: 1 }) }
+
+        before do
+          allow(License).to receive(:current).and_return(license)
+        end
+
+        it 'disallows entering user cap greater then license allows', :js do
+          visit general_admin_application_settings_path
+
+          page.within('#js-signup-settings') do
+            fill_in 'User cap', with: 5
+
+            click_button 'Save changes'
+
+            message =
+              page.find('#application_setting_new_user_signups_cap').native.attribute('validationMessage')
+
+            expect(message).to eq('Value must be less than or equal to 1.')
+          end
+        end
+      end
+
+      it 'changes the user cap from unlimited to 5' do
+        visit general_admin_application_settings_path
+
+        expect(current_settings.new_user_signups_cap).to be_nil
+
+        page.within('#js-signup-settings') do
+          fill_in 'User cap', with: 5
+
+          click_button 'Save changes'
+
+          expect(current_settings.new_user_signups_cap).to eq(5)
+        end
+      end
+
+      it 'changes the user cap to unlimited' do
+        visit general_admin_application_settings_path
+
+        page.within('#js-signup-settings') do
+          fill_in 'User cap', with: nil
+
+          click_button 'Save changes'
+
+          expect(current_settings.new_user_signups_cap).to be_nil
+        end
       end
     end
   end

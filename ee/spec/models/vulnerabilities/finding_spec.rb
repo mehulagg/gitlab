@@ -16,6 +16,9 @@ RSpec.describe Vulnerabilities::Finding do
     it { is_expected.to have_many(:finding_pipelines).class_name('Vulnerabilities::FindingPipeline').with_foreign_key('occurrence_id') }
     it { is_expected.to have_many(:identifiers).class_name('Vulnerabilities::Identifier') }
     it { is_expected.to have_many(:finding_identifiers).class_name('Vulnerabilities::FindingIdentifier').with_foreign_key('occurrence_id') }
+    it { is_expected.to have_many(:finding_links).class_name('Vulnerabilities::FindingLink').with_foreign_key('vulnerability_occurrence_id') }
+    it { is_expected.to have_many(:finding_remediations).class_name('Vulnerabilities::FindingRemediation').with_foreign_key('vulnerability_occurrence_id') }
+    it { is_expected.to have_many(:remediations).through(:finding_remediations) }
   end
 
   describe 'validations' do
@@ -405,6 +408,33 @@ RSpec.describe Vulnerabilities::Finding do
     end
   end
 
+  describe '#links' do
+    let_it_be(:finding, reload: true) do
+      create(
+        :vulnerabilities_finding,
+        raw_metadata: {
+          links: [{ url: 'https://raw.gitlab.com', name: 'raw_metadata_link' }]
+        }.to_json
+      )
+    end
+
+    subject(:links) { finding.links }
+
+    context 'when there are no finding links' do
+      it 'returns links from raw_metadata' do
+        expect(links).to eq([{ 'url' => 'https://raw.gitlab.com', 'name' => 'raw_metadata_link' }])
+      end
+    end
+
+    context 'when there are finding links assigned to given finding' do
+      let_it_be(:finding_link) { create(:finding_link, name: 'finding_link', url: 'https://link.gitlab.com', finding: finding) }
+
+      it 'returns links from finding link' do
+        expect(links).to eq([{ 'url' => 'https://link.gitlab.com', 'name' => 'finding_link' }])
+      end
+    end
+  end
+
   describe 'feedback' do
     let_it_be(:project) { create(:project) }
     let(:finding) do
@@ -515,6 +545,7 @@ RSpec.describe Vulnerabilities::Finding do
         project: project
       )
     end
+
     let_it_be(:feedback) do
       create(
         :vulnerability_feedback,

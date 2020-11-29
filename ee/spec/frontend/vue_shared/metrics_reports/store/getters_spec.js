@@ -1,6 +1,6 @@
-import state from 'ee/vue_shared/metrics_reports/store/state';
-import { summaryStatus, metrics } from 'ee/vue_shared/metrics_reports/store/getters';
 import { LOADING, ERROR, SUCCESS } from 'ee/vue_shared/metrics_reports/constants';
+import { summaryStatus, metrics } from 'ee/vue_shared/metrics_reports/store/getters';
+import state from 'ee/vue_shared/metrics_reports/store/state';
 
 describe('metrics reports getters', () => {
   describe('summaryStatus', () => {

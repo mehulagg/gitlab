@@ -1,8 +1,7 @@
 <script>
 /* eslint-disable vue/no-v-html */
-import { GlLoadingIcon, GlBadge } from '@gitlab/ui';
+import { GlLoadingIcon, GlBadge, GlTooltipDirective } from '@gitlab/ui';
 import { visitUrl } from '../../lib/utils/url_utility';
-import tooltip from '../../vue_shared/directives/tooltip';
 import identicon from '../../vue_shared/components/identicon.vue';
 import eventHub from '../event_hub';
 import { VISIBILITY_TYPE_ICON, GROUP_VISIBILITY_TYPE } from '../constants';
@@ -17,7 +16,7 @@ import { showLearnGitLabGroupItemPopover } from '~/onboarding_issues';
 
 export default {
   directives: {
-    tooltip,
+    GlTooltip: GlTooltipDirective,
   },
   components: {
     GlBadge,
@@ -75,6 +74,9 @@ export default {
     visibilityTooltip() {
       return GROUP_VISIBILITY_TYPE[this.group.visibility];
     },
+    microdata() {
+      return this.group.microdata || {};
+    },
   },
   mounted() {
     if (this.group.name === 'Learn GitLab') {
@@ -100,7 +102,15 @@ export default {
 </script>
 
 <template>
-  <li :id="groupDomId" :class="rowClass" class="group-row" @click.stop="onClickRowGroup">
+  <li
+    :id="groupDomId"
+    :class="rowClass"
+    class="group-row"
+    :itemprop="microdata.itemprop"
+    :itemtype="microdata.itemtype"
+    :itemscope="microdata.itemscope"
+    @click.stop="onClickRowGroup"
+  >
     <div
       :class="{ 'project-row-contents': !isGroup }"
       class="group-row-contents d-flex align-items-center py-2 pr-3"
@@ -119,7 +129,13 @@ export default {
         class="avatar-container rect-avatar s32 d-none flex-grow-0 flex-shrink-0 "
       >
         <a :href="group.relativePath" class="no-expand">
-          <img v-if="hasAvatar" :src="group.avatarUrl" class="avatar s40" />
+          <img
+            v-if="hasAvatar"
+            :src="group.avatarUrl"
+            data-testid="group-avatar"
+            class="avatar s40"
+            :itemprop="microdata.imageItemprop"
+          />
           <identicon v-else :entity-id="group.id" :entity-name="group.name" size-class="s40" />
         </a>
       </div>
@@ -127,11 +143,12 @@ export default {
         <div class="group-text flex-grow-1 flex-shrink-1">
           <div class="d-flex align-items-center flex-wrap title namespace-title gl-mr-3">
             <a
-              v-tooltip
+              v-gl-tooltip.bottom
+              data-testid="group-name"
               :href="group.relativePath"
               :title="group.fullName"
               class="no-expand gl-mt-3 gl-mr-3 gl-text-gray-900!"
-              data-placement="bottom"
+              :itemprop="microdata.nameItemprop"
               >{{
                 // ending bracket must be by closing tag to prevent
                 // link hover text-decoration from over-extending
@@ -148,7 +165,12 @@ export default {
             </span>
           </div>
           <div v-if="group.description" class="description">
-            <span v-html="group.description"> </span>
+            <span
+              :itemprop="microdata.descriptionItemprop"
+              data-testid="group-description"
+              v-html="group.description"
+            >
+            </span>
           </div>
         </div>
         <div v-if="isGroupPendingRemoval">

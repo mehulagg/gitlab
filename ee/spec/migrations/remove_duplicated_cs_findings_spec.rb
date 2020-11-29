@@ -24,7 +24,7 @@ RSpec.describe RemoveDuplicatedCsFindings, :migration do
   end
 
   around do |example|
-    Timecop.freeze { Sidekiq::Testing.fake! { example.run } }
+    freeze_time { Sidekiq::Testing.fake! { example.run } }
   end
 
   it 'updates location fingerprint for containter scanning findings', :sidekiq_might_not_need_inline do

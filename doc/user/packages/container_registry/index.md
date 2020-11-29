@@ -1,7 +1,7 @@
 ---
 stage: Package
 group: Package
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # GitLab Container Registry
@@ -447,7 +447,7 @@ For the project where it's defined, tags matching the regex pattern are removed.
 The underlying layers and images remain.
 
 To delete the underlying layers and images that aren't associated with any tags, administrators can use
-[garbage collection](../../../administration/packages/container_registry.md#removing-unused-layers-not-referenced-by-manifests) with the `-m` switch.
+[garbage collection](../../../administration/packages/container_registry.md#removing-untagged-manifests-and-unreferenced-layers) with the `-m` switch.
 
 ### Enable the cleanup policy
 
@@ -468,7 +468,7 @@ Cleanup policies can be run on all projects, with these exceptions:
   ```
 
   There are performance risks with enabling it for all projects, especially if you
-  are using an [external registry](./index.md#use-with-external-container-registries).
+  are using an [external registry](index.md#use-with-external-container-registries).
 - For self-managed GitLab instances, you can enable or disable the cleanup policy for a specific
   project.
 
@@ -580,7 +580,7 @@ See the API documentation for further details: [Edit project](../../../api/proje
 
 ### Use with external container registries
 
-When using an [external container registry](./../../../administration/packages/container_registry.md#use-an-external-container-registry-with-gitlab-as-an-auth-endpoint),
+When using an [external container registry](../../../administration/packages/container_registry.md#use-an-external-container-registry-with-gitlab-as-an-auth-endpoint),
 running a cleanup policy on a project may have some performance risks.
 If a project runs a policy to remove thousands of tags
 the GitLab background jobs may get backed up or fail completely.

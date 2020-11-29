@@ -13,12 +13,22 @@ module EE
               # needs:pipeline: other/project
               strategy :BridgeHash,
                 class: EE::Gitlab::Ci::Config::Entry::Need::BridgeHash,
-                if: -> (config) { config.is_a?(Hash) && !config.key?(:job) && !config.key?(:project) }
+                if: -> (config) { config.is_a?(Hash) && bridge_to_upstream_pipeline?(config) }
 
               # When defining DAG dependency across project/ref
-              strategy :CrossDependency,
-                class: EE::Gitlab::Ci::Config::Entry::Need::CrossDependency,
-                if: -> (config) { config.is_a?(Hash) && (config.key?(:project) || config.key?(:ref)) }
+              strategy :CrossProjectDependency,
+                class: EE::Gitlab::Ci::Config::Entry::Need::CrossProjectDependency,
+                if: -> (config) { config.is_a?(Hash) && cross_project_need?(config) }
+            end
+
+            class_methods do
+              def bridge_to_upstream_pipeline?(config)
+                !config.key?(:job) && !config.key?(:project)
+              end
+
+              def cross_project_need?(config)
+                config.key?(:project) || config.key?(:ref)
+              end
             end
 
             class BridgeHash < ::Gitlab::Config::Entry::Node
@@ -39,7 +49,7 @@ module EE
               end
             end
 
-            class CrossDependency < ::Gitlab::Config::Entry::Node
+            class CrossProjectDependency < ::Gitlab::Config::Entry::Node
               include ::Gitlab::Config::Entry::Validatable
               include ::Gitlab::Config::Entry::Attributable
 

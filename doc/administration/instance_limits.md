@@ -1,7 +1,7 @@
 ---
 stage: none
 group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference
 ---
 
@@ -179,7 +179,6 @@ Plan.default.actual_limits.update!(project_hooks: 100)
 Plan.default.actual_limits.update!(group_hooks: 100)
 ```
 
-NOTE: **Note:**
 Set the limit to `0` to disable it.
 
 ## Incoming emails from auto-responders
@@ -217,7 +216,6 @@ Plan.default.actual_limits.update!(offset_pagination_limit: 10000)
 
 - **Default offset pagination limit:** 50000
 
-NOTE: **Note:**
 Set the limit to `0` to disable it.
 
 ## CI/CD limits
@@ -250,7 +248,29 @@ To set this limit on a self-managed installation, run the following in the
 Plan.default.actual_limits.update!(ci_active_jobs: 500)
 ```
 
-NOTE: **Note:**
+Set the limit to `0` to disable it.
+
+### Maximum number of deployment jobs in a pipeline
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/46931) in GitLab 13.7.
+
+You can limit the maximum number of deployment jobs in a pipeline. A deployment is
+any job with an [`environment`](../ci/environments/index.md) specified. The number
+of deployments in a pipeline is checked at pipeline creation. Pipelines that have
+too many deployments fail with a `deployments_limit_exceeded` error.
+
+The default limit is 500 for all [self-managed and GitLab.com plans](https://about.gitlab.com/pricing/).
+
+To change the limit on a self-managed installation, change the `default` plan limit with the following
+[GitLab Rails console](operations/rails_console.md#starting-a-rails-console-session) command:
+
+```ruby
+# If limits don't exist for the default plan, you can create one with:
+# Plan.default.create_limits!
+
+Plan.default.actual_limits.update!(ci_pipeline_deployments: 500)
+```
+
 Set the limit to `0` to disable it.
 
 ### Number of CI/CD subscriptions to a project
@@ -273,7 +293,6 @@ To set this limit on a self-managed installation, run the following in the
 Plan.default.actual_limits.update!(ci_project_subscriptions: 500)
 ```
 
-NOTE: **Note:**
 Set the limit to `0` to disable it.
 
 ### Number of pipeline schedules
@@ -351,7 +370,7 @@ setting is used:
 | `ci_max_artifact_size_license_management`   | 0             |
 | `ci_max_artifact_size_license_scanning`     | 0             |
 | `ci_max_artifact_size_load_performance`     | 0             |
-| `ci_max_artifact_size_lsif`                 | 20 MB ([introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/37226) in GitLab 13.3) |
+| `ci_max_artifact_size_lsif`                 | 100 MB ([Introduced at 20 MB](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/37226) in GitLab 13.3 and [raised to 100 MB](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/46980) in GitLab 13.6.) |
 | `ci_max_artifact_size_metadata`             | 0             |
 | `ci_max_artifact_size_metrics_referee`      | 0             |
 | `ci_max_artifact_size_metrics`              | 0             |
@@ -462,11 +481,10 @@ Setting a limit helps reduce the memory usage of the indexing processes as well
 as the overall index size. This value defaults to `1024 KiB` (1 MiB) as any
 text files larger than this likely aren't meant to be read by humans.
 
-NOTE: **Note:**
-You must set a limit, as an unlimited file size is not supported. Setting this
-value to be greater than the amount of memory on GitLab's Sidekiq nodes will
-lead to GitLab's Sidekiq nodes running out of memory as they will pre-allocate
-this amount of memory during indexing.
+You must set a limit, as unlimited file sizes aren't supported. Setting this
+value to be greater than the amount of memory on GitLab's Sidekiq nodes causes
+GitLab's Sidekiq nodes to run out of memory, as they will pre-allocate this
+amount of memory during indexing.
 
 ### Maximum field length
 
@@ -486,7 +504,6 @@ indexed](#maximum-file-size-indexed)).
 This limit can be configured for self-managed installations when [enabling
 Elasticsearch](../integration/elasticsearch.md#enabling-advanced-search).
 
-NOTE: **Note:**
 Set the limit to `0` to disable it.
 
 ## Wiki limits

@@ -1,5 +1,5 @@
-import mutations from 'ee/roadmap/store/mutations';
 import * as types from 'ee/roadmap/store/mutation_types';
+import mutations from 'ee/roadmap/store/mutations';
 
 import defaultState from 'ee/roadmap/store/state';
 

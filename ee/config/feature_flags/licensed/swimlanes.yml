@@ -2,6 +2,7 @@
 name: swimlanes
 introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/41543
 rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/239472
-group: group::portfolio management
+milestone: '13.5'
 type: licensed
+group: group::portfolio management
 default_enabled: true

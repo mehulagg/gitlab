@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import { mapActions, mapGetters, mapState } from 'vuex';
+import { mapActions, mapGetters } from 'vuex';
 
 import 'ee_else_ce/boards/models/issue';
 import 'ee_else_ce/boards/models/list';
@@ -77,7 +77,6 @@ export default () => {
     el: $boardApp,
     components: {
       BoardContent,
-      Board: () => import('ee_else_ce/boards/components/board_column.vue'),
       BoardSidebar,
       BoardAddIssuesModal,
       BoardSettingsSidebar: () => import('~/boards/components/board_settings_sidebar.vue'),
@@ -86,10 +85,17 @@ export default () => {
       boardId: $boardApp.dataset.boardId,
       groupId: Number($boardApp.dataset.groupId),
       rootPath: $boardApp.dataset.rootPath,
+      currentUserId: gon.current_user_id || null,
       canUpdate: $boardApp.dataset.canUpdate,
       labelsFetchPath: $boardApp.dataset.labelsFetchPath,
       labelsManagePath: $boardApp.dataset.labelsManagePath,
       labelsFilterBasePath: $boardApp.dataset.labelsFilterBasePath,
+      timeTrackingLimitToHours: parseBoolean($boardApp.dataset.timeTrackingLimitToHours),
+      weightFeatureAvailable: parseBoolean($boardApp.dataset.weightFeatureAvailable),
+      boardWeight: $boardApp.dataset.boardWeight
+        ? parseInt($boardApp.dataset.boardWeight, 10)
+        : null,
+      scopedLabelsAvailable: parseBoolean($boardApp.dataset.scopedLabels),
     },
     store,
     apolloProvider,
@@ -107,8 +113,7 @@ export default () => {
       };
     },
     computed: {
-      ...mapState(['isShowingEpicsSwimlanes']),
-      ...mapGetters(['shouldUseGraphQL']),
+      ...mapGetters(['isSwimlanesOn', 'shouldUseGraphQL']),
       detailIssueVisible() {
         return Object.keys(this.detailIssue.issue).length;
       },
@@ -147,7 +152,12 @@ export default () => {
       eventHub.$off('initialBoardLoad', this.initialBoardLoad);
     },
     mounted() {
-      this.filterManager = new FilteredSearchBoards(boardsStore.filter, true, boardsStore.cantEdit);
+      this.filterManager = new FilteredSearchBoards(
+        boardsStore.filter,
+        store,
+        true,
+        boardsStore.cantEdit,
+      );
       this.filterManager.setup();
 
       this.performSearch();
@@ -186,11 +196,11 @@ export default () => {
       },
       performSearch() {
         this.setFilters(convertObjectPropsToCamelCase(urlParamsToObject(window.location.search)));
-        if (gon.features.boardsWithSwimlanes && this.isShowingEpicsSwimlanes) {
+        if (this.isSwimlanesOn) {
           this.resetEpics();
           this.resetIssues();
           this.fetchEpicsSwimlanes({});
-        } else if (gon.features.graphqlBoardLists && !this.isShowingEpicsSwimlanes) {
+        } else if (gon.features.graphqlBoardLists) {
           this.fetchLists();
           this.resetIssues();
         }

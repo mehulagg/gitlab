@@ -1,7 +1,7 @@
+import { GlAlert, GlLoadingIcon, GlPagination, GlTab, GlTabs } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import Iterations from 'ee/iterations/components/iterations.vue';
 import IterationsList from 'ee/iterations/components/iterations_list.vue';
-import { shallowMount } from '@vue/test-utils';
-import { GlAlert, GlLoadingIcon, GlPagination, GlTab, GlTabs } from '@gitlab/ui';
 import { Namespace } from 'ee/iterations/constants';
 
 describe('Iterations', () => {

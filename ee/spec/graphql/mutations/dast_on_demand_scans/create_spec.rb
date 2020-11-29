@@ -16,6 +16,8 @@ RSpec.describe Mutations::DastOnDemandScans::Create do
     stub_licensed_features(security_on_demand_scans: true)
   end
 
+  specify { expect(described_class).to require_graphql_authorizations(:create_on_demand_dast_scan) }
+
   describe '#resolve' do
     subject do
       mutation.resolve(
@@ -29,52 +31,6 @@ RSpec.describe Mutations::DastOnDemandScans::Create do
         let(:full_path) { SecureRandom.hex }
 
         it 'raises an exception' do
-          expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
-        end
-      end
-
-      context 'when the user is not associated with the project' do
-        it 'raises an exception' do
-          expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
-        end
-      end
-
-      context 'when the user is an owner' do
-        it 'has no errors' do
-          group.add_owner(user)
-
-          expect(subject[:errors]).to be_empty
-        end
-      end
-
-      context 'when the user is a maintainer' do
-        it 'has no errors' do
-          project.add_maintainer(user)
-
-          expect(subject[:errors]).to be_empty
-        end
-      end
-
-      context 'when the user is a developer' do
-        it 'has no errors' do
-          project.add_developer(user)
-
-          expect(subject[:errors]).to be_empty
-        end
-      end
-
-      context 'when the user is a reporter' do
-        it 'raises an exception' do
-          project.add_reporter(user)
-
-          expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
-        end
-      end
-
-      context 'when the user is a guest' do
-        it 'raises an exception' do
-          project.add_guest(user)
-
           expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
         end
       end
@@ -103,7 +59,7 @@ RSpec.describe Mutations::DastOnDemandScans::Create do
         end
 
         context 'when dast_scanner_profile_id is provided' do
-          let(:dast_scanner_profile) { create(:dast_scanner_profile, project: project, target_timeout: 200, spider_timeout: 5000, use_ajax_spider: true, show_debug_messages: true, scan_type: 'active') }
+          let(:dast_scanner_profile) { create(:dast_scanner_profile, project: project, target_timeout: 200, spider_timeout: 5000, use_ajax_spider: true, show_debug_messages: true, scan_type: 'passive') }
           let(:dast_scanner_profile_id) { dast_scanner_profile.to_global_id }
 
           subject do
@@ -133,21 +89,23 @@ RSpec.describe Mutations::DastOnDemandScans::Create do
 
             subject
           end
-        end
 
-        context 'when on demand scan feature is not enabled' do
-          it 'raises an exception' do
-            stub_feature_flags(security_on_demand_scans_feature_flag: false)
+          context 'when scan_type=active' do
+            let(:dast_scanner_profile) { create(:dast_scanner_profile, project: project, scan_type: 'active') }
 
-            expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
-          end
-        end
+            context 'when target is not validated' do
+              it 'communicates failure' do
+                expect(subject[:errors]).to include('Cannot run active scan against unvalidated target')
+              end
+            end
 
-        context 'when on demand scan licensed feature is not available' do
-          it 'raises an exception' do
-            stub_licensed_features(security_on_demand_scans: false)
+            context 'when target is validated' do
+              it 'has no errors' do
+                create(:dast_site_validation, state: :passed, dast_site_token: create(:dast_site_token, project: project, url: dast_site_profile.dast_site.url))
 
-            expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
+                expect(subject[:errors]).to be_empty
+              end
+            end
           end
         end
       end

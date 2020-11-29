@@ -47,8 +47,8 @@ RSpec.describe 'API-Fuzzing.gitlab-ci.yml' do
         create(:ci_variable, project: project, key: 'FUZZAPI_TARGET_URL', value: 'http://example.com')
       end
 
-      it 'includes no jobs' do
-        expect { pipeline }.to raise_error(Ci::CreatePipelineService::CreateError)
+      it 'includes job to display error' do
+        expect(build_names).to match_array(%w[apifuzzer_fuzz_unlicensed])
       end
     end
 
@@ -60,8 +60,8 @@ RSpec.describe 'API-Fuzzing.gitlab-ci.yml' do
       end
 
       context 'by default' do
-        it 'includes no job' do
-          expect { pipeline }.to raise_error(Ci::CreatePipelineService::CreateError)
+        it 'includes a job' do
+          expect(build_names).to match_array(%w[apifuzzer_fuzz])
         end
       end
 
@@ -79,6 +79,17 @@ RSpec.describe 'API-Fuzzing.gitlab-ci.yml' do
       context 'when configured with OpenAPI' do
         before do
           create(:ci_variable, project: project, key: 'FUZZAPI_OPENAPI', value: 'testing.json')
+          create(:ci_variable, project: project, key: 'FUZZAPI_TARGET_URL', value: 'http://example.com')
+        end
+
+        it 'includes job' do
+          expect(build_names).to match_array(%w[apifuzzer_fuzz])
+        end
+      end
+
+      context 'when configured with Postman' do
+        before do
+          create(:ci_variable, project: project, key: 'FUZZAPI_POSTMAN_COLLECTION', value: 'testing.json')
           create(:ci_variable, project: project, key: 'FUZZAPI_TARGET_URL', value: 'http://example.com')
         end
 

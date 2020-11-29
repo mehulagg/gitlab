@@ -7,20 +7,20 @@ exports[`Value Stream Analytics LabelsSelector with no item selected will render
     <gl-search-box-by-type-stub value=\\"\\" clearbuttontitle=\\"Clear\\"></gl-search-box-by-type-stub>
   </div>
   <div class=\\"mb-3 px-3\\">
-    <gl-dropdown-item-stub avatarurl=\\"\\" iconcolor=\\"\\" iconname=\\"\\" iconrightname=\\"\\" secondarytext=\\"\\" class=\\"\\">
+    <gl-dropdown-item-stub avatarurl=\\"\\" iconcolor=\\"\\" iconname=\\"\\" iconrightarialabel=\\"\\" iconrightname=\\"\\" secondarytext=\\"\\" class=\\"\\">
       <!----> <span class=\\"d-inline-block dropdown-label-box\\" style=\\"background-color: rgb(255, 0, 0);\\"></span>
       roses
     </gl-dropdown-item-stub>
-    <gl-dropdown-item-stub avatarurl=\\"\\" iconcolor=\\"\\" iconname=\\"\\" iconrightname=\\"\\" secondarytext=\\"\\" class=\\"\\">
+    <gl-dropdown-item-stub avatarurl=\\"\\" iconcolor=\\"\\" iconname=\\"\\" iconrightarialabel=\\"\\" iconrightname=\\"\\" secondarytext=\\"\\" class=\\"\\">
       <!----> <span class=\\"d-inline-block dropdown-label-box\\" style=\\"background-color: rgb(255, 255, 255);\\"></span>
       some space
     </gl-dropdown-item-stub>
-    <gl-dropdown-item-stub avatarurl=\\"\\" iconcolor=\\"\\" iconname=\\"\\" iconrightname=\\"\\" secondarytext=\\"\\" class=\\"\\">
+    <gl-dropdown-item-stub avatarurl=\\"\\" iconcolor=\\"\\" iconname=\\"\\" iconrightarialabel=\\"\\" iconrightname=\\"\\" secondarytext=\\"\\" class=\\"\\">
       <!----> <span class=\\"d-inline-block dropdown-label-box\\" style=\\"background-color: rgb(0, 0, 255);\\"></span>
       violets
     </gl-dropdown-item-stub>
     <div class=\\"text-center\\" style=\\"display: none;\\">
-      <gl-loading-icon-stub label=\\"Loading\\" size=\\"md\\" color=\\"orange\\" inline=\\"true\\"></gl-loading-icon-stub>
+      <gl-loading-icon-stub label=\\"Loading\\" size=\\"md\\" color=\\"dark\\" inline=\\"true\\"></gl-loading-icon-stub>
     </div>
     <div class=\\"text-secondary\\" style=\\"display: none;\\">
       No matching labels
@@ -36,20 +36,20 @@ exports[`Value Stream Analytics LabelsSelector with selectedLabelId set will ren
     <gl-search-box-by-type-stub value=\\"\\" clearbuttontitle=\\"Clear\\"></gl-search-box-by-type-stub>
   </div>
   <div class=\\"mb-3 px-3\\">
-    <gl-dropdown-item-stub avatarurl=\\"\\" iconcolor=\\"\\" iconname=\\"\\" iconrightname=\\"\\" secondarytext=\\"\\" class=\\"\\">
+    <gl-dropdown-item-stub avatarurl=\\"\\" iconcolor=\\"\\" iconname=\\"\\" iconrightarialabel=\\"\\" iconrightname=\\"\\" secondarytext=\\"\\" class=\\"\\">
       <!----> <span class=\\"d-inline-block dropdown-label-box\\" style=\\"background-color: rgb(255, 0, 0);\\"></span>
       roses
     </gl-dropdown-item-stub>
-    <gl-dropdown-item-stub avatarurl=\\"\\" iconcolor=\\"\\" iconname=\\"\\" iconrightname=\\"\\" secondarytext=\\"\\" class=\\"\\">
+    <gl-dropdown-item-stub avatarurl=\\"\\" iconcolor=\\"\\" iconname=\\"\\" iconrightarialabel=\\"\\" iconrightname=\\"\\" secondarytext=\\"\\" class=\\"\\">
       <!----> <span class=\\"d-inline-block dropdown-label-box\\" style=\\"background-color: rgb(255, 255, 255);\\"></span>
       some space
     </gl-dropdown-item-stub>
-    <gl-dropdown-item-stub avatarurl=\\"\\" iconcolor=\\"\\" iconname=\\"\\" iconrightname=\\"\\" secondarytext=\\"\\" active=\\"true\\" class=\\"\\">
+    <gl-dropdown-item-stub avatarurl=\\"\\" iconcolor=\\"\\" iconname=\\"\\" iconrightarialabel=\\"\\" iconrightname=\\"\\" secondarytext=\\"\\" active=\\"true\\" class=\\"\\">
       <!----> <span class=\\"d-inline-block dropdown-label-box\\" style=\\"background-color: rgb(0, 0, 255);\\"></span>
       violets
     </gl-dropdown-item-stub>
     <div class=\\"text-center\\" style=\\"display: none;\\">
-      <gl-loading-icon-stub label=\\"Loading\\" size=\\"md\\" color=\\"orange\\" inline=\\"true\\"></gl-loading-icon-stub>
+      <gl-loading-icon-stub label=\\"Loading\\" size=\\"md\\" color=\\"dark\\" inline=\\"true\\"></gl-loading-icon-stub>
     </div>
     <div class=\\"text-secondary\\" style=\\"display: none;\\">
       No matching labels

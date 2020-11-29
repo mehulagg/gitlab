@@ -9,9 +9,11 @@ exports[`Remove cluster confirmation modal renders splitbutton with modal includ
     menu-class="dropdown-menu-large"
   >
     <button
-      class="btn btn-danger btn-md gl-button split-content-button"
+      class="btn btn-danger btn-md gl-button split-content-button btn-danger-secondary"
       type="button"
     >
+      <!---->
+       
       <!---->
        
       <span
@@ -25,7 +27,7 @@ exports[`Remove cluster confirmation modal renders splitbutton with modal includ
     <button
       aria-expanded="false"
       aria-haspopup="true"
-      class="btn dropdown-toggle btn-danger btn-md gl-button gl-dropdown-toggle dropdown-toggle-split"
+      class="btn dropdown-toggle btn-danger btn-md gl-button gl-dropdown-toggle btn-danger-secondary dropdown-toggle-split"
       type="button"
     >
       <span
@@ -51,6 +53,7 @@ exports[`Remove cluster confirmation modal renders splitbutton with modal includ
           type="button"
         >
           <svg
+            aria-hidden="true"
             class="gl-icon s16 gl-new-dropdown-item-check-icon"
             data-testid="mobile-issue-close-icon"
           >
@@ -105,6 +108,7 @@ exports[`Remove cluster confirmation modal renders splitbutton with modal includ
           type="button"
         >
           <svg
+            aria-hidden="true"
             class="gl-icon s16 gl-new-dropdown-item-check-icon gl-visibility-hidden"
             data-testid="mobile-issue-close-icon"
           >

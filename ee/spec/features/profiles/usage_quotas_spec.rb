@@ -12,30 +12,7 @@ RSpec.describe 'Profile > Usage Quota' do
   let_it_be(:other_project) { create(:project, namespace: namespace, shared_runners_enabled: false) }
 
   before do
-    stub_feature_flags(additional_repo_storage_by_namespace: true)
     gitlab_sign_in(user)
-  end
-
-  it 'pushes frontend feature flags' do
-    visit profile_usage_quotas_path
-
-    expect(page).to have_pushed_frontend_feature_flags(
-      additionalRepoStorageByNamespace: true
-    )
-  end
-
-  context 'when `additional_repo_storage_by_namespace` is disabled for a namespace' do
-    before do
-      stub_feature_flags(additional_repo_storage_by_namespace: false, thing: namespace)
-    end
-
-    it 'pushes disabled feature flag to the frontend' do
-      visit profile_usage_quotas_path
-
-      expect(page).to have_pushed_frontend_feature_flags(
-        additionalRepoStorageByNamespace: false
-      )
-    end
   end
 
   it 'is linked within the profile page' do

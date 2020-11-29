@@ -1,10 +1,10 @@
-import Vuex from 'vuex';
 import { mount, createLocalVue } from '@vue/test-utils';
-import createStore from 'ee/subscriptions/new/store';
-import * as types from 'ee/subscriptions/new/store/mutation_types';
+import Vuex from 'vuex';
 import Step from 'ee/subscriptions/new/components/checkout/step.vue';
 import Component from 'ee/subscriptions/new/components/checkout/subscription_details.vue';
 import { NEW_GROUP } from 'ee/subscriptions/new/constants';
+import createStore from 'ee/subscriptions/new/store';
+import * as types from 'ee/subscriptions/new/store/mutation_types';
 
 describe('Subscription Details', () => {
   const localVue = createLocalVue();

@@ -21,7 +21,7 @@ RSpec.describe Geo::BlobVerificationSecondaryService, :geo do
     it 'does not calculate the checksum when not running on a secondary' do
       stub_primary_node
 
-      expect(package_file).not_to receive(:calculate_checksum!)
+      expect(package_file).not_to receive(:calculate_checksum)
 
       service.execute
     end
@@ -29,7 +29,7 @@ RSpec.describe Geo::BlobVerificationSecondaryService, :geo do
     it 'does not verify the checksum if resync is needed' do
       registry.resync
 
-      expect(package_file).not_to receive(:calculate_checksum!)
+      expect(package_file).not_to receive(:calculate_checksum)
 
       service.execute
     end
@@ -37,7 +37,7 @@ RSpec.describe Geo::BlobVerificationSecondaryService, :geo do
     it 'does not verify the checksum if sync is started' do
       registry.start!
 
-      expect(package_file).not_to receive(:calculate_checksum!)
+      expect(package_file).not_to receive(:calculate_checksum)
 
       service.execute
     end
@@ -45,7 +45,7 @@ RSpec.describe Geo::BlobVerificationSecondaryService, :geo do
     it 'does not verify the checksum if primary was never verified' do
       package_file.assign_attributes(verification_checksum: nil)
 
-      expect(package_file).not_to receive(:calculate_checksum!)
+      expect(package_file).not_to receive(:calculate_checksum)
 
       service.execute
     end
@@ -54,13 +54,13 @@ RSpec.describe Geo::BlobVerificationSecondaryService, :geo do
       package_file.assign_attributes(verification_checksum: '62fc1ec4ce60')
       registry.update(verification_checksum: '62fc1ec4ce60')
 
-      expect(package_file).not_to receive(:calculate_checksum!)
+      expect(package_file).not_to receive(:calculate_checksum)
 
       service.execute
     end
 
     it 'sets checksum when the checksum matches' do
-      allow(package_file).to receive(:calculate_checksum!).and_return('62fc1ec4ce60')
+      allow(package_file).to receive(:calculate_checksum).and_return('62fc1ec4ce60')
 
       service.execute
 
@@ -77,7 +77,7 @@ RSpec.describe Geo::BlobVerificationSecondaryService, :geo do
 
     context 'when the checksum mismatch' do
       before do
-        allow(package_file).to receive(:calculate_checksum!).and_return('99fc1ec4ce60')
+        allow(package_file).to receive(:calculate_checksum).and_return('99fc1ec4ce60')
       end
 
       it 'keeps track of failures' do
@@ -109,7 +109,7 @@ RSpec.describe Geo::BlobVerificationSecondaryService, :geo do
 
     context 'when checksum calculation fails' do
       before do
-        allow(package_file).to receive(:calculate_checksum!).and_raise('Error calculating checksum')
+        allow(package_file).to receive(:calculate_checksum).and_raise('Error calculating checksum')
       end
 
       it 'keeps track of failures' do

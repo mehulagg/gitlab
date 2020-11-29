@@ -11,8 +11,7 @@ module Vulnerabilities
     rule { issue & ~can?(:create_issue) }.prevent :create_vulnerability_feedback
 
     rule do
-      merge_request &
-        (~can?(:create_merge_request_in) | ~can?(:create_merge_request_from))
+      merge_request & ~can?(:create_merge_request_in)
     end.prevent :create_vulnerability_feedback
 
     rule { ~dismissal }.prevent :destroy_vulnerability_feedback, :update_vulnerability_feedback

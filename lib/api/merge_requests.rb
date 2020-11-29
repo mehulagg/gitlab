@@ -8,7 +8,10 @@ module API
 
     before { authenticate_non_get! }
 
+    feature_category :code_review
+
     helpers Helpers::MergeRequestsHelpers
+    helpers Helpers::SSEHelpers
 
     # EE::API::MergeRequests would override the following helpers
     helpers do
@@ -214,6 +217,8 @@ module API
 
         handle_merge_request_errors!(merge_request)
 
+        Gitlab::UsageDataCounters::EditorUniqueCounter.track_sse_edit_action(author: current_user) if request_from_sse?(user_project)
+
         present merge_request, with: Entities::MergeRequest, current_user: current_user, project: user_project
       end
 
@@ -350,7 +355,11 @@ module API
       get ':id/merge_requests/:merge_request_iid/changes' do
         merge_request = find_merge_request_with_access(params[:merge_request_iid])
 
-        present merge_request, with: Entities::MergeRequestChanges, current_user: current_user, project: user_project
+        present merge_request,
+          with: Entities::MergeRequestChanges,
+          current_user: current_user,
+          project: user_project,
+          access_raw_diffs: params.fetch(:access_raw_diffs, false)
       end
 
       desc 'Get the merge request pipelines' do

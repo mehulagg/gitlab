@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # GitLab tests in the Continuous Integration (CI) context
 
 ## Test suite parallelization on the CI
@@ -6,8 +12,8 @@ Our current CI parallelization setup is as follows:
 
 1. The `retrieve-tests-metadata` job in the `prepare` stage ensures we have a
    `knapsack/report-master.json` file:
-   - The `knapsack/report-master.json` file is fetched from the latest `master` artifacts, if it's not here
-     we initialize the file with `{}`.
+   - The `knapsack/report-master.json` file is fetched from the latest `master` pipeline which runs `update-tests-metadata`
+     (for now it's the 2-hourly scheduled master pipeline), if it's not here we initialize the file with `{}`.
 1. Each `[rspec|rspec-ee] [unit|integration|system|geo] n m` job are run with
    `knapsack rspec` and should have an evenly distributed share of tests:
    - It works because the jobs have access to the `knapsack/report-master.json`

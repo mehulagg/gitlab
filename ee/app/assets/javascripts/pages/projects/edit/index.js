@@ -7,13 +7,11 @@ import UsersSelect from '~/users_select';
 import UserCallout from '~/user_callout';
 import groupsSelect from '~/groups_select';
 
-document.addEventListener('DOMContentLoaded', () => {
-  new UsersSelect();
-  groupsSelect();
+new UsersSelect();
+groupsSelect();
 
-  new UserCallout({ className: 'js-mr-approval-callout' });
+new UserCallout({ className: 'js-mr-approval-callout' });
 
-  mountApprovals(document.getElementById('js-mr-approvals-settings'));
+mountApprovals(document.getElementById('js-mr-approvals-settings'));
 
-  initProjectAdjournedDeleteButton();
-});
+initProjectAdjournedDeleteButton();

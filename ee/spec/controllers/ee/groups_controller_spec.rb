@@ -19,6 +19,18 @@ RSpec.describe GroupsController do
     it_behaves_like 'namespace storage limit alert'
   end
 
+  describe 'GET #issues' do
+    it 'does not list test cases' do
+      issue = create(:issue, project: project, title: 'foo')
+      incident = create(:incident, project: project)
+      create(:quality_test_case, project: project)
+
+      get :issues, params: { id: group.to_param }
+
+      expect(assigns(:issues)).to match_array([issue, incident])
+    end
+  end
+
   describe 'GET #activity' do
     render_views
 

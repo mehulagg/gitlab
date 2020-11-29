@@ -1,7 +1,7 @@
 ---
 stage: Enablement
 group: Global Search
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 type: reference
 ---
 
@@ -64,8 +64,8 @@ The Advanced Search Syntax also supports the use of filters. The available filte
 - extension: Filters by extension in the filename. Please write the extension without a leading dot. Exact match only.
 - blob: Filters by Git `object ID`. Exact match only.
 
-To use them, simply add them to your query in the format `<filter_name>:<value>` without
- any spaces between the colon (`:`) and the value.
+To use them, add them to your keyword in the format `<filter_name>:<value>` without
+any spaces between the colon (`:`) and the value. A keyword or an asterisk (`*`) is required for filter searches and has to be added in front of the filter separated by a space.
 
 Examples:
 

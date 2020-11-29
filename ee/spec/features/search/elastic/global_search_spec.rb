@@ -164,15 +164,14 @@ RSpec.describe 'Global elastic search', :elastic, :sidekiq_inline do
       ensure_elasticsearch_index!
     end
 
-    it "finds files" do
+    it "finds wiki pages" do
       visit dashboard_projects_path
 
       submit_search('term')
       select_search_scope('Wiki')
 
-      expect(page).to have_selector('.file-content .code')
-
-      expect(page).to have_selector("span.line[lang='markdown']")
+      expect(page).to have_selector('.search-result-row .description', text: '# term')
+      expect(page).to have_link('test')
     end
   end
 

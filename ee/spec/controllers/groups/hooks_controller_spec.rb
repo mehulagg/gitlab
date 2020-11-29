@@ -80,7 +80,8 @@ RSpec.describe Groups::HooksController do
             token: 'TEST TOKEN',
             url: 'http://example.com',
             wiki_page_events: true,
-            deployment_events: true
+            deployment_events: true,
+            releases_events: true
           }
         end
 

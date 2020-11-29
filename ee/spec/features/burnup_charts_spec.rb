@@ -52,20 +52,6 @@ RSpec.describe 'Burnup charts', :js do
     end
   end
 
-  describe 'feature flag disabled' do
-    before do
-      stub_licensed_features(milestone_charts: true)
-      stub_feature_flags(burnup_charts: false)
-    end
-
-    it 'only shows burndown chart' do
-      visit group_milestone_path(milestone.group, milestone)
-
-      expect(page).to have_selector(burndown_chart_selector)
-      expect(page).not_to have_selector(burnup_chart_selector)
-    end
-  end
-
   def burnup_chart_points
     fill_color = "#5772ff"
     burnup_chart.all("path[fill='#{fill_color}']", count: 12)

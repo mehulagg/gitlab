@@ -12,7 +12,7 @@ RSpec.describe Mutations::AlertManagement::UpdateAlertStatus do
   specify { expect(described_class).to require_graphql_authorizations(:update_alert_management_alert) }
 
   describe '#resolve' do
-    subject(:resolve) { mutation_for(project, current_user).resolve(args) }
+    subject(:resolve) { mutation_for(project, current_user).resolve(**args) }
 
     context 'user has access to project' do
       before do
@@ -37,8 +37,8 @@ RSpec.describe Mutations::AlertManagement::UpdateAlertStatus do
       context 'error occurs when updating' do
         it 'returns the alert with errors' do
           # Stub an error on the alert
-          allow_next_instance_of(Resolvers::AlertManagement::AlertResolver) do |resolver|
-            allow(resolver).to receive(:resolve).and_return(alert)
+          allow_next_instance_of(::AlertManagement::AlertsFinder) do |finder|
+            allow(finder).to receive(:execute).and_return([alert])
           end
 
           allow(alert).to receive(:save).and_return(false)

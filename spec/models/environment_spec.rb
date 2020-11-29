@@ -982,6 +982,22 @@ RSpec.describe Environment, :use_clean_rails_memory_store_caching do
     end
   end
 
+  describe '#has_running_deployments?' do
+    subject { environment.has_running_deployments? }
+
+    it 'return false when no deployments exist' do
+      is_expected.to eq(false)
+    end
+
+    context 'when deployment is running on the environment' do
+      let!(:deployment) { create(:deployment, :running, environment: environment) }
+
+      it 'return true' do
+        is_expected.to eq(true)
+      end
+    end
+  end
+
   describe '#metrics' do
     let(:project) { create(:prometheus_project) }
 
@@ -1376,6 +1392,33 @@ RSpec.describe Environment, :use_clean_rails_memory_store_caching do
 
     context 'when environment does not have an alert' do
       it { is_expected.to be(false) }
+    end
+  end
+
+  describe '#cancel_deployment_jobs!' do
+    subject { environment.cancel_deployment_jobs! }
+
+    let_it_be(:project) { create(:project, :repository) }
+    let_it_be(:environment, reload: true) { create(:environment, project: project) }
+    let!(:deployment) { create(:deployment, project: project, environment: environment, deployable: build) }
+    let!(:build) { create(:ci_build, :running, project: project, environment: environment) }
+
+    it 'cancels an active deployment job' do
+      subject
+
+      expect(build.reset).to be_canceled
+    end
+
+    context 'when deployable does not exist' do
+      before do
+        deployment.update_column(:deployable_id, non_existing_record_id)
+      end
+
+      it 'does not raise an error' do
+        expect { subject }.not_to raise_error
+
+        expect(build.reset).to be_running
+      end
     end
   end
 end

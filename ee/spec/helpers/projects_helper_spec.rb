@@ -134,7 +134,9 @@ RSpec.describe ProjectsHelper do
         {
           has_vulnerabilities: 'false',
           empty_state_svg_path: start_with('/assets/illustrations/security-dashboard_empty'),
-          security_dashboard_help_path: '/help/user/application_security/security_dashboard/index'
+          security_dashboard_help_path: '/help/user/application_security/security_dashboard/index',
+          project_full_path: project.full_path,
+          no_vulnerabilities_svg_path: start_with('/assets/illustrations/issues-')
         }
       end
 
@@ -148,14 +150,14 @@ RSpec.describe ProjectsHelper do
           project: { id: project.id, name: project.name },
           project_full_path: project.full_path,
           vulnerabilities_export_endpoint: "/api/v4/security/projects/#{project.id}/vulnerability_exports",
-          vulnerability_feedback_help_path: '/help/user/application_security/index#interacting-with-the-vulnerabilities',
           no_vulnerabilities_svg_path: start_with('/assets/illustrations/issues-'),
           empty_state_svg_path: start_with('/assets/illustrations/security-dashboard-empty-state'),
           dashboard_documentation: '/help/user/application_security/security_dashboard/index',
           security_dashboard_help_path: '/help/user/application_security/security_dashboard/index',
           not_enabled_scanners_help_path: help_page_path('user/application_security/index', anchor: 'quick-start'),
           no_pipeline_run_scanners_help_path: "/#{project.full_path}/-/pipelines/new",
-          auto_fix_documentation: help_page_path('user/application_security/index', anchor: 'auto-fix-merge-requests')
+          auto_fix_documentation: help_page_path('user/application_security/index', anchor: 'auto-fix-merge-requests'),
+          auto_fix_mrs_path: end_with('/merge_requests?label_name=GitLab-auto-fix')
         }
       end
 
@@ -205,6 +207,7 @@ RSpec.describe ProjectsHelper do
         projects/security/configuration#show
         projects/security/sast_configuration#show
         projects/security/vulnerabilities#show
+        projects/security/vulnerability_report#index
         projects/security/dashboard#index
         projects/on_demand_scans#index
         projects/dast_profiles#index

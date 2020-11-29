@@ -1,10 +1,10 @@
 = _("The following SSH key was deleted by an administrator, %{username}.") % { username: @deleted_by.username }
 
-= @key.title
+= @params[:title]
 
-= _("Created on %{created_at}") % { created_at: @key.created_at.to_date.to_s(:medium) }
+= _("Created on %{created_at}") % { created_at: @params[:created_at].to_date.to_s(:medium) }
 
-- if @key.last_used_at
-  = _("Last used %{last_used_at} ago") % { last_used_at: time_ago_in_words(@key.last_used_at) }
+- if @params[:last_used_at]
+  = _("Last used %{last_used_at} ago") % { last_used_at: time_ago_in_words(@params[:last_used_at]) }
 
 = html_escape(_("You can create a new SSH key by visiting %{link}")) % { link: profile_keys_url.html_safe }

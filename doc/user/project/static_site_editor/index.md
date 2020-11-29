@@ -1,7 +1,7 @@
 ---
 stage: Create
 group: Static Site Editor
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 type: reference, how-to
 description: "The static site editor enables users to edit content on static websites without prior knowledge of the underlying templating language, site architecture or Git commands."
 ---
@@ -66,10 +66,12 @@ easily [edit your content](#edit-content).
 1. To get started, create a new project from the [Static Site Editor - Middleman](https://gitlab.com/gitlab-org/project-templates/static-site-editor-middleman)
    template. You can either [fork it](../repository/forking_workflow.md#creating-a-fork)
    or [create a new project from a template](../../../gitlab-basics/create-project.md#built-in-templates).
-1. Edit the [`data/config.yml`](#configuration-files) configuration file
+1. Edit the [`data/config.yml`](#static-site-generator-configuration) configuration file
    to replace `<username>` and `<project-name>` with the proper values for
-   your project's path. This triggers a CI/CD pipeline to deploy your project
-   with GitLab Pages.
+   your project's path.
+1. (Optional) Edit the [`.gitlab/static-site-editor.yml`](#static-site-editor-configuration-file) file
+   to customize the behavior of the Static Site Editor.
+1. When you submit your changes, GitLab triggers a CI/CD pipeline to deploy your project with GitLab Pages.
 1. When the pipeline finishes, from your project's left-side menu, go to **Settings > Pages** to find the URL of your new website.
 1. Visit your website and look at the bottom-left corner of the screen to see the new **Edit this page** button.
 
@@ -80,6 +82,7 @@ codebase.
 ## Edit content
 
 > - Support for modifying the default merge request title and description [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/216861) in GitLab 13.5.
+> - Support for selecting a merge request template [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/263252) in GitLab 13.6.
 
 After setting up your project, you can start editing content directly from the Static Site Editor.
 
@@ -91,7 +94,9 @@ To edit a file:
    wish to edit the raw Markdown instead, you can toggle the **Markdown** mode
    in the bottom-right corner.
 1. When you're done, click **Submit changes...**.
-1. (Optional) Adjust the default title and description of the merge request that will be submitted with your changes.
+1. (Optional) Adjust the default title and description of the merge request that will be submitted
+   with your changes. Alternatively, select a [merge request template](../../../user/project/description_templates.md#creating-merge-request-templates)
+   from the dropdown menu and edit it accordingly.
 1. Click **Submit changes**.
 1. A new merge request is automatically created and you can assign a colleague for review.
 
@@ -104,13 +109,36 @@ The Static Site Editors supports Markdown files (`.md`, `.md.erb`) for editing t
 ### Images
 
 > - Support for adding images through the WYSIWYG editor [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/216640) in GitLab 13.1.
+> - Support for uploading images via the WYSIWYG editor [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/218529) in GitLab 13.6.
 
-You can add image files on the WYSIWYG mode by clicking the image icon (**{doc-image}**).
-From there, link to a URL, add optional [ALT text](https://moz.com/learn/seo/alt-text),
-and you're done. The link can reference images already hosted in your project, an asset hosted
+#### Upload an image
+
+You can upload image files via the WYSIWYG editor directly to the repository to default upload directory
+`source/images`. To do so:
+
+1. Click the image icon (**{doc-image}**).
+1. Choose the **Upload file** tab.
+1. Click **Choose file** to select a file from your computer.
+1. Optional: add a description to the image for SEO and accessibility ([ALT text](https://moz.com/learn/seo/alt-text)).
+1. Click **Insert image**.
+
+The selected file can be any supported image file (`.png`, `.jpg`, `.jpeg`, `.gif`). The editor renders
+thumbnail previews so you can verify the correct image is included and there aren't any references to
+missing images.
+
+#### Link to an image
+
+You can also link to an image if you'd like:
+
+1. Click the image icon (**{doc-image}**).
+1. Choose the **Link to an image** tab.
+1. Add the link to the image into the **Image URL** field (use the full path; relative paths are not supported yet).
+1. Optional: add a description to the image for SEO and accessibility ([ALT text](https://moz.com/learn/seo/alt-text)).
+1. Click **Insert image**.
+
+The link can reference images already hosted in your project, an asset hosted
 externally on a content delivery network, or any other external URL. The editor renders thumbnail previews
 so you can verify the correct image is included and there aren't any references to missing images.
-default directory (`source/images/`).
 
 ### Videos
 
@@ -152,6 +180,41 @@ Note that support for adding new attributes to the page's front matter from the 
 yet. You can do so by editing the file locally, through the GitLab regular file editor, or through the Web IDE. Once added, the form will load the new fields.
 
 ## Configuration files
+
+You can customize the behavior of a project which uses the Static Site Editor with
+the following configuration files:
+
+- The [`.gitlab/static-site-editor.yml`](#static-site-editor-configuration-file), which customizes the
+  behavior of the Static Site Editor.
+- [Static Site Generator configuration files](#static-site-generator-configuration),
+  such as `data/config.yml`, which configures the Static Site Generator itself.
+  It also controls the **Edit this page** button when the site is generated.
+
+### Static Site Editor configuration file
+
+> [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/4267) in GitLab 13.6.
+
+The `.gitlab/static-site-editor.yml` configuration file contains entries you can
+use to customize behavior of the Static Site Editor (SSE). If the file does not exist,
+default values which support a default Middleman project configuration are used.
+The [Static Site Editor - Middleman](https://gitlab.com/gitlab-org/project-templates/static-site-editor-middleman) project template generates a file pre-populated with these defaults.
+
+To customize the behavior of the SSE, edit `.gitlab/static-site-editor.yml`'s entries
+(described in the table below) according to what works best for your project (respecting YAML syntax).
+
+After the table, see an [example of the SSE configuration file](#gitlabstatic-site-editoryml-example).
+
+| Entry | GitLab version | Type | Default value | Description |
+|---|---|---|---|---|
+| `image_upload_path` | [13.6](https://gitlab.com/gitlab-org/gitlab/-/issues/216641) | String | `source/images` | Directory for images uploaded from the WYSIWYG editor. |
+
+#### `.gitlab/static-site-editor.yml` example
+
+```yaml
+image_upload_path: 'source/images' # Relative path to the project's root. Don't include leading or trailing slashes.
+```
+
+### Static Site Generator configuration
 
 The Static Site Editor uses Middleman's configuration file, `data/config.yml`
 to customize the behavior of the project itself and to control the **Edit this

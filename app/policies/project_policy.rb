@@ -147,6 +147,7 @@ class ProjectPolicy < BasePolicy
     builds
     pages
     metrics_dashboard
+    operations
   ]
 
   features.each do |f|
@@ -270,6 +271,19 @@ class ProjectPolicy < BasePolicy
 
   rule { metrics_dashboard_disabled }.policy do
     prevent(:metrics_dashboard)
+  end
+
+  rule { operations_disabled }.policy do
+    prevent(*create_read_update_admin_destroy(:feature_flag))
+    prevent(*create_read_update_admin_destroy(:environment))
+    prevent(*create_read_update_admin_destroy(:sentry_issue))
+    prevent(*create_read_update_admin_destroy(:alert_management_alert))
+    prevent(*create_read_update_admin_destroy(:cluster))
+    prevent(*create_read_update_admin_destroy(:terraform_state))
+    prevent(*create_read_update_admin_destroy(:deployment))
+    prevent(:metrics_dashboard)
+    prevent(:read_pod_logs)
+    prevent(:read_prometheus)
   end
 
   rule { can?(:metrics_dashboard) }.policy do
@@ -568,6 +582,7 @@ class ProjectPolicy < BasePolicy
 
   rule { write_package_registry_deploy_token }.policy do
     enable :create_package
+    enable :read_package
     enable :read_project
   end
 

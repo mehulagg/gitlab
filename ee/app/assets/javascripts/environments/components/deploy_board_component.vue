@@ -11,8 +11,10 @@
  */
 import { isEmpty } from 'lodash';
 import {
+  GlIcon,
   GlLoadingIcon,
   GlLink,
+  GlTooltip,
   GlTooltipDirective,
   GlSafeHtmlDirective as SafeHtml,
 } from '@gitlab/ui';
@@ -23,8 +25,10 @@ import { STATUS_MAP, CANARY_STATUS } from '../constants';
 export default {
   components: {
     instanceComponent: () => import('ee_component/vue_shared/components/deployment_instance.vue'),
+    GlIcon,
     GlLoadingIcon,
     GlLink,
+    GlTooltip,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -113,9 +117,26 @@ export default {
           </section>
 
           <section class="deploy-board-instances">
-            <span class="deploy-board-instances-text gl-font-base text-secondary">
-              {{ instanceTitle }} ({{ instanceCount }})
-            </span>
+            <div class="gl-font-base text-secondary">
+              <span class="deploy-board-instances-text"
+                >{{ instanceTitle }} ({{ instanceCount }})</span
+              >
+              <span ref="legend-icon" data-testid="legend-tooltip-target">
+                <gl-icon class="gl-text-blue-500 gl-ml-2" name="question" />
+              </span>
+              <gl-tooltip :target="() => $refs['legend-icon']" boundary="#content-body">
+                <div class="deploy-board-legend gl-display-flex gl-flex-direction-column">
+                  <div
+                    v-for="status in statuses"
+                    :key="status.text"
+                    class="gl-display-flex gl-align-items-center"
+                  >
+                    <instance-component :status="status.class" :stable="status.stable" />
+                    <span class="legend-text gl-ml-3">{{ status.text }}</span>
+                  </div>
+                </div>
+              </gl-tooltip>
+            </div>
 
             <div class="deploy-board-instances-container d-flex flex-wrap flex-row">
               <template v-for="(instance, i) in deployBoardData.instances">
@@ -128,16 +149,6 @@ export default {
                   :stable="instance.stable"
                 />
               </template>
-            </div>
-            <div class="deploy-board-legend d-flex mt-3">
-              <div
-                v-for="status in statuses"
-                :key="status.text"
-                class="d-flex justify-content-center align-items-center mr-3"
-              >
-                <instance-component :status="status.class" :stable="status.stable" />
-                <span class="legend-text ml-2">{{ status.text }}</span>
-              </div>
             </div>
           </section>
 
@@ -166,14 +177,15 @@ export default {
         <section v-safe-html="deployBoardSvg" class="deploy-board-empty-state-svg"></section>
 
         <section class="deploy-board-empty-state-text">
-          <span class="deploy-board-empty-state-title d-flex">{{
-            __('Kubernetes deployment not found')
-          }}</span>
+          <span class="deploy-board-empty-state-title d-flex">
+            {{ __('Kubernetes deployment not found') }}
+          </span>
           <span>
             To see deployment progress for your environments, make sure you are deploying to
             <code>$KUBE_NAMESPACE</code> and annotating with
             <code>app.gitlab.com/app=$CI_PROJECT_PATH_SLUG</code>
-            and <code>app.gitlab.com/env=$CI_ENVIRONMENT_SLUG</code>.
+            and
+            <code>app.gitlab.com/env=$CI_ENVIRONMENT_SLUG</code>.
           </span>
         </section>
       </div>

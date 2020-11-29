@@ -11,5 +11,9 @@ module Geo
     def self.model
       ::Terraform::StateVersion
     end
+
+    def needs_checksum?
+      false
+    end
   end
 end

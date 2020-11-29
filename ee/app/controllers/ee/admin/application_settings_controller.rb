@@ -6,8 +6,6 @@ module EE
       extend ::Gitlab::Utils::Override
       extend ActiveSupport::Concern
 
-      include ::Admin::MergeRequestApprovalSettingsHelper
-
       prepended do
         before_action :elasticsearch_reindexing_task, only: [:general]
 
@@ -54,14 +52,12 @@ module EE
           attrs += EE::ApplicationSettingsHelper.merge_request_appovers_rules_attributes
         end
 
-        if show_compliance_merge_request_approval_settings?
-          attrs << { compliance_frameworks: [] }
-        end
-
         if ::Gitlab::Geo.license_allows? && ::Feature.enabled?(:maintenance_mode)
           attrs << :maintenance_mode
           attrs << :maintenance_mode_message
         end
+
+        attrs << :new_user_signups_cap if ::Feature.enabled?(:admin_new_user_signups_cap)
 
         attrs
       end

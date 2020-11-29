@@ -15,6 +15,7 @@ RSpec.describe 'admin/licenses/show.html.haml' do
       render
 
       expect(rendered).to have_content('Buy License')
+      expect(rendered).not_to have_content('License overview')
     end
   end
 

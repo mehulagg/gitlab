@@ -34,12 +34,6 @@ class ProjectsController < Projects::ApplicationController
   # Project Export Rate Limit
   before_action :export_rate_limit, only: [:export, :download_export, :generate_new_export]
 
-  # Experiments
-  before_action only: [:new, :create] do
-    frontend_experimentation_tracking_data(:new_create_project_ui, 'click_tab')
-    push_frontend_experiment(:new_create_project_ui)
-  end
-
   before_action only: [:edit] do
     push_frontend_feature_flag(:service_desk_custom_address, @project)
     push_frontend_feature_flag(:approval_suggestions, @project, default_enabled: true)
@@ -317,8 +311,6 @@ class ProjectsController < Projects::ApplicationController
   end
 
   def unfoldered_environment_names
-    return render_404 unless Feature.enabled?(:deployment_filters)
-
     respond_to do |format|
       format.json do
         render json: EnvironmentNamesFinder.new(@project, current_user).execute
@@ -383,6 +375,21 @@ class ProjectsController < Projects::ApplicationController
       .merge(import_url_params)
   end
 
+  def project_feature_attributes
+    %i[
+      builds_access_level
+      issues_access_level
+      forking_access_level
+      merge_requests_access_level
+      repository_access_level
+      snippets_access_level
+      wiki_access_level
+      pages_access_level
+      metrics_dashboard_access_level
+      operations_access_level
+    ]
+  end
+
   def project_params_attributes
     [
       :allow_merge_on_skipped_pipeline,
@@ -420,23 +427,11 @@ class ProjectsController < Projects::ApplicationController
       :suggestion_commit_message,
       :packages_enabled,
       :service_desk_enabled,
-
-      project_feature_attributes: %i[
-        builds_access_level
-        issues_access_level
-        forking_access_level
-        merge_requests_access_level
-        repository_access_level
-        snippets_access_level
-        wiki_access_level
-        pages_access_level
-        metrics_dashboard_access_level
-      ],
       project_setting_attributes: %i[
         show_default_award_emojis
         squash_option
       ]
-    ]
+    ] + [project_feature_attributes: project_feature_attributes]
   end
 
   def project_params_create_attributes

@@ -3,8 +3,7 @@
 exports[`Contribution Analytics Column Chart matches the snapshot 1`] = `
 <div>
   <gl-column-chart-stub
-    bars=""
-    data="[object Object]"
+    bars="[object Object]"
     height="350"
     lines=""
     option="[object Object]"

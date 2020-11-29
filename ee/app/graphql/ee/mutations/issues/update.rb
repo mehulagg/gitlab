@@ -9,15 +9,16 @@ module EE
         prepended do
           include ::Mutations::Issues::CommonEEMutationArguments
 
-          argument :epic_id, GraphQL::ID_TYPE,
+          argument :epic_id, ::Types::GlobalIDType[::Epic],
                    required: false,
+                   loads: ::Types::EpicType,
                    description: 'The ID of the parent epic. NULL when removing the association'
         end
 
-        def resolve(project_path:, iid:, **args)
-          args[:epic_id] = ::GitlabSchema.parse_gid(args[:epic_id], expected_type: ::Epic).model_id if args[:epic_id]
-
+        def resolve(**args)
           super
+        rescue ::Gitlab::Access::AccessDeniedError
+          raise_resource_not_available_error!
         end
       end
     end

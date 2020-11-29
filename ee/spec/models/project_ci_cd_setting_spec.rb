@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe ProjectCiCdSetting do
+  using RSpec::Parameterized::TableSyntax
+
   before do
     stub_feature_flags(disable_merge_trains: false)
   end
@@ -47,25 +49,59 @@ RSpec.describe ProjectCiCdSetting do
   end
 
   describe '#merge_trains_enabled?' do
-    subject { project.merge_trains_enabled? }
+    subject(:result) { project.merge_trains_enabled? }
 
     let(:project) { create(:project) }
 
-    context 'when Merge trains (EEP) is available' do
-      before do
-        stub_licensed_features(merge_pipelines: true, merge_trains: true)
-        project.merge_pipelines_enabled = true
-      end
-
-      it { is_expected.to be_truthy }
+    where(:merge_pipelines_enabled, :merge_trains_enabled, :feature_available, :expected_result) do
+      true      | true     | true    | true
+      true      | false    | true    | false
+      false     | false    | true    | false
+      false     | true     | true    | false
+      true      | true     | false   | false
+      true      | false    | false   | false
+      false     | false    | false   | false
     end
 
-    context 'when Merge trains (EEP) is unavailable' do
+    with_them do
       before do
-        stub_licensed_features(merge_trains: false)
+        stub_licensed_features(merge_pipelines: feature_available, merge_trains: feature_available)
       end
 
-      it { is_expected.to be_falsy }
+      it 'returns merge trains availability' do
+        project.update!(merge_pipelines_enabled: merge_pipelines_enabled, merge_trains_enabled: merge_trains_enabled)
+
+        expect(result).to eq(expected_result)
+      end
+    end
+  end
+
+  describe '#auto_rollback_enabled?' do
+    using RSpec::Parameterized::TableSyntax
+
+    let(:project) { create(:project) }
+
+    where(:license_feature, :feature_flag, :actual_setting) do
+      true  | true  | true
+      false | true  | true
+      true  | false | true
+      false | false | true
+      true  | true  | false
+      false | true  | false
+      true  | false | false
+      false | false | false
+    end
+
+    with_them do
+      before do
+        stub_licensed_features(auto_rollback: license_feature)
+        stub_feature_flags(cd_auto_rollback: feature_flag)
+        project.auto_rollback_enabled = actual_setting
+      end
+
+      it 'is only enabled if set and both the license and the feature flag allows' do
+        expect(project.auto_rollback_enabled?).to be(actual_setting && license_feature && feature_flag)
+      end
     end
   end
 

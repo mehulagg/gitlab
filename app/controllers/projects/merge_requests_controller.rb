@@ -27,7 +27,6 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
   before_action :authenticate_user!, only: [:assign_related_issues]
   before_action :check_user_can_push_to_source_branch!, only: [:rebase]
   before_action only: [:show] do
-    push_frontend_feature_flag(:suggest_pipeline, default_enabled: true)
     push_frontend_feature_flag(:widget_visibility_polling, @project, default_enabled: true)
     push_frontend_feature_flag(:mr_commit_neighbor_nav, @project, default_enabled: true)
     push_frontend_feature_flag(:multiline_comments, @project, default_enabled: true)
@@ -36,11 +35,13 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
     push_frontend_feature_flag(:approvals_commented_by, @project, default_enabled: true)
     push_frontend_feature_flag(:hide_jump_to_next_unresolved_in_threads, default_enabled: true)
     push_frontend_feature_flag(:merge_request_widget_graphql, @project)
-    push_frontend_feature_flag(:unified_diff_lines, @project, default_enabled: true)
+    push_frontend_feature_flag(:unified_diff_components, @project)
     push_frontend_feature_flag(:highlight_current_diff_row, @project)
     push_frontend_feature_flag(:default_merge_ref_for_diffs, @project)
     push_frontend_feature_flag(:core_security_mr_widget, @project, default_enabled: true)
-    push_frontend_feature_flag(:remove_resolve_note, @project)
+    push_frontend_feature_flag(:core_security_mr_widget_counts, @project)
+    push_frontend_feature_flag(:remove_resolve_note, @project, default_enabled: true)
+    push_frontend_feature_flag(:test_failure_history, @project)
 
     record_experiment_user(:invite_members_version_a)
     record_experiment_user(:invite_members_version_b)
@@ -48,7 +49,6 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
 
   before_action do
     push_frontend_feature_flag(:vue_issuable_sidebar, @project.group)
-    push_frontend_feature_flag(:deployment_filters)
   end
 
   around_action :allow_gitaly_ref_name_caching, only: [:index, :show, :discussions]
@@ -319,8 +319,6 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
   end
 
   def export_csv
-    return render_404 unless Feature.enabled?(:export_merge_requests_as_csv, project)
-
     IssuableExportCsvWorker.perform_async(:merge_request, current_user.id, project.id, finder_options.to_h) # rubocop:disable CodeReuse/Worker
 
     index_path = project_merge_requests_path(project)
@@ -482,7 +480,7 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
 
   def endpoint_metadata_url(project, merge_request)
     params = request.query_parameters
-    params[:view] = cookies[:diff_view] if params[:view].blank? && cookies[:diff_view].present?
+    params[:view] = "inline"
 
     if Feature.enabled?(:default_merge_ref_for_diffs, project)
       params = params.merge(diff_head: true)

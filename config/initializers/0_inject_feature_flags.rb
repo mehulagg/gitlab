@@ -14,14 +14,7 @@ if Gitlab.ee? && Gitlab.dev_or_test_env?
   # being unique to licensed names. These feature flags should be reworked to
   # be "development" with explicit check
   IGNORED_FEATURE_FLAGS = %i[
-    resource_access_token
-    ci_secrets_management
-    feature_flags_related_issues
-    group_coverage_reports
-    group_wikis
-    incident_sla
     swimlanes
-    minimal_access_role
   ].to_set
 
   # First, we validate a list of overrides to ensure that these overrides

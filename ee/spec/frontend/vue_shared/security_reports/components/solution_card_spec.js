@@ -1,5 +1,5 @@
-import SolutionCard from 'ee/vue_shared/security_reports/components/solution_card.vue';
 import { shallowMount } from '@vue/test-utils';
+import SolutionCard from 'ee/vue_shared/security_reports/components/solution_card.vue';
 import { s__ } from '~/locale';
 
 describe('Solution Card', () => {
