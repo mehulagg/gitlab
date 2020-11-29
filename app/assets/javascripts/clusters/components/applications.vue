@@ -294,7 +294,6 @@ export default {
             </p>
           </template>
           <template v-else>
-
             <gl-alert variant="info" :dismissible="false">
               <span data-testid="ingressCostWarning">
                 <gl-sprintf
