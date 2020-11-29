@@ -68,3 +68,49 @@ package-and-qa:
       artifacts: false
     - job: build-assets-image
       artifacts: false
+  variables:
+    QA_BRANCH: "ml-use-custom-default-branch"
+    QA_DEFAULT_BRANCH: "main"
+
+.if-dot-com-gitlab-org-and-security-merge-request: &if-dot-com-gitlab-org-and-security-merge-request
+  if: '$CI_SERVER_HOST == "gitlab.com" && $CI_PROJECT_NAMESPACE =~ /^gitlab-org($|\/security$)/ && $CI_MERGE_REQUEST_IID'
+
+package-and-qa-master:
+  extends:
+    - .package-and-qa-base
+  # This job often times out, so temporarily use private runners and a long timeout: https://gitlab.com/gitlab-org/gitlab/-/issues/238563
+  tags:
+    - prm
+  timeout: 4h
+  needs:
+    - job: build-qa-image
+      artifacts: false
+    - job: build-assets-image
+      artifacts: false
+  variables:
+    QA_BRANCH: "ml-use-custom-default-branch"
+    QA_DEFAULT_BRANCH: "master"
+  rules:
+    - <<: *if-dot-com-gitlab-org-and-security-merge-request
+      when: manual
+      allow_failure: true
+
+package-and-qa-testbranch:
+  extends:
+    - .package-and-qa-base
+  # This job often times out, so temporarily use private runners and a long timeout: https://gitlab.com/gitlab-org/gitlab/-/issues/238563
+  tags:
+    - prm
+  timeout: 4h
+  needs:
+    - job: build-qa-image
+      artifacts: false
+    - job: build-assets-image
+      artifacts: false
+  variables:
+    QA_BRANCH: "ml-use-custom-default-branch"
+    QA_DEFAULT_BRANCH: "testbranch"
+  rules:
+    - <<: *if-dot-com-gitlab-org-and-security-merge-request
+      when: manual
+      allow_failure: true
