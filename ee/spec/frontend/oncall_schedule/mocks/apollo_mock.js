@@ -1,5 +1,4 @@
 export const projectPath = '';
-export const timezones = ['PST'];
 export const ID = '7';
 export const errorMsg = 'Something went wrong';
 
@@ -12,7 +11,7 @@ export const getOncallSchedulesQueryResponse = {
             iid: '37',
             name: 'Test schedule',
             description: 'Description 1 lives here',
-            timezone: 'Europe/Dublin',
+            timezone: 'Pacific/Honolulu',
           },
         ],
       },
@@ -24,7 +23,7 @@ export const scheduleToDestroy = {
   iid: '37',
   name: 'Test schedule',
   description: 'Description 1 lives here',
-  timezone: 'Europe/Dublin',
+  timezone: 'Pacific/Honolulu',
 };
 
 export const destroyScheduleResponse = {
@@ -35,7 +34,7 @@ export const destroyScheduleResponse = {
         iid: '37',
         name: 'Test schedule',
         description: 'Description 1 lives here',
-        timezone: 'Europe/Dublin',
+        timezone: 'Pacific/Honolulu',
       },
     },
   },
@@ -49,7 +48,7 @@ export const destroyScheduleResponseWithErrors = {
         iid: '37',
         name: 'Test schedule',
         description: 'Description 1 lives here',
-        timezone: 'Europe/Dublin',
+        timezone: 'Pacific/Honolulu',
       },
     },
   },
