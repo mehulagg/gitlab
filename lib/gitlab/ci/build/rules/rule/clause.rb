@@ -13,7 +13,10 @@ module Gitlab
         UnknownClauseError = Class.new(StandardError)
 
         def self.fabricate(type, value)
-          "#{self}::#{type.to_s.camelize}".safe_constantize&.new(value)
+          # We use const_get and rescue NameError because `safe_constantize` resolves `Variables`
+          # to a different class/module, even when using `"::#{self}::#{type.to_s.camelize}".safe_constantize`
+          const_get(type.to_s.camelize).new(value)
+        rescue NameError
         end
 
         def initialize(spec)

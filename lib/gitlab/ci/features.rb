@@ -70,6 +70,10 @@ module Gitlab
       def self.ci_pipeline_editor_page_enabled?(project)
         ::Feature.enabled?(:ci_pipeline_editor_page, project, default_enabled: false)
       end
+
+      def self.rules_variables_enabled?(project)
+        ::Feature.enabled?(:ci_rules_variables, project, default_enabled: false)
+      end
     end
   end
 end

@@ -104,7 +104,7 @@ RSpec.describe Gitlab::Ci::Build::Rules do
     context 'with one rule without any clauses' do
       let(:rule_list) { [{ when: 'manual', allow_failure: true }] }
 
-      it { is_expected.to eq(described_class::Result.new('manual', nil, true)) }
+      it { is_expected.to eq(described_class::Result.new('manual', nil, true, nil)) }
     end
 
     context 'with one matching rule' do
@@ -171,13 +171,21 @@ RSpec.describe Gitlab::Ci::Build::Rules do
       context 'with matching rule' do
         let(:rule_list) { [{ if: '$VAR == null', allow_failure: true }] }
 
-        it { is_expected.to eq(described_class::Result.new('on_success', nil, true)) }
+        it { is_expected.to eq(described_class::Result.new('on_success', nil, true, nil)) }
       end
 
       context 'with non-matching rule' do
         let(:rule_list) { [{ if: '$VAR != null', allow_failure: true }] }
 
         it { is_expected.to eq(described_class::Result.new('never')) }
+      end
+    end
+
+    context 'with variables' do
+      context 'with matching rule' do
+        let(:rule_list) { [{ if: '$VAR == null', variables: { MY_VAR: 'my var' } }] }
+
+        it { is_expected.to eq(described_class::Result.new('on_success', nil, nil, { MY_VAR: 'my var' })) }
       end
     end
   end

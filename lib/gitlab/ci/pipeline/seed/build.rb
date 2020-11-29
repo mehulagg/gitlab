@@ -156,7 +156,30 @@ module Gitlab
           def rules_attributes
             return {} unless @using_rules
 
-            rules_result.build_attributes
+            if ::Gitlab::Ci::Features.rules_variables_enabled?(@pipeline.project)
+              rules_result.build_attributes.merge(rules_yaml_variables)
+            else
+              rules_result.build_attributes
+            end
+          end
+
+          def rules_yaml_variables
+            seed_variables = @seed_attributes[:yaml_variables].deep_dup # { key: key, value: value, public: true }
+            rules_variables = rules_result.variables # { key => value }
+
+            return {} unless rules_variables
+
+            result = rules_variables.each_with_object(seed_variables) do |(key, value), variables|
+              matched = variables.find { |v| v[:key] == key.to_s }
+
+              if matched
+                matched[:value] = value
+              else
+                variables << { key: key.to_s, value: value, public: true }
+              end
+            end
+
+            { yaml_variables: result }
           end
 
           def rules_result
