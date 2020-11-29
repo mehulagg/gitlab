@@ -98,6 +98,9 @@ export default {
           this.isUpdating = false;
         });
     },
+    editSchedule({ id, variables }) {
+      
+    }
   },
 };
 </script>
@@ -105,7 +108,7 @@ export default {
 <template>
   <div>
     <gl-loading-icon v-if="isLoading" size="lg" class="gl-mt-3" />
-    <oncall-schedule v-else-if="schedule" :schedule="schedule" @delete-schedule="deleteSchedule" />
+    <oncall-schedule v-else-if="schedule" :schedule="schedule" @delete-schedule="deleteSchedule" @edit-schedule="editSchedule" />
     <gl-empty-state
       v-else
       :title="$options.i18n.emptyState.title"
