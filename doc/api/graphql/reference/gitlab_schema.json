@@ -24338,7 +24338,7 @@
             },
             {
               "name": "containerRepositories",
-              "description": "Container repositories of the project",
+              "description": "Container repositories of the group",
               "args": [
                 {
                   "name": "name",

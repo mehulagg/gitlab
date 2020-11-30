@@ -8779,7 +8779,7 @@ type Group {
   ): CodeCoverageActivityConnection
 
   """
-  Container repositories of the project
+  Container repositories of the group
   """
   containerRepositories(
     """

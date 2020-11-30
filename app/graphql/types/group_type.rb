@@ -92,7 +92,7 @@ module Types
     field :container_repositories,
           Types::ContainerRepositoryType.connection_type,
           null: true,
-          description: 'Container repositories of the project',
+          description: 'Container repositories of the group',
           resolver: Resolvers::ContainerRepositoriesResolver,
           authorize: :read_container_image
 
