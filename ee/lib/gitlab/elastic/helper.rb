@@ -94,7 +94,12 @@ module Gitlab
         ES_SEPARATE_CLASSES.map do |class_name|
           proxy = ::Elastic::Latest::ApplicationClassProxy.new(class_name, use_separate_indices: true)
 
+          alias_name = "#{target_name}-#{proxy.index_name}"
           new_index_name = "#{target_name}-#{proxy.index_name}-#{Time.now.strftime("%Y%m%d-%H%M")}"
+
+          if with_alias ? index_exists?(index_name: alias_name) : index_exists?(index_name: new_index_name)
+            raise "Index under '#{with_alias ? target_name : new_index_name}' already exists"
+          end
 
           settings = proxy.settings
           settings.merge!(options[:settings]) if options[:settings]
@@ -113,7 +118,6 @@ module Gitlab
           client.indices.create create_index_options
 
           if with_alias
-            alias_name = "#{target_name}-#{proxy.index_name}"
             client.indices.put_alias(name: alias_name, index: new_index_name)
           end
 
