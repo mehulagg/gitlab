@@ -10,7 +10,7 @@ import {
 } from '@gitlab/ui';
 import { mapState, mapActions } from 'vuex';
 import { sprintf, __ } from '~/locale';
-import ValueStreamForm from './value_stream_form.vue';
+import ValueStreamForm from './value_stream_form/index.vue';
 
 const I18N = {
   DELETE_NAME: __('Delete %{name}'),
@@ -33,6 +33,13 @@ export default {
   },
   directives: {
     GlModalDirective,
+  },
+  props: {
+    hasPathNavigation: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   computed: {
     ...mapState({
@@ -116,7 +123,7 @@ export default {
     <gl-button v-else v-gl-modal-directive="'value-stream-form-modal'">{{
       $options.I18N.CREATE_VALUE_STREAM
     }}</gl-button>
-    <value-stream-form />
+    <value-stream-form :has-path-navigation="hasPathNavigation" />
     <gl-modal
       data-testid="delete-value-stream-modal"
       modal-id="delete-value-stream-modal"
