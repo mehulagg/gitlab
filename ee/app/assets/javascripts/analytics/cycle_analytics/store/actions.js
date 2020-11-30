@@ -1,4 +1,5 @@
 import Api from 'ee/api';
+import { keyBy } from 'lodash';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { __, sprintf } from '~/locale';
 import httpStatus from '~/lib/utils/http_status';
@@ -341,11 +342,62 @@ export const receiveCreateValueStreamSuccess = ({ commit, dispatch }, valueStrea
   return dispatch('fetchCycleAnalyticsData');
 };
 
+/**
+ * This is a stopgap solution until the value stream stages
+ * can be modified via the value stream entity
+ *
+ * TODO: link to related BE issue
+ */
+const updateValueStreamStages = (currentGroupPath, data, newStages, stageIds) => {
+  console.log('updateValueStreamStages::currentGroupPath', currentGroupPath);
+  console.log('updateValueStreamStages::data', data);
+  console.log('updateValueStreamStages::newStages', newStages);
+  console.log('updateValueStreamStages::stageIds', stageIds);
+  const { id: valueStreamId } = data;
+  const promises = newStages.map(({ id: stageId, name, ...rest }) =>
+    Api.cycleAnalyticsUpdateStage({
+      groupId: currentGroupPath,
+      valueStreamId,
+      stageId,
+      // stageId: stageIds[name].id,
+      data: { name, ...rest },
+    }),
+  );
+
+  console.log('promises', promises);
+
+  return Promise.all(promises)
+    .then(r => {
+      console.log('promises done', r);
+      return;
+    })
+    .then(() => ({ data }));
+};
+
+const valueStreamStageIds = (groupId, newValueStream) => {
+  console.log('valueStreamStageIds', groupId, newValueStream);
+  return Api.cycleAnalyticsGroupStagesAndEvents({ groupId, valueStreamId: newValueStream.id }).then(
+    ({ data: { stages } }) =>
+      Promise.resolve({ stageIds: keyBy(stages, 'title'), data: newValueStream }),
+  );
+};
+
 export const createValueStream = ({ commit, dispatch, getters }, data) => {
   const { currentGroupPath } = getters;
   commit(types.REQUEST_CREATE_VALUE_STREAM);
 
-  return Api.cycleAnalyticsCreateValueStream(currentGroupPath, data)
+  console.log('createValueStream::data', data);
+  const { name, stages } = data;
+
+  return Api.cycleAnalyticsCreateValueStream(currentGroupPath, { name })
+    .then(({ data: newValueStream }) =>
+      // because this is a custom value stream at this point,
+      // the stages are persisted, so we need to fetch the ids
+      valueStreamStageIds(currentGroupPath, newValueStream),
+    )
+    .then(({ data: newValueStream, stageIds }) =>
+      updateValueStreamStages(currentGroupPath, newValueStream, stages, stageIds),
+    )
     .then(({ data: newValueStream }) => dispatch('receiveCreateValueStreamSuccess', newValueStream))
     .catch(({ response } = {}) => {
       const { data: { message, payload: { errors } } = null } = response;
