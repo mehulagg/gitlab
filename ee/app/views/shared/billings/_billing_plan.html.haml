@@ -1,6 +1,12 @@
 - purchase_link = plan.purchase_link
+- plan_name = plan.name
+- show_deprecated_plan = ::Feature.enabled?(:hide_deprecated_billing_plans) && plan.deprecated?
+- if show_deprecated_plan
+  - plan.name      += ' (Legacy)'
+  - faq_link_url   = 'https://about.gitlab.com/gitlab-com/#faq'
+  - faq_link_start = '<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe % { url: faq_link_url }
 
-.card.h-100{ class: ("card-active" if is_current) }
+.card.h-100{ class: ("card-active" if is_current || show_deprecated_plan) }
   .card-header.gl-font-weight-bold.d-flex.flex-row.justify-content-between.flex-wrap
     %div
       = plan.name
@@ -9,35 +15,38 @@
         = _("Current Plan")
 
   .card-body
-    .price-per-month
-      .gl-mr-2
-        = number_to_plan_currency(plan.price_per_month)
+    - if show_deprecated_plan
+      = s_("The %{plan_name} is no longer available to purchase. For more information about how this will impact you, check our our %{faq_link_start}frequently asked questions%{faq_link_end}.").html_safe % { plan_name: plan_name, faq_link_start: faq_link_start, faq_link_end: '</a>'.html_safe }
+    - else
+      .price-per-month
+        .gl-mr-2
+          = number_to_plan_currency(plan.price_per_month)
 
-      %ul.conditions.gl-p-0.gl-my-auto
-        %li= s_("BillingPlans|per user")
-        %li= s_("BillingPlans|monthly")
-    .price-per-year.text-left{ class: ("invisible" unless plan.price_per_year > 0) }
-      - price_per_year = number_to_plan_currency(plan.price_per_year)
-      = s_("BillingPlans|billed annually at %{price_per_year}") % { price_per_year: price_per_year }
+        %ul.conditions.gl-p-0.gl-my-auto
+          %li= s_("BillingPlans|per user")
+          %li= s_("BillingPlans|monthly")
+      .price-per-year.text-left{ class: ("invisible" unless plan.price_per_year > 0) }
+        - price_per_year = number_to_plan_currency(plan.price_per_year)
+        = s_("BillingPlans|billed annually at %{price_per_year}") % { price_per_year: price_per_year }
 
-    %hr.gl-my-3
+      %hr.gl-my-3
 
-    %ul.unstyled-list
-      - plan_feature_short_list(plan).each do |feature|
-        - feature_class = "gl-p-0!"
-        - if feature.highlight
-          - feature_class += " gl-font-weight-bold"
-        %li{ class: "#{feature_class}" }
-          = feature.title
-      %li.gl-p-0.gl-pt-3
-        - if plan.about_page_href
-          = link_to s_("BillingPlans|See all %{plan_name} features") % { plan_name: plan.name }, EE::SUBSCRIPTIONS_COMPARISON_URL
+      %ul.unstyled-list
+        - plan_feature_short_list(plan).each do |feature|
+          - feature_class = "gl-p-0!"
+          - if feature.highlight
+            - feature_class += " gl-font-weight-bold"
+          %li{ class: "#{feature_class}" }
+            = feature.title
+        %li.gl-p-0.gl-pt-3
+          - if plan.about_page_href
+            = link_to s_("BillingPlans|See all %{plan_name} features") % { plan_name: plan.name }, EE::SUBSCRIPTIONS_COMPARISON_URL
 
   - if purchase_link
     .card-footer
       .float-right{ class: ("invisible" unless purchase_link.action == 'upgrade' || is_current) }
         - if show_contact_sales_button?(purchase_link.action)
           = link_to s_('BillingPlan|Contact sales'), "#{contact_sales_url}?test=inappcontactsales#{plan.code}", class: "btn btn-success-secondary gl-button", data: { **experiment_tracking_data_for_button_click('contact_sales') }
-        - upgrade_button_class = "disabled" if is_current && !namespace.trial_active?
         - cta_class = '-new' if use_new_purchase_flow?(namespace)
-        = link_to s_('BillingPlan|Upgrade'), plan_purchase_or_upgrade_url(namespace, plan), class: "btn btn-success gl-button #{upgrade_button_class} billing-cta-purchase#{cta_class}", data: { **experiment_tracking_data_for_button_click('upgrade') }
+        - upgrade_button_classes = upgrade_button_css_classes(namespace, plan, is_current)
+        = link_to s_('BillingPlan|Upgrade'), plan_purchase_or_upgrade_url(namespace, plan), class: "#{upgrade_button_classes} billing-cta-purchase#{cta_class}", data: { **experiment_tracking_data_for_button_click('upgrade') }
