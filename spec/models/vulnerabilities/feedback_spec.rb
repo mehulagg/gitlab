@@ -118,7 +118,7 @@ RSpec.describe Vulnerabilities::Feedback do
     let!(:invalid_feedback) do
       feedback = build(:vulnerability_feedback, project: project, pipeline: create(:ci_pipeline))
 
-      feedback.save(validate: false)
+      feedback.save!(validate: false)
     end
 
     it 'filters out invalid feedback' do
