@@ -42,12 +42,9 @@ export default class ImageFile {
       .filter(`.${viewMode}`)
       .addClass('active');
 
-    // eslint-disable-next-line no-jquery/no-fade
-    return $(`.view:visible:not(.${viewMode})`, this.file).fadeOut(200, () => {
-      // eslint-disable-next-line no-jquery/no-fade
-      $(`.view.${viewMode}`, this.file).fadeIn(200);
-      return this.initView(viewMode);
-    });
+    $(`.view:visible:not(.${viewMode})`, this.file).addClass('hide');
+    $(`.view.${viewMode}`, this.file).removeClass('hide');
+    return this.initView(viewMode);
   }
 
   initView(viewMode) {

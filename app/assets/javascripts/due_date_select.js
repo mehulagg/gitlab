@@ -119,20 +119,18 @@ class DueDateSelect {
   }
 
   updateIssueBoardIssue() {
-    // eslint-disable-next-line no-jquery/no-fade
-    this.$loading.fadeIn();
+    this.$loading.removeClass('hidden');
     this.$dropdown.trigger('loading.gl.dropdown');
     this.$selectbox.hide();
     this.$value.css('display', '');
-    const fadeOutLoader = () => {
-      // eslint-disable-next-line no-jquery/no-fade
-      this.$loading.fadeOut();
+    const hideLoader = () => {
+      this.$loading.addClass('hidden');
     };
 
     boardsStore.detail.issue
       .update(this.$dropdown.attr('data-issue-update'))
-      .then(fadeOutLoader)
-      .catch(fadeOutLoader);
+      .then(hideLoader)
+      .catch(hideLoader);
   }
 
   submitSelectedDate(isDropdown) {
@@ -140,8 +138,7 @@ class DueDateSelect {
     const hasDueDate = this.displayedDate !== __('None');
     const displayedDateStyle = hasDueDate ? 'bold' : 'no-value';
 
-    // eslint-disable-next-line no-jquery/no-fade
-    this.$loading.removeClass('hidden').fadeIn();
+    this.$loading.removeClass('hidden');
 
     if (isDropdown) {
       this.$dropdown.trigger('loading.gl.dropdown');
@@ -164,8 +161,7 @@ class DueDateSelect {
       }
       this.$sidebarCollapsedValue.attr('data-original-title', tooltipText);
 
-      // eslint-disable-next-line no-jquery/no-fade
-      return this.$loading.fadeOut();
+      return this.$loading.addClass('hidden');
     });
   }
 }
