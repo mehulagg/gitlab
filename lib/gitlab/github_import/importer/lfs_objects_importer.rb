@@ -28,6 +28,8 @@ module Gitlab
           lfs_objects.each do |object|
             yield object
           end
+        rescue Projects::LfsPointers::LfsObjectDownloadListService::LfsObjectDownloadListError => e
+          error(project.id, e)
         end
       end
     end
