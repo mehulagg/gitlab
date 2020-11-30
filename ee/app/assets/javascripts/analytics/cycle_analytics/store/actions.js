@@ -345,6 +345,8 @@ export const createValueStream = ({ commit, dispatch, getters }, data) => {
   const { currentGroupPath } = getters;
   commit(types.REQUEST_CREATE_VALUE_STREAM);
 
+  console.log('data', data);
+
   return Api.cycleAnalyticsCreateValueStream(currentGroupPath, data)
     .then(({ data: newValueStream }) => dispatch('receiveCreateValueStreamSuccess', newValueStream))
     .catch(({ response } = {}) => {
