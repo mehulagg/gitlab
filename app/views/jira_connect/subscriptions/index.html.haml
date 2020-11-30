@@ -32,10 +32,10 @@
           %label
             GitLab namespace
 
-        .ak-field-group.field-group-input
-          %input#namespace-input.ak-field-text{ type: 'text', required: true, placeholder: 'e.g. "MyCompany" or "MyCompany/GroupName"' }
-          %button.ak-button.ak-button__appearance-primary{ type: 'submit' }
-            Link namespace to Jira
+          .ak-field-group.field-group-input
+            %input#namespace-input.ak-field-text{ type: 'text', required: true, placeholder: 'e.g. "MyCompany" or "MyCompany/GroupName"' }
+            %button.ak-button.ak-button__appearance-primary{ type: 'submit' }
+              Link namespace to Jira
 
     - if @subscriptions.present?
       %table.subscriptions
