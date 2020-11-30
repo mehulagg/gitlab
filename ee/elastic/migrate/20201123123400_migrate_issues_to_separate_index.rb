@@ -22,8 +22,6 @@ class MigrateIssuesToSeparateIndex < Elastic::Migration
 
     body = query(slice: 0, max_slices: 5)
 
-    puts body
-
     response = client.reindex(body: body, wait_for_completion: true)
 
     raise "Reindexing failed with #{response['failures']}" if response['failures'].present?
