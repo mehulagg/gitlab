@@ -747,14 +747,12 @@ job 5:
 
 #### Using your own runners
 
-When you use your own runners, GitLab Runner runs only one job at a time by default. See the
-`concurrent` flag in [runner global settings](https://docs.gitlab.com/runner/configuration/advanced-configuration.html#the-global-section)
-for more information.
+When you use your own runners, each runner runs only one job at a time by default.
+Jobs can run in parallel if they run on different runners.
 
-Jobs run on your own runners in parallel only if:
-
-- Run on different runners.
-- The runner's `concurrent` setting has been changed.
+If you have only one runner, jobs can run in parallel if the runner's
+[`concurrent` setting](https://docs.gitlab.com/runner/configuration/advanced-configuration.html#the-global-section)
+is greater than `1`.
 
 #### `.pre` and `.post`
 
@@ -3444,6 +3442,9 @@ job split into three separate jobs.
 
 Use `matrix:` to configure different variables for jobs that are running in parallel.
 There can be from 2 to 50 jobs.
+
+Jobs can only run in parallel if there are multiple runners, or a single runner is
+[configured to run multiple jobs concurrently](#using-your-own-runners)
 
 [In GitLab 13.5](https://gitlab.com/gitlab-org/gitlab/-/issues/26362) and later,
 you can have one-dimensional matrices with a single job.
