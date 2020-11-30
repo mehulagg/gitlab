@@ -26,7 +26,7 @@ import {
 } from './mock_data';
 
 import CommitForm from '~/pipeline_editor/components/commit/commit_form.vue';
-import getCiConfig from '~/pipeline_editor/graphql/queries/ci_config.graphql';
+import getCiConfigData from '~/pipeline_editor/graphql/queries/ci_config.graphql';
 import PipelineGraph from '~/pipelines/components/pipeline_graph/pipeline_graph.vue';
 import PipelineEditorApp from '~/pipeline_editor/pipeline_editor_app.vue';
 import TextEditor from '~/pipeline_editor/components/text_editor.vue';
@@ -99,7 +99,7 @@ describe('~/pipeline_editor/pipeline_editor_app.vue', () => {
   };
 
   const createComponentWithApollo = ({ props = {}, mountFn = shallowMount } = {}) => {
-    const handlers = [[getCiConfig, mockCiConfigData]];
+    const handlers = [[getCiConfigData, mockCiConfigData]];
     const resolvers = {
       Query: {
         blobContent() {

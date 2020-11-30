@@ -1,0 +1,1 @@
+export const CI_CONFIG_STATUS_VALID = 'VALID';

@@ -48,19 +48,23 @@ export default {
     },
     jobs: {
       type: Array,
-      required: true,
+      required: false,
+      default: () => [],
     },
     errors: {
       type: Array,
-      required: true,
+      required: false,
+      default: () => [],
     },
     warnings: {
       type: Array,
-      required: true,
+      required: false,
+      default: () => [],
     },
     dryRun: {
       type: Boolean,
-      required: true,
+      required: false,
+      default: false,
     },
     lintHelpPagePath: {
       type: String,
