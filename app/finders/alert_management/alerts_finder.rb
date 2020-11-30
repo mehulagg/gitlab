@@ -20,6 +20,7 @@ module AlertManagement
       collection = project.alert_management_alerts
       collection = by_status(collection)
       collection = by_iid(collection)
+      collection = by_view(collection)
       collection = by_assignee(collection)
       collection = by_search(collection)
 
@@ -42,13 +43,14 @@ module AlertManagement
       values.present? ? collection.for_status(values) : collection
     end
 
+    def by_view(collection)
+      return collection unless params[:view].present?
+
+      AlertManagement::Alert::VIEW_FILTERS[params[:view]].call(collection)
+    end
+
     def by_search(collection)
-      if params[:monitoring_tool].present?
-        collection = collection.by_monitoring_tool(params[:monitoring_tool])
-        params[:search].present? ? collection.fuzzy_search(params[:search], [:title, :description, :service]) : collection
-      else
-        params[:search].present? ? collection.search(params[:search]) : collection
-      end
+      params[:search].present? ? collection.search(params[:search]) : collection
     end
 
     def sort(collection)

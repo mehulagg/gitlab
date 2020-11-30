@@ -38,12 +38,12 @@ RSpec.describe Resolvers::AlertManagement::AlertResolver do
       it { is_expected.to contain_exactly(ignored_alert) }
     end
 
-    context 'filtering by monitoring tool' do
-      let_it_be(:alert1) { create(:alert_management_alert, project: project, monitoring_tool: 'cilium') }
-      let_it_be(:alert2) { create(:alert_management_alert, project: project, monitoring_tool: 'cilium') }
+    context 'filtering by monitoring tool according to asked view' do
+      let_it_be(:alert1) { create(:alert_management_alert, project: project, monitoring_tool: 'CiliumInternal') }
+      let_it_be(:alert2) { create(:alert_management_alert, project: project, monitoring_tool: 'CiliumInternal') }
       let_it_be(:alert3) { create(:alert_management_alert, project: project, monitoring_tool: 'generic') }
 
-      let(:args) { { monitoring_tool: 'cilium' } }
+      let(:args) { { view: 'threat_monitoring' } }
 
       it { is_expected.to contain_exactly(alert1, alert2) }
     end

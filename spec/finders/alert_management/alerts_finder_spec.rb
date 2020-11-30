@@ -239,45 +239,62 @@ RSpec.describe AlertManagement::AlertsFinder, '#execute' do
 
           it { is_expected.not_to include(alert) }
         end
+      end
 
-        context 'filtering by monitoring tool' do
-          let_it_be(:alert2) do
-            create(:alert_management_alert,
-                   :with_fingerprint,
-                   project: project,
-                   title: 'Distinctive',
-                   description: 'Desc',
-                   service: 'UnknownService',
-                   monitoring_tool: 'cilium'
-                  )
-          end
+      context 'filtering by monitoring tool' do
+        let_it_be(:alert) do
+          create(:alert_management_alert,
+                 :with_fingerprint,
+                 project: project,
+                 title: 'Title',
+                 description: 'Desc',
+                 service: 'Service',
+                 monitoring_tool: 'Monitor'
+                )
+        end
 
-          let_it_be(:alert3) do
-            create(:alert_management_alert,
-                   :with_fingerprint,
-                   project: project,
-                   title: 'Title',
-                   description: 'Desc',
-                   service: 'CiliumService',
-                   monitoring_tool: 'cilium'
-                  )
-          end
+        let_it_be(:alert2) do
+          create(:alert_management_alert,
+                 :with_fingerprint,
+                 project: project,
+                 title: 'Distinctive',
+                 description: 'Desc',
+                 service: 'UnknownService',
+                 monitoring_tool: 'CiliumInternal'
+                )
+        end
 
-          let(:params) { { monitoring_tool: 'cilium' } }
+        let_it_be(:alert3) do
+          create(:alert_management_alert,
+                 :with_fingerprint,
+                 project: project,
+                 title: 'Title',
+                 description: 'Desc',
+                 service: 'CiliumService',
+                 monitoring_tool: 'CiliumInternal'
+                )
+        end
 
-          it { is_expected.to match_array([alert2, alert3]) }
+        let(:params) { { view: 'threat_monitoring' } }
 
-          context 'filter by monitoring tool and search by term' do
-            let(:params) { { monitoring_tool: 'cilium', search: 'Distinctive' } }
+        it { is_expected.to match_array([alert2, alert3]) }
 
-            it { is_expected.to match_array([alert2]) }
-          end
+        context 'filter for operations  view' do
+          let(:params) { { view: 'operations' } }
 
-          context 'filter by monitoring tool' do
-            let(:params) { { monitoring_tool: 'cilium', search: 'DistinctiveService' } }
+          it { is_expected.to match_array([alert, resolved_alert, ignored_alert]) }
+        end
 
-            it { is_expected.to be_empty }
-          end
+        context 'filter for thread monitoring view and search by term' do
+          let(:params) { { view: 'threat_monitoring', search: 'Distinctive' } }
+
+          it { is_expected.to match_array([alert2]) }
+        end
+
+        context 'filter for thread monitoring view' do
+          let(:params) { { view: 'threat_monitoring', search: 'DistinctiveService' } }
+
+          it { is_expected.to be_empty }
         end
       end
 

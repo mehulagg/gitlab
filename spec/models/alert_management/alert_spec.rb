@@ -194,15 +194,6 @@ RSpec.describe AlertManagement::Alert do
       it { is_expected.to match_array(triggered_alert) }
     end
 
-    describe '.monitoring_tool' do
-      let_it_be(:alert1) { create(:alert_management_alert, :acknowledged, project: project, monitoring_tool: 'cilium') }
-      let_it_be(:alert2) { create(:alert_management_alert, :acknowledged, project: project, monitoring_tool: 'cilium') }
-
-      subject { project.alert_management_alerts.by_monitoring_tool('cilium') }
-
-      it { is_expected.to match_array([alert1, alert2]) }
-    end
-
     describe '.for_status' do
       let(:status) { :resolved }
 

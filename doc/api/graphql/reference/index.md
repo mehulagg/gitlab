@@ -3848,6 +3848,15 @@ Alert status values.
 | `RESOLVED` | Resolved status |
 | `TRIGGERED` | Triggered status |
 
+### AlertManagementViewFilter
+
+View filter.
+
+| Value | Description |
+| ----- | ----------- |
+| `OPERATIONS` | Alerts for Operations view |
+| `THREAT_MONITORING` | Alerts for Threat Monitoring view |
+
 ### AvailabilityEnum
 
 User availability status.

@@ -22,6 +22,13 @@ module AlertManagement
     }.freeze
     private_constant :STATUSES
 
+    # rubocop: disable CodeReuse/ActiveRecord
+    VIEW_FILTERS = {
+      threat_monitoring:  -> (collection) { collection.where(monitoring_tool: 'CiliumInternal') },
+      operations:  -> (collection) { collection.where.not(monitoring_tool: 'CiliumInternal') }
+    }.with_indifferent_access.freeze
+    # rubocop: enable CodeReuse/ActiveRecord
+
     belongs_to :project
     belongs_to :issue, optional: true
     belongs_to :prometheus_alert, optional: true
@@ -121,7 +128,6 @@ module AlertManagement
     scope :search, -> (query) { fuzzy_search(query, [:title, :description, :monitoring_tool, :service]) }
     scope :open, -> { with_status(open_statuses) }
     scope :not_resolved, -> { without_status(:resolved) }
-    scope :by_monitoring_tool, -> (tool) { where(monitoring_tool: tool) }
     scope :with_prometheus_alert, -> { includes(:prometheus_alert) }
 
     scope :order_start_time,    -> (sort_order) { order(started_at: sort_order) }

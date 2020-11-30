@@ -18,8 +18,8 @@ module Resolvers
                 description: 'Sort alerts by this criteria',
                 required: false
 
-      argument :monitoring_tool, GraphQL::STRING_TYPE,
-                description: 'Filters by monitoring tool',
+      argument :view, [Types::AlertManagement::ViewFilterEnum],
+                description: 'Filter query for ui views',
                 required: false
 
       argument :search, GraphQL::STRING_TYPE,
