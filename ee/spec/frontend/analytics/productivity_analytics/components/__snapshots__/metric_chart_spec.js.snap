@@ -23,7 +23,7 @@ exports[`MetricChart component template when isLoading is false and chartData is
   <!---->
    
   <gl-dropdown-stub
-    category="tertiary"
+    category="primary"
     class="mb-4 metric-dropdown"
     headertext=""
     menu-class="w-100 mw-100"
