@@ -1,0 +1,26 @@
+query getCiConfigData($content: String!) {
+  ciConfig(content: $content) {
+    errors
+    status
+    stages {
+      nodes {
+        name
+        groups {
+          nodes {
+            name
+            jobs {
+              nodes {
+                name
+                needs {
+                  nodes {
+                    name
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
