@@ -3949,6 +3949,7 @@ Status of a container repository.
 | ----- | ----------- |
 | `FAILED_VALIDATION` | Site validation process finished but failed |
 | `INPROGRESS_VALIDATION` | Site validation process is in progress |
+| `NONE` | No validation exists |
 | `PASSED_VALIDATION` | Site validation process finished successfully |
 | `PENDING_VALIDATION` | Site validation process has not started |
 

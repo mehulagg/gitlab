@@ -14324,6 +14324,12 @@
           "interfaces": null,
           "enumValues": [
             {
+              "name": "NONE",
+              "description": "No validation exists",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "PENDING_VALIDATION",
               "description": "Site validation process has not started",
               "isDeprecated": false,

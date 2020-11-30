@@ -15,7 +15,7 @@ class DastSiteProfile < ApplicationRecord
   delegate :dast_site_validation, to: :dast_site, allow_nil: true
 
   def status
-    return DastSiteValidation::INITIAL_STATE unless dast_site_validation
+    return Types::DastSiteProfileValidationStatusEnum.enum[:none] unless dast_site_validation
 
     dast_site_validation.state
   end

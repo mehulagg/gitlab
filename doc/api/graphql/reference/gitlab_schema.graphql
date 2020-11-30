@@ -5228,6 +5228,11 @@ enum DastSiteProfileValidationStatusEnum {
   INPROGRESS_VALIDATION
 
   """
+  No validation exists
+  """
+  NONE
+
+  """
   Site validation process finished successfully
   """
   PASSED_VALIDATION
