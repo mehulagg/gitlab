@@ -5,7 +5,6 @@ const refreshTypes = [`filters/${SET_FILTER}`, `filters/${SET_HIDE_DISMISSED}`];
 export default store => {
   const refreshVulnerabilities = payload => {
     store.dispatch('vulnerabilities/fetchVulnerabilities', payload);
-    store.dispatch('vulnerabilities/fetchVulnerabilitiesHistory', payload);
   };
 
   store.subscribe(({ type }) => {

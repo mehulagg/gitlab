@@ -50,6 +50,16 @@ RSpec.describe Projects::Security::ConfigurationPresenter do
       end
     end
 
+    context 'when the project has no default branch set' do
+      before do
+        allow(project).to receive(:default_branch).and_return(nil)
+      end
+
+      it 'includes the path to gitlab_ci history' do
+        expect(subject[:gitlab_ci_history_path]).to eq(project_blame_path(project, 'master/.gitlab-ci.yml'))
+      end
+    end
+
     context "when the latest default branch pipeline's source is auto devops" do
       before do
         pipeline = create(

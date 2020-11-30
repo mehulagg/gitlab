@@ -2,8 +2,8 @@ import { GlForm, GlSkeletonLoader } from '@gitlab/ui';
 import { shallowMount, mount } from '@vue/test-utils';
 import { merge } from 'lodash';
 import OnDemandScansForm from 'ee/on_demand_scans/components/on_demand_scans_form.vue';
-import OnDemandScansScannerProfileSelector from 'ee/on_demand_scans/components/profile_selector/scanner_profile_selector.vue';
-import OnDemandScansSiteProfileSelector from 'ee/on_demand_scans/components/profile_selector/site_profile_selector.vue';
+import ScannerProfileSelector from 'ee/on_demand_scans/components/profile_selector/scanner_profile_selector.vue';
+import SiteProfileSelector from 'ee/on_demand_scans/components/profile_selector/site_profile_selector.vue';
 import dastOnDemandScanCreate from 'ee/on_demand_scans/graphql/dast_on_demand_scan_create.mutation.graphql';
 import { redirectTo } from '~/lib/utils/url_utility';
 import { scannerProfiles, siteProfiles } from '../mock_data';
@@ -34,6 +34,8 @@ const defaultMocks = {
 };
 
 const pipelineUrl = `/${projectPath}/pipelines/123`;
+const [passiveScannerProfile, activeScannerProfile] = scannerProfiles;
+const [nonValidatedSiteProfile, validatedSiteProfile] = siteProfiles;
 
 jest.mock('~/lib/utils/url_utility', () => ({
   isAbsolute: jest.requireActual('~/lib/utils/url_utility').isAbsolute,
@@ -46,11 +48,12 @@ describe('OnDemandScansForm', () => {
   const findForm = () => subject.find(GlForm);
   const findByTestId = testId => subject.find(`[data-testid="${testId}"]`);
   const findAlert = () => findByTestId('on-demand-scan-error');
+  const findProfilesConflictAlert = () => findByTestId('on-demand-scans-profiles-conflict-alert');
   const findSubmitButton = () => findByTestId('on-demand-scan-submit-button');
 
-  const setFormData = () => {
-    subject.find(OnDemandScansScannerProfileSelector).vm.$emit('input', scannerProfiles[0].id);
-    subject.find(OnDemandScansSiteProfileSelector).vm.$emit('input', siteProfiles[0].id);
+  const setValidFormData = () => {
+    subject.find(ScannerProfileSelector).vm.$emit('input', passiveScannerProfile);
+    subject.find(SiteProfileSelector).vm.$emit('input', nonValidatedSiteProfile);
     return subject.vm.$nextTick();
   };
   const submitForm = () => findForm().vm.$emit('submit', { preventDefault: () => {} });
@@ -68,6 +71,9 @@ describe('OnDemandScansForm', () => {
             siteProfilesLibraryPath,
             newScannerProfilePath,
             newSiteProfilePath,
+            glFeatures: {
+              securityOnDemandScansSiteValidation: true,
+            },
           },
         },
         options,
@@ -134,7 +140,7 @@ describe('OnDemandScansForm', () => {
     });
 
     it('becomes enabled when form is valid', async () => {
-      await setFormData();
+      await setValidFormData();
 
       expect(submitButton.props('disabled')).toBe(false);
     });
@@ -155,7 +161,7 @@ describe('OnDemandScansForm', () => {
         jest
           .spyOn(subject.vm.$apollo, 'mutate')
           .mockResolvedValue({ data: { dastOnDemandScanCreate: { pipelineUrl, errors: [] } } });
-        await setFormData();
+        await setValidFormData();
         submitForm();
       });
 
@@ -167,8 +173,8 @@ describe('OnDemandScansForm', () => {
         expect(subject.vm.$apollo.mutate).toHaveBeenCalledWith({
           mutation: dastOnDemandScanCreate,
           variables: {
-            dastScannerProfileId: scannerProfiles[0].id,
-            dastSiteProfileId: siteProfiles[0].id,
+            dastScannerProfileId: passiveScannerProfile.id,
+            dastSiteProfileId: nonValidatedSiteProfile.id,
             fullPath: projectPath,
           },
         });
@@ -186,7 +192,7 @@ describe('OnDemandScansForm', () => {
     describe('on top-level error', () => {
       beforeEach(async () => {
         jest.spyOn(subject.vm.$apollo, 'mutate').mockRejectedValue();
-        await setFormData();
+        await setValidFormData();
         submitForm();
       });
 
@@ -208,7 +214,7 @@ describe('OnDemandScansForm', () => {
         jest
           .spyOn(subject.vm.$apollo, 'mutate')
           .mockResolvedValue({ data: { dastOnDemandScanCreate: { pipelineUrl: null, errors } } });
-        await setFormData();
+        await setValidFormData();
         submitForm();
       });
 
@@ -226,4 +232,52 @@ describe('OnDemandScansForm', () => {
       });
     });
   });
+
+  describe.each`
+    description                                  | selectedScannerProfile   | selectedSiteProfile        | hasConflict
+    ${'a passive scan and a non-validated site'} | ${passiveScannerProfile} | ${nonValidatedSiteProfile} | ${false}
+    ${'a passive scan and a validated site'}     | ${passiveScannerProfile} | ${validatedSiteProfile}    | ${false}
+    ${'an active scan and a non-validated site'} | ${activeScannerProfile}  | ${nonValidatedSiteProfile} | ${true}
+    ${'an active scan and a validated site'}     | ${activeScannerProfile}  | ${validatedSiteProfile}    | ${false}
+  `(
+    'profiles conflict prevention',
+    ({ description, selectedScannerProfile, selectedSiteProfile, hasConflict }) => {
+      const setFormData = () => {
+        subject.find(ScannerProfileSelector).vm.$emit('input', selectedScannerProfile);
+        subject.find(SiteProfileSelector).vm.$emit('input', selectedSiteProfile);
+        return subject.vm.$nextTick();
+      };
+
+      it(
+        hasConflict
+          ? `warns about conflicting profiles when user selects ${description}`
+          : `does not report any conflict when user selects ${description}`,
+        async () => {
+          mountShallowSubject();
+          await setFormData();
+
+          expect(findProfilesConflictAlert().exists()).toBe(hasConflict);
+          expect(findSubmitButton().props('disabled')).toBe(hasConflict);
+        },
+      );
+
+      describe('feature flag disabled', () => {
+        beforeEach(() => {
+          mountShallowSubject({
+            provide: {
+              glFeatures: {
+                securityOnDemandScansSiteValidation: false,
+              },
+            },
+          });
+          return setFormData();
+        });
+
+        it(`does not report any conflict when user selects ${description}`, () => {
+          expect(findProfilesConflictAlert().exists()).toBe(false);
+          expect(findSubmitButton().props('disabled')).toBe(false);
+        });
+      });
+    },
+  );
 });

@@ -39,6 +39,6 @@ module AuditEventsHelper
   end
 
   def export_url
-    Feature.enabled?(:audit_log_export_csv) ? admin_audit_log_reports_url(format: :csv) : ''
+    admin_audit_log_reports_url(format: :csv)
   end
 end

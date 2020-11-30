@@ -124,6 +124,7 @@ export default {
           id="epic-title"
           v-model="title"
           data-testid="epic-title"
+          data-qa-selector="epic_title_field"
           :placeholder="s__('Epics|Enter a title for your epic')"
           autocomplete="off"
           autofocus
@@ -162,6 +163,7 @@ export default {
           id="epic-confidentiality"
           v-model="confidential"
           data-testid="epic-confidentiality"
+          data-qa-selector="confidential_epic_checkbox"
         >
           {{ $options.i18n.confidentialityLabel }}
         </gl-form-checkbox>
@@ -226,6 +228,7 @@ export default {
           :loading="loading"
           :disabled="!title"
           data-testid="save-epic"
+          data-qa-selector="create_epic_button"
         >
           {{ __('Create epic') }}
         </gl-button>

@@ -2,7 +2,6 @@ import Vue from 'vue';
 import { s__, __ } from '~/locale';
 import { visitUrl } from '~/lib/utils/url_utility';
 import * as types from './mutation_types';
-import { DAYS } from './constants';
 import { isSameVulnerability } from './utils';
 
 export default {
@@ -33,30 +32,6 @@ export default {
   },
   [types.SET_VULNERABILITIES_PAGE](state, payload) {
     state.pageInfo = { ...state.pageInfo, page: payload };
-  },
-  [types.SET_VULNERABILITIES_HISTORY_ENDPOINT](state, payload) {
-    state.vulnerabilitiesHistoryEndpoint = payload;
-  },
-  [types.SET_VULNERABILITIES_HISTORY_DAY_RANGE](state, days) {
-    state.vulnerabilitiesHistoryDayRange = days;
-
-    if (days <= DAYS.THIRTY) {
-      state.vulnerabilitiesHistoryMaxDayInterval = 7;
-    } else if (days > DAYS.SIXTY) {
-      state.vulnerabilitiesHistoryMaxDayInterval = 14;
-    }
-  },
-  [types.REQUEST_VULNERABILITIES_HISTORY](state) {
-    state.isLoadingVulnerabilitiesHistory = true;
-    state.errorLoadingVulnerabilitiesHistory = false;
-  },
-  [types.RECEIVE_VULNERABILITIES_HISTORY_SUCCESS](state, payload) {
-    state.isLoadingVulnerabilitiesHistory = false;
-    state.vulnerabilitiesHistory = payload;
-  },
-  [types.RECEIVE_VULNERABILITIES_HISTORY_ERROR](state) {
-    state.isLoadingVulnerabilitiesHistory = false;
-    state.errorLoadingVulnerabilitiesHistory = true;
   },
   [types.SET_MODAL_DATA](state, payload) {
     const { vulnerability } = payload;

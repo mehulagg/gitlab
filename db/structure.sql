@@ -9320,6 +9320,8 @@ CREATE TABLE application_settings (
     elasticsearch_indexed_file_size_limit_kb integer DEFAULT 1024 NOT NULL,
     enforce_namespace_storage_limit boolean DEFAULT false NOT NULL,
     container_registry_delete_tags_service_timeout integer DEFAULT 250 NOT NULL,
+    kroki_url character varying,
+    kroki_enabled boolean,
     elasticsearch_client_request_timeout integer DEFAULT 0 NOT NULL,
     gitpod_enabled boolean DEFAULT false NOT NULL,
     gitpod_url text DEFAULT 'https://gitpod.io/'::text,
@@ -9347,6 +9349,7 @@ CREATE TABLE application_settings (
     secret_detection_revocation_token_types_url text,
     cloud_license_enabled boolean DEFAULT false NOT NULL,
     CONSTRAINT app_settings_registry_exp_policies_worker_capacity_positive CHECK ((container_registry_expiration_policies_worker_capacity >= 0)),
+    CONSTRAINT check_17d9558205 CHECK ((char_length((kroki_url)::text) <= 1024)),
     CONSTRAINT check_2dba05b802 CHECK ((char_length(gitpod_url) <= 255)),
     CONSTRAINT check_51700b31b5 CHECK ((char_length(default_branch_name) <= 255)),
     CONSTRAINT check_57123c9593 CHECK ((char_length(help_page_documentation_base_url) <= 255)),
@@ -11291,6 +11294,7 @@ CREATE TABLE compliance_management_frameworks (
     description text NOT NULL,
     color text NOT NULL,
     namespace_id integer NOT NULL,
+    regulated boolean DEFAULT true NOT NULL,
     CONSTRAINT check_08cd34b2c2 CHECK ((char_length(color) <= 10)),
     CONSTRAINT check_1617e0b87e CHECK ((char_length(description) <= 255)),
     CONSTRAINT check_ab00bc2193 CHECK ((char_length(name) <= 255))
@@ -12015,7 +12019,8 @@ CREATE TABLE experiment_users (
     user_id bigint NOT NULL,
     group_type smallint DEFAULT 0 NOT NULL,
     created_at timestamp with time zone NOT NULL,
-    updated_at timestamp with time zone NOT NULL
+    updated_at timestamp with time zone NOT NULL,
+    converted_at timestamp with time zone
 );
 
 CREATE SEQUENCE experiment_users_id_seq
@@ -14795,7 +14800,8 @@ CREATE TABLE plan_limits (
     golang_max_file_size bigint DEFAULT 104857600 NOT NULL,
     debian_max_file_size bigint DEFAULT '3221225472'::bigint NOT NULL,
     project_feature_flags integer DEFAULT 200 NOT NULL,
-    ci_max_artifact_size_api_fuzzing integer DEFAULT 0 NOT NULL
+    ci_max_artifact_size_api_fuzzing integer DEFAULT 0 NOT NULL,
+    ci_pipeline_deployments integer DEFAULT 500 NOT NULL
 );
 
 CREATE SEQUENCE plan_limits_id_seq
@@ -15124,7 +15130,8 @@ CREATE TABLE project_features (
     pages_access_level integer NOT NULL,
     forking_access_level integer,
     metrics_dashboard_access_level integer,
-    requirements_access_level integer DEFAULT 20 NOT NULL
+    requirements_access_level integer DEFAULT 20 NOT NULL,
+    operations_access_level integer DEFAULT 20 NOT NULL
 );
 
 CREATE SEQUENCE project_features_id_seq
@@ -20479,7 +20486,7 @@ CREATE INDEX index_ci_builds_on_protected ON ci_builds USING btree (protected);
 
 CREATE INDEX index_ci_builds_on_queued_at ON ci_builds USING btree (queued_at);
 
-CREATE INDEX index_ci_builds_on_runner_id ON ci_builds USING btree (runner_id);
+CREATE INDEX index_ci_builds_on_runner_id_and_id_desc ON ci_builds USING btree (runner_id, id DESC);
 
 CREATE INDEX index_ci_builds_on_stage_id ON ci_builds USING btree (stage_id);
 
@@ -21769,6 +21776,8 @@ CREATE UNIQUE INDEX index_project_repositories_on_project_id ON project_reposito
 
 CREATE INDEX index_project_repositories_on_shard_id ON project_repositories USING btree (shard_id);
 
+CREATE INDEX index_project_repositories_on_shard_id_and_project_id ON project_repositories USING btree (shard_id, project_id);
+
 CREATE UNIQUE INDEX index_project_repository_states_on_project_id ON project_repository_states USING btree (project_id);
 
 CREATE INDEX index_project_repository_storage_moves_on_project_id ON project_repository_storage_moves USING btree (project_id);
@@ -21778,6 +21787,8 @@ CREATE INDEX index_project_settings_on_project_id_partially ON project_settings 
 CREATE UNIQUE INDEX index_project_settings_on_push_rule_id ON project_settings USING btree (push_rule_id);
 
 CREATE INDEX index_project_statistics_on_namespace_id ON project_statistics USING btree (namespace_id);
+
+CREATE INDEX index_project_statistics_on_packages_size_and_project_id ON project_statistics USING btree (packages_size, project_id);
 
 CREATE UNIQUE INDEX index_project_statistics_on_project_id ON project_statistics USING btree (project_id);
 
@@ -22507,19 +22518,11 @@ CREATE UNIQUE INDEX one_canonical_wiki_page_slug_per_metadata ON wiki_page_slugs
 
 CREATE INDEX package_name_index ON packages_packages USING btree (name);
 
-CREATE INDEX packages_packages_verification_checksum_partial ON packages_package_files USING btree (verification_checksum) WHERE (verification_checksum IS NOT NULL);
-
-CREATE INDEX packages_packages_verification_failure_partial ON packages_package_files USING btree (verification_failure) WHERE (verification_failure IS NOT NULL);
-
 CREATE INDEX partial_index_ci_builds_on_scheduled_at_with_scheduled_jobs ON ci_builds USING btree (scheduled_at) WHERE ((scheduled_at IS NOT NULL) AND ((type)::text = 'Ci::Build'::text) AND ((status)::text = 'scheduled'::text));
 
 CREATE INDEX partial_index_deployments_for_legacy_successful_deployments ON deployments USING btree (id) WHERE ((finished_at IS NULL) AND (status = 2));
 
 CREATE INDEX partial_index_deployments_for_project_id_and_tag ON deployments USING btree (project_id) WHERE (tag IS TRUE);
-
-CREATE INDEX snippet_repositories_verification_checksum_partial ON snippet_repositories USING btree (verification_checksum) WHERE (verification_checksum IS NOT NULL);
-
-CREATE INDEX snippet_repositories_verification_failure_partial ON snippet_repositories USING btree (verification_failure) WHERE (verification_failure IS NOT NULL);
 
 CREATE UNIQUE INDEX snippet_user_mentions_on_snippet_id_and_note_id_index ON snippet_user_mentions USING btree (snippet_id, note_id);
 
@@ -22530,10 +22533,6 @@ CREATE UNIQUE INDEX taggings_idx ON taggings USING btree (tag_id, taggable_id, t
 CREATE INDEX temporary_index_vulnerabilities_on_id ON vulnerabilities USING btree (id) WHERE ((state = 2) AND ((dismissed_at IS NULL) OR (dismissed_by_id IS NULL)));
 
 CREATE UNIQUE INDEX term_agreements_unique_index ON term_agreements USING btree (user_id, term_id);
-
-CREATE INDEX terraform_state_versions_verification_checksum_partial ON terraform_state_versions USING btree (verification_checksum) WHERE (verification_checksum IS NOT NULL);
-
-CREATE INDEX terraform_state_versions_verification_failure_partial ON terraform_state_versions USING btree (verification_failure) WHERE (verification_failure IS NOT NULL);
 
 CREATE INDEX tmp_build_stage_position_index ON ci_builds USING btree (stage_id, stage_idx) WHERE (stage_idx IS NOT NULL);
 
@@ -23117,9 +23116,6 @@ ALTER TABLE ONLY merge_request_diffs
 
 ALTER TABLE ONLY ci_pipelines
     ADD CONSTRAINT fk_86635dbd80 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY services
-    ADD CONSTRAINT fk_868a8e7ad6 FOREIGN KEY (inherit_from_id) REFERENCES services(id) ON DELETE SET NULL;
 
 ALTER TABLE ONLY geo_event_log
     ADD CONSTRAINT fk_86c84214ec FOREIGN KEY (repository_renamed_event_id) REFERENCES geo_repository_renamed_events(id) ON DELETE CASCADE;
@@ -24785,6 +24781,9 @@ ALTER TABLE ONLY resource_label_events
 
 ALTER TABLE ONLY ci_builds_metadata
     ADD CONSTRAINT fk_rails_ffcf702a02 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY services
+    ADD CONSTRAINT fk_services_inherit_from_id FOREIGN KEY (inherit_from_id) REFERENCES services(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY timelogs
     ADD CONSTRAINT fk_timelogs_issues_issue_id FOREIGN KEY (issue_id) REFERENCES issues(id) ON DELETE CASCADE;

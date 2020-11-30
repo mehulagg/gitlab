@@ -1,10 +1,12 @@
 import { shallowMount } from '@vue/test-utils';
+import { within } from '@testing-library/dom';
 import CsvExportButton from 'ee/security_dashboard/components/csv_export_button.vue';
 import DashboardNotConfigured from 'ee/security_dashboard/components/empty_states/instance_dashboard_not_configured.vue';
 import FirstClassInstanceDashboard from 'ee/security_dashboard/components/first_class_instance_security_dashboard.vue';
 import FirstClassInstanceVulnerabilities from 'ee/security_dashboard/components/first_class_instance_security_dashboard_vulnerabilities.vue';
 import Filters from 'ee/security_dashboard/components/first_class_vulnerability_filters.vue';
 import SecurityDashboardLayout from 'ee/security_dashboard/components/security_dashboard_layout.vue';
+import VulnerabilitiesCountList from 'ee/security_dashboard/components/vulnerability_count_list.vue';
 
 describe('First Class Instance Dashboard Component', () => {
   let wrapper;
@@ -19,6 +21,7 @@ describe('First Class Instance Dashboard Component', () => {
   const findCsvExportButton = () => wrapper.find(CsvExportButton);
   const findEmptyState = () => wrapper.find(DashboardNotConfigured);
   const findFilters = () => wrapper.find(Filters);
+  const findVulnerabilitiesCountList = () => wrapper.find(VulnerabilitiesCountList);
 
   const createWrapper = ({ data = {}, stubs, mocks = defaultMocks() }) => {
     return shallowMount(FirstClassInstanceDashboard, {
@@ -74,6 +77,13 @@ describe('First Class Instance Dashboard Component', () => {
         vulnerabilitiesExportEndpoint,
       );
     });
+
+    it('displays the vulnerability count list with the correct data', () => {
+      expect(findVulnerabilitiesCountList().props()).toMatchObject({
+        scope: 'instance',
+        filters: wrapper.vm.filters,
+      });
+    });
   });
 
   describe('when loading projects', () => {
@@ -88,6 +98,10 @@ describe('First Class Instance Dashboard Component', () => {
 
     it('does not render the export button', () => {
       expect(findCsvExportButton().exists()).toBe(false);
+    });
+
+    it('does not render the vulnerabilities count list', () => {
+      expect(findVulnerabilitiesCountList().exists()).toBe(false);
     });
   });
 
@@ -115,6 +129,10 @@ describe('First Class Instance Dashboard Component', () => {
     it('has no filters', () => {
       expect(findFilters().exists()).toBe(false);
     });
+
+    it('does not render the vulnerabilities count list', () => {
+      expect(findVulnerabilitiesCountList().exists()).toBe(false);
+    });
   });
 
   describe('always', () => {
@@ -123,7 +141,9 @@ describe('First Class Instance Dashboard Component', () => {
     });
 
     it('has the security dashboard title', () => {
-      expect(wrapper.find('.page-title').text()).toBe('Vulnerability Report');
+      expect(
+        within(wrapper.element).getByRole('heading', { name: 'Vulnerability Report' }),
+      ).not.toBe(null);
     });
   });
 });

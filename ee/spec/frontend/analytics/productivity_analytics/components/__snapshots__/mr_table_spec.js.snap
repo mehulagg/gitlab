@@ -52,6 +52,7 @@ exports[`MergeRequestTable component matches the snapshot 1`] = `
                 class="w-100"
                 iconcolor=""
                 iconname=""
+                iconrightarialabel=""
                 iconrightname=""
                 secondarytext=""
               >
@@ -74,6 +75,7 @@ exports[`MergeRequestTable component matches the snapshot 1`] = `
                 class="w-100"
                 iconcolor=""
                 iconname=""
+                iconrightarialabel=""
                 iconrightname=""
                 secondarytext=""
               >
@@ -96,6 +98,7 @@ exports[`MergeRequestTable component matches the snapshot 1`] = `
                 class="w-100"
                 iconcolor=""
                 iconname=""
+                iconrightarialabel=""
                 iconrightname=""
                 secondarytext=""
               >

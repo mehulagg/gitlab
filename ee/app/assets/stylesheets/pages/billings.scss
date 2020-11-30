@@ -120,7 +120,6 @@
     tr {
       th,
       td {
-        @include gl-display-flex;
         @include gl-border-b-solid;
         @include gl-border-b-1;
         @include gl-p-5;
