@@ -1,3 +1,5 @@
+- page_heading = "GitLab for Jira Configuration"
+
 %header.jira-connect-header
   = brand_header_logo
 
@@ -9,10 +11,9 @@
     = link_to _('Sign in to GitLab'), jira_connect_users_path, target: '_blank', rel: 'noopener noreferrer', class: 'js-jira-connect-sign-in'
 
 .jira-connect-app
-  %h1
-    GitLab for Jira Configuration
-
   - if current_user.blank? && @subscriptions.empty?
+    %h1
+      = page_heading
     %h2.heading-with-border Sign in to GitLab.com to get started.
 
     .gl-mt-5
@@ -23,6 +24,8 @@
   - else
     .js-jira-connect-app
 
+    %h1
+      = page_heading
     - unless new_jira_connect_ui?
       %form#add-subscription-form.subscription-form{ action: jira_connect_subscriptions_path }
         .ak-field-group

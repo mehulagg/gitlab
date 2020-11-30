@@ -3,23 +3,15 @@ import $ from 'jquery';
 import setConfigs from '@gitlab/ui/dist/config';
 import Translate from '~/vue_shared/translate';
 import GlFeatureFlagsPlugin from '~/vue_shared/gl_feature_flags_plugin';
-
-import App from './components/app.vue';
 import { addSubscription, removeSubscription } from '~/jira_connect/api';
-
-const store = {
-  state: {
-    error: '',
-  },
-  setErrorMessage(errorMessage) {
-    this.state.error = errorMessage;
-  },
-};
+import JiraConnectApp from './components/app.vue';
+import createStore from './store';
 
 /**
- * Initialize necessary form handlers for the Jira Connect app
+ * Initialize form handlers for the Jira Connect app
+ * @param {object} store - object created with `createStore` builder
  */
-const initJiraFormHandlers = () => {
+const initJiraFormHandlers = (store) => {
   const reqComplete = () => {
     AP.navigator.reload();
   };
@@ -28,8 +20,6 @@ const initJiraFormHandlers = () => {
     const { responseJSON: { error = fallbackErrorMessage } = {} } = res || {};
 
     store.setErrorMessage(error);
-    // eslint-disable-next-line no-alert
-    alert(error);
   };
 
   if (typeof AP.getLocation === 'function') {
@@ -65,9 +55,10 @@ const initJiraFormHandlers = () => {
 };
 
 function initJiraConnect() {
+  const store = createStore();
   const el = document.querySelector('.js-jira-connect-app');
 
-  initJiraFormHandlers();
+  initJiraFormHandlers(store);
 
   if (!el) {
     return null;
@@ -83,7 +74,7 @@ function initJiraConnect() {
       state: store.state,
     },
     render(createElement) {
-      return createElement(App, {});
+      return createElement(JiraConnectApp, {});
     },
   });
 }
