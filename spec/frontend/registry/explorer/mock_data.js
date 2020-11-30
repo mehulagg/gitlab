@@ -45,21 +45,18 @@ export const registryServerResponse = [
   },
 ];
 
-export const imagesListResponse = {
-  data: [
-    {
-      path: 'foo',
-      location: 'location',
-      destroy_path: 'path',
-    },
-    {
-      path: 'bar',
-      location: 'location-2',
-      destroy_path: 'path-2',
-    },
-  ],
-  headers,
-};
+export const imagesListResponse = [
+  {
+    path: 'foo',
+    location: 'location',
+    destroyPath: 'path',
+  },
+  {
+    path: 'bar',
+    location: 'location-2',
+    destroyPath: 'path-2',
+  },
+];
 
 export const tagsListResponse = {
   data: [
@@ -90,12 +87,9 @@ export const tagsListResponse = {
   headers,
 };
 
-export const imagePagination = {
-  perPage: 10,
-  page: 1,
-  total: 14,
-  totalPages: 2,
-  nextPage: 2,
+export const pageInfo = {
+  hasPreviousPage: false,
+  hasNextPage: true,
 };
 
 export const imageDetailsMock = {
