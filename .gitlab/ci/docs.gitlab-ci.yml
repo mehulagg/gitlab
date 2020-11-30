@@ -61,7 +61,7 @@ docs-lint links:
     # The path must be 'ee/' because we have hardcoded links relying on it
     # https://gitlab.com/gitlab-org/gitlab-docs/-/blob/887850752fc0e72856da6632db132f005ba77f16/content/index.erb#L44-63
     - cd doc
-    - find | grep -rl "redirect_to" | xargs rm -f
+    - find *.md | grep -rl "redirect_to"
     - mv ../doc/ /tmp/gitlab-docs/content/ee
     - cd ../tmp/gitlab-docs
     # Build HTML from Markdown
