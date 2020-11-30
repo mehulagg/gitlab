@@ -23,7 +23,7 @@ module Resolvers
         url_base = DastSiteValidation.get_normalized_url_base(args[:target_url])
         DastSiteValidationsFinder.new(project_id: project.id, url_base: url_base).execute
       else
-        DastSiteValidationsFinder.new(project_id: project.id, **args.compact).execute
+        DastSiteValidationsFinder.new(project_id: project.id, url_base: args[:normalized_target_url]).execute
       end
     end
   end

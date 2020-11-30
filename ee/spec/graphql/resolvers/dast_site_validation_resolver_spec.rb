@@ -31,6 +31,12 @@ RSpec.describe Resolvers::DastSiteValidationResolver do
     subject { sync(dast_site_validations) }
 
     it { is_expected.to contain_exactly(dast_site_validation2, dast_site_validation1) }
+
+    context 'when filtering by normalized_target_url' do
+      subject { sync(dast_site_validations(normalized_target_url: dast_site_validation2.url_base)) }
+
+      it { is_expected.to contain_exactly(dast_site_validation2) }
+    end
   end
 
   private
