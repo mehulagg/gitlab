@@ -1,3 +1,5 @@
+@import 'page_bundles/mixins_and_variables_and_functions';
+
 $security-filter-height: 90px;
 $selection-summary-height: 68px;
 
@@ -66,4 +68,47 @@ $selection-summary-height: 68px;
 .security-charts > section {
   flex: 1 1 40%;
   margin: 1rem;
+}
+
+.vulnerability-list {
+  @media (min-width: $breakpoint-sm) {
+    .checkbox {
+      padding-left: $gl-spacing-scale-4;
+      padding-right: 0;
+      width: 1px;
+
+      + td,
+      + th {
+        padding-left: $gl-spacing-scale-4;
+      }
+    }
+
+    .detected {
+      width: 9%;
+    }
+
+    .status {
+      width: 8%;
+    }
+
+    .severity {
+      width: 10%;
+    }
+
+    .description {
+      max-width: 0;
+    }
+
+    .identifier {
+      width: 16%;
+    }
+
+    .scanner {
+      width: 10%;
+    }
+
+    .activity {
+      width: 5%;
+    }
+  }
 }

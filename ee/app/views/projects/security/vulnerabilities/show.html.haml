@@ -4,5 +4,6 @@
 - page_title @vulnerability.title
 - page_description @vulnerability.description
 - vulnerability_init_details = { vulnerability: vulnerability_details_json(@vulnerability, @pipeline)}
+- add_page_specific_style 'page_bundles/security_dashboard'
 
 #js-vulnerability-main{ data: vulnerability_init_details }
