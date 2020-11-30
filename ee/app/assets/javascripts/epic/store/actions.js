@@ -10,6 +10,7 @@ import { statusType, statusEvent, dateTypes } from '../constants';
 
 import epicSetSubscription from '../queries/epicSetSubscription.mutation.graphql';
 import updateEpic from '../queries/updateEpic.mutation.graphql';
+import epicSetSubscription from '../queries/epicSetSubscription.mutation.graphql';
 
 import * as types from './mutation_types';
 
