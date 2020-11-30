@@ -1858,6 +1858,32 @@ RSpec.describe MergeRequest, factory_default: :keep do
     end
   end
 
+  describe '#has_codequality_reports?' do
+    subject { merge_request.has_codequality_reports? }
+
+    let(:project) { create(:project, :repository) }
+
+    context 'when head pipeline has a codequality report' do
+      let(:merge_request) { create(:merge_request, :with_codequality_reports, source_project: project) }
+
+      it { is_expected.to be_truthy }
+
+      context 'when feature flag is disabled' do
+        before do
+          stub_feature_flags(codequality_mr_diff: false)
+        end
+
+        it { is_expected.to be_falsey }
+      end
+    end
+
+    context 'when head pipeline does not have a codequality report' do
+      let(:merge_request) { create(:merge_request, source_project: project) }
+
+      it { is_expected.to be_falsey }
+    end
+  end
+
   describe '#has_terraform_reports?' do
     context 'when head pipeline has terraform reports' do
       it 'returns true' do

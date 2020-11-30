@@ -28001,6 +28001,9 @@ msgstr ""
 msgid "This merge request does not have accessibility reports"
 msgstr ""
 
+msgid "This merge request does not have codequality reports"
+msgstr ""
+
 msgid "This merge request is closed. To apply this suggestion, edit this file directly."
 msgstr ""
 
