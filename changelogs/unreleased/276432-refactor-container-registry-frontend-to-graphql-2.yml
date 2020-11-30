@@ -1,5 +1,5 @@
 ---
-title: Add containerRepositoriesCount to project and group queries
+title: Add containerRepositoriesCount to project and group GraphQL types
 merge_request: 48685
 author:
 type: changed
