@@ -80,11 +80,9 @@ export default {
     },
     detailsPath() {
       return accessValue(this.dataMethod, 'detailsPath', this.status);
-      // return this.status[accessors[this.dataMethod].detailsPath];
     },
     hasDetails() {
       return accessValue(this.dataMethod, 'hasDetails', this.status);
-      // return this.status[accessors[this.dataMethod].hasDetails];
     },
     status() {
       return this.job && this.job.status ? this.job.status : {};
