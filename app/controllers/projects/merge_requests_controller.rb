@@ -21,7 +21,8 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
     :exposed_artifacts,
     :coverage_reports,
     :terraform_reports,
-    :accessibility_reports
+    :accessibility_reports,
+    :codequality_reports
   ]
   before_action :set_issuables_index, only: [:index]
   before_action :authenticate_user!, only: [:assign_related_issues]
@@ -187,6 +188,14 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
   def coverage_reports
     if @merge_request.has_coverage_reports?
       reports_response(@merge_request.find_coverage_reports)
+    else
+      head :no_content
+    end
+  end
+
+  def codequality_reports
+    if @merge_request.has_codequality_reports?
+      reports_response(@merge_request.compare_codequality_reports)
     else
       head :no_content
     end

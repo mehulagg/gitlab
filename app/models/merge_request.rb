@@ -1454,6 +1454,20 @@ class MergeRequest < ApplicationRecord
     compare_reports(Ci::GenerateCoverageReportsService)
   end
 
+  def has_codequality_reports?
+    return false unless Feature.enabled?(:codequality_mr_diff, project)
+
+    actual_head_pipeline&.has_reports?(Ci::JobArtifact.codequality_reports)
+  end
+
+  def compare_codequality_reports
+    unless has_codequality_reports?
+      return { status: :error, status_reason: _('This merge request does not have codequality reports') }
+    end
+
+    compare_reports(Ci::CompareCodequalityReportsService)
+  end
+
   def find_terraform_reports
     unless has_terraform_reports?
       return { status: :error, status_reason: 'This merge request does not have terraform reports' }
