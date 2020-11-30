@@ -96,6 +96,9 @@ module Types
 
       field :project, Types::ProjectType, null: true,
             description: 'Project the pipeline belongs to'
+
+      field :active, GraphQL::BOOLEAN_TYPE, null: false, method: :active?,
+            description: ''
     end
   end
 end

@@ -92,6 +92,8 @@ module Types
           description: 'Indicates if there is a rebase currently in progress for the merge request'
     field :default_merge_commit_message, GraphQL::STRING_TYPE, null: true,
           description: 'Default merge commit message of the merge request'
+    field :default_merge_commit_message_with_description, GraphQL::STRING_TYPE, null: true,
+          description: 'Default merge commit message of the merge request with description'
     field :merge_ongoing, GraphQL::BOOLEAN_TYPE, method: :merge_ongoing?, null: false,
           description: 'Indicates if a merge is currently occurring'
     field :source_branch_exists, GraphQL::BOOLEAN_TYPE,
@@ -154,6 +156,16 @@ module Types
 
     field :approved_by, Types::UserType.connection_type, null: true,
           description: 'Users who approved the merge request'
+    field :squash_on_merge, GraphQL::BOOLEAN_TYPE, null: false, method: :squash_on_merge?,
+          description: 'Indicates if squash on merge is enabled'
+    field :available_auto_merge_strategies, [GraphQL::STRING_TYPE], null: true,
+          description: 'Array of available auto merge strategies'
+    field :has_ci, GraphQL::BOOLEAN_TYPE, null: false, method: :has_ci?,
+          description: 'Indicates if the merge request has CI'
+    field :mergeable, GraphQL::BOOLEAN_TYPE, null: false, method: :mergeable?,
+          description: 'Indicates if the merge request is mergeable'
+    field :commits_without_merge_commits, Types::CommitType.connection_type, null: true,
+          calls_gitaly: true, description: 'Merge request commits excluding merge commits'
 
     def approved_by
       object.approved_by_users
@@ -199,6 +211,18 @@ module Types
 
     def source_branch_protected
       object.source_project.present? && ProtectedBranch.protected?(object.source_project, object.source_branch)
+    end
+
+    def default_merge_commit_message_with_description
+      object.default_merge_commit_message(include_description: true)
+    end
+
+    def available_auto_merge_strategies
+      AutoMergeService.new(object.project, current_user).available_strategies(object)
+    end
+
+    def commits_without_merge_commits
+      object.recent_commits.without_merge_commits
     end
   end
 end
