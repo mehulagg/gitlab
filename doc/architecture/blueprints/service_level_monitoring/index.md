@@ -137,7 +137,7 @@ During 2019, GitLab.com experienced multiple major incidents related to Sidekiq.
 
 The programmatic interface would be extremely simple. An SLI is a boolean indicator - it either succeeds or fails. The API would allow development teams to declare an SLI with a unique identifier, assign an appropriate feature category and optionally specify the maximum duration that the code could take to complete.
 
-```ruy
+```ruby
 SkyLab::service_level_indicator(
   identifier: :perform_chatops_command,
   max_duration: 1.second
