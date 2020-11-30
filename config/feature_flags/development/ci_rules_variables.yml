@@ -1,7 +1,7 @@
 ---
 name: ci_rules_variables
-introduced_by_url:
-rollout_issue_url: # https://gitlab.com/gitlab-org/gitlab/-/issues/new?issue%5Btitle%5D=%5BFeature+flag%5D+Rollout+of+%60ci_rules_variables%60&issuable_template=Feature+Flag+Roll+Out
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/48752
+rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/289803
 milestone: '13.7'
 type: development
 group: group::pipeline authoring
