@@ -69,6 +69,7 @@ class GroupsController < Groups::ApplicationController
     @group = Groups::CreateService.new(current_user, group_params).execute
 
     if @group.persisted?
+      invite_teammates
       track_experiment_event(:onboarding_issues, 'created_namespace')
 
       notice = if @group.chat_team.present?
@@ -333,6 +334,19 @@ class GroupsController < Groups::ApplicationController
   override :has_project_list?
   def has_project_list?
     %w(details show index).include?(action_name)
+  end
+
+  def invite_teammates
+    invite_params = {
+      user_ids: emails_param[:emails].reject(&:blank?).join(','),
+      access_level: Gitlab::Access::DEVELOPER
+    }
+
+    Members::CreateService.new(current_user, invite_params).execute(@group)
+  end
+
+  def emails_param
+    params.require(:group).permit(emails: [])
   end
 end
 
