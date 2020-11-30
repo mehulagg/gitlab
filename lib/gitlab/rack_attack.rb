@@ -11,9 +11,11 @@ module Gitlab
       configure_throttles(rack_attack)
     end
 
+    # rubocop:disable Metrics/AbcSize,Metrics/PerceivedComplexity,Metrics/CyclomaticComplexity
     def self.configure_throttles(rack_attack)
       throttle_or_track(rack_attack, 'throttle_unauthenticated', Gitlab::Throttle.unauthenticated_options) do |req|
         if !req.should_be_skipped? &&
+           !req.jwt_auth_request? &&
            Gitlab::Throttle.settings.throttle_unauthenticated_enabled &&
            req.unauthenticated?
           req.ip
@@ -71,11 +73,27 @@ module Gitlab
         end
       end
 
+      throttle_or_track(rack_attack, 'throttle_jwt_auth_unauthenticated', Gitlab::Throttle.jwt_auth_options) do |req|
+        if req.jwt_auth_request? &&
+           Gitlab::Throttle.settings.throttle_jwt_auth_enabled &&
+           req.unauthenticated?
+          req.ip
+        end
+      end
+
+      throttle_or_track(rack_attack, 'throttle_jwt_auth_authenticated', Gitlab::Throttle.jwt_auth_options) do |req|
+        if req.jwt_auth_request? &&
+           Gitlab::Throttle.settings.throttle_jwt_auth_enabled
+          req.authenticated_user_id([:api])
+        end
+      end
+
       rack_attack.safelist('throttle_bypass_header') do |req|
         Gitlab::Throttle.bypass_header.present? &&
           req.get_header(Gitlab::Throttle.bypass_header) == '1'
       end
     end
+    # rubocop:enable Metrics/AbcSize,Metrics/PerceivedComplexity,Metrics/CyclomaticComplexity
 
     def self.throttle_or_track(rack_attack, throttle_name, *args, &block)
       if track?(throttle_name)

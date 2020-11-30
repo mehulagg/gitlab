@@ -49,5 +49,21 @@
     .form-group
       = f.label :throttle_authenticated_web_period_in_seconds, 'Authenticated web rate limit period in seconds', class: 'label-bold'
       = f.number_field :throttle_authenticated_web_period_in_seconds, class: 'form-control'
+    %hr
+    %h5
+      = _('JWT Auth request rate limit')
+    .form-group
+      .form-check
+        = f.check_box :throttle_jwt_auth_enabled, class: 'form-check-input', data: { qa_selector: 'throttle_jwt_auth_checkbox' }
+        = f.label :throttle_jwt_auth_enabled, class: 'form-check-label label-bold' do
+          Enable JWT Auth request rate limit
+        %span.form-text.text-muted
+          Helps control request volume to /jwt/auth, used when authenticating to the Container Registry
+    .form-group
+      = f.label :throttle_jwt_auth_requests_per_period, 'Max requests to /jwt/auth per period per user/IP', class: 'label-bold'
+      = f.number_field :throttle_jwt_auth_requests_per_period, class: 'form-control'
+    .form-group
+      = f.label :throttle_jwt_auth_period_in_seconds, '/jwt/auth rate limit period in seconds', class: 'label-bold'
+      = f.number_field :throttle_jwt_auth_period_in_seconds, class: 'form-control'
 
   = f.submit 'Save changes', class: "gl-button btn btn-success", data: { qa_selector: 'save_changes_button' }

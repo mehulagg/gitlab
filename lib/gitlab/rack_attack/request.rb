@@ -31,12 +31,16 @@ module Gitlab
         path.start_with?('/-/collector/i')
       end
 
+      def jwt_auth_request?
+        path.start_with?('/jwt/auth/')
+      end
+
       def should_be_skipped?
         api_internal_request? || health_check_request?
       end
 
       def web_request?
-        !api_request? && !health_check_request?
+        !api_request? && !health_check_request? && !jwt_auth_request?
       end
 
       def protected_path?

@@ -46,5 +46,12 @@ module Gitlab
 
       { limit: limit_proc, period: period_proc }
     end
+
+    def self.jwt_auth_options
+      limit_proc = proc { |req| settings.throttle_jwt_auth_requests_per_period }
+      period_proc = proc { |req| settings.throttle_jwt_auth_period_in_seconds.seconds }
+
+      { limit: limit_proc, period: period_proc }
+    end
   end
 end
