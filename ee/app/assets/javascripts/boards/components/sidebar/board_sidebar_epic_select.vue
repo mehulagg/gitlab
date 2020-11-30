@@ -37,7 +37,9 @@ export default {
       receiveEpicsSuccess: RECEIVE_FIRST_EPICS_SUCCESS,
     }),
     ...mapActions(['setActiveIssueEpic']),
-    openEpicsDropdown() {
+    async openEpicsDropdown() {
+      await this.$nextTick();
+
       this.$refs.epicSelect.handleEditClick();
     },
     async setEpic(selectedEpic) {

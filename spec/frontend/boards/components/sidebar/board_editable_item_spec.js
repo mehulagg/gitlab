@@ -38,7 +38,7 @@ describe('boards sidebar remove issue', () => {
 
       expect(findEditButton().exists()).toBe(false);
       expect(findLoader().exists()).toBe(false);
-      expect(findExpanded().isVisible()).toBe(false);
+      expect(findExpanded().exists()).toBe(false);
     });
 
     it('shows "None" if empty collapsed slot', () => {
@@ -72,8 +72,8 @@ describe('boards sidebar remove issue', () => {
       findEditButton().vm.$emit('click');
 
       return wrapper.vm.$nextTick().then(() => {
-        expect(findCollapsed().isVisible()).toBe(false);
-        expect(findExpanded().isVisible()).toBe(true);
+        expect(findCollapsed().exists()).toBe(false);
+        expect(findExpanded().exists()).toBe(true);
         expect(findExpanded().text()).toBe('Select item');
       });
     });
@@ -87,13 +87,13 @@ describe('boards sidebar remove issue', () => {
     });
 
     it('hides expanded section and displays collapsed section', async () => {
-      expect(findExpanded().isVisible()).toBe(true);
+      expect(findExpanded().exists()).toBe(true);
       document.body.click();
 
       await wrapper.vm.$nextTick();
 
-      expect(findCollapsed().isVisible()).toBe(true);
-      expect(findExpanded().isVisible()).toBe(false);
+      expect(findCollapsed().exists()).toBe(true);
+      expect(findExpanded().exists()).toBe(false);
     });
 
     it('emits close event', async () => {

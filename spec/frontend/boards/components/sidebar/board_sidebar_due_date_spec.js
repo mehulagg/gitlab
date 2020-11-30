@@ -56,13 +56,16 @@ describe('~/boards/components/sidebar/board_sidebar_due_date.vue', () => {
     expect(findResetButton().exists()).toBe(true);
   });
 
-  describe('when due date is submitted', () => {
+  describe.only('when due date is submitted', () => {
     beforeEach(async () => {
       createWrapper();
 
       jest.spyOn(wrapper.vm, 'setActiveIssueDueDate').mockImplementation(() => {
         store.state.issues[TEST_ISSUE.id].dueDate = TEST_DUE_DATE;
       });
+      // console.log(wrapper.html());
+      // wrapper.find('[data-testid="edit-button"]').vm.$emit('click');
+      // await wrapper.vm.$nextTick;
       findDatePicker().vm.$emit('input', TEST_PARSED_DATE);
       await wrapper.vm.$nextTick();
     });
