@@ -78,7 +78,7 @@ rolled out.
 Having decided where to add a navigation element, the next step is deciding what to add. The
 mechanics of what is required is [documented below](#data-file) but, in principle:
 
-- Links only to `docs.gitlab.com` pages. Sending visitors to links not on the
+- Link only to `docs.gitlab.com` pages. Sending visitors to links not on the
   documentation site with a global nav link lacks context, as they don't know
   that they're external links.
 - Navigation item text (that which the reader sees) should:
