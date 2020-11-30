@@ -1,3 +1,10 @@
+-# .gl-alert.gl-alert-info.alert.flex-alert
+-#   = sprite_icon('information-o', css_class: 'gl-icon gl-alert-icon gl-alert-icon-no-title')
+-#   .alert-message
+-#     = _("Test error")
+
+- is_gitlab_connected = !current_user.blank? || !@subscriptions.empty?
+
 %header.jira-connect-header
   = brand_header_logo
 
@@ -9,20 +16,9 @@
     = link_to _('Sign in to GitLab'), jira_connect_users_path, target: '_blank', rel: 'noopener noreferrer', class: 'js-jira-connect-sign-in'
 
 .jira-connect-app
-  %h1
-    GitLab for Jira Configuration
+  .js-jira-connect-app{ data: { is_gitlab_connected: is_gitlab_connected.to_s, jira_connect_users_path: jira_connect_users_path } }
 
-  - if current_user.blank? && @subscriptions.empty?
-    %h2.heading-with-border Sign in to GitLab.com to get started.
-
-    .gl-mt-5
-      = external_link _('Sign in to GitLab'), jira_connect_users_path, class: 'ak-button ak-button__appearance-primary js-jira-connect-sign-in'
-
-    .gl-mt-5
-      %p Note: this integration only works with accounts on GitLab.com (SaaS).
-  - else
-    .js-jira-connect-app
-
+  - if is_gitlab_connected
     %form#add-subscription-form.subscription-form{ action: jira_connect_subscriptions_path }
       .ak-field-group
         %label
