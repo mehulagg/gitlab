@@ -24,7 +24,6 @@ const initJiraFormHandlers = () => {
     if (!error) return;
 
     store.setErrorMessage(error);
-    alert(error);
   };
 
   AP.getLocation(location => {

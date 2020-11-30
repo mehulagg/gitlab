@@ -13,5 +13,8 @@ export default {
 </script>
 <template>
   <div>
+    <div v-if="error" class="gl-alert gl-alert-danger gl-mb-5">
+      <div class="gl-alert-body">{{ error }}</div>
+    </div>
   </div>
 </template>
