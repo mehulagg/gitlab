@@ -1,6 +1,7 @@
 <script>
 import { GlBadge, GlIcon, GlSprintf, GlTable, GlTooltip } from '@gitlab/ui';
 import { s__ } from '~/locale';
+import StateActions from './states_table_actions.vue';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import timeagoMixin from '~/vue_shared/mixins/timeago';
 
@@ -11,6 +12,7 @@ export default {
     GlSprintf,
     GlTable,
     GlTooltip,
+    StateActions,
     TimeAgoTooltip,
   },
   mixins: [timeagoMixin],
@@ -18,6 +20,11 @@ export default {
     states: {
       required: true,
       type: Array,
+    },
+    terraformAdmin: {
+      required: false,
+      type: Boolean,
+      default: false,
     },
   },
   computed: {
@@ -30,7 +37,6 @@ export default {
         {
           key: 'updated',
           thClass: 'gl-display-none',
-          tdClass: 'gl-text-right',
         },
       ];
     },
@@ -83,19 +89,23 @@ export default {
     </template>
 
     <template #cell(updated)="{ item }">
-      <p class="gl-m-0" data-testid="terraform-states-table-updated">
-        <gl-sprintf :message="s__('Terraform|%{user} updated %{timeAgo}')">
-          <template #user>
-            <span v-if="item.latestVersion">
-              {{ createdByUserName(item) }}
-            </span>
-          </template>
+      <div class="gl-display-flex gl-justify-content-end gl-align-items-center">
+        <p class="gl-m-0" data-testid="terraform-states-table-updated">
+          <gl-sprintf :message="s__('Terraform|%{user} updated %{timeAgo}')">
+            <template #user>
+              <span v-if="item.latestVersion">
+                {{ createdByUserName(item) }}
+              </span>
+            </template>
 
-          <template #timeAgo>
-            <time-ago-tooltip :time="updatedTime(item)" />
-          </template>
-        </gl-sprintf>
-      </p>
+            <template #timeAgo>
+              <time-ago-tooltip :time="updatedTime(item)" />
+            </template>
+          </gl-sprintf>
+        </p>
+
+        <state-actions v-if="terraformAdmin" :state="item" />
+      </div>
     </template>
   </gl-table>
 </template>
