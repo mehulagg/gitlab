@@ -24,9 +24,6 @@ export default {
           total: stats.total?.count || 0,
         };
       },
-      error() {
-        this.error = __('Error loading issues');
-      },
     },
   },
   props: {
