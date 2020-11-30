@@ -42,7 +42,7 @@ class Geo::BaseRegistry < Geo::TrackingBase
   end
 
   def self.delete_worker_class
-    ::Geo::FileRegistryRemovalWorker
+    ::Geo::FrameworkDestroyWorker
   end
 
   def self.replicator_class
