@@ -86,7 +86,7 @@ module EE
       end
 
       def needs_touch?
-        Time.current - updated_at > 5.minutes.to_i
+        updated_at < 5.minutes.ago
       end
 
       def triggers_subscriptions?
