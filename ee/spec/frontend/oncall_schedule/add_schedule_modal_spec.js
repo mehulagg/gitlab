@@ -4,7 +4,7 @@ import waitForPromises from 'helpers/wait_for_promises';
 import AddScheduleModal, { i18n } from 'ee/oncall_schedules/components/add_schedule_modal.vue';
 import mockTimezones from './mocks/mockTimezones.json';
 
-describe('AddScheduleModal', () => {
+describe('Add schedule modal', () => {
   let wrapper;
   const projectPath = 'group/project';
   const mutate = jest.fn();

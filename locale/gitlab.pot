@@ -18973,6 +18973,12 @@ msgstr ""
 msgid "OnCallSchedules|Failed to add schedule"
 msgstr ""
 
+msgid "OnCallSchedules|On-call schedule"
+msgstr ""
+
+msgid "OnCallSchedules|On-call schedule for the %{tzShort}"
+msgstr ""
+
 msgid "OnCallSchedules|Route alerts directly to specific members of your team"
 msgstr ""
 

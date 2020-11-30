@@ -1,7 +1,7 @@
 <script>
 import { GlSprintf, GlCard } from '@gitlab/ui';
 import { s__, __ } from '~/locale';
-import ScheduleShell from './schedule/components/schedul_shell.vue';
+import ScheduleTimelineSection from './schedule/components/schedule_timeline_section.vue';
 import { getTimeframeForWeeksView } from './schedule/utils';
 import { PRESET_TYPES, PRESET_DEFAULTS } from './schedule/constants';
 
@@ -17,7 +17,7 @@ export default {
   components: {
     GlSprintf,
     GlCard,
-    ScheduleShell,
+    ScheduleTimelineSection,
   },
   props: {
     schedule: {
@@ -52,15 +52,16 @@ export default {
 
       <div class="gl-text-gray-500 gl-mb-5">
         <gl-sprintf :message="$options.i18n.scheduleForTz">
-          <template #tzShort
-            ><span>{{ schedule.timezone }}</span></template
-          >
+          <template #tzShort>
+            <span>{{ schedule.timezone }}</span>
+          </template>
         </gl-sprintf>
         | <span>{{ tzLong }}</span>
       </div>
 
-      <div ref="scheduleContainer" class="gl-w-full">
-        <schedule-shell :preset-type="$options.presetType" :timeframe="timeframe" :epics="[]" />
+      <div class="schedule-shell js-schedule-shell">
+        <schedule-timeline-section :preset-type="$options.presetType" :timeframe="timeframe" />
+        <rotations />
       </div>
     </gl-card>
   </div>
