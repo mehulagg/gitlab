@@ -70,7 +70,7 @@ module QA
       end
     end
 
-    describe 'License Compliance pipeline reports' do
+    describe 'License Compliance pipeline reports', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/241448', type: :stale }  do
       let(:executor) {"qa-runner-#{Time.now.to_i}"}
 
       after do
@@ -108,7 +108,7 @@ module QA
         Page::Project::Menu.perform(&:click_on_license_compliance)
       end
 
-      it 'can approve and deny licenses in the pipeline', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/965' do
+      it 'can approve and deny licenses in the pipeline', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/965'do
         EE::Page::Project::Secure::LicenseCompliance.perform do |license_compliance|
           license_compliance.open_tab
           license_compliance.approve_license approved_license_name
