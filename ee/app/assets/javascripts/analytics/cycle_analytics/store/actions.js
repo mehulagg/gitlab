@@ -1,4 +1,5 @@
 import Api from 'ee/api';
+import { keyBy, pick } from 'lodash';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { __, sprintf } from '~/locale';
 import httpStatus from '~/lib/utils/http_status';
@@ -341,13 +342,86 @@ export const receiveCreateValueStreamSuccess = ({ commit, dispatch }, valueStrea
   return dispatch('fetchCycleAnalyticsData');
 };
 
+const pickUpdateableDefaultFields = stage => {
+  const acceptedFields = ['custom', 'hidden', 'name', 'title'];
+  return pick(stage, acceptedFields);
+};
+
+/**
+ * This is a stopgap solution until the value stream stages
+ * can be modified via the value stream entity
+ *
+ * TODO: link to related BE issue
+ */
+const updateValueStreamStages = (currentGroupPath, valueStreamId, newStages) => {
+  const promises = newStages.map(({ id, ...rest }) => {
+    return Api.cycleAnalyticsUpdateStage({
+      groupId: currentGroupPath,
+      valueStreamId,
+      stageId: id,
+      data: rest,
+    });
+  });
+  return Promise.all(promises);
+};
+
+const mergeStageData = (persistedStages, newStages) => {
+  const merged = persistedStages.map(stage => {
+    const newData = newStages.find(
+      ns => ns.defaultName.toLowerCase().trim() === stage.title.toLowerCase().trim(),
+    );
+    return {
+      ...stage,
+      ...pickUpdateableDefaultFields(newData),
+    };
+  });
+  return merged;
+};
+
+const updateDefaultValueStreams = (groupId, newValueStream, persistedStages, newStages) => {
+  // hide all stages
+  // retrive the value stream
+  // send the correct update
+  const { id: valueStreamId } = newValueStream;
+  const finalStageData = mergeStageData(persistedStages, newStages);
+  console.log('finalStageData', finalStageData);
+  return updateValueStreamStages(groupId, valueStreamId, finalStageData).then(() => ({
+    data: newValueStream,
+  }));
+};
+
+const triggerValueStreamPersistance = ({ currentGroupPath: groupId, newValueStream }) => {
+  const valueStreamId = newValueStream.id;
+  return Api.cycleAnalyticsUpdateStage({
+    groupId,
+    valueStreamId,
+    stageId: 'issue',
+    data: { hidden: false },
+  })
+    .then(() =>
+      Api.cycleAnalyticsGroupStagesAndEvents({
+        groupId,
+        valueStreamId,
+      }),
+    )
+    .then(({ data: { stages } }) => ({ data: newValueStream, stages }));
+};
+
 export const createValueStream = ({ commit, dispatch, getters }, data) => {
   const { currentGroupPath } = getters;
   commit(types.REQUEST_CREATE_VALUE_STREAM);
 
-  return Api.cycleAnalyticsCreateValueStream(currentGroupPath, data)
+  const { name, stages: newStages } = data;
+
+  return Api.cycleAnalyticsCreateValueStream(currentGroupPath, { name })
+    .then(({ data: newValueStream }) =>
+      triggerValueStreamPersistance({ currentGroupPath, newValueStream }),
+    )
+    .then(({ data: newValueStream, stages: persistedStages }) =>
+      updateDefaultValueStreams(currentGroupPath, newValueStream, persistedStages, newStages),
+    )
     .then(({ data: newValueStream }) => dispatch('receiveCreateValueStreamSuccess', newValueStream))
-    .catch(({ response } = {}) => {
+    .catch((response = {}) => {
       const { data: { message, payload: { errors } } = null } = response;
       commit(types.RECEIVE_CREATE_VALUE_STREAM_ERROR, { message, errors });
     });

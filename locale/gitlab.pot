@@ -956,6 +956,9 @@ msgstr ""
 msgid "(check progress)"
 msgstr ""
 
+msgid "(default)"
+msgstr ""
+
 msgid "(deleted)"
 msgstr ""
 
@@ -8133,6 +8136,24 @@ msgid "CreateTag|Tag"
 msgstr ""
 
 msgid "CreateTokenToCloneLink|create a personal access token"
+msgstr ""
+
+msgid "CreateValueStreamForm|Enter stage name"
+msgstr ""
+
+msgid "CreateValueStreamForm|From default template"
+msgstr ""
+
+msgid "CreateValueStreamForm|From scratch"
+msgstr ""
+
+msgid "CreateValueStreamForm|Maximum length 100 characters"
+msgstr ""
+
+msgid "CreateValueStreamForm|Name is required"
+msgstr ""
+
+msgid "CreateValueStreamForm|Restore stage"
 msgstr ""
 
 msgid "Created"
@@ -17002,9 +17023,6 @@ msgstr ""
 msgid "Maximum job timeout has a value which could not be accepted"
 msgstr ""
 
-msgid "Maximum length 100 characters"
-msgstr ""
-
 msgid "Maximum lifetime allowable for Personal Access Tokens is active, your expire date must be set before %{maximum_allowable_date}."
 msgstr ""
 
@@ -18228,9 +18246,6 @@ msgid "Name"
 msgstr ""
 
 msgid "Name has already been taken"
-msgstr ""
-
-msgid "Name is required"
 msgstr ""
 
 msgid "Name new label"
@@ -23736,6 +23751,9 @@ msgstr ""
 msgid "Restore"
 msgstr ""
 
+msgid "Restore defaults"
+msgstr ""
+
 msgid "Restore group"
 msgstr ""
 
@@ -26247,6 +26265,9 @@ msgid "Stacktrace snippet"
 msgstr ""
 
 msgid "Stage"
+msgstr ""
+
+msgid "Stage %{index}"
 msgstr ""
 
 msgid "Stage & Commit"
@@ -30445,7 +30466,7 @@ msgstr ""
 msgid "Value Stream Analytics gives an overview of how much time it takes to go from idea to production in your project."
 msgstr ""
 
-msgid "Value Stream Name"
+msgid "Value Stream name"
 msgstr ""
 
 msgid "ValueStreamAnalyticsStage|We don't have enough data to show this stage."
