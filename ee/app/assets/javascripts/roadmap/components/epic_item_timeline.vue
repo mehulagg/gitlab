@@ -36,10 +36,10 @@ export default {
       type: Array,
       required: true,
     },
-    timeframeItem: {
-      type: [Date, Object],
-      required: true,
-    },
+    // timeframeItem: {
+    //   type: [Date, Object],
+    //   required: true,
+    // },
     epic: {
       type: Object,
       required: true,
@@ -94,15 +94,16 @@ export default {
       }
       return this.epic.endDate;
     },
-    hasStartDate() {
-      if (this.presetTypeQuarters) {
-        return this.hasStartDateForQuarter();
-      } else if (this.presetTypeMonths) {
-        return this.hasStartDateForMonth();
-      } else if (this.presetTypeWeeks) {
-        return this.hasStartDateForWeek();
-      }
-      return false;
+    timeframeItemIndex() {
+      return this.timeframe.findIndex(timeframeItem => {
+        return this.hasStartDate(timeframeItem);
+      });
+    },
+    timeframeItem() {
+      return this.timeframe[this.timeframeItemIndex];
+    },
+    timelineLeftOffset() {
+      return `${this.$options.cellWidth * this.timeframeItemIndex + EPIC_DETAILS_CELL_WIDTH}px`;
     },
     timelineBarInnerStyle() {
       return {
@@ -158,16 +159,28 @@ export default {
   },
   methods: {
     generateKey,
+    hasStartDate(timeframeItem) {
+      if (this.presetTypeQuarters) {
+        return this.hasStartDateForQuarter(timeframeItem);
+      } else if (this.presetTypeMonths) {
+        return this.hasStartDateForMonth(timeframeItem);
+      } else if (this.presetTypeWeeks) {
+        return this.hasStartDateForWeek(timeframeItem);
+      }
+      return false;
+    },
   },
 };
 </script>
 
 <template>
-  <span class="epic-timeline-cell" data-qa-selector="epic_timeline_cell">
-    <current-day-indicator :preset-type="presetType" :timeframe-item="timeframeItem" />
+  <span
+    :style="{ left: timelineLeftOffset }"
+    class="epic-timeline-cell"
+    data-qa-selector="epic_timeline_cell"
+  >
     <div class="epic-bar-wrapper">
       <a
-        v-if="hasStartDate"
         :id="generateKey(epic)"
         :href="epic.webUrl"
         :style="timelineBarStyles(epic)"

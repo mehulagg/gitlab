@@ -137,6 +137,8 @@ export default {
       if (this.$el.parentElement) this.$el.parentElement.scrollBy(TIMELINE_CELL_MIN_WIDTH / 2, 0);
     },
     handleEpicsListScroll({ scrollTop, clientHeight, scrollHeight }) {
+      // Not relevant
+      console.log("epicsListScroll event.")
       this.showBottomShadow = Math.ceil(scrollTop) + clientHeight < scrollHeight;
     },
     getEpicItemProps(index) {

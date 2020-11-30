@@ -67,3 +67,5 @@ export const EPIC_LEVEL_MARGIN = {
 export const EPICS_LIMIT_DISMISSED_COOKIE_NAME = 'epics_limit_warning_dismissed';
 
 export const EPICS_LIMIT_DISMISSED_COOKIE_TIMEOUT = 365;
+
+export const GRID_COLOR = '#dbdbdb'; // equivalent to gl-gray-100

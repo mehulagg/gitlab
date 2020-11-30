@@ -255,9 +255,10 @@ html.group-epics-roadmap-html {
 }
 
 .epics-list-item {
+  @include gl-relative;
   &:hover {
-    .epic-details-cell,
-    .epic-timeline-cell {
+    .epic-details-cell {
+    // .epic-timeline-cell {
       background-color: var(--gray-50, $gray-50);
     }
   }
@@ -286,8 +287,8 @@ html.group-epics-roadmap-html {
   }
 }
 
-.epic-details-cell,
-.epic-timeline-cell {
+.epic-details-cell {
+// .epic-timeline-cell {
   float: left;
   height: $item-height;
   border-bottom: $border-style;
@@ -314,7 +315,8 @@ html.group-epics-roadmap-html {
 }
 
 .epic-timeline-cell {
-  position: relative;
+  @include gl-absolute;
+  @include gl-top-0;
   width: $timeline-cell-width;
   background-color: transparent;
   border-right: $border-style;
