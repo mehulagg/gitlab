@@ -6,7 +6,7 @@ import OnCallScheduleWrapper, {
   i18n,
 } from 'ee/oncall_schedules/components/oncall_schedules_wrapper.vue';
 import OncallSchedule from 'ee/oncall_schedules/components/oncall_schedule.vue';
-import getOncallSchedulesQuery from 'ee/oncall_schedules/graphql/get_oncall_schedules.query.graphql';
+import getOncallSchedulesQuery from 'ee/oncall_schedules/graphql/queries/get_oncall_schedules.query.graphql';
 import destroyOncallScheduleMutation from 'ee/oncall_schedules/graphql/mutations/destroy_oncall_schedule.mutation.graphql';
 import { DELETE_SCHEDULE_ERROR } from 'ee/oncall_schedules/utils/error_messages';
 import createFlash from '~/flash';

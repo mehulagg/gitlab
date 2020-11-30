@@ -1,8 +1,5 @@
 <script>
-import {
-  GlModal,
-  GlAlert,
-} from '@gitlab/ui';
+import { GlModal, GlAlert } from '@gitlab/ui';
 import { s__ } from '~/locale';
 import createOncallScheduleMutation from '../graphql/mutations/create_oncall_schedule.mutation.graphql';
 import AddEditScheduleForm from './add_edit_schedule_form.vue';
@@ -18,7 +15,7 @@ export default {
   components: {
     GlModal,
     GlAlert,
-    AddEditScheduleForm
+    AddEditScheduleForm,
   },
   props: {
     modalId: {
@@ -31,6 +28,7 @@ export default {
       loading: false,
       showErrorAlert: false,
       error: '',
+      form: null,
     };
   },
   computed: {
@@ -61,7 +59,7 @@ export default {
             oncallScheduleCreateInput: {
               projectPath: this.projectPath,
               ...form,
-              timezone: this.form.timezone.identifier,
+              timezone: form.timezone.identifier,
             },
           },
         })
@@ -81,6 +79,9 @@ export default {
     },
     hideErrorAlert() {
       this.showErrorAlert = false;
+    },
+    updateScheduleForm({ form }) {
+      this.form = form;
     },
   },
 };
@@ -104,6 +105,6 @@ export default {
     >
       {{ error || $options.i18n.errorMsg }}
     </gl-alert>
-    <add-edit-schedule-form @submit-schedule-form="createSchedule" />
+    <add-edit-schedule-form @update-schedule-form="updateScheduleForm" />
   </gl-modal>
 </template>

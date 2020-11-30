@@ -1,5 +1,8 @@
 <script>
 import { GlSprintf, GlModal } from '@gitlab/ui';
+import destroyOncallScheduleMutation from '../graphql/mutations/destroy_oncall_schedule.mutation.graphql';
+import getOncallSchedulesQuery from '../graphql/queries/get_oncall_schedules.query.graphql';
+import { updateStoreAfterScheduleDelete } from '../utils/cache_updates';
 import { s__, __ } from '~/locale';
 
 export const i18n = {
@@ -7,6 +10,7 @@ export const i18n = {
 };
 
 export default {
+  i18n,
   components: {
     GlSprintf,
     GlModal,
@@ -16,6 +20,13 @@ export default {
       type: Object,
       required: true,
     },
+  },
+  data() {
+    return {
+      loading: false,
+      showErrorAlert: false,
+      error: '',
+    };
   },
   computed: {
     primaryProps() {
@@ -32,28 +43,55 @@ export default {
   },
   methods: {
     deleteSchedule() {
-      this.$emit('delete-schedule', { id: this.schedule.id });
+      const { projectPath } = this;
+
+      this.loading = true;
+      this.$apollo
+        .mutate({
+          mutation: destroyOncallScheduleMutation,
+          variables: {
+            id: this.schedule.id,
+          },
+          update(store, { data }) {
+            updateStoreAfterScheduleDelete(store, getOncallSchedulesQuery, data, { projectPath });
+          },
+        })
+        .then(({ data: { oncallScheduleDestroy } = {} } = {}) => {
+          const error = oncallScheduleDestroy?.errors[0];
+          if (error) {
+            throw error;
+          }
+          this.$refs.editScheduleModal.hide();
+        })
+        .catch(error => {
+          this.error = error;
+          this.showErrorAlert = true;
+        })
+        .finally(() => {
+          this.loading = false;
+        });
     },
   },
 };
 </script>
 
 <template>
-    <gl-modal
-      modal-id="deleteSchedule"
-      :title="$options.i18n.deleteSchedule"
-      :action-primary="primaryProps"
-      :action-cancel="cancelProps"
-      @primary="deleteSchedule"
+  <gl-modal
+    ref="deleteSchedule"
+    modal-id="deleteScheduleModal"
+    :title="$options.i18n.deleteSchedule"
+    :action-primary="primaryProps"
+    :action-cancel="cancelProps"
+    @primary="deleteSchedule"
+  >
+    <gl-sprintf
+      :message="
+        s__(
+          'OnCallSchedules|Are you sure you want to delete the %{deleteSchedule} schedule. This action cannot be undone.',
+        )
+      "
     >
-      <gl-sprintf
-        :message="
-          s__(
-            'OnCallSchedules|Are you sure you want to delete the %{deleteSchedule} schedule. This action cannot be undone.',
-          )
-        "
-      >
-        <template #deleteSchedule>{{ schedule.name }}</template>
-      </gl-sprintf>
-    </gl-modal>
+      <template #deleteSchedule>{{ schedule.name }}</template>
+    </gl-sprintf>
+  </gl-modal>
 </template>

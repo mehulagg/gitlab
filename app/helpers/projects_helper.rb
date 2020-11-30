@@ -469,13 +469,14 @@ module ProjectsHelper
   end
 
   def can_view_operations_tab?(current_user, project)
-    return false unless project.feature_available?(:operations, current_user)
-
     [
       :metrics_dashboard,
       :read_alert_management_alert,
       :read_incident_management_oncall_schedule,
       :read_environment,
+      :read_issue,
+      :read_sentry_issue,
+      :read_cluster,
       :read_feature_flag,
       :read_terraform_state
     ].any? do |ability|
@@ -623,7 +624,6 @@ module ProjectsHelper
       lfsEnabled: !!project.lfs_enabled,
       emailsDisabled: project.emails_disabled?,
       metricsDashboardAccessLevel: feature.metrics_dashboard_access_level,
-      operationsAccessLevel: feature.operations_access_level,
       showDefaultAwardEmojis: project.show_default_award_emojis?
     }
   end

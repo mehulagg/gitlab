@@ -51,12 +51,6 @@ export default {
     getFormattedTimezone(tz) {
       return __(`(UTC${tz.formatted_offset}) ${tz.abbr} ${tz.name}`);
     },
-    deleteSchedule() {
-      this.$emit('delete-schedule', { id: this.schedule.id });
-    },
-    editSchedule(variables) {
-      this.$emit('edit-schedule', { id: this.schedule.id, variables });
-    },
   },
 };
 </script>
@@ -69,8 +63,8 @@ export default {
         <div class="gl-display-flex gl-justify-content-space-between">
           <span class="gl-font-weight-bold gl-font-lg">{{ schedule.name }}</span>
           <gl-button-group>
-            <gl-button v-gl-modal.editSchedule icon="pencil" />
-            <gl-button v-gl-modal.deleteSchedule icon="remove" />
+            <gl-button v-gl-modal.editScheduleModal icon="pencil" />
+            <gl-button v-gl-modal.deleteScheduleModal icon="remove" />
           </gl-button-group>
         </div>
       </template>
@@ -88,7 +82,7 @@ export default {
         <schedule-shell :preset-type="$options.presetType" :timeframe="timeframe" :epics="[]" />
       </div>
     </gl-card>
-    <delete-schedule-modal @delete-schedule="deleteSchedule" />
-    <edit-schedule-modal @edit-schedule="editSchedule" />
+    <delete-schedule-modal :schedule="schedule" />
+    <edit-schedule-modal :schedule="schedule" />
   </div>
 </template>

@@ -262,11 +262,7 @@
                   %span
                     = _('Incidents')
 
-            - if project_nav_tab?(:on_call_schedule)
-              = nav_link(controller: :on_call_schedule) do
-                = link_to project_on_call_schedule_index_path(@project), title: _('On-call schedules') do
-                  %span
-                    = _('On-call schedules')
+            = render_if_exists 'projects/sidebar/oncall_schedules'
 
             - if project_nav_tab? :serverless
               = nav_link(controller: :functions) do
