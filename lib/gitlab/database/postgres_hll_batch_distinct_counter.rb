@@ -53,7 +53,49 @@ module Gitlab
         GROUP BY 1
       SQL
 
-      TOTAL_BUCKETS_NUMBER = 512
+      class HLLBuckets
+        TOTAL_BUCKETS_NUMBER = 512
+
+        def initialize(hll_buckets = {})
+          @hll_buckets = hll_buckets
+        end
+
+        def estimated_distinct_count
+          @estimated_distinct_count ||= estimate_cardinality
+        end
+
+        def merge!(other_hll_buckets)
+          hll_buckets.merge!(other_hll_buckets) {|_key, old, new| new > old ? new : old }
+        end
+
+        def to_s
+          hll_buckets.to_json
+        end
+
+        private
+
+        attr_accessor :hll_buckets
+
+        # arbitrary values that are present in #estimate_cardinality
+        # are sourced from https://www.sisense.com/blog/hyperloglog-in-pure-sql/
+        # article, they are not representing any entity and serves as tune value
+        # for the whole equation
+        def estimate_cardinality
+          num_zero_buckets = TOTAL_BUCKETS_NUMBER - hll_buckets.size
+
+          num_uniques = (
+          ((TOTAL_BUCKETS_NUMBER**2) * (0.7213 / (1 + 1.079 / TOTAL_BUCKETS_NUMBER))) /
+            (num_zero_buckets + hll_buckets.values.sum { |bucket_hash| 2**(-1 * bucket_hash)} )
+          ).to_i
+
+          if num_zero_buckets > 0 && num_uniques < 2.5 * TOTAL_BUCKETS_NUMBER
+            ((0.7213 / (1 + 1.079 / TOTAL_BUCKETS_NUMBER)) * (TOTAL_BUCKETS_NUMBER *
+              Math.log2(TOTAL_BUCKETS_NUMBER.to_f / num_zero_buckets)))
+          else
+            num_uniques
+          end
+        end
+      end
 
       def initialize(relation, column = nil)
         @relation = relation
@@ -78,42 +120,22 @@ module Gitlab
         return FALLBACK if unwanted_configuration?(finish, batch_size, start)
 
         batch_start = start
-        hll_blob = {}
+        hll_buckets = HLLBuckets.new
 
         while batch_start <= finish
           begin
-            hll_blob.merge!(hll_blob_for_batch(batch_start, batch_start + batch_size)) {|_key, old, new| new > old ? new : old }
+            hll_buckets.merge!(hll_buckets_for_batch(batch_start, batch_start + batch_size))
             batch_start += batch_size
           end
           sleep(SLEEP_TIME_IN_SECONDS)
         end
 
-        estimate_cardinality(hll_blob)
+        hll_buckets
       end
 
       private
 
-      # arbitrary values that are present in #estimate_cardinality
-      # are sourced from https://www.sisense.com/blog/hyperloglog-in-pure-sql/
-      # article, they are not representing any entity and serves as tune value
-      # for the whole equation
-      def estimate_cardinality(hll_blob)
-        num_zero_buckets = TOTAL_BUCKETS_NUMBER - hll_blob.size
-
-        num_uniques = (
-          ((TOTAL_BUCKETS_NUMBER**2) * (0.7213 / (1 + 1.079 / TOTAL_BUCKETS_NUMBER))) /
-            (num_zero_buckets + hll_blob.values.sum { |bucket_hash| 2**(-1 * bucket_hash)} )
-        ).to_i
-
-        if num_zero_buckets > 0 && num_uniques < 2.5 * TOTAL_BUCKETS_NUMBER
-          ((0.7213 / (1 + 1.079 / TOTAL_BUCKETS_NUMBER)) * (TOTAL_BUCKETS_NUMBER *
-            Math.log2(TOTAL_BUCKETS_NUMBER.to_f / num_zero_buckets)))
-        else
-          num_uniques
-        end
-      end
-
-      def hll_blob_for_batch(start, finish)
+      def hll_buckets_for_batch(start, finish)
         @relation
           .connection
           .execute(BUCKETED_DATA_SQL % { source_query: source_query(start, finish) })

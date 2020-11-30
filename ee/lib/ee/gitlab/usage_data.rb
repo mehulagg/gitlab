@@ -426,7 +426,14 @@ module EE
                                 .where(status: 'success', retried: [nil, false])
                                 .where('security_scans.scan_type = ?', scan_type)
                                 .where(time_period)
-            pipelines_with_secure_jobs["#{name}_pipeline".to_sym] = start && finish ? estimate_batch_distinct_count(relation, :commit_id, batch_size: 1500, start: start, finish: finish, batch: false) : 0
+            metric_name = "#{name}_pipeline".to_sym
+            pipelines_with_secure_jobs[metric_name] = for_aggregated_metrics(save_as: metric_name) do
+              if start && finish
+                estimate_batch_distinct_count(relation, :commit_id, batch_size: 1500, start: start, finish: finish, batch: false)
+              else
+                ::Gitlab::Database::PostgresHllBatchDistinctCounter::HLLBuckets.new
+              end
+            end
           end
 
           pipelines_with_secure_jobs

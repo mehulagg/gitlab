@@ -64,7 +64,9 @@ module Gitlab
         if Feature.disabled?(:postgres_hll_batch_counting)
           distinct_count(relation, column, batch: batch, batch_size: batch_size, start: start, finish: finish)
         else
-          Gitlab::Database::PostgresHllBatchDistinctCounter.new(relation, column).estimate_distinct_count(batch_size: batch_size, start: start, finish: finish)
+          Gitlab::Database::PostgresHllBatchDistinctCounter
+            .new(relation, column)
+            .estimate_distinct_count(batch_size: batch_size, start: start, finish: finish)
         end
       rescue ActiveRecord::StatementInvalid
         FALLBACK
@@ -73,6 +75,23 @@ module Gitlab
       rescue StandardError => error
         Gitlab::ErrorTracking.track_and_raise_for_dev_exception(error)
         DISTRIBUTED_HLL_FALLBACK
+      end
+
+      def for_aggregated_metrics(save_as:)
+        raw_data = yield
+
+        unless raw_data.is_a? ::Gitlab::Database::PostgresHllBatchDistinctCounter::HLLBuckets
+          Gitlab::ErrorTracking.track_and_raise_for_dev_exception(StandardError.new("Unsupported data type: #{raw_data.class}"))
+          return raw_data
+        end
+
+        Gitlab::Redis::SharedState.with do |redis|
+          redis.set(save_as, raw_data.to_s, ex: 24.hours)
+        end
+
+        raw_data.estimated_distinct_count
+      rescue ::Redis::CommandError
+        raw_data.estimated_distinct_count
       end
 
       def sum(relation, column, batch_size: nil, start: nil, finish: nil)
