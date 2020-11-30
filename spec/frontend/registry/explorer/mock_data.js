@@ -50,11 +50,15 @@ export const imagesListResponse = [
     path: 'foo',
     location: 'location',
     destroyPath: 'path',
+    id: 'gid://gitlab/ContainerRepository/1',
+    canDelete: true,
   },
   {
     path: 'bar',
     location: 'location-2',
     destroyPath: 'path-2',
+    id: 'gid://gitlab/ContainerRepository/2',
+    canDelete: true,
   },
 ];
 

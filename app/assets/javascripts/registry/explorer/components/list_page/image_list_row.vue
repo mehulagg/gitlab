@@ -57,7 +57,7 @@ export default {
       return n__(
         'ContainerRegistry|%{count} Tag',
         'ContainerRegistry|%{count} Tags',
-        this.item.tags_count,
+        this.item.tagsCount,
       );
     },
     warningIconText() {
@@ -119,7 +119,7 @@ export default {
       <delete-button
         :title="$options.i18n.REMOVE_REPOSITORY_LABEL"
         :disabled="disabledDelete"
-        :tooltip-disabled="Boolean(item.canDelete)"
+        :tooltip-disabled="item.canDelete"
         :tooltip-title="$options.i18n.LIST_DELETE_BUTTON_DISABLED"
         @delete="$emit('delete', item)"
       />
