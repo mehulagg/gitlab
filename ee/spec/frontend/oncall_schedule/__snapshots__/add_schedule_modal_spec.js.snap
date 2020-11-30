@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`AddScheduleModal renders modal layout 1`] = `
+exports[`Add schedule modal renders modal layout 1`] = `
 <gl-modal-stub
   actioncancel="[object Object]"
   actionprimary="[object Object]"

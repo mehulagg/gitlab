@@ -946,6 +946,9 @@ msgstr ""
 msgid "(No changes)"
 msgstr ""
 
+msgid "(UTC%{offset}) %{timezone}"
+msgstr ""
+
 msgid "(check progress)"
 msgstr ""
 
@@ -19046,6 +19049,12 @@ msgid "OnCallSchedules|Create on-call schedules  in GitLab"
 msgstr ""
 
 msgid "OnCallSchedules|Failed to add schedule"
+msgstr ""
+
+msgid "OnCallSchedules|On-call schedule"
+msgstr ""
+
+msgid "OnCallSchedules|On-call schedule for the %{tzShort}"
 msgstr ""
 
 msgid "OnCallSchedules|Route alerts directly to specific members of your team"

@@ -23,7 +23,10 @@ export default {
   },
   methods: {
     getIndicatorStyles() {
-      const left = Math.floor((this.currentDate.getDay() / DAYS_IN_WEEK) * 100 - DAYS_IN_WEEK);
+      // as we start schedule scale from the current date the indicator will always be on the first date. So we find
+      // the percentage of space one day cell takes and divide it by 2 cause the tick is in the middle of the cell.
+      // It might be updated to more precise position - time of the day
+      const left = 100 / DAYS_IN_WEEK / 2;
 
       return {
         left: `${left}%`,

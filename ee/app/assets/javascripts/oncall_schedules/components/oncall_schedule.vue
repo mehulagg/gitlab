@@ -1,9 +1,10 @@
 <script>
 import { GlSprintf, GlCard } from '@gitlab/ui';
-import { s__, __ } from '~/locale';
-import ScheduleShell from './schedule/components/schedul_shell.vue';
+import { s__ } from '~/locale';
+import ScheduleTimelineSection from './schedule/components/schedule_timeline_section.vue';
 import { getTimeframeForWeeksView } from './schedule/utils';
 import { PRESET_TYPES, PRESET_DEFAULTS } from './schedule/constants';
+import { getFormattedTimezone } from '../utils';
 
 export const i18n = {
   title: s__('OnCallSchedules|On-call schedule'),
@@ -17,7 +18,7 @@ export default {
   components: {
     GlSprintf,
     GlCard,
-    ScheduleShell,
+    ScheduleTimelineSection,
   },
   props: {
     schedule: {
@@ -28,15 +29,10 @@ export default {
   computed: {
     tzLong() {
       const selectedTz = this.timezones.find(tz => tz.identifier === this.schedule.timezone);
-      return this.getFormattedTimezone(selectedTz);
+      return getFormattedTimezone(selectedTz);
     },
     timeframe() {
       return getTimeframeForWeeksView(PRESET_TYPES.WEEKS, PRESET_DEFAULTS.WEEKS.TIMEFRAME_LENGTH);
-    },
-  },
-  methods: {
-    getFormattedTimezone(tz) {
-      return __(`(UTC${tz.formatted_offset}) ${tz.abbr} ${tz.name}`);
     },
   },
 };
@@ -52,15 +48,15 @@ export default {
 
       <div class="gl-text-gray-500 gl-mb-5">
         <gl-sprintf :message="$options.i18n.scheduleForTz">
-          <template #tzShort
-            ><span>{{ schedule.timezone }}</span></template
-          >
+          <template #tzShort>
+            <span>{{ schedule.timezone }}</span>
+          </template>
         </gl-sprintf>
         | <span>{{ tzLong }}</span>
       </div>
 
-      <div ref="scheduleContainer" class="gl-w-full">
-        <schedule-shell :preset-type="$options.presetType" :timeframe="timeframe" :epics="[]" />
+      <div class="schedule-shell js-schedule-shell">
+        <schedule-timeline-section :preset-type="$options.presetType" :timeframe="timeframe" />
       </div>
     </gl-card>
   </div>

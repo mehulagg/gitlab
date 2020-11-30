@@ -1,22 +1,14 @@
 import { newDate } from '~/lib/utils/datetime_utility';
-
 import { PRESET_DEFAULTS, DAYS_IN_WEEK } from './constants';
 
 /**
- * This method returns array of Dates respresenting Months based on provided initialDate
+ * This method returns array of Dates representing 2-weeks timeframe based on provided initialDate
  *
- * For eg; If initialDate is 15th Jan 2018
- *         Then as per Roadmap specs, we need to show
- *         2 weeks before current week,
- *         current week AND
- *         4 weeks after current week
- *         thus, total of 7 weeks.
- *         Note that week starts on Sunday
- *
+ * For eg; If initialDate is 31th Dec 2017
+ *         we show 2 weeks starting from the current date
  * So returned array from this method will be;
  *        [
- *          31 Dec 2017, 7 Jan 2018, 14 Jan 2018, 21 Jan 2018,
- *          28 Jan 2018, 4 Mar 2018, 11 Mar 2018
+ *          31 Dec 2017, 7 Jan 2018
  *        ]
  *
  * @param {Date} initialDate
@@ -31,10 +23,10 @@ export const getTimeframeForWeeksView = (initialDate = new Date()) => {
   // Iterate for the length of this preset
   for (let i = 0; i < rangeLength; i += 1) {
     // Push date to timeframe only when day is
-    // first day (Sunday) of the week
+    // the first day of the next week (if initial date is Tuesday next date will be also Tuesday but of the next week)
     timeframe.push(newDate(startDate));
 
-    // Move date next Sunday
+    // Move date to the next in a week
     startDate.setDate(startDate.getDate() + DAYS_IN_WEEK);
   }
 

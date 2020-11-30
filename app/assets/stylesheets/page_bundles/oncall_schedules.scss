@@ -55,16 +55,6 @@ $epic-details-cell-width: 150px;
   @include gl-rounded-base;
 }
 
-.timeline-section .timeline-header-blank::after {
-  @include gl-content-empty;
-  @include gl-absolute;
-  @include gl-top-0;
-  right: -$grid-size;
-  width: $grid-size;
-  @include gl-pointer-events-none;
-  background: $column-right-gradient;
-}
-
 .timeline-section {
   @include gl-sticky;
   position: -webkit-sticky;
@@ -89,6 +79,13 @@ $epic-details-cell-width: 150px;
 
     &::after {
       height: $header-item-height;
+      @include gl-content-empty;
+      @include gl-absolute;
+      @include gl-top-0;
+      right: -$grid-size;
+      width: $grid-size;
+      @include gl-pointer-events-none;
+      background: $column-right-gradient;
     }
   }
 
