@@ -20,7 +20,7 @@ RSpec.describe QA::Resource::Events::Project do
       {
         "action_name": "pushed",
         "push_data": {
-          "ref": "main"
+          "ref": "master"
         }
       },
       {

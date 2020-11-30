@@ -431,8 +431,8 @@ RSpec.describe QA::Specs::Helpers::Quarantine do
 
         it 'runs on default branch pipelines' do
           group = describe_successfully do
-            it('runs on main pipeline given a single pipeline', only: { pipeline: :main } ) {}
-            it('runs in main given an array of pipelines', only: { pipeline: [:canary, :main] }) {}
+            it('runs on master pipeline given a single pipeline', only: { pipeline: :master } ) {}
+            it('runs in master given an array of pipelines', only: { pipeline: [:canary, :master] }) {}
             it('does not run in non-default pipelines', only: { pipeline: [:nightly, :not_nightly, :not_master] } ) {}
           end
 

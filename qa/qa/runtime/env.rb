@@ -103,7 +103,7 @@ module QA
       end
 
       def default_branch
-        ENV['QA_DEFAULT_BRANCH'] || 'main'
+        ENV['QA_DEFAULT_BRANCH'] || 'master'
       end
 
       def log_destination
