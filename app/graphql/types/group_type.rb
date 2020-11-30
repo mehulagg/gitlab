@@ -97,7 +97,7 @@ module Types
           authorize: :read_container_image
 
     field :container_repositories_count, GraphQL::INT_TYPE, null: false,
-          description: 'Number of container repositories in the project'
+          description: 'Number of container repositories in the group'
 
     def label(title:)
       BatchLoader::GraphQL.for(title).batch(key: group) do |titles, loader, args|

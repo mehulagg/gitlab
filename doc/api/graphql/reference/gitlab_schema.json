@@ -24401,7 +24401,7 @@
             },
             {
               "name": "containerRepositoriesCount",
-              "description": "Number of container repositories in the project",
+              "description": "Number of container repositories in the group",
               "args": [
 
               ],
