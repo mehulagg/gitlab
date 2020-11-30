@@ -18,7 +18,8 @@ RSpec.describe Gitlab::Experimentation::EXPERIMENTS do
       :invite_email,
       :invitation_reminders,
       :group_only_trials,
-      :default_to_issues_board
+      :default_to_issues_board,
+      :trimmed_skip_trial_copy
     ]
 
     backwards_compatible_experiment_keys = described_class.filter { |_, v| v[:use_backwards_compatible_subject_index] }.keys

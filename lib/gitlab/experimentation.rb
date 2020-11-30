@@ -77,6 +77,10 @@ module Gitlab
       default_to_issues_board: {
         tracking_category: 'Growth::Conversion::Experiment::DefaultToIssuesBoard',
         use_backwards_compatible_subject_index: true
+      },
+      trimmed_skip_trial_copy: {
+        tracking_category: 'Growth::Conversion::Experiment::TrimmedSkipTrialCopy',
+        use_backwards_compatible_subject_index: true
       }
     }.freeze
 

@@ -4,6 +4,7 @@
     .label
       = s_("Trials|You can always resume this process by selecting your avatar and choosing 'Start a Gold trial'")
   - else
-    = link_to s_('Trials|Skip Trial (Continue with Free Account)'), dashboard_projects_path, class: 'block center py-2'
+    - trial_text = experiment_enabled?(:trimmed_skip_trial_copy) ?  s_('Trials|Skip Trial') : s_('Trials|Skip Trial (Continue with Free Account)') 
+    = link_to trial_text, dashboard_projects_path, class: 'block center py-2'
     .label
       = s_("Trials|You won't get a free trial right now but you can always resume this process by clicking on your avatar and choosing 'Start a free trial'")

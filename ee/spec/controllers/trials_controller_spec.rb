@@ -47,6 +47,12 @@ RSpec.describe TrialsController do
       response
     end
 
+    it 'calls record_experiment_user for the trimmed_skip_trial_copy experiment' do
+      expect(controller).to receive(:record_experiment_user).with(:trimmed_skip_trial_copy)
+
+      subject
+    end
+
     it_behaves_like 'an authenticated endpoint'
     it_behaves_like 'a dot-com only feature'
   end
@@ -174,6 +180,12 @@ RSpec.describe TrialsController do
     subject do
       post :apply, params: post_params
       response
+    end
+
+    it 'calls record a conversion event for the trimmed_skip_trial_copy experiment' do
+      expect(controller).not_to receive(:record_experiment_conversion_event).with(:trimmed_skip_trial_copy)
+
+      subject
     end
 
     it_behaves_like 'an authenticated endpoint'
