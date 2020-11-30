@@ -5,6 +5,7 @@ import {
   GlForm,
   GlFormInput,
   GlFormGroup,
+  GlFormText,
   GlModal,
   GlFormRadioGroup,
 } from '@gitlab/ui';
@@ -12,7 +13,6 @@ import { debounce } from 'lodash';
 import { mapState, mapActions } from 'vuex';
 import { sprintf, __, s__ } from '~/locale';
 import { capitalizeFirstCharacter } from '~/lib/utils/text_utility';
-// import { DEFAULT_STAGE_NAMES } from '../../constants';
 import { DATA_REFETCH_DELAY } from '../../shared/constants';
 
 const ERRORS = {
@@ -80,6 +80,7 @@ export default {
     GlForm,
     GlFormInput,
     GlFormGroup,
+    GlFormText,
     GlModal,
     GlFormRadioGroup,
   },
@@ -91,7 +92,6 @@ export default {
     },
   },
   data() {
-    console.log('DEFAULT_STAGE_CONFIG', DEFAULT_STAGE_CONFIG);
     return {
       errors: {},
       name: '',
@@ -142,7 +142,6 @@ export default {
     } else {
       this.onHandleInput();
     }
-    console.log('mounted', this.stages);
   },
   methods: {
     ...mapActions(['createValueStream']),
@@ -157,7 +156,7 @@ export default {
       return i === 0;
     },
     isLastStage(i) {
-      return i === this.stages.length;
+      return i === this.stages?.length - 1;
     },
     onSubmit() {
       const { name } = this;
@@ -212,22 +211,28 @@ export default {
         :key="stage.id"
         :label="sprintf(__('Stage %{i}'), { i: i + 1 })"
       >
-        <gl-form-input
-          v-if="stage.custom"
-          v-model.trim="stage.title"
-          :name="`create-value-stream-stage-${i}`"
-          :placeholder="s__('CreateValueStreamForm|Enter stage name')"
-          :state="isValid"
-          required
-          @input="onHandleInput"
-        />
-        <span v-else>{{ stage.title }}</span>
-        <gl-button-group>
-          <gl-button :disabled="isFirstStage(i)" icon="arrow-down" />
-          <gl-button :disabled="isLastStage(i)" icon="arrow-up" />
-        </gl-button-group>
-        &nbsp;
-        <gl-button icon="archive" />
+        <div class="gl-display-flex gl-flex-direction-row gl-justify-content-space-between">
+          <div>
+            <gl-form-input
+              v-if="stage.custom"
+              v-model.trim="stage.title"
+              :name="`create-value-stream-stage-${i}`"
+              :placeholder="s__('CreateValueStreamForm|Enter stage name')"
+              :state="isValid"
+              required
+              @input="onHandleInput"
+            />
+            <gl-form-text v-else>{{ stage.title }}</gl-form-text>
+          </div>
+          <div>
+            <gl-button-group>
+              <gl-button :disabled="isLastStage(i)" icon="arrow-down" />
+              <gl-button :disabled="isFirstStage(i)" icon="arrow-up" />
+            </gl-button-group>
+            &nbsp;
+            <gl-button icon="archive" />
+          </div>
+        </div>
       </gl-form-group>
     </gl-form>
   </gl-modal>
