@@ -100,6 +100,8 @@ module EE
 
       has_many :incident_management_oncall_schedules, class_name: 'IncidentManagement::OncallSchedule', inverse_of: :project
 
+      elastic_index_dependant_association :issues, on_change: :visibility_level
+
       scope :with_shared_runners_limit_enabled, -> do
         if ::Ci::Runner.has_shared_runners_with_non_zero_public_cost?
           with_shared_runners
@@ -630,15 +632,6 @@ module EE
       # Index the wiki repository after import of non-forked projects only, the project repository is indexed
       # in ProjectImportState so ElasticSearch will get project repository changes when mirrors are updated
       ElasticCommitIndexerWorker.perform_async(id, nil, nil, true) if use_elasticsearch? && !forked?
-    end
-
-    override :associations_needing_elasticsearch_update
-    def associations_needing_elasticsearch_update
-      if previous_changes.include?(:visibility_level)
-        ['issues']
-      else
-        []
-      end
     end
 
     def log_geo_updated_events

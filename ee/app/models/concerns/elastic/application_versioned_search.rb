@@ -64,12 +64,39 @@ module Elastic
     # Override in child object if there are associations that need to be
     # updated when specific fields are updated
     def associations_needing_elasticsearch_update
-      []
+      self.class.elastic_index_dependants.map do |dependant|
+        association_name = dependant[:association_name]
+        on_change = dependant[:on_change]
+
+        next nil unless previous_changes.include?(on_change)
+
+        association_name.to_s
+      end.compact.uniq
     end
 
     class_methods do
       def __elasticsearch__
         @__elasticsearch__ ||= ::Elastic::MultiVersionClassProxy.new(self)
+      end
+
+      # Mark a dependant association as needing to be updated when a specific
+      # field in this object changes. For example if you want to update
+      # project.issues in the index when project.visibility_level is changed
+      # then you can declare that as:
+      #
+      # elastic_index_dependant_association :issues, on_change: :visibility_level
+      #
+      def elastic_index_dependant_association(association_name, on_change:)
+        # Validate these are actually correct associations before sending to
+        # Sidekiq to avoid errors occuring when the job is picked up.
+        raise "Invalid association to index. \"#{association_name}\" is either not a collection or not an association." unless reflect_on_association(association_name)&.collection?
+        raise "Invalid on_change attribute. \"#{on_change}\" is not an attribute of \"#{self}\"" unless has_attribute?(on_change)
+
+        elastic_index_dependants << { association_name: association_name, on_change: on_change }
+      end
+
+      def elastic_index_dependants
+        @elastic_index_dependants ||= []
       end
     end
   end
