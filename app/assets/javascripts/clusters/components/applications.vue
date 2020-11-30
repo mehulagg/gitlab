@@ -573,7 +573,7 @@ export default {
         title-link="https://github.com/knative/docs"
       >
         <template #description>
-          <gl-alert v-if="!rbac" variant="info" class="gl-my-3" :dismissible="false">
+          <gl-alert v-if="!rbac" variant="info" class="rbac-notice gl-my-3" :dismissible="false">
             {{
               s__(`ClusterIntegration|You must have an RBAC-enabled cluster
             to install Knative.`)
