@@ -5,14 +5,14 @@ module Gitlab
     class PlanEventFetcher < BaseEventFetcher
       include PlanHelper
 
-      def initialize(*args)
+      def initialize(**args)
         @projections = [issue_table[:title],
                         issue_table[:iid],
                         issue_table[:id],
                         issue_table[:created_at],
                         issue_table[:author_id]]
 
-        super(*args)
+        super(args)
       end
 
       private
