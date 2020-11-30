@@ -1,23 +1,76 @@
+import { CI_CONFIG_STATUS_VALID } from '~/pipeline_editor/constants';
+
 export const mockProjectPath = 'user1/project1';
 export const mockDefaultBranch = 'master';
 export const mockNewMergeRequestPath = '/-/merge_requests/new';
+export const mockLintHelpPagePath = '/-/lint-help';
 export const mockCommitId = 'aabbccdd';
 export const mockCommitMessage = 'My commit message';
 
 export const mockCiConfigPath = '.gitlab-ci.yml';
 export const mockCiYml = `
-job1:
+stages:
+  - test
+  - build
+
+job_test_1:
   stage: test
+  script:
+    - echo "test 1"
+
+job_test_2:
+  stage: test
+  script:
+    - echo "test 2"
+
+job_build:
+  stage: build
   script: 
-    - echo 'test'
+    - echo "build"
+  needs: ["job_test_2"]
 `;
 
 export const mockCiConfigQueryResponse = {
   data: {
     ciConfig: {
       errors: [],
-      stages: [],
-      status: '',
+      status: CI_CONFIG_STATUS_VALID,
+      stages: [
+        {
+          __typename: 'CiConfigStage',
+          name: 'test',
+          groups: [
+            {
+              name: 'job_test_1',
+              jobs: [{ name: 'job_test_1', needs: [], __typename: 'CiConfigJob' }],
+              __typename: 'CiConfigGroup',
+            },
+            {
+              name: 'job_test_2',
+              jobs: [{ name: 'job_test_2', needs: [], __typename: 'CiConfigJob' }],
+              __typename: 'CiConfigGroup',
+            },
+          ],
+        },
+        {
+          __typename: 'CiConfigStage',
+          name: 'build',
+          groups: [
+            {
+              name: 'job_build',
+              jobs: [
+                {
+                  name: 'job_build',
+                  needs: [{ name: 'job_test_2', __typename: 'CiConfigNeed' }],
+                  __typename: 'CiConfigJob',
+                },
+              ],
+              __typename: 'CiConfigGroup',
+            },
+          ],
+        },
+      ],
+      __typename: 'CiConfig',
     },
   },
 };

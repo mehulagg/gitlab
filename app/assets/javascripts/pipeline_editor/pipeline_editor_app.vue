@@ -6,6 +6,7 @@ import { mergeUrlParams, redirectTo, refreshCurrentPage } from '~/lib/utils/url_
 import PipelineGraph from '~/pipelines/components/pipeline_graph/pipeline_graph.vue';
 import CommitForm from './components/commit/commit_form.vue';
 import TextEditor from './components/text_editor.vue';
+import CiLint from './components/lint/ci_lint.vue';
 
 import commitCiFileMutation from './graphql/mutations/commit_ci_file.mutation.graphql';
 import getBlobContent from './graphql/queries/blob_content.graphql';
@@ -29,6 +30,7 @@ export default {
     GlTabs,
     PipelineGraph,
     TextEditor,
+    CiLint,
   },
   props: {
     projectPath: {
@@ -150,6 +152,7 @@ export default {
     defaultCommitMessage: __('Update %{sourcePath} file'),
     tabEdit: s__('Pipelines|Write pipeline configuration'),
     tabGraph: s__('Pipelines|Visualize'),
+    tabLint: s__('Pipelines|Lint'),
   },
   errorTexts: {
     [LOAD_FAILURE_NO_REF]: s__(
@@ -263,6 +266,10 @@ export default {
 
           <gl-tab :title="$options.i18n.tabGraph" :lazy="!isVisualizeTabActive">
             <pipeline-graph :pipeline-data="ciConfigData" />
+          </gl-tab>
+
+          <gl-tab :title="$options.i18n.tabLint">
+            <ci-lint :ci-config="ciConfigData" />
           </gl-tab>
         </gl-tabs>
       </div>

@@ -20257,6 +20257,9 @@ msgstr ""
 msgid "Pipelines|Last Used"
 msgstr ""
 
+msgid "Pipelines|Lint"
+msgstr ""
+
 msgid "Pipelines|Loading Pipelines"
 msgstr ""
 
