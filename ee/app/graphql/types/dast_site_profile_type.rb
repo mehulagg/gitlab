@@ -29,5 +29,12 @@ module Types
     field :validation_status, Types::DastSiteProfileValidationStatusEnum, null: true,
           description: 'The current validation status of the site profile',
           resolve: -> (obj, _args, _ctx) { obj.status }
+
+    field :normalized_target_url, GraphQL::STRING_TYPE, null: true,
+          description: 'Normalized URL of the target to be scanned'
+
+    def normalized_target_url
+      DastSiteValidation.get_normalized_url_base(object.dast_site.url)
+    end
   end
 end
