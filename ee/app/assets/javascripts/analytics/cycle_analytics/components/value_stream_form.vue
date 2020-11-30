@@ -47,8 +47,7 @@ const I18N = {
   CREATE_VALUE_STREAM: __('Create Value Stream'),
   CREATED: __("'%{name}' Value Stream created"),
   CANCEL: __('Cancel'),
-  MODAL_TITLE: __('Value Stream Name'),
-  FIELD_NAME_LABEL: __('Name'),
+  FIELD_NAME_LABEL: __('Value Stream name'),
   FIELD_NAME_PLACEHOLDER: __('Example: My Value Stream'),
 };
 
@@ -63,14 +62,12 @@ const PRESET_OPTIONS = [
   },
 ];
 
-const DEFAULT_STAGE_CONFIG = ['issue', 'plan', 'code', 'test', 'review', 'staging', 'total'].map(
-  id => ({
-    id,
-    title: capitalizeFirstCharacter(id),
-    hidden: false,
-    custom: false,
-  }),
-);
+const DEFAULT_STAGE_CONFIG = ['issue', 'plan', 'code', 'test', 'review', 'staging'].map(id => ({
+  id,
+  name: capitalizeFirstCharacter(id),
+  hidden: false,
+  custom: false,
+}));
 
 export default {
   name: 'ValueStreamForm',
@@ -90,15 +87,30 @@ export default {
       required: false,
       default: () => ({}),
     },
+    hasPathNavigation: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   data() {
+    const { hasPathNavigation, initialData } = this;
+    const additionalFields = hasPathNavigation
+      ? {
+          selectedPreset: PRESET_OPTIONS[0].value,
+          presetOptions: PRESET_OPTIONS,
+          stages: DEFAULT_STAGE_CONFIG,
+          ...initialData,
+        }
+      : {};
     return {
-      errors: {},
       name: '',
       selectedPreset: PRESET_OPTIONS[0].value,
       presetOptions: PRESET_OPTIONS,
       stages: [...DEFAULT_STAGE_CONFIG, { ...defaultStageFields }],
       ...this.initialData,
+      errors: {},
+      ...additionalFields,
     };
   },
   computed: {
@@ -177,7 +189,8 @@ export default {
   <gl-modal
     data-testid="value-stream-form-modal"
     modal-id="value-stream-form-modal"
-    :title="$options.I18N.MODAL_TITLE"
+    scrollable
+    :title="$options.I18N.CREATE_VALUE_STREAM"
     :action-primary="primaryProps"
     :action-cancel="{ text: $options.I18N.CANCEL }"
     :action-secondary="{
@@ -205,33 +218,37 @@ export default {
           @input="onHandleInput"
         />
       </gl-form-group>
-      <hr />
-      <gl-form-group
-        v-for="(stage, i) in stages"
-        :key="stage.id"
-        :label="sprintf(__('Stage %{i}'), { i: i + 1 })"
-      >
-        <div class="gl-display-flex gl-flex-direction-row gl-justify-content-space-between">
-          <div>
-            <gl-form-input
-              v-model.trim="stage.title"
-              :name="`create-value-stream-stage-${i}`"
-              :placeholder="s__('CreateValueStreamForm|Enter stage name')"
-              :state="isValid"
-              required
-              @input="onHandleInput"
-            />
+      <div v-if="hasPathNavigation">
+        <hr />
+        <gl-form-group
+          v-for="(stage, i) in stages"
+          :key="stage.id"
+          :label="sprintf(__('Stage %{i}'), { i: i + 1 })"
+        >
+          <div class="gl-display-flex gl-flex-direction-row gl-justify-content-space-between">
+            <div>
+              <gl-form-input
+                v-if="stage.custom"
+                v-model.trim="stage.name"
+                :name="`create-value-stream-stage-${i}`"
+                :placeholder="s__('CreateValueStreamForm|Enter stage name')"
+                :state="isValid"
+                required
+                @input="onHandleInput"
+              />
+              <span v-else>{{ stage.name }}</span>
+            </div>
+            <div>
+              <gl-button-group>
+                <gl-button :disabled="isLastStage(i)" icon="arrow-down" />
+                <gl-button :disabled="isFirstStage(i)" icon="arrow-up" />
+              </gl-button-group>
+              &nbsp;
+              <gl-button icon="archive" />
+            </div>
           </div>
-          <div>
-            <gl-button-group>
-              <gl-button :disabled="isLastStage(i)" icon="arrow-down" />
-              <gl-button :disabled="isFirstStage(i)" icon="arrow-up" />
-            </gl-button-group>
-            &nbsp;
-            <gl-button icon="archive" />
-          </div>
-        </div>
-      </gl-form-group>
+        </gl-form-group>
+      </div>
     </gl-form>
   </gl-modal>
 </template>

@@ -22,6 +22,13 @@ const I18N = {
 };
 
 export default {
+  props: {
+    hasPathNavigation: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+  },
   components: {
     GlAlert,
     GlButton,
@@ -116,7 +123,7 @@ export default {
     <gl-button v-else v-gl-modal-directive="'value-stream-form-modal'">{{
       $options.I18N.CREATE_VALUE_STREAM
     }}</gl-button>
-    <value-stream-form />
+    <value-stream-form :has-path-navigation="hasPathNavigation" />
     <gl-modal
       data-testid="delete-value-stream-modal"
       modal-id="delete-value-stream-modal"
