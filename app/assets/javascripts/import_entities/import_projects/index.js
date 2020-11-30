@@ -1,8 +1,8 @@
 import Vue from 'vue';
-import Translate from '../vue_shared/translate';
+import Translate from '~/vue_shared/translate';
+import { parseBoolean } from '~/lib/utils/common_utils';
+import { queryToObject } from '~/lib/utils/url_utility';
 import ImportProjectsTable from './components/import_projects_table.vue';
-import { parseBoolean } from '../lib/utils/common_utils';
-import { queryToObject } from '../lib/utils/url_utility';
 import createStore from './store';
 
 Vue.use(Translate);
