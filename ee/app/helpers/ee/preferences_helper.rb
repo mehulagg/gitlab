@@ -20,10 +20,6 @@ module EE
       end
     end
 
-    def group_overview_content_preference?
-      group_view_choices.size > 1
-    end
-
     private
 
     def group_view_security_dashboard_enabled?

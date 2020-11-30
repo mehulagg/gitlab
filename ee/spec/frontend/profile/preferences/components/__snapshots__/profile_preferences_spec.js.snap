@@ -61,22 +61,7 @@ exports[`ProfilePreferences component should render ProfilePreferences properly 
           name="user[layout]"
           tabindex="-1"
           title="Layout width"
-        >
-          <option
-            value="fixed"
-          >
-            
-            Fixed
-          
-          </option>
-          <option
-            value="fluid"
-          >
-            
-            Fluid
-          
-          </option>
-        </select>
+        />
          
         <i
           aria-hidden="true"
@@ -114,22 +99,7 @@ exports[`ProfilePreferences component should render ProfilePreferences properly 
           name="user[dashboard]"
           tabindex="-1"
           title="Homepage content"
-        >
-          <option
-            value="your_projects"
-          >
-            
-            Your projects (default)
-          
-          </option>
-          <option
-            value="starred"
-          >
-            
-            Starred projects
-          
-          </option>
-        </select>
+        />
          
         <i
           aria-hidden="true"
@@ -146,7 +116,60 @@ exports[`ProfilePreferences component should render ProfilePreferences properly 
       </div>
     </div>
      
-    <group-overview-selector-stub />
+    <div
+      class="form-group"
+    >
+      <label
+        class="label-bold"
+        data-testid="profile-preferences-group-overview-heading"
+        for="user_group_view"
+      >
+        
+    Group overview content
+  
+      </label>
+       
+      <div
+        class="select-wrapper"
+      >
+        <select
+          class="form-control select-control"
+          name="user[group_view]"
+          tabindex="-1"
+          title="Group overview content"
+        >
+          <option
+            data-testid="profile-preferences-group-overview-option"
+            value="details"
+          >
+            
+        Details
+      
+          </option>
+          <option
+            data-testid="profile-preferences-group-overview-option"
+            value="security"
+          >
+            
+        Security Dashboard
+      
+          </option>
+        </select>
+         
+        <i
+          aria-hidden="true"
+          class="fa fa-chevron-down"
+        />
+      </div>
+       
+      <div
+        class="form-text text-muted"
+      >
+        
+    Choose what content you want to see on a group’s overview page.
+  
+      </div>
+    </div>
      
     <div
       class="form-group"
@@ -169,22 +192,7 @@ exports[`ProfilePreferences component should render ProfilePreferences properly 
           name="user[project_view]"
           tabindex="-1"
           title="Project overview content"
-        >
-          <option
-            value="files"
-          >
-            
-            Files and Readme
-          
-          </option>
-          <option
-            value="activity"
-          >
-            
-            Activity
-          
-          </option>
-        </select>
+        />
          
         <i
           aria-hidden="true"
@@ -255,41 +263,7 @@ exports[`ProfilePreferences component should render ProfilePreferences properly 
       </label>
     </div>
      
-    <div
-      class="form-group form-check"
-      data-testid="view-diffs-file-by-file"
-    >
-      <input
-        name="user[view_diffs_file_by_file]"
-        type="hidden"
-        value="0"
-      />
-       
-      <input
-        class="form-check-input"
-        id="user_view_diffs_file_by_file"
-        name="user[view_diffs_file_by_file]"
-        type="checkbox"
-        value="1"
-      />
-       
-      <label
-        class="form-check-label"
-        for="user_view_diffs_file_by_file"
-      >
-        
-        Show one file at a time on merge request’s Changes tab
-      
-      </label>
-       
-      <div
-        class="form-text text-muted"
-      >
-        
-        Instead of all the files changed, show only one file at a time. To switch between files, use the file browser.
-      
-      </div>
-    </div>
+    <!---->
      
     <div
       class="form-group"
@@ -380,29 +354,7 @@ exports[`ProfilePreferences component should render ProfilePreferences properly 
           name="user[preferred_language]"
           tabindex="-1"
           title="Language"
-        >
-          <option
-            value="en"
-          >
-            
-            English
-          
-          </option>
-          <option
-            value="da"
-          >
-            
-            Danish
-          
-          </option>
-          <option
-            value="swe"
-          >
-            
-            Swedish
-          
-          </option>
-        </select>
+        />
          
         <i
           aria-hidden="true"
@@ -440,22 +392,7 @@ exports[`ProfilePreferences component should render ProfilePreferences properly 
           name="user[first_day_of_week]"
           tabindex="-1"
           title="First day of the week"
-        >
-          <option
-            value="1"
-          >
-            
-            Monday
-          
-          </option>
-          <option
-            value="7"
-          >
-            
-            Sunday
-          
-          </option>
-        </select>
+        />
          
         <i
           aria-hidden="true"
@@ -465,139 +402,16 @@ exports[`ProfilePreferences component should render ProfilePreferences properly 
     </div>
   </div>
    
-  <div
-    class="col-sm-12"
-    data-testid="user-time-settings-rule"
-  >
-    <hr />
-  </div>
+  <!---->
    
-  <div
-    class="col-lg-4 profile-settings-sidebar"
-    data-testid="user-time-settings-heading"
-  >
-    <h4
-      class="gl-mt-0"
-    >
-      
-      Time preferences
-    
-    </h4>
-     
-    <p>
-      
-      These settings will update how dates and times are displayed for you.
-    
-    </p>
-  </div>
+  <!---->
    
-  <div
-    class="col-lg-8"
-    data-testid="user-time-settings-option"
-  >
-    <h5>
-      
-      Time format
-    
-    </h5>
-     
-    <div
-      class="form-group form-check"
-    >
-      <input
-        name="user[render_whitespace_in_code]"
-        type="hidden"
-        value="0"
-      />
-       
-      <input
-        class="form-check-input"
-        id="user_render_whitespace_in_code"
-        name="user[render_whitespace_in_code]"
-        type="checkbox"
-        value="1"
-      />
-       
-      <label
-        class="form-check-label"
-        for="user_time_format_in_24h"
-      >
-        
-        Display time in 24-hour format
-      
-      </label>
-    </div>
-     
-    <div
-      class="form-group form-check"
-    >
-      <input
-        name="user[time_display_relative]"
-        type="hidden"
-        value="0"
-      />
-       
-      <input
-        class="form-check-input"
-        id="user_time_display_relative"
-        name="user[time_display_relative]"
-        type="checkbox"
-        value="1"
-      />
-       
-      <label
-        class="form-check-label"
-        for="user_time_display_relative"
-      >
-        
-        For example: 30 mins ago.
-      
-      </label>
-    </div>
-  </div>
+  <!---->
    
-  <div
-    class="col-sm-12"
-  >
-    <hr
-      data-testid="profile-preferences-integrations-rule"
-    />
-  </div>
+  <!---->
    
-  <div
-    class="col-lg-4 profile-settings-sidebar"
-  >
-    <h4
-      class="gl-mt-0"
-      data-testid="profile-preferences-integrations-heading"
-    >
-      
-      Integrations
-    
-    </h4>
-     
-    <p>
-      
-      Customize integrations with third party services.
-    
-    </p>
-  </div>
+  <!---->
    
-  <div
-    class="col-lg-8"
-  >
-    <integration-view-stub
-      config="[object Object]"
-      helplink="http://foo.com/help"
-      message="Click %{linkStart}Foo%{linkEnd}!"
-      messageurl="http://foo.com"
-    />
-    <integration-view-stub
-      config="[object Object]"
-      helplink="http://bar.com/help"
-      message="Click %{linkStart}Bar%{linkEnd}!"
-      messageurl="http://bar.com"
-    />
-  </div>
+  <!---->
 </div>
 `;
