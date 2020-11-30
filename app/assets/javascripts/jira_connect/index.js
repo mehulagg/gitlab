@@ -2,13 +2,26 @@ import Vue from 'vue';
 import $ from 'jquery';
 import App from './components/app.vue';
 
+const store = {
+  state: {
+    error: '',
+  },
+  setErrorMessage(errorMessage) {
+    store.state.error = errorMessage;
+  },
+};
+
 const initForm = () => {
   const reqComplete = () => {
     AP.navigator.reload();
   };
 
   const reqFailed = res => {
-    alert(res.responseJSON.error);
+    const { error } = res?.responseJSON || {};
+    if (!error) return;
+
+    store.setErrorMessage(error);
+    alert(error);
   };
 
   AP.getLocation(location => {
@@ -61,8 +74,11 @@ function initJiraConnect() {
 
   return new Vue({
     el,
+    data: {
+      state: store.state,
+    },
     render(createElement) {
-      return createElement(App, {});
+      return createElement(App);
     },
   });
 }
