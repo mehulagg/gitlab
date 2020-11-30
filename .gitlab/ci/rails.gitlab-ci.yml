@@ -14,6 +14,10 @@
   - run_timed_command "scripts/gitaly-test-spawn"
   - source ./scripts/rspec_helpers.sh
 
+.filter-rspec-tests:
+  variables:
+    RSPEC_MATCHING_TESTS_ENABLED: "true"
+
 .rspec-base:
   extends: .rails-job-base
   stage: test
@@ -22,7 +26,6 @@
     RUBY_GC_MALLOC_LIMIT_MAX: 134217728
     CRYSTALBALL: "true"
     RECORD_DEPRECATIONS: "true"
-    RSPEC_MATCHING_TESTS_ENABLED: "true"
   needs: ["setup-test-env", "retrieve-tests-metadata", "compile-test-assets", "detect-tests"]
   script:
     - *base-script
@@ -241,11 +244,23 @@ rspec migration pg11:
     - .rspec-base-migration
     - .rspec-migration-parallel
 
+rspec migration pg11 filtered:
+  extends:
+    - rspec migration pg11
+    - .filter-rspec-tests
+    - .rails:rules:ee-and-foss:filtered
+
 rspec unit pg11:
   extends:
     - .rspec-base-pg11
     - .rails:rules:ee-and-foss-unit
     - .rspec-unit-parallel
+
+rspec unit pg11 filtered:
+  extends:
+    - rspec unit pg11
+    - .filter-rspec-tests
+    - .rails:rules:ee-and-foss:filtered
 
 rspec integration pg11:
   extends:
@@ -253,11 +268,23 @@ rspec integration pg11:
     - .rails:rules:ee-and-foss-integration
     - .rspec-integration-parallel
 
+rspec integration pg11 filtered:
+  extends:
+    - rspec integration pg11
+    - .filter-rspec-tests
+    - .rails:rules:ee-and-foss:filtered
+
 rspec system pg11:
   extends:
     - .rspec-base-pg11
     - .rails:rules:ee-and-foss-system
     - .rspec-system-parallel
+
+rspec system pg11 filtered:
+  extends:
+    - rspec system pg11
+    - .filter-rspec-tests
+    - .rails:rules:ee-and-foss:filtered
 
 rspec fast_spec_helper:
   extends:
@@ -265,6 +292,12 @@ rspec fast_spec_helper:
     - .rails:rules:ee-and-foss-fast_spec_helper
   script:
     - bin/rspec spec/fast_spec_helper.rb
+
+rspec fast_spec_helper filtered:
+  extends:
+    - rspec fast_spec_helper
+    - .filter-rspec-tests
+    - .rails:rules:ee-and-foss:filtered
 
 db:migrate:reset:
   extends: .db-job-base
@@ -444,11 +477,23 @@ rspec-ee migration pg11:
     - .rails:rules:ee-only-migration
     - .rspec-ee-migration-parallel
 
+rspec-ee migration pg11 filtered:
+  extends:
+    - rspec-ee migration pg11
+    - .filter-rspec-tests
+    - .rails:rules:ee-only:filtered
+
 rspec-ee unit pg11:
   extends:
     - .rspec-ee-base-pg11
     - .rails:rules:ee-only-unit
     - .rspec-ee-unit-parallel
+
+rspec-ee unit pg11 filtered:
+  extends:
+    - rspec-ee unit pg11
+    - .filter-rspec-tests
+    - .rails:rules:ee-only:filtered
 
 rspec-ee integration pg11:
   extends:
@@ -456,11 +501,23 @@ rspec-ee integration pg11:
     - .rails:rules:ee-only-integration
     - .rspec-ee-integration-parallel
 
+rspec-ee integration pg11 filtered:
+  extends:
+    - rspec-ee integration pg11
+    - .filter-rspec-tests
+    - .rails:rules:ee-only:filtered
+
 rspec-ee system pg11:
   extends:
     - .rspec-ee-base-pg11
     - .rails:rules:ee-only-system
     - .rspec-ee-system-parallel
+
+rspec-ee system pg11 filtered:
+  extends:
+    - rspec-ee system pg11
+    - .filter-rspec-tests
+    - .rails:rules:ee-only:filtered
 
 rspec-ee unit pg11 geo:
   extends:
@@ -468,15 +525,33 @@ rspec-ee unit pg11 geo:
     - .rails:rules:ee-only-unit
     - .rspec-ee-unit-geo-parallel
 
+rspec-ee unit pg11 geo filtered:
+  extends:
+    - rspec-ee unit pg11 geo
+    - .filter-rspec-tests
+    - .rails:rules:ee-only:filtered
+
 rspec-ee integration pg11 geo:
   extends:
     - .rspec-ee-base-geo-pg11
     - .rails:rules:ee-only-integration
 
+rspec-ee integration pg11 geo filtered:
+  extends:
+    - rspec-ee integration pg11 geo
+    - .filter-rspec-tests
+    - .rails:rules:ee-only:filtered
+
 rspec-ee system pg11 geo:
   extends:
     - .rspec-ee-base-geo-pg11
     - .rails:rules:ee-only-system
+
+rspec-ee system pg11 geo filtered:
+  extends:
+    - rspec-ee system pg11 geo
+    - .filter-rspec-tests
+    - .rails:rules:ee-only:filtered
 
 db:rollback geo:
   extends:

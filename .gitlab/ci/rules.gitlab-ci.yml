@@ -43,6 +43,9 @@
 .if-merge-request-title-run-all-rspec: &if-merge-request-title-run-all-rspec
   if: '$CI_MERGE_REQUEST_TITLE =~ /RUN ALL RSPEC/'
 
+.if-merge-request-title-not-run-all-rspec: &if-merge-request-title-not-run-all-rspec
+  if: '$CI_MERGE_REQUEST_IID && ! $CI_MERGE_REQUEST_TITLE =~ /RUN ALL RSPEC/'
+
 .if-security-merge-request: &if-security-merge-request
   if: '$CI_PROJECT_NAMESPACE == "gitlab-org/security" && $CI_MERGE_REQUEST_IID'
 
@@ -483,28 +486,44 @@
 ###############
 # Rails rules #
 ###############
+.rails:rules:ee-and-foss:filtered:
+  rules:
+    - <<: *if-merge-request-title-run-all-rspec
+      when: never
+    - <<: *if-merge-request
+
 .rails:rules:ee-and-foss-migration:
   rules:
+    - <<: *if-merge-request-title-not-run-all-rspec
+      when: never
     - changes: *db-patterns
     - <<: *if-merge-request-title-run-all-rspec
 
 .rails:rules:ee-and-foss-unit:
   rules:
+    - <<: *if-merge-request-title-not-run-all-rspec
+      when: never
     - changes: *backend-patterns
     - <<: *if-merge-request-title-run-all-rspec
 
 .rails:rules:ee-and-foss-integration:
   rules:
+    - <<: *if-merge-request-title-not-run-all-rspec
+      when: never
     - changes: *backend-patterns
     - <<: *if-merge-request-title-run-all-rspec
 
 .rails:rules:ee-and-foss-system:
   rules:
+    - <<: *if-merge-request-title-not-run-all-rspec
+      when: never
     - changes: *code-backstage-patterns
     - <<: *if-merge-request-title-run-all-rspec
 
 .rails:rules:ee-and-foss-fast_spec_helper:
   rules:
+    - <<: *if-merge-request-title-not-run-all-rspec
+      when: never
     - changes: ["config/**/*"]
     - <<: *if-merge-request-title-run-all-rspec
 
@@ -514,9 +533,17 @@
       changes: *code-backstage-qa-patterns
     - <<: *if-merge-request-title-run-all-rspec
 
+.rails:rules:ee-only:filtered:
+  rules:
+    - <<: *if-merge-request-title-run-all-rspec
+      when: never
+    - <<: *if-merge-request
+
 .rails:rules:ee-only-migration:
   rules:
     - <<: *if-not-ee
+      when: never
+    - <<: *if-merge-request-title-not-run-all-rspec
       when: never
     - changes: *db-patterns
     - <<: *if-merge-request-title-run-all-rspec
@@ -525,6 +552,8 @@
   rules:
     - <<: *if-not-ee
       when: never
+    - <<: *if-merge-request-title-not-run-all-rspec
+      when: never
     - changes: *backend-patterns
     - <<: *if-merge-request-title-run-all-rspec
 
@@ -532,12 +561,16 @@
   rules:
     - <<: *if-not-ee
       when: never
+    - <<: *if-merge-request-title-not-run-all-rspec
+      when: never
     - changes: *backend-patterns
     - <<: *if-merge-request-title-run-all-rspec
 
 .rails:rules:ee-only-system:
   rules:
     - <<: *if-not-ee
+      when: never
+    - <<: *if-merge-request-title-not-run-all-rspec
       when: never
     - changes: *code-backstage-patterns
     - <<: *if-merge-request-title-run-all-rspec
