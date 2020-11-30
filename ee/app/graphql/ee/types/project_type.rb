@@ -80,10 +80,16 @@ module EE
         field :dast_site_validation,
               ::Types::DastSiteValidationType,
               null: true,
+              resolver: ::Resolvers::DastSiteValidationResolver.single,
+              description: 'DAST Site Validation associated with the project. Will always return `null` ' \
+                           'if `security_on_demand_scans_site_validation` is disabled'
+
+        field :dast_site_validations,
+              ::Types::DastSiteValidationType.connection_type,
+              null: true,
               resolver: ::Resolvers::DastSiteValidationResolver,
-              description: 'DAST Site Validation associated with the project' do
-                argument :target_url, GraphQL::STRING_TYPE, required: true, description: 'target URL of the DAST Site Validation'
-              end
+              description: 'DAST Site Validations associated with the project. Will always return `[]` ' \
+                           'if `security_on_demand_scans_site_validation` is disabled'
 
         field :cluster_agent,
               ::Types::Clusters::AgentType,
