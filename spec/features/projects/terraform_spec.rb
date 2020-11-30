@@ -11,7 +11,7 @@ RSpec.describe 'Terraform', :js do
     gitlab_sign_in(user)
   end
 
-  context 'when user does not have any terraform states and visits index page' do
+  context 'when user does not have any terraform states and visits the index page' do
     before do
       visit project_terraform_index_path(project)
     end
@@ -22,7 +22,7 @@ RSpec.describe 'Terraform', :js do
   end
 
   context 'when user has a terraform state' do
-    let_it_be(:terraform_state) { create(:terraform_state, :locked, project: project) }
+    let_it_be(:terraform_state) { create(:terraform_state, :locked, :with_version, project: project) }
 
     context 'when user visits the index page' do
       before do
@@ -35,13 +35,45 @@ RSpec.describe 'Terraform', :js do
 
       it 'displays a table with terraform states' do
         expect(page).to have_selector(
-          '[data-testid="terraform-states-table"] tbody tr',
+          '[data-testid="terraform-states-table-name"]',
+          count: project.terraform_states.size
+        )
+      end
+
+      it 'displays terraform actions dropdown' do
+        expect(page).to have_selector(
+          '[data-testid*="terraform-state-actions"]',
           count: project.terraform_states.size
         )
       end
 
       it 'displays terraform information' do
         expect(page).to have_content(terraform_state.name)
+      end
+
+      it 'download terraform JSON' do
+        find("[data-testid='terraform-state-actions-#{terraform_state.name}']").click
+        # TODO
+      end
+
+      context 'when user is not a terraform admin' do
+        let_it_be(:developer) { create(:user) }
+
+        before do
+          project.add_developer(developer)
+          gitlab_sign_out
+          gitlab_sign_in(developer)
+          visit project_terraform_index_path(project)
+        end
+
+        it 'displays a table without an action dropdown', :aggregate_failures do
+          expect(page).to have_selector(
+            '[data-testid="terraform-states-table-name"]',
+            count: project.terraform_states.size
+          )
+
+          expect(page).not_to have_selector('[data-testid*="terraform-state-actions"]')
+        end
       end
     end
   end
