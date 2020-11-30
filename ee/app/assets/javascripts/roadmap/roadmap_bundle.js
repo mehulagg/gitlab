@@ -62,7 +62,6 @@ export default () => {
           dropKeys: ['scope', 'utf8', 'state', 'sort', 'layout'], // These keys are unsupported/unnecessary
         }),
       );
-
       const timeframe = getTimeframeForPreset(
         presetType,
         window.innerWidth - el.offsetLeft - EPIC_DETAILS_CELL_WIDTH,
