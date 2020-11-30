@@ -24,6 +24,7 @@ RSpec.describe 'Import/Export - Group Import', :js do
     let(:file) { File.join(Rails.root, 'spec', %w[fixtures group_export.tar.gz]) }
 
     context 'when using the pre-filled path', :sidekiq_inline do
+      # rubocop: disable CodeReuse/ActiveRecord
       it 'successfully imports the group' do
         group_name = 'Test Group Import'
 
@@ -32,12 +33,12 @@ RSpec.describe 'Import/Export - Group Import', :js do
         fill_in :group_name, with: group_name
         find('#import-group-tab').click
 
-        expect(page).to have_content 'Import a GitLab group export file'
+        expect(page).to have_content 'Import group from file'
         attach_file(file) do
           find('.js-filepicker-button').click
         end
 
-        expect { click_on 'Import group' }.to change { Group.count }.by 1
+        expect { click_on 'Import' }.to change { Group.count }.by 1
 
         group = Group.find_by(name: group_name)
 
@@ -46,9 +47,11 @@ RSpec.describe 'Import/Export - Group Import', :js do
         expect(group.path).to eq 'test-group-import'
         expect(group.import_state.status).to eq GroupImportState.state_machine.states[:finished].value
       end
+      # rubocop: enable CodeReuse/ActiveRecord
     end
 
     context 'when modifying the pre-filled path' do
+      # rubocop: disable CodeReuse/ActiveRecord
       it 'successfully imports the group' do
         visit new_group_path
 
@@ -60,11 +63,12 @@ RSpec.describe 'Import/Export - Group Import', :js do
           find('.js-filepicker-button').click
         end
 
-        expect { click_on 'Import group' }.to change { Group.count }.by 1
+        expect { click_on 'Import' }.to change { Group.count }.by 1
 
         group = Group.find_by(name: 'Test Group Import')
         expect(group.path).to eq 'custom-path'
       end
+      # rubocop: enable CodeReuse/ActiveRecord
     end
 
     context 'when the path is already taken' do
@@ -94,7 +98,7 @@ RSpec.describe 'Import/Export - Group Import', :js do
         find('.js-filepicker-button').click
       end
 
-      expect { click_on 'Import group' }.not_to change { Group.count }
+      expect { click_on 'Import' }.not_to change { Group.count }
 
       page.within('.flash-container') do
         expect(page).to have_content('Unable to process group import file')
