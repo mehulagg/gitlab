@@ -31,10 +31,21 @@ module Types
             null: false,
             description: 'Timestamp the version was updated'
 
-      field :version,
-            GraphQL::INT_TYPE,
+      field :download_path, GraphQL::STRING_TYPE,
             null: true,
-            description: 'The version number'
+            description: "URL for downloading the version's JSON file"
+
+      field :serial, GraphQL::INT_TYPE,
+            null: true,
+            description: 'Serial number of the version'
+
+      def download_path
+        "/api/#{::API::API.version}/projects/#{object.project_id}/terraform/state/#{object.terraform_state.name}/versions/#{object.version}"
+      end
+
+      def serial
+        object.version
+      end
     end
   end
 end

@@ -21504,6 +21504,11 @@ type TerraformStateVersion {
   createdByUser: User
 
   """
+  URL for downloading the version's JSON file
+  """
+  downloadPath: String
+
+  """
   ID of the Terraform state version
   """
   id: ID!
@@ -21514,14 +21519,14 @@ type TerraformStateVersion {
   job: CiJob
 
   """
+  Serial number of the version
+  """
+  serial: Int
+
+  """
   Timestamp the version was updated
   """
   updatedAt: Time!
-
-  """
-  The version number
-  """
-  version: Int
 }
 
 """
