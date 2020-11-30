@@ -988,6 +988,8 @@ The job attributes you can use with `rules` are:
 - [`when`](#when): If not defined, defaults to `when: on_success`.
   - If used as `when: delayed`, `start_in` is also required.
 - [`allow_failure`](#allow_failure): If not defined, defaults to `allow_failure: false`.
+- [`variables`](#variables): If not defined, defaults to existing variables.
+  - More info: [`rules:variables`](#rules:variables)
 
 If a rule evaluates to true, and `when` has any value except `never`, the job is included in the pipeline.
 
@@ -1411,6 +1413,76 @@ job:
 ```
 
 In this example, if the first rule matches, then the job has `when: manual` and `allow_failure: true`.
+
+#### `rules:variables`
+
+> - [Introduced](link-to-issue) in GitLab 13.7.
+> - It's [deployed behind a feature flag](../../user/feature_flags.md), disabled by default.
+> - It's disabled on GitLab.com.
+> - It's not recommended for production use.
+> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#anchor-to-section). **(CORE ONLY)**
+
+CAUTION: **Warning:**
+This feature might not be available to you. Check the **version history** note above for details.
+
+You can use [`variables`](#variables) in `rules:` to define variables for specific conditions.
+
+For example;
+
+```yaml
+job:
+  script: "echo job1"
+  variables:
+    VAR1: my var 1
+    VAR2: my var 2
+  rules:
+    - if: $CI_COMMIT_REF_NAME =~ /master/
+      variables:
+        VAR1: overridden var 1
+    - if: $CI_COMMIT_REF_NAME =~ /feature/
+      variables:
+        VAR2: overridden var 2
+        VAR3: new var 3
+    - when: on_success
+```
+
+If the first condition is satisfied, then the total variables will be:
+```
+- VAR1: overridden var 1
+- VAR2: my var 2
+```
+
+If the second condition is satisfied, then the total variables will be:
+```
+- VAR1: my var 1
+- VAR2: overridden var 2
+- VAR3: new var 3
+```
+
+If no condition is satisfied, then the total variables will be:
+```
+- VAR1: my var 1
+- VAR2: my var 2
+```
+
+##### Enable or disable rules:variables **(CORE ONLY)**
+
+rules:variables is under development and not ready for production use. It is
+deployed behind a feature flag that is **disabled by default**.
+[GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
+can enable it.
+
+To enable it:
+
+```ruby
+Feature.enable(:ci_rules_variables)
+```
+
+To disable it:
+
+```ruby
+Feature.disable(:ci_rules_variables)
+```
 
 #### Complex rule clauses
 
