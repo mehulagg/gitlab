@@ -116,8 +116,9 @@ RSpec.describe 'Container Registry', :js do
 
   context 'when there are more than 10 images' do
     before do
-      create_list(:container_repository, 12, project: project)
       project.container_repositories << container_repository
+      create_list(:container_repository, 12, project: project)
+
       visit_container_registry
     end
 
@@ -150,6 +151,6 @@ RSpec.describe 'Container Registry', :js do
 
   def visit_second_page
     pagination = find '.gl-pagination'
-    pagination.click_link '2'
+    pagination.click_link 'Next'
   end
 end
