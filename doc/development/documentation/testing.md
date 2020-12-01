@@ -38,7 +38,7 @@ run these tests on your local machine. This has the advantage of:
 To run tests locally, it's important to:
 
 - [Install the tools](#install-linters), and [keep them up to date](#update-linters).
-- Run [linters](#lint-checks), [documentaion link tests](#documentation-link-tests), and
+- Run [linters](#lint-checks), [documentation link tests](#documentation-link-tests), and
   [UI link tests](#ui-link-tests) the same way they are run in CI/CD pipelines. That is, using the
   same configuration we use in CI/CD pipelines, which can be different to the default configuration
   of the tool.
