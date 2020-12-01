@@ -20,12 +20,15 @@ export default {
       type: Number,
       required: true,
     },
+    codeCssClass: {
+      type: String,
+      required: false,
+      default: '',
+    },
   },
   computed: {
     sanitizedOutput() {
-      return sanitize(this.rawCode, {
-        ALLOWED_ATTR: ['src'],
-      });
+      return sanitize(this.rawCode);
     },
     showOutput() {
       return this.index === 0;
@@ -37,6 +40,7 @@ export default {
 <template>
   <div class="output">
     <prompt type="Out" :count="count" :show-output="showOutput" />
-    <div class="gl-overflow-auto" v-html="sanitizedOutput"></div>
+    <div v-if="sanitizedOutput.length" class="gl-overflow-auto" v-html="sanitizedOutput"></div>
+    <pre v-else ref="code" :class="codeCssClass" class="language-python" v-text="rawCode"></pre>
   </div>
 </template>
