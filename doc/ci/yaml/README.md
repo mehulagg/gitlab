@@ -3444,7 +3444,7 @@ Use `matrix:` to configure different variables for jobs that are running in para
 There can be from 2 to 50 jobs.
 
 Jobs can only run in parallel if there are multiple runners, or a single runner is
-[configured to run multiple jobs concurrently](#using-your-own-runners)
+[configured to run multiple jobs concurrently](#using-your-own-runners).
 
 [In GitLab 13.5](https://gitlab.com/gitlab-org/gitlab/-/issues/26362) and later,
 you can have one-dimensional matrices with a single job.
