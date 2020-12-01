@@ -3815,6 +3815,15 @@ Values for sorting alerts.
 | `updated_asc` **{warning-solid}** | **Deprecated:** Use UPDATED_ASC. Deprecated in 13.5 |
 | `updated_desc` **{warning-solid}** | **Deprecated:** Use UPDATED_DESC. Deprecated in 13.5 |
 
+### AlertManagementDomainFilter
+
+Filters the alerts based on given domain.
+
+| Value | Description |
+| ----- | ----------- |
+| `OPERATIONS` | Alerts for Operations view |
+| `THREAT_MONITORING` | Alerts for Threat Monitoring view |
+
 ### AlertManagementIntegrationType
 
 Values of types of integrations.

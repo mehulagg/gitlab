@@ -591,6 +591,21 @@ type AlertManagementAlertStatusCountsType {
 }
 
 """
+Filters the alerts based on given domain
+"""
+enum AlertManagementDomainFilter {
+  """
+  Alerts for Operations view
+  """
+  OPERATIONS
+
+  """
+  Alerts for Threat Monitoring view
+  """
+  THREAT_MONITORING
+}
+
+"""
 An endpoint and credentials used to accept alerts for a project
 """
 type AlertManagementHttpIntegration implements AlertManagementIntegration {
@@ -15299,6 +15314,11 @@ type Project {
     assigneeUsername: String
 
     """
+    Filter query for given domain
+    """
+    domain: [AlertManagementDomainFilter!]
+
+    """
     IID of the alert. For example, "1"
     """
     iid: String
@@ -15352,6 +15372,11 @@ type Project {
     Returns the elements in the list that come before the specified cursor.
     """
     before: String
+
+    """
+    Filter query for given domain
+    """
+    domain: [AlertManagementDomainFilter!]
 
     """
     Returns the first _n_ elements from the list.

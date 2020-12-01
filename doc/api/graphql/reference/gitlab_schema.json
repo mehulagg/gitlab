@@ -1481,6 +1481,29 @@
           "possibleTypes": null
         },
         {
+          "kind": "ENUM",
+          "name": "AlertManagementDomainFilter",
+          "description": "Filters the alerts based on given domain",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
+          "enumValues": [
+            {
+              "name": "THREAT_MONITORING",
+              "description": "Alerts for Threat Monitoring view",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "OPERATIONS",
+              "description": "Alerts for Operations view",
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "possibleTypes": null
+        },
+        {
           "kind": "OBJECT",
           "name": "AlertManagementHttpIntegration",
           "description": "An endpoint and credentials used to accept alerts for a project",
@@ -45458,6 +45481,24 @@
                   "defaultValue": null
                 },
                 {
+                  "name": "domain",
+                  "description": "Filter query for given domain",
+                  "type": {
+                    "kind": "LIST",
+                    "name": null,
+                    "ofType": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "ENUM",
+                        "name": "AlertManagementDomainFilter",
+                        "ofType": null
+                      }
+                    }
+                  },
+                  "defaultValue": null
+                },
+                {
                   "name": "search",
                   "description": "Search query for title, description, service, or monitoring_tool.",
                   "type": {
@@ -45558,6 +45599,24 @@
                     "kind": "ENUM",
                     "name": "AlertManagementAlertSort",
                     "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "domain",
+                  "description": "Filter query for given domain",
+                  "type": {
+                    "kind": "LIST",
+                    "name": null,
+                    "ofType": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "ENUM",
+                        "name": "AlertManagementDomainFilter",
+                        "ofType": null
+                      }
+                    }
                   },
                   "defaultValue": null
                 },

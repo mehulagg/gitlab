@@ -38,6 +38,16 @@ RSpec.describe Resolvers::AlertManagement::AlertResolver do
       it { is_expected.to contain_exactly(ignored_alert) }
     end
 
+    context 'filtering by monitoring tool according to asked view' do
+      let_it_be(:alert1) { create(:alert_management_alert, project: project, monitoring_tool: 'CiliumInternal') }
+      let_it_be(:alert2) { create(:alert_management_alert, project: project, monitoring_tool: 'CiliumInternal') }
+      let_it_be(:alert3) { create(:alert_management_alert, project: project, monitoring_tool: 'generic') }
+
+      let(:args) { { domain: 'threat_monitoring' } }
+
+      it { is_expected.to contain_exactly(alert1, alert2) }
+    end
+
     describe 'sorting' do
       # Other sorting examples in spec/finders/alert_management/alerts_finder_spec.rb
       context 'when sorting by events count' do

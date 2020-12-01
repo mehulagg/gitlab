@@ -22,6 +22,13 @@ module AlertManagement
     }.freeze
     private_constant :STATUSES
 
+    # rubocop: disable CodeReuse/ActiveRecord
+    DOMAINS = {
+      threat_monitoring:  -> (collection) { collection.where(monitoring_tool: 'CiliumInternal') },
+      operations:  -> (collection) { collection.where.not(monitoring_tool: 'CiliumInternal') }
+    }.with_indifferent_access.freeze
+    # rubocop: enable CodeReuse/ActiveRecord
+
     belongs_to :project
     belongs_to :issue, optional: true
     belongs_to :prometheus_alert, optional: true

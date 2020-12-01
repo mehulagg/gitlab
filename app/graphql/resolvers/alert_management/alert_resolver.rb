@@ -18,6 +18,10 @@ module Resolvers
                 description: 'Sort alerts by this criteria',
                 required: false
 
+      argument :domain, [Types::AlertManagement::DomainFilterEnum],
+                description: 'Filter query for given domain',
+                required: false
+
       argument :search, GraphQL::STRING_TYPE,
                 description: 'Search query for title, description, service, or monitoring_tool.',
                 required: false

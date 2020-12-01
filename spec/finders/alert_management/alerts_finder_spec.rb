@@ -241,6 +241,63 @@ RSpec.describe AlertManagement::AlertsFinder, '#execute' do
         end
       end
 
+      context 'filtering by domain' do
+        let_it_be(:alert) do
+          create(:alert_management_alert,
+                 :with_fingerprint,
+                 project: project,
+                 title: 'Title',
+                 description: 'Desc',
+                 service: 'Service',
+                 monitoring_tool: 'Monitor'
+                )
+        end
+
+        let_it_be(:alert2) do
+          create(:alert_management_alert,
+                 :with_fingerprint,
+                 project: project,
+                 title: 'Distinctive',
+                 description: 'Desc',
+                 service: 'UnknownService',
+                 monitoring_tool: 'CiliumInternal'
+                )
+        end
+
+        let_it_be(:alert3) do
+          create(:alert_management_alert,
+                 :with_fingerprint,
+                 project: project,
+                 title: 'Title',
+                 description: 'Desc',
+                 service: 'CiliumService',
+                 monitoring_tool: 'CiliumInternal'
+                )
+        end
+
+        let(:params) { { domain: 'threat_monitoring' } }
+
+        it { is_expected.to match_array([alert2, alert3]) }
+
+        context 'filter for operations  view' do
+          let(:params) { { domain: 'operations' } }
+
+          it { is_expected.to match_array([alert, resolved_alert, ignored_alert]) }
+        end
+
+        context 'filter for thread monitoring view and search by term' do
+          let(:params) { { domain: 'threat_monitoring', search: 'Distinctive' } }
+
+          it { is_expected.to match_array([alert2]) }
+        end
+
+        context 'filter for thread monitoring view' do
+          let(:params) { { domain: 'threat_monitoring', search: 'DistinctiveService' } }
+
+          it { is_expected.to be_empty }
+        end
+      end
+
       context 'assignee username given' do
         let_it_be(:assignee) { create(:user) }
         let_it_be(:alert) { create(:alert_management_alert, project: project, assignees: [assignee]) }
