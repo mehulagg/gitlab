@@ -25,6 +25,7 @@ module Types
             description: 'Tooltip associated with the status',
             method: :status_tooltip
       field :action, Types::Ci::StatusActionType, null: true,
+            calls_gitaly: true,
             description: 'Action information for the status. This includes method, button title, icon, path, and title',
             resolve: -> (obj, _args, _ctx) {
               if obj.has_action?
