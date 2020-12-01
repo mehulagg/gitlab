@@ -54,6 +54,12 @@
     %li.d-md-none
       = link_to _("Switch to GitLab Next"), "https://next.gitlab.com/"
 
+  - if users = Gitlab::WardenSession.users
+    %li.divider
+    - users.each do |user|
+      %li
+        = link_to user.name, root_url
+
   - if current_user_menu?(:sign_out)
     %li.divider
     %li

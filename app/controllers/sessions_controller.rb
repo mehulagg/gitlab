@@ -12,16 +12,13 @@ class SessionsController < Devise::SessionsController
 
   skip_before_action :check_two_factor_requirement, only: [:destroy]
   skip_before_action :check_password_expiration, only: [:destroy]
-
-  # replaced with :require_no_authentication_without_flash
-  skip_before_action :require_no_authentication, only: [:new, :create]
+  skip_before_action :require_no_authentication
 
   prepend_before_action :check_initial_setup, only: [:new]
   prepend_before_action :authenticate_with_two_factor,
     if: -> { action_name == 'create' && two_factor_enabled? }
   prepend_before_action :check_captcha, only: [:create]
   prepend_before_action :store_redirect_uri, only: [:new]
-  prepend_before_action :require_no_authentication_without_flash, only: [:new, :create]
   prepend_before_action :ensure_password_authentication_enabled!, if: -> { action_name == 'create' && password_based_login? }
 
   before_action :auto_sign_in_with_provider, only: [:new]
@@ -32,6 +29,8 @@ class SessionsController < Devise::SessionsController
   before_action do
     push_frontend_feature_flag(:webauthn)
   end
+
+  multi_user_login only: :create
 
   after_action :log_failed_login, if: :action_new_and_failed_login?
   after_action :verify_known_sign_in, only: [:create]

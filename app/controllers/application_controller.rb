@@ -23,6 +23,7 @@ class ApplicationController < ActionController::Base
   include Gitlab::Logging::CloudflareHelper
   include Gitlab::Utils::StrongMemoize
   include ::Gitlab::WithFeatureCategory
+  include MultiUser
 
   before_action :authenticate_user!, except: [:route_not_found]
   before_action :enforce_terms!, if: :should_enforce_terms?
@@ -49,6 +50,7 @@ class ApplicationController < ActionController::Base
   around_action :sessionless_bypass_admin_mode!, if: :sessionless_user?
   around_action :set_locale
   around_action :set_session_storage
+  around_action :set_multi_user
   around_action :set_current_admin
 
   after_action :set_page_title_header, if: :json_request?
