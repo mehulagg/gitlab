@@ -1,6 +1,6 @@
 ---
-stage: Enablement
-group: Distribution
+stage: none
+group: unassigned
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference
 ---
@@ -331,7 +331,7 @@ p=Project.find_by_full_path('PROJECT PATH')
 IssueRebalancingService.new(p.issues.take).execute
 ```
 
-## Imports / Exports
+## Import a project
 
 ```ruby
 # Find the project and get the error
@@ -372,6 +372,21 @@ Clear the cache:
 
 ```shell
 sudo gitlab-rake cache:clear
+```
+
+### Export a project
+
+```ruby
+u = User.find_by_username('<user>')
+# Sufficient permissions needed, see https://docs.gitlab.com/ee/user/permissions.html#project-members-permissions
+
+p = Project.find_by_full_path('<username-or-group>/<project-name>')
+
+# Log debug information
+ActiveRecord::Base.logger = Logger.new(STDOUT)
+Gitlab::Utils::Measuring.logger = Logger.new(STDOUT)
+
+Projects::ImportExport::ExportService.new(p, u).execute
 ```
 
 ## Repository
