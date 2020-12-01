@@ -342,6 +342,7 @@ module EE
         enable :create_requirement_test_report
         enable :admin_requirement
         enable :update_requirement
+        enable :import_requirements
       end
 
       rule { requirements_available & owner }.enable :destroy_requirement

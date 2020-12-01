@@ -12,7 +12,12 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
       # Use this scope for all new project routes.
       scope '-' do
         namespace :requirements_management do
-          resources :requirements, only: [:index]
+          resources :requirements, only: [:index] do
+            collection do
+              post :import_csv
+              post :authorize
+            end
+          end
         end
 
         namespace :quality do

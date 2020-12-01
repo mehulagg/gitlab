@@ -16,6 +16,7 @@ module BillingPlansHelper
       namespace_id: group.id,
       namespace_name: group.name,
       plan_upgrade_href: plan_upgrade_url(group, plan),
+      plan_renew_href: plan_renew_url(group),
       customer_portal_url: "#{EE::SUBSCRIPTIONS_URL}/subscriptions",
       billable_seats_href: billable_seats_href(group)
     }
@@ -93,6 +94,12 @@ module BillingPlansHelper
     return unless group && plan&.id
 
     "#{EE::SUBSCRIPTIONS_URL}/gitlab/namespaces/#{group.id}/upgrade/#{plan.id}"
+  end
+
+  def plan_renew_url(group)
+    return unless group
+
+    "#{EE::SUBSCRIPTIONS_URL}/gitlab/namespaces/#{group.id}/renew"
   end
 
   def billable_seats_href(group)

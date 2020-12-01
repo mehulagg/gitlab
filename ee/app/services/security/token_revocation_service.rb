@@ -11,7 +11,10 @@ module Security
     end
 
     def execute
+      raise RevocationFailedError, 'Missing revocation token data' if missing_token_data?
+
       return error('Token revocation is disabled') unless token_revocation_enabled?
+      return success if revoke_token_body.blank?
 
       response = revoke_tokens
       response.success? ? success : error('Failed to revoke tokens')
@@ -29,11 +32,9 @@ module Security
     end
 
     def revoke_tokens
-      raise RevocationFailedError, 'Missing revocation tokens data' if missing_token_data?
-
       ::Gitlab::HTTP.post(
         token_revocation_url,
-        body: message,
+        body: revoke_token_body,
         headers: {
          'Content-Type' => 'application/json',
          'Authorization' => revocation_api_token
@@ -54,23 +55,25 @@ module Security
       )
     end
 
-    def message
-      response = ::Gitlab::HTTP.get(
-        token_types_url,
-        headers: {
-          'Content-Type' => 'application/json',
-          'Authorization' => revocation_api_token
-        }
-      )
-      raise RevocationFailedError, 'Failed to get revocation token types' unless response.success?
+    def revoke_token_body
+      @revoke_token_body ||= begin
+         response = ::Gitlab::HTTP.get(
+           token_types_url,
+           headers: {
+             'Content-Type' => 'application/json',
+             'Authorization' => revocation_api_token
+           }
+         )
+         raise RevocationFailedError, 'Failed to get revocation token types' unless response.success?
 
-      token_types = ::Gitlab::Json.parse(response.body)['types']
-      raise RevocationFailedError, 'No token type is available' if token_types.blank?
+         token_types = ::Gitlab::Json.parse(response.body)['types']
+         return if token_types.blank?
 
-      @revocable_keys.filter! { |key| token_types.include?(key[:type]) }
-      raise RevocationFailedError, 'No revocable key is present' if @revocable_keys.blank?
+         @revocable_keys.filter! { |key| token_types.include?(key[:type]) }
+         return if @revocable_keys.blank?
 
-      @revocable_keys.to_json
+         @revocable_keys.to_json
+       end
     end
 
     def token_types_url

@@ -896,9 +896,6 @@ msgstr ""
 msgid "&lt; 1 hour"
 msgstr ""
 
-msgid "&lt;no scopes selected&gt;"
-msgstr ""
-
 msgid "'%{data}' at %{location} does not match format: %{format}"
 msgstr ""
 
@@ -26221,6 +26218,9 @@ msgstr ""
 msgid "SubscriptionTable|Next invoice"
 msgstr ""
 
+msgid "SubscriptionTable|Renew"
+msgstr ""
+
 msgid "SubscriptionTable|Seats currently in use"
 msgstr ""
 
@@ -27255,6 +27255,9 @@ msgid "The time taken by each data entry gathered by that stage."
 msgstr ""
 
 msgid "The update action will time out after %{number_of_minutes} minutes. For big repositories, use a clone/push combination."
+msgstr ""
+
+msgid "The uploaded file was invalid. Supported file extensions are %{extensions}."
 msgstr ""
 
 msgid "The usage ping is disabled, and cannot be configured through this form."
@@ -31248,6 +31251,9 @@ msgstr ""
 msgid "You have insufficient permissions to create an on-call schedule for this project"
 msgstr ""
 
+msgid "You have insufficient permissions to remove an on-call schedule from this project"
+msgstr ""
+
 msgid "You have insufficient permissions to remove this HTTP integration"
 msgstr ""
 
@@ -31657,6 +31663,9 @@ msgid "Your request for access could not be processed: %{error_meesage}"
 msgstr ""
 
 msgid "Your request for access has been queued for review."
+msgstr ""
+
+msgid "Your requirements are being imported. Once finished, you'll receive a confirmation email."
 msgstr ""
 
 msgid "Your response has been recorded."
@@ -32765,6 +32774,9 @@ msgid "no name set"
 msgstr ""
 
 msgid "no one can merge"
+msgstr ""
+
+msgid "no scopes selected"
 msgstr ""
 
 msgid "none"

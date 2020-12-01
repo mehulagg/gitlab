@@ -73,7 +73,7 @@ exports[`OnDemandScansSiteProfileSelector renders properly with profiles 1`] = `
           <button
             aria-expanded="false"
             aria-haspopup="true"
-            class="btn dropdown-toggle btn-default btn-md gl-button gl-dropdown-toggle btn-default-tertiary"
+            class="btn dropdown-toggle btn-default btn-md gl-button gl-dropdown-toggle"
             type="button"
           >
             <!---->
