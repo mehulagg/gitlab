@@ -267,7 +267,7 @@ export default {
         </gl-skeleton-loader>
       </div>
       <template v-else>
-        <template v-if="images.length > 0">
+        <template v-if="images.length > 0 || name">
           <div class="gl-display-flex gl-p-1 gl-mt-3" data-testid="listHeader">
             <div class="gl-flex-fill-1">
               <h5>{{ $options.i18n.IMAGE_REPOSITORY_LIST_LABEL }}</h5>
