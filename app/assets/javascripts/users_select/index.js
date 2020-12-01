@@ -63,7 +63,7 @@ function UsersSelect(currentUser, els, options = {}) {
     const abilityName = $dropdown.data('abilityName');
     let $value = $block.find('.value');
     const $collapsedSidebar = $block.find('.sidebar-collapsed-user');
-    const $loading = $block.find('.block-loading').addClass('hidden');
+    const $loading = $block.find('.block-loading').addClass('gl-display-none');
     const selectedIdDefault = defaultNullUser && showNullUser ? 0 : null;
     let selectedId = $dropdown.data('selected');
     let assignTo;
@@ -204,14 +204,14 @@ function UsersSelect(currentUser, els, options = {}) {
       const data = {};
       data[abilityName] = {};
       data[abilityName].assignee_id = selected != null ? selected : null;
-      $loading.removeClass('hidden');
+      $loading.removeClass('gl-display-none');
       $dropdown.trigger('loading.gl.dropdown');
 
       return axios.put(issueURL, data).then(({ data }) => {
         let user = {};
         let tooltipTitle = user.name;
         $dropdown.trigger('loaded.gl.dropdown');
-        $loading.addClass('hidden');
+        $loading.addClass('gl-display-none');
         if (data.assignee) {
           user = {
             name: data.assignee.name,

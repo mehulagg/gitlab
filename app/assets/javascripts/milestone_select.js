@@ -53,7 +53,7 @@ export default class MilestoneSelect {
       const $block = $selectBox.closest('.block');
       const $sidebarCollapsedValue = $block.find('.sidebar-collapsed-icon');
       const $value = $block.find('.value');
-      const $loading = $block.find('.block-loading').addClass('hidden');
+      const $loading = $block.find('.block-loading').addClass('gl-display-none');
       selectedMilestoneDefault = showAny ? '' : null;
       selectedMilestoneDefault =
         showNo && defaultNo ? __('No milestone') : selectedMilestoneDefault;
@@ -254,29 +254,29 @@ export default class MilestoneSelect {
             }
 
             $dropdown.trigger('loading.gl.dropdown');
-            $loading.removeClass('hidden');
+            $loading.removeClass('gl-display-none');
 
             boardsStore.detail.issue
               .update($dropdown.attr('data-issue-update'))
               .then(() => {
                 $dropdown.trigger('loaded.gl.dropdown');
-                $loading.addClass('hidden');
+                $loading.addClass('gl-display-none');
               })
               .catch(() => {
-                $loading.addClass('hidden');
+                $loading.addClass('gl-display-none');
               });
           } else {
             selected = $selectBox.find('input[type="hidden"]').val();
             data = {};
             data[abilityName] = {};
             data[abilityName].milestone_id = selected != null ? selected : null;
-            $loading.removeClass('hidden');
+            $loading.removeClass('gl-display-none');
             $dropdown.trigger('loading.gl.dropdown');
             return axios
               .put(issueUpdateURL, data)
               .then(({ data }) => {
                 $dropdown.trigger('loaded.gl.dropdown');
-                $loading.addClass('hidden');
+                $loading.addClass('gl-display-none');
                 $selectBox.hide();
                 $value.css('display', '');
                 if (data.milestone != null) {
@@ -307,7 +307,7 @@ export default class MilestoneSelect {
                   .text(__('None'));
               })
               .catch(() => {
-                $loading.addClass('hidden');
+                $loading.addClass('gl-display-none');
               });
           }
         },

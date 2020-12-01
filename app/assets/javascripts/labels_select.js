@@ -45,7 +45,7 @@ export default class LabelsSelect {
       const $sidebarCollapsedValue = $block.find('.sidebar-collapsed-icon span');
       const $value = $block.find('.value');
       const $dropdownMenu = $dropdown.parent().find('.dropdown-menu');
-      const $loading = $block.find('.block-loading').addClass('hidden');
+      const $loading = $block.find('.block-loading').addClass('gl-display-none');
       const fieldName = $dropdown.data('fieldName');
       let initialSelected = $selectbox
         .find(`input[name="${$dropdown.data('fieldName')}"]`)
@@ -82,13 +82,13 @@ export default class LabelsSelect {
         if (!selected.length) {
           data[abilityName].label_ids = [''];
         }
-        $loading.removeClass('hidden');
+        $loading.removeClass('gl-display-none');
         $dropdown.trigger('loading.gl.dropdown');
         axios
           .put(issueUpdateURL, data)
           .then(({ data }) => {
             let template;
-            $loading.addClass('hidden');
+            $loading.addClass('gl-display-none');
             $dropdown.trigger('loaded.gl.dropdown');
             $selectbox.hide();
             data.issueUpdateURL = issueUpdateURL;
@@ -338,7 +338,7 @@ export default class LabelsSelect {
           const label = clickEvent.selectedObj;
 
           const hideLoader = () => {
-            $loading.addClass('hidden');
+            $loading.addClass('gl-display-none');
           };
 
           const page = $('body').attr('data-page');
@@ -399,7 +399,7 @@ export default class LabelsSelect {
               boardsStore.detail.issue.labels = labels;
             }
 
-            $loading.removeClass('hidden');
+            $loading.removeClass('gl-display-none');
             const oldLabels = boardsStore.detail.issue.labels;
 
             boardsStore.detail.issue

@@ -42,8 +42,8 @@ export default class ImageFile {
       .filter(`.${viewMode}`)
       .addClass('active');
 
-    $(`.view:visible:not(.${viewMode})`, this.file).addClass('hide');
-    $(`.view.${viewMode}`, this.file).removeClass('hide');
+    $(`.view:visible:not(.${viewMode})`, this.file).addClass('gl-display-none');
+    $(`.view.${viewMode}`, this.file).removeClass('gl-display-none');
     return this.initView(viewMode);
   }
 

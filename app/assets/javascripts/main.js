@@ -138,7 +138,7 @@ function deferredInitialisation() {
 
     $(this)
       .closest('li')
-      .addClass('hidden');
+      .addClass('gl-display-none');
   });
 
   $('.js-remove-tr').on('ajax:before', function removeTRAjaxBeforeCallback() {
@@ -148,7 +148,7 @@ function deferredInitialisation() {
   $('.js-remove-tr').on('ajax:success', function removeTRAjaxSuccessCallback() {
     $(this)
       .closest('tr')
-      .addClass('hidden');
+      .addClass('gl-display-none');
   });
 
   const glTooltipDelay = localStorage.getItem('gl-tooltip-delay');

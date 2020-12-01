@@ -11,7 +11,7 @@ function WeightSelect(els, options = {}) {
     const $selectbox = $dropdown.closest('.selectbox');
     const $block = $selectbox.closest('.block');
     const $value = $block.find('.value');
-    $block.find('.block-loading').addClass('hidden');
+    $block.find('.block-loading').addClass('gl-display-none');
     const fieldName = options.fieldName || $dropdown.data('fieldName');
     const inputField = $dropdown.closest('.selectbox').find(`input[name='${fieldName}']`);
 
