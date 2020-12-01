@@ -75,7 +75,7 @@ describe('Image List Row', () => {
       expect(link.props('to')).toMatchObject({
         name: 'details',
         params: {
-          id: 1,
+          id: 26,
         },
       });
     });
