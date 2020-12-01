@@ -55,10 +55,10 @@ can be any public or private repository.
    git init
    git add composer.json
    git commit -m 'Composer package test'
-   git tag v1.0.0
+   git tag 1.0.0
    git remote add origin git@gitlab.example.com:<namespace>/<project-name>.git
    git push --set-upstream origin master
-   git push origin v1.0.0
+   git push origin 1.0.0
    ```
 
 The package is now in your GitLab Package Registry.
