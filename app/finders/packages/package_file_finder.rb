@@ -8,6 +8,10 @@ class Packages::PackageFileFinder
     @params = params
   end
 
+  def by_id(id)
+    package.package_files.find_by_id(id)
+  end
+
   def execute
     package_files.last
   end
