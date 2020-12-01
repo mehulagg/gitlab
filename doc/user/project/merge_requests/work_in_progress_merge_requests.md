@@ -14,10 +14,11 @@ being merged, and it will stay disabled until the "Draft" flag has been removed.
 
 ![Blocked Merge Button](img/draft_blocked_merge_button_v13_2.png)
 
-Draft merge requests do not run [pipelines for merged results](../../../ci/merge_request_pipelines/pipelines_for_merged_results/index.md),
-and run [merge request pipelines](../../../ci/merge_request_pipelines/index.md) when
-pipelines for merged results is enabled. To run pipelines for merged results, you must
-[remove the draft status](#removing-the-draft-flag-from-a-merge-request).
+When [pipelines for merged results](../../../ci/merge_request_pipelines/pipelines_for_merged_results/index.md)
+is enabled, draft merge requests run [merge request pipelines](../../../ci/merge_request_pipelines/index.md)
+only.
+
+To run pipelines for merged results, you must [remove the draft status](#removing-the-draft-flag-from-a-merge-request).
 
 ## Adding the "Draft" flag to a merge request
 
