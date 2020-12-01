@@ -132,27 +132,29 @@ class License < ApplicationRecord
   EEP_FEATURES.freeze
 
   EEU_FEATURES = EEP_FEATURES + %i[
+    api_fuzzing
     auto_rollback
+    cilium_alerts
     container_scanning
     coverage_fuzzing
     credentials_inventory
-    cilium_alerts
     dast
     dependency_scanning
     devops_adoption
+    enforce_pat_expiration
     enterprise_templates
-    api_fuzzing
+    environment_alerts
     group_level_compliance_dashboard
     incident_management
     insights
     issuable_health_status
     license_scanning
     personal_access_token_expiration_policy
-    enforce_pat_expiration
+    project_activity_analytics
     prometheus_alerts
     pseudonymizer
+    quality_management
     release_evidence_test_artifacts
-    environment_alerts
     report_approver_rules
     requirements
     sast
@@ -164,7 +166,6 @@ class License < ApplicationRecord
     subepics
     threat_monitoring
     vulnerability_auto_fix
-    quality_management
   ]
   EEU_FEATURES.freeze
 

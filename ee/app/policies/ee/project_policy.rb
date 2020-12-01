@@ -54,6 +54,11 @@ module EE
           ::Gitlab::CurrentSettings.prevent_merge_requests_committers_approval
       end
 
+      with_scope :subject
+      condition(:project_activity_analytics_available) do
+        @subject.feature_available?(:project_activity_analytics)
+      end
+
       condition(:project_merge_request_analytics_available) do
         @subject.feature_available?(:project_merge_request_analytics)
       end
@@ -350,6 +355,9 @@ module EE
       end
 
       rule { can?(:read_merge_request) & code_review_analytics_enabled }.enable :read_code_review_analytics
+
+      rule { reporter & project_activity_analytics_available }
+        .enable :read_project_activity_analytics
 
       rule { reporter & project_merge_request_analytics_available }
         .enable :read_project_merge_request_analytics
