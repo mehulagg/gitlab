@@ -2,12 +2,16 @@
 
 module Gitlab
   module BackgroundMigration
-    # This class updates vulnerability feedback entities with no pipeline id assigned.
+    # This class updates vulnerabilities entities with state dismissed
     class PopulateDismissedStateForVulnerabilities
-      def perform(project_ids)
+      class Vulnerability < ActiveRecord::Base # rubocop:disable Style/Documentation
+        self.table_name = 'vulnerabilities'
+      end
+
+      def perform(vulnerability_ids)
+        Vulnerability.where(id: vulnerability_ids).update_all(state: 2)
+        PopulateMissingVulnerabilityDismissalInformation.new.perform(*vulnerability_ids)
       end
     end
   end
 end
-
-Gitlab::BackgroundMigration::PopulateDismissedStateForVulnerabilities.prepend_if_ee('EE::Gitlab::BackgroundMigration::PopulateDismissedStateForVulnerabilities')

@@ -32,5 +32,13 @@ RSpec.describe ::Gitlab::BackgroundMigration::PopulateDismissedStateForVulnerabi
       expect(vulnerability_1.reload.state).to eq(2)
       expect(vulnerability_2.reload.state).to eq(2)
     end
+
+    it 'populates missing dismissal information' do
+      expect_next_instance_of(::Gitlab::BackgroundMigration::PopulateMissingVulnerabilityDismissalInformation) do |migration|
+        expect(migration).to receive(:perform).with(vulnerability_1.id, vulnerability_2.id)
+      end
+
+      subject.perform([vulnerability_1.id, vulnerability_2.id])
+    end
   end
 end

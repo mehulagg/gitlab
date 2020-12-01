@@ -25,7 +25,7 @@ class SchedulePopulateDismissedStateForVulnerabilities < ActiveRecord::Migration
     return if vulnerabilities.rows.blank?
 
     vulnerabilities.rows.flatten.in_groups_of(BATCH_SIZE, false).each_with_index do |vulnerability_ids, index|
-      migrate_in(index * INTERVAL, MIGRATION, [vulnerability_ids])
+      migrate_in(index * DELAY_INTERVAL, MIGRATION_CLASS, [vulnerability_ids])
     end
   end
 
