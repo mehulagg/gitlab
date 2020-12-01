@@ -12065,7 +12065,8 @@ CREATE TABLE experiment_users (
     group_type smallint DEFAULT 0 NOT NULL,
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
-    converted_at timestamp with time zone
+    converted_at timestamp with time zone,
+    context jsonb DEFAULT '{}'::jsonb NOT NULL
 );
 
 CREATE SEQUENCE experiment_users_id_seq

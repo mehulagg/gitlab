@@ -19,20 +19,21 @@ RSpec.describe Experiment do
     let_it_be(:experiment_name) { :experiment_key }
     let_it_be(:user) { 'a user' }
     let_it_be(:group) { 'a group' }
+    let_it_be(:context) { { a: 42 } }
 
-    subject(:add_user) { described_class.add_user(experiment_name, group, user) }
+    subject(:add_user) { described_class.add_user(experiment_name, group, user, context) }
 
     context 'when an experiment with the provided name does not exist' do
       it 'creates a new experiment record' do
         allow_next_instance_of(described_class) do |experiment|
-          allow(experiment).to receive(:record_user_and_group).with(user, group)
+          allow(experiment).to receive(:record_user_and_group).with(user, group, context)
         end
         expect { add_user }.to change(described_class, :count).by(1)
       end
 
       it 'forwards the user and group_type to the instance' do
         expect_next_instance_of(described_class) do |experiment|
-          expect(experiment).to receive(:record_user_and_group).with(user, group)
+          expect(experiment).to receive(:record_user_and_group).with(user, group, context)
         end
         add_user
       end
@@ -43,14 +44,14 @@ RSpec.describe Experiment do
 
       it 'does not create a new experiment record' do
         allow_next_found_instance_of(described_class) do |experiment|
-          allow(experiment).to receive(:record_user_and_group).with(user, group)
+          allow(experiment).to receive(:record_user_and_group).with(user, group, context)
         end
         expect { add_user }.not_to change(described_class, :count)
       end
 
       it 'forwards the user and group_type to the instance' do
         expect_next_found_instance_of(described_class) do |experiment|
-          expect(experiment).to receive(:record_user_and_group).with(user, group)
+          expect(experiment).to receive(:record_user_and_group).with(user, group, context)
         end
         add_user
       end
@@ -131,6 +132,8 @@ RSpec.describe Experiment do
     let_it_be(:user) { create(:user) }
 
     let(:group) { :control }
+    let(:context) { { a: 42 } }
+    let(:record_user_and_group_with_context) { experiment.record_user_and_group(user, group, context) }
 
     subject(:record_user_and_group) { experiment.record_user_and_group(user, group) }
 
@@ -142,6 +145,11 @@ RSpec.describe Experiment do
       it 'assigns the correct group_type to the experiment_user' do
         record_user_and_group
         expect(ExperimentUser.last.group_type).to eq('control')
+      end
+
+      it 'adds the correct context to the experiment_user' do
+        record_user_and_group_with_context
+        expect(ExperimentUser.last.context).to eq({ 'a' => 42 })
       end
     end
 
@@ -155,11 +163,17 @@ RSpec.describe Experiment do
         expect { record_user_and_group }.not_to change(ExperimentUser, :count)
       end
 
-      context 'but the group_type has changed' do
+      context 'but the group_type and context has changed' do
         let(:group) { :experimental }
+        let(:context) { { b: 37 } }
 
         it 'updates the existing experiment_user record' do
           expect { record_user_and_group }.to change { ExperimentUser.last.group_type }
+        end
+
+        it 'updates the existing experiment_user record with context' do
+          record_user_and_group_with_context
+          expect(ExperimentUser.last.context).to eq({ 'b' => 37 })
         end
       end
     end

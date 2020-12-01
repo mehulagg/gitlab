@@ -60,11 +60,11 @@ module Gitlab
         end
       end
 
-      def record_experiment_user(experiment_key)
+      def record_experiment_user(experiment_key, context = {})
         return if dnt_enabled?
         return unless Experimentation.enabled?(experiment_key) && current_user
 
-        ::Experiment.add_user(experiment_key, tracking_group(experiment_key), current_user)
+        ::Experiment.add_user(experiment_key, tracking_group(experiment_key), current_user, context)
       end
 
       def record_experiment_conversion_event(experiment_key)
