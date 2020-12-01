@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import IntegrationForm from './components/integration_form.vue';
+import OverrideDropdownApp from './app.vue';
 
 export default (el, store) => {
   if (!el) {
@@ -10,7 +10,7 @@ export default (el, store) => {
     el,
     store,
     render(createElement) {
-      return createElement(IntegrationForm);
+      return createElement(OverrideDropdownApp);
     },
   });
 };

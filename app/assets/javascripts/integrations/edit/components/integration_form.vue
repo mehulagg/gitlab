@@ -5,7 +5,6 @@ import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import eventHub from '../event_hub';
 import { integrationLevels } from '../constants';
 
-import OverrideDropdown from './override_dropdown.vue';
 import ActiveCheckbox from './active_checkbox.vue';
 import JiraTriggerFields from './jira_trigger_fields.vue';
 import JiraIssuesFields from './jira_issues_fields.vue';
@@ -17,7 +16,6 @@ import ResetConfirmationModal from './reset_confirmation_modal.vue';
 export default {
   name: 'IntegrationForm',
   components: {
-    OverrideDropdown,
     ActiveCheckbox,
     JiraTriggerFields,
     JiraIssuesFields,
@@ -77,13 +75,6 @@ export default {
 
 <template>
   <div>
-    <override-dropdown
-      v-if="defaultState !== null"
-      :inherit-from-id="defaultState.id"
-      :override="override"
-      :learn-more-path="propsSource.learnMorePath"
-      @change="setOverride"
-    />
     <active-checkbox v-if="propsSource.showActive" :key="`${currentKey}-active-checkbox`" />
     <jira-trigger-fields
       v-if="isJira"

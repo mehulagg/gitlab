@@ -8,6 +8,9 @@
     %span.js-service-active-status{ class: hide_class, data: { value: value.to_s } }
       = boolean_to_icon value
 
+- if @default_integration
+  .js-vue-integration-override-dropdown
+
 .row.gl-mb-3
   .col-lg-4
     - if @service.respond_to?(:detailed_description)

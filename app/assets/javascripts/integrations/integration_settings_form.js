@@ -3,7 +3,10 @@ import axios from '../lib/utils/axios_utils';
 import { __, s__ } from '~/locale';
 import toast from '~/vue_shared/plugins/global_toast';
 import initForm from './edit';
+import { createStore } from './edit/store';
+import initOverrideDropdown from './override_dropdown';
 import eventHub from './edit/event_hub';
+import { parseDatasetToProps } from './utils/integrations_utils';
 
 export default class IntegrationSettingsForm {
   constructor(formSelector) {
@@ -17,11 +20,23 @@ export default class IntegrationSettingsForm {
   }
 
   init() {
-    // Init Vue component
-    this.vue = initForm(
-      document.querySelector('.js-vue-integration-settings'),
-      document.querySelector('.js-vue-default-integration-settings'),
-    );
+    const el = document.querySelector('.js-vue-integration-settings');
+    const defaultEl = document.querySelector('.js-vue-default-integration-settings');
+
+    const props = parseDatasetToProps(el.dataset);
+    const initialState = {
+      defaultState: null,
+      customState: props,
+    };
+    if (defaultEl) {
+      initialState.defaultState = Object.freeze(parseDatasetToProps(defaultEl.dataset));
+    }
+    const store = createStore(initialState);
+
+    // Init Vue components
+    this.vue = initForm(el, store);
+    initOverrideDropdown(document.querySelector('.js-vue-integration-override-dropdown'), store);
+
     eventHub.$on('toggle', active => {
       this.formActive = active;
       this.toggleServiceState();
