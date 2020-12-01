@@ -12,6 +12,15 @@ import { mapState, mapActions } from 'vuex';
 import { sprintf, __ } from '~/locale';
 import ValueStreamForm from './value_stream_form.vue';
 
+const I18N = {
+  DELETE_NAME: __('Delete %{name}'),
+  DELETE_CONFIRMATION: __('Are you sure you want to delete "%{name}" Value Stream?'),
+  DELETED: __("'%{name}' Value Stream deleted"),
+  DELETE: __('Delete'),
+  CREATE_VALUE_STREAM: __('Create new Value Stream'),
+  CANCEL: __('Cancel'),
+};
+
 export default {
   components: {
     GlAlert,
@@ -32,9 +41,6 @@ export default {
       data: 'valueStreams',
       selectedValueStream: 'selectedValueStream',
     }),
-    isLoading() {
-      return this.isDeleting;
-    },
     hasValueStreams() {
       return Boolean(this.data.length);
     },
@@ -48,15 +54,14 @@ export default {
       return this.selectedValueStream?.isCustom || false;
     },
     deleteSelectedText() {
-      return sprintf(__('Delete %{name}'), { name: this.selectedValueStreamName });
+      return sprintf(this.$options.I18N.DELETE_NAME, { name: this.selectedValueStreamName });
     },
     deleteConfirmationText() {
-      return sprintf(__('Are you sure you want to delete "%{name}" Value Stream?'), {
+      return sprintf(this.$options.I18N.DELETE_CONFIRMATION, {
         name: this.selectedValueStreamName,
       });
     },
   },
-
   methods: {
     ...mapActions(['setSelectedValueStream', 'deleteValueStream']),
     onSuccess(message) {
@@ -72,11 +77,12 @@ export default {
       const name = this.selectedValueStreamName;
       return this.deleteValueStream(this.selectedValueStreamId).then(() => {
         if (!this.deleteValueStreamError) {
-          this.onSuccess(sprintf(__("'%{name}' Value Stream deleted"), { name }));
+          this.onSuccess(sprintf(this.$options.I18N.DELETED, { name }));
         }
       });
     },
   },
+  I18N,
 };
 </script>
 <template>
@@ -97,7 +103,7 @@ export default {
       >
       <gl-dropdown-divider />
       <gl-dropdown-item v-gl-modal-directive="'value-stream-form-modal'">{{
-        __('Create new Value Stream')
+        $options.I18N.CREATE_VALUE_STREAM
       }}</gl-dropdown-item>
       <gl-dropdown-item
         v-if="canDeleteSelectedStage"
@@ -108,7 +114,7 @@ export default {
       >
     </gl-dropdown>
     <gl-button v-else v-gl-modal-directive="'value-stream-form-modal'">{{
-      __('Create new Value Stream')
+      $options.I18N.CREATE_VALUE_STREAM
     }}</gl-button>
     <value-stream-form />
     <gl-modal
@@ -116,10 +122,10 @@ export default {
       modal-id="delete-value-stream-modal"
       :title="__('Delete Value Stream')"
       :action-primary="{
-        text: __('Delete'),
-        attributes: [{ variant: 'danger' }, { loading: isLoading }],
+        text: $options.I18N.DELETE,
+        attributes: [{ variant: 'danger' }, { loading: isDeleting }],
       }"
-      :action-cancel="{ text: __('Cancel') }"
+      :action-cancel="{ text: $options.I18N.CANCEL }"
       @primary.prevent="onDelete"
     >
       <gl-alert v-if="deleteValueStreamError" variant="danger">{{

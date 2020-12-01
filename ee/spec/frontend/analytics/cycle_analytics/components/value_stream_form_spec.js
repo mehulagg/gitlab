@@ -45,26 +45,78 @@ describe('ValueStreamForm', () => {
 
   const findModal = () => wrapper.find(GlModal);
   const createSubmitButtonDisabledState = () =>
-    findModal('create').props('actionPrimary').attributes[1].disabled;
-  const submitModal = modal => findModal(modal).vm.$emit('primary', mockEvent);
+    findModal().props('actionPrimary').attributes[1].disabled;
+  const submitModal = () => findModal().vm.$emit('primary', mockEvent);
   const findFormGroup = () => wrapper.find(GlFormGroup);
-
-  beforeEach(() => {
-    wrapper = createComponent({
-      initialState: {},
-    });
-  });
 
   afterEach(() => {
     wrapper.destroy();
+    wrapper = null;
   });
 
-  describe('Create value stream form', () => {
+  describe('default state', () => {
+    beforeEach(() => {
+      wrapper = createComponent({ initialState: {} });
+    });
+
     it('submit button is disabled', () => {
       expect(createSubmitButtonDisabledState()).toBe(true);
     });
+  });
 
-    describe('form errors', () => {
+  describe('form errors', () => {
+    beforeEach(() => {
+      wrapper = createComponent({
+        data: { name: streamName },
+        initialState: {
+          createValueStreamErrors,
+        },
+      });
+    });
+
+    it('renders the error', () => {
+      expect(findFormGroup().attributes('invalid-feedback')).toEqual(
+        createValueStreamErrors.name.join('\n'),
+      );
+    });
+
+    it('submit button is disabled', () => {
+      expect(createSubmitButtonDisabledState()).toBe(true);
+    });
+  });
+
+  describe('with valid fields', () => {
+    beforeEach(() => {
+      wrapper = createComponent({ data: { name: streamName } });
+    });
+
+    it('submit button is enabled', () => {
+      expect(createSubmitButtonDisabledState()).toBe(false);
+    });
+
+    describe('form submitted successfully', () => {
+      beforeEach(() => {
+        submitModal();
+      });
+
+      it('calls the "createValueStream" event when submitted', () => {
+        expect(createValueStreamMock).toHaveBeenCalledWith(expect.any(Object), {
+          name: streamName,
+        });
+      });
+
+      it('clears the name field', () => {
+        expect(wrapper.vm.name).toBe('');
+      });
+
+      it('displays a toast message', () => {
+        expect(mockToastShow).toHaveBeenCalledWith(`'${streamName}' Value Stream created`, {
+          position: 'top-center',
+        });
+      });
+    });
+
+    describe('form submission fails', () => {
       beforeEach(() => {
         wrapper = createComponent({
           data: { name: streamName },
@@ -72,73 +124,20 @@ describe('ValueStreamForm', () => {
             createValueStreamErrors,
           },
         });
+
+        submitModal();
       });
 
-      it('renders the error', () => {
-        expect(findFormGroup().attributes('invalid-feedback')).toEqual(
-          createValueStreamErrors.name.join('\n'),
-        );
+      it('calls the createValueStream action', () => {
+        expect(createValueStreamMock).toHaveBeenCalled();
       });
 
-      it('submit button is disabled', () => {
-        expect(createSubmitButtonDisabledState()).toBe(true);
-      });
-    });
-
-    describe('with valid fields', () => {
-      beforeEach(() => {
-        wrapper = createComponent({ data: { name: streamName } });
+      it('does not clear the name field', () => {
+        expect(wrapper.vm.name).toBe(streamName);
       });
 
-      it('submit button is enabled', () => {
-        expect(createSubmitButtonDisabledState()).toBe(false);
-      });
-
-      describe('form submitted successfully', () => {
-        beforeEach(() => {
-          submitModal('create');
-        });
-
-        it('calls the "createValueStream" event when submitted', () => {
-          expect(createValueStreamMock).toHaveBeenCalledWith(expect.any(Object), {
-            name: streamName,
-          });
-        });
-
-        it('clears the name field', () => {
-          expect(wrapper.vm.name).toEqual('');
-        });
-
-        it('displays a toast message', () => {
-          expect(mockToastShow).toHaveBeenCalledWith(`'${streamName}' Value Stream created`, {
-            position: 'top-center',
-          });
-        });
-      });
-
-      describe('form submission fails', () => {
-        beforeEach(() => {
-          wrapper = createComponent({
-            data: { name: streamName },
-            initialState: {
-              createValueStreamErrors,
-            },
-          });
-
-          submitModal('create');
-        });
-
-        it('calls the createValueStream action', () => {
-          expect(createValueStreamMock).toHaveBeenCalled();
-        });
-
-        it('does not clear the name field', () => {
-          expect(wrapper.vm.name).toEqual(streamName);
-        });
-
-        it('does not display a toast message', () => {
-          expect(mockToastShow).not.toHaveBeenCalled();
-        });
+      it('does not display a toast message', () => {
+        expect(mockToastShow).not.toHaveBeenCalled();
       });
     });
   });

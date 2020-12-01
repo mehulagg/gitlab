@@ -10,15 +10,26 @@ const ERRORS = {
   MAX_LENGTH: __('Maximum length 100 characters'),
 };
 
+const NAME_MAX_LENGTH = 100;
+
 const validate = ({ name }) => {
   const errors = { name: [] };
-  if (name.length > 100) {
+  if (name.length > NAME_MAX_LENGTH) {
     errors.name.push(ERRORS.MAX_LENGTH);
   }
   if (!name.length) {
     errors.name.push(ERRORS.MIN_LENGTH);
   }
   return errors;
+};
+
+const I18N = {
+  CREATE_VALUE_STREAM: __('Create Value Stream'),
+  CREATED: __("'%{name}' Value Stream created"),
+  CANCEL: __('Cancel'),
+  MODAL_TITLE: __('Value Stream Name'),
+  FIELD_NAME_LABEL: __('Name'),
+  FIELD_NAME_PLACEHOLDER: __('Example: My Value Stream'),
 };
 
 export default {
@@ -61,6 +72,16 @@ export default {
     isLoading() {
       return this.isCreating;
     },
+    primaryProps() {
+      return {
+        text: this.$options.I18N.CREATE_VALUE_STREAM,
+        attributes: [
+          { variant: 'success' },
+          { disabled: !this.isValid },
+          { loading: this.isLoading },
+        ],
+      };
+    },
   },
   watch: {
     initialFormErrors(newErrors = {}) {
@@ -85,7 +106,7 @@ export default {
       const { name } = this;
       return this.createValueStream({ name }).then(() => {
         if (!this.hasFormErrors) {
-          this.$toast.show(sprintf(__("'%{name}' Value Stream created"), { name }), {
+          this.$toast.show(sprintf(this.$options.I18N.CREATED, { name }), {
             position: 'top-center',
           });
           this.name = '';
@@ -93,29 +114,21 @@ export default {
       });
     },
   },
+  I18N,
 };
 </script>
 <template>
   <gl-modal
     data-testid="value-stream-form-modal"
     modal-id="value-stream-form-modal"
-    :title="__('Value Stream Name')"
-    :action-primary="{
-      text: __('Create Value Stream'),
-      attributes: [
-        { variant: 'success' },
-        {
-          disabled: !isValid,
-        },
-        { loading: isLoading },
-      ],
-    }"
-    :action-cancel="{ text: __('Cancel') }"
+    :title="$options.I18N.MODAL_TITLE"
+    :action-primary="primaryProps"
+    :action-cancel="{ text: $options.I18N.CANCEL }"
     @primary.prevent="onSubmit"
   >
     <gl-form>
       <gl-form-group
-        :label="__('Name')"
+        :label="$options.I18N.FIELD_NAME_LABEL"
         label-for="create-value-stream-name"
         :invalid-feedback="invalidFeedback"
         :state="isValid"
@@ -124,7 +137,7 @@ export default {
           id="create-value-stream-name"
           v-model.trim="name"
           name="create-value-stream-name"
-          :placeholder="__('Example: My Value Stream')"
+          :placeholder="$options.I18N.FIELD_NAME_PLACEHOLDER"
           :state="isValid"
           required
           @input="onHandleInput"
