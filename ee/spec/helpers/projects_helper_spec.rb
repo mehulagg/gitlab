@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe ProjectsHelper do
-  let(:project) { create(:project) }
+  let_it_be(:project) { create(:project) }
 
   before do
     helper.instance_variable_set(:@project, project)
@@ -257,8 +257,7 @@ RSpec.describe ProjectsHelper do
     end
 
     with_them do
-      let(:project) { create(:project) }
-      let(:user)    { create(:user) }
+      let_it_be(:user) { create(:user) }
 
       before do
         allow(helper).to receive(:can?) { false }
@@ -292,11 +291,12 @@ RSpec.describe ProjectsHelper do
 
   describe '#show_discover_project_security?' do
     using RSpec::Parameterized::TableSyntax
-    let(:user) { create(:user) }
+
+    let_it_be(:user) { create(:user) }
 
     where(
       gitlab_com?: [true, false],
-       user?: [true, false],
+      user?: [true, false],
       security_dashboard_feature_available?: [true, false],
       can_admin_namespace?: [true, false]
     )
