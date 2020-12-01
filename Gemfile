@@ -87,7 +87,7 @@ gem 'net-ldap'
 # Locked at Grape v1.4.0 until https://github.com/ruby-grape/grape/pull/2088 is merged
 # Remove config/initializers/grape_patch.rb
 gem 'grape', '= 1.4.0'
-gem 'grape-entity', '~> 0.7.1'
+gem 'grape-entity', '~> 0.8.2'
 gem 'rack-cors', '~> 1.0.6', require: 'rack/cors'
 
 # GraphQL API
