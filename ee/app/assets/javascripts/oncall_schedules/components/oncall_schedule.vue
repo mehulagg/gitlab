@@ -1,7 +1,8 @@
 <script>
-import { GlSprintf, GlCard } from '@gitlab/ui';
+import { GlSprintf, GlCard, GlButtonGroup, GlButton, GlModalDirective } from '@gitlab/ui';
 import { s__ } from '~/locale';
 import ScheduleTimelineSection from './schedule/components/schedule_timeline_section.vue';
+import DestroyScheduleModal from './destroy_schedule_modal.vue';
 import { getTimeframeForWeeksView } from './schedule/utils';
 import { PRESET_TYPES } from './schedule/constants';
 import { getFormattedTimezone } from '../utils';
@@ -19,6 +20,12 @@ export default {
     GlSprintf,
     GlCard,
     ScheduleTimelineSection,
+    GlButtonGroup,
+    GlButton,
+    DestroyScheduleModal,
+  },
+  directives: {
+    GlModal: GlModalDirective,
   },
   props: {
     schedule: {
@@ -43,7 +50,13 @@ export default {
     <h2>{{ $options.i18n.title }}</h2>
     <gl-card>
       <template #header>
-        <h3 class="gl-font-weight-bold gl-font-lg gl-m-0">{{ schedule.name }}</h3>
+        <div class="gl-display-flex gl-justify-content-space-between gl-m-0">
+          <span class="gl-font-weight-bold gl-font-lg">{{ schedule.name }}</span>
+          <gl-button-group>
+            <gl-button icon="pencil" />
+            <gl-button v-gl-modal.destroyScheduleModal icon="remove" />
+          </gl-button-group>
+        </div>
       </template>
 
       <p class="gl-text-gray-500 gl-mb-5">
@@ -57,5 +70,6 @@ export default {
         <schedule-timeline-section :preset-type="$options.presetType" :timeframe="timeframe" />
       </div>
     </gl-card>
+    <destroy-schedule-modal :schedule="schedule" />
   </div>
 </template>
