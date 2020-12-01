@@ -18,11 +18,11 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :sidekiq_might_not_need
     let(:results) { described_class.new(user, 'hello world', limit_project_ids) }
 
     where(:scope, :results_method, :expected) do
-      'projects'       | :projects       | { 1 => 'test <span class="gl-text-black-normal gl-font-weight-bold">highlight</span>' }
-      'milestones'     | :milestones     | { 1 => 'test <span class="gl-text-black-normal gl-font-weight-bold">highlight</span>' }
-      'notes'          | :notes          | { 1 => 'test <span class="gl-text-black-normal gl-font-weight-bold">highlight</span>' }
-      'issues'         | :issues         | { 1 => 'test <span class="gl-text-black-normal gl-font-weight-bold">highlight</span>' }
-      'merge_requests' | :merge_requests | { 1 => 'test <span class="gl-text-black-normal gl-font-weight-bold">highlight</span>' }
+      'projects'       | :projects       | { 1 => 'test <span class="search-term-highlight">highlight</span>' }
+      'milestones'     | :milestones     | { 1 => 'test <span class="search-term-highlight">highlight</span>' }
+      'notes'          | :notes          | { 1 => 'test <span class="search-term-highlight">highlight</span>' }
+      'issues'         | :issues         | { 1 => 'test <span class="search-term-highlight">highlight</span>' }
+      'merge_requests' | :merge_requests | { 1 => 'test <span class="search-term-highlight">highlight</span>' }
       'blobs'          | nil             | nil
       'wiki_blobs'     | nil             | nil
       'commits'        | nil             | nil
@@ -32,7 +32,7 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :sidekiq_might_not_need
 
     with_them do
       it 'returns the expected highlight map' do
-        expect(results).to receive(results_method).and_return([{ _source: { id: 1 }, highlight: 'test <span class="gl-text-black-normal gl-font-weight-bold">highlight</span>' }]) if results_method
+        expect(results).to receive(results_method).and_return([{ _source: { id: 1 }, highlight: 'test <span class="search-term-highlight">highlight</span>' }]) if results_method
         expect(results.highlight_map(scope)).to eq(expected)
       end
     end

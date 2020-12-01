@@ -15,6 +15,11 @@ $search-avatar-size: 16px;
   .blob-result {
     margin: 5px 0;
   }
+
+  .search-term-highlight {
+    color: $black; // Turns white in dark mode
+    font-weight: 600;
+  }
 }
 
 .search form:hover,
