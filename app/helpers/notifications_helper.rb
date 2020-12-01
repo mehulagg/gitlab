@@ -106,7 +106,7 @@ module NotificationsHelper
     when :success_pipeline
       s_('NotificationEvent|Successful pipeline')
     else
-      s_(event.to_s.humanize)
+      s_("NotificationEvent|" + event.to_s.humanize)
     end
   end
 
