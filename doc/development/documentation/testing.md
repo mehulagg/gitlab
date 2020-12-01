@@ -197,7 +197,7 @@ You can use Vale:
 At a minimum, install [markdownlint](#markdownlint) and [Vale](#vale) to match the checks run in
 build pipelines:
 
-1. Install `markdownlint-cli`, using `yarn`:
+1. Install `markdownlint-cli``:
 
    ```shell
    yarn global add markdownlint-cli
