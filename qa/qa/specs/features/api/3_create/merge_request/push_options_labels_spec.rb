@@ -7,13 +7,15 @@ module QA
       #
       # git config --global receive.advertisepushoptions true
 
-      branch = "push-options-test-#{SecureRandom.hex(8)}"
-      title = "MR push options test #{SecureRandom.hex(8)}"
-      commit_message = 'Add README.md'
+      let(:branch) { "push-options-test-#{SecureRandom.hex(8)}" }
+      let(:title) { "MR push options test #{SecureRandom.hex(8)}" }
+      let(:commit_message) { 'Add README.md' }
 
-      project = Resource::Project.fabricate_via_api! do |project|
-        project.name = 'merge-request-push-options'
-        project.initialize_with_readme = true
+      let(:project) do
+        Resource::Project.fabricate_via_api! do |project|
+          project.name = 'merge-request-push-options'
+          project.initialize_with_readme = true
+        end
       end
 
       it 'sets labels', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1032' do
