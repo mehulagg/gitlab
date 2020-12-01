@@ -296,6 +296,38 @@ Be aware that:
   be deducted from your Additional Minutes quota immediately after your purchase of additional
   minutes.
 
+## Storage subscription
+
+Each project is subject to a storage quota. When a project exceeds the default 10 GiB quota, or its
+allocated storage, it is locked. For more details, see [Usage Quotas].
+
+To unlock a project you must [buy more storage](#buy-more-storage). You can allocate more storage to
+a group or personal namespace by buying a storage add-on subscription. A storage subscription
+provides an additional 10 GiB space and is renewed annually. You can buy multiple storage
+subscriptions per namespace.
+
+### Buy more storage
+
+To purchase more storage for either a personal or group namespace:
+
+1. Log in to GitLab.com.
+1. From either your personal homepage or the group's page, go to **Settings > Usage Quotas**.
+1. For each locked project, total by how much its **Usage** exceeds the free quota and purchased
+   storage. You must purchase the storage increment that exceeds this total.
+1. Click **Purchase more storage** and you are taken to the Customers Portal.
+1. Click **Add new subscription**.
+1. Scroll to **Purchase add-on subscriptions** and select **Buy storage subscription**.
+1. In the **Subscription details** section select the name of the user or group from the dropdown.
+1. Enter the desired quantity of storage packs.
+1. In the **Billing information** section select the payment method from the dropdown.
+1. Select the **Privacy Policy** and **Terms of Service** checkbox.
+1. Select **Buy subscription**.
+1. Log out of the Customers Portal.
+1. Switch back to the GitLab.com tab and refresh the page.
+
+The **Purchased storage available** total is incremented by the amount purchased. All locked
+projects are unlocked and their excess usage is deducted from the additional storage.
+
 ## Customers portal
 
 GitLab provides a [customer portal](../index.md#customers-portal) where you can

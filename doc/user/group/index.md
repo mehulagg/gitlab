@@ -772,57 +772,6 @@ To enable prevent project forking:
   for the group. **(STARTER ONLY)**
 - **Pipelines quota**: Keep track of the [pipeline quota](../admin_area/settings/continuous_integration.md) for the group.
 
-#### Storage usage quota **(STARTER)**
-
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/13294) in [GitLab Starter](https://about.gitlab.com/pricing/) 12.0.
-
-A group owner can check the aggregated storage usage for all the projects in a group, sub-groups included, in the **Storage** tab of the **Usage Quotas** page available to the group page settings list.
-
-![Group storage usage quota](img/group_storage_usage_quota.png)
-
-The total usage of the storage is updated if any relevant event that
-will affect its value is triggered (e.g., a commit push).
-For performance reasons, we may delay the update up to 1 hour and 30 minutes.
-
-If your namespace shows `N/A` as the total storage usage, you can trigger a recalculation by pushing a commit to any project in that namespace.
-
-#### Storage usage statistics
-
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/247831) in GitLab 13.6.
-> - It's [deployed behind a feature flag](<../../../user/feature_flags.md), disabled by default.
-> - It's disabled on GitLab.com.
-> - It's not recommended for production use.
-> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-storage-usage-statistics-core-only). **(STARTER ONLY)**
-
-CAUTION: **Warning:**
-This feature might not be available to you. Check the **version history** note above for details.
-
-The following storage usage statistics are available to the namespace's owner:
-
-- Total namespace storage used: Total storage used in this namespace.
-- Total excess storage used: Total storage used in this group which is **above** the amount included
-  in the group's tier.
-- Purchased storage available: Total storage that has been purchased but is not yet used.
-
-### Enable or disable Storage usage statistics **(STARTER ONLY)**
-
-Storage usage statistics is under development and not ready for production use. It is deployed
-behind a feature flag that is **disabled by default**.
-[GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
-can enable it.
-
-To enable it:
-
-```ruby
-Feature.enable(:additional_repo_storage_by_namespace)
-```
-
-To disable it:
-
-```ruby
-Feature.disable(:additional_repo_storage_by_namespace)
-```
-
 #### Group push rules **(STARTER)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/34370) in [GitLab Starter](https://about.gitlab.com/pricing/) 12.8.
