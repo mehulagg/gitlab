@@ -77,8 +77,7 @@ access all projects that would be normally accessible to the user creating that
 job. The unique job token does not have any write permissions, but there
 is a [proposal to add support](https://gitlab.com/groups/gitlab-org/-/epics/3559).
 
-In case you need your CI pipeline to push to the Package Registry,
-consider using [Deploy Tokens](deploy_tokens/index.md).
+If you need your CI pipeline to push to the Package Registry, consider using [deploy tokens](deploy_tokens/index.md).
 
 We try to make sure that this token doesn't leak by:
 
