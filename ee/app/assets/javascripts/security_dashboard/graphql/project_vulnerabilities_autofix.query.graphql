@@ -23,7 +23,7 @@ query project(
     ) {
       nodes {
         ...Vulnerability
-        solutions
+        hasSolutions
       }
       pageInfo {
         ...PageInfo
