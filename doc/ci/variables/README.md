@@ -259,7 +259,7 @@ To access environment variables, use the syntax for your runner's [shell](https:
 |----------------------|------------------------------------------|
 | bash/sh              | `$variable`                              |
 | PowerShell           | `$env:variable` (primary) or `$variable` |
-| Windows Batch        | `%variable%`, or `!variable!` if the variable contains white spaces or newlines (use with [delayed expansion](https://ss64.com/nt/delayedexpansion.html)). |
+| Windows Batch        | `%variable%`, or `!variable!` for [delayed expansion](https://ss64.com/nt/delayedexpansion.html). Delayed expansion can be used with variables containing white spaces or newlines, but can be disabled with a [feature flag](https://docs.gitlab.com/runner/configuration/feature-flags.html#available-feature-flags). |
 
 ### Bash
 
