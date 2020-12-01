@@ -135,7 +135,7 @@ are as follows:
   a part of.
 
   Suppose B is a fork of A, and A does not belong to an object pool.
-  Now C gets created as a fork of B. C is not be part of a pool
+  Now C gets created as a fork of B. C is not part of a pool
   repository.
 
 > TODO should forks of forks be deduplicated?
