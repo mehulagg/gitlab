@@ -49,6 +49,7 @@ module Security
 
       vulnerability_params = finding.to_hash.except(:compare_key, :identifiers, :location, :scanner, :scan, :links)
       vulnerability_params[:uuid] = calculate_uuid_v5(finding)
+
       vulnerability_finding = create_or_find_vulnerability_finding(finding, vulnerability_params)
 
       update_vulnerability_scanner(finding)
@@ -65,7 +66,14 @@ module Security
 
       create_vulnerability_pipeline_object(vulnerability_finding, pipeline)
 
-      create_vulnerability(vulnerability_finding, pipeline)
+      vulnerability = create_vulnerability(vulnerability_finding, pipeline)
+      Security::PerformAutoactionsService.new(
+        vulnerability,
+        vulnerability_finding,
+        vulnerability_finding.metadata['autoactions']
+      ).execute
+
+      vulnerability
     end
 
     # rubocop: disable CodeReuse/ActiveRecord

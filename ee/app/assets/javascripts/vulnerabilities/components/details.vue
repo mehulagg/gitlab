@@ -124,10 +124,10 @@ export default {
         this.location.operatingSystem
       );
     },
-<<<<<<< HEAD
+
     details() {
       return this.vulnerability.details;
-=======
+    },
     hasRequest() {
       return Boolean(this.requestData.length);
     },
@@ -139,7 +139,6 @@ export default {
     },
     hasResponses() {
       return Boolean(this.hasResponse || this.hasRecordedResponse);
->>>>>>> master
     },
   },
   methods: {
