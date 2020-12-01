@@ -2,7 +2,6 @@
 import { mapState, mapActions } from 'vuex';
 import { GlToggle } from '@gitlab/ui';
 import { parseBoolean } from '~/lib/utils/common_utils';
-import Tracking from '~/tracking';
 import LocalStorageSync from '~/vue_shared/components/local_storage_sync.vue';
 
 export default {
@@ -17,11 +16,6 @@ export default {
     ...mapActions(['setShowLabels']),
     onToggle(val) {
       this.setShowLabels(val);
-
-      Tracking.event(document.body.dataset.page, 'toggle', {
-        label: 'show_labels',
-        property: this.isShowingLabels ? 'on' : 'off',
-      });
     },
 
     onStorageUpdate(val) {
@@ -41,6 +35,9 @@ export default {
     <gl-toggle
       :value="isShowingLabels"
       :label="__('Show labels')"
+      :data-track-property="isShowingLabels ? 'on' : 'off'"
+      data-track-event="toggle"
+      data-track-label="show_labels"
       label-position="left"
       aria-describedby="board-labels-toggle-text"
       data-qa-selector="show_labels_toggle"
