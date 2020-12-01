@@ -1,5 +1,5 @@
 <script>
-import { GlFormGroup, GlFormInput, GlButton } from '@gitlab/ui';
+import { GlFormGroup, GlFormInput, GlButton, GlSprintf, GlLink } from '@gitlab/ui';
 import { __, sprintf } from '~/locale';
 
 export default {
@@ -7,8 +7,14 @@ export default {
     GlFormGroup,
     GlFormInput,
     GlButton,
+    GlSprintf,
+    GlLink,
   },
   props: {
+    docsPath: {
+      type: String,
+      required: true,
+    },
     emails: {
       type: Array,
       required: true,
@@ -16,7 +22,7 @@ export default {
   },
   data() {
     return {
-      numberOfInputs: Math.max(this.emails.length, 2),
+      numberOfInputs: Math.max(this.emails.length, 1),
     };
   },
   methods: {
@@ -39,7 +45,7 @@ export default {
   i18n: {
     inviteTeammatesLabel: __('Invite teammates (optional)'),
     inviteTeammatesDescription: __(
-      'Invited users will be added with developer level permissions. You can always change this later.',
+      'Invited users will be added with developer level permissions. %{linkStart}View the documentation%{linkEnd} to see how to change this later.',
     ),
     emailLabel: __('Email %{number}'),
     emailPlaceholder: __('teammate%{number}@company.com'),
@@ -49,10 +55,17 @@ export default {
 </script>
 <template>
   <div class="gl-mb-6">
-    <gl-form-group
-      :label="$options.i18n.inviteTeammatesLabel"
-      :description="$options.i18n.inviteTeammatesDescription"
-    />
+    <gl-form-group :label="$options.i18n.inviteTeammatesLabel">
+      <p class="form-text text-muted">
+        <gl-sprintf :message="$options.i18n.inviteTeammatesDescription">
+          <template #link="{ content }">
+            <gl-link :href="docsPath" target="_blank" rel="noopener noreferrer">
+              {{ content }}
+            </gl-link>
+          </template>
+        </gl-sprintf>
+      </p>
+    </gl-form-group>
     <gl-form-group
       v-for="(number, index) in numberOfInputs"
       :key="number"

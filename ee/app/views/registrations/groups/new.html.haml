@@ -42,7 +42,8 @@
             = f.label :visibility_level, class: 'label-bold' do
               = _('Visibility level')
             .js-visibility-level-dropdown{ data: { visibility_level_options: visibility_level_options.to_json, default_level: f.object.visibility_level } }
-        .js-invite-teammates{ data: { emails: params.dig(:group, :emails) || [] } }
+        = render partial: 'shared/groups/invite_teammates'
+        .js-invite-teammates{ data: { emails: params.dig(:group, :emails) || [], docs_path: help_page_path('user/permissions') } }
         .row
           .form-group.col-sm-12.mb-0
             = button_tag class: %w[btn btn-success w-100] do

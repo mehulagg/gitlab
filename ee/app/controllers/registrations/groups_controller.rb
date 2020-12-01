@@ -2,6 +2,8 @@
 
 module Registrations
   class GroupsController < ApplicationController
+    include GroupInviteTeammates
+
     layout 'checkout'
 
     before_action :authorize_create_group!, only: :new
@@ -17,7 +19,7 @@ module Registrations
       @group = Groups::CreateService.new(current_user, group_params).execute
 
       if @group.persisted?
-        invite_teammates
+        invite_teammates(@group)
 
         redirect_to new_users_sign_up_project_path(namespace_id: @group.id)
       else
@@ -35,21 +37,8 @@ module Registrations
       access_denied! unless experiment_enabled?(:onboarding_issues)
     end
 
-    def invite_teammates
-      invite_params = {
-        user_ids: emails_param[:emails].reject(&:blank?).join(','),
-        access_level: Gitlab::Access::DEVELOPER
-      }
-
-      Members::CreateService.new(current_user, invite_params).execute(@group)
-    end
-
     def group_params
       params.require(:group).permit(:name, :path, :visibility_level)
-    end
-
-    def emails_param
-      params.require(:group).permit(emails: [])
     end
   end
 end
