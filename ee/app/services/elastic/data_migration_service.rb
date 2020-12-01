@@ -21,20 +21,25 @@ module Elastic
       end
 
       def drop_migration_has_finished_cache!(migration)
-        name = migration.name.underscore
-        Rails.cache.delete cache_key(:migration_has_finished, name)
+        Rails.cache.delete cache_key(:migration_has_finished, migration.name_for_key)
       end
 
       def migration_has_finished?(name)
-        Rails.cache.fetch cache_key(:migration_has_finished, name), expires_in: 30.minutes do
+        Rails.cache.fetch cache_key(:migration_has_finished, name.underscore), expires_in: 30.minutes do
           migration_has_finished_uncached?(name)
         end
       end
 
       def migration_has_finished_uncached?(name)
-        migration = migrations.find { |migration| migration.name == name.to_s.camelize }
+        migration = migrations.find { |migration| migration.name_for_key == name.underscore.to_s }
 
-        !!migration&.load_from_index&.dig('_source', 'completed')
+        !!migration&.completed?
+      end
+
+      def pending_migrations?
+        migrations.reverse.any? do |migration|
+          !migration_has_finished?(migration.name_for_key)
+        end
       end
 
       def mark_all_as_completed!
