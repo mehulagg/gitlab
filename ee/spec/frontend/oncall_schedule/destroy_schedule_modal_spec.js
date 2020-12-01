@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import createMockApollo from 'jest/helpers/mock_apollo_helper';
 import { GlModal } from '@gitlab/ui';
