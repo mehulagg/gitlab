@@ -31,7 +31,7 @@ The scripts are grouped into **jobs**, and jobs run as part of a larger
 
 When you add a `.gitlab-ci.yml` file to your
 repository, GitLab detects it and an application called [GitLab Runner](https://docs.gitlab.com/runner/)
-runs the jobs. Runner works similarly to your terminal.
+runs the scripts defined in the jobs.
 
 A `.gitlab-ci.yml` file might contain:
 
