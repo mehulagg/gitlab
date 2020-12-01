@@ -11876,7 +11876,7 @@ CREATE TABLE elasticsearch_indexed_namespaces (
 CREATE TABLE elasticsearch_indexed_projects (
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
-    project_id integer
+    project_id integer NOT NULL
 );
 
 CREATE TABLE emails (
@@ -19175,6 +19175,9 @@ ALTER TABLE ONLY draft_notes
 ALTER TABLE ONLY elastic_reindexing_tasks
     ADD CONSTRAINT elastic_reindexing_tasks_pkey PRIMARY KEY (id);
 
+ALTER TABLE ONLY elasticsearch_indexed_projects
+    ADD CONSTRAINT elasticsearch_indexed_projects_pkey PRIMARY KEY (project_id);
+
 ALTER TABLE ONLY emails
     ADD CONSTRAINT emails_pkey PRIMARY KEY (id);
 
@@ -20967,8 +20970,6 @@ CREATE INDEX index_elastic_reindexing_tasks_on_state ON elastic_reindexing_tasks
 CREATE INDEX index_elasticsearch_indexed_namespaces_on_created_at ON elasticsearch_indexed_namespaces USING btree (created_at);
 
 CREATE UNIQUE INDEX index_elasticsearch_indexed_namespaces_on_namespace_id ON elasticsearch_indexed_namespaces USING btree (namespace_id);
-
-CREATE UNIQUE INDEX index_elasticsearch_indexed_projects_on_project_id ON elasticsearch_indexed_projects USING btree (project_id);
 
 CREATE UNIQUE INDEX index_emails_on_confirmation_token ON emails USING btree (confirmation_token);
 
