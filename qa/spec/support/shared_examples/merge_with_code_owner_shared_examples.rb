@@ -31,7 +31,7 @@ module QA
       end
 
       # Require approval from code owners on master
-      Resource::ProtectedBranch.fabricate! do |protected_branch|
+      Resource::ProtectedBranch.fabricate_via_api! do |protected_branch|
         protected_branch.project = project
         protected_branch.branch_name = 'master'
         protected_branch.new_branch = false
