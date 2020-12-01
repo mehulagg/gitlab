@@ -248,6 +248,16 @@ Subsequent calls to this method for the same experiment and the same user have n
 
 Note that this data is completely separate from the [events tracking data](#implement-the-tracking-events). They are not linked together in any way.
 
+#### Adding a context
+
+You can add an arbitrary context hash to the experiment or control users, to be consumed in the data analytics dashboards.
+
+```ruby
+before_action do
+  record_experiment_user(:signup_flow, foo: 42)
+end
+```
+
 ### Record experiment conversion event
 
 Along with the tracking of backend and frontend events and the [recording of experiment participants](#record-experiment-user), we can also record when a user performs the desired conversion event action. For example:
