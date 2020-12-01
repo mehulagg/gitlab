@@ -233,20 +233,10 @@ module EE
       !has_parent?
     end
 
-    def actual_shared_runners_minutes_limit(include_extra: true)
-      extra_minutes = include_extra ? extra_shared_runners_minutes_limit.to_i : 0
-
-      if shared_runners_minutes_limit
-        shared_runners_minutes_limit + extra_minutes
-      else
-        ::Gitlab::CurrentSettings.shared_runners_minutes + extra_minutes
-      end
-    end
-
     def shared_runners_minutes_limit_enabled?
       shared_runner_minutes_supported? &&
         any_project_with_shared_runners_enabled? &&
-        actual_shared_runners_minutes_limit.nonzero?
+        ci_minutes_quota.total_minutes.nonzero?
     end
 
     def any_project_with_shared_runners_enabled?
