@@ -3554,6 +3554,7 @@ Represents a vulnerability.
 | `description` | String | Description of the vulnerability |
 | `detectedAt` | Time! | Timestamp of when the vulnerability was first detected |
 | `discussions` | DiscussionConnection! | All discussions on this noteable |
+| `hasSolutions` | Boolean! | Indicates where vulnerability has available solution |
 | `id` | ID! | GraphQL ID of the vulnerability |
 | `identifiers` | VulnerabilityIdentifier! => Array | Identifiers of the vulnerability. |
 | `issueLinks` | VulnerabilityIssueLinkConnection! | List of issue links related to the vulnerability |
