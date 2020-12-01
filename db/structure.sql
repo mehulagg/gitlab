@@ -21578,6 +21578,8 @@ CREATE INDEX index_notes_on_note_trigram ON notes USING gin (note gin_trgm_ops);
 
 CREATE INDEX index_notes_on_noteable_id_and_noteable_type ON notes USING btree (noteable_id, noteable_type);
 
+CREATE INDEX index_notes_on_noteable_id_and_noteable_type_minus_system ON notes USING btree (noteable_id, noteable_type) WHERE (NOT system);
+
 CREATE INDEX index_notes_on_project_id_and_id_and_system_false ON notes USING btree (project_id, id) WHERE (NOT system);
 
 CREATE INDEX index_notes_on_project_id_and_noteable_type ON notes USING btree (project_id, noteable_type);
