@@ -17,7 +17,8 @@ To use GitLab CI/CD, you need:
 In the `.gitlab-ci.yml` file, you can define:
 
 - The scripts you want to run.
-- The dependencies you want to include and cache.
+- Other configuration files and templates you want to include.
+- Dependencies and caches.
 - The commands you want to run in sequence and those you want to run in parallel.
 - The location to deploy your application to.
 - Whether you want to run the scripts automatically or trigger any of them manually.
