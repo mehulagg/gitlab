@@ -844,6 +844,14 @@ Before enabling this, you should ensure jobs are visible to
 also [erase](../jobs/index.md#view-jobs-in-a-pipeline) all generated job logs
 before making them visible again.
 
+Introduced in GitLab 13.7 job logs are only available to [project developers or up](../../user/permissions.md#project-members-permissions)
+if debug logging is enabled by setting `CI_DEBUG_TRACE` to true in [YAML defined](#gitlab-ciyml-defined-variables)
+or persisted variables([project](#create-a-custom-variable-in-the-ui), 
+[group](#group-level-environment-variables), 
+[instance](#instance-level-cicd-environment-variables), 
+[pipeline schedule](../pipelines/schedules.md#using-variables), and
+[jobs](../jobs/#specifying-variables-when-running-manual-jobs) variables).
+
 To enable debug logs (traces), set the `CI_DEBUG_TRACE` variable to `true`:
 
 ```yaml

@@ -113,11 +113,11 @@ RSpec.describe Projects::JobsController, :clean_gitlab_redis_shared_state do
 
     context 'when requesting HTML' do
       context 'when job exists' do
-        before do
-          get_show(id: job.id)
-        end
+        let(:extra_params) { { id: job.id } }
 
         it 'has a job' do
+          get_show(**extra_params)
+
           expect(response).to have_gitlab_http_status(:ok)
           expect(assigns(:build).id).to eq(job.id)
         end
@@ -566,7 +566,7 @@ RSpec.describe Projects::JobsController, :clean_gitlab_redis_shared_state do
 
     def get_show_json
       expect { get_show(id: job.id, format: :json) }
-        .to change { Gitlab::GitalyClient.get_request_count }.by_at_most(2)
+        .to change { Gitlab::GitalyClient.get_request_count }.by_at_most(4)
     end
 
     def get_show(**extra_params)
@@ -598,6 +598,36 @@ RSpec.describe Projects::JobsController, :clean_gitlab_redis_shared_state do
         expect(json_response['size']).to be_present
         expect(json_response['total']).to be_present
         expect(json_response['lines'].count).to be_positive
+      end
+
+      context 'when CI_DEBUG_TRACE enabled' do
+        let!(:variable) { create(:ci_instance_variable, key: 'CI_DEBUG_TRACE', value: 'true') }
+
+        context 'when developer or above for project' do
+          before do
+            project.add_developer(user)
+            sign_in(user)
+
+            get_trace
+          end
+
+          it 'returns response ok' do
+            expect(response).to have_gitlab_http_status(:ok)
+          end
+        end
+
+        context 'when not developer or above for project' do
+          before do
+            project.add_guest(user)
+            sign_in(user)
+
+            get_trace
+          end
+
+          it 'returns response forbidden' do
+            expect(response).to have_gitlab_http_status(:forbidden)
+          end
+        end
       end
     end
 
@@ -1027,7 +1057,7 @@ RSpec.describe Projects::JobsController, :clean_gitlab_redis_shared_state do
                  }
     end
 
-    context "when job has a trace artifact" do
+    context 'when job has a trace artifact' do
       let(:job) { create(:ci_build, :trace_artifact, pipeline: pipeline) }
 
       it "sets #{Gitlab::Workhorse::DETECT_HEADER} header" do
@@ -1037,6 +1067,34 @@ RSpec.describe Projects::JobsController, :clean_gitlab_redis_shared_state do
         expect(response.headers["Content-Type"]).to eq("text/plain; charset=utf-8")
         expect(response.body).to eq(job.job_artifacts_trace.open.read)
         expect(response.header[Gitlab::Workhorse::DETECT_HEADER]).to eq "true"
+      end
+
+      context 'when CI_DEBUG_TRACE enabled' do
+        before do
+          create(:ci_instance_variable, key: 'CI_DEBUG_TRACE', value: 'true')
+        end
+
+        context 'when developer or above for project' do
+          it 'returns response ok' do
+            project.add_developer(user)
+            sign_in(user)
+
+            response = subject
+
+            expect(response).to have_gitlab_http_status(:ok)
+          end
+        end
+
+        context 'when not developer or above for project' do
+          it 'returns response forbidden' do
+            project.add_guest(user)
+            sign_in(user)
+
+            response = subject
+
+            expect(response).to have_gitlab_http_status(:forbidden)
+          end
+        end
       end
     end
 

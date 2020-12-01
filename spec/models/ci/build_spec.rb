@@ -4685,4 +4685,64 @@ RSpec.describe Ci::Build do
       expect(action).not_to have_received(:perform!)
     end
   end
+
+  describe 'debug_mode?' do
+    let(:build) { create(:ci_build, pipeline: pipeline) }
+
+    subject { build.debug_mode? }
+
+    context 'when CI_DEBUG_TRACE=true is in variables' do
+      context 'when in instance variables' do
+        it 'debug_mode? returns true' do
+          create(:ci_instance_variable, key: 'CI_DEBUG_TRACE', value: 'true')
+
+          expect(subject).to eq(true)
+        end
+      end
+
+      context 'when in group variables' do
+        it 'debug_mode? returns true' do
+          create(:ci_group_variable, key: 'CI_DEBUG_TRACE', value: 'true', group: project.group)
+
+          expect(subject).to eq(true)
+        end
+      end
+
+      context 'when in pipeline variables' do
+        it 'debug_mode? returns true' do
+          create(:ci_pipeline_variable, key: 'CI_DEBUG_TRACE', value: 'true', pipeline: pipeline)
+
+          expect(subject).to eq(true)
+        end
+      end
+
+      context 'when in project variables' do
+        it 'debug_mode? returns true' do
+          create(:ci_variable, key: 'CI_DEBUG_TRACE', value: 'true', project: project)
+
+          expect(subject).to eq(true)
+        end
+      end
+
+      context 'when in job variables' do
+        it 'debug_mode? returns true' do
+          create(:ci_job_variable, key: 'CI_DEBUG_TRACE', value: 'true', job: build)
+
+          expect(subject).to eq(true)
+        end
+      end
+
+      context 'when in yaml variables' do
+        let(:build) { create(:ci_build, yaml_variables: [{ key: :CI_DEBUG_TRACE, value: 'true' }], pipeline: pipeline) }
+
+        it 'debug_mode? returns true' do
+          expect(subject).to eq(true)
+        end
+      end
+    end
+
+    context 'when CI_DEBUG_TRACE is not in variables' do
+      it { expect(subject).to eq(false) }
+    end
+  end
 end

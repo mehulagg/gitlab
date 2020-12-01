@@ -31284,6 +31284,9 @@ msgstr ""
 msgid "You may close the milestone now."
 msgstr ""
 
+msgid "You must be a developer or higher for the associated project to view the build details if debug trace is enabled. You can disable the debug trace by unsetting 'CI_DEBUG_TRACE=true' wherever variables are set for this job."
+msgstr ""
+
 msgid "You must be logged in to search across all of GitLab"
 msgstr ""
 

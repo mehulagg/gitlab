@@ -45,6 +45,18 @@ module Ci
       @subject.pipeline.webide?
     end
 
+    condition(:debug_mode, scope: :subject) do
+      @subject.debug_mode?
+    end
+
+    rule { can?(:read_build) }.policy do
+      enable :read_build_trace
+    end
+
+    rule { debug_mode & ~can?(:create_build) }.policy do
+      prevent :read_build_trace
+    end
+
     rule { ~protected_environment_access & (protected_ref | archived) }.policy do
       prevent :update_build
       prevent :update_commit_status

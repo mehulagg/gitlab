@@ -6,6 +6,7 @@ class Projects::JobsController < Projects::ApplicationController
 
   before_action :find_job_as_build, except: [:index, :play]
   before_action :find_job_as_processable, only: [:play]
+  before_action :authorize_read_build_trace!, only: [:trace, :raw]
   before_action :authorize_read_build!
   before_action :authorize_update_build!,
     except: [:index, :show, :status, :raw, :trace, :erase]
@@ -156,6 +157,19 @@ class Projects::JobsController < Projects::ApplicationController
   end
 
   private
+
+  def authorize_read_build_trace!
+    msg = _(
+      "You must be a developer or higher for the associated project to view the build details if debug trace is enabled. " \
+      "You can disable the debug trace by unsetting 'CI_DEBUG_TRACE=true' wherever variables are set for this job."
+    )
+
+    unless can?(current_user, :read_build_trace, @build)
+      return access_denied!(msg) if @build.debug_mode?
+
+      access_denied!('The current user not authorized to access the job log')
+    end
+  end
 
   def authorize_update_build!
     return access_denied! unless can?(current_user, :update_build, @build)

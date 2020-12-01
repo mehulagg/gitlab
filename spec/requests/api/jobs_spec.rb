@@ -3,6 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe API::Jobs do
+  using RSpec::Parameterized::TableSyntax
   include HttpIOHelpers
 
   let_it_be(:project, reload: true) do
@@ -715,6 +716,29 @@ RSpec.describe API::Jobs do
 
       it 'does not return specific job trace' do
         expect(response).to have_gitlab_http_status(:unauthorized)
+      end
+    end
+
+    context 'when ci_debug_trace is set to true' do
+      where(:public_builds, :user_project_role, :expected_status) do
+        true         | 'developer'     | :ok
+        true         | 'guest'         | :forbidden
+        false        | 'developer'     | :ok
+        false        | 'guest'         | :forbidden
+      end
+
+      with_them do
+        before do
+          create(:ci_instance_variable, key: 'CI_DEBUG_TRACE', value: true)
+          project.update(public_builds: public_builds)
+          project.send("add_#{user_project_role}", user)
+
+          get api("/projects/#{project.id}/jobs/#{job.id}/trace", api_user)
+        end
+
+        it 'renders trace to authorized users' do
+          expect(response).to have_gitlab_http_status(expected_status)
+        end
       end
     end
   end

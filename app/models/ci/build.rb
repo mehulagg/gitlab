@@ -982,6 +982,11 @@ module Ci
       ::Gitlab.com? ? 500_000 : 0
     end
 
+    def debug_mode?
+      # NOTE: this will only check all variables set in the gitlab database or in the ci file
+      variables.any? { |variable| variable[:key] == 'CI_DEBUG_TRACE' && variable[:value].casecmp('true') == 0 }
+    end
+
     protected
 
     def run_status_commit_hooks!
