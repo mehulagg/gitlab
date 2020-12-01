@@ -249,17 +249,6 @@ module EE
         actual_shared_runners_minutes_limit.nonzero?
     end
 
-    def shared_runners_remaining_minutes_percent
-      return 0 if shared_runners_remaining_minutes.to_f <= 0
-      return 0 if actual_shared_runners_minutes_limit.to_f == 0
-
-      (shared_runners_remaining_minutes.to_f * 100) / actual_shared_runners_minutes_limit.to_f
-    end
-
-    def shared_runners_remaining_minutes_below_threshold?
-      shared_runners_remaining_minutes_percent.to_i <= last_ci_minutes_usage_notification_level.to_i
-    end
-
     def any_project_with_shared_runners_enabled?
       all_projects.with_shared_runners.any?
     end
@@ -427,10 +416,6 @@ module EE
         start_date: created_at,
         seats: 0
       )
-    end
-
-    def shared_runners_remaining_minutes
-      [actual_shared_runners_minutes_limit.to_f - ci_minutes_quota.total_minutes_used.to_f, 0].max
     end
 
     def total_repository_size_excess_calculation(repository_size_limit, project_level: true)

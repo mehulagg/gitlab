@@ -275,4 +275,26 @@ RSpec.describe Ci::Minutes::Quota do
       it { is_expected.to eq(expected_minutes) }
     end
   end
+
+  describe '#percent_total_minutes_remaining' do
+    subject { quota.percent_total_minutes_remaining }
+
+    where(:total_minutes_used, :total_minutes, :result) do
+      0   | 0   | 0
+      10  | 0   | 0
+      0   | 100 | 100
+      60  | 100 | 40
+      100 | 100 | 0
+      120 | 100 | 0
+    end
+
+    with_them do
+      before do
+        allow(namespace).to receive(:shared_runners_seconds).and_return(total_minutes_used * 60)
+        allow(quota).to receive(:total_minutes).and_return(total_minutes)
+      end
+
+      it { is_expected.to eq(result) }
+    end
+  end
 end

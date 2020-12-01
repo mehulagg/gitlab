@@ -50,7 +50,7 @@ module Ci
       end
 
       def calculate_notification_stage
-        percentage = context.shared_runners_remaining_minutes_percent.to_i
+        percentage = context.percent_total_minutes_remaining.to_i
 
         if percentage <= PERCENTAGES[:exceeded]
           :exceeded
