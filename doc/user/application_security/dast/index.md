@@ -92,8 +92,8 @@ There are two ways to define the URL to be scanned by DAST:
 
 1. Add it in an `environment_url.txt` file at the root of your project.
    This is useful for testing in dynamic environments. To run DAST against an application
-   dynamically created during a GitLab CI/CD pipeline, a job that runs prior to the DAST scan needs
-   to persist the app's domain in an `environment_url.txt` file. DAST automatically parses the
+   dynamically created during a GitLab CI/CD pipeline, a job that runs prior to the DAST scan must
+   persist the application's domain in an `environment_url.txt` file. DAST automatically parses the
    `environment_url.txt` file to find its scan target.
 
    For example, in a job that runs prior to DAST, you could include code that looks similar to:
