@@ -280,7 +280,7 @@ describe('RelatedIssuesRoot', () => {
         const input = 'asdf/qwer#444 #12 ';
         wrapper.vm.onInput({
           untouchedRawReferences: input.trim().split(/\s/),
-          touchedReference: 2,
+          touchedReference: '2',
         });
 
         expect(wrapper.vm.state.pendingReferences).toHaveLength(2);
@@ -292,12 +292,25 @@ describe('RelatedIssuesRoot', () => {
         const input = 'something random ';
         wrapper.vm.onInput({
           untouchedRawReferences: input.trim().split(/\s/),
-          touchedReference: 2,
+          touchedReference: '2',
         });
 
         expect(wrapper.vm.state.pendingReferences).toHaveLength(2);
         expect(wrapper.vm.state.pendingReferences[0]).toEqual('something');
         expect(wrapper.vm.state.pendingReferences[1]).toEqual('random');
+      });
+
+      it('prepends # when user enters a numeric value [0-9]', async () => {
+        const input = '23';
+
+        wrapper.vm.onInput({
+          untouchedRawReferences: input.trim().split(/\s/),
+          touchedReference: input,
+        });
+
+        await wrapper.vm.$nextTick;
+
+        expect(wrapper.vm.inputValue).toBe(`#${input}`);
       });
     });
 
