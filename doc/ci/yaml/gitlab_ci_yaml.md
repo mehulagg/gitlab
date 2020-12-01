@@ -11,8 +11,8 @@ type: reference
 To use GitLab CI/CD, you need:
 
 - Application code hosted in a Git repository.
-- Build, test, and deployment scripts in a file called [`.gitlab-ci.yml`](README.md),
-  which is located in the root of your repository.
+- A file called [`.gitlab-ci.yml`](README.md) in the root of your repository, which
+  contains the CI/CD configuration.
 
 In the `.gitlab-ci.yml` file, you can define:
 
