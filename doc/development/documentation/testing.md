@@ -13,9 +13,8 @@ processes similar to those used for code to maintain standards and quality of do
 We have tests:
 
 - To lint the words and structure of the documentation.
-- To check that links to documentation within the documentation suite are valid.
-- To check that all links to documentation from UI elements (`app/views` files, for example)
-  are valid.
+- To check the validity of internal links within the documentation suite.
+- To check the validity of links from UI elements, such as files in `app/views` files.
 
 For the specifics of each test run in our CI/CD pipelines, see the configuration for those test
 in the relevant projects:
