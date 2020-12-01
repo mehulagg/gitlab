@@ -52,6 +52,17 @@ module Ci
         @total_minutes_used ||= namespace.shared_runners_seconds.to_i / 60
       end
 
+      def percent_total_minutes_remaining
+        return 0 if total_minutes_remaining == 0
+        return 0 if total_minutes == 0
+
+        (total_minutes_remaining.to_f * 100) / total_minutes.to_f
+      end
+
+      def total_minutes_remaining
+        [total_minutes.to_i - total_minutes_used, 0].max
+      end
+
       private
 
       def monthly_minutes_used_up?

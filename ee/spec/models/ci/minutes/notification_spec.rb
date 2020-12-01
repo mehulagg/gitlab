@@ -38,7 +38,7 @@ RSpec.describe Ci::Minutes::Notification do
 
       context 'when at the warning level' do
         before do
-          allow(group).to receive(:shared_runners_remaining_minutes).and_return(4)
+          allow(group).to receive(:shared_runners_seconds).and_return(16.minutes)
         end
 
         describe '#show?' do
@@ -70,7 +70,7 @@ RSpec.describe Ci::Minutes::Notification do
 
       context 'when at the danger level' do
         before do
-          allow(group).to receive(:shared_runners_remaining_minutes).and_return(1)
+          allow(group).to receive(:shared_runners_seconds).and_return(19.minutes)
         end
 
         describe '#show?' do
@@ -102,7 +102,7 @@ RSpec.describe Ci::Minutes::Notification do
 
       context 'when right at the limit for notification' do
         before do
-          allow(group).to receive(:shared_runners_remaining_minutes).and_return(6)
+          allow(group).to receive(:shared_runners_seconds).and_return(14.minutes)
         end
 
         describe '#show?' do
