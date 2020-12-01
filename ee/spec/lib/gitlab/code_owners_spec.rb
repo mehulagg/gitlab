@@ -44,6 +44,33 @@ RSpec.describe Gitlab::CodeOwners do
     end
   end
 
+  describe '.sections_for_ref' do
+    subject { described_class.sections_for_ref(project, branch) }
+
+    let(:branch) { TestEnv::BRANCH_SHA['with-codeowners'] }
+    let(:codeowner_lookup_ref) { branch }
+
+    context 'when the feature is available' do
+      before do
+        stub_licensed_features(code_owners: true)
+      end
+
+      it 'returns sections' do
+        is_expected.to match_array(['codeowners'])
+      end
+    end
+
+    context 'when the feature is not available' do
+      before do
+        stub_licensed_features(code_owners: false)
+      end
+
+      it 'returns empty array' do
+        is_expected.to be_empty
+      end
+    end
+  end
+
   describe ".fast_path_lookup and .slow_path_lookup" do
     let(:codeowner_lookup_ref) { merge_request.target_branch }
     let(:codeowner_content) { 'files/ruby/feature.rb @owner-1' }
