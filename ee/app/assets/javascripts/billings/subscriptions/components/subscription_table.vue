@@ -54,7 +54,11 @@ export default {
       };
     },
     renewButton() {
-      if (this.isFreePlan && !this.plan.trial && !gon.features.saasManualRenewButton) {
+      if (this.isFreePlan && !this.plan.trial) {
+        return null;
+      }
+
+      if (!gon.features.saasManualRenewButton) {
         return null;
       }
 
