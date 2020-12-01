@@ -10,6 +10,14 @@ RSpec.shared_examples 'reenqueuer' do
     expect(subject.lease_timeout).to be_a(ActiveSupport::Duration)
   end
 
+  # If the worker is completely idempotent, then there would be no condition in
+  # which it needs to immediately reenqueue itself. Reenqueuer workers
+  # inherently do not meet "idempotent worker" criteria in
+  # `rubocop/cop/scalability/idempotent_worker.rb`.
+  it 'is not marked as idempotent' do
+    expect(subject.class.idempotent?).to be_falsy
+  end
+
   describe '#perform' do
     it 'tries to obtain a lease' do
       expect_to_obtain_exclusive_lease(subject.lease_key)

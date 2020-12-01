@@ -35,7 +35,7 @@ module RuboCop
 
           1. It can safely run multiple times with the same arguments
           2. The application side-effects are expected to happen once (or side-effects of a second run are not impactful)
-          3. It can safely be skipped if another job with the same arguments is already in the queue
+          3. It can safely be skipped if another job with the same arguments is already running or is in the queue
 
           If all the above is true, make sure to mark it as so by calling the `idempotent!`
           method in the worker scope.
