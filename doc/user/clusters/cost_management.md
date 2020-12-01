@@ -1,7 +1,7 @@
 ---
 stage: Configure
 group: Configure
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Cluster cost management **(ULTIMATE)**
@@ -58,7 +58,7 @@ file or creating similar dashboard configuration files. To learn more, read abou
 
 #### Available metrics
 
-Metrics contain both instance and node labels. The instance label will be deprecated in a future version.
+Metrics contain both instance and node labels. The instance label is scheduled for deprecation in a future version.
 
 - `node_cpu_hourly_cost` - Hourly cost per vCPU on this node.
 - `node_gpu_hourly_cost` - Hourly cost per GPU on this node.

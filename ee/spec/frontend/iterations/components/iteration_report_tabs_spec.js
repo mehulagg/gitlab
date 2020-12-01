@@ -1,6 +1,6 @@
-import IterationReportTabs from 'ee/iterations/components/iteration_report_tabs.vue';
-import { mount } from '@vue/test-utils';
 import { GlAlert, GlAvatar, GlLoadingIcon, GlPagination, GlTable, GlTab } from '@gitlab/ui';
+import { mount } from '@vue/test-utils';
+import IterationReportTabs from 'ee/iterations/components/iteration_report_tabs.vue';
 import { Namespace } from 'ee/iterations/constants';
 
 describe('Iterations report tabs', () => {

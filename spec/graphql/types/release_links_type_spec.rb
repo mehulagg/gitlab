@@ -8,14 +8,12 @@ RSpec.describe GitlabSchema.types['ReleaseLinks'] do
   it 'has the expected fields' do
     expected_fields = %w[
       selfUrl
-      openMergeRequestsUrl
+      openedMergeRequestsUrl
       mergedMergeRequestsUrl
       closedMergeRequestsUrl
-      openIssuesUrl
+      openedIssuesUrl
       closedIssuesUrl
       editUrl
-      mergeRequestsUrl
-      issuesUrl
     ]
 
     expect(described_class).to include_graphql_fields(*expected_fields)

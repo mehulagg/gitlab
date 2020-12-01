@@ -77,5 +77,20 @@ RSpec.describe Projects::Security::DastSiteProfilesController, type: :request do
     it_behaves_like 'a GET request' do
       let(:path) { edit_path }
     end
+
+    context 'record does not exist' do
+      let(:dast_site_profile) { 0 }
+
+      before do
+        with_feature_available
+        with_user_authorized
+      end
+
+      it 'sees a 404 error' do
+        get edit_path
+
+        expect(response).to have_gitlab_http_status(:not_found)
+      end
+    end
   end
 end

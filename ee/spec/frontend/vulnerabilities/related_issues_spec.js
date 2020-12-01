@@ -3,12 +3,12 @@ import { shallowMount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
 import RelatedIssues from 'ee/vulnerabilities/components/related_issues.vue';
 import waitForPromises from 'helpers/wait_for_promises';
-import RelatedIssuesBlock from '~/related_issues/components/related_issues_block.vue';
-import { issuableTypesMap, PathIdSeparator } from '~/related_issues/constants';
-import axios from '~/lib/utils/axios_utils';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
+import axios from '~/lib/utils/axios_utils';
 import httpStatusCodes from '~/lib/utils/http_status';
 import * as urlUtility from '~/lib/utils/url_utility';
+import RelatedIssuesBlock from '~/related_issues/components/related_issues_block.vue';
+import { issuableTypesMap, PathIdSeparator } from '~/related_issues/constants';
 
 jest.mock('~/flash');
 

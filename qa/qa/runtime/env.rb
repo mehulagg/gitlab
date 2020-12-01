@@ -8,7 +8,7 @@ module QA
     module Env
       extend self
 
-      attr_writer :personal_access_token, :ldap_username, :ldap_password
+      attr_writer :personal_access_token
 
       ENV_VARIABLES = Gitlab::QA::Runtime::Env::ENV_VARIABLES
 
@@ -293,6 +293,11 @@ module QA
         @ldap_username ||= ENV['GITLAB_LDAP_USERNAME']
       end
 
+      def ldap_username=(ldap_username)
+        @ldap_username = ldap_username # rubocop:disable Gitlab/ModuleWithInstanceVariables
+        ENV['GITLAB_LDAP_USERNAME'] = ldap_username
+      end
+
       def ldap_password
         @ldap_password ||= ENV['GITLAB_LDAP_PASSWORD']
       end
@@ -388,6 +393,10 @@ module QA
       #   #=> 13.3.4-ee.0
       def deploy_version
         ENV['DEPLOY_VERSION']
+      end
+
+      def user_agent
+        ENV['GITLAB_QA_USER_AGENT']
       end
 
       private

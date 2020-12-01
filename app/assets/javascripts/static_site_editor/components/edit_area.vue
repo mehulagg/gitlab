@@ -6,10 +6,10 @@ import EditDrawer from './edit_drawer.vue';
 import UnsavedChangesConfirmDialog from './unsaved_changes_confirm_dialog.vue';
 import parseSourceFile from '~/static_site_editor/services/parse_source_file';
 import { EDITOR_TYPES } from '~/vue_shared/components/rich_content_editor/constants';
-import { DEFAULT_IMAGE_UPLOAD_PATH } from '../constants';
 import imageRepository from '../image_repository';
 import formatter from '../services/formatter';
 import templater from '../services/templater';
+import renderImage from '../services/renderers/render_image';
 
 export default {
   components: {
@@ -37,15 +37,25 @@ export default {
       required: false,
       default: '',
     },
+    branch: {
+      type: String,
+      required: true,
+    },
+    baseUrl: {
+      type: String,
+      required: true,
+    },
     mounts: {
       type: Array,
       required: true,
     },
+    project: {
+      type: String,
+      required: true,
+    },
     imageRoot: {
       type: String,
-      required: false,
-      default: DEFAULT_IMAGE_UPLOAD_PATH,
-      validator: prop => prop.endsWith('/'),
+      required: true,
     },
   },
   data() {
@@ -71,6 +81,18 @@ export default {
     },
     isWysiwygMode() {
       return this.editorMode === EDITOR_TYPES.wysiwyg;
+    },
+    customRenderers() {
+      const imageRenderer = renderImage.build(
+        this.mounts,
+        this.project,
+        this.branch,
+        this.baseUrl,
+        this.$options.imageRepository,
+      );
+      return {
+        image: [imageRenderer],
+      };
     },
   },
   created() {
@@ -140,6 +162,7 @@ export default {
       :content="editableContent"
       :initial-edit-type="editorMode"
       :image-root="imageRoot"
+      :options="{ customRenderers }"
       class="mb-9 pb-6 h-100"
       @modeChange="onModeChange"
       @input="onInputChange"

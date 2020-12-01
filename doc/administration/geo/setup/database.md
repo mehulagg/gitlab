@@ -1,7 +1,7 @@
 ---
 stage: Enablement
 group: Geo
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: howto
 ---
 
@@ -477,7 +477,7 @@ information, see [High Availability with Omnibus GitLab](../../postgresql/replic
 ## Patroni support
 
 Support for Patroni is intended to replace `repmgr` as a
-[highly availabile PostgreSQL solution](../../postgresql/replication_and_failover.md) 
+[highly availabile PostgreSQL solution](../../postgresql/replication_and_failover.md)
 on the primary node, but it can also be used for PostgreSQL HA on a secondary
 node.
 
@@ -496,14 +496,16 @@ This experimental implementation has the following limitations:
   avoid this, you can pause auto-failover by running `gitlab-ctl patroni pause`.
   After a reconfigure, it unpauses on its own.
 
-For instructions about how to set up Patroni on the primary node, see the 
+For instructions about how to set up Patroni on the primary node, see the
 [PostgreSQL replication and failover with Omnibus GitLab](../../postgresql/replication_and_failover.md#patroni) page.
+
+If you are currently using `repmgr` on your Geo primary, see [these instructions](#migrating-from-repmgr-to-patroni) for migrating from `repmgr` to Patroni.
 
 A production-ready and secure setup requires at least three Patroni instances on
 the primary, and a similar configuration on the secondary nodes. Be sure to use
 password credentials and other database best practices.
 
-Similar to `repmgr`, using Patroni on a secondary node is optional. 
+Similar to `repmgr`, using Patroni on a secondary node is optional.
 
 To set up database replication with Patroni on a secondary node, configure a
 _permanent replication slot_ on the primary node's Patroni cluster, and ensure
@@ -516,7 +518,7 @@ On Patroni instances for the primary node, add the following to the
 # You need one entry for each secondary, with a unique name following PostgreSQL slot_name constraints:
 #
 # Configuration syntax will be: 'unique_slotname' => { 'type' => 'physical' },
-# We don't support setting a permanent replication slot for logical replication type 
+# We don't support setting a permanent replication slot for logical replication type
 patroni['replication_slots'] = {
     'geo_secondary' => { 'type' => 'physical' }
 }
@@ -524,7 +526,7 @@ patroni['replication_slots'] = {
 postgresql['md5_auth_cidr_addresses'] = [
   'PATRONI_PRIMARY1_IP/32', 'PATRONI_PRIMARY2_IP/32', 'PATRONI_PRIMARY3_IP/32', 'PATRONI_PRIMARY_PGBOUNCER/32',
   'PATRONI_SECONDARY1_IP/32', 'PATRONI_SECONDARY2_IP/32', 'PATRONI_SECONDARY3_IP/32' # we list all secondary instances as they can all become a Standby Leader
-  # any other instance that needs access to the database as per documentation 
+  # any other instance that needs access to the database as per documentation
 ]
 
 postgresql['pgbouncer_user_password'] = 'PGBOUNCER_PASSWORD_HASH'
@@ -538,7 +540,7 @@ On Patroni instances for the secondary node, add the following to the
 ```ruby
 postgresql['md5_auth_cidr_addresses'] = [
   'PATRONI_SECONDARY1_IP/32', 'PATRONI_SECONDARY2_IP/32', 'PATRONI_SECONDARY3_IP/32', 'PATRONI_SECONDARY_PGBOUNCER/32',
-  # any other instance that needs access to the database as per documentation 
+  # any other instance that needs access to the database as per documentation
 ]
 
 patroni['enable'] = true
@@ -548,6 +550,13 @@ patroni['standby_cluster']['port'] = 5432
 patroni['standby_cluster']['primary_slot_name'] = 'geo_secondary' # or the unique replication slot name you setup before
 patroni['replication_password'] = 'PLAIN_TEXT_POSTGRESQL_REPLICATION_PASSWORD'
 ```
+
+## Migrating from repmgr to Patroni
+
+1. Before migrating, it is recommended that there is no replication lag between the primary and secondary sites and that replication is paused. In GitLab 13.2 and later, you can pause and resume replication with `gitlab-ctl geo-replication-pause` and `gitlab-ctl geo-replication-resume` on a Geo secondary database node.
+1. Follow the [instructions to migrate repmgr to Patroni](../../postgresql/replication_and_failover.md#switching-from-repmgr-to-patroni). When configuring Patroni on each primary site database node, add `patroni['replicaton_slots'] = { '<slot_name>' => 'physical' }`
+to `gitlab.rb` where `<slot_name>` is the name of the replication slot for your Geo secondary. This will ensure that Patroni recognizes the replication slot as permanent and will not drop it upon restarting.
+1. If database replication to the secondary was paused before migration, resume replication once Patroni is confirmed working on the primary.
 
 ## Troubleshooting
 

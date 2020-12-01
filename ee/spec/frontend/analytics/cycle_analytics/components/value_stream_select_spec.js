@@ -1,9 +1,9 @@
-import Vuex from 'vuex';
-import { shallowMount, createLocalVue } from '@vue/test-utils';
 import { GlButton, GlDropdown, GlFormGroup } from '@gitlab/ui';
+import { shallowMount, createLocalVue } from '@vue/test-utils';
+import Vuex from 'vuex';
 import ValueStreamSelect from 'ee/analytics/cycle_analytics/components/value_stream_select.vue';
-import { valueStreams } from '../mock_data';
 import { findDropdownItemText } from '../helpers';
+import { valueStreams } from '../mock_data';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);

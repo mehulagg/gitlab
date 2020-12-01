@@ -218,23 +218,46 @@ export const isMetaKey = e => e.metaKey || e.ctrlKey || e.altKey || e.shiftKey;
 export const isMetaClick = e => e.metaKey || e.ctrlKey || e.which === 2;
 
 export const contentTop = () => {
-  const perfBar = $('#js-peek').outerHeight() || 0;
-  const mrTabsHeight = $('.merge-request-tabs').outerHeight() || 0;
-  const headerHeight = $('.navbar-gitlab').outerHeight() || 0;
-  const diffFilesChanged = $('.js-diff-files-changed').outerHeight() || 0;
   const isDesktop = breakpointInstance.isDesktop();
-  const diffFileTitleBar =
-    (isDesktop && $('.diff-file .file-title-flex-parent:visible').outerHeight()) || 0;
-  const compareVersionsHeaderHeight = (isDesktop && $('.mr-version-controls').outerHeight()) || 0;
+  const heightCalculators = [
+    () => $('#js-peek').outerHeight(),
+    () => $('.navbar-gitlab').outerHeight(),
+    ({ desktop }) => {
+      const container = document.querySelector('.line-resolve-all-container');
+      let size = 0;
 
-  return (
-    perfBar +
-    mrTabsHeight +
-    headerHeight +
-    diffFilesChanged +
-    diffFileTitleBar +
-    compareVersionsHeaderHeight
-  );
+      if (!desktop && container) {
+        size = container.offsetHeight;
+      }
+
+      return size;
+    },
+    () => $('.merge-request-tabs').outerHeight(),
+    () => $('.js-diff-files-changed').outerHeight(),
+    ({ desktop }) => {
+      const diffsTabIsActive = window.mrTabs?.currentAction === 'diffs';
+      let size;
+
+      if (desktop && diffsTabIsActive) {
+        size = $('.diff-file .file-title-flex-parent:visible').outerHeight();
+      }
+
+      return size;
+    },
+    ({ desktop }) => {
+      let size;
+
+      if (desktop) {
+        size = $('.mr-version-controls').outerHeight();
+      }
+
+      return size;
+    },
+  ];
+
+  return heightCalculators.reduce((totalHeight, calculator) => {
+    return totalHeight + (calculator({ desktop: isDesktop }) || 0);
+  }, 0);
 };
 
 export const scrollToElement = (element, options = {}) => {
@@ -738,6 +761,24 @@ export const roundOffFloat = (number, precision = 0) => {
   // eslint-disable-next-line no-restricted-properties
   const multiplier = Math.pow(10, precision);
   return Math.round(number * multiplier) / multiplier;
+};
+
+/**
+ * Method to round down values with decimal places
+ * with provided precision.
+ *
+ * Eg; roundDownFloat(3.141592, 3) = 3.141
+ *
+ * Refer to spec/javascripts/lib/utils/common_utils_spec.js for
+ * more supported examples.
+ *
+ * @param {Float} number
+ * @param {Number} precision
+ */
+export const roundDownFloat = (number, precision = 0) => {
+  // eslint-disable-next-line no-restricted-properties
+  const multiplier = Math.pow(10, precision);
+  return Math.floor(number * multiplier) / multiplier;
 };
 
 /**

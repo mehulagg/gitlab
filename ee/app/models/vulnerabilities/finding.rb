@@ -26,6 +26,11 @@ module Vulnerabilities
     has_many :finding_identifiers, class_name: 'Vulnerabilities::FindingIdentifier', inverse_of: :finding, foreign_key: 'occurrence_id'
     has_many :identifiers, through: :finding_identifiers, class_name: 'Vulnerabilities::Identifier'
 
+    has_many :finding_links, class_name: 'Vulnerabilities::FindingLink', inverse_of: :finding, foreign_key: 'vulnerability_occurrence_id'
+
+    has_many :finding_remediations, class_name: 'Vulnerabilities::FindingRemediation', inverse_of: :finding, foreign_key: 'vulnerability_occurrence_id'
+    has_many :remediations, through: :finding_remediations
+
     has_many :finding_pipelines, class_name: 'Vulnerabilities::FindingPipeline', inverse_of: :finding, foreign_key: 'occurrence_id'
     has_many :pipelines, through: :finding_pipelines, class_name: 'Ci::Pipeline'
 
@@ -95,6 +100,7 @@ module Vulnerabilities
     scope :by_projects, -> (values) { where(project_id: values) }
     scope :by_severities, -> (values) { where(severity: values) }
     scope :by_confidences, -> (values) { where(confidence: values) }
+    scope :by_project_fingerprints, -> (values) { where(project_fingerprint: values) }
 
     scope :all_preloaded, -> do
       preload(:scanner, :identifiers, project: [:namespace, :project_feature])
@@ -256,7 +262,9 @@ module Vulnerabilities
     end
 
     def links
-      metadata.fetch('links', [])
+      return metadata.fetch('links', []) if finding_links.load.empty?
+
+      finding_links.as_json(only: [:name, :url])
     end
 
     def remediations

@@ -1,33 +1,10 @@
-- issuable = local_assigns.fetch(:issuable)
-- presenter = local_assigns.fetch(:presenter)
 - form = local_assigns.fetch(:form)
 
 - return unless issuable.is_a?(MergeRequest)
 - return unless issuable.approval_feature_available?
 
-- can_update_approvers = can?(current_user, :update_approvers, issuable)
-
 .form-group.row
   .col-sm-2.col-form-label
     = form.label :approver_ids, "Approval rules"
   .col-sm-10
-    #js-mr-approvals-input{ data: { 'project_id': @target_project.id,
-      'can_edit': can?(current_user, :update_approvers, issuable).to_s,
-      'allow_multi_rule': @target_project.multiple_approval_rules_available?.to_s,
-      'mr_id': issuable.iid,
-      'mr_settings_path': presenter.api_approval_settings_path,
-      'eligible_approvers_docs_path': help_page_path('user/project/merge_requests/merge_request_approvals', anchor: 'eligible-approvers'),
-      'project_settings_path': presenter.api_project_approval_settings_path } }
-      = sprite_icon('spinner', size: 24, css_class: 'gl-spinner')
-    - if can_update_approvers
-      - approver_presenter = MergeRequestApproverPresenter.new(issuable, skip_user: current_user)
-      .form-text.text-muted.suggested-approvers
-        - if approver_presenter.any?
-          Suggested approvers:
-          = approver_presenter.render
-      - if approver_presenter.show_code_owner_tips?
-        .form-text.text-muted
-          Tip: add a
-          = link_to 'CODEOWNERS', help_page_path('user/project/code_owners'), target: '_blank', tabindex: -1
-          to automatically add approvers based on file paths and file types.
-    = render 'projects/merge_requests/code_owner_approval_rules', merge_request: @mr_presenter
+    = render_if_exists 'shared/issuable/approver_suggestion', issuable: issuable, presenter: presenter

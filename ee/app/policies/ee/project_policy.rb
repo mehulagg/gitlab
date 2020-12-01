@@ -16,7 +16,7 @@ module EE
       condition(:iterations_available) { @subject.feature_available?(:iterations) }
 
       with_scope :subject
-      condition(:requirements_available) { @subject.feature_available?(:requirements) }
+      condition(:requirements_available) { @subject.feature_available?(:requirements) & feature_available?(:requirements) }
 
       condition(:compliance_framework_available) { @subject.feature_available?(:compliance_framework, @user) }
 
@@ -33,10 +33,22 @@ module EE
         !PushRule.global&.commit_committer_check
       end
 
-      with_scope :subject
-      condition(:regulated_merge_request_approval_settings) do
+      with_scope :global
+      condition(:locked_approvers_rules) do
         License.feature_available?(:admin_merge_request_approvers_rules) &&
-          @subject.has_regulated_settings?
+          ::Gitlab::CurrentSettings.disable_overriding_approvers_per_merge_request
+      end
+
+      with_scope :global
+      condition(:locked_merge_request_author_setting) do
+        License.feature_available?(:admin_merge_request_approvers_rules) &&
+          ::Gitlab::CurrentSettings.prevent_merge_requests_author_approval
+      end
+
+      with_scope :global
+      condition(:locked_merge_request_committer_setting) do
+        License.feature_available?(:admin_merge_request_approvers_rules) &&
+          ::Gitlab::CurrentSettings.prevent_merge_requests_committers_approval
       end
 
       condition(:project_merge_request_analytics_available) do
@@ -166,6 +178,7 @@ module EE
         enable :read_deploy_board
         enable :admin_epic_issue
         enable :read_group_timelogs
+        enable :read_incident_management_oncall_schedule
       end
 
       rule { can?(:developer_access) }.policy do
@@ -226,10 +239,10 @@ module EE
         enable :admin_path_locks
         enable :update_approvers
         enable :modify_approvers_rules
-        enable :modify_overriding_approvers_per_merge_request_setting
         enable :modify_auto_fix_setting
         enable :modify_merge_request_author_setting
         enable :modify_merge_request_committer_setting
+        enable :admin_incident_management_oncall_schedule
       end
 
       rule { license_scanning_enabled & can?(:maintainer_access) }.enable :admin_software_license_policy
@@ -305,9 +318,15 @@ module EE
         prevent :read_project
       end
 
-      rule { regulated_merge_request_approval_settings }.policy do
-        prevent :modify_overriding_approvers_per_merge_request_setting
+      rule { locked_approvers_rules }.policy do
+        prevent :modify_approvers_rules
+      end
+
+      rule { locked_merge_request_author_setting }.policy do
         prevent :modify_merge_request_author_setting
+      end
+
+      rule { locked_merge_request_committer_setting }.policy do
         prevent :modify_merge_request_committer_setting
       end
 
@@ -323,6 +342,7 @@ module EE
         enable :create_requirement_test_report
         enable :admin_requirement
         enable :update_requirement
+        enable :import_requirements
       end
 
       rule { requirements_available & owner }.enable :destroy_requirement
@@ -331,8 +351,6 @@ module EE
 
       rule { status_page_available & can?(:owner_access) }.enable :mark_issue_for_publication
       rule { status_page_available & can?(:developer_access) }.enable :publish_status_page
-
-      rule { public_project }.enable :view_embedded_analytics_report
 
       rule { over_storage_limit }.policy do
         prevent(*readonly_abilities)

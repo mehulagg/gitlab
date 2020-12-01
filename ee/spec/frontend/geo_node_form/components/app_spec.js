@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlBadge } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import GeoNodeFormApp from 'ee/geo_node_form/components/app.vue';
 import GeoNodeForm from 'ee/geo_node_form/components/geo_node_form.vue';
 import { MOCK_SELECTIVE_SYNC_TYPES, MOCK_SYNC_SHARDS } from '../mock_data';

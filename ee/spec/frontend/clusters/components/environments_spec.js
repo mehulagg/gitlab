@@ -1,6 +1,6 @@
+import { GlTable, GlEmptyState, GlLoadingIcon, GlIcon } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
 import Environments from 'ee/clusters/components/environments.vue';
-import { GlTable, GlEmptyState, GlLoadingIcon, GlIcon } from '@gitlab/ui';
 import environments from './mock_data';
 
 describe('Environments', () => {

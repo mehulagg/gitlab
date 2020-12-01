@@ -1,6 +1,6 @@
-import { merge } from 'lodash';
 import { GlBadge, GlIcon } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
+import { merge } from 'lodash';
 import PipelineStatusBadge from 'ee/security_dashboard/components/pipeline_status_badge.vue';
 
 describe('Pipeline status badge', () => {

@@ -4,6 +4,8 @@ module API
   class Iterations < ::API::Base
     include PaginationParams
 
+    feature_category :issue_tracking
+
     helpers do
       params :list_params do
         optional :state, type: String, values: %w[opened upcoming started closed all], default: 'all',

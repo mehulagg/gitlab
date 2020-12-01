@@ -68,7 +68,7 @@ module BlobHelper
   def edit_blob_button(project = @project, ref = @ref, path = @path, options = {})
     return unless blob = readable_blob(options, path, project, ref)
 
-    common_classes = "btn btn-primary js-edit-blob ml-2 #{options[:extra_class]}"
+    common_classes = "btn btn-primary js-edit-blob gl-mr-3 #{options[:extra_class]}"
     data = { track_event: 'click_edit', track_label: 'Edit' }
 
     if Feature.enabled?(:web_ide_primary_edit, project.group)
@@ -88,7 +88,7 @@ module BlobHelper
   def ide_edit_button(project = @project, ref = @ref, path = @path, blob:)
     return unless blob
 
-    common_classes = 'btn btn-primary ide-edit-button ml-2'
+    common_classes = 'btn btn-primary ide-edit-button gl-mr-3'
     data = { track_event: 'click_edit_ide', track_label: 'Web IDE' }
 
     unless Feature.enabled?(:web_ide_primary_edit, project.group)
@@ -382,8 +382,7 @@ module BlobHelper
   end
 
   def show_suggest_pipeline_creation_celebration?
-    Feature.enabled?(:suggest_pipeline, default_enabled: true) &&
-      @blob.path == Gitlab::FileDetector::PATTERNS[:gitlab_ci] &&
+    @blob.path == Gitlab::FileDetector::PATTERNS[:gitlab_ci] &&
       @blob.auxiliary_viewer&.valid?(project: @project, sha: @commit.sha, user: current_user) &&
       @project.uses_default_ci_config? &&
       cookies[suggest_pipeline_commit_cookie_name].present?

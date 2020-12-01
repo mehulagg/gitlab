@@ -1,6 +1,6 @@
+import { GlTable } from '@gitlab/ui';
 import { createLocalVue, mount } from '@vue/test-utils';
 import Vuex from 'vuex';
-import { GlTable } from '@gitlab/ui';
 import MergeRequestTable from 'ee/analytics/code_review_analytics/components/merge_request_table.vue';
 import createState from 'ee/analytics/code_review_analytics/store/modules/merge_requests/state';
 import { mockMergeRequests } from '../mock_data';

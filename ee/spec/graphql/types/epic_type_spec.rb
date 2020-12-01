@@ -11,8 +11,8 @@ RSpec.describe GitlabSchema.types['Epic'] do
       closed_at created_at updated_at children has_children has_issues has_parent
       web_path web_url relation_path reference issues user_permissions
       notes discussions relative_position subscribed participants
-      descendant_counts descendant_weight_sum upvotes downvotes health_status
-      current_user_todos
+      descendant_counts descendant_weight_sum upvotes downvotes
+      user_notes_count user_discussions_count health_status current_user_todos
     ]
   end
 

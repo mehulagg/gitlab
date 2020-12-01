@@ -1,9 +1,9 @@
-import { merge } from 'lodash';
-import { extendedWrapper } from 'helpers/vue_test_utils_helper';
-import { shallowMount } from '@vue/test-utils';
 import { GlLink } from '@gitlab/ui';
-import ProjectPipelineStatus from 'ee/security_dashboard/components/project_pipeline_status.vue';
+import { shallowMount } from '@vue/test-utils';
+import { merge } from 'lodash';
 import PipelineStatusBadge from 'ee/security_dashboard/components/pipeline_status_badge.vue';
+import ProjectPipelineStatus from 'ee/security_dashboard/components/project_pipeline_status.vue';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 
 describe('Project Pipeline Status Component', () => {

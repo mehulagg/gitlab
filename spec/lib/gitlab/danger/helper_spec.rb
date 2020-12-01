@@ -236,13 +236,16 @@ RSpec.describe Gitlab::Danger::Helper do
 
       '.gitlab/ci/frontend.gitlab-ci.yml' | %i[frontend engineering_productivity]
 
-      'app/models/foo' | [:backend]
-      'bin/foo'        | [:backend]
-      'config/foo'     | [:backend]
-      'lib/foo'        | [:backend]
-      'rubocop/foo'    | [:backend]
-      'spec/foo'       | [:backend]
-      'spec/foo/bar'   | [:backend]
+      'app/models/foo'             | [:backend]
+      'bin/foo'                    | [:backend]
+      'config/foo'                 | [:backend]
+      'lib/foo'                    | [:backend]
+      'rubocop/foo'                | [:backend]
+      '.rubocop.yml'               | [:backend]
+      '.rubocop_todo.yml'          | [:backend]
+      '.rubocop_manual_todo.yml'   | [:backend]
+      'spec/foo'                   | [:backend]
+      'spec/foo/bar'               | [:backend]
 
       'ee/app/foo'      | [:backend]
       'ee/bin/foo'      | [:backend]
@@ -278,9 +281,9 @@ RSpec.describe Gitlab::Danger::Helper do
       'scripts/foo'                                           | [:engineering_productivity]
       'lib/gitlab/danger/foo'                                 | [:engineering_productivity]
       'ee/lib/gitlab/danger/foo'                              | [:engineering_productivity]
-      '.overcommit.yml.example'                               | [:engineering_productivity]
+      'lefthook.yml'                                          | [:engineering_productivity]
       '.editorconfig'                                         | [:engineering_productivity]
-      'tooling/overcommit/foo'                                | [:engineering_productivity]
+      'tooling/bin/find_foss_tests'                           | [:engineering_productivity]
       '.codeclimate.yml'                                      | [:engineering_productivity]
       '.gitlab/CODEOWNERS'                                    | [:engineering_productivity]
 
@@ -586,6 +589,32 @@ RSpec.describe Gitlab::Danger::Helper do
 
     it 'returns empty string for empty array' do
       expect(helper.prepare_labels_for_mr([])).to eq('')
+    end
+  end
+
+  describe '#has_ci_changes?' do
+    context 'when .gitlab/ci is changed' do
+      it 'returns true' do
+        expect(helper).to receive(:all_changed_files).and_return(%w[migration.rb .gitlab/ci/test.yml])
+
+        expect(helper.has_ci_changes?).to be_truthy
+      end
+    end
+
+    context 'when .gitlab-ci.yml is changed' do
+      it 'returns true' do
+        expect(helper).to receive(:all_changed_files).and_return(%w[migration.rb .gitlab-ci.yml])
+
+        expect(helper.has_ci_changes?).to be_truthy
+      end
+    end
+
+    context 'when neither .gitlab/ci/ or .gitlab-ci.yml is changed' do
+      it 'returns false' do
+        expect(helper).to receive(:all_changed_files).and_return(%w[migration.rb nested/.gitlab-ci.yml])
+
+        expect(helper.has_ci_changes?).to be_falsey
+      end
     end
   end
 end

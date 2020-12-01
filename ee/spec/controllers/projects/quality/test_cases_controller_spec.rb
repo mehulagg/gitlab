@@ -91,5 +91,28 @@ RSpec.describe Projects::Quality::TestCasesController do
 
       it_behaves_like 'test case action', :new
     end
+
+    describe '#show' do
+      let_it_be(:test_case) { create(:quality_test_case, project: project) }
+
+      subject { get :show, params: { namespace_id: project.namespace, project_id: project, id: test_case } }
+
+      it_behaves_like 'test case action', :show
+
+      context 'when feature is enabled and user has access' do
+        before do
+          stub_licensed_features(quality_management: true)
+          project.add_developer(user)
+          sign_in(user)
+        end
+
+        it 'assigns test case related variables' do
+          subject
+
+          expect(assigns(:test_case)).to eq(test_case)
+          expect(assigns(:issuable_sidebar)).to be_present
+        end
+      end
+    end
   end
 end

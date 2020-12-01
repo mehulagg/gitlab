@@ -107,7 +107,7 @@ RSpec.describe Gitlab::PathRegex do
   end
 
   let(:sitemap_words) do
-    %w(sitemap.xml sitemap.xml.gz)
+    %w(sitemap sitemap.xml sitemap.xml.gz)
   end
 
   let(:ee_top_level_words) do
@@ -177,7 +177,7 @@ RSpec.describe Gitlab::PathRegex do
 
     # We ban new items in this list, see https://gitlab.com/gitlab-org/gitlab/-/issues/215362
     it 'does not allow expansion' do
-      expect(described_class::TOP_LEVEL_ROUTES.size).to eq(43)
+      expect(described_class::TOP_LEVEL_ROUTES.size).to eq(44)
     end
   end
 
@@ -464,5 +464,35 @@ RSpec.describe Gitlab::PathRegex do
     it { is_expected.not_to match('snippets/1') }
 
     it_behaves_like 'invalid snippet routes'
+  end
+
+  describe '.container_image_regex' do
+    subject { described_class.container_image_regex }
+
+    it { is_expected.to match('gitlab-foss') }
+    it { is_expected.to match('gitlab_foss') }
+    it { is_expected.to match('gitlab-org/gitlab-foss') }
+    it { is_expected.to match('100px.com/100px.ruby') }
+
+    it 'only matches at most one slash' do
+      expect(subject.match('foo/bar/baz')[0]).to eq('foo/bar')
+    end
+
+    it 'does not match other non-word characters' do
+      expect(subject.match('ruby:2.7.0')[0]).to eq('ruby')
+    end
+  end
+
+  describe '.container_image_blob_sha_regex' do
+    subject { described_class.container_image_blob_sha_regex }
+
+    it { is_expected.to match('sha256:asdf1234567890ASDF') }
+    it { is_expected.to match('foo:123') }
+    it { is_expected.to match('a12bc3f590szp') }
+    it { is_expected.not_to match('') }
+
+    it 'does not match malicious characters' do
+      expect(subject.match('sha256:asdf1234%2f')[0]).to eq('sha256:asdf1234')
+    end
   end
 end

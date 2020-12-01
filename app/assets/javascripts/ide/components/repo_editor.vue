@@ -6,11 +6,12 @@ import ContentViewer from '~/vue_shared/components/content_viewer/content_viewer
 import DiffViewer from '~/vue_shared/components/diff_viewer/diff_viewer.vue';
 import {
   WEBIDE_MARK_FILE_CLICKED,
-  WEBIDE_MARK_FILE_START,
+  WEBIDE_MARK_REPO_EDITOR_START,
+  WEBIDE_MARK_REPO_EDITOR_FINISH,
+  WEBIDE_MEASURE_REPO_EDITOR,
   WEBIDE_MEASURE_FILE_AFTER_INTERACTION,
-  WEBIDE_MEASURE_FILE_FROM_REQUEST,
-} from '~/performance_constants';
-import { performanceMarkAndMeasure } from '~/performance_utils';
+} from '~/performance/constants';
+import { performanceMarkAndMeasure } from '~/performance/utils';
 import eventHub from '../eventhub';
 import {
   leftSidebarViews,
@@ -22,11 +23,13 @@ import Editor from '../lib/editor';
 import FileTemplatesBar from './file_templates/bar.vue';
 import { __ } from '~/locale';
 import { extractMarkdownImagesFromEntries } from '../stores/utils';
+import { getFileEditorOrDefault } from '../stores/modules/editor/utils';
 import { getPathParent, readFileAsDataURL, registerSchema, isTextFile } from '../utils';
 import { getRulesWithTraversal } from '../lib/editorconfig/parser';
 import mapRulesToMonaco from '../lib/editorconfig/rules_mapper';
 
 export default {
+  name: 'RepoEditor',
   components: {
     ContentViewer,
     DiffViewer,
@@ -49,6 +52,7 @@ export default {
     ...mapState('rightPane', {
       rightPaneIsOpen: 'isOpen',
     }),
+    ...mapState('editor', ['fileEditors']),
     ...mapState([
       'viewer',
       'panelResizing',
@@ -67,6 +71,9 @@ export default {
       'getJsonSchemaForPath',
     ]),
     ...mapGetters('fileTemplates', ['showFileTemplatesBar']),
+    fileEditor() {
+      return getFileEditorOrDefault(this.fileEditors, this.file.path);
+    },
     shouldHideEditor() {
       return this.file && !this.file.loading && !isTextFile(this.file);
     },
@@ -80,10 +87,10 @@ export default {
       return this.shouldHideEditor && this.file.mrChange && this.viewer === viewerTypes.mr;
     },
     isEditorViewMode() {
-      return this.file.viewMode === FILE_VIEW_MODE_EDITOR;
+      return this.fileEditor.viewMode === FILE_VIEW_MODE_EDITOR;
     },
     isPreviewViewMode() {
-      return this.file.viewMode === FILE_VIEW_MODE_PREVIEW;
+      return this.fileEditor.viewMode === FILE_VIEW_MODE_PREVIEW;
     },
     editTabCSS() {
       return {
@@ -125,8 +132,7 @@ export default {
         this.initEditor();
 
         if (this.currentActivityView !== leftSidebarViews.edit.name) {
-          this.setFileViewMode({
-            file: this.file,
+          this.updateEditor({
             viewMode: FILE_VIEW_MODE_EDITOR,
           });
         }
@@ -134,8 +140,7 @@ export default {
     },
     currentActivityView() {
       if (this.currentActivityView !== leftSidebarViews.edit.name) {
-        this.setFileViewMode({
-          file: this.file,
+        this.updateEditor({
           viewMode: FILE_VIEW_MODE_EDITOR,
         });
       }
@@ -172,9 +177,6 @@ export default {
       }
     },
   },
-  beforeCreate() {
-    performanceMarkAndMeasure({ mark: WEBIDE_MARK_FILE_START });
-  },
   beforeDestroy() {
     this.editor.dispose();
   },
@@ -195,14 +197,13 @@ export default {
       'getFileData',
       'getRawFileData',
       'changeFileContent',
-      'setFileLanguage',
-      'setEditorPosition',
-      'setFileViewMode',
       'removePendingTab',
       'triggerFilesChange',
       'addTempImage',
     ]),
+    ...mapActions('editor', ['updateFileEditor']),
     initEditor() {
+      performanceMarkAndMeasure({ mark: WEBIDE_MARK_REPO_EDITOR_START });
       if (this.shouldHideEditor && (this.file.content || this.file.raw)) {
         return;
       }
@@ -284,19 +285,19 @@ export default {
 
       // Handle Cursor Position
       this.editor.onPositionChange((instance, e) => {
-        this.setEditorPosition({
+        this.updateEditor({
           editorRow: e.position.lineNumber,
           editorColumn: e.position.column,
         });
       });
 
       this.editor.setPosition({
-        lineNumber: this.file.editorRow,
-        column: this.file.editorColumn,
+        lineNumber: this.fileEditor.editorRow,
+        column: this.fileEditor.editorColumn,
       });
 
       // Handle File Language
-      this.setFileLanguage({
+      this.updateEditor({
         fileLanguage: this.model.language,
       });
 
@@ -304,7 +305,15 @@ export default {
       if (performance.getEntriesByName(WEBIDE_MARK_FILE_CLICKED).length) {
         eventHub.$emit(WEBIDE_MEASURE_FILE_AFTER_INTERACTION);
       } else {
-        eventHub.$emit(WEBIDE_MEASURE_FILE_FROM_REQUEST);
+        performanceMarkAndMeasure({
+          mark: WEBIDE_MARK_REPO_EDITOR_FINISH,
+          measures: [
+            {
+              name: WEBIDE_MEASURE_REPO_EDITOR,
+              start: WEBIDE_MARK_REPO_EDITOR_START,
+            },
+          ],
+        });
       }
     },
     refreshEditorDimensions() {
@@ -354,6 +363,16 @@ export default {
       const schema = this.getJsonSchemaForPath(this.file.path);
       registerSchema(schema);
     },
+    updateEditor(data) {
+      // Looks like our model wrapper `.dispose` causes the monaco editor to emit some position changes after
+      // when disposing. We want to ignore these by only capturing editor changes that happen to the currently active
+      // file.
+      if (!this.file.active) {
+        return;
+      }
+
+      this.updateFileEditor({ path: this.file.path, data });
+    },
   },
   viewerTypes,
   FILE_VIEW_MODE_EDITOR,
@@ -369,7 +388,7 @@ export default {
           <a
             href="javascript:void(0);"
             role="button"
-            @click.prevent="setFileViewMode({ file, viewMode: $options.FILE_VIEW_MODE_EDITOR })"
+            @click.prevent="updateEditor({ viewMode: $options.FILE_VIEW_MODE_EDITOR })"
           >
             {{ __('Edit') }}
           </a>
@@ -378,7 +397,7 @@ export default {
           <a
             href="javascript:void(0);"
             role="button"
-            @click.prevent="setFileViewMode({ file, viewMode: $options.FILE_VIEW_MODE_PREVIEW })"
+            @click.prevent="updateEditor({ viewMode: $options.FILE_VIEW_MODE_PREVIEW })"
             >{{ previewMode.previewTitle }}</a
           >
         </li>

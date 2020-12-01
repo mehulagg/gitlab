@@ -1,7 +1,7 @@
 ---
 stage: Enablement
 group: Geo
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: howto
 ---
 
@@ -172,6 +172,12 @@ the **primary** database. Use the following as a guide.
    ## Configure the Geo secondary role and the PostgreSQL role
    ##
    roles ['geo_secondary_role', 'postgres_role']
+
+   ##
+   ## The unique identifier for the Geo node.
+   ## This should match the secondary's application node.
+   ##
+   gitlab_rails['geo_node_name'] = '<node_name_here>'
 
    ##
    ## Secondary address

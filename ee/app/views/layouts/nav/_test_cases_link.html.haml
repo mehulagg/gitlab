@@ -1,4 +1,4 @@
-- return unless Feature.enabled?(:quality_test_cases, project)
+- return unless Feature.enabled?(:quality_test_cases, project, default_enabled: true)
 - return unless project.feature_available?(:quality_management)
 - return unless can?(current_user, :read_issue, project)
 

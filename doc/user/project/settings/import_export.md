@@ -1,7 +1,7 @@
 ---
 stage: Manage
 group: Import
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 type: reference, howto
 ---
 
@@ -32,6 +32,9 @@ To set up a project import/export:
 
 Note the following:
 
+- Before you can import a project, you need to export the data first.
+  See [Exporting a project and its data](#exporting-a-project-and-its-data)
+  for how you can export a project through the UI.
 - Imports from a newer version of GitLab are not supported.
   The Importing GitLab version must be greater than or equal to the Exporting GitLab version.
 - Imports will fail unless the import and export GitLab instances are
@@ -48,6 +51,9 @@ Note the following:
   then new branches associated with such merge requests will be created
   within a project during the import/export. Thus, the number of branches
   in the exported project could be bigger than in the original project.
+- Deploy keys allowed to push to protected branches are not exported. Therefore,
+  you will need to recreate this association by first enabling these deploy keys in your
+  imported project and then updating your protected branches accordingly.
 
 ## Version history
 
@@ -111,6 +117,7 @@ The following items will be exported:
 - LFS objects
 - Issue boards
 - Pipelines history
+- Push Rules
 
 The following items will NOT be exported:
 
@@ -120,7 +127,6 @@ The following items will NOT be exported:
 - Webhooks
 - Any encrypted tokens
 - Merge Request Approvers
-- Push Rules
 - Awards
 
 NOTE: **Note:**
@@ -128,6 +134,11 @@ For more details on the specific data persisted in a project export, see the
 [`import_export.yml`](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/import_export/project/import_export.yml) file.
 
 ## Exporting a project and its data
+
+Full project export functionality is limited to project maintainers and owners.
+You can configure such functionality through [project settings](index.md):
+
+To export a project and its data, follow these steps:
 
 1. Go to your project's homepage.
 

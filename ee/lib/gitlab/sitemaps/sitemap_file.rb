@@ -20,15 +20,21 @@ module Gitlab
       end
 
       def save
-        return if urls.empty?
+        return if empty?
 
         File.write(SITEMAP_FILE_PATH, render)
       end
 
       def render
+        return if empty?
+
         fragment = File.read(File.expand_path("fragments/sitemap_file.xml.builder", __dir__))
 
         instance_eval fragment
+      end
+
+      def empty?
+        urls.empty?
       end
 
       private

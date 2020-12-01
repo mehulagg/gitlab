@@ -7,35 +7,16 @@ RSpec.describe RegistrationsController do
 
   before do
     stub_feature_flags(invisible_captcha: false)
+    stub_application_setting(require_admin_approval_after_user_signup: false)
   end
 
   describe '#new' do
     subject { get :new }
 
-    context 'with the experimental signup flow enabled and the user is part of the experimental group' do
-      before do
-        stub_experiment(signup_flow: true)
-        stub_experiment_for_user(signup_flow: true)
-      end
-
-      it 'renders new template and sets the resource variable' do
-        expect(subject).to render_template(:new)
-        expect(response).to have_gitlab_http_status(:ok)
-        expect(assigns(:resource)).to be_a(User)
-      end
-    end
-
-    context 'with the experimental signup flow enabled and the user is part of the control group' do
-      before do
-        stub_experiment(signup_flow: true)
-        stub_experiment_for_user(signup_flow: false)
-      end
-
-      it 'renders new template and sets the resource variable' do
-        subject
-        expect(response).to have_gitlab_http_status(:found)
-        expect(response).to redirect_to(new_user_session_path(anchor: 'register-pane'))
-      end
+    it 'renders new template and sets the resource variable' do
+      expect(subject).to render_template(:new)
+      expect(response).to have_gitlab_http_status(:ok)
+      expect(assigns(:resource)).to be_a(User)
     end
   end
 
@@ -73,6 +54,14 @@ RSpec.describe RegistrationsController do
             .to eq('You have signed up successfully. However, we could not sign you in because your account is awaiting approval from your GitLab administrator.')
         end
 
+        it 'emails the access request to approvers' do
+          expect_next_instance_of(NotificationService) do |notification|
+            allow(notification).to receive(:new_instance_access_request).with(User.find_by(email: 'new@user.com'))
+          end
+
+          subject
+        end
+
         context 'email confirmation' do
           context 'when `send_user_confirmation_email` is true' do
             before do
@@ -88,10 +77,6 @@ RSpec.describe RegistrationsController do
       end
 
       context 'when the `require_admin_approval_after_user_signup` setting is turned off' do
-        before do
-          stub_application_setting(require_admin_approval_after_user_signup: false)
-        end
-
         it 'signs up the user in `active` state' do
           subject
           created_user = User.find_by(email: 'new@user.com')
@@ -104,6 +89,12 @@ RSpec.describe RegistrationsController do
           subject
 
           expect(flash[:notice]).to be_nil
+        end
+
+        it 'does not email the approvers' do
+          expect(NotificationService).not_to receive(:new)
+
+          subject
         end
 
         context 'email confirmation' do
@@ -420,47 +411,6 @@ RSpec.describe RegistrationsController do
           end
         end
       end
-    end
-  end
-
-  describe '#welcome' do
-    subject { get :welcome }
-
-    it 'renders the devise_experimental_separate_sign_up_flow layout' do
-      sign_in(create(:user))
-
-      expected_layout = Gitlab.ee? ? :checkout : :devise_experimental_separate_sign_up_flow
-
-      expect(subject).to render_template(expected_layout)
-    end
-
-    context '2FA is required from group' do
-      before do
-        user = create(:user, require_two_factor_authentication_from_group: true)
-        sign_in(user)
-      end
-
-      it 'does not perform a redirect' do
-        expect(subject).not_to redirect_to(profile_two_factor_auth_path)
-      end
-    end
-  end
-
-  describe '#update_registration' do
-    subject(:update_registration) do
-      patch :update_registration, params: { user: { role: 'software_developer', setup_for_company: 'false' } }
-    end
-
-    context 'without a signed in user' do
-      it { is_expected.to redirect_to new_user_registration_path }
-    end
-
-    context 'with a signed in user' do
-      before do
-        sign_in(create(:user))
-      end
-
-      it { is_expected.to redirect_to(dashboard_projects_path)}
     end
   end
 end

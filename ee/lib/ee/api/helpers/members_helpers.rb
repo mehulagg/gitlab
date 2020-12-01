@@ -28,6 +28,14 @@ module EE
 
           members
         end
+
+        override :source_members
+        def source_members(source)
+          return super if source.is_a?(Project)
+          return super unless source.minimal_access_role_allowed?
+
+          source.all_group_members
+        end
         # rubocop: enable CodeReuse/ActiveRecord
 
         def can_view_group_identity?(members_source)

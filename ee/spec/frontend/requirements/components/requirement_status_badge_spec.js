@@ -1,6 +1,6 @@
+import { GlBadge, GlIcon, GlTooltip } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 
-import { GlBadge, GlIcon, GlTooltip } from '@gitlab/ui';
 import RequirementStatusBadge from 'ee/requirements/components/requirement_status_badge.vue';
 import { mockTestReport, mockTestReportFailed, mockTestReportMissing } from '../mock_data';
 

@@ -57,8 +57,7 @@ module EE
         where("EXISTS (?)", matcher)
       end
 
-      delegate :shared_runners_minutes, :shared_runners_seconds, :shared_runners_seconds_last_reset,
-        :extra_shared_runners_minutes, to: :namespace_statistics, allow_nil: true
+      delegate :shared_runners_seconds, :shared_runners_seconds_last_reset, to: :namespace_statistics, allow_nil: true
 
       delegate :additional_purchased_storage_size, :additional_purchased_storage_size=,
         :additional_purchased_storage_ends_on, :additional_purchased_storage_ends_on=,
@@ -250,11 +249,6 @@ module EE
         actual_shared_runners_minutes_limit.nonzero?
     end
 
-    def shared_runners_minutes_used?
-      shared_runners_minutes_limit_enabled? &&
-        shared_runners_minutes.to_i >= actual_shared_runners_minutes_limit
-    end
-
     def shared_runners_remaining_minutes_percent
       return 0 if shared_runners_remaining_minutes.to_f <= 0
       return 0 if actual_shared_runners_minutes_limit.to_f == 0
@@ -264,12 +258,6 @@ module EE
 
     def shared_runners_remaining_minutes_below_threshold?
       shared_runners_remaining_minutes_percent.to_i <= last_ci_minutes_usage_notification_level.to_i
-    end
-
-    def extra_shared_runners_minutes_used?
-      shared_runners_minutes_limit_enabled? &&
-        extra_shared_runners_minutes_limit &&
-        extra_shared_runners_minutes.to_i >= extra_shared_runners_minutes_limit
     end
 
     def any_project_with_shared_runners_enabled?
@@ -373,7 +361,9 @@ module EE
     end
 
     def additional_repo_storage_by_namespace_enabled?
-      !::Feature.enabled?(:namespace_storage_limit, self) && ::Feature.enabled?(:additional_repo_storage_by_namespace, self)
+      !::Feature.enabled?(:namespace_storage_limit, self) &&
+        ::Feature.enabled?(:additional_repo_storage_by_namespace, self) &&
+        ::Gitlab::CurrentSettings.automatic_purchased_storage_allocation?
     end
 
     def root_storage_size
@@ -440,7 +430,7 @@ module EE
     end
 
     def shared_runners_remaining_minutes
-      [actual_shared_runners_minutes_limit.to_f - shared_runners_minutes.to_f, 0].max
+      [actual_shared_runners_minutes_limit.to_f - ci_minutes_quota.total_minutes_used.to_f, 0].max
     end
 
     def total_repository_size_excess_calculation(repository_size_limit, project_level: true)

@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # GraphQL pagination
 
 ## Types of pagination
@@ -79,6 +85,20 @@ This was a conscious decision to support performance and data stability.
 However, there are some cases where we have to use the offset
 pagination connection, `OffsetActiveRecordRelationConnection`, such as when
 sorting by label priority in issues, due to the complexity of the sort.
+
+If you return a relation from a resolver that is not suitable for keyset
+pagination (due to the sort order for example), then you can use the
+`BaseResolver#offset_pagination` method to wrap the relation in the correct
+connection type. For example:
+
+```ruby
+def resolve(**args)
+  result = Finder.new(object, current_user, args).execute
+  result = offset_pagination(result) if needs_offset?(args[:sort])
+
+  result
+end
+```
 
 ### Keyset pagination
 
@@ -199,9 +219,51 @@ the `order_due_date_and_labels_priority` method creates a very complex query.
 
 These types of queries are not supported. In these instances, you can use offset pagination.
 
-<!-- ### Offset pagination -->
+### Offset pagination
+
+There are times when the [complexity of sorting](#limitations-of-query-complexity)
+is more than our keyset pagination can handle.
+
+For example, in [`IssuesResolver`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/graphql/resolvers/issues_resolver.rb),
+when sorting by `priority_asc`, we can't use keyset pagination as the ordering is much
+too complex. For more information, read [`issuable.rb`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/models/concerns/issuable.rb).
+
+In cases like this, we can fall back to regular offset pagination by returning a
+[`Gitlab::Graphql::Pagination::OffsetActiveRecordRelationConnection`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/graphql/pagination/offset_active_record_relation_connection.rb)
+instead of an `ActiveRecord::Relation`:
+
+```ruby
+    def resolve(parent, finder, **args)
+      issues = apply_lookahead(Gitlab::Graphql::Loaders::IssuableLoader.new(parent, finder).batching_find_all)
+
+      if non_stable_cursor_sort?(args[:sort])
+        # Certain complex sorts are not supported by the stable cursor pagination yet.
+        # In these cases, we use offset pagination, so we return the correct connection.
+        offset_pagination(issues)
+      else
+        issues
+      end
+    end
+```
 
 <!-- ### External pagination -->
+
+### External pagination
+
+There may be times where you need to return data through the GitLab API that is stored in
+another system. In these cases you may have to paginate a third-party's API.
+
+An example of this is with our [Error Tracking](../../operations/error_tracking.md) implementation,
+where we proxy [Sentry errors](../../operations/error_tracking.md#sentry-error-tracking) through
+the GitLab API. We do this by calling the Sentry API which enforces its own pagination rules.
+This means we cannot access the collection within GitLab to perform our own custom pagination.
+
+For consistency, we manually set the pagination cursors based on values returned by the external API, using `Gitlab::Graphql::ExternallyPaginatedArray.new(previous_cursor, next_cursor, *items)`.
+
+You can see an example implementation in the following files:
+
+- [`types/error__tracking/sentry_error_collection_type.rb`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/graphql/types/error_tracking/sentry_error_collection_type.rb) which adds an extension to  `field :errors`.
+- [`resolvers/error_tracking/sentry_errors_resolver.rb`](https://gitlab.com/gitlab-org/gitlab/blob/master/app/graphql/resolvers/error_tracking/sentry_errors_resolver.rb) which returns the data from the resolver.
 
 ## Testing
 

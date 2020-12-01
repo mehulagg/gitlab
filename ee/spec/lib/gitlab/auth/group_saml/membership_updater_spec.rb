@@ -6,8 +6,13 @@ RSpec.describe Gitlab::Auth::GroupSaml::MembershipUpdater do
   let(:user) { create(:user) }
   let(:saml_provider) { create(:saml_provider, default_membership_role: Gitlab::Access::DEVELOPER) }
   let(:group) { saml_provider.group }
+  let(:omniauth_auth_hash) do
+    OmniAuth::AuthHash.new(extra: {
+      raw_info: OneLogin::RubySaml::Attributes.new('groups' => %w(Developers Owners))
+    })
+  end
 
-  subject { described_class.new(user, saml_provider).execute }
+  subject(:update_membership) { described_class.new(user, saml_provider, omniauth_auth_hash).execute }
 
   it 'adds the user to the group' do
     subject
@@ -44,5 +49,54 @@ RSpec.describe Gitlab::Auth::GroupSaml::MembershipUpdater do
     end.to change { AuditEvent.by_entity('Group', group).count }.by(1)
 
     expect(AuditEvent.last.details).to include(add: 'user_access', target_details: user.name, as: 'Developer')
+  end
+
+  it 'does not enqueue group sync' do
+    expect(GroupSamlGroupSyncWorker).not_to receive(:perform_async)
+
+    update_membership
+  end
+
+  context 'when SAML group links exist' do
+    def stub_saml_group_sync_available(enabled)
+      allow(group).to receive(:saml_group_sync_available?).and_return(enabled)
+    end
+
+    let(:group_link) { create(:saml_group_link, saml_group_name: 'Owners', group: group) }
+    let(:subgroup_link) { create(:saml_group_link, saml_group_name: 'Developers', group: create(:group, parent: group)) }
+
+    context 'when group sync is not available' do
+      before do
+        stub_saml_group_sync_available(false)
+      end
+
+      it 'does not enqueue group sync' do
+        expect(GroupSamlGroupSyncWorker).not_to receive(:perform_async)
+      end
+    end
+
+    context 'when group sync is available' do
+      before do
+        stub_saml_group_sync_available(true)
+      end
+
+      it 'enqueues group sync' do
+        expect(GroupSamlGroupSyncWorker).to receive(:perform_async).with(user.id, group.id, match_array([group_link.id, subgroup_link.id]))
+
+        update_membership
+      end
+
+      context 'with a group link outside the top-level group' do
+        before do
+          create(:saml_group_link, saml_group_name: 'Developers', group: create(:group))
+        end
+
+        it 'enqueues group sync without the outside group' do
+          expect(GroupSamlGroupSyncWorker).to receive(:perform_async).with(user.id, group.id, match_array([group_link.id, subgroup_link.id]))
+
+          update_membership
+        end
+      end
+    end
   end
 end

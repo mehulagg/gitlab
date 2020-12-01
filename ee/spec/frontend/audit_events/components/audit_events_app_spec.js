@@ -1,11 +1,11 @@
 import { shallowMount } from '@vue/test-utils';
 
 import AuditEventsApp from 'ee/audit_events/components/audit_events_app.vue';
+import AuditEventsExportButton from 'ee/audit_events/components/audit_events_export_button.vue';
+import AuditEventsFilter from 'ee/audit_events/components/audit_events_filter.vue';
+import AuditEventsTable from 'ee/audit_events/components/audit_events_table.vue';
 import DateRangeField from 'ee/audit_events/components/date_range_field.vue';
 import SortingField from 'ee/audit_events/components/sorting_field.vue';
-import AuditEventsTable from 'ee/audit_events/components/audit_events_table.vue';
-import AuditEventsFilter from 'ee/audit_events/components/audit_events_filter.vue';
-import AuditEventsExportButton from 'ee/audit_events/components/audit_events_export_button.vue';
 import { AVAILABLE_TOKEN_TYPES } from 'ee/audit_events/constants';
 import createStore from 'ee/audit_events/store';
 

@@ -133,17 +133,21 @@ from:
 - [Approval Rules](approval_rules.md)
 - [Feature categorization](feature_categorization/index.md)
 - [Wikis development guide](wikis.md)
+- [Newlines style guide](newlines_styleguide.md)
+- [Image scaling guide](image_scaling.md)
 
 ## Performance guides
 
 - [Instrumentation](instrumentation.md) for Ruby code running in production
-  environments
+  environments.
 - [Performance guidelines](performance.md) for writing code, benchmarks, and
-  certain patterns to avoid
+  certain patterns to avoid.
 - [Merge request performance guidelines](merge_request_performance_guidelines.md)
   for ensuring merge requests do not negatively impact GitLab performance
 - [Profiling](profiling.md) a URL, measuring performance using Sherlock, or
-  tracking down N+1 queries using Bullet
+  tracking down N+1 queries using Bullet.
+- [Cached queries guidelines](cached_queries.md), for tracking down N+1 queries masked by query caching, memory profiling and why should
+  we avoid cached queries.
 
 ## Database guides
 
@@ -172,7 +176,7 @@ See [database guidelines](database/index.md).
 ## Documentation guides
 
 - [Writing documentation](documentation/index.md)
-- [Documentation style guide](documentation/styleguide.md)
+- [Documentation style guide](documentation/styleguide/index.md)
 - [Markdown](../user/markdown.md)
 
 ## Internationalization (i18n) guides
@@ -183,7 +187,7 @@ See [database guidelines](database/index.md).
 
 ## Product Analytics guides
 
-- [Product Analytics guide](product_analytics/index.md)
+- [Product Analytics guide](https://about.gitlab.com/handbook/product/product-analytics-guide/)
 - [Usage Ping guide](product_analytics/usage_ping.md)
 - [Snowplow guide](product_analytics/snowplow.md)
 
@@ -214,9 +218,9 @@ See [database guidelines](database/index.md).
 ## Other Development guides
 
 - [Defining relations between files using projections](projections.md)
-- [Reference processing](./reference_processing.md)
+- [Reference processing](reference_processing.md)
 - [Compatibility with multiple versions of the application running at the same time](multi_version_compatibility.md)
-- [Features inside `.gitlab/`](./features_inside_dot_gitlab.md)
+- [Features inside `.gitlab/`](features_inside_dot_gitlab.md)
 
 ## Other GitLab Development Kit (GDK) guides
 

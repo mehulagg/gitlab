@@ -76,7 +76,7 @@ const buildProjectsFromJSON = (projects = []) => {
 };
 
 /**
- * Builds the initial data object for cycle analytics with data loaded from the backend
+ * Builds the initial data object for Value Stream Analytics with data loaded from the backend
  *
  * @param {Object} dataset - dataset object paseed to the frontend via data-* properties
  * @returns {Object} - The initial data to load the app with

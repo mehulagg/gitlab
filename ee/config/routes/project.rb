@@ -12,16 +12,22 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
       # Use this scope for all new project routes.
       scope '-' do
         namespace :requirements_management do
-          resources :requirements, only: [:index]
+          resources :requirements, only: [:index] do
+            collection do
+              post :import_csv
+              post :authorize
+            end
+          end
         end
 
         namespace :quality do
-          resources :test_cases, only: [:index, :new]
+          resources :test_cases, only: [:index, :new, :show]
         end
 
         resources :autocomplete_sources, only: [] do
           collection do
             get 'epics'
+            get 'vulnerabilities'
           end
         end
 
@@ -132,7 +138,6 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
       resource :insights, only: [:show], trailing_slash: true do
         collection do
           post :query
-          get :embedded
         end
       end
       # All new routes should go under /-/ scope.

@@ -106,7 +106,7 @@ RSpec.describe Gitlab::BackgroundMigration::UserMentions::CreateResourceUserMent
       let(:design_user_mentions) { table(:design_user_mentions) }
 
       let(:project) { projects.create!(id: 1, name: 'gitlab1', path: 'gitlab1', namespace_id: group.id, visibility_level: 0) }
-      let!(:design) { designs.create!(filename: 'test.png', project_id: project.id) }
+      let!(:design) { designs.create!(filename: 'test.png', project_id: project.id, iid: 1000) }
 
       let!(:note1) { notes.create!(noteable_id: design.id, noteable_type: 'DesignManagement::Design', project_id: project.id, author_id: author.id, note: description_mentions) }
       let!(:note2) { notes.create!(noteable_id: design.id, noteable_type: 'DesignManagement::Design', project_id: project.id, author_id: author.id, note: 'sample note') }

@@ -14,7 +14,7 @@ RSpec.shared_examples 'updating health status' do
     end
   end
 
-  subject { mutation.resolve(params) }
+  subject { mutation.resolve(**params) }
 
   context 'when the user has permission' do
     before do

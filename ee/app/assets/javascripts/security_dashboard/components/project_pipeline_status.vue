@@ -59,13 +59,13 @@ export default {
         <span class="gl-font-weight-bold gl-mr-3">{{ $options.i18n.lastUpdated }}</span>
         <span class="gl-white-space-nowrap">
           <time-ago-tooltip class="gl-pr-3" :time="pipeline.createdAt" />
-          <gl-link :href="pipeline.path" target="_blank">#{{ pipeline.id }}</gl-link>
+          <gl-link :href="pipeline.path">#{{ pipeline.id }}</gl-link>
           <pipeline-status-badge :pipeline="pipeline" class="gl-ml-3" />
         </span>
       </div>
       <div v-if="autoFixMrsCount" data-testid="auto-fix-mrs-link">
         <span class="gl-font-weight-bold gl-mr-3">{{ $options.i18n.autoFixSolutions }}</span>
-        <gl-link :href="autoFixMrsPath" target="_blank" class="gl-white-space-nowrap">{{
+        <gl-link :href="autoFixMrsPath" class="gl-white-space-nowrap">{{
           sprintf($options.i18n.autoFixMrsLink, { mrsCount: autoFixMrsCount })
         }}</gl-link>
       </div>

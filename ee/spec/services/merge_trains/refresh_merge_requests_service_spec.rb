@@ -181,62 +181,6 @@ RSpec.describe MergeTrains::RefreshMergeRequestsService do
         subject
       end
 
-      context 'when ci_always_refresh_merge_requests_from_beginning is disabled' do
-        before do
-          stub_feature_flags(ci_always_refresh_merge_requests_from_beginning: false)
-        end
-
-        it 'executes RefreshMergeRequestService to all the following merge requests' do
-          expect(refresh_service_1).not_to receive(:execute).with(merge_request_1)
-          expect(refresh_service_2).to receive(:execute).with(merge_request_2)
-
-          subject
-        end
-
-        context 'when merge request 1 was tried to be refreshed while the system is refreshing merge request 2' do
-          before do
-            allow_any_instance_of(described_class).to receive(:unsafe_refresh).with(merge_request_2) do
-              service.execute(merge_request_1)
-            end
-          end
-
-          it 'refreshes the merge request 1 later with AutoMergeProcessWorker' do
-            expect(AutoMergeProcessWorker).to receive(:perform_async).with(merge_request_1.id).once
-
-            subject
-          end
-
-          context 'when ci_always_refresh_merge_requests_from_beginning is disabled' do
-            before do
-              stub_feature_flags(ci_always_refresh_merge_requests_from_beginning: false)
-            end
-
-            it 'refreshes the merge request 1 later with AutoMergeProcessWorker' do
-              expect(AutoMergeProcessWorker).to receive(:perform_async).with(merge_request_1.id).once
-
-              subject
-            end
-          end
-
-          it_behaves_like 'logging results', 4
-
-          context 'when merge request 1 has already been merged' do
-            before do
-              allow(merge_request_1.merge_train).to receive(:cleanup_ref)
-              merge_request_1.merge_train.update_column(:status, MergeTrain.state_machines[:status].states[:merged].value)
-            end
-
-            it 'does not refresh the merge request 1' do
-              expect(AutoMergeProcessWorker).not_to receive(:perform_async).with(merge_request_1.id)
-
-              subject
-            end
-
-            it_behaves_like 'logging results', 1
-          end
-        end
-      end
-
       it_behaves_like 'logging results', 3
     end
   end

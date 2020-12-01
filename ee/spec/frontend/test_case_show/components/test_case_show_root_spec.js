@@ -1,17 +1,16 @@
+import { GlLink, GlLoadingIcon, GlSprintf } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
-import { GlLoadingIcon } from '@gitlab/ui';
-
-import { mockCurrentUserTodo } from 'jest/issuable_list/mock_data';
 
 import TestCaseShowRoot from 'ee/test_case_show/components/test_case_show_root.vue';
 import TestCaseSidebar from 'ee/test_case_show/components/test_case_sidebar.vue';
+import { mockCurrentUserTodo } from 'jest/issuable_list/mock_data';
 
-import IssuableShow from '~/issuable_show/components/issuable_show_root.vue';
-import IssuableHeader from '~/issuable_show/components/issuable_header.vue';
 import IssuableBody from '~/issuable_show/components/issuable_body.vue';
 import IssuableEditForm from '~/issuable_show/components/issuable_edit_form.vue';
-import IssuableSidebar from '~/issuable_sidebar/components/issuable_sidebar_root.vue';
+import IssuableHeader from '~/issuable_show/components/issuable_header.vue';
+import IssuableShow from '~/issuable_show/components/issuable_show_root.vue';
 import IssuableEventHub from '~/issuable_show/event_hub';
+import IssuableSidebar from '~/issuable_sidebar/components/issuable_sidebar_root.vue';
 
 import { mockProvide, mockTestCase } from '../mock_data';
 
@@ -33,6 +32,7 @@ const createComponent = ({ testCase, testCaseQueryLoading = false } = {}) =>
       },
     },
     stubs: {
+      GlSprintf,
       IssuableShow,
       IssuableHeader,
       IssuableBody,
@@ -299,6 +299,27 @@ describe('TestCaseShowRoot', () => {
 
     it('renders status-badge slot contents', () => {
       expect(wrapper.find('[data-testid="status"]').text()).toContain('Open');
+    });
+
+    it('renders status-badge slot contents with updated test case URL when testCase.moved is true', () => {
+      const movedTestCase = {
+        ...mockTestCase,
+        status: 'closed',
+        moved: true,
+        movedTo: {
+          webUrl: 'http://0.0.0.0:3000/gitlab-org/gitlab-test/-/issues/30',
+        },
+      };
+
+      const wrapperMoved = createComponent({
+        testCase: movedTestCase,
+      });
+      const statusEl = wrapperMoved.find('[data-testid="status"]');
+
+      expect(statusEl.text()).toContain('Archived');
+      expect(statusEl.find(GlLink).attributes('href')).toBe(movedTestCase.movedTo.webUrl);
+
+      wrapperMoved.destroy();
     });
 
     it('renders header-actions slot contents', () => {

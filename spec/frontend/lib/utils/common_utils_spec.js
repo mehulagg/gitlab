@@ -220,6 +220,7 @@ describe('common_utils', () => {
     beforeEach(() => {
       elem = document.createElement('div');
       window.innerHeight = windowHeight;
+      window.mrTabs = { currentAction: 'show' };
       jest.spyOn($.fn, 'animate');
       jest.spyOn($.fn, 'offset').mockReturnValue({ top: elemTop });
     });
@@ -956,6 +957,25 @@ describe('common_utils', () => {
       expect(commonUtils.roundOffFloat(34567.14159, -3)).toBeCloseTo(35000);
       expect(commonUtils.roundOffFloat(34567.14159, -4)).toBeCloseTo(30000);
       expect(commonUtils.roundOffFloat(34567.14159, -5)).toBeCloseTo(0);
+    });
+  });
+
+  describe('roundDownFloat', () => {
+    it('Rounds down decimal places of a float number with provided precision', () => {
+      expect(commonUtils.roundDownFloat(3.141592, 3)).toBe(3.141);
+    });
+
+    it('Rounds down a float number to a whole number when provided precision is zero', () => {
+      expect(commonUtils.roundDownFloat(3.141592, 0)).toBe(3);
+      expect(commonUtils.roundDownFloat(3.9, 0)).toBe(3);
+    });
+
+    it('Rounds down float number to nearest 0, 10, 100, 1000 and so on when provided precision is below 0', () => {
+      expect(commonUtils.roundDownFloat(34567.14159, -1)).toBeCloseTo(34560);
+      expect(commonUtils.roundDownFloat(34567.14159, -2)).toBeCloseTo(34500);
+      expect(commonUtils.roundDownFloat(34567.14159, -3)).toBeCloseTo(34000);
+      expect(commonUtils.roundDownFloat(34567.14159, -4)).toBeCloseTo(30000);
+      expect(commonUtils.roundDownFloat(34567.14159, -5)).toBeCloseTo(0);
     });
   });
 

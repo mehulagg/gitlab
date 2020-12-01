@@ -1,12 +1,12 @@
 import {
+  PortMatchModeAny,
+  PortMatchModePortProtocol,
+} from 'ee/threat_monitoring/components/policy_editor/constants';
+import {
   labelSelector,
   portSelectors,
   splitItems,
 } from 'ee/threat_monitoring/components/policy_editor/lib/utils';
-import {
-  PortMatchModeAny,
-  PortMatchModePortProtocol,
-} from 'ee/threat_monitoring/components/policy_editor/constants';
 
 describe('labelSelector', () => {
   it('returns selector map', () => {

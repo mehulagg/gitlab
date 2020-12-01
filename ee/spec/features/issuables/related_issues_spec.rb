@@ -14,11 +14,39 @@ RSpec.describe 'Related issues', :js do
   let_it_be(:issue_project_b_a) { create(:issue, project: project_b) }
   let_it_be(:issue_project_unauthorized_a) { create(:issue, project: project_unauthorized) }
 
+  shared_examples 'issue closed by modal' do |selector|
+    it 'shows a modal to confirm closing the issue' do
+      # Workaround for modal not showing when issue is first added
+      visit project_issue_path(project, issue_a)
+
+      wait_for_requests
+
+      within(selector) do
+        click_button 'Close issue'
+      end
+
+      within('.modal-content', visible: true) do
+        expect(page).to have_text 'Are you sure you want to close this blocked issue?'
+        expect(page).to have_link("##{issue_b.iid}", href: project_issue_path(project, issue_b))
+
+        click_button 'Yes, close issue'
+      end
+
+      wait_for_requests
+
+      expect(page).not_to have_selector('.modal-content', visible: true)
+
+      within(first('.status-box', visible: :all)) do
+        expect(page).to have_text 'Closed'
+      end
+    end
+  end
+
   context 'when user has permission to manage related issues' do
     before do
       project.add_maintainer(user)
       project_b.add_maintainer(user)
-      gitlab_sign_in(user)
+      sign_in(user)
     end
 
     context 'with "Relates to", "Blocks", "Is blocked by" groupings' do
@@ -95,29 +123,12 @@ RSpec.describe 'Related issues', :js do
           expect(find('.js-related-issues-header-issue-count')).to have_content('1')
         end
 
-        it 'hides the modal when issue is closed' do
-          # Workaround for modal not showing when issue is first added
-          visit project_issue_path(project, issue_a)
-          wait_for_requests
+        context 'when clicking the top `Close issue` button in the issue header', :aggregate_failures do
+          it_behaves_like 'issue closed by modal', '.detail-page-header'
+        end
 
-          within('.new-note') do
-            button = find(:button, 'Close issue')
-            scroll_to(button)
-            button.click
-          end
-
-          click_button 'Yes, close issue'
-
-          wait_for_requests
-
-          find(:button, 'Yes, close issue', visible: false)
-
-          status_box = first('.status-box', visible: :all)
-          scroll_to(status_box)
-
-          within(status_box) do
-            expect(page).to have_content 'Closed'
-          end
+        context 'when clicking the bottom `Close issue` button below the comment textarea', :aggregate_failures do
+          it_behaves_like 'issue closed by modal', '.new-note'
         end
       end
 

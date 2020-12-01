@@ -2,7 +2,7 @@
 type: reference
 stage: Enablement
 group: Global Search
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Elasticsearch integration **(STARTER ONLY)**
@@ -23,8 +23,8 @@ and the advantage of the following special searches:
 
 | GitLab version                              | Elasticsearch version         |
 |---------------------------------------------|-------------------------------|
-| GitLab Enterprise Edition 13.6 or greater   | Elasticsearch 7.x (6.4 - 6.x deprecated to be removed in 13.8) |
-| GitLab Enterprise Edition 13.2 through 13.5 | Elasticsearch 6.4 through 7.x |
+| GitLab Enterprise Edition 13.9 or greater   | Elasticsearch 6.8 through 7.x |
+| GitLab Enterprise Edition 13.3 through 13.8 | Elasticsearch 6.4 through 7.x |
 | GitLab Enterprise Edition 12.7 through 13.2 | Elasticsearch 6.x through 7.x |
 | GitLab Enterprise Edition 11.5 through 12.6 | Elasticsearch 5.6 through 6.x |
 | GitLab Enterprise Edition 9.0 through 11.4  | Elasticsearch 5.1 through 5.5 |
@@ -58,7 +58,7 @@ A few notes on CPU and storage:
   see boosts in both query and indexing performance.
 
 Keep in mind, these are **minimum requirements** for Elasticsearch.
-Heavily-utilized Elasticsearch clusters will likely require considerably more
+Heavily-used Elasticsearch clusters will likely require considerably more
 resources.
 
 ## Installing Elasticsearch
@@ -82,6 +82,12 @@ replica.
 After the data is added to the database or repository and [Elasticsearch is
 enabled in the Admin Area](#enabling-advanced-search) the search index will be
 updated automatically.
+
+## Upgrading to a new Elasticsearch major version
+
+Since Elasticsearch can read and use indices created in the previous major version, you don't need to change anything in GitLab's configuration when upgrading Elasticsearch.
+
+The only thing worth noting is that if you have created your current index before GitLab 13.0, you might want to [reclaim the production index name](#reclaiming-the-gitlab-production-index-name) or reindex from scratch (which will implicitly create an alias). The latter might be faster depending on the GitLab instance size. Once you do that, you'll be able to perform zero-downtime reindexing and you will benefit from any future features that will make use of the alias.
 
 ## Elasticsearch repository indexer
 
@@ -435,6 +441,55 @@ After the reindexing is completed, the original index will be scheduled to be de
 
 While the reindexing is running, you will be able to follow its progress under that same section.
 
+## Background migrations
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/234046) in GitLab 13.6.
+
+With reindex migrations running in the background, there's no need for a manual
+intervention. This usually happens in situations where new features are added to
+Advanced Search, which means adding or changing the way content is indexed.
+
+To confirm that the background migrations ran, you can check with:
+
+```shell
+curl "$CLUSTER_URL/gitlab-production-migrations/_search?q=*" | jq .
+```
+
+This should return something similar to:
+
+```json
+{
+  "took": 14,
+  "timed_out": false,
+  "_shards": {
+    "total": 1,
+    "successful": 1,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": {
+      "value": 1,
+      "relation": "eq"
+    },
+    "max_score": 1,
+    "hits": [
+      {
+        "_index": "gitlab-production-migrations",
+        "_type": "_doc",
+        "_id": "20201105181100",
+        "_score": 1,
+        "_source": {
+          "completed": true
+        }
+      }
+    ]
+  }
+}
+```
+
+In order to debug issues with the migrations you can check the [`elasticsearch.log` file](../administration/logs.md#elasticsearchlog).
+
 ## GitLab Advanced Search Rake tasks
 
 Rake tasks are available to:
@@ -506,7 +561,7 @@ For basic guidance on choosing a cluster configuration you may refer to [Elastic
 - Generally, you will want to use at least a 2-node cluster configuration with one replica, which will allow you to have resilience. If your storage usage is growing quickly, you may want to plan horizontal scaling (adding more nodes) beforehand.
 - It's not recommended to use HDD storage with the search cluster, because it will take a hit on performance. It's better to use SSD storage (NVMe or SATA SSD drives for example).
 - You can use the [GitLab Performance Tool](https://gitlab.com/gitlab-org/quality/performance) to benchmark search performance with different search cluster sizes and configurations.
-- `Heap size` should be set to no more than 50% of your physical RAM. Additionally, it shouldn't be set to more than the threshold for zero-based compressed oops. The exact threshold varies, but 26 GB is safe on most systems, but can also be as large as 30 GB on some systems. See [Setting the heap size](https://www.elastic.co/guide/en/elasticsearch/reference/current/heap-size.html#heap-size) for more details.
+- `Heap size` should be set to no more than 50% of your physical RAM. Additionally, it shouldn't be set to more than the threshold for zero-based compressed oops. The exact threshold varies, but 26 GB is safe on most systems, but can also be as large as 30 GB on some systems. See [Heap size settings](https://www.elastic.co/guide/en/elasticsearch/reference/current/important-settings.html#heap-size-settings) and [Setting JVM options](https://www.elastic.co/guide/en/elasticsearch/reference/current/jvm-options.html) for more details.
 - Number of CPUs (CPU cores) per node usually corresponds to the `Number of Elasticsearch shards` setting described below.
 - A good guideline is to ensure you keep the number of shards per node below 20 per GB heap it has configured. A node with a 30GB heap should therefore have a maximum of 600 shards, but the further below this limit you can keep it the better. This will generally help the cluster stay in good health.
 - Small shards result in small segments, which increases overhead. Aim to keep the average shard size between at least a few GB and a few tens of GB. Another consideration is the number of documents, you should aim for this simple formula for the number of shards: `number of expected documents / 5M +1`.
@@ -712,6 +767,17 @@ However, some larger installations may wish to tune the merge policy settings:
 
 ## Troubleshooting
 
+One of the most valuable tools for identifying issues with the Elasticsearch
+integration will be logs. The most relevant logs for this integration are:
+
+1. [`sidekiq.log`](../administration/logs.md#sidekiqlog) - All of the
+   indexing happens in Sidekiq, so much of the relevant logs for the
+   Elasticsearch integration can be found in this file.
+1. [`elasticsearch.log`](../administration/logs.md#elasticsearchlog) - There
+   are additional logs specific to Elasticsearch that are sent to this file
+   that may contain useful diagnostic information about searching,
+   indexing or migrations.
+
 Here are some common pitfalls and how to overcome them.
 
 ### How can I verify that my GitLab instance is using Elasticsearch?
@@ -868,6 +934,13 @@ Gitlab::Elastic::Indexer::Error: time="2020-01-23T09:13:00Z" level=fatal msg="he
 
 You probably have not used either `http://` or `https://` as part of your value in the **"URL"** field of the Elasticsearch Integration Menu. Please make sure you are using either `http://` or `https://` in this field as the [Elasticsearch client for Go](https://github.com/olivere/elastic) that we are using [needs the prefix for the URL to be accepted as valid](https://github.com/olivere/elastic/commit/a80af35aa41856dc2c986204e2b64eab81ccac3a).
 Once you have corrected the formatting of the URL, delete the index (via the [dedicated Rake task](#gitlab-advanced-search-rake-tasks)) and [reindex the content of your instance](#enabling-advanced-search).
+
+### My Elasticsearch cluster has a plugin and the integration is not working
+
+Certain 3rd party plugins may introduce bugs in your cluster or for whatever
+reason may be incompatible with our integration. You should try disabling
+plugins so you can rule out the possibility that the plugin is causing the
+problem.
 
 ### Low-level troubleshooting
 

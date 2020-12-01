@@ -1,4 +1,3 @@
-import { buildRule, ruleSpec } from 'ee/threat_monitoring/components/policy_editor/lib/rules';
 import {
   RuleTypeEndpoint,
   RuleTypeEntity,
@@ -10,6 +9,7 @@ import {
   PortMatchModePortProtocol,
   EntityTypes,
 } from 'ee/threat_monitoring/components/policy_editor/constants';
+import { buildRule, ruleSpec } from 'ee/threat_monitoring/components/policy_editor/lib/rules';
 
 describe('buildRule', () => {
   const oldRule = {

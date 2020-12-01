@@ -2,7 +2,7 @@
 type: howto, reference
 stage: Manage
 group: Access
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # SCIM provisioning using SAML SSO for GitLab.com groups **(SILVER ONLY)**
@@ -121,8 +121,12 @@ Once synchronized, changing the field mapped to `id` and `externalId` may cause 
 
 ### Okta configuration steps
 
-The SAML application that was created during [Single sign-on](index.md#okta-setup-notes) setup for [Okta](https://developer.okta.com/docs/guides/build-sso-integration/saml2/overview/) now needs to be set up for SCIM.
-Before proceeding, be sure to complete the [GitLab configuration](#gitlab-configuration) process.
+Before you start this section, complete the [GitLab configuration](#gitlab-configuration) process.
+Make sure that you've also set up a SAML application for [Okta](https://developer.okta.com/docs/guides/build-sso-integration/saml2/overview/),
+as described in the [Okta setup notes](index.md#okta-setup-notes)
+
+Make sure that the Okta setup matches our documentation exactly, especially the NameID
+configuration. Otherwise, the Okta SCIM app may not work properly.
 
 1. Sign in to Okta.
 1. If you see an **Admin** button in the top right, click the button. This will
@@ -222,7 +226,7 @@ The **Identity** (`extern_uid`) value stored by GitLab is updated by SCIM whenev
 
 This value is also used by SCIM to match users on the `id`, and is updated by SCIM whenever the `id` or `externalId` values change.
 
-It is important that this SCIM `id` and SCIM `externalId` are configured to the same value as the SAML `NameId`. SAML responses can be traced using [debugging tools](./index.md#saml-debugging-tools), and any errors can be checked against our [SAML troubleshooting docs](./index.md#troubleshooting).
+It is important that this SCIM `id` and SCIM `externalId` are configured to the same value as the SAML `NameId`. SAML responses can be traced using [debugging tools](index.md#saml-debugging-tools), and any errors can be checked against our [SAML troubleshooting docs](index.md#troubleshooting).
 
 ### How do I verify user's SAML NameId matches the SCIM externalId
 
@@ -245,7 +249,7 @@ that provider may create duplicate users.
 If the `externalId` for a user is not correct, and also doesn't match the SAML NameID,
 you can address the problem in the following ways:
 
-- You can have users unlink and relink themselves, based on the ["SAML authentication failed: User has already been taken"](./index.md#message-saml-authentication-failed-user-has-already-been-taken) section.
+- You can have users unlink and relink themselves, based on the ["SAML authentication failed: User has already been taken"](index.md#message-saml-authentication-failed-user-has-already-been-taken) section.
 - You can unlink all users simultaneously, by removing all users from the SAML app while provisioning is turned on.
 - It may be possible to use the [SCIM API](../../../api/scim.md#update-a-single-saml-user) to manually correct the `externalId` stored for users to match the SAML `NameId`.
   To look up a user, you'll need to know the desired value that matches the `NameId` as well as the current `externalId`.
@@ -254,9 +258,18 @@ It is important not to update these to incorrect values, since this will cause u
 
 ### I need to change my SCIM app
 
-Individual users can follow the instructions in the ["SAML authentication failed: User has already been taken"](./index.md#i-need-to-change-my-saml-app) section.
+Individual users can follow the instructions in the ["SAML authentication failed: User has already been taken"](index.md#i-need-to-change-my-saml-app) section.
 
 Alternatively, users can be removed from the SCIM app which will delink all removed users. Sync can then be turned on for the new SCIM app to [link existing users](#user-access-and-linking-setup).
+
+### The SCIM app is throwing `"User has already been taken","status":409` error message
+
+Changing the SAML or SCIM configuration or provider can cause the following problems:
+
+| Problem                                                                      | Solution           |
+|------------------------------------------------------------------------------|--------------------|
+| SAML and SCIM identity mismatch. | First [verify that the user's SAML NameId matches the SCIM externalId](#how-do-i-verify-users-saml-nameid-matches-the-scim-externalid) and then [update or fix the mismatched SCIM externalId and SAML NameId](#update-or-fix-mismatched-scim-externalid-and-saml-nameid). |
+| SCIM identity mismatch between GitLab and the Identify Provider SCIM app. | You can confirm whether you're hitting the error because of your SCIM identity mismatch between your SCIM app and GitLab.com by using [SCIM API](../../../api/scim.md#update-a-single-saml-user) which shows up in the `id` key and compares it with the user `externalId` in the SCIM app. You can use the same [SCIM API](../../../api/scim.md#update-a-single-saml-user) to update the SCIM `id` for the user on GitLab.com. |
 
 ### Azure
 

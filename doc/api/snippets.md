@@ -1,7 +1,7 @@
 ---
 stage: Create
 group: Editor
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 type: reference, api
 ---
 
@@ -21,7 +21,7 @@ Valid values for snippet visibility levels are:
 | Visibility | Description                                         |
 |:-----------|:----------------------------------------------------|
 | `private`  | Snippet is visible only to the snippet creator.     |
-| `internal` | Snippet is visible for any logged in user.          |
+| `internal` | Snippet is visible for any logged in user except [external users](../user/permissions.md#external-users).          |
 | `public`   | Snippet can be accessed without any authentication. |
 
 ## List all snippets for a user

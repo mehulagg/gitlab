@@ -1,4 +1,7 @@
 ---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: index, reference
 ---
 
@@ -74,14 +77,14 @@ With the [Customers Portal](https://customers.gitlab.com/) you can:
 - [Change your payment method](#change-your-payment-method)
 - [Change the linked account](#change-the-linked-account)
 - [Change the associated namespace](#change-the-associated-namespace)
-- [Change customers portal account password](#change-customer-portal-account-password)
+- [Change customers portal account password](#change-customers-portal-account-password)
 
 ### Change your personal details
 
 Your personal details are used on invoices. Your email address is used for the Customers Portal
 login and license-related email.
 
-To change your personal details, including name and billing address:
+To change your personal details, including name, billing address, and email address:
 
 1. Log in to the [Customers Portal](https://customers.gitlab.com/customers/sign_in).
 1. Select **My account > Account details**.
@@ -149,9 +152,9 @@ With a linked GitLab.com account:
 1. Select the desired group from the **This subscription is for** dropdown.
 1. Click **Proceed to checkout**.
 
-Subscription charges are calculated based on the total number of users in a group, including its subgroups and nested projects. If the total number of users exceeds the number of seats in your subscription, you will be charged for the additional users.
+Subscription charges are calculated based on the total number of users in a group, including its subgroups and nested projects. If the total number of users exceeds the number of seats in your subscription, your account is charged for the additional users.
 
-### Change customer portal account password
+### Change Customers Portal account password
 
 To change the password for this customers portal account:
 

@@ -60,6 +60,7 @@ class Environment < ApplicationRecord
             addressable_url: true
 
   delegate :stop_action, :manual_actions, to: :last_deployment, allow_nil: true
+  delegate :auto_rollback_enabled?, to: :project
 
   scope :available, -> { with_state(:available) }
   scope :stopped, -> { with_state(:stopped) }
@@ -240,10 +241,6 @@ class Environment < ApplicationRecord
   def cancel_deployment_jobs!
     jobs = active_deployments.with_deployable
     jobs.each do |deployment|
-      # guard against data integrity issues,
-      # for example https://gitlab.com/gitlab-org/gitlab/-/issues/218659#note_348823660
-      next unless deployment.deployable
-
       Gitlab::OptimisticLocking.retry_lock(deployment.deployable) do |deployable|
         deployable.cancel! if deployable&.cancelable?
       end
@@ -303,6 +300,10 @@ class Environment < ApplicationRecord
 
   def has_opened_alert?
     latest_opened_most_severe_alert.present?
+  end
+
+  def has_running_deployments?
+    all_deployments.running.exists?
   end
 
   def metrics
@@ -383,7 +384,37 @@ class Environment < ApplicationRecord
     !!deployment_platform&.cluster&.application_elastic_stack_available?
   end
 
+  def rollout_status
+    return unless rollout_status_available?
+
+    result = rollout_status_with_reactive_cache
+
+    result || ::Gitlab::Kubernetes::RolloutStatus.loading
+  end
+
+  def ingresses
+    return unless rollout_status_available?
+
+    deployment_platform.ingresses(deployment_namespace)
+  end
+
+  def patch_ingress(ingress, data)
+    return unless rollout_status_available?
+
+    deployment_platform.patch_ingress(deployment_namespace, ingress, data)
+  end
+
   private
+
+  def rollout_status_available?
+    has_terminals?
+  end
+
+  def rollout_status_with_reactive_cache
+    with_reactive_cache do |data|
+      deployment_platform.rollout_status(self, data)
+    end
+  end
 
   def has_metrics_and_can_query?
     has_metrics? && prometheus_adapter.can_query?
@@ -395,7 +426,7 @@ class Environment < ApplicationRecord
 
   # Overrides ReactiveCaching default to activate limit checking behind a FF
   def reactive_cache_limit_enabled?
-    Feature.enabled?(:reactive_caching_limit_environment, project)
+    Feature.enabled?(:reactive_caching_limit_environment, project, default_enabled: true)
   end
 end
 

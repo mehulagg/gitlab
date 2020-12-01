@@ -1,7 +1,7 @@
 ---
-stage: none
-group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+stage: Enablement
+group: Geo
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Doctor Rake tasks **(CORE ONLY)**
@@ -21,7 +21,6 @@ Automatic resolution is not yet implemented. If you have values that
 cannot be decrypted, you can follow steps to reset them, see our
 docs on what to do [when the secrets file is lost](../../raketasks/backup_restore.md#when-the-secrets-file-is-lost).
 
-NOTE: **Note:**
 This can take a very long time, depending on the size of your
 database, as it checks all rows in all tables.
 

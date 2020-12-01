@@ -6,11 +6,6 @@ module EE
       extend ActiveSupport::Concern
       extend ::Gitlab::Utils::Override
 
-      EE_FAILURE_REASONS = {
-        activity_limit_exceeded: 20,
-        size_limit_exceeded: 21
-      }.freeze
-
       prepended do
         include UsageStatistics
 
@@ -23,6 +18,7 @@ module EE
         # Subscriptions to this pipeline
         has_many :downstream_bridges, class_name: '::Ci::Bridge', foreign_key: :upstream_pipeline_id
         has_many :security_scans, class_name: 'Security::Scan', through: :builds
+        has_many :security_findings, class_name: 'Security::Finding', through: :security_scans, source: :findings
 
         has_one :source_project, class_name: 'Ci::Sources::Project', foreign_key: :pipeline_id
 
@@ -173,6 +169,10 @@ module EE
 
       def can_store_security_reports?
         project.can_store_security_reports? && has_security_reports?
+      end
+
+      def has_security_findings?
+        security_findings.exists?
       end
 
       private

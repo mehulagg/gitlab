@@ -1,7 +1,7 @@
 ---
 stage: Verify
 group: Testing
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: tutorial
 ---
 
@@ -140,7 +140,7 @@ new browser window interacting with your app as you specified.
 Which brings us to the exciting part: how do we run this in GitLab CI/CD? There are two things we
 need to do for this:
 
-1. Set up [CI/CD jobs](../../yaml/README.md#introduction) that actually have a browser available.
+1. Set up [CI/CD jobs](../../yaml/README.md) that actually have a browser available.
 1. Update our WebdriverIO configuration to use those browsers to visit the review apps.
 
 For the scope of this article, we've defined an additional [CI/CD stage](../../yaml/README.md#stages)

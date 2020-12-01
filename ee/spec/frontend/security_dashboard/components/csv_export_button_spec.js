@@ -1,16 +1,16 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlLoadingIcon, GlIcon } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
-import { TEST_HOST } from 'helpers/test_constants';
-import { useFakeDate } from 'helpers/fake_date';
 import CsvExportButton, {
   STORAGE_KEY,
 } from 'ee/security_dashboard/components/csv_export_button.vue';
+import { useFakeDate } from 'helpers/fake_date';
+import { TEST_HOST } from 'helpers/test_constants';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
-import statusCodes from '~/lib/utils/http_status';
 import axios from '~/lib/utils/axios_utils';
-import downloader from '~/lib/utils/downloader';
 import { formatDate } from '~/lib/utils/datetime_utility';
+import downloader from '~/lib/utils/downloader';
+import statusCodes from '~/lib/utils/http_status';
 
 jest.mock('~/flash');
 jest.mock('~/lib/utils/downloader');

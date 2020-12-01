@@ -2,13 +2,12 @@ import { mount } from '@vue/test-utils';
 
 import { delay } from 'lodash';
 
-import createStore from 'ee/roadmap/store';
 import EpicItemComponent from 'ee/roadmap/components/epic_item.vue';
 import EpicItemContainer from 'ee/roadmap/components/epic_item_container.vue';
 
-import { getTimeframeForMonthsView } from 'ee/roadmap/utils/roadmap_utils';
-
 import { PRESET_TYPES } from 'ee/roadmap/constants';
+import createStore from 'ee/roadmap/store';
+import { getTimeframeForMonthsView } from 'ee/roadmap/utils/roadmap_utils';
 
 import {
   mockTimeframeInitialDate,

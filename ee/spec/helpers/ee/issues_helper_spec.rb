@@ -3,7 +3,8 @@
 require "spec_helper"
 
 RSpec.describe EE::IssuesHelper do
-  let(:project) { create(:project) }
+  let(:group) { create :group }
+  let(:project) { create :project, group: group }
   let(:issue) { create :issue, project: project }
 
   describe '#issue_closed_link' do
@@ -87,6 +88,38 @@ RSpec.describe EE::IssuesHelper do
 
         it { is_expected.to be_truthy }
       end
+    end
+  end
+
+  describe '#scoped_labels_available?' do
+    shared_examples 'without license' do
+      before do
+        stub_licensed_features(scoped_labels: false)
+      end
+
+      it { is_expected.to be_falsy }
+    end
+
+    shared_examples 'with license' do
+      before do
+        stub_licensed_features(scoped_labels: true)
+      end
+
+      it { is_expected.to be_truthy }
+    end
+
+    context 'project' do
+      subject { helper.scoped_labels_available?(project) }
+
+      it_behaves_like 'without license'
+      it_behaves_like 'with license'
+    end
+
+    context 'group' do
+      subject { helper.scoped_labels_available?(group) }
+
+      it_behaves_like 'without license'
+      it_behaves_like 'with license'
     end
   end
 end

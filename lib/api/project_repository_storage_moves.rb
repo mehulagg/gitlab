@@ -6,6 +6,8 @@ module API
 
     before { authenticated_as_admin! }
 
+    feature_category :gitaly
+
     resource :project_repository_storage_moves do
       desc 'Get a list of all project repository storage moves' do
         detail 'This feature was introduced in GitLab 13.0.'
@@ -31,6 +33,22 @@ module API
         storage_move = ProjectRepositoryStorageMove.find(params[:repository_storage_move_id])
 
         present storage_move, with: Entities::ProjectRepositoryStorageMove, current_user: current_user
+      end
+
+      desc 'Schedule bulk project repository storage moves' do
+        detail 'This feature was introduced in GitLab 13.7.'
+      end
+      params do
+        requires :source_storage_name, type: String, desc: 'The source storage shard', values: -> { Gitlab.config.repositories.storages.keys }
+        optional :destination_storage_name, type: String, desc: 'The destination storage shard', values: -> { Gitlab.config.repositories.storages.keys }
+      end
+      post do
+        ::Projects::ScheduleBulkRepositoryShardMovesService.enqueue(
+          declared_params[:source_storage_name],
+          declared_params[:destination_storage_name]
+        )
+
+        accepted!
       end
     end
 

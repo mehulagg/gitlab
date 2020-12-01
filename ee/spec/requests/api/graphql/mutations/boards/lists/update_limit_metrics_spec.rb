@@ -9,6 +9,8 @@ RSpec.describe 'Update list limit metrics' do
   let_it_be(:board) { create(:board, group: group) }
   let_it_be(:user)  { create(:user) }
   let_it_be(:list)  { create(:list, board: board) }
+  let_it_be(:forbidden_user) { create(:user) }
+  let(:current_user) { user }
 
   let(:mutation_class) { Mutations::Boards::Lists::UpdateLimitMetrics }
   let(:mutation_name) { mutation_class.graphql_name }
@@ -18,39 +20,48 @@ RSpec.describe 'Update list limit metrics' do
     group.add_maintainer(user)
   end
 
-  it 'returns an error if the user is not allowed to update the issue' do
-    post_graphql_mutation(mutation('all_metrics'), current_user: create(:user))
+  context 'the current_user is not allowed to update the issue' do
+    let(:current_user) { forbidden_user }
 
-    expect(graphql_errors).to include(a_hash_including('message' => "The resource that you are attempting to access does " \
-     "not exist or you don't have permission to perform this action"))
+    it 'returns an error' do
+      perform_mutation(build_mutation('all_metrics'))
+
+      expect(graphql_errors).to include(a_hash_including('message' => "The resource that you are attempting to access does " \
+       "not exist or you don't have permission to perform this action"))
+    end
   end
 
   it 'returns an error if the list cannot be found' do
-    list_gid = ::URI::GID.parse("gid://#{GlobalID.app}/List/0")
+    list_gid = GlobalID.new(::Gitlab::GlobalId.build(model_name: 'List', id: 0))
 
-    post_graphql_mutation(mutation('all_metrics', list_id: list_gid), current_user: create(:user))
+    perform_mutation(build_mutation('all_metrics', list_id: list_gid.to_s))
 
     expect(graphql_errors).to include(a_hash_including('message' => "The resource that you are attempting to access does " \
      "not exist or you don't have permission to perform this action"))
   end
 
-  it 'returns an error if the gid identifies another object' do
-    post_graphql_mutation(mutation('all_metrics', list_id: user.to_global_id.to_s), current_user: create(:user))
+  context 'the list_id is not a valid ListID' do
+    let(:mutation) { build_mutation('all_metrics', list_id: user.to_global_id.to_s) }
 
-    expect(graphql_errors).to include(a_hash_including('message' => /"#{GitlabSchema.id_from_object(user)}" does not represent an instance of List/))
+    it_behaves_like 'an invalid argument to the mutation', argument_name: :list_id
   end
 
   %w[all_metrics issue_count issue_weights].each do |metric|
     it "updates the list limit metrics for limit metric #{metric}" do
-      post_graphql_mutation(mutation(metric), current_user: user)
+      perform_mutation(build_mutation(metric))
 
       expect(response).to have_gitlab_http_status(:success)
 
-      response_list = json_response['data'][mutation_result_identifier]['list']
-      expect(response_list['id']).to eq(list.to_global_id.to_s)
-      expect(response_list['limitMetric']).to eq(metric.to_s)
-      expect(response_list['maxIssueCount']).to eq(3)
-      expect(response_list['maxIssueWeight']).to eq(42)
+      expect(graphql_data).to include(
+        mutation_result_identifier => include(
+          'list' => include(
+            'id' => eq(list.to_global_id.to_s),
+            'limitMetric' => eq(metric.to_s),
+            'maxIssueCount' => eq(3),
+            'maxIssueWeight' => eq(42)
+          )
+        )
+      )
 
       expect_list_update(list, metric: metric, count: 3, weight: 42)
     end
@@ -65,7 +76,11 @@ RSpec.describe 'Update list limit metrics' do
     }
   end
 
-  def mutation(metric, additional_params = {})
+  def perform_mutation(mutation)
+    post_graphql_mutation(mutation, current_user: current_user)
+  end
+
+  def build_mutation(metric, additional_params = {})
     graphql_mutation(mutation_name, list_update_params(metric).merge(additional_params),
                      <<-QL.strip_heredoc
                        clientMutationId

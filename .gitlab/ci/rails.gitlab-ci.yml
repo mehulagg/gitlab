@@ -21,6 +21,7 @@
     RUBY_GC_MALLOC_LIMIT: 67108864
     RUBY_GC_MALLOC_LIMIT_MAX: 134217728
     CRYSTALBALL: "true"
+    RECORD_DEPRECATIONS: "true"
   needs: ["setup-test-env", "retrieve-tests-metadata", "compile-test-assets"]
   script:
     - *base-script
@@ -31,6 +32,7 @@
     paths:
       - coverage/
       - crystalball/
+      - deprecations/
       - knapsack/
       - rspec_flaky/
       - rspec_profiling/
@@ -183,7 +185,6 @@ update-coverage-cache:
     - .shared:rules:update-cache
   stage: prepare
   script:
-    - run_timed_command "gem install bundler -v 1.17.3"
     - run_timed_command "bundle install --jobs=$(nproc) --path=vendor --retry=3 --quiet --without default development test production puma unicorn kerberos metrics omnibus ed25519"
   cache:
     policy: push  # We want to rebuild the cache from scratch to ensure stale dependencies are cleaned up.
@@ -289,6 +290,7 @@ db:migrate-from-v12.10.0:
     - git checkout -f FETCH_HEAD
     - sed -i -e "s/gem 'grpc', '~> 1.24.0'/gem 'grpc', '~> 1.30.2'/" Gemfile  # Update gRPC for Ruby 2.7
     - sed -i -e "s/gem 'google-protobuf', '~> 3.8.0'/gem 'google-protobuf', '~> 3.12.0'/" Gemfile
+    - gem install bundler:1.17.3
     - bundle update google-protobuf grpc bootsnap
     - bundle install $BUNDLE_INSTALL_FLAGS
     - date
@@ -363,7 +365,6 @@ rspec:coverage:
     - memory-static
     - memory-on-boot
   script:
-    - run_timed_command "gem install bundler -v 1.17.3"
     - run_timed_command "bundle install --jobs=$(nproc) --path=vendor --retry=3 --quiet --without default development test production puma unicorn kerberos metrics omnibus ed25519"
     - run_timed_command "bundle exec scripts/merge-simplecov"
     - run_timed_command "bundle exec scripts/gather-test-memory-data"
@@ -383,6 +384,7 @@ rspec:feature-flags:
     - .coverage-base
     - .rails:rules:rspec-feature-flags
   stage: post-test
+  allow_failure: true
   # We cannot use needs since it would mean needing 84 jobs (since most are parallelized)
   # so we use `dependencies` here.
   dependencies:
@@ -401,9 +403,9 @@ rspec:feature-flags:
     - memory-static
     - memory-on-boot
   script:
-    - run_timed_command "gem install bundler -v 1.17.3"
     - run_timed_command "bundle install --jobs=$(nproc) --path=vendor --retry=3 --quiet --without default development test production puma unicorn kerberos metrics omnibus ed25519"
-    - run_timed_command "bundle exec scripts/used-feature-flags"
+    - 'run_timed_command "bundle exec scripts/used-feature-flags" || (scripts/slack master-broken "☠️ \`${CI_JOB_NAME}\` failed! ☠️ See ${CI_JOB_URL}" ci_failing "GitLab Bot" && exit 1)'
+
 # EE/FOSS: default refs (MRs, master, schedules) jobs #
 #######################################################
 

@@ -1,7 +1,7 @@
 ---
 stage: Verify
 group: Continuous Integration
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference
 ---
 
@@ -225,7 +225,7 @@ should disable **Pipelines must succeed** so you can accept merge requests.
 
 Pipeline configuration warnings are shown when you:
 
-- [Validate configuration with the CI Lint tool](yaml/README.md#validate-the-gitlab-ciyml).
+- [Validate configuration with the CI Lint tool](yaml/README.md).
 - [Manually run a pipeline](pipelines/index.md#run-a-pipeline-manually).
 
 ### "Job may allow multiple pipelines to run for a single action" warning

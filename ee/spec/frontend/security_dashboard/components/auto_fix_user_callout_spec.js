@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlBanner } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import AutoFixUserCallout from 'ee/security_dashboard/components/auto_fix_user_callout.vue';
 
 describe('AutoFixUserCallout', () => {

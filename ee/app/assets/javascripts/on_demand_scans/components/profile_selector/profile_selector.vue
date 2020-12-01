@@ -25,14 +25,14 @@ export default {
       default: () => [],
     },
     value: {
-      type: String,
+      type: Object,
       required: false,
       default: null,
     },
   },
-  computed: {
-    selectedProfile() {
-      return this.value ? this.profiles.find(({ id }) => this.value === id) : null;
+  methods: {
+    isChecked({ id }) {
+      return this.value?.id === id;
     },
   },
 };
@@ -67,9 +67,7 @@ export default {
       </template>
       <gl-dropdown
         :text="
-          selectedProfile
-            ? selectedProfile.dropdownLabel
-            : s__('OnDemandScans|Select one of the existing profiles')
+          value ? value.dropdownLabel : s__('OnDemandScans|Select one of the existing profiles')
         "
         class="mw-460"
         data-testid="profiles-dropdown"
@@ -77,19 +75,19 @@ export default {
         <gl-dropdown-item
           v-for="profile in profiles"
           :key="profile.id"
-          :is-checked="value === profile.id"
+          :is-checked="isChecked(profile)"
           is-check-item
-          @click="$emit('input', profile.id)"
+          @click="$emit('input', profile)"
         >
           {{ profile.profileName }}
         </gl-dropdown-item>
       </gl-dropdown>
       <div
-        v-if="selectedProfile && $scopedSlots.summary"
+        v-if="value && $scopedSlots.summary"
         data-testid="selected-profile-summary"
         class="gl-mt-6 gl-pt-6 gl-border-t-solid gl-border-gray-100 gl-border-t-1"
       >
-        <slot name="summary" :profile="selectedProfile"></slot>
+        <slot name="summary" :profile="value"></slot>
       </div>
     </gl-form-group>
     <template v-else>

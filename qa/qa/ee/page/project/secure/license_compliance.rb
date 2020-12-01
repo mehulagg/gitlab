@@ -28,7 +28,7 @@ module QA
             def approve_license(license)
               click_element :license_add_button
               expand_select_list
-              search_and_select license
+              search_and_select_exact license
               click_element :approved_license_radio
               click_element :add_license_submit_button
 
@@ -36,6 +36,7 @@ module QA
             end
 
             def has_approved_license?(name)
+              has_element?(:admin_license_compliance_row, text: name)
               within_element(:admin_license_compliance_row, text: name) do
                 has_element?(:status_success_icon)
               end
@@ -44,7 +45,7 @@ module QA
             def deny_license(license)
               click_element :license_add_button
               expand_select_list
-              search_and_select license
+              search_and_select_exact license
               click_element :blacklisted_license_radio
               click_element :add_license_submit_button
 
@@ -52,6 +53,7 @@ module QA
             end
 
             def has_denied_license?(name)
+              has_element?(:admin_license_compliance_row, text: name)
               within_element(:admin_license_compliance_row, text: name) do
                 has_element?(:status_failed_icon)
               end

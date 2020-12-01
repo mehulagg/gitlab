@@ -1,5 +1,5 @@
-import Vuex from 'vuex';
 import { mount, createLocalVue } from '@vue/test-utils';
+import Vuex from 'vuex';
 
 import SidebarLabels from 'ee/epic/components/sidebar_items/sidebar_labels.vue';
 import createStore from 'ee/epic/store';
@@ -22,6 +22,7 @@ describe('SidebarLabelsComponent', () => {
       propsData: { canUpdate: false, sidebarCollapsed: false },
       store,
       stubs: {
+        LabelsSelectVue: true,
         GlLabel: true,
       },
     });

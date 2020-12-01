@@ -43,7 +43,7 @@ module QualityManagement
       end
 
       def can_create_test_cases?
-        project.feature_available?(:quality_management) && Feature.enabled?(:quality_test_cases, project)
+        project.feature_available?(:quality_management) && Feature.enabled?(:quality_test_cases, project, default_enabled: true)
       end
     end
   end

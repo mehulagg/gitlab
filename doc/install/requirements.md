@@ -1,7 +1,7 @@
 ---
 stage: Enablement
 group: Distribution
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference
 ---
 
@@ -45,7 +45,13 @@ Please consider using a virtual machine to run GitLab.
 
 ### Ruby versions
 
-GitLab requires Ruby (MRI) 2.6. Beginning in GitLab 12.2, we no longer support Ruby 2.5 and lower.
+From GitLab 13.6:
+
+- Ruby 2.7 and later is required.
+
+From GitLab 12.2:
+
+- Ruby 2.6 and later is required.
 
 You must use the standard MRI implementation of Ruby.
 We love [JRuby](https://www.jruby.org/) and [Rubinius](https://github.com/rubinius/rubinius#the-rubinius-language-platform), but GitLab
@@ -56,6 +62,10 @@ needs several Gems that have native extensions.
 The minimum required Go version is 1.13.
 
 ### Git versions
+
+From GitLab 13.6:
+
+- Git 2.29.x and later is required.
 
 From GitLab 13.1:
 
@@ -216,8 +226,8 @@ Redis stores all user sessions and the background task queue.
 The storage requirements for Redis are minimal, about 25kB per user.
 Sidekiq processes the background jobs with a multithreaded process.
 This process starts with the entire Rails stack (200MB+) but it can grow over time due to memory leaks.
-On a very active server (10,000 active users) the Sidekiq process can use 1GB+ of memory.
-
+On a very active server (10,000 billable users) the Sidekiq process can use 1GB+ of memory.
+                                    
 ## Prometheus and its exporters
 
 As of Omnibus GitLab 9.0, [Prometheus](https://prometheus.io) and its related

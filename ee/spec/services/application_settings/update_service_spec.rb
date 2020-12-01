@@ -164,5 +164,71 @@ RSpec.describe ApplicationSettings::UpdateService do
         end
       end
     end
+
+    context 'user cap setting' do
+      shared_examples 'worker is not called' do
+        it 'does not call ApproveBlockedUsersWorker' do
+          expect(ApproveBlockedUsersWorker).not_to receive(:perform_async)
+
+          service.execute
+        end
+      end
+
+      shared_examples 'worker is called' do
+        it 'calls ApproveBlockedUsersWorker' do
+          expect(ApproveBlockedUsersWorker).to receive(:perform_async)
+
+          service.execute
+        end
+      end
+
+      context 'when new user cap is set to nil' do
+        context 'when changing new user cap to any number' do
+          let(:opts) { { new_user_signups_cap: 10 } }
+
+          include_examples 'worker is not called'
+        end
+
+        context 'when leaving new user cap set to nil' do
+          let(:opts) { { new_user_signups_cap: nil } }
+
+          include_examples 'worker is not called'
+        end
+      end
+
+      context 'when new user cap is set to a number' do
+        let(:setting) do
+          build(:application_setting, new_user_signups_cap: 10)
+        end
+
+        context 'when decreasing new user cap' do
+          let(:opts) { { new_user_signups_cap: 8 } }
+
+          include_examples 'worker is not called'
+        end
+
+        context 'when increasing new user cap' do
+          let(:opts) { { new_user_signups_cap: 15 } }
+
+          include_examples 'worker is called'
+        end
+
+        context 'when changing user cap to nil' do
+          let(:opts) { { new_user_signups_cap: nil } }
+
+          include_examples 'worker is called'
+        end
+      end
+
+      context 'when feature is disabled' do
+        let(:opts) { { new_user_signups_cap: 10 } }
+
+        before do
+          stub_feature_flags(admin_new_user_signups_cap: false)
+        end
+
+        include_examples 'worker is not called'
+      end
+    end
   end
 end

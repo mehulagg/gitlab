@@ -1,13 +1,13 @@
-import merge from 'lodash/merge';
+import { GlAlert, GlForm, GlModal } from '@gitlab/ui';
 import { within } from '@testing-library/dom';
 import { mount, shallowMount } from '@vue/test-utils';
-import { GlAlert, GlForm, GlModal } from '@gitlab/ui';
-import { TEST_HOST } from 'helpers/test_constants';
+import merge from 'lodash/merge';
 import DastScannerProfileForm from 'ee/security_configuration/dast_scanner_profiles/components/dast_scanner_profile_form.vue';
+import { SCAN_TYPE } from 'ee/security_configuration/dast_scanner_profiles/constants';
 import dastScannerProfileCreateMutation from 'ee/security_configuration/dast_scanner_profiles/graphql/dast_scanner_profile_create.mutation.graphql';
 import dastScannerProfileUpdateMutation from 'ee/security_configuration/dast_scanner_profiles/graphql/dast_scanner_profile_update.mutation.graphql';
-import { SCAN_TYPE } from 'ee/security_configuration/dast_scanner_profiles/constants';
 import { scannerProfiles } from 'ee_jest/on_demand_scans/mock_data';
+import { TEST_HOST } from 'helpers/test_constants';
 import { redirectTo } from '~/lib/utils/url_utility';
 
 jest.mock('~/lib/utils/url_utility', () => ({

@@ -61,8 +61,7 @@ class ApplicationController < ActionController::Base
     :gitea_import_enabled?, :github_import_configured?,
     :gitlab_import_enabled?, :gitlab_import_configured?,
     :bitbucket_import_enabled?, :bitbucket_import_configured?,
-    :bitbucket_server_import_enabled?,
-    :google_code_import_enabled?, :fogbugz_import_enabled?,
+    :bitbucket_server_import_enabled?, :fogbugz_import_enabled?,
     :git_import_enabled?, :gitlab_project_import_enabled?,
     :manifest_import_enabled?, :phabricator_import_enabled?
 
@@ -266,6 +265,12 @@ class ApplicationController < ActionController::Base
     end
   end
 
+  def stream_headers
+    headers['Content-Length'] = nil
+    headers['X-Accel-Buffering'] = 'no' # Disable buffering on Nginx
+    headers['Last-Modified'] = '0' # Prevent buffering via Rack::ETag middleware
+  end
+
   def default_headers
     headers['X-Frame-Options'] = 'DENY'
     headers['X-XSS-Protection'] = '1; mode=block'
@@ -426,10 +431,6 @@ class ApplicationController < ActionController::Base
 
   def bitbucket_import_configured?
     Gitlab::Auth::OAuth::Provider.enabled?(:bitbucket)
-  end
-
-  def google_code_import_enabled?
-    Gitlab::CurrentSettings.import_sources.include?('google_code')
   end
 
   def fogbugz_import_enabled?

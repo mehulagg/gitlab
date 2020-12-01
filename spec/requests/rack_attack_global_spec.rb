@@ -106,10 +106,21 @@ RSpec.describe 'Rack Attack global throttles' do
         let(:request_jobs_url) { '/api/v4/jobs/request' }
         let(:runner) { create(:ci_runner) }
 
-        it 'does not cont as unauthenticated' do
+        it 'does not count as unauthenticated' do
           (1 + requests_per_period).times do
             post request_jobs_url, params: { token: runner.token }
             expect(response).to have_gitlab_http_status(:no_content)
+          end
+        end
+      end
+
+      context 'when the request is to a health endpoint' do
+        let(:health_endpoint) { '/-/metrics' }
+
+        it 'does not throttle the requests' do
+          (1 + requests_per_period).times do
+            get health_endpoint
+            expect(response).to have_gitlab_http_status(:ok)
           end
         end
       end
@@ -125,12 +136,21 @@ RSpec.describe 'Rack Attack global throttles' do
           env: :throttle,
           remote_ip: '127.0.0.1',
           request_method: 'GET',
-          path: '/users/sign_in'
+          path: '/users/sign_in',
+          matched: 'throttle_unauthenticated'
         }
 
         expect(Gitlab::AuthLogger).to receive(:error).with(arguments)
 
         get url_that_does_not_require_authentication
+      end
+
+      it_behaves_like 'tracking when dry-run mode is set' do
+        let(:throttle_name) { 'throttle_unauthenticated' }
+
+        def do_request
+          get url_that_does_not_require_authentication
+        end
       end
     end
 
@@ -230,6 +250,10 @@ RSpec.describe 'Rack Attack global throttles' do
 
       let(:post_params) { { user: { login: 'username', password: 'password' } } }
 
+      def do_request
+        post protected_path_that_does_not_require_authentication, params: post_params
+      end
+
       before do
         settings_to_set[:throttle_protected_paths_requests_per_period] = requests_per_period # 1
         settings_to_set[:throttle_protected_paths_period_in_seconds] = period_in_seconds # 10_000
@@ -243,7 +267,7 @@ RSpec.describe 'Rack Attack global throttles' do
 
         it 'allows requests over the rate limit' do
           (1 + requests_per_period).times do
-            post protected_path_that_does_not_require_authentication, params: post_params
+            do_request
             expect(response).to have_gitlab_http_status(:ok)
           end
         end
@@ -257,11 +281,15 @@ RSpec.describe 'Rack Attack global throttles' do
 
         it 'rejects requests over the rate limit' do
           requests_per_period.times do
-            post protected_path_that_does_not_require_authentication, params: post_params
+            do_request
             expect(response).to have_gitlab_http_status(:ok)
           end
 
           expect_rejection { post protected_path_that_does_not_require_authentication, params: post_params }
+        end
+
+        it_behaves_like 'tracking when dry-run mode is set' do
+          let(:throttle_name) { 'throttle_unauthenticated_protected_paths' }
         end
       end
     end
@@ -317,6 +345,64 @@ RSpec.describe 'Rack Attack global throttles' do
       end
 
       it_behaves_like 'rate-limited web authenticated requests'
+    end
+  end
+
+  describe 'throttle bypass header' do
+    let(:headers) { {} }
+    let(:bypass_header) { 'gitlab-bypass-rate-limiting' }
+
+    def do_request
+      get '/users/sign_in', headers: headers
+    end
+
+    before do
+      # Disabling protected paths throttle, otherwise requests to
+      # '/users/sign_in' are caught by this throttle.
+      settings_to_set[:throttle_protected_paths_enabled] = false
+
+      # Set low limits
+      settings_to_set[:throttle_unauthenticated_requests_per_period] = requests_per_period
+      settings_to_set[:throttle_unauthenticated_period_in_seconds] = period_in_seconds
+
+      stub_env('GITLAB_THROTTLE_BYPASS_HEADER', bypass_header)
+      settings_to_set[:throttle_unauthenticated_enabled] = true
+
+      stub_application_setting(settings_to_set)
+    end
+
+    shared_examples 'reject requests over the rate limit' do
+      it 'rejects requests over the rate limit' do
+        # At first, allow requests under the rate limit.
+        requests_per_period.times do
+          do_request
+          expect(response).to have_gitlab_http_status(:ok)
+        end
+
+        # the last straw
+        expect_rejection { do_request }
+      end
+    end
+
+    context 'without the bypass header set' do
+      it_behaves_like 'reject requests over the rate limit'
+    end
+
+    context 'with bypass header set to 1' do
+      let(:headers) { { bypass_header => '1' } }
+
+      it 'does not throttle' do
+        (1 + requests_per_period).times do
+          do_request
+          expect(response).to have_gitlab_http_status(:ok)
+        end
+      end
+    end
+
+    context 'with bypass header set to some other value' do
+      let(:headers) { { bypass_header => 'some other value' } }
+
+      it_behaves_like 'reject requests over the rate limit'
     end
   end
 end

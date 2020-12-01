@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlPopover } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import GeoNodeSyncProgress from 'ee/geo_nodes/components/geo_node_sync_progress.vue';
 import StackedProgressBar from '~/vue_shared/components/stacked_progress_bar.vue';
 

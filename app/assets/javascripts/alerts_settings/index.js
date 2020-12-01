@@ -1,10 +1,15 @@
 import Vue from 'vue';
-import VueApollo from 'vue-apollo';
-import createDefaultClient from '~/lib/graphql';
+import { GlToast } from '@gitlab/ui';
 import { parseBoolean } from '~/lib/utils/common_utils';
 import AlertSettingsWrapper from './components/alerts_settings_wrapper.vue';
+import apolloProvider from './graphql';
 
-Vue.use(VueApollo);
+apolloProvider.clients.defaultClient.cache.writeData({
+  data: {
+    currentIntegration: null,
+  },
+});
+Vue.use(GlToast);
 
 export default el => {
   if (!el) {
@@ -29,28 +34,16 @@ export default el => {
     opsgenieMvcEnabled,
     opsgenieMvcTargetUrl,
     projectPath,
+    multiIntegrations,
   } = el.dataset;
-
-  const apolloProvider = new VueApollo({
-    defaultClient: createDefaultClient(
-      {},
-      {
-        cacheConfig: {},
-      },
-    ),
-  });
-
-  apolloProvider.clients.defaultClient.cache.writeData({
-    data: {},
-  });
 
   return new Vue({
     el,
     provide: {
       prometheus: {
-        activated: parseBoolean(prometheusActivated),
-        prometheusUrl,
-        authorizationKey: prometheusAuthorizationKey,
+        active: parseBoolean(prometheusActivated),
+        url: prometheusUrl,
+        token: prometheusAuthorizationKey,
         prometheusFormPath,
         prometheusResetKeyPath,
         prometheusApiUrl,
@@ -58,18 +51,19 @@ export default el => {
       generic: {
         alertsSetupUrl,
         alertsUsageUrl,
-        activated: parseBoolean(activatedStr),
+        active: parseBoolean(activatedStr),
         formPath,
-        authorizationKey,
+        token: authorizationKey,
         url,
       },
       opsgenie: {
         formPath: opsgenieMvcFormPath,
-        activated: parseBoolean(opsgenieMvcEnabled),
+        active: parseBoolean(opsgenieMvcEnabled),
         opsgenieMvcTargetUrl,
         opsgenieMvcIsAvailable: parseBoolean(opsgenieMvcAvailable),
       },
       projectPath,
+      multiIntegrations: parseBoolean(multiIntegrations),
     },
     apolloProvider,
     components: {

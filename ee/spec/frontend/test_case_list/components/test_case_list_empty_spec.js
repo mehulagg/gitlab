@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlEmptyState, GlSprintf, GlButton } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 
 import TestCaseListEmptyState from 'ee/test_case_list/components/test_case_list_empty_state.vue';
 

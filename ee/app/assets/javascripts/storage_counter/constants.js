@@ -11,3 +11,10 @@ export const STORAGE_USAGE_THRESHOLDS = {
   [ALERT_THRESHOLD]: 0.95,
   [ERROR_THRESHOLD]: 1.0,
 };
+
+export const PROJECTS_PER_PAGE = 20;
+
+export const SKELETON_LOADER_ROWS = {
+  desktop: PROJECTS_PER_PAGE,
+  mobile: 5,
+};

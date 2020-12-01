@@ -25,6 +25,15 @@ export const epicTokenKey = {
   icon: 'epic',
 };
 
+export const iterationTokenKey = {
+  formattedKey: __('Iteration'),
+  key: 'iteration',
+  type: 'string',
+  param: 'title',
+  symbol: '',
+  icon: 'iteration',
+};
+
 export const weightConditions = [
   {
     url: 'weight=None',
@@ -79,15 +88,34 @@ export const epicConditions = [
   },
 ];
 
+export const iterationConditions = [
+  {
+    url: 'iteration_id=None',
+    operator: '=',
+    tokenKey: 'iteration',
+    value: __('None'),
+  },
+  {
+    url: 'iteration_id=Any',
+    operator: '=',
+    tokenKey: 'iteration',
+    value: __('Any'),
+  },
+];
+
 /**
  * Filter tokens for issues in EE.
  */
 class IssuesFilteredSearchTokenKeysEE extends FilteredSearchTokenKeys {
   constructor() {
+    const milestoneTokenKeyIndex = tokenKeys.findIndex(tk => tk.key === 'milestone');
+    tokenKeys.splice(milestoneTokenKeyIndex + 1, 0, iterationTokenKey);
+
     super([...tokenKeys, epicTokenKey, weightTokenKey], alternativeTokenKeys, [
       ...conditions,
       ...weightConditions,
       ...epicConditions,
+      ...iterationConditions,
     ]);
   }
 
@@ -105,7 +133,15 @@ class IssuesFilteredSearchTokenKeysEE extends FilteredSearchTokenKeys {
   }
 
   removeEpicToken() {
-    const index = this.tokenKeys.findIndex(token => token.key === epicTokenKey.key);
+    this.removeToken(epicTokenKey);
+  }
+
+  removeIterationToken() {
+    this.removeToken(iterationTokenKey);
+  }
+
+  removeToken(tokenKey) {
+    const index = this.tokenKeys.findIndex(token => token.key === tokenKey.key);
     if (index >= 0) {
       this.tokenKeys.splice(index, 1);
     }

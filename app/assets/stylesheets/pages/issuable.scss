@@ -1,16 +1,12 @@
 .issuable-warning-icon {
   background-color: $orange-50;
   border-radius: $border-radius-default;
+  color: $orange-600;
   width: $issuable-warning-size;
   height: $issuable-warning-size;
   text-align: center;
   margin-right: $issuable-warning-icon-margin;
   line-height: $gl-line-height-24;
-
-  .icon {
-    fill: $orange-600;
-    vertical-align: text-bottom;
-  }
 }
 
 .limit-container-width {
@@ -201,10 +197,6 @@
 
     &:last-child {
       border: 0;
-    }
-
-    .select2-container span {
-      margin-top: 0;
     }
 
     &.assignee {
@@ -701,10 +693,6 @@
 
 .issuable-list {
   li {
-    .issue-box {
-      display: flex;
-    }
-
     .issuable-info-container {
       flex: 1;
       display: flex;
@@ -918,6 +906,25 @@
 
   .dropdown-toggle > .icon {
     margin: 0 3px;
+  }
+}
+
+/*
+ * Following overrides are done to prevent
+ * legacy dropdown styles from influencing
+ * GitLab UI components used within GlDropdown
+ */
+.issuable-move-dropdown {
+  .b-dropdown-form {
+    @include gl-p-0;
+  }
+
+  .gl-search-box-by-type button.gl-clear-icon-button:hover {
+    @include gl-bg-transparent;
+  }
+
+  .issuable-move-button:not(.disabled):hover {
+    @include gl-text-white;
   }
 }
 

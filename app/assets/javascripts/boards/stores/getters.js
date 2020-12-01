@@ -3,24 +3,23 @@ import { inactiveId } from '../constants';
 
 export default {
   isSidebarOpen: state => state.activeId !== inactiveId,
-  isSwimlanesOn: state => {
-    if (!gon?.features?.boardsWithSwimlanes && !gon?.features?.swimlanes) {
-      return false;
-    }
-
-    return state.isShowingEpicsSwimlanes;
-  },
+  isSwimlanesOn: () => false,
   getIssueById: state => id => {
     return state.issues[id] || {};
   },
 
-  getIssues: (state, getters) => listId => {
+  getIssuesByList: (state, getters) => listId => {
     const listIssueIds = state.issuesByListId[listId] || [];
     return listIssueIds.map(id => getters.getIssueById(id));
   },
 
-  getActiveIssue: state => {
+  activeIssue: state => {
     return state.issues[state.activeId] || {};
+  },
+
+  projectPathForActiveIssue: (_, getters) => {
+    const referencePath = getters.activeIssue.referencePath || '';
+    return referencePath.slice(0, referencePath.indexOf('#'));
   },
 
   getListByLabelId: state => labelId => {

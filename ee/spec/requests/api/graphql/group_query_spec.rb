@@ -233,6 +233,122 @@ RSpec.describe 'getting group information' do
         current_user: user
       )
     end
+
+    context 'when loading release statistics' do
+      let_it_be(:guest_user) { create(:user) }
+      let_it_be(:public_user) { create(:user) }
+
+      let(:query_fields) do
+        <<~QUERY
+        stats {
+          releaseStats {
+            releasesCount
+            releasesPercentage
+          }
+        }
+        QUERY
+      end
+
+      let(:group_level_release_statistics) { true }
+
+      let(:query) do
+        graphql_query_for('group', { 'fullPath' => group.full_path }, query_fields)
+      end
+
+      let(:release_stats) do
+        graphql_data.with_indifferent_access.dig(:group, :stats, :releaseStats)
+      end
+
+      before do
+        stub_feature_flags(group_level_release_statistics: group_level_release_statistics)
+
+        group.add_guest(guest_user)
+
+        post_graphql(query, current_user: current_user)
+      end
+
+      shared_examples 'no access to release statistics' do
+        it 'returns data about release utilization within the group' do
+          expect(release_stats).to be_nil
+        end
+      end
+
+      shared_examples 'full access to release statistics' do
+        context 'when there are no releases' do
+          it 'returns 0 for both statistics' do
+            expect(release_stats).to match(
+              releasesCount: 0,
+              releasesPercentage: 0
+            )
+          end
+        end
+
+        context 'when there are some releases' do
+          let_it_be(:subgroup) { create(:group, :private, parent: group) }
+          let_it_be(:project_in_group) { create(:project, group: group) }
+          let_it_be(:project_in_subgroup) { create(:project, group: subgroup) }
+          let_it_be(:another_project_in_subgroup) { create(:project, group: subgroup) }
+          let_it_be(:project_in_unrelated_group) { create(:project) }
+          let_it_be(:release_1) { create(:release, project: project_in_group) }
+          let_it_be(:release_2) { create(:release, project: project_in_subgroup) }
+          let_it_be(:release_3) { create(:release, project: project_in_subgroup) }
+          let_it_be(:release_4) { create(:release, project: project_in_unrelated_group) }
+
+          it 'returns data about release utilization within the group' do
+            expect(release_stats).to match(
+              releasesCount: 3,
+              releasesPercentage: 67
+            )
+          end
+        end
+      end
+
+      shared_examples 'correct access to release statistics' do
+        context 'when the user is not logged in' do
+          let(:current_user) { nil }
+
+          it_behaves_like 'no access to release statistics'
+        end
+
+        context 'when the user is not a member of the group' do
+          let(:current_user) { public_user }
+
+          it_behaves_like 'no access to release statistics'
+        end
+
+        context 'when the user is at least a guest' do
+          let(:current_user) { guest_user }
+
+          it_behaves_like 'full access to release statistics'
+        end
+      end
+
+      context 'when the group is private' do
+        let_it_be(:group) { create(:group, :private) }
+
+        it_behaves_like 'correct access to release statistics'
+      end
+
+      context 'when the group is public' do
+        let_it_be(:group) { create(:group, :public) }
+
+        it_behaves_like 'correct access to release statistics'
+      end
+
+      context 'when the group_level_release_statistics feature flag is disabled' do
+        let_it_be(:group) { create(:group, :public) }
+
+        let(:current_user) { guest_user }
+        let(:group_level_release_statistics) { false }
+
+        it 'returns null for both statistics' do
+          expect(release_stats).to match(
+            releasesCount: nil,
+            releasesPercentage: nil
+          )
+        end
+      end
+    end
   end
 
   describe 'pagination' do

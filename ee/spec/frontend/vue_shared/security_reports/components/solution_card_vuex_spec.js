@@ -1,7 +1,7 @@
+import { shallowMount } from '@vue/test-utils';
 import Vue from 'vue';
 import component from 'ee/vue_shared/security_reports/components/solution_card_vuex.vue';
 import { trimText } from 'helpers/text_helper';
-import { shallowMount } from '@vue/test-utils';
 import { s__ } from '~/locale';
 
 describe('Solution Card', () => {

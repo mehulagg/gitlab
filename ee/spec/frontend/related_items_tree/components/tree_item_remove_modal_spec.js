@@ -1,12 +1,12 @@
+import { GlModal } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
-import { GlModal } from '@gitlab/ui';
 
 import TreeItemRemoveModal from 'ee/related_items_tree/components/tree_item_remove_modal.vue';
 
+import { ChildType } from 'ee/related_items_tree/constants';
 import createDefaultStore from 'ee/related_items_tree/store';
 import * as epicUtils from 'ee/related_items_tree/utils/epic_utils';
-import { ChildType } from 'ee/related_items_tree/constants';
 import { PathIdSeparator } from '~/related_issues/constants';
 
 import { mockParentItem, mockQueryResponse, mockIssue1 } from '../mock_data';

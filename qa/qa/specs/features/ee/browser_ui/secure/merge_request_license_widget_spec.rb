@@ -103,11 +103,21 @@ module QA
         @merge_request.visit!
 
         Page::MergeRequest::Show.perform do |show|
-          show.approve_license_with_mr(approved_license_name)
-          show.deny_license_with_mr(denied_license_name)
-
           show.wait_for_license_compliance_report
+          show.click_manage_licenses_button
+        end
 
+        EE::Page::Project::Secure::LicenseCompliance.perform do |license_compliance|
+          license_compliance.open_tab
+          license_compliance.approve_license approved_license_name
+          license_compliance.deny_license denied_license_name
+        end
+
+        @merge_request.visit!
+
+        Page::MergeRequest::Show.perform do |show|
+          show.wait_for_license_compliance_report
+          show.expand_license_report
           expect(show).to have_approved_license approved_license_name
           expect(show).to have_denied_license denied_license_name
         end

@@ -8,7 +8,10 @@ module EE
     override :filter_items
     def filter_items(items)
       items = super(items)
-      by_approvers(items)
+      items = by_approvers(items)
+      items = by_merge_commit_sha(items)
+
+      items
     end
 
     # Filter by merge requests approval list that contains specified user directly or as part of group membership
@@ -16,6 +19,12 @@ module EE
       ::MergeRequests::ByApproversFinder
         .new(params[:approver_usernames], params[:approver_ids])
         .execute(items)
+    end
+
+    def by_merge_commit_sha(items)
+      return items unless params[:merge_commit_sha].present?
+
+      items.by_merge_commit_sha(params[:merge_commit_sha])
     end
 
     class_methods do

@@ -199,13 +199,6 @@ RSpec.describe Admin::ApplicationSettingsController do
       it_behaves_like 'settings for licensed features'
     end
 
-    context 'compliance frameworks' do
-      let(:settings) { { compliance_frameworks: [1, 2, 3, 4, 5] } }
-      let(:feature) { :admin_merge_request_approvers_rules }
-
-      it_behaves_like 'settings for licensed features'
-    end
-
     context 'required instance ci template' do
       let(:settings) { { required_instance_ci_template: 'Auto-DevOps' } }
       let(:feature) { :required_ci_templates }
@@ -293,17 +286,17 @@ RSpec.describe Admin::ApplicationSettingsController do
     end
 
     context 'when an admin user attempts a request' do
-      let_it_be(:yesterday) { Time.current.utc.yesterday.to_date }
+      let_it_be(:yesterday) { Time.current.utc.yesterday }
       let_it_be(:max_count) { 15 }
       let_it_be(:current_count) { 10 }
 
       around do |example|
-        Timecop.freeze { example.run }
+        freeze_time { example.run }
       end
 
       before_all do
-        HistoricalData.create!(date: yesterday - 1.day, active_user_count: max_count)
-        HistoricalData.create!(date: yesterday, active_user_count: current_count)
+        HistoricalData.create!(recorded_at: yesterday - 1.day, active_user_count: max_count)
+        HistoricalData.create!(recorded_at: yesterday, active_user_count: current_count)
       end
 
       before do
@@ -318,7 +311,8 @@ RSpec.describe Admin::ApplicationSettingsController do
         body = response.body
         expect(body).to start_with('<span id="LC1" class="line" lang="json">')
         expect(body).to include('<span class="nl">"license_key"</span>')
-        expect(body).to include("<span class=\"s2\">\"#{yesterday}\"</span>")
+        expect(body).to include("<span class=\"s2\">\"#{yesterday.to_date}\"</span>")
+        expect(body).to include("<span class=\"s2\">\"#{yesterday.iso8601}\"</span>")
         expect(body).to include("<span class=\"mi\">#{max_count}</span>")
         expect(body).to include("<span class=\"mi\">#{current_count}</span>")
       end

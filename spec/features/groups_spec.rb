@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe 'Group' do
-  let(:user) { create(:admin) }
+  let(:user) { create(:user) }
 
   before do
     sign_in(user)
@@ -21,8 +21,6 @@ RSpec.describe 'Group' do
     end
 
     describe 'as a non-admin' do
-      let(:user) { create(:user) }
-
       it 'creates a group and persists visibility radio selection', :js do
         stub_application_setting(default_group_visibility: :private)
 
@@ -140,6 +138,8 @@ RSpec.describe 'Group' do
     let(:group) { create(:group, path: 'foo') }
 
     context 'as admin' do
+      let(:user) { create(:admin) }
+
       before do
         visit new_group_path(group, parent_id: group.id)
       end
@@ -190,6 +190,8 @@ RSpec.describe 'Group' do
     let(:new_name) { 'new-name' }
 
     before do
+      group.add_owner(user)
+
       visit path
     end
 
@@ -200,6 +202,8 @@ RSpec.describe 'Group' do
 
     it 'saves new settings' do
       page.within('.gs-general') do
+        # Have to reset it to '' so it overwrites rather than appends
+        fill_in('group_name', with: '')
         fill_in 'group_name', with: new_name
         click_button 'Save changes'
       end
@@ -228,6 +232,10 @@ RSpec.describe 'Group' do
   describe 'group page with markdown description' do
     let(:group) { create(:group) }
     let(:path)  { group_path(group) }
+
+    before do
+      group.add_owner(user)
+    end
 
     it 'parses Markdown' do
       group.update_attribute(:description, 'This is **my** group')
@@ -267,6 +275,10 @@ RSpec.describe 'Group' do
     let!(:nested_group) { create(:group, parent: group) }
     let!(:project) { create(:project, namespace: group) }
 
+    before do
+      group.add_owner(user)
+    end
+
     it 'renders projects and groups on the page' do
       visit group_path(group)
       wait_for_requests
@@ -294,35 +306,47 @@ RSpec.describe 'Group' do
   describe 'new subgroup / project button' do
     let(:group) { create(:group, project_creation_level: Gitlab::Access::NO_ONE_PROJECT_ACCESS, subgroup_creation_level: Gitlab::Access::OWNER_SUBGROUP_ACCESS) }
 
-    it 'new subgroup button is displayed without project creation permission' do
-      visit group_path(group)
+    before do
+      group.add_owner(user)
+    end
 
-      page.within '.group-buttons' do
-        expect(page).to have_link('New subgroup')
+    context 'when user has subgroup creation permissions but not project creation permissions' do
+      it 'only displays "New subgroup" button' do
+        visit group_path(group)
+
+        page.within '[data-testid="group-buttons"]' do
+          expect(page).to have_link('New subgroup')
+          expect(page).not_to have_link('New project')
+        end
       end
     end
 
-    it 'new subgroup button is displayed together with new project button when having project creation permission' do
-      group.update!(project_creation_level: Gitlab::Access::MAINTAINER_PROJECT_ACCESS)
-      visit group_path(group)
+    context 'when user has project creation permissions but not subgroup creation permissions' do
+      it 'only displays "New project" button' do
+        group.update!(project_creation_level: Gitlab::Access::MAINTAINER_PROJECT_ACCESS)
+        user = create(:user)
 
-      page.within '.group-buttons' do
-        expect(page).to have_css("li[data-text='New subgroup']", visible: false)
-        expect(page).to have_css("li[data-text='New project']", visible: false)
+        group.add_maintainer(user)
+        sign_out(:user)
+        sign_in(user)
+
+        visit group_path(group)
+        page.within '[data-testid="group-buttons"]' do
+          expect(page).to have_link('New project')
+          expect(page).not_to have_link('New subgroup')
+        end
       end
     end
 
-    it 'new project button is displayed without subgroup creation permission' do
-      group.update!(project_creation_level: Gitlab::Access::MAINTAINER_PROJECT_ACCESS)
-      user = create(:user)
+    context 'when user has project and subgroup creation permissions' do
+      it 'displays "New subgroup" and "New project" buttons' do
+        group.update!(project_creation_level: Gitlab::Access::MAINTAINER_PROJECT_ACCESS)
+        visit group_path(group)
 
-      group.add_maintainer(user)
-      sign_out(:user)
-      sign_in(user)
-
-      visit group_path(group)
-      page.within '.group-buttons' do
-        expect(page).to have_link('New project')
+        page.within '[data-testid="group-buttons"]' do
+          expect(page).to have_link('New subgroup')
+          expect(page).to have_link('New project')
+        end
       end
     end
   end

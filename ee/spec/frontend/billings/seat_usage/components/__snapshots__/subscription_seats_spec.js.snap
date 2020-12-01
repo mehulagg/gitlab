@@ -1,0 +1,51 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Subscription Seats renders table content renders the correct data 1`] = `
+Array [
+  Object {
+    "email": "administrator@email.com",
+    "tooltip": undefined,
+    "user": Object {
+      "avatarLabeled": Object {
+        "size": "32",
+        "src": "path/to/img_administrator",
+        "text": "Administrator  @root",
+      },
+      "avatarLink": Object {
+        "alt": "Administrator",
+        "href": "path/to/administrator",
+      },
+    },
+  },
+  Object {
+    "email": "agustin_walker@email.com",
+    "tooltip": undefined,
+    "user": Object {
+      "avatarLabeled": Object {
+        "size": "32",
+        "src": "path/to/img_agustin_walker",
+        "text": "Agustin Walker  @lester.orn",
+      },
+      "avatarLink": Object {
+        "alt": "Agustin Walker",
+        "href": "path/to/agustin_walker",
+      },
+    },
+  },
+  Object {
+    "email": "Private",
+    "tooltip": "An email address is only visible for users managed through Group Managed Accounts.",
+    "user": Object {
+      "avatarLabeled": Object {
+        "size": "32",
+        "src": "path/to/img_joella_miller",
+        "text": "Joella Miller  @era",
+      },
+      "avatarLink": Object {
+        "alt": "Joella Miller",
+        "href": "path/to/joella_miller",
+      },
+    },
+  },
+]
+`;

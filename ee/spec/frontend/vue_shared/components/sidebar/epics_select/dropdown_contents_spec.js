@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlLink } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 
 import DropdownContents from 'ee/vue_shared/components/sidebar/epics_select/dropdown_contents.vue';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';

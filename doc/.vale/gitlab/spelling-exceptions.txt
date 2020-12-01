@@ -216,7 +216,7 @@ jsdom
 JupyterHub
 kanban
 kanbans
-Kaniko
+kaniko
 Karma
 Kerberos
 keyset
@@ -231,6 +231,7 @@ Kubesec
 Laravel
 LDAP
 ldapsearch
+Lefthook
 Leiningen
 Libravatar
 liveness
@@ -251,6 +252,7 @@ Markdown
 markdownlint
 matcher
 matchers
+Matomo
 Mattermost
 mbox
 memoization
@@ -316,6 +318,7 @@ PgBouncer
 Phabricator
 phaser
 phasers
+phpenv
 Pipfile
 Pipfiles
 Piwik
@@ -475,6 +478,8 @@ substrings
 subtree
 subtrees
 sudo
+swimlane
+swimlanes
 syslog
 tcpdump
 Thanos

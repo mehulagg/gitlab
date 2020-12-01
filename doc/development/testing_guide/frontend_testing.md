@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Frontend testing standards and style guidelines
 
 There are two types of test suites you'll encounter while developing frontend code
@@ -24,7 +30,6 @@ We have started to migrate frontend tests to the [Jest](https://jestjs.io) testi
 
 Jest tests can be found in `/spec/frontend` and `/ee/spec/frontend` in EE.
 
-NOTE: **Note:**
 Most examples have a Jest and Karma example. See the Karma examples only as explanation to what's going on in the code, should you stumble over some use cases during your discovery. The Jest examples are the one you should follow.
 
 ## Karma test suite
@@ -109,6 +114,37 @@ describe('Component', () => {
 ```
 
 Remember that the performance of each test depends on the environment.
+
+### Timout error due to async components
+
+If your component is fetching some other components asynchroneously based on some conditions, it might happen so that your Jest suite for this component will become flaky timing out from time to time. 
+
+```javascript
+// ide.vue
+export default {
+  components: {
+    'error-message': () => import('./error_message.vue'),
+    'gl-button': () => import('@gitlab/ui/src/components/base/button/button.vue'),
+    ...
+};
+```
+
+To address this issue, you can "help" Jest by stubbing the async components so that Jest would not need to fetch those asynchroneously at the run-time.
+
+```javascript
+// ide_spec.js
+import { GlButton } from '@gitlab/ui';
+import ErrorMessage from '~/ide/components/error_message.vue';
+...
+return shallowMount(ide, {
+  ...
+  stubs: {
+    ErrorMessage,
+    GlButton,
+    ...
+  },
+})
+```
 
 ## What and how to test
 
@@ -305,7 +341,6 @@ it('tests a promise rejection', async () => {
 
 You can also simply return a promise from the test function.
 
-NOTE: **Note:**
 Using the `done` and `done.fail` callbacks is discouraged when working with
 promises. They should only be used when testing callback-based code.
 
@@ -755,7 +790,7 @@ While you work on a test suite, you may want to run these specs in watch mode, s
 # Watch and rerun all specs matching the name icon
 yarn jest --watch icon
 
-# Watch and rerun one specifc file
+# Watch and rerun one specific file
 yarn jest --watch path/to/spec/file.spec.js
 ```
 
@@ -893,6 +928,32 @@ it.each([
     expect(renderPipeline(status)).toEqual(icon)
  }
 );
+```
+
+**Note**: only use template literal block if pretty print is **not** needed for spec output. For example, empty strings, nested objects etc.
+
+For example, when testing the difference between an empty search string and a non-empty search string, the use of the array block syntax with the pretty print option would be preferred. That way the differences between an empty string e.g. `''` and a non-empty string e.g. `'search string'` would be visible in the spec output. Whereas with a template literal block, the empty string would be shown as a space, which could lead to a confusing developer experience
+
+```javascript
+// bad
+it.each`
+    searchTerm | expected
+    ${''} | ${{ issue: { users: { nodes: [] } } }}
+    ${'search term'} | ${{ issue: { other: { nested: [] } } }}
+`('when search term is $searchTerm, it returns $expected', ({ searchTerm, expected }) => {
+  expect(search(searchTerm)).toEqual(expected)
+});
+
+// good
+it.each([
+    ['', { issue: { users: { nodes: [] } } }],
+    ['search term', { issue: { other: { nested: [] } } }],
+])('when search term is %p, expect to return %p',
+ (searchTerm, expected) => {
+    expect(search(searchTerm)).toEqual(expected)
+ }
+);
+
 ```
 
 ```javascript

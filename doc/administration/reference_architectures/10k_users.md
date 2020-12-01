@@ -2,7 +2,7 @@
 reading_time: true
 stage: Enablement
 group: Distribution
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Reference architecture: up to 10,000 users **(PREMIUM ONLY)**
@@ -32,6 +32,81 @@ full list of reference architectures, see
 | Monitoring node                            | 1           | 4 vCPU, 3.6 GB memory   | n1-highcpu-4    | c5.xlarge   | F4s v2   |
 | Object storage                             | n/a         | n/a                     | n/a             | n/a         | n/a      |
 | NFS server                                 | 1           | 4 vCPU, 3.6 GB memory   | n1-highcpu-4    | c5.xlarge   | F4s v2   |
+
+```mermaid
+stateDiagram-v2
+    [*] --> LoadBalancer
+    LoadBalancer --> ApplicationServer
+
+    ApplicationServer --> BackgroundJobs
+    ApplicationServer --> Gitaly
+    ApplicationServer --> Redis_Cache
+    ApplicationServer --> Redis_Queues
+    ApplicationServer --> PgBouncer
+    PgBouncer --> Database
+    ApplicationServer --> ObjectStorage
+    BackgroundJobs --> ObjectStorage
+
+    ApplicationMonitoring -->ApplicationServer
+    ApplicationMonitoring -->PgBouncer
+    ApplicationMonitoring -->Database
+    ApplicationMonitoring -->BackgroundJobs
+
+    ApplicationServer --> Consul
+
+    Consul --> Database
+    Consul --> PgBouncer
+    Redis_Cache --> Consul
+    Redis_Queues --> Consul
+    BackgroundJobs --> Consul
+
+    state Consul {
+      "Consul_1..3"
+    }
+
+    state Database {
+      "PG_Primary_Node"
+      "PG_Secondary_Node_1..2"
+    }
+
+    state Redis_Cache {
+      "R_Cache_Primary_Node"
+      "R_Cache_Replica_Node_1..2"
+      "R_Cache_Sentinel_1..3"
+    }
+
+    state Redis_Queues {
+      "R_Queues_Primary_Node"
+      "R_Queues_Replica_Node_1..2"
+      "R_Queues_Sentinel_1..3"
+    }
+
+    state Gitaly {
+      "Gitaly_1..2"
+    }
+
+    state BackgroundJobs {
+      "Sidekiq_1..4"
+    }
+
+    state ApplicationServer {
+      "GitLab_Rails_1..3"
+    }
+
+    state LoadBalancer {
+      "LoadBalancer_1"
+    }
+
+    state ApplicationMonitoring {
+      "Prometheus"
+      "Grafana"
+    }
+
+    state PgBouncer {
+      "Internal_Load_Balancer"
+      "PgBouncer_1..3"
+    }
+```
 
 The Google Cloud Platform (GCP) architectures were built and tested using the
 [Intel Xeon E5 v3 (Haswell)](https://cloud.google.com/compute/docs/cpu-platforms)
@@ -836,6 +911,12 @@ a node and change its status from primary to replica (and vice versa).
    # Set up password authentication for Redis (use the same password in all nodes).
    redis['password'] = 'REDIS_PRIMARY_PASSWORD_OF_FIRST_CLUSTER'
 
+   # Set the Redis Cache instance as an LRU
+   # 90% of available RAM in MB
+   redis['maxmemory'] = '13500mb'
+   redis['maxmemory_policy'] = "allkeys-lru"
+   redis['maxmemory_samples'] = 5
+
    ## Enable service discovery for Prometheus
    consul['enable'] = true
    consul['monitoring_service_discovery'] =  true
@@ -896,6 +977,12 @@ You can specify multiple roles, like sentinel and Redis, as:
    # Port of primary Redis server, uncomment to change to non default. Defaults
    # to `6379`.
    #redis['master_port'] = 6379
+
+   # Set the Redis Cache instance as an LRU
+   # 90% of available RAM in MB
+   redis['maxmemory'] = '13500mb'
+   redis['maxmemory_policy'] = "allkeys-lru"
+   redis['maxmemory_samples'] = 5
 
    ## Enable service discovery for Prometheus
    consul['enable'] = true
@@ -1335,21 +1422,26 @@ To configure the Sentinel Queues server:
 
 ## Configure Gitaly
 
+NOTE: **Note:**
+[Gitaly Cluster](../gitaly/praefect.md) support
+for the Reference Architectures is being
+worked on as a [collaborative effort](https://gitlab.com/gitlab-org/quality/reference-architectures/-/issues/1) between the Quality Engineering and Gitaly teams. When this component has been verified
+some Architecture specs will likely change as a result to support the new
+and improved designed.
+
 [Gitaly](../gitaly/index.md) server node requirements are dependent on data,
 specifically the number of projects and those projects' sizes. It's recommended
-that a Gitaly server node stores no more than 5 TB of data. Although this
-reference architecture includes a recommendation for the number of Gitaly server
-nodes to use, depending on your storage requirements, you may require additional
-Gitaly server nodes.
+that a Gitaly server node stores no more than 5 TB of data. Depending on your
+repository storage requirements, you may require additional Gitaly server nodes.
 
 Due to Gitaly having notable input and output requirements, we strongly
-recommend that all Gitaly nodes use solid-state drives (SSDs). These SSDs should
-have a throughput of at least 8,000 input/output operations per second (IOPS)
-for read operations and 2,000 IOPS for write operations. These IOPS values are
-initial recommendations, and may be adjusted to greater or lesser values
-depending on the scale of your environment's workload. If you're running the
-environment on a Cloud provider, refer to their documentation about how to
-configure IOPS correctly.
+recommend that all Gitaly nodes use solid-state drives (SSDs). These SSDs
+should have a throughput of at least 8,000
+input/output operations per second (IOPS) for read operations and 2,000 IOPS for
+write operations. These IOPS values are initial recommendations, and may be
+adjusted to greater or lesser values depending on the scale of your
+environment's workload. If you're running the environment on a Cloud provider,
+refer to their documentation about how to configure IOPS correctly.
 
 Be sure to note the following items:
 
@@ -1357,8 +1449,8 @@ Be sure to note the following items:
   [repository storage paths](../repository_storage_paths.md).
 - A Gitaly server can host one or more storage paths.
 - A GitLab server can use one or more Gitaly server nodes.
-- Gitaly addresses must be specified to be correctly resolvable for _all_
-  Gitaly clients.
+- Gitaly addresses must be specified to be correctly resolvable for all Gitaly
+  clients.
 - Gitaly servers must not be exposed to the public internet, as Gitaly's network
   traffic is unencrypted by default. The use of a firewall is highly recommended
   to restrict access to the Gitaly server. Another option is to
@@ -1387,8 +1479,8 @@ On each node:
 1. [Download and install](https://about.gitlab.com/install/) the Omnibus GitLab
    package of your choice. Be sure to follow _only_ installation steps 1 and 2
    on the page, and _do not_ provide the `EXTERNAL_URL` value.
-1. Edit `/etc/gitlab/gitlab.rb` to configure the storage paths, enable
-   the network listener, and configure the token:
+1. Edit the Gitaly server node's `/etc/gitlab/gitlab.rb` file to configure
+   storage paths, enable the network listener, and to configure the token:
 
    <!--
    updates to following example must also be made at
@@ -1988,7 +2080,7 @@ on what features you intend to use:
 | [Merge request diffs](../merge_request_diffs.md#using-object-storage) | Yes |
 | [Mattermost](https://docs.mattermost.com/administration/config-settings.html#file-storage)| No |
 | [Packages](../packages/index.md#using-object-storage) (optional feature) | Yes |
-| [Dependency Proxy](../packages/dependency_proxy.md#using-object-storage) (optional feature) **(PREMIUM ONLY)** | Yes |
+| [Dependency Proxy](../packages/dependency_proxy.md#using-object-storage) (optional feature) | Yes |
 | [Pseudonymizer](../pseudonymizer.md#configuration) (optional feature) **(ULTIMATE ONLY)** | No |
 | [Autoscale runner caching](https://docs.gitlab.com/runner/configuration/autoscale.html#distributed-runners-caching) (optional for improved performance) | No |
 | [Terraform state files](../terraform_state.md#using-object-storage) | Yes |

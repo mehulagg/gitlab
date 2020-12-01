@@ -26,7 +26,9 @@ RSpec.describe Groups::Security::MergeCommitReportsController do
           CSV
         end
 
-        let(:export_csv_service) { instance_spy(MergeCommits::ExportCsvService, csv_data: csv_data) }
+        let(:export_csv_service) do
+          instance_spy(MergeCommits::ExportCsvService, csv_data: ServiceResponse.success(payload: csv_data))
+        end
 
         before_all do
           group.add_owner(user)
@@ -70,6 +72,18 @@ RSpec.describe Groups::Security::MergeCommitReportsController do
                 'Brock Lesnar | Kane'
               ]
             ])
+          end
+        end
+
+        context 'when invalid' do
+          let(:export_csv_service) do
+            instance_spy(MergeCommits::ExportCsvService, csv_data: nil)
+          end
+
+          it do
+            subject
+
+            expect(flash[:alert]).to eq 'An error occurred while trying to generate the report. Please try again later.'
           end
         end
       end

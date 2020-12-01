@@ -33,52 +33,8 @@ describe('Boards - Getters', () => {
       window.gon = { features: {} };
     });
 
-    describe('when boardsWithSwimlanes is true', () => {
-      beforeEach(() => {
-        window.gon = { features: { boardsWithSwimlanes: true } };
-      });
-
-      describe('when isShowingEpicsSwimlanes is true', () => {
-        it('returns true', () => {
-          const state = {
-            isShowingEpicsSwimlanes: true,
-          };
-
-          expect(getters.isSwimlanesOn(state)).toBe(true);
-        });
-      });
-
-      describe('when isShowingEpicsSwimlanes is false', () => {
-        it('returns false', () => {
-          const state = {
-            isShowingEpicsSwimlanes: false,
-          };
-
-          expect(getters.isSwimlanesOn(state)).toBe(false);
-        });
-      });
-    });
-
-    describe('when boardsWithSwimlanes is false', () => {
-      describe('when isShowingEpicsSwimlanes is true', () => {
-        it('returns false', () => {
-          const state = {
-            isShowingEpicsSwimlanes: true,
-          };
-
-          expect(getters.isSwimlanesOn(state)).toBe(false);
-        });
-      });
-
-      describe('when isShowingEpicsSwimlanes is false', () => {
-        it('returns false', () => {
-          const state = {
-            isShowingEpicsSwimlanes: false,
-          };
-
-          expect(getters.isSwimlanesOn(state)).toBe(false);
-        });
-      });
+    it('returns false', () => {
+      expect(getters.isSwimlanesOn()).toBe(false);
     });
   });
 
@@ -94,7 +50,7 @@ describe('Boards - Getters', () => {
     });
   });
 
-  describe('getActiveIssue', () => {
+  describe('activeIssue', () => {
     it.each`
       id     | expected
       ${'1'} | ${'issue'}
@@ -102,11 +58,27 @@ describe('Boards - Getters', () => {
     `('returns $expected when $id is passed to state', ({ id, expected }) => {
       const state = { issues: { '1': 'issue' }, activeId: id };
 
-      expect(getters.getActiveIssue(state)).toEqual(expected);
+      expect(getters.activeIssue(state)).toEqual(expected);
     });
   });
 
-  describe('getIssues', () => {
+  describe('projectPathByIssueId', () => {
+    it('returns project path for the active issue', () => {
+      const mockActiveIssue = {
+        referencePath: 'gitlab-org/gitlab-test#1',
+      };
+      expect(getters.projectPathForActiveIssue({}, { activeIssue: mockActiveIssue })).toEqual(
+        'gitlab-org/gitlab-test',
+      );
+    });
+
+    it('returns empty string as project when active issue is an empty object', () => {
+      const mockActiveIssue = {};
+      expect(getters.projectPathForActiveIssue({}, { activeIssue: mockActiveIssue })).toEqual('');
+    });
+  });
+
+  describe('getIssuesByList', () => {
     const boardsState = {
       issuesByListId: mockIssuesByListId,
       issues,
@@ -114,7 +86,7 @@ describe('Boards - Getters', () => {
     it('returns issues for a given listId', () => {
       const getIssueById = issueId => [mockIssue, mockIssue2].find(({ id }) => id === issueId);
 
-      expect(getters.getIssues(boardsState, { getIssueById })('gid://gitlab/List/2')).toEqual(
+      expect(getters.getIssuesByList(boardsState, { getIssueById })('gid://gitlab/List/2')).toEqual(
         mockIssues,
       );
     });

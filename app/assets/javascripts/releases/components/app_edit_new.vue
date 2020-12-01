@@ -29,11 +29,12 @@ export default {
       'markdownDocsPath',
       'markdownPreviewPath',
       'releasesPagePath',
-      'updateReleaseApiDocsPath',
       'release',
       'newMilestonePath',
       'manageMilestonesPath',
       'projectId',
+      'groupId',
+      'groupMilestonesAvailable',
     ]),
     ...mapGetters('detail', ['isValid', 'isExistingRelease']),
     showForm() {
@@ -141,6 +142,8 @@ export default {
           <milestone-combobox
             v-model="releaseMilestones"
             :project-id="projectId"
+            :group-id="groupId"
+            :group-milestones-available="groupMilestonesAvailable"
             :extra-links="milestoneComboboxExtraLinks"
           />
         </div>

@@ -161,7 +161,6 @@ module Types
           resolver: Resolvers::ProjectMilestonesResolver
 
     field :project_members,
-          Types::MemberInterface.connection_type,
           description: 'Members of the project',
           resolver: Resolvers::ProjectMembersResolver
 
@@ -188,9 +187,9 @@ module Types
          resolver: Resolvers::PackagesResolver
 
     field :pipelines,
-          Types::Ci::PipelineType.connection_type,
           null: true,
           description: 'Build pipelines of the project',
+          extras: [:lookahead],
           resolver: Resolvers::ProjectPipelinesResolver
 
     field :pipeline,
@@ -239,8 +238,7 @@ module Types
     field :jira_imports,
           Types::JiraImportType.connection_type,
           null: true,
-          description: 'Jira imports into the project',
-          resolver: Resolvers::Projects::JiraImportsResolver
+          description: 'Jira imports into the project'
 
     field :services,
           Types::Projects::ServiceType.connection_type,
@@ -295,8 +293,7 @@ module Types
           Types::ContainerRepositoryType.connection_type,
           null: true,
           description: 'Container repositories of the project',
-          resolver: Resolvers::ContainerRepositoriesResolver,
-          authorize: :read_container_image
+          resolver: Resolvers::ContainerRepositoriesResolver
 
     field :label,
           Types::LabelType,

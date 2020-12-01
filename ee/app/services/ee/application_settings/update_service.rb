@@ -15,10 +15,13 @@ module EE
         elasticsearch_namespace_ids = params.delete(:elasticsearch_namespace_ids)
         elasticsearch_project_ids = params.delete(:elasticsearch_project_ids)
 
+        previous_user_cap = application_setting.new_user_signups_cap
+
         if result = super
           find_or_create_index
           update_elasticsearch_containers(ElasticsearchIndexedNamespace, elasticsearch_namespace_ids)
           update_elasticsearch_containers(ElasticsearchIndexedProject, elasticsearch_project_ids)
+          auto_approve_blocked_users(previous_user_cap)
         end
 
         result
@@ -38,6 +41,17 @@ module EE
 
         # Add new containers
         new_container_ids.each { |id| klass.create!(klass.target_attr_name => id) }
+      end
+
+      def auto_approve_blocked_users(previous_user_cap)
+        return if ::Feature.disabled?(:admin_new_user_signups_cap)
+        return if previous_user_cap.nil?
+
+        current_user_cap = application_setting.new_user_signups_cap
+
+        if current_user_cap.nil? || current_user_cap > previous_user_cap
+          ApproveBlockedUsersWorker.perform_async(current_user.id)
+        end
       end
 
       private

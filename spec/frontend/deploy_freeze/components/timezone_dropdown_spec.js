@@ -3,6 +3,7 @@ import { shallowMount, createLocalVue } from '@vue/test-utils';
 import { GlDropdownItem, GlDropdown } from '@gitlab/ui';
 import TimezoneDropdown from '~/vue_shared/components/timezone_dropdown.vue';
 import createStore from '~/deploy_freeze/store';
+import { findTzByName, formatTz, timezoneDataFixture } from '../helpers';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -10,7 +11,6 @@ localVue.use(Vuex);
 describe('Deploy freeze timezone dropdown', () => {
   let wrapper;
   let store;
-  const timezoneDataFixture = getJSONFixture('/api/freeze-periods/timezone_data.json');
 
   const createComponent = (searchTerm, selectedTimezone) => {
     store = createStore({
@@ -63,8 +63,9 @@ describe('Deploy freeze timezone dropdown', () => {
     });
 
     it('renders only the time zone searched for', () => {
+      const selectedTz = findTzByName('Alaska');
       expect(findAllDropdownItems()).toHaveLength(1);
-      expect(findDropdownItemByIndex(0).text()).toBe('[UTC -8] Alaska');
+      expect(findDropdownItemByIndex(0).text()).toBe(formatTz(selectedTz));
     });
 
     it('should not display empty results message', () => {
@@ -72,13 +73,15 @@ describe('Deploy freeze timezone dropdown', () => {
     });
 
     describe('Custom events', () => {
+      const selectedTz = findTzByName('Alaska');
+
       it('should emit input if a time zone is clicked', () => {
         findDropdownItemByIndex(0).vm.$emit('click');
         expect(wrapper.emitted('input')).toEqual([
           [
             {
-              formattedTimezone: '[UTC -8] Alaska',
-              identifier: 'America/Juneau',
+              formattedTimezone: formatTz(selectedTz),
+              identifier: selectedTz.identifier,
             },
           ],
         ]);

@@ -1,7 +1,7 @@
 ---
 stage: Growth
 group: Product Analytics
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Usage Ping Guide
@@ -15,7 +15,7 @@ This guide describes Usage Ping's purpose and how it's implemented.
 
 For more information about Product Analytics, see:
 
-- [Product Analytics Guide](index.md)
+- [Product Analytics Guide](https://about.gitlab.com/handbook/product/product-analytics-guide/)
 - [Snowplow Guide](snowplow.md)
 
 More useful links:
@@ -31,15 +31,15 @@ More useful links:
 - The usage data is primarily composed of row counts for different tables in the instance’s database. By comparing these counts month over month (or week over week), we can get a rough sense for how an instance is using the different features within the product. In addition to counts, other facts
     that help us classify and understand GitLab installations are collected.
 - Usage ping is important to GitLab as we use it to calculate our Stage Monthly Active Users (SMAU) which helps us measure the success of our stages and features.
-- While usage ping is enabled, GitLab will gather data from the other instances and will be able to show usage statistics of your instance to your users.
+- While usage ping is enabled, GitLab gathers data from the other instances and can show usage statistics of your instance to your users.
 
 ### Why should we enable Usage Ping?
 
 - The main purpose of Usage Ping is to build a better GitLab. Data about how GitLab is used is collected to better understand feature/stage adoption and usage, which helps us understand how GitLab is adding value and helps our team better understand the reasons why people use GitLab and with this knowledge we're able to make better product decisions.
 - As a benefit of having the usage ping active, GitLab lets you analyze the users’ activities over time of your GitLab installation.
 - As a benefit of having the usage ping active, GitLab provides you with The DevOps Report,which gives you an overview of your entire instance’s adoption of Concurrent DevOps from planning to monitoring.
-- You will get better, more proactive support. (assuming that our TAMs and support organization used the data to deliver more value)
-- You will get insight and advice into how to get the most value out of your investment in GitLab. Wouldn't you want to know that a number of features or values are not being adopted in your organization?
+- You get better, more proactive support. (assuming that our TAMs and support organization used the data to deliver more value)
+- You get insight and advice into how to get the most value out of your investment in GitLab. Wouldn't you want to know that a number of features or values are not being adopted in your organization?
 - You get a report that illustrates how you compare against other similar organizations (anonymized), with specific advice and recommendations on how to improve your DevOps processes.
 - Usage Ping is enabled by default. To disable it, see [Disable Usage Ping](#disable-usage-ping).
 
@@ -117,7 +117,10 @@ sequenceDiagram
 1. When the cron job runs, it calls [`GitLab::UsageData.to_json`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/services/submit_usage_ping_service.rb#L22).
 1. `GitLab::UsageData.to_json` [cascades down](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/usage_data.rb#L22) to ~400+ other counter method calls.
 1. The response of all methods calls are [merged together](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/usage_data.rb#L14) into a single JSON payload in `GitLab::UsageData.to_json`.
-1. The JSON payload is then [posted to the Versions application]( https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/services/submit_usage_ping_service.rb#L20).
+1. The JSON payload is then [posted to the Versions application]( https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/services/submit_usage_ping_service.rb#L20)
+   If a firewall exception is needed, the required URL depends on several things. If 
+   the hostname is `version.gitlab.com`, the protocol is `TCP`, and the port number is `443`,
+   the required URL is <https://version.gitlab.com/>.
 
 ## Implementing Usage Ping
 
@@ -189,7 +192,7 @@ Arguments:
 - `relation` the ActiveRecord_Relation to perform the count
 - `column` the column to perform the distinct count, by default is the primary key
 - `batch`: default `true` in order to use batch counting
-- `batch_size`: if none set it will use default value 10000 from `Gitlab::Database::BatchCounter`
+- `batch_size`: if none set it uses default value 10000 from `Gitlab::Database::BatchCounter`
 - `start`: custom start of the batch counting in order to avoid complex min calculations
 - `end`: custom end of the batch counting in order to avoid complex min calculations
 
@@ -213,7 +216,7 @@ Arguments:
 
 - `relation` the ActiveRecord_Relation to perform the operation
 - `column` the column to sum on
-- `batch_size`: if none set it will use default value 1000 from `Gitlab::Database::BatchCounter`
+- `batch_size`: if none set it uses default value 1000 from `Gitlab::Database::BatchCounter`
 - `start`: custom start of the batch counting in order to avoid complex min calculations
 - `end`: custom end of the batch counting in order to avoid complex min calculations
 
@@ -270,7 +273,7 @@ Implemented using Redis methods [PFADD](https://redis.io/commands/pfadd) and [PF
 
 ##### Adding new events
 
-1. Define events in [`known_events.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/usage_data_counters/known_events.yml).
+1. Define events in [`known_events`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/usage_data_counters/known_events/).
 
    Example event:
 
@@ -304,7 +307,7 @@ Implemented using Redis methods [PFADD](https://redis.io/commands/pfadd) and [PF
      access to a group of events.
    - `redis_slot`: optional Redis slot; default value: event name. Used if needed to calculate totals
      for a group of metrics. Ensure keys are in the same slot. For example:
-     `i_compliance_credential_inventory` with `redis_slot: 'compliance'` will build Redis key
+     `i_compliance_credential_inventory` with `redis_slot: 'compliance'` builds Redis key
      `i_{compliance}_credential_inventory-2020-34`. If `redis_slot` is not defined the Redis key will
      be `{i_compliance_credential_inventory}-2020-34`.
    - `expiry`: expiry time in days. Default: 29 days for daily aggregation and 6 weeks for weekly
@@ -312,6 +315,7 @@ Implemented using Redis methods [PFADD](https://redis.io/commands/pfadd) and [PF
    - `aggregation`: aggregation `:daily` or `:weekly`. The argument defines how we build the Redis
      keys for data storage. For `daily` we keep a key for metric per day of the year, for `weekly` we
      keep a key for metric per week of the year.
+   - `feature_flag`: optional. For details, see our [GitLab internal Feature flags](../feature_flags/) documentation.
 
 1. Track event in controller using `RedisTracking` module with `track_redis_hll_event(*controller_actions, name:, feature:, feature_default_enabled: false)`.
 
@@ -402,7 +406,7 @@ Implemented using Redis methods [PFADD](https://redis.io/commands/pfadd) and [PF
    | `event` | string | yes | The event name it should be tracked |
 
    Response
-w
+
    Return 200 if tracking failed for any reason.
 
    - `200` if event was tracked or any errors
@@ -412,7 +416,7 @@ w
 
 1. Track events using JavaScript/Vue API helper which calls the API above
 
-   Example usage for an existing event already defined in  [known events](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/usage_data_counters/known_events.yml):
+   Example usage for an existing event already defined in [known events](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/usage_data_counters/known_events/):
 
    Note that `usage_data_api` and `usage_data_#{event_name}` should be enabled in order to be able to track events
 
@@ -422,20 +426,46 @@ w
    api.trackRedisHllUserEvent('my_already_defined_event_name'),
    ```
 
-1. Track event using base module `Gitlab::UsageDataCounters::HLLRedisCounter.track_event(entity_id, event_name)`.
+1. Track event using base module `Gitlab::UsageDataCounters::HLLRedisCounter.track_event(values, event_name)`.
+
+   Arguments:
+
+   - `values`: One value or array of values we count. For example: user_id, visitor_id, user_ids.
+   - `event_name`: event name.
+
+1. Track event on context level using base module `Gitlab::UsageDataCounters::HLLRedisCounter.track_event_in_context(entity_id, event_name, context)`.
 
    Arguments:
 
    - `entity_id`: value we count. For example: user_id, visitor_id.
    - `event_name`: event name.
+   - `context`: context value. Allowed values are `default`, `free`, `bronze`, `silver`, `gold`, `starter`, `premium`, `ultimate`
 
-1. Get event data using `Gitlab::UsageDataCounters::HLLRedisCounter.unique_events(event_names:, start_date:, end_date)`.
+1. Get event data using `Gitlab::UsageDataCounters::HLLRedisCounter.unique_events(event_names:, start_date:, end_date:, context: '')`.
 
    Arguments:
 
    - `event_names`: the list of event names.
    - `start_date`: start date of the period for which we want to get event data.
    - `end_date`: end date of the period for which we want to get event data.
+   - `context`: context of the event. Allowed values are `default`, `free`, `bronze`, `silver`, `gold`, `starter`, `premium`, `ultimate`.
+
+1. Testing tracking and getting unique events
+
+Trigger events in rails console by using `track_event` method
+
+   ```ruby
+   Gitlab::UsageDataCounters::HLLRedisCounter.track_event(1, 'g_compliance_audit_events')
+   Gitlab::UsageDataCounters::HLLRedisCounter.track_event(2, 'g_compliance_audit_events')
+   ```
+
+Next, get the unique events for the current week.
+
+   ```ruby
+   # Get unique events for metric for current_week
+   Gitlab::UsageDataCounters::HLLRedisCounter.unique_events(event_names: 'g_compliance_audit_events',
+   start_date: Date.current.beginning_of_week, end_date: Date.current.end_of_week)
+   ```
 
 Recommendations:
 
@@ -445,9 +475,23 @@ Recommendations:
 - Use a [feature flag](../../operations/feature_flags.md) to have a control over the impact when
   adding new metrics.
 
+##### Enable/Disable Redis HLL tracking
+
+Events are tracked behind [feature flags](../feature_flags/index.md) due to concerns for Redis performance and scalability.
+
+For a full list of events and coresponding feature flags see, [known_events](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/usage_data_counters/known_events/) files.
+
+To enable or disable tracking for specific event within <https://gitlab.com> or <https://staging.gitlab.com>, run commands such as the following to
+[enable or disable the corresponding feature](../feature_flags/index.md).
+
+```shell
+/chatops run feature set <feature_name> true
+/chatops run feature set <feature_name> false
+```
+
 ##### Known events in usage data payload
 
-All events added in [`known_events.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/usage_data_counters/known_events.yml) are automatically added to usage data generation under the `redis_hll_counters` key. This column is stored in [version-app as a JSON](https://gitlab.com/gitlab-services/version-gitlab-com/-/blob/master/db/schema.rb#L209).
+All events added in [`known_events/common.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/usage_data_counters/known_events/common.yml) are automatically added to usage data generation under the `redis_hll_counters` key. This column is stored in [version-app as a JSON](https://gitlab.com/gitlab-services/version-gitlab-com/-/blob/master/db/schema.rb#L209).
 For each event we add metrics for the weekly and monthly time frames, and totals for each where applicable:
 
 - `#{event_name}_weekly`: Data for 7 days for daily [aggregation](#adding-new-events) events and data for the last complete week for weekly [aggregation](#adding-new-events) events.
@@ -493,7 +537,7 @@ Example usage:
 redis_usage_data(Gitlab::UsageDataCounters::WikiPageCounter)
 redis_usage_data { ::Gitlab::UsageCounters::PodLogs.usage_totals[:total] }
 
-# Define events in known_events.yml https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/usage_data_counters/known_events.yml
+# Define events in common.yml https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/usage_data_counters/known_events/common.yml
 
 # Tracking events
 Gitlab::UsageDataCounters::HLLRedisCounter.track_event(visitor_id, 'expand_vulnerabilities')
@@ -533,7 +577,7 @@ NOTE: **Note:**
 Prometheus as a data source for Usage Ping is currently only available for single-node Omnibus installations
 that are running the [bundled Prometheus](../../administration/monitoring/prometheus/index.md) instance.
 
-In order to query Prometheus for metrics, a helper method is available that will `yield` a fully configured
+To query Prometheus for metrics, a helper method is available to `yield` a fully configured
 `PrometheusClient`, given it is available as per the note above:
 
 ```ruby
@@ -572,7 +616,7 @@ Gitlab::UsageData.distinct_count(::Note.with_suggestions.where(time_period), :au
 
 ### 3. Generate the SQL query
 
-Your Rails console will return the generated SQL queries.
+Your Rails console returns the generated SQL queries.
 
 Example:
 
@@ -590,7 +634,7 @@ Paste the SQL query into `#database-lab` to see how the query performs at scale.
 
 - `#database-lab` is a Slack channel which uses a production-sized environment to test your queries.
 - GitLab.com’s production database has a 15 second timeout.
-- Any single query must stay below 1 second execution time with cold caches.
+- Any single query must stay below [1 second execution time](../query_performance.md#timing-guidelines-for-queries) with cold caches.
 - Add a specialized index on columns involved to reduce the execution time.
 
 In order to have an understanding of the query's execution we add in the MR description the following information:
@@ -613,7 +657,7 @@ We also use `#database-lab` and [explain.depesz.com](https://explain.depesz.com/
 
 ### 5. Add the metric definition
 
-When adding, changing, or updating metrics, please update the [Event Dictionary's **Usage Ping** table](event_dictionary.md).
+When adding, changing, or updating metrics, please update the [Event Dictionary's **Usage Ping** table](https://about.gitlab.com/handbook/product/product-analytics-guide#event-dictionary).
 
 ### 6. Add new metric to Versions Application
 
@@ -629,7 +673,7 @@ Ensure you comply with the [Changelog entries guide](../changelog.md).
 
 ### 9. Ask for a Product Analytics Review
 
-On GitLab.com, we have DangerBot setup to monitor Product Analytics related files and DangerBot will recommend a Product Analytics review. Mention `@gitlab-org/growth/product_analytics/engineers` in your MR for a review.
+On GitLab.com, we have DangerBot setup to monitor Product Analytics related files and DangerBot recommends a Product Analytics review. Mention `@gitlab-org/growth/product_analytics/engineers` in your MR for a review.
 
 ### 10. Verify your metric
 
@@ -655,10 +699,10 @@ This is the recommended approach to test Prometheus based Usage Ping.
 The easiest way to verify your changes is to build a new Omnibus image from your code branch via CI, then download the image
 and run a local container instance:
 
-1. From your merge request, click on the `qa` stage, then trigger the `package-and-qa` job. This job will trigger an Omnibus
+1. From your merge request, click on the `qa` stage, then trigger the `package-and-qa` job. This job triggers an Omnibus
 build in a [downstream pipeline of the `omnibus-gitlab-mirror` project](https://gitlab.com/gitlab-org/build/omnibus-gitlab-mirror/-/pipelines).
 1. In the downstream pipeline, wait for the `gitlab-docker` job to finish.
-1. Open the job logs and locate the full container name including the version. It will take the following form: `registry.gitlab.com/gitlab-org/build/omnibus-gitlab-mirror/gitlab-ee:<VERSION>`.
+1. Open the job logs and locate the full container name including the version. It takes the following form: `registry.gitlab.com/gitlab-org/build/omnibus-gitlab-mirror/gitlab-ee:<VERSION>`.
 1. On your local machine, make sure you are logged in to the GitLab Docker registry. You can find the instructions for this in
 [Authenticate to the GitLab Container Registry](../../user/packages/container_registry/index.md#authenticate-with-the-container-registry).
 1. Once logged in, download the new image via `docker pull registry.gitlab.com/gitlab-org/build/omnibus-gitlab-mirror/gitlab-ee:<VERSION>`
@@ -679,7 +723,60 @@ but with the following limitations:
 - While it runs a `node_exporter`, `docker-compose` services emulate hosts, meaning that it would normally report itself to not be associated
 with any of the other services that are running. That is not how node metrics are reported in a production setup, where `node_exporter`
 always runs as a process alongside other GitLab components on any given node. From Usage Ping's perspective none of the node data would therefore
-appear to be associated to any of the services running, since they all appear to be running on different hosts. To alleviate this problem, the `node_exporter` in GCK was arbitrarily "assigned" to the `web` service, meaning only for this service `node_*` metrics will appear in Usage Ping.
+appear to be associated to any of the services running, since they all appear to be running on different hosts. To alleviate this problem, the `node_exporter` in GCK was arbitrarily "assigned" to the `web` service, meaning only for this service `node_*` metrics appears in Usage Ping.
+
+## Aggregated metrics
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/45979) in GitLab 13.6.
+> - It's [deployed behind a feature flag](../../user/feature_flags.md), disabled by default.
+> - It's enabled on GitLab.com.
+
+CAUTION: **Warning:**
+This feature is intended solely for internal GitLab use.
+
+In order to add data for aggregated metrics into Usage Ping payload you should add corresponding definition into  [`aggregated_metrics.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/usage_data_counters/aggregated_metrics.yml) file. Each aggregate definition includes following parts:
+
+- name: unique name under which aggregate metric is added to Usage Ping payload
+- operator: operator that defines how aggregated metric data is counted. Available operators are:
+  - `OR`: removes duplicates and counts all entries that triggered any of listed events
+  - `AND`: removes duplicates and counts all elements that were observed triggering all of following events
+- events: list of events names (from [`known_events.yml`](#known-events-in-usage-data-payload)) to aggregate into metric. All events in this list must have the same `redis_slot` and `aggregation` attributes.
+- feature_flag: name of [development feature flag](../feature_flags/development.md#development-type) that is checked before
+metrics aggregation is performed. Corresponding feature flag should have `default_enabled` attribute set to `false`.
+`feature_flag` attribute is **OPTIONAL**  and can be omitted, when `feature_flag` is missing no feature flag is checked.
+
+Example aggregated metric entries:
+
+```yaml
+- name: product_analytics_test_metrics_union
+  operator: OR
+  events: ['i_search_total', 'i_search_advanced', 'i_search_paid']
+- name: product_analytics_test_metrics_intersection_with_feautre_flag
+  operator: AND
+  events: ['i_search_total', 'i_search_advanced', 'i_search_paid']
+  feature_flag: example_aggregated_metric
+```
+
+Aggregated metrics are added under `aggregated_metrics` key in both `counts_weekly` and `counts_monthly` top level keys in Usage Ping payload.
+
+```ruby
+{
+  :counts_monthly => {
+    :deployments => 1003,
+    :successful_deployments => 78,
+    :failed_deployments => 275,
+    :packages => 155,
+    :personal_snippets => 2106,
+    :project_snippets => 407,
+    :promoted_issues => 719,
+    :aggregated_metrics => {
+      :product_analytics_test_metrics_union => 7,
+      :product_analytics_test_metrics_intersection_with_feautre_flag => 2
+    },
+    :snippets => 2513
+  }
+}
+```
 
 ## Example Usage Ping payload
 
@@ -945,3 +1042,7 @@ bin/rake gitlab:usage_data:dump_sql_in_json
 # You may pipe the output into a file
 bin/rake gitlab:usage_data:dump_sql_in_yaml > ~/Desktop/usage-metrics-2020-09-02.yaml
 ```
+
+## Generating and troubleshooting usage ping
+
+To get a usage ping, or to troubleshoot caching issues on your GitLab instance, please follow [instructions to generate usage ping](../../administration/troubleshooting/gitlab_rails_cheat_sheet.md#generate-usage-ping).

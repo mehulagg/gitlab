@@ -1,0 +1,29 @@
+- if Gitlab::Ci::Features.auto_rollback_available?(@project)
+  %section.settings.no-animate#auto-rollback-settings{ class: ('expanded' if expanded) }
+    .settings-header
+      %h4
+        = _("Automatic deployment rollbacks")
+      %button.gl-button.btn.js-settings-toggle{ type: 'button' }
+        = expanded ? _('Collapse') : _('Expand')
+      %p
+        = s_('AutoRollback|Automatically roll back to the last successful deployment when a critical problem is detected.')
+
+    .settings-content
+      .row
+        .col-lg-12
+          = form_for @project, url: project_settings_ci_cd_path(@project, anchor: 'auto-rollback-settings') do |f|
+            = form_errors(@project)
+            %fieldset.builds-feature
+              .gl-form-group.form-group
+                .card
+                  .card-body
+                    .gl-form.form-check
+                      = f.check_box :auto_rollback_enabled, class: 'gl-form-checkbox form-check-input'
+                      = f.label :auto_rollback_enabled, class: 'form-check-label col-form-label' do
+                        = s_('AutoRollback|Enable automatic rollbacks')
+                      %small.form-text.text-gl-muted
+                        = s_('AutoRollback|Automatic rollbacks start when a critical alert is triggered. If the last successful deployment fails to roll back automatically, it can still be done manually.')
+                        -# This will be added once the documentation page has been created
+                        -# = link_to _('More information'), help_page_path('topics/auto_rollback/index.md'), target: '_blank'
+
+              = f.submit _('Save changes'), class: "gl-button btn btn-success gl-mt-5", data: { qa_selector: 'save_changes_button' }

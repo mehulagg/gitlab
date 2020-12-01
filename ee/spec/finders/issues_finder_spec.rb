@@ -170,6 +170,22 @@ RSpec.describe IssuesFinder do
           end
         end
 
+        context 'filter issue by iteration title' do
+          let(:params) { { iteration_title: iteration_1.title } }
+
+          it 'returns all issues with the iteration title' do
+            expect(issues).to contain_exactly(iteration_1_issue)
+          end
+        end
+
+        context 'filter issue by negated iteration title' do
+          let(:params) { { not: { iteration_title: iteration_1.title } } }
+
+          it 'returns all issues that do not match the iteration title' do
+            expect(issues).to contain_exactly(issue1, issue2, issue3, issue4, iteration_2_issue)
+          end
+        end
+
         context 'without iteration_id param' do
           let(:params) { { iteration_id: nil } }
 

@@ -10,6 +10,7 @@ import NoPreviewViewer from '~/vue_shared/components/diff_viewer/viewers/no_prev
 import DiffFileDrafts from '~/batch_comments/components/diff_file_drafts.vue';
 import InlineDiffView from './inline_diff_view.vue';
 import ParallelDiffView from './parallel_diff_view.vue';
+import DiffView from './diff_view.vue';
 import userAvatarLink from '../../vue_shared/components/user_avatar/user_avatar_link.vue';
 import NoteForm from '../../notes/components/note_form.vue';
 import ImageDiffOverlay from './image_diff_overlay.vue';
@@ -18,12 +19,14 @@ import eventHub from '../../notes/event_hub';
 import { IMAGE_DIFF_POSITION_TYPE } from '../constants';
 import { getDiffMode } from '../store/utils';
 import { diffViewerModes } from '~/ide/constants';
+import { mapInline, mapParallel } from './diff_row_utils';
 
 export default {
   components: {
     GlLoadingIcon,
     InlineDiffView,
     ParallelDiffView,
+    DiffView,
     DiffViewer,
     NoteForm,
     DiffDiscussions,
@@ -83,6 +86,17 @@ export default {
     author() {
       return this.getUserData;
     },
+    mappedLines() {
+      if (this.glFeatures.unifiedDiffComponents) {
+        return this.diffLines(this.diffFile, true).map(mapParallel(this)) || [];
+      }
+
+      // TODO: Everything below this line can be deleted when unifiedDiffComponents FF is removed
+      if (this.isInlineView) {
+        return this.diffFile.highlighted_diff_lines.map(mapInline(this));
+      }
+      return this.diffLines(this.diffFile).map(mapParallel(this));
+    },
   },
   updated() {
     this.$nextTick(() => {
@@ -113,19 +127,26 @@ export default {
 <template>
   <div class="diff-content">
     <div class="diff-viewer">
-      <template v-if="isTextFile">
+      <template v-if="isTextFile && glFeatures.unifiedDiffComponents">
+        <diff-view
+          :diff-file="diffFile"
+          :diff-lines="mappedLines"
+          :help-page-path="helpPagePath"
+          :inline="isInlineView"
+        />
+        <gl-loading-icon v-if="diffFile.renderingLines" size="md" class="mt-3" />
+      </template>
+      <template v-else-if="isTextFile">
         <inline-diff-view
           v-if="isInlineView"
           :diff-file="diffFile"
-          :diff-lines="diffFile.highlighted_diff_lines"
+          :diff-lines="mappedLines"
           :help-page-path="helpPagePath"
         />
         <parallel-diff-view
           v-else-if="isParallelView"
           :diff-file="diffFile"
-          :diff-lines="
-            glFeatures.unifiedDiffLines ? diffLines(diffFile) : diffFile.parallel_diff_lines || []
-          "
+          :diff-lines="mappedLines"
           :help-page-path="helpPagePath"
         />
         <gl-loading-icon v-if="diffFile.renderingLines" size="md" class="mt-3" />
@@ -148,12 +169,16 @@ export default {
         :a-mode="diffFile.a_mode"
         :b-mode="diffFile.b_mode"
       >
-        <image-diff-overlay
-          slot="image-overlay"
-          :discussions="imageDiscussions"
-          :file-hash="diffFileHash"
-          :can-comment="getNoteableData.current_user.can_create_note && !diffFile.brokenSymlink"
-        />
+        <template #image-overlay="{ renderedWidth, renderedHeight }">
+          <image-diff-overlay
+            v-if="renderedWidth"
+            :rendered-width="renderedWidth"
+            :rendered-height="renderedHeight"
+            :discussions="imageDiscussions"
+            :file-hash="diffFileHash"
+            :can-comment="getNoteableData.current_user.can_create_note && !diffFile.brokenSymlink"
+          />
+        </template>
         <div v-if="showNotesContainer" class="note-container">
           <user-avatar-link
             v-if="diffFileCommentForm && author"

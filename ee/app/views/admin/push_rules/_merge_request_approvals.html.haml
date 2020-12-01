@@ -6,10 +6,7 @@
     %button.btn.js-settings-toggle{ type: 'button' }
       = expanded_by_default? ? _('Collapse') : _('Expand')
     %p
-      - if show_compliance_merge_request_approval_settings?
-        = _('Regulate approvals by authors/committers, based on compliance frameworks. Can be changed only at the instance level.')
-      - else
-        = _('Settings to prevent self-approval across all projects in the instance. Only an administrator can modify these settings.')
+      = _('Settings to prevent self-approval across all projects in the instance. Only an administrator can modify these settings.')
 
   .settings-content
     %hr.clearfix.mt-0
@@ -18,18 +15,5 @@
       = form_errors(@application_setting)
 
       = render 'merge_request_approvals_fields', f: f
-
-      - if show_compliance_merge_request_approval_settings?
-        .sub-section
-          %h5
-            = _('Compliance frameworks')
-          .form-group
-            .form-text.text-muted.mb-2
-              = _('The above settings apply to all projects with the selected compliance framework(s).')
-
-            = f.collection_check_boxes(:compliance_frameworks, compliance_framework_checkboxes, :first, :last) do |b|
-              .form-check
-                = b.check_box(class: "form-check-input")
-                = b.label(class: "form-check-label")
 
       = f.submit _('Save changes'), class: "gl-button btn btn-success"

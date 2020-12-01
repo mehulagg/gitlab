@@ -1,7 +1,7 @@
 <script>
 import { mapActions, mapGetters, mapState } from 'vuex';
 import { escape } from 'lodash';
-import { GlLoadingIcon, GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
+import { GlButton, GlLoadingIcon, GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { sprintf } from '~/locale';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
@@ -11,7 +11,13 @@ import DiffFileHeader from './diff_file_header.vue';
 import DiffContent from './diff_content.vue';
 import { diffViewerErrors } from '~/ide/constants';
 import { collapsedType, isCollapsed } from '../diff_file';
-import { DIFF_FILE_AUTOMATIC_COLLAPSE, DIFF_FILE_MANUAL_COLLAPSE } from '../constants';
+import {
+  DIFF_FILE_AUTOMATIC_COLLAPSE,
+  DIFF_FILE_MANUAL_COLLAPSE,
+  EVT_EXPAND_ALL_FILES,
+  EVT_PERF_MARK_DIFF_FILES_END,
+  EVT_PERF_MARK_FIRST_DIFF_FILE_SHOWN,
+} from '../constants';
 import { DIFF_FILE, GENERIC_ERROR } from '../i18n';
 import eventHub from '../event_hub';
 
@@ -19,6 +25,7 @@ export default {
   components: {
     DiffFileHeader,
     DiffContent,
+    GlButton,
     GlLoadingIcon,
   },
   directives: {
@@ -29,6 +36,16 @@ export default {
     file: {
       type: Object,
       required: true,
+    },
+    isFirstFile: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    isLastFile: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
     canCurrentUserFork: {
       type: Boolean,
@@ -153,10 +170,15 @@ export default {
   },
   created() {
     notesEventHub.$on(`loadCollapsedDiff/${this.file.file_hash}`, this.requestDiff);
-    eventHub.$on('mr:diffs:expandAllFiles', this.expandAllListener);
+    eventHub.$on(EVT_EXPAND_ALL_FILES, this.expandAllListener);
+  },
+  mounted() {
+    if (this.hasDiff) {
+      this.postRender();
+    }
   },
   beforeDestroy() {
-    eventHub.$off('mr:diffs:expandAllFiles', this.expandAllListener);
+    eventHub.$off(EVT_EXPAND_ALL_FILES, this.expandAllListener);
   },
   methods: {
     ...mapActions('diffs', [
@@ -169,6 +191,23 @@ export default {
       if (this.isCollapsed) {
         this.handleToggle();
       }
+    },
+    async postRender() {
+      const eventsForThisFile = [];
+
+      if (this.isFirstFile) {
+        eventsForThisFile.push(EVT_PERF_MARK_FIRST_DIFF_FILE_SHOWN);
+      }
+
+      if (this.isLastFile) {
+        eventsForThisFile.push(EVT_PERF_MARK_DIFF_FILES_END);
+      }
+
+      await this.$nextTick();
+
+      eventsForThisFile.forEach(event => {
+        eventHub.$emit(event);
+      });
     },
     handleToggle() {
       const currentCollapsedFlag = this.isCollapsed;
@@ -193,6 +232,7 @@ export default {
         .then(() => {
           requestIdleCallback(
             () => {
+              this.postRender();
               this.assignDiscussionsToDiff(this.getDiffFileDiscussions(this.file));
             },
             { timeout: 1000 },
@@ -267,16 +307,21 @@ export default {
           <div v-safe-html="errorMessage" class="nothing-here-block"></div>
         </div>
         <template v-else>
-          <div v-show="showWarning" class="nothing-here-block diff-collapsed">
-            {{ $options.i18n.collapsed }}
-            <a
-              class="click-to-expand"
-              data-testid="toggle-link"
-              href="#"
+          <div
+            v-show="showWarning"
+            class="collapsed-file-warning gl-p-7 gl-bg-orange-50 gl-text-center gl-rounded-bottom-left-base gl-rounded-bottom-right-base"
+          >
+            <p class="gl-mb-8">
+              {{ $options.i18n.autoCollapsed }}
+            </p>
+            <gl-button
+              data-testid="expand-button"
+              category="secondary"
+              variant="warning"
               @click.prevent="handleToggle"
             >
               {{ $options.i18n.expand }}
-            </a>
+            </gl-button>
           </div>
           <diff-content
             v-show="showContent"

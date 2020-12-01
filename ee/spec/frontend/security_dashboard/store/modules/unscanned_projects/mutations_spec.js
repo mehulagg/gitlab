@@ -1,6 +1,6 @@
-import createState from 'ee/security_dashboard/store/modules/unscanned_projects/state';
-import mutations from 'ee/security_dashboard/store/modules/unscanned_projects/mutations';
 import * as types from 'ee/security_dashboard/store/modules/unscanned_projects/mutation_types';
+import mutations from 'ee/security_dashboard/store/modules/unscanned_projects/mutations';
+import createState from 'ee/security_dashboard/store/modules/unscanned_projects/state';
 
 describe('unscannedProjects mutations', () => {
   let state;

@@ -16,6 +16,12 @@
 - page_description     @epic.description_html
 
 - page_card_attributes @epic.card_attributes
+- add_page_specific_style 'page_bundles/epics'
+- add_page_specific_style 'page_bundles/roadmap'
+
+- add_page_startup_api_call discussions_path(@epic)
+- add_page_startup_graphql_call('epic/epic_details', { fullPath: @group.full_path, iid: @epic.iid })
+- add_page_startup_graphql_call('epic/epic_children', { fullPath: @group.full_path, iid: @epic.iid, pageSize: 100, epicEndCursor: '', issueEndCursor: '' })
 
 #epic-app-root{ data: epic_show_app_data(@epic),
   'data-allow-sub-epics' => allow_sub_epics }
@@ -39,7 +45,9 @@
     .row
       %section.col-md-12
         #js-tree{ data: { id: @epic.to_global_id,
+          numerical_id: @epic.id,
           iid: @epic.iid,
+          group_id: @group.id,
           full_path: @group.full_path,
           auto_complete_epics: 'true',
           auto_complete_issues: 'true',

@@ -1,7 +1,7 @@
 ---
 stage: Manage
 group: Access
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: howto
 ---
 
@@ -44,7 +44,7 @@ Please note that for the deactivation option to be visible to an admin, the user
 Users can also be deactivated using the [GitLab API](../../api/users.md#deactivate-user).
 
 NOTE: **Note:**
-A deactivated user does not consume a [seat](../../subscriptions/self_managed/index.md#choose-the-number-of-users).
+A deactivated user does not consume a [seat](../../subscriptions/self_managed/index.md#billable-users).
 
 ## Activating a user
 
@@ -62,8 +62,8 @@ To do this:
 Users can also be activated using the [GitLab API](../../api/users.md#activate-user).
 
 NOTE: **Note:**
-Activating a user will change the user's state to active and it consumes a
-[seat](../../subscriptions/self_managed/index.md#choose-the-number-of-users).
+Activating a user changes the user's state to active and consumes a
+[seat](../../subscriptions/self_managed/index.md#billable-users).
 
 TIP: **Tip:**
 A deactivated user can also activate their account themselves by simply logging back in via the UI.

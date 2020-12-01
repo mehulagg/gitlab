@@ -32,7 +32,7 @@ import {
   setHighlightedRow,
   toggleTreeOpen,
   scrollToFile,
-  toggleShowTreeList,
+  setShowTreeList,
   renderFileForDiscussionId,
   setRenderTreeList,
   setShowWhitespace,
@@ -901,15 +901,22 @@ describe('DiffsStoreActions', () => {
     });
   });
 
-  describe('toggleShowTreeList', () => {
+  describe('setShowTreeList', () => {
     it('commits toggle', done => {
-      testAction(toggleShowTreeList, null, {}, [{ type: types.TOGGLE_SHOW_TREE_LIST }], [], done);
+      testAction(
+        setShowTreeList,
+        { showTreeList: true },
+        {},
+        [{ type: types.SET_SHOW_TREE_LIST, payload: true }],
+        [],
+        done,
+      );
     });
 
     it('updates localStorage', () => {
       jest.spyOn(localStorage, 'setItem').mockImplementation(() => {});
 
-      toggleShowTreeList({ commit() {}, state: { showTreeList: true } });
+      setShowTreeList({ commit() {} }, { showTreeList: true });
 
       expect(localStorage.setItem).toHaveBeenCalledWith('mr_tree_show', true);
     });
@@ -917,7 +924,7 @@ describe('DiffsStoreActions', () => {
     it('does not update localStorage', () => {
       jest.spyOn(localStorage, 'setItem').mockImplementation(() => {});
 
-      toggleShowTreeList({ commit() {}, state: { showTreeList: true } }, false);
+      setShowTreeList({ commit() {} }, { showTreeList: true, saving: false });
 
       expect(localStorage.setItem).not.toHaveBeenCalled();
     });
@@ -1149,7 +1156,11 @@ describe('DiffsStoreActions', () => {
       file_hash: 'testhash',
       alternate_viewer: { name: updatedViewerName },
     };
-    const updatedViewer = { name: updatedViewerName, automaticallyCollapsed: false };
+    const updatedViewer = {
+      name: updatedViewerName,
+      automaticallyCollapsed: false,
+      manuallyCollapsed: false,
+    };
     const testData = [{ rich_text: 'test' }, { rich_text: 'file2' }];
     let renamedFile;
     let mock;
@@ -1232,10 +1243,6 @@ describe('DiffsStoreActions', () => {
         { diffViewType: 'inline' },
         [
           {
-            type: 'SET_HIDDEN_VIEW_DIFF_FILE_LINES',
-            payload: { filePath: 'path', lines: ['test'] },
-          },
-          {
             type: 'SET_CURRENT_VIEW_DIFF_FILE_LINES',
             payload: { filePath: 'path', lines: ['test'] },
           },
@@ -1254,10 +1261,6 @@ describe('DiffsStoreActions', () => {
         { file: { file_path: 'path' }, data: [] },
         { diffViewType: 'inline' },
         [
-          {
-            type: 'SET_HIDDEN_VIEW_DIFF_FILE_LINES',
-            payload: { filePath: 'path', lines },
-          },
           {
             type: 'SET_CURRENT_VIEW_DIFF_FILE_LINES',
             payload: { filePath: 'path', lines: lines.slice(0, 200) },

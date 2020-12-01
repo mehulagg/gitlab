@@ -4,6 +4,8 @@ module API
   class ProjectAliases < ::API::Base
     include PaginationParams
 
+    feature_category :source_code_management
+
     before { check_feature_availability }
     before { authenticated_as_admin! }
 

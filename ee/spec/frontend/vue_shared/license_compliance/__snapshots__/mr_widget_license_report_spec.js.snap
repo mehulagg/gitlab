@@ -51,6 +51,7 @@ exports[`License Report MR Widget report section should render correctly 1`] = `
   >
     <a
       class="btn btn-default btn-sm js-manage-licenses gl-mr-3"
+      data-qa-selector="manage_licenses_button"
       href="http://test.host/lm_settings"
     >
       

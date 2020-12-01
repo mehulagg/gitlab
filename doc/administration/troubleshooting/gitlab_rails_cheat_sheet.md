@@ -1,7 +1,7 @@
 ---
 stage: none
 group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference
 ---
 
@@ -308,10 +308,10 @@ pp p.statistics  # compare with earlier values
 
 ### Recreate
 
-A Projects Wiki can be recreated by
-
-NOTE: **Note:**
+CAUTION: **Caution:**
 This is a destructive operation, the Wiki will be empty.
+
+A Projects Wiki can be recreated by this command:
 
 ```ruby
 p = Project.find_by_full_path('<username-or-group>/<project-name>')  ### enter your projects path
@@ -458,7 +458,7 @@ user.skip_reconfirmation!
 User.active.count
 
 # Users taking a seat on the instance
-License.current.current_active_users_count
+User.billable.count
 
 # The historical max on the instance as of the past year
 ::HistoricalData.max_historical_user_count
@@ -858,7 +858,7 @@ Find this content in the [Container Registry troubleshooting docs](../packages/c
 
 ## Sidekiq
 
-This content has been moved to the [Troubleshooting Sidekiq docs](./sidekiq.md).
+This content has been moved to the [Troubleshooting Sidekiq docs](sidekiq.md).
 
 ## Redis
 
@@ -998,4 +998,20 @@ Geo::ProjectRegistry.update_all(resync_repository: true, resync_wiki: true)
 project = Project.find_by_full_path('<group/project>')
 
 Geo::RepositorySyncService.new(project).execute
+```
+
+### Generate usage ping
+
+#### Generate or get the cached usage ping
+
+```ruby
+Gitlab::UsageData.to_json
+```
+
+#### Generate a fresh new usage ping
+
+This will also refresh the cached usage ping displayed in the admin area
+
+```ruby
+Gitlab::UsageData.to_json(force_refresh: true)
 ```

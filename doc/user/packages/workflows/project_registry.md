@@ -1,7 +1,7 @@
 ---
 stage: Package
 group: Package
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Project as a package registry
@@ -67,9 +67,9 @@ If you are using NPM, this involves creating an `.npmrc` file and adding the app
 to your project using your project ID, then adding a section to your `package.json` file with a similar URL.
 
 Follow
-the instructions in the [GitLab NPM Registry documentation](../npm_registry/index.md#authenticating-to-the-gitlab-npm-registry). After
+the instructions in the [GitLab NPM Registry documentation](../npm_registry/index.md#authenticate-to-the-package-registry). After
 you do this, you can push your NPM package to your project using `npm publish`, as described in the
-[uploading packages](../npm_registry/index.md#uploading-packages) section of the docs.
+[publishing packages](../npm_registry/index.md#publish-an-npm-package) section of the docs.
 
 #### Maven
 

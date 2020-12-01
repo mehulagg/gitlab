@@ -3,6 +3,7 @@ import $ from 'jquery';
 import 'select2/select2';
 import { debounce } from 'lodash';
 import Api from 'ee/api';
+import { loadCSSFile } from '~/lib/utils/css_utils';
 import { __ } from '~/locale';
 
 const anyBranch = {
@@ -54,27 +55,36 @@ export default {
     const $modal = $('#project-settings-approvals-create-modal .modal-content');
     this.$input = $(this.$refs.input);
 
-    this.$input
-      .select2({
-        minimumInputLength: 0,
-        multiple: false,
-        closeOnSelect: false,
-        formatResult,
-        formatSelection,
-        initSelection: (element, callback) => this.initialOption(element, callback),
-        query: debounce(({ term, callback }) => this.fetchBranches(term).then(callback), 250),
-        id: ({ type, id }) => `${type}${id}`,
+    loadCSSFile(gon.select2_css_path)
+      .then(() => {
+        this.$input
+          .select2({
+            minimumInputLength: 0,
+            multiple: false,
+            closeOnSelect: false,
+            formatResult,
+            formatSelection,
+            initSelection: (element, callback) => this.initialOption(element, callback),
+            query: debounce(({ term, callback }) => {
+              // eslint-disable-next-line promise/no-nesting
+              this.fetchBranches(term)
+                .then(callback)
+                .catch(() => {});
+            }, 250),
+            id: ({ type, id }) => `${type}${id}`,
+          })
+          .on('change', e => this.onChange(e))
+          .on('select2-open', () => {
+            // https://stackoverflow.com/questions/18487056/select2-doesnt-work-when-embedded-in-a-bootstrap-modal
+            // Ensure search feature works in modal
+            // (known issue with our current select2 version, solved in version 4 with "dropdownParent")
+            $modal.removeAttr('tabindex', '-1');
+          })
+          .on('select2-close', () => {
+            $modal.attr('tabindex', '-1');
+          });
       })
-      .on('change', e => this.onChange(e))
-      .on('select2-open', () => {
-        // https://stackoverflow.com/questions/18487056/select2-doesnt-work-when-embedded-in-a-bootstrap-modal
-        // Ensure search feature works in modal
-        // (known issue with our current select2 version, solved in version 4 with "dropdownParent")
-        $modal.removeAttr('tabindex', '-1');
-      })
-      .on('select2-close', () => {
-        $modal.attr('tabindex', '-1');
-      });
+      .catch(() => {});
   },
   beforeDestroy() {
     this.$input.select2('destroy');

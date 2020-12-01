@@ -1,7 +1,7 @@
 ---
 stage: Release
 group: Release Management
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Release links API
@@ -91,32 +91,35 @@ Create an asset as a link from a Release.
 POST /projects/:id/releases/:tag_name/assets/links
 ```
 
-| Attribute     | Type           | Required | Description                             |
-| ------------- | -------------- | -------- | --------------------------------------- |
-| `id`          | integer/string | yes      | The ID or [URL-encoded path of the project](../README.md#namespaced-path-encoding). |
-| `tag_name`    | string         | yes      | The tag associated with the Release. |
-| `name`        | string         | yes      | The name of the link. |
-| `url`         | string         | yes      | The URL of the link. |
-| `link_type`        | string         | no       | The type of the link: `other`, `runbook`, `image`, `package`. Defaults to `other`. |
+| Attribute     | Type           | Required | Description                                                                                                      |
+| ------------- | -------------- | -------- | ---------------------------------------------------------------------------------------------------------------- |
+| `id`          | integer/string | yes      | The ID or [URL-encoded path of the project](../README.md#namespaced-path-encoding).                              |
+| `tag_name`    | string         | yes      | The tag associated with the Release.                                                                             |
+| `name`        | string         | yes      | The name of the link. Link names must be unique within the release.                                              |
+| `url`         | string         | yes      | The URL of the link. Link URLs must be unique within the release.                                                |
+| `filepath`    | string         | no       | Optional path for a [Direct Asset link](../../user/project/releases/index.md#permanent-links-to-release-assets). |
+| `link_type`   | string         | no       | The type of the link: `other`, `runbook`, `image`, `package`. Defaults to `other`.                               |
 
 Example request:
 
 ```shell
 curl --request POST \
-     --header "PRIVATE-TOKEN: n671WNGecHugsdEDPsyo" \
-     --data name="awesome-v0.2.dmg" \
-     --data url="http://192.168.10.15:3000" \
-     "https://gitlab.example.com/api/v4/projects/24/releases/v0.1/assets/links"
+    --header "PRIVATE-TOKEN: tkhfG7HgG-LiZd3zfdDC" \
+    --data name="hellodarwin-amd64" \
+    --data url="https://gitlab.example.com/mynamespace/hello/-/jobs/688/artifacts/raw/bin/hello-darwin-amd64" \
+    --data filepath="/bin/hellodarwin-amd64" \
+    "https://gitlab.example.com/api/v4/projects/20/releases/v1.7.0/assets/links"
 ```
 
 Example response:
 
 ```json
 {
-   "id":1,
-   "name":"awesome-v0.2.dmg",
-   "url":"http://192.168.10.15:3000",
-   "external":true,
+   "id":2,
+   "name":"hellodarwin-amd64",
+   "url":"https://gitlab.example.com/mynamespace/hello/-/jobs/688/artifacts/raw/bin/hello-darwin-amd64",
+   "direct_asset_url":"https://gitlab.example.com/mynamespace/hello/-/releases/v1.7.0/downloads/bin/hellodarwin-amd64",
+   "external":false,
    "link_type":"other"
 }
 ```
@@ -136,6 +139,7 @@ PUT /projects/:id/releases/:tag_name/assets/links/:link_id
 | `link_id`     | integer         | yes      | The ID of the link. |
 | `name`        | string         | no | The name of the link. |
 | `url`         | string         | no | The URL of the link. |
+| `filepath` | string     | no | Optional path for a [Direct Asset link](../../user/project/releases/index.md#permanent-links-to-release-assets).
 | `link_type`        | string         | no       | The type of the link: `other`, `runbook`, `image`, `package`. Defaults to `other`. |
 
 NOTE: **Note:**

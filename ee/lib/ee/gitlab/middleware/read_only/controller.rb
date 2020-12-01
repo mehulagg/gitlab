@@ -7,20 +7,28 @@ module EE
         module Controller
           extend ::Gitlab::Utils::Override
 
-          WHITELISTED_GEO_ROUTES = {
+          ALLOWLISTED_GEO_ROUTES = {
             'admin/geo/nodes' => %w{update}
           }.freeze
 
-          WHITELISTED_GEO_ROUTES_TRACKING_DB = {
+          ALLOWLISTED_GEO_ROUTES_TRACKING_DB = {
             'admin/geo/projects' => %w{destroy resync reverify force_redownload resync_all reverify_all},
             'admin/geo/uploads' => %w{destroy}
           }.freeze
 
+          ALLOWLISTED_GIT_WRITE_ROUTES = {
+            'repositories/git_http' => %w{git_receive_pack}
+          }.freeze
+
+          ALLOWLISTED_GIT_LFS_LOCKS_ROUTES = {
+            'repositories/lfs_locks_api' => %w{verify create unlock}
+          }.freeze
+
           private
 
-          override :whitelisted_routes
-          def whitelisted_routes
-            super || geo_node_update_route? || geo_proxy_git_ssh_route? || geo_api_route?
+          override :allowlisted_routes
+          def allowlisted_routes
+            super || geo_node_update_route? || geo_proxy_git_ssh_route? || geo_api_route? || geo_proxy_git_http_route? || lfs_locks_route?
           end
 
           def geo_node_update_route?
@@ -30,10 +38,10 @@ module EE
             controller = route_hash[:controller]
             action = route_hash[:action]
 
-            if WHITELISTED_GEO_ROUTES[controller]&.include?(action)
+            if ALLOWLISTED_GEO_ROUTES[controller]&.include?(action)
               ::Gitlab::Database.db_read_write?
             else
-              WHITELISTED_GEO_ROUTES_TRACKING_DB[controller]&.include?(action)
+              ALLOWLISTED_GEO_ROUTES_TRACKING_DB[controller]&.include?(action)
             end
           end
 
@@ -43,10 +51,28 @@ module EE
             end
           end
 
+          def geo_proxy_git_http_route?
+            return unless request.path.end_with?('.git/git-receive-pack')
+
+            ALLOWLISTED_GIT_WRITE_ROUTES[route_hash[:controller]]&.include?(route_hash[:action])
+          end
+
           def geo_api_route?
             ::Gitlab::Middleware::ReadOnly::API_VERSIONS.any? do |version|
               request.path.include?("/api/v#{version}/geo_replication")
             end
+          end
+
+          def lfs_locks_route?
+            # Calling route_hash may be expensive. Only do it if we think there's a possible match
+            return unless ::Gitlab::Geo.secondary?
+
+            unless request.path.end_with?('/info/lfs/locks', '/info/lfs/locks/verify') ||
+                %r{/info/lfs/locks/\d+/unlock\z}.match?(request.path)
+              return false
+            end
+
+            ALLOWLISTED_GIT_LFS_LOCKS_ROUTES[route_hash[:controller]]&.include?(route_hash[:action])
           end
         end
       end

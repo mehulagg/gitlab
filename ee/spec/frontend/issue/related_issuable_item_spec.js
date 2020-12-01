@@ -1,10 +1,10 @@
 import { mount } from '@vue/test-utils';
 import IssueWeight from 'ee_component/boards/components/issue_card_weight.vue';
+import { TEST_HOST } from 'jest/helpers/test_constants';
 import {
   defaultAssignees,
   defaultMilestone,
 } from 'jest/vue_shared/components/issue/related_issuable_mock_data';
-import { TEST_HOST } from 'jest/helpers/test_constants';
 import RelatedIssuableItem from '~/vue_shared/components/issue/related_issuable_item.vue';
 
 describe('RelatedIssuableItem', () => {
