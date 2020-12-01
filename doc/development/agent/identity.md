@@ -51,7 +51,7 @@ and minimize the permissions each particular agent needs.
 
 ## Kubernetes Agent authentication
 
-When adding a new agent, the UI wizard gives the user a bearer access token. The
+When adding a new agent, GitLab provides the user with a bearer access token. The
 agent uses this token to authenticate with GitLab. This token is a random string
 and does not encode any information in it, but it is secret and must
 be treated with care. Store it as a `Secret` in Kubernetes.
