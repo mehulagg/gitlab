@@ -1,12 +1,10 @@
 # frozen_string_literal: true
 
 module QA
-  context 'Create' do
-    # Use Admin credentials as a workaround for a permissions bug
-    # See https://gitlab.com/gitlab-org/gitlab/issues/13769
-    describe 'Pull mirror a repository over HTTP', :requires_admin do
+  RSpec.describe 'Create' do
+    describe 'Pull mirror a repository over HTTP' do
       it 'configures and syncs a (pull) mirrored repository with password auth', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/520' do
-        Flow::Login.sign_in_as_admin
+        Flow::Login.sign_in
 
         source = Resource::Repository::ProjectPush.fabricate! do |project_push|
           project_push.project_name = 'pull-mirror-source-project'
@@ -37,9 +35,12 @@ module QA
 
         # Check that the target project has the commit from the source
         target_project.visit!
-        expect(page).to have_content("README.md")
-        expect(page).to have_content("This is a pull mirroring test project")
-        expect(page).to have_content("Mirrored from #{masked_url(source_project_uri)}")
+
+        Page::Project::Show.perform do |project|
+          expect(project).to have_file('README.md')
+          expect(project).to have_readme_content('This is a pull mirroring test project')
+          expect(project).to have_text("Mirrored from #{masked_url(source_project_uri)}")
+        end
       end
 
       def masked_url(url)

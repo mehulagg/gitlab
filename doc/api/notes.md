@@ -1,3 +1,9 @@
+---
+stage: Plan
+group: Project Management
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Notes API
 
 Notes are comments on:
@@ -12,7 +18,8 @@ assignee changes, there will be a corresponding system note).
 
 ## Resource events
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/38096) in GitLab 13.3 for state, milestone, and weight events.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/38096) in GitLab 13.3 for state, milestone, and weight events.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/40850) in [GitLab Starter](https://about.gitlab.com/pricing/) 13.4 for iteration events.
 
 Some system notes are not part of this API, but are recorded as separate events:
 
@@ -20,6 +27,7 @@ Some system notes are not part of this API, but are recorded as separate events:
 - [Resource state events](resource_state_events.md)
 - [Resource milestone events](resource_milestone_events.md)
 - [Resource weight events](resource_weight_events.md) **(STARTER)**
+- [Resource iteration events](resource_iteration_events.md) **(STARTER)**
 
 ## Notes pagination
 

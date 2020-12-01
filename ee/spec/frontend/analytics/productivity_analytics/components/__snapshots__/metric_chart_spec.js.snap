@@ -22,21 +22,31 @@ exports[`MetricChart component template when isLoading is false and chartData is
 <div>
   <!---->
    
-  <gl-deprecated-dropdown-stub
+  <gl-dropdown-stub
+    category="primary"
     class="mb-4 metric-dropdown"
+    headertext=""
     menu-class="w-100 mw-100"
+    size="medium"
     text="Please select a metric"
-    toggle-class="dropdown-menu-toggle w-100"
+    toggleclass="dropdown-menu-toggle w-100"
+    variant="default"
   >
-    <gl-deprecated-dropdown-item-stub
+    <gl-dropdown-item-stub
       active-class="is-active"
+      avatarurl=""
       class="w-100"
+      iconcolor=""
+      iconname=""
+      iconrightarialabel=""
+      iconrightname=""
+      secondarytext=""
     >
       <span
         class="d-flex"
       >
         <gl-icon-stub
-          aria-label="Selected"
+          arialabel="Selected"
           class="flex-shrink-0 gl-mr-2 invisible"
           name="mobile-issue-close"
           size="16"
@@ -46,16 +56,22 @@ exports[`MetricChart component template when isLoading is false and chartData is
             Time from last commit to merge
           
       </span>
-    </gl-deprecated-dropdown-item-stub>
-    <gl-deprecated-dropdown-item-stub
+    </gl-dropdown-item-stub>
+    <gl-dropdown-item-stub
       active-class="is-active"
+      avatarurl=""
       class="w-100"
+      iconcolor=""
+      iconname=""
+      iconrightarialabel=""
+      iconrightname=""
+      secondarytext=""
     >
       <span
         class="d-flex"
       >
         <gl-icon-stub
-          aria-label="Selected"
+          arialabel="Selected"
           class="flex-shrink-0 gl-mr-2 invisible"
           name="mobile-issue-close"
           size="16"
@@ -65,8 +81,8 @@ exports[`MetricChart component template when isLoading is false and chartData is
             Time from first comment to last commit
           
       </span>
-    </gl-deprecated-dropdown-item-stub>
-  </gl-deprecated-dropdown-stub>
+    </gl-dropdown-item-stub>
+  </gl-dropdown-stub>
    
   <!---->
    
@@ -82,7 +98,7 @@ exports[`MetricChart component template when isLoading is true matches the snaps
    
   <gl-loading-icon-stub
     class="my-4 py-4"
-    color="orange"
+    color="dark"
     label="Loading"
     size="md"
   />

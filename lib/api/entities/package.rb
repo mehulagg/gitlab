@@ -7,7 +7,19 @@ module API
       extend ::API::Entities::EntityHelpers
 
       expose :id
-      expose :name
+
+      expose :name do |package|
+        if package.conan?
+          package.conan_recipe
+        else
+          package.name
+        end
+      end
+
+      expose :conan_package_name, if: ->(package) { package.conan? } do |package|
+        package.name
+      end
+
       expose :version
       expose :package_type
 
@@ -26,7 +38,8 @@ module API
       expose :project_path, if: ->(obj, opts) { opts[:group] && Ability.allowed?(opts[:user], :read_project, obj.project) }
       expose :tags
 
-      expose :pipeline, if: ->(package) { package.build_info }, using: Package::Pipeline
+      expose :pipeline, if: ->(package) { package.original_build_info }, using: Package::Pipeline
+      expose :pipelines, if: ->(package) { package.pipelines.present? }, using: Package::Pipeline
 
       expose :versions, using: ::API::Entities::PackageVersion, unless: ->(_, opts) { opts[:collection] }
 

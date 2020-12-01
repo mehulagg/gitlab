@@ -1,10 +1,10 @@
 ---
 stage: Monitor
-group: APM
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+group: Health
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Monitor your CI/CD environment's metrics **(CORE)**
+# Monitor your environment's metrics **(CORE)**
 
 GitLab helps your team monitor the health and performance of your applications
 and infrastructure by turning statistics and log files into charts and graphs
@@ -46,7 +46,7 @@ For GitLab-managed Prometheus, you can set up [Auto DevOps](../../topics/autodev
 to quickly create a deployment:
 
 1. Navigate to your project's **Operations > Kubernetes** page.
-1. Ensure that, in addition to Prometheus, you also have Runner and Ingress
+1. Ensure that, in addition to Prometheus, you also have GitLab Runner and Ingress
    installed.
 1. After installing Ingress, copy its endpoint.
 1. Navigate to your project's **Settings > CI/CD** page. In the
@@ -147,7 +147,7 @@ After saving them, they display on the environment metrics dashboard provided th
 A few fields are required:
 
 - **Name**: Chart title
-- **Type**: Type of metric. Metrics of the same type will be shown together.
+- **Type**: Type of metric. Metrics of the same type are shown together.
 - **Query**: Valid [PromQL query](https://prometheus.io/docs/prometheus/latest/querying/basics/).
 - **Y-axis label**: Y axis title to display on the dashboard.
 - **Unit label**: Query units, for example `req / sec`. Shown next to the value.

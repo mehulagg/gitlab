@@ -21,14 +21,18 @@ class MergeRequest < ApplicationRecord
   include MilestoneEventable
   include StateEventable
   include ApprovableBase
+  include IdInOrdered
+  include Todoable
 
   extend ::Gitlab::Utils::Override
 
   sha_attribute :squash_commit_sha
+  sha_attribute :merge_ref_sha
 
   self.reactive_cache_key = ->(model) { [model.project.id, model.iid] }
   self.reactive_cache_refresh_interval = 10.minutes
   self.reactive_cache_lifetime = 10.minutes
+  self.reactive_cache_work_type = :no_dependency
 
   SORTING_PREFERENCE_FIELD = :merge_requests_sort
 
@@ -37,7 +41,14 @@ class MergeRequest < ApplicationRecord
   belongs_to :merge_user, class_name: "User"
   belongs_to :iteration, foreign_key: 'sprint_id'
 
-  has_internal_id :iid, scope: :target_project, track_if: -> { !importing? }, init: ->(s) { s&.target_project&.merge_requests&.maximum(:iid) }
+  has_internal_id :iid, scope: :target_project, track_if: -> { !importing? },
+    init: ->(mr, scope) do
+      if mr
+        mr.target_project&.merge_requests&.maximum(:iid)
+      elsif scope[:project]
+        where(target_project: scope[:project]).maximum(:iid)
+      end
+    end
 
   has_many :merge_request_diffs
   has_many :merge_request_context_commits, inverse_of: :merge_request
@@ -45,6 +56,7 @@ class MergeRequest < ApplicationRecord
 
   has_one :merge_request_diff,
     -> { order('merge_request_diffs.id DESC') }, inverse_of: :merge_request
+  has_one :cleanup_schedule, inverse_of: :merge_request
 
   belongs_to :latest_merge_request_diff, class_name: 'MergeRequestDiff'
   manual_inverse_association :latest_merge_request_diff, :merge_request
@@ -118,6 +130,8 @@ class MergeRequest < ApplicationRecord
   # Temporary fields to store compare vars
   # when creating new merge request
   attr_accessor :can_be_created, :compare_commits, :diff_options, :compare
+
+  participant :reviewers
 
   # Keep states definition to be evaluated before the state_machine block to avoid spec failures.
   # If this gets evaluated after, the `merged` and `locked` states which are overrided can be nil.
@@ -253,11 +267,7 @@ class MergeRequest < ApplicationRecord
   scope :join_project, -> { joins(:target_project) }
   scope :join_metrics, -> do
     query = joins(:metrics)
-
-    if Feature.enabled?(:improved_mr_merged_at_queries, default_enabled: true)
-      query = query.where(MergeRequest.arel_table[:target_project_id].eq(MergeRequest::Metrics.arel_table[:target_project_id]))
-    end
-
+    query = query.where(MergeRequest.arel_table[:target_project_id].eq(MergeRequest::Metrics.arel_table[:target_project_id]))
     query
   end
   scope :references_project, -> { references(:target_project) }
@@ -268,6 +278,8 @@ class MergeRequest < ApplicationRecord
                target_project: :project_feature,
                metrics: [:latest_closed_by, :merged_by])
   }
+
+  scope :with_csv_entity_associations, -> { preload(:assignees, :approved_by_users, :author, :milestone, metrics: [:merged_by]) }
 
   scope :by_target_branch_wildcard, ->(wildcard_branch_name) do
     where("target_branch LIKE ?", ApplicationRecord.sanitize_sql_like(wildcard_branch_name).tr('*', '%'))
@@ -290,6 +302,7 @@ class MergeRequest < ApplicationRecord
   scope :preload_author, -> { preload(:author) }
   scope :preload_approved_by_users, -> { preload(:approved_by_users) }
   scope :preload_metrics, -> (relation) { preload(metrics: relation) }
+  scope :with_web_entity_associations, -> { preload(:author, :target_project) }
 
   scope :with_auto_merge_enabled, -> do
     with_state(:opened).where(auto_merge_enabled: true)
@@ -297,6 +310,33 @@ class MergeRequest < ApplicationRecord
 
   scope :including_metrics, -> do
     includes(:metrics)
+  end
+
+  scope :with_jira_issue_keys, -> { where('title ~ :regex OR merge_requests.description ~ :regex', regex: Gitlab::Regex.jira_issue_key_regex.source) }
+
+  scope :review_requested, -> do
+    where(reviewers_subquery.exists)
+  end
+
+  scope :no_review_requested, -> do
+    where(reviewers_subquery.exists.not)
+  end
+
+  scope :review_requested_to, ->(user) do
+    where(
+      reviewers_subquery
+        .where(Arel::Table.new("#{to_ability_name}_reviewers")[:user_id].eq(user))
+        .exists
+    )
+  end
+
+  scope :no_review_requested_to, ->(user) do
+    where(
+      reviewers_subquery
+        .where(Arel::Table.new("#{to_ability_name}_reviewers")[:user_id].eq(user))
+        .exists
+        .not
+    )
   end
 
   after_save :keep_around_commit, unless: :importing?
@@ -344,6 +384,12 @@ class MergeRequest < ApplicationRecord
     else
       super
     end
+  end
+
+  def self.reviewers_subquery
+    MergeRequestReviewer.arel_table
+      .project('true')
+      .where(Arel::Nodes::SqlLiteral.new("#{to_ability_name}_id = #{to_ability_name}s.id"))
   end
 
   def rebase_in_progress?
@@ -627,7 +673,7 @@ class MergeRequest < ApplicationRecord
   def diff_size
     # Calling `merge_request_diff.diffs.real_size` will also perform
     # highlighting, which we don't need here.
-    merge_request_diff&.real_size || diff_stats&.real_size || diffs.real_size
+    merge_request_diff&.real_size || diff_stats&.real_size(project: project) || diffs.real_size
   end
 
   def modified_paths(past_merge_request_diff: nil, fallback_on_overflow: false)
@@ -926,7 +972,7 @@ class MergeRequest < ApplicationRecord
   # rubocop: enable CodeReuse/ServiceClass
 
   def diffable_merge_ref?
-    can_be_merged? && merge_ref_head.present?
+    open? && merge_ref_head.present? && (Feature.enabled?(:display_merge_conflicts_in_diff, project) || can_be_merged?)
   end
 
   # Returns boolean indicating the merge_status should be rechecked in order to
@@ -1258,6 +1304,8 @@ class MergeRequest < ApplicationRecord
   # Returns the current merge-ref HEAD commit.
   #
   def merge_ref_head
+    return project.repository.commit(merge_ref_sha) if merge_ref_sha
+
     project.repository.commit(merge_ref_path)
   end
 
@@ -1295,6 +1343,14 @@ class MergeRequest < ApplicationRecord
     yield
   ensure
     unlock_mr
+  end
+
+  def update_and_mark_in_progress_merge_commit_sha(commit_id)
+    self.update(in_progress_merge_commit_sha: commit_id)
+    # Since another process checks for matching merge request, we need
+    # to make it possible to detect whether the query should go to the
+    # primary.
+    target_project.mark_primary_write_location
   end
 
   def diverged_commits_count
@@ -1371,8 +1427,6 @@ class MergeRequest < ApplicationRecord
   end
 
   def has_coverage_reports?
-    return false unless Feature.enabled?(:coverage_report_view, project)
-
     actual_head_pipeline&.has_coverage_reports?
   end
 
@@ -1473,6 +1527,19 @@ class MergeRequest < ApplicationRecord
     Commit.truncate_sha(merge_commit_sha) if merge_commit_sha
   end
 
+  def merged_commit_sha
+    return unless merged?
+
+    sha = merge_commit_sha || squash_commit_sha || diff_head_sha
+    sha.presence
+  end
+
+  def short_merged_commit_sha
+    if sha = merged_commit_sha
+      Commit.truncate_sha(sha)
+    end
+  end
+
   def can_be_reverted?(current_user)
     return false unless merge_commit
     return false unless merged_at
@@ -1494,6 +1561,7 @@ class MergeRequest < ApplicationRecord
 
       metrics&.merged_at ||
         merge_event&.created_at ||
+        resource_state_events.find_by(state: :merged)&.created_at ||
         notes.system.reorder(nil).find_by(note: 'merged')&.created_at
     end
   end
@@ -1574,6 +1642,12 @@ class MergeRequest < ApplicationRecord
       .find_by(sha: diff_base_sha, ref: target_branch)
   end
 
+  def merge_base_pipeline
+    @merge_base_pipeline ||= project.ci_pipelines
+      .order(id: :desc)
+      .find_by(sha: actual_head_pipeline.target_sha, ref: target_branch)
+  end
+
   def discussions_rendered_on_frontend?
     true
   end
@@ -1587,7 +1661,7 @@ class MergeRequest < ApplicationRecord
   def first_contribution?
     return false if project.team.max_member_access(author_id) > Gitlab::Access::GUEST
 
-    project.merge_requests.merged.where(author_id: author_id).empty?
+    !project.merge_requests.merged.exists?(author_id: author_id)
   end
 
   # TODO: remove once production database rename completes
@@ -1661,6 +1735,10 @@ class MergeRequest < ApplicationRecord
 
   def allows_reviewers?
     Feature.enabled?(:merge_request_reviewers, project)
+  end
+
+  def allows_multiple_reviewers?
+    false
   end
 
   private

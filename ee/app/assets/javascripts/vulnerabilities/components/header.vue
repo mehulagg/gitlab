@@ -1,10 +1,14 @@
 <script>
-import { GlLoadingIcon, GlButton } from '@gitlab/ui';
+import { GlLoadingIcon, GlButton, GlBadge } from '@gitlab/ui';
 import Api from 'ee/api';
 import { CancelToken } from 'axios';
 import SplitButton from 'ee/vue_shared/security_reports/components/split_button.vue';
 import axios from '~/lib/utils/axios_utils';
 import download from '~/lib/utils/downloader';
+import {
+  convertObjectPropsToSnakeCase,
+  convertObjectPropsToCamelCase,
+} from '~/lib/utils/common_utils';
 import { redirectTo } from '~/lib/utils/url_utility';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { s__ } from '~/locale';
@@ -20,6 +24,7 @@ export default {
   components: {
     GlLoadingIcon,
     GlButton,
+    GlBadge,
     ResolutionAlert,
     VulnerabilityStateDropdown,
     SplitButton,
@@ -46,7 +51,16 @@ export default {
     };
   },
 
+  badgeVariants: {
+    confirmed: 'danger',
+    resolved: 'success',
+    detected: 'warning',
+  },
+
   computed: {
+    stateVariant() {
+      return this.$options.badgeVariants[this.vulnerability.state] || 'neutral';
+    },
     actionButtons() {
       const buttons = [];
 
@@ -68,7 +82,7 @@ export default {
       );
     },
     hasIssue() {
-      return Boolean(this.vulnerability.issue_feedback?.issue_iid);
+      return Boolean(this.vulnerability.issueFeedback?.issueIid);
     },
     hasRemediation() {
       const { remediations } = this.vulnerability;
@@ -76,18 +90,14 @@ export default {
     },
     canCreateMergeRequest() {
       return (
-        !this.vulnerability.merge_request_feedback?.merge_request_path &&
-        Boolean(this.vulnerability.create_mr_url) &&
+        !this.vulnerability.mergeRequestFeedback?.mergeRequestPath &&
+        Boolean(this.vulnerability.createMrUrl) &&
         this.hasRemediation
       );
     },
-    statusBoxStyle() {
-      // Get the badge variant based on the vulnerability state, defaulting to 'expired'.
-      return VULNERABILITY_STATE_OBJECTS[this.vulnerability.state]?.statusBoxStyle || 'expired';
-    },
     showResolutionAlert() {
       return (
-        this.vulnerability.resolved_on_default_branch &&
+        this.vulnerability.resolvedOnDefaultBranch &&
         this.vulnerability.state !== VULNERABILITY_STATE_OBJECTS.resolved.state
       );
     },
@@ -97,7 +107,7 @@ export default {
     'vulnerability.state': {
       immediate: true,
       handler(state) {
-        const id = this.vulnerability[`${state}_by_id`];
+        const id = this.vulnerability[`${state}ById`];
 
         if (id === undefined) return; // Don't do anything if there's no ID.
 
@@ -127,7 +137,7 @@ export default {
 
       Api.changeVulnerabilityState(this.vulnerability.id, newState)
         .then(({ data }) => {
-          Object.assign(this.vulnerability, data);
+          Object.assign(this.vulnerability, convertObjectPropsToCamelCase(data));
           this.$emit('vulnerability-state-change');
         })
         .catch(() => {
@@ -145,26 +155,26 @@ export default {
       this.isProcessingAction = true;
 
       const {
-        report_type: category,
+        reportType: category,
         pipeline: { sourceBranch },
-        project_fingerprint: projectFingerprint,
+        projectFingerprint,
       } = this.vulnerability;
 
       axios
-        .post(this.vulnerability.create_mr_url, {
+        .post(this.vulnerability.createMrUrl, {
           vulnerability_feedback: {
             feedback_type: FEEDBACK_TYPES.MERGE_REQUEST,
             category,
             project_fingerprint: projectFingerprint,
             vulnerability_data: {
-              ...this.vulnerability,
+              ...convertObjectPropsToSnakeCase(this.vulnerability),
               category,
               target_branch: sourceBranch,
             },
           },
         })
-        .then(({ data: { merge_request_path } }) => {
-          redirectTo(merge_request_path);
+        .then(({ data: { merge_request_path: mergeRequestPath } }) => {
+          redirectTo(mergeRequestPath);
         })
         .catch(() => {
           this.isProcessingAction = false;
@@ -219,20 +229,14 @@ export default {
     <resolution-alert
       v-if="showResolutionAlert"
       :vulnerability-id="vulnerability.id"
-      :default-branch-name="vulnerability.project_default_branch"
+      :default-branch-name="vulnerability.projectDefaultBranch"
     />
     <div class="detail-page-header">
       <div class="detail-page-header-body align-items-center">
         <gl-loading-icon v-if="isLoadingVulnerability" class="mr-2" />
-        <span
-          v-else
-          ref="badge"
-          :class="
-            `text-capitalize align-self-center issuable-status-box status-box status-box-${statusBoxStyle}`
-          "
-        >
+        <gl-badge v-else class="gl-mr-4 text-capitalize" :variant="stateVariant">
           {{ vulnerability.state }}
-        </span>
+        </gl-badge>
 
         <status-description
           class="issuable-meta"

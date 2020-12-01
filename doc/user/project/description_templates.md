@@ -1,7 +1,7 @@
 ---
 stage: Plan
 group: Project Management
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Description templates
@@ -49,8 +49,8 @@ To create a Markdown file:
 
  1. Click the `+` button next to `master` and click **New file**.
  1. Add the name of your issue template to the **File name** text field next to `master`.
-    Make sure words are separated with underscores and that your file has the `.md` extension, for
-    example `feature_request.md`.
+    Make sure that your file has the `.md` extension, for
+    example `feature_request.md` or `Feature Request.md`.
  1. Commit and push to your default branch.
 
 If you don't have a `.gitlab/issue_templates` directory in your repository, you'll need to create it.
@@ -62,7 +62,7 @@ To create the `.gitlab/issue_templates` directory:
  1. Click the `+` button next to `master` again and select **New directory**.This time, n
  1. Name your directory `issue_templates` and commit to your default branch.
 
-To check if this has worked correctly, [create a new issue](./issues/managing_issues.md#create-a-new-issue)
+To check if this has worked correctly, [create a new issue](issues/managing_issues.md#create-a-new-issue)
 and see if you can choose a description template.
 
 ## Creating merge request templates
@@ -78,6 +78,9 @@ This will enable the `Bug` dropdown option when creating or editing issues. When
 `Bug` is selected, the content from the `Bug.md` template file will be copied
 to the issue description field. The 'Reset template' button will discard any
 changes you made after picking the template and return it to its initial status.
+
+TIP: **Tip:**
+You can create short-cut links to create an issue using a designated template. For example: `https://gitlab.com/gitlab-org/gitlab/-/issues/new?issuable_template=Feature%20proposal`.
 
 ![Description templates](img/description_templates.png)
 

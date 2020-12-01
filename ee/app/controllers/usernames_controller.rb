@@ -3,6 +3,8 @@
 class UsernamesController < ApplicationController
   skip_before_action :authenticate_user!, only: [:suggest]
 
+  feature_category :users
+
   def suggest
     if validate_params
       username = ::User.username_suggestion(params[:name])

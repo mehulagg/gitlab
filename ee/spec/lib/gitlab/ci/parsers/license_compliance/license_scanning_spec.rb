@@ -122,6 +122,18 @@ RSpec.describe Gitlab::Ci::Parsers::LicenseCompliance::LicenseScanning do
         expect(report.licenses[0].count).to be(2)
         expect(report.licenses[0].dependencies.count).to be(2)
         expect(report.licenses[0].dependencies.map(&:name)).to contain_exactly('b', 'c')
+
+        dependency_b = report.licenses[0].dependencies.find { |x| x.name == 'b' }
+        expect(dependency_b.name).to eql('b')
+        expect(dependency_b.version).to eql('0.1.0')
+        expect(dependency_b.path).to eql('yarn.lock')
+        expect(dependency_b.package_manager).to eql('yarn')
+
+        dependency_c = report.licenses[0].dependencies.find { |x| x.name == 'c' }
+        expect(dependency_c.name).to eql('c')
+        expect(dependency_c.version).to eql('1.1.0')
+        expect(dependency_c.path).to eql('Gemfile.lock')
+        expect(dependency_c.package_manager).to eql('bundler')
       end
 
       it 'parses the MIT license' do
@@ -131,6 +143,18 @@ RSpec.describe Gitlab::Ci::Parsers::LicenseCompliance::LicenseScanning do
         expect(report.licenses[1].count).to be(2)
         expect(report.licenses[1].dependencies.count).to be(2)
         expect(report.licenses[1].dependencies.map(&:name)).to contain_exactly('a', 'c')
+
+        dependency_a = report.licenses[1].dependencies.find { |x| x.name == 'a' }
+        expect(dependency_a.name).to eql('a')
+        expect(dependency_a.version).to eql('1.0.0')
+        expect(dependency_a.path).to eql('Gemfile.lock')
+        expect(dependency_a.package_manager).to eql('bundler')
+
+        dependency_c = report.licenses[1].dependencies.find { |x| x.name == 'c' }
+        expect(dependency_c.name).to eql('c')
+        expect(dependency_c.version).to eql('1.1.0')
+        expect(dependency_c.path).to eql('Gemfile.lock')
+        expect(dependency_c.package_manager).to eql('bundler')
       end
 
       it 'parses an unknown license' do
@@ -140,6 +164,11 @@ RSpec.describe Gitlab::Ci::Parsers::LicenseCompliance::LicenseScanning do
         expect(report.licenses[2].count).to be(1)
         expect(report.licenses[2].dependencies.count).to be(1)
         expect(report.licenses[2].dependencies.map(&:name)).to contain_exactly('d')
+
+        expect(report.licenses[2].dependencies[0].name).to eql('d')
+        expect(report.licenses[2].dependencies[0].version).to eql('1.1.1')
+        expect(report.licenses[2].dependencies[0].package_manager).to eql('bundler')
+        expect(report.licenses[2].dependencies[0].path).to eql('Gemfile.lock')
       end
     end
 

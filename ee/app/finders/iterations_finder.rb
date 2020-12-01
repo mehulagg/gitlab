@@ -15,6 +15,27 @@ class IterationsFinder
 
   attr_reader :params, :current_user
 
+  class << self
+    def params_for_parent(parent, include_ancestors: false)
+      case parent
+      when Group
+        if include_ancestors
+          { group_ids: parent.self_and_ancestors.select(:id) }
+        else
+          { group_ids: parent.id }
+        end
+      when Project
+        if include_ancestors && parent.parent_id.present?
+          { group_ids: parent.parent.self_and_ancestors.select(:id), project_ids: parent.id }
+        else
+          { project_ids: parent.id }
+        end
+      else
+        raise ArgumentError, 'Invalid parent class. Only Project and Group are supported.'
+      end
+    end
+  end
+
   def initialize(current_user, params = {})
     @params = params
     @current_user = current_user

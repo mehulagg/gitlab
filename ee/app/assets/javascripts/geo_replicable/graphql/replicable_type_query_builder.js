@@ -11,7 +11,6 @@ export default graphQlFieldName => {
           }
           nodes {
             id
-            packageFileId
             state
             retryCount
             lastSyncFailure

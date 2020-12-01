@@ -33,7 +33,7 @@ RSpec.describe 'Profile > Account', :js do
       end
 
       it 'allows the user to disconnect when there is an existing identity' do
-        expect(page).to have_link('Disconnect Twitter', href: '/profile/account/unlink?provider=twitter')
+        expect(page).to have_link('Disconnect Twitter', href: '/-/profile/account/unlink?provider=twitter')
       end
 
       it 'shows active for a provider that is not allowed to unlink' do
@@ -78,14 +78,14 @@ RSpec.describe 'Profile > Account', :js do
         update_username(new_username)
         visit new_project_path
         expect(current_path).to eq(new_project_path)
-        expect(find('.breadcrumbs-sub-title')).to have_content('Details')
+        expect(find('.breadcrumbs')).to have_content(user.name)
       end
 
       it 'the old project path redirects to the new path' do
         update_username(new_username)
         visit old_project_path
         expect(current_path).to eq(new_project_path)
-        expect(find('.breadcrumbs-sub-title')).to have_content('Details')
+        expect(find('.breadcrumbs')).to have_content(user.name)
       end
     end
   end
@@ -128,10 +128,10 @@ def update_username(new_username)
 
   fill_in 'username-change-input', with: new_username
 
-  page.find('[data-target="#username-change-confirmation-modal"]').click
+  page.find('[data-testid="username-change-confirmation-modal"]').click
 
   page.within('.modal') do
-    find('.js-modal-primary-action').click
+    find('.js-modal-action-primary').click
   end
 
   wait_for_requests

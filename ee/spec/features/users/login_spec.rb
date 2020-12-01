@@ -32,6 +32,16 @@ RSpec.describe 'Login' do
       .to change { AuditEvent.where(entity_id: -1).count }.from(0).to(1)
   end
 
+  it 'creates a security event for an invalid one-time code' do
+    user = create(:user, :two_factor)
+    gitlab_sign_in(user)
+
+    expect do
+      fill_in 'user_otp_attempt', with: 'invalid_code'
+      click_button 'Verify code'
+    end.to change { AuditEvent.count }.by(1)
+  end
+
   describe 'smartcard authentication' do
     before do
       allow(Gitlab.config.smartcard).to receive(:enabled).and_return(true)
@@ -45,16 +55,16 @@ RSpec.describe 'Login' do
           stub_licensed_features(smartcard_auth: false)
         end
 
-        it 'correctly renders tabs and panes' do
+        it 'does not render any tabs' do
           subject
 
-          ensure_tab_pane_correctness(false)
+          ensure_no_tabs
         end
 
-        it 'does not show smartcard login form' do
-          subject
+        it 'renders link to sign up path' do
+          visit new_user_session_path
 
-          expect(page).not_to have_selector('.nav-tabs a[href="#smartcard"]')
+          expect(page.body).to have_link('Register now', href: new_user_registration_path)
         end
       end
 
@@ -66,16 +76,13 @@ RSpec.describe 'Login' do
         it 'correctly renders tabs and panes' do
           subject
 
-          expect(page.all('.nav-tabs a[data-toggle="tab"]').length).to be(3)
-
-          ensure_one_active_tab
-          ensure_one_active_pane
+          ensure_tab_pane_correctness(%w(Smartcard Standard))
         end
 
-        it 'shows smartcard login form' do
-          subject
+        it 'renders link to sign up path' do
+          visit new_user_session_path
 
-          expect(page).to have_selector('.nav-tabs a[href="#smartcard"]')
+          expect(page.body).to have_link('Register now', href: new_user_registration_path)
         end
 
         describe 'with two-factor authentication required', :clean_gitlab_redis_shared_state do

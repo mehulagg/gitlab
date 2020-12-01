@@ -1,7 +1,7 @@
+import { GlDropdown, GlDropdownItem } from '@gitlab/ui';
+import { mount } from '@vue/test-utils';
 import Vue from 'vue';
 import Vuex from 'vuex';
-import { mount } from '@vue/test-utils';
-import { GlNewDropdown as GlDropdown, GlNewDropdownItem as GlDropdownItem } from '@gitlab/ui';
 import ToggleEpicsSwimlanes from 'ee/boards/components/toggle_epics_swimlanes.vue';
 
 Vue.use(Vuex);
@@ -41,7 +41,7 @@ describe('ToggleEpicsSwimlanes', () => {
     });
 
     it('renders "Group by" label', () => {
-      expect(wrapper.find('[data-testid="toggle-swimlanes-label"]').text()).toEqual('Group by:');
+      expect(wrapper.find('[data-testid="toggle-swimlanes-label"]').text()).toEqual('Group by');
     });
 
     it('renders dropdown with 2 options', () => {

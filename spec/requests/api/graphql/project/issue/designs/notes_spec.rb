@@ -30,9 +30,9 @@ RSpec.describe 'Getting designs related to an issue' do
 
     post_graphql(query(note_fields), current_user: nil)
 
-    designs_data = graphql_data['project']['issue']['designs']['designs']
-    design_data = designs_data['edges'].first['node']
-    note_data = design_data['notes']['edges'].first['node']
+    designs_data = graphql_data['project']['issue']['designCollection']['designs']
+    design_data = designs_data['nodes'].first
+    note_data = design_data['notes']['nodes'].first
 
     expect(note_data['id']).to eq(note.to_global_id.to_s)
   end
@@ -40,14 +40,10 @@ RSpec.describe 'Getting designs related to an issue' do
   def query(note_fields = all_graphql_fields_for(Note))
     design_node = <<~NODE
     designs {
-      edges {
-        node {
-          notes {
-            edges {
-              node {
-                #{note_fields}
-              }
-            }
+      nodes {
+        notes {
+          nodes {
+            #{note_fields}
           }
         }
       }
@@ -60,7 +56,7 @@ RSpec.describe 'Getting designs related to an issue' do
         'issue',
         { iid: design.issue.iid.to_s },
         query_graphql_field(
-          'designs', {}, design_node
+          'designCollection', {}, design_node
         )
       )
     )

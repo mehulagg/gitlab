@@ -1,9 +1,9 @@
 <script>
-import { GlDeprecatedDropdownItem } from '@gitlab/ui';
+import { GlDropdownItem } from '@gitlab/ui';
 
 export default {
   components: {
-    GlDeprecatedDropdownItem,
+    GlDropdownItem,
   },
   props: {
     user: {
@@ -24,28 +24,15 @@ export default {
 </script>
 
 <template>
-  <gl-deprecated-dropdown-item
+  <gl-dropdown-item
     :key="user.username"
     data-testid="assigneeDropdownItem"
-    class="assignee-dropdown-item gl-vertical-align-middle"
     :active="active"
     active-class="is-active"
+    :avatar-url="user.avatar_url"
+    :secondary-text="`@${user.username}`"
     @click="$emit('update-alert-assignees', user.username)"
   >
-    <span class="gl-relative mr-2">
-      <img
-        :alt="user.username"
-        :src="user.avatar_url"
-        :width="32"
-        class="avatar avatar-inline gl-m-0 s32"
-        data-qa-selector="avatar_image"
-      />
-    </span>
-    <span class="d-flex gl-flex-direction-column gl-overflow-hidden">
-      <strong class="dropdown-menu-user-full-name">
-        {{ user.name }}
-      </strong>
-      <span class="dropdown-menu-user-username"> {{ user.username }}</span>
-    </span>
-  </gl-deprecated-dropdown-item>
+    {{ user.name }}
+  </gl-dropdown-item>
 </template>

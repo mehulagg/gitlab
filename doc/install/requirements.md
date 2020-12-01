@@ -1,4 +1,7 @@
 ---
+stage: Enablement
+group: Distribution
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference
 ---
 
@@ -12,7 +15,7 @@ as the hardware requirements that are needed to install and use GitLab.
 ### Supported Linux distributions
 
 - Ubuntu (16.04/18.04/20.04)
-- Debian (8/9/10)
+- Debian (9/10)
 - CentOS (6/7/8)
 - openSUSE (Leap 15.1/Enterprise Server 12.2)
 - Red Hat Enterprise Linux (please use the CentOS packages and instructions)
@@ -42,7 +45,13 @@ Please consider using a virtual machine to run GitLab.
 
 ### Ruby versions
 
-GitLab requires Ruby (MRI) 2.6. Beginning in GitLab 12.2, we no longer support Ruby 2.5 and lower.
+From GitLab 13.6:
+
+- Ruby 2.7 and later is required.
+
+From GitLab 12.2:
+
+- Ruby 2.6 and later is required.
 
 You must use the standard MRI implementation of Ruby.
 We love [JRuby](https://www.jruby.org/) and [Rubinius](https://github.com/rubinius/rubinius#the-rubinius-language-platform), but GitLab
@@ -53,6 +62,10 @@ needs several Gems that have native extensions.
 The minimum required Go version is 1.13.
 
 ### Git versions
+
+From GitLab 13.6:
+
+- Git 2.29.x and later is required.
 
 From GitLab 13.1:
 
@@ -140,7 +153,6 @@ We highly recommend users to use the minimum PostgreSQL versions specified below
 GitLab version | Minimum PostgreSQL version
 -|-
 10.0 | 9.6
-12.10 | 11
 13.0 | 11
 
 You must also ensure the `pg_trgm` and `btree_gist` extensions are [loaded into every
@@ -151,7 +163,7 @@ Support for [PostgreSQL 9.6 and 10 has been removed in GitLab 13.0](https://abou
 
 #### Additional requirements for GitLab Geo
 
-If you're using [GitLab Geo](../administration/geo/replication/index.md):
+If you're using [GitLab Geo](../administration/geo/index.md):
 
 - We strongly recommend running Omnibus-managed instances as they are actively
   developed and tested. We aim to be compatible with most external (not managed
@@ -214,8 +226,8 @@ Redis stores all user sessions and the background task queue.
 The storage requirements for Redis are minimal, about 25kB per user.
 Sidekiq processes the background jobs with a multithreaded process.
 This process starts with the entire Rails stack (200MB+) but it can grow over time due to memory leaks.
-On a very active server (10,000 active users) the Sidekiq process can use 1GB+ of memory.
-
+On a very active server (10,000 billable users) the Sidekiq process can use 1GB+ of memory.
+                                    
 ## Prometheus and its exporters
 
 As of Omnibus GitLab 9.0, [Prometheus](https://prometheus.io) and its related

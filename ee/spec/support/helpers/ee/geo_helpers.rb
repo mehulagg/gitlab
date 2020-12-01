@@ -80,11 +80,12 @@ module EE
 
       DummyModel.class_eval do
         include ::Gitlab::Geo::ReplicableModel
+        include ::Gitlab::Geo::VerificationState
 
         with_replicator Geo::DummyReplicator
 
-        def self.replicables_for_geo_node
-          self.all
+        def self.replicables_for_current_secondary(primary_key_in)
+          self.primary_key_in(primary_key_in)
         end
       end
 
@@ -104,6 +105,12 @@ module EE
       ActiveRecord::Schema.define do
         create_table :dummy_models, force: true do |t|
           t.binary :verification_checksum
+          t.integer :verification_state
+          t.datetime_with_timezone :verification_started_at
+          t.datetime_with_timezone :verified_at
+          t.datetime_with_timezone :verification_retry_at
+          t.integer :verification_retry_count
+          t.text :verification_failure
         end
       end
     end

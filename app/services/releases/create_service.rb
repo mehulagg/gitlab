@@ -1,9 +1,7 @@
 # frozen_string_literal: true
 
 module Releases
-  class CreateService < BaseService
-    include Releases::Concerns
-
+  class CreateService < Releases::BaseService
     def execute
       return error('Access Denied', 403) unless allowed?
       return error('Release already exists', 409) if release
@@ -12,7 +10,7 @@ module Releases
       # should be found before the creation of new tag
       # because tag creation can spawn new pipeline
       # which won't have any data for evidence yet
-      evidence_pipeline = find_evidence_pipeline
+      evidence_pipeline = Releases::EvidencePipelineFinder.new(project, params).execute
 
       tag = ensure_tag
 
@@ -54,6 +52,8 @@ module Releases
 
       notify_create_release(release)
 
+      execute_hooks(release, 'create')
+
       create_evidence!(release, evidence_pipeline)
 
       success(tag: tag, release: release)
@@ -78,26 +78,10 @@ module Releases
       )
     end
 
-    def find_evidence_pipeline
-      # TODO: remove this with the release creation moved to it's own form https://gitlab.com/gitlab-org/gitlab/-/issues/214245
-      return params[:evidence_pipeline] if params[:evidence_pipeline]
-
-      sha = existing_tag&.dereferenced_target&.sha
-      sha ||= repository.commit(ref)&.sha
-
-      return unless sha
-
-      project.ci_pipelines.for_sha(sha).last
-    end
-
     def create_evidence!(release, pipeline)
-      return if release.historical_release?
+      return if release.historical_release? || release.upcoming_release?
 
-      if release.upcoming_release?
-        CreateEvidenceWorker.perform_at(release.released_at, release.id, pipeline&.id)
-      else
-        CreateEvidenceWorker.perform_async(release.id, pipeline&.id)
-      end
+      ::Releases::CreateEvidenceWorker.perform_async(release.id, pipeline&.id)
     end
   end
 end

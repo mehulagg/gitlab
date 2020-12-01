@@ -3,6 +3,14 @@
 #
 # Do not edit it manually!
 ---
+- :name: cronjob:active_user_count_threshold
+  :feature_category: :provision
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent:
+  :tags: []
 - :name: cronjob:adjourned_group_deletion
   :feature_category: :authentication_and_authorization
   :has_external_dependencies:
@@ -44,6 +52,14 @@
   :idempotent: true
   :tags: []
 - :name: cronjob:elastic_index_initial_bulk_cron
+  :feature_category: :global_search
+  :has_external_dependencies:
+  :urgency: :throttled
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
+- :name: cronjob:elastic_migration
   :feature_category: :global_search
   :has_external_dependencies:
   :urgency: :throttled
@@ -172,7 +188,7 @@
   :idempotent:
   :tags: []
 - :name: cronjob:historical_data
-  :feature_category: :billing
+  :feature_category: :provision
   :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
@@ -186,6 +202,14 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent:
+  :tags: []
+- :name: cronjob:incident_management_incident_sla_exceeded_check
+  :feature_category: :incident_management
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
   :tags: []
 - :name: cronjob:ingress_modsecurity_counter_metrics
   :feature_category: :web_firewall
@@ -236,7 +260,7 @@
   :idempotent:
   :tags: []
 - :name: cronjob:sync_seat_link
-  :feature_category: :billing
+  :feature_category: :provision
   :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
@@ -275,12 +299,12 @@
   :weight: 1
   :idempotent:
   :tags: []
-- :name: dependency_proxy:purge_dependency_proxy_cache
-  :feature_category: :dependency_proxy
+- :name: deployment:deployments_auto_rollback
+  :feature_category: :continuous_delivery
   :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
-  :weight: 1
+  :weight: 3
   :idempotent: true
   :tags: []
 - :name: epics:epics_update_epics_dates
@@ -306,14 +330,6 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent:
-  :tags: []
-- :name: geo:geo_blob_verification_primary
-  :feature_category: :geo_replication
-  :has_external_dependencies:
-  :urgency: :low
-  :resource_boundary: :unknown
-  :weight: 1
-  :idempotent: true
   :tags: []
 - :name: geo:geo_container_repository_sync
   :feature_category: :geo_replication
@@ -370,6 +386,14 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent:
+  :tags: []
+- :name: geo:geo_framework_repository_destroy
+  :feature_category: :geo_replication
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
   :tags: []
 - :name: geo:geo_hashed_storage_attachments_migration
   :feature_category: :geo_replication
@@ -483,6 +507,14 @@
   :weight: 1
   :idempotent:
   :tags: []
+- :name: geo:geo_verification
+  :feature_category: :geo_replication
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
 - :name: personal_access_tokens:personal_access_tokens_groups_policy
   :feature_category: :authentication_and_authorization
   :has_external_dependencies:
@@ -507,6 +539,22 @@
   :weight: 3
   :idempotent:
   :tags: []
+- :name: security_scans:scan_security_report_secrets
+  :feature_category: :static_application_security_testing
+  :has_external_dependencies: true
+  :urgency: :low
+  :resource_boundary: :cpu
+  :weight: 2
+  :idempotent: true
+  :tags: []
+- :name: security_scans:security_store_scans
+  :feature_category: :static_application_security_testing
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 2
+  :idempotent:
+  :tags: []
 - :name: security_scans:store_security_reports
   :feature_category: :static_application_security_testing
   :has_external_dependencies:
@@ -514,7 +562,8 @@
   :resource_boundary: :unknown
   :weight: 2
   :idempotent:
-  :tags: []
+  :tags:
+  - :requires_disk_io
 - :name: security_scans:store_security_scans
   :feature_category: :static_application_security_testing
   :has_external_dependencies:
@@ -522,7 +571,8 @@
   :resource_boundary: :unknown
   :weight: 2
   :idempotent:
-  :tags: []
+  :tags:
+  - :requires_disk_io
 - :name: security_scans:sync_security_reports_to_report_approval_rules
   :feature_category: :static_application_security_testing
   :has_external_dependencies:
@@ -555,6 +605,14 @@
   :weight: 1
   :idempotent: true
   :tags: []
+- :name: approve_blocked_users
+  :feature_category: :users
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
 - :name: ci_batch_reset_minutes
   :feature_category: :continuous_integration
   :has_external_dependencies:
@@ -569,6 +627,22 @@
   :urgency: :low
   :resource_boundary: :cpu
   :weight: 2
+  :idempotent:
+  :tags: []
+- :name: dast_site_validation
+  :feature_category: :dynamic_application_security_testing
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
+- :name: elastic_association_indexer
+  :feature_category: :global_search
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
   :idempotent:
   :tags: []
 - :name: elastic_commit_indexer
@@ -627,12 +701,44 @@
   :weight: 1
   :idempotent:
   :tags: []
+- :name: environments_canary_ingress_update
+  :feature_category: :continuous_delivery
+  :has_external_dependencies: true
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
+- :name: group_saml_group_sync
+  :feature_category: :authentication_and_authorization
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
+- :name: incident_management_apply_incident_sla_exceeded_label
+  :feature_category: :incident_management
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
 - :name: ldap_group_sync
   :feature_category: :authentication_and_authorization
   :has_external_dependencies: true
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 2
+  :idempotent:
+  :tags: []
+- :name: merge_request_reset_approvals
+  :feature_category: :source_code_management
+  :has_external_dependencies:
+  :urgency: :high
+  :resource_boundary: :cpu
+  :weight: 1
   :idempotent:
   :tags: []
 - :name: new_epic
@@ -645,6 +751,14 @@
   :tags: []
 - :name: project_import_schedule
   :feature_category: :importers
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent:
+  :tags: []
+- :name: project_template_export
+  :feature_category: :templates
   :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
@@ -675,8 +789,25 @@
   :weight: 1
   :idempotent:
   :tags: []
+- :name: requirements_management_import_requirements_csv
+  :feature_category: :requirements_management
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
 - :name: requirements_management_process_requirements_reports
   :feature_category: :requirements_management
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags:
+  - :requires_disk_io
+- :name: set_user_status_based_on_user_cap_setting
+  :feature_category: :users
   :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
@@ -692,7 +823,7 @@
   :idempotent: true
   :tags: []
 - :name: sync_seat_link_request
-  :feature_category: :billing
+  :feature_category: :provision
   :has_external_dependencies: true
   :urgency: :low
   :resource_boundary: :unknown

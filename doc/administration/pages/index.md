@@ -1,7 +1,7 @@
 ---
 stage: Release
 group: Release Management
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 description: 'Learn how to administer GitLab Pages.'
 ---
 
@@ -53,8 +53,14 @@ supporting custom domains a secondary IP is not needed.
 
 Before proceeding with the Pages configuration, you will need to:
 
-1. Have an exclusive root domain for serving GitLab Pages. Note that you cannot
-   use a subdomain of your GitLab's instance domain.
+1. Have a domain for Pages that is not a subdomain of your GitLab's instance domain.
+
+   | GitLab domain | Pages domain | Does it work? |
+   | :---: | :---: | :---: |
+   | `example.com` | `example.io` | **{check-circle}** Yes |
+   | `example.com` | `pages.example.com` | **{dotted-circle}** No |
+   | `gitlab.example.com` | `pages.example.com` | **{check-circle}** Yes |
+
 1. Configure a **wildcard DNS record**.
 1. (Optional) Have a **wildcard certificate** for that domain if you decide to
    serve Pages under HTTPS.
@@ -235,6 +241,7 @@ control over how the Pages daemon runs and serves content in your environment.
 | `pages_path` | The directory on disk where pages are stored, defaults to `GITLAB-RAILS/shared/pages`.
 | `pages_nginx[]` | |
 | `enable` | Include a virtual host `server{}` block for Pages inside NGINX. Needed for NGINX to proxy traffic back to the Pages daemon. Set to `false` if the Pages daemon should directly receive all requests, for example, when using [custom domains](index.md#custom-domains).
+| `FF_ENABLE_REDIRECTS` | Feature flag to disable redirects (enabled by default). Read the [redirects documentation](../../user/project/pages/redirects.md#disable-redirects) for more info. |
 
 ---
 
@@ -369,8 +376,8 @@ Pages access control is disabled by default. To enable it:
 1. Users can now configure it in their [projects' settings](../../user/project/pages/pages_access_control.md).
 
 NOTE: **Important:**
-For multi-node setups, in order for this setting to be effective, it has to be applied
-to all the App nodes as well as the Sidekiq nodes.
+For this setting to be effective with multi-node setups, it has to be applied to
+all the App nodes and Sidekiq nodes.
 
 #### Disabling public access to all Pages websites
 
@@ -396,8 +403,7 @@ redeployed. This issue will be resolved by
 ### Running behind a proxy
 
 Like the rest of GitLab, Pages can be used in those environments where external
-internet connectivity is gated by a proxy. In order to use a proxy for GitLab
-pages:
+internet connectivity is gated by a proxy. To use a proxy for GitLab Pages:
 
 1. Configure in `/etc/gitlab/gitlab.rb`:
 
@@ -408,9 +414,6 @@ pages:
 1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure) for the changes to take effect.
 
 ### Using a custom Certificate Authority (CA)
-
-NOTE: **Note:**
-[Before 13.3](https://gitlab.com/gitlab-org/omnibus-gitlab/-/merge_requests/4411), when using Omnibus, a [workaround was required](https://docs.gitlab.com/13.1/ee/administration/pages/index.html#using-a-custom-certificate-authority-ca).
 
 When using certificates issued by a custom CA, [Access Control](../../user/project/pages/pages_access_control.md#gitlab-pages-access-control) and
 the [online view of HTML job artifacts](../../ci/pipelines/job_artifacts.md#browsing-artifacts)
@@ -455,6 +458,34 @@ are stored.
    ```
 
 1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
+
+Alternatively, if you have existing Pages deployed you can follow
+the below steps to do a no downtime transfer to a new storage location.
+
+1. Pause Pages deployments by setting the following in `/etc/gitlab/gitlab.rb`:
+
+   ```ruby
+   sidekiq['experimental_queue_selector'] = true
+   sidekiq['queue_groups'] = [
+     "feature_category!=pages"
+   ]
+   ```
+
+1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
+1. `rsync` contents from the current storage location to the new storage location: `sudo rsync -avzh --progress /var/opt/gitlab/gitlab-rails/shared/pages/ /mnt/storage/pages`
+1. Set the new storage location in `/etc/gitlab/gitlab.rb`:
+
+   ```ruby
+   gitlab_rails['pages_path'] = "/mnt/storage/pages"
+   ```
+
+1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
+1. Verify Pages are still being served up as expected.
+1. Unpause Pages deployments by removing from `/etc/gitlab/gitlab.rb` the `sidekiq` setting set above.
+1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
+1. Trigger a new Pages deployment and verify it's working as expected.
+1. Remove the old Pages storage location: `sudo rm -rf /var/opt/gitlab/gitlab-rails/shared/pages`
+1. Verify Pages are still being served up as expected.
 
 ## Configure listener for reverse proxy requests
 
@@ -503,11 +534,12 @@ To override the global maximum pages size for a specific group:
 
 ## Running GitLab Pages on a separate server
 
-You can run the GitLab Pages daemon on a separate server in order to decrease the load on your main application server.
+You can run the GitLab Pages daemon on a separate server to decrease the load on
+your main application server.
 
 To configure GitLab Pages on a separate server:
 
-DANGER: **Danger:**
+DANGER: **Warning:**
 The following procedure includes steps to back up and edit the
 `gitlab-secrets.json` file. This file contains secrets that control
 database encryption. Proceed with caution.
@@ -521,7 +553,6 @@ database encryption. Proceed with caution.
 1. On the **GitLab server**, to enable Pages, add the following to `/etc/gitlab/gitlab.rb`:
 
    ```ruby
-   gitlab_pages['enable'] = true
    pages_external_url "http://<pages_server_URL>"
    ```
 
@@ -552,18 +583,11 @@ database encryption. Proceed with caution.
    to include:
 
    ```ruby
-   external_url 'http://<gitlab_server_IP_or_URL>'
+   roles ['pages_role']
+
    pages_external_url "http://<pages_server_URL>"
-   postgresql['enable'] = false
-   redis['enable'] = false
-   prometheus['enable'] = false
-   puma['enable'] = false
-   sidekiq['enable'] = false
-   gitlab_workhorse['enable'] = false
-   gitaly['enable'] = false
-   alertmanager['enable'] = false
-   node_exporter['enable'] = false
-   gitlab_rails['auto_migrate'] = false
+
+   gitlab_pages['gitlab_server'] = 'http://<gitlab_server_IP_or_URL>'
    ```
 
 1. Create a backup of the secrets file on the **Pages server**:
@@ -590,7 +614,7 @@ database encryption. Proceed with caution.
    ```ruby
    pages_external_url "http://<pages_server_URL>"
    gitlab_pages['enable'] = false
-   gitlab_rails['pages_enabled']=false
+   pages_nginx['enable'] = false
    gitlab_rails['pages_path'] = "/mnt/pages"
    ```
 
@@ -774,3 +798,24 @@ For example, if there is a connection timeout:
 ```plaintext
 error="failed to connect to internal Pages API: Get \"https://gitlab.example.com:3000/api/v4/internal/pages/status\": net/http: request canceled while waiting for connection (Client.Timeout exceeded while awaiting headers)"
 ```
+
+### 500 error with `securecookie: failed to generate random iv` and `Failed to save the session`
+
+This problem most likely results from an [out-dated operating system](https://docs.gitlab.com/omnibus/package-information/deprecated_os.html).
+The [Pages daemon uses the `securecookie` library](https://gitlab.com/search?group_id=9970&project_id=734943&repository_ref=master&scope=blobs&search=securecookie&snippets=false) to get random strings via [crypto/rand in Go](https://golang.org/pkg/crypto/rand/#pkg-variables).
+This requires the `getrandom` syscall or `/dev/urandom` to be available on the host OS.
+Upgrading to an [officially supported operating system](https://about.gitlab.com/install/) is recommended.
+
+### The requested scope is invalid, malformed, or unknown
+
+This problem comes from the permissions of the GitLab Pages OAuth application. To fix it, go to
+**Admin > Applications > GitLab Pages** and edit the application. Under **Scopes**, ensure that the
+`api` scope is selected and save your changes.
+
+### Workaround in case no wildcard DNS entry can be set
+
+If the wildcard DNS [prerequisite](#prerequisites) can't be met, you can still use GitLab Pages in a limited fashion:
+
+1. [Move](../../user/project/settings/index.md#transferring-an-existing-project-into-another-namespace)
+   all projects you need to use Pages with into a single group namespace, for example `pages`.
+1. Configure a [DNS entry](#dns-configuration) without the `*.`-wildcard, for example `pages.example.io`.

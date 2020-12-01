@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 
 module API
-  class SystemHooks < Grape::API::Instance
+  class SystemHooks < ::API::Base
     include PaginationParams
+
+    feature_category :integrations
 
     before do
       authenticate!
@@ -70,7 +72,9 @@ module API
         hook = SystemHook.find_by(id: params[:id])
         not_found!('System hook') unless hook
 
-        destroy_conditionally!(hook)
+        destroy_conditionally!(hook) do
+          WebHooks::DestroyService.new(current_user).execute(hook)
+        end
       end
       # rubocop: enable CodeReuse/ActiveRecord
     end

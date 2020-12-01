@@ -10,7 +10,6 @@ module EE
         # rubocop: disable Cop/InjectEnterpriseEditionModule
         include EE::Gitlab::QuickActions::EpicActions
         include EE::Gitlab::QuickActions::IssueActions
-        include EE::Gitlab::QuickActions::MergeRequestActions
         include EE::Gitlab::QuickActions::IssueAndMergeRequestActions
         # rubocop: enable Cop/InjectEnterpriseEditionModule
       end

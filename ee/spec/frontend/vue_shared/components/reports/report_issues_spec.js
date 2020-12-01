@@ -1,7 +1,6 @@
 import Vue from 'vue';
 import { componentNames } from 'ee/reports/components/issue_body';
 import store from 'ee/vue_shared/security_reports/store';
-import mountComponent, { mountComponentWithStore } from 'helpers/vue_mount_component_helper';
 import { codequalityParsedIssues } from 'ee_jest/vue_mr_widget/mock_data';
 import {
   sastParsedIssues,
@@ -9,8 +8,9 @@ import {
   parsedDast,
   secretScanningParsedIssues,
 } from 'ee_jest/vue_shared/security_reports/mock_data';
-import { STATUS_FAILED, STATUS_SUCCESS } from '~/reports/constants';
+import mountComponent, { mountComponentWithStore } from 'helpers/vue_mount_component_helper';
 import reportIssues from '~/reports/components/report_item.vue';
+import { STATUS_FAILED, STATUS_SUCCESS } from '~/reports/constants';
 
 describe('Report issues', () => {
   let vm;
@@ -37,7 +37,7 @@ describe('Report issues', () => {
       it('should render "Fixed" keyword', () => {
         expect(vm.$el.textContent).toContain('Fixed');
         expect(vm.$el.textContent.replace(/\s+/g, ' ').trim()).toEqual(
-          'Fixed: Insecure Dependency in Gemfile.lock:12',
+          'Fixed: Minor - Insecure Dependency in Gemfile.lock:12',
         );
       });
     });

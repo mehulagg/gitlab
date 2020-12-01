@@ -27,7 +27,7 @@ RSpec.describe 'Value stream analytics charts', :js do
   def toggle_more_options(stage)
     stage.hover
 
-    stage.find('.more-actions-toggle').click
+    stage.find('[data-testid="more-actions-toggle"]').click
   end
 
   before do

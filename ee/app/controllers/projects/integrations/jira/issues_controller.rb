@@ -11,11 +11,14 @@ module Projects
         before_action :check_feature_enabled!
 
         before_action do
-          push_frontend_feature_flag(:jira_issues_integration, project, { default_enabled: true })
+          push_frontend_feature_flag(:jira_issues_integration, project, type: :licensed, default_enabled: true)
+          push_frontend_feature_flag(:jira_issues_list, project, type: :development)
         end
 
         rescue_from ::Projects::Integrations::Jira::IssuesFinder::IntegrationError, with: :render_integration_error
         rescue_from ::Projects::Integrations::Jira::IssuesFinder::RequestError, with: :render_request_error
+
+        feature_category :integrations
 
         def index
           params[:state] = params[:state].presence || default_state

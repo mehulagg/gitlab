@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Review Apps
 
 Review Apps are automatically deployed by [the
@@ -165,8 +171,11 @@ This will grant you the following permissions for:
 
 ### Log into my Review App
 
-The default username is `root` and its password can be found in the 1Password
-secure note named `gitlab-{ce,ee} Review App's root password`.
+For GitLab Team Members only. If you want to sign in to the review app, review
+the GitLab handbook information for the [shared 1Password account](https://about.gitlab.com/handbook/security/#1password-for-teams).
+
+- The default username is `root`.
+- The password can be found in the 1Password secure note named `gitlab-{ce,ee} Review App's root password`.
 
 ### Enable a feature flag for my Review App
 

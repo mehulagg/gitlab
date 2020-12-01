@@ -46,6 +46,17 @@ class GroupsController < Groups::ApplicationController
 
   layout :determine_layout
 
+  feature_category :subgroups, [
+                     :index, :new, :create, :show, :edit, :update,
+                     :destroy, :details, :transfer
+                   ]
+
+  feature_category :audit_events, [:activity]
+  feature_category :issue_tracking, [:issues, :issues_calendar, :preview_markdown]
+  feature_category :code_review, [:merge_requests, :unfoldered_environment_names]
+  feature_category :projects, [:projects]
+  feature_category :importers, [:export, :download_export]
+
   def index
     redirect_to(current_user ? dashboard_groups_path : explore_groups_path)
   end
@@ -121,10 +132,20 @@ class GroupsController < Groups::ApplicationController
 
   def update
     if Groups::UpdateService.new(@group, current_user, group_params).execute
-      redirect_to edit_group_path(@group, anchor: params[:update_section]), notice: "Group '#{@group.name}' was successfully updated."
+      notice = "Group '#{@group.name}' was successfully updated."
+
+      redirect_to edit_group_origin_location, notice: notice
     else
       @group.reset
       render action: "edit"
+    end
+  end
+
+  def edit_group_origin_location
+    if params.dig(:group, :redirect_target) == 'repository_settings'
+      group_settings_repository_path(@group, anchor: 'js-default-branch-name')
+    else
+      edit_group_path(@group, anchor: params[:update_section])
     end
   end
 
@@ -168,9 +189,19 @@ class GroupsController < Groups::ApplicationController
     end
   end
 
+  def unfoldered_environment_names
+    respond_to do |format|
+      format.json do
+        render json: EnvironmentNamesFinder.new(@group, current_user).execute
+      end
+    end
+  end
+
   protected
 
   def render_show_html
+    record_experiment_user(:invite_members_empty_group_version_a) if ::Gitlab.com?
+
     render 'groups/show', locals: { trial: params[:trial] }
   end
 
@@ -230,7 +261,9 @@ class GroupsController < Groups::ApplicationController
       :two_factor_grace_period,
       :project_creation_level,
       :subgroup_creation_level,
-      :default_branch_protection
+      :default_branch_protection,
+      :default_branch_name,
+      :allow_mfa_for_subgroups
     ]
   end
 
@@ -295,6 +328,11 @@ class GroupsController < Groups::ApplicationController
   override :markdown_service_params
   def markdown_service_params
     params.merge(group: group)
+  end
+
+  override :has_project_list?
+  def has_project_list?
+    %w(details show index).include?(action_name)
   end
 end
 

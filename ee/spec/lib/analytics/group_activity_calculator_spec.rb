@@ -74,7 +74,7 @@ RSpec.describe Analytics::GroupActivityCalculator do
       let(:old_member) { create(:user, created_at: 102.days.ago) }
 
       before do
-        Timecop.freeze(100.days.ago) do
+        travel_to(100.days.ago) do
           subgroup.add_developer old_member
         end
       end

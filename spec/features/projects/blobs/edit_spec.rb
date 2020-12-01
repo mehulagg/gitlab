@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe 'Editing file blob', :js do
   include TreeHelper
+  include BlobSpecHelpers
 
   let(:project) { create(:project, :public, :repository) }
   let(:merge_request) { create(:merge_request, source_project: project, source_branch: 'feature', target_branch: 'master') }
@@ -20,9 +21,18 @@ RSpec.describe 'Editing file blob', :js do
       sign_in(user)
     end
 
-    def edit_and_commit(commit_changes: true)
+    def edit_and_commit(commit_changes: true, is_diff: false)
+      set_default_button('edit')
+      refresh
       wait_for_requests
-      find('.js-edit-blob').click
+
+      if is_diff
+        first('.js-diff-more-actions').click
+        click_link('Edit in single-file editor')
+      else
+        click_link('Edit')
+      end
+
       fill_editor(content: 'class NextFeature\\nend\\n')
 
       if commit_changes
@@ -38,7 +48,7 @@ RSpec.describe 'Editing file blob', :js do
     context 'from MR diff' do
       before do
         visit diffs_project_merge_request_path(project, merge_request)
-        edit_and_commit
+        edit_and_commit(is_diff: true)
       end
 
       it 'returns me to the mr' do
@@ -169,12 +179,14 @@ RSpec.describe 'Editing file blob', :js do
       end
 
       context 'with protected branch' do
-        before do
-          visit project_edit_blob_path(project, tree_join(protected_branch, file_path))
-        end
-
         it 'shows blob editor with patch branch' do
-          expect(find('.js-branch-name').value).to eq('patch-1')
+          freeze_time do
+            visit project_edit_blob_path(project, tree_join(protected_branch, file_path))
+
+            epoch = Time.now.strftime('%s%L').last(5)
+
+            expect(find('.js-branch-name').value).to eq "#{user.username}-protected-branch-patch-#{epoch}"
+          end
         end
       end
     end

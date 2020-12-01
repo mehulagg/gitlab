@@ -8,12 +8,18 @@ class Feature
   module Shared
     # optional: defines if a on-disk definition is required for this feature flag type
     # rollout_issue: defines if `bin/feature-flag` asks for rollout issue
+    # default_enabled: defines a default state of a feature flag when created by `bin/feature-flag`
+    # ee_only: defines that a feature flag can only be created in a context of EE
+    # deprecated: defines if a feature flag type that is deprecated and to be removed,
+    #             the deprecated types are hidden from all interfaces
     # example: usage being shown when exception is raised
     TYPES = {
       development: {
         description: 'Short lived, used to enable unfinished code to be deployed',
-        optional: true,
+        optional: false,
         rollout_issue: true,
+        ee_only: false,
+        default_enabled: false,
         example: <<-EOS
           Feature.enabled?(:my_feature_flag, project)
           Feature.enabled?(:my_feature_flag, project, type: :development)
@@ -24,20 +30,37 @@ class Feature
         description: "Long-lived feature flags that control operational aspects of GitLab's behavior",
         optional: true,
         rollout_issue: false,
+        ee_only: false,
+        default_enabled: false,
         example: <<-EOS
           Feature.enabled?(:my_ops_flag, type: ops)
           push_frontend_feature_flag?(:my_ops_flag, project, type: :ops)
         EOS
+      },
+      licensed: {
+        description: 'Permanent feature flags used to temporarily disable licensed features.',
+        deprecated: true,
+        optional: true,
+        rollout_issue: false,
+        ee_only: true,
+        default_enabled: true,
+        example: <<-EOS
+          project.feature_available?(:my_licensed_feature)
+          namespace.feature_available?(:my_licensed_feature)
+        EOS
       }
     }.freeze
 
+    # The ordering of PARAMS defines an order in YAML
+    # This is done to ease the file comparison
     PARAMS = %i[
       name
-      default_enabled
-      type
       introduced_by_url
       rollout_issue_url
+      milestone
+      type
       group
+      default_enabled
     ].freeze
   end
 end

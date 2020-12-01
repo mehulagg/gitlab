@@ -15,12 +15,17 @@ RSpec.describe BillingPlansHelper do
       it 'returns data attributes' do
         upgrade_href =
           "#{EE::SUBSCRIPTIONS_URL}/gitlab/namespaces/#{group.id}/upgrade/#{plan.id}"
+        renew_href =
+          "#{EE::SUBSCRIPTIONS_URL}/gitlab/namespaces/#{group.id}/renew"
+        billable_seats_href = helper.group_seat_usage_path(group)
 
         expect(helper.subscription_plan_data_attributes(group, plan))
           .to eq(namespace_id: group.id,
                  namespace_name: group.name,
                  plan_upgrade_href: upgrade_href,
-                 customer_portal_url: customer_portal_url)
+                 plan_renew_href: renew_href,
+                 customer_portal_url: customer_portal_url,
+                 billable_seats_href: billable_seats_href)
       end
     end
 
@@ -36,10 +41,15 @@ RSpec.describe BillingPlansHelper do
       let(:plan) { Hashie::Mash.new(id: nil) }
 
       it 'returns data attributes without upgrade href' do
+        renew_href = "#{EE::SUBSCRIPTIONS_URL}/gitlab/namespaces/#{group.id}/renew"
+        billable_seats_href = helper.group_seat_usage_path(group)
+
         expect(helper.subscription_plan_data_attributes(group, plan))
           .to eq(namespace_id: group.id,
                  namespace_name: group.name,
                  customer_portal_url: customer_portal_url,
+                 billable_seats_href: billable_seats_href,
+                 plan_renew_href: renew_href,
                  plan_upgrade_href: nil)
       end
     end
@@ -123,6 +133,48 @@ RSpec.describe BillingPlansHelper do
           }
         })
       end
+    end
+  end
+
+  describe '#seats_data_last_update_info' do
+    before do
+      allow(UpdateMaxSeatsUsedForGitlabComSubscriptionsWorker).to receive(:last_enqueue_time).and_return(enqueue_time)
+    end
+
+    context 'when last_enqueue_time from the worker is known' do
+      let(:enqueue_time) { Time.current }
+
+      it 'shows the last enqueue time' do
+        expect(helper.seats_data_last_update_info).to match("as of #{enqueue_time}")
+      end
+    end
+
+    context 'when last_enqueue_time from the worker is unknown' do
+      let(:enqueue_time) { nil }
+
+      it 'shows default message' do
+        expect(helper.seats_data_last_update_info).to match('is updated every day at 12:00pm UTC')
+      end
+    end
+  end
+
+  describe "#plan_purchase_or_upgrade_url" do
+    let(:plan) { double('Plan') }
+
+    it 'is upgradable' do
+      group = double('Group', upgradable?: true)
+
+      expect(helper).to receive(:plan_upgrade_url)
+
+      helper.plan_purchase_or_upgrade_url(group, plan)
+    end
+
+    it 'is purchasable' do
+      group = double('Group', upgradable?: false)
+
+      expect(helper).to receive(:plan_purchase_url)
+
+      helper.plan_purchase_or_upgrade_url(group, plan)
     end
   end
 end

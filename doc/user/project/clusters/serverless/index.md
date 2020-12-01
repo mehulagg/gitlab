@@ -1,7 +1,7 @@
 ---
 stage: Configure
 group: Configure
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Serverless
@@ -39,9 +39,9 @@ With GitLab Serverless, you can deploy both functions-as-a-service (FaaS) and se
 
 ## Prerequisites
 
-To run Knative on GitLab, you will need:
+To run Knative on GitLab, you need:
 
-1. **Existing GitLab project:** You will need a GitLab project to associate all resources. The simplest way to get started:
+1. **Existing GitLab project:** You need a GitLab project to associate all resources. The simplest way to get started:
    - If you are planning on [deploying functions](#deploying-functions),
      clone the [functions example project](https://gitlab.com/knative-examples/functions) to get
      started.
@@ -51,19 +51,19 @@ To run Knative on GitLab, you will need:
 1. **Kubernetes Cluster:** An RBAC-enabled Kubernetes cluster is required to deploy Knative.
    The simplest way to get started is to add a cluster using GitLab's [GKE integration](../add_remove_clusters.md).
    The set of minimum recommended cluster specifications to run Knative is 3 nodes, 6 vCPUs, and 22.50 GB memory.
-1. **GitLab Runner:** A runner is required to run the CI jobs that will deploy serverless
-   applications or functions onto your cluster. You can install the GitLab Runner
+1. **GitLab Runner:** A runner is required to run the CI jobs that deploy serverless
+   applications or functions onto your cluster. You can install GitLab Runner
    onto the existing Kubernetes cluster. See [Installing Applications](../index.md#installing-applications) for more information.
-1. **Domain Name:** Knative will provide its own load balancer using Istio. It will provide an
-   external IP address or hostname for all the applications served by Knative. You will be prompted to enter a
-   wildcard domain where your applications will be served. Configure your DNS server to use the
+1. **Domain Name:** Knative provides its own load balancer using Istio, and an
+   external IP address or hostname for all the applications served by Knative. Enter a
+   wildcard domain to serve your applications. Configure your DNS server to use the
    external IP address or hostname for that domain.
 1. **`.gitlab-ci.yml`:** GitLab uses [Kaniko](https://github.com/GoogleContainerTools/kaniko)
    to build the application. We also use [GitLab Knative tool](https://gitlab.com/gitlab-org/gitlabktl)
    CLI to simplify the deployment of services and functions to Knative.
 1. **`serverless.yml`** (for [functions only](#deploying-functions)): When using serverless to deploy functions, the `serverless.yml` file
-   will contain the information for all the functions being hosted in the repository as well as a reference to the
-   runtime being used.
+   contains the information for all the functions being hosted in the repository as well as a reference
+   to the runtime being used.
 1. **`Dockerfile`** (for [applications only](#deploying-serverless-applications)): Knative requires a
    `Dockerfile` in order to build your applications. It should be included at the root of your
    project's repository and expose port `8080`. `Dockerfile` is not require if you plan to build serverless functions
@@ -75,8 +75,8 @@ To run Knative on GitLab, you will need:
 
 ## Installing Knative via GitLab's Kubernetes integration
 
-NOTE: **Note:**
-The minimum recommended cluster size to run Knative is 3-nodes, 6 vCPUs, and 22.50 GB memory. **RBAC must be enabled.**
+The minimum recommended cluster size to run Knative is 3-nodes, 6 vCPUs, and 22.50 GB
+memory. **RBAC must be enabled.**
 
 1. [Add a Kubernetes cluster](../add_remove_clusters.md).
 1. Select the **Applications** tab and scroll down to the Knative app section. Enter the domain to be used with
@@ -92,29 +92,26 @@ The minimum recommended cluster size to run Knative is 3-nodes, 6 vCPUs, and 22.
    For clusters created on GKE, see [GKE Cluster Access](https://cloud.google.com/kubernetes-engine/docs/how-to/cluster-access-for-kubectl),
    for other platforms [Install kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/).
 
-1. The Ingress is now available at this address and will route incoming requests to the proper service based on the DNS
+1. The Ingress is now available at this address and routes incoming requests to the proper service based on the DNS
    name in the request. To support this, a wildcard DNS record should be created for the desired domain name. For example,
    if your Knative base domain is `knative.info` then you need to create an A record or CNAME record with domain `*.knative.info`
    pointing the IP address or hostname of the Ingress.
 
    ![DNS entry](img/dns-entry.png)
 
-NOTE: **Note:**
 You can deploy either [functions](#deploying-functions) or [serverless applications](#deploying-serverless-applications)
-on a given project but not both. The current implementation makes use of a `serverless.yml` file to signal a FaaS project.
+on a given project, but not both. The current implementation makes use of a
+`serverless.yml` file to signal a FaaS project.
 
 ## Using an existing installation of Knative
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/58941) in GitLab 12.0.
 
-NOTE: **Note:**
-The "invocations" monitoring feature of GitLab serverless will not work when
+The _invocations_ monitoring feature of GitLab serverless is unavailable when
 adding an existing installation of Knative.
 
-It is also possible to use GitLab Serverless with an existing Kubernetes
-cluster which already has Knative installed.
-
-You must do the following:
+It's also possible to use GitLab Serverless with an existing Kubernetes cluster
+which already has Knative installed. You must do the following:
 
 1. Follow the steps to
    [add an existing Kubernetes
@@ -124,7 +121,7 @@ You must do the following:
    - For a non-GitLab managed cluster, ensure that the service account for the token
      provided can manage resources in the `serving.knative.dev` API group.
    - For a GitLab managed cluster, if you added the cluster in [GitLab 12.1 or later](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/30235),
-     then GitLab will already have the required access and you can proceed to the next step.
+     then GitLab already has the required access and you can proceed to the next step.
 
      Otherwise, you need to manually grant GitLab's service account the ability to manage
      resources in the `serving.knative.dev` API group. Since every GitLab service account
@@ -237,12 +234,12 @@ Follow these steps to deploy a function using the Node.js runtime to your
 Knative instance (you can skip these steps if you've cloned the example
 project):
 
-1. Create a directory that will house the function. In this example we will
+1. Create a directory to house the function. In this example we will
    create a directory called `echo` at the root of the project.
 
-1. Create the file that will contain the function code. In this example, our file is called `echo.js` and is located inside the `echo` directory. If your project is:
+1. Create the file to contain the function code. In this example, our file is called `echo.js` and is located inside the `echo` directory. If your project is:
    - Public, continue to the next step.
-   - Private, you will need to [create a GitLab deploy token](../../deploy_tokens/index.md#creating-a-deploy-token) with `gitlab-deploy-token` as the name and the `read_registry` scope.
+   - Private, you must [create a GitLab deploy token](../../deploy_tokens/index.md#creating-a-deploy-token) with `gitlab-deploy-token` as the name and the `read_registry` scope.
 
 1. `.gitlab-ci.yml`: this defines a pipeline used to deploy your functions.
    It must be included at the root of your repository:
@@ -307,7 +304,7 @@ Explanation of the fields used above:
 
 | Parameter | Description |
 |-----------|-------------|
-| `service` | Name for the Knative service which will serve the function. |
+| `service` | Name for the Knative service which serves the function. |
 | `description` | A short description of the `service`. |
 
 ### `provider`
@@ -352,9 +349,9 @@ The optional `runtime` parameter can refer to one of the following runtime alias
 | `openfaas/classic/ruby` | OpenFaaS |
 
 After the `gitlab-ci.yml` template has been added and the `serverless.yml` file
-has been created, pushing a commit to your project will result in a CI pipeline
-being executed which will deploy each function as a Knative service. Once the
-deploy stage has finished, additional details for the function will appear
+has been created, pushing a commit to your project results in a CI pipeline
+being executed which deploys each function as a Knative service. After the
+deploy stage has finished, additional details for the function display
 under **Operations > Serverless**.
 
 ![serverless page](img/serverless-page.png)
@@ -453,16 +450,16 @@ To run a function locally:
 
 > Introduced in GitLab 11.5.
 
+12345678901234567890123456789012345678901234567890123456789012345678901234567890
 Serverless applications are an alternative to [serverless functions](#deploying-functions).
-They are useful in scenarios where an existing runtime does not meet the needs of an application,
-such as one written in a language that has no runtime available. Note though that serverless
-applications should be stateless!
+They're useful in scenarios where an existing runtime does not meet the needs of
+an application, such as one written in a language that has no runtime available.
+Note though that serverless applications should be stateless.
 
-NOTE: **Note:**
-You can reference and import the sample [Knative Ruby App](https://gitlab.com/knative-examples/knative-ruby-app) to get started.
-
-Add the following `.gitlab-ci.yml` to the root of your repository
-(you may skip this step if you've previously cloned the sample [Knative Ruby App](https://gitlab.com/knative-examples/knative-ruby-app) mentioned above):
+You can reference and import the sample [Knative Ruby App](https://gitlab.com/knative-examples/knative-ruby-app)
+to get started. Add the following `.gitlab-ci.yml` to the root of your repository
+(you may skip this step if you've previously cloned the previously mentioned,
+sample [Knative Ruby App](https://gitlab.com/knative-examples/knative-ruby-app)):
 
 ```yaml
 include:
@@ -485,7 +482,7 @@ A `serverless.yml` file is not required when deploying serverless applications.
 
 ### Deploy the application with Knative
 
-With all the pieces in place, the next time a CI pipeline runs, the Knative application will be deployed. Navigate to
+With all the pieces in place, the next time a CI pipeline runs the Knative application deploys. Navigate to
 **CI/CD > Pipelines** and click the most recent pipeline.
 
 ### Function details
@@ -501,13 +498,13 @@ rows to bring up the function details page.
 
 ![function_details](img/function-details-loaded.png)
 
-The pod count will give you the number of pods running the serverless function instances on a given cluster.
+The pod count gives you the number of pods running the serverless function instances on a given cluster.
 
 For the Knative function invocations to appear,
 [Prometheus must be installed](../index.md#installing-applications).
 
 Once Prometheus is installed, a message may appear indicating that the metrics data _is
-loading or is not available at this time._  It will appear upon the first access of the
+loading or is not available at this time._  It appears upon the first access of the
 page, but should go away after a few seconds. If the message does not disappear, then it
 is possible that GitLab is unable to connect to the Prometheus instance running on the
 cluster.
@@ -561,14 +558,18 @@ Or:
 
 ## Enabling TLS for Knative services
 
-By default, a GitLab serverless deployment will be served over `http`. In order to serve over `https` you
-must manually obtain and install TLS certificates.
+By default, a GitLab serverless deployment is served over `http`. To serve
+over `https`, you must manually obtain and install TLS certificates.
 
-The simplest way to accomplish this is to
-use [Certbot to manually obtain Let's Encrypt certificates](https://knative.dev/docs/serving/using-a-tls-cert/#using-certbot-to-manually-obtain-let-s-encrypt-certificates). Certbot is a free, open source software tool for automatically using Let’s Encrypt certificates on manually-administrated websites to enable HTTPS.
+12345678901234567890123456789012345678901234567890123456789012345678901234567890
+The simplest way to accomplish this is to use Certbot to
+[manually obtain Let's Encrypt certificates](https://knative.dev/docs/serving/using-a-tls-cert/#using-certbot-to-manually-obtain-let-s-encrypt-certificates).
+Certbot is a free, open source software tool for automatically using Let’s Encrypt
+certificates on manually-administered websites to enable HTTPS.
 
-NOTE: **Note:**
-The instructions below relate to installing and running Certbot on a Linux server that has Python 3 installed and may not work on other operating systems or with other versions of Python.
+The following instructions relate to installing and running Certbot on a Linux
+server that has Python 3 installed, and may not work on other operating systems
+or with other versions of Python.
 
 1. Install Certbot by running the
    [`certbot-auto` wrapper script](https://certbot.eff.org/docs/install.html#certbot-auto).
@@ -646,7 +647,7 @@ The instructions below relate to installing and running Certbot on a Linux serve
    ```
 
 1. Create certificate and private key files. Using the contents of the files
-   returned by Certbot, we'll create two files in order to create the
+   returned by Certbot, create two files in order to create the
    Kubernetes secret:
 
    Run the following command to see the contents of `fullchain.pem`:
@@ -788,7 +789,7 @@ The instructions below relate to installing and running Certbot on a Linux serve
    kubectl edit gateway knative-ingress-gateway --namespace knative-serving
    ```
 
-   Update the gateway to include the following tls: section and configuration:
+   Update the gateway to include the following `tls:` section and configuration:
 
    ```shell
    tls:
@@ -827,8 +828,8 @@ The instructions below relate to installing and running Certbot on a Linux serve
    ```
 
    After your changes are running on your Knative cluster, you can begin using the HTTPS protocol for secure access your deployed Knative services.
-   In the event a mistake is made during this process and you need to update the cert, you will need to edit the gateway `knative-ingress-gateway`
-   to switch back to `PASSTHROUGH` mode. Once corrections are made, edit the file again so the gateway will use the new certificates.
+   In the event a mistake is made during this process and you need to update the cert, you must edit the gateway `knative-ingress-gateway`
+   to switch back to `PASSTHROUGH` mode. Once corrections are made, edit the file again so the gateway uses the new certificates.
 
 ## Using an older version of `gitlabktl`
 

@@ -9,8 +9,12 @@ module EE
     end
 
     class_methods do
-      def replicables_for_geo_node(node = ::Gitlab::Geo.current_node)
-        node.container_repositories
+      # @param primary_key_in [Range, ContainerRepository] arg to pass to primary_key_in scope
+      # @return [ActiveRecord::Relation<ContainerRepository>] everything that should be synced to this node, restricted by primary key
+      def replicables_for_current_secondary(primary_key_in)
+        node = ::Gitlab::Geo.current_node
+
+        node.container_repositories.primary_key_in(primary_key_in)
       end
     end
 

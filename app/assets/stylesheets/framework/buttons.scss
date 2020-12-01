@@ -200,8 +200,7 @@
     @include btn-orange;
   }
 
-  &.btn-close,
-  &.btn-close-color {
+  &.btn-close {
     @include btn-outline($white, $orange-500, $orange-500, $orange-50, $orange-600, $orange-600, $orange-100, $orange-700, $orange-700);
   }
 
@@ -417,12 +416,6 @@
   }
 }
 
-@include media-breakpoint-down(xs) {
-  .btn-wide-on-xs {
-    width: 100%;
-  }
-}
-
 .btn-blank {
   padding: 0;
   background: transparent;
@@ -541,4 +534,14 @@ fieldset[disabled] .btn,
 
 .btn-no-padding {
   padding: 0;
+}
+
+// This class helps convert `.gl-button` children so that they consistently
+// match the style of `.btn` elements which might be around them. Ideally we
+// wouldn't need this class.
+//
+// Remove by upgrading all buttons in a container to use the new `.gl-button` style.
+.gl-button-deprecated-adapter .gl-button {
+  box-shadow: none;
+  border-width: 1px;
 }

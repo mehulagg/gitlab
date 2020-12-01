@@ -1,5 +1,6 @@
 import Vuex from 'vuex';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
+import { GlBreakpointInstance } from '@gitlab/ui/dist/utils';
 import PackageTitle from '~/packages/details/components/package_title.vue';
 import PackageTags from '~/packages/shared/components/package_tags.vue';
 import TitleArea from '~/vue_shared/components/registry/title_area.vue';
@@ -52,8 +53,8 @@ describe('PackageTitle', () => {
   const packageSize = () => wrapper.find('[data-testid="package-size"]');
   const pipelineProject = () => wrapper.find('[data-testid="pipeline-project"]');
   const packageRef = () => wrapper.find('[data-testid="package-ref"]');
-  const packageRefIcon = () => wrapper.find('[data-testid="package-ref-icon"]');
   const packageTags = () => wrapper.find(PackageTags);
+  const packageBadges = () => wrapper.findAll('[data-testid="tag-badge"]');
 
   afterEach(() => {
     wrapper.destroy();
@@ -70,6 +71,14 @@ describe('PackageTitle', () => {
       await createComponent({ packageEntity: { ...mavenPackage, tags: mockTags } });
 
       expect(wrapper.element).toMatchSnapshot();
+    });
+
+    it('with tags on mobile', async () => {
+      jest.spyOn(GlBreakpointInstance, 'isDesktop').mockReturnValue(false);
+      await createComponent({ packageEntity: { ...mavenPackage, tags: mockTags } });
+      await wrapper.vm.$nextTick();
+
+      expect(packageBadges()).toHaveLength(mockTags.length);
     });
   });
 
@@ -98,16 +107,16 @@ describe('PackageTitle', () => {
   });
 
   describe.each`
-    packageEntity   | expectedResult
+    packageEntity   | text
     ${conanPackage} | ${'conan'}
     ${mavenPackage} | ${'maven'}
     ${npmPackage}   | ${'npm'}
     ${nugetPackage} | ${'nuget'}
-  `(`package type`, ({ packageEntity, expectedResult }) => {
+  `(`package type`, ({ packageEntity, text }) => {
     beforeEach(() => createComponent({ packageEntity }));
 
-    it(`${packageEntity.package_type} should render from Vuex getters ${expectedResult}`, () => {
-      expect(packageType().text()).toBe(expectedResult);
+    it(`${packageEntity.package_type} should render from Vuex getters ${text}`, () => {
+      expect(packageType().props()).toEqual(expect.objectContaining({ text, icon: 'package' }));
     });
   });
 
@@ -115,13 +124,13 @@ describe('PackageTitle', () => {
     it('correctly calculates when there is only 1 file', async () => {
       await createComponent({ packageEntity: npmPackage, packageFiles: npmFiles });
 
-      expect(packageSize().text()).toBe('200 bytes');
+      expect(packageSize().props()).toMatchObject({ text: '200 bytes', icon: 'disk' });
     });
 
     it('correctly calulates when there are multiple files', async () => {
       await createComponent();
 
-      expect(packageSize().text()).toBe('300 bytes');
+      expect(packageSize().props('text')).toBe('300 bytes');
     });
   });
 
@@ -153,8 +162,10 @@ describe('PackageTitle', () => {
 
     it('correctly shows the package ref if there is one', async () => {
       await createComponent({ packageEntity: npmPackage });
-      expect(packageRefIcon().exists()).toBe(true);
-      expect(packageRef().text()).toBe(npmPackage.pipeline.ref);
+      expect(packageRef().props()).toMatchObject({
+        text: npmPackage.pipeline.ref,
+        icon: 'branch',
+      });
     });
   });
 
@@ -168,8 +179,11 @@ describe('PackageTitle', () => {
     it('correctly shows the pipeline project if there is one', async () => {
       await createComponent({ packageEntity: npmPackage });
 
-      expect(pipelineProject().text()).toBe(npmPackage.pipeline.project.name);
-      expect(pipelineProject().attributes('href')).toBe(npmPackage.pipeline.project.web_url);
+      expect(pipelineProject().props()).toMatchObject({
+        text: npmPackage.pipeline.project.name,
+        icon: 'review-list',
+        link: npmPackage.pipeline.project.web_url,
+      });
     });
   });
 });

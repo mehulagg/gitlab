@@ -1,12 +1,12 @@
 <script>
-import { GlDeprecatedDropdown, GlDeprecatedDropdownItem, GlIcon } from '@gitlab/ui';
+import { GlDropdown, GlDropdownItem, GlIcon } from '@gitlab/ui';
 import MergeRequestTableRow from './mr_table_row.vue';
 import Pagination from '~/vue_shared/components/pagination_links.vue';
 
 export default {
   components: {
-    GlDeprecatedDropdown,
-    GlDeprecatedDropdownItem,
+    GlDropdown,
+    GlDropdownItem,
     GlIcon,
     MergeRequestTableRow,
     Pagination,
@@ -64,13 +64,13 @@ export default {
             <div class="d-flex">
               <span class="d-none d-md-flex metric-col">{{ __('Time to merge') }}</span>
 
-              <gl-deprecated-dropdown
+              <gl-dropdown
                 class="w-100 metric-col"
                 toggle-class="dropdown-menu-toggle w-100"
                 menu-class="w-100 mw-100"
                 :text="metricDropdownLabel"
               >
-                <gl-deprecated-dropdown-item
+                <gl-dropdown-item
                   v-for="option in columnOptions"
                   :key="option.key"
                   active-class="is-active"
@@ -87,8 +87,8 @@ export default {
                     />
                     {{ option.label }}
                   </span>
-                </gl-deprecated-dropdown-item>
-              </gl-deprecated-dropdown>
+                </gl-dropdown-item>
+              </gl-dropdown>
             </div>
           </div>
         </div>

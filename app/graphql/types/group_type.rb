@@ -17,6 +17,10 @@ module Types
             group.avatar_url(only_path: false)
           end
 
+    field :custom_emoji, Types::CustomEmojiType.connection_type, null: true,
+          description: 'Custom emoji within this namespace',
+          feature_flag: :custom_emoji
+
     field :share_with_group_lock, GraphQL::BOOLEAN_TYPE, null: true,
           description: 'Indicates if sharing a project with another group within this group is prevented'
 
@@ -46,8 +50,14 @@ module Types
     field :issues,
           Types::IssueType.connection_type,
           null: true,
-          description: 'Issues of the group',
+          description: 'Issues for projects in this group',
           resolver: Resolvers::GroupIssuesResolver
+
+    field :merge_requests,
+          Types::MergeRequestType.connection_type,
+          null: true,
+          description: 'Merge requests for projects in this group',
+          resolver: Resolvers::GroupMergeRequestsResolver
 
     field :milestones, Types::MilestoneType.connection_type, null: true,
           description: 'Milestones of the group',
@@ -64,7 +74,7 @@ module Types
           Types::BoardType,
           null: true,
           description: 'A single board of the group',
-          resolver: Resolvers::BoardsResolver.single
+          resolver: Resolvers::BoardResolver
 
     field :label,
           Types::LabelType,
@@ -74,6 +84,17 @@ module Types
               required: true,
               description: 'Title of the label'
           end
+
+    field :group_members,
+          description: 'A membership of a user within this group',
+          resolver: Resolvers::GroupMembersResolver
+
+    field :container_repositories,
+          Types::ContainerRepositoryType.connection_type,
+          null: true,
+          description: 'Container repositories of the project',
+          resolver: Resolvers::ContainerRepositoriesResolver,
+          authorize: :read_container_image
 
     def label(title:)
       BatchLoader::GraphQL.for(title).batch(key: group) do |titles, loader, args|

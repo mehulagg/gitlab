@@ -75,7 +75,7 @@ RSpec.describe Feature::Definition do
 
   describe '.load_from_file' do
     it 'properly loads a definition from file' do
-      expect(File).to receive(:read).with(path) { yaml_content }
+      expect_file_read(path, content: yaml_content)
 
       expect(described_class.send(:load_from_file, path).attributes)
         .to eq(definition.attributes)
@@ -93,7 +93,7 @@ RSpec.describe Feature::Definition do
 
     context 'for invalid definition' do
       it 'raises exception' do
-        expect(File).to receive(:read).with(path) { '{}' }
+        expect_file_read(path, content: '{}')
 
         expect do
           described_class.send(:load_from_file, path)
@@ -105,6 +105,7 @@ RSpec.describe Feature::Definition do
   describe '.load_all!' do
     let(:store1) { Dir.mktmpdir('path1') }
     let(:store2) { Dir.mktmpdir('path2') }
+    let(:definitions) { {} }
 
     before do
       allow(described_class).to receive(:paths).and_return(
@@ -115,28 +116,30 @@ RSpec.describe Feature::Definition do
       )
     end
 
+    subject { described_class.send(:load_all!) }
+
     it "when there's no feature flags a list of definitions is empty" do
-      expect(described_class.load_all!).to be_empty
+      is_expected.to be_empty
     end
 
     it "when there's a single feature flag it properly loads them" do
       write_feature_flag(store1, path, yaml_content)
 
-      expect(described_class.load_all!).to be_one
+      is_expected.to be_one
     end
 
     it "when the same feature flag is stored multiple times raises exception" do
       write_feature_flag(store1, path, yaml_content)
       write_feature_flag(store2, path, yaml_content)
 
-      expect { described_class.load_all! }
+      expect { subject }
         .to raise_error(/Feature flag 'feature_flag' is already defined/)
     end
 
     it "when one of the YAMLs is invalid it does raise exception" do
       write_feature_flag(store1, path, '{}')
 
-      expect { described_class.load_all! }
+      expect { subject }
         .to raise_error(/Feature flag is missing name/)
     end
 

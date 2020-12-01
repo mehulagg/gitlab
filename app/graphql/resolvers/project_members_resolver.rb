@@ -1,25 +1,14 @@
 # frozen_string_literal: true
+# rubocop:disable Graphql/ResolverType (inherited from MembersResolver)
 
 module Resolvers
-  class ProjectMembersResolver < BaseResolver
-    include Gitlab::Graphql::Authorize::AuthorizeResource
-
-    argument :search, GraphQL::STRING_TYPE,
-              required: false,
-              description: 'Search query'
-
-    type Types::MemberInterface, null: true
-
+  class ProjectMembersResolver < MembersResolver
     authorize :read_project_member
 
-    alias_method :project, :object
+    private
 
-    def resolve(**args)
-      authorize!(project)
-
+    def finder_class
       MembersFinder
-        .new(project, current_user, params: args)
-        .execute
     end
   end
 end

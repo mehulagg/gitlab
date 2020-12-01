@@ -11,9 +11,19 @@ RSpec.describe DesignManagement::Design do
   let_it_be(:design3) { create(:design, :with_versions, issue: issue, versions_count: 1) }
   let_it_be(:deleted_design) { create(:design, :with_versions, deleted: true) }
 
+  it_behaves_like 'AtomicInternalId', validate_presence: true do
+    let(:internal_id_attribute) { :iid }
+    let(:instance) { build(:design, issue: issue) }
+    let(:scope) { :project }
+    let(:scope_attrs) { { project: instance.project } }
+    let(:usage) { :design_management_designs }
+  end
+
   it_behaves_like 'a class that supports relative positioning' do
+    let_it_be(:relative_parent) { create(:issue) }
+
     let(:factory) { :design }
-    let(:default_params) { { issue: issue } }
+    let(:default_params) { { issue: relative_parent } }
   end
 
   describe 'relations' do
@@ -21,8 +31,20 @@ RSpec.describe DesignManagement::Design do
     it { is_expected.to belong_to(:issue) }
     it { is_expected.to have_many(:actions) }
     it { is_expected.to have_many(:versions) }
+    it { is_expected.to have_many(:authors) }
     it { is_expected.to have_many(:notes).dependent(:delete_all) }
     it { is_expected.to have_many(:user_mentions) }
+
+    describe '#authors' do
+      it 'returns unique version authors', :aggregate_failures do
+        author = create(:user)
+        create_list(:design_version, 2, designs: [design1], author: author)
+        version_authors = design1.versions.map(&:author)
+
+        expect(version_authors).to contain_exactly(issue.author, author, author)
+        expect(design1.authors).to contain_exactly(issue.author, author)
+      end
+    end
   end
 
   describe 'validations' do
@@ -204,6 +226,15 @@ RSpec.describe DesignManagement::Design do
     end
   end
 
+  describe ".build_full_path" do
+    it "builds the full path for a design" do
+      design = build(:design, issue: issue, filename: "hello.jpg")
+      expected_path = "#{DesignManagement.designs_directory}/issue-#{design.issue.iid}/hello.jpg"
+
+      expect(described_class.build_full_path(issue, design)).to eq(expected_path)
+    end
+  end
+
   describe '#visible_in?' do
     let_it_be(:issue) { create(:issue, project: issue.project) }
 
@@ -312,6 +343,38 @@ RSpec.describe DesignManagement::Design do
 
         expect(design).not_to be_deleted
       end
+    end
+  end
+
+  describe '#participants' do
+    let_it_be_with_refind(:design) { create(:design, issue: issue) }
+    let_it_be(:current_user) { create(:user) }
+    let_it_be(:version_author) { create(:user) }
+    let_it_be(:note_author) { create(:user) }
+    let_it_be(:mentioned_user) { create(:user) }
+    let_it_be(:design_version) { create(:design_version, :committed, designs: [design], author: version_author) }
+    let_it_be(:note) do
+      create(:diff_note_on_design,
+        noteable: design,
+        issue: issue,
+        project: issue.project,
+        author: note_author,
+        note: mentioned_user.to_reference
+      )
+    end
+
+    subject { design.participants(current_user) }
+
+    it { is_expected.to be_empty }
+
+    context 'when participants can read the project' do
+      before do
+        design.project.add_guest(version_author)
+        design.project.add_guest(note_author)
+        design.project.add_guest(mentioned_user)
+      end
+
+      it { is_expected.to contain_exactly(version_author, note_author, mentioned_user) }
     end
   end
 

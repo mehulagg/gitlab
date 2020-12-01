@@ -19,6 +19,7 @@ module API
       end
 
       use AdminModeMiddleware
+      use ResponseCoercerMiddleware
 
       helpers HelperMethods
 
@@ -54,8 +55,10 @@ module API
         user = find_user_from_sources
         return unless user
 
-        # Sessions are enforced to be unavailable for API calls, so ignore them for admin mode
-        Gitlab::Auth::CurrentUserMode.bypass_session!(user.id) if Feature.enabled?(:user_mode_in_session)
+        if user.is_a?(User) && Feature.enabled?(:user_mode_in_session)
+          # Sessions are enforced to be unavailable for API calls, so ignore them for admin mode
+          Gitlab::Auth::CurrentUserMode.bypass_session!(user.id)
+        end
 
         unless api_access_allowed?(user)
           forbidden!(api_access_denied_message(user))
@@ -183,6 +186,44 @@ module API
           # (https://github.com/nov/rack-oauth2/blob/40c9a99fd80486ccb8de0e4869ae384547c0d703/lib/rack/oauth2/server/abstract/error.rb#L26).
           Rack::Response.new(body, status, headers)
         end
+      end
+    end
+
+    # Prior to Rack v2.1.x, returning a body of [nil] or [201] worked
+    # because the body was coerced to a string. However, this no longer
+    # works in Rack v2.1.0+. The Rack spec
+    # (https://github.com/rack/rack/blob/master/SPEC.rdoc#the-body-)
+    # says:
+    #
+    # The Body must respond to `each` and must only yield String values
+    #
+    # Because it's easy to return the wrong body type, this middleware
+    # will:
+    #
+    # 1. Inspect each element of the body if it is an Array.
+    # 2. Coerce each value to a string if necessary.
+    # 3. Flag a test and development error.
+    class ResponseCoercerMiddleware < ::Grape::Middleware::Base
+      def call(env)
+        response = super(env)
+
+        status = response[0]
+        body = response[2]
+
+        return response if Rack::Utils::STATUS_WITH_NO_ENTITY_BODY[status]
+        return response unless body.is_a?(Array)
+
+        body.map! do |part|
+          if part.is_a?(String)
+            part
+          else
+            err = ArgumentError.new("The response body should be a String, but it is of type #{part.class}")
+            Gitlab::ErrorTracking.track_and_raise_for_dev_exception(err)
+            part.to_s
+          end
+        end
+
+        response
       end
     end
 

@@ -1,8 +1,7 @@
 <script>
 import { mapState } from 'vuex';
-import { GlIcon } from '@gitlab/ui';
+import { GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import { __, sprintf } from '~/locale';
-import tooltip from '~/vue_shared/directives/tooltip';
 import eventHub from '~/sidebar/event_hub';
 import EditForm from './edit_form.vue';
 
@@ -12,7 +11,7 @@ export default {
     GlIcon,
   },
   directives: {
-    tooltip,
+    GlTooltip: GlTooltipDirective,
   },
   props: {
     fullPath: {
@@ -73,15 +72,12 @@ export default {
   <div class="block issuable-sidebar-item confidentiality">
     <div
       ref="collapseIcon"
-      v-tooltip
+      v-gl-tooltip.viewport.left
       :title="tooltipLabel"
       class="sidebar-collapsed-icon"
-      data-container="body"
-      data-placement="left"
-      data-boundary="viewport"
       @click="toggleForm"
     >
-      <gl-icon :name="confidentialityIcon" aria-hidden="true" />
+      <gl-icon :name="confidentialityIcon" />
     </div>
     <div class="title hide-collapsed">
       {{ __('Confidentiality') }}
@@ -105,16 +101,11 @@ export default {
         :issuable-type="issuableType"
       />
       <div v-if="!confidential" class="no-value sidebar-item-value" data-testid="not-confidential">
-        <gl-icon :size="16" name="eye" aria-hidden="true" class="sidebar-item-icon inline" />
+        <gl-icon :size="16" name="eye" class="sidebar-item-icon inline" />
         {{ __('Not confidential') }}
       </div>
       <div v-else class="value sidebar-item-value hide-collapsed">
-        <gl-icon
-          :size="16"
-          name="eye-slash"
-          aria-hidden="true"
-          class="sidebar-item-icon inline is-active"
-        />
+        <gl-icon :size="16" name="eye-slash" class="sidebar-item-icon inline is-active" />
         {{ confidentialText }}
       </div>
     </div>

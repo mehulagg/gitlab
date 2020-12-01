@@ -42,15 +42,6 @@ namespace :import do
     get :realtime_changes
   end
 
-  resource :google_code, only: [:create, :new], controller: :google_code do
-    get :status
-    post :callback
-    get :jobs
-
-    get   :new_user_map,    path: :user_map
-    post  :create_user_map, path: :user_map
-  end
-
   resource :fogbugz, only: [:create, :new], controller: :fogbugz do
     get :status
     post :callback
@@ -67,6 +58,11 @@ namespace :import do
 
   resource :gitlab_group, only: [:create] do
     post :authorize
+  end
+
+  resource :bulk_imports, only: [:create] do
+    post :configure
+    get :status
   end
 
   resource :manifest, only: [:create, :new], controller: :manifest do

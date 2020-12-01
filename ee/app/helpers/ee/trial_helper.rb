@@ -23,6 +23,22 @@ module EE
       end
     end
 
+    def trial_selection_intro_text
+      if any_trial_user_namespaces? && any_trial_group_namespaces?
+        s_('Trials|You can apply your trial to a new group, an existing group, or your personal account.')
+      elsif any_trial_user_namespaces?
+        s_('Trials|You can apply your trial to a new group or your personal account.')
+      elsif any_trial_group_namespaces?
+        s_('Trials|You can apply your trial to a new group or an existing group.')
+      else
+        s_('Trials|Create a new group to start your GitLab Gold trial.')
+      end
+    end
+
+    def show_trial_namespace_select?
+      any_trial_group_namespaces? || any_trial_user_namespaces?
+    end
+
     def namespace_options_for_select(selected = nil)
       grouped_options = {
         'New' => [[_('Create group'), 0]],
@@ -33,21 +49,37 @@ module EE
       grouped_options_for_select(grouped_options, selected, prompt: _('Please select'))
     end
 
-    def trial_group_namespaces
-      current_user.manageable_groups_eligible_for_trial
-    end
-
-    def trial_user_namespaces
-      user_namespace = current_user.namespace
-      user_namespace.eligible_for_trial? ? [user_namespace] : []
-    end
-
     def show_trial_errors?(namespace, service_result)
       namespace&.invalid? || (service_result && !service_result[:success])
     end
 
     def trial_errors(namespace, service_result)
       namespace&.errors&.full_messages&.to_sentence&.presence || service_result&.dig(:errors)&.presence
+    end
+
+    private
+
+    def trial_group_namespaces
+      strong_memoize(:trial_group_namespaces) do
+        current_user.manageable_groups_eligible_for_trial
+      end
+    end
+
+    def trial_user_namespaces
+      return [] if experiment_enabled?(:group_only_trials)
+
+      strong_memoize(:trial_user_namespaces) do
+        user_namespace = current_user.namespace
+        user_namespace.eligible_for_trial? ? [user_namespace] : []
+      end
+    end
+
+    def any_trial_group_namespaces?
+      trial_group_namespaces.any?
+    end
+
+    def any_trial_user_namespaces?
+      trial_user_namespaces.any?
     end
   end
 end

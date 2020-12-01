@@ -1,3 +1,4 @@
+import { convertToCamelCase } from '~/lib/utils/text_utility';
 import MergeRequestStore from '~/vue_merge_request_widget/stores/mr_widget_store';
 import { stateKey } from '~/vue_merge_request_widget/stores/state_maps';
 import mockData from '../mock_data';
@@ -69,6 +70,38 @@ describe('MergeRequestStore', () => {
       });
     });
 
+    describe('isPipelineBlocked', () => {
+      const pipelineWaitingForManualAction = {
+        details: {
+          status: {
+            group: 'manual',
+          },
+        },
+      };
+
+      it('should be `false` when the pipeline status is missing', () => {
+        store.setData({ ...mockData, pipeline: undefined });
+
+        expect(store.isPipelineBlocked).toBe(false);
+      });
+
+      it('should be `false` when the pipeline is waiting for manual action', () => {
+        store.setData({ ...mockData, pipeline: pipelineWaitingForManualAction });
+
+        expect(store.isPipelineBlocked).toBe(false);
+      });
+
+      it('should be `true` when the pipeline is waiting for manual action and the pipeline must succeed', () => {
+        store.setData({
+          ...mockData,
+          pipeline: pipelineWaitingForManualAction,
+          only_allow_merge_if_pipeline_succeeds: true,
+        });
+
+        expect(store.isPipelineBlocked).toBe(true);
+      });
+    });
+
     describe('isNothingToMergeState', () => {
       it('returns true when nothingToMerge', () => {
         store.state = stateKey.nothingToMerge;
@@ -86,27 +119,52 @@ describe('MergeRequestStore', () => {
 
   describe('setPaths', () => {
     it('should set the add ci config path', () => {
-      store.setData({ ...mockData });
+      store.setPaths({ ...mockData });
 
       expect(store.mergeRequestAddCiConfigPath).toBe('/group2/project2/new/pipeline');
     });
 
     it('should set humanAccess=Maintainer when user has that role', () => {
-      store.setData({ ...mockData });
+      store.setPaths({ ...mockData });
 
       expect(store.humanAccess).toBe('Maintainer');
     });
 
     it('should set pipelinesEmptySvgPath', () => {
-      store.setData({ ...mockData });
+      store.setPaths({ ...mockData });
 
       expect(store.pipelinesEmptySvgPath).toBe('/path/to/svg');
     });
 
     it('should set newPipelinePath', () => {
-      store.setData({ ...mockData });
+      store.setPaths({ ...mockData });
 
       expect(store.newPipelinePath).toBe('/group2/project2/pipelines/new');
     });
+
+    it('should set sourceProjectDefaultUrl', () => {
+      store.setPaths({ ...mockData });
+
+      expect(store.sourceProjectDefaultUrl).toBe('/gitlab-org/html5-boilerplate.git');
+    });
+
+    it('should set securityReportsDocsPath', () => {
+      store.setPaths({ ...mockData });
+
+      expect(store.securityReportsDocsPath).toBe('security-reports-docs-path');
+    });
+
+    it.each(['sast_comparison_path', 'secret_scanning_comparison_path'])(
+      'should set %s path',
+      property => {
+        // Ensure something is set in the mock data
+        expect(property in mockData).toBe(true);
+        const expectedValue = mockData[property];
+
+        store.setPaths({ ...mockData });
+
+        expect(store[convertToCamelCase(property)]).toBe(expectedValue);
+      },
+    );
   });
 });

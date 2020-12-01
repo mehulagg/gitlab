@@ -5,10 +5,14 @@ class Admin::UsersController < Admin::ApplicationController
 
   before_action :user, except: [:index, :new, :create]
   before_action :check_impersonation_availability, only: :impersonate
+  before_action :ensure_destroy_prerequisites_met, only: [:destroy]
+
+  feature_category :users
 
   def index
     @users = User.filter_items(params[:filter]).order_name_asc
     @users = @users.search_with_secondary_emails(params[:search_query]) if params[:search_query].present?
+    @users = @users.includes(:authorized_projects) # rubocop: disable CodeReuse/ActiveRecord
     @users = @users.sort_by_attribute(@sort = params[:sort])
     @users = @users.page(params[:page])
   end
@@ -58,6 +62,16 @@ class Admin::UsersController < Admin::ApplicationController
     end
   end
 
+  def approve
+    result = Users::ApproveService.new(current_user).execute(user)
+
+    if result[:status] == :success
+      redirect_back_or_admin_user(notice: _("Successfully approved"))
+    else
+      redirect_back_or_admin_user(alert: result[:message])
+    end
+  end
+
   def activate
     return redirect_back_or_admin_user(notice: _("Error occurred. A blocked user must be unblocked to be activated")) if user.blocked?
 
@@ -68,6 +82,7 @@ class Admin::UsersController < Admin::ApplicationController
   def deactivate
     return redirect_back_or_admin_user(notice: _("Error occurred. A blocked user cannot be deactivated")) if user.blocked?
     return redirect_back_or_admin_user(notice: _("Successfully deactivated")) if user.deactivated?
+    return redirect_back_or_admin_user(notice: _("Internal users cannot be deactivated")) if user.internal?
     return redirect_back_or_admin_user(notice: _("The user you are trying to deactivate has been active in the past %{minimum_inactive_days} days and cannot be deactivated") % { minimum_inactive_days: ::User::MINIMUM_INACTIVE_DAYS }) unless user.can_be_deactivated?
 
     user.deactivate
@@ -77,7 +92,7 @@ class Admin::UsersController < Admin::ApplicationController
   def block
     result = Users::BlockService.new(current_user).execute(user)
 
-    if result[:status] = :success
+    if result[:status] == :success
       redirect_back_or_admin_user(notice: _("Successfully blocked"))
     else
       redirect_back_or_admin_user(alert: _("Error occurred. User was not blocked"))
@@ -167,13 +182,13 @@ class Admin::UsersController < Admin::ApplicationController
         # restore username to keep form action url.
         user.username = params[:id]
         format.html { render "edit" }
-        format.json { render json: [result[:message]], status: result[:status] }
+        format.json { render json: [result[:message]], status: :internal_server_error }
       end
     end
   end
 
   def destroy
-    user.delete_async(deleted_by: current_user, params: params.permit(:hard_delete))
+    user.delete_async(deleted_by: current_user, params: destroy_params)
 
     respond_to do |format|
       format.html { redirect_to admin_users_path, status: :found, notice: _("The user is being deleted.") }
@@ -200,6 +215,24 @@ class Admin::UsersController < Admin::ApplicationController
 
   def admin_making_changes_for_another_user?
     user != current_user
+  end
+
+  def destroy_params
+    params.permit(:hard_delete)
+  end
+
+  def ensure_destroy_prerequisites_met
+    return if hard_delete?
+
+    if user.solo_owned_groups.present?
+      message = s_('AdminUsers|You must transfer ownership or delete the groups owned by this user before you can delete their account')
+
+      redirect_to admin_user_path(user), status: :see_other, alert: message
+    end
+  end
+
+  def hard_delete?
+    destroy_params[:hard_delete]
   end
 
   def user

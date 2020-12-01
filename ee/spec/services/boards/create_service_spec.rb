@@ -3,6 +3,10 @@
 require 'spec_helper'
 
 RSpec.describe Boards::CreateService, services: true do
+  def created_board
+    service.execute.payload
+  end
+
   shared_examples 'boards create service' do
     context 'With the feature available' do
       before do
@@ -16,8 +20,12 @@ RSpec.describe Boards::CreateService, services: true do
           expect { service.execute }.to change(parent.boards, :count).by(1)
         end
 
+        it 'returns a successful response' do
+          expect(service.execute).to be_success
+        end
+
         it 'creates the default lists' do
-          board = service.execute
+          board = created_board
 
           expect(board.lists.size).to eq 2
           expect(board.lists.first).to be_backlog
@@ -32,10 +40,12 @@ RSpec.describe Boards::CreateService, services: true do
           expect { service.execute }.not_to change(parent.boards, :count)
         end
 
-        it "does not create board's default lists" do
-          board = service.execute
+        it 'returns an error response' do
+          expect(service.execute).to be_error
+        end
 
-          expect(board.lists.size).to eq 0
+        it "does not create board's default lists" do
+          expect(created_board.lists.size).to eq 0
         end
       end
 
@@ -46,8 +56,12 @@ RSpec.describe Boards::CreateService, services: true do
           expect { service.execute }.to change(parent.boards, :count).by(1)
         end
 
+        it 'returns a successful response' do
+          expect(service.execute).to be_success
+        end
+
         it "creates board's default lists" do
-          board = service.execute
+          board = created_board
 
           expect(board.lists.size).to eq 2
           expect(board.lists.last).to be_closed
@@ -68,13 +82,13 @@ RSpec.describe Boards::CreateService, services: true do
         stub_licensed_features(multiple_group_issue_boards: false)
         service = described_class.new(parent, double)
 
-        expect(service.execute).not_to be_nil
+        expect(service.execute.payload).not_to be_nil
         expect { service.execute }.not_to change(parent.boards, :count)
       end
     end
 
     it_behaves_like 'setting a milestone scope' do
-      subject { described_class.new(parent, double, milestone_id: milestone.id).execute }
+      subject { described_class.new(parent, double, milestone_id: milestone.id).execute.payload }
     end
   end
 end

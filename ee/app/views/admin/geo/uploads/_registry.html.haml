@@ -4,7 +4,7 @@
       %strong.text-truncate.flex-fill
         = upload_registry.file
       - unless upload_registry.upload
-        = button_tag s_('Geo|Remove'), type: "button", class: 'btn btn-danger btn-inverted js-confirm-modal-button', data: remove_tracking_entry_modal_data(admin_geo_upload_path(upload_registry))
+        = button_tag s_('Geo|Remove'), type: "button", class: 'gl-button btn btn-danger btn-inverted js-confirm-modal-button', data: remove_tracking_entry_modal_data(admin_geo_upload_path(upload_registry))
   .card-body
     .container.m-0.p-0
       .row

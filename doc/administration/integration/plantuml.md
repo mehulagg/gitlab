@@ -1,7 +1,7 @@
 ---
 stage: Create
 group: Source Code
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 type: reference, howto
 ---
 
@@ -132,7 +132,7 @@ stop;
 You need to enable PlantUML integration from Settings under Admin Area. To do
 that, login with an Admin account and do following:
 
-- In GitLab, go to **Admin Area > Settings > Integrations**.
+- In GitLab, go to **Admin Area > Settings > General**.
 - Expand the **PlantUML** section.
 - Check **Enable PlantUML** checkbox.
 - Set the PlantUML instance as `https://gitlab.example.com/-/plantuml/`.

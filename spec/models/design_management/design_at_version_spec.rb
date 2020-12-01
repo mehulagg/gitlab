@@ -185,7 +185,7 @@ RSpec.describe DesignManagement::DesignAtVersion do
   end
 
   describe 'validations' do
-    subject(:design_at_version) { build(:design_at_version) }
+    subject(:design_at_version) { build_stubbed(:design_at_version) }
 
     it { is_expected.to be_valid }
 
@@ -272,29 +272,6 @@ RSpec.describe DesignManagement::DesignAtVersion do
 
   def id_of(design, version)
     build(:design_at_version, design: design, version: version).id
-  end
-
-  describe '.instantiate' do
-    context 'when attrs are valid' do
-      subject do
-        described_class.instantiate(design: design, version: version)
-      end
-
-      it { is_expected.to be_a(described_class).and(be_valid) }
-    end
-
-    context 'when attrs are invalid' do
-      subject do
-        described_class.instantiate(
-          design: create(:design),
-          version: create(:design_version)
-        )
-      end
-
-      it 'raises a validation error' do
-        expect { subject }.to raise_error(ActiveModel::ValidationError)
-      end
-    end
   end
 
   describe '.lazy_find' do

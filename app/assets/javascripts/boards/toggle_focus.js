@@ -1,13 +1,16 @@
 import $ from 'jquery';
 import Vue from 'vue';
-import collapseIcon from './icons/fullscreen_collapse.svg';
-import expandIcon from './icons/fullscreen_expand.svg';
+import { GlIcon } from '@gitlab/ui';
+import { hide } from '~/tooltips';
 
 export default (ModalStore, boardsStore) => {
   const issueBoardsContent = document.querySelector('.content-wrapper > .js-focus-mode-board');
 
   return new Vue({
     el: document.getElementById('js-toggle-focus-btn'),
+    components: {
+      GlIcon,
+    },
     data: {
       modal: ModalStore.store,
       store: boardsStore.state,
@@ -15,7 +18,9 @@ export default (ModalStore, boardsStore) => {
     },
     methods: {
       toggleFocusMode() {
-        $(this.$refs.toggleFocusModeButton).tooltip('hide');
+        const $el = $(this.$refs.toggleFocusModeButton);
+        hide($el);
+
         issueBoardsContent.classList.toggle('is-focused');
 
         this.isFullscreen = !this.isFullscreen;
@@ -32,12 +37,7 @@ export default (ModalStore, boardsStore) => {
           title="Toggle focus mode"
           ref="toggleFocusModeButton"
           @click="toggleFocusMode">
-          <span v-show="isFullscreen">
-            ${collapseIcon}
-          </span>
-          <span v-show="!isFullscreen">
-            ${expandIcon}
-          </span>
+          <gl-icon :name="isFullscreen ? 'minimize' : 'maximize'" />
         </a>
       </div>
     `,

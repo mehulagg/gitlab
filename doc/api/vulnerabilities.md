@@ -1,3 +1,9 @@
+---
+stage: Secure
+group: Threat Insights
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Vulnerabilities API **(ULTIMATE)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/10242) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 12.6.
@@ -17,7 +23,7 @@ Every API call to vulnerabilities must be [authenticated](README.md#authenticati
 
 Vulnerability permissions inherit permissions from their project. If a project is
 private, and a user isn't a member of the project to which the vulnerability
-belongs, requests to that project will return a `404 Not Found` status code.
+belongs, requests to that project returns a `404 Not Found` status code.
 
 ## Single vulnerability
 
@@ -71,7 +77,7 @@ Confirms a given vulnerability. Returns status code `304` if the vulnerability i
 
 If an authenticated user does not have permission to
 [confirm vulnerabilities](../user/permissions.md#project-members-permissions),
-this request will result in a `403` status code.
+this request results in a `403` status code.
 
 ```plaintext
 POST /vulnerabilities/:id/confirm
@@ -121,7 +127,7 @@ Resolves a given vulnerability. Returns status code `304` if the vulnerability i
 
 If an authenticated user does not have permission to
 [resolve vulnerabilities](../user/permissions.md#project-members-permissions),
-this request will result in a `403` status code.
+this request results in a `403` status code.
 
 ```plaintext
 POST /vulnerabilities/:id/resolve
@@ -171,7 +177,7 @@ Dismisses a given vulnerability. Returns status code `304` if the vulnerability 
 
 If an authenticated user does not have permission to
 [dismiss vulnerabilities](../user/permissions.md#project-members-permissions),
-this request will result in a `403` status code.
+this request results in a `403` status code.
 
 ```plaintext
 POST /vulnerabilities/:id/dismiss
@@ -193,6 +199,56 @@ Example response:
   "title": "Predictable pseudorandom number generator",
   "description": null,
   "state": "closed",
+  "severity": "medium",
+  "confidence": "medium",
+  "report_type": "sast",
+  "project": {
+    "id": 32,
+    "name": "security-reports",
+    "full_path": "/gitlab-examples/security/security-reports",
+    "full_name": "gitlab-examples / security / security-reports"
+  },
+  "author_id": 1,
+  "updated_by_id": null,
+  "last_edited_by_id": null,
+  "closed_by_id": null,
+  "start_date": null,
+  "due_date": null,
+  "created_at": "2019-10-13T15:08:40.219Z",
+  "updated_at": "2019-10-13T15:09:40.382Z",
+  "last_edited_at": null,
+  "closed_at": null
+}
+```
+
+## Revert vulnerability to detected state
+
+Reverts a given vulnerability to detected state. Returns status code `304` if the vulnerability is already in detected state.
+
+If an authenticated user does not have permission to
+[revert vulnerability to detected state](../user/permissions.md#project-members-permissions),
+this request results in a `403` status code.
+
+```plaintext
+POST /vulnerabilities/:id/revert
+```
+
+| Attribute | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `id` | integer or string | yes | The ID of a vulnerability to revert to detected state |
+
+```shell
+curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/vulnerabilities/5/dismiss"
+```
+
+Example response:
+
+```json
+{
+  "id": 2,
+  "title": "Predictable pseudorandom number generator",
+  "description": null,
+  "state": "detected",
   "severity": "medium",
   "confidence": "medium",
   "report_type": "sast",

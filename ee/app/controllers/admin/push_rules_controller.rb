@@ -7,6 +7,8 @@ class Admin::PushRulesController < Admin::ApplicationController
 
   respond_to :html
 
+  feature_category :source_code_management
+
   def show
   end
 

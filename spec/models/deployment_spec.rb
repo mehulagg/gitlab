@@ -98,15 +98,27 @@ RSpec.describe Deployment do
     context 'when deployment runs' do
       let(:deployment) { create(:deployment) }
 
-      before do
-        deployment.run!
-      end
-
       it 'starts running' do
         freeze_time do
+          deployment.run!
+
           expect(deployment).to be_running
           expect(deployment.finished_at).to be_nil
         end
+      end
+
+      it 'executes Deployments::ExecuteHooksWorker asynchronously' do
+        expect(Deployments::ExecuteHooksWorker)
+            .to receive(:perform_async).with(deployment.id)
+
+        deployment.run!
+      end
+
+      it 'executes Deployments::DropOlderDeploymentsWorker asynchronously' do
+        expect(Deployments::DropOlderDeploymentsWorker)
+            .to receive(:perform_async).once.with(deployment.id)
+
+        deployment.run!
       end
     end
 
@@ -122,15 +134,15 @@ RSpec.describe Deployment do
         end
       end
 
-      it 'executes Deployments::SuccessWorker asynchronously' do
-        expect(Deployments::SuccessWorker)
+      it 'executes Deployments::UpdateEnvironmentWorker asynchronously' do
+        expect(Deployments::UpdateEnvironmentWorker)
           .to receive(:perform_async).with(deployment.id)
 
         deployment.succeed!
       end
 
-      it 'executes Deployments::FinishedWorker asynchronously' do
-        expect(Deployments::FinishedWorker)
+      it 'executes Deployments::ExecuteHooksWorker asynchronously' do
+        expect(Deployments::ExecuteHooksWorker)
           .to receive(:perform_async).with(deployment.id)
 
         deployment.succeed!
@@ -149,9 +161,16 @@ RSpec.describe Deployment do
         end
       end
 
-      it 'executes Deployments::FinishedWorker asynchronously' do
-        expect(Deployments::FinishedWorker)
+      it 'executes Deployments::LinkMergeRequestWorker asynchronously' do
+        expect(Deployments::LinkMergeRequestWorker)
           .to receive(:perform_async).with(deployment.id)
+
+        deployment.drop!
+      end
+
+      it 'executes Deployments::ExecuteHooksWorker asynchronously' do
+        expect(Deployments::ExecuteHooksWorker)
+            .to receive(:perform_async).with(deployment.id)
 
         deployment.drop!
       end
@@ -169,11 +188,43 @@ RSpec.describe Deployment do
         end
       end
 
-      it 'executes Deployments::FinishedWorker asynchronously' do
-        expect(Deployments::FinishedWorker)
+      it 'executes Deployments::LinkMergeRequestWorker asynchronously' do
+        expect(Deployments::LinkMergeRequestWorker)
           .to receive(:perform_async).with(deployment.id)
 
         deployment.cancel!
+      end
+
+      it 'executes Deployments::ExecuteHooksWorker asynchronously' do
+        expect(Deployments::ExecuteHooksWorker)
+            .to receive(:perform_async).with(deployment.id)
+
+        deployment.cancel!
+      end
+    end
+
+    context 'when deployment was skipped' do
+      let(:deployment) { create(:deployment, :running) }
+
+      it 'has correct status' do
+        deployment.skip!
+
+        expect(deployment).to be_skipped
+        expect(deployment.finished_at).to be_nil
+      end
+
+      it 'does not execute Deployments::LinkMergeRequestWorker asynchronously' do
+        expect(Deployments::LinkMergeRequestWorker)
+          .not_to receive(:perform_async).with(deployment.id)
+
+        deployment.skip!
+      end
+
+      it 'does not execute Deployments::ExecuteHooksWorker' do
+        expect(Deployments::ExecuteHooksWorker)
+            .not_to receive(:perform_async).with(deployment.id)
+
+        deployment.skip!
       end
     end
   end
@@ -294,6 +345,7 @@ RSpec.describe Deployment do
         deployment2 = create(:deployment, status: :running )
         create(:deployment, status: :failed )
         create(:deployment, status: :canceled )
+        create(:deployment, status: :skipped)
 
         is_expected.to contain_exactly(deployment1, deployment2)
       end
@@ -320,8 +372,52 @@ RSpec.describe Deployment do
       it 'retrieves deployments with deployable builds' do
         with_deployable = create(:deployment)
         create(:deployment, deployable: nil)
+        create(:deployment, deployable_type: 'CommitStatus', deployable_id: non_existing_record_id)
 
         is_expected.to contain_exactly(with_deployable)
+      end
+    end
+
+    describe 'visible' do
+      subject { described_class.visible }
+
+      it 'retrieves the visible deployments' do
+        deployment1 = create(:deployment, status: :running)
+        deployment2 = create(:deployment, status: :success)
+        deployment3 = create(:deployment, status: :failed)
+        deployment4 = create(:deployment, status: :canceled)
+        create(:deployment, status: :skipped)
+
+        is_expected.to contain_exactly(deployment1, deployment2, deployment3, deployment4)
+      end
+    end
+  end
+
+  describe 'latest_for_sha' do
+    subject { described_class.latest_for_sha(sha) }
+
+    let_it_be(:project) { create(:project, :repository) }
+    let_it_be(:commits) { project.repository.commits('master', limit: 2) }
+    let_it_be(:deployments) { commits.reverse.map { |commit| create(:deployment, project: project, sha: commit.id) } }
+    let(:sha) { commits.map(&:id) }
+
+    it 'finds the latest deployment with sha' do
+      is_expected.to eq(deployments.last)
+    end
+
+    context 'when sha is old' do
+      let(:sha) { commits.last.id }
+
+      it 'finds the latest deployment with sha' do
+        is_expected.to eq(deployments.first)
+      end
+    end
+
+    context 'when sha is nil' do
+      let(:sha) { nil }
+
+      it 'returns nothing' do
+        is_expected.to be_nil
       end
     end
   end
@@ -580,9 +676,10 @@ RSpec.describe Deployment do
       expect(deploy).to be_success
     end
 
-    it 'schedules SuccessWorker and FinishedWorker when finishing a deploy' do
-      expect(Deployments::SuccessWorker).to receive(:perform_async)
-      expect(Deployments::FinishedWorker).to receive(:perform_async)
+    it 'schedules workers when finishing a deploy' do
+      expect(Deployments::UpdateEnvironmentWorker).to receive(:perform_async)
+      expect(Deployments::LinkMergeRequestWorker).to receive(:perform_async)
+      expect(Deployments::ExecuteHooksWorker).to receive(:perform_async)
 
       deploy.update_status('success')
     end

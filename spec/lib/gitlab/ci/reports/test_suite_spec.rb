@@ -91,7 +91,7 @@ RSpec.describe Gitlab::Ci::Reports::TestSuite do
     subject { test_suite.with_attachment! }
 
     context 'when test cases do not contain an attachment' do
-      let(:test_case) { build(:test_case, :failed)}
+      let(:test_case) { build(:report_test_case, :failed)}
 
       before do
         test_suite.add_test_case(test_case)
@@ -103,7 +103,7 @@ RSpec.describe Gitlab::Ci::Reports::TestSuite do
     end
 
     context 'when test cases contain an attachment' do
-      let(:test_case_with_attachment) { build(:test_case, :failed_with_attachment)}
+      let(:test_case_with_attachment) { build(:report_test_case, :failed_with_attachment)}
 
       before do
         test_suite.add_test_case(test_case_with_attachment)
@@ -226,6 +226,20 @@ RSpec.describe Gitlab::Ci::Reports::TestSuite do
           is_expected.to be_empty
         end
       end
+    end
+  end
+
+  describe '#each_test_case' do
+    before do
+      test_suite.add_test_case(test_case_success)
+      test_suite.add_test_case(test_case_failed)
+      test_suite.add_test_case(test_case_skipped)
+      test_suite.add_test_case(test_case_error)
+    end
+
+    it 'yields each test case to given block' do
+      expect { |b| test_suite.each_test_case(&b) }
+        .to yield_successive_args(test_case_success, test_case_failed, test_case_skipped, test_case_error)
     end
   end
 

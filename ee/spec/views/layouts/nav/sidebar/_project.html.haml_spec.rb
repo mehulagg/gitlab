@@ -3,14 +3,12 @@
 require 'spec_helper'
 
 RSpec.describe 'layouts/nav/sidebar/_project' do
-  let(:project) { create(:project, :repository) }
+  let_it_be_with_refind(:project) { create(:project, :repository) }
 
   before do
     assign(:project, project)
     assign(:repository, project.repository)
     allow(view).to receive(:current_ref).and_return('master')
-
-    stub_licensed_features(tracing: true)
   end
 
   describe 'issue boards' do
@@ -28,8 +26,6 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
     let(:user) { create(:user) }
 
     before do
-      stub_licensed_features(feature_flags: true)
-
       project.project_feature.update!(builds_access_level: feature)
 
       project.team.add_developer(user)
@@ -53,43 +49,6 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
         render
 
         expect(rendered).to have_link('Operations', href: metrics_project_environments_path(project))
-      end
-    end
-  end
-
-  describe 'Operations > Tracing' do
-    it 'is not visible when no valid license' do
-      allow(view).to receive(:can?).and_return(true)
-      stub_licensed_features(tracing: false)
-
-      render
-
-      expect(rendered).not_to have_text 'Tracing'
-    end
-
-    it 'is not visible to unauthorized user' do
-      render
-
-      expect(rendered).not_to have_text 'Tracing'
-    end
-
-    it 'links to Tracing page' do
-      allow(view).to receive(:can?).and_return(true)
-
-      render
-
-      expect(rendered).to have_link('Tracing', href: project_tracing_path(project))
-    end
-
-    context 'without project.tracing_external_url' do
-      before do
-        allow(view).to receive(:can?).and_return(true)
-      end
-
-      it 'links to Tracing page' do
-        render
-
-        expect(rendered).to have_link('Tracing', href: project_tracing_path(project))
       end
     end
   end
@@ -224,7 +183,6 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
   describe 'Settings > Operations' do
     it 'is not visible when no valid license' do
       allow(view).to receive(:can?).and_return(true)
-      stub_licensed_features(tracing: false)
 
       render
 
@@ -261,28 +219,10 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
           stub_licensed_features(iterations: true)
         end
 
-        context 'with project_iterations feature flag enabled' do
-          before do
-            stub_feature_flags(project_iterations: true)
-          end
+        it 'is visible' do
+          render
 
-          it 'is visible' do
-            render
-
-            expect(rendered).to have_text 'Iterations'
-          end
-        end
-
-        context 'with project_iterations feature flag disabled' do
-          before do
-            stub_feature_flags(project_iterations: false)
-          end
-
-          it 'is not visible' do
-            render
-
-            expect(rendered).not_to have_text 'Iterations'
-          end
+          expect(rendered).to have_text 'Iterations'
         end
       end
 
@@ -305,28 +245,10 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
           stub_licensed_features(iterations: true)
         end
 
-        context 'with project_iterations feature flag enabled' do
-          before do
-            stub_feature_flags(project_iterations: true)
-          end
+        it 'is not visible' do
+          render
 
-          it 'is not visible' do
-            render
-
-            expect(rendered).not_to have_text 'Iterations'
-          end
-        end
-
-        context 'with project_iterations feature flag disabled' do
-          before do
-            stub_feature_flags(project_iterations: false)
-          end
-
-          it 'is not visible' do
-            render
-
-            expect(rendered).not_to have_text 'Iterations'
-          end
+          expect(rendered).not_to have_text 'Iterations'
         end
       end
 

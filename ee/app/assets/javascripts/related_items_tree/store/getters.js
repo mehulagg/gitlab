@@ -1,4 +1,5 @@
 import { issuableTypesMap, PathIdSeparator } from '~/related_issues/constants';
+import { processIssueTypeIssueSources } from '../utils/epic_utils';
 
 export const autoCompleteSources = () => gl.GfmAutoComplete && gl.GfmAutoComplete.dataSources;
 
@@ -11,6 +12,14 @@ export const itemAutoCompleteSources = (state, getters) => {
   if (getters.isEpic) {
     return state.autoCompleteEpics ? getters.autoCompleteSources : {};
   }
+
+  if (state.issuesEndpoint.includes('epics')) {
+    return {
+      ...getters.autoCompleteSources,
+      issues: processIssueTypeIssueSources(['issue'], getters.autoCompleteSources),
+    };
+  }
+
   return state.autoCompleteIssues ? getters.autoCompleteSources : {};
 };
 

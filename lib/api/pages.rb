@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 module API
-  class Pages < Grape::API::Instance
+  class Pages < ::API::Base
+    feature_category :pages
+
     before do
       require_pages_config_enabled!
       authenticated_with_can_read_all_resources!

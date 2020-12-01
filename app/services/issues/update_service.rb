@@ -3,6 +3,7 @@
 module Issues
   class UpdateService < Issues::BaseService
     include SpamCheckMethods
+    extend ::Gitlab::Utils::Override
 
     def execute(issue)
       handle_move_between_ids(issue)
@@ -17,11 +18,23 @@ module Issues
       super
     end
 
+    override :filter_params
+    def filter_params(issue)
+      super
+
+      # filter confidential in `Issues::UpdateService` and not in `IssuableBaseService#filtr_params`
+      # because we do allow users that cannot admin issues to set confidential flag when creating an issue
+      unless can_admin_issuable?(issue)
+        params.delete(:confidential)
+      end
+    end
+
     def before_update(issue, skip_spam_check: false)
       spam_check(issue, current_user, action: :update) unless skip_spam_check
     end
 
     def after_update(issue)
+      add_incident_label(issue)
       IssuesChannel.broadcast_to(issue, event: 'updated') if Gitlab::ActionCable::Config.in_app? || Feature.enabled?(:broadcast_issue_updates, issue.project)
     end
 
@@ -44,12 +57,14 @@ module Issues
         create_assignee_note(issue, old_assignees)
         notification_service.async.reassigned_issue(issue, current_user, old_assignees)
         todo_service.reassigned_assignable(issue, current_user, old_assignees)
+        track_incident_action(current_user, issue, :incident_assigned)
       end
 
       if issue.previous_changes.include?('confidential')
         # don't enqueue immediately to prevent todos removal in case of a mistake
         TodosDestroyer::ConfidentialIssueWorker.perform_in(Todo::WAIT_FOR_DELETE, issue.id) if issue.confidential?
         create_confidentiality_note(issue)
+        track_usage_event(:incident_management_incident_change_confidential, current_user.id)
       end
 
       added_labels = issue.labels - old_labels

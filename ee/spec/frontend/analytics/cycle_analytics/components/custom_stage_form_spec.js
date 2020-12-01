@@ -1,13 +1,13 @@
-import Vuex from 'vuex';
+import { createLocalVue, mount } from '@vue/test-utils';
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
-import customStagesStore from 'ee/analytics/cycle_analytics/store/modules/custom_stages';
-import { createLocalVue, mount } from '@vue/test-utils';
-import waitForPromises from 'helpers/wait_for_promises';
+import Vuex from 'vuex';
 import CustomStageForm, {
   initializeFormData,
 } from 'ee/analytics/cycle_analytics/components/custom_stage_form.vue';
 import { STAGE_ACTIONS } from 'ee/analytics/cycle_analytics/constants';
+import customStagesStore from 'ee/analytics/cycle_analytics/store/modules/custom_stages';
+import waitForPromises from 'helpers/wait_for_promises';
 import {
   endpoints,
   groupLabels,
@@ -264,7 +264,7 @@ describe('CustomStageForm', () => {
             wrapper
               .find(sel.startEventLabel)
               .findAll('.dropdown-item')
-              .at(1) // item at index 0 is 'select a label'
+              .at(0)
               .trigger('click');
             return wrapper.vm.$nextTick();
           })
@@ -454,7 +454,7 @@ describe('CustomStageForm', () => {
             wrapper
               .find(sel.endEventLabel)
               .findAll('.dropdown-item')
-              .at(2) // item at index 0 is 'select a label'
+              .at(1)
               .trigger('click');
 
             return wrapper.vm.$nextTick();

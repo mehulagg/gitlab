@@ -79,14 +79,28 @@ RSpec.describe Projects::AutocompleteService do
         expect(issues.count).to eq 3
       end
 
-      it 'lists all project issues for admin' do
-        autocomplete = described_class.new(project, admin)
-        issues = autocomplete.issues.map(&:iid)
+      context 'when admin mode is enabled', :enable_admin_mode do
+        it 'lists all project issues for admin', :enable_admin_mode do
+          autocomplete = described_class.new(project, admin)
+          issues = autocomplete.issues.map(&:iid)
 
-        expect(issues).to include issue.iid
-        expect(issues).to include security_issue_1.iid
-        expect(issues).to include security_issue_2.iid
-        expect(issues.count).to eq 3
+          expect(issues).to include issue.iid
+          expect(issues).to include security_issue_1.iid
+          expect(issues).to include security_issue_2.iid
+          expect(issues.count).to eq 3
+        end
+      end
+
+      context 'when admin mode is disabled' do
+        it 'does not list project confidential issues for admin' do
+          autocomplete = described_class.new(project, admin)
+          issues = autocomplete.issues.map(&:iid)
+
+          expect(issues).to include issue.iid
+          expect(issues).not_to include security_issue_1.iid
+          expect(issues).not_to include security_issue_2.iid
+          expect(issues.count).to eq 1
+        end
       end
     end
   end
@@ -123,7 +137,7 @@ RSpec.describe Projects::AutocompleteService do
       let!(:subgroup_milestone) { create(:milestone, group: subgroup) }
 
       before do
-        project.update(namespace: subgroup)
+        project.update!(namespace: subgroup)
       end
 
       it 'includes project milestones and all acestors milestones' do
@@ -138,7 +152,7 @@ RSpec.describe Projects::AutocompleteService do
     def expect_labels_to_equal(labels, expected_labels)
       expect(labels.size).to eq(expected_labels.size)
       extract_title = lambda { |label| label['title'] }
-      expect(labels.map(&extract_title)).to eq(expected_labels.map(&extract_title))
+      expect(labels.map(&extract_title)).to match_array(expected_labels.map(&extract_title))
     end
 
     let(:user) { create(:user) }

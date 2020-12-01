@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Import API
 
 ## Import repository from GitHub
@@ -13,10 +19,20 @@ POST /import/github
 | `personal_access_token`       | string | yes      | GitHub personal access token |
 | `repo_id`   | integer | yes      | GitHub repository ID     |
 | `new_name`   | string | no      | New repository name     |
-| `target_namespace`   | string | yes      | Namespace to import repository into     |
+| `target_namespace`   | string | yes      | Namespace to import repository into. Supports subgroups like `/namespace/subgroup`.     |
+| `github_hostname`   | string  | no  | Custom GitHub enterprise hostname. Defaults to GitHub.com if `github_hostname` is not set. |
 
 ```shell
-curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" --data "personal_access_token=abc123&repo_id=12345&target_namespace=root" "https://gitlab.example.com/api/v4/import/github"
+curl --request POST \
+  --url "https://gitlab.example.com/api/v4/import/github" \
+  --header "content-type: application/json" \
+  --header "PRIVATE-TOKEN: <your_access_token>" \
+  --data '{
+    "personal_access_token": "aBc123abC12aBc123abC12abC123+_A/c123",
+    "repo_id": "12345",
+    "target_namespace": "group/subgroup",
+    "new_name": "NEW-NAME"
+}'
 ```
 
 Example response:
@@ -37,7 +53,7 @@ Import your projects from Bitbucket Server to GitLab via the API.
 NOTE: **Note:**
 The Bitbucket Project Key is only used for finding the repository in Bitbucket.
 You must specify a `target_namespace` if you want to import the repository to a GitLab group.
-If you do not specify `target_namespace`, the project will import to your personal user namespace.
+If you do not specify `target_namespace`, the project imports to your personal user namespace.
 
 ```plaintext
 POST /import/bitbucket_server
@@ -50,8 +66,8 @@ POST /import/bitbucket_server
 | `personal_access_token` | string | yes | Bitbucket Server personal access token/password |
 | `bitbucket_server_project` | string | yes | Bitbucket Project Key |
 | `bitbucket_server_repo` | string | yes | Bitbucket Repository Name |
-| `new_name` | string | no | New repo name |
-| `target_namespace` | string | no | Namespace to import repo into |
+| `new_name` | string | no | New repository name |
+| `target_namespace` | string | no | Namespace to import repository into. Supports subgroups like `/namespace/subgroup` |
 
 ```shell
 curl --request POST \

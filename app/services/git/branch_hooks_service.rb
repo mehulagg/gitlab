@@ -76,10 +76,17 @@ module Git
     def branch_change_hooks
       enqueue_process_commit_messages
       enqueue_jira_connect_sync_messages
+      enqueue_metrics_dashboard_sync
     end
 
     def branch_remove_hooks
       project.repository.after_remove_branch(expire_cache: false)
+    end
+
+    def enqueue_metrics_dashboard_sync
+      return unless default_branch?
+
+      ::Metrics::Dashboard::SyncDashboardsWorker.perform_async(project.id)
     end
 
     # Schedules processing of commit messages
@@ -111,7 +118,7 @@ module Git
       commits_to_sync = limited_commits.select { |commit| Atlassian::JiraIssueKeyExtractor.has_keys?(commit.safe_message) }.map(&:sha)
 
       if branch_to_sync || commits_to_sync.any?
-        JiraConnect::SyncBranchWorker.perform_async(project.id, branch_to_sync, commits_to_sync)
+        JiraConnect::SyncBranchWorker.perform_async(project.id, branch_to_sync, commits_to_sync, Atlassian::JiraConnect::Client.generate_update_sequence_id)
       end
     end
 

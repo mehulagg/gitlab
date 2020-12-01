@@ -1,11 +1,13 @@
 # frozen_string_literal: true
 
 module API
-  class Variables < Grape::API::Instance
+  class Variables < ::API::Base
     include PaginationParams
 
     before { authenticate! }
     before { authorize! :admin_build, user_project }
+
+    feature_category :continuous_integration
 
     helpers do
       def filter_variable_parameters(params)
@@ -17,7 +19,6 @@ module API
       def find_variable(params)
         variables = ::Ci::VariablesFinder.new(user_project, params).execute.to_a
 
-        return variables.first unless ::Gitlab::Ci::Features.variables_api_filter_environment_scope?
         return variables.first unless variables.many? # rubocop: disable CodeReuse/ActiveRecord
 
         conflict!("There are multiple variables with provided parameters. Please use 'filter[environment_scope]'")

@@ -1,7 +1,7 @@
 ---
 stage: Create
 group: Source Code
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 type: reference, api
 ---
 
@@ -52,7 +52,7 @@ POST /internal/allowed
 | `username` | string | no      | Username from the certificate used to connect to GitLab Shell |
 | `project`  | string | no (if `gl_repository` is passed) | Path to the project |
 | `gl_repository`  | string | no (if `project` is passed) | Repository identifier (e.g. `project-7`) |
-| `protocol` | string | yes     | SSH when called from GitLab-shell, HTTP or SSH when called from Gitaly |
+| `protocol` | string | yes     | SSH when called from GitLab Shell, HTTP or SSH when called from Gitaly |
 | `action`   | string | yes     | Git command being run (`git-upload-pack`, `git-receive-pack`, `git-upload-archive`) |
 | `changes`  | string | yes     | `<oldrev> <newrev> <refname>` when called from Gitaly, the magic string `_any` when called from GitLab Shell |
 | `check_ip` | string | no     | IP address from which call to GitLab Shell was made |
@@ -223,6 +223,7 @@ Example response:
 
 - GitLab Geo
 - GitLab Shell's `bin/check`
+- Gitaly
 
 ## Get new 2FA recovery codes using an SSH key
 
@@ -371,7 +372,23 @@ Example response:
 }
 ```
 
-## Kubernetes agent information
+## Kubernetes agent endpoints
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/41045) in GitLab 13.4.
+> - This feature is not deployed on GitLab.com
+> - It's not recommended for production use.
+
+The following endpoints are used by the GitLab Kubernetes Agent Server (kas)
+for various purposes.
+
+These endpoints are all authenticated using JWT. The JWT secret is stored in a file
+specified in `config/gitlab.yml`. By default, the location is in the root of the
+GitLab Rails app in a file called `.gitlab_kas_secret`.
+
+CAUTION: **Caution:**
+The Kubernetes agent is under development and is not recommended for production use.
+
+### Kubernetes agent information
 
 Called from GitLab Kubernetes Agent Server (kas) to retrieve agent
 information for the given agent token. This returns the Gitaly connection
@@ -388,7 +405,7 @@ Example Request:
 curl --request GET --header "Gitlab-Kas-Api-Request: <JWT token>" --header "Authorization: Bearer <agent token>" "http://localhost:3000/api/v4/internal/kubernetes/agent_info"
 ```
 
-## Kubernetes agent project information
+### Kubernetes agent project information
 
 Called from GitLab Kubernetes Agent Server (kas) to retrieve project
 information for the given agent token. This returns the Gitaly
@@ -413,7 +430,7 @@ Example Request:
 curl --request GET --header "Gitlab-Kas-Api-Request: <JWT token>" --header "Authorization: Bearer <agent token>" "http://localhost:3000/api/v4/internal/kubernetes/project_info?id=7"
 ```
 
-## Kubernetes agent usage metrics
+### Kubernetes agent usage metrics
 
 Called from GitLab Kubernetes Agent Server (kas) to increase the usage
 metric counters.

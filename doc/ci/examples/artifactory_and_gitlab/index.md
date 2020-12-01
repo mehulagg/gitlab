@@ -1,14 +1,9 @@
 ---
 stage: Verify
 group: Continuous Integration
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 disqus_identifier: 'https://docs.gitlab.com/ee/articles/artifactory_and_gitlab/index.html'
-author: Fabio Busatto
-author_gitlab: bikebilly
-level: intermediate
-article_type: tutorial
 type: tutorial
-date: 2017-08-15
 ---
 
 # How to deploy Maven projects to Artifactory with GitLab CI/CD
@@ -28,10 +23,10 @@ We also assume that an Artifactory instance is available and reachable from the 
 
 ## Create the simple Maven dependency
 
-First of all, you need an application to work with: in this specific case we will
-use a simple one, but it could be any Maven application. This will be the
-dependency you want to package and deploy to Artifactory, in order to be
-available to other projects.
+First, you need an application to work with: in this specific case we'll use a
+simple one, but it could be any Maven application. This will be the dependency
+you want to package and deploy to Artifactory, to be available to other
+projects.
 
 ### Prepare the dependency application
 
@@ -63,7 +58,7 @@ The application is ready to use, but you need some additional steps to deploy it
 1. Log in to Artifactory with your user's credentials.
 1. From the main screen, click on the `libs-release-local` item in the **Set Me Up** panel.
 1. Copy to clipboard the configuration snippet under the **Deploy** paragraph.
-1. Change the `url` value in order to have it configurable via variables.
+1. Change the `url` value to have it configurable by using variables.
 1. Copy the snippet in the `pom.xml` file for your project, just after the
    `dependencies` section. The snippet should look like this:
 
@@ -82,7 +77,7 @@ is to configure the authentication data. It is a simple task, but Maven requires
 it to stay in a file called `settings.xml` that has to be in the `.m2` subdirectory
 in the user's homedir.
 
-Since you want to use GitLab Runner to automatically deploy the application, you
+Since you want to use a runner to automatically deploy the application, you
 should create the file in the project's home directory and set a command line
 parameter in `.gitlab-ci.yml` to use the custom location instead of the default one:
 
@@ -110,7 +105,7 @@ parameter in `.gitlab-ci.yml` to use the custom location instead of the default 
 Now it's time we set up [GitLab CI/CD](https://about.gitlab.com/stages-devops-lifecycle/continuous-integration/) to automatically build, test and deploy the dependency!
 
 GitLab CI/CD uses a file in the root of the repository, named `.gitlab-ci.yml`, to read the definitions for jobs
-that will be executed by the configured GitLab Runners. You can read more about this file in the [GitLab Documentation](../../yaml/README.md).
+that will be executed by the configured runners. You can read more about this file in the [GitLab Documentation](../../yaml/README.md).
 
 First of all, remember to set up variables for your deployment. Navigate to your project's **Settings > CI/CD > Environment variables** page
 and add the following ones (replace them with your current values, of course):
@@ -151,8 +146,9 @@ deploy:
     - master
 ```
 
-GitLab Runner will use the latest [Maven Docker image](https://hub.docker.com/_/maven/), which already contains all the tools and the dependencies you need to manage the project,
-in order to run the jobs.
+The runner uses the latest [Maven Docker image](https://hub.docker.com/_/maven/),
+which contains all of the tools and dependencies needed to manage the project
+and to run the jobs.
 
 Environment variables are set to instruct Maven to use the `homedir` of the repository instead of the user's home when searching for configuration and dependencies.
 

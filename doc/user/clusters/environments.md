@@ -1,7 +1,7 @@
 ---
 stage: Configure
 group: Configure
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Cluster Environments **(PREMIUM)**
@@ -43,6 +43,5 @@ Once you have successful deployments to your group-level or instance-level clust
 1. Navigate to your group's **Kubernetes** page.
 1. Click on the **Environments** tab.
 
-NOTE: **Note:**
-Only successful deployments to the cluster is included in this page.
-Non-cluster environments will not be included.
+Only successful deployments to the cluster are included in this page.
+Non-cluster environments aren't included.

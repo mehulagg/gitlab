@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
 module QA
-  RSpec.describe 'Plan' do
+  RSpec.describe 'Plan', :reliable do
     describe 'Epics Management' do
       before do
         Flow::Login.sign_in
       end
 
-      it 'creates an epic', :reliable, testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/522' do
+      it 'creates an epic', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/522' do
         epic_title = 'Epic created via GUI'
         EE::Resource::Epic.fabricate_via_browser_ui! do |epic|
           epic.title = epic_title
@@ -36,7 +36,7 @@ module QA
             epic.visit!
           end
 
-          it 'adds/removes issue to/from epic', :reliable, testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/526' do
+          it 'adds/removes issue to/from epic', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/526' do
             EE::Page::Group::Epic::Show.perform do |show|
               show.add_issue_to_epic(issue.web_url)
 
@@ -48,23 +48,25 @@ module QA
             end
           end
 
-          it 'comments on epic', :reliable, testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/525' do
+          it 'comments on epic', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/525' do
             comment = 'My Epic Comment'
             EE::Page::Group::Epic::Show.perform do |show|
-              show.add_comment_to_epic(comment)
-            end
+              show.comment(comment)
 
-            expect(page).to have_content(comment)
+              expect(show).to have_comment(comment)
+            end
           end
 
           it 'closes and reopens an epic', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/524' do
-            EE::Page::Group::Epic::Show.perform(&:close_reopen_epic)
+            EE::Page::Group::Epic::Show.perform do |show|
+              show.close_reopen_epic
 
-            expect(page).to have_content('Closed')
+              expect(show).to have_system_note('closed')
 
-            EE::Page::Group::Epic::Show.perform(&:close_reopen_epic)
+              show.close_reopen_epic
 
-            expect(page).to have_content('Open')
+              expect(show).to have_system_note('opened')
+            end
           end
         end
 
@@ -79,8 +81,10 @@ module QA
 
           epic.visit!
 
-          expect(page).to have_content('added issue')
-          expect(page).to have_content('removed issue')
+          EE::Page::Group::Epic::Show.perform do |show|
+            expect(show).to have_system_note('added issue')
+            expect(show).to have_system_note('removed issue')
+          end
         end
 
         def create_issue_resource

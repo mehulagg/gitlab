@@ -214,11 +214,49 @@ module EmailsHelper
     end
   end
 
+  def instance_access_request_text(user, format: nil)
+    gitlab_host = Gitlab.config.gitlab.host
+
+    _('%{username} has asked for a GitLab account on your instance %{host}:') % { username: sanitize_name(user.name), host: gitlab_host }
+  end
+
+  def instance_access_request_link(user, format: nil)
+    url = admin_user_url(user)
+
+    case format
+    when :html
+      user_page = '<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe % { url: url }
+      _("Click %{link_start}here%{link_end} to view the request.").html_safe % { link_start: user_page, link_end: '</a>'.html_safe }
+    else
+      _('Click %{link_to} to view the request.') % { link_to: url }
+    end
+  end
+
   def contact_your_administrator_text
     _('Please contact your administrator with any questions.')
   end
 
+  def change_reviewer_notification_text(new_reviewers, previous_reviewers, html_tag = nil)
+    new = new_reviewers.any? ? users_to_sentence(new_reviewers) : s_('ChangeReviewer|Unassigned')
+    old = previous_reviewers.any? ? users_to_sentence(previous_reviewers) : nil
+
+    if html_tag.present?
+      new = content_tag(html_tag, new)
+      old = content_tag(html_tag, old) if old.present?
+    end
+
+    if old.present?
+      s_('ChangeReviewer|Reviewer changed from %{old} to %{new}').html_safe % { old: old, new: new }
+    else
+      s_('ChangeReviewer|Reviewer changed to %{new}').html_safe % { new: new }
+    end
+  end
+
   private
+
+  def users_to_sentence(users)
+    sanitize_name(users.map(&:name).to_sentence)
+  end
 
   def generate_link(text, url)
     link_to(text, url, target: :_blank, rel: 'noopener noreferrer')

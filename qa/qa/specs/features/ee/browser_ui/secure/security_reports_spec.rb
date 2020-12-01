@@ -3,7 +3,7 @@
 require 'pathname'
 
 module QA
-  RSpec.describe 'Secure', :docker, :runner do
+  RSpec.describe 'Secure', :runner do
     let(:number_of_dependencies_in_fixture) { 9 }
     let(:dependency_scan_example_vuln) { 'Prototype pollution attack in mixin-deep' }
     let(:container_scan_example_vuln) { 'CVE-2017-18269 in glibc' }
@@ -23,6 +23,7 @@ module QA
         @project = Resource::Project.fabricate_via_api! do |p|
           p.name = Runtime::Env.auto_devops_project_name || 'project-with-secure'
           p.description = 'Project with Secure'
+          p.group = Resource::Group.fabricate_via_api!
         end
 
         @runner = Resource::Runner.fabricate! do |runner|
@@ -50,8 +51,7 @@ module QA
       end
 
       it 'displays security reports in the pipeline', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/565' do
-        Page::Project::Menu.perform(&:click_ci_cd_pipelines)
-        Page::Project::Pipeline::Index.perform(&:click_on_latest_pipeline)
+        Flow::Pipeline.visit_latest_pipeline
 
         Page::Project::Pipeline::Show.perform do |pipeline|
           pipeline.click_on_security
@@ -76,7 +76,7 @@ module QA
 
       it 'displays security reports in the project security dashboard', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/566' do
         Page::Project::Menu.perform(&:click_project)
-        Page::Project::Menu.perform(&:click_on_security_dashboard)
+        Page::Project::Menu.perform(&:click_on_vulnerability_report)
 
         EE::Page::Project::Secure::Show.perform do |dashboard|
           filter_report_and_perform(dashboard, "Dependency Scanning") do

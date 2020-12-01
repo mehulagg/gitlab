@@ -1,5 +1,0 @@
----
-title: Hide the upgrade link on the admin license page if plan Ultimate
-merge_request: 40977
-author:
-type: changed

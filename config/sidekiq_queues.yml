@@ -30,6 +30,10 @@
   - 1
 - - analytics_code_review_metrics
   - 1
+- - analytics_instance_statistics_counter_job
+  - 1
+- - approve_blocked_users
+  - 1
 - - authorized_keys
   - 2
 - - authorized_project_update
@@ -42,23 +46,27 @@
   - 3
 - - background_migration
   - 1
+- - bulk_import
+  - 1
 - - chaos
   - 2
 - - chat_notification
   - 2
 - - ci_batch_reset_minutes
   - 1
+- - ci_delete_objects
+  - 1
 - - container_repository
   - 1
 - - create_commit_signature
-  - 2
-- - create_evidence
   - 2
 - - create_github_webhook
   - 2
 - - create_note_diff_file
   - 1
 - - cronjob
+  - 1
+- - dast_site_validation
   - 1
 - - default
   - 1
@@ -74,9 +82,19 @@
   - 1
 - - deployment
   - 3
+- - design_management_copy_design_collection
+  - 1
 - - design_management_new_version
   - 1
+- - destroy_pages_deployments
+  - 1
 - - detect_repository_languages
+  - 1
+- - disallow_two_factor_for_group
+  - 1
+- - disallow_two_factor_for_subgroups
+  - 1
+- - elastic_association_indexer
   - 1
 - - elastic_commit_indexer
   - 1
@@ -96,6 +114,8 @@
   - 2
 - - emails_on_push
   - 2
+- - environments_canary_ingress_update
+  - 1
 - - epics
   - 2
 - - error_tracking_issue_link
@@ -128,15 +148,21 @@
   - 1
 - - group_import
   - 1
+- - group_saml_group_sync
+  - 1
 - - hashed_storage
   - 1
 - - import_issues_csv
   - 2
 - - incident_management
   - 2
+- - incident_management_apply_incident_sla_exceeded_label
+  - 1
 - - invalid_gpg_signature_update
   - 2
 - - irker
+  - 1
+- - issuable_export_csv
   - 1
 - - issue_placement
   - 2
@@ -154,9 +180,15 @@
   - 2
 - - merge
   - 5
+- - merge_request_cleanup_refs
+  - 1
 - - merge_request_mergeability_check
   - 1
+- - merge_request_reset_approvals
+  - 1
 - - metrics_dashboard_prune_old_annotations
+  - 1
+- - metrics_dashboard_sync_dashboards
   - 1
 - - migrate_external_diffs
   - 1
@@ -218,13 +250,25 @@
   - 1
 - - project_import_schedule
   - 1
+- - project_schedule_bulk_repository_shard_moves
+  - 1
 - - project_service
+  - 1
+- - project_template_export
   - 1
 - - project_update_repository_storage
   - 1
 - - prometheus_create_default_alerts
   - 1
 - - propagate_integration
+  - 1
+- - propagate_integration_group
+  - 1
+- - propagate_integration_inherit
+  - 1
+- - propagate_integration_inherit_descendant
+  - 1
+- - propagate_integration_project
   - 1
 - - propagate_service_template
   - 1
@@ -252,6 +296,8 @@
   - 1
 - - repository_update_remote_mirror
   - 1
+- - requirements_management_import_requirements_csv
+  - 1
 - - requirements_management_process_requirements_reports
   - 1
 - - security_scans
@@ -261,6 +307,8 @@
 - - self_monitoring_project_delete
   - 2
 - - service_desk_email_receiver
+  - 1
+- - set_user_status_based_on_user_cap_setting
   - 1
 - - status_page_publish
   - 1
@@ -291,6 +339,8 @@
 - - vulnerability_exports_export_deletion
   - 1
 - - web_hook
+  - 1
+- - web_hooks_destroy
   - 1
 - - x509_certificate_revoke
   - 1

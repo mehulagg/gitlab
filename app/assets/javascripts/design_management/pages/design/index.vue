@@ -2,7 +2,7 @@
 import Mousetrap from 'mousetrap';
 import { GlLoadingIcon, GlAlert } from '@gitlab/ui';
 import { ApolloMutation } from 'vue-apollo';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import { fetchPolicies } from '~/lib/graphql';
 import allVersionsMixin from '../../mixins/all_versions';
 import Toolbar from '../../components/toolbar/index.vue';
@@ -13,18 +13,19 @@ import DesignReplyForm from '../../components/design_notes/design_reply_form.vue
 import DesignSidebar from '../../components/design_sidebar.vue';
 import getDesignQuery from '../../graphql/queries/get_design.query.graphql';
 import createImageDiffNoteMutation from '../../graphql/mutations/create_image_diff_note.mutation.graphql';
-import updateImageDiffNoteMutation from '../../graphql/mutations/update_image_diff_note.mutation.graphql';
+import repositionImageDiffNoteMutation from '../../graphql/mutations/reposition_image_diff_note.mutation.graphql';
 import updateActiveDiscussionMutation from '../../graphql/mutations/update_active_discussion.mutation.graphql';
 import {
   extractDiscussions,
   extractDesign,
-  updateImageDiffNoteOptimisticResponse,
+  repositionImageDiffNoteOptimisticResponse,
   toDiffNoteGid,
   extractDesignNoteId,
+  getPageLayoutElement,
 } from '../../utils/design_management_utils';
 import {
   updateStoreAfterAddImageDiffNote,
-  updateStoreAfterUpdateImageDiffNote,
+  updateStoreAfterRepositionImageDiffNote,
 } from '../../utils/cache_update';
 import {
   ADD_DISCUSSION_COMMENT_ERROR,
@@ -38,7 +39,9 @@ import {
 } from '../../utils/error_messages';
 import { trackDesignDetailView } from '../../utils/tracking';
 import { DESIGNS_ROUTE_NAME } from '../../router/constants';
-import { ACTIVE_DISCUSSION_SOURCE_TYPES } from '../../constants';
+import { ACTIVE_DISCUSSION_SOURCE_TYPES, DESIGN_DETAIL_LAYOUT_CLASSLIST } from '../../constants';
+
+const DEFAULT_SCALE = 1;
 
 export default {
   components: {
@@ -65,7 +68,7 @@ export default {
       comment: '',
       annotationCoordinates: null,
       errorMessage: '',
-      scale: 1,
+      scale: DEFAULT_SCALE,
       resolvedDiscussionsExpanded: false,
     };
   },
@@ -157,6 +160,11 @@ export default {
   beforeDestroy() {
     Mousetrap.unbind('esc', this.closeDesign);
   },
+  beforeRouteUpdate(to, from, next) {
+    // reset scale when the active design changes
+    this.scale = DEFAULT_SCALE;
+    next();
+  },
   methods: {
     addImageDiffNoteToStore(
       store,
@@ -174,12 +182,12 @@ export default {
     updateImageDiffNoteInStore(
       store,
       {
-        data: { updateImageDiffNote },
+        data: { repositionImageDiffNote },
       },
     ) {
-      return updateStoreAfterUpdateImageDiffNote(
+      return updateStoreAfterRepositionImageDiffNote(
         store,
-        updateImageDiffNote,
+        repositionImageDiffNote,
         getDesignQuery,
         this.designVariables,
       );
@@ -191,7 +199,7 @@ export default {
       );
 
       const mutationPayload = {
-        optimisticResponse: updateImageDiffNoteOptimisticResponse(note, {
+        optimisticResponse: repositionImageDiffNoteOptimisticResponse(note, {
           position,
         }),
         variables: {
@@ -200,7 +208,7 @@ export default {
             position,
           },
         },
-        mutation: updateImageDiffNoteMutation,
+        mutation: repositionImageDiffNoteMutation,
         update: this.updateImageDiffNoteInStore,
       };
 
@@ -222,7 +230,7 @@ export default {
     onQueryError(message) {
       // because we redirect user to /designs (the issue page),
       // we want to create these flashes on the issue page
-      createFlash(message);
+      createFlash({ message });
       this.$router.push({ name: this.$options.DESIGNS_ROUTE_NAME });
     },
     onError(message, e) {
@@ -293,6 +301,22 @@ export default {
       this.resolvedDiscussionsExpanded = !this.resolvedDiscussionsExpanded;
     },
   },
+  beforeRouteEnter(to, from, next) {
+    const pageEl = getPageLayoutElement();
+    if (pageEl) {
+      pageEl.classList.add(...DESIGN_DETAIL_LAYOUT_CLASSLIST);
+    }
+
+    next();
+  },
+  beforeRouteLeave(to, from, next) {
+    const pageEl = getPageLayoutElement();
+    if (pageEl) {
+      pageEl.classList.remove(...DESIGN_DETAIL_LAYOUT_CLASSLIST);
+    }
+
+    next();
+  },
   createImageDiffNoteMutation,
   DESIGNS_ROUTE_NAME,
 };
@@ -300,11 +324,13 @@ export default {
 
 <template>
   <div
-    class="design-detail js-design-detail fixed-top w-100 position-bottom-0 d-flex justify-content-center flex-column flex-lg-row"
+    class="design-detail js-design-detail fixed-top gl-w-full gl-bottom-0 gl-display-flex gl-justify-content-center gl-flex-direction-column gl-lg-flex-direction-row"
   >
-    <gl-loading-icon v-if="isFirstLoading" size="xl" class="align-self-center" />
+    <gl-loading-icon v-if="isFirstLoading" size="xl" class="gl-align-self-center" />
     <template v-else>
-      <div class="d-flex overflow-hidden flex-grow-1 flex-column position-relative">
+      <div
+        class="gl-display-flex gl-overflow-hidden gl-flex-grow-1 gl-flex-direction-column gl-relative"
+      >
         <design-destroyer
           :filenames="[design.filename]"
           :project-path="projectPath"
@@ -323,7 +349,7 @@ export default {
           </template>
         </design-destroyer>
 
-        <div v-if="errorMessage" class="p-3">
+        <div v-if="errorMessage" class="gl-p-5">
           <gl-alert variant="danger" @dismiss="errorMessage = null">
             {{ errorMessage }}
           </gl-alert>
@@ -340,7 +366,9 @@ export default {
           @moveNote="onMoveNote"
         />
 
-        <div class="design-scaler-wrapper position-absolute mb-4 d-flex-center">
+        <div
+          class="design-scaler-wrapper gl-absolute gl-mb-6 gl-display-flex gl-justify-content-center gl-align-items-center"
+        >
           <design-scaler @scale="scale = $event" />
         </div>
       </div>
@@ -355,7 +383,7 @@ export default {
         @toggleResolvedComments="toggleResolvedComments"
         @todoError="onTodoError"
       >
-        <template #replyForm>
+        <template #reply-form>
           <apollo-mutation
             v-if="isAnnotating"
             #default="{ mutate, loading }"

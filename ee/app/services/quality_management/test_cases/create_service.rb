@@ -5,7 +5,7 @@ module QualityManagement
     class CreateService < BaseService
       ISSUE_TYPE = 'test_case'
 
-      def initialize(project, current_user, title:, description:, label_ids: [])
+      def initialize(project, current_user, title:, description: nil, label_ids: [])
         super(project, current_user)
 
         @title = title
@@ -43,7 +43,7 @@ module QualityManagement
       end
 
       def can_create_test_cases?
-        project.feature_available?(:quality_management) && Feature.enabled?(:quality_test_cases, project)
+        project.feature_available?(:quality_management) && Feature.enabled?(:quality_test_cases, project, default_enabled: true)
       end
     end
   end

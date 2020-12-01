@@ -124,6 +124,39 @@ RSpec.describe DeployToken do
     end
   end
 
+  # override the default PolicyActor implementation that always returns false
+  describe "#deactivated?" do
+    context "when it has been revoked" do
+      it 'returns true' do
+        deploy_token.revoke!
+
+        expect(deploy_token.deactivated?).to be_truthy
+      end
+    end
+
+    context "when it hasn't been revoked and is not expired" do
+      it 'returns false' do
+        expect(deploy_token.deactivated?).to be_falsy
+      end
+    end
+
+    context "when it hasn't been revoked and is expired" do
+      it 'returns false' do
+        deploy_token.update_attribute(:expires_at, Date.today - 5.days)
+
+        expect(deploy_token.deactivated?).to be_truthy
+      end
+    end
+
+    context "when it hasn't been revoked and has no expiry" do
+      let(:deploy_token) { create(:deploy_token, expires_at: nil) }
+
+      it 'returns false' do
+        expect(deploy_token.deactivated?).to be_falsy
+      end
+    end
+  end
+
   describe '#username' do
     context 'persisted records' do
       it 'returns a default username if none is set' do
@@ -350,6 +383,31 @@ RSpec.describe DeployToken do
     context 'with no gitlab deploy token associated' do
       it 'returns nil' do
         is_expected.to be_nil
+      end
+    end
+  end
+
+  describe '#accessible_projects' do
+    subject { deploy_token.accessible_projects }
+
+    context 'when a deploy token is associated to a project' do
+      let_it_be(:deploy_token) { create(:deploy_token, :project) }
+
+      it 'returns only projects directly associated with the token' do
+        expect(deploy_token).to receive(:projects)
+
+        subject
+      end
+    end
+
+    context 'when a deploy token is associated to a group' do
+      let_it_be(:group) { create(:group) }
+      let_it_be(:deploy_token) { create(:deploy_token, :group, groups: [group]) }
+
+      it 'returns all projects from the group' do
+        expect(group).to receive(:all_projects)
+
+        subject
       end
     end
   end

@@ -60,6 +60,10 @@ module QA
         autoload :Menu, 'qa/ee/page/main/menu'
       end
 
+      module Registration
+        autoload :Welcome, 'qa/ee/page/registration/welcome'
+      end
+
       module Admin
         autoload :Menu, 'qa/ee/page/admin/menu'
         autoload :License, 'qa/ee/page/admin/license'
@@ -138,10 +142,6 @@ module QA
           autoload :Repository, 'qa/ee/page/project/settings/repository'
           autoload :PushRules, 'qa/ee/page/project/settings/push_rules'
           autoload :LicenseCompliance, 'qa/ee/page/project/settings/license_compliance'
-
-          module Services
-            autoload :Jenkins, 'qa/ee/page/project/settings/services/jenkins'
-          end
         end
 
         module Operations
@@ -152,6 +152,7 @@ module QA
 
         module Pipeline
           autoload :Show, 'qa/ee/page/project/pipeline/show'
+          autoload :Index, 'qa/ee/page/project/pipeline/index'
         end
 
         module Secure
@@ -164,6 +165,18 @@ module QA
 
         module PathLocks
           autoload :Index, 'qa/ee/page/project/path_locks/index'
+        end
+
+        module Packages
+          autoload :Index, 'qa/ee/page/project/packages/index'
+        end
+
+        module Snippet
+          autoload :Index, 'qa/ee/page/project/snippet/index'
+        end
+
+        module Job
+          autoload :Show, 'qa/ee/page/project/job/show'
         end
       end
 
@@ -178,6 +191,7 @@ module QA
 
         module Epic
           autoload :Index, 'qa/ee/page/group/epic/index'
+          autoload :New, 'qa/ee/page/group/epic/new'
           autoload :Show, 'qa/ee/page/group/epic/show'
         end
 
@@ -196,6 +210,7 @@ module QA
       autoload :Epic, 'qa/ee/resource/epic'
       autoload :GroupLabel, 'qa/ee/resource/group_label'
       autoload :GroupIteration, 'qa/ee/resource/group_iteration'
+      autoload :ImportRepoWithCICD, 'qa/ee/resource/import_repo_with_ci_cd'
 
       module Board
         autoload :BaseBoard, 'qa/ee/resource/board/base_board'

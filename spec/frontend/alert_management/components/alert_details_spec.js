@@ -1,54 +1,71 @@
-import { mount, shallowMount } from '@vue/test-utils';
 import { GlAlert, GlLoadingIcon } from '@gitlab/ui';
+import { mount, shallowMount } from '@vue/test-utils';
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
-import AlertDetailsTable from '~/vue_shared/components/alert_details_table.vue';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import AlertDetails from '~/alert_management/components/alert_details.vue';
+import AlertSummaryRow from '~/alert_management/components/alert_summary_row.vue';
+import {
+  ALERTS_SEVERITY_LABELS,
+  trackAlertsDetailsViewsOptions,
+} from '~/alert_management/constants';
 import createIssueMutation from '~/alert_management/graphql/mutations/create_issue_from_alert.mutation.graphql';
 import { joinPaths } from '~/lib/utils/url_utility';
-import {
-  trackAlertsDetailsViewsOptions,
-  ALERTS_SEVERITY_LABELS,
-} from '~/alert_management/constants';
 import Tracking from '~/tracking';
+import AlertDetailsTable from '~/vue_shared/components/alert_details_table.vue';
 import mockAlerts from '../mocks/alerts.json';
 
 const mockAlert = mockAlerts[0];
+const environmentName = 'Production';
+const environmentPath = '/fake/path';
 
 describe('AlertDetails', () => {
-  let wrapper;
+  let environmentData = { name: environmentName, path: environmentPath };
   let mock;
+  let wrapper;
   const projectPath = 'root/alerts';
   const projectIssuesPath = 'root/alerts/-/issues';
   const projectId = '1';
   const $router = { replace: jest.fn() };
 
   function mountComponent({ data, loading = false, mountMethod = shallowMount, stubs = {} } = {}) {
-    wrapper = mountMethod(AlertDetails, {
-      provide: {
-        alertId: 'alertId',
-        projectPath,
-        projectIssuesPath,
-        projectId,
-      },
-      data() {
-        return { alert: { ...mockAlert }, sidebarStatus: false, ...data };
-      },
-      mocks: {
-        $apollo: {
-          mutate: jest.fn(),
-          queries: {
-            alert: {
-              loading,
-            },
-            sidebarStatus: {},
-          },
+    wrapper = extendedWrapper(
+      mountMethod(AlertDetails, {
+        provide: {
+          alertId: 'alertId',
+          projectPath,
+          projectIssuesPath,
+          projectId,
         },
-        $router,
-        $route: { params: {} },
-      },
-      stubs,
-    });
+        data() {
+          return {
+            alert: {
+              ...mockAlert,
+              environment: environmentData,
+            },
+            sidebarStatus: false,
+            ...data,
+          };
+        },
+        mocks: {
+          $apollo: {
+            mutate: jest.fn(),
+            queries: {
+              alert: {
+                loading,
+              },
+              sidebarStatus: {},
+            },
+          },
+          $router,
+          $route: { params: {} },
+        },
+        stubs: {
+          ...stubs,
+          AlertSummaryRow,
+        },
+      }),
+    );
   }
 
   beforeEach(() => {
@@ -62,9 +79,11 @@ describe('AlertDetails', () => {
     mock.restore();
   });
 
-  const findCreateIncidentBtn = () => wrapper.find('[data-testid="createIncidentBtn"]');
-  const findViewIncidentBtn = () => wrapper.find('[data-testid="viewIncidentBtn"]');
-  const findIncidentCreationAlert = () => wrapper.find('[data-testid="incidentCreationError"]');
+  const findCreateIncidentBtn = () => wrapper.findByTestId('createIncidentBtn');
+  const findViewIncidentBtn = () => wrapper.findByTestId('viewIncidentBtn');
+  const findIncidentCreationAlert = () => wrapper.findByTestId('incidentCreationError');
+  const findEnvironmentName = () => wrapper.findByTestId('environmentName');
+  const findEnvironmentPath = () => wrapper.findByTestId('environmentPath');
   const findDetailsTable = () => wrapper.find(AlertDetailsTable);
 
   describe('Alert details', () => {
@@ -74,7 +93,7 @@ describe('AlertDetails', () => {
       });
 
       it('shows an empty state', () => {
-        expect(wrapper.find('[data-testid="alertDetailsTabs"]').exists()).toBe(false);
+        expect(wrapper.findByTestId('alertDetailsTabs').exists()).toBe(false);
       });
     });
 
@@ -84,28 +103,26 @@ describe('AlertDetails', () => {
       });
 
       it('renders a tab with overview information', () => {
-        expect(wrapper.find('[data-testid="overview"]').exists()).toBe(true);
+        expect(wrapper.findByTestId('overview').exists()).toBe(true);
       });
 
       it('renders a tab with an activity feed', () => {
-        expect(wrapper.find('[data-testid="activity"]').exists()).toBe(true);
+        expect(wrapper.findByTestId('activity').exists()).toBe(true);
       });
 
       it('renders severity', () => {
-        expect(wrapper.find('[data-testid="severity"]').text()).toBe(
+        expect(wrapper.findByTestId('severity').text()).toBe(
           ALERTS_SEVERITY_LABELS[mockAlert.severity],
         );
       });
 
       it('renders a title', () => {
-        expect(wrapper.find('[data-testid="title"]').text()).toBe(mockAlert.title);
+        expect(wrapper.findByTestId('title').text()).toBe(mockAlert.title);
       });
 
       it('renders a start time', () => {
-        expect(wrapper.find('[data-testid="startTimeItem"]').exists()).toBe(true);
-        expect(wrapper.find('[data-testid="startTimeItem"]').props().time).toBe(
-          mockAlert.startedAt,
-        );
+        expect(wrapper.findByTestId('startTimeItem').exists()).toBe(true);
+        expect(wrapper.findByTestId('startTimeItem').props('time')).toBe(mockAlert.startedAt);
       });
     });
 
@@ -126,12 +143,32 @@ describe('AlertDetails', () => {
         });
 
         it(`${field} is ${isShown ? 'displayed' : 'hidden'} correctly`, () => {
+          const element = wrapper.findByTestId(field);
           if (isShown) {
-            expect(wrapper.find(`[data-testid="${field}"]`).text()).toBe(data.toString());
+            expect(element.text()).toContain(data.toString());
           } else {
-            expect(wrapper.find(`[data-testid="${field}"]`).exists()).toBe(false);
+            expect(wrapper.findByTestId(field).exists()).toBe(false);
           }
         });
+      });
+    });
+
+    describe('environment fields', () => {
+      it('should show the environment name with a link to the path', () => {
+        mountComponent();
+        const path = findEnvironmentPath();
+
+        expect(findEnvironmentName().exists()).toBe(false);
+        expect(path.text()).toBe(environmentName);
+        expect(path.attributes('href')).toBe(environmentPath);
+      });
+
+      it('should only show the environment name if the path is not provided', () => {
+        environmentData = { name: environmentName, path: null };
+        mountComponent();
+
+        expect(findEnvironmentPath().exists()).toBe(false);
+        expect(findEnvironmentName().text()).toBe(environmentName);
       });
     });
 
@@ -141,6 +178,7 @@ describe('AlertDetails', () => {
         mountComponent({
           data: { alert: { ...mockAlert, issueIid }, sidebarStatus: false },
         });
+
         expect(findViewIncidentBtn().exists()).toBe(true);
         expect(findViewIncidentBtn().attributes('href')).toBe(
           joinPaths(projectIssuesPath, issueIid),
@@ -166,8 +204,8 @@ describe('AlertDetails', () => {
         jest
           .spyOn(wrapper.vm.$apollo, 'mutate')
           .mockResolvedValue({ data: { createAlertIssue: { issue: { iid: issueIid } } } });
-
         findCreateIncidentBtn().trigger('click');
+
         expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledWith({
           mutation: createIssueMutation,
           variables: {
@@ -197,6 +235,7 @@ describe('AlertDetails', () => {
       beforeEach(() => {
         mountComponent({ data: { alert: mockAlert } });
       });
+
       it('should display a table of raw alert details data', () => {
         expect(findDetailsTable().exists()).toBe(true);
       });
@@ -222,7 +261,7 @@ describe('AlertDetails', () => {
         mountComponent({
           data: { errored: true, sidebarErrorMessage: '<span data-testid="htmlError" />' },
         });
-        expect(wrapper.find('[data-testid="htmlError"]').exists()).toBe(true);
+        expect(wrapper.findByTestId('htmlError').exists()).toBe(true);
       });
 
       it('does not display an error when dismissed', () => {
@@ -232,7 +271,7 @@ describe('AlertDetails', () => {
     });
 
     describe('header', () => {
-      const findHeader = () => wrapper.find('[data-testid="alert-header"]');
+      const findHeader = () => wrapper.findByTestId('alert-header');
       const stubs = { TimeAgoTooltip: { template: '<span>now</span>' } };
 
       describe('individual header fields', () => {

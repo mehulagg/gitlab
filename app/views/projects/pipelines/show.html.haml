@@ -2,10 +2,12 @@
 - breadcrumb_title "##{@pipeline.id}"
 - page_title _('Pipeline')
 - pipeline_has_errors = @pipeline.builds.empty? && @pipeline.yaml_errors.present?
+- add_page_specific_style 'page_bundles/pipeline'
+- add_page_specific_style 'page_bundles/reports'
+- add_page_specific_style 'page_bundles/ci_status'
 
 .js-pipeline-container{ data: { controller_action: "#{controller.action_name}" } }
-  #js-pipeline-header-vue.pipeline-header-container
-
+  #js-pipeline-header-vue.pipeline-header-container{ data: { full_path: @project.full_path, pipeline_iid: @pipeline.iid, pipeline_id: @pipeline.id, pipelines_path: project_pipelines_path(@project) } }
   - if @pipeline.commit.present?
     = render "projects/pipelines/info", commit: @pipeline.commit
 
@@ -21,4 +23,4 @@
 
   = render "projects/pipelines/with_tabs", pipeline: @pipeline, pipeline_has_errors: pipeline_has_errors
 
-.js-pipeline-details-vue{ data: { endpoint: project_pipeline_path(@project, @pipeline, format: :json) } }
+.js-pipeline-details-vue{ data: { endpoint: project_pipeline_path(@project, @pipeline, format: :json), pipeline_project_path: @project.full_path, pipeline_iid: @pipeline.iid } }

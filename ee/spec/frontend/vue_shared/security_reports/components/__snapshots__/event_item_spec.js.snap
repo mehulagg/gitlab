@@ -8,6 +8,7 @@ exports[`Event Item with action buttons renders the action buttons 1`] = `
     class="circle-icon-container gl-flex-shrink-0 gl-align-self-start ci-status-icon-success"
   >
     <svg
+      aria-hidden="true"
       class="gl-icon s16"
       data-testid="plus-icon"
     >
@@ -32,7 +33,7 @@ exports[`Event Item with action buttons renders the action buttons 1`] = `
       >
          
         <span
-          class="note-header-author-name bold"
+          class="note-header-author-name gl-font-weight-bold"
         >
           Tanuki
         </span>
@@ -61,6 +62,7 @@ exports[`Event Item with action buttons renders the action buttons 1`] = `
       >
         <span
           class="system-note-message"
+          data-qa-selector="system_note_content"
         >
           ·
         </span>
@@ -79,36 +81,42 @@ exports[`Event Item with action buttons renders the action buttons 1`] = `
     class="gl-flex-shrink-0 gl-align-self-start"
   >
     <button
-      class="btn px-1 btn-transparent btn-md"
+      class="btn btn-default btn-md gl-button btn-default-tertiary btn-icon"
       title="Foo Action"
       type="button"
     >
       <!---->
        
       <svg
-        class="link-highlight gl-icon s16"
+        aria-hidden="true"
+        class="gl-button-icon gl-icon s16"
         data-testid="pencil-icon"
       >
         <use
           href="#pencil"
         />
       </svg>
+        
+      <!---->
     </button>
     <button
-      class="btn px-1 btn-transparent btn-md"
+      class="btn btn-default btn-md gl-button btn-default-tertiary btn-icon"
       title="Bar Action"
       type="button"
     >
       <!---->
        
       <svg
-        class="link-highlight gl-icon s16"
+        aria-hidden="true"
+        class="gl-button-icon gl-icon s16"
         data-testid="remove-icon"
       >
         <use
           href="#remove"
         />
       </svg>
+        
+      <!---->
     </button>
   </div>
 </div>

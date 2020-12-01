@@ -1,26 +1,20 @@
 ---
 stage: Verify
 group: Testing
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
-author: Vincent Tunru
-author_gitlab: Vinnl
-level: advanced
-article_type: user guide
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: tutorial
-date: 2019-02-18
-description: 'Confidence checking your entire app every time a new feature is added can quickly become repetitive. Learn how to automate it with GitLab CI/CD.'
 ---
 
 # End-to-end testing with GitLab CI/CD and WebdriverIO
 
 [Review Apps](../../review_apps/index.md) are great: for every merge request
 (or branch, for that matter), the new code can be copied and deployed to a fresh production-like live
-environment, making it incredibly low-effort to assess the impact of the changes. Thus, when we use a dependency manager like
+environment, reducing the effort to assess the impact of changes. Thus, when we use a dependency manager like
 [Dependencies.io](https://www.dependencies.io/), it can submit a merge request with an updated dependency,
 and it will immediately be clear that the application can still be properly built and deployed. After all, you can _see_ it
 running!
 
-<img src="img/deployed_dependency_update.png" alt="dependencies.io" class="image-noshadow">
+<img src="img/deployed_dependency_update.png" alt="dependencies.io">
 
 However, looking at the freshly deployed code to check whether it still looks and behaves as
 expected is repetitive manual work, which means it is a prime candidate for automation. This is
@@ -101,9 +95,10 @@ dependency upgrade did not break anything without even having to look at your we
 
 ## Running locally
 
-We'll get to running the above test in CI/CD in a moment. When writing tests, however, it helps if
-you do not have to wait for your pipelines to succeed in order to check whether they do what you
-expect them to do. In other words, let's get it to run locally.
+We'll get to running the above test in CI/CD in a moment. When writing tests,
+however, it helps if you don't have to wait for your pipelines to succeed to
+determine whether they do what you expect them to do. In other words, let's get
+it to run locally.
 
 Make sure that your app is running locally. If you use Webpack,
 you can use [the Webpack Dev Server WebdriverIO plugin](https://www.npmjs.com/package/wdio-webpack-dev-server-service)
@@ -145,7 +140,7 @@ new browser window interacting with your app as you specified.
 Which brings us to the exciting part: how do we run this in GitLab CI/CD? There are two things we
 need to do for this:
 
-1. Set up [CI/CD jobs](../../yaml/README.md#introduction) that actually have a browser available.
+1. Set up [CI/CD jobs](../../yaml/README.md) that actually have a browser available.
 1. Update our WebdriverIO configuration to use those browsers to visit the review apps.
 
 For the scope of this article, we've defined an additional [CI/CD stage](../../yaml/README.md#stages)

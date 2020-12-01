@@ -8,9 +8,9 @@
           - else
             %strong.text-truncate.flex-fill
               = link_to project_registry.project.full_name, admin_namespace_project_path(project_registry.project.namespace, project_registry.project)
-            = link_to(reverify_admin_geo_project_path(project_registry), method: :post, class: 'btn btn-default btn-sm mr-2') do
+            = link_to(reverify_admin_geo_project_path(project_registry), method: :post, class: 'gl-button btn btn-default btn-sm mr-2') do
               = s_('Geo|Reverify')
-            = link_to(resync_admin_geo_project_path(project_registry), method: :post, class: 'btn btn-default-primary btn-sm') do
+            = link_to(resync_admin_geo_project_path(project_registry), method: :post, class: 'gl-button btn btn-default-primary btn-sm') do
               = s_('Geo|Resync')
 
       = render partial: 'registry_synced', locals: { project_registry: project_registry }

@@ -1,23 +1,22 @@
 # frozen_string_literal: true
 
 module API
-  class ProjectApprovals < ::Grape::API::Instance
+  class ProjectApprovals < ::API::Base
+    feature_category :code_review
+
     before { authenticate! }
     before { authorize! :update_approvers, user_project }
 
     helpers do
-      def filter_forbidden_param!(permission, param)
-        unless can?(current_user, permission, user_project)
-          params.delete(param)
-        end
+      def filter_forbidden_param(params, permission, param)
+        can?(current_user, permission, user_project) ? params : params.except(param)
       end
 
       def filter_params(params)
-        filter_forbidden_param!(:modify_merge_request_committer_setting, :merge_requests_disable_committers_approval)
-        filter_forbidden_param!(:modify_approvers_rules, :disable_overriding_approvers_per_merge_request)
-        filter_forbidden_param!(:modify_merge_request_author_setting, :merge_requests_author_approval)
-
         params
+          .then { |params| filter_forbidden_param(params, :modify_merge_request_committer_setting, :merge_requests_disable_committers_approval) }
+          .then { |params| filter_forbidden_param(params, :modify_approvers_rules, :disable_overriding_approvers_per_merge_request) }
+          .then { |params| filter_forbidden_param(params, :modify_merge_request_author_setting, :merge_requests_author_approval) }
       end
     end
 

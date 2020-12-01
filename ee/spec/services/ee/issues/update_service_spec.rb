@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'spec_helper'
 
 RSpec.describe Issues::UpdateService do
@@ -8,6 +9,10 @@ RSpec.describe Issues::UpdateService do
   let(:user) { issue.author }
 
   describe 'execute' do
+    before do
+      project.add_reporter(user)
+    end
+
     def update_issue(opts)
       described_class.new(project, user, opts).execute(issue)
     end
@@ -119,68 +124,30 @@ RSpec.describe Issues::UpdateService do
         group.add_maintainer(user)
       end
 
-      context 'when track_iteration_change_events is disabled' do
-        before do
-          stub_feature_flags(track_iteration_change_events: false)
+      RSpec.shared_examples 'creates iteration resource event' do
+        it 'creates a system note' do
+          expect do
+            update_issue(iteration: iteration)
+          end.not_to change { Note.system.count }
         end
 
-        RSpec.shared_examples 'creates iteration system note' do
-          it 'creates a system note' do
-            expect do
-              update_issue(iteration: iteration)
-            end.to change { Note.system.count }.by(1)
-          end
-
-          it 'does not create a iteration change event' do
-            expect do
-              update_issue(iteration: iteration)
-            end.not_to change { ResourceIterationEvent.count }
-          end
-        end
-
-        context 'group iterations' do
-          let(:iteration) { create(:iteration, group: group) }
-
-          it_behaves_like 'creates iteration system note'
-        end
-
-        context 'project iterations' do
-          let(:iteration) { create(:iteration, :skip_project_validation, project: project) }
-
-          it_behaves_like 'creates iteration system note'
+        it 'does not create a iteration change event' do
+          expect do
+            update_issue(iteration: iteration)
+          end.to change { ResourceIterationEvent.count }.by(1)
         end
       end
 
-      context 'when track_iteration_change_events is enabled' do
-        before do
-          stub_feature_flags(track_iteration_change_events: true)
-        end
+      context 'group iterations' do
+        let(:iteration) { create(:iteration, group: group) }
 
-        RSpec.shared_examples 'creates iteration resource event' do
-          it 'creates a system note' do
-            expect do
-              update_issue(iteration: iteration)
-            end.not_to change { Note.system.count }
-          end
+        it_behaves_like 'creates iteration resource event'
+      end
 
-          it 'does not create a iteration change event' do
-            expect do
-              update_issue(iteration: iteration)
-            end.to change { ResourceIterationEvent.count }.by(1)
-          end
-        end
+      context 'project iterations' do
+        let(:iteration) { create(:iteration, :skip_project_validation, project: project) }
 
-        context 'group iterations' do
-          let(:iteration) { create(:iteration, group: group) }
-
-          it_behaves_like 'creates iteration resource event'
-        end
-
-        context 'project iterations' do
-          let(:iteration) { create(:iteration, :skip_project_validation, project: project) }
-
-          it_behaves_like 'creates iteration resource event'
-        end
+        it_behaves_like 'creates iteration resource event'
       end
     end
 
@@ -204,6 +171,20 @@ RSpec.describe Issues::UpdateService do
           group.add_maintainer(user)
         end
 
+        context 'when EpicIssues::CreateService returns failure', :aggregate_failures do
+          it 'does not send usage data for added or changed epic action' do
+            link_sevice = double
+            expect(EpicIssues::CreateService).to receive(:new)
+                                                   .with(epic, user, { target_issuable: issue, skip_epic_dates_update: true })
+                                                   .and_return(link_sevice)
+            expect(link_sevice).to receive(:execute).and_return({ status: :failure })
+
+            expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).not_to receive(:track_issue_added_to_epic_action)
+
+            subject
+          end
+        end
+
         context 'when issue does not belong to an epic yet' do
           it 'assigns an issue to the provided epic' do
             expect { update_issue(epic: epic) }.to change { issue.reload.epic }.from(nil).to(epic)
@@ -211,9 +192,16 @@ RSpec.describe Issues::UpdateService do
 
           it 'calls EpicIssues::CreateService' do
             link_sevice = double
-            expect(EpicIssues::CreateService).to receive(:new).with(epic, user, { target_issuable: issue })
+            expect(EpicIssues::CreateService).to receive(:new)
+              .with(epic, user, { target_issuable: issue, skip_epic_dates_update: true })
               .and_return(link_sevice)
-            expect(link_sevice).to receive(:execute)
+            expect(link_sevice).to receive(:execute).and_return({ status: :success })
+
+            subject
+          end
+
+          it 'tracks usage data for added to epic action' do
+            expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).to receive(:track_issue_added_to_epic_action).with(author: user)
 
             subject
           end
@@ -232,9 +220,16 @@ RSpec.describe Issues::UpdateService do
 
           it 'calls EpicIssues::CreateService' do
             link_sevice = double
-            expect(EpicIssues::CreateService).to receive(:new).with(epic, user, { target_issuable: issue })
+            expect(EpicIssues::CreateService).to receive(:new)
+              .with(epic, user, { target_issuable: issue, skip_epic_dates_update: true })
               .and_return(link_sevice)
-            expect(link_sevice).to receive(:execute)
+            expect(link_sevice).to receive(:execute).and_return({ status: :success })
+
+            subject
+          end
+
+          it 'tracks usage data for changed epic action' do
+            expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).to receive(:track_issue_changed_epic_action).with(author: user)
 
             subject
           end
@@ -260,6 +255,12 @@ RSpec.describe Issues::UpdateService do
           it 'does not do anything' do
             expect { subject }.not_to change { issue.reload.epic }
           end
+
+          it 'does not send usage data for removed epic action' do
+            expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).not_to receive(:track_issue_removed_from_epic_action)
+
+            subject
+          end
         end
 
         context 'when issue belongs to an epic' do
@@ -273,9 +274,28 @@ RSpec.describe Issues::UpdateService do
             link_sevice = double
             expect(EpicIssues::DestroyService).to receive(:new).with(EpicIssue.last, user)
               .and_return(link_sevice)
-            expect(link_sevice).to receive(:execute)
+            expect(link_sevice).to receive(:execute).and_return({ status: :success })
 
             subject
+          end
+
+          it 'tracks usage data for removed from epic action' do
+            expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).to receive(:track_issue_removed_from_epic_action).with(author: user)
+
+            subject
+          end
+
+          context 'but EpicIssues::DestroyService returns failure', :aggregate_failures do
+            it 'does not send usage data for removed epic action' do
+              link_sevice = double
+              expect(EpicIssues::DestroyService).to receive(:new).with(EpicIssue.last, user)
+                                                      .and_return(link_sevice)
+              expect(link_sevice).to receive(:execute).and_return({ status: :failure })
+
+              expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).not_to receive(:track_issue_removed_from_epic_action)
+
+              subject
+            end
           end
         end
       end
@@ -311,7 +331,7 @@ RSpec.describe Issues::UpdateService do
         link_sevice = double
         expect(EpicIssues::DestroyService).to receive(:new).with(epic_issue, user)
           .and_return(link_sevice)
-        expect(link_sevice).to receive(:execute)
+        expect(link_sevice).to receive(:execute).and_return({ status: :success })
 
         subject
       end

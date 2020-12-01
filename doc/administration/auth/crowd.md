@@ -2,7 +2,7 @@
 type: reference
 stage: Manage
 group: Access
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Atlassian Crowd OmniAuth Provider
@@ -82,6 +82,8 @@ If you see an error message like the one below when you sign in after Crowd auth
 could not authorize you from Crowd because invalid credentials
 ```
 
-Please make sure the Crowd users who need to login to GitLab are authorized to [the application](#configure-a-new-crowd-application) in the step of **Authorisation**. This could be verified by try "Authentication test" for Crowd as of 2.11.
+Ensure the Crowd users who need to sign in to GitLab are authorized to the
+[application](#configure-a-new-crowd-application) in the **Authorisation** step.
+This could be verified by trying "Authentication test" for Crowd (as of 2.11).
 
 ![Example Crowd application authorisation configuration](img/crowd_application_authorisation.png)

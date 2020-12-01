@@ -1,23 +1,28 @@
 import Vue from 'vue';
+import VueApollo from 'vue-apollo';
 import { GlToast } from '@gitlab/ui';
 import CycleAnalytics from './components/base.vue';
 import createStore from './store';
 import { buildCycleAnalyticsInitialData } from '../shared/utils';
+import createDefaultClient from '~/lib/graphql';
 import { urlQueryToFilter } from '~/vue_shared/components/filtered_search_bar/filtered_search_utils';
-import { parseBoolean } from '~/lib/utils/common_utils';
 
 Vue.use(GlToast);
+Vue.use(VueApollo);
+
+const apolloProvider = new VueApollo({
+  defaultClient: createDefaultClient(),
+});
 
 export default () => {
   const el = document.querySelector('#js-cycle-analytics-app');
-  const { emptyStateSvgPath, noDataSvgPath, noAccessSvgPath, hideGroupDropDown } = el.dataset;
+  const { emptyStateSvgPath, noDataSvgPath, noAccessSvgPath } = el.dataset;
   const initialData = buildCycleAnalyticsInitialData(el.dataset);
   const store = createStore();
   const {
     cycleAnalyticsScatterplotEnabled: hasDurationChart = false,
     valueStreamAnalyticsPathNavigation: hasPathNavigation = false,
     valueStreamAnalyticsCreateMultipleValueStreams: hasCreateMultipleValueStreams = false,
-    analyticsSimilaritySearch: hasAnalyticsSimilaritySearch = false,
   } = gon?.features;
 
   const {
@@ -37,13 +42,13 @@ export default () => {
       hasDurationChart,
       hasPathNavigation,
       hasCreateMultipleValueStreams,
-      hasAnalyticsSimilaritySearch,
     },
   });
 
   return new Vue({
     el,
     name: 'CycleAnalyticsApp',
+    apolloProvider,
     store,
     render: createElement =>
       createElement(CycleAnalytics, {
@@ -51,7 +56,6 @@ export default () => {
           emptyStateSvgPath,
           noDataSvgPath,
           noAccessSvgPath,
-          hideGroupDropDown: parseBoolean(hideGroupDropDown),
         },
       }),
   });

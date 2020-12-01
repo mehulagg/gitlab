@@ -12,15 +12,19 @@ class Projects::ServicesController < Projects::ApplicationController
   before_action :set_deprecation_notice_for_prometheus_service, only: [:edit, :update]
   before_action :redirect_deprecated_prometheus_service, only: [:update]
   before_action only: :edit do
-    push_frontend_feature_flag(:jira_issues_integration, @project, { default_enabled: true })
+    push_frontend_feature_flag(:jira_issues_integration, @project, type: :licensed, default_enabled: true)
+    push_frontend_feature_flag(:jira_vulnerabilities_integration, @project, type: :licensed, default_enabled: true)
+    push_frontend_feature_flag(:jira_for_vulnerabilities, @project, type: :development, default_enabled: false)
   end
 
   respond_to :html
 
   layout "project_settings"
 
+  feature_category :integrations
+
   def edit
-    @admin_integration = Service.instance_for(service.type)
+    @default_integration = Service.default_integration(service.type, project)
   end
 
   def update
@@ -65,18 +69,20 @@ class Projects::ServicesController < Projects::ApplicationController
     result = ::Integrations::Test::ProjectService.new(@service, current_user, params[:event]).execute
 
     unless result[:success]
-      return { error: true, message: _('Test failed.'), service_response: result[:message].to_s, test_failed: true }
+      return { error: true, message: s_('Integrations|Connection failed. Please check your settings.'), service_response: result[:message].to_s, test_failed: true }
     end
 
-    {}
+    result[:data].presence || {}
   rescue Gitlab::HTTP::BlockedUrlError => e
-    { error: true, message: _('Test failed.'), service_response: e.message, test_failed: true }
+    { error: true, message: s_('Integrations|Connection failed. Please check your settings.'), service_response: e.message, test_failed: true }
   end
 
   def success_message
-    message = @service.active? ? _('activated') : _('settings saved, but not activated')
-
-    _('%{service_title} %{message}.') % { service_title: @service.title, message: message }
+    if @service.active?
+      s_('Integrations|%{integration} settings saved and active.') % { integration: @service.title }
+    else
+      s_('Integrations|%{integration} settings saved, but not active.') % { integration: @service.title }
+    end
   end
 
   def service

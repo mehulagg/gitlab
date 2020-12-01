@@ -1,7 +1,7 @@
 ---
 stage: Secure
 group: Fuzz Testing
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference, howto
 ---
 
@@ -30,6 +30,7 @@ Docker image with the fuzz engine to run your app.
 | Swift    | [libfuzzer](https://github.com/apple/swift/blob/master/docs/libFuzzerIntegration.md) | [swift-fuzzing-example](https://gitlab.com/gitlab-org/security-products/demos/coverage-fuzzing/swift-fuzzing-example) |
 | Rust     | [cargo-fuzz (libFuzzer support)](https://github.com/rust-fuzz/cargo-fuzz) | [rust-fuzzing-example](https://gitlab.com/gitlab-org/security-products/demos/coverage-fuzzing/rust-fuzzing-example) |
 | Java     | [JQF](https://github.com/rohanpadhye/JQF) | [java-fuzzing-example](https://gitlab.com/gitlab-org/security-products/demos/coverage-fuzzing/java-fuzzing-example) |
+| Java     | [javafuzz](https://gitlab.com/gitlab-org/security-products/analyzers/fuzzers/javafuzz) (recommended) | [javafuzz-fuzzing-example](https://gitlab.com/gitlab-org/security-products/demos/coverage-fuzzing/javafuzz-fuzzing-example) |
 
 ## Configuration
 
@@ -174,6 +175,80 @@ To use coverage fuzzing in an offline environment, follow these steps:
 1. For each fuzzing step, set `COVFUZZ_URL_PREFIX` to `${NEW_URL_GITLAB_COV_FUZ}/-/raw`, where
    `NEW_URL_GITLAB_COV_FUZ` is the URL of the private `gitlab-cov-fuzz` clone that you set up in the
    first step.
+
+### Continuous fuzzing (long-running async fuzzing jobs)
+
+It's also possible to run the fuzzing jobs longer and without blocking your main pipeline. This
+configuration uses the GitLab [parent-child pipelines](../../../ci/parent_child_pipelines.md).
+The full example is available in the [repository](https://gitlab.com/gitlab-org/security-products/demos/coverage-fuzzing/go-fuzzing-example/-/tree/continuous_fuzzing#running-go-fuzz-from-ci).
+This example uses Go, but is applicable for any other supported languages.
+
+The suggested workflow in this scenario is to have long-running, async fuzzing jobs on a
+main/development branch, and short, blocking sync fuzzing jobs on all other branches and MRs. This
+is a good way to balance the needs of letting a developer's per-commit pipeline complete quickly,
+and also giving the fuzzer a large amount of time to fully explore and test the app.
+
+Long-running fuzzing jobs are usually necessary for the coverage guided fuzzer to find deeper bugs
+in your latest code base. THe following is an example of what `.gitlab-ci.yml` looks like in this
+workflow (for the full example, see the [repository](https://gitlab.com/gitlab-org/security-products/demos/coverage-fuzzing/go-fuzzing-example/-/tree/continuous_fuzzing)):
+
+```yaml
+
+sync_fuzzing:
+  variables:
+    COVFUZZ_ADDITIONAL_ARGS: '-max_total_time=300'
+  trigger:
+    include: .covfuzz-ci.yml
+    strategy: depend
+  rules:
+    - if: $CI_COMMIT_BRANCH != 'continuous_fuzzing' && $CI_PIPELINE_SOURCE != 'merge_request_event'
+
+async_fuzzing:
+  variables:
+    COVFUZZ_ADDITIONAL_ARGS: '-max_total_time=3600'  
+  trigger:
+    include: .covfuzz-ci.yml
+  rules:
+    - if: $CI_COMMIT_BRANCH == 'continuous_fuzzing' && $CI_PIPELINE_SOURCE != 'merge_request_event'
+```
+
+This essentially creates two steps:
+
+1. `sync_fuzzing`: Runs all your fuzz targets for a short period of time in a blocking
+   configuration. This finds simple bugs and allows you to be confident that your MRs aren't
+   introducing new bugs or causing old bugs to reappear.
+1. `async_fuzzing`: Runs on your branch and finds deep bugs in your code without blocking your
+   development cycle and MRs.
+
+The `covfuzz-ci.yml` is the same as that in the [original synchronous example](https://gitlab.com/gitlab-org/security-products/demos/coverage-fuzzing/go-fuzzing-example#running-go-fuzz-from-ci).
+
+## Interacting with the vulnerabilities
+
+After a vulnerability is found, you can [interact with it](../index.md#interacting-with-the-vulnerabilities).
+The merge request widget lists the vulnerability and contains a button for downloading the fuzzing
+artifacts. By clicking one of the detected vulnerabilities, you can see its details.
+
+![Coverage Fuzzing Security Report](img/coverage_fuzzing_report_v13_6.png)
+
+You can also view the vulnerability from the [Security Dashboard](../security_dashboard/index.md),
+which shows an overview of all the security vulnerabilities in your groups, projects, and pipelines.
+
+Clicking the vulnerability opens a modal that provides additional information about the
+vulnerability:
+
+- Status: The vulnerability's status. As with any type of vulnerability, a coverage fuzzing
+  vulnerability can be Detected, Confirmed, Dismissed, or Resolved.
+- Project: The project in which the vulnerability exists.
+- Crash type: The type of crash or weakness in the code. This typically maps to a [CWE](https://cwe.mitre.org/).
+- Crash state: A normalized version of the stacktrace, containing the last three functions of the
+  crash (without random addresses).
+- Stacktrace snippet: The last few lines of the stacktrace, which shows details about the crash.
+- Identifier: The vulnerability's identifier. This maps to either a [CVE](https://cve.mitre.org/)
+  or [CWE](https://cwe.mitre.org/).
+- Severity: The vulnerability's severity. This can be Critical, High, Medium, Low, Info, or Unknown.
+- Scanner: The scanner that detected the vulnerability (for example, Coverage Fuzzing).
+- Scanner Provider: The engine that did the scan. For Coverage Fuzzing, this can be any of the
+  engines listed in [Supported fuzzing engines and languages](#supported-fuzzing-engines-and-languages).
 
 ### Glossary
 

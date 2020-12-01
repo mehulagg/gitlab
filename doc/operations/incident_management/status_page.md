@@ -1,10 +1,10 @@
 ---
 stage: Monitor
 group: Health
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# GitLab Status Page **(ULTIMATE)**
+# Status Page
 
 > [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/2479) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 12.10.
 
@@ -12,11 +12,11 @@ With a GitLab Status Page, you can create and deploy a static website to communi
 efficiently to users during an incident. The Status Page landing page displays an
 overview of recent incidents:
 
-![Status Page landing page](./img/status_page_incidents_v12_10.png)
+![Status Page landing page](img/status_page_incidents_v12_10.png)
 
 Clicking an incident displays a detail page with more information about a particular incident:
 
-![Status Page detail](./img/status_page_detail_v12_10.png)
+![Status Page detail](img/status_page_detail_v12_10.png)
 
 - Status on the incident, including when the incident was last updated.
 - The incident title, including any emojis.
@@ -25,7 +25,7 @@ Clicking an incident displays a detail page with more information about a partic
   valid image extension. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/205166) in GitLab 13.1.
 - A chronological ordered list of updates to the incident.
 
-## Set up a GitLab Status Page
+## Set up a Status Page
 
 To configure a GitLab Status Page you must:
 
@@ -37,10 +37,9 @@ To configure a GitLab Status Page you must:
 
 ### Configure GitLab with cloud provider information
 
-To provide GitLab with the AWS account information needed to push content to your Status Page:
-
-NOTE: **Note:**
 Only AWS S3 is supported as a deploy target.
+
+To provide GitLab with the AWS account information needed to push content to your Status Page:
 
 1. Sign into GitLab as a user with Maintainer or greater [permissions](../../user/permissions.md).
 1. Navigate to **{settings}** **Settings > Operations**. Next to **Status Page**,
@@ -74,8 +73,6 @@ the necessary CI/CD variables to deploy the Status Page to AWS S3:
 1. Scroll to **Variables**, and click **Expand**.
 1. Add the following variables from your Amazon Console:
    - `S3_BUCKET_NAME` - The name of the Amazon S3 bucket.
-
-     NOTE: **Note:**
      If no bucket with the provided name exists, the first pipeline run creates
      one and configures it for
      [static website hosting](https://docs.aws.amazon.com/AmazonS3/latest/dev/HostingWebsiteOnS3Setup.html).
@@ -128,23 +125,20 @@ To publish an incident:
 1. Create an issue in the project you enabled the GitLab Status Page settings in.
 1. A [project or group owner](../../user/permissions.md) must use the
    `/publish` [quick action](../../user/project/quick_actions.md) to publish the
-   issue to the GitLab Status Page.
-
-   NOTE: **Note:**
-   Confidential issues can't be published.
+   issue to the GitLab Status Page. Confidential issues can't be published.
 
 A background worker publishes the issue onto the Status Page using the credentials
-you provided during setup. As part of publication, GitLab will:
+you provided during setup. As part of publication, GitLab:
 
-- Anonymize user and group mentions with `Incident Responder`.
-- Remove titles of non-public [GitLab references](../../user/markdown.md#special-gitlab-references).
-- Publish any files attached to incident issue descriptions, up to 5000 per issue.
+- Anonymizes user and group mentions with `Incident Responder`.
+- Removes titles of non-public [GitLab references](../../user/markdown.md#special-gitlab-references).
+- Publishes any files attached to incident issue descriptions, up to 5000 per issue.
   ([Introduced in GitLab 13.1](https://gitlab.com/gitlab-org/gitlab/-/issues/205166).)
 
 After publication, you can access the incident's details page by clicking the
 **Published on status page** button displayed under the Incident's title.
 
-![Status Page detail link](./img/status_page_detail_link_v13_1.png)
+![Status Page detail link](img/status_page_detail_link_v13_1.png)
 
 ### Update an incident
 

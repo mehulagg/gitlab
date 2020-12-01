@@ -11,6 +11,7 @@ module Vulnerabilities
     self.table_name = "vulnerability_occurrences"
 
     FINDINGS_PER_PAGE = 20
+    MAX_NUMBER_OF_IDENTIFIERS = 20
 
     paginates_per FINDINGS_PER_PAGE
 
@@ -25,10 +26,16 @@ module Vulnerabilities
     has_many :finding_identifiers, class_name: 'Vulnerabilities::FindingIdentifier', inverse_of: :finding, foreign_key: 'occurrence_id'
     has_many :identifiers, through: :finding_identifiers, class_name: 'Vulnerabilities::Identifier'
 
+    has_many :finding_links, class_name: 'Vulnerabilities::FindingLink', inverse_of: :finding, foreign_key: 'vulnerability_occurrence_id'
+
+    has_many :finding_remediations, class_name: 'Vulnerabilities::FindingRemediation', inverse_of: :finding, foreign_key: 'vulnerability_occurrence_id'
+    has_many :remediations, through: :finding_remediations
+
     has_many :finding_pipelines, class_name: 'Vulnerabilities::FindingPipeline', inverse_of: :finding, foreign_key: 'occurrence_id'
     has_many :pipelines, through: :finding_pipelines, class_name: 'Ci::Pipeline'
 
     attr_writer :sha
+    attr_accessor :scan
 
     CONFIDENCE_LEVELS = {
       # undefined: 0, no longer applicable
@@ -58,7 +65,8 @@ module Vulnerabilities
       container_scanning: 2,
       dast: 3,
       secret_detection: 4,
-      coverage_fuzzing: 5
+      coverage_fuzzing: 5,
+      api_fuzzing: 6
     }.with_indifferent_access.freeze
 
     enum confidence: CONFIDENCE_LEVELS, _prefix: :confidence
@@ -92,6 +100,7 @@ module Vulnerabilities
     scope :by_projects, -> (values) { where(project_id: values) }
     scope :by_severities, -> (values) { where(severity: values) }
     scope :by_confidences, -> (values) { where(confidence: values) }
+    scope :by_project_fingerprints, -> (values) { where(project_fingerprint: values) }
 
     scope :all_preloaded, -> do
       preload(:scanner, :identifiers, project: [:namespace, :project_feature])
@@ -147,15 +156,21 @@ module Vulnerabilities
       end
     end
 
+    def self.related_dismissal_feedback
+      Feedback
+      .where(arel_table[:report_type].eq(Feedback.arel_table[:category]))
+      .where(arel_table[:project_id].eq(Feedback.arel_table[:project_id]))
+      .where(Arel::Nodes::NamedFunction.new('ENCODE', [arel_table[:project_fingerprint], Arel::Nodes::SqlLiteral.new("'HEX'")]).eq(Feedback.arel_table[:project_fingerprint]))
+      .for_dismissal
+    end
+    private_class_method :related_dismissal_feedback
+
+    def self.dismissed
+      where('EXISTS (?)', related_dismissal_feedback.select(1))
+    end
+
     def self.undismissed
-      where(
-        "NOT EXISTS (?)",
-        Feedback.select(1)
-        .where("#{table_name}.report_type = vulnerability_feedback.category")
-        .where("#{table_name}.project_id = vulnerability_feedback.project_id")
-        .where("ENCODE(#{table_name}.project_fingerprint, 'HEX') = vulnerability_feedback.project_fingerprint") # rubocop:disable GitlabSecurity/SqlInjection
-        .for_dismissal
-      )
+      where('NOT EXISTS (?)', related_dismissal_feedback.select(1))
     end
 
     def self.batch_count_by_project_and_severity(project_id, severity)
@@ -246,27 +261,81 @@ module Vulnerabilities
       metadata.fetch('location', {})
     end
 
+    def file
+      location.dig('file')
+    end
+
     def links
-      metadata.fetch('links', [])
+      return metadata.fetch('links', []) if finding_links.load.empty?
+
+      finding_links.as_json(only: [:name, :url])
     end
 
     def remediations
       metadata.dig('remediations')
     end
 
+    def build_evidence_request(data)
+      return if data.nil?
+
+      {
+        headers: data.fetch('headers', []).map do |request_header|
+          {
+            name: request_header['name'],
+            value: request_header['value']
+          }
+        end,
+        method: data['method'],
+        url: data['url'],
+        body: data['body']
+      }
+    end
+
+    def build_evidence_response(data)
+      return if data.nil?
+
+      {
+        headers: data.fetch('headers', []).map do |header_data|
+          {
+            name: header_data['name'],
+            value: header_data['value']
+          }
+        end,
+        status_code: data['status_code'],
+        reason_phrase: data['reason_phrase'],
+        body: data['body']
+      }
+    end
+
+    def build_evidence_supporting_messages(data)
+      return [] if data.nil?
+
+      data.map do |message|
+        {
+          name: message['name'],
+          request: build_evidence_request(message['request']),
+          response: build_evidence_response(message['response'])
+        }
+      end
+    end
+
+    def build_evidence_source(data)
+      return if data.nil?
+
+      {
+        id: data['id'],
+        name: data['name'],
+        url: data['url']
+      }
+    end
+
     def evidence
       {
         summary: metadata.dig('evidence', 'summary'),
-        request: {
-          headers: metadata.dig('evidence', 'request', 'headers') || [],
-          method: metadata.dig('evidence', 'request', 'method'),
-          url: metadata.dig('evidence', 'request', 'url')
-        },
-        response: {
-          headers: metadata.dig('evidence', 'response', 'headers') || [],
-          status_code: metadata.dig('evidence', 'response', 'status_code'),
-          reason_phrase: metadata.dig('evidence', 'response', 'reason_phrase')
-        }
+        request: build_evidence_request(metadata.dig('evidence', 'request')),
+        response: build_evidence_response(metadata.dig('evidence', 'response')),
+        source: build_evidence_source(metadata.dig('evidence', 'source')),
+        supporting_messages: build_evidence_supporting_messages(metadata.dig('evidence', 'supporting_messages'))
       }
     end
 
@@ -274,8 +343,26 @@ module Vulnerabilities
       metadata.dig('message')
     end
 
-    def cve
-      metadata.dig('cve')
+    def cve_value
+      identifiers.find(&:cve?)&.name
+    end
+
+    def cwe_value
+      identifiers.find(&:cwe?)&.name
+    end
+
+    def other_identifier_values
+      identifiers.select(&:other?).map(&:name)
+    end
+
+    def assets
+      metadata.fetch('assets', []).map do |asset_data|
+        {
+          name: asset_data['name'],
+          type: asset_data['type'],
+          url: asset_data['url']
+        }
+      end
     end
 
     alias_method :==, :eql? # eql? is necessary in some cases like array intersection

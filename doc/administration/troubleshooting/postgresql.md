@@ -1,4 +1,7 @@
 ---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference
 ---
 
@@ -34,7 +37,7 @@ This section is for links to information elsewhere in the GitLab documentation.
 
 - [More about external PostgreSQL](../postgresql/external.md)
 
-- [Running Geo with external PostgreSQL](../geo/replication/external_database.md)
+- [Running Geo with external PostgreSQL](../geo/setup/external_database.md)
 
 - [Upgrades when running PostgreSQL configured for HA.](https://docs.gitlab.com/omnibus/settings/database.html#upgrading-a-gitlab-ha-cluster)
 
@@ -145,4 +148,4 @@ It may take a little while to respond.
 ```
 
 NOTE: **Note:**
-These are Omnibus settings. If an external database, such as a customer's PostgreSQL installation or Amazon RDS is being used, these values don't get set, and would have to be set externally.
+These are Omnibus GitLab settings. If an external database, such as a customer's PostgreSQL installation or Amazon RDS is being used, these values don't get set, and would have to be set externally.

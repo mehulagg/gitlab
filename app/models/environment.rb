@@ -4,11 +4,14 @@ class Environment < ApplicationRecord
   include Gitlab::Utils::StrongMemoize
   include ReactiveCaching
   include FastDestroyAll::Helpers
+  include Presentable
 
   self.reactive_cache_refresh_interval = 1.minute
   self.reactive_cache_lifetime = 55.seconds
   self.reactive_cache_hard_limit = 10.megabytes
   self.reactive_cache_work_type = :external_dependency
+
+  PRODUCTION_ENVIRONMENT_IDENTIFIERS = %w[prod production].freeze
 
   belongs_to :project, required: true
 
@@ -57,6 +60,7 @@ class Environment < ApplicationRecord
             addressable_url: true
 
   delegate :stop_action, :manual_actions, to: :last_deployment, allow_nil: true
+  delegate :auto_rollback_enabled?, to: :project
 
   scope :available, -> { with_state(:available) }
   scope :stopped, -> { with_state(:stopped) }
@@ -67,6 +71,7 @@ class Environment < ApplicationRecord
   scope :order_by_last_deployed_at_desc, -> do
     order(Gitlab::Database.nulls_last_order("(#{max_deployment_id_sql})", 'DESC'))
   end
+  scope :order_by_name, -> { order('environments.name ASC') }
 
   scope :in_review_folder, -> { where(environment_type: "review") }
   scope :for_name, -> (name) { where(name: name) }
@@ -86,6 +91,7 @@ class Environment < ApplicationRecord
   scope :with_rank, -> do
     select('environments.*, rank() OVER (PARTITION BY project_id ORDER BY id DESC)')
   end
+  scope :for_id, -> (id) { where(id: id) }
 
   state_machine :state, initial: :available do
     event :start do
@@ -116,6 +122,10 @@ class Environment < ApplicationRecord
 
   def self.pluck_names
     pluck(:name)
+  end
+
+  def self.pluck_unique_names
+    pluck('DISTINCT(environments.name)')
   end
 
   def self.find_or_create_by_name(name)
@@ -211,7 +221,7 @@ class Environment < ApplicationRecord
   end
 
   def update_merge_request_metrics?
-    folder_name == "production"
+    PRODUCTION_ENVIRONMENT_IDENTIFIERS.include?(folder_name.downcase)
   end
 
   def ref_path
@@ -231,10 +241,6 @@ class Environment < ApplicationRecord
   def cancel_deployment_jobs!
     jobs = active_deployments.with_deployable
     jobs.each do |deployment|
-      # guard against data integrity issues,
-      # for example https://gitlab.com/gitlab-org/gitlab/-/issues/218659#note_348823660
-      next unless deployment.deployable
-
       Gitlab::OptimisticLocking.retry_lock(deployment.deployable) do |deployable|
         deployable.cancel! if deployable&.cancelable?
       end
@@ -294,6 +300,10 @@ class Environment < ApplicationRecord
 
   def has_opened_alert?
     latest_opened_most_severe_alert.present?
+  end
+
+  def has_running_deployments?
+    all_deployments.running.exists?
   end
 
   def metrics
@@ -374,7 +384,37 @@ class Environment < ApplicationRecord
     !!deployment_platform&.cluster&.application_elastic_stack_available?
   end
 
+  def rollout_status
+    return unless rollout_status_available?
+
+    result = rollout_status_with_reactive_cache
+
+    result || ::Gitlab::Kubernetes::RolloutStatus.loading
+  end
+
+  def ingresses
+    return unless rollout_status_available?
+
+    deployment_platform.ingresses(deployment_namespace)
+  end
+
+  def patch_ingress(ingress, data)
+    return unless rollout_status_available?
+
+    deployment_platform.patch_ingress(deployment_namespace, ingress, data)
+  end
+
   private
+
+  def rollout_status_available?
+    has_terminals?
+  end
+
+  def rollout_status_with_reactive_cache
+    with_reactive_cache do |data|
+      deployment_platform.rollout_status(self, data)
+    end
+  end
 
   def has_metrics_and_can_query?
     has_metrics? && prometheus_adapter.can_query?
@@ -386,7 +426,7 @@ class Environment < ApplicationRecord
 
   # Overrides ReactiveCaching default to activate limit checking behind a FF
   def reactive_cache_limit_enabled?
-    Feature.enabled?(:reactive_caching_limit_environment, project)
+    Feature.enabled?(:reactive_caching_limit_environment, project, default_enabled: true)
   end
 end
 

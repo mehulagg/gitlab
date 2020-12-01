@@ -10,8 +10,8 @@ RSpec.describe IterationsFinder do
   let_it_be(:user) { create(:user) }
   let!(:started_group_iteration) { create(:started_iteration, :skip_future_date_validation, group: group, title: 'one test', start_date: now - 1.day, due_date: now) }
   let!(:upcoming_group_iteration) { create(:iteration, group: group, start_date: 1.day.from_now, due_date: 2.days.from_now) }
-  let!(:iteration_from_project_1) { create(:started_iteration, :skip_project_validation, project: project_1, start_date: 2.days.from_now, due_date: 3.days.from_now) }
-  let!(:iteration_from_project_2) { create(:started_iteration, :skip_project_validation, project: project_2, start_date: 4.days.from_now, due_date: 5.days.from_now) }
+  let!(:iteration_from_project_1) { create(:started_iteration, :skip_project_validation, project: project_1, start_date: 3.days.from_now, due_date: 4.days.from_now) }
+  let!(:iteration_from_project_2) { create(:started_iteration, :skip_project_validation, project: project_2, start_date: 5.days.from_now, due_date: 6.days.from_now) }
   let(:project_ids) { [project_1.id, project_2.id] }
 
   subject { described_class.new(user, params).execute }
@@ -130,8 +130,8 @@ RSpec.describe IterationsFinder do
         end
 
         it 'returns iterations which end after the timeframe' do
-          iteration = create(:iteration, :skip_project_validation, project: project_2, start_date: 6.days.from_now, due_date: 2.weeks.from_now)
-          params.merge!(start_date: 6.days.from_now, end_date: 7.days.from_now)
+          iteration = create(:iteration, :skip_project_validation, project: project_2, start_date: 9.days.from_now, due_date: 2.weeks.from_now)
+          params.merge!(start_date: 9.days.from_now, end_date: 10.days.from_now)
 
           expect(subject).to match_array([iteration])
         end
@@ -157,6 +157,60 @@ RSpec.describe IterationsFinder do
         finder = described_class.new(user, project_ids: [project_1.id], state: 'all')
 
         expect(finder.find_by(iid: iteration_from_project_1.iid)).to eq(iteration_from_project_1)
+      end
+    end
+
+    describe '.params_for_parent' do
+      let_it_be(:parent_group) { create(:group) }
+      let_it_be(:group) { create(:group, parent: parent_group) }
+      let_it_be(:project) { create(:project, group: group) }
+
+      context 'when parent is a project' do
+        subject { described_class.params_for_parent(project, include_ancestors: include_ancestors) }
+
+        context 'when include_ancestors is true' do
+          let(:include_ancestors) { true }
+
+          it 'returns project and ancestor group ids' do
+            expect(subject).to match(group_ids: contain_exactly(group, parent_group), project_ids: project.id)
+          end
+        end
+
+        context 'when include_ancestors is false' do
+          let(:include_ancestors) { false }
+
+          it 'returns project id' do
+            expect(subject).to eq(project_ids: project.id)
+          end
+        end
+      end
+
+      context 'when parent is a group' do
+        subject { described_class.params_for_parent(group, include_ancestors: include_ancestors) }
+
+        context 'when include_ancestors is true' do
+          let(:include_ancestors) { true }
+
+          it 'returns group and ancestor ids' do
+            expect(subject).to match(group_ids: contain_exactly(group, parent_group))
+          end
+        end
+
+        context 'when include_ancestors is false' do
+          let(:include_ancestors) { false }
+
+          it 'returns group id' do
+            expect(subject).to eq(group_ids: group.id)
+          end
+        end
+      end
+
+      context 'when parent is invalid' do
+        subject { described_class.params_for_parent(double(User)) }
+
+        it 'raises an ArgumentError' do
+          expect { subject }.to raise_error(ArgumentError, 'Invalid parent class. Only Project and Group are supported.')
+        end
       end
     end
   end

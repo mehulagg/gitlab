@@ -9,7 +9,7 @@ RSpec.describe Projects::TransferService do
   let_it_be(:group) { create(:group) }
   let(:project) { create(:project, :repository, :legacy_storage, namespace: user.namespace) }
 
-  subject(:execute_transfer) { described_class.new(project, user).execute(group) }
+  subject(:execute_transfer) { described_class.new(project, user).execute(group).tap { project.reload } }
 
   context 'with npm packages' do
     before do
@@ -311,6 +311,37 @@ RSpec.describe Projects::TransferService do
       end
 
       it { expect(project.visibility_level).to eq(Gitlab::VisibilityLevel::PRIVATE) }
+    end
+  end
+
+  context 'shared Runners group level configurations' do
+    using RSpec::Parameterized::TableSyntax
+
+    where(:project_shared_runners_enabled, :shared_runners_setting, :expected_shared_runners_enabled) do
+      true  | 'disabled_and_unoverridable' | false
+      false | 'disabled_and_unoverridable' | false
+      true  | 'disabled_with_override'     | true
+      false | 'disabled_with_override'     | false
+      true  | 'enabled'                    | true
+      false | 'enabled'                    | false
+    end
+
+    with_them do
+      let(:project) { create(:project, :public, :repository, namespace: user.namespace, shared_runners_enabled: project_shared_runners_enabled) }
+      let(:group) { create(:group) }
+
+      before do
+        group.add_owner(user)
+        expect_next_found_instance_of(Group) do |group|
+          expect(group).to receive(:shared_runners_setting).and_return(shared_runners_setting)
+        end
+
+        execute_transfer
+      end
+
+      it 'updates shared runners based on the parent group' do
+        expect(project.shared_runners_enabled).to eq(expected_shared_runners_enabled)
+      end
     end
   end
 

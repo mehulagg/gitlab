@@ -61,6 +61,7 @@ buildpacks
 bundler
 bundlers
 burndown
+burnup
 cacheable
 CAS
 CentOS
@@ -76,6 +77,7 @@ Citus
 clonable
 Cloudwatch
 Cobertura
+Codepen
 Cognito
 colocated
 colocating
@@ -141,8 +143,10 @@ Facebook
 failover
 failovers
 failsafe
+Falco
 fastlane
 favicon
+Figma
 Filebeat
 Fio
 firewalled
@@ -165,6 +169,7 @@ Gitleaks
 Gitter
 globals
 Gmail
+Gollum
 Google
 Gosec
 Gradle
@@ -211,7 +216,7 @@ jsdom
 JupyterHub
 kanban
 kanbans
-Kaniko
+kaniko
 Karma
 Kerberos
 keyset
@@ -219,12 +224,14 @@ Kibana
 Kinesis
 Knative
 Kramdown
+Kubecost
 kubectl
 Kubernetes
 Kubesec
 Laravel
 LDAP
 ldapsearch
+Lefthook
 Leiningen
 Libravatar
 liveness
@@ -245,6 +252,7 @@ Markdown
 markdownlint
 matcher
 matchers
+Matomo
 Mattermost
 mbox
 memoization
@@ -252,6 +260,7 @@ memoize
 memoized
 memoizing
 Memorystore
+mergeability
 mergeable
 Microsoft
 middleware
@@ -274,6 +283,7 @@ mockups
 ModSecurity
 monorepo
 monorepos
+multiline
 mutex
 nameserver
 nameservers
@@ -283,6 +293,7 @@ namespaces
 namespacing
 namespacings
 Nanoc
+Netlify
 NGINX
 Nokogiri
 npm
@@ -296,6 +307,7 @@ OmniAuth
 onboarding
 OpenID
 OpenShift
+Opsgenie
 Packagist
 parallelization
 parallelizations
@@ -303,8 +315,10 @@ passwordless
 Patroni
 performant
 PgBouncer
+Phabricator
 phaser
 phasers
+phpenv
 Pipfile
 Pipfiles
 Piwik
@@ -336,6 +350,7 @@ proxied
 proxies
 proxyable
 proxying
+pseudocode
 pseudonymized
 pseudonymizer
 Puma
@@ -343,6 +358,7 @@ Python
 Qualys
 Rackspace
 Raspbian
+Rdoc
 reachability
 rebase
 rebased
@@ -363,6 +379,8 @@ reindex
 reindexed
 reindexes
 reindexing
+reinitialize
+reinitializing
 relicensing
 remediations
 repmgr
@@ -380,6 +398,7 @@ reusability
 reverified
 reverifies
 reverify
+RHEL
 rollout
 rollouts
 rsync
@@ -402,6 +421,7 @@ sanitization
 sbt
 scatterplot
 scatterplots
+Schemastore
 Sendmail
 Sentry
 serializer
@@ -420,7 +440,10 @@ smartcard
 smartcards
 SMTP
 Sobelow
+Solarized
 Sourcegraph
+sparkline
+sparklines
 spidering
 Splunk
 SpotBugs
@@ -436,6 +459,8 @@ subfolder
 subfolders
 subgraph
 subgraphs
+subkey
+subkeys
 sublicense
 sublicensed
 sublicenses
@@ -452,8 +477,12 @@ substring
 substrings
 subtree
 subtrees
+sudo
+swimlane
+swimlanes
 syslog
 tcpdump
+Thanos
 Tiller
 timecop
 todos
@@ -476,6 +505,7 @@ unarchived
 unarchives
 unarchiving
 unassign
+unassigning
 unassigns
 uncheck
 unchecked
@@ -507,6 +537,9 @@ unprioritized
 unprotect
 unprotected
 unprotects
+unprovision
+unprovisioned
+unprovisions
 unpublish
 unpublished
 unpublishes

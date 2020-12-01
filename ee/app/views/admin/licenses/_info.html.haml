@@ -18,8 +18,8 @@
           %strong= @license.plan.capitalize
           - unless @license.ultimate?
             = ' - '
-            = link_to _('How to upgrade'),
-              help_page_path('subscriptions/index.md', anchor: 'upgrade-your-self-managed-subscription-tier'),
+            = link_to _('Contact Sales to upgrade'),
+              'https://about.gitlab.com/sales/?inapplink=contactsalessm',
               class: 'inline-link',
               target: :_blank,
               rel: :noreferrer
@@ -50,8 +50,8 @@
         %p= html_escape(_('Your license will be included in your GitLab backup and will survive upgrades, so in normal usage you should never need to re-upload your %{code_open}.gitlab-license%{code_close} file.')) % { code_open: '<code>'.html_safe, code_close: '</code>'.html_safe }
         %p= _('Still, we recommend keeping a backup saved somewhere. Otherwise, if you ever need it and have lost it, you will need to request GitLab Inc. to send it to you again.')
         %br
-        = link_to _('Download license'), download_admin_license_path, class: 'btn btn-info'
-        = link_to _('Customer Portal'), 'https://customers.gitlab.com', class: 'btn btn-info btn-inverted', data: { track_event: 'click_text', track_label: 'license_dashboard', track_property: 'customer_portal' }, target: '_blank', rel: 'noopener noreferrer'
+        = link_to _('Download license'), download_admin_license_path, class: 'gl-button btn btn-info'
+        = link_to _('Customer Portal'), 'https://customers.gitlab.com', class: 'gl-button btn btn-info btn-inverted', data: { track_event: 'click_text', track_label: 'license_dashboard', track_property: 'customer_portal' }, target: '_blank', rel: 'noopener noreferrer'
 
     .card.border-danger
       .card-header.bg-danger.text-white
@@ -60,4 +60,4 @@
         %p= _('If you remove this license, GitLab will fall back on the previous license, if any.')
         %p= _('If there is no previous license or if the previous license has expired, some GitLab functionality will be blocked until a new, valid license is uploaded.')
         %br
-        = link_to _('Remove license'), admin_license_path, data: { confirm: _('Are you sure you want to remove the license?'), qa_selector: 'remove_license_link' }, method: :delete, class: 'btn btn-remove'
+        = link_to _('Remove license'), admin_license_path, data: { confirm: _('Are you sure you want to remove the license?'), qa_selector: 'remove_license_link' }, method: :delete, class: 'gl-button btn btn-danger'

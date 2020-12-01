@@ -19,12 +19,12 @@ RSpec.describe Gitlab::Geo::EventGapTracking, :clean_gitlab_redis_cache do
     end
 
     it 'returns the lowest gap id' do
-      Timecop.travel(50.minutes.ago) do
+      travel_to(50.minutes.ago) do
         gap_tracking.previous_id = 18
         gap_tracking.send(:track_gaps, 20)
       end
 
-      Timecop.travel(40.minutes.ago) do
+      travel_to(40.minutes.ago) do
         gap_tracking.previous_id = 12
         gap_tracking.send(:track_gaps, 14)
       end
@@ -79,7 +79,7 @@ RSpec.describe Gitlab::Geo::EventGapTracking, :clean_gitlab_redis_cache do
 
   describe '#fill_gaps' do
     it 'ignore gaps that are less than 10 minutes old' do
-      Timecop.freeze do
+      freeze_time do
         gap_tracking.check!(event_id_with_gap)
 
         expect { |blk| gap_tracking.fill_gaps(&blk) }.not_to yield_with_args(anything)
@@ -116,7 +116,7 @@ RSpec.describe Gitlab::Geo::EventGapTracking, :clean_gitlab_redis_cache do
         yielded << event_log
       end
 
-      Timecop.travel(13.minutes.ago) do
+      travel_to(13.minutes.ago) do
         gap_tracking.check!(event_id_with_gap)
       end
       create(:geo_event_log, :updated_event, id: gap_id)
@@ -125,7 +125,7 @@ RSpec.describe Gitlab::Geo::EventGapTracking, :clean_gitlab_redis_cache do
         expect { gap_tracking.fill_gaps(&blk) }.to change { yielded.count }.by(1)
       end.count
 
-      Timecop.travel(12.minutes.ago) do
+      travel_to(12.minutes.ago) do
         gap_tracking.check!(event_id_with_gap + 3)
       end
       create(:geo_event_log, :updated_event, id: event_id_with_gap + 1)
@@ -145,7 +145,7 @@ RSpec.describe Gitlab::Geo::EventGapTracking, :clean_gitlab_redis_cache do
     end
 
     it 'saves the gap id in redis' do
-      Timecop.freeze do
+      freeze_time do
         gap_tracking.send(:track_gaps, event_id_with_gap)
 
         expect(read_gaps).to contain_exactly([gap_id.to_s, Time.now.to_i])
@@ -153,7 +153,7 @@ RSpec.describe Gitlab::Geo::EventGapTracking, :clean_gitlab_redis_cache do
     end
 
     it 'saves a range of gaps id in redis' do
-      Timecop.freeze do
+      freeze_time do
         gap_tracking.send(:track_gaps, event_id_with_gap + 3)
 
         expected_gaps = ((previous_event_id + 1)..(event_id_with_gap + 2)).collect { |id| [id.to_s, Time.now.to_i] }
@@ -165,7 +165,7 @@ RSpec.describe Gitlab::Geo::EventGapTracking, :clean_gitlab_redis_cache do
     it 'saves the gaps in order' do
       expected_gaps = []
 
-      Timecop.freeze do
+      freeze_time do
         gap_tracking.send(:track_gaps, event_id_with_gap)
         expected_gaps << [gap_id.to_s, Time.now.to_i]
       end

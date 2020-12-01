@@ -9,6 +9,10 @@ module AlertManagement
       return bad_request unless incoming_payload.has_required_attributes?
 
       process_alert_management_alert
+      return bad_request unless alert.persisted?
+
+      process_incident_issues if process_issues?
+      send_alert_email if send_email?
 
       ServiceResponse.success
     end
@@ -30,8 +34,6 @@ module AlertManagement
       else
         create_alert_management_alert
       end
-
-      process_incident_alert
     end
 
     def reset_alert_management_alert_status
@@ -47,7 +49,7 @@ module AlertManagement
     def create_alert_management_alert
       if alert.save
         alert.execute_services
-        SystemNoteService.create_new_alert(alert, Gitlab::AlertManagement::AlertParams::MONITORING_TOOLS[:prometheus])
+        SystemNoteService.create_new_alert(alert, Gitlab::AlertManagement::Payload::MONITORING_TOOLS[:prometheus])
         return
       end
 
@@ -84,11 +86,16 @@ module AlertManagement
       SystemNoteService.auto_resolve_prometheus_alert(issue, project, User.alert_bot) if issue.reset.closed?
     end
 
-    def process_incident_alert
-      return unless alert.persisted?
-      return if alert.issue
+    def process_incident_issues
+      return if alert.issue || alert.resolved?
 
       IncidentManagement::ProcessAlertWorker.perform_async(nil, nil, alert.id)
+    end
+
+    def send_alert_email
+      notification_service
+        .async
+        .prometheus_alerts_fired(project, [alert])
     end
 
     def logger

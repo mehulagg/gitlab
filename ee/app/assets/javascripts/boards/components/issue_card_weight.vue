@@ -26,7 +26,6 @@ export default {
     :is="tagName"
     ref="itemWeight"
     class="board-card-info card-number board-card-weight"
-    tabindex="1"
     v-on="$listeners"
   >
     <gl-icon name="weight" class="board-card-info-icon" />

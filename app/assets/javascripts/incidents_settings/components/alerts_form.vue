@@ -6,8 +6,8 @@ import {
   GlIcon,
   GlFormGroup,
   GlFormCheckbox,
-  GlNewDropdown,
-  GlNewDropdownItem,
+  GlDropdown,
+  GlDropdownItem,
 } from '@gitlab/ui';
 import {
   I18N_ALERT_SETTINGS_FORM,
@@ -24,8 +24,8 @@ export default {
     GlFormGroup,
     GlIcon,
     GlFormCheckbox,
-    GlNewDropdown,
-    GlNewDropdownItem,
+    GlDropdown,
+    GlDropdownItem,
   },
   inject: ['service', 'alertSettings'],
   data() {
@@ -101,13 +101,13 @@ export default {
             <gl-icon name="question" :size="12" />
           </gl-link>
         </label>
-        <gl-new-dropdown
+        <gl-dropdown
           id="alert-integration-settings-issue-template"
           data-qa-selector="incident_templates_dropdown"
           :text="issueTemplateHeader"
           :block="true"
         >
-          <gl-new-dropdown-item
+          <gl-dropdown-item
             v-for="template in templates"
             :key="template.key"
             data-qa-selector="incident_templates_item"
@@ -116,8 +116,8 @@ export default {
             @click="selectIssueTemplate(template.key)"
           >
             {{ template.name }}
-          </gl-new-dropdown-item>
-        </gl-new-dropdown>
+          </gl-dropdown-item>
+        </gl-dropdown>
       </gl-form-group>
 
       <gl-form-group class="gl-pl-0 gl-mb-5">
@@ -130,18 +130,16 @@ export default {
           <span>{{ $options.i18n.autoCloseIncidents.label }}</span>
         </gl-form-checkbox>
       </gl-form-group>
-      <div class="gl-display-flex gl-justify-content-end">
-        <gl-button
-          ref="submitBtn"
-          data-qa-selector="save_changes_button"
-          :disabled="loading"
-          variant="success"
-          type="submit"
-          class="js-no-auto-disable"
-        >
-          {{ $options.i18n.saveBtnLabel }}
-        </gl-button>
-      </div>
+      <gl-button
+        ref="submitBtn"
+        data-qa-selector="save_changes_button"
+        :disabled="loading"
+        variant="success"
+        type="submit"
+        class="js-no-auto-disable"
+      >
+        {{ $options.i18n.saveBtnLabel }}
+      </gl-button>
     </form>
   </div>
 </template>

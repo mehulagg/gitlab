@@ -1,6 +1,6 @@
-import IterationReportSummary from 'ee/iterations/components/iteration_report_summary.vue';
-import { mount } from '@vue/test-utils';
 import { GlCard } from '@gitlab/ui';
+import { mount } from '@vue/test-utils';
+import IterationReportSummary from 'ee/iterations/components/iteration_report_summary.vue';
 import { Namespace } from 'ee/iterations/constants';
 
 describe('Iterations report summary', () => {

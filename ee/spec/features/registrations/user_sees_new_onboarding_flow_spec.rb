@@ -43,7 +43,7 @@ RSpec.describe 'User sees new onboarding flow', :js do
 
     Sidekiq::Worker.drain_all
 
-    click_on 'Show me everything'
+    click_on 'Show me the basics'
 
     expect(page).to have_content('Learn GitLab')
     expect(page).to have_css('.popover', text: 'Here are all your projects in your group, including the one you just created. To start, let’s take a look at your personalized learning project which will help you learn about GitLab at your own pace. 1 / 2')

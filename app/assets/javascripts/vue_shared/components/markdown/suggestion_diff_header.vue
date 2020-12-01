@@ -42,6 +42,11 @@ export default {
       required: false,
       default: null,
     },
+    suggestionsCount: {
+      type: Number,
+      required: false,
+      default: 0,
+    },
   },
   data() {
     return {
@@ -66,6 +71,9 @@ export default {
         return __('Applying suggestion...');
       }
       return __('Applying suggestions...');
+    },
+    isLoggedIn() {
+      return Boolean(gon.current_user_id);
     },
   },
   methods: {
@@ -127,7 +135,7 @@ export default {
     </div>
     <div v-else class="d-flex align-items-center">
       <gl-button
-        v-if="canBeBatched && !isDisableButton"
+        v-if="suggestionsCount > 1 && canBeBatched && !isDisableButton"
         class="btn-inverted js-add-to-batch-btn btn-grouped"
         :disabled="isDisableButton"
         @click="addSuggestionToBatch"
@@ -136,6 +144,7 @@ export default {
       </gl-button>
       <span v-gl-tooltip.viewport="tooltipMessage" tabindex="0">
         <gl-button
+          v-if="isLoggedIn"
           class="btn-inverted js-apply-btn btn-grouped"
           :disabled="isDisableButton"
           variant="success"

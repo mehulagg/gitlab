@@ -182,26 +182,25 @@ module Issuable
     end
 
     def supports_time_tracking?
-      is_a?(TimeTrackable) && !incident?
+      is_a?(TimeTrackable)
+    end
+
+    def supports_severity?
+      incident?
     end
 
     def incident?
       is_a?(Issue) && super
     end
 
+    def supports_issue_type?
+      is_a?(Issue)
+    end
+
     def severity
       return IssuableSeverity::DEFAULT unless incident?
 
       issuable_severity&.severity || IssuableSeverity::DEFAULT
-    end
-
-    def update_severity(severity)
-      return unless incident?
-
-      severity = severity.to_s.downcase
-      severity = IssuableSeverity::DEFAULT unless IssuableSeverity.severities.key?(severity)
-
-      (issuable_severity || build_issuable_severity(issue_id: id)).update(severity: severity)
     end
 
     private

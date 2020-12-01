@@ -1,4 +1,7 @@
 ---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 comments: false
 ---
 
@@ -21,10 +24,10 @@ The following are available Rake tasks:
 | [Clean up](cleanup.md)                                                                              | Clean up unneeded items from GitLab instances.                                            |
 | [Development](../development/rake_tasks.md)                                                         | Tasks for GitLab contributors.                                                            |
 | [Doctor tasks](../administration/raketasks/doctor.md)                                               | Checks for data integrity issues.                                                         |
-| [Elasticsearch](../integration/elasticsearch.md#gitlab-elasticsearch-rake-tasks) **(STARTER ONLY)** | Maintain Elasticsearch in a GitLab instance.                                              |
+| [Elasticsearch](../integration/elasticsearch.md#gitlab-advanced-search-rake-tasks) **(STARTER ONLY)** | Maintain Elasticsearch in a GitLab instance.                                              |
 | [Enable namespaces](features.md)                                                                    | Enable usernames and namespaces for user projects.                                        |
 | [General maintenance](../administration/raketasks/maintenance.md)                                   | General maintenance and self-check tasks.                                                 |
-| [Geo maintenance](../administration/raketasks/geo.md) **(PREMIUM ONLY)**                            | [Geo](../administration/geo/replication/index.md)-related maintenance.                    |
+| [Geo maintenance](../administration/raketasks/geo.md) **(PREMIUM ONLY)**                            | [Geo](../administration/geo/index.md)-related maintenance.                    |
 | [GitHub import](../administration/raketasks/github_import.md)                                       | Retrieve and import repositories from GitHub.                                             |
 | [Import repositories](import.md)                                                                    | Import bare repositories into your GitLab instance.                                       |
 | [Import large project exports](../development/import_project.md#importing-via-a-rake-task)          | Import large GitLab [project exports](../user/project/settings/import_export.md).         |

@@ -72,6 +72,7 @@ RSpec.describe ApplicationSetting do
     it { is_expected.not_to allow_value(nil).for(:push_event_activities_limit) }
 
     it { is_expected.to validate_numericality_of(:container_registry_delete_tags_service_timeout).only_integer.is_greater_than_or_equal_to(0) }
+    it { is_expected.to validate_numericality_of(:container_registry_expiration_policies_worker_capacity).only_integer.is_greater_than_or_equal_to(0) }
 
     it { is_expected.to validate_numericality_of(:snippet_size_limit).only_integer.is_greater_than(0) }
     it { is_expected.to validate_numericality_of(:wiki_page_max_content_bytes).only_integer.is_greater_than_or_equal_to(1024) }
@@ -111,6 +112,35 @@ RSpec.describe ApplicationSetting do
     it { is_expected.to allow_value(50).for(:repository_storages_weighted_default) }
     it { is_expected.to allow_value(nil).for(:repository_storages_weighted_default) }
     it { is_expected.not_to allow_value({ default: 100, shouldntexist: 50 }).for(:repository_storages_weighted) }
+
+    context 'help_page_documentation_base_url validations' do
+      it { is_expected.to allow_value(nil).for(:help_page_documentation_base_url) }
+      it { is_expected.to allow_value('https://docs.gitlab.com').for(:help_page_documentation_base_url) }
+      it { is_expected.to allow_value('http://127.0.0.1').for(:help_page_documentation_base_url) }
+      it { is_expected.not_to allow_value('docs.gitlab.com').for(:help_page_documentation_base_url) }
+
+      context 'when url length validation' do
+        let(:value) { 'http://'.ljust(length, 'A') }
+
+        context 'when value string length is 255 characters' do
+          let(:length) { 255 }
+
+          it 'allows the value' do
+            is_expected.to allow_value(value).for(:help_page_documentation_base_url)
+          end
+        end
+
+        context 'when value string length exceeds 255 characters' do
+          let(:length) { 256 }
+
+          it 'does not allow the value' do
+            is_expected.not_to allow_value(value)
+                                 .for(:help_page_documentation_base_url)
+                                 .with_message('is too long (maximum is 255 characters)')
+          end
+        end
+      end
+    end
 
     context 'grafana_url validations' do
       before do
@@ -320,7 +350,7 @@ RSpec.describe ApplicationSetting do
       end
     end
 
-    it_behaves_like 'an object with email-formated attributes', :admin_notification_email do
+    it_behaves_like 'an object with email-formated attributes', :abuse_notification_email do
       subject { setting }
     end
 
@@ -618,6 +648,37 @@ RSpec.describe ApplicationSetting do
           end
         end
       end
+
+      describe '#ci_jwt_signing_key' do
+        it { is_expected.not_to allow_value('').for(:ci_jwt_signing_key) }
+        it { is_expected.not_to allow_value('invalid RSA key').for(:ci_jwt_signing_key) }
+        it { is_expected.to allow_value(nil).for(:ci_jwt_signing_key) }
+        it { is_expected.to allow_value(OpenSSL::PKey::RSA.new(1024).to_pem).for(:ci_jwt_signing_key) }
+
+        it 'is encrypted' do
+          subject.ci_jwt_signing_key = OpenSSL::PKey::RSA.new(1024).to_pem
+
+          aggregate_failures do
+            expect(subject.encrypted_ci_jwt_signing_key).to be_present
+            expect(subject.encrypted_ci_jwt_signing_key_iv).to be_present
+            expect(subject.encrypted_ci_jwt_signing_key).not_to eq(subject.ci_jwt_signing_key)
+          end
+        end
+      end
+
+      describe '#cloud_license_auth_token' do
+        it { is_expected.to allow_value(nil).for(:cloud_license_auth_token) }
+
+        it 'is encrypted' do
+          subject.cloud_license_auth_token = 'token-from-customers-dot'
+
+          aggregate_failures do
+            expect(subject.encrypted_cloud_license_auth_token).to be_present
+            expect(subject.encrypted_cloud_license_auth_token_iv).to be_present
+            expect(subject.encrypted_cloud_license_auth_token).not_to eq(subject.cloud_license_auth_token)
+          end
+        end
+      end
     end
 
     context 'static objects external storage' do
@@ -635,6 +696,29 @@ RSpec.describe ApplicationSetting do
         allow(subject).to receive(:sourcegraph_enabled).and_return(true)
 
         expect(subject.sourcegraph_url).to be_nil
+        is_expected.to be_invalid
+      end
+    end
+
+    context 'gitpod settings' do
+      it 'is invalid if gitpod is enabled and no url is provided' do
+        allow(subject).to receive(:gitpod_enabled).and_return(true)
+        allow(subject).to receive(:gitpod_url).and_return(nil)
+
+        is_expected.to be_invalid
+      end
+
+      it 'is invalid if gitpod is enabled and an empty url is provided' do
+        allow(subject).to receive(:gitpod_enabled).and_return(true)
+        allow(subject).to receive(:gitpod_url).and_return('')
+
+        is_expected.to be_invalid
+      end
+
+      it 'is invalid if gitpod is enabled and an invalid url is provided' do
+        allow(subject).to receive(:gitpod_enabled).and_return(true)
+        allow(subject).to receive(:gitpod_url).and_return('javascript:alert("test")//')
+
         is_expected.to be_invalid
       end
     end
@@ -752,6 +836,23 @@ RSpec.describe ApplicationSetting do
 
         expect(setting.sourcegraph_url_is_com?).to eq(is_com)
       end
+    end
+  end
+
+  describe '#instance_review_permitted?', :request_store do
+    subject { setting.instance_review_permitted? }
+
+    before do
+      RequestStore.store[:current_license] = nil
+      expect(Rails.cache).to receive(:fetch).and_return(
+        ::ApplicationSetting::INSTANCE_REVIEW_MIN_USERS + users_over_minimum
+      )
+    end
+
+    where(users_over_minimum: [-1, 0, 1])
+
+    with_them do
+      it { is_expected.to be(users_over_minimum >= 0) }
     end
   end
 

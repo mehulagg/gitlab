@@ -17,13 +17,13 @@ RSpec.describe AutoMerge::MergeTrainService do
 
   before do
     project.add_maintainer(user)
+    project.update!(merge_pipelines_enabled: true, merge_trains_enabled: true)
 
     allow(AutoMergeProcessWorker).to receive(:perform_async) { }
 
     stub_feature_flags(ci_disallow_to_create_merge_request_pipelines_in_target_project: false)
     stub_feature_flags(disable_merge_trains: false)
     stub_licensed_features(merge_trains: true, merge_pipelines: true)
-    project.update!(merge_pipelines_enabled: true)
   end
 
   describe '#execute' do
@@ -349,7 +349,15 @@ RSpec.describe AutoMerge::MergeTrainService do
       2.times { is_expected.to be_truthy }
     end
 
-    context 'when merge trains project option is disabled' do
+    context 'when merge trains flag is disabled' do
+      before do
+        project.update!(merge_trains_enabled: false)
+      end
+
+      it { is_expected.to be_falsy }
+    end
+
+    context 'when merge train ci setting is disabled' do
       before do
         stub_feature_flags(disable_merge_trains: true)
       end

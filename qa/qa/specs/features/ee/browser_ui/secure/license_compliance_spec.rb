@@ -3,9 +3,9 @@
 require 'pathname'
 
 module QA
-  RSpec.describe 'Secure', :docker, :runner do
+  RSpec.describe 'Secure', :runner do
     let(:approved_license_name) { "MIT License" }
-    let(:denied_license_name) { "WTFPL" }
+    let(:denied_license_name) { "Apache License 2.0" }
 
     describe 'License Compliance page' do
       after(:all) do
@@ -70,8 +70,7 @@ module QA
       end
     end
 
-    describe 'License Compliance pipeline reports' do
-      let(:number_of_licenses_in_fixture) { 2 }
+    describe 'License Compliance pipeline reports', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/241448', type: :bug } do
       let(:executor) {"qa-runner-#{Time.now.to_i}"}
 
       after do
@@ -101,30 +100,29 @@ module QA
                                        .new(__dir__)
                                        .join('../../../../../ee/fixtures/secure_premade_reports')
           project_push.commit_message = 'Create Secure compatible application to serve premade reports'
-        end.project.visit!
+        end
 
+        @project.visit!
         Page::Project::Menu.perform(&:click_ci_cd_pipelines)
         Page::Project::Pipeline::Index.perform(&:wait_for_latest_pipeline_success)
+        Page::Project::Menu.perform(&:click_on_license_compliance)
       end
 
       it 'can approve and deny licenses in the pipeline', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/965' do
+        EE::Page::Project::Secure::LicenseCompliance.perform do |license_compliance|
+          license_compliance.open_tab
+          license_compliance.approve_license approved_license_name
+          license_compliance.deny_license denied_license_name
+        end
+
+        @project.visit!
         Page::Project::Menu.perform(&:click_ci_cd_pipelines)
         Page::Project::Pipeline::Index.perform(&:click_on_latest_pipeline)
 
         Page::Project::Pipeline::Show.perform do |pipeline|
           pipeline.click_on_licenses
-
-          expect(pipeline).to have_license_count_of number_of_licenses_in_fixture
-
-          pipeline.approve_license(approved_license_name)
-          pipeline.deny_license(denied_license_name)
-        end
-
-        Page::Project::Menu.perform(&:click_on_license_compliance)
-        EE::Page::Project::Secure::LicenseCompliance.perform do |license_compliance|
-          license_compliance.open_tab
-          expect(license_compliance).to have_approved_license approved_license_name
-          expect(license_compliance).to have_denied_license denied_license_name
+          expect(pipeline).to have_approved_license approved_license_name
+          expect(pipeline).to have_denied_license denied_license_name
         end
       end
     end

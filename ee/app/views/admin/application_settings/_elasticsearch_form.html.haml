@@ -8,11 +8,11 @@
 %section.settings.as-elasticsearch.no-animate#js-elasticsearch-settings{ class: ('expanded' if expanded), data: { qa_selector: 'elasticsearch_tab' } }
   .settings-header
     %h4
-      = _('Elasticsearch')
-    %button.btn.js-settings-toggle{ type: 'button' }
+      = _('Advanced Search')
+    %button.btn.gl-button.js-settings-toggle{ type: 'button' }
       = expanded ? 'Collapse' : 'Expand'
     %p
-      = _('Elasticsearch integration. Elasticsearch AWS IAM.')
+      = _('Advanced Search with Elasticsearch')
   .settings-content
     = form_for @application_setting, url: general_admin_application_settings_path(anchor: 'js-elasticsearch-settings'), html: { class: 'fieldset-form' } do |f|
       = form_errors(@application_setting) if expanded
@@ -26,7 +26,7 @@
                 Elasticsearch indexing
               - unless Gitlab::CurrentSettings.elasticsearch_indexing?
                 .form-text.text-muted
-                  = _('Please create an index before enabling indexing')
+                  = _('An empty index will be created if one does not already exist')
               - if Gitlab::CurrentSettings.elasticsearch_indexing?
                 .form-text
                   = link_to _('Index all projects'), admin_elasticsearch_enqueue_index_path,
@@ -93,9 +93,16 @@
               = _('Maximum concurrency of Elasticsearch bulk requests per indexing operation.')
               = _('This only applies to repository indexing operations.')
 
+          .form-group
+            = f.label :elasticsearch_client_request_timeout, _('Client request timeout'), class: 'label-bold'
+            = f.number_field :elasticsearch_client_request_timeout, value: @application_setting.elasticsearch_client_request_timeout, class: 'form-control'
+            .form-text.text-muted
+              = _('Elasticsearch HTTP client timeout value in seconds.')
+              = _('Setting this to 0 means using the system default timeout value.')
+
         .sub-section
           %h4= _('Elasticsearch zero-downtime reindexing')
-          = link_to _('Trigger cluster reindexing'), admin_elasticsearch_trigger_reindexing_path, class: 'btn btn-success', method: :post, disabled: @elasticsearch_reindexing_task&.in_progress?
+          = link_to _('Trigger cluster reindexing'), admin_elasticsearch_trigger_reindexing_path, class: 'gl-button btn btn-primary', data: { confirm: _('Are you sure you want to reindex?') }, method: :post, disabled: @elasticsearch_reindexing_task&.in_progress?
           .form-text.text-muted
             = _('This feature should be used with an index that was created after 13.0')
           - Elastic::ReindexingTask.old_indices_scheduled_for_deletion.each do |task|
@@ -117,7 +124,7 @@
               - percentage = ((processed_documents / expected_documents.to_f) * 100).round(2)
               %p= _('Documents reindexed: %{processed_documents} (%{percentage}%%)') % { processed_documents: processed_documents, percentage: percentage }
               .progress
-                .progress-bar.progress-bar-striped.bg-success{ "aria-valuemax" => "100", "aria-valuemin" => "0", "aria-valuenow" => percentage, :role => "progressbar", :style => "width: #{percentage}%" }
+                .progress-bar.progress-bar-striped.bg-primary{ "aria-valuemax" => "100", "aria-valuemin" => "0", "aria-valuenow" => percentage, :role => "progressbar", :style => "width: #{percentage}%" }
 
         .sub-section
           %h4= _('Elasticsearch indexing restrictions')
@@ -140,6 +147,41 @@
               %p= _('Too many projects enabled. You will need to manage them via the console or the API.')
             - else
               = f.text_field :elasticsearch_project_ids, class: 'js-elasticsearch-projects', value: elasticsearch_project_ids, data: { selected: elasticsearch_objects_options(@application_setting.elasticsearch_limited_projects(true)).to_json }
+
+        .sub-section
+          %h4= _('Custom analyzers: language support')
+          %h5
+            = _('Chinese language support using')
+            %a{ href: 'https://www.elastic.co/guide/en/elasticsearch/plugins/current/analysis-smartcn.html' }
+              = _('smartcn custom analyzer')
+          .form-group
+            .form-check
+              = f.check_box :elasticsearch_analyzers_smartcn_enabled, class: 'form-check-input'
+              = f.label :elasticsearch_analyzers_smartcn_enabled, class: 'form-check-label' do
+                = _('Enable smartcn custom analyzer: Indexing')
+          .form-group
+            .form-check
+              = f.check_box :elasticsearch_analyzers_smartcn_search, class: 'form-check-input', disabled: !Gitlab::CurrentSettings.elasticsearch_analyzers_smartcn_enabled?
+              = f.label :elasticsearch_analyzers_smartcn_search, class: 'form-check-label' do
+                = _('Enable smartcn custom analyzer: Search')
+              .form-text.gl-text-gray-600
+                = _('Please only enable search after installing the plugin, enabling indexing and recreating the index')
+          %h5
+            = _('Japanese language support using')
+            %a{ href: 'https://www.elastic.co/guide/en/elasticsearch/plugins/current/analysis-kuromoji.html' }
+              = _('kuromoji custom analyzer')
+          .form-group
+            .form-check
+              = f.check_box :elasticsearch_analyzers_kuromoji_enabled, class: 'form-check-input'
+              = f.label :elasticsearch_analyzers_kuromoji_enabled, class: 'form-check-label' do
+                = _('Enable kuromoji custom analyzer: Indexing')
+          .form-group
+            .form-check
+              = f.check_box :elasticsearch_analyzers_kuromoji_search, class: 'form-check-input', disabled: !Gitlab::CurrentSettings.elasticsearch_analyzers_kuromoji_enabled?
+              = f.label :elasticsearch_analyzers_kuromoji_search, class: 'form-check-label' do
+                = _('Enable kuromoji custom analyzer: Search')
+              .form-text.gl-text-gray-600
+                = _('Please only enable search after installing the plugin, enabling indexing and recreating the index')
 
         .sub-section
           %h4= _('Elasticsearch AWS IAM credentials')
@@ -167,4 +209,4 @@
             .form-text.text-muted
               = _('AWS Secret Access Key.  Only required if not using role instance credentials')
 
-      = f.submit _('Save changes'), class: "btn btn-success", data: { qa_selector: 'submit_button' }
+      = f.submit _('Save changes'), class: "gl-button btn btn-success", data: { qa_selector: 'submit_button' }

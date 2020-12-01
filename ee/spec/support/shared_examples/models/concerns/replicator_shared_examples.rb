@@ -19,7 +19,7 @@ RSpec.shared_examples 'a replicator' do
 
       before do
         create(registry_factory, :synced)
-        create(registry_factory)
+        create(registry_factory) # rubocop: disable Rails/SaveBang
         create(registry_factory, :failed)
       end
 

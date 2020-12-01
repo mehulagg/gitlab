@@ -1,6 +1,12 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # API V3 to API V4
 
-Since GitLab 9.0, API V4 is the preferred version to be used.
+In GitLab 9.0 and later, API V4 is the preferred version to be used.
 
 API V3 was unsupported from GitLab 9.5, released on August
 22, 2017. API v3 was removed in [GitLab 11.0](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/36819).
@@ -74,8 +80,8 @@ Below are the changes made between V3 and V4.
   - `POST /projects/:id/trigger/builds` to `POST /projects/:id/trigger/pipeline`
   - Require description when creating a new trigger `POST /projects/:id/triggers`
 - Simplify project payload exposed on Environment endpoints [!9675](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/9675)
-- API uses merge request `IID`s (internal ID, as in the web UI) rather than `ID`s. This affects the merge requests, award emoji, todos, and time tracking APIs. [!9530](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/9530)
-- API uses issue `IID`s (internal ID, as in the web UI) rather than `ID`s. This affects the issues, award emoji, todos, and time tracking APIs. [!9530](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/9530)
+- API uses merge request `IID`s (internal ID, as in the web UI) rather than `ID`s. This affects the merge requests, award emoji, to-dos, and time tracking APIs. [!9530](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/9530)
+- API uses issue `IID`s (internal ID, as in the web UI) rather than `ID`s. This affects the issues, award emoji, to-dos, and time tracking APIs. [!9530](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/9530)
 - Change initial page from `0` to `1` on `GET /projects/:id/repository/commits` (like on the rest of the API) [!9679](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/9679)
 - Return correct `Link` header data for `GET /projects/:id/repository/commits` [!9679](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/9679)
 - Update endpoints for repository files [!9637](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/9637)

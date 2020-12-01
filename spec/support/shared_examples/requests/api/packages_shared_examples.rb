@@ -126,3 +126,15 @@ RSpec.shared_examples 'job token for package uploads' do
     end
   end
 end
+
+RSpec.shared_examples 'a package tracking event' do |category, action|
+  before do
+    stub_feature_flags(collect_package_events: true)
+  end
+
+  it "creates a gitlab tracking event #{action}", :snowplow do
+    expect { subject }.to change { Packages::Event.count }.by(1)
+
+    expect_snowplow_event(category: category, action: action)
+  end
+end

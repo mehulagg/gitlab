@@ -31,6 +31,16 @@ RSpec.describe DastSiteProfilesFinder do
       expect(recorder.count).to be_zero
     end
 
+    it 'eager loads the dast_site_validation association' do
+      dast_site_profile1 = subject.first!
+
+      recorder = ActiveRecord::QueryRecorder.new do
+        dast_site_profile1.dast_site_validation
+      end
+
+      expect(recorder.count).to be_zero
+    end
+
     context 'filtering by id' do
       let(:params) { { id: dast_site_profile1.id } }
 

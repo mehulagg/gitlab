@@ -1,40 +1,48 @@
 <script>
-/* eslint-disable vue/no-v-html */
-import { escape } from 'lodash';
 import { mapActions, mapState } from 'vuex';
 import { LICENSE_MANAGEMENT } from 'ee/vue_shared/license_compliance/store/constants';
-import { s__, sprintf } from '~/locale';
-import DeprecatedModal2 from '~/vue_shared/components/deprecated_modal_2.vue';
+import { GlModal, GlSprintf } from '@gitlab/ui';
+import { s__, __ } from '~/locale';
 
 export default {
   name: 'LicenseDeleteConfirmationModal',
-  components: { GlModal: DeprecatedModal2 },
+  components: { GlModal, GlSprintf },
   computed: {
     ...mapState(LICENSE_MANAGEMENT, ['currentLicenseInModal']),
-    confirmationText() {
-      const name = `<strong>${escape(this.currentLicenseInModal.name)}</strong>`;
-
-      return sprintf(
-        s__('LicenseCompliance|You are about to remove the license, %{name}, from this project.'),
-        { name },
-        false,
-      );
-    },
   },
   methods: {
     ...mapActions(LICENSE_MANAGEMENT, ['resetLicenseInModal', 'deleteLicense']),
+  },
+  modal: {
+    title: s__('LicenseCompliance|Remove license?'),
+    actionPrimary: {
+      text: s__('LicenseCompliance|Remove license'),
+      attributes: [{ variant: 'danger' }],
+    },
+    actionCancel: {
+      text: __('Cancel'),
+    },
   },
 };
 </script>
 <template>
   <gl-modal
-    id="modal-license-delete-confirmation"
-    :header-title-text="s__('LicenseCompliance|Remove license?')"
-    :footer-primary-button-text="s__('LicenseCompliance|Remove license')"
-    footer-primary-button-variant="danger"
+    modal-id="modal-license-delete-confirmation"
+    :title="$options.modal.title"
+    :action-primary="$options.modal.actionPrimary"
+    :action-cancel="$options.modal.actionCancel"
+    @primary="deleteLicense(currentLicenseInModal)"
     @cancel="resetLicenseInModal"
-    @submit="deleteLicense(currentLicenseInModal)"
   >
-    <span v-if="currentLicenseInModal" v-html="confirmationText"></span>
+    <gl-sprintf
+      v-if="currentLicenseInModal"
+      :message="
+        s__('LicenseCompliance|You are about to remove the license, %{name}, from this project.')
+      "
+    >
+      <template #name>
+        <strong>{{ currentLicenseInModal.name }}</strong>
+      </template>
+    </gl-sprintf>
   </gl-modal>
 </template>

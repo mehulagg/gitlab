@@ -7,28 +7,15 @@ RSpec.describe API::Issues, :mailer do
   let_it_be(:project) do
     create(:project, :public, creator_id: user.id, namespace: user.namespace)
   end
+
   let_it_be(:group) { create(:group) }
   let_it_be(:epic) { create(:epic, group: group) }
   let_it_be(:group_project) { create(:project, :public, creator_id: user.id, namespace: group) }
 
   let(:user2)             { create(:user) }
+
   let_it_be(:author)      { create(:author) }
   let_it_be(:assignee)    { create(:assignee) }
-  let(:issue_title)       { 'foo' }
-  let(:issue_description) { 'closed' }
-  let!(:issue) do
-    create :issue,
-           author: user,
-           assignees: [user],
-           project: project,
-           milestone: milestone,
-           created_at: generate(:past_time),
-           updated_at: 1.hour.ago,
-           title: issue_title,
-           description: issue_description
-  end
-
-  let_it_be(:milestone) { create(:milestone, title: '1.0.0', project: project) }
 
   before_all do
     project.add_reporter(user)
@@ -92,6 +79,36 @@ RSpec.describe API::Issues, :mailer do
     end
   end
 
+  shared_examples 'filtering by epic_id' do
+    let_it_be(:epic1) { create :epic, group: group_project.namespace }
+    let_it_be(:epic2) { create :epic, group: group_project.namespace }
+    let_it_be(:issue1) { create(:issue, { author: user, epic: epic1, project: group_project }) }
+    let_it_be(:issue2) { create(:issue, { author: user, epic: epic2, project: group_project }) }
+    let_it_be(:issue3) { create(:issue, { author: user, project: group_project }) }
+
+    before do
+      stub_licensed_features(epics: true)
+    end
+
+    it 'returns issues without epic when epic_id is "None"' do
+      get api(endpoint, user), params: { epic_id: 'None', scope: 'all' }
+
+      expect_response_contain_exactly(issue3.id)
+    end
+
+    it 'returns issues with any epic when epic_id is "Any"' do
+      get api(endpoint, user), params: { epic_id: 'Any', scope: 'all' }
+
+      expect_response_contain_exactly(issue1.id, issue2.id)
+    end
+
+    it 'returns issues with any epic when epic_id is specific' do
+      get api(endpoint, user), params: { epic_id: epic1.id, scope: 'all' }
+
+      expect_response_contain_exactly(issue1.id)
+    end
+  end
+
   describe "GET /issues" do
     context "when authenticated" do
       it 'matches V4 response schema' do
@@ -102,6 +119,8 @@ RSpec.describe API::Issues, :mailer do
       end
 
       context "blocking issues count" do
+        let!(:issue) { create :issue, author: user, project: project }
+
         it 'returns a blocking issues count of 0 if there are no blocking issues' do
           get api('/issues', user)
 
@@ -121,6 +140,7 @@ RSpec.describe API::Issues, :mailer do
       end
 
       context "filtering by weight" do
+        let!(:issue) { create(:issue, author: user2, project: project, weight: nil, created_at: 4.days.ago) }
         let!(:issue1) { create(:issue, author: user2, project: project, weight: 1, created_at: 3.days.ago) }
         let!(:issue2) { create(:issue, author: user2, project: project, weight: 5, created_at: 2.days.ago) }
         let!(:issue3) { create(:issue, author: user2, project: project, weight: 3, created_at: 1.day.ago) }
@@ -156,6 +176,42 @@ RSpec.describe API::Issues, :mailer do
           expect_paginated_array_response(issue3.id)
         end
       end
+
+      it_behaves_like 'filtering by epic_id' do
+        let(:endpoint) { '/issues' }
+      end
+
+      context 'filtering by iteration' do
+        let_it_be(:iteration_1) { create(:iteration, group: group) }
+        let_it_be(:iteration_2) { create(:iteration, group: group) }
+        let_it_be(:iteration_1_issue) { create(:issue, project: group_project, iteration: iteration_1) }
+        let_it_be(:iteration_2_issue) { create(:issue, project: group_project, iteration: iteration_2) }
+        let_it_be(:no_iteration_issue) { create(:issue, project: group_project) }
+
+        it 'returns issues with specific iteration' do
+          get api('/issues', user), params: { iteration_id: iteration_1.id }
+
+          expect_response_contain_exactly(iteration_1_issue.id)
+        end
+
+        it 'returns issues with no iteration' do
+          get api('/issues', user), params: { iteration_id: 'None' }
+
+          expect_response_contain_exactly(no_iteration_issue.id)
+        end
+
+        it 'returns issues with any iteration' do
+          get api('/issues', user), params: { iteration_id: 'Any' }
+
+          expect_response_contain_exactly(iteration_1_issue.id, iteration_2_issue.id)
+        end
+
+        it 'returns issues with a specific iteration title' do
+          get api('/issues', user), params: { iteration_title: iteration_1.title }
+
+          expect_response_contain_exactly(iteration_1_issue.id)
+        end
+      end
     end
   end
 
@@ -180,7 +236,11 @@ RSpec.describe API::Issues, :mailer do
       end
     end
 
-    include_examples 'exposes epic' do
+    it_behaves_like 'filtering by epic_id' do
+      let(:endpoint) { "/groups/#{group_project.group.id}/issues" }
+    end
+
+    it_behaves_like 'exposes epic' do
       let!(:issue_with_epic) { create(:issue, project: group_project, epic: epic) }
     end
   end
@@ -206,6 +266,10 @@ RSpec.describe API::Issues, :mailer do
       end
     end
 
+    it_behaves_like 'filtering by epic_id' do
+      let(:endpoint) { "/projects/#{group_project.id}/issues" }
+    end
+
     context 'on personal project' do
       let!(:issue_with_epic) { create(:issue, project: project, epic: epic) }
 
@@ -226,7 +290,7 @@ RSpec.describe API::Issues, :mailer do
 
       subject { get api("/projects/#{group_project.id}/issues", user) }
 
-      include_examples 'exposes epic'
+      it_behaves_like 'exposes epic'
     end
   end
 
@@ -253,7 +317,7 @@ RSpec.describe API::Issues, :mailer do
 
       subject { get api("/projects/#{group_project.id}/issues/#{issue_with_epic.iid}", user) }
 
-      include_examples 'exposes epic'
+      it_behaves_like 'exposes epic'
     end
   end
 
@@ -368,6 +432,8 @@ RSpec.describe API::Issues, :mailer do
   end
 
   describe 'PUT /projects/:id/issues/:issue_id to update weight' do
+    let!(:issue) { create :issue, author: user, project: project }
+
     it 'updates an issue with no weight' do
       put api("/projects/#{project.id}/issues/#{issue.iid}", user), params: { weight: 101 }
 
@@ -423,30 +489,176 @@ RSpec.describe API::Issues, :mailer do
         expect(issue.reload.read_attribute(:weight)).to be_nil
       end
     end
-
-    context 'when issue weight tracking feature flag is not active' do
-      before do
-        stub_feature_flags(track_issue_weight_change_events: false)
-      end
-
-      it 'does not create a ResourceWeightEvent' do
-        expect do
-          put api("/projects/#{project.id}/issues/#{issue.iid}", user), params: { weight: 9 }
-        end.not_to change { ResourceWeightEvent.count }
-      end
-
-      it 'creates a system note' do
-        expect do
-          put api("/projects/#{project.id}/issues/#{issue.iid}", user), params: { weight: 9 }
-        end.to change { Note.count }.by(1)
-      end
-    end
   end
 
   describe 'PUT /projects/:id/issues/:issue_id to update epic' do
     it_behaves_like 'with epic parameter' do
       let(:issue_with_epic) { create(:issue, project: target_project) }
       let(:request) { put api("/projects/#{target_project.id}/issues/#{issue_with_epic.iid}", user), params: params }
+    end
+  end
+
+  describe 'POST /projects/:id/issues/:issue_id/metric_images' do
+    include WorkhorseHelpers
+    using RSpec::Parameterized::TableSyntax
+
+    let(:issue) { create(:incident, project: project) }
+
+    let(:file) { fixture_file_upload('spec/fixtures/rails_sample.jpg', 'image/jpg') }
+    let(:file_name) { 'rails_sample.jpg' }
+    let(:url) { 'http://gitlab.com' }
+
+    let(:workhorse_token) { JWT.encode({ 'iss' => 'gitlab-workhorse' }, Gitlab::Workhorse.secret, 'HS256') }
+    let(:workhorse_header) { { 'GitLab-Workhorse' => '1.0', Gitlab::Workhorse::INTERNAL_API_REQUEST_HEADER => workhorse_token } }
+
+    let(:params) { { url: url } }
+
+    subject do
+      workhorse_finalize(
+        api("/projects/#{project.id}/issues/#{issue.iid}/metric_images", user2),
+        method: :post,
+        file_key: :file,
+        params: params.merge(file: file),
+        headers: workhorse_header,
+        send_rewritten_field: true
+      )
+    end
+
+    shared_examples 'can_upload_metric_image' do
+      it 'creates a new metric image' do
+        subject
+
+        expect(response).to have_gitlab_http_status(:created)
+        expect(json_response['filename']).to eq(file_name)
+        expect(json_response['url']).to eq(url)
+        expect(json_response['file_path']).to match(%r{/uploads/-/system/issuable_metric_image/file/[\d+]/#{file_name}})
+        expect(json_response['created_at']).not_to be_nil
+        expect(json_response['id']).not_to be_nil
+      end
+    end
+
+    shared_examples 'unauthorized_upload' do
+      it 'disallows the upload' do
+        subject
+
+        expect(response).to have_gitlab_http_status(:forbidden)
+        expect(json_response['message']).to eq('Not allowed!')
+      end
+    end
+
+    where(:user_role, :own_issue, :expected_status) do
+      :guest    | true  | :can_upload_metric_image
+      :guest    | false | :unauthorized_upload
+      :reporter | true  | :can_upload_metric_image
+      :reporter | false | :can_upload_metric_image
+    end
+
+    with_them do
+      before do
+        # Local storage
+        stub_uploads_object_storage(IssuableMetricImageUploader, enabled: false)
+        allow_any_instance_of(IssuableMetricImageUploader).to receive(:file_storage?).and_return(true)
+
+        stub_licensed_features(incident_metric_upload: true)
+        project.send("add_#{user_role}", user2)
+        own_issue ? issue.update!(author: user2) : issue.update!(author: user)
+      end
+
+      it_behaves_like "#{params[:expected_status]}"
+    end
+
+    context 'file size too large' do
+      before do
+        stub_licensed_features(incident_metric_upload: true)
+        allow_next_instance_of(UploadedFile) do |upload_file|
+          allow(upload_file).to receive(:size).and_return(IssuableMetricImage::MAX_FILE_SIZE + 1)
+        end
+      end
+
+      it 'returns an error' do
+        subject
+
+        expect(response).to have_gitlab_http_status(:bad_request)
+        expect(response.body).to match(/File is too large/)
+      end
+    end
+
+    context 'object storage enabled' do
+      before do
+        # Object storage
+        stub_licensed_features(incident_metric_upload: true)
+        stub_uploads_object_storage(IssuableMetricImageUploader)
+
+        allow_any_instance_of(IssuableMetricImageUploader).to receive(:file_storage?).and_return(false)
+        project.add_developer(user2)
+      end
+
+      it_behaves_like 'can_upload_metric_image'
+
+      it 'uploads to remote storage' do
+        subject
+
+        last_upload = IssuableMetricImage.last.uploads.last
+        expect(last_upload.store).to eq(::ObjectStorage::Store::REMOTE)
+      end
+    end
+  end
+
+  describe 'GET /projects/:id/issues/:issue_id/metric_images' do
+    using RSpec::Parameterized::TableSyntax
+
+    let_it_be(:project) do
+      create(:project, :private, creator_id: user.id, namespace: user.namespace)
+    end
+
+    let_it_be(:issue) { create(:incident, project: project) }
+    let!(:image) { create(:issuable_metric_image, issue: issue) }
+
+    subject { get api("/projects/#{project.id}/issues/#{issue.iid}/metric_images", user2) }
+
+    shared_examples 'can_read_metric_image' do
+      it 'can read the metric images' do
+        subject
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response.first).to match(
+          {
+            id: image.id,
+            created_at: image.created_at.strftime('%Y-%m-%eT%H:%M:%S.%LZ'),
+            filename: image.filename,
+            file_path: image.file_path,
+            url: image.url
+          }.with_indifferent_access
+        )
+      end
+    end
+
+    shared_examples 'unauthorized_read' do
+      it 'cannot read the metric images' do
+        subject
+
+        expect(response).to have_gitlab_http_status(:not_found)
+      end
+    end
+
+    where(:user_role, :own_issue, :issue_confidential, :expected_status) do
+      :not_member | false | false | :unauthorized_read
+      :guest      | false | true  | :unauthorized_read
+      :guest      | true  | false | :can_read_metric_image
+      :guest      | false | false | :can_read_metric_image
+      :reporter   | true  | false | :can_read_metric_image
+      :reporter   | false | false | :can_read_metric_image
+    end
+
+    with_them do
+      before do
+        stub_licensed_features(incident_metric_upload: true)
+        project.send("add_#{user_role}", user2) unless user_role == :not_member
+        issue.update!(confidential: true) if issue_confidential
+        own_issue ? issue.update!(author: user2) : issue.update!(author: user)
+      end
+
+      it_behaves_like "#{params[:expected_status]}"
     end
   end
 

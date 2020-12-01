@@ -9,9 +9,9 @@ import NoChanges from '~/diffs/components/no_changes.vue';
 import DiffFile from '~/diffs/components/diff_file.vue';
 import CompareVersions from '~/diffs/components/compare_versions.vue';
 import HiddenFilesWarning from '~/diffs/components/hidden_files_warning.vue';
+import CollapsedFilesWarning from '~/diffs/components/collapsed_files_warning.vue';
 import CommitWidget from '~/diffs/components/commit_widget.vue';
 import TreeList from '~/diffs/components/tree_list.vue';
-import { INLINE_DIFF_VIEW_TYPE, PARALLEL_DIFF_VIEW_TYPE } from '~/diffs/constants';
 import createDiffsStore from '../create_diffs_store';
 import axios from '~/lib/utils/axios_utils';
 import * as urlUtils from '~/lib/utils/url_utility';
@@ -21,6 +21,10 @@ const mergeRequestDiff = { version_index: 1 };
 const TEST_ENDPOINT = `${TEST_HOST}/diff/endpoint`;
 const COMMIT_URL = '[BASE URL]/OLD';
 const UPDATED_COMMIT_URL = '[BASE URL]/NEW';
+
+function getCollapsedFilesWarning(wrapper) {
+  return wrapper.find(CollapsedFilesWarning);
+}
 
 describe('diffs/components/app', () => {
   const oldMrTabs = window.mrTabs;
@@ -70,12 +74,6 @@ describe('diffs/components/app', () => {
     });
   }
 
-  function getOppositeViewType(currentViewType) {
-    return currentViewType === INLINE_DIFF_VIEW_TYPE
-      ? PARALLEL_DIFF_VIEW_TYPE
-      : INLINE_DIFF_VIEW_TYPE;
-  }
-
   beforeEach(() => {
     // setup globals (needed for component to mount :/)
     window.mrTabs = {
@@ -118,104 +116,6 @@ describe('diffs/components/app', () => {
       store.state.diffs.retrievingBatches = true;
       store.state.diffs.diffFiles = [];
       wrapper.vm.$nextTick(done);
-    });
-
-    describe('when the diff view type changes and it should load a single diff view style', () => {
-      const noLinesDiff = {
-        highlighted_diff_lines: [],
-        parallel_diff_lines: [],
-      };
-      const parallelLinesDiff = {
-        highlighted_diff_lines: [],
-        parallel_diff_lines: ['line'],
-      };
-      const inlineLinesDiff = {
-        highlighted_diff_lines: ['line'],
-        parallel_diff_lines: [],
-      };
-      const fullDiff = {
-        highlighted_diff_lines: ['line'],
-        parallel_diff_lines: ['line'],
-      };
-
-      function expectFetchToOccur({ vueInstance, done = () => {}, existingFiles = 1 } = {}) {
-        vueInstance.$nextTick(() => {
-          expect(vueInstance.diffFiles.length).toEqual(existingFiles);
-          expect(vueInstance.fetchDiffFilesBatch).toHaveBeenCalled();
-
-          done();
-        });
-      }
-
-      it('fetches diffs if it has none', done => {
-        wrapper.vm.isLatestVersion = () => false;
-
-        store.state.diffs.diffViewType = getOppositeViewType(wrapper.vm.diffViewType);
-
-        expectFetchToOccur({ vueInstance: wrapper.vm, existingFiles: 0, done });
-      });
-
-      it('fetches diffs if it has both view styles, but no lines in either', done => {
-        wrapper.vm.isLatestVersion = () => false;
-
-        store.state.diffs.diffFiles.push(noLinesDiff);
-        store.state.diffs.diffViewType = getOppositeViewType(wrapper.vm.diffViewType);
-
-        expectFetchToOccur({ vueInstance: wrapper.vm, done });
-      });
-
-      it('fetches diffs if it only has inline view style', done => {
-        wrapper.vm.isLatestVersion = () => false;
-
-        store.state.diffs.diffFiles.push(inlineLinesDiff);
-        store.state.diffs.diffViewType = getOppositeViewType(wrapper.vm.diffViewType);
-
-        expectFetchToOccur({ vueInstance: wrapper.vm, done });
-      });
-
-      it('fetches diffs if it only has parallel view style', done => {
-        wrapper.vm.isLatestVersion = () => false;
-
-        store.state.diffs.diffFiles.push(parallelLinesDiff);
-        store.state.diffs.diffViewType = getOppositeViewType(wrapper.vm.diffViewType);
-
-        expectFetchToOccur({ vueInstance: wrapper.vm, done });
-      });
-
-      it('fetches batch diffs if it has none', done => {
-        store.state.diffs.diffViewType = getOppositeViewType(wrapper.vm.diffViewType);
-
-        expectFetchToOccur({ vueInstance: wrapper.vm, existingFiles: 0, done });
-      });
-
-      it('fetches batch diffs if it has both view styles, but no lines in either', done => {
-        store.state.diffs.diffFiles.push(noLinesDiff);
-        store.state.diffs.diffViewType = getOppositeViewType(wrapper.vm.diffViewType);
-
-        expectFetchToOccur({ vueInstance: wrapper.vm, done });
-      });
-
-      it('fetches batch diffs if it only has inline view style', done => {
-        store.state.diffs.diffFiles.push(inlineLinesDiff);
-        store.state.diffs.diffViewType = getOppositeViewType(wrapper.vm.diffViewType);
-
-        expectFetchToOccur({ vueInstance: wrapper.vm, done });
-      });
-
-      it('fetches batch diffs if it only has parallel view style', done => {
-        store.state.diffs.diffFiles.push(parallelLinesDiff);
-        store.state.diffs.diffViewType = getOppositeViewType(wrapper.vm.diffViewType);
-
-        expectFetchToOccur({ vueInstance: wrapper.vm, done });
-      });
-
-      it('does not fetch batch diffs if it has already fetched both styles of diff', () => {
-        store.state.diffs.diffFiles.push(fullDiff);
-        store.state.diffs.diffViewType = getOppositeViewType(wrapper.vm.diffViewType);
-
-        expect(wrapper.vm.diffFiles.length).toEqual(1);
-        expect(wrapper.vm.fetchDiffFilesBatch).not.toHaveBeenCalled();
-      });
     });
 
     it('calls batch methods if diffsBatchLoad is enabled, and not latest version', done => {
@@ -668,24 +568,49 @@ describe('diffs/components/app', () => {
       );
     });
 
-    it('should render hidden files warning if render overflow warning is present', () => {
-      createComponent({}, ({ state }) => {
-        state.diffs.renderOverflowWarning = true;
-        state.diffs.realSize = '5';
-        state.diffs.plainDiffPath = 'plain diff path';
-        state.diffs.emailPatchPath = 'email patch path';
-        state.diffs.size = 1;
+    describe('warnings', () => {
+      describe('hidden files', () => {
+        it('should render hidden files warning if render overflow warning is present', () => {
+          createComponent({}, ({ state }) => {
+            state.diffs.renderOverflowWarning = true;
+            state.diffs.realSize = '5';
+            state.diffs.plainDiffPath = 'plain diff path';
+            state.diffs.emailPatchPath = 'email patch path';
+            state.diffs.size = 1;
+          });
+
+          expect(wrapper.find(HiddenFilesWarning).exists()).toBe(true);
+          expect(wrapper.find(HiddenFilesWarning).props()).toEqual(
+            expect.objectContaining({
+              total: '5',
+              plainDiffPath: 'plain diff path',
+              emailPatchPath: 'email patch path',
+              visible: 1,
+            }),
+          );
+        });
       });
 
-      expect(wrapper.find(HiddenFilesWarning).exists()).toBe(true);
-      expect(wrapper.find(HiddenFilesWarning).props()).toEqual(
-        expect.objectContaining({
-          total: '5',
-          plainDiffPath: 'plain diff path',
-          emailPatchPath: 'email patch path',
-          visible: 1,
-        }),
-      );
+      describe('collapsed files', () => {
+        it('should render the collapsed files warning if there are any automatically collapsed files', () => {
+          createComponent({}, ({ state }) => {
+            state.diffs.diffFiles = [{ viewer: { automaticallyCollapsed: true } }];
+          });
+
+          expect(getCollapsedFilesWarning(wrapper).exists()).toBe(true);
+        });
+
+        it('should not render the collapsed files warning if there are no automatically collapsed files', () => {
+          createComponent({}, ({ state }) => {
+            state.diffs.diffFiles = [
+              { viewer: { automaticallyCollapsed: false, manuallyCollapsed: true } },
+              { viewer: { automaticallyCollapsed: false, manuallyCollapsed: false } },
+            ];
+          });
+
+          expect(getCollapsedFilesWarning(wrapper).exists()).toBe(false);
+        });
+      });
     });
 
     it('should display commit widget if store has a commit', () => {
@@ -713,60 +638,64 @@ describe('diffs/components/app', () => {
     });
   });
 
-  describe('hideTreeListIfJustOneFile', () => {
-    let toggleShowTreeList;
+  describe('setTreeDisplay', () => {
+    let setShowTreeList;
 
     beforeEach(() => {
-      toggleShowTreeList = jest.fn();
+      setShowTreeList = jest.fn();
     });
 
     afterEach(() => {
       localStorage.removeItem('mr_tree_show');
     });
 
-    it('calls toggleShowTreeList when only 1 file', () => {
+    it('calls setShowTreeList when only 1 file', () => {
       createComponent({}, ({ state }) => {
         state.diffs.diffFiles.push({ sha: '123' });
       });
 
       wrapper.setMethods({
-        toggleShowTreeList,
+        setShowTreeList,
       });
 
-      wrapper.vm.hideTreeListIfJustOneFile();
+      wrapper.vm.setTreeDisplay();
 
-      expect(toggleShowTreeList).toHaveBeenCalledWith(false);
+      expect(setShowTreeList).toHaveBeenCalledWith({ showTreeList: false, saving: false });
     });
 
-    it('does not call toggleShowTreeList when more than 1 file', () => {
+    it('calls setShowTreeList with true when more than 1 file is in diffs array', () => {
       createComponent({}, ({ state }) => {
         state.diffs.diffFiles.push({ sha: '123' });
         state.diffs.diffFiles.push({ sha: '124' });
       });
 
       wrapper.setMethods({
-        toggleShowTreeList,
+        setShowTreeList,
       });
 
-      wrapper.vm.hideTreeListIfJustOneFile();
+      wrapper.vm.setTreeDisplay();
 
-      expect(toggleShowTreeList).not.toHaveBeenCalled();
+      expect(setShowTreeList).toHaveBeenCalledWith({ showTreeList: true, saving: false });
     });
 
-    it('does not call toggleShowTreeList when localStorage is set', () => {
-      localStorage.setItem('mr_tree_show', 'true');
+    it.each`
+      showTreeList
+      ${true}
+      ${false}
+    `('calls setShowTreeList with localstorage $showTreeList', ({ showTreeList }) => {
+      localStorage.setItem('mr_tree_show', showTreeList);
 
       createComponent({}, ({ state }) => {
         state.diffs.diffFiles.push({ sha: '123' });
       });
 
       wrapper.setMethods({
-        toggleShowTreeList,
+        setShowTreeList,
       });
 
-      wrapper.vm.hideTreeListIfJustOneFile();
+      wrapper.vm.setTreeDisplay();
 
-      expect(toggleShowTreeList).not.toHaveBeenCalled();
+      expect(setShowTreeList).toHaveBeenCalledWith({ showTreeList, saving: false });
     });
   });
 

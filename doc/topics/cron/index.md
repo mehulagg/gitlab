@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Cron
 
 Cron syntax is used to schedule when jobs should run.
@@ -24,7 +30,7 @@ Cron scheduling uses a series of five numbers, separated by spaces:
 # * * * * * <command to execute>
 ```
 
-[Source: [Wikipedia](https://en.wikipedia.org/wiki/Cron)]
+(Source: [Wikipedia](https://en.wikipedia.org/wiki/Cron))
 
 In cron syntax, the asterisk (`*`) means 'every,' so the following cron strings
 are valid:

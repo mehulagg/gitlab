@@ -7,7 +7,7 @@ module ProjectsHelper
   end
 
   def link_to_project(project)
-    link_to namespace_project_path(namespace_id: project.namespace, id: project), title: h(project.name) do
+    link_to namespace_project_path(namespace_id: project.namespace, id: project), title: h(project.name), class: 'gl-link' do
       title = content_tag(:span, project.name, class: 'project-name')
 
       if project.namespace
@@ -84,18 +84,8 @@ module ProjectsHelper
   end
 
   def project_title(project)
-    namespace_link =
-      if project.group
-        group_title(project.group, nil, nil)
-      else
-        owner = project.namespace.owner
-        link_to(simple_sanitize(owner.name), user_path(owner))
-      end
-
-    project_link = link_to project_path(project) do
-      icon = project_icon(project, alt: project.name, class: 'avatar-tile', width: 15, height: 15) if project.avatar_url && !Rails.env.test?
-      [icon, content_tag("span", simple_sanitize(project.name), class: "breadcrumb-item-text js-breadcrumb-item-text")].join.html_safe
-    end
+    namespace_link = build_namespace_breadcrumb_link(project)
+    project_link = build_project_breadcrumb_link(project)
 
     namespace_link = breadcrumb_list_item(namespace_link) unless project.group
     project_link = breadcrumb_list_item project_link
@@ -109,7 +99,7 @@ module ProjectsHelper
   end
 
   def transfer_project_message(project)
-    _("You are going to transfer %{project_full_name} to another owner. Are you ABSOLUTELY sure?") %
+    _("You are going to transfer %{project_full_name} to another namespace. Are you ABSOLUTELY sure?") %
       { project_full_name: project.full_name }
   end
 
@@ -301,9 +291,8 @@ module ProjectsHelper
     !disabled && !compact_mode
   end
 
-  # overridden in EE
   def settings_operations_available?
-    can?(current_user, :read_environment, @project)
+    !@project.archived? && can?(current_user, :admin_operations, @project)
   end
 
   def error_tracking_setting_project_json
@@ -466,18 +455,31 @@ module ProjectsHelper
       builds:             :read_build,
       clusters:           :read_cluster,
       serverless:         :read_cluster,
+      terraform:          :read_terraform_state,
       error_tracking:     :read_sentry_issue,
       alert_management:   :read_alert_management_alert,
-      incidents:          :read_incidents,
+      incidents:          :read_issue,
       labels:             :read_label,
       issues:             :read_issue,
       project_members:    :read_project_member,
-      wiki:               :read_wiki
+      wiki:               :read_wiki,
+      feature_flags:      :read_feature_flag
     }
   end
 
   def can_view_operations_tab?(current_user, project)
-    [:read_environment, :read_cluster, :metrics_dashboard].any? do |ability|
+    return false unless project.feature_available?(:operations, current_user)
+
+    [
+      :metrics_dashboard,
+      :read_alert_management_alert,
+      :read_environment,
+      :read_issue,
+      :read_sentry_issue,
+      :read_cluster,
+      :read_feature_flag,
+      :read_terraform_state
+    ].any? do |ability|
       can?(current_user, ability, project)
     end
   end
@@ -555,7 +557,11 @@ module ProjectsHelper
   end
 
   def sidebar_operations_link_path(project = @project)
-    metrics_project_environments_path(project) if can?(current_user, :read_environment, project)
+    if can?(current_user, :read_environment, project)
+      metrics_project_environments_path(project)
+    else
+      project_feature_flags_path(project)
+    end
   end
 
   def project_last_activity(project)
@@ -618,6 +624,7 @@ module ProjectsHelper
       lfsEnabled: !!project.lfs_enabled,
       emailsDisabled: project.emails_disabled?,
       metricsDashboardAccessLevel: feature.metrics_dashboard_access_level,
+      operationsAccessLevel: feature.operations_access_level,
       showDefaultAwardEmojis: project.show_default_award_emojis?
     }
   end
@@ -748,6 +755,9 @@ module ProjectsHelper
       logs
       product_analytics
       metrics_dashboard
+      feature_flags
+      tracings
+      terraform
     ]
   end
 
@@ -756,10 +766,6 @@ module ProjectsHelper
       project.has_auto_devops_implicitly_enabled? &&
       project.builds_enabled? &&
       !project.repository.gitlab_ci_yml
-  end
-
-  def native_code_navigation_enabled?(project)
-    Feature.enabled?(:code_navigation, project, default_enabled: true)
   end
 
   def show_visibility_confirm_modal?(project)
@@ -772,9 +778,31 @@ module ProjectsHelper
   end
 
   def project_access_token_available?(project)
-    return false if ::Gitlab.com?
+    can?(current_user, :admin_resource_access_tokens, project)
+  end
 
-    ::Feature.enabled?(:resource_access_token, project, default_enabled: true)
+  def build_project_breadcrumb_link(project)
+    project_name = simple_sanitize(project.name)
+
+    push_to_schema_breadcrumb(project_name, project_path(project))
+
+    link_to project_path(project) do
+      icon = project_icon(project, alt: project_name, class: 'avatar-tile', width: 15, height: 15) if project.avatar_url && !Rails.env.test?
+      [icon, content_tag("span", project_name, class: "breadcrumb-item-text js-breadcrumb-item-text")].join.html_safe
+    end
+  end
+
+  def build_namespace_breadcrumb_link(project)
+    if project.group
+      group_title(project.group, nil, nil)
+    else
+      owner = project.namespace.owner
+      name = simple_sanitize(owner.name)
+      url = user_path(owner)
+
+      push_to_schema_breadcrumb(name, url)
+      link_to(name, url)
+    end
   end
 end
 

@@ -3,16 +3,22 @@ import gettersCE from '~/boards/stores/getters';
 export default {
   ...gettersCE,
 
-  getIssues: (state, getters) => listId => {
-    const listIssueIds = state.issuesByListId[listId] || [];
-
-    return listIssueIds.map(id => getters.getIssueById(id));
+  isSwimlanesOn: state => {
+    return Boolean(gon?.features?.swimlanes && state.isShowingEpicsSwimlanes);
   },
   getIssuesByEpic: (state, getters) => (listId, epicId) => {
-    return getters.getIssues(listId).filter(issue => issue.epic && issue.epic.id === epicId);
+    return getters.getIssuesByList(listId).filter(issue => issue.epic && issue.epic.id === epicId);
   },
 
   getUnassignedIssues: (state, getters) => listId => {
-    return getters.getIssues(listId).filter(i => Boolean(i.epic) === false);
+    return getters.getIssuesByList(listId).filter(i => Boolean(i.epic) === false);
+  },
+
+  getEpicById: state => epicId => {
+    return state.epics.find(epic => epic.id === epicId);
+  },
+
+  shouldUseGraphQL: state => {
+    return state.isShowingEpicsSwimlanes || gon?.features?.graphqlBoardLists;
   },
 };

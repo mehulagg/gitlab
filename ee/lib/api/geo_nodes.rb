@@ -1,10 +1,12 @@
 # frozen_string_literal: true
 
 module API
-  class GeoNodes < Grape::API::Instance
+  class GeoNodes < ::API::Base
     include PaginationParams
     include APIGuard
     include ::Gitlab::Utils::StrongMemoize
+
+    feature_category :geo_replication
 
     before do
       authenticate_admin_or_geo_node!

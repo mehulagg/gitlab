@@ -17,7 +17,7 @@ module QA
                   element :issue_filter_input, /%input.form-control.filtered-search/ # rubocop:disable QA/ElementWithPattern
                 end
 
-                view 'app/assets/javascripts/issuables_list/components/issuable.vue' do
+                view 'app/assets/javascripts/issues_list/components/issuable.vue' do
                   element :issuable_weight_content
                 end
               end

@@ -1,10 +1,12 @@
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
-import testAction from 'helpers/vuex_action_helper';
 import * as rootGetters from 'ee/analytics/cycle_analytics/store/getters';
-import * as getters from 'ee/analytics/cycle_analytics/store/modules/duration_chart/getters';
 import * as actions from 'ee/analytics/cycle_analytics/store/modules/duration_chart/actions';
+import * as getters from 'ee/analytics/cycle_analytics/store/modules/duration_chart/getters';
 import * as types from 'ee/analytics/cycle_analytics/store/modules/duration_chart/mutation_types';
+import testAction from 'helpers/vuex_action_helper';
+import httpStatusCodes from '~/lib/utils/http_status';
+import { shouldFlashAMessage } from '../../../helpers';
 import {
   group,
   allowedStages as stages,
@@ -15,13 +17,13 @@ import {
   endpoints,
   valueStreams,
 } from '../../../mock_data';
-import { shouldFlashAMessage } from '../../../helpers';
 
 const selectedGroup = { fullPath: group.path };
 const [stage1, stage2] = stages;
 const hiddenStage = { ...stage1, hidden: true, id: 3, slug: 3 };
 const activeStages = [stage1, stage2];
 const [selectedValueStream] = valueStreams;
+const error = new Error(`Request failed with status code ${httpStatusCodes.BAD_REQUEST}`);
 
 const rootState = {
   startDate,
@@ -104,9 +106,40 @@ describe('DurationChart actions', () => {
         });
     });
 
+    describe(`Status ${httpStatusCodes.OK} and error message in response`, () => {
+      const dataError = 'Too much data';
+
+      beforeEach(() => {
+        mock.onGet(endpoints.durationData).reply(httpStatusCodes.OK, { error: dataError });
+      });
+
+      it(`dispatches the 'receiveDurationDataError' with ${dataError}`, () => {
+        const dispatch = jest.fn();
+        const commit = jest.fn();
+
+        return actions
+          .fetchDurationData({
+            dispatch,
+            commit,
+            rootState,
+            rootGetters: {
+              ...rootGetters,
+              activeStages,
+            },
+          })
+          .then(() => {
+            expect(commit).not.toHaveBeenCalled();
+            expect(dispatch.mock.calls).toEqual([
+              ['requestDurationData'],
+              ['receiveDurationDataError', new Error(dataError)],
+            ]);
+          });
+      });
+    });
+
     describe('receiveDurationDataError', () => {
       beforeEach(() => {
-        mock.onGet(endpoints.durationData).reply(404);
+        mock.onGet(endpoints.durationData).reply(httpStatusCodes.BAD_REQUEST, error);
       });
 
       it("dispatches the 'receiveDurationDataError' action when there is an error", () => {
@@ -122,7 +155,10 @@ describe('DurationChart actions', () => {
             },
           })
           .then(() => {
-            expect(dispatch).toHaveBeenCalledWith('receiveDurationDataError');
+            expect(dispatch.mock.calls).toEqual([
+              ['requestDurationData'],
+              ['receiveDurationDataError', error],
+            ]);
           });
       });
     });
@@ -141,6 +177,7 @@ describe('DurationChart actions', () => {
         [
           {
             type: types.RECEIVE_DURATION_DATA_ERROR,
+            payload: {},
           },
         ],
         [],

@@ -1,7 +1,7 @@
 ---
 stage: Verify
 group: Continuous Integration
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference
 ---
 
@@ -52,8 +52,8 @@ For an overview, see [Parent-Child Pipelines feature demo](https://youtu.be/n8Kp
 ## Examples
 
 The simplest case is [triggering a child pipeline](yaml/README.md#trigger) using a
-local YAML file to define the pipeline configuration. In this case, the parent pipeline will
-trigger the child pipeline, and continue without waiting:
+local YAML file to define the pipeline configuration. In this case, the parent pipeline
+triggers the child pipeline, and continues without waiting:
 
 ```yaml
 microservice_a:
@@ -68,11 +68,22 @@ microservice_a:
   trigger:
     include:
       - local: path/to/microservice_a.yml
-      - template: SAST.gitlab-ci.yml
+      - template: Security/SAST.gitlab-ci.yml
 ```
 
-NOTE: **Note:**
-The max number of entries that are accepted for `trigger:include:` is three.
+In [GitLab 13.5](https://gitlab.com/gitlab-org/gitlab/-/issues/205157) and later,
+you can use [`include:file`](yaml/README.md#includefile) to trigger child pipelines
+with a configuration file in a different project:
+
+```yaml
+microservice_a:
+  trigger:
+    include:
+      - project: 'my-group/my-pipeline-library'
+        file: 'path/to/ci-config.yml'
+```
+
+The maximum number of entries that are accepted for `trigger:include:` is three.
 
 Similar to [multi-project pipelines](multi_project_pipelines.md#mirroring-status-from-triggered-pipeline),
 we can set the parent pipeline to depend on the status of the child pipeline upon completion:
@@ -82,7 +93,7 @@ microservice_a:
   trigger:
     include:
       - local: path/to/microservice_a.yml
-      - template: SAST.gitlab-ci.yml
+      - template: Security/SAST.gitlab-ci.yml
     strategy: depend
 ```
 
@@ -147,15 +158,24 @@ For an overview, see [Create child pipelines using dynamically generated configu
 
 We also have an [example project using Dynamic Child Pipelines with Jsonnet](https://gitlab.com/gitlab-org/project-templates/jsonnet) which shows how to use a data templating language to generate your `.gitlab-ci.yml` at runtime. You could use a similar process for other templating languages like [Dhall](https://dhall-lang.org/) or [`ytt`](https://get-ytt.io/).
 
+The artifact path is parsed by GitLab, not the runner, so the path must match the
+syntax for the OS running GitLab. If GitLab is running on Linux but using a Windows
+runner for testing, the path separator for the trigger job would be `/`. Other CI/CD
+configuration for jobs, like scripts, that use the Windows runner would use `\`.
+
 In GitLab 12.9, the child pipeline could fail to be created in certain cases, causing the parent pipeline to fail.
 This is [resolved in GitLab 12.10](https://gitlab.com/gitlab-org/gitlab/-/issues/209070).
 
-## Limitations
+## Nested child pipelines
 
-In GitLab 13.3 and older, a parent pipeline can trigger many child pipelines, but
-those child pipeline cannot trigger further child pipelines.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/29651) in GitLab 13.4.
+> - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/243747) in GitLab 13.5.
 
-In GitLab 13.4 and newer, the [maximum depth of child pipelines was increased to 2](https://gitlab.com/gitlab-org/gitlab/-/issues/29651).
-A parent pipeline can trigger many child pipelines. These child pipelines can trigger
-their own child pipelines. This second layer of child pipelines cannot trigger further
-child pipelines.
+Parent and child pipelines were introduced with a maximum depth of one level of child
+pipelines, which was later increased to two. A parent pipeline can trigger many child
+pipelines, and these child pipelines can trigger their own child pipelines. It's not
+possible to trigger another level of child pipelines.
+
+## Pass variables to a child pipeline
+
+You can [pass variables to a downstream pipeline](multi_project_pipelines.md#passing-variables-to-a-downstream-pipeline).

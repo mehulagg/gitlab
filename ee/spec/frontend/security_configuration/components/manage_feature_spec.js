@@ -1,7 +1,7 @@
-import { merge } from 'lodash';
 import { shallowMount } from '@vue/test-utils';
-import ManageFeature from 'ee/security_configuration/components/manage_feature.vue';
+import { merge } from 'lodash';
 import CreateMergeRequestButton from 'ee/security_configuration/components/create_merge_request_button.vue';
+import ManageFeature from 'ee/security_configuration/components/manage_feature.vue';
 import { generateFeatures } from './helpers';
 
 const createSastMergeRequestPath = '/create_sast_merge_request_path';
@@ -99,23 +99,6 @@ describe('ManageFeature component', () => {
       const button = findTestId('manageButton');
       expect(button.exists()).toBe(true);
       expect(button.attributes('href')).toBe(feature.configuration_path);
-    });
-  });
-
-  describe('given a feature type that is not "sast"', () => {
-    beforeEach(() => {
-      [feature] = generateFeatures(1, { type: 'something_that_is_not_sast' });
-
-      createComponent({
-        propsData: { feature },
-      });
-    });
-
-    it('shows docs link for feature', () => {
-      const link = findTestId('docsLink');
-      expect(link.exists()).toBe(true);
-      expect(link.attributes('aria-label')).toContain(feature.name);
-      expect(link.attributes('href')).toBe(feature.link);
     });
   });
 });

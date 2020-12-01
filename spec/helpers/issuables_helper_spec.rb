@@ -44,23 +44,6 @@ RSpec.describe IssuablesHelper do
     end
   end
 
-  describe '#issuable_labels_tooltip' do
-    let(:label_entity) { LabelEntity.represent(label).as_json }
-    let(:label2_entity) { LabelEntity.represent(label2).as_json }
-
-    it 'returns label text with no labels' do
-      expect(issuable_labels_tooltip([])).to eq(_('Labels'))
-    end
-
-    it 'returns label text with labels within max limit' do
-      expect(issuable_labels_tooltip([label_entity])).to eq(label[:title])
-    end
-
-    it 'returns label text with labels exceeding max limit' do
-      expect(issuable_labels_tooltip([label_entity, label2_entity], limit: 1)).to eq("#{label[:title]}, and 1 more")
-    end
-  end
-
   describe '#issuables_state_counter_text' do
     let(:user) { create(:user) }
 
@@ -198,7 +181,8 @@ RSpec.describe IssuablesHelper do
         initialDescriptionHtml: '<p dir="auto">issue text</p>',
         initialDescriptionText: 'issue text',
         initialTaskStatus: '0 of 0 tasks completed',
-        issueType: 'issue'
+        issueType: 'issue',
+        iid: issue.iid.to_s
       }
       expect(helper.issuable_initial_data(issue)).to match(hash_including(expected_data))
     end
@@ -305,6 +289,38 @@ RSpec.describe IssuablesHelper do
     end
   end
 
+  describe '#reviewer_sidebar_data' do
+    let(:user) { create(:user) }
+
+    subject { helper.reviewer_sidebar_data(user, merge_request: merge_request) }
+
+    context 'without merge_request' do
+      let(:merge_request) { nil }
+
+      it 'returns hash of reviewer data' do
+        is_expected.to eql({
+          avatar_url: user.avatar_url,
+          name: user.name,
+          username: user.username
+        })
+      end
+    end
+
+    context 'with merge_request' do
+      let(:merge_request) { build(:merge_request) }
+
+      where(can_merge: [true, false])
+
+      with_them do
+        before do
+          allow(merge_request).to receive(:can_be_merged_by?).and_return(can_merge)
+        end
+
+        it { is_expected.to include({ can_merge: can_merge })}
+      end
+    end
+  end
+
   describe '#issuable_squash_option?' do
     using RSpec::Parameterized::TableSyntax
 
@@ -326,6 +342,24 @@ RSpec.describe IssuablesHelper do
 
         expect(helper.issuable_squash_option?(issuable, project)).to eq(expectation)
       end
+    end
+  end
+
+  describe '#issuable_display_type' do
+    using RSpec::Parameterized::TableSyntax
+
+    where(:issuable_type, :issuable_display_type) do
+      :issue         | 'issue'
+      :incident      | 'incident'
+      :merge_request | 'merge request'
+    end
+
+    with_them do
+      let(:issuable) { build_stubbed(issuable_type) }
+
+      subject { helper.issuable_display_type(issuable) }
+
+      it { is_expected.to eq(issuable_display_type) }
     end
   end
 

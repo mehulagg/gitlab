@@ -2,11 +2,8 @@
 
 module Resolvers
   class ProjectMergeRequestsResolver < MergeRequestsResolver
-    argument :assignee_username, GraphQL::STRING_TYPE,
-             required: false,
-             description: 'Username of the assignee'
-    argument :author_username, GraphQL::STRING_TYPE,
-             required: false,
-             description: 'Username of the author'
+    type ::Types::MergeRequestType.connection_type, null: true
+    accept_assignee
+    accept_author
   end
 end

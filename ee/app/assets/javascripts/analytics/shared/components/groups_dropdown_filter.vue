@@ -4,9 +4,9 @@ import {
   GlIcon,
   GlLoadingIcon,
   GlAvatar,
-  GlNewDropdown as GlDropdown,
-  GlNewDropdownHeader as GlDropdownHeader,
-  GlNewDropdownItem as GlDropdownItem,
+  GlDropdown,
+  GlDropdownSectionHeader,
+  GlDropdownItem,
   GlSearchBoxByType,
   GlSafeHtmlDirective as SafeHtml,
 } from '@gitlab/ui';
@@ -22,7 +22,7 @@ export default {
     GlLoadingIcon,
     GlAvatar,
     GlDropdown,
-    GlDropdownHeader,
+    GlDropdownSectionHeader,
     GlDropdownItem,
     GlSearchBoxByType,
   },
@@ -133,8 +133,8 @@ export default {
       </div>
       <gl-icon class="gl-ml-2" name="chevron-down" />
     </template>
-    <gl-dropdown-header>{{ __('Groups') }}</gl-dropdown-header>
-    <gl-search-box-by-type v-model.trim="searchTerm" class="gl-m-3" />
+    <gl-dropdown-section-header>{{ __('Groups') }}</gl-dropdown-section-header>
+    <gl-search-box-by-type v-model.trim="searchTerm" />
     <gl-dropdown-item
       v-for="group in availableGroups"
       :key="group.id"

@@ -1,10 +1,4 @@
 import { mount } from '@vue/test-utils';
-import PolicyRuleBuilder from 'ee/threat_monitoring/components/policy_editor/policy_rule_builder.vue';
-import PolicyRuleEndpoint from 'ee/threat_monitoring/components/policy_editor/policy_rule_endpoint.vue';
-import PolicyRuleEntity from 'ee/threat_monitoring/components/policy_editor/policy_rule_entity.vue';
-import PolicyRuleCIDR from 'ee/threat_monitoring/components/policy_editor/policy_rule_cidr.vue';
-import PolicyRuleFQDN from 'ee/threat_monitoring/components/policy_editor/policy_rule_fqdn.vue';
-import { buildRule } from 'ee/threat_monitoring/components/policy_editor/lib/rules';
 import {
   RuleDirectionOutbound,
   EndpointMatchModeAny,
@@ -14,6 +8,12 @@ import {
   RuleTypeFQDN,
   PortMatchModePortProtocol,
 } from 'ee/threat_monitoring/components/policy_editor/constants';
+import { buildRule } from 'ee/threat_monitoring/components/policy_editor/lib/rules';
+import PolicyRuleBuilder from 'ee/threat_monitoring/components/policy_editor/policy_rule_builder.vue';
+import PolicyRuleCIDR from 'ee/threat_monitoring/components/policy_editor/policy_rule_cidr.vue';
+import PolicyRuleEndpoint from 'ee/threat_monitoring/components/policy_editor/policy_rule_endpoint.vue';
+import PolicyRuleEntity from 'ee/threat_monitoring/components/policy_editor/policy_rule_entity.vue';
+import PolicyRuleFQDN from 'ee/threat_monitoring/components/policy_editor/policy_rule_fqdn.vue';
 
 describe('PolicyRuleBuilder component', () => {
   let wrapper;
@@ -101,6 +101,11 @@ describe('PolicyRuleBuilder component', () => {
     const event = wrapper.emitted()['rule-type-change'];
     expect(event.length).toEqual(2);
     expect(event[0]).toEqual([RuleTypeEntity]);
+  });
+
+  it('emits remove upon remove-button click', () => {
+    wrapper.find("[data-testid='remove-rule']").trigger('click');
+    expect(wrapper.emitted().remove.length).toEqual(1);
   });
 
   it('renders only endpoint rule component', () => {

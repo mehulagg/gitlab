@@ -19,7 +19,6 @@ class Snippet < ApplicationRecord
   extend ::Gitlab::Utils::Override
 
   MAX_FILE_COUNT = 10
-  MAX_SINGLE_FILE_COUNT = 1
 
   cache_markdown_field :title, pipeline: :single_line
   cache_markdown_field :description
@@ -175,8 +174,8 @@ class Snippet < ApplicationRecord
     Snippet.find_by(id: id, project: project)
   end
 
-  def self.max_file_limit(user)
-    Feature.enabled?(:snippet_multiple_files, user) ? MAX_FILE_COUNT : MAX_SINGLE_FILE_COUNT
+  def self.max_file_limit
+    MAX_FILE_COUNT
   end
 
   def initialize(attributes = {})
@@ -214,7 +213,8 @@ class Snippet < ApplicationRecord
   def blobs
     return [] unless repository_exists?
 
-    repository.ls_files(repository.root_ref).map { |file| Blob.lazy(repository, repository.root_ref, file) }
+    branch = default_branch
+    list_files(branch).map { |file| Blob.lazy(repository, branch, file) }
   end
 
   def hook_attrs
@@ -283,7 +283,8 @@ class Snippet < ApplicationRecord
     strong_memoize(:repository_size_checker) do
       ::Gitlab::RepositorySizeChecker.new(
         current_size_proc: -> { repository.size.megabytes },
-        limit: Gitlab::CurrentSettings.snippet_size_limit
+        limit: Gitlab::CurrentSettings.snippet_size_limit,
+        namespace: nil
       )
     end
   end
@@ -293,9 +294,7 @@ class Snippet < ApplicationRecord
     @storage ||= Storage::Hashed.new(self, prefix: Storage::Hashed::SNIPPET_REPOSITORY_PATH_PREFIX)
   end
 
-  # This is the full_path used to identify the
-  # the snippet repository. It will be used mostly
-  # for logging purposes.
+  # This is the full_path used to identify the the snippet repository.
   override :full_path
   def full_path
     return unless persisted?
@@ -303,10 +302,15 @@ class Snippet < ApplicationRecord
     @full_path ||= begin
       components = []
       components << project.full_path if project_id?
-      components << '@snippets'
+      components << 'snippets'
       components << self.id
       components.join('/')
     end
+  end
+
+  override :default_branch
+  def default_branch
+    super || 'master'
   end
 
   def repository_storage
@@ -336,17 +340,17 @@ class Snippet < ApplicationRecord
   def file_name_on_repo
     return if repository.empty?
 
-    list_files(repository.root_ref).first
+    list_files(default_branch).first
   end
 
   def list_files(ref = nil)
     return [] if repository.empty?
 
-    repository.ls_files(ref)
+    repository.ls_files(ref || default_branch)
   end
 
   def multiple_files?
-    list_files(repository.root_ref).size > 1
+    list_files.size > 1
   end
 
   class << self

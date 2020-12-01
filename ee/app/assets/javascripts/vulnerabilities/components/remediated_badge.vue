@@ -1,18 +1,20 @@
 <script>
-import { GlDeprecatedBadge as GlBadge, GlPopover } from '@gitlab/ui';
+import { GlIcon, GlPopover, GlBadge } from '@gitlab/ui';
 
 export default {
-  name: 'RemediatedBadge',
   components: {
-    GlBadge,
+    GlIcon,
     GlPopover,
+    GlBadge,
   },
 };
 </script>
 
 <template>
-  <div class="d-inline-block">
-    <gl-badge ref="badge" variant="info">{{ __('Remediated: needs review') }}</gl-badge>
+  <div class="gl-display-inline-block">
+    <gl-badge ref="badge" variant="info">
+      <gl-icon name="admin" />
+    </gl-badge>
     <gl-popover
       ref="popover"
       :content="

@@ -55,34 +55,35 @@ RSpec.describe Ci::Bridge do
 
       expect(bridge.scoped_variables_hash.keys).to include(*variables)
     end
-  end
 
-  describe 'state machine transitions' do
-    context 'when bridge points towards downstream' do
-      it 'schedules downstream pipeline creation' do
-        expect(bridge).to receive(:schedule_downstream_pipeline!)
+    context 'when bridge has dependency which has dotenv variable' do
+      let(:test) { create(:ci_build, pipeline: pipeline, stage_idx: 0) }
+      let(:bridge) { create(:ci_bridge, pipeline: pipeline, stage_idx: 1, options: { dependencies: [test.name] }) }
 
-        bridge.enqueue!
+      let!(:job_variable) { create(:ci_job_variable, :dotenv_source, job: test) }
+
+      it 'includes inherited variable' do
+        expect(bridge.scoped_variables_hash).to include(job_variable.key => job_variable.value)
       end
     end
   end
 
   describe 'state machine transitions' do
     context 'when bridge points towards downstream' do
-      it 'schedules downstream pipeline creation' do
-        expect(bridge).to receive(:schedule_downstream_pipeline!)
+      %i[created manual].each do |status|
+        it "schedules downstream pipeline creation when the status is #{status}" do
+          bridge.status = status
 
-        bridge.enqueue!
+          expect(bridge).to receive(:schedule_downstream_pipeline!)
+
+          bridge.enqueue!
+        end
       end
-    end
-  end
 
-  describe 'state machine transitions' do
-    context 'when bridge points towards downstream' do
-      it 'schedules downstream pipeline creation' do
-        expect(bridge).to receive(:schedule_downstream_pipeline!)
+      it 'raises error when the status is failed' do
+        bridge.status = :failed
 
-        bridge.enqueue!
+        expect { bridge.enqueue! }.to raise_error(StateMachines::InvalidTransition)
       end
     end
   end
@@ -302,6 +303,118 @@ RSpec.describe Ci::Bridge do
       it 'returns nil' do
         expect(bridge.target_ref).to be_nil
       end
+    end
+  end
+
+  describe '#play' do
+    let(:downstream_project) { create(:project) }
+    let(:user) { create(:user) }
+    let(:bridge) { create(:ci_bridge, :playable, pipeline: pipeline, downstream: downstream_project) }
+
+    subject { bridge.play(user) }
+
+    before do
+      project.add_maintainer(user)
+      downstream_project.add_maintainer(user)
+    end
+
+    it 'enqueues the bridge' do
+      subject
+
+      expect(bridge).to be_pending
+    end
+  end
+
+  describe '#playable?' do
+    context 'when bridge is a manual action' do
+      subject { build_stubbed(:ci_bridge, :manual).playable? }
+
+      it { is_expected.to be_truthy }
+
+      context 'when FF ci_manual_bridges is disabled' do
+        before do
+          stub_feature_flags(ci_manual_bridges: false)
+        end
+
+        it { is_expected.to be_falsey }
+      end
+    end
+
+    context 'when build is not a manual action' do
+      subject { build_stubbed(:ci_bridge, :created).playable? }
+
+      it { is_expected.to be_falsey }
+    end
+  end
+
+  describe '#action?' do
+    context 'when bridge is a manual action' do
+      subject { build_stubbed(:ci_bridge, :manual).action? }
+
+      it { is_expected.to be_truthy }
+
+      context 'when FF ci_manual_bridges is disabled' do
+        before do
+          stub_feature_flags(ci_manual_bridges: false)
+        end
+
+        it { is_expected.to be_falsey }
+      end
+    end
+
+    context 'when build is not a manual action' do
+      subject { build_stubbed(:ci_bridge, :created).action? }
+
+      it { is_expected.to be_falsey }
+    end
+  end
+
+  describe '#dependency_variables' do
+    subject { bridge.dependency_variables }
+
+    shared_context 'when ci_bridge_dependency_variables is disabled' do
+      before do
+        stub_feature_flags(ci_bridge_dependency_variables: false)
+      end
+
+      it { is_expected.to be_empty }
+    end
+
+    context 'when downloading from previous stages' do
+      let!(:prepare1) { create(:ci_build, name: 'prepare1', pipeline: pipeline, stage_idx: 0) }
+      let!(:bridge) { create(:ci_bridge, pipeline: pipeline, stage_idx: 1) }
+
+      let!(:job_variable_1) { create(:ci_job_variable, :dotenv_source, job: prepare1) }
+      let!(:job_variable_2) { create(:ci_job_variable, job: prepare1) }
+
+      it 'inherits only dependent variables' do
+        expect(subject.to_hash).to eq(job_variable_1.key => job_variable_1.value)
+      end
+
+      it_behaves_like 'when ci_bridge_dependency_variables is disabled'
+    end
+
+    context 'when using needs' do
+      let!(:prepare1) { create(:ci_build, name: 'prepare1', pipeline: pipeline, stage_idx: 0) }
+      let!(:prepare2) { create(:ci_build, name: 'prepare2', pipeline: pipeline, stage_idx: 0) }
+      let!(:prepare3) { create(:ci_build, name: 'prepare3', pipeline: pipeline, stage_idx: 0) }
+      let!(:bridge) do
+        create(:ci_bridge, pipeline: pipeline,
+                           stage_idx: 1,
+                           scheduling_type: 'dag',
+                           needs_attributes: [{ name: 'prepare1', artifacts: true },
+                                              { name: 'prepare2', artifacts: false }])
+      end
+
+      let!(:job_variable_1) { create(:ci_job_variable, :dotenv_source, job: prepare1) }
+      let!(:job_variable_2) { create(:ci_job_variable, :dotenv_source, job: prepare2) }
+      let!(:job_variable_3) { create(:ci_job_variable, :dotenv_source, job: prepare3) }
+
+      it 'inherits only needs with artifacts variables' do
+        expect(subject.to_hash).to eq(job_variable_1.key => job_variable_1.value)
+      end
+
+      it_behaves_like 'when ci_bridge_dependency_variables is disabled'
     end
   end
 end

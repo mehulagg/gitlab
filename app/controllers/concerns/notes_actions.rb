@@ -31,6 +31,10 @@ module NotesActions
     # We know there's more data, so tell the frontend to poll again after 1ms
     set_polling_interval_header(interval: 1) if meta[:more]
 
+    # Only present an ETag for the empty response to ensure pagination works
+    # as expected
+    ::Gitlab::EtagCaching::Middleware.skip!(response) if notes.present?
+
     render json: meta.merge(notes: notes)
   end
 
@@ -100,7 +104,7 @@ module NotesActions
   # the finder. Here, we select between returning all notes since then, or a
   # page's worth of notes.
   def gather_notes
-    if Feature.enabled?(:paginated_notes, project)
+    if Feature.enabled?(:paginated_notes, noteable.try(:resource_parent))
       gather_some_notes
     else
       gather_all_notes
@@ -115,7 +119,7 @@ module NotesActions
   end
 
   def gather_some_notes
-    paginator = Gitlab::UpdatedNotesPaginator.new(
+    paginator = ::Gitlab::UpdatedNotesPaginator.new(
       notes_finder.execute.inc_relations_for_view,
       last_fetched_at: last_fetched_at
     )

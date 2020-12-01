@@ -6,10 +6,12 @@ import {
   GlLoadingIcon,
   GlEmptyState,
   GlIcon,
-  GlNewDropdown,
-  GlNewDropdownItem,
+  GlDropdown,
+  GlDropdownItem,
 } from '@gitlab/ui';
+import BurnCharts from 'ee/burndown_chart/components/burn_charts.vue';
 import { formatDate } from '~/lib/utils/datetime_utility';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { __ } from '~/locale';
 import IterationReportSummary from './iteration_report_summary.vue';
 import IterationForm from './iteration_form.vue';
@@ -30,13 +32,14 @@ const page = {
 
 export default {
   components: {
+    BurnCharts,
     GlAlert,
     GlBadge,
     GlLoadingIcon,
     GlEmptyState,
     GlIcon,
-    GlNewDropdown,
-    GlNewDropdownItem,
+    GlDropdown,
+    GlDropdownItem,
     IterationForm,
     IterationReportSummary,
     IterationReportTabs,
@@ -61,6 +64,7 @@ export default {
       },
     },
   },
+  mixins: [glFeatureFlagsMixin()],
   props: {
     fullPath: {
       type: String,
@@ -193,7 +197,7 @@ export default {
         <span class="gl-ml-4"
           >{{ formatDate(iteration.startDate) }} – {{ formatDate(iteration.dueDate) }}</span
         >
-        <gl-new-dropdown
+        <gl-dropdown
           v-if="canEditIteration"
           data-testid="actions-dropdown"
           variant="default"
@@ -205,10 +209,8 @@ export default {
           <template #button-content>
             <gl-icon name="ellipsis_v" /><span class="gl-sr-only">{{ __('Actions') }}</span>
           </template>
-          <gl-new-dropdown-item @click="loadEditPage">{{
-            __('Edit iteration')
-          }}</gl-new-dropdown-item>
-        </gl-new-dropdown>
+          <gl-dropdown-item @click="loadEditPage">{{ __('Edit iteration') }}</gl-dropdown-item>
+        </gl-dropdown>
       </div>
       <h3 ref="title" class="page-title">{{ iteration.title }}</h3>
       <div ref="description" v-html="iteration.descriptionHtml"></div>
@@ -216,6 +218,11 @@ export default {
         :full-path="fullPath"
         :iteration-id="iteration.id"
         :namespace-type="namespaceType"
+      />
+      <burn-charts
+        :start-date="iteration.startDate"
+        :due-date="iteration.dueDate"
+        :iteration-id="iteration.id"
       />
       <iteration-report-tabs
         :full-path="fullPath"

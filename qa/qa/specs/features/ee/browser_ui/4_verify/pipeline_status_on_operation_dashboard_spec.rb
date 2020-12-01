@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module QA
-  RSpec.describe 'Verify', :docker do
+  RSpec.describe 'Verify' do
     describe 'Operations Dashboard' do
       let(:group) { Resource::Group.fabricate_via_api! }
       let!(:runner) do

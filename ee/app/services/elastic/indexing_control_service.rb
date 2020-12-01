@@ -31,7 +31,7 @@ module Elastic
       end
 
       def queue_size
-        Elastic::IndexingControl::WORKERS.sum do |worker_class| # rubocop:disable CodeReuse/ActiveRecord
+        Elastic::IndexingControl::WORKERS.sum do |worker_class|
           new(worker_class).queue_size
         end
       end

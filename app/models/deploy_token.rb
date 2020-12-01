@@ -54,6 +54,10 @@ class DeployToken < ApplicationRecord
     !revoked && !expired?
   end
 
+  def deactivated?
+    !active?
+  end
+
   def scopes
     AVAILABLE_SCOPES.select { |token_scope| read_attribute(token_scope) }
   end
@@ -75,6 +79,20 @@ class DeployToken < ApplicationRecord
   def project
     strong_memoize(:project) do
       projects.first
+    end
+  end
+
+  def group
+    strong_memoize(:group) do
+      groups.first
+    end
+  end
+
+  def accessible_projects
+    if project_type?
+      projects
+    elsif group_type?
+      group.all_projects
     end
   end
 

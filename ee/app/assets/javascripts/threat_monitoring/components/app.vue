@@ -3,6 +3,7 @@ import { mapActions } from 'vuex';
 import { GlAlert, GlEmptyState, GlIcon, GlLink, GlPopover, GlTabs, GlTab } from '@gitlab/ui';
 import { s__ } from '~/locale';
 import axios from '~/lib/utils/axios_utils';
+import ThreatAlerts from './threat_alerts.vue';
 import ThreatMonitoringFilters from './threat_monitoring_filters.vue';
 import ThreatMonitoringSection from './threat_monitoring_section.vue';
 import NetworkPolicyList from './network_policy_list.vue';
@@ -17,6 +18,7 @@ export default {
     GlPopover,
     GlTabs,
     GlTab,
+    ThreatAlerts,
     ThreatMonitoringFilters,
     ThreatMonitoringSection,
     NetworkPolicyList,
@@ -73,6 +75,11 @@ export default {
       // environment id only means that infrastructure *might* be set up.
       isSetUpMaybe: this.isValidEnvironmentId(this.defaultEnvironmentId),
     };
+  },
+  computed: {
+    showAlertsTab() {
+      return gon.features.threatMonitoringAlerts;
+    },
   },
   created() {
     if (this.isSetUpMaybe) {
@@ -161,7 +168,20 @@ export default {
     </header>
 
     <gl-tabs>
-      <gl-tab :title="s__('ThreatMonitoring|Overview')">
+      <gl-tab
+        v-if="showAlertsTab"
+        :title="s__('ThreatMonitoring|Alerts')"
+        data-testid="threat-monitoring-alerts-tab"
+      >
+        <threat-alerts />
+      </gl-tab>
+      <gl-tab ref="networkPolicyTab" :title="s__('ThreatMonitoring|Policies')">
+        <network-policy-list
+          :documentation-path="documentationPath"
+          :new-policy-path="newPolicyPath"
+        />
+      </gl-tab>
+      <gl-tab :title="s__('ThreatMonitoring|Statistics')">
         <threat-monitoring-filters />
 
         <threat-monitoring-section
@@ -194,12 +214,6 @@ export default {
           :chart-empty-state-svg-path="networkPolicyNoDataSvgPath"
           :documentation-path="documentationPath"
           documentation-anchor="container-network-policy"
-        />
-      </gl-tab>
-      <gl-tab ref="networkPolicyTab" :title="s__('ThreatMonitoring|Policies')">
-        <network-policy-list
-          :documentation-path="documentationPath"
-          :new-policy-path="newPolicyPath"
         />
       </gl-tab>
     </gl-tabs>

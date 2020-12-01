@@ -9,6 +9,7 @@ RSpec.describe MarkupHelper do
     project.add_maintainer(user)
     user
   end
+
   let_it_be(:issue) { create(:issue, project: project) }
   let_it_be(:merge_request) { create(:merge_request, source_project: project, target_project: project) }
   let_it_be(:snippet) { create(:project_snippet, project: project) }
@@ -315,6 +316,7 @@ RSpec.describe MarkupHelper do
   describe '#render_wiki_content' do
     let(:wiki) { double('WikiPage', path: "file.#{extension}") }
     let(:wiki_repository) { double('Repository') }
+    let(:content) { 'wiki content' }
     let(:context) do
       {
         pipeline: :wiki, project: project, wiki: wiki,
@@ -324,9 +326,11 @@ RSpec.describe MarkupHelper do
     end
 
     before do
-      expect(wiki).to receive(:content).and_return('wiki content')
+      expect(wiki).to receive(:content).and_return(content)
       expect(wiki).to receive(:slug).and_return('nested/page')
       expect(wiki).to receive(:repository).and_return(wiki_repository)
+      allow(wiki).to receive(:container).and_return(project)
+
       helper.instance_variable_set(:@wiki, wiki)
     end
 
@@ -337,6 +341,19 @@ RSpec.describe MarkupHelper do
         expect(helper).to receive(:markdown_unsafe).with('wiki content', context)
 
         helper.render_wiki_content(wiki)
+      end
+
+      context 'when context has labels' do
+        let_it_be(:label) { create(:label, title: 'Bug', project: project) }
+
+        let(:content) { '~Bug' }
+
+        it 'renders label' do
+          result = helper.render_wiki_content(wiki)
+          doc = Nokogiri::HTML.parse(result)
+
+          expect(doc.css('.gl-label-link')).not_to be_empty
+        end
       end
     end
 

@@ -39,11 +39,13 @@ export default {
     },
     issueId: {
       type: Number,
-      required: true,
+      required: false,
+      default: 0,
     },
     epicIssueId: {
       type: Number,
-      required: true,
+      required: false,
+      default: 0,
     },
     canEdit: {
       type: Boolean,

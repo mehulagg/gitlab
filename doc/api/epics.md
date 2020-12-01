@@ -1,7 +1,7 @@
 ---
 stage: Plan
-group: Portfolio Management
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+group: Product Planning
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Epics API **(PREMIUM)**
@@ -67,10 +67,10 @@ GET /groups/:id/epics?state=opened
 | `sort`              | string           | no         | Return epics sorted in `asc` or `desc` order. Default is `desc`                                                             |
 | `search`            | string           | no         | Search epics against their `title` and `description`                                                                        |
 | `state`             | string           | no         | Search epics against their `state`, possible filters: `opened`, `closed` and `all`, default: `all`                          |
-| `created_after`     | datetime         | no         | Return epics created on or after the given time                                                                             |
-| `created_before`    | datetime         | no         | Return epics created on or before the given time                                                                            |
-| `updated_after`     | datetime         | no         | Return epics updated on or after the given time                                                                             |
-| `updated_before`    | datetime         | no         | Return epics updated on or before the given time                                                                            |
+| `created_after`     | datetime         | no         | Return epics created on or after the given time. Expected in ISO 8601 format (`2019-03-15T08:00:00Z`) |
+| `created_before`    | datetime         | no         | Return epics created on or before the given time. Expected in ISO 8601 format (`2019-03-15T08:00:00Z`) |
+| `updated_after`     | datetime         | no         | Return epics updated on or after the given time. Expected in ISO 8601 format (`2019-03-15T08:00:00Z`) |
+| `updated_before`    | datetime         | no         | Return epics updated on or before the given time. Expected in ISO 8601 format (`2019-03-15T08:00:00Z`) |
 | `include_ancestor_groups` | boolean    | no         | Include epics from the requested group's ancestors. Default is `false`                                                      |
 | `include_descendant_groups` | boolean  | no         | Include epics from the requested group's descendants. Default is `true`                                                     |
 | `my_reaction_emoji` | string           | no         | Return epics reacted by the authenticated user by the given emoji. `None` returns epics not given a reaction. `Any` returns epics given at least one reaction. Introduced in [GitLab 13.0](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/31479)|
@@ -266,7 +266,8 @@ POST /groups/:id/epics
 | `title`             | string           | yes        | The title of the epic |
 | `labels`            | string           | no         | The comma separated list of labels |
 | `description`       | string           | no         | The description of the epic. Limited to 1,048,576 characters.  |
-| `confidential`      | boolean          | no         | Whether the epic should be confidential. Will be ignored if `confidential_epics` feature flag is disabled. |
+| `confidential`      | boolean          | no         | Whether the epic should be confidential |
+| `created_at`        | string           | no         | When the epic was created. Date time string, ISO 8601 formatted, for example `2016-03-11T03:45:40Z` . Requires administrator or project/group owner privileges ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/255309) in GitLab 13.5) |
 | `start_date_is_fixed` | boolean        | no         | Whether start date should be sourced from `start_date_fixed` or from milestones (since 11.3) |
 | `start_date_fixed`  | string           | no         | The fixed start date of an epic (since 11.3) |
 | `due_date_is_fixed` | boolean          | no         | Whether due date should be sourced from `due_date_fixed` or from milestones (since 11.3) |
@@ -347,8 +348,11 @@ PUT /groups/:id/epics/:epic_iid
 | `epic_iid`          | integer/string   | yes        | The internal ID of the epic  |
 | `title`             | string           | no         | The title of an epic |
 | `description`       | string           | no         | The description of an epic. Limited to 1,048,576 characters.  |
-| `confidential`      | boolean          | no         | Whether the epic should be confidential. Will be ignored if `confidential_epics` feature flag is disabled. |
-| `labels`            | string           | no         | The comma separated list of labels |
+| `confidential`      | boolean          | no         | Whether the epic should be confidential |
+| `labels`            | string           | no         | Comma-separated label names for an issue. Set to an empty string to unassign all labels. |
+| `add_labels`        | string           | no         | Comma-separated label names to add to an issue. |
+| `remove_labels`     | string           | no         | Comma-separated label names to remove from an issue. |
+| `updated_at`        | string           | no         | When the epic was updated. Date time string, ISO 8601 formatted, for example `2016-03-11T03:45:40Z` . Requires administrator or project/group owner privileges ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/255309) in GitLab 13.5) |
 | `start_date_is_fixed` | boolean        | no         | Whether start date should be sourced from `start_date_fixed` or from milestones (since 11.3) |
 | `start_date_fixed`  | string           | no         | The fixed start date of an epic (since 11.3) |
 | `due_date_is_fixed` | boolean          | no         | Whether due date should be sourced from `due_date_fixed` or from milestones (since 11.3) |
@@ -422,10 +426,10 @@ DELETE /groups/:id/epics/:epic_iid
 curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/1/epics/5"
 ```
 
-## Create a todo
+## Create a to-do item
 
-Manually creates a todo for the current user on an epic. If
-there already exists a todo for the user on that epic, status code `304` is
+Manually creates a to-do item for the current user on an epic. If
+there already exists a to-do item for the user on that epic, status code `304` is
 returned.
 
 ```plaintext

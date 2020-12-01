@@ -15,7 +15,7 @@ module EE
             instance.group_epic_url(object.group, object, **options)
           when Iteration
             instance.iteration_url(object, **options)
-          when Vulnerability
+          when ::Vulnerability
             instance.project_security_vulnerability_url(object.project, object, **options)
           else
             super

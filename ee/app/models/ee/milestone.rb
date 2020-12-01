@@ -15,9 +15,5 @@ module EE
     end
 
     alias_method :supports_timebox_charts?, :supports_milestone_charts?
-
-    def burnup_charts_available?
-      ::Feature.enabled?(:burnup_charts, resource_parent)
-    end
   end
 end

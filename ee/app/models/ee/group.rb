@@ -27,10 +27,8 @@ module EE
       has_one :scim_oauth_access_token
 
       has_many :ldap_group_links, foreign_key: 'group_id', dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
+      has_many :saml_group_links, foreign_key: 'group_id'
       has_many :hooks, dependent: :destroy, class_name: 'GroupHook' # rubocop:disable Cop/ActiveRecordDependent
-
-      has_one :dependency_proxy_setting, class_name: 'DependencyProxy::GroupSetting'
-      has_many :dependency_proxy_blobs, class_name: 'DependencyProxy::Blob'
 
       has_many :allowed_email_domains, -> { order(id: :asc) }, autosave: true
 
@@ -222,6 +220,17 @@ module EE
       ensure_saml_discovery_token!
     end
 
+    def saml_enabled?
+      return false unless saml_provider
+
+      saml_provider.persisted? && saml_provider.enabled?
+    end
+
+    def saml_group_sync_available?
+      ::Feature.enabled?(:saml_group_links, self, default_enabled: true) &&
+        feature_available?(:group_saml_group_sync) && root_ancestor.saml_enabled?
+    end
+
     override :multiple_issue_boards_available?
     def multiple_issue_boards_available?
       feature_available?(:multiple_group_issue_boards)
@@ -304,10 +313,6 @@ module EE
       end
     end
 
-    def dependency_proxy_feature_available?
-      ::Gitlab.config.dependency_proxy.enabled && feature_available?(:dependency_proxy)
-    end
-
     override :supports_events?
     def supports_events?
       feature_available?(:epics)
@@ -378,16 +383,6 @@ module EE
       end
     end
 
-    def wiki_access_level
-      # TODO: Remove this method once we implement group-level features.
-      # https://gitlab.com/gitlab-org/gitlab/-/issues/208412
-      if ::Feature.enabled?(:group_wiki, self)
-        ::ProjectFeature::ENABLED
-      else
-        ::ProjectFeature::DISABLED
-      end
-    end
-
     def owners_emails
       owners.pluck(:email)
     end
@@ -399,6 +394,55 @@ module EE
       return namespace_settings.prevent_forking_outside_group? if namespace_settings
 
       root_ancestor.saml_provider&.prohibited_outer_forks?
+    end
+
+    def minimal_access_role_allowed?
+      feature_available?(:minimal_access_role) && !has_parent?
+    end
+
+    override :member?
+    def member?(user, min_access_level = minimal_member_access_level)
+      if min_access_level == ::Gitlab::Access::MINIMAL_ACCESS && minimal_access_role_allowed?
+        all_group_members.find_by(user_id: user.id).present?
+      else
+        super
+      end
+    end
+
+    def minimal_member_access_level
+      minimal_access_role_allowed? ? ::Gitlab::Access::MINIMAL_ACCESS : ::Gitlab::Access::GUEST
+    end
+
+    override :access_level_roles
+    def access_level_roles
+      levels = ::GroupMember.access_level_roles
+      return levels unless minimal_access_role_allowed?
+
+      levels.merge(::Gitlab::Access::MINIMAL_ACCESS_HASH)
+    end
+
+    override :users_count
+    def users_count
+      return all_group_members.count unless minimal_access_role_allowed?
+
+      members.count
+    end
+
+    def releases_count
+      ::Release.by_namespace_id(self_and_descendants.select(:id)).count
+    end
+
+    def releases_percentage
+      calculate_sql = <<~SQL
+      (
+        COUNT(*) FILTER (WHERE EXISTS (SELECT 1 FROM releases WHERE releases.project_id = projects.id)) * 100.0 / GREATEST(COUNT(*), 1)
+      )::integer AS releases_percentage
+      SQL
+
+      self.class.count_by_sql(
+        ::Project.select(calculate_sql)
+        .where(namespace_id: self_and_descendants.select(:id)).to_sql
+      )
     end
 
     private

@@ -56,7 +56,7 @@ RSpec.describe Issue, :elastic do
     end
   end
 
-  it "searches issues" do
+  it "searches issues", :aggregate_failures do
     Sidekiq::Testing.inline! do
       create :issue, title: 'bla-bla term1', project: project
       create :issue, description: 'bla-bla term2', project: project
@@ -73,6 +73,14 @@ RSpec.describe Issue, :elastic do
     expect(described_class.elastic_search('(term1 | term2 | term3) +bla-bla', options: options).total_count).to eq(2)
     expect(described_class.elastic_search(Issue.last.to_reference, options: options).total_count).to eq(1)
     expect(described_class.elastic_search('bla-bla', options: { project_ids: :any, public_and_internal_projects: true }).total_count).to eq(3)
+  end
+
+  it "names elasticsearch queries" do
+    described_class.elastic_search('*').total_count
+
+    assert_named_queries('doc:is_a:issue',
+                         'issue:match:search_terms',
+                         'issue:authorized:project')
   end
 
   it "searches by iid and scopes to type: issue only" do
@@ -121,8 +129,18 @@ RSpec.describe Issue, :elastic do
     })
 
     expected_hash['assignee_id'] = [assignee.id]
+    expected_hash['issues_access_level'] = issue.project.project_feature.issues_access_level
 
     expect(issue.__elasticsearch__.as_indexed_json).to eq(expected_hash)
+  end
+
+  it 'handles a project missing project_feature' do
+    issue = create :issue, project: project
+    allow(issue.project).to receive(:project_feature).and_return(nil)
+
+    expect(Gitlab::ErrorTracking).to receive(:track_exception)
+
+    expect(issue.__elasticsearch__.as_indexed_json['issues_access_level']).to eq(ProjectFeature::PRIVATE)
   end
 
   context 'field length limits' do

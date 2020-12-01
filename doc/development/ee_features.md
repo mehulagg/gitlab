@@ -1,9 +1,15 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Guidelines for implementing Enterprise Edition features
 
 - **Write the code and the tests.**: As with any code, EE features should have
   good test coverage to prevent regressions.
 - **Write documentation.**: Add documentation to the `doc/` directory. Describe
-  the feature and include screenshots, if applicable. Indicate [what editions](documentation/styleguide.md#product-badges)
+  the feature and include screenshots, if applicable. Indicate [what editions](documentation/styleguide/index.md#product-tier-badges)
   the feature applies to.
 - **Submit a MR to the `www-gitlab-com` project.**: Add the new feature to the
   [EE features list](https://about.gitlab.com/features/).
@@ -25,6 +31,16 @@ You can force GitLab to act as CE by either deleting the `ee/` directory or by
 setting the [`FOSS_ONLY` environment variable](https://gitlab.com/gitlab-org/gitlab/blob/master/config/helpers/is_ee_env.js)
 to something that evaluates as `true`. The same works for running tests
 (for example `FOSS_ONLY=1 yarn jest`).
+
+## CI pipelines in a FOSS context
+
+By default, merge request pipelines for development run in an EE-context only. If you are
+developing features that differ between FOSS and EE, you may wish to run pipelines in a
+FOSS context as well.
+
+To run pipelines in both contexts, include `RUN AS-IF-FOSS` in the merge request title.
+
+See the [As-if-FOSS jobs](pipelines.md#as-if-foss-jobs) pipelines documentation for more information.
 
 ## Separation of EE code
 
@@ -106,10 +122,10 @@ This is also not just applied to models. Here's a list of other examples:
 
 To test an `EE` namespaced module that extends a CE class with EE features,
 create the spec file as you normally would in the `ee/spec` directory, including the second `ee/` subdirectory.
-For example, an extension `ee/app/models/ee/user.rb` would have its tests in `ee/app/models/ee/user_spec.rb`.
+For example, an extension `ee/app/models/ee/user.rb` would have its tests in `ee/spec/models/ee/user_spec.rb`.
 
 In the `RSpec.describe` call, use the CE class name where the EE module would be used.
-For example, in `ee/app/models/ee/user_spec.rb`, the test would start with:
+For example, in `ee/spec/models/ee/user_spec.rb`, the test would start with:
 
 ```ruby
 RSpec.describe User do
@@ -416,6 +432,38 @@ module EE
 end
 ```
 
+### Code in `app/graphql/`
+
+EE-specific mutations, resolvers, and types should be added to
+`ee/app/graphql/{mutations,resolvers,types}`.
+
+To override a CE mutation, resolver, or type, create the file in
+`ee/app/graphql/ee/{mutations,resolvers,types}` and add new code to a
+`prepended` block.
+
+For example, if CE has a mutation called `Mutations::Tanukis::Create` and you
+wanted to add a new argument, place the EE override in
+`ee/app/graphql/ee/mutations/tanukis/create.rb`:
+
+```ruby
+module EE
+  module Mutations
+    module Tanukis
+      module Create
+        extend ActiveSupport::Concern
+
+        prepended do
+          argument :name,
+                   GraphQL::STRING_TYPE,
+                   required: false,
+                   description: 'Tanuki name'
+        end
+      end
+    end
+  end
+end
+```
+
 #### Using `render_if_exists`
 
 Instead of using regular `render`, we should use `render_if_exists`, which
@@ -525,7 +573,7 @@ constants.
 
 #### EE parameters
 
-We can define `params` and utilize `use` in another `params` definition to
+We can define `params` and use `use` in another `params` definition to
 include parameters defined in EE. However, we need to define the "interface" first
 in CE in order for EE to override it. We don't have to do this in other places
 due to `prepend_if_ee`, but Grape is complex internally and we couldn't easily

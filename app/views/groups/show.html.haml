@@ -1,11 +1,16 @@
-- breadcrumb_title _("Details")
-- page_title _("Groups")
 - @content_class = "limit-container-width" unless fluid_layout
+- page_itemtype    'https://schema.org/Organization'
+- @skip_current_level_breadcrumb = true
+
+- if show_thanks_for_purchase_banner?
+  = render_if_exists 'shared/thanks_for_purchase_banner', plan_title: plan_title, quantity: params[:purchased_quantity].to_i
 
 - if show_invite_banner?(@group)
   = content_for :group_invite_members_banner do
     .container-fluid.container-limited{ class: "gl-pb-2! gl-pt-6! #{@content_class}" }
       .js-group-invite-members-banner{ data: { svg_path: image_path('illustrations/merge_requests.svg'),
+        is_dismissed_key: "invite_#{@group.id}_#{current_user.id}",
+        track_label: 'invite_members_banner',
         invite_members_path: group_group_members_path(@group) } }
 
 = content_for :meta_tags do
@@ -20,6 +25,8 @@
 = render_if_exists 'groups/self_or_ancestor_marked_for_deletion_notice', group: @group
 
 = render_if_exists 'groups/group_activity_analytics', group: @group
+
+= render_if_exists 'groups/invite_members_modal', group: @group
 
 .groups-listing{ data: { endpoints: { default: group_children_path(@group, format: :json), shared: group_shared_projects_path(@group, format: :json) } } }
   .top-area.group-nav-container.justify-content-between

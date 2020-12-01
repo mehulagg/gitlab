@@ -62,7 +62,7 @@ describe('vue_shared/components/confirm_modal', () => {
         wrapper.vm.modalAttributes = MOCK_MODAL_DATA.modalAttributes;
       });
 
-      it('renders GlModal wtih data', () => {
+      it('renders GlModal with data', () => {
         expect(findModal().exists()).toBeTruthy();
         expect(findModal().attributes()).toEqual(
           expect.objectContaining({
@@ -70,6 +70,24 @@ describe('vue_shared/components/confirm_modal', () => {
             okvariant: MOCK_MODAL_DATA.modalAttributes.okVariant,
           }),
         );
+      });
+    });
+
+    describe.each`
+      desc                             | attrs                                                                         | expectation
+      ${'when message is simple text'} | ${{}}                                                                         | ${`<div>${MOCK_MODAL_DATA.modalAttributes.message}</div>`}
+      ${'when message has html'}       | ${{ messageHtml: '<p>Header</p><ul onhover="alert(1)"><li>First</li></ul>' }} | ${'<p>Header</p><ul><li>First</li></ul>'}
+    `('$desc', ({ attrs, expectation }) => {
+      beforeEach(() => {
+        createComponent();
+        wrapper.vm.modalAttributes = {
+          ...MOCK_MODAL_DATA.modalAttributes,
+          ...attrs,
+        };
+      });
+
+      it('renders message', () => {
+        expect(findForm().element.innerHTML).toContain(expectation);
       });
     });
   });
@@ -84,6 +102,22 @@ describe('vue_shared/components/confirm_modal', () => {
 
       it('does not submit form', () => {
         expect(findForm().element.submit).not.toHaveBeenCalled();
+      });
+
+      describe('with handleSubmit prop', () => {
+        const handleSubmit = jest.fn();
+        beforeEach(() => {
+          createComponent({ handleSubmit });
+          findModal().vm.$emit('primary');
+        });
+
+        it('will call handleSubmit', () => {
+          expect(handleSubmit).toHaveBeenCalled();
+        });
+
+        it('does not submit the form', () => {
+          expect(findForm().element.submit).not.toHaveBeenCalled();
+        });
       });
 
       describe('when modal submitted', () => {

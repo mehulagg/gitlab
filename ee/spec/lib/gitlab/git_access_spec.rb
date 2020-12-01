@@ -38,7 +38,7 @@ RSpec.describe Gitlab::GitAccess do
     let(:primary_repo_url) { geo_primary_http_url_to_repo(project) }
     let(:primary_repo_ssh_url) { geo_primary_ssh_url_to_repo(project) }
 
-    it_behaves_like 'a read-only GitLab instance'
+    it_behaves_like 'git access for a read-only GitLab instance'
   end
 
   describe "push_rule_check" do
@@ -725,6 +725,40 @@ RSpec.describe Gitlab::GitAccess do
 
       it 'allows push changes' do
         expect { push_changes }.not_to raise_error
+      end
+    end
+  end
+
+  describe '#check_maintenance_mode!' do
+    let(:changes) { Gitlab::GitAccess::ANY }
+
+    before do
+      project.add_maintainer(user)
+    end
+
+    def push_access_check
+      access.check('git-receive-pack', changes)
+    end
+
+    context 'when maintenance mode is enabled' do
+      before do
+        stub_application_setting(maintenance_mode: true)
+      end
+
+      it 'blocks git push' do
+        aggregate_failures do
+          expect { push_access_check }.to raise_forbidden('Git push is not allowed because this GitLab instance is currently in (read-only) maintenance mode.')
+        end
+      end
+    end
+
+    context 'when maintenance mode is disabled' do
+      before do
+        stub_application_setting(maintenance_mode: false)
+      end
+
+      it 'allows git push' do
+        expect { push_access_check }.not_to raise_error
       end
     end
   end

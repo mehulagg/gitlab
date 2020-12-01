@@ -1,15 +1,18 @@
-- breadcrumb_title _("Details")
-- page_title _("Details")
+- page_title _('No repository')
+- @skip_current_level_breadcrumb = true
 
-%h2
-  %i.fa.fa-warning
-  #{ _('No repository') }
+%h2.gl-display-flex
+  .gl-display-flex.gl-align-items-center.gl-justify-content-center
+    = sprite_icon('warning-solid', size: 24, css_class: 'gl-mr-2')
+  = _('No repository')
 
 %p.slead
   #{ _('The repository for this project does not exist.') }
   %br
   #{ _('This means you can not push code until you create an empty repository or import existing one.') }
 %hr
+
+= render_if_exists 'projects/invite_members_modal', project: @project
 
 .no-repo-actions
   = link_to project_repository_path(@project), method: :post, class: 'btn btn-primary' do
@@ -22,4 +25,4 @@
 
 - if can? current_user, :remove_project, @project
   .prepend-top-20
-    = link_to _('Delete project'), project_path(@project), data: { confirm: remove_project_message(@project)}, method: :delete, class: "btn btn-inverted btn-remove float-right"
+    = link_to _('Delete project'), project_path(@project), data: { confirm: remove_project_message(@project)}, method: :delete, class: "gl-button btn btn-danger btn-danger-secondary float-right"

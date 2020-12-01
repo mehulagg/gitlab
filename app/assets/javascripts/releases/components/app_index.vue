@@ -1,51 +1,33 @@
 <script>
 import { mapState, mapActions } from 'vuex';
-import {
-  GlDeprecatedSkeletonLoading as GlSkeletonLoading,
-  GlEmptyState,
-  GlLink,
-  GlButton,
-} from '@gitlab/ui';
-import {
-  getParameterByName,
-  historyPushState,
-  buildUrlWithCurrentLocation,
-} from '~/lib/utils/common_utils';
+import { GlEmptyState, GlLink, GlButton } from '@gitlab/ui';
+import { getParameterByName } from '~/lib/utils/common_utils';
 import { __ } from '~/locale';
-import TablePagination from '~/vue_shared/components/pagination/table_pagination.vue';
 import ReleaseBlock from './release_block.vue';
+import ReleasesPagination from './releases_pagination.vue';
+import ReleaseSkeletonLoader from './release_skeleton_loader.vue';
+import ReleasesSort from './releases_sort.vue';
 
 export default {
   name: 'ReleasesApp',
   components: {
-    GlSkeletonLoading,
     GlEmptyState,
-    ReleaseBlock,
-    TablePagination,
     GlLink,
     GlButton,
-  },
-  props: {
-    projectId: {
-      type: String,
-      required: true,
-    },
-    documentationPath: {
-      type: String,
-      required: true,
-    },
-    illustrationPath: {
-      type: String,
-      required: true,
-    },
-    newReleasePath: {
-      type: String,
-      required: false,
-      default: '',
-    },
+    ReleaseBlock,
+    ReleasesPagination,
+    ReleaseSkeletonLoader,
+    ReleasesSort,
   },
   computed: {
-    ...mapState('list', ['isLoading', 'releases', 'hasError', 'pageInfo']),
+    ...mapState('list', [
+      'documentationPath',
+      'illustrationPath',
+      'newReleasePath',
+      'isLoading',
+      'releases',
+      'hasError',
+    ]),
     shouldRenderEmptyState() {
       return !this.releases.length && !this.hasError && !this.isLoading;
     },
@@ -59,34 +41,45 @@ export default {
     },
   },
   created() {
-    this.fetchReleases({
-      page: getParameterByName('page'),
-      projectId: this.projectId,
-    });
+    this.fetchReleases();
+
+    window.addEventListener('popstate', this.fetchReleases);
   },
   methods: {
-    ...mapActions('list', ['fetchReleases']),
-    onChangePage(page) {
-      historyPushState(buildUrlWithCurrentLocation(`?page=${page}`));
-      this.fetchReleases({ page, projectId: this.projectId });
+    ...mapActions('list', {
+      fetchReleasesStoreAction: 'fetchReleases',
+    }),
+    fetchReleases() {
+      this.fetchReleasesStoreAction({
+        // these two parameters are only used in "GraphQL mode"
+        before: getParameterByName('before'),
+        after: getParameterByName('after'),
+
+        // this parameter is only used when in "REST mode"
+        page: getParameterByName('page'),
+      });
     },
   },
 };
 </script>
 <template>
   <div class="flex flex-column mt-2">
-    <gl-button
-      v-if="newReleasePath"
-      :href="newReleasePath"
-      :aria-describedby="shouldRenderEmptyState && 'releases-description'"
-      category="primary"
-      variant="success"
-      class="align-self-end mb-2 js-new-release-btn"
-    >
-      {{ __('New release') }}
-    </gl-button>
+    <div class="gl-align-self-end gl-mb-3">
+      <releases-sort class="gl-mr-2" @sort:changed="fetchReleases" />
 
-    <gl-skeleton-loading v-if="isLoading" class="js-loading" />
+      <gl-button
+        v-if="newReleasePath"
+        :href="newReleasePath"
+        :aria-describedby="shouldRenderEmptyState && 'releases-description'"
+        category="primary"
+        variant="success"
+        class="js-new-release-btn"
+      >
+        {{ __('New release') }}
+      </gl-button>
+    </div>
+
+    <release-skeleton-loader v-if="isLoading" class="js-loading" />
 
     <gl-empty-state
       v-else-if="shouldRenderEmptyState"
@@ -117,7 +110,7 @@ export default {
       />
     </div>
 
-    <table-pagination v-if="!isLoading" :change="onChangePage" :page-info="pageInfo" />
+    <releases-pagination v-if="!isLoading" />
   </div>
 </template>
 <style>

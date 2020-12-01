@@ -9,7 +9,7 @@ RSpec.describe API::Terraform::State do
   let_it_be(:developer) { create(:user, developer_projects: [project]) }
   let_it_be(:maintainer) { create(:user, maintainer_projects: [project]) }
 
-  let!(:state) { create(:terraform_state, :with_file, project: project) }
+  let!(:state) { create(:terraform_state, :with_version, project: project) }
 
   let(:current_user) { maintainer }
   let(:auth_header) { user_basic_auth_header(current_user) }
@@ -18,7 +18,7 @@ RSpec.describe API::Terraform::State do
   let(:state_path) { "/projects/#{project_id}/terraform/state/#{state_name}" }
 
   before do
-    stub_terraform_state_object_storage(Terraform::StateUploader)
+    stub_terraform_state_object_storage
   end
 
   describe 'GET /projects/:id/terraform/state/:name' do
@@ -42,7 +42,7 @@ RSpec.describe API::Terraform::State do
           request
 
           expect(response).to have_gitlab_http_status(:ok)
-          expect(response.body).to eq(state.file.read)
+          expect(response.body).to eq(state.reload.latest_file.read)
         end
 
         context 'for a project that does not exist' do
@@ -63,7 +63,7 @@ RSpec.describe API::Terraform::State do
           request
 
           expect(response).to have_gitlab_http_status(:ok)
-          expect(response.body).to eq(state.file.read)
+          expect(response.body).to eq(state.reload.latest_file.read)
         end
       end
     end
@@ -78,7 +78,7 @@ RSpec.describe API::Terraform::State do
           request
 
           expect(response).to have_gitlab_http_status(:ok)
-          expect(response.body).to eq(state.file.read)
+          expect(response.body).to eq(state.reload.latest_file.read)
         end
 
         it 'returns unauthorized if the the job is not running' do
@@ -106,14 +106,14 @@ RSpec.describe API::Terraform::State do
           request
 
           expect(response).to have_gitlab_http_status(:ok)
-          expect(response.body).to eq(state.file.read)
+          expect(response.body).to eq(state.reload.latest_file.read)
         end
       end
     end
   end
 
   describe 'POST /projects/:id/terraform/state/:name' do
-    let(:params) { { 'instance': 'example-instance' } }
+    let(:params) { { 'instance': 'example-instance', 'serial': state.latest_version.version + 1 } }
 
     subject(:request) { post api(state_path), headers: auth_header, as: :json, params: params }
 
@@ -125,6 +125,7 @@ RSpec.describe API::Terraform::State do
           expect { request }.to change { Terraform::State.count }.by(0)
 
           expect(response).to have_gitlab_http_status(:ok)
+          expect(Gitlab::Json.parse(response.body)).to be_empty
         end
 
         context 'on Unicorn', :unicorn do
@@ -132,6 +133,7 @@ RSpec.describe API::Terraform::State do
             expect { request }.to change { Terraform::State.count }.by(0)
 
             expect(response).to have_gitlab_http_status(:ok)
+            expect(Gitlab::Json.parse(response.body)).to be_empty
           end
         end
       end
@@ -167,6 +169,7 @@ RSpec.describe API::Terraform::State do
           expect { request }.to change { Terraform::State.count }.by(1)
 
           expect(response).to have_gitlab_http_status(:ok)
+          expect(Gitlab::Json.parse(response.body)).to be_empty
         end
 
         context 'on Unicorn', :unicorn do
@@ -174,6 +177,7 @@ RSpec.describe API::Terraform::State do
             expect { request }.to change { Terraform::State.count }.by(1)
 
             expect(response).to have_gitlab_http_status(:ok)
+            expect(Gitlab::Json.parse(response.body)).to be_empty
           end
         end
       end
@@ -198,6 +202,18 @@ RSpec.describe API::Terraform::State do
         end
       end
     end
+
+    context 'when using job token authentication' do
+      let(:job) { create(:ci_build, status: :running, project: project, user: maintainer) }
+      let(:auth_header) { job_basic_auth_header(job) }
+
+      it 'associates the job with the newly created state version' do
+        expect { request }.to change { state.versions.count }.by(1)
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(state.reload_latest_version.build).to eq(job)
+      end
+    end
   end
 
   describe 'DELETE /projects/:id/terraform/state/:name' do
@@ -206,10 +222,11 @@ RSpec.describe API::Terraform::State do
     context 'with maintainer permissions' do
       let(:current_user) { maintainer }
 
-      it 'deletes the state' do
+      it 'deletes the state and returns empty body' do
         expect { request }.to change { Terraform::State.count }.by(-1)
 
         expect(response).to have_gitlab_http_status(:ok)
+        expect(Gitlab::Json.parse(response.body)).to be_empty
       end
     end
 

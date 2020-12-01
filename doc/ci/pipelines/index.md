@@ -1,7 +1,7 @@
 ---
 stage: Verify
 group: Continuous Integration
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 disqus_identifier: 'https://docs.gitlab.com/ee/ci/pipelines.html'
 type: reference
 ---
@@ -10,7 +10,7 @@ type: reference
 
 > Introduced in GitLab 8.8.
 
-NOTE: **Tip:**
+TIP: **Tip:**
 Watch the
 ["Mastering continuous software development"](https://about.gitlab.com/webcast/mastering-ci-cd/)
 webcast to see a comprehensive demo of a GitLab CI/CD pipeline.
@@ -68,7 +68,7 @@ Pipelines can be configured in many different ways:
 
 Pipelines and their component jobs and stages are defined in the CI/CD pipeline configuration file for each project.
 
-- Jobs are the [basic configuration](../yaml/README.md#introduction) component.
+- [Jobs](../jobs/index.md) are the basic configuration component.
 - Stages are defined by using the [`stages`](../yaml/README.md#stages) keyword.
 
 For a list of configuration options in the CI pipeline file, see the [GitLab CI/CD Pipeline Configuration Reference](../yaml/README.md).
@@ -78,6 +78,27 @@ You can also configure specific aspects of your pipelines through the GitLab UI.
 - [Pipeline settings](settings.md) for each project.
 - [Pipeline schedules](schedules.md).
 - [Custom CI/CD variables](../variables/README.md#custom-environment-variables).
+
+### Ref Specs for Runners
+
+When a runner picks a pipeline job, GitLab provides that job's metadata. This includes the [Git refspecs](https://git-scm.com/book/en/v2/Git-Internals-The-Refspec),
+which indicate which ref (branch, tag, and so on) and commit (SHA1) are checked out from your
+project repository.
+
+This table lists the refspecs injected for each pipeline type:
+
+| Pipeline type                                                      | Refspecs                                                                                       |
+|---------------                                                     |----------------------------------------                                                        |
+| Pipeline for Branches                                              | `+refs/pipelines/<id>:refs/pipelines/<id>` and `+refs/heads/<name>:refs/remotes/origin/<name>` |
+| pipeline for Tags                                                  | `+refs/pipelines/<id>:refs/pipelines/<id>` and `+refs/tags/<name>:refs/tags/<name>`            |
+| [Pipeline for Merge Requests](../merge_request_pipelines/index.md) | `+refs/pipelines/<id>:refs/pipelines/<id>`                                                     |
+
+The refs `refs/heads/<name>` and `refs/tags/<name>` exist in your
+project repository. GitLab generates the special ref `refs/pipelines/<id>` during a
+running pipeline job. This ref can be created even after the associated branch or tag has been
+deleted. It's therefore useful in some features such as [automatically stopping an environment](../environments/index.md#automatically-stopping-an-environment),
+and [merge trains](../merge_request_pipelines/pipelines_for_merged_results/merge_trains/index.md)
+that might run pipelines after branch deletion.
 
 ### View pipelines
 
@@ -101,8 +122,8 @@ you can filter the pipeline list by:
 
 - Trigger author
 - Branch name
-- Status ([since GitLab 13.1](https://gitlab.com/gitlab-org/gitlab/-/issues/217617))
-- Tag ([since GitLab 13.1](https://gitlab.com/gitlab-org/gitlab/-/issues/217617))
+- Status ([GitLab 13.1 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/217617))
+- Tag ([GitLab 13.1 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/217617))
 
 ### Run a pipeline manually
 
@@ -114,7 +135,7 @@ operation of the pipeline.
 To execute a pipeline manually:
 
 1. Navigate to your project's **CI/CD > Pipelines**.
-1. Click on the **Run Pipeline** button.
+1. Select the **Run Pipeline** button.
 1. On the **Run Pipeline** page:
     1. Select the branch to run the pipeline for in the **Create for** field.
     1. Enter any [environment variables](../variables/README.md) required for the pipeline run.
@@ -157,7 +178,7 @@ For each `var` or `file_var`, a key and value are required.
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/7931) in GitLab 8.15.
 
-Manual actions, configured using the [`when:manual`](../yaml/README.md#whenmanual) parameter,
+Manual actions, configured using the [`when:manual`](../yaml/README.md#whenmanual) keyword,
 allow you to require manual interaction before moving forward in the pipeline.
 
 You can do this straight from the pipeline graph. Just click the play button
@@ -174,7 +195,7 @@ stage has a job with a manual action.
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/27188) in GitLab 11.11.
 
 Multiple manual actions in a single stage can be started at the same time using the "Play all manual" button.
-Once you click this button, each individual manual action is triggered and refreshed
+After you click this button, each individual manual action is triggered and refreshed
 to an updated status.
 
 This functionality is only available:
@@ -199,7 +220,7 @@ such as builds, logs, artifacts, and triggers. **This action cannot be undone.**
 ### Pipeline quotas
 
 Each user has a personal pipeline quota that tracks the usage of shared runners in all personal projects.
-Each group has a [usage quota](../../subscriptions/index.md#ci-pipeline-minutes) that tracks the usage of shared runners for all projects created within the group.
+Each group has a [usage quota](../../subscriptions/gitlab_com/index.md#ci-pipeline-minutes) that tracks the usage of shared runners for all projects created within the group.
 
 When a pipeline is triggered, regardless of who triggered it, the pipeline quota for the project owner's [namespace](../../user/group/index.md#namespaces) is used. In this case, the namespace can be the user or group that owns the project.
 
@@ -266,201 +287,6 @@ preserving deployment keys and other credentials from being unintentionally
 accessed. In order to ensure that jobs intended to be executed on protected
 runners do not use regular runners, they must be tagged accordingly.
 
-## View jobs in a pipeline
-
-When you access a pipeline, you can see the related jobs for that pipeline.
-
-Clicking an individual job shows you its job log, and allows you to:
-
-- Cancel the job.
-- Retry the job.
-- Erase the job log.
-
-### See why a job failed
-
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/17782) in GitLab 10.7.
-
-When a pipeline fails or is allowed to fail, there are several places where you
-can find the reason:
-
-- In the [pipeline graph](#visualize-pipelines), on the pipeline detail view.
-- In the pipeline widgets, in the merge requests and commit pages.
-- In the job views, in the global and detailed views of a job.
-
-In each place, if you hover over the failed job you can see the reason it failed.
-
-![Pipeline detail](img/job_failure_reason.png)
-
-In [GitLab 10.8](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/17814) and later,
-you can also see the reason it failed on the Job detail page.
-
-### The order of jobs in a pipeline
-
-The order of jobs in a pipeline depends on the type of pipeline graph.
-
-- For [regular pipeline graphs](#regular-pipeline-graphs), jobs are sorted by name.
-- For [pipeline mini graphs](#pipeline-mini-graphs), jobs are sorted by severity and then by name.
-
-The order of severity is:
-
-- failed
-- warning
-- pending
-- running
-- manual
-- scheduled
-- canceled
-- success
-- skipped
-- created
-
-For example:
-
-![Pipeline mini graph sorting](img/pipelines_mini_graph_sorting.png)
-
-### Group jobs in a pipeline
-
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/6242) in GitLab 8.12.
-
-If you have many similar jobs, your [pipeline graph](#visualize-pipelines) becomes long and hard
-to read.
-
-You can automatically group similar jobs together. If the job names are formatted in a certain way,
-they are collapsed into a single group in regular pipeline graphs (not the mini graphs).
-
-You can recognize when a pipeline has grouped jobs if you don't see the retry or
-cancel button inside them. Hovering over them shows the number of grouped
-jobs. Click to expand them.
-
-![Grouped pipelines](img/pipelines_grouped.png)
-
-To create a group of jobs, in the [CI/CD pipeline configuration file](../yaml/README.md),
-separate each job name with a number and one of the following:
-
-- A slash (`/`), for example, `test 1/3`, `test 2/3`, `test 3/3`.
-- A colon (`:`), for example, `test 1:3`, `test 2:3`, `test 3:3`.
-- A space, for example `test 0 3`, `test 1 3`, `test 2 3`.
-
-You can use these symbols interchangeably.
-
-In the example below, these three jobs are in a group named `build ruby`:
-
-```yaml
-build ruby 1/3:
-  stage: build
-  script:
-    - echo "ruby1"
-
-build ruby 2/3:
-  stage: build
-  script:
-    - echo "ruby2"
-
-build ruby 3/3:
-  stage: build
-  script:
-    - echo "ruby3"
-```
-
-In the pipeline, the result is a group named `build ruby` with three jobs:
-
-![Job group](img/job_group_v12_10.png)
-
-The jobs are be ordered by comparing the numbers from left to right. You
-usually want the first number to be the index and the second number to be the total.
-
-[This regular expression](https://gitlab.com/gitlab-org/gitlab/blob/2f3dc314f42dbd79813e6251792853bc231e69dd/app/models/commit_status.rb#L99)
-evaluates the job names: `\d+[\s:\/\\]+\d+\s*`.
-
-### Specifying variables when running manual jobs
-
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/30485) in GitLab 12.2.
-
-When running manual jobs you can supply additional job specific variables.
-
-You can do this from the job page of the manual job you want to run with
-additional variables. To access this page, click on the **name** of the manual job in
-the pipeline view, *not* the play (**{play}**) button.
-
-This is useful when you want to alter the execution of a job that uses
-[custom environment variables](../variables/README.md#custom-environment-variables).
-Add a variable name (key) and value here to override the value defined in
-[the UI or `.gitlab-ci.yml`](../variables/README.md#custom-environment-variables),
-for a single run of the manual job.
-
-![Manual job variables](img/manual_job_variables.png)
-
-### Delay a job
-
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/21767) in GitLab 11.4.
-
-When you do not want to run a job immediately, you can use the [`when:delayed`](../yaml/README.md#whendelayed) parameter to
-delay a job's execution for a certain period.
-
-This is especially useful for timed incremental rollout where new code is rolled out gradually.
-
-For example, if you start rolling out new code and:
-
-- Users do not experience trouble, GitLab can automatically complete the deployment from 0% to 100%.
-- Users experience trouble with the new code, you can stop the timed incremental rollout by canceling the pipeline
-  and [rolling](../environments/index.md#retrying-and-rolling-back) back to the last stable version.
-
-![Pipelines example](img/pipeline_incremental_rollout.png)
-
-### Expand and collapse job log sections
-
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/14664) in GitLab 12.0.
-
-Job logs are divided into sections that can be collapsed or expanded. Each section displays
-the duration.
-
-In the following example:
-
-- Two sections are collapsed and can be expanded.
-- Three sections are expanded and can be collapsed.
-
-![Collapsible sections](img/collapsible_log_v12_6.png)
-
-#### Custom collapsible sections
-
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/14664) in GitLab 12.0.
-
-You can create [collapsible sections in job logs](../pipelines/index.md#expand-and-collapse-job-log-sections)
-by manually outputting special codes
-that GitLab uses to determine what sections to collapse:
-
-- Section start marker: `section_start:UNIX_TIMESTAMP:SECTION_NAME\r\e[0K` + `TEXT_OF_SECTION_HEADER`
-- Section end marker: `section_end:UNIX_TIMESTAMP:SECTION_NAME\r\e[0K`
-
-You must add these codes to the script section of the CI configuration. For example,
-using `echo`:
-
-```yaml
-job1:
-  script:
-    - echo -e "section_start:`date +%s`:my_first_section\r\e[0KHeader of the 1st collapsible section"
-    - echo 'this line should be hidden when collapsed'
-    - echo -e "section_end:`date +%s`:my_first_section\r\e[0K"
-```
-
-In the example above:
-
-- `date +%s`: The Unix timestamp (for example `1560896352`).
-- `my_first_section`: The name given to the section.
-- `\r\e[0K`: Prevents the section markers from displaying in the rendered (colored)
-  job log, but they are displayed in the raw job log. To see them, in the top right
-  of the job log, click **{doc-text}** (**Show complete raw**).
-  - `\r`: carriage return.
-  - `\e[0K`: clear line ANSI escape code.
-
-Sample raw job log:
-
-```plaintext
-section_start:1560896352:my_first_section\r\e[0KHeader of the 1st collapsible section
-this line should be hidden when collapsed
-section_end:1560896353:my_first_section\r\e[0K
-```
-
 ## Visualize pipelines
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/5742) in GitLab 8.11.
@@ -473,7 +299,6 @@ and their statuses.
 Pipeline graphs can be displayed in two different ways, depending on the page you
 access the graph from.
 
-NOTE: **Note:**
 GitLab capitalizes the stages' names in the pipeline graphs.
 
 ### Regular pipeline graphs
@@ -535,32 +360,3 @@ GitLab provides API endpoints to:
 - Trigger pipeline runs. For more information, see:
   - [Triggering pipelines through the API](../triggers/README.md).
   - [Pipeline triggers API](../../api/pipeline_triggers.md).
-
-## Troubleshooting `fatal: reference is not a tree:`
-
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/17043) in GitLab 12.4.
-
-Previously, you'd have encountered unexpected pipeline failures when you force-pushed
-a branch to its remote repository. To illustrate the problem, suppose you've had the current workflow:
-
-1. A user creates a feature branch named `example` and pushes it to a remote repository.
-1. A new pipeline starts running on the `example` branch.
-1. A user rebases the `example` branch on the latest `master` branch and force-pushes it to its remote repository.
-1. A new pipeline starts running on the `example` branch again, however,
-   the previous pipeline (2) fails because of `fatal: reference is not a tree:` error.
-
-This is because the previous pipeline cannot find a checkout-SHA (which associated with the pipeline record)
-from the `example` branch that the commit history has already been overwritten by the force-push.
-Similarly, [Pipelines for merged results](../merge_request_pipelines/pipelines_for_merged_results/index.md)
-might have failed intermittently due to [the same reason](../merge_request_pipelines/pipelines_for_merged_results/index.md#intermittently-pipelines-fail-by-fatal-reference-is-not-a-tree-error).
-
-As of GitLab 12.4, we've improved this behavior by persisting pipeline refs exclusively.
-To illustrate its life cycle:
-
-1. A pipeline is created on a feature branch named `example`.
-1. A persistent pipeline ref is created at `refs/pipelines/<pipeline-id>`,
-   which retains the checkout-SHA of the associated pipeline record.
-   This persistent ref stays intact during the pipeline execution,
-   even if the commit history of the `example` branch has been overwritten by force-push.
-1. The runner fetches the persistent pipeline ref and gets source code from the checkout-SHA.
-1. When the pipeline finished, its persistent ref is cleaned up in a background process.

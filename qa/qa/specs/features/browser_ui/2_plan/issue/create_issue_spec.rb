@@ -19,7 +19,7 @@ module QA
         end
       end
 
-      it 'closes an issue', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/225303', type: :bug }, testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/852' do
+      it 'closes an issue', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/225303', type: :bug }, testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1085' do
         closed_issue.visit!
 
         Page::Project::Issue::Show.perform do |issue_page|
@@ -41,7 +41,7 @@ module QA
       context 'when using attachments in comments', :object_storage do
         let(:gif_file_name) { 'banana_sample.gif' }
         let(:file_to_attach) do
-          File.absolute_path(File.join('spec', 'fixtures', gif_file_name))
+          File.absolute_path(File.join('qa', 'fixtures', 'designs', gif_file_name))
         end
 
         before do

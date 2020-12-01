@@ -1,7 +1,7 @@
 ---
 stage: Create
 group: Source Code
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 type: reference, how-to
 ---
 
@@ -64,6 +64,8 @@ Feature.enable(:sourcegraph, Project.find_by_full_path('my_group/my_project'))
 
 If you are new to Sourcegraph, head over to the [Sourcegraph installation documentation](https://docs.sourcegraph.com/admin) and get your instance up and running.
 
+If you are using an HTTPS connection to GitLab, you will need to [configure HTTPS](https://docs.sourcegraph.com/admin/http_https_configuration) for your Sourcegraph instance. 
+
 ### Connect your Sourcegraph instance to your GitLab instance
 
 1. Navigate to the site admin area in Sourcegraph.
@@ -74,7 +76,7 @@ You can skip this step if you already have your GitLab repositories searchable i
 
 ### Configure your GitLab instance with Sourcegraph
 
-1. In GitLab, go to **Admin Area > Settings > Integrations**.
+1. In GitLab, go to **Admin Area > Settings > General**.
 1. Expand the **Sourcegraph** configuration section.
 1. Check **Enable Sourcegraph**.
 1. Set the Sourcegraph URL to your Sourcegraph instance, e.g., `https://sourcegraph.example.com`.

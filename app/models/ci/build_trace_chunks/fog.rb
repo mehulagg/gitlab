@@ -8,13 +8,21 @@ module Ci
       end
 
       def data(model)
-        connection.get_object(bucket_name, key(model))[:body]
+        files.get(key(model))&.body
       rescue Excon::Error::NotFound
         # If the object does not exist in the object storage, this method returns nil.
       end
 
       def set_data(model, new_data)
-        connection.put_object(bucket_name, key(model), new_data)
+        if Feature.enabled?(:ci_live_trace_use_fog_attributes)
+          files.create(create_attributes(model, new_data))
+        else
+          # TODO: Support AWS S3 server side encryption
+          files.create({
+            key: key(model),
+            body: new_data
+          })
+        end
       end
 
       def append_data(model, new_data, offset)
@@ -43,7 +51,7 @@ module Ci
 
       def delete_keys(keys)
         keys.each do |key|
-          connection.delete_object(bucket_name, key_raw(*key))
+          files.destroy(key_raw(*key))
         end
       end
 
@@ -51,6 +59,13 @@ module Ci
 
       def key(model)
         key_raw(model.build_id, model.chunk_index)
+      end
+
+      def create_attributes(model, new_data)
+        {
+          key: key(model),
+          body: new_data
+        }.merge(object_store_config.fog_attributes)
       end
 
       def key_raw(build_id, chunk_index)
@@ -69,8 +84,24 @@ module Ci
         @connection ||= ::Fog::Storage.new(object_store.connection.to_hash.deep_symbolize_keys)
       end
 
+      def fog_directory
+        @fog_directory ||= connection.directories.new(key: bucket_name)
+      end
+
+      def files
+        @files ||= fog_directory.files
+      end
+
       def object_store
         Gitlab.config.artifacts.object_store
+      end
+
+      def object_store_raw_config
+        object_store
+      end
+
+      def object_store_config
+        @object_store_config ||= ::ObjectStorage::Config.new(object_store_raw_config)
       end
     end
   end

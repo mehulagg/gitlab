@@ -3,7 +3,7 @@ import {
   GlFilteredSearchToken,
   GlFilteredSearchSuggestion,
   GlFilteredSearchTokenSegment,
-  GlNewDropdownDivider as GlDropdownDivider,
+  GlDropdownDivider,
 } from '@gitlab/ui';
 import MockAdapter from 'axios-mock-adapter';
 import waitForPromises from 'helpers/wait_for_promises';
@@ -50,6 +50,7 @@ function createComponent(options = {}) {
     provide: {
       portalName: 'fake target',
       alignSuggestions: function fakeAlignSuggestions() {},
+      suggestionsListClass: 'custom-class',
     },
     stubs,
   });

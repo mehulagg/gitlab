@@ -1,6 +1,7 @@
 /* eslint-disable no-new, class-methods-use-this */
 
 import $ from 'jquery';
+import 'vendor/jquery.scrollTo';
 import { GlBreakpointInstance as bp } from '@gitlab/ui/dist/utils';
 import Cookies from 'js-cookie';
 import createEventHub from '~/helpers/event_hub_factory';
@@ -368,6 +369,9 @@ export default class MergeRequestTabs {
         projectId: pipelineTableViewEl.dataset.projectId,
         mergeRequestId: mrWidgetData ? mrWidgetData.iid : null,
       },
+      provide: {
+        targetProjectFullPath: mrWidgetData?.target_project_full_path || '',
+      },
     }).$mount();
 
     // $mount(el) replaces the el with the new rendered component. We need it in order to mount
@@ -394,10 +398,6 @@ export default class MergeRequestTabs {
         $container.html(data.html);
 
         initChangesDropdown(this.stickyTop);
-
-        if (typeof gl.diffNotesCompileComponents !== 'undefined') {
-          gl.diffNotesCompileComponents();
-        }
 
         localTimeAgo($('.js-timeago', 'div#diffs'));
         syntaxHighlight($('#diffs .js-syntax-highlight'));
@@ -481,13 +481,14 @@ export default class MergeRequestTabs {
   }
 
   shrinkView() {
-    const $gutterIcon = $('.js-sidebar-toggle i:visible');
+    const $gutterBtn = $('.js-sidebar-toggle:visible');
+    const $expandSvg = $gutterBtn.find('.js-sidebar-expand');
 
     // Wait until listeners are set
     setTimeout(() => {
       // Only when sidebar is expanded
-      if ($gutterIcon.is('.fa-angle-double-right')) {
-        $gutterIcon.closest('a').trigger('click', [true]);
+      if ($expandSvg.length && $expandSvg.hasClass('hidden')) {
+        $gutterBtn.trigger('click', [true]);
       }
     }, 0);
   }
@@ -497,13 +498,14 @@ export default class MergeRequestTabs {
     if (parseBoolean(Cookies.get('collapsed_gutter'))) {
       return;
     }
-    const $gutterIcon = $('.js-sidebar-toggle i:visible');
+    const $gutterBtn = $('.js-sidebar-toggle');
+    const $collapseSvg = $gutterBtn.find('.js-sidebar-collapse');
 
     // Wait until listeners are set
     setTimeout(() => {
       // Only when sidebar is collapsed
-      if ($gutterIcon.is('.fa-angle-double-left')) {
-        $gutterIcon.closest('a').trigger('click', [true]);
+      if ($collapseSvg.length && !$collapseSvg.hasClass('hidden')) {
+        $gutterBtn.trigger('click', [true]);
       }
     }, 0);
   }

@@ -1,38 +1,39 @@
 export const sourceContentHeaderYAML = `---
 layout: handbook-page-toc
 title: Handbook
-twitter_image: '/images/tweets/handbook-gitlab.png'
+twitter_image: /images/tweets/handbook-gitlab.png
+suppress_header: true
+extra_css:
+  - sales-and-free-trial-common.css
+  - form-to-resource.css
 ---`;
-export const sourceContentHeaderTOML = `+++
-layout: "handbook-page-toc"
-title: "Handbook"
-twitter_image: "/images/tweets/handbook-gitlab.png"
-+++`;
-export const sourceContentHeaderJSON = `{
-"layout": "handbook-page-toc",
-"title": "Handbook",
-"twitter_image": "/images/tweets/handbook-gitlab.png",
-}`;
-export const sourceContentSpacing = `
-`;
+export const sourceContentHeaderObjYAML = {
+  layout: 'handbook-page-toc',
+  title: 'Handbook',
+  twitter_image: '/images/tweets/handbook-gitlab.png',
+  suppress_header: true,
+  extra_css: ['sales-and-free-trial-common.css', 'form-to-resource.css'],
+};
+export const sourceContentSpacing = `\n`;
 export const sourceContentBody = `## On this page
 {:.no_toc .hidden-md .hidden-lg}
 
 - TOC
 {:toc .hidden-md .hidden-lg}
 
-![image](path/to/image1.png)
-`;
+![image](path/to/image1.png)`;
 export const sourceContentYAML = `${sourceContentHeaderYAML}${sourceContentSpacing}${sourceContentBody}`;
-export const sourceContentTOML = `${sourceContentHeaderTOML}${sourceContentSpacing}${sourceContentBody}`;
-export const sourceContentJSON = `${sourceContentHeaderJSON}${sourceContentSpacing}${sourceContentBody}`;
 export const sourceContentTitle = 'Handbook';
 
 export const username = 'gitlabuser';
 export const projectId = '123456';
+export const project = 'user1/project1';
 export const returnUrl = 'https://www.gitlab.com';
 export const sourcePath = 'foobar.md.html';
-
+export const mergeRequestMeta = {
+  title: `Update ${sourcePath} file`,
+  description: 'Copy update',
+};
 export const savedContentMeta = {
   branch: {
     label: 'foobar',
@@ -47,6 +48,10 @@ export const savedContentMeta = {
     url: 'foobar/-/merge_requests/123',
   },
 };
+export const mergeRequestTemplates = [
+  { key: 'Template1', name: 'Template 1', content: 'This is template 1!' },
+  { key: 'Template2', name: 'Template 2', content: 'This is template 2!' },
+];
 
 export const submitChangesError = 'Could not save changes';
 export const commitBranchResponse = {
@@ -67,3 +72,20 @@ export const images = new Map([
   ['path/to/image1.png', 'image1-content'],
   ['path/to/image2.png', 'image2-content'],
 ]);
+
+export const mounts = [
+  {
+    source: 'default/source/',
+    target: '',
+  },
+  {
+    source: 'source/with/target',
+    target: 'target',
+  },
+];
+
+export const branch = 'master';
+
+export const baseUrl = '/user1/project1/-/sse/master%2Ftest.md';
+
+export const imageRoot = 'source/images/';

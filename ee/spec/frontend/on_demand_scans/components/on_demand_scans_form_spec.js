@@ -1,62 +1,78 @@
-import { merge } from 'lodash';
-import { mount, shallowMount } from '@vue/test-utils';
 import { GlForm, GlSkeletonLoader } from '@gitlab/ui';
-import { TEST_HOST } from 'helpers/test_constants';
+import { shallowMount, mount } from '@vue/test-utils';
+import { merge } from 'lodash';
 import OnDemandScansForm from 'ee/on_demand_scans/components/on_demand_scans_form.vue';
+import ScannerProfileSelector from 'ee/on_demand_scans/components/profile_selector/scanner_profile_selector.vue';
+import SiteProfileSelector from 'ee/on_demand_scans/components/profile_selector/site_profile_selector.vue';
 import dastOnDemandScanCreate from 'ee/on_demand_scans/graphql/dast_on_demand_scan_create.mutation.graphql';
 import { redirectTo } from '~/lib/utils/url_utility';
+import { scannerProfiles, siteProfiles } from '../mock_data';
 
-const helpPagePath = `${TEST_HOST}/application_security/dast/index#on-demand-scans`;
+const helpPagePath = '/application_security/dast/index#on-demand-scans';
 const projectPath = 'group/project';
 const defaultBranch = 'master';
-const profilesLibraryPath = `${TEST_HOST}/${projectPath}/-/on_demand_scans/profiles`;
-const newSiteProfilePath = `${TEST_HOST}/${projectPath}/-/on_demand_scans/profiles`;
+const scannerProfilesLibraryPath = '/security/configuration/dast_profiles#scanner-profiles';
+const siteProfilesLibraryPath = '/security/configuration/dast_profiles#site-profiles';
+const newScannerProfilePath = '/security/configuration/dast_profiles/dast_scanner_profile/new';
+const newSiteProfilePath = `/${projectPath}/-/security/configuration/dast_profiles`;
 
 const defaultProps = {
   helpPagePath,
   projectPath,
   defaultBranch,
-  profilesLibraryPath,
-  newSiteProfilePath,
 };
 
-const siteProfiles = [
-  { id: 1, profileName: 'My first site profile', targetUrl: 'https://example.com' },
-  { id: 2, profileName: 'My second site profile', targetUrl: 'https://foo.bar' },
-];
-const pipelineUrl = `${TEST_HOST}/${projectPath}/pipelines/123`;
+const defaultMocks = {
+  $apollo: {
+    mutate: jest.fn(),
+    queries: {
+      scannerProfiles: {},
+      siteProfiles: {},
+    },
+    addSmartQuery: jest.fn(),
+  },
+};
+
+const pipelineUrl = `/${projectPath}/pipelines/123`;
+const [passiveScannerProfile, activeScannerProfile] = scannerProfiles;
+const [nonValidatedSiteProfile, validatedSiteProfile] = siteProfiles;
 
 jest.mock('~/lib/utils/url_utility', () => ({
   isAbsolute: jest.requireActual('~/lib/utils/url_utility').isAbsolute,
   redirectTo: jest.fn(),
 }));
 
-describe('OnDemandScansApp', () => {
-  let wrapper;
+describe('OnDemandScansForm', () => {
+  let subject;
 
-  const findForm = () => wrapper.find(GlForm);
-  const findSiteProfilesDropdown = () => wrapper.find('[data-testid="site-profiles-dropdown"]');
-  const findManageSiteProfilesButton = () =>
-    wrapper.find('[data-testid="manage-site-profiles-button"]');
-  const findCreateNewSiteProfileLink = () =>
-    wrapper.find('[data-testid="create-site-profile-link"]');
-  const findAlert = () => wrapper.find('[data-testid="on-demand-scan-error"]');
-  const findCancelButton = () => wrapper.find('[data-testid="on-demand-scan-cancel-button"]');
+  const findForm = () => subject.find(GlForm);
+  const findByTestId = testId => subject.find(`[data-testid="${testId}"]`);
+  const findAlert = () => findByTestId('on-demand-scan-error');
+  const findProfilesConflictAlert = () => findByTestId('on-demand-scans-profiles-conflict-alert');
+  const findSubmitButton = () => findByTestId('on-demand-scan-submit-button');
+
+  const setValidFormData = () => {
+    subject.find(ScannerProfileSelector).vm.$emit('input', passiveScannerProfile);
+    subject.find(SiteProfileSelector).vm.$emit('input', nonValidatedSiteProfile);
+    return subject.vm.$nextTick();
+  };
   const submitForm = () => findForm().vm.$emit('submit', { preventDefault: () => {} });
 
-  const wrapperFactory = (mountFn = shallowMount) => (options = {}) => {
-    wrapper = mountFn(
+  const subjectMounterFactory = (mountFn = shallowMount) => (options = {}) => {
+    subject = mountFn(
       OnDemandScansForm,
       merge(
         {},
         {
           propsData: defaultProps,
-          mocks: {
-            $apollo: {
-              mutate: jest.fn(),
-              queries: {
-                siteProfiles: {},
-              },
+          mocks: defaultMocks,
+          provide: {
+            scannerProfilesLibraryPath,
+            siteProfilesLibraryPath,
+            newScannerProfilePath,
+            newSiteProfilePath,
+            glFeatures: {
+              securityOnDemandScansSiteValidation: true,
             },
           },
         },
@@ -69,224 +85,96 @@ describe('OnDemandScansApp', () => {
       ),
     );
   };
-  const createComponent = wrapperFactory();
-  const createFullComponent = wrapperFactory(mount);
-
-  beforeEach(() => {
-    createComponent();
-  });
+  const mountSubject = subjectMounterFactory(mount);
+  const mountShallowSubject = subjectMounterFactory();
 
   afterEach(() => {
-    wrapper.destroy();
-    wrapper = null;
+    subject.destroy();
+    subject = null;
   });
 
   it('renders properly', () => {
-    expect(wrapper.html()).not.toBe('');
+    mountSubject();
+    expect(subject.html()).not.toBe('');
   });
 
-  describe('computed props', () => {
-    describe('formData', () => {
-      it('returns an object with a key:value mapping from the form object including the project path', () => {
-        wrapper.vm.form = {
-          siteProfileId: {
-            value: siteProfiles[0],
-            state: null,
-            feedback: '',
-          },
-        };
-        expect(wrapper.vm.formData).toEqual({
-          fullPath: projectPath,
-          siteProfileId: siteProfiles[0],
-        });
-      });
-    });
-
-    describe('formHasErrors', () => {
-      it('returns true if any of the fields are invalid', () => {
-        wrapper.vm.form = {
-          siteProfileId: {
-            value: siteProfiles[0],
-            state: false,
-            feedback: '',
-          },
-          foo: {
-            value: 'bar',
-            state: null,
-          },
-        };
-        expect(wrapper.vm.formHasErrors).toBe(true);
-      });
-
-      it('returns false if none of the fields are invalid', () => {
-        wrapper.vm.form = {
-          siteProfileId: {
-            value: siteProfiles[0],
-            state: null,
-            feedback: '',
-          },
-          foo: {
-            value: 'bar',
-            state: null,
-          },
-        };
-        expect(wrapper.vm.formHasErrors).toBe(false);
-      });
-    });
-
-    describe('someFieldEmpty', () => {
-      it('returns true if any of the fields are empty', () => {
-        wrapper.vm.form = {
-          siteProfileId: {
-            value: '',
-            state: false,
-            feedback: '',
-          },
-          foo: {
-            value: 'bar',
-            state: null,
-          },
-        };
-        expect(wrapper.vm.someFieldEmpty).toBe(true);
-      });
-
-      it('returns false if no field is empty', () => {
-        wrapper.vm.form = {
-          siteProfileId: {
-            value: siteProfiles[0],
-            state: null,
-            feedback: '',
-          },
-          foo: {
-            value: 'bar',
-            state: null,
-          },
-        };
-        expect(wrapper.vm.someFieldEmpty).toBe(false);
-      });
-    });
-
-    describe('isSubmitDisabled', () => {
-      it.each`
-        formHasErrors | someFieldEmpty | expected
-        ${true}       | ${true}        | ${true}
-        ${true}       | ${false}       | ${true}
-        ${false}      | ${true}        | ${true}
-        ${false}      | ${false}       | ${false}
-      `(
-        'is $expected when formHasErrors is $formHasErrors and someFieldEmpty is $someFieldEmpty',
-        ({ formHasErrors, someFieldEmpty, expected }) => {
-          createComponent({
-            computed: {
-              formHasErrors: () => formHasErrors,
-              someFieldEmpty: () => someFieldEmpty,
+  it.each`
+    scannerProfilesLoading | siteProfilesLoading | isLoading
+    ${true}                | ${true}             | ${true}
+    ${false}               | ${true}             | ${true}
+    ${true}                | ${false}            | ${true}
+    ${false}               | ${false}            | ${false}
+  `(
+    'sets loading state to $isLoading if scanner profiles loading is $scannerProfilesLoading and site profiles loading is $siteProfilesLoading',
+    ({ scannerProfilesLoading, siteProfilesLoading, isLoading }) => {
+      mountShallowSubject({
+        mocks: {
+          $apollo: {
+            queries: {
+              scannerProfiles: { loading: scannerProfilesLoading },
+              siteProfiles: { loading: siteProfilesLoading },
             },
-          });
-
-          expect(wrapper.vm.isSubmitDisabled).toBe(expected);
-        },
-      );
-    });
-  });
-
-  describe('site profiles', () => {
-    describe('while site profiles are being fetched', () => {
-      beforeEach(() => {
-        createComponent({ mocks: { $apollo: { queries: { siteProfiles: { loading: true } } } } });
-      });
-
-      it('shows a skeleton loader', () => {
-        expect(wrapper.find(GlSkeletonLoader).exists()).toBe(true);
-      });
-    });
-
-    describe('when site profiles could not be fetched', () => {
-      beforeEach(() => {
-        createComponent();
-        return wrapper.vm.showErrors('ERROR_FETCH_SITE_PROFILES');
-      });
-
-      it('shows a non-dismissible alert and no field', () => {
-        const alert = findAlert();
-        expect(alert.exists()).toBe(true);
-        expect(alert.props('dismissible')).toBe(false);
-        expect(alert.text()).toContain(
-          'Could not fetch site profiles. Please refresh the page, or try again later.',
-        );
-      });
-    });
-
-    describe('when there are no site profiles yet', () => {
-      beforeEach(() => {
-        createFullComponent();
-      });
-
-      it('disables the link to manage site profiles', () => {
-        expect(findManageSiteProfilesButton().props('disabled')).toBe(true);
-      });
-
-      it('shows a link to create a new site profile', () => {
-        const link = findCreateNewSiteProfileLink();
-        expect(link.exists()).toBe(true);
-        expect(link.attributes('href')).toBe(newSiteProfilePath);
-      });
-    });
-
-    describe('when there are site profiles', () => {
-      beforeEach(() => {
-        createComponent({
-          data: {
-            siteProfiles,
           },
-        });
+        },
       });
 
-      it('shows a dropdown containing the site profiles', () => {
-        const dropdown = findSiteProfilesDropdown();
-        expect(dropdown.exists()).toBe(true);
-        expect(dropdown.element.children).toHaveLength(siteProfiles.length);
-      });
+      expect(subject.find(GlSkeletonLoader).exists()).toBe(isLoading);
+    },
+  );
 
-      it('when a site profile is selected, its summary is displayed below the dropdown', async () => {
-        wrapper.vm.form.dastSiteProfileId.value = siteProfiles[0].id;
-        await wrapper.vm.$nextTick();
-        const summary = wrapper.find('[data-testid="site-profile-summary"]');
+  describe('submit button', () => {
+    let submitButton;
 
-        expect(summary.exists()).toBe(true);
-        expect(summary.text()).toContain(siteProfiles[0].targetUrl);
+    beforeEach(() => {
+      mountShallowSubject({
+        data: {
+          scannerProfiles,
+          siteProfiles,
+        },
       });
+      submitButton = findSubmitButton();
+    });
+
+    it('is disabled while some fields are empty', () => {
+      expect(submitButton.props('disabled')).toBe(true);
+    });
+
+    it('becomes enabled when form is valid', async () => {
+      await setValidFormData();
+
+      expect(submitButton.props('disabled')).toBe(false);
     });
   });
 
   describe('submission', () => {
     beforeEach(() => {
-      createComponent({
+      mountShallowSubject({
         data: {
+          scannerProfiles,
           siteProfiles,
         },
       });
     });
 
     describe('on success', () => {
-      beforeEach(() => {
+      beforeEach(async () => {
         jest
-          .spyOn(wrapper.vm.$apollo, 'mutate')
+          .spyOn(subject.vm.$apollo, 'mutate')
           .mockResolvedValue({ data: { dastOnDemandScanCreate: { pipelineUrl, errors: [] } } });
-        findSiteProfilesDropdown().vm.$emit('input', siteProfiles[0]);
+        await setValidFormData();
         submitForm();
       });
 
       it('sets loading state', () => {
-        expect(wrapper.vm.loading).toBe(true);
+        expect(subject.vm.loading).toBe(true);
       });
 
       it('triggers GraphQL mutation', () => {
-        expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledWith({
+        expect(subject.vm.$apollo.mutate).toHaveBeenCalledWith({
           mutation: dastOnDemandScanCreate,
           variables: {
-            scanType: 'PASSIVE',
-            branch: 'master',
-            dastSiteProfileId: siteProfiles[0],
+            dastScannerProfileId: passiveScannerProfile.id,
+            dastSiteProfileId: nonValidatedSiteProfile.id,
             fullPath: projectPath,
           },
         });
@@ -302,14 +190,14 @@ describe('OnDemandScansApp', () => {
     });
 
     describe('on top-level error', () => {
-      beforeEach(() => {
-        jest.spyOn(wrapper.vm.$apollo, 'mutate').mockRejectedValue();
-        findSiteProfilesDropdown().vm.$emit('input', siteProfiles[0]);
+      beforeEach(async () => {
+        jest.spyOn(subject.vm.$apollo, 'mutate').mockRejectedValue();
+        await setValidFormData();
         submitForm();
       });
 
       it('resets loading state', () => {
-        expect(wrapper.vm.loading).toBe(false);
+        expect(subject.vm.loading).toBe(false);
       });
 
       it('shows an alert', () => {
@@ -322,16 +210,16 @@ describe('OnDemandScansApp', () => {
     describe('on errors as data', () => {
       const errors = ['error#1', 'error#2', 'error#3'];
 
-      beforeEach(() => {
+      beforeEach(async () => {
         jest
-          .spyOn(wrapper.vm.$apollo, 'mutate')
+          .spyOn(subject.vm.$apollo, 'mutate')
           .mockResolvedValue({ data: { dastOnDemandScanCreate: { pipelineUrl: null, errors } } });
-        findSiteProfilesDropdown().vm.$emit('input', siteProfiles[0]);
+        await setValidFormData();
         submitForm();
       });
 
       it('resets loading state', () => {
-        expect(wrapper.vm.loading).toBe(false);
+        expect(subject.vm.loading).toBe(false);
       });
 
       it('shows an alert with the returned errors', () => {
@@ -345,12 +233,51 @@ describe('OnDemandScansApp', () => {
     });
   });
 
-  describe('cancel', () => {
-    it('emits cancel event on click', () => {
-      jest.spyOn(wrapper.vm, '$emit');
-      findCancelButton().vm.$emit('click');
+  describe.each`
+    description                                  | selectedScannerProfile   | selectedSiteProfile        | hasConflict
+    ${'a passive scan and a non-validated site'} | ${passiveScannerProfile} | ${nonValidatedSiteProfile} | ${false}
+    ${'a passive scan and a validated site'}     | ${passiveScannerProfile} | ${validatedSiteProfile}    | ${false}
+    ${'an active scan and a non-validated site'} | ${activeScannerProfile}  | ${nonValidatedSiteProfile} | ${true}
+    ${'an active scan and a validated site'}     | ${activeScannerProfile}  | ${validatedSiteProfile}    | ${false}
+  `(
+    'profiles conflict prevention',
+    ({ description, selectedScannerProfile, selectedSiteProfile, hasConflict }) => {
+      const setFormData = () => {
+        subject.find(ScannerProfileSelector).vm.$emit('input', selectedScannerProfile);
+        subject.find(SiteProfileSelector).vm.$emit('input', selectedSiteProfile);
+        return subject.vm.$nextTick();
+      };
 
-      expect(wrapper.vm.$emit).toHaveBeenCalledWith('cancel');
-    });
-  });
+      it(
+        hasConflict
+          ? `warns about conflicting profiles when user selects ${description}`
+          : `does not report any conflict when user selects ${description}`,
+        async () => {
+          mountShallowSubject();
+          await setFormData();
+
+          expect(findProfilesConflictAlert().exists()).toBe(hasConflict);
+          expect(findSubmitButton().props('disabled')).toBe(hasConflict);
+        },
+      );
+
+      describe('feature flag disabled', () => {
+        beforeEach(() => {
+          mountShallowSubject({
+            provide: {
+              glFeatures: {
+                securityOnDemandScansSiteValidation: false,
+              },
+            },
+          });
+          return setFormData();
+        });
+
+        it(`does not report any conflict when user selects ${description}`, () => {
+          expect(findProfilesConflictAlert().exists()).toBe(false);
+          expect(findSubmitButton().props('disabled')).toBe(false);
+        });
+      });
+    },
+  );
 });

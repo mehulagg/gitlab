@@ -5,12 +5,13 @@ require 'spec_helper'
 RSpec.describe Security::StoreFindingsMetadataService do
   let_it_be(:security_scan) { create(:security_scan) }
   let_it_be(:project) { security_scan.project }
-  let_it_be(:security_finding) { build(:ci_reports_security_finding) }
+  let_it_be(:security_finding_1) { build(:ci_reports_security_finding) }
+  let_it_be(:security_finding_2) { build(:ci_reports_security_finding) }
   let_it_be(:security_scanner) { build(:ci_reports_security_scanner) }
   let_it_be(:report) do
     build(
       :ci_reports_security_report,
-      findings: [security_finding],
+      findings: [security_finding_1, security_finding_2],
       scanners: [security_scanner]
     )
   end
@@ -36,10 +37,12 @@ RSpec.describe Security::StoreFindingsMetadataService do
       end
 
       it 'creates the security finding entries in database' do
-        expect { store_findings }.to change { security_scan.findings.count }.by(1)
-                                 .and change { security_scan.findings.last&.severity }.to(security_finding.severity.to_s)
-                                 .and change { security_scan.findings.last&.confidence }.to(security_finding.confidence.to_s)
-                                 .and change { security_scan.findings.last&.project_fingerprint }.to(security_finding.project_fingerprint)
+        expect { store_findings }.to change { security_scan.findings.count }.by(2)
+                                 .and change { security_scan.findings.first&.severity }.to(security_finding_1.severity.to_s)
+                                 .and change { security_scan.findings.first&.confidence }.to(security_finding_1.confidence.to_s)
+                                 .and change { security_scan.findings.first&.project_fingerprint }.to(security_finding_1.project_fingerprint)
+                                 .and change { security_scan.findings.first&.position }.to(0)
+                                 .and change { security_scan.findings.last&.position }.to(1)
       end
 
       context 'when the scanners already exist in the database' do

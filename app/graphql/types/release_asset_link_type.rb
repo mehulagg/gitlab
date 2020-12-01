@@ -17,5 +17,15 @@ module Types
           description: 'Type of the link: `other`, `runbook`, `image`, `package`; defaults to `other`'
     field :external, GraphQL::BOOLEAN_TYPE, null: true, method: :external?,
           description: 'Indicates the link points to an external resource'
+
+    field :direct_asset_url, GraphQL::STRING_TYPE, null: true,
+          description: 'Direct asset URL of the link'
+
+    def direct_asset_url
+      return object.url unless object.filepath
+
+      release = object.release.present
+      release.download_url(object.filepath)
+    end
   end
 end

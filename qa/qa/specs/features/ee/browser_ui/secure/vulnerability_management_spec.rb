@@ -3,7 +3,7 @@
 require 'pathname'
 
 module QA
-  RSpec.describe 'Secure', :docker, :runner do
+  RSpec.describe 'Secure', :runner do
     describe 'Security Reports in a Merge Request' do
       let(:sast_vuln_count) { 5 }
       let(:dependency_scan_vuln_count) { 4 }

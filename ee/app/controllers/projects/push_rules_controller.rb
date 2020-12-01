@@ -11,6 +11,8 @@ class Projects::PushRulesController < Projects::ApplicationController
 
   layout "project_settings"
 
+  feature_category :source_code_management
+
   def update
     @push_rule = project.push_rule
     @push_rule.update(push_rule_params)

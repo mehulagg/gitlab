@@ -1,7 +1,6 @@
 import { isEmpty } from 'lodash';
 import { sprintf, __ } from '~/locale';
 import { formatDate } from '~/lib/utils/datetime_utility';
-import tooltip from '~/vue_shared/directives/tooltip';
 import timeagoMixin from '~/vue_shared/mixins/timeago';
 
 const mixins = {
@@ -99,9 +98,6 @@ const mixins = {
       default: () => ({}),
     },
   },
-  directives: {
-    tooltip,
-  },
   mixins: [timeagoMixin],
   computed: {
     hasState() {
@@ -111,7 +107,7 @@ const mixins = {
       return this.isMergeRequest && this.pipelineStatus && Object.keys(this.pipelineStatus).length;
     },
     isOpen() {
-      return this.state === 'opened';
+      return this.state === 'opened' || this.state === 'reopened';
     },
     isClosed() {
       return this.state === 'closed';

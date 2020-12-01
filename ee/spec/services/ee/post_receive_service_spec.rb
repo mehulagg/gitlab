@@ -104,36 +104,48 @@ RSpec.describe PostReceiveService, :geo do
   end
 
   describe 'storage size limit alerts' do
+    using RSpec::Parameterized::TableSyntax
+
     let(:check_storage_size_response) { ServiceResponse.success }
 
-    before do
-      expect_next_instance_of(Namespaces::CheckStorageSizeService, project.namespace, user) do |check_storage_size_service|
-        expect(check_storage_size_service).to receive(:execute).and_return(check_storage_size_response)
-      end
+    where(:additional_repo_storage_by_namespace_enabled, :service_class_name) do
+      true  | Namespaces::CheckExcessStorageSizeService
+      false | Namespaces::CheckStorageSizeService
     end
 
-    context 'when there is no payload' do
-      it 'adds no alert' do
-        expect(subject.size).to eq(0)
-      end
-    end
+    with_them do
+      before do
+        allow(project.namespace).to receive(:additional_repo_storage_by_namespace_enabled?)
+          .and_return(additional_repo_storage_by_namespace_enabled)
 
-    context 'when there is payload' do
-      let(:check_storage_size_response) do
-        ServiceResponse.success(
-          payload: {
-            alert_level: :info,
-            usage_message: "Usage",
-            explanation_message: "Explanation"
-          }
-        )
+        allow_next_instance_of(service_class_name, project.namespace, user) do |service|
+          expect(service).to receive(:execute).and_return(check_storage_size_response)
+        end
       end
 
-      it 'adds an alert' do
-        response = subject
+      context 'when there is no payload' do
+        it 'adds no alert' do
+          expect(subject).to be_empty
+        end
+      end
 
-        expect(response.size).to eq(1)
-        expect(response).to include({ 'type' => 'alert', 'message' => "##### INFO #####\nUsage\nExplanation" })
+      context 'when there is payload' do
+        let(:check_storage_size_response) do
+          ServiceResponse.success(
+            payload: {
+              alert_level: :info,
+              usage_message: "Usage",
+              explanation_message: "Explanation"
+            }
+          )
+        end
+
+        it 'adds an alert' do
+          response = subject
+
+          expect(response).to be_present
+          expect(response).to include({ 'type' => 'alert', 'message' => "##### INFO #####\nUsage\nExplanation" })
+        end
       end
     end
   end

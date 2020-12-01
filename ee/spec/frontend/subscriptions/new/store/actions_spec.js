@@ -1,9 +1,9 @@
-import testAction from 'helpers/vuex_action_helper';
-import { useMockLocationHelper } from 'helpers/mock_window_location_helper';
 import MockAdapter from 'axios-mock-adapter';
-import * as actions from 'ee/subscriptions/new/store/actions';
-import * as constants from 'ee/subscriptions/new/constants';
 import Api from 'ee/api';
+import * as constants from 'ee/subscriptions/new/constants';
+import * as actions from 'ee/subscriptions/new/store/actions';
+import { useMockLocationHelper } from 'helpers/mock_window_location_helper';
+import testAction from 'helpers/vuex_action_helper';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 

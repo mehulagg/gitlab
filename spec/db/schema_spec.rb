@@ -11,7 +11,7 @@ RSpec.describe 'Database schema' do
   let(:columns_name_with_jsonb) { retrieve_columns_name_with_jsonb }
 
   # List of columns historically missing a FK, don't add more columns
-  # See: https://docs.gitlab.com/ce/development/foreign_keys.html#naming-foreign-keys
+  # See: https://docs.gitlab.com/ee/development/foreign_keys.html#naming-foreign-keys
   IGNORED_FK_COLUMNS = {
     abuse_reports: %w[reporter_id user_id],
     application_settings: %w[performance_bar_allowed_group_id slack_app_id snowplow_app_id eks_account_id eks_access_key_id],
@@ -31,6 +31,7 @@ RSpec.describe 'Database schema' do
     ci_trigger_requests: %w[commit_id],
     cluster_providers_aws: %w[security_group_id vpc_id access_key_id],
     cluster_providers_gcp: %w[gcp_project_id operation_id],
+    compliance_management_frameworks: %w[group_id],
     commit_user_mentions: %w[commit_id],
     deploy_keys_projects: %w[deploy_key_id],
     deployments: %w[deployable_id environment_id user_id],
@@ -85,7 +86,7 @@ RSpec.describe 'Database schema' do
     users_star_projects: %w[user_id],
     vulnerability_identifiers: %w[external_id],
     vulnerability_scanners: %w[external_id],
-    web_hooks: %w[service_id group_id]
+    web_hooks: %w[group_id]
   }.with_indifferent_access.freeze
 
   context 'for table' do
@@ -234,6 +235,26 @@ RSpec.describe 'Database schema' do
 
     it 'we do not have unexpected schemas' do
       expect(get_schemas.size).to eq(Gitlab::Database::EXTRA_SCHEMAS.size + 1)
+    end
+  end
+
+  context 'primary keys' do
+    let(:exceptions) do
+      %i(
+        elasticsearch_indexed_namespaces
+        elasticsearch_indexed_projects
+        merge_request_context_commit_diff_files
+      )
+    end
+
+    it 'expects every table to have a primary key defined' do
+      connection = ActiveRecord::Base.connection
+
+      problematic_tables = connection.tables.select do |table|
+        !connection.primary_key(table).present?
+      end.map(&:to_sym)
+
+      expect(problematic_tables - exceptions).to be_empty
     end
   end
 

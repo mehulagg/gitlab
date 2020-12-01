@@ -1,14 +1,12 @@
 <script>
-/* eslint-disable vue/no-v-html */
 import { mapState, mapActions, mapGetters } from 'vuex';
-import { GlButton, GlFormInput, GlFormGroup } from '@gitlab/ui';
-import { __, sprintf } from '~/locale';
+import { GlButton, GlFormInput, GlFormGroup, GlSprintf } from '@gitlab/ui';
+import { __ } from '~/locale';
 import MarkdownField from '~/vue_shared/components/markdown/field.vue';
 import { BACK_URL_PARAM } from '~/releases/constants';
 import { getParameterByName } from '~/lib/utils/common_utils';
 import AssetLinksForm from './asset_links_form.vue';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import MilestoneCombobox from '~/milestones/project_milestone_combobox.vue';
+import MilestoneCombobox from '~/milestones/components/milestone_combobox.vue';
 import TagField from './tag_field.vue';
 
 export default {
@@ -17,12 +15,12 @@ export default {
     GlFormInput,
     GlFormGroup,
     GlButton,
+    GlSprintf,
     MarkdownField,
     AssetLinksForm,
     MilestoneCombobox,
     TagField,
   },
-  mixins: [glFeatureFlagsMixin()],
   computed: {
     ...mapState('detail', [
       'isFetchingRelease',
@@ -31,27 +29,16 @@ export default {
       'markdownDocsPath',
       'markdownPreviewPath',
       'releasesPagePath',
-      'updateReleaseApiDocsPath',
       'release',
       'newMilestonePath',
       'manageMilestonesPath',
       'projectId',
+      'groupId',
+      'groupMilestonesAvailable',
     ]),
     ...mapGetters('detail', ['isValid', 'isExistingRelease']),
     showForm() {
       return Boolean(!this.isFetchingRelease && !this.fetchError && this.release);
-    },
-    subtitleText() {
-      return sprintf(
-        __(
-          'Releases are based on Git tags. We recommend tags that use semantic versioning, for example %{codeStart}v1.0%{codeEnd}, %{codeStart}v2.0-pre%{codeEnd}.',
-        ),
-        {
-          codeStart: '<code>',
-          codeEnd: '</code>',
-        },
-        false,
-      );
     },
     releaseTitle: {
       get() {
@@ -79,9 +66,6 @@ export default {
     },
     cancelPath() {
       return getParameterByName(BACK_URL_PARAM) || this.releasesPagePath;
-    },
-    showAssetLinksForm() {
-      return this.glFeatures.releaseAssetLinkEditing;
     },
     saveButtonLabel() {
       return this.isExistingRelease ? __('Save changes') : __('Create release');
@@ -127,7 +111,19 @@ export default {
 </script>
 <template>
   <div class="d-flex flex-column">
-    <p class="pt-3 js-subtitle-text" v-html="subtitleText"></p>
+    <p class="pt-3 js-subtitle-text">
+      <gl-sprintf
+        :message="
+          __(
+            'Releases are based on Git tags. We recommend tags that use semantic versioning, for example %{codeStart}v1.0%{codeEnd}, %{codeStart}v2.0-pre%{codeEnd}.',
+          )
+        "
+      >
+        <template #code="{ content }">
+          <code>{{ content }}</code>
+        </template>
+      </gl-sprintf>
+    </p>
     <form v-if="showForm" class="js-quick-submit" @submit.prevent="submitForm">
       <tag-field />
       <gl-form-group>
@@ -146,11 +142,13 @@ export default {
           <milestone-combobox
             v-model="releaseMilestones"
             :project-id="projectId"
+            :group-id="groupId"
+            :group-milestones-available="groupMilestonesAvailable"
             :extra-links="milestoneComboboxExtraLinks"
           />
         </div>
       </gl-form-group>
-      <gl-form-group>
+      <gl-form-group data-testid="release-notes">
         <label for="release-notes">{{ __('Release notes') }}</label>
         <div class="bordered-box pr-3 pl-3">
           <markdown-field
@@ -158,6 +156,7 @@ export default {
             :markdown-preview-path="markdownPreviewPath"
             :markdown-docs-path="markdownDocsPath"
             :add-spacing-classes="false"
+            :textarea-value="releaseNotes"
             class="gl-mt-3 gl-mb-3"
           >
             <template #textarea>
@@ -175,7 +174,7 @@ export default {
         </div>
       </gl-form-group>
 
-      <asset-links-form v-if="showAssetLinksForm" />
+      <asset-links-form />
 
       <div class="d-flex pt-3">
         <gl-button

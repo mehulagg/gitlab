@@ -2,6 +2,7 @@
 
 module DesignManagement
   class Design < ApplicationRecord
+    include AtomicInternalId
     include Importable
     include Noteable
     include Gitlab::FileTypeDetection
@@ -10,12 +11,15 @@ module DesignManagement
     include Mentionable
     include WhereComposite
     include RelativePositioning
+    include Todoable
+    include Participable
 
     belongs_to :project, inverse_of: :designs
     belongs_to :issue
 
     has_many :actions
     has_many :versions, through: :actions, class_name: 'DesignManagement::Version', inverse_of: :designs
+    has_many :authors, -> { distinct }, through: :versions, class_name: 'User'
     # This is a polymorphic association, so we can't count on FK's to delete the
     # data
     has_many :notes, as: :noteable, dependent: :delete_all # rubocop:disable Cop/ActiveRecordDependent
@@ -23,12 +27,19 @@ module DesignManagement
 
     has_many :events, as: :target, dependent: :delete_all # rubocop:disable Cop/ActiveRecordDependent
 
+    has_internal_id :iid, scope: :project, presence: true,
+      hook_names: %i[create update], # Deal with old records
+      track_if: -> { !importing? }
+
     validates :project, :filename, presence: true
     validates :issue, presence: true, unless: :importing?
     validates :filename, uniqueness: { scope: :issue_id }, length: { maximum: 255 }
     validate :validate_file_is_image
 
     alias_attribute :title, :filename
+
+    participant :authors
+    participant :notes_with_associations
 
     # Pre-fetching scope to include the data necessary to construct a
     # reference using `to_reference`.
@@ -167,6 +178,10 @@ module DesignManagement
       end
     end
 
+    def self.build_full_path(issue, design)
+      File.join(DesignManagement.designs_directory, "issue-#{issue.iid}", design.filename)
+    end
+
     def to_ability_name
       'design'
     end
@@ -180,7 +195,7 @@ module DesignManagement
     end
 
     def full_path
-      @full_path ||= File.join(DesignManagement.designs_directory, "issue-#{issue.iid}", filename)
+      @full_path ||= self.class.build_full_path(issue, self)
     end
 
     def diff_refs
@@ -222,6 +237,10 @@ module DesignManagement
       )
 
       !interloper.exists?
+    end
+
+    def notes_with_associations
+      notes.includes(:author)
     end
 
     private

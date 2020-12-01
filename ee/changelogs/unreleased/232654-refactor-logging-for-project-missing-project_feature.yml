@@ -1,5 +1,0 @@
----
-title: Use Gitlab::ErrorTracking in place of project.logger for indexing errors
-merge_request: 39979
-author:
-type: fixed

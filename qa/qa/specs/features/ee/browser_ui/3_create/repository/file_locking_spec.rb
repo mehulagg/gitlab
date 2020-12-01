@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module QA
-  context 'Create' do
+  RSpec.describe 'Create' do
     describe 'File Locking' do
       before do
         Flow::Login.sign_in
@@ -144,7 +144,7 @@ module QA
 
       def expect_error_on_push(for_file: 'file', as_user:)
         expect { push branch: 'master', file: for_file, as_user: as_user }.to raise_error(
-          QA::Git::Repository::RepositoryCommandError)
+          QA::Support::Run::CommandError)
       end
 
       def expect_no_error_on_push(for_file: 'file', as_user:)

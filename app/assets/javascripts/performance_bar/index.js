@@ -5,14 +5,17 @@ import axios from '~/lib/utils/axios_utils';
 import PerformanceBarService from './services/performance_bar_service';
 import PerformanceBarStore from './stores/performance_bar_store';
 
-const initPerformanceBar = ({ container }) =>
-  new Vue({
-    el: container,
+import initPerformanceBarLog from './performance_bar_log';
+
+const initPerformanceBar = el => {
+  const performanceBarData = el.dataset;
+
+  return new Vue({
+    el,
     components: {
       PerformanceBarApp: () => import('./components/performance_bar_app.vue'),
     },
     data() {
-      const performanceBarData = document.querySelector(this.$options.el).dataset;
       const store = new PerformanceBarStore();
 
       return {
@@ -118,9 +121,15 @@ const initPerformanceBar = ({ container }) =>
       });
     },
   });
+};
 
 document.addEventListener('DOMContentLoaded', () => {
-  initPerformanceBar({ container: '#js-peek' });
+  const jsPeek = document.querySelector('#js-peek');
+  if (jsPeek) {
+    initPerformanceBar(jsPeek);
+  }
 });
+
+initPerformanceBarLog();
 
 export default initPerformanceBar;

@@ -3,19 +3,20 @@
 require 'spec_helper'
 
 RSpec.describe LicenseMonitoringHelper do
-  let_it_be(:admin) { create(:admin) }
-  let_it_be(:user) { create(:user) }
-  let_it_be(:license_seats_limit) { 10 }
-
-  let_it_be(:license) do
-    create(:license, data: build(:gitlab_license, restrictions: { active_user_count: license_seats_limit }).export)
-  end
-
   describe '#show_active_user_count_threshold_banner?' do
+    let_it_be(:admin) { create(:admin) }
+    let_it_be(:user) { create(:user) }
+    let_it_be(:license_seats_limit) { 10 }
+    let_it_be(:license) do
+      create(:license, data: build(:gitlab_license, restrictions: { active_user_count: license_seats_limit }).export)
+    end
+
     subject { helper.show_active_user_count_threshold_banner? }
 
     shared_examples 'banner hidden when below the threshold' do
-      let(:active_user_count) { 1 }
+      before do
+        allow(license).to receive(:active_user_count_threshold_reached?).and_return(false)
+      end
 
       it { is_expected.to be_falsey }
     end
@@ -52,7 +53,8 @@ RSpec.describe LicenseMonitoringHelper do
 
         context 'is trial' do
           before do
-            allow(License.current).to receive(:trial?).and_return(true)
+            allow(license).to receive(:trial?).and_return(true)
+            allow(License).to receive(:current).and_return(license)
           end
 
           it { is_expected.to be_falsey }
@@ -61,8 +63,9 @@ RSpec.describe LicenseMonitoringHelper do
 
       context 'when current active user count greater than total user count' do
         before do
-          allow(helper).to receive(:total_user_count).and_return(license_seats_limit)
-          allow(helper).to receive(:current_active_users_count).and_return(license_seats_limit + 1)
+          allow(license).to receive(:restricted_user_count).and_return(license_seats_limit)
+          allow(license).to receive(:daily_billable_users_count).and_return(license_seats_limit + 1)
+          allow(License).to receive(:current).and_return(license)
         end
 
         it { is_expected.to be_falsey }
@@ -72,11 +75,13 @@ RSpec.describe LicenseMonitoringHelper do
         before do
           allow(helper).to receive(:current_user).and_return(admin)
           allow(helper).to receive(:admin_section?).and_return(true)
-          allow(helper).to receive(:current_active_users_count).and_return(active_user_count)
         end
 
         context 'when above the threshold' do
-          let(:active_user_count) { license_seats_limit - 1 }
+          before do
+            allow(license).to receive(:active_user_count_threshold_reached?).and_return(license_seats_limit + 1)
+            allow(License).to receive(:current).and_return(license)
+          end
 
           it { is_expected.to be_truthy }
         end
@@ -98,6 +103,32 @@ RSpec.describe LicenseMonitoringHelper do
         end
 
         it_behaves_like 'banner hidden when below the threshold'
+      end
+    end
+  end
+
+  describe '#users_over_license' do
+    context 'with an user overage' do
+      let(:license) { build(:license) }
+
+      before do
+        allow(helper).to receive(:license_is_over_capacity?).and_return true
+        allow(License).to receive(:current).and_return(license)
+        allow(license).to receive(:overage_with_historical_max) { 5 }
+      end
+
+      it 'shows overage as a number' do
+        expect(helper.users_over_license).to eq 5
+      end
+    end
+
+    context 'without an user overage' do
+      before do
+        allow(helper).to receive(:license_is_over_capacity?).and_return false
+      end
+
+      it 'shows overage as a number' do
+        expect(helper.users_over_license).to eq 0
       end
     end
   end

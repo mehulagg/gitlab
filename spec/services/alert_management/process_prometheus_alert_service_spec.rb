@@ -10,7 +10,25 @@ RSpec.describe AlertManagement::ProcessPrometheusAlertService do
   end
 
   describe '#execute' do
-    subject(:execute) { described_class.new(project, nil, payload).execute }
+    let(:service) { described_class.new(project, nil, payload) }
+    let(:auto_close_incident) { true }
+    let(:create_issue) { true }
+    let(:send_email) { true }
+    let(:incident_management_setting) do
+      double(
+        auto_close_incident?: auto_close_incident,
+        create_issue?: create_issue,
+        send_email?: send_email
+      )
+    end
+
+    before do
+      allow(service)
+        .to receive(:incident_management_setting)
+        .and_return(incident_management_setting)
+    end
+
+    subject(:execute) { service.execute }
 
     context 'when alert payload is valid' do
       let(:parsed_payload) { Gitlab::AlertManagement::Payload.parse(project, payload, monitoring_tool: 'Prometheus') }
@@ -43,6 +61,8 @@ RSpec.describe AlertManagement::ProcessPrometheusAlertService do
           let!(:alert) { create(:alert_management_alert, project: project, fingerprint: fingerprint) }
 
           it_behaves_like 'adds an alert management alert event'
+          it_behaves_like 'processes incident issues'
+          it_behaves_like 'Alert Notification Service sends notification email'
 
           context 'existing alert is resolved' do
             let!(:alert) { create(:alert_management_alert, :resolved, project: project, fingerprint: fingerprint) }
@@ -79,46 +99,71 @@ RSpec.describe AlertManagement::ProcessPrometheusAlertService do
               execute
             end
           end
+
+          context 'when auto-creation of issues is disabled' do
+            let(:create_issue) { false }
+
+            it_behaves_like 'does not process incident issues'
+          end
+
+          context 'when emails are disabled' do
+            let(:send_email) { false }
+
+            it 'does not send notification' do
+              expect(NotificationService).not_to receive(:new)
+
+              expect(subject).to be_success
+            end
+          end
         end
 
         context 'when alert does not exist' do
           context 'when alert can be created' do
             it_behaves_like 'creates an alert management alert'
+            it_behaves_like 'Alert Notification Service sends notification email'
+            it_behaves_like 'processes incident issues'
 
             it 'creates a system note corresponding to alert creation' do
               expect { subject }.to change(Note, :count).by(1)
             end
 
-            it 'processes the incident alert' do
-              expect(IncidentManagement::ProcessAlertWorker)
-                .to receive(:perform_async)
-                .with(nil, nil, kind_of(Integer))
-                .once
+            context 'when auto-alert creation is disabled' do
+              let(:create_issue) { false }
 
-              expect(subject).to be_success
+              it_behaves_like 'does not process incident issues'
+            end
+
+            context 'when emails are disabled' do
+              let(:send_email) { false }
+
+              it 'does not send notification' do
+                expect(NotificationService).not_to receive(:new)
+
+                expect(subject).to be_success
+              end
             end
           end
 
           context 'when alert cannot be created' do
+            let(:errors) { double(messages: { hosts: ['hosts array is over 255 chars'] })}
+
             before do
-              payload['annotations']['title'] = 'description' * 50
+              allow(service).to receive(:alert).and_call_original
+              allow(service).to receive_message_chain(:alert, :save).and_return(false)
+              allow(service).to receive_message_chain(:alert, :errors).and_return(errors)
             end
+
+            it_behaves_like 'Alert Notification Service sends no notifications', http_status: :bad_request
+            it_behaves_like 'does not process incident issues due to error', http_status: :bad_request
 
             it 'writes a warning to the log' do
               expect(Gitlab::AppLogger).to receive(:warn).with(
                 message: 'Unable to create AlertManagement::Alert',
                 project_id: project.id,
-                alert_errors: { title: ["is too long (maximum is 200 characters)"] }
+                alert_errors: { hosts: ['hosts array is over 255 chars'] }
               )
 
               execute
-            end
-
-            it 'does not create incident issue' do
-              expect(IncidentManagement::ProcessAlertWorker)
-                .not_to receive(:perform_async)
-
-              expect(subject).to be_success
             end
           end
 
@@ -131,35 +176,28 @@ RSpec.describe AlertManagement::ProcessPrometheusAlertService do
         let!(:alert) { create(:alert_management_alert, project: project, fingerprint: fingerprint) }
 
         context 'when auto_resolve_incident set to true' do
-          let_it_be(:operations_settings) { create(:project_incident_management_setting, project: project, auto_close_incident: true) }
-
           context 'when status can be changed' do
+            it_behaves_like 'Alert Notification Service sends notification email'
+            it_behaves_like 'does not process incident issues'
+
             it 'resolves an existing alert' do
               expect { execute }.to change { alert.reload.resolved? }.to(true)
             end
 
-            [true, false].each do |state_tracking_enabled|
-              context 'existing issue' do
-                before do
-                  stub_feature_flags(track_resource_state_change_events: state_tracking_enabled)
-                end
+            context 'existing issue' do
+              let!(:alert) { create(:alert_management_alert, :with_issue, project: project, fingerprint: fingerprint) }
 
-                let!(:alert) { create(:alert_management_alert, :with_issue, project: project, fingerprint: fingerprint) }
+              it 'closes the issue' do
+                issue = alert.issue
 
-                it 'closes the issue' do
-                  issue = alert.issue
+                expect { execute }
+                  .to change { issue.reload.state }
+                  .from('opened')
+                  .to('closed')
+              end
 
-                  expect { execute }
-                    .to change { issue.reload.state }
-                    .from('opened')
-                    .to('closed')
-                end
-
-                if state_tracking_enabled
-                  specify { expect { execute }.to change(ResourceStateEvent, :count).by(1) }
-                else
-                  specify { expect { execute }.to change(Note, :count).by(1) }
-                end
+              it 'creates a resource state event' do
+                expect { execute }.to change(ResourceStateEvent, :count).by(1)
               end
             end
           end
@@ -179,16 +217,28 @@ RSpec.describe AlertManagement::ProcessPrometheusAlertService do
 
               execute
             end
+
+            it_behaves_like 'Alert Notification Service sends notification email'
           end
 
           it { is_expected.to be_success }
         end
 
         context 'when auto_resolve_incident set to false' do
-          let_it_be(:operations_settings) { create(:project_incident_management_setting, project: project, auto_close_incident: false) }
+          let(:auto_close_incident) { false }
 
           it 'does not resolve an existing alert' do
             expect { execute }.not_to change { alert.reload.resolved? }
+          end
+        end
+
+        context 'when emails are disabled' do
+          let(:send_email) { false }
+
+          it 'does not send notification' do
+            expect(NotificationService).not_to receive(:new)
+
+            expect(subject).to be_success
           end
         end
       end

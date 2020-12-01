@@ -16,7 +16,10 @@ RSpec.describe Resolvers::ComplianceFrameworksResolver do
       end
 
       it 'includes the name of the compliance frameworks' do
-        expect(subject).to contain_exactly(have_attributes(framework: 'sox'))
+        expect(subject.size).to eq(1)
+
+        framework = subject.first.compliance_management_framework
+        expect(framework.name).to eq('SOX')
       end
     end
 

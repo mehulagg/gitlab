@@ -58,8 +58,8 @@ RSpec.describe Gitlab::Ci::Reports::LicenseScanning::Report do
       let(:apache_license) { report.by_license_name('Apache 2.0') }
 
       before do
-        mit_license.add_dependency('Library4')
-        apache_license.add_dependency('Library3')
+        mit_license.add_dependency(name: 'Library4')
+        apache_license.add_dependency(name: 'Library3')
 
         subject
       end
@@ -90,7 +90,7 @@ RSpec.describe Gitlab::Ci::Reports::LicenseScanning::Report do
       before do
         report
           .add_license(id: nil, name: 'MIT')
-          .add_dependency('rails')
+          .add_dependency(name: 'rails')
       end
 
       context 'when a denied license is found in the report' do
@@ -169,24 +169,41 @@ RSpec.describe Gitlab::Ci::Reports::LicenseScanning::Report do
   end
 
   describe '#diff_with' do
+    subject { base_report.diff_with(head_report) }
+
     def names_from(licenses)
       licenses.map(&:name)
+    end
+
+    context 'when the other report is not available' do
+      let(:base_report) { build(:license_scan_report, :version_2) }
+      let(:head_report) { nil }
+
+      before do
+        base_report
+          .add_license(id: 'MIT', name: 'MIT License')
+          .add_dependency(name: 'rails')
+      end
+
+      specify do
+        expect(names_from(subject[:removed])).to contain_exactly('MIT License')
+        expect(subject[:added]).to be_empty
+        expect(subject[:unchanged]).to be_empty
+      end
     end
 
     context 'when diffing two v1 reports' do
       let(:base_report) { build(:license_scan_report, :version_1) }
       let(:head_report) { build(:license_scan_report, :version_1) }
 
-      subject { base_report.diff_with(head_report) }
-
       before do
-        base_report.add_license(id: nil, name: 'MIT').add_dependency('Library1')
-        base_report.add_license(id: nil, name: 'BSD').add_dependency('Library1')
-        base_report.add_license(id: nil, name: 'WTFPL').add_dependency('Library2')
+        base_report.add_license(id: nil, name: 'MIT').add_dependency(name: 'Library1')
+        base_report.add_license(id: nil, name: 'BSD').add_dependency(name: 'Library1')
+        base_report.add_license(id: nil, name: 'WTFPL').add_dependency(name: 'Library2')
 
-        head_report.add_license(id: nil, name: 'MIT').add_dependency('Library1')
-        head_report.add_license(id: nil, name: 'Apache 2.0').add_dependency('Library3')
-        head_report.add_license(id: nil, name: 'bsd').add_dependency('Library1')
+        head_report.add_license(id: nil, name: 'MIT').add_dependency(name: 'Library1')
+        head_report.add_license(id: nil, name: 'Apache 2.0').add_dependency(name: 'Library3')
+        head_report.add_license(id: nil, name: 'bsd').add_dependency(name: 'Library1')
       end
 
       it { expect(names_from(subject[:added])).to contain_exactly('Apache 2.0') }
@@ -198,16 +215,14 @@ RSpec.describe Gitlab::Ci::Reports::LicenseScanning::Report do
       let(:base_report) { build(:license_scan_report, :version_2) }
       let(:head_report) { build(:license_scan_report, :version_2) }
 
-      subject { base_report.diff_with(head_report) }
-
       before do
-        base_report.add_license(id: 'MIT', name: 'MIT').add_dependency('Library1')
-        base_report.add_license(id: 'BSD-3-Clause', name: 'BSD').add_dependency('Library1')
-        base_report.add_license(id: 'WTFPL', name: 'WTFPL').add_dependency('Library2')
+        base_report.add_license(id: 'MIT', name: 'MIT').add_dependency(name: 'Library1')
+        base_report.add_license(id: 'BSD-3-Clause', name: 'BSD').add_dependency(name: 'Library1')
+        base_report.add_license(id: 'WTFPL', name: 'WTFPL').add_dependency(name: 'Library2')
 
-        head_report.add_license(id: 'BSD-3-Clause', name: 'bsd').add_dependency('Library1')
-        head_report.add_license(id: 'Apache-2.0', name: 'Apache 2.0').add_dependency('Library3')
-        head_report.add_license(id: 'MIT', name: 'MIT License').add_dependency('Library1')
+        head_report.add_license(id: 'BSD-3-Clause', name: 'bsd').add_dependency(name: 'Library1')
+        head_report.add_license(id: 'Apache-2.0', name: 'Apache 2.0').add_dependency(name: 'Library3')
+        head_report.add_license(id: 'MIT', name: 'MIT License').add_dependency(name: 'Library1')
       end
 
       it { expect(names_from(subject[:added])).to contain_exactly('Apache 2.0') }
@@ -219,16 +234,14 @@ RSpec.describe Gitlab::Ci::Reports::LicenseScanning::Report do
       let(:base_report) { build(:license_scan_report, :version_1) }
       let(:head_report) { build(:license_scan_report, :version_2) }
 
-      subject { base_report.diff_with(head_report) }
-
       before do
-        base_report.add_license(id: nil, name: 'MIT').add_dependency('Library1')
-        base_report.add_license(id: nil, name: 'BSD').add_dependency('Library1')
-        base_report.add_license(id: nil, name: 'WTFPL').add_dependency('Library2')
+        base_report.add_license(id: nil, name: 'MIT').add_dependency(name: 'Library1')
+        base_report.add_license(id: nil, name: 'BSD').add_dependency(name: 'Library1')
+        base_report.add_license(id: nil, name: 'WTFPL').add_dependency(name: 'Library2')
 
-        head_report.add_license(id: 'BSD-3-Clause', name: 'bsd').add_dependency('Library1')
-        head_report.add_license(id: 'Apache-2.0', name: 'Apache 2.0').add_dependency('Library3')
-        head_report.add_license(id: 'MIT', name: 'MIT').add_dependency('Library1')
+        head_report.add_license(id: 'BSD-3-Clause', name: 'bsd').add_dependency(name: 'Library1')
+        head_report.add_license(id: 'Apache-2.0', name: 'Apache 2.0').add_dependency(name: 'Library3')
+        head_report.add_license(id: 'MIT', name: 'MIT').add_dependency(name: 'Library1')
       end
 
       it { expect(names_from(subject[:added])).to contain_exactly('Apache 2.0') }
@@ -240,16 +253,14 @@ RSpec.describe Gitlab::Ci::Reports::LicenseScanning::Report do
       let(:base_report) { build(:license_scan_report, :version_2) }
       let(:head_report) { build(:license_scan_report, :version_1) }
 
-      subject { base_report.diff_with(head_report) }
-
       before do
-        base_report.add_license(id: 'MIT', name: 'MIT').add_dependency('Library1')
-        base_report.add_license(id: 'BSD-3-Clause', name: 'BSD').add_dependency('Library1')
-        base_report.add_license(id: 'WTFPL', name: 'WTFPL').add_dependency('Library2')
+        base_report.add_license(id: 'MIT', name: 'MIT').add_dependency(name: 'Library1')
+        base_report.add_license(id: 'BSD-3-Clause', name: 'BSD').add_dependency(name: 'Library1')
+        base_report.add_license(id: 'WTFPL', name: 'WTFPL').add_dependency(name: 'Library2')
 
-        head_report.add_license(id: nil, name: 'bsd').add_dependency('Library1')
-        head_report.add_license(id: nil, name: 'Apache 2.0').add_dependency('Library3')
-        head_report.add_license(id: nil, name: 'MIT').add_dependency('Library1')
+        head_report.add_license(id: nil, name: 'bsd').add_dependency(name: 'Library1')
+        head_report.add_license(id: nil, name: 'Apache 2.0').add_dependency(name: 'Library3')
+        head_report.add_license(id: nil, name: 'MIT').add_dependency(name: 'Library1')
       end
 
       it { expect(names_from(subject[:added])).to contain_exactly('Apache 2.0') }

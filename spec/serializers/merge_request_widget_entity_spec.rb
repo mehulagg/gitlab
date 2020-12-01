@@ -88,25 +88,40 @@ RSpec.describe MergeRequestWidgetEntity do
   end
 
   describe 'codequality report artifacts', :request_store do
+    let(:merge_base_pipeline) { create(:ci_pipeline, :with_codequality_report, project: project) }
+
     before do
       project.add_developer(user)
 
       allow(resource).to receive_messages(
+        merge_base_pipeline: merge_base_pipeline,
         base_pipeline: pipeline,
         head_pipeline: pipeline
       )
     end
 
-    context "with report artifacts" do
+    context 'with report artifacts' do
       let(:pipeline) { create(:ci_pipeline, :with_codequality_report, project: project) }
+      let(:generic_job_id) { pipeline.builds.first.id }
+      let(:merge_base_job_id) { merge_base_pipeline.builds.first.id }
 
-      it "has data entry" do
-        expect(subject).to include(:codeclimate)
+      it 'has head_path and base_path entries' do
+        expect(subject[:codeclimate][:head_path]).to include("/jobs/#{generic_job_id}/artifacts/download?file_type=codequality")
+        expect(subject[:codeclimate][:base_path]).to include("/jobs/#{generic_job_id}/artifacts/download?file_type=codequality")
+      end
+
+      context 'on pipelines for merged results' do
+        let(:pipeline) { create(:ci_pipeline, :merged_result_pipeline, :with_codequality_report, project: project) }
+
+        it 'returns URLs from the head_pipeline and merge_base_pipeline' do
+          expect(subject[:codeclimate][:head_path]).to include("/jobs/#{generic_job_id}/artifacts/download?file_type=codequality")
+          expect(subject[:codeclimate][:base_path]).to include("/jobs/#{merge_base_job_id}/artifacts/download?file_type=codequality")
+        end
       end
     end
 
-    context "without artifacts" do
-      it "does not have data entry" do
+    context 'without artifacts' do
+      it 'does not have data entry' do
         expect(subject).not_to include(:codeclimate)
       end
     end
@@ -270,56 +285,34 @@ RSpec.describe MergeRequestWidgetEntity do
   end
 
   describe 'user callouts' do
-    context 'when suggest pipeline feature is enabled' do
+    subject { described_class.new(resource, request: request).as_json }
+
+    it 'provides a valid path value for user callout path' do
+      expect(subject[:user_callouts_path]).to eq '/-/user_callouts'
+    end
+
+    it 'provides a valid value for suggest pipeline feature id' do
+      expect(subject[:suggest_pipeline_feature_id]).to eq described_class::SUGGEST_PIPELINE
+    end
+
+    it 'provides a valid value for if it is dismissed' do
+      expect(subject[:is_dismissed_suggest_pipeline]).to be(false)
+    end
+
+    context 'when the suggest pipeline has been dismissed' do
       before do
-        stub_feature_flags(suggest_pipeline: true)
+        create(:user_callout, user: user, feature_name: described_class::SUGGEST_PIPELINE)
       end
 
-      it 'provides a valid path value for user callout path' do
-        expect(subject[:user_callouts_path]).to eq '/-/user_callouts'
-      end
-
-      it 'provides a valid value for suggest pipeline feature id' do
-        expect(subject[:suggest_pipeline_feature_id]).to eq described_class::SUGGEST_PIPELINE
-      end
-
-      it 'provides a valid value for if it is dismissed' do
-        expect(subject[:is_dismissed_suggest_pipeline]).to be(false)
-      end
-
-      context 'when the suggest pipeline has been dismissed' do
-        before do
-          create(:user_callout, user: user, feature_name: described_class::SUGGEST_PIPELINE)
-        end
-
-        it 'indicates suggest pipeline has been dismissed' do
-          expect(subject[:is_dismissed_suggest_pipeline]).to be(true)
-        end
-      end
-
-      context 'when user is not logged in' do
-        let(:request) { double('request', current_user: nil, project: project) }
-
-        it 'returns a blank is dismissed value' do
-          expect(subject[:is_dismissed_suggest_pipeline]).to be_nil
-        end
+      it 'indicates suggest pipeline has been dismissed' do
+        expect(subject[:is_dismissed_suggest_pipeline]).to be(true)
       end
     end
 
-    context 'when suggest pipeline feature is not enabled' do
-      before do
-        stub_feature_flags(suggest_pipeline: false)
-      end
+    context 'when user is not logged in' do
+      let(:request) { double('request', current_user: nil, project: project) }
 
-      it 'provides no valid value for user callout path' do
-        expect(subject[:user_callouts_path]).to be_nil
-      end
-
-      it 'provides no valid value for suggest pipeline feature id' do
-        expect(subject[:suggest_pipeline_feature_id]).to be_nil
-      end
-
-      it 'provides no valid value for if it is dismissed' do
+      it 'returns a blank is dismissed value' do
         expect(subject[:is_dismissed_suggest_pipeline]).to be_nil
       end
     end
@@ -352,6 +345,24 @@ RSpec.describe MergeRequestWidgetEntity do
       entity = described_class.new(merge_request, request: request).as_json
 
       expect(entity[:rebase_path]).to be_nil
+    end
+  end
+
+  it 'has security_reports_docs_path' do
+    expect(subject[:security_reports_docs_path]).not_to be_nil
+  end
+
+  describe 'has source_project_default_url' do
+    it 'returns the default url to the source project' do
+      expect(subject[:source_project_default_url]).to eq project.http_url_to_repo
+    end
+
+    context 'when source project is nil' do
+      it 'returns nil' do
+        allow(resource).to receive(:source_project).and_return(nil)
+
+        expect(subject[:source_project_default_url]).to be_nil
+      end
     end
   end
 end

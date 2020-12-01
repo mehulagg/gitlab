@@ -134,7 +134,9 @@ RSpec.describe ProjectsHelper do
         {
           has_vulnerabilities: 'false',
           empty_state_svg_path: start_with('/assets/illustrations/security-dashboard_empty'),
-          security_dashboard_help_path: '/help/user/application_security/security_dashboard/index'
+          security_dashboard_help_path: '/help/user/application_security/security_dashboard/index',
+          project_full_path: project.full_path,
+          no_vulnerabilities_svg_path: start_with('/assets/illustrations/issues-')
         }
       end
 
@@ -142,27 +144,60 @@ RSpec.describe ProjectsHelper do
     end
 
     context 'project with vulnerabilities' do
-      before do
-        create(:vulnerability, project: project)
-      end
-
-      let(:expected_values) do
+      let(:base_values) do
         {
           has_vulnerabilities: 'true',
           project: { id: project.id, name: project.name },
           project_full_path: project.full_path,
           vulnerabilities_export_endpoint: "/api/v4/security/projects/#{project.id}/vulnerability_exports",
-          vulnerability_feedback_help_path: '/help/user/application_security/index#interacting-with-the-vulnerabilities',
           no_vulnerabilities_svg_path: start_with('/assets/illustrations/issues-'),
           empty_state_svg_path: start_with('/assets/illustrations/security-dashboard-empty-state'),
           dashboard_documentation: '/help/user/application_security/security_dashboard/index',
           security_dashboard_help_path: '/help/user/application_security/security_dashboard/index',
           not_enabled_scanners_help_path: help_page_path('user/application_security/index', anchor: 'quick-start'),
-          no_pipeline_run_scanners_help_path: new_project_pipeline_path(project)
+          no_pipeline_run_scanners_help_path: "/#{project.full_path}/-/pipelines/new",
+          auto_fix_documentation: help_page_path('user/application_security/index', anchor: 'auto-fix-merge-requests'),
+          auto_fix_mrs_path: end_with('/merge_requests?label_name=GitLab-auto-fix')
         }
       end
 
-      it { is_expected.to match(expected_values) }
+      before do
+        create(:vulnerability, project: project)
+      end
+
+      context 'without pipeline' do
+        before do
+          allow(project).to receive(:latest_pipeline_with_security_reports).and_return(nil)
+        end
+
+        it { is_expected.to match(base_values) }
+      end
+
+      context 'with pipeline' do
+        let(:pipeline_created_at) { '1881-05-19T00:00:00Z' }
+        let(:pipeline) { build_stubbed(:ci_pipeline, project: project, created_at: pipeline_created_at) }
+        let(:pipeline_values) do
+          {
+            pipeline: {
+              id: pipeline.id,
+              path: "/#{project.full_path}/-/pipelines/#{pipeline.id}",
+              created_at: pipeline_created_at,
+              security_builds: {
+                failed: {
+                  count: 0,
+                  path: "/#{project.full_path}/-/pipelines/#{pipeline.id}/failures"
+                }
+              }
+            }
+          }
+        end
+
+        before do
+          allow(project).to receive(:latest_pipeline_with_security_reports).and_return(pipeline)
+        end
+
+        it { is_expected.to match(base_values.merge!(pipeline_values)) }
+      end
     end
   end
 
@@ -172,12 +207,14 @@ RSpec.describe ProjectsHelper do
         projects/security/configuration#show
         projects/security/sast_configuration#show
         projects/security/vulnerabilities#show
+        projects/security/vulnerability_report#index
         projects/security/dashboard#index
         projects/on_demand_scans#index
         projects/dast_profiles#index
         projects/dast_site_profiles#new
         projects/dast_site_profiles#edit
         projects/dast_scanner_profiles#new
+        projects/dast_scanner_profiles#edit
         projects/dependencies#index
         projects/licenses#index
         projects/threat_monitoring#show
@@ -199,6 +236,7 @@ RSpec.describe ProjectsHelper do
         projects/dast_site_profiles#new
         projects/dast_site_profiles#edit
         projects/dast_scanner_profiles#new
+        projects/dast_scanner_profiles#edit
       ]
     end
 
@@ -257,7 +295,6 @@ RSpec.describe ProjectsHelper do
     let(:user) { create(:user) }
 
     where(
-      ab_feature_enabled?: [true, false],
       gitlab_com?: [true, false],
        user?: [true, false],
       security_dashboard_feature_available?: [true, false],
@@ -267,13 +304,11 @@ RSpec.describe ProjectsHelper do
     with_them do
       it 'returns the expected value' do
         allow(::Gitlab).to receive(:com?) { gitlab_com? }
-        allow(user).to receive(:ab_feature_enabled?) { ab_feature_enabled? }
         allow(helper).to receive(:current_user) { user? ? user : nil }
         allow(project).to receive(:feature_available?) { security_dashboard_feature_available? }
         allow(helper).to receive(:can?) { can_admin_namespace? }
 
-        expected_value = user? && gitlab_com? &&
-                         ab_feature_enabled? && !security_dashboard_feature_available? && can_admin_namespace?
+        expected_value = user? && gitlab_com? && !security_dashboard_feature_available? && can_admin_namespace?
 
         expect(helper.show_discover_project_security?(project)).to eq(expected_value)
       end

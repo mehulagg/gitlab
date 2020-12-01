@@ -1,0 +1,5 @@
+---
+title: Fix missing padding in custody report dropdown
+merge_request: 47927
+author:
+type: fixed

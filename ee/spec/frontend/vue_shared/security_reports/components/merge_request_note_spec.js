@@ -1,7 +1,7 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlSprintf } from '@gitlab/ui';
-import component from 'ee/vue_shared/security_reports/components/merge_request_note.vue';
+import { shallowMount } from '@vue/test-utils';
 import EventItem from 'ee/vue_shared/security_reports/components/event_item.vue';
+import component from 'ee/vue_shared/security_reports/components/merge_request_note.vue';
 
 describe('Merge request note', () => {
   const now = new Date();

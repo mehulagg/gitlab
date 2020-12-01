@@ -13,6 +13,7 @@ RSpec.describe "Admin::Users" do
 
   before do
     sign_in(current_user)
+    gitlab_enable_admin_mode_sign_in(current_user)
   end
 
   describe 'GET /admin/users' do
@@ -134,13 +135,13 @@ RSpec.describe "Admin::Users" do
       # SSH key should be the first in the list
       within('ul.content-list li.key-list-item:nth-of-type(1)') do
         expect(page).to have_content(key2.title)
-        expect(page).to have_css('a[data-method=delete]', text: 'Remove')
+        expect(page).to have_button('Delete')
       end
 
       # Next, LDAP key
       within('ul.content-list li.key-list-item:nth-of-type(2)') do
         expect(page).to have_content(key1.title)
-        expect(page).not_to have_css('a[data-method=delete]')
+        expect(page).not_to have_button('Delete')
       end
     end
   end

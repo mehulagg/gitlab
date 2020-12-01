@@ -19,6 +19,7 @@ module Banzai
           Filter::SyntaxHighlightFilter,
           Filter::MathFilter,
           Filter::ColorFilter,
+          Filter::KrokiFilter,
           Filter::MermaidFilter,
           Filter::VideoLinkFilter,
           Filter::AudioLinkFilter,
@@ -59,7 +60,8 @@ module Banzai
           Filter::CommitRangeReferenceFilter,
           Filter::CommitReferenceFilter,
           Filter::LabelReferenceFilter,
-          Filter::MilestoneReferenceFilter
+          Filter::MilestoneReferenceFilter,
+          Filter::AlertReferenceFilter
         ]
       end
 

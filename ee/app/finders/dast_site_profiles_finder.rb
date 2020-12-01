@@ -6,7 +6,7 @@ class DastSiteProfilesFinder
   end
 
   def execute
-    relation = DastSiteProfile.with_dast_site
+    relation = DastSiteProfile.with_dast_site_and_validation
     relation = by_id(relation)
     relation = by_project(relation)
     relation
@@ -20,7 +20,7 @@ class DastSiteProfilesFinder
   def by_id(relation)
     return relation if params[:id].nil?
 
-    relation.where(id: params[:id])
+    relation.where(id: params[:id]).limit(1)
   end
   # rubocop: enable CodeReuse/ActiveRecord
 

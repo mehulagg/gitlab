@@ -116,7 +116,7 @@ RSpec.describe ProjectImportState, type: :model do
 
   describe 'when create' do
     it 'sets next execution timestamp to now' do
-      Timecop.freeze(Time.current) do
+      travel_to(Time.current) do
         import_state = create(:import_state, :mirror)
 
         expect(import_state.next_execution_timestamp).to be_like_time(Time.current)
@@ -488,7 +488,7 @@ RSpec.describe ProjectImportState, type: :model do
     end
 
     def expect_next_execution_timestamp(import_state, new_timestamp)
-      Timecop.freeze(timestamp) do
+      travel_to(timestamp) do
         expect do
           import_state.set_next_execution_timestamp
         end.to change { import_state.next_execution_timestamp }.to eq(new_timestamp)
@@ -518,7 +518,7 @@ RSpec.describe ProjectImportState, type: :model do
 
       expect(UpdateAllMirrorsWorker).to receive(:perform_async)
 
-      Timecop.freeze(timestamp) do
+      travel_to(timestamp) do
         expect { import_state.force_import_job! }.to change(import_state, :next_execution_timestamp).to(5.minutes.ago)
       end
     end
@@ -530,7 +530,7 @@ RSpec.describe ProjectImportState, type: :model do
 
         expect(UpdateAllMirrorsWorker).to receive(:perform_async)
 
-        Timecop.freeze(timestamp) do
+        travel_to(timestamp) do
           expect { import_state.force_import_job! }.to change(import_state, :retry_count).to(0)
           expect(import_state.next_execution_timestamp).to be_like_time(5.minutes.ago)
         end

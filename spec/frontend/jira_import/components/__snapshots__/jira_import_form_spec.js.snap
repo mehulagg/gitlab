@@ -91,6 +91,8 @@ exports[`JiraImportForm table body shows correct information in each cell 1`] = 
           >
             <!---->
              
+            <!---->
+             
             <span
               class="gl-new-dropdown-button-text"
             >
@@ -98,7 +100,8 @@ exports[`JiraImportForm table body shows correct information in each cell 1`] = 
             </span>
              
             <svg
-              class="dropdown-chevron gl-icon s16"
+              aria-hidden="true"
+              class="gl-button-icon dropdown-chevron gl-icon s16"
               data-testid="chevron-down-icon"
             >
               <use
@@ -114,9 +117,10 @@ exports[`JiraImportForm table body shows correct information in each cell 1`] = 
             <!---->
              
             <div
-              class="gl-search-box-by-type gl-m-3"
+              class="gl-search-box-by-type"
             >
               <svg
+                aria-hidden="true"
                 class="gl-search-box-by-type-search-icon gl-icon s16"
                 data-testid="search-icon"
               >
@@ -202,6 +206,8 @@ exports[`JiraImportForm table body shows correct information in each cell 1`] = 
           >
             <!---->
              
+            <!---->
+             
             <span
               class="gl-new-dropdown-button-text"
             >
@@ -209,7 +215,8 @@ exports[`JiraImportForm table body shows correct information in each cell 1`] = 
             </span>
              
             <svg
-              class="dropdown-chevron gl-icon s16"
+              aria-hidden="true"
+              class="gl-button-icon dropdown-chevron gl-icon s16"
               data-testid="chevron-down-icon"
             >
               <use
@@ -225,9 +232,10 @@ exports[`JiraImportForm table body shows correct information in each cell 1`] = 
             <!---->
              
             <div
-              class="gl-search-box-by-type gl-m-3"
+              class="gl-search-box-by-type"
             >
               <svg
+                aria-hidden="true"
                 class="gl-search-box-by-type-search-icon gl-icon s16"
                 data-testid="search-icon"
               >

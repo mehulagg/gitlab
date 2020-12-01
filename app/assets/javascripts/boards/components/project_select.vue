@@ -15,16 +15,12 @@ export default {
     GlLoadingIcon,
   },
   props: {
-    groupId: {
-      type: Number,
-      required: true,
-      default: 0,
-    },
     list: {
       type: Object,
       required: true,
     },
   },
+  inject: ['groupId'],
   data() {
     return {
       loading: true,
@@ -48,6 +44,7 @@ export default {
         this.selectedProject = {
           id: $el.data('project-id'),
           name: $el.data('project-name'),
+          path: $el.data('project-path'),
         };
         eventHub.$emit('setSelectedProject', this.selectedProject);
       },
@@ -79,11 +76,12 @@ export default {
       renderRow(project) {
         return `
             <li>
-              <a href='#' class='dropdown-menu-link' data-project-id="${
-                project.id
-              }" data-project-name="${project.name}" data-project-name-with-namespace="${
-          project.name_with_namespace
-        }">
+              <a href='#' class='dropdown-menu-link'
+                data-project-id="${project.id}"
+                data-project-name="${project.name}"
+                data-project-name-with-namespace="${project.name_with_namespace}"
+                data-project-path="${project.path_with_namespace}"
+              >
                 ${escape(project.name_with_namespace)}
               </a>
             </li>

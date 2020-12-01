@@ -1,5 +1,4 @@
 <script>
-import $ from 'jquery';
 import { GlTooltipDirective } from '@gitlab/ui';
 import CiIcon from '~/vue_shared/components/ci_icon.vue';
 import JobItem from './job_item.vue';
@@ -30,27 +29,7 @@ export default {
       return `${name} - ${status.label}`;
     },
   },
-  mounted() {
-    this.stopDropdownClickPropagation();
-  },
   methods: {
-    /**
-     * When the user right clicks or cmd/ctrl + click in the group name or the action icon
-     * the dropdown should not be closed so we stop propagation
-     * of the click event inside the dropdown.
-     *
-     * Since this component is rendered multiple times per page we need to guarantee we only
-     * target the click event of this component.
-     */
-    stopDropdownClickPropagation() {
-      $(
-        '.js-grouped-pipeline-dropdown button, .js-grouped-pipeline-dropdown a.mini-pipeline-graph-dropdown-item',
-        this.$el,
-      ).on('click', e => {
-        e.stopPropagation();
-      });
-    },
-
     pipelineActionRequestComplete() {
       this.$emit('pipelineActionRequestComplete');
     },
@@ -65,15 +44,19 @@ export default {
       type="button"
       data-toggle="dropdown"
       data-display="static"
-      class="dropdown-menu-toggle build-content"
+      class="dropdown-menu-toggle build-content gl-build-content"
     >
-      <ci-icon :status="group.status" />
+      <div class="gl-display-flex gl-align-items-center gl-justify-content-space-between">
+        <span class="gl-display-flex gl-align-items-center">
+          <ci-icon :status="group.status" :size="24" />
 
-      <span class="ci-status-text text-truncate mw-70p gl-pl-2 d-inline-block align-bottom">
-        {{ group.name }}
-      </span>
+          <span class="gl-text-truncate mw-70p gl-pl-3 gl-display-inline-block">
+            {{ group.name }}
+          </span>
+        </span>
 
-      <span class="dropdown-counter-badge"> {{ group.size }} </span>
+        <span class="gl-font-weight-100 gl-font-size-lg gl-pr-2"> {{ group.size }} </span>
+      </div>
     </button>
 
     <ul class="dropdown-menu big-pipeline-graph-dropdown-menu js-grouped-pipeline-dropdown">

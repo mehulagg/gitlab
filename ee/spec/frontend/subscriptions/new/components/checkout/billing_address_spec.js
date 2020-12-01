@@ -1,9 +1,9 @@
-import Vuex from 'vuex';
 import { mount, createLocalVue } from '@vue/test-utils';
+import Vuex from 'vuex';
+import Component from 'ee/subscriptions/new/components/checkout/billing_address.vue';
+import Step from 'ee/subscriptions/new/components/checkout/step.vue';
 import createStore from 'ee/subscriptions/new/store';
 import * as types from 'ee/subscriptions/new/store/mutation_types';
-import Step from 'ee/subscriptions/new/components/checkout/step.vue';
-import Component from 'ee/subscriptions/new/components/checkout/billing_address.vue';
 
 describe('Billing Address', () => {
   const localVue = createLocalVue();

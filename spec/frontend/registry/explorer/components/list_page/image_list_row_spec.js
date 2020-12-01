@@ -9,6 +9,8 @@ import {
   ROW_SCHEDULED_FOR_DELETION,
   LIST_DELETE_BUTTON_DISABLED,
   REMOVE_REPOSITORY_LABEL,
+  ASYNC_DELETE_IMAGE_ERROR_MESSAGE,
+  CLEANUP_TIMED_OUT_ERROR_MESSAGE,
 } from '~/registry/explorer/constants';
 import { RouterLink } from '../../stubs';
 import { imagesListResponse } from '../../mock_data';
@@ -17,10 +19,11 @@ describe('Image List Row', () => {
   let wrapper;
   const item = imagesListResponse.data[0];
 
-  const findDetailsLink = () => wrapper.find('[data-testid="detailsLink"]');
+  const findDetailsLink = () => wrapper.find('[data-testid="details-link"]');
   const findTagsCount = () => wrapper.find('[data-testid="tagsCount"]');
   const findDeleteBtn = () => wrapper.find(DeleteButton);
   const findClipboardButton = () => wrapper.find(ClipboardButton);
+  const findWarningIcon = () => wrapper.find('[data-testid="warning-icon"]');
 
   const mountComponent = props => {
     wrapper = shallowMount(Component, {
@@ -64,7 +67,12 @@ describe('Image List Row', () => {
       mountComponent();
       const link = findDetailsLink();
       expect(link.html()).toContain(item.path);
-      expect(link.props('to').name).toBe('details');
+      expect(link.props('to')).toMatchObject({
+        name: 'details',
+        params: {
+          id: item.id,
+        },
+      });
     });
 
     it('contains a clipboard button', () => {
@@ -73,6 +81,26 @@ describe('Image List Row', () => {
       expect(button.exists()).toBe(true);
       expect(button.props('text')).toBe(item.location);
       expect(button.props('title')).toBe(item.location);
+    });
+
+    describe('warning icon', () => {
+      it.each`
+        failedDelete | cleanup_policy_started_at | shown    | title
+        ${true}      | ${true}                   | ${true}  | ${ASYNC_DELETE_IMAGE_ERROR_MESSAGE}
+        ${false}     | ${true}                   | ${true}  | ${CLEANUP_TIMED_OUT_ERROR_MESSAGE}
+        ${false}     | ${false}                  | ${false} | ${''}
+      `(
+        'when failedDelete is $failedDelete and cleanup_policy_started_at is $cleanup_policy_started_at',
+        ({ cleanup_policy_started_at, failedDelete, shown, title }) => {
+          mountComponent({ item: { ...item, failedDelete, cleanup_policy_started_at } });
+          const icon = findWarningIcon();
+          expect(icon.exists()).toBe(shown);
+          if (shown) {
+            const tooltip = getBinding(icon.element, 'gl-tooltip');
+            expect(tooltip.value.title).toBe(title);
+          }
+        },
+      );
     });
   });
 

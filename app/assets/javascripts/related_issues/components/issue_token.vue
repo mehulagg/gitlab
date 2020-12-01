@@ -1,5 +1,5 @@
 <script>
-import { GlIcon } from '@gitlab/ui';
+import { GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import { __, sprintf } from '~/locale';
 import relatedIssuableMixin from '~/vue_shared/mixins/related_issuable_mixin';
 
@@ -7,6 +7,9 @@ export default {
   name: 'IssueToken',
   components: {
     GlIcon,
+  },
+  directives: {
+    GlTooltip: GlTooltipDirective,
   },
   mixins: [relatedIssuableMixin],
   props: {
@@ -52,7 +55,7 @@ export default {
     <component
       :is="computedLinkElementType"
       ref="link"
-      v-tooltip
+      v-gl-tooltip
       :class="{
         'issue-token-link': isCondensed,
         'issuable-main-info': !isCondensed,
@@ -84,12 +87,13 @@ export default {
       >
         <gl-icon
           v-if="hasState"
-          v-tooltip
+          v-gl-tooltip
           :class="iconClass"
           :name="iconName"
           :size="12"
           :title="stateTitle"
           :aria-label="state"
+          data-testid="referenceIcon"
         />
         {{ displayReference }}
       </component>
@@ -97,7 +101,7 @@ export default {
     <button
       v-if="canRemove"
       ref="removeButton"
-      v-tooltip
+      v-gl-tooltip
       :class="{
         'issue-token-remove-button': isCondensed,
         'btn btn-default': !isCondensed,
@@ -105,11 +109,12 @@ export default {
       :title="removeButtonLabel"
       :aria-label="removeButtonLabel"
       :disabled="removeDisabled"
+      data-testid="removeBtn"
       type="button"
       class="js-issue-token-remove-button"
       @click="onRemoveRequest"
     >
-      <i class="fa fa-times" aria-hidden="true"></i>
+      <gl-icon name="close" />
     </button>
   </div>
 </template>

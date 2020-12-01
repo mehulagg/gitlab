@@ -13,6 +13,8 @@ class Projects::BranchesController < Projects::ApplicationController
   before_action :redirect_for_legacy_index_sort_or_search, only: [:index]
   before_action :limit_diverging_commit_counts!, only: [:diverging_commit_counts]
 
+  feature_category :source_code_management
+
   def index
     respond_to do |format|
       format.html do
@@ -25,7 +27,7 @@ class Projects::BranchesController < Projects::ApplicationController
 
         @refs_pipelines = @project.ci_pipelines.latest_successful_for_refs(@branches.map(&:name))
         @merged_branch_names = repository.merged_branch_names(@branches.map(&:name))
-        @branch_pipeline_statuses = branch_pipeline_statuses
+        @branch_pipeline_statuses = Ci::CommitStatusesFinder.new(@project, repository, current_user, @branches).execute
 
         # https://gitlab.com/gitlab-org/gitlab/-/issues/22851
         Gitlab::GitalyClient.allow_n_plus_1_calls do
@@ -38,10 +40,6 @@ class Projects::BranchesController < Projects::ApplicationController
         render json: branches.map(&:name)
       end
     end
-  end
-
-  def recent
-    @branches = @repository.recent_branches
   end
 
   def diverging_commit_counts
@@ -194,16 +192,5 @@ class Projects::BranchesController < Projects::ApplicationController
     return unless can?(current_user, :update_issue, confidential_issue_project)
 
     confidential_issue_project
-  end
-
-  def branch_pipeline_statuses
-    latest_commits = @branches.map do |branch|
-      [branch.name, repository.commit(branch.dereferenced_target).sha]
-    end.to_h
-
-    latest_pipelines = project.ci_pipelines.latest_pipeline_per_commit(latest_commits.values)
-    latest_commits.transform_values do |commit_sha|
-      latest_pipelines[commit_sha]&.detailed_status(current_user)
-    end.compact
   end
 end

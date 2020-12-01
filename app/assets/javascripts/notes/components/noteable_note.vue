@@ -23,6 +23,7 @@ import {
   commentLineOptions,
   formatLineRange,
 } from './multiline_comment_utils';
+import { INLINE_DIFF_LINES_KEY } from '~/diffs/constants';
 
 export default {
   name: 'NoteableNote',
@@ -73,6 +74,11 @@ export default {
       required: false,
       default: false,
     },
+    discussionResolvePath: {
+      type: String,
+      required: false,
+      default: '',
+    },
   },
   data() {
     return {
@@ -81,6 +87,7 @@ export default {
       isRequesting: false,
       isResolving: false,
       commentLineStart: {},
+      resolveAsThread: this.glFeatures.removeResolveNote,
     };
   },
   computed: {
@@ -133,6 +140,10 @@ export default {
       return this.note.isDraft;
     },
     canResolve() {
+      if (this.glFeatures.removeResolveNote && !this.discussionRoot) return false;
+
+      if (this.glFeatures.removeResolveNote) return this.note.current_user.can_resolve_discussion;
+
       return (
         this.note.current_user.can_resolve ||
         (this.note.isDraft && this.note.discussion_id !== null)
@@ -159,12 +170,8 @@ export default {
       return this.line && this.startLineNumber !== this.endLineNumber;
     },
     commentLineOptions() {
-      const sideA = this.line.type === 'new' ? 'right' : 'left';
-      const sideB = sideA === 'left' ? 'right' : 'left';
-      const lines = this.diffFile.highlighted_diff_lines.length
-        ? this.diffFile.highlighted_diff_lines
-        : this.diffFile.parallel_diff_lines.map(l => l[sideA] || l[sideB]);
-      return commentLineOptions(lines, this.commentLineStart, this.line.line_code, sideA);
+      const lines = this.diffFile[INLINE_DIFF_LINES_KEY].length;
+      return commentLineOptions(lines, this.commentLineStart, this.line.line_code);
     },
     diffFile() {
       if (this.commentLineStart.line_code) {
@@ -345,7 +352,8 @@ export default {
     :class="classNameBindings"
     :data-award-url="note.toggle_award_path"
     :data-note-id="note.id"
-    class="note note-wrapper qa-noteable-note-item"
+    class="note note-wrapper"
+    data-qa-selector="noteable_note_container"
   >
     <div
       v-if="showMultiLineComment"
@@ -389,6 +397,10 @@ export default {
           :note-id="note.id"
           :note-url="note.noteable_note_url"
           :access-level="note.human_access"
+          :is-contributor="note.is_contributor"
+          :is-author="note.is_noteable_author"
+          :project-name="note.project_name"
+          :noteable-type="note.noteable_type"
           :show-reply="showReplyButton"
           :can-edit="note.current_user.can_edit"
           :can-award-emoji="note.current_user.can_award_emoji"

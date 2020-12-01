@@ -1,7 +1,7 @@
 ---
 stage: Plan
 group: Certify
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Service Desk
@@ -9,8 +9,6 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/149) in [GitLab Premium](https://about.gitlab.com/pricing/) 9.1.
 > - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/214839) to [GitLab Starter](https://about.gitlab.com/pricing/) in 13.0.
 > - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/215364) to [GitLab Core](https://about.gitlab.com/pricing/) in 13.2.
-
-## Overview
 
 Service Desk is a module that allows your team to connect directly
 with any external party through email right inside of GitLab; no external tools required.
@@ -78,7 +76,7 @@ Follow these steps to do so:
    address's format. The older format is still supported, however, allowing existing aliases or
    contacts to continue working.
 
-   DANGER: **Danger:**
+   DANGER: **Warning:**
    This email address can be used by anyone to create an issue on this project, whether or not they
    have access to your GitLab instance. We recommend **putting this behind an alias** so it can be
    changed if needed, and **[enabling Akismet](../../integration/akismet.md)** on your GitLab
@@ -101,7 +99,7 @@ navigation's **Issues** menu.
 
 When a user submits a new issue using Service Desk, or when a new note is created on a Service Desk issue, an email is sent to the author.
 
-The body of these email messages can customized by using templates. To create a new customized template,
+The body of these email messages can be customized by using templates. To create a new customized template,
 create a new Markdown (`.md`) file inside the `.gitlab/service_desk_templates/`
 directory in your repository. Commit and push to your default branch.
 
@@ -129,7 +127,7 @@ in the email, `%{ISSUE_PATH}` placeholder which will be replaced by
 You can customize the email display name. Emails sent from Service Desk will have
 this name in the `From` header. The default display name is `GitLab Support Bot`.
 
-### Using custom email address
+### Using custom email address **(CORE ONLY)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/2201) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.0.
 

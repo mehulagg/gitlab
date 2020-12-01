@@ -1,19 +1,20 @@
 <script>
 /* eslint-disable vue/no-v-html */
-import Mousetrap from 'mousetrap';
 import { escape } from 'lodash';
 import {
   GlButton,
-  GlNewDropdown as GlDropdown,
-  GlNewDropdownHeader as GlDropdownHeader,
-  GlNewDropdownItem as GlDropdownItem,
+  GlDropdown,
+  GlDropdownSectionHeader,
+  GlDropdownItem,
   GlTooltipDirective,
+  GlModalDirective,
 } from '@gitlab/ui';
 import { n__, s__, sprintf } from '~/locale';
 import { mergeUrlParams, webIDEUrl } from '~/lib/utils/url_utility';
 import clipboardButton from '~/vue_shared/components/clipboard_button.vue';
 import TooltipOnTruncate from '~/vue_shared/components/tooltip_on_truncate.vue';
 import MrWidgetIcon from './mr_widget_icon.vue';
+import MrWidgetHowToMergeModal from './mr_widget_how_to_merge_modal.vue';
 
 export default {
   name: 'MRWidgetHeader',
@@ -21,13 +22,15 @@ export default {
     clipboardButton,
     TooltipOnTruncate,
     MrWidgetIcon,
+    MrWidgetHowToMergeModal,
     GlButton,
     GlDropdown,
-    GlDropdownHeader,
+    GlDropdownSectionHeader,
     GlDropdownItem,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
+    GlModalDirective,
   },
   props: {
     mr: {
@@ -83,16 +86,8 @@ export default {
           )
         : '';
     },
-  },
-  mounted() {
-    Mousetrap.bind('b', this.copyBranchName);
-  },
-  beforeDestroy() {
-    Mousetrap.unbind('b');
-  },
-  methods: {
-    copyBranchName() {
-      this.$refs.copyBranchNameButton.$el.click();
+    isFork() {
+      return this.mr.sourceProjectFullPath !== this.mr.targetProjectFullPath;
     },
   },
 };
@@ -110,10 +105,10 @@ export default {
             class="label-branch label-truncate js-source-branch"
             v-html="mr.sourceBranchLink"
           /><clipboard-button
-            ref="copyBranchNameButton"
+            data-testid="mr-widget-copy-clipboard"
             :text="branchNameClipboardData"
             :title="__('Copy branch name')"
-            css-class="btn-default btn-transparent btn-clipboard"
+            category="tertiary"
           />
           {{ s__('mrWidget|into') }}
           <tooltip-on-truncate
@@ -152,13 +147,22 @@ export default {
             </gl-button>
           </span>
           <gl-button
+            v-gl-modal-directive="'modal-merge-info'"
             :disabled="mr.sourceBranchRemoved"
-            data-target="#modal_merge_info"
-            data-toggle="modal"
             class="js-check-out-branch gl-mr-3"
           >
             {{ s__('mrWidget|Check out branch') }}
           </gl-button>
+          <mr-widget-how-to-merge-modal
+            :is-fork="isFork"
+            :can-merge="mr.canMerge"
+            :source-branch="mr.sourceBranch"
+            :source-project="mr.sourceProject"
+            :source-project-path="mr.sourceProjectFullPath"
+            :target-branch="mr.targetBranch"
+            :source-project-default-url="mr.sourceProjectDefaultUrl"
+            :reviewing-docs-path="mr.reviewingDocsPath"
+          />
         </template>
         <gl-dropdown
           v-gl-tooltip
@@ -168,7 +172,7 @@ export default {
           right
           data-qa-selector="download_dropdown"
         >
-          <gl-dropdown-header>{{ s__('Download as') }}</gl-dropdown-header>
+          <gl-dropdown-section-header>{{ s__('Download as') }}</gl-dropdown-section-header>
           <gl-dropdown-item
             :href="mr.emailPatchesPath"
             class="js-download-email-patches"

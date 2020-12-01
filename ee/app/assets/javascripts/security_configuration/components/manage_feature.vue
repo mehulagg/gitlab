@@ -1,13 +1,11 @@
 <script>
-import { GlButton, GlLink } from '@gitlab/ui';
-import { sprintf, s__ } from '~/locale';
+import { GlButton } from '@gitlab/ui';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import CreateMergeRequestButton from './create_merge_request_button.vue';
 
 export default {
   components: {
     GlButton,
-    GlLink,
     CreateMergeRequestButton,
   },
   mixins: [glFeatureFlagsMixin()],
@@ -29,17 +27,12 @@ export default {
     canConfigureFeature() {
       return Boolean(this.glFeatures.sastConfigurationUi && this.feature.configuration_path);
     },
-    // TODO: Remove as part of https://gitlab.com/gitlab-org/gitlab/-/issues/227575
+    // TODO: Remove as part of https://gitlab.com/gitlab-org/gitlab/-/issues/241377
     canCreateSASTMergeRequest() {
       return Boolean(this.feature.type === 'sast' && this.createSastMergeRequestPath);
     },
     canManageProfiles() {
       return this.feature.type === 'dast_profiles';
-    },
-    getFeatureDocumentationLinkLabel() {
-      return sprintf(s__('SecurityConfiguration|Feature documentation for %{featureName}'), {
-        featureName: this.feature.name,
-      });
     },
   },
 };
@@ -48,8 +41,6 @@ export default {
 <template>
   <gl-button
     v-if="canManageProfiles"
-    variant="success"
-    category="primary"
     :href="feature.configuration_path"
     data-testid="manageButton"
     >{{ s__('SecurityConfiguration|Manage') }}</gl-button
@@ -71,20 +62,10 @@ export default {
     >{{ s__('SecurityConfiguration|Enable') }}</gl-button
   >
 
-  <!-- TODO: Remove as part of https://gitlab.com/gitlab-org/gitlab/-/issues/227575 -->
+  <!-- TODO: Remove as part of https://gitlab.com/gitlab-org/gitlab/-/issues/241377 -->
   <create-merge-request-button
     v-else-if="canCreateSASTMergeRequest"
     :auto-devops-enabled="autoDevopsEnabled"
     :endpoint="createSastMergeRequestPath"
   />
-
-  <gl-link
-    v-else
-    target="_blank"
-    :href="feature.link"
-    :aria-label="getFeatureDocumentationLinkLabel"
-    data-testid="docsLink"
-  >
-    {{ s__('SecurityConfiguration|See documentation') }}
-  </gl-link>
 </template>

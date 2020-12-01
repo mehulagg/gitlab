@@ -2,32 +2,33 @@
 
 require 'spec_helper'
 
-RSpec.describe 'User creates blob in new project', :js do
+RSpec.describe 'User creates new blob', :js do
+  include WebIdeSpecHelpers
+
   let(:user) { create(:user) }
   let(:project) { create(:project, :empty_repo) }
 
   shared_examples 'creating a file' do
-    before do
-      sign_in(user)
+    it 'allows the user to add a new file in Web IDE' do
       visit project_path(project)
-    end
 
-    it 'allows the user to add a new file' do
       click_link 'New file'
 
-      execute_script("monaco.editor.getModels()[0].setValue('Hello world')")
+      wait_for_requests
 
-      fill_in(:file_name, with: 'dummy-file')
+      ide_create_new_file('dummy-file', content: "Hello world\n")
 
-      click_button('Commit changes')
+      ide_commit
 
-      expect(page).to have_content('The file has been successfully created')
+      expect(page).to have_content('All changes are committed')
+      expect(project.repository.blob_at('master', 'dummy-file').data).to eql("Hello world\n")
     end
   end
 
   describe 'as a maintainer' do
     before do
       project.add_maintainer(user)
+      sign_in(user)
     end
 
     it_behaves_like 'creating a file'
@@ -35,6 +36,11 @@ RSpec.describe 'User creates blob in new project', :js do
 
   describe 'as an admin' do
     let(:user) { create(:user, :admin) }
+
+    before do
+      sign_in(user)
+      gitlab_enable_admin_mode_sign_in(user)
+    end
 
     it_behaves_like 'creating a file'
   end

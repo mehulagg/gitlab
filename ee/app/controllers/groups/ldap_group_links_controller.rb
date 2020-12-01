@@ -8,6 +8,8 @@ class Groups::LdapGroupLinksController < Groups::ApplicationController
 
   layout 'group_settings'
 
+  feature_category :authentication_and_authorization
+
   def index
   end
 

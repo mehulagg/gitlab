@@ -6,7 +6,7 @@ module EE
     extend ::Gitlab::Utils::Override
 
     def supports_epic?
-      is_a?(Issue) && !incident? && project.group.present?
+      is_a?(Issue) && issue_type_supports?(:epics) && project.group.present?
     end
 
     def supports_health_status?
@@ -19,6 +19,26 @@ module EE
 
     def weight_available?
       supports_weight? && project&.feature_available?(:issue_weights)
+    end
+
+    def sla_available?
+      return false unless ::IncidentManagement::IncidentSla.available_for?(project)
+
+      supports_sla?
+    end
+
+    def metric_images_available?
+      return false unless IssuableMetricImage.available_for?(project)
+
+      supports_metric_images?
+    end
+
+    def supports_sla?
+      incident?
+    end
+
+    def supports_metric_images?
+      incident?
     end
   end
 end

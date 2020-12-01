@@ -28,6 +28,8 @@ module EE
       validate :auditor_requires_license_add_on, if: :auditor
       validate :cannot_be_admin_and_auditor
 
+      after_create :perform_user_cap_check
+
       delegate :shared_runners_minutes_limit, :shared_runners_minutes_limit=,
                :extra_shared_runners_minutes_limit, :extra_shared_runners_minutes_limit=,
                to: :namespace
@@ -43,6 +45,9 @@ module EE
 
       has_many :approvals,                dependent: :destroy # rubocop: disable Cop/ActiveRecordDependent
       has_many :approvers,                dependent: :destroy # rubocop: disable Cop/ActiveRecordDependent
+
+      has_many :minimal_access_group_members, -> { where(access_level: [::Gitlab::Access::MINIMAL_ACCESS]) }, source: 'GroupMember', class_name: 'GroupMember'
+      has_many :minimal_access_groups, through: :minimal_access_group_members, source: :group
 
       has_many :users_ops_dashboard_projects
       has_many :ops_dashboard_projects, through: :users_ops_dashboard_projects, source: :project
@@ -63,6 +68,8 @@ module EE
 
       belongs_to :managing_group, class_name: 'Group', optional: true, inverse_of: :managed_users
 
+      has_many :user_permission_export_uploads
+
       scope :not_managed, ->(group: nil) {
         scope = where(managing_group_id: nil)
         scope = scope.or(where.not(managing_group_id: group.id)) if group
@@ -71,7 +78,14 @@ module EE
 
       scope :managed_by, ->(group) { where(managing_group: group) }
 
-      scope :excluding_guests, -> { joins(:members).merge(::Member.non_guests).distinct }
+      scope :excluding_guests, -> do
+        subquery = ::Member
+          .select(1)
+          .where(::Member.arel_table[:user_id].eq(::User.arel_table[:id]))
+          .merge(::Member.non_guests)
+
+        where('EXISTS (?)', subquery)
+      end
 
       scope :subscribed_for_admin_email, -> { where(admin_email_unsubscribed_at: nil) }
       scope :ldap, -> { joins(:identities).where('identities.provider LIKE ?', 'ldap%') }
@@ -137,6 +151,16 @@ module EE
           all
         end
       end
+
+      def billable
+        scope = active.without_bots
+
+        License.with_valid_license do |license|
+          scope = scope.excluding_guests if license.exclude_guests_from_active_count?
+        end
+
+        scope
+      end
     end
 
     def cannot_be_admin_and_auditor
@@ -176,41 +200,21 @@ module EE
     end
 
     def available_custom_project_templates(search: nil, subgroup_id: nil, project_id: nil)
-      templates = ::Gitlab::CurrentSettings.available_custom_project_templates(subgroup_id)
-
-      params = {}
-
-      if project_id
-        templates = templates.where(id: project_id)
-      else
-        params = { search: search, sort: 'name_asc' }
-      end
-
-      ::ProjectsFinder.new(current_user: self,
-                           project_ids_relation: templates,
-                           params: params)
-                      .execute
+      CustomProjectTemplatesFinder
+        .new(current_user: self, search: search, subgroup_id: subgroup_id, project_id: project_id)
+        .execute
     end
 
     def available_subgroups_with_custom_project_templates(group_id = nil)
       found_groups = GroupsWithTemplatesFinder.new(group_id).execute
 
-      if ::Feature.enabled?(:optimized_groups_with_templates_finder)
-        GroupsFinder.new(self, min_access_level: ::Gitlab::Access::DEVELOPER)
-          .execute
-          .where(id: found_groups.select(:custom_project_templates_group_id))
-          .preload(:projects)
-          .joins(:projects)
-          .reorder(nil)
-          .distinct
-      else
-        GroupsFinder.new(self, min_access_level: ::Gitlab::Access::DEVELOPER)
-          .execute
-          .where(id: found_groups.select(:custom_project_templates_group_id))
-          .includes(:projects)
-          .reorder(nil)
-          .distinct
-      end
+      GroupsFinder.new(self, min_access_level: ::Gitlab::Access::DEVELOPER)
+        .execute
+        .where(id: found_groups.select(:custom_project_templates_group_id))
+        .preload(:projects)
+        .joins(:projects)
+        .reorder(nil)
+        .distinct
     end
 
     def roadmap_layout
@@ -325,36 +329,27 @@ module EE
       super
     end
 
-    def ab_feature_enabled?(feature, percentage: nil)
-      return false unless ::Gitlab.com?
-      return false if ::Gitlab::Geo.secondary?
-
-      raise "Currently only discover_security feature is supported" unless feature == :discover_security
-
-      return false unless ::Feature.enabled?(feature)
-
-      filter = user_preference.feature_filter_type.presence || 0
-
-      # We use a 2nd feature flag for control as enabled and percentage_of_time for chatops
-      flipper_feature = ::Feature.get((feature.to_s + '_control').to_sym) # rubocop:disable Gitlab/AvoidFeatureGet
-      percentage ||= flipper_feature&.percentage_of_time_value || 0
-      return false if percentage <= 0
-
-      if filter == UserPreference::FEATURE_FILTER_UNKNOWN
-        filter = SecureRandom.rand * 100 <= percentage ? UserPreference::FEATURE_FILTER_EXPERIMENT : UserPreference::FEATURE_FILTER_CONTROL
-        user_preference.update_column :feature_filter_type, filter
-      end
-
-      filter == UserPreference::FEATURE_FILTER_EXPERIMENT
-    end
-
     def gitlab_employee?
       strong_memoize(:gitlab_employee) do
-        if ::Gitlab.com? && ::Feature.enabled?(:gitlab_employee_badge)
-          human? && ::Gitlab::Com.gitlab_com_group_member_id?(id)
-        else
-          false
-        end
+        ::Gitlab.com? && ::Feature.enabled?(:gitlab_employee_badge) && gitlab_team_member?
+      end
+    end
+
+    def gitlab_team_member?
+      strong_memoize(:gitlab_team_member) do
+        ::Gitlab::Com.gitlab_com_group_member?(id) && human?
+      end
+    end
+
+    def gitlab_service_user?
+      strong_memoize(:gitlab_service_user) do
+        service_user? && ::Gitlab::Com.gitlab_com_group_member?(id)
+      end
+    end
+
+    def gitlab_bot?
+      strong_memoize(:gitlab_bot) do
+        bot? && ::Gitlab::Com.gitlab_com_group_member_id?(id)
       end
     end
 
@@ -365,6 +360,22 @@ module EE
     def owns_upgradeable_namespace?
       !owns_paid_namespace?(plans: [::Plan::GOLD]) &&
         owns_paid_namespace?(plans: [::Plan::BRONZE, ::Plan::SILVER])
+    end
+
+    # Returns the groups a user has access to, either through a membership or a project authorization
+    override :authorized_groups
+    def authorized_groups
+      ::Group.unscoped do
+        ::Group.from_union([
+          super,
+          available_minimal_access_groups
+        ])
+      end
+    end
+
+    def find_or_init_board_epic_preference(board_id:, epic_id:)
+      boards_epic_user_preferences.find_or_initialize_by(
+        board_id: board_id, epic_id: epic_id)
     end
 
     protected
@@ -396,6 +407,21 @@ module EE
       return true unless License.current.exclude_guests_from_active_count?
 
       highest_role > ::Gitlab::Access::GUEST
+    end
+
+    def available_minimal_access_groups
+      return ::Group.none unless License.feature_available?(:minimal_access_role)
+      return minimal_access_groups unless ::Gitlab::CurrentSettings.should_check_namespace_plan?
+
+      minimal_access_groups.with_feature_available_in_plan(:minimal_access_role)
+    end
+
+    def perform_user_cap_check
+      return unless ::Gitlab::CurrentSettings.should_apply_user_signup_cap?
+
+      run_after_commit do
+        SetUserStatusBasedOnUserCapSettingWorker.perform_async(id)
+      end
     end
   end
 end

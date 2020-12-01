@@ -7,6 +7,8 @@ module Registrations
     before_action :authorize_create_group!, only: :new
     before_action :check_experiment_enabled
 
+    feature_category :navigation
+
     def new
       @group = Group.new(visibility_level: helpers.default_group_visibility)
     end

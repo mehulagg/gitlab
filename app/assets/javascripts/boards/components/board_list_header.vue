@@ -1,5 +1,5 @@
 <script>
-import { mapActions } from 'vuex';
+import { mapActions, mapState } from 'vuex';
 import {
   GlButton,
   GlButtonGroup,
@@ -9,20 +9,17 @@ import {
   GlSprintf,
   GlTooltipDirective,
 } from '@gitlab/ui';
-import isWipLimitsOn from 'ee_else_ce/boards/mixins/is_wip_limits';
 import { n__, s__ } from '~/locale';
 import AccessorUtilities from '../../lib/utils/accessor';
-import BoardDelete from './board_delete';
 import IssueCount from './issue_count.vue';
 import boardsStore from '../stores/boards_store';
 import eventHub from '../eventhub';
-import { ListType } from '../constants';
+import sidebarEventHub from '~/sidebar/event_hub';
+import { inactiveId, LIST, ListType } from '../constants';
 import { isScopedLabel } from '~/lib/utils/common_utils';
-import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
 export default {
   components: {
-    BoardDelete,
     GlButtonGroup,
     GlButton,
     GlLabel,
@@ -34,7 +31,6 @@ export default {
   directives: {
     GlTooltip: GlTooltipDirective,
   },
-  mixins: [isWipLimitsOn, glFeatureFlagMixin()],
   props: {
     list: {
       type: Object,
@@ -45,19 +41,15 @@ export default {
       type: Boolean,
       required: true,
     },
-    boardId: {
-      type: String,
-      required: true,
-    },
-    canAdminList: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
     isSwimlanesHeader: {
       type: Boolean,
       required: false,
       default: false,
+    },
+  },
+  inject: {
+    boardId: {
+      default: '',
     },
   },
   data() {
@@ -66,6 +58,7 @@ export default {
     };
   },
   computed: {
+    ...mapState(['activeId']),
     isLoggedIn() {
       return Boolean(gon.current_user_id);
     },
@@ -113,10 +106,7 @@ export default {
     },
     isSettingsShown() {
       return (
-        this.listType !== ListType.backlog &&
-        this.showListHeaderButton &&
-        this.list.isExpanded &&
-        this.isWipLimitsOn
+        this.listType !== ListType.backlog && this.showListHeaderButton && this.list.isExpanded
       );
     },
     showBoardListAndBoardInfo() {
@@ -131,7 +121,14 @@ export default {
     },
   },
   methods: {
-    ...mapActions(['updateList']),
+    ...mapActions(['setActiveId']),
+    openSidebarSettings() {
+      if (this.activeId === inactiveId) {
+        sidebarEventHub.$emit('sidebar.closeAll');
+      }
+
+      this.setActiveId({ id: this.list.id, sidebarType: LIST });
+    },
     showScopedLabels(label) {
       return boardsStore.scopedLabels.enabled && isScopedLabel(label);
     },
@@ -158,11 +155,7 @@ export default {
       }
     },
     updateListFunction() {
-      if (this.glFeatures.boardsWithSwimlanes && this.isSwimlanesHeader) {
-        this.updateList({ listId: this.list.id, collapsed: !this.list.isExpanded });
-      } else {
-        this.list.update();
-      }
+      this.list.update();
     },
   },
 };
@@ -172,7 +165,6 @@ export default {
   <header
     :class="{
       'has-border': list.label && list.label.color,
-      'gl-relative': list.isExpanded,
       'gl-h-full': !list.isExpanded,
       'board-inner gl-rounded-top-left-base gl-rounded-top-right-base': isSwimlanesHeader,
     }"
@@ -184,11 +176,12 @@ export default {
     <h3
       :class="{
         'user-can-drag': !disabled && !list.preset,
-        'gl-py-3': !list.isExpanded && !isSwimlanesHeader,
+        'gl-py-3 gl-h-full': !list.isExpanded && !isSwimlanesHeader,
         'gl-border-b-0': !list.isExpanded || isSwimlanesHeader,
         'gl-py-2': !list.isExpanded && isSwimlanesHeader,
+        'gl-flex-direction-column': !list.isExpanded,
       }"
-      class="board-title gl-m-0 gl-display-flex js-board-handle"
+      class="board-title gl-m-0 gl-display-flex gl-align-items-center gl-font-base gl-px-3 js-board-handle"
     >
       <gl-button
         v-if="list.isExpandable"
@@ -197,11 +190,20 @@ export default {
         :title="chevronTooltip"
         :icon="chevronIcon"
         class="board-title-caret no-drag gl-cursor-pointer"
-        variant="link"
+        category="tertiary"
+        size="small"
         @click="toggleExpanded"
       />
       <!-- The following is only true in EE and if it is a milestone -->
-      <span v-if="showMilestoneListDetails" aria-hidden="true" class="gl-mr-2 milestone-icon">
+      <span
+        v-if="showMilestoneListDetails"
+        aria-hidden="true"
+        class="milestone-icon"
+        :class="{
+          'gl-mt-3 gl-rotate-90': !list.isExpanded,
+          'gl-mr-2': list.isExpanded,
+        }"
+      >
         <gl-icon name="timer" />
       </span>
 
@@ -209,6 +211,9 @@ export default {
         v-if="showAssigneeListDetails"
         :href="list.assignee.path"
         class="user-avatar-link js-no-trigger"
+        :class="{
+          'gl-mt-3 gl-rotate-90': !list.isExpanded,
+        }"
       >
         <img
           v-gl-tooltip.hover.bottom
@@ -222,20 +227,28 @@ export default {
       </a>
       <div
         class="board-title-text"
-        :class="{ 'gl-display-none': !list.isExpanded && isSwimlanesHeader }"
+        :class="{
+          'gl-display-none': !list.isExpanded && isSwimlanesHeader,
+          'gl-flex-grow-0 gl-my-3 gl-mx-0': !list.isExpanded,
+          'gl-flex-grow-1': list.isExpanded,
+        }"
       >
         <span
           v-if="list.type !== 'label'"
           v-gl-tooltip.hover
           :class="{
-            'gl-display-inline-block': list.type === 'milestone',
+            'gl-display-block': !list.isExpanded || list.type === 'milestone',
           }"
           :title="listTitle"
-          class="board-title-main-text block-truncated"
+          class="board-title-main-text gl-text-truncate"
         >
           {{ list.title }}
         </span>
-        <span v-if="list.type === 'assignee'" class="board-title-sub-text gl-ml-2">
+        <span
+          v-if="list.type === 'assignee'"
+          class="gl-ml-2 gl-font-weight-normal gl-text-gray-500"
+          :class="{ 'gl-display-none': !list.isExpanded }"
+        >
           @{{ listAssignee }}
         </span>
         <gl-label
@@ -275,26 +288,13 @@ export default {
         </div>
       </gl-tooltip>
 
-      <board-delete
-        v-if="canAdminList && !list.preset && list.id"
-        :list="list"
-        inline-template="true"
-      >
-        <gl-button
-          v-gl-tooltip.hover.bottom
-          :class="{ 'gl-display-none': !list.isExpanded }"
-          :aria-label="__('Delete list')"
-          class="board-delete no-drag gl-pr-0 gl-shadow-none! gl-mr-3"
-          :title="__('Delete list')"
-          icon="remove"
-          size="small"
-          @click.stop="deleteBoard"
-        />
-      </board-delete>
       <div
         v-if="showBoardListAndBoardInfo"
         class="issue-count-badge gl-display-inline-flex gl-pr-0 no-drag text-secondary"
-        :class="{ 'gl-display-none!': !list.isExpanded && isSwimlanesHeader }"
+        :class="{
+          'gl-display-none!': !list.isExpanded && isSwimlanesHeader,
+          'gl-p-0': !list.isExpanded,
+        }"
       >
         <span class="gl-display-inline-flex">
           <gl-tooltip :target="() => $refs.issueCount" :title="issuesTooltipLabel" />

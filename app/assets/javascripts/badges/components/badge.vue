@@ -1,5 +1,5 @@
 <script>
-import { GlLoadingIcon, GlTooltipDirective, GlIcon } from '@gitlab/ui';
+import { GlLoadingIcon, GlTooltipDirective, GlIcon, GlButton } from '@gitlab/ui';
 
 export default {
   // name: 'Badge' is a false positive: https://gitlab.com/gitlab-org/frontend/eslint-plugin-i18n/issues/25
@@ -8,6 +8,7 @@ export default {
   components: {
     GlIcon,
     GlLoadingIcon,
+    GlButton,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -83,22 +84,23 @@ export default {
 
     <div v-show="hasError" class="btn-group">
       <div class="btn btn-default btn-sm disabled">
-        <gl-icon :size="16" class="gl-ml-3 gl-mr-3" name="doc-image" aria-hidden="true" />
+        <gl-icon :size="16" class="gl-ml-3 gl-mr-3" name="doc-image" />
       </div>
       <div class="btn btn-default btn-sm disabled">
         <span class="gl-ml-3 gl-mr-3">{{ s__('Badges|No badge image') }}</span>
       </div>
     </div>
 
-    <button
+    <gl-button
       v-show="hasError"
       v-gl-tooltip.hover
       :title="s__('Badges|Reload badge image')"
-      class="btn btn-transparent btn-sm text-primary"
+      category="tertiary"
+      variant="success"
       type="button"
+      icon="retry"
+      size="small"
       @click="reloadImage"
-    >
-      <gl-icon :size="16" name="retry" />
-    </button>
+    />
   </div>
 </template>

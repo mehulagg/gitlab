@@ -2,7 +2,7 @@
 type: reference, howto
 stage: Manage
 group: Import
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Migrating projects to a GitLab instance
@@ -18,7 +18,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 1. [From Perforce](perforce.md)
 1. [From SVN](svn.md)
 1. [From TFVC](tfvc.md)
-1. [From repo by URL](repo_by_url.md)
+1. [From repository by URL](repo_by_url.md)
 1. [By uploading a manifest file (AOSP)](manifest.md)
 1. [From Gemnasium](gemnasium.md)
 1. [From Phabricator](phabricator.md)
@@ -30,9 +30,14 @@ repository is too large the import can timeout.
 
 There is also the option of [connecting your external repository to get CI/CD benefits](../../../ci/ci_cd_for_external_repos/index.md). **(PREMIUM)**
 
+## LFS authentication
+
+When importing a project that contains LFS objects, if the project has an [`.lfsconfig`](https://github.com/git-lfs/git-lfs/blob/master/docs/man/git-lfs-config.5.ronn)
+file with a URL host (`lfs.url`) different from the repository URL host, LFS files are not downloaded.
+
 ## Migrating from self-managed GitLab to GitLab.com
 
-If you only need to migrate Git repos, you can [import each project by URL](repo_by_url.md). Issues and merge requests can't be imported.
+If you only need to migrate Git repositories, you can [import each project by URL](repo_by_url.md). Issues and merge requests can't be imported.
 
 If you want to retain all metadata like issues and merge requests, you can use
 the [import/export feature](../settings/import_export.md) to export projects from self-managed GitLab and import those projects into GitLab.com.

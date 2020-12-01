@@ -1,8 +1,5 @@
-import initSubscriptions from 'ee/billings';
+import initSubscriptions from 'ee/billings/subscriptions';
 import PersistentUserCallout from '~/persistent_user_callout';
 
-document.addEventListener('DOMContentLoaded', () => {
-  PersistentUserCallout.factory(document.querySelector('.js-gold-trial-callout'));
-
-  initSubscriptions();
-});
+PersistentUserCallout.factory(document.querySelector('.js-gold-trial-callout'));
+initSubscriptions();

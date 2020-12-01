@@ -202,7 +202,7 @@ describe('Design overlay component', () => {
         { x: position.x, y: position.y },
         { x: 20, y: 20 },
       ).then(() => {
-        expect(findFirstBadge().attributes().style).toBe('left: 20px; top: 20px; cursor: move;');
+        expect(findFirstBadge().attributes().style).toBe('left: 20px; top: 20px;');
       });
     });
 
@@ -243,11 +243,11 @@ describe('Design overlay component', () => {
         });
     });
 
-    describe('without [adminNote] permission', () => {
+    describe('without [repositionNote] permission', () => {
       const mockNoteNotAuthorised = {
         ...notes[0],
         userPermissions: {
-          adminNote: false,
+          repositionNote: false,
         },
       };
 
@@ -300,9 +300,7 @@ describe('Design overlay component', () => {
           { x: position.x, y: position.y },
           { x: 20, y: 20 },
         ).then(() => {
-          expect(findCommentBadge().attributes().style).toBe(
-            'left: 20px; top: 20px; cursor: move;',
-          );
+          expect(findCommentBadge().attributes().style).toBe('left: 20px; top: 20px;');
         });
       });
 
@@ -414,18 +412,18 @@ describe('Design overlay component', () => {
 
   describe('canMoveNote', () => {
     it.each`
-      adminNotePermission | canMoveNoteResult
-      ${true}             | ${true}
-      ${false}            | ${false}
-      ${undefined}        | ${false}
+      repositionNotePermission | canMoveNoteResult
+      ${true}                  | ${true}
+      ${false}                 | ${false}
+      ${undefined}             | ${false}
     `(
-      'returns [$canMoveNoteResult] when [adminNote permission] is [$adminNotePermission]',
-      ({ adminNotePermission, canMoveNoteResult }) => {
+      'returns [$canMoveNoteResult] when [repositionNote permission] is [$repositionNotePermission]',
+      ({ repositionNotePermission, canMoveNoteResult }) => {
         createComponent();
 
         const note = {
           userPermissions: {
-            adminNote: adminNotePermission,
+            repositionNote: repositionNotePermission,
           },
         };
         expect(wrapper.vm.canMoveNote(note)).toBe(canMoveNoteResult);

@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # GraphQL development guidelines
 
 This guide contains all the information to successfully contribute to GitLab's
@@ -8,6 +14,6 @@ feedback, and suggestions.
 
 - [GraphQL API development style guide](../api_graphql_styleguide.md): development style guide for
   GraphQL.
-- [GraphQL API documentation style guide](../documentation/styleguide.md#graphql-api): documentation
+- [GraphQL API documentation style guide](../documentation/graphql_styleguide.md): documentation
   style guide for GraphQL.
 - [GraphQL API](../../api/graphql/index.md): user documentation for the GitLab GraphQL API.

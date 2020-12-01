@@ -33,8 +33,7 @@
 }
 
 .show.dropdown {
-  .dropdown-menu,
-  .dropdown-menu-nav {
+  .dropdown-menu {
     @include set-visible;
     min-height: $dropdown-min-height;
     max-height: $dropdown-max-height;
@@ -144,15 +143,9 @@
 
   .fa {
     position: absolute;
-
-    &.fa-spinner {
-      font-size: 16px;
-      margin-top: -3px;
-    }
   }
 
-  .fa-chevron-down,
-  .fa-spinner {
+  .fa-chevron-down {
     position: absolute;
     top: 11px;
     right: 8px;
@@ -190,15 +183,6 @@
   background-color: $gray-darker;
   color: $gl-text-color;
   outline: 0;
-
-  // make sure the text color is not overridden
-  &.text-danger {
-    color: $brand-danger;
-  }
-
-  .avatar {
-    border-color: $white;
-  }
 }
 
 @mixin dropdown-link {
@@ -217,11 +201,6 @@
   text-align: left;
   width: 100%;
 
-  // make sure the text color is not overridden
-  &.text-danger {
-    color: $brand-danger;
-  }
-
   &.disable-hover {
     text-decoration: none;
   }
@@ -233,10 +212,6 @@
     @include dropdown-item-hover;
 
     text-decoration: none;
-
-    .badge.badge-pill {
-      background-color: darken($blue-50, 5%);
-    }
   }
 
   &.dropdown-menu-user-link {
@@ -258,8 +233,7 @@
   }
 }
 
-.dropdown-menu,
-.dropdown-menu-nav {
+.dropdown-menu {
   display: none;
   position: absolute;
   width: auto;
@@ -393,49 +367,57 @@
     pointer-events: none;
   }
 
-  .dropdown-menu li {
-    cursor: pointer;
+  .dropdown-menu {
+    display: none;
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
 
-    &.droplab-item-active button {
-      @include dropdown-item-hover;
-    }
+    li {
+      cursor: pointer;
 
-    > a,
-    > button {
-      display: flex;
-      margin: 0;
-      text-overflow: inherit;
-      text-align: left;
+      &.droplab-item-active button {
+        @include dropdown-item-hover;
+      }
 
-      &.btn .fa:not(:last-child) {
+      > a,
+      > button {
+        display: flex;
+        margin: 0;
+        text-overflow: inherit;
+        text-align: left;
+
+        &.btn .fa:not(:last-child) {
+          margin-left: 5px;
+        }
+      }
+
+      > button.dropdown-epic-button {
+        flex-direction: column;
+
+        .reference {
+          color: $gray-300;
+          margin-top: $gl-padding-4;
+        }
+      }
+
+      &.droplab-item-selected i,
+      &.droplab-item-selected svg {
+        visibility: visible;
+      }
+
+      .icon {
+        visibility: hidden;
+      }
+
+      .description {
+        display: inline-block;
+        white-space: normal;
         margin-left: 5px;
-      }
-    }
 
-    > button.dropdown-epic-button {
-      flex-direction: column;
-
-      .reference {
-        color: $gray-300;
-        margin-top: $gl-padding-4;
-      }
-    }
-
-    &.droplab-item-selected i {
-      visibility: visible;
-    }
-
-    .icon {
-      visibility: hidden;
-    }
-
-    .description {
-      display: inline-block;
-      white-space: normal;
-      margin-left: 5px;
-
-      p {
-        margin-bottom: 0;
+        p {
+          margin-bottom: 0;
+        }
       }
     }
   }
@@ -447,21 +429,12 @@
   }
 }
 
-.droplab-dropdown .dropdown-menu,
-.droplab-dropdown .dropdown-menu-nav {
-  display: none;
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(0);
-}
-
 .comment-type-dropdown.show .dropdown-menu {
   display: block;
 }
 
 .filtered-search-box-input-container {
-  .dropdown-menu,
-  .dropdown-menu-nav {
+  .dropdown-menu {
     max-width: 280px;
   }
 }
@@ -596,8 +569,6 @@
 }
 
 .dropdown-title-button {
-  position: absolute;
-  top: 0;
   padding: 0;
   color: $dropdown-title-btn-color;
   border: 0;
@@ -607,17 +578,6 @@
   &:hover {
     color: darken($dropdown-title-btn-color, 15%);
   }
-}
-
-.dropdown-menu-close {
-  top: $gl-padding-6;
-  right: $gl-padding-8;
-  width: 20px;
-  height: 20px;
-}
-
-.dropdown-menu-close-icon {
-  vertical-align: middle;
 }
 
 .dropdown-menu-back {
@@ -632,6 +592,7 @@
 
   .fa,
   .input-icon,
+  .dropdown-input-clear,
   .dropdown-input-search {
     position: absolute;
     top: $gl-padding-8;
@@ -682,13 +643,15 @@
     border-color: $blue-300;
     box-shadow: 0 0 4px $dropdown-input-focus-shadow;
 
-    ~ .fa {
+    ~ .fa,
+    ~ .dropdown-input-clear {
       color: $gray-700;
     }
   }
 
   &:hover {
-    ~ .fa {
+    ~ .fa,
+    ~ .dropdown-input-clear {
       color: $gray-700;
     }
   }
@@ -860,8 +823,7 @@
   }
 
   header.navbar-gitlab .dropdown {
-    .dropdown-menu,
-    .dropdown-menu-nav {
+    .dropdown-menu {
       width: 100%;
       min-width: 100%;
     }
@@ -1049,6 +1011,23 @@ header.header-content .dropdown-menu.frequent-items-dropdown-menu {
     }
   }
 
+  li {
+    &:hover,
+    &.is-focused {
+      .label-item {
+        @include dropdown-item-hover;
+
+        text-decoration: none;
+      }
+    }
+  }
+
+  .labels-select-dropdown-button {
+    .gl-button-text {
+      width: 100%;
+    }
+  }
+
   .labels-select-dropdown-contents {
     min-height: $dropdown-min-height;
     max-height: 330px;
@@ -1082,13 +1061,6 @@ header.header-content .dropdown-menu.frequent-items-dropdown-menu {
 
   .label-item {
     padding: 8px 20px;
-
-    &:hover,
-    &.is-focused {
-      @include dropdown-item-hover;
-
-      text-decoration: none;
-    }
   }
 
   .color-input-container {
@@ -1133,5 +1105,19 @@ header.header-content .dropdown-menu.frequent-items-dropdown-menu {
 .gl-new-dropdown {
   .gl-dropdown-menu-wide {
     width: $gl-dropdown-width-wide;
+  }
+}
+
+.gl-dropdown-item-deprecated-adapter {
+  .dropdown-item {
+    align-items: flex-start;
+
+    .gl-new-dropdown-item-text-primary {
+      @include gl-font-weight-bold;
+    }
+
+    .gl-new-dropdown-item-text-secondary {
+      color: inherit;
+    }
   }
 }

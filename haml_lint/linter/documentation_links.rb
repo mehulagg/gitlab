@@ -13,7 +13,7 @@ module HamlLint
       DOCS_DIRECTORY = File.join(File.expand_path('../..', __dir__), 'doc')
 
       HELP_PATH_LINK_PATTERN = <<~PATTERN
-      `(send nil? :help_page_path $...)
+      `(send nil? {:help_page_url :help_page_path} $...)
       PATTERN
 
       MARKDOWN_HEADER = %r{\A\#{1,6}\s+(?<header>.+)\Z}.freeze
@@ -92,8 +92,7 @@ module HamlLint
         File.open(path_to_file).any? do |line|
           result = line.match(MARKDOWN_HEADER)
 
-          # TODO:Do an exact match for anchors (Follow-up https://gitlab.com/gitlab-org/gitlab/-/merge_requests/39850)
-          anchor.start_with?(string_to_anchor(result[:header].delete('*'))) if result
+          string_to_anchor(result[:header]) == anchor if result
         end
       end
     end

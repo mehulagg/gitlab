@@ -3,17 +3,13 @@
 require 'spec_helper'
 
 RSpec.describe AuditEventService do
-  let(:project) { create(:project) }
-  let(:user) { create(:user, :with_sign_ins) }
-  let(:project_member) { create(:project_member, user: user) }
+  let_it_be(:project) { create(:project) }
+  let_it_be(:user) { create(:user, :with_sign_ins) }
+  let_it_be(:project_member) { create(:project_member, user: user) }
   let(:service) { described_class.new(user, project, { action: :destroy }) }
   let(:logger) { instance_double(Gitlab::AuditJsonLogger) }
 
   describe '#security_event' do
-    before do
-      stub_licensed_features(admin_audit_log: false)
-    end
-
     it 'creates an event and logs to a file' do
       expect(service).to receive(:file_logger).and_return(logger)
       expect(logger).to receive(:info).with(author_id: user.id,
@@ -51,6 +47,58 @@ RSpec.describe AuditEventService do
       expect(details[:to]).to be false
       expect(details[:action]).to eq(:create)
       expect(details[:target_id]).to eq(1)
+    end
+
+    context 'authentication event' do
+      let(:audit_service) { described_class.new(user, user, with: 'standard') }
+
+      it 'creates an authentication event' do
+        expect(AuthenticationEvent).to receive(:new).with(
+          user: user,
+          user_name: user.name,
+          ip_address: user.current_sign_in_ip,
+          result: AuthenticationEvent.results[:success],
+          provider: 'standard'
+        )
+
+        audit_service.for_authentication.security_event
+      end
+
+      it 'tracks exceptions when the event cannot be created' do
+        allow(user).to receive_messages(current_sign_in_ip: 'invalid IP')
+
+        expect(Gitlab::ErrorTracking).to(
+          receive(:track_exception)
+            .with(ActiveRecord::RecordInvalid, audit_event_type: 'AuthenticationEvent').and_call_original
+        )
+
+        audit_service.for_authentication.security_event
+      end
+
+      context 'with IP address', :request_store do
+        using RSpec::Parameterized::TableSyntax
+
+        where(:from_caller, :from_context, :from_author_sign_in, :output) do
+          '192.168.0.1' | '192.168.0.2' | '192.168.0.3' | '192.168.0.1'
+          nil           | '192.168.0.2' | '192.168.0.3' | '192.168.0.2'
+          nil           | nil           | '192.168.0.3' | '192.168.0.3'
+        end
+
+        with_them do
+          let(:user) { create(:user, current_sign_in_ip: from_author_sign_in) }
+          let(:audit_service) { described_class.new(user, user, with: 'standard', ip_address: from_caller) }
+
+          before do
+            allow(Gitlab::RequestContext.instance).to receive(:client_ip).and_return(from_context)
+          end
+
+          specify do
+            expect(AuthenticationEvent).to receive(:new).with(hash_including(ip_address: output))
+
+            audit_service.for_authentication.security_event
+          end
+        end
+      end
     end
   end
 

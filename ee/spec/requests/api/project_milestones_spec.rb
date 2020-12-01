@@ -24,8 +24,4 @@ RSpec.describe API::ProjectMilestones do
   it_behaves_like 'group and project milestone burndowns', '/projects/:id/milestones/:milestone_id/burndown_events' do
     let(:route) { "/projects/#{project.id}/milestones" }
   end
-
-  it_behaves_like 'group and project milestone burnups', '/projects/:id/milestones/:milestone_id/burnup_events' do
-    let(:route) { "/projects/#{project.id}/milestones" }
-  end
 end

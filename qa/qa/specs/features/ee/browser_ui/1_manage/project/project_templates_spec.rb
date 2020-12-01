@@ -4,6 +4,8 @@ require 'securerandom'
 module QA
   RSpec.describe 'Manage' do
     describe 'Project templates' do
+      include Support::Api
+
       before(:all) do
         @files = [
           {
@@ -58,15 +60,21 @@ module QA
             namespace: Runtime::Namespace.name(reset_cache: false),
             template_name: built_in)
 
-          Page::Project::Show.perform(&:wait_for_import_success)
+          Page::Project::Show.perform do |project|
+            project.wait_for_import_success
 
-          expect(page).to have_content("Initialized from '#{built_in}' project template")
-          expect(page).to have_content(".ruby-version")
+            expect(project).to have_content("Initialized from '#{built_in}' project template")
+            expect(project).to have_file(".ruby-version")
+          end
         end
       end
 
-      # Skipping on staging due to: https://gitlab.com/gitlab-org/gitlab/-/issues/228624
-      context 'instance level', :requires_admin, :skip_live_env do
+      # This was originally quarantined only on staging
+      # against the issue https://gitlab.com/gitlab-org/gitlab/-/issues/228624
+      # Now quarantining against a new issue due to failures on master
+      # If dequarantining, the original staging quarantine should be reverted
+      # if still applicable.
+      context 'instance level', :requires_admin, quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/247874', type: :bug } do
         before do
           Flow::Login.sign_in_as_admin
 
@@ -105,9 +113,12 @@ module QA
             namespace: Runtime::Namespace.path,
             template_name: @template_project.name)
 
-          Page::Project::Show.perform(&:wait_for_import_success)
-          @files.each do |file|
-            expect(page).to have_content(file[:name])
+          Page::Project::Show.perform do |project|
+            project.wait_for_import_success
+
+            @files.each do |file|
+              expect(project).to have_file(file[:name])
+            end
           end
         end
       end
@@ -152,10 +163,19 @@ module QA
             namespace: Runtime::Namespace.sandbox_name,
             template_name: @template_project.name)
 
-          Page::Project::Show.perform(&:wait_for_import_success)
-          @files.each do |file|
-            expect(page).to have_content(file[:name])
+          Page::Project::Show.perform do |project|
+            project.wait_for_import_success
+            @project_id = project.project_id
+
+            @files.each do |file|
+              expect(project).to have_file(file[:name])
+            end
           end
+        end
+
+        after do
+          api_client = Runtime::API::Client.new(:gitlab)
+          delete Runtime::API::Request.new(api_client, "/projects/#{@project_id}").url
         end
       end
 

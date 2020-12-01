@@ -12,6 +12,7 @@ module Gitlab
           attr_reader :scanners
           attr_reader :identifiers
 
+          attr_accessor :scan
           attr_accessor :scanned_resources
           attr_accessor :error
 
@@ -57,6 +58,10 @@ module Gitlab
 
           def merge!(other)
             replace_with!(::Security::MergeReportsService.new(self, other).execute)
+          end
+
+          def primary_scanner
+            scanners.first&.second
           end
         end
       end

@@ -3,6 +3,7 @@ import { GlIcon, GlIntersectionObserver } from '@gitlab/ui';
 import Visibility from 'visibilityjs';
 import { __, s__, sprintf } from '~/locale';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
+import { sanitize } from '~/lib/dompurify';
 import { visitUrl } from '~/lib/utils/url_utility';
 import Poll from '~/lib/utils/poll';
 import eventHub from '../event_hub';
@@ -136,6 +137,16 @@ export default {
       type: String,
       required: true,
     },
+    isConfidential: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    isLocked: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
     issuableType: {
       type: String,
       required: false,
@@ -168,7 +179,7 @@ export default {
     const store = new Store({
       titleHtml: this.initialTitleHtml,
       titleText: this.initialTitleText,
-      descriptionHtml: this.initialDescriptionHtml,
+      descriptionHtml: sanitize(this.initialDescriptionHtml),
       descriptionText: this.initialDescriptionText,
       updatedAt: this.updatedAt,
       updatedByName: this.updatedByName,
@@ -217,8 +228,8 @@ export default {
     defaultErrorMessage() {
       return sprintf(s__('Error updating %{issuableType}'), { issuableType: this.issuableType });
     },
-    isOpenStatus() {
-      return this.issuableStatus === IssuableStatus.Open;
+    isClosed() {
+      return this.issuableStatus === IssuableStatus.Closed;
     },
     pinnedLinkClasses() {
       return this.showTitleBorder
@@ -226,13 +237,13 @@ export default {
         : '';
     },
     statusIcon() {
-      return this.isOpenStatus ? 'issue-open-m' : 'mobile-issue-close';
+      return this.isClosed ? 'mobile-issue-close' : 'issue-open-m';
     },
     statusText() {
       return IssuableStatusText[this.issuableStatus];
     },
     shouldShowStickyHeader() {
-      return this.isStickyHeaderShowing && this.issuableType === IssuableType.Issue;
+      return this.issuableType === IssuableType.Issue;
     },
   },
   created() {
@@ -247,7 +258,7 @@ export default {
     });
 
     if (!Visibility.hidden()) {
-      this.poll.makeRequest();
+      this.poll.makeDelayedRequest(2000);
     }
 
     Visibility.change(() => {
@@ -432,10 +443,14 @@ export default {
         :show-inline-edit-button="showInlineEditButton"
       />
 
-      <gl-intersection-observer @appear="hideStickyHeader" @disappear="showStickyHeader">
+      <gl-intersection-observer
+        v-if="shouldShowStickyHeader"
+        @appear="hideStickyHeader"
+        @disappear="showStickyHeader"
+      >
         <transition name="issuable-header-slide">
           <div
-            v-if="shouldShowStickyHeader"
+            v-if="isStickyHeaderShowing"
             class="issue-sticky-header gl-fixed gl-z-index-3 gl-bg-white gl-border-1 gl-border-b-solid gl-border-b-gray-100 gl-py-3"
             data-testid="issue-sticky-header"
           >
@@ -444,11 +459,17 @@ export default {
             >
               <p
                 class="issuable-status-box status-box gl-my-0"
-                :class="[isOpenStatus ? 'status-box-open' : 'status-box-issue-closed']"
+                :class="[isClosed ? 'status-box-issue-closed' : 'status-box-open']"
               >
                 <gl-icon :name="statusIcon" class="gl-display-block d-sm-none gl-h-6!" />
                 <span class="gl-display-none d-sm-block">{{ statusText }}</span>
               </p>
+              <span v-if="isLocked" data-testid="locked" class="issuable-warning-icon">
+                <gl-icon name="lock" :aria-label="__('Locked')" />
+              </span>
+              <span v-if="isConfidential" data-testid="confidential" class="issuable-warning-icon">
+                <gl-icon name="eye-slash" :aria-label="__('Confidential')" />
+              </span>
               <p
                 class="gl-font-weight-bold gl-overflow-hidden gl-white-space-nowrap gl-text-overflow-ellipsis gl-my-0"
                 :title="state.titleText"
@@ -468,7 +489,6 @@ export default {
 
       <component
         :is="descriptionComponent"
-        v-if="state.descriptionHtml"
         :can-update="canUpdate"
         :description-html="state.descriptionHtml"
         :description-text="state.descriptionText"

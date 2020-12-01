@@ -26,29 +26,36 @@ RSpec.describe 'User views iteration' do
         visit project_iterations_inherited_path(project, iteration.id)
       end
 
-      it 'shows iteration info and dates' do
-        expect(page).to have_content(iteration.title)
-        expect(page).to have_content(iteration.description)
-        expect(page).to have_content(iteration.start_date.strftime('%b %-d, %Y'))
-        expect(page).to have_content(iteration.due_date.strftime('%b %-d, %Y'))
-      end
+      it 'shows iteration info' do
+        aggregate_failures 'shows iteration info and dates' do
+          expect(page).to have_content(iteration.title)
+          expect(page).to have_content(iteration.description)
+          expect(page).to have_content(iteration.start_date.strftime('%b %-d, %Y'))
+          expect(page).to have_content(iteration.due_date.strftime('%b %-d, %Y'))
+        end
 
-      it 'shows correct summary information' do
-        expect(page).to have_content("Complete 50%")
-        expect(page).to have_content("Open 1")
-        expect(page).to have_content("In progress 0")
-        expect(page).to have_content("Completed 1")
-      end
+        aggregate_failures 'shows correct summary information' do
+          expect(page).to have_content("Complete 50%")
+          expect(page).to have_content("Open 1")
+          expect(page).to have_content("In progress 0")
+          expect(page).to have_content("Completed 1")
+        end
 
-      it 'shows only issues that are part of the project' do
-        expect(page).to have_content(issue.title)
-        expect(page).not_to have_content(assigned_issue.title)
-        expect(page).to have_content(closed_issue.title)
-        expect(page).not_to have_content(other_issue.title)
-      end
+        aggregate_failures 'expect burnup and burndown charts' do
+          expect(page).to have_content('Burndown chart')
+          expect(page).to have_content('Burnup chart')
+        end
 
-      it 'hides action dropdown for editing the iteration' do
-        expect(page).not_to have_button('Actions')
+        aggregate_failures 'shows only issues that are part of the project' do
+          expect(page).to have_content(issue.title)
+          expect(page).not_to have_content(assigned_issue.title)
+          expect(page).to have_content(closed_issue.title)
+          expect(page).not_to have_content(other_issue.title)
+        end
+
+        aggregate_failures 'hides action dropdown for editing the iteration' do
+          expect(page).not_to have_button('Actions')
+        end
       end
     end
   end

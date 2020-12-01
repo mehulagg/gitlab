@@ -203,18 +203,6 @@
             margin-right: 0;
           }
         }
-
-        &:hover,
-        &:focus {
-          text-decoration: none;
-          outline: 0;
-          opacity: 1;
-          color: $white;
-
-          &.header-user-dropdown-toggle .header-user-avatar {
-            border-color: $white;
-          }
-        }
       }
 
       .header-new-dropdown-toggle {
@@ -458,15 +446,15 @@
     box-shadow: 0 1px 0 rgba($gl-header-color, 0.2);
 
     &.green-badge {
-      background-color: $green-500;
+      background-color: $green-400;
     }
 
     &.merge-requests-count {
-      background-color: $orange-500;
+      background-color: $orange-400;
     }
 
     &.todos-count {
-      background-color: $blue-500;
+      background-color: $blue-400;
     }
   }
 

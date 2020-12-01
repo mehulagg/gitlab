@@ -9,6 +9,7 @@ export default () => {
     networkPoliciesEndpoint,
     threatMonitoringPath,
     policy,
+    environmentId,
   } = el.dataset;
 
   const store = createStore();
@@ -18,6 +19,10 @@ export default () => {
   store.dispatch('networkPolicies/setEndpoints', {
     networkPoliciesEndpoint,
   });
+
+  if (environmentId !== undefined) {
+    store.dispatch('threatMonitoring/setCurrentEnvironmentId', parseInt(environmentId, 10));
+  }
 
   const props = { threatMonitoringPath };
   if (policy) {

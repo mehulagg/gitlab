@@ -1,10 +1,14 @@
 import { mount } from '@vue/test-utils';
 import StorageApp from 'ee/storage_counter/components/app.vue';
 import Project from 'ee/storage_counter/components/project.vue';
+import ProjectsTable from 'ee/storage_counter/components/projects_table.vue';
+import StorageInlineAlert from 'ee/storage_counter/components/storage_inline_alert.vue';
 import TemporaryStorageIncreaseModal from 'ee/storage_counter/components/temporary_storage_increase_modal.vue';
+import UsageGraph from 'ee/storage_counter/components/usage_graph.vue';
+import UsageStatistics from 'ee/storage_counter/components/usage_statistics.vue';
+import { formatUsageSize } from 'ee/storage_counter/utils';
 import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
-import { projects, withRootStorageStatistics } from '../data';
-import { numberToHumanSize } from '~/lib/utils/number_utils';
+import { namespaceData, withRootStorageStatistics } from '../mock_data';
 
 const TEST_LIMIT = 1000;
 
@@ -15,8 +19,19 @@ describe('Storage counter app', () => {
   const findPurchaseStorageLink = () => wrapper.find("[data-testid='purchase-storage-link']");
   const findTemporaryStorageIncreaseButton = () =>
     wrapper.find("[data-testid='temporary-storage-increase-button']");
+  const findUsageGraph = () => wrapper.find(UsageGraph);
+  const findUsageStatistics = () => wrapper.find(UsageStatistics);
+  const findStorageInlineAlert = () => wrapper.find(StorageInlineAlert);
+  const findProjectsTable = () => wrapper.find(ProjectsTable);
+  const findPrevButton = () => wrapper.find('[data-testid="prevButton"]');
+  const findNextButton = () => wrapper.find('[data-testid="nextButton"]');
 
-  function createComponent(props = {}, loading = false) {
+  const createComponent = ({
+    props = {},
+    loading = false,
+    additionalRepoStorageByNamespace = false,
+    namespace = {},
+  } = {}) => {
     const $apollo = {
       queries: {
         namespace: {
@@ -31,8 +46,18 @@ describe('Storage counter app', () => {
       directives: {
         GlModalDirective: createMockDirective(),
       },
+      provide: {
+        glFeatures: {
+          additionalRepoStorageByNamespace,
+        },
+      },
+      data() {
+        return {
+          namespace,
+        };
+      },
     });
-  }
+  };
 
   beforeEach(() => {
     createComponent();
@@ -44,33 +69,33 @@ describe('Storage counter app', () => {
 
   it('renders the 2 projects', async () => {
     wrapper.setData({
-      namespace: projects,
+      namespace: namespaceData,
     });
 
     await wrapper.vm.$nextTick();
 
-    expect(wrapper.findAll(Project)).toHaveLength(2);
+    expect(wrapper.findAll(Project)).toHaveLength(3);
   });
 
   describe('limit', () => {
     it('when limit is set it renders limit information', async () => {
       wrapper.setData({
-        namespace: projects,
+        namespace: namespaceData,
       });
 
       await wrapper.vm.$nextTick();
 
-      expect(wrapper.text()).toContain(numberToHumanSize(projects.limit));
+      expect(wrapper.text()).toContain(formatUsageSize(namespaceData.limit));
     });
 
     it('when limit is 0 it does not render limit information', async () => {
       wrapper.setData({
-        namespace: { ...projects, limit: 0 },
+        namespace: { ...namespaceData, limit: 0 },
       });
 
       await wrapper.vm.$nextTick();
 
-      expect(wrapper.text()).not.toContain(numberToHumanSize(0));
+      expect(wrapper.text()).not.toContain(formatUsageSize(0));
     });
   });
 
@@ -86,10 +111,37 @@ describe('Storage counter app', () => {
     });
   });
 
+  describe('with additional_repo_storage_by_namespace feature flag', () => {
+    it('usage_graph component hidden is when flag is false', async () => {
+      wrapper.setData({
+        namespace: withRootStorageStatistics,
+      });
+
+      await wrapper.vm.$nextTick();
+
+      expect(findUsageGraph().exists()).toBe(true);
+      expect(findUsageStatistics().exists()).toBe(false);
+      expect(findStorageInlineAlert().exists()).toBe(false);
+    });
+
+    it('usage_statistics component is rendered when flag is true', async () => {
+      createComponent({
+        additionalRepoStorageByNamespace: true,
+        namespace: withRootStorageStatistics,
+      });
+
+      await wrapper.vm.$nextTick();
+
+      expect(findUsageStatistics().exists()).toBe(true);
+      expect(findUsageGraph().exists()).toBe(false);
+      expect(findStorageInlineAlert().exists()).toBe(true);
+    });
+  });
+
   describe('without rootStorageStatistics information', () => {
     it('renders N/A', async () => {
       wrapper.setData({
-        namespace: projects,
+        namespace: namespaceData,
       });
 
       await wrapper.vm.$nextTick();
@@ -107,7 +159,7 @@ describe('Storage counter app', () => {
 
     describe('when purchaseStorageUrl is set', () => {
       beforeEach(() => {
-        createComponent({ purchaseStorageUrl: 'customers.gitlab.com' });
+        createComponent({ props: { purchaseStorageUrl: 'customers.gitlab.com' } });
       });
 
       it('does render link', () => {
@@ -127,7 +179,7 @@ describe('Storage counter app', () => {
       ${{ isTemporaryStorageIncreaseVisible: 'true' }}  | ${true}
     `('with $props', ({ props, isVisible }) => {
       beforeEach(() => {
-        createComponent(props);
+        createComponent({ props });
       });
 
       it(`renders button = ${isVisible}`, () => {
@@ -137,10 +189,10 @@ describe('Storage counter app', () => {
 
     describe('when temporary storage increase is visible', () => {
       beforeEach(() => {
-        createComponent({ isTemporaryStorageIncreaseVisible: 'true' });
+        createComponent({ props: { isTemporaryStorageIncreaseVisible: 'true' } });
         wrapper.setData({
           namespace: {
-            ...projects,
+            ...namespaceData,
             limit: TEST_LIMIT,
           },
         });
@@ -159,10 +211,78 @@ describe('Storage counter app', () => {
 
       it('renders modal', () => {
         expect(wrapper.find(TemporaryStorageIncreaseModal).props()).toEqual({
-          limit: numberToHumanSize(TEST_LIMIT),
+          limit: formatUsageSize(TEST_LIMIT),
           modalId: StorageApp.modalId,
         });
       });
+    });
+  });
+
+  describe('filtering projects', () => {
+    beforeEach(() => {
+      createComponent({
+        additionalRepoStorageByNamespace: true,
+        namespace: withRootStorageStatistics,
+      });
+    });
+
+    const sampleSearchTerm = 'GitLab';
+    const sampleShortSearchTerm = '12';
+
+    it('triggers search if user enters search input', () => {
+      expect(wrapper.vm.searchTerm).toBe('');
+
+      findProjectsTable().vm.$emit('search', sampleSearchTerm);
+
+      expect(wrapper.vm.searchTerm).toBe(sampleSearchTerm);
+    });
+
+    it('triggers search if user clears the entered search input', () => {
+      const projectsTable = findProjectsTable();
+
+      expect(wrapper.vm.searchTerm).toBe('');
+
+      projectsTable.vm.$emit('search', sampleSearchTerm);
+
+      expect(wrapper.vm.searchTerm).toBe(sampleSearchTerm);
+
+      projectsTable.vm.$emit('search', '');
+
+      expect(wrapper.vm.searchTerm).toBe('');
+    });
+
+    it('does not trigger search if user enters short search input', () => {
+      expect(wrapper.vm.searchTerm).toBe('');
+
+      findProjectsTable().vm.$emit('search', sampleShortSearchTerm);
+
+      expect(wrapper.vm.searchTerm).toBe('');
+    });
+  });
+
+  describe('renders projects table pagination component', () => {
+    const namespaceWithPageInfo = {
+      namespace: {
+        ...withRootStorageStatistics,
+        projects: {
+          ...withRootStorageStatistics.projects,
+          pageInfo: {
+            hasPreviousPage: false,
+            hasNextPage: true,
+          },
+        },
+      },
+    };
+    beforeEach(() => {
+      createComponent(namespaceWithPageInfo);
+    });
+
+    it('with disabled "Prev" button', () => {
+      expect(findPrevButton().attributes().disabled).toBe('disabled');
+    });
+
+    it('with enabled "Next" button', () => {
+      expect(findNextButton().attributes().disabled).toBeUndefined();
     });
   });
 });

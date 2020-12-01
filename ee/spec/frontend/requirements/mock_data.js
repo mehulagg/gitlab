@@ -34,11 +34,18 @@ export const mockTestReportMissing = {
 export const requirement1 = {
   iid: '1',
   title: 'Virtutis, magnitudinis animi, patientiae, fortitudinis fomentis dolor mitigari solet.',
+  titleHtml:
+    'Virtutis, magnitudinis animi, patientiae, fortitudinis fomentis dolor mitigari solet.',
+  description: 'fortitudinis _fomentis_ dolor mitigari solet.',
+  descriptionHtml: 'fortitudinis <i>fomentis</i> dolor mitigari solet.',
   createdAt: '2020-03-19T08:09:09Z',
   updatedAt: '2020-03-20T08:09:09Z',
   state: 'OPENED',
   userPermissions: mockUserPermissions,
   author: mockAuthor,
+  lastTestReportState: 'PASSED',
+  lastTestReportManuallyCreated: false,
+  satisfied: true,
   testReports: {
     nodes: [mockTestReport],
   },
@@ -47,11 +54,18 @@ export const requirement1 = {
 export const requirement2 = {
   iid: '2',
   title: 'Est autem officium, quod ita factum est, ut eius facti probabilis ratio reddi possit.',
+  titleHtml:
+    'Est autem officium, quod ita factum est, ut eius facti probabilis ratio reddi possit.',
+  description: 'ut eius facti _probabilis_ ratio reddi possit.',
+  descriptionHtml: 'ut eius facti <i>probabilis</i> ratio reddi possit.',
   createdAt: '2020-03-19T08:08:14Z',
   updatedAt: '2020-03-20T08:08:14Z',
   state: 'OPENED',
   userPermissions: mockUserPermissions,
   author: mockAuthor,
+  lastTestReportState: 'FAILED',
+  lastTestReportManuallyCreated: true,
+  satisfied: false,
   testReports: {
     nodes: [mockTestReport],
   },
@@ -60,11 +74,17 @@ export const requirement2 = {
 export const requirement3 = {
   iid: '3',
   title: 'Non modo carum sibi quemque, verum etiam vehementer carum esse',
+  titleHtml: 'Non modo carum sibi quemque, verum etiam vehementer carum esse',
+  description: 'verum etiam _vehementer_ carum esse.',
+  descriptionHtml: 'verum etiam <i>vehementer</i> carum esse.',
   createdAt: '2020-03-19T08:08:25Z',
   updatedAt: '2020-03-20T08:08:25Z',
   state: 'OPENED',
   userPermissions: mockUserPermissions,
   author: mockAuthor,
+  lastTestReportState: null,
+  lastTestReportManuallyCreated: true,
+  satisfied: false,
   testReports: {
     nodes: [mockTestReport],
   },
@@ -73,11 +93,17 @@ export const requirement3 = {
 export const requirementArchived = {
   iid: '23',
   title: 'Cuius quidem, quoniam Stoicus fuit',
+  titleHtml: 'Cuius quidem, quoniam Stoicus fuit',
+  description: 'quoniam _Stoicus_ fuit.',
+  descriptionHtml: 'quoniam <i>Stoicus</i> fuit.',
   createdAt: '2020-03-31T13:31:40Z',
   updatedAt: '2020-03-31T13:31:40Z',
   state: 'ARCHIVED',
   userPermissions: mockUserPermissions,
   author: mockAuthor,
+  lastTestReportState: null,
+  lastTestReportManuallyCreated: true,
+  satisfied: false,
   testReports: {
     nodes: [mockTestReport],
   },

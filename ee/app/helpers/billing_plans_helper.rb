@@ -16,7 +16,9 @@ module BillingPlansHelper
       namespace_id: group.id,
       namespace_name: group.name,
       plan_upgrade_href: plan_upgrade_url(group, plan),
-      customer_portal_url: "#{EE::SUBSCRIPTIONS_URL}/subscriptions"
+      plan_renew_href: plan_renew_url(group),
+      customer_portal_url: "#{EE::SUBSCRIPTIONS_URL}/subscriptions",
+      billable_seats_href: billable_seats_href(group)
     }
   end
 
@@ -48,9 +50,9 @@ module BillingPlansHelper
     plan.features.sort_by! { |feature| feature.highlight ? 0 : 1 }[0...4]
   end
 
-  def plan_purchase_or_upgrade_url(group, plan, current_plan)
+  def plan_purchase_or_upgrade_url(group, plan)
     if group.upgradable?
-      plan_upgrade_url(group, current_plan)
+      plan_upgrade_url(group, plan)
     else
       plan_purchase_url(group, plan)
     end
@@ -71,6 +73,13 @@ module BillingPlansHelper
     namespace == current_user.namespace
   end
 
+  def seats_data_last_update_info
+    last_enqueue_time = UpdateMaxSeatsUsedForGitlabComSubscriptionsWorker.last_enqueue_time&.utc
+    return _("Seats usage data as of %{last_enqueue_time} (Updated daily)" % { last_enqueue_time: last_enqueue_time }) if last_enqueue_time
+
+    _('Seats usage data is updated every day at 12:00pm UTC')
+  end
+
   private
 
   def plan_purchase_url(group, plan)
@@ -85,5 +94,17 @@ module BillingPlansHelper
     return unless group && plan&.id
 
     "#{EE::SUBSCRIPTIONS_URL}/gitlab/namespaces/#{group.id}/upgrade/#{plan.id}"
+  end
+
+  def plan_renew_url(group)
+    return unless group
+
+    "#{EE::SUBSCRIPTIONS_URL}/gitlab/namespaces/#{group.id}/renew"
+  end
+
+  def billable_seats_href(group)
+    return unless Feature.enabled?(:api_billable_member_list, group)
+
+    group_seat_usage_path(group)
   end
 end

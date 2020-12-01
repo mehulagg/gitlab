@@ -21,6 +21,25 @@ RSpec.describe Ci::BuildTraceChunk, :clean_gitlab_redis_shared_state do
     stub_artifacts_object_storage
   end
 
+  describe 'chunk creation' do
+    let(:metrics) { spy('metrics') }
+
+    before do
+      allow(::Gitlab::Ci::Trace::Metrics)
+        .to receive(:new)
+        .and_return(metrics)
+    end
+
+    it 'increments trace operation chunked metric' do
+      build_trace_chunk.save!
+
+      expect(metrics)
+        .to have_received(:increment_trace_operation)
+        .with(operation: :chunked)
+        .once
+    end
+  end
+
   context 'FastDestroyAll' do
     let(:parent) { create(:project) }
     let(:pipeline) { create(:ci_pipeline, project: parent) }
@@ -81,15 +100,15 @@ RSpec.describe Ci::BuildTraceChunk, :clean_gitlab_redis_shared_state do
     subject { described_class.all_stores }
 
     it 'returns a correctly ordered array' do
-      is_expected.to eq(%w[redis database fog])
+      is_expected.to eq(%i[redis database fog])
     end
 
     it 'returns redis store as the lowest precedence' do
-      expect(subject.first).to eq('redis')
+      expect(subject.first).to eq(:redis)
     end
 
     it 'returns fog store as the highest precedence' do
-      expect(subject.last).to eq('fog')
+      expect(subject.last).to eq(:fog)
     end
   end
 
@@ -121,6 +140,34 @@ RSpec.describe Ci::BuildTraceChunk, :clean_gitlab_redis_shared_state do
       end
 
       it { is_expected.to eq('Sample data in fog') }
+
+      it 'returns a new Fog store' do
+        expect(described_class.get_store_class(data_store)).to be_a(Ci::BuildTraceChunks::Fog)
+      end
+    end
+  end
+
+  describe '#get_store_class' do
+    using RSpec::Parameterized::TableSyntax
+
+    where(:data_store, :expected_store) do
+      :redis | Ci::BuildTraceChunks::Redis
+      :database | Ci::BuildTraceChunks::Database
+      :fog | Ci::BuildTraceChunks::Fog
+    end
+
+    with_them do
+      context "with store" do
+        it 'returns an instance of the right class' do
+          expect(expected_store).to receive(:new).twice.and_call_original
+          expect(described_class.get_store_class(data_store.to_s)).to be_a(expected_store)
+          expect(described_class.get_store_class(data_store.to_sym)).to be_a(expected_store)
+        end
+      end
+    end
+
+    it 'raises an error' do
+      expect { described_class.get_store_class('unknown') }.to raise_error('Unknown store type: unknown')
     end
   end
 
@@ -346,6 +393,24 @@ RSpec.describe Ci::BuildTraceChunk, :clean_gitlab_redis_shared_state do
         it_behaves_like 'Scheduling no sidekiq worker'
       end
     end
+
+    describe 'append metrics' do
+      let(:metrics) { spy('metrics') }
+
+      before do
+        allow(::Gitlab::Ci::Trace::Metrics)
+          .to receive(:new)
+          .and_return(metrics)
+      end
+
+      it 'increments trace operation appended metric' do
+        build_trace_chunk.append('123456', 0)
+
+        expect(metrics)
+          .to have_received(:increment_trace_operation)
+          .with(operation: :appended)
+      end
+    end
   end
 
   describe '#truncate' do
@@ -463,21 +528,13 @@ RSpec.describe Ci::BuildTraceChunk, :clean_gitlab_redis_shared_state do
   end
 
   describe '#persist_data!' do
-    subject { build_trace_chunk.persist_data! }
+    let(:build) { create(:ci_build, :running) }
 
-    shared_examples_for 'Atomic operation' do
-      context 'when the other process is persisting' do
-        let(:lease_key) { "trace_write:#{build_trace_chunk.build.id}:chunks:#{build_trace_chunk.chunk_index}" }
-
-        before do
-          stub_exclusive_lease_taken(lease_key)
-        end
-
-        it 'raise an error' do
-          expect { subject }.to raise_error('Failed to obtain a lock')
-        end
-      end
+    before do
+      build_trace_chunk.save!
     end
+
+    subject { build_trace_chunk.persist_data! }
 
     context 'when data_store is redis' do
       let(:data_store) { :redis }
@@ -509,8 +566,6 @@ RSpec.describe Ci::BuildTraceChunk, :clean_gitlab_redis_shared_state do
 
             expect(build_trace_chunk.reload.checksum).to eq '3398914352'
           end
-
-          it_behaves_like 'Atomic operation'
         end
 
         context 'when data size has not reached CHUNK_SIZE' do
@@ -523,6 +578,70 @@ RSpec.describe Ci::BuildTraceChunk, :clean_gitlab_redis_shared_state do
             expect(Ci::BuildTraceChunks::Redis.new.data(build_trace_chunk)).to eq(data)
             expect(Ci::BuildTraceChunks::Database.new.data(build_trace_chunk)).to be_nil
             expect(Ci::BuildTraceChunks::Fog.new.data(build_trace_chunk)).to be_nil
+          end
+
+          context 'when chunk is a final one' do
+            before do
+              create(:ci_build_pending_state, build: build)
+            end
+
+            it 'persists the data' do
+              subject
+
+              expect(build_trace_chunk.fog?).to be_truthy
+            end
+          end
+
+          context 'when the chunk has been modifed by a different worker' do
+            it 'reloads the chunk before migration' do
+              described_class
+                .find(build_trace_chunk.id)
+                .update!(data_store: :fog)
+
+              build_trace_chunk.persist_data!
+            end
+
+            it 'verifies the operation using optimistic locking' do
+              allow(build_trace_chunk)
+                .to receive(:save!)
+                .and_raise(ActiveRecord::StaleObjectError)
+
+              expect { build_trace_chunk.persist_data! }
+                .to raise_error(described_class::FailedToPersistDataError)
+            end
+
+            it 'does not allow flushing unpersisted chunk' do
+              build_trace_chunk.checksum = '12345'
+
+              expect { build_trace_chunk.persist_data! }
+                .to raise_error(described_class::FailedToPersistDataError,
+                                /Modifed build trace chunk detected/)
+            end
+          end
+
+          context 'when the chunk is being locked by a different worker' do
+            let(:metrics) { spy('metrics') }
+
+            it 'increments stalled chunk trace metric' do
+              allow(build_trace_chunk)
+                .to receive(:metrics)
+                .and_return(metrics)
+
+              expect do
+                subject
+
+                expect(metrics)
+                  .to have_received(:increment_trace_operation)
+                    .with(operation: :stalled)
+                    .once
+              end.to raise_error(described_class::FailedToPersistDataError)
+            end
+
+            def lock_chunk(&block)
+              "trace_write:#{build.id}:chunks:#{chunk_index}".then do |key|
+                build_trace_chunk.in_lock(key, &block)
+              end
+            end
           end
         end
       end
@@ -558,8 +677,6 @@ RSpec.describe Ci::BuildTraceChunk, :clean_gitlab_redis_shared_state do
             expect(Ci::BuildTraceChunks::Database.new.data(build_trace_chunk)).to be_nil
             expect(Ci::BuildTraceChunks::Fog.new.data(build_trace_chunk)).to eq(data)
           end
-
-          it_behaves_like 'Atomic operation'
         end
 
         context 'when data size has not reached CHUNK_SIZE' do
@@ -572,6 +689,18 @@ RSpec.describe Ci::BuildTraceChunk, :clean_gitlab_redis_shared_state do
             expect(Ci::BuildTraceChunks::Redis.new.data(build_trace_chunk)).to be_nil
             expect(Ci::BuildTraceChunks::Database.new.data(build_trace_chunk)).to eq(data)
             expect(Ci::BuildTraceChunks::Fog.new.data(build_trace_chunk)).to be_nil
+          end
+
+          context 'when chunk is a final one' do
+            before do
+              create(:ci_build_pending_state, build: build)
+            end
+
+            it 'persists the data' do
+              subject
+
+              expect(build_trace_chunk.fog?).to be_truthy
+            end
           end
         end
       end
@@ -607,8 +736,6 @@ RSpec.describe Ci::BuildTraceChunk, :clean_gitlab_redis_shared_state do
             expect(Ci::BuildTraceChunks::Database.new.data(build_trace_chunk)).to be_nil
             expect(Ci::BuildTraceChunks::Fog.new.data(build_trace_chunk)).to eq(data)
           end
-
-          it_behaves_like 'Atomic operation'
         end
 
         context 'when data size has not reached CHUNK_SIZE' do
@@ -617,6 +744,54 @@ RSpec.describe Ci::BuildTraceChunk, :clean_gitlab_redis_shared_state do
           it 'does not raise error' do
             expect { subject }.not_to raise_error
           end
+        end
+      end
+    end
+  end
+
+  describe 'final?' do
+    let(:build) { create(:ci_build, :running) }
+
+    context 'when build pending state exists' do
+      before do
+        create(:ci_build_pending_state, build: build)
+      end
+
+      context 'when chunks is not the last one' do
+        before do
+          create(:ci_build_trace_chunk, chunk_index: 1, build: build)
+        end
+
+        it 'is not a final chunk' do
+          expect(build.reload.pending_state).to be_present
+          expect(build_trace_chunk).not_to be_final
+        end
+      end
+
+      context 'when chunks is the last one' do
+        it 'is a final chunk' do
+          expect(build.reload.pending_state).to be_present
+          expect(build_trace_chunk).to be_final
+        end
+      end
+    end
+
+    context 'when build pending state does not exist' do
+      context 'when chunks is not the last one' do
+        before do
+          create(:ci_build_trace_chunk, chunk_index: 1, build: build)
+        end
+
+        it 'is not a final chunk' do
+          expect(build.reload.pending_state).not_to be_present
+          expect(build_trace_chunk).not_to be_final
+        end
+      end
+
+      context 'when chunks is the last one' do
+        it 'is not a final chunk' do
+          expect(build.reload.pending_state).not_to be_present
+          expect(build_trace_chunk).not_to be_final
         end
       end
     end
@@ -666,6 +841,64 @@ RSpec.describe Ci::BuildTraceChunk, :clean_gitlab_redis_shared_state do
       end
 
       it_behaves_like 'deletes all build_trace_chunk and data in redis'
+    end
+  end
+
+  describe 'comparable build trace chunks' do
+    describe '#<=>' do
+      context 'when chunks are associated with different builds' do
+        let(:first) { create(:ci_build_trace_chunk, build: build, chunk_index: 1) }
+        let(:second) { create(:ci_build_trace_chunk, chunk_index: 1) }
+
+        it 'returns nil' do
+          expect(first <=> second).to be_nil
+        end
+      end
+
+      context 'when there are two chunks with different indexes' do
+        let(:first) { create(:ci_build_trace_chunk, build: build, chunk_index: 1) }
+        let(:second) { create(:ci_build_trace_chunk, build: build, chunk_index: 0) }
+
+        it 'indicates the the first one is greater than then second' do
+          expect(first <=> second).to eq 1
+        end
+      end
+
+      context 'when there are two chunks with the same index within the same build' do
+        let(:chunk) { create(:ci_build_trace_chunk) }
+
+        it 'indicates the these are equal' do
+          expect(chunk <=> chunk).to be_zero # rubocop:disable Lint/UselessComparison
+        end
+      end
+    end
+
+    describe '#==' do
+      context 'when chunks have the same index' do
+        let(:chunk) { create(:ci_build_trace_chunk) }
+
+        it 'indicates that the chunks are equal' do
+          expect(chunk).to eq chunk
+        end
+      end
+
+      context 'when chunks have different indexes' do
+        let(:first) { create(:ci_build_trace_chunk, build: build, chunk_index: 1) }
+        let(:second) { create(:ci_build_trace_chunk, build: build, chunk_index: 0) }
+
+        it 'indicates that the chunks are not equal' do
+          expect(first).not_to eq second
+        end
+      end
+
+      context 'when chunks are associated with different builds' do
+        let(:first) { create(:ci_build_trace_chunk, build: build, chunk_index: 1) }
+        let(:second) { create(:ci_build_trace_chunk, chunk_index: 1) }
+
+        it 'indicates that the chunks are not equal' do
+          expect(first).not_to eq second
+        end
+      end
     end
   end
 end

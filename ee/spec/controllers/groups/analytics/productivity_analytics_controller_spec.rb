@@ -51,18 +51,6 @@ RSpec.describe Groups::Analytics::ProductivityAnalyticsController do
       end
     end
 
-    context 'when productivity_analytics feature flag is disabled' do
-      before do
-        stub_feature_flags(Gitlab::Analytics::PRODUCTIVITY_ANALYTICS_FEATURE_FLAG => false)
-      end
-
-      it 'renders 404, not found error' do
-        subject
-
-        expect(response).to have_gitlab_http_status(:not_found)
-      end
-    end
-
     context 'when feature is not licensed' do
       before do
         stub_licensed_features(productivity_analytics: false)

@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 
 module API
-  class ErrorTracking < Grape::API::Instance
+  class ErrorTracking < ::API::Base
     before { authenticate! }
+
+    feature_category :error_tracking
 
     params do
       requires :id, type: String, desc: 'The ID of a project'

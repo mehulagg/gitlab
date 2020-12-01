@@ -1,5 +1,6 @@
 <script>
-import { GlLink, GlSprintf } from '@gitlab/ui';
+import { GlLink, GlSprintf, GlTooltipDirective, GlIcon } from '@gitlab/ui';
+import { SUPPORTING_MESSAGE_TYPES } from 'ee/vulnerabilities/constants';
 import SeverityBadge from 'ee/vue_shared/security_reports/components/severity_badge.vue';
 import ReportDetails from 'ee/vue_shared/security_reports/components/report_items/details.vue';
 import CodeBlock from '~/vue_shared/components/code_block.vue';
@@ -8,7 +9,10 @@ import DetailItem from './detail_item.vue';
 
 export default {
   name: 'VulnerabilityDetails',
-  components: { CodeBlock, GlLink, SeverityBadge, DetailItem, GlSprintf, ReportDetails },
+  components: { CodeBlock, GlLink, SeverityBadge, DetailItem, GlSprintf, GlIcon, ReportDetails },
+  directives: {
+    GlTooltip: GlTooltipDirective,
+  },
   props: {
     vulnerability: {
       type: Object,
@@ -20,7 +24,7 @@ export default {
       return this.vulnerability.location || {};
     },
     stacktraceSnippet() {
-      return this.vulnerability.stacktrace_snippet || '';
+      return this.vulnerability.stacktraceSnippet || '';
     },
     scanner() {
       return this.vulnerability.scanner || {};
@@ -29,10 +33,10 @@ export default {
       return (this.location.file || '') + (this.lineNumber ? `:${this.lineNumber}` : '');
     },
     fileUrl() {
-      return (this.location.blob_path || '') + (this.lineNumber ? `#L${this.lineNumber}` : '');
+      return (this.location.blobPath || '') + (this.lineNumber ? `#L${this.lineNumber}` : '');
     },
     lineNumber() {
-      const { start_line: start, end_line: end } = this.location;
+      const { startLine: start, endLine: end } = this.location;
       return end > start ? `${start}-${end}` : start;
     },
     scannerUrl() {
@@ -54,55 +58,110 @@ export default {
         properties: {},
       };
     },
+    assertion() {
+      return this.vulnerability.evidenceSource?.name;
+    },
+    recordedMessage() {
+      return this.vulnerability?.supportingMessages?.find(
+        msg => msg.name === SUPPORTING_MESSAGE_TYPES.RECORDED,
+      )?.response;
+    },
+    constructedRequest() {
+      return this.constructRequest(this.vulnerability.request);
+    },
+    constructedResponse() {
+      return this.constructResponse(this.vulnerability.response);
+    },
+    constructedRecordedResponse() {
+      return this.constructResponse(this.recordedMessage);
+    },
     requestData() {
-      const { request: { method, url, headers = [] } = {} } = this.vulnerability;
+      if (!this.vulnerability.request) {
+        return [];
+      }
 
       return [
         {
-          label: __('%{labelStart}Method:%{labelEnd} %{method}'),
-          content: method,
-        },
-        {
-          label: __('%{labelStart}URL:%{labelEnd} %{url}'),
-          content: url,
-        },
-        {
-          label: __('%{labelStart}Headers:%{labelEnd} %{headers}'),
-          content: this.getHeadersAsCodeBlockLines(headers),
+          label: __('%{labelStart}Sent request:%{labelEnd} %{headers}'),
+          content: this.constructedRequest,
           isCode: true,
         },
       ].filter(x => x.content);
     },
     responseData() {
-      const {
-        response: { status_code: statusCode, reason_phrase: reasonPhrase, headers = [] } = {},
-      } = this.vulnerability;
+      if (!this.vulnerability.response) {
+        return [];
+      }
 
       return [
         {
-          label: __('%{labelStart}Status:%{labelEnd} %{status}'),
-          content: statusCode && reasonPhrase ? `${statusCode} ${reasonPhrase}` : '',
+          label: __('%{labelStart}Actual response:%{labelEnd} %{headers}'),
+          content: this.constructedResponse,
+          isCode: true,
         },
+      ].filter(x => x.content);
+    },
+    recordedResponseData() {
+      if (!this.recordedMessage) {
+        return [];
+      }
+
+      return [
         {
-          label: __('%{labelStart}Headers:%{labelEnd} %{headers}'),
-          content: this.getHeadersAsCodeBlockLines(headers),
+          label: __('%{labelStart}Unmodified response:%{labelEnd} %{headers}'),
+          content: this.constructedRecordedResponse,
           isCode: true,
         },
       ].filter(x => x.content);
     },
     shouldShowLocation() {
       return (
-        this.location.crash_address || this.location.crash_type || this.location.stacktrace_snippet
+        this.location.crashAddress ||
+        this.location.crashType ||
+        this.location.stacktraceSnippet ||
+        this.location.file ||
+        this.location.image ||
+        this.location.operatingSystem
       );
     },
+<<<<<<< HEAD
     details() {
       return this.vulnerability.details;
+=======
+    hasRequest() {
+      return Boolean(this.requestData.length);
+    },
+    hasResponse() {
+      return Boolean(this.responseData.length);
+    },
+    hasRecordedResponse() {
+      return Boolean(this.recordedResponseData.length);
+    },
+    hasResponses() {
+      return Boolean(this.hasResponse || this.hasRecordedResponse);
+>>>>>>> master
     },
   },
   methods: {
     getHeadersAsCodeBlockLines(headers) {
       return Array.isArray(headers)
         ? headers.map(({ name, value }) => `${name}: ${value}`).join('\n')
+        : '';
+    },
+    constructResponse(response) {
+      const { body, status_code: statusCode, reason_phrase: reasonPhrase, headers = [] } = response;
+      const headerLines = this.getHeadersAsCodeBlockLines(headers);
+
+      return statusCode && reasonPhrase && headerLines
+        ? [`${statusCode} ${reasonPhrase}\n`, headerLines, '\n\n', body].join('')
+        : '';
+    },
+    constructRequest(request) {
+      const { body, method, url, headers = [] } = request;
+      const headerLines = this.getHeadersAsCodeBlockLines(headers);
+
+      return method && url && headerLines
+        ? [`${method} ${url}\n`, headerLines, '\n\n', body].join('')
         : '';
     },
   },
@@ -127,13 +186,8 @@ export default {
       <detail-item :sprintf-message="__('%{labelStart}Severity:%{labelEnd} %{severity}')">
         <severity-badge :severity="vulnerability.severity" class="gl-display-inline ml-1" />
       </detail-item>
-      <detail-item
-        v-if="vulnerability.evidence"
-        :sprintf-message="__('%{labelStart}Evidence:%{labelEnd} %{evidence}')"
-        >{{ vulnerability.evidence }}
-      </detail-item>
-      <detail-item :sprintf-message="__('%{labelStart}Report Type:%{labelEnd} %{reportType}')"
-        >{{ vulnerability.report_type }}
+      <detail-item :sprintf-message="__('%{labelStart}Scan Type:%{labelEnd} %{reportType}')"
+        >{{ vulnerability.reportType }}
       </detail-item>
       <detail-item
         v-if="scanner.name"
@@ -155,14 +209,20 @@ export default {
         </component>
       </detail-item>
       <detail-item
-        v-if="location.image"
-        :sprintf-message="__('%{labelStart}Image:%{labelEnd} %{image}')"
-        >{{ location.image }}
+        v-if="location.class"
+        :sprintf-message="__('%{labelStart}Class:%{labelEnd} %{class}')"
+        >{{ location.class }}
       </detail-item>
       <detail-item
-        v-if="location.operating_system"
-        :sprintf-message="__('%{labelStart}Namespace:%{labelEnd} %{namespace}')"
-        >{{ location.operating_system }}
+        v-if="location.method"
+        :sprintf-message="__('%{labelStart}Method:%{labelEnd} %{method}')"
+      >
+        <code>{{ location.method }}</code>
+      </detail-item>
+      <detail-item
+        v-if="vulnerability.evidence"
+        :sprintf-message="__('%{labelStart}Evidence:%{labelEnd} %{evidence}')"
+        >{{ vulnerability.evidence }}
       </detail-item>
     </ul>
 
@@ -170,35 +230,31 @@ export default {
       <h3>{{ __('Location') }}</h3>
       <ul>
         <detail-item
-          v-if="location.crash_address"
-          :sprintf-message="__('%{labelStart}Crash Address:%{labelEnd} %{crash_address}')"
-          >{{ location.crash_address }}
+          v-if="location.image"
+          :sprintf-message="__('%{labelStart}Image:%{labelEnd} %{image}')"
+          >{{ location.image }}
         </detail-item>
         <detail-item
-          v-if="location.stacktrace_snippet"
-          :sprintf-message="__('%{labelStart}Crash State:%{labelEnd} %{stacktrace_snippet}')"
-        >
-          <code-block :code="location.stacktrace_snippet" max-height="225px" />
+          v-if="location.operatingSystem"
+          :sprintf-message="__('%{labelStart}Namespace:%{labelEnd} %{namespace}')"
+          >{{ location.operatingSystem }}
         </detail-item>
-      </ul>
-    </template>
-
-    <template v-if="location.file">
-      <h3>{{ __('Location') }}</h3>
-      <ul>
-        <detail-item :sprintf-message="__('%{labelStart}File:%{labelEnd} %{file}')">
+        <detail-item
+          v-if="location.file"
+          :sprintf-message="__('%{labelStart}File:%{labelEnd} %{file}')"
+        >
           <gl-link :href="fileUrl" target="_blank">{{ fileText }}</gl-link>
         </detail-item>
         <detail-item
-          v-if="location.class"
-          :sprintf-message="__('%{labelStart}Class:%{labelEnd} %{class}')"
-          >{{ location.class }}
+          v-if="location.crashAddress"
+          :sprintf-message="__('%{labelStart}Crash Address:%{labelEnd} %{crash_address}')"
+          >{{ location.crashAddress }}
         </detail-item>
         <detail-item
-          v-if="location.method"
-          :sprintf-message="__('%{labelStart}Method:%{labelEnd} %{method}')"
+          v-if="location.stacktraceSnippet"
+          :sprintf-message="__('%{labelStart}Crash State:%{labelEnd} %{stacktrace_snippet}')"
         >
-          <code>{{ location.method }}</code>
+          <code-block :code="location.stacktraceSnippet" max-height="225px" />
         </detail-item>
       </ul>
     </template>
@@ -206,7 +262,11 @@ export default {
     <template v-if="vulnerability.links && vulnerability.links.length">
       <h3>{{ __('Links') }}</h3>
       <ul>
-        <li v-for="link in vulnerability.links" :key="link.url">
+        <li
+          v-for="(link, index) in vulnerability.links"
+          :key="`${index}:${link.url}`"
+          class="gl-ml-0! gl-list-style-position-inside"
+        >
           <gl-link
             :href="link.url"
             data-testid="link"
@@ -223,7 +283,11 @@ export default {
     <template v-if="vulnerability.identifiers && vulnerability.identifiers.length">
       <h3>{{ __('Identifiers') }}</h3>
       <ul>
-        <li v-for="identifier in vulnerability.identifiers" :key="identifier.url">
+        <li
+          v-for="(identifier, index) in vulnerability.identifiers"
+          :key="`${index}:${identifier.url}`"
+          class="gl-ml-0! gl-list-style-position-inside"
+        >
           <gl-link :href="identifier.url" data-testid="identifier" target="_blank">
             {{ identifier.name }}
           </gl-link>
@@ -231,15 +295,15 @@ export default {
       </ul>
     </template>
 
-    <section v-if="requestData.length" data-testid="request">
-      <h3>{{ s__('Vulnerability|Request') }}</h3>
+    <section v-if="hasRequest" data-testid="request">
+      <h3>{{ s__('Vulnerability|Request/Response') }}</h3>
       <ul>
         <detail-item
-          v-for="{ label, isCode, content } in requestData"
-          :key="label"
+          v-for="({ label, isCode, content }, index) in requestData"
+          :key="`${index}:${label}`"
           :sprintf-message="label"
         >
-          <code-block v-if="isCode" class="mt-1" :code="content" max-height="225px" />
+          <code-block v-if="isCode" class="gl-mt-2" :code="content" max-height="225px" />
           <template v-else>
             {{ content }}
           </template>
@@ -247,21 +311,74 @@ export default {
       </ul>
     </section>
 
-    <section v-if="responseData.length" data-testid="response">
-      <h3>{{ s__('Vulnerability|Response') }}</h3>
+    <div v-if="hasResponses" class="row">
+      <section
+        v-if="hasRecordedResponse"
+        :class="hasResponse ? 'col-6' : 'col'"
+        data-testid="recorded-response"
+      >
+        <ul>
+          <detail-item
+            v-for="({ label, isCode, content }, index) in recordedResponseData"
+            :key="`${index}:${label}`"
+            :sprintf-message="label"
+          >
+            <gl-icon
+              v-gl-tooltip
+              name="information-o"
+              class="gl-hover-cursor-pointer gl-mr-3"
+              :title="
+                s__(
+                  'Vulnerability|The unmodified response is the original response that had no mutations done to the request',
+                )
+              "
+            />
+            <code-block v-if="isCode" class="gl-mt-2" :code="content" max-height="225px" />
+            <template v-else>
+              {{ content }}
+            </template>
+          </detail-item>
+        </ul>
+      </section>
+
+      <section
+        v-if="hasResponse"
+        :class="hasRecordedResponse ? 'col-6' : 'col'"
+        data-testid="response"
+      >
+        <ul>
+          <detail-item
+            v-for="({ label, isCode, content }, index) in responseData"
+            :key="`${index}:${label}`"
+            :sprintf-message="label"
+          >
+            <gl-icon
+              v-gl-tooltip
+              name="information-o"
+              class="gl-hover-cursor-pointer gl-mr-3"
+              :title="
+                s__(
+                  'Vulnerability|Actual received response is the one received when this fault was detected',
+                )
+              "
+            />
+            <code-block v-if="isCode" class="gl-mt-2" :code="content" max-height="225px" />
+            <template v-else>
+              {{ content }}
+            </template>
+          </detail-item>
+        </ul>
+      </section>
+    </div>
+
+    <template v-if="assertion">
+      <h3>{{ s__('Vulnerability|Additional Info') }}</h3>
       <ul>
-        <detail-item
-          v-for="{ label, isCode, content } in responseData"
-          :key="label"
-          :sprintf-message="label"
-        >
-          <code-block v-if="isCode" class="mt-1" :code="content" max-height="225px" />
-          <template v-else>
-            {{ content }}
-          </template>
+        <detail-item :sprintf-message="__('%{labelStart}Assert:%{labelEnd} %{assertion}')">
+          {{ assertion }}
         </detail-item>
       </ul>
-    </section>
+    </template>
 
     <div v-if="details">
       <h3>{{ s__('Vulnerability|Details') }}</h3>

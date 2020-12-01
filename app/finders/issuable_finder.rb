@@ -44,6 +44,7 @@ class IssuableFinder
   NEGATABLE_PARAMS_HELPER_KEYS = %i[project_id scope status include_subgroups].freeze
 
   attr_accessor :current_user, :params
+  attr_writer :parent
 
   delegate(*%i[assignee milestones], to: :params)
 
@@ -101,7 +102,7 @@ class IssuableFinder
     items = filter_items(items)
 
     # Let's see if we have to negate anything
-    items = filter_negated_items(items)
+    items = filter_negated_items(items) if should_filter_negated_args?
 
     # This has to be last as we use a CTE as an optimization fence
     # for counts by passing the force_cte param and passing the
@@ -133,13 +134,15 @@ class IssuableFinder
     by_my_reaction_emoji(items)
   end
 
-  # Negates all params found in `negatable_params`
-  def filter_negated_items(items)
-    return items unless Feature.enabled?(:not_issuable_queries, params.group || params.project, default_enabled: true)
+  def should_filter_negated_args?
+    return false unless Feature.enabled?(:not_issuable_queries, params.group || params.project, default_enabled: true)
 
     # API endpoints send in `nil` values so we test if there are any non-nil
-    return items unless not_params.present? && not_params.values.any?
+    not_params.present? && not_params.values.any?
+  end
 
+  # Negates all params found in `negatable_params`
+  def filter_negated_items(items)
     items = by_negated_author(items)
     items = by_negated_assignee(items)
     items = by_negated_label(items)
@@ -150,7 +153,9 @@ class IssuableFinder
   end
 
   def row_count
-    Gitlab::IssuablesCountForState.new(self).for_state_or_opened(params[:state])
+    Gitlab::IssuablesCountForState
+      .new(self, nil, fast_fail: true)
+      .for_state_or_opened(params[:state])
   end
 
   # We often get counts for each state by running a query per state, and
@@ -204,7 +209,25 @@ class IssuableFinder
     end
   end
 
+  def parent_param=(obj)
+    @parent = obj
+    params[parent_param] = parent if parent
+  end
+
+  def parent_param
+    case parent
+    when Project
+      :project_id
+    when Group
+      :group_id
+    else
+      raise "Unexpected parent: #{parent.class}"
+    end
+  end
+
   private
+
+  attr_reader :parent
 
   def not_params
     strong_memoize(:not_params) do

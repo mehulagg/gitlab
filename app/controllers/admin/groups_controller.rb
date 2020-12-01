@@ -5,6 +5,8 @@ class Admin::GroupsController < Admin::ApplicationController
 
   before_action :group, only: [:edit, :update, :destroy, :project_update, :members_update]
 
+  feature_category :subgroups
+
   def index
     @groups = groups.sort_by_attribute(@sort = params[:sort])
     @groups = @groups.search(params[:name]) if params[:name].present?
@@ -19,7 +21,7 @@ class Admin::GroupsController < Admin::ApplicationController
     # the Group with statistics).
     @group = Group.with_statistics.find(group&.id)
     @members = present_members(
-      @group.members.order("access_level DESC").page(params[:members_page]))
+      group_members.order("access_level DESC").page(params[:members_page]))
     @requesters = present_members(
       AccessRequestsFinder.new(@group).execute(current_user))
     @projects = @group.projects.with_statistics.page(params[:projects_page])
@@ -39,6 +41,7 @@ class Admin::GroupsController < Admin::ApplicationController
 
     if @group.save
       @group.add_owner(current_user)
+      @group.create_namespace_settings
       redirect_to [:admin, @group], notice: _('Group %{group_name} was successfully created.') % { group_name: @group.name }
     else
       render "new"
@@ -80,6 +83,10 @@ class Admin::GroupsController < Admin::ApplicationController
 
   def group
     @group ||= Group.find_by_full_path(params[:id])
+  end
+
+  def group_members
+    @group.members
   end
 
   def group_params

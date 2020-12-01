@@ -17,6 +17,8 @@ module Projects
         authorize_modify_auto_fix_setting!
       end
 
+      feature_category :static_application_security_testing
+
       def show
         @configuration = ConfigurationPresenter.new(project,
                                                     auto_fix_permission: auto_fix_authorized?,

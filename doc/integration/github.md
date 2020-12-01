@@ -1,12 +1,20 @@
+---
+stage: Create
+group: Ecosystem
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Integrate your GitLab instance with GitHub
 
-You can integrate your GitLab instance with GitHub.com as well as GitHub Enterprise to enable users to import projects from GitHub and/or to login to your GitLab instance with your GitHub account.
+You can integrate your GitLab instance with GitHub.com and GitHub Enterprise to
+enable users to import projects from GitHub or sign in to your GitLab instance
+with your GitHub account.
 
 ## Enabling GitHub OAuth
 
-To enable the GitHub OmniAuth provider, you'll need an OAuth 2 Client ID and Client Secret from GitHub. To get these credentials, sign into GitHub and follow their procedure for [Creating an OAuth App](https://developer.github.com/apps/building-oauth-apps/creating-an-oauth-app/).
+To enable the GitHub OmniAuth provider, you need an OAuth 2 Client ID and Client Secret from GitHub. To get these credentials, sign into GitHub and follow their procedure for [Creating an OAuth App](https://developer.github.com/apps/building-oauth-apps/creating-an-oauth-app/).
 
-When you create an OAuth 2 app in GitHub, you'll need the following information:
+When you create an OAuth 2 app in GitHub, you need the following information:
 
 - The URL of your GitLab instance, such as `https://gitlab.example.com`.
 - The authorization callback URL; in this case, `https://gitlab.example.com/users/auth`. Include the port number if your GitLab instance uses a non-default port.
@@ -16,13 +24,13 @@ To prevent an [OAuth2 covert redirect](https://oauth.net/advisories/2014-1-cover
 
 See [Initial OmniAuth Configuration](omniauth.md#initial-omniauth-configuration) for initial settings.
 
-Once you have configured the GitHub provider, you'll need the following information, which you'll need to substitute in the GitLab configuration file, in the steps shown next.
+After you have configured the GitHub provider, you need the following information, which you must substitute in the GitLab configuration file, in the steps shown next.
 
-| Setting from GitHub  |  Substitute in the GitLab configuration file | Description |
-|:---------------------|:-----------------------------------------------|:------------|
-| Client ID            | `YOUR_APP_ID`     |  OAuth 2 Client ID     |
-| Client Secret        | `YOUR_APP_SECRET` |  OAuth 2 Client Secret |
-| URL                  | `https://github.example.com/` |  GitHub Deployment URL |
+| Setting from GitHub  | Substitute in the GitLab configuration file  | Description |
+|:---------------------|:---------------------------------------------|:------------|
+| Client ID            | `YOUR_APP_ID`                                | OAuth 2 Client ID |
+| Client Secret        | `YOUR_APP_SECRET`                            | OAuth 2 Client Secret |
+| URL                  | `https://github.example.com/`                | GitHub Deployment URL |
 
 Follow these steps to incorporate the GitHub OAuth 2 app in your GitLab server:
 
@@ -71,17 +79,18 @@ Follow these steps to incorporate the GitHub OAuth 2 app in your GitLab server:
 
    ```yaml
    - { name: 'github', app_id: 'YOUR_APP_ID',
-     app_secret: 'YOUR_APP_SECRET',
-     args: { scope: 'user:email' } }
+       app_secret: 'YOUR_APP_SECRET',
+       args: { scope: 'user:email' } }
    ```
 
    For GitHub Enterprise:
 
    ```yaml
-   - { name: 'github', app_id: 'YOUR_APP_ID',
-     app_secret: 'YOUR_APP_SECRET',
-     url: "https://github.example.com/",
-     args: { scope: 'user:email' } }
+   - { name: 'github',
+       app_id: 'YOUR_APP_ID',
+       app_secret: 'YOUR_APP_SECRET',
+       url: "https://github.example.com/",
+       args: { scope: 'user:email' } }
    ```
 
    **Replace `https://github.example.com/` with your GitHub URL.**
@@ -92,12 +101,12 @@ Follow these steps to incorporate the GitHub OAuth 2 app in your GitLab server:
 
 1. Refresh the GitLab sign in page. You should now see a GitHub icon below the regular sign in form.
 
-1. Click the icon to begin the authentication process. GitHub will ask the user to sign in and authorize the GitLab application.
+1. Click the icon to begin the authentication process. GitHub asks the user to sign in and authorize the GitLab application.
 
 ## GitHub Enterprise with self-signed Certificate
 
 If you are attempting to import projects from GitHub Enterprise with a self-signed
-certificate and the imports are failing, you will need to disable SSL verification.
+certificate and the imports are failing, you must disable SSL verification.
 It should be disabled by adding `verify_ssl` to `false` in the provider configuration
 and changing the global Git `sslVerify` option to `false` in the GitLab server.
 
@@ -116,7 +125,7 @@ gitlab_rails['omniauth_providers'] = [
 ]
 ```
 
-You will also need to disable Git SSL verification on the server hosting GitLab.
+You must also disable Git SSL verification on the server hosting GitLab.
 
 ```ruby
 omnibus_gitconfig['system'] = { "http" => ["sslVerify = false"] }
@@ -125,14 +134,15 @@ omnibus_gitconfig['system'] = { "http" => ["sslVerify = false"] }
 For installation from source:
 
 ```yaml
-- { name: 'github', app_id: 'YOUR_APP_ID',
-  app_secret: 'YOUR_APP_SECRET',
-  url: "https://github.example.com/",
-  verify_ssl: false,
-  args: { scope: 'user:email' } }
+- { name: 'github',
+    app_id: 'YOUR_APP_ID',
+    app_secret: 'YOUR_APP_SECRET',
+    url: "https://github.example.com/",
+    verify_ssl: false,
+    args: { scope: 'user:email' } }
 ```
 
-You will also need to disable Git SSL verification on the server hosting GitLab.
+You must also disable Git SSL verification on the server hosting GitLab.
 
 ```shell
 git config --global http.sslVerify false
@@ -148,7 +158,7 @@ via Omnibus, or [restart GitLab](../administration/restart_gitlab.md#installatio
 Check the [`production.log`](../administration/logs.md#productionlog)
 on your GitLab server to obtain further details. If you are getting the error like
 `Faraday::ConnectionFailed (execution expired)` in the log, there may be a connectivity issue
-between your GitLab instance and GitHub Enterprise. To verify it, [start the rails console](../administration/troubleshooting/debug.md#starting-a-rails-console-session)
+between your GitLab instance and GitHub Enterprise. To verify it, [start the rails console](../administration/operations/rails_console.md#starting-a-rails-console-session)
 and run the commands below replacing `<github_url>` with the URL of your GitHub Enterprise instance:
 
 ```ruby

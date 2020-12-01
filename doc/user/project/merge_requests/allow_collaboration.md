@@ -1,7 +1,7 @@
 ---
 stage: Create
 group: Source Code
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference, howto
 ---
 
@@ -28,11 +28,12 @@ source project and only lasts while the merge request is open. Once enabled,
 upstream members will also be able to retry the pipelines and jobs of the
 merge request:
 
-1. Enable the contribution while creating or editing a merge request.
+1. While creating or editing a merge request, select the checkbox **Allow
+   commits from members who can merge to the target branch**.
 
    ![Enable contribution](img/allow_collaboration.png)
 
-1. Once the merge request is created, you'll see that commits from members who
+1. Once the merge request is created, you can see that commits from members who
    can merge to the target branch are allowed.
 
    ![Check that contribution is enabled](img/allow_collaboration_after_save.png)

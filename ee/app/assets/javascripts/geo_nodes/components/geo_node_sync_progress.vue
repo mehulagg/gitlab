@@ -2,13 +2,9 @@
 import { GlPopover, GlSprintf, GlLink } from '@gitlab/ui';
 import { toNumber } from 'lodash';
 import StackedProgressBar from '~/vue_shared/components/stacked_progress_bar.vue';
-import tooltip from '~/vue_shared/directives/tooltip';
 
 export default {
   name: 'GeoNodeSyncProgress',
-  directives: {
-    tooltip,
-  },
   components: {
     GlPopover,
     GlSprintf,

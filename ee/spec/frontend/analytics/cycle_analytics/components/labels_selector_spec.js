@@ -1,17 +1,18 @@
-import Vuex from 'vuex';
+import { GlDropdownSectionHeader } from '@gitlab/ui';
 import { mount, shallowMount, createLocalVue } from '@vue/test-utils';
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
-import waitForPromises from 'helpers/wait_for_promises';
+import Vuex from 'vuex';
+import LabelsSelector from 'ee/analytics/cycle_analytics/components/labels_selector.vue';
 import createStore from 'ee/analytics/cycle_analytics/store';
 import * as getters from 'ee/analytics/cycle_analytics/store/getters';
-import LabelsSelector from 'ee/analytics/cycle_analytics/components/labels_selector.vue';
+import waitForPromises from 'helpers/wait_for_promises';
 import { groupLabels } from '../mock_data';
 
 const selectedLabel = groupLabels[groupLabels.length - 1];
 const findActiveItem = wrapper =>
   wrapper
-    .findAll('gl-deprecated-dropdown-item-stub')
+    .findAll('gl-dropdown-item-stub')
     .filter(d => d.attributes('active'))
     .at(0);
 
@@ -70,10 +71,10 @@ describe('Value Stream Analytics LabelsSelector', () => {
     });
 
     it('will render with the default option selected', () => {
-      const activeItem = findActiveItem(wrapper);
+      const sectionHeader = wrapper.find(GlDropdownSectionHeader);
 
-      expect(activeItem.exists()).toBe(true);
-      expect(activeItem.text()).toEqual('Select a label');
+      expect(sectionHeader.exists()).toBe(true);
+      expect(sectionHeader.text()).toEqual('Select a label');
     });
 
     describe('with a failed request', () => {
@@ -102,23 +103,12 @@ describe('Value Stream Analytics LabelsSelector', () => {
       it('will emit the "selectLabel" event', () => {
         expect(wrapper.emitted('selectLabel')).toBeUndefined();
 
-        const elem = wrapper.findAll('.dropdown-item').at(2);
+        const elem = wrapper.findAll('.dropdown-item').at(1);
         elem.trigger('click');
 
         return wrapper.vm.$nextTick().then(() => {
           expect(wrapper.emitted('selectLabel').length > 0).toBe(true);
           expect(wrapper.emitted('selectLabel')[0]).toContain(groupLabels[1].id);
-        });
-      });
-
-      it('will emit the "clearLabel" event if it is the default item', () => {
-        expect(wrapper.emitted('clearLabel')).toBeUndefined();
-
-        const elem = wrapper.findAll('.dropdown-item').at(0);
-        elem.trigger('click');
-
-        return wrapper.vm.$nextTick().then(() => {
-          expect(wrapper.emitted('clearLabel').length > 0).toBe(true);
         });
       });
     });

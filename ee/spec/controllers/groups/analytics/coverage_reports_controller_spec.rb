@@ -3,15 +3,15 @@
 require 'spec_helper'
 
 RSpec.describe Groups::Analytics::CoverageReportsController do
-  let(:user)  { create(:user) }
-  let(:group) { create(:group) }
-  let(:project) { create(:project, namespace: group) }
-  let(:ref_path) { 'refs/heads/master' }
+  let_it_be(:user)  { create(:user) }
+  let_it_be(:group) { create(:group) }
+  let_it_be(:project) { create(:project, namespace: group) }
+  let_it_be(:ref_path) { 'refs/heads/master' }
 
-  let!(:first_coverage) { create_daily_coverage('rspec', project, 79.0, '2020-03-09') }
-  let!(:last_coverage)  { create_daily_coverage('karma', project, 95.0, '2020-03-10') }
+  let_it_be(:first_coverage) { create_daily_coverage('rspec', project, 79.0, '2020-03-09') }
+  let_it_be(:last_coverage) { create_daily_coverage('karma', project, 95.0, '2020-03-10') }
 
-  let(:valid_request_params) do
+  let_it_be(:valid_request_params) do
     {
       group_id: group.name,
       start_date: '2020-03-01',
@@ -21,11 +21,11 @@ RSpec.describe Groups::Analytics::CoverageReportsController do
     }
   end
 
-  context 'without permissions' do
-    before do
-      sign_in(user)
-    end
+  before do
+    sign_in(user)
+  end
 
+  context 'without permissions' do
     describe 'GET index' do
       it 'responds 403' do
         get :index, params: valid_request_params
@@ -38,7 +38,6 @@ RSpec.describe Groups::Analytics::CoverageReportsController do
   context 'with permissions' do
     before do
       group.add_owner(user)
-      sign_in(user)
     end
 
     context 'without a license' do
@@ -55,35 +54,20 @@ RSpec.describe Groups::Analytics::CoverageReportsController do
       end
     end
 
-    context 'with the feature flag shut off' do
-      before do
-        stub_licensed_features(group_coverage_reports: true)
-        stub_feature_flags(group_coverage_reports: false)
-      end
-
-      describe 'GET index' do
-        it 'responds 403 because the feature is not licensed' do
-          get :index, params: valid_request_params
-
-          expect(response).to have_gitlab_http_status(:forbidden)
-        end
-      end
-    end
-
     describe 'GET index' do
       before do
         stub_licensed_features(group_coverage_reports: true)
       end
 
-      it 'responds 200 with CSV coverage data' do
-        expect(Gitlab::Tracking).to receive(:event).with(
-          described_class.name,
-          'download_code_coverage_csv',
+      it 'responds 200 with CSV coverage data', :snowplow do
+        get :index, params: valid_request_params
+
+        expect_snowplow_event(
+          category: described_class.name,
+          action: 'download_code_coverage_csv',
           label: 'group_id',
           value: group.id
         )
-
-        get :index, params: valid_request_params
 
         expect(response).to have_gitlab_http_status(:ok)
         expect(csv_response).to eq([
@@ -108,6 +92,20 @@ RSpec.describe Groups::Analytics::CoverageReportsController do
 
           get :index, params: params
         end
+      end
+
+      it 'executes the same number of queries regardless of the number of records returned' do
+        control = ActiveRecord::QueryRecorder.new do
+          get :index, params: valid_request_params
+        end
+
+        expect(CSV.parse(response.body).length).to eq(3)
+
+        create_daily_coverage('rspec', project, 79.0, '2020-03-10')
+
+        expect { get :index, params: valid_request_params }.not_to exceed_query_limit(control)
+
+        expect(csv_response.length).to eq(4)
       end
 
       context 'with an invalid format' do

@@ -22,6 +22,8 @@ RSpec.describe API::Settings, 'Settings' do
       expect(json_response['default_ci_config_path']).to be_nil
       expect(json_response['sourcegraph_enabled']).to be_falsey
       expect(json_response['sourcegraph_url']).to be_nil
+      expect(json_response['secret_detection_token_revocation_url']).to be_nil
+      expect(json_response['secret_detection_revocation_token_types_url']).to be_nil
       expect(json_response['sourcegraph_public_only']).to be_truthy
       expect(json_response['default_project_visibility']).to be_a String
       expect(json_response['default_snippet_visibility']).to be_a String
@@ -39,6 +41,8 @@ RSpec.describe API::Settings, 'Settings' do
       expect(json_response['snippet_size_limit']).to eq(50.megabytes)
       expect(json_response['spam_check_endpoint_enabled']).to be_falsey
       expect(json_response['spam_check_endpoint_url']).to be_nil
+      expect(json_response['wiki_page_max_content_bytes']).to be_a(Integer)
+      expect(json_response['require_admin_approval_after_user_signup']).to eq(true)
     end
   end
 
@@ -95,6 +99,7 @@ RSpec.describe API::Settings, 'Settings' do
             help_page_text: 'custom help text',
             help_page_hide_commercial_content: true,
             help_page_support_url: 'http://example.com/help',
+            help_page_documentation_base_url: 'https://docs.gitlab.com',
             project_export_enabled: false,
             rsa_key_restriction: ApplicationSetting::FORBIDDEN_KEY_VALUE,
             dsa_key_restriction: 2048,
@@ -103,7 +108,7 @@ RSpec.describe API::Settings, 'Settings' do
             enforce_terms: true,
             terms: 'Hello world!',
             performance_bar_allowed_group_path: group.full_path,
-            diff_max_patch_bytes: 150_000,
+            diff_max_patch_bytes: 300_000,
             default_branch_protection: ::Gitlab::Access::PROTECTION_DEV_CAN_MERGE,
             local_markdown_version: 3,
             allow_local_requests_from_web_hooks_and_services: true,
@@ -116,7 +121,8 @@ RSpec.describe API::Settings, 'Settings' do
             spam_check_endpoint_enabled: true,
             spam_check_endpoint_url: 'https://example.com/spam_check',
             disabled_oauth_sign_in_sources: 'unknown',
-            import_sources: 'github,bitbucket'
+            import_sources: 'github,bitbucket',
+            wiki_page_max_content_bytes: 12345
           }
 
         expect(response).to have_gitlab_http_status(:ok)
@@ -136,6 +142,7 @@ RSpec.describe API::Settings, 'Settings' do
         expect(json_response['help_page_text']).to eq('custom help text')
         expect(json_response['help_page_hide_commercial_content']).to be_truthy
         expect(json_response['help_page_support_url']).to eq('http://example.com/help')
+        expect(json_response['help_page_documentation_base_url']).to eq('https://docs.gitlab.com')
         expect(json_response['project_export_enabled']).to be_falsey
         expect(json_response['rsa_key_restriction']).to eq(ApplicationSetting::FORBIDDEN_KEY_VALUE)
         expect(json_response['dsa_key_restriction']).to eq(2048)
@@ -144,7 +151,7 @@ RSpec.describe API::Settings, 'Settings' do
         expect(json_response['enforce_terms']).to be(true)
         expect(json_response['terms']).to eq('Hello world!')
         expect(json_response['performance_bar_allowed_group_id']).to eq(group.id)
-        expect(json_response['diff_max_patch_bytes']).to eq(150_000)
+        expect(json_response['diff_max_patch_bytes']).to eq(300_000)
         expect(json_response['default_branch_protection']).to eq(Gitlab::Access::PROTECTION_DEV_CAN_MERGE)
         expect(json_response['local_markdown_version']).to eq(3)
         expect(json_response['allow_local_requests_from_web_hooks_and_services']).to eq(true)
@@ -158,6 +165,7 @@ RSpec.describe API::Settings, 'Settings' do
         expect(json_response['spam_check_endpoint_url']).to eq('https://example.com/spam_check')
         expect(json_response['disabled_oauth_sign_in_sources']).to eq([])
         expect(json_response['import_sources']).to match_array(%w(github bitbucket))
+        expect(json_response['wiki_page_max_content_bytes']).to eq(12345)
       end
     end
 
@@ -372,42 +380,58 @@ RSpec.describe API::Settings, 'Settings' do
       end
     end
 
-    context 'domain_blacklist settings' do
-      it 'rejects domain_blacklist_enabled when domain_blacklist is empty' do
+    context 'domain_denylist settings' do
+      it 'rejects domain_denylist_enabled when domain_denylist is empty' do
         put api('/application/settings', admin),
           params: {
-            domain_blacklist_enabled: true,
-            domain_blacklist: []
+            domain_denylist_enabled: true,
+            domain_denylist: []
           }
 
         expect(response).to have_gitlab_http_status(:bad_request)
         message = json_response["message"]
-        expect(message["domain_blacklist"]).to eq(["Domain blacklist cannot be empty if Blacklist is enabled."])
+        expect(message["domain_denylist"]).to eq(["Domain denylist cannot be empty if denylist is enabled."])
       end
 
-      it 'allows array for domain_blacklist' do
+      it 'allows array for domain_denylist' do
         put api('/application/settings', admin),
           params: {
-            domain_blacklist_enabled: true,
-            domain_blacklist: ['domain1.com', 'domain2.com']
+            domain_denylist_enabled: true,
+            domain_denylist: ['domain1.com', 'domain2.com']
           }
 
         expect(response).to have_gitlab_http_status(:ok)
-        expect(json_response['domain_blacklist_enabled']).to be(true)
-        expect(json_response['domain_blacklist']).to eq(['domain1.com', 'domain2.com'])
+        expect(json_response['domain_denylist_enabled']).to be(true)
+        expect(json_response['domain_denylist']).to eq(['domain1.com', 'domain2.com'])
       end
 
-      it 'allows a string for domain_blacklist' do
+      it 'allows a string for domain_denylist' do
         put api('/application/settings', admin),
           params: {
-            domain_blacklist_enabled: true,
-            domain_blacklist: 'domain3.com, *.domain4.com'
+            domain_denylist_enabled: true,
+            domain_denylist: 'domain3.com, *.domain4.com'
           }
 
         expect(response).to have_gitlab_http_status(:ok)
-        expect(json_response['domain_blacklist_enabled']).to be(true)
-        expect(json_response['domain_blacklist']).to eq(['domain3.com', '*.domain4.com'])
+        expect(json_response['domain_denylist_enabled']).to be(true)
+        expect(json_response['domain_denylist']).to eq(['domain3.com', '*.domain4.com'])
       end
+    end
+
+    it 'supports legacy admin_notification_email' do
+      put api('/application/settings', admin),
+          params: { admin_notification_email: 'test@example.com' }
+
+      expect(response).to have_gitlab_http_status(:ok)
+      expect(json_response['abuse_notification_email']).to eq('test@example.com')
+    end
+
+    it 'supports setting require_admin_approval_after_user_signup' do
+      put api('/application/settings', admin),
+          params: { require_admin_approval_after_user_signup: true }
+
+      expect(response).to have_gitlab_http_status(:ok)
+      expect(json_response['require_admin_approval_after_user_signup']).to eq(true)
     end
 
     context "missing sourcegraph_url value when sourcegraph_enabled is true" do

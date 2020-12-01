@@ -1,7 +1,7 @@
 ---
 stage: Configure
 group: Configure
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Runbooks
@@ -37,7 +37,7 @@ for an overview of how this is accomplished in GitLab!
 
 ## Requirements
 
-To create an executable runbook, you will need:
+To create an executable runbook, you need:
 
 - **Kubernetes** - A Kubernetes cluster is required to deploy the rest of the
   applications. The simplest way to get started is to add a cluster using one
@@ -71,7 +71,7 @@ the components outlined above and the pre-loaded demo runbook.
    ![install ingress](img/ingress-install.png)
 
 1. After Ingress has been installed successfully, click the **Install** button next
-   to the **JupyterHub** application. You will need the **Jupyter Hostname** provided
+   to the **JupyterHub** application. You need the **Jupyter Hostname** provided
    here in the next step.
 
    ![install JupyterHub](img/jupyterhub-install.png)
@@ -84,8 +84,8 @@ the components outlined above and the pre-loaded demo runbook.
 
    ![authorize Jupyter](img/authorize-jupyter.png)
 
-1. Click **Authorize**, and you will be redirected to the JupyterHub application.
-1. Click **Start My Server**, and the server will start in a few seconds.
+1. Click **Authorize**, and GitLab redirects you to the JupyterHub application.
+1. Click **Start My Server** to start the server in a few seconds.
 1. To configure the runbook's access to your GitLab project, you must enter your
    [GitLab Access Token](../../../profile/personal_access_tokens.md)
    and your Project ID in the **Setup** section of the demo runbook:
@@ -115,9 +115,7 @@ the components outlined above and the pre-loaded demo runbook.
       VARIABLE_VALUE = project.variables.get('PRIVATE_TOKEN').value
       ```
 
-1. To configure the operation of a runbook, create and configure variables:
-
-   NOTE: **Note:**
+1. To configure the operation of a runbook, create and configure variables.
    For this example, we are using the **Run SQL queries in Notebook** section in the
    sample runbook to query a PostgreSQL database. The first four lines of the following
    code block define the variables that are required for this query to function:

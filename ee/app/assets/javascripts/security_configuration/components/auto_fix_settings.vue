@@ -1,6 +1,6 @@
 <script>
-import * as Sentry from '@sentry/browser';
 import { GlIcon, GlLink, GlCard, GlFormCheckbox, GlSprintf } from '@gitlab/ui';
+import * as Sentry from '~/sentry/wrapper';
 import axios from '~/lib/utils/axios_utils';
 import { __ } from '~/locale';
 import { deprecatedCreateFlash as createFlash } from '~/flash';

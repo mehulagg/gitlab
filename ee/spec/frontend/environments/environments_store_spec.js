@@ -60,26 +60,6 @@ describe('Store', () => {
 
       expect(store.state.environments[0].deployBoardData).toEqual(deployBoardMockData);
     });
-
-    it('should set hasLegacyAppLabel property', () => {
-      expect(store.state.environments[0].deployBoardData).toEqual(deployBoardMockData);
-
-      const environment = {
-        name: 'foo',
-        size: 1,
-        latest: {
-          id: 1,
-        },
-        rollout_status: {
-          ...deployBoardMockData,
-          status: 'not_found',
-          has_legacy_app_label: true,
-        },
-      };
-      store.storeEnvironments([environment]);
-
-      expect(store.state.environments[0].hasLegacyAppLabel).toBe(true);
-    });
   });
 
   describe('canaryCallout', () => {

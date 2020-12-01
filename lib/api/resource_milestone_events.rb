@@ -1,13 +1,16 @@
 # frozen_string_literal: true
 
 module API
-  class ResourceMilestoneEvents < Grape::API::Instance
+  class ResourceMilestoneEvents < ::API::Base
     include PaginationParams
     helpers ::API::Helpers::NotesHelpers
 
     before { authenticate! }
 
-    [Issue, MergeRequest].each do |eventable_type|
+    {
+      Issue => :issue_tracking,
+      MergeRequest => :code_review
+    }.each do |eventable_type, feature_category|
       parent_type = eventable_type.parent_class.to_s.underscore
       eventables_str = eventable_type.to_s.underscore.pluralize
 
@@ -23,7 +26,7 @@ module API
           use :pagination
         end
 
-        get ":id/#{eventables_str}/:eventable_id/resource_milestone_events" do
+        get ":id/#{eventables_str}/:eventable_id/resource_milestone_events", feature_category: feature_category do
           eventable = find_noteable(eventable_type, params[:eventable_id])
 
           events = ResourceMilestoneEventFinder.new(current_user, eventable).execute
@@ -38,7 +41,7 @@ module API
           requires :event_id, type: String, desc: 'The ID of a resource milestone event'
           requires :eventable_id, types: [Integer, String], desc: 'The ID of the eventable'
         end
-        get ":id/#{eventables_str}/:eventable_id/resource_milestone_events/:event_id" do
+        get ":id/#{eventables_str}/:eventable_id/resource_milestone_events/:event_id", feature_category: feature_category do
           eventable = find_noteable(eventable_type, params[:eventable_id])
 
           event = eventable.resource_milestone_events.find(params[:event_id])

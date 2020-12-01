@@ -10,6 +10,8 @@ module EE
       expose :milestone, using: BoardMilestoneEntity
       expose :assignee, using: BoardAssigneeEntity
       expose :labels, using: BoardLabelEntity
+      expose :hide_backlog_list
+      expose :hide_closed_list
     end
   end
 end

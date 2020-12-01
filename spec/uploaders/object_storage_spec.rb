@@ -210,6 +210,27 @@ RSpec.describe ObjectStorage do
         end
       end
 
+      describe '#use_open_file' do
+        context 'when file is stored locally' do
+          it "returns the file" do
+            expect { |b| uploader.use_open_file(&b) }.to yield_with_args(an_instance_of(ObjectStorage::Concern::OpenFile))
+          end
+        end
+
+        context 'when file is stored remotely' do
+          let(:store) { described_class::Store::REMOTE }
+
+          before do
+            stub_artifacts_object_storage
+            stub_request(:get, %r{s3.amazonaws.com/#{uploader.path}}).to_return(status: 200, body: '')
+          end
+
+          it "returns the file" do
+            expect { |b| uploader.use_open_file(&b) }.to yield_with_args(an_instance_of(ObjectStorage::Concern::OpenFile))
+          end
+        end
+      end
+
       describe '#migrate!' do
         subject { uploader.migrate!(new_store) }
 
@@ -494,7 +515,7 @@ RSpec.describe ObjectStorage do
         end
 
         context 'uses AWS' do
-          let(:storage_url) { "https://uploads.s3-eu-central-1.amazonaws.com/" }
+          let(:storage_url) { "https://uploads.s3.eu-central-1.amazonaws.com/" }
           let(:credentials) do
             {
               provider: "AWS",
@@ -774,7 +795,7 @@ RSpec.describe ObjectStorage do
           end
 
           let!(:fog_file) do
-            fog_connection.directories.new(key: 'uploads').files.create(
+            fog_connection.directories.new(key: 'uploads').files.create( # rubocop:disable Rails/SaveBang
               key: 'tmp/uploads/test/123123',
               body: 'content'
             )
@@ -842,6 +863,21 @@ RSpec.describe ObjectStorage do
           expect(avatars.map(&:upload).uniq).to eq(avatars.map(&:upload))
         end
       end
+    end
+  end
+
+  describe 'OpenFile' do
+    subject { ObjectStorage::Concern::OpenFile.new(file) }
+
+    let(:file) { double(read: true, size: true, path: true) }
+
+    it 'delegates read and size methods' do
+      expect(subject.read).to eq(true)
+      expect(subject.size).to eq(true)
+    end
+
+    it 'does not delegate path method' do
+      expect { subject.path }.to raise_error(NoMethodError)
     end
   end
 end

@@ -45,43 +45,19 @@ RSpec.describe Gitlab::Ci::Config::Entry::Product::Variables do
       end
     end
 
-    context 'when entry value is not correct' do
-      shared_examples 'invalid variables' do |message|
-        describe '#errors' do
-          it 'saves errors' do
-            expect(entry.errors).to include(message)
-          end
-        end
+    context 'with only one variable' do
+      let(:config) { { VAR: 'test' } }
 
-        describe '#valid?' do
-          it 'is not valid' do
-            expect(entry).not_to be_valid
-          end
+      describe '#valid?' do
+        it 'is valid' do
+          expect(entry).to be_valid
         end
       end
 
-      context 'with array' do
-        let(:config) { [:VAR, 'test'] }
-
-        it_behaves_like 'invalid variables', /should be a hash of key value pairs/
-      end
-
-      context 'with empty array' do
-        let(:config) { { VAR: 'test', VAR2: [] } }
-
-        it_behaves_like 'invalid variables', /should be a hash of key value pairs/
-      end
-
-      context 'with nested array' do
-        let(:config) { { VAR: 'test', VAR2: [1, [2]] } }
-
-        it_behaves_like 'invalid variables', /should be a hash of key value pairs/
-      end
-
-      context 'with only one variable' do
-        let(:config) { { VAR: 'test' } }
-
-        it_behaves_like 'invalid variables', /variables config requires at least 2 items/
+      describe '#errors' do
+        it 'does not append errors' do
+          expect(entry.errors).to be_empty
+        end
       end
     end
   end

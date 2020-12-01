@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 module API
-  class GroupPushRule < Grape::API::Instance
+  class GroupPushRule < ::API::Base
+    feature_category :source_code_management
+
     before { authenticate! }
     before { check_group_push_rule_access! }
     before { authorize_change_param(user_group, :commit_committer_check, :reject_unsigned_commits) }

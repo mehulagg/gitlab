@@ -5,7 +5,7 @@ module EE
     module Ci
       module Pipeline
         module Quota
-          class Size < Ci::Limit
+          class Size < ::Gitlab::Ci::Limit
             include ::Gitlab::Utils::StrongMemoize
             include ActionView::Helpers::TextHelper
 
@@ -45,7 +45,7 @@ module EE
             end
 
             def seeds_size
-              @command.stage_seeds.sum(&:size) # rubocop: disable CodeReuse/ActiveRecord
+              @command.stage_seeds.sum(&:size)
             end
           end
         end

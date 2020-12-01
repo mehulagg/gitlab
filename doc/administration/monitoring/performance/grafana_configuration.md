@@ -1,7 +1,7 @@
 ---
 stage: Monitor
-group: APM
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+group: Health
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Grafana Configuration
@@ -17,7 +17,6 @@ or Grafana supplies package repositories (Yum/Apt) for easy installation.
 See [Grafana installation documentation](https://grafana.com/docs/grafana/latest/installation/)
 for detailed steps.
 
-NOTE: **Note:**
 Before starting Grafana for the first time, set the admin user
 and password in `/etc/grafana/grafana.ini`. If you don't, the default password
 is `admin`.
@@ -50,7 +49,6 @@ JSON file individually:
 1. After the dashboard is imported, click the **Save dashboard** icon in the top bar:
    ![Grafana save icon](img/grafana_save_icon.png)
 
-   NOTE: **Note:**
    If you don't save the dashboard after importing it, the dashboard is removed
    when you navigate away from the page.
 
@@ -115,7 +113,7 @@ If you require access to your old Grafana data but don't meet one of these crite
 1. [Exporting the dashboards](https://grafana.com/docs/grafana/latest/reference/export_import/#exporting-a-dashboard) you need.
 1. Refreshing the data and [re-importing your dashboards](https://grafana.com/docs/grafana/latest/reference/export_import/#importing-a-dashboard).
 
-DANGER: **Danger:**
+DANGER: **Warning:**
 These actions pose a temporary vulnerability while your old Grafana data is in use.
 Deciding to take any of these actions should be weighed carefully with your need to access
 existing data and dashboards.

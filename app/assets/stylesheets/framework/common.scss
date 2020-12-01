@@ -135,7 +135,6 @@ hr {
   text-overflow: ellipsis;
   white-space: nowrap;
 
-  > div:not(.block):not(.select2-display-none),
   .str-truncated {
     display: inline;
   }
@@ -324,15 +323,8 @@ img.emoji {
 }
 
 .project-item-select-holder {
-  display: inline-block;
-  position: relative;
-
   .project-item-select {
-    position: absolute;
-    top: 0;
-    right: 0;
     min-width: 250px;
-    visibility: hidden;
   }
 }
 
@@ -396,11 +388,7 @@ img.emoji {
   🚨 Do not use these classes — they are deprecated and being removed. 🚨
   See https://gitlab.com/gitlab-org/gitlab/-/issues/217418 for more details.
 **/
-.prepend-top-15 { margin-top: 15px; }
 .prepend-top-20 { margin-top: 20px; }
-.prepend-left-15 { margin-left: 15px; }
-.prepend-left-20 { margin-left: 20px; }
-.append-right-20 { margin-right: 20px; }
 .append-bottom-20 { margin-bottom: 20px; }
 .ml-10 { margin-left: 4.5rem; }
 .inline { display: inline-block; }
@@ -428,11 +416,9 @@ img.emoji {
 /** COMMON SIZING CLASSES **/
 .w-0 { width: 0; }
 .w-8em { width: 8em; }
-.w-3rem { width: 3rem; }
 .w-15p { width: 15%; }
 .w-30p { width: 30%; }
 .w-60p { width: 60%; }
-.w-70p { width: 70%; }
 
 .h-12em { height: 12em; }
 .h-32-px { height: 32px;}

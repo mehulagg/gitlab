@@ -25,11 +25,11 @@ export default class FilteredSearchCodeReviewAnalytics extends FilteredSearchMan
    */
   updateObject = path => {
     const filters = urlParamsToObject(path);
-    const { selectedLabels, selectedMilestone } = transformFilters(filters);
+    const { selectedLabels: selectedLabelList, selectedMilestone } = transformFilters(filters);
 
     store.dispatch('filters/setFilters', {
-      labelNames: selectedLabels,
-      milestoneTitle: selectedMilestone,
+      selectedLabelList,
+      selectedMilestone,
     });
   };
 }

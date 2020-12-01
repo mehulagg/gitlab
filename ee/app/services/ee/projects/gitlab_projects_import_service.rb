@@ -10,8 +10,8 @@ module EE
       def execute
         super.tap do |project|
           if project.saved? && custom_template
-            custom_template.add_export_job(current_user: current_user,
-                                           after_export_strategy: export_strategy(project))
+            custom_template.add_template_export_job(current_user: current_user,
+                                                    after_export_strategy: export_strategy(project))
           end
         end
       end

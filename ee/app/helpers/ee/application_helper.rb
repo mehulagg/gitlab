@@ -74,16 +74,11 @@ module EE
       ::Gitlab.config.smartcard.client_certificate_required_port
     end
 
-    def page_class
-      class_names = super
-      class_names += system_message_class
-
-      class_names
-    end
-
     override :autocomplete_data_sources
     def autocomplete_data_sources(object, noteable_type)
       return {} unless object && noteable_type
+
+      enabled_for_vulnerabilities = object.feature_available?(:security_dashboard) && ::Feature.enabled?(:vulnerability_special_references, object)
 
       if object.is_a?(Group)
         {
@@ -92,18 +87,16 @@ module EE
           issues: issues_group_autocomplete_sources_path(object),
           mergeRequests: merge_requests_group_autocomplete_sources_path(object),
           epics: epics_group_autocomplete_sources_path(object),
+          vulnerabilities: enabled_for_vulnerabilities ? vulnerabilities_group_autocomplete_sources_path(object) : nil,
           commands: commands_group_autocomplete_sources_path(object, type: noteable_type, type_id: params[:id]),
           milestones: milestones_group_autocomplete_sources_path(object)
-        }
-      elsif object.group&.feature_available?(:epics)
-        { epics: epics_project_autocomplete_sources_path(object) }.merge(super)
+        }.compact
       else
-        super
+        {
+          epics: object.group&.feature_available?(:epics) ? epics_project_autocomplete_sources_path(object) : nil,
+          vulnerabilities: enabled_for_vulnerabilities ? vulnerabilities_project_autocomplete_sources_path(object) : nil
+        }.compact.merge(super)
       end
-    end
-
-    def instance_review_permitted?
-      ::Gitlab::CurrentSettings.instance_review_permitted? && current_user&.admin?
     end
 
     override :show_last_push_widget?

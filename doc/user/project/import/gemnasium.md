@@ -2,7 +2,7 @@
 type: reference, howto
 stage: Manage
 group: Import
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Gemnasium **(ULTIMATE)**
@@ -83,7 +83,7 @@ back to both GitLab and GitHub when completed.
 
    ![click on connected project](img/gemnasium/project_connected.png)
 
-   Your project is now mirrored on GitLab, where the Runners will be able to access
+   Your project is now mirrored on GitLab, where the runners will be able to access
    your source code and run your tests.
 
    Optional step: If you set this up on GitLab.com, make sure the project is
@@ -96,7 +96,7 @@ back to both GitLab and GitHub when completed.
    The mirroring is pull-only by default, so you may create or update the file on
    GitHub:
 
-   ![Edit gitlab-ci.yml file](img/gemnasium/edit_gitlab-ci.png)
+   ![Edit YAML file](img/gemnasium/edit_gitlab-ci.png)
 
 1. Once your file has been committed, a new pipeline will be automatically
    triggered if your file is valid:

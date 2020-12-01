@@ -17,7 +17,6 @@ RSpec.describe 'admin/dashboard/index.html.haml' do
 
     allow(view).to receive(:admin?).and_return(true)
     allow(view).to receive(:current_application_settings).and_return(Gitlab::CurrentSettings.current_application_settings)
-    allow(view).to receive(:show_license_breakdown?).and_return(false)
   end
 
   it "shows version of GitLab Workhorse" do
@@ -37,7 +36,7 @@ RSpec.describe 'admin/dashboard/index.html.haml' do
     render
 
     expect(rendered).not_to have_content "Users in License"
-    expect(rendered).not_to have_content "Active Users"
+    expect(rendered).not_to have_content "Billable Users"
     expect(rendered).not_to have_content "Maximum Users"
     expect(rendered).not_to have_content "Users over License"
   end

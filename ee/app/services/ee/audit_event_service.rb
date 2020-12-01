@@ -158,8 +158,8 @@ module EE
     #   all of these incorrect usages are removed.
     #
     # @return [AuditEventService]
-    def for_user(full_path = @entity.full_path)
-      for_custom_model('user', full_path)
+    def for_user(full_path: @entity.full_path, entity_id: @entity.id)
+      for_custom_model(model: 'user', target_details: full_path, target_id: entity_id)
     end
 
     # Builds the @details attribute for project
@@ -168,7 +168,7 @@ module EE
     #
     # @return [AuditEventService]
     def for_project
-      for_custom_model('project', @entity.full_path)
+      for_custom_model(model: 'project', target_details: @entity.full_path, target_id: @entity.id)
     end
 
     # Builds the @details attribute for project variable
@@ -177,7 +177,7 @@ module EE
     #
     # @return [AuditEventService]
     def for_project_variable(project_variable_key)
-      for_custom_model('ci_variable', project_variable_key)
+      for_custom_model(model: 'ci_variable', target_details: project_variable_key, target_id: project_variable_key)
     end
 
     # Builds the @details attribute for group
@@ -186,7 +186,7 @@ module EE
     #
     # @return [AuditEventService]
     def for_group
-      for_custom_model('group', @entity.full_path)
+      for_custom_model(model: 'group', target_details: @entity.full_path, target_id: @entity.id)
     end
 
     # Builds the @details attribute for group variable
@@ -195,7 +195,7 @@ module EE
     #
     # @return [AuditEventService]
     def for_group_variable(group_variable_key)
-      for_custom_model('ci_group_variable', group_variable_key)
+      for_custom_model(model: 'ci_group_variable', target_details: group_variable_key, target_id: group_variable_key)
     end
 
     def enabled?
@@ -220,7 +220,7 @@ module EE
     def method_missing(method_sym, *arguments, &block)
       super(method_sym, *arguments, &block) unless respond_to?(method_sym)
 
-      for_custom_model(method_sym.to_s.split('for_').last, *arguments)
+      for_custom_model(model: method_sym.to_s.split('for_').last, target_details: arguments[0], target_id: arguments[1])
     end
 
     def respond_to?(method, include_private = false)
@@ -236,7 +236,7 @@ module EE
       end
     end
 
-    def for_custom_model(model, key_title)
+    def for_custom_model(model:, target_details:, target_id:)
       action = @details[:action]
       model_class = model.camelize
       custom_message = @details[:custom_message]
@@ -247,25 +247,25 @@ module EE
           {
             remove: model,
             author_name: @author.name,
-            target_id: key_title,
+            target_id: target_id,
             target_type: model_class,
-            target_details: key_title
+            target_details: target_details
           }
         when :create
           {
             add: model,
             author_name: @author.name,
-            target_id: key_title,
+            target_id: target_id,
             target_type: model_class,
-            target_details: key_title
+            target_details: target_details
           }
         when :custom
           {
             custom_message: custom_message,
             author_name: @author&.name,
-            target_id: key_title,
+            target_id: target_id,
             target_type: model_class,
-            target_details: key_title
+            target_details: target_details
           }
         end
 

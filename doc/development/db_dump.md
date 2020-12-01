@@ -1,3 +1,9 @@
+---
+stage: Enablement
+group: Database
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Importing a database dump into a staging environment
 
 Sometimes it is useful to import the database from a production environment

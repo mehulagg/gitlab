@@ -13,9 +13,9 @@ import {
   sortableEnd,
 } from '../mixins/sortable_default_options';
 
-if (gon.features && gon.features.multiSelectBoard) {
-  Sortable.mount(new MultiDrag());
-}
+// This component is being replaced in favor of './board_list_new.vue' for GraphQL boards
+
+Sortable.mount(new MultiDrag());
 
 export default {
   name: 'BoardList',
@@ -25,11 +25,6 @@ export default {
     GlLoadingIcon,
   },
   props: {
-    groupId: {
-      type: Number,
-      required: false,
-      default: 0,
-    },
     disabled: {
       type: Boolean,
       required: true,
@@ -40,18 +35,6 @@ export default {
     },
     issues: {
       type: Array,
-      required: true,
-    },
-    loading: {
-      type: Boolean,
-      required: true,
-    },
-    issueLinkBase: {
-      type: String,
-      required: true,
-    },
-    rootPath: {
-      type: String,
       required: true,
     },
   },
@@ -72,6 +55,9 @@ export default {
     },
     issuesSizeExceedsMax() {
       return this.list.maxIssueCount > 0 && this.list.issuesSize > this.list.maxIssueCount;
+    },
+    loading() {
+      return this.list.loading;
     },
   },
   watch: {
@@ -108,12 +94,13 @@ export default {
     eventHub.$on(`scroll-board-list-${this.list.id}`, this.scrollToTop);
   },
   mounted() {
-    const multiSelectOpts = {};
-    if (gon.features && gon.features.multiSelectBoard) {
-      multiSelectOpts.multiDrag = true;
-      multiSelectOpts.selectedClass = 'js-multi-select';
-      multiSelectOpts.animation = 500;
-    }
+    // TODO: Use Draggable in ./board_list_new.vue to drag & drop issue
+    // https://gitlab.com/gitlab-org/gitlab/-/issues/218164
+    const multiSelectOpts = {
+      multiDrag: true,
+      selectedClass: 'js-multi-select',
+      animation: 500,
+    };
 
     const options = getBoardSortableDefaultOptions({
       scroll: true,
@@ -430,11 +417,7 @@ export default {
     <div v-if="loading" class="board-list-loading text-center" :aria-label="__('Loading issues')">
       <gl-loading-icon />
     </div>
-    <board-new-issue
-      v-if="list.type !== 'closed' && showIssueForm"
-      :group-id="groupId"
-      :list="list"
-    />
+    <board-new-issue v-if="list.type !== 'closed' && showIssueForm" :list="list" />
     <ul
       v-show="!loading"
       ref="list"
@@ -450,9 +433,6 @@ export default {
         :index="index"
         :list="list"
         :issue="issue"
-        :issue-link-base="issueLinkBase"
-        :group-id="groupId"
-        :root-path="rootPath"
         :disabled="disabled"
       />
       <li v-if="showCount" class="board-list-count text-center" data-issue-id="-1">

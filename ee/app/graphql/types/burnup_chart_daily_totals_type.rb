@@ -4,7 +4,7 @@ module Types
   # rubocop: disable Graphql/AuthorizeTypes
   class BurnupChartDailyTotalsType < BaseObject
     graphql_name 'BurnupChartDailyTotals'
-    description 'Represents the total number of issues and their weights for a particular day.'
+    description 'Represents the total number of issues and their weights for a particular day'
 
     field :date, GraphQL::Types::ISO8601Date, null: false,
           description: 'Date for burnup totals'

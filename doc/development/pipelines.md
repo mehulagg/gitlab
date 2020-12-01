@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Pipelines for the GitLab project
 
 Pipelines for <https://gitlab.com/gitlab-org/gitlab> and <https://gitlab.com/gitlab-org/gitlab-foss> (as well as the
@@ -122,7 +128,6 @@ graph RL;
   click 2_2-5 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=8404303&udv=0"
   subgraph "Needs `setup-test-env` & `compile-test-assets`";
     2_2-2 & 2_2-4 & 2_2-5 --> 1-6 & 1-3;
-    2_2-3 --> 1-6 & 1-4;
   end
 
   2_3-1["build-assets-image (2.5 minutes)"];
@@ -228,7 +233,6 @@ graph RL;
   click 2_2-5 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=8404303&udv=0"
   subgraph "Needs `setup-test-env` & `compile-test-assets`";
     2_2-2 & 2_2-4 & 2_2-5 --> 1-6 & 1-3;
-    2_2-3 --> 1-6 & 1-4;
   end
 
   2_3-1["build-assets-image (2.5 minutes)"];
@@ -357,6 +361,65 @@ graph RL;
   end
 ```
 
+### Fail-fast pipeline in Merge Requests
+
+To provide faster feedback when a Merge Request breaks existing tests, we are experimenting with a
+fail-fast mechanism.
+
+An `rspec fail-fast` job is added in parallel to all other `rspec` jobs in a Merge
+Request pipeline. This job runs the tests that are directly related to the changes
+in the Merge Request.
+
+If any of these tests fail, the `rspec fail-fast` job fails, triggering a
+`fail-pipeline-early` job to run. The `fail-pipeline-early` job:
+
+- Cancels the currently running pipeline and all in-progress jobs.
+- Sets pipeline to have status `failed`.
+
+For example:
+
+```mermaid
+graph LR
+    subgraph "prepare stage";
+        A["detect-tests"]
+    end
+
+    subgraph "test stage";
+        B["jest"];
+        C["rspec migration"];
+        D["rspec unit"];
+        E["rspec integration"];
+        F["rspec system"];
+        G["rspec fail-fast"];
+    end
+
+    subgraph "post-test stage";
+        Z["fail-pipeline-early"];
+    end
+
+    A --"artifact: list of test files"--> G
+    G --"on failure"--> Z
+```
+
+A Merge Request author may choose to opt-out of the fail fast mechanism by doing one of the following:
+
+- Including `[SKIP RSPEC FAIL-FAST]` in the Merge Request title.
+- Starting the `dont-interrupt-me` job found in the `sync` stage of a Merge Request pipeline.
+
+The `rspec fail-fast` is a no-op if there are more than 10 test files related to the
+Merge Request. This prevents `rspec fail-fast` duration from exceeding the average
+`rspec` job duration and defeating its purpose.
+
+This number can be overridden by setting a CI variable named `RSPEC_FAIL_FAST_TEST_FILE_COUNT_THRESHOLD`.
+
+NOTE: **Note:**
+This experiment is only enabled when the CI variable `RSPEC_FAIL_FAST_ENABLED=true` is set.
+
+#### Determining related test files in a Merge Request
+
+The test files related to the Merge Request are determined using the [`test_file_finder`](https://gitlab.com/gitlab-org/ci-cd/test_file_finder) gem.
+We are using a custom mapping between source file to test files, maintained in the `tests.yml` file.
+
 ### PostgreSQL versions testing
 
 #### Current versions testing
@@ -372,7 +435,7 @@ graph RL;
 
 We follow the [PostgreSQL versions shipped with Omnibus GitLab](https://docs.gitlab.com/omnibus/package-information/postgresql_versions.html):
 
-| PostgreSQL version | 13.0 (May 2020) | 13.1 (June 2020) | 13.2 (July 2020) | 13.3 (August 2020) | 13.4, 13.5   | 13.6 (November 2020) | 14.0 (May 2021?) |
+| PostgreSQL version | 13.0 (May 2020) | 13.1 (June 2020) | 13.2 (July 2020) | 13.3 (August 2020) | 13.4, 13.5   | [13.7 (December 2020)](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5722) | 14.0 (May 2021?) |
 | ------ | --------------- | ---------------- | ---------------- | ------------------ | ------------ | -------------------- | ---------------- |
 | PG11   | MRs/`master`/`2-hour`/`nightly` | MRs/`master`/`2-hour`/`nightly` | MRs/`master`/`2-hour`/`nightly` | MRs/`master`/`2-hour`/`nightly` | MRs/`master`/`2-hour`/`nightly` | `nightly` | - |
 | PG12   | - | - | `nightly` | `2-hour`/`nightly` | `2-hour`/`nightly` | MRs/`2-hour`/`nightly` | `2-hour`/`nightly`     |
@@ -401,8 +464,8 @@ of the `gitlab-org/gitlab-foss` project. These jobs are only created in the foll
 - Merge requests which include `RUN AS-IF-FOSS` in their title.
 - Merge requests that changes the CI configuration.
 
-The `* as-if-foss` jobs have the `FOSS_ONLY='1'` variable set and gets their EE-specific
-folders removed before the tests start running.
+The `* as-if-foss` jobs are run in addition to the regular EE-context jobs. They have the `FOSS_ONLY='1'` variable
+set and get their EE-specific folders removed before the tests start running.
 
 The intent is to ensure that a change won't introduce a failure once the `gitlab-org/gitlab` project will be synced to
 the `gitlab-org/gitlab-foss` project.
@@ -422,17 +485,19 @@ request, be sure to start the `dont-interrupt-me` job before pushing.
 
 1. All jobs must only pull caches by default.
 1. All jobs must be able to pass with an empty cache. In other words, caches are only there to speed up jobs.
-1. We currently have 6 different caches defined in
+1. We currently have several different caches defined in
    [`.gitlab/ci/global.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/blob/master/.gitlab/ci/global.gitlab-ci.yml),
    with fixed keys:
    - `.rails-cache`.
    - `.static-analysis-cache`.
+   - `.coverage-cache`
    - `.qa-cache`
    - `.yarn-cache`.
    - `.assets-compile-cache` (the key includes `${NODE_ENV}` so it's actually two different caches).
 1. Only 6 specific jobs, running in 2-hourly scheduled pipelines, are pushing (i.e. updating) to the caches:
    - `update-rails-cache`, defined in [`.gitlab/ci/rails.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/blob/master/.gitlab/ci/rails.gitlab-ci.yml).
    - `update-static-analysis-cache`, defined in [`.gitlab/ci/rails.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/blob/master/.gitlab/ci/rails.gitlab-ci.yml).
+   - `update-coverage-cache`, defined in [`.gitlab/ci/rails.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/blob/master/.gitlab/ci/rails.gitlab-ci.yml).
    - `update-qa-cache`, defined in [`.gitlab/ci/qa.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/blob/master/.gitlab/ci/qa.gitlab-ci.yml).
    - `update-assets-compile-production-cache`, defined in [`.gitlab/ci/frontend.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/blob/master/.gitlab/ci/frontend.gitlab-ci.yml).
    - `update-assets-compile-test-cache`, defined in [`.gitlab/ci/frontend.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/blob/master/.gitlab/ci/frontend.gitlab-ci.yml).
@@ -456,7 +521,7 @@ variable:
 
 ```shell
 echo "Downloading archived master..."
-wget -O /tmp/gitlab.tar.gz https://storage.googleapis.com/gitlab-ci-git-repo-cache/project-278964/gitlab-master.tar.gz
+wget -O /tmp/gitlab.tar.gz https://storage.googleapis.com/gitlab-ci-git-repo-cache/project-278964/gitlab-master-shallow.tar.gz
 
 if [ ! -f /tmp/gitlab.tar.gz ]; then
     echo "Repository cache not available, cloning a new directory..."
@@ -498,8 +563,9 @@ overwrites the Git configuration with the appropriate settings to fetch
 from the GitLab repository.
 
 `CI_REPO_CACHE_CREDENTIALS` contains the Google Cloud service account
-JSON for uploading to the `gitlab-ci-git-repo-cache` bucket. These
-credentials are stored in the 1Password GitLab.com Production vault.
+JSON for uploading to the `gitlab-ci-git-repo-cache` bucket. (If you’re a
+GitLab Team Member, find credentials in the
+[GitLab shared 1Password account](https://about.gitlab.com/handbook/security/#1password-for-teams).
 
 Note that this bucket should be located in the same continent as the
 runner, or [network egress charges will apply](https://cloud.google.com/storage/pricing).
@@ -560,7 +626,7 @@ each pipeline includes default variables defined in
 
 Most of the jobs [extend from a few CI definitions](../ci/yaml/README.md#extends)
 defined in [`.gitlab/ci/global.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/blob/master/.gitlab/ci/global.gitlab-ci.yml)
-that are scoped to a single [configuration parameter](../ci/yaml/README.md#configuration-parameters).
+that are scoped to a single [configuration keyword](../ci/yaml/README.md#job-keywords).
 
 | Job definitions  | Description |
 |------------------|-------------|

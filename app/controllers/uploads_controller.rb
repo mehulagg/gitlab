@@ -19,10 +19,17 @@ class UploadsController < ApplicationController
   rescue_from UnknownUploadModelError, with: :render_404
 
   skip_before_action :authenticate_user!
+  skip_before_action :check_two_factor_requirement, only: [:show]
   before_action :upload_mount_satisfied?
   before_action :authorize_access!, only: [:show]
   before_action :authorize_create_access!, only: [:create, :authorize]
   before_action :verify_workhorse_api!, only: [:authorize]
+
+  feature_category :not_owned
+
+  def self.model_classes
+    MODEL_CLASSES
+  end
 
   def uploader_class
     PersonalFileUploader
@@ -96,7 +103,7 @@ class UploadsController < ApplicationController
   end
 
   def upload_model_class
-    MODEL_CLASSES[params[:model]] || raise(UnknownUploadModelError)
+    self.class.model_classes[params[:model]] || raise(UnknownUploadModelError)
   end
 
   def upload_model_class_has_mounts?
@@ -109,3 +116,5 @@ class UploadsController < ApplicationController
     upload_model_class.uploader_options.has_key?(upload_mount)
   end
 end
+
+UploadsController.prepend_if_ee('EE::UploadsController')

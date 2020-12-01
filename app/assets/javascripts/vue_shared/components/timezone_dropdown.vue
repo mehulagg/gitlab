@@ -1,15 +1,15 @@
 <script>
-import { GlNewDropdown, GlDeprecatedDropdownItem, GlSearchBoxByType, GlIcon } from '@gitlab/ui';
+import { GlDropdown, GlDropdownItem, GlSearchBoxByType } from '@gitlab/ui';
 import { __ } from '~/locale';
 import autofocusonshow from '~/vue_shared/directives/autofocusonshow';
+import { secondsToHours } from '~/lib/utils/datetime_utility';
 
 export default {
   name: 'TimezoneDropdown',
   components: {
-    GlNewDropdown,
-    GlDeprecatedDropdownItem,
+    GlDropdown,
+    GlDropdownItem,
     GlSearchBoxByType,
-    GlIcon,
   },
   directives: {
     autofocusonshow,
@@ -59,44 +59,30 @@ export default {
     isSelected(timezone) {
       return this.value === timezone.formattedTimezone;
     },
-    formatUtcOffset(offset) {
-      const parsed = parseInt(offset, 10);
-      if (Number.isNaN(parsed) || parsed === 0) {
-        return `0`;
-      }
-      const prefix = offset > 0 ? '+' : '-';
-      return `${prefix}${Math.abs(offset / 3600)}`;
-    },
     formatTimezone(item) {
-      return `[UTC ${this.formatUtcOffset(item.offset)}] ${item.name}`;
+      return `[UTC ${secondsToHours(item.offset)}] ${item.name}`;
     },
   },
 };
 </script>
 <template>
-  <gl-new-dropdown :text="value" block lazy menu-class="gl-w-full!">
-    <template #button-content>
-      <span class="gl-flex-grow-1" :class="{ 'gl-text-gray-300': !value }">
-        {{ selectedTimezoneLabel }}
-      </span>
-      <gl-icon name="chevron-down" />
-    </template>
-
-    <gl-search-box-by-type v-model.trim="searchTerm" v-autofocusonshow autofocus class="gl-m-3" />
-    <gl-deprecated-dropdown-item
+  <gl-dropdown :text="selectedTimezoneLabel" block lazy menu-class="gl-w-full!">
+    <gl-search-box-by-type v-model.trim="searchTerm" v-autofocusonshow autofocus />
+    <gl-dropdown-item
       v-for="timezone in filteredResults"
       :key="timezone.formattedTimezone"
+      :is-checked="isSelected(timezone)"
+      :is-check-item="true"
       @click="selectTimezone(timezone)"
     >
-      <gl-icon
-        :class="{ invisible: !isSelected(timezone) }"
-        name="mobile-issue-close"
-        class="gl-vertical-align-middle"
-      />
       {{ timezone.formattedTimezone }}
-    </gl-deprecated-dropdown-item>
-    <gl-deprecated-dropdown-item v-if="!filteredResults.length" data-testid="noMatchingResults">
+    </gl-dropdown-item>
+    <gl-dropdown-item
+      v-if="!filteredResults.length"
+      class="gl-pointer-events-none"
+      data-testid="noMatchingResults"
+    >
       {{ $options.tranlations.noResultsText }}
-    </gl-deprecated-dropdown-item>
-  </gl-new-dropdown>
+    </gl-dropdown-item>
+  </gl-dropdown>
 </template>

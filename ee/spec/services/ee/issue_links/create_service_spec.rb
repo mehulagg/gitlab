@@ -29,7 +29,7 @@ RSpec.describe IssueLinks::CreateService do
       let(:another_project_issue_ref) { another_project_issue.to_reference(project) }
 
       let(:params) do
-        { issuable_references: [issue_a_ref, another_project_issue_ref], link_type: 'is_blocked_by' }
+        { issuable_references: [issue_a_ref, another_project_issue_ref], link_type: 'blocks' }
       end
 
       before do
@@ -53,12 +53,24 @@ RSpec.describe IssueLinks::CreateService do
       it 'creates relationships' do
         expect { subject }.to change(IssueLink, :count).from(0).to(2)
 
-        expect(IssueLink.find_by!(target: issue_a)).to have_attributes(source: issue, link_type: 'is_blocked_by')
-        expect(IssueLink.find_by!(target: another_project_issue)).to have_attributes(source: issue, link_type: 'is_blocked_by')
+        expect(IssueLink.find_by!(target: issue_a)).to have_attributes(source: issue, link_type: 'blocks')
+        expect(IssueLink.find_by!(target: another_project_issue)).to have_attributes(source: issue, link_type: 'blocks')
       end
 
       it 'returns success status' do
         is_expected.to eq(status: :success)
+      end
+
+      context 'when blocked_by relation is used' do
+        let(:params) do
+          { issuable_references: [issue_a_ref], link_type: 'is_blocked_by' }
+        end
+
+        it 'creates creates `blocks` relation with swapped source and target' do
+          expect { subject }.to change(IssueLink, :count).from(0).to(1)
+
+          expect(IssueLink.find_by!(source: issue_a)).to have_attributes(target: issue, link_type: 'blocks')
+        end
       end
     end
 
@@ -69,7 +81,7 @@ RSpec.describe IssueLinks::CreateService do
 
       before do
         create :issue_link, source: issue, target: issue_b, link_type: IssueLink::TYPE_RELATES_TO
-        create :issue_link, source: issue, target: issue_c, link_type: IssueLink::TYPE_IS_BLOCKED_BY
+        create :issue_link, source: issue, target: issue_c, link_type: IssueLink::TYPE_BLOCKS
       end
 
       let(:params) do
@@ -79,7 +91,7 @@ RSpec.describe IssueLinks::CreateService do
             issue_b.to_reference,
             issue_c.to_reference
           ],
-          link_type: IssueLink::TYPE_IS_BLOCKED_BY
+          link_type: IssueLink::TYPE_BLOCKS
         }
       end
 
@@ -87,7 +99,7 @@ RSpec.describe IssueLinks::CreateService do
         expect(subject).to eq(status: :success)
 
         expect(IssueLink.where(target: [issue_a, issue_b, issue_c]).pluck(:link_type))
-          .to eq([IssueLink::TYPE_IS_BLOCKED_BY, IssueLink::TYPE_IS_BLOCKED_BY, IssueLink::TYPE_IS_BLOCKED_BY])
+          .to eq([IssueLink::TYPE_BLOCKS, IssueLink::TYPE_BLOCKS, IssueLink::TYPE_BLOCKS])
       end
     end
   end

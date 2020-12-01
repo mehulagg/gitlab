@@ -9,7 +9,6 @@ RSpec.describe 'Subscriptions Content Security Policy' do
   let_it_be(:zuora_url) { 'https://*.zuora.com' }
 
   before do
-    stub_experiment_for_user(signup_flow: true)
     stub_request(:get, /.*gitlab_plans.*/).to_return(status: 200, body: "{}")
 
     expect_next_instance_of(SubscriptionsController) do |controller|

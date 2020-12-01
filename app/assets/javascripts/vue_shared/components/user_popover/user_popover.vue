@@ -1,19 +1,32 @@
 <script>
 /* eslint-disable vue/no-v-html */
-import { GlPopover, GlDeprecatedSkeletonLoading as GlSkeletonLoading, GlIcon } from '@gitlab/ui';
+import {
+  GlPopover,
+  GlLink,
+  GlDeprecatedSkeletonLoading as GlSkeletonLoading,
+  GlIcon,
+} from '@gitlab/ui';
+import UserAvailabilityStatus from '~/set_status_modal/components/user_availability_status.vue';
 import UserAvatarImage from '../user_avatar/user_avatar_image.vue';
 import { glEmojiTag } from '../../../emoji';
 
 const MAX_SKELETON_LINES = 4;
+
+const SECURITY_BOT_USER_DATA = {
+  username: 'GitLab-Security-Bot',
+  name: 'GitLab Security Bot',
+};
 
 export default {
   name: 'UserPopover',
   maxSkeletonLines: MAX_SKELETON_LINES,
   components: {
     GlIcon,
+    GlLink,
     GlPopover,
     GlSkeletonLoading,
     UserAvatarImage,
+    UserAvailabilityStatus,
   },
   props: {
     target: {
@@ -43,6 +56,18 @@ export default {
     userIsLoading() {
       return !this.user?.loaded;
     },
+    isSecurityBot() {
+      const { username, name, websiteUrl = '' } = this.user;
+      return (
+        gon.features?.securityAutoFix &&
+        username === SECURITY_BOT_USER_DATA.username &&
+        name === SECURITY_BOT_USER_DATA.name &&
+        websiteUrl.length
+      );
+    },
+    availabilityStatus() {
+      return this.user?.status?.availability || null;
+    },
   },
 };
 </script>
@@ -69,6 +94,10 @@ export default {
           <div class="gl-mb-3">
             <h5 class="gl-m-0">
               {{ user.name }}
+              <user-availability-status
+                v-if="availabilityStatus"
+                :availability="availabilityStatus"
+              />
             </h5>
             <span class="gl-text-gray-500">@{{ user.username }}</span>
           </div>
@@ -88,6 +117,12 @@ export default {
           </div>
           <div v-if="statusHtml" class="js-user-status gl-mt-3">
             <span v-html="statusHtml"></span>
+          </div>
+          <div v-if="isSecurityBot" class="gl-text-blue-500">
+            <gl-icon name="question" />
+            <gl-link data-testid="user-popover-bot-docs-link" :href="user.websiteUrl">
+              {{ sprintf(__('Learn more about %{username}'), { username: user.name }) }}
+            </gl-link>
           </div>
         </template>
       </div>

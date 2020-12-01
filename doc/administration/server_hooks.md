@@ -1,7 +1,7 @@
 ---
 stage: Create
 group: Gitaly
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference, howto
 disqus_identifier: 'https://docs.gitlab.com/ee/administration/custom_hooks.html'
 ---
@@ -37,7 +37,7 @@ Note the following about server hooks:
   - [GitLab CI/CD](../ci/README.md).
   - [Push Rules](../push_rules/push_rules.md), for a user-configurable Git hook
     interface. **(STARTER)**
-- Server hooks aren't replicated to [Geo](geo/replication/index.md) secondary nodes.
+- Server hooks aren't replicated to [Geo](geo/index.md) secondary nodes.
 
 ## Create a server hook for a repository
 
@@ -155,22 +155,6 @@ Pre-receive and post-receive server hooks can also access the following Git envi
 NOTE: **Note:**
 While other environment variables can be passed to server hooks, your application should not rely on
 them as they can change.
-
-## Transition to Go
-
-> Introduced in GitLab 13.2 using feature flags.
-
-The following server hooks have been re-implemented in Go:
-
-- `pre-receive`, with the Go implementation used by default. To use the Ruby implementation instead,
-  [disable](feature_flags.md#enable-or-disable-the-feature) the `:gitaly_go_preceive_hook` feature
-  flag.
-- `update`, with the Go implementation used by default. To use the Ruby implementation instead,
-  [disable](feature_flags.md#enable-or-disable-the-feature) the `:gitaly_go_update_hook` feature
-  flag.
-- `post-receive`, however the Ruby implementation is used by default. To use the Go implementation
-  instead, [enable](feature_flags.md#enable-or-disable-the-feature) the
-  `:gitaly_go_postreceive_hook` feature flag.
 
 ## Custom error messages
 

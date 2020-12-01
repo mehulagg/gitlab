@@ -1,24 +1,32 @@
 import { s__ } from '~/locale';
+import {
+  FEEDBACK_TYPE_ISSUE,
+  FEEDBACK_TYPE_MERGE_REQUEST,
+} from '~/vue_shared/security_reports/constants';
 
 export const VULNERABILITY_STATE_OBJECTS = {
+  detected: {
+    action: 'revert',
+    state: 'detected',
+    statusBoxStyle: 'expired',
+    displayName: s__('VulnerabilityManagement|Detected'),
+    description: s__('VulnerabilityManagement|Needs triage'),
+  },
   dismissed: {
     action: 'dismiss',
     state: 'dismissed',
-    statusBoxStyle: 'upcoming',
     displayName: s__('Dismiss'),
     description: s__('VulnerabilityManagement|Will not fix or a false-positive'),
   },
   confirmed: {
     action: 'confirm',
     state: 'confirmed',
-    statusBoxStyle: 'closed',
     displayName: s__('Confirm'),
     description: s__('VulnerabilityManagement|A true-positive and will fix'),
   },
   resolved: {
     action: 'resolve',
     state: 'resolved',
-    statusBoxStyle: 'open',
     displayName: s__('Resolve'),
     description: s__('VulnerabilityManagement|Verified as fixed or mitigated'),
   },
@@ -45,8 +53,8 @@ export const HEADER_ACTION_BUTTONS = {
 };
 
 export const FEEDBACK_TYPES = {
-  ISSUE: 'issue',
-  MERGE_REQUEST: 'merge_request',
+  ISSUE: FEEDBACK_TYPE_ISSUE,
+  MERGE_REQUEST: FEEDBACK_TYPE_MERGE_REQUEST,
 };
 
 export const RELATED_ISSUES_ERRORS = {
@@ -60,4 +68,9 @@ export const RELATED_ISSUES_ERRORS = {
 export const REGEXES = {
   ISSUE_FORMAT: /^#?(\d+)$/, // Matches '123' and '#123'.
   LINK_FORMAT: /\/(.+\/.+)\/-\/issues\/(\d+)/, // Matches '/username/project/-/issues/123'.
+};
+
+export const SUPPORTING_MESSAGE_TYPES = {
+  // eslint-disable-next-line @gitlab/require-i18n-strings
+  RECORDED: 'Recorded',
 };

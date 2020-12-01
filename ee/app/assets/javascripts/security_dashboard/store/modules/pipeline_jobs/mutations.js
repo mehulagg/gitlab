@@ -7,6 +7,9 @@ export default {
   [types.SET_PROJECT_ID](state, payload) {
     state.projectId = payload;
   },
+  [types.SET_PIPELINE_ID](state, payload) {
+    state.pipelineId = payload;
+  },
   [types.REQUEST_PIPELINE_JOBS](state) {
     state.isLoading = true;
   },

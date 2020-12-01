@@ -52,14 +52,14 @@ RSpec.describe Projects::IssuesController do
           get :index, params: { namespace_id: project.namespace, project_id: project }
 
           expect(response).to redirect_to(project_issues_path(new_project))
-          expect(response).to have_gitlab_http_status(:found)
+          expect(response).to have_gitlab_http_status(:moved_permanently)
         end
 
         it 'redirects from an old issue correctly' do
           get :show, params: { namespace_id: project.namespace, project_id: project, id: issue }
 
           expect(response).to redirect_to(project_issue_path(new_project, issue))
-          expect(response).to have_gitlab_http_status(:found)
+          expect(response).to have_gitlab_http_status(:moved_permanently)
         end
       end
     end
@@ -80,6 +80,16 @@ RSpec.describe Projects::IssuesController do
         get :index, params: { namespace_id: project.namespace, project_id: project }
 
         expect(response).to have_gitlab_http_status(:ok)
+      end
+
+      it 'returns only list type issues' do
+        issue = create(:issue, project: project)
+        incident = create(:issue, project: project, issue_type: 'incident')
+        create(:issue, project: project, issue_type: 'test_case')
+
+        get :index, params: { namespace_id: project.namespace, project_id: project }
+
+        expect(assigns(:issues)).to contain_exactly(issue, incident)
       end
 
       it "returns 301 if request path doesn't match project path" do
@@ -378,15 +388,23 @@ RSpec.describe Projects::IssuesController do
   # Rails router. A controller-style spec matches the wrong route, and
   # session['user_return_to'] becomes incorrect.
   describe 'Redirect after sign in', type: :request do
-    context 'with an AJAX request' do
+    before_all do
+      project.add_developer(user)
+    end
+
+    before do
+      login_as(user)
+    end
+
+    context 'with a JSON request' do
       it 'does not store the visited URL' do
-        get project_issue_path(project, issue), xhr: true
+        get project_issue_path(project, issue, format: :json)
 
         expect(session['user_return_to']).to be_blank
       end
     end
 
-    context 'without an AJAX request' do
+    context 'with an HTML request' do
       it 'stores the visited URL' do
         get project_issue_path(project, issue)
 
@@ -1019,7 +1037,8 @@ RSpec.describe Projects::IssuesController do
 
         go(id: issue.to_param)
 
-        expect(recent_issues_double).to have_received(:log_view)
+        expect(response).to be_successful
+        expect(recent_issues_double).to have_received(:log_view).with(issue)
       end
 
       context 'when not logged in' do
@@ -1631,7 +1650,7 @@ RSpec.describe Projects::IssuesController do
       end
 
       it 'allows CSV export' do
-        expect(ExportCsvWorker).to receive(:perform_async).with(viewer.id, project.id, anything)
+        expect(IssuableExportCsvWorker).to receive(:perform_async).with(:issue, viewer.id, project.id, anything)
 
         request_csv
 
@@ -1646,7 +1665,7 @@ RSpec.describe Projects::IssuesController do
       it 'redirects to the sign in page' do
         request_csv
 
-        expect(ExportCsvWorker).not_to receive(:perform_async)
+        expect(IssuableExportCsvWorker).not_to receive(:perform_async)
         expect(response).to redirect_to(new_user_session_path)
       end
     end
@@ -1850,7 +1869,7 @@ RSpec.describe Projects::IssuesController do
             }
 
         expect(response).to redirect_to(designs_project_issue_path(new_project, issue))
-        expect(response).to have_gitlab_http_status(:found)
+        expect(response).to have_gitlab_http_status(:moved_permanently)
       end
     end
   end

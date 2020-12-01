@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 
 module API
-  class ManagedLicenses < Grape::API::Instance
+  class ManagedLicenses < ::API::Base
     include PaginationParams
+
+    feature_category :license_compliance
 
     before { authenticate! unless route.settings[:skip_authentication] }
 

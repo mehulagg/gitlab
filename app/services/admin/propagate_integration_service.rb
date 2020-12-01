@@ -5,42 +5,52 @@ module Admin
     include PropagateService
 
     def propagate
-      update_inherited_integrations
-      create_integration_for_projects_without_integration
+      if integration.instance?
+        update_inherited_integrations
+        create_integration_for_groups_without_integration if Feature.enabled?(:group_level_integrations, default_enabled: true)
+        create_integration_for_projects_without_integration
+      else
+        update_inherited_descendant_integrations
+        create_integration_for_groups_without_integration_belonging_to_group
+        create_integration_for_projects_without_integration_belonging_to_group
+      end
     end
 
     private
 
-    # rubocop: disable Cop/InBatches
-    # rubocop: disable CodeReuse/ActiveRecord
     def update_inherited_integrations
-      Service.where(type: integration.type, inherit_from_id: integration.id).in_batches(of: BATCH_SIZE) do |batch|
-        bulk_update_from_integration(batch)
-      end
+      propagate_integrations(
+        Service.by_type(integration.type).inherit_from_id(integration.id),
+        PropagateIntegrationInheritWorker
+      )
     end
-    # rubocop: enable Cop/InBatches
-    # rubocop: enable CodeReuse/ActiveRecord
 
-    # rubocop: disable CodeReuse/ActiveRecord
-    def bulk_update_from_integration(batch)
-      # Retrieving the IDs instantiates the ActiveRecord relation (batch)
-      # into concrete models, otherwise update_all will clear the relation.
-      # https://stackoverflow.com/q/34811646/462015
-      batch_ids = batch.pluck(:id)
-
-      Service.transaction do
-        batch.update_all(service_hash)
-
-        if data_fields_present?
-          integration.data_fields.class.where(service_id: batch_ids).update_all(data_fields_hash)
-        end
-      end
+    def update_inherited_descendant_integrations
+      propagate_integrations(
+        Service.inherited_descendants_from_self_or_ancestors_from(integration),
+        PropagateIntegrationInheritDescendantWorker
+      )
     end
-    # rubocop: enable CodeReuse/ActiveRecord
 
-    def service_hash
-      @service_hash ||= integration.to_service_hash
-        .tap { |json| json['inherit_from_id'] = integration.id }
+    def create_integration_for_groups_without_integration
+      propagate_integrations(
+        Group.without_integration(integration),
+        PropagateIntegrationGroupWorker
+      )
+    end
+
+    def create_integration_for_groups_without_integration_belonging_to_group
+      propagate_integrations(
+        integration.group.descendants.without_integration(integration),
+        PropagateIntegrationGroupWorker
+      )
+    end
+
+    def create_integration_for_projects_without_integration_belonging_to_group
+      propagate_integrations(
+        Project.without_integration(integration).in_namespace(integration.group.self_and_descendants),
+        PropagateIntegrationProjectWorker
+      )
     end
   end
 end

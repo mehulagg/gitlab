@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module QA
-  RSpec.describe 'Package', :docker, :orchestrated, :packages do
+  RSpec.describe 'Package', :orchestrated, :packages do
     describe 'Maven Repository' do
       include Runtime::Fixtures
 
@@ -95,7 +95,7 @@ module QA
         end
 
         Page::Project::Packages::Index.perform do |index|
-          expect(index).to have_content("Package was removed")
+          expect(index).to have_content("Package deleted successfully")
           expect(index).to have_no_package(package_name)
         end
       end

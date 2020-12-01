@@ -5,7 +5,13 @@ module Gitlab
     module Parsers
       module Security
         class Dast < Common
-          protected
+          def parse!(json_data, report)
+            report_data = super
+
+            report.scanned_resources = create_scanned_resources(report_data.dig('scan', 'scanned_resources'))
+          end
+
+          private
 
           def parse_report(json_data)
             report = super
@@ -15,7 +21,16 @@ module Gitlab
             report
           end
 
-          private
+          def create_scanned_resources(scanned_resources)
+            return [] unless scanned_resources
+
+            scanned_resources.map do |sr|
+              uri = URI.parse(sr['url'])
+              ::Gitlab::Ci::Reports::Security::ScannedResource.new(uri, sr['method'])
+            rescue URI::InvalidURIError
+              nil
+            end.compact
+          end
 
           def create_location(location_data)
             ::Gitlab::Ci::Reports::Security::Locations::Dast.new(

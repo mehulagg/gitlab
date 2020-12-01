@@ -34,7 +34,8 @@ RSpec.describe 'User comments on a diff', :js do
           page.within('.diff-files-holder > div:nth-child(3)') do
             expect(page).to have_content('Line is wrong')
 
-            find('.js-btn-vue-toggle-comments').click
+            find('.js-diff-more-actions').click
+            click_button 'Hide comments on this file'
 
             expect(page).not_to have_content('Line is wrong')
           end
@@ -67,7 +68,8 @@ RSpec.describe 'User comments on a diff', :js do
 
           # Hide the comment.
           page.within('.diff-files-holder > div:nth-child(3)') do
-            find('.js-btn-vue-toggle-comments').click
+            find('.js-diff-more-actions').click
+            click_button 'Hide comments on this file'
 
             expect(page).not_to have_content('Line is wrong')
           end
@@ -80,7 +82,8 @@ RSpec.describe 'User comments on a diff', :js do
 
           # Show the comment.
           page.within('.diff-files-holder > div:nth-child(3)') do
-            find('.js-btn-vue-toggle-comments').click
+            find('.js-diff-more-actions').click
+            click_button 'Show comments on this file'
           end
 
           # Now both the comments should be shown.
@@ -133,13 +136,7 @@ RSpec.describe 'User comments on a diff', :js do
         add_comment('-13', '+15')
       end
 
-      it 'allows comments to start above hidden lines and end below' do
-        # click +28, select 21 add and verify comment
-        click_diff_line(find('div[data-path="files/ruby/popen.rb"] .new_line a[data-linenumber="28"]').find(:xpath, '../..'), 'right')
-        add_comment('21', '+28')
-      end
-
-      it 'allows comments on previously hidden lines at the top of a file' do
+      it 'allows comments on previously hidden lines at the top of a file', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/285294' do
         # Click -9, expand up, select 1 add and verify comment
         page.within('[data-path="files/ruby/popen.rb"]') do
           all('.js-unfold-all')[0].click

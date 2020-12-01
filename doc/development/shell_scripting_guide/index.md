@@ -1,6 +1,10 @@
-# Shell scripting standards and style guidelines
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
 
-## Overview
+# Shell scripting standards and style guidelines
 
 GitLab consists of many various services and sub-projects. The majority of
 their backend code is written in [Ruby](https://www.ruby-lang.org) and
@@ -15,7 +19,7 @@ should be eventually harmonized with this guide. If there are any per-project
 deviations from this guide, they should be described in the
 `README.md` or `PROCESS.md` file for such a project.
 
-### Avoid using shell scripts
+## Avoid using shell scripts
 
 CAUTION: **Caution:**
 This is a must-read section.
@@ -65,7 +69,7 @@ shell check:
   before_script:
     - shellcheck --version
   script:
-    - shellcheck scripts/**/*.sh # path to your shell scripts
+    - shellcheck scripts/**/*.sh  # path to your shell scripts
 ```
 
 TIP: **Tip:**
@@ -93,7 +97,7 @@ shfmt:
   before_script:
     - shfmt -version
   script:
-    - shfmt -i 2 -ci -d scripts # path to your shell scripts
+    - shfmt -i 2 -ci -d scripts  # path to your shell scripts
 ```
 
 TIP: **Tip:**

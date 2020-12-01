@@ -36,27 +36,6 @@ module EE
       epics_service(epic, user).issue_epic_change(issue)
     end
 
-    def change_iteration(noteable, author, iteration)
-      issuables_service(noteable, noteable.project, author).change_iteration(iteration)
-    end
-
-    # Called when the weight of a Noteable is changed
-    #
-    # noteable   - Noteable object
-    # project    - Project owning noteable
-    # author     - User performing the change
-    #
-    # Example Note text:
-    #
-    #   "removed the weight"
-    #
-    #   "changed weight to 4"
-    #
-    # Returns the created Note object
-    def change_weight_note(noteable, project, author)
-      issuables_service(noteable, project, author).change_weight_note
-    end
-
     # Called when the health_stauts of an Issue is changed
     #
     # noteable   - Noteable object

@@ -1,7 +1,7 @@
 ---
 stage: Release
 group: Progressive Delivery
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: howto, reference
 ---
 
@@ -12,7 +12,7 @@ more repositories, by importing an SSH public key to your GitLab instance.
 
 This is useful for cloning repositories to your Continuous
 Integration (CI) server. By using deploy keys, you don't have to set up a
-dummy user account.
+fake user account.
 
 There are two types of deploy keys:
 

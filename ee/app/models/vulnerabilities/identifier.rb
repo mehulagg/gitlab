@@ -25,5 +25,17 @@ module Vulnerabilities
     validates :name, presence: true
 
     scope :with_fingerprint, -> (fingerprints) { where(fingerprint: fingerprints) }
+
+    def cve?
+      external_type.casecmp?('cve')
+    end
+
+    def cwe?
+      external_type.casecmp?('cwe')
+    end
+
+    def other?
+      !(cve? || cwe?)
+    end
   end
 end

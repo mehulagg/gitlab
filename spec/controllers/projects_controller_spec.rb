@@ -41,27 +41,6 @@ RSpec.describe ProjectsController do
           end
         end
       end
-
-      context 'with the new_create_project_ui experiment enabled and the user is part of the control group' do
-        before do
-          stub_experiment(new_create_project_ui: true)
-          stub_experiment_for_user(new_create_project_ui: false)
-          allow_any_instance_of(described_class).to receive(:experimentation_subject_id).and_return('uuid')
-        end
-
-        it 'passes the right tracking parameters to the frontend' do
-          get(:new)
-
-          expect(Gon.tracking_data).to eq(
-            {
-              category: 'Manage::Import::Experiment::NewCreateProjectUi',
-              action: 'click_tab',
-              label: 'uuid',
-              property: 'control_group'
-            }
-          )
-        end
-      end
     end
   end
 
@@ -213,13 +192,13 @@ RSpec.describe ProjectsController do
           expect(assigns(:issuable_meta_data)).not_to be_nil
         end
 
-        it 'shows customize workflow page if wiki and issues are disabled' do
+        it 'shows activity page if wiki and issues are disabled' do
           project.project_feature.update_attribute(:wiki_access_level, ProjectFeature::DISABLED)
           project.project_feature.update_attribute(:issues_access_level, ProjectFeature::DISABLED)
 
           get :show, params: { namespace_id: project.namespace, id: project }
 
-          expect(response).to render_template("projects/_customize_workflow")
+          expect(response).to render_template("projects/_activity")
         end
 
         it 'shows activity if enabled by user' do
@@ -1436,5 +1415,56 @@ RSpec.describe ProjectsController do
 
   def project_moved_message(redirect_route, project)
     "Project '#{redirect_route.path}' was moved to '#{project.full_path}'. Please update any links and bookmarks that may still have the old path."
+  end
+
+  describe 'GET #unfoldered_environment_names' do
+    it 'shows the environment names of a public project to an anonymous user' do
+      create(:environment, project: public_project, name: 'foo')
+
+      get(
+        :unfoldered_environment_names,
+        params: { namespace_id: public_project.namespace, id: public_project, format: :json }
+      )
+
+      expect(response).to have_gitlab_http_status(:ok)
+      expect(json_response).to eq(%w[foo])
+    end
+
+    it 'does not show environment names of a private project to anonymous users' do
+      create(:environment, project: project, name: 'foo')
+
+      get(
+        :unfoldered_environment_names,
+        params: { namespace_id: project.namespace, id: project, format: :json }
+      )
+
+      expect(response).to redirect_to(new_user_session_path)
+    end
+
+    it 'shows environment names of a private project to a project member' do
+      create(:environment, project: project, name: 'foo')
+      project.add_developer(user)
+      sign_in(user)
+
+      get(
+        :unfoldered_environment_names,
+        params: { namespace_id: project.namespace, id: project, format: :json }
+      )
+
+      expect(response).to have_gitlab_http_status(:ok)
+      expect(json_response).to eq(%w[foo])
+    end
+
+    it 'does not show environment names of a private project to a logged-in non-member' do
+      create(:environment, project: project, name: 'foo')
+      sign_in(user)
+
+      get(
+        :unfoldered_environment_names,
+        params: { namespace_id: project.namespace, id: project, format: :json }
+      )
+
+      expect(response).to have_gitlab_http_status(:not_found)
+    end
   end
 end

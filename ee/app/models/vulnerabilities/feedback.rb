@@ -15,7 +15,7 @@ module Vulnerabilities
     attr_accessor :vulnerability_data
 
     enum feedback_type: { dismissal: 0, issue: 1, merge_request: 2 }, _prefix: :for
-    enum category: { sast: 0, dependency_scanning: 1, container_scanning: 2, dast: 3, secret_detection: 4, coverage_fuzzing: 5 }
+    enum category: ::Vulnerabilities::Finding::REPORT_TYPES
 
     validates :project, presence: true
     validates :author, presence: true
@@ -33,6 +33,9 @@ module Vulnerabilities
     scope :all_preloaded, -> do
       preload(:author, :comment_author, :project, :issue, :merge_request, :pipeline)
     end
+
+    after_save :touch_pipeline, if: :for_dismissal?
+    after_destroy :touch_pipeline, if: :for_dismissal?
 
     # TODO remove once filtered data has been cleaned
     def self.only_valid_feedback
@@ -82,6 +85,18 @@ module Vulnerabilities
         category: category,
         project_fingerprint: project_fingerprint
       }
+    end
+
+    def touch_pipeline
+      pipeline&.touch
+    end
+
+    def finding
+      Finding.find_by(
+        project_id: project_id,
+        report_type: category,
+        project_fingerprint: project_fingerprint
+      )
     end
   end
 end

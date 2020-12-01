@@ -4,9 +4,8 @@ import { GlIcon } from '@gitlab/ui';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { s__, sprintf } from '~/locale';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import { UNFOLD_COUNT, INLINE_DIFF_VIEW_TYPE, PARALLEL_DIFF_VIEW_TYPE } from '../constants';
+import { UNFOLD_COUNT, INLINE_DIFF_VIEW_TYPE, INLINE_DIFF_LINES_KEY } from '../constants';
 import * as utils from '../store/utils';
-import tooltip from '../../vue_shared/directives/tooltip';
 
 const EXPAND_ALL = 0;
 const EXPAND_UP = 1;
@@ -15,7 +14,6 @@ const EXPAND_DOWN = 2;
 const lineNumberByViewType = (viewType, diffLine) => {
   const numberGetters = {
     [INLINE_DIFF_VIEW_TYPE]: line => line?.new_line,
-    [PARALLEL_DIFF_VIEW_TYPE]: line => (line?.right || line?.left)?.new_line,
   };
   const numberGetter = numberGetters[viewType];
   return numberGetter && numberGetter(diffLine);
@@ -28,9 +26,6 @@ const i18n = {
 
 export default {
   i18n,
-  directives: {
-    tooltip,
-  },
   components: {
     GlIcon,
   },
@@ -58,19 +53,9 @@ export default {
       required: false,
       default: false,
     },
-    colspan: {
-      type: Number,
-      required: false,
-      default: 4,
-    },
   },
   computed: {
     ...mapState({
-      diffViewType(state) {
-        return this.glFeatures.unifiedDiffLines
-          ? PARALLEL_DIFF_VIEW_TYPE
-          : state.diffs.diffViewType;
-      },
       diffFiles: state => state.diffs.diffFiles,
     }),
     canExpandUp() {
@@ -88,16 +73,14 @@ export default {
     ...mapActions('diffs', ['loadMoreLines']),
     getPrevLineNumber(oldLineNumber, newLineNumber) {
       const diffFile = utils.findDiffFile(this.diffFiles, this.fileHash);
-      const lines = {
-        [INLINE_DIFF_VIEW_TYPE]: diffFile.highlighted_diff_lines,
-        [PARALLEL_DIFF_VIEW_TYPE]: diffFile.parallel_diff_lines,
-      };
-      const index = utils.getPreviousLineIndex(this.diffViewType, diffFile, {
+      const index = utils.getPreviousLineIndex(INLINE_DIFF_VIEW_TYPE, diffFile, {
         oldLineNumber,
         newLineNumber,
       });
 
-      return lineNumberByViewType(this.diffViewType, lines[this.diffViewType][index - 2]) || 0;
+      return (
+        lineNumberByViewType(INLINE_DIFF_VIEW_TYPE, diffFile[INLINE_DIFF_LINES_KEY][index - 2]) || 0
+      );
     },
     callLoadMoreLines(
       endpoint,
@@ -124,7 +107,7 @@ export default {
       this.isRequesting = true;
       const endpoint = this.contextLinesPath;
       const { fileHash } = this;
-      const view = this.diffViewType;
+      const view = INLINE_DIFF_VIEW_TYPE;
       const oldLineNumber = this.line.meta_data.old_pos || 0;
       const newLineNumber = this.line.meta_data.new_pos || 0;
       const offset = newLineNumber - oldLineNumber;
@@ -237,28 +220,26 @@ export default {
 </script>
 
 <template>
-  <td :colspan="colspan" class="text-center gl-font-regular">
-    <div class="content js-line-expansion-content">
-      <a
-        v-if="canExpandDown"
-        class="gl-mx-2 gl-cursor-pointer js-unfold-down gl-display-inline-block gl-py-4"
-        @click="handleExpandLines(EXPAND_DOWN)"
-      >
-        <gl-icon :size="12" name="expand-down" aria-hidden="true" />
-        <span>{{ $options.i18n.showMore }}</span>
-      </a>
-      <a class="gl-mx-2 cursor-pointer js-unfold-all" @click="handleExpandLines()">
-        <gl-icon :size="12" name="expand" aria-hidden="true" />
-        <span>{{ $options.i18n.showAll }}</span>
-      </a>
-      <a
-        v-if="canExpandUp"
-        class="gl-mx-2 gl-cursor-pointer js-unfold gl-display-inline-block gl-py-4"
-        @click="handleExpandLines(EXPAND_UP)"
-      >
-        <gl-icon :size="12" name="expand-up" aria-hidden="true" />
-        <span>{{ $options.i18n.showMore }}</span>
-      </a>
-    </div>
-  </td>
+  <div class="content js-line-expansion-content">
+    <a
+      v-if="canExpandDown"
+      class="gl-mx-2 gl-cursor-pointer js-unfold-down gl-display-inline-block gl-py-4"
+      @click="handleExpandLines(EXPAND_DOWN)"
+    >
+      <gl-icon :size="12" name="expand-down" />
+      <span>{{ $options.i18n.showMore }}</span>
+    </a>
+    <a class="gl-mx-2 cursor-pointer js-unfold-all" @click="handleExpandLines()">
+      <gl-icon :size="12" name="expand" />
+      <span>{{ $options.i18n.showAll }}</span>
+    </a>
+    <a
+      v-if="canExpandUp"
+      class="gl-mx-2 gl-cursor-pointer js-unfold gl-display-inline-block gl-py-4"
+      @click="handleExpandLines(EXPAND_UP)"
+    >
+      <gl-icon :size="12" name="expand-up" />
+      <span>{{ $options.i18n.showMore }}</span>
+    </a>
+  </div>
 </template>

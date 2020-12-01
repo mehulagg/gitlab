@@ -65,6 +65,12 @@ RSpec.describe ApplicationSetting do
     it { is_expected.not_to allow_value(1.1).for(:elasticsearch_max_bulk_concurrency) }
     it { is_expected.not_to allow_value(-1).for(:elasticsearch_max_bulk_concurrency) }
 
+    it { is_expected.to allow_value(30).for(:elasticsearch_client_request_timeout) }
+    it { is_expected.to allow_value(0).for(:elasticsearch_client_request_timeout) }
+    it { is_expected.not_to allow_value(nil).for(:elasticsearch_client_request_timeout) }
+    it { is_expected.not_to allow_value(1.1).for(:elasticsearch_client_request_timeout) }
+    it { is_expected.not_to allow_value(-1).for(:elasticsearch_client_request_timeout) }
+
     it { is_expected.to allow_value(nil).for(:required_instance_ci_template) }
     it { is_expected.not_to allow_value("").for(:required_instance_ci_template) }
     it { is_expected.not_to allow_value("  ").for(:required_instance_ci_template) }
@@ -79,6 +85,14 @@ RSpec.describe ApplicationSetting do
     it { is_expected.not_to allow_value(-5).for(:max_personal_access_token_lifetime) }
     it { is_expected.not_to allow_value(366).for(:max_personal_access_token_lifetime) }
 
+    it { is_expected.to allow_value(nil).for(:new_user_signups_cap) }
+    it { is_expected.to allow_value(1).for(:new_user_signups_cap) }
+    it { is_expected.to allow_value(10).for(:new_user_signups_cap) }
+    it { is_expected.to allow_value("").for(:new_user_signups_cap) }
+    it { is_expected.not_to allow_value("value").for(:new_user_signups_cap) }
+    it { is_expected.not_to allow_value(-1).for(:new_user_signups_cap) }
+    it { is_expected.not_to allow_value(2.5).for(:new_user_signups_cap) }
+
     describe 'when additional email text is enabled' do
       before do
         stub_licensed_features(email_additional_text: true)
@@ -86,6 +100,19 @@ RSpec.describe ApplicationSetting do
 
       it { is_expected.to allow_value("a" * subject.email_additional_text_character_limit).for(:email_additional_text) }
       it { is_expected.not_to allow_value("a" * (subject.email_additional_text_character_limit + 1)).for(:email_additional_text) }
+    end
+
+    describe 'when secret detection token revocation is enabled' do
+      before do
+        stub_application_setting(secret_detection_token_revocation_enabled: true)
+      end
+
+      it { is_expected.to allow_value("http://test.com").for(:secret_detection_token_revocation_url) }
+      it { is_expected.to allow_value("AKVD34#$%56").for(:secret_detection_token_revocation_token) }
+      it { is_expected.to allow_value("http://test.com").for(:secret_detection_revocation_token_types_url) }
+      it { is_expected.not_to allow_value(nil).for(:secret_detection_token_revocation_url) }
+      it { is_expected.not_to allow_value(nil).for(:secret_detection_token_revocation_token) }
+      it { is_expected.not_to allow_value(nil).for(:secret_detection_revocation_token_types_url) }
     end
 
     context 'when validating allowed_ips' do
@@ -152,6 +179,19 @@ RSpec.describe ApplicationSetting do
           expect(setting.valid?).to eq(is_valid)
         end
       end
+    end
+
+    context 'when license presented' do
+      let_it_be(:max_active_user_count) { 20 }
+
+      before_all do
+        create_current_license({ restrictions: { active_user_count: max_active_user_count } })
+      end
+
+      it { is_expected.to allow_value(max_active_user_count - 1).for(:new_user_signups_cap) }
+      it { is_expected.to allow_value(max_active_user_count).for(:new_user_signups_cap) }
+      it { is_expected.to allow_value(nil).for(:new_user_signups_cap) }
+      it { is_expected.not_to allow_value(max_active_user_count + 1).for(:new_user_signups_cap) }
     end
   end
 
@@ -288,7 +328,8 @@ RSpec.describe ApplicationSetting do
         elasticsearch_aws_access_key: 'test-access-key',
         elasticsearch_aws_secret_access_key: 'test-secret-access-key',
         elasticsearch_max_bulk_size_mb: 67,
-        elasticsearch_max_bulk_concurrency: 8
+        elasticsearch_max_bulk_concurrency: 8,
+        elasticsearch_client_request_timeout: 30
       )
 
       expect(setting.elasticsearch_config).to eq(
@@ -298,8 +339,15 @@ RSpec.describe ApplicationSetting do
         aws_access_key: 'test-access-key',
         aws_secret_access_key: 'test-secret-access-key',
         max_bulk_size_bytes: 67.megabytes,
-        max_bulk_concurrency: 8
+        max_bulk_concurrency: 8,
+        client_request_timeout: 30
       )
+
+      setting.update!(
+        elasticsearch_client_request_timeout: 0
+      )
+
+      expect(setting.elasticsearch_config).not_to include(:client_request_timeout)
     end
 
     context 'limiting namespaces and projects' do
@@ -381,18 +429,6 @@ RSpec.describe ApplicationSetting do
 
           expect(setting.elasticsearch_indexes_project?(projects.first)).to be(true)
         end
-
-        context 'when elasticsearch_indexes_project_cache feature flag is disabled' do
-          before do
-            stub_feature_flags(elasticsearch_indexes_project_cache: false)
-          end
-
-          it 'does not use the cache' do
-            expect(::Gitlab::Elastic::ElasticsearchEnabledCache).not_to receive(:fetch)
-
-            expect(setting.elasticsearch_indexes_project?(projects.first)).to be(false)
-          end
-        end
       end
     end
   end
@@ -407,8 +443,8 @@ RSpec.describe ApplicationSetting do
   end
 
   describe '#search_using_elasticsearch?' do
-    # Constructs a truth table with 16 entries to run the specs against
-    where(indexing: [true, false], searching: [true, false], limiting: [true, false])
+    # Constructs a truth table to run the specs against
+    where(indexing: [true, false], searching: [true, false], limiting: [true, false], advanced_global_search_for_limited_indexing: [true, false])
 
     with_them do
       let_it_be(:included_project_container) { create(:elasticsearch_indexed_project) }
@@ -430,12 +466,14 @@ RSpec.describe ApplicationSetting do
           elasticsearch_search: searching,
           elasticsearch_limit_indexing: limiting
         )
+
+        stub_feature_flags(advanced_global_search_for_limited_indexing: advanced_global_search_for_limited_indexing)
       end
 
       context 'global scope' do
         let(:scope) { nil }
 
-        it { is_expected.to eq(only_when_enabled_globally) }
+        it { is_expected.to eq(indexing && searching && (!limiting || advanced_global_search_for_limited_indexing)) }
       end
 
       context 'namespace (in scope)' do
@@ -580,7 +618,7 @@ RSpec.describe ApplicationSetting do
       end
 
       it 'is in days_from_now' do
-        expect(subject.to_date - Date.today).to eq days_from_now
+        expect((subject.to_date - Date.current).to_i).to eq days_from_now
       end
     end
 
@@ -702,6 +740,36 @@ RSpec.describe ApplicationSetting do
       setting.compliance_frameworks = [""]
 
       expect(setting.compliance_frameworks).to eq([])
+    end
+  end
+
+  describe '#should_apply_user_signup_cap?' do
+    subject { setting.should_apply_user_signup_cap? }
+
+    context 'when feature admin_new_user_signups_cap is disabled' do
+      before do
+        stub_feature_flags(admin_new_user_signups_cap: false)
+      end
+
+      it { is_expected.to be false }
+    end
+
+    context 'when feature admin_new_user_signups_cap is enabled' do
+      before do
+        allow(Gitlab::CurrentSettings).to receive(:new_user_signups_cap).and_return(new_user_signups_cap)
+      end
+
+      context 'when new_user_signups_cap setting is nil' do
+        let(:new_user_signups_cap) { nil }
+
+        it { is_expected.to be false }
+      end
+
+      context 'when new_user_signups_cap setting is set to any number' do
+        let(:new_user_signups_cap) { 10 }
+
+        it { is_expected.to be true }
+      end
     end
   end
 end

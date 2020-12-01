@@ -18,7 +18,8 @@ module Projects
         license_scanning: 'user/compliance/license_compliance/index',
         sast: 'user/application_security/sast/index',
         secret_detection: 'user/application_security/secret_detection/index',
-        coverage_fuzzing: 'user/application_security/coverage_fuzzing/index'
+        coverage_fuzzing: 'user/application_security/coverage_fuzzing/index',
+        api_fuzzing: 'user/application_security/api_fuzzing/index'
       }.freeze
 
       def self.localized_scan_descriptions
@@ -31,7 +32,8 @@ module Projects
           license_scanning: _('Search your project dependencies for their licenses and apply policies.'),
           sast: _('Analyze your source code for known vulnerabilities.'),
           secret_detection: _('Analyze your source code and git history for secrets.'),
-          coverage_fuzzing: _('Find bugs in your code with coverage-guided fuzzing')
+          coverage_fuzzing: _('Find bugs in your code with coverage-guided fuzzing.'),
+          api_fuzzing: _('Find bugs in your code with API fuzzing.')
         }.freeze
       end
 
@@ -45,7 +47,8 @@ module Projects
           license_scanning: _('License Compliance'),
           sast: _('Static Application Security Testing (SAST)'),
           secret_detection: _('Secret Detection'),
-          coverage_fuzzing: _('Coverage Fuzzing')
+          coverage_fuzzing: _('Coverage Fuzzing'),
+          api_fuzzing: _('API Fuzzing')
         }.freeze
       end
 
@@ -62,6 +65,7 @@ module Projects
           auto_fix_enabled: autofix_enabled,
           can_toggle_auto_fix_settings: auto_fix_permission,
           gitlab_ci_present: gitlab_ci_present?,
+          gitlab_ci_history_path: gitlab_ci_history_path,
           auto_fix_user_path: '/' # TODO: real link will be updated with https://gitlab.com/gitlab-org/gitlab/-/issues/215669
         }
       end
@@ -91,6 +95,13 @@ module Projects
 
       def gitlab_ci_present?
         latest_pipeline.try(:config_path) == Gitlab::FileDetector::PATTERNS[:gitlab_ci]
+      end
+
+      def gitlab_ci_history_path
+        return '' if project.empty_repo?
+
+        gitlab_ci = Gitlab::FileDetector::PATTERNS[:gitlab_ci]
+        Gitlab::Routing.url_helpers.project_blame_path(project, File.join(project.default_branch_or_master, gitlab_ci))
       end
 
       def features
@@ -172,7 +183,7 @@ module Projects
       def configuration_path(type)
         {
           sast: project_security_configuration_sast_path(project),
-          dast_profiles: project_profiles_path(project)
+          dast_profiles: project_security_configuration_dast_profiles_path(project)
         }[type]
       end
     end

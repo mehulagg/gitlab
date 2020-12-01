@@ -1,12 +1,13 @@
 <script>
 import {
-  GlDeprecatedDropdown,
-  GlDeprecatedDropdownDivider,
-  GlDeprecatedDropdownItem,
+  GlDropdown,
+  GlDropdownDivider,
+  GlDropdownItem,
   GlLoadingIcon,
   GlSearchBoxByType,
   GlSprintf,
   GlButton,
+  GlAlert,
 } from '@gitlab/ui';
 import ClipboardButton from '../../vue_shared/components/clipboard_button.vue';
 import { __, s__ } from '~/locale';
@@ -20,11 +21,12 @@ export default {
     GlButton,
     ClipboardButton,
     GlLoadingIcon,
-    GlDeprecatedDropdown,
-    GlDeprecatedDropdownDivider,
-    GlDeprecatedDropdownItem,
+    GlDropdown,
+    GlDropdownDivider,
+    GlDropdownItem,
     GlSearchBoxByType,
     GlSprintf,
+    GlAlert,
   },
   props: {
     knative: {
@@ -106,12 +108,13 @@ export default {
 
 <template>
   <div class="row">
-    <div
+    <gl-alert
       v-if="knative.updateFailed"
-      class="bs-callout bs-callout-danger cluster-application-banner col-12 mt-2 mb-2 js-cluster-knative-domain-name-failure-message"
+      class="gl-mb-5 col-12 js-cluster-knative-domain-name-failure-message"
+      variant="danger"
     >
       {{ s__('ClusterIntegration|Something went wrong while updating Knative domain name.') }}
-    </div>
+    </gl-alert>
 
     <div
       :class="{ 'col-md-6': knativeInstalled, 'col-12': !knativeInstalled }"
@@ -121,7 +124,7 @@ export default {
         <strong>{{ s__('ClusterIntegration|Knative Domain Name:') }}</strong>
       </label>
 
-      <gl-deprecated-dropdown
+      <gl-dropdown
         v-if="showDomainsDropdown"
         :text="domainDropdownText"
         toggle-class="dropdown-menu-toggle"
@@ -130,18 +133,17 @@ export default {
         <gl-search-box-by-type
           v-model.trim="searchQuery"
           :placeholder="s__('ClusterIntegration|Search domains')"
-          class="gl-m-3"
         />
-        <gl-deprecated-dropdown-item
+        <gl-dropdown-item
           v-for="domain in filteredDomains"
           :key="domain.id"
           @click="selectDomain(domain)"
         >
           <span class="ml-1">{{ domain.domain }}</span>
-        </gl-deprecated-dropdown-item>
+        </gl-dropdown-item>
         <template v-if="searchQuery">
-          <gl-deprecated-dropdown-divider />
-          <gl-deprecated-dropdown-item key="custom-domain" @click="selectCustomDomain(searchQuery)">
+          <gl-dropdown-divider />
+          <gl-dropdown-item key="custom-domain" @click="selectCustomDomain(searchQuery)">
             <span class="ml-1">
               <gl-sprintf :message="s__('ClusterIntegration|Use %{query}')">
                 <template #query>
@@ -149,9 +151,9 @@ export default {
                 </template>
               </gl-sprintf>
             </span>
-          </gl-deprecated-dropdown-item>
+          </gl-dropdown-item>
         </template>
-      </gl-deprecated-dropdown>
+      </gl-dropdown>
 
       <input
         v-else

@@ -1,7 +1,7 @@
 ---
 stage: Create
 group: Source Code
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: concepts, howto
 ---
 
@@ -86,7 +86,7 @@ according to the markup language.
 | [reStructuredText](https://docutils.sourceforge.io/rst.html) | `rst` |
 | [AsciiDoc](../../asciidoc.md) | `adoc`, `ad`, `asciidoc` |
 | [Textile](https://textile-lang.com/) | `textile` |
-| [rdoc](http://rdoc.sourceforge.net/doc/index.html)  | `rdoc` |
+| [Rdoc](http://rdoc.sourceforge.net/doc/index.html)  | `rdoc` |
 | [Org mode](https://orgmode.org/) | `org` |
 | [creole](http://www.wikicreole.org/) | `creole` |
 | [MediaWiki](https://www.mediawiki.org/wiki/MediaWiki) | `wiki`, `mediawiki` |
@@ -190,7 +190,7 @@ updated every 15 minutes at most, so may not reflect recent activity. The displa
 The project size may differ slightly from one instance to another due to compression, housekeeping, and other factors.
 
 [Repository size limit](../../admin_area/settings/account_and_limit_settings.md) may be set by admins.
-GitLab.com's repository size limit [is set by GitLab](../../gitlab_com/index.md#repository-size-limit).
+GitLab.com's repository size limit [is set by GitLab](../../gitlab_com/index.md#account-and-limit-settings).
 
 ## Contributors
 
@@ -234,7 +234,7 @@ lock your files to prevent any conflicting changes.
 
 ## Repository's API
 
-You can access your repos via [repository API](../../../api/repositories.md).
+You can access your repositories via [repository API](../../../api/repositories.md).
 
 ## Clone in Apple Xcode
 
@@ -247,6 +247,7 @@ used for cloning your project. The button is only shown on macOS.
 ## Download Source Code
 
 > Support for directory download was [introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/24704) in GitLab 11.11.
+> Support for [including Git LFS blobs](../../../topics/git/lfs#lfs-objects-in-project-archives) was [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/15079) in GitLab 13.5.
 
 The source code stored in a repository can be downloaded from the UI.
 By clicking the download icon, a dropdown will open with links to download the following:

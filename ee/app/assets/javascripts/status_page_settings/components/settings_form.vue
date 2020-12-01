@@ -180,18 +180,16 @@ export default {
         >
           <gl-form-input id="status-page-aws-secret-access-key " v-model="awsSecretKey" />
         </gl-form-group>
-        <div class="gl-display-flex gl-justify-content-end">
-          <gl-button
-            ref="submitBtn"
-            :disabled="loading"
-            variant="success"
-            category="primary"
-            type="submit"
-            class="js-no-auto-disable"
-          >
-            {{ $options.i18n.saveBtnLabel }}
-          </gl-button>
-        </div>
+        <gl-button
+          ref="submitBtn"
+          :disabled="loading"
+          variant="success"
+          category="primary"
+          type="submit"
+          class="js-no-auto-disable"
+        >
+          {{ $options.i18n.saveBtnLabel }}
+        </gl-button>
       </form>
     </div>
   </section>

@@ -71,7 +71,10 @@ module Projects
       Project.transaction do
         project.expire_caches_before_rename(@old_path)
 
+        # Apply changes to the project
         update_namespace_and_visibility(@new_namespace)
+        update_shared_runners_settings
+        project.save!
 
         # Notifications
         project.send_move_instructions(@old_path)
@@ -79,11 +82,7 @@ module Projects
         # Directories on disk
         move_project_folders(project)
 
-        # Move missing group labels to project
-        Labels::TransferService.new(current_user, @old_group, project).execute
-
-        # Move missing group milestones
-        Milestones::TransferService.new(current_user, @old_group, project).execute
+        transfer_missing_group_resources(@old_group)
 
         # Move uploads
         move_project_uploads(project)
@@ -103,6 +102,12 @@ module Projects
       refresh_permissions
     end
 
+    def transfer_missing_group_resources(group)
+      Labels::TransferService.new(current_user, group, project).execute
+
+      Milestones::TransferService.new(current_user, group, project).execute
+    end
+
     def allowed_transfer?(current_user, project)
       @new_namespace &&
         can?(current_user, :change_namespace, project) &&
@@ -114,7 +119,6 @@ module Projects
       # Apply new namespace id and visibility level
       project.namespace = to_namespace
       project.visibility_level = to_namespace.visibility_level unless project.visibility_level_allowed_by_group?
-      project.save!
     end
 
     def update_repository_configuration(full_path)
@@ -201,6 +205,14 @@ module Projects
 
     def new_design_repo_path
       "#{new_path}#{::Gitlab::GlRepository::DESIGN.path_suffix}"
+    end
+
+    def update_shared_runners_settings
+      # If a project is being transferred to another group it means it can already
+      # have shared runners enabled but we need to check whether the new group allows that.
+      if project.group && project.group.shared_runners_setting == 'disabled_and_unoverridable'
+        project.shared_runners_enabled = false
+      end
     end
   end
 end

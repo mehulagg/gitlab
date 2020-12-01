@@ -3,9 +3,11 @@
 require 'spec_helper'
 
 RSpec.describe ComplianceManagement::ComplianceFramework::ProjectSettings do
-  let(:known_frameworks) { ComplianceManagement::ComplianceFramework::ProjectSettings.frameworks.keys }
+  let_it_be(:group) { create(:group) }
+  let_it_be(:sub_group) { create(:group, parent: group) }
+  let_it_be(:project) { create(:project, group: sub_group) }
 
-  subject { build :compliance_framework_project_setting }
+  subject { build(:compliance_framework_project_setting, project: project) }
 
   describe 'Associations' do
     it 'belongs to project' do
@@ -17,17 +19,24 @@ RSpec.describe ComplianceManagement::ComplianceFramework::ProjectSettings do
     it 'confirms the presence of project' do
       expect(subject).to validate_presence_of(:project)
     end
+  end
 
-    it 'confirms that the framework is unique for the project' do
-      expect(subject).to validate_uniqueness_of(:framework).scoped_to(:project_id).ignoring_case_sensitivity
+  describe 'creation of ComplianceManagement::Framework record' do
+    subject { create(:compliance_framework_project_setting, :sox, project: project) }
+
+    it 'creates a new record' do
+      expect(subject.reload.compliance_management_framework.name).to eq('SOX')
     end
+  end
 
-    it 'allows all known frameworks' do
-      expect(subject).to allow_values(*known_frameworks).for(:framework)
-    end
+  describe 'set a custom ComplianceManagement::Framework' do
+    let(:framework) { create(:compliance_framework, name: 'my framework') }
 
-    it 'invalidates an unknown framework' do
-      expect { build :compliance_framework_project_setting, framework: 'ABCDEFGH' }.to raise_error(ArgumentError).with_message(/is not a valid framework/)
+    it 'assigns the framework' do
+      subject.compliance_management_framework = framework
+      subject.save!
+
+      expect(subject.compliance_management_framework.name).to eq('my framework')
     end
   end
 end

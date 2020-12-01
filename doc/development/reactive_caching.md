@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # `ReactiveCaching`
 
 > This doc refers to <https://gitlab.com/gitlab-org/gitlab/blob/master/app/models/concerns/reactive_caching.rb>.
@@ -85,9 +91,7 @@ The ReactiveCaching concern can be used in models as well as `project_services`
 
 1. Implement the `calculate_reactive_cache` method in your model/service.
 1. Call `with_reactive_cache` in your model/service where the cached value is needed.
-1. If the `calculate_reactive_cache` method above submits requests to external services
-(e.g. Prometheus, K8s), make sure to change the
-[`reactive_cache_work_type` accordingly](#selfreactive_cache_work_type).
+1. Set the [`reactive_cache_work_type` accordingly](#selfreactive_cache_work_type).
 
 ### In controllers
 
@@ -252,7 +256,7 @@ self.reactive_cache_hard_limit = 5.megabytes
 - This is the type of work performed by the `calculate_reactive_cache` method. Based on this attribute,
 it's able to pick the right worker to process the caching job. Make sure to
 set it as `:external_dependency` if the work performs any external request
-(e.g. Kubernetes, Sentry).
+(e.g. Kubernetes, Sentry); otherwise set it to `:no_dependency`.
 
 #### `self.reactive_cache_worker_finder`
 

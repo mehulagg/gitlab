@@ -35,6 +35,7 @@ class FeatureFlagOptionParser
     :name,
     :type,
     :group,
+    :milestone,
     :ee,
     :amend,
     :dry_run,
@@ -60,11 +61,15 @@ class FeatureFlagOptionParser
           options.force = value
         end
 
-        opts.on('-m', '--introduced-by-url [string]', String, 'URL to Merge Request introducing Feature Flag') do |value|
+        opts.on('-m', '--introduced-by-url [string]', String, 'URL of Merge Request introducing the Feature Flag') do |value|
           options.introduced_by_url = value
         end
 
-        opts.on('-i', '--rollout-issue-url [string]', String, 'URL to Issue rolling out Feature Flag') do |value|
+        opts.on('-M', '--milestone [string]', String, 'Milestone in which the Feature Flag was introduced') do |value|
+          options.milestone = value
+        end
+
+        opts.on('-i', '--rollout-issue-url [string]', String, 'URL of Issue rolling out the Feature Flag') do |value|
           options.rollout_issue_url = value
         end
 
@@ -99,14 +104,14 @@ class FeatureFlagOptionParser
       end
 
       # Name is a first name
-      options.name = argv.first
+      options.name = argv.first.downcase.gsub(/-/, '_')
 
       options
     end
 
     def read_group
       $stdout.puts
-      $stdout.puts ">> Please specify the group introducing feature flag, like `group::apm`:"
+      $stdout.puts ">> Specify the group introducing the feature flag, like `group::apm`:"
 
       loop do
         $stdout.print "?> "
@@ -114,7 +119,7 @@ class FeatureFlagOptionParser
         group = nil if group.empty?
         return group if group.nil? || group.start_with?('group::')
 
-        $stderr.puts "Group needs to include `group::`"
+        $stderr.puts "The group needs to include `group::`"
       end
     end
 
@@ -123,9 +128,11 @@ class FeatureFlagOptionParser
       return TYPES.first.first if TYPES.one?
 
       $stdout.puts
-      $stdout.puts ">> Please specify the type of your feature flag:"
+      $stdout.puts ">> Specify the feature flag type:"
       $stdout.puts
       TYPES.each do |type, data|
+        next if data[:deprecated]
+
         $stdout.puts "#{type.to_s.rjust(15)}#{' '*6}#{data[:description]}"
       end
 
@@ -133,7 +140,7 @@ class FeatureFlagOptionParser
         $stdout.print "?> "
 
         type = $stdin.gets.strip.to_sym
-        return type if TYPES[type]
+        return type if TYPES[type] && !TYPES[type][:deprecated]
 
         $stderr.puts "Invalid type specified '#{type}'"
       end
@@ -141,7 +148,7 @@ class FeatureFlagOptionParser
 
     def read_introduced_by_url
       $stdout.puts
-      $stdout.puts ">> If you have MR open, can you paste the URL here? (or enter to skip)"
+      $stdout.puts ">> URL of the MR introducing the feature flag (enter to skip):"
 
       loop do
         $stdout.print "?> "
@@ -151,6 +158,10 @@ class FeatureFlagOptionParser
 
         $stderr.puts "URL needs to start with https://"
       end
+    end
+
+    def read_ee_only(options)
+      TYPES.dig(options.type, :ee_only)
     end
 
     def read_rollout_issue_url(options)
@@ -166,11 +177,11 @@ class FeatureFlagOptionParser
       issue_new_url = url + "?" + URI.encode_www_form(params)
 
       $stdout.puts
-      $stdout.puts ">> Open this URL and fill the rest of details:"
+      $stdout.puts ">> Open this URL and fill in the rest of the details:"
       $stdout.puts issue_new_url
       $stdout.puts
 
-      $stdout.puts ">> Paste URL of `rollout issue` here, or enter to skip:"
+      $stdout.puts ">> URL of the rollout issue (enter to skip):"
 
       loop do
         $stdout.print "?> "
@@ -180,6 +191,15 @@ class FeatureFlagOptionParser
 
         $stderr.puts "URL needs to start with https://"
       end
+    end
+
+    def read_milestone
+      milestone = File.read('VERSION')
+      milestone.gsub(/^(\d+\.\d+).*$/, '\1').chomp
+    end
+
+    def read_default_enabled(options)
+      TYPES.dig(options.type, :default_enabled)
     end
   end
 end
@@ -200,9 +220,11 @@ class FeatureFlagCreator
 
     # Read type from $stdin unless is already set
     options.type ||= FeatureFlagOptionParser.read_type
+    options.ee ||= FeatureFlagOptionParser.read_ee_only(options)
     options.group ||= FeatureFlagOptionParser.read_group
     options.introduced_by_url ||= FeatureFlagOptionParser.read_introduced_by_url
     options.rollout_issue_url ||= FeatureFlagOptionParser.read_rollout_issue_url(options)
+    options.milestone ||= FeatureFlagOptionParser.read_milestone
 
     $stdout.puts "\e[32mcreate\e[0m #{file_path}"
     $stdout.puts contents
@@ -220,14 +242,23 @@ class FeatureFlagCreator
   private
 
   def contents
-    YAML.dump(
+    # Slice is used to ensure that YAML keys
+    # are always ordered in a predictable way
+    config_hash.slice(
+      *::Feature::Shared::PARAMS.map(&:to_s)
+    ).to_yaml
+  end
+
+  def config_hash
+    {
       'name'              => options.name,
       'introduced_by_url' => options.introduced_by_url,
       'rollout_issue_url' => options.rollout_issue_url,
-      'group'             => options.group.to_s,
+      'milestone'         => options.milestone,
+      'group'             => options.group,
       'type'              => options.type.to_s,
-      'default_enabled'   => false
-    ).strip
+      'default_enabled'   => FeatureFlagOptionParser.read_default_enabled(options)
+    }
   end
 
   def write

@@ -38,13 +38,16 @@ module Ci
 
     has_one :deployment, as: :deployable, class_name: 'Deployment'
     has_one :resource, class_name: 'Ci::Resource', inverse_of: :build
+    has_one :pending_state, class_name: 'Ci::BuildPendingState', inverse_of: :build
     has_many :trace_sections, class_name: 'Ci::BuildTraceSection'
-    has_many :trace_chunks, class_name: 'Ci::BuildTraceChunk', foreign_key: :build_id
+    has_many :trace_chunks, class_name: 'Ci::BuildTraceChunk', foreign_key: :build_id, inverse_of: :build
     has_many :report_results, class_name: 'Ci::BuildReportResult', inverse_of: :build
 
     has_many :job_artifacts, class_name: 'Ci::JobArtifact', foreign_key: :job_id, dependent: :destroy, inverse_of: :job # rubocop:disable Cop/ActiveRecordDependent
     has_many :job_variables, class_name: 'Ci::JobVariable', foreign_key: :job_id
     has_many :sourced_pipelines, class_name: 'Ci::Sources::Pipeline', foreign_key: :source_job_id
+
+    has_many :pages_deployments, inverse_of: :ci_build
 
     Ci::JobArtifact.file_types.each do |key, value|
       has_one :"job_artifacts_#{key}", -> { where(file_type: value) }, class_name: 'Ci::JobArtifact', inverse_of: :job, foreign_key: :job_id
@@ -98,6 +101,10 @@ module Ci
           .where('ci_builds.id = ci_job_artifacts.job_id')
           .where(file_type: Ci::JobArtifact::DOWNLOADABLE_TYPES)
       )
+    end
+
+    scope :in_pipelines, ->(pipelines) do
+      where(pipeline: pipelines)
     end
 
     scope :with_existing_job_artifacts, ->(query) do
@@ -175,7 +182,6 @@ module Ci
     end
 
     scope :queued_before, ->(time) { where(arel_table[:queued_at].lt(time)) }
-    scope :order_id_desc, -> { order('ci_builds.id DESC') }
 
     scope :preload_project_and_pipeline_project, -> do
       preload(Ci::Pipeline::PROJECT_ROUTE_AND_NAMESPACE_ROUTE,
@@ -212,6 +218,10 @@ module Ci
           .new(build.project, current_user)
           .execute(build)
         # rubocop: enable CodeReuse/ServiceClass
+      end
+
+      def with_preloads
+        preload(:job_artifacts_archive, :job_artifacts, project: [:namespace])
       end
     end
 
@@ -321,6 +331,8 @@ module Ci
 
       after_transition any => [:success, :failed, :canceled] do |build|
         build.run_after_commit do
+          build.run_status_commit_hooks!
+
           BuildFinishedWorker.perform_async(id)
         end
       end
@@ -367,8 +379,16 @@ module Ci
         Ci::BuildRunnerSession.where(build: build).delete_all
       end
 
-      after_transition any => [:skipped, :canceled] do |build|
-        build.deployment&.cancel
+      after_transition any => [:skipped, :canceled] do |build, transition|
+        if Feature.enabled?(:cd_skipped_deployment_status, build.project)
+          if transition.to_name == :skipped
+            build.deployment&.skip
+          else
+            build.deployment&.cancel
+          end
+        else
+          build.deployment&.cancel
+        end
       end
     end
 
@@ -518,7 +538,6 @@ module Ci
           .concat(job_jwt_variables)
           .concat(scoped_variables)
           .concat(job_variables)
-          .concat(environment_changed_page_variables)
           .concat(persisted_environment_variables)
           .to_runner_variables
       end
@@ -555,15 +574,6 @@ module Ci
       end
     end
 
-    def environment_changed_page_variables
-      Gitlab::Ci::Variables::Collection.new.tap do |variables|
-        break variables unless environment_status && Feature.enabled?(:modifed_path_ci_variables, project)
-
-        variables.append(key: 'CI_MERGE_REQUEST_CHANGED_PAGE_PATHS', value: environment_status.changed_paths.join(','))
-        variables.append(key: 'CI_MERGE_REQUEST_CHANGED_PAGE_URLS', value: environment_status.changed_urls.join(','))
-      end
-    end
-
     def deploy_token_variables
       Gitlab::Ci::Variables::Collection.new.tap do |variables|
         break variables unless gitlab_deploy_token
@@ -571,14 +581,6 @@ module Ci
         variables.append(key: 'CI_DEPLOY_USER', value: gitlab_deploy_token.username)
         variables.append(key: 'CI_DEPLOY_PASSWORD', value: gitlab_deploy_token.token, public: false, masked: true)
       end
-    end
-
-    def dependency_variables
-      return [] if all_dependencies.empty?
-
-      Gitlab::Ci::Variables::Collection.new.concat(
-        Ci::JobVariable.where(job: all_dependencies).dotenv_source
-      )
     end
 
     def features
@@ -774,6 +776,11 @@ module Ci
         end
     end
 
+    def has_expired_locked_archive_artifacts?
+      locked_artifacts? &&
+        artifacts_expire_at.present? && artifacts_expire_at < Time.current
+    end
+
     def has_expiring_archive_artifacts?
       has_expiring_artifacts? && job_artifacts_archive.present?
     end
@@ -823,10 +830,6 @@ module Ci
 
     def credentials
       Gitlab::Ci::Build::Credentials::Factory.new(self).create!
-    end
-
-    def all_dependencies
-      dependencies.all
     end
 
     def has_valid_build_dependencies?
@@ -895,7 +898,11 @@ module Ci
     def collect_test_reports!(test_reports)
       test_reports.get_suite(group_name).tap do |test_suite|
         each_report(Ci::JobArtifact::TEST_REPORT_FILE_TYPES) do |file_type, blob|
-          Gitlab::Ci::Parsers.fabricate!(file_type).parse!(blob, test_suite, job: self)
+          Gitlab::Ci::Parsers.fabricate!(file_type).parse!(
+            blob,
+            test_suite,
+            job: self
+          )
         end
       end
     end
@@ -914,6 +921,14 @@ module Ci
       end
 
       coverage_report
+    end
+
+    def collect_codequality_reports!(codequality_report)
+      each_report(Ci::JobArtifact::CODEQUALITY_REPORT_FILE_TYPES) do |file_type, blob|
+        Gitlab::Ci::Parsers.fabricate!(file_type).parse!(blob, codequality_report)
+      end
+
+      codequality_report
     end
 
     def collect_terraform_reports!(terraform_reports)
@@ -953,17 +968,37 @@ module Ci
       var[:value]&.to_i if var
     end
 
+    def remove_pending_state!
+      pending_state.try(:delete)
+    end
+
+    def run_on_status_commit(&block)
+      status_commit_hooks.push(block)
+    end
+
+    def max_test_cases_per_report
+      # NOTE: This is temporary and will be replaced later by a value
+      # that would come from an actual application limit.
+      ::Gitlab.com? ? 500_000 : 0
+    end
+
+    protected
+
+    def run_status_commit_hooks!
+      status_commit_hooks.reverse_each do |hook|
+        instance_eval(&hook)
+      end
+    end
+
     private
+
+    def status_commit_hooks
+      @status_commit_hooks ||= []
+    end
 
     def auto_retry
       strong_memoize(:auto_retry) do
         Gitlab::Ci::Build::AutoRetry.new(self)
-      end
-    end
-
-    def dependencies
-      strong_memoize(:dependencies) do
-        Ci::BuildDependencies.new(self)
       end
     end
 
@@ -1026,7 +1061,7 @@ module Ci
 
         jwt = Gitlab::Ci::Jwt.for_build(self)
         variables.append(key: 'CI_JOB_JWT', value: jwt, public: false, masked: true)
-      rescue OpenSSL::PKey::RSAError => e
+      rescue OpenSSL::PKey::RSAError, Gitlab::Ci::Jwt::NoSigningKeyError => e
         Gitlab::ErrorTracking.track_exception(e)
       end
     end

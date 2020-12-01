@@ -2,7 +2,7 @@ import Vuex from 'vuex';
 import { shallowMount } from '@vue/test-utils';
 import AxiosMockAdapter from 'axios-mock-adapter';
 import { setTestTimeout } from 'helpers/timeout';
-import { GlNewDropdownItem as GlDropdownItem } from '@gitlab/ui';
+import { GlDropdownItem } from '@gitlab/ui';
 import invalidUrl from '~/lib/utils/invalid_url';
 import axios from '~/lib/utils/axios_utils';
 import AlertWidget from '~/monitoring/components/alert_widget.vue';
@@ -37,8 +37,6 @@ import MonitorStackedColumnChart from '~/monitoring/components/charts/stacked_co
 
 import { createStore, monitoringDashboard } from '~/monitoring/stores';
 import { createStore as createEmbedGroupStore } from '~/monitoring/stores/embed_group';
-
-global.URL.createObjectURL = jest.fn();
 
 const mocks = {
   $toast: {
@@ -94,6 +92,8 @@ describe('Dashboard Panel', () => {
     state = store.state.monitoringDashboard;
 
     axiosMock = new AxiosMockAdapter(axios);
+
+    jest.spyOn(URL, 'createObjectURL');
   });
 
   afterEach(() => {
@@ -106,7 +106,7 @@ describe('Dashboard Panel', () => {
         {},
         {
           slots: {
-            topLeft: `<div class="top-left-content">OK</div>`,
+            'top-left': `<div class="top-left-content">OK</div>`,
           },
         },
       );

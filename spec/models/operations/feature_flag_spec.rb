@@ -7,6 +7,10 @@ RSpec.describe Operations::FeatureFlag do
 
   subject { create(:operations_feature_flag) }
 
+  it_behaves_like 'includes Limitable concern' do
+    subject { build(:operations_feature_flag, project: create(:project)) }
+  end
+
   describe 'associations' do
     it { is_expected.to belong_to(:project) }
     it { is_expected.to have_many(:scopes) }
@@ -21,7 +25,7 @@ RSpec.describe Operations::FeatureFlag do
     context 'a version 1 feature flag' do
       it 'is valid if associated with Operations::FeatureFlagScope models' do
         project = create(:project)
-        feature_flag = described_class.create({ name: 'test', project: project, version: 1,
+        feature_flag = described_class.create!({ name: 'test', project: project, version: 1,
                                  scopes_attributes: [{ environment_scope: '*', active: false }] })
 
         expect(feature_flag).to be_valid
@@ -29,9 +33,10 @@ RSpec.describe Operations::FeatureFlag do
 
       it 'is invalid if associated with Operations::FeatureFlags::Strategy models' do
         project = create(:project)
-        feature_flag = described_class.create({ name: 'test', project: project, version: 1,
+        feature_flag = described_class.new({ name: 'test', project: project, version: 1,
                                  strategies_attributes: [{ name: 'default', parameters: {} }] })
 
+        expect(feature_flag.valid?).to eq(false)
         expect(feature_flag.errors.messages).to eq({
           version_associations: ["version 1 feature flags may not have strategies"]
         })
@@ -41,9 +46,10 @@ RSpec.describe Operations::FeatureFlag do
     context 'a version 2 feature flag' do
       it 'is invalid if associated with Operations::FeatureFlagScope models' do
         project = create(:project)
-        feature_flag = described_class.create({ name: 'test', project: project, version: 2,
+        feature_flag = described_class.new({ name: 'test', project: project, version: 2,
                                  scopes_attributes: [{ environment_scope: '*', active: false }] })
 
+        expect(feature_flag.valid?).to eq(false)
         expect(feature_flag.errors.messages).to eq({
           version_associations: ["version 2 feature flags may not have scopes"]
         })
@@ -51,7 +57,7 @@ RSpec.describe Operations::FeatureFlag do
 
       it 'is valid if associated with Operations::FeatureFlags::Strategy models' do
         project = create(:project)
-        feature_flag = described_class.create({ name: 'test', project: project, version: 2,
+        feature_flag = described_class.create!({ name: 'test', project: project, version: 2,
                                                 strategies_attributes: [{ name: 'default', parameters: {} }] })
 
         expect(feature_flag).to be_valid
@@ -71,7 +77,7 @@ RSpec.describe Operations::FeatureFlag do
     it 'defaults to 1 if unspecified' do
       project = create(:project)
 
-      feature_flag = described_class.create(name: 'my_flag', project: project, active: true)
+      feature_flag = described_class.create!(name: 'my_flag', project: project, active: true)
 
       expect(feature_flag).to be_valid
       expect(feature_flag.version_before_type_cast).to eq(1)
@@ -109,14 +115,14 @@ RSpec.describe Operations::FeatureFlag do
 
     context 'with a version 1 feature flag' do
       it 'creates a default scope' do
-        feature_flag = described_class.create({ name: 'test', project: project, scopes_attributes: [], version: 1 })
+        feature_flag = described_class.create!({ name: 'test', project: project, scopes_attributes: [], version: 1 })
 
         expect(feature_flag.scopes.count).to eq(1)
         expect(feature_flag.scopes.first.environment_scope).to eq('*')
       end
 
       it 'allows specifying the default scope in the parameters' do
-        feature_flag = described_class.create({ name: 'test', project: project,
+        feature_flag = described_class.create!({ name: 'test', project: project,
                                                 scopes_attributes: [{ environment_scope: '*', active: false },
                                                                     { environment_scope: 'review/*', active: true }], version: 1 })
 
@@ -127,7 +133,7 @@ RSpec.describe Operations::FeatureFlag do
 
     context 'with a version 2 feature flag' do
       it 'does not create a default scope' do
-        feature_flag = described_class.create({ name: 'test', project: project, scopes_attributes: [], version: 2 })
+        feature_flag = described_class.create!({ name: 'test', project: project, scopes_attributes: [], version: 2 })
 
         expect(feature_flag.scopes).to eq([])
       end
@@ -253,6 +259,40 @@ RSpec.describe Operations::FeatureFlag do
       flags = described_class.for_unleash_client(project, 'production')
 
       expect(flags.map(&:id)).to eq([feature_flag.id, feature_flag_b.id])
+    end
+  end
+
+  describe '#hook_attrs' do
+    it 'includes expected attributes' do
+      hook_attrs = {
+        id: subject.id,
+        name: subject.name,
+        description: subject.description,
+        active: subject.active
+      }
+      expect(subject.hook_attrs).to eq(hook_attrs)
+    end
+  end
+
+  describe "#execute_hooks" do
+    let_it_be(:user) { create(:user) }
+    let_it_be(:project) { create(:project) }
+    let_it_be(:feature_flag) { create(:operations_feature_flag, project: project) }
+
+    it 'does not execute the hook when feature_flag event is disabled' do
+      create(:project_hook, project: project, feature_flag_events: false)
+      expect(WebHookWorker).not_to receive(:perform_async)
+
+      feature_flag.execute_hooks(user)
+      feature_flag.touch
+    end
+
+    it 'executes hook when feature_flag event is enabled' do
+      hook = create(:project_hook, project: project, feature_flag_events: true)
+      expect(WebHookWorker).to receive(:perform_async).with(hook.id, an_instance_of(Hash), 'feature_flag_hooks')
+
+      feature_flag.execute_hooks(user)
+      feature_flag.touch
     end
   end
 end

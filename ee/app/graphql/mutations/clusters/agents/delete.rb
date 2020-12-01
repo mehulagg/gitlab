@@ -8,8 +8,9 @@ module Mutations
 
         authorize :admin_cluster
 
-        argument :id,
-                 ::Types::GlobalIDType[::Clusters::Agent],
+        AgentID = ::Types::GlobalIDType[::Clusters::Agent]
+
+        argument :id, AgentID,
                  required: true,
                  description: 'Global id of the cluster agent that will be deleted'
 
@@ -27,6 +28,9 @@ module Mutations
         private
 
         def find_object(id:)
+          # TODO: remove this line when the compatibility layer is removed
+          # See: https://gitlab.com/gitlab-org/gitlab/-/issues/257883
+          id = AgentID.coerce_isolated_input(id)
           GitlabSchema.find_by_gid(id)
         end
       end

@@ -2,6 +2,7 @@ import Vue from 'vue';
 import { mapActions } from 'vuex';
 import { identity } from 'lodash';
 import Translate from '~/vue_shared/translate';
+import PerformancePlugin from '~/performance/vue_performance_plugin';
 import ide from './components/ide.vue';
 import { createStore } from './stores';
 import { createRouter } from './ide_router';
@@ -10,6 +11,10 @@ import { resetServiceWorkersPublicPath } from '../lib/utils/webpack';
 import { DEFAULT_THEME } from './lib/themes';
 
 Vue.use(Translate);
+
+Vue.use(PerformancePlugin, {
+  components: ['FileTree'],
+});
 
 /**
  * Function that receives the default store and returns an extended one.
@@ -73,11 +78,9 @@ export function initIde(el, options = {}) {
  * @param {Objects} options - Extra options for the IDE (Used by EE).
  */
 export function startIde(options) {
-  document.addEventListener('DOMContentLoaded', () => {
-    const ideElement = document.getElementById('ide');
-    if (ideElement) {
-      resetServiceWorkersPublicPath();
-      initIde(ideElement, options);
-    }
-  });
+  const ideElement = document.getElementById('ide');
+  if (ideElement) {
+    resetServiceWorkersPublicPath();
+    initIde(ideElement, options);
+  }
 }

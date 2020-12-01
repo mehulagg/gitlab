@@ -1,7 +1,7 @@
 ---
 stage: Create
 group: Source Code
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 disqus_identifier: 'https://docs.gitlab.com/ee/workflow/forking_workflow.html'
 ---
 
@@ -14,7 +14,7 @@ can create a fork.
 
 A fork is a personal copy of the repository and all its branches, which you create
 in a namespace of your choice. This way you can make changes in your own fork and
-submit them through a merge request to the repo you don't have access to.
+submit them through a merge request to the repository you don't have access to.
 
 ## Creating a fork
 

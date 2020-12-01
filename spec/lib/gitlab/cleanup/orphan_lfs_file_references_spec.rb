@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::Cleanup::OrphanLfsFileReferences do
+  include ProjectForksHelper
+
   let(:null_logger) { Logger.new('/dev/null') }
   let(:project) { create(:project, :repository, lfs_enabled: true) }
   let(:lfs_object) { create(:lfs_object) }
@@ -40,10 +42,22 @@ RSpec.describe Gitlab::Cleanup::OrphanLfsFileReferences do
       expect(null_logger).to receive(:info).with("Looking for orphan LFS files for project #{project.name_with_namespace}")
       expect(null_logger).to receive(:info).with("Removed invalid references: 1")
       expect(ProjectCacheWorker).to receive(:perform_async).with(project.id, [], [:lfs_objects_size])
+      expect(service).to receive(:remove_orphan_references).and_call_original
 
       expect { service.run! }.to change { project.lfs_objects.count }.from(2).to(1)
 
       expect(LfsObjectsProject.exists?(invalid_reference.id)).to be_falsey
+    end
+
+    it 'does nothing if the project has no LFS objects' do
+      expect(null_logger).to receive(:info).with(/Looking for orphan LFS files/)
+      expect(null_logger).to receive(:info).with(/Nothing to do/)
+
+      project.lfs_objects_projects.delete_all
+
+      expect(service).not_to receive(:remove_orphan_references)
+
+      service.run!
     end
 
     context 'LFS object is in design repository' do

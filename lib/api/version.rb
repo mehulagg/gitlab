@@ -1,13 +1,15 @@
 # frozen_string_literal: true
 
 module API
-  class Version < Grape::API::Instance
+  class Version < ::API::Base
     helpers ::API::Helpers::GraphqlHelpers
     include APIGuard
 
     allow_access_with_scope :read_user, if: -> (request) { request.get? }
 
     before { authenticate! }
+
+    feature_category :not_owned
 
     METADATA_QUERY = <<~EOF
       {

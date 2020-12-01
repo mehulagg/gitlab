@@ -6,6 +6,7 @@ import { __ } from '~/locale';
 const DEFAULT_PER_PAGE = 20;
 
 const Api = {
+  DEFAULT_PER_PAGE,
   groupsPath: '/api/:version/groups.json',
   groupPath: '/api/:version/groups/:id',
   groupMembersPath: '/api/:version/groups/:id/members',
@@ -20,7 +21,9 @@ const Api = {
   projectPath: '/api/:version/projects/:id',
   forkedProjectsPath: '/api/:version/projects/:id/forks',
   projectLabelsPath: '/:namespace_path/:project_path/-/labels',
+  projectFileSchemaPath: '/:namespace_path/:project_path/-/schema/:ref/:filename',
   projectUsersPath: '/api/:version/projects/:id/users',
+  projectMembersPath: '/api/:version/projects/:id/members',
   projectMergeRequestsPath: '/api/:version/projects/:id/merge_requests',
   projectMergeRequestPath: '/api/:version/projects/:id/merge_requests/:mrid',
   projectMergeRequestChangesPath: '/api/:version/projects/:id/merge_requests/:mrid/changes',
@@ -29,9 +32,11 @@ const Api = {
   projectProtectedBranchesPath: '/api/:version/projects/:id/protected_branches',
   projectSearchPath: '/api/:version/projects/:id/search',
   projectMilestonesPath: '/api/:version/projects/:id/milestones',
+  projectIssuePath: '/api/:version/projects/:id/issues/:issue_iid',
   mergeRequestsPath: '/api/:version/merge_requests',
   groupLabelsPath: '/groups/:namespace_path/-/labels',
   issuableTemplatePath: '/:namespace_path/:project_path/templates/:type/:key',
+  issuableTemplatesPath: '/:namespace_path/:project_path/templates/:type',
   projectTemplatePath: '/api/:version/projects/:id/templates/:type/:key',
   projectTemplatesPath: '/api/:version/projects/:id/templates/:type',
   userCountsPath: '/api/:version/user_counts',
@@ -53,6 +58,7 @@ const Api = {
   releaseLinkPath: '/api/:version/projects/:id/releases/:tag_name/assets/links/:link_id',
   mergeRequestsPipeline: '/api/:version/projects/:id/merge_requests/:merge_request_iid/pipelines',
   adminStatisticsPath: '/api/:version/application/statistics',
+  pipelineJobsPath: '/api/:version/projects/:id/pipelines/:pipeline_id/jobs',
   pipelineSinglePath: '/api/:version/projects/:id/pipelines/:pipeline_id',
   pipelinesPath: '/api/:version/projects/:id/pipelines/',
   createPipelinePath: '/api/:version/projects/:id/pipeline',
@@ -63,6 +69,11 @@ const Api = {
   issuePath: '/api/:version/projects/:id/issues/:issue_iid',
   tagsPath: '/api/:version/projects/:id/repository/tags',
   freezePeriodsPath: '/api/:version/projects/:id/freeze_periods',
+  usageDataIncrementUniqueUsersPath: '/api/:version/usage_data/increment_unique_users',
+  featureFlagUserLists: '/api/:version/projects/:id/feature_flags_user_lists',
+  featureFlagUserList: '/api/:version/projects/:id/feature_flags_user_lists/:list_iid',
+  billableGroupMembersPath: '/api/:version/groups/:id/billable_members',
+  containerRegistryDetailsPath: '/api/:version/registry/repositories/:id/',
 
   group(groupId, callback = () => {}) {
     const url = Api.buildUrl(Api.groupPath).replace(':id', groupId);
@@ -99,6 +110,11 @@ const Api = {
     return axios.delete(url);
   },
 
+  containerRegistryDetails(registryId, options = {}) {
+    const url = Api.buildUrl(this.containerRegistryDetailsPath).replace(':id', registryId);
+    return axios.get(url, options);
+  },
+
   groupMembers(id, options) {
     const url = Api.buildUrl(this.groupMembersPath).replace(':id', encodeURIComponent(id));
 
@@ -108,6 +124,12 @@ const Api = {
         ...options,
       },
     });
+  },
+
+  inviteGroupMember(id, data) {
+    const url = Api.buildUrl(this.groupMembersPath).replace(':id', encodeURIComponent(id));
+
+    return axios.post(url, data);
   },
 
   groupMilestones(id, options) {
@@ -192,6 +214,12 @@ const Api = {
         },
       })
       .then(({ data }) => data);
+  },
+
+  inviteProjectMembers(id, data) {
+    const url = Api.buildUrl(this.projectMembersPath).replace(':id', encodeURIComponent(id));
+
+    return axios.post(url, data);
   },
 
   // Return single project
@@ -316,6 +344,14 @@ const Api = {
     });
   },
 
+  addProjectIssueAsTodo(projectId, issueIid) {
+    const url = Api.buildUrl(Api.projectIssuePath)
+      .replace(':id', encodeURIComponent(projectId))
+      .replace(':issue_iid', encodeURIComponent(issueIid));
+
+    return axios.post(`${url}/todo`);
+  },
+
   mergeRequests(params = {}) {
     const url = Api.buildUrl(Api.mergeRequestsPath);
 
@@ -365,7 +401,7 @@ const Api = {
   },
 
   commitMultiple(id, data) {
-    // see https://docs.gitlab.com/ce/api/commits.html#create-a-commit-with-multiple-files-and-actions
+    // see https://docs.gitlab.com/ee/api/commits.html#create-a-commit-with-multiple-files-and-actions
     const url = Api.buildUrl(Api.commitsPath).replace(':id', encodeURIComponent(id));
     return axios.post(url, JSON.stringify(data), {
       headers: {
@@ -433,15 +469,36 @@ const Api = {
   },
 
   issueTemplate(namespacePath, projectPath, key, type, callback) {
-    const url = Api.buildUrl(Api.issuableTemplatePath)
-      .replace(':key', encodeURIComponent(key))
-      .replace(':type', type)
-      .replace(':project_path', projectPath)
-      .replace(':namespace_path', namespacePath);
+    const url = this.buildIssueTemplateUrl(
+      Api.issuableTemplatePath,
+      type,
+      projectPath,
+      namespacePath,
+    ).replace(':key', encodeURIComponent(key));
     return axios
       .get(url)
       .then(({ data }) => callback(null, data))
       .catch(callback);
+  },
+
+  issueTemplates(namespacePath, projectPath, type, callback) {
+    const url = this.buildIssueTemplateUrl(
+      Api.issuableTemplatesPath,
+      type,
+      projectPath,
+      namespacePath,
+    );
+    return axios
+      .get(url)
+      .then(({ data }) => callback(null, data))
+      .catch(callback);
+  },
+
+  buildIssueTemplateUrl(path, type, projectPath, namespacePath) {
+    return Api.buildUrl(path)
+      .replace(':type', type)
+      .replace(':project_path', projectPath)
+      .replace(':namespace_path', namespacePath);
   },
 
   users(query, options) {
@@ -509,12 +566,13 @@ const Api = {
     });
   },
 
-  postUserStatus({ emoji, message }) {
+  postUserStatus({ emoji, message, availability }) {
     const url = Api.buildUrl(this.userPostStatusPath);
 
     return axios.put(url, {
       emoji,
       message,
+      availability,
     });
   },
 
@@ -587,6 +645,14 @@ const Api = {
       .replace(':pipeline_id', encodeURIComponent(pipelineId));
 
     return axios.get(url);
+  },
+
+  pipelineJobs(projectId, pipelineId, params) {
+    const url = Api.buildUrl(this.pipelineJobsPath)
+      .replace(':id', encodeURIComponent(projectId))
+      .replace(':pipeline_id', encodeURIComponent(pipelineId));
+
+    return axios.get(url, { params });
   },
 
   // Return all pipelines for a project or filter by query params
@@ -685,8 +751,83 @@ const Api = {
     return axios.post(url, freezePeriod);
   },
 
+  trackRedisHllUserEvent(event) {
+    if (!gon.features?.usageDataApi) {
+      return null;
+    }
+
+    const url = Api.buildUrl(this.usageDataIncrementUniqueUsersPath);
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+
+    return axios.post(url, { event }, { headers });
+  },
+
   buildUrl(url) {
     return joinPaths(gon.relative_url_root || '', url.replace(':version', gon.api_version));
+  },
+
+  fetchFeatureFlagUserLists(id, page) {
+    const url = Api.buildUrl(this.featureFlagUserLists).replace(':id', id);
+
+    return axios.get(url, { params: { page } });
+  },
+
+  searchFeatureFlagUserLists(id, search) {
+    const url = Api.buildUrl(this.featureFlagUserLists).replace(':id', id);
+
+    return axios.get(url, { params: { search } });
+  },
+
+  createFeatureFlagUserList(id, list) {
+    const url = Api.buildUrl(this.featureFlagUserLists).replace(':id', id);
+
+    return axios.post(url, list);
+  },
+
+  fetchFeatureFlagUserList(id, listIid) {
+    const url = Api.buildUrl(this.featureFlagUserList)
+      .replace(':id', id)
+      .replace(':list_iid', listIid);
+
+    return axios.get(url);
+  },
+
+  updateFeatureFlagUserList(id, list) {
+    const url = Api.buildUrl(this.featureFlagUserList)
+      .replace(':id', id)
+      .replace(':list_iid', list.iid);
+
+    return axios.put(url, list);
+  },
+
+  deleteFeatureFlagUserList(id, listIid) {
+    const url = Api.buildUrl(this.featureFlagUserList)
+      .replace(':id', id)
+      .replace(':list_iid', listIid);
+
+    return axios.delete(url);
+  },
+
+  fetchBillableGroupMembersList(namespaceId, options = {}, callback = () => {}) {
+    const url = Api.buildUrl(this.billableGroupMembersPath).replace(':id', namespaceId);
+    const defaults = {
+      per_page: DEFAULT_PER_PAGE,
+      page: 1,
+    };
+
+    return axios
+      .get(url, {
+        params: {
+          ...defaults,
+          ...options,
+        },
+      })
+      .then(({ data, headers }) => {
+        callback(data);
+        return { data, headers };
+      });
   },
 };
 

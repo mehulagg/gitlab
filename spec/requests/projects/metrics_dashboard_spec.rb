@@ -39,7 +39,9 @@ RSpec.describe 'Projects::MetricsDashboardController' do
 
     context 'with anonymous user and public dashboard visibility' do
       let(:anonymous_user) { create(:user) }
-      let(:project) { create(:project, :public) }
+      let(:project) do
+        create(:project, :public, :metrics_dashboard_enabled)
+      end
 
       before do
         project.update!(metrics_dashboard_access_level: 'enabled')
@@ -68,7 +70,7 @@ RSpec.describe 'Projects::MetricsDashboardController' do
 
     context 'when query param environment does not exist' do
       it 'responds with 404' do
-        send_request(environment: 99)
+        send_request(environment: non_existing_record_id)
         expect(response).to have_gitlab_http_status(:not_found)
       end
     end
@@ -103,7 +105,7 @@ RSpec.describe 'Projects::MetricsDashboardController' do
 
     context 'when query param environment does not exist' do
       it 'responds with 404' do
-        send_request(dashboard_path: dashboard_path, environment: 99)
+        send_request(dashboard_path: dashboard_path, environment: non_existing_record_id)
         expect(response).to have_gitlab_http_status(:not_found)
       end
     end

@@ -6,8 +6,8 @@ RSpec.shared_examples 'a Geo framework registry' do
   context 'finders' do
     let!(:failed_item1) { create(registry_class_factory, :failed) }
     let!(:failed_item2) { create(registry_class_factory, :failed) }
-    let!(:unsynced_item1) { create(registry_class_factory) }
-    let!(:unsynced_item2) { create(registry_class_factory) }
+    let!(:unsynced_item1) { create(registry_class_factory) } # rubocop:disable Rails/SaveBang
+    let!(:unsynced_item2) { create(registry_class_factory) } # rubocop:disable Rails/SaveBang
 
     describe '.find_registries_never_attempted_sync' do
       it 'returns unsynced items' do

@@ -856,6 +856,55 @@ RSpec.describe API::MergeRequests do
       expect(json_response.first['id']).to eq merge_request_closed.id
     end
 
+    context 'when filtering by deployments' do
+      let_it_be(:mr) do
+        create(:merge_request, :merged, source_project: project, target_project: project)
+      end
+
+      before do
+        env = create(:environment, project: project, name: 'staging')
+        deploy = create(:deployment, :success, environment: env, deployable: nil)
+
+        deploy.link_merge_requests(MergeRequest.where(id: mr.id))
+      end
+
+      it 'supports getting merge requests deployed to an environment' do
+        get api(endpoint_path, user), params: { environment: 'staging' }
+
+        expect(json_response.first['id']).to eq mr.id
+      end
+
+      it 'does not return merge requests for an environment without deployments' do
+        get api(endpoint_path, user), params: { environment: 'bla' }
+
+        expect_empty_array_response
+      end
+
+      it 'supports getting merge requests deployed after a date' do
+        get api(endpoint_path, user), params: { deployed_after: '1990-01-01' }
+
+        expect(json_response.first['id']).to eq mr.id
+      end
+
+      it 'does not return merge requests not deployed after a given date' do
+        get api(endpoint_path, user), params: { deployed_after: '2100-01-01' }
+
+        expect_empty_array_response
+      end
+
+      it 'supports getting merge requests deployed before a date' do
+        get api(endpoint_path, user), params: { deployed_before: '2100-01-01' }
+
+        expect(json_response.first['id']).to eq mr.id
+      end
+
+      it 'does not return merge requests not deployed before a given date' do
+        get api(endpoint_path, user), params: { deployed_before: '1990-01-01' }
+
+        expect_empty_array_response
+      end
+    end
+
     context 'a project which enforces all discussions to be resolved' do
       let_it_be(:project) { create(:project, :repository, only_allow_merge_if_all_discussions_are_resolved: true) }
 
@@ -1140,7 +1189,7 @@ RSpec.describe API::MergeRequests do
 
     context 'when a merge request has more than the changes limit' do
       it "returns a string indicating that more changes were made" do
-        stub_const('Commit::DIFF_HARD_LIMIT_FILES', 5)
+        allow(Commit).to receive(:diff_hard_limit_files).and_return(5)
 
         merge_request_overflow = create(:merge_request, :simple,
                                         author: user,
@@ -1263,13 +1312,44 @@ RSpec.describe API::MergeRequests do
   end
 
   describe 'GET /projects/:id/merge_requests/:merge_request_iid/changes' do
-    let_it_be(:merge_request) { create(:merge_request, :simple, author: user, assignees: [user], source_project: project, target_project: project, source_branch: 'markdown', title: "Test", created_at: base_time) }
+    let_it_be(:merge_request) do
+      create(
+        :merge_request,
+        :simple,
+        author: user,
+        assignees: [user],
+        source_project: project,
+        target_project: project,
+        source_branch: 'markdown',
+        title: "Test",
+        created_at: base_time
+      )
+    end
 
-    it 'returns the change information of the merge_request' do
-      get api("/projects/#{project.id}/merge_requests/#{merge_request.iid}/changes", user)
+    shared_examples 'find an existing merge request' do
+      it 'returns the change information of the merge_request' do
+        get api("/projects/#{project.id}/merge_requests/#{merge_request.iid}/changes", user)
 
-      expect(response).to have_gitlab_http_status(:ok)
-      expect(json_response['changes'].size).to eq(merge_request.diffs.size)
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response['changes'].size).to eq(merge_request.diffs.size)
+        expect(json_response['overflow']).to be_falsy
+      end
+    end
+
+    shared_examples 'accesses diffs via raw_diffs' do
+      let(:params) { {} }
+
+      it 'as expected' do
+        expect_any_instance_of(MergeRequest) do |merge_request|
+          expect(merge_request).to receive(:raw_diffs).and_call_original
+        end
+
+        expect_any_instance_of(MergeRequest) do |merge_request|
+          expect(merge_request).not_to receive(:diffs)
+        end
+
+        get(api("/projects/#{project.id}/merge_requests/#{merge_request.iid}/changes", user), params: params)
+      end
     end
 
     it 'returns a 404 when merge_request_iid not found' do
@@ -1281,6 +1361,53 @@ RSpec.describe API::MergeRequests do
       get api("/projects/#{project.id}/merge_requests/#{merge_request.id}/changes", user)
 
       expect(response).to have_gitlab_http_status(:not_found)
+    end
+
+    it_behaves_like 'find an existing merge request'
+    it_behaves_like 'accesses diffs via raw_diffs'
+
+    it 'returns the overflow status as false' do
+      get api("/projects/#{project.id}/merge_requests/#{merge_request.iid}/changes", user)
+
+      expect(response).to have_gitlab_http_status(:ok)
+      expect(json_response['overflow']).to be_falsy
+    end
+
+    context 'when using DB-backed diffs via feature flag' do
+      before do
+        stub_feature_flags(mrc_api_use_raw_diffs_from_gitaly: false)
+      end
+
+      it_behaves_like 'find an existing merge request'
+
+      it 'accesses diffs via DB-backed diffs.diffs' do
+        expect_any_instance_of(MergeRequest) do |merge_request|
+          expect(merge_request).to receive(:diffs).and_call_original
+        end
+
+        get api("/projects/#{project.id}/merge_requests/#{merge_request.iid}/changes", user)
+      end
+
+      context 'when the diff_collection has overflowed its size limits' do
+        before do
+          expect_next_instance_of(Gitlab::Git::DiffCollection) do |diff_collection|
+            expect(diff_collection).to receive(:overflow?).and_return(true)
+          end
+        end
+
+        it 'returns the overflow status as true' do
+          get api("/projects/#{project.id}/merge_requests/#{merge_request.iid}/changes", user)
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_response['overflow']).to be_truthy
+        end
+      end
+
+      context 'when access_raw_diffs is passed as an option' do
+        it_behaves_like 'accesses diffs via raw_diffs' do
+          let(:params) { { access_raw_diffs: true } }
+        end
+      end
     end
   end
 
@@ -1759,6 +1886,54 @@ RSpec.describe API::MergeRequests do
         post api("/projects/#{forked_project.id}/merge_requests", user2),
         params: { title: 'Test merge_request', target_branch: 'master', source_branch: 'markdown', author: user2, target_project_id: forked_project.id }
         expect(response).to have_gitlab_http_status(:created)
+      end
+    end
+
+    describe 'SSE counter' do
+      let(:headers) { {} }
+      let(:params) do
+        {
+          title: 'Test merge_request',
+          source_branch: 'feature_conflict',
+          target_branch: 'master',
+          author_id: user.id,
+          milestone_id: milestone.id,
+          squash: true
+        }
+      end
+
+      subject { post api("/projects/#{project.id}/merge_requests", user), params: params, headers: headers }
+
+      it 'does not increase the SSE counter by default' do
+        expect(Gitlab::UsageDataCounters::EditorUniqueCounter).not_to receive(:track_sse_edit_action)
+
+        subject
+
+        expect(response).to have_gitlab_http_status(:created)
+      end
+
+      context 'when referer is not the SSE' do
+        let(:headers) { { 'HTTP_REFERER' => 'https://gitlab.com' } }
+
+        it 'does not increase the SSE counter by default' do
+          expect(Gitlab::UsageDataCounters::EditorUniqueCounter).not_to receive(:track_sse_edit_action)
+
+          subject
+
+          expect(response).to have_gitlab_http_status(:created)
+        end
+      end
+
+      context 'when referer is the SSE' do
+        let(:headers) { { 'HTTP_REFERER' => project_show_sse_url(project, 'master/README.md') } }
+
+        it 'increases the SSE counter by default' do
+          expect(Gitlab::UsageDataCounters::EditorUniqueCounter).to receive(:track_sse_edit_action).with(author: user)
+
+          subject
+
+          expect(response).to have_gitlab_http_status(:created)
+        end
       end
     end
   end
@@ -2354,10 +2529,44 @@ RSpec.describe API::MergeRequests do
       expect(json_response['squash']).to be_truthy
     end
 
-    it "returns merge_request with renamed target_branch" do
+    it "updates target_branch and returns merge_request" do
       put api("/projects/#{project.id}/merge_requests/#{merge_request.iid}", user), params: { target_branch: "wiki" }
       expect(response).to have_gitlab_http_status(:ok)
       expect(json_response['target_branch']).to eq('wiki')
+    end
+
+    context "forked projects" do
+      let_it_be(:user2) { create(:user) }
+      let(:project) { create(:project, :public, :repository) }
+      let!(:forked_project) { fork_project(project, user2, repository: true) }
+      let(:merge_request) do
+        create(:merge_request,
+               source_project: forked_project,
+               target_project: project,
+               source_branch: "fixes")
+      end
+
+      shared_examples "update of allow_collaboration and allow_maintainer_to_push" do |request_value, expected_value|
+        %w[allow_collaboration allow_maintainer_to_push].each do |attr|
+          it "attempts to update #{attr} to #{request_value} and returns #{expected_value} for `allow_collaboration`" do
+            put api("/projects/#{project.id}/merge_requests/#{merge_request.iid}", user2), params: { attr => request_value }
+
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(json_response["allow_collaboration"]).to eq(expected_value)
+            expect(json_response["allow_maintainer_to_push"]).to eq(expected_value)
+          end
+        end
+      end
+
+      context "when source project is public (i.e. MergeRequest#collaborative_push_possible? == true)" do
+        it_behaves_like "update of allow_collaboration and allow_maintainer_to_push", true, true
+      end
+
+      context "when source project is private (i.e. MergeRequest#collaborative_push_possible? == false)" do
+        let(:project) { create(:project, :private, :repository) }
+
+        it_behaves_like "update of allow_collaboration and allow_maintainer_to_push", true, false
+      end
     end
 
     it "returns merge_request that removes the source branch" do

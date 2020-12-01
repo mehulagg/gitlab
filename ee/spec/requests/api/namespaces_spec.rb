@@ -5,9 +5,10 @@ require 'spec_helper'
 RSpec.describe API::Namespaces do
   let(:admin) { create(:admin) }
   let(:user) { create(:user) }
-  let!(:group1) { create(:group, name: 'test.test-group.2') }
-  let!(:group2) { create(:group, :nested) }
-  let!(:gold_plan) { create(:gold_plan) }
+
+  let_it_be(:group1, reload: true) { create(:group, name: 'test.test-group.2') }
+  let_it_be(:group2) { create(:group, :nested) }
+  let_it_be(:gold_plan) { create(:gold_plan) }
 
   describe "GET /namespaces" do
     context "when authenticated as admin" do
@@ -111,6 +112,62 @@ RSpec.describe API::Namespaces do
           get api("/namespaces?requested_hosted_plan=gold", user)
 
           expect(json_response.first['billable_members_count']).to eq(2)
+        end
+      end
+    end
+
+    context 'with gitlab subscription' do
+      before do
+        group1.add_guest(user)
+
+        create(:gitlab_subscription, namespace: group1, max_seats_used: 1, seats_in_use: 1)
+      end
+
+      it "avoids additional N+1 database queries" do
+        control = ActiveRecord::QueryRecorder.new(skip_cached: false) { get api("/namespaces", user) }
+
+        create(:gitlab_subscription, namespace: group2, max_seats_used: 2)
+        group2.add_guest(user)
+
+        group3 = create(:group)
+        create(:gitlab_subscription, namespace: group3, max_seats_used: 3)
+        group3.add_guest(user)
+
+        # We seem to have some N+1 queries.
+        # The saml_provider association adds one for each group (saml_provider is
+        #   an association on group, not namespace).
+        # The route adds one for each namespace.
+        # And more...
+        expect { get api("/namespaces", user) }.not_to exceed_all_query_limit(control).with_threshold(7)
+      end
+
+      it 'includes max_seats_used' do
+        get api("/namespaces", user)
+
+        expect(json_response.first['max_seats_used']).to eq(1)
+      end
+
+      it 'includes seats_in_use' do
+        get api("/namespaces", user)
+
+        expect(json_response.first['seats_in_use']).to eq(1)
+      end
+    end
+
+    context 'without gitlab subscription' do
+      it 'does not include max_seats_used' do
+        get api("/namespaces", user)
+
+        json_response.each do |resp|
+          expect(resp.keys).not_to include('max_seats_used')
+        end
+      end
+
+      it 'does not include seats_in_use' do
+        get api("/namespaces", user)
+
+        json_response.each do |resp|
+          expect(resp.keys).not_to include('seats_in_use')
         end
       end
     end
@@ -285,7 +342,7 @@ RSpec.describe API::Namespaces do
     end
 
     context 'when authenticated as a regular user' do
-      it 'returns an unauthroized error' do
+      it 'returns an unauthorized error' do
         do_post(user, params)
 
         expect(response).to have_gitlab_http_status(:forbidden)
@@ -347,7 +404,7 @@ RSpec.describe API::Namespaces do
     end
 
     context 'with a regular user' do
-      it 'returns an unauthroized error' do
+      it 'returns an unauthorized error' do
         do_get(developer)
 
         expect(response).to have_gitlab_http_status(:forbidden)
@@ -401,7 +458,7 @@ RSpec.describe API::Namespaces do
     end
 
     context 'when authenticated as a regular user' do
-      it 'returns an unauthroized error' do
+      it 'returns an unauthorized error' do
         do_put(namespace.id, user, { seats: 150 })
 
         expect(response).to have_gitlab_http_status(:forbidden)

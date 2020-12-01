@@ -45,9 +45,9 @@ exports[`Alert integration settings form default state should match the default 
         </gl-link-stub>
       </label>
        
-      <gl-new-dropdown-stub
+      <gl-dropdown-stub
         block="true"
-        category="tertiary"
+        category="primary"
         data-qa-selector="incident_templates_dropdown"
         headertext=""
         id="alert-integration-settings-issue-template"
@@ -55,11 +55,12 @@ exports[`Alert integration settings form default state should match the default 
         text="selecte_tmpl"
         variant="default"
       >
-        <gl-new-dropdown-item-stub
+        <gl-dropdown-item-stub
           avatarurl=""
           data-qa-selector="incident_templates_item"
           iconcolor=""
           iconname=""
+          iconrightarialabel=""
           iconrightname=""
           ischeckitem="true"
           secondarytext=""
@@ -67,8 +68,8 @@ exports[`Alert integration settings form default state should match the default 
           
           No template selected
         
-        </gl-new-dropdown-item-stub>
-      </gl-new-dropdown-stub>
+        </gl-dropdown-item-stub>
+      </gl-dropdown-stub>
     </gl-form-group-stub>
      
     <gl-form-group-stub
@@ -93,23 +94,20 @@ exports[`Alert integration settings form default state should match the default 
       </gl-form-checkbox-stub>
     </gl-form-group-stub>
      
-    <div
-      class="gl-display-flex gl-justify-content-end"
+    <gl-button-stub
+      buttontextclasses=""
+      category="primary"
+      class="js-no-auto-disable"
+      data-qa-selector="save_changes_button"
+      icon=""
+      size="medium"
+      type="submit"
+      variant="success"
     >
-      <gl-button-stub
-        category="primary"
-        class="js-no-auto-disable"
-        data-qa-selector="save_changes_button"
-        icon=""
-        size="medium"
-        type="submit"
-        variant="success"
-      >
-        
-        Save changes
       
-      </gl-button-stub>
-    </div>
+      Save changes
+    
+    </gl-button-stub>
   </form>
 </div>
 `;

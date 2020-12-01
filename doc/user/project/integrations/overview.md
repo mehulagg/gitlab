@@ -1,7 +1,7 @@
 ---
 stage: Create
 group: Ecosystem
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Integrations
@@ -50,7 +50,7 @@ Click on the service links to see further configuration instructions and details
 | [Mattermost slash commands](mattermost_slash_commands.md) | Mattermost chat and ChatOps slash commands | No |
 | [Mattermost Notifications](mattermost.md) | Receive event notifications in Mattermost | No |
 | [Microsoft teams](microsoft_teams.md) |  Receive notifications for actions that happen on GitLab into a room on Microsoft Teams using Office 365 Connectors | No |
-| Packagist | Update your project on Packagist, the main Composer repository | Yes |
+| Packagist | Update your projects on Packagist, the main Composer repository | Yes |
 | Pipelines emails | Email the pipeline status to a list of recipients | No |
 | [Slack Notifications](slack.md) | Send GitLab events (for example, an issue was created) to Slack as notifications | No |
 | [Slack slash commands](slack_slash_commands.md) **(CORE ONLY)** | Use slash commands in Slack to control GitLab | No |
@@ -59,6 +59,7 @@ Click on the service links to see further configuration instructions and details
 | [Prometheus](prometheus.md) | Monitor the performance of your deployed apps | No |
 | Pushover | Pushover makes it easy to get real-time notifications on your Android device, iPhone, iPad, and Desktop | No |
 | [Redmine](redmine.md) | Redmine issue tracker | No |
+| [EWM](ewm.md) | EWM work item tracker | No |
 | [Unify Circuit](unify_circuit.md) | Receive events notifications in Unify Circuit | No |
 | [Webex Teams](webex_teams.md) | Receive events notifications in Webex Teams | No |
 | [YouTrack](youtrack.md) | YouTrack issue tracker | No |

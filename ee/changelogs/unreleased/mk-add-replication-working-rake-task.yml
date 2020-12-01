@@ -1,5 +1,0 @@
----
-title: 'Geo: Add rake task to check if DB replication is working'
-merge_request: 41618
-author:
-type: added

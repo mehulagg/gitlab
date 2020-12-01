@@ -1,9 +1,9 @@
 import { shallowMount } from '@vue/test-utils';
-import createStore from 'ee/threat_monitoring/store';
-import ThreatMonitoringSection from 'ee/threat_monitoring/components/threat_monitoring_section.vue';
 import LoadingSkeleton from 'ee/threat_monitoring/components/loading_skeleton.vue';
 import StatisticsHistory from 'ee/threat_monitoring/components/statistics_history.vue';
 import StatisticsSummary from 'ee/threat_monitoring/components/statistics_summary.vue';
+import ThreatMonitoringSection from 'ee/threat_monitoring/components/threat_monitoring_section.vue';
+import createStore from 'ee/threat_monitoring/store';
 
 import { mockNominalHistory, mockAnomalousHistory } from '../mock_data';
 
@@ -31,6 +31,8 @@ describe('ThreatMonitoringSection component', () => {
       timeRange,
       ...state,
     });
+
+    jest.spyOn(store, 'dispatch').mockImplementation(() => Promise.resolve());
 
     wrapper = shallowMount(ThreatMonitoringSection, {
       propsData: {
@@ -108,6 +110,24 @@ describe('ThreatMonitoringSection component', () => {
 
   it('does not show the chart empty state', () => {
     expect(findChartEmptyState().exists()).toBe(false);
+  });
+
+  it('fetches statistics', () => {
+    expect(store.dispatch).toHaveBeenCalledWith('threatMonitoringWaf/fetchStatistics');
+  });
+
+  it('fetches statistics on environment change', async () => {
+    store.dispatch.mockReset();
+    await store.commit('threatMonitoring/SET_CURRENT_ENVIRONMENT_ID', 2);
+
+    expect(store.dispatch).toHaveBeenCalledWith('threatMonitoringWaf/fetchStatistics');
+  });
+
+  it('fetches statistics on time window change', async () => {
+    store.dispatch.mockReset();
+    await store.commit('threatMonitoring/SET_CURRENT_TIME_WINDOW', 'hour');
+
+    expect(store.dispatch).toHaveBeenCalledWith('threatMonitoringWaf/fetchStatistics');
   });
 
   describe('given the statistics are loading', () => {

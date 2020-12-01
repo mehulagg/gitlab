@@ -4,10 +4,13 @@ import {
   GlBadge,
   GlIcon,
   GlButton,
-  GlDeprecatedSkeletonLoading as GlSkeletonLoading,
+  GlSkeletonLoader,
   GlTable,
+  GlPopover,
+  GlLink,
 } from '@gitlab/ui';
 import { s__ } from '~/locale';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import DependencyLicenseLinks from './dependency_license_links.vue';
 import DependencyVulnerabilities from './dependency_vulnerabilities.vue';
 import DependencyLocation from './dependency_location.vue';
@@ -37,9 +40,12 @@ export default {
     GlBadge,
     GlIcon,
     GlButton,
-    GlSkeletonLoading,
+    GlSkeletonLoader,
     GlTable,
+    GlPopover,
+    GlLink,
   },
+  mixins: [glFeatureFlagsMixin()],
   props: {
     dependencies: {
       type: Array,
@@ -67,7 +73,7 @@ export default {
   },
   methods: {
     // The GlTable component mutates the `_showDetails` property on items
-    // passed to it in order to track the visibilty of each row's `row-details`
+    // passed to it in order to track the visibility of each row's `row-details`
     // slot. So, create a deep clone of them here to avoid mutating the
     // `dependencies` prop.
     // We also make sure that `vulnerabilities` is always defined to prevent rendering
@@ -87,6 +93,14 @@ export default {
     { key: 'isVulnerable', label: '', tdClass },
   ],
   DEPENDENCIES_PER_PAGE: 20,
+  DEPENDENCY_PATH_LINK:
+    'https://docs.gitlab.com/ee/user/application_security/dependency_list/#dependency-paths',
+  i18n: {
+    tooltipText: s__(
+      'Dependencies|The component dependency path is based on the lock file. There may be several paths. In these cases, the longest path is displayed.',
+    ),
+    tooltipMoreText: s__('Dependencies|Learn more about dependency paths'),
+  },
 };
 </script>
 
@@ -99,6 +113,29 @@ export default {
     details-td-class="pt-0"
     stacked="md"
   >
+    <template #head(location)="data">
+      {{ data.label }}
+      <template v-if="glFeatures.pathToVulnerableDependency">
+        <gl-icon id="location-info" name="information" class="gl-text-blue-600" />
+        <gl-popover
+          target="location-info"
+          triggers="hover focus"
+          placement="top"
+          :title="s__('Dependencies|Location and dependency path')"
+        >
+          {{ $options.i18n.tooltipText }}
+          <div class="gl-mt-4">
+            <gl-link
+              :href="$options.DEPENDENCY_PATH_LINK"
+              target="_blank"
+              class="font-size-inherit"
+              >{{ $options.i18n.tooltipMoreText }}</gl-link
+            >
+          </div>
+        </gl-popover>
+      </template>
+    </template>
+
     <!-- toggleDetails and detailsShowing are scoped slot props provided by
       GlTable; they mutate/read the item's _showDetails property, which GlTable
       uses to show/hide the row-details slot -->
@@ -152,7 +189,7 @@ export default {
 
     <template #table-busy>
       <div class="mt-2">
-        <gl-skeleton-loading v-for="n in $options.DEPENDENCIES_PER_PAGE" :key="n" :lines="1" />
+        <gl-skeleton-loader v-for="n in $options.DEPENDENCIES_PER_PAGE" :key="n" :lines="1" />
       </div>
     </template>
   </gl-table>

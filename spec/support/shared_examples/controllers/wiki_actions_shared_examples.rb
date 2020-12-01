@@ -14,11 +14,27 @@ RSpec.shared_examples 'wiki controller actions' do
     sign_in(user)
   end
 
+  shared_examples 'recovers from git timeout' do
+    let(:method_name) { :page }
+
+    context 'when we encounter git command errors' do
+      it 'renders the appropriate template', :aggregate_failures do
+        expect(controller).to receive(method_name) do
+          raise ::Gitlab::Git::CommandTimedOut, 'Deadline Exceeded'
+        end
+
+        request
+
+        expect(response).to render_template('shared/wikis/git_error')
+      end
+    end
+  end
+
   describe 'GET #new' do
-    subject { get :new, params: routing_params }
+    subject(:request) { get :new, params: routing_params }
 
     it 'redirects to #show and appends a `random_title` param' do
-      subject
+      request
 
       expect(response).to be_redirect
       expect(response.redirect_url).to match(%r{
@@ -35,7 +51,7 @@ RSpec.shared_examples 'wiki controller actions' do
       end
 
       it 'redirects to the wiki container and displays an error message' do
-        subject
+        request
 
         expect(response).to redirect_to(container)
         expect(flash[:notice]).to eq('Could not create Wiki Repository at this time. Please try again later.')
@@ -46,6 +62,12 @@ RSpec.shared_examples 'wiki controller actions' do
   describe 'GET #pages' do
     before do
       get :pages, params: routing_params.merge(id: wiki_title)
+    end
+
+    it_behaves_like 'recovers from git timeout' do
+      subject(:request) { get :pages, params: routing_params.merge(id: wiki_title) }
+
+      let(:method_name) { :wiki_pages }
     end
 
     it 'assigns the page collections' do
@@ -99,6 +121,12 @@ RSpec.shared_examples 'wiki controller actions' do
       end
     end
 
+    it_behaves_like 'recovers from git timeout' do
+      subject(:request) { get :history, params: routing_params.merge(id: wiki_title) }
+
+      let(:allow_read_wiki)   { true }
+    end
+
     it_behaves_like 'fetching history', :ok do
       let(:allow_read_wiki)   { true }
 
@@ -139,6 +167,10 @@ RSpec.shared_examples 'wiki controller actions' do
         expect(response).to have_gitlab_http_status(:not_found)
       end
     end
+
+    it_behaves_like 'recovers from git timeout' do
+      subject(:request) { get :diff, params: routing_params.merge(id: wiki_title, version_id: wiki.repository.commit.id) }
+    end
   end
 
   describe 'GET #show' do
@@ -146,13 +178,15 @@ RSpec.shared_examples 'wiki controller actions' do
 
     let(:random_title) { nil }
 
-    subject { get :show, params: routing_params.merge(id: id, random_title: random_title) }
+    subject(:request) { get :show, params: routing_params.merge(id: id, random_title: random_title) }
 
     context 'when page exists' do
       let(:id) { wiki_title }
 
+      it_behaves_like 'recovers from git timeout'
+
       it 'renders the page' do
-        subject
+        request
 
         expect(response).to have_gitlab_http_status(:ok)
         expect(response).to render_template('shared/wikis/show')
@@ -161,19 +195,48 @@ RSpec.shared_examples 'wiki controller actions' do
         expect(assigns(:sidebar_limited)).to be(false)
       end
 
-      it 'increases the page view counter' do
-        expect do
-          subject
+      context 'the sidebar fails to load' do
+        before do
+          allow(Wiki).to receive(:for_container).and_return(wiki)
+          wiki.wiki
+          expect(wiki).to receive(:find_sidebar) do
+            raise ::Gitlab::Git::CommandTimedOut, 'Deadline Exceeded'
+          end
+        end
+
+        it 'renders the page, and marks the sidebar as failed' do
+          request
 
           expect(response).to have_gitlab_http_status(:ok)
-        end.to change { Gitlab::UsageDataCounters::WikiPageCounter.read(:view) }.by(1)
+          expect(response).to render_template('shared/wikis/_sidebar')
+          expect(assigns(:page).title).to eq(wiki_title)
+          expect(assigns(:sidebar_page)).to be_nil
+          expect(assigns(:sidebar_wiki_entries)).to be_nil
+          expect(assigns(:sidebar_limited)).to be_nil
+          expect(assigns(:sidebar_error)).to be_a_kind_of(::Gitlab::Git::CommandError)
+        end
+      end
+
+      context 'page view tracking' do
+        it_behaves_like 'tracking unique hll events', :track_unique_wiki_page_views do
+          let(:target_id) { 'wiki_action' }
+          let(:expected_type) { instance_of(String) }
+        end
+
+        it 'increases the page view counter' do
+          expect do
+            request
+
+            expect(response).to have_gitlab_http_status(:ok)
+          end.to change { Gitlab::UsageDataCounters::WikiPageCounter.read(:view) }.by(1)
+        end
       end
 
       context 'when page content encoding is invalid' do
         it 'sets flash error' do
           allow(controller).to receive(:valid_encoding?).and_return(false)
 
-          subject
+          request
 
           expect(response).to have_gitlab_http_status(:ok)
           expect(response).to render_template('shared/wikis/show')
@@ -187,7 +250,7 @@ RSpec.shared_examples 'wiki controller actions' do
 
       context 'when the user can create pages' do
         before do
-          subject
+          request
 
           expect(response).to have_gitlab_http_status(:ok)
           expect(response).to render_template('shared/wikis/edit')
@@ -212,7 +275,7 @@ RSpec.shared_examples 'wiki controller actions' do
         end
 
         it 'shows the empty state' do
-          subject
+          request
 
           expect(response).to have_gitlab_http_status(:ok)
           expect(response).to render_template('shared/wikis/empty')
@@ -226,10 +289,10 @@ RSpec.shared_examples 'wiki controller actions' do
       where(:file_name) { ['dk.png', 'unsanitized.svg', 'git-cheat-sheet.pdf'] }
 
       with_them do
-        let(:id) { upload_file_to_wiki(container, user, file_name) }
+        let(:id) { upload_file_to_wiki(wiki, user, file_name) }
 
         it 'delivers the file with the correct headers' do
-          subject
+          request
 
           expect(response).to have_gitlab_http_status(:ok)
           expect(response.headers['Content-Disposition']).to match(/^inline/)
@@ -255,7 +318,7 @@ RSpec.shared_examples 'wiki controller actions' do
       let(:id_param) { 'invalid' }
 
       it 'redirects to show' do
-        subject
+        request
 
         expect(response).to redirect_to_wiki(wiki, 'invalid')
       end
@@ -265,7 +328,7 @@ RSpec.shared_examples 'wiki controller actions' do
       let(:id_param) { ' ' }
 
       it 'redirects to the home page' do
-        subject
+        request
 
         expect(response).to redirect_to_wiki(wiki, 'home')
       end
@@ -275,7 +338,7 @@ RSpec.shared_examples 'wiki controller actions' do
       it 'redirects to show' do
         allow(controller).to receive(:valid_encoding?).and_return(false)
 
-        subject
+        request
 
         expect(response).to redirect_to_wiki(wiki, wiki.list_pages.first)
       end
@@ -288,7 +351,7 @@ RSpec.shared_examples 'wiki controller actions' do
         allow(page).to receive(:content).and_return(nil)
         allow(controller).to receive(:page).and_return(page)
 
-        subject
+        request
 
         expect(response).to redirect_to_wiki(wiki, page)
       end
@@ -298,15 +361,16 @@ RSpec.shared_examples 'wiki controller actions' do
   describe 'GET #edit' do
     let(:id_param) { wiki_title }
 
-    subject { get(:edit, params: routing_params.merge(id: id_param)) }
+    subject(:request) { get(:edit, params: routing_params.merge(id: id_param)) }
 
     it_behaves_like 'edit action'
+    it_behaves_like 'recovers from git timeout'
 
     context 'when page content encoding is valid' do
       render_views
 
       it 'shows the edit page' do
-        subject
+        request
 
         expect(response).to have_gitlab_http_status(:ok)
         expect(response.body).to include(s_('Wiki|Edit Page'))
@@ -319,7 +383,7 @@ RSpec.shared_examples 'wiki controller actions' do
     let(:new_content) { 'New content' }
     let(:id_param) { wiki_title }
 
-    subject do
+    subject(:request) do
       patch(:update,
             params: routing_params.merge(
               id: id_param,
@@ -333,7 +397,7 @@ RSpec.shared_examples 'wiki controller actions' do
       render_views
 
       it 'updates the page' do
-        subject
+        request
 
         wiki_page = wiki.list_pages(load_content: true).first
 
@@ -348,7 +412,7 @@ RSpec.shared_examples 'wiki controller actions' do
       end
 
       it 'renders the empty state' do
-        subject
+        request
 
         expect(response).to render_template('shared/wikis/empty')
       end
@@ -359,7 +423,7 @@ RSpec.shared_examples 'wiki controller actions' do
     let(:new_title) { 'New title' }
     let(:new_content) { 'New content' }
 
-    subject do
+    subject(:request) do
       post(:create,
             params: routing_params.merge(
               wiki: { title: new_title, content: new_content }
@@ -369,7 +433,7 @@ RSpec.shared_examples 'wiki controller actions' do
     context 'when page is valid' do
       it 'creates the page' do
         expect do
-          subject
+          request
         end.to change { wiki.list_pages.size }.by 1
 
         wiki_page = wiki.find_page(new_title)
@@ -384,7 +448,7 @@ RSpec.shared_examples 'wiki controller actions' do
 
       it 'renders the edit state' do
         expect do
-          subject
+          request
         end.not_to change { wiki.list_pages.size }
 
         expect(response).to render_template('shared/wikis/edit')
@@ -395,7 +459,7 @@ RSpec.shared_examples 'wiki controller actions' do
   describe 'DELETE #destroy' do
     let(:id_param) { wiki_title }
 
-    subject do
+    subject(:request) do
       delete(:destroy,
             params: routing_params.merge(
               id: id_param
@@ -405,7 +469,7 @@ RSpec.shared_examples 'wiki controller actions' do
     context 'when page exists' do
       it 'deletes the page' do
         expect do
-          subject
+          request
         end.to change { wiki.list_pages.size }.by(-1)
       end
 
@@ -418,7 +482,7 @@ RSpec.shared_examples 'wiki controller actions' do
 
         it 'renders the edit state' do
           expect do
-            subject
+            request
           end.not_to change { wiki.list_pages.size }
 
           expect(response).to render_template('shared/wikis/edit')
@@ -432,7 +496,7 @@ RSpec.shared_examples 'wiki controller actions' do
 
       it 'renders 404' do
         expect do
-          subject
+          request
         end.not_to change { wiki.list_pages.size }
 
         expect(response).to have_gitlab_http_status(:not_found)

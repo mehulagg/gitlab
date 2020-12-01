@@ -1,4 +1,4 @@
-import { GlNewDropdownItem as GlDropdownItem } from '@gitlab/ui';
+import { GlDropdownItem } from '@gitlab/ui';
 
 export function renderTotalTime(selector, element, totalTime = {}) {
   const { days, hours, mins, seconds } = totalTime;

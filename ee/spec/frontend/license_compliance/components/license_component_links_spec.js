@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlModal, GlLink, GlIntersperse } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 
 import LicenseComponentLinks, {
   VISIBLE_COMPONENT_COUNT,
@@ -7,7 +7,12 @@ import LicenseComponentLinks, {
 
 describe('LicenseComponentLinks component', () => {
   // data helpers
-  const createComponents = n => [...Array(n).keys()].map(i => ({ name: `component ${i + 1}` }));
+  const createComponents = n =>
+    [...Array(n).keys()].map(i => ({
+      name: `component ${i + 1}`,
+      version: (i + 1) % 2 === 0 ? null : `${i + 1}.0.0`,
+    }));
+
   const addUrls = (components, numComponentsWithUrls = Infinity) =>
     components.map((comp, i) => ({
       ...comp,
@@ -36,6 +41,15 @@ describe('LicenseComponentLinks component', () => {
 
   afterEach(() => {
     wrapper.destroy();
+  });
+
+  it("renders components' name and version", () => {
+    factory({ numComponents: 2, numComponentsWithUrl: 1 });
+    const text = wrapper.text();
+
+    expect(text).toContain(`component 1 (1.0.0)`);
+    expect(text).toContain(`component 2`);
+    expect(text).not.toContain('component 2 (');
   });
 
   it('intersperses the list of licenses correctly', () => {

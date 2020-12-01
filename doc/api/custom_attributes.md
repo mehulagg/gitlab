@@ -1,9 +1,15 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Custom Attributes API
 
 Every API call to custom attributes must be authenticated as administrator.
 
 Custom attributes are currently available on users, groups, and projects,
-which will be referred to as "resource" in this documentation.
+which is referred to as "resource" in this documentation.
 
 ## List custom attributes
 
@@ -68,7 +74,7 @@ Example response:
 
 ## Set custom attribute
 
-Set a custom attribute on a resource. The attribute will be updated if it already exists,
+Set a custom attribute on a resource. The attribute is updated if it already exists,
 or newly created otherwise.
 
 ```plaintext

@@ -468,7 +468,6 @@ $gl-line-height-20: 20px;
 $gl-line-height-24: 24px;
 $gl-line-height-14: 14px;
 
-$issue-box-upcoming-bg: #8f8f8f;
 $pages-group-name-color: #4c4e54;
 
 /*
@@ -618,7 +617,6 @@ $award-emoji-width-xs: 90%;
 $search-input-border-color: rgba($blue-400, 0.8);
 $search-input-width: 200px;
 $search-input-xl-width: 320px;
-$location-icon-color: #e7e9ed;
 
 /*
  *  Notes
@@ -781,7 +779,6 @@ $login-brand-holder-color: #888;
 * Projects
 */
 $project-option-descr-color: #54565b;
-$project-network-controls-color: #888;
 
 /*
  * Monitor Charts
@@ -820,7 +817,6 @@ $pipeline-dropdown-line-height: 20px;
 $pipeline-dropdown-status-icon-size: 18px;
 $ci-action-dropdown-button-size: 24px;
 $ci-action-dropdown-svg-size: 12px;
-$pipelines-table-header-height: 40px;
 
 /*
 CI variable lists
@@ -869,9 +865,6 @@ $add-to-slack-popup-max-width: 400px;
 $add-to-slack-gif-max-width: 850px;
 $add-to-slack-well-max-width: 750px;
 $add-to-slack-logo-size: 100px;
-$double-headed-arrow-width: 100px;
-$double-headed-arrow-height: 25px;
-$right-arrow-size: 16px;
 
 /*
 Popup
@@ -924,8 +917,3 @@ $compare-branches-sticky-header-height: 68px;
  - Issue: https://gitlab.com/gitlab-org/design.gitlab.com/issues/242
  */
 $enable-validation-icons: false;
-
-/*
-Licenses
-*/
-$license-header-cell-width: 150px;

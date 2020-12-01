@@ -2,10 +2,8 @@ import initVueAlerts from '~/vue_alerts';
 import initConfirmModal from '~/confirm_modal';
 import showToast from '~/vue_shared/plugins/global_toast';
 
-document.addEventListener('DOMContentLoaded', () => {
-  initVueAlerts();
-  initConfirmModal();
+initVueAlerts();
+initConfirmModal();
 
-  const toasts = document.querySelectorAll('.js-toast-message');
-  toasts.forEach(toast => showToast(toast.dataset.message));
-});
+const toasts = document.querySelectorAll('.js-toast-message');
+toasts.forEach(toast => showToast(toast.dataset.message));

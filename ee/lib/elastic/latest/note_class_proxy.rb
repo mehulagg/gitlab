@@ -11,10 +11,12 @@ module Elastic
 
       def elastic_search(query, options: {})
         options[:in] = ['note']
-
         query_hash = basic_query_hash(%w[note], query)
-        query_hash = project_ids_filter(query_hash, options)
-        query_hash = confidentiality_filter(query_hash, options)
+
+        context.name(:note) do
+          query_hash = context.name(:authorized) { project_ids_filter(query_hash, options) }
+          query_hash = context.name(:confidentiality) { confidentiality_filter(query_hash, options) }
+        end
 
         query_hash[:highlight] = highlight_options(options[:in])
 
@@ -35,18 +37,20 @@ module Elastic
                 must: [
                   {
                     bool: {
-                    should: [
-                      { bool: { must_not: [{ exists: { field: :issue } }] } },
-                      { term: { "issue.confidential" => false } }
-                    ]
+                      _name: context.name(:issue, :not_confidential),
+                      should: [
+                        { bool: { must_not: [{ exists: { field: :issue } }] } },
+                        { term: { "issue.confidential" => false } }
+                      ]
                     }
                   },
                   {
                     bool: {
-                    should: [
-                      { bool: { must_not: [{ exists: { field: :confidential } }] } },
-                      { term: { confidential: false } }
-                    ]
+                      _name: context.name(:not_confidential),
+                      should: [
+                        { bool: { must_not: [{ exists: { field: :confidential } }] } },
+                        { term: { confidential: false } }
+                      ]
                     }
                   }
                 ]
@@ -62,17 +66,17 @@ module Elastic
                 {
                   bool: {
                     should: [
-                      { term: { "issue.confidential" => true } },
-                      { term: { confidential: true } }
+                      { term: { "issue.confidential" => { _name: context.name(:issue, :confidential), value: true } } },
+                      { term: { confidential: { _name: context.name(:confidential), value: true } } }
                     ]
                   }
                 },
                 {
                   bool: {
                     should: [
-                      { term: { "issue.author_id" => current_user.id } },
-                      { term: { "issue.assignee_id" => current_user.id } },
-                      { terms: { project_id: authorized_project_ids(current_user, options) } }
+                      { term: { "issue.author_id" => { _name: context.name(:as_author), value: current_user.id } } },
+                      { term: { "issue.assignee_id" => { _name: context.name(:as_assignee), value: current_user.id } } },
+                      { terms: { _name: context.name(:project, :membership, :id), project_id: authorized_project_ids(current_user, options) } }
                     ]
                   }
                 }
@@ -98,15 +102,18 @@ module Elastic
       def project_ids_filter(query_hash, options)
         query_hash[:query][:bool][:filter] ||= []
 
-        project_query = project_ids_query(
-          options[:current_user],
-          options[:project_ids],
-          options[:public_and_internal_projects],
-          options[:features]
-        )
+        project_query = context.name(:project) do
+          project_ids_query(
+            options[:current_user],
+            options[:project_ids],
+            options[:public_and_internal_projects],
+            options[:features]
+          )
+        end
 
         filters = {
           bool: {
+            _name: context.name,
             should: []
           }
         }
@@ -130,7 +137,7 @@ module Elastic
                     }
                   }
                 },
-                { term: { noteable_type: noteable_type } }
+                { term: { noteable_type: { _name: context.name(:noteable, :is_a, noteable_type), value: noteable_type } } }
               ]
             }
           }
@@ -146,17 +153,19 @@ module Elastic
       override :pick_projects_by_membership
       def pick_projects_by_membership(project_ids, user, _ = nil)
         noteable_type_to_feature.map do |noteable_type, feature|
-          condition =
-            if project_ids == :any
-              { term: { visibility_level: Project::PRIVATE } }
-            else
-              { terms: { id: filter_ids_by_feature(project_ids, user, feature) } }
-            end
+          context.name(feature) do
+            condition =
+              if project_ids == :any
+                { term: { visibility_level: { _name: context.name(:any), value: Project::PRIVATE } } }
+              else
+                { terms: { _name: context.name(:membership, :id), id: filter_ids_by_feature(project_ids, user, feature) } }
+              end
 
-          limit =
-            { terms: { "#{feature}_access_level" => [::ProjectFeature::ENABLED, ::ProjectFeature::PRIVATE] } }
+            limit =
+              { terms: { _name: context.name(:enabled_or_private), "#{feature}_access_level" => [::ProjectFeature::ENABLED, ::ProjectFeature::PRIVATE] } }
 
-          { bool: { filter: [condition, limit] }, noteable_type: noteable_type }
+            { bool: { _name: context.name, filter: [condition, limit] }, noteable_type: noteable_type }
+          end
         end
       end
 
@@ -166,14 +175,16 @@ module Elastic
       override :limit_by_feature
       def limit_by_feature(condition, _ = nil, include_members_only:)
         noteable_type_to_feature.map do |noteable_type, feature|
-          limit =
-            if include_members_only
-              { terms: { "#{feature}_access_level" => [::ProjectFeature::ENABLED, ::ProjectFeature::PRIVATE] } }
-            else
-              { term: { "#{feature}_access_level" => ::ProjectFeature::ENABLED } }
-            end
+          context.name(feature) do
+            limit =
+              if include_members_only
+                { terms: { _name: context.name(:enabled_or_private), "#{feature}_access_level" => [::ProjectFeature::ENABLED, ::ProjectFeature::PRIVATE] } }
+              else
+                { term: { "#{feature}_access_level" => { _name: context.name(:enabled), value: ::ProjectFeature::ENABLED } } }
+              end
 
-          { bool: { filter: [condition, limit] }, noteable_type: noteable_type }
+            { bool: { _name: context.name, filter: [condition, limit] }, noteable_type: noteable_type }
+          end
         end
       end
     end

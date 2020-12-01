@@ -1,9 +1,9 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import Vuex from 'vuex';
 import FilterDropdowns from 'ee/analytics/productivity_analytics/components/filter_dropdowns.vue';
+import { getStoreConfig } from 'ee/analytics/productivity_analytics/store';
 import GroupsDropdownFilter from 'ee/analytics/shared/components/groups_dropdown_filter.vue';
 import ProjectsDropdownFilter from 'ee/analytics/shared/components/projects_dropdown_filter.vue';
-import { getStoreConfig } from 'ee/analytics/productivity_analytics/store';
 import resetStore from '../helpers';
 
 const localVue = createLocalVue();
@@ -21,7 +21,7 @@ describe('FilterDropdowns component', () => {
   const groupId = 1;
   const groupNamespace = 'gitlab-org';
   const projectPath = 'gitlab-org/gitlab-test';
-  const projectId = 10;
+  const projectId = 'gid://gitlab/Project/1';
 
   beforeEach(() => {
     const {
@@ -41,6 +41,7 @@ describe('FilterDropdowns component', () => {
         ...modules,
       },
     });
+
     wrapper = shallowMount(FilterDropdowns, {
       localVue,
       store: mockStore,
@@ -71,6 +72,7 @@ describe('FilterDropdowns component', () => {
     describe('with a group selected', () => {
       beforeEach(() => {
         wrapper.vm.groupId = groupId;
+        mockStore.state.filters.groupNamespace = groupNamespace;
       });
 
       it('renders the projects dropdown', () => {
@@ -107,7 +109,7 @@ describe('FilterDropdowns component', () => {
       describe('when the list of selected projects is not empty', () => {
         beforeEach(() => {
           mockStore.state.filters.groupNamespace = groupNamespace;
-          wrapper.vm.onProjectsSelected([{ id: projectId, path_with_namespace: `${projectPath}` }]);
+          wrapper.vm.onProjectsSelected([{ id: projectId, fullPath: `${projectPath}` }]);
         });
 
         it('invokes setProjectPath action', () => {

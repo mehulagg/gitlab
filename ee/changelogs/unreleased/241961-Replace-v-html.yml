@@ -1,5 +1,0 @@
----
-title: Replace v-html with v-safe-html in dismissal_note.vue
-merge_request: 41137
-author: Kev @KevSlashNull
-type: other

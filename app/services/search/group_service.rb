@@ -16,7 +16,9 @@ module Search
         params[:search],
         projects,
         group: group,
-        filters: { state: params[:state] }
+        order_by: params[:order_by],
+        sort: params[:sort],
+        filters: { state: params[:state], confidential: params[:confidential] }
       )
     end
 

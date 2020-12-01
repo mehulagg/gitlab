@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 
 module API
-  class Features < Grape::API::Instance
+  class Features < ::API::Base
     before { authenticated_as_admin! }
+
+    feature_category :feature_flags
 
     helpers do
       def gate_value(params)
@@ -44,6 +46,15 @@ module API
         present features, with: Entities::Feature, current_user: current_user
       end
 
+      desc 'Get a list of all feature definitions' do
+        success Entities::Feature::Definition
+      end
+      get :definitions do
+        definitions = ::Feature::Definition.definitions.values.map(&:to_h)
+
+        present definitions, with: Entities::Feature::Definition, current_user: current_user
+      end
+
       desc 'Set the gate value for the given feature' do
         success Entities::Feature
       end
@@ -54,6 +65,7 @@ module API
         optional :user, type: String, desc: 'A GitLab username'
         optional :group, type: String, desc: "A GitLab group's path, such as 'gitlab-org'"
         optional :project, type: String, desc: 'A projects path, like gitlab-org/gitlab-ce'
+        optional :force, type: Boolean, desc: 'Skip feature flag validation checks, ie. YAML definition'
 
         mutually_exclusive :key, :feature_group
         mutually_exclusive :key, :user
@@ -61,6 +73,8 @@ module API
         mutually_exclusive :key, :project
       end
       post ':name' do
+        validate_feature_flag_name!(params[:name]) unless params[:force]
+
         feature = Feature.get(params[:name]) # rubocop:disable Gitlab/AvoidFeatureGet
         targets = gate_targets(params)
         value = gate_value(params)
@@ -97,5 +111,13 @@ module API
         no_content!
       end
     end
+
+    helpers do
+      def validate_feature_flag_name!(name)
+        # no-op
+      end
+    end
   end
 end
+
+API::Features.prepend_if_ee('EE::API::Features')

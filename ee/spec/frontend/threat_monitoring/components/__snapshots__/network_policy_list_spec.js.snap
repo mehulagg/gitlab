@@ -6,10 +6,10 @@ exports[`NetworkPolicyList component renders policies table 1`] = `
 <table
   aria-busy="false"
   aria-colcount="3"
-  aria-describedby="__BVID__529__caption_"
+  aria-describedby="__BVID__432__caption_"
   aria-multiselectable="false"
   class="table b-table gl-table table-hover b-table-stacked-md b-table-selectable b-table-select-single"
-  id="__BVID__529"
+  id="__BVID__432"
   role="table"
 >
   <!---->
@@ -25,7 +25,7 @@ exports[`NetworkPolicyList component renders policies table 1`] = `
     >
       <th
         aria-colindex="1"
-        class="w-75 font-weight-bold"
+        class="w-50 font-weight-bold"
         role="columnheader"
         scope="col"
       >

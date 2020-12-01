@@ -21,15 +21,17 @@ module Issues
       user = current_user
       issue.run_after_commit do
         NewIssueWorker.perform_async(issue.id, user.id)
-        IssuePlacementWorker.perform_async(issue.id)
+        IssuePlacementWorker.perform_async(nil, issue.project_id)
       end
     end
 
-    def after_create(issuable)
-      todo_service.new_issue(issuable, current_user)
+    def after_create(issue)
+      add_incident_label(issue)
+      todo_service.new_issue(issue, current_user)
       user_agent_detail_service.create
-      resolve_discussions_with_issue(issuable)
-      delete_milestone_total_issue_counter_cache(issuable.milestone)
+      resolve_discussions_with_issue(issue)
+      delete_milestone_total_issue_counter_cache(issue.milestone)
+      track_incident_action(current_user, issue, :incident_created)
 
       super
     end

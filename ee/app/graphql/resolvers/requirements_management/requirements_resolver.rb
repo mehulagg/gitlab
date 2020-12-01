@@ -3,6 +3,10 @@
 module Resolvers
   module RequirementsManagement
     class RequirementsResolver < BaseResolver
+      include LooksAhead
+
+      type ::Types::RequirementsManagement::RequirementType.connection_type, null: true
+
       argument :iid, GraphQL::ID_TYPE,
                required: false,
                description: 'IID of the requirement, e.g., "1"'
@@ -27,19 +31,29 @@ module Resolvers
                required: false,
                description: 'Filter requirements by author username'
 
-      type Types::RequirementsManagement::RequirementType, null: true
-
-      def resolve(**args)
+      def resolve_with_lookahead(**args)
         # The project could have been loaded in batch by `BatchLoader`.
         # At this point we need the `id` of the project to query for issues, so
         # make sure it's loaded and not `nil` before continuing.
         project = object.respond_to?(:sync) ? object.sync : object
         return ::RequirementsManagement::Requirement.none if project.nil?
-        return ::RequirementsManagement::Requirement.none unless Feature.enabled?(:requirements_management, project, default_enabled: true)
 
         args[:project_id] = project.id
         args[:iids] ||= [args[:iid]].compact
 
+        apply_lookahead(find_requirements(args))
+      end
+
+      private
+
+      def preloads
+        {
+          last_test_report_manually_created: [:test_reports],
+          last_test_report_state: [:test_reports, { test_reports: [:build] }]
+        }
+      end
+
+      def find_requirements(args)
         ::RequirementsManagement::RequirementsFinder.new(context[:current_user], args).execute
       end
     end

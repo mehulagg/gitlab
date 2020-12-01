@@ -1,10 +1,11 @@
+import { GlAlert, GlLink } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
 import { merge } from 'lodash';
-import { GlAlert, GlLink } from '@gitlab/ui';
 import SecurityConfigurationApp from 'ee/security_configuration/components/app.vue';
+import FeatureStatus from 'ee/security_configuration/components/feature_status.vue';
 import ManageFeature from 'ee/security_configuration/components/manage_feature.vue';
-import stubChildren from 'helpers/stub_children';
 import { useLocalStorageSpy } from 'helpers/local_storage_helper';
+import stubChildren from 'helpers/stub_children';
 import LocalStorageSync from '~/vue_shared/components/local_storage_sync.vue';
 import { generateFeatures } from './helpers';
 
@@ -16,6 +17,7 @@ const propsData = {
   autoDevopsPath: 'http://autoDevopsPath',
   helpPagePath: 'http://helpPagePath',
   gitlabCiPresent: false,
+  gitlabCiHistoryPath: '/ci/history',
   autoFixSettingsProps: {},
   createSastMergeRequestPath: 'http://createSastMergeRequestPath',
 };
@@ -173,27 +175,18 @@ describe('Security Configuration App', () => {
         const { feature, status, manage } = getRowCells(rows.at(i));
         expect(feature.text()).toMatch(features[i].name);
         expect(feature.text()).toMatch(features[i].description);
-        expect(status.text()).toMatch(features[i].configured ? 'Enabled' : 'Not enabled');
-        expect(manage.find(ManageFeature).props()).toMatchObject({
+        expect(status.find(FeatureStatus).props()).toEqual({
+          feature: features[i],
+          gitlabCiPresent: propsData.gitlabCiPresent,
+          gitlabCiHistoryPath: propsData.gitlabCiHistoryPath,
+        });
+        expect(manage.find(ManageFeature).props()).toEqual({
           feature: features[i],
           autoDevopsEnabled: propsData.autoDevopsEnabled,
           createSastMergeRequestPath: propsData.createSastMergeRequestPath,
         });
+        expect(feature.find(GlLink).props('href')).toBe(features[i].href);
       }
-    });
-
-    describe('given a feature enabled by Auto DevOps', () => {
-      it('displays the expected status text', () => {
-        const features = generateFeatures(1, {
-          configured: true,
-          status: 'Enabled with Auto DevOps',
-        });
-
-        createComponent({ propsData: { features, autoDevopsEnabled: true } });
-
-        const { status } = getRowCells(getFeaturesRows().at(0));
-        expect(status.text()).toMatch('Enabled with Auto DevOps');
-      });
     });
   });
 });

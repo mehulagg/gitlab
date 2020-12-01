@@ -14,23 +14,9 @@ RSpec.describe 'GroupAnalytics' do
     sign_in(user)
   end
 
-  context 'when the feature is enabled' do
-    it 'renders the container' do
-      visit path
+  it 'renders the container' do
+    visit path
 
-      expect(page).to have_css('#js-group-activity')
-    end
-  end
-
-  context 'when the feature is disabled' do
-    before do
-      stub_feature_flags(group_activity_analytics: false)
-    end
-
-    it 'does not render the container' do
-      visit path
-
-      expect(page).not_to have_css('#js-group-activity')
-    end
+    expect(page).to have_css('#js-group-activity')
   end
 end

@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Import bare repositories **(CORE ONLY)**
 
 Rake tasks are available to import bare repositories into a GitLab instance.
@@ -7,13 +13,13 @@ please use [our project-based import/export](../user/project/settings/import_exp
 
 Note that:
 
-- The owner of the project will be the first administrator.
-- The groups will be created as needed, including subgroups.
-- The owner of the group will be the first administrator.
-- Existing projects will be skipped.
+- The owner of the project is the first administrator.
+- The groups are created as needed, including subgroups.
+- The owner of the group is the first administrator.
+- Existing projects are skipped.
 - Projects in hashed storage may be skipped. For more information, see
   [Importing bare repositories from hashed storage](#importing-bare-repositories-from-hashed-storage).
-- The existing Git repositories will be moved from disk (removed from the original path).
+- The existing Git repositories ware moved from disk (removed from the original path).
 
 To import bare repositories into a GitLab instance:
 
@@ -29,8 +35,8 @@ To import bare repositories into a GitLab instance:
 
 1. Copy your bare repositories inside this newly created folder. Note:
 
-   - Any `.git` repositories found on any of the subfolders will be imported as projects.
-   - Groups will be created as needed, these could be nested folders.
+   - Any `.git` repositories found on any of the subfolders are imported as projects.
+   - Groups are created as needed, these could be nested folders.
 
    For example, if we copy the repositories to `/var/opt/gitlab/git-data/repository-import-2020-08-22`,
    and repository `A` needs to be under the groups `G1` and `G2`, it must be created under those folders:
@@ -127,11 +133,11 @@ Bare repositories are **not** importable by GitLab 10.4 to GitLab 11.6, if all t
 - It was not renamed, transferred, or migrated to [hashed storage](../administration/repository_storage_types.md#hashed-storage) in GitLab 10.4 to GitLab 11.6.
 - Its ancestor namespaces were not renamed or transferred in GitLab 10.4 to GitLab 11.6.
 
-[Since GitLab 11.6](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/41776), all
+[In GitLab 11.6](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/41776) and later, all
 bare repositories are importable.
 
 To manually migrate repositories yourself (for GitLab 10.4 to GitLab 11.6), you can use the
-[Rails console](../administration/troubleshooting/debug.md#starting-a-rails-console-session)
+[Rails console](../administration/operations/rails_console.md#starting-a-rails-console-session)
 to do so. In a Rails console session, run the following to migrate a project:
 
 ```ruby

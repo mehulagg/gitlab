@@ -1,10 +1,12 @@
 # frozen_string_literal: true
 
 module API
-  class Todos < Grape::API::Instance
+  class Todos < ::API::Base
     include PaginationParams
 
     before { authenticate! }
+
+    feature_category :issue_tracking
 
     ISSUABLE_TYPES = {
       'merge_requests' => ->(iid) { find_merge_request_with_access(iid) },

@@ -4,7 +4,7 @@
   .settings-header
     %h4
       = s_('AdminSettings|Required pipeline configuration')
-    %button.btn.btn-default.js-settings-toggle{ type: 'button' }
+    %button.btn.gl-button.btn-default.js-settings-toggle{ type: 'button' }
       = expanded ? _('Collapse') : _('Expand')
     %p
       - config_link_start = '<a href="%{url}">'.html_safe % { url: help_page_path('ci/yaml/README') }
@@ -22,4 +22,4 @@
           = dropdown_tag(s_('AdminSettings|No required pipeline'), options: { toggle_class: 'js-ci-template-dropdown dropdown-select', title: s_('AdminSettings|Select a template'), filter: true, placeholder: _("Filter"), data: { data: gitlab_ci_ymls(nil) } } )
           = f.text_field :required_instance_ci_template, value: @application_setting.required_instance_ci_template, id: 'required_instance_ci_template_name', class: 'hidden'
 
-      = f.submit _('Save changes'), class: "btn btn-success"
+      = f.submit _('Save changes'), class: "gl-button btn btn-success"

@@ -49,12 +49,15 @@ module Types
 
     field :milestone, ::Types::MilestoneType,
           null: true,
-          description: 'Find a milestone',
-          resolve: -> (_obj, args, _ctx) { GitlabSchema.find_by_gid(args[:id]) } do
-      argument :id, ::Types::GlobalIDType[Milestone],
-               required: true,
-               description: 'Find a milestone by its ID'
-    end
+          description: 'Find a milestone' do
+            argument :id, ::Types::GlobalIDType[Milestone], required: true, description: 'Find a milestone by its ID'
+          end
+
+    field :container_repository, Types::ContainerRepositoryDetailsType,
+          null: true,
+          description: 'Find a container repository' do
+            argument :id, ::Types::GlobalIDType[::ContainerRepository], required: true, description: 'The global ID of the container repository'
+          end
 
     field :user, Types::UserType,
           null: true,
@@ -76,12 +79,42 @@ module Types
             argument :id, ::Types::GlobalIDType[::Issue], required: true, description: 'The global ID of the Issue'
           end
 
+    field :instance_statistics_measurements, Types::Admin::Analytics::InstanceStatistics::MeasurementType.connection_type,
+          null: true,
+          description: 'Get statistics on the instance',
+          resolver: Resolvers::Admin::Analytics::InstanceStatistics::MeasurementsResolver
+
+    field :runner_platforms, Types::Ci::RunnerPlatformType.connection_type,
+      null: true, description: 'Supported runner platforms',
+      resolver: Resolvers::Ci::RunnerPlatformsResolver
+
+    field :runner_setup, Types::Ci::RunnerSetupType, null: true,
+      description: 'Get runner setup instructions',
+      resolver: Resolvers::Ci::RunnerSetupResolver
+
     def design_management
       DesignManagementObject.new(nil)
     end
 
     def issue(id:)
-      GitlabSchema.object_from_id(id, expected_type: ::Issue)
+      # TODO: remove this line when the compatibility layer is removed
+      # See: https://gitlab.com/gitlab-org/gitlab/-/issues/257883
+      id = ::Types::GlobalIDType[::Issue].coerce_isolated_input(id)
+      GitlabSchema.find_by_gid(id)
+    end
+
+    def milestone(id:)
+      # TODO: remove this line when the compatibility layer is removed
+      # See: https://gitlab.com/gitlab-org/gitlab/-/issues/257883
+      id = ::Types::GlobalIDType[Milestone].coerce_isolated_input(id)
+      GitlabSchema.find_by_gid(id)
+    end
+
+    def container_repository(id:)
+      # TODO: remove this line when the compatibility layer is removed
+      # See: https://gitlab.com/gitlab-org/gitlab/-/issues/257883
+      id = ::Types::GlobalIDType[::ContainerRepository].coerce_isolated_input(id)
+      GitlabSchema.find_by_gid(id)
     end
   end
 end

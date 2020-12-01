@@ -2,10 +2,60 @@
 
 require 'spec_helper'
 
-RSpec.shared_examples 'Signup' do
+RSpec.shared_examples 'Signup name validation' do |field, max_length, label|
+  before do
+    visit new_user_registration_path
+  end
+
+  describe "#{field} validation", :js do
+    it "does not show an error border if the user's fullname length is not longer than #{max_length} characters" do
+      fill_in field, with: 'u' * max_length
+
+      expect(find('.name')).not_to have_css '.gl-field-error-outline'
+    end
+
+    it 'shows an error border if the user\'s fullname contains an emoji' do
+      simulate_input("##{field}", 'Ehsan 🦋')
+
+      expect(find('.name')).to have_css '.gl-field-error-outline'
+    end
+
+    it "shows an error border if the user\'s fullname is longer than #{max_length} characters" do
+      fill_in field, with: 'n' * (max_length + 1)
+
+      expect(find('.name')).to have_css '.gl-field-error-outline'
+    end
+
+    it "shows an error message if the user\'s #{label} is longer than #{max_length} characters" do
+      fill_in field, with: 'n' * (max_length + 1)
+
+      expect(page).to have_content("#{label} is too long (maximum is #{max_length} characters).")
+    end
+
+    it 'shows an error message if the username contains emojis' do
+      simulate_input("##{field}", 'Ehsan 🦋')
+
+      expect(page).to have_content("Invalid input, please avoid emojis")
+    end
+  end
+end
+
+RSpec.describe 'Signup' do
   include TermsHelper
 
+  before do
+    stub_application_setting(require_admin_approval_after_user_signup: false)
+  end
+
   let(:new_user) { build_stubbed(:user) }
+
+  def fill_in_signup_form
+    fill_in 'new_user_username', with: new_user.username
+    fill_in 'new_user_email', with: new_user.email
+    fill_in 'new_user_first_name', with: new_user.first_name
+    fill_in 'new_user_last_name', with: new_user.last_name
+    fill_in 'new_user_password', with: new_user.password
+  end
 
   describe 'username validation', :js do
     before do
@@ -144,21 +194,9 @@ RSpec.shared_examples 'Signup' do
         it 'creates the user account and sends a confirmation email' do
           visit new_user_registration_path
 
-          fill_in 'new_user_username', with: new_user.username
-          fill_in 'new_user_email', with: new_user.email
-
-          if Gitlab::Experimentation.enabled?(:signup_flow)
-            fill_in 'new_user_first_name', with: new_user.first_name
-            fill_in 'new_user_last_name', with: new_user.last_name
-          else
-            fill_in 'new_user_name', with: new_user.name
-            fill_in 'new_user_email_confirmation', with: new_user.email
-          end
-
-          fill_in 'new_user_password', with: new_user.password
+          fill_in_signup_form
 
           expect { click_button 'Register' }.to change { User.count }.by(1)
-
           expect(current_path).to eq users_almost_there_path
           expect(page).to have_content('Please check your email to confirm your account')
         end
@@ -172,54 +210,10 @@ RSpec.shared_examples 'Signup' do
         it 'creates the user account and sends a confirmation email' do
           visit new_user_registration_path
 
-          fill_in 'new_user_username', with: new_user.username
-          fill_in 'new_user_email', with: new_user.email
-
-          if Gitlab::Experimentation.enabled?(:signup_flow)
-            fill_in 'new_user_first_name', with: new_user.first_name
-            fill_in 'new_user_last_name', with: new_user.last_name
-          else
-            fill_in 'new_user_name', with: new_user.name
-            fill_in 'new_user_email_confirmation', with: new_user.email
-          end
-
-          fill_in 'new_user_password', with: new_user.password
+          fill_in_signup_form
 
           expect { click_button 'Register' }.to change { User.count }.by(1)
-
-          if Gitlab::Experimentation.enabled?(:signup_flow)
-            expect(current_path).to eq users_sign_up_welcome_path
-          else
-            expect(current_path).to eq dashboard_projects_path
-            expect(page).to have_content("Please check your email (#{new_user.email}) to verify that you own this address and unlock the power of CI/CD.")
-          end
-        end
-      end
-    end
-
-    context "when sigining up with different cased emails" do
-      it "creates the user successfully" do
-        visit new_user_registration_path
-
-        fill_in 'new_user_username', with: new_user.username
-        fill_in 'new_user_email', with: new_user.email
-
-        if Gitlab::Experimentation.enabled?(:signup_flow)
-          fill_in 'new_user_first_name', with: new_user.first_name
-          fill_in 'new_user_last_name', with: new_user.last_name
-        else
-          fill_in 'new_user_name', with: new_user.name
-          fill_in 'new_user_email_confirmation', with: new_user.email.capitalize
-        end
-
-        fill_in 'new_user_password', with: new_user.password
-        click_button "Register"
-
-        if Gitlab::Experimentation.enabled?(:signup_flow)
           expect(current_path).to eq users_sign_up_welcome_path
-        else
-          expect(current_path).to eq dashboard_projects_path
-          expect(page).to have_content("Welcome! You have signed up successfully.")
         end
       end
     end
@@ -232,75 +226,48 @@ RSpec.shared_examples 'Signup' do
       it 'creates the user account and goes to dashboard' do
         visit new_user_registration_path
 
-        fill_in 'new_user_username', with: new_user.username
-        fill_in 'new_user_email', with: new_user.email
-
-        if Gitlab::Experimentation.enabled?(:signup_flow)
-          fill_in 'new_user_first_name', with: new_user.first_name
-          fill_in 'new_user_last_name', with: new_user.last_name
-        else
-          fill_in 'new_user_name', with: new_user.name
-          fill_in 'new_user_email_confirmation', with: new_user.email
-        end
-
-        fill_in 'new_user_password', with: new_user.password
+        fill_in_signup_form
         click_button "Register"
 
-        if Gitlab::Experimentation.enabled?(:signup_flow)
-          expect(current_path).to eq users_sign_up_welcome_path
-        else
-          expect(current_path).to eq dashboard_projects_path
-          expect(page).to have_content("Welcome! You have signed up successfully.")
-        end
+        expect(current_path).to eq users_sign_up_welcome_path
+      end
+    end
+
+    context 'with required admin approval enabled' do
+      before do
+        stub_application_setting(require_admin_approval_after_user_signup: true)
+      end
+
+      it 'creates the user but does not sign them in' do
+        visit new_user_registration_path
+
+        fill_in_signup_form
+
+        expect { click_button 'Register' }.to change { User.count }.by(1)
+        expect(current_path).to eq new_user_session_path
+        expect(page).to have_content("You have signed up successfully. However, we could not sign you in because your account is awaiting approval from your GitLab administrator")
       end
     end
   end
 
   context 'with errors' do
     it "displays the errors" do
-      existing_user = create(:user)
-
+      create(:user, email: new_user.email)
       visit new_user_registration_path
 
-      if Gitlab::Experimentation.enabled?(:signup_flow)
-        fill_in 'new_user_first_name', with: new_user.first_name
-        fill_in 'new_user_last_name', with: new_user.last_name
-      else
-        fill_in 'new_user_name', with: new_user.name
-      end
-
-      fill_in 'new_user_username', with: new_user.username
-      fill_in 'new_user_email', with: existing_user.email
-      fill_in 'new_user_password', with: new_user.password
+      fill_in_signup_form
       click_button "Register"
 
       expect(current_path).to eq user_registration_path
-
-      if Gitlab::Experimentation.enabled?(:signup_flow)
-        expect(page).to have_content("error prohibited this user from being saved")
-      else
-        expect(page).to have_content("errors prohibited this user from being saved")
-        expect(page).to have_content("Email confirmation doesn't match")
-      end
-
+      expect(page).to have_content("error prohibited this user from being saved")
       expect(page).to have_content("Email has already been taken")
     end
 
     it 'does not redisplay the password' do
-      existing_user = create(:user)
-
+      create(:user, email: new_user.email)
       visit new_user_registration_path
 
-      if Gitlab::Experimentation.enabled?(:signup_flow)
-        fill_in 'new_user_first_name', with: new_user.first_name
-        fill_in 'new_user_last_name', with: new_user.last_name
-      else
-        fill_in 'new_user_name', with: new_user.name
-      end
-
-      fill_in 'new_user_username', with: new_user.username
-      fill_in 'new_user_email', with: existing_user.email
-      fill_in 'new_user_password', with: new_user.password
+      fill_in_signup_form
       click_button "Register"
 
       expect(current_path).to eq user_registration_path
@@ -313,52 +280,15 @@ RSpec.shared_examples 'Signup' do
       enforce_terms
     end
 
-    it 'requires the user to check the checkbox' do
+    it 'renders text that the user confirms terms by clicking register' do
       visit new_user_registration_path
 
-      fill_in 'new_user_username', with: new_user.username
-      fill_in 'new_user_email', with: new_user.email
+      expect(page).to have_content(/By clicking Register, I agree that I have read and accepted the Terms of Use and Privacy Policy/)
 
-      if Gitlab::Experimentation.enabled?(:signup_flow)
-        fill_in 'new_user_first_name', with: new_user.first_name
-        fill_in 'new_user_last_name', with: new_user.last_name
-      else
-        fill_in 'new_user_name', with: new_user.name
-        fill_in 'new_user_email_confirmation', with: new_user.email
-      end
-
-      fill_in 'new_user_password', with: new_user.password
-
+      fill_in_signup_form
       click_button 'Register'
 
-      expect(current_path).to eq new_user_session_path
-      expect(page).to have_content(/you must accept our terms of service/i)
-    end
-
-    it 'asks the user to accept terms before going to the dashboard' do
-      visit new_user_registration_path
-
-      fill_in 'new_user_username', with: new_user.username
-      fill_in 'new_user_email', with: new_user.email
-
-      if Gitlab::Experimentation.enabled?(:signup_flow)
-        fill_in 'new_user_first_name', with: new_user.first_name
-        fill_in 'new_user_last_name', with: new_user.last_name
-      else
-        fill_in 'new_user_name', with: new_user.name
-        fill_in 'new_user_email_confirmation', with: new_user.email
-      end
-
-      fill_in 'new_user_password', with: new_user.password
-      check :terms_opt_in
-
-      click_button "Register"
-
-      if Gitlab::Experimentation.enabled?(:signup_flow)
-        expect(current_path).to eq users_sign_up_welcome_path
-      else
-        expect(current_path).to eq dashboard_projects_path
-      end
+      expect(current_path).to eq users_sign_up_welcome_path
     end
   end
 
@@ -385,18 +315,7 @@ RSpec.shared_examples 'Signup' do
       it 'prevents from signing up' do
         visit new_user_registration_path
 
-        fill_in 'new_user_username', with: new_user.username
-        fill_in 'new_user_email', with: new_user.email
-
-        if Gitlab::Experimentation.enabled?(:signup_flow)
-          fill_in 'new_user_first_name', with: new_user.first_name
-          fill_in 'new_user_last_name', with: new_user.last_name
-        else
-          fill_in 'new_user_name', with: new_user.name
-          fill_in 'new_user_email_confirmation', with: new_user.email
-        end
-
-        fill_in 'new_user_password', with: new_user.password
+        fill_in_signup_form
 
         expect { click_button 'Register' }.not_to change { User.count }
         expect(page).to have_content('There was an error with the reCAPTCHA. Please solve the reCAPTCHA again.')
@@ -407,129 +326,34 @@ RSpec.shared_examples 'Signup' do
       it 'prevents from signing up' do
         visit new_user_registration_path
 
-        fill_in 'new_user_username', with: new_user.username
-        fill_in 'new_user_email', with: new_user.email
-
-        if Gitlab::Experimentation.enabled?(:signup_flow)
-          fill_in 'new_user_first_name', with: new_user.first_name
-          fill_in 'new_user_last_name', with: new_user.last_name
-        else
-          fill_in 'new_user_name', with: new_user.name
-          fill_in 'new_user_email_confirmation', with: new_user.email
-        end
-
-        fill_in 'new_user_password', with: new_user.password
+        fill_in_signup_form
 
         expect { click_button 'Register' }.not_to change { User.count }
         expect(page).to have_content('That was a bit too quick! Please resubmit.')
       end
     end
   end
-end
 
-RSpec.shared_examples 'Signup name validation' do |field, max_length|
-  before do
+  it 'redirects to step 2 of the signup process, sets the role and redirects back' do
     visit new_user_registration_path
+
+    fill_in_signup_form
+    click_button 'Register'
+
+    visit new_project_path
+
+    expect(page).to have_current_path(users_sign_up_welcome_path)
+
+    select 'Software Developer', from: 'user_role'
+    click_button 'Get started!'
+
+    created_user = User.find_by_username(new_user.username)
+
+    expect(created_user.software_developer_role?).to be_truthy
+    expect(created_user.setup_for_company).to be_nil
+    expect(page).to have_current_path(new_project_path)
   end
 
-  describe "#{field} validation", :js do
-    it "does not show an error border if the user's fullname length is not longer than #{max_length} characters" do
-      fill_in field, with: 'u' * max_length
-
-      expect(find('.name')).not_to have_css '.gl-field-error-outline'
-    end
-
-    it 'shows an error border if the user\'s fullname contains an emoji' do
-      simulate_input("##{field}", 'Ehsan 🦋')
-
-      expect(find('.name')).to have_css '.gl-field-error-outline'
-    end
-
-    it "shows an error border if the user\'s fullname is longer than #{max_length} characters" do
-      fill_in field, with: 'n' * (max_length + 1)
-
-      expect(find('.name')).to have_css '.gl-field-error-outline'
-    end
-
-    it "shows an error message if the user\'s fullname is longer than #{max_length} characters" do
-      fill_in field, with: 'n' * (max_length + 1)
-
-      expect(page).to have_content("Name is too long (maximum is #{max_length} characters).")
-    end
-
-    it 'shows an error message if the username contains emojis' do
-      simulate_input("##{field}", 'Ehsan 🦋')
-
-      expect(page).to have_content("Invalid input, please avoid emojis")
-    end
-  end
-end
-
-RSpec.describe 'With original flow' do
-  before do
-    stub_experiment(signup_flow: false)
-    stub_experiment_for_user(signup_flow: false)
-  end
-
-  it_behaves_like 'Signup'
-  it_behaves_like 'Signup name validation', 'new_user_name', 255
-end
-
-RSpec.describe 'With experimental flow' do
-  before do
-    stub_experiment(signup_flow: true)
-    stub_experiment_for_user(signup_flow: true)
-  end
-
-  it_behaves_like 'Signup'
-  it_behaves_like 'Signup name validation', 'new_user_first_name', 127
-  it_behaves_like 'Signup name validation', 'new_user_last_name', 127
-
-  context 'when role is required' do
-    it 'redirects to step 2 of the signup process, sets the role and redirects back' do
-      new_user = build_stubbed(:user)
-      visit new_user_registration_path
-      fill_in 'new_user_first_name', with: new_user.first_name
-      fill_in 'new_user_last_name', with: new_user.last_name
-      fill_in 'new_user_username', with: new_user.username
-      fill_in 'new_user_email', with: new_user.email
-      fill_in 'new_user_password', with: new_user.password
-      click_button 'Register'
-      visit new_project_path
-
-      expect(page).to have_current_path(users_sign_up_welcome_path)
-
-      select 'Software Developer', from: 'user_role'
-      click_button 'Get started!'
-      new_user = User.find_by_username(new_user.username)
-
-      expect(new_user.software_developer_role?).to be_truthy
-      expect(new_user.setup_for_company).to be_nil
-      expect(page).to have_current_path(new_project_path)
-    end
-  end
-
-  context 'when terms_opt_in experimental is enabled' do
-    include TermsHelper
-
-    before do
-      enforce_terms
-      stub_experiment(signup_flow: true, terms_opt_in: true)
-      stub_experiment_for_user(signup_flow: true, terms_opt_in: true)
-    end
-
-    it 'terms are checked by default' do
-      new_user = build_stubbed(:user)
-
-      visit new_user_registration_path
-      fill_in 'new_user_first_name', with: new_user.first_name
-      fill_in 'new_user_last_name', with: new_user.last_name
-      fill_in 'new_user_username', with: new_user.username
-      fill_in 'new_user_email', with: new_user.email
-      fill_in 'new_user_password', with: new_user.password
-      click_button 'Register'
-
-      expect(current_path).to eq users_sign_up_welcome_path
-    end
-  end
+  it_behaves_like 'Signup name validation', 'new_user_first_name', 127, 'First name'
+  it_behaves_like 'Signup name validation', 'new_user_last_name', 127, 'Last name'
 end

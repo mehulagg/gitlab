@@ -6,8 +6,8 @@ RSpec.describe "Admin uploads license", :js do
   let_it_be(:admin) { create(:admin) }
 
   before do
-    stub_feature_flags(licenses_app: false)
     sign_in(admin)
+    gitlab_enable_admin_mode_sign_in(admin)
   end
 
   context 'default state' do
@@ -136,6 +136,7 @@ RSpec.describe "Admin uploads license", :js do
       it "doesn't upload license" do
         attach_and_upload(path)
 
+        find('.gl-alert details').click
         expect(page).to have_content("This license has already expired.")
       end
     end

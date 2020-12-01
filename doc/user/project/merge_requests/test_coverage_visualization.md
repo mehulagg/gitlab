@@ -1,20 +1,14 @@
 ---
 stage: Verify
 group: Testing
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference, howto
 ---
 
-# Test Coverage Visualization **(CORE ONLY)**
+# Test Coverage Visualization
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/3708) in GitLab 12.9.
-> - It's [deployed behind a feature flag](../../../user/feature_flags.md), disabled by default.
-> - It's disabled on GitLab.com.
-> - It can be enabled or disabled per-project.
-> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enabling-the-feature). **(CORE ONLY)**
-
-CAUTION: **Caution:**
-This feature might not be available to you. Check the **version history** note above for details.
+> - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/249811) in GitLab 13.5.
 
 With the help of [GitLab CI/CD](../../../ci/README.md), you can collect the test
 coverage information of your favorite testing or coverage-analysis tool, and visualize
@@ -61,7 +55,9 @@ NOTE: **Note:**
 The Cobertura XML parser currently does not support the `sources` element and ignores it. It is assumed that
 the `filename` of a `class` element contains the full path relative to the project root.
 
-## Example test coverage configuration
+## Example test coverage configurations
+
+### JavaScript example
 
 The following [`gitlab-ci.yml`](../../../ci/yaml/README.md) example uses [Mocha](https://mochajs.org/)
 JavaScript testing and [NYC](https://github.com/istanbuljs/nyc) coverage-tooling to
@@ -77,28 +73,104 @@ test:
       cobertura: coverage/cobertura-coverage.xml
 ```
 
-## Enabling the feature
+### Java and Kotlin examples
 
-This feature comes with the `:coverage_report_view` feature flag disabled by
-default. It is disabled on GitLab.com. This feature is disabled due to some performance issues with very large
-data sets. When [the performance issue](https://gitlab.com/gitlab-org/gitlab/-/issues/211410)
-is resolved, the feature will be enabled by default. [GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
-can enable it for your instance. Test coverage visualization can be enabled or disabled per-project.
+#### Maven example
 
-To enable it:
+The following [`gitlab-ci.yml`](../../../ci/yaml/README.md) example for Java or Kotlin uses [Maven](https://maven.apache.org/)
+to build the project and [Jacoco](https://www.eclemma.org/jacoco/) coverage-tooling to
+generate the coverage artifact.
+You can check the [Docker image configuration and scripts](https://gitlab.com/haynes/jacoco2cobertura) if you want to build your own image.
 
-```ruby
-# Instance-wide
-Feature.enable(:coverage_report_view)
-# or by project
-Feature.enable(:coverage_report_view, Project.find(<project id>))
+GitLab expects the artifact in the Cobertura format, so you have to execute a few
+scripts before uploading it. The `test-jdk11` job tests the code and generates an
+XML artifact. The `coverage-jdk-11` job converts the artifact into a Cobertura report:
+
+```yaml
+test-jdk11:
+  stage: test
+  image: maven:3.6.3-jdk-11
+  script:
+    - 'mvn $MAVEN_CLI_OPTS clean org.jacoco:jacoco-maven-plugin:prepare-agent test jacoco:report'
+  artifacts:
+    paths:
+      - target/site/jacoco/jacoco.xml
+
+coverage-jdk11:
+  # Must be in a stage later than test-jdk11's stage.
+  # The `visualize` stage does not exist by default.
+  # Please define it first, or chose an existing stage like `deploy`.
+  stage: visualize
+  image: haynes/jacoco2cobertura:1.0.4
+  script:
+    # convert report from jacoco to cobertura
+    - 'python /opt/cover2cover.py target/site/jacoco/jacoco.xml src/main/java > target/site/cobertura.xml'
+    # read the <source></source> tag and prepend the path to every filename attribute
+    - 'python /opt/source2filename.py target/site/cobertura.xml'
+  needs: ["test-jdk11"]
+  dependencies:
+    - test-jdk11
+  artifacts:
+    reports:
+      cobertura: target/site/cobertura.xml
 ```
 
-To disable it:
+#### Gradle example
 
-```ruby
-# Instance-wide
-Feature.disable(:coverage_report_view)
-# or by project
-Feature.disable(:coverage_report_view, Project.find(<project id>))
+The following [`gitlab-ci.yml`](../../../ci/yaml/README.md) example for Java or Kotlin uses [Gradle](https://gradle.org/)
+to build the project and [Jacoco](https://www.eclemma.org/jacoco/) coverage-tooling to
+generate the coverage artifact.
+You can check the [Docker image configuration and scripts](https://gitlab.com/haynes/jacoco2cobertura) if you want to build your own image.
+
+GitLab expects the artifact in the Cobertura format, so you have to execute a few
+scripts before uploading it. The `test-jdk11` job tests the code and generates an
+XML artifact. The `coverage-jdk-11` job converts the artifact into a Cobertura report:
+
+```yaml
+test-jdk11:
+  stage: test
+  image: gradle:6.6.1-jdk11
+  script:
+    - 'gradle test jacocoTestReport' # jacoco must be configured to create an xml report
+  artifacts:
+    paths:
+      - build/jacoco/jacoco.xml
+
+coverage-jdk11:
+  # Must be in a stage later than test-jdk11's stage.
+  # The `visualize` stage does not exist by default.
+  # Please define it first, or chose an existing stage like `deploy`.
+  stage: visualize
+  image: haynes/jacoco2cobertura:1.0.4
+  script:
+    # convert report from jacoco to cobertura
+    - 'python /opt/cover2cover.py build/jacoco/jacoco.xml src/main/java > build/cobertura.xml'
+    # read the <source></source> tag and prepend the path to every filename attribute
+    - 'python /opt/source2filename.py build/cobertura.xml'
+  needs: ["test-jdk11"]
+  dependencies:
+    - test-jdk11
+  artifacts:
+    reports:
+      cobertura: build/cobertura.xml
+```
+
+### Python example
+
+The following [`gitlab-ci.yml`](../../../ci/yaml/README.md) example for Python uses [pytest-cov](https://pytest-cov.readthedocs.io/) to collect test coverage data and [coverage.py](https://coverage.readthedocs.io/) to convert the report to use full relative paths.
+The information isn't displayed without the conversion.
+
+This example assumes that the code for your package is in `src/` and your tests are in `tests.py`:
+
+```yaml
+run tests:
+  stage: test
+  image: python:3
+  script:
+    - pip install pytest pytest-cov
+    - pytest --cov=src/ tests.py
+    - coverage xml
+  artifacts:
+    reports:
+      cobertura: coverage.xml
 ```

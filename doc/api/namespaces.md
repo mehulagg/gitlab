@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Namespaces API
 
 Usernames and groupnames fall under a special category called namespaces.
@@ -87,6 +93,26 @@ the `plan` parameter associated with a namespace:
 ]
 ```
 
+Users on GitLab.com also see `max_seats_used` and `seats_in_use` parameters.
+`max_seats_used` is the highest number of users the group had. `seats_in_use` is
+the number of license seats currently being used. Both values are updated
+once a day.
+
+`max_seats_used` and `seats_in_use` are non-zero only for namespaces on paid plans.
+
+```json
+[
+  {
+    "id": 1,
+    "name": "user1",
+    "billable_members_count": 2,
+    "max_seats_used": 3,
+    "seats_in_use": 2,
+    ...
+  }
+]
+```
+
 NOTE: **Note:**
 Only group maintainers/owners are presented with `members_count_with_descendants`, as well as `plan` **(BRONZE ONLY)**.
 
@@ -123,6 +149,8 @@ Example response:
     "web_url": "https://gitlab.example.com/groups/twitter",
     "members_count_with_descendants": 2,
     "billable_members_count": 2,
+    "max_seats_used": 0,
+    "seats_in_use": 0,
     "plan": "default",
     "trial_ends_on": null,
     "trial": false
@@ -162,6 +190,8 @@ Example response:
   "web_url": "https://gitlab.example.com/groups/group1",
   "members_count_with_descendants": 2,
   "billable_members_count": 2,
+  "max_seats_used": 0,
+  "seats_in_use": 0,
   "plan": "default",
   "trial_ends_on": null,
   "trial": false
@@ -188,6 +218,8 @@ Example response:
   "web_url": "https://gitlab.example.com/groups/group1",
   "members_count_with_descendants": 2,
   "billable_members_count": 2,
+  "max_seats_used": 0,
+  "seats_in_use": 0,
   "plan": "default",
   "trial_ends_on": null,
   "trial": false

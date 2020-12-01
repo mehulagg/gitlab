@@ -1,18 +1,18 @@
 import { uniq } from 'lodash';
-import { TEST_HOST } from 'helpers/test_constants';
-import { getJSONFixture } from 'helpers/fixtures';
-import mutations from 'ee/analytics/cycle_analytics/store/mutations';
-import * as types from 'ee/analytics/cycle_analytics/store/mutation_types';
 import {
   DEFAULT_DAYS_IN_PAST,
   TASKS_BY_TYPE_SUBJECT_ISSUE,
 } from 'ee/analytics/cycle_analytics/constants';
-import { toYmd } from 'ee/analytics/shared/utils';
+import * as types from 'ee/analytics/cycle_analytics/store/mutation_types';
+import mutations from 'ee/analytics/cycle_analytics/store/mutations';
 import {
   getTasksByTypeData,
   transformRawTasksByTypeData,
   transformStagesForPathNavigation,
 } from 'ee/analytics/cycle_analytics/utils';
+import { toYmd } from 'ee/analytics/shared/utils';
+import { getJSONFixture } from 'helpers/fixtures';
+import { TEST_HOST } from 'helpers/test_constants';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import { getDateInPast, getDatesInRange } from '~/lib/utils/datetime_utility';
 
@@ -29,10 +29,10 @@ export const endpoints = {
   groupLabels: /groups\/[A-Z|a-z|\d|\-|_]+\/-\/labels.json/,
   recentActivityData: /analytics\/value_stream_analytics\/summary/,
   timeMetricsData: /analytics\/value_stream_analytics\/time_summary/,
-  durationData: /analytics\/value_stream_analytics\/value_streams\/\d+\/stages\/\d+\/duration_chart/,
-  stageData: /analytics\/value_stream_analytics\/value_streams\/\d+\/stages\/\d+\/records/,
-  stageMedian: /analytics\/value_stream_analytics\/value_streams\/\d+\/stages\/\d+\/median/,
-  baseStagesEndpoint: /analytics\/value_stream_analytics\/value_streams\/\d+\/stages$/,
+  durationData: /analytics\/value_stream_analytics\/value_streams\/\w+\/stages\/\w+\/duration_chart/,
+  stageData: /analytics\/value_stream_analytics\/value_streams\/\w+\/stages\/\w+\/records/,
+  stageMedian: /analytics\/value_stream_analytics\/value_streams\/\w+\/stages\/\w+\/median/,
+  baseStagesEndpoint: /analytics\/value_stream_analytics\/value_streams\/\w+\/stages$/,
   tasksByTypeData: /analytics\/type_of_work\/tasks_by_type/,
   tasksByTypeTopLabelsData: /analytics\/type_of_work\/tasks_by_type\/top_labels/,
   valueStreamData: /analytics\/value_stream_analytics\/value_streams/,
@@ -52,7 +52,7 @@ export const group = {
   avatar_url: `${TEST_HOST}/images/home/nasa.svg`,
 };
 
-export const selectedGroup = convertObjectPropsToCamelCase(group, { deep: true });
+export const currentGroup = convertObjectPropsToCamelCase(group, { deep: true });
 
 const getStageByTitle = (stages, title) =>
   stages.find(stage => stage.title && stage.title.toLowerCase().trim() === title) || {};
@@ -75,13 +75,12 @@ export const reviewStage = getStageByTitle(dummyState.stages, 'review');
 export const codeStage = getStageByTitle(dummyState.stages, 'code');
 export const testStage = getStageByTitle(dummyState.stages, 'test');
 export const stagingStage = getStageByTitle(dummyState.stages, 'staging');
-export const totalStage = getStageByTitle(dummyState.stages, 'total');
 
 export const allowedStages = [issueStage, planStage, codeStage];
 
 const deepCamelCase = obj => convertObjectPropsToCamelCase(obj, { deep: true });
 
-export const defaultStages = ['issue', 'plan', 'review', 'code', 'test', 'staging', 'production'];
+export const defaultStages = ['issue', 'plan', 'review', 'code', 'test', 'staging'];
 
 const stageFixtures = defaultStages.reduce((acc, stage) => {
   const events = getJSONFixture(fixtureEndpoints.stageEvents(stage));
@@ -111,14 +110,12 @@ export const stageMediansWithNumericIds = defaultStages.reduce((acc, stage) => {
 export const endDate = new Date(2019, 0, 14);
 export const startDate = getDateInPast(endDate, DEFAULT_DAYS_IN_PAST);
 
-export const rawIssueEvents = stageFixtures.issue;
 export const issueEvents = deepCamelCase(stageFixtures.issue);
 export const planEvents = deepCamelCase(stageFixtures.plan);
 export const reviewEvents = deepCamelCase(stageFixtures.review);
 export const codeEvents = deepCamelCase(stageFixtures.code);
 export const testEvents = deepCamelCase(stageFixtures.test);
 export const stagingEvents = deepCamelCase(stageFixtures.staging);
-export const totalEvents = deepCamelCase(stageFixtures.production);
 export const rawCustomStage = {
   title: 'Coolest beans stage',
   hidden: false,
@@ -192,7 +189,7 @@ export const tasksByTypeData = {
 };
 
 export const taskByTypeFilters = {
-  selectedGroup: {
+  currentGroup: {
     id: 22,
     name: 'Gitlab Org',
     fullName: 'Gitlab Org',
@@ -254,13 +251,13 @@ export const rawDurationMedianData = [
 
 export const selectedProjects = [
   {
-    id: 1,
+    id: 'gid://gitlab/Project/1',
     name: 'cool project',
     pathWithNamespace: 'group/cool-project',
     avatarUrl: null,
   },
   {
-    id: 2,
+    id: 'gid://gitlab/Project/2',
     name: 'another cool project',
     pathWithNamespace: 'group/another-cool-project',
     avatarUrl: null,

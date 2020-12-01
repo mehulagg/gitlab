@@ -20,12 +20,11 @@ RSpec.describe MergeRequests::ReopenService do
 
     context 'valid params' do
       let(:service) { described_class.new(project, user, {}) }
-      let(:state_tracking) { true }
 
       before do
-        stub_feature_flags(track_resource_state_change_events: state_tracking)
-
         allow(service).to receive(:execute_hooks)
+        merge_request.create_cleanup_schedule(scheduled_at: Time.current)
+        merge_request.update_column(:merge_ref_sha, 'abc123')
 
         perform_enqueued_jobs do
           service.execute(merge_request)
@@ -46,21 +45,18 @@ RSpec.describe MergeRequests::ReopenService do
         expect(email.subject).to include(merge_request.title)
       end
 
+      it 'destroys cleanup schedule record' do
+        expect(merge_request.reload.cleanup_schedule).to be_nil
+      end
+
+      it 'clears the cached merge_ref_sha' do
+        expect(merge_request.reload.merge_ref_sha).to be_nil
+      end
+
       context 'note creation' do
-        context 'when state event tracking is disabled' do
-          let(:state_tracking) { false }
-
-          it 'creates system note about merge_request reopen' do
-            note = merge_request.notes.last
-            expect(note.note).to include 'reopened'
-          end
-        end
-
-        context 'when state event tracking is enabled' do
-          it 'creates resource state event about merge_request reopen' do
-            event = merge_request.resource_state_events.last
-            expect(event.state).to eq('reopened')
-          end
+        it 'creates resource state event about merge_request reopen' do
+          event = merge_request.resource_state_events.last
+          expect(event.state).to eq('reopened')
         end
       end
     end

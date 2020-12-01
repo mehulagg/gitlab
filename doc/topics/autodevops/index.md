@@ -1,12 +1,19 @@
+---
+stage: Configure
+group: Configure
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Auto DevOps
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/37115) in GitLab 10.0.
 > - Generally available on GitLab 11.0.
 
-Auto DevOps provides pre-defined CI/CD configuration allowing you to automatically
-detect, build, test, deploy, and monitor your applications. Leveraging CI/CD
-best practices and tools, Auto DevOps aims to simplify the setup and execution
-of a mature and modern software development lifecycle.
+Auto DevOps are default CI/CD templates that auto-discover the source code you have. They
+enable GitLab to automatically detect, build, test, deploy, and monitor your applications.
+Leveraging [CI/CD best practices](../../ci/pipelines/pipeline_efficiency.md) and tools,
+Auto DevOps aims to simplify the setup and execution of a mature and modern software
+development lifecycle.
 
 ## Overview
 
@@ -42,7 +49,7 @@ runs on pipelines automatically only if a [`Dockerfile` or matching buildpack](s
 exists.
 
 If a [CI/CD configuration file](../../ci/yaml/README.md) is present in the project,
-it will continue to be used, whether or not Auto DevOps is enabled.
+it continues to be used, whether or not Auto DevOps is enabled.
 
 ## Quick start
 
@@ -83,9 +90,9 @@ project in a simple and automatic way:
 
 1. [Auto Build](stages.md#auto-build)
 1. [Auto Test](stages.md#auto-test)
-1. [Auto Code Quality](stages.md#auto-code-quality) **(STARTER)**
-1. [Auto SAST (Static Application Security Testing)](stages.md#auto-sast) **(ULTIMATE)**
-1. [Auto Secret Detection](stages.md#auto-secret-detection) **(ULTIMATE)**
+1. [Auto Code Quality](stages.md#auto-code-quality)
+1. [Auto SAST (Static Application Security Testing)](stages.md#auto-sast)
+1. [Auto Secret Detection](stages.md#auto-secret-detection)
 1. [Auto Dependency Scanning](stages.md#auto-dependency-scanning) **(ULTIMATE)**
 1. [Auto License Compliance](stages.md#auto-license-compliance) **(ULTIMATE)**
 1. [Auto Container Scanning](stages.md#auto-container-scanning) **(ULTIMATE)**
@@ -94,6 +101,7 @@ project in a simple and automatic way:
 1. [Auto Deploy](stages.md#auto-deploy)
 1. [Auto Browser Performance Testing](stages.md#auto-browser-performance-testing) **(PREMIUM)**
 1. [Auto Monitoring](stages.md#auto-monitoring)
+1. [Auto Code Intelligence](stages.md#auto-code-intelligence)
 
 As Auto DevOps relies on many different components, you should have a basic
 knowledge of the following:
@@ -138,7 +146,7 @@ any of the following places:
 The base domain variable `KUBE_INGRESS_BASE_DOMAIN` follows the same order of precedence
 as other environment [variables](../../ci/variables/README.md#priority-of-environment-variables).
 If the CI/CD variable is not set and the cluster setting is left blank, the instance-wide **Auto DevOps domain**
-setting will be used if set.
+setting is used if set.
 
 TIP: **Tip:**
 If you use the [GitLab managed app for Ingress](../../user/clusters/applications.md#ingress),
@@ -158,7 +166,7 @@ a base domain of `example.com`, you'd need a DNS entry like:
 ```
 
 In this case, the deployed applications are served from `example.com`, and `1.2.3.4`
-is the IP address of your load balancer; generally NGINX ([see requirements](#requirements)).
+is the IP address of your load balancer; generally NGINX ([see requirements](requirements.md)).
 Setting up the DNS record is beyond the scope of this document; check with your
 DNS provider for information.
 
@@ -175,7 +183,7 @@ See [Auto DevOps requirements for Amazon ECS](requirements.md#auto-devops-requir
 
 ## Enabling/Disabling Auto DevOps
 
-When first using Auto DevOps, review the [requirements](#requirements) to ensure
+When first using Auto DevOps, review the [requirements](requirements.md) to ensure
 all the necessary components to make full use of Auto DevOps are available. First-time
 users should follow the [quick start guide](quick_start_guide.md).
 
@@ -228,7 +236,7 @@ Auto DevOps at the group and project level, respectively.
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/38542) in GitLab 11.0.
 
-You can change the deployment strategy used by Auto DevOps by going to your
+You can change the deployment strategy used by Auto DevOps by visiting your
 project's **Settings > CI/CD > Auto DevOps**. The following options
 are available:
 
@@ -317,7 +325,7 @@ metadata:
   name: gitlab-managed-apps-default-proxy
   namespace: gitlab-managed-apps
 spec:
-   env:
+  env:
     - name: http_proxy
       value: "PUT_YOUR_HTTP_PROXY_HERE"
     - name: https_proxy
@@ -364,7 +372,7 @@ To fix this issue, you must either:
 
 ### Failure to create a Kubernetes namespace
 
-Auto Deploy will fail if GitLab can't create a Kubernetes namespace and
+Auto Deploy fails if GitLab can't create a Kubernetes namespace and
 service account for your project. For help debugging this issue, see
 [Troubleshooting failed deployment jobs](../../user/project/clusters/index.md#troubleshooting).
 
@@ -399,7 +407,7 @@ If you receive this error, you can do one of the following actions:
   database by setting `AUTO_DEVOPS_POSTGRES_DELETE_V1` to a non-empty value and
   redeploying.
 
-  DANGER: **Danger:**
+  DANGER: **Warning:**
   Deleting the channel 1 PostgreSQL database permanently deletes the existing
   channel 1 database and all its data. See
   [Upgrading PostgreSQL](upgrading_postgresql.md)
@@ -413,9 +421,155 @@ If you receive this error, you can do one of the following actions:
   and persisted by Helm, regardless of whether or not your chart uses the
   variable.
 
-DANGER: **Danger:**
+DANGER: **Warning:**
 Setting `POSTGRES_ENABLED` to `false` permanently deletes any existing
 channel 1 database for your environment.
+
+### Error: unable to recognize "": no matches for kind "Deployment" in version "extensions/v1beta1"
+
+After upgrading your Kubernetes cluster to [v1.16+](stages.md#kubernetes-116),
+you may encounter this message when deploying with Auto DevOps:
+
+```plaintext
+UPGRADE FAILED
+Error: failed decoding reader into objects: unable to recognize "": no matches for kind "Deployment" in version "extensions/v1beta1"
+```
+
+This can occur if your current deployments on the environment namespace were deployed with a
+deprecated/removed API that doesn't exist in Kubernetes v1.16+. For example,
+if [your in-cluster PostgreSQL was installed in a legacy way](#detected-an-existing-postgresql-database),
+the resource was created via the `extensions/v1beta1` API. However, the deployment resource
+was moved to the `app/v1` API in v1.16.
+
+To recover such outdated resources, you must convert the current deployments by mapping legacy APIs
+to newer APIs. There is a helper tool called [`mapkubeapis`](https://github.com/hickeyma/helm-mapkubeapis)
+that works for this problem. Follow these steps to use the tool in Auto DevOps:
+
+1. Modify your `.gitlab-ci.yml` with:
+
+   ```yaml
+   include:
+     - template: Auto-DevOps.gitlab-ci.yml
+     - remote: https://gitlab.com/shinya.maeda/ci-templates/-/raw/master/map-deprecated-api.gitlab-ci.yml
+
+   variables:
+     HELM_VERSION_FOR_MAPKUBEAPIS: "v2" # If you're using auto-depoy-image v2 or above, please specify "v3".
+   ```
+
+1. Run the job `<environment-name>:map-deprecated-api`. Ensure that this job succeeds before moving
+   to the next step. You should see something like the following output:
+
+   ```shell
+   2020/10/06 07:20:49 Found deprecated or removed Kubernetes API:
+   "apiVersion: extensions/v1beta1
+   kind: Deployment"
+   Supported API equivalent:
+   "apiVersion: apps/v1
+   kind: Deployment"
+   ```
+
+1. Revert your `.gitlab-ci.yml` to the previous version. You no longer need to include the
+   supplemental template `map-deprecated-api`.
+
+1. Continue the deployments as usual.
+
+### Error: error initializing: Looks like "https://kubernetes-charts.storage.googleapis.com" is not a valid chart repository or cannot be reached
+
+As [announced in the official CNCF blogpost](https://www.cncf.io/blog/2020/10/07/important-reminder-for-all-helm-users-stable-incubator-repos-are-deprecated-and-all-images-are-changing-location/),
+the stable Helm chart repository was deprecated and removed on November 13th, 2020.
+You may encounter this error after that date.
+
+Some GitLab features had dependencies on the stable chart. To mitigate the impact, we changed them
+to use new official repositories or the [Helm Stable Archive repository maintained by GitLab](https://gitlab.com/gitlab-org/cluster-integration/helm-stable-archive).
+Auto Deploy contains [an example fix](https://gitlab.com/gitlab-org/cluster-integration/auto-deploy-image/-/merge_requests/127).
+
+In Auto Deploy, `v1.0.6+` of `auto-deploy-image` no longer adds the deprecated stable repository to
+the `helm` command. If you use a custom chart and it relies on the deprecated stable repository,
+specify an older `auto-deploy-image` like this example:
+
+```yaml
+include:
+  - template: Auto-DevOps.gitlab-ci.yml
+
+.auto-deploy:
+  image: "registry.gitlab.com/gitlab-org/cluster-integration/auto-deploy-image:v1.0.5"
+```
+
+Keep in mind that this approach stops working when the stable repository is removed,
+so you must eventually fix your custom chart.
+
+To fix your custom chart:
+
+1. In your chart directory, update the `repository` value in your `requirements.yaml` file from :
+
+   ```yaml
+   repository: "https://kubernetes-charts.storage.googleapis.com/"
+   ```
+
+   to:
+
+   ```yaml
+   repository: "https://charts.helm.sh/stable"
+   ```
+
+1. In your chart directory, run `helm dep update .` using the same Helm major version as Auto DevOps.
+1. Commit the changes for the `requirements.yaml` file.
+1. If you previously had a `requirements.lock` file, commit the changes to the file.
+   If you did not previously have a `requirements.lock` file in your chart,
+   you do not need to commit the new one. This file is optional, but when present,
+   it's used to verify the integrity of the downloaded dependencies.
+
+You can find more information in
+[issue #263778, "Migrate PostgreSQL from stable Helm repo"](https://gitlab.com/gitlab-org/gitlab/-/issues/263778).
+
+### Error: release .... failed: timed out waiting for the condition
+
+When getting started with Auto DevOps, you may encounter this error when first
+deploying your application:
+
+```plaintext
+INSTALL FAILED
+PURGING CHART
+Error: release staging failed: timed out waiting for the condition
+```
+
+This is most likely caused by a failed liveness (or readiness) probe attempted
+during the deployment process. By default, these probes are run against the root
+page of the deployed application on port 5000. If your application isn't configured
+to serve anything at the root page, or is configured to run on a specific port
+*other* than 5000, this check fails.
+
+If it fails, you should see these failures within the events for the relevant
+Kubernetes namespace. These events look like the following example:
+
+```plaintext
+LAST SEEN   TYPE      REASON                   OBJECT                                            MESSAGE
+3m20s       Warning   Unhealthy                pod/staging-85db88dcb6-rxd6g                      Readiness probe failed: Get http://10.192.0.6:5000/: dial tcp 10.192.0.6:5000: connect: connection refused
+3m32s       Warning   Unhealthy                pod/staging-85db88dcb6-rxd6g                      Liveness probe failed: Get http://10.192.0.6:5000/: dial tcp 10.192.0.6:5000: connect: connection refused
+```
+
+To change the port used for the liveness checks, pass
+[custom values to the Helm chart](customize.md#customize-values-for-helm-chart)
+used by Auto DevOps:
+
+1. Create a directory and file at the root of your repository named `.gitlab/auto-deploy-values.yaml`.
+
+1. Populate the file with the following content, replacing the port values with
+   the actual port number your application is configured to use:
+
+   ```yaml
+   service:
+     internalPort: <port_value>
+     externalPort: <port_value>
+   ```
+
+1. Commit your changes.
+
+After committing your changes, subsequent probes should use the newly-defined ports.
+The page that's probed can also be changed by overriding the `livenessProbe.path`
+and `readinessProbe.path` values (shown in the
+[default `values.yaml`](https://gitlab.com/gitlab-org/cluster-integration/auto-deploy-image/-/blob/master/assets/auto-deploy-app/values.yaml)
+file) in the same fashion.
 
 ## Development guides
 

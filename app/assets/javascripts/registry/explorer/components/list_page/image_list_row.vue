@@ -10,6 +10,7 @@ import {
   LIST_DELETE_BUTTON_DISABLED,
   REMOVE_REPOSITORY_LABEL,
   ROW_SCHEDULED_FOR_DELETION,
+  CLEANUP_TIMED_OUT_ERROR_MESSAGE,
 } from '../../constants/index';
 
 export default {
@@ -34,17 +35,8 @@ export default {
     LIST_DELETE_BUTTON_DISABLED,
     REMOVE_REPOSITORY_LABEL,
     ROW_SCHEDULED_FOR_DELETION,
-    ASYNC_DELETE_IMAGE_ERROR_MESSAGE,
   },
   computed: {
-    encodedItem() {
-      const params = JSON.stringify({
-        name: this.item.path,
-        tags_path: this.item.tags_path,
-        id: this.item.id,
-      });
-      return window.btoa(params);
-    },
     disabledDelete() {
       return !this.item.destroy_path || this.item.deleting;
     },
@@ -54,6 +46,14 @@ export default {
         'ContainerRegistry|%{count} Tags',
         this.item.tags_count,
       );
+    },
+    warningIconText() {
+      if (this.item.failedDelete) {
+        return ASYNC_DELETE_IMAGE_ERROR_MESSAGE;
+      } else if (this.item.cleanup_policy_started_at) {
+        return CLEANUP_TIMED_OUT_ERROR_MESSAGE;
+      }
+      return null;
     },
   },
 };
@@ -72,8 +72,8 @@ export default {
     <template #left-primary>
       <router-link
         class="gl-text-body gl-font-weight-bold"
-        data-testid="detailsLink"
-        :to="{ name: 'details', params: { id: encodedItem } }"
+        data-testid="details-link"
+        :to="{ name: 'details', params: { id: item.id } }"
       >
         {{ item.path }}
       </router-link>
@@ -82,11 +82,12 @@ export default {
         :disabled="item.deleting"
         :text="item.location"
         :title="item.location"
-        css-class="btn-default btn-transparent btn-clipboard gl-text-gray-300"
+        category="tertiary"
       />
       <gl-icon
-        v-if="item.failedDelete"
-        v-gl-tooltip="{ title: $options.i18n.ASYNC_DELETE_IMAGE_ERROR_MESSAGE }"
+        v-if="warningIconText"
+        v-gl-tooltip="{ title: warningIconText }"
+        data-testid="warning-icon"
         name="warning"
         class="gl-text-orange-500"
       />

@@ -25,6 +25,9 @@ RSpec.describe 'get list of boards' do
           nodes {
             id
             title
+            userPreferences {
+              collapsed
+            }
           }
         }
       EPIC
@@ -42,24 +45,38 @@ RSpec.describe 'get list of boards' do
     it 'returns open epics referenced by issues in the board' do
       board = create(:board, resource_parent: board_parent)
       issue_project = board_parent.is_a?(Project) ? board_parent : create(:project, group: board_parent)
+      # matches filters:
       issue1 = create(:issue, project: issue_project, labels: [label])
+      # matches filters, but is assigned to the same epic as issue1:
       issue2 = create(:issue, project: issue_project, labels: [label])
+      # doesn't match labelName filter:
       issue3 = create(:issue, project: issue_project)
+      # matches filters, but its epic is closed:
       issue4 = create(:issue, project: issue_project, labels: [label])
+      # doesn't match negated authorUsername filter:
       issue5 = create(:issue, project: issue_project, labels: [label], author: current_user)
+
       epic1 = create(:epic, group: parent_group)
       epic2 = create(:epic, group: parent_group)
       epic3 = create(:epic, :closed, group: parent_group)
+
       create(:epic_issue, issue: issue1, epic: epic1)
       create(:epic_issue, issue: issue2, epic: epic1)
       create(:epic_issue, issue: issue3, epic: epic2)
       create(:epic_issue, issue: issue4, epic: epic3)
       create(:epic_issue, issue: issue5, epic: epic2)
 
+      create(:epic_user_preference, board: board, epic: epic1, user: current_user, collapsed: true)
+
       post_graphql(board_epic_query(board), current_user: current_user)
 
-      board_titles = board_data['epics']['nodes'].map { |node| node['title'] }
-      expect(board_titles).to match_array [epic1.title]
+      aggregate_failures 'board epics response' do
+        epics = board_data['epics']['nodes']
+
+        expect(epics.size).to eq(1)
+        expect(epics.first['title']).to eq(epic1.title)
+        expect(epics.first['userPreferences']['collapsed']).to eq(true)
+      end
     end
   end
 

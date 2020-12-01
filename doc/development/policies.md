@@ -1,3 +1,9 @@
+---
+stage: Manage
+group: Access
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # `DeclarativePolicy` framework
 
 The DeclarativePolicy framework is designed to assist in performance of policy checks, and to enable ease of extension for EE. The DSL code in `app/policies` is what `Ability.allowed?` uses to check whether a particular action is allowed on a subject.
@@ -171,7 +177,7 @@ class ParentPolicy < BasePolicy
   condition(:speaks_spanish) { @subject.spoken_languages.include?(:es) }
   condition(:has_license) { @subject.driving_license.present? }
   condition(:enjoys_broccoli) { @subject.enjoyment_of(:broccoli) > 0 }
-  
+
   rule { speaks_spanish }.enable :read_spanish
   rule { has_license }.enable :drive_car
   rule { enjoys_broccoli }.enable :eat_broccoli
@@ -190,7 +196,7 @@ child policy, for example:
 ```ruby
 class ChildPolicy < BasePolicy
   delegate { @subject.parent }
-  
+
   rule { default }.prevent :drive_car
 end
 ```
@@ -211,11 +217,11 @@ The solution it to override the `:eat_broccoli` ability in the child policy:
 ```ruby
 class ChildPolicy < BasePolicy
   delegate { @subject.parent }
-  
+
   overrides :eat_broccoli
-  
+
   condition(:good_kid) { @subject.behavior_level >= Child::GOOD }
-  
+
   rule { good_kid }.enable :eat_broccoli
 end
 ```

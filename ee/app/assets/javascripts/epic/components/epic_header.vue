@@ -1,10 +1,9 @@
 <script>
 import { mapState, mapGetters, mapActions } from 'vuex';
-import { GlButton, GlIcon } from '@gitlab/ui';
+import { GlButton, GlIcon, GlTooltipDirective } from '@gitlab/ui';
 
 import { __ } from '~/locale';
 
-import tooltip from '~/vue_shared/directives/tooltip';
 import UserAvatarLink from '~/vue_shared/components/user_avatar/user_avatar_link.vue';
 import TimeagoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 
@@ -13,7 +12,7 @@ import { statusType } from '../constants';
 
 export default {
   directives: {
-    tooltip,
+    GlTooltipDirective,
   },
   components: {
     GlIcon,
@@ -115,10 +114,9 @@ export default {
       type="button"
       class="float-right gl-display-block d-sm-none gl-align-self-center gutter-toggle issuable-gutter-toggle"
       data-testid="sidebar-toggle"
+      icon="chevron-double-lg-left"
       @click="toggleSidebar({ sidebarCollapsed })"
-    >
-      <i class="fa fa-angle-double-left"></i>
-    </gl-button>
+    />
     <div
       class="detail-page-header-actions gl-display-flex gl-flex-wrap gl-align-items-center gl-w-full gl-sm-w-auto!"
       data-testid="action-buttons"
@@ -129,7 +127,8 @@ export default {
         :class="actionButtonClass"
         category="secondary"
         variant="warning"
-        class="qa-close-reopen-epic-button gl-mt-3 gl-sm-mt-0! gl-w-full gl-sm-w-auto!"
+        class="gl-mt-3 gl-sm-mt-0! gl-w-full gl-sm-w-auto!"
+        data-qa-selector="close_reopen_epic_button"
         data-testid="toggle-status-button"
         @click="toggleEpicStatus(isEpicOpen)"
       >

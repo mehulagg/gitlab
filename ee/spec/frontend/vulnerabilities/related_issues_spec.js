@@ -2,14 +2,13 @@ import { GlAlert } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
 import RelatedIssues from 'ee/vulnerabilities/components/related_issues.vue';
-import { FEEDBACK_TYPES } from 'ee/vulnerabilities/constants';
 import waitForPromises from 'helpers/wait_for_promises';
-import RelatedIssuesBlock from '~/related_issues/components/related_issues_block.vue';
-import { issuableTypesMap, PathIdSeparator } from '~/related_issues/constants';
-import axios from '~/lib/utils/axios_utils';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
+import axios from '~/lib/utils/axios_utils';
 import httpStatusCodes from '~/lib/utils/http_status';
 import * as urlUtility from '~/lib/utils/url_utility';
+import RelatedIssuesBlock from '~/related_issues/components/related_issues_block.vue';
+import { issuableTypesMap, PathIdSeparator } from '~/related_issues/constants';
 
 jest.mock('~/flash');
 
@@ -34,7 +33,7 @@ describe('Vulnerability related issues component', () => {
   const issue1 = { id: 3, vulnerabilityLinkId: 987 };
   const issue2 = { id: 25, vulnerabilityLinkId: 876 };
 
-  const createWrapper = async (data = {}, opts) => {
+  const createWrapper = async ({ data = {}, provide = {}, stubs = {} } = {}) => {
     wrapper = shallowMount(RelatedIssues, {
       propsData,
       data: () => data,
@@ -45,8 +44,9 @@ describe('Vulnerability related issues component', () => {
         reportType,
         issueTrackingHelpPath,
         permissionsHelpPath,
+        ...provide,
       },
-      ...opts,
+      stubs,
     });
     // Need this special check because RelatedIssues creates the store and uses its state in the data function, so we
     // need to set the state of the store, not replace the state property.
@@ -79,7 +79,7 @@ describe('Vulnerability related issues component', () => {
       },
     };
 
-    createWrapper(data);
+    createWrapper({ data });
 
     expect(relatedIssuesBlock().props()).toMatchObject({
       helpPath: propsData.helpPath,
@@ -120,7 +120,7 @@ describe('Vulnerability related issues component', () => {
   describe('add related issue', () => {
     beforeEach(() => {
       mockAxios.onGet(propsData.endpoint).replyOnce(httpStatusCodes.OK, []);
-      createWrapper({ isFormVisible: true });
+      createWrapper({ data: { isFormVisible: true } });
     });
 
     it('adds related issue with vulnerabilityLinkId populated', async () => {
@@ -178,7 +178,7 @@ describe('Vulnerability related issues component', () => {
       ${true}  | ${false}
       ${false} | ${true}
     `('toggles form visibility from $from to $to', async ({ from, to }) => {
-      createWrapper({ isFormVisible: from });
+      createWrapper({ data: { isFormVisible: from } });
 
       blockEmit('toggleAddRelatedIssuesForm');
       await wrapper.vm.$nextTick();
@@ -187,9 +187,11 @@ describe('Vulnerability related issues component', () => {
 
     it('resets form and hides it', async () => {
       createWrapper({
-        inputValue: 'some input value',
-        isFormVisible: true,
-        state: { pendingReferences: ['135', '246'] },
+        data: {
+          inputValue: 'some input value',
+          isFormVisible: true,
+          state: { pendingReferences: ['135', '246'] },
+        },
       });
       blockEmit('addIssuableFormCancel');
       await wrapper.vm.$nextTick();
@@ -205,7 +207,7 @@ describe('Vulnerability related issues component', () => {
       const pendingReferences = ['135', '246'];
       const untouchedRawReferences = ['357', '468'];
       const touchedReference = 'touchedReference';
-      createWrapper({ state: { pendingReferences } });
+      createWrapper({ data: { state: { pendingReferences } } });
       blockEmit('addIssuableFormInput', { untouchedRawReferences, touchedReference });
       await wrapper.vm.$nextTick();
 
@@ -225,7 +227,7 @@ describe('Vulnerability related issues component', () => {
     });
 
     it('removes pending reference', async () => {
-      createWrapper({ state: { pendingReferences: ['135', '246', '357'] } });
+      createWrapper({ data: { state: { pendingReferences: ['135', '246', '357'] } } });
       blockEmit('pendingIssuableRemoveRequest', 1);
       await wrapper.vm.$nextTick();
 
@@ -266,13 +268,13 @@ describe('Vulnerability related issues component', () => {
 
   describe('when linked issue is already created', () => {
     beforeEach(() => {
-      createWrapper(
-        {
+      createWrapper({
+        data: {
           isFetching: false,
           state: { relatedIssues: [issue1, { ...issue2, vulnerabilityLinkType: 'created' }] },
         },
-        { stubs: { RelatedIssuesBlock } },
-      );
+        stubs: { RelatedIssuesBlock },
+      });
     });
 
     it('does not display the create issue button', () => {
@@ -290,7 +292,7 @@ describe('Vulnerability related issues component', () => {
 
     beforeEach(async () => {
       mockAxios.onGet(propsData.endpoint).replyOnce(httpStatusCodes.OK, [issue1, issue2]);
-      createWrapper({}, { stubs: { RelatedIssuesBlock } });
+      createWrapper({ stubs: { RelatedIssuesBlock } });
       await axios.waitForAll();
     });
 
@@ -299,10 +301,10 @@ describe('Vulnerability related issues component', () => {
     });
 
     it('calls create issue endpoint on click and redirects to new issue', async () => {
-      const issueUrl = '/group/project/issues/123';
+      const issueUrl = `/group/project/-/security/vulnerabilities/${vulnerabilityId}/create_issue`;
       const spy = jest.spyOn(urlUtility, 'redirectTo');
       mockAxios.onPost(propsData.createIssueUrl).reply(200, {
-        issue_url: issueUrl,
+        web_url: issueUrl,
       });
 
       findCreateIssueButton().vm.$emit('click');
@@ -313,17 +315,6 @@ describe('Vulnerability related issues component', () => {
       expect(mockAxios.history.post).toHaveLength(1);
       expect(postRequest.url).toBe(createIssueUrl);
       expect(spy).toHaveBeenCalledWith(issueUrl);
-      expect(JSON.parse(postRequest.data)).toMatchObject({
-        vulnerability_feedback: {
-          feedback_type: FEEDBACK_TYPES.ISSUE,
-          category: reportType,
-          project_fingerprint: projectFingerprint,
-          vulnerability_data: {
-            category: reportType,
-            vulnerability_id: vulnerabilityId,
-          },
-        },
-      });
     });
 
     it('shows an error message when issue creation fails', async () => {
@@ -337,6 +328,18 @@ describe('Vulnerability related issues component', () => {
       findAlert().vm.$emit('dismiss');
       await wrapper.vm.$nextTick();
       expect(findAlert().exists()).toBe(false);
+    });
+  });
+
+  describe('when project issue tracking is disabled', () => {
+    it('hides the "Create Issue" button', () => {
+      createWrapper({
+        provide: {
+          createIssueUrl: undefined,
+        },
+      });
+
+      expect(findCreateIssueButton().exists()).toBe(false);
     });
   });
 });

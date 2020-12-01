@@ -11,7 +11,6 @@ import EvidenceBlock from './evidence_block.vue';
 import ReleaseBlockAssets from './release_block_assets.vue';
 import ReleaseBlockFooter from './release_block_footer.vue';
 import ReleaseBlockHeader from './release_block_header.vue';
-import ReleaseBlockMetadata from './release_block_metadata.vue';
 import ReleaseBlockMilestoneInfo from './release_block_milestone_info.vue';
 
 export default {
@@ -21,7 +20,6 @@ export default {
     ReleaseBlockAssets,
     ReleaseBlockFooter,
     ReleaseBlockHeader,
-    ReleaseBlockMetadata,
     ReleaseBlockMilestoneInfo,
   },
   mixins: [glFeatureFlagsMixin()],
@@ -54,22 +52,13 @@ export default {
     milestones() {
       return this.release.milestones || [];
     },
-    shouldShowEvidence() {
-      return this.glFeatures.releaseEvidenceCollection;
-    },
-    shouldShowFooter() {
-      return this.glFeatures.releaseIssueSummary;
-    },
     shouldRenderAssets() {
       return Boolean(
         this.assets.links.length || (this.assets.sources && this.assets.sources.length),
       );
     },
-    shouldRenderReleaseMetaData() {
-      return !this.glFeatures.releaseIssueSummary;
-    },
     shouldRenderMilestoneInfo() {
-      return Boolean(this.glFeatures.releaseIssueSummary && !isEmpty(this.release.milestones));
+      return Boolean(!isEmpty(this.release.milestones));
     },
   },
 
@@ -98,16 +87,20 @@ export default {
     <release-block-header :release="release" />
     <div class="card-body">
       <div v-if="shouldRenderMilestoneInfo">
+        <!-- TODO: Switch open* links to opened* once fields have been updated in GraphQL -->
         <release-block-milestone-info
           :milestones="milestones"
-          :open-issues-path="release._links.issuesUrl"
+          :opened-issues-path="release._links.openedIssuesUrl"
+          :closed-issues-path="release._links.closedIssuesUrl"
+          :opened-merge-requests-path="release._links.openedMergeRequestsUrl"
+          :merged-merge-requests-path="release._links.mergedMergeRequestsUrl"
+          :closed-merge-requests-path="release._links.closedMergeRequestsUrl"
         />
         <hr class="mb-3 mt-0" />
       </div>
 
-      <release-block-metadata v-if="shouldRenderReleaseMetaData" :release="release" />
       <release-block-assets v-if="shouldRenderAssets" :assets="assets" />
-      <evidence-block v-if="hasEvidence && shouldShowEvidence" :release="release" />
+      <evidence-block v-if="hasEvidence" :release="release" />
 
       <div ref="gfm-content" class="card-text gl-mt-3">
         <div class="md" v-html="release.descriptionHtml"></div>
@@ -115,7 +108,6 @@ export default {
     </div>
 
     <release-block-footer
-      v-if="shouldShowFooter"
       class="card-footer"
       :commit="release.commit"
       :commit-path="release.commitPath"

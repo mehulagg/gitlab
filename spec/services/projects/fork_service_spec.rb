@@ -179,7 +179,7 @@ RSpec.describe Projects::ForkService do
 
         context "when origin has git depth specified" do
           before do
-            @from_project.update(ci_default_git_depth: 42)
+            @from_project.update!(ci_default_git_depth: 42)
           end
 
           it "inherits default_git_depth from the origin project" do
@@ -201,7 +201,7 @@ RSpec.describe Projects::ForkService do
       context "when project has restricted visibility level" do
         context "and only one visibility level is restricted" do
           before do
-            @from_project.update(visibility_level: Gitlab::VisibilityLevel::INTERNAL)
+            @from_project.update!(visibility_level: Gitlab::VisibilityLevel::INTERNAL)
             stub_application_setting(restricted_visibility_levels: [Gitlab::VisibilityLevel::INTERNAL])
           end
 
@@ -343,10 +343,6 @@ RSpec.describe Projects::ForkService do
   context 'when forking with object pools' do
     let(:fork_from_project) { create(:project, :public) }
     let(:forker) { create(:user) }
-
-    before do
-      stub_feature_flags(object_pools: true)
-    end
 
     context 'when no pool exists' do
       it 'creates a new object pool' do

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module API
-  class API < Grape::API::Instance
+  class API < ::API::Base
     include APIGuard
 
     LOG_FILENAME = Rails.root.join("log", "api_json.log")
@@ -25,7 +25,8 @@ module API
                     Gitlab::GrapeLogging::Loggers::QueueDurationLogger.new,
                     Gitlab::GrapeLogging::Loggers::PerfLogger.new,
                     Gitlab::GrapeLogging::Loggers::CorrelationIdLogger.new,
-                    Gitlab::GrapeLogging::Loggers::ContextLogger.new
+                    Gitlab::GrapeLogging::Loggers::ContextLogger.new,
+                    Gitlab::GrapeLogging::Loggers::ContentLogger.new
                   ]
 
     allow_access_with_scope :api
@@ -48,11 +49,17 @@ module API
     before do
       coerce_nil_params_to_array!
 
+      api_endpoint = env['api.endpoint']
+      feature_category = api_endpoint.options[:for].try(:feature_category_for_app, api_endpoint).to_s
+
+      header[Gitlab::Metrics::RequestsRackMiddleware::FEATURE_CATEGORY_HEADER] = feature_category
+
       Gitlab::ApplicationContext.push(
         user: -> { @current_user },
         project: -> { @project },
         namespace: -> { @group },
-        caller_id: route.origin
+        caller_id: route.origin,
+        feature_category: feature_category
       )
     end
 
@@ -115,7 +122,14 @@ module API
 
     format :json
     formatter :json, Gitlab::Json::GrapeFormatter
-    content_type :txt, "text/plain"
+
+    # There is a small chance some users depend on the old behavior.
+    # We this change under a feature flag to see if affects GitLab.com users.
+    if Gitlab::Database.cached_table_exists?('features') && Feature.enabled?(:api_json_content_type)
+      content_type :json, 'application/json'
+    else
+      content_type :txt, 'text/plain'
+    end
 
     # Ensure the namespace is right, otherwise we might load Grape::API::Helpers
     helpers ::API::Helpers
@@ -147,12 +161,17 @@ module API
       mount ::API::Commits
       mount ::API::CommitStatuses
       mount ::API::ContainerRegistryEvent
+      mount ::API::ContainerRepositories
+      mount ::API::DependencyProxy
       mount ::API::DeployKeys
       mount ::API::DeployTokens
       mount ::API::Deployments
       mount ::API::Environments
       mount ::API::ErrorTracking
       mount ::API::Events
+      mount ::API::FeatureFlags
+      mount ::API::FeatureFlagScopes
+      mount ::API::FeatureFlagsUserLists
       mount ::API::Features
       mount ::API::Files
       mount ::API::FreezePeriods
@@ -168,6 +187,7 @@ module API
       mount ::API::ImportBitbucketServer
       mount ::API::ImportGithub
       mount ::API::IssueLinks
+      mount ::API::Invitations
       mount ::API::Issues
       mount ::API::JobArtifacts
       mount ::API::Jobs
@@ -194,9 +214,13 @@ module API
       mount ::API::NugetPackages
       mount ::API::PypiPackages
       mount ::API::ComposerPackages
-      mount ::API::ConanPackages
+      mount ::API::ConanProjectPackages
+      mount ::API::ConanInstancePackages
+      mount ::API::DebianGroupPackages
+      mount ::API::DebianProjectPackages
       mount ::API::MavenPackages
-      mount ::API::NpmPackages
+      mount ::API::NpmProjectPackages
+      mount ::API::NpmInstancePackages
       mount ::API::GenericPackages
       mount ::API::GoProxy
       mount ::API::Pages
@@ -215,6 +239,8 @@ module API
       mount ::API::ProjectStatistics
       mount ::API::ProjectTemplates
       mount ::API::Terraform::State
+      mount ::API::Terraform::StateVersion
+      mount ::API::PersonalAccessTokens
       mount ::API::ProtectedBranches
       mount ::API::ProtectedTags
       mount ::API::Releases
@@ -235,6 +261,8 @@ module API
       mount ::API::Templates
       mount ::API::Todos
       mount ::API::Triggers
+      mount ::API::Unleash
+      mount ::API::UsageData
       mount ::API::UserCounts
       mount ::API::Users
       mount ::API::Variables
@@ -243,6 +271,7 @@ module API
     end
 
     mount ::API::Internal::Base
+    mount ::API::Internal::Lfs
     mount ::API::Internal::Pages
     mount ::API::Internal::Kubernetes
 
@@ -256,7 +285,7 @@ module API
       end
     end
 
-    route :any, '*path' do
+    route :any, '*path', feature_category: :not_owned do
       error!('404 Not Found', 404)
     end
   end

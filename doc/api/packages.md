@@ -1,7 +1,7 @@
 ---
 stage: Package
 group: Package
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Packages API
@@ -26,7 +26,7 @@ GET /projects/:id/packages
 | `id`      | integer/string | yes | ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) |
 | `order_by`| string | no | The field to use as order. One of `created_at` (default), `name`, `version`, or `type`. |
 | `sort`    | string | no | The direction of the order, either `asc` (default) for ascending order or `desc` for descending order. |
-| `package_type` | string | no | Filter the returned packages by type. One of `conan`, `maven`, `npm`, `pypi`, `composer`, or `nuget`. (_Introduced in GitLab 12.9_)
+| `package_type` | string | no | Filter the returned packages by type. One of `conan`, `maven`, `npm`, `pypi`, `composer`, `nuget`, or `golang`. (_Introduced in GitLab 12.9_)
 | `package_name` | string | no | Filter the project packages with a fuzzy search by name. (_Introduced in GitLab 12.9_)
 
 ```shell
@@ -50,11 +50,24 @@ Example response:
     "version": "1.0.3",
     "package_type": "npm",
     "created_at": "2019-11-27T03:37:38.711Z"
+  },
+  {
+    "id": 3,
+    "name": "Hello/0.1@mycompany/stable",
+    "conan_package_name": "Hello",
+    "version": "0.1",
+    "package_type": "conan",
+    "_links": {
+      "web_path": "/foo/bar/-/packages/3",
+      "delete_api_path": "https://gitlab.example.com/api/v4/projects/1/packages/3"
+    },
+    "created_at": "2029-12-16T20:33:34.316Z",
+    "tags": []
   }
 ]
 ```
 
-By default, the `GET` request will return 20 results, since the API is [paginated](README.md#pagination).
+By default, the `GET` request returns 20 results, since the API is [paginated](README.md#pagination).
 
 ### Within a group
 
@@ -73,16 +86,17 @@ GET /groups/:id/packages
 | `exclude_subgroups` | boolean | false | If the parameter is included as true, packages from projects from subgroups are not listed. Default is `false`. |
 | `order_by`| string | no | The field to use as order. One of `created_at` (default), `name`, `version`, `type`, or `project_path`. |
 | `sort`    | string | no | The direction of the order, either `asc` (default) for ascending order or `desc` for descending order. |
-| `package_type` | string | no | Filter the returned packages by type. One of `conan`, `maven`, `npm`, `pypi`, `composer`, or `nuget`. (_Introduced in GitLab 12.9_) |
+| `package_type` | string | no | Filter the returned packages by type. One of `conan`, `maven`, `npm`, `pypi`, `composer`, `nuget`, or `golang`. (_Introduced in GitLab 12.9_) |
 | `package_name` | string | no | Filter the project packages with a fuzzy search by name. (_[Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/30980) in GitLab 13.0_)
 
 ```shell
 curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/:id/packages?exclude_subgroups=true"
 ```
 
-CAUTION: **Deprecation:**
-> The `build_info` attribute in the response is deprecated in favour of `pipeline`.
-> Introduced [GitLab 12.10](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/28040).
+> **Deprecation:**
+>
+> The `pipeline` attribute in the response is deprecated in favor of `pipelines`, which was [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/44348) in GitLab 13.6. Both are available until 13.7.
+> The `build_info` attribute in the response is deprecated in favor of `pipeline`, which was [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/28040) in GitLab 12.10.
 
 Example response:
 
@@ -98,19 +112,21 @@ Example response:
       "delete_api_path": "/namespace1/project1/-/packages/1"
     },
     "created_at": "2019-11-27T03:37:38.711Z",
-    "pipeline": {
-      "id": 123,
-      "status": "pending",
-      "ref": "new-pipeline",
-      "sha": "a91957a858320c0e17f3a0eca7cfacbff50ea29a",
-      "web_url": "https://example.com/foo/bar/pipelines/47",
-      "created_at": "2016-08-11T11:28:34.085Z",
-      "updated_at": "2016-08-11T11:32:35.169Z",
-      "user": {
-        "name": "Administrator",
-        "avatar_url": "https://www.gravatar.com/avatar/e64c7d89f26bd1972efa854d13d7dd61?s=80&d=identicon"
+    "pipelines": [
+      {
+        "id": 123,
+        "status": "pending",
+        "ref": "new-pipeline",
+        "sha": "a91957a858320c0e17f3a0eca7cfacbff50ea29a",
+        "web_url": "https://example.com/foo/bar/pipelines/47",
+        "created_at": "2016-08-11T11:28:34.085Z",
+        "updated_at": "2016-08-11T11:32:35.169Z",
+        "user": {
+          "name": "Administrator",
+          "avatar_url": "https://www.gravatar.com/avatar/e64c7d89f26bd1972efa854d13d7dd61?s=80&d=identicon"
+        }
       }
-    }
+    ]
   },
   {
     "id": 2,
@@ -122,24 +138,26 @@ Example response:
       "delete_api_path": "/namespace1/project1/-/packages/1"
     },
     "created_at": "2019-11-27T03:37:38.711Z",
-    "pipeline": {
-      "id": 123,
-      "status": "pending",
-      "ref": "new-pipeline",
-      "sha": "a91957a858320c0e17f3a0eca7cfacbff50ea29a",
-      "web_url": "https://example.com/foo/bar/pipelines/47",
-      "created_at": "2016-08-11T11:28:34.085Z",
-      "updated_at": "2016-08-11T11:32:35.169Z",
-      "user": {
-        "name": "Administrator",
-        "avatar_url": "https://www.gravatar.com/avatar/e64c7d89f26bd1972efa854d13d7dd61?s=80&d=identicon"
+    "pipelines": [
+      {
+        "id": 123,
+        "status": "pending",
+        "ref": "new-pipeline",
+        "sha": "a91957a858320c0e17f3a0eca7cfacbff50ea29a",
+        "web_url": "https://example.com/foo/bar/pipelines/47",
+        "created_at": "2016-08-11T11:28:34.085Z",
+        "updated_at": "2016-08-11T11:32:35.169Z",
+        "user": {
+          "name": "Administrator",
+          "avatar_url": "https://www.gravatar.com/avatar/e64c7d89f26bd1972efa854d13d7dd61?s=80&d=identicon"
+        }
       }
-    }
+    ]
   }
 ]
 ```
 
-By default, the `GET` request will return 20 results, since the API is [paginated](README.md#pagination).
+By default, the `GET` request returns 20 results, since the API is [paginated](README.md#pagination).
 
 The `_links` object contains the following properties:
 
@@ -165,9 +183,10 @@ GET /projects/:id/packages/:package_id
 curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/:id/packages/:package_id"
 ```
 
-CAUTION: **Deprecation:**
-> The `build_info` attribute in the response is deprecated in favour of `pipeline`.
-> Introduced [GitLab 12.10](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/28040).
+> **Deprecation:**
+>
+> The `pipeline` attribute in the response is deprecated in favor of `pipelines`, which was [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/44348) in GitLab 13.6. Both are available until 13.7.
+> The `build_info` attribute in the response is deprecated in favor of `pipeline`, which was [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/28040) in GitLab 12.10.
 
 Example response:
 
@@ -182,37 +201,41 @@ Example response:
     "delete_api_path": "/namespace1/project1/-/packages/1"
   },
   "created_at": "2019-11-27T03:37:38.711Z",
-  "pipeline": {
-    "id": 123,
-    "status": "pending",
-    "ref": "new-pipeline",
-    "sha": "a91957a858320c0e17f3a0eca7cfacbff50ea29a",
-    "web_url": "https://example.com/foo/bar/pipelines/47",
-    "created_at": "2016-08-11T11:28:34.085Z",
-    "updated_at": "2016-08-11T11:32:35.169Z",
-    "user": {
-      "name": "Administrator",
-      "avatar_url": "https://www.gravatar.com/avatar/e64c7d89f26bd1972efa854d13d7dd61?s=80&d=identicon"
+  "pipelines": [
+    {
+      "id": 123,
+      "status": "pending",
+      "ref": "new-pipeline",
+      "sha": "a91957a858320c0e17f3a0eca7cfacbff50ea29a",
+      "web_url": "https://example.com/foo/bar/pipelines/47",
+      "created_at": "2016-08-11T11:28:34.085Z",
+      "updated_at": "2016-08-11T11:32:35.169Z",
+      "user": {
+        "name": "Administrator",
+        "avatar_url": "https://www.gravatar.com/avatar/e64c7d89f26bd1972efa854d13d7dd61?s=80&d=identicon"
+      }
     }
-  },
+  ],
   "versions": [
     {
       "id":2,
       "version":"2.0-SNAPSHOT",
       "created_at":"2020-04-28T04:42:11.573Z",
-      "pipeline": {
-        "id": 234,
-        "status": "pending",
-        "ref": "new-pipeline",
-        "sha": "a91957a858320c0e17f3a0eca7cfacbff50ea29a",
-        "web_url": "https://example.com/foo/bar/pipelines/58",
-        "created_at": "2016-08-11T11:28:34.085Z",
-        "updated_at": "2016-08-11T11:32:35.169Z",
-        "user": {
-          "name": "Administrator",
-          "avatar_url": "https://www.gravatar.com/avatar/e64c7d89f26bd1972efa854d13d7dd61?s=80&d=identicon"
+      "pipelines": [
+        {
+          "id": 234,
+          "status": "pending",
+          "ref": "new-pipeline",
+          "sha": "a91957a858320c0e17f3a0eca7cfacbff50ea29a",
+          "web_url": "https://example.com/foo/bar/pipelines/58",
+          "created_at": "2016-08-11T11:28:34.085Z",
+          "updated_at": "2016-08-11T11:32:35.169Z",
+          "user": {
+            "name": "Administrator",
+            "avatar_url": "https://www.gravatar.com/avatar/e64c7d89f26bd1972efa854d13d7dd61?s=80&d=identicon"
+          }
         }
-      }
+      ]
     }
   ]
 }
@@ -253,7 +276,22 @@ Example response:
     "file_name": "my-app-1.5-20181107.152550-1.jar",
     "size": 2421,
     "file_md5": "58e6a45a629910c6ff99145a688971ac",
-    "file_sha1": "ebd193463d3915d7e22219f52740056dfd26cbfe"
+    "file_sha1": "ebd193463d3915d7e22219f52740056dfd26cbfe",
+    "pipelines": [
+      {
+        "id": 123,
+        "status": "pending",
+        "ref": "new-pipeline",
+        "sha": "a91957a858320c0e17f3a0eca7cfacbff50ea29a",
+        "web_url": "https://example.com/foo/bar/pipelines/47",
+        "created_at": "2016-08-11T11:28:34.085Z",
+        "updated_at": "2016-08-11T11:32:35.169Z",
+        "user": {
+          "name": "Administrator",
+          "avatar_url": "https://www.gravatar.com/avatar/e64c7d89f26bd1972efa854d13d7dd61?s=80&d=identicon"
+        }
+      }
+    ]
   },
   {
     "id": 26,
@@ -276,7 +314,7 @@ Example response:
 ]
 ```
 
-By default, the `GET` request will return 20 results, since the API is [paginated](README.md#pagination).
+By default, the `GET` request returns 20 results, since the API is [paginated](README.md#pagination).
 
 ## Delete a project package
 

@@ -52,16 +52,16 @@ module EE
       end
 
       def blocking_issues_for_collection(issues_ids)
+        open_state_id = ::Issuable::STATE_ID_MAP[:opened]
+
         from_union([
-          select('COUNT(*), issue_links.source_id AS blocking_issue_id')
+          select("COUNT(CASE WHEN issues.state_id = #{open_state_id} then 1 else null end), issue_links.source_id AS blocking_issue_id")
             .joins(:target)
-            .where(issues: { state_id: ::Issue.available_states[:opened] })
             .where(link_type: ::IssueLink::TYPE_BLOCKS)
             .where(source_id: issues_ids)
             .group(:blocking_issue_id),
-          select('COUNT(*), issue_links.target_id AS blocking_issue_id')
+          select("COUNT(CASE WHEN issues.state_id = #{open_state_id} then 1 else null end), issue_links.target_id AS blocking_issue_id")
             .joins(:source)
-            .where(issues: { state_id: ::Issue.available_states[:opened] })
             .where(link_type: ::IssueLink::TYPE_IS_BLOCKED_BY)
             .where(target_id: issues_ids)
             .group(:blocking_issue_id)

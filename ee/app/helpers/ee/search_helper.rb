@@ -3,7 +3,8 @@ module EE
   module SearchHelper
     extend ::Gitlab::Utils::Override
 
-    SWITCH_TO_BASIC_SEARCHABLE_TABS = %w[projects issues merge_requests milestones users].freeze
+    SWITCH_TO_BASIC_SEARCHABLE_TABS = %w[projects issues merge_requests milestones users epics].freeze
+    PLACEHOLDER = '_PLACEHOLDER_'
 
     override :search_filter_input_options
     def search_filter_input_options(type, placeholder = _('Search or filter results...'))
@@ -16,7 +17,20 @@ module EE
         options[:data]['epics-endpoint'] = group_epics_path(@group)
       end
 
+      if allow_filtering_by_iteration?
+        if @project
+          options[:data]['iterations-endpoint'] = expose_path(api_v4_projects_iterations_path(id: @project.id))
+        elsif @group
+          options[:data]['iterations-endpoint'] = expose_path(api_v4_groups_iterations_path(id: @group.id))
+        end
+      end
+
       options
+    end
+
+    override :recent_items_autocomplete
+    def recent_items_autocomplete(term)
+      super + recent_epics_autocomplete(term)
     end
 
     override :search_blob_title
@@ -28,11 +42,14 @@ module EE
       end
     end
 
-    override :project_autocomplete
-    def project_autocomplete
-      return super unless @project && @project.feature_available?(:feature_flags)
-
-      super + [{ category: "In this project", label: _("Feature Flags"), url: project_feature_flags_path(@project) }]
+    override :search_entries_scope_label
+    def search_entries_scope_label(scope, count)
+      case scope
+      when 'epics'
+        ns_('SearchResults|epic', 'SearchResults|epics', count)
+      else
+        super
+      end
     end
 
     # This is a special case for snippet searches in .com.
@@ -52,24 +69,68 @@ module EE
       end
     end
 
-    def revert_to_basic_search_filter_url
-      search_params = params
-        .permit(::SearchHelper::SEARCH_PERMITTED_PARAMS)
-        .merge(basic_search: true)
+    override :highlight_and_truncate_issuable
+    def highlight_and_truncate_issuable(issuable, search_term, search_highlight)
+      return super unless search_service.use_elasticsearch? && search_highlight[issuable.id]&.description.present?
 
-      search_path(search_params)
+      # We use Elasticsearch highlighting for results from Elasticsearch. Sanitize the description, replace the
+      # pre/post tags from Elasticsearch with highlighting, truncate, and mark as html_safe. HTML tags are not
+      # counted towards the character limit.
+      text = sanitize(search_highlight[issuable.id].description.first)
+      text.gsub!(::Elastic::Latest::GitClassProxy::HIGHLIGHT_START_TAG, '<span class="gl-text-black-normal gl-font-weight-bold">')
+      text.gsub!(::Elastic::Latest::GitClassProxy::HIGHLIGHT_END_TAG, '</span>')
+      Truncato.truncate(text, count_tags: false, count_tail: false, max_length: 200).html_safe
     end
 
-    def show_switch_to_basic_search?(search_service)
-      return false unless ::Feature.enabled?(:switch_to_basic_search, default_enabled: false)
-      return false unless search_service.use_elasticsearch?
+    def advanced_search_status_marker(project)
+      ref = params[:repository_ref]
+      enabled = project.nil? || ref.blank? || ref == project.default_branch
 
-      return true if @project
+      tags = {}
+      tags[:doc_link_start], tags[:doc_link_end] = tag.a(PLACEHOLDER,
+                                                         href: help_page_path('user/search/advanced_search_syntax.md'),
+                                                         rel: :noopener,
+                                                         target: '_blank')
+                                                     .split(PLACEHOLDER)
 
-      search_service.scope.in?(SWITCH_TO_BASIC_SEARCHABLE_TABS)
+      unless enabled
+        tags[:ref_elem] = tag.a(href: '#', class: 'ref-truncated has-tooltip', data: { title: ref }) do
+          tag.code(ref, class: 'gl-white-space-nowrap')
+        end
+        tags[:default_branch] = tag.code(project.default_branch)
+        tags[:default_branch_link_start], tags[:default_branch_link_end] = link_to(PLACEHOLDER,
+                                                                                   search_path(safe_params.except(:repository_ref)),
+                                                                                   data: { testid: 'es-search-default-branch' })
+                                                                             .split(PLACEHOLDER)
+      end
+
+      # making sure all the tags are marked `html_safe`
+      message =
+        if enabled
+          _('%{doc_link_start}Advanced search%{doc_link_end} is enabled.')
+        else
+          _('%{doc_link_start}Advanced search%{doc_link_end} is disabled since %{ref_elem} is not the default branch; %{default_branch_link_start}search on %{default_branch} instead%{default_branch_link_end}.')
+        end % tags.transform_values(&:html_safe)
+
+      # wrap it inside a `div` for testing purposes
+      tag.div(message.html_safe, data: { testid: 'es-status-marker', enabled: enabled })
     end
 
     private
+
+    def recent_epics_autocomplete(term)
+      return [] unless current_user
+
+      ::Gitlab::Search::RecentEpics.new(user: current_user).search(term).map do |e|
+        {
+          category: "Recent epics",
+          id: e.id,
+          label: search_result_sanitize(e.title),
+          url: epic_path(e),
+          avatar_url: e.group.avatar_url || ''
+        }
+      end
+    end
 
     def search_multiple_assignees?(type)
       context = @project.presence || @group.presence || :dashboard
@@ -78,11 +139,20 @@ module EE
         context.feature_available?(:multiple_issue_assignees))
     end
 
+    def allow_filtering_by_iteration?
+      # We currently only have group-level iterations so we hide
+      # this filter for projects under personal namespaces
+      return false if @project && @project.namespace.user?
+
+      context = @project.presence || @group.presence
+
+      context&.feature_available?(:iterations)
+    end
+
     def gitlab_com_snippet_db_search?
       @current_user &&
         @show_snippets &&
         ::Gitlab.com? &&
-        ::Feature.enabled?(:restricted_snippet_scope_search, default_enabled: true) &&
         ::Gitlab::CurrentSettings.search_using_elasticsearch?(scope: nil)
     end
   end

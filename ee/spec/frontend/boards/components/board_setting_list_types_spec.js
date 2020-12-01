@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlAvatarLink, GlAvatarLabeled } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import BoardSettingsListTypes from 'ee_component/boards/components/board_settings_list_types.vue';
 
 describe('BoardSettingsListType', () => {

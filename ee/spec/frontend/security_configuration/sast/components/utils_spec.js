@@ -1,7 +1,8 @@
 import {
   isValidConfigurationEntity,
   isValidAnalyzerEntity,
-  extractSastConfigurationEntities,
+  toSastCiConfigurationEntityInput,
+  toSastCiConfigurationAnalyzerEntityInput,
 } from 'ee/security_configuration/sast/components/utils';
 import { makeEntities, makeAnalyzerEntities } from './helpers';
 
@@ -40,7 +41,6 @@ describe('isValidAnalyzerEntity', () => {
     {},
     ...makeAnalyzerEntities(1, { name: undefined }),
     ...makeAnalyzerEntities(1, { label: undefined }),
-    ...makeAnalyzerEntities(1, { description: undefined }),
     ...makeAnalyzerEntities(1, { enabled: undefined }),
     ...makeAnalyzerEntities(1, { enabled: '' }),
   ];
@@ -54,36 +54,68 @@ describe('isValidAnalyzerEntity', () => {
   });
 });
 
-describe('extractSastConfigurationEntities', () => {
+describe('toSastCiConfigurationEntityInput', () => {
+  let entity;
+
+  describe('given a SastCiConfigurationEntity', () => {
+    beforeEach(() => {
+      [entity] = makeEntities(1);
+    });
+
+    it('returns a SastCiConfigurationEntityInput object', () => {
+      expect(toSastCiConfigurationEntityInput(entity)).toEqual({
+        field: entity.field,
+        defaultValue: entity.defaultValue,
+        value: entity.value,
+      });
+    });
+  });
+});
+
+describe('toSastCiConfigurationAnalyzerEntityInput', () => {
+  let entity;
+
   describe.each`
-    context                    | response
-    ${'which is empty'}        | ${{}}
-    ${'with no project'}       | ${{ project: null }}
-    ${'with no configuration'} | ${{ project: {} }}
-  `('given a response $context', ({ response }) => {
-    it('returns an empty array', () => {
-      expect(extractSastConfigurationEntities(response)).toEqual([]);
+    context                                  | enabled  | variables
+    ${'a disabled entity with variables'}    | ${false} | ${makeEntities(1)}
+    ${'an enabled entity without variables'} | ${true}  | ${undefined}
+  `('given $context', ({ enabled, variables }) => {
+    beforeEach(() => {
+      if (variables) {
+        [entity] = makeAnalyzerEntities(1, { enabled, variables: { nodes: variables } });
+      } else {
+        [entity] = makeAnalyzerEntities(1, { enabled });
+      }
+    });
+
+    it('returns a SastCiConfigurationAnalyzerEntityInput without variables', () => {
+      expect(toSastCiConfigurationAnalyzerEntityInput(entity)).toEqual({
+        name: entity.name,
+        enabled: entity.enabled,
+      });
     });
   });
 
-  describe('given a valid response', () => {
-    it('returns an array of entities from the global and pipeline sections', () => {
-      const globalEntities = makeEntities(3, { description: 'global' });
-      const pipelineEntities = makeEntities(3, { description: 'pipeline' });
+  describe('given an enabled entity with variables', () => {
+    beforeEach(() => {
+      [entity] = makeAnalyzerEntities(1, {
+        enabled: true,
+        variables: { nodes: makeEntities(1) },
+      });
+    });
 
-      const response = {
-        project: {
-          sastCiConfiguration: {
-            global: { nodes: globalEntities },
-            pipeline: { nodes: pipelineEntities },
+    it('returns a SastCiConfigurationAnalyzerEntityInput with variables', () => {
+      expect(toSastCiConfigurationAnalyzerEntityInput(entity)).toEqual({
+        name: entity.name,
+        enabled: entity.enabled,
+        variables: [
+          {
+            field: 'field0',
+            defaultValue: 'defaultValue0',
+            value: 'value0',
           },
-        },
-      };
-
-      expect(extractSastConfigurationEntities(response)).toEqual([
-        ...globalEntities,
-        ...pipelineEntities,
-      ]);
+        ],
+      });
     });
   });
 });

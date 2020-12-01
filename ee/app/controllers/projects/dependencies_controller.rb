@@ -5,8 +5,10 @@ module Projects
     before_action :authorize_read_dependency_list!
 
     before_action do
-      push_frontend_feature_flag(:path_to_vulnerable_dependency, project)
+      push_frontend_feature_flag(:path_to_vulnerable_dependency, project, default_enabled: true)
     end
+
+    feature_category :dependency_scanning
 
     def index
       respond_to do |format|

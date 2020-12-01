@@ -12,8 +12,8 @@ class Milestone < ApplicationRecord
   has_many :milestone_releases
   has_many :releases, through: :milestone_releases
 
-  has_internal_id :iid, scope: :project, track_if: -> { !importing? }, init: ->(s) { s&.project&.milestones&.maximum(:iid) }
-  has_internal_id :iid, scope: :group, track_if: -> { !importing? }, init: ->(s) { s&.group&.milestones&.maximum(:iid) }
+  has_internal_id :iid, scope: :project, track_if: -> { !importing? }
+  has_internal_id :iid, scope: :group, track_if: -> { !importing? }
 
   has_many :events, as: :target, dependent: :delete_all # rubocop:disable Cop/ActiveRecordDependent
 
@@ -44,6 +44,10 @@ class Milestone < ApplicationRecord
     state :closed
 
     state :active
+  end
+
+  def self.min_chars_for_partial_matching
+    2
   end
 
   def self.reference_prefix

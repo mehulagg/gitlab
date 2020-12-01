@@ -19,7 +19,8 @@ module Gitlab
       attr_reader :model_record_id
 
       delegate :model, to: :class
-      delegate :in_replicables_for_geo_node?, to: :model_record
+      delegate :replication_enabled_feature_key, to: :class
+      delegate :in_replicables_for_current_secondary?, to: :model_record
 
       class << self
         delegate :find_registries_never_attempted_sync, :find_registries_needs_sync_again, to: :registry_class
@@ -133,20 +134,8 @@ module Gitlab
         replicator_class.new(model_record_id: replicable_id)
       end
 
-      def self.checksummed
-        model.checksummed
-      end
-
-      def self.checksummed_count
-        model.checksummed.count
-      end
-
-      def self.checksum_failed_count
-        model.checksum_failed.count
-      end
-
       def self.primary_total_count
-        model.count
+        model.available_replicables.count
       end
 
       def self.registry_count
@@ -186,6 +175,10 @@ module Gitlab
         CLASS_SUFFIXES.each { |suffix| name.delete_suffix!(suffix) }
 
         const_get("::Geo::#{name}Replicator", false)
+      end
+
+      def self.replication_enabled_feature_key
+        :"geo_#{replicable_name}_replication"
       end
 
       # @param [ActiveRecord::Base] model_record
@@ -236,11 +229,6 @@ module Gitlab
         consume_method = "consume_event_#{event_name}".to_sym
         raise NotImplementedError, "Consume method not implemented: '#{consume_method}'" unless self.methods.include?(consume_method)
 
-        # Inject model_record based on included class
-        if model_record
-          event_data[:model_record] = model_record
-        end
-
         send(consume_method, **event_data) # rubocop:disable GitlabSecurity/PublicSend
       end
 
@@ -265,17 +253,6 @@ module Gitlab
         registry_class.for_model_record_id(model_record_id)
       end
 
-      # Checksum value from the main database
-      #
-      # @abstract
-      def primary_checksum
-        model_record.verification_checksum
-      end
-
-      def secondary_checksum
-        registry.verification_checksum
-      end
-
       # Return exactly the data needed by `for_replicable_params` to
       # reinstantiate this Replicator elsewhere.
       #
@@ -284,11 +261,37 @@ module Gitlab
         { replicable_name: replicable_name, replicable_id: model_record_id }
       end
 
-      protected
+      def handle_after_destroy
+        return false unless Gitlab::Geo.enabled?
+        return unless self.class.enabled?
 
-      def self.replication_enabled_feature_key
-        :"geo_#{replicable_name}_replication"
+        publish(:deleted, **deleted_params)
       end
+
+      def handle_after_update
+        return false unless Gitlab::Geo.enabled?
+        return unless self.class.enabled?
+
+        publish(:updated, **updated_params)
+      end
+
+      def created_params
+        event_params
+      end
+
+      def deleted_params
+        event_params
+      end
+
+      def updated_params
+        event_params
+      end
+
+      def event_params
+        { model_record_id: model_record.id }
+      end
+
+      protected
 
       # Store an event on the database
       #

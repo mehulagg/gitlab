@@ -6,7 +6,7 @@ RSpec.describe 'Creating a DAST Site Profile' do
   include GraphqlHelpers
 
   let(:profile_name) { FFaker::Company.catch_phrase }
-  let(:target_url) { FFaker::Internet.uri(:https) }
+  let(:target_url) { generate(:url) }
   let(:dast_site_profile) { DastSiteProfile.find_by(project: project, name: profile_name) }
 
   let(:mutation_name) { :dast_site_profile_create }
@@ -32,7 +32,9 @@ RSpec.describe 'Creating a DAST Site Profile' do
         allow(DastSiteProfile).to receive(:create!).and_raise(StandardError)
       end
 
-      it_behaves_like 'a mutation that returns top-level errors', errors: ['Internal server error']
+      it_behaves_like 'a mutation that returns top-level errors' do
+        let(:match_errors) { contain_exactly(include('Internal server error')) }
+      end
     end
   end
 end

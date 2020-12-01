@@ -11,7 +11,7 @@ RSpec.describe Mutations::Discussions::ToggleResolve do
 
   describe '#resolve' do
     subject do
-      mutation.resolve({ id: id_arg, resolve: resolve_arg })
+      mutation.resolve(id: id_arg, resolve: resolve_arg)
     end
 
     let(:id_arg) { discussion.to_global_id.to_s }
@@ -50,8 +50,8 @@ RSpec.describe Mutations::Discussions::ToggleResolve do
 
           it 'raises an error' do
             expect { subject }.to raise_error(
-              Gitlab::Graphql::Errors::ArgumentError,
-              "#{discussion.to_global_id} is not a valid ID for Discussion."
+              GraphQL::CoercionError,
+              "\"#{discussion.to_global_id}\" does not represent an instance of Discussion"
             )
           end
         end

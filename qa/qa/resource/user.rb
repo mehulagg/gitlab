@@ -7,15 +7,18 @@ module QA
     class User < Base
       attr_reader :unique_id
       attr_writer :username, :password
-      attr_accessor :admin, :provider, :extern_uid
+      attr_accessor :admin, :provider, :extern_uid, :expect_fabrication_success
 
       attribute :id
       attribute :name
+      attribute :first_name
+      attribute :last_name
       attribute :email
 
       def initialize
         @admin = false
         @unique_id = SecureRandom.hex(8)
+        @expect_fabrication_success = true
       end
 
       def admin?
@@ -32,6 +35,14 @@ module QA
 
       def name
         @name ||= api_resource&.dig(:name) || "QA User #{unique_id}"
+      end
+
+      def first_name
+        name.split(' ').first
+      end
+
+      def last_name
+        name.split(' ').drop(1).join(' ')
       end
 
       def email
@@ -64,12 +75,7 @@ module QA
             login.sign_in_using_credentials(user: self)
           end
         else
-          Page::Main::Login.perform do |login|
-            login.switch_to_register_tab
-          end
-          Page::Main::SignUp.perform do |signup|
-            signup.sign_up!(self)
-          end
+          Flow::SignUp.sign_up!(self)
         end
       end
 

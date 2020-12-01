@@ -10,9 +10,11 @@ module Projects
 
       prepend_before_action :repository, :project_without_auth
 
+      feature_category :incident_management
+
       def create
         token = extract_alert_manager_token(request)
-        result = notify_service.execute(token)
+        result = notify_service.execute(token, integration)
 
         head result.http_status
       end
@@ -41,6 +43,18 @@ module Projects
         else
           Projects::Alerting::NotifyService
         end
+      end
+
+      def integration
+        AlertManagement::HttpIntegrationsFinder.new(
+          project,
+          endpoint_identifier: endpoint_identifier,
+          active: true
+        ).execute.first
+      end
+
+      def endpoint_identifier
+        params[:endpoint_identifier] || AlertManagement::HttpIntegration::LEGACY_IDENTIFIER
       end
 
       def notification_payload

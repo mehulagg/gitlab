@@ -1,7 +1,7 @@
 ---
 stage: Verify
 group: Testing
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference, howto
 ---
 
@@ -55,7 +55,7 @@ include:
 ```
 
 creates an `a11y` job in your CI/CD pipeline, runs
-Pa11y against the webpages defined in `a11y_urls`, and builds an HTML report for each.
+Pa11y against the web pages defined in `a11y_urls`, and builds an HTML report for each.
 
 The report for each URL is saved as an artifact that can be [viewed directly in your browser](../../../ci/pipelines/job_artifacts.md#browsing-artifacts).
 

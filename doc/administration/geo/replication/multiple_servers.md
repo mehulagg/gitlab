@@ -1,7 +1,7 @@
 ---
 stage: Enablement
 group: Geo
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: howto
 ---
 
@@ -13,7 +13,7 @@ described, it is possible to adapt these instructions to your needs.
 
 ## Architecture overview
 
-![Geo multi-node diagram](../../high_availability/img/geo-ha-diagram.png)
+![Geo multi-node diagram](img/geo-ha-diagram.png)
 
 _[diagram source - GitLab employees only](https://docs.google.com/drawings/d/1z0VlizKiLNXVVVaERFwgsIOuEgjcUqDTWPdQYsE7Z4c/edit)_
 
@@ -133,7 +133,7 @@ Configure the following services, again using the non-Geo multi-node
 documentation:
 
 - [Configuring Redis for GitLab](../../redis/replication_and_failover.md#example-configuration-for-the-gitlab-application) for multiple nodes.
-- [Gitaly](../../high_availability/gitaly.md), which will store data that is
+- [Gitaly](../../gitaly/index.md), which will store data that is
   synchronized from the **primary** node.
 
 NOTE: **Note:**
@@ -147,7 +147,7 @@ The following documentation assumes the database will be run on
 a single node only. Multi-node PostgreSQL on **secondary** nodes is
 [not currently supported](https://gitlab.com/groups/gitlab-org/-/epics/2536).
 
-Configure the [**secondary** database](database.md) as a read-only replica of
+Configure the [**secondary** database](../setup/database.md) as a read-only replica of
 the **primary** database. Use the following as a guide.
 
 1. Generate an MD5 hash of the desired password for the database user that the
@@ -172,6 +172,12 @@ the **primary** database. Use the following as a guide.
    ## Configure the Geo secondary role and the PostgreSQL role
    ##
    roles ['geo_secondary_role', 'postgres_role']
+
+   ##
+   ## The unique identifier for the Geo node.
+   ## This should match the secondary's application node.
+   ##
+   gitlab_rails['geo_node_name'] = '<node_name_here>'
 
    ##
    ## Secondary address
@@ -222,7 +228,7 @@ the **primary** database. Use the following as a guide.
 After making these changes, [reconfigure GitLab](../../restart_gitlab.md#omnibus-gitlab-reconfigure) so the changes take effect.
 
 If using an external PostgreSQL instance, refer also to
-[Geo with external PostgreSQL instances](external_database.md).
+[Geo with external PostgreSQL instances](../setup/external_database.md).
 
 ### Step 3: Configure the tracking database on the **secondary** node
 
@@ -294,7 +300,7 @@ Configure the tracking database.
 After making these changes, [reconfigure GitLab](../../restart_gitlab.md#omnibus-gitlab-reconfigure) so the changes take effect.
 
 If using an external PostgreSQL instance, refer also to
-[Geo with external PostgreSQL instances](external_database.md).
+[Geo with external PostgreSQL instances](../setup/external_database.md).
 
 ### Step 4: Configure the frontend application servers on the **secondary** node
 
@@ -422,7 +428,6 @@ application servers above, with some changes to run only the `sidekiq` service:
    ##
    alertmanager['enable'] = false
    consul['enable'] = false
-   geo_logcursor['enable'] = false
    gitaly['enable'] = false
    gitlab_exporter['enable'] = false
    gitlab_workhorse['enable'] = false

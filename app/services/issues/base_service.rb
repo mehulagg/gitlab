@@ -2,6 +2,8 @@
 
 module Issues
   class BaseService < ::IssuableBaseService
+    include IncidentManagement::UsageData
+
     def hook_data(issue, action, old_associations: {})
       hook_data = issue.to_hook_data(current_user, old_associations: old_associations)
       hook_data[:object_attributes][:action] = action
@@ -32,6 +34,18 @@ module Issues
 
     private
 
+    def filter_params(merge_request)
+      super
+
+      moved_issue = params.delete(:moved_issue)
+
+      # Setting created_at, updated_at and iid is allowed only for admins and owners or
+      # when moving an issue as we preserve the original issue attributes except id and iid.
+      params.delete(:iid) unless current_user.can?(:set_issue_iid, project)
+      params.delete(:created_at) unless moved_issue || current_user.can?(:set_issue_created_at, project)
+      params.delete(:updated_at) unless moved_issue || current_user.can?(:set_issue_updated_at, project)
+    end
+
     def create_assignee_note(issue, old_assignees)
       SystemNoteService.change_issuable_assignees(
         issue, issue.project, current_user, old_assignees)
@@ -58,6 +72,22 @@ module Issues
       return unless milestone
 
       Milestones::IssuesCountService.new(milestone).delete_cache
+    end
+
+    # Applies label "incident" (creates it if missing) to incident issues.
+    # Please use in "after" hooks only to ensure we are not appyling
+    # labels prematurely.
+    def add_incident_label(issue)
+      return unless issue.incident?
+
+      label = ::IncidentManagement::CreateIncidentLabelService
+        .new(project, current_user)
+        .execute
+        .payload[:label]
+
+      return if issue.label_ids.include?(label.id)
+
+      issue.labels << label
     end
   end
 end

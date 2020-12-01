@@ -9,14 +9,17 @@ import {
   GlSegmentedControl,
   GlButton,
   GlAlert,
+  GlModal,
+  GlModalDirective,
 } from '@gitlab/ui';
-import { s__ } from '~/locale';
+import { s__, __, sprintf } from '~/locale';
 import { redirectTo } from '~/lib/utils/url_utility';
 import EnvironmentPicker from '../environment_picker.vue';
 import NetworkPolicyEditor from '../network_policy_editor.vue';
 import PolicyRuleBuilder from './policy_rule_builder.vue';
 import PolicyPreview from './policy_preview.vue';
 import PolicyActionPicker from './policy_action_picker.vue';
+import DimDisableContainer from './dim_disable_container.vue';
 import {
   EditorModeRule,
   EditorModeYAML,
@@ -38,12 +41,15 @@ export default {
     GlSegmentedControl,
     GlButton,
     GlAlert,
+    GlModal,
     EnvironmentPicker,
     NetworkPolicyEditor,
     PolicyRuleBuilder,
     PolicyPreview,
     PolicyActionPicker,
+    DimDisableContainer,
   },
+  directives: { GlModal: GlModalDirective },
   props: {
     threatMonitoringPath: {
       type: String,
@@ -82,7 +88,12 @@ export default {
       return toYaml(this.policy);
     },
     ...mapState('threatMonitoring', ['currentEnvironmentId']),
-    ...mapState('networkPolicies', ['errorUpdatingPolicy']),
+    ...mapState('networkPolicies', [
+      'isUpdatingPolicy',
+      'isRemovingPolicy',
+      'errorUpdatingPolicy',
+      'errorRemovingPolicy',
+    ]),
     shouldShowRuleEditor() {
       return this.editorMode === EditorModeRule;
     },
@@ -100,13 +111,16 @@ export default {
         ? s__('NetworkPolicies|Save changes')
         : s__('NetworkPolicies|Create policy');
     },
+    deleteModalTitle() {
+      return sprintf(s__('NetworkPolicies|Delete policy: %{policy}'), { policy: this.policy.name });
+    },
   },
   created() {
     this.fetchEnvironments();
   },
   methods: {
     ...mapActions('threatMonitoring', ['fetchEnvironments']),
-    ...mapActions('networkPolicies', ['createPolicy', 'updatePolicy']),
+    ...mapActions('networkPolicies', ['createPolicy', 'updatePolicy', 'deletePolicy']),
     addRule() {
       this.policy.rules.push(buildRule(RuleTypeEndpoint));
     },
@@ -120,6 +134,9 @@ export default {
       const rule = this.policy.rules[ruleIdx];
       this.policy.rules.splice(ruleIdx, 1, buildRule(ruleType, rule));
     },
+    removeRule(ruleIdx) {
+      this.policy.rules.splice(ruleIdx, 1);
+    },
     loadYaml(manifest) {
       this.yamlEditorValue = manifest;
       this.yamlEditorError = null;
@@ -131,7 +148,7 @@ export default {
       }
     },
     changeEditorMode(mode) {
-      if (mode === EditorModeYAML) {
+      if (mode === EditorModeYAML && !this.hasParsingError) {
         this.yamlEditorValue = toYaml(this.policy);
       }
 
@@ -148,6 +165,13 @@ export default {
         if (!this.errorUpdatingPolicy) redirectTo(this.threatMonitoringPath);
       });
     },
+    removePolicy() {
+      const policy = { name: this.existingPolicy.name, manifest: toYaml(this.policy) };
+
+      return this.deletePolicy({ environmentId: this.currentEnvironmentId, policy }).then(() => {
+        if (!this.errorRemovingPolicy) redirectTo(this.threatMonitoringPath);
+      });
+    },
   },
   policyTypes: [{ value: 'networkPolicy', text: s__('NetworkPolicies|Network Policy') }],
   editorModes: [
@@ -157,6 +181,16 @@ export default {
   parsingErrorMessage: s__(
     'NetworkPolicies|Rule mode is unavailable for this policy. In some cases, we cannot parse the YAML file back into the rules editor.',
   ),
+  deleteModal: {
+    id: 'delete-modal',
+    secondary: {
+      text: s__('NetworkPolicies|Delete policy'),
+      attributes: { variant: 'danger' },
+    },
+    cancel: {
+      text: __('Cancel'),
+    },
+  },
 };
 </script>
 
@@ -217,42 +251,80 @@ export default {
     <hr />
     <div v-if="shouldShowRuleEditor" class="row" data-testid="rule-editor">
       <div class="col-sm-12 col-md-6 col-lg-7 col-xl-8">
-        <gl-alert v-if="hasParsingError" data-testid="parsing-alert" :dismissible="false">{{
-          $options.parsingErrorMessage
-        }}</gl-alert>
+        <gl-alert
+          v-if="hasParsingError"
+          class="gl-z-index-1"
+          data-testid="parsing-alert"
+          :dismissible="false"
+          >{{ $options.parsingErrorMessage }}</gl-alert
+        >
 
-        <h4>{{ s__('NetworkPolicies|Rules') }}</h4>
-        <policy-rule-builder
-          v-for="(rule, idx) in policy.rules"
-          :key="idx"
-          class="gl-mb-4"
-          :rule="rule"
-          :endpoint-match-mode="policy.endpointMatchMode"
-          :endpoint-labels="policy.endpointLabels"
-          :endpoint-selector-disabled="idx > 0"
-          @rule-type-change="updateRuleType(idx, $event)"
-          @endpoint-match-mode-change="updateEndpointMatchMode"
-          @endpoint-labels-change="updateEndpointLabels"
-        />
+        <dim-disable-container data-testid="rule-builder-container" :disabled="hasParsingError">
+          <template #title>
+            <h4>{{ s__('NetworkPolicies|Rules') }}</h4>
+          </template>
 
-        <div class="gl-p-3 gl-rounded-base gl-border-1 gl-border-solid gl-border-gray-100 gl-mb-5">
-          <gl-button
-            variant="link"
-            category="primary"
-            data-testid="add-rule"
-            :disabled="hasParsingError"
-            @click="addRule"
-            >{{ s__('Network Policy|New rule') }}</gl-button
+          <template #disabled>
+            <div
+              class="gl-bg-gray-10 gl-border-solid gl-border-1 gl-border-gray-100 gl-rounded-base gl-p-6"
+            ></div>
+          </template>
+
+          <policy-rule-builder
+            v-for="(rule, idx) in policy.rules"
+            :key="idx"
+            class="gl-mb-4"
+            :rule="rule"
+            :endpoint-match-mode="policy.endpointMatchMode"
+            :endpoint-labels="policy.endpointLabels"
+            :endpoint-selector-disabled="idx > 0"
+            @rule-type-change="updateRuleType(idx, $event)"
+            @endpoint-match-mode-change="updateEndpointMatchMode"
+            @endpoint-labels-change="updateEndpointLabels"
+            @remove="removeRule(idx)"
+          />
+
+          <div
+            class="gl-p-3 gl-rounded-base gl-border-1 gl-border-solid gl-border-gray-100 gl-mb-5"
           >
-        </div>
+            <gl-button variant="link" category="primary" data-testid="add-rule" @click="addRule">{{
+              s__('Network Policy|New rule')
+            }}</gl-button>
+          </div>
+        </dim-disable-container>
 
-        <h4>{{ s__('NetworkPolicies|Actions') }}</h4>
-        <p>{{ s__('NetworkPolicies|Traffic that does not match any rule will be blocked.') }}</p>
-        <policy-action-picker />
+        <dim-disable-container data-testid="policy-action-container" :disabled="hasParsingError">
+          <template #title>
+            <h4>{{ s__('NetworkPolicies|Actions') }}</h4>
+            <p>
+              {{ s__('NetworkPolicies|Traffic that does not match any rule will be blocked.') }}
+            </p>
+          </template>
+
+          <template #disabled>
+            <div
+              class="gl-bg-gray-10 gl-border-solid gl-border-1 gl-border-gray-100 gl-rounded-base gl-p-6"
+            ></div>
+          </template>
+
+          <policy-action-picker />
+        </dim-disable-container>
       </div>
       <div class="col-sm-12 col-md-6 col-lg-5 col-xl-4">
-        <h5>{{ s__('NetworkPolicies|Policy preview') }}</h5>
-        <policy-preview :policy-yaml="policyYaml" :policy-description="humanizedPolicy" />
+        <dim-disable-container data-testid="policy-preview-container" :disabled="hasParsingError">
+          <template #title>
+            <h5>{{ s__('NetworkPolicies|Policy preview') }}</h5>
+          </template>
+
+          <template #disabled>
+            <policy-preview
+              :policy-yaml="s__('NetworkPolicies|Unable to parse policy')"
+              policy-description=""
+            />
+          </template>
+
+          <policy-preview :policy-yaml="policyYaml" :policy-description="humanizedPolicy" />
+        </dim-disable-container>
       </div>
     </div>
     <div v-if="shouldShowYamlEditor" class="row" data-testid="yaml-editor">
@@ -282,13 +354,36 @@ export default {
           category="primary"
           variant="success"
           data-testid="save-policy"
+          :loading="isUpdatingPolicy"
           @click="savePolicy"
           >{{ saveButtonText }}</gl-button
+        >
+        <gl-button
+          v-if="isEditing"
+          v-gl-modal="'delete-modal'"
+          category="secondary"
+          variant="danger"
+          data-testid="delete-policy"
+          :loading="isRemovingPolicy"
+          >{{ s__('NetworkPolicies|Delete policy') }}</gl-button
         >
         <gl-button category="secondary" variant="default" :href="threatMonitoringPath">{{
           __('Cancel')
         }}</gl-button>
       </div>
     </div>
+    <gl-modal
+      modal-id="delete-modal"
+      :title="deleteModalTitle"
+      :action-secondary="$options.deleteModal.secondary"
+      :action-cancel="$options.deleteModal.cancel"
+      @secondary="removePolicy"
+    >
+      {{
+        s__(
+          'NetworkPolicies|Are you sure you want to delete this policy? This action cannot be undone.',
+        )
+      }}
+    </gl-modal>
   </section>
 </template>

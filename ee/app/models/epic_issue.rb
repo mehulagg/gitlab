@@ -18,6 +18,18 @@ class EpicIssue < ApplicationRecord
 
   validate :validate_confidential_epic
 
+  def epic_tree_root?
+    false
+  end
+
+  def self.epic_tree_node_query(node)
+    selection = <<~SELECT_LIST
+      id, relative_position, epic_id as parent_id, epic_id, '#{underscore}' as object_type
+    SELECT_LIST
+
+    select(selection).in_epic(node.parent_ids)
+  end
+
   private
 
   def validate_confidential_epic

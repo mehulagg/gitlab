@@ -1,0 +1,223 @@
+<script>
+import {
+  GlLoadingIcon,
+  GlDropdown,
+  GlDropdownDivider,
+  GlDropdownItem,
+  GlButton,
+  GlSprintf,
+  GlLink,
+} from '@gitlab/ui';
+
+import { s__, __ } from '~/locale';
+import { getIdFromGraphQLId } from '~/graphql_shared/utils';
+import IssuableShow from '~/issuable_show/components/issuable_show_root.vue';
+import IssuableEventHub from '~/issuable_show/event_hub';
+
+import TestCaseSidebar from './test_case_sidebar.vue';
+import TestCaseGraphQL from '../mixins/test_case_graphql';
+
+const stateEvent = {
+  Close: 'CLOSE',
+  Reopen: 'REOPEN',
+};
+
+export default {
+  components: {
+    GlLoadingIcon,
+    GlDropdown,
+    GlDropdownDivider,
+    GlDropdownItem,
+    GlButton,
+    GlSprintf,
+    GlLink,
+    IssuableShow,
+    TestCaseSidebar,
+  },
+  inject: [
+    'projectFullPath',
+    'testCaseNewPath',
+    'testCaseId',
+    'canEditTestCase',
+    'descriptionPreviewPath',
+    'descriptionHelpPath',
+  ],
+  mixins: [TestCaseGraphQL],
+  data() {
+    return {
+      testCase: {},
+      editTestCaseFormVisible: false,
+      testCaseSaveInProgress: false,
+      testCaseStateChangeInProgress: false,
+    };
+  },
+  computed: {
+    isTestCaseOpen() {
+      return this.testCase.state === 'opened';
+    },
+    statusBadgeClass() {
+      return this.isTestCaseOpen ? 'status-box-open' : 'status-box-issue-closed';
+    },
+    statusIcon() {
+      return this.isTestCaseOpen ? 'issue-open-m' : 'mobile-issue-close';
+    },
+    statusBadgeText() {
+      return this.isTestCaseOpen ? __('Open') : __('Archived');
+    },
+    testCaseActionButtonVariant() {
+      return this.isTestCaseOpen ? 'warning' : 'default';
+    },
+    testCaseActionTitle() {
+      return this.isTestCaseOpen ? __('Archive test case') : __('Reopen test case');
+    },
+    todo() {
+      const todos = this.testCase.currentUserTodos.nodes;
+
+      return todos.length ? todos[0] : null;
+    },
+    selectedLabels() {
+      return this.testCase.labels.nodes.map(label => ({
+        ...label,
+        id: getIdFromGraphQLId(label.id),
+      }));
+    },
+  },
+  methods: {
+    handleTestCaseStateChange() {
+      this.testCaseStateChangeInProgress = true;
+      return this.updateTestCase({
+        variables: {
+          stateEvent: this.isTestCaseOpen ? stateEvent.Close : stateEvent.Reopen,
+        },
+        errorMessage: s__('TestCases|Something went wrong while updating the test case.'),
+      })
+        .then(updatedTestCase => {
+          this.testCase = updatedTestCase;
+        })
+        .finally(() => {
+          this.testCaseStateChangeInProgress = false;
+        });
+    },
+    handleEditTestCase() {
+      this.editTestCaseFormVisible = true;
+    },
+    handleSaveTestCase({ issuableTitle, issuableDescription }) {
+      this.testCaseSaveInProgress = true;
+      return this.updateTestCase({
+        variables: {
+          title: issuableTitle,
+          description: issuableDescription,
+        },
+        errorMessage: s__('TestCases|Something went wrong while updating the test case.'),
+      })
+        .then(updatedTestCase => {
+          this.testCase = updatedTestCase;
+          this.editTestCaseFormVisible = false;
+          IssuableEventHub.$emit('update.issuable');
+        })
+        .finally(() => {
+          this.testCaseSaveInProgress = false;
+        });
+    },
+    handleCancelClick() {
+      this.editTestCaseFormVisible = false;
+      IssuableEventHub.$emit('close.form');
+    },
+    handleTestCaseUpdated(updatedTestCase) {
+      this.testCase = updatedTestCase;
+    },
+  },
+};
+</script>
+
+<template>
+  <div class="test-case-container">
+    <gl-loading-icon v-if="testCaseLoading" size="md" class="gl-mt-3" />
+    <issuable-show
+      v-if="!testCaseLoading && !testCaseLoadFailed"
+      :issuable="testCase"
+      :status-badge-class="statusBadgeClass"
+      :status-icon="statusIcon"
+      :enable-edit="canEditTestCase"
+      :enable-autocomplete="true"
+      :edit-form-visible="editTestCaseFormVisible"
+      :description-preview-path="descriptionPreviewPath"
+      :description-help-path="descriptionHelpPath"
+      @edit-issuable="handleEditTestCase"
+    >
+      <template #status-badge>
+        <gl-sprintf
+          v-if="testCase.moved"
+          :message="__('Archived (%{movedToStart}moved%{movedToEnd})')"
+        >
+          <template #movedTo="{ content }">
+            <gl-link :href="testCase.movedTo.webUrl" class="text-white text-underline">{{
+              content
+            }}</gl-link>
+          </template>
+        </gl-sprintf>
+        <span v-else>{{ statusBadgeText }}</span>
+      </template>
+      <template #header-actions>
+        <gl-dropdown
+          v-if="canEditTestCase"
+          data-testid="actions-dropdown"
+          :text="__('Options')"
+          :right="true"
+          class="d-md-none gl-flex-grow-1"
+        >
+          <gl-dropdown-item>{{ testCaseActionTitle }}</gl-dropdown-item>
+          <gl-dropdown-divider />
+          <gl-dropdown-item :href="testCaseNewPath">{{ __('New test case') }}</gl-dropdown-item>
+        </gl-dropdown>
+        <gl-button
+          v-if="canEditTestCase"
+          data-testid="archive-test-case"
+          category="secondary"
+          class="d-none d-md-inline-block gl-mr-2"
+          :variant="testCaseActionButtonVariant"
+          :loading="testCaseStateChangeInProgress"
+          @click="handleTestCaseStateChange"
+          >{{ testCaseActionTitle }}</gl-button
+        >
+        <gl-button
+          data-testid="new-test-case"
+          category="secondary"
+          variant="success"
+          class="d-md-inline-block"
+          :class="{ 'd-none': canEditTestCase, 'gl-flex-grow-1': !canEditTestCase }"
+          :href="testCaseNewPath"
+          >{{ __('New test case') }}</gl-button
+        >
+      </template>
+      <template #edit-form-actions="issuableMeta">
+        <gl-button
+          data-testid="save-test-case"
+          :disable="testCaseSaveInProgress || !issuableMeta.issuableTitle.length"
+          :loading="testCaseSaveInProgress"
+          category="primary"
+          variant="success"
+          class="float-left qa-save-button"
+          @click.prevent="handleSaveTestCase(issuableMeta)"
+          >{{ __('Save changes') }}</gl-button
+        >
+        <gl-button
+          data-testid="cancel-test-case-edit"
+          class="float-right"
+          @click="handleCancelClick"
+        >
+          {{ __('Cancel') }}
+        </gl-button>
+      </template>
+      <template #right-sidebar-items="{ sidebarExpanded }">
+        <test-case-sidebar
+          :sidebar-expanded="sidebarExpanded"
+          :selected-labels="selectedLabels"
+          :todo="todo"
+          :moved="testCase.moved"
+          @test-case-updated="handleTestCaseUpdated"
+        />
+      </template>
+    </issuable-show>
+  </div>
+</template>

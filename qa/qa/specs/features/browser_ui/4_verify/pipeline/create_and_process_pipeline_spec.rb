@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module QA
-  RSpec.describe 'Verify', :docker, :runner do
+  RSpec.describe 'Verify', :runner do
     describe 'Pipeline creation and processing' do
       let(:executor) { "qa-runner-#{Time.now.to_i}" }
       let(:max_wait) { 30 }
@@ -65,8 +65,7 @@ module QA
           )
         end.project.visit!
 
-        Page::Project::Menu.perform(&:click_ci_cd_pipelines)
-        Page::Project::Pipeline::Index.perform(&:click_on_latest_pipeline)
+        Flow::Pipeline.visit_latest_pipeline
 
         {
           'test-success': :passed,

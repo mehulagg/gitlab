@@ -1,9 +1,8 @@
 <script>
-import { GlIcon } from '@gitlab/ui';
+import { GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import { __ } from '~/locale';
 import Tracking from '~/tracking';
 import toggleButton from '~/vue_shared/components/toggle_button.vue';
-import tooltip from '~/vue_shared/directives/tooltip';
 import eventHub from '../../event_hub';
 
 const ICON_ON = 'notifications';
@@ -13,7 +12,7 @@ const LABEL_OFF = __('Notifications off');
 
 export default {
   directives: {
-    tooltip,
+    GlTooltip: GlTooltipDirective,
   },
   components: {
     GlIcon,
@@ -110,20 +109,12 @@ export default {
   <div>
     <span
       ref="tooltip"
-      v-tooltip
-      class="sidebar-collapsed-icon"
+      v-gl-tooltip.viewport.left
       :title="notificationTooltip"
-      data-container="body"
-      data-placement="left"
-      data-boundary="viewport"
+      class="sidebar-collapsed-icon"
       @click="onClickCollapsedIcon"
     >
-      <gl-icon
-        :name="notificationIcon"
-        :size="16"
-        aria-hidden="true"
-        class="sidebar-item-icon is-active"
-      />
+      <gl-icon :name="notificationIcon" :size="16" class="sidebar-item-icon is-active" />
     </span>
     <span class="issuable-header-text hide-collapsed float-left"> {{ notificationText }} </span>
     <toggle-button

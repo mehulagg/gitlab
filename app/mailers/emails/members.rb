@@ -51,32 +51,50 @@ module Emails
 
       return unless member_exists?
 
-      subject_line = subject("Invitation to join the #{member_source.human_name} #{member_source.model_name.singular}")
-
-      if member.invite_to_unknown_user? && Feature.enabled?(:invite_email_experiment)
-        subject_line = subject("#{member.created_by.name} invited you to join GitLab") if member.created_by
-        @invite_url_params = { new_user_invite: 'experiment' }
-
-        member_email_with_layout(
-          to: member.invite_email,
-          subject: subject_line,
-          template: 'member_invited_email_experiment',
-          layout: 'experiment_mailer'
-        )
-
-        Gitlab::Tracking.event(Gitlab::Experimentation::EXPERIMENTS[:invite_email][:tracking_category], 'sent', property: 'experiment_group')
-      else
-        @invite_url_params = member.invite_to_unknown_user? ? { new_user_invite: 'control' } : {}
-
-        member_email_with_layout(
-          to: member.invite_email,
-          subject: subject_line
-        )
-
-        if member.invite_to_unknown_user?
-          Gitlab::Tracking.event(Gitlab::Experimentation::EXPERIMENTS[:invite_email][:tracking_category], 'sent', property: 'control_group')
+      subject_line =
+        if member.created_by
+          subject(s_("MemberInviteEmail|%{member_name} invited you to join GitLab") % { member_name: member.created_by.name })
+        else
+          subject(s_("MemberInviteEmail|Invitation to join the %{project_or_group} %{project_or_group_name}") % { project_or_group: member_source.human_name, project_or_group_name: member_source.model_name.singular })
         end
+
+      member_email_with_layout(
+        to: member.invite_email,
+        subject: subject_line,
+        layout: 'unknown_user_mailer'
+      )
+
+      if Gitlab::Experimentation.enabled?(:invitation_reminders)
+        Gitlab::Tracking.event(
+          Gitlab::Experimentation.experiment(:invitation_reminders).tracking_category,
+          'sent',
+          property: Gitlab::Experimentation.enabled_for_attribute?(:invitation_reminders, member.invite_email) ? 'experimental_group' : 'control_group',
+          label: Digest::MD5.hexdigest(member.to_global_id.to_s)
+        )
       end
+    end
+
+    def member_invited_reminder_email(member_source_type, member_id, token, reminder_index)
+      @member_source_type = member_source_type
+      @member_id = member_id
+      @token = token
+      @reminder_index = reminder_index
+
+      return unless member_exists? && member.created_by && member.invite_to_unknown_user?
+
+      subjects = {
+        0 => s_("InviteReminderEmail|%{inviter}'s invitation to GitLab is pending"),
+        1 => s_('InviteReminderEmail|%{inviter} is waiting for you to join GitLab'),
+        2 => s_('InviteReminderEmail|%{inviter} is still waiting for you to join GitLab')
+      }
+
+      subject_line = subjects[reminder_index] % { inviter: member.created_by.name }
+
+      member_email_with_layout(
+        layout: 'unknown_user_mailer',
+        to: member.invite_email,
+        subject: subject(subject_line)
+      )
     end
 
     def member_invite_accepted_email(member_source_type, member_id)
@@ -130,15 +148,10 @@ module Emails
       @member_source_type.classify.constantize
     end
 
-    def member_email_with_layout(to:, subject:, template: nil, layout: 'mailer')
+    def member_email_with_layout(to:, subject:, layout: 'mailer')
       mail(to: to, subject: subject) do |format|
-        if template
-          format.html { render template, layout: layout }
-          format.text { render template, layout: layout }
-        else
-          format.html { render layout: layout }
-          format.text { render layout: layout }
-        end
+        format.html { render layout: layout }
+        format.text { render layout: layout }
       end
     end
   end

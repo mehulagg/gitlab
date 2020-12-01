@@ -7,6 +7,7 @@ RSpec.describe API::Members do
   let(:developer) { create(:user) }
   let(:access_requester) { create(:user) }
   let(:stranger) { create(:user) }
+  let(:user_with_minimal_access) { create(:user) }
 
   let(:project) do
     create(:project, :public, creator_id: maintainer.id, namespace: maintainer.namespace) do |project|
@@ -20,6 +21,7 @@ RSpec.describe API::Members do
     create(:group, :public) do |group|
       group.add_developer(developer)
       group.add_owner(maintainer)
+      create(:group_member, :minimal_access, source: group, user: user_with_minimal_access)
       group.request_access(access_requester)
     end
   end
@@ -196,6 +198,7 @@ RSpec.describe API::Members do
 
               # Member attributes
               expect(json_response['access_level']).to eq(Member::DEVELOPER)
+              expect(json_response['created_at'].to_time).to be_like_time(developer.created_at)
             end
           end
         end
@@ -244,13 +247,42 @@ RSpec.describe API::Members do
         it 'creates a new member' do
           expect do
             post api("/#{source_type.pluralize}/#{source.id}/members", maintainer),
-                 params: { user_id: stranger.id, access_level: Member::DEVELOPER, expires_at: '2016-08-05' }
+                 params: { user_id: stranger.id, access_level: Member::DEVELOPER }
 
             expect(response).to have_gitlab_http_status(:created)
           end.to change { source.members.count }.by(1)
           expect(json_response['id']).to eq(stranger.id)
           expect(json_response['access_level']).to eq(Member::DEVELOPER)
-          expect(json_response['expires_at']).to eq('2016-08-05')
+        end
+
+        describe 'executes the Members::CreateService for multiple user_ids' do
+          it 'returns success when it successfully create all members' do
+            expect do
+              user_ids = [stranger.id, access_requester.id].join(',')
+
+              post api("/#{source_type.pluralize}/#{source.id}/members", maintainer),
+                   params: { user_id: user_ids, access_level: Member::DEVELOPER }
+
+              expect(response).to have_gitlab_http_status(:created)
+            end.to change { source.members.count }.by(2)
+            expect(json_response['status']).to eq('success')
+          end
+
+          it 'returns the error message if there was an error adding members to group' do
+            error_message = 'Unable to find User ID'
+            user_ids = [stranger.id, access_requester.id].join(',')
+
+            allow_next_instance_of(::Members::CreateService) do |service|
+              expect(service).to receive(:execute).with(source).and_return({ status: :error, message: error_message })
+            end
+
+            expect do
+              post api("/#{source_type.pluralize}/#{source.id}/members", maintainer),
+                   params: { user_id: user_ids, access_level: Member::DEVELOPER }
+            end.not_to change { source.members.count }
+            expect(json_response['status']).to eq('error')
+            expect(json_response['message']).to eq(error_message)
+          end
         end
       end
 
@@ -282,6 +314,40 @@ RSpec.describe API::Members do
           expect(response).to have_gitlab_http_status(:created)
           expect(json_response['id']).to eq(stranger.id)
           expect(json_response['access_level']).to eq(Member::MAINTAINER)
+        end
+      end
+
+      context 'access expiry date' do
+        subject do
+          post api("/#{source_type.pluralize}/#{source.id}/members", maintainer),
+               params: { user_id: stranger.id, access_level: Member::DEVELOPER, expires_at: expires_at }
+        end
+
+        context 'when set to a date in the past' do
+          let(:expires_at) { 2.days.ago.to_date }
+
+          it 'does not create a member' do
+            expect do
+              subject
+            end.not_to change { source.members.count }
+
+            expect(response).to have_gitlab_http_status(:bad_request)
+            expect(json_response['message']).to eq({ 'expires_at' => ['cannot be a date in the past'] })
+          end
+        end
+
+        context 'when set to a date in the future' do
+          let(:expires_at) { 2.days.from_now.to_date }
+
+          it 'creates a member' do
+            expect do
+              subject
+            end.to change { source.members.count }.by(1)
+
+            expect(response).to have_gitlab_http_status(:created)
+            expect(json_response['id']).to eq(stranger.id)
+            expect(json_response['expires_at']).to eq(expires_at.to_s)
+          end
         end
       end
 
@@ -369,12 +435,40 @@ RSpec.describe API::Members do
       context 'when authenticated as a maintainer/owner' do
         it 'updates the member' do
           put api("/#{source_type.pluralize}/#{source.id}/members/#{developer.id}", maintainer),
-              params: { access_level: Member::MAINTAINER, expires_at: '2016-08-05' }
+              params: { access_level: Member::MAINTAINER }
 
           expect(response).to have_gitlab_http_status(:ok)
           expect(json_response['id']).to eq(developer.id)
           expect(json_response['access_level']).to eq(Member::MAINTAINER)
-          expect(json_response['expires_at']).to eq('2016-08-05')
+        end
+      end
+
+      context 'access expiry date' do
+        subject do
+          put api("/#{source_type.pluralize}/#{source.id}/members/#{developer.id}", maintainer),
+              params: { expires_at: expires_at, access_level: Member::MAINTAINER }
+        end
+
+        context 'when set to a date in the past' do
+          let(:expires_at) { 2.days.ago.to_date }
+
+          it 'does not update the member' do
+            subject
+
+            expect(response).to have_gitlab_http_status(:bad_request)
+            expect(json_response['message']).to eq({ 'expires_at' => ['cannot be a date in the past'] })
+          end
+        end
+
+        context 'when set to a date in the future' do
+          let(:expires_at) { 2.days.from_now.to_date }
+
+          it 'updates the member' do
+            subject
+
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(json_response['expires_at']).to eq(expires_at.to_s)
+          end
         end
       end
 

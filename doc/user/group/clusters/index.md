@@ -2,7 +2,7 @@
 type: reference
 stage: Configure
 group: Configure
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Group-level Kubernetes clusters
@@ -13,6 +13,9 @@ Similar to [project-level](../../project/clusters/index.md) and
 [instance-level](../../instance/clusters/index.md) Kubernetes clusters,
 group-level Kubernetes clusters allow you to connect a Kubernetes cluster to
 your group, enabling you to use the same cluster across multiple projects.
+
+To view your group level Kubernetes clusters, navigate to your project and select
+**Kubernetes** from the left-hand menu.
 
 ## Installing applications
 
@@ -55,11 +58,11 @@ differentiate the new cluster from your other clusters.
 > - Became [optional](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/26565) in GitLab 11.11.
 
 You can choose to allow GitLab to manage your cluster for you. If GitLab manages
-your cluster, resources for your projects will be automatically created. See the
+your cluster, resources for your projects are automatically created. See the
 [Access controls](../../project/clusters/add_remove_clusters.md#access-controls)
 section for details on which resources GitLab creates for you.
 
-For clusters not managed by GitLab, project-specific resources won't be created
+For clusters not managed by GitLab, project-specific resources aren't created
 automatically. If you're using [Auto DevOps](../../../topics/autodevops/index.md)
 for deployments with a cluster not managed by GitLab, you must ensure:
 
@@ -69,9 +72,8 @@ for deployments with a cluster not managed by GitLab, you must ensure:
   (this is [not automatic](https://gitlab.com/gitlab-org/gitlab/-/issues/31519)). Editing
   `KUBE_NAMESPACE` directly is discouraged.
 
-NOTE: **Note:**
 If you [install applications](#installing-applications) on your cluster, GitLab creates
-the resources required to run them even if you choose to manage your own cluster.
+the resources required to run them, even if you choose to manage your own cluster.
 
 ### Clearing the cluster cache
 
@@ -95,7 +97,7 @@ To clear the cache:
 
 Domains at the cluster level permit support for multiple domains
 per [multiple Kubernetes clusters](#multiple-kubernetes-clusters) When specifying a domain,
-this will be automatically set as an environment variable (`KUBE_INGRESS_BASE_DOMAIN`) during
+this is automatically set as an environment variable (`KUBE_INGRESS_BASE_DOMAIN`) during
 the [Auto DevOps](../../../topics/autodevops/index.md) stages.
 
 The domain should have a wildcard DNS configured to the Ingress IP address.
@@ -162,10 +164,10 @@ For a consolidated view of which CI [environments](../../../ci/environments/inde
 are deployed to the Kubernetes cluster, see the documentation for
 [cluster environments](../../clusters/environments.md).
 
-## Security of Runners
+## Security of runners
 
-For important information about securely configuring GitLab Runners, see
-[Security of Runners](../../project/clusters/add_remove_clusters.md#security-of-gitlab-runners)
+For important information about securely configuring runners, see
+[Security of runners](../../project/clusters/add_remove_clusters.md#security-of-runners)
 documentation for project-level clusters.
 
 ## More information

@@ -132,19 +132,6 @@ RSpec.describe Mutations::Epics::Update do
         it_behaves_like 'a mutation that returns top-level errors',
           errors: ['The list of epic attributes is empty']
       end
-
-      context 'when confidential_epics is disabled' do
-        before do
-          stub_feature_flags(confidential_epics: false)
-        end
-
-        it 'ignores confidential field' do
-          post_graphql_mutation(mutation, current_user: current_user)
-
-          epic_hash = mutation_response['epic']
-          expect(epic_hash['confidential']).to be_falsey
-        end
-      end
     end
   end
 end

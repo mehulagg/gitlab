@@ -1,16 +1,12 @@
 .issuable-warning-icon {
   background-color: $orange-50;
   border-radius: $border-radius-default;
+  color: $orange-600;
   width: $issuable-warning-size;
   height: $issuable-warning-size;
   text-align: center;
   margin-right: $issuable-warning-icon-margin;
   line-height: $gl-line-height-24;
-
-  .icon {
-    fill: $orange-600;
-    vertical-align: text-bottom;
-  }
 }
 
 .limit-container-width {
@@ -77,14 +73,6 @@
   }
 }
 
-.issuable-filter-count {
-  span {
-    display: block;
-    margin-bottom: -16px;
-    padding: 13px 0;
-  }
-}
-
 .issuable-show-labels {
   .gl-label {
     margin-bottom: 5px;
@@ -117,13 +105,14 @@
   }
 }
 
-.assignee {
+.assignee,
+.reviewer {
   .merge-icon {
-    color: $orange-500;
+    color: $orange-400;
     position: absolute;
     bottom: 0;
     right: 0;
-    text-shadow: -1px -1px 0 $white, 1px -1px 0 $white, -1px 1px 0 $white, 1px 1px 0 $white;
+    text-shadow: -1px -1px 2px $white, 1px -1px 2px $white, -1px 1px 2px $white, 1px 1px 2px $white;
   }
 }
 
@@ -210,10 +199,6 @@
       border: 0;
     }
 
-    .select2-container span {
-      margin-top: 0;
-    }
-
     &.assignee {
       .author-link {
         display: block;
@@ -239,16 +224,6 @@
 
     .avatar {
       margin-left: 0;
-    }
-
-    a.edit-link:not([href]):hover {
-      color: rgba($gray-normal, 0.2);
-    }
-
-    .confidential-edit,
-    .lock-edit,
-    .edit-link {
-      @extend .btn-link;
     }
   }
 
@@ -359,13 +334,6 @@
 
     .assignee .user-list .avatar {
       margin: 0;
-    }
-
-    .username {
-      display: block;
-      margin-top: 4px;
-      font-size: 13px;
-      font-weight: $gl-font-weight-normal;
     }
 
     .hide-expanded {
@@ -678,12 +646,6 @@
   }
 }
 
-.issuable-form-padding-top {
-  @include media-breakpoint-up(sm) {
-    padding-top: 7px;
-  }
-}
-
 .issuable-status-box {
   align-self: stretch;
   display: flex;
@@ -731,14 +693,9 @@
 
 .issuable-list {
   li {
-    .issue-box {
-      display: flex;
-    }
-
     .issuable-info-container {
       flex: 1;
       display: flex;
-      padding-right: $gl-padding;
 
       .issuable-main-info {
         flex: 1 auto;
@@ -839,11 +796,7 @@
   }
 }
 
-.time_tracker {
-  padding-bottom: 0;
-  border-bottom: 0;
-
-
+.time-tracker {
   .sidebar-collapsed-icon {
     > .stopwatch-svg {
       display: inline-block;
@@ -956,6 +909,25 @@
   }
 }
 
+/*
+ * Following overrides are done to prevent
+ * legacy dropdown styles from influencing
+ * GitLab UI components used within GlDropdown
+ */
+.issuable-move-dropdown {
+  .b-dropdown-form {
+    @include gl-p-0;
+  }
+
+  .gl-search-box-by-type button.gl-clear-icon-button:hover {
+    @include gl-bg-transparent;
+  }
+
+  .issuable-move-button:not(.disabled):hover {
+    @include gl-text-white;
+  }
+}
+
 .right-sidebar-collapsed {
   .sidebar-grouped-item {
     .sidebar-collapsed-icon {
@@ -1001,5 +973,17 @@
   .avatar {
     margin-top: -3px;
     border: 0;
+  }
+}
+
+@include media-breakpoint-down(sm) {
+  // Overriding the following rule with the negative margin
+  // https://gitlab.com/gitlab-org/gitlab/-/blob/146c43c931c3743a140529307aea616e4aa9ff21/app/assets/stylesheets/framework/sidebar.scss#L1-5
+  .container-fluid {
+    .issuable-list,
+    .issues-filters,
+    .epics-filters {
+      margin: 0 (-$gl-padding);
+    }
   }
 }

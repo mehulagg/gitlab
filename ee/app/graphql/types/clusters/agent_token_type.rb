@@ -7,6 +7,8 @@ module Types
 
       authorize :admin_cluster
 
+      connection_type_class(Types::CountableConnectionType)
+
       field :cluster_agent,
             Types::Clusters::AgentType,
             description: 'Cluster agent this token is associated with',

@@ -49,36 +49,102 @@ RSpec.describe SearchHelper do
         expect(options[:data][:'multiple-assignees']).to eq('true')
       end
     end
+
+    describe 'iterations-endpoint' do
+      let_it_be(:group, refind: true) { create(:group) }
+      let_it_be(:project_under_group, refind: true) { create(:project, group: group) }
+
+      context 'when iterations are available' do
+        before do
+          stub_licensed_features(iterations: true)
+        end
+
+        it 'includes iteration endpoint in project context' do
+          @project = project_under_group
+
+          expect(options[:data]['iterations-endpoint']).to eq(expose_path(api_v4_projects_iterations_path(id: @project.id)))
+        end
+
+        it 'includes iteration endpoint in group context' do
+          @group = group
+
+          expect(options[:data]['iterations-endpoint']).to eq(expose_path(api_v4_groups_iterations_path(id: @group.id)))
+        end
+
+        it 'does not include iterations endpoint for projects under a namespace' do
+          @project = create(:project, namespace: create(:namespace))
+
+          expect(options[:data]['iterations-endpoint']).to be(nil)
+        end
+
+        it 'does not include iterations endpoint in dashboard context' do
+          expect(options[:data]['iterations-endpoint']).to be(nil)
+        end
+      end
+
+      context 'when iterations are not available' do
+        before do
+          stub_licensed_features(iterations: false)
+        end
+
+        it 'does not include iterations endpoint in project context' do
+          @project = project_under_group
+
+          expect(options[:data]['iterations-endpoint']).to be(nil)
+        end
+
+        it 'does not include iterations endpoint in group context' do
+          @group = group
+
+          expect(options[:data]['iterations-endpoint']).to be(nil)
+        end
+      end
+    end
   end
 
-  describe '#project_autocomplete' do
-    let(:user) { create(:user) }
+  describe 'search_autocomplete_opts' do
+    context "with a user" do
+      let(:user) { create(:user) }
 
-    before do
-      @project = create(:project, :repository)
-      allow(self).to receive(:current_user).and_return(user)
-    end
-
-    context 'with a licensed user' do
-      it "does not include feature flags" do
-        expect(project_autocomplete.find { |i| i[:label] == 'Feature Flags'} ).to be_nil
-      end
-    end
-
-    context 'with a licensed user' do
       before do
-        stub_licensed_features(feature_flags: true)
+        allow(self).to receive(:current_user).and_return(user)
       end
 
-      it "does include feature flags" do
-        expect(project_autocomplete.find { |i| i[:label] == 'Feature Flags' }).to be_present
+      it 'includes the users recently viewed epics' do
+        recent_epics = instance_double(::Gitlab::Search::RecentEpics)
+        expect(::Gitlab::Search::RecentEpics).to receive(:new).with(user: user).and_return(recent_epics)
+        group1 = create(:group, :public, :with_avatar)
+        group2 = create(:group, :public)
+        epic1 = create(:epic, title: 'epic 1', group: group1)
+        epic2 = create(:epic, title: 'epic 2', group: group2)
+
+        expect(recent_epics).to receive(:search).with('the search term').and_return(Epic.id_in_ordered([epic1.id, epic2.id]))
+
+        results = search_autocomplete_opts("the search term")
+
+        expect(results.count).to eq(2)
+
+        expect(results[0]).to include({
+          category: 'Recent epics',
+          id: epic1.id,
+          label: 'epic 1',
+          url: Gitlab::Routing.url_helpers.group_epic_path(epic1.group, epic1),
+          avatar_url: group1.avatar_url
+        })
+
+        expect(results[1]).to include({
+          category: 'Recent epics',
+          id: epic2.id,
+          label: 'epic 2',
+          url: Gitlab::Routing.url_helpers.group_epic_path(epic2.group, epic2),
+          avatar_url: '' # This group didn't have an avatar so set this to ''
+        })
       end
     end
   end
 
   describe '#search_entries_info_template' do
     let(:com_value) { true }
-    let(:flag_enabled) { true }
     let(:elasticsearch_enabled) { true }
     let(:show_snippets) { true }
     let(:collection) { Kaminari.paginate_array([:foo]).page(1).per(10) }
@@ -93,7 +159,6 @@ RSpec.describe SearchHelper do
       @current_user = user
 
       allow(Gitlab).to receive(:com?).and_return(com_value)
-      stub_feature_flags(restricted_snippet_scope_search: flag_enabled)
       stub_ee_application_setting(search_using_elasticsearch: elasticsearch_enabled)
     end
 
@@ -111,12 +176,6 @@ RSpec.describe SearchHelper do
 
     context 'when not in Gitlab.com' do
       let(:com_value) { false }
-
-      it_behaves_like 'returns old message'
-    end
-
-    context 'when flag restricted_snippet_scope_search is not enabled' do
-      let(:flag_enabled) { false }
 
       it_behaves_like 'returns old message'
     end
@@ -140,47 +199,52 @@ RSpec.describe SearchHelper do
     end
   end
 
-  describe '#show_switch_to_basic_search?' do
-    let(:use_elasticsearch) { true }
-    let(:scope) { 'commits' }
-    let(:search_service) { instance_double(Search::GlobalService, use_elasticsearch?: use_elasticsearch, scope: scope) }
-
-    subject { show_switch_to_basic_search?(search_service) }
+  describe '#highlight_and_truncate_issuable' do
+    let(:description) { 'hello world' }
+    let(:issue) { create(:issue, description: description) }
+    let(:user) { create(:user) }
+    let(:search_highlight) { {} }
 
     before do
-      stub_feature_flags(switch_to_basic_search: true)
+      allow(self).to receive(:current_user).and_return(user)
+      stub_ee_application_setting(search_using_elasticsearch: true)
     end
 
-    context 'when :switch_to_basic_search feature is disabled' do
-      before do
-        stub_feature_flags(switch_to_basic_search: false)
+    # Elasticsearch returns Elasticsearch::Model::HashWrapper class for the highlighting
+    subject { highlight_and_truncate_issuable(issue, 'test', Elasticsearch::Model::HashWrapper.new(search_highlight)) }
+
+    context 'when description is not present' do
+      let(:description) { nil }
+
+      it 'does nothing' do
+        expect(self).not_to receive(:sanitize)
+
+        subject
+      end
+    end
+
+    context 'when description present' do
+      using RSpec::Parameterized::TableSyntax
+
+      where(:description, :search_highlight, :expected) do
+        'test'                                                                 | { 1 => { description: ['gitlabelasticsearch→test←gitlabelasticsearch'] } } | "<span class='gl-text-black-normal gl-font-weight-bold'>test</span>"
+        '<span style="color: blue;">this test should not be blue</span>'       | { 1 => { description: ['<span style="color: blue;">this gitlabelasticsearch→test←gitlabelasticsearch should not be blue</span>'] } } | "<span>this <span class='gl-text-black-normal gl-font-weight-bold'>test</span> should not be blue</span>"
+        '<a href="#" onclick="alert(\'XSS\')">Click Me test</a>'               | { 1 => { description: ['<a href="#" onclick="alert(\'XSS\')">Click Me gitlabelasticsearch→test←gitlabelasticsearch</a>'] } } | "<a href='#'>Click Me <span class='gl-text-black-normal gl-font-weight-bold'>test</span></a>"
+        '<script type="text/javascript">alert(\'Another XSS\');</script> test' | { 1 => { description: ['<script type="text/javascript">alert(\'Another XSS\');</script> gitlabelasticsearch→test←gitlabelasticsearch'] } } | "alert(&apos;Another XSS&apos;); <span class='gl-text-black-normal gl-font-weight-bold'>test</span>"
+        'Lorem test ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec.' | { 1 => { description: ['Lorem gitlabelasticsearch→test←gitlabelasticsearch ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec.'] } } | "Lorem <span class='gl-text-black-normal gl-font-weight-bold'>test</span> ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Don..."
       end
 
-      it { is_expected.to eq(false) }
-    end
+      with_them do
+        before do
+          # table syntax doesn't allow use of calculated fields so we must fake issue.id
+          # to ensure the test goes down the correct path
+          allow(issue).to receive(:id).and_return(1)
+        end
 
-    context 'when not currently using elasticsearch' do
-      let(:use_elasticsearch) { false }
-
-      it { is_expected.to eq(false) }
-    end
-
-    context 'when project scope' do
-      before do
-        @project = create(:project)
+        it 'sanitizes, truncates, and highlights the search term' do
+          expect(subject).to eq(expected)
+        end
       end
-
-      it { is_expected.to eq(true) }
-    end
-
-    context 'when commits tab' do
-      it { is_expected.to eq(false) }
-    end
-
-    context 'when issues tab' do
-      let(:scope) { 'issues' }
-
-      it { is_expected.to eq(true) }
     end
   end
 end

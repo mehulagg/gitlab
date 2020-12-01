@@ -2,7 +2,7 @@
 type: howto
 stage: Manage
 group: Access
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Deleting a User account
@@ -35,7 +35,7 @@ As an administrator, you can delete a user account by:
    - **Delete user and contributions** to delete the user and
      their associated records.
 
-DANGER: **Danger:**
+DANGER: **Warning:**
 Using the **Delete user and contributions** option may result
 in removing more data than intended. Please see [associated records](#associated-records)
 below for additional details.

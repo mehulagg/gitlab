@@ -1,11 +1,12 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlLoadingIcon } from '@gitlab/ui';
-import SecurityDashboardLayout from 'ee/security_dashboard/components/security_dashboard_layout.vue';
+import { shallowMount } from '@vue/test-utils';
+import CsvExportButton from 'ee/security_dashboard/components/csv_export_button.vue';
+import DashboardNotConfigured from 'ee/security_dashboard/components/empty_states/group_dashboard_not_configured.vue';
 import FirstClassGroupDashboard from 'ee/security_dashboard/components/first_class_group_security_dashboard.vue';
 import FirstClassGroupVulnerabilities from 'ee/security_dashboard/components/first_class_group_security_dashboard_vulnerabilities.vue';
-import DashboardNotConfigured from 'ee/security_dashboard/components/empty_states/group_dashboard_not_configured.vue';
-import CsvExportButton from 'ee/security_dashboard/components/csv_export_button.vue';
 import Filters from 'ee/security_dashboard/components/first_class_vulnerability_filters.vue';
+import SecurityDashboardLayout from 'ee/security_dashboard/components/security_dashboard_layout.vue';
+import VulnerabilitiesCountList from 'ee/security_dashboard/components/vulnerability_count_list.vue';
 
 describe('First Class Group Dashboard Component', () => {
   let wrapper;
@@ -21,6 +22,7 @@ describe('First Class Group Dashboard Component', () => {
   const findFilters = () => wrapper.find(Filters);
   const findLoadingIcon = () => wrapper.find(GlLoadingIcon);
   const findEmptyState = () => wrapper.find(DashboardNotConfigured);
+  const findVulnerabilitiesCountList = () => wrapper.find(VulnerabilitiesCountList);
 
   const createWrapper = ({ data } = {}) => {
     return shallowMount(FirstClassGroupDashboard, {
@@ -107,6 +109,14 @@ describe('First Class Group Dashboard Component', () => {
 
     it('should not display the dashboard not configured component', () => {
       expect(findEmptyState().exists()).toBe(false);
+    });
+
+    it('should display the vulnerability count list with the correct data', () => {
+      expect(findVulnerabilitiesCountList().props()).toMatchObject({
+        scope: 'group',
+        fullPath: groupFullPath,
+        filters: wrapper.vm.filters,
+      });
     });
   });
 

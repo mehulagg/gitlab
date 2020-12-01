@@ -1,6 +1,12 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Uploads sanitize Rake tasks **(CORE ONLY)**
 
-Since GitLab 11.9, EXIF data is automatically stripped from JPG or TIFF image uploads.
+In GitLab 11.9 and later, EXIF data is automatically stripped from JPG or TIFF image uploads.
 
 EXIF data may contain sensitive information (for example, GPS location), so you
 can remove EXIF data from existing images that were uploaded to an earlier version of GitLab.
@@ -35,8 +41,8 @@ The Rake task accepts following parameters.
 
 | Parameter    | Type    | Description                                                                                                                 |
 |:-------------|:--------|:----------------------------------------------------------------------------------------------------------------------------|
-| `start_id`   | integer | Only uploads with equal or greater ID will be processed                                                                     |
-| `stop_id`    | integer | Only uploads with equal or smaller ID will be processed                                                                     |
+| `start_id`   | integer | Only uploads with equal or greater ID are processed                                                                     |
+| `stop_id`    | integer | Only uploads with equal or smaller ID are processed                                                                     |
 | `dry_run`    | boolean | Do not remove EXIF data, only check if EXIF data are present or not. Defaults to `true`                                     |
 | `sleep_time` | float   | Pause for number of seconds after processing each image. Defaults to 0.3 seconds                                            |
 | `uploader`   | string  | Run sanitization only for uploads of the given uploader: `FileUploader`, `PersonalFileUploader`, or `NamespaceFileUploader` |
@@ -60,7 +66,7 @@ To remove EXIF data on uploads with an ID between 100 and 5000 and pause for 0.1
 sudo RAILS_ENV=production -u git -H bundle exec rake gitlab:uploads:sanitize:remove_exif[100,5000,false,0.1] 2>&1 | tee exif.log
 ```
 
-The output is written into an `exif.log` file because it will probably be long.
+The output is written into an `exif.log` file because it is often long.
 
 If sanitization fails for an upload, an error message should be in the output of the Rake task.
 Typical reasons include that the file is missing in the storage or it's not a valid image.

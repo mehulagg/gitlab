@@ -14,6 +14,7 @@ RSpec.describe 'Pipeline', :js do
   before do
     sign_in(user)
     project.add_role(user, role)
+    stub_feature_flags(graphql_pipeline_details: false)
   end
 
   shared_context 'pipeline builds' do
@@ -172,10 +173,17 @@ RSpec.describe 'Pipeline', :js do
       end
     end
 
-    it_behaves_like 'showing user status' do
-      let(:user_with_status) { pipeline.user }
+    describe 'pipelines details view' do
+      let!(:status) { create(:user_status, user: pipeline.user, emoji: 'smirk', message: 'Authoring this object') }
 
-      subject { visit project_pipeline_path(project, pipeline) }
+      it 'pipeline header shows the user status and emoji' do
+        visit project_pipeline_path(project, pipeline)
+
+        within '[data-testid="ci-header-content"]' do
+          expect(page).to have_selector("[data-testid='#{status.message}']")
+          expect(page).to have_selector("[data-name='#{status.emoji}']")
+        end
+      end
     end
 
     describe 'pipeline graph' do
@@ -338,7 +346,7 @@ RSpec.describe 'Pipeline', :js do
       it 'shows Pipeline, Jobs, DAG and Failed Jobs tabs with link' do
         expect(page).to have_link('Pipeline')
         expect(page).to have_link('Jobs')
-        expect(page).to have_link('DAG')
+        expect(page).to have_link('Needs')
         expect(page).to have_link('Failed Jobs')
       end
 
@@ -378,7 +386,7 @@ RSpec.describe 'Pipeline', :js do
           find('.js-tests-tab-link').click
 
           expect(page).to have_content('Jobs')
-          expect(page).to have_selector('.js-tests-detail', visible: :all)
+          expect(page).to have_selector('[data-testid="tests-detail"]', visible: :all)
         end
       end
 
@@ -400,7 +408,7 @@ RSpec.describe 'Pipeline', :js do
 
       context 'when retrying' do
         before do
-          find('[data-testid="retryButton"]').click
+          find('[data-testid="retryPipeline"]').click
         end
 
         it 'does not show a "Retry" button', :sidekiq_might_not_need_inline do
@@ -885,7 +893,7 @@ RSpec.describe 'Pipeline', :js do
       it 'shows Pipeline, Jobs and DAG tabs with link' do
         expect(page).to have_link('Pipeline')
         expect(page).to have_link('Jobs')
-        expect(page).to have_link('DAG')
+        expect(page).to have_link('Needs')
       end
 
       it 'shows counter in Jobs tab' do
@@ -902,7 +910,7 @@ RSpec.describe 'Pipeline', :js do
 
       context 'when retrying' do
         before do
-          find('[data-testid="retryButton"]').click
+          find('[data-testid="retryPipeline"]').click
         end
 
         it 'does not show a "Retry" button', :sidekiq_might_not_need_inline do

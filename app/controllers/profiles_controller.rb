@@ -2,6 +2,7 @@
 
 class ProfilesController < Profiles::ApplicationController
   include ActionView::Helpers::SanitizeHelper
+  include Gitlab::Tracking
 
   before_action :user
   before_action :authorize_change_username!, only: :update_username
@@ -9,6 +10,8 @@ class ProfilesController < Profiles::ApplicationController
   before_action do
     push_frontend_feature_flag(:webauthn)
   end
+
+  feature_category :users
 
   def show
   end
@@ -63,6 +66,8 @@ class ProfilesController < Profiles::ApplicationController
     @events = AuditEvent.where(entity_type: "User", entity_id: current_user.id)
       .order("created_at DESC")
       .page(params[:page])
+
+    Gitlab::Tracking.event(self.class.name, 'search_audit_event')
   end
   # rubocop: enable CodeReuse/ActiveRecord
 
@@ -104,6 +109,7 @@ class ProfilesController < Profiles::ApplicationController
       :bio,
       :email,
       :role,
+      :gitpod_enabled,
       :hide_no_password,
       :hide_no_ssh_key,
       :hide_project_limit,
@@ -121,7 +127,7 @@ class ProfilesController < Profiles::ApplicationController
       :include_private_contributions,
       :timezone,
       :job_title,
-      status: [:emoji, :message]
+      status: [:emoji, :message, :availability]
     )
   end
 end

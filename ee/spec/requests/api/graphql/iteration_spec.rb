@@ -50,6 +50,7 @@ RSpec.describe 'Querying an Iteration' do
     let_it_be(:project_iteration) { create(:iteration, :skip_project_validation, project: project) }
 
     shared_examples 'scoped path' do
+      let(:queried_iteration_id) { queried_iteration.to_global_id.to_s }
       let(:iteration_nodes) do
         nodes = <<~NODES
           nodes {
@@ -58,7 +59,7 @@ RSpec.describe 'Querying an Iteration' do
           }
         NODES
 
-        query_graphql_field('iterations', { id: queried_iteration.id }, nodes)
+        query_graphql_field('iterations', { id: queried_iteration_id }, nodes)
       end
 
       before_all do
@@ -67,6 +68,14 @@ RSpec.describe 'Querying an Iteration' do
 
       specify do
         expect(subject).to include('scopedPath' => expected_scope_path, 'scopedUrl' => expected_scope_url)
+      end
+
+      context 'when given a raw model id (backward compatibility)' do
+        let(:queried_iteration_id) { queried_iteration.id }
+
+        specify do
+          expect(subject).to include('scopedPath' => expected_scope_path, 'scopedUrl' => expected_scope_url)
+        end
       end
     end
 

@@ -34,6 +34,12 @@ RSpec.shared_examples 'issue with epic_id parameter' do
     it 'raises an exception' do
       expect { execute }.to raise_error(Gitlab::Access::AccessDeniedError)
     end
+
+    it 'does not send usage data for added epic action', :aggregate_failures do
+      expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).not_to receive(:track_issue_added_epic_action)
+
+      expect { execute }.to raise_error(Gitlab::Access::AccessDeniedError)
+    end
   end
 
   context 'when user can add issues to the epic' do
@@ -55,7 +61,13 @@ RSpec.shared_examples 'issue with epic_id parameter' do
       it 'calls EpicIssues::CreateService' do
         link_sevice = double
         expect(EpicIssues::CreateService).to receive(:new).and_return(link_sevice)
-        expect(link_sevice).to receive(:execute)
+        expect(link_sevice).to receive(:execute).and_return({ status: :success })
+
+        execute
+      end
+
+      it 'tracks usage data for added to epic action' do
+        expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).to receive(:track_issue_added_to_epic_action).with(author: user)
 
         execute
       end
@@ -98,6 +110,12 @@ RSpec.shared_examples 'issue with epic_id parameter' do
 
         expect(issue.reload).to be_persisted
         expect(issue.epic).to eq(epic)
+      end
+
+      it 'tracks usage data for added to epic action' do
+        expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).to receive(:track_issue_added_to_epic_action).with(author: user)
+
+        execute
       end
     end
   end

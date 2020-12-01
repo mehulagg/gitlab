@@ -8,6 +8,8 @@ module Projects
       before_action :authorize_read_threat_monitoring!
       before_action :set_polling_interval, only: [:summary]
 
+      feature_category :container_network_security
+
       def summary
         return not_found unless environment.has_metrics?
 
@@ -34,7 +36,7 @@ module Projects
       end
 
       def index
-        response = NetworkPolicies::ResourcesService.new(environment: environment).execute
+        response = NetworkPolicies::ResourcesService.new(project: project, environment_id: params[:environment_id]).execute
         respond_with_service_response(response)
       end
 
@@ -89,7 +91,7 @@ module Projects
       end
 
       def respond_with_service_response(response)
-        payload = response.success? ? response.payload : { error: response.message }
+        payload = response.success? ? response.payload : { payload: response.payload, error: response.message }
         respond_to do |format|
           format.json do
             render status: response.http_status, json: payload

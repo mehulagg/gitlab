@@ -14,11 +14,7 @@ RSpec.shared_examples 'updating health status' do
     end
   end
 
-  subject { mutation.resolve(params) }
-
-  it 'raises an error if the resource is not accessible to the user' do
-    expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
-  end
+  subject { mutation.resolve(**params) }
 
   context 'when the user has permission' do
     before do

@@ -5,7 +5,7 @@ require 'spec_helper'
 RSpec.describe DastSites::FindOrCreateService do
   let(:user) { create(:user) }
   let(:project) { create(:project, :repository, creator: user) }
-  let(:url) { FFaker::Internet.uri(:http) }
+  let(:url) { generate(:url) }
 
   before do
     stub_licensed_features(security_on_demand_scans: true)
@@ -55,16 +55,6 @@ RSpec.describe DastSites::FindOrCreateService do
         it 'raises an exception' do
           expect { subject }.to raise_error(ActiveRecord::RecordInvalid) do |err|
             expect(err.record.errors.full_messages).to include('Url is blocked: Requests to localhost are not allowed')
-          end
-        end
-      end
-
-      context 'when on demand scan feature is disabled' do
-        it 'raises an exception' do
-          stub_feature_flags(security_on_demand_scans_feature_flag: false)
-
-          expect { subject }.to raise_error(DastSites::FindOrCreateService::PermissionsError) do |err|
-            expect(err.message).to include('Insufficient permissions')
           end
         end
       end

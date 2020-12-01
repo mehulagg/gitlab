@@ -138,4 +138,46 @@ describe('Network Policies mutations', () => {
       expect(state.errorUpdatingPolicy).toBe(true);
     });
   });
+
+  describe(types.REQUEST_DELETE_POLICY, () => {
+    beforeEach(() => {
+      mutations[types.REQUEST_DELETE_POLICY](state);
+    });
+
+    it('sets isRemovingPolicy to true and sets errorRemovingPolicy to false', () => {
+      expect(state.isRemovingPolicy).toBe(true);
+      expect(state.errorRemovingPolicy).toBe(false);
+    });
+  });
+
+  describe(types.RECEIVE_DELETE_POLICY_SUCCESS, () => {
+    const policy = { id: 1, name: 'production', manifest: 'foo' };
+
+    beforeEach(() => {
+      state.policies.push(policy);
+      mutations[types.RECEIVE_DELETE_POLICY_SUCCESS](state, {
+        policy,
+      });
+    });
+
+    it('removes the policy', () => {
+      expect(state.policies).not.toEqual(expect.objectContaining(policy));
+    });
+
+    it('sets isRemovingPolicy to false and sets errorRemovingPolicy to false', () => {
+      expect(state.isRemovingPolicy).toBe(false);
+      expect(state.errorRemovingPolicy).toBe(false);
+    });
+  });
+
+  describe(types.RECEIVE_DELETE_POLICY_ERROR, () => {
+    beforeEach(() => {
+      mutations[types.RECEIVE_DELETE_POLICY_ERROR](state);
+    });
+
+    it('sets isRemovingPolicy to false and sets errorRemovingPolicy to true', () => {
+      expect(state.isRemovingPolicy).toBe(false);
+      expect(state.errorRemovingPolicy).toBe(true);
+    });
+  });
 });

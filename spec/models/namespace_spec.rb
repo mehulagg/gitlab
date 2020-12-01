@@ -19,6 +19,7 @@ RSpec.describe Namespace do
     it { is_expected.to have_one :aggregation_schedule }
     it { is_expected.to have_one :namespace_settings }
     it { is_expected.to have_many :custom_emoji }
+    it { is_expected.to have_many :namespace_onboarding_actions }
   end
 
   describe 'validations' do
@@ -147,30 +148,45 @@ RSpec.describe Namespace do
   end
 
   describe '.search' do
-    let(:namespace) { create(:namespace) }
+    let_it_be(:first_namespace) { build(:namespace, name: 'my first namespace', path: 'old-path').tap(&:save!) }
+    let_it_be(:parent_namespace) { build(:namespace, name: 'my parent namespace', path: 'parent-path').tap(&:save!) }
+    let_it_be(:second_namespace) { build(:namespace, name: 'my second namespace', path: 'new-path', parent: parent_namespace).tap(&:save!) }
+    let_it_be(:project_with_same_path) { create(:project, id: second_namespace.id, path: first_namespace.path) }
 
     it 'returns namespaces with a matching name' do
-      expect(described_class.search(namespace.name)).to eq([namespace])
+      expect(described_class.search('my first namespace')).to eq([first_namespace])
     end
 
     it 'returns namespaces with a partially matching name' do
-      expect(described_class.search(namespace.name[0..2])).to eq([namespace])
+      expect(described_class.search('first')).to eq([first_namespace])
     end
 
     it 'returns namespaces with a matching name regardless of the casing' do
-      expect(described_class.search(namespace.name.upcase)).to eq([namespace])
+      expect(described_class.search('MY FIRST NAMESPACE')).to eq([first_namespace])
     end
 
     it 'returns namespaces with a matching path' do
-      expect(described_class.search(namespace.path)).to eq([namespace])
+      expect(described_class.search('old-path')).to eq([first_namespace])
     end
 
     it 'returns namespaces with a partially matching path' do
-      expect(described_class.search(namespace.path[0..2])).to eq([namespace])
+      expect(described_class.search('old')).to eq([first_namespace])
     end
 
     it 'returns namespaces with a matching path regardless of the casing' do
-      expect(described_class.search(namespace.path.upcase)).to eq([namespace])
+      expect(described_class.search('OLD-PATH')).to eq([first_namespace])
+    end
+
+    it 'returns namespaces with a matching route path' do
+      expect(described_class.search('parent-path/new-path', include_parents: true)).to eq([second_namespace])
+    end
+
+    it 'returns namespaces with a partially matching route path' do
+      expect(described_class.search('parent-path/new', include_parents: true)).to eq([second_namespace])
+    end
+
+    it 'returns namespaces with a matching route path regardless of the casing' do
+      expect(described_class.search('PARENT-PATH/NEW-PATH', include_parents: true)).to eq([second_namespace])
     end
   end
 
@@ -672,7 +688,7 @@ RSpec.describe Namespace do
       let!(:project) { create(:project_empty_repo, namespace: namespace) }
 
       it 'has no repositories base directories to remove' do
-        allow(GitlabShellWorker).to receive(:perform_in)
+        expect(GitlabShellWorker).not_to receive(:perform_in)
 
         expect(File.exist?(path_in_dir)).to be(false)
 
@@ -855,13 +871,59 @@ RSpec.describe Namespace do
   end
 
   describe '#all_projects' do
-    let(:group) { create(:group) }
-    let(:child) { create(:group, parent: group) }
-    let!(:project1) { create(:project_empty_repo, namespace: group) }
-    let!(:project2) { create(:project_empty_repo, namespace: child) }
+    shared_examples 'all projects for a group' do
+      let(:namespace) { create(:group) }
+      let(:child) { create(:group, parent: namespace) }
+      let!(:project1) { create(:project_empty_repo, namespace: namespace) }
+      let!(:project2) { create(:project_empty_repo, namespace: child) }
 
-    it { expect(group.all_projects.to_a).to match_array([project2, project1]) }
-    it { expect(child.all_projects.to_a).to match_array([project2]) }
+      it { expect(namespace.all_projects.to_a).to match_array([project2, project1]) }
+      it { expect(child.all_projects.to_a).to match_array([project2]) }
+    end
+
+    shared_examples 'all projects for personal namespace' do
+      let_it_be(:user) { create(:user) }
+      let_it_be(:user_namespace) { create(:namespace, owner: user) }
+      let_it_be(:project) { create(:project, namespace: user_namespace) }
+
+      it { expect(user_namespace.all_projects.to_a).to match_array([project]) }
+    end
+
+    context 'with recursive approach' do
+      context 'when namespace is a group' do
+        include_examples 'all projects for a group'
+
+        it 'queries for the namespace and its descendants' do
+          expect(Project).to receive(:where).with(namespace: [namespace, child])
+
+          namespace.all_projects
+        end
+      end
+
+      context 'when namespace is a user namespace' do
+        include_examples 'all projects for personal namespace'
+
+        it 'only queries for the namespace itself' do
+          expect(Project).to receive(:where).with(namespace: user_namespace)
+
+          user_namespace.all_projects
+        end
+      end
+    end
+
+    context 'with route path wildcard approach' do
+      before do
+        stub_feature_flags(recursive_approach_for_all_projects: false)
+      end
+
+      context 'when namespace is a group' do
+        include_examples 'all projects for a group'
+      end
+
+      context 'when namespace is a user namespace' do
+        include_examples 'all projects for personal namespace'
+      end
+    end
   end
 
   describe '#all_pipelines' do
@@ -1210,24 +1272,6 @@ RSpec.describe Namespace do
           expect(virtual_domain.lookup_paths).not_to be_empty
         end
       end
-
-      it 'preloads project_feature and route' do
-        project2 = create(:project, namespace: namespace)
-        project3 = create(:project, namespace: namespace)
-
-        project.mark_pages_as_deployed
-        project2.mark_pages_as_deployed
-        project3.mark_pages_as_deployed
-
-        virtual_domain = namespace.pages_virtual_domain
-
-        queries = ActiveRecord::QueryRecorder.new { virtual_domain.lookup_paths }
-
-        # 1 to load projects
-        # 1 to preload project features
-        # 1 to load routes
-        expect(queries.count).to eq(3)
-      end
     end
   end
 
@@ -1317,6 +1361,142 @@ RSpec.describe Namespace do
         let(:setting_name) { :lfs_enabled }
 
         it_behaves_like 'fetching closest setting'
+      end
+    end
+  end
+
+  describe '#shared_runners_setting' do
+    using RSpec::Parameterized::TableSyntax
+
+    where(:shared_runners_enabled, :allow_descendants_override_disabled_shared_runners, :shared_runners_setting) do
+      true  | true  | 'enabled'
+      true  | false | 'enabled'
+      false | true  | 'disabled_with_override'
+      false | false | 'disabled_and_unoverridable'
+    end
+
+    with_them do
+      let(:namespace) { build(:namespace, shared_runners_enabled: shared_runners_enabled, allow_descendants_override_disabled_shared_runners: allow_descendants_override_disabled_shared_runners)}
+
+      it 'returns the result' do
+        expect(namespace.shared_runners_setting).to eq(shared_runners_setting)
+      end
+    end
+  end
+
+  describe '#shared_runners_setting_higher_than?' do
+    using RSpec::Parameterized::TableSyntax
+
+    where(:shared_runners_enabled, :allow_descendants_override_disabled_shared_runners, :other_setting, :result) do
+      true  | true  | 'enabled'                    | false
+      true  | true  | 'disabled_with_override'     | true
+      true  | true  | 'disabled_and_unoverridable' | true
+      false | true  | 'enabled'                    | false
+      false | true  | 'disabled_with_override'     | false
+      false | true  | 'disabled_and_unoverridable' | true
+      false | false | 'enabled'                    | false
+      false | false | 'disabled_with_override'     | false
+      false | false | 'disabled_and_unoverridable' | false
+    end
+
+    with_them do
+      let(:namespace) { build(:namespace, shared_runners_enabled: shared_runners_enabled, allow_descendants_override_disabled_shared_runners: allow_descendants_override_disabled_shared_runners)}
+
+      it 'returns the result' do
+        expect(namespace.shared_runners_setting_higher_than?(other_setting)).to eq(result)
+      end
+    end
+  end
+
+  describe 'validation #changing_shared_runners_enabled_is_allowed' do
+    context 'without a parent' do
+      let(:namespace) { build(:namespace, shared_runners_enabled: true) }
+
+      it 'is valid' do
+        expect(namespace).to be_valid
+      end
+    end
+
+    context 'with a parent' do
+      context 'when parent has shared runners disabled' do
+        let(:parent) { create(:namespace, :shared_runners_disabled) }
+        let(:sub_namespace) { build(:namespace, shared_runners_enabled: true, parent_id: parent.id) }
+
+        it 'is invalid' do
+          expect(sub_namespace).to be_invalid
+          expect(sub_namespace.errors[:shared_runners_enabled]).to include('cannot be enabled because parent group has shared Runners disabled')
+        end
+      end
+
+      context 'when parent has shared runners disabled but allows override' do
+        let(:parent) { create(:namespace, :shared_runners_disabled, :allow_descendants_override_disabled_shared_runners) }
+        let(:sub_namespace) { build(:namespace, shared_runners_enabled: true, parent_id: parent.id) }
+
+        it 'is valid' do
+          expect(sub_namespace).to be_valid
+        end
+      end
+
+      context 'when parent has shared runners enabled' do
+        let(:parent) { create(:namespace, shared_runners_enabled: true) }
+        let(:sub_namespace) { build(:namespace, shared_runners_enabled: true, parent_id: parent.id) }
+
+        it 'is valid' do
+          expect(sub_namespace).to be_valid
+        end
+      end
+    end
+  end
+
+  describe 'validation #changing_allow_descendants_override_disabled_shared_runners_is_allowed' do
+    context 'without a parent' do
+      context 'with shared runners disabled' do
+        let(:namespace) { build(:namespace, :allow_descendants_override_disabled_shared_runners, :shared_runners_disabled) }
+
+        it 'is valid' do
+          expect(namespace).to be_valid
+        end
+      end
+
+      context 'with shared runners enabled' do
+        let(:namespace) { create(:namespace) }
+
+        it 'is invalid' do
+          namespace.allow_descendants_override_disabled_shared_runners = true
+
+          expect(namespace).to be_invalid
+          expect(namespace.errors[:allow_descendants_override_disabled_shared_runners]).to include('cannot be changed if shared runners are enabled')
+        end
+      end
+    end
+
+    context 'with a parent' do
+      context 'when parent does not allow shared runners' do
+        let(:parent) { create(:namespace, :shared_runners_disabled) }
+        let(:sub_namespace) { build(:namespace, :shared_runners_disabled, :allow_descendants_override_disabled_shared_runners, parent_id: parent.id) }
+
+        it 'is invalid' do
+          expect(sub_namespace).to be_invalid
+          expect(sub_namespace.errors[:allow_descendants_override_disabled_shared_runners]).to include('cannot be enabled because parent group does not allow it')
+        end
+      end
+
+      context 'when parent allows shared runners and setting to true' do
+        let(:parent) { create(:namespace, shared_runners_enabled: true) }
+        let(:sub_namespace) { build(:namespace, :shared_runners_disabled, :allow_descendants_override_disabled_shared_runners, parent_id: parent.id) }
+
+        it 'is valid' do
+          expect(sub_namespace).to be_valid
+        end
+      end
+
+      context 'when parent allows shared runners and setting to false' do
+        let(:parent) { create(:namespace, shared_runners_enabled: true) }
+        let(:sub_namespace) { build(:namespace, :shared_runners_disabled, allow_descendants_override_disabled_shared_runners: false, parent_id: parent.id) }
+
+        it 'is valid' do
+          expect(sub_namespace).to be_valid
+        end
       end
     end
   end

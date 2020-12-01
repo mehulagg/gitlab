@@ -7,6 +7,8 @@ module Registrations
     before_action :check_experiment_enabled
     before_action :find_namespace, only: :new
 
+    feature_category :navigation
+
     def new
       @project = Project.new(namespace: @namespace)
     end

@@ -14,6 +14,7 @@ import {
   SET_ROLE,
   SET_SECURITY_GROUP,
   SET_GITLAB_MANAGED_CLUSTER,
+  SET_NAMESPACE_PER_ENVIRONMENT,
   SET_INSTANCE_TYPE,
   SET_NODE_COUNT,
   REQUEST_CREATE_ROLE,
@@ -22,6 +23,7 @@ import {
   REQUEST_CREATE_CLUSTER,
   CREATE_CLUSTER_ERROR,
 } from '~/create_cluster/eks_cluster/store/mutation_types';
+import { DEFAULT_REGION } from '~/create_cluster/eks_cluster/constants';
 import axios from '~/lib/utils/axios_utils';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 
@@ -40,6 +42,7 @@ describe('EKS Cluster Store Actions', () => {
   let instanceType;
   let nodeCount;
   let gitlabManagedCluster;
+  let namespacePerEnvironment;
   let mock;
   let state;
   let newClusterUrl;
@@ -57,6 +60,7 @@ describe('EKS Cluster Store Actions', () => {
     instanceType = 'small-1';
     nodeCount = '5';
     gitlabManagedCluster = true;
+    namespacePerEnvironment = true;
 
     newClusterUrl = '/clusters/1';
 
@@ -76,19 +80,20 @@ describe('EKS Cluster Store Actions', () => {
   });
 
   it.each`
-    action                       | mutation                      | payload                  | payloadDescription
-    ${'setClusterName'}          | ${SET_CLUSTER_NAME}           | ${{ clusterName }}       | ${'cluster name'}
-    ${'setEnvironmentScope'}     | ${SET_ENVIRONMENT_SCOPE}      | ${{ environmentScope }}  | ${'environment scope'}
-    ${'setKubernetesVersion'}    | ${SET_KUBERNETES_VERSION}     | ${{ kubernetesVersion }} | ${'kubernetes version'}
-    ${'setRole'}                 | ${SET_ROLE}                   | ${{ role }}              | ${'role'}
-    ${'setRegion'}               | ${SET_REGION}                 | ${{ region }}            | ${'region'}
-    ${'setKeyPair'}              | ${SET_KEY_PAIR}               | ${{ keyPair }}           | ${'key pair'}
-    ${'setVpc'}                  | ${SET_VPC}                    | ${{ vpc }}               | ${'vpc'}
-    ${'setSubnet'}               | ${SET_SUBNET}                 | ${{ subnet }}            | ${'subnet'}
-    ${'setSecurityGroup'}        | ${SET_SECURITY_GROUP}         | ${{ securityGroup }}     | ${'securityGroup'}
-    ${'setInstanceType'}         | ${SET_INSTANCE_TYPE}          | ${{ instanceType }}      | ${'instance type'}
-    ${'setNodeCount'}            | ${SET_NODE_COUNT}             | ${{ nodeCount }}         | ${'node count'}
-    ${'setGitlabManagedCluster'} | ${SET_GITLAB_MANAGED_CLUSTER} | ${gitlabManagedCluster}  | ${'gitlab managed cluster'}
+    action                          | mutation                         | payload                    | payloadDescription
+    ${'setClusterName'}             | ${SET_CLUSTER_NAME}              | ${{ clusterName }}         | ${'cluster name'}
+    ${'setEnvironmentScope'}        | ${SET_ENVIRONMENT_SCOPE}         | ${{ environmentScope }}    | ${'environment scope'}
+    ${'setKubernetesVersion'}       | ${SET_KUBERNETES_VERSION}        | ${{ kubernetesVersion }}   | ${'kubernetes version'}
+    ${'setRole'}                    | ${SET_ROLE}                      | ${{ role }}                | ${'role'}
+    ${'setRegion'}                  | ${SET_REGION}                    | ${{ region }}              | ${'region'}
+    ${'setKeyPair'}                 | ${SET_KEY_PAIR}                  | ${{ keyPair }}             | ${'key pair'}
+    ${'setVpc'}                     | ${SET_VPC}                       | ${{ vpc }}                 | ${'vpc'}
+    ${'setSubnet'}                  | ${SET_SUBNET}                    | ${{ subnet }}              | ${'subnet'}
+    ${'setSecurityGroup'}           | ${SET_SECURITY_GROUP}            | ${{ securityGroup }}       | ${'securityGroup'}
+    ${'setInstanceType'}            | ${SET_INSTANCE_TYPE}             | ${{ instanceType }}        | ${'instance type'}
+    ${'setNodeCount'}               | ${SET_NODE_COUNT}                | ${{ nodeCount }}           | ${'node count'}
+    ${'setGitlabManagedCluster'}    | ${SET_GITLAB_MANAGED_CLUSTER}    | ${gitlabManagedCluster}    | ${'gitlab managed cluster'}
+    ${'setNamespacePerEnvironment'} | ${SET_NAMESPACE_PER_ENVIRONMENT} | ${namespacePerEnvironment} | ${'namespace per environment'}
   `(`$action commits $mutation with $payloadDescription payload`, data => {
     const { action, mutation, payload } = data;
 
@@ -105,12 +110,13 @@ describe('EKS Cluster Store Actions', () => {
       secretAccessKey: 'secret-key-id',
     };
 
-    describe('when request succeeds', () => {
+    describe('when request succeeds with default region', () => {
       beforeEach(() => {
         mock
           .onPost(state.createRolePath, {
             role_arn: payload.roleArn,
             role_external_id: payload.externalId,
+            region: DEFAULT_REGION,
           })
           .reply(201, response);
       });
@@ -121,7 +127,51 @@ describe('EKS Cluster Store Actions', () => {
           payload,
           state,
           [],
-          [{ type: 'requestCreateRole' }, { type: 'createRoleSuccess', payload: response }],
+          [
+            { type: 'requestCreateRole' },
+            {
+              type: 'createRoleSuccess',
+              payload: {
+                region: DEFAULT_REGION,
+                ...response,
+              },
+            },
+          ],
+        ));
+    });
+
+    describe('when request succeeds with custom region', () => {
+      const customRegion = 'custom-region';
+
+      beforeEach(() => {
+        mock
+          .onPost(state.createRolePath, {
+            role_arn: payload.roleArn,
+            role_external_id: payload.externalId,
+            region: customRegion,
+          })
+          .reply(201, response);
+      });
+
+      it('dispatches createRoleSuccess action', () =>
+        testAction(
+          actions.createRole,
+          {
+            selectedRegion: customRegion,
+            ...payload,
+          },
+          state,
+          [],
+          [
+            { type: 'requestCreateRole' },
+            {
+              type: 'createRoleSuccess',
+              payload: {
+                region: customRegion,
+                ...response,
+              },
+            },
+          ],
         ));
     });
 
@@ -134,6 +184,7 @@ describe('EKS Cluster Store Actions', () => {
           .onPost(state.createRolePath, {
             role_arn: payload.roleArn,
             role_external_id: payload.externalId,
+            region: DEFAULT_REGION,
           })
           .reply(400, error);
       });
@@ -156,8 +207,14 @@ describe('EKS Cluster Store Actions', () => {
   });
 
   describe('createRoleSuccess', () => {
-    it('commits createRoleSuccess mutation', () => {
-      testAction(actions.createRoleSuccess, null, state, [{ type: CREATE_ROLE_SUCCESS }]);
+    it('sets region and commits createRoleSuccess mutation', () => {
+      testAction(
+        actions.createRoleSuccess,
+        { region },
+        state,
+        [{ type: CREATE_ROLE_SUCCESS }],
+        [{ type: 'setRegion', payload: { region } }],
+      );
     });
   });
 
@@ -179,6 +236,7 @@ describe('EKS Cluster Store Actions', () => {
         name: clusterName,
         environment_scope: environmentScope,
         managed: gitlabManagedCluster,
+        namespace_per_environment: namespacePerEnvironment,
         provider_aws_attributes: {
           kubernetes_version: kubernetesVersion,
           region,
@@ -204,6 +262,7 @@ describe('EKS Cluster Store Actions', () => {
         selectedInstanceType: instanceType,
         nodeCount,
         gitlabManagedCluster,
+        namespacePerEnvironment,
       });
     });
 

@@ -52,13 +52,9 @@ export default {
 
 <template>
   <div ref="geoNodeFormSelectiveSyncContainer">
-    <h2 class="gl-font-size-h2 gl-my-5">{{ __('Selective synchronization') }}</h2>
+    <h2 class="gl-font-size-h2 gl-my-5">{{ __('Synchronization settings') }}</h2>
     <p class="gl-mb-5">
-      {{
-        __(
-          'Set what should be replicated by choosing specific projects or groups by the secondary node.',
-        )
-      }}
+      {{ __('Set what should be replicated by this secondary node.') }}
       <gl-link
         :href="$options.SELECTIVE_SYNC_MORE_INFO"
         target="_blank"
@@ -69,6 +65,7 @@ export default {
     <gl-form-group
       :label="__('Selective synchronization')"
       label-for="node-selective-synchronization-field"
+      :description="__('Choose specific groups or storage shards')"
     >
       <gl-form-select
         id="node-selective-synchronization-field"

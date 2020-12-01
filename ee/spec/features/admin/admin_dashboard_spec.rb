@@ -7,7 +7,9 @@ RSpec.describe 'Admin Dashboard' do
     let_it_be(:users_statistics) { create(:users_statistics) }
 
     before do
-      sign_in(create(:admin))
+      admin = create(:admin)
+      sign_in(admin)
+      gitlab_enable_admin_mode_sign_in(admin)
     end
 
     describe 'license' do
@@ -64,9 +66,9 @@ RSpec.describe 'Admin Dashboard' do
       expect(page).to have_content("Users with highest role Maintainer 6")
       expect(page).to have_content("Users with highest role Owner 5")
       expect(page).to have_content("Bots 2")
-      expect(page).to have_content("Active users (Billable users) 71")
       expect(page).to have_content("Blocked users 7")
       expect(page).to have_content("Total users 78")
+      expect(page).to have_content("Billable users 71")
     end
   end
 end

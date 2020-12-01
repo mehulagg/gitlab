@@ -8,7 +8,7 @@ RSpec.describe Mutations::DastSiteProfiles::Create do
   let(:user) { create(:user) }
   let(:full_path) { project.full_path }
   let(:profile_name) { SecureRandom.hex }
-  let(:target_url) { FFaker::Internet.uri(:https) }
+  let(:target_url) { generate(:url) }
   let(:dast_site_profile) { DastSiteProfile.find_by(project: project, name: profile_name) }
 
   subject(:mutation) { described_class.new(object: nil, context: { current_user: user }, field: nil) }
@@ -16,6 +16,8 @@ RSpec.describe Mutations::DastSiteProfiles::Create do
   before do
     stub_licensed_features(security_on_demand_scans: true)
   end
+
+  specify { expect(described_class).to require_graphql_authorizations(:create_on_demand_dast_scan) }
 
   describe '#resolve' do
     subject do
@@ -32,28 +34,6 @@ RSpec.describe Mutations::DastSiteProfiles::Create do
 
         it 'raises an exception' do
           expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
-        end
-      end
-
-      context 'when the user is not associated with the project' do
-        it 'raises an exception' do
-          expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
-        end
-      end
-
-      context 'when the user is an owner' do
-        it 'returns the dast_site_profile id' do
-          group.add_owner(user)
-
-          expect(subject[:id]).to eq(dast_site_profile.to_global_id)
-        end
-      end
-
-      context 'when the user is a maintainer' do
-        it 'returns the dast_site_profile id' do
-          project.add_maintainer(user)
-
-          expect(subject[:id]).to eq(dast_site_profile.to_global_id)
         end
       end
 
@@ -87,22 +67,6 @@ RSpec.describe Mutations::DastSiteProfiles::Create do
             )
 
             expect(response[:errors]).to include('Name has already been taken')
-          end
-        end
-
-        context 'when on demand scan feature is not enabled' do
-          it 'raises an exception' do
-            stub_feature_flags(security_on_demand_scans_feature_flag: false)
-
-            expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
-          end
-        end
-
-        context 'when on demand scan licensed feature is not available' do
-          it 'raises an exception' do
-            stub_licensed_features(security_on_demand_scans: false)
-
-            expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
           end
         end
       end

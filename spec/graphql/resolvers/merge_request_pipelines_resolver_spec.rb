@@ -14,6 +14,7 @@ RSpec.describe Resolvers::MergeRequestPipelinesResolver do
       sha: merge_request.diff_head_sha
     )
   end
+
   let_it_be(:other_project_pipeline) { create(:ci_pipeline, project: merge_request.source_project, ref: 'other-ref') }
   let_it_be(:other_pipeline) { create(:ci_pipeline) }
   let(:current_user) { create(:user) }
@@ -28,5 +29,12 @@ RSpec.describe Resolvers::MergeRequestPipelinesResolver do
 
   it 'resolves only MRs for the passed merge request' do
     expect(resolve_pipelines).to contain_exactly(pipeline)
+  end
+
+  describe 'with archived project' do
+    let(:archived_project) { create(:project, :archived) }
+    let(:merge_request) { create(:merge_request, source_project: archived_project) }
+
+    it { expect(resolve_pipelines).not_to contain_exactly(pipeline) }
   end
 end

@@ -83,19 +83,19 @@ RSpec.describe 'Query.project(fullPath).dastSiteProfile' do
       end
     end
 
-    context 'when on demand scan feature flag is disabled' do
-      it 'returns a null dast_site_profile' do
-        stub_feature_flags(security_on_demand_scans_feature_flag: false)
-
-        expect(dast_site_profile_response).to be_nil
-      end
-    end
-
     context 'when on demand scan licensed feature is not available' do
       it 'returns a null dast_site_profile' do
         stub_licensed_features(security_on_demand_scans: false)
 
         expect(dast_site_profile_response).to be_nil
+      end
+    end
+
+    context 'when there is no associated dast_site_validation' do
+      it 'returns a pending validation status' do
+        dast_site_profile.dast_site_validation.destroy!
+
+        expect(dast_site_profile_response['validationStatus']).to eq('PENDING_VALIDATION')
       end
     end
   end

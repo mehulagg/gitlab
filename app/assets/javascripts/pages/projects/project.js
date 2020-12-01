@@ -9,52 +9,22 @@ import axios from '~/lib/utils/axios_utils';
 import { deprecatedCreateFlash as flash } from '~/flash';
 import projectSelect from '../../project_select';
 import initDeprecatedJQueryDropdown from '~/deprecated_jquery_dropdown';
+import initClonePanel from '~/clone_panel';
 
 export default class Project {
   constructor() {
-    const $cloneOptions = $('ul.clone-options-dropdown');
-    const $projectCloneField = $('#project_clone');
-    const $cloneBtnLabel = $('.js-git-clone-holder .js-clone-dropdown-label');
-    const mobileCloneField = document.querySelector(
-      '.js-mobile-git-clone .js-clone-dropdown-label',
-    );
+    initClonePanel();
 
-    const selectedCloneOption = $cloneBtnLabel.text().trim();
-    if (selectedCloneOption.length > 0) {
-      $(`a:contains('${selectedCloneOption}')`, $cloneOptions).addClass('is-active');
+    // Ref switcher
+    if (document.querySelector('.js-project-refs-dropdown')) {
+      Project.initRefSwitcher();
+      $('.project-refs-select').on('change', function() {
+        return $(this)
+          .parents('form')
+          .trigger('submit');
+      });
     }
 
-    $('a', $cloneOptions).on('click', e => {
-      e.preventDefault();
-      const $this = $(e.currentTarget);
-      const url = $this.attr('href');
-      const cloneType = $this.data('cloneType');
-
-      $('.is-active', $cloneOptions).removeClass('is-active');
-      $(`a[data-clone-type="${cloneType}"]`).each(function() {
-        const $el = $(this);
-        const activeText = $el.find('.dropdown-menu-inner-title').text();
-        const $container = $el.closest('.project-clone-holder');
-        const $label = $container.find('.js-clone-dropdown-label');
-
-        $el.toggleClass('is-active');
-        $label.text(activeText);
-      });
-
-      if (mobileCloneField) {
-        mobileCloneField.dataset.clipboardText = url;
-      } else {
-        $projectCloneField.val(url);
-      }
-      $('.js-git-empty .js-clone').text(url);
-    });
-    // Ref switcher
-    Project.initRefSwitcher();
-    $('.project-refs-select').on('change', function() {
-      return $(this)
-        .parents('form')
-        .submit();
-    });
     $('.hide-no-ssh-message').on('click', function(e) {
       Cookies.set('hide_no_ssh_message', 'false');
       $(this)
@@ -78,6 +48,7 @@ export default class Project {
         .remove();
       return e.preventDefault();
     });
+
     Project.projectSelectDropdown();
   }
 
@@ -149,11 +120,32 @@ export default class Project {
         },
         clicked(options) {
           const { e } = options;
-          if (!shouldVisit) {
-            e.preventDefault();
+          e.preventDefault();
+
+          // Since this page does not reload when changing directories in a repo
+          // the rendered links do not have the path to the current directory.
+          // This updates the path based on the current url and then opens
+          // the the url with the updated path parameter.
+          if (shouldVisit) {
+            const selectedUrl = new URL(e.target.href);
+            const loc = window.location.href;
+
+            if (loc.includes('/-/')) {
+              const refs = this.fullData.Branches.concat(this.fullData.Tags);
+              const currentRef = refs.find(ref => loc.indexOf(ref) > -1);
+              if (currentRef) {
+                const targetPath = loc.split(currentRef)[1].slice(1);
+                selectedUrl.searchParams.set('path', targetPath);
+              }
+            }
+
+            // Open in new window if "meta" key is pressed
+            if (e.metaKey) {
+              window.open(selectedUrl.href, '_blank');
+            } else {
+              window.location.href = selectedUrl.href;
+            }
           }
-          /* The actual process is removed since `link.href` in `RenderRow` contains the full target.
-           * It makes the visitable link can be visited when opening on a new tab of browser */
         },
       });
     });

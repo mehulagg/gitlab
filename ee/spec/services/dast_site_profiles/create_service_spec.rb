@@ -6,7 +6,7 @@ RSpec.describe DastSiteProfiles::CreateService do
   let(:user) { create(:user) }
   let(:project) { create(:project, :repository, creator: user) }
   let(:name) { FFaker::Company.catch_phrase }
-  let(:target_url) { FFaker::Internet.uri(:http) }
+  let(:target_url) { generate(:url) }
 
   before do
     stub_licensed_features(security_on_demand_scans: true)
@@ -74,20 +74,6 @@ RSpec.describe DastSiteProfiles::CreateService do
 
         it 'populates errors' do
           expect(errors).to include('Url is blocked: Requests to localhost are not allowed')
-        end
-      end
-
-      context 'when on demand scan feature is disabled' do
-        before do
-          stub_feature_flags(security_on_demand_scans_feature_flag: false)
-        end
-
-        it 'returns an error status' do
-          expect(status).to eq(:error)
-        end
-
-        it 'populates message' do
-          expect(message).to eq('Insufficient permissions')
         end
       end
 

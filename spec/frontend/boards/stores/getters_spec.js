@@ -1,14 +1,22 @@
 import getters from '~/boards/stores/getters';
 import { inactiveId } from '~/boards/constants';
+import {
+  mockIssue,
+  mockIssue2,
+  mockIssues,
+  mockIssuesByListId,
+  issues,
+  mockListsWithModel,
+} from '../mock_data';
 
 describe('Boards - Getters', () => {
-  describe('getLabelToggleState', () => {
+  describe('labelToggleState', () => {
     it('should return "on" when isShowingLabels is true', () => {
       const state = {
         isShowingLabels: true,
       };
 
-      expect(getters.getLabelToggleState(state)).toBe('on');
+      expect(getters.labelToggleState(state)).toBe('on');
     });
 
     it('should return "off" when isShowingLabels is false', () => {
@@ -16,7 +24,7 @@ describe('Boards - Getters', () => {
         isShowingLabels: false,
       };
 
-      expect(getters.getLabelToggleState(state)).toBe('off');
+      expect(getters.labelToggleState(state)).toBe('off');
     });
   });
 
@@ -43,52 +51,8 @@ describe('Boards - Getters', () => {
       window.gon = { features: {} };
     });
 
-    describe('when boardsWithSwimlanes is true', () => {
-      beforeEach(() => {
-        window.gon = { features: { boardsWithSwimlanes: true } };
-      });
-
-      describe('when isShowingEpicsSwimlanes is true', () => {
-        it('returns true', () => {
-          const state = {
-            isShowingEpicsSwimlanes: true,
-          };
-
-          expect(getters.isSwimlanesOn(state)).toBe(true);
-        });
-      });
-
-      describe('when isShowingEpicsSwimlanes is false', () => {
-        it('returns false', () => {
-          const state = {
-            isShowingEpicsSwimlanes: false,
-          };
-
-          expect(getters.isSwimlanesOn(state)).toBe(false);
-        });
-      });
-    });
-
-    describe('when boardsWithSwimlanes is false', () => {
-      describe('when isShowingEpicsSwimlanes is true', () => {
-        it('returns false', () => {
-          const state = {
-            isShowingEpicsSwimlanes: true,
-          };
-
-          expect(getters.isSwimlanesOn(state)).toBe(false);
-        });
-      });
-
-      describe('when isShowingEpicsSwimlanes is false', () => {
-        it('returns false', () => {
-          const state = {
-            isShowingEpicsSwimlanes: false,
-          };
-
-          expect(getters.isSwimlanesOn(state)).toBe(false);
-        });
-      });
+    it('returns false', () => {
+      expect(getters.isSwimlanesOn()).toBe(false);
     });
   });
 
@@ -104,7 +68,7 @@ describe('Boards - Getters', () => {
     });
   });
 
-  describe('getActiveIssue', () => {
+  describe('activeIssue', () => {
     it.each`
       id     | expected
       ${'1'} | ${'issue'}
@@ -112,7 +76,58 @@ describe('Boards - Getters', () => {
     `('returns $expected when $id is passed to state', ({ id, expected }) => {
       const state = { issues: { '1': 'issue' }, activeId: id };
 
-      expect(getters.getActiveIssue(state)).toEqual(expected);
+      expect(getters.activeIssue(state)).toEqual(expected);
+    });
+  });
+
+  describe('projectPathByIssueId', () => {
+    it('returns project path for the active issue', () => {
+      const mockActiveIssue = {
+        referencePath: 'gitlab-org/gitlab-test#1',
+      };
+      expect(getters.projectPathForActiveIssue({}, { activeIssue: mockActiveIssue })).toEqual(
+        'gitlab-org/gitlab-test',
+      );
+    });
+
+    it('returns empty string as project when active issue is an empty object', () => {
+      const mockActiveIssue = {};
+      expect(getters.projectPathForActiveIssue({}, { activeIssue: mockActiveIssue })).toEqual('');
+    });
+  });
+
+  describe('getIssuesByList', () => {
+    const boardsState = {
+      issuesByListId: mockIssuesByListId,
+      issues,
+    };
+    it('returns issues for a given listId', () => {
+      const getIssueById = issueId => [mockIssue, mockIssue2].find(({ id }) => id === issueId);
+
+      expect(getters.getIssuesByList(boardsState, { getIssueById })('gid://gitlab/List/2')).toEqual(
+        mockIssues,
+      );
+    });
+  });
+
+  const boardsState = {
+    boardLists: {
+      'gid://gitlab/List/1': mockListsWithModel[0],
+      'gid://gitlab/List/2': mockListsWithModel[1],
+    },
+  };
+
+  describe('getListByLabelId', () => {
+    it('returns list for a given label id', () => {
+      expect(getters.getListByLabelId(boardsState)('gid://gitlab/GroupLabel/121')).toEqual(
+        mockListsWithModel[1],
+      );
+    });
+  });
+
+  describe('getListByTitle', () => {
+    it('returns list for a given list title', () => {
+      expect(getters.getListByTitle(boardsState)('To Do')).toEqual(mockListsWithModel[1]);
     });
   });
 });

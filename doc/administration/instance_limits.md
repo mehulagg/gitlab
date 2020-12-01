@@ -1,4 +1,7 @@
 ---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference
 ---
 
@@ -162,21 +165,20 @@ There is a limit when embedding metrics in GFM for performance reasons.
 
 On GitLab.com, the [maximum number of webhooks and their size](../user/gitlab_com/index.md#webhooks) per project, and per group, is limited.
 
-To set this limit on a self-managed installation, run the following in the
-[GitLab Rails console](troubleshooting/debug.md#starting-a-rails-console-session):
+To set this limit on a self-managed installation, where the default is `100` project webhooks and `50` group webhooks, run the following in the
+[GitLab Rails console](operations/rails_console.md#starting-a-rails-console-session):
 
 ```ruby
 # If limits don't exist for the default plan, you can create one with:
 # Plan.default.create_limits!
 
 # For project webhooks
-Plan.default.actual_limits.update!(project_hooks: 100)
+Plan.default.actual_limits.update!(project_hooks: 200)
 
 # For group webhooks
 Plan.default.actual_limits.update!(group_hooks: 100)
 ```
 
-NOTE: **Note:**
 Set the limit to `0` to disable it.
 
 ## Incoming emails from auto-responders
@@ -203,7 +205,7 @@ support keyset-based pagination. More information about pagination options can b
 found in the [API docs section on pagination](../api/README.md#pagination).
 
 To set this limit on a self-managed installation, run the following in the
-[GitLab Rails console](troubleshooting/debug.md#starting-a-rails-console-session):
+[GitLab Rails console](operations/rails_console.md#starting-a-rails-console-session):
 
 ```ruby
 # If limits don't exist for the default plan, you can create one with:
@@ -214,7 +216,6 @@ Plan.default.actual_limits.update!(offset_pagination_limit: 10000)
 
 - **Default offset pagination limit:** 50000
 
-NOTE: **Note:**
 Set the limit to `0` to disable it.
 
 ## CI/CD limits
@@ -234,11 +235,11 @@ If a new pipeline would cause the total number of jobs to exceed the limit, the 
 will fail with a `job_activity_limit_exceeded` error.
 
 - On GitLab.com different [limits are defined per plan](../user/gitlab_com/index.md#gitlab-cicd) and they affect all projects under that plan.
-- On [GitLab Starter](https://about.gitlab.com/pricing/#self-managed) tier or higher self-managed installations, this limit is defined for the `default` plan that affects all projects.
-  This limit is disabled by default.
+- On [GitLab Starter](https://about.gitlab.com/pricing/#self-managed) tier or higher self-managed installations, this limit is defined under a `default` plan that affects all projects.
+  This limit is disabled (`0`) by default.
 
 To set this limit on a self-managed installation, run the following in the
-[GitLab Rails console](troubleshooting/debug.md#starting-a-rails-console-session):
+[GitLab Rails console](operations/rails_console.md#starting-a-rails-console-session):
 
 ```ruby
 # If limits don't exist for the default plan, you can create one with:
@@ -247,7 +248,29 @@ To set this limit on a self-managed installation, run the following in the
 Plan.default.actual_limits.update!(ci_active_jobs: 500)
 ```
 
-NOTE: **Note:**
+Set the limit to `0` to disable it.
+
+### Maximum number of deployment jobs in a pipeline
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/46931) in GitLab 13.7.
+
+You can limit the maximum number of deployment jobs in a pipeline. A deployment is
+any job with an [`environment`](../ci/environments/index.md) specified. The number
+of deployments in a pipeline is checked at pipeline creation. Pipelines that have
+too many deployments fail with a `deployments_limit_exceeded` error.
+
+The default limit is 500 for all [self-managed and GitLab.com plans](https://about.gitlab.com/pricing/).
+
+To change the limit on a self-managed installation, change the `default` plan's limit with the following
+[GitLab Rails console](operations/rails_console.md#starting-a-rails-console-session) command:
+
+```ruby
+# If limits don't exist for the default plan, you can create one with:
+# Plan.default.create_limits!
+
+Plan.default.actual_limits.update!(ci_pipeline_deployments: 500)
+```
+
 Set the limit to `0` to disable it.
 
 ### Number of CI/CD subscriptions to a project
@@ -261,16 +284,15 @@ If a new subscription would cause the total number of subscription to exceed the
 limit, the subscription will be considered invalid.
 
 - On GitLab.com different [limits are defined per plan](../user/gitlab_com/index.md#gitlab-cicd) and they affect all projects under that plan.
-- On [GitLab Starter](https://about.gitlab.com/pricing/#self-managed) tier or higher self-managed installations, this limit is defined for the `default` plan that affects all projects.
+- On [GitLab Starter](https://about.gitlab.com/pricing/#self-managed) tier or higher self-managed installations, this limit is defined under a `default` plan that affects all projects. By default, there is a limit of `2` subscriptions.
 
 To set this limit on a self-managed installation, run the following in the
-[GitLab Rails console](troubleshooting/debug.md#starting-a-rails-console-session):
+[GitLab Rails console](operations/rails_console.md#starting-a-rails-console-session):
 
 ```ruby
 Plan.default.actual_limits.update!(ci_project_subscriptions: 500)
 ```
 
-NOTE: **Note:**
 Set the limit to `0` to disable it.
 
 ### Number of pipeline schedules
@@ -286,11 +308,11 @@ On GitLab.com, different limits are [defined per plan](../user/gitlab_com/index.
 and they affect all projects under that plan.
 
 On self-managed instances ([GitLab Starter](https://about.gitlab.com/pricing/#self-managed)
-or higher tiers), this limit is defined for the `default` plan that affects all
-projects. By default, there is no limit.
+or higher tiers), this limit is defined under a `default` plan that affects all
+projects. By default, there is a limit of `10` pipeline schedules.
 
 To set this limit on a self-managed installation, run the following in the
-[GitLab Rails console](troubleshooting/debug.md#starting-a-rails-console-session):
+[GitLab Rails console](operations/rails_console.md#starting-a-rails-console-session):
 
 ```ruby
 Plan.default.actual_limits.update!(ci_pipeline_schedules: 100)
@@ -308,7 +330,7 @@ On self-managed instances this limit is defined for the `default` plan. By defau
 this limit is set to `25`.
 
 To update this limit to a new value on a self-managed installation, run the following in the
-[GitLab Rails console](troubleshooting/debug.md#starting-a-rails-console-session):
+[GitLab Rails console](operations/rails_console.md#starting-a-rails-console-session):
 
 ```ruby
 Plan.default.actual_limits.update!(ci_instance_level_variables: 30)
@@ -319,7 +341,7 @@ Plan.default.actual_limits.update!(ci_instance_level_variables: 30)
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/37226) in GitLab 13.3.
 
 Job artifacts defined with [`artifacts:reports`](../ci/pipelines/job_artifacts.md#artifactsreports)
-that are uploaded by the Runner are rejected if the file size exceeds the maximum
+that are uploaded by the runner are rejected if the file size exceeds the maximum
 file size limit. The limit is determined by comparing the project's
 [maximum artifact size setting](../user/admin_area/settings/continuous_integration.md#maximum-artifacts-size)
 with the instance limit for the given artifact type, and choosing the smaller value.
@@ -333,6 +355,7 @@ setting is used:
 | Artifact limit name                         | Default value |
 |---------------------------------------------|---------------|
 | `ci_max_artifact_size_accessibility`        | 0             |
+| `ci_max_artifact_size_api_fuzzing`          | 0             |
 | `ci_max_artifact_size_archive`              | 0             |
 | `ci_max_artifact_size_browser_performance`  | 0             |
 | `ci_max_artifact_size_cluster_applications` | 0             |
@@ -347,7 +370,7 @@ setting is used:
 | `ci_max_artifact_size_license_management`   | 0             |
 | `ci_max_artifact_size_license_scanning`     | 0             |
 | `ci_max_artifact_size_load_performance`     | 0             |
-| `ci_max_artifact_size_lsif`                 | 20 MB ([introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/37226) in GitLab 13.3) |
+| `ci_max_artifact_size_lsif`                 | 100 MB ([Introduced at 20 MB](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/37226) in GitLab 13.3 and [raised to 100 MB](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/46980) in GitLab 13.6.) |
 | `ci_max_artifact_size_metadata`             | 0             |
 | `ci_max_artifact_size_metrics_referee`      | 0             |
 | `ci_max_artifact_size_metrics`              | 0             |
@@ -360,7 +383,7 @@ setting is used:
 | `ci_max_artifact_size_trace`                | 0             |
 
 For example, to set the `ci_max_artifact_size_junit` limit to 10MB on a self-managed
-installation, run the following in the [GitLab Rails console](troubleshooting/debug.md#starting-a-rails-console-session):
+installation, run the following in the [GitLab Rails console](operations/rails_console.md#starting-a-rails-console-session):
 
 ```ruby
 Plan.default.actual_limits.update!(ci_max_artifact_size_junit: 10)
@@ -458,11 +481,10 @@ Setting a limit helps reduce the memory usage of the indexing processes as well
 as the overall index size. This value defaults to `1024 KiB` (1 MiB) as any
 text files larger than this likely aren't meant to be read by humans.
 
-NOTE: **Note:**
-You must set a limit, as an unlimited file size is not supported. Setting this
-value to be greater than the amount of memory on GitLab's Sidekiq nodes will
-lead to GitLab's Sidekiq nodes running out of memory as they will pre-allocate
-this amount of memory during indexing.
+You must set a limit, as unlimited file sizes aren't supported. Setting this
+value to be greater than the amount of memory on GitLab's Sidekiq nodes causes
+GitLab's Sidekiq nodes to run out of memory, as they will pre-allocate this
+amount of memory during indexing.
 
 ### Maximum field length
 
@@ -480,9 +502,8 @@ indexed](#maximum-file-size-indexed)).
 - For self-managed installations it is unlimited by default
 
 This limit can be configured for self-managed installations when [enabling
-Elasticsearch](../integration/elasticsearch.md#enabling-elasticsearch).
+Elasticsearch](../integration/elasticsearch.md#enabling-advanced-search).
 
-NOTE: **Note:**
 Set the limit to `0` to disable it.
 
 ## Wiki limits
@@ -527,13 +548,17 @@ More information can be found in the [Push event activities limit and bulk push 
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/218017) in GitLab 13.4.
 
-On GitLab.com, the maximum file size for a package that's uploaded to the [GitLab Package Registry](../user/packages/package_registry/index.md)
-is 5 gigabytes.
+On GitLab.com, the maximum file size for a package that's uploaded to the [GitLab Package Registry](../user/packages/package_registry/index.md) varies by format:
 
-Limits are set per package type.
+- Conan: 3GB
+- Generic: 5GB
+- Maven: 3GB
+- NPM: 500MB
+- NuGet: 500MB
+- PyPI: 3GB
 
 To set this limit on a self-managed installation, run the following in the
-[GitLab Rails console](troubleshooting/debug.md#starting-a-rails-console-session):
+[GitLab Rails console](operations/rails_console.md#starting-a-rails-console-session):
 
 ```ruby
 # File size limit is stored in bytes
@@ -552,6 +577,12 @@ Plan.default.actual_limits.update!(maven_max_file_size: 100.megabytes)
 
 # For PyPI Packages
 Plan.default.actual_limits.update!(pypi_max_file_size: 100.megabytes)
+
+# For Debian Packages
+Plan.default.actual_limits.update!(debian_max_file_size: 100.megabytes)
+
+# For Generic Packages
+Plan.default.actual_limits.update!(generic_packages_max_file_size: 100.megabytes)
 ```
 
 Set the limit to `0` to allow any file size.

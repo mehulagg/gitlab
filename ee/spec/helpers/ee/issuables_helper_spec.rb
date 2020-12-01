@@ -15,10 +15,6 @@ RSpec.describe IssuablesHelper do
     context 'for an epic' do
       let_it_be(:epic) { create(:epic, author: user, description: 'epic text', confidential: true) }
 
-      before do
-        stub_feature_flags(confidential_epics: true)
-      end
-
       it 'returns the correct data' do
         @group = epic.group
 
@@ -31,7 +27,6 @@ RSpec.describe IssuablesHelper do
           canDestroy: true,
           canAdmin: true,
           issuableRef: "&#{epic.iid}",
-          issuableStatus: "opened",
           markdownPreviewPath: "/groups/#{@group.full_path}/preview_markdown",
           markdownDocsPath: '/help/user/markdown',
           issuableTemplateNamesPath: '',

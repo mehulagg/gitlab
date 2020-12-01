@@ -6,7 +6,10 @@ RSpec.describe Ci::RunDastScanService do
   let(:user) { create(:user) }
   let(:project) { create(:project, :repository, creator: user) }
   let(:branch) { project.default_branch }
-  let(:target_url) { FFaker::Internet.uri(:http) }
+  let(:target_url) { generate(:url) }
+  let(:use_ajax_spider) { true }
+  let(:show_debug_messages) { false }
+  let(:full_scan_enabled) { true }
 
   before do
     stub_licensed_features(security_on_demand_scans: true)
@@ -21,13 +24,18 @@ RSpec.describe Ci::RunDastScanService do
       expect(described_class.ci_template['stages']).to eq(['dast'])
     end
 
-    it 'has has no rules' do
-      expect(described_class.ci_template['dast']['rules']).to be_nil
+    it 'has one rule is always true' do
+      rules = described_class.ci_template['dast']['rules']
+
+      aggregate_failures do
+        expect(rules.size).to eq(1)
+        expect(rules).to include('when' => 'always')
+      end
     end
   end
 
   describe '#execute' do
-    subject { described_class.new(project, user).execute(branch: branch, target_url: target_url, spider_timeout: 42, target_timeout: 21) }
+    subject { described_class.new(project, user).execute(branch: branch, target_url: target_url, spider_timeout: 42, target_timeout: 21, use_ajax_spider: use_ajax_spider, show_debug_messages: show_debug_messages, full_scan_enabled: full_scan_enabled) }
 
     let(:status) { subject.status }
     let(:pipeline) { subject.payload }
@@ -126,6 +134,18 @@ RSpec.describe Ci::RunDastScanService do
             'value' => '21',
             'public' => true
           }, {
+            'key' => "DAST_USE_AJAX_SPIDER",
+            'public' => true,
+            'value' => 'true'
+          }, {
+            'key' => "DAST_DEBUG",
+            'public' => true,
+            'value' => 'false'
+          }, {
+            'key' => "DAST_FULL_SCAN_ENABLED",
+            'public' => true,
+            'value' => 'true'
+          }, {
             'key' => 'GIT_STRATEGY',
             'value' => 'none',
             'public' => true
@@ -153,20 +173,6 @@ RSpec.describe Ci::RunDastScanService do
 
         it 'populates message' do
           expect(message).to eq(full_error_messages)
-        end
-      end
-
-      context 'when on demand scan feature is disabled' do
-        before do
-          stub_feature_flags(security_on_demand_scans_feature_flag: false)
-        end
-
-        it 'returns an error status' do
-          expect(status).to eq(:error)
-        end
-
-        it 'populates message' do
-          expect(message).to eq('Insufficient permissions')
         end
       end
 

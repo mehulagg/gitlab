@@ -1,78 +1,45 @@
-import getFrontMatterLanguageDefinition from './parse_source_file_language_support';
+import { frontMatterify, stringify } from './front_matterify';
 
-const parseSourceFile = (raw, options = { frontMatterLanguage: 'yaml' }) => {
-  const { open, close } = getFrontMatterLanguageDefinition(options.frontMatterLanguage);
-  const anyChar = '[\\s\\S]';
-  const frontMatterBlock = `^${open}$${anyChar}*?^${close}$`;
-  const frontMatterRegex = new RegExp(`${frontMatterBlock}`, 'm');
-  const preGroupedRegex = new RegExp(`(${anyChar}*?)(${frontMatterBlock})(\\s*)(${anyChar}*)`, 'm'); // preFrontMatter, frontMatter, spacing, and content
-  let initial;
+const parseSourceFile = raw => {
   let editable;
 
-  const hasFrontMatter = source => frontMatterRegex.test(source);
-
-  const buildPayload = (source, header, spacing, body) => {
-    return { raw: source, header, spacing, body };
-  };
-
-  const parse = source => {
-    if (hasFrontMatter(source)) {
-      const match = source.match(preGroupedRegex);
-      const [, preFrontMatter, frontMatter, spacing, content] = match;
-      const header = preFrontMatter + frontMatter;
-
-      return buildPayload(source, header, spacing, content);
+  const syncContent = (newVal, isBody) => {
+    if (isBody) {
+      editable.content = newVal;
+    } else {
+      try {
+        editable = frontMatterify(newVal);
+        editable.isMatterValid = true;
+      } catch (e) {
+        editable.isMatterValid = false;
+      }
     }
-
-    return buildPayload(source, '', '', source);
   };
 
-  const syncEditable = () => {
-    /*
-    We re-parse as markdown editing could have added non-body changes (preFrontMatter, frontMatter, or spacing).
-    Re-parsing additionally gets us the desired body that was extracted from the potentially mutated editable.raw
-    */
-    editable = parse(editable.raw);
+  const content = (isBody = false) => (isBody ? editable.content : stringify(editable));
+
+  const matter = () => editable.matter;
+
+  const syncMatter = settings => {
+    editable.matter = settings;
   };
 
-  const refreshEditableRaw = () => {
-    editable.raw = `${editable.header}${editable.spacing}${editable.body}`;
-  };
+  const isModified = () => stringify(editable) !== raw;
 
-  const sync = (newVal, isBodyToRaw) => {
-    const editableKey = isBodyToRaw ? 'body' : 'raw';
-    editable[editableKey] = newVal;
+  const hasMatter = () => editable.hasMatter;
 
-    if (isBodyToRaw) {
-      refreshEditableRaw();
-    }
+  const isMatterValid = () => editable.isMatterValid;
 
-    syncEditable();
-  };
-
-  const frontMatter = () => editable.header;
-
-  const setFrontMatter = val => {
-    editable.header = val;
-    refreshEditableRaw();
-  };
-
-  const content = (isBody = false) => {
-    const editableKey = isBody ? 'body' : 'raw';
-    return editable[editableKey];
-  };
-
-  const isModified = () => initial.raw !== editable.raw;
-
-  initial = parse(raw);
-  editable = parse(raw);
+  syncContent(raw);
 
   return {
-    frontMatter,
-    setFrontMatter,
+    matter,
+    isMatterValid,
+    syncMatter,
     content,
+    syncContent,
     isModified,
-    sync,
+    hasMatter,
   };
 };
 

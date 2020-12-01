@@ -4,6 +4,11 @@ class EnvironmentEntity < Grape::Entity
   include RequestAwareEntity
 
   expose :id
+
+  expose :global_id do |environment|
+    environment.to_global_id.to_s
+  end
+
   expose :name
   expose :state
   expose :external_url
@@ -71,8 +76,6 @@ class EnvironmentEntity < Grape::Entity
     can?(current_user, :destroy_environment, environment)
   end
 
-  expose :has_opened_alert?, if: -> (*) { can_read_alert_management_alert? }, expose_nil: false, as: :has_opened_alert
-
   private
 
   alias_method :environment, :object
@@ -91,10 +94,6 @@ class EnvironmentEntity < Grape::Entity
 
   def can_read_pod_logs?
     can?(current_user, :read_pod_logs, environment.project)
-  end
-
-  def can_read_alert_management_alert?
-    can?(current_user, :read_alert_management_alert, environment.project)
   end
 
   def cluster_platform_kubernetes?

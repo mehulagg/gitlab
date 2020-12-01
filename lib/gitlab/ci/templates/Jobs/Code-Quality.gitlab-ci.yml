@@ -7,18 +7,24 @@ code_quality:
   variables:
     DOCKER_DRIVER: overlay2
     DOCKER_TLS_CERTDIR: ""
-    CODE_QUALITY_IMAGE: "registry.gitlab.com/gitlab-org/ci-cd/codequality:0.85.10-gitlab.1"
+    CODE_QUALITY_IMAGE: "registry.gitlab.com/gitlab-org/ci-cd/codequality:0.85.18"
   needs: []
-  before_script:
-    - source lib/gitlab/ci/templates/utils/env.sh
-    - export SOURCE_CODE=$PWD
   script:
+    - export SOURCE_CODE=$PWD
     - |
       if ! docker info &>/dev/null; then
         if [ -z "$DOCKER_HOST" -a "$KUBERNETES_PORT" ]; then
           export DOCKER_HOST='tcp://localhost:2375'
         fi
       fi
+    - | # this is required to avoid undesirable reset of Docker image ENV variables being set on build stage
+      function propagate_env_vars() {
+        CURRENT_ENV=$(printenv)
+
+        for VAR_NAME; do
+          echo $CURRENT_ENV | grep "${VAR_NAME}=" > /dev/null && echo "--env $VAR_NAME "
+        done
+      }
     - docker pull --quiet "$CODE_QUALITY_IMAGE"
     - |
       docker run \
@@ -28,6 +34,7 @@ code_quality:
           CODECLIMATE_DEBUG \
           CODECLIMATE_DEV \
           REPORT_STDOUT \
+          REPORT_FORMAT \
           ENGINE_MEMORY_LIMIT_BYTES \
         ) \
         --volume "$PWD":/code \

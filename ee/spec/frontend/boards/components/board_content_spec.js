@@ -11,13 +11,13 @@ describe('ee/BoardContent', () => {
   const createComponent = () => {
     wrapper = shallowMount(BoardContent, {
       store,
+      provide: {
+        timeTrackingLimitToHours: false,
+      },
       propsData: {
         lists: [],
         canAdminList: false,
         disabled: false,
-        issueLinkBase: '',
-        rootPath: '',
-        boardId: '',
       },
       stubs: {
         'board-content-sidebar': BoardContentSidebar,
@@ -42,7 +42,7 @@ describe('ee/BoardContent', () => {
     ${false}    | ${{ isShowingEpicsSwimlanes: false }} | ${false}
   `('with featureFlag=$featureFlag and state=$state', ({ featureFlag, state, result }) => {
     beforeEach(() => {
-      gon.features.boardsWithSwimlanes = featureFlag;
+      gon.features.swimlanes = featureFlag;
       Object.assign(store.state, state);
       createComponent();
     });

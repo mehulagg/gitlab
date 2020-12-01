@@ -3,9 +3,12 @@
 exports[`Contribution Analytics Column Chart matches the snapshot 1`] = `
 <div>
   <gl-column-chart-stub
-    data="[object Object]"
+    bars="[object Object]"
     height="350"
+    lines=""
     option="[object Object]"
+    secondarydata=""
+    secondarydatatitle=""
     width="0"
     xaxistitle="Username"
     xaxistype="category"

@@ -1,7 +1,7 @@
 ---
 stage: Create
 group: Source Code
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 type: reference
 ---
 
@@ -35,7 +35,9 @@ code_navigation:
       lsif: dump.lsif
 ```
 
-The generated LSIF file must be less than 170MiB.
+The generated LSIF file size may be limited by
+the [artifact application limits (`ci_max_artifact_size_lsif`)](../../administration/instance_limits.md#maximum-file-size-per-type-of-artifact),
+default to 100MB (configurable by an instance administrator).
 
 After the job succeeds, code intelligence data can be viewed while browsing the code:
 
@@ -58,9 +60,9 @@ relevant language.
 
 | Language | Implementation |
 |---|---|
-| Go | [sourcegraph/lsif-go](https://github.com/sourcegraph/lsif-go) |
-| JavaScript | [sourcegraph/lsif-node](https://github.com/sourcegraph/lsif-node) |
-| TypeScript | [sourcegraph/lsif-node](https://github.com/sourcegraph/lsif-node) |
+| Go | [`sourcegraph/lsif-go`](https://github.com/sourcegraph/lsif-go) |
+| JavaScript | [`sourcegraph/lsif-node`](https://github.com/sourcegraph/lsif-node) |
+| TypeScript | [`sourcegraph/lsif-node`](https://github.com/sourcegraph/lsif-node) |
 
 View a complete list of [available LSIF indexers](https://lsif.dev/#implementations-server) on their website and
 refer to their documentation to see how to generate an LSIF file for your specific language.

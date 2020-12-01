@@ -1,24 +1,22 @@
 ---
-stage: Create
-group: Source Code
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+stage: Manage
+group: Access
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 type: reference, howto
 ---
 
-# Project access tokens **(CORE ONLY)**
+# Project access tokens
+
+NOTE: **Note:**
+Project access tokens are supported for self-managed instances on Core and above. They are also supported on GitLab.com Bronze and above.
 
 > - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/2587) in GitLab 13.0.
 > - It was [deployed](https://gitlab.com/groups/gitlab-org/-/epics/2587) behind a feature flag, disabled by default.
 > - [Became enabled by default](https://gitlab.com/gitlab-org/gitlab/-/issues/218722) in GitLab 13.3.
-> - It's disabled on GitLab.com.
-> - It can be enabled or disabled by project.
+> - [Became available on GitLab.com](https://gitlab.com/gitlab-org/gitlab/-/issues/235765) in 13.5.
 > - It's recommended for production use.
-> - For GitLab self-managed instances, GitLab administrators can [disable it](#enable-or-disable-project-access-tokens).
 
-Project access tokens are scoped to a project and can be used to authenticate with the [GitLab API](../../../api/README.md#personalproject-access-tokens).
-
-<!-- Commented out until https://gitlab.com/gitlab-org/gitlab/-/issues/219551 is fixed -->
-<!-- You can also use project access tokens with Git to authenticate over HTTP or SSH. -->
+Project access tokens are scoped to a project and can be used to authenticate with the [GitLab API](../../../api/README.md#personalproject-access-tokens). You can also use project access tokens with Git to authenticate over HTTP.
 
 Project access tokens expire on the date you define, at midnight UTC.
 
@@ -43,19 +41,20 @@ For each project access token created, a bot user will also be created and added
 For the bot:
 
 - The name is set to the name of the token.
-- The username is set to `project_{project_id}_bot`, such as `project_123_bot`.
+- The username is set to `project_{project_id}_bot` for the first access token, such as `project_123_bot`.
+- The username is set to `project_{project_id}_bot{bot_count}` for further access tokens, such as `project_123_bot1`.
 
 API calls made with a project access token are associated with the corresponding bot user.
 
 These users will appear in **Members** but can not be modified.
 Furthermore, the bot user can not be added to any other project.
 
-When the project access token is [revoked](#revoking-a-project-access-token) the bot user will be deleted and all
-records will be moved to a system-wide user with the username "Ghost User". For more information,
-see [Associated Records](../../profile/account/delete_account.md#associated-records).
+- The username is set to `project_{project_id}_bot` for the first access token, such as `project_123_bot`.
+- The username is set to `project_{project_id}_bot{bot_count}` for further access tokens, such as `project_123_bot1`.
 
-Project bot users are a [GitLab-created service account](../../../subscriptions/index.md#self-managed), but count as a licensed seat.
-These users will not count against your licensed seat in the future when [this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/223695) is resolved.
+When the project access token is [revoked](#revoking-a-project-access-token) the bot user is then deleted and all records are moved to a system-wide user with the username "Ghost User". For more information, see [Associated Records](../../profile/account/delete_account.md#associated-records).
+
+Project bot users are [GitLab-created service accounts](../../../subscriptions/self_managed/index.md#billable-users) and do not count as licensed seats.
 
 ## Revoking a project access token
 
@@ -76,33 +75,3 @@ the following table.
 | `write_registry`   | Allows write-access (push) to [container registry](../../packages/container_registry/index.md). |
 | `read_repository`  | Allows read-only access (pull) to the repository. |
 | `write_repository` | Allows read-write access (pull, push) to the repository. |
-
-### Enable or disable project access tokens
-
-Project access tokens are deployed behind a feature flag that is **enabled by default**.
-[GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
-can disable it for your instance, globally or by project.
-
-To disable it globally:
-
-```ruby
-Feature.disable(:resource_access_token)
-```
-
-To disable it for a specific project:
-
-```ruby
-Feature.disable(:resource_access_token, project)
-```
-
-To enable it globally:
-
-```ruby
-Feature.enable(:resource_access_token)
-```
-
-To enable it for a specific project:
-
-```ruby
-Feature.enable(:resource_access_token, project)
-```

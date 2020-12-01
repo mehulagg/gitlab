@@ -6,11 +6,6 @@ module EE
       extend ActiveSupport::Concern
       extend ::Gitlab::Utils::Override
 
-      EE_FAILURE_REASONS = {
-        activity_limit_exceeded: 20,
-        size_limit_exceeded: 21
-      }.freeze
-
       prepended do
         include UsageStatistics
 
@@ -23,6 +18,7 @@ module EE
         # Subscriptions to this pipeline
         has_many :downstream_bridges, class_name: '::Ci::Bridge', foreign_key: :upstream_pipeline_id
         has_many :security_scans, class_name: 'Security::Scan', through: :builds
+        has_many :security_findings, class_name: 'Security::Finding', through: :security_scans, source: :findings
 
         has_one :source_project, class_name: 'Ci::Sources::Project', foreign_key: :pipeline_id
 
@@ -51,7 +47,8 @@ module EE
           license_scanning: %i[license_scanning],
           metrics: %i[metrics_reports],
           requirements: %i[requirements],
-          coverage_fuzzing: %i[coverage_fuzzing]
+          coverage_fuzzing: %i[coverage_fuzzing],
+          api_fuzzing: %i[api_fuzzing]
         }.freeze
 
         state_machine :status do
@@ -60,6 +57,7 @@ module EE
 
             pipeline.run_after_commit do
               StoreSecurityReportsWorker.perform_async(pipeline.id) if pipeline.default_branch?
+              ::Security::StoreScansWorker.perform_async(pipeline.id)
               SyncSecurityReportsToReportApprovalRulesWorker.perform_async(pipeline.id)
             end
           end
@@ -105,7 +103,7 @@ module EE
         reports_scope = report_types.empty? ? ::Ci::JobArtifact.security_reports : ::Ci::JobArtifact.security_reports(file_types: report_types)
 
         ::Gitlab::Ci::Reports::Security::Reports.new(self).tap do |security_reports|
-          builds.latest.with_reports(reports_scope).each do |build|
+          latest_report_builds(reports_scope).each do |build|
             build.collect_security_reports!(security_reports)
           end
         end
@@ -113,7 +111,7 @@ module EE
 
       def license_scanning_report
         ::Gitlab::Ci::Reports::LicenseScanning::Report.new.tap do |license_management_report|
-          builds.latest.with_reports(::Ci::JobArtifact.license_scanning_reports).each do |build|
+          latest_report_builds(::Ci::JobArtifact.license_scanning_reports).each do |build|
             build.collect_license_scanning_reports!(license_management_report)
           end
         end
@@ -121,10 +119,10 @@ module EE
 
       def dependency_list_report
         ::Gitlab::Ci::Reports::DependencyList::Report.new.tap do |dependency_list_report|
-          builds.latest.with_reports(::Ci::JobArtifact.dependency_list_reports).each do |build|
+          latest_report_builds(::Ci::JobArtifact.dependency_list_reports).each do |build|
             build.collect_dependency_list_reports!(dependency_list_report)
           end
-          builds.latest.with_reports(::Ci::JobArtifact.license_scanning_reports).each do |build|
+          latest_report_builds(::Ci::JobArtifact.license_scanning_reports).each do |build|
             build.collect_licenses_for_dependency_list!(dependency_list_report)
           end
         end
@@ -132,7 +130,7 @@ module EE
 
       def metrics_report
         ::Gitlab::Ci::Reports::Metrics::Report.new.tap do |metrics_report|
-          builds.latest.with_reports(::Ci::JobArtifact.metrics_reports).each do |build|
+          latest_report_builds(::Ci::JobArtifact.metrics_reports).each do |build|
             build.collect_metrics_reports!(metrics_report)
           end
         end
@@ -160,12 +158,32 @@ module EE
         merge_request_pipeline? && merge_train_ref?
       end
 
+      def latest_failed_security_builds
+        security_builds.select(&:latest?)
+                       .select(&:failed?)
+      end
+
+      def license_scan_completed?
+        latest_report_builds(::Ci::JobArtifact.license_scanning_reports).exists?
+      end
+
+      def can_store_security_reports?
+        project.can_store_security_reports? && has_security_reports?
+      end
+
+      def has_security_findings?
+        security_findings.exists?
+      end
+
       private
 
-      def project_has_subscriptions?
-        return false unless ::Feature.enabled?(:ci_project_subscriptions, project)
+      def has_security_reports?
+        has_reports?(::Ci::JobArtifact.security_reports.or(::Ci::JobArtifact.license_scanning_reports))
+      end
 
-        project.downstream_projects.any?
+      def project_has_subscriptions?
+        project.feature_available?(:ci_project_subscriptions) &&
+          project.downstream_projects.any?
       end
 
       def merge_train_ref?
@@ -175,6 +193,10 @@ module EE
       def available_licensed_report_type?(file_type)
         feature_names = REPORT_LICENSED_FEATURES.fetch(file_type)
         feature_names.nil? || feature_names.any? { |feature| project.feature_available?(feature) }
+      end
+
+      def security_builds
+        @security_builds ||= ::Security::SecurityJobsFinder.new(pipeline: self).execute
       end
     end
   end

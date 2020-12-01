@@ -2,7 +2,7 @@
 type: reference
 stage: Manage
 group: Import
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 # Group Import/Export
 
@@ -52,7 +52,7 @@ The following items are exported:
 The following items are **not** exported:
 
 - Projects
-- Runners token
+- Runner tokens
 - SAML discovery tokens
 
 NOTE: **Note:**
@@ -94,7 +94,7 @@ on an existing group's page.
 
 1. On the New Group page, select the **Import group** tab.
 
-   ![Fill in group details](img/import_panel_v13_1.png)
+   ![Fill in group details](img/import_panel_v13_4.png)
 
 1. Enter your group name.
 

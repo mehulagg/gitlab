@@ -28,6 +28,7 @@ module Gitlab
       gon.sprite_icons           = IconsHelper.sprite_icon_path
       gon.sprite_file_icons      = IconsHelper.sprite_file_icons_path
       gon.emoji_sprites_css_path = ActionController::Base.helpers.stylesheet_path('emoji_sprites')
+      gon.select2_css_path       = ActionController::Base.helpers.stylesheet_path('lazy_bundles/select2.css')
       gon.test_env               = Rails.env.test?
       gon.disable_animations     = Gitlab.config.gitlab['disable_animations']
       gon.suggested_label_colors = LabelsHelper.suggested_colors
@@ -43,12 +44,10 @@ module Gitlab
 
       # Initialize gon.features with any flags that should be
       # made globally available to the frontend
-      push_frontend_feature_flag(:snippets_vue, default_enabled: true)
-      push_frontend_feature_flag(:monaco_blobs, default_enabled: true)
-      push_frontend_feature_flag(:monaco_ci, default_enabled: false)
-      push_frontend_feature_flag(:snippets_edit_vue, default_enabled: false)
       push_frontend_feature_flag(:webperf_experiment, default_enabled: false)
       push_frontend_feature_flag(:snippets_binary_blob, default_enabled: false)
+      push_frontend_feature_flag(:usage_data_api, default_enabled: true)
+      push_frontend_feature_flag(:security_auto_fix, default_enabled: false)
 
       # Startup CSS feature is a special one as it can be enabled by means of cookies and params
       gon.push({ features: { 'startupCss' => use_startup_css? } }, true)
@@ -59,10 +58,14 @@ module Gitlab
     # name - The name of the feature flag, e.g. `my_feature`.
     # args - Any additional arguments to pass to `Feature.enabled?`. This allows
     #        you to check if a flag is enabled for a particular user.
-    def push_frontend_feature_flag(name, *args)
-      var_name = name.to_s.camelize(:lower)
-      enabled = Feature.enabled?(name, *args)
+    def push_frontend_feature_flag(name, *args, **kwargs)
+      enabled = Feature.enabled?(name, *args, **kwargs)
 
+      push_to_gon_features(name, enabled)
+    end
+
+    def push_to_gon_features(name, enabled)
+      var_name = name.to_s.camelize(:lower)
       # Here the `true` argument signals gon that the value should be merged
       # into any existing ones, instead of overwriting them. This allows you to
       # use this method to push multiple feature flags.
@@ -80,3 +83,5 @@ module Gitlab
     end
   end
 end
+
+Gitlab::GonHelper.prepend_if_ee('EE::Gitlab::GonHelper')

@@ -1,10 +1,14 @@
 # frozen_string_literal: true
 
 class Admin::LicensesController < Admin::ApplicationController
+  include Admin::LicenseRequest
+
   before_action :license, only: [:show, :download, :destroy]
   before_action :require_license, only: [:download, :destroy]
 
   respond_to :html
+
+  feature_category :provision
 
   def show
     if @license.present? || License.future_dated_only?
@@ -61,21 +65,6 @@ class Admin::LicensesController < Admin::ApplicationController
   end
 
   private
-
-  def license
-    @license ||= begin
-      License.reset_current
-      License.reset_future_dated
-      License.current
-    end
-  end
-
-  def require_license
-    return if license
-
-    flash.keep
-    redirect_to new_admin_license_path
-  end
 
   def build_license
     @license ||= License.new(data: params[:trial_key])

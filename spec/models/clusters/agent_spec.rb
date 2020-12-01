@@ -12,6 +12,31 @@ RSpec.describe Clusters::Agent do
   it { is_expected.to validate_length_of(:name).is_at_most(63) }
   it { is_expected.to validate_uniqueness_of(:name).scoped_to(:project_id) }
 
+  describe 'scopes' do
+    describe '.ordered_by_name' do
+      let(:names) { %w(agent-d agent-b agent-a agent-c) }
+
+      subject { described_class.ordered_by_name }
+
+      before do
+        names.each do |name|
+          create(:cluster_agent, name: name)
+        end
+      end
+
+      it { expect(subject.map(&:name)).to eq(names.sort) }
+    end
+
+    describe '.with_name' do
+      let!(:matching_name) { create(:cluster_agent, name: 'matching-name') }
+      let!(:other_name) { create(:cluster_agent, name: 'other-name') }
+
+      subject { described_class.with_name(matching_name.name) }
+
+      it { is_expected.to contain_exactly(matching_name) }
+    end
+  end
+
   describe 'validation' do
     describe 'name validation' do
       it 'rejects names that do not conform to RFC 1123', :aggregate_failures do
@@ -30,6 +55,18 @@ RSpec.describe Clusters::Agent do
           expect(agent).to be_valid
         end
       end
+    end
+  end
+
+  describe '#has_access_to?' do
+    let(:agent) { build(:cluster_agent) }
+
+    it 'has access to own project' do
+      expect(agent.has_access_to?(agent.project)).to be_truthy
+    end
+
+    it 'does not have access to other projects' do
+      expect(agent.has_access_to?(create(:project))).to be_falsey
     end
   end
 end

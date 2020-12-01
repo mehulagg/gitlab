@@ -235,4 +235,25 @@ RSpec.describe Vulnerabilities::Feedback do
 
     it { is_expected.to eq({ project_id: project.id, category: category, project_fingerprint: project_fingerprint }) }
   end
+
+  describe '#finding' do
+    let_it_be(:feedback) { create(:vulnerability_feedback) }
+
+    subject { feedback.finding }
+
+    context 'when the is no finding persisted' do
+      it { is_expected.to be_nil }
+    end
+
+    context 'when there is a persisted finding' do
+      let!(:finding) do
+        create(:vulnerabilities_finding,
+               project: feedback.project,
+               report_type: feedback.category,
+               project_fingerprint: feedback.project_fingerprint)
+      end
+
+      it { is_expected.to eq(finding) }
+    end
+  end
 end

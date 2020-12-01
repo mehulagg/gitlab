@@ -3,7 +3,7 @@ import { merge } from 'lodash';
 import { GlLineChart } from '@gitlab/ui/dist/charts';
 import dateFormat from 'dateformat';
 import ResizableChartContainer from '~/vue_shared/components/resizable_chart/resizable_chart_container.vue';
-import { s__, __, sprintf } from '~/locale';
+import { __, n__, s__, sprintf } from '~/locale';
 import commonChartOptions from './common_chart_options';
 
 export default {
@@ -103,12 +103,14 @@ export default {
   methods: {
     formatTooltipText(params) {
       const [seriesData] = params.seriesData;
+      if (!seriesData) {
+        return;
+      }
+
       this.tooltip.title = dateFormat(params.value, 'dd mmm yyyy');
 
       if (this.issuesSelected) {
-        this.tooltip.content = sprintf(__('%{total} open issues'), {
-          total: seriesData.value[1],
-        });
+        this.tooltip.content = n__('%d open issue', '%d open issues', seriesData.value[1]);
       } else {
         this.tooltip.content = sprintf(__('%{total} open issue weight'), {
           total: seriesData.value[1],
@@ -139,8 +141,8 @@ export default {
         :format-tooltip-text="formatTooltipText"
         :include-legend-avg-max="false"
       >
-        <template slot="tooltipTitle">{{ tooltip.title }}</template>
-        <template slot="tooltipContent">{{ tooltip.content }}</template>
+        <template slot="tooltip-title">{{ tooltip.title }}</template>
+        <template slot="tooltip-content">{{ tooltip.content }}</template>
       </gl-line-chart>
     </resizable-chart-container>
   </div>

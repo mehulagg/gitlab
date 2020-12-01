@@ -1,5 +1,5 @@
 <script>
-import { GlSprintf, GlForm, GlFormSelect, GlFormInput } from '@gitlab/ui';
+import { GlSprintf, GlForm, GlFormSelect, GlFormInput, GlButton } from '@gitlab/ui';
 import { s__ } from '~/locale';
 import {
   RuleTypeNetwork,
@@ -25,6 +25,7 @@ export default {
     GlForm,
     GlFormSelect,
     GlFormInput,
+    GlButton,
     PolicyRuleEndpoint,
     PolicyRuleEntity,
     'policy-rule-cidr': PolicyRuleCIDR,
@@ -131,7 +132,7 @@ export default {
 
 <template>
   <div
-    class="gl-bg-gray-10 gl-border-solid gl-border-1 gl-border-gray-100 gl-rounded-base px-3 pt-3"
+    class="gl-bg-gray-10 gl-border-solid gl-border-1 gl-border-gray-100 gl-rounded-base px-3 pt-3 gl-relative"
   >
     <gl-form inline @submit.prevent>
       <gl-sprintf :message="sprintfTemplate">
@@ -151,7 +152,9 @@ export default {
         </template>
 
         <template #isLabel="{ content }">
-          <label for="direction" class="gl-mr-4 gl-mb-5!">{{ content }}</label>
+          <label for="direction" class="gl-mr-4 gl-mb-5! gl-font-weight-normal">{{
+            content
+          }}</label>
         </template>
 
         <template #ruleDirection>
@@ -177,7 +180,7 @@ export default {
           <gl-form-input
             v-if="shouldShowEndpointLabels"
             data-testid="endpoint-labels"
-            class="gl-mr-4 gl-mb-5"
+            class="gl-mr-4 gl-mb-5 gl-bg-white!"
             placeholder="key:value"
             :value="endpointLabels"
             :disabled="endpointSelectorDisabled"
@@ -187,7 +190,7 @@ export default {
         </template>
 
         <template #directionLabel="{ content }">
-          <label for="ruleMode" class="gl-mr-4 gl-mb-5!">{{ content }}</label>
+          <label for="ruleMode" class="gl-mr-4 gl-mb-5! gl-font-weight-normal">{{ content }}</label>
         </template>
 
         <template #rule>
@@ -203,7 +206,9 @@ export default {
         </template>
 
         <template #portsLabel="{ content }">
-          <label for="portMatch" class="gl-mr-4 gl-mb-5!">{{ content }}</label>
+          <label for="portMatch" class="gl-mr-4 gl-mb-5! gl-font-weight-normal">{{
+            content
+          }}</label>
         </template>
 
         <template #ports>
@@ -219,12 +224,20 @@ export default {
             v-if="shouldShowPorts"
             v-model="rule.ports"
             data-testid="ports"
-            class="gl-mr-4 gl-mb-5"
+            class="gl-mr-4 gl-mb-5 gl-bg-white!"
             placeholder="80/tcp"
           />
           <!-- eslint-enable @gitlab/vue-require-i18n-attribute-strings -->
         </template>
       </gl-sprintf>
     </gl-form>
+
+    <gl-button
+      icon="remove"
+      size="small"
+      class="gl-absolute gl-top-3 gl-right-3"
+      data-testid="remove-rule"
+      @click="$emit('remove')"
+    />
   </div>
 </template>

@@ -6,15 +6,15 @@ module NotificationsHelper
   def notification_icon_class(level)
     case level.to_sym
     when :disabled, :owner_disabled
-      'microphone-slash'
+      'notifications-off'
     when :participating
-      'volume-up'
+      'notifications'
     when :watch
       'eye'
     when :mention
       'at'
     when :global
-      'globe'
+      'earth'
     end
   end
 
@@ -28,8 +28,11 @@ module NotificationsHelper
     end
   end
 
-  def notification_icon(level, text = nil)
-    icon("#{notification_icon_class(level)} fw", text: text)
+  def notification_icon(level)
+    icon = notification_icon_class(level)
+    return '' unless icon
+
+    sprite_icon(icon)
   end
 
   def notification_title(level)
@@ -64,6 +67,7 @@ module NotificationsHelper
     when :custom
       _('You will only receive notifications for the events you choose')
     when :owner_disabled
+      # Any change must be reflected in board_sidebar_subscription.vue
       _('Notifications have been disabled by the project or group owner')
     end
   end

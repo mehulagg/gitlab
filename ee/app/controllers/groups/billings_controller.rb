@@ -4,7 +4,14 @@ class Groups::BillingsController < Groups::ApplicationController
   before_action :authorize_admin_group!
   before_action :verify_namespace_plan_check_enabled
 
+  before_action only: [:index] do
+    push_frontend_feature_flag(:api_billable_member_list)
+    push_frontend_feature_flag(:saas_manual_renew_button)
+  end
+
   layout 'group_settings'
+
+  feature_category :purchase
 
   def index
     @top_most_group = @group.root_ancestor if @group.has_parent?

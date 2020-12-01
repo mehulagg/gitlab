@@ -2,10 +2,12 @@
 
 module API
   module Ci
-    class Runners < Grape::API::Instance
+    class Runners < ::API::Base
       include PaginationParams
 
       before { authenticate! }
+
+      feature_category :continuous_integration
 
       resource :runners do
         desc 'Get runners available for user' do

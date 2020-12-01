@@ -1,10 +1,11 @@
 ---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference, howto
 ---
 
 # Rack Attack initializer
-
-## Overview
 
 [Rack Attack](https://github.com/kickstarter/rack-attack), also known as Rack::Attack, is a Ruby gem
 that is meant to protect GitLab with the ability to customize throttling and

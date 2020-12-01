@@ -3,7 +3,7 @@
 module SystemCheck
   module App
     class ElasticsearchCheck < SystemCheck::BaseCheck
-      set_name 'Elasticsearch version 6.x - 7.x?'
+      set_name 'Elasticsearch version 7.x (6.4 - 6.x deprecated to be removed in 13.8)?'
       set_skip_reason 'skipped (elasticsearch is disabled)'
       set_check_pass -> { "yes (#{self.current_version})" }
       set_check_fail -> { "no (#{self.current_version})" }
@@ -22,7 +22,7 @@ module SystemCheck
       def check?
         case self.class.current_version.major
         when 6
-          true
+          self.class.current_version.minor >= 4
         when 7
           true
         else

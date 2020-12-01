@@ -169,6 +169,7 @@ excluded_attributes:
     - :compliance_framework_setting
     - :show_default_award_emojis
     - :services
+    - :exported_protected_branches
   namespaces:
     - :runners_token
     - :runners_token_encrypted
@@ -185,6 +186,7 @@ excluded_attributes:
     - :secret
     - :encrypted_secret_token
     - :encrypted_secret_token_iv
+    - :repository_read_only
   merge_request_diff:
     - :external_diff
     - :stored_externally
@@ -218,6 +220,7 @@ excluded_attributes:
     - :duplicated_to_id
     - :promoted_to_epic_id
     - :blocking_issues_count
+    - :service_desk_reply_to
   merge_request:
     - :milestone_id
     - :sprint_id
@@ -403,9 +406,32 @@ ee:
       - issues:
         - epic_issue:
           - :epic
+        - :issuable_sla
       - protected_branches:
         - :unprotect_access_levels
       - protected_environments:
         - :deploy_access_levels
       - :service_desk_setting
       - :security_setting
+      - :push_rule
+
+  included_attributes:
+    issuable_sla:
+      - :issue
+      - :due_at
+    push_rule:
+      - :force_push_regex
+      - :delete_branch_regex
+      - :commit_message_regex
+      - :author_email_regex
+      - :file_name_regex
+      - :branch_name_regex
+      - :commit_message_negative_regex
+      - :max_file_size
+      - :deny_delete_tag
+      - :member_check
+      - :is_sample
+      - :prevent_secrets
+      - :reject_unsigned_commits
+      - :commit_committer_check
+      - :regexp_uses_re2

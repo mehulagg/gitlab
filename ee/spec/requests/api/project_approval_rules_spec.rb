@@ -11,12 +11,41 @@ RSpec.describe API::ProjectApprovalRules do
   let_it_be(:approver) { create(:user) }
   let_it_be(:other_approver) { create(:user) }
 
+  describe 'GET /projects/:id/approval_rules/:approval_rule_id' do
+    let_it_be(:private_project) { create(:project, :private, creator: user, namespace: user.namespace) }
+    let!(:approval_rule) { create(:approval_project_rule, project: private_project) }
+    let(:url) { "/projects/#{private_project.id}/approval_rules/#{approval_rule.id}" }
+
+    context 'when the request is correct' do
+      it 'matches the response schema', :aggregate_failures do
+        get api(url, user)
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(response).to match_response_schema('public_api/v4/project_approval_rule', dir: 'ee')
+
+        rule = json_response
+
+        expect(rule['approvals_required']).to eq(approval_rule.approvals_required)
+        expect(rule['id']).to eq(approval_rule.id)
+        expect(rule['name']).to eq(approval_rule.name)
+      end
+    end
+
+    context 'when the user is not authorized' do
+      it 'does not display rule information' do
+        get api(url, user2)
+
+        expect(response).to have_gitlab_http_status(:not_found)
+      end
+    end
+  end
+
   describe 'GET /projects/:id/approval_rules' do
     let(:url) { "/projects/#{project.id}/approval_rules" }
 
     context 'when the request is correct' do
       let!(:rule) do
-        rule = create(:approval_project_rule, name: 'security', project: project, approvals_required: 7)
+        rule = create(:approval_project_rule, name: 'vulnerability', project: project, approvals_required: 7)
         rule.users << approver
         rule
       end
@@ -40,7 +69,7 @@ RSpec.describe API::ProjectApprovalRules do
         rule = json.first
 
         expect(rule['approvals_required']).to eq(7)
-        expect(rule['name']).to eq('security')
+        expect(rule['name']).to eq('vulnerability')
       end
 
       context 'private group filtering' do
@@ -73,7 +102,7 @@ RSpec.describe API::ProjectApprovalRules do
 
       context 'report_approver rules' do
         let!(:report_approver_rule) do
-          create(:approval_project_rule, :security_report, project: project)
+          create(:approval_project_rule, :vulnerability_report, project: project)
         end
 
         it 'includes report_approver rules' do

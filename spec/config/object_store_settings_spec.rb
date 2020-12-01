@@ -24,6 +24,7 @@ RSpec.describe ObjectStoreSettings do
           'lfs' => { 'enabled' => true },
           'artifacts' => { 'enabled' => true },
           'external_diffs' => { 'enabled' => false },
+          'pages' => { 'enabled' => true },
           'object_store' => {
             'enabled' => true,
             'connection' => connection,
@@ -39,6 +40,9 @@ RSpec.describe ObjectStoreSettings do
               'external_diffs' => {
                 'bucket' => 'external_diffs',
                 'enabled' => false
+              },
+              'pages' => {
+                'bucket' => 'pages'
               }
             }
           }
@@ -55,6 +59,7 @@ RSpec.describe ObjectStoreSettings do
         expect(settings.artifacts['object_store']['background_upload']).to be false
         expect(settings.artifacts['object_store']['proxy_download']).to be false
         expect(settings.artifacts['object_store']['remote_directory']).to eq('artifacts')
+        expect(settings.artifacts['object_store']['consolidated_settings']).to be true
 
         expect(settings.lfs['enabled']).to be true
         expect(settings.lfs['object_store']['enabled']).to be true
@@ -63,16 +68,55 @@ RSpec.describe ObjectStoreSettings do
         expect(settings.lfs['object_store']['background_upload']).to be false
         expect(settings.lfs['object_store']['proxy_download']).to be true
         expect(settings.lfs['object_store']['remote_directory']).to eq('lfs-objects')
+        expect(settings.lfs['object_store']['consolidated_settings']).to be true
+
+        expect(settings.pages['enabled']).to be true
+        expect(settings.pages['object_store']['enabled']).to be true
+        expect(settings.pages['object_store']['connection']).to eq(connection)
+        expect(settings.pages['object_store']['remote_directory']).to eq('pages')
+        expect(settings.pages['object_store']['consolidated_settings']).to be true
 
         expect(settings.external_diffs['enabled']).to be false
         expect(settings.external_diffs['object_store']['enabled']).to be false
         expect(settings.external_diffs['object_store']['remote_directory']).to eq('external_diffs')
+        expect(settings.external_diffs['object_store']['consolidated_settings']).to be true
       end
 
       it 'raises an error when a bucket is missing' do
         config['object_store']['objects']['lfs'].delete('bucket')
 
         expect { subject }.to raise_error(/Object storage for lfs must have a bucket specified/)
+      end
+
+      it 'does not raise error if pages bucket is missing' do
+        config['object_store']['objects']['pages'].delete('bucket')
+
+        expect { subject }.not_to raise_error
+      end
+
+      it 'allows pages to define its own connection' do
+        pages_connection = { 'provider' => 'Google', 'google_application_default' => true }
+        config['pages'] = {
+          'enabled' => true,
+          'object_store' => {
+            'enabled' => true,
+            'connection' => pages_connection
+          }
+        }
+
+        expect { subject }.not_to raise_error
+
+        described_class::WORKHORSE_ACCELERATED_TYPES.each do |object_type|
+          section = settings.try(object_type)
+
+          next unless section
+
+          expect(section['object_store']['connection']).to eq(connection)
+          expect(section['object_store']['consolidated_settings']).to be true
+        end
+
+        expect(settings.pages['object_store']['connection']).to eq(pages_connection)
+        expect(settings.pages['object_store']['consolidated_settings']).to be_falsey
       end
 
       context 'with legacy config' do

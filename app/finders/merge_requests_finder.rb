@@ -33,21 +33,50 @@ class MergeRequestsFinder < IssuableFinder
   include MergedAtFilter
 
   def self.scalar_params
-    @scalar_params ||= super + [:wip, :draft, :target_branch, :merged_after, :merged_before]
+    @scalar_params ||= super + [
+      :approved_by_ids,
+      :deployed_after,
+      :deployed_before,
+      :draft,
+      :environment,
+      :merged_after,
+      :merged_before,
+      :reviewer_id,
+      :reviewer_username,
+      :target_branch,
+      :wip
+    ]
+  end
+
+  def self.array_params
+    @array_params ||= super.merge(approved_by_usernames: [])
   end
 
   def klass
     MergeRequest
   end
 
+  def params_class
+    MergeRequestsFinder::Params
+  end
+
   def filter_items(_items)
     items = by_commit(super)
-    items = by_deployment(items)
     items = by_source_branch(items)
     items = by_draft(items)
     items = by_target_branch(items)
     items = by_merged_at(items)
+    items = by_approvals(items)
+    items = by_deployments(items)
+    items = by_reviewer(items)
+
     by_source_project_id(items)
+  end
+
+  def filter_negated_items(items)
+    items = super(items)
+    items = by_negated_reviewer(items)
+    by_negated_target_branch(items)
   end
 
   private
@@ -80,17 +109,29 @@ class MergeRequestsFinder < IssuableFinder
 
     items.where(target_branch: target_branch)
   end
+  # rubocop: enable CodeReuse/ActiveRecord
+
+  # rubocop: disable CodeReuse/ActiveRecord
+  def by_negated_target_branch(items)
+    return items unless not_params[:target_branch]
+
+    items.where.not(target_branch: not_params[:target_branch])
+  end
+  # rubocop: enable CodeReuse/ActiveRecord
 
   def source_project_id
     @source_project_id ||= params[:source_project_id].presence
   end
 
+  # rubocop: disable CodeReuse/ActiveRecord
   def by_source_project_id(items)
     return items unless source_project_id
 
     items.where(source_project_id: source_project_id)
   end
+  # rubocop: enable CodeReuse/ActiveRecord
 
+  # rubocop: disable CodeReuse/ActiveRecord
   def by_draft(items)
     draft_param = params[:draft] || params[:wip]
 
@@ -102,6 +143,7 @@ class MergeRequestsFinder < IssuableFinder
       items
     end
   end
+  # rubocop: enable CodeReuse/ActiveRecord
 
   # WIP is deprecated in favor of Draft. Currently both options are supported
   def wip_match(table)
@@ -121,15 +163,60 @@ class MergeRequestsFinder < IssuableFinder
       .or(table[:title].matches('(Draft)%'))
   end
 
-  def by_deployment(items)
-    return items unless deployment_id
+  # Filter by merge requests that had been approved by specific users
+  # rubocop: disable CodeReuse/Finder
+  def by_approvals(items)
+    MergeRequests::ByApprovalsFinder
+      .new(params[:approved_by_usernames], params[:approved_by_ids])
+      .execute(items)
+  end
+  # rubocop: enable CodeReuse/Finder
 
-    items.includes(:deployment_merge_requests)
-         .where(deployment_merge_requests: { deployment_id: deployment_id })
+  def by_deployments(items)
+    env = params[:environment]
+    before = params[:deployed_before]
+    after = params[:deployed_after]
+    id = params[:deployment_id]
+
+    return items if !env && !before && !after && !id
+
+    # Each filter depends on the same JOIN+WHERE. To prevent this JOIN+WHERE
+    # from being duplicated for every filter, we only produce it once. The
+    # filter methods in turn expect the JOIN+WHERE to already be present.
+    #
+    # This approach ensures that query performance doesn't degrade as the number
+    # of deployment related filters increases.
+    deploys = DeploymentMergeRequest.join_deployments_for_merge_requests
+    deploys = deploys.by_deployment_id(id) if id
+    deploys = deploys.deployed_to(env) if env
+    deploys = deploys.deployed_before(before) if before
+    deploys = deploys.deployed_after(after) if after
+
+    items.where_exists(deploys)
   end
 
-  def deployment_id
-    @deployment_id ||= params[:deployment_id].presence
+  def by_reviewer(items)
+    return items unless params.reviewer_id? || params.reviewer_username?
+
+    if params.filter_by_no_reviewer?
+      items.no_review_requested
+    elsif params.filter_by_any_reviewer?
+      items.review_requested
+    elsif params.reviewer
+      items.review_requested_to(params.reviewer)
+    else # reviewer not found
+      items.none
+    end
+  end
+
+  def by_negated_reviewer(items)
+    return items unless not_params.reviewer_id? || not_params.reviewer_username?
+
+    if not_params.reviewer.present?
+      items.no_review_requested_to(not_params.reviewer)
+    else # reviewer not found
+      items.none
+    end
   end
 end
 

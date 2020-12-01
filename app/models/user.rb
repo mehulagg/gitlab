@@ -28,6 +28,10 @@ class User < ApplicationRecord
 
   DEFAULT_NOTIFICATION_LEVEL = :participating
 
+  INSTANCE_ACCESS_REQUEST_APPROVERS_TO_BE_NOTIFIED_LIMIT = 10
+
+  BLOCKED_PENDING_APPROVAL_STATE = 'blocked_pending_approval'.freeze
+
   add_authentication_token_field :incoming_email_token, token_generator: -> { SecureRandom.hex.to_i(16).to_s(36) }
   add_authentication_token_field :feed_token
   add_authentication_token_field :static_object_token
@@ -64,14 +68,7 @@ class User < ApplicationRecord
   # and should be added after Devise modules are initialized.
   include AsyncDeviseEmail
 
-  BLOCKED_MESSAGE = "Your account has been blocked. Please contact your GitLab " \
-                    "administrator if you think this is an error."
-  LOGIN_FORBIDDEN = "Your account does not have the required permission to login. Please contact your GitLab " \
-                    "administrator if you think this is an error."
-
-  MINIMUM_INACTIVE_DAYS = 180
-
-  ignore_column :bio, remove_with: '13.4', remove_after: '2020-09-22'
+  MINIMUM_INACTIVE_DAYS = 90
 
   # Override Devise::Models::Trackable#update_tracked_fields!
   # to limit database writes to at most once every hour
@@ -120,7 +117,7 @@ class User < ApplicationRecord
 
   # Groups
   has_many :members
-  has_many :group_members, -> { where(requested_at: nil) }, source: 'GroupMember'
+  has_many :group_members, -> { where(requested_at: nil).where("access_level >= ?", Gitlab::Access::GUEST) }, source: 'GroupMember'
   has_many :groups, through: :group_members
   has_many :owned_groups, -> { where(members: { access_level: Gitlab::Access::OWNER }) }, through: :group_members, source: :group
   has_many :maintainers_groups, -> { where(members: { access_level: Gitlab::Access::MAINTAINER }) }, through: :group_members, source: :group
@@ -134,6 +131,8 @@ class User < ApplicationRecord
            -> { where(members: { access_level: [Gitlab::Access::REPORTER, Gitlab::Access::DEVELOPER, Gitlab::Access::MAINTAINER, Gitlab::Access::OWNER] }) },
            through: :group_members,
            source: :group
+  has_many :minimal_access_group_members, -> { where(access_level: [Gitlab::Access::MINIMAL_ACCESS]) }, source: 'GroupMember', class_name: 'GroupMember'
+  has_many :minimal_access_groups, through: :minimal_access_group_members, source: :group
 
   # Projects
   has_many :groups_projects,          through: :groups, source: :projects
@@ -169,8 +168,11 @@ class User < ApplicationRecord
 
   has_many :issue_assignees, inverse_of: :assignee
   has_many :merge_request_assignees, inverse_of: :assignee
+  has_many :merge_request_reviewers, inverse_of: :reviewer
   has_many :assigned_issues, class_name: "Issue", through: :issue_assignees, source: :issue
   has_many :assigned_merge_requests, class_name: "MergeRequest", through: :merge_request_assignees, source: :merge_request
+
+  has_many :bulk_imports
 
   has_many :custom_attributes, class_name: 'UserCustomAttribute'
   has_many :callouts, class_name: 'UserCallout'
@@ -279,6 +281,7 @@ class User < ApplicationRecord
             :view_diffs_file_by_file, :view_diffs_file_by_file=,
             :tab_width, :tab_width=,
             :sourcegraph_enabled, :sourcegraph_enabled=,
+            :gitpod_enabled, :gitpod_enabled=,
             :setup_for_company, :setup_for_company=,
             :render_whitespace_in_code, :render_whitespace_in_code=,
             :experience_level, :experience_level=,
@@ -297,6 +300,7 @@ class User < ApplicationRecord
       transition active: :blocked
       transition deactivated: :blocked
       transition ldap_blocked: :blocked
+      transition blocked_pending_approval: :blocked
     end
 
     event :ldap_block do
@@ -308,13 +312,18 @@ class User < ApplicationRecord
       transition deactivated: :active
       transition blocked: :active
       transition ldap_blocked: :active
+      transition blocked_pending_approval: :active
+    end
+
+    event :block_pending_approval do
+      transition active: :blocked_pending_approval
     end
 
     event :deactivate do
       transition active: :deactivated
     end
 
-    state :blocked, :ldap_blocked do
+    state :blocked, :ldap_blocked, :blocked_pending_approval do
       def blocked?
         true
       end
@@ -337,7 +346,9 @@ class User < ApplicationRecord
 
   # Scopes
   scope :admins, -> { where(admin: true) }
+  scope :instance_access_request_approvers_to_be_notified, -> { admins.active.order_recent_sign_in.limit(INSTANCE_ACCESS_REQUEST_APPROVERS_TO_BE_NOTIFIED_LIMIT) }
   scope :blocked, -> { with_states(:blocked, :ldap_blocked) }
+  scope :blocked_pending_approval, -> { with_states(:blocked_pending_approval) }
   scope :external, -> { where(external: true) }
   scope :confirmed, -> { where.not(confirmed_at: nil) }
   scope :active, -> { with_state(:active).non_internal }
@@ -345,6 +356,9 @@ class User < ApplicationRecord
   scope :deactivated, -> { with_state(:deactivated).non_internal }
   scope :without_projects, -> { joins('LEFT JOIN project_authorizations ON users.id = project_authorizations.user_id').where(project_authorizations: { user_id: nil }) }
   scope :by_username, -> (usernames) { iwhere(username: Array(usernames).map(&:to_s)) }
+  scope :by_name, -> (names) { iwhere(name: Array(names)) }
+  scope :by_user_email, -> (emails) { iwhere(email: Array(emails)) }
+  scope :by_emails, -> (emails) { joins(:emails).where(emails: { email: Array(emails).map(&:downcase) }) }
   scope :for_todos, -> (todos) { where(id: todos.select(:user_id)) }
   scope :with_emails, -> { preload(:emails) }
   scope :with_dashboard, -> (dashboard) { where(dashboard: dashboard) }
@@ -380,11 +394,14 @@ class User < ApplicationRecord
     super && can?(:log_in)
   end
 
+  # The messages for these keys are defined in `devise.en.yml`
   def inactive_message
-    if blocked?
-      BLOCKED_MESSAGE
+    if blocked_pending_approval?
+      :blocked_pending_approval
+    elsif blocked?
+      :blocked
     elsif internal?
-      LOGIN_FORBIDDEN
+      :forbidden
     else
       super
     end
@@ -506,17 +523,15 @@ class User < ApplicationRecord
     # @param emails [String, Array<String>] email addresses to check
     # @param confirmed [Boolean] Only return users where the email is confirmed
     def by_any_email(emails, confirmed: false)
-      emails = Array(emails).map(&:downcase)
-
-      from_users = where(email: emails)
+      from_users = by_user_email(emails)
       from_users = from_users.confirmed if confirmed
 
-      from_emails = joins(:emails).where(emails: { email: emails })
+      from_emails = by_emails(emails)
       from_emails = from_emails.confirmed.merge(Email.confirmed) if confirmed
 
       items = [from_users, from_emails]
 
-      user_ids = Gitlab::PrivateCommitEmail.user_ids_for_emails(emails)
+      user_ids = Gitlab::PrivateCommitEmail.user_ids_for_emails(Array(emails).map(&:downcase))
       items << where(id: user_ids) if user_ids.present?
 
       from_union(items)
@@ -534,6 +549,8 @@ class User < ApplicationRecord
         admins
       when 'blocked'
         blocked
+      when 'blocked_pending_approval'
+        blocked_pending_approval
       when 'two_factor_disabled'
         without_two_factor
       when 'two_factor_enabled'
@@ -573,11 +590,13 @@ class User < ApplicationRecord
 
       sanitized_order_sql = Arel.sql(sanitize_sql_array([order, query: query]))
 
-      where(
-        fuzzy_arel_match(:name, query, lower_exact_match: true)
-          .or(fuzzy_arel_match(:username, query, lower_exact_match: true))
-          .or(arel_table[:email].eq(query))
-      ).reorder(sanitized_order_sql, :name)
+      search_query = if Feature.enabled?(:user_search_secondary_email)
+                       search_with_secondary_emails(query)
+                     else
+                       search_without_secondary_emails(query)
+                     end
+
+      search_query.reorder(sanitized_order_sql, :name)
     end
 
     # Limits the result set to users _not_ in the given query/list of IDs.
@@ -592,6 +611,18 @@ class User < ApplicationRecord
       reorder(:name)
     end
 
+    def search_without_secondary_emails(query)
+      return none if query.blank?
+
+      query = query.downcase
+
+      where(
+        fuzzy_arel_match(:name, query, lower_exact_match: true)
+          .or(fuzzy_arel_match(:username, query, lower_exact_match: true))
+          .or(arel_table[:email].eq(query))
+      )
+    end
+
     # searches user by given pattern
     # it compares name, email, username fields and user's secondary emails with given pattern
     # This method uses ILIKE on PostgreSQL.
@@ -602,15 +633,16 @@ class User < ApplicationRecord
       query = query.downcase
 
       email_table = Email.arel_table
-      matched_by_emails_user_ids = email_table
+      matched_by_email_user_id = email_table
         .project(email_table[:user_id])
         .where(email_table[:email].eq(query))
+        .take(1) # at most 1 record as there is a unique constraint
 
       where(
         fuzzy_arel_match(:name, query)
           .or(fuzzy_arel_match(:username, query))
           .or(arel_table[:email].eq(query))
-          .or(arel_table[:id].in(matched_by_emails_user_ids))
+          .or(arel_table[:id].eq(matched_by_email_user_id))
       )
     end
 
@@ -683,6 +715,17 @@ class User < ApplicationRecord
         u.bio = 'The GitLab migration bot'
         u.name = 'GitLab Migration Bot'
         u.confirmed_at = Time.zone.now
+      end
+    end
+
+    def security_bot
+      email_pattern = "security-bot%s@#{Settings.gitlab.host}"
+
+      unique_internal(where(user_type: :security_bot), 'GitLab-Security-Bot', email_pattern) do |u|
+        u.bio = 'System bot that monitors detected vulnerabilities for solutions and creates merge requests with the fixes.'
+        u.name = 'GitLab Security Bot'
+        u.website_url = Gitlab::Routing.url_helpers.help_page_url('user/application_security/security_bot/index.md')
+        u.avatar = bot_avatar(image: 'security-bot.png')
       end
     end
 
@@ -772,7 +815,7 @@ class User < ApplicationRecord
   end
 
   def two_factor_otp_enabled?
-    otp_required_for_login?
+    otp_required_for_login? || Feature.enabled?(:forti_authenticator, self)
   end
 
   def two_factor_u2f_enabled?
@@ -888,10 +931,11 @@ class User < ApplicationRecord
   # Returns the groups a user has access to, either through a membership or a project authorization
   def authorized_groups
     Group.unscoped do
-      Group.from_union([
-        groups,
-        authorized_projects.joins(:namespace).select('namespaces.*')
-      ])
+      if Feature.enabled?(:shared_group_membership_auth, self)
+        authorized_groups_with_shared_membership
+      else
+        authorized_groups_without_shared_membership
+      end
     end
   end
 
@@ -1203,7 +1247,7 @@ class User < ApplicationRecord
   end
 
   def solo_owned_groups
-    @solo_owned_groups ||= owned_groups.select do |group|
+    @solo_owned_groups ||= owned_groups.includes(:owners).select do |group|
       group.owners == [self]
     end
   end
@@ -1675,6 +1719,8 @@ class User < ApplicationRecord
   end
 
   def terms_accepted?
+    return true if project_bot?
+
     accepted_term_id.present?
   end
 
@@ -1705,7 +1751,7 @@ class User < ApplicationRecord
   end
 
   def can_be_deactivated?
-    active? && no_recent_activity?
+    active? && no_recent_activity? && !internal?
   end
 
   def last_active_at
@@ -1715,9 +1761,6 @@ class User < ApplicationRecord
     [last_activity, last_sign_in].compact.max
   end
 
-  # Below is used for the signup_flow experiment. Should be removed
-  # when experiment finishes.
-  # See https://gitlab.com/gitlab-org/growth/engineering/issues/64
   REQUIRES_ROLE_VALUE = 99
 
   def role_required?
@@ -1727,7 +1770,6 @@ class User < ApplicationRecord
   def set_role_required!
     update_column(:role, REQUIRES_ROLE_VALUE)
   end
-  # End of signup_flow experiment methods
 
   def dismissed_callout?(feature_name:, ignore_dismissal_earlier_than: nil)
     callouts = self.callouts.with_feature_name(feature_name)
@@ -1788,6 +1830,26 @@ class User < ApplicationRecord
 
   private
 
+  def authorized_groups_without_shared_membership
+    Group.from_union([
+      groups,
+      authorized_projects.joins(:namespace).select('namespaces.*')
+    ])
+  end
+
+  def authorized_groups_with_shared_membership
+    cte = Gitlab::SQL::CTE.new(:direct_groups, authorized_groups_without_shared_membership)
+    cte_alias = cte.table.alias(Group.table_name)
+
+    Group
+      .with(cte.to_arel)
+      .from_union([
+        Group.from(cte_alias),
+        Group.joins(:shared_with_group_links)
+             .where(group_group_links: { shared_with_group_id: Group.from(cte_alias) })
+    ])
+  end
+
   def default_private_profile_to_false
     return unless private_profile_changed? && private_profile.nil?
 
@@ -1824,15 +1886,15 @@ class User < ApplicationRecord
     valid = true
     error = nil
 
-    if Gitlab::CurrentSettings.domain_blacklist_enabled?
-      blocked_domains = Gitlab::CurrentSettings.domain_blacklist
+    if Gitlab::CurrentSettings.domain_denylist_enabled?
+      blocked_domains = Gitlab::CurrentSettings.domain_denylist
       if domain_matches?(blocked_domains, email)
         error = 'is not from an allowed domain.'
         valid = false
       end
     end
 
-    allowed_domains = Gitlab::CurrentSettings.domain_whitelist
+    allowed_domains = Gitlab::CurrentSettings.domain_allowlist
     unless allowed_domains.blank?
       if domain_matches?(allowed_domains, email)
         valid = true

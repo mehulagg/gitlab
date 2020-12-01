@@ -20,7 +20,7 @@ RSpec.describe ReleasesHelper do
     let(:release) { create(:release, project: project) }
     let(:user) { create(:user) }
     let(:can_user_create_release) { false }
-    let(:common_keys) { [:project_id, :illustration_path, :documentation_path] }
+    let(:common_keys) { [:project_id, :project_path, :illustration_path, :documentation_path] }
 
     # rubocop: disable CodeReuse/ActiveRecord
     before do
@@ -64,11 +64,13 @@ RSpec.describe ReleasesHelper do
     describe '#data_for_edit_release_page' do
       it 'has the needed data to display the "edit release" page' do
         keys = %i(project_id
+                  group_id
+                  group_milestones_available
+                  project_path
                   tag_name
                   markdown_preview_path
                   markdown_docs_path
                   releases_page_path
-                  update_release_api_docs_path
                   release_assets_docs_path
                   manage_milestones_path
                   new_milestone_path)
@@ -80,16 +82,28 @@ RSpec.describe ReleasesHelper do
     describe '#data_for_new_release_page' do
       it 'has the needed data to display the "new release" page' do
         keys = %i(project_id
+                  group_id
+                  group_milestones_available
+                  project_path
                   releases_page_path
                   markdown_preview_path
                   markdown_docs_path
-                  update_release_api_docs_path
                   release_assets_docs_path
                   manage_milestones_path
                   new_milestone_path
                   default_branch)
 
         expect(helper.data_for_new_release_page.keys).to match_array(keys)
+      end
+    end
+
+    describe '#data_for_show_page' do
+      it 'has the needed data to display the individual "release" page' do
+        keys = %i(project_id
+                  project_path
+                  tag_name)
+
+        expect(helper.data_for_show_page.keys).to match_array(keys)
       end
     end
   end

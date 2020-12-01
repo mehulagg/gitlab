@@ -140,7 +140,7 @@ RSpec.describe Gitlab::I18n::PoLinter do
       let(:po_path) { 'spec/fixtures/unescaped_chars.po' }
 
       it 'contains an error' do
-        message_id = 'You are going to transfer %{project_name_with_namespace} to another owner. Are you ABSOLUTELY sure?'
+        message_id = 'You are going to transfer %{project_name_with_namespace} to another namespace. Are you ABSOLUTELY sure?'
         expected_error = 'translation contains unescaped `%`, escape it using `%%`'
 
         expect(errors[message_id]).to include(expected_error)
@@ -461,9 +461,10 @@ RSpec.describe Gitlab::I18n::PoLinter do
       fake_metadata = double
       allow(fake_metadata).to receive(:forms_to_test).and_return(4)
       allow(linter).to receive(:metadata_entry).and_return(fake_metadata)
-      allow(linter).to receive(:locale).and_return('pl_PL')
 
-      numbers = linter.numbers_covering_all_plurals
+      numbers = Gitlab::I18n.with_locale('pl_PL') do
+        linter.numbers_covering_all_plurals
+      end
 
       expect(numbers).to contain_exactly(0, 1, 2)
     end

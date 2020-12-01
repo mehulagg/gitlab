@@ -27,14 +27,6 @@ RSpec.shared_examples 'an on-demand scan mutation when user can run an on-demand
     expect(mutation_response["errors"]).to be_empty
   end
 
-  context 'when on demand scan feature is disabled' do
-    before do
-      stub_feature_flags(security_on_demand_scans_feature_flag: false)
-    end
-
-    it_behaves_like 'a mutation that returns a top-level access error'
-  end
-
   context 'when on demand scan licensed feature is not available' do
     before do
       stub_licensed_features(security_on_demand_scans: false)

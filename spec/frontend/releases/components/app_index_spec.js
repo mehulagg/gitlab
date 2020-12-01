@@ -2,48 +2,88 @@ import { range as rge } from 'lodash';
 import Vuex from 'vuex';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import waitForPromises from 'helpers/wait_for_promises';
+import { getJSONFixture } from 'helpers/fixtures';
 import ReleasesApp from '~/releases/components/app_index.vue';
 import createStore from '~/releases/stores';
-import listModule from '~/releases/stores/modules/list';
+import createListModule from '~/releases/stores/modules/list';
 import api from '~/api';
-import {
-  pageInfoHeadersWithoutPagination,
-  pageInfoHeadersWithPagination,
-  release2 as release,
-  releases,
-} from '../mock_data';
+import { pageInfoHeadersWithoutPagination, pageInfoHeadersWithPagination } from '../mock_data';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
-import TablePagination from '~/vue_shared/components/pagination/table_pagination.vue';
+import ReleasesPagination from '~/releases/components/releases_pagination.vue';
+
+jest.mock('~/lib/utils/common_utils', () => ({
+  ...jest.requireActual('~/lib/utils/common_utils'),
+  getParameterByName: jest.fn().mockImplementation(paramName => {
+    return `${paramName}_param_value`;
+  }),
+}));
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
 
+const release = getJSONFixture('api/releases/release.json');
+const releases = [release];
+
 describe('Releases App ', () => {
   let wrapper;
+  let fetchReleaseSpy;
 
-  const releasesPagination = rge(21).map(index => ({
+  const paginatedReleases = rge(21).map(index => ({
     ...convertObjectPropsToCamelCase(release, { deep: true }),
     tagName: `${index}.00`,
   }));
 
-  const defaultProps = {
+  const defaultInitialState = {
     projectId: 'gitlab-ce',
+    projectPath: 'gitlab-org/gitlab-ce',
     documentationPath: 'help/releases',
     illustrationPath: 'illustration/path',
   };
 
-  const createComponent = (propsData = defaultProps) => {
-    const store = createStore({ modules: { list: listModule } });
+  const createComponent = (stateUpdates = {}) => {
+    const listModule = createListModule({
+      ...defaultInitialState,
+      ...stateUpdates,
+    });
+
+    fetchReleaseSpy = jest.spyOn(listModule.actions, 'fetchReleases');
+
+    const store = createStore({
+      modules: { list: listModule },
+      featureFlags: {
+        graphqlReleaseData: true,
+        graphqlReleasesPage: false,
+        graphqlMilestoneStats: true,
+      },
+    });
 
     wrapper = shallowMount(ReleasesApp, {
       store,
       localVue,
-      propsData,
     });
   };
 
   afterEach(() => {
     wrapper.destroy();
+  });
+
+  describe('on startup', () => {
+    beforeEach(() => {
+      jest
+        .spyOn(api, 'releases')
+        .mockResolvedValue({ data: releases, headers: pageInfoHeadersWithoutPagination });
+
+      createComponent();
+    });
+
+    it('calls fetchRelease with the page, before, and after parameters', () => {
+      expect(fetchReleaseSpy).toHaveBeenCalledTimes(1);
+      expect(fetchReleaseSpy).toHaveBeenCalledWith(expect.anything(), {
+        page: 'page_param_value',
+        before: 'before_param_value',
+        after: 'after_param_value',
+      });
+    });
   });
 
   describe('while loading', () => {
@@ -61,7 +101,7 @@ describe('Releases App ', () => {
       expect(wrapper.contains('.js-loading')).toBe(true);
       expect(wrapper.contains('.js-empty-state')).toBe(false);
       expect(wrapper.contains('.js-success-state')).toBe(false);
-      expect(wrapper.contains(TablePagination)).toBe(false);
+      expect(wrapper.contains(ReleasesPagination)).toBe(false);
     });
   });
 
@@ -78,7 +118,7 @@ describe('Releases App ', () => {
       expect(wrapper.contains('.js-loading')).toBe(false);
       expect(wrapper.contains('.js-empty-state')).toBe(false);
       expect(wrapper.contains('.js-success-state')).toBe(true);
-      expect(wrapper.contains(TablePagination)).toBe(true);
+      expect(wrapper.contains(ReleasesPagination)).toBe(true);
     });
   });
 
@@ -86,7 +126,7 @@ describe('Releases App ', () => {
     beforeEach(() => {
       jest
         .spyOn(api, 'releases')
-        .mockResolvedValue({ data: releasesPagination, headers: pageInfoHeadersWithPagination });
+        .mockResolvedValue({ data: paginatedReleases, headers: pageInfoHeadersWithPagination });
 
       createComponent();
     });
@@ -95,7 +135,7 @@ describe('Releases App ', () => {
       expect(wrapper.contains('.js-loading')).toBe(false);
       expect(wrapper.contains('.js-empty-state')).toBe(false);
       expect(wrapper.contains('.js-success-state')).toBe(true);
-      expect(wrapper.contains(TablePagination)).toBe(true);
+      expect(wrapper.contains(ReleasesPagination)).toBe(true);
     });
   });
 
@@ -124,7 +164,7 @@ describe('Releases App ', () => {
       const newReleasePath = 'path/to/new/release';
 
       beforeEach(() => {
-        createComponent({ ...defaultProps, newReleasePath });
+        createComponent({ newReleasePath });
       });
 
       it('renders the "New release" button', () => {
@@ -141,6 +181,29 @@ describe('Releases App ', () => {
 
       it('does not render the "New release" button', () => {
         expect(findNewReleaseButton().exists()).toBe(false);
+      });
+    });
+  });
+
+  describe('when the back button is pressed', () => {
+    beforeEach(() => {
+      jest
+        .spyOn(api, 'releases')
+        .mockResolvedValue({ data: releases, headers: pageInfoHeadersWithoutPagination });
+
+      createComponent();
+
+      fetchReleaseSpy.mockClear();
+
+      window.dispatchEvent(new PopStateEvent('popstate'));
+    });
+
+    it('calls fetchRelease with the page parameter', () => {
+      expect(fetchReleaseSpy).toHaveBeenCalledTimes(1);
+      expect(fetchReleaseSpy).toHaveBeenCalledWith(expect.anything(), {
+        page: 'page_param_value',
+        before: 'before_param_value',
+        after: 'after_param_value',
       });
     });
   });

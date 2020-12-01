@@ -127,11 +127,22 @@ RSpec.describe Projects::UpdateService do
           end
 
           context 'when updated by an admin' do
-            it 'updates the project to public' do
-              result = update_project(project, admin, visibility_level: Gitlab::VisibilityLevel::PUBLIC)
+            context 'when admin mode is enabled', :enable_admin_mode do
+              it 'updates the project to public' do
+                result = update_project(project, admin, visibility_level: Gitlab::VisibilityLevel::PUBLIC)
 
-              expect(result).to eq({ status: :success })
-              expect(project).to be_public
+                expect(result).to eq({ status: :success })
+                expect(project).to be_public
+              end
+            end
+
+            context 'when admin mode is disabled' do
+              it 'does not update the project to public' do
+                result = update_project(project, admin, visibility_level: Gitlab::VisibilityLevel::PUBLIC)
+
+                expect(result).to eq({ status: :error, message: 'New visibility level not allowed!' })
+                expect(project).to be_private
+              end
             end
           end
         end
@@ -141,20 +152,47 @@ RSpec.describe Projects::UpdateService do
         let(:group) { create(:group, visibility_level: Gitlab::VisibilityLevel::INTERNAL) }
 
         before do
-          project.update(namespace: group, visibility_level: group.visibility_level)
+          project.update!(namespace: group, visibility_level: group.visibility_level)
         end
 
-        it 'does not update project visibility level' do
+        it 'does not update project visibility level even if admin', :enable_admin_mode do
           result = update_project(project, admin, visibility_level: Gitlab::VisibilityLevel::PUBLIC)
 
           expect(result).to eq({ status: :error, message: 'Visibility level public is not allowed in a internal group.' })
           expect(project.reload).to be_internal
         end
       end
+
+      context 'when updating shared runners' do
+        context 'can enable shared runners' do
+          let(:group) { create(:group, shared_runners_enabled: true) }
+          let(:project) { create(:project, namespace: group, shared_runners_enabled: false) }
+
+          it 'enables shared runners' do
+            result = update_project(project, user, shared_runners_enabled: true)
+
+            expect(result).to eq({ status: :success })
+            expect(project.reload.shared_runners_enabled).to be_truthy
+          end
+        end
+
+        context 'cannot enable shared runners' do
+          let(:group) { create(:group, :shared_runners_disabled) }
+          let(:project) { create(:project, namespace: group, shared_runners_enabled: false) }
+
+          it 'does not enable shared runners' do
+            result = update_project(project, user, shared_runners_enabled: true)
+
+            expect(result).to eq({ status: :error, message: 'Shared runners enabled cannot be enabled because parent group does not allow it' })
+            expect(project.reload.shared_runners_enabled).to be_falsey
+          end
+        end
+      end
     end
 
     describe 'when updating project that has forks' do
       let(:project) { create(:project, :internal) }
+      let(:user) { project.owner }
       let(:forked_project) { fork_project(project) }
 
       context 'and unlink forks feature flag is off' do
@@ -168,7 +206,7 @@ RSpec.describe Projects::UpdateService do
           expect(project).to be_internal
           expect(forked_project).to be_internal
 
-          expect(update_project(project, admin, opts)).to eq({ status: :success })
+          expect(update_project(project, user, opts)).to eq({ status: :success })
 
           expect(project).to be_private
           expect(forked_project.reload).to be_private
@@ -180,7 +218,7 @@ RSpec.describe Projects::UpdateService do
           expect(project).to be_internal
           expect(forked_project).to be_internal
 
-          expect(update_project(project, admin, opts)).to eq({ status: :success })
+          expect(update_project(project, user, opts)).to eq({ status: :success })
 
           expect(project).to be_public
           expect(forked_project.reload).to be_internal
@@ -194,7 +232,7 @@ RSpec.describe Projects::UpdateService do
           expect(project).to be_internal
           expect(forked_project).to be_internal
 
-          expect(update_project(project, admin, opts)).to eq({ status: :success })
+          expect(update_project(project, user, opts)).to eq({ status: :success })
 
           expect(project).to be_private
           expect(forked_project.reload).to be_internal
@@ -230,7 +268,7 @@ RSpec.describe Projects::UpdateService do
       end
 
       it 'handles empty project feature attributes' do
-        project.project_feature.update(wiki_access_level: ProjectFeature::DISABLED)
+        project.project_feature.update!(wiki_access_level: ProjectFeature::DISABLED)
 
         result = update_project(project, user, { name: 'test1' })
 
@@ -241,7 +279,7 @@ RSpec.describe Projects::UpdateService do
 
     context 'when enabling a wiki' do
       it 'creates a wiki' do
-        project.project_feature.update(wiki_access_level: ProjectFeature::DISABLED)
+        project.project_feature.update!(wiki_access_level: ProjectFeature::DISABLED)
         TestEnv.rm_storage_dir(project.repository_storage, project.wiki.path)
 
         result = update_project(project, user, project_feature_attributes: { wiki_access_level: ProjectFeature::ENABLED })
@@ -252,7 +290,7 @@ RSpec.describe Projects::UpdateService do
       end
 
       it 'logs an error and creates a metric when wiki can not be created' do
-        project.project_feature.update(wiki_access_level: ProjectFeature::DISABLED)
+        project.project_feature.update!(wiki_access_level: ProjectFeature::DISABLED)
 
         expect_any_instance_of(ProjectWiki).to receive(:wiki).and_raise(Wiki::CouldNotCreateWikiError)
         expect_any_instance_of(described_class).to receive(:log_error).with("Could not create wiki for #{project.full_name}")
@@ -550,15 +588,21 @@ RSpec.describe Projects::UpdateService do
       context 'authenticated as admin' do
         let(:user) { create(:admin) }
 
-        it 'schedules the transfer of the repository to the new storage and locks the project' do
-          update_project(project, admin, opts)
+        context 'when admin mode is enabled', :enable_admin_mode do
+          it 'schedules the transfer of the repository to the new storage and locks the project' do
+            update_project(project, admin, opts)
 
-          expect(project).to be_repository_read_only
-          expect(project.repository_storage_moves.last).to have_attributes(
-            state: ::ProjectRepositoryStorageMove.state_machines[:state].states[:scheduled].value,
-            source_storage_name: 'default',
-            destination_storage_name: 'test_second_storage'
-          )
+            expect(project).to be_repository_read_only
+            expect(project.repository_storage_moves.last).to have_attributes(
+              state: ::ProjectRepositoryStorageMove.state_machines[:state].states[:scheduled].value,
+              source_storage_name: 'default',
+              destination_storage_name: 'test_second_storage'
+            )
+          end
+        end
+
+        context 'when admin mode is disabled' do
+          it_behaves_like 'the transfer was not scheduled'
         end
 
         context 'the repository is read-only' do

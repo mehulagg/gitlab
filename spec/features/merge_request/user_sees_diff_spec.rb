@@ -63,16 +63,17 @@ RSpec.describe 'Merge request > User sees diff', :js do
         visit diffs_project_merge_request_path(project, merge_request)
 
         # Throws `Capybara::Poltergeist::InvalidSelector` if we try to use `#hash` syntax
-        expect(page).to have_selector("[id=\"#{changelog_id}\"] a.js-edit-blob")
+        expect(page).to have_selector("[id=\"#{changelog_id}\"] .js-edit-blob", visible: false)
       end
     end
 
     context 'as user who needs to fork' do
-      it 'shows fork/cancel confirmation', :sidekiq_might_not_need_inline, quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/196749' do
+      it 'shows fork/cancel confirmation', :sidekiq_might_not_need_inline do
         sign_in(user)
         visit diffs_project_merge_request_path(project, merge_request)
 
         # Throws `Capybara::Poltergeist::InvalidSelector` if we try to use `#hash` syntax
+        find("[id=\"#{changelog_id}\"] .js-diff-more-actions").click
         find("[id=\"#{changelog_id}\"] .js-edit-blob").click
 
         expect(page).to have_selector('.js-fork-suggestion-button', count: 1)

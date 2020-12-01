@@ -32,6 +32,8 @@ export const findNoteId = id => (id.match('DiffNote/(.+$)') || [])[1];
 
 export const findIssueId = id => (id.match('Issue/(.+$)') || [])[1];
 
+export const findDesignId = id => (id.match('Design/(.+$)') || [])[1];
+
 export const extractDesigns = data => data.project.issue.designCollection.designs.nodes;
 
 export const extractDesign = data => (extractDesigns(data) || [])[0];
@@ -63,6 +65,10 @@ export const designUploadOptimisticResponse = files => {
     fullPath: '',
     notesCount: 0,
     event: 'NONE',
+    currentUserTodos: {
+      __typename: 'TodoConnection',
+      nodes: [],
+    },
     diffRefs: {
       __typename: 'DiffRefs',
       baseSha: '',
@@ -101,12 +107,12 @@ export const designUploadOptimisticResponse = files => {
  *  @param {Object} note
  *  @param {Object} position
  */
-export const updateImageDiffNoteOptimisticResponse = (note, { position }) => ({
+export const repositionImageDiffNoteOptimisticResponse = (note, { position }) => ({
   // False positive i18n lint: https://gitlab.com/gitlab-org/frontend/eslint-plugin-i18n/issues/26
   // eslint-disable-next-line @gitlab/require-i18n-strings
   __typename: 'Mutation',
-  updateImageDiffNote: {
-    __typename: 'UpdateImageDiffNotePayload',
+  repositionImageDiffNote: {
+    __typename: 'RepositionImageDiffNotePayload',
     note: {
       ...note,
       position: {

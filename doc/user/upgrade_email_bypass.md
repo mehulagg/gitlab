@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Updating to GitLab 13.2: Email confirmation issues
 
 In the [GitLab 13.0.1 security release](https://about.gitlab.com/releases/2020/05/27/security-release-13-0-1-released/),
@@ -21,7 +27,7 @@ sent within five minutes, with a link for users to re-confirm the subject email 
 
 ## Do the confirmation emails expire?
 
-The links in these re-confirmation emails expire after one day by default. Users who click an expired link will be asked to request a new re-confirmation email. Any user can request a new re-confirmation email from `http://gitlab.example.com/users/confirmation/new`.
+The links in these re-confirmation emails expire after one day by default. Users who click an expired link are asked to request a new re-confirmation email. Any user can request a new re-confirmation email from `http://gitlab.example.com/users/confirmation/new`.
 
 ## Generate a list of affected users
 
@@ -82,7 +88,7 @@ As an administrator, you may also confirm a user in the [Admin Area](admin_area/
 ## What do I do if I am an administrator and I am locked out?
 
 If you are an administrator and cannot otherwise verify your email address, sign in to your GitLab
-instance with a [Rails console session](../administration/troubleshooting/navigating_gitlab_via_rails_console.md#starting-a-rails-console-session).
+instance with a [Rails console session](../administration/operations/rails_console.md#starting-a-rails-console-session).
 Once connected, run the following commands to confirm your administrator account:
 
 ```ruby
@@ -94,7 +100,7 @@ admin.save!
 ## How do I force-confirm all users on my self-managed instance?
 
 If you are an administrator and would like to force-confirm all users on your system, sign in to your GitLab
-instance with a [Rails console session](../administration/troubleshooting/navigating_gitlab_via_rails_console.md#starting-a-rails-console-session).
+instance with a [Rails console session](../administration/operations/rails_console.md#starting-a-rails-console-session).
 Once connected, run the following commands to confirm all user accounts:
 
 ```ruby
@@ -106,16 +112,16 @@ The command described in this section may activate users who have not properly c
 
 ## What about LDAP users?
 
-LDAP Users will remain confirmed if all of the following conditions are met:
+LDAP Users remain confirmed if all of the following conditions are met:
 
 - The ["User email confirmation at sign-up" option](../security/user_email_confirmation.md) is set to false.
 - The first sign-in is based on user LDAP credentials.
 - The user has added and verified [a secondary email address](profile/index.md#profile-settings) some time later.
 
 NOTE: **Note:**
-Confirmation timestamps (primary vs. secondary) will be different.
+Confirmation timestamps (primary vs. secondary) are different.
 
-Users will be unconfirmed by the background migration if any of the following conditions are met:
+Users remain unconfirmed by the background migration if any of the following conditions are met:
 
 - They [create an account through GitLab](profile/account/create_accounts.md).
 - They [swap their primary email address](profile/index.md#profile-settings) and verify it.

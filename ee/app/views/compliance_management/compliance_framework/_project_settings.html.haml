@@ -5,4 +5,5 @@
     = f.fields_for :compliance_framework_setting, ComplianceManagement::ComplianceFramework::ProjectSettings.new do |cf|
       = cf.label :framework, _('Compliance framework (optional)'), class: 'label-bold'
       %p.text-secondary= _('Select required regulatory standard')
-      = cf.select :framework, options_for_select(compliance_framework_options, @project.compliance_framework_setting&.framework), { selected: '', disabled: '', prompt: _('Choose your framework'), include_blank: _('None') }, class: 'form-control'
+      - selected_default_framework = @project.compliance_framework_setting&.compliance_management_framework&.default_framework_definition&.identifier
+      = cf.select :framework, options_for_select(compliance_framework_options, selected_default_framework), { selected: '', disabled: '', prompt: _('Choose your framework'), include_blank: _('None') }, class: 'form-control'

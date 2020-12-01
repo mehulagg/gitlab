@@ -1,6 +1,6 @@
+import { GlLink, GlButton } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 
-import { GlLink, GlButton } from '@gitlab/ui';
 import RequirementItem from 'ee/requirements/components/requirement_item.vue';
 import RequirementStatusBadge from 'ee/requirements/components/requirement_status_badge.vue';
 
@@ -30,64 +30,6 @@ describe('RequirementItem', () => {
   afterEach(() => {
     wrapper.destroy();
     wrapperArchived.destroy();
-  });
-
-  describe('computed', () => {
-    describe('reference', () => {
-      it('returns string containing `requirement.iid` prefixed with "REQ-"', () => {
-        expect(wrapper.vm.reference).toBe(`REQ-${requirement1.iid}`);
-      });
-    });
-
-    describe('canUpdate', () => {
-      it('returns value of `requirement.userPermissions.updateRequirement`', () => {
-        expect(wrapper.vm.canUpdate).toBe(requirement1.userPermissions.updateRequirement);
-      });
-    });
-
-    describe('canArchive', () => {
-      it('returns value of `requirement.userPermissions.updateRequirement`', () => {
-        expect(wrapper.vm.canArchive).toBe(requirement1.userPermissions.adminRequirement);
-      });
-    });
-
-    describe('createdAt', () => {
-      it('returns timeago-style string representing `requirement.createdAt`', () => {
-        // We don't have to be accurate here as it is already covered in rspecs
-        expect(wrapper.vm.createdAt).toContain('created');
-        expect(wrapper.vm.createdAt).toContain('ago');
-      });
-    });
-
-    describe('updatedAt', () => {
-      it('returns timeago-style string representing `requirement.updatedAt`', () => {
-        // We don't have to be accurate here as it is already covered in rspecs
-        expect(wrapper.vm.updatedAt).toContain('updated');
-        expect(wrapper.vm.updatedAt).toContain('ago');
-      });
-    });
-
-    describe('isArchived', () => {
-      it('returns `true` when current requirement is archived', () => {
-        expect(wrapperArchived.vm.isArchived).toBe(true);
-      });
-
-      it('returns `false` when current requirement is archived', () => {
-        expect(wrapper.vm.isArchived).toBe(false);
-      });
-    });
-
-    describe('author', () => {
-      it('returns value of `requirement.author`', () => {
-        expect(wrapper.vm.author).toBe(requirement1.author);
-      });
-    });
-
-    describe('testReport', () => {
-      it('returns testReport object from reports array within `requirement`', () => {
-        expect(wrapper.vm.testReport).toBe(mockTestReport);
-      });
-    });
   });
 
   describe('methods', () => {
@@ -139,6 +81,13 @@ describe('RequirementItem', () => {
       });
     });
 
+    it('emits `show-click` event with requirement as param', () => {
+      wrapper.trigger('click');
+
+      expect(wrapper.emitted('show-click')).toBeTruthy();
+      expect(wrapper.emitted('show-click')[0]).toEqual([requirement1]);
+    });
+
     it('renders element containing requirement reference', () => {
       expect(wrapper.find('.issuable-reference').text()).toBe(`REQ-${requirement1.iid}`);
     });
@@ -186,6 +135,11 @@ describe('RequirementItem', () => {
 
       expect(editButtonEl.exists()).toBe(true);
       expect(editButtonEl.attributes('title')).toBe('Edit');
+
+      editButtonEl.vm.$emit('click');
+
+      expect(wrapper.emitted('edit-click')).toBeTruthy();
+      expect(wrapper.emitted('edit-click')[0]).toEqual([wrapper.vm.requirement]);
     });
 
     it('does not render element containing requirement `Edit` button when `requirement.userPermissions.updateRequirement` is false', () => {

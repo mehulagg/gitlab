@@ -1,3 +1,9 @@
+---
+stage: Manage
+group: Import
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Translate GitLab to your language
 
 The text in GitLab's user interface is in American English by default.
@@ -38,10 +44,10 @@ Voting for translations is also valuable, helping to confirm good and flag inacc
 
 See [Translation guidelines](translation.md).
 
-### Proof reading
+### Proofreading
 
-Proof reading helps ensure the accuracy and consistency of translations. All
-translations are proof read before being accepted. If a translations requires
+Proofreading helps ensure the accuracy and consistency of translations. All
+translations are proofread before being accepted. If a translations requires
 changes, you will be notified with a comment explaining why.
 
 See [Proofreading Translations](proofreader.md) for more information on who's

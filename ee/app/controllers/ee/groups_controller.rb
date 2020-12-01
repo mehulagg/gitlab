@@ -11,9 +11,7 @@ module EE
 
       before_action :ee_authorize_admin_group!, only: [:restore]
 
-      before_action only: :issues do
-        push_frontend_feature_flag(:scoped_labels, @group)
-      end
+      feature_category :subgroups, [:restore]
     end
 
     override :render_show_html

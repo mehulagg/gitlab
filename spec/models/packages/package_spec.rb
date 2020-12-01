@@ -10,6 +10,8 @@ RSpec.describe Packages::Package, type: :model do
     it { is_expected.to have_many(:package_files).dependent(:destroy) }
     it { is_expected.to have_many(:dependency_links).inverse_of(:package) }
     it { is_expected.to have_many(:tags).inverse_of(:package) }
+    it { is_expected.to have_many(:build_infos).inverse_of(:package) }
+    it { is_expected.to have_many(:pipelines).through(:build_infos) }
     it { is_expected.to have_one(:conan_metadatum).inverse_of(:package) }
     it { is_expected.to have_one(:maven_metadatum).inverse_of(:package) }
     it { is_expected.to have_one(:nuget_metadatum).inverse_of(:package) }
@@ -108,6 +110,35 @@ RSpec.describe Packages::Package, type: :model do
         it { is_expected.not_to allow_value('.foobar').for(:name) }
         it { is_expected.not_to allow_value('%foo%bar').for(:name) }
       end
+
+      context 'generic package' do
+        subject { build_stubbed(:generic_package) }
+
+        it { is_expected.to allow_value('123').for(:name) }
+        it { is_expected.to allow_value('foo').for(:name) }
+        it { is_expected.to allow_value('foo.bar.baz-2.0-20190901.47283-1').for(:name) }
+        it { is_expected.not_to allow_value('../../foo').for(:name) }
+        it { is_expected.not_to allow_value('..\..\foo').for(:name) }
+        it { is_expected.not_to allow_value('%2f%2e%2e%2f%2essh%2fauthorized_keys').for(:name) }
+        it { is_expected.not_to allow_value('$foo/bar').for(:name) }
+        it { is_expected.not_to allow_value('my file name').for(:name) }
+        it { is_expected.not_to allow_value('!!().for(:name)().for(:name)').for(:name) }
+      end
+
+      context 'nuget package' do
+        subject { build_stubbed(:nuget_package) }
+
+        it { is_expected.to allow_value('My.Package').for(:name) }
+        it { is_expected.to allow_value('My.Package.Mvc').for(:name) }
+        it { is_expected.to allow_value('MyPackage').for(:name) }
+        it { is_expected.to allow_value('My.23.Package').for(:name) }
+        it { is_expected.to allow_value('My23Package').for(:name) }
+        it { is_expected.to allow_value('runtime.my-test64.runtime.package.Mvc').for(:name) }
+        it { is_expected.to allow_value('my_package').for(:name) }
+        it { is_expected.not_to allow_value('My/package').for(:name) }
+        it { is_expected.not_to allow_value('../../../my_package').for(:name) }
+        it { is_expected.not_to allow_value('%2e%2e%2fmy_package').for(:name) }
+      end
     end
 
     describe '#version' do
@@ -140,6 +171,13 @@ RSpec.describe Packages::Package, type: :model do
         it { is_expected.not_to allow_value('.1.2.3').for(:version) }
         it { is_expected.not_to allow_value('+1.2.3').for(:version) }
         it { is_expected.not_to allow_value('%2e%2e%2f1.2.3').for(:version) }
+      end
+
+      context 'composer package' do
+        it_behaves_like 'validating version to be SemVer compliant for', :composer_package
+
+        it { is_expected.to allow_value('dev-master').for(:version) }
+        it { is_expected.to allow_value('2.x-dev').for(:version) }
       end
 
       context 'maven package' do
@@ -257,7 +295,12 @@ RSpec.describe Packages::Package, type: :model do
       end
 
       it_behaves_like 'validating version to be SemVer compliant for', :npm_package
-      it_behaves_like 'validating version to be SemVer compliant for', :nuget_package
+
+      context 'nuget package' do
+        it_behaves_like 'validating version to be SemVer compliant for', :nuget_package
+
+        it { is_expected.to allow_value('1.2.3.4').for(:version) }
+      end
     end
 
     describe '#package_already_taken' do
@@ -497,6 +540,14 @@ RSpec.describe Packages::Package, type: :model do
 
       it { is_expected.to match_array([package1, package2]) }
     end
+
+    describe '.with_normalized_pypi_name' do
+      let_it_be(:pypi_package) { create(:pypi_package, name: 'Foo.bAr---BAZ_buz') }
+
+      subject { described_class.with_normalized_pypi_name('foo-bar-baz-buz') }
+
+      it { is_expected.to match_array([pypi_package]) }
+    end
   end
 
   describe '.select_distinct_name' do
@@ -531,7 +582,7 @@ RSpec.describe Packages::Package, type: :model do
   end
 
   describe '#pipeline' do
-    let_it_be(:package) { create(:maven_package) }
+    let_it_be_with_refind(:package) { create(:maven_package) }
 
     context 'package without pipeline' do
       it 'returns nil if there is no pipeline' do
@@ -543,7 +594,7 @@ RSpec.describe Packages::Package, type: :model do
       let_it_be(:pipeline) { create(:ci_pipeline) }
 
       before do
-        package.create_build_info!(pipeline: pipeline)
+        package.build_infos.create!(pipeline: pipeline)
       end
 
       it 'returns the pipeline' do
@@ -585,6 +636,25 @@ RSpec.describe Packages::Package, type: :model do
           expect { package.project.actual_limits.send(plan_limit_name) }
             .not_to raise_error(NoMethodError)
         end
+      end
+    end
+  end
+
+  describe '#original_build_info' do
+    let_it_be_with_refind(:package) { create(:npm_package) }
+
+    context 'without build_infos' do
+      it 'returns nil' do
+        expect(package.original_build_info).to be_nil
+      end
+    end
+
+    context 'with build_infos' do
+      let_it_be(:first_build_info) { create(:package_build_info, :with_pipeline, package: package) }
+      let_it_be(:second_build_info) { create(:package_build_info, :with_pipeline, package: package) }
+
+      it 'returns the first build info' do
+        expect(package.original_build_info).to eq(first_build_info)
       end
     end
   end

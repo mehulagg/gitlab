@@ -1,7 +1,7 @@
 ---
 stage: Secure
 group: Dynamic Analysis
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference, howto
 ---
 
@@ -9,16 +9,16 @@ type: reference, howto
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/4348) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 10.4.
 
-NOTE: **Note:**
-The whitepaper ["A Seismic Shift in Application Security"](https://about.gitlab.com/resources/whitepaper-seismic-shift-application-security/)
-explains how **4 of the top 6 attacks were application based**. Download it
-to learn how to protect your organization.
-
 Running [static checks](../sast/index.md) on your code is the first step to detect
 vulnerabilities that can put the security of your code at risk. Yet, once
 deployed, your application is exposed to a new category of possible attacks,
 such as cross-site scripting or broken authentication flaws. This is where
 Dynamic Application Security Testing (DAST) comes into place.
+
+NOTE: **Note:**
+The whitepaper ["A Seismic Shift in Application Security"](https://about.gitlab.com/resources/whitepaper-seismic-shift-application-security/)
+explains how 4 of the top 6 attacks were application based. Download it to learn how to protect your
+organization.
 
 ## Overview
 
@@ -32,11 +32,10 @@ provided by [Auto DevOps](../../../topics/autodevops/index.md).
 GitLab checks the DAST report, compares the found vulnerabilities between the source and target
 branches, and shows the information on the merge request.
 
-NOTE: **Note:**
-This comparison logic uses only the latest pipeline executed for the target branch's base commit.
-Running the pipeline on any other commit has no effect on the merge request.
+Note that this comparison logic uses only the latest pipeline executed for the target branch's base
+commit. Running the pipeline on any other commit has no effect on the merge request.
 
-![DAST Widget](img/dast_v13_2.png)
+![DAST Widget](img/dast_v13_4.png)
 
 By clicking on one of the detected linked vulnerabilities, you can
 see the details and the URL(s) affected.
@@ -53,12 +52,11 @@ However, DAST can be [configured](#full-scan)
 to also perform an *active scan*: attack your application and produce a more extensive security report.
 It can be very useful combined with [Review Apps](../../../ci/review_apps/index.md).
 
-NOTE: **Note:**
-A pipeline may consist of multiple jobs, including SAST and DAST scanning. If any
-job fails to finish for any reason, the security dashboard doesn't show DAST scanner
-output. For example, if the DAST job finishes but the SAST job fails, the security
-dashboard doesn't show DAST results. The analyzer outputs an
-[exit code](../../../development/integrations/secure.md#exit-code) on failure.
+Note that a pipeline may consist of multiple jobs, including SAST and DAST scanning. If any job
+fails to finish for any reason, the security dashboard doesn't show DAST scanner output. For
+example, if the DAST job finishes but the SAST job fails, the security dashboard doesn't show DAST
+results. On failure, the analyzer outputs an
+[exit code](../../../development/integrations/secure.md#exit-code).
 
 ## Use cases
 
@@ -163,6 +161,13 @@ headers whose values you want masked. For details on how to mask headers, see
 
 It's also possible to authenticate the user before performing the DAST checks.
 
+NOTE: **Note:**
+We highly recommended that you configure the scanner to authenticate to the application,
+otherwise it cannot check most of the application for security risks, as most
+of your application is likely not accessible without authentication. It is also recommended
+that you periodically confirm the scanner's authentication is still working as this tends to break over
+time due to authentication changes to the application.
+
 Create masked variables to pass the credentials that DAST uses.
 To create masked variables for the username and password, see [Create a custom variable in the UI](../../../ci/variables/README.md#create-a-custom-variable-in-the-ui).
 Note that the key of the username variable must be `DAST_USERNAME`
@@ -179,6 +184,8 @@ variables:
   DAST_AUTH_URL: https://example.com/sign-in
   DAST_USERNAME_FIELD: session[user]  # the name of username field at the sign-in HTML form
   DAST_PASSWORD_FIELD: session[password]  # the name of password field at the sign-in HTML form
+  DAST_SUBMIT_FIELD: login # the `id` or `name` of the element that when clicked will submit the login form or the password form of a multi-page login process
+  DAST_FIRST_SUBMIT_FIELD: next # the `id` or `name` of the element that when clicked will submit the username form of a multi-page login process
   DAST_AUTH_EXCLUDE_URLS: http://example.com/sign-out,http://example.com/sign-out-2  # optional, URLs to skip during the authenticated scan; comma-separated, no spaces in between
 ```
 
@@ -187,7 +194,7 @@ The results are saved as a
 that you can later download and analyze.
 Due to implementation limitations, we always take the latest DAST artifact available.
 
-DANGER: **Danger:**
+DANGER: **Warning:**
 **NEVER** run an authenticated scan against a production server. When an authenticated
 scan is run, it may perform *any* function that the authenticated user can. This
 includes actions like modifying and deleting data, submitting forms, and following links.
@@ -206,8 +213,8 @@ variables:
   DAST_FULL_SCAN_ENABLED: "true"
 ```
 
-NOTE: **Note:**
-If your DAST job exceeds the job timeout and you need to reduce the scan duration, we shared some tips for optimizing DAST scans in a [blog post](https://about.gitlab.com/blog/2020/08/31/how-to-configure-dast-full-scans-for-complex-web-applications/).
+If your DAST job exceeds the job timeout and you need to reduce the scan duration, we shared some
+tips for optimizing DAST scans in a [blog post](https://about.gitlab.com/blog/2020/08/31/how-to-configure-dast-full-scans-for-complex-web-applications/).
 
 #### Domain validation
 
@@ -398,11 +405,9 @@ variables:
   DAST_API_HOST_OVERRIDE: api-test.host.com
 ```
 
-NOTE: **Note:**
-Using a host override is ONLY supported when importing the API
-specification from a URL. It does not work and will be ignored when importing
-the specification from a file. This is due to a limitation in the ZAP OpenAPI
-extension.
+Note that using a host override is ONLY supported when importing the API specification from a URL.
+It doesn't work and is ignored when importing the specification from a file. This is due to a
+limitation in the ZAP OpenAPI extension.
 
 #### Authentication using headers
 
@@ -418,6 +423,81 @@ variables:
   DAST_API_SPECIFICATION: http://api-test.api.com/api-specification.yml
   DAST_REQUEST_HEADERS: "Authorization: Bearer my.token"
 ```
+
+### URL scan
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/214120) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.4.
+
+A URL scan allows you to specify which parts of a website are scanned by DAST.
+
+#### Define the URLs to scan
+
+URLs to scan can be specified by either of the following methods:
+
+- Use `DAST_PATHS_FILE` environment variable to specify the name of a file containing the paths.
+- Use `DAST_PATHS` environment variable to list the paths.
+
+##### Use DAST_PATHS_FILE environment variable
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/258825) in GitLab 13.6.
+
+To define the URLs to scan in a file, create a plain text file with one path per line.
+
+```txt
+page1.html
+/page2.html
+category/shoes/page1.html
+```
+
+To scan the URLs in that file, set the environment variable `DAST_PATHS_FILE` to the path of that file.
+
+```yaml
+include:
+  - template: DAST.gitlab-ci.yml
+
+variables:
+  DAST_PATHS_FILE: url_file.txt
+```
+
+By default, DAST scans do not clone the project repository. If the file is checked in to the project, instruct the DAST job to clone the project by setting GIT_STRATEGY to fetch. The file is expected to be in the `/zap/wrk` directory.
+
+```yaml
+dast:
+  script:
+    - mkdir -p /zap/wrk
+    - cp url_file.txt /zap/wrk/url_file.txt
+    - /analyze -t $DAST_WEBSITE
+  variables:
+    GIT_STRATEGY: fetch
+    DAST_PATHS_FILE: url_file.txt
+```
+
+##### Use DAST_PATHS environment variable
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/214120) in GitLab 13.4.
+
+To specify the paths to scan in an environment variable, add a comma-separated list of the paths to the `DAST_PATHS`
+environment variable. Note that you can only scan paths of a single host.
+
+```yaml
+include:
+  - template: DAST.gitlab-ci.yml
+
+variables:
+  DAST_PATHS=/page1.html,/category1/page1.html,/page3.html
+```
+
+When using `DAST_PATHS` and `DAST_PATHS_FILE`, note the following:
+
+- `DAST_WEBSITE` must be defined when using either `DAST_PATHS_FILE` or `DAST_PATHS`. The paths listed in either use `DAST_WEBSITE` to build the URLs to scan
+- Spidering is disabled when `DAST_PATHS` or `DAST_PATHS_FILE` are defined
+- `DAST_PATHS_FILE` and `DAST_PATHS` can not be used together
+- The `DAST_PATHS` environment variable has a limit of about 130kb. If you have a list or paths
+  greater than this, use `DAST_PATHS_FILE`.
+
+#### Full Scan
+
+To perform a [full scan](#full-scan) on the listed paths, use the `DAST_FULL_SCAN_ENABLED` environment variable.
 
 ### Customizing the DAST settings
 
@@ -452,6 +532,7 @@ DAST can be [configured](#customizing-the-dast-settings) using environment varia
 | `SECURE_ANALYZERS_PREFIX`   | URL | Set the Docker registry base address from which to download the analyzer. |
 | `DAST_WEBSITE`  | URL | The URL of the website to scan. `DAST_API_SPECIFICATION` must be specified if this is omitted. |
 | `DAST_API_SPECIFICATION`  | URL or string | The API specification to import. The specification can be hosted at a URL, or the name of a file present in the `/zap/wrk` directory. `DAST_WEBSITE` must be specified if this is omitted. |
+| `DAST_SPIDER_START_AT_HOST`  | boolean | Set to `false` to prevent DAST from resetting the target to its host before scanning. When `true`, non-host targets `http://test.site/some_path` is reset to `http://test.site` before scan. Default: `true`. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/258805) in GitLab 13.6. |
 | `DAST_AUTH_URL` | URL | The URL of the page containing the sign-in HTML form on the target website. `DAST_USERNAME` and `DAST_PASSWORD` are submitted with the login form to create an authenticated scan. Not supported for API scans. |
 | `DAST_USERNAME` | string | The username to authenticate to in the website. |
 | `DAST_PASSWORD` | string | The password to authenticate to in the website. |
@@ -465,14 +546,18 @@ DAST can be [configured](#customizing-the-dast-settings) using environment varia
 | `DAST_API_HOST_OVERRIDE` | string | Used to override domains defined in API specification files. Only supported when importing the API specification from a URL. Example: `example.com:8080` |
 | `DAST_EXCLUDE_RULES` | string | Set to a comma-separated list of Vulnerability Rule IDs to exclude them from running during the scan. Rule IDs are numbers and can be found from the DAST log or on the [ZAP project](https://github.com/zaproxy/zaproxy/blob/develop/docs/scanners.md). For example, `HTTP Parameter Override` has a rule ID of `10026`. **Note:** In earlier versions of GitLab the excluded rules were executed but alerts they generated were suppressed. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/118641) in GitLab 12.10. |
 | `DAST_REQUEST_HEADERS` | string | Set to a comma-separated list of request header names and values. Headers are added to every request made by DAST. For example, `Cache-control: no-cache,User-Agent: DAST/1.0` |
-| `DAST_DEBUG` | boolean | Enable debug message output. Default: `false` |
-| `DAST_SPIDER_MINS` | number | The maximum duration of the spider scan in minutes. Set to `0` for unlimited. Default: One minute, or unlimited when the scan is a full scan. |
-| `DAST_HTML_REPORT` | string | The filename of the HTML report written at the end of a scan. |
-| `DAST_MARKDOWN_REPORT` | string | The filename of the Markdown report written at the end of a scan. |
-| `DAST_XML_REPORT` | string | The filename of the XML report written at the end of a scan. |
-| `DAST_INCLUDE_ALPHA_VULNERABILITIES` | boolean | Set to `true` to include alpha passive and active scan rules. Default: `false` |
-| `DAST_USE_AJAX_SPIDER` | boolean | Set to `true` to use the AJAX spider in addition to the traditional spider, useful for crawling sites that require JavaScript. Default: `false` |
-| `DAST_ZAP_CLI_OPTIONS` | string | ZAP server command-line options. For example, `-Xmx3072m` would set the Java maximum memory allocation pool size. |
+| `DAST_DEBUG` | boolean | Enable debug message output. Default: `false`. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/12652) in GitLab 13.1. |
+| `DAST_SPIDER_MINS` | number | The maximum duration of the spider scan in minutes. Set to `0` for unlimited. Default: One minute, or unlimited when the scan is a full scan. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/12652) in GitLab 13.1. |
+| `DAST_HTML_REPORT` | string | The filename of the HTML report written at the end of a scan. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/12652) in GitLab 13.1. |
+| `DAST_MARKDOWN_REPORT` | string | The filename of the Markdown report written at the end of a scan. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/12652) in GitLab 13.1.|
+| `DAST_XML_REPORT` | string | The filename of the XML report written at the end of a scan. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/12652) in GitLab 13.1. |
+| `DAST_INCLUDE_ALPHA_VULNERABILITIES` | boolean | Set to `true` to include alpha passive and active scan rules. Default: `false`. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/12652) in GitLab 13.1. |
+| `DAST_USE_AJAX_SPIDER` | boolean | Set to `true` to use the AJAX spider in addition to the traditional spider, useful for crawling sites that require JavaScript. Default: `false`. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/12652) in GitLab 13.1. |
+| `DAST_PATHS` | string | Set to a comma-separated list of URLs for DAST to scan. For example, `/page1.html,/category1/page3.html,/page2.html`. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/214120) in GitLab 13.4. |
+| `DAST_PATHS_FILE` | string | The file path containing the paths within `DAST_WEBSITE` to scan. The file must be plain text with one path per line and be in `/zap/wrk`. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/258825) in GitLab 13.6. |
+| `DAST_SUBMIT_FIELD` | string | The `id` or `name` of the element that when clicked submits the login form or the password form of a multi-page login process. [Introduced](https://gitlab.com/gitlab-org/gitlab-ee/issues/9894) in GitLab 12.4. |
+| `DAST_FIRST_SUBMIT_FIELD` | string | The `id` or `name` of the element that when clicked submits the username form of a multi-page login process. [Introduced](https://gitlab.com/gitlab-org/gitlab-ee/issues/9894) in GitLab 12.4. |
+| `DAST_ZAP_CLI_OPTIONS` | string | ZAP server command-line options. For example, `-Xmx3072m` would set the Java maximum memory allocation pool size. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/12652) in GitLab 13.1. |
 | `DAST_ZAP_LOG_CONFIGURATION` | string | Set to a semicolon-separated list of additional log4j properties for the ZAP Server. For example, `log4j.logger.org.parosproxy.paros.network.HttpSender=DEBUG;log4j.logger.com.crawljax=DEBUG` |
 
 ### DAST command-line options
@@ -523,7 +608,7 @@ variables:
 ### Cloning the project's repository
 
 The DAST job does not require the project's repository to be present when running, so by default
-[`GIT_STRATEGY`](../../../ci/yaml/README.md#git-strategy) is set to `none`.
+[`GIT_STRATEGY`](../../../ci/runners/README.md#git-strategy) is set to `none`.
 
 ### Debugging DAST jobs
 
@@ -564,10 +649,9 @@ To use DAST in an offline environment, you need:
   [container image](https://gitlab.com/gitlab-org/security-products/dast), found in the
   [DAST container registry](https://gitlab.com/gitlab-org/security-products/dast/container_registry).
 
-NOTE: **Note:**
-GitLab Runner has a [default `pull policy` of `always`](https://docs.gitlab.com/runner/executors/docker.html#using-the-always-pull-policy),
-meaning the Runner tries to pull Docker images from the GitLab container registry even if a local
-copy is available. GitLab Runner's [`pull_policy` can be set to `if-not-present`](https://docs.gitlab.com/runner/executors/docker.html#using-the-if-not-present-pull-policy)
+Note that GitLab Runner has a [default `pull policy` of `always`](https://docs.gitlab.com/runner/executors/docker.html#using-the-always-pull-policy),
+meaning the runner tries to pull Docker images from the GitLab container registry even if a local
+copy is available. The GitLab Runner [`pull_policy` can be set to `if-not-present`](https://docs.gitlab.com/runner/executors/docker.html#using-the-if-not-present-pull-policy)
 in an offline environment if you prefer using only locally available Docker images. However, we
 recommend keeping the pull policy setting to `always` if not in an offline environment, as this
 enables the use of updated scanners in your CI/CD pipelines.
@@ -607,90 +691,117 @@ security reports without requiring internet access.
 
 Alternatively, you can use the variable `SECURE_ANALYZERS_PREFIX` to override the base registry address of the `dast` image.
 
-## On-Demand Scans
+## Site profile
+
+A site profile describes the attributes of a web site to scan on demand with DAST. A site profile is
+required for an on-demand DAST scan.
+
+A site profile contains the following:
+
+- **Profile name**: A name you assign to the site to be scanned.
+- **Target URL**: The URL that DAST runs against.
+
+### Create a site profile
+
+To create a site profile:
+
+1. From your project's home page, go to **Security & Compliance > Configuration**.
+1. Click **Manage** in the **DAST Profiles** row.
+1. Click **New Profile > Site Profile**.
+1. Type in a unique **Profile name** and **Target URL** then click **Save profile**.
+
+### Edit a site profile
+
+To edit an existing site profile:
+
+1. From your project's home page, go to **Security & Compliance > Configuration**.
+1. Click **Manage** in the **DAST Profiles** row.
+1. Click **Edit** in the row of the profile to edit.
+1. Edit the **Profile name** and **Target URL**, then click **Save profile**.
+
+### Delete a site profile
+
+To delete an existing site profile:
+
+1. From your project's home page, go to **Security & Compliance > Configuration**.
+1. Click **Manage** in the **DAST Profiles** row.
+1. Click **{remove}** (Delete profile) in the row of the profile to delete.
+
+## Scanner profile
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/222767) in GitLab 13.4.
+
+A scanner profile defines the scanner settings used to run an on-demand scan:
+
+- **Profile name:** A name you give the scanner profile. For example, "Spider_15".
+- **Spider timeout:** The maximum number of minutes allowed for the spider to traverse the site.
+- **Target timeout:** The maximum number of seconds DAST waits for the site to be available before
+  starting the scan.
+- **Scan mode:** A passive scan monitors all HTTP messages (requests and responses) sent to the target. An active scan attacks the target to find potential vulnerabilities.
+- **AJAX spider:**  Run the AJAX spider, in addition to the traditional spider, to crawl the target site.
+- **Debug messages:** Include debug messages in the DAST console output.
+
+Scan mode, AJAX spider, Debug messages are [added in GitLab 13.5](https://gitlab.com/gitlab-org/gitlab/-/issues/225804)
+
+### Create a scanner profile
+
+To create a scanner profile:
+
+1. From your project's home page, go to **Security & Compliance > Configuration**.
+1. Click **Manage** in the **DAST Profiles** row.
+1. Click **New Profile > Scanner Profile**.
+1. Enter a unique **Profile name**, the desired **Spider timeout**, and the **Target timeout**.
+1. Click **Save profile**.
+
+### Edit a scanner profile
+
+To edit a scanner profile:
+
+1. From your project's home page, go to **Security & Compliance > Configuration**.
+1. Click **Manage** in the **DAST Profiles** row.
+1. Click **Edit** in the scanner profile's row.
+
+### Delete a scanner profile
+
+To delete a scanner profile:
+
+1. From your project's home page, go to **Security & Compliance > Configuration**.
+1. Click **Manage** in the **DAST Profiles** row.
+1. Click **{remove}** (Delete profile) in the scanner profile's row.
+
+## On-demand scans
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/218465) in GitLab 13.2.
 > - [Improved](https://gitlab.com/gitlab-org/gitlab/-/issues/218465) in GitLab 13.3.
-> - It's deployed behind a feature flag, enabled by default.
-> - It's enabled on GitLab.com.
-> - It's able to be enabled or disabled per-project.
-> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-on-demand-scans).
 
-You can run a passive DAST scan against a target website, outside the DevOps lifecycle. These scans
-are always associated with the default branch of your project and the results are available in the
-project dashboard.
+An on-demand DAST scan runs outside the DevOps life cycle. Changes in your repository don't trigger
+the scan. You must start it manually.
 
-### Site profile
+An on-demand DAST scan:
 
-An on-demand scan requires a site profile, which includes:
+- Uses settings in the site profile and scanner profile you select when you run the scan,
+  instead of those in the `.gitlab-ci.yml` file.
+- Is associated with your project's default branch.
 
-- **Profile name**: A name you assign to the site to be scanned.
-- **Target URL**: The URL against which the DAST scan runs.
-
-### Run an on-demand scan
+### Run an on-demand DAST scan
 
 NOTE: **Note:**
 You must have permission to run an on-demand DAST scan against a protected branch.
-The default branch is automatically protected. For more details, see [Pipeline security on protected branches](../../../ci/pipelines/index.md#pipeline-security-on-protected-branches).
+The default branch is automatically protected. For more information, see
+[Pipeline security on protected branches](../../../ci/pipelines/index.md#pipeline-security-on-protected-branches).
 
-Running an on-demand scan requires an existing site profile. If a site profile for the target URL
-doesn't exist, first [create a site profile](#create-a-site-profile). An on-demand DAST scan has
-a fixed timeout of 60 seconds.
+To run an on-demand DAST scan, you need:
 
-- From your project's home page, go to **Security & Compliance > On-demand Scans** in the left sidebar.
-- Click **Create new DAST scan**.
-- Select a site profile from the profiles dropdown.
-- Click **Run scan**.
+- A [scanner profile](#create-a-scanner-profile).
+- A [site profile](#create-a-site-profile).
 
-#### Create a site profile
+1. From your project's home page, go to **Security & Compliance > On-demand Scans** in the left sidebar.
+1. Click **Create new DAST scan**.
+1. In **Scanner profile**, select a scanner profile from the dropdown.
+1. In **Site profile**, select a site profile from the dropdown.
+1. Click **Run scan**.
 
-- From your project's home page, go to **Security & Compliance > Configuration** in the left sidebar.
-- Click **Manage** in the **DAST Profiles** row.
-- Click **New Profile > Site Profile**.
-- Type in a unique **Profile name** and **Target URL** then click **Save profile**.
-
-#### Edit a site profile
-
-- From your project's home page, go to **Security & Compliance > Configuration** in the left sidebar.
-- Click **Manage** in the **DAST Profiles** row.
-- Click **Edit** in the row of the profile to edit.
-- Edit the **Profile name** and **Target URL** then click **Save profile**.
-
-#### Delete a site profile
-
-- From your project's home page, go to **Security & Compliance > Configuration** in the left sidebar.
-- Click **Manage** in the **DAST Profiles** row.
-- Click **{remove}** in the row of the profile to delete.
-- Click **Delete**.
-
-### Enable or disable On-demand Scans
-
-On-demand Scans is enabled by default. You can disable On-demand Scans
-instance-wide, or disable it for specific projects if you prefer.
-
-Use of On-demand Scans requires the `security_on_demand_scans_feature_flag`
-feature flag enabled.
-
-[GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
-can disable or enable the feature flags.
-
-To disable On-demand Scans:
-
-```ruby
-# Instance-wide
-Feature.disable(:security_on_demand_scans_feature_flag)
-# or by project
-Feature.disable(:security_on_demand_scans_feature_flag, Project.find(<project id>))
-```
-
-To enable On-demand Scans:
-
-```ruby
-# Instance-wide
-Feature.enable(:security_on_demand_scans_feature_flag)
-# or by project
-Feature.enable(:security_on_demand_scans_feature_flag, Project.find(<project ID>))
-```
+The on-demand DAST scan runs and the project's dashboard shows the results.
 
 ## Reports
 
@@ -715,8 +826,8 @@ sample reports can be found in the
 
 There are two formats of data in the JSON report that are used side by side:
 
-- The proprietary ZAP format that will be eventually deprecated.
-- A common format that will be the default in the future.
+- The proprietary ZAP format, which is planned to be deprecated.
+- A common format that is planned to the default in the future.
 
 ### Other formats
 
@@ -758,7 +869,7 @@ include:
   template: DAST.gitlab-ci.yml
 
 variables:
-  DAST_INCLUDE_ALPHA_VULNERABILITIES: true
+  DAST_INCLUDE_ALPHA_VULNERABILITIES: "true"
 ```
 
 ## Interacting with the vulnerabilities
@@ -814,6 +925,10 @@ Change the number after `-Xmx` to the required memory amount.
 ### DAST job exceeding the job timeout
 
 If your DAST job exceeds the job timeout and you need to reduce the scan duration, we shared some tips for optimizing DAST scans in a [blog post](https://about.gitlab.com/blog/2020/08/31/how-to-configure-dast-full-scans-for-complex-web-applications/).
+
+### Getting warning message `gl-dast-report.json: no matching files`
+
+For information on this, see the [general Application Security troubleshooting section](../../../ci/pipelines/job_artifacts.md#error-message-no-files-to-upload).
 
 <!-- ## Troubleshooting
 

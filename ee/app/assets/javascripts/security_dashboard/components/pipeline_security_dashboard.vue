@@ -64,10 +64,6 @@ export default {
       type: String,
       required: true,
     },
-    vulnerabilityFeedbackHelpPath: {
-      type: String,
-      required: true,
-    },
     loadingErrorIllustrations: {
       type: Object,
       required: true,
@@ -113,17 +109,16 @@ export default {
     <security-reports-summary
       v-if="securityReportSummary"
       :summary="securityReportSummary"
-      class="gl-mt-5"
+      class="gl-my-5"
     />
     <security-dashboard
       :vulnerabilities-endpoint="vulnerabilitiesEndpoint"
-      :vulnerability-feedback-help-path="vulnerabilityFeedbackHelpPath"
       :lock-to-project="{ id: projectId }"
       :pipeline-id="pipelineId"
       :loading-error-illustrations="loadingErrorIllustrations"
       :security-report-summary="securityReportSummary"
     >
-      <template #emptyState>
+      <template #empty-state>
         <gl-empty-state v-bind="emptyStateProps" />
       </template>
     </security-dashboard>

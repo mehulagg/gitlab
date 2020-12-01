@@ -22,7 +22,7 @@ class ApplicationController < ActionController::Base
   include Impersonation
   include Gitlab::Logging::CloudflareHelper
   include Gitlab::Utils::StrongMemoize
-  include ControllerWithFeatureCategory
+  include ::Gitlab::WithFeatureCategory
 
   before_action :authenticate_user!, except: [:route_not_found]
   before_action :enforce_terms!, if: :should_enforce_terms?
@@ -61,8 +61,7 @@ class ApplicationController < ActionController::Base
     :gitea_import_enabled?, :github_import_configured?,
     :gitlab_import_enabled?, :gitlab_import_configured?,
     :bitbucket_import_enabled?, :bitbucket_import_configured?,
-    :bitbucket_server_import_enabled?,
-    :google_code_import_enabled?, :fogbugz_import_enabled?,
+    :bitbucket_server_import_enabled?, :fogbugz_import_enabled?,
     :git_import_enabled?, :gitlab_project_import_enabled?,
     :manifest_import_enabled?, :phabricator_import_enabled?
 
@@ -121,7 +120,7 @@ class ApplicationController < ActionController::Base
   end
 
   def route_not_found
-    if current_user
+    if current_user || browser.bot.search_engine?
       not_found
     else
       store_location_for(:user, request.fullpath) unless request.xhr?
@@ -266,11 +265,18 @@ class ApplicationController < ActionController::Base
     end
   end
 
+  def stream_headers
+    headers['Content-Length'] = nil
+    headers['X-Accel-Buffering'] = 'no' # Disable buffering on Nginx
+    headers['Last-Modified'] = '0' # Prevent buffering via Rack::ETag middleware
+  end
+
   def default_headers
     headers['X-Frame-Options'] = 'DENY'
     headers['X-XSS-Protection'] = '1; mode=block'
     headers['X-UA-Compatible'] = 'IE=edge'
     headers['X-Content-Type-Options'] = 'nosniff'
+    headers[Gitlab::Metrics::RequestsRackMiddleware::FEATURE_CATEGORY_HEADER] = feature_category
   end
 
   def default_cache_headers
@@ -427,10 +433,6 @@ class ApplicationController < ActionController::Base
     Gitlab::Auth::OAuth::Provider.enabled?(:bitbucket)
   end
 
-  def google_code_import_enabled?
-    Gitlab::CurrentSettings.import_sources.include?('google_code')
-  end
-
   def fogbugz_import_enabled?
     Gitlab::CurrentSettings.import_sources.include?('fogbugz')
   end
@@ -465,7 +467,8 @@ class ApplicationController < ActionController::Base
       user: -> { auth_user if strong_memoized?(:auth_user) },
       project: -> { @project if @project&.persisted? },
       namespace: -> { @group if @group&.persisted? },
-      caller_id: full_action_name) do
+      caller_id: caller_id,
+      feature_category: feature_category) do
       yield
     ensure
       @current_context = Labkit::Context.current.to_h
@@ -484,7 +487,7 @@ class ApplicationController < ActionController::Base
 
   def set_page_title_header
     # Per https://tools.ietf.org/html/rfc5987, headers need to be ISO-8859-1, not UTF-8
-    response.headers['Page-Title'] = URI.escape(page_title('GitLab'))
+    response.headers['Page-Title'] = Addressable::URI.encode_component(page_title('GitLab'))
   end
 
   def set_current_admin(&block)
@@ -547,17 +550,17 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  def full_action_name
+  def caller_id
     "#{self.class.name}##{action_name}"
   end
 
-  # A user requires a role and have the setup_for_company attribute set when they are part of the experimental signup
-  # flow (executed by the Growth team). Users are redirected to the welcome page when their role is required and the
-  # experiment is enabled for the current user.
+  def feature_category
+    self.class.feature_category_for_action(action_name).to_s
+  end
+
   def required_signup_info
     return unless current_user
     return unless current_user.role_required?
-    return unless experiment_enabled?(:signup_flow)
 
     store_location_for :user, request.fullpath
 

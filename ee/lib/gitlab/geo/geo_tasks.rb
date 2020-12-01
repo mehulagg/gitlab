@@ -23,6 +23,7 @@ module Gitlab
           current_node = GeoNode.current_node
 
           abort 'The primary is not set' unless primary_node
+          abort 'Current node is not identified' unless current_node
           abort 'This is not a secondary node' unless current_node.secondary?
 
           primary_node.destroy

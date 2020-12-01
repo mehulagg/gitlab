@@ -44,7 +44,10 @@ module Gitlab
       #   "+      # Test change",
       #   "-      # Old change" ]
       def changed_lines(changed_file)
-        git.diff_for_file(changed_file).patch.split("\n").select { |line| %r{^[+-]}.match?(line) }
+        diff = git.diff_for_file(changed_file)
+        return [] unless diff
+
+        diff.patch.split("\n").select { |line| %r{^[+-]}.match?(line) }
       end
 
       def all_ee_changes
@@ -120,7 +123,8 @@ module Gitlab
         none: "",
         qa: "~QA",
         test: "~test ~Quality for `spec/features/*`",
-        engineering_productivity: '~"Engineering Productivity" for CI, Danger'
+        engineering_productivity: '~"Engineering Productivity" for CI, Danger',
+        ci_template: '~"ci::templates"'
       }.freeze
       # First-match win, so be sure to put more specific regex at the top...
       CATEGORIES = {
@@ -164,7 +168,7 @@ module Gitlab
 
         %r{\A(\.gitlab-ci\.yml\z|\.gitlab\/ci)} => :engineering_productivity,
         %r{\A\.codeclimate\.yml\z} => :engineering_productivity,
-        %r{\A\.overcommit\.yml\.example\z} => :engineering_productivity,
+        %r{\Alefthook.yml\z} => :engineering_productivity,
         %r{\A\.editorconfig\z} => :engineering_productivity,
         %r{Dangerfile\z} => :engineering_productivity,
         %r{\A(ee/)?(danger/|lib/gitlab/danger/)} => :engineering_productivity,
@@ -172,6 +176,8 @@ module Gitlab
         %r{\Atooling/} => :engineering_productivity,
         %r{(CODEOWNERS)} => :engineering_productivity,
         %r{(tests.yml)} => :engineering_productivity,
+
+        %r{\Alib/gitlab/ci/templates} => :ci_template,
 
         %r{\A(ee/)?spec/features/} => :test,
         %r{\A(ee/)?spec/support/shared_examples/features/} => :test,
@@ -184,7 +190,7 @@ module Gitlab
         %r{\A(ee/)?vendor/} => :backend,
         %r{\A(Gemfile|Gemfile.lock|Rakefile)\z} => :backend,
         %r{\A[A-Z_]+_VERSION\z} => :backend,
-        %r{\A\.rubocop(_todo)?\.yml\z} => :backend,
+        %r{\A\.rubocop((_manual)?_todo)?\.yml\z} => :backend,
         %r{\Afile_hooks/} => :backend,
 
         %r{\A(ee/)?qa/} => :qa,
@@ -193,6 +199,9 @@ module Gitlab
         %r{\A(ee/)?changelogs/} => :none,
         %r{\Alocale/gitlab\.pot\z} => :none,
         %r{\Adata/whats_new/} => :none,
+
+        # GraphQL auto generated doc files and schema
+        %r{\Adoc/api/graphql/reference/} => :backend,
 
         # Fallbacks in case the above patterns miss anything
         %r{\.rb\z} => :backend,
@@ -209,6 +218,12 @@ module Gitlab
 
       def sanitize_mr_title(title)
         title.gsub(DRAFT_REGEX, '').gsub(/`/, '\\\`')
+      end
+
+      def draft_mr?
+        return false unless gitlab_helper
+
+        DRAFT_REGEX.match?(gitlab_helper.mr_json['title'])
       end
 
       def security_mr?
@@ -252,6 +267,10 @@ module Gitlab
 
       def has_database_scoped_labels?(current_mr_labels)
         current_mr_labels.any? { |label| label.start_with?('database::') }
+      end
+
+      def has_ci_changes?
+        changed_files(%r{\A(\.gitlab-ci\.yml|\.gitlab/ci/)}).any?
       end
     end
   end

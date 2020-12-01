@@ -8,4 +8,7 @@ export default () => ({
   selectedLabelIds: [],
   topRankedLabels: [],
   data: [],
+
+  errorCode: null,
+  errorMessage: '',
 });

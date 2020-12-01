@@ -5,8 +5,8 @@ module Types
     include ::Gitlab::Graphql::Aggregations::Epics::Constants
 
     graphql_name 'Epic'
-    description 'Represents an epic.'
-
+    description 'Represents an epic'
+    accepts ::Epic
     authorize :read_epic
 
     expose_permissions Types::PermissionTypes::Epic
@@ -30,11 +30,9 @@ module Types
           description: 'Indicates if the epic is confidential'
 
     field :group, GroupType, null: false,
-          description: 'Group to which the epic belongs',
-          resolve: -> (obj, _args, _ctx) { Gitlab::Graphql::Loaders::BatchModelLoader.new(Group, obj.group_id).find }
+          description: 'Group to which the epic belongs'
     field :parent, EpicType, null: true,
-          description: 'Parent epic of the epic',
-          resolve: -> (obj, _args, _ctx) { Gitlab::Graphql::Loaders::BatchModelLoader.new(Epic, obj.parent_id).find }
+          description: 'Parent epic of the epic'
     field :author, Types::UserType, null: false,
           description: 'Author of the epic',
           resolve: -> (obj, _args, _ctx) { Gitlab::Graphql::Loaders::BatchModelLoader.new(User, obj.author_id).find }
@@ -68,12 +66,17 @@ module Types
     field :downvotes, GraphQL::INT_TYPE, null: false,
           description: 'Number of downvotes the epic has received'
 
+    field :user_notes_count, GraphQL::INT_TYPE, null: false,
+          description: 'Number of user notes of the epic'
+    field :user_discussions_count, GraphQL::INT_TYPE, null: false,
+          description: 'Number of user discussions in the epic'
+
     field :closed_at, Types::TimeType, null: true,
-          description: "Timestamp of the epic's closure"
+          description: 'Timestamp of when the epic was closed'
     field :created_at, Types::TimeType, null: true,
-          description: "Timestamp of the epic's creation"
+          description: 'Timestamp of when the epic was created'
     field :updated_at, Types::TimeType, null: true,
-          description: "Timestamp of the epic's last activity"
+          description: 'Timestamp of when the epic was updated'
 
     field :children, ::Types::EpicType.connection_type, null: true,
           description: 'Children (sub-epics) of the epic',
@@ -145,6 +148,26 @@ module Types
       resolve: -> (epic, args, ctx) do
         Epics::DescendantCountService.new(epic, ctx[:current_user])
       end
+
+    def user_notes_count
+      BatchLoader::GraphQL.for(object.id).batch(key: :epic_user_notes_count) do |ids, loader, args|
+        counts = Note.count_for_collection(ids, 'Epic').index_by(&:noteable_id)
+
+        ids.each do |id|
+          loader.call(id, counts[id]&.count || 0)
+        end
+      end
+    end
+
+    def user_discussions_count
+      BatchLoader::GraphQL.for(object.id).batch(key: :epic_user_discussions_count) do |ids, loader, args|
+        counts = Note.count_for_collection(ids, 'Epic', 'COUNT(DISTINCT discussion_id) as count').index_by(&:noteable_id)
+
+        ids.each do |id|
+          loader.call(id, counts[id]&.count || 0)
+        end
+      end
+    end
 
     def has_children?
       Gitlab::Graphql::Aggregations::Epics::LazyEpicAggregate.new(context, object.id, COUNT) do |node, _aggregate_object|

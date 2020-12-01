@@ -1,11 +1,11 @@
+import { GlButton, GlEmptyState, GlModal, GlSprintf, GlLink, GlPagination } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
-import { GlButton, GlEmptyState, GlModal, GlSprintf, GlLink, GlPagination } from '@gitlab/ui';
+import component from 'ee/environments_dashboard/components/dashboard/dashboard.vue';
+import Environment from 'ee/environments_dashboard/components/dashboard/environment.vue';
+import ProjectHeader from 'ee/environments_dashboard/components/dashboard/project_header.vue';
 import createStore from 'ee/vue_shared/dashboards/store/index';
 import state from 'ee/vue_shared/dashboards/store/state';
-import component from 'ee/environments_dashboard/components/dashboard/dashboard.vue';
-import ProjectHeader from 'ee/environments_dashboard/components/dashboard/project_header.vue';
-import Environment from 'ee/environments_dashboard/components/dashboard/environment.vue';
 import { trimText } from 'helpers/text_helper';
 import ProjectSelector from '~/vue_shared/components/project_selector/project_selector.vue';
 

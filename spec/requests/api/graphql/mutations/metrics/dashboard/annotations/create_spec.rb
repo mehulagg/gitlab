@@ -101,7 +101,7 @@ RSpec.describe Mutations::Metrics::Dashboard::Annotations::Create do
           graphql_mutation(:create_annotation, variables)
         end
 
-        it_behaves_like 'a mutation that returns top-level errors', errors: ['invalid_id is not a valid GitLab ID.']
+        it_behaves_like 'an invalid argument to the mutation', argument_name: :environment_id
       end
     end
   end
@@ -109,7 +109,7 @@ RSpec.describe Mutations::Metrics::Dashboard::Annotations::Create do
   context 'when annotation source is cluster' do
     let(:mutation) do
       variables = {
-        cluster_id: GitlabSchema.id_from_object(cluster).to_s,
+        cluster_id: cluster.to_global_id.to_s,
         starting_at: starting_at,
         ending_at: ending_at,
         dashboard_path: dashboard_path,
@@ -188,15 +188,15 @@ RSpec.describe Mutations::Metrics::Dashboard::Annotations::Create do
         graphql_mutation(:create_annotation, variables)
       end
 
-      it_behaves_like 'a mutation that returns top-level errors', errors: ['invalid_id is not a valid GitLab ID.']
+      it_behaves_like 'an invalid argument to the mutation', argument_name: :cluster_id
     end
   end
 
   context 'when both environment_id and cluster_id are provided' do
     let(:mutation) do
       variables = {
-        environment_id: GitlabSchema.id_from_object(environment).to_s,
-        cluster_id: GitlabSchema.id_from_object(cluster).to_s,
+        environment_id: environment.to_global_id.to_s,
+        cluster_id: cluster.to_global_id.to_s,
         starting_at: starting_at,
         ending_at: ending_at,
         dashboard_path: dashboard_path,
@@ -209,23 +209,26 @@ RSpec.describe Mutations::Metrics::Dashboard::Annotations::Create do
     it_behaves_like 'a mutation that returns top-level errors', errors: [described_class::ANNOTATION_SOURCE_ARGUMENT_ERROR]
   end
 
-  context 'when a non-cluster or environment id is provided' do
-    let(:mutation) do
-      variables = {
-        environment_id: GitlabSchema.id_from_object(project).to_s,
-        starting_at: starting_at,
-        ending_at: ending_at,
-        dashboard_path: dashboard_path,
-        description: description
-      }
+  [:environment_id, :cluster_id].each do |arg_name|
+    context "when #{arg_name} is given an ID of the wrong type" do
+      let(:gid) { global_id_of(project) }
+      let(:mutation) do
+        variables = {
+          starting_at: starting_at,
+          ending_at: ending_at,
+          dashboard_path: dashboard_path,
+          description: description,
+          arg_name => gid
+        }
 
-      graphql_mutation(:create_annotation, variables)
+        graphql_mutation(:create_annotation, variables)
+      end
+
+      before do
+        project.add_developer(current_user)
+      end
+
+      it_behaves_like 'an invalid argument to the mutation', argument_name: arg_name
     end
-
-    before do
-      project.add_developer(current_user)
-    end
-
-    it_behaves_like 'a mutation that returns top-level errors', errors: [described_class::INVALID_ANNOTATION_SOURCE_ERROR]
   end
 end

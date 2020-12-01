@@ -1,7 +1,7 @@
 ---
 stage: Plan
 group: Project Management
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Issue Data and Actions
@@ -18,7 +18,7 @@ You can find all the information for that issue on one screen.
 
 ![Issue view](img/issues_main_view_numbered.png)
 
-- **1.** [New Issue, close issue (reopen issue, report issue)](#new-issue-close-issue-reopen-issue-report-issue)
+- **1.** [Issue actions](#issue-actions)
 - **2.** [To Do](#to-do)
 - **3.** [Assignee](#assignee)
   - **3.1.** [Multiple Assignees **(STARTER)**](#multiple-assignees)
@@ -36,7 +36,7 @@ You can find all the information for that issue on one screen.
 - **15.** [Edit](#edit)
 - **16.** [Description](#description)
 - **17.** [Mentions](#mentions)
-- **18.** [Related Issues **(STARTER)**](#related-issues)
+- **18.** [Related Issues](#related-issues)
 - **19.** [Related Merge Requests](#related-merge-requests)
 - **20.** [Award emoji](#award-emoji)
 - **21.** [Show all activity](#show-all-activity)
@@ -55,22 +55,21 @@ Many of the elements of the issue screen refresh automatically, such as the titl
 description, when they are changed by another user. Comments and system notes also
 update automatically in response to various actions and content updates.
 
-### New Issue, close issue (reopen issue, report issue)
+### Issue actions
 
-Clicking on **New issue** will open a new window to create a new issue in the same project.
-Clicking on **Close issue** will close this issue, but it will not be deleted. If the
-issue is already closed, you can still access it and the button will show **Reopen issue**, as shown below,
-which you can click to reopen the issue. A reopened issue is no different from any
-other issue.
+In an open issue, you can close it by selecting the **Close issue** button.
+The issue is marked as closed but is not deleted.
 
-![Reopen Issue](img/reopen-issue.png)
+To reopen a closed issue, select the **Reopen issue** button.
+A reopened issue is no different from any other open issue.
 
-If you do not have rights to modify the issue, the **close issue** button will be
-replaced with **report issue**, which you can click to [submit an abuse report](../../abuse_reports.md)
-about the issue. It will also appear if you have rights to modify the issue, but only
-after it is closed.
+To access additional actions, select the vertical ellipsis
+(**{ellipsis_v}**) button:
 
-![Report Abuse](img/report-abuse.png)
+- To create a new issue in the same project, select **New issue** in the dropdown menu.
+
+- If you are not the issue author, you can [submit an abuse report](../../abuse_reports.md).
+  Select **Report abuse** in the dropdown menu.
 
 ### To Do
 
@@ -80,7 +79,7 @@ The button to do this has a different label depending on whether the issue is al
 List or not. If the issue is:
 
 - Already on your To-Do List: The button is labeled **Mark as done**. Click the button to remove the issue from your To-Do List.
-- Not on your To-Do List: The button is labeled **Add a To Do**. Click the button to add the issue to your To-Do List.
+- Not on your To-Do List: The button is labeled **Add a to do**. Click the button to add the issue to your To-Do List.
 
 ### Assignee
 
@@ -191,12 +190,12 @@ The plain text title and description of the issue fill the top center of the iss
 The description fully supports [GitLab Flavored Markdown](../../markdown.md#gitlab-flavored-markdown-gfm),
 allowing many formatting options.
 
-> [Since GitLab 12.6](https://gitlab.com/gitlab-org/gitlab/-/issues/10103), changes to an issue's description are listed in the [issue history](#issue-history).**(STARTER)**
+> [In GitLab 12.6](https://gitlab.com/gitlab-org/gitlab/-/issues/10103) and later, changes to an issue's description are listed in the [issue history](#issue-history).**(STARTER)**
 
 ### Mentions
 
 You can mention a user or a group present in your GitLab instance with `@username` or
-`@groupname` and they will be notified via todos and email, unless they have disabled
+`@groupname` and they will be notified via to-dos and email, unless they have disabled
 all notifications in their profile settings. This is controlled in the
 [notification settings](../../profile/notifications.md).
 
@@ -208,7 +207,7 @@ TIP: **Tip:**
 Avoid mentioning `@all` in issues and merge requests, as it sends an email notification
 to all the members of that project's group, which can be interpreted as spam.
 
-### Related Issues **(STARTER)**
+### Related Issues
 
 Issues that were mentioned as [related issues](related_issues.md) are listed here.
 You can also click the `+` to add more related issues.
@@ -242,7 +241,7 @@ and selecting either:
 Also:
 
 - You can mention a user or a group present in your GitLab instance with
-  `@username` or `@groupname` and they will be notified via To-Do items
+  `@username` or `@groupname` and they will be notified via to-do items
   and email, unless they have [disabled all notifications](#notifications)
   in their profile settings.
 - Mentions for yourself (the current logged in user), will be highlighted

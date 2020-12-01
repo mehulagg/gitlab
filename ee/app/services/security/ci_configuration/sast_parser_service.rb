@@ -19,6 +19,10 @@ module Security
         fill_current_value_with_default_for(result, :pipeline)
         populate_current_value_for(result, :global)
         populate_current_value_for(result, :pipeline)
+
+        fill_current_value_with_default_for_analyzers(result)
+        populate_current_value_for_analyzers(result)
+
         result
       end
 
@@ -46,8 +50,27 @@ module Security
         end
       end
 
+      def fill_current_value_with_default_for_analyzers(result)
+        result[:analyzers].each do |analyzer|
+          analyzer[:variables].each do |entity|
+            entity[:value] = entity[:default_value] if entity[:default_value]
+          end
+        end
+      end
+
+      def populate_current_value_for_analyzers(result)
+        result[:analyzers].each do |analyzer|
+          analyzer[:enabled] = sast_default_analyzers.include?(analyzer[:name])
+          populate_current_value_for(analyzer, :variables)
+        end
+      end
+
       def sast_template_attributes
         @sast_template_attributes ||= build_sast_attributes(sast_template_content)
+      end
+
+      def sast_default_analyzers
+        @sast_default_analyzers ||= gitlab_ci_yml_attributes["SAST_DEFAULT_ANALYZERS"] || sast_template_attributes["SAST_DEFAULT_ANALYZERS"]
       end
 
       def gitlab_ci_yml_attributes

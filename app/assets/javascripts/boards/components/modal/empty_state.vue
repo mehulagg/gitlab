@@ -1,10 +1,14 @@
 <script>
-/* eslint-disable vue/no-v-html */
-import { __, sprintf } from '~/locale';
+import { GlButton, GlSprintf } from '@gitlab/ui';
+import { __ } from '~/locale';
 import ModalStore from '../../stores/modal_store';
 import modalMixin from '../../mixins/modal_mixins';
 
 export default {
+  components: {
+    GlButton,
+    GlSprintf,
+  },
   mixins: [modalMixin],
   props: {
     newIssuePath: {
@@ -30,11 +34,8 @@ export default {
 
       if (this.activeTab === 'selected') {
         obj.title = __("You haven't selected any issues yet");
-        obj.content = sprintf(
-          __(
-            'Go back to %{startTag}Open issues%{endTag} and select some issues to add to your board.',
-          ),
-          { startTag: '<strong>', endTag: '</strong>' },
+        obj.content = __(
+          'Go back to %{tagStart}Open issues%{tagEnd} and select some issues to add to your board.',
         );
       }
 
@@ -53,18 +54,29 @@ export default {
       <div class="col-12 col-md-6 order-md-first">
         <div class="text-content">
           <h4>{{ contents.title }}</h4>
-          <p v-html="contents.content"></p>
-          <a v-if="activeTab === 'all'" :href="newIssuePath" class="btn btn-success btn-inverted">{{
-            __('New issue')
-          }}</a>
-          <button
+          <p>
+            <gl-sprintf :message="contents.content">
+              <template #tag="{ content }">
+                <strong>{{ content }}</strong>
+              </template>
+            </gl-sprintf>
+          </p>
+          <gl-button
+            v-if="activeTab === 'all'"
+            :href="newIssuePath"
+            category="secondary"
+            variant="success"
+          >
+            {{ __('New issue') }}
+          </gl-button>
+          <gl-button
             v-if="activeTab === 'selected'"
-            class="btn btn-default"
-            type="button"
+            category="primary"
+            variant="default"
             @click="changeTab('all')"
           >
             {{ __('Open issues') }}
-          </button>
+          </gl-button>
         </div>
       </div>
     </div>

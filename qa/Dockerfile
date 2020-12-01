@@ -1,10 +1,10 @@
-FROM ruby:2.6-stretch
+FROM ruby:2.7-buster
 LABEL maintainer="GitLab Quality Department <quality@gitlab.com>"
 
 ENV DEBIAN_FRONTEND="noninteractive"
 ENV DOCKER_VERSION="17.09.0-ce"
-ENV CHROME_VERSION="85.0.4183.83-1"
-ENV CHROME_DRIVER_VERSION="85.0.4183.87"
+ENV CHROME_VERSION="84.0.4147.89-1"
+ENV CHROME_DRIVER_VERSION="84.0.4147.30"
 ENV CHROME_DEB="google-chrome-stable_${CHROME_VERSION}_amd64.deb"
 ENV CHROME_URL="https://s3.amazonaws.com/gitlab-google-chrome-stable/${CHROME_DEB}"
 
@@ -65,7 +65,7 @@ COPY VERSION ./ee/app/models/license.r[b] /home/gitlab/ee/app/models/
 COPY ./lib/gitlab.rb /home/gitlab/lib/
 COPY ./lib/gitlab/utils.rb /home/gitlab/lib/gitlab/
 COPY ./INSTALLATION_TYPE ./VERSION /home/gitlab/
-RUN cd /home/gitlab/qa/ && bundle install --jobs=$(nproc) --retry=3 --quiet
+RUN cd /home/gitlab/qa/ && bundle install --jobs=$(nproc) --retry=3 --without=development --quiet
 COPY ./qa /home/gitlab/qa
 
 ENTRYPOINT ["bin/test"]

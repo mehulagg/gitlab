@@ -1,7 +1,7 @@
 ---
 stage: Create
 group: Source Code
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 disqus_identifier: 'https://docs.gitlab.com/ee/workflow/repository_mirroring.html'
 ---
 
@@ -56,6 +56,7 @@ The following are some possible use cases for repository mirroring:
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/249) in GitLab Enterprise Edition 8.7.
 > - [Moved to GitLab Core](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/18715) in 10.8.
+> - [LFS support over HTTPS added](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/40137) in 13.5
 
 For an existing project, you can set up push mirroring as follows:
 
@@ -181,7 +182,7 @@ To set up a mirror from GitLab to AWS CodeCommit:
    not confuse it with the IAM user ID or AWS keys of this user.
 
 1. Copy or download special Git HTTPS user ID and password.
-1. In the AWS CodeCommit console, create a new repository to mirror from your GitLab repo.
+1. In the AWS CodeCommit console, create a new repository to mirror from your GitLab repository.
 1. Open your new repository and click **Clone URL > Clone HTTPS** (not **Clone HTTPS (GRC)**).
 1. In GitLab, open the repository to be push-mirrored.
 1. Click **Settings > Repository** and expand **Mirroring repositories**.
@@ -192,7 +193,7 @@ To set up a mirror from GitLab to AWS CodeCommit:
    ```
 
    Replace `<your_aws_git_userid>` with the AWS **special HTTPS Git user ID** from the IAM Git
-   credentials created earlier. Replace `<your_codecommit_repo>` with the name of your repo in CodeCommit.
+   credentials created earlier. Replace `<your_codecommit_repo>` with the name of your repository in CodeCommit.
 
 1. For **Mirror direction**, select **Push**.
 1. For **Authentication method**, select **Password** and fill in the **Password** field with the special IAM Git clone user ID **password** created earlier in AWS.
@@ -576,3 +577,7 @@ Should an error occur during a push, GitLab will display an "Error" highlight fo
 ### 13:Received RST_STREAM with error code 2 with GitHub
 
 If you receive an "13:Received RST_STREAM with error code 2" while mirroring to a GitHub repository, your GitHub settings might be set to block pushes that expose your email address used in commits. Either set your email address on GitHub to be public, or disable the [Block command line pushes that expose my email](https://github.com/settings/emails) setting.
+
+### 4:Deadline Exceeded
+
+When upgrading to GitLab 11.11.8 or newer, a change in how usernames are represented means that you may need to update your mirroring username and password to ensure that `%40` characters are replaced with `@`.

@@ -68,6 +68,9 @@ namespace :gitlab do
       helper = Gitlab::Elastic::Helper.new(target_name: args[:target_name])
       index_name = helper.create_empty_index(with_alias: with_alias, options: options)
 
+      helper.create_migrations_index unless helper.index_exists?(index_name: helper.migrations_index_name)
+      ::Elastic::DataMigrationService.mark_all_as_completed!
+
       puts "Index '#{index_name}' has been created.".color(:green)
       puts "Alias '#{helper.target_name}' → '#{index_name}' has been created".color(:green) if with_alias
     end
@@ -91,11 +94,7 @@ namespace :gitlab do
 
     desc "GitLab | Elasticsearch | Zero-downtime cluster reindexing"
     task reindex_cluster: :environment do
-      Elastic::ReindexingTask.create!
-
-      ElasticClusterReindexingCronWorker.perform_async
-
-      puts "Reindexing job was successfully scheduled".color(:green)
+      trigger_cluster_reindexing
     end
 
     desc "GitLab | Elasticsearch | Clear indexing status"
@@ -135,6 +134,16 @@ namespace :gitlab do
       end
 
       count
+    end
+
+    def trigger_cluster_reindexing
+      Elastic::ReindexingTask.create!
+
+      ElasticClusterReindexingCronWorker.perform_async
+
+      puts 'Reindexing job was successfully scheduled'.color(:green)
+    rescue PG::UniqueViolation, ActiveRecord::RecordNotUnique
+      puts 'There is another task in progress. Please wait for it to finish.'.color(:red)
     end
 
     def display_unindexed(projects)

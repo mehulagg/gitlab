@@ -13,6 +13,8 @@ module EE
         mount_mutation ::Mutations::Issues::SetIteration
         mount_mutation ::Mutations::Issues::SetWeight
         mount_mutation ::Mutations::Issues::SetEpic
+        mount_mutation ::Mutations::Issues::PromoteToEpic
+        mount_mutation ::Mutations::Environments::CanaryIngress::Update
         mount_mutation ::Mutations::EpicTree::Reorder
         mount_mutation ::Mutations::Epics::Update
         mount_mutation ::Mutations::Epics::Create
@@ -23,20 +25,33 @@ module EE
         mount_mutation ::Mutations::RequirementsManagement::CreateRequirement
         mount_mutation ::Mutations::RequirementsManagement::UpdateRequirement
         mount_mutation ::Mutations::Vulnerabilities::Dismiss
+        mount_mutation ::Mutations::Vulnerabilities::Resolve
+        mount_mutation ::Mutations::Vulnerabilities::Confirm
+        mount_mutation ::Mutations::Vulnerabilities::RevertToDetected
         mount_mutation ::Mutations::Boards::Update
         mount_mutation ::Mutations::Boards::Lists::UpdateLimitMetrics
+        mount_mutation ::Mutations::Boards::UpdateEpicUserPreferences
         mount_mutation ::Mutations::InstanceSecurityDashboard::AddProject
         mount_mutation ::Mutations::InstanceSecurityDashboard::RemoveProject
-        mount_mutation ::Mutations::Pipelines::RunDastScan
         mount_mutation ::Mutations::DastOnDemandScans::Create
         mount_mutation ::Mutations::DastSiteProfiles::Create
         mount_mutation ::Mutations::DastSiteProfiles::Update
         mount_mutation ::Mutations::DastSiteProfiles::Delete
+        mount_mutation ::Mutations::DastSiteValidations::Create
         mount_mutation ::Mutations::DastScannerProfiles::Create
         mount_mutation ::Mutations::DastScannerProfiles::Update
         mount_mutation ::Mutations::DastScannerProfiles::Delete
+        mount_mutation ::Mutations::DastSiteTokens::Create
         mount_mutation ::Mutations::Security::CiConfiguration::ConfigureSast
         mount_mutation ::Mutations::Namespaces::IncreaseStorageTemporarily
+        mount_mutation ::Mutations::QualityManagement::TestCases::Create
+        mount_mutation ::Mutations::Admin::Analytics::DevopsAdoption::Segments::Create
+        mount_mutation ::Mutations::Admin::Analytics::DevopsAdoption::Segments::Update
+        mount_mutation ::Mutations::Admin::Analytics::DevopsAdoption::Segments::Delete
+        mount_mutation ::Mutations::IncidentManagement::OncallSchedule::Create
+        mount_mutation ::Mutations::IncidentManagement::OncallSchedule::Destroy
+
+        prepend(Types::DeprecatedMutations)
       end
     end
   end

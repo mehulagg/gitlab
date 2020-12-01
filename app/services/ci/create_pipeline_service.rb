@@ -14,9 +14,11 @@ module Ci
                 Gitlab::Ci::Pipeline::Chain::Config::Process,
                 Gitlab::Ci::Pipeline::Chain::RemoveUnwantedChatJobs,
                 Gitlab::Ci::Pipeline::Chain::Skip,
+                Gitlab::Ci::Pipeline::Chain::SeedBlock,
                 Gitlab::Ci::Pipeline::Chain::EvaluateWorkflowRules,
                 Gitlab::Ci::Pipeline::Chain::Seed,
                 Gitlab::Ci::Pipeline::Chain::Limit::Size,
+                Gitlab::Ci::Pipeline::Chain::Limit::Deployments,
                 Gitlab::Ci::Pipeline::Chain::Validate::External,
                 Gitlab::Ci::Pipeline::Chain::Populate,
                 Gitlab::Ci::Pipeline::Chain::StopDryRun,
@@ -70,7 +72,7 @@ module Ci
         push_options: params[:push_options] || {},
         chat_data: params[:chat_data],
         bridge: bridge,
-        **extra_options(options))
+        **extra_options(**options))
 
       # Ensure we never persist the pipeline when dry_run: true
       @pipeline.readonly! if command.dry_run?
@@ -82,8 +84,7 @@ module Ci
       schedule_head_pipeline_update if pipeline.persisted?
 
       # If pipeline is not persisted, try to recover IID
-      pipeline.reset_project_iid unless pipeline.persisted? ||
-          Feature.disabled?(:ci_pipeline_rewind_iid, project, default_enabled: true)
+      pipeline.reset_project_iid unless pipeline.persisted?
 
       pipeline
     end

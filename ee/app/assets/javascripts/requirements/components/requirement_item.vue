@@ -1,12 +1,10 @@
 <script>
-import { escape } from 'lodash';
 import { GlPopover, GlLink, GlAvatar, GlButton, GlTooltipDirective } from '@gitlab/ui';
-import { __, sprintf } from '~/locale';
-import { getTimeago } from '~/lib/utils/datetime_utility';
 import timeagoMixin from '~/vue_shared/mixins/timeago';
 
 import RequirementStatusBadge from './requirement_status_badge.vue';
 
+import RequirementMeta from '../mixins/requirement_meta';
 import { FilterState } from '../constants';
 
 export default {
@@ -20,7 +18,7 @@ export default {
   directives: {
     GlTooltip: GlTooltipDirective,
   },
-  mixins: [timeagoMixin],
+  mixins: [RequirementMeta, timeagoMixin],
   props: {
     requirement: {
       type: Object,
@@ -42,36 +40,13 @@ export default {
       required: false,
       default: false,
     },
+    active: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   computed: {
-    reference() {
-      return `REQ-${this.requirement.iid}`;
-    },
-    canUpdate() {
-      return this.requirement.userPermissions.updateRequirement;
-    },
-    canArchive() {
-      return this.requirement.userPermissions.adminRequirement;
-    },
-    createdAt() {
-      return sprintf(__('created %{timeAgo}'), {
-        timeAgo: escape(getTimeago().format(this.requirement.createdAt)),
-      });
-    },
-    updatedAt() {
-      return sprintf(__('updated %{timeAgo}'), {
-        timeAgo: escape(getTimeago().format(this.requirement.updatedAt)),
-      });
-    },
-    isArchived() {
-      return this.requirement?.state === FilterState.archived;
-    },
-    author() {
-      return this.requirement.author;
-    },
-    testReport() {
-      return this.requirement.testReports.nodes[0];
-    },
     showIssuableMetaActions() {
       return Boolean(this.canUpdate || this.canArchive || this.testReport);
     },
@@ -105,73 +80,77 @@ export default {
 </script>
 
 <template>
-  <li class="issue requirement" :class="{ 'disabled-content': stateChangeRequestActive }">
-    <div class="issue-box">
-      <div class="issuable-info-container">
-        <span class="issuable-reference text-muted d-none d-sm-block mr-2">{{ reference }}</span>
-        <div class="issuable-main-info">
-          <span class="issuable-reference text-muted d-block d-sm-none">{{ reference }}</span>
-          <div class="issue-title title">
-            <span class="issue-title-text">{{ requirement.title }}</span>
-          </div>
-          <div class="issuable-info d-none d-sm-inline-block">
-            <span class="issuable-authored">
-              <span
-                v-gl-tooltip:tooltipcontainer.bottom
-                :title="tooltipTitle(requirement.createdAt)"
-                >{{ createdAt }}</span
-              >
-              {{ __('by') }}
-              <gl-link ref="authorLink" class="author-link js-user-link" :href="author.webUrl">
-                <span class="author">{{ author.name }}</span>
-              </gl-link>
-            </span>
+  <li
+    class="issue requirement gl-cursor-pointer"
+    :class="{ 'disabled-content': stateChangeRequestActive, 'gl-bg-blue-50': active }"
+    @click="$emit('show-click', requirement)"
+  >
+    <div class="issuable-info-container">
+      <span class="issuable-reference text-muted d-none d-sm-block mr-2">{{ reference }}</span>
+      <div class="issuable-main-info">
+        <span class="issuable-reference text-muted d-block d-sm-none">{{ reference }}</span>
+        <div class="issue-title title">
+          <span class="issue-title-text">{{ requirement.title }}</span>
+        </div>
+        <div class="issuable-info d-none d-sm-inline-block">
+          <span class="issuable-authored">
             <span
               v-gl-tooltip:tooltipcontainer.bottom
-              :title="tooltipTitle(requirement.updatedAt)"
-              class="issuable-updated-at"
-              >&middot; {{ updatedAt }}</span
+              :title="tooltipTitle(requirement.createdAt)"
+              >{{ createdAtFormatted }}</span
             >
-          </div>
+            {{ __('by') }}
+            <gl-link ref="authorLink" class="author-link js-user-link" :href="author.webUrl">
+              <span class="author">{{ author.name }}</span>
+            </gl-link>
+          </span>
+          <span
+            v-gl-tooltip:tooltipcontainer.bottom
+            :title="tooltipTitle(requirement.updatedAt)"
+            class="issuable-updated-at"
+            >&middot; {{ updatedAtFormatted }}</span
+          >
+        </div>
+        <requirement-status-badge
+          v-if="testReport"
+          :test-report="testReport"
+          :last-test-report-manually-created="requirement.lastTestReportManuallyCreated"
+          class="d-block d-sm-none"
+        />
+      </div>
+      <div class="d-flex">
+        <ul v-if="showIssuableMetaActions" class="controls flex-column flex-sm-row">
           <requirement-status-badge
             v-if="testReport"
             :test-report="testReport"
-            class="d-block d-sm-none"
+            :last-test-report-manually-created="requirement.lastTestReportManuallyCreated"
+            element-type="li"
+            class="d-none d-sm-block"
           />
-        </div>
-        <div class="d-flex">
-          <ul v-if="showIssuableMetaActions" class="controls flex-column flex-sm-row">
-            <requirement-status-badge
-              v-if="testReport"
-              :test-report="testReport"
-              element-type="li"
-              class="d-none d-sm-block"
+          <li v-if="canUpdate && !isArchived" class="requirement-edit d-sm-block">
+            <gl-button
+              v-gl-tooltip
+              icon="pencil"
+              :title="__('Edit')"
+              @click="$emit('edit-click', requirement)"
             />
-            <li v-if="canUpdate && !isArchived" class="requirement-edit d-sm-block">
-              <gl-button
-                v-gl-tooltip
-                icon="pencil"
-                :title="__('Edit')"
-                @click="$emit('editClick', requirement)"
-              />
-            </li>
-            <li v-if="canArchive && !isArchived" class="requirement-archive d-sm-block">
-              <gl-button
-                v-if="!stateChangeRequestActive"
-                v-gl-tooltip
-                icon="archive"
-                :loading="stateChangeRequestActive"
-                :title="__('Archive')"
-                @click="handleArchiveClick"
-              />
-            </li>
-            <li v-if="canArchive && isArchived" class="requirement-reopen d-sm-block">
-              <gl-button :loading="stateChangeRequestActive" @click="handleReopenClick">{{
-                __('Reopen')
-              }}</gl-button>
-            </li>
-          </ul>
-        </div>
+          </li>
+          <li v-if="canArchive && !isArchived" class="requirement-archive d-sm-block">
+            <gl-button
+              v-if="!stateChangeRequestActive"
+              v-gl-tooltip
+              icon="archive"
+              :loading="stateChangeRequestActive"
+              :title="__('Archive')"
+              @click.stop="handleArchiveClick"
+            />
+          </li>
+          <li v-if="canArchive && isArchived" class="requirement-reopen d-sm-block">
+            <gl-button :loading="stateChangeRequestActive" @click="handleReopenClick">{{
+              __('Reopen')
+            }}</gl-button>
+          </li>
+        </ul>
       </div>
     </div>
     <gl-popover :target="getAuthorPopoverTarget()" triggers="hover focus" placement="top">

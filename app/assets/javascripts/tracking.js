@@ -9,9 +9,10 @@ const DEFAULT_SNOWPLOW_OPTIONS = {
   respectDoNotTrack: true,
   forceSecureTracker: true,
   eventMethod: 'post',
-  contexts: { webPage: true },
+  contexts: { webPage: true, performanceTiming: true },
   formTracking: false,
   linkClickTracking: false,
+  pageUnloadTimer: 10,
 };
 
 const createEventPayload = (el, { suffix = '' } = {}) => {

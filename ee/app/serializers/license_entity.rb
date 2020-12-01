@@ -3,7 +3,11 @@
 class LicenseEntity < Grape::Entity
   class ComponentEntity < Grape::Entity
     expose :name
-    expose :path, as: :blob_path
+    expose :version
+    expose :package_manager
+    expose :blob_path do |model, options|
+      model.blob_path_for(options[:project])
+    end
   end
 
   expose :id

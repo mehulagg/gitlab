@@ -1,7 +1,7 @@
 import Search from './search';
-import initStateFilter from '~/search/state_filter';
+import { initSearchApp } from '~/search';
 
 document.addEventListener('DOMContentLoaded', () => {
-  initStateFilter();
-  return new Search();
+  initSearchApp();
+  return new Search(); // Deprecated Dropdown (Projects)
 });

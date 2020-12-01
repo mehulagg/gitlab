@@ -2,6 +2,7 @@
 
 class ProjectStatistics < ApplicationRecord
   include AfterCommitQueue
+  include CounterAttribute
 
   belongs_to :project
   belongs_to :namespace
@@ -9,16 +10,23 @@ class ProjectStatistics < ApplicationRecord
   default_value_for :wiki_size, 0
   default_value_for :snippets_size, 0
 
+  counter_attribute :build_artifacts_size
+  counter_attribute :storage_size
+
+  counter_attribute_after_flush do |project_statistic|
+    Namespaces::ScheduleAggregationWorker.perform_async(project_statistic.namespace_id)
+  end
+
   before_save :update_storage_size
 
-  COLUMNS_TO_REFRESH = [:repository_size, :wiki_size, :lfs_objects_size, :commit_count, :snippets_size].freeze
+  COLUMNS_TO_REFRESH = [:repository_size, :wiki_size, :lfs_objects_size, :commit_count, :snippets_size, :uploads_size].freeze
   INCREMENTABLE_COLUMNS = {
     build_artifacts_size: %i[storage_size],
     packages_size: %i[storage_size],
     pipeline_artifacts_size: %i[storage_size],
     snippets_size: %i[storage_size]
   }.freeze
-  NAMESPACE_RELATABLE_COLUMNS = [:repository_size, :wiki_size, :lfs_objects_size].freeze
+  NAMESPACE_RELATABLE_COLUMNS = [:repository_size, :wiki_size, :lfs_objects_size, :uploads_size].freeze
 
   scope :for_project_ids, ->(project_ids) { where(project_id: project_ids) }
 
@@ -29,6 +37,8 @@ class ProjectStatistics < ApplicationRecord
   end
 
   def refresh!(only: [])
+    return if Gitlab::Database.read_only?
+
     COLUMNS_TO_REFRESH.each do |column, generator|
       if only.empty? || only.include?(column)
         public_send("update_#{column}") # rubocop:disable GitlabSecurity/PublicSend
@@ -62,6 +72,12 @@ class ProjectStatistics < ApplicationRecord
     self.lfs_objects_size = project.lfs_objects.sum(:size)
   end
 
+  def update_uploads_size
+    return uploads_size unless Feature.enabled?(:count_uploads_size_in_storage_stats, project)
+
+    self.uploads_size = project.uploads.sum(:size)
+  end
+
   # `wiki_size` and `snippets_size` have no default value in the database
   # and the column can be nil.
   # This means that, when the columns were added, all rows had nil
@@ -88,6 +104,10 @@ class ProjectStatistics < ApplicationRecord
     # might try to update project statistics before the `pipeline_artifacts_size` column has been created.
     storage_size += pipeline_artifacts_size if self.class.column_names.include?('pipeline_artifacts_size')
 
+    # The `uploads_size` column was added on 20201105021637 but db/post_migrate/20190527194900_schedule_calculate_wiki_sizes.rb
+    # might try to update project statistics before the `uploads_size` column has been created.
+    storage_size += uploads_size if self.class.column_names.include?('uploads_size')
+
     self.storage_size = storage_size
   end
 
@@ -96,12 +116,27 @@ class ProjectStatistics < ApplicationRecord
   # Additional columns are updated depending on key => [columns], which allows
   # to update statistics which are and also those which aren't included in storage_size
   # or any other additional summary column in the future.
-  def self.increment_statistic(project_id, key, amount)
+  def self.increment_statistic(project, key, amount)
     raise ArgumentError, "Cannot increment attribute: #{key}" unless INCREMENTABLE_COLUMNS.key?(key)
     return if amount == 0
 
-    where(project_id: project_id)
-      .columns_to_increment(key, amount)
+    project.statistics.try do |project_statistics|
+      if project_statistics.counter_attribute_enabled?(key)
+        statistics_to_increment = [key] + INCREMENTABLE_COLUMNS[key].to_a
+        statistics_to_increment.each do |statistic|
+          project_statistics.delayed_increment_counter(statistic, amount)
+        end
+      else
+        legacy_increment_statistic(project, key, amount)
+      end
+    end
+  end
+
+  def self.legacy_increment_statistic(project, key, amount)
+    where(project_id: project.id).columns_to_increment(key, amount)
+
+    Namespaces::ScheduleAggregationWorker.perform_async( # rubocop: disable CodeReuse/Worker
+      project.namespace_id)
   end
 
   def self.columns_to_increment(key, amount)

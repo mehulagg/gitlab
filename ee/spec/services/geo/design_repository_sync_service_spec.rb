@@ -111,7 +111,7 @@ RSpec.describe Geo::DesignRepositorySyncService do
 
       allow(repository).to receive(:fetch_as_mirror)
         .with(url_to_repo, remote_name: 'geo', forced: true)
-        .and_raise(Gitlab::Shell::Error.new(Gitlab::GitAccess::ERROR_MESSAGES[:no_repo]))
+        .and_raise(Gitlab::Shell::Error.new(Gitlab::GitAccessDesign::ERROR_MESSAGES[:no_repo]))
 
       subject.execute
 

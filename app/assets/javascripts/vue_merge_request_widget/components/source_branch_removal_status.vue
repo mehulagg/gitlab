@@ -1,6 +1,5 @@
 <script>
-import { GlSprintf } from '@gitlab/ui';
-import tooltip from '../../vue_shared/directives/tooltip';
+import { GlIcon, GlSprintf, GlTooltipDirective } from '@gitlab/ui';
 import { __ } from '../../locale';
 
 export default {
@@ -9,10 +8,11 @@ export default {
     tooltipTitle: __('A user with write access to the source branch selected this option'),
   },
   components: {
+    GlIcon,
     GlSprintf,
   },
   directives: {
-    tooltip,
+    GlTooltip: GlTooltipDirective,
   },
 };
 </script>
@@ -26,12 +26,11 @@ export default {
         </template>
       </gl-sprintf>
     </span>
-    <i
-      v-tooltip
+    <gl-icon
+      v-gl-tooltip.hover
       :title="$options.i18n.tooltipTitle"
       :aria-label="$options.i18n.tooltipTitle"
-      class="fa fa-question-circle"
-    >
-    </i>
+      name="question-o"
+    />
   </p>
 </template>

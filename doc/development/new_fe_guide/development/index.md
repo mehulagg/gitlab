@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Development
 
 ## [Components](components.md)
@@ -12,6 +18,6 @@ Learn how to implement an accessible frontend.
 
 Learn how to keep our frontend performant.
 
-## [Testing](testing.md)
+## [Testing](../../testing_guide/frontend_testing.md)
 
 Learn how to keep our frontend tested.

@@ -1,4 +1,10 @@
-# Admin Sidekiq queues API
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
+# Sidekiq queues administration API **(CORE ONLY)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/25998) in GitLab 12.9
 
@@ -15,7 +21,7 @@ The response has three fields:
    delete further jobs (including those added after the first request
    was issued).
 
-This API endpoint is only available to admin users.
+This API endpoint is only available to administrators.
 
 ```plaintext
 DELETE /admin/sidekiq/queues/:queue_name
@@ -29,6 +35,7 @@ DELETE /admin/sidekiq/queues/:queue_name
 | `root_namespace`    | string         | no       | The root namespace of the project                                                                                                            |
 | `subscription_plan` | string         | no       | The subscription plan of the root namespace (GitLab.com only)                                                                                |
 | `caller_id`         | string         | no       | The endpoint or background job that schedule the job (for example: `ProjectsController#create`, `/api/:version/projects/:id`, `PostReceive`) |
+| `feature_category`  | string         | no       | The feature category of the background job (for example: `issue_tracking` or `code_review`)                                                  |
 
 At least one attribute, other than `queue_name`, is required.
 

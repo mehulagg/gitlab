@@ -24,7 +24,7 @@ module ServicesHelper
     when "commit", "commit_events"
       s_("ProjectService|Event will be triggered when a commit is created/updated")
     when "deployment"
-      s_("ProjectService|Event will be triggered when a deployment finishes")
+      s_("ProjectService|Event will be triggered when a deployment starts or finishes")
     when "alert"
       s_("ProjectService|Event will be triggered when a new, unique alert is recorded")
     end
@@ -33,13 +33,6 @@ module ServicesHelper
   def service_event_field_name(event)
     event = event.pluralize if %w[merge_request issue confidential_issue].include?(event)
     "#{event}_events"
-  end
-
-  def service_save_button(disabled: false)
-    button_tag(class: 'btn btn-success', type: 'submit', disabled: disabled, data: { qa_selector: 'save_changes_button' }) do
-      icon('spinner spin', class: 'hidden js-btn-spinner') +
-        content_tag(:span, 'Save changes', class: 'js-btn-label')
-    end
   end
 
   def scoped_integrations_path
@@ -96,7 +89,12 @@ module ServicesHelper
       trigger_events: trigger_events_for_service(integration),
       fields: fields_for_service(integration),
       inherit_from_id: integration.inherit_from_id,
-      integration_level: integration_level(integration)
+      integration_level: integration_level(integration),
+      editable: integration.editable?.to_s,
+      cancel_path: scoped_integrations_path,
+      can_test: integration.can_test?.to_s,
+      test_path: scoped_test_integration_path(integration),
+      reset_path: ''
     }
   end
 
@@ -117,7 +115,11 @@ module ServicesHelper
   end
 
   def group_level_integrations?
-    @group.present? && Feature.enabled?(:group_level_integrations, @group)
+    @group.present? && Feature.enabled?(:group_level_integrations, @group, default_enabled: true)
+  end
+
+  def instance_level_integrations?
+    !Gitlab.com?
   end
 
   extend self

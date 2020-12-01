@@ -1,9 +1,11 @@
-import { mount } from '@vue/test-utils';
 import { GlDrawer } from '@gitlab/ui';
-import waitForPromises from 'helpers/wait_for_promises';
+import { mount } from '@vue/test-utils';
 import BoardContentSidebar from 'ee_component/boards/components/board_content_sidebar.vue';
-import { createStore } from '~/boards/stores';
+import waitForPromises from 'helpers/wait_for_promises';
+import BoardAssigneeDropdown from '~/boards/components/board_assignee_dropdown.vue';
+import IssuableTitle from '~/boards/components/issuable_title.vue';
 import { ISSUABLE } from '~/boards/constants';
+import { createStore } from '~/boards/stores';
 
 describe('ee/BoardContentSidebar', () => {
   let wrapper;
@@ -11,15 +13,36 @@ describe('ee/BoardContentSidebar', () => {
 
   const createComponent = () => {
     wrapper = mount(BoardContentSidebar, {
+      provide: {
+        canUpdate: true,
+        rootPath: '',
+      },
       store,
+      stubs: {
+        'board-sidebar-epic-select': '<div></div>',
+        'board-sidebar-time-tracker': '<div></div>',
+        'board-sidebar-weight-input': '<div></div>',
+        'board-sidebar-labels-select': '<div></div>',
+        'board-sidebar-due-date': '<div></div>',
+        'board-sidebar-subscription': '<div></div>',
+        'board-sidebar-milestone-select': '<div></div>',
+      },
+      mocks: {
+        $apollo: {
+          queries: {
+            participants: {
+              loading: false,
+            },
+          },
+        },
+      },
     });
   };
 
   beforeEach(() => {
     store = createStore();
     store.state.sidebarType = ISSUABLE;
-    store.state.activeId = 1;
-    store.state.issues = { '1': { title: 'One', referencePath: 'path' } };
+    store.state.issues = { '1': { title: 'One', referencePath: 'path', assignees: [] } };
     store.state.activeId = '1';
 
     createComponent();
@@ -27,6 +50,7 @@ describe('ee/BoardContentSidebar', () => {
 
   afterEach(() => {
     wrapper.destroy();
+    wrapper = null;
   });
 
   it('confirms we render GlDrawer', () => {
@@ -37,12 +61,12 @@ describe('ee/BoardContentSidebar', () => {
     expect(wrapper.find(GlDrawer).props('open')).toBe(true);
   });
 
-  it('renders a title of an issue in the sidebar', () => {
-    expect(wrapper.find('[data-testid="issue-title"]').text()).toContain('One');
+  it('finds IssuableTitle', () => {
+    expect(wrapper.find(IssuableTitle).text()).toContain('One');
   });
 
-  it('renders a referencePath of an issue in the sidebar', () => {
-    expect(wrapper.find('[data-testid="issue-title"]').text()).toContain('path');
+  it('renders BoardAssigneeDropdown', () => {
+    expect(wrapper.find(BoardAssigneeDropdown).exists()).toBe(true);
   });
 
   describe('when we emit close', () => {

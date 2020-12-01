@@ -1,10 +1,12 @@
 # frozen_string_literal: true
 
 module API
-  class FreezePeriods < Grape::API::Instance
+  class FreezePeriods < ::API::Base
     include PaginationParams
 
     before { authenticate! }
+
+    feature_category :continuous_delivery
 
     params do
       requires :id, type: String, desc: 'The ID of a project'

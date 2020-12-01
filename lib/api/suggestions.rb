@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 
 module API
-  class Suggestions < Grape::API::Instance
+  class Suggestions < ::API::Base
     before { authenticate! }
+
+    feature_category :code_review
 
     resource :suggestions do
       desc 'Apply suggestion patch in the Merge Request it was created' do

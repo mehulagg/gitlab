@@ -3,6 +3,8 @@ class Projects::ProtectedEnvironmentsController < Projects::ApplicationControlle
   before_action :authorize_admin_project!
   before_action :protected_environment, except: [:create, :search]
 
+  feature_category :continuous_delivery
+
   def create
     protected_environment = ::ProtectedEnvironments::CreateService.new(@project, current_user, protected_environment_params).execute
 

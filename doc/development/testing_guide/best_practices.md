@@ -81,7 +81,7 @@ browser is much slower than parsing the HTML response from the app.
 
 A common cause of slow tests is excessive creation of objects, and thus
 computation and DB time. Factories are essential to development, but they can
-make inserting data into the DB so easy that we may be able to optimize. 
+make inserting data into the DB so easy that we may be able to optimize.
 
 The two basic techniques to bear in mind here are:
 
@@ -151,11 +151,14 @@ In order to reuse a single object for all calls to a named factory in implicit p
 can be used:
 
 ```ruby
+RSpec.describe API::Search, factory_default: :keep do
   let_it_be(:namespace) { create_default(:namespace) }
 ```
 
 Then every project we create will use this `namespace`, without us having to pass
-it as `namespace: namespace`.
+it as `namespace: namespace`. In order to make it work along with `let_it_be`, `factory_default: :keep`
+must be explicitly specified. That will keep the default factory for every example in a suite instead of
+recreating it for each example.
 
 Maybe we don't need to create 208 different projects - we
 can create one and reuse it. In addition, we can see that only about 1/3 of the
@@ -237,7 +240,7 @@ end
 
 it 'schedules a background job' do
   expect(BackgroundJob).to receive(:perform_async)
-  
+
   subject.execute
 end
 ```
@@ -249,7 +252,7 @@ combining the examples:
 ```ruby
 it 'performs the expected side-effects' do
   expect(BackgroundJob).to receive(:perform_async)
-  
+
   expect { subject.execute }
     .to change(Event, :count).by(1)
     .and change { arg_0.frobulance }.to('wibble')
@@ -358,7 +361,7 @@ Finished in 34.51 seconds (files took 0.76702 seconds to load)
 1 example, 0 failures
 ```
 
-Note: `live_debug` only works on JavaScript enabled specs.
+`live_debug` only works on JavaScript enabled specs.
 
 #### Run `:js` spec in a visible browser
 
@@ -427,9 +430,9 @@ spec itself, but the former is preferred.
 It takes around one second to load tests that are using `fast_spec_helper`
 instead of 30+ seconds in case of a regular `spec_helper`.
 
-### `let` variables
+### `subject` and `let` variables
 
-GitLab's RSpec suite has made extensive use of `let`(along with it strict, non-lazy
+GitLab's RSpec suite has made extensive use of `let`(along with its strict, non-lazy
 version `let!`) variables to reduce duplication. However, this sometimes [comes at the cost of clarity](https://thoughtbot.com/blog/lets-not),
 so we need to set some guidelines for their use going forward:
 
@@ -448,6 +451,9 @@ so we need to set some guidelines for their use going forward:
 - `let!` variables should be used only in case if strict evaluation with defined
   order is required, otherwise `let` will suffice. Remember that `let` is lazy and won't
   be evaluated until it is referenced.
+- Avoid referencing `subject` in examples. Use a named subject `subject(:name)`, or a `let` variable instead, so
+  the variable has a contextual name.
+- If the `subject` is never referenced inside examples, then it's acceptable to define the `subject` without a name.
 
 ### Common test setup
 
@@ -478,26 +484,30 @@ This will result in only one `Project`, `User`, and `ProjectMember` created for 
 is handled automatically using a transaction rollback.
 
 Note that if you modify an object defined inside a `let_it_be` block,
-then you will need to reload the object as needed, or specify the `reload`
-option to reload for every example.
+then you must do one of the following:
+
+- Reload the object as needed.
+- Use the `let_it_be_with_reload` alias.
+- Specify the `reload` option to reload for every example.
 
 ```ruby
+let_it_be_with_reload(:project) { create(:project) }
 let_it_be(:project, reload: true) { create(:project) }
 ```
 
-You can also specify the `refind` option as well to completely load a
-new object.
+You can also use the `let_it_be_with_refind` alias, or specify the `refind`
+option as well to completely load a new object.
 
 ```ruby
+let_it_be_with_refind(:project) { create(:project) }
 let_it_be(:project, refind: true) { create(:project) }
 ```
 
 ### Time-sensitive tests
 
-[Timecop](https://github.com/travisjeffery/timecop) is available in our
-Ruby-based tests for verifying things that are time-sensitive. Any test that
-exercises or verifies something time-sensitive should make use of Timecop to
-prevent transient test failures.
+[`ActiveSupport::Testing::TimeHelpers`](https://api.rubyonrails.org/v6.0.3.1/classes/ActiveSupport/Testing/TimeHelpers.html)
+can be used to verify things that are time-sensitive. Any test that exercises or verifies something time-sensitive
+should make use of these helpers to prevent transient test failures.
 
 Example:
 
@@ -505,7 +515,7 @@ Example:
 it 'is overdue' do
   issue = build(:issue, due_date: Date.tomorrow)
 
-  Timecop.freeze(3.days.from_now) do
+  travel_to(3.days.from_now) do
     expect(issue).to be_overdue
   end
 end
@@ -574,9 +584,9 @@ this trait should be either fixed to not rely on Sidekiq processing jobs, or the
 `:sidekiq_might_not_need_inline` trait should be updated to `:sidekiq_inline` if
 the processing of background jobs is needed/expected.
 
-NOTE: **Note:**
-The usage of `perform_enqueued_jobs` is only useful for testing delayed mail
-deliveries since our Sidekiq workers aren't inheriting from `ApplicationJob` / `ActiveJob::Base`.
+The usage of `perform_enqueued_jobs` is useful only for testing delayed mail
+deliveries, because our Sidekiq workers aren't inheriting from `ApplicationJob`
+/ `ActiveJob::Base`.
 
 #### DNS
 
@@ -592,6 +602,32 @@ it "really connects to Prometheus", :permit_dns do
 
 And if you need more specific control, the DNS blocking is implemented in
 `spec/support/helpers/dns_helpers.rb` and these methods can be called elsewhere.
+
+#### Stubbing File methods
+
+In the situations where you need to
+[stub](https://relishapp.com/rspec/rspec-mocks/v/3-9/docs/basics/allowing-messages)
+methods such as `File.read`, make sure to:
+
+1. Stub `File.read` for only the filepath you are interested in.
+1. Call the original implementation for other filepaths.
+
+Otherwise `File.read` calls from other parts of the codebase get
+stubbed incorrectly. You should use the `stub_file_read`, and
+`expect_file_read` helper methods which does the stubbing for
+`File.read` correctly.
+
+```ruby
+# bad, all Files will read and return nothing
+allow(File).to receive(:read)
+
+# good
+stub_file_read(my_filepath)
+
+# also OK
+allow(File).to receive(:read).and_call_original
+allow(File).to receive(:read).with(my_filepath)
+```
 
 #### Filesystem
 
@@ -885,6 +921,10 @@ GitLab uses [factory_bot](https://github.com/thoughtbot/factory_bot) as a test f
   resulting record to pass validation.
 - When instantiating from a factory, don't supply attributes that aren't
   required by the test.
+- Prefer [implicit](https://github.com/thoughtbot/factory_bot/blob/master/GETTING_STARTED.md#implicit-definition)
+  or [explicit](https://github.com/thoughtbot/factory_bot/blob/master/GETTING_STARTED.md#explicit-definition)
+  association definitions instead of using `create` / `build` for association setup.
+  See [issue #262624](https://gitlab.com/gitlab-org/gitlab/-/issues/262624) for further context.
 - Factories don't have to be limited to `ActiveRecord` objects.
   [See example](https://gitlab.com/gitlab-org/gitlab-foss/commit/0b8cefd3b2385a21cfed779bd659978c0402766d).
 

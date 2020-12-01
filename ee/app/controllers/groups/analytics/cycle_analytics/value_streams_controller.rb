@@ -1,9 +1,7 @@
 # frozen_string_literal: true
 
-class Groups::Analytics::CycleAnalytics::ValueStreamsController < Analytics::ApplicationController
+class Groups::Analytics::CycleAnalytics::ValueStreamsController < Groups::Analytics::ApplicationController
   respond_to :json
-
-  check_feature_flag Gitlab::Analytics::CYCLE_ANALYTICS_FEATURE_FLAG
 
   before_action :load_group
   before_action do

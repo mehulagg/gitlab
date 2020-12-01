@@ -22,7 +22,8 @@ module Gitlab
     REPLICATOR_CLASSES = [
       ::Geo::MergeRequestDiffReplicator,
       ::Geo::PackageFileReplicator,
-      ::Geo::TerraformStateReplicator
+      ::Geo::TerraformStateVersionReplicator,
+      ::Geo::SnippetRepositoryReplicator
     ].freeze
 
     def self.current_node
@@ -87,7 +88,7 @@ module Gitlab
     end
 
     def self.oauth_authentication
-      return false unless Gitlab::Geo.secondary?
+      return unless Gitlab::Geo.secondary?
 
       self.cache_value(:oauth_application) do
         Gitlab::Geo.current_node.oauth_application || raise(OauthApplicationUndefinedError)

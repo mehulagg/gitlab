@@ -7,6 +7,7 @@ RSpec.describe API::Epics do
   let(:group) { create(:group) }
   let(:project) { create(:project, :public, group: group) }
   let(:label) { create(:group_label, group: group) }
+  let(:label2) { create(:group_label, group: group, title: 'label-2') }
   let!(:epic) { create(:labeled_epic, group: group, labels: [label]) }
   let(:params) { nil }
 
@@ -58,6 +59,13 @@ RSpec.describe API::Epics do
 
         expect(Array.wrap(json_response)).to all(include(*extra_date_fields))
       end
+    end
+  end
+
+  shared_context 'with labels' do
+    before do
+      create(:label_link, label: label, target: epic)
+      create(:label_link, label: label2, target: epic)
     end
   end
 
@@ -610,17 +618,36 @@ RSpec.describe API::Epics do
         end
       end
 
-      context 'when confidential_epics flag is disabled' do
-        before do
-          stub_feature_flags(confidential_epics: false)
+      context 'setting created_at' do
+        let(:creation_time) { 2.weeks.ago }
+        let(:params) { { title: 'new epic', created_at: creation_time } }
 
-          post api(url, user), params: params
+        it 'sets the creation time on the new epic if the user is an admin' do
+          admin = create(:user, :admin)
+
+          post api(url, admin), params: params
+
+          expect(response).to have_gitlab_http_status(:created)
+          expect(Time.parse(json_response['created_at'])).to be_like_time(creation_time)
         end
 
-        it 'ignores confidential attribute' do
-          epic = Epic.last
+        it 'sets the creation time on the new epic if the user is a group owner' do
+          group.add_owner(user)
 
-          expect(epic.confidential).to be_falsey
+          post api(url, user), params: params
+
+          expect(response).to have_gitlab_http_status(:created)
+          expect(Time.parse(json_response['created_at'])).to be_like_time(creation_time)
+        end
+
+        it 'ignores the given creation time if the user is another user' do
+          user2 = create(:user)
+          group.add_developer(user2)
+
+          post api(url, user2), params: params
+
+          expect(response).to have_gitlab_http_status(:created)
+          expect(Time.parse(json_response['created_at'])).not_to be_like_time(creation_time)
         end
       end
 
@@ -724,19 +751,6 @@ RSpec.describe API::Epics do
           end
         end
 
-        context 'when confidential_epics flag is disabled' do
-          before do
-            stub_feature_flags(confidential_epics: false)
-            stub_licensed_features(epics: true)
-
-            put api(url, user), params: params
-          end
-
-          it 'does not include confidential attribute' do
-            expect(epic.reload.confidential).to be_falsey
-          end
-        end
-
         it 'clears labels when labels param is nil' do
           params[:labels] = 'label1'
           put api(url, user), params: params
@@ -756,22 +770,47 @@ RSpec.describe API::Epics do
           expect(json_response['labels']).to be_empty
         end
 
-        it 'updates the epic with labels param as array' do
-          stub_const("Gitlab::QueryLimiting::Transaction::THRESHOLD", 110)
+        context 'with labels' do
+          include_context 'with labels'
 
-          params[:labels] = ['label1', 'label2', 'foo, bar', '&,?']
+          it 'updates the epic with labels param as array' do
+            stub_const("Gitlab::QueryLimiting::Transaction::THRESHOLD", 110)
 
-          put api(url, user), params: params
+            params[:labels] = ['label1', 'label2', 'foo, bar', '&,?']
 
-          expect(response).to have_gitlab_http_status(:ok)
-          expect(json_response['title']).to include 'new title'
-          expect(json_response['description']).to include 'new description'
-          expect(json_response['labels']).to include 'label1'
-          expect(json_response['labels']).to include 'label2'
-          expect(json_response['labels']).to include 'foo'
-          expect(json_response['labels']).to include 'bar'
-          expect(json_response['labels']).to include '&'
-          expect(json_response['labels']).to include '?'
+            put api(url, user), params: params
+
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(json_response['title']).to include 'new title'
+            expect(json_response['description']).to include 'new description'
+            expect(json_response['labels']).to include 'label1'
+            expect(json_response['labels']).to include 'label2'
+            expect(json_response['labels']).to include 'foo'
+            expect(json_response['labels']).to include 'bar'
+            expect(json_response['labels']).to include '&'
+            expect(json_response['labels']).to include '?'
+          end
+
+          it 'when adding labels, keeps existing labels and adds new' do
+            put api(url, user), params: { add_labels: '1, 2' }
+
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(json_response['labels']).to contain_exactly(label.title, label2.title, '1', '2')
+          end
+
+          it 'when removing labels, only removes those specified' do
+            put api(url, user), params: { remove_labels: label.title }
+
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(json_response['labels']).to eq([label2.title])
+          end
+
+          it 'when removing all labels, keeps no labels' do
+            put api(url, user), params: { remove_labels: "#{label.title}, #{label2.title}" }
+
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(json_response['labels']).to be_empty
+          end
         end
 
         context 'when state_event is close' do
@@ -789,6 +828,38 @@ RSpec.describe API::Epics do
             put api(url, user), params: { state_event: 'reopen' }
 
             expect(epic.reload).to be_opened
+          end
+        end
+
+        context 'setting updated_at' do
+          let(:update_time) { 1.week.ago }
+
+          it 'ignores the given update time when run by another user' do
+            user2 = create(:user)
+            group.add_developer(user2)
+
+            put api(url, user2), params: { title: 'updated by other user', updated_at: update_time }
+
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(Time.parse(json_response['updated_at'])).not_to be_like_time(update_time)
+          end
+
+          it 'sets the update time on the epic when run by an admin' do
+            admin = create(:user, :admin)
+
+            put api(url, admin), params: { title: 'updated by admin', updated_at: update_time }
+
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(Time.parse(json_response['updated_at'])).to be_like_time(update_time)
+          end
+
+          it 'sets the update time on the epic when run by a group owner' do
+            group.add_owner(user)
+
+            put api(url, user), params: { title: 'updated by owner', updated_at: update_time }
+
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(Time.parse(json_response['updated_at'])).to be_like_time(update_time)
           end
         end
 

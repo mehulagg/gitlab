@@ -32,6 +32,8 @@ class CommitStatus < ApplicationRecord
     where(allow_failure: true, status: [:failed, :canceled])
   end
 
+  scope :order_id_desc, -> { order('ci_builds.id DESC') }
+
   scope :exclude_ignored, -> do
     # We want to ignore failed but allowed to fail jobs.
     #
@@ -46,6 +48,7 @@ class CommitStatus < ApplicationRecord
   scope :ordered_by_stage, -> { order(stage_idx: :asc) }
   scope :latest_ordered, -> { latest.ordered.includes(project: :namespace) }
   scope :retried_ordered, -> { retried.ordered.includes(project: :namespace) }
+  scope :ordered_by_pipeline, -> { order(pipeline_id: :asc) }
   scope :before_stage, -> (index) { where('stage_idx < ?', index) }
   scope :for_stage, -> (index) { where(stage_idx: index) }
   scope :after_stage, -> (index) { where('stage_idx > ?', index) }
@@ -202,8 +205,8 @@ class CommitStatus < ApplicationRecord
     # 'rspec:linux: 1/10' => 'rspec:linux'
     common_name = name.to_s.gsub(%r{\d+[\s:\/\\]+\d+\s*}, '')
 
-    # 'rspec:linux: [aws, max memory]' => 'rspec:linux'
-    common_name.gsub!(%r{: \[.*, .*\]\s*\z}, '')
+    # 'rspec:linux: [aws, max memory]' => 'rspec:linux', 'rspec:linux: [aws]' => 'rspec:linux'
+    common_name.gsub!(%r{: \[.*\]\s*\z}, '')
 
     common_name.strip!
     common_name

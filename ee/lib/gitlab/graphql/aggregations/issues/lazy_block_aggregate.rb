@@ -7,8 +7,9 @@ module Gitlab
         class LazyBlockAggregate
           attr_reader :issue_id, :lazy_state
 
-          def initialize(query_ctx, issue_id)
+          def initialize(query_ctx, issue_id, &block)
             @issue_id = issue_id
+            @block = block
 
             # Initialize the loading state for this query,
             # or get the previously-initiated state
@@ -27,7 +28,11 @@ module Gitlab
               load_records_into_loaded_objects
             end
 
-            !!@lazy_state[:loaded_objects][@issue_id]
+            result = @lazy_state[:loaded_objects][@issue_id]
+
+            return @block.call(result) if @block
+
+            result
           end
 
           private
@@ -36,10 +41,10 @@ module Gitlab
             # The record hasn't been loaded yet, so
             # hit the database with all pending IDs to prevent N+1
             pending_ids = @lazy_state[:pending_ids].to_a
-            blocked = IssueLink.blocked_issues_for_collection(pending_ids).compact.flatten
+            blocked_data = IssueLink.blocked_issues_for_collection(pending_ids).compact.flatten
 
-            blocked.each do |o|
-              @lazy_state[:loaded_objects][o.blocked_issue_id] = true
+            blocked_data.each do |blocked|
+              @lazy_state[:loaded_objects][blocked.blocked_issue_id] = blocked.count
             end
 
             @lazy_state[:pending_ids].clear

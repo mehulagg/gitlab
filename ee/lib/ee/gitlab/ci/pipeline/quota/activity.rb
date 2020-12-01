@@ -5,7 +5,7 @@ module EE
     module Ci
       module Pipeline
         module Quota
-          class Activity < Ci::Limit
+          class Activity < ::Gitlab::Ci::Limit
             include ::Gitlab::Utils::StrongMemoize
             include ActionView::Helpers::TextHelper
 

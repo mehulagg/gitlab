@@ -92,6 +92,7 @@ RSpec.describe Gitlab::Elastic::Indexer do
         expect_popen.with(
           [
             TestEnv.indexer_bin_path,
+            "--project-path=#{project.full_path}",
             project.id.to_s,
             "#{project.repository.disk_path}.git"
           ],
@@ -214,6 +215,7 @@ RSpec.describe Gitlab::Elastic::Indexer do
             TestEnv.indexer_bin_path,
             '--blob-type=wiki_blob',
             '--skip-commits',
+            "--project-path=#{project.full_path}",
             project.id.to_s,
             "#{project.wiki.repository.disk_path}.git"
           ],
@@ -385,6 +387,25 @@ RSpec.describe Gitlab::Elastic::Indexer do
     it 'indexes the file' do
       files = indexed_file_paths_for('file')
       expect(files).to include(long_path)
+    end
+  end
+
+  context 'when project no longer exists in database' do
+    let!(:logger_double) { instance_double(Gitlab::Elasticsearch::Logger) }
+
+    before do
+      allow(Gitlab::Elasticsearch::Logger).to receive(:build).and_return(logger_double)
+      allow(indexer).to receive(:run_indexer!) { Project.where(id: project.id).delete_all }
+    end
+
+    it 'does not raises an exception and prints log message' do
+      expect(logger_double).to receive(:debug).with(
+        message: 'Index status could not be updated as the project does not exist',
+        project_id: project.id,
+        wiki: false
+      )
+      expect(IndexStatus).not_to receive(:safe_find_or_create_by!).with(project_id: project.id)
+      expect { indexer.run }.not_to raise_error
     end
   end
 

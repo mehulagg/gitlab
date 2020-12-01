@@ -1,3 +1,10 @@
+---
+type: reference, dev
+stage: none
+group: Development
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Issues workflow
 
 ## Issue tracker guidelines
@@ -82,25 +89,6 @@ The descriptions on the [labels page](https://gitlab.com/groups/gitlab-org/-/lab
 explain what falls under each type label.
 
 The GitLab handbook documents [when something is a bug](https://about.gitlab.com/handbook/product/product-processes/#bug-issues) and [when it is a feature request](https://about.gitlab.com/handbook/product/product-processes/#feature-issues).
-
-### Facet labels
-
-Sometimes it's useful to refine the type of an issue. In those cases, you can
-add facet labels.
-
-Following is a non-exhaustive list of facet labels:
-
-- ~enhancement: This label can refine an issue that has the ~feature label.
-- ~"master:broken": This label can refine an issue that has the ~bug label.
-- ~"failure::flaky-test": This label can refine an issue that has the ~bug label.
-- ~"technical debt": This label can refine an issue that has the ~tooling label.
-- ~"static analysis": This label can refine an issue that has the ~tooling label.
-- ~"ci-build": This label can refine an issue that has the ~tooling label.
-- ~performance: A performance issue could describe a ~bug or a ~feature.
-- ~security: A security issue could describe a ~bug or a ~feature.
-- ~database: A database issue could describe a ~bug or a ~feature.
-- ~customer: This relates to an issue that was created by a customer, or that is of interest for a customer.
-- ~"UI text": Issues that add or modify any text within the UI such as user-assistance microcopy, button/menu labels, or error messages.
 
 ### Stage labels
 
@@ -219,6 +207,13 @@ Examples of feature labels are `~wiki`, `~ldap`, `~api`, `~issues`, `~"merge req
 
 Feature labels are all-lowercase.
 
+### Facet labels
+
+To track additional information or context about created issues, developers may
+add _facet labels_. Facet labels are also sometimes used for issue prioritization
+or for measurements (such as time to close). An example of a facet label is the
+~customer label, which indicates customer interest.
+
 ### Department labels
 
 The current department labels are:
@@ -319,6 +314,11 @@ We recommend people that have never contributed to any open source project to
 look for issues labeled `~"Accepting merge requests"` with a [weight of 1](https://gitlab.com/groups/gitlab-org/-/issues?state=opened&label_name[]=Accepting+merge+requests&assignee_id=None&sort=weight&weight=1) or the `~"Good for 1st time contributors"` [label](https://gitlab.com/gitlab-org/gitlab/-/issues?scope=all&utf8=%E2%9C%93&state=opened&label_name[]=Good%20for%201st%20time%20contributors&assignee_id=None) attached to it.
 More experienced contributors are very welcome to tackle
 [any of them](https://gitlab.com/groups/gitlab-org/-/issues?state=opened&label_name[]=Accepting+merge+requests&assignee_id=None).
+
+For more complex features that have a weight of 2 or more and clear scope, we recommend looking at issues
+with the [label `~"Community Challenge"`](https://gitlab.com/gitlab-org/gitlab/-/issues?scope=all&utf8=%E2%9C%93&state=opened&label_name[]=Accepting%20merge%20requests&label_name[]=Community%20challenge).
+If your MR for the `~"Community Challenge"` issue gets merged, you will also have a chance to win a custom
+GitLab merchandise.
 
 If you've decided that you would like to work on an issue, please @-mention
 the [appropriate product manager](https://about.gitlab.com/handbook/product/#who-to-talk-to-for-what)

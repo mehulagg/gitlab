@@ -1,15 +1,16 @@
 <script>
 import $ from 'jquery';
 import { GlButton } from '@gitlab/ui';
+import { produce } from 'immer';
 import { __ } from '~/locale';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
+import MergeRequest from '~/merge_request';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import mergeRequestQueryVariablesMixin from '../../mixins/merge_request_query_variables';
 import getStateQuery from '../../queries/get_state.query.graphql';
 import workInProgressQuery from '../../queries/states/work_in_progress.query.graphql';
 import removeWipMutation from '../../queries/toggle_wip.mutation.graphql';
 import StatusIcon from '../mr_widget_status_icon.vue';
-import tooltip from '../../../vue_shared/directives/tooltip';
 import eventHub from '../../event_hub';
 
 export default {
@@ -17,9 +18,6 @@ export default {
   components: {
     StatusIcon,
     GlButton,
-  },
-  directives: {
-    tooltip,
   },
   mixins: [glFeatureFlagMixin(), mergeRequestQueryVariablesMixin],
   apollo: {
@@ -55,13 +53,15 @@ export default {
   },
   methods: {
     removeWipMutation() {
+      const { mergeRequestQueryVariables } = this;
+
       this.isMakingRequest = true;
 
       this.$apollo
         .mutate({
           mutation: removeWipMutation,
           variables: {
-            ...this.mergeRequestQueryVariables,
+            ...mergeRequestQueryVariables,
             wip: false,
           },
           update(
@@ -81,16 +81,22 @@ export default {
               return;
             }
 
-            const data = store.readQuery({
+            const sourceData = store.readQuery({
               query: getStateQuery,
-              variables: this.mergeRequestQueryVariables,
+              variables: mergeRequestQueryVariables,
             });
-            data.project.mergeRequest.workInProgress = workInProgress;
-            data.project.mergeRequest.title = title;
+
+            const data = produce(sourceData, draftState => {
+              // eslint-disable-next-line no-param-reassign
+              draftState.project.mergeRequest.workInProgress = workInProgress;
+              // eslint-disable-next-line no-param-reassign
+              draftState.project.mergeRequest.title = title;
+            });
+
             store.writeQuery({
               query: getStateQuery,
               data,
-              variables: this.mergeRequestQueryVariables,
+              variables: mergeRequestQueryVariables,
             });
           },
           optimisticResponse: {
@@ -126,8 +132,7 @@ export default {
           .then(res => res.data)
           .then(data => {
             eventHub.$emit('UpdateWidgetData', data);
-            createFlash(__('The merge request can now be merged.'), 'notice');
-            $('.merge-request .detail-page-description .title').text(this.mr.title);
+            MergeRequest.toggleDraftStatus(this.mr.title, true);
           })
           .catch(() => {
             this.isMakingRequest = false;
@@ -145,7 +150,7 @@ export default {
     <div class="media-body">
       <div class="gl-ml-3 float-left">
         <span class="gl-font-weight-bold">
-          {{ __('This merge request is still a work in progress.') }}
+          {{ __('This merge request is still a draft.') }}
         </span>
         <span class="gl-display-block text-muted">{{
           __("Draft merge requests can't be merged.")

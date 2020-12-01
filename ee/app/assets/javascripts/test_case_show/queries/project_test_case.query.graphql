@@ -1,0 +1,10 @@
+#import "./test_case.fragment.graphql"
+
+query projectTestCase($projectPath: ID!, $testCaseId: String) {
+  project(fullPath: $projectPath) {
+    name
+    issue(iid: $testCaseId) {
+      ...TestCase
+    }
+  }
+}

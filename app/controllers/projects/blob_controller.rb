@@ -32,12 +32,9 @@ class Projects::BlobController < Projects::ApplicationController
   before_action :validate_diff_params, only: :diff
   before_action :set_last_commit_sha, only: [:edit, :update]
 
-  before_action only: :show do
-    push_frontend_feature_flag(:code_navigation, @project, default_enabled: true)
-    push_frontend_feature_flag(:suggest_pipeline) if experiment_enabled?(:suggest_pipeline)
-  end
-
   track_redis_hll_event :create, :update, name: 'g_edit_by_sfe', feature: :track_editor_edit_actions, feature_default_enabled: true
+
+  feature_category :source_code_management
 
   def new
     commit unless @repository.empty?
@@ -103,8 +100,6 @@ class Projects::BlobController < Projects::ApplicationController
   end
 
   def diff
-    apply_diff_view_cookie!
-
     @form = Blobs::UnfoldPresenter.new(blob, diff_params)
 
     # keep only json rendering when

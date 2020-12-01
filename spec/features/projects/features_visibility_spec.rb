@@ -150,6 +150,7 @@ RSpec.describe 'Edit Project Settings' do
       before do
         non_member.update_attribute(:admin, true)
         sign_in(non_member)
+        gitlab_enable_admin_mode_sign_in(non_member)
       end
 
       it 'renders 404 if feature is disabled' do
@@ -201,7 +202,7 @@ RSpec.describe 'Edit Project Settings' do
 
       visit project_path(project)
 
-      expect(page).to have_content "Customize your workflow!"
+      expect(page).to have_content "joined project"
     end
 
     it "hides project activity tabs" do

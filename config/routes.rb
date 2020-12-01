@@ -45,8 +45,7 @@ Rails.application.routes.draw do
 
   # Sign up
   scope path: '/users/sign_up', module: :registrations, as: :users_sign_up do
-    get :welcome
-    patch :update_registration
+    resource :welcome, only: [:show, :update], controller: 'welcome'
     resource :experience_level, only: [:show, :update]
 
     Gitlab.ee do
@@ -69,10 +68,6 @@ Rails.application.routes.draw do
   # Begin of the /-/ scope.
   # Use this scope for all new global routes.
   scope path: '-' do
-    # remove in 13.5
-    get '/instance_statistics', to: redirect('admin/dev_ops_score')
-    get '/instance_statistics/dev_ops_score', to: redirect('admin/dev_ops_score')
-    get '/instance_statistics/cohorts', to: redirect('admin/cohorts')
     # Autocomplete
     get '/autocomplete/users' => 'autocomplete#users'
     get '/autocomplete/users/:id' => 'autocomplete#user'
@@ -87,11 +82,15 @@ Rails.application.routes.draw do
       get '/autocomplete/namespace_routes' => 'autocomplete#namespace_routes'
     end
 
+    get '/whats_new' => 'whats_new#index'
+
     # '/-/health' implemented by BasicHealthCheck middleware
     get 'liveness' => 'health#liveness'
     get 'readiness' => 'health#readiness'
     resources :metrics, only: [:index]
     mount Peek::Railtie => '/peek', as: 'peek_routes'
+
+    get 'runner_setup/platforms' => 'runner_setup#platforms'
 
     # Boards resources shared between group and projects
     resources :boards, only: [] do
@@ -135,7 +134,6 @@ Rails.application.routes.draw do
       draw :country
       draw :country_state
       draw :subscription
-      draw :analytics
 
       scope '/push_from_secondary/:geo_node_id' do
         draw :git_http
@@ -175,11 +173,11 @@ Rails.application.routes.draw do
     resources :abuse_reports, only: [:new, :create]
 
     # JWKS (JSON Web Key Set) endpoint
-    # Used by third parties to verify CI_JOB_JWT, placeholder route
-    # in case we decide to move away from doorkeeper-openid_connect
-    get 'jwks' => 'doorkeeper/openid_connect/discovery#keys'
+    # Used by third parties to verify CI_JOB_JWT
+    get 'jwks' => 'jwks#index'
 
     draw :snippets
+    draw :profile
 
     # Product analytics collector
     match '/collector/i', to: ProductAnalytics::CollectorApp.new, via: :all
@@ -266,7 +264,6 @@ Rails.application.routes.draw do
   draw :uploads
   draw :explore
   draw :admin
-  draw :profile
   draw :dashboard
   draw :user
   draw :project
@@ -274,6 +271,11 @@ Rails.application.routes.draw do
   # Issue https://gitlab.com/gitlab-org/gitlab/-/issues/210024
   scope as: 'deprecated' do
     draw :snippets
+    draw :profile
+  end
+
+  Gitlab.ee do
+    get '/sitemap' => 'sitemap#show', format: :xml
   end
 
   root to: "root#index"

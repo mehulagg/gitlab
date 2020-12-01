@@ -5,6 +5,7 @@ class Member < ApplicationRecord
   include AfterCommitQueue
   include Sortable
   include Importable
+  include CreatedAtFilterable
   include Expirable
   include Gitlab::Access
   include Presentable
@@ -20,12 +21,12 @@ class Member < ApplicationRecord
 
   delegate :name, :username, :email, to: :user, prefix: true
 
+  validates :expires_at, allow_blank: true, future_date: true
   validates :user, presence: true, unless: :invite?
   validates :source, presence: true
   validates :user_id, uniqueness: { scope: [:source_type, :source_id],
                                     message: "already exists in source",
                                     allow_nil: true }
-  validates :access_level, inclusion: { in: Gitlab::Access.all_values }, presence: true
   validate :higher_access_level_than_group, unless: :importing?
   validates :invite_email,
     presence: {
@@ -60,6 +61,7 @@ class Member < ApplicationRecord
     left_join_users
       .where(user_ok)
       .where(requested_at: nil)
+      .non_minimal_access
       .reorder(nil)
   end
 
@@ -68,6 +70,8 @@ class Member < ApplicationRecord
     left_join_users
       .where(users: { state: 'active' })
       .non_request
+      .non_invite
+      .non_minimal_access
       .reorder(nil)
   end
 
@@ -76,7 +80,10 @@ class Member < ApplicationRecord
   scope :request, -> { where.not(requested_at: nil) }
   scope :non_request, -> { where(requested_at: nil) }
 
-  scope :not_accepted_invitations_by_user, -> (user) { invite.where(invite_accepted_at: nil, created_by: user) }
+  scope :not_accepted_invitations, -> { invite.where(invite_accepted_at: nil) }
+  scope :not_accepted_invitations_by_user, -> (user) { not_accepted_invitations.where(created_by: user) }
+  scope :not_expired, -> (today = Date.current) { where(arel_table[:expires_at].gt(today).or(arel_table[:expires_at].eq(nil))) }
+  scope :last_ten_days_excluding_today, -> (today = Date.current) { where(created_at: (today - 10).beginning_of_day..(today - 1).end_of_day) }
 
   scope :has_access, -> { active.where('access_level > 0') }
 
@@ -85,9 +92,12 @@ class Member < ApplicationRecord
   scope :developers, -> { active.where(access_level: DEVELOPER) }
   scope :maintainers, -> { active.where(access_level: MAINTAINER) }
   scope :non_guests, -> { where('members.access_level > ?', GUEST) }
+  scope :non_minimal_access, -> { where('members.access_level > ?', MINIMAL_ACCESS) }
   scope :owners, -> { active.where(access_level: OWNER) }
   scope :owners_and_maintainers, -> { active.where(access_level: [OWNER, MAINTAINER]) }
   scope :with_user, -> (user) { where(user: user) }
+  scope :with_user_by_email, -> (email) { left_join_users.where(users: { email: email } ) }
+
   scope :preload_user_and_notification_settings, -> { preload(user: :notification_settings) }
 
   scope :with_source_id, ->(source_id) { where(source_id: source_id) }
@@ -367,6 +377,14 @@ class Member < ApplicationRecord
     send_invite
   end
 
+  def send_invitation_reminder(reminder_index)
+    return unless invite?
+
+    generate_invite_token! unless @raw_invite_token
+
+    run_after_commit_or_now { notification_service.invite_member_reminder(self, @raw_invite_token, reminder_index) }
+  end
+
   def create_notification_setting
     user.notification_settings.find_or_create_for(source)
   end
@@ -399,6 +417,10 @@ class Member < ApplicationRecord
 
   def invite_to_unknown_user?
     invite? && user_id.nil?
+  end
+
+  def created_by_name
+    created_by&.name
   end
 
   private

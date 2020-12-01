@@ -9,7 +9,7 @@ RSpec.describe Gitlab::Kubernetes::KubeClient do
   let(:api_url) { 'https://kubernetes.example.com/prefix' }
   let(:kubeclient_options) { { auth_options: { bearer_token: 'xyz' } } }
 
-  let(:client) { described_class.new(api_url, kubeclient_options) }
+  let(:client) { described_class.new(api_url, **kubeclient_options) }
 
   before do
     stub_kubeclient_discover(api_url)
@@ -19,7 +19,7 @@ RSpec.describe Gitlab::Kubernetes::KubeClient do
     case method_name
     when /\A(get_|delete_)/
       client.public_send(method_name)
-    when /\A(create_|update_)/
+    when /\A(create_|update_|patch_)/
       client.public_send(method_name, {})
     else
       raise "Unknown method name #{method_name}"
@@ -133,7 +133,7 @@ RSpec.describe Gitlab::Kubernetes::KubeClient do
     end
 
     it 'falls back to default options, but allows overriding' do
-      client = Gitlab::Kubernetes::KubeClient.new(api_url, {})
+      client = described_class.new(api_url)
       defaults = Gitlab::Kubernetes::KubeClient::DEFAULT_KUBECLIENT_OPTIONS
       expect(client.kubeclient_options[:timeouts]).to eq(defaults[:timeouts])
 
@@ -302,6 +302,8 @@ RSpec.describe Gitlab::Kubernetes::KubeClient do
       :create_role,
       :get_role,
       :update_role,
+      :delete_role_binding,
+      :update_role_binding,
       :update_cluster_role_binding
     ].each do |method|
       describe "##{method}" do
@@ -347,6 +349,62 @@ RSpec.describe Gitlab::Kubernetes::KubeClient do
     end
   end
 
+  describe '#get_ingresses' do
+    let(:extensions_client) { client.extensions_client }
+    let(:networking_client) { client.networking_client }
+
+    include_examples 'redirection not allowed', 'get_ingresses'
+    include_examples 'dns rebinding not allowed', 'get_ingresses'
+
+    it 'delegates to the extensions client' do
+      expect(extensions_client).to receive(:get_ingresses)
+
+      client.get_ingresses
+    end
+
+    context 'extensions does not have deployments for Kubernetes 1.22+ clusters' do
+      before do
+        WebMock
+          .stub_request(:get, api_url + '/apis/extensions/v1beta1')
+          .to_return(kube_response(kube_1_22_extensions_v1beta1_discovery_body))
+      end
+
+      it 'delegates to the apps client' do
+        expect(networking_client).to receive(:get_ingresses)
+
+        client.get_ingresses
+      end
+    end
+  end
+
+  describe '#patch_ingress' do
+    let(:extensions_client) { client.extensions_client }
+    let(:networking_client) { client.networking_client }
+
+    include_examples 'redirection not allowed', 'patch_ingress'
+    include_examples 'dns rebinding not allowed', 'patch_ingress'
+
+    it 'delegates to the extensions client' do
+      expect(extensions_client).to receive(:patch_ingress)
+
+      client.patch_ingress
+    end
+
+    context 'extensions does not have ingress for Kubernetes 1.22+ clusters' do
+      before do
+        WebMock
+          .stub_request(:get, api_url + '/apis/extensions/v1beta1')
+          .to_return(kube_response(kube_1_22_extensions_v1beta1_discovery_body))
+      end
+
+      it 'delegates to the apps client' do
+        expect(networking_client).to receive(:patch_ingress)
+
+        client.patch_ingress
+      end
+    end
+  end
+
   describe 'istio API group' do
     let(:istio_client) { client.istio_client }
 
@@ -376,6 +434,7 @@ RSpec.describe Gitlab::Kubernetes::KubeClient do
     [
       :create_network_policy,
       :get_network_policies,
+      :get_network_policy,
       :update_network_policy,
       :delete_network_policy
     ].each do |method|
@@ -400,6 +459,7 @@ RSpec.describe Gitlab::Kubernetes::KubeClient do
     [
       :create_cilium_network_policy,
       :get_cilium_network_policies,
+      :get_cilium_network_policy,
       :update_cilium_network_policy,
       :delete_cilium_network_policy
     ].each do |method|

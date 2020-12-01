@@ -1,11 +1,13 @@
 # frozen_string_literal: true
 
 module API
-  class Groups < Grape::API::Instance
+  class Groups < ::API::Base
     include PaginationParams
     include Helpers::CustomAttributes
 
     before { authenticate_non_get! }
+
+    feature_category :subgroups
 
     helpers Helpers::GroupsHelpers
 
@@ -29,7 +31,12 @@ module API
 
       # rubocop: disable CodeReuse/ActiveRecord
       def find_groups(params, parent_id = nil)
-        find_params = params.slice(:all_available, :custom_attributes, :owned, :min_access_level)
+        find_params = params.slice(
+          :all_available,
+          :custom_attributes,
+          :owned, :min_access_level,
+          :include_parent_descendants
+        )
 
         find_params[:parent] = if params[:top_level_only]
                                  [nil]
@@ -41,7 +48,7 @@ module API
           find_params.fetch(:all_available, current_user&.can_read_all_resources?)
 
         groups = GroupsFinder.new(current_user, find_params).execute
-        groups = groups.search(params[:search]) if params[:search].present?
+        groups = groups.search(params[:search], include_parents: true) if params[:search].present?
         groups = groups.where.not(id: params[:skip_groups]) if params[:skip_groups].present?
         order_options = { params[:order_by] => params[:sort] }
         order_options["id"] ||= "asc"
@@ -306,6 +313,19 @@ module API
       end
       get ":id/subgroups" do
         groups = find_groups(declared_params(include_missing: false), params[:id])
+        present_groups params, groups
+      end
+
+      desc 'Get a list of descendant groups of this group.' do
+        success Entities::Group
+      end
+      params do
+        use :group_list_params
+        use :with_custom_attributes
+      end
+      get ":id/descendant_groups" do
+        finder_params = declared_params(include_missing: false).merge(include_parent_descendants: true)
+        groups = find_groups(finder_params, params[:id])
         present_groups params, groups
       end
 

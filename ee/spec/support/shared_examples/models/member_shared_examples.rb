@@ -30,7 +30,7 @@ RSpec.shared_examples 'member validations' do
           let!(:subgroup) { create(:group, parent: group) }
 
           before do
-            entity.update(group: subgroup) if entity.is_a?(Project)
+            entity.update!(group: subgroup) if entity.is_a?(Project)
           end
 
           it 'does not allow adding a group member with SSO enforced on subgroup' do

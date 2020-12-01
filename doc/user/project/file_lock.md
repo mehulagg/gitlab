@@ -1,9 +1,8 @@
 ---
 stage: Create
 group: Source Code
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference, howto
-last_updated: 2020-09-07
 ---
 
 # File Locking **(CORE)**
@@ -70,7 +69,7 @@ brew install git-lfs
 ```
 
 Once installed, **open your local repository in a terminal window** and
-install Git LFS in your repo. If you're sure that LFS is already installed,
+install Git LFS in your repository. If you're sure that LFS is already installed,
 you can skip this step. If you're unsure, re-installing it won't do any harm:
 
 ```shell
@@ -160,7 +159,7 @@ command line interface, file locks can be created for any file.
 ### View exclusively-locked files
 
 To list all the files locked with LFS locally, open a terminal window in your
-repo and run:
+repository and run:
 
 ```shell
 git lfs locks
@@ -190,7 +189,7 @@ Suggested workflow for shared projects:
 1. Lock the file.
 1. Edit the file.
 1. Commit your changes.
-1. Push to the repo.
+1. Push to the repository.
 1. Get your changes reviewed, approved, and merged.
 1. Unlock the file.
 

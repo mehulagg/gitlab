@@ -3,8 +3,9 @@ import {
   GlFilteredSearch,
   GlButtonGroup,
   GlButton,
-  GlNewDropdown as GlDropdown,
-  GlNewDropdownItem as GlDropdownItem,
+  GlDropdown,
+  GlDropdownItem,
+  GlFormCheckbox,
 } from '@gitlab/ui';
 
 import FilteredSearchBarRoot from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
@@ -36,6 +37,8 @@ const createComponent = ({
   recentSearchesStorageKey = 'requirements',
   tokens = mockAvailableTokens,
   sortOptions,
+  showCheckbox = false,
+  checkboxChecked = false,
   searchInputPlaceholder = 'Filter requirements',
 } = {}) => {
   const mountMethod = shallow ? shallowMount : mount;
@@ -46,6 +49,8 @@ const createComponent = ({
       recentSearchesStorageKey,
       tokens,
       sortOptions,
+      showCheckbox,
+      checkboxChecked,
       searchInputPlaceholder,
     },
   });
@@ -368,6 +373,26 @@ describe('FilteredSearchBarRoot', () => {
       expect(glFilteredSearchEl.props('placeholder')).toBe('Filter requirements');
       expect(glFilteredSearchEl.props('availableTokens')).toEqual(mockAvailableTokens);
       expect(glFilteredSearchEl.props('historyItems')).toEqual(mockHistoryItems);
+    });
+
+    it('renders checkbox when `showCheckbox` prop is true', async () => {
+      let wrapperWithCheckbox = createComponent({
+        showCheckbox: true,
+      });
+
+      expect(wrapperWithCheckbox.find(GlFormCheckbox).exists()).toBe(true);
+      expect(wrapperWithCheckbox.find(GlFormCheckbox).attributes('checked')).not.toBeDefined();
+
+      wrapperWithCheckbox.destroy();
+
+      wrapperWithCheckbox = createComponent({
+        showCheckbox: true,
+        checkboxChecked: true,
+      });
+
+      expect(wrapperWithCheckbox.find(GlFormCheckbox).attributes('checked')).toBe('true');
+
+      wrapperWithCheckbox.destroy();
     });
 
     it('renders search history items dropdown with formatting done using token symbols', async () => {

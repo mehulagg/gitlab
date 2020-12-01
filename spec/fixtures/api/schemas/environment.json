@@ -16,6 +16,7 @@
   ],
   "properties": {
     "id": { "type": "integer" },
+    "global_id": { "type": "string" },
     "name": { "type": "string" },
     "state": { "type": "string" },
     "external_url": { "$ref": "types/nullable_string.json" },
@@ -41,8 +42,11 @@
         { "type": "null" },
         { "$ref": "deployment.json" },
         {
-          "name": { "type": "string" },
-          "build_path": { "type": "string" }
+          "type": "object",
+          "properties" : {
+            "name": { "type": "string" },
+            "build_path": { "type": "string" }
+          }
         }
       ]
     },

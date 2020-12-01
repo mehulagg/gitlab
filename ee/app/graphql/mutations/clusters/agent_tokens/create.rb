@@ -8,8 +8,9 @@ module Mutations
 
         authorize :create_cluster
 
-        argument :cluster_agent_id,
-                 ::Types::GlobalIDType[::Clusters::Agent],
+        ClusterAgentID = ::Types::GlobalIDType[::Clusters::Agent]
+
+        argument :cluster_agent_id, ClusterAgentID,
                  required: true,
                  description: 'Global ID of the cluster agent that will be associated with the new token'
 
@@ -42,6 +43,9 @@ module Mutations
         private
 
         def find_object(id:)
+          # TODO: remove this line when the compatibility layer is removed
+          # See: https://gitlab.com/gitlab-org/gitlab/-/issues/257883
+          id = ClusterAgentID.coerce_isolated_input(id)
           GitlabSchema.find_by_gid(id)
         end
       end

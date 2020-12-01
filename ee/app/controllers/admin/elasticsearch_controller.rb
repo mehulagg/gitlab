@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class Admin::ElasticsearchController < Admin::ApplicationController
+  feature_category :global_search
+
   # POST
   # Scheduling indexing jobs
   def enqueue_index

@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlIcon, GlPopover, GlLink } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import geoNodeReplicationStatusComponent from 'ee/geo_nodes/components/geo_node_replication_status.vue';
 import {
   REPLICATION_STATUS_CLASS,

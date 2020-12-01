@@ -1,12 +1,14 @@
 # frozen_string_literal: true
 
 module API
-  class Badges < Grape::API::Instance
+  class Badges < ::API::Base
     include PaginationParams
 
     before { authenticate_non_get! }
 
     helpers ::API::Helpers::BadgesHelpers
+
+    feature_category :continuous_integration
 
     helpers do
       def find_source_if_admin(source_type)

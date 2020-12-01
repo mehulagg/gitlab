@@ -7,12 +7,23 @@ exports[`DependenciesActions component matches the snapshot 1`] = `
   <div
     class="btn-group flex-grow-1 mr-2"
   >
-    <gl-deprecated-dropdown-stub
+    <gl-dropdown-stub
+      category="primary"
       class="flex-grow-1 text-center"
+      headertext=""
       right=""
+      size="medium"
       text="Severity"
+      variant="default"
     >
-      <gl-deprecated-dropdown-item-stub>
+      <gl-dropdown-item-stub
+        avatarurl=""
+        iconcolor=""
+        iconname=""
+        iconrightarialabel=""
+        iconrightname=""
+        secondarytext=""
+      >
         <span
           class="d-flex"
         >
@@ -25,8 +36,15 @@ exports[`DependenciesActions component matches the snapshot 1`] = `
           Component name
         
         </span>
-      </gl-deprecated-dropdown-item-stub>
-      <gl-deprecated-dropdown-item-stub>
+      </gl-dropdown-item-stub>
+      <gl-dropdown-item-stub
+        avatarurl=""
+        iconcolor=""
+        iconname=""
+        iconrightarialabel=""
+        iconrightname=""
+        secondarytext=""
+      >
         <span
           class="d-flex"
         >
@@ -39,8 +57,15 @@ exports[`DependenciesActions component matches the snapshot 1`] = `
           Packager
         
         </span>
-      </gl-deprecated-dropdown-item-stub>
-      <gl-deprecated-dropdown-item-stub>
+      </gl-dropdown-item-stub>
+      <gl-dropdown-item-stub
+        avatarurl=""
+        iconcolor=""
+        iconname=""
+        iconrightarialabel=""
+        iconrightname=""
+        secondarytext=""
+      >
         <span
           class="d-flex"
         >
@@ -53,10 +78,11 @@ exports[`DependenciesActions component matches the snapshot 1`] = `
           Severity
         
         </span>
-      </gl-deprecated-dropdown-item-stub>
-    </gl-deprecated-dropdown-stub>
+      </gl-dropdown-item-stub>
+    </gl-dropdown-stub>
      
     <gl-button-stub
+      buttontextclasses=""
       category="primary"
       class="flex-grow-0 js-sort-order"
       icon=""
@@ -72,6 +98,7 @@ exports[`DependenciesActions component matches the snapshot 1`] = `
   </div>
    
   <gl-button-stub
+    buttontextclasses=""
     category="primary"
     class="js-download"
     download="dependencies.json"

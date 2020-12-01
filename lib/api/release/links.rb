@@ -2,13 +2,15 @@
 
 module API
   module Release
-    class Links < Grape::API::Instance
+    class Links < ::API::Base
       include PaginationParams
 
       RELEASE_ENDPOINT_REQUIREMENTS = API::NAMESPACE_OR_PROJECT_REQUIREMENTS
         .merge(tag_name: API::NO_SLASH_URL_PART_REGEX)
 
       before { authorize! :read_release, user_project }
+
+      feature_category :release_orchestration
 
       params do
         requires :id, type: String, desc: 'The ID of a project'

@@ -1,16 +1,17 @@
 <script>
 import { mapState, mapActions } from 'vuex';
 import {
-  GlDeprecatedBadge as GlBadge,
+  GlBadge,
   GlLink,
   GlLoadingIcon,
   GlPagination,
   GlDeprecatedSkeletonLoading as GlSkeletonLoading,
   GlSprintf,
   GlTable,
+  GlTooltipDirective,
 } from '@gitlab/ui';
 import AncestorNotice from './ancestor_notice.vue';
-import tooltip from '~/vue_shared/directives/tooltip';
+import NodeErrorHelpText from './node_error_help_text.vue';
 import { CLUSTER_TYPES, STATUSES } from '../constants';
 import { __, sprintf } from '~/locale';
 
@@ -26,9 +27,10 @@ export default {
     GlSkeletonLoading,
     GlSprintf,
     GlTable,
+    NodeErrorHelpText,
   },
   directives: {
-    tooltip,
+    GlTooltip: GlTooltipDirective,
   },
   computed: {
     ...mapState([
@@ -199,7 +201,13 @@ export default {
   <section v-else>
     <ancestor-notice />
 
-    <gl-table :items="clusters" :fields="fields" stacked="md" class="qa-clusters-table">
+    <gl-table
+      :items="clusters"
+      :fields="fields"
+      stacked="md"
+      class="qa-clusters-table"
+      data-testid="cluster_list_table"
+    >
       <template #cell(name)="{ item }">
         <div :class="[contentAlignClasses, 'js-status']">
           <img
@@ -219,7 +227,7 @@ export default {
 
           <gl-loading-icon
             v-if="item.status === 'deleting' || item.status === 'creating'"
-            v-tooltip
+            v-gl-tooltip
             :title="statusTitle(item.status)"
             size="sm"
           />
@@ -231,9 +239,12 @@ export default {
 
         <gl-skeleton-loading v-else-if="loadingNodes" :lines="1" :class="contentAlignClasses" />
 
-        <small v-else class="gl-font-sm gl-font-style-italic gl-text-gray-200">{{
-          __('Unknown')
-        }}</small>
+        <NodeErrorHelpText
+          v-else-if="item.kubernetes_errors"
+          :class="contentAlignClasses"
+          :error-type="item.kubernetes_errors.connection_error"
+          :popover-id="`nodeSizeError${item.id}`"
+        />
       </template>
 
       <template #cell(total_cpu)="{ item }">
@@ -250,6 +261,13 @@ export default {
         </span>
 
         <gl-skeleton-loading v-else-if="loadingNodes" :lines="1" :class="contentAlignClasses" />
+
+        <NodeErrorHelpText
+          v-else-if="item.kubernetes_errors"
+          :class="contentAlignClasses"
+          :error-type="item.kubernetes_errors.node_connection_error"
+          :popover-id="`nodeCpuError${item.id}`"
+        />
       </template>
 
       <template #cell(total_memory)="{ item }">
@@ -266,10 +284,17 @@ export default {
         </span>
 
         <gl-skeleton-loading v-else-if="loadingNodes" :lines="1" :class="contentAlignClasses" />
+
+        <NodeErrorHelpText
+          v-else-if="item.kubernetes_errors"
+          :class="contentAlignClasses"
+          :error-type="item.kubernetes_errors.metrics_connection_error"
+          :popover-id="`nodeMemoryError${item.id}`"
+        />
       </template>
 
       <template #cell(cluster_type)="{value}">
-        <gl-badge variant="light">
+        <gl-badge variant="muted">
           {{ value }}
         </gl-badge>
       </template>

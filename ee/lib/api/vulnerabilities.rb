@@ -1,9 +1,11 @@
 # frozen_string_literal: true
 
 module API
-  class Vulnerabilities < Grape::API::Instance
+  class Vulnerabilities < ::API::Base
     include ::API::Helpers::VulnerabilitiesHooks
     include PaginationParams
+
+    feature_category :vulnerability_management
 
     helpers ::API::Helpers::VulnerabilitiesHelpers
 
@@ -67,6 +69,16 @@ module API
         not_modified! if @vulnerability.confirmed?
 
         @vulnerability = ::Vulnerabilities::ConfirmService.new(current_user, @vulnerability).execute
+        render_vulnerability(@vulnerability)
+      end
+
+      desc 'Revert a vulnerability to a detected state' do
+        success EE::API::Entities::Vulnerability
+      end
+      post ':id/revert' do
+        not_modified! if @vulnerability.detected?
+
+        @vulnerability = ::Vulnerabilities::RevertToDetectedService.new(current_user, @vulnerability).execute
         render_vulnerability(@vulnerability)
       end
     end

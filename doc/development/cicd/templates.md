@@ -1,7 +1,7 @@
 ---
 stage: Release
 group: Progressive Delivery
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: index, concepts, howto
 ---
 
@@ -13,15 +13,16 @@ This document explains how to develop [GitLab CI/CD templates](../../ci/examples
 
 All template files reside in the `lib/gitlab/ci/templates` directory, and are categorized by the following sub-directories:
 
-| Sub-directory  | Content                                                      | [Selectable in UI](#make-sure-the-new-template-can-be-selected-in-ui) |
-|----------------|--------------------------------------------------------------|-----------------------------------------------------------------------|
-| `/AWS/*`       | Cloud Deployment (AWS) related jobs                          | No                                                                    |
-| `/Jobs/*`      | Auto DevOps related jobs                                     | No                                                                    |
-| `/Pages/*`     | Static site generators for GitLab Pages (for example Jekyll) | Yes                                                                   |
-| `/Security/*`  | Security related jobs                                        | Yes                                                                   |
-| `/Verify/*`    | Verify/testing related jobs                                  | Yes                                                                   |
-| `/Workflows/*` | Common uses of the `workflow:` keyword                       | No                                                                    |
-| `/*` (root)    | General templates                                            | Yes                                                                   |
+| Sub-directory  | Content                                            | [Selectable in UI](#make-sure-the-new-template-can-be-selected-in-ui) |
+|----------------|----------------------------------------------------|-----------------------------------------------------------------------|
+| `/AWS/*`       | Cloud Deployment (AWS) related jobs                | No      |
+| `/Jobs/*`      | Auto DevOps related jobs                           | No      |
+| `/Pages/*`     | Static site generators for GitLab Pages (for example Jekyll) | Yes     |
+| `/Security/*`  | Security related jobs                              | Yes     |
+| `/Terraform/*` | Infrastructure as Code related templates           | No      |
+| `/Verify/*`    | Verify/testing related jobs                        | Yes     |
+| `/Workflows/*` | Common uses of the `workflow:` keyword             | No      |
+| `/*` (root)    | General templates                                  | Yes     |
 
 ## Criteria
 
@@ -106,15 +107,17 @@ GitLab v14.0 could be so different that a user will want to continue using the v
 after upgrading to GitLab 14.0.
 
 You can add a note in the template or in documentation explaining how to use `include:remote`
-to include older template versions:
+to include older template versions. If other templates are included with `include: template`,
+they can be combined with the `include: remote`:
 
 ```yaml
-# To use the v13 stable template, which is not included in v14, fetch the specifc
+# To use the v13 stable template, which is not included in v14, fetch the specific
 # template from the remote template repository with the `include:remote:` keyword.
 # If you fetch from the GitLab canonical project, use the following URL format:
 # https://gitlab.com/gitlab-org/gitlab/-/raw/<version>/lib/gitlab/ci/templates/<template-name>
 include:
-  remote: https://gitlab.com/gitlab-org/gitlab/-/raw/v13.0.1-ee/lib/gitlab/ci/templates/Jobs/Deploy.gitlab-ci.yml
+  - template: Auto-DevOps.gitlab-ci.yml
+  - remote: https://gitlab.com/gitlab-org/gitlab/-/raw/v13.0.1-ee/lib/gitlab/ci/templates/Jobs/Deploy.gitlab-ci.yml
 ```
 
 ### Further reading
@@ -171,3 +174,7 @@ is updated in a major version GitLab release.
 A template could contain malicious code. For example, a template that contains the `export` shell command in a job
 might accidentally expose project secret variables in a job log.
 If you're unsure if it's secure or not, you need to ask security experts for cross-validation.
+
+## Contribute CI/CD Template Merge Requests
+
+After your CI/CD Template MR is created and labeled with `ci::templates`, DangerBot suggests one reviewer and one maintainer that can review your code. When your merge request is ready for review, please `@mention` the reviewer and ask them to review your CI/CD Template changes. See details in the merge request that added [a DangerBot task for CI/CD Template MRs](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/44688).

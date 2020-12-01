@@ -13,39 +13,42 @@ module Mutations
       field :iteration,
             Types::IterationType,
             null: true,
-            description: 'The updated iteration'
+            description: 'Updated iteration.'
 
       argument :group_path, GraphQL::ID_TYPE,
                required: true,
-               description: "The group of the iteration"
+               description: 'Group of the iteration.'
 
+      # rubocop:disable Graphql/IDType
       argument :id,
                GraphQL::ID_TYPE,
                required: true,
-               description: 'The id of the iteration'
+               description: 'Global ID of the iteration.'
+      # rubocop:enable Graphql/IDType
 
       argument :title,
                GraphQL::STRING_TYPE,
                required: false,
-               description: 'The title of the iteration'
+               description: 'Title of the iteration.'
 
       argument :description,
                GraphQL::STRING_TYPE,
                required: false,
-               description: 'The description of the iteration'
+               description: 'Description of the iteration.'
 
       argument :start_date,
                GraphQL::STRING_TYPE,
                required: false,
-               description: 'The start date of the iteration'
+               description: 'Start date of the iteration.'
 
       argument :due_date,
                GraphQL::STRING_TYPE,
                required: false,
-               description: 'The end date of the iteration'
+               description: 'End date of the iteration.'
 
       def resolve(args)
         validate_arguments!(args)
+        args[:id] = id_from_args(args)
 
         parent = resolve_group(full_path: args[:group_path]).try(:sync)
         iteration = authorized_find!(parent: parent, id: args[:id])
@@ -64,11 +67,20 @@ module Mutations
       private
 
       def find_object(parent:, id:)
-        ::Resolvers::IterationsResolver.new(object: parent, context: context, field: nil).resolve(id: id).items.first
+        ::Resolvers::IterationsResolver.new(object: parent, context: context, field: nil)
+          .resolve(id: id).items.first
       end
 
       def validate_arguments!(args)
         raise Gitlab::Graphql::Errors::ArgumentError, 'The list of iteration attributes is empty' if args.except(:group_path, :id).empty?
+      end
+
+      # Originally accepted a raw model id. Now accept a gid, but allow a raw id
+      # for backward compatibility
+      def id_from_args(args)
+        GitlabSchema.parse_gid(args[:id], expected_type: ::Iteration)
+      rescue Gitlab::Graphql::Errors::ArgumentError
+        ::Gitlab::GlobalId.as_global_id(args[:id].to_i, model_name: 'Iteration')
       end
     end
   end

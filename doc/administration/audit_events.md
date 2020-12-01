@@ -1,7 +1,7 @@
 ---
 stage: Manage
 group: Compliance
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Audit Events **(STARTER)**
@@ -9,7 +9,9 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 GitLab offers a way to view the changes made within the GitLab server for owners and administrators on a [paid plan](https://about.gitlab.com/pricing/).
 
 GitLab system administrators can also take advantage of the logs located on the
-filesystem. See [the logs system documentation](logs.md) for more details.
+file system. See [the logs system documentation](logs.md) for more details.
+
+You can generate an [Audit report](audit_reports.md) of audit events.
 
 ## Overview
 
@@ -96,9 +98,10 @@ From there, you can see the following actions:
 - Permission to approve merge requests by authors was updated ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/7531) in GitLab 12.9)
 - Number of required approvals was updated ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/7531) in GitLab 12.9)
 - Added or removed users and groups from project approval groups ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/213603) in GitLab 13.2)
-- Project CI/CD variable added, removed, or protected status changed. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/30857) in GitLab 13.4.
+- Project CI/CD variable added, removed, or protected status changed ([Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/30857) in GitLab 13.4)
+- User was approved via Admin Area ([Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/276250) in GitLab 13.6)
 
-Project events can also be accessed via the [Project Audit Events API](../api/audit_events.md#project-audit-events)
+Project events can also be accessed via the [Project Audit Events API](../api/audit_events.md#project-audit-events).
 
 ### Instance events **(PREMIUM ONLY)**
 
@@ -108,13 +111,13 @@ Server-wide audit logging introduces the ability to observe user actions across
 the entire instance of your GitLab server, making it easy to understand who
 changed what and when for audit purposes.
 
-To view the server-wide admin log, visit **Admin Area > Monitoring > Audit Log**.
+To view the server-wide administrator log, visit **Admin Area > Monitoring > Audit Log**.
 
 In addition to the group and project events, the following user actions are also
 recorded:
 
-- Failed Logins
 - Sign-in events and the authentication type (such as standard, LDAP, or OmniAuth)
+- Failed sign-ins
 - Added SSH key
 - Added or removed email
 - Changed password
@@ -126,14 +129,11 @@ recorded:
 - User was added ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/251) in GitLab 12.8)
 - User was blocked via Admin Area ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/251) in GitLab 12.8)
 - User was blocked via API ([introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/25872) in GitLab 12.9)
+- Failed second-factor authentication attempt ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/16826) in GitLab 13.5)
+- A user's personal access token was successfully created or revoked ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/276921) in GitLab 13.6)
+- A failed attempt to create or revoke a user's personal access token ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/276921) in GitLab 13.6)
 
-It's possible to filter particular actions by choosing an audit data type from
-the filter dropdown box. You can further filter by specific group, project, or user
-(for authentication events).
-
-![audit log](img/audit_log.png)
-
-Instance events can also be accessed via the [Instance Audit Events API](../api/audit_events.md#instance-audit-events)
+Instance events can also be accessed via the [Instance Audit Events API](../api/audit_events.md#instance-audit-events).
 
 ### Missing events
 
@@ -151,7 +151,7 @@ on adding these events into GitLab:
 
 The current architecture of audit events is not prepared to receive a very high amount of records.
 It may make the user interface for your project or audit logs very busy, and the disk space consumed by the
-`audit_events` PostgreSQL table will increase considerably. It's disabled by default
+`audit_events` PostgreSQL table may increase considerably. It's disabled by default
 to prevent performance degradations on GitLab instances with very high Git write traffic.
 
 In an upcoming release, Audit Logs for Git push events will be enabled
@@ -173,3 +173,60 @@ the steps bellow.
    ```ruby
    Feature.enable(:repository_push_audit_event)
    ```
+
+## Search
+
+The search filters you can see depends on which audit level you are at.
+
+| Filter | Available options |
+| ------ | ----------------- |
+| Scope (Project level) | A specific user who performed the action. |
+| Scope (Group level) | A specific user (in a group) who performed the action. |
+| Scope (Instance level) | A specific group, project, or user that the action was scoped to. |
+| Date range | Either via the date range buttons or pickers (maximum range of 31 days). Default is from the first day of the month to today's date. |
+
+![audit log](img/audit_log_v13_6.png)
+
+## Export to CSV **(PREMIUM ONLY)**
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/1449) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.4.
+> - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/285441) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.7.
+
+Export to CSV allows customers to export the current filter view of your audit log as a
+CSV file, which stores tabular data in plain text. The data provides a comprehensive view with respect to
+audit events.
+
+To export the Audit Log to CSV, navigate to
+**{monitor}** **Admin Area > Monitoring > Audit Log**
+
+1. Select the available search [filters](#search).
+1. Click **Export as CSV**.
+
+### Sort
+
+Exported events are always sorted by `created_at` in ascending order.
+
+### Format
+
+Data is encoded with a comma as the column delimiter, with `"` used to quote fields if needed, and newlines to separate rows.
+The first row contains the headers, which are listed in the following table along with a description of the values:
+
+| Column  | Description |
+|---------|-------------|
+| ID | Audit event `id` |
+| Author ID | ID of the author |
+| Author Name | Full name of the author |
+| Entity ID | ID of the scope |
+| Entity Type | Type of the scope (`Project`/`Group`/`User`) |
+| Entity Path | Path of the scope |
+| Target ID | ID of the target |
+| Target Type | Type of the target |
+| Target Details | Details of the target |
+| Action | Description of the action |
+| IP Address | IP address of the author who performed the action |
+| Created At (UTC) | Formatted as `YYYY-MM-DD HH:MM:SS` |
+
+### Limitation
+
+The Audit Log CSV file is limited to a maximum of `100,000` events.
+The remaining records are truncated when this limit is reached.

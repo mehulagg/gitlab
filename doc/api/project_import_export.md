@@ -1,7 +1,7 @@
 ---
 stage: Create
 group: Source Code
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 type: reference, api
 ---
 
@@ -85,6 +85,8 @@ an email notifying the user to download the file, uploading the exported file to
 `finished` state is after the export process has completed and the user has been notified.
 
 `regeneration_in_progress` is when an export file is available to download, and a request to generate a new export is in process.
+
+`none` is when there are no exports _queued_, _started_, _finished_, or _being regenerated_
 
 `_links` are only present when export has finished.
 

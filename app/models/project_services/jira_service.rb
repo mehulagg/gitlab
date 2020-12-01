@@ -30,7 +30,7 @@ class JiraService < IssueTrackerService
 
   # TODO: we can probably just delegate as part of
   # https://gitlab.com/gitlab-org/gitlab/issues/29404
-  data_field :username, :password, :url, :api_url, :jira_issue_transition_id, :project_key, :issues_enabled
+  data_field :username, :password, :url, :api_url, :jira_issue_transition_id, :project_key, :issues_enabled, :vulnerabilities_enabled, :vulnerabilities_issuetype
 
   before_update :reset_password
   after_commit :update_deployment_type, on: [:create, :update], if: :update_deployment_type?
@@ -439,7 +439,8 @@ class JiraService < IssueTrackerService
   end
 
   def update_deployment_type?
-    api_url_changed? || url_changed? || username_changed? || password_changed?
+    (api_url_changed? || url_changed? || username_changed? || password_changed?) &&
+      can_test?
   end
 
   def update_deployment_type

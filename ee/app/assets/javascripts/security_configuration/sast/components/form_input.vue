@@ -45,10 +45,15 @@ export default {
       type: String,
       required: true,
     },
+    disabled: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   computed: {
-    isCustomValue() {
-      return this.value !== this.defaultValue;
+    showCustomValueMessage() {
+      return !this.disabled && this.value !== this.defaultValue;
     },
     inputSize() {
       return SCHEMA_TO_PROP_SIZE_MAP[this.size];
@@ -72,9 +77,15 @@ export default {
       <gl-form-text class="gl-mt-3">{{ description }}</gl-form-text>
     </template>
 
-    <gl-form-input :id="field" :size="inputSize" :value="value" @input="$emit('input', $event)" />
+    <gl-form-input
+      :id="field"
+      :size="inputSize"
+      :value="value"
+      :disabled="disabled"
+      @input="$emit('input', $event)"
+    />
 
-    <template v-if="isCustomValue" #description>
+    <template v-if="showCustomValueMessage" #description>
       <gl-sprintf :message="$options.i18n.CUSTOM_VALUE_MESSAGE">
         <template #anchor="{ content }">
           <gl-link @click="resetToDefaultValue" v-text="content" />

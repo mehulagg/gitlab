@@ -1,0 +1,11 @@
+- group_links = group.saml_group_links.load
+
+.card
+  .card-header= s_('GroupSAML|Active SAML Group Links (%{count})') % { count: group_links.size }
+
+  - if group_links.any?
+    %ul.content-list
+      = render collection: group_links, partial: 'saml_group_link', locals: { group: group }
+  - else
+    .card-body
+      = s_('GroupSAML|No active SAML group links')

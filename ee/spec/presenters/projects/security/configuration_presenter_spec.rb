@@ -6,6 +6,7 @@ RSpec.describe Projects::Security::ConfigurationPresenter do
   include Gitlab::Routing.url_helpers
 
   let(:project) { create(:project, :repository) }
+  let(:project_with_no_repo) { create(:project) }
   let(:current_user) { create(:user) }
 
   it 'presents the given project' do
@@ -35,6 +36,28 @@ RSpec.describe Projects::Security::ConfigurationPresenter do
 
     it 'includes the path to create a SAST merge request' do
       expect(subject[:create_sast_merge_request_path]).to eq(project_security_configuration_sast_path(project))
+    end
+
+    it 'includes the path to gitlab_ci history' do
+      expect(subject[:gitlab_ci_history_path]).to eq(project_blame_path(project, 'master/.gitlab-ci.yml'))
+    end
+
+    context 'when the project is empty' do
+      subject { described_class.new(project_with_no_repo, auto_fix_permission: true, current_user: current_user).to_html_data_attribute }
+
+      it 'includes a blank gitlab_ci history path' do
+        expect(subject[:gitlab_ci_history_path]).to eq('')
+      end
+    end
+
+    context 'when the project has no default branch set' do
+      before do
+        allow(project).to receive(:default_branch).and_return(nil)
+      end
+
+      it 'includes the path to gitlab_ci history' do
+        expect(subject[:gitlab_ci_history_path]).to eq(project_blame_path(project, 'master/.gitlab-ci.yml'))
+      end
     end
 
     context "when the latest default branch pipeline's source is auto devops" do
@@ -68,7 +91,8 @@ RSpec.describe Projects::Security::ConfigurationPresenter do
           security_scan(:dependency_scanning, configured: false, auto_dev_ops_enabled: true),
           security_scan(:license_scanning, configured: false, auto_dev_ops_enabled: true),
           security_scan(:secret_detection, configured: true, auto_dev_ops_enabled: true),
-          security_scan(:coverage_fuzzing, configured: false, auto_dev_ops_enabled: true)
+          security_scan(:coverage_fuzzing, configured: false, auto_dev_ops_enabled: true),
+          security_scan(:api_fuzzing, configured: false, auto_dev_ops_enabled: true)
         )
       end
     end
@@ -91,7 +115,8 @@ RSpec.describe Projects::Security::ConfigurationPresenter do
           security_scan(:dependency_scanning, configured: false),
           security_scan(:license_scanning, configured: false),
           security_scan(:secret_detection, configured: false),
-          security_scan(:coverage_fuzzing, configured: false)
+          security_scan(:coverage_fuzzing, configured: false),
+          security_scan(:api_fuzzing, configured: false)
         )
       end
     end
@@ -121,7 +146,8 @@ RSpec.describe Projects::Security::ConfigurationPresenter do
           security_scan(:dependency_scanning, configured: false),
           security_scan(:license_scanning, configured: false),
           security_scan(:secret_detection, configured: true),
-          security_scan(:coverage_fuzzing, configured: false)
+          security_scan(:coverage_fuzzing, configured: false),
+          security_scan(:api_fuzzing, configured: false)
         )
       end
 
@@ -138,7 +164,8 @@ RSpec.describe Projects::Security::ConfigurationPresenter do
           security_scan(:dependency_scanning, configured: false),
           security_scan(:license_scanning, configured: false),
           security_scan(:secret_detection, configured: false),
-          security_scan(:coverage_fuzzing, configured: false)
+          security_scan(:coverage_fuzzing, configured: false),
+          security_scan(:api_fuzzing, configured: false)
         )
       end
 
@@ -161,7 +188,8 @@ RSpec.describe Projects::Security::ConfigurationPresenter do
           security_scan(:dependency_scanning, configured: false),
           security_scan(:license_scanning, configured: false),
           security_scan(:secret_detection, configured: false),
-          security_scan(:coverage_fuzzing, configured: false)
+          security_scan(:coverage_fuzzing, configured: false),
+          security_scan(:api_fuzzing, configured: false)
         )
       end
 
@@ -176,7 +204,8 @@ RSpec.describe Projects::Security::ConfigurationPresenter do
           security_scan(:dependency_scanning, configured: false),
           security_scan(:license_scanning, configured: true),
           security_scan(:secret_detection, configured: true),
-          security_scan(:coverage_fuzzing, configured: false)
+          security_scan(:coverage_fuzzing, configured: false),
+          security_scan(:api_fuzzing, configured: false)
         )
       end
 
@@ -246,7 +275,7 @@ RSpec.describe Projects::Security::ConfigurationPresenter do
 
   def configuration_path(type)
     if type === :dast_profiles
-      project_profiles_path(project)
+      project_security_configuration_dast_profiles_path(project)
     elsif type === :sast
       project_security_configuration_sast_path(project)
     else

@@ -2,11 +2,13 @@
 
 module Projects
   class UpdateMirrorService < BaseService
+    include Gitlab::Utils::StrongMemoize
+
     Error = Class.new(StandardError)
     UpdateError = Class.new(Error)
 
     def execute
-      if project.import_url && Gitlab::UrlBlocker.blocked_url?(CGI.unescape(Gitlab::UrlSanitizer.sanitize(project.import_url)))
+      if project.import_url && Gitlab::UrlBlocker.blocked_url?(normalized_url(project.import_url))
         return error("The import URL is invalid.")
       end
 
@@ -40,12 +42,23 @@ module Projects
       # Let's skip this if the repository hasn't changed.
       update_lfs_objects if project.repository.checksum != checksum_before
 
+      # Running git fetch in the repository creates loose objects in the same
+      # way running git push *to* the repository does, so ensure we run regular
+      # garbage collection
+      run_housekeeping
+
       success
     rescue Gitlab::Shell::Error, Gitlab::Git::BaseError, UpdateError => e
       error(e.message)
     end
 
     private
+
+    def normalized_url(url)
+      strong_memoize(:normalized_url) do
+        CGI.unescape(Gitlab::UrlSanitizer.sanitize(url))
+      end
+    end
 
     def update_branches
       local_branches = repository.branches.each_with_object({}) { |branch, branches| branches[branch.name] = branch }
@@ -139,6 +152,15 @@ module Projects
       else
         # We ignore diverged branches other than the default branch
       end
+    end
+
+    def run_housekeeping
+      service = Projects::HousekeepingService.new(project)
+
+      service.increment!
+      service.execute if service.needed?
+    rescue Projects::HousekeepingService::LeaseTaken
+      # best-effort
     end
 
     # In Git is possible to tag blob objects, and those blob objects don't point to a Git commit so those tags

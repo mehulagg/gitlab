@@ -7,14 +7,17 @@ module Backup
   class Files
     include Backup::Helper
 
-    attr_reader :name, :app_files_dir, :backup_tarball, :files_parent_dir
+    DEFAULT_EXCLUDE = 'lost+found'
 
-    def initialize(name, app_files_dir)
+    attr_reader :name, :app_files_dir, :backup_tarball, :excludes, :files_parent_dir
+
+    def initialize(name, app_files_dir, excludes: [])
       @name = name
       @app_files_dir = File.realpath(app_files_dir)
       @files_parent_dir = File.realpath(File.join(@app_files_dir, '..'))
       @backup_files_dir = File.join(Gitlab.config.backup.path, File.basename(@app_files_dir) )
       @backup_tarball = File.join(Gitlab.config.backup.path, name + '.tar.gz')
+      @excludes = [DEFAULT_EXCLUDE].concat(excludes)
     end
 
     # Copy files from public/files to backup/files
@@ -23,7 +26,7 @@ module Backup
       FileUtils.rm_f(backup_tarball)
 
       if ENV['STRATEGY'] == 'copy'
-        cmd = %W(rsync -a --exclude=lost+found #{app_files_dir} #{Gitlab.config.backup.path})
+        cmd = [%w[rsync -a], exclude_dirs(:rsync), %W[#{app_files_dir} #{Gitlab.config.backup.path}]].flatten
         output, status = Gitlab::Popen.popen(cmd)
 
         unless status == 0
@@ -31,17 +34,27 @@ module Backup
           raise Backup::Error, 'Backup failed'
         end
 
-        run_pipeline!([%W(#{tar} --warning=no-file-changed --exclude=lost+found -C #{@backup_files_dir} -cf - .), gzip_cmd], out: [backup_tarball, 'w', 0600])
+        tar_cmd = [tar, exclude_dirs(:tar), %W[-C #{@backup_files_dir} -cf - .]].flatten
+        status_list, output = run_pipeline!([tar_cmd, gzip_cmd], out: [backup_tarball, 'w', 0600])
         FileUtils.rm_rf(@backup_files_dir)
       else
-        run_pipeline!([%W(#{tar} --warning=no-file-changed --exclude=lost+found -C #{app_files_dir} -cf - .), gzip_cmd], out: [backup_tarball, 'w', 0600])
+        tar_cmd = [tar, exclude_dirs(:tar), %W[-C #{app_files_dir} -cf - .]].flatten
+        status_list, output = run_pipeline!([tar_cmd, gzip_cmd], out: [backup_tarball, 'w', 0600])
+      end
+
+      unless pipeline_succeeded?(tar_status: status_list[0], gzip_status: status_list[1], output: output)
+        raise Backup::Error, "Backup operation failed: #{output}"
       end
     end
 
     def restore
       backup_existing_files_dir
 
-      run_pipeline!([%w(gzip -cd), %W(#{tar} --unlink-first --recursive-unlink -C #{app_files_dir} -xf -)], in: backup_tarball)
+      cmd_list = [%w[gzip -cd], %W[#{tar} --unlink-first --recursive-unlink -C #{app_files_dir} -xf -]]
+      status_list, output = run_pipeline!(cmd_list, in: backup_tarball)
+      unless pipeline_succeeded?(gzip_status: status_list[0], tar_status: status_list[1], output: output)
+        raise Backup::Error, "Restore operation failed: #{output}"
+      end
     end
 
     def tar
@@ -73,13 +86,56 @@ module Backup
     def run_pipeline!(cmd_list, options = {})
       err_r, err_w = IO.pipe
       options[:err] = err_w
-      status = Open3.pipeline(*cmd_list, options)
+      status_list = Open3.pipeline(*cmd_list, options)
       err_w.close
-      return if status.compact.all?(&:success?)
 
-      regex = /^g?tar: \.: Cannot mkdir: No such file or directory$/
-      error = err_r.read
-      raise Backup::Error, "Backup failed. #{error}" unless error =~ regex
+      [status_list, err_r.read]
+    end
+
+    def noncritical_warning?(warning)
+      noncritical_warnings = [
+        /^g?tar: \.: Cannot mkdir: No such file or directory$/
+      ]
+
+      noncritical_warnings.map { |w| warning =~ w }.any?
+    end
+
+    def pipeline_succeeded?(tar_status:, gzip_status:, output:)
+      return false unless gzip_status&.success?
+
+      tar_status&.success? || tar_ignore_non_success?(tar_status.exitstatus, output)
+    end
+
+    def tar_ignore_non_success?(exitstatus, output)
+      # tar can exit with nonzero code:
+      #  1 - if some files changed (i.e. a CI job is currently writes to log)
+      #  2 - if it cannot create `.` directory (see issue https://gitlab.com/gitlab-org/gitlab/-/issues/22442)
+      #  http://www.gnu.org/software/tar/manual/html_section/tar_19.html#Synopsis
+      #  so check tar status 1 or stderr output against some non-critical warnings
+      if exitstatus == 1
+        $stdout.puts "Ignoring tar exit status 1 'Some files differ': #{output}"
+        return true
+      end
+
+      # allow tar to fail with other non-success status if output contain non-critical warning
+      if noncritical_warning?(output)
+        $stdout.puts "Ignoring non-success exit status #{exitstatus} due to output of non-critical warning(s): #{output}"
+        return true
+      end
+
+      false
+    end
+
+    def exclude_dirs(fmt)
+      excludes.map do |s|
+        if s == DEFAULT_EXCLUDE
+          '--exclude=' + s
+        elsif fmt == :rsync
+          '--exclude=/' + s
+        elsif fmt == :tar
+          '--exclude=./' + s
+        end
+      end
     end
   end
 end

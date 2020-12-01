@@ -1,7 +1,7 @@
 ---
 stage: Monitor
-group: APM
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+group: Health
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Custom dashboards **(CORE)**
@@ -13,10 +13,6 @@ includes a few key metrics, but you can also define your own custom dashboards.
 
 You may create a [new dashboard from scratch](#add-a-new-dashboard-to-your-project)
 or [duplicate a GitLab-defined Prometheus dashboard](#duplicate-a-gitlab-defined-dashboard).
-
-NOTE: **Note:**
-The metrics as defined below do not support alerts, unlike
-[custom metrics](../index.md#adding-custom-metrics).
 
 ## Add a new dashboard to your project
 
@@ -51,16 +47,16 @@ To create a new dashboard from the command line:
      - group: 'Group Title'
        panels:
          - type: area-chart
-           title: "Chart Title"
-           y_label: "Y-Axis"
+           title: 'Chart Title'
+           y_label: 'Y-Axis'
            y_axis:
              format: number
              precision: 0
            metrics:
              - id: my_metric_id
                query_range: 'http_requests_total'
-               label: "Instance: {{instance}}, method: {{method}}"
-               unit: "count"
+               label: 'Instance: {{instance}}, method: {{method}}'
+               unit: 'count'
    ```
 
 1. Save the file, commit, and push to your repository. The file must be present in your **default** branch.
@@ -70,8 +66,8 @@ To create a new dashboard from the command line:
 Your custom dashboard is available at `https://example.com/project/-/metrics/custom_dashboard_name.yml`.
 
 NOTE: **Note:**
-Configuration files nested under subdirectories of `.gitlab/dashboards` are not
-supported and won't be available in the UI.
+Configuration files nested under subdirectories of `.gitlab/dashboards` aren't
+supported or available in the UI.
 
 ## Add a new metrics panel to a dashboard
 
@@ -86,7 +82,7 @@ with the **Add Panel** page:
 1. Click **Add panel** in the **{ellipsis_v}** **More actions** menu.
 
    NOTE: **Note:**
-   You can add panel only to custom dashboards.
+   You can only add panels to custom dashboards.
 
    ![Monitoring Dashboard actions menu with add panel item](img/actions_menu_create_add_panel_v13_3.png)
 1. In the **Define and preview panel** section, paste in the YAML you want to
@@ -100,16 +96,12 @@ with the **Add Panel** page:
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/37238) in GitLab 12.7.
 > - From [GitLab 12.8 onwards](https://gitlab.com/gitlab-org/gitlab/-/issues/39505), custom metrics are also duplicated when you duplicate a dashboard.
 
-You can save a complete copy of a GitLab defined dashboard along with all custom metrics added to it.
+You can save a complete copy of a GitLab-defined dashboard along with all custom metrics added to it.
 The resulting `.yml` file can be customized and adapted to your project.
 You can decide to save the dashboard `.yml` file in the project's **default** branch or in a
-new branch.
+new branch. To duplicate a GitLab-defined dashboard:
 
 1. Click **Duplicate current dashboard** in the **{ellipsis_v}** **More actions** menu.
-
-   NOTE: **Note:**
-   You can duplicate only GitLab-defined dashboards.
-
 1. Enter the filename and other information, such as the new commit's message, and click **Duplicate**.
 1. Select a branch to add your dashboard to:
    - *If you select your **default** branch,* the new dashboard becomes immediately available.
@@ -121,14 +113,9 @@ Your custom dashboard is available at `https://example.com/project/-/metrics/cus
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/223204) in GitLab 13.2.
 
-To manage the settings for your metrics dashboard:
-
-1. Sign in as a user with project Maintainer or Administrator
-   [permissions](../../../user/permissions.md#project-members-permissions).
-1. Navigate to your dashboard at **Operations > Metrics**.
-1. In the top-right corner of your dashboard, click **Metrics Settings**:
-
-   ![Monitoring Dashboard actions menu with create new item](img/metrics_settings_button_v13_3.png)
+Users with project Maintainer or Administrator
+[permissions](../../../user/permissions.md#project-members-permissions)
+can manage [the settings](settings.md) for your metrics dashboard.
 
 ## Chart Context Menu
 
@@ -169,7 +156,7 @@ and end times to the URL, enabling you to share specific timeframes more easily.
 
 You can use **Metrics Dashboard Annotations** to mark any important events on
 every metrics dashboard by adding annotations to it. While viewing a dashboard,
-annotation entries assigned to the selected time range will be automatically
+annotation entries assigned to the selected time range are automatically
 fetched and displayed on every chart within that dashboard. On mouse hover, each
 annotation presents additional details, including the exact time of an event and
 its description.
@@ -231,7 +218,7 @@ links:
 ## Troubleshooting
 
 When troubleshooting issues with a managed Prometheus app, it is often useful to
-[view the Prometheus UI](../../../development/prometheus.md#access-the-ui-of-a-prometheus-managed-application-in-kubernetes).
+[view the Prometheus UI](../../../user/project/integrations/prometheus.md#access-the-ui-of-a-prometheus-managed-application-in-kubernetes).
 
 ### "No data found" error on Metrics dashboard page
 

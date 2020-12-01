@@ -1,7 +1,7 @@
 ---
 stage: Create
 group: Source Code
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 type: reference
 ---
 
@@ -34,9 +34,11 @@ When you create a project in GitLab, you'll have access to a large number of
   - [Protected tags](protected_tags.md): Control over who has
   permission to create tags, and prevent accidental update or deletion
   - [Repository mirroring](repository/repository_mirroring.md)
-  - [Signing commits](gpg_signed_commits/index.md): use GPG to sign your commits
+  - [Signing commits](repository/gpg_signed_commits/index.md): use GPG to sign your commits
   - [Deploy tokens](deploy_tokens/index.md): Manage project-based deploy tokens that allow permanent access to the repository and Container Registry.
 - [Web IDE](web_ide/index.md)
+- [CVE ID Requests](../application_security/cve_id_request.md): Request a CVE identifier to track a
+  vulnerability in your project.
 
 **Issues and merge requests:**
 
@@ -94,9 +96,9 @@ When you create a project in GitLab, you'll have access to a large number of
 
 - [Wiki](wiki/index.md): document your GitLab project in an integrated Wiki.
 - [Snippets](../snippets.md): store, share and collaborate on code snippets.
-- [Value Stream Analytics](cycle_analytics.md): review your development lifecycle.
+- [Value Stream Analytics](../analytics/value_stream_analytics.md): review your development lifecycle.
 - [Insights](insights/index.md): configure the Insights that matter for your projects. **(ULTIMATE)**
-- [Security Dashboard](security_dashboard.md): Security Dashboard. **(ULTIMATE)**
+- [Security Dashboard](../application_security/security_dashboard/index.md): Security Dashboard. **(ULTIMATE)**
 - [Syntax highlighting](highlighting.md): an alternative to customize
   your code blocks, overriding GitLab's default choice of language.
 - [Badges](badges.md): badges for the project overview.
@@ -190,17 +192,7 @@ To delete a project, first navigate to the home page for that project.
 1. Click **Delete project**
 1. Confirm this action by typing in the expected text.
 
-### Delayed deletion **(PREMIUM)**
-
-By default, projects in a personal namespace are deleted after a seven day delay.
-
-Admins can restore the project during this period of time.
-This delay [may be changed by an admin](../admin_area/settings/visibility_and_access_controls.md#default-deletion-delay).
-
-Admins can view all projects pending deletion. If you're an administrator, go to the top navigation bar, click **Projects > Your projects**, and then select the **Deleted projects** tab.
-From this tab an admin can restore any project.
-
-For information on delay deletion of projects within a group, please see [Enabling delayed Project removal](../group/index.md#enabling-delayed-project-removal)
+Projects in personal namespaces are deleted immediately on request. For information on delayed deletion of projects within a group, please see [Enabling delayed project removal](../group/index.md#enabling-delayed-project-removal).
 
 ## CI/CD for external repositories **(PREMIUM)**
 
@@ -247,6 +239,14 @@ For users without permissions to view the project's code:
 
 - The wiki homepage is displayed, if any.
 - The list of issues within the project is displayed.
+
+## GitLab Workflow - VS Code extension
+
+To avoid switching from the GitLab UI and VS Code while working in GitLab repositories, you can integrate
+the [VS Code](https://code.visualstudio.com/) editor with GitLab through the
+[GitLab Workflow extension](https://marketplace.visualstudio.com/items?itemName=GitLab.gitlab-workflow).
+
+To review or contribute to the extension's code, visit [its codebase in GitLab](https://gitlab.com/gitlab-org/gitlab-vscode-extension/).
 
 ## Redirects when changing repository paths
 

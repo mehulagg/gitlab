@@ -1,7 +1,7 @@
 <script>
 /* global Mousetrap */
 import 'mousetrap';
-import { GlButton, GlButtonGroup } from '@gitlab/ui';
+import { GlButton, GlButtonGroup, GlTooltipDirective } from '@gitlab/ui';
 import { s__, sprintf } from '~/locale';
 import allDesignsMixin from '../../mixins/all_designs';
 import { DESIGN_ROUTE_NAME } from '../../router/constants';
@@ -10,6 +10,9 @@ export default {
   components: {
     GlButton,
     GlButtonGroup,
+  },
+  directives: {
+    GlTooltip: GlTooltipDirective,
   },
   mixins: [allDesignsMixin],
   props: {
@@ -64,10 +67,11 @@ export default {
 </script>
 
 <template>
-  <div v-if="designsCount" class="d-flex align-items-center">
+  <div v-if="designsCount" class="gl-display-flex gl-align-items-center">
     {{ paginationText }}
-    <gl-button-group class="ml-3 mr-3">
+    <gl-button-group class="gl-mx-5">
       <gl-button
+        v-gl-tooltip.bottom
         :disabled="!previousDesign"
         :title="s__('DesignManagement|Go to previous design')"
         icon="angle-left"
@@ -75,6 +79,7 @@ export default {
         @click="navigateToDesign(previousDesign)"
       />
       <gl-button
+        v-gl-tooltip.bottom
         :disabled="!nextDesign"
         :title="s__('DesignManagement|Go to next design')"
         icon="angle-right"

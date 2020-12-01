@@ -5,12 +5,14 @@ module QA
     describe 'Group SAML SSO - Non enforced SSO' do
       include Support::Api
 
+      let(:user) { Resource::User.fabricate_via_api! }
+
       before(:all) do
         @group = Resource::Sandbox.fabricate_via_api! do |sandbox_group|
           sandbox_group.path = "saml_sso_group_#{SecureRandom.hex(8)}"
         end
 
-        Runtime::Feature.enable_and_verify('group_administration_nav_item')
+        Runtime::Feature.enable(:group_administration_nav_item)
 
         @saml_idp_service = Flow::Saml.run_saml_idp_service(@group.path)
       end
@@ -25,42 +27,44 @@ module QA
       end
 
       context 'when SAML SSO is configured with a default membership role' do
-        let(:user) { Resource::User.fabricate_via_api! }
         let(:default_membership_role) { 'Developer' }
 
         it 'adds the new member with access level as set in SAML SSO configuration', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/968' do
           managed_group_url = Flow::Saml.enable_saml_sso(@group, @saml_idp_service, default_membership_role)
           Page::Main::Menu.perform(&:sign_out_if_signed_in)
 
-          Flow::Login.sign_in(as: user)
+          Flow::Login.while_signed_in(as: user) do
+            page.visit managed_group_url
+            EE::Page::Group::SamlSSOSignIn.perform(&:click_sign_in)
+            Flow::Saml.login_to_idp_if_required('user3', 'user3pass')
 
-          page.visit managed_group_url
-          EE::Page::Group::SamlSSOSignIn.perform(&:click_sign_in)
-          Flow::Saml.login_to_idp_if_required('user3', 'user3pass')
-          expect(page).to have_content("SAML for #{@group.path} was added to your connected accounts")
+            expect(page).to have_content("SAML for #{@group.path} was added to your connected accounts")
 
-          member_details = @group.list_members.find { |item| item['username'] == user.username }
+            member_details = @group.list_members.find { |item| item['username'] == user.username }
 
-          expect(member_details['access_level']).to eq(Resource::Members::AccessLevel::DEVELOPER)
+            expect(member_details['access_level']).to eq(Resource::Members::AccessLevel::DEVELOPER)
+          end
         end
       end
 
       it 'User logs in to group with SAML SSO', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/673' do
         managed_group_url = Flow::Saml.enable_saml_sso(@group, @saml_idp_service)
 
-        page.visit managed_group_url
+        Flow::Login.while_signed_in(as: user) do
+          page.visit managed_group_url
 
-        EE::Page::Group::SamlSSOSignIn.perform(&:click_sign_in)
+          EE::Page::Group::SamlSSOSignIn.perform(&:click_sign_in)
 
-        Flow::Saml.login_to_idp_if_required('user1', 'user1pass')
+          Flow::Saml.login_to_idp_if_required('user1', 'user1pass')
 
-        expect(page).to have_content("SAML for #{@group.path} was added to your connected accounts")
+          expect(page).to have_content("SAML for #{@group.path} was added to your connected accounts")
 
-        page.visit managed_group_url
+          page.visit managed_group_url
 
-        EE::Page::Group::SamlSSOSignIn.perform(&:click_sign_in)
+          EE::Page::Group::SamlSSOSignIn.perform(&:click_sign_in)
 
-        expect(page).to have_content("Already signed in with SAML for #{@group.path}")
+          expect(page).to have_content("Already signed in with SAML for #{@group.path}")
+        end
       end
 
       it 'Lets group admin test settings', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/674' do
@@ -93,10 +97,14 @@ module QA
         expect(page).not_to have_content("Fingerprint mismatch")
       end
 
+      after do
+        user.remove_via_api! if user
+      end
+
       after(:all) do
         @group.remove_via_api!
 
-        Runtime::Feature.remove('group_administration_nav_item')
+        Runtime::Feature.remove(:group_administration_nav_item)
 
         page.visit Runtime::Scenario.gitlab_address
         Page::Main::Menu.perform(&:sign_out_if_signed_in)

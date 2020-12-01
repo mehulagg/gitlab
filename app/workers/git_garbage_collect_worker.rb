@@ -27,20 +27,17 @@ class GitGarbageCollectWorker # rubocop:disable Scalability/IdempotentWorker
 
     task = task.to_sym
 
-    if task == :gc
+    if gc?(task)
       ::Projects::GitDeduplicationService.new(project).execute
       cleanup_orphan_lfs_file_references(project)
     end
 
-    gitaly_call(task, project.repository.raw_repository)
+    gitaly_call(task, project)
 
     # Refresh the branch cache in case garbage collection caused a ref lookup to fail
-    flush_ref_caches(project) if task == :gc
+    flush_ref_caches(project) if gc?(task)
 
-    if task != :pack_refs
-      project.repository.expire_statistics_caches
-      Projects::UpdateStatisticsService.new(project, nil, statistics: [:repository_size, :lfs_objects_size]).execute
-    end
+    update_repository_statistics(project) if task != :pack_refs
 
     # In case pack files are deleted, release libgit2 cache and open file
     # descriptors ASAP instead of waiting for Ruby garbage collection
@@ -50,6 +47,10 @@ class GitGarbageCollectWorker # rubocop:disable Scalability/IdempotentWorker
   end
 
   private
+
+  def gc?(task)
+    task == :gc || task == :prune
+  end
 
   def try_obtain_lease(key)
     ::Gitlab::ExclusiveLease.new(key, timeout: LEASE_TIMEOUT).try_obtain
@@ -67,8 +68,9 @@ class GitGarbageCollectWorker # rubocop:disable Scalability/IdempotentWorker
     ::Gitlab::ExclusiveLease.get_uuid(key)
   end
 
-  ## `repository` has to be a Gitlab::Git::Repository
-  def gitaly_call(task, repository)
+  def gitaly_call(task, project)
+    repository = project.repository.raw_repository
+
     client = if task == :pack_refs
                Gitlab::GitalyClient::RefService.new(repository)
              else
@@ -76,8 +78,8 @@ class GitGarbageCollectWorker # rubocop:disable Scalability/IdempotentWorker
              end
 
     case task
-    when :gc
-      client.garbage_collect(bitmaps_enabled?)
+    when :prune, :gc
+      client.garbage_collect(bitmaps_enabled?, prune: task == :prune)
     when :full_repack
       client.repack_full(bitmaps_enabled?)
     when :incremental_repack
@@ -94,16 +96,25 @@ class GitGarbageCollectWorker # rubocop:disable Scalability/IdempotentWorker
   end
 
   def cleanup_orphan_lfs_file_references(project)
-    return unless Feature.enabled?(:cleanup_lfs_during_gc, project)
     return if Gitlab::Database.read_only? # GitGarbageCollectWorker may be run on a Geo secondary
 
     ::Gitlab::Cleanup::OrphanLfsFileReferences.new(project, dry_run: false, logger: logger).run!
+  rescue => err
+    Gitlab::GitLogger.warn(message: "Cleaning up orphan LFS objects files failed", error: err.message)
+    Gitlab::ErrorTracking.track_and_raise_for_dev_exception(err)
   end
 
   def flush_ref_caches(project)
-    project.repository.after_create_branch
+    project.repository.expire_branches_cache
     project.repository.branch_names
     project.repository.has_visible_content?
+  end
+
+  def update_repository_statistics(project)
+    project.repository.expire_statistics_caches
+    return if Gitlab::Database.read_only? # GitGarbageCollectWorker may be run on a Geo secondary
+
+    Projects::UpdateStatisticsService.new(project, nil, statistics: [:repository_size, :lfs_objects_size]).execute
   end
 
   def bitmaps_enabled?

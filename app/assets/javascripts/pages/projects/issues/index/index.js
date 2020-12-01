@@ -7,24 +7,22 @@ import UsersSelect from '~/users_select';
 import initFilteredSearch from '~/pages/search/init_filtered_search';
 import { FILTERED_SEARCH } from '~/pages/constants';
 import { ISSUABLE_INDEX } from '~/pages/projects/constants';
-import initIssuablesList from '~/issuables_list';
+import initIssuablesList from '~/issues_list';
 import initManualOrdering from '~/manual_ordering';
 import { showLearnGitLabIssuesPopover } from '~/onboarding_issues';
 
-document.addEventListener('DOMContentLoaded', () => {
-  IssuableFilteredSearchTokenKeys.addExtraTokensForIssues();
+IssuableFilteredSearchTokenKeys.addExtraTokensForIssues();
 
-  initFilteredSearch({
-    page: FILTERED_SEARCH.ISSUES,
-    filteredSearchTokenKeys: IssuableFilteredSearchTokenKeys,
-    useDefaultState: true,
-  });
-
-  new IssuableIndex(ISSUABLE_INDEX.ISSUE);
-  new ShortcutsNavigation();
-  new UsersSelect();
-
-  initManualOrdering();
-  initIssuablesList();
-  showLearnGitLabIssuesPopover();
+initFilteredSearch({
+  page: FILTERED_SEARCH.ISSUES,
+  filteredSearchTokenKeys: IssuableFilteredSearchTokenKeys,
+  useDefaultState: true,
 });
+
+new IssuableIndex(ISSUABLE_INDEX.ISSUE);
+new ShortcutsNavigation();
+new UsersSelect();
+
+initManualOrdering();
+initIssuablesList();
+showLearnGitLabIssuesPopover();

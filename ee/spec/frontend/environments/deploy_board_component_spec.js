@@ -1,5 +1,6 @@
-import Vue from 'vue';
+import { GlTooltip, GlIcon } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
+import Vue from 'vue';
 import DeployBoard from 'ee/environments/components/deploy_board_component.vue';
 import { deployBoardMockData, environment } from './mock_data';
 
@@ -52,6 +53,15 @@ describe('Deploy Board', () => {
       expect(buttons.at(0).attributes('href')).toEqual(deployBoardMockData.rollback_url);
       expect(buttons.at(1).attributes('href')).toEqual(deployBoardMockData.abort_url);
     });
+
+    it('sets up a tooltip for the legend', () => {
+      const iconSpan = wrapper.find('[data-testid="legend-tooltip-target"]');
+      const tooltip = wrapper.find(GlTooltip);
+      const icon = iconSpan.find(GlIcon);
+
+      expect(tooltip.props('target')()).toBe(iconSpan.element);
+      expect(icon.props('name')).toBe('question');
+    });
   });
 
   describe('with empty state', () => {
@@ -89,28 +99,6 @@ describe('Deploy Board', () => {
     });
   });
 
-  describe('with hasLegacyAppLabel equal true', () => {
-    beforeEach(done => {
-      wrapper = createComponent({
-        isLoading: false,
-        isEmpty: false,
-        logsPath,
-        hasLegacyAppLabel: true,
-        deployBoardData: {},
-      });
-      wrapper.vm.$nextTick(done);
-    });
-
-    it('should render legacy label warning message', () => {
-      const warningMessage = wrapper.find('.bs-callout-warning');
-
-      expect(warningMessage).toBeTruthy();
-      expect(warningMessage.text()).toContain(
-        'Matching on the app label has been removed for deploy boards.',
-      );
-    });
-  });
-
   describe('has legend component', () => {
     let statuses = [];
     beforeEach(done => {
@@ -118,7 +106,6 @@ describe('Deploy Board', () => {
         isLoading: false,
         isEmpty: false,
         logsPath: environment.log_path,
-        hasLegacyAppLabel: true,
         deployBoardData: deployBoardMockData,
       });
       ({ statuses } = wrapper.vm);

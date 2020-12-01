@@ -1,17 +1,20 @@
 ---
 stage: Create
 group: Source Code
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 type: reference, concepts
 ---
 
-# Merge Request Approvals
+# Merge Request Approvals **(CORE)**
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/580) in GitLab Enterprise Edition 7.2. Available in GitLab Core and higher tiers.
+> - Redesign [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/1979) in [GitLab Premium](https://about.gitlab.com/pricing/) 11.8 and [feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/10685) in 12.0.
 
 Code review is an essential practice of every successful project, and giving your
 approval once a merge request is in good shape is an important part of the review
 process, as it clearly communicates the ability to merge the change.
 
-## Optional Approvals **(CORE ONLY)**
+## Optional Approvals
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/27426) in GitLab 13.2.
 
@@ -120,6 +123,29 @@ indistinguishably.
 
 Alternatively, you can **require**
 [Code Owner's approvals for Protected Branches](../protected_branches.md#protected-branches-approval-by-code-owners). **(PREMIUM)**
+
+#### Merge Request approval segregation of duties
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/40491) in [GitLab Starter](https://about.gitlab.com/pricing/) 13.4.
+
+Managers or operators with [Reporter permissions](../../permissions.md#project-members-permissions)
+to a project sometimes need to be required approvers of a merge request,
+before a merge to a protected branch begins. These approvers aren't allowed
+to push or merge code to any branches.
+
+To enable this access:
+
+1. [Create a new group](../../group/index.md#create-a-new-group), and then
+   [add the user to the group](../../group/index.md#add-users-to-a-group),
+   ensuring you select the Reporter role for the user.
+1. [Share the project with your group](../members/share_project_with_groups.md#sharing-a-project-with-a-group-of-users),
+   based on the Reporter role.
+1. Navigate to your project's **Settings > General**, and in the
+   **Merge request approvals** section, click **Expand**.
+1. [Add the group](../../group/index.md#create-a-new-group) to the permission list
+   for the protected branch.
+
+![Update approval rule](img/update_approval_rule_v13_4.png)
 
 #### Adding / editing a default approval rule
 
@@ -311,26 +337,6 @@ of your security team when a vulnerability would be introduced by a merge reques
 
 For more information, see
 [Security approvals in merge requests](../../application_security/index.md#security-approvals-in-merge-requests).
-
-### Enabling the new approvals interface
-
-Since [GitLab v12.0](https://gitlab.com/gitlab-org/gitlab/-/issues/10685), an updated approvals
-interface is available by default. In versions older than 12.0, the updated interface is not
-available unless the `approval_rules` feature flag is enabled, which can be done from
-the Rails console by instance administrators.
-
-Use these commands to start the Rails console:
-
-```shell
-# Omnibus GitLab
-gitlab-rails console
-
-# Installation from source
-cd /home/git/gitlab
-sudo -u git -H bin/rails console -e production
-```
-
-Then run `Feature.enable(:approval_rules)` to enable the updated interface.
 
 <!-- ## Troubleshooting
 

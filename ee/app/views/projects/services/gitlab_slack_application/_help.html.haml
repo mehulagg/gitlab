@@ -2,9 +2,7 @@
   %p
     This service allows users to perform common operations on this
     project by entering slash commands in Slack.
-    = link_to help_page_path('user/project/integrations/gitlab_slack_application.md'), target: '_blank' do
-      View documentation
-      = icon('external-link')
+    = external_link _('View documentation'), help_page_path('user/project/integrations/gitlab_slack_application.md')
   %p.inline
     See the list of available commands in Slack after setting up this service
     by entering

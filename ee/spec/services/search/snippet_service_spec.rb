@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe Search::SnippetService do
   include SearchResultHelpers
   include ProjectHelpers
+  include AdminModeHelper
   using RSpec::Parameterized::TableSyntax
 
   it_behaves_like 'EE search service shared examples', ::Gitlab::SnippetSearchResults, ::Gitlab::Elastic::SnippetSearchResults do
@@ -32,11 +33,20 @@ RSpec.describe Search::SnippetService do
 
       context 'project snippet' do
         let(:pendings) do
+          # TODO: Ignore some spec cases, non-members regular users or non-member admins without admin mode should see snippets if:
+          #   - feature access level is enabled, and
+          #   - project access level is public or internal, and
+          #   - snippet access level is equal or more open than the project access level
+          # See https://gitlab.com/gitlab-org/gitlab/-/merge_requests/45988#note_436009204
           [
-            { snippet_level: :public, project_level: :public, feature_access_level: :enabled, membership: :non_member, expected_count: 1 },
-            { snippet_level: :public, project_level: :internal, feature_access_level: :enabled, membership: :non_member, expected_count: 1 },
-            { snippet_level: :internal, project_level: :public, feature_access_level: :enabled, membership: :non_member, expected_count: 1 },
-            { snippet_level: :internal, project_level: :internal, feature_access_level: :enabled, membership: :non_member, expected_count: 1 }
+            { snippet_level: :public, project_level: :public, feature_access_level: :enabled, membership: :admin, admin_mode: false, expected_count: 1 },
+            { snippet_level: :public, project_level: :internal, feature_access_level: :enabled, membership: :admin, admin_mode: false, expected_count: 1 },
+            { snippet_level: :internal, project_level: :public, feature_access_level: :enabled, membership: :admin, admin_mode: false, expected_count: 1 },
+            { snippet_level: :internal, project_level: :internal, feature_access_level: :enabled, membership: :admin, admin_mode: false, expected_count: 1 },
+            { snippet_level: :public, project_level: :public, feature_access_level: :enabled, membership: :non_member, admin_mode: nil, expected_count: 1 },
+            { snippet_level: :public, project_level: :internal, feature_access_level: :enabled, membership: :non_member, admin_mode: nil, expected_count: 1 },
+            { snippet_level: :internal, project_level: :public, feature_access_level: :enabled, membership: :non_member, admin_mode: nil, expected_count: 1 },
+            { snippet_level: :internal, project_level: :internal, feature_access_level: :enabled, membership: :non_member, admin_mode: nil, expected_count: 1 }
           ]
         end
 
@@ -47,6 +57,7 @@ RSpec.describe Search::SnippetService do
               project_level: project_level,
               feature_access_level: feature_access_level,
               membership: membership,
+              admin_mode: admin_mode,
               expected_count: expected_count
             }
           )
@@ -62,7 +73,7 @@ RSpec.describe Search::SnippetService do
 
         let_it_be(:snippet) { create(:project_snippet, :public, project: project, author: snippet_author, title: 'foobar') }
 
-        where(:snippet_level, :project_level, :feature_access_level, :membership, :expected_count) do
+        where(:snippet_level, :project_level, :feature_access_level, :membership, :admin_mode, :expected_count) do
           permission_table_for_project_snippet_access
         end
 
@@ -75,6 +86,7 @@ RSpec.describe Search::SnippetService do
             expected_objects = expected_count == 0 ? [] : [snippet]
 
             search_user = user_from_membership(membership)
+            enable_admin_mode!(search_user) if admin_mode
 
             expect_search_results(search_user, 'snippet_titles', expected_objects: expected_objects, pending: pending?) do |user|
               described_class.new(user, search: snippet.title).execute
@@ -98,7 +110,7 @@ RSpec.describe Search::SnippetService do
 
         let(:snippet) { snippets[snippet_level] }
 
-        where(:snippet_level, :membership, :expected_count) do
+        where(:snippet_level, :membership, :admin_mode, :expected_count) do
           permission_table_for_personal_snippet_access
         end
 
@@ -111,6 +123,7 @@ RSpec.describe Search::SnippetService do
             expected_objects = expected_count == 0 ? [] : [snippet]
 
             search_user = user_from_membership(membership)
+            enable_admin_mode!(search_user) if admin_mode
 
             expect_search_results(search_user, 'snippet_titles', expected_objects: expected_objects) do |user|
               described_class.new(user, search: snippet.title).execute

@@ -29,6 +29,10 @@ describe('Suggestion Diff component', () => {
     });
   };
 
+  beforeEach(() => {
+    window.gon.current_user_id = 1;
+  });
+
   afterEach(() => {
     wrapper.destroy();
   });
@@ -57,7 +61,9 @@ describe('Suggestion Diff component', () => {
   });
 
   it('renders apply suggestion and add to batch buttons', () => {
-    createComponent();
+    createComponent({
+      suggestionsCount: 2,
+    });
 
     const applyBtn = findApplyButton();
     const addToBatchBtn = findAddToBatchButton();
@@ -67,6 +73,14 @@ describe('Suggestion Diff component', () => {
 
     expect(addToBatchBtn.exists()).toBe(true);
     expect(addToBatchBtn.html().includes('Add suggestion to batch')).toBe(true);
+  });
+
+  it('does not render apply suggestion button with anonymous user', () => {
+    window.gon.current_user_id = null;
+
+    createComponent();
+
+    expect(findApplyButton().exists()).toBe(false);
   });
 
   describe('when apply suggestion is clicked', () => {
@@ -104,7 +118,9 @@ describe('Suggestion Diff component', () => {
 
   describe('when add to batch is clicked', () => {
     it('emits addToBatch', () => {
-      createComponent();
+      createComponent({
+        suggestionsCount: 2,
+      });
 
       findAddToBatchButton().vm.$emit('click');
 

@@ -1,12 +1,12 @@
-import Vuex from 'vuex';
+import { GlAlert, GlDropdown, GlDropdownItem, GlEmptyState } from '@gitlab/ui';
+import { createLocalVue, shallowMount } from '@vue/test-utils';
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
-import { createLocalVue, shallowMount } from '@vue/test-utils';
-import { TEST_HOST } from 'helpers/test_constants';
+import Vuex from 'vuex';
 import Insights from 'ee/insights/components/insights.vue';
 import { createStore } from 'ee/insights/stores';
 import { pageInfo } from 'ee_jest/insights/mock_data';
-import { GlAlert, GlDeprecatedDropdown, GlDeprecatedDropdownItem, GlEmptyState } from '@gitlab/ui';
+import { TEST_HOST } from 'helpers/test_constants';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -86,18 +86,18 @@ describe('Insights component', () => {
 
       it('has the correct nav tabs', async () => {
         await wrapper.vm.$nextTick();
-        expect(wrapper.find(GlDeprecatedDropdown).exists()).toBe(true);
+        expect(wrapper.find(GlDropdown).exists()).toBe(true);
         expect(
           wrapper
-            .find(GlDeprecatedDropdown)
-            .find(GlDeprecatedDropdownItem)
+            .find(GlDropdown)
+            .find(GlDropdownItem)
             .text(),
         ).toBe(title);
       });
 
       it('should not disable the tab selector', async () => {
         await wrapper.vm.$nextTick();
-        expect(wrapper.find(GlDeprecatedDropdown).attributes().disabled).toBeUndefined();
+        expect(wrapper.find(GlDropdown).attributes().disabled).toBeUndefined();
       });
     });
 
@@ -117,18 +117,18 @@ describe('Insights component', () => {
 
       it('has the correct nav tabs', async () => {
         await wrapper.vm.$nextTick();
-        expect(wrapper.find(GlDeprecatedDropdown).exists()).toBe(true);
+        expect(wrapper.find(GlDropdown).exists()).toBe(true);
         expect(
           wrapper
-            .find(GlDeprecatedDropdown)
-            .find(GlDeprecatedDropdownItem)
+            .find(GlDropdown)
+            .find(GlDropdownItem)
             .text(),
         ).toBe(title);
       });
 
       it('disables the tab selector', async () => {
         await wrapper.vm.$nextTick();
-        expect(wrapper.find(GlDeprecatedDropdown).attributes()).toMatchObject({ disabled: 'true' });
+        expect(wrapper.find(GlDropdown).attributes()).toMatchObject({ disabled: 'true' });
       });
     });
 
@@ -152,7 +152,7 @@ describe('Insights component', () => {
 
       it('enables the tab selector', async () => {
         await wrapper.vm.$nextTick();
-        expect(wrapper.find(GlDeprecatedDropdown).attributes()).toMatchObject({ disabled: 'true' });
+        expect(wrapper.find(GlDropdown).attributes()).toMatchObject({ disabled: 'true' });
       });
     });
 
@@ -175,7 +175,7 @@ describe('Insights component', () => {
 
       it('disables the tab selector', async () => {
         await wrapper.vm.$nextTick();
-        expect(wrapper.find(GlDeprecatedDropdown).attributes()).toMatchObject({ disabled: 'true' });
+        expect(wrapper.find(GlDropdown).attributes()).toMatchObject({ disabled: 'true' });
       });
     });
 
@@ -199,7 +199,7 @@ describe('Insights component', () => {
 
       it('enables the tab selector', async () => {
         await wrapper.vm.$nextTick();
-        expect(wrapper.find(GlDeprecatedDropdown).attributes().disabled).toBeUndefined();
+        expect(wrapper.find(GlDropdown).attributes().disabled).toBeUndefined();
       });
     });
 
@@ -223,7 +223,7 @@ describe('Insights component', () => {
 
       it('enables the tab selector', async () => {
         await wrapper.vm.$nextTick();
-        expect(wrapper.find(GlDeprecatedDropdown).attributes().disabled).toBeUndefined();
+        expect(wrapper.find(GlDropdown).attributes().disabled).toBeUndefined();
       });
     });
   });
@@ -243,7 +243,7 @@ describe('Insights component', () => {
 
     it('does not display dropdown', async () => {
       await wrapper.vm.$nextTick();
-      expect(wrapper.find(GlDeprecatedDropdown).exists()).toBe(false);
+      expect(wrapper.find(GlDropdown).exists()).toBe(false);
     });
   });
 
@@ -262,7 +262,7 @@ describe('Insights component', () => {
 
     it('does not display dropdown', async () => {
       await wrapper.vm.$nextTick();
-      expect(wrapper.find(GlDeprecatedDropdown).exists()).toBe(false);
+      expect(wrapper.find(GlDropdown).exists()).toBe(false);
     });
   });
 

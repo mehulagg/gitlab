@@ -4,8 +4,12 @@ require 'spec_helper'
 
 RSpec.describe Ci::BuildTraceChunks::Fog do
   let(:data_store) { described_class.new }
+  let(:bucket) { 'artifacts' }
+  let(:connection_params) { Gitlab.config.artifacts.object_store.connection.symbolize_keys }
+  let(:connection) { ::Fog::Storage.new(connection_params) }
 
   before do
+    stub_object_storage(connection_params: connection_params, remote_directory: bucket)
     stub_artifacts_object_storage
   end
 
@@ -69,6 +73,52 @@ RSpec.describe Ci::BuildTraceChunks::Fog do
         data_store.set_data(model, new_data)
 
         expect(data_store.data(model)).to eq new_data
+      end
+
+      context 'when S3 server side encryption is enabled' do
+        before do
+          config = Gitlab.config.artifacts.object_store.to_h
+          config[:storage_options] = { server_side_encryption: 'AES256' }
+          allow(data_store).to receive(:object_store_raw_config).and_return(config)
+        end
+
+        it 'creates a file with attributes' do
+          expect_next_instance_of(Fog::AWS::Storage::Files) do |files|
+            expect(files).to receive(:create).with(
+              hash_including(
+                key: anything,
+                body: new_data,
+                'x-amz-server-side-encryption' => 'AES256')
+            ).and_call_original
+          end
+
+          expect(data_store.data(model)).to be_nil
+
+          data_store.set_data(model, new_data)
+
+          expect(data_store.data(model)).to eq new_data
+        end
+
+        context 'when ci_live_trace_use_fog_attributes flag is disabled' do
+          before do
+            stub_feature_flags(ci_live_trace_use_fog_attributes: false)
+          end
+
+          it 'does not pass along Fog attributes' do
+            expect_next_instance_of(Fog::AWS::Storage::Files) do |files|
+              expect(files).to receive(:create).with(
+                key: anything,
+                body: new_data
+              ).and_call_original
+            end
+
+            expect(data_store.data(model)).to be_nil
+
+            data_store.set_data(model, new_data)
+
+            expect(data_store.data(model)).to eq new_data
+          end
+        end
       end
     end
   end
@@ -148,17 +198,17 @@ RSpec.describe Ci::BuildTraceChunks::Fog do
     end
 
     it 'deletes multiple data' do
-      ::Fog::Storage.new(JobArtifactUploader.object_store_credentials).tap do |connection|
-        expect(connection.get_object('artifacts', "tmp/builds/#{build.id}/chunks/0.log")[:body]).to be_present
-        expect(connection.get_object('artifacts', "tmp/builds/#{build.id}/chunks/1.log")[:body]).to be_present
-      end
+      files = connection.directories.new(key: bucket).files
+
+      expect(files.count).to eq(2)
+      expect(files[0].body).to be_present
+      expect(files[1].body).to be_present
 
       subject
 
-      ::Fog::Storage.new(JobArtifactUploader.object_store_credentials).tap do |connection|
-        expect { connection.get_object('artifacts', "tmp/builds/#{build.id}/chunks/0.log")[:body] }.to raise_error(Excon::Error::NotFound)
-        expect { connection.get_object('artifacts', "tmp/builds/#{build.id}/chunks/1.log")[:body] }.to raise_error(Excon::Error::NotFound)
-      end
+      files.reload
+
+      expect(files.count).to eq(0)
     end
   end
 end

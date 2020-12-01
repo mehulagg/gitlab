@@ -304,6 +304,38 @@ module API
               desc: 'Project URL'
             }
           ],
+          'datadog' => [
+            {
+              required: true,
+              name: :api_key,
+              type: String,
+              desc: 'API key used for authentication with Datadog'
+            },
+            {
+              required: false,
+              name: :datadog_site,
+              type: String,
+              desc: 'Choose the Datadog site to send data to. Set to "datadoghq.eu" to send data to the EU site'
+            },
+            {
+              required: false,
+              name: :api_url,
+              type: String,
+              desc: '(Advanced) Define the full URL for your Datadog site directly'
+            },
+            {
+              required: false,
+              name: :datadog_service,
+              type: String,
+              desc: 'Name of this GitLab instance that all data will be tagged with'
+            },
+            {
+              required: false,
+              name: :datadog_env,
+              type: String,
+              desc: 'The environment tag that traces will be tagged with'
+            }
+          ],
           'discord' => [
             {
               required: true,
@@ -381,6 +413,12 @@ module API
               type: String,
               desc: 'The Hangouts Chat webhook. e.g. https://chat.googleapis.com/v1/spaces…'
             },
+            {
+              required: false,
+              name: :branches_to_be_notified,
+              type: String,
+              desc: 'Branches for which notifications are to be sent'
+            },
             chat_notification_events
           ].flatten,
           'hipchat' => [
@@ -451,6 +489,32 @@ module API
               name: :colorize_messages,
               type: Boolean,
               desc: 'Colorize messages'
+            }
+          ],
+          'jenkins' => [
+            {
+              required: true,
+              name: :jenkins_url,
+              type: String,
+              desc: 'Jenkins root URL like https://jenkins.example.com'
+            },
+            {
+              required: true,
+              name: :project_name,
+              type: String,
+              desc: 'The URL-friendly project name. Example: my_project_name'
+            },
+            {
+              required: false,
+              name: :username,
+              type: String,
+              desc: 'A user with access to the Jenkins server, if applicable'
+            },
+            {
+              required: false,
+              name: :password,
+              type: String,
+              desc: 'The password of the user'
             }
           ],
           'jira' => [
@@ -633,6 +697,26 @@ module API
               desc: 'The issues URL'
             }
           ],
+          'ewm' => [
+            {
+              required: true,
+              name: :new_issue_url,
+              type: String,
+              desc: 'New Issue URL'
+            },
+            {
+              required: true,
+              name: :project_url,
+              type: String,
+              desc: 'Project URL'
+            },
+            {
+              required: true,
+              name: :issues_url,
+              type: String,
+              desc: 'Issues URL'
+            }
+          ],
           'youtrack' => [
             {
               required: true,
@@ -732,14 +816,17 @@ module API
           ::ConfluenceService,
           ::CampfireService,
           ::CustomIssueTrackerService,
+          ::DatadogService,
           ::DiscordService,
           ::DroneCiService,
           ::EmailsOnPushService,
+          ::EwmService,
           ::ExternalWikiService,
           ::FlowdockService,
           ::HangoutsChatService,
           ::HipchatService,
           ::IrkerService,
+          ::JenkinsService,
           ::JiraService,
           ::MattermostSlashCommandsService,
           ::SlackSlashCommandsService,

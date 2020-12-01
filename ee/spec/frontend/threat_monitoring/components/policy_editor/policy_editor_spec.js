@@ -1,9 +1,6 @@
+import { GlModal } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
-import PolicyEditorApp from 'ee/threat_monitoring/components/policy_editor/policy_editor.vue';
-import PolicyPreview from 'ee/threat_monitoring/components/policy_editor/policy_preview.vue';
-import PolicyRuleBuilder from 'ee/threat_monitoring/components/policy_editor/policy_rule_builder.vue';
 import NetworkPolicyEditor from 'ee/threat_monitoring/components/network_policy_editor.vue';
-import createStore from 'ee/threat_monitoring/store';
 import {
   RuleDirectionInbound,
   PortMatchModeAny,
@@ -12,8 +9,12 @@ import {
   EndpointMatchModeLabel,
 } from 'ee/threat_monitoring/components/policy_editor/constants';
 import fromYaml from 'ee/threat_monitoring/components/policy_editor/lib/from_yaml';
-import toYaml from 'ee/threat_monitoring/components/policy_editor/lib/to_yaml';
 import { buildRule } from 'ee/threat_monitoring/components/policy_editor/lib/rules';
+import toYaml from 'ee/threat_monitoring/components/policy_editor/lib/to_yaml';
+import PolicyEditorApp from 'ee/threat_monitoring/components/policy_editor/policy_editor.vue';
+import PolicyPreview from 'ee/threat_monitoring/components/policy_editor/policy_preview.vue';
+import PolicyRuleBuilder from 'ee/threat_monitoring/components/policy_editor/policy_rule_builder.vue';
+import createStore from 'ee/threat_monitoring/store';
 import { redirectTo } from '~/lib/utils/url_utility';
 
 jest.mock('~/lib/utils/url_utility');
@@ -51,6 +52,8 @@ describe('PolicyEditorApp component', () => {
   const findNetworkPolicyEditor = () => wrapper.find(NetworkPolicyEditor);
   const findPolicyName = () => wrapper.find("[id='policyName']");
   const findSavePolicy = () => wrapper.find("[data-testid='save-policy']");
+  const findDeletePolicy = () => wrapper.find("[data-testid='delete-policy']");
+  const findEditorModeToggle = () => wrapper.find("[data-testid='editor-mode']");
 
   beforeEach(() => {
     factory();
@@ -70,6 +73,10 @@ describe('PolicyEditorApp component', () => {
 
   it('does not render parsing error alert', () => {
     expect(findYAMLParsingAlert().exists()).toBe(false);
+  });
+
+  it('does not render delete button', () => {
+    expect(findDeletePolicy().exists()).toBe(false);
   });
 
   describe('given .yaml editor mode is enabled', () => {
@@ -171,9 +178,19 @@ spec:
     });
   });
 
+  it('removes a new rule', async () => {
+    findAddRuleButton().vm.$emit('click');
+    await wrapper.vm.$nextTick();
+    expect(wrapper.findAll(PolicyRuleBuilder).length).toEqual(1);
+
+    wrapper.find(PolicyRuleBuilder).vm.$emit('remove');
+    await wrapper.vm.$nextTick();
+    expect(wrapper.findAll(PolicyRuleBuilder).length).toEqual(0);
+  });
+
   it('updates yaml editor value on switch to yaml editor', async () => {
     findPolicyName().vm.$emit('input', 'test-policy');
-    wrapper.find("[data-testid='editor-mode']").vm.$emit('input', EditorModeYAML);
+    findEditorModeToggle().vm.$emit('input', EditorModeYAML);
     await wrapper.vm.$nextTick();
 
     const editor = findNetworkPolicyEditor();
@@ -196,8 +213,26 @@ spec:
       expect(findYAMLParsingAlert().exists()).toBe(true);
     });
 
-    it('disables add rule button', () => {
-      expect(findAddRuleButton().props('disabled')).toBe(true);
+    it('disables rule builder', () => {
+      expect(wrapper.find("[data-testid='rule-builder-container']").props().disabled).toBe(true);
+    });
+
+    it('disables action picker', () => {
+      expect(wrapper.find("[data-testid='policy-action-container']").props().disabled).toBe(true);
+    });
+
+    it('disables policy preview', () => {
+      expect(wrapper.find("[data-testid='policy-preview-container']").props().disabled).toBe(true);
+    });
+
+    it('does not update yaml editor value on switch to yaml editor', async () => {
+      findPolicyName().vm.$emit('input', 'test-policy');
+      findEditorModeToggle().vm.$emit('input', EditorModeYAML);
+      await wrapper.vm.$nextTick();
+
+      const editor = findNetworkPolicyEditor();
+      expect(editor.exists()).toBe(true);
+      expect(editor.props('value')).toEqual('');
     });
   });
 
@@ -280,6 +315,28 @@ spec:
         await wrapper.vm.$nextTick();
         expect(redirectTo).not.toHaveBeenCalledWith('/threat-monitoring');
       });
+    });
+
+    it('renders delete button', () => {
+      expect(findDeletePolicy().exists()).toBe(true);
+    });
+
+    it('it does not trigger deletePolicy on delete button click', async () => {
+      findDeletePolicy().vm.$emit('click');
+      await wrapper.vm.$nextTick();
+
+      expect(store.dispatch).not.toHaveBeenCalledWith('networkPolicies/deletePolicy');
+    });
+
+    it('removes policy and redirects to a threat monitoring path on secondary modal button click', async () => {
+      wrapper.find(GlModal).vm.$emit('secondary');
+      await wrapper.vm.$nextTick();
+
+      expect(store.dispatch).toHaveBeenCalledWith('networkPolicies/deletePolicy', {
+        environmentId: -1,
+        policy: { name: 'policy', manifest: toYaml(wrapper.vm.policy) },
+      });
+      expect(redirectTo).toHaveBeenCalledWith('/threat-monitoring');
     });
   });
 });

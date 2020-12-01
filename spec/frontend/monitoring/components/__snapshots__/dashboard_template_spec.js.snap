@@ -32,8 +32,8 @@ exports[`Dashboard template matches the default snapshot 1`] = `
     <div
       class="mb-2 pr-2 d-flex d-sm-block"
     >
-      <gl-new-dropdown-stub
-        category="tertiary"
+      <gl-dropdown-stub
+        category="primary"
         class="flex-grow-1"
         data-qa-selector="environments_dropdown"
         headertext=""
@@ -47,12 +47,11 @@ exports[`Dashboard template matches the default snapshot 1`] = `
         <div
           class="d-flex flex-column overflow-hidden"
         >
-          <gl-new-dropdown-header-stub>
+          <gl-dropdown-section-header-stub>
             Environment
-          </gl-new-dropdown-header-stub>
+          </gl-dropdown-section-header-stub>
            
           <gl-search-box-by-type-stub
-            class="gl-m-3"
             clearbuttontitle="Clear"
             value=""
           />
@@ -69,7 +68,7 @@ exports[`Dashboard template matches the default snapshot 1`] = `
         
           </div>
         </div>
-      </gl-new-dropdown-stub>
+      </gl-dropdown-stub>
     </div>
      
     <div

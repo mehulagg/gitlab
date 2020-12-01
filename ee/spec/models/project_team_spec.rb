@@ -35,7 +35,17 @@ RSpec.describe ProjectTeam do
       it 'does not add the given user to the team' do
         project.team.add_user(user, :reporter)
 
-        expect(project.team.reporter?(user)).to be(false)
+        expect(project.members.map(&:user)).not_to include(user)
+      end
+
+      context 'project bot user' do
+        let_it_be(:project_bot) { create(:user, :project_bot) }
+
+        it 'adds the project bot user to the team' do
+          project.team.add_user(project_bot, :maintainer)
+
+          expect(project.members.map(&:user)).to include(project_bot)
+        end
       end
     end
   end

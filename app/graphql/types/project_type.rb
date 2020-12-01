@@ -161,7 +161,6 @@ module Types
           resolver: Resolvers::ProjectMilestonesResolver
 
     field :project_members,
-          Types::MemberInterface.connection_type,
           description: 'Members of the project',
           resolver: Resolvers::ProjectMembersResolver
 
@@ -188,9 +187,9 @@ module Types
          resolver: Resolvers::PackagesResolver
 
     field :pipelines,
-          Types::Ci::PipelineType.connection_type,
           null: true,
           description: 'Build pipelines of the project',
+          extras: [:lookahead],
           resolver: Resolvers::ProjectPipelinesResolver
 
     field :pipeline,
@@ -234,13 +233,12 @@ module Types
           Types::BoardType,
           null: true,
           description: 'A single board of the project',
-          resolver: Resolvers::BoardsResolver.single
+          resolver: Resolvers::BoardResolver
 
     field :jira_imports,
           Types::JiraImportType.connection_type,
           null: true,
-          description: 'Jira imports into the project',
-          resolver: Resolvers::Projects::JiraImportsResolver
+          description: 'Jira imports into the project'
 
     field :services,
           Types::Projects::ServiceType.connection_type,
@@ -267,6 +265,12 @@ module Types
           description: 'Counts of alerts by status for the project',
           resolver: Resolvers::AlertManagement::AlertStatusCountsResolver
 
+    field :alert_management_integrations,
+          Types::AlertManagement::IntegrationType.connection_type,
+          null: true,
+          description: 'Integrations which can receive alerts for the project',
+          resolver: Resolvers::AlertManagement::IntegrationsResolver
+
     field :releases,
           Types::ReleaseType.connection_type,
           null: true,
@@ -285,6 +289,12 @@ module Types
           null: true,
           description: 'The container expiration policy of the project'
 
+    field :container_repositories,
+          Types::ContainerRepositoryType.connection_type,
+          null: true,
+          description: 'Container repositories of the project',
+          resolver: Resolvers::ContainerRepositoriesResolver
+
     field :label,
           Types::LabelType,
           null: true,
@@ -293,6 +303,12 @@ module Types
               required: true,
               description: 'Title of the label'
           end
+
+    field :terraform_states,
+          Types::Terraform::StateType.connection_type,
+          null: true,
+          description: 'Terraform states associated with the project',
+          resolver: Resolvers::Terraform::StatesResolver
 
     def label(title:)
       BatchLoader::GraphQL.for(title).batch(key: project) do |titles, loader, args|

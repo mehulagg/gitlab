@@ -1,6 +1,6 @@
 import { shallowMount } from '@vue/test-utils';
-import { mockTracking } from 'helpers/tracking_helper';
 import CardSecurityDiscoverApp from 'ee/vue_shared/discover/card_security_discover_app.vue';
+import { mockTracking } from 'helpers/tracking_helper';
 
 describe('Card security discover app', () => {
   let wrapper;

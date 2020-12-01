@@ -1,15 +1,23 @@
 ---
+stage: Enablement
+group: Distribution
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 description: 'Learn how to spin up a pre-configured GitLab VM on Microsoft Azure.'
 type: howto
 ---
 
 # Install GitLab on Microsoft Azure
 
-Azure is Microsoft's business cloud and GitLab is a pre-configured offering on the Azure Marketplace.
-Hopefully, you aren't surprised to hear that Microsoft and Azure have embraced open source software
-like Ubuntu, Red Hat Enterprise Linux, and of course - GitLab! This means that you can spin up a
-pre-configured GitLab VM and have your very own private GitLab up and running in around 30 minutes.
-Let's get started.
+CAUTION: **Deprecated:**
+The GitLab image in the Azure Marketplace is deprecated. You can track GitLab's
+efforts to [post a new image](https://gitlab.com/gitlab-com/alliances/microsoft/gitlab-tracker/-/issues/2).
+
+Azure is Microsoft's business cloud and GitLab is a pre-configured offering on
+the Azure Marketplace. Hopefully, you aren't surprised to hear that Microsoft
+and Azure have embraced open source software like Ubuntu, Red Hat Enterprise Linux,
+and of course - GitLab! This means that you can spin up a pre-configured
+GitLab VM and have your very own private GitLab up and running in around 30
+minutes. Let's get started.
 
 ## Getting started
 
@@ -339,8 +347,8 @@ connect to it using SSH ([Secure Shell](https://en.wikipedia.org/wiki/Secure_She
 If you're running Windows, you'll need to connect using [PuTTY](https://www.putty.org) or an equivalent Windows SSH client.
 If you're running Linux or macOS, then you already have an SSH client installed.
 
-Remember that you will need to login with the username and password you specified
-[when you created](#basics) your Azure VM.
+Remember to sign in with the username and password you specified when you
+[created your Azure VM](#basics).
 
 If you need to reset your VM password, read
 [how to reset SSH credentials for a user on an Azure VM](https://docs.microsoft.com/en-us/azure/virtual-machines/troubleshooting/troubleshoot-ssh-connection).
@@ -367,20 +375,20 @@ read on [using PuTTY in Windows](https://mediatemple.net/community/products/dv/2
 
 ### Updating GitLab
 
-Once you've logged in via SSH, enter the following command to update GitLab to the latest
-version:
+After signing in by using SSH, enter the following command to update GitLab to
+the latest version:
 
 ```shell
 sudo apt-get update && sudo apt-get install gitlab-ce
 ```
 
-This command will update GitLab and its associated components to the latest versions, so it will
-take a little time to complete. You'll see various update tasks being completed in your SSH
-terminal window:
+This command updates GitLab and its associated components to the latest versions,
+so it will take a little time to complete. You'll see various update tasks being
+completed in your SSH terminal window:
 
 ![GitLab updating](img/gitlab-ssh-update-in-progress.png)
 
-Once the update process has completed, you'll see a message like this:
+After the update process is complete, you'll see a message like this:
 
 ```plaintext
 Upgrade complete! If your GitLab server is misbehaving try running
@@ -414,7 +422,7 @@ on any cloud service you choose.
 
 ## Where to next?
 
-Check out our other [Technical Articles](../../articles/index.md) or browse the [GitLab Documentation](../../README.md) to learn more about GitLab.
+Check out our other [Technical Articles](../../topics/index.md) or browse the [GitLab Documentation](../../README.md) to learn more about GitLab.
 
 ### Useful links
 

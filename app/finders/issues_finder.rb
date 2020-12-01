@@ -41,7 +41,7 @@ class IssuesFinder < IssuableFinder
   # rubocop: enable CodeReuse/ActiveRecord
 
   def params_class
-    IssuesFinder::Params
+    self.class.const_get(:Params, false)
   end
 
   # rubocop: disable CodeReuse/ActiveRecord
@@ -97,6 +97,8 @@ class IssuesFinder < IssuableFinder
       items.due_between(Date.today.beginning_of_month, Date.today.end_of_month)
     elsif params.filter_by_due_next_month_and_previous_two_weeks?
       items.due_between(Date.today - 2.weeks, (Date.today + 1.month).end_of_month)
+    else
+      items.none
     end
   end
 

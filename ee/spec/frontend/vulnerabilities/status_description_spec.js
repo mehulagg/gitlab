@@ -1,17 +1,18 @@
-import { mount } from '@vue/test-utils';
 import {
   GlLink,
   GlDeprecatedSkeletonLoading as GlSkeletonLoading,
   GlLoadingIcon,
 } from '@gitlab/ui';
+import { mount } from '@vue/test-utils';
 import { capitalize } from 'lodash';
-import UsersMockHelper from 'helpers/user_mock_data_helper';
 import StatusText from 'ee/vulnerabilities/components/status_description.vue';
 import { VULNERABILITY_STATE_OBJECTS, VULNERABILITY_STATES } from 'ee/vulnerabilities/constants';
+import UsersMockHelper from 'helpers/user_mock_data_helper';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import UserAvatarLink from '~/vue_shared/components/user_avatar/user_avatar_link.vue';
 
-const NON_DETECTED_STATES = Object.keys(VULNERABILITY_STATE_OBJECTS);
+const { detected, ...NON_DETECTED_STATE_OBJECTS } = VULNERABILITY_STATE_OBJECTS;
+const NON_DETECTED_STATES = Object.keys(NON_DETECTED_STATE_OBJECTS);
 const ALL_STATES = Object.keys(VULNERABILITY_STATES);
 
 describe('Vulnerability status description component', () => {
@@ -36,9 +37,9 @@ describe('Vulnerability status description component', () => {
     // Automatically create the ${v.state}_at property if it doesn't exist. Otherwise, every test would need to create
     // it manually for the component to mount properly.
     if (vulnerability.state === 'detected') {
-      vulnerability.pipeline.created_at = vulnerability.pipeline.created_at || createDate();
+      vulnerability.pipeline.createdAt = vulnerability.pipeline.createdAt || createDate();
     } else {
-      const propertyName = `${vulnerability.state}_at`;
+      const propertyName = `${vulnerability.state}At`;
       vulnerability[propertyName] = vulnerability[propertyName] || createDate();
     }
 
@@ -58,7 +59,7 @@ describe('Vulnerability status description component', () => {
       ${'shows bolded state text'}         | ${true}
     `('$description if isStatusBolded is isStatusBolded', ({ isStatusBolded }) => {
       createWrapper({
-        vulnerability: { state: 'detected', pipeline: { created_at: createDate('2001') } },
+        vulnerability: { state: 'detected', pipeline: { createdAt: createDate('2001') } },
         isStatusBolded,
       });
 
@@ -70,7 +71,7 @@ describe('Vulnerability status description component', () => {
     it('uses the pipeline created date when the vulnerability state is "detected"', () => {
       const pipelineDateString = createDate('2001');
       createWrapper({
-        vulnerability: { state: 'detected', pipeline: { created_at: pipelineDateString } },
+        vulnerability: { state: 'detected', pipeline: { createdAt: pipelineDateString } },
       });
 
       expect(timeAgo().props('time')).toBe(pipelineDateString);
@@ -84,8 +85,8 @@ describe('Vulnerability status description component', () => {
         createWrapper({
           vulnerability: {
             state,
-            pipeline: { created_at: 'pipeline_created_at' },
-            [`${state}_at`]: expectedDate,
+            pipeline: { createdAt: 'pipeline_created_at' },
+            [`${state}At`]: expectedDate,
           },
         });
 

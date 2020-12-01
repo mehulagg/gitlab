@@ -10,13 +10,13 @@
 /doc/ @gl-docsteam
 /doc/administration/monitoring/ @aqualls
 /doc/development/ @marcia @mjang1
-/doc/development/documentation/ @mikelewis
+/doc/development/documentation/ @cnorris
 /doc/ci @marcel.amirault @sselhorn
 /doc/operations @aqualls @eread
 /doc/user/clusters @aqualls
 /doc/user/infrastructure @aqualls
 /doc/user/project/clusters @aqualls
-/doc/.vale/ @marcel.amirault @eread @aqualls @mikelewis
+/doc/.vale/ @marcel.amirault @eread @aqualls @cnorris
 
 [Docs Create]
 /doc/user/project/merge_requests/allow_collaboration.md @marcia
@@ -184,7 +184,7 @@ Dangerfile @gl-quality/eng-prod
 /lib/gitlab/auth/ldap/ @dblessing @mkozono
 
 [Templates]
-/lib/gitlab/ci/templates/ @nolith @dosuken123
+/lib/gitlab/ci/templates/ @nolith @shinya.maeda
 /lib/gitlab/ci/templates/Auto-DevOps.gitlab-ci.yml @DylanGriffith @mayra-cabrera @tkuah
 /lib/gitlab/ci/templates/Security/ @plafoucriere @gonzoyumo @twoodham @sethgitlab
 
@@ -194,10 +194,17 @@ Dangerfile @gl-quality/eng-prod
 
 # Secure & Threat Management ownership delineation
 # https://about.gitlab.com/handbook/engineering/development/threat-management/delineate-secure-threat-management.html#technical-boundaries
-[Secure]
-/ee/app/models/vulnerability.rb @gitlab-org/secure/threat-insights-backend-team
+[Threat Insights]
+/ee/app/finders/security/ @gitlab-org/secure/threat-insights-backend-team
 /ee/app/models/security/ @gitlab-org/secure/threat-insights-backend-team
 /ee/app/models/vulnerabilities/ @gitlab-org/secure/threat-insights-backend-team
+/ee/app/models/vulnerability.rb @gitlab-org/secure/threat-insights-backend-team
+/ee/app/policies/vulnerabilities/ @gitlab-org/secure/threat-insights-backend-team
+/ee/app/policies/vulnerability*.rb @gitlab-org/secure/threat-insights-backend-team
+/ee/lib/api/vulnerabilit*.rb @gitlab-org/secure/threat-insights-backend-team
+/ee/spec/policies/vulnerabilities/ @gitlab-org/secure/threat-insights-backend-team
+/ee/spec/policies/vulnerabilities/vulnerability*.rb @gitlab-org/secure/threat-insights-backend-team
+[Secure]
 /ee/lib/gitlab/ci/parsers/license_compliance/ @gitlab-org/secure/composition-analysis-be
 /ee/lib/gitlab/ci/parsers/security/ @gitlab-org/secure/composition-analysis-be @gitlab-org/secure/dynamic-analysis-be @gitlab-org/secure/static-analysis-be @gitlab-org/secure/fuzzing-be
 /ee/lib/gitlab/ci/reports/coverage_fuzzing/ @gitlab-org/secure/fuzzing-be
@@ -205,16 +212,45 @@ Dangerfile @gl-quality/eng-prod
 /ee/lib/gitlab/ci/reports/license_scanning/ @gitlab-org/secure/composition-analysis-be
 /ee/lib/gitlab/ci/reports/security/ @gitlab-org/secure/composition-analysis-be @gitlab-org/secure/dynamic-analysis-be @gitlab-org/secure/static-analysis-be @gitlab-org/secure/fuzzing-be
 
+[Container Security]
+/ee/app/views/projects/threat_monitoring/** @gitlab-org/threat-management/defend/container-security/frontend
+/ee/app/assets/javascripts/pages/projects/threat_monitoring/** @gitlab-org/threat-management/defend/container-security/frontend
+/ee/app/assets/javascripts/threat_monitoring/** @gitlab-org/threat-management/defend/container-security/frontend
+/ee/spec/frontend/threat_monitoring/** @gitlab-org/threat-management/defend/container-security/frontend
+
+/ee/app/controllers/projects/threat_monitoring_controller.rb @gitlab-org/threat-management/defend/container-security/backend
+/ee/spec/controllers/projects/threat_monitoring_controller_spec.rb @gitlab-org/threat-management/defend/container-security/backend
+/lib/gitlab/kubernetes/cilium_network_policy.rb @gitlab-org/threat-management/defend/container-security/backend
+/spec/lib/gitlab/kubernetes/cilium_network_policy_spec.rb @gitlab-org/threat-management/defend/container-security/backend
+/lib/gitlab/kubernetes/network_policy_common.rb @gitlab-org/threat-management/defend/container-security/backend
+/spec/support/shared_examples/lib/gitlab/kubernetes/network_policy_common_shared_examples.rb @gitlab-org/threat-management/defend/container-security/backend
+/lib/gitlab/kubernetes/network_policy.rb @gitlab-org/threat-management/defend/container-security/backend
+/spec/lib/gitlab/kubernetes/network_policy_spec.rb @gitlab-org/threat-management/defend/container-security/backend
+/ee/app/services/network_policies/** @gitlab-org/threat-management/defend/container-security/backend
+/ee/spec/services/network_policies/** @gitlab-org/threat-management/defend/container-security/backend
+/ee/app/controllers/projects/security/waf_anomalies_controller.rb @gitlab-org/threat-management/defend/container-security/backend
+/ee/spec/controllers/projects/security/waf_anomalies_controller_spec.rb @gitlab-org/threat-management/defend/container-security/backend
+/app/models/clusters/applications/cilium.rb @gitlab-org/threat-management/defend/container-security/backend
+/spec/models/clusters/applications/cilium_spec.rb @gitlab-org/threat-management/defend/container-security/backend
+/ee/app/controllers/projects/security/network_policies_controller.rb @gitlab-org/threat-management/defend/container-security/backend
+/ee/spec/controllers/projects/security/network_policies_controller_spec.rb  @gitlab-org/threat-management/defend/container-security/backend
+/ee/app/workers/network_policy_metrics_worker.rb   @gitlab-org/threat-management/defend/container-security/backend
+/ee/spec/workers/network_policy_metrics_worker_spec.rb @gitlab-org/threat-management/defend/container-security/backend
+/ee/app/services/network_policies/** @gitlab-org/threat-management/defend/container-security/backend
+/ee/spec/services/network_policies/** @gitlab-org/threat-management/defend/container-security/backend
+/ee/lib/gitlab/usage_data_counters/network_policy_counter.rb @gitlab-org/threat-management/defend/container-security/backend
+/ee/spec/lib/gitlab/usage_data_counters/network_policy_counter_spec.rb @gitlab-org/threat-management/defend/container-security/backend
+
 [Code Owners]
 /ee/lib/gitlab/code_owners.rb @reprazent @kerrizor @garyh
 /ee/lib/gitlab/code_owners/ @reprazent @kerrizor @garyh
 /ee/spec/lib/gitlab/code_owners/ @reprazent @kerrizor @garyh
 /doc/user/project/code_owners.md @reprazent @kerrizor @garyh
 
-[Telemetry]
-/ee/lib/gitlab/usage_data_counters/ @gitlab-org/growth/telemetry/engineers
-/ee/lib/ee/gitlab/usage_data.rb @gitlab-org/growth/telemetry/engineers
-/lib/gitlab/grafana_embed_usage_data.rb @gitlab-org/growth/telemetry/engineers
-/lib/gitlab/usage_data.rb @gitlab-org/growth/telemetry/engineers
-/lib/gitlab/cycle_analytics/usage_data.rb @gitlab-org/growth/telemetry/engineers
-/lib/gitlab/usage_data_counters/ @gitlab-org/growth/telemetry/engineers
+[Product Analytics]
+/ee/lib/gitlab/usage_data_counters/ @gitlab-org/growth/product_analytics/engineers
+/ee/lib/ee/gitlab/usage_data.rb @gitlab-org/growth/product_analytics/engineers
+/lib/gitlab/grafana_embed_usage_data.rb @gitlab-org/growth/product_analytics/engineers
+/lib/gitlab/usage_data.rb @gitlab-org/growth/product_analytics/engineers
+/lib/gitlab/cycle_analytics/usage_data.rb @gitlab-org/growth/product_analytics/engineers
+/lib/gitlab/usage_data_counters/ @gitlab-org/growth/product_analytics/engineers

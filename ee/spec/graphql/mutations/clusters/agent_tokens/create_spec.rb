@@ -52,7 +52,7 @@ RSpec.describe Mutations::Clusters::AgentTokens::Create do
         subject { mutation.resolve(cluster_agent_id: cluster_agent.id) }
 
         it 'generates an error message when id invalid', :aggregate_failures do
-          expect { subject }.to raise_error(NoMethodError)
+          expect { subject }.to raise_error(::GraphQL::CoercionError)
         end
       end
     end

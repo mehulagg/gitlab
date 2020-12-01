@@ -2,17 +2,17 @@
 import {
   GlButton,
   GlLink,
-  GlNewDropdown,
-  GlNewDropdownItem,
+  GlDropdown,
+  GlDropdownItem,
   GlSearchBoxByType,
-  GlNewDropdownHeader,
+  GlDropdownSectionHeader,
   GlIcon,
   GlTooltipDirective,
 } from '@gitlab/ui';
 import groupIterationsQuery from '../queries/group_iterations.query.graphql';
 import currentIterationQuery from '../queries/issue_iteration.query.graphql';
 import setIssueIterationMutation from '../queries/set_iteration_on_issue.mutation.graphql';
-import { iterationSelectTextMap } from '../constants';
+import { iterationSelectTextMap, iterationDisplayState } from '../constants';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 
 export default {
@@ -24,10 +24,10 @@ export default {
   components: {
     GlButton,
     GlLink,
-    GlNewDropdown,
-    GlNewDropdownItem,
+    GlDropdown,
+    GlDropdownItem,
     GlSearchBoxByType,
-    GlNewDropdownHeader,
+    GlDropdownSectionHeader,
     GlIcon,
   },
   props: {
@@ -71,6 +71,7 @@ export default {
         return {
           fullPath: this.groupPath,
           title: search,
+          state: iterationDisplayState,
         };
       },
       update(data) {
@@ -161,7 +162,7 @@ export default {
 </script>
 
 <template>
-  <div>
+  <div data-qa-selector="iteration_container">
     <div v-gl-tooltip class="sidebar-collapsed-icon">
       <gl-icon :size="16" :aria-label="$options.iterationText" name="iteration" />
       <span class="collapse-truncated-title">{{ iterationTitle }}</span>
@@ -176,17 +177,18 @@ export default {
         data-track-label="right_sidebar"
         data-track-property="iteration"
         data-track-event="click_edit_button"
+        data-qa-selector="edit_iteration_link"
         @click.stop="toggleDropdown"
         >{{ __('Edit') }}</gl-button
       >
     </div>
     <div data-testid="select-iteration" class="hide-collapsed">
       <span v-if="showNoIterationContent" class="no-value">{{ $options.noIteration }}</span>
-      <gl-link v-else-if="!editing" :href="iterationUrl"
+      <gl-link v-else-if="!editing" data-qa-selector="iteration_link" :href="iterationUrl"
         ><strong>{{ iterationTitle }}</strong></gl-link
       >
     </div>
-    <gl-new-dropdown
+    <gl-dropdown
       v-show="editing"
       ref="newDropdown"
       data-toggle="dropdown"
@@ -194,18 +196,18 @@ export default {
       class="dropdown gl-w-full"
       :class="{ show: editing }"
     >
-      <gl-new-dropdown-header class="d-flex justify-content-center">{{
+      <gl-dropdown-section-header class="d-flex justify-content-center">{{
         __('Assign Iteration')
-      }}</gl-new-dropdown-header>
-      <gl-search-box-by-type ref="search" v-model="searchTerm" class="gl-m-3" />
-      <gl-new-dropdown-item
+      }}</gl-dropdown-section-header>
+      <gl-search-box-by-type ref="search" v-model="searchTerm" />
+      <gl-dropdown-item
         v-for="iterationItem in iterations"
         :key="iterationItem.id"
         :is-check-item="true"
         :is-checked="isIterationChecked(iterationItem.id)"
         @click="setIteration(iterationItem.id)"
-        >{{ iterationItem.title }}</gl-new-dropdown-item
+        >{{ iterationItem.title }}</gl-dropdown-item
       >
-    </gl-new-dropdown>
+    </gl-dropdown>
   </div>
 </template>

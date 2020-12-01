@@ -1,34 +1,50 @@
 <script>
 import { mapActions, mapGetters, mapState } from 'vuex';
-import { GlButton, GlLoadingIcon } from '@gitlab/ui';
 import { __ } from '~/locale';
+import {
+  WEBIDE_MARK_APP_START,
+  WEBIDE_MARK_FILE_FINISH,
+  WEBIDE_MARK_FILE_CLICKED,
+  WEBIDE_MEASURE_FILE_AFTER_INTERACTION,
+  WEBIDE_MEASURE_BEFORE_VUE,
+} from '~/performance/constants';
+import { performanceMarkAndMeasure } from '~/performance/utils';
 import { modalTypes } from '../constants';
-import FindFile from '~/vue_shared/components/file_finder/index.vue';
-import NewModal from './new_dropdown/modal.vue';
+import eventHub from '../eventhub';
 import IdeSidebar from './ide_side_bar.vue';
-import RepoTabs from './repo_tabs.vue';
-import IdeStatusBar from './ide_status_bar.vue';
 import RepoEditor from './repo_editor.vue';
-import RightPane from './panes/right.vue';
-import ErrorMessage from './error_message.vue';
-import CommitEditorHeader from './commit_sidebar/editor_header.vue';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+
+import { measurePerformance } from '../utils';
+
+eventHub.$on(WEBIDE_MEASURE_FILE_AFTER_INTERACTION, () =>
+  measurePerformance(
+    WEBIDE_MARK_FILE_FINISH,
+    WEBIDE_MEASURE_FILE_AFTER_INTERACTION,
+    WEBIDE_MARK_FILE_CLICKED,
+  ),
+);
 
 export default {
   components: {
-    NewModal,
     IdeSidebar,
-    RepoTabs,
-    IdeStatusBar,
     RepoEditor,
-    FindFile,
-    ErrorMessage,
-    CommitEditorHeader,
-    GlButton,
-    GlLoadingIcon,
-    RightPane,
+    'error-message': () => import('./error_message.vue'),
+    'gl-button': () => import('@gitlab/ui/src/components/base/button/button.vue'),
+    'gl-loading-icon': () => import('@gitlab/ui/src/components/base/loading_icon/loading_icon.vue'),
+    'commit-editor-header': () => import('./commit_sidebar/editor_header.vue'),
+    'repo-tabs': () => import('./repo_tabs.vue'),
+    'ide-status-bar': () => import('./ide_status_bar.vue'),
+    'find-file': () => import('~/vue_shared/components/file_finder/index.vue'),
+    'right-pane': () => import('./panes/right.vue'),
+    'new-modal': () => import('./new_dropdown/modal.vue'),
   },
   mixins: [glFeatureFlagsMixin()],
+  data() {
+    return {
+      loadDeferred: false,
+    };
+  },
   computed: {
     ...mapState([
       'openFiles',
@@ -47,6 +63,7 @@ export default {
       'emptyRepo',
       'currentTree',
       'editorTheme',
+      'getUrlForPath',
     ]),
     themeName() {
       return window.gon?.user_color_scheme;
@@ -57,6 +74,16 @@ export default {
 
     if (this.themeName)
       document.querySelector('.navbar-gitlab').classList.add(`theme-${this.themeName}`);
+  },
+  beforeCreate() {
+    performanceMarkAndMeasure({
+      mark: WEBIDE_MARK_APP_START,
+      measures: [
+        {
+          name: WEBIDE_MEASURE_BEFORE_VUE,
+        },
+      ],
+    });
   },
   methods: {
     ...mapActions(['toggleFileFinder']),
@@ -71,10 +98,13 @@ export default {
       return returnValue;
     },
     openFile(file) {
-      this.$router.push(`/project${file.url}`);
+      this.$router.push(this.getUrlForPath(file.path));
     },
     createNewFile() {
       this.$refs.newModal.open(modalTypes.blob);
+    },
+    loadDeferredComponents() {
+      this.loadDeferred = true;
     },
   },
 };
@@ -87,19 +117,23 @@ export default {
   >
     <error-message v-if="errorMessage" :message="errorMessage" />
     <div class="ide-view flex-grow d-flex">
-      <find-file
-        v-show="fileFindVisible"
-        :files="allBlobs"
-        :visible="fileFindVisible"
-        :loading="loading"
-        @toggle="toggleFileFinder"
-        @click="openFile"
-      />
-      <ide-sidebar />
+      <template v-if="loadDeferred">
+        <find-file
+          v-show="fileFindVisible"
+          :files="allBlobs"
+          :visible="fileFindVisible"
+          :loading="loading"
+          @toggle="toggleFileFinder"
+          @click="openFile"
+        />
+      </template>
+      <ide-sidebar @tree-ready="loadDeferredComponents" />
       <div class="multi-file-edit-pane">
         <template v-if="activeFile">
-          <commit-editor-header v-if="isCommitModeActive" :active-file="activeFile" />
-          <repo-tabs v-else :active-file="activeFile" :files="openFiles" :viewer="viewer" />
+          <template v-if="loadDeferred">
+            <commit-editor-header v-if="isCommitModeActive" :active-file="activeFile" />
+            <repo-tabs v-else :active-file="activeFile" :files="openFiles" :viewer="viewer" />
+          </template>
           <repo-editor :file="activeFile" class="multi-file-edit-pane-content" />
         </template>
         <template v-else>
@@ -146,9 +180,13 @@ export default {
           </div>
         </template>
       </div>
-      <right-pane v-if="currentProjectId" />
+      <template v-if="loadDeferred">
+        <right-pane v-if="currentProjectId" />
+      </template>
     </div>
-    <ide-status-bar />
-    <new-modal ref="newModal" />
+    <template v-if="loadDeferred">
+      <ide-status-bar />
+      <new-modal ref="newModal" />
+    </template>
   </article>
 </template>

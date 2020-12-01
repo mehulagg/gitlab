@@ -1,7 +1,7 @@
 ---
 stage: Monitor
-group: APM
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+group: Health
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Panel types for dashboards **(CORE)**
@@ -17,16 +17,16 @@ dashboard: 'Dashboard Title'
 panel_groups:
   - group: 'Group Title'
     panels:
-      - type: area-chart # or line-chart
+      - type: area-chart  # or line-chart
         title: 'Area Chart Title'
-        y_label: "Y-Axis"
+        y_label: 'Y-Axis'
         y_axis:
           format: number
           precision: 0
         metrics:
           - id: area_http_requests_total
             query_range: 'http_requests_total'
-            label: "Instance: {{instance}}, Method: {{method}}"
+            label: 'Instance: {{instance}}, Method: {{method}}'
             unit: "count"
 ```
 
@@ -39,7 +39,7 @@ Note the following properties:
 
 ![area panel chart](img/prometheus_dashboard_area_panel_type_v12_8.png)
 
-Starting in [version 12.8](https://gitlab.com/gitlab-org/gitlab/-/issues/202696), the y-axis values will automatically scale according to the data. Previously, it always started from 0.
+Starting in [version 12.8](https://gitlab.com/gitlab-org/gitlab/-/issues/202696), the y-axis values scale according to the data. Previously, it always started from 0.
 
 ## Anomaly chart
 
@@ -55,23 +55,23 @@ panel_groups:
   - group: 'Group Title'
     panels:
       - type: anomaly-chart
-        title: "Chart Title"
+        title: 'Chart Title'
         y_label: "Y-Axis"
         metrics:
           - id: anomaly_requests_normal
             query_range: 'http_requests_total'
-            label: "# of Requests"
-            unit: "count"
+            label: '# of Requests'
+            unit: 'count'
         metrics:
           - id: anomaly_requests_upper_limit
             query_range: 10000
-            label: "Max # of requests"
-            unit: "count"
+            label: 'Max # of requests'
+            unit: 'count'
         metrics:
           - id: anomaly_requests_lower_limit
             query_range: 2000
-            label: "Min # of requests"
-            unit: "count"
+            label: 'Min # of requests'
+            unit: 'count'
 ```
 
 Note the following properties:
@@ -93,13 +93,13 @@ panel_groups:
   - group: 'Group title'
     panels:
       - type: bar
-        title: "Http Handlers"
+        title: 'HTTP Handlers'
         x_label: 'Response Size'
         y_axis:
-          name: "Handlers"
+          name: 'Handlers'
         metrics:
           - id: prometheus_http_response_size_bytes_bucket
-            query_range: "sum(increase(prometheus_http_response_size_bytes_bucket[1d])) by (handler)"
+            query_range: 'sum(increase(prometheus_http_response_size_bytes_bucket[1d])) by (handler)'
             unit: 'Bytes'
 ```
 
@@ -121,13 +121,13 @@ dashboard: 'Dashboard Title'
 panel_groups:
   - group: 'Group title'
     panels:
-      - title: "Column"
-        type: "column"
+      - title: 'Column'
+        type: 'column'
         metrics:
         - id: 1024_memory
           query: 'avg(sum(container_memory_usage_bytes{container_name!="POD",pod_name=~"^%{ci_environment_slug}-([^c].*|c([^a]|a([^n]|n([^a]|a([^r]|r[^y])))).*|)-(.*)",namespace="%{kube_namespace}"}) by (job)) without (job) / count(avg(container_memory_usage_bytes{container_name!="POD",pod_name=~"^%{ci_environment_slug}-([^c].*|c([^a]|a([^n]|n([^a]|a([^r]|r[^y])))).*|)-(.*)",namespace="%{kube_namespace}"}) without (job)) /1024/1024'
           unit: MB
-          label: "Memory Usage"
+          label: 'Memory Usage'
 ```
 
 Note the following properties:
@@ -153,19 +153,19 @@ panel_groups:
     priority: 5
     panels:
       - type: 'stacked-column'
-        title: "Stacked column"
-        y_label: "y label"
+        title: 'Stacked column'
+        y_label: 'y label'
         x_label: 'x label'
         metrics:
           - id: memory_1
             query_range: 'memory_query'
-            label: "memory query 1"
-            unit: "count"
+            label: 'memory query 1'
+            unit: 'count'
             series_name: 'group 1'
           - id: memory_2
             query_range: 'memory_query_2'
-            label: "memory query 2"
-            unit: "count"
+            label: 'memory query 2'
+            unit: 'count'
             series_name: 'group 2'
 ```
 
@@ -185,13 +185,13 @@ dashboard: 'Dashboard Title'
 panel_groups:
   - group: 'Group Title'
     panels:
-      - title: "Single Stat"
-        type: "single-stat"
+      - title: 'Single Stat'
+        type: 'single-stat'
         metrics:
           - id: 10
             query: 'max(go_memstats_alloc_bytes{job="prometheus"})'
             unit: MB
-            label: "Total"
+            label: 'Total'
 ```
 
 Note the following properties:
@@ -215,14 +215,14 @@ dashboard: 'Dashboard Title'
 panel_groups:
   - group: 'Group Title'
     panels:
-      - title: "Single Stat"
-        type: "single-stat"
+      - title: 'Single Stat'
+        type: 'single-stat'
         max_value: 100
         metrics:
           - id: 10
             query: 'max(go_memstats_alloc_bytes{job="prometheus"})'
             unit: '%'
-            label: "Total"
+            label: 'Total'
 ```
 
 For example, if you have a query value of `53.6`, adding `%` as the unit results in a single stat value of `53.6%`, but if the maximum expected value of the query is `120`, the value would be `44.6%`. Adding the `max_value` causes the correct percentage value to display.
@@ -242,15 +242,15 @@ dashboard: 'Dashboard Title'
 panel_groups:
   - group: 'Group Title'
     panels:
-      - title: "Gauge"
-        type: "gauge"
+      - title: 'Gauge'
+        type: 'gauge'
         min_value: 0
         max_value: 1000
         split: 5
         thresholds:
           values: [60, 90]
-          mode: "percentage"
-        format: "kilobytes"
+          mode: 'percentage'
+        format: 'kilobytes'
         metrics:
           - id: 10
             query: 'floor(max(prometheus_http_response_size_bytes_bucket)/1000)'
@@ -289,13 +289,13 @@ dashboard: 'Dashboard Title'
 panel_groups:
   - group: 'Group Title'
     panels:
-      - title: "Heatmap"
-        type: "heatmap"
+      - title: 'Heatmap'
+        type: 'heatmap'
         metrics:
           - id: 10
             query: 'sum(rate(nginx_upstream_responses_total{upstream=~"%{kube_namespace}-%{ci_environment_slug}-.*"}[60m])) by (status_code)'
             unit: req/sec
-            label: "Status code"
+            label: 'Status code'
 ```
 
 Note the following properties:

@@ -1,18 +1,19 @@
-import Vuex from 'vuex';
+import { GlAlert, GlLoadingIcon, GlTable, GlIcon, GlAvatarsInline, GlPagination } from '@gitlab/ui';
 import { mount, shallowMount, createLocalVue } from '@vue/test-utils';
-import { GlAlert, GlLoadingIcon, GlTable, GlIcon, GlAvatarsInline } from '@gitlab/ui';
-import store from 'ee/analytics/merge_request_analytics/store';
+import Vuex from 'vuex';
 import ThroughputTable from 'ee/analytics/merge_request_analytics/components/throughput_table.vue';
 import {
   THROUGHPUT_TABLE_STRINGS,
   THROUGHPUT_TABLE_TEST_IDS as TEST_IDS,
 } from 'ee/analytics/merge_request_analytics/constants';
+import store from 'ee/analytics/merge_request_analytics/store';
 import {
   throughputTableData,
   startDate,
   endDate,
   fullPath,
   throughputTableHeaders,
+  pageInfo,
 } from '../mock_data';
 
 const localVue = createLocalVue();
@@ -58,12 +59,10 @@ describe('ThroughputTable', () => {
 
   const additionalData = data => {
     wrapper.setData({
-      throughputTableData: [
-        {
-          ...throughputTableData[0],
-          ...data,
-        },
-      ],
+      throughputTableData: {
+        list: [{ ...throughputTableData[0], ...data }],
+        pageInfo,
+      },
     });
   };
 
@@ -76,6 +75,18 @@ describe('ThroughputTable', () => {
 
   const findColSubComponent = (colTestId, childComponent) =>
     findCol(colTestId).find(childComponent);
+
+  const findPagination = () => wrapper.find(GlPagination);
+
+  const findPrevious = () =>
+    findPagination()
+      .findAll('.page-item')
+      .at(0);
+
+  const findNext = () =>
+    findPagination()
+      .findAll('.page-item')
+      .at(1);
 
   afterEach(() => {
     wrapper.destroy();
@@ -100,6 +111,10 @@ describe('ThroughputTable', () => {
 
     it('does not display the table', () => {
       displaysComponent(GlTable, false);
+    });
+
+    it('does not display the pagination', () => {
+      displaysComponent(GlPagination, false);
     });
   });
 
@@ -132,7 +147,12 @@ describe('ThroughputTable', () => {
   describe('with data', () => {
     beforeEach(() => {
       wrapper = createComponent({ func: mount });
-      wrapper.setData({ throughputTableData });
+      wrapper.setData({
+        throughputTableData: {
+          list: throughputTableData,
+          pageInfo,
+        },
+      });
     });
 
     it('displays the table', () => {
@@ -145,6 +165,10 @@ describe('ThroughputTable', () => {
 
     it('does not display the no data message', () => {
       displaysComponent(GlAlert, false);
+    });
+
+    it('displays the pagination', () => {
+      displaysComponent(GlPagination, true);
     });
 
     describe('table fields', () => {
@@ -191,7 +215,7 @@ describe('ThroughputTable', () => {
         it('includes an active label icon and count when available', async () => {
           additionalData({
             labels: {
-              nodes: [{ title: 'Brinix' }],
+              count: 1,
             },
           });
 
@@ -228,7 +252,7 @@ describe('ThroughputTable', () => {
           expect(icon.props('name')).toBe('comments');
         });
 
-        it('includes a pipeline icon and when available', async () => {
+        it('includes a pipeline icon when available', async () => {
           const iconName = 'status_canceled';
 
           additionalData({
@@ -247,6 +271,61 @@ describe('ThroughputTable', () => {
 
           expect(icon.find(GlIcon).exists()).toBe(true);
           expect(icon.props('name')).toBe(iconName);
+        });
+
+        describe('approval details', () => {
+          const iconName = 'approval';
+
+          it('does not display by default', async () => {
+            const approved = findColSubItem(TEST_IDS.MERGE_REQUEST_DETAILS, TEST_IDS.APPROVED);
+
+            expect(approved.exists()).toBe(false);
+          });
+
+          it('displays the singular when there is a single approval', async () => {
+            additionalData({
+              approvedBy: {
+                nodes: [
+                  {
+                    id: 1,
+                  },
+                ],
+              },
+            });
+
+            await wrapper.vm.$nextTick();
+
+            const approved = findColSubItem(TEST_IDS.MERGE_REQUEST_DETAILS, TEST_IDS.APPROVED);
+            const icon = approved.find(GlIcon);
+
+            expect(approved.text()).toBe('1 Approval');
+            expect(icon.exists()).toBe(true);
+            expect(icon.props('name')).toBe(iconName);
+          });
+
+          it('displays the plural when there are multiple approvals', async () => {
+            additionalData({
+              approvedBy: {
+                nodes: [
+                  {
+                    id: 1,
+                  },
+                  {
+                    id: 2,
+                  },
+                ],
+              },
+            });
+
+            await wrapper.vm.$nextTick();
+
+            const approved = findColSubItem(TEST_IDS.MERGE_REQUEST_DETAILS, TEST_IDS.APPROVED);
+            const icon = approved.find(GlIcon);
+
+            expect(approved.text()).toBe('2 Approvals');
+            expect(icon.exists()).toBe(true);
+            expect(icon.props('name')).toBe(iconName);
+          });
         });
       });
 
@@ -292,6 +371,60 @@ describe('ThroughputTable', () => {
         expect(assignees.exists()).toBe(true);
         expect(assignees.props('avatars')).toBe(throughputTableData[0].assignees.nodes);
       });
+    });
+  });
+
+  describe('pagination', () => {
+    beforeEach(() => {
+      wrapper = createComponent({ func: mount });
+      wrapper.setData({
+        throughputTableData: {
+          list: throughputTableData,
+          pageInfo,
+        },
+      });
+    });
+
+    it('disables the prev button on the first page', () => {
+      expect(findPrevious().classes()).toContain('disabled');
+      expect(findNext().classes()).not.toContain('disabled');
+    });
+
+    it('disables the next button on the last page', async () => {
+      wrapper.setData({
+        pagination: {
+          currentPage: 3,
+        },
+        throughputTableData: {
+          pageInfo: {
+            hasNextPage: false,
+          },
+        },
+      });
+
+      await wrapper.vm.$nextTick();
+
+      expect(findPrevious().classes()).not.toContain('disabled');
+      expect(findNext().classes()).toContain('disabled');
+    });
+
+    it('shows the prev and next buttons on middle pages', async () => {
+      wrapper.setData({
+        pagination: {
+          currentPage: 2,
+        },
+        throughputTableData: {
+          pageInfo: {
+            hasNextPage: true,
+            hasPrevPage: true,
+          },
+        },
+      });
+
+      await wrapper.vm.$nextTick();
+
+      expect(findPrevious().classes()).not.toContain('disabled');
+      expect(findNext().classes()).not.toContain('disabled');
     });
   });
 

@@ -1,12 +1,12 @@
-import Vuex from 'vuex';
+import { GlIcon } from '@gitlab/ui';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import Draggable from 'vuedraggable';
-import EpicsSwimlanes from 'ee/boards/components/epics_swimlanes.vue';
-import BoardListHeader from 'ee_else_ce/boards/components/board_list_header.vue';
+import Vuex from 'vuex';
 import EpicLane from 'ee/boards/components/epic_lane.vue';
+import EpicsSwimlanes from 'ee/boards/components/epics_swimlanes.vue';
 import IssueLaneList from 'ee/boards/components/issues_lane_list.vue';
 import getters from 'ee/boards/stores/getters';
-import { GlIcon } from '@gitlab/ui';
+import BoardListHeader from 'ee_else_ce/boards/components/board_list_header_new.vue';
 import { mockListsWithModel, mockEpics, mockIssuesByListId, issues } from '../mock_data';
 
 const localVue = createLocalVue();
@@ -17,14 +17,22 @@ describe('EpicsSwimlanes', () => {
 
   const createStore = () => {
     return new Vuex.Store({
-      actions: {
-        fetchIssuesForAllLists: jest.fn(),
-      },
       state: {
         epics: mockEpics,
-        isLoadingIssues: false,
         issuesByListId: mockIssuesByListId,
         issues,
+        pageInfoByListId: {
+          'gid://gitlab/List/1': {},
+          'gid://gitlab/List/2': {},
+        },
+        listsFlags: {
+          'gid://gitlab/List/1': {
+            unassignedIssuesCount: 1,
+          },
+          'gid://gitlab/List/2': {
+            unassignedIssuesCount: 1,
+          },
+        },
       },
       getters,
     });
@@ -34,9 +42,7 @@ describe('EpicsSwimlanes', () => {
     const store = createStore();
     const defaultProps = {
       lists: mockListsWithModel,
-      boardId: '1',
       disabled: false,
-      rootPath: '/',
     };
 
     wrapper = shallowMount(EpicsSwimlanes, {

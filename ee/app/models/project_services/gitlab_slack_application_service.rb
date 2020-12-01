@@ -30,7 +30,7 @@ class GitlabSlackApplicationService < Service
   end
 
   def description
-    'Use the GitLab Slack application for this project'
+    s_('Integrations|Use the GitLab Slack application')
   end
 
   def self.to_param

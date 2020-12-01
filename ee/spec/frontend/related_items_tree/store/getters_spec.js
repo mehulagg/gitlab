@@ -90,6 +90,28 @@ describe('RelatedItemsTree', () => {
             expect.objectContaining({}),
           );
         });
+
+        it('returns autoCompleteSources with a formatted issue_type query URL for issues when parent is epic', () => {
+          const mockGetter = {
+            autoCompleteSources: {
+              issues: 'foo',
+            },
+          };
+          state.issuesEndpoint = '/epics';
+          state.issuableType = issuableTypesMap.Issue;
+          state.autoCompleteIssues = true;
+
+          expect(getters.itemAutoCompleteSources(state, mockGetter)).toEqual({
+            issues: 'foo?issue_types=issue',
+          });
+
+          state.issuesEndpoint = '/';
+          state.autoCompleteEpics = false;
+
+          expect(getters.itemAutoCompleteSources(state, mockGetter)).toEqual({
+            issues: 'foo',
+          });
+        });
       });
 
       describe('itemPathIdSeparator', () => {

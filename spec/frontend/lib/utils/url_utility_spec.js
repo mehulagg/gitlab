@@ -161,6 +161,15 @@ describe('URL utility', () => {
       );
     });
 
+    it('sorts params in alphabetical order with sort option', () => {
+      expect(mergeUrlParams({ c: 'c', b: 'b', a: 'a' }, 'https://host/path', { sort: true })).toBe(
+        'https://host/path?a=a&b=b&c=c',
+      );
+      expect(
+        mergeUrlParams({ alpha: 'alpha' }, 'https://host/path?op=/&foo=bar', { sort: true }),
+      ).toBe('https://host/path?alpha=alpha&foo=bar&op=%2F');
+    });
+
     describe('with spread array option', () => {
       const spreadArrayOptions = { spreadArrays: true };
 
@@ -500,6 +509,20 @@ describe('URL utility', () => {
     });
   });
 
+  describe('isBlobUrl', () => {
+    it.each`
+      url                               | valid
+      ${undefined}                      | ${false}
+      ${'blob:http://gitlab.com/abcd'}  | ${true}
+      ${'data:image/png;base64,abcdef'} | ${false}
+      ${'notaurl'}                      | ${false}
+      ${'../relative_url'}              | ${false}
+      ${'<a></a>'}                      | ${false}
+    `('returns $valid for $url', ({ url, valid }) => {
+      expect(urlUtils.isBlobUrl(url)).toBe(valid);
+    });
+  });
+
   describe('relativePathToAbsolute', () => {
     it.each`
       path                       | base                                  | result
@@ -655,6 +678,19 @@ describe('URL utility', () => {
     });
   });
 
+  describe('cleanLeadingSeparator', () => {
+    it.each`
+      path            | expected
+      ${'/foo/bar'}   | ${'foo/bar'}
+      ${'foo/bar'}    | ${'foo/bar'}
+      ${'//foo/bar'}  | ${'foo/bar'}
+      ${'/./foo/bar'} | ${'./foo/bar'}
+      ${''}           | ${''}
+    `('$path becomes $expected', ({ path, expected }) => {
+      expect(urlUtils.cleanLeadingSeparator(path)).toBe(expected);
+    });
+  });
+
   describe('joinPaths', () => {
     it.each`
       paths                                       | expected
@@ -676,6 +712,18 @@ describe('URL utility', () => {
       ${['///', '/', '//']}                       | ${'/'}
     `('joins paths $paths => $expected', ({ paths, expected }) => {
       expect(urlUtils.joinPaths(...paths)).toBe(expected);
+    });
+  });
+
+  describe('stripFinalUrlSegment', () => {
+    it.each`
+      path                                                        | expected
+      ${'http://fake.domain/twitter/typeahead-js/-/tags/v0.11.0'} | ${'http://fake.domain/twitter/typeahead-js/-/tags/'}
+      ${'http://fake.domain/bar/cool/-/nested/content'}           | ${'http://fake.domain/bar/cool/-/nested/'}
+      ${'http://fake.domain/bar/cool?q="search"'}                 | ${'http://fake.domain/bar/'}
+      ${'http://fake.domain/bar/cool#link-to-something'}          | ${'http://fake.domain/bar/'}
+    `('stripFinalUrlSegment $path => $expected', ({ path, expected }) => {
+      expect(urlUtils.stripFinalUrlSegment(path)).toBe(expected);
     });
   });
 
@@ -776,6 +824,38 @@ describe('URL utility', () => {
       ${'http://foo.bar:8080'} | ${'http'}
     `('returns correct protocol for $url', ({ url, expectation }) => {
       expect(urlUtils.getHTTPProtocol(url)).toBe(expectation);
+    });
+  });
+
+  describe('stripPathTail', () => {
+    it.each`
+      path                     | expected
+      ${''}                    | ${''}
+      ${'index.html'}          | ${''}
+      ${'/'}                   | ${'/'}
+      ${'/foo/bar'}            | ${'/foo/'}
+      ${'/foo/bar/'}           | ${'/foo/bar/'}
+      ${'/foo/bar/index.html'} | ${'/foo/bar/'}
+    `('strips the filename from $path => $expected', ({ path, expected }) => {
+      expect(urlUtils.stripPathTail(path)).toBe(expected);
+    });
+  });
+
+  describe('getURLOrigin', () => {
+    it('when no url passed, returns correct origin from window location', () => {
+      const origin = 'https://foo.bar';
+
+      setWindowLocation({ origin });
+      expect(urlUtils.getURLOrigin()).toBe(origin);
+    });
+
+    it.each`
+      url                          | expectation
+      ${'not-a-url'}               | ${null}
+      ${'wss://example.com'}       | ${'wss://example.com'}
+      ${'https://foo.bar/foo/bar'} | ${'https://foo.bar'}
+    `('returns correct origin for $url', ({ url, expectation }) => {
+      expect(urlUtils.getURLOrigin(url)).toBe(expectation);
     });
   });
 });

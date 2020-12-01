@@ -9,7 +9,6 @@ RSpec.describe Projects::OnDemandScansController, type: :request do
   describe 'GET #index' do
     context 'feature available' do
       before do
-        stub_feature_flags(security_on_demand_scans_feature_flag: true)
         stub_licensed_features(security_on_demand_scans: true)
       end
 
@@ -49,16 +48,7 @@ RSpec.describe Projects::OnDemandScansController, type: :request do
         login_as(user)
       end
 
-      it "sees a 404 error if the feature flag is disabled" do
-        stub_feature_flags(security_on_demand_scans_feature_flag: false)
-        stub_licensed_features(security_on_demand_scans: true)
-        get project_on_demand_scans_path(project)
-
-        expect(response).to have_gitlab_http_status(:not_found)
-      end
-
       it "sees a 404 error if the license doesn't support the feature" do
-        stub_feature_flags(security_on_demand_scans_feature_flag: true)
         stub_licensed_features(security_on_demand_scans: false)
         get project_on_demand_scans_path(project)
 

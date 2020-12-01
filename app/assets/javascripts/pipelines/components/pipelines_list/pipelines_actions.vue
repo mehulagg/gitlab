@@ -32,7 +32,7 @@ export default {
       if (action.scheduled_at) {
         const confirmationMessage = sprintf(
           s__(
-            "DelayedJobs|Are you sure you want to run %{jobName} immediately? Otherwise this job will run automatically after it's timer finishes.",
+            'DelayedJobs|Are you sure you want to run %{jobName} immediately? Otherwise this job will run automatically after its timer finishes.',
           ),
           { jobName: action.name },
         );
@@ -87,7 +87,7 @@ export default {
       :aria-label="__('Run manual or delayed jobs')"
     >
       <gl-icon name="play" class="icon-play" />
-      <i class="fa fa-caret-down" aria-hidden="true"></i>
+      <gl-icon name="chevron-down" />
       <gl-loading-icon v-if="isLoading" />
     </button>
 

@@ -6,6 +6,7 @@ import ChartSkeletonLoader from '~/vue_shared/components/resizable_chart/skeleto
 import { filterToQueryObject } from '~/vue_shared/components/filtered_search_bar/filtered_search_utils';
 import throughputChartQueryBuilder from '../graphql/throughput_chart_query_builder';
 import { THROUGHPUT_CHART_STRINGS } from '../constants';
+import { formatThroughputChartData } from '../utils';
 
 export default {
   name: 'ThroughputChart',
@@ -38,10 +39,12 @@ export default {
       },
       variables() {
         const options = filterToQueryObject({
-          labels: this.selectedLabelList,
+          sourceBranches: this.selectedSourceBranch,
+          targetBranches: this.selectedTargetBranch,
+          milestoneTitle: this.selectedMilestone,
           authorUsername: this.selectedAuthor,
           assigneeUsername: this.selectedAssignee,
-          milestoneTitle: this.selectedMilestone,
+          labels: this.selectedLabelList,
         });
 
         return {
@@ -59,10 +62,12 @@ export default {
   },
   computed: {
     ...mapState('filters', {
+      selectedSourceBranch: state => state.branches.source.selected,
+      selectedTargetBranch: state => state.branches.target.selected,
       selectedMilestone: state => state.milestones.selected,
       selectedAuthor: state => state.authors.selected,
-      selectedLabelList: state => state.labels.selectedList,
       selectedAssignee: state => state.assignees.selected,
+      selectedLabelList: state => state.labels.selectedList,
     }),
     chartOptions() {
       return {
@@ -71,7 +76,7 @@ export default {
           type: 'category',
           axisLabel: {
             formatter: value => {
-              return value.split('_')[0]; // Aug_2020 => Aug
+              return value.split(' ')[0]; // Aug 2020 => Aug
             },
           },
         },
@@ -81,24 +86,13 @@ export default {
       };
     },
     formattedThroughputChartData() {
-      if (!this.throughputChartData) return [];
-
-      const data = Object.keys(this.throughputChartData)
-        .slice(0, -1) // Remove the __typeName key
-        .map(value => [value, this.throughputChartData[value].count]);
-
-      return [
-        {
-          name: THROUGHPUT_CHART_STRINGS.Y_AXIS_TITLE,
-          data,
-        },
-      ];
+      return formatThroughputChartData(this.throughputChartData);
     },
     chartDataLoading() {
       return !this.hasError && this.$apollo.queries.throughputChartData.loading;
     },
     chartDataAvailable() {
-      return this.formattedThroughputChartData[0]?.data.length;
+      return this.formattedThroughputChartData[0]?.data?.some(entry => Boolean(entry[1]));
     },
     alertDetails() {
       return {

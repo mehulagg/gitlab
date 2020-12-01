@@ -1,6 +1,6 @@
 import { mount } from '@vue/test-utils';
-import { issuable1 } from 'jest/vue_shared/components/issue/related_issuable_mock_data';
 import IssueWeight from 'ee/boards/components/issue_card_weight.vue';
+import { issuable1 } from 'jest/vue_shared/components/issue/related_issuable_mock_data';
 import RelatedIssuesList from '~/related_issues/components/related_issues_list.vue';
 import { PathIdSeparator } from '~/related_issues/constants';
 
@@ -11,7 +11,10 @@ describe('RelatedIssuesList', () => {
   let wrapper;
 
   afterEach(() => {
-    wrapper.destroy();
+    if (wrapper) {
+      wrapper.destroy();
+      wrapper = null;
+    }
   });
 
   describe('related item contents', () => {

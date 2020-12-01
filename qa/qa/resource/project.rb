@@ -12,7 +12,10 @@ module QA
       attr_accessor :repository_storage # requires admin access
       attr_writer :initialize_with_readme
       attr_writer :auto_devops_enabled
+      attr_writer :github_personal_access_token
+      attr_writer :github_repository_path
 
+      attribute :default_branch
       attribute :id
       attribute :name
       attribute :add_name_uuid
@@ -21,6 +24,7 @@ module QA
       attribute :runners_token
       attribute :visibility
       attribute :template_name
+      attribute :import
 
       attribute :group do
         Group.fabricate!
@@ -56,6 +60,7 @@ module QA
         @auto_devops_enabled = false
         @visibility = :public
         @template_name = nil
+        @import = false
 
         self.name = "the_awesome_project"
       end
@@ -65,6 +70,8 @@ module QA
       end
 
       def fabricate!
+        return if @import
+
         unless @standalone
           group.visit!
           Page::Group::Show.perform(&:go_to_new_project)
@@ -103,6 +110,10 @@ module QA
         response.any? { |file| file[:path] == file_path }
       end
 
+      def has_branch?(branch)
+        has_branches?(Array(branch))
+      end
+
       def has_branches?(branches)
         branches.all? do |branch|
           response = get(Runtime::API::Request.new(api_client, "#{api_repository_branches_path}/#{branch}").url)
@@ -131,6 +142,10 @@ module QA
 
       def api_members_path
         "#{api_get_path}/members"
+      end
+
+      def api_merge_requests_path
+        "#{api_get_path}/merge_requests"
       end
 
       def api_runners_path
@@ -185,6 +200,10 @@ module QA
         post_body
       end
 
+      def api_delete_path
+        "/projects/#{id}"
+      end
+
       def change_repository_storage(new_storage)
         put_body = { repository_storage: new_storage }
         response = put Runtime::API::Request.new(api_client, api_put_path).url, put_body
@@ -214,6 +233,14 @@ module QA
         Runtime::Logger.error("Import failed: #{result[:import_error]}") if result[:import_status] == "failed"
 
         result[:import_status]
+      end
+
+      def merge_requests
+        parse_body(get(Runtime::API::Request.new(api_client, api_merge_requests_path).url))
+      end
+
+      def merge_request_with_title(title)
+        merge_requests.find { |mr| mr[:title] == title }
       end
 
       def runners(tag_list: nil)

@@ -1,9 +1,7 @@
 ---
-type: reference
-last_updated: 2020-01-06
 stage: Release
 group: Release Management
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Exploring GitLab Pages
@@ -13,7 +11,7 @@ GitLab Pages offers.
 
 To familiarize yourself with GitLab Pages first:
 
-- Read an [introduction to GitLab Pages](index.md#overview).
+- Read an [introduction to GitLab Pages](index.md).
 - Learn [how to get started with Pages](index.md#getting-started).
 - Learn how to enable GitLab Pages
   across your GitLab instance on the [administrator documentation](../../../administration/pages/index.md).
@@ -36,7 +34,7 @@ If you are using [GitLab Pages on GitLab.com](#gitlab-pages-on-gitlabcom) to hos
 - The domain name for GitLab Pages on GitLab.com is `gitlab.io`.
 - Custom domains and TLS support are enabled.
 - Shared runners are enabled by default, provided for free and can be used to
-  build your website. If you want you can still bring your own Runner.
+  build your website. If you want you can still bring your own runner.
 
 ## Example projects
 
@@ -62,13 +60,8 @@ If the case of `404.html`, there are different scenarios. For example:
 
 ## Redirects in GitLab Pages
 
-Since you cannot use any custom server configuration files, like `.htaccess` or
-any `.conf` file, if you want to redirect a page to another
-location, you can use the [HTTP meta refresh tag](https://en.wikipedia.org/wiki/Meta_refresh).
-
-Some static site generators provide plugins for that functionality so that you
-don't have to create and edit HTML files manually. For example, Jekyll has the
-[redirect-from plugin](https://github.com/jekyll/jekyll-redirect-from).
+You can configure redirects for your site using a `_redirects` file. To learn more, read
+the [redirects documentation](redirects.md).
 
 ## GitLab Pages Access Control **(CORE)**
 
@@ -180,7 +173,7 @@ Most modern browsers support downloading files in a compressed format. This
 speeds up downloads by reducing the size of files.
 
 Before serving an uncompressed file, Pages will check whether the same file
-exists with a `.gz` extension. If it does, and the browser supports receiving
+exists with a `.br` or `.gz` extension. If it does, and the browser supports receiving
 compressed files, it will serve that version instead of the uncompressed one.
 
 To take advantage of this feature, the artifact you upload to the Pages should
@@ -189,14 +182,17 @@ have this structure:
 ```plaintext
 public/
 ├─┬ index.html
+│ | index.html.br
 │ └ index.html.gz
 │
 ├── css/
 │   └─┬ main.css
+│     | main.css.br
 │     └ main.css.gz
 │
 └── js/
     └─┬ main.js
+      | main.js.br
       └ main.js.gz
 ```
 
@@ -209,6 +205,7 @@ pages:
   script:
     # Build the public/ directory first
     - find public -type f -regex '.*\.\(htm\|html\|txt\|text\|js\|css\)$' -exec gzip -f -k {} \;
+    - find public -type f -regex '.*\.\(htm\|html\|txt\|text\|js\|css\)$' -exec brotli -f -k {} \;
 ```
 
 By pre-compressing the files and including both versions in the artifact, Pages
@@ -262,9 +259,8 @@ instead. Here are some examples of what will happen given the above Pages site:
 | `/other/index`       | `200 OK`      | `public/other/index.html` |
 | `/other/index.html`  | `200 OK`      | `public/other/index.html` |
 
-NOTE: **Note:**
-When `public/data/index.html` exists, it takes priority over the `public/data.html`
-file for both the `/data` and `/data/` URL paths.
+Note that when `public/data/index.html` exists, it takes priority over the `public/data.html` file
+for both the `/data` and `/data/` URL paths.
 
 ## Frequently Asked Questions
 

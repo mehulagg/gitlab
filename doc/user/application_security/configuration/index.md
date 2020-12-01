@@ -2,7 +2,7 @@
 type: reference, howto
 stage: Secure
 group: Static Analysis
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Security Configuration **(ULTIMATE)**
@@ -15,21 +15,25 @@ The Security Configuration page displays the configuration state of each securit
 current project.
 
 To view a project's security configuration, go to the project's home page,
-then in the left sidebar, go to **Security & Compliance** > **Configuration**.
+then in the left sidebar go to **Security & Compliance > Configuration**.
+
+For each security control the page displays:
+
+- **Security Control:** Name, description, and a documentation link.
+- **Status:** The security control's status (enabled, not enabled, or available).
+- **Manage:** A management option or a documentation link.
 
 ## Status
-
-For each security control, the page displays the status and either a management option or a
-documentation link.
 
 The status of each security control is determined by the project's latest default branch
 [CI pipeline](../../../ci/pipelines/index.md).
 If a job with the expected security report artifact exists in the pipeline, the feature's status is
 _enabled_.
 
-NOTE: **Note:**
 If the latest pipeline used [Auto DevOps](../../../topics/autodevops/index.md),
 all security features are configured by default.
+
+For SAST, click **View history** to see the `.gitlab-ci.yml` file's history.
 
 ## Manage
 

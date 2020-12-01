@@ -31,6 +31,20 @@ RSpec.describe Repository, :elastic do
     expect(project.repository.elastic_search(partial_ref + '*')[:commits][:total_count]).to eq(1)
   end
 
+  it "names elasticsearch queries" do
+    project = create :project, :repository
+    project.repository.elastic_search('*')
+
+    assert_named_queries('doc:is_a:blob',
+                         'blob:match:search_terms')
+
+    assert_named_queries('doc:is_a:wiki_blob',
+                         'blob:match:search_terms')
+
+    assert_named_queries('doc:is_a:commit',
+                         'commit:match:search_terms')
+  end
+
   it 'can filter blobs' do
     project = create :project, :repository
     index!(project)
@@ -46,6 +60,9 @@ RSpec.describe Repository, :elastic do
 
     # Finds files/markdown/ruby-style-guide.md
     expect(project.repository.elastic_search('def | popen extension:md')[:blobs][:total_count]).to eq(1)
+
+    # Finds files/ruby/popen.rb
+    expect(project.repository.elastic_search('* blob:7e3e39ebb9b2bf433b4ad17313770fbe4051649c')[:blobs][:total_count]).to eq(1)
   end
 
   def search_and_check!(on, query, type:, per: 1000)

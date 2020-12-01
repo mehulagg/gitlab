@@ -1361,7 +1361,8 @@ module Gitlab
             paths: ["logs/", "binaries/"],
             untracked: true,
             key: 'key',
-            policy: 'pull-push'
+            policy: 'pull-push',
+            when: 'on_success'
           )
         end
 
@@ -1383,7 +1384,8 @@ module Gitlab
             paths: ["logs/", "binaries/"],
             untracked: true,
             key: { files: ['file'] },
-            policy: 'pull-push'
+            policy: 'pull-push',
+            when: 'on_success'
           )
         end
 
@@ -1402,7 +1404,8 @@ module Gitlab
             paths: ['logs/', 'binaries/'],
             untracked: true,
             key: 'key',
-            policy: 'pull-push'
+            policy: 'pull-push',
+            when: 'on_success'
           )
         end
 
@@ -1425,7 +1428,8 @@ module Gitlab
             paths: ['logs/', 'binaries/'],
             untracked: true,
             key: { files: ['file'] },
-            policy: 'pull-push'
+            policy: 'pull-push',
+            when: 'on_success'
           )
         end
 
@@ -1448,7 +1452,8 @@ module Gitlab
             paths: ['logs/', 'binaries/'],
             untracked: true,
             key: { files: ['file'], prefix: 'prefix' },
-            policy: 'pull-push'
+            policy: 'pull-push',
+            when: 'on_success'
           )
         end
 
@@ -1468,7 +1473,8 @@ module Gitlab
             paths: ["test/"],
             untracked: false,
             key: 'local',
-            policy: 'pull-push'
+            policy: 'pull-push',
+            when: 'on_success'
           )
         end
       end
@@ -2105,6 +2111,71 @@ module Gitlab
         end
       end
 
+      describe 'cross pipeline needs' do
+        context 'when configuration is valid' do
+          let(:config) do
+            <<~YAML
+            rspec:
+              stage: test
+              script: rspec
+              needs:
+                - pipeline: $THE_PIPELINE_ID
+                  job: dependency-job
+            YAML
+          end
+
+          it 'returns a valid configuration and sets artifacts: true by default' do
+            expect(subject).to be_valid
+
+            rspec = subject.build_attributes(:rspec)
+            expect(rspec.dig(:options, :cross_dependencies)).to eq(
+              [{ pipeline: '$THE_PIPELINE_ID', job: 'dependency-job', artifacts: true }]
+            )
+          end
+
+          context 'when pipeline ID is hard-coded' do
+            let(:config) do
+              <<~YAML
+              rspec:
+                stage: test
+                script: rspec
+                needs:
+                  - pipeline: "123"
+                    job: dependency-job
+              YAML
+            end
+
+            it 'returns a valid configuration and sets artifacts: true by default' do
+              expect(subject).to be_valid
+
+              rspec = subject.build_attributes(:rspec)
+              expect(rspec.dig(:options, :cross_dependencies)).to eq(
+                [{ pipeline: '123', job: 'dependency-job', artifacts: true }]
+              )
+            end
+          end
+        end
+
+        context 'when configuration is not valid' do
+          let(:config) do
+            <<~YAML
+            rspec:
+              stage: test
+              script: rspec
+              needs:
+                - pipeline: $THE_PIPELINE_ID
+                  job: dependency-job
+                  something: else
+            YAML
+          end
+
+          it 'returns an error' do
+            expect(subject).not_to be_valid
+            expect(subject.errors).to include(/:need config contains unknown keys: something/)
+          end
+        end
+      end
+
       describe "Hidden jobs" do
         let(:config_processor) { Gitlab::Ci::YamlProcessor.new(config).execute }
 
@@ -2240,44 +2311,46 @@ module Gitlab
       end
 
       describe 'with parent-child pipeline' do
+        let(:config) do
+          YAML.dump({
+            build1: { stage: 'build', script: 'test' },
+            test1: {
+              stage: 'test',
+              trigger: {
+                include: includes
+              }
+            }
+          })
+        end
+
         context 'when artifact and job are specified' do
-          let(:config) do
-            YAML.dump({
-              build1: { stage: 'build', script: 'test' },
-              test1: { stage: 'test', trigger: {
-                include: [{ artifact: 'generated.yml', job: 'build1' }]
-              } }
-            })
+          let(:includes) { [{ artifact: 'generated.yml', job: 'build1' }] }
+
+          it { is_expected.to be_valid }
+        end
+
+        context 'when job is not specified while artifact is' do
+          let(:includes) { [{ artifact: 'generated.yml' }] }
+
+          it_behaves_like 'returns errors', /include config must specify the job where to fetch the artifact from/
+        end
+
+        context 'when project and file are specified' do
+          let(:includes) do
+            [{ file: 'generated.yml', project: 'my-namespace/my-project' }]
           end
 
           it { is_expected.to be_valid }
         end
 
-        context 'when job is not specified specified while artifact is' do
-          let(:config) do
-            YAML.dump({
-              build1: { stage: 'build', script: 'test' },
-              test1: { stage: 'test', trigger: {
-                include: [{ artifact: 'generated.yml' }]
-              } }
-            })
-          end
+        context 'when file is not specified while project is' do
+          let(:includes) { [{ project: 'something' }] }
 
-          it_behaves_like 'returns errors', /include config must specify the job where to fetch the artifact from/
+          it_behaves_like 'returns errors', /include config must specify the file where to fetch the config from/
         end
 
         context 'when include is a string' do
-          let(:config) do
-            YAML.dump({
-              build1: { stage: 'build', script: 'test' },
-              test1: {
-                stage: 'test',
-                trigger: {
-                  include: 'generated.yml'
-                }
-              }
-            })
-          end
+          let(:includes) { 'generated.yml' }
 
           it { is_expected.to be_valid }
         end
@@ -2457,13 +2530,13 @@ module Gitlab
         context 'returns errors if variables is not a map' do
           let(:config) { YAML.dump({ variables: "test", rspec: { script: "test" } }) }
 
-          it_behaves_like 'returns errors', 'variables config should be a hash of key value pairs'
+          it_behaves_like 'returns errors', 'variables config should be a hash of key value pairs, value can be a hash'
         end
 
         context 'returns errors if variables is not a map of key-value strings' do
           let(:config) { YAML.dump({ variables: { test: false }, rspec: { script: "test" } }) }
 
-          it_behaves_like 'returns errors', 'variables config should be a hash of key value pairs'
+          it_behaves_like 'returns errors', 'variables config should be a hash of key value pairs, value can be a hash'
         end
 
         context 'returns errors if job when is not on_success, on_failure or always' do

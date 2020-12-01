@@ -9,7 +9,5 @@ FactoryBot.modify do
       action { :created }
       project { nil }
     end
-
-    trait(:approved) { action { :approved } }
   end
 end

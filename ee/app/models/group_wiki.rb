@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class GroupWiki < Wiki
+  self.container_class = ::Group
   alias_method :group, :container
 
   override :create_wiki_repository
@@ -8,7 +9,7 @@ class GroupWiki < Wiki
     super
 
     storage_record = container.group_wiki_repository || container.build_group_wiki_repository
-    storage_record.update!(shard_name: repository_storage, disk_path: storage.disk_path)
+    storage_record.update!(shard_name: repository.shard, disk_path: storage.disk_path)
   end
 
   override :storage
@@ -18,7 +19,9 @@ class GroupWiki < Wiki
 
   override :repository_storage
   def repository_storage
-    container.group_wiki_repository&.shard_name || self.class.pick_repository_storage
+    strong_memoize(:repository_storage) do
+      container.group_wiki_repository&.shard_name || self.class.pick_repository_storage
+    end
   end
 
   override :hashed_storage?

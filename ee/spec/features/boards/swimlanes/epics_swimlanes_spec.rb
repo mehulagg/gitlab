@@ -21,8 +21,29 @@ RSpec.describe 'epics swimlanes', :js do
   let_it_be(:epic_issue1) { create(:epic_issue, epic: epic1, issue: issue1) }
   let_it_be(:epic_issue2) { create(:epic_issue, epic: epic2, issue: issue2) }
 
+  context 'link to swimlanes view' do
+    before do
+      stub_licensed_features(epics: true, swimlanes: true)
+      sign_in(user)
+      visit_epics_swimlanes_page
+    end
+
+    it 'displays epics swimlanes when link to boards with group_by epic in URL' do
+      expect(page).to have_selector('[data-testid="board-swimlanes"]')
+
+      epic_lanes = page.all(:css, '.board-epic-lane')
+      expect(epic_lanes.length).to eq(2)
+    end
+
+    it 'displays issue not assigned to epic in unassigned issues lane' do
+      page.within('.board-lane-unassigned-issues-title') do
+        expect(page.find('span[data-testid="issues-lane-issue-count"]')).to have_content('1')
+      end
+    end
+  end
+
   before do
-    stub_licensed_features(epics: true)
+    stub_licensed_features(epics: true, swimlanes: true)
     sign_in(user)
     visit_board_page
     select_epics
@@ -30,7 +51,7 @@ RSpec.describe 'epics swimlanes', :js do
 
   context 'switch to swimlanes view' do
     it 'displays epics swimlanes when selecting Epic in Group by dropdown' do
-      expect(page).to have_css('.board-swimlanes')
+      expect(page).to have_selector('[data-testid="board-swimlanes"]')
 
       epic_lanes = page.all(:css, '.board-epic-lane')
       expect(epic_lanes.length).to eq(2)
@@ -77,20 +98,24 @@ RSpec.describe 'epics swimlanes', :js do
         find('.issue-count-badge-add-button').click
       end
 
+      wait_for_all_requests
+
       page.within(first('.board-new-issue-form')) do
         find('.form-control').set('bug')
         click_button 'Submit issue'
       end
 
-      wait_for_requests
+      wait_for_all_requests
 
       page.within(first('.board .issue-count-badge-count')) do
         expect(page).to have_content('3')
       end
 
+      wait_for_all_requests
+
       page.within("[data-testid='board-lane-unassigned-issues']") do
         page.within(first('.board-card')) do
-          issue = project.issues.find_by_title('bug')
+          issue = project.issues.find_by!(title: 'bug')
 
           expect(page).to have_content(issue.to_reference)
         end
@@ -108,5 +133,10 @@ RSpec.describe 'epics swimlanes', :js do
       page.find('.dropdown-toggle').click
       page.find('.dropdown-item', text: 'Epic').click
     end
+  end
+
+  def visit_epics_swimlanes_page
+    visit "#{project_boards_path(project)}?group_by=epic"
+    wait_for_requests
   end
 end

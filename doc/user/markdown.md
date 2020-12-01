@@ -1,7 +1,7 @@
 ---
 stage: Create
 group: Source Code
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 type: reference, howto
 ---
 
@@ -78,13 +78,11 @@ character of the top list item (`C` in this case):
    - dark
    - milk
 
-NOTE: **Note:**
-We flag any significant differences between Redcarpet and CommonMark
-  Markdown in this document.
+We flag any significant differences between Redcarpet and CommonMark Markdown in this document.
 
 If you have a large volume of Markdown files, it can be tedious to determine
 if they display correctly or not. You can use the
-[diff_redcarpet_cmark](https://gitlab.com/digitalmoksha/diff_redcarpet_cmark)
+[`diff_redcarpet_cmark`](https://gitlab.com/digitalmoksha/diff_redcarpet_cmark)
 tool (not an officially supported product) to generate a list of files and the
 differences between how RedCarpet and CommonMark render the files. It gives
 an indication if anything needs to be changed - often nothing needs
@@ -126,7 +124,7 @@ changing how standard Markdown is used:
 
 ### Colors
 
-> If this is not rendered correctly, [view it in GitLab itself](https://gitlab.com/gitlab-org/gitlab/blob/master/doc/user/markdown.md#colors).
+If this section is not rendered correctly, [view it in GitLab](https://gitlab.com/gitlab-org/gitlab/blob/master/doc/user/markdown.md#colors).
 
 It's possible to have color written in HEX, RGB, or HSL format rendered with a color
 indicator.
@@ -164,6 +162,7 @@ Color written inside backticks is followed by a color "chip":
 ### Diagrams and flowcharts
 
 It's possible to generate diagrams and flowcharts from text in GitLab using [Mermaid](https://mermaidjs.github.io/) or [PlantUML](https://plantuml.com).
+It's also possible to use [Kroki](https://kroki.io) to create a wide variety of diagrams.
 
 #### Mermaid
 
@@ -233,9 +232,14 @@ end
 
 To make PlantUML available in GitLab, a GitLab administrator needs to enable it first. Read more in [PlantUML & GitLab](../administration/integration/plantuml.md).
 
+#### Kroki
+
+To make Kroki available in GitLab, a GitLab administrator needs to enable it first.
+Read more in the [Kroki integration](../administration/integration/kroki.md) page.
+
 ### Emoji
 
-> If this is not rendered correctly, [view it in GitLab itself](https://gitlab.com/gitlab-org/gitlab/blob/master/doc/user/markdown.md#emoji).
+If this section is not rendered correctly, [view it in GitLab](https://gitlab.com/gitlab-org/gitlab/blob/master/doc/user/markdown.md#emoji).
 
 ```markdown
 Sometimes you want to :monkey: around a bit and add some :star2: to your :speech_balloon:. Well we have a gift for you:
@@ -259,13 +263,14 @@ If you're new to this, don't be <img src="https://gitlab.com/gitlab-org/gitlab-f
 
 Consult the [Emoji Cheat Sheet](https://www.webfx.com/tools/emoji-cheat-sheet/) for a list of all supported emoji codes. <img src="https://gitlab.com/gitlab-org/gitlab-foss/raw/master/app/assets/images/emoji/thumbsup.png" width="20px" height="20px" style="display:inline;margin:0">
 
-NOTE: **Note:**
+#### Emoji and your OS
+
 The emoji example above uses hard-coded images for this documentation. The emoji,
 when rendered within GitLab, may appear different depending on the OS and browser used.
 
-Most emoji are natively supported on macOS, Windows, iOS, Android, and fall back on image-based emoji where there is no support.
+Most emoji are natively supported on macOS, Windows, iOS, Android, and fall back on image-based
+emoji where there is no support.
 
-NOTE: **Note:**
 On Linux, you can download [Noto Color Emoji](https://www.google.com/get/noto/help/emoji/)
 to get full native emoji support. Ubuntu 18.04 (like many modern Linux distributions) has
 this font installed by default.
@@ -335,7 +340,7 @@ $example = array(
 
 ### Inline diff
 
-> If this is not rendered correctly, [view it in GitLab itself](https://gitlab.com/gitlab-org/gitlab/blob/master/doc/user/markdown.md#inline-diff).
+If this section is not rendered correctly, [view it in GitLab](https://gitlab.com/gitlab-org/gitlab/blob/master/doc/user/markdown.md#inline-diff).
 
 With inline diff tags you can display `{+ additions +}` or `[- deletions -]`.
 
@@ -374,7 +379,7 @@ backslash `\`, otherwise the diff highlight don't render correctly:
 
 ### Math
 
-> If this is not rendered correctly, [view it in GitLab itself](https://gitlab.com/gitlab-org/gitlab/blob/master/doc/user/markdown.md#math).
+If this section is not rendered correctly, [view it in GitLab](https://gitlab.com/gitlab-org/gitlab/blob/master/doc/user/markdown.md#math).
 
 It's possible to have math written with LaTeX syntax rendered using [KaTeX](https://github.com/KaTeX/KaTeX).
 
@@ -402,8 +407,7 @@ a^2+b^2=c^2
 
 _Be advised that KaTeX only supports a [subset](https://katex.org/docs/supported.html) of LaTeX._
 
-NOTE: **Note:**
-This also works for the Asciidoctor `:stem: latexmath`. For details see
+This also works for the Asciidoctor `:stem: latexmath`. For details, see
 the [Asciidoctor user manual](https://asciidoctor.org/docs/user-manual/#activating-stem-support).
 
 ### Special GitLab references
@@ -427,6 +431,7 @@ GFM recognizes the following:
 | merge request                   | `!123`                     | `namespace/project!123`                 | `project!123`                  |
 | snippet                         | `$123`                     | `namespace/project$123`                 | `project$123`                  |
 | epic **(ULTIMATE)**             | `&123`                     | `group1/subgroup&123`                   |                                |
+| vulnerability **(ULTIMATE)** *(1)* | `[vulnerability:123]`   | `[vulnerability:namespace/project/123]` | `[vulnerability:project/123]`  |
 | label by ID                     | `~123`                     | `namespace/project~123`                 | `project~123`                  |
 | one-word label by name          | `~bug`                     | `namespace/project~bug`                 | `project~bug`                  |
 | multi-word label by name        | `~"feature request"`       | `namespace/project~"feature request"`   | `project~"feature request"`    |
@@ -438,10 +443,35 @@ GFM recognizes the following:
 | commit range comparison         | `9ba12248...b19a04f5`      | `namespace/project@9ba12248...b19a04f5` | `project@9ba12248...b19a04f5`  |
 | repository file references      | `[README](doc/README)`     |                                         |                                |
 | repository file line references | `[README](doc/README#L13)` |                                         |                                |
+| [alert](../operations/incident_management/alerts.md) | `^alert#123` | `namespace/project^alert#123`    | `project^alert#123`            |
+
+1. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/281035) in GitLab 13.6.
+
+    The Vulnerability special references feature is under development but ready for production use.
+    It is deployed behind a feature flag that is **disabled by default**.
+    [GitLab administrators with access to the GitLab Rails console](../administration/feature_flags.md)
+    can opt to enable it for your instance.
+    It's disabled on GitLab.com.
+
+    To disable it:
+
+    ```ruby
+    Feature.disable(:vulnerability_special_references)
+    ```
+
+    To enable it:
+
+    ```ruby
+    Feature.enable(:vulnerability_special_references)
+    ```
+
+For example, referencing an issue by using `#123` will format the output as a link
+to issue number 123 with text `#123`. Likewise, a link to issue number 123 will be
+recognized and formatted with text `#123`.
 
 In addition to this, links to some objects are also recognized and formatted. Some examples of these are:
 
-- Comments on issues: `"https://gitlab.com/gitlab-org/gitlab/-/issues/1234#note_101075757"`, which are rendered as `#1234 (note1)`
+- Comments on issues: `"https://gitlab.com/gitlab-org/gitlab/-/issues/1234#note_101075757"`, which are rendered as `#1234 (comment 101075757)`
 - The issues designs tab: `"https://gitlab.com/gitlab-org/gitlab/-/issues/1234/designs"`, which are rendered as `#1234 (designs)`.
 - Links to individual designs: `"https://gitlab.com/gitlab-org/gitlab/-/issues/1234/designs/layout.png"`, which are rendered as `#1234[layout.png]`.
 
@@ -529,7 +559,7 @@ If this snippet was placed on a page at `<your_wiki>/documentation/main`,
 it would link to `<your_wiki>/documentation/related`:
 
 ```markdown
-[Link to Related Page](./related)
+[Link to Related Page](related)
 ```
 
 If this snippet was placed on a page at `<your_wiki>/documentation/related/content`,
@@ -543,7 +573,7 @@ If this snippet was placed on a page at `<your_wiki>/documentation/main`,
 it would link to `<your_wiki>/documentation/related.md`:
 
 ```markdown
-[Link to Related Page](./related.md)
+[Link to Related Page](related.md)
 ```
 
 If this snippet was placed on a page at `<your_wiki>/documentation/related/content`,
@@ -602,9 +632,9 @@ Quote break.
 
 #### Multiline blockquote
 
-> If this is not rendered correctly, [view it in GitLab itself](https://gitlab.com/gitlab-org/gitlab/blob/master/doc/user/markdown.md#multiline-blockquote).
+If this section is not rendered correctly, [view it in GitLab](https://gitlab.com/gitlab-org/gitlab/blob/master/doc/user/markdown.md#multiline-blockquote).
 
-GFM extends the standard Markdown standard by also supporting multi-line blockquotes
+GFM extends the standard Markdown by also supporting multi-line blockquotes
 fenced by `>>>`:
 
 ```markdown
@@ -683,7 +713,7 @@ Tildes are OK too.
 
 #### Colored code and syntax highlighting
 
-> If this is not rendered correctly, [view it in GitLab itself](https://gitlab.com/gitlab-org/gitlab/blob/master/doc/user/markdown.md#colored-code-and-syntax-highlighting).
+If this section is not rendered correctly, [view it in GitLab](https://gitlab.com/gitlab-org/gitlab/blob/master/doc/user/markdown.md#colored-code-and-syntax-highlighting).
 
 GitLab uses the [Rouge Ruby library](http://rouge.jneen.net/) for more colorful syntax
 highlighting in code blocks. For a list of supported languages visit the
@@ -776,7 +806,7 @@ Strikethrough is not part of the core Markdown standard, but is part of GFM.
 
 #### Multiple underscores in words and mid-word emphasis
 
-> If this is not rendered correctly, [view it in GitLab itself](https://gitlab.com/gitlab-org/gitlab/blob/master/doc/user/markdown.md#multiple-underscores-in-words).
+If this section is not rendered correctly, [view it in GitLab](https://gitlab.com/gitlab-org/gitlab/blob/master/doc/user/markdown.md#multiple-underscores-in-words).
 
 It's not usually useful to italicize just _part_ of a word, especially when you're
 dealing with code and names that often appear with multiple underscores. As a result,
@@ -968,7 +998,7 @@ Do not change to a reference style link.
 
 #### Videos
 
-> If this is not rendered correctly, [view it in GitLab itself](https://gitlab.com/gitlab-org/gitlab/blob/master/doc/user/markdown.md#videos).
+If this section is not rendered correctly, [view it in GitLab](https://gitlab.com/gitlab-org/gitlab/blob/master/doc/user/markdown.md#videos).
 
 Image tags that link to files with a video extension are automatically converted to
 a video player. The valid video extensions are `.mp4`, `.m4v`, `.mov`, `.webm`, and `.ogv`:
@@ -985,7 +1015,7 @@ Here's a sample video:
 
 #### Audio
 
-> If this is not rendered correctly, [view it in GitLab itself](https://gitlab.com/gitlab-org/gitlab/blob/master/doc/user/markdown.md#audio).
+If this section is not rendered correctly, [view it in GitLab](https://gitlab.com/gitlab-org/gitlab/blob/master/doc/user/markdown.md#audio).
 
 Similar to videos, link tags for files with an audio extension are automatically converted to
 an audio player. The valid audio extensions are `.mp3`, `.oga`, `.ogg`, `.spx`, and `.wav`:
@@ -1002,7 +1032,7 @@ Here's a sample audio clip:
 
 ### Inline HTML
 
-> To see the Markdown rendered within HTML in the second example, [view it in GitLab itself](https://gitlab.com/gitlab-org/gitlab/blob/master/doc/user/markdown.md#inline-html).
+To see the Markdown rendered within HTML in the second example, [view it in GitLab](https://gitlab.com/gitlab-org/gitlab/blob/master/doc/user/markdown.md#inline-html).
 
 You can also use raw HTML in your Markdown, and it usually works pretty well.
 
@@ -1066,7 +1096,7 @@ Markdown is fine in GitLab.
 
 #### Details and summary
 
-> To see the Markdown rendered within HTML in the second example, [view it in GitLab itself](https://gitlab.com/gitlab-org/gitlab/blob/master/doc/user/markdown.md#details-and-summary).
+To see the Markdown rendered within HTML in the second example, [view it in GitLab](https://gitlab.com/gitlab-org/gitlab/blob/master/doc/user/markdown.md#details-and-summary).
 
 Content can be collapsed using HTML's [`<details>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/details)
 and [`<summary>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/summary)
@@ -1100,7 +1130,7 @@ These details <em>remain</em> <strong>hidden</strong> until expanded.
 
 Markdown inside these tags is supported as well.
 
-NOTE: **Note:**
+TIP: **Tip:**
 If your Markdown isn't rendering correctly, try adding
 `{::options parse_block_html="true" /}` to the top of the page, and add
 `markdown="span"` to the opening summary tag like this: `<summary markdown="span">`.
@@ -1415,24 +1445,20 @@ Example:
 
 ```markdown
 | header 1 | header 2 | header 3 |
-| ---      |  ------  |---------:|
+| ---      |  ------  |----------|
 | cell 1   | cell 2   | cell 3   |
 | cell 4 | cell 5 is longer | cell 6 is much longer than the others, but that's ok. It eventually wraps the text when the cell is too large for the display size. |
-| cell 7   |          | cell <br> 9 |
+| cell 7   |          | cell 9   |
 ```
 
 | header 1 | header 2 | header 3 |
-| ---      |  ------  |---------:|
+| ---      |  ------  |----------|
 | cell 1   | cell 2   | cell 3   |
-| cell 4 | cell 5 is longer | cell 6 is much longer than the others, but that's okay. It eventually wraps the text when the cell is too large for the display size. |
-| cell 7   |          | cell <br> 9 |
+| cell 4 | cell 5 is longer | cell 6 is much longer than the others, but that's ok. It eventually wraps the text when the cell is too large for the display size. |
+| cell 7   |          | cell 9   |
 
 Additionally, you can choose the alignment of text within columns by adding colons (`:`)
-to the sides of the "dash" lines in the second row. This affects every cell in the column.
-
-NOTE: **Note:**
-[Within GitLab itself](https://gitlab.com/gitlab-org/gitlab/blob/master/doc/user/markdown.md#tables),
-the headers are always left-aligned in Chrome and Firefox, and centered in Safari.
+to the sides of the "dash" lines in the second row. This affects every cell in the column:
 
 ```markdown
 | Left Aligned | Centered | Right Aligned | Left Aligned | Centered | Right Aligned |
@@ -1445,6 +1471,34 @@ the headers are always left-aligned in Chrome and Firefox, and centered in Safar
 | :---         | :---:    | ---:          | :----------- | :------: | ------------: |
 | Cell 1       | Cell 2   | Cell 3        | Cell 4       | Cell 5   | Cell 6        |
 | Cell 7       | Cell 8   | Cell 9        | Cell 10      | Cell 11  | Cell 12       |
+
+[Within GitLab itself](https://gitlab.com/gitlab-org/gitlab/blob/master/doc/user/markdown.md#tables),
+the headers are always left-aligned in Chrome and Firefox, and centered in Safari.
+
+You can use HTML formatting to adjust the rendering of tables. For example, you can
+use `<br>` tags to force a cell to have multiple lines:
+
+```markdown
+| Name | Details |
+|------|---------|
+| Item1 | This is on one line |
+| Item2 | This item has:<br>- Multiple items<br>- That we want listed separately |
+```
+
+| Name | Details |
+|------|---------|
+| Item1 | This is on one line |
+| Item2 | This item has:<br>- Multiple items<br>- That we want listed separately |
+
+You can use HTML formatting within GitLab itself to add [task lists](#task-lists) with checkboxes,
+but they do not render properly on `docs.gitlab.com`:
+
+```markdown
+| header 1 | header 2 |
+|----------|----------|
+| cell 1   | cell 2   |
+| cell 3   | <ul><li> - [ ] Task one </li><li> - [ ] Task two </li></ul> |
+```
 
 #### Copy from spreadsheet and paste in Markdown
 
@@ -1467,5 +1521,5 @@ entry and paste the spreadsheet:
 - This document leveraged heavily from the [Markdown-Cheatsheet](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet).
 - The original [Markdown Syntax Guide](https://daringfireball.net/projects/markdown/syntax)
   at Daring Fireball is an excellent resource for a detailed explanation of standard Markdown.
-- The detailed specification for CommonMark can be found in the [CommonMark Spec](https://spec.commonmark.org/current/)
-- The [CommonMark Dingus](http://try.commonmark.org) is a handy tool for testing CommonMark syntax.
+- You can find the detailed specification for CommonMark in the [CommonMark Spec](https://spec.commonmark.org/current/).
+- The [CommonMark Dingus](https://spec.commonmark.org/dingus/) is a handy tool for testing CommonMark syntax.

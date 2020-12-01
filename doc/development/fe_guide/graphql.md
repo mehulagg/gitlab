@@ -1,3 +1,10 @@
+---
+type: reference, dev
+stage: none
+group: Development
+info: "See the Technical Writers assigned to Development Guidelines: https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments-to-development-guidelines"
+---
+
 # GraphQL
 
 ## Getting Started
@@ -31,6 +38,9 @@ If you are using GraphQL within a Vue application, the [Usage in Vue](#usage-in-
 can help you learn how to integrate Vue Apollo.
 
 For other use cases, check out the [Usage outside of Vue](#usage-outside-of-vue) section.
+
+We use [Immer](https://immerjs.github.io/immer/docs/introduction) for immutable cache updates;
+see [Immutability and cache updates](#immutability-and-cache-updates) for more information.
 
 ### Tooling
 
@@ -130,6 +140,56 @@ fragment DesignItem on Design {
 
 More about fragments:
 [GraphQL Docs](https://graphql.org/learn/queries/#fragments)
+
+## Global IDs
+
+GitLab's GraphQL API expresses `id` fields as Global IDs rather than the PostgreSQL
+primary key `id`. Global ID is [a convention](https://graphql.org/learn/global-object-identification/)
+used for caching and fetching in client-side libraries.
+
+To convert a Global ID to the primary key `id`, you can use `getIdFromGraphQLId`:
+
+```javascript
+import { getIdFromGraphQLId } from '~/graphql_shared/utils';
+
+const primaryKeyId = getIdFromGraphQLId(data.id);
+```
+
+## Immutability and cache updates
+
+From Apollo version 3.0.0 all the cache updates need to be immutable; it needs to be replaced entirely
+with a **new and updated** object.
+
+To facilitate the process of updating the cache and returning the new object we use the library [Immer](https://immerjs.github.io/immer/docs/introduction).
+When possible, follow these conventions:
+
+- The updated cache is named `data`.
+- The original cache data is named `sourceData`.
+
+A typical update process looks like this:
+
+```javascript
+...
+const sourceData = client.readQuery({ query });
+
+const data = produce(sourceData, draftState => {
+  draftState.commits.push(newCommit);
+});
+
+client.writeQuery({
+  query,
+  data,
+});
+...
+```
+
+As shown in the code example by using `produce`, we can perform any kind of direct manipulation of the
+`draftState`. Besides, `immer` guarantees that a new state which includes the changes to `draftState` will be generated.
+
+Finally, to verify whether the immutable cache update is working properly, we need to change
+`assumeImmutableResults` to `true` in the `default client config` (see [Apollo Client](#apollo-client) for more info).
+
+If everything is working properly `assumeImmutableResults` should remain set to `true`.
 
 ## Usage in Vue
 
@@ -248,7 +308,7 @@ const resolvers = {
 export default resolvers;
 ```
 
-We need to pass resolvers object to our existing Apollo Client:
+We need to pass a resolvers object to our existing Apollo Client:
 
 ```javascript
 // graphql.js
@@ -259,13 +319,13 @@ import resolvers from './graphql/resolvers';
 const defaultClient = createDefaultClient(resolvers);
 ```
 
-Now every single time on attempt to fetch a version, our client will fetch `id` and `sha` from the remote API endpoint and will assign our hardcoded values to `author` and `createdAt` version properties. With this data, frontend developers are able to work on UI part without being blocked by backend. When actual response is added to the API, a custom local resolver can be removed fast and the only change to query/fragment is `@client` directive removal.
+For each attempt to fetch a version, our client will fetch `id` and `sha` from the remote API endpoint and will assign our hardcoded values to the `author` and `createdAt` version properties. With this data, frontend developers are able to work on their UI without being blocked by backend. When the actual response is added to the API, our custom local resolver can be removed and the only change to the query/fragment is to remove the `@client` directive.
 
 Read more about local state management with Apollo in the [Vue Apollo documentation](https://vue-apollo.netlify.app/guide/local-state.html#local-state).
 
 ### Using with Vuex
 
-When Apollo Client is used within Vuex and fetched data is stored in the Vuex store, there is no need in keeping Apollo Client cache enabled. Otherwise we would have data from the API stored in two places - Vuex store and Apollo Client cache. More to say, with Apollo's default settings, a subsequent fetch from the GraphQL API could result in fetching data from Apollo cache (in the case where we have the same query and variables). To prevent this behavior, we need to disable Apollo Client cache passing a valid `fetchPolicy` option to its constructor:
+When Apollo Client is used within Vuex and fetched data is stored in the Vuex store, there is no need to keep Apollo Client cache enabled. Otherwise we would have data from the API stored in two places - Vuex store and Apollo Client cache. With Apollo's default settings, a subsequent fetch from the GraphQL API could result in fetching data from Apollo cache (in the case where we have the same query and variables). To prevent this behavior, we need to disable Apollo Client cache by passing a valid `fetchPolicy` option to its constructor:
 
 ```javascript
 import fetchPolicies from '~/graphql_shared/fetch_policy_constants';
@@ -379,9 +439,11 @@ parameter, indicating a starting or ending point of our pagination. They should 
 followed with `first` or `last` parameter respectively to indicate _how many_ items
 we want to fetch after or before a given endpoint.
 
-For example, here we're fetching 10 designs after a cursor:
+For example, here we're fetching 10 designs after a cursor (let us call this `projectQuery`):
 
 ```javascript
+#import "~/graphql_shared/fragments/pageInfo.fragment.graphql"
+
 query {
   project(fullPath: "root/my-project") {
     id
@@ -393,6 +455,9 @@ query {
               id
             }
           }
+          pageInfo {
+            ...PageInfo
+          }
         }
       }
     }
@@ -400,7 +465,12 @@ query {
 }
 ```
 
+Note that we are using the [`pageInfo.fragment.graphql`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/assets/javascripts/graphql_shared/fragments/pageInfo.fragment.graphql) to populate the `pageInfo` information.
+
 #### Using `fetchMore` method in components
+
+This approach makes sense to use with user-handled pagination (e.g. when the scrolls to fetch more data or explicitly clicks a "Next Page"-button).
+When we need to fetch all the data initially, it is recommended to use [a (non-smart) query, instead](#using-a-recursive-query-in-components).
 
 When making an initial fetch, we usually want to start a pagination from the beginning.
 In this case, we can either:
@@ -408,13 +478,18 @@ In this case, we can either:
 - Skip passing a cursor.
 - Pass `null` explicitly to `after`.
 
-After data is fetched, we should save a `pageInfo` object. Let's assume we're storing
-it to Vue component `data`:
+After data is fetched, we can use the `update`-hook as an opportunity [to customize
+the data that is set in the Vue component property](https://apollo.vuejs.org/api/smart-query.html#options), getting a hold of the `pageInfo` object among other data.
+
+In the `result`-hook, we can inspect the `pageInfo` object to see if we need to fetch
+the next page. Note that we also keep a `requestCount` to ensure that the application
+does not keep requesting the next page, indefinitely:
 
 ```javascript
 data() {
   return {
     pageInfo: null,
+    requestCount: 0,
   }
 },
 apollo: {
@@ -422,13 +497,29 @@ apollo: {
     query: projectQuery,
     variables() {
       return {
-        // rest of design variables
-        ...
+        // ... The rest of the design variables
         first: 10,
       };
     },
-    result(res) {
-      this.pageInfo = res.data?.project?.issue?.designCollection?.designs?.pageInfo;
+    update(data) {
+      const { id = null, issue = {} } = data.project || {};
+      const { edges = [], pageInfo } = issue.designCollection?.designs || {};
+
+      return {
+        id,
+        edges,
+        pageInfo,
+      };
+    },
+    result() {
+      const { pageInfo } = this.designs;
+
+      // Increment the request count with each new result
+      this.requestCount += 1;
+      // Only fetch next page if we have more requests and there is a next page to fetch
+      if (this.requestCount < MAX_REQUEST_COUNT && pageInfo?.hasNextPage) {
+        this.fetchNextPage(pageInfo.endCursor);
+      }
     },
   },
 },
@@ -437,34 +528,102 @@ apollo: {
 When we want to move to the next page, we use an Apollo `fetchMore` method, passing a
 new cursor (and, optionally, new variables) there. In the `updateQuery` hook, we have
 to return a result we want to see in the Apollo cache after fetching the next page.
+[`Immer`s `produce`](#immutability-and-cache-updates)-function can help us with the immutability here:
 
 ```javascript
-fetchNextPage() {
-  // as a first step, we're checking if we have more pages to move forward
-  if (this.pageInfo?.hasNextPage) {
-    this.$apollo.queries.designs.fetchMore({
-      variables: {
-        // rest of design variables
-        ...
-        first: 10,
-        after: this.pageInfo?.endCursor,
-      },
-      updateQuery(previousResult, { fetchMoreResult }) {
-        // here we can implement the logic of adding new designs to fetched one (for example, if we use infinite scroll)
-        // or replacing old result with the new one if we use numbered pages
+fetchNextPage(endCursor) {
+  this.$apollo.queries.designs.fetchMore({
+    variables: {
+      // ... The rest of the design variables
+      first: 10,
+      after: endCursor,
+    },
+    updateQuery(previousResult, { fetchMoreResult }) {
+      // Here we can implement the logic of adding new designs to existing ones
+      // (for example, if we use infinite scroll) or replacing old result
+      // with the new one if we use numbered pages
 
-        const newDesigns = fetchMoreResult.project.issue.designCollection.designs;
-        previousResult.project.issue.designCollection.designs.push(...newDesigns)
+      const { designs: previousDesigns } = previousResult.project.issue.designCollection;
+      const { designs: newDesigns } = fetchMoreResult.project.issue.designCollection
 
-        return previousResult;
-      },
-    });
-  }
+      return produce(previousResult, draftData => {
+        // `produce` gives us a working copy, `draftData`, that we can modify
+        // as we please and from it will produce the next immutable result for us
+        draftData.project.issue.designCollection.designs = [...previousDesigns, ...newDesigns];
+      });
+    },
+  });
 }
 ```
 
-Please note we don't have to save `pageInfo` one more time; `fetchMore` triggers a query
-`result` hook as well.
+#### Using a recursive query in components
+
+When it is necessary to fetch all paginated data initially an Apollo query can do the trick for us.
+If we need to fetch the next page based on user interactions, it is recommend to use a [`smartQuery`](https://apollo.vuejs.org/api/smart-query.html) along with the [`fetchMore`-hook](#using-fetchmore-method-in-components).
+
+When the query resolves we can update the component data and inspect the `pageInfo` object
+to see if we need to fetch the next page, i.e. call the method recursively.
+
+Note that we also keep a `requestCount` to ensure that the application does not keep
+requesting the next page, indefinitely.
+
+```javascript
+data() {
+  return {
+    requestCount: 0,
+    isLoading: false,
+    designs: {
+      edges: [],
+      pageInfo: null,
+    },
+  }
+},
+created() {
+  this.fetchDesigns();
+},
+methods: {
+  handleError(error) {
+    this.isLoading = false;
+    // Do something with `error`
+  },
+  fetchDesigns(endCursor) {
+    this.isLoading = true;
+
+    return this.$apollo
+      .query({
+        query: projectQuery,
+        variables() {
+          return {
+            // ... The rest of the design variables
+            first: 10,
+            endCursor,
+          };
+        },
+      })
+      .then(({ data }) => {
+        const { id = null, issue = {} } = data.project || {};
+        const { edges = [], pageInfo } = issue.designCollection?.designs || {};
+
+        // Update data
+        this.designs = {
+          id,
+          edges: [...this.designs.edges, ...edges];
+          pageInfo: pageInfo;
+        };
+
+        // Increment the request count with each new result
+        this.requestCount += 1;
+        // Only fetch next page if we have more requests and there is a next page to fetch
+        if (this.requestCount < MAX_REQUEST_COUNT && pageInfo?.hasNextPage) {
+          this.fetchDesigns(pageInfo.endCursor);
+        } else {
+          this.isLoading = false;
+        }
+      })
+      .catch(this.handleError);
+  },
+},
+```
 
 ### Managing performance
 
@@ -604,40 +763,53 @@ it('calls mutation on submitting form ', () => {
 
 ### Testing with mocked Apollo Client
 
-To test the logic of Apollo cache updates, we might want to mock an Apollo Client in our unit tests. To separate tests with mocked client from 'usual' unit tests, it's recommended to create an additional component factory. This way we only create Apollo Client instance when it's necessary:
+To test the logic of Apollo cache updates, we might want to mock an Apollo Client in our unit tests. We use [`mock-apollo-client`](https://www.npmjs.com/package/mock-apollo-client) library to mock Apollo client and [`createMockApollo` helper](https://gitlab.com/gitlab-org/gitlab/-/blob/master/spec/frontend/helpers/mock_apollo_helper.js) we created on top of it.
 
-```javascript
-function createComponent() {...}
+To separate tests with mocked client from 'usual' unit tests, it's recommended to create an additional factory and pass the created `mockApollo` as an option to the `createComponent`-factory. This way we only create Apollo Client instance when it's necessary.
 
-function createComponentWithApollo() {...}
-```
-
-We use [`mock-apollo-client`](https://www.npmjs.com/package/mock-apollo-client) library to mock Apollo client in tests.
-
-```javascript
-import { createMockClient } from 'mock-apollo-client';
-```
-
-Then we need to inject `VueApollo` to Vue local instance (`localVue.use()` can also be called within `createComponentWithApollo()`)
+We need to inject `VueApollo` to the Vue local instance and, likewise, it is recommended to call `localVue.use()` within `createMockApolloProvider()` to only load it when it is necessary.
 
 ```javascript
 import VueApollo from 'vue-apollo';
 import { createLocalVue } from '@vue/test-utils';
 
 const localVue = createLocalVue();
-localVue.use(VueApollo);
+
+function createMockApolloProvider() {
+  localVue.use(VueApollo);
+
+  return createMockApollo(requestHandlers);
+}
+
+function createComponent(options = {}) {
+  const { mockApollo } = options;
+  ...
+  return shallowMount(..., {
+    localVue,
+    apolloProvider: mockApollo,
+    ...
+  });
+}
 ```
 
-After this, on the global `describe`, we should create a variable for `fakeApollo`:
+After this, you can control whether you need a variable for `mockApollo` and assign it in the appropriate `describe`-scope:
 
 ```javascript
-describe('Some component with Apollo mock', () => {
+describe('Some component', () => {
   let wrapper;
-  let fakeApollo
-})
+
+  describe('with Apollo mock', () => {
+    let mockApollo;
+
+    beforeEach(() => {
+      mockApollo = createMockApolloProvider();
+      wrapper = createComponent({ mockApollo });
+    });
+  });
+});
 ```
 
-Within component factory, we need to define an array of _handlers_ for every query or mutation:
+Within `createMockApolloProvider`-factory, we need to define an array of _handlers_ for every query or mutation:
 
 ```javascript
 import getDesignListQuery from '~/design_management/graphql/queries/get_design_list.query.graphql';
@@ -646,13 +818,16 @@ import moveDesignMutation from '~/design_management/graphql/mutations/move_desig
 
 describe('Some component with Apollo mock', () => {
   let wrapper;
-  let fakeApollo;
+  let mockApollo;
 
-  function createComponentWithApollo() {
+  function createMockApolloProvider() {
+    Vue.use(VueApollo);
+
     const requestHandlers = [
       [getDesignListQuery, jest.fn().mockResolvedValue(designListQueryResponse)],
       [permissionsQuery, jest.fn().mockResolvedValue(permissionsQueryResponse)],
     ];
+    ...
   }
 })
 ```
@@ -662,39 +837,56 @@ After this, we need to create a mock Apollo Client instance using a helper:
 ```javascript
 import createMockApollo from 'jest/helpers/mock_apollo_helper';
 
-describe('Some component with Apollo mock', () => {
+describe('Some component', () => {
   let wrapper;
-  let fakeApollo;
 
-  function createComponentWithApollo() {
+  function createMockApolloProvider() {
+    Vue.use(VueApollo);
+
     const requestHandlers = [
       [getDesignListQuery, jest.fn().mockResolvedValue(designListQueryResponse)],
       [permissionsQuery, jest.fn().mockResolvedValue(permissionsQueryResponse)],
     ];
 
-    fakeApollo = createMockApollo(requestHandlers);
-    wrapper = shallowMount(Index, {
+    return createMockApollo(requestHandlers);
+  }
+
+  function createComponent(options = {}) {
+    const { mockApollo } = options;
+
+    return shallowMount(Index, {
       localVue,
-      apolloProvider: fakeApollo,
+      apolloProvider: mockApollo,
     });
   }
-})
+
+  describe('with Apollo mock', () => {
+    let mockApollo;
+
+    beforeEach(() => {
+      mockApollo = createMockApolloProvider();
+      wrapper = createComponent({ mockApollo });
+    });
+  });
+});
 ```
 
-NOTE: **Note:**
-When mocking resolved values, make sure the structure of the response is the same as actual API response: i.e. root property should be `data` for example
+When mocking resolved values, ensure the structure of the response is the same
+as the actual API response. For example, root property should be `data`.
 
 When testing queries, please keep in mind they are promises, so they need to be _resolved_ to render a result. Without resolving, we can check the `loading` state of the query:
 
 ```javascript
 it('renders a loading state', () => {
-  createComponentWithApollo();
+  const mockApollo = createMockApolloProvider();
+  const wrapper = createComponent({ mockApollo });
 
   expect(wrapper.find(LoadingSpinner).exists()).toBe(true)
 });
 
 it('renders designs list', async () => {
-  createComponentWithApollo();
+  const mockApollo = createMockApolloProvider();
+  const wrapper = createComponent({ mockApollo });
 
   jest.runOnlyPendingTimers();
   await wrapper.vm.$nextTick();
@@ -706,7 +898,7 @@ it('renders designs list', async () => {
 If we need to test a query error, we need to mock a rejected value as request handler:
 
 ```javascript
-function createComponentWithApollo() {
+function createMockApolloProvider() {
   ...
   const requestHandlers = [
     [getDesignListQuery, jest.fn().mockRejectedValue(new Error('GraphQL error')],
@@ -716,7 +908,7 @@ function createComponentWithApollo() {
 ...
 
 it('renders error if query fails', async () => {
-  createComponent()
+  const wrapper = createComponent();
 
   jest.runOnlyPendingTimers();
   await wrapper.vm.$nextTick();
@@ -730,9 +922,11 @@ Request handlers can also be passed to component factory as a parameter.
 Mutations could be tested the same way with a few additional `nextTick`s to get the updated result:
 
 ```javascript
-function createComponentWithApollo({
+function createMockApolloProvider({
   moveHandler = jest.fn().mockResolvedValue(moveDesignMutationResponse),
 }) {
+  Vue.use(VueApollo);
+
   moveDesignHandler = moveHandler;
 
   const requestHandlers = [
@@ -741,15 +935,21 @@ function createComponentWithApollo({
     [moveDesignMutation, moveDesignHandler],
   ];
 
-  fakeApollo = createMockApollo(requestHandlers);
-  wrapper = shallowMount(Index, {
+  return createMockApollo(requestHandlers);
+}
+
+function createComponent(options = {}) {
+  const { mockApollo } = options;
+
+  return shallowMount(Index, {
     localVue,
-    apolloProvider: fakeApollo,
+    apolloProvider: mockApollo,
   });
 }
 ...
 it('calls a mutation with correct parameters and reorders designs', async () => {
-  createComponentWithApollo({});
+  const mockApollo = createMockApolloProvider({});
+  const wrapper = createComponent({ mockApollo });
 
   wrapper.find(VueDraggable).vm.$emit('change', {
     moved: {
@@ -767,6 +967,234 @@ it('calls a mutation with correct parameters and reorders designs', async () => 
       .at(0)
       .props('id'),
   ).toBe('2');
+});
+```
+
+#### Testing `@client` queries
+
+##### Using mock resolvers
+
+If your application contains `@client` queries, you get
+the following Apollo Client warning when passing only handlers:
+
+```shell
+Unexpected call of console.warn() with:
+
+Warning: mock-apollo-client - The query is entirely client-side (using @client directives) and resolvers have been configured. The request handler will not be called.
+```
+
+To fix this you should define mock `resolvers` instead of
+mock `handlers`. For example, given the following `@client` query:
+
+```graphql
+query getBlobContent($path: String, $ref: String!) {
+  blobContent(path: $path, ref: $ref) @client {
+    rawData
+  }
+}
+```
+
+And its actual client-side resolvers:
+
+```javascript
+import Api from '~/api';
+
+export const resolvers = {
+  Query: {
+    blobContent(_, { path, ref }) {
+      return {
+        __typename: 'BlobContent',
+        rawData: Api.getRawFile(path, { ref }).then(({ data }) => {
+          return data;
+        }),
+      };
+    },
+  },
+};
+
+export default resolvers;
+```
+
+We can use a **mock resolver** that returns data with the
+same shape, while mock the result with a mock function:
+
+```javascript
+let mockApollo;
+let mockBlobContentData; // mock function, jest.fn();
+
+const mockResolvers = {
+  Query: {
+    blobContent() {
+      return {
+        __typename: 'BlobContent',
+        rawData: mockBlobContentData(), // the mock function can resolve mock data
+      };
+    },
+  },
+};
+
+const createComponentWithApollo = ({ props = {} } = {}) => {
+  mockApollo = createMockApollo([], mockResolvers); // resolvers are the second parameter
+
+  wrapper = shallowMount(MyComponent, {
+    localVue,
+    propsData: {},
+    apolloProvider: mockApollo,
+    // ...
+  })
+};
+
+```
+
+After which, you can resolve or reject the value needed.
+
+```javascript
+beforeEach(() => {
+  mockBlobContentData = jest.fn();
+});
+
+it('shows data', async() => {
+  mockBlobContentData.mockResolvedValue(data); // you may resolve or reject to mock the result
+
+  createComponentWithApollo();
+
+  await waitForPromises(); // wait on the resolver mock to execute
+
+  expect(findContent().text()).toBe(mockCiYml);
+});
+```
+
+##### Using `cache.writeQuery`
+
+Sometimes we want to test a `result` hook of the local query. In order to have it triggered, we need to populate a cache with correct data to be fetched with this query:
+
+```javascript
+query fetchLocalUser {
+  fetchLocalUser @client {
+    name
+  }
+}
+```
+
+```javascript
+import fetchLocalUserQuery from '~/design_management/graphql/queries/fetch_local_user.query.graphql';
+
+function createMockApolloProvider() {
+  Vue.use(VueApollo);
+
+  const requestHandlers = [
+    [getDesignListQuery, jest.fn().mockResolvedValue(designListQueryResponse)],
+    [permissionsQuery, jest.fn().mockResolvedValue(permissionsQueryResponse)],
+  ];
+
+  const mockApollo = createMockApollo(requestHandlers, {});
+  mockApollo.clients.defaultClient.cache.writeQuery({
+    query: fetchLocalUserQuery,
+    data: {
+      fetchLocalUser: {
+        __typename: 'User',
+        name: 'Test',
+      },
+    },
+  });
+
+  return mockApollo;
+}
+
+function createComponent(options = {}) {
+  const { mockApollo } = options;
+
+  return shallowMount(Index, {
+    localVue,
+    apolloProvider: mockApollo,
+  });
+}
+```
+
+Sometimes it is necessary to control what the local resolver returns and inspect how it is called by the component. This can be done by mocking your local resolver:
+
+```javascript
+import fetchLocalUserQuery from '~/design_management/graphql/queries/fetch_local_user.query.graphql';
+
+function createMockApolloProvider(options = {}) {
+  Vue.use(VueApollo);
+  const { fetchLocalUserSpy } = options;
+
+  const mockApollo = createMockApollo([], {
+    Query: {
+      fetchLocalUser: fetchLocalUserSpy,
+    },
+  });
+
+  // Necessary for local resolvers to be activated
+  mockApollo.clients.defaultClient.cache.writeQuery({
+    query: fetchLocalUserQuery,
+    data: {},
+  });
+
+  return mockApollo;
+}
+```
+
+In the test you can then control what the spy is supposed to do and inspect the component after the request have returned:
+
+```javascript
+describe('My Index test with `createMockApollo`', () => {
+  let wrapper;
+  let fetchLocalUserSpy;
+
+  afterEach(() => {
+    wrapper.destroy();
+    wrapper = null;
+    fetchLocalUserSpy = null;
+  });
+
+  describe('when loading', () => {
+    beforeEach(() => {
+      const mockApollo = createMockApolloProvider();
+      wrapper = createComponent({ mockApollo });
+    });
+
+    it('displays the loader', () => {
+      // Assess that the loader is present
+    });
+  });
+
+  describe('with data', () => {
+    beforeEach(async () => {
+      fetchLocalUserSpy = jest.fn().mockResolvedValue(localUserQueryResponse);
+      const mockApollo = createMockApolloProvider(fetchLocalUserSpy);
+      wrapper = createComponent({ mockApollo });
+      await waitForPromises();
+    });
+
+    it('should fetch data once', () => {
+      expect(fetchLocalUserSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('displays data', () => {
+      // Assess that data is present
+    });
+  });
+
+  describe('with error', () => {
+    const error = 'Error!';
+
+    beforeEach(async () => {
+      fetchLocalUserSpy = jest.fn().mockRejectedValueOnce(error);
+      const mockApollo = createMockApolloProvider(fetchLocalUserSpy);
+      wrapper = createComponent({ mockApollo });
+      await waitForPromises();
+    });
+
+    it('should fetch data once', () => {
+      expect(fetchLocalUserSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('displays the error', () => {
+      // Assess that the error is displayed
+    });
+  });
 });
 ```
 
@@ -850,3 +1278,99 @@ const defaultClient = createDefaultClient(
   },
 );
 ```
+
+## Making initial queries early with GraphQL startup calls
+
+To improve performance, sometimes we want to make initial GraphQL queries early. In order to do this, we can add them to **startup calls** with the following steps:
+
+- Move all the queries you need initially in your application to `app/graphql/queries`;
+- Add `__typename` property to every nested query level:
+
+  ```javascript
+  query getPermissions($projectPath: ID!) {
+    project(fullPath: $projectPath) {
+      __typename
+      userPermissions {
+        __typename
+        pushCode
+        forkProject
+        createMergeRequestIn
+      }
+    }
+  }
+  ```
+
+- If queries contain fragments, you need to move fragments to the query file directly instead of importing them:
+
+  ```javascript
+  fragment PageInfo on PageInfo {
+    __typename
+    hasNextPage
+    hasPreviousPage
+    startCursor
+    endCursor
+  }
+
+  query getFiles(
+    $projectPath: ID!
+    $path: String
+    $ref: String!
+  ) {
+    project(fullPath: $projectPath) {
+      __typename
+      repository {
+        __typename
+        tree(path: $path, ref: $ref) {
+          __typename
+            pageInfo {
+              ...PageInfo
+            }
+          }
+        }
+      }
+    }
+  }
+  ```
+
+- If the fragment is used only once, we can also remove the fragment altogether:
+
+  ```javascript
+  query getFiles(
+    $projectPath: ID!
+    $path: String
+    $ref: String!
+  ) {
+    project(fullPath: $projectPath) {
+      __typename
+      repository {
+        __typename
+        tree(path: $path, ref: $ref) {
+          __typename
+            pageInfo {
+              __typename
+              hasNextPage
+              hasPreviousPage
+              startCursor
+              endCursor
+            }
+          }
+        }
+      }
+    }
+  }
+  ```
+
+- Add startup call(s) with correct variables to the HAML file that serves as a view
+for your application. To add GraphQL startup calls, we use
+`add_page_startup_graphql_call` helper where the first parameter is a path to the
+query, the second one is an object containing query variables. Path to the query is
+relative to `app/graphql/queries` folder: for example, if we need a
+`app/graphql/queries/repository/files.query.graphql` query, the path will be
+`repository/files`.
+
+  ```yaml
+  - current_route_path = request.fullpath.match(/-\/tree\/[^\/]+\/(.+$)/).to_a[1]
+  - add_page_startup_graphql_call('repository/path_last_commit', { projectPath: @project.full_path, ref: current_ref, path: current_route_path || "" })
+  - add_page_startup_graphql_call('repository/permissions', { projectPath: @project.full_path })
+  - add_page_startup_graphql_call('repository/files', { nextPageCursor: "", pageSize: 100, projectPath: @project.full_path, ref: current_ref, path: current_route_path || "/"})
+  ```

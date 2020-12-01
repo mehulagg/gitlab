@@ -8,6 +8,8 @@ class Groups::ScimOauthController < Groups::ApplicationController
   before_action :check_group_saml_available!
   before_action :check_group_saml_configured
 
+  feature_category :authentication_and_authorization
+
   def show
     scim_token = ScimOauthAccessToken.find_by_group_id(@group.id)
 

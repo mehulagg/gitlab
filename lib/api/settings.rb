@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 
 module API
-  class Settings < Grape::API::Instance
+  class Settings < ::API::Base
     before { authenticated_as_admin! }
+
+    feature_category :not_owned
 
     helpers Helpers::SettingsHelpers
 
@@ -29,7 +31,8 @@ module API
       success Entities::ApplicationSetting
     end
     params do
-      optional :admin_notification_email, type: String, desc: 'Abuse reports will be sent to this address if it is set. Abuse reports are always available in the admin area.'
+      optional :admin_notification_email, type: String, desc: 'Deprecated: Use :abuse_notification_email instead. Abuse reports will be sent to this address if it is set. Abuse reports are always available in the admin area.'
+      optional :abuse_notification_email, type: String, desc: 'Abuse reports will be sent to this address if it is set. Abuse reports are always available in the admin area.'
       optional :after_sign_up_text, type: String, desc: 'Text shown after sign up'
       optional :after_sign_out_path, type: String, desc: 'We will redirect users to this page after they sign out'
       optional :akismet_enabled, type: Boolean, desc: 'Helps prevent bots from creating issues'
@@ -50,9 +53,9 @@ module API
       optional :default_projects_limit, type: Integer, desc: 'The maximum number of personal projects'
       optional :default_snippet_visibility, type: String, values: Gitlab::VisibilityLevel.string_values, desc: 'The default snippet visibility'
       optional :disabled_oauth_sign_in_sources, type: Array[String], coerce_with: Validations::Types::CommaSeparatedToArray.coerce, desc: 'Disable certain OAuth sign-in sources'
-      optional :domain_blacklist_enabled, type: Boolean, desc: 'Enable domain blacklist for sign ups'
-      optional :domain_blacklist, type: Array[String], coerce_with: Validations::Types::CommaSeparatedToArray.coerce, desc: 'Users with e-mail addresses that match these domain(s) will NOT be able to sign-up. Wildcards allowed. Use separate lines for multiple entries. Ex: domain.com, *.domain.com'
-      optional :domain_whitelist, type: Array[String], coerce_with: Validations::Types::CommaSeparatedToArray.coerce, desc: 'ONLY users with e-mail addresses that match these domain(s) will be able to sign-up. Wildcards allowed. Use separate lines for multiple entries. Ex: domain.com, *.domain.com'
+      optional :domain_denylist_enabled, type: Boolean, desc: 'Enable domain denylist for sign ups'
+      optional :domain_denylist, type: Array[String], coerce_with: Validations::Types::CommaSeparatedToArray.coerce, desc: 'Users with e-mail addresses that match these domain(s) will NOT be able to sign-up. Wildcards allowed. Use separate lines for multiple entries. Ex: domain.com, *.domain.com'
+      optional :domain_allowlist, type: Array[String], coerce_with: Validations::Types::CommaSeparatedToArray.coerce, desc: 'ONLY users with e-mail addresses that match these domain(s) will be able to sign-up. Wildcards allowed. Use separate lines for multiple entries. Ex: domain.com, *.domain.com'
       optional :eks_integration_enabled, type: Boolean, desc: 'Enable integration with Amazon EKS'
       given eks_integration_enabled: -> (val) { val } do
         requires :eks_account_id, type: String, desc: 'Amazon account ID for EKS integration'
@@ -61,6 +64,10 @@ module API
       end
       optional :email_author_in_body, type: Boolean, desc: 'Some email servers do not support overriding the email sender name. Enable this option to include the name of the author of the issue, merge request or comment in the email body instead.'
       optional :enabled_git_access_protocol, type: String, values: %w[ssh http nil], desc: 'Allow only the selected protocols to be used for Git access.'
+      optional :gitpod_enabled, type: Boolean, desc: 'Enable Gitpod'
+      given gitpod_enabled: ->(val) { val } do
+        requires :gitpod_url, type: String, desc: 'The configured Gitpod instance URL'
+      end
       optional :gitaly_timeout_default, type: Integer, desc: 'Default Gitaly timeout, in seconds. Set to 0 to disable timeouts.'
       optional :gitaly_timeout_fast, type: Integer, desc: 'Gitaly fast operation timeout, in seconds. Set to 0 to disable timeouts.'
       optional :gitaly_timeout_medium, type: Integer, desc: 'Medium Gitaly timeout, in seconds. Set to 0 to disable timeouts.'
@@ -69,6 +76,7 @@ module API
       optional :gravatar_enabled, type: Boolean, desc: 'Flag indicating if the Gravatar service is enabled'
       optional :help_page_hide_commercial_content, type: Boolean, desc: 'Hide marketing-related entries from help'
       optional :help_page_support_url, type: String, desc: 'Alternate support URL for help page and help dropdown'
+      optional :help_page_documentation_base_url, type: String, desc: 'Alternate documentation pages URL'
       optional :help_page_text, type: String, desc: 'Custom text displayed on the help page'
       optional :home_page_url, type: String, desc: 'We will redirect non-logged in users to this page'
       optional :housekeeping_enabled, type: Boolean, desc: 'Enable automatic repository housekeeping (git repack, git gc)'
@@ -94,6 +102,10 @@ module API
       optional :performance_bar_allowed_group_id, type: String, desc: 'Deprecated: Use :performance_bar_allowed_group_path instead. Path of the group that is allowed to toggle the performance bar.' # support legacy names, can be removed in v6
       optional :performance_bar_allowed_group_path, type: String, desc: 'Path of the group that is allowed to toggle the performance bar.'
       optional :performance_bar_enabled, type: String, desc: 'Deprecated: Pass `performance_bar_allowed_group_path: nil` instead. Allow enabling the performance.' # support legacy names, can be removed in v6
+      optional :kroki_enabled, type: Boolean, desc: 'Enable Kroki'
+      given kroki_enabled: ->(val) { val } do
+        requires :kroki_url, type: String, desc: 'The Kroki server URL'
+      end
       optional :plantuml_enabled, type: Boolean, desc: 'Enable PlantUML'
       given plantuml_enabled: ->(val) { val } do
         requires :plantuml_url, type: String, desc: 'The PlantUML server URL'
@@ -150,6 +162,8 @@ module API
       end
       optional :issues_create_limit, type: Integer, desc: "Maximum number of issue creation requests allowed per minute per user. Set to 0 for unlimited requests per minute."
       optional :raw_blob_request_limit, type: Integer, desc: "Maximum number of requests per minute for each raw path. Set to 0 for unlimited requests per minute."
+      optional :wiki_page_max_content_bytes, type: Integer, desc: "Maximum wiki page content size in bytes"
+      optional :require_admin_approval_after_user_signup, type: Boolean, desc: 'Require explicit admin approval for new signups'
 
       ApplicationSetting::SUPPORTED_KEY_TYPES.each do |type|
         optional :"#{type}_key_restriction",
@@ -187,6 +201,11 @@ module API
       # support legacy names, can be removed in v5
       if attrs.has_key?(:allow_local_requests_from_hooks_and_services)
         attrs[:allow_local_requests_from_web_hooks_and_services] = attrs.delete(:allow_local_requests_from_hooks_and_services)
+      end
+
+      # support legacy names, can be removed in v5
+      if attrs.has_key?(:admin_notification_email)
+        attrs[:abuse_notification_email] = attrs.delete(:admin_notification_email)
       end
 
       # since 13.0 it's not possible to disable hashed storage - support can be removed in 14.0

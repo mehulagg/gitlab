@@ -3,7 +3,7 @@
 require 'securerandom'
 
 module QA
-  RSpec.describe 'Plan' do
+  RSpec.describe 'Plan', :reliable do
     describe 'Group issue boards' do
       before do
         Flow::Login.sign_in

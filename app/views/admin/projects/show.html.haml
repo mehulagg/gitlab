@@ -2,6 +2,7 @@
 - breadcrumb_title @project.full_name
 - page_title @project.full_name, _("Projects")
 - @content_class = "admin-projects"
+- current_user_is_group_owner = @group && @group.has_owner?(current_user)
 
 .js-remove-member-modal
 %h3.page-title
@@ -13,8 +14,9 @@
 - if @project.last_repository_check_failed?
   .row
     .col-md-12
-      .card
-        .card-header.alert.alert-danger
+      .gl-alert.gl-alert-danger.gl-mb-5{ data: { testid: 'last-repository-check-failed-alert' } }
+        = sprite_icon('error', size: 16, css_class: 'gl-icon gl-alert-icon gl-alert-icon-no-title')
+        .gl-alert-body
           - last_check_message = _("Last repository check (%{last_check_timestamp}) failed. See the 'repocheck.log' file for error messages.")
           - last_check_message = last_check_message % { last_check_timestamp: time_ago_with_tooltip(@project.last_repository_check_at) }
           = last_check_message.html_safe
@@ -100,7 +102,7 @@
               = _('Git LFS status:')
             %strong
               = project_lfs_status(@project)
-              = link_to icon('question-circle'), help_page_path('topics/git/lfs/index')
+              = link_to sprite_icon('question-o'), help_page_path('topics/git/lfs/index')
         - else
           %li
             %span.light
@@ -148,7 +150,7 @@
 
           .form-group.row
             .offset-sm-3.col-sm-9
-              = f.submit _('Transfer'), class: 'btn btn-primary'
+              = f.submit _('Transfer'), class: 'gl-button btn btn-primary'
 
     .card.repository-check
       .card-header
@@ -165,10 +167,10 @@
             - else
               = _("This repository was last checked %{last_check_timestamp}. The check passed.") % { last_check_timestamp: @project.last_repository_check_at.to_s(:medium) }
 
-            = link_to icon('question-circle'), help_page_path('administration/repository_checks')
+            = link_to sprite_icon('question-o'), help_page_path('administration/repository_checks')
 
           .form-group
-            = f.submit _('Trigger repository check'), class: 'btn btn-primary'
+            = f.submit _('Trigger repository check'), class: 'gl-button btn btn-primary'
 
   .col-md-6
     - if @group
@@ -182,11 +184,16 @@
               = sprite_icon('pencil-square', css_class: 'gl-icon')
               = _('Manage access')
         %ul.content-list.members-list
-          = render partial: 'shared/members/member', collection: @group_members, as: :member, locals: { show_controls: false }
+          = render partial: 'shared/members/member',
+                   collection: @group_members, as: :member,
+                   locals: { membership_source: @project,
+                             group: @group,
+                             show_controls: false,
+                             current_user_is_group_owner: current_user_is_group_owner }
         .card-footer
           = paginate @group_members, param_name: 'group_members_page', theme: 'gitlab'
 
-    = render 'shared/members/requests', membership_source: @project, requesters: @requesters, force_mobile_view: true
+    = render 'shared/members/requests', membership_source: @project, group: @group, requesters: @requesters, force_mobile_view: true
 
     .card
       .card-header
@@ -198,6 +205,11 @@
             = sprite_icon('pencil-square', css_class: 'gl-icon')
             = _('Manage access')
       %ul.content-list.project_members.members-list
-        = render partial: 'shared/members/member', collection: @project_members, as: :member, locals: { show_controls: false }
+        = render partial: 'shared/members/member',
+                 collection: @project_members, as: :member,
+                 locals: { membership_source: @project,
+                           group: @group,
+                           show_controls: false,
+                           current_user_is_group_owner: current_user_is_group_owner }
       .card-footer
         = paginate @project_members, param_name: 'project_members_page', theme: 'gitlab'

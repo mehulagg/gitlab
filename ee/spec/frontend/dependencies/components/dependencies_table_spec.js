@@ -1,15 +1,10 @@
-import { nextTick } from 'vue';
+import { GlBadge, GlButton, GlLink, GlSkeletonLoader } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
-import {
-  GlBadge,
-  GlButton,
-  GlLink,
-  GlDeprecatedSkeletonLoading as GlSkeletonLoading,
-} from '@gitlab/ui';
-import stubChildren from 'helpers/stub_children';
+import { nextTick } from 'vue';
 import DependenciesTable from 'ee/dependencies/components/dependencies_table.vue';
 import DependencyLicenseLinks from 'ee/dependencies/components/dependency_license_links.vue';
 import DependencyVulnerabilities from 'ee/dependencies/components/dependency_vulnerabilities.vue';
+import stubChildren from 'helpers/stub_children';
 import { makeDependency } from './utils';
 
 describe('DependenciesTable component', () => {
@@ -80,7 +75,7 @@ describe('DependenciesTable component', () => {
     });
 
     it('renders the loading skeleton', () => {
-      expect(wrapper.find(GlSkeletonLoading).exists()).toBe(true);
+      expect(wrapper.find(GlSkeletonLoader).exists()).toBe(true);
     });
 
     it('does not render any dependencies', () => {

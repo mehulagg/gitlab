@@ -11,36 +11,15 @@ RSpec.describe ResourceAccessTokens::CreateService do
 
   describe '#execute' do
     # Created shared_examples as it will easy to include specs for group bots in https://gitlab.com/gitlab-org/gitlab/-/issues/214046
-    shared_examples 'fails when user does not have the permission to create a Resource Bot' do
-      before_all do
-        resource.add_developer(user)
+    shared_examples 'token creation fails' do
+      let(:resource) { create(:project)}
+
+      it 'does not add the project bot as a member' do
+        expect { subject }.not_to change { resource.members.count }
       end
 
-      it 'returns error' do
-        response = subject
-
-        expect(response.error?).to be true
-        expect(response.message).to eq("User does not have permission to create #{resource_type} Access Token")
-      end
-    end
-
-    shared_examples 'fails when flag is disabled' do
-      before do
-        stub_feature_flags(resource_access_token: false)
-      end
-
-      it 'returns nil' do
-        expect(subject).to be nil
-      end
-    end
-
-    shared_examples 'fails on gitlab.com' do
-      before do
-        allow(Gitlab).to receive(:com?) { true }
-      end
-
-      it 'returns nil' do
-        expect(subject).to be nil
+      it 'immediately destroys the bot user if one was created', :sidekiq_inline do
+        expect { subject }.not_to change { User.bots.count }
       end
     end
 
@@ -53,6 +32,7 @@ RSpec.describe ResourceAccessTokens::CreateService do
         access_token = response.payload[:access_token]
 
         expect(access_token.user.reload.user_type).to eq("#{resource_type}_bot")
+        expect(access_token.user.created_by_id).to eq(user.id)
       end
 
       context 'email confirmation status' do
@@ -66,8 +46,18 @@ RSpec.describe ResourceAccessTokens::CreateService do
         end
 
         context 'when created by an admin' do
-          it_behaves_like 'creates a user that has their email confirmed' do
-            let(:user) { create(:admin) }
+          let(:user) { create(:admin) }
+
+          context 'when admin mode is enabled', :enable_admin_mode do
+            it_behaves_like 'creates a user that has their email confirmed'
+          end
+
+          context 'when admin mode is disabled' do
+            it 'returns error' do
+              response = subject
+
+              expect(response.error?).to be true
+            end
           end
         end
 
@@ -77,8 +67,8 @@ RSpec.describe ResourceAccessTokens::CreateService do
       end
 
       context 'bot name' do
-        context 'when no value is passed' do
-          it 'uses default value' do
+        context 'when no name is passed' do
+          it 'uses default name' do
             response = subject
             access_token = response.payload[:access_token]
 
@@ -86,10 +76,10 @@ RSpec.describe ResourceAccessTokens::CreateService do
           end
         end
 
-        context 'when user provides value' do
+        context 'when user provides name' do
           let_it_be(:params) { { name: 'Random bot' } }
 
-          it 'overrides the default value' do
+          it 'overrides the default name value' do
             response = subject
             access_token = response.payload[:access_token]
 
@@ -121,7 +111,7 @@ RSpec.describe ResourceAccessTokens::CreateService do
         context 'when user provides scope explicitly' do
           let_it_be(:params) { { scopes: Gitlab::Auth::REPOSITORY_SCOPES } }
 
-          it 'overrides the default value' do
+          it 'overrides the default scope value' do
             response = subject
             access_token = response.payload[:access_token]
 
@@ -130,47 +120,79 @@ RSpec.describe ResourceAccessTokens::CreateService do
         end
 
         context 'expires_at' do
-          context 'when no value is passed' do
-            it 'uses default value' do
+          context 'when no expiration value is passed' do
+            it 'uses nil expiration value' do
               response = subject
               access_token = response.payload[:access_token]
 
               expect(access_token.expires_at).to eq(nil)
             end
+
+            context 'expiry of the project bot member' do
+              it 'project bot membership does not expire' do
+                response = subject
+                access_token = response.payload[:access_token]
+                project_bot = access_token.user
+
+                expect(project.members.find_by(user_id: project_bot.id).expires_at).to eq(nil)
+              end
+            end
           end
 
-          context 'when user provides value' do
+          context 'when user provides expiration value' do
             let_it_be(:params) { { expires_at: Date.today + 1.month } }
 
-            it 'overrides the default value' do
+            it 'overrides the default expiration value' do
               response = subject
               access_token = response.payload[:access_token]
 
               expect(access_token.expires_at).to eq(params[:expires_at])
+            end
+
+            context 'expiry of the project bot member' do
+              it 'sets the project bot to expire on the same day as the token' do
+                response = subject
+                access_token = response.payload[:access_token]
+                project_bot = access_token.user
+
+                expect(project.members.find_by(user_id: project_bot.id).expires_at).to eq(params[:expires_at])
+              end
             end
           end
 
           context 'when invalid scope is passed' do
             let_it_be(:params) { { scopes: [:invalid_scope] } }
 
-            it 'returns error' do
+            it_behaves_like 'token creation fails'
+
+            it 'returns the scope error message' do
               response = subject
 
               expect(response.error?).to be true
+              expect(response.errors).to include("Scopes can only contain available scopes")
             end
           end
         end
-      end
 
-      context 'when access provisioning fails' do
-        before do
-          allow(resource).to receive(:add_maintainer).and_return(nil)
-        end
+        context "when access provisioning fails" do
+          let_it_be(:bot_user) { create(:user, :project_bot) }
+          let(:unpersisted_member) { build(:project_member, source: resource, user: bot_user) }
 
-        it 'returns error' do
-          response = subject
+          before do
+            allow_next_instance_of(ResourceAccessTokens::CreateService) do |service|
+              allow(service).to receive(:create_user).and_return(bot_user)
+              allow(service).to receive(:create_membership).and_return(unpersisted_member)
+            end
+          end
 
-          expect(response.error?).to be true
+          it_behaves_like 'token creation fails'
+
+          it 'returns the provisioning error message' do
+            response = subject
+
+            expect(response.error?).to be true
+            expect(response.errors).to include("Could not provision maintainer access to project access token")
+          end
         end
       end
     end
@@ -179,9 +201,16 @@ RSpec.describe ResourceAccessTokens::CreateService do
       let_it_be(:resource_type) { 'project' }
       let_it_be(:resource) { project }
 
-      it_behaves_like 'fails when user does not have the permission to create a Resource Bot'
-      it_behaves_like 'fails when flag is disabled'
-      it_behaves_like 'fails on gitlab.com'
+      context 'when user does not have permission to create a resource bot' do
+        it_behaves_like 'token creation fails'
+
+        it 'returns the permission error message' do
+          response = subject
+
+          expect(response.error?).to be true
+          expect(response.errors).to include("User does not have permission to create #{resource_type} Access Token")
+        end
+      end
 
       context 'user with valid permission' do
         before_all do

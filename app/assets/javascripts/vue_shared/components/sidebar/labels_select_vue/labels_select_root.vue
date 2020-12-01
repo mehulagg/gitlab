@@ -28,6 +28,11 @@ export default {
     DropdownValueCollapsed,
   },
   props: {
+    allowLabelRemove: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
     allowLabelEdit: {
       type: Boolean,
       required: true,
@@ -100,6 +105,11 @@ export default {
       required: false,
       default: __('Manage group labels'),
     },
+    isEditing: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   data() {
     return {
@@ -126,10 +136,16 @@ export default {
     showDropdownContents(showDropdownContents) {
       this.setContentIsOnViewport(showDropdownContents);
     },
+    isEditing(newVal) {
+      if (newVal) {
+        this.toggleDropdownContents();
+      }
+    },
   },
   mounted() {
     this.setInitialState({
       variant: this.variant,
+      allowLabelRemove: this.allowLabelRemove,
       allowLabelEdit: this.allowLabelEdit,
       allowLabelCreate: this.allowLabelCreate,
       allowMultiselect: this.allowMultiselect,
@@ -166,7 +182,11 @@ export default {
         !state.showDropdownButton &&
         !state.showDropdownContents
       ) {
-        this.handleDropdownClose(state.labels.filter(label => label.touched));
+        let filterFn = label => label.touched;
+        if (this.isDropdownVariantEmbedded) {
+          filterFn = label => label.set;
+        }
+        this.handleDropdownClose(state.labels.filter(filterFn));
       }
     },
     /**
@@ -186,7 +206,7 @@ export default {
       ].some(
         className =>
           target?.classList.contains(className) ||
-          target?.parentElement.classList.contains(className),
+          target?.parentElement?.classList.contains(className),
       );
 
       const hadExceptionParent = ['.js-btn-back', '.js-labels-list'].some(
@@ -248,12 +268,15 @@ export default {
         :allow-label-edit="allowLabelEdit"
         :labels-select-in-progress="labelsSelectInProgress"
       />
-      <dropdown-value v-show="!showDropdownButton">
+      <dropdown-value
+        :disable-labels="labelsSelectInProgress"
+        @onLabelRemove="$emit('onLabelRemove', $event)"
+      >
         <slot></slot>
       </dropdown-value>
-      <dropdown-button v-show="dropdownButtonVisible" />
+      <dropdown-button v-show="dropdownButtonVisible" class="gl-mt-2" />
       <dropdown-contents
-        v-if="dropdownButtonVisible && showDropdownContents"
+        v-show="dropdownButtonVisible && showDropdownContents"
         ref="dropdownContents"
       />
     </template>

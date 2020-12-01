@@ -29,12 +29,6 @@ class Commit
   delegate :repository, to: :container
   delegate :project, to: :repository, allow_nil: true
 
-  DIFF_SAFE_LINES = Gitlab::Git::DiffCollection::DEFAULT_LIMITS[:max_lines]
-
-  # Commits above this size will not be rendered in HTML
-  DIFF_HARD_LIMIT_FILES = 1000
-  DIFF_HARD_LIMIT_LINES = 50000
-
   MIN_SHA_LENGTH = Gitlab::Git::Commit::MIN_SHA_LENGTH
   COMMIT_SHA_PATTERN = /\h{#{MIN_SHA_LENGTH},40}/.freeze
   EXACT_COMMIT_SHA_PATTERN = /\A#{COMMIT_SHA_PATTERN}\z/.freeze
@@ -80,10 +74,30 @@ class Commit
       sha[0..MIN_SHA_LENGTH]
     end
 
-    def max_diff_options
+    def diff_safe_lines(project: nil)
+      Gitlab::Git::DiffCollection.default_limits(project: project)[:max_lines]
+    end
+
+    def diff_hard_limit_files(project: nil)
+      if Feature.enabled?(:increased_diff_limits, project)
+        2000
+      else
+        1000
+      end
+    end
+
+    def diff_hard_limit_lines(project: nil)
+      if Feature.enabled?(:increased_diff_limits, project)
+        75000
+      else
+        50000
+      end
+    end
+
+    def max_diff_options(project: nil)
       {
-        max_files: DIFF_HARD_LIMIT_FILES,
-        max_lines: DIFF_HARD_LIMIT_LINES
+        max_files: diff_hard_limit_files(project: project),
+        max_lines: diff_hard_limit_lines(project: project)
       }
     end
 
@@ -321,7 +335,11 @@ class Commit
     strong_memoize(:raw_signature_type) do
       next unless @raw.instance_of?(Gitlab::Git::Commit)
 
-      @raw.raw_commit.signature_type if defined? @raw.raw_commit.signature_type
+      if raw_commit_from_rugged? && gpg_commit.signature_text.present?
+        :PGP
+      elsif defined? @raw.raw_commit.signature_type
+        @raw.raw_commit.signature_type
+      end
     end
   end
 
@@ -333,13 +351,21 @@ class Commit
     strong_memoize(:signature) do
       case signature_type
       when :PGP
-        Gitlab::Gpg::Commit.new(self).signature
+        gpg_commit.signature
       when :X509
         Gitlab::X509::Commit.new(self).signature
       else
         nil
       end
     end
+  end
+
+  def raw_commit_from_rugged?
+    @raw.raw_commit.is_a?(Rugged::Commit)
+  end
+
+  def gpg_commit
+    @gpg_commit ||= Gitlab::Gpg::Commit.new(self)
   end
 
   def revert_branch_name

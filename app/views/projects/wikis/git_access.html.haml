@@ -1,5 +1,6 @@
 - @content_class = "limit-container-width" unless fluid_layout
 - page_title s_("WikiClone|Git Access"), _("Wiki")
+- add_page_specific_style 'page_bundles/wiki'
 
 .wiki-page-header.top-area.has-sidebar-toggle.py-3.flex-column.flex-lg-row
   = wiki_sidebar_toggle_button
@@ -10,7 +11,7 @@
       %strong= @wiki.full_path
 
   .pt-3.pt-lg-0.w-100
-    = render "shared/clone_panel", project: @wiki
+    = render "shared/clone_panel", container: @wiki
 
 .wiki-git-access
   %h3= s_("WikiClone|Install Gollum")

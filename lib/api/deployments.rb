@@ -2,10 +2,12 @@
 
 module API
   # Deployments RESTful API endpoints
-  class Deployments < Grape::API::Instance
+  class Deployments < ::API::Base
     include PaginationParams
 
     before { authenticate! }
+
+    feature_category :continuous_delivery
 
     params do
       requires :id, type: String, desc: 'The project ID'

@@ -1,6 +1,5 @@
 import mutations from '~/ide/stores/mutations/file';
 import { createStore } from '~/ide/stores';
-import { FILE_VIEW_MODE_PREVIEW } from '~/ide/constants';
 import { file } from '../../helpers';
 
 describe('IDE store file mutations', () => {
@@ -39,20 +38,34 @@ describe('IDE store file mutations', () => {
   });
 
   describe('TOGGLE_FILE_OPEN', () => {
-    beforeEach(() => {
-      mutations.TOGGLE_FILE_OPEN(localState, localFile.path);
-    });
-
     it('adds into opened files', () => {
+      mutations.TOGGLE_FILE_OPEN(localState, localFile.path);
+
       expect(localFile.opened).toBeTruthy();
       expect(localState.openFiles.length).toBe(1);
     });
 
-    it('removes from opened files', () => {
+    describe('if already open', () => {
+      it('removes from opened files', () => {
+        mutations.TOGGLE_FILE_OPEN(localState, localFile.path);
+        mutations.TOGGLE_FILE_OPEN(localState, localFile.path);
+
+        expect(localFile.opened).toBeFalsy();
+        expect(localState.openFiles.length).toBe(0);
+      });
+    });
+
+    it.each`
+      entry                                | loading
+      ${{ opened: false }}                 | ${true}
+      ${{ opened: false, tempFile: true }} | ${false}
+      ${{ opened: true }}                  | ${false}
+    `('for state: $entry, sets loading=$loading', ({ entry, loading }) => {
+      Object.assign(localFile, entry);
+
       mutations.TOGGLE_FILE_OPEN(localState, localFile.path);
 
-      expect(localFile.opened).toBeFalsy();
-      expect(localState.openFiles.length).toBe(0);
+      expect(localFile.loading).toBe(loading);
     });
   });
 
@@ -61,13 +74,11 @@ describe('IDE store file mutations', () => {
       mutations.SET_FILE_DATA(localState, {
         data: {
           raw_path: 'raw',
-          binary: true,
         },
         file: localFile,
       });
 
       expect(localFile.rawPath).toBe('raw');
-      expect(localFile.binary).toBeTruthy();
       expect(localFile.raw).toBeNull();
       expect(localFile.baseRaw).toBeNull();
     });
@@ -517,17 +528,6 @@ describe('IDE store file mutations', () => {
       });
 
       expect(localFile.changed).toBeTruthy();
-    });
-  });
-
-  describe('SET_FILE_VIEWMODE', () => {
-    it('updates file view mode', () => {
-      mutations.SET_FILE_VIEWMODE(localState, {
-        file: localFile,
-        viewMode: FILE_VIEW_MODE_PREVIEW,
-      });
-
-      expect(localFile.viewMode).toBe(FILE_VIEW_MODE_PREVIEW);
     });
   });
 

@@ -10,12 +10,14 @@ FactoryBot.define do
   factory :project, class: 'Project' do
     sequence(:name) { |n| "project#{n}" }
     path { name.downcase.gsub(/\s/, '_') }
-    # Behaves differently to nil due to cache_has_external_issue_tracker
+
+    # Behaves differently to nil due to cache_has_external_* methods.
     has_external_issue_tracker { false }
+    has_external_wiki { false }
 
     # Associations
     namespace
-    creator { group ? create(:user) : namespace&.owner }
+    creator { group ? association(:user) : namespace&.owner }
 
     transient do
       # Nest Project Feature attributes
@@ -29,6 +31,8 @@ FactoryBot.define do
       pages_access_level do
         visibility_level == Gitlab::VisibilityLevel::PUBLIC ? ProjectFeature::ENABLED : ProjectFeature::PRIVATE
       end
+      metrics_dashboard_access_level { ProjectFeature::PRIVATE }
+      operations_access_level { ProjectFeature::ENABLED }
 
       # we can't assign the delegated `#ci_cd_settings` attributes directly, as the
       # `#ci_cd_settings` relation needs to be created first
@@ -53,7 +57,9 @@ FactoryBot.define do
         forking_access_level: evaluator.forking_access_level,
         merge_requests_access_level: merge_requests_access_level,
         repository_access_level: evaluator.repository_access_level,
-        pages_access_level: evaluator.pages_access_level
+        pages_access_level: evaluator.pages_access_level,
+        metrics_dashboard_access_level: evaluator.metrics_dashboard_access_level,
+        operations_access_level: evaluator.operations_access_level
       }
 
       project.build_project_feature(hash)
@@ -283,6 +289,12 @@ FactoryBot.define do
       end
     end
 
+    trait :with_import_url do
+      import_finished
+
+      import_url { generate(:url) }
+    end
+
     trait(:wiki_enabled)            { wiki_access_level { ProjectFeature::ENABLED } }
     trait(:wiki_disabled)           { wiki_access_level { ProjectFeature::DISABLED } }
     trait(:wiki_private)            { wiki_access_level { ProjectFeature::PRIVATE } }
@@ -309,6 +321,12 @@ FactoryBot.define do
     trait(:pages_enabled)           { pages_access_level { ProjectFeature::ENABLED } }
     trait(:pages_disabled)          { pages_access_level { ProjectFeature::DISABLED } }
     trait(:pages_private)           { pages_access_level { ProjectFeature::PRIVATE } }
+    trait(:metrics_dashboard_enabled) { metrics_dashboard_access_level { ProjectFeature::ENABLED } }
+    trait(:metrics_dashboard_disabled) { metrics_dashboard_access_level { ProjectFeature::DISABLED } }
+    trait(:metrics_dashboard_private) { metrics_dashboard_access_level { ProjectFeature::PRIVATE } }
+    trait(:operations_enabled)           { operations_access_level { ProjectFeature::ENABLED } }
+    trait(:operations_disabled)          { operations_access_level { ProjectFeature::DISABLED } }
+    trait(:operations_private)           { operations_access_level { ProjectFeature::PRIVATE } }
 
     trait :auto_devops do
       association :auto_devops, factory: :project_auto_devops
@@ -390,6 +408,12 @@ FactoryBot.define do
         }
       )
     end
+  end
+
+  factory :ewm_project, parent: :project do
+    has_external_issue_tracker { true }
+
+    ewm_service
   end
 
   factory :project_with_design, parent: :project do

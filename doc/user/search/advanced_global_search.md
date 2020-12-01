@@ -1,7 +1,7 @@
 ---
-stage: Create
-group: Editor
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+stage: Enablement
+group: Global Search
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 type: reference
 ---
 
@@ -44,7 +44,10 @@ The Advanced Search can be useful in various scenarios.
 ### Faster searches
 
 If you are dealing with huge amount of data and want to keep GitLab's search
-fast, the Advanced Search will help you achieve that.
+fast, Advanced Search will help you achieve that.
+
+NOTE: **Note:**
+Between versions 12.10 and 13.4, Advanced Search response times have improved by 80%.
 
 ### Promote innersourcing
 

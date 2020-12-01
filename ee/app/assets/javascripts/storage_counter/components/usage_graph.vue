@@ -1,8 +1,15 @@
 <script>
+import { GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import { s__ } from '~/locale';
 import { numberToHumanSize } from '~/lib/utils/number_utils';
 
 export default {
+  components: {
+    GlIcon,
+  },
+  directives: {
+    GlTooltip: GlTooltipDirective,
+  },
   props: {
     rootStorageStatistics: {
       required: true,
@@ -17,13 +24,16 @@ export default {
     storageTypes() {
       const {
         buildArtifactsSize,
+        pipelineArtifactsSize,
         lfsObjectsSize,
         packagesSize,
         repositorySize,
         storageSize,
         wikiSize,
         snippetsSize,
+        uploadsSize,
       } = this.rootStorageStatistics;
+      const artifactsSize = buildArtifactsSize + pipelineArtifactsSize;
 
       if (storageSize === 0) {
         return null;
@@ -49,10 +59,11 @@ export default {
           size: packagesSize,
         },
         {
-          name: s__('UsageQuota|Build Artifacts'),
-          style: this.usageStyle(this.barRatio(buildArtifactsSize)),
+          name: s__('UsageQuota|Artifacts'),
+          style: this.usageStyle(this.barRatio(artifactsSize)),
           class: 'gl-bg-data-viz-green-600',
-          size: buildArtifactsSize,
+          size: artifactsSize,
+          tooltip: s__('UsageQuota|Artifacts is a sum of build and pipeline artifacts.'),
         },
         {
           name: s__('UsageQuota|Wikis'),
@@ -65,6 +76,12 @@ export default {
           style: this.usageStyle(this.barRatio(snippetsSize)),
           class: 'gl-bg-data-viz-orange-800',
           size: snippetsSize,
+        },
+        {
+          name: s__('UsageQuota|Uploads'),
+          style: this.usageStyle(this.barRatio(uploadsSize)),
+          class: 'gl-bg-data-viz-aqua-700',
+          size: uploadsSize,
         },
       ]
         .filter(data => data.size !== 0)
@@ -115,6 +132,15 @@ export default {
         </span>
         <span class="gl-text-gray-500 gl-font-sm">
           {{ formatSize(storageType.size) }}
+        </span>
+        <span
+          v-if="storageType.tooltip"
+          v-gl-tooltip
+          :title="storageType.tooltip"
+          :aria-label="storageType.tooltip"
+          class="gl-ml-2"
+        >
+          <gl-icon name="question" :size="12" />
         </span>
       </div>
     </div>

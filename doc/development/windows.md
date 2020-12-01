@@ -1,4 +1,7 @@
 ---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference, howto
 ---
 
@@ -87,7 +90,7 @@ You should now be remoted into a Windows machine with a command prompt.
 - Start the runner: `gitlab-runner.exe start`.
 
 For more information, see [Install GitLab Runner on Windows](https://docs.gitlab.com/runner/install/windows.html)
-and [Registering Runners](https://docs.gitlab.com/runner/register/index.html).
+and [Registering runners](https://docs.gitlab.com/runner/register/index.html).
 
 ## Developer tips
 

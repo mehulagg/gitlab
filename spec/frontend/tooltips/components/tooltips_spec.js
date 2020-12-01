@@ -80,6 +80,14 @@ describe('tooltips/components/tooltips.vue', () => {
       expect(wrapper.find(GlTooltip).html()).toContain(target.getAttribute('title'));
     });
 
+    it('sets the configuration values passed in the config object', async () => {
+      const config = { show: true };
+      target = createTooltipTarget();
+      wrapper.vm.addTooltips([target], config);
+      await wrapper.vm.$nextTick();
+      expect(wrapper.find(GlTooltip).props()).toMatchObject(config);
+    });
+
     it.each`
       attribute           | value                 | prop
       ${'data-placement'} | ${'bottom'}           | ${'placement'}
@@ -120,7 +128,7 @@ describe('tooltips/components/tooltips.vue', () => {
       wrapper.vm.addTooltips([target, createTooltipTarget()]);
       await wrapper.vm.$nextTick();
 
-      wrapper.vm.dispose([target]);
+      wrapper.vm.dispose(target);
       await wrapper.vm.$nextTick();
 
       expect(allTooltips()).toHaveLength(1);
@@ -145,6 +153,48 @@ describe('tooltips/components/tooltips.vue', () => {
       await wrapper.vm.$nextTick();
 
       expect(allTooltips()).toHaveLength(1);
+    });
+  });
+
+  describe('triggerEvent', () => {
+    it('triggers a bootstrap-vue tooltip global event for the tooltip specified', async () => {
+      const target = createTooltipTarget();
+      const event = 'hide';
+
+      buildWrapper();
+
+      wrapper.vm.addTooltips([target]);
+
+      await wrapper.vm.$nextTick();
+
+      wrapper.vm.triggerEvent(target, event);
+
+      expect(wrapper.find(GlTooltip).emitted(event)).toHaveLength(1);
+    });
+  });
+
+  describe('fixTitle', () => {
+    it('updates tooltip content with the latest value the target title property', async () => {
+      const target = createTooltipTarget();
+      const currentTitle = 'title';
+      const newTitle = 'new title';
+
+      target.setAttribute('title', currentTitle);
+
+      buildWrapper();
+
+      wrapper.vm.addTooltips([target]);
+
+      await wrapper.vm.$nextTick();
+
+      expect(wrapper.find(GlTooltip).text()).toBe(currentTitle);
+
+      target.setAttribute('title', newTitle);
+      wrapper.vm.fixTitle(target);
+
+      await wrapper.vm.$nextTick();
+
+      expect(wrapper.find(GlTooltip).text()).toBe(newTitle);
     });
   });
 

@@ -63,6 +63,70 @@ RSpec.describe API::Releases do
         end
       end
     end
+
+    context 'with a group milestone' do
+      let(:project) { create(:project, :repository, group: group) }
+      let(:group) { create(:group) }
+      let(:group_milestone) { create(:milestone, group: group, title: 'g1') }
+
+      before do
+        stub_licensed_features(group_milestone_project_releases: true)
+        params.merge!(milestone_params)
+      end
+
+      context 'succesfully adds a group milestone' do
+        let(:milestone_params) { { milestones: [group_milestone.title] } }
+
+        it 'adds the milestone', :aggregate_failures do
+          post api("/projects/#{project.id}/releases", maintainer), params: params
+
+          expect(response).to have_gitlab_http_status(:created)
+          expect(json_response['milestones'].map {|m| m['title']}).to match_array(['g1'])
+        end
+      end
+
+      context 'fails to add a group milestone if project does not belong to this group' do
+        let(:milestone_params) { { milestones: ['abc1'] } }
+
+        it 'returns a 400 error as milestone not found', :aggregate_failures do
+          post api("/projects/#{project.id}/releases", maintainer), params: params
+
+          expect(response).to have_gitlab_http_status(:bad_request)
+          expect(json_response['message']).to eq("Milestone(s) not found: abc1")
+        end
+      end
+
+      context 'when valid group and project milestones are passed' do
+        let(:project_milestone) { create(:milestone, project: project, title: 'v1.0') }
+        let(:milestone_params) { { milestones: [group_milestone.title, project_milestone.title] } }
+
+        it 'adds the milestone', :aggregate_failures do
+          post api("/projects/#{project.id}/releases", maintainer), params: params
+
+          expect(response).to have_gitlab_http_status(:created)
+          expect(json_response['milestones'].map {|m| m['title']}).to match_array(['g1', 'v1.0'])
+        end
+      end
+
+      context 'with a supergroup milestone' do
+        let(:group) { create(:group, parent: supergroup) }
+        let(:supergroup) { create(:group) }
+        let(:supergroup_milestone) { create(:milestone, group: supergroup, title: 'sg1') }
+        let(:milestone_params) { params.merge({ milestones: [supergroup_milestone.title] }) }
+
+        before do
+          stub_licensed_features(group_milestone_project_releases: true)
+          params.merge!(milestone_params)
+        end
+
+        it 'returns a 400 error as milestone not found', :aggregate_failures do
+          post api("/projects/#{project.id}/releases", maintainer), params: params
+
+          expect(response).to have_gitlab_http_status(:bad_request)
+          expect(json_response['message']).to eq("Milestone(s) not found: sg1")
+        end
+      end
+    end
   end
 
   describe 'PUT /projects/:id/releases/:tag_name' do
@@ -149,6 +213,42 @@ RSpec.describe API::Releases do
           let(:milestone_message) { "Milestones associated with release changed to [none]" }
 
           it_behaves_like 'update with milestones'
+        end
+      end
+    end
+
+    context 'with group milestones' do
+      let(:project) { create(:project, :repository, group: group) }
+      let(:group) { create(:group) }
+
+      before do
+        stub_licensed_features(group_milestone_project_releases: true)
+
+        put api("/projects/#{project.id}/releases/v0.1", maintainer), params: params
+      end
+
+      context 'when a group milestone is passed' do
+        let(:group_milestone) { create(:milestone, group: group, title: 'g1') }
+        let(:params) { { milestones: [group_milestone.title] } }
+
+        context 'when there is no project milestone' do
+          it 'adds the group milestone', :aggregate_failures do
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(json_response['milestones'].map {|m| m['title']}).to match_array([group_milestone.title])
+          end
+        end
+
+        context 'when there is an existing project milestone' do
+          let(:project_milestone) { create(:milestone, project: project, title: 'p1') }
+
+          before do
+            release.milestones << project_milestone
+          end
+
+          it 'replaces the project milestone with the group milestone', :aggregate_failures do
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(json_response['milestones'].map {|m| m['title']}).to match_array([group_milestone.title])
+          end
         end
       end
     end

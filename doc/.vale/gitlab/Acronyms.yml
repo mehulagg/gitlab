@@ -16,18 +16,26 @@ second: '(?:\b[A-Z][a-z]+ )+\(([A-Z]{3,5})\)'
 exceptions:
   - ANSI
   - API
+  - ARM
   - ARN
   - ASCII
   - AWS
+  - BSD
   - CLI
+  - CNA
   - CNAME
   - CORE
   - CPU
   - CSS
   - CSV
+  - CVE
+  - DAG
   - DAST
+  - DHCP
   - DNS
+  - DVCS
   - EKS
+  - EOL
   - FAQ
   - FOSS
   - GCP
@@ -41,19 +49,25 @@ exceptions:
   - HTTP
   - HTTPS
   - IAM
+  - IANA
   - IBM
   - IDE
   - IID
+  - IMAP
   - IRC
   - ISO
   - JSON
+  - LAN
   - LDAP
   - LDAPS
   - LESS
   - LFS
   - LRU
+  - LTS
   - MIME
+  - MIT
   - MVC
+  - NAT
   - NFS
   - NGINX
   - NOTE
@@ -65,7 +79,10 @@ exceptions:
   - POST
   - PUT
   - RAM
+  - REST
+  - RHEL
   - RPC
+  - RPM
   - RSA
   - RSS
   - RVM
@@ -76,8 +93,10 @@ exceptions:
   - SCSS
   - SDK
   - SHA
+  - SLA
   - SMTP
   - SQL
+  - SSD
   - SSH
   - SSL
   - SSO
@@ -85,6 +104,7 @@ exceptions:
   - SVN
   - TCP
   - TIP
+  - TLD
   - TLS
   - TODO
   - TOML
@@ -92,6 +112,7 @@ exceptions:
   - URI
   - URL
   - USB
+  - UTC
   - UUID
   - VPC
   - WIP

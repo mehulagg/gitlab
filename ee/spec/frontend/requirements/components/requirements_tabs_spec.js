@@ -1,6 +1,5 @@
+import { GlLink, GlBadge, GlButton } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
-
-import { GlLink, GlDeprecatedBadge as GlBadge, GlButton } from '@gitlab/ui';
 
 import RequirementsTabs from 'ee/requirements/components/requirements_tabs.vue';
 import { FilterState } from 'ee/requirements/constants';

@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 
 module API
-  class License < Grape::API::Instance
+  class License < ::API::Base
     before { authenticated_as_admin! }
+
+    feature_category :provision
 
     resource :license do
       desc 'Get information on the currently active license' do
@@ -49,7 +51,7 @@ module API
       get do
         licenses = LicensesFinder.new(current_user).execute
 
-        present licenses, with: EE::API::Entities::GitlabLicense, current_active_users_count: ::License.current&.current_active_users_count
+        present licenses, with: EE::API::Entities::GitlabLicense, current_active_users_count: ::License.current&.daily_billable_users_count
       end
     end
   end

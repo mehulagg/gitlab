@@ -1,5 +1,0 @@
----
-title: Add GraphQL endpoint for deleting a cluster agent token
-merge_request: 40338
-author:
-type: added

@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Proxying assets
 
 A possible security concern when managing a public facing GitLab instance is
@@ -25,7 +31,7 @@ A Camo server is used to act as the proxy.
 To install a Camo server as an asset proxy:
 
 1. Deploy a `go-camo` server. Helpful instructions can be found in
-   [building catus/go-camo](https://github.com/cactus/go-camo#building).
+   [building cactus/go-camo](https://github.com/cactus/go-camo#building).
 
 1. Make sure your instance of GitLab is running, and that you have created a private API token.
    Using the API, configure the asset proxy settings on your GitLab instance. For example:

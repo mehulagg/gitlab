@@ -25,7 +25,7 @@ RSpec.describe EnvironmentEntity do
   end
 
   it 'exposes core elements of environment' do
-    expect(subject).to include(:id, :name, :state, :environment_path)
+    expect(subject).to include(:id, :global_id, :name, :state, :environment_path)
   end
 
   it 'exposes folder path' do
@@ -79,26 +79,6 @@ RSpec.describe EnvironmentEntity do
       project.add_maintainer(user)
 
       expect(subject).to include(:cancel_auto_stop_path, :auto_stop_at)
-    end
-  end
-
-  context 'with alert' do
-    let!(:environment) { create(:environment, project: project) }
-    let!(:prometheus_alert) { create(:prometheus_alert, project: project, environment: environment) }
-    let!(:alert) { create(:alert_management_alert, :triggered, :prometheus, project: project, environment: environment, prometheus_alert: prometheus_alert) }
-
-    it 'exposes active alert flag' do
-      project.add_maintainer(user)
-
-      expect(subject[:has_opened_alert]).to eq(true)
-    end
-
-    context 'when user does not have permission to read alert' do
-      it 'does not expose active alert flag' do
-        project.add_reporter(user)
-
-        expect(subject[:has_opened_alert]).to be_nil
-      end
     end
   end
 

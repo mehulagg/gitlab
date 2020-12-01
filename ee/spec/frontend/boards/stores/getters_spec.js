@@ -1,35 +1,80 @@
 import getters from 'ee/boards/stores/getters';
 import {
   mockIssue,
-  mockIssue2,
   mockIssue3,
   mockIssue4,
   mockIssues,
   mockIssuesByListId,
+  mockEpics,
   issues,
 } from '../mock_data';
 
 describe('EE Boards Store Getters', () => {
   const boardsState = {
     issuesByListId: mockIssuesByListId,
+    epics: mockEpics,
     issues,
   };
 
-  describe('getIssues', () => {
-    it('returns issues for a given listId', () => {
-      const getIssueById = issueId => [mockIssue, mockIssue2].find(({ id }) => id === issueId);
+  describe('isSwimlanesOn', () => {
+    afterEach(() => {
+      window.gon = { features: {} };
+    });
 
-      expect(getters.getIssues(boardsState, { getIssueById })('gid://gitlab/List/2')).toEqual(
-        mockIssues,
-      );
+    describe('when swimlanes feature is true', () => {
+      beforeEach(() => {
+        window.gon = { features: { swimlanes: true } };
+      });
+
+      describe('when isShowingEpicsSwimlanes is true', () => {
+        it('returns true', () => {
+          const state = {
+            isShowingEpicsSwimlanes: true,
+          };
+
+          expect(getters.isSwimlanesOn(state)).toBe(true);
+        });
+      });
+
+      describe('when isShowingEpicsSwimlanes is false', () => {
+        it('returns false', () => {
+          const state = {
+            isShowingEpicsSwimlanes: false,
+          };
+
+          expect(getters.isSwimlanesOn(state)).toBe(false);
+        });
+      });
+    });
+
+    describe('when swimlanes feature is false', () => {
+      describe('when isShowingEpicsSwimlanes is true', () => {
+        it('returns false', () => {
+          const state = {
+            isShowingEpicsSwimlanes: true,
+          };
+
+          expect(getters.isSwimlanesOn(state)).toBe(false);
+        });
+      });
+
+      describe('when isShowingEpicsSwimlanes is false', () => {
+        it('returns false', () => {
+          const state = {
+            isShowingEpicsSwimlanes: false,
+          };
+
+          expect(getters.isSwimlanesOn(state)).toBe(false);
+        });
+      });
     });
   });
 
   describe('getIssuesByEpic', () => {
     it('returns issues for a given listId and epicId', () => {
-      const getIssues = () => mockIssues;
+      const getIssuesByList = () => mockIssues;
       expect(
-        getters.getIssuesByEpic(boardsState, { getIssues })(
+        getters.getIssuesByEpic(boardsState, { getIssuesByList })(
           'gid://gitlab/List/2',
           'gid://gitlab/Epic/41',
         ),
@@ -39,10 +84,16 @@ describe('EE Boards Store Getters', () => {
 
   describe('getUnassignedIssues', () => {
     it('returns issues not assigned to an epic for a given listId', () => {
-      const getIssues = () => [mockIssue, mockIssue3, mockIssue4];
+      const getIssuesByList = () => [mockIssue, mockIssue3, mockIssue4];
       expect(
-        getters.getUnassignedIssues(boardsState, { getIssues })('gid://gitlab/List/1'),
+        getters.getUnassignedIssues(boardsState, { getIssuesByList })('gid://gitlab/List/1'),
       ).toEqual([mockIssue3, mockIssue4]);
+    });
+  });
+
+  describe('getEpicById', () => {
+    it('returns epic for a given id', () => {
+      expect(getters.getEpicById(boardsState)(mockEpics[0].id)).toEqual(mockEpics[0]);
     });
   });
 });

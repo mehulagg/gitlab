@@ -34,26 +34,26 @@ RSpec.describe ApplicationSettings::UpdateService do
       end
     end
 
-    context 'index dependent' do
-      using RSpec::Parameterized::TableSyntax
+    context 'elasticsearch_indexing update' do
+      context 'index creation' do
+        let(:opts) { { elasticsearch_indexing: true } }
 
-      where(:index_exists, :indexing_enabled, :input_value, :result) do
-        false  | false | true | false
-        false  | true  | true | true
-        true   | false | true | true
-        true   | true  | true | true
-      end
+        context 'when index exists' do
+          it 'skips creating a new index' do
+            expect(Gitlab::Elastic::Helper.default).to(receive(:index_exists?)).and_return(true)
+            expect(Gitlab::Elastic::Helper.default).not_to(receive(:create_empty_index))
 
-      with_them do
-        before do
-          allow(Gitlab::Elastic::Helper.default).to(receive(:index_exists?)).and_return(index_exists)
-          allow(service.application_setting).to(receive(:elasticsearch_indexing)).and_return(indexing_enabled)
+            service.execute
+          end
         end
 
-        let(:opts) { { elasticsearch_indexing: input_value } }
+        context 'when index does not exist' do
+          it 'creates a new index' do
+            expect(Gitlab::Elastic::Helper.default).to(receive(:index_exists?)).and_return(false)
+            expect(Gitlab::Elastic::Helper.default).to(receive(:create_empty_index))
 
-        it 'returns correct result' do
-          expect(service.execute).to be(result)
+            service.execute
+          end
         end
       end
     end
@@ -162,6 +162,72 @@ RSpec.describe ApplicationSettings::UpdateService do
             end
           end
         end
+      end
+    end
+
+    context 'user cap setting' do
+      shared_examples 'worker is not called' do
+        it 'does not call ApproveBlockedUsersWorker' do
+          expect(ApproveBlockedUsersWorker).not_to receive(:perform_async)
+
+          service.execute
+        end
+      end
+
+      shared_examples 'worker is called' do
+        it 'calls ApproveBlockedUsersWorker' do
+          expect(ApproveBlockedUsersWorker).to receive(:perform_async)
+
+          service.execute
+        end
+      end
+
+      context 'when new user cap is set to nil' do
+        context 'when changing new user cap to any number' do
+          let(:opts) { { new_user_signups_cap: 10 } }
+
+          include_examples 'worker is not called'
+        end
+
+        context 'when leaving new user cap set to nil' do
+          let(:opts) { { new_user_signups_cap: nil } }
+
+          include_examples 'worker is not called'
+        end
+      end
+
+      context 'when new user cap is set to a number' do
+        let(:setting) do
+          build(:application_setting, new_user_signups_cap: 10)
+        end
+
+        context 'when decreasing new user cap' do
+          let(:opts) { { new_user_signups_cap: 8 } }
+
+          include_examples 'worker is not called'
+        end
+
+        context 'when increasing new user cap' do
+          let(:opts) { { new_user_signups_cap: 15 } }
+
+          include_examples 'worker is called'
+        end
+
+        context 'when changing user cap to nil' do
+          let(:opts) { { new_user_signups_cap: nil } }
+
+          include_examples 'worker is called'
+        end
+      end
+
+      context 'when feature is disabled' do
+        let(:opts) { { new_user_signups_cap: 10 } }
+
+        before do
+          stub_feature_flags(admin_new_user_signups_cap: false)
+        end
+
+        include_examples 'worker is not called'
       end
     end
   end

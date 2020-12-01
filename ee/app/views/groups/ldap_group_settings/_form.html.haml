@@ -1,12 +1,11 @@
-- if Feature.enabled?(:ldap_settings_unlock_groups_by_owners) && ::Gitlab::CurrentSettings.allow_group_owners_to_manage_ldap
-  %section.ldap-group-settings
-    = form_for(group, url: group_ldap_settings_url(group), method: :put) do |f|
-      .form-holder
-        .form-group.row
-          .col-sm-10
-            .form-check
-              = f.check_box :unlock_membership_to_ldap, class: 'form-check-input'
-              = f.label :unlock_membership_to_ldap, class: 'form-check-label' do
-                = _('Allow owners to manually add users outside of LDAP')
-      .form-actions
-        = f.submit _('Save'), class: 'btn btn-success qa-save'
+%section.ldap-group-settings
+  = form_for(group, url: group_ldap_settings_url(group), method: :put) do |f|
+    .form-holder
+      .form-group.row
+        .col-sm-10
+          .form-check
+            = f.check_box :unlock_membership_to_ldap, class: 'form-check-input'
+            = f.label :unlock_membership_to_ldap, class: 'form-check-label' do
+              = _('Allow owners to manually add users outside of LDAP')
+    .form-actions
+      = f.submit _('Save'), class: 'btn btn-success qa-save'

@@ -17,7 +17,8 @@
     "pipeline_events",
     "wiki_page_events",
     "job_events",
-    "deployment_events"
+    "deployment_events",
+    "releases_events"
   ],
   "properties": {
     "id": { "type": "integer" },
@@ -36,7 +37,8 @@
     "pipeline_events": { "type": "boolean" },
     "wiki_page_events": { "type": "boolean" },
     "job_events": { "type": "boolean" },
-    "deployment_events": { "type": "boolean" }
+    "deployment_events": { "type": "boolean" },
+    "releases_events": { "type": "boolean" }
   },
   "additionalProperties": false
 }

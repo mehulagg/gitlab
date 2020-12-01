@@ -2,7 +2,7 @@
 type: reference, howto
 stage: Create
 group: Editor
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 ---
 
 # Snippets settings **(CORE ONLY)**
@@ -20,8 +20,8 @@ abuse of the feature. The default value is **52428800 Bytes** (50 MB).
 
 The content size limit will be applied when a snippet is created or updated.
 
-In order not to break any existing snippets, the limit doesn't have any
-effect on them until a snippet is edited again and the content changes.
+This limit doesn't affect existing snippets until they're updated and their
+content changes.
 
 ### Snippets size limit configuration
 

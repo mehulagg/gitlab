@@ -9,7 +9,9 @@ module QA
         attr_accessor :title
 
         attribute :group do
-          QA::Resource::Group.fabricate_via_api!
+          QA::Resource::Group.fabricate_via_api! do |group|
+            group.path = "group-to-test-iterations-#{SecureRandom.hex(8)}"
+          end
         end
 
         attribute :id
@@ -39,6 +41,38 @@ module QA
             new.fill_due_date(@due_date)
             new.click_create_iteration_button
           end
+        end
+
+        def api_get_path
+          "gid://gitlab/Iteration/#{id}"
+        end
+
+        def api_post_path
+          "/graphql"
+        end
+
+        def api_post_body
+          <<~GQL
+            mutation {
+              createIteration(input: {
+                groupPath: "#{group.full_path}"
+                title: "#{@title}"
+                description: "#{@description}"
+                startDate: "#{@start_date}"
+                dueDate: "#{@due_date}"
+                }) {
+                iteration {
+                  id
+                  title
+                  description
+                  startDate
+                  dueDate
+                  webUrl
+                }
+                errors
+              }
+            }
+          GQL
         end
       end
     end

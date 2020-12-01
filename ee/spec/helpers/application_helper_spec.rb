@@ -105,29 +105,39 @@ RSpec.describe ApplicationHelper do
       it 'returns paths for autocomplete_sources_controller' do
         expect_autocomplete_data_sources(object, noteable_type, [:members, :issues, :mergeRequests, :labels, :epics, :commands, :milestones])
       end
+
+      context 'when vulnerabilities are enabled' do
+        before do
+          stub_licensed_features(security_dashboard: true)
+        end
+
+        it 'returns paths for autocomplete_sources_controller with vulnerabilities' do
+          expect_autocomplete_data_sources(object, noteable_type, [:members, :issues, :mergeRequests, :labels, :epics, :vulnerabilities, :commands, :milestones])
+        end
+      end
     end
 
     context 'project' do
       let(:object) { create(:project) }
       let(:noteable_type) { Issue }
 
-      context 'when epics are enabled' do
+      context 'when epics and vulnerabilities are enabled' do
         before do
-          stub_licensed_features(epics: true)
+          stub_licensed_features(epics: true, security_dashboard: true)
         end
 
         it 'returns paths for autocomplete_sources_controller for personal projects' do
-          expect_autocomplete_data_sources(object, noteable_type, [:members, :issues, :mergeRequests, :labels, :milestones, :commands, :snippets])
+          expect_autocomplete_data_sources(object, noteable_type, [:members, :issues, :mergeRequests, :labels, :milestones, :commands, :snippets, :vulnerabilities])
         end
 
-        it 'returns paths for autocomplete_sources_controller including epics for group projects' do
+        it 'returns paths for autocomplete_sources_controller including epics and vulnerabilities for group projects' do
           object.update!(group: create(:group))
 
-          expect_autocomplete_data_sources(object, noteable_type, [:members, :issues, :mergeRequests, :labels, :milestones, :commands, :snippets, :epics])
+          expect_autocomplete_data_sources(object, noteable_type, [:members, :issues, :mergeRequests, :labels, :milestones, :commands, :snippets, :epics, :vulnerabilities])
         end
       end
 
-      context 'when epics are disabled' do
+      context 'when epics and vulnerabilities are disabled' do
         it 'returns paths for autocomplete_sources_controller' do
           expect_autocomplete_data_sources(object, noteable_type, [:members, :issues, :mergeRequests, :labels, :milestones, :commands, :snippets])
         end
@@ -182,32 +192,6 @@ RSpec.describe ApplicationHelper do
         ee_view = helper.lookup_context.find(view, [], false)
         expect(ee_view.short_identifier).to eq("ee/#{expected_view_path}")
       end
-    end
-  end
-
-  describe '#instance_review_permitted?' do
-    let_it_be(:non_admin_user) { create :user }
-    let_it_be(:admin_user) { create :user, :admin }
-
-    before do
-      allow(::Gitlab::CurrentSettings).to receive(:instance_review_permitted?).and_return(app_setting)
-      allow(helper).to receive(:current_user).and_return(current_user)
-    end
-
-    subject { helper.instance_review_permitted? }
-
-    where(app_setting: [true, false], is_admin: [true, false, nil])
-
-    with_them do
-      let(:current_user) do
-        if is_admin.nil?
-          nil
-        else
-          is_admin ? admin_user : non_admin_user
-        end
-      end
-
-      it { is_expected.to be(app_setting && is_admin) }
     end
   end
 end

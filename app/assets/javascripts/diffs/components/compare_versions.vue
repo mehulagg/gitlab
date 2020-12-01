@@ -6,7 +6,8 @@ import { polyfillSticky } from '~/lib/utils/sticky';
 import CompareDropdownLayout from './compare_dropdown_layout.vue';
 import SettingsDropdown from './settings_dropdown.vue';
 import DiffStats from './diff_stats.vue';
-import { CENTERED_LIMITED_CONTAINER_CLASSES } from '../constants';
+import { CENTERED_LIMITED_CONTAINER_CLASSES, EVT_EXPAND_ALL_FILES } from '../constants';
+import eventHub from '../event_hub';
 
 export default {
   components: {
@@ -38,7 +39,7 @@ export default {
   },
   computed: {
     ...mapGetters('diffs', [
-      'hasCollapsedFile',
+      'whichCollapsedTypes',
       'diffCompareDropdownTargetVersions',
       'diffCompareDropdownSourceVersions',
     ]),
@@ -64,12 +65,10 @@ export default {
     polyfillSticky(this.$el);
   },
   methods: {
-    ...mapActions('diffs', [
-      'setInlineDiffViewType',
-      'setParallelDiffViewType',
-      'expandAllFiles',
-      'toggleShowTreeList',
-    ]),
+    ...mapActions('diffs', ['setInlineDiffViewType', 'setParallelDiffViewType', 'setShowTreeList']),
+    expandAllFiles() {
+      eventHub.$emit(EVT_EXPAND_ALL_FILES);
+    },
   },
 };
 </script>
@@ -89,7 +88,7 @@ export default {
         class="gl-mr-3 js-toggle-tree-list"
         :title="toggleFileBrowserTitle"
         :selected="showTreeList"
-        @click="toggleShowTreeList"
+        @click="setShowTreeList({ showTreeList: !showTreeList })"
       />
       <gl-sprintf
         v-if="showDropdowns"
@@ -100,6 +99,7 @@ export default {
           <compare-dropdown-layout
             :versions="diffCompareDropdownTargetVersions"
             class="mr-version-compare-dropdown"
+            data-qa-selector="target_version_dropdown"
           />
         </template>
         <template #source>
@@ -128,7 +128,7 @@ export default {
           {{ __('Show latest version') }}
         </gl-button>
         <gl-button
-          v-show="hasCollapsedFile"
+          v-show="whichCollapsedTypes.any"
           variant="default"
           class="gl-mr-3"
           @click="expandAllFiles"

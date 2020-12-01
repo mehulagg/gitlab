@@ -5,7 +5,10 @@ module WikiActions
   include PreviewMarkdown
   include SendsBlob
   include Gitlab::Utils::StrongMemoize
+  include RedisTracking
   extend ActiveSupport::Concern
+
+  RESCUE_GIT_TIMEOUTS_IN = %w[show edit history diff pages].freeze
 
   included do
     before_action { respond_to :html }
@@ -31,7 +34,18 @@ module WikiActions
       end
     end
 
+    # NOTE: We want to include wiki page views in the same counter as the other
+    # Event-based wiki actions tracked through TrackUniqueEvents, so we use the same event name.
+    track_redis_hll_event :show, name: Gitlab::UsageDataCounters::TrackUniqueEvents::WIKI_ACTION.to_s,
+      feature: :track_unique_wiki_page_views, feature_default_enabled: true
+
     helper_method :view_file_button, :diff_file_html_data
+
+    rescue_from ::Gitlab::Git::CommandTimedOut do |exc|
+      raise exc unless RESCUE_GIT_TIMEOUTS_IN.include?(action_name)
+
+      render 'shared/wikis/git_error'
+    end
   end
 
   def new
@@ -40,11 +54,7 @@ module WikiActions
 
   # rubocop:disable Gitlab/ModuleWithInstanceVariables
   def pages
-    @wiki_pages = Kaminari.paginate_array(
-      wiki.list_pages(sort: params[:sort], direction: params[:direction])
-    ).page(params[:page])
-
-    @wiki_entries = WikiPage.group_by_directory(@wiki_pages)
+    @wiki_entries = WikiDirectory.group_pages(wiki_pages)
 
     render 'shared/wikis/pages'
   end
@@ -97,9 +107,10 @@ module WikiActions
     @page = response.payload[:page]
 
     if response.success?
+      flash[:toast] = _('Wiki page was successfully updated.')
+
       redirect_to(
-        wiki_page_path(wiki, page),
-        notice: _('Wiki was successfully updated.')
+        wiki_page_path(wiki, page)
       )
     else
       render 'shared/wikis/edit'
@@ -116,9 +127,10 @@ module WikiActions
     @page = response.payload[:page]
 
     if response.success?
+      flash[:toast] = _('Wiki page was successfully created.')
+
       redirect_to(
-        wiki_page_path(wiki, page),
-        notice: _('Wiki was successfully updated.')
+        wiki_page_path(wiki, page)
       )
     else
       render 'shared/wikis/edit'
@@ -163,9 +175,10 @@ module WikiActions
     response = WikiPages::DestroyService.new(container: container, current_user: current_user).execute(page)
 
     if response.success?
+      flash[:toast] = _("Wiki page was successfully deleted.")
+
       redirect_to wiki_path(wiki),
-      status: :found,
-      notice: _("Page was successfully deleted")
+      status: :found
     else
       @error = response
       render 'shared/wikis/edit'
@@ -216,8 +229,18 @@ module WikiActions
     unless @sidebar_page # Fallback to default sidebar
       @sidebar_wiki_entries, @sidebar_limited = wiki.sidebar_entries
     end
+  rescue ::Gitlab::Git::CommandTimedOut => e
+    @sidebar_error = e
   end
   # rubocop:enable Gitlab/ModuleWithInstanceVariables
+
+  def wiki_pages
+    strong_memoize(:wiki_pages) do
+      Kaminari.paginate_array(
+        wiki.list_pages(sort: params[:sort], direction: params[:direction])
+      ).page(params[:page])
+    end
+  end
 
   def wiki_params
     params.require(:wiki).permit(:title, :content, :format, :message, :last_commit_sha)

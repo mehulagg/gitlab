@@ -186,7 +186,7 @@ module Gitlab
         end
 
         def log_level
-          debug_logging? ? :debug : Rails.logger.level # rubocop:disable Gitlab/RailsLogger
+          debug_logging? ? :debug : Rails.logger.level
         end
 
         def debug_logging?

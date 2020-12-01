@@ -6,6 +6,8 @@ class ApprovalProjectRule < ApplicationRecord
 
   belongs_to :project
   has_and_belongs_to_many :protected_branches
+  has_many :approval_merge_request_rule_sources
+  has_many :approval_merge_request_rules, through: :approval_merge_request_rule_sources
 
   enum rule_type: {
     regular: 0,
@@ -19,14 +21,6 @@ class ApprovalProjectRule < ApplicationRecord
 
   validates :name, uniqueness: { scope: [:project_id, :rule_type] }
   validates :rule_type, uniqueness: { scope: :project_id, message: proc { _('any-approver for the project already exists') } }, if: :any_approver?
-
-  def self.applicable_to_branch(branch)
-    includes(:protected_branches).select { |rule| rule.applies_to_branch?(branch) }
-  end
-
-  def self.inapplicable_to_branch(branch)
-    includes(:protected_branches).reject { |rule| rule.applies_to_branch?(branch) }
-  end
 
   def applies_to_branch?(branch)
     return true if protected_branches.empty?

@@ -1,8 +1,8 @@
 <script>
+import GetBlobContent from 'shared_queries/snippet/snippet_blob_content.query.graphql';
+
 import BlobHeader from '~/blob/components/blob_header.vue';
 import BlobContent from '~/blob/components/blob_content.vue';
-
-import GetBlobContent from '../queries/snippet.blob.content.query.graphql';
 
 import {
   SIMPLE_BLOB_VIEWER,
@@ -21,8 +21,9 @@ export default {
       query: GetBlobContent,
       variables() {
         return {
-          ids: this.snippet.id,
+          ids: [this.snippet.id],
           rich: this.activeViewerType === RICH_BLOB_VIEWER,
+          paths: [this.blob.path],
         };
       },
       update(data) {
@@ -49,6 +50,13 @@ export default {
       type: Object,
       required: true,
     },
+  },
+  provide() {
+    return {
+      blobHash: Math.random()
+        .toString()
+        .split('.')[1],
+    };
   },
   data() {
     return {
@@ -79,8 +87,10 @@ export default {
     },
     onContentUpdate(data) {
       const { path: blobPath } = this.blob;
-      const { blobs } = data.snippets.edges[0].node;
-      const updatedBlobData = blobs.find(blob => blob.path === blobPath);
+      const {
+        blobs: { nodes: dataBlobs },
+      } = data.snippets.nodes[0];
+      const updatedBlobData = dataBlobs.find(blob => blob.path === blobPath);
       return updatedBlobData.richData || updatedBlobData.plainData;
     },
   },

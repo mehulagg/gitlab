@@ -2,10 +2,11 @@
 
 module NetworkPolicies
   module Responses
-    def kubernetes_error_response(error)
+    def kubernetes_error_response(error, payload = {})
       ServiceResponse.error(
         http_status: :bad_request,
-        message: s_('NetworkPolicies|Kubernetes error: %{error}') % { error: error }
+        message: s_('NetworkPolicies|Kubernetes error: %{error}') % { error: error },
+        payload: payload
       )
     end
 

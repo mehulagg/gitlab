@@ -14,7 +14,7 @@ RSpec.describe LooksAhead do
 
   # Simplified schema to test lookahead
   let_it_be(:schema) do
-    issues_resolver = Class.new(Resolvers::BaseResolver) do
+    issues_resolver = Class.new(GraphQL::Schema::Resolver) do
       include LooksAhead
 
       def resolve_with_lookahead(**args)
@@ -41,7 +41,6 @@ RSpec.describe LooksAhead do
       field :issues, issue.connection_type,
         null: true
       field :issues_with_lookahead, issue.connection_type,
-        extras: [:lookahead],
         resolver: issues_resolver,
         null: true
     end
@@ -115,20 +114,6 @@ RSpec.describe LooksAhead do
     expect(the_user.issues).to receive(:preload).with(:labels)
 
     query.result
-  end
-
-  context 'the feature flag is off' do
-    before do
-      stub_feature_flags(described_class::FEATURE_FLAG => false)
-    end
-
-    it_behaves_like 'a working query on the test schema'
-
-    it 'does not preload labels on issues' do
-      expect(the_user.issues).not_to receive(:preload).with(:labels)
-
-      query.result
-    end
   end
 
   it 'issues fewer queries than the naive approach' do

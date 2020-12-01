@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # GraphQL API
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/19008) in GitLab 11.0 (enabled by feature flag `graphql`).
@@ -76,6 +82,10 @@ The process is as follows:
    release post (at or prior to X.11 and X.5 releases).
 1. Fields meeting criteria are removed in X.0 or X.6.
 
+### List of removed items
+
+View the [fields, enums, and other items we removed](removed_items.md) from the GraphQL API.
+
 ## Available queries
 
 The GraphQL API includes the following queries at the root level:
@@ -113,3 +123,11 @@ Machine-readable versions are also available:
 
 - [JSON format](reference/gitlab_schema.json)
 - [IDL format](reference/gitlab_schema.graphql)
+
+## Generate updates for documentation
+
+If you've changed the GraphQL schema, you should set up an MR to gain approval of your changes.
+To generate the required documentation and schema, follow the instructions given in the
+[Rake tasks for developers](../../development/rake_tasks.md#update-graphql-documentation-and-schema-definitions) page.
+
+Be sure to run these commands using the [GitLab Development Kit](https://gitlab.com/gitlab-org/gitlab-development-kit/).

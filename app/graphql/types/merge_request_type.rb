@@ -49,6 +49,8 @@ module Types
           description: 'ID of the merge request target project'
     field :source_branch, GraphQL::STRING_TYPE, null: false,
           description: 'Source branch of the merge request'
+    field :source_branch_protected, GraphQL::BOOLEAN_TYPE, null: false, calls_gitaly: true,
+          description: 'Indicates if the source branch is protected'
     field :target_branch, GraphQL::STRING_TYPE, null: false,
           description: 'Target branch of the merge request'
     field :work_in_progress, GraphQL::BOOLEAN_TYPE, method: :work_in_progress?, null: false,
@@ -68,6 +70,8 @@ module Types
           description: 'SHA of the merge request commit (set once merged)'
     field :user_notes_count, GraphQL::INT_TYPE, null: true,
           description: 'User notes count of the merge request'
+    field :user_discussions_count, GraphQL::INT_TYPE, null: true,
+          description: 'Number of user discussions in the merge request'
     field :should_remove_source_branch, GraphQL::BOOLEAN_TYPE, method: :should_remove_source_branch?, null: true,
           description: 'Indicates if the source branch of the merge request will be deleted after merge'
     field :force_remove_source_branch, GraphQL::BOOLEAN_TYPE, method: :force_remove_source_branch?, null: true,
@@ -80,15 +84,12 @@ module Types
           description: 'Error message due to a merge error'
     field :allow_collaboration, GraphQL::BOOLEAN_TYPE, null: true,
           description: 'Indicates if members of the target project can push to the fork'
-    field :should_be_rebased, GraphQL::BOOLEAN_TYPE, method: :should_be_rebased?, null: false,
+    field :should_be_rebased, GraphQL::BOOLEAN_TYPE, method: :should_be_rebased?, null: false, calls_gitaly: true,
           description: 'Indicates if the merge request will be rebased'
     field :rebase_commit_sha, GraphQL::STRING_TYPE, null: true,
           description: 'Rebase commit SHA of the merge request'
     field :rebase_in_progress, GraphQL::BOOLEAN_TYPE, method: :rebase_in_progress?, null: false, calls_gitaly: true,
           description: 'Indicates if there is a rebase currently in progress for the merge request'
-    field :merge_commit_message, GraphQL::STRING_TYPE, method: :default_merge_commit_message, null: true,
-          deprecated: { reason: 'Use `defaultMergeCommitMessage`', milestone: '11.8' },
-          description: 'Default merge commit message of the merge request'
     field :default_merge_commit_message, GraphQL::STRING_TYPE, null: true,
           description: 'Default merge commit message of the merge request'
     field :merge_ongoing, GraphQL::BOOLEAN_TYPE, method: :merge_ongoing?, null: false,
@@ -112,13 +113,13 @@ module Types
 
     field :head_pipeline, Types::Ci::PipelineType, null: true, method: :actual_head_pipeline,
           description: 'The pipeline running on the branch HEAD of the merge request'
-    field :pipelines, Types::Ci::PipelineType.connection_type,
+    field :pipelines,
+          null: true,
           description: 'Pipelines for the merge request',
           resolver: Resolvers::MergeRequestPipelinesResolver
 
     field :milestone, Types::MilestoneType, null: true,
-          description: 'The milestone of the merge request',
-          resolve: -> (obj, _args, _ctx) { Gitlab::Graphql::Loaders::BatchModelLoader.new(Milestone, obj.milestone_id).find }
+          description: 'The milestone of the merge request'
     field :assignees, Types::UserType.connection_type, null: true, complexity: 5,
           description: 'Assignees of the merge request'
     field :author, Types::UserType, null: true,
@@ -146,6 +147,37 @@ module Types
           description: Types::TaskCompletionStatus.description
     field :commit_count, GraphQL::INT_TYPE, null: true,
           description: 'Number of commits in the merge request'
+    field :conflicts, GraphQL::BOOLEAN_TYPE, null: false, method: :cannot_be_merged?,
+          description: 'Indicates if the merge request has conflicts'
+    field :auto_merge_enabled, GraphQL::BOOLEAN_TYPE, null: false,
+          description: 'Indicates if auto merge is enabled for the merge request'
+
+    field :approved_by, Types::UserType.connection_type, null: true,
+          description: 'Users who approved the merge request'
+
+    def approved_by
+      object.approved_by_users
+    end
+
+    def user_notes_count
+      BatchLoader::GraphQL.for(object.id).batch(key: :merge_request_user_notes_count) do |ids, loader, args|
+        counts = Note.count_for_collection(ids, 'MergeRequest').index_by(&:noteable_id)
+
+        ids.each do |id|
+          loader.call(id, counts[id]&.count || 0)
+        end
+      end
+    end
+
+    def user_discussions_count
+      BatchLoader::GraphQL.for(object.id).batch(key: :merge_request_user_discussions_count) do |ids, loader, args|
+        counts = Note.count_for_collection(ids, 'MergeRequest', 'COUNT(DISTINCT discussion_id) as count').index_by(&:noteable_id)
+
+        ids.each do |id|
+          loader.call(id, counts[id]&.count || 0)
+        end
+      end
+    end
 
     def diff_stats(path: nil)
       stats = Array.wrap(object.diff_stats&.to_a)
@@ -158,20 +190,15 @@ module Types
     end
 
     def diff_stats_summary
-      nil_stats = { additions: 0, deletions: 0, file_count: 0 }
-      return nil_stats unless object.diff_stats.present?
-
-      object.diff_stats.each_with_object(nil_stats) do |status, hash|
-        hash.merge!(additions: status.additions, deletions: status.deletions, file_count: 1) { |_, x, y| x + y }
-      end
+      BatchLoaders::MergeRequestDiffSummaryBatchLoader.load_for(object)
     end
 
     def commit_count
       object&.metrics&.commits_count
     end
 
-    def approvers
-      object.approver_users
+    def source_branch_protected
+      object.source_project.present? && ProtectedBranch.protected?(object.source_project, object.source_branch)
     end
   end
 end

@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Sidekiq Style Guide
 
 This document outlines various guidelines that should be followed when adding or
@@ -21,7 +27,10 @@ After adding a new queue, run `bin/rake
 gitlab:sidekiq:all_queues_yml:generate` to regenerate
 `app/workers/all_queues.yml` or `ee/app/workers/all_queues.yml` so that
 it can be picked up by
-[`sidekiq-cluster`](../administration/operations/extra_sidekiq_processes.md).
+[`sidekiq-cluster`](../administration/operations/extra_sidekiq_processes.md). 
+Additionally, run
+`bin/rake gitlab:sidekiq:sidekiq_queues_yml:generate` to regenerate
+`config/sidekiq_queues.yml`.
 
 ## Queue Namespaces
 
@@ -112,7 +121,6 @@ As a general rule, a worker can be considered idempotent if:
 
 A good example of that would be a cache expiration worker.
 
-NOTE: **Note:**
 A job scheduled for an idempotent worker will automatically be
 [deduplicated](#deduplication) when an unstarted job with the same
 arguments is already in the queue.
@@ -152,7 +160,6 @@ end
 It's encouraged to only have the `idempotent!` call in the top-most worker class, even if
 the `perform` method is defined in another class or module.
 
-NOTE: **Note:**
 If the worker class is not marked as idempotent, a cop will fail.
 Consider skipping the cop if you're not confident your job can safely
 run multiple times.
@@ -165,6 +172,22 @@ job. The work is skipped because the same work would be
 done by the job that was scheduled first; by the time the second
 job executed, the first job would do nothing.
 
+#### Strategies
+
+GitLab supports two deduplication strategies:
+
+- `until_executing`
+- `until_executed`
+
+More [deduplication strategies have been
+suggested](https://gitlab.com/gitlab-com/gl-infra/scalability/-/issues/195). If
+you are implementing a worker that could benefit from a different
+strategy, please comment in the issue.
+
+##### Until Executing
+
+This strategy takes a lock when a job is added to the queue, and removes that lock before the job starts.
+
 For example, `AuthorizedProjectsWorker` takes a user ID. When the
 worker runs, it recalculates a user's authorizations. GitLab schedules
 this job each time an action potentially changes a user's
@@ -173,10 +196,47 @@ same time, the second job can be skipped if the first job hasn't
 begun, because when the first job runs, it creates the
 authorizations for both projects.
 
+```ruby
+module AuthorizedProjectUpdate
+  class UserRefreshOverUserRangeWorker
+    include ApplicationWorker
+
+    deduplicate :until_executing
+    idempotent!
+
+    # ...
+  end
+end
+```
+
+##### Until Executed
+
+This strategy takes a lock when a job is added to the queue, and removes that lock after the job finishes.
+It can be used to prevent jobs from running simultaneously multiple times.
+
+```ruby
+module Ci
+  class BuildTraceChunkFlushWorker
+    include ApplicationWorker
+
+    deduplicate :until_executed
+    idempotent!
+
+    # ...
+  end
+end
+```
+
+#### Scheduling jobs in the future
+
 GitLab doesn't skip jobs scheduled in the future, as we assume that
 the state will have changed by the time the job is scheduled to
-execute. If you do want to deduplicate jobs scheduled in the future
-this can be specified on the worker as follows:
+execute. Deduplication of jobs scheduled in the feature is possible
+for both `until_executed` and `until_executing` strategies.
+
+If you do want to deduplicate jobs scheduled in the future,
+this can be specified on the worker by passing `including_scheduled: true` argument
+when defining deduplication strategy:
 
 ```ruby
 module AuthorizedProjectUpdate
@@ -191,29 +251,84 @@ module AuthorizedProjectUpdate
 end
 ```
 
-This strategy is called `until_executing`. More [deduplication
-strategies have been
-suggested](https://gitlab.com/gitlab-com/gl-infra/scalability/-/issues/195). If
-you are implementing a worker that could benefit from a different
-strategy, please comment in the issue.
+## Limited capacity worker
 
-If the automatic deduplication were to cause issues in certain
-queues. This can be temporarily disabled by enabling a feature flag
-named `disable_<queue name>_deduplication`. For example to disable
-deduplication for the `AuthorizedProjectsWorker`, we would enable the
-feature flag `disable_authorized_projects_deduplication`.
+It is possible to limit the number of concurrent running jobs for a worker class
+by using the `LimitedCapacity::Worker` concern.
 
-From ChatOps:
+The worker must implement three methods:
 
-```shell
-/chatops run feature set disable_authorized_projects_deduplication true
-```
-
-From the rails console:
+- `perform_work` - the concern implements the usual `perform` method and calls
+`perform_work` if there is any capacity available.
+- `remaining_work_count` - number of jobs that will have work to perform.
+- `max_running_jobs` - maximum number of jobs allowed to run concurrently.
 
 ```ruby
-Feature.enable!(:disable_authorized_projects_deduplication)
+class MyDummyWorker
+  include ApplicationWorker
+  include LimitedCapacity::Worker
+
+  def perform_work(*args)
+  end
+
+  def remaining_work_count(*args)
+    5
+  end
+
+  def max_running_jobs
+    25
+  end
+end
 ```
+
+Additional to the regular worker, a cron worker must be defined as well to
+backfill the queue with jobs. the arguments passed to `perform_with_capacity`
+will be passed along to the `perform_work` method.
+
+```ruby
+class ScheduleMyDummyCronWorker
+  include ApplicationWorker
+  include CronjobQueue
+
+  def perform(*args)
+    MyDummyWorker.perform_with_capacity(*args)
+  end
+end
+```
+
+### How many jobs are running?
+
+It will be running `max_running_jobs` at almost all times.
+
+The cron worker will check the remaining capacity on each execution and it
+will schedule at most `max_running_jobs` jobs. Those jobs on completion will
+re-enqueue themselves immediately, but not on failure. The cron worker is in
+charge of replacing those failed jobs.
+
+### Handling errors and idempotence
+
+This concern disables Sidekiq retries, logs the errors, and sends the job to the
+dead queue. This is done to have only one source that produces jobs and because
+the retry would occupy a slot with a job that will be performed in the distant future.
+
+We let the cron worker enqueue new jobs, this could be seen as our retry and
+back off mechanism because the job might fail again if executed immediately.
+This means that for every failed job, we will be running at a lower capacity
+until the cron worker fills the capacity again. If it is important for the
+worker not to get a backlog, exceptions must be handled in `#perform_work` and
+the job should not raise.
+
+The jobs are deduplicated using the `:none` strategy, but the worker is not
+marked as `idempotent!`.
+
+### Metrics
+
+This concern exposes three Prometheus metrics of gauge type with the worker class
+name as label:
+
+- `limited_capacity_worker_running_jobs`
+- `limited_capacity_worker_max_running_jobs`
+- `limited_capacity_worker_remaining_work_count`
 
 ## Job urgency
 
@@ -350,9 +465,7 @@ class ExternalDependencyWorker
 end
 ```
 
-NOTE: **Note:**
-Note that a job cannot be both high urgency and have
-external dependencies.
+A job cannot be both high urgency and have external dependencies.
 
 ## CPU-bound and Memory-bound Workers
 
@@ -566,8 +679,8 @@ blocks:
 
 ## Arguments logging
 
-When [`SIDEKIQ_LOG_ARGUMENTS`](../administration/troubleshooting/sidekiq.md#log-arguments-to-sidekiq-jobs)
-is enabled, Sidekiq job arguments will be logged.
+As of GitLab 13.6, Sidekiq job arguments will be logged by default, unless [`SIDEKIQ_LOG_ARGUMENTS`](../administration/troubleshooting/sidekiq.md#log-arguments-to-sidekiq-jobs)
+is disabled.
 
 By default, the only arguments logged are numeric arguments, because
 arguments of other types could contain sensitive information. To
@@ -617,7 +730,7 @@ during deployment before all Rails and Sidekiq nodes have the updated code.
 
 #### Deprecate and remove an argument
 
-**Before you remove arguments from the `perform_async` and `perform` methods.**, deprecate them. The 
+**Before you remove arguments from the `perform_async` and `perform` methods.**, deprecate them. The
 following example deprecates and then removes `arg2` from the `perform_async` method:
 
 1. Provide a default value (usually `nil`) and use a comment to mark the
@@ -688,7 +801,7 @@ This approach requires multiple releases.
 ##### Parameter hash
 
 This approach will not require multiple releases if an existing worker already
-utilizes a parameter hash.
+uses a parameter hash.
 
 1. Use a parameter hash in the worker to allow future flexibility.
 

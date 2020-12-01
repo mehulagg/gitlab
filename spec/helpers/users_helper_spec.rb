@@ -126,6 +126,16 @@ RSpec.describe UsersHelper do
       end
     end
 
+    context 'with a pending approval user' do
+      it 'returns the pending approval badge' do
+        blocked_pending_approval_user = create(:user, :blocked_pending_approval)
+
+        badges = helper.user_badges_in_admin_section(blocked_pending_approval_user)
+
+        expect(filter_ee_badges(badges)).to eq([text: 'Pending approval', variant: 'info'])
+      end
+    end
+
     context 'with an admin user' do
       it "returns the admin badge" do
         admin_user = create(:admin)
@@ -179,32 +189,24 @@ RSpec.describe UsersHelper do
     end
   end
 
+  describe '#can_force_email_confirmation?' do
+    subject { helper.can_force_email_confirmation?(user) }
+
+    context 'for a user that is already confirmed' do
+      it { is_expected.to eq(false) }
+    end
+
+    context 'for a user that is not confirmed' do
+      let(:user) { create(:user, :unconfirmed) }
+
+      it { is_expected.to eq(true) }
+    end
+  end
+
   describe '#work_information' do
-    subject { helper.work_information(user) }
+    let(:with_schema_markup) { false }
 
-    context 'when both job_title and organization are present' do
-      let(:user) { build(:user, organization: 'GitLab', job_title: 'Frontend Engineer') }
-
-      it 'returns job title concatenated with organization' do
-        is_expected.to eq('Frontend Engineer at GitLab')
-      end
-    end
-
-    context 'when only organization is present' do
-      let(:user) { build(:user, organization: 'GitLab') }
-
-      it "returns organization" do
-        is_expected.to eq('GitLab')
-      end
-    end
-
-    context 'when only job_title is present' do
-      let(:user) { build(:user, job_title: 'Frontend Engineer') }
-
-      it 'returns job title' do
-        is_expected.to eq('Frontend Engineer')
-      end
-    end
+    subject { helper.work_information(user, with_schema_markup: with_schema_markup) }
 
     context 'when neither organization nor job_title are present' do
       it { is_expected.to be_nil }
@@ -214,6 +216,121 @@ RSpec.describe UsersHelper do
       let(:user) { nil }
 
       it { is_expected.to be_nil }
+    end
+
+    context 'without schema markup' do
+      context 'when both job_title and organization are present' do
+        let(:user) { build(:user, organization: 'GitLab', job_title: 'Frontend Engineer') }
+
+        it 'returns job title concatenated with organization' do
+          is_expected.to eq('Frontend Engineer at GitLab')
+        end
+      end
+
+      context 'when only organization is present' do
+        let(:user) { build(:user, organization: 'GitLab') }
+
+        it "returns organization" do
+          is_expected.to eq('GitLab')
+        end
+      end
+
+      context 'when only job_title is present' do
+        let(:user) { build(:user, job_title: 'Frontend Engineer') }
+
+        it 'returns job title' do
+          is_expected.to eq('Frontend Engineer')
+        end
+      end
+    end
+
+    context 'with schema markup' do
+      let(:with_schema_markup) { true }
+
+      context 'when both job_title and organization are present' do
+        let(:user) { build(:user, organization: 'GitLab', job_title: 'Frontend Engineer') }
+
+        it 'returns job title concatenated with organization' do
+          is_expected.to eq('<span itemprop="jobTitle">Frontend Engineer</span> at <span itemprop="worksFor">GitLab</span>')
+        end
+      end
+
+      context 'when only organization is present' do
+        let(:user) { build(:user, organization: 'GitLab') }
+
+        it "returns organization" do
+          is_expected.to eq('<span itemprop="worksFor">GitLab</span>')
+        end
+      end
+
+      context 'when only job_title is present' do
+        let(:user) { build(:user, job_title: 'Frontend Engineer') }
+
+        it 'returns job title' do
+          is_expected.to eq('<span itemprop="jobTitle">Frontend Engineer</span>')
+        end
+      end
+    end
+  end
+
+  describe '#user_display_name' do
+    subject { helper.user_display_name(user) }
+
+    before do
+      stub_current_user(nil)
+    end
+
+    context 'for a confirmed user' do
+      let(:user) { create(:user) }
+
+      before do
+        stub_profile_permission_allowed(true)
+      end
+
+      it { is_expected.to eq(user.name) }
+    end
+
+    context 'for an unconfirmed user' do
+      let(:user) { create(:user, :unconfirmed) }
+
+      before do
+        stub_profile_permission_allowed(false)
+      end
+
+      it { is_expected.to eq('Unconfirmed user') }
+
+      context 'when current user is an admin' do
+        before do
+          admin_user = create(:admin)
+          stub_current_user(admin_user)
+          stub_profile_permission_allowed(true, admin_user)
+        end
+
+        it { is_expected.to eq(user.name) }
+      end
+
+      context 'when the current user is self' do
+        before do
+          stub_current_user(user)
+          stub_profile_permission_allowed(true, user)
+        end
+
+        it { is_expected.to eq(user.name) }
+      end
+    end
+
+    context 'for a blocked user' do
+      let(:user) { create(:user, :blocked) }
+
+      it { is_expected.to eq('Blocked user') }
+    end
+
+    def stub_current_user(user)
+      allow(helper).to receive(:current_user).and_return(user)
+    end
+
+    def stub_profile_permission_allowed(allowed, current_user = nil)
+      allow(helper).to receive(:can?).with(user, :read_user_profile, current_user).and_return(allowed)
     end
   end
 end

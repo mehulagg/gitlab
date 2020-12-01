@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 module API
-  class ImportBitbucketServer < Grape::API::Instance
+  class ImportBitbucketServer < ::API::Base
+    feature_category :importers
+
     helpers do
       def client
         @client ||= BitbucketServer::Client.new(credentials)

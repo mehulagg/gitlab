@@ -1,4 +1,5 @@
 <script>
+import { GlTruncate } from '@gitlab/ui';
 import FileHeader from '~/vue_shared/components/file_row_header.vue';
 import FileIcon from '~/vue_shared/components/file_icon.vue';
 import { escapeFileUrl } from '~/lib/utils/url_utility';
@@ -8,11 +9,17 @@ export default {
   components: {
     FileHeader,
     FileIcon,
+    GlTruncate,
   },
   props: {
     file: {
       type: Object,
       required: true,
+    },
+    fileUrl: {
+      type: String,
+      required: false,
+      default: '',
     },
     level: {
       type: Number,
@@ -22,6 +29,11 @@ export default {
       type: String,
       required: false,
       default: '',
+    },
+    truncateMiddle: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
   },
   computed: {
@@ -47,6 +59,9 @@ export default {
     textForTitle() {
       // don't output a title if we don't have the expanded path
       return this.file?.tree?.length ? this.file.tree[0].parentPath : false;
+    },
+    fileRouterUrl() {
+      return this.fileUrl || `/project${this.file.url}`;
     },
   },
   watch: {
@@ -74,7 +89,7 @@ export default {
         this.toggleTreeOpen(this.file.path);
       }
 
-      if (this.$router) this.$router.push(`/project${this.file.url}`);
+      if (this.$router && !this.hasUrlAtCurrentRoute()) this.$router.push(this.fileRouterUrl);
 
       if (this.isBlob) this.clickedFile(this.file.path);
     },
@@ -104,7 +119,7 @@ export default {
     hasUrlAtCurrentRoute() {
       if (!this.$router || !this.$router.currentRoute) return true;
 
-      return this.$router.currentRoute.path === `/project${escapeFileUrl(this.file.url)}`;
+      return this.$router.currentRoute.path === escapeFileUrl(this.fileRouterUrl);
     },
   },
 };
@@ -126,9 +141,10 @@ export default {
       <span
         ref="textOutput"
         :style="levelIndentation"
-        class="file-row-name str-truncated"
+        class="file-row-name"
         data-qa-selector="file_name_content"
-        :class="fileClasses"
+        data-testid="file-row-name-container"
+        :class="[fileClasses, { 'str-truncated': !truncateMiddle, 'gl-min-w-0': truncateMiddle }]"
       >
         <file-icon
           class="file-row-icon"
@@ -138,8 +154,10 @@ export default {
           :folder="isTree"
           :opened="file.opened"
           :size="16"
+          :submodule="file.submodule"
         />
-        {{ file.name }}
+        <gl-truncate v-if="truncateMiddle" :text="file.name" position="middle" class="gl-pr-7" />
+        <template v-else>{{ file.name }}</template>
       </span>
       <slot></slot>
     </div>

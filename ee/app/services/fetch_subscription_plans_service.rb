@@ -39,6 +39,6 @@ class FetchSubscriptionPlansService
   end
 
   def cache_key
-    "subscription-plans-#{@plan}"
+    "subscription-plan-#{@plan}"
   end
 end

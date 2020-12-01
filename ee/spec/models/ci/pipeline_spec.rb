@@ -13,6 +13,7 @@ RSpec.describe Ci::Pipeline do
   end
 
   it { is_expected.to have_many(:security_scans).through(:builds).class_name('Security::Scan') }
+  it { is_expected.to have_many(:security_findings).through(:security_scans).class_name('Security::Finding').source(:findings) }
   it { is_expected.to have_many(:downstream_bridges) }
   it { is_expected.to have_many(:vulnerability_findings).through(:vulnerabilities_finding_pipelines).class_name('Vulnerabilities::Finding') }
   it { is_expected.to have_many(:vulnerabilities_finding_pipelines).class_name('Vulnerabilities::FindingPipeline') }
@@ -377,7 +378,7 @@ RSpec.describe Ci::Pipeline do
 
         context 'when feature is not available' do
           before do
-            stub_feature_flags(ci_project_subscriptions: false)
+            stub_licensed_features(ci_project_subscriptions: false)
           end
 
           it 'does not schedule the trigger downstream subscriptions worker' do
@@ -389,7 +390,7 @@ RSpec.describe Ci::Pipeline do
 
         context 'when feature is available' do
           before do
-            stub_feature_flags(ci_project_subscriptions: true)
+            stub_licensed_features(ci_project_subscriptions: true)
           end
 
           it 'schedules the trigger downstream subscriptions worker' do
@@ -493,6 +494,116 @@ RSpec.describe Ci::Pipeline do
       let(:merge_request) { create(:merge_request, :with_detached_merge_request_pipeline) }
 
       it { is_expected.to eq(:detached) }
+    end
+  end
+
+  describe '#latest_failed_security_builds' do
+    let(:sast_build) { create(:ee_ci_build, :sast, :failed, pipeline: pipeline) }
+    let(:dast_build) { create(:ee_ci_build, :sast, pipeline: pipeline) }
+    let(:retried_sast_build) { create(:ee_ci_build, :sast, :failed, :retried, pipeline: pipeline) }
+    let(:expected_builds) { [sast_build] }
+
+    before do
+      allow_next_instance_of(::Security::SecurityJobsFinder) do |finder|
+        allow(finder).to receive(:execute).and_return([sast_build, dast_build, retried_sast_build])
+      end
+    end
+
+    subject { pipeline.latest_failed_security_builds }
+
+    it { is_expected.to match_array(expected_builds) }
+  end
+
+  describe "#license_scan_completed?" do
+    where(:pipeline_status, :build_types, :expected_status) do
+      [
+        [:blocked, [:container_scanning], false],
+        [:blocked, [:license_scan_v2_1, :container_scanning], true],
+        [:blocked, [:license_scan_v2_1], true],
+        [:blocked, [], false],
+        [:failed, [:container_scanning], false],
+        [:failed, [:license_scan_v2_1, :container_scanning], true],
+        [:failed, [:license_scan_v2_1], true],
+        [:failed, [], false],
+        [:running, [:container_scanning], false],
+        [:running, [:license_scan_v2_1, :container_scanning], true],
+        [:running, [:license_scan_v2_1], true],
+        [:running, [], false],
+        [:success, [:container_scanning], false],
+        [:success, [:license_scan_v2_1, :container_scanning], true],
+        [:success, [:license_scan_v2_1], true],
+        [:success, [], false]
+      ]
+    end
+
+    with_them do
+      subject { pipeline.license_scan_completed? }
+
+      let(:pipeline) { create(:ci_pipeline, pipeline_status, builds: builds) }
+      let(:builds) { build_types.map { |build_type| create(:ee_ci_build, build_type) } }
+
+      specify { expect(subject).to eq(expected_status) }
+    end
+  end
+
+  describe '#can_store_security_reports?' do
+    subject { pipeline.can_store_security_reports? }
+
+    before do
+      pipeline.succeed!
+    end
+
+    context 'when the security reports can not be stored for the project' do
+      before do
+        allow(project).to receive(:can_store_security_reports?).and_return(false)
+      end
+
+      context 'when the pipeline does not have security reports' do
+        it { is_expected.to be_falsy }
+      end
+
+      context 'when the pipeline has security reports' do
+        before do
+          create(:ee_ci_build, :sast, pipeline: pipeline, project: project)
+        end
+
+        it { is_expected.to be_falsy }
+      end
+    end
+
+    context 'when the security reports can be stored for the project' do
+      before do
+        allow(project).to receive(:can_store_security_reports?).and_return(true)
+      end
+
+      context 'when the pipeline does not have security reports' do
+        it { is_expected.to be_falsy }
+      end
+
+      context 'when the pipeline has security reports' do
+        before do
+          create(:ee_ci_build, :sast, pipeline: pipeline, project: project)
+        end
+
+        it { is_expected.to be_truthy }
+      end
+    end
+  end
+
+  describe '#has_security_findings?' do
+    subject { pipeline.has_security_findings? }
+
+    context 'when the pipeline has security_findings' do
+      before do
+        scan = create(:security_scan, pipeline: pipeline)
+        create(:security_finding, scan: scan)
+      end
+
+      it { is_expected.to be_truthy }
+    end
+
+    context 'when the pipeline does not have security_findings' do
+      it { is_expected.to be_falsey }
     end
   end
 end

@@ -2,9 +2,8 @@
 /* eslint-disable vue/no-v-html */
 import { mapActions, mapState } from 'vuex';
 import { throttle } from 'lodash';
-import { GlIcon } from '@gitlab/ui';
+import { GlTooltipDirective, GlButton, GlIcon } from '@gitlab/ui';
 import { __ } from '../../../locale';
-import tooltip from '../../../vue_shared/directives/tooltip';
 import ScrollButton from './detail/scroll_button.vue';
 import JobDescription from './detail/description.vue';
 
@@ -15,9 +14,10 @@ const scrollPositions = {
 
 export default {
   directives: {
-    tooltip,
+    GlTooltip: GlTooltipDirective,
   },
   components: {
+    GlButton,
     GlIcon,
     ScrollButton,
     JobDescription,
@@ -76,15 +76,15 @@ export default {
 <template>
   <div class="ide-pipeline build-page d-flex flex-column flex-fill">
     <header class="ide-job-header d-flex align-items-center">
-      <button class="btn btn-default btn-sm d-flex" @click="setDetailJob(null)">
-        <gl-icon name="chevron-left" /> {{ __('View jobs') }}
-      </button>
+      <gl-button category="secondary" icon="chevron-left" size="small" @click="setDetailJob(null)">
+        {{ __('View jobs') }}
+      </gl-button>
     </header>
     <div class="top-bar d-flex border-left-0 mr-3">
       <job-description :job="detailJob" />
       <div class="controllers ml-auto">
         <a
-          v-tooltip
+          v-gl-tooltip
           :title="__('Show complete raw log')"
           :href="detailJob.rawPath"
           data-placement="top"
@@ -92,7 +92,7 @@ export default {
           class="controllers-buttons"
           target="_blank"
         >
-          <i aria-hidden="true" class="fa fa-file-text-o"></i>
+          <gl-icon name="doc-text" />
         </a>
         <scroll-button :disabled="isScrolledToTop" direction="up" @click="scrollUp" />
         <scroll-button :disabled="isScrolledToBottom" direction="down" @click="scrollDown" />

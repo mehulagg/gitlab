@@ -1,7 +1,7 @@
 ---
 stage: Create
 group: Source Code
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 type: reference, api
 ---
 
@@ -60,7 +60,7 @@ POST /projects/:id/approvals
 | `disable_overriding_approvers_per_merge_request` | boolean | no       | Allow/Disallow overriding approvers per MR                                                          |
 | `merge_requests_author_approval`                 | boolean | no       | Allow/Disallow authors from self approving merge requests; `true` means authors can self approve |
 | `merge_requests_disable_committers_approval`     | boolean | no       | Allow/Disallow committers from self approving merge requests                                        |
-| `require_password_to_approve`                    | boolean | no       | Require approver to enter a password in order to authenticate before adding the approval         |
+| `require_password_to_approve`                    | boolean | no       | Require approver to enter a password to authenticate before adding the approval         |
 
 ```json
 {
@@ -171,6 +171,104 @@ GET /projects/:id/approval_rules
     "contains_hidden_groups": false
   }
 ]
+```
+
+### Get a single project-level rule
+
+> - Introduced 13.7.
+
+You can request information about a single project approval rules using the following endpoint:
+
+```plaintext
+GET /projects/:id/approval_rules/:approval_rule_id
+```
+
+**Parameters:**
+
+| Attribute            | Type    | Required | Description                                               |
+|----------------------|---------|----------|-----------------------------------------------------------|
+| `id`                 | integer | yes      | The ID of a project                                       |
+| `approval_rule_id`   | integer | yes      | The ID of a approval rule                                 |
+
+```json
+{
+  "id": 1,
+  "name": "security",
+  "rule_type": "regular",
+  "eligible_approvers": [
+    {
+      "id": 5,
+      "name": "John Doe",
+      "username": "jdoe",
+      "state": "active",
+      "avatar_url": "https://www.gravatar.com/avatar/0?s=80&d=identicon",
+      "web_url": "http://localhost/jdoe"
+    },
+    {
+      "id": 50,
+      "name": "Group Member 1",
+      "username": "group_member_1",
+      "state": "active",
+      "avatar_url": "https://www.gravatar.com/avatar/0?s=80&d=identicon",
+      "web_url": "http://localhost/group_member_1"
+    }
+  ],
+  "approvals_required": 3,
+  "users": [
+    {
+      "id": 5,
+      "name": "John Doe",
+      "username": "jdoe",
+      "state": "active",
+      "avatar_url": "https://www.gravatar.com/avatar/0?s=80&d=identicon",
+      "web_url": "http://localhost/jdoe"
+    }
+  ],
+  "groups": [
+    {
+      "id": 5,
+      "name": "group1",
+      "path": "group1",
+      "description": "",
+      "visibility": "public",
+      "lfs_enabled": false,
+      "avatar_url": null,
+      "web_url": "http://localhost/groups/group1",
+      "request_access_enabled": false,
+      "full_name": "group1",
+      "full_path": "group1",
+      "parent_id": null,
+      "ldap_cn": null,
+      "ldap_access": null
+    }
+  ],
+  "protected_branches": [
+    {
+      "id": 1,
+      "name": "master",
+      "push_access_levels": [
+        {
+          "access_level": 30,
+          "access_level_description": "Developers + Maintainers"
+        }
+      ],
+      "merge_access_levels": [
+        {
+          "access_level": 30,
+          "access_level_description": "Developers + Maintainers"
+        }
+      ],
+      "unprotect_access_levels": [
+        {
+          "access_level": 40,
+          "access_level_description": "Maintainers"
+        }
+      ],
+      "code_owner_approval_required": "false"
+    }
+  ],
+  "contains_hidden_groups": false
+}
 ```
 
 ### Create project-level rule

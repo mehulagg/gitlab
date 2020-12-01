@@ -1,5 +1,0 @@
----
-title: Replace v-html with v-safe-html in groups_dropdown_filter.vue
-merge_request: 41212
-author: Kev @KevSlashNull
-type: other

@@ -8,7 +8,6 @@ RSpec.describe Groups::Analytics::CycleAnalytics::ValueStreamsController do
   let(:params) { { group_id: group } }
 
   before do
-    stub_feature_flags(Gitlab::Analytics::CYCLE_ANALYTICS_FEATURE_FLAG => true)
     stub_licensed_features(cycle_analytics_for_groups: true)
 
     group.add_maintainer(user)

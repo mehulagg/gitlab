@@ -1,5 +1,5 @@
 <script>
-import { GlLink, GlDeprecatedBadge as GlBadge, GlButton } from '@gitlab/ui';
+import { GlLink, GlBadge, GlButton } from '@gitlab/ui';
 
 import { FilterState } from '../constants';
 
@@ -50,10 +50,10 @@ export default {
           id="state-opened"
           data-state="opened"
           :title="__('Filter by requirements that are currently opened.')"
-          @click="$emit('clickTab', { filterBy: $options.FilterState.opened })"
+          @click="$emit('click-tab', { filterBy: $options.FilterState.opened })"
         >
           {{ __('Open') }}
-          <gl-badge class="badge-pill">{{ requirementsCount.OPENED }}</gl-badge>
+          <gl-badge>{{ requirementsCount.OPENED }}</gl-badge>
         </gl-link>
       </li>
       <li :class="{ active: isArchivedTab }">
@@ -61,10 +61,10 @@ export default {
           id="state-archived"
           data-state="archived"
           :title="__('Filter by requirements that are currently archived.')"
-          @click="$emit('clickTab', { filterBy: $options.FilterState.archived })"
+          @click="$emit('click-tab', { filterBy: $options.FilterState.archived })"
         >
           {{ __('Archived') }}
-          <gl-badge class="badge-pill">{{ requirementsCount.ARCHIVED }}</gl-badge>
+          <gl-badge>{{ requirementsCount.ARCHIVED }}</gl-badge>
         </gl-link>
       </li>
       <li :class="{ active: isAllTab }">
@@ -72,10 +72,10 @@ export default {
           id="state-all"
           data-state="all"
           :title="__('Show all requirements.')"
-          @click="$emit('clickTab', { filterBy: $options.FilterState.all })"
+          @click="$emit('click-tab', { filterBy: $options.FilterState.all })"
         >
           {{ __('All') }}
-          <gl-badge class="badge-pill">{{ requirementsCount.ALL }}</gl-badge>
+          <gl-badge>{{ requirementsCount.ALL }}</gl-badge>
         </gl-link>
       </li>
     </ul>
@@ -85,7 +85,7 @@ export default {
         variant="success"
         class="js-new-requirement qa-new-requirement-button"
         :disabled="showCreateForm"
-        @click="$emit('clickNewRequirement')"
+        @click="$emit('click-new-requirement')"
         >{{ __('New requirement') }}</gl-button
       >
     </div>

@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 
 module API
-  class LdapGroupLinks < Grape::API::Instance
+  class LdapGroupLinks < ::API::Base
     before { authenticate! }
+
+    feature_category :authentication_and_authorization
 
     params do
       requires :id, type: String, desc: 'The ID of a group'

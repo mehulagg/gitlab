@@ -3,7 +3,9 @@
 module API
   # Kubernetes Internal API
   module Internal
-    class Kubernetes < Grape::API::Instance
+    class Kubernetes < ::API::Base
+      feature_category :kubernetes_management
+
       before do
         check_feature_enabled
         authenticate_gitlab_kas_request!
@@ -45,7 +47,7 @@ module API
         end
 
         def check_feature_enabled
-          not_found! unless Feature.enabled?(:kubernetes_agent_internal_api, default_enabled: true)
+          not_found! unless Feature.enabled?(:kubernetes_agent_internal_api, default_enabled: true, type: :ops)
         end
 
         def check_agent_token
@@ -83,9 +85,7 @@ module API
           get '/project_info' do
             project = find_project(params[:id])
 
-            # TODO sort out authorization for real
-            # https://gitlab.com/gitlab-org/gitlab/-/issues/220912
-            if !project || !project.public?
+            unless Guest.can?(:download_code, project) || agent.has_access_to?(project)
               not_found!
             end
 

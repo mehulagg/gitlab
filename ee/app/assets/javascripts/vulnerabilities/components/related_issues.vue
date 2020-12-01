@@ -6,7 +6,7 @@ import RelatedIssuesBlock from '~/related_issues/components/related_issues_block
 import { issuableTypesMap, PathIdSeparator } from '~/related_issues/constants';
 import { sprintf, __, s__ } from '~/locale';
 import { joinPaths, redirectTo } from '~/lib/utils/url_utility';
-import { RELATED_ISSUES_ERRORS, FEEDBACK_TYPES } from '../constants';
+import { RELATED_ISSUES_ERRORS } from '../constants';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { getFormattedIssue, getAddRelatedIssueRequestParams } from '../helpers';
 
@@ -59,25 +59,28 @@ export default {
     isIssueAlreadyCreated() {
       return Boolean(this.state.relatedIssues.find(i => i.lockIssueRemoval));
     },
+    canCreateIssue() {
+      return !this.isIssueAlreadyCreated && !this.isFetching && Boolean(this.createIssueUrl);
+    },
   },
   inject: {
     vulnerabilityId: {
-      type: Number,
+      default: 0,
     },
     projectFingerprint: {
-      type: String,
+      default: '',
     },
     createIssueUrl: {
-      type: String,
+      default: '',
     },
     reportType: {
-      type: String,
+      default: '',
     },
     issueTrackingHelpPath: {
-      type: String,
+      default: '',
     },
     permissionsHelpPath: {
-      type: String,
+      default: '',
     },
   },
   created() {
@@ -89,20 +92,9 @@ export default {
       this.errorCreatingIssue = false;
 
       return axios
-        .post(this.createIssueUrl, {
-          vulnerability_feedback: {
-            feedback_type: FEEDBACK_TYPES.ISSUE,
-            category: this.reportType,
-            project_fingerprint: this.projectFingerprint,
-            vulnerability_data: {
-              ...this.vulnerability,
-              category: this.reportType,
-              vulnerability_id: this.vulnerabilityId,
-            },
-          },
-        })
-        .then(({ data: { issue_url } }) => {
-          redirectTo(issue_url);
+        .post(this.createIssueUrl)
+        .then(({ data: { web_url } }) => {
+          redirectTo(web_url);
         })
         .catch(() => {
           this.isProcessingAction = false;
@@ -272,7 +264,7 @@ export default {
       <template #headerText>
         {{ $options.i18n.relatedIssues }}
       </template>
-      <template v-if="!isIssueAlreadyCreated && !isFetching" #headerActions>
+      <template v-if="canCreateIssue" #header-actions>
         <gl-button
           ref="createIssue"
           variant="success"

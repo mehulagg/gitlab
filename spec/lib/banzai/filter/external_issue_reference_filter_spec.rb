@@ -5,6 +5,8 @@ require 'spec_helper'
 RSpec.describe Banzai::Filter::ExternalIssueReferenceFilter do
   include FilterSpecHelper
 
+  let_it_be_with_refind(:project) { create(:project) }
+
   shared_examples_for "external issue tracker" do
     it_behaves_like 'a reference containing an element node'
 
@@ -116,7 +118,7 @@ RSpec.describe Banzai::Filter::ExternalIssueReferenceFilter do
   end
 
   context "redmine project" do
-    let(:project) { create(:redmine_project) }
+    let_it_be(:service) { create(:redmine_service, project: project) }
 
     before do
       project.update!(issues_enabled: false)
@@ -138,7 +140,7 @@ RSpec.describe Banzai::Filter::ExternalIssueReferenceFilter do
   end
 
   context "youtrack project" do
-    let(:project) { create(:youtrack_project) }
+    let_it_be(:service) { create(:youtrack_service, project: project) }
 
     before do
       project.update!(issues_enabled: false)
@@ -181,7 +183,7 @@ RSpec.describe Banzai::Filter::ExternalIssueReferenceFilter do
   end
 
   context "jira project" do
-    let(:project) { create(:jira_project) }
+    let_it_be(:service) { create(:jira_service, project: project) }
     let(:reference) { issue.to_reference }
 
     context "with right markdown" do
@@ -206,6 +208,49 @@ RSpec.describe Banzai::Filter::ExternalIssueReferenceFilter do
         exp = act = "Issue #{reference}"
         expect(filter(act).to_html).to eq exp
       end
+    end
+  end
+
+  context "ewm project" do
+    let_it_be(:service) { create(:ewm_service, project: project) }
+
+    before do
+      project.update!(issues_enabled: false)
+    end
+
+    context "rtcwi keyword" do
+      let(:issue) { ExternalIssue.new("rtcwi 123", project) }
+      let(:reference) { issue.to_reference }
+
+      it_behaves_like "external issue tracker"
+    end
+
+    context "workitem keyword" do
+      let(:issue) { ExternalIssue.new("workitem 123", project) }
+      let(:reference) { issue.to_reference }
+
+      it_behaves_like "external issue tracker"
+    end
+
+    context "defect keyword" do
+      let(:issue) { ExternalIssue.new("defect 123", project) }
+      let(:reference) { issue.to_reference }
+
+      it_behaves_like "external issue tracker"
+    end
+
+    context "task keyword" do
+      let(:issue) { ExternalIssue.new("task 123", project) }
+      let(:reference) { issue.to_reference }
+
+      it_behaves_like "external issue tracker"
+    end
+
+    context "bug keyword" do
+      let(:issue) { ExternalIssue.new("bug 123", project) }
+      let(:reference) { issue.to_reference }
+
+      it_behaves_like "external issue tracker"
     end
   end
 end

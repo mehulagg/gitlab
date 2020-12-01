@@ -1,7 +1,7 @@
 ---
 stage: Create
 group: Source Code
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 type: reference, howto
 ---
 
@@ -91,7 +91,7 @@ Updating files: 100% (28/28), done.
 
 $ cd www-gitlab-com
 
-$ git sparse-checkout init --clone
+$ git sparse-checkout init --cone
 
 $ git sparse-checkout add data
 remote: Enumerating objects: 301, done.

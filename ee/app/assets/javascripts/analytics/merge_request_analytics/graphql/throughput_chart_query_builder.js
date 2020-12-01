@@ -21,11 +21,31 @@ export default (startDate = null, endDate = null) => {
 
     // first: 0 is an optimization which makes sure we don't load merge request objects into memory (backend).
     // Currently when requesting counts we also load the first 100 records (preloader problem).
-    return `${month}_${year}: mergeRequests(first: 0, mergedBefore: "${mergedBefore}", mergedAfter: "${mergedAfter}", labels: $labels, authorUsername: $authorUsername, assigneeUsername: $assigneeUsername, milestoneTitle: $milestoneTitle) { count }`;
+    return `
+      ${month}_${year}: mergeRequests(
+        first: 0,
+        mergedBefore: "${mergedBefore}",
+        mergedAfter: "${mergedAfter}",
+        labels: $labels,
+        authorUsername: $authorUsername,
+        assigneeUsername: $assigneeUsername,
+        milestoneTitle: $milestoneTitle,
+        sourceBranches: $sourceBranches,
+        targetBranches: $targetBranches
+      ) { count }
+    `;
   });
 
   return gql`
-    query($fullPath: ID!, $labels: [String!], $authorUsername: String, $assigneeUsername: String, $milestoneTitle: String) {
+    query(
+      $fullPath: ID!,
+      $labels: [String!],
+      $authorUsername: String,
+      $assigneeUsername: String,
+      $milestoneTitle: String,
+      $sourceBranches: [String!],
+      $targetBranches: [String!]
+    ) {
       throughputChartData: project(fullPath: $fullPath) {
         ${computedMonthData}
       }

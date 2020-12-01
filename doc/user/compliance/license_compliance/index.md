@@ -2,7 +2,7 @@
 type: reference, howto
 stage: Secure
 group: Composition Analysis
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # License Compliance **(ULTIMATE)**
@@ -21,7 +21,7 @@ that is provided by [Auto DevOps](../../../topics/autodevops/index.md).
 
 GitLab checks the License Compliance report, compares the licenses between the
 source and target branches, and shows the information right on the merge request.
-Denied licenses will be clearly visible with an `x` red icon next to them
+Denied licenses are notated with an `x` red icon next to them
 as well as new licenses which need a decision from you. In addition, you can
 [manually allow or deny](#policies)
 licenses in your project's license compliance policy section. If GitLab detects a denied license
@@ -30,17 +30,14 @@ to remove the license.
 
 NOTE: **Note:**
 If the license compliance report doesn't have anything to compare to, no information
-will be displayed in the merge request area. That is the case when you add the
+is displayed in the merge request area. That is the case when you add the
 `license_scanning` job in your `.gitlab-ci.yml` for the first time.
-Consecutive merge requests will have something to compare to and the license
-compliance report will be shown properly.
+Consecutive merge requests have something to compare to and the license
+compliance report is shown properly.
 
 ![License Compliance Widget](img/license_compliance_v13_0.png)
 
-If you are a project or group Maintainer, you can click on a license to be given
-the choice to allow it or deny it.
-
-![License approval decision](img/license_compliance_decision_v13_0.png)
+You can click on a license to see more information.
 
 When GitLab detects a **Denied** license, you can view it in the [license list](#license-list).
 
@@ -62,7 +59,6 @@ The following languages and package managers are supported.
 | .NET       | [Nuget](https://www.nuget.org/) | The .NET Framework is supported via the [mono project](https://www.mono-project.com/). There are, however, some limitations. The scanner doesn't support Windows-specific dependencies and doesn't report dependencies of your project's listed dependencies. Also, the scanner always marks detected licenses for all dependencies as `unknown`. | [License Finder](https://github.com/pivotal/LicenseFinder) |
 | Python     | [pip](https://pip.pypa.io/en/stable/) | Python is supported through [requirements.txt](https://pip.pypa.io/en/stable/user_guide/#requirements-files) and [Pipfile.lock](https://github.com/pypa/pipfile#pipfilelock). | [License Finder](https://github.com/pivotal/LicenseFinder) |
 | Ruby       | [gem](https://rubygems.org/) |  | [License Finder](https://github.com/pivotal/LicenseFinder)|
-| Objective-C, Swift | [Carthage](https://github.com/Carthage/Carthage) |  | [License Finder](https://github.com/pivotal/LicenseFinder) |
 
 NOTE: **Note:**
 Java 8 and Gradle 1.x projects are not supported.
@@ -78,6 +74,7 @@ which means that the reported licenses might be incomplete or inaccurate.
 | JavaScript | [Yarn](https://yarnpkg.com/)|[License Finder](https://github.com/pivotal/LicenseFinder)|
 | Go         | go get, gvt, glide, dep, trash, govendor |[License Finder](https://github.com/pivotal/LicenseFinder)|
 | Erlang     | [Rebar](https://www.rebar3.org/) |[License Finder](https://github.com/pivotal/LicenseFinder)|
+| Objective-C, Swift | [Carthage](https://github.com/Carthage/Carthage) |  | [License Finder](https://github.com/pivotal/LicenseFinder) |
 | Objective-C, Swift | [CocoaPods](https://cocoapods.org/) v0.39 and below |[License Finder](https://github.com/pivotal/LicenseFinder)|
 | Elixir     | [Mix](https://elixir-lang.org/getting-started/mix-otp/introduction-to-mix.html) |[License Finder](https://github.com/pivotal/LicenseFinder)|
 | C++/C      | [Conan](https://conan.io/) |[License Finder](https://github.com/pivotal/LicenseFinder)|
@@ -117,15 +114,20 @@ Before GitLab 12.8, the `license_scanning` job was named `license_management`. G
 the `license_management` job, so you must migrate to the `license_scanning` job and use the new
 `License-Scanning.gitlab-ci.yml` template.
 
-The results will be saved as a
+The results are saved as a
 [License Compliance report artifact](../../../ci/pipelines/job_artifacts.md#artifactsreportslicense_scanning)
 that you can later download and analyze. Due to implementation limitations, we
 always take the latest License Compliance artifact available. Behind the scenes, the
-[GitLab License Compliance Docker image](https://gitlab.com/gitlab-org/security-products/license-management)
+[GitLab License Compliance Docker image](https://gitlab.com/gitlab-org/security-products/analyzers/license-finder)
 is used to detect the languages/frameworks and in turn analyzes the licenses.
 
 The License Compliance settings can be changed through [environment variables](#available-variables) by using the
 [`variables`](../../../ci/yaml/README.md#variables) parameter in `.gitlab-ci.yml`.
+
+### When License Compliance runs
+
+When using the GitLab `License-Scanning.gitlab-ci.yml` template, the License Compliance job doesn't
+wait for other stages to complete.
 
 ### Available variables
 
@@ -139,7 +141,7 @@ License Compliance can be configured using environment variables.
 | `ASDF_PYTHON_VERSION`       | no       | Version of Python to use for the scan. |
 | `ASDF_RUBY_VERSION`         | no       | Version of Ruby to use for the scan. |
 | `GRADLE_CLI_OPTS`           | no       | Additional arguments for the gradle executable. If not supplied, defaults to `--exclude-task=test`. |
-| `LICENSE_FINDER_CLI_OPTS`   | no       | Additional arguments for the `license_finder` executable. For example, if your project has both Golang and Ruby code stored in different directories and you want to only scan the Ruby code, you can update your `.gitlab-ci-yml` template to specify which project directories to scan, like `LICENSE_FINDER_CLI_OPTS: '--debug --aggregate-paths=. ruby'`. |
+| `LICENSE_FINDER_CLI_OPTS`   | no       | Additional arguments for the `license_finder` executable. For example, if you have multiple projects in nested directories, you can update your `.gitlab-ci-yml` template to specify a recursive scan, like `LICENSE_FINDER_CLI_OPTS: '--recursive'`. |
 | `LM_JAVA_VERSION`           | no       | Version of Java. If set to `11`, Maven and Gradle use Java 11 instead of Java 8. |
 | `LM_PYTHON_VERSION`         | no       | Version of Python. If set to `3`, dependencies are installed using Python 3 instead of Python 2.7. |
 | `MAVEN_CLI_OPTS`            | no       | Additional arguments for the mvn executable. If not supplied, defaults to `-DskipTests`. |
@@ -158,7 +160,7 @@ in the project automated setup, like the download and installation of a certific
 For that, a `LICENSE_MANAGEMENT_SETUP_CMD` environment variable can be passed to the container,
 with the required commands to run before the license detection.
 
-If present, this variable will override the setup step necessary to install all the packages
+If present, this variable overrides the setup step necessary to install all the packages
 of your application (e.g.: for a project with a `Gemfile`, the setup step could be
 `bundle install`).
 
@@ -439,14 +441,14 @@ documentation for a list of settings that you can apply.
 The `license_scanning` job runs in a [Debian 10](https://www.debian.org/releases/buster/) Docker
 image. The supplied image ships with some build tools such as [CMake](https://cmake.org/) and [GCC](https://gcc.gnu.org/).
 However, not all project types are supported by default. To install additional tools needed to
-compile dependencies, use a [`before_script`](../../../ci/yaml/README.md#before_script-and-after_script)
+compile dependencies, use a [`before_script`](../../../ci/yaml/README.md#before_script)
 to install the necessary build tools using the [`apt`](https://wiki.debian.org/PackageManagementTools)
 package manager. For a comprehensive list, consult [the Conan documentation](https://docs.conan.io/en/latest/introduction.html#all-platforms-all-build-systems-and-compilers).
 
 The default [Conan](https://conan.io/) configuration sets [`CONAN_LOGIN_USERNAME`](https://docs.conan.io/en/latest/reference/env_vars.html#conan-login-username-conan-login-username-remote-name)
 to `ci_user`, and binds [`CONAN_PASSWORD`](https://docs.conan.io/en/latest/reference/env_vars.html#conan-password-conan-password-remote-name)
 to the [`CI_JOB_TOKEN`](../../../ci/variables/predefined_variables.md)
-for the running job. This allows Conan projects to fetch packages from a [GitLab Conan Repository](../../packages/conan_repository/#fetching-conan-package-information-from-the-gitlab-package-registry)
+for the running job. This allows Conan projects to fetch packages from a [GitLab Conan Repository](../../packages/conan_repository/#fetch-conan-package-information-from-the-package-registry)
 if a GitLab remote is specified in the `.conan/remotes.json` file.
 
 To override the default credentials specify a [`CONAN_LOGIN_USERNAME_{REMOTE_NAME}`](https://docs.conan.io/en/latest/reference/env_vars.html#conan-login-username-conan-login-username-remote-name)
@@ -616,8 +618,8 @@ To use License Compliance in an offline environment, you need:
 
 NOTE: **Note:**
 GitLab Runner has a [default `pull policy` of `always`](https://docs.gitlab.com/runner/executors/docker.html#using-the-always-pull-policy),
-meaning the Runner tries to pull Docker images from the GitLab container registry even if a local
-copy is available. GitLab Runner's [`pull_policy` can be set to `if-not-present`](https://docs.gitlab.com/runner/executors/docker.html#using-the-if-not-present-pull-policy)
+meaning the runner tries to pull Docker images from the GitLab container registry even if a local
+copy is available. The GitLab Runner [`pull_policy` can be set to `if-not-present`](https://docs.gitlab.com/runner/executors/docker.html#using-the-if-not-present-pull-policy)
 in an offline environment if you prefer using only locally available Docker images. However, we
 recommend keeping the pull policy setting to `always` if not in an offline environment, as this
 enables the use of updated scanners in your CI/CD pipelines.
@@ -629,7 +631,7 @@ import the following default License Compliance analyzer images from `registry.g
 offline [local Docker container registry](../../packages/container_registry/index.md):
 
 ```plaintext
-registry.gitlab.com/gitlab-org/security-products/license-management:latest
+registry.gitlab.com/gitlab-org/security-products/analyzers/license-finder:latest
 ```
 
 The process for importing Docker images into a local offline Docker registry depends on
@@ -693,7 +695,7 @@ requirements must be met:
    [supported languages and package managers](#supported-languages-and-package-managers).
 
 Once everything is set, navigate to **Security & Compliance > License Compliance**
-in your project's sidebar, and you'll see the licenses displayed, where:
+in your project's sidebar, and the licenses are displayed, where:
 
 - **Name:** The name of the license.
 - **Component:** The components which have this license.
@@ -706,8 +708,8 @@ in your project's sidebar, and you'll see the licenses displayed, where:
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/22465) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 12.9.
 
 Policies allow you to specify licenses that are `allowed` or `denied` in a project. If a `denied`
-license is newly committed it will disallow a merge request and instruct the developer to remove it.
-Note, the merge request will not be able to be merged until the `denied` license is removed.
+license is newly committed it blocks the merge request and instructs the developer to remove it.
+Note, the merge request is not able to be merged until the `denied` license is removed.
 You may add a [`License-Check` approval rule](#enabling-license-approvals-within-a-project),
 which enables a designated approver that can approve and then merge a merge request with `denied` license.
 
@@ -769,12 +771,12 @@ specify the desired version by adding a
 or using the appropriate [`ASDF_<tool>_VERSION`](https://asdf-vm.com/#/core-configuration?id=environment-variables) environment variable to
 activate the appropriate version.
 
-For example, the following `.tool-versions` file will activate version `12.16.3` of [Node.js](https://nodejs.org/)
-and version `2.6.6` of [Ruby](https://www.ruby-lang.org/).
+For example, the following `.tool-versions` file activates version `12.16.3` of [Node.js](https://nodejs.org/)
+and version `2.7.2` of [Ruby](https://www.ruby-lang.org/).
 
 ```plaintext
 nodejs 12.16.3
-ruby 2.6.6
+ruby 2.7.2
 ```
 
 The next example shows how to activate the same versions of the tools mentioned above by using environment variables defined in your
@@ -787,7 +789,7 @@ include:
 license_scanning:
   variables:
     ASDF_NODEJS_VERSION: '12.16.3'
-    ASDF_RUBY_VERSION: '2.6.6'
+    ASDF_RUBY_VERSION: '2.7.2'
 ```
 
 A full list of variables can be found in [environment variables](#available-variables).

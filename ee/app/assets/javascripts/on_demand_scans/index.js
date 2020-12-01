@@ -9,17 +9,27 @@ export default () => {
   }
 
   const {
-    helpPagePath,
+    dastSiteValidationDocsPath,
     emptyStateSvgPath,
     projectPath,
     defaultBranch,
-    profilesLibraryPath,
+    scannerProfilesLibraryPath,
+    siteProfilesLibraryPath,
     newSiteProfilePath,
+    newScannerProfilePath,
+    helpPagePath,
   } = el.dataset;
 
   return new Vue({
     el,
     apolloProvider,
+    provide: {
+      scannerProfilesLibraryPath,
+      siteProfilesLibraryPath,
+      newScannerProfilePath,
+      newSiteProfilePath,
+      dastSiteValidationDocsPath,
+    },
     render(h) {
       return h(OnDemandScansApp, {
         props: {
@@ -27,8 +37,6 @@ export default () => {
           emptyStateSvgPath,
           projectPath,
           defaultBranch,
-          profilesLibraryPath,
-          newSiteProfilePath,
         },
       });
     },

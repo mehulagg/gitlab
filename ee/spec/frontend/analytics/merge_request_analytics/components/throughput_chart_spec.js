@@ -1,12 +1,18 @@
-import Vuex from 'vuex';
-import { shallowMount, createLocalVue } from '@vue/test-utils';
 import { GlAlert } from '@gitlab/ui';
 import { GlAreaChart } from '@gitlab/ui/dist/charts';
-import store from 'ee/analytics/merge_request_analytics/store';
+import { shallowMount, createLocalVue } from '@vue/test-utils';
+import Vuex from 'vuex';
 import ThroughputChart from 'ee/analytics/merge_request_analytics/components/throughput_chart.vue';
 import { THROUGHPUT_CHART_STRINGS } from 'ee/analytics/merge_request_analytics/constants';
+import store from 'ee/analytics/merge_request_analytics/store';
 import ChartSkeletonLoader from '~/vue_shared/components/resizable_chart/skeleton_loader.vue';
-import { throughputChartData, startDate, endDate, fullPath } from '../mock_data';
+import {
+  throughputChartData,
+  throughputChartNoData,
+  startDate,
+  endDate,
+  fullPath,
+} from '../mock_data';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -131,6 +137,28 @@ describe('ThroughputChart', () => {
 
     it('does not display a no data message', () => {
       displaysComponent(GlAlert, false);
+    });
+  });
+
+  describe('with no data in the response', () => {
+    beforeEach(() => {
+      wrapper = createComponent();
+      wrapper.setData({ throughputChartData: throughputChartNoData });
+    });
+
+    it('does not display a skeleton loader', () => {
+      displaysComponent(ChartSkeletonLoader, false);
+    });
+
+    it('does not display the chart', () => {
+      displaysComponent(GlAreaChart, false);
+    });
+
+    it('displays an empty state message when there is no data', () => {
+      const alert = wrapper.find(GlAlert);
+
+      expect(alert.exists()).toBe(true);
+      expect(alert.text()).toBe(THROUGHPUT_CHART_STRINGS.NO_DATA);
     });
   });
 

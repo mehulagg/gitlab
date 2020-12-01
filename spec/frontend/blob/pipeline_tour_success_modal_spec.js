@@ -16,6 +16,7 @@ describe('PipelineTourSuccessModal', () => {
       stubs: {
         GlModal,
         GlSprintf,
+        'gl-emoji': '<img/>',
       },
     });
   };
@@ -66,13 +67,15 @@ describe('PipelineTourSuccessModal', () => {
   it('has expected structure', () => {
     const modal = wrapper.find(GlModal);
     const sprintf = modal.find(GlSprintf);
+    const emoji = modal.find('img');
 
-    expect(modal.attributes('title')).toContain("That's it, well done!");
+    expect(wrapper.text()).toContain("That's it, well done!");
     expect(sprintf.exists()).toBe(true);
+    expect(emoji.exists()).toBe(true);
   });
 
   it('renders the link for codeQualityLink', () => {
-    expect(wrapper.find(GlLink).attributes('href')).toBe(wrapper.vm.$options.codeQualityLink);
+    expect(wrapper.find(GlLink).attributes('href')).toBe('/code-quality-link');
   });
 
   it('calls to remove cookie', () => {

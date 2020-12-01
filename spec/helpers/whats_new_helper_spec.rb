@@ -3,20 +3,45 @@
 require 'spec_helper'
 
 RSpec.describe WhatsNewHelper do
-  describe '#whats_new_most_recent_release_items' do
-    let(:fixture_dir_glob) { Dir.glob(File.join('spec', 'fixtures', 'whats_new', '*.yml')) }
+  describe '#whats_new_storage_key' do
+    subject { helper.whats_new_storage_key }
 
-    it 'returns json from the most recent file' do
-      allow(Dir).to receive(:glob).with(Rails.root.join('data', 'whats_new', '*.yml')).and_return(fixture_dir_glob)
+    context 'when version exist' do
+      let(:release_item) { double(:item) }
 
-      expect(helper.whats_new_most_recent_release_items).to include({ title: "bright and sunshinin' day" }.to_json)
+      before do
+        allow(ReleaseHighlight).to receive(:most_recent_version).and_return(84.0)
+      end
+
+      it { is_expected.to eq('display-whats-new-notification-84.0') }
     end
 
-    it 'fails gracefully and logs an error' do
-      allow(YAML).to receive(:load_file).and_raise
+    context 'when most recent release highlights do NOT exist' do
+      before do
+        allow(ReleaseHighlight).to receive(:most_recent_version).and_return(nil)
+      end
 
-      expect(Gitlab::ErrorTracking).to receive(:track_exception)
-      expect(helper.whats_new_most_recent_release_items).to eq(''.to_json)
+      it { is_expected.to be_nil }
+    end
+  end
+
+  describe '#whats_new_most_recent_release_items_count' do
+    subject { helper.whats_new_most_recent_release_items_count }
+
+    context 'when recent release items exist' do
+      it 'returns the count from the most recent file' do
+        allow(ReleaseHighlight).to receive(:most_recent_item_count).and_return(1)
+
+        expect(subject).to eq(1)
+      end
+    end
+
+    context 'when recent release items do NOT exist' do
+      it 'returns nil' do
+        allow(ReleaseHighlight).to receive(:most_recent_item_count).and_return(nil)
+
+        expect(subject).to be_nil
+      end
     end
   end
 end

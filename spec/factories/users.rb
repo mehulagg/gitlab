@@ -23,8 +23,20 @@ FactoryBot.define do
       after(:build) { |user, _| user.block! }
     end
 
+    trait :blocked_pending_approval do
+      after(:build) { |user, _| user.block_pending_approval! }
+    end
+
+    trait :ldap_blocked do
+      after(:build) { |user, _| user.ldap_block! }
+    end
+
     trait :bot do
       user_type { :alert_bot }
+    end
+
+    trait :deactivated do
+      after(:build) { |user, _| user.deactivate! }
     end
 
     trait :project_bot do
@@ -58,7 +70,7 @@ FactoryBot.define do
 
     trait :with_sign_ins do
       sign_in_count { 3 }
-      current_sign_in_at { Time.now }
+      current_sign_in_at { FFaker::Time.between(10.days.ago, 1.day.ago) }
       last_sign_in_at { FFaker::Time.between(10.days.ago, 1.day.ago) }
       current_sign_in_ip { '127.0.0.1' }
       last_sign_in_ip { '127.0.0.1' }
@@ -133,6 +145,16 @@ FactoryBot.define do
         end
 
         user.identities << create(:identity, identity_attrs)
+      end
+    end
+
+    factory :atlassian_user do
+      transient do
+        extern_uid { generate(:username) }
+      end
+
+      after(:create) do |user, evaluator|
+        create(:atlassian_identity, user: user, extern_uid: evaluator.extern_uid)
       end
     end
 

@@ -34,8 +34,7 @@ class Geo::UploadRegistry < Geo::BaseRegistry
   #                 For example: [[[1, 'avatar'], [5, 'file']], [[3, 'attachment']]]
   def self.find_registry_differences(range)
     source =
-      self::MODEL_CLASS.replicables_for_geo_node
-          .id_in(range)
+      self::MODEL_CLASS.replicables_for_current_secondary(range)
           .pluck(self::MODEL_CLASS.arel_table[:id], self::MODEL_CLASS.arel_table[:uploader])
           .map! { |id, uploader| [id, uploader.sub(/Uploader\z/, '').underscore] }
 

@@ -801,6 +801,11 @@ RSpec.describe Projects::PipelinesController do
     context 'with an invalid .gitlab-ci.yml file' do
       before do
         stub_ci_pipeline_yaml_file(YAML.dump({
+          build: {
+            stage: 'build',
+            script: 'echo',
+            rules: [{ when: 'always' }]
+          },
           test: {
             stage: 'invalid',
             script: 'echo'
@@ -812,9 +817,13 @@ RSpec.describe Projects::PipelinesController do
         expect { subject }.not_to change { project.ci_pipelines.count }
 
         expect(response).to have_gitlab_http_status(:bad_request)
-        expect(json_response['base']).to include(
+        expect(json_response['errors']).to eq([
           'test job: chosen stage does not exist; available stages are .pre, build, test, deploy, .post'
+        ])
+        expect(json_response['warnings'][0]).to include(
+          'jobs:build may allow multiple pipelines to run for a single action due to `rules:when`'
         )
+        expect(json_response['total_warnings']).to eq(1)
       end
     end
   end
@@ -1137,6 +1146,86 @@ RSpec.describe Projects::PipelinesController do
                          project_id: project,
                          id: pipeline.id
                        }
+    end
+  end
+
+  describe 'GET config_variables.json' do
+    let(:result) { YAML.dump(ci_config) }
+
+    before do
+      stub_gitlab_ci_yml_for_sha(sha, result)
+    end
+
+    context 'when sending a valid sha' do
+      let(:sha) { 'master' }
+      let(:ci_config) do
+        {
+          variables: {
+            KEY1: { value: 'val 1', description: 'description 1' }
+          },
+          test: {
+            stage: 'test',
+            script: 'echo'
+          }
+        }
+      end
+
+      it 'returns variable list' do
+        get_config_variables
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response['KEY1']).to eq({ 'value' => 'val 1', 'description' => 'description 1' })
+      end
+    end
+
+    context 'when sending an invalid sha' do
+      let(:sha) { 'invalid-sha' }
+      let(:ci_config) { nil }
+
+      it 'returns empty json' do
+        get_config_variables
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response).to eq({})
+      end
+    end
+
+    context 'when sending an invalid config' do
+      let(:sha) { 'master' }
+      let(:ci_config) do
+        {
+          variables: {
+            KEY1: { value: 'val 1', description: 'description 1' }
+          },
+          test: {
+            stage: 'invalid',
+            script: 'echo'
+          }
+        }
+      end
+
+      it 'returns empty result' do
+        get_config_variables
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response).to eq({})
+      end
+    end
+
+    private
+
+    def stub_gitlab_ci_yml_for_sha(sha, result)
+      allow_any_instance_of(Repository)
+          .to receive(:gitlab_ci_yml_for)
+          .with(sha, '.gitlab-ci.yml')
+          .and_return(result)
+    end
+
+    def get_config_variables
+      get :config_variables, params: { namespace_id: project.namespace,
+                                       project_id: project,
+                                       sha: sha },
+                             format: :json
     end
   end
 end

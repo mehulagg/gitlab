@@ -18,10 +18,11 @@ export const getPackageTypeLabel = packageType => {
     case PackageType.NUGET:
       return s__('PackageType|NuGet');
     case PackageType.PYPI:
-      return s__('PackageType|PyPi');
+      return s__('PackageType|PyPI');
     case PackageType.COMPOSER:
       return s__('PackageType|Composer');
-
+    case PackageType.GENERIC:
+      return s__('PackageType|Generic');
     default:
       return null;
   }

@@ -2,11 +2,13 @@
 
 require 'spec_helper'
 
-RSpec.describe Project do
+RSpec.describe Project, factory_default: :keep do
   include ProjectForksHelper
   include GitHelpers
   include ExternalAuthorizationServiceHelpers
   using RSpec::Parameterized::TableSyntax
+
+  let_it_be(:namespace) { create_default(:namespace) }
 
   it_behaves_like 'having unique enum values'
 
@@ -31,6 +33,7 @@ RSpec.describe Project do
     it { is_expected.to have_many(:deploy_keys) }
     it { is_expected.to have_many(:hooks) }
     it { is_expected.to have_many(:protected_branches) }
+    it { is_expected.to have_many(:exported_protected_branches) }
     it { is_expected.to have_one(:slack_service) }
     it { is_expected.to have_one(:microsoft_teams_service) }
     it { is_expected.to have_one(:mattermost_service) }
@@ -61,6 +64,7 @@ RSpec.describe Project do
     it { is_expected.to have_one(:youtrack_service) }
     it { is_expected.to have_one(:custom_issue_tracker_service) }
     it { is_expected.to have_one(:bugzilla_service) }
+    it { is_expected.to have_one(:ewm_service) }
     it { is_expected.to have_one(:external_wiki_service) }
     it { is_expected.to have_one(:confluence_service) }
     it { is_expected.to have_one(:project_feature) }
@@ -71,6 +75,7 @@ RSpec.describe Project do
     it { is_expected.to have_one(:last_event).class_name('Event') }
     it { is_expected.to have_one(:forked_from_project).through(:fork_network_member) }
     it { is_expected.to have_one(:auto_devops).class_name('ProjectAutoDevops') }
+    it { is_expected.to have_one(:tracing_setting).class_name('ProjectTracingSetting') }
     it { is_expected.to have_one(:error_tracking_setting).class_name('ErrorTracking::ProjectErrorTrackingSetting') }
     it { is_expected.to have_one(:project_setting) }
     it { is_expected.to have_one(:alerting_setting).class_name('Alerting::ProjectAlertingSetting') }
@@ -84,7 +89,6 @@ RSpec.describe Project do
     it { is_expected.to have_many(:runners) }
     it { is_expected.to have_many(:variables) }
     it { is_expected.to have_many(:triggers) }
-    it { is_expected.to have_many(:pages_domains) }
     it { is_expected.to have_many(:labels).class_name('ProjectLabel') }
     it { is_expected.to have_many(:users_star_projects) }
     it { is_expected.to have_many(:repository_languages) }
@@ -116,6 +120,7 @@ RSpec.describe Project do
     it { is_expected.to have_many(:prometheus_alert_events) }
     it { is_expected.to have_many(:self_managed_prometheus_alert_events) }
     it { is_expected.to have_many(:alert_management_alerts) }
+    it { is_expected.to have_many(:alert_management_http_integrations) }
     it { is_expected.to have_many(:jira_imports) }
     it { is_expected.to have_many(:metrics_users_starred_dashboards).inverse_of(:project) }
     it { is_expected.to have_many(:repository_storage_moves) }
@@ -123,11 +128,18 @@ RSpec.describe Project do
     it { is_expected.to have_many(:packages).class_name('Packages::Package') }
     it { is_expected.to have_many(:package_files).class_name('Packages::PackageFile') }
     it { is_expected.to have_many(:pipeline_artifacts) }
+    it { is_expected.to have_many(:terraform_states).class_name('Terraform::State').inverse_of(:project) }
+
+    # GitLab Pages
+    it { is_expected.to have_many(:pages_domains) }
+    it { is_expected.to have_one(:pages_metadatum) }
+    it { is_expected.to have_many(:pages_deployments) }
 
     it_behaves_like 'model with repository' do
       let_it_be(:container) { create(:project, :repository, path: 'somewhere') }
       let(:stubbed_container) { build_stubbed(:project) }
       let(:expected_full_path) { "#{container.namespace.full_path}/somewhere" }
+      let(:expected_lfs_enabled) { true }
     end
 
     it_behaves_like 'model with wiki' do
@@ -1523,6 +1535,42 @@ RSpec.describe Project do
     end
   end
 
+  describe '.service_desk_custom_address_enabled?' do
+    let_it_be(:project) { create(:project, service_desk_enabled: true) }
+
+    subject(:address_enabled) { project.service_desk_custom_address_enabled? }
+
+    context 'when service_desk_email is enabled' do
+      before do
+        allow(::Gitlab::ServiceDeskEmail).to receive(:enabled?).and_return(true)
+      end
+
+      it 'returns true' do
+        expect(address_enabled).to be_truthy
+      end
+
+      context 'when service_desk_custom_address flag is disabled' do
+        before do
+          stub_feature_flags(service_desk_custom_address: false)
+        end
+
+        it 'returns false' do
+          expect(address_enabled).to be_falsey
+        end
+      end
+    end
+
+    context 'when service_desk_email is disabled' do
+      before do
+        allow(::Gitlab::ServiceDeskEmail).to receive(:enabled?).and_return(false)
+      end
+
+      it 'returns false when service_desk_email is disabled' do
+        expect(address_enabled).to be_falsey
+      end
+    end
+  end
+
   describe '.find_by_service_desk_project_key' do
     it 'returns the correct project' do
       project1 = create(:project)
@@ -2900,6 +2948,20 @@ RSpec.describe Project do
     end
   end
 
+  describe '#lfs_objects_for_repository_types' do
+    let(:project) { create(:project) }
+
+    it 'returns LFS objects of the specified type only' do
+      none, design, wiki = *[nil, :design, :wiki].map do |type|
+        create(:lfs_objects_project, project: project, repository_type: type).lfs_object
+      end
+
+      expect(project.lfs_objects_for_repository_types(nil)).to contain_exactly(none)
+      expect(project.lfs_objects_for_repository_types(nil, :wiki)).to contain_exactly(none, wiki)
+      expect(project.lfs_objects_for_repository_types(:design)).to contain_exactly(design)
+    end
+  end
+
   context 'forks' do
     include ProjectForksHelper
 
@@ -2975,81 +3037,39 @@ RSpec.describe Project do
         expect(project.forks).to contain_exactly(forked_project)
       end
     end
-
-    describe '#lfs_storage_project' do
-      it 'returns self for non-forks' do
-        expect(project.lfs_storage_project).to eq project
-      end
-
-      it 'returns the fork network root for forks' do
-        second_fork = fork_project(forked_project)
-
-        expect(second_fork.lfs_storage_project).to eq project
-      end
-
-      it 'returns self when fork_source is nil' do
-        expect(forked_project).to receive(:fork_source).and_return(nil)
-
-        expect(forked_project.lfs_storage_project).to eq forked_project
-      end
-    end
-
-    describe '#all_lfs_objects' do
-      let(:lfs_object) { create(:lfs_object) }
-
-      context 'when LFS object is only associated to the source' do
-        before do
-          project.lfs_objects << lfs_object
-        end
-
-        it 'returns the lfs object for a project' do
-          expect(project.all_lfs_objects).to contain_exactly(lfs_object)
-        end
-
-        it 'returns the lfs object for a fork' do
-          expect(forked_project.all_lfs_objects).to contain_exactly(lfs_object)
-        end
-      end
-
-      context 'when LFS object is only associated to the fork' do
-        before do
-          forked_project.lfs_objects << lfs_object
-        end
-
-        it 'returns nothing' do
-          expect(project.all_lfs_objects).to be_empty
-        end
-
-        it 'returns the lfs object for a fork' do
-          expect(forked_project.all_lfs_objects).to contain_exactly(lfs_object)
-        end
-      end
-
-      context 'when LFS object is associated to both source and fork' do
-        before do
-          project.lfs_objects << lfs_object
-          forked_project.lfs_objects << lfs_object
-        end
-
-        it 'returns the lfs object for the source and fork' do
-          expect(project.all_lfs_objects).to contain_exactly(lfs_object)
-          expect(forked_project.all_lfs_objects).to contain_exactly(lfs_object)
-        end
-      end
-    end
   end
 
   describe '#set_repository_read_only!' do
     let(:project) { create(:project) }
 
-    it 'returns true when there is no existing git transfer in progress' do
-      expect(project.set_repository_read_only!).to be_truthy
+    it 'makes the repository read-only' do
+      expect { project.set_repository_read_only! }
+        .to change(project, :repository_read_only?)
+        .from(false)
+        .to(true)
     end
 
-    it 'returns false when there is an existing git transfer in progress' do
+    it 'raises an error if the project is already read-only' do
+      project.set_repository_read_only!
+
+      expect { project.set_repository_read_only! }.to raise_error(described_class::RepositoryReadOnlyError, /already read-only/)
+    end
+
+    it 'raises an error when there is an existing git transfer in progress' do
       allow(project).to receive(:git_transfer_in_progress?) { true }
 
-      expect(project.set_repository_read_only!).to be_falsey
+      expect { project.set_repository_read_only! }.to raise_error(described_class::RepositoryReadOnlyError, /in progress/)
+    end
+
+    context 'skip_git_transfer_check is true' do
+      it 'makes the project read-only when git transfers are in progress' do
+        allow(project).to receive(:git_transfer_in_progress?) { true }
+
+        expect { project.set_repository_read_only!(skip_git_transfer_check: true) }
+          .to change(project, :repository_read_only?)
+          .from(false)
+          .to(true)
+      end
     end
   end
 
@@ -3696,7 +3716,7 @@ RSpec.describe Project do
     let(:project) { create(:project) }
 
     before do
-      project.namespace_id = 7
+      project.namespace_id = project.namespace_id + 1
     end
 
     it { expect(project.parent_changed?).to be_truthy }
@@ -4024,8 +4044,16 @@ RSpec.describe Project do
       context 'when feature is private' do
         let(:project) { create(:project, :public, :merge_requests_private) }
 
-        it 'returns projects with the project feature private' do
-          is_expected.to include(project)
+        context 'when admin mode is enabled', :enable_admin_mode do
+          it 'returns projects with the project feature private' do
+            is_expected.to include(project)
+          end
+        end
+
+        context 'when admin mode is disabled' do
+          it 'does not return projects with the project feature private' do
+            is_expected.not_to include(project)
+          end
         end
       end
     end
@@ -4048,7 +4076,7 @@ RSpec.describe Project do
     end
   end
 
-  describe '.filter_by_feature_visibility', :enable_admin_mode do
+  describe '.filter_by_feature_visibility' do
     include_context 'ProjectPolicyTable context'
     include ProjectHelpers
     using RSpec::Parameterized::TableSyntax
@@ -4060,12 +4088,13 @@ RSpec.describe Project do
     context 'reporter level access' do
       let(:feature) { MergeRequest }
 
-      where(:project_level, :feature_access_level, :membership, :expected_count) do
+      where(:project_level, :feature_access_level, :membership, :admin_mode, :expected_count) do
         permission_table_for_reporter_feature_access
       end
 
       with_them do
         it "respects visibility" do
+          enable_admin_mode!(user) if admin_mode
           update_feature_access_level(project, feature_access_level)
 
           expected_objects = expected_count == 1 ? [project] : []
@@ -4080,12 +4109,13 @@ RSpec.describe Project do
     context 'issues' do
       let(:feature) { Issue }
 
-      where(:project_level, :feature_access_level, :membership, :expected_count) do
+      where(:project_level, :feature_access_level, :membership, :admin_mode, :expected_count) do
         permission_table_for_guest_feature_access
       end
 
       with_them do
         it "respects visibility" do
+          enable_admin_mode!(user) if admin_mode
           update_feature_access_level(project, feature_access_level)
 
           expected_objects = expected_count == 1 ? [project] : []
@@ -4100,12 +4130,13 @@ RSpec.describe Project do
     context 'wiki' do
       let(:feature) { :wiki }
 
-      where(:project_level, :feature_access_level, :membership, :expected_count) do
+      where(:project_level, :feature_access_level, :membership, :admin_mode, :expected_count) do
         permission_table_for_guest_feature_access
       end
 
       with_them do
         it "respects visibility" do
+          enable_admin_mode!(user) if admin_mode
           update_feature_access_level(project, feature_access_level)
 
           expected_objects = expected_count == 1 ? [project] : []
@@ -4120,12 +4151,13 @@ RSpec.describe Project do
     context 'code' do
       let(:feature) { :repository }
 
-      where(:project_level, :feature_access_level, :membership, :expected_count) do
+      where(:project_level, :feature_access_level, :membership, :admin_mode, :expected_count) do
         permission_table_for_guest_feature_access_and_non_private_project_only
       end
 
       with_them do
         it "respects visibility" do
+          enable_admin_mode!(user) if admin_mode
           update_feature_access_level(project, feature_access_level)
 
           expected_objects = expected_count == 1 ? [project] : []
@@ -4247,6 +4279,27 @@ RSpec.describe Project do
 
       expect { project.destroy }.not_to raise_error
     end
+
+    context 'when there is an old pages deployment' do
+      let!(:old_deployment_from_another_project) { create(:pages_deployment) }
+      let!(:old_deployment) { create(:pages_deployment, project: project) }
+
+      it 'schedules a destruction of pages deployments' do
+        expect(DestroyPagesDeploymentsWorker).to(
+          receive(:perform_async).with(project.id)
+        )
+
+        project.remove_pages
+      end
+
+      it 'removes pages deployments', :sidekiq_inline do
+        expect do
+          project.remove_pages
+        end.to change { PagesDeployment.count }.by(-1)
+
+        expect(PagesDeployment.find_by_id(old_deployment.id)).to be_nil
+      end
+    end
   end
 
   describe '#remove_export' do
@@ -4276,29 +4329,33 @@ RSpec.describe Project do
   end
 
   describe '#git_transfer_in_progress?' do
+    using RSpec::Parameterized::TableSyntax
+
     let(:project) { build(:project) }
 
     subject { project.git_transfer_in_progress? }
 
-    it 'returns false when repo_reference_count and wiki_reference_count are 0' do
-      allow(project).to receive(:repo_reference_count) { 0 }
-      allow(project).to receive(:wiki_reference_count) { 0 }
-
-      expect(subject).to be_falsey
+    where(:project_reference_counter, :wiki_reference_counter, :design_reference_counter, :result) do
+      0 | 0 | 0 | false
+      2 | 0 | 0 | true
+      0 | 2 | 0 | true
+      0 | 0 | 2 | true
     end
 
-    it 'returns true when repo_reference_count is > 0' do
-      allow(project).to receive(:repo_reference_count) { 2 }
-      allow(project).to receive(:wiki_reference_count) { 0 }
+    with_them do
+      before do
+        allow(project).to receive(:reference_counter).with(type: Gitlab::GlRepository::PROJECT) do
+          double(:project_reference_counter, value: project_reference_counter)
+        end
+        allow(project).to receive(:reference_counter).with(type: Gitlab::GlRepository::WIKI) do
+          double(:wiki_reference_counter, value: wiki_reference_counter)
+        end
+        allow(project).to receive(:reference_counter).with(type: Gitlab::GlRepository::DESIGN) do
+          double(:design_reference_counter, value: design_reference_counter)
+        end
+      end
 
-      expect(subject).to be_truthy
-    end
-
-    it 'returns true when wiki_reference_count is > 0' do
-      allow(project).to receive(:repo_reference_count) { 0 }
-      allow(project).to receive(:wiki_reference_count) { 2 }
-
-      expect(subject).to be_truthy
+      specify { expect(subject).to be result }
     end
   end
 
@@ -4372,7 +4429,7 @@ RSpec.describe Project do
       end
 
       it 'schedules HashedStorage::ProjectMigrateWorker with delayed start when the wiki repo is in use' do
-        Gitlab::ReferenceCounter.new(Gitlab::GlRepository::WIKI.identifier_for_container(project)).increase
+        Gitlab::ReferenceCounter.new(Gitlab::GlRepository::WIKI.identifier_for_container(project.wiki)).increase
 
         expect(HashedStorage::ProjectMigrateWorker).to receive(:perform_in)
 
@@ -5018,15 +5075,21 @@ RSpec.describe Project do
     context "with an empty repository" do
       let_it_be(:project) { create(:project_empty_repo) }
 
-      context "Gitlab::CurrentSettings.default_branch_name is unavailable" do
+      context "group.default_branch_name is available" do
+        let(:project_group) { create(:group) }
+        let(:project) { create(:project, path: 'avatar', namespace: project_group) }
+
         before do
           expect(Gitlab::CurrentSettings)
+            .not_to receive(:default_branch_name)
+
+          expect(project.group)
             .to receive(:default_branch_name)
-            .and_return(nil)
+            .and_return('example_branch')
         end
 
-        it "returns that value" do
-          expect(project.default_branch).to be_nil
+        it "returns the group default value" do
+          expect(project.default_branch).to eq("example_branch")
         end
       end
 
@@ -5034,11 +5097,23 @@ RSpec.describe Project do
         before do
           expect(Gitlab::CurrentSettings)
             .to receive(:default_branch_name)
-            .and_return('example_branch')
+            .and_return(example_branch_name)
         end
 
-        it "returns that value" do
-          expect(project.default_branch).to eq("example_branch")
+        context "is missing or nil" do
+          let(:example_branch_name) { nil }
+
+          it "returns nil" do
+            expect(project.default_branch).to be_nil
+          end
+        end
+
+        context "is present" do
+          let(:example_branch_name) { "example_branch_name" }
+
+          it "returns the expected branch name" do
+            expect(project.default_branch).to eq(example_branch_name)
+          end
         end
       end
     end
@@ -5528,14 +5603,36 @@ RSpec.describe Project do
   end
 
   describe '#find_or_initialize_services' do
-    it 'returns only enabled services' do
+    before do
       allow(Service).to receive(:available_services_names).and_return(%w[prometheus pushover teamcity])
       allow(subject).to receive(:disabled_services).and_return(%w[prometheus])
+    end
 
+    it 'returns only enabled services' do
       services = subject.find_or_initialize_services
 
       expect(services.count).to eq(2)
       expect(services.map(&:title)).to eq(['JetBrains TeamCity CI', 'Pushover'])
+    end
+  end
+
+  describe '#disabled_services' do
+    subject { build(:project).disabled_services }
+
+    context 'without datadog_ci_integration' do
+      before do
+        stub_feature_flags(datadog_ci_integration: false)
+      end
+
+      it { is_expected.to include('datadog') }
+    end
+
+    context 'with datadog_ci_integration' do
+      before do
+        stub_feature_flags(datadog_ci_integration: true)
+      end
+
+      it { is_expected.not_to include('datadog') }
     end
   end
 
@@ -5603,32 +5700,6 @@ RSpec.describe Project do
       project = create(:project, namespace: group)
 
       expect(described_class.for_group(group)).to eq([project])
-    end
-  end
-
-  describe '.for_repository_storage' do
-    it 'returns the projects for a given repository storage' do
-      stub_storage_settings('test_second_storage' => {
-        'path' => TestEnv::SECOND_STORAGE_PATH,
-        'gitaly_address' => Gitlab.config.repositories.storages.default.gitaly_address
-      })
-      expected_project = create(:project, repository_storage: 'default')
-      create(:project, repository_storage: 'test_second_storage')
-
-      expect(described_class.for_repository_storage('default')).to eq([expected_project])
-    end
-  end
-
-  describe '.excluding_repository_storage' do
-    it 'returns the projects excluding the given repository storage' do
-      stub_storage_settings('test_second_storage' => {
-        'path' => TestEnv::SECOND_STORAGE_PATH,
-        'gitaly_address' => Gitlab.config.repositories.storages.default.gitaly_address
-      })
-      expected_project = create(:project, repository_storage: 'test_second_storage')
-      create(:project, repository_storage: 'default')
-
-      expect(described_class.excluding_repository_storage('default')).to eq([expected_project])
     end
   end
 
@@ -5855,6 +5926,38 @@ RSpec.describe Project do
     end
   end
 
+  describe 'validation #changing_shared_runners_enabled_is_allowed' do
+    using RSpec::Parameterized::TableSyntax
+
+    where(:shared_runners_setting, :project_shared_runners_enabled, :valid_record) do
+      'enabled'                    | true  | true
+      'enabled'                    | false | true
+      'disabled_with_override'     | true  | true
+      'disabled_with_override'     | false | true
+      'disabled_and_unoverridable' | true  | false
+      'disabled_and_unoverridable' | false | true
+    end
+
+    with_them do
+      let(:group) { create(:group) }
+      let(:project) { build(:project, namespace: group, shared_runners_enabled: project_shared_runners_enabled) }
+
+      before do
+        allow_next_found_instance_of(Group) do |group|
+          allow(group).to receive(:shared_runners_setting).and_return(shared_runners_setting)
+        end
+      end
+
+      it 'validates the configuration' do
+        expect(project.valid?).to eq(valid_record)
+
+        unless valid_record
+          expect(project.errors[:shared_runners_enabled]).to contain_exactly('cannot be enabled because parent group does not allow it')
+        end
+      end
+    end
+  end
+
   describe '#mark_pages_as_deployed' do
     let(:project) { create(:project) }
     let(:artifacts_archive) { create(:ci_job_artifact, project: project) }
@@ -5906,6 +6009,26 @@ RSpec.describe Project do
         project.mark_pages_as_not_deployed
       end.to change { pages_metadatum.reload.deployed }.from(true).to(false)
                .and change { pages_metadatum.reload.artifacts_archive }.from(artifacts_archive).to(nil)
+    end
+  end
+
+  describe '#update_pages_deployment!' do
+    let(:project) { create(:project) }
+    let(:deployment) { create(:pages_deployment, project: project) }
+
+    it "creates new metadata record if none exists yet and sets deployment" do
+      project.pages_metadatum.destroy!
+      project.reload
+
+      project.update_pages_deployment!(deployment)
+
+      expect(project.pages_metadatum.pages_deployment).to eq(deployment)
+    end
+
+    it "updates the existing metadara record with deployment" do
+      expect do
+        project.update_pages_deployment!(deployment)
+      end.to change { project.pages_metadatum.reload.pages_deployment }.from(nil).to(deployment)
     end
   end
 
@@ -6146,53 +6269,6 @@ RSpec.describe Project do
 
     it 'returns limited number of protected branches based on specified limit' do
       expect(subject.count).to eq(1)
-    end
-  end
-
-  describe '#all_lfs_objects_oids' do
-    let(:project) { create(:project) }
-    let(:lfs_object) { create(:lfs_object) }
-    let(:another_lfs_object) { create(:lfs_object) }
-
-    subject { project.all_lfs_objects_oids }
-
-    context 'when project has associated LFS objects' do
-      before do
-        create(:lfs_objects_project, lfs_object: lfs_object, project: project)
-        create(:lfs_objects_project, lfs_object: another_lfs_object, project: project)
-      end
-
-      it 'returns OIDs of LFS objects' do
-        expect(subject).to match_array([lfs_object.oid, another_lfs_object.oid])
-      end
-
-      context 'and there are specified oids' do
-        subject { project.all_lfs_objects_oids(oids: [lfs_object.oid]) }
-
-        it 'returns OIDs of LFS objects that match specified oids' do
-          expect(subject).to eq([lfs_object.oid])
-        end
-      end
-    end
-
-    context 'when fork has associated LFS objects to itself and source' do
-      let(:source) { create(:project) }
-      let(:project) { fork_project(source) }
-
-      before do
-        create(:lfs_objects_project, lfs_object: lfs_object, project: source)
-        create(:lfs_objects_project, lfs_object: another_lfs_object, project: project)
-      end
-
-      it 'returns OIDs of LFS objects' do
-        expect(subject).to match_array([lfs_object.oid, another_lfs_object.oid])
-      end
-    end
-
-    context 'when project has no associated LFS objects' do
-      it 'returns empty array' do
-        expect(subject).to be_empty
-      end
     end
   end
 

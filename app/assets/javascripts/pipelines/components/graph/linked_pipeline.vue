@@ -2,6 +2,8 @@
 import { GlTooltipDirective, GlButton, GlLink, GlLoadingIcon } from '@gitlab/ui';
 import CiStatus from '~/vue_shared/components/ci_icon.vue';
 import { __, sprintf } from '~/locale';
+import { accessValue } from './accessors';
+import { DOWNSTREAM, REST, UPSTREAM } from './constants';
 
 export default {
   directives: {
@@ -13,7 +15,16 @@ export default {
     GlLink,
     GlLoadingIcon,
   },
+  inject: {
+    dataMethod: {
+      default: REST,
+    },
+  },
   props: {
+    columnTitle: {
+      type: String,
+      required: true,
+    },
     pipeline: {
       type: Object,
       required: true,
@@ -22,7 +33,7 @@ export default {
       type: Number,
       required: true,
     },
-    columnTitle: {
+    type: {
       type: String,
       required: true,
     },
@@ -41,7 +52,7 @@ export default {
       return `js-linked-pipeline-${this.pipeline.id}`;
     },
     pipelineStatus() {
-      return this.pipeline.details.status;
+      return accessValue(this.dataMethod, 'pipelineStatus', this.pipeline);
     },
     projectName() {
       return this.pipeline.project.name;
@@ -50,12 +61,10 @@ export default {
       return this.childPipeline ? __('child-pipeline') : this.pipeline.project.name;
     },
     parentPipeline() {
-      // Refactor string match when BE returns Upstream/Downstream indicators
-      return this.projectId === this.pipeline.project.id && this.columnTitle === __('Upstream');
+      return this.isUpstream && this.isSameProject;
     },
     childPipeline() {
-      // Refactor string match when BE returns Upstream/Downstream indicators
-      return this.projectId === this.pipeline.project.id && this.isDownstream;
+      return this.isDownstream && this.isSameProject;
     },
     label() {
       if (this.parentPipeline) {
@@ -66,21 +75,28 @@ export default {
       return __('Multi-project');
     },
     isDownstream() {
-      return this.columnTitle === __('Downstream');
+      return this.type === DOWNSTREAM;
+    },
+    isUpstream() {
+      return this.type === UPSTREAM;
+    },
+    isSameProject() {
+      return this.projectId === this.pipeline.project.id;
+    },
+    sourceJobName() {
+      return accessValue(this.dataMethod, 'sourceJob', this.pipeline);
     },
     sourceJobInfo() {
-      return this.isDownstream
-        ? sprintf(__('Created by %{job}'), { job: this.pipeline.source_job.name })
-        : '';
+      return this.isDownstream ? sprintf(__('Created by %{job}'), { job: this.sourceJobName }) : '';
     },
     expandedIcon() {
-      if (this.parentPipeline) {
+      if (this.isUpstream) {
         return this.expanded ? 'angle-right' : 'angle-left';
       }
       return this.expanded ? 'angle-left' : 'angle-right';
     },
     expandButtonPosition() {
-      return this.parentPipeline ? 'gl-left-0 gl-border-r-1!' : 'gl-right-0 gl-border-l-1!';
+      return this.isUpstream ? 'gl-left-0 gl-border-r-1!' : 'gl-right-0 gl-border-l-1!';
     },
   },
   methods: {
@@ -116,7 +132,7 @@ export default {
   >
     <div
       class="gl-relative gl-bg-white gl-p-3 gl-border-solid gl-border-gray-100 gl-border-1"
-      :class="{ 'gl-pl-9': parentPipeline }"
+      :class="{ 'gl-pl-9': isUpstream }"
     >
       <div class="gl-display-flex">
         <ci-status
@@ -130,14 +146,9 @@ export default {
             {{ downstreamTitle }}
           </span>
           <div class="gl-text-truncate">
-            <gl-link
-              v-if="childPipeline"
-              class="gl-text-blue-500!"
-              :href="pipeline.path"
-              data-testid="childPipelineLink"
+            <gl-link class="gl-text-blue-500!" :href="pipeline.path" data-testid="pipelineLink"
               >#{{ pipeline.id }}</gl-link
             >
-            <span v-else>#{{ pipeline.id }}</span>
           </div>
         </div>
       </div>

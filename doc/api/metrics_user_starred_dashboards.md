@@ -1,7 +1,7 @@
 ---
 stage: Monitor
-group: APM
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+group: Health
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: concepts, howto
 ---
 
@@ -54,7 +54,7 @@ Parameters:
 | Attribute      | Type           | Required | Description                                                                  |
 |:---------------|:---------------|:---------|:-----------------------------------------------------------------------------|
 | `id` | integer/string | yes | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) |
-| `dashboard_path` | string        | no      | URL-encoded path to file defining the dashboard which should no longer be marked as favorite. When not supplied all dashboards within given projects will be removed from favorites.   |
+| `dashboard_path` | string        | no      | URL-encoded path to file defining the dashboard which should no longer be marked as favorite. When not supplied, all dashboards within given projects are removed from favorites.   |
 
 ```shell
 curl --request DELETE --header 'Private-Token: <your_access_token>' https://gitlab.example.com/api/v4/projects/20/metrics/user_starred_dashboards \

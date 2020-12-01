@@ -31,7 +31,7 @@ RSpec.describe Projects::CreateFromTemplateService do
   let(:subgroup_1_2_1) { create(:group, parent: subgroup_1_2) }
   let(:subgroup_2) { create(:group, parent: group) }
   let(:subgroup_2_1) { create(:group, parent: subgroup_2) }
-  let(:project_template) { create(:project, :public, namespace: subgroup_1_2) }
+  let(:project_template) { create(:project, :public, :metrics_dashboard_enabled, namespace: subgroup_1_2) }
   let(:template_name) { project_template.name }
   let(:namespace_id) { nil }
   let(:group_with_project_templates_id) { nil }
@@ -69,6 +69,7 @@ RSpec.describe Projects::CreateFromTemplateService do
 
         it 'creates an empty project' do
           expect(::Gitlab::ProjectTemplate).to receive(:find)
+          expect(::Gitlab::SampleDataTemplate).to receive(:find)
           expect(subject).not_to receive(:find_template_project)
         end
       end
@@ -78,6 +79,7 @@ RSpec.describe Projects::CreateFromTemplateService do
           stub_licensed_features(custom_project_templates: false)
 
           expect(::Gitlab::ProjectTemplate).to receive(:find)
+          expect(::Gitlab::SampleDataTemplate).to receive(:find)
           expect(subject).not_to receive(:find_template_project)
         end
       end

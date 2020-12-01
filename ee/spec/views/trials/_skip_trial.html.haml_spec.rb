@@ -5,29 +5,32 @@ require 'spec_helper'
 RSpec.describe 'trials/_skip_trial.html.haml' do
   include ApplicationHelper
 
-  context 'without glm_source' do
-    it 'displays skip trial' do
-      render 'trials/skip_trial'
+  let(:source) { nil }
 
-      expect(rendered).to have_content("Skip Trial (Continue with Free Account)")
-    end
+  before do
+    params[:glm_source] = source
+    render 'trials/skip_trial'
   end
 
-  context 'with glm_source' do
-    it 'displays skip trial when using about.gitlab.com' do
-      params[:glm_source] = 'about.gitlab.com'
+  subject { rendered }
 
-      render 'trials/skip_trial'
+  shared_examples 'has Skip Trial verbiage' do
+    it { is_expected.to have_content("Skip Trial (Continue with Free Account)") }
+  end
 
-      expect(rendered).to have_content("Skip Trial (Continue with Free Account)")
-    end
+  context 'without glm_source' do
+    include_examples 'has Skip Trial verbiage'
+  end
 
-    it 'displays go back to GitLab when using GitLab.com' do
-      params[:glm_source] = 'gitlab.com'
+  context 'with glm_source of about.gitlab.com' do
+    let(:source) { 'about.gitlab.com' }
 
-      render 'trials/skip_trial'
+    include_examples 'has Skip Trial verbiage'
+  end
 
-      expect(rendered).to have_content("Go back to GitLab")
-    end
+  context 'with glm_source of gitlab.com' do
+    let(:source) { 'gitlab.com' }
+
+    it { is_expected.to have_content("Go back to GitLab") }
   end
 end

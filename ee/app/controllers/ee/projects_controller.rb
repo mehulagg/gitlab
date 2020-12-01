@@ -9,6 +9,8 @@ module EE
       before_action :log_download_export_audit_event, only: [:download_export]
       before_action :log_archive_audit_event, only: [:archive]
       before_action :log_unarchive_audit_event, only: [:unarchive]
+
+      feature_category :projects, [:restore]
     end
 
     def restore
@@ -43,6 +45,11 @@ module EE
 
         render_edit
       end
+    end
+
+    override :project_feature_attributes
+    def project_feature_attributes
+      super + [:requirements_access_level]
     end
 
     override :project_params_attributes
@@ -81,13 +88,16 @@ module EE
         group_with_project_templates_id
       ]
 
-      if allow_merge_pipelines_params?
-        attrs << %i[merge_pipelines_enabled]
-      end
+      attrs << %i[merge_pipelines_enabled] if allow_merge_pipelines_params?
+      attrs << %i[merge_trains_enabled] if allow_merge_trains_params?
 
       attrs += merge_request_rules_params
 
       attrs += compliance_framework_params
+
+      if ::Gitlab::Ci::Features.auto_rollback_available?(project)
+        attrs << :auto_rollback_enabled
+      end
 
       if allow_mirror_params?
         attrs + mirror_params
@@ -131,6 +141,10 @@ module EE
 
     def allow_merge_pipelines_params?
       project&.feature_available?(:merge_pipelines)
+    end
+
+    def allow_merge_trains_params?
+      project&.feature_available?(:merge_trains)
     end
 
     def compliance_framework_params

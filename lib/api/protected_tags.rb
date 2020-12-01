@@ -1,12 +1,14 @@
 # frozen_string_literal: true
 
 module API
-  class ProtectedTags < Grape::API::Instance
+  class ProtectedTags < ::API::Base
     include PaginationParams
 
     TAG_ENDPOINT_REQUIREMENTS = API::NAMESPACE_OR_PROJECT_REQUIREMENTS.merge(name: API::NO_SLASH_URL_PART_REGEX)
 
     before { authorize_admin_project }
+
+    feature_category :source_code_management
 
     params do
       requires :id, type: String, desc: 'The ID of a project'

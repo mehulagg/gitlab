@@ -7,6 +7,7 @@ export default () => ({
   state: {
     discussions: [],
     discussionSortOrder: ASC,
+    persistSortOrder: true,
     convertedDisscussionIds: [],
     targetNoteHash: null,
     lastFetchedAt: null,
@@ -25,7 +26,6 @@ export default () => ({
 
     // View layer
     isToggleStateButtonLoading: false,
-    isToggleBlockedIssueWarning: false,
     isNotesFetched: false,
     isLoading: true,
     isLoadingDescriptionVersion: false,
@@ -41,10 +41,12 @@ export default () => ({
       current_user: {},
       preview_note_path: 'path/to/preview',
     },
+    isResolvingDiscussion: false,
     commentsDisabled: false,
     resolvableDiscussionsCount: 0,
     unresolvedDiscussionsCount: 0,
     descriptionVersions: {},
+    isTimelineEnabled: false,
   },
   actions,
   getters,

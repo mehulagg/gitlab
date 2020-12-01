@@ -1,7 +1,8 @@
-import { shallowMount } from '@vue/test-utils';
-import { GlDeprecatedButton, GlLoadingIcon, GlIcon } from '@gitlab/ui';
-import ApprovalsList from 'ee/vue_merge_request_widget/components/approvals/approvals_list.vue';
+import { GlDeprecatedButton, GlButton, GlLoadingIcon, GlIcon } from '@gitlab/ui';
+import { mount } from '@vue/test-utils';
 import ApprovalsFooter from 'ee/vue_merge_request_widget/components/approvals/approvals_footer.vue';
+import ApprovalsList from 'ee/vue_merge_request_widget/components/approvals/approvals_list.vue';
+import stubChildren from 'helpers/stub_children';
 import UserAvatarList from '~/vue_shared/components/user_avatar/user_avatar_list.vue';
 
 const testSuggestedApprovers = () => Array.from({ length: 11 }, (_, i) => i).map(id => ({ id }));
@@ -11,16 +12,20 @@ describe('EE MRWidget approvals footer', () => {
   let wrapper;
 
   const createComponent = (props = {}) => {
-    wrapper = shallowMount(ApprovalsFooter, {
+    wrapper = mount(ApprovalsFooter, {
       propsData: {
         suggestedApprovers: testSuggestedApprovers(),
         approvalRules: testApprovalRules(),
         ...props,
       },
+      stubs: {
+        ...stubChildren(ApprovalsFooter),
+        GlButton: false,
+      },
     });
   };
 
-  const findToggle = () => wrapper.find('button');
+  const findToggle = () => wrapper.find(GlButton);
   const findToggleIcon = () => findToggle().find(GlIcon);
   const findToggleLoadingIcon = () => findToggle().find(GlLoadingIcon);
   const findExpandButton = () => wrapper.find(GlDeprecatedButton);
@@ -138,7 +143,7 @@ describe('EE MRWidget approvals footer', () => {
       it('expands when clicked', () => {
         const button = findToggle();
 
-        button.trigger('click');
+        button.vm.$emit('click');
 
         return wrapper.vm.$nextTick().then(() => {
           expect(wrapper.emitted().input).toEqual([[true]]);

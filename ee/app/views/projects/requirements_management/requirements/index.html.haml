@@ -1,4 +1,5 @@
 - page_title _('Requirements')
+- add_page_specific_style 'page_bundles/issues_list'
 - @content_wrapper_class = 'js-requirements-container-wrapper'
 - @content_class = 'requirements-container'
 
@@ -30,6 +31,8 @@
   all: total_requirements,
   requirements_web_url: project_requirements_management_requirements_path(@project),
   can_create_requirement: "#{can?(current_user, :create_requirement, @project)}",
+  description_preview_path: preview_markdown_path(@project),
+  description_help_path: help_page_path('user/markdown'),
   empty_state_path: image_path('illustrations/empty-state/empty-requirements-lg.svg') } }
   - if current_tab_count == 0
     -# Show regular spinner only when there will be no

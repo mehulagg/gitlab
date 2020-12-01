@@ -36,9 +36,8 @@ RSpec.describe 'Timelogs through GroupQuery' do
         expect(graphql_data['group']['groupTimelogsEnabled']).to be_truthy
       end
 
-      it 'contains correct data' do
+      it 'contains correct data', :aggregate_failures do
         username = timelog_array.map {|data| data['user']['username'] }
-        date = timelog_array.map { |data| data['date'].to_time }
         spent_at = timelog_array.map { |data| data['spentAt'].to_time }
         time_spent = timelog_array.map { |data| data['timeSpent'] }
         issue_title = timelog_array.map {|data| data['issue']['title'] }
@@ -46,7 +45,6 @@ RSpec.describe 'Timelogs through GroupQuery' do
         epic_title = timelog_array.map {|data| data['issue']['epic']['title'] }
 
         expect(username).to eq([user.username])
-        expect(date.first).to be_like_time(timelog1.spent_at)
         expect(spent_at.first).to be_like_time(timelog1.spent_at)
         expect(time_spent).to eq([timelog1.time_spent])
         expect(issue_title).to eq([issue.title])
@@ -121,7 +119,6 @@ RSpec.describe 'Timelogs through GroupQuery' do
   def query(timelog_params = params)
     timelog_nodes = <<~NODE
       nodes {
-        date
         spentAt
         timeSpent
         user {

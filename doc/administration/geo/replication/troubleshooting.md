@@ -1,7 +1,7 @@
 ---
 stage: Enablement
 group: Geo
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: howto
 ---
 
@@ -251,7 +251,7 @@ sudo gitlab-rake gitlab:geo:check
 
    When performing a PostgreSQL major version (9 > 10) update this is expected. Follow:
 
-   - [initiate-the-replication-process](database.md#step-3-initiate-the-replication-process)
+   - [initiate-the-replication-process](../setup/database.md#step-3-initiate-the-replication-process)
 
 ## Fixing replication errors
 
@@ -268,7 +268,7 @@ default to 1. You may need to increase this value if you have more
 
 Be sure to restart PostgreSQL for this to take
 effect. See the [PostgreSQL replication
-setup](database.md#postgresql-replication) guide for more details.
+setup](../setup/database.md#postgresql-replication) guide for more details.
 
 ### Message: `FATAL:  could not start WAL streaming: ERROR:  replication slot "geo_secondary_my_domain_com" does not exist`?
 
@@ -276,11 +276,11 @@ This occurs when PostgreSQL does not have a replication slot for the
 **secondary** node by that name.
 
 You may want to rerun the [replication
-process](database.md) on the **secondary** node .
+process](../setup/database.md) on the **secondary** node .
 
 ### Message: "Command exceeded allowed execution time" when setting up replication?
 
-This may happen while [initiating the replication process](database.md#step-3-initiate-the-replication-process) on the **secondary** node,
+This may happen while [initiating the replication process](../setup/database.md#step-3-initiate-the-replication-process) on the **secondary** node,
 and indicates that your initial dataset is too large to be replicated in the default timeout (30 minutes).
 
 Re-run `gitlab-ctl replicate-geo-database`, but include a larger value for
@@ -386,6 +386,15 @@ This happens when you have added IP addresses without a subnet mask in `postgres
 To fix this, add the subnet mask in `/etc/gitlab/gitlab.rb` under `postgresql['md5_auth_cidr_addresses']`
 to respect the CIDR format (i.e. `1.2.3.4/32`).
 
+### Message: `Found data in the gitlabhq_production database!` when running `gitlab-ctl replicate-geo-database`
+
+This happens if data is detected in the `projects` table. When one or more projects are detected, the operation
+is aborted to prevent accidental data loss. To bypass this message, pass the `--force` option to the command.
+
+In GitLab 13.4, a seed project is added when GitLab is first installed. This makes it necessary to pass `--force` even
+on a new Geo secondary node. There is an [issue to account for seed projects](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5618)
+when checking the database.
+
 ### Very large repositories never successfully synchronize on the **secondary** node
 
 GitLab places a timeout on all repository clones, including project imports
@@ -483,8 +492,8 @@ to start again from scratch, there are a few steps that can help you:
    gitlab-ctl start geo-postgresql
    ```
 
-   Reconfigure in order to recreate the folders and make sure permissions and ownership
-   are correctly
+   Reconfigure to recreate the folders and make sure permissions and ownership
+   are correct:
 
    ```shell
    gitlab-ctl reconfigure
@@ -605,32 +614,21 @@ or `gitlab-ctl promote-to-primary-node`, either:
 
 ### Message: ActiveRecord::RecordInvalid: Validation failed: Enabled Geo primary node cannot be disabled
 
-This error may occur if you have paused replication from the original primary node before attempting to promote this node.
-To double check this, you can do the following:
+If you disabled a secondary node, either with the [replication pause task](../index.md#pausing-and-resuming-replication)
+(13.2) or by using the user interface (13.1 and earlier), you must first
+re-enable the node before you can continue. This is fixed in 13.4.
 
-- Get the current secondary node's ID using:
+Run the following command, replacing  `https://<secondary url>/` with the URL
+for your secondary server, using either `http` or `https`, and ensuring that you
+end the URL with a slash (`/`):
 
-  ```shell
-  sudo gitlab-rails runner 'puts GeoNode.current_node.id'
-  ```
+```shell
+sudo gitlab-rails dbconsole
 
-- Double check that the node is active through the database by running the following
-  on the secondary node, replacing `ID_FROM_ABOVE`:
+UPDATE geo_nodes SET enabled = true WHERE url = 'https://<secondary url>/' AND enabled = false;"
+```
 
-  ```shell
-  sudo gitlab-rails dbconsole
-
-  SELECT enabled FROM geo_nodes WHERE id = ID_FROM_ABOVE;
-  ```
-
-- If the above returned `f` it means that the replication was paused.
-  You can re-enable it through an `UPDATE` statement in the database:
-
-  ```shell
-  sudo gitlab-rails dbconsole
-
-  UPDATE geo_nodes SET enabled = 't' WHERE id = ID_FROM_ABOVE;
-  ```
+This should update 1 row.
 
 ### Message: ``NoMethodError: undefined method `secondary?' for nil:NilClass``
 
@@ -674,6 +672,20 @@ sudo /opt/gitlab/embedded/bin/gitlab-pg-ctl promote
 
 GitLab 12.9 and later are [unaffected by this error](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5147).
 
+### Two-factor authentication is broken after a failover
+
+The setup instructions for Geo prior to 10.5 failed to replicate the
+`otp_key_base` secret, which is used to encrypt the two-factor authentication
+secrets stored in the database. If it differs between **primary** and **secondary**
+nodes, users with two-factor authentication enabled won't be able to log in
+after a failover.
+
+If you still have access to the old **primary** node, you can follow the
+instructions in the
+[Upgrading to GitLab 10.5](../replication/version_specific_updates.md#updating-to-gitlab-105)
+section to resolve the error. Otherwise, the secret is lost and you'll need to
+[reset two-factor authentication for all users](../../../security/two_factor_authentication.md#disabling-2fa-for-everyone).
+
 ## Expired artifacts
 
 If you notice for some reason there are more artifacts on the Geo
@@ -708,7 +720,8 @@ GitLab cannot find or doesn't have permission to access the `database_geo.yml` c
 In an Omnibus GitLab installation, the file should be in `/var/opt/gitlab/gitlab-rails/etc`.
 If it doesn't exist or inadvertent changes have been made to it, run `sudo gitlab-ctl reconfigure` to restore it to its correct state.
 
-If this path is mounted on a remote volume, please check your volume configuration and that it has correct permissions.
+If this path is mounted on a remote volume, ensure your volume configuration
+has the correct permissions.
 
 ### An existing tracking database cannot be reused
 
@@ -723,7 +736,7 @@ This error refers to a problem with the database replica on a **secondary** node
 which Geo expects to have access to. It usually means, either:
 
 - An unsupported replication method was used (for example, logical replication).
-- The instructions to setup a [Geo database replication](database.md) were not followed correctly.
+- The instructions to setup a [Geo database replication](../setup/database.md) were not followed correctly.
 - Your database connection details are incorrect, that is you have specified the wrong
   user in your `/etc/gitlab/gitlab.rb` file.
 
@@ -743,7 +756,7 @@ The most common problems that prevent the database from replicating correctly ar
 - Database replication slot is misconfigured.
 - Database is not using a replication slot or another alternative and cannot catch-up because WAL files were purged.
 
-Make sure you follow the [Geo database replication](database.md) instructions for supported configuration.
+Make sure you follow the [Geo database replication](../setup/database.md) instructions for supported configuration.
 
 ### Geo database version (...) does not match latest migration (...)
 
@@ -770,3 +783,13 @@ To resolve this issue:
   using IPv6 to send its status to the **primary** node. If it is, add an entry to
   the **primary** node using IPv4 in the `/etc/hosts` file. Alternatively, you should
   [enable IPv6 on the **primary** node](https://docs.gitlab.com/omnibus/settings/nginx.html#setting-the-nginx-listen-address-or-addresses).
+
+## Fixing client errors
+
+### Authorization errors from LFS HTTP(s) client requests
+
+You may have problems if you're running a version of [Git LFS](https://git-lfs.github.com/) before 2.4.2.
+As noted in [this authentication issue](https://github.com/git-lfs/git-lfs/issues/3025),
+requests redirected from the secondary to the primary node do not properly send the
+Authorization header. This may result in either an infinite `Authorization <-> Redirect`
+loop, or Authorization errors.

@@ -1,3 +1,9 @@
+---
+stage: Enablement
+group: Geo
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Doctor Rake tasks **(CORE ONLY)**
 
 This is a collection of tasks to help investigate and repair
@@ -15,7 +21,6 @@ Automatic resolution is not yet implemented. If you have values that
 cannot be decrypted, you can follow steps to reset them, see our
 docs on what to do [when the secrets file is lost](../../raketasks/backup_restore.md#when-the-secrets-file-is-lost).
 
-NOTE: **Note:**
 This can take a very long time, depending on the size of your
 database, as it checks all rows in all tables.
 
@@ -47,9 +52,8 @@ I, [2020-06-11T17:18:15.575711 #27148]  INFO -- : Done!
 
 ### Verbose mode
 
-In order to get more detailed information about which
-rows and columns cannot be decrypted, you can pass a VERBOSE
-environment variable:
+To get more detailed information about which rows and columns can't be
+decrypted, you can pass a `VERBOSE` environment variable:
 
 **Omnibus Installation**
 

@@ -45,7 +45,7 @@ describe('RepoEditor', () => {
 
   const createOpenFile = path => {
     const origFile = store.state.openFiles[0];
-    const newFile = { ...origFile, path, key: path };
+    const newFile = { ...origFile, path, key: path, name: 'myfile.txt', content: 'hello world' };
 
     store.state.entries[path] = newFile;
 
@@ -54,8 +54,8 @@ describe('RepoEditor', () => {
 
   beforeEach(() => {
     const f = {
-      ...file(),
-      viewMode: FILE_VIEW_MODE_EDITOR,
+      ...file('file.txt'),
+      content: 'hello world',
     };
 
     const storeOptions = createStoreOptions();
@@ -91,6 +91,8 @@ describe('RepoEditor', () => {
   });
 
   const findEditor = () => vm.$el.querySelector('.multi-file-editor-holder');
+  const changeViewMode = viewMode =>
+    store.dispatch('editor/updateFileEditor', { path: vm.file.path, data: { viewMode } });
 
   describe('default', () => {
     beforeEach(() => {
@@ -142,6 +144,7 @@ describe('RepoEditor', () => {
           ...vm.file,
           projectId: 'namespace/project',
           path: 'sample.md',
+          name: 'sample.md',
           content: 'testing 123',
         });
 
@@ -200,7 +203,8 @@ describe('RepoEditor', () => {
 
     describe('when open file is binary and not raw', () => {
       beforeEach(done => {
-        vm.file.binary = true;
+        vm.file.name = 'file.dat';
+        vm.file.content = '🐱'; // non-ascii binary content
 
         vm.$nextTick(done);
       });
@@ -406,7 +410,10 @@ describe('RepoEditor', () => {
     describe('when files view mode is preview', () => {
       beforeEach(done => {
         jest.spyOn(vm.editor, 'updateDimensions').mockImplementation();
-        vm.file.viewMode = FILE_VIEW_MODE_PREVIEW;
+        changeViewMode(FILE_VIEW_MODE_PREVIEW);
+        vm.file.name = 'myfile.md';
+        vm.file.content = 'hello world';
+
         vm.$nextTick(done);
       });
 
@@ -417,7 +424,7 @@ describe('RepoEditor', () => {
 
       describe('when file view mode changes to editor', () => {
         it('should update dimensions', () => {
-          vm.file.viewMode = FILE_VIEW_MODE_EDITOR;
+          changeViewMode(FILE_VIEW_MODE_EDITOR);
 
           return vm.$nextTick().then(() => {
             expect(vm.editor.updateDimensions).toHaveBeenCalled();
@@ -650,7 +657,6 @@ describe('RepoEditor', () => {
             path: 'foo/foo.png',
             type: 'blob',
             content: 'Zm9v',
-            binary: true,
             rawPath: 'data:image/png;base64,Zm9v',
           });
         });

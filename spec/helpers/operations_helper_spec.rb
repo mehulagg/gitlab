@@ -35,7 +35,7 @@ RSpec.describe OperationsHelper do
           'url' => alerts_service.url,
           'authorization_key' => nil,
           'form_path' => project_service_path(project, alerts_service),
-          'alerts_setup_url' => help_page_path('user/project/integrations/generic_alerts.md', anchor: 'setting-up-generic-alerts'),
+          'alerts_setup_url' => help_page_path('operations/incident_management/alert_integrations.md', anchor: 'generic-http-endpoint'),
           'alerts_usage_url' => project_alert_management_index_path(project),
           'prometheus_form_path' => project_service_path(project, prometheus_service),
           'prometheus_reset_key_path' => reset_alerting_token_project_settings_operations_path(project),
@@ -43,7 +43,9 @@ RSpec.describe OperationsHelper do
           'prometheus_api_url' => nil,
           'prometheus_activated' => 'false',
           'prometheus_url' => notify_project_prometheus_alerts_url(project, format: :json),
-          'disabled' => 'false'
+          'disabled' => 'false',
+          'project_path' => project.full_path,
+          'multi_integrations' => 'false'
         )
       end
     end
@@ -145,7 +147,7 @@ RSpec.describe OperationsHelper do
     subject { helper.operations_settings_data }
 
     it 'returns the correct set of data' do
-      is_expected.to eq(
+      is_expected.to include(
         operations_settings_endpoint: project_settings_operations_path(project),
         templates: '[]',
         create_issue: 'false',

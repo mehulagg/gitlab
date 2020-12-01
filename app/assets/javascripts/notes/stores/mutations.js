@@ -11,24 +11,30 @@ export default {
     const isDiscussion = type === constants.DISCUSSION_NOTE || type === constants.DIFF_NOTE;
 
     if (!exists) {
-      const noteData = {
-        expanded: true,
-        id: discussion_id,
-        individual_note: !isDiscussion,
-        notes: [note],
-        reply_id: discussion_id,
-      };
+      let discussion = data.discussion || note.base_discussion;
 
-      if (isDiscussion && isInMRPage()) {
-        noteData.resolvable = note.resolvable;
-        noteData.resolved = false;
-        noteData.active = true;
-        noteData.resolve_path = note.resolve_path;
-        noteData.resolve_with_issue_path = note.resolve_with_issue_path;
-        noteData.diff_discussion = false;
+      if (!discussion) {
+        discussion = {
+          expanded: true,
+          id: discussion_id,
+          individual_note: !isDiscussion,
+          reply_id: discussion_id,
+        };
+
+        if (isDiscussion && isInMRPage()) {
+          discussion.resolvable = note.resolvable;
+          discussion.resolved = false;
+          discussion.active = true;
+          discussion.resolve_path = note.resolve_path;
+          discussion.resolve_with_issue_path = note.resolve_with_issue_path;
+          discussion.diff_discussion = false;
+        }
       }
 
-      state.discussions.push(noteData);
+      note.base_discussion = undefined; // No point keeping a reference to this
+      discussion.notes = [note];
+
+      state.discussions.push(discussion);
     }
   },
 
@@ -207,6 +213,10 @@ export default {
     }
   },
 
+  [types.SET_RESOLVING_DISCUSSION](state, isResolving) {
+    state.isResolvingDiscussion = isResolving;
+  },
+
   [types.UPDATE_NOTE](state, note) {
     const noteObj = utils.findNoteObjectById(state.discussions, note.discussion_id);
 
@@ -295,10 +305,6 @@ export default {
     Object.assign(state, { isToggleStateButtonLoading: value });
   },
 
-  [types.TOGGLE_BLOCKED_ISSUE_WARNING](state, value) {
-    Object.assign(state, { isToggleBlockedIssueWarning: value });
-  },
-
   [types.SET_NOTES_FETCHED_STATE](state, value) {
     Object.assign(state, { isNotesFetched: value });
   },
@@ -313,8 +319,13 @@ export default {
     discussion.truncated_diff_lines = utils.prepareDiffLines(diffLines);
   },
 
-  [types.SET_DISCUSSIONS_SORT](state, sort) {
-    state.discussionSortOrder = sort;
+  [types.SET_DISCUSSIONS_SORT](state, { direction, persist }) {
+    state.discussionSortOrder = direction;
+    state.persistSortOrder = persist;
+  },
+
+  [types.SET_TIMELINE_VIEW](state, value) {
+    state.isTimelineEnabled = value;
   },
 
   [types.SET_SELECTED_COMMENT_POSITION](state, position) {

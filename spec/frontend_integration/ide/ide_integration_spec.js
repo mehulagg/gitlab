@@ -1,62 +1,71 @@
-/**
- * WARNING: WIP
- *
- * Please do not copy from this spec or use it as an example for anything.
- *
- * This is in place to iteratively set up the frontend integration testing environment
- * and will be improved upon in a later iteration.
- *
- * See https://gitlab.com/gitlab-org/gitlab/-/issues/208800 for more information.
- */
-import { TEST_HOST } from 'helpers/test_constants';
+import { waitForText } from 'helpers/wait_for_text';
+import waitForPromises from 'helpers/wait_for_promises';
 import { useOverclockTimers } from 'test_helpers/utils/overclock_timers';
-import { initIde } from '~/ide';
-import extendStore from '~/ide/stores/extend';
-
-const TEST_DATASET = {
-  emptyStateSvgPath: '/test/empty_state.svg',
-  noChangesStateSvgPath: '/test/no_changes_state.svg',
-  committedStateSvgPath: '/test/committed_state.svg',
-  pipelinesEmptyStateSvgPath: '/test/pipelines_empty_state.svg',
-  promotionSvgPath: '/test/promotion.svg',
-  ciHelpPagePath: '/test/ci_help_page',
-  webIDEHelpPagePath: '/test/web_ide_help_page',
-  clientsidePreviewEnabled: 'true',
-  renderWhitespaceInCode: 'false',
-  codesandboxBundlerUrl: 'test/codesandbox_bundler',
-};
+import { createCommitId } from 'test_helpers/factories/commit_id';
+import * as ideHelper from './helpers/ide_helper';
+import startWebIDE from './helpers/start';
 
 describe('WebIDE', () => {
   useOverclockTimers();
 
   let vm;
-  let root;
+  let container;
 
   beforeEach(() => {
-    root = document.createElement('div');
-    document.body.appendChild(root);
-
-    global.jsdom.reconfigure({
-      url: `${TEST_HOST}/-/ide/project/gitlab-test/lorem-ipsum`,
-    });
+    setFixtures('<div class="webide-container"></div>');
+    container = document.querySelector('.webide-container');
   });
 
   afterEach(() => {
     vm.$destroy();
     vm = null;
-    root.remove();
   });
 
-  const createComponent = () => {
-    const el = document.createElement('div');
-    Object.assign(el.dataset, TEST_DATASET);
-    root.appendChild(el);
-    vm = initIde(el, { extendStore });
-  };
+  it('user commits changes', async () => {
+    vm = startWebIDE(container);
 
-  it('runs', () => {
-    createComponent();
+    await ideHelper.createFile('foo/bar/test.txt', 'Lorem ipsum dolar sit');
+    await ideHelper.deleteFile('foo/bar/.gitkeep');
+    await ideHelper.commit();
 
-    expect(root).toMatchSnapshot();
+    const commitId = createCommitId(1);
+    const commitShortId = commitId.slice(0, 8);
+
+    await waitForText('All changes are committed');
+    await waitForText(commitShortId);
+
+    expect(mockServer.db.branches.findBy({ name: 'master' }).commit).toMatchObject({
+      short_id: commitShortId,
+      id: commitId,
+      message: 'Update foo/bar/test.txt\nDeleted foo/bar/.gitkeep',
+      __actions: [
+        {
+          action: 'create',
+          content: 'Lorem ipsum dolar sit\n',
+          encoding: 'text',
+          file_path: 'foo/bar/test.txt',
+          last_commit_id: '',
+        },
+        {
+          action: 'delete',
+          encoding: 'text',
+          file_path: 'foo/bar/.gitkeep',
+        },
+      ],
+    });
+  });
+
+  it('user adds file that starts with +', async () => {
+    vm = startWebIDE(container);
+
+    await ideHelper.createFile('+test', 'Hello world!');
+    await ideHelper.openFile('+test');
+
+    // Wait for monaco things
+    await waitForPromises();
+
+    // Assert that +test is the only open tab
+    const tabs = Array.from(document.querySelectorAll('.multi-file-tab'));
+    expect(tabs.map(x => x.textContent.trim())).toEqual(['+test']);
   });
 });

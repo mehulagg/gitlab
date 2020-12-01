@@ -7,6 +7,7 @@ module QA
         module Epic
           class Show < QA::Page::Base
             include QA::Page::Component::Issuable::Common
+            include QA::Page::Component::Note
 
             view 'ee/app/assets/javascripts/epic/components/epic_header.vue' do
               element :close_reopen_epic_button
@@ -17,7 +18,7 @@ module QA
             end
 
             view 'app/assets/javascripts/related_issues/components/related_issuable_input.vue' do
-              element :add_issue_input
+              element :add_issue_field
             end
 
             view 'ee/app/assets/javascripts/related_items_tree/components/epic_issue_actions_split_button.vue' do
@@ -35,15 +36,10 @@ module QA
             def add_issue_to_epic(issue_url)
               click_element(:epic_issue_actions_split_button)
               find('button', text: 'Add an existing issue').click
-              fill_element :add_issue_input, issue_url
+              fill_element :add_issue_field, issue_url
               # Clicking the title blurs the input
               click_element :title
               click_element :add_issue_button
-            end
-
-            def add_comment_to_epic(comment)
-              fill_element :comment_input, comment
-              click_element :comment_button
             end
 
             def remove_issue_from_epic

@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe 'Admin Groups' do
   include Select2Helper
+  include Spec::Support::Helpers::Features::MembersHelpers
 
   let(:internal) { Gitlab::VisibilityLevel::INTERNAL }
   let(:user) { create :user }
@@ -12,6 +13,7 @@ RSpec.describe 'Admin Groups' do
 
   before do
     sign_in(current_user)
+    gitlab_enable_admin_mode_sign_in(current_user)
     stub_application_setting(default_group_visibility: internal)
   end
 
@@ -174,7 +176,7 @@ RSpec.describe 'Admin Groups' do
 
       click_button 'Invite'
 
-      page.within '[data-qa-selector="members_list"]' do
+      page.within members_table do
         expect(page).to have_content(current_user.name)
         expect(page).to have_content('Developer')
       end
@@ -192,7 +194,7 @@ RSpec.describe 'Admin Groups' do
         expect(page).to have_content('Developer')
       end
 
-      accept_confirm { find(:css, 'li', text: current_user.name).find(:css, 'a.btn-remove').click }
+      accept_confirm { find(:css, 'li', text: current_user.name).find(:css, 'a.btn-danger').click }
 
       visit group_group_members_path(group)
 

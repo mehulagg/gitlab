@@ -16,6 +16,18 @@ RSpec.describe Gitlab::Elastic::Client do
 
         expect(client.get(index: 'foo', id: 1)).to eq([:fake_response])
       end
+
+      it 'does not set request timeout in transport' do
+        expect(client.transport.options).not_to include(:request_timeout)
+      end
+
+      context 'with client_request_timeout in config' do
+        let(:params) { { url: 'http://dummy-elastic:9200', client_request_timeout: 30 } }
+
+        it 'does not set request timeout in transport' do
+          expect(client.transport.options).to include(request_timeout: 30)
+        end
+      end
     end
 
     context 'with AWS IAM static credentials' do

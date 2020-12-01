@@ -23,6 +23,12 @@ RSpec.describe Admin::UsersController do
 
       expect(assigns(:users)).to eq([admin])
     end
+
+    it 'eager loads authorized projects association' do
+      get :index
+
+      expect(assigns(:users).first.association(:authorized_projects)).to be_loaded
+    end
   end
 
   describe 'GET :id' do
@@ -36,7 +42,7 @@ RSpec.describe Admin::UsersController do
     end
   end
 
-  describe 'DELETE #user with projects', :sidekiq_might_not_need_inline do
+  describe 'DELETE #destroy', :sidekiq_might_not_need_inline do
     let(:project) { create(:project, namespace: user.namespace) }
     let!(:issue) { create(:issue, author: user) }
 
@@ -58,6 +64,84 @@ RSpec.describe Admin::UsersController do
       expect(response).to have_gitlab_http_status(:ok)
       expect(User.exists?(user.id)).to be_falsy
       expect(Issue.exists?(issue.id)).to be_falsy
+    end
+
+    context 'prerequisites for account deletion' do
+      context 'solo-owned groups' do
+        let(:group) { create(:group) }
+
+        context 'if the user is the sole owner of at least one group' do
+          before do
+            create(:group_member, :owner, group: group, user: user)
+          end
+
+          context 'soft-delete' do
+            it 'fails' do
+              delete :destroy, params: { id: user.username }
+
+              message = s_('AdminUsers|You must transfer ownership or delete the groups owned by this user before you can delete their account')
+
+              expect(flash[:alert]).to eq(message)
+              expect(response).to have_gitlab_http_status(:see_other)
+              expect(response).to redirect_to admin_user_path(user)
+              expect(User.exists?(user.id)).to be_truthy
+            end
+          end
+
+          context 'hard-delete' do
+            it 'succeeds' do
+              delete :destroy, params: { id: user.username, hard_delete: true }
+
+              expect(response).to redirect_to(admin_users_path)
+              expect(flash[:notice]).to eq(_('The user is being deleted.'))
+              expect(User.exists?(user.id)).to be_falsy
+            end
+          end
+        end
+      end
+    end
+  end
+
+  describe 'PUT #approve' do
+    let(:user) { create(:user, :blocked_pending_approval) }
+
+    subject { put :approve, params: { id: user.username } }
+
+    context 'when successful' do
+      it 'activates the user' do
+        subject
+
+        user.reload
+
+        expect(user).to be_active
+        expect(flash[:notice]).to eq('Successfully approved')
+      end
+
+      it 'emails the user on approval' do
+        expect(DeviseMailer).to receive(:user_admin_approval).with(user).and_call_original
+        expect { subject }.to have_enqueued_mail(DeviseMailer, :user_admin_approval)
+      end
+    end
+
+    context 'when unsuccessful' do
+      let(:user) { create(:user, :blocked) }
+
+      it 'displays the error' do
+        subject
+
+        expect(flash[:alert]).to eq('The user you are trying to approve is not pending an approval')
+      end
+
+      it 'does not activate the user' do
+        subject
+
+        user.reload
+        expect(user).not_to be_active
+      end
+
+      it 'does not email the pending user' do
+        expect { subject }.not_to have_enqueued_mail(DeviseMailer, :user_admin_approval)
+      end
     end
   end
 
@@ -147,6 +231,17 @@ RSpec.describe Admin::UsersController do
         user.reload
         expect(user.deactivated?).to be_falsey
         expect(flash[:notice]).to eq('Error occurred. A blocked user cannot be deactivated')
+      end
+    end
+
+    context 'for an internal user' do
+      it 'does not deactivate the user' do
+        internal_user = User.alert_bot
+
+        put :deactivate, params: { id: internal_user.username }
+
+        expect(internal_user.reload.deactivated?).to be_falsey
+        expect(flash[:notice]).to eq('Internal users cannot be deactivated')
       end
     end
   end
@@ -286,7 +381,7 @@ RSpec.describe Admin::UsersController do
 
   describe 'POST update' do
     context 'when the password has changed' do
-      def update_password(user, password = User.random_password, password_confirmation = password)
+      def update_password(user, password = User.random_password, password_confirmation = password, format = :html)
         params = {
           id: user.to_param,
           user: {
@@ -295,7 +390,7 @@ RSpec.describe Admin::UsersController do
           }
         }
 
-        post :update, params: params
+        post :update, params: params, format: format
       end
 
       context 'when admin changes their own password' do
@@ -392,6 +487,23 @@ RSpec.describe Admin::UsersController do
         it 'does not update the password' do
           expect { update_password(user, password, password_confirmation) }
             .not_to change { user.reload.encrypted_password }
+        end
+      end
+
+      context 'when the update fails' do
+        let(:password) { User.random_password }
+
+        before do
+          expect_next_instance_of(Users::UpdateService) do |service|
+            allow(service).to receive(:execute).and_return({ message: 'failed', status: :error })
+          end
+        end
+
+        it 'returns a 500 error' do
+          expect { update_password(admin, password, password, :json) }
+            .not_to change { admin.reload.password_expired? }
+
+          expect(response).to have_gitlab_http_status(:error)
         end
       end
     end

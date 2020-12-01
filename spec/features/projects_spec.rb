@@ -6,25 +6,35 @@ RSpec.describe 'Project' do
   include ProjectForksHelper
   include MobileHelpers
 
-  describe 'creating from template' do
+  describe 'template' do
     let(:user) { create(:user) }
-    let(:template) { Gitlab::ProjectTemplate.find(:rails) }
 
     before do
       sign_in user
       visit new_project_path
     end
 
-    it "allows creation from templates", :js do
-      find('#create-from-template-tab').click
-      find("label[for=#{template.name}]").click
-      fill_in("project_name", with: template.name)
+    shared_examples 'creates from template' do |template, sub_template_tab = nil|
+      it "is created from template", :js do
+        find('[data-qa-selector="create_from_template_link"]').click
+        find(".project-template #{sub_template_tab}").click if sub_template_tab
+        find("label[for=#{template.name}]").click
+        fill_in("project_name", with: template.name)
 
-      page.within '#content-body' do
-        click_button "Create project"
+        page.within '#content-body' do
+          click_button "Create project"
+        end
+
+        expect(page).to have_content template.name
       end
+    end
 
-      expect(page).to have_content template.name
+    context 'create with project template' do
+      it_behaves_like 'creates from template', Gitlab::ProjectTemplate.find(:rails)
+    end
+
+    context 'create with sample data template' do
+      it_behaves_like 'creates from template', Gitlab::SampleDataTemplate.find(:basic), '.sample-data-templates-tab'
     end
   end
 
@@ -37,9 +47,7 @@ RSpec.describe 'Project' do
     end
 
     it 'shows the command in a popover', :js do
-      page.within '.profile-settings-sidebar' do
-        click_link 'Show command'
-      end
+      click_link 'Show command'
 
       expect(page).to have_css('.popover .push-to-create-popover #push_to_create_tip')
       expect(page).to have_content 'Private projects can be created in your personal namespace with:'
@@ -51,7 +59,7 @@ RSpec.describe 'Project' do
     let(:path)    { project_path(project) }
 
     before do
-      sign_in(create(:admin))
+      sign_in(project.owner)
     end
 
     it 'parses Markdown' do
@@ -99,6 +107,15 @@ RSpec.describe 'Project' do
         expect(page).to have_css('.home-panel-description .is-expanded')
       end
     end
+
+    context 'page description' do
+      before do
+        project.update_attribute(:description, '**Lorem** _ipsum_ dolor sit [amet](https://example.com)')
+        visit path
+      end
+
+      it_behaves_like 'page meta description', 'Lorem ipsum dolor sit amet'
+    end
   end
 
   describe 'project topics' do
@@ -106,7 +123,7 @@ RSpec.describe 'Project' do
     let(:path)    { project_path(project) }
 
     before do
-      sign_in(create(:admin))
+      sign_in(project.owner)
       visit path
     end
 
@@ -137,7 +154,7 @@ RSpec.describe 'Project' do
     let(:path)    { project_path(project) }
 
     before do
-      sign_in(create(:admin))
+      sign_in(project.owner)
       visit path
     end
 
@@ -260,7 +277,7 @@ RSpec.describe 'Project' do
     end
 
     it 'deletes a project', :sidekiq_might_not_need_inline do
-      expect { remove_with_confirm('Delete project', "Delete #{project.full_name}", 'Yes, delete project') }.to change { Project.count }.by(-1)
+      expect { remove_with_confirm('Delete project', project.path, 'Yes, delete project') }.to change { Project.count }.by(-1)
       expect(page).to have_content "Project '#{project.full_name}' is in the process of being deleted."
       expect(Project.all.count).to be_zero
       expect(project.issues).to be_empty

@@ -5,9 +5,7 @@
       = s_("GroupSAML|SAML Single Sign On")
     %p
       = s_("GroupSAML|Manage your group’s membership while adding another level of security with SAML.")
-    = link_to help_page_path('user/group/saml_sso/index'), target: '_blank' do
-      = _("Learn more")
-      = icon('external-link')
+    = external_link _('Learn more'), help_page_path('user/group/saml_sso/index')
   .col-lg-9
     = render 'info'
 %section.row.border-top.mt-4

@@ -33,20 +33,19 @@ RSpec.shared_examples 'a blob replicator' do
         "replicable_name" => replicator.replicable_name, "event_name" => "created", "payload" => { "model_record_id" => replicator.model_record.id })
     end
 
-    it 'schedules the checksum calculation if needed' do
-      expect(Geo::BlobVerificationPrimaryWorker).to receive(:perform_async)
-      expect(replicator).to receive(:needs_checksum?).and_return(true)
+    it 'calls #after_verifiable_update' do
+      expect(replicator).to receive(:after_verifiable_update)
 
       replicator.handle_after_create_commit
     end
 
     context 'when replication feature flag is disabled' do
       before do
-        stub_feature_flags("geo_#{replicator.replicable_name}_replication": false)
+        stub_feature_flags(replicator.replication_enabled_feature_key => false)
       end
 
-      it 'does not schedule the checksum calculation' do
-        expect(Geo::BlobVerificationPrimaryWorker).not_to receive(:perform_async)
+      it 'does not call #after_verifiable_update' do
+        expect(replicator).not_to receive(:after_verifiable_update)
 
         replicator.handle_after_create_commit
       end
@@ -71,7 +70,7 @@ RSpec.shared_examples 'a blob replicator' do
 
     context 'when replication feature flag is disabled' do
       before do
-        stub_feature_flags("geo_#{replicator.replicable_name}_replication": false)
+        stub_feature_flags(replicator.replication_enabled_feature_key => false)
       end
 
       it 'does not publish' do
@@ -82,75 +81,59 @@ RSpec.shared_examples 'a blob replicator' do
     end
   end
 
-  describe '#calculate_checksum!' do
-    it 'calculates the checksum' do
-      model_record.save!
-
-      replicator.calculate_checksum!
-
-      expect(model_record.reload.verification_checksum).not_to be_nil
-      expect(model_record.reload.verified_at).not_to be_nil
-    end
-
-    it 'saves the error message and increments retry counter' do
-      model_record.save!
-
-      allow(model_record).to receive(:calculate_checksum!) do
-        raise StandardError.new('Failure to calculate checksum')
-      end
-
-      replicator.calculate_checksum!
-
-      expect(model_record.reload.verification_failure).to eq 'Failure to calculate checksum'
-      expect(model_record.verification_retry_count).to be 1
-    end
-  end
-
-  describe '#consume_event_created' do
+  describe 'created event consumption' do
     context "when the blob's project is in replicables for this geo node" do
       it 'invokes Geo::BlobDownloadService' do
-        expect(replicator).to receive(:in_replicables_for_geo_node?).and_return(true)
+        expect(replicator).to receive(:in_replicables_for_current_secondary?).and_return(true)
         service = double(:service)
 
         expect(service).to receive(:execute)
         expect(::Geo::BlobDownloadService).to receive(:new).with(replicator: replicator).and_return(service)
 
-        replicator.consume_event_created
+        replicator.consume(:created)
       end
     end
 
     context "when the blob's project is not in replicables for this geo node" do
       it 'does not invoke Geo::BlobDownloadService' do
-        expect(replicator).to receive(:in_replicables_for_geo_node?).and_return(false)
+        expect(replicator).to receive(:in_replicables_for_current_secondary?).and_return(false)
 
         expect(::Geo::BlobDownloadService).not_to receive(:new)
 
-        replicator.consume_event_created
+        replicator.consume(:created)
       end
     end
   end
 
-  describe '#consume_event_deleted' do
-    context "when the blob's project is in replicables for this geo node" do
+  describe 'deleted event consumption' do
+    before do
+      model_record.save!
+    end
+
+    let!(:model_record_id) { replicator.model_record_id }
+    let!(:blob_path) { replicator.blob_path }
+    let!(:deleted_params) { { model_record_id: model_record_id, blob_path: blob_path } }
+
+    context 'when model_record was deleted from the DB and the replicator only has its ID' do
+      before do
+        model_record.delete
+      end
+
+      # The replicator is instantiated by Geo::EventService on the secondary
+      # side, after the model_record no longer exists. This line ensures the
+      # replicator does not hold an instance of ActiveRecord::Base, which helps
+      # avoid a regression of
+      # https://gitlab.com/gitlab-org/gitlab/-/issues/233040
+      let(:secondary_side_replicator) { replicator.class.new(model_record_id: model_record_id) }
+
       it 'invokes Geo::FileRegistryRemovalService' do
-        expect(replicator).to receive(:in_replicables_for_geo_node?).and_return(true)
         service = double(:service)
 
         expect(service).to receive(:execute)
         expect(::Geo::FileRegistryRemovalService)
-          .to receive(:new).with(replicator.replicable_name, replicator.model_record_id, 'blob_path').and_return(service)
+          .to receive(:new).with(secondary_side_replicator.replicable_name, model_record_id, blob_path).and_return(service)
 
-        replicator.consume_event_deleted({ blob_path: 'blob_path' })
-      end
-    end
-
-    context "when the blob's project is not in replicables for this geo node" do
-      it 'does not invoke Geo::FileRegistryRemovalService' do
-        expect(replicator).to receive(:in_replicables_for_geo_node?).and_return(false)
-
-        expect(::Geo::FileRegistryRemovalService).not_to receive(:new)
-
-        replicator.consume_event_deleted({ blob_path: '' })
+        secondary_side_replicator.consume(:deleted, **deleted_params)
       end
     end
   end
@@ -174,6 +157,16 @@ RSpec.shared_examples 'a blob replicator' do
 
     it 'is a Class' do
       expect(invoke_model).to be_a(Class)
+    end
+  end
+
+  describe '#blob_path' do
+    context 'when the file is locally stored' do
+      it 'returns a valid path to a file' do
+        file_exist = File.exist?(replicator.blob_path)
+
+        expect(file_exist).to be_truthy
+      end
     end
   end
 end

@@ -1,7 +1,7 @@
 ---
 stage: Monitor
-group: APM
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+group: Health
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # GitLab exporter
@@ -13,7 +13,6 @@ The [GitLab exporter](https://gitlab.com/gitlab-org/gitlab-exporter) enables you
 measure various GitLab metrics pulled from Redis and the database in Omnibus GitLab
 instances.
 
-NOTE: **Note:**
 For installations from source you must install and configure it yourself.
 
 To enable the GitLab exporter in an Omnibus GitLab instance:

@@ -12,7 +12,7 @@
         %th= _('Uploaded on')
         %th= _('Valid from')
         %th= _('Expires on')
-        %th= _('Active users')
+        %th= _('Users in License')
     %tbody
       - @licenses.each do |license|
         %tr{ class: ('gl-bg-blue-50 font-weight-bold gl-text-blue-500' if license == @license), data: { testid: ('license-current' if license == @license) } }

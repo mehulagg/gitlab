@@ -22,8 +22,6 @@ RSpec.describe Gitlab::BackgroundMigration::MigrateApproverToApprovalRulesCheckP
       allow(Gitlab::BackgroundMigration).to receive(:exists?).with('MigrateApproverToApprovalRulesInBatch').and_return(false)
 
       described_class.new.perform
-
-      expect(Feature.enabled?(:approval_rule)).to eq(true)
     end
   end
 end

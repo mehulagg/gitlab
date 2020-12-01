@@ -38,6 +38,10 @@ export default () => {
     components: {
       RequirementsRoot,
     },
+    provide: {
+      descriptionPreviewPath: el.dataset.descriptionPreviewPath,
+      descriptionHelpPath: el.dataset.descriptionHelpPath,
+    },
     data() {
       const {
         filterBy,

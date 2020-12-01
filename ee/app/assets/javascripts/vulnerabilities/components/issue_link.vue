@@ -23,7 +23,7 @@ export default {
     v-gl-tooltip="issue.title"
     :href="issue.webUrl"
     :data-testid="`issue-link-${issue.iid}`"
-    class="d-inline-flex align-items-center ml-2 gl-flex-shrink-0"
+    class="d-inline-flex align-items-center gl-flex-shrink-0"
   >
     <gl-icon
       class="mr-1"

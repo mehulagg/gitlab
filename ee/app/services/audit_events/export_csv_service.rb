@@ -2,25 +2,23 @@
 
 module AuditEvents
   class ExportCsvService
-    TARGET_FILESIZE = 15.megabytes
-
     def initialize(params = {})
       @params = params
     end
 
     def csv_data
-      csv_builder.render(TARGET_FILESIZE)
+      csv_builder.render
     end
 
     private
 
     def csv_builder
-      @csv_builder ||= CsvBuilder.new(data, header_to_value_hash)
+      @csv_builder ||= CsvBuilders::Stream.new(data, header_to_value_hash)
     end
 
     def data
-      events = AuditLogFinder.new(finder_params).execute
-      Gitlab::Audit::Events::Preloader.preload!(events)
+      events = AuditLogFinder.new(**finder_params).execute
+      Gitlab::Audit::Events::Preloader.new(events)
     end
 
     def finder_params

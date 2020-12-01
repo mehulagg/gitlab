@@ -1,5 +1,0 @@
-- if show_switch_to_basic_search?(search_service)
-  - begin_link = '<a href="%{url}">'.html_safe % { url: revert_to_basic_search_filter_url }
-  - end_link = '</a>'.html_safe
-  %p.text-center
-    = _('You can try again using %{begin_link}basic search%{end_link}').html_safe % { begin_link: begin_link, end_link: end_link }

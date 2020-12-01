@@ -32,7 +32,9 @@ RSpec.describe Projects::AlertManagementHelper do
           'populating-alerts-help-url' => 'http://test.host/help/operations/incident_management/index.md#enable-alert-management',
           'empty-alert-svg-path' => match_asset_path('/assets/illustrations/alert-management-empty-state.svg'),
           'user-can-enable-alert-management' => 'true',
-          'alert-management-enabled' => 'false'
+          'alert-management-enabled' => 'false',
+          'text-query': nil,
+          'assignee-username-query': nil
         )
       end
     end
@@ -73,6 +75,28 @@ RSpec.describe Projects::AlertManagementHelper do
       context 'when prometheus service is inactive' do
         it 'disables alert management' do
           prometheus_service.update!(manual_configuration: false)
+
+          expect(data).to include(
+            'alert-management-enabled' => 'false'
+          )
+        end
+      end
+    end
+
+    context 'with http integration' do
+      let_it_be(:integration) { create(:alert_management_http_integration, project: project) }
+
+      context 'when integration is active' do
+        it 'enables alert management' do
+          expect(data).to include(
+            'alert-management-enabled' => 'true'
+          )
+        end
+      end
+
+      context 'when integration is inactive' do
+        it 'disables alert management' do
+          integration.update!(active: false)
 
           expect(data).to include(
             'alert-management-enabled' => 'false'

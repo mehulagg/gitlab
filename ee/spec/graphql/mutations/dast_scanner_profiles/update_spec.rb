@@ -12,12 +12,17 @@ RSpec.describe Mutations::DastScannerProfiles::Update do
   let_it_be(:new_profile_name) { SecureRandom.hex }
   let_it_be(:new_target_timeout) { dast_scanner_profile.target_timeout + 1 }
   let_it_be(:new_spider_timeout) { dast_scanner_profile.spider_timeout + 1 }
+  let_it_be(:new_scan_type) { (DastScannerProfile.scan_types.keys - [DastScannerProfile.last.scan_type]).first }
+  let_it_be(:new_use_ajax_spider) { !dast_scanner_profile.use_ajax_spider }
+  let_it_be(:new_show_debug_messages) { !dast_scanner_profile.show_debug_messages }
 
   subject(:mutation) { described_class.new(object: nil, context: { current_user: user }, field: nil) }
 
   before do
     stub_licensed_features(security_on_demand_scans: true)
   end
+
+  specify { expect(described_class).to require_graphql_authorizations(:create_on_demand_dast_scan) }
 
   describe '#resolve' do
     subject do
@@ -26,7 +31,10 @@ RSpec.describe Mutations::DastScannerProfiles::Update do
         id: scanner_profile_id,
         profile_name: new_profile_name,
         target_timeout: new_target_timeout,
-        spider_timeout: new_spider_timeout
+        spider_timeout: new_spider_timeout,
+        scan_type: new_scan_type,
+        use_ajax_spider: new_use_ajax_spider,
+        show_debug_messages: new_show_debug_messages
       )
     end
 
@@ -41,23 +49,31 @@ RSpec.describe Mutations::DastScannerProfiles::Update do
         end
       end
 
-      context 'when the user is not associated with the project' do
-        it 'raises an exception' do
-          expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
-        end
-      end
-
-      context 'when user can not run a DAST scan' do
-        it 'raises an exception' do
-          project.add_guest(user)
-
-          expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
-        end
-      end
-
       context 'when the user can run a DAST scan' do
         before do
           project.add_developer(user)
+        end
+
+        context 'when the user omits unrequired elements' do
+          subject do
+            mutation.resolve(
+              full_path: full_path,
+              id: scanner_profile_id,
+              profile_name: new_profile_name,
+              target_timeout: new_target_timeout,
+              spider_timeout: new_spider_timeout
+            )
+          end
+
+          it 'does not update those elements' do
+            updated_dast_scanner_profile = subject[:id].find
+
+            aggregate_failures do
+              expect(updated_dast_scanner_profile.scan_type).to eq(dast_scanner_profile.scan_type)
+              expect(updated_dast_scanner_profile.use_ajax_spider).to eq(dast_scanner_profile.use_ajax_spider)
+              expect(updated_dast_scanner_profile.show_debug_messages).to eq(dast_scanner_profile.show_debug_messages)
+            end
+          end
         end
 
         it 'updates the dast_scanner_profile' do
@@ -67,6 +83,9 @@ RSpec.describe Mutations::DastScannerProfiles::Update do
             expect(dast_scanner_profile.name).to eq(new_profile_name)
             expect(dast_scanner_profile.target_timeout).to eq(new_target_timeout)
             expect(dast_scanner_profile.spider_timeout).to eq(new_spider_timeout)
+            expect(dast_scanner_profile.scan_type).to eq(new_scan_type)
+            expect(dast_scanner_profile.use_ajax_spider).to eq(new_use_ajax_spider)
+            expect(dast_scanner_profile.show_debug_messages).to eq(new_show_debug_messages)
           end
         end
 
@@ -75,22 +94,6 @@ RSpec.describe Mutations::DastScannerProfiles::Update do
 
           it 'raises an exception' do
             expect(subject[:errors]).to include('Scanner profile not found for given parameters')
-          end
-        end
-
-        context 'when on demand scan feature is not enabled' do
-          it 'raises an exception' do
-            stub_feature_flags(security_on_demand_scans_feature_flag: false)
-
-            expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
-          end
-        end
-
-        context 'when on demand scan licensed feature is not available' do
-          it 'raises an exception' do
-            stub_licensed_features(security_on_demand_scans: false)
-
-            expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
           end
         end
       end

@@ -1,3 +1,10 @@
+---
+type: reference, dev
+stage: none
+group: Development
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Merge requests workflow
 
 We welcome merge requests from everyone, with fixes and improvements
@@ -116,24 +123,37 @@ document from the Kubernetes team also has some great points regarding this.
 
 ### Commit messages guidelines
 
-When writing commit messages, please follow the guidelines below:
+Commit messages should follow the guidelines below, for reasons explained by Chris Beams in [How to Write a Git Commit Message](https://chris.beams.io/posts/git-commit/):
 
-- The commit subject must contain at least 3 words.
-- The commit subject must not be longer than 72 characters.
-- The commit subject must start with a capital letter.
-- The commit subject must not end with a period.
 - The commit subject and body must be separated by a blank line.
+- The commit subject must start with a capital letter.
+- The commit subject must not be longer than 72 characters.
+- The commit subject must not end with a period.
 - The commit body must not contain more than 72 characters per line.
 - Commits that change 30 or more lines across at least 3 files must
   describe these changes in the commit body.
 - The commit subject or body must not contain Emojis.
 - Use issues and merge requests' full URLs instead of short references,
   as they are displayed as plain text outside of GitLab.
-- The merge request must not contain more than 10 commit messages.
+- The merge request should not contain more than 10 commit messages.
+- The commit subject should contain at least 3 words.
 
-If the guidelines are not met, the MR will not pass the
-[Danger checks](https://gitlab.com/gitlab-org/gitlab/blob/master/danger/commit_messages/Dangerfile).
-For more information see [How to Write a Git Commit Message](https://chris.beams.io/posts/git-commit/).
+**Important notes:**
+
+- If the guidelines are not met, the MR may not pass the [Danger checks](https://gitlab.com/gitlab-org/gitlab/blob/master/danger/commit_messages/Dangerfile).
+- Consider enabling [Squash and merge](../../user/project/merge_requests/squash_and_merge.md#squash-and-merge)
+  if your merge request includes "Applied suggestion to X files" commits, so that Danger can ignore those.
+- The prefixes in the form of `[prefix]` and `prefix:` are allowed (they can be all lowercase, as long
+  as the message itself is capitalized). For instance, `danger: Improve Danger behavior` and
+  `[API] Improve the labels endpoint` are valid commit messages.
+
+#### Why these standards matter
+
+1. Consistent commit messages that follow these guidelines make the history more readable.
+1. Concise standard commit messages helps to identify breaking changes for a deployment or ~"master:broken" quicker when
+   reviewing commits between two points in time.
+
+#### Commit message template
 
 Example commit message template that can be used on your machine that embodies the above (guide for [how to apply template](https://codeinthehole.com/tips/a-useful-template-for-commit-messages/)):
 
@@ -218,10 +238,10 @@ requirements.
 1. [Secure coding guidelines](https://gitlab.com/gitlab-com/gl-security/security-guidelines) have been followed.
 1. [Documented](../documentation/index.md) in the `/doc` directory.
 1. [Changelog entry added](../changelog.md), if necessary.
-1. Reviewed by relevant (UX/FE/BE/tech writing) reviewers and all concerns are addressed.
+1. Reviewed by relevant reviewers and all concerns are addressed for Availability, Regressions, Security. Documentation reviews should take place as soon as possible, but they should not block a merge request.
 1. Merged by a project maintainer.
 1. Create an issue in the [infrastructure issue tracker](https://gitlab.com/gitlab-com/gl-infra/infrastructure/-/issues) to inform the Infrastructure department when your contribution is changing default settings or introduces a new setting, if relevant.
-1. Confirmed to be working in the [Canary stage](https://about.gitlab.com/handbook/engineering/#canary-testing) or on GitLab.com once the contribution is deployed.
+1. Confirmed to be working in the [Canary stage](https://about.gitlab.com/handbook/engineering/#canary-testing) with no new [Sentry](https://about.gitlab.com/handbook/engineering/#sentry) errors or on GitLab.com once the contribution is deployed.
 1. Added to the [release post](https://about.gitlab.com/handbook/marketing/blog/release-posts/),
    if relevant.
 1. Added to [the website](https://gitlab.com/gitlab-com/www-gitlab-com/blob/master/data/features.yml), if relevant.
@@ -242,6 +262,7 @@ request:
 1. The [GitLab Development Kit](https://gitlab.com/gitlab-org/gitlab-development-kit).
 1. The [CI environment preparation](https://gitlab.com/gitlab-org/gitlab/blob/master/scripts/prepare_build.sh).
 1. The [Omnibus package creator](https://gitlab.com/gitlab-org/omnibus-gitlab).
+1. The [Cloud Native GitLab Dockerfiles](https://gitlab.com/gitlab-org/build/CNG)
 
 ## Incremental improvements
 

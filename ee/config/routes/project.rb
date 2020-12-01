@@ -16,12 +16,13 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
         end
 
         namespace :quality do
-          resources :test_cases, only: [:index]
+          resources :test_cases, only: [:index, :new, :show]
         end
 
         resources :autocomplete_sources, only: [] do
           collection do
             get 'epics'
+            get 'vulnerabilities'
           end
         end
 
@@ -34,7 +35,7 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
         resources :subscriptions, only: [:create, :destroy]
 
         resource :threat_monitoring, only: [:show], controller: :threat_monitoring do
-          resources :policies, only: [:new], controller: :threat_monitoring
+          resources :policies, only: [:new, :edit], controller: :threat_monitoring
         end
 
         resources :protected_environments, only: [:create, :update, :destroy], constraints: { id: /\d+/ } do
@@ -55,10 +56,15 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
           end
 
           resources :dashboard, only: [:index], controller: :dashboard
+          resources :vulnerability_report, only: [:index], controller: :vulnerability_report
 
           resource :configuration, only: [:show], controller: :configuration do
             post :auto_fix, on: :collection
             resource :sast, only: [:show, :create], controller: :sast_configuration
+            resource :dast_profiles, only: [:show] do
+              resources :dast_site_profiles, only: [:new, :edit]
+              resources :dast_scanner_profiles, only: [:new, :edit]
+            end
           end
 
           resource :discover, only: [:show], controller: :discover
@@ -68,6 +74,7 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
           resources :vulnerabilities, only: [:show] do
             member do
               get :discussions, format: :json
+              post :create_issue, format: :json
             end
 
             scope module: :vulnerabilities do
@@ -79,7 +86,7 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
         namespace :analytics do
           resources :code_reviews, only: [:index]
           resource :issues_analytics, only: [:show]
-          resource :merge_request_analytics, only: :show, constraints: -> (req) { Gitlab::Analytics.project_merge_request_analytics_enabled? }
+          resource :merge_request_analytics, only: :show
         end
 
         resources :approvers, only: :destroy
@@ -89,13 +96,12 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
         resources :dependencies, only: [:index]
         resources :licenses, only: [:index, :create, :update]
 
+        resources :feature_flags, param: :iid do
+          resources :feature_flag_issues, only: [:index, :create, :destroy], as: 'issues', path: 'issues'
+        end
+
         scope :on_demand_scans do
           root 'on_demand_scans#index', as: 'on_demand_scans'
-          scope :profiles do
-            root 'dast_profiles#index', as: 'profiles'
-            resources :dast_site_profiles, only: [:new, :edit]
-            resources :dast_scanner_profiles, only: [:new]
-          end
         end
 
         namespace :integrations do
@@ -122,14 +128,11 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
         end
       end
 
-      resource :tracing, only: [:show]
-
       post '/restore' => '/projects#restore', as: :restore
 
       resource :insights, only: [:show], trailing_slash: true do
         collection do
           post :query
-          get :embedded
         end
       end
       # All new routes should go under /-/ scope.

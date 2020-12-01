@@ -10,14 +10,14 @@ import { deprecatedCreateFlash as Flash } from '~/flash';
 import GLForm from '~/gl_form';
 import MarkdownHeader from './header.vue';
 import MarkdownToolbar from './toolbar.vue';
-import GlMentions from '~/vue_shared/components/gl_mentions.vue';
+import GfmAutocomplete from '~/vue_shared/components/gfm_autocomplete/gfm_autocomplete.vue';
 import Suggestions from '~/vue_shared/components/markdown/suggestions.vue';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import axios from '~/lib/utils/axios_utils';
 
 export default {
   components: {
-    GlMentions,
+    GfmAutocomplete,
     MarkdownHeader,
     MarkdownToolbar,
     GlIcon,
@@ -25,6 +25,18 @@ export default {
   },
   mixins: [glFeatureFlagsMixin()],
   props: {
+    /**
+     * This prop should be bound to the value of the `<textarea>` element
+     * that is rendered as a child of this component (in the `textarea` slot)
+     */
+    textareaValue: {
+      type: String,
+      required: true,
+    },
+    markdownDocsPath: {
+      type: String,
+      required: true,
+    },
     isSubmitting: {
       type: Boolean,
       required: false,
@@ -34,10 +46,6 @@ export default {
       type: String,
       required: false,
       default: '',
-    },
-    markdownDocsPath: {
-      type: String,
-      required: true,
     },
     addSpacingClasses: {
       type: Boolean,
@@ -83,12 +91,6 @@ export default {
       type: Boolean,
       required: false,
       default: false,
-    },
-    // This prop is used as a fallback in case if textarea.elm is undefined
-    textareaValue: {
-      type: String,
-      required: false,
-      default: '',
     },
   },
   data() {
@@ -139,10 +141,9 @@ export default {
     addMultipleToDiscussionWarning() {
       return sprintf(
         __(
-          '%{icon}You are about to add %{usersTag} people to the discussion. They will all receive a notification.',
+          'You are about to add %{usersTag} people to the discussion. They will all receive a notification.',
         ),
         {
-          icon: '<i class="fa fa-exclamation-triangle" aria-hidden="true"></i>',
           usersTag: `<strong><span class="js-referenced-users-count">${this.referencedUsers.length}</span></strong>`,
         },
         false,
@@ -165,16 +166,21 @@ export default {
   },
   mounted() {
     // GLForm class handles all the toolbar buttons
-    return new GLForm($(this.$refs['gl-form']), {
-      emojis: this.enableAutocomplete,
-      members: this.enableAutocomplete && !this.glFeatures.tributeAutocomplete,
-      issues: this.enableAutocomplete && !this.glFeatures.tributeAutocomplete,
-      mergeRequests: this.enableAutocomplete && !this.glFeatures.tributeAutocomplete,
-      epics: this.enableAutocomplete,
-      milestones: this.enableAutocomplete,
-      labels: this.enableAutocomplete && !this.glFeatures.tributeAutocomplete,
-      snippets: this.enableAutocomplete,
-    });
+    return new GLForm(
+      $(this.$refs['gl-form']),
+      {
+        emojis: this.enableAutocomplete,
+        members: this.enableAutocomplete && !this.glFeatures.tributeAutocomplete,
+        issues: this.enableAutocomplete && !this.glFeatures.tributeAutocomplete,
+        mergeRequests: this.enableAutocomplete && !this.glFeatures.tributeAutocomplete,
+        epics: this.enableAutocomplete && !this.glFeatures.tributeAutocomplete,
+        milestones: this.enableAutocomplete && !this.glFeatures.tributeAutocomplete,
+        labels: this.enableAutocomplete && !this.glFeatures.tributeAutocomplete,
+        snippets: this.enableAutocomplete && !this.glFeatures.tributeAutocomplete,
+        vulnerabilities: this.enableAutocomplete,
+      },
+      true,
+    );
   },
   beforeDestroy() {
     const glForm = $(this.$refs['gl-form']).data('glForm');
@@ -188,17 +194,11 @@ export default {
 
       this.previewMarkdown = true;
 
-      /*
-          Can't use `$refs` as the component is technically in the parent component
-          so we access the VNode & then get the element
-        */
-      const text = this.$slots.textarea[0]?.elm?.value || this.textareaValue;
-
-      if (text) {
+      if (this.textareaValue) {
         this.markdownPreviewLoading = true;
         this.markdownPreview = __('Loading…');
         axios
-          .post(this.markdownPreviewPath, { text })
+          .post(this.markdownPreviewPath, { text: this.textareaValue })
           .then(response => this.renderMarkdown(response.data))
           .catch(() => new Flash(__('Error loading markdown preview')));
       } else {
@@ -233,7 +233,7 @@ export default {
   <div
     ref="gl-form"
     :class="{ 'gl-mt-3 gl-mb-3': addSpacingClasses }"
-    class="js-vue-markdown-field md-area position-relative"
+    class="js-vue-markdown-field md-area position-relative gfm-form"
   >
     <markdown-header
       :preview-markdown="previewMarkdown"
@@ -246,9 +246,9 @@ export default {
     />
     <div v-show="!previewMarkdown" class="md-write-holder">
       <div class="zen-backdrop">
-        <gl-mentions v-if="glFeatures.tributeAutocomplete">
+        <gfm-autocomplete v-if="glFeatures.tributeAutocomplete">
           <slot name="textarea"></slot>
-        </gl-mentions>
+        </gfm-autocomplete>
         <slot v-else name="textarea"></slot>
         <a
           class="zen-control zen-control-leave js-zen-leave gl-text-gray-500"
@@ -293,6 +293,7 @@ export default {
     <template v-if="previewMarkdown && !markdownPreviewLoading">
       <div v-if="referencedCommands" class="referenced-commands" v-html="referencedCommands"></div>
       <div v-if="shouldShowReferencedUsers" class="referenced-users">
+        <gl-icon name="warning-solid" />
         <span v-html="addMultipleToDiscussionWarning"></span>
       </div>
     </template>

@@ -28,7 +28,8 @@ module SortingHelper
       sort_value_contacted_date    => sort_title_contacted_date,
       sort_value_relative_position => sort_title_relative_position,
       sort_value_size              => sort_title_size,
-      sort_value_expire_date       => sort_title_expire_date
+      sort_value_expire_date       => sort_title_expire_date,
+      sort_value_relevant          => sort_title_relevant
     }
   end
 
@@ -39,6 +40,7 @@ module SortingHelper
       sort_value_latest_activity  => sort_title_latest_activity,
       sort_value_recently_created => sort_title_created_date,
       sort_value_name             => sort_title_name,
+      sort_value_name_desc        => sort_title_name_desc,
       sort_value_stars_desc       => sort_title_stars
     }
 
@@ -81,14 +83,21 @@ module SortingHelper
     }
   end
 
+  def search_reverse_sort_options_hash
+    {
+      sort_value_recently_created => sort_value_oldest_created,
+      sort_value_oldest_created   => sort_value_recently_created
+    }
+  end
+
   def groups_sort_options_hash
     {
       sort_value_name             => sort_title_name,
       sort_value_name_desc        => sort_title_name_desc,
       sort_value_recently_created => sort_title_recently_created,
       sort_value_oldest_created   => sort_title_oldest_created,
-      sort_value_recently_updated => sort_title_recently_updated,
-      sort_value_oldest_updated   => sort_title_oldest_updated
+      sort_value_latest_activity  => sort_title_recently_updated,
+      sort_value_oldest_activity  => sort_title_oldest_updated
     }
   end
 
@@ -218,6 +227,10 @@ module SortingHelper
     sort_options_hash[sort_value]
   end
 
+  def search_sort_option_title(sort_value)
+    sort_options_hash[sort_value]
+  end
+
   def sort_direction_icon(sort_value)
     case sort_value
     when sort_value_milestone, sort_value_due_date, /_asc\z/
@@ -252,6 +265,13 @@ module SortingHelper
   def project_sort_direction_button(sort_value)
     reverse_sort = projects_reverse_sort_options_hash[sort_value]
     url = filter_projects_path(sort: reverse_sort)
+
+    sort_direction_button(url, reverse_sort, sort_value)
+  end
+
+  def search_sort_direction_button(sort_value)
+    reverse_sort = search_reverse_sort_options_hash[sort_value]
+    url = page_filter_path(sort: reverse_sort)
 
     sort_direction_button(url, reverse_sort, sort_value)
   end
@@ -421,6 +441,10 @@ module SortingHelper
     s_('SortOptions|Expired date')
   end
 
+  def sort_title_relevant
+    s_('SortOptions|Relevant')
+  end
+
   # Values.
   def sort_value_access_level_asc
     'access_level_asc'
@@ -580,6 +604,10 @@ module SortingHelper
 
   def sort_value_expire_date
     'expired_asc'
+  end
+
+  def sort_value_relevant
+    'relevant'
   end
 
   def packages_sort_options_hash

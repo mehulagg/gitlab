@@ -1,10 +1,10 @@
 import { shallowMount } from '@vue/test-utils';
-import { TEST_HOST } from 'helpers/test_constants';
 import { createStore } from '~/mr_notes/stores';
 import InlineDiffTableRow from '~/diffs/components/inline_diff_table_row.vue';
 import DiffGutterAvatars from '~/diffs/components/diff_gutter_avatars.vue';
 import diffFileMockData from '../mock_data/diff_file';
 import discussionsMockData from '../mock_data/diff_discussions';
+import { mapInline } from '~/diffs/components/diff_row_utils';
 
 const TEST_USER_ID = 'abc123';
 const TEST_USER = { id: TEST_USER_ID };
@@ -12,7 +12,16 @@ const TEST_USER = { id: TEST_USER_ID };
 describe('InlineDiffTableRow', () => {
   let wrapper;
   let store;
-  const thisLine = diffFileMockData.highlighted_diff_lines[0];
+  const mockDiffContent = {
+    diffFile: diffFileMockData,
+    shouldRenderDraftRow: jest.fn(),
+    hasParallelDraftLeft: jest.fn(),
+    hasParallelDraftRight: jest.fn(),
+    draftForLine: jest.fn(),
+  };
+
+  const applyMap = mapInline(mockDiffContent);
+  const thisLine = applyMap(diffFileMockData.highlighted_diff_lines[0]);
 
   const createComponent = (props = {}, propsStore = store) => {
     wrapper = shallowMount(InlineDiffTableRow, {
@@ -25,13 +34,6 @@ describe('InlineDiffTableRow', () => {
         isHighlighted: false,
         ...props,
       },
-    });
-  };
-
-  const setWindowLocation = value => {
-    Object.defineProperty(window, 'location', {
-      writable: true,
-      value,
     });
   };
 
@@ -122,22 +124,15 @@ describe('InlineDiffTableRow', () => {
       const findNoteButton = () => wrapper.find({ ref: 'addDiffNoteButton' });
 
       it.each`
-        userData     | query                | mergeRefHeadComments | expectation
-        ${TEST_USER} | ${'diff_head=false'} | ${false}             | ${true}
-        ${TEST_USER} | ${'diff_head=true'}  | ${true}              | ${true}
-        ${TEST_USER} | ${'diff_head=true'}  | ${false}             | ${false}
-        ${null}      | ${''}                | ${true}              | ${false}
-      `(
-        'exists is $expectation - with userData ($userData) query ($query)',
-        ({ userData, query, mergeRefHeadComments, expectation }) => {
-          store.state.notes.userData = userData;
-          gon.features = { mergeRefHeadComments };
-          setWindowLocation({ href: `${TEST_HOST}?${query}` });
-          createComponent({}, store);
+        userData     | expectation
+        ${TEST_USER} | ${true}
+        ${null}      | ${false}
+      `('exists is $expectation - with userData ($userData)', ({ userData, expectation }) => {
+        store.state.notes.userData = userData;
+        createComponent({}, store);
 
-          expect(findNoteButton().exists()).toBe(expectation);
-        },
-      );
+        expect(findNoteButton().exists()).toBe(expectation);
+      });
 
       it.each`
         isHover  | line                                                       | expectation
@@ -147,7 +142,7 @@ describe('InlineDiffTableRow', () => {
         ${true}  | ${{ ...thisLine, type: 'old-nonewline', discussions: [] }} | ${false}
         ${true}  | ${{ ...thisLine, discussions: [{}] }}                      | ${false}
       `('visible is $expectation - line ($line)', ({ isHover, line, expectation }) => {
-        createComponent({ line });
+        createComponent({ line: applyMap(line) });
         wrapper.setData({ isHover });
 
         return wrapper.vm.$nextTick().then(() => {
@@ -163,7 +158,7 @@ describe('InlineDiffTableRow', () => {
         'has attribute disabled=$disabled when the outer component has prop commentsDisabled=$commentsDisabled',
         ({ disabled, commentsDisabled }) => {
           createComponent({
-            line: { ...thisLine, commentsDisabled },
+            line: applyMap({ ...thisLine, commentsDisabled }),
           });
 
           wrapper.setData({ isHover: true });
@@ -192,7 +187,7 @@ describe('InlineDiffTableRow', () => {
         'has the correct tooltip when commentsDisabled=$commentsDisabled',
         ({ tooltip, commentsDisabled }) => {
           createComponent({
-            line: { ...thisLine, commentsDisabled },
+            line: applyMap({ ...thisLine, commentsDisabled }),
           });
 
           wrapper.setData({ isHover: true });
@@ -231,7 +226,7 @@ describe('InlineDiffTableRow', () => {
             beforeEach(() => {
               jest.spyOn(store, 'dispatch').mockImplementation();
               createComponent({
-                line: { ...thisLine, ...lineProps },
+                line: applyMap({ ...thisLine, ...lineProps }),
               });
             });
 
@@ -283,7 +278,7 @@ describe('InlineDiffTableRow', () => {
 
       describe('with showCommentButton', () => {
         it('renders if line has discussions', () => {
-          createComponent({ line });
+          createComponent({ line: applyMap(line) });
 
           expect(findAvatars().props()).toEqual({
             discussions: line.discussions,
@@ -293,13 +288,13 @@ describe('InlineDiffTableRow', () => {
 
         it('does notrender if line has no discussions', () => {
           line.discussions = [];
-          createComponent({ line });
+          createComponent({ line: applyMap(line) });
 
           expect(findAvatars().exists()).toEqual(false);
         });
 
         it('toggles line discussion', () => {
-          createComponent({ line });
+          createComponent({ line: applyMap(line) });
 
           expect(store.dispatch).toHaveBeenCalledTimes(1);
 

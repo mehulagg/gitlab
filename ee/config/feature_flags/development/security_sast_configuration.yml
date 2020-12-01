@@ -1,7 +1,0 @@
----
-name: security_sast_configuration
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/40637
-rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/235929
-group: group::static analysis
-type: development
-default_enabled: false

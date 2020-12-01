@@ -1,7 +1,7 @@
 ---
 stage: Verify
 group: Continuous Integration
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference
 last_update: 2019-07-03
 ---
@@ -37,10 +37,9 @@ run.
 
 To add a merge request to a merge train, you need [permissions](../../../../user/permissions.md) to push to the target branch.
 
-NOTE: **Note:**
 Each merge train can run a maximum of **twenty** pipelines in parallel.
 If more than twenty merge requests are added to the merge train, the merge requests
-will be queued until a slot in the merge train is free. There is no limit to the
+are queued until a slot in the merge train is free. There is no limit to the
 number of merge requests that can be queued.
 
 ## Merge train example
@@ -56,7 +55,7 @@ If the pipeline for `B` fails, it is removed from the train. The pipeline for
 `C` restarts with the `A` and `C` changes, but without the `B` changes.
 
 If `A` then completes successfully, it merges into the target branch, and `C` continues
-to run. If more merge requests are added to the train, they will now include the `A`
+to run. If more merge requests are added to the train, they now include the `A`
 changes that are included in the target branch, and the `C` changes that are from
 the merge request already in the train.
 
@@ -83,9 +82,13 @@ To enable merge trains for your project:
 1. If you are on a self-managed GitLab instance, ensure the [feature flag](#merge-trains-feature-flag) is set correctly.
 1. [Configure your CI/CD configuration file](../../index.md#configuring-pipelines-for-merge-requests)
    so that the pipeline or individual jobs run for merge requests.
-1. Visit your project's **Settings > General** and expand **Merge requests**.
-1. Check **Enable merge trains and pipelines for merged results**.
-1. Click **Save changes**.
+1. Visit your project's **Settings > General** and expand **Merge requests**
+1. Check **Enable merged results pipelines.** (if not enabled)
+1. Check **Enable merge trains.**
+1. Click **Save changes**
+
+In GitLab 13.5 and earlier, there is only one checkbox, named
+**Enable merge trains and pipelines for merged results**.
 
 CAUTION: **Caution:**
 If you select the check box but don't configure your CI/CD to use
@@ -149,7 +152,7 @@ is recreated and all pipelines restart.
 ### Merge request dropped from the merge train immediately
 
 If a merge request is not mergeable (for example, it's a draft merge request, there is a merge
-conflict, etc.), your merge request will be dropped from the merge train automatically.
+conflict, etc.), your merge request is dropped from the merge train automatically.
 
 In these cases, the reason for dropping the merge request is in the **system notes**.
 
@@ -176,7 +179,7 @@ for more information.
 
 A Merge Train pipeline cannot be retried because the merge request is dropped from the merge train upon failure. For this reason, the retry button does not appear next to the pipeline icon.
 
-In the case of pipeline failure, you should [re-enqueue](#add-a-merge-request-to-a-merge-train) the merge request to the merge train, which will then initiate a new pipeline.
+In the case of pipeline failure, you should [re-enqueue](#add-a-merge-request-to-a-merge-train) the merge request to the merge train, which then initiates a new pipeline.
 
 ### Unable to add to merge train with message "The pipeline for this merge request failed."
 
@@ -192,26 +195,36 @@ you can clear the **Pipelines must succeed** check box and keep
 **Enable merge trains and pipelines for merged results** (merge trains) enabled.
 
 If you want to keep the **Pipelines must succeed** option enabled along with Merge
-Trains, you can create a new pipeline for merged results when this error occurs by
-going to the **Pipelines** tab and clicking **Run pipeline**. Then click
-**Start/Add to merge train when pipeline succeeds**.
+Trains, create a new pipeline for merged results when this error occurs:
+
+1. Go to the **Pipelines** tab and click **Run pipeline**.
+1. Click **Start/Add to merge train when pipeline succeeds**.
 
 See [the related issue](https://gitlab.com/gitlab-org/gitlab/-/issues/35135)
 for more information.
 
 ### Merge Trains feature flag **(PREMIUM ONLY)**
 
-To enable and disable the Merge Trains feature, use the `:disable_merge_trains` feature flag.
+In [GitLab 13.6 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/244831),
+you can [enable or disable merge trains in the project settings](#enable-merge-trains).
 
-To check if the feature flag is enabled on your GitLab instance,
-ask an administrator to execute the following commands:
+In GitLab 13.5 and earlier, merge trains are automatically enabled when
+[pipelines for merged results](../index.md#pipelines-for-merged-results) are enabled.
+To use pipelines for merged results without using merge trains, you can enable a
+[feature flag](../../../../user/feature_flags.md) that blocks the merge trains feature.
 
-```shell
-> sudo gitlab-rails console                         # Login to Rails console of GitLab instance.
-> Feature.enabled?(:disable_merge_trains)           # Check if it's disabled or not.
-> Feature.enable(:disable_merge_trains)             # Disable Merge Trains.
-> Feature.disable(:disable_merge_trains)            # Enable Merge Trains.
+[GitLab administrators with access to the GitLab Rails console](../../../../administration/feature_flags.md)
+can enable the feature flag to disable merge trains:
+
+```ruby
+Feature.enable(:disable_merge_trains)
 ```
 
-When you disable this feature, all existing merge trains are cancelled and
+After you enable this feature flag, all existing merge trains are cancelled and
 the **Start/Add to Merge Train** button no longer appears in merge requests.
+
+To disable the feature flag, and enable merge trains again:
+
+```ruby
+Feature.disable(:disable_merge_trains)
+```

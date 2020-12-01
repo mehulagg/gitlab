@@ -126,7 +126,7 @@ class UpdateAllMirrorsWorker # rubocop:disable Scalability/IdempotentWorker
         .joins(root_namespaces_join)
         .joins('LEFT JOIN gitlab_subscriptions ON gitlab_subscriptions.namespace_id = root_namespaces.id')
         .joins('LEFT JOIN plans ON plans.id = gitlab_subscriptions.hosted_plan_id')
-        .where(['plans.name IN (?) OR projects.visibility_level = ?', ::Plan::ALL_HOSTED_PLANS, ::Gitlab::VisibilityLevel::PUBLIC])
+        .where(['plans.name IN (?) OR projects.visibility_level = ?', ::Plan::PAID_HOSTED_PLANS, ::Gitlab::VisibilityLevel::PUBLIC])
     end
 
     relation

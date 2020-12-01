@@ -1,7 +1,7 @@
 ---
 stage: Verify
 group: Testing
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference
 ---
 
@@ -9,8 +9,6 @@ type: reference
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/45318) in GitLab 11.2. Requires GitLab Runner 11.2 and above.
 > - [Renamed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/39737) from JUnit test reports to Unit test reports in GitLab 13.4.
-
-## Overview
 
 It is very common that a [CI/CD pipeline](pipelines/index.md) contains a
 test job that will verify your code.
@@ -20,12 +18,12 @@ tests failed so that they can fix them.
 
 You can configure your job to use Unit test reports, and GitLab will display a
 report on the merge request so that it's easier and faster to identify the
-failure without having to check the entire log. Unit test reports currently 
+failure without having to check the entire log. Unit test reports currently
 only support test reports in the JUnit report format.
 
-If you don't use Merge Requests but still want to see the unit test report 
-output without searching through job logs, the full 
-[Unit test reports](#viewing-unit-test-reports-on-gitlab) are available 
+If you don't use Merge Requests but still want to see the unit test report
+output without searching through job logs, the full
+[Unit test reports](#viewing-unit-test-reports-on-gitlab) are available
 in the pipeline detail view.
 
 Consider the following workflow:
@@ -81,8 +79,9 @@ merge request widget.
 
 To make the Unit test report output files browsable, include them with the
 [`artifacts:paths`](yaml/README.md#artifactspaths) keyword as well, as shown in the [Ruby example](#ruby-example).
+To upload the report even if the job fails (for example if the tests do not pass), use the [`artifacts:when:always`](yaml/README.md#artifactswhen)
+keyword.
 
-NOTE: **Note:**
 You cannot have multiple tests with the same name and class in your JUnit report format XML file.
 
 ### Ruby example
@@ -97,6 +96,7 @@ ruby:
     - bundle install
     - bundle exec rspec --format progress --format RspecJunitFormatter --out rspec.xml
   artifacts:
+    when: always
     paths:
       - rspec.xml
     reports:
@@ -116,6 +116,7 @@ golang:
     - go get -u github.com/jstemmer/go-junit-report
     - go test -v 2>&1 | go-junit-report -set-exit-code > report.xml
   artifacts:
+    when: always
     reports:
       junit: report.xml
 ```
@@ -137,12 +138,13 @@ java:
   script:
     - gradle test
   artifacts:
+    when: always
     reports:
       junit: build/test-results/test/**/TEST-*.xml
 ```
 
-NOTE: **Note:**
-Support for `**` was added in [GitLab Runner 13.0](https://gitlab.com/gitlab-org/gitlab-runner/-/issues/2620).
+In [GitLab Runner 13.0](https://gitlab.com/gitlab-org/gitlab-runner/-/issues/2620)
+and later, you can use `**`.
 
 #### Maven
 
@@ -156,6 +158,7 @@ java:
   script:
     - mvn verify
   artifacts:
+    when: always
     reports:
       junit:
         - target/surefire-reports/TEST-*.xml
@@ -173,6 +176,7 @@ pytest:
   script:
     - pytest --junitxml=report.xml
   artifacts:
+    when: always
     reports:
       junit: report.xml
 ```
@@ -194,6 +198,7 @@ cpp:
   script:
     - gtest.exe --gtest_output="xml:report.xml"
   artifacts:
+    when: always
     reports:
       junit: report.xml
 ```
@@ -208,6 +213,7 @@ cunit:
   script:
     - ./my-cunit-test
   artifacts:
+    when: always
     reports:
       junit: ./my-cunit-test.xml
 ```
@@ -236,6 +242,44 @@ Test:
     reports:
       junit:
         - ./**/*test-result.xml
+```
+
+### JavaScript example
+
+There are a few tools that can produce JUnit report format XML files in JavaScript.
+
+#### Jest
+
+The [jest-junit](https://github.com/jest-community/jest-junit) npm package can generate test reports for JavaScript applications.
+In the following `.gitlab-ci.yml` example, the `javascript` job uses Jest to generate the test reports:
+
+```yaml
+javascript:
+  stage: test
+  script:
+    - 'jest --ci --reporters=default --reporters=jest-junit'
+  artifacts:
+    when: always
+    reports:
+      junit:
+        - junit.xml
+```
+
+#### Karma
+
+The [Karma-junit-reporter](https://github.com/karma-runner/karma-junit-reporter) npm package can generate test reports for JavaScript applications.
+In the following `.gitlab-ci.yml` example, the `javascript` job uses Karma to generate the test reports:
+
+```yaml
+javascript:
+  stage: test
+  script:
+    - karma start --reporters junit
+  artifacts:
+    when: always
+    reports:
+      junit:
+        - junit.xml
 ```
 
 ## Viewing Unit test reports on GitLab

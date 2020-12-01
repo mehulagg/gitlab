@@ -1,7 +1,7 @@
 ---
 stage: Create
 group: Ecosystem
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Slack Notifications Service
@@ -64,7 +64,7 @@ The following triggers are available for Slack notifications:
 - **Tag push**: Triggered when a new tag is pushed to the repository.
 - **Pipeline**: Triggered when a pipeline status changes.
 - **Wiki page**: Triggered when a wiki page is created or updated.
-- **Deployment**: Triggered when a deployment finishes.
+- **Deployment**: Triggered when a deployment starts or finishes.
 - **Alert**: Triggered when a new, unique alert is recorded.
 
 ## Troubleshooting

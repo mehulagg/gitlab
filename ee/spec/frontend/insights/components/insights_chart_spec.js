@@ -1,16 +1,25 @@
 import { GlColumnChart, GlLineChart, GlStackedColumnChart } from '@gitlab/ui/dist/charts';
 import { shallowMount } from '@vue/test-utils';
 
+import InsightsChart from 'ee/insights/components/insights_chart.vue';
+import InsightsChartError from 'ee/insights/components/insights_chart_error.vue';
+import { CHART_TYPES } from 'ee/insights/constants';
 import {
   chartInfo,
   barChartData,
   lineChartData,
   stackedBarChartData,
 } from 'ee_jest/insights/mock_data';
-import InsightsChart from 'ee/insights/components/insights_chart.vue';
-import InsightsChartError from 'ee/insights/components/insights_chart_error.vue';
-import { CHART_TYPES } from 'ee/insights/constants';
+import ResizableChartContainer from '~/vue_shared/components/resizable_chart/resizable_chart_container.vue';
 import ChartSkeletonLoader from '~/vue_shared/components/resizable_chart/skeleton_loader.vue';
+
+const DEFAULT_PROPS = {
+  loaded: false,
+  type: chartInfo.type,
+  title: chartInfo.title,
+  data: null,
+  error: '',
+};
 
 describe('Insights chart component', () => {
   let wrapper;
@@ -26,66 +35,32 @@ describe('Insights chart component', () => {
   });
 
   describe('when chart is loading', () => {
-    it('displays the chart loader', () => {
-      wrapper = factory({
-        loaded: false,
-        type: CHART_TYPES.BAR,
-        title: chartInfo.title,
-        data: null,
-        error: '',
-      });
+    it('displays the chart loader in the container', () => {
+      wrapper = factory(DEFAULT_PROPS);
 
       expect(wrapper.find(ChartSkeletonLoader).exists()).toBe(true);
+      expect(wrapper.find(ResizableChartContainer).exists()).toBe(true);
     });
   });
 
-  describe('when chart is loaded', () => {
-    it('displays a bar chart', () => {
+  describe.each`
+    type                       | component               | name                      | data
+    ${CHART_TYPES.BAR}         | ${GlColumnChart}        | ${'GlColumnChart'}        | ${barChartData}
+    ${CHART_TYPES.LINE}        | ${GlLineChart}          | ${'GlLineChart'}          | ${lineChartData}
+    ${CHART_TYPES.STACKED_BAR} | ${GlStackedColumnChart} | ${'GlStackedColumnChart'} | ${stackedBarChartData}
+    ${CHART_TYPES.PIE}         | ${GlColumnChart}        | ${'GlColumnChart'}        | ${barChartData}
+  `('when chart is loaded', ({ type, component, name, data }) => {
+    it(`when ${type} is passed: displays the a ${name}-chart in container and not the loader`, () => {
       wrapper = factory({
+        ...DEFAULT_PROPS,
         loaded: true,
-        type: CHART_TYPES.BAR,
-        title: chartInfo.title,
-        data: barChartData,
-        error: '',
+        type,
+        data,
       });
 
-      expect(wrapper.find(GlColumnChart).exists()).toBe(true);
-    });
-
-    it('displays a line chart', () => {
-      wrapper = factory({
-        loaded: true,
-        type: CHART_TYPES.LINE,
-        title: chartInfo.title,
-        data: lineChartData,
-        error: '',
-      });
-
-      expect(wrapper.find(GlLineChart).exists()).toBe(true);
-    });
-
-    it('displays a stacked bar chart', () => {
-      wrapper = factory({
-        loaded: true,
-        type: CHART_TYPES.STACKED_BAR,
-        title: chartInfo.title,
-        data: stackedBarChartData,
-        error: '',
-      });
-
-      expect(wrapper.find(GlStackedColumnChart).exists()).toBe(true);
-    });
-
-    it('displays a bar chart when a pie chart is requested', () => {
-      wrapper = factory({
-        loaded: true,
-        type: CHART_TYPES.PIE,
-        title: chartInfo.title,
-        data: barChartData,
-        error: '',
-      });
-
-      expect(wrapper.find(GlColumnChart).exists()).toBe(true);
+      expect(wrapper.find(ChartSkeletonLoader).exists()).toBe(false);
+      expect(wrapper.find(ResizableChartContainer).exists()).toBe(true);
+      expect(wrapper.find(component).exists()).toBe(true);
     });
   });
 
@@ -94,15 +69,15 @@ describe('Insights chart component', () => {
 
     beforeEach(() => {
       wrapper = factory({
-        loaded: false,
-        type: chartInfo.type,
-        title: chartInfo.title,
+        ...DEFAULT_PROPS,
         data: {},
         error,
       });
     });
 
     it('displays info about the error', () => {
+      expect(wrapper.find(ChartSkeletonLoader).exists()).toBe(false);
+      expect(wrapper.find(ResizableChartContainer).exists()).toBe(false);
       expect(wrapper.find(InsightsChartError).exists()).toBe(true);
     });
   });

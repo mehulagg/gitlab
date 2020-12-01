@@ -1,3 +1,3 @@
-import CILintEditor from '../ci_lint_editor';
+import initCiLint from '~/ci_lint';
 
-document.addEventListener('DOMContentLoaded', () => new CILintEditor());
+initCiLint();

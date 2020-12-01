@@ -3,48 +3,10 @@
 require 'spec_helper'
 
 RSpec.describe Projects::Alerting::NotifyService do
-  let_it_be(:project, reload: true) { create(:project, :repository) }
+  let_it_be_with_reload(:project) { create(:project, :repository) }
 
   before do
     allow(ProjectServiceWorker).to receive(:perform_async)
-  end
-
-  shared_examples 'processes incident issues' do
-    let(:create_incident_service) { spy }
-
-    before do
-      allow_any_instance_of(AlertManagement::Alert).to receive(:execute_services)
-    end
-
-    it 'processes issues' do
-      expect(IncidentManagement::ProcessAlertWorker)
-        .to receive(:perform_async)
-        .with(nil, nil, kind_of(Integer))
-        .once
-
-      Sidekiq::Testing.inline! do
-        expect(subject).to be_success
-      end
-    end
-  end
-
-  shared_examples 'does not process incident issues' do
-    it 'does not process issues' do
-      expect(IncidentManagement::ProcessAlertWorker)
-        .not_to receive(:perform_async)
-
-      expect(subject).to be_success
-    end
-  end
-
-  shared_examples 'does not process incident issues due to error' do |http_status:|
-    it 'does not process issues' do
-      expect(IncidentManagement::ProcessAlertWorker)
-        .not_to receive(:perform_async)
-
-      expect(subject).to be_error
-      expect(subject.http_status).to eq(http_status)
-    end
   end
 
   describe '#execute' do
@@ -52,11 +14,14 @@ RSpec.describe Projects::Alerting::NotifyService do
     let(:starts_at) { Time.current.change(usec: 0) }
     let(:fingerprint) { 'testing' }
     let(:service) { described_class.new(project, nil, payload) }
+    let_it_be(:environment) { create(:environment, project: project) }
     let(:environment) { create(:environment, project: project) }
+    let(:ended_at) { nil }
     let(:payload_raw) do
       {
         title: 'alert title',
         start_time: starts_at.rfc3339,
+        end_time: ended_at&.rfc3339,
         severity: 'low',
         monitoring_tool: 'GitLab RSpec',
         service: 'GitLab Test Suite',
@@ -69,16 +34,15 @@ RSpec.describe Projects::Alerting::NotifyService do
 
     let(:payload) { ActionController::Parameters.new(payload_raw).permit! }
 
-    subject { service.execute(token) }
+    subject { service.execute(token, nil) }
 
-    context 'with activated Alerts Service' do
-      let!(:alerts_service) { create(:alerts_service, project: project) }
-
+    shared_examples 'notifcations are handled correctly' do
       context 'with valid token' do
-        let(:token) { alerts_service.token }
-        let(:incident_management_setting) { double(send_email?: email_enabled, create_issue?: issue_enabled) }
+        let(:token) { integration.token }
+        let(:incident_management_setting) { double(send_email?: email_enabled, create_issue?: issue_enabled, auto_close_incident?: auto_close_enabled) }
         let(:email_enabled) { false }
         let(:issue_enabled) { false }
+        let(:auto_close_enabled) { false }
 
         before do
           allow(service)
@@ -96,7 +60,7 @@ RSpec.describe Projects::Alerting::NotifyService do
                 title: payload_raw.fetch(:title),
                 started_at: Time.zone.parse(payload_raw.fetch(:start_time)),
                 severity: payload_raw.fetch(:severity),
-                status: AlertManagement::Alert::STATUSES[:triggered],
+                status: AlertManagement::Alert.status_value(:triggered),
                 events: 1,
                 hosts: payload_raw.fetch(:hosts),
                 payload: payload_raw.with_indifferent_access,
@@ -123,6 +87,7 @@ RSpec.describe Projects::Alerting::NotifyService do
 
           it 'creates a system note corresponding to alert creation' do
             expect { subject }.to change(Note, :count).by(1)
+            expect(Note.last.note).to include(payload_raw.fetch(:monitoring_tool))
           end
 
           context 'existing alert with same fingerprint' do
@@ -130,6 +95,48 @@ RSpec.describe Projects::Alerting::NotifyService do
             let!(:alert) { create(:alert_management_alert, project: project, fingerprint: fingerprint_sha) }
 
             it_behaves_like 'adds an alert management alert event'
+
+            context 'end time given' do
+              let(:ended_at) { Time.current.change(nsec: 0) }
+
+              it 'does not resolve the alert' do
+                expect { subject }.not_to change { alert.reload.status }
+              end
+
+              it 'does not set the ended at' do
+                subject
+
+                expect(alert.reload.ended_at).to be_nil
+              end
+
+              it_behaves_like 'does not an create alert management alert'
+
+              context 'auto_close_enabled setting enabled' do
+                let(:auto_close_enabled) { true }
+
+                it 'resolves the alert and sets the end time', :aggregate_failures do
+                  subject
+                  alert.reload
+
+                  expect(alert.resolved?).to eq(true)
+                  expect(alert.ended_at).to eql(ended_at)
+                end
+
+                context 'related issue exists' do
+                  let(:alert) { create(:alert_management_alert, :with_issue, project: project, fingerprint: fingerprint_sha) }
+                  let(:issue) { alert.issue }
+
+                  it { expect { subject }.to change { issue.reload.state }.from('opened').to('closed') }
+                  it { expect { subject }.to change(ResourceStateEvent, :count).by(1) }
+                end
+
+                context 'with issue enabled' do
+                  let(:issue_enabled) { true }
+
+                  it_behaves_like 'does not process incident issues'
+                end
+              end
+            end
 
             context 'existing alert is resolved' do
               let!(:alert) { create(:alert_management_alert, :resolved, project: project, fingerprint: fingerprint_sha) }
@@ -152,6 +159,13 @@ RSpec.describe Projects::Alerting::NotifyService do
             end
           end
 
+          context 'end time given' do
+            let(:ended_at) { Time.current }
+
+            it_behaves_like 'creates an alert management alert'
+            it_behaves_like 'assigns the alert properties'
+          end
+
           context 'with a minimal payload' do
             let(:payload_raw) do
               {
@@ -170,7 +184,7 @@ RSpec.describe Projects::Alerting::NotifyService do
                 title: payload_raw.fetch(:title),
                 started_at: Time.zone.parse(payload_raw.fetch(:start_time)),
                 severity: 'critical',
-                status: AlertManagement::Alert::STATUSES[:triggered],
+                status: AlertManagement::Alert.status_value(:triggered),
                 events: 1,
                 hosts: [],
                 payload: payload_raw.with_indifferent_access,
@@ -184,7 +198,23 @@ RSpec.describe Projects::Alerting::NotifyService do
                 environment_id: nil
               )
             end
+
+            it 'creates a system note corresponding to alert creation' do
+              expect { subject }.to change(Note, :count).by(1)
+              expect(Note.last.note).to include(source)
+            end
           end
+        end
+
+        context 'with overlong payload' do
+          let(:deep_size_object) { instance_double(Gitlab::Utils::DeepSize, valid?: false) }
+
+          before do
+            allow(Gitlab::Utils::DeepSize).to receive(:new).and_return(deep_size_object)
+          end
+
+          it_behaves_like 'does not process incident issues due to error', http_status: :bad_request
+          it_behaves_like 'does not an create alert management alert'
         end
 
         it_behaves_like 'does not process incident issues'
@@ -193,17 +223,6 @@ RSpec.describe Projects::Alerting::NotifyService do
           let(:issue_enabled) { true }
 
           it_behaves_like 'processes incident issues'
-
-          context 'with an invalid payload' do
-            before do
-              allow(Gitlab::Alerting::NotificationPayloadParser)
-                .to receive(:call)
-                .and_raise(Gitlab::Alerting::NotificationPayloadParser::BadPayloadError)
-            end
-
-            it_behaves_like 'does not process incident issues due to error', http_status: :bad_request
-            it_behaves_like 'does not an create alert management alert'
-          end
 
           context 'when alert already exists' do
             let(:fingerprint_sha) { Digest::SHA1.hexdigest(fingerprint) }
@@ -232,9 +251,21 @@ RSpec.describe Projects::Alerting::NotifyService do
         it_behaves_like 'does not process incident issues due to error', http_status: :unauthorized
         it_behaves_like 'does not an create alert management alert'
       end
+    end
 
-      context 'with deactivated Alerts Service' do
-        let!(:alerts_service) { create(:alerts_service, :inactive, project: project) }
+    context 'with an HTTP Integration' do
+      let_it_be_with_reload(:integration) { create(:alert_management_http_integration, project: project) }
+
+      subject { service.execute(token, integration) }
+
+      it_behaves_like 'notifcations are handled correctly' do
+        let(:source) { integration.name }
+      end
+
+      context 'with deactivated HTTP Integration' do
+        before do
+          integration.update!(active: false)
+        end
 
         it_behaves_like 'does not process incident issues due to error', http_status: :forbidden
         it_behaves_like 'does not an create alert management alert'

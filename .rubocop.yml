@@ -7,16 +7,18 @@ require:
   - rubocop-rspec
 
 inherit_from:
+  - .rubocop_manual_todo.yml
   - .rubocop_todo.yml
   - ./rubocop/rubocop-migrations.yml
   - ./rubocop/rubocop-usage-data.yml
+  - ./rubocop/rubocop-code_reuse.yml
 
 inherit_mode:
   merge:
     - Include
 
 AllCops:
-  TargetRubyVersion: 2.6
+  TargetRubyVersion: 2.7
   TargetRailsVersion: 6.0
   Exclude:
     - 'vendor/**/*'
@@ -44,6 +46,10 @@ Cop/StaticTranslationDefinition:
   Exclude:
     - 'spec/**/*'
     - 'ee/spec/**/*'
+
+Lint/LastKeywordArgument:
+  Enabled: true
+  Safe: false
 
 # This cop checks whether some constant value isn't a
 # mutable literal (e.g. array or hash).
@@ -293,7 +299,15 @@ Gitlab/AvoidFeatureGet:
   Enabled: true
 
 RSpec/TimecopFreeze:
-  Enabled: false
+  Enabled: true
+  AutoCorrect: true
+  Include:
+    - 'spec/**/*.rb'
+    - 'ee/spec/**/*.rb'
+    - 'qa/spec/**/*.rb'
+
+RSpec/TimecopTravel:
+  Enabled: true
   AutoCorrect: true
   Include:
     - 'spec/**/*.rb'
@@ -327,7 +341,7 @@ Gitlab/Union:
     - 'spec/**/*'
     - 'ee/spec/**/*'
 
-API/GrapeAPIInstance:
+API/Base:
   Enabled: true
   Include:
     - 'lib/**/api/**/*.rb'
@@ -345,6 +359,12 @@ Cop/SidekiqOptionsQueue:
     - 'spec/**/*.rb'
     - 'ee/spec/**/*.rb'
 
+Graphql/ResolverType:
+  Enabled: true
+  Include:
+    - 'app/graphql/resolvers/**/*'
+    - 'ee/app/graphql/resolvers/**/*'
+
 Graphql/AuthorizeTypes:
   Enabled: true
   Include:
@@ -353,6 +373,21 @@ Graphql/AuthorizeTypes:
   Exclude:
     - 'spec/**/*.rb'
     - 'ee/spec/**/*.rb'
+
+Graphql/GIDExpectedType:
+  Enabled: true
+  Include:
+    - 'app/graphql/**/*'
+    - 'ee/app/graphql/**/*'
+  Exclude:
+    - 'spec/**/*.rb'
+    - 'ee/spec/**/*.rb'
+
+Graphql/IDType:
+  Enabled: true
+  Include:
+    - 'app/graphql/**/*'
+    - 'ee/app/graphql/**/*'
 
 Graphql/JSONType:
   Enabled: true
@@ -538,3 +573,19 @@ Migration/ReferToIndexByName:
     - !ruby/regexp /\Adb\/(post_)?migrate\/201.*\.rb\z/
     - !ruby/regexp /\Adb\/(post_)?migrate\/20200[1-7].*\.rb\z/
     - !ruby/regexp /\Aee\/db\/geo\/(post_)?migrate\/201.*\.rb\z/
+
+Migration/CreateTableWithForeignKeys:
+  # Disable this cop for all the existing migrations
+  Exclude:
+    - !ruby/regexp /\Adb\/(?:post_)?migrate\/(?:201[0-9]\d+|20200[0-8][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9])_.+\.rb\z/
+
+Gitlab/RailsLogger:
+  Exclude:
+    - 'spec/**/*.rb'
+    - 'ee/spec/**/*.rb'
+
+# WIP See https://gitlab.com/gitlab-org/gitlab/-/issues/267606
+FactoryBot/InlineAssociation:
+  Include:
+    - 'spec/factories/**/*.rb'
+    - 'ee/spec/factories/**/*.rb'

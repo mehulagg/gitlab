@@ -20,10 +20,7 @@
   = render 'shared/issuable/form/title', issuable: issuable, form: form, has_wip_commits: commits && commits.detect(&:work_in_progress?)
 #js-suggestions{ data: { project_path: @project.full_path } }
 
-= render 'shared/form_elements/apply_template_warning'
-
-- if issuable.is_a?(Issuable) && @issue
-  = render 'shared/issuable/form/type_selector', issuable: issuable, form: form, type: @issue[:issue_type]
+= render 'shared/issuable/form/type_selector', issuable: issuable, form: form
 
 = render 'shared/form_elements/description', model: issuable, form: form, project: project
 

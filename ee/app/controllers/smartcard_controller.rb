@@ -9,6 +9,8 @@ class SmartcardController < ApplicationController
   before_action :check_ngingx_certificate_header, only: :extract_certificate
   before_action :check_certificate_param, only: :verify_certificate
 
+  feature_category :authentication_and_authorization
+
   def auth
     redirect_to extract_certificate_smartcard_url(extract_certificate_url_options)
   end
@@ -62,7 +64,7 @@ class SmartcardController < ApplicationController
     end
 
     store_active_session
-    log_audit_event(user, with: certificate.auth_method)
+    log_audit_event(user, with: certificate.auth_method, ip_address: request.remote_ip)
     sign_in_and_redirect(user)
   end
 

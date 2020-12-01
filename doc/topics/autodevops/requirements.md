@@ -1,3 +1,9 @@
+---
+stage: Configure
+group: Configure
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Requirements for Auto DevOps
 
 You can set up Auto DevOps for [Kubernetes](#auto-devops-requirements-for-kubernetes)
@@ -40,7 +46,7 @@ To make full use of Auto DevOps with Kubernetes, you need:
   [Auto Deploy](stages.md#auto-deploy), and [Auto Monitoring](stages.md#auto-monitoring))
 
   You need a domain configured with wildcard DNS, which all of your Auto DevOps
-  applications will use. If you're using the
+  applications use. If you're using the
   [GitLab-managed app for Ingress](../../user/clusters/applications.md#ingress),
   the URL endpoint is automatically configured for you.
 
@@ -48,21 +54,21 @@ To make full use of Auto DevOps with Kubernetes, you need:
 
 - **GitLab Runner** (for all stages)
 
-  Your Runner must be configured to run Docker, usually with either the
+  Your runner must be configured to run Docker, usually with either the
   [Docker](https://docs.gitlab.com/runner/executors/docker.html)
   or [Kubernetes](https://docs.gitlab.com/runner/executors/kubernetes.html) executors, with
   [privileged mode enabled](https://docs.gitlab.com/runner/executors/docker.html#use-docker-in-docker-with-privileged-mode).
-  The Runners don't need to be installed in the Kubernetes cluster, but the
+  The runners don't need to be installed in the Kubernetes cluster, but the
   Kubernetes executor is easy to use and automatically autoscales.
-  You can configure Docker-based Runners to autoscale as well, using
+  You can configure Docker-based runners to autoscale as well, using
   [Docker Machine](https://docs.gitlab.com/runner/install/autoscaling.html).
 
   If you've configured GitLab's Kubernetes integration in the first step, you
   can deploy it to your cluster by installing the
   [GitLab-managed app for GitLab Runner](../../user/clusters/applications.md#gitlab-runner).
 
-  Runners should be registered as [shared Runners](../../ci/runners/README.md#shared-runners)
-  for the entire GitLab instance, or [specific Runners](../../ci/runners/README.md#specific-runners)
+  Runners should be registered as [shared runners](../../ci/runners/README.md#shared-runners)
+  for the entire GitLab instance, or [specific runners](../../ci/runners/README.md#specific-runners)
   that are assigned to specific projects (the default if you've installed the
   GitLab Runner managed application).
 
@@ -105,7 +111,7 @@ After all requirements are met, you can [enable Auto DevOps](index.md#enablingdi
 
 You can choose to target [AWS ECS](../../ci/cloud_deployment/index.md) as a deployment platform instead of using Kubernetes.
 
-To get started on Auto DevOps to AWS ECS, you'll have to add a specific Environment
+To get started on Auto DevOps to AWS ECS, you must add a specific Environment
 Variable. To do so, follow these steps:
 
 1. In your project, go to **Settings > CI / CD** and expand the **Variables**
@@ -118,21 +124,19 @@ Variable. To do so, follow these steps:
 
 When you trigger a pipeline, if you have Auto DevOps enabled and if you have correctly
 [entered AWS credentials as environment variables](../../ci/cloud_deployment/index.md#deploy-your-application-to-the-aws-elastic-container-service-ecs),
-your application will be deployed to AWS ECS.
+your application is deployed to AWS ECS.
 
-NOTE: **Note:**
 [GitLab Managed Apps](../../user/clusters/applications.md) are not available when deploying to AWS ECS.
 You must manually configure your application (such as Ingress or Help) on AWS ECS.
 
-NOTE: **Note:**
 If you have both a valid `AUTO_DEVOPS_PLATFORM_TARGET` variable and a Kubernetes cluster tied to your project,
-only the deployment to Kubernetes will run.
+only the deployment to Kubernetes runs.
 
 CAUTION: **Warning:**
-Setting the `AUTO_DEVOPS_PLATFORM_TARGET` variable to `ECS` will trigger jobs
+Setting the `AUTO_DEVOPS_PLATFORM_TARGET` variable to `ECS` triggers jobs
 defined in the [`Jobs/Deploy/ECS.gitlab-ci.yml` template](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Jobs/Deploy/ECS.gitlab-ci.yml).
 However, it's not recommended to [include](../../ci/yaml/README.md#includetemplate)
 it on its own. This template is designed to be used with Auto DevOps only. It may change
 unexpectedly causing your pipeline to fail if included on its own. Also, the job
 names within this template may also change. Do not override these jobs' names in your
-own pipeline, as the override will stop working when the name changes.
+own pipeline, as the override stops working when the name changes.

@@ -44,7 +44,8 @@ RSpec.shared_context 'project navbar structure' do
           _('Boards'),
           _('Labels'),
           _('Service Desk'),
-          _('Milestones')
+          _('Milestones'),
+          (_('Iterations') if Gitlab.ee?)
         ]
       },
       {
@@ -55,6 +56,7 @@ RSpec.shared_context 'project navbar structure' do
         nav_item: _('CI / CD'),
         nav_sub_items: [
           _('Pipelines'),
+          s_('Pipelines|Editor'),
           _('Jobs'),
           _('Artifacts'),
           _('Schedules')
@@ -64,14 +66,17 @@ RSpec.shared_context 'project navbar structure' do
         nav_item: _('Operations'),
         nav_sub_items: [
           _('Metrics'),
+          _('Logs'),
+          _('Tracing'),
+          _('Error Tracking'),
           _('Alerts'),
           _('Incidents'),
-          _('Environments'),
-          _('Error Tracking'),
-          _('Product Analytics'),
           _('Serverless'),
-          _('Logs'),
-          _('Kubernetes')
+          _('Terraform'),
+          _('Kubernetes'),
+          _('Environments'),
+          _('Feature Flags'),
+          _('Product Analytics')
         ]
       },
       analytics_nav_item,

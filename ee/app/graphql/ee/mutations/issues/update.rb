@@ -7,14 +7,18 @@ module EE
         extend ActiveSupport::Concern
 
         prepended do
-          argument :health_status,
-                   ::Types::HealthStatusEnum,
+          include ::Mutations::Issues::CommonEEMutationArguments
+
+          argument :epic_id, ::Types::GlobalIDType[::Epic],
                    required: false,
-                   description: 'The desired health status'
-          argument :epic_id,
-                   GraphQL::ID_TYPE,
-                   required: false,
+                   loads: ::Types::EpicType,
                    description: 'The ID of the parent epic. NULL when removing the association'
+        end
+
+        def resolve(**args)
+          super
+        rescue ::Gitlab::Access::AccessDeniedError
+          raise_resource_not_available_error!
         end
       end
     end

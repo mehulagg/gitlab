@@ -14,7 +14,7 @@ import Tracking from '~/tracking';
 export default function initTodoToggle() {
   $(document).on('todo:toggle', (e, count) => {
     const updatedCount = count || e?.detail?.count || 0;
-    const $todoPendingCount = $('.todos-count');
+    const $todoPendingCount = $('.js-todos-count');
 
     $todoPendingCount.text(highCountTrim(updatedCount));
     $todoPendingCount.toggleClass('hidden', updatedCount === 0);
@@ -40,20 +40,38 @@ function initStatusTriggers() {
           new Vue({
             el: statusModalElement,
             data() {
-              const { currentEmoji, currentMessage } = setStatusModalWrapperEl.dataset;
+              const {
+                currentEmoji,
+                defaultEmoji,
+                currentMessage,
+                currentAvailability,
+                canSetUserAvailability,
+              } = setStatusModalWrapperEl.dataset;
 
               return {
                 currentEmoji,
+                defaultEmoji,
                 currentMessage,
+                currentAvailability,
+                canSetUserAvailability,
               };
             },
             render(createElement) {
-              const { currentEmoji, currentMessage } = this;
+              const {
+                currentEmoji,
+                defaultEmoji,
+                currentMessage,
+                currentAvailability,
+                canSetUserAvailability,
+              } = this;
 
               return createElement(SetStatusModalWrapper, {
                 props: {
                   currentEmoji,
+                  defaultEmoji,
                   currentMessage,
+                  currentAvailability,
+                  canSetUserAvailability,
                 },
               });
             },
