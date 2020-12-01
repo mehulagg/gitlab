@@ -18,8 +18,8 @@ module Resolvers
                 description: 'Sort alerts by this criteria',
                 required: false
 
-      argument :view, [Types::AlertManagement::ViewFilterEnum],
-                description: 'Filter query for ui views',
+      argument :domain, [Types::AlertManagement::DomainFilterEnum],
+                description: 'Filter query for given domain',
                 required: false
 
       argument :search, GraphQL::STRING_TYPE,

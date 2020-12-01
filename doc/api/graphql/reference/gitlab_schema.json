@@ -1481,6 +1481,29 @@
           "possibleTypes": null
         },
         {
+          "kind": "ENUM",
+          "name": "AlertManagementDomainFilter",
+          "description": "Filters the alerts based on given domain",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
+          "enumValues": [
+            {
+              "name": "THREAT_MONITORING",
+              "description": "Alerts for Threat Monitoring view",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "OPERATIONS",
+              "description": "Alerts for Operations view",
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "possibleTypes": null
+        },
+        {
           "kind": "OBJECT",
           "name": "AlertManagementHttpIntegration",
           "description": "An endpoint and credentials used to accept alerts for a project",
@@ -2075,29 +2098,6 @@
             {
               "name": "IGNORED",
               "description": "Ignored status",
-              "isDeprecated": false,
-              "deprecationReason": null
-            }
-          ],
-          "possibleTypes": null
-        },
-        {
-          "kind": "ENUM",
-          "name": "AlertManagementViewFilter",
-          "description": "View filter",
-          "fields": null,
-          "inputFields": null,
-          "interfaces": null,
-          "enumValues": [
-            {
-              "name": "THREAT_MONITORING",
-              "description": "Alerts for Threat Monitoring view",
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
-              "name": "OPERATIONS",
-              "description": "Alerts for Operations view",
               "isDeprecated": false,
               "deprecationReason": null
             }
@@ -45481,8 +45481,8 @@
                   "defaultValue": null
                 },
                 {
-                  "name": "view",
-                  "description": "Filter query for ui views",
+                  "name": "domain",
+                  "description": "Filter query for given domain",
                   "type": {
                     "kind": "LIST",
                     "name": null,
@@ -45491,7 +45491,7 @@
                       "name": null,
                       "ofType": {
                         "kind": "ENUM",
-                        "name": "AlertManagementViewFilter",
+                        "name": "AlertManagementDomainFilter",
                         "ofType": null
                       }
                     }
@@ -45603,8 +45603,8 @@
                   "defaultValue": null
                 },
                 {
-                  "name": "view",
-                  "description": "Filter query for ui views",
+                  "name": "domain",
+                  "description": "Filter query for given domain",
                   "type": {
                     "kind": "LIST",
                     "name": null,
@@ -45613,7 +45613,7 @@
                       "name": null,
                       "ofType": {
                         "kind": "ENUM",
-                        "name": "AlertManagementViewFilter",
+                        "name": "AlertManagementDomainFilter",
                         "ofType": null
                       }
                     }

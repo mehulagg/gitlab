@@ -20,7 +20,7 @@ module AlertManagement
       collection = project.alert_management_alerts
       collection = by_status(collection)
       collection = by_iid(collection)
-      collection = by_view(collection)
+      collection = by_domain(collection)
       collection = by_assignee(collection)
       collection = by_search(collection)
 
@@ -43,10 +43,10 @@ module AlertManagement
       values.present? ? collection.for_status(values) : collection
     end
 
-    def by_view(collection)
-      return collection unless params[:view].present?
+    def by_domain(collection)
+      return collection unless params[:domain].present?
 
-      AlertManagement::Alert::VIEW_FILTERS[params[:view]].call(collection)
+      AlertManagement::Alert::DOMAINS[params[:domain]].call(collection)
     end
 
     def by_search(collection)

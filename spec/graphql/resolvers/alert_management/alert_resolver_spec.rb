@@ -43,7 +43,7 @@ RSpec.describe Resolvers::AlertManagement::AlertResolver do
       let_it_be(:alert2) { create(:alert_management_alert, project: project, monitoring_tool: 'CiliumInternal') }
       let_it_be(:alert3) { create(:alert_management_alert, project: project, monitoring_tool: 'generic') }
 
-      let(:args) { { view: 'threat_monitoring' } }
+      let(:args) { { domain: 'threat_monitoring' } }
 
       it { is_expected.to contain_exactly(alert1, alert2) }
     end

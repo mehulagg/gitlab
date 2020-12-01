@@ -591,6 +591,21 @@ type AlertManagementAlertStatusCountsType {
 }
 
 """
+Filters the alerts based on given domain
+"""
+enum AlertManagementDomainFilter {
+  """
+  Alerts for Operations view
+  """
+  OPERATIONS
+
+  """
+  Alerts for Threat Monitoring view
+  """
+  THREAT_MONITORING
+}
+
+"""
 An endpoint and credentials used to accept alerts for a project
 """
 type AlertManagementHttpIntegration implements AlertManagementIntegration {
@@ -820,21 +835,6 @@ enum AlertManagementStatus {
   Triggered status
   """
   TRIGGERED
-}
-
-"""
-View filter
-"""
-enum AlertManagementViewFilter {
-  """
-  Alerts for Operations view
-  """
-  OPERATIONS
-
-  """
-  Alerts for Threat Monitoring view
-  """
-  THREAT_MONITORING
 }
 
 """
@@ -15314,6 +15314,11 @@ type Project {
     assigneeUsername: String
 
     """
+    Filter query for given domain
+    """
+    domain: [AlertManagementDomainFilter!]
+
+    """
     IID of the alert. For example, "1"
     """
     iid: String
@@ -15332,11 +15337,6 @@ type Project {
     Alerts with the specified statues. For example, [TRIGGERED]
     """
     statuses: [AlertManagementStatus!]
-
-    """
-    Filter query for ui views
-    """
-    view: [AlertManagementViewFilter!]
   ): AlertManagementAlert
 
   """
@@ -15374,6 +15374,11 @@ type Project {
     before: String
 
     """
+    Filter query for given domain
+    """
+    domain: [AlertManagementDomainFilter!]
+
+    """
     Returns the first _n_ elements from the list.
     """
     first: Int
@@ -15402,11 +15407,6 @@ type Project {
     Alerts with the specified statues. For example, [TRIGGERED]
     """
     statuses: [AlertManagementStatus!]
-
-    """
-    Filter query for ui views
-    """
-    view: [AlertManagementViewFilter!]
   ): AlertManagementAlertConnection
 
   """

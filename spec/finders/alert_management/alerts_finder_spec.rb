@@ -241,7 +241,7 @@ RSpec.describe AlertManagement::AlertsFinder, '#execute' do
         end
       end
 
-      context 'filtering by monitoring tool' do
+      context 'filtering by domain' do
         let_it_be(:alert) do
           create(:alert_management_alert,
                  :with_fingerprint,
@@ -275,24 +275,24 @@ RSpec.describe AlertManagement::AlertsFinder, '#execute' do
                 )
         end
 
-        let(:params) { { view: 'threat_monitoring' } }
+        let(:params) { { domain: 'threat_monitoring' } }
 
         it { is_expected.to match_array([alert2, alert3]) }
 
         context 'filter for operations  view' do
-          let(:params) { { view: 'operations' } }
+          let(:params) { { domain: 'operations' } }
 
           it { is_expected.to match_array([alert, resolved_alert, ignored_alert]) }
         end
 
         context 'filter for thread monitoring view and search by term' do
-          let(:params) { { view: 'threat_monitoring', search: 'Distinctive' } }
+          let(:params) { { domain: 'threat_monitoring', search: 'Distinctive' } }
 
           it { is_expected.to match_array([alert2]) }
         end
 
         context 'filter for thread monitoring view' do
-          let(:params) { { view: 'threat_monitoring', search: 'DistinctiveService' } }
+          let(:params) { { domain: 'threat_monitoring', search: 'DistinctiveService' } }
 
           it { is_expected.to be_empty }
         end

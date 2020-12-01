@@ -23,7 +23,7 @@ module AlertManagement
     private_constant :STATUSES
 
     # rubocop: disable CodeReuse/ActiveRecord
-    VIEW_FILTERS = {
+    DOMAINS = {
       threat_monitoring:  -> (collection) { collection.where(monitoring_tool: 'CiliumInternal') },
       operations:  -> (collection) { collection.where.not(monitoring_tool: 'CiliumInternal') }
     }.with_indifferent_access.freeze
