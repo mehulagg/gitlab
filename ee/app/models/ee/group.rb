@@ -296,21 +296,41 @@ module EE
     # We are plucking the user_ids from the "Members" table in an array and
     # converting the array of user_ids to a Set which will have unique user_ids.
     def billed_user_ids(requested_hosted_plan = nil)
+      billed_user_members.pluck(:user_id).to_set
+    end
+
+    def billed_user_members(requested_hosted_plan = nil)
       if [actual_plan_name, requested_hosted_plan].include?(::Plan::GOLD)
-        strong_memoize(:gold_billed_user_ids) do
-          (billed_group_members.non_guests.distinct.pluck(:user_id) +
-          billed_project_members.non_guests.distinct.pluck(:user_id) +
-          billed_shared_non_guests_group_members.non_guests.distinct.pluck(:user_id) +
-          billed_invited_non_guests_group_to_project_members.non_guests.distinct.pluck(:user_id)).to_set
+        strong_memoize(:gold_billed_users) do
+          gold_billed_members
         end
       else
-        strong_memoize(:non_gold_billed_user_ids) do
-          (billed_group_members.distinct.pluck(:user_id) +
-          billed_project_members.distinct.pluck(:user_id) +
-          billed_shared_group_members.distinct.pluck(:user_id) +
-          billed_invited_group_to_project_members.distinct.pluck(:user_id)).to_set
+        strong_memoize(:non_gold_billed_users) do
+          non_gold_billed_members
         end
       end
+    end
+
+    def non_gold_billed_members
+      ::Member.from_union(
+        [
+          billed_group_members,
+          billed_project_members,
+          billed_shared_group_members,
+          billed_invited_group_to_project_members
+        ]
+      ).distinct
+    end
+
+    def gold_billed_members
+      Member.from_union(
+        [
+          billed_group_members.non_guests,
+          billed_project_members.non_guests,
+          billed_shared_non_guests_group_members.non_guests,
+          billed_invited_non_guests_group_to_project_members.non_guests
+        ]
+      ).distinct
     end
 
     override :supports_events?
