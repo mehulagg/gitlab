@@ -1,5 +1,0 @@
----
-title: Add checking if pipeline needs to be touched when dismissing vulnerability
-merge_request: 48629
-author:
-type: fixed
