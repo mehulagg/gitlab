@@ -1,10 +1,13 @@
 # frozen_string_literal: true
 
 class NamespaceOnboardingAction < ApplicationRecord
-  belongs_to :namespace
+  belongs_to :namespace, optional: false
+
+  validates :action, presence: true
 
   ACTIONS = {
-    subscription_created: 1
+    subscription_created: 1,
+    git_write: 2
   }.freeze
 
   enum action: ACTIONS
