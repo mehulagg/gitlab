@@ -1,18 +1,18 @@
 ---
 stage: Package
 group: Package
-type: tutorial
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Publish NPM packages to GitLab's Package Registry using semantic-release
+# Publish NPM packages to the GitLab Package Registry using semantic-release
 
-This guide will demonstrate how to automatically publish NPM packages to [GitLab's Package Registry](../../user/packages/npm_registry/index.md) using [semantic-release](https://github.com/semantic-release/semantic-release).
+This guide demonstrates how to automatically publish NPM packages to the [GitLab Package Registry](../../user/packages/npm_registry/index.md) by using [semantic-release](https://github.com/semantic-release/semantic-release).
 
 You can also view or fork the complete [example source](https://gitlab.com/gitlab-examples/semantic-release-npm).
 
-## Initialize the module
+## 1. Initialize the module
 
-Inside the project's repo, run `npm init`. Name the module according to [the GitLab NPM Registry's naming conventions](../../user/packages/npm_registry/index.md#package-naming-convention). For example, if the project's path is `gitlab-examples/semantic-release-npm`, name the module `@gitlab-examples/semantic-release-npm`.
+Open a terminal, navigate to the project's repo, and run `npm init`. Name the module according to [the Package Registry's naming conventions](../../user/packages/npm_registry/index.md#package-naming-convention). For example, if the project's path is `gitlab-examples/semantic-release-npm`, name the module `@gitlab-examples/semantic-release-npm`.
 
 Install the following NPM packages:
 
@@ -42,7 +42,7 @@ Add a `.gitignore` file to the project to avoid committing `node_modules`:
 node_modules
 ```
 
-## Configure the pipeline
+## 2. Configure the pipeline
 
 Create a `.gitlab-ci.yml` with the following content:
 
@@ -79,22 +79,22 @@ publish:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 ```
 
-This configures the pipeline with a single job, `publish`, which runs `semantic-release`. The semantic-release library will handle publishing new versions of the NPM package and creating new GitLab releases (if necessary).
+This example configures the pipeline with a single job, `publish`, which runs `semantic-release`. The semantic-release library publishes new versions of the NPM package and creates new GitLab releases (if necessary).
 
-The default `before_script` generates a temporary `.npmrc` that is used to authenticate to GitLab's Package Registry during the `publish` job.
+The default `before_script` generates a temporary `.npmrc` that is used to authenticate to the Package Registry during the `publish` job.
 
-## Set up environment variables
+## 3. Set up environment variables
 
-As part of publishing a package, semantic-release bumps the version in `package.json`. To allow it to commit this change and push it back to GitLab, the pipeline requires a custom environment variable named `GITLAB_TOKEN`. To create this variable:
+As part of publishing a package, semantic-release increases the version number in `package.json`. For semantic-release to commit this change and push it back to GitLab, the pipeline requires a custom environment variable named `GITLAB_TOKEN`. To create this variable:
 
-1. Navigate to **Project > Settings > Access Tokens**
-1. Give the token a name, and select the `api` scope
-1. Click **Create project access token** and copy its value
-1. Navigate to **Project > Settings > CI / CD > Variables**
-1. Click **Add Variable**
-1. In the **Key** field, enter `GITLAB_TOKEN`. In the **Value** field, paste the token created above. Check the **Mask variable** option and click **Add variable**
+1. Navigate to **Project > Settings > Access Tokens**.
+1. Give the token a name, and select the `api` scope.
+1. Click **Create project access token** and copy its value.
+1. Navigate to **Project > Settings > CI / CD > Variables**.
+1. Click **Add Variable**.
+1. In the **Key** field, enter `GITLAB_TOKEN`. In the **Value** field, paste the token created above. Check the **Mask variable** option and click **Add variable**.
 
-## Configure semantic-release
+## 4. Configure semantic-release
 
 semantic-release pulls its configuration info from a `.releaserc.json` file in the project. Create a `.releaserc.json` at the root of the repository:
 
@@ -117,7 +117,7 @@ semantic-release pulls its configuration info from a `.releaserc.json` file in t
 }
 ```
 
-## Begin publishing releases
+## 5. Begin publishing releases
 
 Test the pipeline by creating a commit with a message like:
 
@@ -125,7 +125,7 @@ Test the pipeline by creating a commit with a message like:
 fix: testing patch releases
 ```
 
-and pushing the commit to `master`. The pipeline should create a new release (`v1.0.0`) on the project's **Releases** page and publish a new version of the package to the project's **Package Registry** page.
+Push the commit to `master`. The pipeline should create a new release (`v1.0.0`) on the project's **Releases** page and publish a new version of the package to the project's **Package Registry** page.
 
 To create a minor release, use a commit message like:
 
@@ -143,9 +143,9 @@ BREAKING CHANGE: This is a breaking change.
 
 More information about how commit messages are mapped to releases can be found in [semantic-releases's documentation](https://github.com/semantic-release/semantic-release#how-does-it-work).
 
-## Use the module in a project
+## 6. Use the module in a project
 
-To use the published module, add an `.npmrc` file to the project that will depend on the module. For example, to use [the example project](https://gitlab.com/gitlab-examples/semantic-release-npm)'s module:
+To use the published module, add an `.npmrc` file to the project that depends on the module. For example, to use [the example project](https://gitlab.com/gitlab-examples/semantic-release-npm)'s module:
 
 ```plaintext
 @gitlab-examples:registry=https://gitlab.com/api/v4/packages/npm/

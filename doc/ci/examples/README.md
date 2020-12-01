@@ -43,7 +43,7 @@ The following table lists examples with step-by-step tutorials that are containe
 | Parallel testing Ruby & JS    | [GitLab CI/CD parallel jobs testing for Ruby & JavaScript projects](https://docs.knapsackpro.com/2019/how-to-run-parallel-jobs-for-rspec-tests-on-gitlab-ci-pipeline-and-speed-up-ruby-javascript-testing). |
 | Secrets management with Vault | [Authenticating and Reading Secrets With Hashicorp Vault](authenticating-with-hashicorp-vault/index.md).                   |
 | Multi project pipeline        | [Build, test deploy using multi project pipeline](https://gitlab.com/gitlab-examples/upstream-project).                    |
-| NPM with semantic-release     | [Publish NPM packages to GitLab's Package Registry using semantic-release](semantic-release.md).                           |
+| NPM with semantic-release     | [Publish NPM packages to the GitLab Package Registry using semantic-release](semantic-release.md).                         |
 
 ### Contributing examples
 
