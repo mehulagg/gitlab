@@ -1,6 +1,5 @@
 <script>
 import { __ } from '~/locale';
-import { fetchPolicies } from '~/lib/graphql';
 import IterationReportSummaryCards from './iteration_report_summary_cards.vue';
 import query from '../queries/iteration_issues_summary_stats.query.graphql';
 
