@@ -10,39 +10,40 @@ This guide demonstrates how to automatically publish NPM packages to the [GitLab
 
 You can also view or fork the complete [example source](https://gitlab.com/gitlab-examples/semantic-release-npm).
 
-## 1. Initialize the module
+## Initialize the module
 
-Open a terminal, navigate to the project's repo, and run `npm init`. Name the module according to [the Package Registry's naming conventions](../../user/packages/npm_registry/index.md#package-naming-convention). For example, if the project's path is `gitlab-examples/semantic-release-npm`, name the module `@gitlab-examples/semantic-release-npm`.
+1. Open a terminal and navigate to the project's repo
+1. Run `npm init`. Name the module according to [the Package Registry's naming conventions](../../user/packages/npm_registry/index.md#package-naming-convention). For example, if the project's path is `gitlab-examples/semantic-release-npm`, name the module `@gitlab-examples/semantic-release-npm`.
 
-Install the following NPM packages:
+1. Install the following NPM packages:
 
-```shell
-npm install semantic-release @semantic-release/git @semantic-release/gitlab @semantic-release/npm --save-dev
-```
+   ```shell
+   npm install semantic-release @semantic-release/git @semantic-release/gitlab @semantic-release/npm --save-dev
+   ```
 
-Add the following properties to the module's `package.json`:
+1. Add the following properties to the module's `package.json`:
 
-```json
-{
-  "scripts": {
-    "semantic-release": "semantic-release"
-  },
-  "publishConfig": {
-    "access": "public"
-  },
-  "files": [ <path(s) to files here> ]
-}
-```
+   ```json
+   {
+     "scripts": {
+       "semantic-release": "semantic-release"
+     },
+     "publishConfig": {
+       "access": "public"
+     },
+     "files": [ <path(s) to files here> ]
+   }
+   ```
 
-Update the `files` key with glob pattern(s) that selects all files that should be included in the published module. More information about `files` can be found [in NPM's documentation](https://docs.npmjs.com/cli/v6/configuring-npm/package-json#files).
+1. Update the `files` key with glob pattern(s) that selects all files that should be included in the published module. More information about `files` can be found [in NPM's documentation](https://docs.npmjs.com/cli/v6/configuring-npm/package-json#files).
 
-Add a `.gitignore` file to the project to avoid committing `node_modules`:
+1. Add a `.gitignore` file to the project to avoid committing `node_modules`:
 
 ```plaintext
 node_modules
 ```
 
-## 2. Configure the pipeline
+## Configure the pipeline
 
 Create a `.gitlab-ci.yml` with the following content:
 
@@ -83,7 +84,7 @@ This example configures the pipeline with a single job, `publish`, which runs `s
 
 The default `before_script` generates a temporary `.npmrc` that is used to authenticate to the Package Registry during the `publish` job.
 
-## 3. Set up environment variables
+## Set up environment variables
 
 As part of publishing a package, semantic-release increases the version number in `package.json`. For semantic-release to commit this change and push it back to GitLab, the pipeline requires a custom environment variable named `GITLAB_TOKEN`. To create this variable:
 
@@ -94,7 +95,7 @@ As part of publishing a package, semantic-release increases the version number i
 1. Click **Add Variable**.
 1. In the **Key** field, enter `GITLAB_TOKEN`. In the **Value** field, paste the token created above. Check the **Mask variable** option and click **Add variable**.
 
-## 4. Configure semantic-release
+## Configure semantic-release
 
 semantic-release pulls its configuration info from a `.releaserc.json` file in the project. Create a `.releaserc.json` at the root of the repository:
 
@@ -117,7 +118,7 @@ semantic-release pulls its configuration info from a `.releaserc.json` file in t
 }
 ```
 
-## 5. Begin publishing releases
+## Begin publishing releases
 
 Test the pipeline by creating a commit with a message like:
 
@@ -143,7 +144,7 @@ BREAKING CHANGE: This is a breaking change.
 
 More information about how commit messages are mapped to releases can be found in [semantic-releases's documentation](https://github.com/semantic-release/semantic-release#how-does-it-work).
 
-## 6. Use the module in a project
+## Use the module in a project
 
 To use the published module, add an `.npmrc` file to the project that depends on the module. For example, to use [the example project](https://gitlab.com/gitlab-examples/semantic-release-npm)'s module:
 
