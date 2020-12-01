@@ -10,7 +10,6 @@ export default {
   },
   apollo: {
     issues: {
-      fetchPolicy: fetchPolicies.NO_CACHE,
       query,
       variables() {
         return this.queryVariables;

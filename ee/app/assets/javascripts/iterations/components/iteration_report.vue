@@ -176,7 +176,7 @@ export default {
     <gl-alert v-if="error" variant="danger" @dismiss="error = ''">
       {{ error }}
     </gl-alert>
-    <gl-loading-icon v-else-if="$apollo.queries.iteration.loading" class="gl-py-5" size="lg" />
+    <gl-loading-icon v-else-if="loading" class="gl-py-5" size="lg" />
     <gl-empty-state
       v-else-if="showEmptyState"
       :title="__('Could not find iteration')"

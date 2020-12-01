@@ -38,7 +38,6 @@ export default {
   },
   apollo: {
     canCreateSnippet: {
-      fetchPolicy: fetchPolicies.NO_CACHE,
       query() {
         return this.snippet.project ? CanCreateProjectSnippet : CanCreatePersonalSnippet;
       },
