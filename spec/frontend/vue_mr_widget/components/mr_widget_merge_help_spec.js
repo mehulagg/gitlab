@@ -24,21 +24,23 @@ describe('MRWidgetMergeHelp', () => {
     });
 
     it('renders missing branch information', () => {
-      expect(
-        wrapper.find('.mr-widget-help').text()).toContain('If the this-is-not-the-branch-you-are-looking-for branch exists in your local repository');
+      expect(wrapper.find('.mr-widget-help').text()).toContain(
+        'If the this-is-not-the-branch-you-are-looking-for branch exists in your local repository',
+      );
     });
   });
 
   describe('without missing branch', () => {
     beforeEach(() => {
       createComponent({
-        props: { missingBranch: '' }
+        props: { missingBranch: '' },
       });
     });
 
     it('renders information about how to merge manually', () => {
-      expect(
-        wrapper.find('.mr-widget-help').text()).toContain('You can merge this merge request manually');
+      expect(wrapper.find('.mr-widget-help').text()).toContain(
+        'You can merge this merge request manually',
+      );
     });
   });
 });
