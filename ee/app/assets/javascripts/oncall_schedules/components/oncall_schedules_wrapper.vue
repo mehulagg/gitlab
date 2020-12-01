@@ -4,7 +4,7 @@ import * as Sentry from '~/sentry/wrapper';
 import AddScheduleModal from './add_schedule_modal.vue';
 import OncallSchedule from './oncall_schedule.vue';
 import { s__ } from '~/locale';
-import getOncallSchedules from '../graphql/get_oncall_schedules.query.graphql';
+import getOncallSchedulesQuery from '../graphql/queries/get_oncall_schedules.query.graphql';
 import { fetchPolicies } from '~/lib/graphql';
 
 const addScheduleModalId = 'addScheduleModal';
@@ -39,7 +39,7 @@ export default {
   apollo: {
     schedule: {
       fetchPolicy: fetchPolicies.CACHE_AND_NETWORK,
-      query: getOncallSchedules,
+      query: getOncallSchedulesQuery,
       variables() {
         return {
           projectPath: this.projectPath,

@@ -11,7 +11,7 @@ import {
   GlAlert,
 } from '@gitlab/ui';
 import { s__, __ } from '~/locale';
-import createOncallScheduleMutation from '../graphql/create_oncall_schedule.mutation.graphql';
+import createOncallScheduleMutation from '../graphql/mutations/create_oncall_schedule.mutation.graphql';
 import { getFormattedTimezone } from '../utils';
 
 export const i18n = {
