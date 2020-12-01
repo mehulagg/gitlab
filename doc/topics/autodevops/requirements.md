@@ -142,15 +142,13 @@ unexpectedly causing your pipeline to fail if included on its own. Also, the job
 names within this template may also change. Do not override these jobs' names in your
 own pipeline, as the override stops working when the name changes.
 
-
 ## Auto DevOps requirements for Amazon EC2
 
 [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/216008) in GitLab 13.6.
 
-You can choose to target [AWS EC2](../../ci/cloud_deployment/index.md) as a deployment platform instead of using Kubernetes.
-
-To get started on Auto DevOps to AWS EC2, you must add a specific Environment
-Variable. To do so, follow these steps:
+You can target [AWS EC2](../../ci/cloud_deployment/index.md)
+as a deployment platform instead of Kubernetes. To use Auto DevOps with AWS EC2, you must add a
+specific environment variable. To do so, follow these steps:
 
 1. To leverage Auto DevOps for your project when deploying to AWS EC2, first you must define your [AWS credentials as environment variables](https://docs.gitlab.com/ee/ci/cloud_deployment/#run-aws-commands-from-gitlab-cicd).
 
