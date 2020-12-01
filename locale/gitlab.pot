@@ -18967,7 +18967,13 @@ msgstr ""
 msgid "OnCallSchedules|Add schedule"
 msgstr ""
 
+msgid "OnCallSchedules|Are you sure you want to delete the %{deleteSchedule} schedule. This action cannot be undone."
+msgstr ""
+
 msgid "OnCallSchedules|Create on-call schedules  in GitLab"
+msgstr ""
+
+msgid "OnCallSchedules|Delete schedule"
 msgstr ""
 
 msgid "OnCallSchedules|Failed to add schedule"
@@ -18986,6 +18992,9 @@ msgid "OnCallSchedules|Select timezone"
 msgstr ""
 
 msgid "OnCallSchedules|Sets the default timezone for the schedule, for all participants"
+msgstr ""
+
+msgid "OnCallSchedules|The schedule could not be deleted. Please try again."
 msgstr ""
 
 msgid "OnDemandScans|Could not fetch scanner profiles. Please refresh the page, or try again later."

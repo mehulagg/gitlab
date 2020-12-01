@@ -1,0 +1,17 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DestroyScheduleModal renders destroy schedule modal layout 1`] = `
+<gl-modal-stub
+  actioncancel="[object Object]"
+  actionprimary="[object Object]"
+  modalclass=""
+  modalid="destroyScheduleModal"
+  size="md"
+  title="Delete schedule"
+  titletag="h4"
+>
+  <gl-sprintf-stub
+    message="Are you sure you want to delete the %{deleteSchedule} schedule. This action cannot be undone."
+  />
+</gl-modal-stub>
+`;
