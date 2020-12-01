@@ -114,6 +114,16 @@ namespace :gitlab do
       end
     end
 
+    desc "GitLab | Elasticsearch | Mark last reindexing job as failed"
+    task mark_reindex_failed: :environment do
+      if Elastic::ReindexingTask.running?
+        Elastic::ReindexingTask.current.update!(state: :failure)
+        puts 'Marked the current reindexing job as failed.'
+      else
+        puts 'Did not find the current running reindexing job.'
+      end
+    end
+
     def project_id_batches(&blk)
       relation = Project.all
 
