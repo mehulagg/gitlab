@@ -6,8 +6,8 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Requirements for Auto DevOps
 
-You can set up Auto DevOps for [Kubernetes](#auto-devops-requirements-for-kubernetes)
-or [Amazon Elastic Container Service (ECS)](#auto-devops-requirements-for-amazon-ecs)
+You can set up Auto DevOps for [Kubernetes](#auto-devops-requirements-for-kubernetes),
+[Amazon Elastic Container Service (ECS)](#auto-devops-requirements-for-amazon-ecs),
 or [Amazon Cloud Compute](#auto-devops-requirements-for-amazon-ecs).
 For more information about Auto DevOps, see [the main Auto DevOps page](index.md)
 or the [quick start guide](quick_start_guide.md).
