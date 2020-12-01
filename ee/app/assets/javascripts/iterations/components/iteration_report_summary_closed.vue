@@ -1,7 +1,7 @@
 <script>
 import { __ } from '~/locale';
 import IterationReportSummaryCards from './iteration_report_summary_cards.vue';
-import query from '../queries/iteration_issues_summary_stats.query.graphql';
+import summaryStatsQuery from '../queries/iteration_issues_summary_stats.query.graphql';
 
 export default {
   components: {
@@ -9,7 +9,7 @@ export default {
   },
   apollo: {
     issues: {
-      query,
+      query: summaryStatsQuery,
       variables() {
         return this.queryVariables;
       },
