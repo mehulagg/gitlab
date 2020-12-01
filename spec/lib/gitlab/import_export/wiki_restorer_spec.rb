@@ -14,8 +14,7 @@ RSpec.describe Gitlab::ImportExport::WikiRestorer do
     let(:restorer) do
       described_class.new(path_to_bundle: bundle_path,
                           shared: shared,
-                          project: project.wiki,
-                          wiki_enabled: true)
+                          project: project.wiki)
     end
 
     before do
@@ -37,10 +36,10 @@ RSpec.describe Gitlab::ImportExport::WikiRestorer do
     describe "no wiki in the bundle" do
       let(:bundler) { Gitlab::ImportExport::WikiRepoSaver.new(project: project_without_wiki, shared: shared) }
 
-      it 'creates an empty wiki' do
+      it 'does not creates an empty wiki' do
         expect(restorer.restore).to be true
 
-        expect(project.wiki_repository_exists?).to be true
+        expect(project.wiki_repository_exists?).to be false
       end
     end
   end
