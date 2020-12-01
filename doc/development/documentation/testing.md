@@ -27,7 +27,7 @@ in the relevant projects:
 ## Run tests locally
 
 Similar to [previewing your changes locally](index.md#previewing-the-changes-live), you can also
-run these tests on your local machine. This has the advantage of:
+run these tests on your local computer. This has the advantage of:
 
 - Speeding up the feedback loop. You can know of any problems with the changes in your branch
   without waiting for a CI/CD pipeline to run.
@@ -72,7 +72,7 @@ The output should be similar to:
 
 This requires you to either:
 
-- Have the [required lint tools installed](#local-linters) on your machine.
+- Have the [required lint tools installed](#local-linters) on your computer.
 - A working Docker installation, in which case an image with these tools pre-installed is used.
 
 ### Documentation link tests
@@ -214,45 +214,23 @@ build pipelines:
    brew install vale
    ```
 
-In addition to using markdownlint and Vale at the command line, these tools can be
-[integrated with your code editor](#configure-editors).
+These tools can be [integrated with your code editor](#configure-editors).
 
 ### Update linters
 
-As well as running linters using configuration that matches CI/CD, it's important to run versions
-of the linters that are at least the same as those run in CI/CD. This means you are taking advantage
-of new features and possible bug fixes introduced in the versions used in CI/CD.
+It's important to use linter versions that're at least the same as those run in
+CI/CD. This provides access to new features and possible bug fixes.
 
 To match the versions of `markdownlint-cli` and `vale` used in the GitLab projects, refer to the
 [versions used](https://gitlab.com/gitlab-org/gitlab-docs/-/blob/master/.gitlab-ci.yml#L447)
 when building the `image:docs-lint-markdown` Docker image containing these tools for CI/CD.
 
-To update `markdownlint-cli`, either:
-
-- Update to the latest version, by running:
-
-  ```shell
-  yarn global add markdownlint-cli
-  ```
-
-- Update to a specific version, by appending `@<version>` to the end of the command. For example,
-  to update `markdownlint-cli` to `0.23.2`, run:
-
-  ```shell
-  yarn global add markdownlint-cli@0.23.2
-  ```
-
-To update Vale, either:
-
-- Update to the latest version, by running (for macOS):
-
-  ```shell
-  brew update && brew upgrade vale
-  ```
-
-- Update to a specific version. This usually isn't possible using `brew` (the latest is usually
-  fine), so an alternative method is required. For example, by
-  [direct download](https://github.com/errata-ai/vale/releases).
+| Tool | Version | Command | Additional info |
+|------|---------|---------|-----------------|
+| `markdownlint-cli` | Latest | `yarn global add markdownlint-cli` | n/a |
+| `markdownlint-cli` | Specfic | `yarn global add markdownlint-cli@0.23.2` | The `@` indicates a specific version, and this example updates the tool to version `0.23.2`. |
+| Vale | Latest | `brew update && brew upgrade vale` | This command is for macOS only. |
+| Vale | Specific | n/a | Not possible using `brew`, but can be [directly downloaded](https://github.com/errata-ai/vale/releases). |
 
 ### Configure editors
 
