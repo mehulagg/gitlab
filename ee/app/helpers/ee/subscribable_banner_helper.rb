@@ -5,8 +5,6 @@ module EE
     extend ::Gitlab::Utils::Override
 
     def gitlab_subscription_or_license
-      return if License.future_dated.present?
-
       return decorated_subscription if display_subscription_banner?
 
       License.current if display_license_banner?
@@ -55,10 +53,14 @@ module EE
     end
 
     def display_license_banner?
+      return if License.future_dated.present?
+
       ::Feature.enabled?(:subscribable_license_banner, default_enabled: true)
     end
 
     def display_subscription_banner?
+      return if License.future_dated.present?
+
       @display_subscription_banner &&
         ::Gitlab::CurrentSettings.should_check_namespace_plan? &&
         ::Feature.enabled?(:subscribable_subscription_banner, default_enabled: false)

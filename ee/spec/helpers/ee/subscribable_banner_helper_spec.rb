@@ -77,6 +77,19 @@ RSpec.describe EE::SubscribableBannerHelper do
           expect(subject).to eq(license)
         end
       end
+
+      context 'with a future dated license' do
+        let(:gl_license) { build(:gitlab_license, starts_at: Date.current + 1.month) }
+
+        before do
+          allow(::Gitlab::CurrentSettings).to receive(:should_check_namespace_plan?).and_return(true)
+        end
+        
+        it 'returns the current license' do
+          expect(License).to receive(:current).and_return(license)
+          expect(subject).to eq(license)
+        end
+      end
     end
   end
 
