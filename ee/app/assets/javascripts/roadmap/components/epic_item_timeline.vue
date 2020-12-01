@@ -194,7 +194,7 @@ export default {
         :target="generateKey(epic)"
         :title="epic.title"
         triggers="hover"
-        placement="lefttop"
+        placement="left"
       >
         <p class="text-secondary m-0">{{ timeframeString(epic) }}</p>
         <p class="m-0">{{ popoverWeightText }}</p>
