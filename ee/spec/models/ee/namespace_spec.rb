@@ -520,48 +520,6 @@ RSpec.describe Namespace do
     end
   end
 
-  describe '#actual_shared_runners_minutes_limit' do
-    subject { namespace.actual_shared_runners_minutes_limit }
-
-    context 'when no limit defined' do
-      it { is_expected.to be_zero }
-    end
-
-    context 'when application settings limit is set' do
-      before do
-        stub_application_setting(shared_runners_minutes: 1000)
-      end
-
-      it 'returns global limit' do
-        is_expected.to eq(1000)
-      end
-
-      context 'when namespace limit is set' do
-        before do
-          namespace.shared_runners_minutes_limit = 500
-        end
-
-        it 'returns namespace limit' do
-          is_expected.to eq(500)
-        end
-      end
-
-      context 'when extra minutes limit is set' do
-        before do
-          namespace.update_attribute(:extra_shared_runners_minutes_limit, 100)
-        end
-
-        it 'returns the extra minutes by default' do
-          is_expected.to eq(1100)
-        end
-
-        it 'can exclude the extra minutes if required' do
-          expect(namespace.actual_shared_runners_minutes_limit(include_extra: false)).to eq(1000)
-        end
-      end
-    end
-  end
-
   describe '#shared_runner_minutes_supported?' do
     subject { namespace.shared_runner_minutes_supported? }
 

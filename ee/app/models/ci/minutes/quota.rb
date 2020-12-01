@@ -48,6 +48,10 @@ module Ci
           total_minutes_used >= total_minutes
       end
 
+      def total_minutes
+        @total_minutes ||= monthly_minutes + purchased_minutes
+      end
+
       def total_minutes_used
         @total_minutes_used ||= namespace.shared_runners_seconds.to_i / 60
       end
@@ -98,12 +102,6 @@ module Ci
         purchased_minutes > 0
       end
 
-      # TODO: maps to Namespace#actual_shared_runners_minutes_limit(include_extra: true)
-      def total_minutes
-        @total_minutes ||= monthly_minutes + purchased_minutes
-      end
-
-      # TODO: maps to Namespace#actual_shared_runners_minutes_limit(include_extra: false)
       def monthly_minutes
         @monthly_minutes ||= (namespace.shared_runners_minutes_limit || ::Gitlab::CurrentSettings.shared_runners_minutes).to_i
       end
