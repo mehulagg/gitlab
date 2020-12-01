@@ -13,7 +13,7 @@ module Gitlab
         def initialize(user, saml_provider, auth_hash)
           @user = user
           @saml_provider = saml_provider
-          @auth_hash = AuthHash.new(auth_hash)
+          @auth_hash = auth_hash
         end
 
         def execute

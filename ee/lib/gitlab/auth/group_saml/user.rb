@@ -3,42 +3,54 @@
 module Gitlab
   module Auth
     module GroupSaml
-      class User
+      class User < Gitlab::Auth::Saml::User
+        include ::Gitlab::Utils::StrongMemoize
+
         attr_reader :auth_hash, :saml_provider
 
+        override :initialize
         def initialize(auth_hash, saml_provider)
-          @auth_hash = auth_hash
+          @auth_hash = AuthHash.new(auth_hash)
           @saml_provider = saml_provider
         end
 
+        override :find_and_update!
         def find_and_update!
+          save("GroupSaml Provider ##{saml_provider.id}")
           update_group_membership
 
-          user_from_identity
+          gl_user
         end
 
-        def valid_sign_in?
-          user_from_identity.present?
-        end
-
+        override :bypass_two_factor?
         def bypass_two_factor?
           false
         end
 
         private
 
-        def identity
-          @identity ||= ::Auth::GroupSamlIdentityFinder.new(saml_provider, auth_hash).first
+        override :gl_user
+        def gl_user
+          strong_memoize(:gl_user) do
+            identity&.user || build_new_user
+          end
         end
 
-        def user_from_identity
-          @user_from_identity ||= identity&.user
+        def identity
+          strong_memoize(:identity) do
+            ::Auth::GroupSamlIdentityFinder.new(saml_provider, auth_hash).first
+          end
         end
 
         def update_group_membership
-          return unless user_from_identity
+          return unless valid_sign_in?
 
-          MembershipUpdater.new(user_from_identity, saml_provider, auth_hash).execute
+          MembershipUpdater.new(gl_user, saml_provider, auth_hash).execute
+        end
+
+        override :block_after_signup?
+        def block_after_signup?
+          false
         end
       end
     end
