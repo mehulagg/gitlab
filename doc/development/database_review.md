@@ -40,13 +40,13 @@ migration only.
 
 The following artifacts are required prior to submitting for a ~database review. If your merge request description does not include these items the review will be reassigned back to the author.
 
-If new migrations are introduced in the MR
+If new migrations are introduced in the MR **you are required to provide**
 
 - The output of both migrating and rolling back for all migrations
 
-If new queries have been introduced or existing queries have been updated
+If new queries have been introduced or existing queries have been updated **you are required to provide**
 
-- [Query plan](#query-plan)
+- [Query plans](#query-plans) for each raw SQL query included in the merge request along with the link to the query plan following each raw SQL snippet.
 - [Raw SQL](#raw-sql) for all queries (as translated from ActiveRecord queries)
   - In case of updating an existing query, the raw SQL of both the old and the new version of the query should be provided together with their query plans.
 
@@ -145,7 +145,7 @@ test its execution using `CREATE INDEX CONCURRENTLY` in the `#database-lab` Slac
   `gitlab-org/gitlab-foss` (`project_id = 13083`) or the `gitlab-org/gitlab` (`project_id = 278964`)
    projects provide enough data to serve as a good example.
   - That means that no query plan should return 0 records or less records than the provided limit (if a limit is included). If a query is used in batching, a proper example batch with adequate included results should be identified and provided.
-  - More info on how to find the number of actual returned records in [Understanding EXPLAIN plans](/understanding_explain_plans.html)
+  - More info on how to find the number of actual returned records in [Understanding EXPLAIN plans](understanding_explain_plans.md)
 - For query changes, it is best to provide the SQL query along with a
   plan _before_ and _after_ the change. This helps to spot differences
   quickly.
