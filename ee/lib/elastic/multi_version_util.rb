@@ -5,7 +5,7 @@ module Elastic
     extend ActiveSupport::Concern
     include Gitlab::Utils::StrongMemoize
 
-    attr_reader :data_class, :data_target
+    attr_reader :data_class, :data_target, :use_separate_indices
 
     # TODO: remove once multi-version is functional https://gitlab.com/gitlab-org/gitlab/issues/10156
     TARGET_VERSION = 'V12p1'
@@ -14,6 +14,13 @@ module Elastic
     def version(version)
       version = Elastic.const_get(version, false) if version.is_a?(String)
       version.const_get(proxy_class_name, false).new(data_target)
+    end
+
+    def separate_index_version(version)
+      return unless Gitlab::Elastic::Helper::ES_SEPARATE_CLASSES.include?(data_class)
+
+      version = Elastic.const_get(version, false) if version.is_a?(String)
+      version.const_get(proxy_class_name, false).new(data_target, use_separate_indices: true)
     end
 
     # TODO: load from db table https://gitlab.com/gitlab-org/gitlab/issues/12555
@@ -26,7 +33,7 @@ module Elastic
     # TODO: load from db table https://gitlab.com/gitlab-org/gitlab/issues/12555
     def elastic_writing_targets
       strong_memoize(:elastic_writing_targets) do
-        [elastic_reading_target]
+        [version(TARGET_VERSION), separate_index_version(TARGET_VERSION)].compact
       end
     end
 
