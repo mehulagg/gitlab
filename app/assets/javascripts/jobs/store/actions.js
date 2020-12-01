@@ -161,8 +161,10 @@ export const toggleScrollisInBottom = ({ commit }, toggle) => {
 export const requestTrace = ({ commit }) => commit(types.REQUEST_TRACE);
 
 export const fetchTrace = ({ dispatch, state }, job) => {
-  if (job) {
-    if (job.started && job.has_trace) {
+  // on first fetchTrace call the job will be undefined
+  // ensure job is defined, has started and has a trace before making API call
+  if (job && job.started && job.has_trace) {
+    if (!Visibility.hidden()) {
       axios
         .get(`${state.traceEndpoint}/trace.json`, {
           params: { state: state.traceState },

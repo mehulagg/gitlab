@@ -31,6 +31,8 @@ import {
 import state from '~/jobs/store/state';
 import * as types from '~/jobs/store/mutation_types';
 
+const jobStartedWithTrace = { started: true, has_trace: true };
+
 describe('Job State actions', () => {
   let mockedState;
 
@@ -129,6 +131,10 @@ describe('Job State actions', () => {
               payload: { id: 121212, name: 'karma' },
               type: 'receiveJobSuccess',
             },
+            {
+              payload: { id: 121212, name: 'karma' },
+              type: 'fetchTrace',
+            },
           ],
           done,
         );
@@ -220,7 +226,7 @@ describe('Job State actions', () => {
 
         testAction(
           fetchTrace,
-          null,
+          jobStartedWithTrace,
           mockedState,
           [],
           [
@@ -258,7 +264,7 @@ describe('Job State actions', () => {
         it('dispatches startPollingTrace', done => {
           testAction(
             fetchTrace,
-            null,
+            jobStartedWithTrace,
             mockedState,
             [],
             [
@@ -275,7 +281,7 @@ describe('Job State actions', () => {
 
           testAction(
             fetchTrace,
-            null,
+            jobStartedWithTrace,
             mockedState,
             [],
             [
@@ -296,7 +302,7 @@ describe('Job State actions', () => {
       it('dispatches requestTrace and receiveTraceError ', done => {
         testAction(
           fetchTrace,
-          null,
+          jobStartedWithTrace,
           mockedState,
           [],
           [
@@ -307,6 +313,10 @@ describe('Job State actions', () => {
           done,
         );
       });
+    });
+
+    it('no actions in fetchTrace are called if the current job has not started', done => {
+      testAction(fetchTrace, { started: false, has_trace: false }, mockedState, [], [], done);
     });
   });
 
