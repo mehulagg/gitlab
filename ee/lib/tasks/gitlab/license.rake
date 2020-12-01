@@ -12,6 +12,7 @@ namespace :gitlab do
       puts "Max Users in License: #{license[:license_user_count]}"
       puts "License valid from: #{license[:license_starts_at]} to #{license[:license_expires_at]}"
       puts "Email associated with license: #{license[:licensee]['Email']}"
+      puts "License ID: #{license[:license_id]}"
     end
 
     task :load, [:mode] => :environment do |_, args|
