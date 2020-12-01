@@ -30,9 +30,9 @@ RSpec.describe 'Freeze Periods (JavaScript fixtures)' do
     include ApiHelpers
 
     it 'api/freeze-periods/freeze_periods.json' do
-      create(:ci_freeze_period, project: project, freeze_start: '5 4 * * *', freeze_end: '5 9 * 8 *', cron_timezone: 'America/New_York')
-      create(:ci_freeze_period, project: project, freeze_start: '0 12 * * 1-5', freeze_end: '0 1 5 * *', cron_timezone: 'Etc/UTC')
-      create(:ci_freeze_period, project: project, freeze_start: '0 12 * * 1-5', freeze_end: '0 16 * * 6', cron_timezone: 'Europe/Berlin')
+      create(:ci_freeze_period, project: project, freeze_start: '5 4 * * *', freeze_end: '5 9 * 8 *', cron_timezone: 'America/New_York', created_at: 3.days.ago)
+      create(:ci_freeze_period, project: project, freeze_start: '0 12 * * 1-5', freeze_end: '0 1 5 * *', cron_timezone: 'Etc/UTC', created_at: 2.days.ago)
+      create(:ci_freeze_period, project: project, freeze_start: '0 12 * * 1-5', freeze_end: '0 16 * * 6', cron_timezone: 'Europe/Berlin', created_at: 1.day.ago)
 
       get api("/projects/#{project.id}/freeze_periods", admin)
 
