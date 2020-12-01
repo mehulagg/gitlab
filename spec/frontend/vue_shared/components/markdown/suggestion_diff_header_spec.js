@@ -9,7 +9,7 @@ const DEFAULT_PROPS = {
   isBatched: false,
   isApplyingBatch: false,
   helpPagePath: 'path_to_docs',
-  filePath: 'test.js',
+  defaultCommitMessage: 'Apply suggestion',
 };
 
 describe('Suggestion Diff component', () => {

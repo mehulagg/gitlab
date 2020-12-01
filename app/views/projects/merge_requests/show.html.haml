@@ -12,6 +12,7 @@
 - add_page_specific_style 'page_bundles/pipelines'
 - add_page_specific_style 'page_bundles/reports'
 - add_page_specific_style 'page_bundles/ci_status'
+- default_suggestion_commit_message = @project.suggestion_commit_message && !@project.suggestion_commit_message.empty? ? @project.suggestion_commit_message : Gitlab::Suggestions::CommitMessage::DEFAULT_SUGGESTION_COMMIT_MESSAGE
 
 .merge-request{ data: { mr_action: mr_action, url: merge_request_path(@merge_request, format: :json), project_path: project_path(@merge_request.project), lock_version: @merge_request.lock_version } }
   = render "projects/merge_requests/mr_title"
@@ -88,7 +89,8 @@
         dismiss_endpoint: user_callouts_path,
         show_suggest_popover: show_suggest_popover?.to_s,
         show_whitespace_default: @show_whitespace_default.to_s,
-        file_by_file_default: @file_by_file_default.to_s }
+        file_by_file_default: @file_by_file_default.to_s,
+        default_suggestion_commit_message: default_suggestion_commit_message }
 
     .mr-loading-status
       .loading.hide

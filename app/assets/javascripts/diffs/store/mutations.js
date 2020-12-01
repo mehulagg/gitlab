@@ -36,6 +36,7 @@ export default {
       projectPath,
       dismissEndpoint,
       showSuggestPopover,
+      defaultSuggestionCommitMessage,
       viewDiffsFileByFile,
     } = options;
     Object.assign(state, {
@@ -46,6 +47,7 @@ export default {
       projectPath,
       dismissEndpoint,
       showSuggestPopover,
+      defaultSuggestionCommitMessage,
       viewDiffsFileByFile,
     });
   },

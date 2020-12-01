@@ -38,7 +38,7 @@ export default {
       type: String,
       required: true,
     },
-    filePath: {
+    defaultCommitMessage: {
       type: String,
       required: true,
     },
@@ -91,7 +91,7 @@ export default {
         disabled,
         batchSuggestionsInfo,
         helpPagePath,
-        filePath,
+        defaultCommitMessage,
         suggestionsCount,
       } = this;
       const suggestion =
@@ -103,7 +103,7 @@ export default {
           suggestion,
           batchSuggestionsInfo,
           helpPagePath,
-          filePath,
+          defaultCommitMessage,
           suggestionsCount,
         },
       });

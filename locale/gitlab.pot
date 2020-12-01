@@ -3465,12 +3465,6 @@ msgstr ""
 msgid "Apply suggestion"
 msgstr ""
 
-msgid "Apply suggestion commit message"
-msgstr ""
-
-msgid "Apply suggestion on %{filePath}"
-msgstr ""
-
 msgid "Apply suggestions"
 msgstr ""
 

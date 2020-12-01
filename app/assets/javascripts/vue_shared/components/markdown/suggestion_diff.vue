@@ -27,7 +27,7 @@ export default {
       type: String,
       required: true,
     },
-    filePath: {
+    defaultCommitMessage: {
       type: String,
       required: true,
     },
@@ -78,7 +78,7 @@ export default {
       :is-applying-batch="suggestion.is_applying_batch"
       :batch-suggestions-count="batchSuggestionsCount"
       :help-page-path="helpPagePath"
-      :file-path="filePath"
+      :default-commit-message="defaultCommitMessage"
       :inapplicable-reason="suggestion.inapplicable_reason"
       @apply="applySuggestion"
       @applyBatch="applySuggestionBatch"

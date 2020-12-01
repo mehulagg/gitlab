@@ -60,6 +60,7 @@ export const setBaseConfig = ({ commit }, options) => {
     projectPath,
     dismissEndpoint,
     showSuggestPopover,
+    defaultSuggestionCommitMessage,
     viewDiffsFileByFile,
   } = options;
   commit(types.SET_BASE_CONFIG, {
@@ -70,6 +71,7 @@ export const setBaseConfig = ({ commit }, options) => {
     projectPath,
     dismissEndpoint,
     showSuggestPopover,
+    defaultSuggestionCommitMessage,
     viewDiffsFileByFile,
   });
 };

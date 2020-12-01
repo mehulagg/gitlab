@@ -38,7 +38,7 @@ export default {
       type: String,
       required: true,
     },
-    filePath: {
+    defaultCommitMessage: {
       type: String,
       required: true,
     },
@@ -153,7 +153,7 @@ export default {
       <apply-suggestion
         v-if="canAddCustomCommitMessage"
         :disabled="isDisableButton"
-        :file-path="filePath"
+        :default-commit-message="defaultCommitMessage"
         class="gl-ml-3"
         @apply="applySuggestion"
       />

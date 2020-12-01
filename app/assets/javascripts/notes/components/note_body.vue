@@ -54,6 +54,7 @@ export default {
     ...mapState({
       batchSuggestionsInfo: state => state.notes.batchSuggestionsInfo,
     }),
+    ...mapState('diffs', ['defaultSuggestionCommitMessage']),
     noteBody() {
       return this.note.note;
     },
@@ -130,7 +131,7 @@ export default {
       :note-html="note.note_html"
       :line-type="lineType"
       :help-page-path="helpPagePath"
-      :file-path="note.position.new_path"
+      :default-commit-message="defaultSuggestionCommitMessage"
       @apply="applySuggestion"
       @applyBatch="applySuggestionBatch"
       @addToBatch="addSuggestionToBatch"
