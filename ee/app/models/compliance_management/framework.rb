@@ -64,6 +64,7 @@ module ComplianceManagement
     validates :name, presence: true, length: { maximum: 255 }
     validates :description, presence: true, length: { maximum: 255 }
     validates :color, color: true, allow_blank: false, length: { maximum: 10 }
+    validates :regulated, presence: true
     validates :namespace_id, uniqueness: { scope: :name }
 
     def default_framework_definition

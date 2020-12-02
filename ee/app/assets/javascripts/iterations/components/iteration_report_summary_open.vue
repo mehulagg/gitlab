@@ -1,7 +1,8 @@
 <script>
 import { __ } from '~/locale';
+import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import IterationReportSummaryCards from './iteration_report_summary_cards.vue';
-import query from '../queries/iteration_issues_summary.query.graphql';
+import summaryStatsQuery from '../queries/iteration_issues_summary.query.graphql';
 import { Namespace } from '../constants';
 
 export default {
@@ -10,7 +11,7 @@ export default {
   },
   apollo: {
     issues: {
-      query,
+      query: summaryStatsQuery,
       variables() {
         return this.queryVariables;
       },
@@ -60,7 +61,7 @@ export default {
     queryVariables() {
       return {
         fullPath: this.fullPath,
-        id: this.iterationId,
+        id: getIdFromGraphQLId(this.iterationId),
         isGroup: this.namespaceType === Namespace.Group,
       };
     },

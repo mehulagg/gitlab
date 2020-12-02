@@ -5,12 +5,8 @@ import {
 } from 'ee/security_dashboard/store/modules/filters/mutation_types';
 
 function expectRefreshDispatches(store, payload) {
-  expect(store.dispatch).toHaveBeenCalledTimes(2);
+  expect(store.dispatch).toHaveBeenCalledTimes(1);
   expect(store.dispatch).toHaveBeenCalledWith('vulnerabilities/fetchVulnerabilities', payload);
-  expect(store.dispatch).toHaveBeenCalledWith(
-    'vulnerabilities/fetchVulnerabilitiesHistory',
-    payload,
-  );
 }
 
 describe('mediator', () => {

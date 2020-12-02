@@ -20,6 +20,8 @@
 - add_page_specific_style 'page_bundles/roadmap'
 
 - add_page_startup_api_call discussions_path(@epic)
+- add_page_startup_graphql_call('epic/epic_details', { fullPath: @group.full_path, iid: @epic.iid })
+- add_page_startup_graphql_call('epic/epic_children', { fullPath: @group.full_path, iid: @epic.iid, pageSize: 100, epicEndCursor: '', issueEndCursor: '' })
 
 #epic-app-root{ data: epic_show_app_data(@epic),
   'data-allow-sub-epics' => allow_sub_epics }

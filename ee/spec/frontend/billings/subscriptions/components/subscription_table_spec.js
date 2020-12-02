@@ -1,12 +1,12 @@
-import { shallowMount, createLocalVue } from '@vue/test-utils';
-import Vuex from 'vuex';
 import { GlLoadingIcon } from '@gitlab/ui';
-import { TEST_HOST } from 'helpers/test_constants';
-import initialStore from 'ee/billings/subscriptions/store';
-import * as types from 'ee/billings/subscriptions/store/mutation_types';
+import { createLocalVue, shallowMount } from '@vue/test-utils';
 import SubscriptionTable from 'ee/billings/subscriptions/components/subscription_table.vue';
 import SubscriptionTableRow from 'ee/billings/subscriptions/components/subscription_table_row.vue';
+import initialStore from 'ee/billings/subscriptions/store';
+import * as types from 'ee/billings/subscriptions/store/mutation_types';
 import { mockDataSubscription } from 'ee_jest/billings/mock_data';
+import { TEST_HOST } from 'helpers/test_constants';
+import Vuex from 'vuex';
 
 const TEST_NAMESPACE_NAME = 'GitLab.com';
 const CUSTOMER_PORTAL_URL = 'https://customers.gitlab.com/subscriptions';
@@ -42,6 +42,7 @@ describe('SubscriptionTable component', () => {
         propsData: {
           namespaceName: TEST_NAMESPACE_NAME,
           planUpgradeHref: '/url/',
+          planRenewHref: '/url/for/renew',
           customerPortalUrl: CUSTOMER_PORTAL_URL,
         },
       });
@@ -90,21 +91,23 @@ describe('SubscriptionTable component', () => {
 
   describe.each`
     planName        | isFreePlan | upgradable | isTrialPlan | snapshotDesc
-    ${'free'}       | ${true}    | ${true}    | ${false}    | ${'has Upgrade and Manage buttons'}
+    ${'free'}       | ${true}    | ${true}    | ${false}    | ${'has Upgrade and Renew and Manage buttons'}
     ${'trial-gold'} | ${false}   | ${false}   | ${true}     | ${'has Manage button'}
-    ${'gold'}       | ${false}   | ${false}   | ${false}    | ${'has Manage button'}
-    ${'bronze'}     | ${false}   | ${true}    | ${false}    | ${'has Upgrade and Manage buttons'}
+    ${'gold'}       | ${false}   | ${false}   | ${false}    | ${'has Renew and Manage buttons'}
+    ${'bronze'}     | ${false}   | ${true}    | ${false}    | ${'has Upgrade and Renew and Manage buttons'}
   `(
     'given a $planName plan with state: isFreePlan=$isFreePlan, upgradable=$upgradable, isTrialPlan=$isTrialPlan',
     ({ planName, isFreePlan, upgradable, snapshotDesc }) => {
       beforeEach(() => {
         const planUpgradeHref = `${TEST_HOST}/plan/upgrade/${planName}`;
+        const planRenewHref = `${TEST_HOST}/plan/renew`;
 
         factory({
           propsData: {
             namespaceName: TEST_NAMESPACE_NAME,
             customerPortalUrl: CUSTOMER_PORTAL_URL,
             planUpgradeHref,
+            planRenewHref,
           },
         });
 
@@ -126,4 +129,27 @@ describe('SubscriptionTable component', () => {
       });
     },
   );
+
+  describe('render button', () => {
+    window.gon = { features: {} };
+
+    afterEach(() => {
+      window.gon.features = {};
+    });
+
+    it('renders the renew button when feature flag is on', () => {
+      gon.features.saasManualRenewButton = true;
+      factory({ propsData: { namespaceName: TEST_NAMESPACE_NAME } });
+      expect(findButtonProps()).toStrictEqual([
+        { text: 'Upgrade', href: '' },
+        { text: 'Renew', href: '' },
+      ]);
+    });
+
+    it('does not render the renew button when the feature flag is off', () => {
+      gon.features.saasManualRenewButton = false;
+      factory({ propsData: { namespaceName: TEST_NAMESPACE_NAME } });
+      expect(findButtonProps()).toStrictEqual([{ text: 'Upgrade', href: '' }]);
+    });
+  });
 });

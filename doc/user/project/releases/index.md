@@ -2,7 +2,7 @@
 type: reference, howto
 stage: Release
 group: Release Management
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Releases
@@ -78,6 +78,16 @@ To create a new release through the GitLab UI:
    [title](#title), [milestones](#associate-milestones-with-a-release),
    [release notes](#release-notes-description), or [assets links](#links).
 1. Click **Create release**.
+
+### Create release from GitLab CI 
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/19298) in GitLab 12.7.
+
+You can [create a release directly from the GitLab CI pipeline](../../../ci/yaml/README.md#release)
+by using a `release` node in the job definition.
+
+The release is created only if the job processes without error. If the Rails API returns an error
+during release creation, the release job fails.
 
 ### Schedule a future release
 

@@ -18,8 +18,6 @@ RSpec.describe Namespace do
   it { is_expected.to have_one(:namespace_limit) }
   it { is_expected.to have_one(:elasticsearch_indexed_namespace) }
 
-  it { is_expected.to delegate_method(:extra_shared_runners_minutes).to(:namespace_statistics) }
-  it { is_expected.to delegate_method(:shared_runners_minutes).to(:namespace_statistics) }
   it { is_expected.to delegate_method(:shared_runners_seconds).to(:namespace_statistics) }
   it { is_expected.to delegate_method(:shared_runners_seconds_last_reset).to(:namespace_statistics) }
   it { is_expected.to delegate_method(:trial?).to(:gitlab_subscription) }
@@ -690,7 +688,9 @@ RSpec.describe Namespace do
     end
 
     def stub_minutes_used_and_limit(minutes_used, limit)
-      allow(namespace).to receive(:shared_runners_minutes).and_return(minutes_used)
+      seconds_used = minutes_used.present? ? minutes_used * 60 : minutes_used
+      allow(namespace).to receive(:shared_runners_seconds).and_return(seconds_used)
+
       allow(namespace).to receive(:actual_shared_runners_minutes_limit).and_return(limit)
     end
   end

@@ -255,4 +255,24 @@ RSpec.describe Ci::Minutes::Quota do
       it { is_expected.to eq(result) }
     end
   end
+
+  describe '#total_minutes_used' do
+    subject { quota.total_minutes_used }
+
+    where(:expected_seconds, :expected_minutes) do
+      nil | 0
+      0   | 0
+      59  | 0
+      60  | 1
+      122 | 2
+    end
+
+    with_them do
+      before do
+        allow(namespace).to receive(:shared_runners_seconds).and_return(expected_seconds)
+      end
+
+      it { is_expected.to eq(expected_minutes) }
+    end
+  end
 end

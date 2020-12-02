@@ -19,52 +19,53 @@ export default {
   },
   data() {
     return {
-      requestCount: MAX_REQUEST_COUNT,
+      requestCount: 0,
       loadingError: false,
+      isLoading: false,
       selectedSegmentId: null,
+      groups: {
+        nodes: [],
+        pageInfo: null,
+      },
     };
-  },
-  apollo: {
-    groups: {
-      query: getGroupsQuery,
-      loadingKey: 'loading',
-      result() {
-        this.requestCount -= 1;
-
-        if (this.requestCount > 0 && this.groups?.pageInfo?.nextPage) {
-          this.fetchNextPage();
-        }
-      },
-      error(error) {
-        this.handleError(error);
-      },
-    },
   },
   computed: {
     hasGroupData() {
       return Boolean(this.groups?.nodes?.length);
     },
-    isLoading() {
-      return this.$apollo.queries.groups.loading;
-    },
+  },
+  created() {
+    this.fetchGroups();
   },
   methods: {
     handleError(error) {
       this.loadingError = true;
       Sentry.captureException(error);
     },
-    fetchNextPage() {
-      this.$apollo.queries.groups
-        .fetchMore({
+    fetchGroups(nextPage) {
+      this.isLoading = true;
+      this.$apollo
+        .query({
+          query: getGroupsQuery,
           variables: {
-            nextPage: this.groups.pageInfo.nextPage,
+            nextPage,
           },
-          updateQuery: (previousResult, { fetchMoreResult }) => {
-            const { nodes, ...rest } = fetchMoreResult.groups;
-            const { nodes: previousNodes } = previousResult.groups;
+        })
+        .then(({ data }) => {
+          const { pageInfo, nodes } = data.groups;
 
-            return { groups: { ...rest, nodes: [...previousNodes, ...nodes] } };
-          },
+          // Update data
+          this.groups = {
+            pageInfo,
+            nodes: [...this.groups.nodes, ...nodes],
+          };
+
+          this.requestCount += 1;
+          if (this.requestCount < MAX_REQUEST_COUNT && pageInfo?.nextPage) {
+            this.fetchGroups(pageInfo.nextPage);
+          } else {
+            this.isLoading = false;
+          }
         })
         .catch(this.handleError);
     },

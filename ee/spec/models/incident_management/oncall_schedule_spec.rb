@@ -11,8 +11,9 @@ RSpec.describe IncidentManagement::OncallSchedule do
 
   describe '.validations' do
     let(:timezones) { ActiveSupport::TimeZone.all.map { |tz| tz.tzinfo.identifier } }
+    let(:name) { 'Default on-call schedule' }
 
-    subject { build(:incident_management_oncall_schedule, project: project) }
+    subject { build(:incident_management_oncall_schedule, project: project, name: name) }
 
     it { is_expected.to validate_presence_of(:name) }
     it { is_expected.to validate_length_of(:name).is_at_most(200) }
@@ -22,7 +23,7 @@ RSpec.describe IncidentManagement::OncallSchedule do
 
     context 'when the oncall schedule with the same name exists' do
       before do
-        create(:incident_management_oncall_schedule, project: project)
+        create(:incident_management_oncall_schedule, project: project, name: name)
       end
 
       it 'has validation errors' do
@@ -38,5 +39,14 @@ RSpec.describe IncidentManagement::OncallSchedule do
     let(:scope) { :project }
     let(:scope_attrs) { { project: instance.project } }
     let(:usage) { :incident_management_oncall_schedules }
+  end
+
+  describe '.for_iid' do
+    let_it_be(:oncall_schedule1) { create(:incident_management_oncall_schedule, project: project) }
+    let_it_be(:oncall_schedule2) { create(:incident_management_oncall_schedule, project: project) }
+
+    it 'returns only records with that IID' do
+      expect(described_class.for_iid(oncall_schedule1.iid)).to contain_exactly(oncall_schedule1)
+    end
   end
 end

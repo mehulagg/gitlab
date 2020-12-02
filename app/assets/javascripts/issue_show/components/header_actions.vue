@@ -113,7 +113,7 @@ export default {
   methods: {
     ...mapActions(['toggleStateButtonLoading']),
     toggleIssueState() {
-      if (!this.isClosed && this.getBlockedByIssues.length) {
+      if (!this.isClosed && this.getBlockedByIssues?.length) {
         this.$refs.blockedByIssuesModal.show();
         return;
       }
@@ -242,7 +242,7 @@ export default {
       right
     >
       <template #button-content>
-        <gl-icon name="ellipsis_v" aria-hidden="true" />
+        <gl-icon name="ellipsis_v" />
         <span class="gl-sr-only">{{ dropdownText }}</span>
       </template>
 

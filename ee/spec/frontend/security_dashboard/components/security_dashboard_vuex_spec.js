@@ -6,7 +6,6 @@ import LoadingError from 'ee/security_dashboard/components/loading_error.vue';
 import SecurityDashboardLayout from 'ee/security_dashboard/components/security_dashboard_layout.vue';
 import SecurityDashboardTable from 'ee/security_dashboard/components/security_dashboard_table.vue';
 import SecurityDashboard from 'ee/security_dashboard/components/security_dashboard_vuex.vue';
-import VulnerabilityChart from 'ee/security_dashboard/components/vulnerability_chart.vue';
 
 import createStore from 'ee/security_dashboard/store';
 import IssueModal from 'ee/vue_shared/security_reports/components/modal.vue';
@@ -15,7 +14,6 @@ import axios from '~/lib/utils/axios_utils';
 
 const pipelineId = 123;
 const vulnerabilitiesEndpoint = `${TEST_HOST}/vulnerabilities`;
-const vulnerabilitiesHistoryEndpoint = `${TEST_HOST}/vulnerabilities_history`;
 
 jest.mock('~/lib/utils/url_utility', () => ({
   getParameterValues: jest.fn().mockReturnValue([]),
@@ -41,7 +39,6 @@ describe('Security Dashboard component', () => {
       propsData: {
         dashboardDocumentation: '',
         vulnerabilitiesEndpoint,
-        vulnerabilitiesHistoryEndpoint,
         pipelineId,
         ...props,
       },
@@ -73,10 +70,6 @@ describe('Security Dashboard component', () => {
 
     it('renders the security dashboard table ', () => {
       expect(wrapper.find(SecurityDashboardTable).exists()).toBe(true);
-    });
-
-    it('renders the vulnerability chart', () => {
-      expect(wrapper.find(VulnerabilityChart).exists()).toBe(true);
     });
 
     it('sets the pipeline id', () => {
@@ -141,21 +134,6 @@ describe('Security Dashboard component', () => {
         expect(wrapper.find(IssueModal).props()).toStrictEqual(expectedProps);
       },
     );
-  });
-
-  describe.each`
-    endpointProp                        | Component
-    ${'vulnerabilitiesHistoryEndpoint'} | ${VulnerabilityChart}
-  `('with an empty $endpointProp', ({ endpointProp, Component }) => {
-    beforeEach(() => {
-      createComponent({
-        [endpointProp]: '',
-      });
-    });
-
-    it(`does not show the ${Component.name}`, () => {
-      expect(wrapper.find(Component).exists()).toBe(false);
-    });
   });
 
   describe('on error', () => {

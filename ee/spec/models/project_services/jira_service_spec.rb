@@ -143,6 +143,48 @@ RSpec.describe JiraService do
     end
   end
 
+  describe '#create_issue' do
+    let(:jira_service) { described_class.new(options) }
+    let(:issue_info) { { 'id': '10000' } }
+
+    before do
+      allow(jira_service).to receive(:jira_project_id).and_return('11223')
+      allow(jira_service).to receive(:vulnerabilities_issuetype).and_return('10001')
+    end
+
+    context 'when there is no issues in Jira API' do
+      before do
+        WebMock.stub_request(:post, 'http://jira.example.com/rest/api/2/issue').with(basic_auth: %w(gitlab_jira_username gitlab_jira_password)).to_return(body: issue_info.to_json)
+      end
+
+      it 'creates issue in Jira API' do
+        issue = jira_service.create_issue("Special Summary!?", "*ID*: 2\n_Issue_: !")
+
+        expect(WebMock).to have_requested(:post, 'http://jira.example.com/rest/api/2/issue').with(
+          body: { fields: { project: { id: '11223' }, issuetype: { id: '10001' }, summary: 'Special Summary!?', description: "*ID*: 2\n_Issue_: !" } }.to_json
+        ).once
+        expect(issue.id).to eq('10000')
+      end
+    end
+
+    context 'when there is an error in Jira' do
+      let(:errors) { { 'errorMessages' => [], 'errors' => { 'summary' => 'You must specify a summary of the issue.' } } }
+
+      before do
+        WebMock.stub_request(:post, 'http://jira.example.com/rest/api/2/issue').with(basic_auth: %w(gitlab_jira_username gitlab_jira_password)).to_return(status: [400, 'Bad Request'], body: errors.to_json)
+      end
+
+      it 'returns issue with errors' do
+        issue = jira_service.create_issue('', "*ID*: 2\n_Issue_: !")
+
+        expect(WebMock).to have_requested(:post, 'http://jira.example.com/rest/api/2/issue').with(
+          body: { fields: { project: { id: '11223' }, issuetype: { id: '10001' }, summary: '', description: "*ID*: 2\n_Issue_: !" } }.to_json
+        ).once
+        expect(issue.attrs[:errors]).to eq(errors)
+      end
+    end
+  end
+
   describe '#new_issue_url_with_predefined_fields' do
     before do
       allow(jira_service).to receive(:jira_project_id).and_return('11223')

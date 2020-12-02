@@ -102,7 +102,6 @@ describe('DevopsAdoptionApp', () => {
         groupsSpy = jest.fn().mockResolvedValueOnce({ ...initialResponse, pageInfo: null });
         const mockApollo = createMockApolloProvider({ groupsSpy });
         wrapper = createComponent({ mockApollo });
-        jest.spyOn(wrapper.vm.$apollo.queries.groups, 'fetchMore');
         await waitForPromises();
       });
 
@@ -117,21 +116,16 @@ describe('DevopsAdoptionApp', () => {
       it('should fetch data once', () => {
         expect(groupsSpy).toHaveBeenCalledTimes(1);
       });
-
-      it('should not fetch more data', () => {
-        expect(wrapper.vm.$apollo.queries.groups.fetchMore).not.toHaveBeenCalled();
-      });
     });
 
     describe('when error is thrown in the initial request', () => {
-      const error = 'Error: foo!';
+      const error = new Error('foo!');
 
       beforeEach(async () => {
         jest.spyOn(Sentry, 'captureException');
         groupsSpy = jest.fn().mockRejectedValueOnce(error);
         const mockApollo = createMockApolloProvider({ groupsSpy });
         wrapper = createComponent({ mockApollo });
-        jest.spyOn(wrapper.vm.$apollo.queries.groups, 'fetchMore');
         await waitForPromises();
       });
 
@@ -145,10 +139,6 @@ describe('DevopsAdoptionApp', () => {
 
       it('should fetch data once', () => {
         expect(groupsSpy).toHaveBeenCalledTimes(1);
-      });
-
-      it('should not fetch more data', () => {
-        expect(wrapper.vm.$apollo.queries.groups.fetchMore).not.toHaveBeenCalled();
       });
 
       it('displays the error message and calls Sentry', () => {
@@ -176,7 +166,6 @@ describe('DevopsAdoptionApp', () => {
           .mockResolvedValueOnce({ __typename: 'Groups', nodes: [nextGroupNode], nextPage: null });
         const mockApollo = createMockApolloProvider({ groupsSpy });
         wrapper = createComponent({ mockApollo });
-        jest.spyOn(wrapper.vm.$apollo.queries.groups, 'fetchMore');
         await waitForPromises();
       });
 
@@ -193,12 +182,12 @@ describe('DevopsAdoptionApp', () => {
       });
 
       it('should fetch more data', () => {
-        expect(wrapper.vm.$apollo.queries.groups.fetchMore).toHaveBeenCalledTimes(1);
-        expect(wrapper.vm.$apollo.queries.groups.fetchMore).toHaveBeenCalledWith(
-          expect.objectContaining({
-            variables: { nextPage: 2 },
-          }),
-        );
+        expect(groupsSpy.mock.calls[0][1]).toMatchObject({
+          nextPage: undefined,
+        });
+        expect(groupsSpy.mock.calls[1][1]).toMatchObject({
+          nextPage: 2,
+        });
       });
     });
 
@@ -208,7 +197,6 @@ describe('DevopsAdoptionApp', () => {
         groupsSpy = jest.fn().mockResolvedValue(initialResponse);
         const mockApollo = createMockApolloProvider({ groupsSpy });
         wrapper = createComponent({ mockApollo, data: { requestCount: 2 } });
-        jest.spyOn(wrapper.vm.$apollo.queries.groups, 'fetchMore');
         await waitForPromises();
       });
 
@@ -218,10 +206,6 @@ describe('DevopsAdoptionApp', () => {
 
       it('should fetch data twice', () => {
         expect(groupsSpy).toHaveBeenCalledTimes(2);
-      });
-
-      it('should not fetch more than `requestCount`', () => {
-        expect(wrapper.vm.$apollo.queries.groups.fetchMore).toHaveBeenCalledTimes(1);
       });
     });
 
@@ -237,7 +221,6 @@ describe('DevopsAdoptionApp', () => {
           .mockRejectedValue(error);
         const mockApollo = createMockApolloProvider({ groupsSpy });
         wrapper = createComponent({ mockApollo });
-        jest.spyOn(wrapper.vm.$apollo.queries.groups, 'fetchMore');
         await waitForPromises();
       });
 
@@ -254,11 +237,12 @@ describe('DevopsAdoptionApp', () => {
       });
 
       it('should fetch more data', () => {
-        expect(wrapper.vm.$apollo.queries.groups.fetchMore).toHaveBeenCalledWith(
-          expect.objectContaining({
-            variables: { nextPage: 2 },
-          }),
-        );
+        expect(groupsSpy.mock.calls[0][1]).toMatchObject({
+          nextPage: undefined,
+        });
+        expect(groupsSpy.mock.calls[1][1]).toMatchObject({
+          nextPage: 2,
+        });
       });
 
       it('displays the error message and calls Sentry', () => {

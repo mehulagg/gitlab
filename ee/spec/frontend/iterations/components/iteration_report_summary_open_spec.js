@@ -1,6 +1,6 @@
 import IterationReportSummary from 'ee/iterations/components/iteration_report_summary_open.vue';
 import IterationReportSummaryCards from 'ee/iterations/components/iteration_report_summary_cards.vue';
-import { mount } from '@vue/test-utils';
+import { shallowMount } from '@vue/test-utils';
 
 describe('Iterations report summary', () => {
   let wrapper;
@@ -11,7 +11,7 @@ describe('Iterations report summary', () => {
   };
 
   const mountComponent = ({ props = defaultProps, loading = false, data = {} } = {}) => {
-    wrapper = mount(IterationReportSummary, {
+    wrapper = shallowMount(IterationReportSummary, {
       propsData: props,
       data() {
         return data;
@@ -31,13 +31,13 @@ describe('Iterations report summary', () => {
 
   describe('with valid totals', () => {
     beforeEach(() => {
-      mountComponent();
-
-      wrapper.setData({
-        issues: {
-          closed: 10,
-          assigned: 3,
-          open: 5,
+      mountComponent({
+        data: {
+          issues: {
+            closed: 10,
+            assigned: 3,
+            open: 5,
+          },
         },
       });
     });

@@ -57,8 +57,7 @@ module EE
         where("EXISTS (?)", matcher)
       end
 
-      delegate :shared_runners_minutes, :shared_runners_seconds, :shared_runners_seconds_last_reset,
-        :extra_shared_runners_minutes, to: :namespace_statistics, allow_nil: true
+      delegate :shared_runners_seconds, :shared_runners_seconds_last_reset, to: :namespace_statistics, allow_nil: true
 
       delegate :additional_purchased_storage_size, :additional_purchased_storage_size=,
         :additional_purchased_storage_ends_on, :additional_purchased_storage_ends_on=,
@@ -261,12 +260,6 @@ module EE
       shared_runners_remaining_minutes_percent.to_i <= last_ci_minutes_usage_notification_level.to_i
     end
 
-    def extra_shared_runners_minutes_used?
-      shared_runners_minutes_limit_enabled? &&
-        extra_shared_runners_minutes_limit &&
-        extra_shared_runners_minutes.to_i >= extra_shared_runners_minutes_limit
-    end
-
     def any_project_with_shared_runners_enabled?
       all_projects.with_shared_runners.any?
     end
@@ -437,7 +430,7 @@ module EE
     end
 
     def shared_runners_remaining_minutes
-      [actual_shared_runners_minutes_limit.to_f - shared_runners_minutes.to_f, 0].max
+      [actual_shared_runners_minutes_limit.to_f - ci_minutes_quota.total_minutes_used.to_f, 0].max
     end
 
     def total_repository_size_excess_calculation(repository_size_limit, project_level: true)

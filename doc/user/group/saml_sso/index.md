@@ -2,7 +2,7 @@
 type: reference, howto
 stage: Manage
 group: Access
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # SAML SSO for GitLab.com groups **(SILVER ONLY)**
@@ -279,6 +279,10 @@ If a user is a member of multiple SAML groups mapped to the same GitLab group,
 the user gets the highest access level from the groups. For example, if one group
 is linked as `Guest` and another `Maintainer`, a user in both groups gets `Maintainer` 
 access.
+
+CAUTION: **Warning:**
+Unlinking an account removes all roles assigned to that user within the group. 
+If a user relinks their account, roles need to be reassigned.
 
 ## Glossary
 

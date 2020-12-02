@@ -97,20 +97,6 @@ RSpec.describe AuditEventsHelper do
   describe '#export_url' do
     subject { export_url }
 
-    context 'feature is enabled' do
-      before do
-        stub_feature_flags(audit_log_export_csv: true)
-      end
-
-      it { is_expected.to eq('http://test.host/admin/audit_log_reports.csv') }
-    end
-
-    context 'feature is disabled' do
-      before do
-        stub_feature_flags(audit_log_export_csv: false)
-      end
-
-      it { is_expected.to be_empty }
-    end
+    it { is_expected.to eq('http://test.host/admin/audit_log_reports.csv') }
   end
 end

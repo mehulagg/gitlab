@@ -9,6 +9,13 @@ const TEST_NEW_PATH = '/test/new/site/profile/path';
 const TEST_ATTRS = {
   'data-foo': 'bar',
 };
+const profiles = siteProfiles.map(x => {
+  const suffix = x.validationStatus === 'PASSED_VALIDATION' ? 'Validated' : 'Not Validated';
+  return {
+    ...x,
+    dropdownLabel: `${x.profileName}: ${x.targetUrl} (${suffix})`,
+  };
+});
 
 describe('OnDemandScansSiteProfileSelector', () => {
   let wrapper;
@@ -25,6 +32,10 @@ describe('OnDemandScansSiteProfileSelector', () => {
           provide: {
             siteProfilesLibraryPath: TEST_LIBRARY_PATH,
             newSiteProfilePath: TEST_NEW_PATH,
+            glFeatures: { securityOnDemandScansSiteValidation: true },
+          },
+          scopedSlots: {
+            summary: '<div slot-scope="{ profile }">{{ profile.profileName }}\'s summary</div>',
           },
         },
         options,
@@ -42,7 +53,7 @@ describe('OnDemandScansSiteProfileSelector', () => {
 
   it('renders properly with profiles', () => {
     createFullComponent({
-      propsData: { profiles: siteProfiles, value: siteProfiles[0].id },
+      propsData: { profiles, value: profiles[0] },
     });
 
     expect(wrapper.element).toMatchSnapshot();
@@ -67,25 +78,45 @@ describe('OnDemandScansSiteProfileSelector', () => {
   });
 
   describe('with profiles', () => {
-    beforeEach(() => {
-      createComponent({
-        propsData: { profiles: siteProfiles },
-      });
-    });
-
     it('renders profile selector', () => {
+      createComponent({
+        propsData: { profiles },
+      });
       const sel = findProfileSelector();
 
       expect(sel.props()).toEqual({
         libraryPath: TEST_LIBRARY_PATH,
         newProfilePath: TEST_NEW_PATH,
-        profiles: siteProfiles.map(x => ({
-          ...x,
-          dropdownLabel: `${x.profileName}: ${x.targetUrl}`,
-        })),
+        profiles,
         value: null,
       });
       expect(sel.attributes()).toMatchObject(TEST_ATTRS);
+    });
+
+    describe('feature flag disabled', () => {
+      beforeEach(() => {
+        createComponent({
+          propsData: { profiles },
+          provide: {
+            glFeatures: { securityOnDemandScansSiteValidation: false },
+          },
+        });
+      });
+
+      it('renders profile selector', () => {
+        const sel = findProfileSelector();
+
+        expect(sel.props()).toEqual({
+          libraryPath: TEST_LIBRARY_PATH,
+          newProfilePath: TEST_NEW_PATH,
+          profiles: siteProfiles.map(x => ({
+            ...x,
+            dropdownLabel: `${x.profileName}: ${x.targetUrl}`,
+          })),
+          value: null,
+        });
+        expect(sel.attributes()).toMatchObject(TEST_ATTRS);
+      });
     });
   });
 });

@@ -42,6 +42,26 @@ module EE
       "#{url}/secure/CreateIssueDetails!init.jspa?pid=#{jira_project_id}&issuetype=#{vulnerabilities_issuetype}&summary=#{escaped_summary}&description=#{escaped_description}"[0..MAX_URL_LENGTH]
     end
 
+    def create_issue(summary, description)
+      return if client_url.blank?
+
+      jira_request do
+        issue = client.Issue.build
+        issue.save!(
+          fields: {
+            project: { id: jira_project_id },
+            issuetype: { id: vulnerabilities_issuetype },
+            summary: summary,
+            description: description
+          }
+        )
+        issue
+      rescue JIRA::HTTPError => e
+        issue.attrs[:errors] = ::Gitlab::Json.parse(e.response.read_body)
+        issue
+      end
+    end
+
     def jira_project_id
       strong_memoize(:jira_project_id) do
         client_url.present? ? jira_request { client.Project.find(project_key).id } : nil
