@@ -507,7 +507,7 @@ the Container Registry after the policy runs. The next time the policy runs, the
 so it may take multiple runs for all tags to be deleted.
 
 NOTE: **Note**
-The cleanup policy will match based on tag name only, not the full path. [gitlab-#281071](https://gitlab.com/gitlab-org/gitlab/-/issues/281071) proposes supporting the full path, which allows you to cleanup up dynamically named tags.
+The cleanup policy will match based on tag name only, not the full path. [GitLab-#281071](https://gitlab.com/gitlab-org/gitlab/-/issues/281071) proposes supporting the full path, which allows you to cleanup up dynamically named tags.
 
 ### Create a cleanup policy
 
