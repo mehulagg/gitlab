@@ -5,6 +5,7 @@ import TimeAgo from '~/vue_shared/components/time_ago_tooltip.vue';
 import { convertToSnakeCase } from '~/lib/utils/text_utility';
 // TODO once backend is settled, update by either abstracting this out to app/assets/javascripts/graphql_shared or create new, modified query in #287757
 import getAlerts from '~/alert_management/graphql/queries/get_alerts.query.graphql';
+import AlertStatus from './alert_status.vue';
 
 export default {
   i18n: {
@@ -14,12 +15,6 @@ export default {
     errorMsg: s__(
       "ThreatMonitoring|There was an error displaying the alerts. Confirm your endpoint's configuration details to ensure alerts appear.",
     ),
-  },
-  statuses: {
-    TRIGGERED: s__('ThreatMonitoring|Unreviewed'),
-    ACKNOWLEDGED: s__('ThreatMonitoring|In review'),
-    RESOLVED: s__('ThreatMonitoring|Resolved'),
-    IGNORED: s__('ThreatMonitoring|Dismissed'),
   },
   fields: [
     {
@@ -39,11 +34,11 @@ export default {
       label: s__('ThreatMonitoring|Status'),
       thAttr: { 'data-testid': 'threat-alerts-status-header' },
       thClass: `w-15p`,
-      tdClass: `gl-pl-6!`,
       sortable: true,
     },
   ],
   components: {
+    AlertStatus,
     GlAlert,
     GlLoadingIcon,
     GlTable,
@@ -77,6 +72,7 @@ export default {
     return {
       alerts: {},
       errored: false,
+      errorMsg: '',
       isErrorAlertDismissed: false,
       // TODO implement infinite scrolling in #290705
       pageInfo: {},
@@ -105,6 +101,7 @@ export default {
   methods: {
     errorAlertDismissed() {
       this.errored = false;
+      this.errorMsg = '';
       this.isErrorAlertDismissed = true;
     },
     fetchSortedData({ sortBy, sortDesc }) {
@@ -112,6 +109,13 @@ export default {
       const sortingColumn = convertToSnakeCase(sortBy).toUpperCase();
 
       this.sort = `${sortingColumn}_${sortingDirection}`;
+    },
+    handleAlertError(msg) {
+      this.errored = true;
+      this.errorMsg = msg;
+    },
+    handleStatusUpdate() {
+      this.$apollo.queries.alerts.refetch();
     },
   },
 };
@@ -134,7 +138,7 @@ export default {
       data-testid="threat-alerts-error"
       @dismiss="errorAlertDismissed"
     >
-      {{ $options.i18n.errorMsg }}
+      {{ errorMsg || $options.i18n.errorMsg }}
     </gl-alert>
 
     <gl-table
@@ -171,9 +175,12 @@ export default {
       </template>
 
       <template #cell(status)="{ item }">
-        <div data-testid="threat-alerts-status">
-          {{ $options.statuses[item.status] }}
-        </div>
+        <alert-status
+          :alert="item"
+          :project-path="projectPath"
+          @alert-error="handleAlertError"
+          @hide-dropdown="handleStatusUpdate"
+        />
       </template>
 
       <template #empty>
