@@ -4,10 +4,8 @@ import createDefaultClient from '~/lib/graphql';
 
 Vue.use(VueApollo);
 
-const resolvers = {};
-
 export default new VueApollo({
-  defaultClient: createDefaultClient(resolvers, {
+  defaultClient: createDefaultClient({}, {
     cacheConfig: {},
     assumeImmutableResults: true,
   }),

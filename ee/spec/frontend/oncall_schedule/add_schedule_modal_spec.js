@@ -128,7 +128,7 @@ describe('Add schedule modal', () => {
         expect(findTimezoneDropdown().classes()).toContain('invalid-dropdown');
       });
 
-      it("doesn't have a red border when there is selected opeion", async () => {
+      it("doesn't have a red border when there is selected option", async () => {
         findDropdownOptions()
           .at(1)
           .vm.$emit('click');
