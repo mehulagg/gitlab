@@ -13,6 +13,7 @@ code_quality:
   stage: code_quality
   before_script:
     - pub global activate dart_code_metrics
+    - export PATH="$PATH":"$HOME/.pub-cache/bin"
   script:
     - metrics lib -r codeclimate  > gl-code-quality-report.json
   artifacts:
@@ -25,6 +26,7 @@ test:
   image: "cirrusci/flutter:dev"
   before_script:
     - pub global activate junitreport
+    - export PATH="$PATH":"$HOME/.pub-cache/bin"
   script:
     - flutter test --machine --coverage | tojunit -o report.xml
     - lcov --summary coverage/lcov.info
