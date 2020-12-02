@@ -26,21 +26,21 @@ RSpec.describe 'Flutter.gitlab-ci.yml' do
     end
 
     context 'on master branch' do
-      it 'creates init, code_quality and build jobs' do
-        expect(build_names).to include('init', 'code_quality', 'build', 'deploy')
+      it 'creates init, test, code_quality, build, deploy jobs' do
+        expect(build_names).to include('init', 'test', 'code_quality', 'build', 'deploy')
       end
     end
 
-    context 'outside the master branch' do
-      let(:pipeline_branch) { 'patch-1' }
+    # context 'outside the master branch' do
+    #   let(:pipeline_branch) { 'patch-1' }
 
-      before do
-        project.repository.create_branch(pipeline_branch)
-      end
+    #   before do
+    #     project.repository.create_branch(pipeline_branch)
+    #   end
 
-      it 'does not creates a deploy and a test job' do
-        expect(build_names).not_to include('deploy')
-      end
-    end
+    #   it 'does not creates a deploy and a test job' do
+    #     expect(build_names).not_to include('deploy')
+    #   end
+    # end
   end
 end
