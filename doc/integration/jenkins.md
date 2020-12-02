@@ -160,6 +160,9 @@ Configure the GitLab integration with Jenkins.
 
 ### Option 2: Webhook
 
+If you are unable to provide GitLab with your Jenkins server login you can use this option
+to integrate GitLab and Jenkins.
+
 1. In the configuration of your Jenkins job, in the GitLab configuration section, click **Advanced**.
 1. Click the **Generate** button under the **Secret Token** field.
 1. Copy the resulting token, and save the job configuration.
