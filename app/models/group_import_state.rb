@@ -28,9 +28,9 @@ class GroupImportState < ApplicationRecord
     end
 
     after_transition any => :failed do |state, transition|
-      last_error = transition.args.first&.truncate(255)
+      last_error = transition.args.first
 
-      state.update_column(:last_error, last_error) if last_error
+      state.update_column(:last_error, last_error.truncate(255)) if last_error
     end
   end
 
