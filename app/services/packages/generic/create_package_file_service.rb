@@ -5,7 +5,10 @@ module Packages
     class CreatePackageFileService < BaseService
       def execute
         ::Packages::Package.transaction do
-          create_package_file(find_or_create_package)
+          existing_package_file = find_existing_package_file
+          result = create_package_file(find_or_create_package)
+          remove_existing_package_file(existing_package_file) if params[:replace] && existing_package_file
+          result
         end
       end
 
@@ -33,6 +36,17 @@ module Packages
         }
 
         ::Packages::CreatePackageFileService.new(package, file_params).execute
+      end
+
+      def find_existing_package_file
+        ::Packages::PackageFileFinder
+          .new(project, params[:file_name]).execute
+      end
+
+      def remove_existing_package_file(package_file)
+        return unless package_file
+
+        ::Packages::RemovePackageFileService.new(package_file).execute
       end
     end
   end
