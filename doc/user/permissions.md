@@ -405,6 +405,9 @@ automatically have access to projects and subgroups underneath. To support such 
 Users with minimal access can list the group in the UI and through the API. However, they cannot see
 details such as projects or subgroups. They do not have access to the group's page or list any of its subgroups or projects.
 
+NOTE: **Note:**
+Users with a "minimal access" role will consume a license seat execpt in [GitLab Gold/Ultimate](https://about.gitlab.com/pricing/)
+
 ## Project features
 
 Project features like wiki and issues can be hidden from users depending on
