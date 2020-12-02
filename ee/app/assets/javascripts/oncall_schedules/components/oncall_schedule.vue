@@ -2,7 +2,7 @@
 import { GlSprintf, GlCard, GlButtonGroup, GlButton, GlModalDirective } from '@gitlab/ui';
 import { s__ } from '~/locale';
 import ScheduleTimelineSection from './schedule/components/schedule_timeline_section.vue';
-import DestroyScheduleModal from './destroy_schedule_modal.vue';
+import DeleteScheduleModal from './delete_schedule_modal.vue';
 import { getTimeframeForWeeksView } from './schedule/utils';
 import { PRESET_TYPES } from './schedule/constants';
 import { getFormattedTimezone } from '../utils';
@@ -22,7 +22,7 @@ export default {
     ScheduleTimelineSection,
     GlButtonGroup,
     GlButton,
-    DestroyScheduleModal,
+    DeleteScheduleModal,
   },
   directives: {
     GlModal: GlModalDirective,
@@ -54,7 +54,7 @@ export default {
           <span class="gl-font-weight-bold gl-font-lg">{{ schedule.name }}</span>
           <gl-button-group>
             <gl-button icon="pencil" />
-            <gl-button v-gl-modal.destroyScheduleModal icon="remove" />
+            <gl-button v-gl-modal.deleteScheduleModal icon="remove" />
           </gl-button-group>
         </div>
       </template>
@@ -70,6 +70,6 @@ export default {
         <schedule-timeline-section :preset-type="$options.presetType" :timeframe="timeframe" />
       </div>
     </gl-card>
-    <destroy-schedule-modal :schedule="schedule" />
+    <delete-schedule-modal :schedule="schedule" />
   </div>
 </template>
