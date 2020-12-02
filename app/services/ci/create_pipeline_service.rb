@@ -81,7 +81,10 @@ module Ci
         .new(pipeline, command, SEQUENCE)
         .build!
 
-      schedule_head_pipeline_update if pipeline.persisted?
+      if pipeline.persisted?
+        schedule_head_pipeline_update
+        NamespaceOnboardingAction.create_action(project.namespace, :pipeline_created)
+      end
 
       # If pipeline is not persisted, try to recover IID
       pipeline.reset_project_iid unless pipeline.persisted?

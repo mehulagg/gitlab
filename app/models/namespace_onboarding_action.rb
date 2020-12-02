@@ -4,7 +4,8 @@ class NamespaceOnboardingAction < ApplicationRecord
   belongs_to :namespace
 
   ACTIONS = {
-    subscription_created: 1
+    subscription_created: 1,
+    pipeline_created: 5
   }.freeze
 
   enum action: ACTIONS
