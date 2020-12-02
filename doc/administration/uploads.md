@@ -46,7 +46,7 @@ To change the location where the uploads are stored locally, follow the steps
 below.
 
 NOTE: **Note:**
-For historical reasons, instance level uploads are stored into a base directory,
+For historical reasons, instance level uploads (e.g. [Favicon](../user/admin_area/appearance.md#favicon)) are stored into a base directory,
 which by default is `uploads/-/system`. It is strongly discouraged to change base
 directory on an existing GitLab installation.
 
@@ -150,7 +150,7 @@ _The uploads are stored by default in
 **In installations from source:**
 
 _The uploads are stored by default in
-`/home/git/gitlab/public/uploads/-/system`._
+`/home/git/gitlab/public/uploads`._
 
 1. Edit `/home/git/gitlab/config/gitlab.yml` and add or amend the following
    lines:
