@@ -118,7 +118,7 @@ class BoardsStoreEE {
     let { iterationTitle } = this.store.boardConfig;
     if (this.store.boardConfig.iterationId === 0) {
       /* eslint-disable-next-line @gitlab/require-i18n-strings */
-      iterationTitle = 'No+Iteration';
+      iterationTitle = 'None';
     } else {
       iterationTitle = encodeURIComponent(iterationTitle);
     }

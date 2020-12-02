@@ -7,6 +7,7 @@ RSpec.describe Mutations::Boards::Update do
   let_it_be(:user) { create(:user) }
   let_it_be(:board) { create(:board, project: project) }
   let_it_be(:milestone) { create(:milestone, project: project) }
+  let_it_be(:iteration) { create(:iteration, group: create(:group)) }
   let_it_be(:label1) { create(:label, project: project) }
   let_it_be(:label2) { create(:label, project: project) }
 
@@ -23,6 +24,7 @@ RSpec.describe Mutations::Boards::Update do
       weight: 3,
       assignee_id: user.to_global_id,
       milestone_id: milestone.to_global_id,
+      iteration_id: iteration.to_global_id,
       label_ids: [label1.to_global_id, label2.to_global_id]
     }
   end
@@ -59,6 +61,7 @@ RSpec.describe Mutations::Boards::Update do
           weight: 3,
           assignee: user,
           milestone: milestone,
+          iteration: iteration,
           labels: contain_exactly(label1, label2)
         }
 

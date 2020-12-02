@@ -4,6 +4,13 @@ module EE
   module Iteration
     extend ActiveSupport::Concern
 
+    # For Iteration
+    class Constants
+      None = ::Timebox::TimeboxStruct.new('None', 'none', ::Timebox::None.id).freeze
+      Any = ::Timebox::TimeboxStruct.new('Any', 'any', ::Timebox::Any.id).freeze
+      Current = ::Timebox::TimeboxStruct.new('Current', 'current', -4).freeze
+    end
+
     prepended do
       include Timebox
 

@@ -1280,6 +1280,11 @@ type Board {
   id: ID!
 
   """
+  The board iteration.
+  """
+  iteration: Iteration
+
+  """
   Labels of the board
   """
   labels(
@@ -22594,6 +22599,11 @@ input UpdateBoardInput {
   The board global ID
   """
   id: BoardID!
+
+  """
+  The id of iteration to be assigned to the board.
+  """
+  iterationId: IterationID
 
   """
   The IDs of labels to be added to the board

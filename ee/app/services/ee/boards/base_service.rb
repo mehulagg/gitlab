@@ -20,7 +20,7 @@ module EE
 
         return if [::Milestone::None.id,
                    ::Milestone::Upcoming.id,
-                   ::Milestone::Started.id].include?(milestone_id)
+                   ::Milestone::Started.id].include?(milestone_id.to_i)
 
         finder_params =
           case parent
@@ -36,6 +36,20 @@ module EE
       end
       # rubocop: enable CodeReuse/ActiveRecord
 
+      # rubocop: disable CodeReuse/ActiveRecord
+      def set_iteration
+        return unless params.key?(:iteration_id)
+
+        iteration_id = params[:iteration_id]
+
+        return if [::Iteration::Constants::None.id, ::Iteration::Constants::Current.id].include?(iteration_id.to_i)
+
+        iteration = IterationsFinder.new(current_user, iterations_finder_params).find_by(id: iteration_id)
+
+        params[:iteration_id] = iteration&.id
+      end
+      # rubocop: enable CodeReuse/ActiveRecord
+
       def set_labels
         if params.key?(:label_ids)
           params[:label_ids] = (labels_service.filter_labels_ids_in_param(:label_ids) || [])
@@ -46,6 +60,10 @@ module EE
 
       def labels_service
         @labels_service ||= ::Labels::AvailableLabelsService.new(current_user, parent, params)
+      end
+
+      def iterations_finder_params
+        IterationsFinder.params_for_parent(parent, include_ancestors: true).merge!(state: 'all')
       end
     end
   end

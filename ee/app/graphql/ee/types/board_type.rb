@@ -26,6 +26,9 @@ module EE
         field :milestone, type: ::Types::MilestoneType, null: true,
               description: 'The board milestone.'
 
+        field :iteration, type: ::Types::IterationType, null: true,
+              description: 'The board iteration.'
+
         field :weight, type: GraphQL::INT_TYPE, null: true,
               description: 'Weight of the board.'
       end

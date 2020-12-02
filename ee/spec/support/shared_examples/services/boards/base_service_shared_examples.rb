@@ -67,3 +67,71 @@ RSpec.shared_examples 'setting a milestone scope' do
     end
   end
 end
+
+RSpec.shared_examples 'setting an iteration scope' do
+  before do
+    stub_licensed_features(scoped_issue_board: true)
+  end
+
+  shared_examples 'an invalid iteration' do
+    context 'when iteration is from another group' do
+      let(:iteration) { create(:iteration, group: create(:group)) }
+
+      it { expect(subject.iteration).to be_nil }
+    end
+  end
+
+  shared_examples 'a predefined iteration' do
+    context 'None' do
+      let(:iteration) { ::Iteration::Constants::None }
+
+      it { expect(subject.iteration).to eq(iteration) }
+    end
+
+    context 'Any' do
+      let(:iteration) { ::Iteration::Constants::Any }
+
+      it { expect(subject.iteration).to be_nil }
+    end
+
+    context 'Current' do
+      let(:iteration) { ::Iteration::Constants::Current }
+
+      it { expect(subject.iteration).to eq(iteration) }
+    end
+  end
+
+  shared_examples 'a group iteration' do
+    context 'when iteration is in current group' do
+      let(:iteration) { create(:iteration, group: group) }
+
+      it { expect(subject.iteration).to eq(iteration) }
+    end
+
+    context 'when iteration is in an ancestor group' do
+      let(:iteration) { create(:iteration, group: ancestor_group) }
+
+      it { expect(subject.iteration).to eq(iteration) }
+    end
+  end
+
+  let(:ancestor_group) { create(:group) }
+  let(:group) { create(:group, parent: ancestor_group) }
+
+  context 'for a group board' do
+    let(:parent) { group }
+
+    it_behaves_like 'an invalid iteration'
+    it_behaves_like 'a predefined iteration'
+    it_behaves_like 'a group iteration'
+  end
+
+  context 'for a project board' do
+    let(:project) { create(:project, :private, group: group) }
+    let(:parent) { project }
+
+    it_behaves_like 'an invalid iteration'
+    it_behaves_like 'a predefined iteration'
+    it_behaves_like 'a group iteration'
+  end
+end

@@ -36,6 +36,11 @@ module Mutations
                required: false,
                description: 'The id of milestone to be assigned to the board'
 
+      argument :iteration_id,
+               ::Types::GlobalIDType[::Iteration],
+               required: false,
+               description: 'The id of iteration to be assigned to the board.'
+
       argument :weight,
                GraphQL::INT_TYPE,
                required: false,
@@ -106,6 +111,7 @@ module Mutations
           ::GitlabSchema.parse_gid(label_id, expected_type: ::Label).model_id
         end
 
+        args[:iteration_id] = args[:iteration_id].model_id if args[:iteration_id]
         args
       end
 

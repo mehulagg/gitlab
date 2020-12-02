@@ -56,12 +56,12 @@ module EE
       return unless resource_parent&.feature_available?(:scoped_issue_board)
 
       case iteration_id
-      when ::Iteration::None.id
-        ::Iteration::None
-      when ::Iteration::Any.id
-        ::Iteration::Any
-      when ::Iteration::Current.id
-        ::Iteration::Current
+      when ::Iteration::Constants::None.id
+        ::Iteration::Constants::None
+      when ::Iteration::Constants::Any.id
+        ::Iteration::Constants::Any
+      when ::Iteration::Constants::Current.id
+        ::Iteration::Constants::Current
       else
         super
       end
