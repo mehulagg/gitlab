@@ -197,6 +197,7 @@ latest commit yet. This might be because:
 - GitLab hasn't finished creating the pipeline yet.
 - You are using an external CI service and GitLab hasn't heard back from the service yet.
 - You are not using CI/CD pipelines in your project.
+- You do not have CI/CD enabled for the branch.
 - The latest pipeline was deleted (this is a [known issue](https://gitlab.com/gitlab-org/gitlab/-/issues/214323)).
 
 After the pipeline is created, the message updates with the pipeline status.
