@@ -113,6 +113,9 @@ You can then test the connection by clicking on **Test Connection**. If the conn
    `Sync only assigned users and groups` only syncs the users assigned to
    the application (`Users and groups`), otherwise, it syncs the whole Active Directory.
 
+   NOTE: **Note:**
+   Users will be sent an invitation email welcoming them to the Group when their user is created via the synchronization process. 
+
 Once enabled, the synchronization details and any errors appears on the
 bottom of the **Provisioning** screen, together with a link to the audit logs.
 
