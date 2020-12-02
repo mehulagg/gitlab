@@ -1303,7 +1303,7 @@ You can embed videos from [the official YouTube account for GitLab](https://www.
 For videos from other sources, [link](#link-to-video) them instead.
 
 In most cases, [link to a video](#link-to-video), because
-embeds take up a lot of space on the page and can be distracting to readers.
+embedded videos take up a lot of space on the page and can be distracting to readers.
 
 To embed a video:
 
