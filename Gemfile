@@ -410,7 +410,7 @@ group :test do
   gem 'rspec_profiling', '~> 0.0.6'
   gem 'rspec-parameterized', require: false
 
-  gem 'capybara', '~> 3.33.0'
+  gem 'capybara', '~> 3.34.0'
   gem 'capybara-screenshot', '~> 1.0.22'
   gem 'selenium-webdriver', '~> 3.142'
 
