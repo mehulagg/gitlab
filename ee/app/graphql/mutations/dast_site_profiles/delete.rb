@@ -34,6 +34,8 @@ module Mutations
 
       def find_dast_site_profile(project:, global_id:)
         project.dast_site_profiles.find(global_id.model_id)
+      rescue ActiveRecord::RecordNotFound
+        raise_resource_not_available_error!
       end
     end
   end
