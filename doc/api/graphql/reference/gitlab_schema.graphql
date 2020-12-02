@@ -3401,6 +3401,11 @@ type ContainerRepository {
   path: String!
 
   """
+  Visibility level of the container repository project
+  """
+  projectVisibilityLevel: VisibilityLevelsEnum!
+
+  """
   Status of the container repository.
   """
   status: ContainerRepositoryStatus
@@ -3504,6 +3509,11 @@ type ContainerRepositoryDetails {
   Path of the container repository.
   """
   path: String!
+
+  """
+  Visibility level of the container repository project
+  """
+  projectVisibilityLevel: VisibilityLevelsEnum!
 
   """
   Status of the container repository.

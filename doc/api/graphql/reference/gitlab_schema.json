@@ -9221,6 +9221,24 @@
               "deprecationReason": null
             },
             {
+              "name": "projectVisibilityLevel",
+              "description": "Visibility level of the container repository project",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "ENUM",
+                  "name": "VisibilityLevelsEnum",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "status",
               "description": "Status of the container repository.",
               "args": [
@@ -9515,6 +9533,24 @@
                 "ofType": {
                   "kind": "SCALAR",
                   "name": "String",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "projectVisibilityLevel",
+              "description": "Visibility level of the container repository project",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "ENUM",
+                  "name": "VisibilityLevelsEnum",
                   "ofType": null
                 }
               },
