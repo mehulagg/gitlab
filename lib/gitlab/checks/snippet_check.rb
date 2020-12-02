@@ -10,12 +10,13 @@ module Gitlab
       ATTRIBUTES = %i[oldrev newrev ref branch_name tag_name logger].freeze
       attr_reader(*ATTRIBUTES)
 
-      def initialize(change, default_branch:, logger:)
+      def initialize(change, default_branch:, root_ref:, logger:)
         @oldrev, @newrev, @ref = change.values_at(:oldrev, :newrev, :ref)
         @branch_name = Gitlab::Git.branch_name(@ref)
         @tag_name = Gitlab::Git.tag_name(@ref)
 
         @default_branch = default_branch
+        @root_ref = root_ref
         @logger = logger
         @logger.append_message("Running checks for ref: #{@branch_name || @tag_name}")
       end
@@ -35,7 +36,17 @@ module Gitlab
       private
 
       def creation?
-        @branch_name != @default_branch && super
+        # If the `root_ref` is not present means that this is the first commit to the
+        # repository and when the default branch is going to be created.
+        # We allow the first branch creation no matter the name because
+        # we control it in the BE and it's not open to users.
+        #
+        # This is added in order to prevent a concurrency problem when
+        # the instance default branch is changed in the middle of a snippet
+        # creation, where the `branch_name` could be a valid one like `master`
+        # when the commit operation started but the new `default_branch` is
+        # different like, for example, `main`, when the flow gets here.
+        (@branch_name != @default_branch && @root_ref) && super
       end
     end
   end
