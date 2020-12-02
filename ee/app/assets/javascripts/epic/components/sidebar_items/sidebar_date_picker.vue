@@ -1,6 +1,6 @@
 <script>
 import { uniqueId } from 'lodash';
-import { GlLoadingIcon, GlButton, GlIcon, GlTooltipDirective } from '@gitlab/ui';
+import { GlLoadingIcon, GlButton, GlIcon, GlTooltipDirective, GlPopover, GlSprintf, GlLink } from '@gitlab/ui';
 
 import { __, s__ } from '~/locale';
 import { dateInWords } from '~/lib/utils/datetime_utility';
@@ -25,6 +25,9 @@ export default {
     ToggleSidebar,
     GlLoadingIcon,
     GlButton,
+    GlPopover,
+    GlSprintf,
+    GlLink,
   },
   props: {
     sidebarCollapsed: {
@@ -124,19 +127,8 @@ export default {
     collapsedText() {
       return this.selectedDateWords ? this.selectedDateWords : __('None');
     },
-    popoverOptions() {
-      return this.getPopoverConfig({
-        title: s__(
-          'Epics|These dates affect how your epics appear in the roadmap. Dates from milestones come from the milestones assigned to issues in the epic. You can also set fixed dates or remove them entirely.',
-        ),
-        content: `
-          <a
-            href="${gon.gitlab_url}/help/user/group/epics/index.md#start-date-and-due-date"
-            target="_blank"
-            rel="noopener noreferrer"
-          >${s__('Epics|More information')}</a>
-        `,
-      });
+    popoverUrl() {
+      return `${gon.gitlab_url}/help/user/group/epics/index.md#start-date-and-due-date`;
     },
     dateInvalidPopoverOptions() {
       return this.getPopoverConfig({
@@ -154,9 +146,7 @@ export default {
   methods: {
     getPopoverConfig({ title, content }) {
       return {
-        html: true,
-        trigger: 'focus',
-        container: 'body',
+        triggers: 'focus',
         boundary: 'viewport',
         template: `
           <div class="popover" role="tooltip">
@@ -199,11 +189,28 @@ export default {
       <gl-loading-icon v-if="dateSaveInProgress" :inline="true" />
       <div class="float-right d-flex">
         <gl-icon
-          v-popover="popoverOptions"
+          id="epic-datepicker-popover"
           name="question-o"
           class="help-icon gl-mr-2"
           tabindex="0"
         />
+        <gl-popover
+          target="epic-datepicker-popover"
+          triggers="click"
+          placement="left"
+          boundary="viewport"
+        >
+          <p>
+            <gl-sprintf
+              :message="
+                s__('Epics|These dates affect how your epics appear in the roadmap. Dates from milestones come from the milestones assigned to issues in the epic. You can also set fixed dates or remove them entirely.')
+              "
+            />
+          </p>
+          <gl-link :href="popoverUrl">{{
+            __('More information')
+          }}</gl-link>
+        </gl-popover>
         <gl-button
           v-show="canUpdate && !editing"
           ref="editButton"
