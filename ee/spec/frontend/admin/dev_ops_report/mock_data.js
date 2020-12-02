@@ -35,6 +35,7 @@ export const devopsAdoptionSegmentsData = {
   nodes: [
     {
       name: 'Segment 1',
+      id: 1,
       latestSnapshot: {
         issueOpened: true,
         mergeRequestOpened: true,
@@ -74,3 +75,6 @@ export const segmentName = 'Foooo';
 export const genericErrorMessage = 'An error occured while saving the segment. Please try again.';
 
 export const dataErrorMessage = 'Name already taken.';
+
+export const genericDeleteErrorMessage =
+  'An error occured while deleting the segment. Please try again.';

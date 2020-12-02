@@ -4,6 +4,8 @@ export const MAX_REQUEST_COUNT = 10;
 
 export const DEVOPS_ADOPTION_SEGMENT_MODAL_ID = 'devopsSegmentModal';
 
+export const DEVOPS_ADOPTION_SEGMENT_DELETE_MODAL_ID = 'devopsSegmentDeleteModal';
+
 export const DATE_TIME_FORMAT = 'yyyy-mm-dd HH:MM';
 
 export const DEVOPS_ADOPTION_ERROR_KEYS = {
@@ -42,6 +44,16 @@ export const DEVOPS_ADOPTION_STRINGS = {
     selectedGroupsTextSingular: s__('DevopsAdoption|%{selectedCount} group selected (20 max)'),
     selectedGroupsTextPlural: s__('DevopsAdoption|%{selectedCount} groups selected (20 max)'),
     error: s__('DevopsAdoption|An error occured while saving the segment. Please try again.'),
+  },
+  table: {
+    deleteButton: s__('DevopsAdoption|Delete segment'),
+  },
+  deleteModal: {
+    title: s__('DevopsAdoption|Confirm delete segment'),
+    confirmationMessage: s__('DevopsAdoption|Are you sure that you would like to delete %{name}?'),
+    cancel: __('Cancel'),
+    confirm: s__('DevopsAdoption|Delete segment'),
+    error: s__('DevopsAdoption|An error occured while deleting the segment. Please try again.'),
   },
 };
 

@@ -1,6 +1,7 @@
 query devopsAdoptionSegments {
   devopsAdoptionSegments {
     nodes {
+      id
       name
       latestSnapshot {
         issueOpened

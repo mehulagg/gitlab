@@ -9607,13 +9607,25 @@ msgstr ""
 msgid "DevopsAdoption|Add new segment"
 msgstr ""
 
+msgid "DevopsAdoption|An error occured while deleting the segment. Please try again."
+msgstr ""
+
 msgid "DevopsAdoption|An error occured while saving the segment. Please try again."
 msgstr ""
 
 msgid "DevopsAdoption|Approvals"
 msgstr ""
 
+msgid "DevopsAdoption|Are you sure that you would like to delete %{name}?"
+msgstr ""
+
+msgid "DevopsAdoption|Confirm delete segment"
+msgstr ""
+
 msgid "DevopsAdoption|Create new segment"
+msgstr ""
+
+msgid "DevopsAdoption|Delete segment"
 msgstr ""
 
 msgid "DevopsAdoption|Deploys"
