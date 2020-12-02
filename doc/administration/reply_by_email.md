@@ -26,23 +26,23 @@ addition, this "reply key" is also added to the `References` header.
 
 ### 2. You reply to the notification email
 
-When you reply to the notification email, your email client will:
+When you reply to the notification email, your email client:
 
-- send the email to the `Reply-To` address it got from the notification email
-- set the `In-Reply-To` header to the value of the `Message-ID` header from the
+- sends the email to the `Reply-To` address it got from the notification email
+- sets the `In-Reply-To` header to the value of the `Message-ID` header from the
   notification email
-- set the `References` header to the value of the `Message-ID` plus the value of
+- sets the `References` header to the value of the `Message-ID` plus the value of
   the notification email's `References` header.
 
 ### 3. GitLab receives your reply to the notification email
 
-When GitLab receives your reply, it will look for the "reply key" in the
+When GitLab receives your reply, it looks for the "reply key" in the
 following headers, in this order:
 
 1. the `To` header
 1. the `References` header
 
-If it finds a reply key, it will be able to leave your reply as a comment on
+If it finds a reply key, it leaves your reply as a comment on
 the entity the notification was about (issue, merge request, commit...).
 
 For more details about the `Message-ID`, `In-Reply-To`, and `References headers`,
