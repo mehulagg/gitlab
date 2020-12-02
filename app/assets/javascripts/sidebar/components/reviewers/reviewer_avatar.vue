@@ -1,13 +1,9 @@
 <script>
 // NOTE! For the first iteration, we are simply copying the implementation of Assignees
 // It will soon be overhauled in Issue https://gitlab.com/gitlab-org/gitlab/-/issues/233736
-import { GlIcon } from '@gitlab/ui';
 import { __, sprintf } from '~/locale';
 
 export default {
-  components: {
-    GlIcon,
-  },
   props: {
     user: {
       type: Object,
@@ -42,6 +38,6 @@ export default {
       class="avatar avatar-inline m-0"
       data-qa-selector="avatar_image"
     />
-    <gl-icon v-if="hasMergeIcon" name="warning-solid" aria-hidden="true" class="merge-icon" />
+    <i v-if="hasMergeIcon" aria-hidden="true" class="fa fa-exclamation-triangle merge-icon"></i>
   </span>
 </template>

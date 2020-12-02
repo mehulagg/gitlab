@@ -1,4 +1,4 @@
-import { GlTooltip, GlIcon, GlLoadingIcon } from '@gitlab/ui';
+import { GlTooltip, GlIcon } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
 import Vue from 'vue';
 import DeployBoard from 'ee/environments/components/deploy_board_component.vue';
@@ -95,7 +95,7 @@ describe('Deploy Board', () => {
     });
 
     it('should render loading spinner', () => {
-      expect(wrapper.find(GlLoadingIcon).exists()).toBe(true);
+      expect(wrapper.find('.fa-spin')).toBeDefined();
     });
   });
 

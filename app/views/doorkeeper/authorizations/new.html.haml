@@ -10,7 +10,7 @@
         - if current_user.admin?
           .text-warning
             %p
-              = sprite_icon('warning-solid')
+              = icon("exclamation-triangle fw")
               = html_escape(_('You are an admin, which means granting access to %{client_name} will allow them to interact with GitLab as an admin as well. Proceed with caution.')) % { client_name: tag.strong(@pre_auth.client.name) }
         %p
           - link_to_client = link_to(@pre_auth.client.name, @pre_auth.redirect_uri, target: '_blank', rel: 'noopener noreferrer')

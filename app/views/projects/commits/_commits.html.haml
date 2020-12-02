@@ -37,9 +37,7 @@
     = _('Add previously merged commits')
 
 - if commits.size == 0 && context_commits.nil?
-  .commits-empty.gl-mt-6
-    = custom_icon('illustration_no_commits')
-    %h4
+  .mt-4.text-center
+    .bold
       = _('Your search didn\'t match any commits.')
-    %p
-      = _('Try changing or removing filters.')
+    = _('Try changing or removing filters.')

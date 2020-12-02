@@ -29,10 +29,6 @@ module QA
                   element :membership_lock_checkbox
                 end
 
-                view 'ee/app/views/groups/settings/_prevent_forking.html.haml' do
-                  element :prevent_forking_outside_group_checkbox
-                end
-
                 view 'ee/app/views/shared/_repository_size_limit_setting.html.haml' do
                   element :repository_size_limit_field
                 end
@@ -89,18 +85,6 @@ module QA
             def set_membership_lock_disabled
               expand_content :permission_lfs_2fa_content
               uncheck_element :membership_lock_checkbox
-              click_element :save_permissions_changes_button
-            end
-
-            def set_prevent_forking_outside_group_enabled
-              expand_content :permission_lfs_2fa_content
-              check_element :prevent_forking_outside_group_checkbox
-              click_element :save_permissions_changes_button
-            end
-
-            def set_prevent_forking_outside_group_disabled
-              expand_content :permission_lfs_2fa_content
-              uncheck_element :prevent_forking_outside_group_checkbox
               click_element :save_permissions_changes_button
             end
 

@@ -10,20 +10,19 @@ const initJiraFormHandlers = () => {
     AP.navigator.reload();
   };
 
-  const reqFailed = (res, fallbackErrorMessage) => {
-    const { responseJSON: { error } = {} } = res || {};
+  const reqFailed = res => {
     // eslint-disable-next-line no-alert
-    alert(error || fallbackErrorMessage);
+    alert(res.responseJSON.error);
   };
 
   AP.getLocation(location => {
-    $('.js-jira-connect-sign-in').each(function updateSignInLink() {
+    $('.js-jira-connect-sign-in').each(() => {
       const updatedLink = `${$(this).attr('href')}?return_to=${location}`;
       $(this).attr('href', updatedLink);
     });
   });
 
-  $('#add-subscription-form').on('submit', function onAddSubscriptionForm(e) {
+  $('#add-subscription-form').on('submit', e => {
     const actionUrl = $(this).attr('action');
     e.preventDefault();
 
@@ -35,11 +34,11 @@ const initJiraFormHandlers = () => {
         format: 'json',
       })
         .done(reqComplete)
-        .fail(err => reqFailed(err, 'Failed to add namespace. Please try again.'));
+        .fail(reqFailed);
     });
   });
 
-  $('.remove-subscription').on('click', function onRemoveSubscriptionClick(e) {
+  $('.remove-subscription').on('click', e => {
     const href = $(this).attr('href');
     e.preventDefault();
 
@@ -54,7 +53,7 @@ const initJiraFormHandlers = () => {
         },
       })
         .done(reqComplete)
-        .fail(err => reqFailed(err, 'Failed to remove namespace. Please try again.'));
+        .fail(reqFailed);
     });
   });
 };

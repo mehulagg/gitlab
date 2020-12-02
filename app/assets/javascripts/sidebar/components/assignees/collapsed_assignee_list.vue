@@ -112,12 +112,11 @@ export default {
     />
     <button v-if="hasMoreThanTwoAssignees" class="btn-link" type="button">
       <span class="avatar-counter sidebar-avatar-counter"> {{ sidebarAvatarCounter }} </span>
-      <gl-icon
+      <i
         v-if="isMergeRequest && !allAssigneesCanMerge"
-        name="warning-solid"
         aria-hidden="true"
-        class="merge-icon"
-      />
+        class="fa fa-exclamation-triangle merge-icon"
+      ></i>
     </button>
   </div>
 </template>

@@ -2,7 +2,7 @@
 
 .form-group.gl-mb-3
   .form-check
-    = f.check_box :prevent_forking_outside_group, checked: group.prevent_forking_outside_group?, class: 'form-check-input', disabled: !can_change_prevent_forking?(current_user, group), data: { qa_selector: 'prevent_forking_outside_group_checkbox' }
+    = f.check_box :prevent_forking_outside_group, checked: group.prevent_forking_outside_group?, class: 'form-check-input', disabled: !can_change_prevent_forking?(current_user, group)
     = f.label :prevent_forking_outside_group, class: 'form-check-label' do
       %span.gl-display-block= s_('GroupSettings|Prevent forking outside of the group')
       %span.text-muted= s_('GroupSettings|This setting will prevent group members from forking projects outside of the group.')
