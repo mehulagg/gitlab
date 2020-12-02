@@ -1024,7 +1024,7 @@ rake gitlab:usage_data:generate
 
 #### Generate and send usage ping
 
-Prints the metrics saved in `conversational_development_index_metrics`
+Prints the metrics saved in `conversational_development_index_metrics`.
 
 ```shell
 rake gitlab:usage_data:generate_and_send
