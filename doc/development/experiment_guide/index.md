@@ -248,9 +248,9 @@ Subsequent calls to this method for the same experiment and the same user have n
 
 Note that this data is completely separate from the [events tracking data](#implement-the-tracking-events). They are not linked together in any way.
 
-#### Adding a context
+#### Add context
 
-You can add an arbitrary context hash to the experiment or control users, to be consumed in the data analytics dashboards.
+You can add arbitrary context data in a hash which will be stored as part of the experiment user record. This data can then be used by data analytics dashboards.
 
 ```ruby
 before_action do
