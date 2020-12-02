@@ -117,8 +117,8 @@ In most cases the anchors `\A` for beginning of text and `\z` for end of text sh
 When a regular expression (regex) is matching against a string and can't find a match,
 it will sometimes backtrack to try other possibilities. For example when the regex `.*!$`
 is matching the string `hello!`, the `.*` will first match the entire string but then the `!`
-from the regex won't be able to match because the character has already been consumed
- When that happens, the ruby regex engine will _backtrack_ one character to allow the `!` to match.
+from the regex won't be able to match because the character has already been consumed.
+When that happens, the Ruby regex engine will _backtrack_ one character to allow the `!` to match.
  
 [ReDoS](https://owasp.org/www-community/attacks/Regular_expression_Denial_of_Service_-_ReDoS)
 is a possible attack if the attacker knows or controls the regular expression used,
