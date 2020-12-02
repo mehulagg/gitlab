@@ -1,0 +1,6 @@
+---
+title: Truncate error messages for failed Group Import to avoid Group Import getting
+  stuck
+merge_request: 48989
+author:
+type: fixed
