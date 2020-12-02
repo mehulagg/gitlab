@@ -8,7 +8,7 @@ import { s__, __ } from '~/locale';
 export const i18n = {
   deleteSchedule: s__('OnCallSchedules|Delete schedule'),
   deleteScheduleMessage: s__(
-    'OnCallSchedules|Are you sure you want to delete the %{deleteSchedule} schedule? This action cannot be undone.',
+    'OnCallSchedules|Are you sure you want to delete the "%{deleteSchedule}" schedule? This action cannot be undone.',
   ),
 };
 
@@ -29,8 +29,7 @@ export default {
   data() {
     return {
       loading: false,
-      showErrorAlert: false,
-      error: '',
+      error: null,
     };
   },
   computed: {
@@ -63,7 +62,7 @@ export default {
           },
         })
         .then(({ data: { oncallScheduleDestroy } = {} } = {}) => {
-          const error = oncallScheduleDestroy?.errors[0];
+          const error = oncallScheduleDestroy.errors[0];
           if (error) {
             throw error;
           }
@@ -71,14 +70,13 @@ export default {
         })
         .catch(error => {
           this.error = error;
-          this.showErrorAlert = true;
         })
         .finally(() => {
           this.loading = false;
         });
     },
     hideErrorAlert() {
-      this.showErrorAlert = false;
+      this.error = null;
     },
   },
 };
@@ -88,17 +86,13 @@ export default {
   <gl-modal
     ref="destroyScheduleModal"
     modal-id="destroyScheduleModal"
+    size="sm"
     :title="$options.i18n.deleteSchedule"
     :action-primary="primaryProps"
     :action-cancel="cancelProps"
-    @primary="deleteSchedule"
+    @primary.prevent="deleteSchedule"
   >
-    <gl-alert
-      v-if="showErrorAlert"
-      variant="danger"
-      class="gl-mt-n3 gl-mb-3"
-      @dismiss="hideErrorAlert"
-    >
+    <gl-alert v-if="error" variant="danger" class="gl-mt-n3 gl-mb-3" @dismiss="hideErrorAlert">
       {{ error || $options.i18n.errorMsg }}
     </gl-alert>
     <gl-sprintf :message="$options.i18n.deleteScheduleMessage">

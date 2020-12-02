@@ -1,19 +1,14 @@
 /* eslint-disable no-unused-vars */
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import createMockApollo from 'jest/helpers/mock_apollo_helper';
-import { GlModal, GlAlert } from '@gitlab/ui';
+import { GlModal, GlAlert, GlSprintf } from '@gitlab/ui';
 import VueApollo from 'vue-apollo';
 import waitForPromises from 'helpers/wait_for_promises';
 import destroyOncallScheduleMutation from 'ee/oncall_schedules/graphql/mutations/destroy_oncall_schedule.mutation.graphql';
 import DestroyScheduleModal, {
   i18n,
 } from 'ee/oncall_schedules/components/destroy_schedule_modal.vue';
-import { DELETE_SCHEDULE_ERROR } from 'ee/oncall_schedules/utils/error_messages';
-import {
-  getOncallSchedulesQueryResponse,
-  destroyScheduleResponse,
-  scheduleToDestroy,
-} from './mocks/apollo_mock';
+import { getOncallSchedulesQueryResponse, destroyScheduleResponse } from './mocks/apollo_mock';
 
 const localVue = createLocalVue();
 const projectPath = 'group/project';
@@ -28,6 +23,7 @@ describe('DestroyScheduleModal', () => {
   let destroyScheduleHandler;
 
   const findModal = () => wrapper.find(GlModal);
+  const findModalText = () => wrapper.find(GlSprintf);
   const findAlert = () => wrapper.find(GlAlert);
 
   async function awaitApolloDomMock() {
@@ -63,6 +59,7 @@ describe('DestroyScheduleModal', () => {
           mutate,
         },
       },
+      stubs: { GlSprintf: false },
     });
     wrapper.vm.$refs.destroyScheduleModal.hide = mockHideModal;
   };
@@ -100,12 +97,8 @@ describe('DestroyScheduleModal', () => {
   });
 
   describe('renders destroy modal with the correct schedule information', () => {
-    it('renders name of correct modal id', () => {
-      expect(findModal().attributes('modalid')).toBe('destroyScheduleModal');
-    });
-
     it('renders name of schedule to destroy', () => {
-      expect(findModal().html()).toContain(i18n.deleteScheduleMessage);
+      expect(findModalText().attributes('message')).toBe(i18n.deleteScheduleMessage);
     });
   });
 
@@ -132,7 +125,11 @@ describe('DestroyScheduleModal', () => {
       const error = 'some error';
       mutate.mockResolvedValueOnce({ data: { oncallScheduleDestroy: { errors: [error] } } });
       findModal().vm.$emit('primary', { preventDefault: jest.fn() });
+      await waitForPromises();
+      const alert = findAlert();
       expect(mockHideModal).not.toHaveBeenCalled();
+      expect(alert.exists()).toBe(true);
+      expect(alert.text()).toContain(error);
     });
   });
 
