@@ -1,17 +1,22 @@
 <script>
-import { GlBadge, GlIcon, GlSprintf, GlTable, GlTooltip } from '@gitlab/ui';
+import { GlBadge, GlIcon, GlLink, GlSprintf, GlTable, GlTooltip } from '@gitlab/ui';
 import { s__ } from '~/locale';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import timeagoMixin from '~/vue_shared/mixins/timeago';
+
+import CiBadgeLink from '~/vue_shared/components/ci_badge_link.vue';
 
 export default {
   components: {
     GlBadge,
     GlIcon,
+    GlLink,
     GlSprintf,
     GlTable,
     GlTooltip,
     TimeAgoTooltip,
+
+    CiBadgeLink,
   },
   mixins: [timeagoMixin],
   props: {
@@ -25,12 +30,15 @@ export default {
       return [
         {
           key: 'name',
-          thClass: 'gl-display-none',
+          label: s__('Terraform|Name'),
+        },
+        {
+          key: 'pipeline',
+          label: s__('Terraform|Pipeline'),
         },
         {
           key: 'updated',
-          thClass: 'gl-display-none',
-          tdClass: 'gl-text-right',
+          label: s__('Terraform|Commit details'),
         },
       ];
     },
@@ -42,6 +50,15 @@ export default {
     lockedByUserName(item) {
       return item.lockedByUser?.name || s__('Terraform|Unknown User');
     },
+    pipelineDetailedStatus(item) {
+      return item.latestVersion?.job?.pipeline?.detailedStatus;
+    },
+    pipelineID(item) {
+      return item.latestVersion?.job?.pipeline?.iid;
+    },
+    pipelinePath(item) {
+      return item.latestVersion?.job?.pipeline?.path;
+    },
     updatedTime(item) {
       return item.latestVersion?.updatedAt || item.updatedAt;
     },
@@ -50,9 +67,18 @@ export default {
 </script>
 
 <template>
-  <gl-table :items="states" :fields="fields" data-testid="terraform-states-table">
+  <gl-table
+    fixed="lg"
+    stacked="md"
+    :items="states"
+    :fields="fields"
+    data-testid="terraform-states-table"
+  >
     <template #cell(name)="{ item }">
-      <div class="gl-display-flex align-items-center" data-testid="terraform-states-table-name">
+      <div
+        class="gl-display-flex align-items-center gl-justify-content-end gl-justify-content-md-start"
+        data-testid="terraform-states-table-name"
+      >
         <p class="gl-font-weight-bold gl-m-0 gl-text-gray-900">
           {{ item.name }}
         </p>
@@ -78,6 +104,18 @@ export default {
               </template>
             </gl-sprintf>
           </gl-tooltip>
+        </div>
+      </div>
+    </template>
+
+    <template #cell(pipeline)="{ item }">
+      <div v-if="pipelineID(item)">
+        <gl-link v-if="pipelineID(item)" :href="pipelinePath(item)" target="_blank">
+          #{{ pipelineID(item) }}
+        </gl-link>
+
+        <div class="ci-status">
+          <ci-badge-link :status="pipelineDetailedStatus(item)" />
         </div>
       </div>
     </template>
