@@ -183,10 +183,8 @@ module TestEnv
   end
 
   def start_gitaly(gitaly_dir)
-    if ci?
-      # Gitaly has been spawned outside this process already
-      return
-    end
+    # Gitaly has been spawned outside this process already
+    return if ci?
 
     spawn_script = Rails.root.join('scripts/gitaly-test-spawn').to_s
     Bundler.with_original_env do

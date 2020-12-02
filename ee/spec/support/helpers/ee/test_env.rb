@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'file_utils'
+
 module EE
   module TestEnv
     def init(*args, &blk)
@@ -19,6 +21,8 @@ module EE
       )
 
       Settings.elasticsearch['indexer_path'] = indexer_bin_path
+
+      keep_only_bin if ci?
     end
 
     def indexer_path
@@ -41,6 +45,15 @@ module EE
 
     def test_dirs
       @ee_test_dirs ||= super + ['gitlab-elasticsearch-indexer']
+    end
+
+    def keep_only_bin
+      Dir.glob(File.join(indexer_path, "**", "*"), File::FNM_DOTMATCH).each do |path|
+        next if %w[. ..].include?(path)
+        next if path == indexer_bin_path
+
+        FileUtils.rm_rf(path)
+      end
     end
   end
 end

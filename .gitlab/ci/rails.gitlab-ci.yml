@@ -147,6 +147,7 @@ setup-test-env:
     - run_timed_command "bundle exec ruby -I. -e 'require \"config/environment\"; TestEnv.init'"
     - run_timed_command "scripts/gitaly-test-build"  # Do not use 'bundle exec' here
     - rm tmp/tests/gitaly/.ruby-bundle  # This file prevents gems from being installed even if vendor/gitaly-ruby is missing
+    - rm -rf tmp/tests/gitlab-workhorse/{_build,_support,.git,.gitlab,changelos,cmd,doc,internal,testdata,*.go,*.md}
   artifacts:
     expire_in: 7d
     paths:

@@ -7,6 +7,7 @@
 require 'securerandom'
 require 'socket'
 require 'logger'
+require 'file_utils'
 
 module GitalyTest
   LOGGER = begin
@@ -64,6 +65,16 @@ module GitalyTest
       File.join(tmp_tests_gitaly_dir, 'config.toml')
     when :praefect
       File.join(tmp_tests_gitaly_dir, 'praefect.config.toml')
+    end
+  end
+
+  def build_gitaly
+    system(env, 'make', chdir: tmp_tests_gitaly_dir)
+  end
+
+  def delete_useless_folders!
+    %w[_build .git internal proto].each do |dir|
+      FileUtils.remove_entry_secure(File.join(tmp_tests_gitaly_dir, dir))
     end
   end
 
