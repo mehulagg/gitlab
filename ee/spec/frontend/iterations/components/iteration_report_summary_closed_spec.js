@@ -1,5 +1,4 @@
 import IterationReportSummaryClosed from 'ee/iterations/components/iteration_report_summary_closed.vue';
-import IterationReportSummaryCards from 'ee/iterations/components/iteration_report_summary_cards.vue';
 import { shallowMount } from '@vue/test-utils';
 
 describe('Iterations report summary', () => {

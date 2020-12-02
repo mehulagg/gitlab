@@ -1,5 +1,6 @@
 <script>
 import { __ } from '~/locale';
+import { fetchPolicies } from '~/lib/graphql';
 import IterationReportSummaryCards from './iteration_report_summary_cards.vue';
 import summaryStatsQuery from '../queries/iteration_issues_summary_stats.query.graphql';
 
@@ -9,6 +10,7 @@ export default {
   },
   apollo: {
     issues: {
+      fetchPolicy: fetchPolicies.NO_CACHE,
       query: summaryStatsQuery,
       variables() {
         return this.queryVariables;
