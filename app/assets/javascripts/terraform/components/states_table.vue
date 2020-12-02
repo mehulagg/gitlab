@@ -4,7 +4,7 @@ import { s__ } from '~/locale';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import timeagoMixin from '~/vue_shared/mixins/timeago';
 
-import CiBadgeLink from '~/vue_shared/components/ci_badge_link.vue';
+import CiBadge from '~/vue_shared/components/ci_badge_link.vue';
 
 export default {
   components: {
@@ -16,7 +16,7 @@ export default {
     GlTooltip,
     TimeAgoTooltip,
 
-    CiBadgeLink,
+    CiBadge,
   },
   mixins: [timeagoMixin],
   props: {
@@ -51,7 +51,7 @@ export default {
       return item.lockedByUser?.name || s__('Terraform|Unknown User');
     },
     pipelineDetailedStatus(item) {
-      return item.latestVersion?.job?.pipeline?.detailedStatus;
+      return item.latestVersion?.job?.detailedStatus;
     },
     pipelineID(item) {
       return item.latestVersion?.job?.pipeline?.iid;
@@ -68,7 +68,7 @@ export default {
 
 <template>
   <gl-table
-    fixed="lg"
+    fixed
     stacked="md"
     :items="states"
     :fields="fields"
@@ -114,8 +114,12 @@ export default {
           #{{ pipelineID(item) }}
         </gl-link>
 
-        <div class="ci-status">
-          <ci-badge-link :status="pipelineDetailedStatus(item)" />
+        <div>
+          <ci-badge
+            :status="pipelineDetailedStatus(item)"
+            :show-text="true"
+            :icon-classes="'gl-vertical-align-middle!'"
+          />
         </div>
       </div>
     </template>

@@ -8,17 +8,17 @@ fragment StateVersion on TerraformStateVersion {
   }
 
   job {
+    detailedStatus {
+      detailsPath
+      group
+      icon
+      label
+      text
+    }
+
     pipeline {
       iid
       path
-
-      detailedStatus {
-        detailsPath
-        group
-        icon
-        label
-        text
-      }
     }
   }
 }
