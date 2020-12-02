@@ -1,14 +1,14 @@
 <script>
-import AlertsTable from './alerts_table.vue';
+import AlertsList from './alerts_list.vue';
 
 export default {
   name: 'ThreatAlerts',
   components: {
-    AlertsTable,
+    AlertsList,
   },
 };
 </script>
 
 <template>
-  <alerts-table />
+  <alerts-list />
 </template>
