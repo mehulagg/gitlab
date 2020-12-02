@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import createMockApollo from 'jest/helpers/mock_apollo_helper';
-import { GlModal } from '@gitlab/ui';
+import { GlModal, GlAlert } from '@gitlab/ui';
 import VueApollo from 'vue-apollo';
 import waitForPromises from 'helpers/wait_for_promises';
 import destroyOncallScheduleMutation from 'ee/oncall_schedules/graphql/mutations/destroy_oncall_schedule.mutation.graphql';
@@ -28,6 +28,7 @@ describe('DestroyScheduleModal', () => {
   let destroyScheduleHandler;
 
   const findModal = () => wrapper.find(GlModal);
+  const findAlert = () => wrapper.find(GlAlert);
 
   async function awaitApolloDomMock() {
     await wrapper.vm.$nextTick(); // kick off the DOM update
@@ -131,7 +132,6 @@ describe('DestroyScheduleModal', () => {
       const error = 'some error';
       mutate.mockResolvedValueOnce({ data: { oncallScheduleDestroy: { errors: [error] } } });
       findModal().vm.$emit('primary', { preventDefault: jest.fn() });
-      await waitForPromises();
       expect(mockHideModal).not.toHaveBeenCalled();
     });
   });
