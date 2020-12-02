@@ -1,10 +1,11 @@
-const unwrapGroups = stages =>
-  stages.map(stage => {
+const unwrapGroups = stages => {
+  return stages.map(stage => {
     const {
       groups: { nodes: groups },
     } = stage;
     return { ...stage, groups };
   });
+};
 
 const unwrapNodesWithName = (jobArray, prop, field = 'name') => {
   return jobArray.map(job => {
@@ -32,4 +33,4 @@ const unwrapStagesWithNeeds = denodedStages => {
   return nodes;
 };
 
-export { unwrapNodesWithName, unwrapJobWithNeeds, unwrapStagesWithNeeds };
+export { unwrapGroups, unwrapNodesWithName, unwrapJobWithNeeds, unwrapStagesWithNeeds };
