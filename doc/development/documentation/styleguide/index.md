@@ -1786,7 +1786,7 @@ For example:
 Whenever a major GitLab release occurs, we remove all version references
 to now-unsupported versions of GitLab. Note that this includes the removal of
 specific instructions for users of non-supported GitLab versions. For example,
-if GitLab versions 11.x and greater are supported, special
+if GitLab versions 11.x and later are supported, special
 instructions for users of GitLab 10 should be removed.
 
 To view historical information about a feature, review GitLab
