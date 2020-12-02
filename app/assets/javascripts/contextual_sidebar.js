@@ -19,7 +19,6 @@ export default class ContextualSidebar {
     if (!this.$sidebar.length) return;
 
     this.$innerScroll = $('.nav-sidebar-inner-scroll', this.$sidebar);
-    this.$overlay = $('.mobile-overlay');
     this.$openSidebar = $('.toggle-mobile-nav');
     this.$closeSidebar = $('.close-nav-button');
     this.$sidebarToggle = $('.js-toggle-sidebar');
@@ -30,7 +29,6 @@ export default class ContextualSidebar {
 
     this.$openSidebar.on('click', () => this.toggleSidebarNav(true));
     this.$closeSidebar.on('click', () => this.toggleSidebarNav(false));
-    this.$overlay.on('click', () => this.toggleSidebarNav(false));
     this.$sidebarToggle.on('click', () => {
       if (!ContextualSidebar.isDesktopBreakpoint()) {
         this.toggleSidebarNav(!this.$sidebar.hasClass('sidebar-expanded-mobile'));
@@ -64,10 +62,6 @@ export default class ContextualSidebar {
 
     this.$sidebar.toggleClass(SIDEBAR_COLLAPSED_CLASS, !show);
     this.$sidebar.toggleClass('sidebar-expanded-mobile', !dbp ? show : false);
-    this.$overlay.toggleClass(
-      'mobile-nav-open',
-      supportedSizes.includes(breakpoint) ? show : false,
-    );
     this.$sidebar.removeClass('sidebar-collapsed-desktop');
   }
 

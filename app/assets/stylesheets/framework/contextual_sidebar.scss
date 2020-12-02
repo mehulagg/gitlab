@@ -465,17 +465,4 @@
   .toggle-sidebar-button {
     display: none;
   }
-
-  .mobile-overlay {
-    display: none;
-
-    &.mobile-nav-open {
-      display: block;
-      position: fixed;
-      background-color: $black-transparent;
-      height: 100%;
-      width: 100%;
-      z-index: 300;
-    }
-  }
 }
