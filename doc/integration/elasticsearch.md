@@ -441,6 +441,20 @@ After the reindexing is completed, the original index will be scheduled to be de
 
 While the reindexing is running, you will be able to follow its progress under that same section.
 
+### Mark the most recent reindex job as failed and unpause the indexing
+Sometimes users want to abandon the unfinished reindex job and unpause the indexing. They can achieve it via the following steps.
+
+1. Mark the most recent reindex job as failed by the following command
+   ```shell
+   # Omnibus installations
+   sudo gitlab-rake gitlab:elastic:mark_reindex_failed
+
+   # Installations from source
+   bundle exec rake gitlab:elastic:mark_reindex_failed RAILS_ENV=production
+   ```
+
+1. Uncheck the `Pause Elasticsearch indexing` checkbox in **Admin Area > Settings > General > Advanced Search**
+
 ## Background migrations
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/234046) in GitLab 13.6.
@@ -790,7 +804,7 @@ There are a couple of ways to achieve that:
   This is always correctly identifying whether the current project/namespace
   being searched is using Elasticsearch.
 
-- From the admin area under **Settings > General > Elasticsearch** check that the
+- From the admin area under **Settings > General > Advanced Search** check that the
   Advanced Search settings are checked.
 
   Those same settings there can be obtained from the Rails console if necessary:
