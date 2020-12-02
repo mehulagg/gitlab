@@ -967,7 +967,7 @@ included in the generated anchor links. For example, when you link to
 `## This is an example **(CORE)**`, use the anchor `#this-is-an-example`.
 
 Keep in mind that the GitLab user interface links to many documentation pages
-and anchor links to take the user to the right spot. When changing
+and anchor links to take the user to the right spot. When you change
 a heading, search `doc/*`, `app/views/*`, and `ee/app/views/*` for the old
 anchor. If you do not fix these links, the [`ui-docs-lint` job](../testing.md#ui-docs-links-test)
 in your merge request fails.
