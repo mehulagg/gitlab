@@ -45,6 +45,7 @@ export default () => {
     apolloProvider,
     el,
     provide: {
+      documentationPath,
       projectPath,
     },
     store,
@@ -55,7 +56,6 @@ export default () => {
           emptyStateSvgPath,
           wafNoDataSvgPath,
           networkPolicyNoDataSvgPath,
-          documentationPath,
           defaultEnvironmentId: parseInt(defaultEnvironmentId, 10),
           showUserCallout: parseBoolean(showUserCallout),
           userCalloutId,

@@ -9,7 +9,7 @@ import getAlerts from '~/alert_management/graphql/queries/get_alerts.query.graph
 export default {
   i18n: {
     noAlertsMsg: s__(
-      'ThreatMonitoring|No alerts available to display. See %{linkStart}enabling alert management%{linkEnd} for more information on adding alerts to the list.',
+      'ThreatMonitoring|No alerts available to display. See %{linkStart}enabling threat alerts%{linkEnd} for more information on adding alerts to the list.',
     ),
     errorMsg: s__(
       "ThreatMonitoring|There was an error displaying the alerts. Confirm your endpoint's configuration details to ensure alerts appear.",
@@ -26,7 +26,7 @@ export default {
       key: 'startedAt',
       label: s__('ThreatMonitoring|Date and time'),
       thClass: `w-15p`,
-      tdClass: `sortable-cell`,
+      tdClass: `gl-pl-6!`,
       sortable: true,
     },
     {
@@ -37,8 +37,9 @@ export default {
     {
       key: 'status',
       label: s__('ThreatMonitoring|Status'),
+      thAttr: { 'data-testid': 'threat-alerts-status-header' },
       thClass: `w-15p`,
-      tdClass: `sortable-cell`,
+      tdClass: `gl-pl-6!`,
       sortable: true,
     },
   ],
@@ -53,7 +54,7 @@ export default {
   directives: {
     GlTooltip: GlTooltipDirective,
   },
-  inject: ['projectPath'],
+  inject: ['documentationPath', 'projectPath'],
   apollo: {
     alerts: {
       query: getAlerts,
@@ -77,8 +78,8 @@ export default {
       alerts: {},
       errored: false,
       isErrorAlertDismissed: false,
+      // TODO implement infinite scrolling in #290705
       pageInfo: {},
-      serverErrorMessage: '',
       sort: 'STARTED_AT_DESC',
       sortBy: 'startedAt',
       sortDesc: true,
@@ -94,14 +95,16 @@ export default {
     },
     showNoAlertsMsg() {
       return (
-        !this.errored && !this.loading && this.alertsCount?.all === 0 && !this.isErrorAlertDismissed
+        this.alerts.list?.length === 0 &&
+        !this.loading &&
+        !this.errored &&
+        !this.isErrorAlertDismissed
       );
     },
   },
   methods: {
     errorAlertDismissed() {
       this.errored = false;
-      this.serverErrorMessage = '';
       this.isErrorAlertDismissed = true;
     },
     fetchSortedData({ sortBy, sortDesc }) {
@@ -115,14 +118,27 @@ export default {
 </script>
 <template>
   <div>
-    <gl-alert v-if="showNoAlertsMsg" @dismiss="errorAlertDismissed">
+    <gl-alert
+      v-if="showNoAlertsMsg"
+      data-testid="threat-alerts-unconfigured"
+      @dismiss="errorAlertDismissed"
+    >
       <gl-sprintf :message="$options.i18n.noAlertsMsg">
         <template #link="{ content }">
-          <gl-link class="gl-display-inline-block" :href="populatingAlertsHelpUrl" target="_blank">
+          <gl-link class="gl-display-inline-block" :href="documentationPath" target="_blank">
             {{ content }}
           </gl-link>
         </template>
       </gl-sprintf>
+    </gl-alert>
+
+    <gl-alert
+      v-if="errored"
+      :dismissible="false"
+      variant="danger"
+      data-testid="threat-alerts-error"
+    >
+      {{ $options.i18n.errorMsg }}
     </gl-alert>
 
     <gl-table
@@ -141,29 +157,42 @@ export default {
       @sort-changed="fetchSortedData"
     >
       <template #cell(startedAt)="{ item }">
-        <time-ago v-if="item.startedAt" :time="item.startedAt" />
+        <time-ago
+          v-if="item.startedAt"
+          :time="item.startedAt"
+          data-testid="threat-alerts-started-at"
+        />
       </template>
 
       <template #cell(alertLabel)="{ item }">
         <div
-          class="gl-max-w-full text-truncate"
+          class="gl-word-break-all"
           :title="`${item.iid} - ${item.title}`"
-          data-testid="idField"
+          data-testid="threat-alerts-id"
         >
           {{ item.title }}
         </div>
       </template>
 
       <template #cell(status)="{ item }">
-        {{ $options.statuses[item.status] }}
+        <div data-testid="threat-alerts-status">
+          {{ $options.statuses[item.status] }}
+        </div>
       </template>
 
       <template #empty>
-        {{ s__('ThreatMonitoring|No alerts to display.') }}
+        <div data-testid="threat-alerts-empty-state">
+          {{ s__('ThreatMonitoring|No alerts to display.') }}
+        </div>
       </template>
 
       <template #table-busy>
-        <gl-loading-icon size="lg" color="dark" class="mt-3" />
+        <gl-loading-icon
+          size="lg"
+          color="dark"
+          class="gl-mt-3"
+          data-testid="threat-alerts-busy-state"
+        />
       </template>
     </gl-table>
   </div>
