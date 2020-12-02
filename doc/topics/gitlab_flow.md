@@ -303,6 +303,9 @@ The words "change," "improve," "fix," and "refactor" don't add much information 
 For example, "Improve XML generation" could be better written as "Properly escape special characters in XML generation."
 For more information about formatting commit messages, please see this excellent [blog post by Tim Pope](https://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html).
 
+To add more context to a commit message, it is often useful to add additional information in regard to where change originated from, ie a Gitlab issue or a Jira number.
+This allows people to navigate to a more informative source of truth when they require additional in depth context of the change.
+
 ## Testing before merging
 
 ![Merge requests showing the test states: red, yellow, and green](img/gitlab_flow_ci_mr.png)
