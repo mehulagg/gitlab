@@ -28,6 +28,12 @@ The following identity providers are supported:
 - Azure
 - Okta
 
+Your users get confirmation emails:
+
+During the synchronization process, all of your users get GitLab accounts, welcoming them
+to their respective groups, with an invitation email. When implementing SCIM provisioning,
+you may want to warn your security-conscious employees about this email.
+
 ## Requirements
 
 - [Group Single Sign-On](index.md) must be configured.
