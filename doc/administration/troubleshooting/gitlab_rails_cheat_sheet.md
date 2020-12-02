@@ -1018,6 +1018,8 @@ Gitlab::UsageData.to_json(force_refresh: true)
 
 #### Generate and print
 
+Generates usage ping data in JSON format.
+
 ```shell
 rake gitlab:usage_data:generate
 ```
