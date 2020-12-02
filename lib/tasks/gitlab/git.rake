@@ -54,7 +54,7 @@ namespace :gitlab do
         project = Project.find(project_id)
         checksum = project.repository.checksum
 
-        $stdout.puts checksum
+        $stdout.puts "#{project.id},#{checksum}"
       end
     end
   end
