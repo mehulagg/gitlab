@@ -5,51 +5,17 @@ module BulkImports
     extend ActiveSupport::Concern
     include Gitlab::ClassAttributes
 
-    included do
-      include Runner
-
-      private
-
-      def extractors
-        @extractors ||= self.class.extractors.map(&method(:instantiate))
-      end
-
-      def transformers
-        @transformers ||= self.class.transformers.map(&method(:instantiate))
-      end
-
-      def loaders
-        @loaders ||= self.class.loaders.map(&method(:instantiate))
-      end
-
-      def after_run
-        @after_run ||= self.class.after_run_callback
-      end
-
-      def pipeline
-        @pipeline ||= self.class.name
-      end
-
-      def instantiate(class_config)
-        class_config[:klass].new(class_config[:options])
-      end
-
-      def abort_on_failure?
-        self.class.abort_on_failure?
-      end
-    end
-
     class_methods do
       def extractor(klass, options = nil)
-        add_attribute(:extractors, klass, options)
+        add_attribute(:extractors, klass.new(options))
       end
 
       def transformer(klass, options = nil)
-        add_attribute(:transformers, klass, options)
+        add_attribute(:transformers, klass.new(options))
       end
 
       def loader(klass, options = nil)
-        add_attribute(:loaders, klass, options)
+        add_attribute(:loaders, klass.new(options))
       end
 
       def after_run(&block)
@@ -82,9 +48,9 @@ module BulkImports
 
       private
 
-      def add_attribute(sym, klass, options)
+      def add_attribute(sym, object)
         class_attributes[sym] ||= []
-        class_attributes[sym] << { klass: klass, options: options }
+        class_attributes[sym] << object
       end
     end
   end

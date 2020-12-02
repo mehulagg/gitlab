@@ -83,7 +83,7 @@ RSpec.describe BulkImports::Pipeline::Runner do
             .with(bulk_import_entity_id: 1, bulk_import_entity_type: 'group', loader: 'BulkImports::Loader')
         end
 
-        BulkImports::MyPipeline.new.run(context)
+        BulkImports::Pipeline::Runner.run(context, ['BulkImports::MyPipeline'])
       end
 
       context 'when exception is raised' do
@@ -97,7 +97,7 @@ RSpec.describe BulkImports::Pipeline::Runner do
         end
 
         it 'logs import failure' do
-          BulkImports::MyPipeline.new.run(context)
+          BulkImports::Pipeline::Runner.run(context, ['BulkImports::MyPipeline'])
 
           failure = entity.failures.first
 
@@ -113,7 +113,7 @@ RSpec.describe BulkImports::Pipeline::Runner do
           end
 
           it 'marks entity as failed' do
-            BulkImports::MyPipeline.new.run(context)
+            BulkImports::Pipeline::Runner.run(context, ['BulkImports::MyPipeline'])
 
             expect(entity.failed?).to eq(true)
           end
@@ -129,13 +129,13 @@ RSpec.describe BulkImports::Pipeline::Runner do
                 )
             end
 
-            BulkImports::MyPipeline.new.run(context)
+            BulkImports::Pipeline::Runner.run(context, ['BulkImports::MyPipeline'])
           end
         end
 
         context 'when pipeline is not marked to abort on failure' do
           it 'marks entity as failed' do
-            BulkImports::MyPipeline.new.run(context)
+            BulkImports::Pipeline::Runner.run(context, ['BulkImports::MyPipeline'])
 
             expect(entity.failed?).to eq(false)
           end
@@ -162,7 +162,7 @@ RSpec.describe BulkImports::Pipeline::Runner do
             )
         end
 
-        BulkImports::MyPipeline.new.run(context)
+        BulkImports::Pipeline::Runner.run(context, ['BulkImports::MyPipeline'])
       end
     end
   end
