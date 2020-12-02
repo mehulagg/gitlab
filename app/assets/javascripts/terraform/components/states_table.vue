@@ -109,12 +109,12 @@ export default {
     </template>
 
     <template #cell(pipeline)="{ item }">
-      <div v-if="pipelineID(item)">
+      <div data-testid="terraform-states-table-pipeline">
         <gl-link v-if="pipelineID(item)" :href="pipelinePath(item)" target="_blank">
           #{{ pipelineID(item) }}
         </gl-link>
 
-        <div class="gl-my-3">
+        <div v-if="pipelineDetailedStatus(item)" class="gl-my-3">
           <ci-badge :status="pipelineDetailedStatus(item)" />
         </div>
       </div>

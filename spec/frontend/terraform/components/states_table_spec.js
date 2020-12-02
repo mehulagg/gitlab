@@ -37,6 +37,20 @@ describe('StatesTable', () => {
           createdByUser: {
             name: 'user-3',
           },
+          job: {
+            detailedStatus: {
+              detailsPath: '/job-path-3',
+              group: 'failed',
+              icon: 'status_failed',
+              label: 'failed',
+              text: 'failed',
+            },
+
+            pipeline: {
+              iid: 3,
+              path: '/pipeline-path-3',
+            },
+          },
         },
       },
       {
@@ -47,6 +61,21 @@ describe('StatesTable', () => {
         latestVersion: {
           updatedAt: '2020-10-09T00:00:00Z',
           createdByUser: null,
+
+          job: {
+            detailedStatus: {
+              detailsPath: '/job-path-4',
+              group: 'passed',
+              icon: 'status_success',
+              label: 'passed',
+              text: 'passed',
+            },
+
+            pipeline: {
+              iid: 4,
+              path: '/pipeline-path-4',
+            },
+          },
         },
       },
     ],
@@ -99,4 +128,21 @@ describe('StatesTable', () => {
 
     expect(state.text()).toMatchInterpolatedText(updateTime);
   });
+
+  it.each`
+    pipelineText   | lineNumber
+    ${''}          | ${0}
+    ${''}          | ${1}
+    ${'#3 failed'} | ${2}
+    ${'#4 passed'} | ${3}
+  `(
+    'displays the time pipeline information for line "$lineNumber"',
+    ({ pipelineText, lineNumber }) => {
+      const states = wrapper.findAll('[data-testid="terraform-states-table-pipeline"]');
+
+      const state = states.at(lineNumber);
+
+      expect(state.text()).toMatchInterpolatedText(pipelineText);
+    },
+  );
 });
