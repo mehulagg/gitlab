@@ -1,0 +1,5 @@
+---
+title: Move sourcegraph assets to versioned subdirectory
+merge_request: 49030
+author:
+type: fixed
