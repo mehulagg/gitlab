@@ -24,7 +24,7 @@ GitLab has several features based on receiving incoming emails:
 NOTE: **Note:**
 It is **not** recommended to use an email address that receives any
 messages not intended for the GitLab instance. Any incoming emails not intended
-for GitLab receives a reject notice.
+for GitLab receive a reject notice.
 
 Handling incoming emails requires an [IMAP](https://en.wikipedia.org/wiki/Internet_Message_Access_Protocol)-enabled
 email account. GitLab requires one of the following three strategies:
