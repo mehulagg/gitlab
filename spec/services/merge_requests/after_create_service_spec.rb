@@ -53,5 +53,12 @@ RSpec.describe MergeRequests::AfterCreateService do
 
       after_create_service.execute(merge_request)
     end
+
+    it 'records a namespace onboarding progress action' do
+      expect(NamespaceOnboardingAction).to receive(:create_action)
+        .with(merge_request.target_project.namespace, :merge_request_created)
+
+      after_create_service.execute(merge_request)
+    end
   end
 end
