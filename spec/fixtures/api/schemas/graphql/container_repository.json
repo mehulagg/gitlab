@@ -35,6 +35,9 @@
     "expirationPolicyCleanupStatus": {
       "type": "string",
       "enum": ["UNSCHEDULED", "SCHEDULED", "UNFINISHED", "ONGOING"]
+    },
+    "visibilityLevel": {
+      "type": "string"
     }
   }
 }
