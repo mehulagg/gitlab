@@ -65,6 +65,10 @@ RSpec.describe JiraService do
     end
 
     context 'when jira integration is available for the project' do
+      before do
+        stub_licensed_features(jira_vulnerabilities_integration: true)
+      end
+
       context 'when vulnerabilities_enabled is set to false' do
         it { is_expected.to be_falsey }
       end
