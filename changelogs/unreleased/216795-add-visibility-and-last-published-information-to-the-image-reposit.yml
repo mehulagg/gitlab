@@ -1,5 +1,5 @@
 ---
-title: Add visibilityLevel to container_registry graphql type
+title: Add projectVisibilityLevel to container_registry graphql type
 merge_request: 49019
 author:
 type: changed
