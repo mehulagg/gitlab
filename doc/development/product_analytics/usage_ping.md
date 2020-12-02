@@ -194,7 +194,7 @@ Arguments:
 - `end`: custom end of the batch counting in order to avoid complex min calculations
 
 CAUTION: **Warning:**
-Counting over non unique columns can lead to performance issues, please take a look [here](../iterating_tables_in_batches.md) for more details
+Counting over non unique columns can lead to performance issues. Take a look at the [iterating tables in batches](../iterating_tables_in_batches.md) guide for more details.
 
 Examples:
 
