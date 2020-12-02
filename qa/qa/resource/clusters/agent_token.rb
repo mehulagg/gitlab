@@ -5,7 +5,7 @@ module QA
     module Clusters
       class AgentToken < QA::Resource::Base
         attribute :id
-        attribute :token
+        attribute :secret
         attribute :agent do
           QA::Resource::Clusters::Agent.fabricate_via_api!
         end
