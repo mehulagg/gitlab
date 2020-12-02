@@ -46,7 +46,13 @@ module Gitlab
       CrossSlotError = Class.new(StandardError)
 
       class << self
-        def validate!(command)
+        def validate!(command, klass_name)
+          command_name = command.first.to_s.upcase
+
+          if command_name == 'INCRBY' && klass_name.include?('Cache')
+            raise command.join(' ')
+          end
+
           return unless Rails.env.development? || Rails.env.test?
           return if allow_cross_slot_commands?
 
