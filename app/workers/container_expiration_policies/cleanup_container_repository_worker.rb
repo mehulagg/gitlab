@@ -24,9 +24,11 @@ module ContainerExpirationPolicies
         return
       end
 
-      result = ContainerExpirationPolicies::CleanupService.new(container_repository)
-                                                          .execute
-      log_extra_metadata_on_done(:cleanup_status, result.payload[:cleanup_status])
+      result = cleanup_tags
+
+      cleanup_status = result[:status] == :success ? :finished : :unfinished
+
+      log_extra_metadata_on_done(:cleanup_status, cleanup_status)
     end
 
     def remaining_work_count
@@ -73,18 +75,29 @@ module ContainerExpirationPolicies
       container_repository&.project
     end
 
+    def policy_params
+      return {} unless policy
+
+      policy.policy_params
+    end
+
+    def cleanup_tags
+      Projects::ContainerRepository::CleanupTagsService
+        .new(project, nil, policy_params.merge('container_expiration_policy' => true))
+        .execute(container_repository)
+    end
+
     def container_repository
       strong_memoize(:container_repository) do
         ContainerRepository.transaction do
           # rubocop: disable CodeReuse/ActiveRecord
           # We need a lock to prevent two workers from picking up the same row
-          container_repository = ContainerRepository.waiting_for_cleanup
-                                                    .order(:expiration_policy_cleanup_status, :expiration_policy_started_at)
-                                                    .limit(1)
-                                                    .lock('FOR UPDATE SKIP LOCKED')
-                                                    .first
+          ContainerRepository.waiting_for_cleanup
+                             .order(:expiration_policy_cleanup_status, :expiration_policy_started_at)
+                             .limit(1)
+                             .lock('FOR UPDATE SKIP LOCKED')
+                             .first
           # rubocop: enable CodeReuse/ActiveRecord
-          container_repository&.tap(&:cleanup_ongoing!)
         end
       end
     end

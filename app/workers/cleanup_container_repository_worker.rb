@@ -19,17 +19,9 @@ class CleanupContainerRepositoryWorker
 
     return unless valid?
 
-    if run_by_container_expiration_policy?
-      container_repository.start_expiration_policy!
-    end
-
-    result = Projects::ContainerRepository::CleanupTagsService
+    Projects::ContainerRepository::CleanupTagsService
       .new(project, current_user, params)
       .execute(container_repository)
-
-    if run_by_container_expiration_policy? && result[:status] == :success
-      container_repository.reset_expiration_policy_started_at!
-    end
   end
 
   private

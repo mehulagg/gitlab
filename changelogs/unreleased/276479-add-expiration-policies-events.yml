@@ -1,0 +1,5 @@
+---
+title: Add tracing events for cleanup policy executions
+merge_request: 49343
+author:
+type: added

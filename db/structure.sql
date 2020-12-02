@@ -14540,7 +14540,8 @@ CREATE TABLE packages_events (
     originator_type smallint NOT NULL,
     originator bigint,
     created_at timestamp with time zone NOT NULL,
-    package_id bigint
+    package_id bigint,
+    container_repository_id bigint
 );
 
 CREATE SEQUENCE packages_events_id_seq
@@ -21733,6 +21734,8 @@ CREATE UNIQUE INDEX index_packages_dependencies_on_name_and_version_pattern ON p
 
 CREATE INDEX index_packages_dependency_links_on_dependency_id ON packages_dependency_links USING btree (dependency_id);
 
+CREATE INDEX index_packages_events_on_container_repository_id ON packages_events USING btree (container_repository_id);
+
 CREATE INDEX index_packages_events_on_package_id ON packages_events USING btree (package_id);
 
 CREATE INDEX index_packages_maven_metadata_on_package_id_and_path ON packages_maven_metadata USING btree (package_id, path);
@@ -23580,6 +23583,9 @@ ALTER TABLE ONLY design_management_designs_versions
 
 ALTER TABLE ONLY protected_tag_create_access_levels
     ADD CONSTRAINT fk_f7dfda8c51 FOREIGN KEY (protected_tag_id) REFERENCES protected_tags(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY packages_events
+    ADD CONSTRAINT fk_fb29ba361a FOREIGN KEY (container_repository_id) REFERENCES container_repositories(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY ci_stages
     ADD CONSTRAINT fk_fb57e6cc56 FOREIGN KEY (pipeline_id) REFERENCES ci_pipelines(id) ON DELETE CASCADE;

@@ -4,7 +4,7 @@ module Packages
   class CreateEventService < BaseService
     def execute
       if Feature.enabled?(:collect_package_events_redis) && redis_event_name
-        unless guest?
+        unless guest? || worker?
           ::Gitlab::UsageDataCounters::HLLRedisCounter.track_event(current_user.id, redis_event_name)
         end
       end
@@ -12,7 +12,7 @@ module Packages
       if Feature.enabled?(:collect_package_events) && Gitlab::Database.read_write?
         ::Packages::Event.create!(
           event_type: event_name,
-          originator: current_user&.id,
+          originator: current_user.try(:id),
           originator_type: originator_type,
           event_scope: event_scope
         )
@@ -43,6 +43,8 @@ module Packages
         :user
       when DeployToken
         :deploy_token
+      when :worker
+        :worker
       else
         :guest
       end
@@ -50,6 +52,10 @@ module Packages
 
     def guest?
       originator_type == :guest
+    end
+
+    def worker?
+      originator_type == :worker
     end
   end
 end

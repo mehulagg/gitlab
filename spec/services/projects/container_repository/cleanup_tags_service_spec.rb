@@ -247,6 +247,30 @@ RSpec.describe Projects::ContainerRepository::CleanupTagsService do
 
           is_expected.to include(status: :success, deleted: %w(Bb Ba C))
         end
+
+        context 'tracking' do
+          it 'tracks successful deletes' do
+            expect_delete(%w(Bb Ba C), container_expiration_policy: true)
+            expect_next_instance_of(::ContainerExpirationPolicies::TrackingService) do |service|
+              expect(service).to receive(:execute).with(:start)
+              expect(service).to receive(:execute).with(:end)
+            end
+
+            subject
+          end
+
+          it 'tracks faulty deletes' do
+            expect_any_instance_of(Projects::ContainerRepository::DeleteTagsService)
+              .to receive(:execute)
+              .with(repository) { { status: :error } }
+            expect_next_instance_of(::ContainerExpirationPolicies::TrackingService) do |service|
+              expect(service).to receive(:execute).with(:start)
+              expect(service).to receive(:execute).with(:stop)
+            end
+
+            subject
+          end
+        end
       end
 
       context 'without container_expiration_policy param' do
@@ -285,7 +309,7 @@ RSpec.describe Projects::ContainerRepository::CleanupTagsService do
     end
   end
 
-  def expect_delete(tags, container_expiration_policy: nil)
+  def expect_delete(tags, container_expiration_policy: false)
     expect(Projects::ContainerRepository::DeleteTagsService)
       .to receive(:new)
       .with(repository.project, user, tags: tags, container_expiration_policy: container_expiration_policy)

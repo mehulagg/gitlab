@@ -20,7 +20,7 @@ RSpec.describe Packages::CreateEventService do
         allow(::Gitlab::UsageDataCounters::HLLRedisCounter).to receive(:track_event)
       end
 
-      context 'with feature flag disable' do
+      context 'with feature flag disabled' do
         before do
           stub_feature_flags(collect_package_events: false)
         end
@@ -39,7 +39,7 @@ RSpec.describe Packages::CreateEventService do
           expect { subject }.to change { Packages::Event.count }.by(1)
 
           expect(subject.originator_type).to eq(originator_type)
-          expect(subject.originator).to eq(user&.id)
+          expect(subject.originator).to eq(user.try(:id))
           expect(subject.event_scope).to eq(expected_scope)
           expect(subject.event_type).to eq(event_name)
         end
@@ -94,6 +94,12 @@ RSpec.describe Packages::CreateEventService do
       let(:user) { nil }
 
       it_behaves_like 'db package event creation', 'guest', 'container'
+    end
+
+    context 'with a worker' do
+      let(:user) { :worker }
+
+      it_behaves_like 'db package event creation', 'worker', 'container'
     end
 
     context 'with a package as scope' do
