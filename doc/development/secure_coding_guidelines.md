@@ -176,7 +176,7 @@ All user-provided regular expressions should use `Gitlab::UntrustedRegexp`.
 
 For other regular expressions, here are a few guidelines:
 
-- If there's a clean non-regex solution, consider using it
+- If there's a clean non-regex solution, such as `String#start_with?`, consider using it
 - Ruby supports some advanced regex features like [atomic groups](https://www.regular-expressions.info/atomic.html)
 and [possessive quantifiers](https://www.regular-expressions.info/possessive.html) that eleminate backtracking
 - Avoid nested quantifiers if possible (for example `(a+)+`)
