@@ -1,6 +1,6 @@
 {
   "type": "object",
-  "required": ["id", "name", "path", "location", "createdAt", "updatedAt", "tagsCount", "canDelete", "expirationPolicyCleanupStatus", "visibilityLevel"],
+  "required": ["id", "name", "path", "location", "createdAt", "updatedAt", "tagsCount", "canDelete", "expirationPolicyCleanupStatus", "projectVisibilityLevel"],
   "properties": {
     "id": {
       "type": "string"
@@ -36,7 +36,7 @@
       "type": "string",
       "enum": ["UNSCHEDULED", "SCHEDULED", "UNFINISHED", "ONGOING"]
     },
-    "visibilityLevel": {
+    "projectVisibilityLevel": {
       "type": "string"
     }
   }

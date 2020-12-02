@@ -19,13 +19,13 @@ module Types
     field :status, Types::ContainerRepositoryStatusEnum, null: true, description: 'Status of the container repository.'
     field :tags_count, GraphQL::INT_TYPE, null: false, description: 'Number of tags associated with this image.'
     field :can_delete, GraphQL::BOOLEAN_TYPE, null: false, description: 'Can the current user delete the container repository.'
-    field :visibility_level, Types::VisibilityLevelsEnum, null: false, description: 'Container registry visibility level'
+    field :project_visibility_level, Types::VisibilityLevelsEnum, null: false, description: 'Visibility level of the container repository project'
 
     def can_delete
       Ability.allowed?(current_user, :update_container_image, object)
     end
 
-    def visibility_level
+    def project_visibility_level
       object.project.visibility_level
     end
   end
