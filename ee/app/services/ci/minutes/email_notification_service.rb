@@ -4,7 +4,15 @@ module Ci
   module Minutes
     class EmailNotificationService < ::BaseService
       def execute
-        return unless namespace.shared_runners_minutes_limit_enabled?
+        @notification = ::Ci::Minutes::Notification.new(project, nil)
+
+        # TODO: this introduces a change in the logic that it seems to be the right behavior:
+        # - before: we were checking if the root namespace of the project had shared runners
+        #   minutes limit enabled, regardless whether the project had shared runners enabled.
+        # - after: we check if the project is eligible for shared runners minutes. If the project
+        #   has shared runners disabled we won't send a notification. This means we would also
+        #   avoid unnecessary computations.
+        return unless notification.eligible_for_notifications?
 
         notify
       end
@@ -14,8 +22,6 @@ module Ci
       attr_reader :notification
 
       def notify
-        @notification = ::Ci::Minutes::Notification.new(project, nil)
-
         if notification.no_remaining_minutes?
           notify_total_usage
         elsif notification.running_out?

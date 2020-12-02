@@ -1,6 +1,7 @@
 - namespace = local_assigns.fetch(:namespace)
 - minutes_quota = namespace.ci_minutes_quota
 
+/ TODO: this may show the partial for non root namespaces
 - if namespace.any_project_with_shared_runners_enabled?
   %li
     %span.light Pipeline minutes quota:

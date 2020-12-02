@@ -229,14 +229,12 @@ module EE
       @ci_minutes_quota ||= ::Ci::Minutes::Quota.new(self)
     end
 
-    def shared_runner_minutes_supported?
+    def root?
       !has_parent?
     end
 
     def shared_runners_minutes_limit_enabled?
-      shared_runner_minutes_supported? &&
-        any_project_with_shared_runners_enabled? &&
-        ci_minutes_quota.total_minutes.nonzero?
+      ci_minutes_quota.enabled?
     end
 
     def any_project_with_shared_runners_enabled?
@@ -361,7 +359,7 @@ module EE
     end
 
     def validate_shared_runner_minutes_support
-      return if shared_runner_minutes_supported?
+      return if root?
 
       if shared_runners_minutes_limit_changed?
         errors.add(:shared_runners_minutes_limit, 'is not supported for this namespace')
