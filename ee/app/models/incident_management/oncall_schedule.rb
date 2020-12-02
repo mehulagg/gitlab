@@ -11,6 +11,7 @@ module IncidentManagement
     DESCRIPTION_LENGTH = 1000
 
     belongs_to :project, inverse_of: :incident_management_oncall_schedules
+    has_many :oncall_rotations
 
     has_internal_id :iid, scope: :project
 
