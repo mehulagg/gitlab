@@ -116,7 +116,7 @@ cross-link between any related content.
 
 ### Docs-first methodology
 
-We employ a _documentation-first methodology_. This ensures the documentation
+We employ a _documentation-first methodology_. This method ensures the documentation
 remains a complete and trusted resource, and makes communicating about the use
 of GitLab more efficient.
 
