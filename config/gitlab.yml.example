@@ -403,6 +403,7 @@ production: &base
         aws_access_key_id: AWS_ACCESS_KEY_ID
         aws_secret_access_key: AWS_SECRET_ACCESS_KEY
         region: us-east-1
+    serve_from_deployments: false # Set to true if you want Pages to be served from deployments.
 
   ## Mattermost
   ## For enabling Add to Mattermost button

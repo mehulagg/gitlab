@@ -39,9 +39,13 @@ module Pages
 
     attr_reader :project, :trim_prefix, :domain
 
+    def serve_from_deployments?
+      Feature.enabled?(:pages_serve_from_deployments, project) || Gitlab.config.pages.serve_from_deployments
+    end
+
     def deployment
       strong_memoize(:deployment) do
-        next unless Feature.enabled?(:pages_serve_from_deployments, project)
+        next unless serve_from_deployments?
 
         project.pages_metadatum.pages_deployment
       end
