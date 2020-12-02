@@ -1790,23 +1790,16 @@ RSpec.describe Namespace do
 
     subject { namespace.additional_repo_storage_by_namespace_enabled? }
 
-    where(:namespace_storage_limit, :additional_repo_storage_by_namespace, :automatic_purchased_storage_allocation, :result) do
-      false | false | false | false
-      false | false | true  | false
-      false | true  | false | false
-      true  | false | false | false
-      false | true  | true  | true
-      true  | true  | false | false
-      true  | false | true  | false
-      true  | true  | true  | false
+    where(:namespace_storage_limit, :automatic_purchased_storage_allocation, :result) do
+      false | false | false
+      false | true  | true
+      true  | false | false
+      true  | true  | false
     end
 
     with_them do
       before do
-        stub_feature_flags(
-          namespace_storage_limit: namespace_storage_limit,
-          additional_repo_storage_by_namespace: additional_repo_storage_by_namespace
-        )
+        stub_feature_flags(namespace_storage_limit: namespace_storage_limit)
         stub_application_setting(automatic_purchased_storage_allocation: automatic_purchased_storage_allocation)
       end
 

@@ -24,11 +24,9 @@ RSpec.describe ProjectsController do
       using RSpec::Parameterized::TableSyntax
       let(:namespace) { public_project.namespace }
 
-      where(:automatic_purchased_storage_allocation, :additional_repo_storage_by_namespace, :expected_to_render) do
-        true | true | true
-        true | false | false
-        false | true | false
-        false | false | false
+      where(:automatic_purchased_storage_allocation, :expected_to_render) do
+        true  | true
+        false | false
       end
 
       with_them do
@@ -38,7 +36,7 @@ RSpec.describe ProjectsController do
             allow(root_storage).to receive(:above_size_limit?).and_return(true)
           end
           stub_application_setting(automatic_purchased_storage_allocation: automatic_purchased_storage_allocation)
-          stub_feature_flags(additional_repo_storage_by_namespace: additional_repo_storage_by_namespace, namespace_storage_limit: false)
+          stub_feature_flags(namespace_storage_limit: false)
 
           namespace.add_owner(user)
         end
