@@ -952,8 +952,8 @@ search engine optimization (SEO), use the imperative, where possible.
 For guidelines on capitalizing headings, see the section on [capitalization](#capitalization).
 
 NOTE: **Note:**
-If you change an existing title, be careful. In-page [Anchor links](#anchor-links),
-links in the GitLab application, and links from external sites can all break.
+If you change an existing title, be careful. In-page [anchor links](#anchor-links),
+links in the GitLab application, and links from external sites can break.
 
 ### Anchor links
 
