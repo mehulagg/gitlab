@@ -6,6 +6,7 @@
 #js-mr-approvals-input{ data: { 'project_id': @target_project.id,
   'can_edit': can?(current_user, :update_approvers, issuable).to_s,
   'allow_multi_rule': @target_project.multiple_approval_rules_available?.to_s,
+  'can-override': @target_project.can_override_approvers?.to_s,
   'mr_id': issuable.iid,
   'mr_settings_path': presenter.api_approval_settings_path,
   'eligible_approvers_docs_path': help_page_path('user/project/merge_requests/merge_request_approvals', anchor: 'eligible-approvers'),

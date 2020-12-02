@@ -21,6 +21,7 @@ export default function mountApprovalInput(el) {
     prefix: 'mr-edit',
     canEdit: parseBoolean(el.dataset.canEdit),
     allowMultiRule: parseBoolean(el.dataset.allowMultiRule),
+    canOverride: parseBoolean(el.dataset.canOverride),
   });
 
   store.dispatch('setTargetBranch', targetBranch);

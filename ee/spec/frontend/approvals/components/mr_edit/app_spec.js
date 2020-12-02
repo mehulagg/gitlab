@@ -16,10 +16,16 @@ describe('EE Approvals MREditApp', () => {
   let store;
   let axiosMock;
 
-  const factory = () => {
+  const factory = (mergeRequestReviewers = false, mrCollapsedApprovalRules = false) => {
     wrapper = mount(MREditApp, {
       localVue,
       store: new Vuex.Store(store),
+      provide: {
+        glFeatures: {
+          mergeRequestReviewers,
+          mrCollapsedApprovalRules,
+        },
+      },
     });
   };
 
@@ -57,22 +63,91 @@ describe('EE Approvals MREditApp', () => {
   });
 
   describe('with rules', () => {
-    beforeEach(() => {
-      store.modules.approvals.state.rules = [{ id: 7, approvers: [] }];
-      factory();
-    });
+    beforeEach(() => {});
 
     it('renders MR rules', () => {
+      store.modules.approvals.state.rules = [{ id: 7, approvers: [] }];
+
+      factory();
       expect(wrapper.find(MRRules).findAll('.js-name')).toHaveLength(1);
     });
 
     it('renders hidden inputs', () => {
+      store.modules.approvals.state.rules = [{ id: 7, approvers: [] }];
+
+      factory();
       expect(
         wrapper
           .find('.js-approval-rules')
           .find(MRRulesHiddenInputs)
           .exists(),
       ).toBe(true);
+    });
+
+    describe('summary text', () => {
+      const findSummaryText = () => wrapper.find('[data-testid="collapsedSummaryText"]');
+
+      it('optional approvals', () => {
+        store.modules.approvals.state.rules = [];
+        factory(true, true);
+
+        expect(findSummaryText().text()).toEqual('Approvals are optional.');
+      });
+
+      it('anyone can approve', () => {
+        store.modules.approvals.state.rules = [
+          {
+            ruleType: 'any_approver',
+            approvalsRequired: 1,
+          },
+        ];
+        factory(true, true);
+
+        expect(findSummaryText().text()).toEqual(
+          '1 member must approve to merge. Anyone with role Developer or higher can approve.',
+        );
+      });
+
+      it('single required approval', () => {
+        store.modules.approvals.state.rules = [
+          {
+            ruleType: 'any_approver',
+            approvalsRequired: 1,
+          },
+          {
+            ruleType: 'regular',
+            approvalsRequired: 1,
+            approvers: [],
+          },
+        ];
+        factory(true, true);
+
+        expect(findSummaryText().text()).toEqual('1 eligible member must approve to merge.');
+      });
+
+      it('multiple required approval', () => {
+        store.modules.approvals.state.rules = [
+          {
+            ruleType: 'any_approver',
+            approvalsRequired: 1,
+          },
+          {
+            ruleType: 'regular',
+            approvalsRequired: 1,
+            approvers: [],
+          },
+          {
+            ruleType: 'regular',
+            approvalsRequired: 2,
+            approvers: [],
+          },
+        ];
+        factory(true, true);
+
+        expect(findSummaryText().text()).toEqual(
+          '2 approval rules require eligible members to approve before merging.',
+        );
+      });
     });
   });
 });
