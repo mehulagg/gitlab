@@ -1,5 +1,5 @@
 <script>
-import { GlSprintf, GlModal } from '@gitlab/ui';
+import { GlSprintf, GlModal, GlAlert } from '@gitlab/ui';
 import destroyOncallScheduleMutation from '../graphql/mutations/destroy_oncall_schedule.mutation.graphql';
 import getOncallSchedulesQuery from '../graphql/queries/get_oncall_schedules.query.graphql';
 import { updateStoreAfterScheduleDelete } from '../utils/cache_updates';
@@ -17,6 +17,7 @@ export default {
   components: {
     GlSprintf,
     GlModal,
+    GlAlert,
   },
   inject: ['projectPath'],
   props: {
@@ -76,6 +77,9 @@ export default {
           this.loading = false;
         });
     },
+    hideErrorAlert() {
+      this.showErrorAlert = false;
+    },
   },
 };
 </script>
@@ -89,6 +93,14 @@ export default {
     :action-cancel="cancelProps"
     @primary="deleteSchedule"
   >
+    <gl-alert
+      v-if="showErrorAlert"
+      variant="danger"
+      class="gl-mt-n3 gl-mb-3"
+      @dismiss="hideErrorAlert"
+    >
+      {{ error || $options.i18n.errorMsg }}
+    </gl-alert>
     <gl-sprintf :message="$options.i18n.deleteScheduleMessage">
       <template #deleteSchedule>{{ schedule.name }}</template>
     </gl-sprintf>

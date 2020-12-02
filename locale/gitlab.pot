@@ -19021,7 +19021,13 @@ msgstr ""
 msgid "OnCallSchedules|Delete schedule"
 msgstr ""
 
+msgid "OnCallSchedules|Edit schedule"
+msgstr ""
+
 msgid "OnCallSchedules|Failed to add schedule"
+msgstr ""
+
+msgid "OnCallSchedules|Failed to edit schedule"
 msgstr ""
 
 msgid "OnCallSchedules|On-call schedule"
@@ -19040,6 +19046,9 @@ msgid "OnCallSchedules|Sets the default timezone for the schedule, for all parti
 msgstr ""
 
 msgid "OnCallSchedules|The schedule could not be deleted. Please try again."
+msgstr ""
+
+msgid "OnCallSchedules|The schedule could not be updated. Please try again."
 msgstr ""
 
 msgid "OnDemandScans|Could not fetch scanner profiles. Please refresh the page, or try again later."

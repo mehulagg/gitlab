@@ -1,17 +1,19 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`AddScheduleModal renders modal layout 1`] = `
+exports[`UpdateScheduleModal renders update schedule modal layout 1`] = `
 <gl-modal-stub
   actioncancel="[object Object]"
   actionprimary="[object Object]"
   modalclass=""
-  modalid="modalId"
+  modalid="updateScheduleModal"
   size="sm"
-  title="Add schedule"
+  title="Edit schedule"
   titletag="h4"
 >
   <!---->
    
-  <add-edit-schedule-form-stub />
+  <add-edit-schedule-form-stub
+    schedule="[object Object]"
+  />
 </gl-modal-stub>
 `;

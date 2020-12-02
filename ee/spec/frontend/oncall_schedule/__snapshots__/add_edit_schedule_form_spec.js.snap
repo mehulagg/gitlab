@@ -1,0 +1,119 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AddEditScheduleForm renders modal layout 1`] = `
+<gl-form-stub
+  modalid="modalId"
+>
+  <gl-form-group-stub
+    invalid-feedback="Can't be empty"
+    label="Name"
+    label-for="schedule-name"
+    label-size="sm"
+  >
+    <gl-form-input-stub
+      id="schedule-name"
+      state="true"
+      value="Test schedule"
+    />
+  </gl-form-group-stub>
+   
+  <gl-form-group-stub
+    label="Description (optional)"
+    label-for="schedule-description"
+    label-size="sm"
+  >
+    <gl-form-input-stub
+      id="schedule-description"
+      value="Description 1 lives here"
+    />
+  </gl-form-group-stub>
+   
+  <gl-form-group-stub
+    description="Sets the default timezone for the schedule, for all participants"
+    invalid-feedback="Can't be empty"
+    label="Timezone"
+    label-for="schedule-timezone"
+    label-size="sm"
+    state="true"
+  >
+    <gl-dropdown-stub
+      category="primary"
+      class="timezone-dropdown gl-w-full"
+      headertext="Select timezone"
+      id="schedule-timezone"
+      size="medium"
+      text="(UTC-10:00) HST Hawaii"
+      variant="default"
+    >
+      <gl-search-box-by-type-stub
+        clearbuttontitle="Clear"
+        value=""
+      />
+       
+      <gl-dropdown-item-stub
+        avatarurl=""
+        iconcolor=""
+        iconname=""
+        iconrightarialabel=""
+        iconrightname=""
+        ischeckitem="true"
+        secondarytext=""
+      >
+        <span
+          class="gl-white-space-nowrap"
+        >
+           (UTC-12:00) -12 International Date Line West
+        </span>
+      </gl-dropdown-item-stub>
+      <gl-dropdown-item-stub
+        avatarurl=""
+        iconcolor=""
+        iconname=""
+        iconrightarialabel=""
+        iconrightname=""
+        ischeckitem="true"
+        secondarytext=""
+      >
+        <span
+          class="gl-white-space-nowrap"
+        >
+           (UTC-11:00) SST American Samoa
+        </span>
+      </gl-dropdown-item-stub>
+      <gl-dropdown-item-stub
+        avatarurl=""
+        iconcolor=""
+        iconname=""
+        iconrightarialabel=""
+        iconrightname=""
+        ischeckitem="true"
+        secondarytext=""
+      >
+        <span
+          class="gl-white-space-nowrap"
+        >
+           (UTC-11:00) SST Midway Island
+        </span>
+      </gl-dropdown-item-stub>
+      <gl-dropdown-item-stub
+        avatarurl=""
+        iconcolor=""
+        iconname=""
+        iconrightarialabel=""
+        iconrightname=""
+        ischecked="true"
+        ischeckitem="true"
+        secondarytext=""
+      >
+        <span
+          class="gl-white-space-nowrap"
+        >
+           (UTC-10:00) HST Hawaii
+        </span>
+      </gl-dropdown-item-stub>
+       
+      <!---->
+    </gl-dropdown-stub>
+  </gl-form-group-stub>
+</gl-form-stub>
+`;

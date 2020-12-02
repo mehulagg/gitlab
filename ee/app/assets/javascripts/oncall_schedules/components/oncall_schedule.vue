@@ -3,6 +3,7 @@ import { GlSprintf, GlCard, GlButtonGroup, GlButton, GlModalDirective } from '@g
 import { s__ } from '~/locale';
 import ScheduleTimelineSection from './schedule/components/schedule_timeline_section.vue';
 import DestroyScheduleModal from './destroy_schedule_modal.vue';
+import UpdateScheduleModal from './edit_schedule_modal.vue';
 import { getTimeframeForWeeksView } from './schedule/utils';
 import { PRESET_TYPES, PRESET_DEFAULTS } from './schedule/constants';
 import { getFormattedTimezone } from '../utils';
@@ -23,6 +24,7 @@ export default {
     GlButtonGroup,
     GlButton,
     DestroyScheduleModal,
+    UpdateScheduleModal,
   },
   directives: {
     GlModal: GlModalDirective,
@@ -53,7 +55,7 @@ export default {
         <div class="gl-display-flex gl-justify-content-space-between">
           <span class="gl-font-weight-bold gl-font-lg">{{ schedule.name }}</span>
           <gl-button-group>
-            <gl-button icon="pencil" />
+            <gl-button v-gl-modal.updateScheduleModal icon="pencil" />
             <gl-button v-gl-modal.destroyScheduleModal icon="remove" />
           </gl-button-group>
         </div>
@@ -73,5 +75,6 @@ export default {
       </div>
     </gl-card>
     <destroy-schedule-modal :schedule="schedule" />
+    <update-schedule-modal :schedule="schedule" />
   </div>
 </template>
