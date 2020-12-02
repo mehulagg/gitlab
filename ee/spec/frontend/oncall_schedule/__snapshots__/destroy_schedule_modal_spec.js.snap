@@ -13,7 +13,7 @@ exports[`DestroyScheduleModal renders destroy schedule modal layout 1`] = `
   <!---->
    
   <gl-sprintf-stub
-    message="Are you sure you want to delete the %{deleteSchedule} schedule. This action cannot be undone."
+    message="Are you sure you want to delete the %{deleteSchedule} schedule? This action cannot be undone."
   />
 </gl-modal-stub>
 `;
