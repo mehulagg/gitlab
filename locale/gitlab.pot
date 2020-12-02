@@ -18406,6 +18406,9 @@ msgstr ""
 msgid "New response for issue #%{issue_iid}:"
 msgstr ""
 
+msgid "New runner. Has not connected yet"
+msgstr ""
+
 msgid "New runners registration token has been generated!"
 msgstr ""
 
@@ -23497,6 +23500,9 @@ msgid "Run untagged jobs"
 msgstr ""
 
 msgid "Runner cannot be assigned to other projects"
+msgstr ""
+
+msgid "Runner is %{status}, last contact was %{runner_contact} ago"
 msgstr ""
 
 msgid "Runner runs jobs from all unassigned projects"
