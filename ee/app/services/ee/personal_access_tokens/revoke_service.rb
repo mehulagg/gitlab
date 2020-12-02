@@ -38,7 +38,7 @@ module EE
       def audit_event_service(token, response)
         message = if response.success?
                     if token.user.project_bot?
-                      "Created project access token with id #{token.id}"
+                      "Revoked project access token with id #{token.id}"
                     else
                       "Revoked personal access token with id #{token.id}"
                     end
