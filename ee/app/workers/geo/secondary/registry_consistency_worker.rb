@@ -24,7 +24,8 @@ module Geo
         Geo::PackageFileRegistry,
         Geo::ProjectRegistry,
         Geo::TerraformStateVersionRegistry,
-        Geo::UploadRegistry
+        Geo::UploadRegistry,
+        Geo::SnippetRepositoryRegistry
       ].freeze
 
       BATCH_SIZE = 10000

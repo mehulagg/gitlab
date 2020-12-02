@@ -1,10 +1,19 @@
 <script>
-import { GlAlert, GlLoadingIcon } from '@gitlab/ui';
+import dateformat from 'dateformat';
+import { GlLoadingIcon, GlButton, GlSprintf, GlAlert, GlModalDirective } from '@gitlab/ui';
 import * as Sentry from '~/sentry/wrapper';
 import getGroupsQuery from '../graphql/queries/get_groups.query.graphql';
+import devopsAdoptionSegmentsQuery from '../graphql/queries/devops_adoption_segments.query.graphql';
 import DevopsAdoptionEmptyState from './devops_adoption_empty_state.vue';
-import { DEVOPS_ADOPTION_STRINGS, MAX_REQUEST_COUNT } from '../constants';
 import DevopsAdoptionSegmentModal from './devops_adoption_segment_modal.vue';
+import DevopsAdoptionTable from './devops_adoption_table.vue';
+import {
+  DEVOPS_ADOPTION_STRINGS,
+  DEVOPS_ADOPTION_ERROR_KEYS,
+  MAX_REQUEST_COUNT,
+  DATE_TIME_FORMAT,
+  DEVOPS_ADOPTION_SEGMENT_MODAL_ID,
+} from '../constants';
 
 export default {
   name: 'DevopsAdoptionApp',
@@ -13,30 +22,37 @@ export default {
     GlLoadingIcon,
     DevopsAdoptionEmptyState,
     DevopsAdoptionSegmentModal,
+    DevopsAdoptionTable,
+    GlButton,
+    GlSprintf,
+  },
+  directives: {
+    GlModal: GlModalDirective,
   },
   i18n: {
     ...DEVOPS_ADOPTION_STRINGS.app,
   },
+  devopsSegmentModalId: DEVOPS_ADOPTION_SEGMENT_MODAL_ID,
   data() {
     return {
-      requestCount: MAX_REQUEST_COUNT,
-      loadingError: false,
+      isLoadingGroups: false,
+      requestCount: 0,
       selectedSegmentId: null,
+      errors: {
+        [DEVOPS_ADOPTION_ERROR_KEYS.groups]: false,
+        [DEVOPS_ADOPTION_ERROR_KEYS.segments]: false,
+      },
+      groups: {
+        nodes: [],
+        pageInfo: null,
+      },
     };
   },
   apollo: {
-    groups: {
-      query: getGroupsQuery,
-      loadingKey: 'loading',
-      result() {
-        this.requestCount -= 1;
-
-        if (this.requestCount > 0 && this.groups?.pageInfo?.nextPage) {
-          this.fetchNextPage();
-        }
-      },
+    devopsAdoptionSegments: {
+      query: devopsAdoptionSegmentsQuery,
       error(error) {
-        this.handleError(error);
+        this.handleError(DEVOPS_ADOPTION_ERROR_KEYS.segments, error);
       },
     },
   },
@@ -44,44 +60,91 @@ export default {
     hasGroupData() {
       return Boolean(this.groups?.nodes?.length);
     },
+    hasSegmentsData() {
+      return Boolean(this.devopsAdoptionSegments?.nodes?.length);
+    },
+    hasLoadingError() {
+      return Object.values(this.errors).some(error => error === true);
+    },
+    timestamp() {
+      return dateformat(
+        this.devopsAdoptionSegments?.nodes[0]?.latestSnapshot?.recordedAt,
+        DATE_TIME_FORMAT,
+      );
+    },
     isLoading() {
-      return this.$apollo.queries.groups.loading;
+      return this.isLoadingGroups || this.$apollo.queries.devopsAdoptionSegments.loading;
     },
   },
+  created() {
+    this.fetchGroups();
+  },
   methods: {
-    handleError(error) {
-      this.loadingError = true;
+    handleError(key, error) {
+      this.errors[key] = true;
       Sentry.captureException(error);
     },
-    fetchNextPage() {
-      this.$apollo.queries.groups
-        .fetchMore({
+    fetchGroups(nextPage) {
+      this.isLoadingGroups = true;
+      this.$apollo
+        .query({
+          query: getGroupsQuery,
           variables: {
-            nextPage: this.groups.pageInfo.nextPage,
-          },
-          updateQuery: (previousResult, { fetchMoreResult }) => {
-            const { nodes, ...rest } = fetchMoreResult.groups;
-            const { nodes: previousNodes } = previousResult.groups;
-
-            return { groups: { ...rest, nodes: [...previousNodes, ...nodes] } };
+            nextPage,
           },
         })
-        .catch(this.handleError);
+        .then(({ data }) => {
+          const { pageInfo, nodes } = data.groups;
+
+          // Update data
+          this.groups = {
+            pageInfo,
+            nodes: [...this.groups.nodes, ...nodes],
+          };
+
+          this.requestCount += 1;
+          if (this.requestCount < MAX_REQUEST_COUNT && pageInfo?.nextPage) {
+            this.fetchGroups(pageInfo.nextPage);
+          } else {
+            this.isLoadingGroups = false;
+          }
+        })
+        .catch(error => this.handleError(DEVOPS_ADOPTION_ERROR_KEYS.groups, error));
     },
   },
 };
 </script>
 <template>
-  <gl-alert v-if="loadingError" variant="danger" :dismissible="false" class="gl-mt-3">
-    {{ $options.i18n.groupsError }}
-  </gl-alert>
+  <div v-if="hasLoadingError">
+    <template v-for="(error, key) in errors">
+      <gl-alert v-if="error" :key="key" variant="danger" :dismissible="false" class="gl-mt-3">
+        {{ $options.i18n[key] }}
+      </gl-alert>
+    </template>
+  </div>
   <gl-loading-icon v-else-if="isLoading" size="md" class="gl-my-5" />
   <div v-else>
-    <devops-adoption-empty-state :has-groups-data="hasGroupData" />
     <devops-adoption-segment-modal
       v-if="hasGroupData"
       :groups="groups.nodes"
       :segment-id="selectedSegmentId"
     />
+    <div v-if="hasSegmentsData" class="gl-mt-3">
+      <div
+        class="gl-display-flex gl-justify-content-space-between gl-align-items-center gl-my-3"
+        data-testid="tableHeader"
+      >
+        <span class="gl-text-gray-400">
+          <gl-sprintf :message="$options.i18n.tableHeader.text">
+            <template #timestamp>{{ timestamp }}</template>
+          </gl-sprintf>
+        </span>
+        <gl-button v-gl-modal="$options.devopsSegmentModalId">{{
+          $options.i18n.tableHeader.button
+        }}</gl-button>
+      </div>
+      <devops-adoption-table :segments="devopsAdoptionSegments.nodes" />
+    </div>
+    <devops-adoption-empty-state v-else :has-groups-data="hasGroupData" />
   </div>
 </template>

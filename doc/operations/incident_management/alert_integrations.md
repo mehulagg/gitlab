@@ -1,7 +1,7 @@
 ---
 stage: Monitor
 group: Health
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Alert integrations
@@ -181,7 +181,7 @@ the GitLab alerts list is scheduled for deprecation following the 13.7 release o
 You can monitor alerts using a GitLab integration with [Opsgenie](https://www.atlassian.com/software/opsgenie).
 
 If you enable the Opsgenie integration, you can't have other GitLab alert
-services, such as [Generic Alerts](generic_alerts.md) or Prometheus alerts,
+services, such as [Generic Alerts](alert_integrations.md) or Prometheus alerts,
 active at the same time.
 
 To enable Opsgenie integration:

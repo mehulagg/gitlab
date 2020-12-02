@@ -32,7 +32,7 @@ import {
   setHighlightedRow,
   toggleTreeOpen,
   scrollToFile,
-  toggleShowTreeList,
+  setShowTreeList,
   renderFileForDiscussionId,
   setRenderTreeList,
   setShowWhitespace,
@@ -48,6 +48,7 @@ import {
   moveToNeighboringCommit,
   setCurrentDiffFileIdFromNote,
   navigateToDiffFileIndex,
+  setFileByFile,
 } from '~/diffs/store/actions';
 import eventHub from '~/notes/event_hub';
 import * as types from '~/diffs/store/mutation_types';
@@ -901,15 +902,22 @@ describe('DiffsStoreActions', () => {
     });
   });
 
-  describe('toggleShowTreeList', () => {
+  describe('setShowTreeList', () => {
     it('commits toggle', done => {
-      testAction(toggleShowTreeList, null, {}, [{ type: types.TOGGLE_SHOW_TREE_LIST }], [], done);
+      testAction(
+        setShowTreeList,
+        { showTreeList: true },
+        {},
+        [{ type: types.SET_SHOW_TREE_LIST, payload: true }],
+        [],
+        done,
+      );
     });
 
     it('updates localStorage', () => {
       jest.spyOn(localStorage, 'setItem').mockImplementation(() => {});
 
-      toggleShowTreeList({ commit() {}, state: { showTreeList: true } });
+      setShowTreeList({ commit() {} }, { showTreeList: true });
 
       expect(localStorage.setItem).toHaveBeenCalledWith('mr_tree_show', true);
     });
@@ -917,7 +925,7 @@ describe('DiffsStoreActions', () => {
     it('does not update localStorage', () => {
       jest.spyOn(localStorage, 'setItem').mockImplementation(() => {});
 
-      toggleShowTreeList({ commit() {}, state: { showTreeList: true } }, false);
+      setShowTreeList({ commit() {} }, { showTreeList: true, saving: false });
 
       expect(localStorage.setItem).not.toHaveBeenCalled();
     });
@@ -1445,6 +1453,22 @@ describe('DiffsStoreActions', () => {
         [{ type: types.VIEW_DIFF_FILE, payload: '123' }],
         [],
         done,
+      );
+    });
+  });
+
+  describe('setFileByFile', () => {
+    it.each`
+      value
+      ${true}
+      ${false}
+    `('commits SET_FILE_BY_FILE with the new value $value', ({ value }) => {
+      return testAction(
+        setFileByFile,
+        { fileByFile: value },
+        { viewDiffsFileByFile: null },
+        [{ type: types.SET_FILE_BY_FILE, payload: value }],
+        [],
       );
     });
   });

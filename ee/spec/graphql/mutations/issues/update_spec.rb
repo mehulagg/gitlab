@@ -31,7 +31,7 @@ RSpec.describe Mutations::Issues::Update do
     let(:current_user) { user }
     let(:mutation) { described_class.new(object: nil, context: { current_user: current_user }, field: nil) }
 
-    subject { mutation.resolve(params) }
+    subject { mutation.resolve(**params) }
 
     before do
       group.clear_memoization(:feature_available)

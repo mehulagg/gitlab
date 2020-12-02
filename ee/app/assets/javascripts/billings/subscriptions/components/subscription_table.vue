@@ -27,6 +27,11 @@ export default {
       required: false,
       default: '',
     },
+    planRenewHref: {
+      type: String,
+      required: false,
+      default: '',
+    },
   },
   computed: {
     ...mapState(['isLoadingSubscription', 'hasErrorSubscription', 'plan', 'tables', 'endpoint']),
@@ -48,6 +53,16 @@ export default {
           !this.isFreePlan && this.planUpgradeHref ? this.planUpgradeHref : this.customerPortalUrl,
       };
     },
+    renewButton() {
+      if (this.isFreePlan && !this.plan.trial && !gon.features.saasManualRenewButton) {
+        return null;
+      }
+
+      return {
+        text: s__('SubscriptionTable|Renew'),
+        href: this.planRenewHref,
+      };
+    },
     manageButton() {
       if (this.isFreePlan) {
         return null;
@@ -59,7 +74,7 @@ export default {
       };
     },
     buttons() {
-      return [this.upgradeButton, this.manageButton].filter(Boolean);
+      return [this.upgradeButton, this.renewButton, this.manageButton].filter(Boolean);
     },
     visibleRows() {
       let tableKey = TABLE_TYPE_DEFAULT;

@@ -15,12 +15,15 @@ RSpec.describe BillingPlansHelper do
       it 'returns data attributes' do
         upgrade_href =
           "#{EE::SUBSCRIPTIONS_URL}/gitlab/namespaces/#{group.id}/upgrade/#{plan.id}"
+        renew_href =
+          "#{EE::SUBSCRIPTIONS_URL}/gitlab/namespaces/#{group.id}/renew"
         billable_seats_href = helper.group_seat_usage_path(group)
 
         expect(helper.subscription_plan_data_attributes(group, plan))
           .to eq(namespace_id: group.id,
                  namespace_name: group.name,
                  plan_upgrade_href: upgrade_href,
+                 plan_renew_href: renew_href,
                  customer_portal_url: customer_portal_url,
                  billable_seats_href: billable_seats_href)
       end
@@ -38,6 +41,7 @@ RSpec.describe BillingPlansHelper do
       let(:plan) { Hashie::Mash.new(id: nil) }
 
       it 'returns data attributes without upgrade href' do
+        renew_href = "#{EE::SUBSCRIPTIONS_URL}/gitlab/namespaces/#{group.id}/renew"
         billable_seats_href = helper.group_seat_usage_path(group)
 
         expect(helper.subscription_plan_data_attributes(group, plan))
@@ -45,6 +49,7 @@ RSpec.describe BillingPlansHelper do
                  namespace_name: group.name,
                  customer_portal_url: customer_portal_url,
                  billable_seats_href: billable_seats_href,
+                 plan_renew_href: renew_href,
                  plan_upgrade_href: nil)
       end
     end
@@ -52,7 +57,8 @@ RSpec.describe BillingPlansHelper do
 
   describe '#use_new_purchase_flow?' do
     where type: ['Group', nil],
-          plan: Plan.all_plans
+          plan: Plan.all_plans,
+          trial_active: [true, false]
 
     with_them do
       let_it_be(:user) { create(:user) }
@@ -63,12 +69,13 @@ RSpec.describe BillingPlansHelper do
 
       before do
         allow(helper).to receive(:current_user).and_return(user)
+        allow(namespace).to receive(:trial_active?).and_return(trial_active)
       end
 
       subject { helper.use_new_purchase_flow?(namespace) }
 
       it do
-        result = type == 'Group' && plan == Plan::FREE
+        result = type == 'Group' && (plan == Plan::FREE || trial_active)
 
         is_expected.to be(result)
       end
@@ -150,6 +157,26 @@ RSpec.describe BillingPlansHelper do
       it 'shows default message' do
         expect(helper.seats_data_last_update_info).to match('is updated every day at 12:00pm UTC')
       end
+    end
+  end
+
+  describe "#plan_purchase_or_upgrade_url" do
+    let(:plan) { double('Plan') }
+
+    it 'is upgradable' do
+      group = double('Group', upgradable?: true)
+
+      expect(helper).to receive(:plan_upgrade_url)
+
+      helper.plan_purchase_or_upgrade_url(group, plan)
+    end
+
+    it 'is purchasable' do
+      group = double('Group', upgradable?: false)
+
+      expect(helper).to receive(:plan_purchase_url)
+
+      helper.plan_purchase_or_upgrade_url(group, plan)
     end
   end
 end

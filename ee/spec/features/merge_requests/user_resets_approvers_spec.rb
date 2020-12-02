@@ -32,6 +32,8 @@ RSpec.describe 'Merge Requests > User resets approvers', :js do
   end
 
   it 'resets approvers for merge requests' do
+    click_button 'Approval rules'
+
     expect_avatar(find('.js-members'), first_user)
 
     click_button 'Reset to project defaults'

@@ -126,11 +126,6 @@ export default {
       required: false,
       default: '',
     },
-    vulnerabilityFeedbackHelpPath: {
-      type: String,
-      required: false,
-      default: '',
-    },
     createVulnerabilityFeedbackIssuePath: {
       type: String,
       required: false,
@@ -325,7 +320,6 @@ export default {
 
     this.setCanReadVulnerabilityFeedback(this.canReadVulnerabilityFeedback);
     this.setVulnerabilityFeedbackPath(this.vulnerabilityFeedbackPath);
-    this.setVulnerabilityFeedbackHelpPath(this.vulnerabilityFeedbackHelpPath);
     this.setCreateVulnerabilityFeedbackIssuePath(this.createVulnerabilityFeedbackIssuePath);
     this.setCreateVulnerabilityFeedbackMergeRequestPath(
       this.createVulnerabilityFeedbackMergeRequestPath,
@@ -374,7 +368,6 @@ export default {
       'setSourceBranch',
       'setCanReadVulnerabilityFeedback',
       'setVulnerabilityFeedbackPath',
-      'setVulnerabilityFeedbackHelpPath',
       'setCreateVulnerabilityFeedbackIssuePath',
       'setCreateVulnerabilityFeedbackMergeRequestPath',
       'setCreateVulnerabilityFeedbackDismissalPath',
@@ -625,7 +618,6 @@ export default {
 
         <issue-modal
           :modal="modal"
-          :vulnerability-feedback-help-path="vulnerabilityFeedbackHelpPath"
           :can-create-issue="canCreateIssue"
           :can-create-merge-request="canCreateMergeRequest"
           :can-dismiss-vulnerability="canDismissVulnerability"

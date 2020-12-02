@@ -36,9 +36,6 @@ export const setCanReadVulnerabilityFeedback = ({ commit }, value) =>
 export const setVulnerabilityFeedbackPath = ({ commit }, path) =>
   commit(types.SET_VULNERABILITY_FEEDBACK_PATH, path);
 
-export const setVulnerabilityFeedbackHelpPath = ({ commit }, path) =>
-  commit(types.SET_VULNERABILITY_FEEDBACK_HELP_PATH, path);
-
 export const setCreateVulnerabilityFeedbackIssuePath = ({ commit }, path) =>
   commit(types.SET_CREATE_VULNERABILITY_FEEDBACK_ISSUE_PATH, path);
 

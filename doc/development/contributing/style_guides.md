@@ -2,7 +2,7 @@
 type: reference, dev
 stage: none
 group: Development
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Style guides
@@ -38,6 +38,9 @@ go get github.com/Arkweid/lefthook
 
 ## Or with Rubygems
 gem install lefthook
+
+### You may need to run the following if you're using rbenv
+rbenv rehash
 
 # 3. Install the Git hooks
 lefthook install -f

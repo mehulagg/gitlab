@@ -48,6 +48,11 @@ export const devopsAdoptionSegmentsData = {
   __typename: 'devopsAdoptionSegments',
 };
 
+export const devopsAdoptionSegmentsDataEmpty = {
+  nodes: [],
+  __typename: 'devopsAdoptionSegments',
+};
+
 export const devopsAdoptionTableHeaders = [
   'Segment',
   'Issues',

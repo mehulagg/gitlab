@@ -3,7 +3,6 @@ import mockData, { mockStore } from 'jest/vue_mr_widget/mock_data';
 export default {
   ...mockData,
   can_read_vulnerabilities: true,
-  vulnerability_feedback_help_path: '/help/user/application_security/index',
   enabled_reports: {
     sast: false,
     container_scanning: false,

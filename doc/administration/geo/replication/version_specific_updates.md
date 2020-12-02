@@ -1,7 +1,7 @@
 ---
 stage: Enablement
 group: Geo
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: howto
 ---
 
@@ -10,6 +10,10 @@ type: howto
 Check this document if it includes instructions for the version you are updating.
 These steps go together with the [general steps](updating_the_geo_nodes.md#general-update-steps)
 for updating Geo nodes.
+
+## Updating to GitLab 13.5
+
+In GitLab 13.5, there is a [regression that prevents viewing a list of container repositories and registries](https://gitlab.com/gitlab-org/gitlab/-/issues/285475) on Geo secondaries. This issue is fixed in GitLab 13.6.1 and later.
 
 ## Updating to GitLab 13.3
 

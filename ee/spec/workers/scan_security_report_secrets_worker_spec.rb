@@ -8,7 +8,7 @@ RSpec.describe  ScanSecurityReportSecretsWorker do
 
   let(:secret_detection_build) { create(:ci_build, :secret_detection, pipeline: pipeline) }
   let(:file) { 'aws-key1.py' }
-  let(:api_key) { 'AKIALALEMEM35243O567' }
+  let(:api_key) { 'AKIAIOSFODNN7EXAMPLE' }
   let(:identifier_type) { 'gitleaks_rule_id' }
   let(:identifier_value) { 'AWS' }
   let(:revocation_key_type) { 'gitleaks_rule_id_aws' }

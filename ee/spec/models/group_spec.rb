@@ -22,6 +22,8 @@ RSpec.describe Group do
     it { is_expected.to have_one(:group_wiki_repository) }
     it { is_expected.to belong_to(:push_rule) }
     it { is_expected.to have_many(:saml_group_links) }
+    it { is_expected.to have_many(:epics) }
+    it { is_expected.to have_many(:epic_boards).inverse_of(:group) }
 
     it_behaves_like 'model with wiki' do
       let(:container) { create(:group, :nested, :wiki_repo) }
@@ -262,11 +264,11 @@ RSpec.describe Group do
         it 'does not exceed SQL queries count' do
           groups = described_class.where(id: subgroup1)
           control_count = ActiveRecord::QueryRecorder.new do
-            described_class.groups_user_can_read_epics(groups, user, params)
+            described_class.groups_user_can_read_epics(groups, user, **params)
           end.count
 
           groups = described_class.where(id: [subgroup1, subgroup2])
-          expect { described_class.groups_user_can_read_epics(groups, user, params) }
+          expect { described_class.groups_user_can_read_epics(groups, user, **params) }
             .not_to exceed_query_limit(control_count + extra_query_count)
         end
       end

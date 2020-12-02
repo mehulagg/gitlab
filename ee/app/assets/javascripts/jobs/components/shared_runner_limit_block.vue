@@ -1,10 +1,11 @@
 <script>
-import { GlButton } from '@gitlab/ui';
+import { GlButton, GlAlert } from '@gitlab/ui';
 import { s__, sprintf } from '~/locale';
 
 export default {
   components: {
     GlButton,
+    GlAlert,
   },
   props: {
     quotaUsed: {
@@ -46,7 +47,7 @@ export default {
 };
 </script>
 <template>
-  <div class="bs-callout bs-callout-danger">
+  <gl-alert class="gl-my-5" variant="danger" :dismissible="false">
     <p>
       {{ runnersWarningMessage }}
 
@@ -64,5 +65,5 @@ export default {
     >
       {{ __('Purchase more minutes') }}
     </gl-button>
-  </div>
+  </gl-alert>
 </template>

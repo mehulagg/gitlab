@@ -1,7 +1,7 @@
 ---
 stage: Create
 group: Source Code
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 type: reference, howto
 ---
 
@@ -216,7 +216,7 @@ GitLab.com), therefore, you don't need to do anything server-side.
 After the migration finishes successfully, you can remove all `git-annex`
 related branches from your repository.
 
-On GitLab, navigate to your project's **Repository ➔ Branches** and delete all
+On GitLab, navigate to your project's **Repository > Branches** and delete all
 branches created by Git Annex: `git-annex`, and all under `synced/`.
 
 ![repository branches](img/git-annex-branches.png)

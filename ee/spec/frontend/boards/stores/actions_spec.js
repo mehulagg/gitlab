@@ -14,10 +14,9 @@ import { mergeUrlParams, removeParams } from '~/lib/utils/url_utility';
 import {
   mockLists,
   mockIssue,
+  mockIssue2,
   mockEpic,
   rawIssue,
-  mockIssueWithModel,
-  mockIssue2WithModel,
   mockListsWithModel,
 } from '../mock_data';
 
@@ -635,8 +634,8 @@ describe('moveIssue', () => {
   };
 
   const issues = {
-    '436': mockIssueWithModel,
-    '437': mockIssue2WithModel,
+    '436': mockIssue,
+    '437': mockIssue2,
   };
 
   const state = {
@@ -673,7 +672,7 @@ describe('moveIssue', () => {
         {
           type: types.MOVE_ISSUE,
           payload: {
-            originalIssue: mockIssueWithModel,
+            originalIssue: mockIssue,
             fromListId: 'gid://gitlab/List/1',
             toListId: 'gid://gitlab/List/2',
             epicId,
@@ -714,7 +713,7 @@ describe('moveIssue', () => {
         {
           type: types.MOVE_ISSUE,
           payload: {
-            originalIssue: mockIssueWithModel,
+            originalIssue: mockIssue,
             fromListId: 'gid://gitlab/List/1',
             toListId: 'gid://gitlab/List/2',
             epicId,
@@ -723,7 +722,7 @@ describe('moveIssue', () => {
         {
           type: types.MOVE_ISSUE_FAILURE,
           payload: {
-            originalIssue: mockIssueWithModel,
+            originalIssue: mockIssue,
             fromListId: 'gid://gitlab/List/1',
             toListId: 'gid://gitlab/List/2',
             originalIndex: 0,

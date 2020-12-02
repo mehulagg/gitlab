@@ -1,0 +1,5 @@
+---
+title: Remove audit_log_export_csv feature flag
+merge_request: 48669
+author:
+type: added

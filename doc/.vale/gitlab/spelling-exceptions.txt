@@ -120,6 +120,7 @@ dequarantining
 DevOps
 discoverability
 Disqus
+Divio
 Dockerfile
 Dockerfiles
 dogfood
@@ -224,6 +225,7 @@ Kibana
 Kinesis
 Knative
 Kramdown
+Kroki
 Kubecost
 kubectl
 Kubernetes
@@ -252,6 +254,7 @@ Markdown
 markdownlint
 matcher
 matchers
+Matomo
 Mattermost
 mbox
 memoization
@@ -342,6 +345,7 @@ prepend
 prepended
 prepending
 prepends
+Prettifier
 Pritaly
 profiler
 Prometheus

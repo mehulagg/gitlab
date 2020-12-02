@@ -1,7 +1,7 @@
 ---
 stage: Verify
 group: Continuous Integration
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference
 ---
 
@@ -197,14 +197,14 @@ karma:
 
 ### `stages`
 
-`stages` is used to define stages that contain jobs and is defined
-globally for the pipeline.
+Use `stages` to define stages that contain groups of jobs. `stages` is defined globally
+for the pipeline. Use [`stage`](#stage) in a job to define which stage the job is
+part of.
 
 The order of the `stages` items defines the execution order for jobs:
 
-1. Jobs in the same stage are run in parallel.
-1. Jobs in the next stage are run after the jobs from the previous stage
-   complete successfully.
+- Jobs in the same stage run in parallel.
+- Jobs in the next stage run after the jobs from the previous stage complete successfully.
 
 For example:
 
@@ -215,18 +215,21 @@ stages:
   - deploy
 ```
 
-1. First, all jobs of `build` are executed in parallel.
-1. If all jobs of `build` succeed, the `test` jobs are executed in parallel.
-1. If all jobs of `test` succeed, the `deploy` jobs are executed in parallel.
-1. If all jobs of `deploy` succeed, the commit is marked as `passed`.
-1. If any of the previous jobs fails, the commit is marked as `failed` and no
-   jobs of further stage are executed.
+1. All jobs in `build` execute in parallel.
+1. If all jobs in `build` succeed, the `test` jobs execute in parallel.
+1. If all jobs in `test` succeed, the `deploy` jobs execute in parallel.
+1. If all jobs in `deploy` succeed, the pipeline is marked as `passed`.
 
-There are also two edge cases worth mentioning:
+If any job fails, the pipeline is marked as `failed` and jobs in later stages do not
+start. Jobs in the current stage are not stopped and continue to run.
 
-1. If no `stages` are defined in `.gitlab-ci.yml`, then the `build`,
-   `test` and `deploy` can be used as job's stage by default.
-1. If a job does not specify a `stage`, the job is assigned the `test` stage.
+If no `stages` are defined in `.gitlab-ci.yml`, then `build`, `test` and `deploy`
+are the default pipeline stages.
+
+If a job does not specify a [`stage`](#stage), the job is assigned the `test` stage.
+
+To make a job start earlier and ignore the stage order, use
+the [`needs`](#needs) keyword.
 
 ### `workflow:rules`
 
@@ -744,14 +747,12 @@ job 5:
 
 #### Using your own runners
 
-When you use your own runners, GitLab Runner runs only one job at a time by default. See the
-`concurrent` flag in [runner global settings](https://docs.gitlab.com/runner/configuration/advanced-configuration.html#the-global-section)
-for more information.
+When you use your own runners, each runner runs only one job at a time by default.
+Jobs can run in parallel if they run on different runners.
 
-Jobs run on your own runners in parallel only if:
-
-- Run on different runners.
-- The runner's `concurrent` setting has been changed.
+If you have only one runner, jobs can run in parallel if the runner's
+[`concurrent` setting](https://docs.gitlab.com/runner/configuration/advanced-configuration.html#the-global-section)
+is greater than `1`.
 
 #### `.pre` and `.post`
 
@@ -1197,8 +1198,8 @@ or excluded from a pipeline. In plain English, `if` rules can be interpreted as 
 `rules:if` differs slightly from `only:variables` by accepting only a single
 expression string per rule, rather than an array of them. Any set of expressions to be
 evaluated can be [conjoined into a single expression](../variables/README.md#conjunction--disjunction)
-by using `&&` or `||`, and use
-the [variable matching syntax](../variables/README.md#syntax-of-environment-variable-expressions).
+by using `&&` or `||`, and the [variable matching operators (`==`, `!=`, `=~` and `!~`)](../variables/README.md#syntax-of-environment-variable-expressions).
+
 Unlike variables in [`script`](../variables/README.md#syntax-of-environment-variables-in-job-scripts)
 sections, variables in rules expressions are always formatted as `$VARIABLE`.
 
@@ -1493,6 +1494,10 @@ In addition, `only` and `except` can use special keywords:
 | `tags`                   | When the Git reference for a pipeline is a tag.                                                                                                                                                                                  |
 | `triggers`               | For pipelines created by using a [trigger token](../triggers/README.md#trigger-token).                                                                                                                                           |
 | `web`                    | For pipelines created by using **Run pipeline** button in the GitLab UI, from the project's **CI/CD > Pipelines** section.                                                                                                       |
+
+Scheduled pipelines run on specific branches, so jobs configured with `only: branches`
+run on scheduled pipelines too. Add `except: schedules` to prevent jobs with `only: branches`
+from running on scheduled pipelines.
 
 In the example below, `job` runs only for refs that start with `issue-`,
 whereas all branches are skipped:
@@ -3442,6 +3447,9 @@ job split into three separate jobs.
 Use `matrix:` to configure different variables for jobs that are running in parallel.
 There can be from 2 to 50 jobs.
 
+Jobs can only run in parallel if there are multiple runners, or a single runner is
+[configured to run multiple jobs concurrently](#using-your-own-runners).
+
 [In GitLab 13.5](https://gitlab.com/gitlab-org/gitlab/-/issues/26362) and later,
 you can have one-dimensional matrices with a single job.
 
@@ -4316,11 +4324,12 @@ into templates.
 
 ## Skip Pipeline
 
-If your commit message contains `[ci skip]` or `[skip ci]`, using any
-capitalization, the commit is created but the pipeline is skipped.
+To push a commit without triggering a pipeline, add `[ci skip]` or `[skip ci]`, using any
+capitalization, to your commit message.
 
-Alternatively, one can pass the `ci.skip` [Git push option](../../user/project/push_options.md#push-options-for-gitlab-cicd)
-if using Git 2.10 or newer.
+Alternatively, if you are using Git 2.10 or later, use the `ci.skip` [Git push option](../../user/project/push_options.md#push-options-for-gitlab-cicd).
+The `ci.skip` push option does not skip merge request
+pipelines.
 
 ## Processing Git pushes
 

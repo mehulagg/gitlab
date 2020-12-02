@@ -621,15 +621,11 @@ describe('DiffsStoreMutations', () => {
     });
   });
 
-  describe('TOGGLE_SHOW_TREE_LIST', () => {
-    it('toggles showTreeList', () => {
+  describe('SET_SHOW_TREE_LIST', () => {
+    it('sets showTreeList', () => {
       const state = createState();
 
-      mutations[types.TOGGLE_SHOW_TREE_LIST](state);
-
-      expect(state.showTreeList).toBe(false, 'Failed to toggle showTreeList to false');
-
-      mutations[types.TOGGLE_SHOW_TREE_LIST](state);
+      mutations[types.SET_SHOW_TREE_LIST](state, true);
 
       expect(state.showTreeList).toBe(true, 'Failed to toggle showTreeList to true');
     });
@@ -894,6 +890,20 @@ describe('DiffsStoreMutations', () => {
       mutations[types.SET_SHOW_SUGGEST_POPOVER](state);
 
       expect(state.showSuggestPopover).toBe(false);
+    });
+  });
+
+  describe('SET_FILE_BY_FILE', () => {
+    it.each`
+      value    | opposite
+      ${true}  | ${false}
+      ${false} | ${true}
+    `('sets viewDiffsFileByFile to $value', ({ value, opposite }) => {
+      const state = { viewDiffsFileByFile: opposite };
+
+      mutations[types.SET_FILE_BY_FILE](state, value);
+
+      expect(state.viewDiffsFileByFile).toBe(value);
     });
   });
 });

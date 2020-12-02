@@ -19,6 +19,8 @@ class ArtifactFinder
     @job_id = options.delete(:job_id)
     @api_token = options.delete(:api_token)
     @artifact_path = options.delete(:artifact_path)
+
+    warn "No API token given." unless api_token
   end
 
   def execute
@@ -41,7 +43,7 @@ class ArtifactFinder
 
     uri = URI(uri_str)
     request = Net::HTTP::Get.new(uri)
-    request['Private-Token'] = api_token
+    request['Private-Token'] = api_token if api_token
 
     Net::HTTP.start(uri.host, uri.port, use_ssl: true) do |http|
       http.request(request) do |response|

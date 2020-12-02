@@ -92,7 +92,7 @@ module Gitlab
           end
 
           def keys
-            @keys ||= identifiers.map do |identifier|
+            @keys ||= identifiers.reject(&:type_identifier?).map do |identifier|
               FindingKey.new(location_fingerprint: location&.fingerprint, identifier_fingerprint: identifier.fingerprint)
             end
           end

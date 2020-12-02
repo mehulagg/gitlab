@@ -54,10 +54,6 @@ module Gitlab
         tracking_category: 'Growth::Expansion::Experiment::InviteMembersEmptyGroupVersionA',
         use_backwards_compatible_subject_index: true
       },
-      new_create_project_ui: {
-        tracking_category: 'Manage::Import::Experiment::NewCreateProjectUi',
-        use_backwards_compatible_subject_index: true
-      },
       contact_sales_btn_in_app: {
         tracking_category: 'Growth::Conversion::Experiment::ContactSalesInApp',
         use_backwards_compatible_subject_index: true
@@ -81,6 +77,12 @@ module Gitlab
       default_to_issues_board: {
         tracking_category: 'Growth::Conversion::Experiment::DefaultToIssuesBoard',
         use_backwards_compatible_subject_index: true
+      },
+      jobs_empty_state: {
+        tracking_category: 'Growth::Activation::Experiment::JobsEmptyState'
+      },
+      remove_known_trial_form_fields: {
+        tracking_category: 'Growth::Conversion::Experiment::RemoveKnownTrialFormFields'
       }
     }.freeze
 

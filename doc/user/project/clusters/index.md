@@ -1,7 +1,7 @@
 ---
 stage: Monitor
 group: Health
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Kubernetes clusters
@@ -52,11 +52,11 @@ version. The range of supported versions is based on the evaluation of:
 GitLab supports the following Kubernetes versions, and you can upgrade your
 Kubernetes version to any supported version at any time:
 
+- 1.18
 - 1.17
 - 1.16
 - 1.15
 - 1.14 (deprecated, support ends on December 22, 2020)
-- 1.13 (deprecated, support ends on November 22, 2020)
 
 Some GitLab features may support versions outside the range provided here.
 

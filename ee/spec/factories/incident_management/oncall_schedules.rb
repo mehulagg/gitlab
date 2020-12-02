@@ -3,7 +3,7 @@
 FactoryBot.define do
   factory :incident_management_oncall_schedule, class: 'IncidentManagement::OncallSchedule' do
     project
-    name { 'Default On-call Schedule' }
+    sequence(:name) { |n| "On-call Schedule ##{n}" }
     description { 'On-call description' }
     timezone { 'Europe/Berlin' }
   end

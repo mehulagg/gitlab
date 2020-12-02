@@ -28,6 +28,8 @@ module EE
       validate :auditor_requires_license_add_on, if: :auditor
       validate :cannot_be_admin_and_auditor
 
+      after_create :perform_user_cap_check
+
       delegate :shared_runners_minutes_limit, :shared_runners_minutes_limit=,
                :extra_shared_runners_minutes_limit, :extra_shared_runners_minutes_limit=,
                to: :namespace
@@ -254,11 +256,7 @@ module EE
     end
 
     def manageable_groups_eligible_for_subscription
-      manageable_groups
-        .where(parent_id: nil)
-        .left_joins(:gitlab_subscription)
-        .merge(GitlabSubscription.left_joins(:hosted_plan).where(plans: { name: [nil, *::Plan.default_plans] }))
-        .order(:name)
+      manageable_groups.eligible_for_subscription.order(:name)
     end
 
     def manageable_groups_eligible_for_trial
@@ -412,6 +410,14 @@ module EE
       return minimal_access_groups unless ::Gitlab::CurrentSettings.should_check_namespace_plan?
 
       minimal_access_groups.with_feature_available_in_plan(:minimal_access_role)
+    end
+
+    def perform_user_cap_check
+      return unless ::Gitlab::CurrentSettings.should_apply_user_signup_cap?
+
+      run_after_commit do
+        SetUserStatusBasedOnUserCapSettingWorker.perform_async(id)
+      end
     end
   end
 end

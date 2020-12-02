@@ -166,7 +166,7 @@ RSpec.describe 'Pipeline', :js do
     end
   end
 
-  describe 'GET /:project/pipelines/:id/codequality_report' do
+  describe 'GET /:project/pipelines/:id/codequality_report', :aggregate_failures do
     shared_examples_for 'full codequality report' do
       context 'with no code quality artifact' do
         before do
@@ -184,25 +184,16 @@ RSpec.describe 'Pipeline', :js do
         before do
           create(:ee_ci_build, :codequality, pipeline: pipeline)
           visit codequality_report_project_pipeline_path(project, pipeline)
+          wait_for_requests
         end
 
-        it 'shows code quality tab pane as active' do
+        it 'shows code quality tab pane as active, quality issue with link to file, and events for data tracking' do
           expect(page).to have_content('Code Quality')
           expect(page).to have_css('#js-tab-codequality')
-        end
-
-        it 'shows code quality report section' do
-          expect(page).to have_content('Loading codeclimate report')
-        end
-
-        it 'shows code quality issue with link to file' do
-          wait_for_requests
 
           expect(page).to have_content('Method `new_array` has 12 arguments (exceeds 4 allowed). Consider refactoring.')
           expect(find_link('foo.rb:10')[:href]).to end_with(project_blob_path(project, File.join(pipeline.commit.id, 'foo.rb')) + '#L10')
-        end
 
-        it 'contains events for data tracking', :aggregate_failures do
           expect(page).to have_selector('[data-track-event="click_button"]')
           expect(page).to have_selector('[data-track-label="get_codequality_report"]')
         end

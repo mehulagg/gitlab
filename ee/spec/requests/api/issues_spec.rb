@@ -624,7 +624,7 @@ RSpec.describe API::Issues, :mailer do
         expect(json_response.first).to match(
           {
             id: image.id,
-            created_at: image.created_at.strftime('%Y-%m-%eT%H:%M:%S.%LZ'),
+            created_at: image.created_at.strftime('%Y-%m-%dT%H:%M:%S.%LZ'),
             filename: image.filename,
             file_path: image.file_path,
             url: image.url

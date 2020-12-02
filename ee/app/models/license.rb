@@ -26,7 +26,6 @@ class License < ApplicationRecord
     issuable_default_templates
     issue_weights
     iterations
-    jenkins_integration
     ldap_group_sync
     member_lock
     merge_request_approvers

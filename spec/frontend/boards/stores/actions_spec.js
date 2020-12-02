@@ -4,8 +4,7 @@ import {
   mockLists,
   mockListsById,
   mockIssue,
-  mockIssueWithModel,
-  mockIssue2WithModel,
+  mockIssue2,
   rawIssue,
   mockIssues,
   mockMilestone,
@@ -291,6 +290,33 @@ describe('moveList', () => {
       done,
     );
   });
+
+  it('should not commit MOVE_LIST or dispatch updateList if listId and replacedListId are the same', () => {
+    const initialBoardListsState = {
+      'gid://gitlab/List/1': mockListsWithModel[0],
+      'gid://gitlab/List/2': mockListsWithModel[1],
+    };
+
+    const state = {
+      endpoints: { fullPath: 'gitlab-org', boardId: '1' },
+      boardType: 'group',
+      disabled: false,
+      boardLists: initialBoardListsState,
+    };
+
+    testAction(
+      actions.moveList,
+      {
+        listId: 'gid://gitlab/List/1',
+        replacedListId: 'gid://gitlab/List/1',
+        newIndex: 1,
+        adjustmentValue: 1,
+      },
+      state,
+      [],
+      [],
+    );
+  });
 });
 
 describe('updateList', () => {
@@ -500,8 +526,8 @@ describe('moveIssue', () => {
   };
 
   const issues = {
-    '436': mockIssueWithModel,
-    '437': mockIssue2WithModel,
+    '436': mockIssue,
+    '437': mockIssue2,
   };
 
   const state = {
@@ -537,7 +563,7 @@ describe('moveIssue', () => {
         {
           type: types.MOVE_ISSUE,
           payload: {
-            originalIssue: mockIssueWithModel,
+            originalIssue: mockIssue,
             fromListId: 'gid://gitlab/List/1',
             toListId: 'gid://gitlab/List/2',
           },
@@ -612,7 +638,7 @@ describe('moveIssue', () => {
         {
           type: types.MOVE_ISSUE,
           payload: {
-            originalIssue: mockIssueWithModel,
+            originalIssue: mockIssue,
             fromListId: 'gid://gitlab/List/1',
             toListId: 'gid://gitlab/List/2',
           },
@@ -620,7 +646,7 @@ describe('moveIssue', () => {
         {
           type: types.MOVE_ISSUE_FAILURE,
           payload: {
-            originalIssue: mockIssueWithModel,
+            originalIssue: mockIssue,
             fromListId: 'gid://gitlab/List/1',
             toListId: 'gid://gitlab/List/2',
             originalIndex: 0,
@@ -665,8 +691,16 @@ describe('setAssignees', () => {
       { activeIssue: { iid, referencePath: refPath }, commit: () => {} },
       [
         {
+          type: 'SET_ASSIGNEE_LOADING',
+          payload: true,
+        },
+        {
           type: 'UPDATE_ISSUE_BY_ID',
           payload: { prop: 'assignees', issueId: undefined, value: [node] },
+        },
+        {
+          type: 'SET_ASSIGNEE_LOADING',
+          payload: false,
         },
       ],
       [],

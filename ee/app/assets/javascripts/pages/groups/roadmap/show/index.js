@@ -2,7 +2,6 @@ import FilteredSearchTokenKeysEpics from 'ee/filtered_search/filtered_search_tok
 import initEpicCreateApp from 'ee/epic/epic_bundle';
 import initRoadmap from 'ee/roadmap/roadmap_bundle';
 import initFilteredSearch from '~/pages/search/init_filtered_search';
-import UserCallout from '~/user_callout';
 
 initFilteredSearch({
   page: 'epics',
@@ -14,6 +13,3 @@ initFilteredSearch({
 });
 initEpicCreateApp(true);
 initRoadmap();
-
-// eslint-disable-next-line no-new
-new UserCallout({ className: 'js-epics-limit-callout' });

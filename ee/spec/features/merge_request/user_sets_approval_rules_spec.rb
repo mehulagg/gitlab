@@ -25,6 +25,8 @@ RSpec.describe 'Merge request > User sets approval rules', :js do
       end
 
       it "shows approval rules from target project", :sidekiq_might_not_need_inline do
+        click_button 'Approval rules'
+
         names = page_rule_names
         regular_rules.each_with_index do |rule, idx|
           expect(names[idx]).to have_text(rule.name)
@@ -46,6 +48,8 @@ RSpec.describe 'Merge request > User sets approval rules', :js do
       end
 
       it "shows approval rules" do
+        click_button 'Approval rules'
+
         names = page_rule_names
         rules.each.with_index do |rule, idx|
           expect(names[idx]).to have_text(rule.name)

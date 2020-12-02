@@ -21,9 +21,14 @@ class JobFinder
     @pipeline_id = options.delete(:pipeline_id)
     @job_name = options.delete(:job_name)
 
+    # Force the token to be a string so that if api_token is nil, it's set to '', allowing unauthenticated requests (for forks).
+    api_token = options.delete(:api_token).to_s
+
+    warn "No API token given." if api_token.empty?
+
     Gitlab.configure do |config|
       config.endpoint = 'https://gitlab.com/api/v4'
-      config.private_token = options.delete(:api_token)
+      config.private_token = api_token
     end
   end
 

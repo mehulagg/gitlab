@@ -9,13 +9,6 @@ import createMergeRequestsState from 'ee/analytics/code_review_analytics/store/m
 import { TEST_HOST } from 'helpers/test_constants';
 import createFiltersState from '~/vue_shared/components/filtered_search_bar/store/modules/filters/state';
 
-const mockFilterManagerSetup = jest.fn();
-jest.mock('ee/analytics/code_review_analytics/filtered_search_code_review_analytics', () =>
-  jest.fn().mockImplementation(() => ({
-    setup: mockFilterManagerSetup,
-  })),
-);
-
 const localVue = createLocalVue();
 localVue.use(Vuex);
 
@@ -62,7 +55,7 @@ describe('CodeReviewAnalyticsApp component', () => {
       },
     });
 
-  const createComponent = (store, codeReviewAnalyticsHasNewSearch = false) =>
+  const createComponent = store =>
     shallowMount(CodeReviewAnalyticsApp, {
       localVue,
       store,
@@ -73,11 +66,6 @@ describe('CodeReviewAnalyticsApp component', () => {
         milestonePath: `${TEST_HOST}/milestones`,
         projectPath: TEST_HOST,
         labelsPath: `${TEST_HOST}/labels`,
-      },
-      provide: {
-        glFeatures: {
-          codeReviewAnalyticsHasNewSearch,
-        },
       },
     });
 
@@ -98,36 +86,11 @@ describe('CodeReviewAnalyticsApp component', () => {
   const findPagination = () => wrapper.find(GlPagination);
 
   describe('template', () => {
-    describe('when "codeReviewAnalyticsHasNewSearch" is disabled', () => {
-      beforeEach(() => {
-        vuexStore = createStore();
-        wrapper = createComponent(vuexStore);
-      });
+    it('renders the filter bar component', () => {
+      vuexStore = createStore();
+      wrapper = createComponent(vuexStore, true);
 
-      it('does not render the filter bar component', () => {
-        expect(findFilterBar().exists()).toBe(false);
-      });
-
-      it("calls the filterManager's setup method", () => {
-        expect(mockFilterManagerSetup).toHaveBeenCalled();
-      });
-    });
-
-    describe('when "codeReviewAnalyticsHasNewSearch" is enabled', () => {
-      describe('when the feature is enabled', () => {
-        beforeEach(() => {
-          vuexStore = createStore();
-          wrapper = createComponent(vuexStore, true);
-        });
-
-        it('renders the filter bar component', () => {
-          expect(findFilterBar().exists()).toBe(true);
-        });
-
-        it("does not call the filterManager's setup method", () => {
-          expect(mockFilterManagerSetup).not.toHaveBeenCalled();
-        });
-      });
+      expect(findFilterBar().exists()).toBe(true);
     });
 
     describe('while loading', () => {

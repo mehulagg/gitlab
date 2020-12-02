@@ -1,7 +1,7 @@
 ---
 stage: Monitor
 group: Health
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Monitoring GitLab with Prometheus
@@ -349,7 +349,7 @@ To add a Prometheus dashboard for a single server GitLab setup:
 
 GitLab monitors its own internal service metrics, and makes them available at the `/-/metrics` endpoint. Unlike other exporters, this endpoint requires authentication as it's available on the same URL and port as user traffic.
 
-[➔ Read more about the GitLab Metrics.](gitlab_metrics.md)
+Read more about the [GitLab Metrics](gitlab_metrics.md).
 
 ## Bundled software metrics
 

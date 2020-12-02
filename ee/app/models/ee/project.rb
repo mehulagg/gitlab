@@ -38,7 +38,6 @@ module EE
       has_one :push_rule, ->(project) { project&.feature_available?(:push_rules) ? all : none }
       has_one :index_status
 
-      has_one :jenkins_service
       has_one :github_service
       has_one :gitlab_slack_application_service
 
@@ -347,10 +346,6 @@ module EE
       feature_available?(:jira_issues_integration)
     end
 
-    def jira_vulnerabilities_integration_available?
-      ::Feature.enabled?(:jira_for_vulnerabilities, self, default_enabled: false) && feature_available?(:jira_vulnerabilities_integration)
-    end
-
     def multiple_approval_rules_available?
       feature_available?(:multiple_approval_rules)
     end
@@ -581,7 +576,6 @@ module EE
     def disabled_services
       strong_memoize(:disabled_services) do
         super.tap do |services|
-          services.push('jenkins') unless feature_available?(:jenkins_integration)
           services.push('github') unless feature_available?(:github_project_service_integration)
           ::Gitlab::CurrentSettings.slack_app_enabled ? services.push('slack_slash_commands') : services.push('gitlab_slack_application')
         end

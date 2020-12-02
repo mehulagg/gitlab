@@ -17,6 +17,7 @@ describe('SubscriptionApp component', () => {
     namespaceId: '42',
     namespaceName: 'bronze',
     planUpgradeHref: '/url',
+    planRenewHref: '/url/for/renew',
     customerPortalUrl: 'https://customers.gitlab.com/subscriptions',
   };
 
@@ -58,6 +59,7 @@ describe('SubscriptionApp component', () => {
       expectComponentWithProps(SubscriptionTable, {
         namespaceName: providedFields.namespaceName,
         planUpgradeHref: providedFields.planUpgradeHref,
+        planRenewHref: providedFields.planRenewHref,
         customerPortalUrl: providedFields.customerPortalUrl,
       });
     });

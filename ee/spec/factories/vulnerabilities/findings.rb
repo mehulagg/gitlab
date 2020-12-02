@@ -171,7 +171,7 @@ FactoryBot.define do
             cve: "aws-key.py:fac8c3618ca3c0b55431402635743c0d6884016058f696be4a567c4183c66cfd:AWS",
             severity: "Critical",
             confidence: "Unknown",
-            raw_source_code_extract: "AKIALALEMEM35243O345",
+            raw_source_code_extract: "AKIAIOSFODNN7EXAMPLE",
             scanner: { id: "gitleaks", name: "Gitleaks" },
             location: { file: "aws-key.py",
                         commit: { author: "Analyzer", sha: "d874aae969588eb718e1ed18aa0be73ea69b3539" },
@@ -195,6 +195,14 @@ FactoryBot.define do
           }
         ]
         finding.raw_metadata = raw_metadata.to_json
+      end
+    end
+
+    trait :with_pipeline do
+      after(:create) do |finding|
+        pipeline = create(:ci_pipeline, project: finding.project)
+
+        finding.pipelines = [pipeline]
       end
     end
 

@@ -105,7 +105,7 @@ describe('OnDemandScansProfileSelector', () => {
     it('when a profile is selected, input event is emitted', async () => {
       await selectFirstProfile();
 
-      expect(wrapper.emitted('input')).toEqual([[scannerProfiles[0].id]]);
+      expect(wrapper.emitted('input')).toEqual([[scannerProfiles[0]]]);
     });
 
     it('shows dropdown items for each profile', () => {
@@ -130,7 +130,7 @@ describe('OnDemandScansProfileSelector', () => {
       createFullComponent({
         propsData: {
           profiles: scannerProfiles,
-          value: selectedProfile.id,
+          value: selectedProfile,
         },
       });
     });

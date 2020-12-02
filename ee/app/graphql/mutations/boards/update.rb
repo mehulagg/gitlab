@@ -8,7 +8,7 @@ module Mutations
       argument :id,
                ::Types::GlobalIDType[::Board],
                required: true,
-               description: 'The board global id.'
+               description: 'The board global ID'
 
       argument :name,
                 GraphQL::STRING_TYPE,
@@ -29,17 +29,17 @@ module Mutations
                ::Types::GlobalIDType[::User],
                required: false,
                loads: ::Types::UserType,
-               description: 'The id of user to be assigned to the board.'
+               description: 'The id of user to be assigned to the board'
 
       argument :milestone_id,
                ::Types::GlobalIDType[::Milestone],
                required: false,
-               description: 'The id of milestone to be assigned to the board.'
+               description: 'The id of milestone to be assigned to the board'
 
       argument :weight,
                GraphQL::INT_TYPE,
                required: false,
-               description: 'The weight value to be assigned to the board.'
+               description: 'The weight value to be assigned to the board'
 
       argument :labels, [GraphQL::STRING_TYPE],
                required: false,
@@ -47,12 +47,12 @@ module Mutations
 
       argument :label_ids, [::Types::GlobalIDType[::Label]],
                required: false,
-               description: 'The IDs of labels to be added to the board.'
+               description: 'The IDs of labels to be added to the board'
 
       field :board,
             Types::BoardType,
             null: true,
-            description: "The board after mutation."
+            description: "The board after mutation"
 
       authorize :admin_board
 

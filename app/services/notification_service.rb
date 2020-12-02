@@ -353,7 +353,7 @@ class NotificationService
     issue = note.noteable
     support_bot = User.support_bot
 
-    return unless issue.service_desk_reply_to.present?
+    return unless issue.external_author.present?
     return unless issue.project.service_desk_enabled?
     return if note.author == support_bot
     return unless issue.subscribed?(support_bot, issue.project)
@@ -378,6 +378,10 @@ class NotificationService
     recipients.each do |recipient|
       mailer.instance_access_request_email(user, recipient).deliver_later
     end
+  end
+
+  def user_admin_rejection(name, email)
+    mailer.user_admin_rejection_email(name, email).deliver_later
   end
 
   # Members
