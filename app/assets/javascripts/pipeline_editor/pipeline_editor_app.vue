@@ -3,8 +3,8 @@ import { GlAlert, GlLoadingIcon, GlTab, GlTabs } from '@gitlab/ui';
 import { __, s__, sprintf } from '~/locale';
 import { mergeUrlParams, redirectTo, refreshCurrentPage } from '~/lib/utils/url_utility';
 
-import CommitForm from './components/commit/commit_form.vue';
 import PipelineGraph from '~/pipelines/components/pipeline_graph/pipeline_graph.vue';
+import CommitForm from './components/commit/commit_form.vue';
 import TextEditor from './components/text_editor.vue';
 
 import commitCiFileMutation from './graphql/mutations/commit_ci_file.mutation.graphql';
