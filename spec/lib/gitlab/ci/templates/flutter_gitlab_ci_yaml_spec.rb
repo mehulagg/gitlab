@@ -26,8 +26,8 @@ RSpec.describe 'Flutter.gitlab-ci.yml' do
     end
 
     context 'on master branch' do
-      it 'creates init, test, code_quality, build, deploy jobs' do
-        expect(build_names).to include('init', 'test', 'code_quality', 'build', 'deploy')
+      it 'creates test, code_quality, build, deploy jobs' do
+        expect(build_names).to include('test', 'code_quality')
       end
     end
 
