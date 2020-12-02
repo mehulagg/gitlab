@@ -1,0 +1,13 @@
+---
+# Warning: gitlab.Possessive
+#
+# The word GitLab should not be used in the possessive form for legal reasons.
+#
+# For a list of all options, see https://errata-ai.gitbook.io/vale/getting-started/styles
+extends: existence
+message: 'For legal reasons, rewrite "%s" to not use the possessive form.'
+level: warning
+ignorecase: true
+link: https://docs.gitlab.com/ee/development/documentation/styleguide/#contractions
+tokens:
+  - GitLab's
