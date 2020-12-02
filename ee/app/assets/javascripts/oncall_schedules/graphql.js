@@ -5,8 +5,11 @@ import createDefaultClient from '~/lib/graphql';
 Vue.use(VueApollo);
 
 export default new VueApollo({
-  defaultClient: createDefaultClient({}, {
-    cacheConfig: {},
-    assumeImmutableResults: true,
-  }),
+  defaultClient: createDefaultClient(
+    {},
+    {
+      cacheConfig: {},
+      assumeImmutableResults: true,
+    },
+  ),
 });
