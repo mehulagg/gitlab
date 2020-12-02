@@ -47,7 +47,7 @@ documentation.
 ### All information
 
 Include problem-solving actions that may address rare cases or be considered
-_risky_, if you provide proper context through fully detailed
+_risky_, but provide proper context through fully-detailed
 warnings and caveats. This kind of content should be included as it could be
 helpful to others and, when properly explained, its benefits outweigh the risks.
 If you think you have found an exception to this rule, contact the
