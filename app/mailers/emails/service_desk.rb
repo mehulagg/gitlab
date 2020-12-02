@@ -30,10 +30,10 @@ module Emails
       email_sender = sender(@note.author_id)
 
       @issue.issue_email_participants.each do |email_participant|
-        options = service_desk_options(email_sender, 'new_note', email_participant)
+        options = service_desk_options(email_sender, 'new_note', email_participant.email)
                     .merge(subject: subject_base)
 
-        mail_answer_thread(@issue, options)
+        mail_answer_thread(@issue, options).deliver_later
       end
     end
 

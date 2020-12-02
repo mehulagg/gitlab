@@ -358,7 +358,7 @@ class NotificationService
     return if note.author == support_bot
     return unless issue.subscribed?(support_bot, issue.project)
 
-    mailer.service_desk_new_note_email(issue.id, note.id).deliver_later
+    mailer.service_desk_new_note_email(issue.id, note.id)
   end
 
   # Notify users when a new release is created
