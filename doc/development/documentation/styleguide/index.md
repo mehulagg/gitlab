@@ -351,7 +351,7 @@ item, use the same capitalization that's displayed in the user interface.
 Standards for this content are listed in the [Pajamas Design System Content section](https://design.gitlab.com/content/punctuation/)
 and typically match what's called for in this Documentation Style Guide.
 
-If you think the user interface text contains styling mistakes,
+If you think the user interface text contains style mistakes,
 create an issue or an MR to propose a change to the user interface text.
 
 #### Feature names
