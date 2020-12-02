@@ -27,7 +27,6 @@ module QA
           push.project = project
           push.file_name = "other.txt"
           push.file_content = "New file added!"
-          push.branch_name = Runtime::Env.default_branch
           push.new_branch = false
         end
 

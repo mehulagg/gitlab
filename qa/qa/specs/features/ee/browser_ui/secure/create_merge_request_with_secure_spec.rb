@@ -46,9 +46,9 @@ module QA
         merge_request = Resource::MergeRequest.fabricate_via_api! do |mr|
           mr.project = @project
           mr.source_branch = 'secure-mr'
-          mr.target_branch = Runtime::Env.default_branch
+          mr.target_branch = @project.default_branch
           mr.source = @source
-          mr.target = Runtime::Env.default_branch
+          mr.target = @project.default_branch
           mr.target_new_branch = false
         end
 

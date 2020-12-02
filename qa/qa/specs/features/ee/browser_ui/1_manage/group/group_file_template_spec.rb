@@ -28,8 +28,7 @@ module QA
             <<~CI
               job:
                 script: echo "Skipped"
-                except:
-                  - "#{Runtime::Env.default_branch}"
+                only: web
             CI
         },
         {

@@ -30,7 +30,7 @@ module QA
       end
 
       def branch
-        @branch ||= Runtime::Env.default_branch
+        @branch ||= project.default_branch
       end
 
       def fabricate!

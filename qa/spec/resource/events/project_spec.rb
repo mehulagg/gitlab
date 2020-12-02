@@ -6,6 +6,10 @@ RSpec.describe QA::Resource::Events::Project do
       def api_get_path
         '/foo'
       end
+
+      def default_branch
+        'master'
+      end
     end
   end
 
