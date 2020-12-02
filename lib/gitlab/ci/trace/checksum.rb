@@ -64,6 +64,12 @@ module Gitlab
           end
         end
 
+        def trace_size
+          trace_chunks.reduce(0) do |total, chunk|
+            total + chunk_size(chunk)
+          end
+        end
+
         def chunks_count
           trace_chunks.to_a.size
         end

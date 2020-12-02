@@ -113,6 +113,18 @@ RSpec.describe Gitlab::Ci::Trace::Checksum do
     end
   end
 
+  describe '#trace_size' do
+    before do
+      create_chunk(index: 0, data: 'a' * 128.kilobytes)
+      create_chunk(index: 1, data: 'b' * 128.kilobytes)
+      create_chunk(index: 2, data: 'abcdefg-ü')
+    end
+
+    it 'returns total trace size in bytes' do
+      expect(subject.trace_size).to eq (262154)
+    end
+  end
+
   def create_chunk(index:, data:)
     create(:ci_build_trace_chunk, :persisted, build: build,
                                               chunk_index: index,
