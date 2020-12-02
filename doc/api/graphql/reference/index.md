@@ -241,6 +241,7 @@ Represents a project or group board.
 | `hideBacklogList` | Boolean | Whether or not backlog list is hidden |
 | `hideClosedList` | Boolean | Whether or not closed list is hidden |
 | `id` | ID! | ID (global ID) of the board |
+| `iteration` | Iteration | The board iteration. |
 | `labels` | LabelConnection | Labels of the board |
 | `lists` | BoardListConnection | Lists of the board |
 | `milestone` | Milestone | The board milestone |

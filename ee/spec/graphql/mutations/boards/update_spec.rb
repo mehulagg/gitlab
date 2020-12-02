@@ -3,10 +3,12 @@
 require 'spec_helper'
 
 RSpec.describe Mutations::Boards::Update do
-  let_it_be(:project) { create(:project) }
+  let_it_be(:group) { create(:group) }
+  let_it_be(:project) { create(:project, group: group) }
   let_it_be(:user) { create(:user) }
   let_it_be(:board) { create(:board, project: project) }
   let_it_be(:milestone) { create(:milestone, project: project) }
+  let_it_be(:iteration) { create(:iteration, group: group) }
   let_it_be(:label1) { create(:label, project: project) }
   let_it_be(:label2) { create(:label, project: project) }
 
@@ -23,6 +25,7 @@ RSpec.describe Mutations::Boards::Update do
       weight: 3,
       assignee_id: user.to_global_id,
       milestone_id: milestone.to_global_id,
+      iteration_id: iteration.to_global_id,
       label_ids: [label1.to_global_id, label2.to_global_id]
     }
   end
@@ -59,12 +62,25 @@ RSpec.describe Mutations::Boards::Update do
           weight: 3,
           assignee: user,
           milestone: milestone,
+          iteration: iteration,
           labels: contain_exactly(label1, label2)
         }
 
         subject
 
         expect(board.reload).to have_attributes(expected_attributes)
+      end
+
+      context 'when passing current iteration' do
+        before do
+          mutation_params.merge!(iteration_id: Iteration::Constants::Current.to_global_id)
+        end
+
+        it 'updates board with current iteration' do
+          subject
+
+          expect(board.reload.iteration.id).to eq(Iteration::Constants::Current.id)
+        end
       end
 
       context 'when passing labels param' do

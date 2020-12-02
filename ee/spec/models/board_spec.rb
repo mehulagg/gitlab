@@ -95,22 +95,22 @@ RSpec.describe Board do
         stub_licensed_features(scoped_issue_board: true)
       end
 
-      it 'returns Iteration::None, when iteration_id is None.id' do
-        board.iteration_id = Iteration::None.id
+      it 'returns Iteration::Constants::None, when iteration_id is None.id' do
+        board.iteration_id = Iteration::Constants::None.id
 
-        expect(board.iteration).to eq Iteration::None
+        expect(board.iteration).to eq Iteration::Constants::None
       end
 
-      it 'returns Iteration::Any, when iteration_id is Any.id' do
-        board.iteration_id = Iteration::Any.id
+      it 'returns Iteration::Constants::Any, when iteration_id is Any.id' do
+        board.iteration_id = Iteration::Constants::Any.id
 
-        expect(board.iteration).to eq Iteration::Any
+        expect(board.iteration).to eq Iteration::Constants::Any
       end
 
-      it 'returns Iteration::Current, when iteration_id is Current.id' do
-        board.iteration_id = Iteration::Current.id
+      it 'returns ::Iteration::Constants::Current, when iteration_id is Current.id' do
+        board.iteration_id = Iteration::Constants::Current.id
 
-        expect(board.iteration).to eq Iteration::Current
+        expect(board.iteration).to eq Iteration::Constants::Current
       end
 
       it 'returns iteration for valid iteration id' do
