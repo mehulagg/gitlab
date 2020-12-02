@@ -20,8 +20,7 @@ export const init = ({ dispatch }, { endpoint, logState, pagePath }) => {
     logState,
     pagePath,
   });
-
-  return Promise.all([dispatch('fetchJob'), dispatch('fetchTrace')]);
+  dispatch('fetchJob');
 };
 
 export const setJobEndpoint = ({ commit }, endpoint) => commit(types.SET_JOB_ENDPOINT, endpoint);
@@ -65,15 +64,18 @@ export const fetchJob = ({ state, dispatch }) => {
     },
     data: state.jobEndpoint,
     method: 'getJob',
-    successCallback: ({ data }) => {
-      dispatch('receiveJobSuccess', data);
-      dispatch('fetchTrace', data);
-    },
+    successCallback: ({ data }) => dispatch('receiveJobSuccess', data),
     errorCallback: () => dispatch('receiveJobError'),
   });
 
   if (!Visibility.hidden()) {
-    eTagPoll.makeRequest();
+    eTagPoll.makeRequest().then(() => {
+      // if a job is canceled we still need to dispatch
+      // fetchTrace to get the trace so we check for has_trace
+      if (state.job.started || state.job.has_trace) {
+        dispatch('fetchTrace');
+      }
+    });
   } else {
     axios
       .get(state.jobEndpoint)
@@ -84,8 +86,10 @@ export const fetchJob = ({ state, dispatch }) => {
   Visibility.change(() => {
     if (!Visibility.hidden()) {
       dispatch('restartPolling');
+      dispatch('startPollingTrace');
     } else {
       dispatch('stopPolling');
+      dispatch('stopPollingTrace');
     }
   });
 };
@@ -160,29 +164,22 @@ export const toggleScrollisInBottom = ({ commit }, toggle) => {
 
 export const requestTrace = ({ commit }) => commit(types.REQUEST_TRACE);
 
-export const fetchTrace = ({ dispatch, state }, job) => {
-  // on first fetchTrace call the job will be undefined
-  // ensure job is defined, has started and has a trace before making API call
-  if (job && job.started && job.has_trace) {
-    if (!Visibility.hidden()) {
-      axios
-        .get(`${state.traceEndpoint}/trace.json`, {
-          params: { state: state.traceState },
-        })
-        .then(({ data }) => {
-          dispatch('toggleScrollisInBottom', isScrolledToBottom());
-          dispatch('receiveTraceSuccess', data);
+export const fetchTrace = ({ dispatch, state }) =>
+  axios
+    .get(`${state.traceEndpoint}/trace.json`, {
+      params: { state: state.traceState },
+    })
+    .then(({ data }) => {
+      dispatch('toggleScrollisInBottom', isScrolledToBottom());
+      dispatch('receiveTraceSuccess', data);
 
-          if (data.complete) {
-            dispatch('stopPollingTrace');
-          } else if (!state.traceTimeout) {
-            dispatch('startPollingTrace');
-          }
-        })
-        .catch(() => dispatch('receiveTraceError'));
-    }
-  }
-};
+      if (data.complete) {
+        dispatch('stopPollingTrace');
+      } else if (!state.traceTimeout) {
+        dispatch('startPollingTrace');
+      }
+    })
+    .catch(() => dispatch('receiveTraceError'));
 
 export const startPollingTrace = ({ dispatch, commit }) => {
   const traceTimeout = setTimeout(() => {
