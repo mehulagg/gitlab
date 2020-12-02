@@ -20,37 +20,14 @@ export default {
       return this.presetType === PRESET_TYPES.WEEKS;
     },
     hasToday() {
-      if (this.presetTypeQuarters) {
-        return (
-          this.currentDate >= this.timeframeItem.range[0] &&
-          this.currentDate <= this.timeframeItem.range[2]
-        );
-      } else if (this.presetTypeMonths) {
-        return (
-          this.currentDate.getMonth() === this.timeframeItem.getMonth() &&
-          this.currentDate.getFullYear() === this.timeframeItem.getFullYear()
-        );
-      }
-      const timeframeItem = new Date(this.timeframeItem.getTime());
-      const headerSubItems = new Array(7)
-        .fill()
-        .map(
-          (val, i) =>
-            new Date(
-              timeframeItem.getFullYear(),
-              timeframeItem.getMonth(),
-              timeframeItem.getDate() + i,
-            ),
-        );
-
-      return (
-        this.currentDate.getTime() >= headerSubItems[0].getTime() &&
-        this.currentDate.getTime() <= headerSubItems[headerSubItems.length - 1].getTime()
-      );
+      return this.timeframeHasToday(this.timeframeItem);
     },
   },
   methods: {
-    getIndicatorStyles() {
+    /**
+     * Returns the left offset (in %) for the current time indicator (red vertical line)
+     */
+    getIndicatorOffset(timeframeItem) {
       let left;
 
       // Get total days of current timeframe Item and then
@@ -58,21 +35,50 @@ export default {
       // based on the current presetType
       if (this.presetTypeQuarters) {
         left = Math.floor(
-          (dayInQuarter(this.currentDate, this.timeframeItem.range) /
-            totalDaysInQuarter(this.timeframeItem.range)) *
+          (dayInQuarter(this.currentDate, timeframeItem.range) /
+            totalDaysInQuarter(timeframeItem.range)) *
             100,
         );
       } else if (this.presetTypeMonths) {
-        left = Math.floor(
-          (this.currentDate.getDate() / totalDaysInMonth(this.timeframeItem)) * 100,
-        );
+        left = Math.floor((this.currentDate.getDate() / totalDaysInMonth(timeframeItem)) * 100);
       } else if (this.presetTypeWeeks) {
         left = Math.floor(((this.currentDate.getDay() + 1) / DAYS_IN_WEEK) * 100 - DAYS_IN_WEEK);
       }
 
+      return left;
+    },
+    getIndicatorStyles() {
       return {
-        left: `${left}%`,
+        left: `${this.getIndicatorOffset(this.timeframeItem)}%`,
       };
+    },
+    timeframeHasToday(timeframeItem) {
+      if (this.presetTypeQuarters) {
+        return (
+          this.currentDate >= timeframeItem.range[0] && this.currentDate <= timeframeItem.range[2]
+        );
+      } else if (this.presetTypeMonths) {
+        return (
+          this.currentDate.getMonth() === timeframeItem.getMonth() &&
+          this.currentDate.getFullYear() === timeframeItem.getFullYear()
+        );
+      }
+      const timeframeItemDate = new Date(timeframeItem.getTime());
+      const headerSubItems = new Array(7)
+        .fill()
+        .map(
+          (val, i) =>
+            new Date(
+              timeframeItemDate.getFullYear(),
+              timeframeItemDate.getMonth(),
+              timeframeItemDate.getDate() + i,
+            ),
+        );
+
+      return (
+        this.currentDate.getTime() >= headerSubItems[0].getTime() &&
+        this.currentDate.getTime() <= headerSubItems[headerSubItems.length - 1].getTime()
+      );
     },
     timeframeString(roadmapItem) {
       if (roadmapItem.startDateUndefined && roadmapItem.endDateUndefined) {

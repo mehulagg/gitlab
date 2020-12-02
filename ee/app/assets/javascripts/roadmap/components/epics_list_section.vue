@@ -118,7 +118,9 @@ export default {
       this.syncClientWidth();
     },
     syncClientWidth() {
+      // console.log(this.$root.$el);
       this.clientWidth = this.$root.$el?.clientWidth || 0;
+      // console.log(this.clientWidth);
     },
     getEmptyRowContainerStyles() {
       if (this.$refs.epicItems && this.$refs.epicItems.length) {
@@ -137,6 +139,7 @@ export default {
       if (this.$el.parentElement) this.$el.parentElement.scrollBy(TIMELINE_CELL_MIN_WIDTH / 2, 0);
     },
     handleEpicsListScroll({ scrollTop, clientHeight, scrollHeight }) {
+      // console.log('epicsListScroll event.');
       this.showBottomShadow = Math.ceil(scrollTop) + clientHeight < scrollHeight;
     },
     getEpicItemProps(index) {
@@ -199,7 +202,11 @@ export default {
       class="epics-list-item epics-list-item-empty clearfix"
     >
       <span class="epic-details-cell"></span>
-      <span v-for="(timeframeItem, index) in timeframe" :key="index" class="epic-timeline-cell">
+      <span
+        v-for="(timeframeItem, index) in timeframe"
+        :key="index"
+        class="epic-timeline-cell gl-relative"
+      >
         <current-day-indicator :preset-type="presetType" :timeframe-item="timeframeItem" />
       </span>
     </div>

@@ -257,7 +257,8 @@ html.group-epics-roadmap-html {
 .epics-list-item {
   &:hover {
     .epic-details-cell,
-    .epic-timeline-cell {
+    .epic-timeline-cell,
+    .epic-timeline-canvas {
       background-color: var(--gray-50, $gray-50);
     }
   }
@@ -322,10 +323,6 @@ html.group-epics-roadmap-html {
   &:last-child {
     border-right: 0;
   }
-}
-
-.epic-bar-wrapper {
-  position: relative;
 }
 
 .epic-bar {

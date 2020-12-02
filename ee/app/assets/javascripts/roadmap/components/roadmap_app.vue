@@ -111,6 +111,7 @@ export default {
      *    reset scroll-position (due to DOM prepend).
      */
     processExtendedTimeline({ extendType = EXTEND_AS.PREPEND, roadmapTimelineEl, itemsCount = 0 }) {
+      // TODO: Check if this should be removed.
       // Re-render timeline bars with updated timeline
       eventHub.$emit('refreshTimeline', {
         todayBarReady: extendType === EXTEND_AS.PREPEND,
@@ -126,6 +127,12 @@ export default {
       }
     },
     handleScrollToExtend(roadmapTimelineEl, extendType = EXTEND_AS.PREPEND) {
+      // const meta = {
+      //   roadmapTimelineEl,
+      //   extendType,
+      // };
+      // console.log(meta);
+
       this.extendTimeframe({ extendAs: extendType });
       this.refreshEpicDates();
       this.refreshMilestoneDates();

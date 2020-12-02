@@ -8,8 +8,6 @@ import QuartersPresetMixin from '../mixins/quarters_preset_mixin';
 import MonthsPresetMixin from '../mixins/months_preset_mixin';
 import WeeksPresetMixin from '../mixins/weeks_preset_mixin';
 
-import CurrentDayIndicator from './current_day_indicator.vue';
-
 import {
   EPIC_DETAILS_CELL_WIDTH,
   PERCENTAGE,
@@ -21,7 +19,6 @@ import {
 export default {
   cellWidth: TIMELINE_CELL_MIN_WIDTH,
   components: {
-    CurrentDayIndicator,
     GlIcon,
     GlPopover,
     GlProgressBar,
@@ -34,10 +31,6 @@ export default {
     },
     timeframe: {
       type: Array,
-      required: true,
-    },
-    timeframeItem: {
-      type: [Date, Object],
       required: true,
     },
     epic: {
@@ -94,15 +87,16 @@ export default {
       }
       return this.epic.endDate;
     },
-    hasStartDate() {
-      if (this.presetTypeQuarters) {
-        return this.hasStartDateForQuarter();
-      } else if (this.presetTypeMonths) {
-        return this.hasStartDateForMonth();
-      } else if (this.presetTypeWeeks) {
-        return this.hasStartDateForWeek();
-      }
-      return false;
+    timeframeItemIndex() {
+      return this.timeframe.findIndex(timeframeItem => {
+        return this.hasStartDate(timeframeItem);
+      });
+    },
+    timeframeItem() {
+      return this.timeframe[this.timeframeItemIndex];
+    },
+    timelineLeftOffset() {
+      return `${this.$options.cellWidth * this.timeframeItemIndex + EPIC_DETAILS_CELL_WIDTH}px`;
     },
     timelineBarInnerStyle() {
       return {
@@ -158,16 +152,30 @@ export default {
   },
   methods: {
     generateKey,
+    hasStartDate(timeframeItem) {
+      if (this.presetTypeQuarters) {
+        return this.hasStartDateForQuarter(timeframeItem);
+      } else if (this.presetTypeMonths) {
+        return this.hasStartDateForMonth(timeframeItem);
+      } else if (this.presetTypeWeeks) {
+        return this.hasStartDateForWeek(timeframeItem);
+      }
+      return false;
+    },
   },
 };
 </script>
 
 <template>
-  <span class="epic-timeline-cell" data-qa-selector="epic_timeline_cell">
-    <current-day-indicator :preset-type="presetType" :timeframe-item="timeframeItem" />
-    <div class="epic-bar-wrapper">
+  <!-- this used to be epic-timeline-cell -->
+  <span
+    class="gl-absolute gl-top-0 gl-bg-transparent"
+    :style="`width: ${this.$options.cellWidth}px`"
+    data-testid="epic-timeline-banner"
+    data-qa-selector="epic_timeline_banner"
+  >
+    <div :style="{ left: timelineLeftOffset }" class="gl-relative">
       <a
-        v-if="hasStartDate"
         :id="generateKey(epic)"
         :href="epic.webUrl"
         :style="timelineBarStyles(epic)"

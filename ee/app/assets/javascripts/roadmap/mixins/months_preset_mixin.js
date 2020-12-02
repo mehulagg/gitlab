@@ -5,10 +5,10 @@ export default {
     /**
      * Check if current epic starts within current month (timeline cell)
      */
-    hasStartDateForMonth() {
+    hasStartDateForMonth(timeframeItem) {
       return (
-        this.startDateValues.month === this.timeframeItem.getMonth() &&
-        this.startDateValues.year === this.timeframeItem.getFullYear()
+        this.startDateValues.month === timeframeItem.getMonth() &&
+        this.startDateValues.year === timeframeItem.getFullYear()
       );
     },
     /**

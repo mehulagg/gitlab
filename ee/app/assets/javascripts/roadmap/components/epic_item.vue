@@ -6,9 +6,16 @@ import EpicItemTimeline from './epic_item_timeline.vue';
 
 import CommonMixin from '../mixins/common_mixin';
 
-import { EPIC_HIGHLIGHT_REMOVE_AFTER } from '../constants';
+import {
+  EPIC_HIGHLIGHT_REMOVE_AFTER,
+  EPIC_ITEM_HEIGHT,
+  TIMELINE_CELL_MIN_WIDTH,
+  GRID_COLOR,
+  CURRENT_DAY_INDICATOR_COLOR,
+} from '../constants';
 
 export default {
+  epicItemHeight: EPIC_ITEM_HEIGHT,
   components: {
     EpicItemDetails,
     EpicItemTimeline,
@@ -53,6 +60,14 @@ export default {
       required: true,
     },
   },
+  data() {
+    const currentDate = new Date();
+    currentDate.setHours(0, 0, 0, 0);
+
+    return {
+      currentDate,
+    };
+  },
   computed: {
     /**
      * In case Epic start date is out of range
@@ -81,11 +96,75 @@ export default {
     hasChildrenToShow() {
       return this.childrenFlags[this.epic.id].itemExpanded && this.childrenEpics[this.epic.id];
     },
+    canvasWidth() {
+      return this.timeframe.length * TIMELINE_CELL_MIN_WIDTH;
+    },
+    /**
+     * The index of the timeframe that includes the current date.
+     * ex. let timeframe be [ timeframeItem0, timeframeItem1 ].
+     * If today is in timeframeItem1, we should return 1.
+     */
+    currentDayTimeframeIndex() {
+      return this.timeframe.findIndex(timeframeItem => {
+        return this.timeframeHasToday(timeframeItem);
+      });
+    },
+  },
+  watch: {
+    timeframe: {
+      deep: true,
+      handler() {
+        window.requestAnimationFrame(this.updateCanvas);
+      },
+    },
+  },
+  mounted() {
+    window.requestAnimationFrame(this.updateCanvas);
   },
   updated() {
     this.removeHighlight();
   },
   methods: {
+    updateCanvas() {
+      const { canvas } = this.$refs;
+      const ctx = canvas.getContext('2d');
+
+      // Draw grid
+      ctx.beginPath();
+      ctx.strokeStyle = GRID_COLOR;
+      ctx.lineWidth = 1;
+      this.timeframe
+        .map((_, i) => i * TIMELINE_CELL_MIN_WIDTH - 0.5)
+        .forEach(x => {
+          ctx.moveTo(x, 0);
+          ctx.lineTo(x, EPIC_ITEM_HEIGHT);
+        });
+      ctx.moveTo(0, EPIC_ITEM_HEIGHT - 0.5);
+      // TODO check if clientWidth can be used
+      ctx.lineTo(this.canvasWidth, EPIC_ITEM_HEIGHT - 0.5);
+      // console.log('line to:', this.canvasWidth);
+      ctx.stroke();
+
+      // Draw current time indicator (vertical line)
+      ctx.beginPath();
+      ctx.strokeStyle = CURRENT_DAY_INDICATOR_COLOR;
+      ctx.lineWidth = 2;
+      const leftOffset = this.getIndicatorOffset(this.timeframe[this.currentDayTimeframeIndex]);
+      // console.log(leftOffset)
+      ctx.moveTo(
+        this.currentDayTimeframeIndex * TIMELINE_CELL_MIN_WIDTH +
+          0.5 +
+          (TIMELINE_CELL_MIN_WIDTH * leftOffset) / 100.0,
+        0,
+      );
+      ctx.lineTo(
+        this.currentDayTimeframeIndex * TIMELINE_CELL_MIN_WIDTH +
+          0.5 +
+          (TIMELINE_CELL_MIN_WIDTH * leftOffset) / 100.0,
+        EPIC_ITEM_HEIGHT,
+      );
+      ctx.stroke();
+    },
     /**
      * When new epics are added to the list on
      * timeline scroll, we set `newEpic` flag
@@ -112,7 +191,7 @@ export default {
 
 <template>
   <div class="epic-item-container">
-    <div :class="{ 'newly-added-epic': epic.newEpic }" class="epics-list-item clearfix">
+    <div :class="{ 'newly-added-epic': epic.newEpic }" class="epics-list-item gl-relative clearfix">
       <epic-item-details
         :epic="epic"
         :current-group-id="currentGroupId"
@@ -122,12 +201,15 @@ export default {
         :has-filters-applied="hasFiltersApplied"
         :is-children-empty="isChildrenEmpty"
       />
+      <canvas
+        ref="canvas"
+        :height="`${this.$options.epicItemHeight}px`"
+        :width="`${canvasWidth}px`"
+        class="epic-timeline-canvas gl-display-block"
+      ></canvas>
       <epic-item-timeline
-        v-for="(timeframeItem, index) in timeframe"
-        :key="index"
         :preset-type="presetType"
         :timeframe="timeframe"
-        :timeframe-item="timeframeItem"
         :epic="epic"
         :client-width="clientWidth"
       />
