@@ -41,8 +41,11 @@ You can run `kas` and `agentk` locally to test the [Kubernetes Agent](index.md) 
 
    # Start kas
    bazel run //cmd/kas -- --configuration-file="$(pwd)/cfg.yaml"
+   ```
 
-   # Start agentk
+1. In a new terminal window, run this command to start agentk:
+
+   ```shell
    bazel run //cmd/agentk -- --kas-address=grpc://127.0.0.1:8150 --token-file="$(pwd)/token.txt"
    ```
 
