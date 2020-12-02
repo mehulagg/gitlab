@@ -279,7 +279,7 @@ When running your project pipeline at this point:
   If your stack already exists, this step is skipped, but the `provision` job it belongs to still
   runs.
 - Your built application is pushed to your S3 bucket then and deployed to your EC2 instance, based
-  on the related JSON object's content. The deployment job finishes whenever the deployment to EC2
+  on the related JSON object's content. The deployment job finishes when the deployment to EC2
   is done or has failed.
 
 #### Custom build job for Auto DevOps

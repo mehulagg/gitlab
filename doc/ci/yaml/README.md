@@ -2729,7 +2729,7 @@ cache:
 ```
 
 In this example we're creating a cache for Ruby and Node.js dependencies that
-is tied to current versions of the `Gemfile.lock` and `package.json` files. Whenever one of
+is tied to current versions of the `Gemfile.lock` and `package.json` files. When one of
 these files changes, a new cache key is computed and a new cache is created. Any future
 job runs that use the same `Gemfile.lock` and `package.json` with `cache:key:files`
 use the new cache, instead of rebuilding the dependencies.

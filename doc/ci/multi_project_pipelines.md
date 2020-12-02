@@ -307,7 +307,7 @@ Some features are not implemented yet. For example, support for environments.
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/9045) in [GitLab Premium](https://about.gitlab.com/pricing/) 12.8.
 
-You can trigger a pipeline in your project whenever a pipeline finishes for a new
+You can trigger a pipeline in your project when a pipeline finishes for a new
 tag in a different project:
 
 1. Go to the project's **Settings > CI / CD** page, and expand the **Pipeline subscriptions** section.

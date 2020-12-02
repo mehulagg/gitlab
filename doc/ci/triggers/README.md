@@ -157,7 +157,7 @@ curl --request POST \
 
 You can also benefit by using triggers in your `.gitlab-ci.yml`. Let's say that
 you have two projects, A and B, and you want to trigger a rebuild on the `master`
-branch of project B whenever a tag on project A is created. This is the job you
+branch of project B when a tag on project A is created. This is the job you
 need to add in project A's `.gitlab-ci.yml`:
 
 ```yaml
@@ -169,7 +169,7 @@ build_docs:
     - tags
 ```
 
-This means that whenever a new tag is pushed on project A, the job runs and the
+This means that when a new tag is pushed on project A, the job runs and the
 `build_docs` job is executed, triggering a rebuild of project B. The
 `stage: deploy` ensures that this job runs only after all jobs with
 `stage: test` complete successfully.
@@ -206,7 +206,7 @@ Using trigger variables can be proven useful for a variety of reasons:
 - Identifiable jobs. Since the variable is exposed in the UI you can know
   why the rebuild was triggered if you pass a variable that explains the
   purpose.
-- Conditional job processing. You can have conditional jobs that run whenever
+- Conditional job processing. You can have conditional jobs that run when
   a certain variable is present.
 
 Consider the following `.gitlab-ci.yml` where we set three

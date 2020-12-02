@@ -323,7 +323,7 @@ To protect or unprotect a runner:
 
 ### Forks
 
-Whenever a project is forked, it copies the settings of the jobs that relate
+When a project is forked, it copies the settings of the jobs that relate
 to it. This means that if you have shared runners set up for a project and
 someone forks that project, the shared runners serve jobs of this project.
 
