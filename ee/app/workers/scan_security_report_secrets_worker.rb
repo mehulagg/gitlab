@@ -8,7 +8,7 @@ class ScanSecurityReportSecretsWorker # rubocop:disable Scalability/IdempotentWo
 
   worker_resource_boundary :cpu
 
-  sidekiq_options retry: 20
+  sidekiq_options retry: 17
 
   worker_has_external_dependencies!
   idempotent!
