@@ -13,6 +13,7 @@ import BurnCharts from 'ee/burndown_chart/components/burn_charts.vue';
 import { formatDate } from '~/lib/utils/datetime_utility';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { __ } from '~/locale';
+import IterationReportSummaryCards from './iteration_report_summary_cards.vue';
 import IterationReportSummaryClosed from './iteration_report_summary_closed.vue';
 import IterationReportSummaryOpen from './iteration_report_summary_open.vue';
 import IterationForm from './iteration_form.vue';
@@ -42,6 +43,7 @@ export default {
     GlEmptyState,
     GlLoadingIcon,
     IterationForm,
+    IterationReportSummaryCards,
     IterationReportSummaryClosed,
     IterationReportSummaryOpen,
     IterationReportTabs,
@@ -136,6 +138,11 @@ export default {
           return { text: __('Open'), variant: 'success' };
       }
     },
+    summaryComponent() {
+      return this.iteration.state === 'closed'
+        ? IterationReportSummaryClosed
+        : IterationReportSummaryOpen;
+    },
   },
   mounted() {
     this.boundOnPopState = this.onPopState.bind(this);
@@ -219,16 +226,27 @@ export default {
       </div>
       <h3 ref="title" class="page-title">{{ iteration.title }}</h3>
       <div ref="description" v-html="iteration.descriptionHtml"></div>
-      <iteration-report-summary-closed
+
+      <component
+        :is="summaryComponent"
+        :full-path="fullPath"
+        :iteration-id="iteration.id"
+        :namespace-type="namespaceType"
+      >
+        <iteration-report-summary-cards
+          slot-scope="{ columns, loading: summaryLoading, total }"
+          :columns="columns"
+          :loading="summaryLoading"
+          :total="total"
+        />
+      </component>
+      <!-- <iteration-report-summary-closed
         v-if="iteration.state === 'closed'"
         :iteration-id="iteration.id"
       />
       <iteration-report-summary-open
         v-else
-        :full-path="fullPath"
-        :iteration-id="iteration.id"
-        :namespace-type="namespaceType"
-      />
+      /> -->
       <burn-charts
         :start-date="iteration.startDate"
         :due-date="iteration.dueDate"

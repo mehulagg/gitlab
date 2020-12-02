@@ -4,6 +4,7 @@ import { shallowMount } from '@vue/test-utils';
 
 describe('Iterations report summary', () => {
   let wrapper;
+  let slotSpy;
 
   const id = 3;
   const defaultProps = {
@@ -11,6 +12,8 @@ describe('Iterations report summary', () => {
   };
 
   const mountComponent = ({ props = defaultProps, loading = false, data = {} } = {}) => {
+    slotSpy = jest.fn();
+
     wrapper = shallowMount(IterationReportSummaryClosed, {
       propsData: props,
       data() {
@@ -20,6 +23,9 @@ describe('Iterations report summary', () => {
         $apollo: {
           queries: { issues: { loading } },
         },
+      },
+      scopedSlots: {
+        default: slotSpy,
       },
     });
   };
@@ -43,7 +49,7 @@ describe('Iterations report summary', () => {
     });
 
     it('renders cards for each issue type', () => {
-      expect(wrapper.find(IterationReportSummaryCards).props()).toEqual({
+      expect(slotSpy).toHaveBeenCalledWith({
         loading: false,
         columns: [
           {

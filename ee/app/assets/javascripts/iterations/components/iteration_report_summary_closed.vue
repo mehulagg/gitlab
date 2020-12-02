@@ -58,13 +58,12 @@ export default {
       ];
     },
   },
+  render() {
+    return this.$scopedSlots.default({
+      columns: this.columns,
+      loading: this.$apollo.queries.issues.loading,
+      total: this.issues.total,
+    });
+  },
 };
 </script>
-
-<template>
-  <iteration-report-summary-cards
-    :columns="columns"
-    :loading="this.$apollo.queries.issues.loading"
-    :total="issues.total"
-  />
-</template>
