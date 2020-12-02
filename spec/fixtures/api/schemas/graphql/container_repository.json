@@ -1,6 +1,6 @@
 {
   "type": "object",
-  "required": ["id", "name", "path", "location", "createdAt", "updatedAt", "tagsCount", "canDelete", "expirationPolicyCleanupStatus"],
+  "required": ["id", "name", "path", "location", "createdAt", "updatedAt", "tagsCount", "canDelete", "expirationPolicyCleanupStatus", "visibilityLevel"],
   "properties": {
     "id": {
       "type": "string"
