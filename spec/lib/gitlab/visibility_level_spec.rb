@@ -120,6 +120,7 @@ RSpec.describe Gitlab::VisibilityLevel do
     end
   end
 
+  # TODO: remove me?
   describe '#visibility_level_decreased?' do
     let(:project) { create(:project, :internal) }
 

@@ -123,6 +123,7 @@ module Gitlab
       end
     end
 
+    # TODO: remove me?
     def visibility_level_decreased?
       return false unless visibility_level_previous_changes
 
