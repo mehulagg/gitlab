@@ -26750,6 +26750,9 @@ msgstr ""
 msgid "Terraform|An error occurred while loading your Terraform States"
 msgstr ""
 
+msgid "Terraform|Details"
+msgstr ""
+
 msgid "Terraform|Find out how to use the %{linkStart}GitLab managed Terraform State%{linkEnd}"
 msgstr ""
 
@@ -26763,6 +26766,12 @@ msgid "Terraform|Locked"
 msgstr ""
 
 msgid "Terraform|Locked by %{user} %{timeAgo}"
+msgstr ""
+
+msgid "Terraform|Name"
+msgstr ""
+
+msgid "Terraform|Pipeline"
 msgstr ""
 
 msgid "Terraform|Reported Resource Changes: %{addNum} to add, %{changeNum} to change, %{deleteNum} to delete"

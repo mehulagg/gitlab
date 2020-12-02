@@ -38,7 +38,7 @@ export default {
         },
         {
           key: 'updated',
-          label: s__('Terraform|Commit details'),
+          label: s__('Terraform|Details'),
         },
       ];
     },
@@ -114,12 +114,8 @@ export default {
           #{{ pipelineID(item) }}
         </gl-link>
 
-        <div>
-          <ci-badge
-            :status="pipelineDetailedStatus(item)"
-            :show-text="true"
-            :icon-classes="'gl-vertical-align-middle!'"
-          />
+        <div class="gl-my-3">
+          <ci-badge :status="pipelineDetailedStatus(item)" />
         </div>
       </div>
     </template>
