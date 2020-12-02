@@ -1,8 +1,6 @@
 import { GlDropdown, GlDropdownItem, GlEmptyState, GlLoadingIcon, GlTab, GlTabs } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import IterationForm from 'ee/iterations/components/iteration_form.vue';
-import IterationReportSummaryOpen from 'ee/iterations/components/iteration_report_summary_open.vue';
-import IterationReportSummaryCards from 'ee/iterations/components/iteration_report_summary_cards.vue';
 import IterationReport from 'ee/iterations/components/iteration_report.vue';
 import IterationReportTabs from 'ee/iterations/components/iteration_report_tabs.vue';
 import { Namespace } from 'ee/iterations/constants';
@@ -105,25 +103,6 @@ describe('Iterations report', () => {
 
       it('hides actions dropdown', () => {
         expect(findActionsDropdown().exists()).toBe(false);
-      });
-
-      it('renders IterationReportSummaryOpen for open iteration', () => {
-        expect(wrapper.find(IterationReportSummaryOpen).props()).toEqual({
-          iterationId: iteration.id,
-          namespaceType: Namespace.Group,
-          fullPath: defaultProps.fullPath,
-        });
-      });
-
-      it('renders IterationReportCards for closed iterations', async () => {
-        await wrapper.setData({
-          iteration: {
-            ...iteration,
-            state: 'closed',
-          },
-        });
-
-        expect(wrapper.find(IterationReportSummaryCards).exists()).toBe(true);
       });
 
       it('shows IterationReportTabs component', () => {
