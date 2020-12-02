@@ -283,8 +283,8 @@
     :when: 2019-09-11 13:08:28.431132000 Z
 - - :permit
   - "(MIT OR CC0-1.0)"
-  - :who: 
-    :why: 
+  - :who:
+    :why:
     :versions: []
     :when: 2019-11-08 10:03:31.787226000 Z
 - - :permit
@@ -325,3 +325,5 @@
     :why: Used to generate documentation. https://pypi.org/project/docutils/0.13.1/
     :versions: []
     :when: 2020-10-05 20:22:55.955189491 Z
+- - :permit
+  - DO NOT MERGE
