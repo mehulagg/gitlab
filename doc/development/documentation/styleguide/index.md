@@ -1800,8 +1800,8 @@ in the GitLab product documentation.
 
 ### Avoid line breaks in names
 
-Names of products, features, or non-GitLab products containing spaces
-shouldn't split the name across lines with an inserted line break.
+Product names, feature names, and non-GitLab products that contain spaces
+shouldn't be split across lines.
 For example: GitLab Community Edition or Amazon Web Services.
 Splitting product or feature names across lines makes searching for these items
 more difficult, and can cause problems if names change.
