@@ -27,6 +27,7 @@ FactoryBot.define do
 
     after(:create) do |pipeline, evaluator|
       merge_request = evaluator.head_pipeline_of
+      pipeline.update!(merge_request: merge_request) if merge_request
       merge_request&.update!(head_pipeline: pipeline)
 
       if evaluator.child_of
