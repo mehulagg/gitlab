@@ -550,7 +550,7 @@ A container repository.
 | `location` | String! | URL of the container repository. |
 | `name` | String! | Name of the container repository. |
 | `path` | String! | Path of the container repository. |
-| `projectVisibilityLevel` | VisibilityLevelsEnum! | Visibility level of the container repository project |
+| `projectVisibilityLevel` | VisibilityLevelsEnum! | Visibility level of the container registry |
 | `status` | ContainerRepositoryStatus | Status of the container repository. |
 | `tagsCount` | Int! | Number of tags associated with this image. |
 | `updatedAt` | Time! | Timestamp when the container repository was updated. |
@@ -569,7 +569,7 @@ Details of a container repository.
 | `location` | String! | URL of the container repository. |
 | `name` | String! | Name of the container repository. |
 | `path` | String! | Path of the container repository. |
-| `projectVisibilityLevel` | VisibilityLevelsEnum! | Visibility level of the container repository project |
+| `projectVisibilityLevel` | VisibilityLevelsEnum! | Visibility level of the container registry |
 | `status` | ContainerRepositoryStatus | Status of the container repository. |
 | `tags` | ContainerRepositoryTagConnection | Tags of the container repository |
 | `tagsCount` | Int! | Number of tags associated with this image. |

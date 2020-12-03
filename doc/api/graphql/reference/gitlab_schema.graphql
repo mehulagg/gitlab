@@ -3401,7 +3401,7 @@ type ContainerRepository {
   path: String!
 
   """
-  Visibility level of the container repository project
+  Visibility level of the container registry
   """
   projectVisibilityLevel: VisibilityLevelsEnum!
 
@@ -3511,7 +3511,7 @@ type ContainerRepositoryDetails {
   path: String!
 
   """
-  Visibility level of the container repository project
+  Visibility level of the container registry
   """
   projectVisibilityLevel: VisibilityLevelsEnum!
 

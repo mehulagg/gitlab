@@ -9222,7 +9222,7 @@
             },
             {
               "name": "projectVisibilityLevel",
-              "description": "Visibility level of the container repository project",
+              "description": "Visibility level of the container registry",
               "args": [
 
               ],
@@ -9541,7 +9541,7 @@
             },
             {
               "name": "projectVisibilityLevel",
-              "description": "Visibility level of the container repository project",
+              "description": "Visibility level of the container registry",
               "args": [
 
               ],
