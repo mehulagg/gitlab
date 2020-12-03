@@ -16,7 +16,7 @@ We have tests:
 - To check the validity of internal links within the documentation suite.
 - To check the validity of links from UI elements, such as files in `app/views` files.
 
-For the specifics of each test run in our CI/CD pipelines, see the configuration for those test
+For the specifics of each test run in our CI/CD pipelines, see the configuration for those tests
 in the relevant projects:
 
 - <https://gitlab.com/gitlab-org/gitlab/-/blob/master/.gitlab/ci/docs.gitlab-ci.yml>
@@ -38,8 +38,8 @@ To run tests locally, it's important to:
 
 - [Install the tools](#install-linters), and [keep them up to date](#update-linters).
 - Run [linters](#lint-checks), [documentation link tests](#documentation-link-tests), and
-  [UI link tests](#ui-link-tests) the same way they are run in CI/CD pipelines. That is, using the
-  same configuration we use in CI/CD pipelines, which can be different to the default configuration
+  [UI link tests](#ui-link-tests) the same way they are run in CI/CD pipelines. It's important to use
+  same configuration we use in CI/CD pipelines, which can be different than the default configuration
   of the tool.
 
 ### Lint checks
@@ -218,7 +218,7 @@ These tools can be [integrated with your code editor](#configure-editors).
 
 ### Update linters
 
-It's important to use linter versions that're at least the same as those run in
+It's important to use linter versions that are the same or newer than those run in
 CI/CD. This provides access to new features and possible bug fixes.
 
 To match the versions of `markdownlint-cli` and `vale` used in the GitLab projects, refer to the
@@ -234,7 +234,7 @@ when building the `image:docs-lint-markdown` Docker image containing these tools
 
 ### Configure editors
 
-Configuring linters in your editor is more convenient than having to run the commands from the
+Using linters in your editor is more convenient than having to run the commands from the
 command line.
 
 To configure markdownlint within your editor, install one of the following as appropriate:
