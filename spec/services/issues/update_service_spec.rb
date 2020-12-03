@@ -110,21 +110,6 @@ RSpec.describe Issues::UpdateService, :mailer do
             update_issue(opts)
           end
         end
-
-        context 'with existing incident label' do
-          let_it_be(:incident_label) { create(:label, :incident, project: project) }
-
-          before do
-            opts.delete(:label_ids) # don't override but retain existing labels
-            issue.labels << incident_label
-          end
-
-          it_behaves_like 'incident issue' do
-            before do
-              update_issue(opts)
-            end
-          end
-        end
       end
 
       it 'refreshes the number of open issues when the issue is made confidential', :use_clean_rails_memory_store_caching do
@@ -155,7 +140,6 @@ RSpec.describe Issues::UpdateService, :mailer do
 
       context 'issue in incident type' do
         let(:current_user) { user }
-        let(:incident_label_attributes) { attributes_for(:label, :incident) }
 
         before do
           opts.merge!(issue_type: 'incident', confidential: true)
@@ -168,21 +152,6 @@ RSpec.describe Issues::UpdateService, :mailer do
         it_behaves_like 'incident issue' do
           before do
             subject
-          end
-        end
-
-        it 'does create an incident label' do
-          expect { subject }
-            .to change { Label.where(incident_label_attributes).count }.by(1)
-        end
-
-        context 'when invalid' do
-          before do
-            opts.merge!(title: '')
-          end
-
-          it 'does not create an incident label prematurely' do
-            expect { subject }.not_to change(Label, :count)
           end
         end
       end
