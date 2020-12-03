@@ -539,6 +539,8 @@ If you edit the policy and click **Save** again, the interval is reset.
 
 Cleanup policies use regex patterns to determine which tags should be preserved or removed, both in the UI and the API.
 
+Regex patterns are automatically surrounded with `\A` and `\Z` anchors. Do not include any `\A`, `\Z`, `^` or `$` token in the regex patterns as they are not necessary.
+
 Here are examples of regex patterns you may want to use:
 
 - Match all tags:
