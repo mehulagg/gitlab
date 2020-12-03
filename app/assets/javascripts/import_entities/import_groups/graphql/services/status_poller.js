@@ -3,12 +3,16 @@ import bulkImportSourceGroupsQuery from '../queries/bulk_import_source_groups.qu
 import { STATUSES } from '../../../constants';
 import { SourceGroupsManager } from './source_groups_manager';
 
+const groupId = i => `group${i}`;
+
 function generateGroupsQuery(groups) {
   return gql`{
     ${groups
       .map(
         (g, idx) =>
-          `group${idx}: group(fullPath: "${g.import_target.target_namespace}/${g.import_target.new_name}") { id }`,
+          `${groupId(idx)}: group(fullPath: "${g.import_target.target_namespace}/${
+            g.import_target.new_name
+          }") { id }`,
       )
       .join('\n')}
   }`;
@@ -41,14 +45,12 @@ export class StatusPoller {
       });
       const groupsInProgress = bulkImportSourceGroups.filter(g => g.status === STATUSES.STARTED);
       if (groupsInProgress.length) {
-        const results = await this.client.query({
+        const { data: results } = await this.client.query({
           query: generateGroupsQuery(groupsInProgress),
           fetchPolicy: 'no-cache',
         });
-        console.log(results);
-        const groupManager = new SourceGroupsManager(this.client.cache);
-        const completedGroups = groupsInProgress.filter((_, idx) => Boolean(results[idx]));
-        console.log(completedGroups);
+        const groupManager = new SourceGroupsManager({ cache: this.client.cache });
+        const completedGroups = groupsInProgress.filter((_, idx) => Boolean(results[groupId(idx)]));
         completedGroups.forEach(group => {
           groupManager.setImportStatus({ group, status: STATUSES.FINISHED });
         });

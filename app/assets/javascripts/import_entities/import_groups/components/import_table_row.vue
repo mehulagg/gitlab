@@ -1,5 +1,5 @@
 <script>
-import { GlButton, GlIcon, GlFormInput } from '@gitlab/ui';
+import { GlButton, GlIcon, GlLink, GlFormInput } from '@gitlab/ui';
 import Select2Select from '~/vue_shared/components/select2_select.vue';
 import ImportStatus from '../../components/import_status.vue';
 import { STATUSES } from '../../constants';
@@ -9,6 +9,7 @@ export default {
     Select2Select,
     ImportStatus,
     GlButton,
+    GlLink,
     GlIcon,
     GlFormInput,
   },
@@ -32,6 +33,11 @@ export default {
       };
     },
   },
+  methods: {
+    getFullPath(group) {
+      return `${group.import_target.target_namespace}/${group.import_target.new_name}`;
+    },
+  },
   STATUSES,
 };
 </script>
@@ -44,8 +50,13 @@ export default {
       </a>
     </td>
     <td class="gl-p-4">
-      <div class="import-entities-target-select gl-display-flex gl-align-items-stretch">
+      <gl-link v-if="group.status === $options.STATUSES.FINISHED" :href="getFullPath(group)">{{
+        getFullPath(group)
+      }}</gl-link>
+
+      <div v-else class="import-entities-target-select gl-display-flex gl-align-items-stretch">
         <select2-select
+          :disabled="group.status !== $options.STATUSES.NONE"
           :options="select2Options"
           :value="group.import_target.target_namespace"
           @input="$emit('update-target-namespace', $event)"
@@ -57,6 +68,7 @@ export default {
         </div>
         <gl-form-input
           class="gl-rounded-top-left-none gl-rounded-bottom-left-none"
+          :disabled="group.status !== $options.STATUSES.NONE"
           :value="group.import_target.new_name"
           @input="$emit('update-new-name', $event)"
         />
