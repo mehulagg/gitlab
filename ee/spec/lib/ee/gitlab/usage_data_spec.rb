@@ -504,7 +504,7 @@ RSpec.describe Gitlab::UsageData do
   end
 
   describe 'usage_activity_by_stage_secure' do
-    let_it_be(:error_rate) { Gitlab::Database::PostgresHllBatchDistinctCounter::ERROR_RATE }
+    let_it_be(:error_rate) { Gitlab::Database::PostgresHll::BatchDistinctCounter::ERROR_RATE }
     let_it_be(:days_ago_within_monthly_time_period) { 3.days.ago }
     let_it_be(:user) { create(:user, group_view: :security_dashboard, created_at: days_ago_within_monthly_time_period) }
     let_it_be(:user2) { create(:user, group_view: :security_dashboard, created_at: days_ago_within_monthly_time_period) }
@@ -693,7 +693,7 @@ RSpec.describe Gitlab::UsageData do
 
       allow(Gitlab::Database::BatchCount).to receive(:batch_distinct_count).and_raise(ActiveRecord::StatementInvalid)
       allow(Gitlab::Database::BatchCount).to receive(:batch_count).and_raise(ActiveRecord::StatementInvalid)
-      allow(Gitlab::Database::PostgresHllBatchDistinctCounter).to receive(:new).and_raise(ActiveRecord::StatementInvalid)
+      allow(Gitlab::Database::PostgresHll::BatchDistinctCounter).to receive(:new).and_raise(ActiveRecord::StatementInvalid)
       allow(::Ci::Build).to receive(:distinct_count_by).and_raise(ActiveRecord::StatementInvalid)
 
       expect(described_class.usage_activity_by_stage_secure(described_class.last_28_days_time_period)).to include(
