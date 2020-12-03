@@ -1643,11 +1643,11 @@ POST /projects/:id/issues/:issue_iid/notes
 
 Supported attributes:
 
-| Attribute   | Type     | Required | Description           |
-|:------------|:---------|:---------|:----------------------|
-| `id`        | integer/string | yes   | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user |
-| `issue_iid` | integer | yes   | The internal ID of a project's issue |
-| `body`      | String  | yes   | The content of a note. Must contain `/promote` at the start of a new line. |
+| Attribute   | Type           | Required | Description |
+| :---------- | :------------- | :------- | :---------- |
+| `id`        | integer/string | yes      | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user |
+| `issue_iid` | integer        | yes      | The internal ID of a project's issue |
+| `body`      | String         | yes      | The content of a note. Must contain `/promote` at the start of a new line. |
 
 Example request:
 
