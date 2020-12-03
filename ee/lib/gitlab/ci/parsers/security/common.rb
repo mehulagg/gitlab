@@ -72,7 +72,8 @@ module Gitlab
                 identifiers: identifiers,
                 links: links,
                 raw_metadata: data.to_json,
-                metadata_version: version))
+                metadata_version: version,
+                details: data['details'].presence || {}))
           end
 
           def create_scan(report, scan_data)
