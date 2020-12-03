@@ -692,6 +692,28 @@ RSpec.describe ProjectsController do
         end
       end
     end
+
+    context 'when updating project permissions' do
+      it 'updates project settings attributes' do
+        put :update, params: {
+          namespace_id: project.namespace,
+          id: project.path,
+          project: {
+            project_setting_attributes: {
+              show_default_award_emojis: '1',
+              squash_option: 'always',
+              allow_edit_commit_messages: '1'
+            }
+          }
+        }
+
+        project.reload
+
+        expect(project.show_default_award_emojis?).to be_truthy
+        expect(project.squash_always?).to be_truthy
+        expect(project.allow_edit_commit_messages?).to be_truthy
+      end
+    end
   end
 
   describe '#transfer', :enable_admin_mode do

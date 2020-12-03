@@ -1,0 +1,8 @@
+---
+name: allow_edit_commit_messages
+introduced_by_url:
+rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/287798
+milestone: '13.7'
+type: development
+group:
+default_enabled: false
