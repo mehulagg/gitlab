@@ -148,7 +148,7 @@ export default {
           :key="getFormattedTimezone(tz)"
           :is-checked="isTimezoneSelected(tz)"
           is-check-item
-          @click="$emit('update-schedule-form', { type: 'timezone', value: $event })"
+          @click="$emit('update-schedule-form', { type: 'timezone', value: tz })"
         >
           <span class="gl-white-space-nowrap"> {{ getFormattedTimezone(tz) }}</span>
         </gl-dropdown-item>
