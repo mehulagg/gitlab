@@ -53,10 +53,13 @@ click of a button:
 
 ![Static Site Editor](img/wysiwyg_editor_v13_3.png)
 
-When an editor submits their changes, in the background, GitLab automatically
-creates a new branch, commits their changes, and opens a merge request. The
-editor lands directly on the merge request, and then they can assign it to
-a colleague for review.
+When an editor submits their changes, these are the following things that GitLab does automatically in the background:
+- Creates a new branch
+- Commits their changes
+    - If there are formatting changes to adhere to Markdown formatting style guides then these changes would be handled in a separate commit on this branch.
+- Opens a merge request
+
+The editor can then navigate to the merge request to assign it to a colleague for review.
 
 ## Set up your project
 
