@@ -7,7 +7,10 @@ import {
   canResend,
   canUpdate,
   canOverride,
+  parseSortParam,
+  buildSortUrl,
 } from '~/members/utils';
+import { DEFAULT_SORT } from '~/members/constants';
 import { member as memberMock, group, invite } from './mock_data';
 
 const DIRECT_MEMBER_ID = 178;
@@ -117,6 +120,114 @@ describe('Members Utils', () => {
   describe('canOverride', () => {
     it('returns `false`', () => {
       expect(canOverride(memberMock)).toBe(false);
+    });
+  });
+
+  describe('parseSortParam', () => {
+    beforeEach(() => {
+      delete window.location;
+      window.location = new URL('https://localhost');
+    });
+
+    describe('when `sort` param is not present', () => {
+      it('returns default sort options', () => {
+        window.location.search = '';
+
+        expect(parseSortParam(['account'])).toEqual(DEFAULT_SORT);
+      });
+    });
+
+    describe('when field passed in `sortableFields` argument does not have `sort` key defined', () => {
+      it('returns default sort options', () => {
+        window.location.search = '?sort=source_asc';
+
+        expect(parseSortParam(['source'])).toEqual(DEFAULT_SORT);
+      });
+    });
+
+    describe.each`
+      sortParam              | expected
+      ${'name_asc'}          | ${{ sortBy: 'account', sortDesc: false, sortByLabel: 'Account, ascending' }}
+      ${'name_desc'}         | ${{ sortBy: 'account', sortDesc: true, sortByLabel: 'Account, descending' }}
+      ${'last_joined'}       | ${{ sortBy: 'granted', sortDesc: false, sortByLabel: 'Access granted, ascending' }}
+      ${'oldest_joined'}     | ${{ sortBy: 'granted', sortDesc: true, sortByLabel: 'Access granted, descending' }}
+      ${'access_level_asc'}  | ${{ sortBy: 'maxRole', sortDesc: false, sortByLabel: 'Max role, ascending' }}
+      ${'access_level_desc'} | ${{ sortBy: 'maxRole', sortDesc: true, sortByLabel: 'Max role, descending' }}
+      ${'recent_sign_in'}    | ${{ sortBy: 'lastSignIn', sortDesc: false, sortByLabel: 'Last sign-in, ascending' }}
+      ${'oldest_sign_in'}    | ${{ sortBy: 'lastSignIn', sortDesc: true, sortByLabel: 'Last sign-in, descending' }}
+    `('when `sort` query string param is `$sortParam`', ({ sortParam, expected }) => {
+      it(`returns ${JSON.stringify(expected)}`, async () => {
+        window.location.search = `?sort=${sortParam}`;
+
+        expect(parseSortParam(['account', 'granted', 'expires', 'maxRole', 'lastSignIn'])).toEqual(
+          expected,
+        );
+      });
+    });
+  });
+
+  describe('buildSortUrl', () => {
+    beforeEach(() => {
+      delete window.location;
+      window.location = new URL('https://localhost');
+    });
+
+    describe('when field passed in `sortBy` argument does not have `sort` key defined', () => {
+      it('returns an empty string', () => {
+        expect(
+          buildSortUrl({
+            sortBy: 'source',
+            sortDesc: false,
+            filteredSearchBarTokens: [],
+            filteredSearchBarSearchParam: 'search',
+          }),
+        ).toEqual('');
+      });
+    });
+
+    describe('when there are no filter params set', () => {
+      it('sets `sort` param', () => {
+        expect(
+          buildSortUrl({
+            sortBy: 'account',
+            sortDesc: false,
+            filteredSearchBarTokens: [],
+            filteredSearchBarSearchParam: 'search',
+          }),
+        ).toEqual('https://localhost/?sort=name_asc');
+      });
+    });
+
+    describe('when filter params are set', () => {
+      it('merges the `sort` param with the filter params', () => {
+        window.location.search = '?two_factor=enabled&with_inherited_permissions=exclude';
+
+        expect(
+          buildSortUrl({
+            sortBy: 'account',
+            sortDesc: false,
+            filteredSearchBarTokens: ['two_factor', 'with_inherited_permissions'],
+            filteredSearchBarSearchParam: 'search',
+          }),
+        ).toEqual(
+          'https://localhost/?two_factor=enabled&with_inherited_permissions=exclude&sort=name_asc',
+        );
+      });
+    });
+
+    describe('when search param is set', () => {
+      it('merges the `sort` param with the search param', () => {
+        window.location.search = '?search=foobar';
+
+        expect(
+          buildSortUrl({
+            sortBy: 'account',
+            sortDesc: false,
+            filteredSearchBarTokens: ['two_factor', 'with_inherited_permissions'],
+            filteredSearchBarSearchParam: 'search',
+          }),
+        ).toEqual('https://localhost/?search=foobar&sort=name_asc');
+      });
     });
   });
 });
