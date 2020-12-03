@@ -7,7 +7,6 @@ import {
   GlFormGroup,
   GlFormText,
   GlModal,
-  GlFormRadioGroup,
 } from '@gitlab/ui';
 import { debounce } from 'lodash';
 import { mapState, mapActions } from 'vuex';
@@ -47,8 +46,7 @@ const I18N = {
   CREATE_VALUE_STREAM: __('Create Value Stream'),
   CREATED: __("'%{name}' Value Stream created"),
   CANCEL: __('Cancel'),
-  MODAL_TITLE: __('Value Stream Name'),
-  FIELD_NAME_LABEL: __('Name'),
+  FIELD_NAME_LABEL: __('Value Stream name'),
   FIELD_NAME_PLACEHOLDER: __('Example: My Value Stream'),
 };
 
@@ -64,12 +62,16 @@ const PRESET_OPTIONS = [
 ];
 
 const DEFAULT_STAGE_CONFIG = ['issue', 'plan', 'code', 'test', 'review', 'staging', 'total'].map(
-  id => ({
-    id,
-    title: capitalizeFirstCharacter(id),
-    hidden: false,
-    custom: false,
-  }),
+  _id => {
+    const title = capitalizeFirstCharacter(_id);
+    const id = _id === 'total' ? 'production' : _id;
+    return {
+      // id,
+      title,
+      hidden: false,
+      // custom: false,
+    };
+  },
 );
 
 export default {
@@ -82,7 +84,6 @@ export default {
     GlFormGroup,
     GlFormText,
     GlModal,
-    GlFormRadioGroup,
   },
   props: {
     initialData: {
@@ -97,7 +98,7 @@ export default {
       name: '',
       selectedPreset: PRESET_OPTIONS[0].value,
       presetOptions: PRESET_OPTIONS,
-      stages: [...DEFAULT_STAGE_CONFIG, { ...defaultStageFields }],
+      stages: DEFAULT_STAGE_CONFIG,
       ...this.initialData,
     };
   },
@@ -149,9 +150,6 @@ export default {
       const { name } = this;
       this.errors = validate({ name });
     }, DATA_REFETCH_DELAY),
-    onAddStage() {
-      this.stages.push({ ...defaultStageFields });
-    },
     isFirstStage(i) {
       return i === 0;
     },
@@ -159,8 +157,8 @@ export default {
       return i === this.stages?.length - 1;
     },
     onSubmit() {
-      const { name } = this;
-      return this.createValueStream({ name }).then(() => {
+      const { name, stages } = this;
+      return this.createValueStream({ name, stages }).then(() => {
         if (!this.hasFormErrors) {
           this.$toast.show(sprintf(this.$options.I18N.CREATED, { name }), {
             position: 'top-center',
@@ -177,18 +175,13 @@ export default {
   <gl-modal
     data-testid="value-stream-form-modal"
     modal-id="value-stream-form-modal"
-    :title="$options.I18N.MODAL_TITLE"
+    scrollable
+    :title="$options.I18N.CREATE_VALUE_STREAM"
     :action-primary="primaryProps"
     :action-cancel="{ text: $options.I18N.CANCEL }"
-    :action-secondary="{
-      text: s__('CreateValueStreamForm|Add another stage'),
-      attributes: [{ variant: 'info' }],
-    }"
-    @secondary.prevent="onAddStage"
     @primary.prevent="onSubmit"
   >
     <gl-form>
-      <gl-form-radio-group v-model="selectedPreset" :options="presetOptions" name="preset" />
       <gl-form-group
         :label="$options.I18N.FIELD_NAME_LABEL"
         label-for="create-value-stream-name"
@@ -214,7 +207,6 @@ export default {
         <div class="gl-display-flex gl-flex-direction-row gl-justify-content-space-between">
           <div>
             <gl-form-input
-              v-if="stage.custom"
               v-model.trim="stage.title"
               :name="`create-value-stream-stage-${i}`"
               :placeholder="s__('CreateValueStreamForm|Enter stage name')"
@@ -222,7 +214,6 @@ export default {
               required
               @input="onHandleInput"
             />
-            <gl-form-text v-else>{{ stage.title }}</gl-form-text>
           </div>
           <div>
             <gl-button-group>

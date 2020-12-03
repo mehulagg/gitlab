@@ -36,7 +36,7 @@ class Groups::Analytics::CycleAnalytics::ValueStreamsController < Groups::Analyt
   private
 
   def value_stream_params
-    params.require(:value_stream).permit(:name)
+    params.require(:value_stream).permit(:name, :stages)
   end
 
   def value_streams
