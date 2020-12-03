@@ -629,7 +629,8 @@ module ProjectsHelper
       emailsDisabled: project.emails_disabled?,
       metricsDashboardAccessLevel: feature.metrics_dashboard_access_level,
       operationsAccessLevel: feature.operations_access_level,
-      showDefaultAwardEmojis: project.show_default_award_emojis?
+      showDefaultAwardEmojis: project.show_default_award_emojis?,
+      allowEditCommitMessages: project.allow_edit_commit_messages?
     }
   end
 

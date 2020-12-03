@@ -610,7 +610,7 @@ export default {
         }}</template>
       </gl-form-checkbox>
     </project-setting-row>
-    <project-setting-row class="mb-3" v-if="glFeatures.allowEditCommitMessages">
+    <project-setting-row v-if="glFeatures.allowEditCommitMessages" class="mb-3">
       <input
         :value="allowEditCommitMessages"
         type="hidden"
