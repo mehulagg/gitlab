@@ -1,0 +1,14 @@
+name: recorded_at
+description: Time when usage data is recorded
+default_generation: generation_1
+full_path:
+  generation_1: recorded_at
+  generation_2: license.recorded_at
+milestone:
+introduced_by_url:
+group: group::product analytics
+time_frame:
+type: license
+data_source: ruby
+distribution: [ee, ce]
+tier: ['free', 'starter', 'premium', 'ultimate', 'bronze', 'silver', 'gold']

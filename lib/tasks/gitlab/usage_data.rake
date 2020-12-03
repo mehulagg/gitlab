@@ -20,5 +20,17 @@ namespace :gitlab do
       result = SubmitUsagePingService.new.execute
       puts result.inspect
     end
+
+    desc 'GitLab | UsageData | Generate metrics dictionary'
+    task generate_metrics_dictionary: :environment do
+      out = File.join(Rails.root, 'lib', 'gitlab', 'usage_data', 'metric', 'dictionary.json')
+      dictionary = Gitlab::Json.pretty_generate(Gitlab::UsageData::Metric.dictionary)
+
+      File.open(out, 'w') do |handle|
+        handle.write(dictionary)
+      end
+
+      puts dictionary
+    end
   end
 end

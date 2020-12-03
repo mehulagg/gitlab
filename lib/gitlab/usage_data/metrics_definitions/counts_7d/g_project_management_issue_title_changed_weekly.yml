@@ -1,0 +1,13 @@
+name: g_project_management_issue_title_changed_weekly
+description: Distinct users that changed issue title in a group for last recent week
+default_generation: generation_1
+full_path:
+  generation_1: redis_hll_counters.issues_edit.g_project_management_issue_title_changed_weekly
+milestone:
+introduced_by_url:
+group: 'group::project management'
+time_frame: counts_7d
+type: count
+data_source: redis
+distribution: [ee, ce]
+tier: ['free', 'starter', 'premium', 'ultimate', 'bronze', 'silver', 'gold']

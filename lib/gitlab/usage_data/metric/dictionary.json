@@ -1,0 +1,139 @@
+[
+  {
+    "name": "adapter",
+    "description": "The version of the PostgreSQL database",
+    "default_generation": "generation_1",
+    "full_path": {
+      "generation_1": "database.adapter"
+    },
+    "milestone": null,
+    "introduced_by_url": null,
+    "group": "group::enablement distribution",
+    "time_frame": null,
+    "type": "settings",
+    "data_source": "database",
+    "distribution": [
+      "ee",
+      "ce"
+    ],
+    "tier": [
+      "free",
+      "starter",
+      "premium",
+      "ultimate",
+      "bronze",
+      "silver",
+      "gold"
+    ]
+  },
+  {
+    "name": "recorded_at",
+    "description": "Time when usage data is recorded",
+    "default_generation": "generation_1",
+    "full_path": {
+      "generation_1": "recorded_at",
+      "generation_2": "license.recorded_at"
+    },
+    "milestone": null,
+    "introduced_by_url": null,
+    "group": "group::product analytics",
+    "time_frame": null,
+    "type": "license",
+    "data_source": "ruby",
+    "distribution": [
+      "ee",
+      "ce"
+    ],
+    "tier": [
+      "free",
+      "starter",
+      "premium",
+      "ultimate",
+      "bronze",
+      "silver",
+      "gold"
+    ]
+  },
+  {
+    "name": "uuid",
+    "description": "Instance uuid",
+    "default_generation": "generation_1",
+    "full_path": {
+      "generation_1": "uuid",
+      "generation_2": "license.uuid"
+    },
+    "milestone": null,
+    "introduced_by_url": null,
+    "group": "group::product analytics",
+    "time_frame": null,
+    "type": "license",
+    "data_source": "database",
+    "distribution": [
+      "ee",
+      "ce"
+    ],
+    "tier": [
+      "free",
+      "starter",
+      "premium",
+      "ultimate",
+      "bronze",
+      "silver",
+      "gold"
+    ]
+  },
+  {
+    "name": "g_project_management_issue_title_changed_weekly",
+    "description": "Distinct users that changed issue title in a group for last recent week",
+    "default_generation": "generation_1",
+    "full_path": {
+      "generation_1": "redis_hll_counters.issues_edit.g_project_management_issue_title_changed_weekly"
+    },
+    "milestone": null,
+    "introduced_by_url": null,
+    "group": "group::project management",
+    "time_frame": "counts_7d",
+    "type": "count",
+    "data_source": "redis",
+    "distribution": [
+      "ee",
+      "ce"
+    ],
+    "tier": [
+      "free",
+      "starter",
+      "premium",
+      "ultimate",
+      "bronze",
+      "silver",
+      "gold"
+    ]
+  },
+  {
+    "name": "deployments",
+    "description": "Total deployments",
+    "default_generation": "generation_1",
+    "full_path": {
+      "generation_1": "counts.deployments"
+    },
+    "milestone": null,
+    "introduced_by_url": null,
+    "group": "group::ops release",
+    "time_frame": "counts_28d",
+    "type": "count",
+    "data_source": "database",
+    "distribution": [
+      "ee",
+      "ce"
+    ],
+    "tier": [
+      "free",
+      "starter",
+      "premium",
+      "ultimate",
+      "bronze",
+      "silver",
+      "gold"
+    ]
+  }
+]
