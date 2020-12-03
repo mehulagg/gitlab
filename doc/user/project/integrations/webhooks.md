@@ -68,7 +68,7 @@ If you are writing your own endpoint (web server) to receive
 GitLab webhooks, keep in mind the following:
 
 - Your endpoint should send its HTTP response as fast as possible. If the response takes longer than
-  a configured time out, GitLab decides the hook failed and retries it. For information on
+  the configured timeout, GitLab decides the hook failed and retries it. For information on
   customizing this timeout, see
   [Webhook fails or multiple webhook requests are triggered](#webhook-fails-or-multiple-webhook-requests-are-triggered).
 - Your endpoint should ALWAYS return a valid HTTP response. If you do
@@ -1533,7 +1533,7 @@ You can find records for last 2 days in "Recent Deliveries" section on the edit 
 
 In this section you can see:
 
-- HTTP status code (green for 200-299 codes, red for the others, `internal error` for failed deliveries).
+- HTTP status code (green for `200-299` codes, red for the others, `internal error` for failed deliveries).
 - Triggered event.
 - A time when the event was called.
 - Elapsed time of the request.
@@ -1591,7 +1591,7 @@ end
 server.start
 ```
 
-Pick an unused port (for example, 8000) and start the script: `ruby print_http_body.rb
+Pick an unused port (for example, `8000`) and start the script: `ruby print_http_body.rb
 8000`. Then add your server as a webhook receiver in GitLab as
 `http://my.host:8000/`.
 
