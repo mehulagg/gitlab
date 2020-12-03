@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`DeleteScheduleModal renders destroy schedule modal layout 1`] = `
+exports[`DeleteScheduleModal renders delete schedule modal layout 1`] = `
 <gl-modal-stub
   actioncancel="[object Object]"
   actionprimary="[object Object]"
