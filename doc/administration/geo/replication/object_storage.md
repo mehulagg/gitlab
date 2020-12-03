@@ -35,7 +35,6 @@ To enable GitLab replication, you must:
 
 1. Go to **Admin Area > Geo**.
 1. Press **Edit** on the **secondary** node.
-  ![Object storage](img/geo_object_storage.png)
 1. In the **Synchronization Settings** section, find the **Allow this secondary node to replicate content on Object Storage**
    checkbox to enable it.
 
