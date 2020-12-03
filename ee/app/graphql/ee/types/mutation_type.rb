@@ -10,6 +10,7 @@ module EE
         mount_mutation ::Mutations::Clusters::Agents::Delete
         mount_mutation ::Mutations::Clusters::AgentTokens::Create
         mount_mutation ::Mutations::Clusters::AgentTokens::Delete
+        mount_mutation ::Mutations::ComplianceManagement::Frameworks::Update
         mount_mutation ::Mutations::Issues::SetIteration
         mount_mutation ::Mutations::Issues::SetWeight
         mount_mutation ::Mutations::Issues::SetEpic

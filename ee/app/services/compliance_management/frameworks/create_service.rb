@@ -2,7 +2,8 @@
 
 module ComplianceManagement
   module Frameworks
-    class CreateService < BaseService
+    class CreateService < ::BaseService
+      include ComplianceManagement::Frameworks::BaseService
       attr_reader :namespace, :params, :current_user, :framework
 
       def initialize(namespace:, params:, current_user:)
@@ -23,12 +24,6 @@ module ComplianceManagement
         )
 
         framework.save ? success : error
-      end
-
-      private
-
-      def permitted?
-        can?(current_user, :create_custom_compliance_frameworks, namespace)
       end
 
       def success

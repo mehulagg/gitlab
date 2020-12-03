@@ -2,7 +2,8 @@
 
 module ComplianceManagement
   module Frameworks
-    class DestroyService < BaseService
+    class DestroyService < ::BaseService
+      include ComplianceManagement::Frameworks::BaseService
       attr_reader :framework, :current_user
 
       def initialize(framework:, current_user:)
@@ -17,10 +18,6 @@ module ComplianceManagement
       end
 
       private
-
-      def permitted?
-        can? current_user, :manage_compliance_framework, framework
-      end
 
       def success
         ServiceResponse.success(message: _('Framework successfully deleted'))
