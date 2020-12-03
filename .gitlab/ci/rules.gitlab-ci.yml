@@ -43,6 +43,9 @@
 .if-merge-request-title-run-all-rspec: &if-merge-request-title-run-all-rspec
   if: '$CI_MERGE_REQUEST_TITLE =~ /RUN ALL RSPEC/'
 
+.if-merge-request-title-not-run-all-rspec: &if-merge-request-title-not-run-all-rspec
+  if: '$CI_MERGE_REQUEST_TITLE !~ /RUN ALL RSPEC/'
+
 .if-security-merge-request: &if-security-merge-request
   if: '$CI_PROJECT_NAMESPACE == "gitlab-org/security" && $CI_MERGE_REQUEST_IID'
 
@@ -488,25 +491,75 @@
     - changes: *db-patterns
     - <<: *if-merge-request-title-run-all-rspec
 
+.rails:rules:ee-and-foss-migration:minimal:
+  rules:
+    - <<: *if-merge-request-title-run-all-rspec
+      when: never
+    - <<: *if-merge-request
+      changes: *ci-patterns
+      when: never
+    - <<: *if-merge-request
+      changes: *db-patterns
+
 .rails:rules:ee-and-foss-unit:
   rules:
     - changes: *backend-patterns
     - <<: *if-merge-request-title-run-all-rspec
+
+.rails:rules:ee-and-foss-unit:minimal:
+  rules:
+    - <<: *if-merge-request-title-run-all-rspec
+      when: never
+    - <<: *if-merge-request
+      changes: *ci-patterns
+      when: never
+    - <<: *if-merge-request
+      changes: *backend-patterns
 
 .rails:rules:ee-and-foss-integration:
   rules:
     - changes: *backend-patterns
     - <<: *if-merge-request-title-run-all-rspec
 
+.rails:rules:ee-and-foss-integration:minimal:
+  rules:
+    - <<: *if-merge-request-title-run-all-rspec
+      when: never
+    - <<: *if-merge-request
+      changes: *ci-patterns
+      when: never
+    - <<: *if-merge-request
+      changes: *backend-patterns
+
 .rails:rules:ee-and-foss-system:
   rules:
     - changes: *code-backstage-patterns
     - <<: *if-merge-request-title-run-all-rspec
 
+.rails:rules:ee-and-foss-system:minimal:
+  rules:
+    - <<: *if-merge-request-title-run-all-rspec
+      when: never
+    - <<: *if-merge-request
+      changes: *ci-patterns
+      when: never
+    - <<: *if-merge-request
+      changes: *code-backstage-patterns
+
 .rails:rules:ee-and-foss-fast_spec_helper:
   rules:
     - changes: ["config/**/*"]
     - <<: *if-merge-request-title-run-all-rspec
+
+.rails:rules:ee-and-foss-fast_spec_helper:minimal:
+  rules:
+    - <<: *if-merge-request-title-run-all-rspec
+      when: never
+    - <<: *if-merge-request
+      changes: *ci-patterns
+      when: never
+    - <<: *if-merge-request
+      changes: ["config/**/*"]
 
 .rails:rules:default-refs-code-backstage-qa:
   rules:
@@ -521,12 +574,36 @@
     - changes: *db-patterns
     - <<: *if-merge-request-title-run-all-rspec
 
+.rails:rules:ee-only-migration:minimal:
+  rules:
+    - <<: *if-not-ee
+      when: never
+    - <<: *if-merge-request-title-run-all-rspec
+      when: never
+    - <<: *if-merge-request
+      changes: *ci-patterns
+      when: never
+    - <<: *if-merge-request
+      changes: *db-patterns
+
 .rails:rules:ee-only-unit:
   rules:
     - <<: *if-not-ee
       when: never
     - changes: *backend-patterns
     - <<: *if-merge-request-title-run-all-rspec
+
+.rails:rules:ee-only-unit:minimal:
+  rules:
+    - <<: *if-not-ee
+      when: never
+    - <<: *if-merge-request-title-run-all-rspec
+      when: never
+    - <<: *if-merge-request
+      changes: *ci-patterns
+      when: never
+    - <<: *if-merge-request
+      changes: *backend-patterns
 
 .rails:rules:ee-only-integration:
   rules:
@@ -535,12 +612,36 @@
     - changes: *backend-patterns
     - <<: *if-merge-request-title-run-all-rspec
 
+.rails:rules:ee-only-integration:minimal:
+  rules:
+    - <<: *if-not-ee
+      when: never
+    - <<: *if-merge-request-title-run-all-rspec
+      when: never
+    - <<: *if-merge-request
+      changes: *ci-patterns
+      when: never
+    - <<: *if-merge-request
+      changes: *backend-patterns
+
 .rails:rules:ee-only-system:
   rules:
     - <<: *if-not-ee
       when: never
     - changes: *code-backstage-patterns
     - <<: *if-merge-request-title-run-all-rspec
+
+.rails:rules:ee-only-system:minimal:
+  rules:
+    - <<: *if-not-ee
+      when: never
+    - <<: *if-merge-request-title-run-all-rspec
+      when: never
+    - <<: *if-merge-request
+      changes: *ci-patterns
+      when: never
+    - <<: *if-merge-request
+      changes: *code-backstage-patterns
 
 .rails:rules:as-if-foss-migration:
   rules:
@@ -553,6 +654,18 @@
     - <<: *if-merge-request
       changes: *ci-patterns
 
+.rails:rules:as-if-foss-migration:minimal:
+  rules:
+    - <<: *if-not-ee
+      when: never
+    - <<: *if-merge-request
+      changes: *ci-patterns
+      when: never
+    - <<: *if-security-merge-request
+      changes: *db-patterns
+    - <<: *if-merge-request-title-as-if-foss
+      changes: *db-patterns
+
 .rails:rules:as-if-foss-unit:
   rules:
     - <<: *if-not-ee
@@ -563,6 +676,18 @@
       changes: *backend-patterns
     - <<: *if-merge-request
       changes: *ci-patterns
+
+.rails:rules:as-if-foss-unit:minimal:
+  rules:
+    - <<: *if-not-ee
+      when: never
+    - <<: *if-merge-request
+      changes: *ci-patterns
+      when: never
+    - <<: *if-security-merge-request
+      changes: *backend-patterns
+    - <<: *if-merge-request-title-as-if-foss
+      changes: *backend-patterns
 
 .rails:rules:as-if-foss-integration:
   rules:
@@ -575,6 +700,18 @@
     - <<: *if-merge-request
       changes: *ci-patterns
 
+.rails:rules:as-if-foss-integration:minimal:
+  rules:
+    - <<: *if-not-ee
+      when: never
+    - <<: *if-merge-request
+      changes: *ci-patterns
+      when: never
+    - <<: *if-security-merge-request
+      changes: *backend-patterns
+    - <<: *if-merge-request-title-as-if-foss
+      changes: *backend-patterns
+
 .rails:rules:as-if-foss-system:
   rules:
     - <<: *if-not-ee
@@ -585,6 +722,18 @@
       changes: *code-backstage-patterns
     - <<: *if-merge-request
       changes: *ci-patterns
+
+.rails:rules:as-if-foss-system:minimal:
+  rules:
+    - <<: *if-not-ee
+      when: never
+    - <<: *if-merge-request
+      changes: *ci-patterns
+      when: never
+    - <<: *if-security-merge-request
+      changes: *code-backstage-patterns
+    - <<: *if-merge-request-title-as-if-foss
+      changes: *code-backstage-patterns
 
 .rails:rules:ee-mr-and-master-only:
   rules:
