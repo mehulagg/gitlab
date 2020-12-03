@@ -118,7 +118,7 @@ sequenceDiagram
 1. `GitLab::UsageData.to_json` [cascades down](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/usage_data.rb#L22) to ~400+ other counter method calls.
 1. The response of all methods calls are [merged together](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/usage_data.rb#L14) into a single JSON payload in `GitLab::UsageData.to_json`.
 1. The JSON payload is then [posted to the Versions application]( https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/services/submit_usage_ping_service.rb#L20)
-   If a firewall exception is needed, the required URL depends on several things. If 
+   If a firewall exception is needed, the required URL depends on several things. If
    the hostname is `version.gitlab.com`, the protocol is `TCP`, and the port number is `443`,
    the required URL is <https://version.gitlab.com/>.
 
@@ -312,7 +312,7 @@ Implemented using Redis methods [PFADD](https://redis.io/commands/pfadd) and [PF
      be `{i_compliance_credential_inventory}-2020-34`.
    - `expiry`: expiry time in days. Default: 29 days for daily aggregation and 6 weeks for weekly
      aggregation.
-   - `aggregation`: aggregation `:daily` or `:weekly`. The argument defines how we build the Redis
+   - `aggregation`: aggregation `:daily` or `:weekly`. The argument defines where we store the counting data in Redis, counting in `daily` keys or `weekly` keys. By selecting `daily` aggregation does not bring more detailed or fine grained data.
      keys for data storage. For `daily` we keep a key for metric per day of the year, for `weekly` we
      keep a key for metric per week of the year.
    - `feature_flag`: optional. For details, see our [GitLab internal Feature flags](../feature_flags/) documentation.
@@ -477,11 +477,11 @@ Next, get the unique events for the current week.
 We have the following recommendations for [Adding new events](#adding-new-events):
 
 - Event aggregation: weekly.
-- Key expiry time: 
+- Key expiry time:
   - Daily: 29 days.
   - Weekly: 42 days.
 - When adding new metrics, use a [feature flag](../../operations/feature_flags.md) to control the impact.
-- For feature flags triggered by another service, set `default_enabled: false`, 
+- For feature flags triggered by another service, set `default_enabled: false`,
   - Events can be triggered using the `UsageData` API, which helps when there are > 10 events per change
 
 ##### Enable/Disable Redis HLL tracking
