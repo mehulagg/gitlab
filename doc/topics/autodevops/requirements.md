@@ -150,28 +150,26 @@ You can target [AWS EC2](../../ci/cloud_deployment/index.md)
 as a deployment platform instead of Kubernetes. To use Auto DevOps with AWS EC2, you must add a
 specific environment variable. To do so, follow these steps:
 
-1. To leverage Auto DevOps for your project when deploying to AWS EC2, first you must define your [AWS credentials as environment variables](https://docs.gitlab.com/ee/ci/cloud_deployment/#run-aws-commands-from-gitlab-cicd).
+1. Define your [AWS credentials as environment variables](../../ci/cloud_deployment/#run-aws-commands-from-gitlab-cicd).
 
-1. Specify which AWS platform to target during the Auto DevOps deployment
-   by adding  `AUTO_DEVOPS_PLATFORM_TARGET: EC2` 
+1. Specify which AWS platform to target during the Auto DevOps deployment. To do this, add
+   `AUTO_DEVOPS_PLATFORM_TARGET: EC2` as a variable in your `.gitlab-ci.yml` file.
 
-1. Define a job for the build stage. To do so, you must reference the Auto-DevOps.gitlab-ci.yml template and include a job named build_artifact in your .gitlab-ci.yml file.
-For example:
+1. Define a job for the build stage. To do so, you must reference the `Auto-DevOps.gitlab-ci.yml`
+   template and include a job named `build_artifact` in your `.gitlab-ci.yml` file. For example:
 
-# .gitlab-ci.yml
+   ```
+   include:
+     - template: Auto-DevOps.gitlab-ci.yml
 
-```
-include:
-  - template: Auto-DevOps.gitlab-ci.yml
+   variables:
+     - AUTO_DEVOPS_PLATFORM_TARGET: EC2
 
-variables:
-  - AUTO_DEVOPS_PLATFORM_TARGET: EC2
-
-build_artifact:
-  stage: build
-  script:
-    - <your build script goes here>
-  artifacts:
-    paths:
-      - <built artifact>
-```
+   build_artifact:
+     stage: build
+     script:
+       - <your build script goes here>
+     artifacts:
+       paths:
+         - <built artifact>
+   ```
