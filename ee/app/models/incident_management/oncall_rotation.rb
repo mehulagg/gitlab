@@ -4,7 +4,7 @@ module IncidentManagement
   class OncallRotation < ApplicationRecord
     self.table_name = 'incident_management_oncall_rotations'
 
-    enum rotation_length_unit: {
+    enum length_unit: {
       hours: 0,
       days:  1,
       weeks: 2
@@ -18,8 +18,8 @@ module IncidentManagement
 
     validates :name, presence: true, uniqueness: { scope: :oncall_schedule_id }, length: { maximum: NAME_LENGTH }
     validates :starts_at, presence: true
-    validates :rotation_length, presence: true
-    validates :rotation_length_unit, presence: true
+    validates :length, presence: true
+    validates :length_unit, presence: true
 
     delegate :project, to: :oncall_schedule
   end

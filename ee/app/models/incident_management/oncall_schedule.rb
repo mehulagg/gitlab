@@ -12,6 +12,7 @@ module IncidentManagement
 
     belongs_to :project, inverse_of: :incident_management_oncall_schedules
     has_many :oncall_rotations
+    has_many :oncall_participants, through: :oncall_rotations
 
     has_internal_id :iid, scope: :project
 
