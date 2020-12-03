@@ -1630,7 +1630,7 @@ NOTE: **Note:**
 The `closed_by` attribute was [introduced in GitLab 10.6](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/17042). This value is only present for issues closed after GitLab 10.6 and if the user account that closed
 the issue still exists.
 
-## Promote an issue to an epic 
+## Promote an issue to an epic **(PREMIUM)**
 
 Promotes an issue to an epic by adding a comment with the `/promote` quick action. More information on promoting issues to epics is available [here](../user/group/epics/manage_epics.md#promote-an-issue-to-an-epic).
 
