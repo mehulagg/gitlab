@@ -4,11 +4,11 @@ require 'spec_helper'
 
 RSpec.describe ProjectRepositoryStorageMove, type: :model do
   describe 'associations' do
-    it { is_expected.to belong_to(:project) }
+    it { is_expected.to belong_to(:container) }
   end
 
   describe 'validations' do
-    it { is_expected.to validate_presence_of(:project) }
+    it { is_expected.to validate_presence_of(:container) }
     it { is_expected.to validate_presence_of(:state) }
     it { is_expected.to validate_presence_of(:source_storage_name) }
     it { is_expected.to validate_presence_of(:destination_storage_name) }
@@ -32,7 +32,7 @@ RSpec.describe ProjectRepositoryStorageMove, type: :model do
     end
 
     context 'project repository read-only' do
-      subject { build(:project_repository_storage_move, project: project) }
+      subject { build(:project_repository_storage_move, container: project) }
 
       let(:project) { build(:project, repository_read_only: true) }
 
@@ -63,7 +63,7 @@ RSpec.describe ProjectRepositoryStorageMove, type: :model do
     end
 
     context 'when in the default state' do
-      subject(:storage_move) { create(:project_repository_storage_move, project: project, destination_storage_name: 'test_second_storage') }
+      subject(:storage_move) { create(:project_repository_storage_move, container: project, destination_storage_name: 'test_second_storage') }
 
       context 'and transits to scheduled' do
         it 'triggers ProjectUpdateRepositoryStorageWorker' do
@@ -84,7 +84,7 @@ RSpec.describe ProjectRepositoryStorageMove, type: :model do
     end
 
     context 'when started' do
-      subject(:storage_move) { create(:project_repository_storage_move, :started, project: project, destination_storage_name: 'test_second_storage') }
+      subject(:storage_move) { create(:project_repository_storage_move, :started, container: project, destination_storage_name: 'test_second_storage') }
 
       context 'and transits to replicated' do
         it 'sets the repository storage and marks the project as writable' do
