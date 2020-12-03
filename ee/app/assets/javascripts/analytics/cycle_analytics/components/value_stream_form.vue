@@ -19,15 +19,6 @@ const ERRORS = {
   MAX_LENGTH: s__('CreateValueStreamForm|Maximum length 100 characters'),
 };
 
-const defaultStageFields = {
-  name: '',
-  isCustom: true, // ? maybe?
-  startEventIdentifier: null,
-  startEventLabelId: null,
-  endEventIdentifier: null,
-  endEventLabelId: null,
-};
-
 const NAME_MAX_LENGTH = 100;
 
 const validate = ({ name }) => {
@@ -61,18 +52,12 @@ const PRESET_OPTIONS = [
   },
 ];
 
-const DEFAULT_STAGE_CONFIG = ['issue', 'plan', 'code', 'test', 'review', 'staging', 'total'].map(
-  _id => {
-    const title = capitalizeFirstCharacter(_id);
-    const id = _id === 'total' ? 'production' : _id;
-    return {
-      // id,
-      title,
-      hidden: false,
-      // custom: false,
-    };
-  },
-);
+const DEFAULT_STAGE_CONFIG = ['issue', 'plan', 'code', 'test', 'review', 'staging'].map(id => ({
+  id,
+  title: capitalizeFirstCharacter(id),
+  hidden: false,
+  custom: false,
+}));
 
 export default {
   name: 'ValueStreamForm',
