@@ -39,7 +39,7 @@ module Elastic
             analyzer: {
               default: {
                 tokenizer: 'standard',
-                filter: %w(lowercase my_stemmer)
+                filter: %w(lowercase stemmer)
               },
               my_ngram_analyzer: {
                 tokenizer: 'my_ngram_tokenizer',
@@ -62,10 +62,6 @@ module Elastic
               }
             },
             filter: {
-              my_stemmer: {
-                type: 'stemmer',
-                name: 'english'
-              },
               code: {
                 type: "pattern_capture",
                 preserve_original: true,
