@@ -19088,6 +19088,9 @@ msgstr ""
 msgid "On-call schedules"
 msgstr ""
 
+msgid "OnCallSchedules|Add a rotation"
+msgstr ""
+
 msgid "OnCallSchedules|Add a schedule"
 msgstr ""
 
@@ -19109,7 +19112,13 @@ msgstr ""
 msgid "OnCallSchedules|Delete schedule"
 msgstr ""
 
+msgid "OnCallSchedules|Edit schedule"
+msgstr ""
+
 msgid "OnCallSchedules|Failed to add schedule"
+msgstr ""
+
+msgid "OnCallSchedules|Failed to edit schedule"
 msgstr ""
 
 msgid "OnCallSchedules|On-call schedule"
@@ -19130,6 +19139,9 @@ msgstr ""
 msgid "OnCallSchedules|Rotation start date cannot be empty"
 msgstr ""
 
+msgid "OnCallSchedules|Rotations"
+msgstr ""
+
 msgid "OnCallSchedules|Route alerts directly to specific members of your team"
 msgstr ""
 
@@ -19143,6 +19155,9 @@ msgid "OnCallSchedules|Sets the default timezone for the schedule, for all parti
 msgstr ""
 
 msgid "OnCallSchedules|The schedule could not be deleted. Please try again."
+msgstr ""
+
+msgid "OnCallSchedules|The schedule could not be updated. Please try again."
 msgstr ""
 
 msgid "OnDemandScans|Could not fetch scanner profiles. Please refresh the page, or try again later."

@@ -67,3 +67,17 @@ export const destroyScheduleResponseWithErrors = {
     },
   },
 };
+
+export const updateScheduleResponse = {
+  data: {
+    oncallScheduleDestroy: {
+      errors: [],
+      oncallSchedule: {
+        iid: '37',
+        name: 'Test schedule 2',
+        description: 'Description 2 lives here',
+        timezone: 'Pacific/Honolulu',
+      },
+    },
+  },
+};
