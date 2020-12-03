@@ -31,8 +31,8 @@ module IgnorableColumns
     alias_method :ignore_column, :ignore_columns
 
     def ignored_columns_details
-      unless defined?(@ignored_columns_details)
-        IGNORE_COLUMN_MUTEX.synchronize do
+      IGNORE_COLUMN_MUTEX.synchronize do
+        unless defined?(@ignored_columns_details)
           @ignored_columns_details ||= superclass.try(:ignored_columns_details)&.dup || {}
         end
       end
