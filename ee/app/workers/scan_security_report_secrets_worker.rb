@@ -37,7 +37,7 @@ class ScanSecurityReportSecretsWorker # rubocop:disable Scalability/IdempotentWo
       {
         type: revocation_type(vulnerability_finding),
         token: vulnerability_finding.metadata['raw_source_code_extract'],
-        location: vulnerability_finding.vulnerability.present.location_link
+        location: vulnerability_finding.vulnerability.present.location_link_with_raw_path
       }
     end
   end
