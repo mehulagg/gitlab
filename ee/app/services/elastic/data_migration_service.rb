@@ -40,6 +40,9 @@ module Elastic
         migrations.reverse.any? do |migration|
           !migration_has_finished?(migration.name_for_key)
         end
+
+      rescue StandardError
+        nil
       end
 
       def mark_all_as_completed!
