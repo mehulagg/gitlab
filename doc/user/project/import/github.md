@@ -60,7 +60,7 @@ must meet one of the following conditions prior to the import:
 
 - Have previously logged in to a GitLab account using the GitHub icon.
 - Have a GitHub account with a publicly visible
-  [primary email address](https://docs.github.com/en/github/setting-up-and-managing-your-github-user-account/setting-your-commit-email-address)
+  [primary email address](https://docs.github.com/en/free-pro-team@latest/rest/reference/users#get-a-user)
   on their profile that matches their GitLab account's email address.
 
 If a user referenced in the project is not found in GitLab's database, the project creator (typically the user
