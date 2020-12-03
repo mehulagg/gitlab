@@ -37,7 +37,14 @@ therefore, it indicates that it cannot be done by regular users of GitLab.com.
 
 ### Features disabled by default
 
-For features disabled by default, if they cannot be used yet due to security concerns
+For features disabled by default, **do not** document them if they:
+
+- Cannot be used due to security concerns.
+- Would leave data in a corrupt state.
+- Result in no usable change.
+
+**Do** add (or merge) the docs as soon as the feature can be used and is safe for testing by end-users.
+
 or because they would leave data in a corrupt state do **not document them**. Add (or merge)
 the docs as soon as the feature is safe for testing by end-users.
 
