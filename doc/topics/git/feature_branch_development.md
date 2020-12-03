@@ -90,10 +90,7 @@ When the feature branch is ready, it can then be merged into master.
 
 ### Rebase against a dedicated branch
 
-When there are multiple MRs in work on a feature branch, it's important to resolve conflicts
-between these MRs. To prevent issues, you'll need to "rebase" against the feature branch in
-the same way you might do so against "master". If you're on a `test-branch` where multiple
-people are working, be sure to pull from it frequently, to incorporate the work merged by others.
+When there are multiple MRs in work on a feature branch, it's important to resolve conflicts between these MRs. To prevent issues, you'll need to "rebase" against the feature branch in the same way you might do so against "master". If you're on a `test-branch` where multiple people are working, be sure to rebase against it frequently.
 
 Assumptions:
 
@@ -154,7 +151,7 @@ To rebase against the `release-X-Y` branch, follow these steps:
       the `release-X-Y` branch.
 
       ```shell
-      git push origin release-X-Y -f
+      git push --force-with-lease origin release-X-Y
       ```
 
 1. You can continue with your work on your `test-branch`.
