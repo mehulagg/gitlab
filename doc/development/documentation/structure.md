@@ -32,6 +32,7 @@ Landing page topics should be in this format:
 # Title (a noun, like "CI/CD or "Analytics")
 
 Brief introduction to the concept or product area.
+Include the reason why someone would use this thing.
 
 ## Related topics
 
@@ -155,9 +156,9 @@ Topics include other information.
 
 For example:
 
-- Each topic must have a [tier badge](styleguide/index.md#product-badges).
+- Each topic must have a [tier badge](styleguide/index.md#product-tier-badges).
 - New topics must have information about the
-  [GitLab version where the feature was introduced](styleguide/index.md#gitlab-versions-and-tiers).
+  [GitLab version where the feature was introduced](styleguide/index.md#where-to-put-version-text).
 
 ### Help and feedback section
 

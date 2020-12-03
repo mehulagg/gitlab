@@ -75,7 +75,7 @@ different types. For example:
 - Concepts
 - Tasks
 - Reference
-- Tutorials
+- Troubleshooting
 
 At GitLab, we have not traditionally used topic types. However, we are starting to
 move in this direction, so we can address these issues:
