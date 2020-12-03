@@ -250,7 +250,8 @@ Note that this data is completely separate from the [events tracking data](#impl
 
 #### Add context
 
-You can add arbitrary context data in a hash which will be stored as part of the experiment user record. This data can then be used by data analytics dashboards.
+You can add arbitrary context data in a hash which gets stored as part of the experiment user record.
+This data can then be used by data analytics dashboards.
 
 ```ruby
 before_action do
