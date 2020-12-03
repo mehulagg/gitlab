@@ -32,7 +32,7 @@ module Gitlab
               with_options allow_nil: true do
                 validates :extends, array_of_strings_or_string: true
                 validates :rules, array_of_hashes: true
-                validates :allow_failure, boolean: true
+                validates :allow_failure, hash_or_boolean: true
               end
             end
 
@@ -64,6 +64,10 @@ module Gitlab
               description: 'Indicates whether to inherit defaults or not.',
               inherit: false,
               default: {}
+
+            entry :allow_failure, ::Gitlab::Ci::Config::Entry::AllowFailure,
+              description: 'Indicates whether this job is allowed to fail or not.',
+              inherit: false
 
             attributes :extends, :rules, :allow_failure
           end
@@ -143,7 +147,10 @@ module Gitlab
           end
 
           def ignored?
-            allow_failure.nil? ? manual_action? : allow_failure
+            return manual_action? if allow_failure.nil?
+            return false if allow_failure.is_a?(Hash)
+
+            allow_failure
           end
         end
       end

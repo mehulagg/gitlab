@@ -700,6 +700,16 @@ RSpec.describe Gitlab::Ci::Config::Entry::Job do
           expect(entry).not_to be_ignored
         end
       end
+
+      context 'when job is dynamically allowed to fail' do
+        let(:config) do
+          { script: 'deploy', when: 'manual', allow_failure: { exit_codes: 42 } }
+        end
+
+        it 'is not an ignored job' do
+          expect(entry).not_to be_ignored
+        end
+      end
     end
 
     context 'when job is not a manual action' do
@@ -721,6 +731,14 @@ RSpec.describe Gitlab::Ci::Config::Entry::Job do
 
       context 'when job is not allowed to fail' do
         let(:config) { { script: 'deploy', allow_failure: false } }
+
+        it 'is not an ignored job' do
+          expect(entry).not_to be_ignored
+        end
+      end
+
+      context 'when job is dynamically allowed to fail' do
+        let(:config) { { script: 'deploy', allow_failure: { exit_codes: 42 } } }
 
         it 'is not an ignored job' do
           expect(entry).not_to be_ignored

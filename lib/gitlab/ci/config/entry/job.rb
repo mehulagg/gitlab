@@ -166,10 +166,17 @@ module Gitlab
               release: release_value,
               after_script: after_script_value,
               ignore: ignored?,
+              allow_failure: save_allow_failure_options? ? allow_failure_value : nil,
               needs: needs_defined? ? needs_value : nil,
               resource_group: resource_group,
               scheduling_type: needs_defined? ? :dag : :stage
             ).compact
+          end
+
+          private
+
+          def save_allow_failure_options?
+            allow_failure_defined? && allow_failure_value.is_a?(Hash)
           end
         end
       end

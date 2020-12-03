@@ -106,6 +106,7 @@ module Ci
 
         Result.new(status: 200)
       when 'failed'
+        build.conditioally_allow_failure!(params[:exit_code])
         build.drop!(params[:failure_reason] || :unknown_failure)
 
         Result.new(status: 200)

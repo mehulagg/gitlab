@@ -176,6 +176,7 @@ module API
           optional :state, type: String, desc: %q(Job's status: success, failed)
           optional :checksum, type: String, desc: %q(Job's trace CRC32 checksum)
           optional :failure_reason, type: String, desc: %q(Job's failure_reason)
+          optional :exit_code, type: Integer, desc: %q(Job's exit code)
         end
         put '/:id' do
           job = authenticate_job!
