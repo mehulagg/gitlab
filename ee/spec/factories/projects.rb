@@ -10,6 +10,8 @@ FactoryBot.modify do
           retry_count: Gitlab::Mirror::MAX_RETRY + 1,
           last_update_at: Time.now - 1.minute
         )
+
+        create(:project_security_setting, project: project)
       end
     end
 
