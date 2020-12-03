@@ -21379,11 +21379,11 @@ CREATE INDEX index_import_failures_on_project_id_not_null ON import_failures USI
 
 CREATE INDEX index_imported_projects_on_import_type_creator_id_created_at ON projects USING btree (import_type, creator_id, created_at) WHERE (import_type IS NOT NULL);
 
-CREATE INDEX index_inc_mngmnt_oncall_particpants_on_oncall_rotation_id ON incident_management_oncall_participants USING btree (oncall_rotation_id);
+CREATE INDEX index_inc_mngmnt_oncall_participants_on_oncall_rotation_id ON incident_management_oncall_participants USING btree (oncall_rotation_id);
 
-CREATE INDEX index_inc_mngmnt_oncall_particpants_on_oncall_user_id ON incident_management_oncall_participants USING btree (user_id);
+CREATE INDEX index_inc_mngmnt_oncall_participants_on_oncall_user_id ON incident_management_oncall_participants USING btree (user_id);
 
-CREATE UNIQUE INDEX index_inc_mngmnt_oncall_particpants_on_user_id_and_rotation_id ON incident_management_oncall_participants USING btree (user_id, oncall_rotation_id);
+CREATE UNIQUE INDEX index_inc_mngmnt_oncall_participants_on_user_id_and_rotation_id ON incident_management_oncall_participants USING btree (user_id, oncall_rotation_id);
 
 CREATE UNIQUE INDEX index_inc_mngmnt_oncall_rotations_on_oncall_schedule_id_and_id ON incident_management_oncall_rotations USING btree (oncall_schedule_id, id);
 

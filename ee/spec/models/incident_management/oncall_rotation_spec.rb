@@ -12,12 +12,11 @@ RSpec.describe IncidentManagement::OncallRotation do
   end
 
   describe '.validations' do
-    let(:timezones) { ActiveSupport::TimeZone.all.map { |tz| tz.tzinfo.identifier } }
-
     subject { build(:incident_management_oncall_rotation, oncall_schedule: schedule) }
 
     it { is_expected.to validate_presence_of(:name) }
     it { is_expected.to validate_length_of(:name).is_at_most(200) }
+    it { is_expected.to validate_uniqueness_of(:name).scoped_to([:oncall_schedule]) }
     it { is_expected.to validate_presence_of(:starts_at) }
     it { is_expected.to validate_presence_of(:rotation_length) }
     it { is_expected.to validate_presence_of(:rotation_length_unit) }

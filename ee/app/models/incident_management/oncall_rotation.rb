@@ -5,9 +5,9 @@ module IncidentManagement
     self.table_name = 'incident_management_oncall_rotations'
 
     enum rotation_length_unit: {
-        hours: 0,
-        days:  1,
-        weeks: 2
+      hours: 0,
+      days:  1,
+      weeks: 2
     }
 
     NAME_LENGTH = 200
