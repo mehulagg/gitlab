@@ -204,28 +204,11 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :sidekiq_might_not_need
 
   describe 'issues' do
     let(:scope) { 'issues' }
+    let!(:issue_1) { create(:issue, project: project_1, title: 'Hello world, here I am!', iid: 1) }
+    let!(:issue_2) { create(:issue, project: project_1, title: 'Issue Two', description: 'Hello world, here I am!', iid: 2) }
+    let!(:issue_3) { create(:issue, project: project_2, title: 'Issue Three', iid: 2) }
 
     before do
-      @issue_1 = create(
-        :issue,
-        project: project_1,
-        title: 'Hello world, here I am!',
-        iid: 1
-      )
-      @issue_2 = create(
-        :issue,
-        project: project_1,
-        title: 'Issue Two',
-        description: 'Hello world, here I am!',
-        iid: 2
-      )
-      @issue_3 = create(
-        :issue,
-        project: project_2,
-        title: 'Issue Three',
-        iid: 2
-      )
-
       ensure_elasticsearch_index!
     end
 
@@ -235,7 +218,7 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :sidekiq_might_not_need
       results = described_class.new(user, 'hello world', limit_project_ids)
       issues = results.objects('issues')
 
-      expect(issues).to contain_exactly(@issue_1, @issue_2)
+      expect(issues).to contain_exactly(issue_1, issue_2)
       expect(results.issues_count).to eq 2
     end
 
@@ -250,7 +233,7 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :sidekiq_might_not_need
       results = described_class.new(user, '#2', limit_project_ids, public_and_internal_projects: false)
       issues = results.objects('issues')
 
-      expect(issues).to contain_exactly(@issue_2)
+      expect(issues).to contain_exactly(issue_2)
       expect(results.issues_count).to eq 1
     end
 
@@ -258,7 +241,7 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :sidekiq_might_not_need
       results = described_class.new(user, '2', limit_project_ids, public_and_internal_projects: false)
       issues = results.objects('issues')
 
-      expect(issues).to contain_exactly(@issue_2)
+      expect(issues).to contain_exactly(issue_2)
       expect(results.issues_count).to eq 1
     end
 
@@ -267,6 +250,18 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :sidekiq_might_not_need
 
       expect(results.objects('issues')).to be_empty
       expect(results.issues_count).to eq 0
+    end
+
+    it 'handles plural words through algorithmic stemming', :aggregate_failures do
+      issue1 = create(:issue, project: project_1, title: 'remove :title attribute from submit buttons to prevent un-styled tooltips')
+      issue2 = create(:issue, project: project_1, title: 'smarter submit behavior for buttons groups')
+
+      ensure_elasticsearch_index!
+
+      results = described_class.new(user, 'button', limit_project_ids)
+
+      expect( results.objects('issues')).to contain_exactly(issue1, issue2)
+      expect(results.issues_count).to eq 2
     end
 
     context 'filtering' do

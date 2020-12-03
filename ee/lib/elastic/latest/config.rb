@@ -64,7 +64,7 @@ module Elastic
             filter: {
               my_stemmer: {
                 type: 'stemmer',
-                name: 'light_english'
+                name: 'english'
               },
               code: {
                 type: "pattern_capture",
