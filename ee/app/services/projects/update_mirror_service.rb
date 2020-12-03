@@ -33,7 +33,7 @@ module Projects
       checksum_before = project.repository.checksum
 
       update_tags do
-        project.fetch_mirror(forced: true)
+        project.fetch_mirror(forced: true, check_tags_changed: Feature.enabled?(:fetch_mirror_check_tags_changed, project))
       end
 
       update_branches
@@ -99,7 +99,7 @@ module Projects
       old_tags = repository_tags_with_target.each_with_object({}) { |tag, tags| tags[tag.name] = tag }
 
       fetch_result = yield
-      return fetch_result unless fetch_result
+      return fetch_result unless fetch_result&.tags_changed
 
       repository.expire_tags_cache
 

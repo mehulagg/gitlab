@@ -896,7 +896,7 @@ RSpec.describe Project do
       let(:project) { build(:project, :mirror, import_url: import_url, import_data_attributes: { auth_method: auth_method } ) }
 
       specify do
-        expect(project.repository).to receive(:fetch_upstream).with(expected, forced: false)
+        expect(project.repository).to receive(:fetch_upstream).with(expected, forced: false, check_tags_changed: false)
 
         project.fetch_mirror
       end
