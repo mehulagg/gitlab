@@ -3,7 +3,7 @@ import { GlCard, GlSprintf } from '@gitlab/ui';
 import OnCallSchedule, { i18n } from 'ee/oncall_schedules/components/oncall_schedule.vue';
 import ScheduleTimelineSection from 'ee/oncall_schedules/components/schedule/components/schedule_timeline_section.vue';
 import * as utils from 'ee/oncall_schedules/components/schedule/utils';
-import * as commonUtils from 'ee/oncall_schedules/utils';
+import * as commonUtils from 'ee/oncall_schedules/utils/common_utils';
 import { PRESET_TYPES } from 'ee/oncall_schedules/components/schedule/constants';
 import mockTimezones from './mocks/mockTimezones.json';
 

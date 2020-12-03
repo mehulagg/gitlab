@@ -25,7 +25,9 @@ export const getOncallSchedulesQueryResponse = {
             iid: '37',
             name: 'Test schedule',
             description: 'Description 1 lives here',
-            timezone: 'Pacific/Honolulu',
+            timezone: {
+              identifier: 'Pacific/Honolulu',
+            },
           },
         ],
       },

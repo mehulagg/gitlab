@@ -6,10 +6,9 @@ import DeleteScheduleModal from './delete_schedule_modal.vue';
 import EditScheduleModal from './edit_schedule_modal.vue';
 import { getTimeframeForWeeksView } from './schedule/utils';
 import { PRESET_TYPES } from './schedule/constants';
-import { getFormattedTimezone } from '../utils';
+import { getFormattedTimezone } from '../utils/common_utils';
 
 export const i18n = {
-  title: s__('OnCallSchedules|On-call schedule'),
   scheduleForTz: s__('OnCallSchedules|On-call schedule for the %{tzShort}'),
   updateScheduleLabel: s__('OnCallSchedules|Edit schedule'),
   destroyScheduleLabel: s__('OnCallSchedules|Delete schedule'),
@@ -51,7 +50,6 @@ export default {
 
 <template>
   <div>
-    <h2>{{ $options.i18n.title }}</h2>
     <gl-card>
       <template #header>
         <div class="gl-display-flex gl-justify-content-space-between gl-m-0">
