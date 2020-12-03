@@ -1,3 +1,6 @@
+include:
+  - local: /workhorse/.gitlab-ci.yml
+
 workhorse:
   image: golang:1.14
   stage: test
