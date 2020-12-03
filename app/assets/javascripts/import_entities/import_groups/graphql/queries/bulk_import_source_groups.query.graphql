@@ -4,9 +4,4 @@ query bulkImportSourceGroups {
   bulkImportSourceGroups @client {
     ...BulkImportSourceGroupItem
   }
-
-  availableNamespaces @client {
-    id
-    full_path
-  }
 }

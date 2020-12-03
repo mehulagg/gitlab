@@ -18,12 +18,12 @@ export class SourceGroupsManager {
     this.cache = cache;
   }
 
-  findSourceGroupById(id) {
+  findById(id) {
     const cacheId = getGroupId(id);
     return this.cache.readFragment({ fragment: ImportSourceGroupFragment, id: cacheId });
   }
 
-  updateSourceGroup(group, fn) {
+  update(group, fn) {
     this.cache.writeFragment({
       fragment: ImportSourceGroupFragment,
       id: getGroupId(group.id),
@@ -31,13 +31,13 @@ export class SourceGroupsManager {
     });
   }
 
-  updateSourceGroupById(id, fn) {
-    const group = this.findSourceGroupById(id);
-    this.updateSourceGroup(group, fn);
+  updateById(id, fn) {
+    const group = this.findById(id);
+    this.update(group, fn);
   }
 
   setImportStatus({ group, status }) {
-    this.updateSourceGroup(group, sourceGroup => {
+    this.update(group, sourceGroup => {
       // eslint-disable-next-line no-param-reassign
       sourceGroup.status = status;
     });

@@ -37,14 +37,14 @@ export function createResolvers({ endpoints }) {
     },
     Mutation: {
       setTargetNamespace(_, { targetNamespace, sourceGroupId }, { cache }) {
-        new SourceGroupsManager({ cache }).updateSourceGroupById(sourceGroupId, sourceGroup => {
+        new SourceGroupsManager({ cache }).updateById(sourceGroupId, sourceGroup => {
           // eslint-disable-next-line no-param-reassign
           sourceGroup.import_target.target_namespace = targetNamespace;
         });
       },
 
       setNewName(_, { newName, sourceGroupId }, { cache }) {
-        new SourceGroupsManager({ cache }).updateSourceGroupById(sourceGroupId, sourceGroup => {
+        new SourceGroupsManager({ cache }).updateById(sourceGroupId, sourceGroup => {
           // eslint-disable-next-line no-param-reassign
           sourceGroup.import_target.new_name = newName;
         });
@@ -52,18 +52,20 @@ export function createResolvers({ endpoints }) {
 
       async importGroup(_, { sourceGroupId }, { cache }) {
         const groupManager = new SourceGroupsManager({ cache });
-        const group = groupManager.findSourceGroupById(sourceGroupId);
+        const group = groupManager.findById(sourceGroupId);
         groupManager.setImportStatus({ group, status: STATUSES.SCHEDULING });
 
         try {
-          await axios.post('/import/bulk_imports', [
-            {
-              source_type: 'group_entity',
-              source_full_path: group.full_path,
-              destination_namespace: group.import_target.target_namespace,
-              destination_name: group.import_target.new_name,
-            },
-          ]);
+          await axios.post('/import/bulk_imports', {
+            bulk_import: [
+              {
+                source_type: 'group_entity',
+                source_full_path: group.full_path,
+                destination_namespace: group.import_target.target_namespace,
+                destination_name: group.import_target.new_name,
+              },
+            ],
+          });
           groupManager.setImportStatus({ group, status: STATUSES.STARTED });
         } catch (e) {
           groupManager.setImportStatus({ group, status: STATUSES.NONE });
