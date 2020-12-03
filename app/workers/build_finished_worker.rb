@@ -56,6 +56,7 @@ class BuildFinishedWorker # rubocop:disable Scalability/IdempotentWorker
     # details.
     #
     ArchiveTraceWorker.perform_in(ARCHIVE_TRACES_IN, build.id)
+    JiraConnect::SyncService.new(build.project).execute(builds: [build.id])
   end
 end
 
