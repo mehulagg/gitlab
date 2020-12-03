@@ -1632,7 +1632,7 @@ the issue still exists.
 
 ## Promote an issue to an epic 
 
-Promotes an issue to an epic by adding a comment with the `/promote` quick action. More information on promoting issues to epics is available [here](/ee/user/group/epics/manage_epics.html#promote-an-issue-to-an-epic).
+Promotes an issue to an epic by adding a comment with the `/promote` quick action. More information on promoting issues to epics is available [here](../user/group/epics/manage_epics.md#promote-an-issue-to-an-epic).
 
 ```plaintext
 POST /projects/:id/issues/:issue_iid/notes
