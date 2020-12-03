@@ -1,4 +1,4 @@
-import { s__ } from '~/locale';
+import { s__, __ } from '~/locale';
 
 export const MAX_REQUEST_COUNT = 10;
 
@@ -36,10 +36,12 @@ export const DEVOPS_ADOPTION_STRINGS = {
   modal: {
     title: s__('DevopsAdoption|New segment'),
     button: s__('DevopsAdoption|Create new segment'),
+    cancel: __('Cancel'),
     namePlaceholder: s__('DevopsAdoption|My segment'),
     nameLabel: s__('DevopsAdoption|Name'),
     selectedGroupsTextSingular: s__('DevopsAdoption|%{selectedCount} group selected (20 max)'),
     selectedGroupsTextPlural: s__('DevopsAdoption|%{selectedCount} groups selected (20 max)'),
+    error: s__('DevopsAdoption|An error occured while saving the segment. Please try again.'),
   },
 };
 

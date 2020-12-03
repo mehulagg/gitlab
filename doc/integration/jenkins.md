@@ -27,7 +27,7 @@ For a real use case, read the blog post [Continuous integration: From Jenkins to
 
 Moving from a traditional CI plug-in to a single application for the entire software development
 life cycle can decrease hours spent on maintaining toolchains by 10% or more. For more details, see
-the ['GitLab vs. Jenkins' comparison page](https://about.gitlab.com/devops-tools/jenkins-vs-gitlab.html).
+the ['GitLab vs. Jenkins' comparison page](https://about.gitlab.com/devops-tools/jenkins-vs-gitlab/).
 
 NOTE: **Note:**
 This documentation focuses only on how to **configure** a Jenkins *integration* with
@@ -196,14 +196,14 @@ WebHook Error => execution expired
 ```
 
 If those are present, the request is exceeding the
-[webhook timeout](../user/project/integrations/webhooks.md#receiving-duplicate-or-multiple-webhook-requests-triggered-by-one-event),
+[webhook timeout](../user/project/integrations/webhooks.md#webhook-fails-or-multiple-webhook-requests-are-triggered),
 which is set to 10 seconds by default.
 
 To fix this the `gitlab_rails['webhook_timeout']` value must be increased
 in the `gitlab.rb` config file, followed by the [`gitlab-ctl reconfigure` command](../administration/restart_gitlab.md).
 
 If you don't find the errors above, but do find *duplicate* entries like below (in `/var/log/gitlab/gitlab-rail`), this
-could also indicate that [webhook requests are timing out](../user/project/integrations/webhooks.md#receiving-duplicate-or-multiple-webhook-requests-triggered-by-one-event):
+could also indicate that [webhook requests are timing out](../user/project/integrations/webhooks.md#webhook-fails-or-multiple-webhook-requests-are-triggered):
 
 ```plaintext
 2019-10-25_04:22:41.25630 2019-10-25T04:22:41.256Z 1584 TID-ovowh4tek WebHookWorker JID-941fb7f40b69dff3d833c99b INFO: start

@@ -2,17 +2,15 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::Database::LoadBalancing::LoadBalancer do
+RSpec.describe Gitlab::Database::LoadBalancing::LoadBalancer, :request_store do
+  let(:pool_spec) { ActiveRecord::Base.connection_pool.spec }
+  let(:pool) { ActiveRecord::ConnectionAdapters::ConnectionPool.new(pool_spec) }
+
   let(:lb) { described_class.new(%w(localhost localhost)) }
 
   before do
     allow(Gitlab::Database).to receive(:create_connection_pool)
-      .and_return(ActiveRecord::Base.connection_pool)
-  end
-
-  after do
-    RequestStore.delete(described_class::CACHE_KEY)
-    RequestStore.delete(described_class::ENSURE_CACHING_KEY)
+      .and_return(pool)
   end
 
   def raise_and_wrap(wrapper, original)

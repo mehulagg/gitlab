@@ -29,12 +29,12 @@ module Mutations
                ::Types::GlobalIDType[::User],
                required: false,
                loads: ::Types::UserType,
-               description: 'The id of user to be assigned to the board'
+               description: 'The ID of user to be assigned to the board'
 
       argument :milestone_id,
                ::Types::GlobalIDType[::Milestone],
                required: false,
-               description: 'The id of milestone to be assigned to the board'
+               description: 'The ID of milestone to be assigned to the board'
 
       argument :weight,
                GraphQL::INT_TYPE,

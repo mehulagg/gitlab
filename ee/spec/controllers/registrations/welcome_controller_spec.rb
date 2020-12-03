@@ -144,7 +144,7 @@ RSpec.describe Registrations::WelcomeController do
 
             with_them do
               it 'adds the user to the experiments table with the correct group_type' do
-                expect(::Experiment).to receive(:add_user).with(:onboarding_issues, group_type, user)
+                expect(::Experiment).to receive(:add_user).with(:onboarding_issues, group_type, user, {})
 
                 subject
               end

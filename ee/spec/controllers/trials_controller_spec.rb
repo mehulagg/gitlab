@@ -54,8 +54,9 @@ RSpec.describe TrialsController do
       response
     end
 
-    it 'calls record_experiment_user for the remove_known_trial_form_fields experiment' do
+    it 'calls record_experiment_user for the remove_known_trial_form_fields & trimmed_skip_trial_copy experiments' do
       expect(controller).to receive(:record_experiment_user).with(:remove_known_trial_form_fields)
+      expect(controller).to receive(:record_experiment_user).with(:trimmed_skip_trial_copy)
 
       subject
     end
@@ -196,8 +197,9 @@ RSpec.describe TrialsController do
       let(:apply_trial_result) { true }
 
       it { is_expected.to redirect_to("/#{namespace.path}?trial=true") }
-      it 'calls the record conversion method for the remove_known_trial_form_fields experiment' do
+      it 'calls the record conversion method for the remove_known_trial_form_fields & trimmed_skip_trial_copy experiments' do
         expect(controller).to receive(:record_experiment_conversion_event).with(:remove_known_trial_form_fields)
+        expect(controller).to receive(:record_experiment_conversion_event).with(:trimmed_skip_trial_copy)
 
         subject
       end
@@ -215,8 +217,9 @@ RSpec.describe TrialsController do
       let(:apply_trial_result) { false }
 
       it { is_expected.to render_template(:select) }
-      it 'does not call the record conversion method for the remove_known_trial_form_fields experiment' do
+      it 'does not call the record conversion method for the remove_known_trial_form_fields & trimmed_skip_trial_copy experiments' do
         expect(controller).not_to receive(:record_experiment_conversion_event).with(:remove_known_trial_form_fields)
+        expect(controller).not_to receive(:record_experiment_conversion_event).with(:trimmed_skip_trial_copy)
 
         subject
       end

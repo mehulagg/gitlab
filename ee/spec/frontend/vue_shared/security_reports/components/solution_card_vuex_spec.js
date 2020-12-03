@@ -1,7 +1,6 @@
 import { shallowMount } from '@vue/test-utils';
 import Vue from 'vue';
 import component from 'ee/vue_shared/security_reports/components/solution_card_vuex.vue';
-import { trimText } from 'helpers/text_helper';
 import { s__ } from '~/locale';
 
 describe('Solution Card', () => {
@@ -20,22 +19,21 @@ describe('Solution Card', () => {
       it('takes the value of solution', () => {
         const propsData = { solution };
         wrapper = shallowMount(Component, { propsData });
-
-        expect(wrapper.vm.solutionText).toEqual(solution);
+        expect(wrapper.find('.card-body').text()).toMatchInterpolatedText(`Solution: ${solution}`);
       });
 
       it('takes the summary from a remediation', () => {
         const propsData = { remediation };
         wrapper = shallowMount(Component, { propsData });
-
-        expect(wrapper.vm.solutionText).toEqual(remediation.summary);
+        expect(wrapper.find('.card-body').text()).toMatchInterpolatedText(
+          `Solution: ${remediation.summary}`,
+        );
       });
 
-      it('takes the summary from a remediation, if both are defined', () => {
+      it('takes the value of solution, if both are defined', () => {
         const propsData = { remediation, solution };
         wrapper = shallowMount(Component, { propsData });
-
-        expect(wrapper.vm.solutionText).toEqual(remediation.summary);
+        expect(wrapper.find('.card-body').text()).toMatchInterpolatedText(`Solution: ${solution}`);
       });
     });
   });
@@ -48,7 +46,7 @@ describe('Solution Card', () => {
       });
 
       it('renders the solution text and label', () => {
-        expect(trimText(wrapper.find('.card-body').text())).toContain(`Solution: ${solution}`);
+        expect(wrapper.find('.card-body').text()).toMatchInterpolatedText(`Solution: ${solution}`);
       });
 
       it('does not render the card footer', () => {
@@ -67,7 +65,7 @@ describe('Solution Card', () => {
       });
 
       it('renders the solution text and label', () => {
-        expect(trimText(wrapper.find('.card-body').text())).toContain(
+        expect(wrapper.find('.card-body').text()).toMatchInterpolatedText(
           `Solution: ${remediation.summary}`,
         );
       });
@@ -86,7 +84,7 @@ describe('Solution Card', () => {
         });
 
         it('renders the create a merge request to implement this solution message', () => {
-          expect(wrapper.find('.card-footer').text()).toContain(
+          expect(wrapper.find('.card-footer').text()).toMatch(
             s__(
               'ciReport|Create a merge request to implement this solution, or download and apply the patch manually.',
             ),

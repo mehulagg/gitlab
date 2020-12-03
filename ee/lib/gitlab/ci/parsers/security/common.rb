@@ -57,6 +57,7 @@ module Gitlab
             identifiers = create_identifiers(report, data['identifiers'])
             links = create_links(report, data['links'])
             location = create_location(data['location'] || {})
+            remediations = create_remediations(data['remediations'])
 
             report.add_finding(
               ::Gitlab::Ci::Reports::Security::Finding.new(
@@ -71,6 +72,7 @@ module Gitlab
                 scan: report&.scan,
                 identifiers: identifiers,
                 links: links,
+                remediations: remediations,
                 raw_metadata: data.to_json,
                 metadata_version: version))
           end
@@ -124,6 +126,12 @@ module Gitlab
             ::Gitlab::Ci::Reports::Security::Link.new(
               name: link['name'],
               url: link['url'])
+          end
+
+          def create_remediations(remediations_data)
+            remediations_data.to_a.compact.map do |remediation_data|
+              ::Gitlab::Ci::Reports::Security::Remediation.new(remediation_data['summary'], remediation_data['diff'])
+            end
           end
 
           def parse_severity_level(input)

@@ -2619,6 +2619,9 @@ msgstr ""
 msgid "AlertSettings|Proceed with editing"
 msgstr ""
 
+msgid "AlertSettings|Prometheus"
+msgstr ""
+
 msgid "AlertSettings|Prometheus API base URL"
 msgstr ""
 
@@ -5662,6 +5665,9 @@ msgstr ""
 msgid "Clone repository"
 msgstr ""
 
+msgid "Clone this issue"
+msgstr ""
+
 msgid "Clone with %{http_label}"
 msgstr ""
 
@@ -5672,6 +5678,18 @@ msgid "Clone with KRB5"
 msgstr ""
 
 msgid "Clone with SSH"
+msgstr ""
+
+msgid "CloneIssue|Cannot clone issue due to insufficient permissions!"
+msgstr ""
+
+msgid "CloneIssue|Cannot clone issue to target project as it is pending deletion."
+msgstr ""
+
+msgid "Cloned this issue to %{path_to_project}."
+msgstr ""
+
+msgid "Clones this issue, without comments, to %{project}."
 msgstr ""
 
 msgid "Close"
@@ -9568,6 +9586,9 @@ msgstr ""
 msgid "DevopsAdoption|Add new segment"
 msgstr ""
 
+msgid "DevopsAdoption|An error occured while saving the segment. Please try again."
+msgstr ""
+
 msgid "DevopsAdoption|Approvals"
 msgstr ""
 
@@ -11418,6 +11439,9 @@ msgstr ""
 msgid "Failed to check related branches."
 msgstr ""
 
+msgid "Failed to clone this issue because target project doesn't exist."
+msgstr ""
+
 msgid "Failed to create Merge Request. Please try again."
 msgstr ""
 
@@ -11751,9 +11775,6 @@ msgid "FeatureFlags|Feature Flag has no strategies"
 msgstr ""
 
 msgid "FeatureFlags|Feature Flags"
-msgstr ""
-
-msgid "FeatureFlags|Feature Flags will look different in the next milestone. No action is needed, but you may notice the functionality was changed to improve the workflow."
 msgstr ""
 
 msgid "FeatureFlags|Feature flag %{name} will be removed. Are you sure?"
@@ -14539,6 +14560,9 @@ msgstr ""
 msgid "Incompatible project"
 msgstr ""
 
+msgid "Incomplete"
+msgstr ""
+
 msgid "Indent"
 msgstr ""
 
@@ -16861,6 +16885,9 @@ msgstr ""
 msgid "Members|%{userName} is currently an LDAP user. Editing their permissions will override the settings from the LDAP group sync."
 msgstr ""
 
+msgid "Members|2FA"
+msgstr ""
+
 msgid "Members|An error occurred while trying to enable LDAP override, please try again."
 msgstr ""
 
@@ -16894,7 +16921,16 @@ msgstr ""
 msgid "Members|Are you sure you want to withdraw your access request for \"%{source}\""
 msgstr ""
 
+msgid "Members|Direct"
+msgstr ""
+
+msgid "Members|Disabled"
+msgstr ""
+
 msgid "Members|Edit permissions"
+msgstr ""
+
+msgid "Members|Enabled"
 msgstr ""
 
 msgid "Members|Expiration date removed successfully."
@@ -16909,10 +16945,16 @@ msgstr ""
 msgid "Members|Filter members"
 msgstr ""
 
+msgid "Members|Inherited"
+msgstr ""
+
 msgid "Members|LDAP override enabled."
 msgstr ""
 
 msgid "Members|Leave \"%{source}\""
+msgstr ""
+
+msgid "Members|Membership"
 msgstr ""
 
 msgid "Members|No expiration set"
@@ -19061,16 +19103,37 @@ msgstr ""
 msgid "OnCallSchedules|Add a schedule"
 msgstr ""
 
+msgid "OnCallSchedules|Add rotation"
+msgstr ""
+
 msgid "OnCallSchedules|Add schedule"
 msgstr ""
 
 msgid "OnCallSchedules|Create on-call schedules  in GitLab"
 msgstr ""
 
+msgid "OnCallSchedules|Failed to add rotation"
+msgstr ""
+
 msgid "OnCallSchedules|Failed to add schedule"
 msgstr ""
 
+msgid "OnCallSchedules|Rotation length"
+msgstr ""
+
+msgid "OnCallSchedules|Rotation name cannot be empty"
+msgstr ""
+
+msgid "OnCallSchedules|Rotation participants cannot be empty"
+msgstr ""
+
+msgid "OnCallSchedules|Rotation start date cannot be empty"
+msgstr ""
+
 msgid "OnCallSchedules|Route alerts directly to specific members of your team"
+msgstr ""
+
+msgid "OnCallSchedules|Select participant"
 msgstr ""
 
 msgid "OnCallSchedules|Select timezone"
@@ -19388,6 +19451,9 @@ msgid "Owned by:"
 msgstr ""
 
 msgid "Owner"
+msgstr ""
+
+msgid "PST"
 msgstr ""
 
 msgid "Package Registry"
@@ -25598,9 +25664,6 @@ msgstr ""
 msgid "Something went wrong, unable to search projects"
 msgstr ""
 
-msgid "Something went wrong."
-msgstr ""
-
 msgid "Something went wrong. Please try again."
 msgstr ""
 
@@ -26016,6 +26079,9 @@ msgid "Starts %{startsIn}"
 msgstr ""
 
 msgid "Starts at (UTC)"
+msgstr ""
+
+msgid "Starts on"
 msgstr ""
 
 msgid "State your message to activate"
@@ -28879,6 +28945,9 @@ msgstr ""
 msgid "Trials|Go back to GitLab"
 msgstr ""
 
+msgid "Trials|Skip Trial"
+msgstr ""
+
 msgid "Trials|Skip Trial (Continue with Free Account)"
 msgstr ""
 
@@ -29285,6 +29354,9 @@ msgid "Unschedule job"
 msgstr ""
 
 msgid "Unstar"
+msgstr ""
+
+msgid "Unstarted"
 msgstr ""
 
 msgid "Unsubscribe"
@@ -31375,6 +31447,9 @@ msgstr ""
 msgid "You have insufficient permissions to remove this HTTP integration"
 msgstr ""
 
+msgid "You have insufficient permissions to update an on-call schedule for this project"
+msgstr ""
+
 msgid "You have insufficient permissions to update this HTTP integration"
 msgstr ""
 
@@ -31888,6 +31963,9 @@ msgid "as %{role}."
 msgstr ""
 
 msgid "assign yourself"
+msgstr ""
+
+msgid "at"
 msgstr ""
 
 msgid "at risk"

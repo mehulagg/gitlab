@@ -24,6 +24,8 @@ RSpec.describe Group do
     it { is_expected.to have_many(:saml_group_links) }
     it { is_expected.to have_many(:epics) }
     it { is_expected.to have_many(:epic_boards).inverse_of(:group) }
+    it { is_expected.to have_many(:provisioned_user_details).inverse_of(:provisioned_by_group) }
+    it { is_expected.to have_many(:provisioned_users) }
 
     it_behaves_like 'model with wiki' do
       let(:container) { create(:group, :nested, :wiki_repo) }

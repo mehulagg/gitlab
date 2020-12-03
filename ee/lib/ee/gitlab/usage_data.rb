@@ -396,16 +396,44 @@ module EE
         def count_secure_pipelines(time_period)
           return {} if time_period.blank?
 
-          start = ::Ci::Pipeline.minimum(:id)
-          finish = ::Ci::Pipeline.maximum(:id)
           pipelines_with_secure_jobs = {}
 
-          ::Security::Scan.scan_types.each do |name, scan_type|
-            relation = ::Ci::Build.joins(:security_scans)
-                                .where(status: 'success', retried: [nil, false])
-                                .where('security_scans.scan_type = ?', scan_type)
-                                .where(time_period)
-            pipelines_with_secure_jobs["#{name}_pipeline".to_sym] = distinct_count(relation, :commit_id, start: start, finish: finish, batch: false)
+          # HLL batch counting always iterate over pkey of
+          # given relation, while ordinary batch count
+          # iterated over counted attribute, one-to-many joins
+          # can break batch size limitation, and lead to
+          # time outing batch queries, to avoid that
+          # different join strategy is used for HLL counter
+          if ::Feature.enabled?(:postgres_hll_batch_counting)
+            relation = ::Security::Scan.where(time_period).group(:created_at)
+
+            start = relation.select('MIN(id) as min_id').order('min_id ASC').first&.min_id
+            finish = relation.select('MAX(id) as max_id').order('max_id DESC').first&.max_id
+
+            ::Security::Scan.scan_types.each do |name, scan_type|
+              relation = ::Security::Scan.joins(:build)
+                           .where(ci_builds: { status: 'success', retried: [nil, false] })
+                           .where('security_scans.scan_type = ?', scan_type)
+                           .where(security_scans: time_period)
+
+              pipelines_with_secure_jobs["#{name}_pipeline".to_sym] =
+                if start && finish
+                  estimate_batch_distinct_count(relation, :commit_id, batch_size: 1000, start: start, finish: finish)
+                else
+                  0
+                end
+            end
+          else
+            start = ::Ci::Pipeline.minimum(:id)
+            finish = ::Ci::Pipeline.maximum(:id)
+
+            ::Security::Scan.scan_types.each do |name, scan_type|
+              relation = ::Ci::Build.joins(:security_scans)
+                           .where(status: 'success', retried: [nil, false])
+                           .where('security_scans.scan_type = ?', scan_type)
+                           .where(time_period)
+              pipelines_with_secure_jobs["#{name}_pipeline".to_sym] = distinct_count(relation, :commit_id, start: start, finish: finish, batch: false)
+            end
           end
 
           pipelines_with_secure_jobs
