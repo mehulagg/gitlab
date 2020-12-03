@@ -19,6 +19,8 @@ RSpec.describe Gitlab::CodeOwners do
   end
 
   describe '.for_blob' do
+    subject { described_class.for_blob(project, blob) }
+
     let(:branch) { TestEnv::BRANCH_SHA['with-codeowners'] }
     let(:blob) { project.repository.blob_at(branch, 'docs/CODEOWNERS') }
     let(:codeowner_lookup_ref) { branch }
@@ -29,7 +31,7 @@ RSpec.describe Gitlab::CodeOwners do
       end
 
       it 'returns users for a blob' do
-        expect(described_class.for_blob(project, blob)).to include(code_owner)
+        is_expected.to include(code_owner)
       end
     end
 
@@ -39,12 +41,12 @@ RSpec.describe Gitlab::CodeOwners do
       end
 
       it 'returns no users' do
-        expect(described_class.for_blob(project, blob)).to be_empty
+        is_expected.to be_empty
       end
     end
   end
 
-  describe ".fast_path_lookup and .slow_path_lookup" do
+  describe '.fast_path_lookup and .slow_path_lookup' do
     let(:codeowner_lookup_ref) { merge_request.target_branch }
     let(:codeowner_content) { 'files/ruby/feature.rb @owner-1' }
     let(:merge_request) do
@@ -61,7 +63,7 @@ RSpec.describe Gitlab::CodeOwners do
       stub_licensed_features(code_owners: true)
     end
 
-    it "return equivalent results" do
+    it 'returns equivalent results' do
       fast_results = described_class.entries_for_merge_request(merge_request).first
 
       expect(merge_request.merge_request_diff).to receive(:overflow?).and_return(true)
@@ -75,6 +77,9 @@ RSpec.describe Gitlab::CodeOwners do
   end
 
   describe '.entries_for_merge_request' do
+    subject { described_class.entries_for_merge_request(merge_request, merge_request_diff: merge_request_diff) }
+
+    let(:merge_request_diff) { nil }
     let(:codeowner_lookup_ref) { merge_request.target_branch }
     let(:merge_request) do
       create(
@@ -89,38 +94,38 @@ RSpec.describe Gitlab::CodeOwners do
     context 'when the feature is available' do
       before do
         stub_licensed_features(code_owners: true)
+
+        allow(merge_request).to receive(:modified_paths).with(past_merge_request_diff: merge_request_diff) { ['docs/CODEOWNERS'] }
       end
 
       it 'returns owners for merge request' do
-        expect(merge_request).to receive(:modified_paths).with(past_merge_request_diff: nil).and_return(['docs/CODEOWNERS'])
+        entry = subject.first
 
-        entry = described_class.entries_for_merge_request(merge_request).first
-
-        expect(entry.pattern).to eq('docs/CODEOWNERS')
-        expect(entry.users).to eq([code_owner])
+        expect(entry).to have_attributes(pattern: 'docs/CODEOWNERS', users: [code_owner])
       end
 
       context 'when merge_request_diff is specified' do
+        let(:merge_request_diff) { merge_request.merge_request_diff }
+
         it 'returns owners at the specified ref' do
           expect(described_class).to receive(:fast_path_lookup).and_call_original
-          expect(merge_request).to receive(:modified_paths).with(past_merge_request_diff: merge_request.merge_request_diff).and_return(['docs/CODEOWNERS'])
 
-          entry = described_class.entries_for_merge_request(merge_request, merge_request_diff: merge_request.merge_request_diff).first
+          entry = subject.first
 
-          expect(entry.users).to eq([code_owner])
+          expect(entry).to have_attributes(pattern: 'docs/CODEOWNERS', users: [code_owner])
         end
       end
 
       context 'when the merge request is large (>1_000 files)' do
         before do
-          expect(merge_request.merge_request_diff).to receive(:overflow?).and_return(true)
+          expect(merge_request.merge_request_diff).to receive(:overflow?) { true }
         end
 
         it 'generates paths via .slow_path_lookup' do
           expect(described_class).not_to receive(:fast_path_lookup)
           expect(described_class).to receive(:slow_path_lookup).and_call_original
 
-          described_class.entries_for_merge_request(merge_request)
+          subject
         end
       end
     end
@@ -133,7 +138,7 @@ RSpec.describe Gitlab::CodeOwners do
       it 'skips reading codeowners and returns an empty array' do
         expect(described_class).not_to receive(:loader_for_merge_request)
 
-        expect(described_class.entries_for_merge_request(merge_request)).to eq([])
+        is_expected.to be_empty
       end
     end
   end
