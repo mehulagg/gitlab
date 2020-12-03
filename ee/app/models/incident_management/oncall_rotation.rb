@@ -5,9 +5,9 @@ module IncidentManagement
     self.table_name = 'incident_management_oncall_rotations'
 
     enum rotation_length_unit: {
-        hours: 0,
-        days:  1,
-        weeks: 2
+      hours: 0,
+      days:  1,
+      weeks: 2
     }
 
     NAME_LENGTH = 200
@@ -16,7 +16,7 @@ module IncidentManagement
     has_many :oncall_participants, inverse_of: :oncall_rotation
     has_many :participants, through: :oncall_participants
 
-    validates :name, presence: true, uniqueness: { scope: :oncall_schedule }, length: { maximum: NAME_LENGTH }
+    validates :name, presence: true, uniqueness: { scope: :oncall_schedule_id }, length: { maximum: NAME_LENGTH }
     validates :starts_at, presence: true
     validates :rotation_length, presence: true
     validates :rotation_length_unit, presence: true
