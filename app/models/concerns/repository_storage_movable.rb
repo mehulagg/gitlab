@@ -80,24 +80,6 @@ module RepositoryStorageMovable
       state :replicated, value: 6
       state :cleanup_failed, value: 7
     end
-
-    def add_error(message)
-      errors.add(error_key, message)
-    end
-
-    def schedule_repository_storage_update_worker
-      raise NotImplementedError
-    end
-
-    private
-
-    def container_repository_writable
-      add_error(_('is read only')) if container&.repository_read_only?
-    end
-
-    def error_key
-      raise NotImplementedError
-    end
   end
 
   class_methods do
@@ -108,5 +90,23 @@ module RepositoryStorageMovable
 
       container_klass.pick_repository_storage
     end
+  end
+
+  def schedule_repository_storage_update_worker
+    raise NotImplementedError
+  end
+
+  def add_error(message)
+    errors.add(error_key, message)
+  end
+
+  private
+
+  def container_repository_writable
+    add_error(_('is read only')) if container&.repository_read_only?
+  end
+
+  def error_key
+    raise NotImplementedError
   end
 end

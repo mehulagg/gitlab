@@ -11,11 +11,6 @@ class ProjectRepositoryStorageMove < ApplicationRecord
   alias_attribute :project, :container
   scope :with_projects, -> { includes(container: :route) }
 
-  override :error_key
-  def error_key
-    :project
-  end
-
   override :schedule_repository_storage_update_worker
   def schedule_repository_storage_update_worker
     ProjectUpdateRepositoryStorageWorker.perform_async(
@@ -23,5 +18,12 @@ class ProjectRepositoryStorageMove < ApplicationRecord
       destination_storage_name,
       id
     )
+  end
+
+  private
+
+  override :error_key
+  def error_key
+    :project
   end
 end
