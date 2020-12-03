@@ -36,46 +36,67 @@ RSpec.describe Security::StoreGroupedScansService do
 
     subject(:store_scan_group) { service_object.execute }
 
-    before do
-      allow(Security::StoreScanService).to receive(:execute).and_return(true)
-    end
-
-    context 'when the artifacts are not dependency_scanning' do
-      it 'calls the Security::StoreScanService with ordered artifacts' do
-        store_scan_group
-
-        expect(Security::StoreScanService).to have_received(:execute).with(artifact_1, empty_set, false).ordered
-        expect(Security::StoreScanService).to have_received(:execute).with(artifact_3, empty_set, true).ordered
-        expect(Security::StoreScanService).to have_received(:execute).with(artifact_2, empty_set, true).ordered
-      end
-    end
-
-    context 'when the artifacts are dependency_scanning' do
-      let(:report_type) { :dependency_scanning }
-      let(:build_4) { create(:ee_ci_build, name: 'Report 0') }
-      let(:artifact_4) { create(:ee_ci_job_artifact, report_type, job: build_4) }
-      let(:scanner_1) { instance_double(::Gitlab::Ci::Reports::Security::Scanner, external_id: 'this is an unknown id') }
-      let(:scanner_2) { instance_double(::Gitlab::Ci::Reports::Security::Scanner, external_id: 'bundler_audit') }
-      let(:scanner_3) { instance_double(::Gitlab::Ci::Reports::Security::Scanner, external_id: 'retire.js') }
-      let(:mock_report_1) { instance_double(::Gitlab::Ci::Reports::Security::Report, primary_scanner: scanner_1) }
-      let(:mock_report_2) { instance_double(::Gitlab::Ci::Reports::Security::Report, primary_scanner: scanner_2) }
-      let(:mock_report_3) { instance_double(::Gitlab::Ci::Reports::Security::Report, primary_scanner: scanner_3) }
-      let(:artifacts) { [artifact_1, artifact_2, artifact_3, artifact_4] }
+    context 'when there is a parsing error' do
+      let(:expected_error) { RuntimeError.new('Foo') }
 
       before do
-        allow(artifact_1).to receive(:security_report).and_return(mock_report_1)
-        allow(artifact_2).to receive(:security_report).and_return(mock_report_2)
-        allow(artifact_3).to receive(:security_report).and_return(mock_report_3)
-        allow(artifact_4).to receive(:security_report).and_return(mock_report_2)
+        allow(Security::StoreScanService).to receive(:execute).and_raise(expected_error)
+        allow(Gitlab::ErrorTracking).to receive(:track_exception)
       end
 
-      it 'calls the Security::StoreScanService with ordered artifacts' do
+      it 'does not propagate the error to the caller' do
+        expect { store_scan_group }.not_to raise_error
+      end
+
+      it 'tracks the error' do
         store_scan_group
 
-        expect(Security::StoreScanService).to have_received(:execute).with(artifact_4, empty_set, false).ordered
-        expect(Security::StoreScanService).to have_received(:execute).with(artifact_2, empty_set, true).ordered
-        expect(Security::StoreScanService).to have_received(:execute).with(artifact_3, empty_set, true).ordered
-        expect(Security::StoreScanService).to have_received(:execute).with(artifact_1, empty_set, true).ordered
+        expect(Gitlab::ErrorTracking).to have_received(:track_exception).with(expected_error)
+      end
+    end
+
+    context 'when there is no parsing error' do
+      before do
+        allow(Security::StoreScanService).to receive(:execute).and_return(true)
+      end
+
+      context 'when the artifacts are not dependency_scanning' do
+        it 'calls the Security::StoreScanService with ordered artifacts' do
+          store_scan_group
+
+          expect(Security::StoreScanService).to have_received(:execute).with(artifact_1, empty_set, false).ordered
+          expect(Security::StoreScanService).to have_received(:execute).with(artifact_3, empty_set, true).ordered
+          expect(Security::StoreScanService).to have_received(:execute).with(artifact_2, empty_set, true).ordered
+        end
+      end
+
+      context 'when the artifacts are dependency_scanning' do
+        let(:report_type) { :dependency_scanning }
+        let(:build_4) { create(:ee_ci_build, name: 'Report 0') }
+        let(:artifact_4) { create(:ee_ci_job_artifact, report_type, job: build_4) }
+        let(:scanner_1) { instance_double(::Gitlab::Ci::Reports::Security::Scanner, external_id: 'this is an unknown id') }
+        let(:scanner_2) { instance_double(::Gitlab::Ci::Reports::Security::Scanner, external_id: 'bundler_audit') }
+        let(:scanner_3) { instance_double(::Gitlab::Ci::Reports::Security::Scanner, external_id: 'retire.js') }
+        let(:mock_report_1) { instance_double(::Gitlab::Ci::Reports::Security::Report, primary_scanner: scanner_1) }
+        let(:mock_report_2) { instance_double(::Gitlab::Ci::Reports::Security::Report, primary_scanner: scanner_2) }
+        let(:mock_report_3) { instance_double(::Gitlab::Ci::Reports::Security::Report, primary_scanner: scanner_3) }
+        let(:artifacts) { [artifact_1, artifact_2, artifact_3, artifact_4] }
+
+        before do
+          allow(artifact_1).to receive(:security_report).and_return(mock_report_1)
+          allow(artifact_2).to receive(:security_report).and_return(mock_report_2)
+          allow(artifact_3).to receive(:security_report).and_return(mock_report_3)
+          allow(artifact_4).to receive(:security_report).and_return(mock_report_2)
+        end
+
+        it 'calls the Security::StoreScanService with ordered artifacts' do
+          store_scan_group
+
+          expect(Security::StoreScanService).to have_received(:execute).with(artifact_4, empty_set, false).ordered
+          expect(Security::StoreScanService).to have_received(:execute).with(artifact_2, empty_set, true).ordered
+          expect(Security::StoreScanService).to have_received(:execute).with(artifact_3, empty_set, true).ordered
+          expect(Security::StoreScanService).to have_received(:execute).with(artifact_1, empty_set, true).ordered
+        end
       end
     end
   end

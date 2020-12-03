@@ -22,6 +22,8 @@ module Security
           store_scan_for(artifact, deduplicate)
         end
       end
+    rescue StandardError => error
+      Gitlab::ErrorTracking.track_exception(error)
     end
 
     private
