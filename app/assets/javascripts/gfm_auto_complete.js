@@ -197,7 +197,8 @@ class GfmAutoComplete {
         }
         return tmpl;
       },
-      insertTpl: GfmAutoComplete.Emoji.insertTemplateFunction,
+      // eslint-disable-next-line no-template-curly-in-string
+      insertTpl: ':${name}:',
       skipSpecialCharacterTest: true,
       data: GfmAutoComplete.defaultLoadingData,
       callbacks: {
@@ -650,7 +651,12 @@ class GfmAutoComplete {
     } else if (this.cachedData[at]) {
       this.loadData($input, at, this.cachedData[at]);
     } else if (GfmAutoComplete.atTypeMap[at] === 'emojis') {
-      this.loadEmojiData($input, at).catch(() => {});
+      Emoji.initEmojiMap()
+        .then(() => {
+          this.loadData($input, at, Emoji.getValidEmojiNames());
+          GfmAutoComplete.glEmojiTag = Emoji.glEmojiTag;
+        })
+        .catch(() => {});
     } else if (dataSource) {
       AjaxCache.retrieve(dataSource, true)
         .then(data => {
@@ -671,39 +677,6 @@ class GfmAutoComplete {
     // This trigger at.js again
     // otherwise we would be stuck with loading until the user types
     return $input.trigger('keyup');
-  }
-
-  async loadEmojiData($input, at) {
-    await Emoji.initEmojiMap();
-
-    // All the emoji
-    const emojis = Emoji.getAllEmoji();
-
-    // Add all of the fields to atwho's database
-    this.loadData($input, at, [
-      ...Object.keys(emojis), // Names
-      ...Object.values(emojis).flatMap(({ aliases }) => aliases), // Aliases
-      ...Object.values(emojis).map(({ e }) => e), // Unicode values
-      ...Object.values(emojis).map(({ d }) => d), // Descriptions
-    ]);
-
-    // Construct a lookup that can correlate a value to "<value> is the <field> of <emoji>"
-    const lookup = {};
-    const add = (key, kind, emoji) => {
-      if (!(key in lookup)) {
-        lookup[key] = [];
-      }
-      lookup[key].push({ kind, emoji });
-    };
-    Object.values(emojis).forEach(emoji => {
-      add(emoji.name, 'name', emoji);
-      add(emoji.d, 'description', emoji);
-      add(emoji.e, 'unicode', emoji);
-      emoji.aliases.forEach(a => add(a, 'alias', emoji));
-    });
-    this.emojiLookup = lookup;
-
-    GfmAutoComplete.glEmojiTag = Emoji.glEmojiTag;
   }
 
   clearCache() {
@@ -786,24 +759,12 @@ function findEmoji(name) {
 // Emoji
 GfmAutoComplete.glEmojiTag = null;
 GfmAutoComplete.Emoji = {
-  insertTemplateFunction(value) {
-    const results = findEmoji(value.name);
-    if (results.length) {
-      return `:${results[0].emoji.name}:`;
-    }
-    return `:${value.name}:`;
-  },
   templateFunction(name) {
     // glEmojiTag helper is loaded on-demand in fetchData()
-    if (!GfmAutoComplete.glEmojiTag) return `<li>${name}</li>`;
-
-    const results = findEmoji(name);
-    if (!results.length) {
+    if (GfmAutoComplete.glEmojiTag) {
       return `<li>${name} ${GfmAutoComplete.glEmojiTag(name)}</li>`;
     }
-
-    const { field, emoji } = results[0];
-    return `<li>${field} ${GfmAutoComplete.glEmojiTag(emoji.name)}</li>`;
+    return `<li>${name}</li>`;
   },
 };
 // Team Members

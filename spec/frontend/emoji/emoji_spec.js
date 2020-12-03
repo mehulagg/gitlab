@@ -1,6 +1,7 @@
+import MockAdapter from 'axios-mock-adapter';
 import { trimText } from 'helpers/text_helper';
-import { emojiFixtureMap, initEmojiMock, describeEmojiFields } from 'helpers/emoji';
-import { glEmojiTag, searchEmoji, getEmoji } from '~/emoji';
+import axios from '~/lib/utils/axios_utils';
+import { initEmojiMap, glEmojiTag, searchEmoji, EMOJI_VERSION } from '~/emoji';
 import isEmojiUnicodeSupported, {
   isFlagEmoji,
   isRainbowFlagEmoji,
@@ -29,11 +30,54 @@ const emptySupportMap = {
   1.1: false,
 };
 
+const emojiFixtureMap = {
+  atom: {
+    name: 'atom',
+    moji: '⚛',
+    description: 'atom symbol',
+    unicodeVersion: '4.1',
+  },
+  bomb: {
+    name: 'bomb',
+    moji: '💣',
+    unicodeVersion: '6.0',
+    description: 'bomb',
+  },
+  construction_worker_tone5: {
+    name: 'construction_worker_tone5',
+    moji: '👷🏿',
+    unicodeVersion: '8.0',
+    description: 'construction worker tone 5',
+  },
+  five: {
+    name: 'five',
+    moji: '5️⃣',
+    unicodeVersion: '3.0',
+    description: 'keycap digit five',
+  },
+  grey_question: {
+    name: 'grey_question',
+    moji: '❔',
+    unicodeVersion: '6.0',
+    description: 'white question mark ornament',
+  },
+};
+
 describe('gl_emoji', () => {
   let mock;
 
-  beforeEach(async () => {
-    mock = await initEmojiMock();
+  beforeEach(() => {
+    const emojiData = Object.fromEntries(
+      Object.values(emojiFixtureMap).map(m => {
+        const { name: n, moji: e, unicodeVersion: u, category: c, description: d } = m;
+        return [n, { c, e, d, u }];
+      }),
+    );
+
+    mock = new MockAdapter(axios);
+    mock.onGet(`/-/emojis/${EMOJI_VERSION}/emojis.json`).reply(200, JSON.stringify(emojiData));
+
+    return initEmojiMap().catch(() => {});
   });
 
   afterEach(() => {
@@ -352,125 +396,23 @@ describe('gl_emoji', () => {
     });
   });
 
-  describe('getEmoji', () => {
-    const { grey_question } = emojiFixtureMap;
-
-    describe('when query is undefined', () => {
-      it('should return null by default', () => {
-        expect(getEmoji()).toBe(null);
-      });
-
-      it('should return fallback emoji when fallback is true', () => {
-        expect(getEmoji(undefined, true).name).toEqual(grey_question.name);
-      });
-    });
-  });
-
   describe('searchEmoji', () => {
     const { atom, grey_question } = emojiFixtureMap;
-    const search = (query, opts) => searchEmoji(query, opts).map(({ name }) => name);
-    const mangle = str => str.slice(0, 1) + str.slice(-1);
-    const partial = str => str.slice(0, 2);
+    const contains = (e, term) =>
+      expect(searchEmoji(term).map(({ name }) => name)).toContain(e.name);
 
-    describe('with default options', () => {
-      const subject = query => search(query);
+    it('should match by full name', () => contains(grey_question, 'grey_question'));
+    it('should match by full alias', () => contains(atom, 'atom_symbol'));
+    it('should match by full description', () => contains(grey_question, 'ornament'));
 
-      describeEmojiFields('with $field', ({ accessor }) => {
-        it(`should match by lower case: ${accessor(atom)}`, () => {
-          expect(subject(accessor(atom))).toContain(atom.name);
-        });
+    it('should match by partial name', () => contains(grey_question, 'question'));
+    it('should match by partial alias', () => contains(atom, '_symbol'));
+    it('should match by partial description', () => contains(grey_question, 'ment'));
 
-        it(`should match by upper case: ${accessor(atom).toUpperCase()}`, () => {
-          expect(subject(accessor(atom).toUpperCase())).toContain(atom.name);
-        });
+    it('should fuzzy match by name', () => contains(grey_question, 'greion'));
+    it('should fuzzy match by alias', () => contains(atom, 'atobol'));
+    it('should fuzzy match by description', () => contains(grey_question, 'ornt'));
 
-        it(`should not match by partial: ${mangle(accessor(atom))}`, () => {
-          expect(subject(mangle(accessor(atom)))).not.toContain(atom.name);
-        });
-      });
-
-      it(`should match by unicode value: ${atom.moji}`, () => {
-        expect(subject(atom.moji)).toContain(atom.name);
-      });
-
-      it('should not return a fallback value', () => {
-        expect(subject('foo bar baz')).toHaveLength(0);
-      });
-
-      it('should not return a fallback value when query is falsey', () => {
-        expect(subject()).toHaveLength(0);
-      });
-    });
-
-    describe('with fuzzy match', () => {
-      const subject = query => search(query, { match: 'fuzzy' });
-
-      describeEmojiFields('with $field', ({ accessor }) => {
-        it(`should match by lower case: ${accessor(atom)}`, () => {
-          expect(subject(accessor(atom))).toContain(atom.name);
-        });
-
-        it(`should match by upper case: ${accessor(atom).toUpperCase()}`, () => {
-          expect(subject(accessor(atom).toUpperCase())).toContain(atom.name);
-        });
-
-        it(`should match by partial: ${mangle(accessor(atom))}`, () => {
-          expect(subject(mangle(accessor(atom)))).toContain(atom.name);
-        });
-      });
-    });
-
-    describe('with contains match', () => {
-      const subject = query => search(query, { match: 'contains' });
-
-      describeEmojiFields('with $field', ({ accessor }) => {
-        it(`should match by lower case: ${accessor(atom)}`, () => {
-          expect(subject(accessor(atom))).toContain(atom.name);
-        });
-
-        it(`should match by upper case: ${accessor(atom).toUpperCase()}`, () => {
-          expect(subject(accessor(atom).toUpperCase())).toContain(atom.name);
-        });
-
-        it(`should match by partial: ${partial(accessor(atom))}`, () => {
-          expect(subject(partial(accessor(atom)))).toContain(atom.name);
-        });
-
-        it(`should not match by mangled: ${mangle(accessor(atom))}`, () => {
-          expect(subject(mangle(accessor(atom)))).not.toContain(atom.name);
-        });
-      });
-    });
-
-    describe('with fallback', () => {
-      const subject = query => search(query, { fallback: true });
-
-      it.each`
-        query
-        ${'foo bar baz'} | ${undefined}
-      `('should return a fallback value when given $query', ({ query }) => {
-        expect(subject(query)).toContain(grey_question.name);
-      });
-    });
-
-    describe('with name and alias fields', () => {
-      const subject = query => search(query, { fields: ['name', 'alias'] });
-
-      it(`should match by name: ${atom.name}`, () => {
-        expect(subject(atom.name)).toContain(atom.name);
-      });
-
-      it(`should match by alias: ${atom.aliases[0]}`, () => {
-        expect(subject(atom.aliases[0])).toContain(atom.name);
-      });
-
-      it(`should not match by description: ${atom.description}`, () => {
-        expect(subject(atom.description)).not.toContain(atom.name);
-      });
-
-      it(`should not match by unicode value: ${atom.moji}`, () => {
-        expect(subject(atom.moji)).not.toContain(atom.name);
-      });
-    });
+    it('should match by character', () => contains(grey_question, '❔'));
   });
 });
