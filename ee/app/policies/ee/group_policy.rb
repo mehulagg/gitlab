@@ -168,6 +168,7 @@ module EE
       rule { can?(:read_group) & epics_available }.policy do
         enable :read_epic
         enable :read_epic_board
+        enable :read_epic_list
       end
 
       rule { can?(:read_group) & iterations_available }.enable :read_iteration

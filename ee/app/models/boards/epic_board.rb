@@ -5,6 +5,7 @@ module Boards
     belongs_to :group, optional: false, inverse_of: :epic_boards
     has_many :epic_board_labels, foreign_key: :epic_board_id, inverse_of: :epic_board
     has_many :epic_board_positions, foreign_key: :epic_board_id, inverse_of: :epic_board
+    has_many :epic_lists, foreign_key: :epic_board_id, inverse_of: :epic_board
 
     validates :name, length: { maximum: 255 }
 
