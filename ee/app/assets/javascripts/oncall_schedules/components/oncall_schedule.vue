@@ -8,7 +8,6 @@ import { PRESET_TYPES, PRESET_DEFAULTS } from './schedule/constants';
 import { getFormattedTimezone } from '../utils';
 
 export const i18n = {
-  title: s__('OnCallSchedules|On-call schedule'),
   scheduleForTz: s__('OnCallSchedules|On-call schedule for the %{tzShort}'),
 };
 
@@ -47,7 +46,6 @@ export default {
 
 <template>
   <div>
-    <h2 ref="title">{{ $options.i18n.title }}</h2>
     <gl-card>
       <template #header>
         <div class="gl-display-flex gl-justify-content-space-between">

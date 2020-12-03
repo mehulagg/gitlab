@@ -11,7 +11,9 @@ import {
   GlAlert,
 } from '@gitlab/ui';
 import { s__, __ } from '~/locale';
+import getOncallSchedulesQuery from '../graphql/queries/get_oncall_schedules.query.graphql';
 import createOncallScheduleMutation from '../graphql/mutations/create_oncall_schedule.mutation.graphql';
+import { updateStoreOnScheduleCreate } from '../utils/cache_updates';
 import { getFormattedTimezone } from '../utils';
 
 export const i18n = {
@@ -117,16 +119,27 @@ export default {
   methods: {
     createSchedule() {
       this.loading = true;
+      const { projectPath } = this;
 
       this.$apollo
         .mutate({
           mutation: createOncallScheduleMutation,
           variables: {
             oncallScheduleCreateInput: {
-              projectPath: this.projectPath,
+              projectPath,
               ...this.form,
               timezone: this.form.timezone.identifier,
             },
+          },
+          update(
+            store,
+            {
+              data: { oncallScheduleCreate },
+            },
+          ) {
+            updateStoreOnScheduleCreate(store, getOncallSchedulesQuery, oncallScheduleCreate, {
+              projectPath,
+            });
           },
         })
         .then(({ data: { oncallScheduleCreate: { errors: [error] } } }) => {
@@ -134,6 +147,7 @@ export default {
             throw error;
           }
           this.$refs.createScheduleModal.hide();
+          this.$emit('scheduleCreated');
         })
         .catch(error => {
           this.error = error;

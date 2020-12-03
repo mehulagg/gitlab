@@ -3,6 +3,27 @@ import createFlash from '~/flash';
 
 import { DELETE_SCHEDULE_ERROR } from './error_messages';
 
+const addScheduleToStore = (store, query, { oncallSchedule: schedule }, variables) => {
+  if (!schedule) {
+    return;
+  }
+
+  const sourceData = store.readQuery({
+    query,
+    variables,
+  });
+
+  const data = produce(sourceData, draftData => {
+    draftData.project.incidentManagementOncallSchedules.nodes.push(schedule);
+  });
+
+  store.writeQuery({
+    query,
+    variables,
+    data,
+  });
+};
+
 const deleteScheduleFromStore = (store, query, { oncallScheduleDestroy }, variables) => {
   const schedule = oncallScheduleDestroy?.schedule;
   if (!schedule) {
@@ -34,6 +55,12 @@ const onError = (data, message) => {
 };
 
 export const hasErrors = ({ errors = [] }) => errors?.length;
+
+export const updateStoreOnScheduleCreate = (store, query, data, variables) => {
+  if (!hasErrors(data)) {
+    addScheduleToStore(store, query, data, variables);
+  }
+};
 
 export const updateStoreAfterScheduleDelete = (store, query, data, variables) => {
   if (hasErrors(data)) {
