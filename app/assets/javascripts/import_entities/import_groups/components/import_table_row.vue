@@ -32,7 +32,7 @@ export default {
       };
     },
   },
-  statuses: STATUSES,
+  STATUSES,
 };
 </script>
 
@@ -66,9 +66,13 @@ export default {
       <import-status :status="group.status" />
     </td>
     <td class="gl-p-4">
-      <gl-button variant="success" category="secondary" @click="$emit('import-group')">{{
-        __('Import')
-      }}</gl-button>
+      <gl-button
+        v-if="group.status === $options.STATUSES.NONE"
+        variant="success"
+        category="secondary"
+        @click="$emit('import-group')"
+        >{{ __('Import') }}</gl-button
+      >
     </td>
   </tr>
 </template>

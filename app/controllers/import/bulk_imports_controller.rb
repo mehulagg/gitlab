@@ -59,7 +59,7 @@ class Import::BulkImportsController < ApplicationController
   end
 
   def create_params
-    params.permit(:bulk_import, [*bulk_import_params])
+    params.permit(bulk_import: [*bulk_import_params])
   end
 
   def bulk_import_params

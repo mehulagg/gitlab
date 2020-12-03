@@ -5,14 +5,19 @@ import { STATUSES } from '../../constants';
 import { clientTypenames } from './client_typenames';
 import availableNamespacesQuery from './queries/available_namespaces.query.graphql';
 import { SourceGroupsManager } from './services/source_groups_manager';
+import { StatusPoller } from './services/status_poller';
 
 export function createResolvers({ endpoints }) {
+  let statusPoller;
+
   return {
     Query: {
       async bulkImportSourceGroups(_, __, { client }) {
         const {
           data: { availableNamespaces },
         } = await client.query({ query: availableNamespacesQuery });
+
+        statusPoller = new StatusPoller({ client });
 
         return axios.get(endpoints.status).then(({ data }) =>
           data.importable_data.map(group => ({
@@ -54,7 +59,6 @@ export function createResolvers({ endpoints }) {
         const groupManager = new SourceGroupsManager({ cache });
         const group = groupManager.findById(sourceGroupId);
         groupManager.setImportStatus({ group, status: STATUSES.SCHEDULING });
-
         try {
           await axios.post('/import/bulk_imports', {
             bulk_import: [
@@ -67,6 +71,7 @@ export function createResolvers({ endpoints }) {
             ],
           });
           groupManager.setImportStatus({ group, status: STATUSES.STARTED });
+          statusPoller.checkCurrentImports();
         } catch (e) {
           groupManager.setImportStatus({ group, status: STATUSES.NONE });
         }

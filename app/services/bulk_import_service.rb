@@ -30,7 +30,7 @@ class BulkImportService
 
   def initialize(current_user, params, credentials)
     @current_user = current_user
-    @params = params
+    @params = params[:bulk_import]
     @credentials = credentials
   end
 
