@@ -969,8 +969,8 @@ this option.
 
 ## Links
 
-Links are important in GitLab documentation. They allow you to [link instead of
-summarizing](#link-instead-of-summarize) to help preserve a [single source of truth](#why-a-single-source-of-truth)
+Links are important in GitLab documentation. Use link instead of
+summarizing to help preserve a [single source of truth](#documentation-is-the-single-source-of-truth-ssot)
 in GitLab documentation.
 
 We include guidance for links in the following categories:
