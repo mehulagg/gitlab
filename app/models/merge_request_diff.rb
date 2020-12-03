@@ -358,6 +358,7 @@ class MergeRequestDiff < ApplicationRecord
       if comparison
         comparison.diffs_in_batch(batch_page, batch_size, diff_options: diff_options)
       else
+        reorder_diff_files!
         diffs_in_batch_collection(batch_page, batch_size, diff_options: diff_options)
       end
     end
@@ -371,6 +372,7 @@ class MergeRequestDiff < ApplicationRecord
       if comparison
         comparison.diffs(diff_options)
       else
+        reorder_diff_files!
         diffs_collection(diff_options)
       end
     end
@@ -565,7 +567,7 @@ class MergeRequestDiff < ApplicationRecord
   end
 
   def build_merge_request_diff_files(diffs)
-    diffs.map.with_index do |diff, index|
+    sort_diffs(diffs).map.with_index do |diff, index|
       diff_hash = diff.to_hash.merge(
         binary: false,
         merge_request_diff_id: self.id,
@@ -678,6 +680,7 @@ class MergeRequestDiff < ApplicationRecord
 
         rows = build_merge_request_diff_files(diff_collection)
         create_merge_request_diff_files(rows)
+        new_attributes[:sorted] = true
         self.class.uncached { merge_request_diff_files.reset }
       end
 
@@ -718,6 +721,47 @@ class MergeRequestDiff < ApplicationRecord
     [repository, merge_request.source_project.repository].uniq.each do |repo|
       repo.keep_around(start_commit_sha, head_commit_sha, base_commit_sha)
     end
+  end
+
+  def reorder_diff_files!
+    return if sorted?
+
+    diff_files = sort_diffs(merge_request_diff_files)
+
+    diff_files.each_with_index do |diff_file, index|
+      diff_file.relative_order = index
+    end
+
+    transaction do
+      MergeRequestDiffFile.where(merge_request_diff_id: id).delete_all
+      MergeRequestDiffFile.bulk_insert!(diff_files)
+      update_column(:sorted, true)
+    end
+  end
+
+  def sort_diffs(diffs)
+    diffs.sort do |a, b|
+      a_bits = (a.new_path.presence || a.old_path).split(::File::SEPARATOR)
+      b_bits = (b.new_path.presence || b.old_path).split(::File::SEPARATOR)
+
+      sort_bits(a_bits, b_bits)
+    end
+  end
+
+  def sort_bits(a_bits, b_bits)
+    a_bit = a_bits.shift
+    b_bit = b_bits.shift
+    comparison = a_bit <=> b_bit
+
+    if a_bits.size < b_bits.size
+      return 1 if a_bits.empty?
+    elsif a_bits.size > b_bits.size
+      return -1 if b_bits.empty?
+    end
+
+    return sort_bits(a_bits, b_bits) if comparison == 0
+
+    comparison
   end
 end
 
