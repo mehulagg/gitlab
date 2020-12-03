@@ -80,7 +80,7 @@ module EE
     def autocomplete_data_sources(object, noteable_type)
       return {} unless object && noteable_type
 
-      enabled_for_vulnerabilities = object.feature_available?(:security_dashboard) && ::Feature.enabled?(:vulnerability_special_references, object)
+      enabled_for_vulnerabilities = object.feature_available?(:security_dashboard)
 
       if object.is_a?(Group)
         {
