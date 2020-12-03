@@ -13,6 +13,12 @@ export const mount2faAuthentication = () => {
 };
 
 export const mount2faRegistration = () => {
+  const el = $('#js-register-token-2fa');
+
+  if (!el.length) {
+    return;
+  }
+
   if (gon.webauthn) {
     const webauthnRegister = new WebAuthnRegister($('#js-register-token-2fa'), gon.webauthn);
     webauthnRegister.start();

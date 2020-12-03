@@ -16,6 +16,7 @@ module QA
       end
 
       before do
+        Runtime::Feature.enable('vue_2fa_recovery_codes', user: user)
         enable_2fa_for_user(user)
       end
 
@@ -44,6 +45,10 @@ module QA
         end
 
         expect(page).to have_text('Invalid two-factor code')
+      end
+
+      after do
+        Runtime::Feature.disable('vue_2fa_recovery_codes', user: user)
       end
 
       def enable_2fa_for_user(user)
