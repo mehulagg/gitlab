@@ -117,6 +117,7 @@ module EE
       rule { guest }.policy do
         enable :read_wiki
         enable :read_group_release_stats
+        enable :read_group_audit_events
       end
 
       rule { reporter }.policy do

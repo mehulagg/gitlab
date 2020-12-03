@@ -57,7 +57,13 @@ RSpec.shared_examples 'project policies as anonymous' do
     context 'when a project has pending invites' do
       let(:group) { create(:group, :public) }
       let(:project) { create(:project, :public, namespace: group) }
-      let(:user_permissions) { [:create_merge_request_in, :create_project, :create_issue, :create_note, :upload_file, :award_emoji] }
+      let(:user_permissions) do
+        [
+          :read_project_audit_events, :create_merge_request_in, :create_project, :create_issue, :create_note,
+          :upload_file, :award_emoji
+        ]
+      end
+
       let(:anonymous_permissions) { guest_permissions - user_permissions }
       let(:current_user) { anonymous }
 

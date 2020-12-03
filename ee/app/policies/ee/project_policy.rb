@@ -181,6 +181,7 @@ module EE
       rule { ~group_timelogs_available }.prevent :read_group_timelogs
 
       rule { can?(:guest_access) & iterations_available }.enable :read_iteration
+      rule { can?(:guest_access) }.enable :read_project_audit_events
 
       rule { can?(:reporter_access) }.policy do
         enable :admin_board
