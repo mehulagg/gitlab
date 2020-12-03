@@ -4,6 +4,7 @@ import reportsMixin from 'ee/vue_shared/security_reports/mixins/reports_mixin';
 import { componentNames } from 'ee/reports/components/issue_body';
 import ReportSection from '~/reports/components/report_section.vue';
 import PaginationLinks from '~/vue_shared/components/pagination_links.vue';
+import api from '~/api';
 import { n__, s__, sprintf } from '~/locale';
 
 export default {
@@ -40,6 +41,9 @@ export default {
     codequalityStatus() {
       return this.checkReportStatus(this.isLoadingCodequality, this.loadingCodequalityFailed);
     },
+  },
+  mounted() {
+    api.trackRedisHllUserEvent('full_code_quality_report_total');
   },
   methods: {
     ...mapActions(['setPage']),
