@@ -1,6 +1,6 @@
+import { GlLoadingIcon } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
-import { GlLoadingIcon } from '@gitlab/ui';
 import App from 'ee/approvals/components/app.vue';
 import ModalRuleCreate from 'ee/approvals/components/modal_rule_create.vue';
 import ModalRuleRemove from 'ee/approvals/components/modal_rule_remove.vue';

@@ -1,7 +1,7 @@
 ---
 stage: Package
 group: Package
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Composer packages in the Package Registry
@@ -116,7 +116,7 @@ You can publish a Composer package to the Package Registry as part of your CI/CD
 
 1. Run the pipeline.
 
-You can view the published package by going to **Packages & Registries > Package Registry** and selecting the **Composer** tab.
+To view the published package, go to **Packages & Registries > Package Registry** and select the **Composer** tab.
 
 ### Use a CI/CD template
 

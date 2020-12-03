@@ -1,18 +1,17 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlLoadingIcon } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 
+import { DropdownVariant } from 'ee/vue_shared/components/sidebar/epics_select//constants';
 import EpicsSelectBase from 'ee/vue_shared/components/sidebar/epics_select/base.vue';
+import DropdownButton from 'ee/vue_shared/components/sidebar/epics_select/dropdown_button.vue';
+import DropdownContents from 'ee/vue_shared/components/sidebar/epics_select/dropdown_contents.vue';
+import DropdownHeader from 'ee/vue_shared/components/sidebar/epics_select/dropdown_header.vue';
+import DropdownSearchInput from 'ee/vue_shared/components/sidebar/epics_select/dropdown_search_input.vue';
 import DropdownTitle from 'ee/vue_shared/components/sidebar/epics_select/dropdown_title.vue';
 import DropdownValue from 'ee/vue_shared/components/sidebar/epics_select/dropdown_value.vue';
 import DropdownValueCollapsed from 'ee/vue_shared/components/sidebar/epics_select/dropdown_value_collapsed.vue';
 
-import DropdownButton from 'ee/vue_shared/components/sidebar/epics_select/dropdown_button.vue';
-import DropdownHeader from 'ee/vue_shared/components/sidebar/epics_select/dropdown_header.vue';
-import DropdownSearchInput from 'ee/vue_shared/components/sidebar/epics_select/dropdown_search_input.vue';
-import DropdownContents from 'ee/vue_shared/components/sidebar/epics_select/dropdown_contents.vue';
-
 import createDefaultStore from 'ee/vue_shared/components/sidebar/epics_select/store';
-import { DropdownVariant } from 'ee/vue_shared/components/sidebar/epics_select//constants';
 
 import { mockEpic1, mockEpic2, mockAssignRemoveRes, mockIssue, noneEpic } from '../mock_data';
 

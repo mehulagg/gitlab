@@ -185,17 +185,20 @@ export const flattenDurationChartData = data =>
  * i[2] = date, used in the tooltip
  *
  * @param {Array} data - The duration data for selected stages
- * @param {Date} startDate - The globally selected cycle analytics start date
- * @param {Date} endDate - The globally selected cycle analytics end date
+ * @param {Date} startDate - The globally selected Value Stream Analytics start date
+ * @param {Date} endDate - The globally selected Value Stream Analytics end date
  * @returns {Array} An array with each item being another arry of three items (plottable date, computed total, tooltip display date)
  */
 export const getDurationChartData = (data, startDate, endDate) => {
   const flattenedData = flattenDurationChartData(data);
   const eventData = [];
 
+  const endOfDay = newDate(endDate);
+  endOfDay.setHours(23, 59, 59); // make sure we're at the end of the day
+
   for (
     let currentDate = newDate(startDate);
-    currentDate <= endDate;
+    currentDate <= endOfDay;
     currentDate = dayAfter(currentDate)
   ) {
     const currentISODate = dateFormat(newDate(currentDate), dateFormats.isoDate);

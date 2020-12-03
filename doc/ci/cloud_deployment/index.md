@@ -1,7 +1,7 @@
 ---
 stage: Release
-group: Progressive Delivery
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+group: Release
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: howto
 ---
 
@@ -311,7 +311,7 @@ build_artifact:
       - <built artifact>
 ```
 
-### Deploy to Amazon EKS 
+### Deploy to Amazon EKS
 
 - [How to deploy your application to a GitLab-managed Amazon EKS cluster with Auto DevOps](https://about.gitlab.com/blog/2020/05/05/deploying-application-eks/)
 

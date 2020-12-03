@@ -1206,15 +1206,17 @@ RSpec.describe GeoNodeStatus, :geo do
 
         context 'when verification is enabled' do
           before do
+            skip "#{replicator.model} does not include the VerificationState concern yet" unless replicator.model.respond_to?(:verification_state)
+
             stub_current_geo_node(primary)
             allow(replicator).to receive(:verification_enabled?).and_return(true)
           end
 
           context 'when there are replicables' do
             before do
-              create(model_factory, :checksummed)
-              create(model_factory, :checksummed)
-              create(model_factory, :checksum_failure)
+              create(model_factory, :verification_succeeded)
+              create(model_factory, :verification_succeeded)
+              create(model_factory, :verification_failed)
             end
 
             describe '#<replicable_name>_checksummed_count' do

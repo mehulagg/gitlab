@@ -1,9 +1,9 @@
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
-import testAction from 'helpers/vuex_action_helper';
-import * as getters from 'ee/analytics/cycle_analytics/store/getters';
 import * as actions from 'ee/analytics/cycle_analytics/store/actions';
+import * as getters from 'ee/analytics/cycle_analytics/store/getters';
 import * as types from 'ee/analytics/cycle_analytics/store/mutation_types';
+import testAction from 'helpers/vuex_action_helper';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import httpStatusCodes from '~/lib/utils/http_status';
 import {
@@ -94,7 +94,7 @@ describe('Value Stream Analytics actions', () => {
   describe('setSelectedValueStream', () => {
     const vs = { id: 'vs-1', name: 'Value stream 1' };
 
-    it('refetches the cycle analytics data', () => {
+    it('refetches the Value Stream Analytics data', () => {
       return testAction(
         actions.setSelectedValueStream,
         vs,

@@ -1,7 +1,7 @@
 ---
 stage: none
 group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Sidekiq Style Guide
@@ -27,7 +27,10 @@ After adding a new queue, run `bin/rake
 gitlab:sidekiq:all_queues_yml:generate` to regenerate
 `app/workers/all_queues.yml` or `ee/app/workers/all_queues.yml` so that
 it can be picked up by
-[`sidekiq-cluster`](../administration/operations/extra_sidekiq_processes.md).
+[`sidekiq-cluster`](../administration/operations/extra_sidekiq_processes.md). 
+Additionally, run
+`bin/rake gitlab:sidekiq:sidekiq_queues_yml:generate` to regenerate
+`config/sidekiq_queues.yml`.
 
 ## Queue Namespaces
 
@@ -246,26 +249,6 @@ module AuthorizedProjectUpdate
     # ...
   end
 end
-```
-
-#### Troubleshooting
-
-If the automatic deduplication were to cause issues in certain
-queues. This can be temporarily disabled by enabling a feature flag
-named `disable_<queue name>_deduplication`. For example to disable
-deduplication for the `AuthorizedProjectsWorker`, we would enable the
-feature flag `disable_authorized_projects_deduplication`.
-
-From ChatOps:
-
-```shell
-/chatops run feature set disable_authorized_projects_deduplication true
-```
-
-From the rails console:
-
-```ruby
-Feature.enable!(:disable_authorized_projects_deduplication)
 ```
 
 ## Limited capacity worker
@@ -818,7 +801,7 @@ This approach requires multiple releases.
 ##### Parameter hash
 
 This approach will not require multiple releases if an existing worker already
-utilizes a parameter hash.
+uses a parameter hash.
 
 1. Use a parameter hash in the worker to allow future flexibility.
 

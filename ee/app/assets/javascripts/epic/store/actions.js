@@ -1,3 +1,4 @@
+import epicDetailsQuery from 'shared_queries/epic/epic_details.query.graphql';
 import { deprecatedCreateFlash as flash } from '~/flash';
 import { __, s__, sprintf } from '~/locale';
 
@@ -7,9 +8,8 @@ import { visitUrl } from '~/lib/utils/url_utility';
 import epicUtils from '../utils/epic_utils';
 import { statusType, statusEvent, dateTypes } from '../constants';
 
-import epicDetailsQuery from '../queries/epicDetails.query.graphql';
-import updateEpic from '../queries/updateEpic.mutation.graphql';
 import epicSetSubscription from '../queries/epicSetSubscription.mutation.graphql';
+import updateEpic from '../queries/updateEpic.mutation.graphql';
 
 import * as types from './mutation_types';
 

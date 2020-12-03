@@ -1,7 +1,7 @@
 ---
 stage: Release
-group: Release Management
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+group: Release
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 description: 'Learn how to administer GitLab Pages.'
 ---
 
@@ -415,9 +415,6 @@ internet connectivity is gated by a proxy. To use a proxy for GitLab Pages:
 
 ### Using a custom Certificate Authority (CA)
 
-NOTE: **Note:**
-[Before 13.3](https://gitlab.com/gitlab-org/omnibus-gitlab/-/merge_requests/4411), when using Omnibus, a [workaround was required](https://docs.gitlab.com/13.1/ee/administration/pages/index.html#using-a-custom-certificate-authority-ca).
-
 When using certificates issued by a custom CA, [Access Control](../../user/project/pages/pages_access_control.md#gitlab-pages-access-control) and
 the [online view of HTML job artifacts](../../ci/pipelines/job_artifacts.md#browsing-artifacts)
 will fail to work if the custom CA is not recognized.
@@ -556,7 +553,6 @@ database encryption. Proceed with caution.
 1. On the **GitLab server**, to enable Pages, add the following to `/etc/gitlab/gitlab.rb`:
 
    ```ruby
-   gitlab_pages['enable'] = true
    pages_external_url "http://<pages_server_URL>"
    ```
 
@@ -587,18 +583,11 @@ database encryption. Proceed with caution.
    to include:
 
    ```ruby
-   external_url 'http://<gitlab_server_IP_or_URL>'
+   roles ['pages_role']
+
    pages_external_url "http://<pages_server_URL>"
-   postgresql['enable'] = false
-   redis['enable'] = false
-   prometheus['enable'] = false
-   puma['enable'] = false
-   sidekiq['enable'] = false
-   gitlab_workhorse['enable'] = false
-   gitaly['enable'] = false
-   alertmanager['enable'] = false
-   node_exporter['enable'] = false
-   gitlab_rails['auto_migrate'] = false
+
+   gitlab_pages['gitlab_server'] = 'http://<gitlab_server_IP_or_URL>'
    ```
 
 1. Create a backup of the secrets file on the **Pages server**:
@@ -822,3 +811,11 @@ Upgrading to an [officially supported operating system](https://about.gitlab.com
 This problem comes from the permissions of the GitLab Pages OAuth application. To fix it, go to
 **Admin > Applications > GitLab Pages** and edit the application. Under **Scopes**, ensure that the
 `api` scope is selected and save your changes.
+
+### Workaround in case no wildcard DNS entry can be set
+
+If the wildcard DNS [prerequisite](#prerequisites) can't be met, you can still use GitLab Pages in a limited fashion:
+
+1. [Move](../../user/project/settings/index.md#transferring-an-existing-project-into-another-namespace)
+   all projects you need to use Pages with into a single group namespace, for example `pages`.
+1. Configure a [DNS entry](#dns-configuration) without the `*.`-wildcard, for example `pages.example.io`.

@@ -34,8 +34,7 @@ module Types
     field :parent, EpicType, null: true,
           description: 'Parent epic of the epic'
     field :author, Types::UserType, null: false,
-          description: 'Author of the epic',
-          resolve: -> (obj, _args, _ctx) { Gitlab::Graphql::Loaders::BatchModelLoader.new(User, obj.author_id).find }
+          description: 'Author of the epic'
 
     field :start_date, Types::TimeType, null: true,
           description: 'Start date of the epic'
@@ -107,21 +106,21 @@ module Types
            method: :group_epic_link_path
 
     field :reference, GraphQL::STRING_TYPE, null: false,
-    description: 'Internal reference of the epic. Returned in shortened format by default',
-    method: :epic_reference do
-      argument :full, GraphQL::BOOLEAN_TYPE, required: false, default_value: false,
-                description: 'Indicates if the reference should be returned in full'
-    end
+          description: 'Internal reference of the epic. Returned in shortened format by default',
+          method: :epic_reference do
+            argument :full, GraphQL::BOOLEAN_TYPE, required: false, default_value: false,
+                      description: 'Indicates if the reference should be returned in full'
+          end
 
     field :participants, Types::UserType.connection_type, null: true,
           description: 'List of participants for the epic',
           complexity: 5
 
     field :subscribed, GraphQL::BOOLEAN_TYPE,
-      method: :subscribed?,
-      null: false,
-      complexity: 5,
-      description: 'Indicates the currently logged in user is subscribed to the epic'
+          method: :subscribed?,
+          null: false,
+          complexity: 5,
+          description: 'Indicates the currently logged in user is subscribed to the epic'
 
     field :issues,
           Types::EpicIssueType.connection_type,
@@ -132,22 +131,13 @@ module Types
           resolver: Resolvers::EpicIssuesResolver
 
     field :descendant_counts, Types::EpicDescendantCountType, null: true,
-      description: 'Number of open and closed descendant epics and issues',
-      resolve: -> (epic, args, ctx) do
-        Gitlab::Graphql::Aggregations::Epics::LazyEpicAggregate.new(ctx, epic.id, COUNT)
-      end
+          description: 'Number of open and closed descendant epics and issues'
 
     field :descendant_weight_sum, Types::EpicDescendantWeightSumType, null: true,
-      description: "Total weight of open and closed issues in the epic and its descendants",
-      resolve: -> (epic, args, ctx) do
-        Gitlab::Graphql::Aggregations::Epics::LazyEpicAggregate.new(ctx, epic.id, WEIGHT_SUM)
-      end
+          description: "Total weight of open and closed issues in the epic and its descendants"
 
     field :health_status, Types::EpicHealthStatusType, null: true, complexity: 10,
-      description: 'Current health status of the epic',
-      resolve: -> (epic, args, ctx) do
-        Epics::DescendantCountService.new(epic, ctx[:current_user])
-      end
+          description: 'Current health status of the epic'
 
     def user_notes_count
       BatchLoader::GraphQL.for(object.id).batch(key: :epic_user_notes_count) do |ids, loader, args|
@@ -183,5 +173,21 @@ module Types
 
     alias_method :has_children, :has_children?
     alias_method :has_issues, :has_issues?
+
+    def author
+      Gitlab::Graphql::Loaders::BatchModelLoader.new(User, object.author_id).find
+    end
+
+    def descendant_counts
+      Gitlab::Graphql::Aggregations::Epics::LazyEpicAggregate.new(context, object.id, COUNT)
+    end
+
+    def descendant_weight_sum
+      Gitlab::Graphql::Aggregations::Epics::LazyEpicAggregate.new(context, object.id, WEIGHT_SUM)
+    end
+
+    def health_status
+      Epics::DescendantCountService.new(object, context[:current_user])
+    end
   end
 end

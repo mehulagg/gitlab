@@ -21,9 +21,9 @@ export default {
   },
   inject: ['labelsFetchPath', 'labelsManagePath', 'labelsFilterBasePath'],
   computed: {
-    ...mapGetters({ issue: 'activeIssue' }),
+    ...mapGetters(['activeIssue', 'projectPathForActiveIssue']),
     selectedLabels() {
-      const { labels = [] } = this.issue;
+      const { labels = [] } = this.activeIssue;
 
       return labels.map(label => ({
         ...label,
@@ -31,16 +31,12 @@ export default {
       }));
     },
     issueLabels() {
-      const { labels = [] } = this.issue;
+      const { labels = [] } = this.activeIssue;
 
       return labels.map(label => ({
         ...label,
         scoped: isScopedLabel(label),
       }));
-    },
-    projectPath() {
-      const { referencePath = '' } = this.issue;
-      return referencePath.slice(0, referencePath.indexOf('#'));
     },
   },
   methods: {
@@ -55,7 +51,7 @@ export default {
           .filter(label => !payload.find(selected => selected.id === label.id))
           .map(label => label.id);
 
-        const input = { addLabelIds, removeLabelIds, projectPath: this.projectPath };
+        const input = { addLabelIds, removeLabelIds, projectPath: this.projectPathForActiveIssue };
         await this.setActiveIssueLabels(input);
       } catch (e) {
         createFlash({ message: __('An error occurred while updating labels.') });
@@ -68,7 +64,7 @@ export default {
 
       try {
         const removeLabelIds = [getIdFromGraphQLId(id)];
-        const input = { removeLabelIds, projectPath: this.projectPath };
+        const input = { removeLabelIds, projectPath: this.projectPathForActiveIssue };
         await this.setActiveIssueLabels(input);
       } catch (e) {
         createFlash({ message: __('An error occurred when removing the label.') });
@@ -96,7 +92,7 @@ export default {
         @close="removeLabel(label.id)"
       />
     </template>
-    <template>
+    <template #default="{ edit }">
       <labels-select
         ref="labelsSelect"
         :allow-label-edit="false"
@@ -109,6 +105,7 @@ export default {
         :labels-filter-base-path="labelsFilterBasePath"
         :labels-list-title="__('Select label')"
         :dropdown-button-text="__('Choose labels')"
+        :is-editing="edit"
         variant="embedded"
         class="gl-display-block labels gl-w-full"
         @updateSelectedLabels="setLabels"

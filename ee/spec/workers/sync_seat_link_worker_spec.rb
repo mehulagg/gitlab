@@ -11,13 +11,13 @@ RSpec.describe SyncSeatLinkWorker, type: :worker do
         # Setting the date as 12th March 2020 12:00 UTC for tests and creating new license
         create_current_license(starts_at: '2020-02-12'.to_date)
 
-        HistoricalData.create!(recorded_at: '2020-02-11'.to_date, active_user_count: 100)
-        HistoricalData.create!(recorded_at: '2020-02-12'.to_date, active_user_count: 10)
-        HistoricalData.create!(recorded_at: '2020-02-13'.to_date, active_user_count: 15)
+        HistoricalData.create!(recorded_at: '2020-02-11T00:00:00Z', active_user_count: 100)
+        HistoricalData.create!(recorded_at: '2020-02-12T00:00:00Z', active_user_count: 10)
+        HistoricalData.create!(recorded_at: '2020-02-13T00:00:00Z', active_user_count: 15)
 
-        HistoricalData.create!(recorded_at: '2020-03-11'.to_date, active_user_count: 10)
-        HistoricalData.create!(recorded_at: '2020-03-12'.to_date, active_user_count: 20)
-        HistoricalData.create!(recorded_at: '2020-03-15'.to_date, active_user_count: 25)
+        HistoricalData.create!(recorded_at: '2020-03-11T00:00:00Z', active_user_count: 10)
+        HistoricalData.create!(recorded_at: '2020-03-12T00:00:00Z', active_user_count: 12)
+        HistoricalData.create!(recorded_at: '2020-03-15T00:00:00Z', active_user_count: 25)
         allow(SyncSeatLinkRequestWorker).to receive(:perform_async).and_return(true)
       end
 
@@ -27,10 +27,10 @@ RSpec.describe SyncSeatLinkWorker, type: :worker do
 
           expect(SyncSeatLinkRequestWorker).to have_received(:perform_async)
             .with(
-              '2020-03-11',
+              '2020-03-12T00:00:00Z',
               License.current.data,
               15,
-              10
+              12
             )
         end
       end
@@ -46,12 +46,13 @@ RSpec.describe SyncSeatLinkWorker, type: :worker do
 
             subject.perform
 
+            # Time.iso8601('2020-03-12T13:00:00+13:00') == Time.iso8601('2020-03-12T00:00:00Z')
             expect(SyncSeatLinkRequestWorker).to have_received(:perform_async)
               .with(
-                '2020-03-11',
+                '2020-03-12T13:00:00+13:00',
                 License.current.data,
                 15,
-                10
+                12
               )
           end
         end
@@ -67,12 +68,13 @@ RSpec.describe SyncSeatLinkWorker, type: :worker do
 
               subject.perform
 
+              # Time.iso8601('2020-03-11T18:00:00-06:00') == Time.iso8601('2020-03-12T00:00:00Z')
               expect(SyncSeatLinkRequestWorker).to have_received(:perform_async)
                 .with(
-                  '2020-03-11',
+                  '2020-03-11T18:00:00-06:00',
                   License.current.data,
                   15,
-                  10
+                  12
                 )
             end
           end
@@ -88,57 +90,67 @@ RSpec.describe SyncSeatLinkWorker, type: :worker do
       end
     end
 
-    context 'when license is missing' do
-      before do
-        License.current.destroy!
-      end
+    context 'license checks' do
+      let_it_be(:historical_data) { create(:historical_data) }
 
-      include_examples 'no seat link sync'
-    end
-
-    context 'when using a trial license' do
-      before do
-        create(:license, trial: true)
-      end
-
-      include_examples 'no seat link sync'
-    end
-
-    context 'when the license has no expiration date' do
-      before do
-        create_current_license(expires_at: nil, block_changes_at: nil)
-      end
-
-      include_examples 'no seat link sync'
-    end
-
-    context 'when using an expired license' do
-      before do
-        create_current_license(expires_at: expiration_date)
-      end
-
-      context 'the license expired over 15 days ago' do
-        let(:expiration_date) { Time.now.utc.to_date - 16.days }
+      context 'when license is missing' do
+        before do
+          License.current.destroy!
+        end
 
         include_examples 'no seat link sync'
       end
 
-      context 'the license expired less than or equal to 15 days ago' do
-        let(:expiration_date) { Time.now.utc.to_date - 15.days }
+      context 'when using a trial license' do
+        before do
+          create(:license, trial: true)
+        end
 
-        it 'executes the SyncSeatLinkRequestWorker' do
-          expect(SyncSeatLinkRequestWorker).to receive(:perform_async).and_return(true)
+        include_examples 'no seat link sync'
+      end
 
-          subject.perform
+      context 'when the license has no expiration date' do
+        before do
+          create_current_license(expires_at: nil, block_changes_at: nil)
+        end
+
+        include_examples 'no seat link sync'
+      end
+
+      context 'when using an expired license' do
+        before do
+          create_current_license(expires_at: expiration_date)
+        end
+
+        context 'the license expired over 14 days ago' do
+          let(:expiration_date) { Time.zone.now.utc.to_date - 15.days }
+
+          include_examples 'no seat link sync'
+        end
+
+        context 'the license expired less than or equal to 14 days ago' do
+          let(:expiration_date) { Time.zone.now.utc.to_date - 14.days }
+
+          it 'executes the SyncSeatLinkRequestWorker' do
+            expect(SyncSeatLinkRequestWorker).to receive(:perform_async).and_return(true)
+
+            subject.perform
+          end
         end
       end
     end
 
     context 'when seat link has been disabled' do
       before do
+        create(:historical_data)
+
         allow(Gitlab::CurrentSettings).to receive(:seat_link_enabled?).and_return(false)
       end
 
+      include_examples 'no seat link sync'
+    end
+
+    context 'when no historical data exists' do
       include_examples 'no seat link sync'
     end
   end

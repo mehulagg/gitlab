@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlDropdown, GlDropdownItem } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import StageDropdownFilter from 'ee/analytics/cycle_analytics/components/stage_dropdown_filter.vue';
 
 const stages = [

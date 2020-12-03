@@ -1,7 +1,7 @@
 ---
 stage: Package
 group: Package
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Dependency Proxy
@@ -31,6 +31,11 @@ The following images and packages are supported.
 
 For a list of planned additions, view the
 [direction page](https://about.gitlab.com/direction/package/dependency_proxy/#top-vision-items).
+
+## Enable the Dependency Proxy
+
+The Dependency Proxy is disabled by default.
+[Learn how an administrator can enable it](../../../administration/packages/dependency_proxy.md).
 
 ## View the Dependency Proxy
 

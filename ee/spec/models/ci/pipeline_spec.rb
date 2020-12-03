@@ -606,4 +606,24 @@ RSpec.describe Ci::Pipeline do
       it { is_expected.to be_falsey }
     end
   end
+
+  describe '#needs_touch?' do
+    subject { pipeline.needs_touch? }
+
+    context 'when pipeline was updated less than 5 minutes ago' do
+      before do
+        pipeline.updated_at = 4.minutes.ago
+      end
+
+      it { is_expected.to eq(false) }
+    end
+
+    context 'when pipeline was updated more than 5 minutes ago' do
+      before do
+        pipeline.updated_at = 6.minutes.ago
+      end
+
+      it { is_expected.to eq(true) }
+    end
+  end
 end

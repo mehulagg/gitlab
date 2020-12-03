@@ -1,8 +1,8 @@
 import { GlDropdown, GlDropdownItem, GlLoadingIcon } from '@gitlab/ui';
 import { mount, shallowMount } from '@vue/test-utils';
-import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 import Status from 'ee/sidebar/components/status/status.vue';
 import { healthStatus, healthStatusTextMap } from 'ee/sidebar/constants';
+import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 
 const getStatusText = wrapper => wrapper.find('.value .text-plain').text();
 

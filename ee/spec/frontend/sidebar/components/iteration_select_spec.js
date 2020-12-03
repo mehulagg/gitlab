@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlDropdown, GlDropdownItem, GlButton, GlLink, GlSearchBoxByType } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import IterationSelect from 'ee/sidebar/components/iteration_select.vue';
 import { iterationSelectTextMap } from 'ee/sidebar/constants';
 import setIterationOnIssue from 'ee/sidebar/queries/set_iteration_on_issue.mutation.graphql';
@@ -58,7 +58,10 @@ describe('IterationSelect', () => {
   describe('when not editing', () => {
     it('shows the current iteration', () => {
       createComponent({
-        data: { iterations: [{ id: 'id', title: 'title' }], currentIteration: 'id' },
+        data: {
+          iterations: [{ id: 'id', title: 'title' }],
+          currentIteration: { id: 'id', title: 'title' },
+        },
       });
 
       expect(wrapper.find('[data-testid="select-iteration"]').text()).toBe('title');
@@ -68,7 +71,7 @@ describe('IterationSelect', () => {
       createComponent({
         data: {
           iterations: [{ id: 'id', title: 'title', webUrl: 'webUrl' }],
-          currentIteration: 'id',
+          currentIteration: { id: 'id', title: 'title', webUrl: 'webUrl' },
         },
       });
 
@@ -132,7 +135,9 @@ describe('IterationSelect', () => {
           const title = 'title';
 
           beforeEach(() => {
-            createComponent({ data: { iterations: [{ id, title }], currentIteration: id } });
+            createComponent({
+              data: { iterations: [{ id, title }], currentIteration: { id, title } },
+            });
           });
 
           it('renders title $title', () => {
@@ -174,7 +179,10 @@ describe('IterationSelect', () => {
           describe('when currentIteration is equal to iteration id', () => {
             it('does not call setIssueIteration mutation', () => {
               createComponent({
-                data: { iterations: [{ id: 'id', title: 'title' }], currentIteration: 'id' },
+                data: {
+                  iterations: [{ id: 'id', title: 'title' }],
+                  currentIteration: { id: 'id', title: 'title' },
+                },
               });
 
               wrapper
@@ -340,11 +348,11 @@ describe('IterationSelect', () => {
           it.each([
             [{}, undefined],
             [{ project: { issue: {} } }, undefined],
-            [{ project: { issue: { iteration: {} } } }, undefined],
+            [{ project: { issue: { iteration: {} } } }, {}],
           ])('when %j as an argument it returns %j', (data, value) => {
             const { update } = wrapper.vm.$options.apollo.currentIteration;
 
-            expect(update(data)).toBe(value);
+            expect(update(data)).toEqual(value);
           });
         });
 
@@ -354,7 +362,9 @@ describe('IterationSelect', () => {
 
             const { update } = wrapper.vm.$options.apollo.currentIteration;
 
-            expect(update({ project: { issue: { iteration: { id: '123' } } } })).toEqual('123');
+            expect(update({ project: { issue: { iteration: { id: '123' } } } })).toEqual({
+              id: '123',
+            });
           });
         });
       });

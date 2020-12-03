@@ -36,6 +36,12 @@ module EE
         },
         coverage_fuzzing: {
           name: :coverage_fuzzing_jobs
+        },
+        apifuzzer_fuzz: {
+          name: :api_fuzzing_jobs
+        },
+        apifuzzer_fuzz_dnd: {
+          name: :api_fuzzing_dnd_jobs
         }
       }.freeze
 
@@ -105,7 +111,10 @@ module EE
           return {} unless ::License.feature_available?(:requirements)
 
           {
-            requirements_created: count(RequirementsManagement::Requirement)
+            requirements_created: count(RequirementsManagement::Requirement),
+            requirement_test_reports_manual: count(RequirementsManagement::TestReport.without_build),
+            requirement_test_reports_ci: count(RequirementsManagement::TestReport.with_build),
+            requirements_with_test_report: distinct_count(RequirementsManagement::TestReport, :requirement_id)
           }
         end
 
@@ -191,14 +200,6 @@ module EE
                 ldap_keys: count(::LDAPKey),
                 ldap_users: count(::User.ldap, 'users.id'),
                 pod_logs_usages_total: redis_usage_data { ::Gitlab::UsageCounters::PodLogs.usage_totals[:total] },
-                projects_enforcing_code_owner_approval: count(::Project.without_deleted.non_archived.requiring_code_owner_approval),
-                merge_requests_with_added_rules: distinct_count(::ApprovalMergeRequestRule.with_added_approval_rules,
-                                                                :merge_request_id,
-                                                                start: approval_merge_request_rule_minimum_id,
-                                                                finish: approval_merge_request_rule_maximum_id),
-                merge_requests_with_optional_codeowners: distinct_count(::ApprovalMergeRequestRule.code_owner_approval_optional, :merge_request_id),
-                merge_requests_with_overridden_project_rules: merge_requests_with_overridden_project_rules,
-                merge_requests_with_required_codeowners: distinct_count(::ApprovalMergeRequestRule.code_owner_approval_required, :merge_request_id),
                 merged_merge_requests_using_approval_rules: count(::MergeRequest.merged.joins(:approval_rules), # rubocop: disable CodeReuse/ActiveRecord
                                                                   start: merge_request_minimum_id,
                                                                   finish: merge_request_maximum_id),
@@ -309,7 +310,6 @@ module EE
         def usage_activity_by_stage_monitor(time_period)
           super.merge({
             operations_dashboard_users_with_projects_added: distinct_count(UsersOpsDashboardProject.joins(:user).merge(::User.active).where(time_period), :user_id),
-            projects_prometheus_active: distinct_count(::Project.with_active_prometheus_service.where(time_period), :creator_id),
             projects_incident_sla_enabled: count(::Project.with_enabled_incident_sla)
           })
         end

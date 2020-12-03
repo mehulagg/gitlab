@@ -1,7 +1,7 @@
 ---
 stage: Enablement
 group: Geo
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: howto
 ---
 
@@ -10,6 +10,10 @@ type: howto
 Check this document if it includes instructions for the version you are updating.
 These steps go together with the [general steps](updating_the_geo_nodes.md#general-update-steps)
 for updating Geo nodes.
+
+## Updating to GitLab 13.5
+
+In GitLab 13.5, there is a [regression that prevents viewing a list of container repositories and registries](https://gitlab.com/gitlab-org/gitlab/-/issues/285475) on Geo secondaries. This issue is fixed in GitLab 13.6.1 and later.
 
 ## Updating to GitLab 13.3
 
@@ -325,7 +329,7 @@ In GitLab 10.2, synchronizing secondaries over SSH was deprecated. In 10.3,
 support is removed entirely. All installations will switch to the HTTP/HTTPS
 cloning method instead. Before updating, ensure that all your Geo nodes are
 configured to use this method and that it works for your installation. In
-particular, ensure that [Git access over HTTP/HTTPS is enabled](configuration.md#step-6-enable-git-access-over-httphttps).
+particular, ensure that [Git access over HTTP/HTTPS is enabled](configuration.md#step-5-enable-git-access-over-httphttps).
 
 Synchronizing repositories over the public Internet using HTTP is insecure, so
 you should ensure that you have HTTPS configured before updating. Note that

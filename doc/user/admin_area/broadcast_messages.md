@@ -1,7 +1,7 @@
 ---
 stage: none
 group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference, howto
 ---
 
@@ -47,7 +47,7 @@ The available placeholders are:
 - `{{username}}`
 - `{{instance_id}}`
 
-If the user is not signed in, user related values will be empty.
+If the user is not signed in, user related values are empty.
 
 ![Broadcast Message Notification](img/broadcast_messages_notification_v12_10.png)
 
@@ -73,7 +73,7 @@ To add a broadcast message:
 NOTE: **Note:**
 The **Background color** field expects the value to be a hexadecimal code because
 the form uses the [color_field](https://api.rubyonrails.org/v6.0.3.4/classes/ActionView/Helpers/FormHelper.html#method-i-color_field)
-helper method, which generates the proper HTML to render. 
+helper method, which generates the proper HTML to render.
 
 NOTE: **Note:**
 Once a broadcast message has expired, it is no longer displayed in the UI but is still listed in the

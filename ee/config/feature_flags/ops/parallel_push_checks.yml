@@ -5,4 +5,4 @@ rollout_issue_url:
 milestone: '13.6'
 type: ops
 group: group::source_code
-default_enabled: true
+default_enabled: false

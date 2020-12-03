@@ -72,26 +72,6 @@ RSpec.describe EE::NamespaceStorageLimitAlertHelper do
     end
   end
 
-  describe '#can_purchase_storage?' do
-    subject { helper.can_purchase_storage? }
-
-    where(:enforcement_setting_enabled, :feature_enabled, :result) do
-      false | false | false
-      false | true  | false
-      true  | false | false
-      true  | true  | true
-    end
-
-    with_them do
-      before do
-        stub_application_setting(enforce_namespace_storage_limit: enforcement_setting_enabled)
-        stub_feature_flags(buy_storage_link: feature_enabled)
-      end
-
-      it { is_expected.to eq(result) }
-    end
-  end
-
   describe '#purchase_storage_url' do
     subject { helper.purchase_storage_url }
 
@@ -196,8 +176,8 @@ RSpec.describe EE::NamespaceStorageLimitAlertHelper do
     end
   end
 
-  describe '#can_purchase_storage_for_namespace?' do
-    subject { helper.can_purchase_storage_for_namespace?(namespace) }
+  describe '#purchase_storage_link_enabled?' do
+    subject { helper.purchase_storage_link_enabled?(namespace) }
 
     let_it_be(:namespace) { build(:namespace) }
 

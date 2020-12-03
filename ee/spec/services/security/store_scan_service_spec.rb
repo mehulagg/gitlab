@@ -69,7 +69,7 @@ RSpec.describe Security::StoreScanService do
 
     context 'when the `store_security_findings` feature is enabled' do
       before do
-        stub_feature_flags(store_security_findings: true)
+        stub_feature_flags(store_security_findings: artifact.project)
       end
 
       it 'calls the `Security::StoreFindingsMetadataService` to store findings' do

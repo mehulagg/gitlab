@@ -7,6 +7,9 @@ module EE
 
     prepended do
       with_scope :subject
+      condition(:auto_fix_enabled) { @subject.security_setting&.auto_fix_enabled? }
+
+      with_scope :subject
       condition(:repository_mirrors_enabled) { @subject.feature_available?(:repository_mirrors) }
 
       with_scope :subject
@@ -153,6 +156,12 @@ module EE
         !@subject.feature_available?(:feature_flags_related_issues)
       end
 
+      with_scope :subject
+      condition(:oncall_schedules_available) do
+        ::Feature.enabled?(:oncall_schedules_mvc, @subject) &&
+          @subject.feature_available?(:oncall_schedules)
+      end
+
       rule { visual_review_bot }.policy do
         prevent :read_note
         enable :create_note
@@ -179,6 +188,8 @@ module EE
         enable :admin_epic_issue
         enable :read_group_timelogs
       end
+
+      rule { oncall_schedules_available & can?(:reporter_access) }.enable :read_incident_management_oncall_schedule
 
       rule { can?(:developer_access) }.policy do
         enable :admin_board
@@ -217,6 +228,12 @@ module EE
         enable :admin_vulnerability_issue_link
       end
 
+      rule { security_bot && auto_fix_enabled }.policy do
+        enable :push_code
+        enable :create_merge_request_from
+        enable :create_vulnerability_feedback
+      end
+
       rule { issues_disabled & merge_requests_disabled }.policy do
         prevent(*create_read_update_admin_destroy(:iteration))
       end
@@ -244,6 +261,8 @@ module EE
       end
 
       rule { license_scanning_enabled & can?(:maintainer_access) }.enable :admin_software_license_policy
+
+      rule { oncall_schedules_available & can?(:maintainer_access) }.enable :admin_incident_management_oncall_schedule
 
       rule { auditor }.policy do
         enable :public_user_access
@@ -340,6 +359,7 @@ module EE
         enable :create_requirement_test_report
         enable :admin_requirement
         enable :update_requirement
+        enable :import_requirements
       end
 
       rule { requirements_available & owner }.enable :destroy_requirement
@@ -348,8 +368,6 @@ module EE
 
       rule { status_page_available & can?(:owner_access) }.enable :mark_issue_for_publication
       rule { status_page_available & can?(:developer_access) }.enable :publish_status_page
-
-      rule { public_project }.enable :view_embedded_analytics_report
 
       rule { over_storage_limit }.policy do
         prevent(*readonly_abilities)
@@ -364,6 +382,7 @@ module EE
     def lookup_access_level!
       return ::Gitlab::Access::NO_ACCESS if needs_new_sso_session?
       return ::Gitlab::Access::NO_ACCESS if visual_review_bot?
+      return ::Gitlab::Access::REPORTER if security_bot? && auto_fix_enabled?
 
       super
     end

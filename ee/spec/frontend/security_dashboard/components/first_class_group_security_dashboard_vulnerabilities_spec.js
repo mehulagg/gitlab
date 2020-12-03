@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlAlert, GlTable, GlEmptyState, GlIntersectionObserver, GlLoadingIcon } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import FirstClassGroupVulnerabilities from 'ee/security_dashboard/components/first_class_group_security_dashboard_vulnerabilities.vue';
 import VulnerabilityList from 'ee/security_dashboard/components/vulnerability_list.vue';
 import { generateVulnerabilities } from './mock_data';

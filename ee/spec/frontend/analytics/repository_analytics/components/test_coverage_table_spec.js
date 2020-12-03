@@ -1,11 +1,11 @@
-import VueApollo from 'vue-apollo';
 import { mount, shallowMount, createLocalVue } from '@vue/test-utils';
+import VueApollo from 'vue-apollo';
+import TestCoverageTable from 'ee/analytics/repository_analytics/components/test_coverage_table.vue';
+import getGroupProjects from 'ee/analytics/repository_analytics/graphql/queries/get_group_projects.query.graphql';
+import getProjectsTestCoverage from 'ee/analytics/repository_analytics/graphql/queries/get_projects_test_coverage.query.graphql';
 import { useFakeDate } from 'helpers/fake_date';
 import createMockApollo from 'jest/helpers/mock_apollo_helper';
 import waitForPromises from 'jest/helpers/wait_for_promises';
-import TestCoverageTable from 'ee/analytics/repository_analytics/components/test_coverage_table.vue';
-import getProjectsTestCoverage from 'ee/analytics/repository_analytics/graphql/queries/get_projects_test_coverage.query.graphql';
-import getGroupProjects from 'ee/analytics/repository_analytics/graphql/queries/get_group_projects.query.graphql';
 
 const localVue = createLocalVue();
 

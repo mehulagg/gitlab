@@ -1,7 +1,7 @@
 ---
 stage: none
 group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Vue
@@ -91,7 +91,7 @@ return new Vue({
       },
     });
   },
-}
+});
 ```
 
 > When adding an `id` attribute to mount a Vue application, please make sure this `id` is unique across the codebase
@@ -120,7 +120,7 @@ return new Vue({
 Use Vue's [provide/inject](https://vuejs.org/v2/api/#provide-inject) mechanism
 to make feature flags available to any descendant components in a Vue
 application. The `glFeatures` object is already provided in `commons/vue.js`, so
-only the mixin is required to utilize the flags:
+only the mixin is required to use the flags:
 
 ```javascript
 // An arbitrary descendant component
@@ -187,6 +187,30 @@ Check this [page](vuex.md) for more details.
 - If you need to use a specific jQuery plugin in Vue, [create a wrapper around it](https://vuejs.org/v2/examples/select2.html).
 - It is acceptable for Vue to listen to existing jQuery events using jQuery event listeners.
 - It is not recommended to add new jQuery events for Vue to interact with jQuery.
+
+### Mixing Vue and JavaScript classes (in the data function)
+
+In the [Vue documentation](https://vuejs.org/v2/api/#Options-Data) the Data function/object is defined as follows:
+
+> The data object for the Vue instance. Vue will recursively convert its properties into getter/setters to make it “reactive”. The object must be plain: native objects such as browser API objects and prototype properties are ignored. A rule of thumb is that data should just be data - it is not recommended to observe objects with their own stateful behavior.
+
+Based on the Vue guidance:
+
+- **Do not** use or create a JavaScript class in your [data function](https://vuejs.org/v2/api/#data), such as `user: new User()`.
+- **Do not** add new JavaScript class implementations.
+- **Do** use [GraphQL](../api_graphql_styleguide.md), [Vuex](vuex.md) or a set of components if cannot use simple primitives or objects.
+- **Do** maintain existing implementations using such approaches.
+- **Do** Migrate components to a pure object model when there are substantial changes to it.
+- **Do** add business logic to helpers or utils, so you can test them separately from your component.
+
+#### Why
+
+There are additional reasons why having a JavaScript class presents maintainability issues on a huge codebase:
+
+- Once a class is created, it is easy to extend it in a way that can infringe Vue reactivity and best practices.
+- A class adds a layer of abstraction, which makes the component API and its inner workings less clear.
+- It makes it harder to test. Since the class is instantiated by the component data function, it is harder to 'manage' component and class separately.
+- Adding OOP to a functional codebase adds yet another way of writing code, reducing consistency and clarity.
 
 ## Style guide
 

@@ -7,9 +7,37 @@ RSpec.describe Elastic::MigrationRecord, :elastic do
 
   describe '#save!' do
     it 'creates an index if it is not found' do
-      es_helper.delete_index(index_name: @migrations_index_name)
+      es_helper.delete_index(index_name: es_helper.migrations_index_name)
 
       expect { record.save!(completed: true) }.to raise_error(/index is not found/)
+    end
+
+    it 'sets the started_at' do
+      record.save!(completed: false)
+
+      expect(record.load_from_index.dig('_source', 'started_at')).not_to be_nil
+    end
+
+    it 'does not update started_at on subsequent saves' do
+      record.save!(completed: false)
+
+      real_started_at = record.load_from_index.dig('_source', 'started_at')
+
+      record.save!(completed: false)
+
+      expect(record.load_from_index.dig('_source', 'started_at')).to eq(real_started_at)
+    end
+
+    it 'sets completed_at when completed' do
+      record.save!(completed: true)
+
+      expect(record.load_from_index.dig('_source', 'completed_at')).not_to be_nil
+    end
+
+    it 'does not set completed_at when not completed' do
+      record.save!(completed: false)
+
+      expect(record.load_from_index.dig('_source', 'completed_at')).to be_nil
     end
   end
 
@@ -27,7 +55,7 @@ RSpec.describe Elastic::MigrationRecord, :elastic do
       completed_versions.each { |migration| migration.save!(completed: true) }
       in_progress_migration.save!(completed: false)
 
-      es_helper.refresh_index(index_name: @migrations_index_name)
+      es_helper.refresh_index(index_name: es_helper.migrations_index_name)
     end
 
     it 'loads all records' do
@@ -36,7 +64,7 @@ RSpec.describe Elastic::MigrationRecord, :elastic do
     end
 
     it 'returns empty array if no index present' do
-      es_helper.delete_index(index_name: @migrations_index_name)
+      es_helper.delete_index(index_name: es_helper.migrations_index_name)
 
       expect(described_class.persisted_versions(completed: true)).to eq([])
       expect(described_class.persisted_versions(completed: false)).to eq([])

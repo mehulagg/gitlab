@@ -16,7 +16,6 @@ RSpec.describe Project do
 
     it { is_expected.to delegate_method(:actual_shared_runners_minutes_limit).to(:shared_runners_limit_namespace) }
     it { is_expected.to delegate_method(:shared_runners_minutes_limit_enabled?).to(:shared_runners_limit_namespace) }
-    it { is_expected.to delegate_method(:shared_runners_minutes_used?).to(:shared_runners_limit_namespace) }
     it { is_expected.to delegate_method(:shared_runners_remaining_minutes_below_threshold?).to(:shared_runners_limit_namespace) }
 
     it { is_expected.to delegate_method(:closest_gitlab_subscription).to(:namespace) }
@@ -51,6 +50,8 @@ RSpec.describe Project do
     it { is_expected.to have_one(:github_service) }
     it { is_expected.to have_many(:project_aliases) }
     it { is_expected.to have_many(:approval_rules) }
+
+    it { is_expected.to have_many(:incident_management_oncall_schedules).class_name('IncidentManagement::OncallSchedule') }
 
     describe 'approval_rules association' do
       let_it_be(:rule, reload: true) { create(:approval_project_rule) }
@@ -248,9 +249,11 @@ RSpec.describe Project do
     describe '.has_vulnerabilities' do
       let_it_be(:project_1) { create(:project) }
       let_it_be(:project_2) { create(:project) }
+      let_it_be(:project_3) { create(:project) }
 
       before do
-        create(:vulnerability, project: project_1)
+        project_1.project_setting.update!(has_vulnerabilities: true)
+        project_2.project_setting.update!(has_vulnerabilities: false)
       end
 
       subject { described_class.has_vulnerabilities }
@@ -966,12 +969,21 @@ RSpec.describe Project do
           shared_runners_enabled: true)
       end
 
-      before do
-        expect(namespace).to receive(:shared_runners_minutes_used?).and_call_original
+      it 'shared runners are not available' do
+        expect(project.shared_runners_available?).to be_falsey
+      end
+    end
+
+    context 'without used pipeline minutes' do
+      let(:namespace) { create(:namespace, :with_not_used_build_minutes_limit) }
+      let(:project) do
+        create(:project,
+          namespace: namespace,
+          shared_runners_enabled: true)
       end
 
       it 'shared runners are not available' do
-        expect(project.shared_runners_available?).to be_falsey
+        expect(project.shared_runners_available?).to be_truthy
       end
     end
   end
@@ -1300,7 +1312,6 @@ RSpec.describe Project do
     subject { project.disabled_services }
 
     where(:license_feature, :disabled_services) do
-      :jenkins_integration                | %w(jenkins)
       :github_project_service_integration | %w(github)
     end
 
@@ -2533,7 +2544,7 @@ RSpec.describe Project do
     end
   end
 
-  describe 'caculate template repositories' do
+  describe 'calculate template repositories' do
     let(:group1) { create(:group) }
     let(:group2) { create(:group) }
     let(:group2_sub1) { create(:group, parent: group2) }
@@ -2614,6 +2625,17 @@ RSpec.describe Project do
       expect(Gitlab::Database::LoadBalancing::Sticking).to receive(:mark_primary_write_location).with(:project, project.id)
 
       project.mark_primary_write_location
+    end
+  end
+
+  describe '#add_template_export_job' do
+    it 'starts project template export job' do
+      user = create(:user)
+      project = build(:project)
+
+      expect(ProjectTemplateExportWorker).to receive(:perform_async).with(user.id, project.id, nil, {})
+
+      project.add_template_export_job(current_user: user)
     end
   end
 end

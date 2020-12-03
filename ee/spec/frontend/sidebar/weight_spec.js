@@ -1,8 +1,8 @@
 import { shallowMount } from '@vue/test-utils';
-import { mockTracking, unmockTracking, triggerEvent } from 'helpers/tracking_helper';
 import Weight from 'ee/sidebar/components/weight/weight.vue';
-import eventHub from '~/sidebar/event_hub';
+import { mockTracking, unmockTracking, triggerEvent } from 'helpers/tracking_helper';
 import { ENTER_KEY_CODE } from '~/lib/utils/keycodes';
+import eventHub from '~/sidebar/event_hub';
 
 describe('Weight', () => {
   let wrapper;

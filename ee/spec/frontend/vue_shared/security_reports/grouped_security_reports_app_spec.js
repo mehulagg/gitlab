@@ -1,15 +1,15 @@
-import Vue from 'vue';
+import { mount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
+import Vue from 'vue';
 import GroupedSecurityReportsApp from 'ee/vue_shared/security_reports/grouped_security_reports_app.vue';
 import appStore from 'ee/vue_shared/security_reports/store';
-import * as types from 'ee/vue_shared/security_reports/store/mutation_types';
+import { trackMrSecurityReportDetails } from 'ee/vue_shared/security_reports/store/constants';
 import * as sastTypes from 'ee/vue_shared/security_reports/store/modules/sast/mutation_types';
 import * as secretDetectionTypes from 'ee/vue_shared/security_reports/store/modules/secret_detection/mutation_types';
-import { mount } from '@vue/test-utils';
-import { waitForMutation } from 'helpers/vue_test_utils_helper';
+import * as types from 'ee/vue_shared/security_reports/store/mutation_types';
 import { trimText } from 'helpers/text_helper';
 import { mockTracking, unmockTracking } from 'helpers/tracking_helper';
-import { trackMrSecurityReportDetails } from 'ee/vue_shared/security_reports/store/constants';
+import { waitForMutation } from 'helpers/vue_test_utils_helper';
 import axios from '~/lib/utils/axios_utils';
 import { mrStates } from '~/mr_popover/constants';
 import GroupedIssuesList from '~/reports/components/grouped_issues_list.vue';
@@ -49,11 +49,16 @@ describe('Grouped security reports app', () => {
     secretScanningHelpPath: 'path',
     canReadVulnerabilityFeedbackPath: true,
     vulnerabilityFeedbackPath: 'vulnerability_feedback_path.json',
-    vulnerabilityFeedbackHelpPath: 'path',
     coverageFuzzingHelpPath: 'path',
     pipelineId: 123,
     projectId: 321,
     projectFullPath: 'path',
+    containerScanningComparisonPath: CONTAINER_SCANNING_DIFF_ENDPOINT,
+    coverageFuzzingComparisonPath: COVERAGE_FUZZING_DIFF_ENDPOINT,
+    dastComparisonPath: DAST_DIFF_ENDPOINT,
+    dependencyScanningComparisonPath: DEPENDENCY_SCANNING_DIFF_ENDPOINT,
+    sastComparisonPath: SAST_DIFF_ENDPOINT,
+    secretScanningComparisonPath: SECRET_DETECTION_DIFF_ENDPOINT,
   };
 
   const defaultDastSummary = {
@@ -111,16 +116,6 @@ describe('Grouped security reports app', () => {
         coverageFuzzing: true,
       },
     };
-
-    beforeEach(() => {
-      gl.mrWidgetData = gl.mrWidgetData || {};
-      gl.mrWidgetData.container_scanning_comparison_path = CONTAINER_SCANNING_DIFF_ENDPOINT;
-      gl.mrWidgetData.dependency_scanning_comparison_path = DEPENDENCY_SCANNING_DIFF_ENDPOINT;
-      gl.mrWidgetData.dast_comparison_path = DAST_DIFF_ENDPOINT;
-      gl.mrWidgetData.sast_comparison_path = SAST_DIFF_ENDPOINT;
-      gl.mrWidgetData.secret_scanning_comparison_path = SECRET_DETECTION_DIFF_ENDPOINT;
-      gl.mrWidgetData.coverage_fuzzing_comparison_path = COVERAGE_FUZZING_DIFF_ENDPOINT;
-    });
 
     describe('with error', () => {
       beforeEach(() => {
@@ -394,41 +389,32 @@ describe('Grouped security reports app', () => {
   });
 
   describe('coverage fuzzing reports', () => {
-    describe.each([true, false])(
-      'given coverage fuzzing comparison endpoint is /fuzzing and featureEnabled is %s',
-      shouldShowFuzzing => {
-        beforeEach(() => {
-          gl.mrWidgetData = gl.mrWidgetData || {};
-          gl.mrWidgetData.coverage_fuzzing_comparison_path = '/fuzzing';
-
-          createWrapper(
-            {
-              ...props,
-              enabledReports: {
-                coverageFuzzing: true,
-              },
+    describe.each([true, false])('given featureEnabled is %s', shouldShowFuzzing => {
+      beforeEach(() => {
+        createWrapper(
+          {
+            ...props,
+            enabledReports: {
+              coverageFuzzing: true,
             },
-            {},
-            {
-              glFeatures: { coverageFuzzingMrWidget: shouldShowFuzzing },
-            },
-          );
-        });
+          },
+          {},
+          {
+            glFeatures: { coverageFuzzingMrWidget: shouldShowFuzzing },
+          },
+        );
+      });
 
-        it(`${shouldShowFuzzing ? 'renders' : 'does not render'}`, () => {
-          expect(wrapper.find('[data-qa-selector="coverage_fuzzing_report"]').exists()).toBe(
-            shouldShowFuzzing,
-          );
-        });
-      },
-    );
+      it(`${shouldShowFuzzing ? 'renders' : 'does not render'}`, () => {
+        expect(wrapper.find('[data-qa-selector="coverage_fuzzing_report"]').exists()).toBe(
+          shouldShowFuzzing,
+        );
+      });
+    });
   });
 
   describe('container scanning reports', () => {
     beforeEach(() => {
-      gl.mrWidgetData = gl.mrWidgetData || {};
-      gl.mrWidgetData.container_scanning_comparison_path = CONTAINER_SCANNING_DIFF_ENDPOINT;
-
       mock.onGet(CONTAINER_SCANNING_DIFF_ENDPOINT).reply(200, containerScanningDiffSuccessMock);
 
       createWrapper({
@@ -456,9 +442,6 @@ describe('Grouped security reports app', () => {
 
   describe('dependency scanning reports', () => {
     beforeEach(() => {
-      gl.mrWidgetData = gl.mrWidgetData || {};
-      gl.mrWidgetData.dependency_scanning_comparison_path = DEPENDENCY_SCANNING_DIFF_ENDPOINT;
-
       mock.onGet(DEPENDENCY_SCANNING_DIFF_ENDPOINT).reply(200, dependencyScanningDiffSuccessMock);
 
       createWrapper({
@@ -486,9 +469,6 @@ describe('Grouped security reports app', () => {
 
   describe('dast reports', () => {
     beforeEach(() => {
-      gl.mrWidgetData = gl.mrWidgetData || {};
-      gl.mrWidgetData.dast_comparison_path = DAST_DIFF_ENDPOINT;
-
       mock.onGet(DAST_DIFF_ENDPOINT).reply(200, {
         ...dastDiffSuccessMock,
         base_report_out_of_date: true,
@@ -562,9 +542,6 @@ describe('Grouped security reports app', () => {
 
   describe('secret scanning reports', () => {
     const initSecretScan = (isEnabled = true) => {
-      gl.mrWidgetData = gl.mrWidgetData || {};
-      gl.mrWidgetData.secret_scanning_comparison_path = SECRET_DETECTION_DIFF_ENDPOINT;
-
       mock.onGet(SECRET_DETECTION_DIFF_ENDPOINT).reply(200, secretScanningDiffSuccessMock);
 
       createWrapper({
@@ -615,9 +592,6 @@ describe('Grouped security reports app', () => {
 
   describe('sast reports', () => {
     beforeEach(() => {
-      gl.mrWidgetData = gl.mrWidgetData || {};
-      gl.mrWidgetData.sast_comparison_path = SAST_DIFF_ENDPOINT;
-
       mock.onGet(SAST_DIFF_ENDPOINT).reply(200, { ...sastDiffSuccessMock });
 
       createWrapper({
@@ -643,9 +617,6 @@ describe('Grouped security reports app', () => {
 
   describe('Out of date report', () => {
     const createComponent = (extraProp, done) => {
-      gl.mrWidgetData = gl.mrWidgetData || {};
-      gl.mrWidgetData.sast_comparison_path = SAST_DIFF_ENDPOINT;
-
       mock
         .onGet(SAST_DIFF_ENDPOINT)
         .reply(200, { ...sastDiffSuccessMock, base_report_out_of_date: true });

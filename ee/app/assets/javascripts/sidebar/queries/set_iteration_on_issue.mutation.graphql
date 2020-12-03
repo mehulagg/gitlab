@@ -2,6 +2,7 @@ mutation updateIssueConfidential($projectPath: ID!, $iid: String!, $iterationId:
   issueSetIteration(input: { projectPath: $projectPath, iid: $iid, iterationId: $iterationId }) {
     errors
     issue {
+      id
       iteration {
         title
         id

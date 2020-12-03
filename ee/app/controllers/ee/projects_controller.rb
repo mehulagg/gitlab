@@ -88,9 +88,8 @@ module EE
         group_with_project_templates_id
       ]
 
-      if allow_merge_pipelines_params?
-        attrs << %i[merge_pipelines_enabled]
-      end
+      attrs << %i[merge_pipelines_enabled] if allow_merge_pipelines_params?
+      attrs << %i[merge_trains_enabled] if allow_merge_trains_params?
 
       attrs += merge_request_rules_params
 
@@ -142,6 +141,10 @@ module EE
 
     def allow_merge_pipelines_params?
       project&.feature_available?(:merge_pipelines)
+    end
+
+    def allow_merge_trains_params?
+      project&.feature_available?(:merge_trains)
     end
 
     def compliance_framework_params

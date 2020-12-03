@@ -41,5 +41,3 @@ export function initEpicForm() {
     },
   });
 }
-
-export default {};

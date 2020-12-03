@@ -54,7 +54,7 @@ export default {
   apollo: {
     burnupData: {
       skip() {
-        return !this.glFeatures.burnupCharts || (!this.milestoneId && !this.iterationId);
+        return !this.milestoneId && !this.iterationId;
       },
       query: BurnupQuery,
       variables() {
@@ -79,7 +79,7 @@ export default {
       openIssuesWeight: [],
       issuesSelected: true,
       burnupData: [],
-      useLegacyBurndown: !this.glFeatures.burnupCharts,
+      useLegacyBurndown: false,
       showInfo: this.showNewOldBurndownToggle,
       error: '',
     };
@@ -89,7 +89,7 @@ export default {
       return this.iterationId ? 'iteration' : 'milestone';
     },
     title() {
-      return this.glFeatures.burnupCharts ? __('Charts') : __('Burndown chart');
+      return __('Charts');
     },
     issueButtonCategory() {
       return this.issuesSelected ? 'primary' : 'secondary';
@@ -109,11 +109,6 @@ export default {
       }
       return this.pluckBurnupDataProperties('scopeWeight', 'completedWeight');
     },
-  },
-  mounted() {
-    if (!this.glFeatures.burnupCharts) {
-      this.fetchLegacyBurndownEvents();
-    }
   },
   methods: {
     fetchLegacyBurndownEvents() {
@@ -230,12 +225,7 @@ export default {
 
 <template>
   <div>
-    <gl-alert
-      v-if="glFeatures.burnupCharts && showInfo"
-      variant="info"
-      class="col-12 gl-mt-3"
-      @dismiss="showInfo = false"
-    >
+    <gl-alert v-if="showInfo" variant="info" class="col-12 gl-mt-3" @dismiss="showInfo = false">
       <gl-sprintf
         :message="
           __(
@@ -272,7 +262,7 @@ export default {
         </gl-button>
       </gl-button-group>
 
-      <gl-button-group v-if="glFeatures.burnupCharts && showNewOldBurndownToggle">
+      <gl-button-group v-if="showNewOldBurndownToggle">
         <gl-button
           ref="oldBurndown"
           :category="useLegacyBurndown ? 'primary' : 'secondary'"
@@ -293,7 +283,7 @@ export default {
         </gl-button>
       </gl-button-group>
     </div>
-    <div v-if="glFeatures.burnupCharts" class="row">
+    <div class="row">
       <gl-alert v-if="error" variant="danger" class="col-12" @dismiss="error = ''">
         {{ error }}
       </gl-alert>
@@ -313,14 +303,5 @@ export default {
         class="col-md-6"
       />
     </div>
-    <burndown-chart
-      v-else
-      :show-title="false"
-      :start-date="startDate"
-      :due-date="dueDate"
-      :open-issues-count="openIssuesCount"
-      :open-issues-weight="openIssuesWeight"
-      :issues-selected="issuesSelected"
-    />
   </div>
 </template>

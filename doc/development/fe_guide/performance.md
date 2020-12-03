@@ -1,7 +1,7 @@
 ---
 stage: none
 group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Performance
@@ -107,7 +107,7 @@ browser's developer console while on any page within GitLab.
 - **JavaScript that relies on CSS for calculations should use [`waitForCSSLoaded()`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/assets/javascripts/helpers/startup_css_helper.js#L34):**
   GitLab uses [Startup.css](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/38052)
   to improve page performance. This can cause issues if JavaScript relies on CSS
-  for calculations. To fix this the JavaScript can be wrapped in the 
+  for calculations. To fix this the JavaScript can be wrapped in the
   [`waitForCSSLoaded()`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/assets/javascripts/helpers/startup_css_helper.js#L34)
   helper function.
 
@@ -115,8 +115,36 @@ browser's developer console while on any page within GitLab.
   import initMyWidget from './my_widget';
   import { waitForCSSLoaded } from '~/helpers/startup_css_helper';
 
+  waitForCSSLoaded(initMyWidget);
+  ```
+
+  Note that `waitForCSSLoaded()` methods supports receiving the action in different ways:
+    
+  - With a callback:
+  
+    ```javascript
+      waitForCSSLoaded(action)
+    ```
+    
+  - With `then()`:
+  
+    ```javascript
+      waitForCSSLoaded().then(action);
+    ```
+    
+  - With `await` followed by `action`:
+  
+    ```javascript
+      await waitForCSSLoaded;
+      action();
+    ```
+
+  For example, see how we use this in [app/assets/javascripts/pages/projects/graphs/charts/index.js](https://gitlab.com/gitlab-org/gitlab/-/commit/5e90885d6afd4497002df55bf015b338efcfc3c5#02e81de37f5b1716a3ef3222fa7f7edf22c40969_9_8):
+
+  ```javascript
   waitForCSSLoaded(() => {
-    initMyWidget();
+    const languagesContainer = document.getElementById('js-languages-chart');
+    //...
   });
   ```
 

@@ -1,6 +1,6 @@
-import mutations from 'ee/analytics/cycle_analytics/store/modules/type_of_work/mutations';
-import * as types from 'ee/analytics/cycle_analytics/store/modules/type_of_work/mutation_types';
 import { TASKS_BY_TYPE_FILTERS } from 'ee/analytics/cycle_analytics/constants';
+import * as types from 'ee/analytics/cycle_analytics/store/modules/type_of_work/mutation_types';
+import mutations from 'ee/analytics/cycle_analytics/store/modules/type_of_work/mutations';
 
 import { apiTasksByTypeData, rawTasksByTypeData } from '../../../mock_data';
 

@@ -1,13 +1,12 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlButton } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import Approvals from 'ee/vue_merge_request_widget/components/approvals/approvals.vue';
-import ApprovalsFooter from 'ee/vue_merge_request_widget/components/approvals/approvals_footer.vue';
 import ApprovalsAuth from 'ee/vue_merge_request_widget/components/approvals/approvals_auth.vue';
-import MrWidgetContainer from '~/vue_merge_request_widget/components/mr_widget_container.vue';
+import ApprovalsFooter from 'ee/vue_merge_request_widget/components/approvals/approvals_footer.vue';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import ApprovalsFoss from '~/vue_merge_request_widget/components/approvals/approvals.vue';
 import ApprovalsSummary from '~/vue_merge_request_widget/components/approvals/approvals_summary.vue';
 import ApprovalsSummaryOptional from '~/vue_merge_request_widget/components/approvals/approvals_summary_optional.vue';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
 
 import {
   FETCH_LOADING,
@@ -15,6 +14,7 @@ import {
   APPROVE_ERROR,
   UNAPPROVE_ERROR,
 } from '~/vue_merge_request_widget/components/approvals/messages';
+import MrWidgetContainer from '~/vue_merge_request_widget/components/mr_widget_container.vue';
 import eventHub from '~/vue_merge_request_widget/event_hub';
 
 const TEST_HELP_PATH = 'help/path';

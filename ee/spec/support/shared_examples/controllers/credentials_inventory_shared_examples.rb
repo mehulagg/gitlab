@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.shared_examples_for 'credentials inventory controller delete SSH key' do |group_managed_account: false|
-  let_it_be(:user) { group_managed_account ? managed_users.last : create(:user, name: 'David') }
+  let_it_be(:user) { group_managed_account ? managed_users.last : create(:user, name: 'abc') }
   let_it_be(:ssh_key) { create(:personal_key, user: user) }
 
   let(:ssh_key_id) { ssh_key.id }

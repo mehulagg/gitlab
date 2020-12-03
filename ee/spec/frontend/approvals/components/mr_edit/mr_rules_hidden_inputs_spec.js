@@ -1,8 +1,8 @@
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
+import MRRulesHiddenInputs from 'ee/approvals/components/mr_edit/mr_rules_hidden_inputs.vue';
 import { createStoreOptions } from 'ee/approvals/stores';
 import MREditModule from 'ee/approvals/stores/modules/mr_edit';
-import MRRulesHiddenInputs from 'ee/approvals/components/mr_edit/mr_rules_hidden_inputs.vue';
 import { createMRRule } from '../../mocks';
 
 const localVue = createLocalVue();

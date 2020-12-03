@@ -1,8 +1,8 @@
 import { shallowMount } from '@vue/test-utils';
 import Project from 'ee/storage_counter/components/project.vue';
 import StorageRow from 'ee/storage_counter/components/storage_row.vue';
-import ProjectAvatar from '~/vue_shared/components/project_avatar/default.vue';
 import { numberToHumanSize } from '~/lib/utils/number_utils';
+import ProjectAvatar from '~/vue_shared/components/project_avatar/default.vue';
 import { projects } from '../mock_data';
 
 let wrapper;

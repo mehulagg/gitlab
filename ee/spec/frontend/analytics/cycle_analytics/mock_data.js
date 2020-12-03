@@ -1,18 +1,18 @@
 import { uniq } from 'lodash';
-import { TEST_HOST } from 'helpers/test_constants';
-import { getJSONFixture } from 'helpers/fixtures';
-import mutations from 'ee/analytics/cycle_analytics/store/mutations';
-import * as types from 'ee/analytics/cycle_analytics/store/mutation_types';
 import {
   DEFAULT_DAYS_IN_PAST,
   TASKS_BY_TYPE_SUBJECT_ISSUE,
 } from 'ee/analytics/cycle_analytics/constants';
-import { toYmd } from 'ee/analytics/shared/utils';
+import * as types from 'ee/analytics/cycle_analytics/store/mutation_types';
+import mutations from 'ee/analytics/cycle_analytics/store/mutations';
 import {
   getTasksByTypeData,
   transformRawTasksByTypeData,
   transformStagesForPathNavigation,
 } from 'ee/analytics/cycle_analytics/utils';
+import { toYmd } from 'ee/analytics/shared/utils';
+import { getJSONFixture } from 'helpers/fixtures';
+import { TEST_HOST } from 'helpers/test_constants';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import { getDateInPast, getDatesInRange } from '~/lib/utils/datetime_utility';
 

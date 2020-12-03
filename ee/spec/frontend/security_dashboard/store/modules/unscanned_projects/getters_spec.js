@@ -1,5 +1,5 @@
-import * as getters from 'ee/security_dashboard/store/modules/unscanned_projects/getters';
 import { UNSCANNED_PROJECTS_DATE_RANGES } from 'ee/security_dashboard/store/constants';
+import * as getters from 'ee/security_dashboard/store/modules/unscanned_projects/getters';
 import { groupByDateRanges } from 'ee/security_dashboard/store/modules/unscanned_projects/utils';
 
 describe('Unscanned projects getters', () => {

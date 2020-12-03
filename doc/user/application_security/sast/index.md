@@ -1,7 +1,7 @@
 ---
 stage: Secure
 group: Static Analysis
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference, howto
 ---
 
@@ -59,7 +59,7 @@ is **not** `19.03.0`. See [troubleshooting information](#error-response-from-dae
 
 ## Supported languages and frameworks
 
-GitLab SAST supports a variety of languages, package managers, and frameworks. Our SAST security scanners also feature automatic language detection which works even for mixed-language projects. If any supported language is detected in project source code we will automatically run the appropriate SAST analyzers.
+GitLab SAST supports a variety of languages, package managers, and frameworks. Our SAST security scanners also feature automatic language detection which works even for mixed-language projects. If any supported language is detected in project source code we automatically run the appropriate SAST analyzers.
 
 You can also [view our language roadmap](https://about.gitlab.com/direction/secure/static-analysis/sast/#language-support) and [request other language support by opening an issue](https://gitlab.com/groups/gitlab-org/-/epics/297).
 
@@ -111,6 +111,7 @@ as shown in the following table:
 | [Interaction with Vulnerabilities](#interacting-with-the-vulnerabilities) | **{dotted-circle}** | **{check-circle}** |
 | [Access to Security Dashboard](#security-dashboard)                       | **{dotted-circle}** | **{check-circle}** |
 | [Configure SAST in the UI](#configure-sast-in-the-ui)                     | **{dotted-circle}** | **{check-circle}** |
+| [Customize SAST Rulesets](#customize-rulesets)                            | **{dotted-circle}** | **{check-circle}** |
 
 ## Contribute your scanner
 
@@ -205,21 +206,46 @@ spotbugs-sast:
     FAIL_NEVER: 1
 ```
 
-### Custom rulesets **(ULTIMATE)**
+### Customize rulesets **(ULTIMATE)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/235382) in GitLab 13.5.
 
-You can customize the default scanning rules provided with SAST's NodeJS-Scan and Gosec analyzers.
-Customization allows you to exclude rules and modify the behavior of existing rules.
+You can customize the default scanning rules provided by our SAST analyzers.
+
+Ruleset customization supports two capabilities:
+
+1. Disabling predefined rules
+1. Modifying the default behavior of a given analyzer
+
+These capabilities can be used simultaneously.
 
 To customize the default scanning rules, create a file containing custom rules. These rules
-are passed through to the analyzer's underlying scanner tool.
+are passed through to the analyzer's underlying scanner tools.
 
 To create a custom ruleset:
 
 1. Create a `.gitlab` directory at the root of your project, if one doesn't already exist.
 1. Create a custom ruleset file named `sast-ruleset.toml` in the `.gitlab` directory.
 1. In the `sast-ruleset.toml` file, do one of the following:
+
+   - Disable predefined rules belonging to SAST analyzers. In this example, the disabled rules
+     belong to `eslint` and `sobelow` and have the corresponding identifiers `type` and `value`:
+
+     ```toml
+     [eslint]
+       [[eslint.ruleset]]
+         disable = true
+         [eslint.ruleset.identifier]
+           type = "eslint_rule_id"
+           value = "security/detect-object-injection"
+
+     [sobelow]
+       [[sobelow.ruleset]]
+         disable = true
+         [sobelow.ruleset.identifier]
+           type = "sobelow_rule_id"
+           value = "sql_injection"
+     ```
 
    - Define a custom analyzer configuration. In this example, customized rules are defined for the
      `nodejs-scan` scanner:
@@ -310,7 +336,7 @@ a `before_script` execution to prepare your scan job.
 To pass your project's dependencies as artifacts, the dependencies must be included
 in the project's working directory and specified using the `artifacts:path` configuration.
 If all dependencies are present, the `COMPILE=false` variable can be provided to the
-analyzer and compilation will be skipped:
+analyzer and compilation is skipped:
 
 ```yaml
 image: maven:3.6-jdk-8-alpine
@@ -384,7 +410,7 @@ Some analyzers make it possible to filter out vulnerabilities under a given thre
 
 | Environment variable          | Default value            | Description                                                                                                                                                                                                                 |
 |-------------------------------|--------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `SAST_EXCLUDED_PATHS`         | `spec, test, tests, tmp` | Exclude vulnerabilities from output based on the paths. This is a comma-separated list of patterns. Patterns can be globs, or file or folder paths (for example, `doc,spec` ). Parent directories will also match patterns. |
+| `SAST_EXCLUDED_PATHS`         | `spec, test, tests, tmp` | Exclude vulnerabilities from output based on the paths. This is a comma-separated list of patterns. Patterns can be globs, or file or folder paths (for example, `doc,spec` ). Parent directories also match patterns. |
 | `SEARCH_MAX_DEPTH`            | 4                        | Maximum number of directories traversed when searching for source code files. |
 | `SAST_BANDIT_EXCLUDED_PATHS`  |                          | Comma-separated list of paths to exclude from scan. Uses Python's [`fnmatch` syntax](https://docs.python.org/2/library/fnmatch.html); For example: `'*/tests/*, */venv/*'`                                                  |
 | `SAST_BRAKEMAN_LEVEL`         | 1                        | Ignore Brakeman vulnerabilities under given confidence level. Integer, 1=Low 3=High.                                                                                                                                        |
@@ -398,7 +424,7 @@ Some analyzers can be customized with environment variables.
 | Environment variable                  | Analyzer             | Description                                                                                                                                                                                                                                |
 |---------------------------------------|----------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `SCAN_KUBERNETES_MANIFESTS`           | Kubesec              | Set to `"true"` to scan Kubernetes manifests.                                                                                                                                                                                              |
-| `KUBESEC_HELM_CHARTS_PATH`            | Kubesec              | Optional path to Helm charts that `helm` uses to generate a Kubernetes manifest that `kubesec` will scan. If dependencies are defined, `helm dependency build` should be ran in a `before_script` to fetch the necessary dependencies. |
+| `KUBESEC_HELM_CHARTS_PATH`            | Kubesec              | Optional path to Helm charts that `helm` uses to generate a Kubernetes manifest that `kubesec` scans. If dependencies are defined, `helm dependency build` should be ran in a `before_script` to fetch the necessary dependencies. |
 | `KUBESEC_HELM_OPTIONS`                | Kubesec              | Additional arguments for the `helm` executable.                                                                                                                                                                                            |
 | `COMPILE`                             | SpotBugs             | Set to `false` to disable project compilation and dependency fetching. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/195252) in GitLab 13.1.                                                                                  |
 | `ANT_HOME`                            | SpotBugs             | The `ANT_HOME` environment variable.                                                                                                                                                                                                       |
@@ -433,7 +459,7 @@ analyzer containers: `DOCKER_`, `CI`, `GITLAB_`, `FF_`, `HOME`, `PWD`, `OLDPWD`,
 
 Receive early access to experimental features.
 
-Currently, this will enable scanning of iOS and Android apps via the [MobSF analyzer](https://gitlab.com/gitlab-org/security-products/analyzers/mobsf/).
+Currently, this enables scanning of iOS and Android apps via the [MobSF analyzer](https://gitlab.com/gitlab-org/security-products/analyzers/mobsf/).
 
 To enable experimental features, add the following to your `.gitlab-ci.yml` file:
 

@@ -7,11 +7,9 @@ module EE
 
     private
 
-    override :user_created_message
-    def user_created_message(confirmed: false)
-      experiments = "experiment_growth_recaptcha?#{show_recaptcha_sign_up?}"
-
-      super(confirmed: confirmed) + ", experiments:#{experiments}"
+    override :set_blocked_pending_approval?
+    def set_blocked_pending_approval?
+      super || ::Gitlab::CurrentSettings.should_apply_user_signup_cap?
     end
   end
 end

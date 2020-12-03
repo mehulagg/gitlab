@@ -1,19 +1,18 @@
 import Vue from 'vue';
 
 import roadmapShellComponent from 'ee/roadmap/components/roadmap_shell.vue';
-import createStore from 'ee/roadmap/store';
+import { PRESET_TYPES } from 'ee/roadmap/constants';
 import eventHub from 'ee/roadmap/event_hub';
+import createStore from 'ee/roadmap/store';
 import { getTimeframeForMonthsView } from 'ee/roadmap/utils/roadmap_utils';
 
-import { PRESET_TYPES } from 'ee/roadmap/constants';
-
-import { mountComponentWithStore } from 'helpers/vue_mount_component_helper';
 import {
   mockEpic,
   mockTimeframeInitialDate,
   mockGroupId,
   mockMilestone,
 } from 'ee_jest/roadmap/mock_data';
+import { mountComponentWithStore } from 'helpers/vue_mount_component_helper';
 
 const mockTimeframeMonths = getTimeframeForMonthsView(mockTimeframeInitialDate);
 

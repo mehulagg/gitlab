@@ -133,7 +133,7 @@ RSpec.shared_examples 'a blob replicator' do
         expect(::Geo::FileRegistryRemovalService)
           .to receive(:new).with(secondary_side_replicator.replicable_name, model_record_id, blob_path).and_return(service)
 
-        secondary_side_replicator.consume(:deleted, deleted_params)
+        secondary_side_replicator.consume(:deleted, **deleted_params)
       end
     end
   end

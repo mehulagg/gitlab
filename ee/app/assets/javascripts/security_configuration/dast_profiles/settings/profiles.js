@@ -3,6 +3,8 @@ import dastSiteProfilesDelete from 'ee/security_configuration/dast_profiles/grap
 import dastScannerProfilesQuery from 'ee/security_configuration/dast_profiles/graphql/dast_scanner_profiles.query.graphql';
 import dastScannerProfilesDelete from 'ee/security_configuration/dast_profiles/graphql/dast_scanner_profiles_delete.mutation.graphql';
 import { dastProfilesDeleteResponse } from 'ee/security_configuration/dast_profiles/graphql/cache_utils';
+import DastSiteProfileList from 'ee/security_configuration/dast_profiles/components/dast_site_profiles_list.vue';
+import DastScannerProfileList from 'ee/security_configuration/dast_profiles/components/dast_scanner_profiles_list.vue';
 import { s__ } from '~/locale';
 
 export const getProfileSettings = ({ createNewProfilePaths }) => ({
@@ -19,10 +21,11 @@ export const getProfileSettings = ({ createNewProfilePaths }) => ({
         }),
       },
     },
-    tableFields: ['profileName', 'targetUrl'],
+    component: DastSiteProfileList,
+    tableFields: ['profileName', 'targetUrl', 'validationStatus'],
     i18n: {
       createNewLinkText: s__('DastProfiles|Site Profile'),
-      tabName: s__('DastProfiles|Site Profiles'),
+      name: s__('DastProfiles|Site Profiles'),
       errorMessages: {
         fetchNetworkError: s__(
           'DastProfiles|Could not fetch site profiles. Please refresh the page, or try again later.',
@@ -47,10 +50,11 @@ export const getProfileSettings = ({ createNewProfilePaths }) => ({
         }),
       },
     },
+    component: DastScannerProfileList,
     tableFields: ['profileName'],
     i18n: {
       createNewLinkText: s__('DastProfiles|Scanner Profile'),
-      tabName: s__('DastProfiles|Scanner Profiles'),
+      name: s__('DastProfiles|Scanner Profiles'),
       errorMessages: {
         fetchNetworkError: s__(
           'DastProfiles|Could not fetch scanner profiles. Please refresh the page, or try again later.',

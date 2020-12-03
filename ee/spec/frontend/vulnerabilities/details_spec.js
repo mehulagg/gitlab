@@ -1,9 +1,9 @@
-import { mount } from '@vue/test-utils';
-import { getAllByRole, getByTestId } from '@testing-library/dom';
 import { GlLink } from '@gitlab/ui';
-import { SUPPORTING_MESSAGE_TYPES } from 'ee/vulnerabilities/constants';
+import { getAllByRole, getByTestId } from '@testing-library/dom';
+import { mount } from '@vue/test-utils';
 import SeverityBadge from 'ee/vue_shared/security_reports/components/severity_badge.vue';
 import VulnerabilityDetails from 'ee/vulnerabilities/components/details.vue';
+import { SUPPORTING_MESSAGE_TYPES } from 'ee/vulnerabilities/constants';
 
 describe('Vulnerability Details', () => {
   let wrapper;
@@ -12,7 +12,7 @@ describe('Vulnerability Details', () => {
     title: 'some title',
     severity: 'bad severity',
     confidence: 'high confidence',
-    report_type: 'nice report_type',
+    reportType: 'nice report_type',
     description: 'vulnerability description',
   };
 
@@ -37,7 +37,7 @@ describe('Vulnerability Details', () => {
     expect(getText('title')).toBe(vulnerability.title);
     expect(getText('description')).toBe(vulnerability.description);
     expect(wrapper.find(SeverityBadge).props('severity')).toBe(vulnerability.severity);
-    expect(getText('reportType')).toBe(`Scan Type: ${vulnerability.report_type}`);
+    expect(getText('reportType')).toBe(`Scan Type: ${vulnerability.reportType}`);
 
     expect(getById('image').exists()).toBe(false);
     expect(getById('os').exists()).toBe(false);
@@ -56,7 +56,7 @@ describe('Vulnerability Details', () => {
   });
 
   it('shows the operating system if it exists', () => {
-    createWrapper({ location: { operating_system: 'linux' } });
+    createWrapper({ location: { operatingSystem: 'linux' } });
     expect(getText('namespace')).toBe(`Namespace: linux`);
   });
 
@@ -88,37 +88,54 @@ describe('Vulnerability Details', () => {
   });
 
   it('shows the vulnerability identifiers if they exist', () => {
+    const identifiersData = [
+      { name: '00', url: 'http://example.com/00' },
+      { name: '11', url: 'http://example.com/11' },
+      { name: '22', url: 'http://example.com/22' },
+      { name: '33' },
+      { name: '44' },
+      { name: '55' },
+    ];
+
     createWrapper({
-      identifiers: [{ url: '0', name: '00' }, { url: '1', name: '11' }, { url: '2', name: '22' }],
+      identifiers: identifiersData,
     });
 
     const identifiers = getAllById('identifier');
-    expect(identifiers).toHaveLength(3);
 
-    const checkIdentifier = index => {
+    expect(identifiers).toHaveLength(identifiersData.length);
+
+    const checkIdentifier = ({ name, url }, index) => {
       const identifier = identifiers.at(index);
-      expect(identifier.attributes('target')).toBe('_blank');
-      expect(identifier.attributes('href')).toBe(index.toString());
-      expect(identifier.text()).toBe(`${index}${index}`);
+
+      expect(identifier.text()).toBe(name);
+
+      if (url) {
+        expect(identifier.is(GlLink)).toBe(true);
+        expect(identifier.attributes()).toMatchObject({
+          target: '_blank',
+          href: url,
+        });
+      } else {
+        expect(identifier.is(GlLink)).toBe(false);
+      }
     };
 
-    for (let i = 0; i < identifiers.length; i += 1) {
-      checkIdentifier(i);
-    }
+    identifiersData.forEach(checkIdentifier);
   });
 
   describe('file link', () => {
     const file = () => getById('file').find(GlLink);
 
     it('shows only the file name if there is no start line', () => {
-      createWrapper({ location: { file: 'test.txt', blob_path: 'blob_path.txt' } });
+      createWrapper({ location: { file: 'test.txt', blobPath: 'blob_path.txt' } });
       expect(file().attributes('target')).toBe('_blank');
       expect(file().attributes('href')).toBe('blob_path.txt');
       expect(file().text()).toBe('test.txt');
     });
 
     it('shows the correct line number when there is a start line', () => {
-      createWrapper({ location: { file: 'test.txt', start_line: 24, blob_path: 'blob.txt' } });
+      createWrapper({ location: { file: 'test.txt', startLine: 24, blobPath: 'blob.txt' } });
       expect(file().attributes('target')).toBe('_blank');
       expect(file().attributes('href')).toBe('blob.txt#L24');
       expect(file().text()).toBe('test.txt:24');
@@ -126,7 +143,7 @@ describe('Vulnerability Details', () => {
 
     it('shows the correct line numbers when there is a start and end line', () => {
       createWrapper({
-        location: { file: 'test.txt', start_line: 24, end_line: 27, blob_path: 'blob.txt' },
+        location: { file: 'test.txt', startLine: 24, endLine: 27, blobPath: 'blob.txt' },
       });
       expect(file().attributes('target')).toBe('_blank');
       expect(file().attributes('href')).toBe('blob.txt#L24-27');
@@ -135,7 +152,7 @@ describe('Vulnerability Details', () => {
 
     it('shows only the start line when the end line is the same', () => {
       createWrapper({
-        location: { file: 'test.txt', start_line: 24, end_line: 24, blob_path: 'blob.txt' },
+        location: { file: 'test.txt', startLine: 24, endLine: 24, blobPath: 'blob.txt' },
       });
       expect(file().attributes('target')).toBe('_blank');
       expect(file().attributes('href')).toBe('blob.txt#L24');
@@ -237,7 +254,7 @@ describe('Vulnerability Details', () => {
     });
 
     it.each`
-      supporting_messages                                                                                                                                          | expectedData
+      supportingMessages                                                                                                                                           | expectedData
       ${null}                                                                                                                                                      | ${null}
       ${[]}                                                                                                                                                        | ${null}
       ${[{}]}                                                                                                                                                      | ${null}
@@ -247,8 +264,8 @@ describe('Vulnerability Details', () => {
       ${[{}, { response: { headers: TEST_HEADERS, body: '[{"user_id":1,}]', status_code: '200' } }]}                                                               | ${null}
       ${[{}, { response: { headers: TEST_HEADERS, body: '[{"user_id":1,}]', status_code: '200', reason_phrase: 'OK' } }]}                                          | ${null}
       ${[{}, { name: SUPPORTING_MESSAGE_TYPES.RECORDED, response: { headers: TEST_HEADERS, body: '[{"user_id":1,}]', status_code: '200', reason_phrase: 'OK' } }]} | ${[EXPECT_RECORDED_RESPONSE]}
-    `('shows response data for $supporting_messages', ({ supporting_messages, expectedData }) => {
-      createWrapper({ supporting_messages });
+    `('shows response data for $supporting_messages', ({ supportingMessages, expectedData }) => {
+      createWrapper({ supportingMessages });
       expect(getSectionData('recorded-response')).toEqual(expectedData);
     });
   });

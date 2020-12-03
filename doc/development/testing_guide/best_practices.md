@@ -50,6 +50,22 @@ bundle exec guard
 
 When using spring and guard together, use `SPRING=1 bundle exec guard` instead to make use of spring.
 
+### Ruby warnings
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/47767) in GitLab 13.7.
+
+We've enabled [deprecation warnings](https://ruby-doc.org/core-2.7.2/Warning.html)
+by default when running specs. Making these warnings more visible to developers
+helps upgrading to newer Ruby versions.
+
+You can silence deprecation warnings by setting the environment variable
+`SILENCE_DEPRECATIONS`, for example:
+
+```shell
+# silence all deprecation warnings
+SILENCE_DEPRECATIONS=1 bin/rspec spec/models/project_spec.rb
+```
+
 ### Test speed
 
 GitLab has a massive test suite that, without [parallelization](ci.md#test-suite-parallelization-on-the-ci), can take hours
@@ -602,6 +618,32 @@ it "really connects to Prometheus", :permit_dns do
 
 And if you need more specific control, the DNS blocking is implemented in
 `spec/support/helpers/dns_helpers.rb` and these methods can be called elsewhere.
+
+#### Stubbing File methods
+
+In the situations where you need to
+[stub](https://relishapp.com/rspec/rspec-mocks/v/3-9/docs/basics/allowing-messages)
+methods such as `File.read`, make sure to:
+
+1. Stub `File.read` for only the filepath you are interested in.
+1. Call the original implementation for other filepaths.
+
+Otherwise `File.read` calls from other parts of the codebase get
+stubbed incorrectly. You should use the `stub_file_read`, and
+`expect_file_read` helper methods which does the stubbing for
+`File.read` correctly.
+
+```ruby
+# bad, all Files will read and return nothing
+allow(File).to receive(:read)
+
+# good
+stub_file_read(my_filepath)
+
+# also OK
+allow(File).to receive(:read).and_call_original
+allow(File).to receive(:read).with(my_filepath)
+```
 
 #### Filesystem
 

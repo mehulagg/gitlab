@@ -146,7 +146,7 @@ module EE
 
       context = @project.presence || @group.presence
 
-      context && ::Feature.enabled?(:filter_bar_iterations, context) && context.feature_available?(:iterations)
+      context&.feature_available?(:iterations)
     end
 
     def gitlab_com_snippet_db_search?

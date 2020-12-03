@@ -1,6 +1,6 @@
 import { shallowMount } from '@vue/test-utils';
-import ApprovedIcon from 'ee/vue_merge_request_widget/components/approvals/approved_icon.vue';
 import ApprovalsList from 'ee/vue_merge_request_widget/components/approvals/approvals_list.vue';
+import ApprovedIcon from 'ee/vue_merge_request_widget/components/approvals/approved_icon.vue';
 import UserAvatarList from '~/vue_shared/components/user_avatar/user_avatar_list.vue';
 
 const testApprovers = () => Array.from({ length: 11 }, (_, i) => i).map(id => ({ id }));

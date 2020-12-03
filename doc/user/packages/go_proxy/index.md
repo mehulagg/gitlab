@@ -1,7 +1,7 @@
 ---
 stage: Package
 group: Package
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Go proxy for GitLab
@@ -94,11 +94,12 @@ following steps work only if GitLab is configured for HTTPS:
 ### Enable request authentication
 
 Create a [personal access token](../../profile/personal_access_tokens.md) with
-the scope set to `api` or `read_api`. 
+the scope set to `api` or `read_api`.
 
-Add it to [`~/.netrc`](https://ec.haxx.se/usingcurl/usingcurl-netrc):
+Open your [`~/.netrc`](https://ec.haxx.se/usingcurl/usingcurl-netrc) file
+and add the following text. Replace the variables in `< >` with your values.
 
-```shell
+```plaintext
 machine <url> login <username> password <token>
 ```
 
@@ -112,7 +113,7 @@ When downloading dependencies with Go 1.13 and later, fetched sources are
 validated against the checksum database `sum.golang.org`.
 
 If the checksum of the fetched sources doesn't match the checksum from the
-database, Go doesn't build the dependency. 
+database, Go doesn't build the dependency.
 
 Private modules fail to build because `sum.golang.org` can't fetch the source
 of private modules, and so it cannot provide a checksum.

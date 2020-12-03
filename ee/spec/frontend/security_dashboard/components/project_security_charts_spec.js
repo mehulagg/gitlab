@@ -1,12 +1,12 @@
-import { shallowMount, createLocalVue } from '@vue/test-utils';
-import { GlLineChart } from '@gitlab/ui/dist/charts';
 import { GlLoadingIcon } from '@gitlab/ui';
+import { GlLineChart } from '@gitlab/ui/dist/charts';
+import { shallowMount, createLocalVue } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
-import createMockApollo from 'jest/helpers/mock_apollo_helper';
 import DashboardNotConfigured from 'ee/security_dashboard/components/empty_states/reports_not_configured.vue';
-import SecurityChartsLayout from 'ee/security_dashboard/components/security_charts_layout.vue';
 import ProjectSecurityCharts from 'ee/security_dashboard/components/project_security_charts.vue';
+import SecurityChartsLayout from 'ee/security_dashboard/components/security_charts_layout.vue';
 import projectsHistoryQuery from 'ee/security_dashboard/graphql/project_vulnerabilities_by_day_and_count.graphql';
+import createMockApollo from 'jest/helpers/mock_apollo_helper';
 import {
   mockProjectSecurityChartsWithData,
   mockProjectSecurityChartsWithoutData,

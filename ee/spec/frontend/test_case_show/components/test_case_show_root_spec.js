@@ -1,17 +1,16 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlLink, GlLoadingIcon, GlSprintf } from '@gitlab/ui';
-
-import { mockCurrentUserTodo } from 'jest/issuable_list/mock_data';
+import { shallowMount } from '@vue/test-utils';
 
 import TestCaseShowRoot from 'ee/test_case_show/components/test_case_show_root.vue';
 import TestCaseSidebar from 'ee/test_case_show/components/test_case_sidebar.vue';
+import { mockCurrentUserTodo } from 'jest/issuable_list/mock_data';
 
-import IssuableShow from '~/issuable_show/components/issuable_show_root.vue';
-import IssuableHeader from '~/issuable_show/components/issuable_header.vue';
 import IssuableBody from '~/issuable_show/components/issuable_body.vue';
 import IssuableEditForm from '~/issuable_show/components/issuable_edit_form.vue';
-import IssuableSidebar from '~/issuable_sidebar/components/issuable_sidebar_root.vue';
+import IssuableHeader from '~/issuable_show/components/issuable_header.vue';
+import IssuableShow from '~/issuable_show/components/issuable_show_root.vue';
 import IssuableEventHub from '~/issuable_show/event_hub';
+import IssuableSidebar from '~/issuable_sidebar/components/issuable_sidebar_root.vue';
 
 import { mockProvide, mockTestCase } from '../mock_data';
 

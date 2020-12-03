@@ -33,6 +33,7 @@ module EE
             optional :secret_detection_token_revocation_enabled, type: ::Grape::API::Boolean, desc: 'Enable Secret Detection Token Revocation'
             given secret_detection_token_revocation_enabled: ->(val) { val } do
               requires :secret_detection_token_revocation_url, type: String, desc: 'The configured Secret Detection Token Revocation instance URL'
+              requires :secret_detection_revocation_token_types_url, type: String, desc: 'The configured Secret Detection Revocation Token Types instance URL'
             end
 
             optional :email_additional_text, type: String, desc: 'Additional text added to the bottom of every email for legal/auditing/compliance reasons'

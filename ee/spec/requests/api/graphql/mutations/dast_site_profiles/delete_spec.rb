@@ -38,7 +38,9 @@ RSpec.describe 'Creating a DAST Site Profile' do
         dast_site_profile.destroy!
       end
 
-      it_behaves_like 'a mutation that returns top-level errors', errors: ['Internal server error']
+      it_behaves_like 'a mutation that returns top-level errors' do
+        let(:match_errors) { contain_exactly(include("Internal server error: Couldn't find DastSiteProfile")) }
+      end
     end
 
     context 'when wrong type of global id is passed' do

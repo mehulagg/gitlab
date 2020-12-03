@@ -9,6 +9,7 @@ RSpec.describe Analytics::MergeRequestMetricsCalculator do
   let_it_be(:merge_request_note) do
     create(:diff_note_on_merge_request, noteable: merge_request, project: merge_request.source_project, author: create(:user))
   end
+
   let_it_be(:merge_request_author_note) do
     create(:diff_note_on_merge_request,
            noteable: merge_request,
@@ -17,6 +18,7 @@ RSpec.describe Analytics::MergeRequestMetricsCalculator do
            created_at: 11.months.ago
           )
   end
+
   let_it_be(:merge_request_bot_note) do
     create(:diff_note_on_merge_request,
            noteable: merge_request,

@@ -16,7 +16,9 @@ module Elastic
     def save!(completed:)
       raise 'Migrations index is not found' unless helper.index_exists?(index_name: index_name)
 
-      client.index index: index_name, type: '_doc', id: version, body: { completed: completed }
+      data = { completed: completed }.merge(timestamps(completed: completed))
+
+      client.index index: index_name, type: '_doc', id: version, body: data
     end
 
     def persisted?
@@ -40,6 +42,15 @@ module Elastic
     end
 
     private
+
+    def timestamps(completed:)
+      {}.tap do |data|
+        existing_data = load_from_index
+        data[:started_at] = existing_data&.dig('_source', 'started_at') || Time.now.utc
+
+        data[:completed_at] = Time.now.utc if completed
+      end
+    end
 
     def migration
       @migration ||= load_migration

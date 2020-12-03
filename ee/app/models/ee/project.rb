@@ -38,12 +38,12 @@ module EE
       has_one :push_rule, ->(project) { project&.feature_available?(:push_rules) ? all : none }
       has_one :index_status
 
-      has_one :jenkins_service
       has_one :github_service
       has_one :gitlab_slack_application_service
 
       has_one :status_page_setting, inverse_of: :project, class_name: 'StatusPage::ProjectSetting'
       has_one :compliance_framework_setting, class_name: 'ComplianceManagement::ComplianceFramework::ProjectSettings', inverse_of: :project
+      has_many :compliance_management_frameworks, through: :compliance_framework_setting, source: 'compliance_management_framework'
       has_one :security_setting, class_name: 'ProjectSecuritySetting'
       has_one :vulnerability_statistic, class_name: 'Vulnerabilities::Statistic'
 
@@ -98,6 +98,8 @@ module EE
 
       has_many :sourced_pipelines, class_name: 'Ci::Sources::Project', foreign_key: :source_project_id
 
+      has_many :incident_management_oncall_schedules, class_name: 'IncidentManagement::OncallSchedule', inverse_of: :project
+
       scope :with_shared_runners_limit_enabled, -> do
         if ::Ci::Runner.has_shared_runners_with_non_zero_public_cost?
           with_shared_runners
@@ -149,7 +151,7 @@ module EE
       scope :with_designs, -> { where(id: ::DesignManagement::Design.select(:project_id).distinct) }
       scope :with_deleting_user, -> { includes(:deleting_user) }
       scope :with_compliance_framework_settings, -> { preload(:compliance_framework_setting) }
-      scope :has_vulnerabilities, -> { joins(:vulnerabilities).group(:id) }
+      scope :has_vulnerabilities, -> { joins(:project_setting).merge(::ProjectSetting.has_vulnerabilities) }
       scope :has_vulnerability_statistics, -> { joins(:vulnerability_statistic) }
       scope :with_vulnerability_statistics, -> { includes(:vulnerability_statistic) }
 
@@ -165,20 +167,20 @@ module EE
       scope :without_repository_size_limit, -> { where(repository_size_limit: nil) }
 
       scope :order_by_total_repository_size_excess_desc, -> (limit) do
-        excess = ::ProjectStatistics.arel_table[:repository_size] +
+        excess_arel = ::ProjectStatistics.arel_table[:repository_size] +
                    ::ProjectStatistics.arel_table[:lfs_objects_size] -
-                   ::Project.arel_table.coalesce(::Project.arel_table[:repository_size_limit], limit, 0)
+                   arel_table.coalesce(arel_table[:repository_size_limit], limit, 0)
+        alias_node = Arel::Nodes::SqlLiteral.new('excess_storage')
 
-        joins(:statistics).order(
-          Arel.sql(Arel::Nodes::Descending.new(excess).to_sql)
-        )
+        select(*arel.projections, excess_arel.as(alias_node))
+          .joins(:statistics)
+          .order(excess_arel.desc)
       end
 
       delegate :shared_runners_minutes, :shared_runners_seconds, :shared_runners_seconds_last_reset,
         to: :statistics, allow_nil: true
 
       delegate :actual_shared_runners_minutes_limit,
-               :shared_runners_minutes_used?,
                :shared_runners_remaining_minutes_below_threshold?, to: :shared_runners_limit_namespace
 
       delegate :last_update_succeeded?, :last_update_failed?,
@@ -186,7 +188,8 @@ module EE
         to: :import_state, prefix: :mirror, allow_nil: true
 
       delegate :merge_pipelines_enabled, :merge_pipelines_enabled=, :merge_pipelines_enabled?, :merge_pipelines_were_disabled?, to: :ci_cd_settings
-      delegate :merge_trains_enabled?, to: :ci_cd_settings
+      delegate :merge_trains_enabled, :merge_trains_enabled=, :merge_trains_enabled?, to: :ci_cd_settings
+
       delegate :auto_rollback_enabled, :auto_rollback_enabled=, :auto_rollback_enabled?, to: :ci_cd_settings
       delegate :closest_gitlab_subscription, to: :namespace
       delegate :jira_vulnerabilities_integration_enabled?, to: :jira_service, allow_nil: true
@@ -311,7 +314,7 @@ module EE
     end
 
     def shared_runners_available?
-      super && !shared_runners_limit_namespace.shared_runners_minutes_used?
+      super && !::Ci::Minutes::Quota.new(shared_runners_limit_namespace).minutes_used_up?
     end
 
     def link_pool_repository
@@ -342,10 +345,6 @@ module EE
 
     def jira_issues_integration_available?
       feature_available?(:jira_issues_integration)
-    end
-
-    def jira_vulnerabilities_integration_available?
-      ::Feature.enabled?(:jira_for_vulnerabilities, self, default_enabled: false) && feature_available?(:jira_vulnerabilities_integration)
     end
 
     def multiple_approval_rules_available?
@@ -578,7 +577,6 @@ module EE
     def disabled_services
       strong_memoize(:disabled_services) do
         super.tap do |services|
-          services.push('jenkins') unless feature_available?(:jenkins_integration)
           services.push('github') unless feature_available?(:github_project_service_integration)
           ::Gitlab::CurrentSettings.slack_app_enabled ? services.push('slack_slash_commands') : services.push('gitlab_slack_application')
         end
@@ -723,6 +721,16 @@ module EE
     override :predefined_variables
     def predefined_variables
       super.concat(requirements_ci_variables)
+    end
+
+    def add_template_export_job(current_user:, after_export_strategy: nil, params: {})
+      job_id = ProjectTemplateExportWorker.perform_async(current_user.id, self.id, after_export_strategy, params)
+
+      if job_id
+        ::Gitlab::AppLogger.info(message: 'Template Export job started', project_id: self.id, job_id: job_id)
+      else
+        ::Gitlab::AppLogger.error(message: 'Template Export job failed to start', project_id: self.id)
+      end
     end
 
     private

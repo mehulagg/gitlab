@@ -1,4 +1,10 @@
 import {
+  CRITICAL,
+  HIGH,
+  MEDIUM,
+  LOW,
+} from 'ee/security_dashboard/store/modules/vulnerabilities/constants';
+import {
   findIssueIndex,
   groupedTextBuilder,
   statusIcon,
@@ -7,12 +13,6 @@ import {
 } from 'ee/vue_shared/security_reports/store/utils';
 import convertReportType from 'ee/vue_shared/security_reports/store/utils/convert_report_type';
 import getFileLocation from 'ee/vue_shared/security_reports/store/utils/get_file_location';
-import {
-  CRITICAL,
-  HIGH,
-  MEDIUM,
-  LOW,
-} from 'ee/security_dashboard/store/modules/vulnerabilities/constants';
 import getPrimaryIdentifiers from 'ee/vue_shared/security_reports/store/utils/get_primary_identifier';
 
 describe('security reports utils', () => {

@@ -23,6 +23,7 @@ RSpec.describe API::Settings, 'Settings' do
       expect(json_response['sourcegraph_enabled']).to be_falsey
       expect(json_response['sourcegraph_url']).to be_nil
       expect(json_response['secret_detection_token_revocation_url']).to be_nil
+      expect(json_response['secret_detection_revocation_token_types_url']).to be_nil
       expect(json_response['sourcegraph_public_only']).to be_truthy
       expect(json_response['default_project_visibility']).to be_a String
       expect(json_response['default_snippet_visibility']).to be_a String
@@ -41,7 +42,7 @@ RSpec.describe API::Settings, 'Settings' do
       expect(json_response['spam_check_endpoint_enabled']).to be_falsey
       expect(json_response['spam_check_endpoint_url']).to be_nil
       expect(json_response['wiki_page_max_content_bytes']).to be_a(Integer)
-      expect(json_response['require_admin_approval_after_user_signup']).to eq(false)
+      expect(json_response['require_admin_approval_after_user_signup']).to eq(true)
     end
   end
 

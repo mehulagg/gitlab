@@ -13,6 +13,7 @@ class TrialsController < ApplicationController
   feature_category :purchase
 
   def new
+    record_experiment_user(:remove_known_trial_form_fields)
   end
 
   def select
@@ -34,6 +35,7 @@ class TrialsController < ApplicationController
     @result = GitlabSubscriptions::ApplyTrialService.new.execute(apply_trial_params)
 
     if @result&.dig(:success)
+      record_experiment_conversion_event(:remove_known_trial_form_fields)
       redirect_to group_url(@namespace, { trial: true })
     else
       render :select

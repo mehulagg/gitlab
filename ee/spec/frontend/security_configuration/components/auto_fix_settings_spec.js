@@ -1,10 +1,10 @@
 import { mount } from '@vue/test-utils';
-import { TEST_HOST } from 'helpers/test_constants';
 import AxiosMockAdapter from 'axios-mock-adapter';
 import AutoFixSettings from 'ee/security_configuration/components/auto_fix_settings.vue';
+import { TEST_HOST } from 'helpers/test_constants';
 import waitForPromises from 'helpers/wait_for_promises';
-import axios from '~/lib/utils/axios_utils';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
+import axios from '~/lib/utils/axios_utils';
 
 jest.mock('~/flash.js');
 

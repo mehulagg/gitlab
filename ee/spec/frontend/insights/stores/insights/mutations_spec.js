@@ -1,7 +1,7 @@
-import createState from 'ee/insights/stores/modules/insights/state';
-import mutations from 'ee/insights/stores/modules/insights/mutations';
-import * as types from 'ee/insights/stores/modules/insights/mutation_types';
 import { CHART_TYPES } from 'ee/insights/constants';
+import * as types from 'ee/insights/stores/modules/insights/mutation_types';
+import mutations from 'ee/insights/stores/modules/insights/mutations';
+import createState from 'ee/insights/stores/modules/insights/state';
 
 import { configData } from 'ee_jest/insights/mock_data';
 

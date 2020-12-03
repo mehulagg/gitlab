@@ -1,14 +1,14 @@
-import Vue from 'vue';
-import Vuex from 'vuex';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import AxiosMockAdapter from 'axios-mock-adapter';
+import Vue from 'vue';
+import Vuex from 'vuex';
 
 import BoardListHeader from 'ee/boards/components/board_list_header.vue';
+import getters from 'ee/boards/stores/getters';
 import { TEST_HOST } from 'helpers/test_constants';
 import { listObj } from 'jest/boards/mock_data';
-import getters from 'ee/boards/stores/getters';
-import List from '~/boards/models/list';
 import { ListType, inactiveId } from '~/boards/constants';
+import List from '~/boards/models/list';
 import axios from '~/lib/utils/axios_utils';
 import sidebarEventHub from '~/sidebar/event_hub';
 
@@ -45,7 +45,6 @@ describe('Board List Header Component', () => {
     listType = ListType.backlog,
     collapsed = false,
     withLocalStorage = true,
-    isSwimlanesHeader = false,
   } = {}) => {
     const boardId = '1';
 
@@ -76,7 +75,6 @@ describe('Board List Header Component', () => {
       propsData: {
         disabled: false,
         list,
-        isSwimlanesHeader,
       },
       provide: {
         boardId,
@@ -128,14 +126,6 @@ describe('Board List Header Component', () => {
 
         expect(sidebarEventHub.$emit).not.toHaveBeenCalled();
       });
-    });
-  });
-
-  describe('Swimlanes header', () => {
-    it('when collapsed, it displays info icon', () => {
-      createComponent({ isSwimlanesHeader: true, collapsed: true });
-
-      expect(wrapper.find('.board-header-collapsed-info-icon').exists()).toBe(true);
     });
   });
 });

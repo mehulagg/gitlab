@@ -1,7 +1,7 @@
 ---
 stage: Package
 group: Package
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # GitLab Container Registry
@@ -127,7 +127,7 @@ To build and push to the Container Registry:
    docker push registry.example.com/group/project/image
    ```
 
-You can also view these commands by going to your project's **Packages & Registries > Container Registry**.
+To view these commands, go to your project's **Packages & Registries > Container Registry**.
 
 ## Build and push by using GitLab CI/CD
 
@@ -447,7 +447,7 @@ For the project where it's defined, tags matching the regex pattern are removed.
 The underlying layers and images remain.
 
 To delete the underlying layers and images that aren't associated with any tags, administrators can use
-[garbage collection](../../../administration/packages/container_registry.md#removing-unused-layers-not-referenced-by-manifests) with the `-m` switch.
+[garbage collection](../../../administration/packages/container_registry.md#removing-untagged-manifests-and-unreferenced-layers) with the `-m` switch.
 
 ### Enable the cleanup policy
 
@@ -513,24 +513,24 @@ You can create a cleanup policy in [the API](#use-the-cleanup-policy-api) or the
 To create a cleanup policy in the UI:
 
 1. For your project, go to **Settings > CI/CD**.
-1. Expand the **Cleanup policy for tags** section.
+1. Expand the **Clean up image tags** section.
 1. Complete the fields.
 
    | Field                                                                     | Description                                                                                                       |
    |---------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------|
-   | **Cleanup policy**                                                        | Turn the policy on or off.                                                                                        |
-   | **Expiration interval**                                                   | How long tags are exempt from being deleted.                                                                      |
-   | **Expiration schedule**                                                   | How often the policy should run.                                                                                  |
-   | **Number of tags to retain**                                              | How many tags to _always_ keep for each image.                                                                    |
-   | **Tags with names matching this regex pattern expire:**              | The regex pattern that determines which tags to remove. This value cannot be blank. For all tags, use `.*`. See other [regex pattern examples](#regex-pattern-examples). |
-   | **Tags with names matching this regex pattern are preserved:**        | The regex pattern that determines which tags to preserve. The `latest` tag is always preserved. For all tags, use `.*`. See other [regex pattern examples](#regex-pattern-examples). |
+   | **Toggle** | Turn the policy on or off. |
+   | **Run cleanup** | How often the policy should run. |
+   | **Keep the most recent** | How many tags to _always_ keep for each image. |
+   | **Keep tags matching** | The regex pattern that determines which tags to preserve. The `latest` tag is always preserved. For all tags, use `.*`. See other [regex pattern examples](#regex-pattern-examples). |
+   | **Remove tags older than** | Remove only tags older than X days. |
+   | **Remove tags matching**  | The regex pattern that determines which tags to remove. This value cannot be blank. For all tags, use `.*`. See other [regex pattern examples](#regex-pattern-examples). |
 
-1. Click **Set cleanup policy**.
+1. Click **Save**.
 
 Depending on the interval you chose, the policy is scheduled to run.
 
 NOTE: **Note:**
-If you edit the policy and click **Set cleanup policy** again, the interval is reset.
+If you edit the policy and click **Save** again, the interval is reset.
 
 ### Regex pattern examples
 

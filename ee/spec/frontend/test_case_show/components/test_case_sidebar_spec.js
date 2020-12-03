@@ -1,13 +1,12 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlButton, GlIcon } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import Mousetrap from 'mousetrap';
 
+import TestCaseSidebar from 'ee/test_case_show/components/test_case_sidebar.vue';
 import { mockCurrentUserTodo, mockLabels } from 'jest/issuable_list/mock_data';
 
-import TestCaseSidebar from 'ee/test_case_show/components/test_case_sidebar.vue';
-
-import LabelsSelect from '~/vue_shared/components/sidebar/labels_select_vue/labels_select_root.vue';
 import ProjectSelect from '~/vue_shared/components/sidebar/issuable_move_dropdown.vue';
+import LabelsSelect from '~/vue_shared/components/sidebar/labels_select_vue/labels_select_root.vue';
 
 import { mockProvide, mockTestCase } from '../mock_data';
 

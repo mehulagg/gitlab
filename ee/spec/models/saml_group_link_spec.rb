@@ -50,4 +50,26 @@ RSpec.describe SamlGroupLink do
       end
     end
   end
+
+  describe '.by_saml_group_name' do
+    let_it_be(:group) { create(:group) }
+    let_it_be(:group_link) { create(:saml_group_link, group: group) }
+
+    it 'finds the group link' do
+      results = described_class.by_saml_group_name(group_link.saml_group_name)
+
+      expect(results).to match_array([group_link])
+    end
+
+    context 'with multiple groups and group links' do
+      let_it_be(:group2) { create(:group) }
+      let_it_be(:group_link2) { create(:saml_group_link, group: group2) }
+
+      it 'finds group links within the given groups' do
+        results = described_class.by_saml_group_name([group_link.saml_group_name, group_link2.saml_group_name])
+
+        expect(results).to match_array([group_link, group_link2])
+      end
+    end
+  end
 end

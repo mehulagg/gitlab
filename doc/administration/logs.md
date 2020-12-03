@@ -1,7 +1,7 @@
 ---
 stage: Monitor
 group: Health
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Log system
@@ -665,6 +665,31 @@ installations from source.
 
 It logs the progress of the export process.
 
+## `features_json.log`
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/59587) in GitLab 13.7.
+
+This file's location depends on how you installed GitLab:
+
+- For Omnibus GitLab packages: `/var/log/gitlab/gitlab-rails/features_json.log`
+- For installations from source: `/home/git/gitlab/log/features_json.log`
+
+The modification events from [Feature flags in development of GitLab](../development/feature_flags/index.md)
+are recorded in this file. For example:
+
+```json
+{"severity":"INFO","time":"2020-11-24T02:30:59.860Z","correlation_id":null,"key":"cd_auto_rollback","action":"enable","extra.thing":"true"}
+{"severity":"INFO","time":"2020-11-24T02:31:29.108Z","correlation_id":null,"key":"cd_auto_rollback","action":"enable","extra.thing":"true"}
+{"severity":"INFO","time":"2020-11-24T02:31:29.129Z","correlation_id":null,"key":"cd_auto_rollback","action":"disable","extra.thing":"false"}
+{"severity":"INFO","time":"2020-11-24T02:31:29.177Z","correlation_id":null,"key":"cd_auto_rollback","action":"enable","extra.thing":"Project:1"}
+{"severity":"INFO","time":"2020-11-24T02:31:29.183Z","correlation_id":null,"key":"cd_auto_rollback","action":"disable","extra.thing":"Project:1"}
+{"severity":"INFO","time":"2020-11-24T02:31:29.188Z","correlation_id":null,"key":"cd_auto_rollback","action":"enable_percentage_of_time","extra.percentage":"50"}
+{"severity":"INFO","time":"2020-11-24T02:31:29.193Z","correlation_id":null,"key":"cd_auto_rollback","action":"disable_percentage_of_time"}
+{"severity":"INFO","time":"2020-11-24T02:31:29.198Z","correlation_id":null,"key":"cd_auto_rollback","action":"enable_percentage_of_actors","extra.percentage":"50"}
+{"severity":"INFO","time":"2020-11-24T02:31:29.203Z","correlation_id":null,"key":"cd_auto_rollback","action":"disable_percentage_of_actors"}
+{"severity":"INFO","time":"2020-11-24T02:31:29.329Z","correlation_id":null,"key":"cd_auto_rollback","action":"remove"}
+```
+
 ## `auth.log`
 
 > Introduced in GitLab 12.0.
@@ -979,6 +1004,9 @@ When [troubleshooting](troubleshooting/index.md) issues that aren't localized to
 previously listed components, it's helpful to simultaneously gather multiple logs and statistics
 from a GitLab instance.
 
+NOTE: **Note:**
+GitLab Support will often ask for one of these, and maintains the required tools.
+
 ### Briefly tail the main logs
 
 If the bug or error is readily reproducible, save the main GitLab logs
@@ -995,11 +1023,8 @@ Conclude the log gathering with <kbd>Ctrl</kbd> + <kbd>C</kbd>.
 
 If performance degradations or cascading errors occur that can't readily be attributed to one
 of the previously listed GitLab components, [GitLabSOS](https://gitlab.com/gitlab-com/support/toolbox/gitlabsos/)
-can provide a perspective spanning all of Omnibus GitLab. For more details and instructions
+can provide a broader perspective of the GitLab instance. For more details and instructions
 to run it, read [the GitLabSOS documentation](https://gitlab.com/gitlab-com/support/toolbox/gitlabsos/#gitlabsos).
-
-NOTE: **Note:**
-GitLab Support likes to use this custom-made tool.
 
 ### Fast-stats
 

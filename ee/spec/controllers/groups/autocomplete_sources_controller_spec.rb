@@ -33,6 +33,31 @@ RSpec.describe Groups::AutocompleteSourcesController do
     end
   end
 
+  describe '#vulnerabilities' do
+    let_it_be_with_reload(:project) { create(:project, :private, group: group) }
+    let_it_be(:vulnerability) { create(:vulnerability, project: project) }
+
+    before do
+      project.add_developer(user)
+      stub_licensed_features(security_dashboard: true)
+    end
+
+    it 'returns 200 status' do
+      get :vulnerabilities, params: { group_id: group }
+
+      expect(response).to have_gitlab_http_status(:ok)
+    end
+
+    it 'returns the correct response', :aggregate_failures do
+      get :vulnerabilities, params: { group_id: group }
+
+      expect(json_response).to be_an(Array)
+      expect(json_response.first).to include(
+        'id' => vulnerability.id, 'title' => vulnerability.title
+      )
+    end
+  end
+
   describe '#issues' do
     using RSpec::Parameterized::TableSyntax
 

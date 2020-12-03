@@ -81,9 +81,10 @@ RSpec.describe Security::Finding do
   end
 
   describe '.undismissed' do
-    let(:scan) { create(:security_scan) }
-    let!(:undismissed_finding) { create(:security_finding, scan: scan) }
-    let!(:dismissed_finding) { create(:security_finding, scan: scan) }
+    let(:scan_1) { create(:security_scan) }
+    let(:scan_2) { create(:security_scan) }
+    let!(:undismissed_finding) { create(:security_finding, scan: scan_1) }
+    let!(:dismissed_finding) { create(:security_finding, scan: scan_1) }
     let(:expected_findings) { [undismissed_finding] }
 
     subject { described_class.undismissed }
@@ -91,9 +92,15 @@ RSpec.describe Security::Finding do
     before do
       create(:vulnerability_feedback,
              :dismissal,
-             project: scan.project,
-             category: scan.scan_type,
+             project: scan_1.project,
+             category: scan_1.scan_type,
              project_fingerprint: dismissed_finding.project_fingerprint)
+
+      create(:vulnerability_feedback,
+             :dismissal,
+             project: scan_2.project,
+             category: scan_2.scan_type,
+             project_fingerprint: undismissed_finding.project_fingerprint)
     end
 
     it { is_expected.to match_array(expected_findings) }

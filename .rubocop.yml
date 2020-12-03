@@ -32,6 +32,7 @@ AllCops:
     - 'builds/**/*'
     - 'plugins/**/*'
     - 'file_hooks/**/*'
+    - 'workhorse/**/*'
   CacheRootDirectory: tmp
   MaxFilesInCache: 18000
 
@@ -46,6 +47,10 @@ Cop/StaticTranslationDefinition:
   Exclude:
     - 'spec/**/*'
     - 'ee/spec/**/*'
+
+Lint/LastKeywordArgument:
+  Enabled: true
+  Safe: false
 
 # This cop checks whether some constant value isn't a
 # mutable literal (e.g. array or hash).

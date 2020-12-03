@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlAvatarLink, GlAvatar } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 
 import MergeRequest from 'ee/compliance_dashboard/components/merge_requests/merge_request.vue';
 import { createMergeRequest } from '../../mock_data';

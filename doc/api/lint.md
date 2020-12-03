@@ -1,7 +1,7 @@
 ---
 stage: Verify
 group: Continuous Integration
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # CI Lint API
@@ -36,7 +36,20 @@ Example responses:
   ```json
   {
     "status": "valid",
-    "errors": []
+    "errors": [],
+    "warnings": []
+  }
+  ```
+
+- Valid content with warnings:
+
+  ```json
+  {
+    "status": "valid",
+    "errors": [],
+    "warnings": ["jobs:job may allow multiple pipelines to run for a single action due to
+    `rules:when` clause with no `workflow:rules` - read more:
+    https://docs.gitlab.com/ee/ci/troubleshooting.html#pipeline-warnings"]
   }
   ```
 
@@ -47,7 +60,8 @@ Example responses:
     "status": "invalid",
     "errors": [
       "variables config should be a hash of key value pairs"
-    ]
+    ],
+    "warnings": []
   }
   ```
 

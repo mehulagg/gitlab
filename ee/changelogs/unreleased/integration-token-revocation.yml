@@ -1,0 +1,5 @@
+---
+title: Integrate RevocationAPI with BuildFinishedWorker
+merge_request: 46729
+author:
+type: added

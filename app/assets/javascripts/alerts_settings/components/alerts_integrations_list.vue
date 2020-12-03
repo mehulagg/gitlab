@@ -12,7 +12,11 @@ import {
 } from '@gitlab/ui';
 import { s__, __ } from '~/locale';
 import Tracking from '~/tracking';
-import { trackAlertIntegrationsViewsOptions, integrationToDeleteDefault } from '../constants';
+import {
+  trackAlertIntegrationsViewsOptions,
+  integrationToDeleteDefault,
+  typeSet,
+} from '../constants';
 import getCurrentIntegrationQuery from '../graphql/queries/get_current_integration.query.graphql';
 
 export const i18n = {
@@ -35,6 +39,7 @@ const bodyTrClass =
 
 export default {
   i18n,
+  typeSet,
   components: {
     GlButtonGroup,
     GlButton,
@@ -75,6 +80,8 @@ export default {
     },
     {
       key: 'actions',
+      thClass: `gl-text-center`,
+      tdClass: `gl-text-center`,
       label: __('Actions'),
     },
   ],
@@ -90,13 +97,23 @@ export default {
     };
   },
   mounted() {
-    this.trackPageViews();
+    const callback = entries => {
+      const isVisible = entries.some(entry => entry.isIntersecting);
+
+      if (isVisible) {
+        this.trackPageViews();
+        this.observer.disconnect();
+      }
+    };
+
+    this.observer = new IntersectionObserver(callback);
+    this.observer.observe(this.$el);
   },
   methods: {
     tbodyTrClass(item) {
       return {
         [bodyTrClass]: this.integrations.length,
-        'gl-bg-blue-50': item?.id === this.currentIntegration?.id,
+        'gl-bg-blue-50': (item !== null && item.id) === this.currentIntegration?.id,
       };
     },
     trackPageViews() {
@@ -119,6 +136,7 @@ export default {
   <div class="incident-management-list">
     <h5 class="gl-font-lg">{{ $options.i18n.title }}</h5>
     <gl-table
+      class="integration-list"
       :items="integrations"
       :fields="$options.fields"
       :busy="loading"
@@ -150,10 +168,11 @@ export default {
       </template>
 
       <template #cell(actions)="{ item }">
-        <gl-button-group>
+        <gl-button-group class="gl-ml-3">
           <gl-button icon="pencil" @click="$emit('edit-integration', { id: item.id })" />
           <gl-button
             v-gl-modal.deleteIntegration
+            :disabled="item.type === $options.typeSet.prometheus"
             icon="remove"
             @click="setIntegrationToDelete(item)"
           />
@@ -166,7 +185,7 @@ export default {
 
       <template #empty>
         <div
-          class="gl-border-t-solid gl-border-b-solid gl-border-1 gl-border gl-border-gray-100 mt-n3"
+          class="gl-border-t-solid gl-border-b-solid gl-border-1 gl-border gl-border-gray-100 mt-n3 gl-px-5"
         >
           <p class="gl-text-gray-400 gl-py-3 gl-my-3">{{ $options.i18n.emptyState }}</p>
         </div>
@@ -174,7 +193,7 @@ export default {
     </gl-table>
     <gl-modal
       modal-id="deleteIntegration"
-      :title="__('Are you sure?')"
+      :title="s__('AlertSettings|Delete integration')"
       :ok-title="s__('AlertSettings|Delete integration')"
       ok-variant="danger"
       @ok="deleteIntegration"

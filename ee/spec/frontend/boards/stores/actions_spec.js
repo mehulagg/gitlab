@@ -1,23 +1,22 @@
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
-import { TEST_HOST } from 'helpers/test_constants';
-import boardsStoreEE from 'ee/boards/stores/boards_store_ee';
-import actions, { gqlClient } from 'ee/boards/stores/actions';
-import * as types from 'ee/boards/stores/mutation_types';
 import { GroupByParamType } from 'ee/boards/constants';
+import actions, { gqlClient } from 'ee/boards/stores/actions';
+import boardsStoreEE from 'ee/boards/stores/boards_store_ee';
+import * as types from 'ee/boards/stores/mutation_types';
+import { TEST_HOST } from 'helpers/test_constants';
 import testAction from 'helpers/vuex_action_helper';
+import { formatListIssues } from '~/boards/boards_util';
+import { ListType } from '~/boards/constants';
 import * as typesCE from '~/boards/stores/mutation_types';
 import * as commonUtils from '~/lib/utils/common_utils';
 import { mergeUrlParams, removeParams } from '~/lib/utils/url_utility';
-import { ListType } from '~/boards/constants';
-import { formatListIssues } from '~/boards/boards_util';
 import {
   mockLists,
   mockIssue,
+  mockIssue2,
   mockEpic,
   rawIssue,
-  mockIssueWithModel,
-  mockIssue2WithModel,
   mockListsWithModel,
 } from '../mock_data';
 
@@ -635,8 +634,8 @@ describe('moveIssue', () => {
   };
 
   const issues = {
-    '436': mockIssueWithModel,
-    '437': mockIssue2WithModel,
+    '436': mockIssue,
+    '437': mockIssue2,
   };
 
   const state = {
@@ -673,7 +672,7 @@ describe('moveIssue', () => {
         {
           type: types.MOVE_ISSUE,
           payload: {
-            originalIssue: mockIssueWithModel,
+            originalIssue: mockIssue,
             fromListId: 'gid://gitlab/List/1',
             toListId: 'gid://gitlab/List/2',
             epicId,
@@ -714,7 +713,7 @@ describe('moveIssue', () => {
         {
           type: types.MOVE_ISSUE,
           payload: {
-            originalIssue: mockIssueWithModel,
+            originalIssue: mockIssue,
             fromListId: 'gid://gitlab/List/1',
             toListId: 'gid://gitlab/List/2',
             epicId,
@@ -723,7 +722,7 @@ describe('moveIssue', () => {
         {
           type: types.MOVE_ISSUE_FAILURE,
           payload: {
-            originalIssue: mockIssueWithModel,
+            originalIssue: mockIssue,
             fromListId: 'gid://gitlab/List/1',
             toListId: 'gid://gitlab/List/2',
             originalIndex: 0,

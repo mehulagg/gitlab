@@ -1,8 +1,8 @@
-import state from 'ee/vue_shared/security_reports/store/state';
-import mutations from 'ee/vue_shared/security_reports/store/mutations';
 import * as types from 'ee/vue_shared/security_reports/store/mutation_types';
-import { mockFindings } from '../mock_data';
+import mutations from 'ee/vue_shared/security_reports/store/mutations';
+import state from 'ee/vue_shared/security_reports/store/state';
 import { visitUrl } from '~/lib/utils/url_utility';
+import { mockFindings } from '../mock_data';
 
 jest.mock('~/lib/utils/url_utility', () => ({
   visitUrl: jest.fn().mockName('visitUrlMock'),
@@ -46,14 +46,6 @@ describe('EE sast reports mutations', () => {
       mutations[types.SET_VULNERABILITY_FEEDBACK_PATH](stateCopy, 'vulnerability_path');
 
       expect(stateCopy.vulnerabilityFeedbackPath).toEqual('vulnerability_path');
-    });
-  });
-
-  describe('SET_VULNERABILITY_FEEDBACK_HELP_PATH', () => {
-    it('should set the vulnerabilities help path', () => {
-      mutations[types.SET_VULNERABILITY_FEEDBACK_HELP_PATH](stateCopy, 'vulnerability_help_path');
-
-      expect(stateCopy.vulnerabilityFeedbackHelpPath).toEqual('vulnerability_help_path');
     });
   });
 

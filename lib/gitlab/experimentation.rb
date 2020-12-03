@@ -4,7 +4,6 @@
 #
 # Utility module for A/B testing experimental features. Define your experiments in the `EXPERIMENTS` constant.
 # Experiment options:
-# - environment (optional, defaults to enabled for development and GitLab.com)
 # - tracking_category (optional, used to set the category when tracking an experiment event)
 # - use_backwards_compatible_subject_index (optional, set this to true if you need backwards compatibility)
 #
@@ -55,10 +54,6 @@ module Gitlab
         tracking_category: 'Growth::Expansion::Experiment::InviteMembersEmptyGroupVersionA',
         use_backwards_compatible_subject_index: true
       },
-      new_create_project_ui: {
-        tracking_category: 'Manage::Import::Experiment::NewCreateProjectUi',
-        use_backwards_compatible_subject_index: true
-      },
       contact_sales_btn_in_app: {
         tracking_category: 'Growth::Conversion::Experiment::ContactSalesInApp',
         use_backwards_compatible_subject_index: true
@@ -82,59 +77,59 @@ module Gitlab
       default_to_issues_board: {
         tracking_category: 'Growth::Conversion::Experiment::DefaultToIssuesBoard',
         use_backwards_compatible_subject_index: true
+      },
+      jobs_empty_state: {
+        tracking_category: 'Growth::Activation::Experiment::JobsEmptyState'
+      },
+      remove_known_trial_form_fields: {
+        tracking_category: 'Growth::Conversion::Experiment::RemoveKnownTrialFormFields'
       }
     }.freeze
 
     class << self
-      def experiment(key)
-        Experiment.new(EXPERIMENTS[key].merge(key: key))
+      def get_experiment(experiment_key)
+        return unless EXPERIMENTS.key?(experiment_key)
+
+        ::Gitlab::Experimentation::Experiment.new(experiment_key, **EXPERIMENTS[experiment_key])
       end
 
-      def enabled?(experiment_key)
-        return false unless EXPERIMENTS.key?(experiment_key)
+      def active?(experiment_key)
+        experiment = get_experiment(experiment_key)
+        return false unless experiment
 
-        experiment = experiment(experiment_key)
-        experiment.enabled_for_environment? && experiment.enabled?
+        experiment.active?
       end
 
-      def enabled_for_attribute?(experiment_key, attribute)
-        index = Digest::SHA1.hexdigest(attribute).hex % 100
-        enabled_for_value?(experiment_key, index)
-      end
+      def in_experiment_group?(experiment_key, subject:)
+        return false if subject.blank?
+        return false unless active?(experiment_key)
 
-      def enabled_for_value?(experiment_key, value)
-        enabled?(experiment_key) && experiment(experiment_key).enabled_for_index?(value)
-      end
-    end
+        experiment = get_experiment(experiment_key)
+        return false unless experiment
 
-    Experiment = Struct.new(
-      :key,
-      :environment,
-      :tracking_category,
-      :use_backwards_compatible_subject_index,
-      keyword_init: true
-    ) do
-      def enabled?
-        experiment_percentage > 0
-      end
-
-      def enabled_for_environment?
-        return ::Gitlab.dev_env_or_com? if environment.nil?
-
-        environment
-      end
-
-      def enabled_for_index?(index)
-        return false if index.blank?
-
-        index <= experiment_percentage
+        experiment.enabled_for_index?(index_for_subject(experiment, subject))
       end
 
       private
 
-      # When a feature does not exist, the `percentage_of_time_value` method will return 0
-      def experiment_percentage
-        @experiment_percentage ||= Feature.get(:"#{key}_experiment_percentage").percentage_of_time_value # rubocop:disable Gitlab/AvoidFeatureGet
+      def index_for_subject(experiment, subject)
+        index = if experiment.use_backwards_compatible_subject_index
+                  Digest::SHA1.hexdigest(subject_id(subject)).hex
+                else
+                  Zlib.crc32("#{experiment.key}#{subject_id(subject)}")
+                end
+
+        index % 100
+      end
+
+      def subject_id(subject)
+        if subject.respond_to?(:to_global_id)
+          subject.to_global_id.to_s
+        elsif subject.respond_to?(:to_s)
+          subject.to_s
+        else
+          raise ArgumentError.new('Subject must respond to `to_global_id` or `to_s`')
+        end
       end
     end
   end

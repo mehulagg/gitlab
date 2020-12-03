@@ -1,14 +1,14 @@
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
-import testAction from 'helpers/vuex_action_helper';
-import * as rootGetters from 'ee/analytics/cycle_analytics/store/getters';
-import * as getters from 'ee/analytics/cycle_analytics/store/modules/type_of_work/getters';
-import * as actions from 'ee/analytics/cycle_analytics/store/modules/type_of_work/actions';
-import * as types from 'ee/analytics/cycle_analytics/store/modules/type_of_work/mutation_types';
 import {
   TASKS_BY_TYPE_FILTERS,
   TASKS_BY_TYPE_SUBJECT_ISSUE,
 } from 'ee/analytics/cycle_analytics/constants';
+import * as rootGetters from 'ee/analytics/cycle_analytics/store/getters';
+import * as actions from 'ee/analytics/cycle_analytics/store/modules/type_of_work/actions';
+import * as getters from 'ee/analytics/cycle_analytics/store/modules/type_of_work/getters';
+import * as types from 'ee/analytics/cycle_analytics/store/modules/type_of_work/mutation_types';
+import testAction from 'helpers/vuex_action_helper';
 import { deprecatedCreateFlash } from '~/flash';
 import httpStatusCodes from '~/lib/utils/http_status';
 import { groupLabels, endpoints, startDate, endDate, rawTasksByTypeData } from '../../../mock_data';

@@ -353,7 +353,7 @@ RSpec.describe NotificationService, :mailer do
 
         context 'a service-desk issue' do
           before do
-            issue.update!(service_desk_reply_to: 'service.desk@example.com')
+            issue.update!(external_author: 'service.desk@example.com')
             project.update!(service_desk_enabled: true)
           end
 
@@ -848,6 +848,7 @@ RSpec.describe NotificationService, :mailer do
            noteable: design,
            note: "Hello #{member_and_mentioned.to_reference}, G'day #{non_member_and_mentioned.to_reference}")
       end
+
       let_it_be(:note_2) do
         create(:diff_note_on_design, noteable: design, author: member_and_author_of_second_note)
       end
@@ -2322,6 +2323,20 @@ RSpec.describe NotificationService, :mailer do
       subject
 
       should_only_email(*ten_most_recently_active_instance_admins)
+    end
+  end
+
+  describe '#user_admin_rejection', :deliver_mails_inline do
+    let_it_be(:user) { create(:user, :blocked_pending_approval) }
+
+    before do
+      reset_delivered_emails!
+    end
+
+    it 'sends the user a rejection email' do
+      notification.user_admin_rejection(user.name, user.email)
+
+      should_only_email(user)
     end
   end
 

@@ -1,6 +1,6 @@
 import { shallowMount } from '@vue/test-utils';
-import { getBinding, createMockDirective } from 'helpers/vue_mock_directive';
 import IssueLink from 'ee/vulnerabilities/components/issue_link.vue';
+import { getBinding, createMockDirective } from 'helpers/vue_mock_directive';
 
 describe('IssueLink component', () => {
   let wrapper;

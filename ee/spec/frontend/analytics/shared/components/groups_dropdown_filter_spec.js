@@ -1,5 +1,5 @@
-import { mount } from '@vue/test-utils';
 import { GlDropdown, GlDropdownItem } from '@gitlab/ui';
+import { mount } from '@vue/test-utils';
 import GroupsDropdownFilter from 'ee/analytics/shared/components/groups_dropdown_filter.vue';
 import { TEST_HOST } from 'helpers/test_constants';
 import Api from '~/api';

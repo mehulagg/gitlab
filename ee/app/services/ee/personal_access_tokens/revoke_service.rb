@@ -21,14 +21,17 @@ module EE
       end
 
       def managed_user_revocation_allowed?
+        return unless token.present?
         return unless ::Feature.enabled?(:revoke_managed_users_token, group)
 
-        token.user.group_managed_account? &&
-          token.user.managing_group == group &&
+        token.user&.group_managed_account? &&
+          token.user&.managing_group == group &&
           can?(current_user, :admin_group_credentials_inventory, group)
       end
 
       def log_audit_event(token, response)
+        return unless token.present?
+
         audit_event_service(token, response).for_user(full_path: token.user.username, entity_id: token.user.id).security_event
       end
 

@@ -281,13 +281,14 @@ RSpec.describe 'Group value stream analytics filters and data', :js do
   end
 
   context 'with lots of data', :js do
-    let_it_be(:issue) { create(:issue, project: project, created_at: 5.days.ago) }
+    let_it_be(:issue) { create(:issue, project: project) }
 
     around do |example|
       freeze_time { example.run }
     end
 
     before do
+      issue.update!(created_at: 5.days.ago)
       create_cycle(user, project, issue, mr, milestone, pipeline)
       create(:labeled_issue, created_at: 5.days.ago, project: create(:project, group: group), labels: [group_label1])
       create(:labeled_issue, created_at: 3.days.ago, project: create(:project, group: group), labels: [group_label2])

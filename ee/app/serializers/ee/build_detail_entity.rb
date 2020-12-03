@@ -8,7 +8,7 @@ module EE
       expose :runners do
         expose :quota, if: -> (*) { project.shared_runners_minutes_limit_enabled? } do
           expose :used do |runner|
-            project.shared_runners_limit_namespace.shared_runners_minutes.to_i
+            ::Ci::Minutes::Quota.new(project.shared_runners_limit_namespace).total_minutes_used
           end
 
           expose :limit do |runner|

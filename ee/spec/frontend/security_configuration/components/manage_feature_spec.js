@@ -1,7 +1,7 @@
-import { merge } from 'lodash';
 import { shallowMount } from '@vue/test-utils';
-import ManageFeature from 'ee/security_configuration/components/manage_feature.vue';
+import { merge } from 'lodash';
 import CreateMergeRequestButton from 'ee/security_configuration/components/create_merge_request_button.vue';
+import ManageFeature from 'ee/security_configuration/components/manage_feature.vue';
 import { generateFeatures } from './helpers';
 
 const createSastMergeRequestPath = '/create_sast_merge_request_path';

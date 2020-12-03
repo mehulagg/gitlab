@@ -60,6 +60,12 @@ module UsersHelper
     "access:#{max_project_member_access(project)}"
   end
 
+  def show_status_emoji?(status)
+    return false unless status
+
+    status.message.present? || status.emoji != UserStatus::DEFAULT_EMOJI
+  end
+
   def user_status(user)
     return unless user
 
@@ -108,6 +114,96 @@ module UsersHelper
 
   def can_force_email_confirmation?(user)
     !user.confirmed?
+  end
+
+  def user_block_data(user, message)
+    {
+      path: block_admin_user_path(user),
+      method: 'put',
+      modal_attributes: {
+        title: s_('AdminUsers|Block user %{username}?') % { username: sanitize_name(user.name) },
+        messageHtml: message,
+        okVariant: 'warning',
+        okTitle: s_('AdminUsers|Block')
+      }.to_json
+    }
+  end
+
+  def user_unblock_data(user)
+    {
+      path: unblock_admin_user_path(user),
+      method: 'put',
+      modal_attributes: {
+        title: s_('AdminUsers|Unblock user %{username}?') % { username: sanitize_name(user.name) },
+        message: s_('AdminUsers|You can always block their account again if needed.'),
+        okVariant: 'info',
+        okTitle: s_('AdminUsers|Unblock')
+      }.to_json
+    }
+  end
+
+  def user_block_effects
+    header = tag.p s_('AdminUsers|Blocking user has the following effects:')
+
+    list = tag.ul do
+      concat tag.li s_('AdminUsers|User will not be able to login')
+      concat tag.li s_('AdminUsers|User will not be able to access git repositories')
+      concat tag.li s_('AdminUsers|Personal projects will be left')
+      concat tag.li s_('AdminUsers|Owned groups will be left')
+    end
+
+    header + list
+  end
+
+  def user_deactivation_data(user, message)
+    {
+      path: deactivate_admin_user_path(user),
+      method: 'put',
+      modal_attributes: {
+        title: s_('AdminUsers|Deactivate user %{username}?') % { username: sanitize_name(user.name) },
+        messageHtml: message,
+        okVariant: 'warning',
+        okTitle: s_('AdminUsers|Deactivate')
+      }.to_json
+    }
+  end
+
+  def user_activation_data(user)
+    {
+      path: activate_admin_user_path(user),
+      method: 'put',
+      modal_attributes: {
+        title: s_('AdminUsers|Activate user %{username}?') % { username: sanitize_name(user.name) },
+        message: s_('AdminUsers|You can always deactivate their account again if needed.'),
+        okVariant: 'info',
+        okTitle: s_('AdminUsers|Activate')
+      }.to_json
+    }
+  end
+
+  def user_deactivation_effects
+    header = tag.p s_('AdminUsers|Deactivating a user has the following effects:')
+
+    list = tag.ul do
+      concat tag.li s_('AdminUsers|The user will be logged out')
+      concat tag.li s_('AdminUsers|The user will not be able to access git repositories')
+      concat tag.li s_('AdminUsers|The user will not be able to access the API')
+      concat tag.li s_('AdminUsers|The user will not receive any notifications')
+      concat tag.li s_('AdminUsers|The user will not be able to use slash commands')
+      concat tag.li s_('AdminUsers|When the user logs back in, their account will reactivate as a fully active account')
+      concat tag.li s_('AdminUsers|Personal projects, group and user history will be left intact')
+    end
+
+    header + list
+  end
+
+  def user_display_name(user)
+    return s_('UserProfile|Blocked user') if user.blocked?
+
+    can_read_profile = can?(current_user, :read_user_profile, user)
+    return s_('UserProfile|Unconfirmed user') unless user.confirmed? || can_read_profile
+
+    user.name
   end
 
   private

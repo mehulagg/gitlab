@@ -1,7 +1,7 @@
 ---
 stage: Plan
 group: Project Management
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Projects API
@@ -49,7 +49,7 @@ GET /projects
 | `last_activity_before`                     | datetime | **{dotted-circle}** No | Limit results to projects with last_activity before specified time. Format: ISO 8601 YYYY-MM-DDTHH:MM:SSZ |
 | `membership`                               | boolean  | **{dotted-circle}** No | Limit by projects that the current user is a member of. |
 | `min_access_level`                         | integer  | **{dotted-circle}** No | Limit by current user minimal [access level](members.md#valid-access-levels). |
-| `order_by`                                 | string   | **{dotted-circle}** No | Return projects ordered by `id`, `name`, `path`, `created_at`, `updated_at`, or `last_activity_at` fields. `repository_size`, `storage_size`, or `wiki_size` fields are only allowed for admins. Default is `created_at`. |
+| `order_by`                                 | string   | **{dotted-circle}** No | Return projects ordered by `id`, `name`, `path`, `created_at`, `updated_at`, or `last_activity_at` fields. `repository_size`, `storage_size`, `packages_size` or `wiki_size` fields are only allowed for admins. Default is `created_at`. |
 | `owned`                                    | boolean  | **{dotted-circle}** No | Limit by projects explicitly owned by the current user. |
 | `repository_checksum_failed` **(PREMIUM)** | boolean  | **{dotted-circle}** No | Limit projects where the repository checksum calculation has failed ([Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/6137) in [GitLab Premium](https://about.gitlab.com/pricing/) 11.2). |
 | `repository_storage`                       | string   | **{dotted-circle}** No | Limit results to projects stored on `repository_storage`. _(admins only)_ |
@@ -1942,7 +1942,7 @@ PUT /projects/:id
 
 To upload an avatar from your file system, use the `--form` argument. This causes
 cURL to post data using the header `Content-Type: multipart/form-data`. The
-`file=` parameter must point to an image file on your file system and be 
+`file=` parameter must point to an image file on your file system and be
 preceded by `@`. For example:
 
 Example request:
@@ -2416,6 +2416,18 @@ Read more in the [Project import/export](project_import_export.md) documentation
 ## Project members
 
 Read more in the [Project members](members.md) documentation.
+
+## Configure pull mirroring for a project **(STARTER)**
+
+> Introduced in [GitLab Starter](https://about.gitlab.com/pricing/) 11.2.
+
+Configure pull mirroring while [creating a new project](#create-project) or [updating an existing project](#edit-project) using the API if the remote repository is publicly accessible or via `username/password` authentication. In case your HTTP repository is not publicly accessible, you can add the authentication information to the URL: `https://username:password@gitlab.company.com/group/project.git`, where password is a [personal access token](../user/profile/personal_access_tokens.md) with the API scope enabled.
+
+The relevant API parameters to update are:
+
+- `import_url`: URL of remote repository being mirrored (with `username:password` if needed).
+- `mirror`: Enables pull mirroring on project when set to `true`.
+- `only_mirror_protected_branches`: Set to `true` for protected branches.
 
 ## Start the pull mirroring process for a Project **(STARTER)**
 

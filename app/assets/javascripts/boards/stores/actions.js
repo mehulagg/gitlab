@@ -24,6 +24,8 @@ import destroyBoardListMutation from '../queries/board_list_destroy.mutation.gra
 import issueCreateMutation from '../queries/issue_create.mutation.graphql';
 import issueSetLabels from '../queries/issue_set_labels.mutation.graphql';
 import issueSetDueDate from '../queries/issue_set_due_date.mutation.graphql';
+import issueSetSubscriptionMutation from '../graphql/mutations/issue_set_subscription.mutation.graphql';
+import issueSetMilestone from '../queries/issue_set_milestone.mutation.graphql';
 
 const notImplemented = () => {
   /* eslint-disable-next-line @gitlab/require-i18n-strings */
@@ -178,6 +180,10 @@ export default {
     { state, commit, dispatch },
     { listId, replacedListId, newIndex, adjustmentValue },
   ) => {
+    if (listId === replacedListId) {
+      return;
+    }
+
     const { boardLists } = state;
     const backupList = { ...boardLists };
     const movedList = boardLists[listId];
@@ -314,6 +320,8 @@ export default {
   },
 
   setAssignees: ({ commit, getters }, assigneeUsernames) => {
+    commit(types.SET_ASSIGNEE_LOADING, true);
+
     return gqlClient
       .mutate({
         mutation: updateAssignees,
@@ -324,12 +332,43 @@ export default {
         },
       })
       .then(({ data }) => {
+        const { nodes } = data.issueSetAssignees?.issue?.assignees || [];
+
         commit('UPDATE_ISSUE_BY_ID', {
           issueId: getters.activeIssue.id,
           prop: 'assignees',
-          value: data.issueSetAssignees.issue.assignees.nodes,
+          value: nodes,
         });
+
+        return nodes;
+      })
+      .finally(() => {
+        commit(types.SET_ASSIGNEE_LOADING, false);
       });
+  },
+
+  setActiveIssueMilestone: async ({ commit, getters }, input) => {
+    const { activeIssue } = getters;
+    const { data } = await gqlClient.mutate({
+      mutation: issueSetMilestone,
+      variables: {
+        input: {
+          iid: String(activeIssue.iid),
+          milestoneId: getIdFromGraphQLId(input.milestoneId),
+          projectPath: input.projectPath,
+        },
+      },
+    });
+
+    if (data.updateIssue.errors?.length > 0) {
+      throw new Error(data.updateIssue.errors);
+    }
+
+    commit(types.UPDATE_ISSUE_BY_ID, {
+      issueId: activeIssue.id,
+      prop: 'milestone',
+      value: data.updateIssue.issue.milestone,
+    });
   },
 
   createNewIssue: ({ commit, state }, issueInput) => {
@@ -365,7 +404,10 @@ export default {
 
     dispatch('createNewIssue', issueInput)
       .then(res => {
-        commit(types.ADD_ISSUE_TO_LIST, { list, issue: formatIssue(res) });
+        commit(types.ADD_ISSUE_TO_LIST, {
+          list,
+          issue: formatIssue({ ...res, id: getIdFromGraphQLId(res.id) }),
+        });
         commit(types.REMOVE_ISSUE_FROM_LIST, { list, issue });
       })
       .catch(() => commit(types.ADD_ISSUE_TO_LIST_FAILURE, { list, issueId: issueInput.id }));
@@ -417,6 +459,29 @@ export default {
       issueId: activeIssue.id,
       prop: 'dueDate',
       value: data.updateIssue.issue.dueDate,
+    });
+  },
+
+  setActiveIssueSubscribed: async ({ commit, getters }, input) => {
+    const { data } = await gqlClient.mutate({
+      mutation: issueSetSubscriptionMutation,
+      variables: {
+        input: {
+          iid: String(getters.activeIssue.iid),
+          projectPath: input.projectPath,
+          subscribedState: input.subscribed,
+        },
+      },
+    });
+
+    if (data.issueSetSubscription?.errors?.length > 0) {
+      throw new Error(data.issueSetSubscription.errors);
+    }
+
+    commit(types.UPDATE_ISSUE_BY_ID, {
+      issueId: getters.activeIssue.id,
+      prop: 'subscribed',
+      value: data.issueSetSubscription.issue.subscribed,
     });
   },
 

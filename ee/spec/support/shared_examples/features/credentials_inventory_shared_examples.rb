@@ -2,8 +2,8 @@
 
 require 'spec_helper'
 
-RSpec.shared_examples_for 'credentials inventory personal access tokens' do |group_managed_account: false|
-  let_it_be(:user) { group_managed_account ? managed_user : create(:user, name: 'David') }
+RSpec.shared_examples_for 'credentials inventory personal access tokens' do
+  let_it_be(:user) { defined?(managed_user) ? managed_user : create(:user, name: 'abc') }
 
   context 'when a personal access token is active' do
     before_all do
@@ -19,15 +19,12 @@ RSpec.shared_examples_for 'credentials inventory personal access tokens' do |gro
     end
 
     it 'shows the details', :aggregate_failures do
-      expect(first_row.text).to include('David')
+      expect(first_row.text).to include('abc')
       expect(first_row.text).to include('api')
       expect(first_row.text).to include('2019-12-10')
       expect(first_row.text).to include('Never')
       expect(first_row.text).not_to include('2020-06-22')
-
-      unless group_managed_account
-        expect(first_row).to have_selector('a.btn', text: 'Revoke')
-      end
+      expect(first_row).to have_selector('a.btn', text: 'Revoke')
     end
   end
 
@@ -71,16 +68,13 @@ RSpec.shared_examples_for 'credentials inventory personal access tokens' do |gro
 
     it 'shows the details with a revoked date', :aggregate_failures do
       expect(first_row.text).to include('2020-06-22')
-
-      unless group_managed_account
-        expect(first_row).not_to have_selector('a.btn', text: 'Revoke')
-      end
+      expect(first_row).not_to have_selector('a.btn', text: 'Revoke')
     end
   end
 end
 
-RSpec.shared_examples_for 'credentials inventory SSH keys' do |group_managed_account: false|
-  let_it_be(:user) { group_managed_account ? managed_user : create(:user, name: 'David') }
+RSpec.shared_examples_for 'credentials inventory SSH keys' do
+  let_it_be(:user) { defined?(managed_user) ? managed_user : create(:user, name: 'abc') }
 
   context 'when a SSH key is active' do
     before_all do
@@ -96,7 +90,7 @@ RSpec.shared_examples_for 'credentials inventory SSH keys' do |group_managed_acc
     end
 
     it 'shows the details', :aggregate_failures do
-      expect(first_row.text).to include('David')
+      expect(first_row.text).to include('abc')
       expect(first_row.text).to include('2019-12-09')
       expect(first_row.text).to include('2019-12-10')
       expect(first_row.text).to include('Never')

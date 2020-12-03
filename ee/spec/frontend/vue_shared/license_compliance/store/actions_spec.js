@@ -1,13 +1,13 @@
 import MockAdapter from 'axios-mock-adapter';
+import { LICENSE_CHECK_NAME } from 'ee/approvals/constants';
+import { LICENSE_APPROVAL_STATUS } from 'ee/vue_shared/license_compliance/constants';
 import * as actions from 'ee/vue_shared/license_compliance/store/actions';
 import * as mutationTypes from 'ee/vue_shared/license_compliance/store/mutation_types';
 import createState from 'ee/vue_shared/license_compliance/store/state';
-import { LICENSE_APPROVAL_STATUS } from 'ee/vue_shared/license_compliance/constants';
-import { LICENSE_CHECK_NAME } from 'ee/approvals/constants';
-import { TEST_HOST } from 'spec/test_constants';
 import testAction from 'helpers/vuex_action_helper';
-import { approvedLicense, blacklistedLicense } from '../mock_data';
+import { TEST_HOST } from 'spec/test_constants';
 import axios from '~/lib/utils/axios_utils';
+import { approvedLicense, blacklistedLicense } from '../mock_data';
 
 describe('License store actions', () => {
   const apiUrlManageLicenses = `${TEST_HOST}/licenses/management`;

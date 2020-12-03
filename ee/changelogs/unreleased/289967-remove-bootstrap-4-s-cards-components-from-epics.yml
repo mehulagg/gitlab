@@ -1,0 +1,5 @@
+---
+title: Remove Bootstrap 4's Cards class name from Epics
+merge_request: 48856
+author: Takuya Noguchi
+type: performance

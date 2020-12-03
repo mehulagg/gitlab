@@ -1,7 +1,7 @@
+import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
 import Filters from 'ee/security_dashboard/components/filters.vue';
 import createStore from 'ee/security_dashboard/store';
-import { shallowMount, createLocalVue } from '@vue/test-utils';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);

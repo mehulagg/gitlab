@@ -1,6 +1,6 @@
+import { GlLink, GlButton } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 
-import { GlLink, GlButton } from '@gitlab/ui';
 import RequirementItem from 'ee/requirements/components/requirement_item.vue';
 import RequirementStatusBadge from 'ee/requirements/components/requirement_status_badge.vue';
 

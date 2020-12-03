@@ -1,6 +1,6 @@
+import { GlModal, GlSprintf } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import Component from 'ee/vue_shared/security_reports/components/dast_modal.vue';
-import { GlModal, GlSprintf } from '@gitlab/ui';
 
 describe('DAST Modal', () => {
   let wrapper;

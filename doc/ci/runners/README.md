@@ -1,7 +1,7 @@
 ---
 stage: Verify
 group: Runner
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference
 ---
 
@@ -37,10 +37,10 @@ multiple projects.
 
 If you are using a self-managed instance of GitLab:
 
-- Your administrator can install and register shared runners by
-  going to your project's **Settings > CI / CD**, expanding the
-  **Runners** section, and clicking **Show runner installation instructions**.
-  These instructions are also available [in the documentation](https://docs.gitlab.com/runner/install/index.html).
+- Your administrator can install and register shared runners by [following the documentation](https://docs.gitlab.com/runner/install/index.html).
+  <!-- going to your project's-->
+  <!-- **Settings > CI / CD**, expanding the **Runners** section, and clicking **Show runner installation instructions**.-->
+  <!-- These instructions are also available [in the documentation](https://docs.gitlab.com/runner/install/index.html).-->
 - The administrator can also configure a maximum number of shared runner [pipeline minutes for
   each group](../../user/admin_area/settings/continuous_integration.md#shared-runners-pipeline-minutes-quota).
 
@@ -271,21 +271,21 @@ How this feature works:
 1. You set the _maximum job timeout_ for a runner to 24 hours
 1. You set the _CI/CD Timeout_ for a project to **2 hours**
 1. You start a job
-1. The job, if running longer, will be timed out after **2 hours**
+1. The job, if running longer, times out after **2 hours**
 
 **Example 2 - Runner timeout not configured**
 
 1. You remove the _maximum job timeout_ configuration from a runner
 1. You set the _CI/CD Timeout_ for a project to **2 hours**
 1. You start a job
-1. The job, if running longer, will be timed out after **2 hours**
+1. The job, if running longer, times out after **2 hours**
 
 **Example 3 - Runner timeout smaller than project timeout**
 
 1. You set the _maximum job timeout_ for a runner to **30 minutes**
 1. You set the _CI/CD Timeout_ for a project to 2 hours
 1. You start a job
-1. The job, if running longer, will be timed out after **30 minutes**
+1. The job, if running longer, times out after **30 minutes**
 
 ## Be careful with sensitive information
 
@@ -360,8 +360,8 @@ value of the new token.
 It may be useful to know the IP address of a runner so you can troubleshoot
 issues with that runner. GitLab stores and displays the IP address by viewing
 the source of the HTTP requests it makes to GitLab when polling for jobs. The
-IP address is always kept up to date so if the runner IP changes it will be
-automatically updated in GitLab.
+IP address is always kept up to date so if the runner IP changes it
+automatically updates in GitLab.
 
 The IP address for shared runners and specific runners can be found in
 different places.
@@ -390,7 +390,7 @@ you must have Owner [permissions](../../user/permissions.md#project-members-perm
 
 You must set up a runner to be able to run all the different types of jobs
 that it may encounter on the projects it's shared over. This would be
-problematic for large amounts of projects, if it weren't for tags. 
+problematic for large amounts of projects, if it weren't for tags.
 
 GitLab CI tags are not the same as Git tags. GitLab CI tags are associated with runners.
 Git tags are associated with commits.

@@ -21,7 +21,7 @@ RSpec.describe Geo::VerificationWorker, :geo do
     context 'when on a primary node' do
       before do
         stub_primary_node
-        package_file.update!(verification_checksum: nil)
+        package_file.verification_started!
       end
 
       it_behaves_like 'an idempotent worker' do

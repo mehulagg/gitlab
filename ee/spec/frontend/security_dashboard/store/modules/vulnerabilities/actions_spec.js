@@ -1,16 +1,14 @@
 import MockAdapter from 'axios-mock-adapter';
+import * as actions from 'ee/security_dashboard/store/modules/vulnerabilities/actions';
+import * as types from 'ee/security_dashboard/store/modules/vulnerabilities/mutation_types';
+import initialState from 'ee/security_dashboard/store/modules/vulnerabilities/state';
 import testAction from 'helpers/vuex_action_helper';
 import { TEST_HOST } from 'spec/test_constants';
-import { DAYS } from 'ee/security_dashboard/store/modules/vulnerabilities/constants';
 
-import initialState from 'ee/security_dashboard/store/modules/vulnerabilities/state';
-import * as types from 'ee/security_dashboard/store/modules/vulnerabilities/mutation_types';
-import * as actions from 'ee/security_dashboard/store/modules/vulnerabilities/actions';
 import axios from '~/lib/utils/axios_utils';
 import toast from '~/vue_shared/plugins/global_toast';
 
 import mockDataVulnerabilities from './data/mock_data_vulnerabilities';
-import mockDataVulnerabilitiesHistory from './data/mock_data_vulnerabilities_history.json';
 
 const sourceBranch = 'feature-branch-1';
 
@@ -34,38 +32,24 @@ describe('vulnerabilities count actions', () => {
   describe('setPipelineId', () => {
     const pipelineId = 123;
 
-    it('should commit the correct mutation', done => {
-      testAction(
-        actions.setPipelineId,
-        pipelineId,
-        state,
-        [
-          {
-            type: types.SET_PIPELINE_ID,
-            payload: pipelineId,
-          },
-        ],
-        [],
-        done,
-      );
+    it('should commit the correct mutation', () => {
+      return testAction(actions.setPipelineId, pipelineId, state, [
+        {
+          type: types.SET_PIPELINE_ID,
+          payload: pipelineId,
+        },
+      ]);
     });
   });
 
   describe('setSourceBranch', () => {
-    it('should commit the correct mutation', done => {
-      testAction(
-        actions.setSourceBranch,
-        sourceBranch,
-        state,
-        [
-          {
-            type: types.SET_SOURCE_BRANCH,
-            payload: sourceBranch,
-          },
-        ],
-        [],
-        done,
-      );
+    it('should commit the correct mutation', () => {
+      return testAction(actions.setSourceBranch, sourceBranch, state, [
+        {
+          type: types.SET_SOURCE_BRANCH,
+          payload: sourceBranch,
+        },
+      ]);
     });
   });
 });
@@ -117,8 +101,8 @@ describe('vulnerabilities actions', () => {
           .replyOnce(200, data, headers);
       });
 
-      it('should dispatch the request and success actions', done => {
-        testAction(
+      it('should dispatch the request and success actions', () => {
+        return testAction(
           actions.fetchVulnerabilities,
           {},
           state,
@@ -130,12 +114,11 @@ describe('vulnerabilities actions', () => {
               payload: { data, headers },
             },
           ],
-          done,
         );
       });
 
-      it('should pass through the filters', done => {
-        testAction(
+      it('should pass through the filters', () => {
+        return testAction(
           actions.fetchVulnerabilities,
           params,
           state,
@@ -147,7 +130,6 @@ describe('vulnerabilities actions', () => {
               payload: { data: filteredData, headers },
             },
           ],
-          done,
         );
       });
     });
@@ -159,8 +141,8 @@ describe('vulnerabilities actions', () => {
         mock.onGet(state.vulnerabilitiesEndpoint).replyOnce(errorCode, {});
       });
 
-      it('should dispatch the request and error actions', done => {
-        testAction(
+      it('should dispatch the request and error actions', () => {
+        return testAction(
           actions.fetchVulnerabilities,
           {},
           state,
@@ -169,7 +151,6 @@ describe('vulnerabilities actions', () => {
             { type: 'requestVulnerabilities' },
             { type: 'receiveVulnerabilitiesError', payload: errorCode },
           ],
-          done,
         );
       });
     });
@@ -179,95 +160,64 @@ describe('vulnerabilities actions', () => {
         state.vulnerabilitiesEndpoint = '';
       });
 
-      it('should not do anything', done => {
-        testAction(actions.fetchVulnerabilities, {}, state, [], [], done);
+      it('should not do anything', () => {
+        return testAction(actions.fetchVulnerabilities, {}, state);
       });
     });
   });
 
   describe('receiveVulnerabilitiesSuccess', () => {
-    it('should commit the success mutation', done => {
-      testAction(
-        actions.receiveVulnerabilitiesSuccess,
-        { headers, data },
-        state,
-        [
-          {
-            type: types.RECEIVE_VULNERABILITIES_SUCCESS,
-            payload: { pageInfo, vulnerabilities: data },
-          },
-        ],
-        [],
-        done,
-      );
+    it('should commit the success mutation', () => {
+      return testAction(actions.receiveVulnerabilitiesSuccess, { headers, data }, state, [
+        {
+          type: types.RECEIVE_VULNERABILITIES_SUCCESS,
+          payload: { pageInfo, vulnerabilities: data },
+        },
+      ]);
     });
   });
 
   describe('receiveVulnerabilitiesError', () => {
-    it('should commit the error mutation', done => {
+    it('should commit the error mutation', () => {
       const errorCode = 403;
 
-      testAction(
-        actions.receiveVulnerabilitiesError,
-        errorCode,
-        state,
-        [{ type: types.RECEIVE_VULNERABILITIES_ERROR, payload: errorCode }],
-        [],
-        done,
-      );
+      return testAction(actions.receiveVulnerabilitiesError, errorCode, state, [
+        { type: types.RECEIVE_VULNERABILITIES_ERROR, payload: errorCode },
+      ]);
     });
   });
 
   describe('requestVulnerabilities', () => {
-    it('should commit the request mutation', done => {
-      testAction(
-        actions.requestVulnerabilities,
-        {},
-        state,
-        [{ type: types.REQUEST_VULNERABILITIES }],
-        [],
-        done,
-      );
+    it('should commit the request mutation', () => {
+      return testAction(actions.requestVulnerabilities, {}, state, [
+        { type: types.REQUEST_VULNERABILITIES },
+      ]);
     });
   });
 
   describe('setVulnerabilitiesEndpoint', () => {
-    it('should commit the correct mutuation', done => {
+    it('should commit the correct mutuation', () => {
       const endpoint = 'fakepath.json';
 
-      testAction(
-        actions.setVulnerabilitiesEndpoint,
-        endpoint,
-        state,
-        [
-          {
-            type: types.SET_VULNERABILITIES_ENDPOINT,
-            payload: endpoint,
-          },
-        ],
-        [],
-        done,
-      );
+      return testAction(actions.setVulnerabilitiesEndpoint, endpoint, state, [
+        {
+          type: types.SET_VULNERABILITIES_ENDPOINT,
+          payload: endpoint,
+        },
+      ]);
     });
   });
 
   describe('setVulnerabilitiesPage', () => {
-    it('should commit the correct mutuation', done => {
+    it('should commit the correct mutuation', () => {
       const page = 3;
 
-      testAction(
-        actions.setVulnerabilitiesPage,
-        page,
-        state,
-        [
-          {
-            type: types.SET_VULNERABILITIES_PAGE,
-            payload: page,
-          },
-        ],
-        [],
-        done,
-      );
+      return testAction(actions.setVulnerabilitiesPage, page, state, [
+        {
+          type: types.SET_VULNERABILITIES_PAGE,
+          payload: page,
+        },
+      ]);
     });
   });
 });
@@ -279,22 +229,15 @@ describe('openModal', () => {
     state = initialState();
   });
 
-  it('should commit the SET_MODAL_DATA mutation', done => {
+  it('should commit the SET_MODAL_DATA mutation', () => {
     const vulnerability = mockDataVulnerabilities[0];
 
-    testAction(
-      actions.openModal,
-      { vulnerability },
-      state,
-      [
-        {
-          type: types.SET_MODAL_DATA,
-          payload: { vulnerability },
-        },
-      ],
-      [],
-      done,
-    );
+    return testAction(actions.openModal, { vulnerability }, state, [
+      {
+        type: types.SET_MODAL_DATA,
+        payload: { vulnerability },
+      },
+    ]);
   });
 });
 
@@ -352,8 +295,8 @@ describe('issue creation', () => {
           .replyOnce(200, { data });
       });
 
-      it('should dispatch the request and success actions', done => {
-        testAction(
+      it('should dispatch the request and success actions', () => {
+        return testAction(
           actions.createIssue,
           { vulnerability },
           {},
@@ -365,7 +308,6 @@ describe('issue creation', () => {
               payload: { data },
             },
           ],
-          done,
         );
       });
     });
@@ -375,10 +317,10 @@ describe('issue creation', () => {
         mock.onPost(vulnerability.create_vulnerability_feedback_issue_path).replyOnce(404, {});
       });
 
-      it('should dispatch the request and error actions', done => {
+      it('should dispatch the request and error actions', () => {
         const flashError = false;
 
-        testAction(
+        return testAction(
           actions.createIssue,
           { vulnerability, flashError },
           {},
@@ -387,55 +329,37 @@ describe('issue creation', () => {
             { type: 'requestCreateIssue' },
             { type: 'receiveCreateIssueError', payload: { flashError } },
           ],
-          done,
         );
       });
     });
   });
 
   describe('receiveCreateIssueSuccess', () => {
-    it('should commit the success mutation', done => {
+    it('should commit the success mutation', () => {
       const data = mockDataVulnerabilities[0];
 
-      testAction(
-        actions.receiveCreateIssueSuccess,
-        { data },
-        state,
-        [
-          {
-            type: types.RECEIVE_CREATE_ISSUE_SUCCESS,
-            payload: { data },
-          },
-        ],
-        [],
-        done,
-      );
+      return testAction(actions.receiveCreateIssueSuccess, { data }, state, [
+        {
+          type: types.RECEIVE_CREATE_ISSUE_SUCCESS,
+          payload: { data },
+        },
+      ]);
     });
   });
 
   describe('receiveCreateIssueError', () => {
-    it('should commit the error mutation', done => {
-      testAction(
-        actions.receiveCreateIssueError,
-        {},
-        state,
-        [{ type: types.RECEIVE_CREATE_ISSUE_ERROR }],
-        [],
-        done,
-      );
+    it('should commit the error mutation', () => {
+      return testAction(actions.receiveCreateIssueError, {}, state, [
+        { type: types.RECEIVE_CREATE_ISSUE_ERROR },
+      ]);
     });
   });
 
   describe('requestCreateIssue', () => {
-    it('should commit the request mutation', done => {
-      testAction(
-        actions.requestCreateIssue,
-        {},
-        state,
-        [{ type: types.REQUEST_CREATE_ISSUE }],
-        [],
-        done,
-      );
+    it('should commit the request mutation', () => {
+      return testAction(actions.requestCreateIssue, {}, state, [
+        { type: types.REQUEST_CREATE_ISSUE },
+      ]);
     });
   });
 });
@@ -467,8 +391,8 @@ describe('merge request creation', () => {
           .replyOnce(200, { data });
       });
 
-      it('should dispatch the request and success actions', done => {
-        testAction(
+      it('should dispatch the request and success actions', () => {
+        return testAction(
           actions.createMergeRequest,
           { vulnerability },
           {},
@@ -480,7 +404,6 @@ describe('merge request creation', () => {
               payload: { data },
             },
           ],
-          done,
         );
       });
     });
@@ -490,10 +413,10 @@ describe('merge request creation', () => {
         mock.onPost(vulnerability.vulnerability_feedback_merge_request_path).replyOnce(404, {});
       });
 
-      it('should dispatch the request and error actions', done => {
+      it('should dispatch the request and error actions', () => {
         const flashError = false;
 
-        testAction(
+        return testAction(
           actions.createMergeRequest,
           { vulnerability, flashError },
           {},
@@ -502,55 +425,37 @@ describe('merge request creation', () => {
             { type: 'requestCreateMergeRequest' },
             { type: 'receiveCreateMergeRequestError', payload: { flashError } },
           ],
-          done,
         );
       });
     });
   });
 
   describe('receiveCreateMergeRequestSuccess', () => {
-    it('should commit the success mutation', done => {
+    it('should commit the success mutation', () => {
       const data = mockDataVulnerabilities[0];
 
-      testAction(
-        actions.receiveCreateMergeRequestSuccess,
-        { data },
-        state,
-        [
-          {
-            type: types.RECEIVE_CREATE_MERGE_REQUEST_SUCCESS,
-            payload: { data },
-          },
-        ],
-        [],
-        done,
-      );
+      return testAction(actions.receiveCreateMergeRequestSuccess, { data }, state, [
+        {
+          type: types.RECEIVE_CREATE_MERGE_REQUEST_SUCCESS,
+          payload: { data },
+        },
+      ]);
     });
   });
 
   describe('receiveCreateMergeRequestError', () => {
-    it('should commit the error mutation', done => {
-      testAction(
-        actions.receiveCreateMergeRequestError,
-        {},
-        state,
-        [{ type: types.RECEIVE_CREATE_MERGE_REQUEST_ERROR }],
-        [],
-        done,
-      );
+    it('should commit the error mutation', () => {
+      return testAction(actions.receiveCreateMergeRequestError, {}, state, [
+        { type: types.RECEIVE_CREATE_MERGE_REQUEST_ERROR },
+      ]);
     });
   });
 
   describe('requestCreateMergeRequest', () => {
-    it('should commit the request mutation', done => {
-      testAction(
-        actions.requestCreateMergeRequest,
-        {},
-        state,
-        [{ type: types.REQUEST_CREATE_MERGE_REQUEST }],
-        [],
-        done,
-      );
+    it('should commit the request mutation', () => {
+      return testAction(actions.requestCreateMergeRequest, {}, state, [
+        { type: types.REQUEST_CREATE_MERGE_REQUEST },
+      ]);
     });
   });
 });
@@ -584,8 +489,8 @@ describe('vulnerability dismissal', () => {
           .replyOnce(200, data);
       });
 
-      it('should dispatch the request and success actions', done => {
-        testAction(
+      it('should dispatch the request and success actions', () => {
+        return testAction(
           actions.dismissVulnerability,
           { vulnerability, comment },
           {},
@@ -598,17 +503,15 @@ describe('vulnerability dismissal', () => {
               payload: { data, vulnerability },
             },
           ],
-          done,
         );
       });
 
-      it('should show the dismissal toast message', done => {
+      it('should show the dismissal toast message', () => {
         const checkToastMessage = () => {
           expect(toast).toHaveBeenCalledTimes(1);
-          done();
         };
 
-        testAction(
+        return testAction(
           actions.dismissVulnerability,
           { vulnerability, comment },
           {},
@@ -631,10 +534,10 @@ describe('vulnerability dismissal', () => {
         mock.onPost(vulnerability.create_vulnerability_feedback_dismissal_path).replyOnce(404, {});
       });
 
-      it('should dispatch the request and error actions', done => {
+      it('should dispatch the request and error actions', () => {
         const flashError = false;
 
-        testAction(
+        return testAction(
           actions.dismissVulnerability,
           { vulnerability, flashError },
           {},
@@ -643,7 +546,6 @@ describe('vulnerability dismissal', () => {
             { type: 'requestDismissVulnerability' },
             { type: 'receiveDismissVulnerabilityError', payload: { flashError } },
           ],
-          done,
         );
       });
     });
@@ -661,17 +563,16 @@ describe('vulnerability dismissal', () => {
           .replyOnce(200, data);
       });
 
-      it('should show the dismissal toast message and refresh vulnerabilities', done => {
+      it('should show the dismissal toast message and refresh vulnerabilities', () => {
         const checkToastMessage = () => {
           const [message, options] = toast.mock.calls[0];
 
           expect(toast).toHaveBeenCalledTimes(1);
           expect(message).toContain('Turn off the hide dismissed toggle to view');
           expect(Object.keys(options.action)).toHaveLength(2);
-          done();
         };
 
-        testAction(
+        return testAction(
           actions.dismissVulnerability,
           { vulnerability, comment },
           state,
@@ -693,7 +594,7 @@ describe('vulnerability dismissal', () => {
         state.vulnerabilities = [mockDataVulnerabilities[0]];
         state.pageInfo.page = 3;
 
-        testAction(
+        return testAction(
           actions.dismissVulnerability,
           { vulnerability, comment },
           state,
@@ -713,48 +614,31 @@ describe('vulnerability dismissal', () => {
   });
 
   describe('receiveDismissVulnerabilitySuccess', () => {
-    it('should commit the success mutation', done => {
+    it('should commit the success mutation', () => {
       const data = mockDataVulnerabilities[0];
 
-      testAction(
-        actions.receiveDismissVulnerabilitySuccess,
-        { data },
-        state,
-        [
-          {
-            type: types.RECEIVE_DISMISS_VULNERABILITY_SUCCESS,
-            payload: { data },
-          },
-        ],
-        [],
-        done,
-      );
+      return testAction(actions.receiveDismissVulnerabilitySuccess, { data }, state, [
+        {
+          type: types.RECEIVE_DISMISS_VULNERABILITY_SUCCESS,
+          payload: { data },
+        },
+      ]);
     });
   });
 
   describe('receiveDismissVulnerabilityError', () => {
-    it('should commit the error mutation', done => {
-      testAction(
-        actions.receiveDismissVulnerabilityError,
-        {},
-        state,
-        [{ type: types.RECEIVE_DISMISS_VULNERABILITY_ERROR }],
-        [],
-        done,
-      );
+    it('should commit the error mutation', () => {
+      return testAction(actions.receiveDismissVulnerabilityError, {}, state, [
+        { type: types.RECEIVE_DISMISS_VULNERABILITY_ERROR },
+      ]);
     });
   });
 
   describe('requestDismissVulnerability', () => {
-    it('should commit the request mutation', done => {
-      testAction(
-        actions.requestDismissVulnerability,
-        {},
-        state,
-        [{ type: types.REQUEST_DISMISS_VULNERABILITY }],
-        [],
-        done,
-      );
+    it('should commit the request mutation', () => {
+      return testAction(actions.requestDismissVulnerability, {}, state, [
+        { type: types.REQUEST_DISMISS_VULNERABILITY },
+      ]);
     });
   });
 });
@@ -786,17 +670,16 @@ describe('add vulnerability dismissal comment', () => {
         mock.onPatch(url).replyOnce(200, data);
       });
 
-      it('should dispatch the request and success actions', done => {
+      it('should dispatch the request and success actions', () => {
         const checkPassedData = () => {
           const { project_id, id } = vulnerability.dismissal_feedback;
           const expected = JSON.stringify({ project_id, id, comment });
 
           expect(mock.history.patch[0].data).toBe(expected);
           expect(toast).toHaveBeenCalledTimes(1);
-          done();
         };
 
-        testAction(
+        return testAction(
           actions.addDismissalComment,
           { vulnerability, comment },
           {},
@@ -810,17 +693,16 @@ describe('add vulnerability dismissal comment', () => {
         );
       });
 
-      it('should show the add dismissal toast message', done => {
+      it('should show the add dismissal toast message', () => {
         const checkPassedData = () => {
           const { project_id, id } = vulnerability.dismissal_feedback;
           const expected = JSON.stringify({ project_id, id, comment });
 
           expect(mock.history.patch[0].data).toBe(expected);
           expect(toast).toHaveBeenCalledTimes(1);
-          done();
         };
 
-        testAction(
+        return testAction(
           actions.addDismissalComment,
           { vulnerability, comment },
           {},
@@ -840,54 +722,38 @@ describe('add vulnerability dismissal comment', () => {
         mock.onPatch(url).replyOnce(404);
       });
 
-      it('should dispatch the request and error actions', done => {
-        testAction(
+      it('should dispatch the request and error actions', () => {
+        return testAction(
           actions.addDismissalComment,
           { vulnerability, comment },
           {},
           [],
           [{ type: 'requestAddDismissalComment' }, { type: 'receiveAddDismissalCommentError' }],
-          done,
         );
       });
     });
 
     describe('receiveAddDismissalCommentSuccess', () => {
-      it('should commit the success mutation', done => {
-        testAction(
-          actions.receiveAddDismissalCommentSuccess,
-          { data },
-          state,
-          [{ type: types.RECEIVE_ADD_DISMISSAL_COMMENT_SUCCESS, payload: { data } }],
-          [],
-          done,
-        );
+      it('should commit the success mutation', () => {
+        return testAction(actions.receiveAddDismissalCommentSuccess, { data }, state, [
+          { type: types.RECEIVE_ADD_DISMISSAL_COMMENT_SUCCESS, payload: { data } },
+        ]);
       });
     });
 
     describe('receiveAddDismissalCommentError', () => {
-      it('should commit the error mutation', done => {
-        testAction(
-          actions.receiveAddDismissalCommentError,
-          {},
-          state,
-          [{ type: types.RECEIVE_ADD_DISMISSAL_COMMENT_ERROR }],
-          [],
-          done,
-        );
+      it('should commit the error mutation', () => {
+        return testAction(actions.receiveAddDismissalCommentError, {}, state, [
+          { type: types.RECEIVE_ADD_DISMISSAL_COMMENT_ERROR },
+        ]);
       });
     });
 
     describe('requestAddDismissalComment', () => {
-      it('should commit the request mutation', done => {
-        testAction(
-          actions.requestAddDismissalComment,
-          {},
-          state,
-          [{ type: types.REQUEST_ADD_DISMISSAL_COMMENT }],
-          [],
-          done,
-        );
+      it('should commit the request mutation', () => {
+        return testAction(actions.requestAddDismissalComment, {}, state, [
+          { type: types.REQUEST_ADD_DISMISSAL_COMMENT },
+        ]);
       });
     });
   });
@@ -912,16 +778,15 @@ describe('add vulnerability dismissal comment', () => {
         mock.onPatch(url).replyOnce(200, data);
       });
 
-      it('should dispatch the request and success actions', done => {
+      it('should dispatch the request and success actions', () => {
         const checkPassedData = () => {
           const { project_id } = vulnerability.dismissal_feedback;
           const expected = JSON.stringify({ project_id, comment });
 
           expect(mock.history.patch[0].data).toBe(expected);
-          done();
         };
 
-        testAction(
+        return testAction(
           actions.deleteDismissalComment,
           { vulnerability },
           {},
@@ -938,17 +803,16 @@ describe('add vulnerability dismissal comment', () => {
         );
       });
 
-      it('should show the delete dismissal comment toast message', done => {
+      it('should show the delete dismissal comment toast message', () => {
         const checkPassedData = () => {
           const { project_id } = vulnerability.dismissal_feedback;
           const expected = JSON.stringify({ project_id, comment });
 
           expect(mock.history.patch[0].data).toBe(expected);
           expect(toast).toHaveBeenCalledTimes(1);
-          done();
         };
 
-        testAction(
+        return testAction(
           actions.deleteDismissalComment,
           { vulnerability },
           {},
@@ -971,8 +835,8 @@ describe('add vulnerability dismissal comment', () => {
         mock.onPatch(url).replyOnce(404);
       });
 
-      it('should dispatch the request and error actions', done => {
-        testAction(
+      it('should dispatch the request and error actions', () => {
+        return testAction(
           actions.deleteDismissalComment,
           { vulnerability },
           {},
@@ -981,47 +845,31 @@ describe('add vulnerability dismissal comment', () => {
             { type: 'requestDeleteDismissalComment' },
             { type: 'receiveDeleteDismissalCommentError' },
           ],
-          done,
         );
       });
     });
 
     describe('receiveDeleteDismissalCommentSuccess', () => {
-      it('should commit the success mutation', done => {
-        testAction(
-          actions.receiveDeleteDismissalCommentSuccess,
-          { data },
-          state,
-          [{ type: types.RECEIVE_DELETE_DISMISSAL_COMMENT_SUCCESS, payload: { data } }],
-          [],
-          done,
-        );
+      it('should commit the success mutation', () => {
+        return testAction(actions.receiveDeleteDismissalCommentSuccess, { data }, state, [
+          { type: types.RECEIVE_DELETE_DISMISSAL_COMMENT_SUCCESS, payload: { data } },
+        ]);
       });
     });
 
     describe('receiveDeleteDismissalCommentError', () => {
-      it('should commit the error mutation', done => {
-        testAction(
-          actions.receiveDeleteDismissalCommentError,
-          {},
-          state,
-          [{ type: types.RECEIVE_DELETE_DISMISSAL_COMMENT_ERROR }],
-          [],
-          done,
-        );
+      it('should commit the error mutation', () => {
+        return testAction(actions.receiveDeleteDismissalCommentError, {}, state, [
+          { type: types.RECEIVE_DELETE_DISMISSAL_COMMENT_ERROR },
+        ]);
       });
     });
 
     describe('requestDeleteDismissalComment', () => {
-      it('should commit the request mutation', done => {
-        testAction(
-          actions.requestDeleteDismissalComment,
-          {},
-          state,
-          [{ type: types.REQUEST_DELETE_DISMISSAL_COMMENT }],
-          [],
-          done,
-        );
+      it('should commit the request mutation', () => {
+        return testAction(actions.requestDeleteDismissalComment, {}, state, [
+          { type: types.REQUEST_DELETE_DISMISSAL_COMMENT },
+        ]);
       });
     });
   });
@@ -1052,14 +900,14 @@ describe('dismiss multiple vulnerabilities', () => {
       mock.restore();
     });
 
-    it('should fire the dismissSelected mutations when all is well', done => {
+    it('should fire the dismissSelected mutations when all is well', () => {
       mock
         .onPost(state.vulnerabilities[0].create_vulnerability_feedback_dismissal_path)
         .replyOnce(200)
         .onPost(state.vulnerabilities[1].create_vulnerability_feedback_dismissal_path)
         .replyOnce(200);
 
-      testAction(
+      return testAction(
         actions.dismissSelectedVulnerabilities,
         {},
         state,
@@ -1075,19 +923,18 @@ describe('dismiss multiple vulnerabilities', () => {
           expect(mock.history.post[0].url).toEqual(
             state.vulnerabilities[0].create_vulnerability_feedback_dismissal_path,
           );
-          done();
         },
       );
     });
 
-    it('should trigger the error state when something goes wrong', done => {
+    it('should trigger the error state when something goes wrong', () => {
       mock
         .onPost(state.vulnerabilities[0].create_vulnerability_feedback_dismissal_path)
         .replyOnce(200)
         .onPost(state.vulnerabilities[1].create_vulnerability_feedback_dismissal_path)
         .replyOnce(500);
 
-      testAction(
+      return testAction(
         actions.dismissSelectedVulnerabilities,
         {},
         state,
@@ -1096,33 +943,25 @@ describe('dismiss multiple vulnerabilities', () => {
           { type: 'requestDismissSelectedVulnerabilities' },
           { type: 'receiveDismissSelectedVulnerabilitiesError', payload: { flashError: true } },
         ],
-        done,
       );
     });
 
     describe('receiveDismissSelectedVulnerabilitiesSuccess', () => {
-      it(`should commit ${types.RECEIVE_DISMISS_SELECTED_VULNERABILITIES_SUCCESS}`, done => {
-        testAction(
+      it(`should commit ${types.RECEIVE_DISMISS_SELECTED_VULNERABILITIES_SUCCESS}`, () => {
+        return testAction(
           actions.receiveDismissSelectedVulnerabilitiesSuccess,
           { selectedVulnerabilities },
           state,
           [{ type: types.RECEIVE_DISMISS_SELECTED_VULNERABILITIES_SUCCESS }],
-          [],
-          done,
         );
       });
     });
 
     describe('receiveDismissSelectedVulnerabilitiesError', () => {
-      it(`should commit ${types.RECEIVE_DISMISS_SELECTED_VULNERABILITIES_ERROR}`, done => {
-        testAction(
-          actions.receiveDismissSelectedVulnerabilitiesError,
-          {},
-          state,
-          [{ type: types.RECEIVE_DISMISS_SELECTED_VULNERABILITIES_ERROR }],
-          [],
-          done,
-        );
+      it(`should commit ${types.RECEIVE_DISMISS_SELECTED_VULNERABILITIES_ERROR}`, () => {
+        return testAction(actions.receiveDismissSelectedVulnerabilitiesError, {}, state, [
+          { type: types.RECEIVE_DISMISS_SELECTED_VULNERABILITIES_ERROR },
+        ]);
       });
     });
   });
@@ -1136,58 +975,38 @@ describe('selecting vulnerabilities', () => {
   });
 
   describe('selectVulnerability', () => {
-    it(`selectVulnerability should commit ${types.SELECT_VULNERABILITY}`, done => {
+    it(`selectVulnerability should commit ${types.SELECT_VULNERABILITY}`, () => {
       const id = 1234;
 
-      testAction(
-        actions.selectVulnerability,
-        { id },
-        state,
-        [{ type: types.SELECT_VULNERABILITY, payload: id }],
-        [],
-        done,
-      );
+      return testAction(actions.selectVulnerability, { id }, state, [
+        { type: types.SELECT_VULNERABILITY, payload: id },
+      ]);
     });
   });
 
   describe('deselectVulnerability', () => {
-    it(`should commit ${types.DESELECT_VULNERABILITY}`, done => {
+    it(`should commit ${types.DESELECT_VULNERABILITY}`, () => {
       const id = 1234;
 
-      testAction(
-        actions.deselectVulnerability,
-        { id },
-        state,
-        [{ type: types.DESELECT_VULNERABILITY, payload: id }],
-        [],
-        done,
-      );
+      return testAction(actions.deselectVulnerability, { id }, state, [
+        { type: types.DESELECT_VULNERABILITY, payload: id },
+      ]);
     });
   });
 
   describe('selectAllVulnerabilities', () => {
-    it(`should commit ${types.SELECT_ALL_VULNERABILITIES}`, done => {
-      testAction(
-        actions.selectAllVulnerabilities,
-        {},
-        state,
-        [{ type: types.SELECT_ALL_VULNERABILITIES }],
-        [],
-        done,
-      );
+    it(`should commit ${types.SELECT_ALL_VULNERABILITIES}`, () => {
+      return testAction(actions.selectAllVulnerabilities, {}, state, [
+        { type: types.SELECT_ALL_VULNERABILITIES },
+      ]);
     });
   });
 
   describe('deselectAllVulnerabilities', () => {
-    it(`should commit ${types.DESELECT_ALL_VULNERABILITIES}`, done => {
-      testAction(
-        actions.deselectAllVulnerabilities,
-        {},
-        state,
-        [{ type: types.DESELECT_ALL_VULNERABILITIES }],
-        [],
-        done,
-      );
+    it(`should commit ${types.DESELECT_ALL_VULNERABILITIES}`, () => {
+      return testAction(actions.deselectAllVulnerabilities, {}, state, [
+        { type: types.DESELECT_ALL_VULNERABILITIES },
+      ]);
     });
   });
 });
@@ -1199,19 +1018,12 @@ describe('showDismissalDeleteButtons', () => {
     state = initialState();
   });
 
-  it('commits show dismissal delete buttons', done => {
-    testAction(
-      actions.showDismissalDeleteButtons,
-      null,
-      state,
-      [
-        {
-          type: types.SHOW_DISMISSAL_DELETE_BUTTONS,
-        },
-      ],
-      [],
-      done,
-    );
+  it('commits show dismissal delete buttons', () => {
+    return testAction(actions.showDismissalDeleteButtons, null, state, [
+      {
+        type: types.SHOW_DISMISSAL_DELETE_BUTTONS,
+      },
+    ]);
   });
 });
 
@@ -1222,19 +1034,12 @@ describe('hideDismissalDeleteButtons', () => {
     state = initialState();
   });
 
-  it('commits hide dismissal delete buttons', done => {
-    testAction(
-      actions.hideDismissalDeleteButtons,
-      null,
-      state,
-      [
-        {
-          type: types.HIDE_DISMISSAL_DELETE_BUTTONS,
-        },
-      ],
-      [],
-      done,
-    );
+  it('commits hide dismissal delete buttons', () => {
+    return testAction(actions.hideDismissalDeleteButtons, null, state, [
+      {
+        type: types.HIDE_DISMISSAL_DELETE_BUTTONS,
+      },
+    ]);
   });
 });
 
@@ -1257,8 +1062,8 @@ describe('revert vulnerability dismissal', () => {
         mock.onDelete(url).replyOnce(200, {});
       });
 
-      it('should dispatch the request and success actions', done => {
-        testAction(
+      it('should dispatch the request and success actions', () => {
+        return testAction(
           actions.undoDismiss,
           { vulnerability },
           {},
@@ -1267,7 +1072,6 @@ describe('revert vulnerability dismissal', () => {
             { type: 'requestUndoDismiss' },
             { type: 'receiveUndoDismissSuccess', payload: { vulnerability } },
           ],
-          done,
         );
       });
     });
@@ -1277,10 +1081,10 @@ describe('revert vulnerability dismissal', () => {
         mock.onDelete(url).replyOnce(404, {});
       });
 
-      it('should dispatch the request and error actions', done => {
+      it('should dispatch the request and error actions', () => {
         const flashError = false;
 
-        testAction(
+        return testAction(
           actions.undoDismiss,
           { vulnerability, flashError },
           {},
@@ -1289,262 +1093,56 @@ describe('revert vulnerability dismissal', () => {
             { type: 'requestUndoDismiss' },
             { type: 'receiveUndoDismissError', payload: { flashError } },
           ],
-          done,
         );
       });
     });
   });
 
   describe('receiveUndoDismissSuccess', () => {
-    it('should commit the success mutation', done => {
+    it('should commit the success mutation', () => {
       const state = initialState;
       const data = mockDataVulnerabilities[0];
 
-      testAction(
-        actions.receiveUndoDismissSuccess,
-        { data },
-        state,
-        [
-          {
-            type: types.RECEIVE_REVERT_DISMISSAL_SUCCESS,
-            payload: { data },
-          },
-        ],
-        [],
-        done,
-      );
+      return testAction(actions.receiveUndoDismissSuccess, { data }, state, [
+        {
+          type: types.RECEIVE_REVERT_DISMISSAL_SUCCESS,
+          payload: { data },
+        },
+      ]);
     });
   });
 
   describe('receiveUndoDismissError', () => {
-    it('should commit the error mutation', done => {
+    it('should commit the error mutation', () => {
       const state = initialState;
 
-      testAction(
-        actions.receiveUndoDismissError,
-        {},
-        state,
-        [{ type: types.RECEIVE_REVERT_DISMISSAL_ERROR }],
-        [],
-        done,
-      );
+      return testAction(actions.receiveUndoDismissError, {}, state, [
+        { type: types.RECEIVE_REVERT_DISMISSAL_ERROR },
+      ]);
     });
   });
 
   describe('requestUndoDismiss', () => {
-    it('should commit the request mutation', done => {
+    it('should commit the request mutation', () => {
       const state = initialState;
 
-      testAction(
-        actions.requestUndoDismiss,
-        {},
-        state,
-        [{ type: types.REQUEST_REVERT_DISMISSAL }],
-        [],
-        done,
-      );
+      return testAction(actions.requestUndoDismiss, {}, state, [
+        { type: types.REQUEST_REVERT_DISMISSAL },
+      ]);
     });
   });
 });
 
-describe('vulnerabilities history actions', () => {
-  const data = mockDataVulnerabilitiesHistory;
-  const params = { filters: { severity: ['critical'] } };
-  const filteredData = mockDataVulnerabilitiesHistory.critical;
-  let state;
-
-  beforeEach(() => {
-    state = initialState();
+describe('dismissal comment box', () => {
+  it('should commit the open comment mutation with a default payload', () => {
+    return testAction(actions.openDismissalCommentBox, undefined, undefined, [
+      { type: types.OPEN_DISMISSAL_COMMENT_BOX },
+    ]);
   });
 
-  describe('setVulnerabilitiesHistoryEndpoint', () => {
-    it('should commit the correct mutuation', done => {
-      const endpoint = 'fakepath.json';
-
-      testAction(
-        actions.setVulnerabilitiesHistoryEndpoint,
-        endpoint,
-        state,
-        [
-          {
-            type: types.SET_VULNERABILITIES_HISTORY_ENDPOINT,
-            payload: endpoint,
-          },
-        ],
-        [],
-        done,
-      );
-    });
-  });
-
-  describe('setVulnerabilitiesHistoryDayRange', () => {
-    it('should commit the number of past days to show', done => {
-      const days = DAYS.THIRTY;
-      testAction(
-        actions.setVulnerabilitiesHistoryDayRange,
-        days,
-        state,
-        [
-          {
-            type: types.SET_VULNERABILITIES_HISTORY_DAY_RANGE,
-            payload: days,
-          },
-        ],
-        [],
-        done,
-      );
-    });
-  });
-
-  describe('fetchVulnerabilitiesHistory', () => {
-    let mock;
-
-    beforeEach(() => {
-      state.vulnerabilitiesHistoryEndpoint = `${TEST_HOST}/vulnerabilitIES_HISTORY.json`;
-      mock = new MockAdapter(axios);
-    });
-
-    afterEach(() => {
-      mock.restore();
-    });
-
-    describe('on success', () => {
-      beforeEach(() => {
-        mock
-          .onGet(state.vulnerabilitiesHistoryEndpoint, { params })
-          .replyOnce(200, filteredData)
-          .onGet(state.vulnerabilitiesHistoryEndpoint)
-          .replyOnce(200, data);
-      });
-
-      it('should dispatch the request and success actions', done => {
-        testAction(
-          actions.fetchVulnerabilitiesHistory,
-          {},
-          state,
-          [],
-          [
-            { type: 'requestVulnerabilitiesHistory' },
-            {
-              type: 'receiveVulnerabilitiesHistorySuccess',
-              payload: { data },
-            },
-          ],
-          done,
-        );
-      });
-
-      it('return the filtered results', done => {
-        testAction(
-          actions.fetchVulnerabilitiesHistory,
-          params,
-          state,
-          [],
-          [
-            { type: 'requestVulnerabilitiesHistory' },
-            {
-              type: 'receiveVulnerabilitiesHistorySuccess',
-              payload: { data: filteredData },
-            },
-          ],
-          done,
-        );
-      });
-    });
-
-    describe('on error', () => {
-      beforeEach(() => {
-        mock.onGet(state.vulnerabilitiesHistoryEndpoint).replyOnce(404, {});
-      });
-
-      it('should dispatch the request and error actions', done => {
-        testAction(
-          actions.fetchVulnerabilitiesHistory,
-          {},
-          state,
-          [],
-          [
-            { type: 'requestVulnerabilitiesHistory' },
-            { type: 'receiveVulnerabilitiesHistoryError' },
-          ],
-          done,
-        );
-      });
-    });
-
-    describe('with an empty endpoint', () => {
-      beforeEach(() => {
-        state.vulnerabilitiesHistoryEndpoint = '';
-      });
-
-      it('should not do anything', done => {
-        testAction(actions.fetchVulnerabilitiesHistory, {}, state, [], [], done);
-      });
-    });
-  });
-
-  describe('requestVulnerabilitiesHistory', () => {
-    it('should commit the request mutation', done => {
-      testAction(
-        actions.requestVulnerabilitiesHistory,
-        {},
-        state,
-        [{ type: types.REQUEST_VULNERABILITIES_HISTORY }],
-        [],
-        done,
-      );
-    });
-  });
-
-  describe('receiveVulnerabilitiesHistorySuccess', () => {
-    it('should commit the success mutation', done => {
-      testAction(
-        actions.receiveVulnerabilitiesHistorySuccess,
-        { data },
-        state,
-        [{ type: types.RECEIVE_VULNERABILITIES_HISTORY_SUCCESS, payload: data }],
-        [],
-        done,
-      );
-    });
-  });
-
-  describe('receiveVulnerabilitiesHistoryError', () => {
-    it('should commit the error mutation', done => {
-      testAction(
-        actions.receiveVulnerabilitiesHistoryError,
-        {},
-        state,
-        [{ type: types.RECEIVE_VULNERABILITIES_HISTORY_ERROR }],
-        [],
-        done,
-      );
-    });
-  });
-
-  describe('openDismissalCommentBox', () => {
-    it('should commit the open comment mutation with a default payload', done => {
-      testAction(
-        actions.openDismissalCommentBox,
-        undefined,
-        state,
-        [{ type: types.OPEN_DISMISSAL_COMMENT_BOX }],
-        [],
-        done,
-      );
-    });
-  });
-
-  describe('closeDismissalCommentBox', () => {
-    it('should commit the close comment mutation', done => {
-      testAction(
-        actions.closeDismissalCommentBox,
-        {},
-        state,
-        [{ type: types.CLOSE_DISMISSAL_COMMENT_BOX }],
-        [],
-        done,
-      );
-    });
+  it('should commit the close comment mutation', () => {
+    return testAction(actions.closeDismissalCommentBox, {}, undefined, [
+      { type: types.CLOSE_DISMISSAL_COMMENT_BOX },
+    ]);
   });
 });

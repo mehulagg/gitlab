@@ -1,12 +1,13 @@
 <script>
 import { mapActions } from 'vuex';
+import { GlLink } from '@gitlab/ui';
 
 import { LICENSE_MANAGEMENT } from 'ee/vue_shared/license_compliance/store/constants';
 import LicensePackages from './license_packages.vue';
 
 export default {
   name: 'LicenseIssueBody',
-  components: { LicensePackages },
+  components: { LicensePackages, GlLink },
   props: {
     issue: {
       type: Object,
@@ -19,15 +20,7 @@ export default {
 
 <template>
   <div class="report-block-info license-item">
-    <button
-      class="btn-blank btn-link gl-mr-2"
-      type="button"
-      data-toggle="modal"
-      data-target="#modal-set-license-approval"
-      @click="setLicenseInModal(issue)"
-    >
-      {{ issue.name }}
-    </button>
+    <gl-link :href="issue.url" target="_blank">{{ issue.name }}</gl-link>
     <license-packages :packages="issue.packages" class="text-secondary" />
   </div>
 </template>

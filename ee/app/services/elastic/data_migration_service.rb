@@ -20,17 +20,35 @@ module Elastic
         migrations.sort_by(&:version)
       end
 
+      def drop_migration_has_finished_cache!(migration)
+        name = migration.name.underscore
+        Rails.cache.delete cache_key(:migration_has_finished, name)
+      end
+
       def migration_has_finished?(name)
-        migration = migrations.find { |migration| migration.name == name.camelize }
+        Rails.cache.fetch cache_key(:migration_has_finished, name), expires_in: 30.minutes do
+          migration_has_finished_uncached?(name)
+        end
+      end
+
+      def migration_has_finished_uncached?(name)
+        migration = migrations.find { |migration| migration.name == name.to_s.camelize }
 
         !!migration&.load_from_index&.dig('_source', 'completed')
       end
 
       def mark_all_as_completed!
-        migrations.each { |migration| migration.save!(completed: true) }
+        migrations.each do |migration|
+          migration.save!(completed: true)
+          drop_migration_has_finished_cache!(migration)
+        end
       end
 
       private
+
+      def cache_key(method_name, *additional_key)
+        [name, method_name, *additional_key]
+      end
 
       def parse_migration_filename(filename)
         File.basename(filename).scan(MIGRATION_REGEXP).first

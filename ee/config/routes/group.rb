@@ -62,7 +62,6 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
     resource :insights, only: [:show], trailing_slash: true do
       collection do
         post :query
-        get :embedded
       end
     end
 
@@ -86,12 +85,16 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
         get 'merge_requests'
         get 'labels'
         get 'epics'
+        get 'vulnerabilities'
         get 'commands'
         get 'milestones'
       end
     end
 
     resources :billings, only: [:index]
+
+    get :seat_usage, to: 'seat_usage#show'
+
     resources :epics, concerns: :awardable, constraints: { id: /\d+/ } do
       member do
         get '/descriptions/:version_id/diff', action: :description_diff, as: :description_diff
@@ -139,7 +142,11 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
       resources :vulnerabilities, only: [:index]
       resource :compliance_dashboard, only: [:show]
       resource :discover, only: [:show], controller: :discover
-      resources :credentials, only: [:index, :destroy]
+      resources :credentials, only: [:index, :destroy] do
+        member do
+          put :revoke
+        end
+      end
       resources :merge_commit_reports, only: [:index], constraints: { format: :csv }
     end
 

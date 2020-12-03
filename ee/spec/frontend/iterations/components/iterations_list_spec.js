@@ -1,7 +1,7 @@
 import { GlLink } from '@gitlab/ui';
-import IterationsList from 'ee/iterations/components/iterations_list.vue';
 import { shallowMount } from '@vue/test-utils';
 import timezoneMock from 'timezone-mock';
+import IterationsList from 'ee/iterations/components/iterations_list.vue';
 
 describe('Iterations list', () => {
   let wrapper;

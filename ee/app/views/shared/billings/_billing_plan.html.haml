@@ -1,41 +1,43 @@
 - purchase_link = plan.purchase_link
-- is_current_plan = plan.code == current_plan&.code
 
-.col-md-6.col-lg-3
-  .card.mb-5{ class: ("card-active" if is_current_plan) }
-    .card-header.font-weight-bold.p-3
+.card.h-100{ class: ("card-active" if is_current) }
+  .card-header.gl-font-weight-bold.d-flex.flex-row.justify-content-between.flex-wrap
+    %div
       = plan.name
-      - if is_current_plan
-        .float-right.text-muted
-          = _("Current Plan")
+    - if is_current
+      .text-muted
+        = _("Current Plan")
 
-    .card-body
-      .price-per-month
-        .gl-mr-2
-          = number_to_plan_currency(plan.price_per_month)
+  .card-body
+    .price-per-month
+      .gl-mr-2
+        = number_to_plan_currency(plan.price_per_month)
 
-        %ul.conditions.p-0.my-auto
-          %li= s_("BillingPlans|per user")
-          %li= s_("BillingPlans|monthly")
-      .price-per-year.text-left{ class: ("invisible" unless plan.price_per_year > 0) }
-        - price_per_year = number_to_plan_currency(plan.price_per_year)
-        = s_("BillingPlans|billed annually at %{price_per_year}") % { price_per_year: price_per_year }
+      %ul.conditions.gl-p-0.gl-my-auto
+        %li= s_("BillingPlans|per user")
+        %li= s_("BillingPlans|monthly")
+    .price-per-year.text-left{ class: ("invisible" unless plan.price_per_year > 0) }
+      - price_per_year = number_to_plan_currency(plan.price_per_year)
+      = s_("BillingPlans|billed annually at %{price_per_year}") % { price_per_year: price_per_year }
 
-      %hr.mt-3.mb-3
+    %hr.gl-my-3
 
-      %ul.unstyled-list
-        - plan_feature_short_list(plan).each do |feature|
-          %li.p-0{ class: ("font-weight-bold" if feature.highlight) }
-            = feature.title
-        %li.p-0.pt-3
-          - if plan.about_page_href
-            = link_to s_("BillingPlans|See all %{plan_name} features") % { plan_name: plan.name }, EE::SUBSCRIPTIONS_COMPARISON_URL
+    %ul.unstyled-list
+      - plan_feature_short_list(plan).each do |feature|
+        - feature_class = "gl-p-0!"
+        - if feature.highlight
+          - feature_class += " gl-font-weight-bold"
+        %li{ class: "#{feature_class}" }
+          = feature.title
+      %li.gl-p-0.gl-pt-3
+        - if plan.about_page_href
+          = link_to s_("BillingPlans|See all %{plan_name} features") % { plan_name: plan.name }, EE::SUBSCRIPTIONS_COMPARISON_URL
 
-    - if purchase_link
-      .card-footer.p-3
-        .float-right{ class: ("invisible" unless purchase_link.action == 'upgrade' || is_current_plan) }
-          - if show_contact_sales_button?(purchase_link.action)
-            = link_to s_('BillingPlan|Contact sales'), "#{contact_sales_url}?test=inappcontactsales#{plan.code}", class: "btn btn-success-secondary gl-button", data: { **experiment_tracking_data_for_button_click('contact_sales') }
-          - upgrade_button_class = "disabled" if is_current_plan && !namespace.trial_active?
-          - cta_class = '-new' if use_new_purchase_flow?(namespace)
-          = link_to s_('BillingPlan|Upgrade'), plan_purchase_or_upgrade_url(namespace, plan, current_plan), class: "btn btn-success gl-button #{upgrade_button_class} billing-cta-purchase#{cta_class}", data: { **experiment_tracking_data_for_button_click('upgrade') }
+  - if purchase_link
+    .card-footer
+      .float-right{ class: ("invisible" unless purchase_link.action == 'upgrade' || is_current) }
+        - if show_contact_sales_button?(purchase_link.action)
+          = link_to s_('BillingPlan|Contact sales'), "#{contact_sales_url}?test=inappcontactsales#{plan.code}", class: "btn btn-success-secondary gl-button", data: { **experiment_tracking_data_for_button_click('contact_sales') }
+        - upgrade_button_class = "disabled" if is_current && !namespace.trial_active?
+        - cta_class = '-new' if use_new_purchase_flow?(namespace)
+        = link_to s_('BillingPlan|Upgrade'), plan_purchase_or_upgrade_url(namespace, plan), class: "btn btn-success gl-button #{upgrade_button_class} billing-cta-purchase#{cta_class}", data: { **experiment_tracking_data_for_button_click('upgrade') }

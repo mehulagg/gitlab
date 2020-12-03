@@ -18,6 +18,7 @@ RSpec.describe 'Query.project(fullPath).dastSiteProfile' do
             profileName
             targetUrl
             validationStatus
+            normalizedTargetUrl
           }
         }
       }

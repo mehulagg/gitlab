@@ -16,7 +16,7 @@ RSpec.describe Registrations::GroupsController do
     context 'with an authenticated user' do
       before do
         sign_in(user)
-        stub_experiment_for_user(onboarding_issues: true)
+        stub_experiment_for_subject(onboarding_issues: true)
       end
 
       it { is_expected.to have_gitlab_http_status(:ok) }
@@ -37,7 +37,7 @@ RSpec.describe Registrations::GroupsController do
 
       context 'with the experiment not enabled for user' do
         before do
-          stub_experiment_for_user(onboarding_issues: false)
+          stub_experiment_for_subject(onboarding_issues: false)
         end
 
         it { is_expected.to have_gitlab_http_status(:not_found) }
@@ -58,7 +58,7 @@ RSpec.describe Registrations::GroupsController do
     context 'with an authenticated user' do
       before do
         sign_in(user)
-        stub_experiment_for_user(onboarding_issues: true)
+        stub_experiment_for_subject(onboarding_issues: true)
       end
 
       it 'creates a group' do
@@ -122,7 +122,7 @@ RSpec.describe Registrations::GroupsController do
 
       context 'with the experiment not enabled for user' do
         before do
-          stub_experiment_for_user(onboarding_issues: false)
+          stub_experiment_for_subject(onboarding_issues: false)
         end
 
         it { is_expected.to have_gitlab_http_status(:not_found) }

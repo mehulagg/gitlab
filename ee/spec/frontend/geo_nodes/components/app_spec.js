@@ -1,12 +1,12 @@
+import MockAdapter from 'axios-mock-adapter';
 import Vue from 'vue';
 
-import MockAdapter from 'axios-mock-adapter';
 import appComponent from 'ee/geo_nodes/components/app.vue';
-import eventHub from 'ee/geo_nodes/event_hub';
-import GeoNodesStore from 'ee/geo_nodes/store/geo_nodes_store';
-import GeoNodesService from 'ee/geo_nodes/service/geo_nodes_service';
-import mountComponent from 'helpers/vue_mount_component_helper';
 import { NODE_ACTIONS } from 'ee/geo_nodes/constants';
+import eventHub from 'ee/geo_nodes/event_hub';
+import GeoNodesService from 'ee/geo_nodes/service/geo_nodes_service';
+import GeoNodesStore from 'ee/geo_nodes/store/geo_nodes_store';
+import mountComponent from 'helpers/vue_mount_component_helper';
 import axios from '~/lib/utils/axios_utils';
 import '~/vue_shared/plugins/global_toast';
 

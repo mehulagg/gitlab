@@ -1,5 +1,5 @@
-import { TEST_HOST } from 'spec/test_constants';
 import { ChildState } from 'ee/related_items_tree/constants';
+import { TEST_HOST } from 'spec/test_constants';
 
 export const mockInitialConfig = {
   epicsEndpoint: `${TEST_HOST}/epics`,

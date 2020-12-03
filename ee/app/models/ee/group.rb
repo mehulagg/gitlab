@@ -18,6 +18,7 @@ module EE
       add_authentication_token_field :saml_discovery_token, unique: false, token_generator: -> { Devise.friendly_token(8) }
 
       has_many :epics
+      has_many :epic_boards, class_name: 'Boards::EpicBoard', inverse_of: :group
 
       has_one :saml_provider
       has_many :scim_identities
@@ -227,7 +228,7 @@ module EE
     end
 
     def saml_group_sync_available?
-      ::Feature.enabled?(:saml_group_links, self) &&
+      ::Feature.enabled?(:saml_group_links, self, default_enabled: true) &&
         feature_available?(:group_saml_group_sync) && root_ancestor.saml_enabled?
     end
 
@@ -426,6 +427,23 @@ module EE
       return all_group_members.count unless minimal_access_role_allowed?
 
       members.count
+    end
+
+    def releases_count
+      ::Release.by_namespace_id(self_and_descendants.select(:id)).count
+    end
+
+    def releases_percentage
+      calculate_sql = <<~SQL
+      (
+        COUNT(*) FILTER (WHERE EXISTS (SELECT 1 FROM releases WHERE releases.project_id = projects.id)) * 100.0 / GREATEST(COUNT(*), 1)
+      )::integer AS releases_percentage
+      SQL
+
+      self.class.count_by_sql(
+        ::Project.select(calculate_sql)
+        .where(namespace_id: self_and_descendants.select(:id)).to_sql
+      )
     end
 
     private

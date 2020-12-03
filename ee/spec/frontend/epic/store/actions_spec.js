@@ -1,9 +1,9 @@
 import MockAdapter from 'axios-mock-adapter';
 
-import defaultState from 'ee/epic/store/state';
-import * as actions from 'ee/epic/store/actions';
-import epicUtils from 'ee/epic/utils/epic_utils';
 import { statusType, dateTypes } from 'ee/epic/constants';
+import * as actions from 'ee/epic/store/actions';
+import defaultState from 'ee/epic/store/state';
+import epicUtils from 'ee/epic/utils/epic_utils';
 
 import testAction from 'helpers/vuex_action_helper';
 import axios from '~/lib/utils/axios_utils';

@@ -22,8 +22,9 @@ RSpec.describe 'shared/issuable/_approvals.html.haml' do
   end
 
   context 'has no approvers' do
-    context 'can override approvers' do
+    context 'when mr_collapsed_approval_rules feature flag is off' do
       before do
+        stub_feature_flags(mr_collapsed_approval_rules: false)
         render 'shared/issuable/approvals', form: form, issuable: merge_request, presenter: presenter
       end
 

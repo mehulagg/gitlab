@@ -21,13 +21,13 @@ RSpec.describe GitlabSchema.types['MergeRequest'] do
       diff_refs diff_stats diff_stats_summary
       force_remove_source_branch merge_status in_progress_merge_commit_sha
       merge_error allow_collaboration should_be_rebased rebase_commit_sha
-      rebase_in_progress merge_commit_message default_merge_commit_message
+      rebase_in_progress default_merge_commit_message
       merge_ongoing mergeable_discussions_state web_url
       source_branch_exists target_branch_exists
       upvotes downvotes head_pipeline pipelines task_completion_status
       milestone assignees participants subscribed labels discussion_locked time_estimate
       total_time_spent reference author merged_at commit_count current_user_todos
-      conflicts auto_merge_enabled approved_by
+      conflicts auto_merge_enabled approved_by source_branch_protected
     ]
 
     if Gitlab.ee?

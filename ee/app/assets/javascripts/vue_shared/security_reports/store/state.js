@@ -1,3 +1,12 @@
+import {
+  MODULE_CONTAINER_SCANNING,
+  MODULE_COVERAGE_FUZZING,
+  MODULE_DAST,
+  MODULE_DEPENDENCY_SCANNING,
+  MODULE_SAST,
+  MODULE_SECRET_DETECTION,
+} from './constants';
+
 export default () => ({
   blobPath: {
     head: null,
@@ -7,13 +16,21 @@ export default () => ({
   sourceBranch: null,
   canReadVulnerabilityFeedback: false,
   vulnerabilityFeedbackPath: null,
-  vulnerabilityFeedbackHelpPath: null,
   createVulnerabilityFeedbackIssuePath: null,
   createVulnerabilityFeedbackMergeRequestPath: null,
   createVulnerabilityFeedbackDismissalPath: null,
   pipelineId: null,
 
-  containerScanning: {
+  reportTypes: [
+    MODULE_CONTAINER_SCANNING,
+    MODULE_COVERAGE_FUZZING,
+    MODULE_DAST,
+    MODULE_DEPENDENCY_SCANNING,
+    MODULE_SAST,
+    MODULE_SECRET_DETECTION,
+  ],
+
+  [MODULE_CONTAINER_SCANNING]: {
     paths: {
       head: null,
       base: null,
@@ -28,7 +45,7 @@ export default () => ({
     baseReportOutofDate: false,
     hasBaseReport: false,
   },
-  dast: {
+  [MODULE_DAST]: {
     paths: {
       head: null,
       base: null,
@@ -44,7 +61,7 @@ export default () => ({
     hasBaseReport: false,
     scans: [],
   },
-  coverageFuzzing: {
+  [MODULE_COVERAGE_FUZZING]: {
     paths: {
       head: null,
       base: null,
@@ -60,7 +77,7 @@ export default () => ({
     baseReportOutofDate: false,
     hasBaseReport: false,
   },
-  dependencyScanning: {
+  [MODULE_DEPENDENCY_SCANNING]: {
     paths: {
       head: null,
       base: null,

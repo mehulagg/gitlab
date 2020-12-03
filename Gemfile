@@ -48,7 +48,7 @@ gem 'omniauth-authentiq', '~> 0.3.3'
 gem 'omniauth_openid_connect', '~> 0.3.5'
 gem 'omniauth-salesforce', '~> 1.0.5'
 gem 'omniauth-atlassian-oauth2', '~> 0.2.0'
-gem 'rack-oauth2', '~> 1.9.3'
+gem 'rack-oauth2', '~> 1.16.0'
 gem 'jwt', '~> 2.1.0'
 
 # Kerberos authentication. EE-only
@@ -115,7 +115,7 @@ gem 'carrierwave', '~> 1.3'
 gem 'mini_magick', '~> 4.10.1'
 
 # for backups
-gem 'fog-aws', '~> 3.5'
+gem 'fog-aws', '~> 3.7'
 # Locked until fog-google resolves https://github.com/fog/fog-google/issues/421.
 # Also see config/initializers/fog_core_patch.rb.
 gem 'fog-core', '= 2.1.0'
@@ -149,7 +149,7 @@ gem 'html-pipeline', '~> 2.12'
 gem 'deckar01-task_list', '2.3.1'
 gem 'gitlab-markup', '~> 1.7.1'
 gem 'github-markup', '~> 1.7.0', require: 'github/markup'
-gem 'commonmarker', '~> 0.20'
+gem 'commonmarker', '~> 0.21'
 gem 'kramdown', '~> 2.3.0'
 gem 'RedCloth', '~> 4.3.2'
 gem 'rdoc', '~> 6.1.2'
@@ -159,6 +159,7 @@ gem 'wikicloth', '0.8.1'
 gem 'asciidoctor', '~> 2.0.10'
 gem 'asciidoctor-include-ext', '~> 0.3.1', require: false
 gem 'asciidoctor-plantuml', '~> 0.0.12'
+gem 'asciidoctor-kroki', '~> 0.2.2', require: false
 gem 'rouge', '~> 3.25.0'
 gem 'truncato', '~> 0.7.11'
 gem 'bootstrap_form', '~> 4.2.0'
@@ -209,7 +210,7 @@ gem 'httparty', '~> 0.16.4'
 gem 'rainbow', '~> 3.0'
 
 # Progress bar
-gem 'ruby-progressbar'
+gem 'ruby-progressbar', '~> 1.10'
 
 # GitLab settings
 gem 'settingslogic', '~> 2.0.9'
@@ -311,7 +312,7 @@ gem 'gitlab-pg_query', '~> 1.3', require: 'pg_query'
 gem 'premailer-rails', '~> 1.10.3'
 
 # LabKit: Tracing and Correlation
-gem 'gitlab-labkit', '0.13.1'
+gem 'gitlab-labkit', '0.13.3'
 
 # I18n
 gem 'ruby_parser', '~> 3.15', require: false
@@ -351,6 +352,7 @@ group :development do
 end
 
 group :development, :test do
+  gem 'deprecation_toolkit', '~> 1.5.1', require: false
   gem 'bullet', '~> 6.1.0'
   gem 'pry-byebug', '~> 3.9.0', platform: :mri
   gem 'pry-rails', '~> 0.3.9'
@@ -370,7 +372,7 @@ group :development, :test do
   gem 'spring', '~> 2.1.0'
   gem 'spring-commands-rspec', '~> 1.0.4'
 
-  gem 'gitlab-styles', '~> 5.0.0', require: false
+  gem 'gitlab-styles', '~> 5.1.0', require: false
 
   gem 'scss_lint', '~> 0.59.0', require: false
   gem 'haml_lint', '~> 0.36.0', require: false
@@ -464,7 +466,7 @@ group :ed25519 do
 end
 
 # Gitaly GRPC protocol definitions
-gem 'gitaly', '~> 13.5.0-rc2'
+gem 'gitaly', '~> 13.6.1'
 
 gem 'grpc', '~> 1.30.2'
 

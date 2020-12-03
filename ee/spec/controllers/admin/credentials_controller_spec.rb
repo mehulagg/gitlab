@@ -102,6 +102,32 @@ RSpec.describe Admin::CredentialsController do
   end
 
   describe 'PUT #revoke' do
+    shared_examples_for 'responds with 404' do
+      it do
+        put :revoke, params: { id: token_id }
+
+        expect(response).to have_gitlab_http_status(:not_found)
+      end
+    end
+
+    shared_examples_for 'displays the flash success message' do
+      it do
+        put :revoke, params: { id: token_id }
+
+        expect(response).to redirect_to(admin_credentials_path)
+        expect(flash[:notice]).to start_with 'Revoked personal access token '
+      end
+    end
+
+    shared_examples_for 'displays the flash error message' do
+      it do
+        put :revoke, params: { id: token_id }
+
+        expect(response).to redirect_to(admin_credentials_path)
+        expect(flash[:alert]).to eql 'Not permitted to revoke'
+      end
+    end
+
     context 'admin user' do
       before do
         sign_in(admin)
@@ -113,11 +139,9 @@ RSpec.describe Admin::CredentialsController do
         end
 
         context 'non-existent personal access token specified' do
-          it 'returns 404' do
-            put :revoke, params: { id: 999999999999999999999999999999999 }
+          let(:token_id) { 999999999999999999999999999999999 }
 
-            expect(response).to have_gitlab_http_status(:not_found)
-          end
+          it_behaves_like 'responds with 404'
         end
 
         describe 'with an existing personal access token' do
@@ -127,43 +151,27 @@ RSpec.describe Admin::CredentialsController do
               allow(Ability).to receive(:allowed?).with(admin, :revoke_token, personal_access_token) { false }
             end
 
-            it 'returns the flash error message' do
-              put :revoke, params: { id: personal_access_token.id }
+            let(:token_id) { personal_access_token.id }
 
-              expect(response).to redirect_to(admin_credentials_path)
-              expect(flash[:alert]).to eql 'Not permitted to revoke'
-            end
+            it_behaves_like 'displays the flash error message'
           end
 
           context 'personal access token is already revoked' do
-            let_it_be(:personal_access_token) { create(:personal_access_token, revoked: true, user: user) }
+            let_it_be(:token_id) { create(:personal_access_token, revoked: true, user: user).id }
 
-            it 'returns the flash success message' do
-              put :revoke, params: { id: personal_access_token.id }
-
-              expect(response).to redirect_to(admin_credentials_path)
-              expect(flash[:notice]).to eql 'Revoked personal access token %{personal_access_token_name}!' % { personal_access_token_name: personal_access_token.name }
-            end
+            it_behaves_like 'displays the flash success message'
           end
 
           context 'personal access token is already expired' do
-            let_it_be(:personal_access_token) { create(:personal_access_token, expires_at: 5.days.ago, user: user) }
+            let_it_be(:token_id) { create(:personal_access_token, expires_at: 5.days.ago, user: user).id }
 
-            it 'returns the flash success message' do
-              put :revoke, params: { id: personal_access_token.id }
-
-              expect(response).to redirect_to(admin_credentials_path)
-              expect(flash[:notice]).to eql 'Revoked personal access token %{personal_access_token_name}!' % { personal_access_token_name: personal_access_token.name }
-            end
+            it_behaves_like 'displays the flash success message'
           end
 
           context 'personal access token is not revoked or expired' do
-            it 'returns the flash success message' do
-              put :revoke, params: { id: personal_access_token.id }
+            let(:token_id) { personal_access_token.id }
 
-              expect(response).to redirect_to(admin_credentials_path)
-              expect(flash[:notice]).to eql 'Revoked personal access token %{personal_access_token_name}!' % { personal_access_token_name: personal_access_token.name }
-            end
+            it_behaves_like 'displays the flash success message'
 
             it 'informs the token owner' do
               expect(CredentialsInventoryMailer).to receive_message_chain(:personal_access_token_revoked_email, :deliver_later)
@@ -179,11 +187,9 @@ RSpec.describe Admin::CredentialsController do
           stub_licensed_features(credentials_inventory: false)
         end
 
-        it 'returns 404' do
-          put :revoke, params: { id: personal_access_token.id }
+        let(:token_id) { personal_access_token.id }
 
-          expect(response).to have_gitlab_http_status(:not_found)
-        end
+        it_behaves_like 'responds with 404'
       end
     end
 
@@ -192,11 +198,9 @@ RSpec.describe Admin::CredentialsController do
         sign_in(user)
       end
 
-      it 'returns 404' do
-        put :revoke, params: { id: personal_access_token.id }
+      let(:token_id) { personal_access_token.id }
 
-        expect(response).to have_gitlab_http_status(:not_found)
-      end
+      it_behaves_like 'responds with 404'
     end
   end
 end

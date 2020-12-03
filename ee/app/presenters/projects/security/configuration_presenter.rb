@@ -98,8 +98,10 @@ module Projects
       end
 
       def gitlab_ci_history_path
+        return '' if project.empty_repo?
+
         gitlab_ci = Gitlab::FileDetector::PATTERNS[:gitlab_ci]
-        Gitlab::Routing.url_helpers.project_blame_path(project, File.join(project.default_branch, gitlab_ci))
+        Gitlab::Routing.url_helpers.project_blame_path(project, File.join(project.default_branch_or_master, gitlab_ci))
       end
 
       def features

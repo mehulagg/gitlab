@@ -1,6 +1,6 @@
-import { merge } from 'lodash';
-import { mount } from '@vue/test-utils';
 import { GlDropdownItem } from '@gitlab/ui';
+import { mount } from '@vue/test-utils';
+import { merge } from 'lodash';
 import OnDemandScansProfileSelector from 'ee/on_demand_scans/components/profile_selector/profile_selector.vue';
 import { scannerProfiles } from '../../mock_data';
 
@@ -105,7 +105,7 @@ describe('OnDemandScansProfileSelector', () => {
     it('when a profile is selected, input event is emitted', async () => {
       await selectFirstProfile();
 
-      expect(wrapper.emitted('input')).toEqual([[scannerProfiles[0].id]]);
+      expect(wrapper.emitted('input')).toEqual([[scannerProfiles[0]]]);
     });
 
     it('shows dropdown items for each profile', () => {
@@ -130,7 +130,7 @@ describe('OnDemandScansProfileSelector', () => {
       createFullComponent({
         propsData: {
           profiles: scannerProfiles,
-          value: selectedProfile.id,
+          value: selectedProfile,
         },
       });
     });

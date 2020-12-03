@@ -87,8 +87,6 @@ module QA
 
       context 'Add user, change access level, remove user', :requires_admin, testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/734' do
         before do
-          Runtime::Feature.enable('vue_group_members_list', group: group)
-
           sign_in
           group.visit!
           Page::Group::Menu.perform(&:click_group_members_item)
@@ -97,10 +95,6 @@ module QA
             members_page.update_access_level(user.username, "Developer")
             members_page.remove_member(user.username)
           end
-        end
-
-        after do
-          Runtime::Feature.disable('vue_group_members_list', group: group)
         end
 
         it_behaves_like 'audit event', ['Added user access as Guest', 'Changed access level', 'Removed user access']

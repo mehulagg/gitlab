@@ -1,5 +1,5 @@
-import { mount } from '@vue/test-utils';
 import { GlTable, GlButton } from '@gitlab/ui';
+import { mount } from '@vue/test-utils';
 import DevopsAdoptionTable from 'ee/admin/dev_ops_report/components/devops_adoption_table.vue';
 import DevopsAdoptionTableCellFlag from 'ee/admin/dev_ops_report/components/devops_adoption_table_cell_flag.vue';
 import { DEVOPS_ADOPTION_TABLE_TEST_IDS as TEST_IDS } from 'ee/admin/dev_ops_report/constants';

@@ -1,6 +1,6 @@
+import { mount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
 import CodequalityReportApp from 'ee/codequality_report/codequality_report.vue';
-import { mount, createLocalVue } from '@vue/test-utils';
 import { parsedIssues } from './mock_data';
 
 jest.mock('~/flash');

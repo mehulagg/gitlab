@@ -29,13 +29,14 @@ RSpec.describe Gitlab::UsageData do
       create(:ci_build, name: 'sast', pipeline: pipeline)
       create(:ci_build, name: 'secret_detection', pipeline: pipeline)
       create(:ci_build, name: 'coverage_fuzzing', pipeline: pipeline)
+      create(:ci_build, name: 'apifuzzer_fuzz', pipeline: pipeline)
+      create(:ci_build, name: 'apifuzzer_fuzz_dnd', pipeline: pipeline)
       create(:ci_pipeline, source: :ondemand_dast_scan, project: projects[0])
 
       create(:prometheus_alert, project: projects[0])
       create(:prometheus_alert, project: projects[0])
       create(:prometheus_alert, project: projects[1])
 
-      create(:service, project: projects[1], type: 'JenkinsService', active: true)
       create(:jira_service, project: projects[0], issues_enabled: true, project_key: 'GL')
 
       create(:operations_feature_flag, project: projects[0])
@@ -102,7 +103,6 @@ RSpec.describe Gitlab::UsageData do
         operations_dashboard_default_dashboard
         operations_dashboard_users_with_projects_added
         pod_logs_usages_total
-        projects_jenkins_active
         projects_jira_issuelist_active
         projects_mirrored_with_pipelines_enabled
         projects_reporting_ci_cd_back_to_github
@@ -120,7 +120,6 @@ RSpec.describe Gitlab::UsageData do
         network_policy_drops
       ))
 
-      expect(count_data[:projects_jenkins_active]).to eq(1)
       expect(count_data[:projects_with_prometheus_alerts]).to eq(2)
       expect(count_data[:feature_flags]).to eq(1)
       expect(count_data[:status_page_projects]).to eq(1)
@@ -145,6 +144,8 @@ RSpec.describe Gitlab::UsageData do
       expect(count_data[:sast_jobs]).to eq(1)
       expect(count_data[:secret_detection_jobs]).to eq(1)
       expect(count_data[:coverage_fuzzing_jobs]).to eq(1)
+      expect(count_data[:api_fuzzing_jobs]).to eq(1)
+      expect(count_data[:api_fuzzing_dnd_jobs]).to eq(1)
       expect(count_data[:dast_on_demand_pipelines]).to eq(1)
     end
 
@@ -189,6 +190,13 @@ RSpec.describe Gitlab::UsageData do
   describe '.requirements_counts' do
     subject { described_class.requirements_counts }
 
+    let_it_be(:requirement1) { create(:requirement) }
+    let_it_be(:requirement2) { create(:requirement) }
+    let_it_be(:requirement3) { create(:requirement) }
+    let_it_be(:test_report1) { create(:test_report, requirement: requirement1) }
+    let_it_be(:test_report2) { create(:test_report, requirement: requirement2, build: nil) }
+    let_it_be(:test_report3) { create(:test_report, requirement: requirement1) }
+
     context 'when requirements are disabled' do
       it 'returns empty hash' do
         stub_licensed_features(requirements: false)
@@ -201,28 +209,13 @@ RSpec.describe Gitlab::UsageData do
       it 'returns created requirements count' do
         stub_licensed_features(requirements: true)
 
-        create_list(:requirement, 2)
-
-        expect(subject).to eq({ requirements_created: 2 })
+        expect(subject).to eq({
+          requirements_created: 3,
+          requirement_test_reports_manual: 1,
+          requirement_test_reports_ci: 2,
+          requirements_with_test_report: 2
+        })
       end
-    end
-  end
-
-  describe 'code owner approval required' do
-    before do
-      create(:protected_branch, code_owner_approval_required: true)
-
-      create(:protected_branch,
-        code_owner_approval_required: true,
-        project: create(:project, :archived))
-
-      create(:protected_branch,
-        code_owner_approval_required: true,
-        project: create(:project, pending_delete: true))
-    end
-
-    it 'counts the projects actively requiring code owner approval' do
-      expect(described_class.system_usage_data[:counts][:projects_enforcing_code_owner_approval]).to eq(1)
     end
   end
 
@@ -457,12 +450,10 @@ RSpec.describe Gitlab::UsageData do
 
       expect(described_class.usage_activity_by_stage_monitor({})).to include(
         operations_dashboard_users_with_projects_added: 2,
-        projects_prometheus_active: 2,
         projects_incident_sla_enabled: 2
       )
       expect(described_class.usage_activity_by_stage_monitor(described_class.last_28_days_time_period)).to include(
         operations_dashboard_users_with_projects_added: 1,
-        projects_prometheus_active: 1,
         projects_incident_sla_enabled: 2
       )
     end
@@ -520,6 +511,8 @@ RSpec.describe Gitlab::UsageData do
 
     before do
       for_defined_days_back do
+        create(:ci_build, name: 'apifuzzer_fuzz', user: user)
+        create(:ci_build, name: 'apifuzzer_fuzz_dnd', user: user)
         create(:ci_build, name: 'container_scanning', user: user)
         create(:ci_build, name: 'coverage_fuzzing', user: user)
         create(:ci_build, name: 'dast', user: user)
@@ -534,6 +527,8 @@ RSpec.describe Gitlab::UsageData do
       expect(described_class.usage_activity_by_stage_secure(described_class.last_28_days_time_period)).to eq(
         user_preferences_group_overview_security_dashboard: 3,
         user_container_scanning_jobs: 1,
+        user_api_fuzzing_jobs: 1,
+        user_api_fuzzing_dnd_jobs: 1,
         user_coverage_fuzzing_jobs: 1,
         user_dast_jobs: 1,
         user_dependency_scanning_jobs: 1,
@@ -593,7 +588,10 @@ RSpec.describe Gitlab::UsageData do
 
       expect(described_class.usage_activity_by_stage_secure(described_class.last_28_days_time_period)).to include(
         user_preferences_group_overview_security_dashboard: 3,
+        user_api_fuzzing_jobs: 1,
+        user_api_fuzzing_dnd_jobs: 1,
         user_container_scanning_jobs: 1,
+        user_coverage_fuzzing_jobs: 1,
         user_dast_jobs: 1,
         user_dependency_scanning_jobs: 1,
         user_license_management_jobs: 1,
@@ -626,6 +624,8 @@ RSpec.describe Gitlab::UsageData do
 
       expect(described_class.usage_activity_by_stage_secure(described_class.last_28_days_time_period)).to eq(
         user_preferences_group_overview_security_dashboard: 3,
+        user_api_fuzzing_jobs: 1,
+        user_api_fuzzing_dnd_jobs: 1,
         user_container_scanning_jobs: 1,
         user_coverage_fuzzing_jobs: 1,
         user_dast_jobs: 3,
@@ -658,6 +658,8 @@ RSpec.describe Gitlab::UsageData do
 
       expect(described_class.usage_activity_by_stage_secure(described_class.last_28_days_time_period)).to eq(
         user_preferences_group_overview_security_dashboard: 3,
+        user_api_fuzzing_jobs: 1,
+        user_api_fuzzing_dnd_jobs: 1,
         user_container_scanning_jobs: 1,
         user_coverage_fuzzing_jobs: 1,
         user_dast_jobs: 1,
@@ -690,6 +692,8 @@ RSpec.describe Gitlab::UsageData do
 
       expect(described_class.usage_activity_by_stage_secure(described_class.last_28_days_time_period)).to eq(
         user_preferences_group_overview_security_dashboard: -1,
+        user_api_fuzzing_jobs: -1,
+        user_api_fuzzing_dnd_jobs: -1,
         user_container_scanning_jobs: -1,
         user_coverage_fuzzing_jobs: -1,
         user_dast_jobs: -1,

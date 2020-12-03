@@ -1,10 +1,8 @@
-/* global ListIssue */
 /* global List */
 
 import Vue from 'vue';
 import { keyBy } from 'lodash';
 import '~/boards/models/list';
-import '~/boards/models/issue';
 import boardsStore from '~/boards/stores/boards_store';
 
 export const boardObj = {
@@ -176,7 +174,13 @@ export const mockIssue = {
   },
 };
 
-export const mockIssueWithModel = new ListIssue(mockIssue);
+export const mockActiveIssue = {
+  ...mockIssue,
+  id: 436,
+  iid: '27',
+  subscribed: false,
+  emailsDisabled: false,
+};
 
 export const mockIssue2 = {
   id: 'gid://gitlab/Issue/437',
@@ -194,8 +198,6 @@ export const mockIssue2 = {
     id: 'gid://gitlab/Epic/40',
   },
 };
-
-export const mockIssue2WithModel = new ListIssue(mockIssue2);
 
 export const mockIssue3 = {
   id: 'gid://gitlab/Issue/438',

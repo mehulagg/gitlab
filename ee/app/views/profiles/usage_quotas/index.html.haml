@@ -1,6 +1,6 @@
 - page_title s_("UsageQuota|Usage")
 - @content_class = "limit-container-width" unless fluid_layout
-- url_to_purchase_storage = purchase_storage_url if can_purchase_storage_for_namespace?(@namespace)
+- url_to_purchase_storage = purchase_storage_url if purchase_storage_link_enabled?(@namespace)
 
 %h3.page-title
   = s_('UsageQuota|Usage Quotas')

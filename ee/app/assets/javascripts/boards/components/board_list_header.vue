@@ -1,5 +1,4 @@
 <script>
-import { mapState, mapGetters } from 'vuex';
 import BoardListHeaderFoss from '~/boards/components/board_list_header.vue';
 import { __, sprintf, s__ } from '~/locale';
 import boardsStore from '~/boards/stores/boards_store';
@@ -12,8 +11,6 @@ export default {
     };
   },
   computed: {
-    ...mapState(['issuesByListId']),
-    ...mapGetters(['isSwimlanesOn']),
     issuesTooltip() {
       const { maxIssueCount } = this.list;
 

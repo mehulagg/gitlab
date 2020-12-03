@@ -20,19 +20,15 @@ export default {
   inject: ['groupId'],
   computed: {
     ...mapState(['epics']),
-    ...mapGetters({ getEpicById: 'getEpicById', issue: 'activeIssue' }),
+    ...mapGetters(['activeIssue', 'getEpicById', 'projectPathForActiveIssue']),
     storedEpic() {
-      const storedEpic = this.getEpicById(this.issue.epic?.id);
+      const storedEpic = this.getEpicById(this.activeIssue.epic?.id);
       const epicId = getIdFromGraphQLId(storedEpic?.id);
 
       return {
         ...storedEpic,
         id: Number(epicId),
       };
-    },
-    projectPath() {
-      const { referencePath = '' } = this.issue;
-      return referencePath.slice(0, referencePath.indexOf('#'));
     },
   },
   methods: {
@@ -51,7 +47,7 @@ export default {
       const epicId = selectedEpic?.id ? `gid://gitlab/Epic/${selectedEpic.id}` : null;
       const input = {
         epicId,
-        projectPath: this.projectPath,
+        projectPath: this.projectPathForActiveIssue,
       };
 
       try {
@@ -62,7 +58,7 @@ export default {
         }
 
         debounceByAnimationFrame(() => {
-          this.updateIssueById({ issueId: this.issue.id, prop: 'epic', value: epic });
+          this.updateIssueById({ issueId: this.activeIssue.id, prop: 'epic', value: epic });
           this.loading = false;
         })();
       } catch (e) {

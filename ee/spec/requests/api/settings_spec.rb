@@ -70,16 +70,24 @@ RSpec.describe API::Settings, 'EE Settings' do
 
     context 'secret_detection_token_revocation_enabled is true' do
       context 'secret_detection_token_revocation_url value is present' do
+        let(:revocation_url) { 'https://example.com/secret_detection_token_revocation' }
+        let(:revocation_token_types_url) { 'https://example.com/secret_detection_revocation_token_types' }
+        let(:revocation_token) { 'AKDD345$%^^' }
+
         it 'updates secret_detection_token_revocation_url' do
           put api('/application/settings', admin),
             params: {
               secret_detection_token_revocation_enabled: true,
-              secret_detection_token_revocation_url: 'https://example.com/secret_detection_token_revocation'
+              secret_detection_token_revocation_url: revocation_url,
+              secret_detection_token_revocation_token: revocation_token,
+              secret_detection_revocation_token_types_url: revocation_token_types_url
             }
 
           expect(response).to have_gitlab_http_status(:ok)
           expect(json_response['secret_detection_token_revocation_enabled']).to be(true)
-          expect(json_response['secret_detection_token_revocation_url']).to eq('https://example.com/secret_detection_token_revocation')
+          expect(json_response['secret_detection_token_revocation_url']).to eq(revocation_url)
+          expect(json_response['secret_detection_revocation_token_types_url']).to eq(revocation_token_types_url)
+          expect(json_response['secret_detection_token_revocation_token']).to eq(revocation_token)
         end
       end
 
@@ -88,7 +96,7 @@ RSpec.describe API::Settings, 'EE Settings' do
           put api('/application/settings', admin), params: { secret_detection_token_revocation_enabled: true }
 
           expect(response).to have_gitlab_http_status(:bad_request)
-          expect(json_response['error']).to include('secret_detection_token_revocation_url is missing')
+          expect(json_response['error']).to include('secret_detection_token_revocation_url is missing, secret_detection_revocation_token_types_url is missing')
         end
       end
     end

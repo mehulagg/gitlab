@@ -2,8 +2,8 @@ import { shallowMount } from '@vue/test-utils';
 import SidebarWeight from 'ee/sidebar/components/weight/sidebar_weight.vue';
 import SidebarMediator from 'ee/sidebar/sidebar_mediator';
 import SidebarStore from 'ee/sidebar/stores/sidebar_store';
-import SidebarService from '~/sidebar/services/sidebar_service';
 import eventHub from '~/sidebar/event_hub';
+import SidebarService from '~/sidebar/services/sidebar_service';
 import Mock from './ee_mock_data';
 
 describe('Sidebar Weight', () => {

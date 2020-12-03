@@ -51,52 +51,8 @@ describe('Boards - Getters', () => {
       window.gon = { features: {} };
     });
 
-    describe('when boardsWithSwimlanes is true', () => {
-      beforeEach(() => {
-        window.gon = { features: { boardsWithSwimlanes: true } };
-      });
-
-      describe('when isShowingEpicsSwimlanes is true', () => {
-        it('returns true', () => {
-          const state = {
-            isShowingEpicsSwimlanes: true,
-          };
-
-          expect(getters.isSwimlanesOn(state)).toBe(true);
-        });
-      });
-
-      describe('when isShowingEpicsSwimlanes is false', () => {
-        it('returns false', () => {
-          const state = {
-            isShowingEpicsSwimlanes: false,
-          };
-
-          expect(getters.isSwimlanesOn(state)).toBe(false);
-        });
-      });
-    });
-
-    describe('when boardsWithSwimlanes is false', () => {
-      describe('when isShowingEpicsSwimlanes is true', () => {
-        it('returns false', () => {
-          const state = {
-            isShowingEpicsSwimlanes: true,
-          };
-
-          expect(getters.isSwimlanesOn(state)).toBe(false);
-        });
-      });
-
-      describe('when isShowingEpicsSwimlanes is false', () => {
-        it('returns false', () => {
-          const state = {
-            isShowingEpicsSwimlanes: false,
-          };
-
-          expect(getters.isSwimlanesOn(state)).toBe(false);
-        });
-      });
+    it('returns false', () => {
+      expect(getters.isSwimlanesOn()).toBe(false);
     });
   });
 
@@ -121,6 +77,22 @@ describe('Boards - Getters', () => {
       const state = { issues: { '1': 'issue' }, activeId: id };
 
       expect(getters.activeIssue(state)).toEqual(expected);
+    });
+  });
+
+  describe('projectPathByIssueId', () => {
+    it('returns project path for the active issue', () => {
+      const mockActiveIssue = {
+        referencePath: 'gitlab-org/gitlab-test#1',
+      };
+      expect(getters.projectPathForActiveIssue({}, { activeIssue: mockActiveIssue })).toEqual(
+        'gitlab-org/gitlab-test',
+      );
+    });
+
+    it('returns empty string as project when active issue is an empty object', () => {
+      const mockActiveIssue = {};
+      expect(getters.projectPathForActiveIssue({}, { activeIssue: mockActiveIssue })).toEqual('');
     });
   });
 

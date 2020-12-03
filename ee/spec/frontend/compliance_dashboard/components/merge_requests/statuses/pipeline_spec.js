@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlLink } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 
 import Pipeline from 'ee/compliance_dashboard/components/merge_requests/statuses/pipeline.vue';
 import { createPipelineStatus } from '../../../mock_data';

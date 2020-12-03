@@ -1,9 +1,9 @@
 import '~/pages/admin/application_settings/index';
-import 'select2/select2';
 import $ from 'jquery';
 import groupsSelect from '~/groups_select';
 import { s__ } from '~/locale';
 import Api from '~/api';
+import { loadCSSFile } from '~/lib/utils/css_utils';
 
 const onLimitCheckboxChange = (checked, $limitByNamespaces, $limitByProjects) => {
   $limitByNamespaces.find('.select2').select2('data', null);
@@ -38,39 +38,46 @@ const getDropdownConfig = (placeholder, apiPath, textProp) => ({
   },
 });
 
-document.addEventListener('DOMContentLoaded', () => {
-  groupsSelect();
+groupsSelect();
 
-  // ElasticSearch
-  const $container = $('#js-elasticsearch-settings');
+// ElasticSearch
+const $container = $('#js-elasticsearch-settings');
 
-  $container
-    .find('.js-limit-checkbox')
-    .on('change', e =>
-      onLimitCheckboxChange(
-        e.currentTarget.checked,
-        $container.find('.js-limit-namespaces'),
-        $container.find('.js-limit-projects'),
-      ),
-    );
+$container
+  .find('.js-limit-checkbox')
+  .on('change', e =>
+    onLimitCheckboxChange(
+      e.currentTarget.checked,
+      $container.find('.js-limit-namespaces'),
+      $container.find('.js-limit-projects'),
+    ),
+  );
 
-  $container
-    .find('.js-elasticsearch-namespaces')
-    .select2(
-      getDropdownConfig(
-        s__('Elastic|None. Select namespaces to index.'),
-        Api.namespacesPath,
-        'full_path',
-      ),
-    );
+import(/* webpackChunkName: 'select2' */ 'select2/select2')
+  .then(() => {
+    // eslint-disable-next-line promise/no-nesting
+    loadCSSFile(gon.select2_css_path)
+      .then(() => {
+        $container
+          .find('.js-elasticsearch-namespaces')
+          .select2(
+            getDropdownConfig(
+              s__('Elastic|None. Select namespaces to index.'),
+              Api.namespacesPath,
+              'full_path',
+            ),
+          );
 
-  $container
-    .find('.js-elasticsearch-projects')
-    .select2(
-      getDropdownConfig(
-        s__('Elastic|None. Select projects to index.'),
-        Api.projectsPath,
-        'name_with_namespace',
-      ),
-    );
-});
+        $container
+          .find('.js-elasticsearch-projects')
+          .select2(
+            getDropdownConfig(
+              s__('Elastic|None. Select projects to index.'),
+              Api.projectsPath,
+              'name_with_namespace',
+            ),
+          );
+      })
+      .catch(() => {});
+  })
+  .catch(() => {});

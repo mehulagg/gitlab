@@ -1,11 +1,11 @@
 ---
 stage: Verify
 group: Continuous Integration
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: tutorial
 ---
 
-# Triggering pipelines through the API
+# Triggering pipelines through the API **(CORE)**
 
 Triggers can be used to force a pipeline rerun of a specific `ref` (branch or
 tag) with an API call.
@@ -96,7 +96,7 @@ Read more about the [jobs API](../../api/job_artifacts.md#download-the-artifacts
 ## Adding a new trigger
 
 Go to your
-**Settings ➔ CI/CD** under **Triggers** to add a new trigger. The **Add trigger** button creates
+**Settings > CI/CD** under **Triggers** to add a new trigger. The **Add trigger** button creates
 a new token which you can then use to trigger a rerun of this
 particular project's pipeline.
 
@@ -109,7 +109,7 @@ overview of the time the triggers were last used.
 ## Revoking a trigger
 
 You can revoke a trigger any time by going at your project's
-**Settings ➔ CI/CD** under **Triggers** and hitting the **Revoke** button.
+**Settings > CI/CD** under **Triggers** and hitting the **Revoke** button.
 The action is irreversible.
 
 ## Triggering a pipeline
@@ -268,5 +268,13 @@ This behavior can also be achieved through GitLab's UI with
 Old triggers, created before GitLab 9.0 are marked as legacy.
 
 Triggers with the legacy label do not have an associated user and only have
-access to the current project. They are considered deprecated and will be
+access to the current project. They are considered deprecated and might be
 removed with one of the future versions of GitLab.
+
+## Troubleshooting
+
+### '404 not found' when triggering a pipeline
+
+A response of `{"message":"404 Not Found"}` when triggering a pipeline might be caused
+by using a Personal Access Token instead of a trigger token. [Add a new trigger](#adding-a-new-trigger)
+and use that token to authenticate when triggering a pipeline.

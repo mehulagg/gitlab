@@ -18,7 +18,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters({ issue: 'activeIssue' }),
+    ...mapGetters({ issue: 'activeIssue', projectPathForActiveIssue: 'projectPathForActiveIssue' }),
     hasDueDate() {
       return this.issue.dueDate != null;
     },
@@ -36,10 +36,6 @@ export default {
 
       return dateInWords(this.parsedDueDate, true);
     },
-    projectPath() {
-      const referencePath = this.issue.referencePath || '';
-      return referencePath.slice(0, referencePath.indexOf('#'));
-    },
   },
   methods: {
     ...mapActions(['setActiveIssueDueDate']),
@@ -53,7 +49,7 @@ export default {
 
       try {
         const dueDate = date ? formatDate(date, 'yyyy-mm-dd') : null;
-        await this.setActiveIssueDueDate({ dueDate, projectPath: this.projectPath });
+        await this.setActiveIssueDueDate({ dueDate, projectPath: this.projectPathForActiveIssue });
       } catch (e) {
         createFlash({ message: this.$options.i18n.updateDueDateError });
       } finally {
@@ -83,7 +79,7 @@ export default {
         <span class="gl-mx-2">-</span>
         <gl-button
           variant="link"
-          class="gl-text-gray-400!"
+          class="gl-text-gray-500!"
           data-testid="reset-button"
           :disabled="loading"
           @click="setDueDate(null)"

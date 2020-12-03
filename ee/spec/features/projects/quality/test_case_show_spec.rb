@@ -18,7 +18,7 @@ RSpec.describe 'Test Cases', :js do
 
   context 'test case page' do
     before do
-      visit project_issue_path(project, test_case)
+      visit project_quality_test_case_path(project, test_case)
 
       wait_for_all_requests
     end

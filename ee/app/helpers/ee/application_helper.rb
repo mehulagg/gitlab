@@ -11,6 +11,8 @@ module EE
 
     override :read_only_message
     def read_only_message
+      return _('You are on a read-only GitLab instance.') if maintenance_mode?
+
       return super unless ::Gitlab::Geo.secondary?
 
       message = @limited_actions_message ? s_('Geo|You may be able to make a limited amount of changes or perform a limited amount of actions on this page.') : s_('Geo|If you want to make changes, you must visit the primary site.')
@@ -78,6 +80,8 @@ module EE
     def autocomplete_data_sources(object, noteable_type)
       return {} unless object && noteable_type
 
+      enabled_for_vulnerabilities = object.feature_available?(:security_dashboard) && ::Feature.enabled?(:vulnerability_special_references, object)
+
       if object.is_a?(Group)
         {
           members: members_group_autocomplete_sources_path(object, type: noteable_type, type_id: params[:id]),
@@ -85,13 +89,15 @@ module EE
           issues: issues_group_autocomplete_sources_path(object),
           mergeRequests: merge_requests_group_autocomplete_sources_path(object),
           epics: epics_group_autocomplete_sources_path(object),
+          vulnerabilities: enabled_for_vulnerabilities ? vulnerabilities_group_autocomplete_sources_path(object) : nil,
           commands: commands_group_autocomplete_sources_path(object, type: noteable_type, type_id: params[:id]),
           milestones: milestones_group_autocomplete_sources_path(object)
-        }
-      elsif object.group&.feature_available?(:epics)
-        { epics: epics_project_autocomplete_sources_path(object) }.merge(super)
+        }.compact
       else
-        super
+        {
+          epics: object.group&.feature_available?(:epics) ? epics_project_autocomplete_sources_path(object) : nil,
+          vulnerabilities: enabled_for_vulnerabilities ? vulnerabilities_project_autocomplete_sources_path(object) : nil
+        }.compact.merge(super)
       end
     end
 
@@ -128,6 +134,12 @@ module EE
 
         next_unprocessed_event.created_at < EVENT_LAG_SHOW_THRESHOLD.ago
       end
+    end
+
+    def maintenance_mode?
+      return unless ::Feature.enabled?(:maintenance_mode)
+
+      ::Gitlab::CurrentSettings.maintenance_mode
     end
   end
 end

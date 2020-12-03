@@ -23,7 +23,7 @@ module EE
         def self.summaries_per_project
           group(:project_id, 'latest_by_project.date').pluck(
             :project_id,
-            Arel.sql("AVG(cast(data ->> 'coverage' AS FLOAT))"),
+            Arel.sql("ROUND(AVG(CAST(data ->> 'coverage' AS DECIMAL)), 2)::FLOAT"),
             Arel.sql("COUNT(*)"),
             Arel.sql("latest_by_project.date")
           ).each_with_object({}) do |(project_id, average_coverage, coverage_count, date), result|
@@ -37,7 +37,7 @@ module EE
 
         def self.activity_per_group
           group(:date).pluck(
-            Arel.sql("AVG(cast(data ->> 'coverage' AS FLOAT))"),
+            Arel.sql("ROUND(AVG(CAST(data ->> 'coverage' AS DECIMAL)), 2)::FLOAT"),
             Arel.sql("COUNT(*)"),
             Arel.sql("COUNT(DISTINCT ci_daily_build_group_report_results.project_id)"),
             Arel.sql("date")

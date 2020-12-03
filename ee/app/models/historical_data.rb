@@ -16,11 +16,6 @@ class HistoricalData < ApplicationRecord
       )
     end
 
-    # HistoricalData.at(Date.new(2014, 1, 1)).active_user_count
-    def at(date)
-      find_by(recorded_at: date.all_day)
-    end
-
     def max_historical_user_count(license: nil, from: nil, to: nil)
       license ||= License.current
       expires_at = license&.expires_at || Time.current

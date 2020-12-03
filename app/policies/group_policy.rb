@@ -101,6 +101,7 @@ class GroupPolicy < BasePolicy
     enable :read_label
     enable :read_board
     enable :read_group_member
+    enable :read_custom_emoji
   end
 
   rule { ~can?(:read_group) }.policy do
@@ -114,6 +115,7 @@ class GroupPolicy < BasePolicy
     enable :create_metrics_dashboard_annotation
     enable :delete_metrics_dashboard_annotation
     enable :update_metrics_dashboard_annotation
+    enable :create_custom_emoji
   end
 
   rule { reporter }.policy do
@@ -183,7 +185,10 @@ class GroupPolicy < BasePolicy
   rule { developer & developer_maintainer_access }.enable :create_projects
   rule { create_projects_disabled }.prevent :create_projects
 
-  rule { owner | admin }.enable :read_statistics
+  rule { owner | admin }.policy do
+    enable :owner_access
+    enable :read_statistics
+  end
 
   rule { maintainer & can?(:create_projects) }.enable :transfer_projects
 
@@ -194,6 +199,7 @@ class GroupPolicy < BasePolicy
 
   rule { write_package_registry_deploy_token }.policy do
     enable :create_package
+    enable :read_package
     enable :read_group
   end
 

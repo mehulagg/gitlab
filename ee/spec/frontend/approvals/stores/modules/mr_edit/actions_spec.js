@@ -1,6 +1,6 @@
-import testAction from 'helpers/vuex_action_helper';
-import * as types from 'ee/approvals/stores/modules/mr_edit/mutation_types';
 import * as actions from 'ee/approvals/stores/modules/mr_edit/actions';
+import * as types from 'ee/approvals/stores/modules/mr_edit/mutation_types';
+import testAction from 'helpers/vuex_action_helper';
 
 describe('Approval MR edit module actions', () => {
   describe('setTargetBranch', () => {

@@ -9,6 +9,11 @@ import {
   GlSprintf,
   GlTooltipDirective,
 } from '@gitlab/ui';
+import {
+  SCAN_TYPE_LABEL,
+  SCAN_TYPE,
+} from 'ee/security_configuration/dast_scanner_profiles/constants';
+import { DAST_SITE_VALIDATION_STATUS } from 'ee/security_configuration/dast_site_validation/constants';
 import * as Sentry from '~/sentry/wrapper';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { redirectTo } from '~/lib/utils/url_utility';
@@ -21,8 +26,9 @@ import {
   SITE_PROFILES_QUERY,
 } from '../settings';
 import dastOnDemandScanCreateMutation from '../graphql/dast_on_demand_scan_create.mutation.graphql';
-import OnDemandScansScannerProfileSelector from './profile_selector/scanner_profile_selector.vue';
-import OnDemandScansSiteProfileSelector from './profile_selector/site_profile_selector.vue';
+import ProfileSelectorSummaryCell from './profile_selector/summary_cell.vue';
+import ScannerProfileSelector from './profile_selector/scanner_profile_selector.vue';
+import SiteProfileSelector from './profile_selector/site_profile_selector.vue';
 
 const createProfilesApolloOptions = (name, { fetchQuery, fetchError }) => ({
   query: fetchQuery,
@@ -42,9 +48,11 @@ const createProfilesApolloOptions = (name, { fetchQuery, fetchError }) => ({
 });
 
 export default {
+  SCAN_TYPE_LABEL,
   components: {
-    OnDemandScansScannerProfileSelector,
-    OnDemandScansSiteProfileSelector,
+    ProfileSelectorSummaryCell,
+    ScannerProfileSelector,
+    SiteProfileSelector,
     GlAlert,
     GlButton,
     GlCard,
@@ -88,15 +96,16 @@ export default {
     newSiteProfilePath: {
       default: '',
     },
+    dastSiteValidationDocsPath: {
+      default: '',
+    },
   },
   data() {
     return {
       scannerProfiles: [],
       siteProfiles: [],
-      form: {
-        [SCANNER_PROFILES_QUERY.field]: null,
-        [SITE_PROFILES_QUERY.field]: null,
-      },
+      selectedScannerProfile: null,
+      selectedSiteProfile: null,
       loading: false,
       errorType: null,
       errors: [],
@@ -114,7 +123,25 @@ export default {
       return [ERROR_FETCH_SCANNER_PROFILES, ERROR_FETCH_SITE_PROFILES].includes(this.errorType);
     },
     someFieldEmpty() {
-      return Object.values(this.form).some(value => !value);
+      const { selectedScannerProfile, selectedSiteProfile } = this;
+      return !selectedScannerProfile || !selectedSiteProfile;
+    },
+    isActiveScannerProfile() {
+      return this.selectedScannerProfile?.scanType === SCAN_TYPE.ACTIVE;
+    },
+    isValidatedSiteProfile() {
+      return this.selectedSiteProfile?.validationStatus === DAST_SITE_VALIDATION_STATUS.PASSED;
+    },
+    hasProfilesConflict() {
+      return (
+        this.glFeatures.securityOnDemandScansSiteValidation &&
+        !this.someFieldEmpty &&
+        this.isActiveScannerProfile &&
+        !this.isValidatedSiteProfile
+      );
+    },
+    isSubmitButtonDisabled() {
+      return this.someFieldEmpty || this.hasProfilesConflict;
     },
   },
   methods: {
@@ -127,7 +154,8 @@ export default {
           mutation: dastOnDemandScanCreateMutation,
           variables: {
             fullPath: this.projectPath,
-            ...this.form,
+            dastScannerProfileId: this.selectedScannerProfile.id,
+            dastSiteProfileId: this.selectedSiteProfile.id,
           },
         })
         .then(({ data: { dastOnDemandScanCreate: { pipelineUrl, errors } } }) => {
@@ -209,15 +237,76 @@ export default {
       </gl-card>
     </template>
     <template v-else-if="!failedToLoadProfiles">
-      <on-demand-scans-scanner-profile-selector
-        v-model="form.dastScannerProfileId"
+      <scanner-profile-selector
+        v-model="selectedScannerProfile"
         class="gl-mb-5"
         :profiles="scannerProfiles"
-      />
-      <on-demand-scans-site-profile-selector
-        v-model="form.dastSiteProfileId"
-        :profiles="siteProfiles"
-      />
+      >
+        <template #summary="{ profile }">
+          <div class="row">
+            <profile-selector-summary-cell
+              :class="{ 'gl-text-red-500': hasProfilesConflict }"
+              :label="s__('DastProfiles|Scan mode')"
+              :value="$options.SCAN_TYPE_LABEL[profile.scanType]"
+            />
+          </div>
+          <div class="row">
+            <profile-selector-summary-cell
+              :label="s__('DastProfiles|Spider timeout')"
+              :value="n__('%d minute', '%d minutes', profile.spiderTimeout)"
+            />
+            <profile-selector-summary-cell
+              :label="s__('DastProfiles|Target timeout')"
+              :value="n__('%d second', '%d seconds', profile.targetTimeout)"
+            />
+          </div>
+          <div class="row">
+            <profile-selector-summary-cell
+              :label="s__('DastProfiles|AJAX spider')"
+              :value="profile.useAjaxSpider ? __('On') : __('Off')"
+            />
+            <profile-selector-summary-cell
+              :label="s__('DastProfiles|Debug messages')"
+              :value="
+                profile.showDebugMessages
+                  ? s__('DastProfiles|Show debug messages')
+                  : s__('DastProfiles|Hide debug messages')
+              "
+            />
+          </div>
+        </template>
+      </scanner-profile-selector>
+      <site-profile-selector v-model="selectedSiteProfile" class="gl-mb-5" :profiles="siteProfiles">
+        <template #summary="{ profile }">
+          <div class="row">
+            <profile-selector-summary-cell
+              :class="{ 'gl-text-red-500': hasProfilesConflict }"
+              :label="s__('DastProfiles|Target URL')"
+              :value="profile.targetUrl"
+            />
+          </div>
+        </template>
+      </site-profile-selector>
+
+      <gl-alert
+        v-if="hasProfilesConflict"
+        :title="s__('OnDemandScans|You cannot run an active scan against an unvalidated site.')"
+        :dismissible="false"
+        variant="danger"
+        data-testid="on-demand-scans-profiles-conflict-alert"
+      >
+        <gl-sprintf
+          :message="
+            s__(
+              'OnDemandScans|You can either choose a passive scan or validate the target site in your chosen site profile. %{docsLinkStart}Learn more about site validation.%{docsLinkEnd}',
+            )
+          "
+        >
+          <template #docsLink="{ content }">
+            <gl-link :href="dastSiteValidationDocsPath">{{ content }}</gl-link>
+          </template>
+        </gl-sprintf>
+      </gl-alert>
 
       <div class="gl-mt-6 gl-pt-6">
         <gl-button
@@ -225,13 +314,10 @@ export default {
           variant="success"
           class="js-no-auto-disable"
           data-testid="on-demand-scan-submit-button"
-          :disabled="someFieldEmpty"
+          :disabled="isSubmitButtonDisabled"
           :loading="loading"
         >
           {{ s__('OnDemandScans|Run scan') }}
-        </gl-button>
-        <gl-button data-testid="on-demand-scan-cancel-button" @click="$emit('cancel')">
-          {{ __('Cancel') }}
         </gl-button>
       </div>
     </template>

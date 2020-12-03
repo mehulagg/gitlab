@@ -8,14 +8,14 @@ export default {
     GlModal,
   },
   computed: {
-    ...mapGetters(['isSavingOrTesting']),
+    ...mapGetters(['isDisabled']),
     primaryProps() {
       return {
         text: __('Save'),
         attributes: [
           { variant: 'success' },
           { category: 'primary' },
-          { disabled: this.isSavingOrTesting },
+          { disabled: this.isDisabled },
         ],
       };
     },

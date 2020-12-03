@@ -5,6 +5,10 @@ require 'spec_helper'
 RSpec.describe 'Trial Sign Up' do
   let(:user_attrs) { attributes_for(:user, first_name: 'GitLab', last_name: 'GitLab') }
 
+  before do
+    stub_application_setting(require_admin_approval_after_user_signup: false)
+  end
+
   describe 'on GitLab.com' do
     before do
       allow(Gitlab).to receive(:com?).and_return(true).at_least(:once)

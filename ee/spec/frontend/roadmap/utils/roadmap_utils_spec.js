@@ -1,3 +1,4 @@
+import { PRESET_TYPES } from 'ee/roadmap/constants';
 import {
   getTimeframeForQuartersView,
   extendTimeframeForQuartersView,
@@ -10,8 +11,6 @@ import {
   assignDates,
   sortEpics,
 } from 'ee/roadmap/utils/roadmap_utils';
-
-import { PRESET_TYPES } from 'ee/roadmap/constants';
 
 import {
   mockTimeframeInitialDate,

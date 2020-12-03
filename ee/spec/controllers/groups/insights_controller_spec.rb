@@ -145,47 +145,5 @@ RSpec.describe Groups::InsightsController do
         it_behaves_like '200 status'
       end
     end
-
-    describe 'GET #embedded' do
-      subject { get :embedded, params: params.merge(group_id: parent_group.to_param) }
-
-      shared_examples 'has iframe options set' do
-        it 'sets SAMEORIGIN frame option' do
-          subject
-
-          expect(response.headers['X-Frame-Options']).to eq 'SAMEORIGIN'
-        end
-      end
-
-      context 'when feature is disabled' do
-        before do
-          stub_feature_flags(embed_analytics_report: false)
-        end
-
-        it_behaves_like '404 status'
-        include_examples 'has iframe options set'
-      end
-
-      context 'when project is public' do
-        let_it_be(:parent_group) { create(:group, :public) }
-        let_it_be(:project) { create(:project, :public) }
-
-        it_behaves_like '200 status'
-        include_examples 'has iframe options set'
-      end
-
-      context 'when project is internal' do
-        let_it_be(:parent_group) { create(:group, :internal) }
-        let_it_be(:project) { create(:project, :internal) }
-
-        it_behaves_like '404 status'
-        include_examples 'has iframe options set'
-      end
-
-      context 'when project is private' do
-        it_behaves_like '404 status'
-        include_examples 'has iframe options set'
-      end
-    end
   end
 end

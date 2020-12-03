@@ -17,6 +17,12 @@ export const groupNodes = [
   },
 ];
 
+export const nextGroupNode = {
+  __typename: 'Group',
+  full_name: 'Baz',
+  id: 'baz',
+};
+
 export const groupPageInfo = {
   nextPage: 2,
 };
@@ -39,6 +45,11 @@ export const devopsAdoptionSegmentsData = {
       __typename: 'devopsSegment',
     },
   ],
+  __typename: 'devopsAdoptionSegments',
+};
+
+export const devopsAdoptionSegmentsDataEmpty = {
+  nodes: [],
   __typename: 'devopsAdoptionSegments',
 };
 

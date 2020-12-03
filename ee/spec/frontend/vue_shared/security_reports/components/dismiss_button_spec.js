@@ -1,6 +1,6 @@
+import { GlButton } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
 import component from 'ee/vue_shared/security_reports/components/dismiss_button.vue';
-import { GlButton } from '@gitlab/ui';
 
 describe('DismissalButton', () => {
   let wrapper;

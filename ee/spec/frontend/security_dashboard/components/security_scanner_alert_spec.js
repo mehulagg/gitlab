@@ -1,5 +1,5 @@
-import { mount } from '@vue/test-utils';
 import { within, fireEvent } from '@testing-library/dom';
+import { mount } from '@vue/test-utils';
 import SecurityScannerAlert from 'ee/security_dashboard/components/security_scanner_alert.vue';
 
 describe('EE Vulnerability Security Scanner Alert', () => {

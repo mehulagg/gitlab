@@ -26,7 +26,6 @@ class License < ApplicationRecord
     issuable_default_templates
     issue_weights
     iterations
-    jenkins_integration
     ldap_group_sync
     member_lock
     merge_request_approvers
@@ -91,8 +90,10 @@ class License < ApplicationRecord
     group_project_templates
     group_repository_analytics
     group_saml
+    group_saml_group_sync
     group_wikis
     incident_sla
+    incident_metric_upload
     ide_schema_config
     issues_analytics
     jira_issues_integration
@@ -125,6 +126,7 @@ class License < ApplicationRecord
     unprotection_restrictions
     ci_project_subscriptions
     incident_timeline_view
+    oncall_schedules
   ]
   EEP_FEATURES.freeze
 
@@ -133,6 +135,7 @@ class License < ApplicationRecord
     container_scanning
     coverage_fuzzing
     credentials_inventory
+    custom_compliance_frameworks
     dast
     dependency_scanning
     devops_adoption
@@ -145,7 +148,6 @@ class License < ApplicationRecord
     license_scanning
     personal_access_token_expiration_policy
     enforce_pat_expiration
-    group_saml_group_sync
     prometheus_alerts
     pseudonymizer
     release_evidence_test_artifacts

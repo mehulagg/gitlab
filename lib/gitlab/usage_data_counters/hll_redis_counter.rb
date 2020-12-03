@@ -18,8 +18,8 @@ module Gitlab
 
       KNOWN_EVENTS_PATH = File.expand_path('known_events/*.yml', __dir__)
       ALLOWED_AGGREGATIONS = %i(daily weekly).freeze
-      UNION_OF_AGGREGATED_METRICS = 'ANY'
-      INTERSECTION_OF_AGGREGATED_METRICS = 'ALL'
+      UNION_OF_AGGREGATED_METRICS = 'OR'
+      INTERSECTION_OF_AGGREGATED_METRICS = 'AND'
       ALLOWED_METRICS_AGGREGATIONS = [UNION_OF_AGGREGATED_METRICS, INTERSECTION_OF_AGGREGATED_METRICS].freeze
       AGGREGATED_METRICS_PATH = File.expand_path('aggregated_metrics/*.yml', __dir__)
 
@@ -97,15 +97,11 @@ module Gitlab
         end
 
         def aggregated_metrics_monthly_data
-          aggregated_metrics.to_h do |aggregation|
-            [aggregation[:name], calculate_count_for_aggregation(aggregation, start_date: 4.weeks.ago.to_date, end_date: Date.current)]
-          end
+          aggregated_metrics_data(4.weeks.ago.to_date)
         end
 
         def aggregated_metrics_weekly_data
-          aggregated_metrics.to_h do |aggregation|
-            [aggregation[:name], calculate_count_for_aggregation(aggregation, start_date: 7.days.ago.to_date, end_date: Date.current)]
-          end
+          aggregated_metrics_data(7.days.ago.to_date)
         end
 
         def known_events
@@ -130,6 +126,14 @@ module Gitlab
         # The aray of valid context on which we allow tracking
         def valid_context_list
           Plan.all_plans
+        end
+
+        def aggregated_metrics_data(start_date)
+          aggregated_metrics.each_with_object({}) do |aggregation, weekly_data|
+            next if aggregation[:feature_flag] && Feature.disabled?(aggregation[:feature_flag], default_enabled: false, type: :development)
+
+            weekly_data[aggregation[:name]] = calculate_count_for_aggregation(aggregation, start_date: start_date, end_date: Date.current)
+          end
         end
 
         def calculate_count_for_aggregation(aggregation, start_date:, end_date:)

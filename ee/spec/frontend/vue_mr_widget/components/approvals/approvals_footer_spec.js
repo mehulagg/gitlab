@@ -1,8 +1,8 @@
-import { mount } from '@vue/test-utils';
 import { GlDeprecatedButton, GlButton, GlLoadingIcon, GlIcon } from '@gitlab/ui';
-import stubChildren from 'helpers/stub_children';
-import ApprovalsList from 'ee/vue_merge_request_widget/components/approvals/approvals_list.vue';
+import { mount } from '@vue/test-utils';
 import ApprovalsFooter from 'ee/vue_merge_request_widget/components/approvals/approvals_footer.vue';
+import ApprovalsList from 'ee/vue_merge_request_widget/components/approvals/approvals_list.vue';
+import stubChildren from 'helpers/stub_children';
 import UserAvatarList from '~/vue_shared/components/user_avatar/user_avatar_list.vue';
 
 const testSuggestedApprovers = () => Array.from({ length: 11 }, (_, i) => i).map(id => ({ id }));

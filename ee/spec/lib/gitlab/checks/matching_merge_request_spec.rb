@@ -15,6 +15,7 @@ RSpec.describe Gitlab::Checks::MatchingMergeRequest do
         target_branch: target_branch,
         in_progress_merge_commit_sha: newrev)
     end
+
     let(:total_counter) { subject.send(:total_counter) }
     let(:stale_counter) { subject.send(:stale_counter) }
 

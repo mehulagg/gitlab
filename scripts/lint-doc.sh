@@ -65,24 +65,29 @@ then
   echo "Merge request pipeline (detached) detected. Testing all files."
 else
   MERGE_BASE=$(git merge-base ${CI_MERGE_REQUEST_TARGET_BRANCH_SHA} ${CI_MERGE_REQUEST_SOURCE_BRANCH_SHA})
-  MD_DOC_PATH=$(git diff --name-only "${MERGE_BASE}..${CI_MERGE_REQUEST_SOURCE_BRANCH_SHA}" 'doc/*.md')
-  if [ -n "${MD_DOC_PATH}" ]
+  if git diff --name-only "${MERGE_BASE}..${CI_MERGE_REQUEST_SOURCE_BRANCH_SHA}" | grep -E "\.vale|\.markdownlint|lint-doc\.sh"
   then
-    echo -e "Merged results pipeline detected. Testing only the following files:\n${MD_DOC_PATH}"
+    MD_DOC_PATH=${MD_DOC_PATH:-doc}
+    echo "Vale, Markdownlint, or lint-doc.sh configuration changed. Testing all files."
+  else
+    MD_DOC_PATH=$(git diff --name-only "${MERGE_BASE}..${CI_MERGE_REQUEST_SOURCE_BRANCH_SHA}" 'doc/*.md')
+    if [ -n "${MD_DOC_PATH}" ]
+    then
+      echo -e "Merged results pipeline detected. Testing only the following files:\n${MD_DOC_PATH}"
+    fi
   fi
 fi
 
 function run_locally_or_in_docker() {
   local cmd=$1
   local args=$2
-  local pipe_cmd=$3
 
   if hash ${cmd} 2>/dev/null
   then
-    $cmd $args | $pipe_cmd
+    $cmd $args
   elif hash docker 2>/dev/null
   then
-    docker run -t -v ${PWD}:/gitlab -w /gitlab --rm registry.gitlab.com/gitlab-org/gitlab-docs/lint:latest ${cmd} ${args} | $pipe_cmd
+    docker run -t -v ${PWD}:/gitlab -w /gitlab --rm registry.gitlab.com/gitlab-org/gitlab-docs/lint-markdown:alpine-3.12-vale-2.6.1-markdownlint-0.24.0 ${cmd} ${args}
   else
     echo
     echo "  ✖ ERROR: '${cmd}' not found. Install '${cmd}' or Docker to proceed." >&2
@@ -109,7 +114,7 @@ else
 fi
 
 echo '=> Linting prose...'
-run_locally_or_in_docker 'vale' "--minAlertLevel error --output=JSON ${MD_DOC_PATH}" "ruby scripts/vale.rb"
+run_locally_or_in_docker 'vale' "--minAlertLevel error --output=doc/.vale/vale.tmpl ${MD_DOC_PATH}"
 
 if [ $ERRORCODE -ne 0 ]
 then

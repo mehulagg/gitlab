@@ -2,7 +2,7 @@
 import { mapActions, mapGetters, mapState } from 'vuex';
 import { GlButton, GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import Draggable from 'vuedraggable';
-import BoardListHeader from 'ee_else_ce/boards/components/board_list_header.vue';
+import BoardListHeader from 'ee_else_ce/boards/components/board_list_header_new.vue';
 import { DRAGGABLE_TAG } from '../constants';
 import defaultSortableConfig from '~/sortable/sortable_config';
 import { n__ } from '~/locale';
@@ -154,7 +154,7 @@ export default {
             :aria-label="unassignedIssuesCountTooltipText"
             data-testid="issues-lane-issue-count"
           >
-            <gl-icon class="gl-mr-2 gl-flex-shrink-0" name="issues" aria-hidden="true" />
+            <gl-icon class="gl-mr-2 gl-flex-shrink-0" name="issues" />
             <span aria-hidden="true">{{ unassignedIssuesCount }}</span>
           </span>
         </div>

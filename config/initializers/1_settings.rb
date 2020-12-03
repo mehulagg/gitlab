@@ -3,6 +3,13 @@ require_relative '../object_store_settings'
 require_relative '../smime_signature_settings'
 
 # Default settings
+Settings['shared'] ||= Settingslogic.new({})
+Settings.shared['path'] = Settings.absolute(Settings.shared['path'] || "shared")
+
+Settings['encrypted_settings'] ||= Settingslogic.new({})
+Settings.encrypted_settings['path'] ||= File.join(Settings.shared['path'], "encrypted_settings")
+Settings.encrypted_settings['path'] = Settings.absolute(Settings.encrypted_settings['path'])
+
 Settings['ldap'] ||= Settingslogic.new({})
 Settings.ldap['enabled'] = false if Settings.ldap['enabled'].nil?
 Settings.ldap['prevent_ldap_sign_in'] = false if Settings.ldap['prevent_ldap_sign_in'].blank?
@@ -139,9 +146,6 @@ end
 if Gitlab.ee? && Rails.env.test? && !saml_provider_enabled
   Settings.omniauth.providers << Settingslogic.new({ 'name' => 'group_saml' })
 end
-
-Settings['shared'] ||= Settingslogic.new({})
-Settings.shared['path'] = Settings.absolute(Settings.shared['path'] || "shared")
 
 Settings['issues_tracker'] ||= {}
 
@@ -532,6 +536,9 @@ Settings.cron_jobs['member_invitation_reminder_emails_worker']['job_class'] = 'M
 Settings.cron_jobs['schedule_merge_request_cleanup_refs_worker'] ||= Settingslogic.new({})
 Settings.cron_jobs['schedule_merge_request_cleanup_refs_worker']['cron'] ||= '* * * * *'
 Settings.cron_jobs['schedule_merge_request_cleanup_refs_worker']['job_class'] = 'ScheduleMergeRequestCleanupRefsWorker'
+Settings.cron_jobs['manage_evidence_worker'] ||= Settingslogic.new({})
+Settings.cron_jobs['manage_evidence_worker']['cron'] ||= '0 * * * *'
+Settings.cron_jobs['manage_evidence_worker']['job_class'] = 'Releases::ManageEvidenceWorker'
 
 Gitlab.ee do
   Settings.cron_jobs['active_user_count_threshold_worker'] ||= Settingslogic.new({})
@@ -782,6 +789,8 @@ Settings.forti_authenticator['port'] = 443 if Settings.forti_authenticator['port
 # Extra customization
 #
 Settings['extra'] ||= Settingslogic.new({})
+Settings.extra['matomo_site_id'] ||= Settings.extra['piwik_site_id'] if Settings.extra['piwik_site_id'].present?
+Settings.extra['matomo_url'] ||= Settings.extra['piwik_url'] if Settings.extra['piwik_url'].present?
 
 #
 # Rack::Attack settings
