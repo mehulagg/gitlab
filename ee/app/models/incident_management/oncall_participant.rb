@@ -13,7 +13,7 @@ module IncidentManagement
     validates :color_palette, length: { maximum: 10 }
     validates :color_weight, length: { maximum: 4 }
     validates :participant, presence: true, uniqueness: { scope: :oncall_rotation_id }
-    validate  :particpant_can_read_project, if: :participant
+    validate  :participant_can_read_project, if: :participant, on: :create
 
     alias_attribute :user, :participant
 
@@ -21,9 +21,9 @@ module IncidentManagement
 
     private
 
-    def particpant_can_read_project
+    def participant_can_read_project
       unless participant.can?(:read_project, project)
-        errors.add(:participant, 'participant does not have access to the project')
+        errors.add(:participant, 'does not have access to the project')
       end
     end
   end
