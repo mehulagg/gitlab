@@ -84,20 +84,13 @@ we have selected `test-branch` as the source, and `release-13-0` as the target.
 
    That confirms you've set up the MR to merge into the specified branch, not master.
 
-1. Proceed with the change as you would with any other MR. If others
-   also work from the `test-branch`, you may need to
-   [rebase](#rebase-on-a-dedicated branch) against changes
-   that are merged before yours.
+1. Proceed with the change as you would with any other MR. If others also work from the `test-branch`, you may need to [rebase](#rebase-on-a-dedicated branch) against changes that are merged before yours.
 1. When your MR is approved, and an appropriate user merges that MR, you can rest assured that your work is incorporated directly into the feature branch.
 When the feature branch is ready, it can then be merged into master.
 
 ### Rebase against a dedicated branch
 
-When there are multiple MRs in work on a feature branch, it's important
-to resolve conflicts between these MRs. To prevent issues, you'll
-need to "rebase" against the feature branch in the same way you
-might do so against "master". If you're on a `test-branch` where
-multiple people are working, be sure to rebase against it frequently.
+When there are multiple MRs in work on a feature branch, it's important to resolve conflicts between these MRs. To prevent issues, you'll need to "rebase" against the feature branch in the same way you might do so against "master". If you're on a `test-branch` where multiple people are working, be sure to rebase against it frequently.
 
 Assumptions:
 
