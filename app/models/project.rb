@@ -1959,6 +1959,7 @@ class Project < ApplicationRecord
       .concat(predefined_project_variables)
       .concat(pages_variables)
       .concat(container_registry_variables)
+      .concat(dependency_proxy_variables)
       .concat(auto_devops_variables)
       .concat(api_variables)
   end
@@ -2007,6 +2008,18 @@ class Project < ApplicationRecord
   def api_variables
     Gitlab::Ci::Variables::Collection.new.tap do |variables|
       variables.append(key: 'CI_API_V4_URL', value: API::Helpers::Version.new('v4').root_url)
+    end
+  end
+
+  def dependency_proxy_variables
+    Gitlab::Ci::Variables::Collection.new.tap do |variables|
+      break variables unless Gitlab.config.dependency_proxy.enabled
+
+      variables.append(key: 'CI_DEPENDENCY_PROXY_HOST', value: Gitlab.config.gitlab.host)
+      variables.append(
+        key: 'CI_DEPENDENCY_PROXY_GROUP_URL',
+        value: "#{Gitlab.config.gitlab.host}:#{Gitlab.config.gitlab.port}/#{namespace.root_ancestor.path}#{DependencyProxy::URL_SUFFIX}"
+      )
     end
   end
 
