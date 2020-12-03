@@ -13,6 +13,7 @@ describe('ToggleLabels component', () => {
   function createComponent() {
     setShowLabels = jest.fn();
     return shallowMount(ToggleLabels, {
+      localVue,
       store: new Vuex.Store({
         state: {
           isShowingLabels: true,
