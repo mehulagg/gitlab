@@ -90,7 +90,10 @@ When the feature branch is ready, it can then be merged into master.
 
 ### Rebase against a dedicated branch
 
-When there are multiple MRs in work on a feature branch, it's important to resolve conflicts between these MRs. To prevent issues, you'll need to "rebase" against the feature branch in the same way you might do so against "master". If you're on a `test-branch` where multiple people are working, be sure to rebase against it frequently.
+When there are multiple MRs in work on a feature branch, it's important to resolve conflicts
+between these MRs. To prevent issues, you'll need to "rebase" against the feature branch in
+the same way you might do so against "master". If you're on a `test-branch` where multiple
+people are working, be sure to pull from it frequently, to incorporate the work merged by others.
 
 Assumptions:
 
