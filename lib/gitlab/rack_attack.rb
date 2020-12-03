@@ -11,6 +11,12 @@ module Gitlab
       Rack::Attack.throttled_response_retry_after_header = true
       # Configure the throttles
       configure_throttles(rack_attack)
+
+      configure_user_allowlist(ENV['GITLAB_THROTTLE_USER_ALLOWLIST'])
+    end
+
+    def self.configure_user_allowlist(list)
+      @user_allowlist = UserAllowlist.new(list)
     end
 
     def self.configure_throttles(rack_attack)
@@ -94,6 +100,10 @@ module Gitlab
       return true if dry_run_config == '*'
 
       dry_run_config.split(',').map(&:strip).include?(name)
+    end
+
+    def self.user_allowlist
+      @user_allowlist
     end
   end
 end
