@@ -54,12 +54,28 @@ module EE
               null: true,
               description: 'Date until the temporary storage increase is active'
 
+        field :compliance_frameworks,
+              ::Types::ComplianceManagement::ComplianceFrameworkType.connection_type,
+              null: true,
+              description: 'Compliance frameworks available to projects in this namespace',
+              feature_flag: :ff_custom_compliance_frameworks
+
         def additional_purchased_storage_size
           object.additional_purchased_storage_size.megabytes
         end
 
         def storage_size_limit
           object.root_storage_size.limit
+        end
+
+        def compliance_frameworks
+          BatchLoader::GraphQL.for(object.id).batch(default_value: []) do |namespace_ids, loader|
+            results = ::ComplianceManagement::Framework.with_namespaces(namespace_ids)
+
+            results.each do |framework|
+              loader.call(framework.namespace.id) { |xs| xs << framework }
+            end
+          end
         end
       end
     end

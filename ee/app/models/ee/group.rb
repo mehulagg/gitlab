@@ -40,6 +40,8 @@ module EE
       has_many :project_templates, through: :projects, foreign_key: 'custom_project_templates_group_id'
 
       has_many :managed_users, class_name: 'User', foreign_key: 'managing_group_id', inverse_of: :managing_group
+      has_many :provisioned_user_details, class_name: 'UserDetail', foreign_key: 'provisioned_by_group_id', inverse_of: :provisioned_by_group
+      has_many :provisioned_users, through: :provisioned_user_details, source: :user
       has_many :cycle_analytics_stages, class_name: 'Analytics::CycleAnalytics::GroupStage'
       has_many :value_streams, class_name: 'Analytics::CycleAnalytics::GroupValueStream'
 

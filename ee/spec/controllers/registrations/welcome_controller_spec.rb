@@ -76,7 +76,7 @@ RSpec.describe Registrations::WelcomeController do
 
         context 'when part of the onboarding issues experiment' do
           before do
-            stub_experiment_for_user(onboarding_issues: true)
+            stub_experiment_for_subject(onboarding_issues: true)
           end
 
           it { is_expected.to redirect_to new_users_sign_up_group_path }
@@ -123,7 +123,7 @@ RSpec.describe Registrations::WelcomeController do
         sign_in(user)
         allow(::Gitlab).to receive(:com?).and_return(on_gitlab_com)
         stub_experiment(onboarding_issues: experiment_enabled)
-        stub_experiment_for_user(onboarding_issues: experiment_enabled_for_user)
+        stub_experiment_for_subject(onboarding_issues: experiment_enabled_for_user)
         allow(controller.helpers).to receive(:in_subscription_flow?).and_return(in_subscription_flow)
         allow(controller.helpers).to receive(:in_invitation_flow?).and_return(in_invitation_flow)
         allow(controller.helpers).to receive(:in_oauth_flow?).and_return(in_oauth_flow)

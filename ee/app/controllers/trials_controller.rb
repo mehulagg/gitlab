@@ -14,6 +14,7 @@ class TrialsController < ApplicationController
 
   def new
     record_experiment_user(:remove_known_trial_form_fields)
+    record_experiment_user(:trimmed_skip_trial_copy)
   end
 
   def select
@@ -36,6 +37,7 @@ class TrialsController < ApplicationController
 
     if @result&.dig(:success)
       record_experiment_conversion_event(:remove_known_trial_form_fields)
+      record_experiment_conversion_event(:trimmed_skip_trial_copy)
       redirect_to group_url(@namespace, { trial: true })
     else
       render :select

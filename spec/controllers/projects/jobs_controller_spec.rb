@@ -18,7 +18,7 @@ RSpec.describe Projects::JobsController, :clean_gitlab_redis_shared_state do
     describe 'pushing tracking_data to Gon' do
       before do
         stub_experiment(jobs_empty_state: experiment_active)
-        stub_experiment_for_user(jobs_empty_state: in_experiment_group)
+        stub_experiment_for_subject(jobs_empty_state: in_experiment_group)
 
         get_index
       end
@@ -853,18 +853,6 @@ RSpec.describe Projects::JobsController, :clean_gitlab_redis_shared_state do
           post_play
 
           expect(job.reload).to be_pending
-        end
-
-        context 'when FF ci_manual_bridges is disabled' do
-          before do
-            stub_feature_flags(ci_manual_bridges: false)
-          end
-
-          it 'returns 404' do
-            post_play
-
-            expect(response).to have_gitlab_http_status(:not_found)
-          end
         end
       end
     end

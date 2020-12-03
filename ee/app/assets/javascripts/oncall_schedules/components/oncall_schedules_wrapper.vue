@@ -1,6 +1,7 @@
 <script>
 import { GlEmptyState, GlButton, GlModalDirective } from '@gitlab/ui';
 import AddScheduleModal from './add_schedule_modal.vue';
+import AddRotationModal from './rotations/add_rotation_modal.vue';
 import { s__ } from '~/locale';
 
 const addScheduleModalId = 'addScheduleModal';
@@ -21,6 +22,7 @@ export default {
     GlEmptyState,
     GlButton,
     AddScheduleModal,
+    AddRotationModal,
   },
   directives: {
     GlModal: GlModalDirective,
@@ -40,8 +42,12 @@ export default {
         <gl-button v-gl-modal="$options.addScheduleModalId" variant="info">
           {{ $options.i18n.emptyState.button }}
         </gl-button>
+        <gl-button v-gl-modal="'create-schedule-rotation-modal'" variant="danger">
+          {{ $options.i18n.emptyState.button }}
+        </gl-button>
       </template>
     </gl-empty-state>
     <add-schedule-modal :modal-id="$options.addScheduleModalId" />
+    <add-rotation-modal />
   </div>
 </template>

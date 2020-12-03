@@ -3305,7 +3305,7 @@
           "fields": [
             {
               "name": "assignee",
-              "description": "The board assignee.",
+              "description": "The board assignee",
               "args": [
 
               ],
@@ -3319,7 +3319,7 @@
             },
             {
               "name": "epics",
-              "description": "Epics associated with board issues.",
+              "description": "Epics associated with board issues",
               "args": [
                 {
                   "name": "issueFilters",
@@ -3382,7 +3382,7 @@
             },
             {
               "name": "hideBacklogList",
-              "description": "Whether or not backlog list is hidden.",
+              "description": "Whether or not backlog list is hidden",
               "args": [
 
               ],
@@ -3396,7 +3396,7 @@
             },
             {
               "name": "hideClosedList",
-              "description": "Whether or not closed list is hidden.",
+              "description": "Whether or not closed list is hidden",
               "args": [
 
               ],
@@ -3554,7 +3554,7 @@
             },
             {
               "name": "milestone",
-              "description": "The board milestone.",
+              "description": "The board milestone",
               "args": [
 
               ],
@@ -3582,7 +3582,7 @@
             },
             {
               "name": "weight",
-              "description": "Weight of the board.",
+              "description": "Weight of the board",
               "args": [
 
               ],
@@ -8529,6 +8529,60 @@
           "name": "ComplianceFramework",
           "description": "Represents a ComplianceFramework associated with a Project",
           "fields": [
+            {
+              "name": "color",
+              "description": "Hexadecimal representation of compliance framework's label color",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "description",
+              "description": "Description of the compliance framework",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "id",
+              "description": "Compliance framework ID",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "ID",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
             {
               "name": "name",
               "description": "Name of the compliance framework",
@@ -24521,6 +24575,59 @@
               "type": {
                 "kind": "OBJECT",
                 "name": "CodeCoverageActivityConnection",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "complianceFrameworks",
+              "description": "Compliance frameworks available to projects in this namespace. Available only when feature flag `ff_custom_compliance_frameworks` is enabled",
+              "args": [
+                {
+                  "name": "after",
+                  "description": "Returns the elements in the list that come after the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "before",
+                  "description": "Returns the elements in the list that come before the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "first",
+                  "description": "Returns the first _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "last",
+                  "description": "Returns the last _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "ComplianceFrameworkConnection",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -41052,6 +41159,33 @@
               "deprecationReason": null
             },
             {
+              "name": "oncallScheduleUpdate",
+              "description": null,
+              "args": [
+                {
+                  "name": "input",
+                  "description": null,
+                  "type": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "OncallScheduleUpdateInput",
+                      "ofType": null
+                    }
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "OncallScheduleUpdatePayload",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "pipelineCancel",
               "description": null,
               "args": [
@@ -42223,6 +42357,59 @@
               "type": {
                 "kind": "SCALAR",
                 "name": "Float",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "complianceFrameworks",
+              "description": "Compliance frameworks available to projects in this namespace. Available only when feature flag `ff_custom_compliance_frameworks` is enabled",
+              "args": [
+                {
+                  "name": "after",
+                  "description": "Returns the elements in the list that come after the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "before",
+                  "description": "Returns the elements in the list that come before the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "first",
+                  "description": "Returns the first _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "last",
+                  "description": "Returns the last _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "ComplianceFrameworkConnection",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -43881,6 +44068,152 @@
           "kind": "OBJECT",
           "name": "OncallScheduleDestroyPayload",
           "description": "Autogenerated return type of OncallScheduleDestroy",
+          "fields": [
+            {
+              "name": "clientMutationId",
+              "description": "A unique identifier for the client performing the mutation.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "errors",
+              "description": "Errors encountered during execution of the mutation.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "SCALAR",
+                      "name": "String",
+                      "ofType": null
+                    }
+                  }
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "oncallSchedule",
+              "description": "The on-call schedule",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "IncidentManagementOncallSchedule",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "INPUT_OBJECT",
+          "name": "OncallScheduleUpdateInput",
+          "description": "Autogenerated input type of OncallScheduleUpdate",
+          "fields": null,
+          "inputFields": [
+            {
+              "name": "projectPath",
+              "description": "The project to update the on-call schedule in",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "ID",
+                  "ofType": null
+                }
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "iid",
+              "description": "The on-call schedule internal ID to update",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "name",
+              "description": "The name of the on-call schedule",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "description",
+              "description": "The description of the on-call schedule",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "timezone",
+              "description": "The timezone of the on-call schedule",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "clientMutationId",
+              "description": "A unique identifier for the client performing the mutation.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            }
+          ],
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "OncallScheduleUpdatePayload",
+          "description": "Autogenerated return type of OncallScheduleUpdate",
           "fields": [
             {
               "name": "clientMutationId",
@@ -63019,6 +63352,20 @@
               "deprecationReason": null
             },
             {
+              "name": "downloadPath",
+              "description": "URL for downloading the version's JSON file",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "id",
               "description": "ID of the Terraform state version",
               "args": [
@@ -63045,6 +63392,20 @@
               "type": {
                 "kind": "OBJECT",
                 "name": "CiJob",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "serial",
+              "description": "Serial number of the version",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Int",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -65938,7 +66299,7 @@
             },
             {
               "name": "hideBacklogList",
-              "description": "Whether or not backlog list is hidden.",
+              "description": "Whether or not backlog list is hidden",
               "type": {
                 "kind": "SCALAR",
                 "name": "Boolean",
@@ -65948,7 +66309,7 @@
             },
             {
               "name": "hideClosedList",
-              "description": "Whether or not closed list is hidden.",
+              "description": "Whether or not closed list is hidden",
               "type": {
                 "kind": "SCALAR",
                 "name": "Boolean",

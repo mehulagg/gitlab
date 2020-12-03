@@ -22,4 +22,8 @@ class Geo::LfsObjectRegistry < Geo::BaseRegistry
       delete_worker_class.perform_async(:lfs, lfs_object_id)
     end
   end
+
+  def self.delete_worker_class
+    ::Geo::FileRegistryRemovalWorker
+  end
 end

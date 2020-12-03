@@ -1,5 +1,15 @@
 <script>
-import { GlFormGroup, GlFormInput, GlFormCheckboxTree, GlModal, GlSprintf } from '@gitlab/ui';
+import {
+  GlFormGroup,
+  GlFormInput,
+  GlFormCheckboxTree,
+  GlModal,
+  GlSprintf,
+  GlAlert,
+} from '@gitlab/ui';
+import { convertToGraphQLIds, TYPE_GROUP } from '~/graphql_shared/utils';
+import * as Sentry from '~/sentry/wrapper';
+import createDevopsAdoptionSegmentMutation from '../graphql/mutations/create_devops_adoption_segment.mutation.graphql';
 import { DEVOPS_ADOPTION_STRINGS, DEVOPS_ADOPTION_SEGMENT_MODAL_ID } from '../constants';
 
 export default {
@@ -10,6 +20,7 @@ export default {
     GlFormInput,
     GlFormCheckboxTree,
     GlSprintf,
+    GlAlert,
   },
   props: {
     segmentId: {
@@ -27,43 +38,109 @@ export default {
     return {
       name: '',
       checkboxValues: [],
+      loading: false,
+      errors: [],
     };
   },
   computed: {
     checkboxOptions() {
       return this.groups.map(({ id, full_name }) => ({ label: full_name, value: id }));
     },
+    cancelOptions() {
+      return {
+        text: this.$options.i18n.cancel,
+        attributes: [{ disabled: this.loading }],
+      };
+    },
+    primaryOptions() {
+      return {
+        text: this.$options.i18n.button,
+        attributes: [
+          {
+            variant: 'info',
+            loading: this.loading,
+            disabled: !this.canSubmit,
+          },
+        ],
+      };
+    },
+    canSubmit() {
+      return this.name.length && this.checkboxValues.length;
+    },
+    displayError() {
+      return this.errors[0];
+    },
   },
   methods: {
-    createSegment() {},
+    async createSegment() {
+      try {
+        this.loading = true;
+        const {
+          data: {
+            createDevopsAdoptionSegment: { errors },
+          },
+        } = await this.$apollo.mutate({
+          mutation: createDevopsAdoptionSegmentMutation,
+          variables: {
+            name: this.name,
+            groupIds: convertToGraphQLIds(TYPE_GROUP, this.checkboxValues),
+          },
+        });
+
+        if (errors.length) {
+          this.errors = errors;
+        } else {
+          this.name = '';
+          this.checkboxValues = [];
+
+          this.$refs.modal.hide();
+        }
+      } catch (error) {
+        this.errors.push(this.$options.i18n.error);
+        Sentry.captureException(error);
+      } finally {
+        this.loading = false;
+      }
+    },
+    clearErrors() {
+      this.errors = [];
+    },
   },
   devopsSegmentModalId: DEVOPS_ADOPTION_SEGMENT_MODAL_ID,
 };
 </script>
 <template>
   <gl-modal
+    ref="modal"
     :modal-id="$options.devopsSegmentModalId"
     :title="$options.i18n.title"
-    :ok-title="$options.i18n.button"
-    ok-variant="info"
     size="sm"
     scrollable
-    @ok="createSegment"
+    :action-primary="primaryOptions"
+    :action-cancel="cancelOptions"
+    @primary.prevent="createSegment"
   >
-    <gl-form-group :label="$options.i18n.nameLabel" label-for="name" data-testid="name">
+    <gl-alert v-if="errors.length" variant="danger" class="gl-mb-3" @dismiss="clearErrors">
+      {{ displayError }}
+    </gl-alert>
+    <gl-form-group :label="$options.i18n.nameLabel" label-for="name">
       <gl-form-input
         id="name"
         v-model="name"
+        data-testid="name"
         type="text"
         :placeholder="$options.i18n.namePlaceholder"
-        :required="true"
+        required
+        :disabled="loading"
       />
     </gl-form-group>
-    <gl-form-group class="gl-mb-0" data-testid="groups">
+    <gl-form-group class="gl-mb-0">
       <gl-form-checkbox-tree
         v-model="checkboxValues"
+        data-testid="groups"
         :options="checkboxOptions"
         :hide-toggle-all="true"
+        :disabled="loading"
         class="gl-p-3 gl-pb-0 gl-mb-2 gl-border-1 gl-border-solid gl-border-gray-100 gl-rounded-base"
       />
       <div class="gl-text-gray-400" data-testid="groupsHelperText">

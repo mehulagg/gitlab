@@ -17,7 +17,7 @@ RSpec.describe 'Welcome screen', :js do
       allow_any_instance_of(EE::WelcomeHelper).to receive(:in_invitation_flow?).and_return(in_invitation_flow)
       allow_any_instance_of(EE::WelcomeHelper).to receive(:in_subscription_flow?).and_return(in_subscription_flow)
       allow_any_instance_of(EE::WelcomeHelper).to receive(:in_trial_flow?).and_return(in_trial_flow)
-      stub_experiment_for_user(onboarding_issues: part_of_onboarding_issues_experiment)
+      stub_experiment_for_subject(onboarding_issues: part_of_onboarding_issues_experiment)
 
       visit users_sign_up_welcome_path
     end

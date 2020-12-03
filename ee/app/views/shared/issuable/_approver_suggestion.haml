@@ -13,10 +13,6 @@
   = sprite_icon('spinner', size: 24, css_class: 'gl-spinner')
 - if can_update_approvers
   - approver_presenter = MergeRequestApproverPresenter.new(issuable, skip_user: current_user)
-  .form-text.text-muted.suggested-approvers
-    - if approver_presenter.any?
-      Suggested approvers:
-      = approver_presenter.render
   - if approver_presenter.show_code_owner_tips?
     .form-text.text-muted
       = _('Tip: add a')
