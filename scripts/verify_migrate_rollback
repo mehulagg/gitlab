@@ -1,0 +1,80 @@
+#!/usr/bin/env ruby
+
+# frozen_string_literal: true
+
+require 'open3'
+
+class RollbackVerificationCheck
+  FILENAME = 'db/structure.sql'
+
+  MIGRATION_DIRS = %w[db/migrate db/post_migrate].freeze
+
+  VERSION_DIGITS = 14
+
+  def execute
+    if committed_schema_migrations.empty?
+      puts "\e[32m No migrations found, skipping migration rollback check"
+      return
+    end
+
+    committed_schema_migrations.each do |filename|
+      version = find_migration_version(filename)
+
+      run("bin/rails db:migrate:down VERSION=#{version}")
+    end
+
+    diff_output = run("git diff #{merge_base} -- #{FILENAME}").chomp
+
+    unless diff_output.empty? # rubocop:disable Cop/LineBreakAroundConditionalBlock
+      die "rollback of added migrations does not revert #{FILENAME} to previous state:\n#{diff_output}"
+    end
+  ensure
+    run("bin/rails db:migrate")
+  end
+
+  private
+
+  def committed_schema_migrations
+    @committed_schema_migrations ||= begin
+      git_command = "git diff --name-only --diff-filter=A #{merge_base} -- #{MIGRATION_DIRS.join(' ')}"
+      run(git_command).chomp.split("\n")
+    end
+  end
+
+  def merge_base
+    @merge_base ||= run("git merge-base #{target_branch} #{source_ref}").chomp
+  end
+
+  def target_branch
+    ENV['CI_MERGE_REQUEST_TARGET_BRANCH_NAME'] || ENV['TARGET'] || 'master'
+  end
+
+  def source_ref
+    ENV['CI_COMMIT_SHA'] || 'HEAD'
+  end
+
+  def find_migration_version(filename)
+    version_start = filename =~ /\d{#{VERSION_DIGITS}}/
+
+    die "#{filename} has an invalid migration version" if version_start.nil?
+
+    filename.slice(version_start, VERSION_DIGITS)
+  end
+
+  def die(message, error_code: 1)
+    puts "\e[31mError: #{message}\e[0m"
+    exit error_code
+  end
+
+  def run(cmd)
+    puts "\e[32m$ #{cmd}\e[37m"
+    stdout_str, stderr_str, status = Open3.capture3(cmd)
+    puts "#{stdout_str}#{stderr_str}\e[0m"
+
+    die "command failed: #{stderr_str}" unless status.success?
+
+    stdout_str
+  end
+end
+
+RollbackVerificationCheck.new.execute

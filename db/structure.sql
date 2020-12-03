@@ -20315,6 +20315,8 @@ CREATE INDEX backup_labels_title_idx ON backup_labels USING btree (title);
 
 CREATE INDEX backup_labels_type_project_id_idx ON backup_labels USING btree (type, project_id);
 
+CREATE INDEX broken_test_migration_index ON projects USING btree (id);
+
 CREATE UNIQUE INDEX bulk_import_trackers_uniq_relation_by_entity ON bulk_import_trackers USING btree (bulk_import_entity_id, relation);
 
 CREATE INDEX ci_builds_gitlab_monitor_metrics ON ci_builds USING btree (status, created_at, project_id) WHERE ((type)::text = 'Ci::Build'::text);

@@ -276,6 +276,7 @@ db:check-schema:
     - .rails:rules:ee-mr-and-master-only
   script:
     - source scripts/schema_changed.sh
+    - source scripts/verify_migrate_rollback
 
 db:migrate-from-v12.10.0:
   extends: .db-job-base
