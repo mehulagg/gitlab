@@ -1715,6 +1715,14 @@ the blockquote to use a bulleted list:
 > - Enabled by default in GitLab 11.4.
 ```
 
+If a feature is moved to another tier:
+
+```markdown
+> - [Introduced](<link-to-issue>) in [GitLab Premium](https://about.gitlab.com/pricing/) 11.5.
+> - [Moved](<link-to-issue>) to [GitLab Starter](https://about.gitlab.com/pricing/) in 11.8.
+> - [Moved](<link-to-issue>) to GitLab Core in 12.0.
+```
+
 If a feature is deprecated, include a link to a replacement (when available):
 
 ```markdown
