@@ -16,13 +16,14 @@ class Import::BulkImportsController < ApplicationController
   end
 
   def status
+    @source_url = session[url_key]
+
     respond_to do |format|
       format.json do
         render json: { importable_data: serialized_importable_data }
       end
-      format.html do
-        @source_url = session[url_key]
-      end
+
+      format.html
     end
   end
 
