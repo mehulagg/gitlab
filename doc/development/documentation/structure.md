@@ -7,18 +7,23 @@ description: What to include in GitLab documentation pages.
 
 # Documentation topic types
 
-GitLab uses four topic types:
+At GitLab, we have not traditionally used topic types. However, we are starting to
+move in this direction, and we now use four topic types:
 
 - [Concept](#concept)
 - [Task](#task)
 - [Reference](#reference)
 - [Troubleshooting](#troubleshooting)
 
+Each page contains multiple topic types. For example,
+a page with the title `Pipelines`, which is generated from a file called `index.md`,
+can include a concept and multiple task and reference topics.
+
 GitLab also uses high-level landing pages.
 
 ## Landing pages
 
-Landing topics are topics that group other topics.
+Landing pages are topics that group other topics and help a user to navigate a section.
 
 Users who are using the in-product help do not have a left nav,
 and need these topics to navigate the documentation.
@@ -34,10 +39,8 @@ Landing page topics should be in this format:
 Brief introduction to the concept or product area.
 Include the reason why someone would use this thing.
 
-## Related topics
-
-- Bulleted list of
-- Important related topics
+- Bulleted list of important related topics
+- These links are needed because users of in-product help do not have left navigation
 ```
 
 ## Concept
