@@ -118,11 +118,7 @@ export default {
 </script>
 <template>
   <div>
-    <gl-alert
-      v-if="showNoAlertsMsg"
-      data-testid="threat-alerts-unconfigured"
-      @dismiss="errorAlertDismissed"
-    >
+    <gl-alert v-if="showNoAlertsMsg" data-testid="threat-alerts-unconfigured" :dismissible="false">
       <gl-sprintf :message="$options.i18n.noAlertsMsg">
         <template #link="{ content }">
           <gl-link class="gl-display-inline-block" :href="documentationPath" target="_blank">
@@ -134,9 +130,9 @@ export default {
 
     <gl-alert
       v-if="errored"
-      :dismissible="false"
       variant="danger"
       data-testid="threat-alerts-error"
+      @dismiss="errorAlertDismissed"
     >
       {{ $options.i18n.errorMsg }}
     </gl-alert>

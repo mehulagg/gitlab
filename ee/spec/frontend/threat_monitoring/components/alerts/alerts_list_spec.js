@@ -86,6 +86,14 @@ describe('AlertsList component', () => {
       expect(findEmptyState().exists()).toBe(false);
     });
 
+    it('does not show the unconfigured alert error state when the list is populated', async () => {
+      expect(findUnconfiguredAlert().exists()).toBe(false);
+    });
+
+    it('does not show the request error state', async () => {
+      expect(findErrorAlert().exists()).toBe(false);
+    });
+
     it('is initially sorted by started at, descending', () => {
       expect(wrapper.vm.sort).toBe('STARTED_AT_DESC');
     });
@@ -102,12 +110,19 @@ describe('AlertsList component', () => {
   });
 
   describe('empty state', () => {
-    beforeEach(() => {
+    beforeEach(async () => {
       createWrapper();
+      wrapper.setData({
+        alerts: { list: [] },
+      });
     });
 
     it('does show the empty state', () => {
       expect(findEmptyState().exists()).toBe(true);
+    });
+
+    it('does show the unconfigured alert error state when the list is empty', async () => {
+      expect(findUnconfiguredAlert().exists()).toBe(true);
     });
   });
 
@@ -134,23 +149,26 @@ describe('AlertsList component', () => {
     });
   });
 
-  describe('error states', () => {
-    it('does show the unconfigured alert error state', async () => {
+  describe('error state', () => {
+    beforeEach(() => {
       createWrapper();
-      wrapper.setData({
-        alerts: { list: [] },
-      });
-      await wrapper.vm.$nextTick();
-      expect(findUnconfiguredAlert().exists()).toBe(true);
     });
 
-    it('does show the request alerts error state', async () => {
-      createWrapper();
+    it('does not show the unconfigured alert error state when there is a request error', async () => {
       wrapper.setData({
         errored: true,
       });
       await wrapper.vm.$nextTick();
       expect(findErrorAlert().exists()).toBe(true);
+      expect(findUnconfiguredAlert().exists()).toBe(false);
+    });
+
+    it('does not show the unconfigured alert error state when there is a request error that has been dismissed', async () => {
+      wrapper.setData({
+        isErrorAlertDismissed: true,
+      });
+      await wrapper.vm.$nextTick();
+      expect(findUnconfiguredAlert().exists()).toBe(false);
     });
   });
 });
