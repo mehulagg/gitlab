@@ -1,0 +1,5 @@
+---
+title: Move user_notes_count to resolver
+merge_request: 49160
+author:
+type: changed

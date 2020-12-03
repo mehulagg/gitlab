@@ -60,7 +60,7 @@ module Types
           description: 'Number of upvotes the issue has received'
     field :downvotes, GraphQL::INT_TYPE, null: false,
           description: 'Number of downvotes the issue has received'
-    field :user_notes_count, GraphQL::INT_TYPE, null: false,
+    field :user_notes_count, Types::UserNotesCount, null: false,
           description: 'Number of user notes of the issue'
     field :user_discussions_count, GraphQL::INT_TYPE, null: false,
           description: 'Number of user discussions in the issue'
@@ -118,16 +118,6 @@ module Types
 
     field :moved_to, Types::IssueType, null: true,
           description: 'Updated Issue after it got moved to another project'
-
-    def user_notes_count
-      BatchLoader::GraphQL.for(object.id).batch(key: :issue_user_notes_count) do |ids, loader, args|
-        counts = Note.count_for_collection(ids, 'Issue').index_by(&:noteable_id)
-
-        ids.each do |id|
-          loader.call(id, counts[id]&.count || 0)
-        end
-      end
-    end
 
     def user_discussions_count
       BatchLoader::GraphQL.for(object.id).batch(key: :issue_user_discussions_count) do |ids, loader, args|
