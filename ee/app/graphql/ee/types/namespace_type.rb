@@ -58,7 +58,11 @@ module EE
               ::Types::ComplianceManagement::ComplianceFrameworkType.connection_type,
               null: true,
               description: 'Compliance frameworks available to projects in this namespace',
-              feature_flag: :ff_custom_compliance_frameworks
+              feature_flag: :ff_custom_compliance_frameworks do
+                argument :id, ::Types::GlobalIDType[::ComplianceManagement::Framework],
+                         description: 'Global ID of specific compliance framework to return',
+                         required: false
+              end
 
         def additional_purchased_storage_size
           object.additional_purchased_storage_size.megabytes
@@ -68,7 +72,9 @@ module EE
           object.root_storage_size.limit
         end
 
-        def compliance_frameworks
+        def compliance_frameworks(id: nil)
+          return [GlobalID::Locator.locate(id)] unless id.nil?
+
           BatchLoader::GraphQL.for(object.id).batch(default_value: []) do |namespace_ids, loader|
             results = ::ComplianceManagement::Framework.with_namespaces(namespace_ids)
 

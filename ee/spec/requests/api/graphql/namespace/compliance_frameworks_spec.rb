@@ -28,6 +28,21 @@ RSpec.describe 'getting a list of compliance frameworks for a root namespace' do
       )
     end
 
+    context 'when querying a specific framework ID' do
+      let(:query) do
+        graphql_query_for(
+          :namespace, { full_path: namespace.full_path }, query_nodes(:compliance_frameworks, nil, args: { id: global_id_of(compliance_framework_1) })
+        )
+      end
+
+      it 'returns only a single compliance framework' do
+        post_graphql(query, current_user: current_user)
+
+        expect(graphql_data_at(:namespace, :complianceFrameworks, :nodes).size).to eq 1
+        expect(graphql_data_at(:namespace, :complianceFrameworks, :nodes, 0, :id)).to eq global_id_of(compliance_framework_1)
+      end
+    end
+
     context 'when querying multiple namespaces' do
       let(:group) { create(:group) }
       let(:multiple_namespace_query) do
