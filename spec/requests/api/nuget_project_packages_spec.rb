@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-RSpec.describe API::NugetPackages do
+RSpec.describe API::NugetProjectPackages do
   include WorkhorseHelpers
   include PackagesManagerApiSpecHelpers
   include HttpBasicAuthHelpers
