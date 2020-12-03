@@ -23806,6 +23806,11 @@ type Vulnerability implements Noteable {
   ): DiscussionConnection!
 
   """
+  Indicates where vulnerability has available solution
+  """
+  hasSolutions: Boolean!
+
+  """
   GraphQL ID of the vulnerability
   """
   id: ID!
