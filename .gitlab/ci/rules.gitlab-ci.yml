@@ -73,6 +73,9 @@
 .if-cache-credentials-schedule: &if-cache-credentials-schedule
   if: '$CI_REPO_CACHE_CREDENTIALS && $CI_PIPELINE_SOURCE == "schedule"'
 
+.if-merge-request-rspec-minimal-disabled: &if-merge-request-rspec-minimal-disabled
+  if: '$CI_MERGE_REQUEST_IID && $RSPEC_MINIMAL_ENABLED != "true"'
+
 .if-rspec-fail-fast-disabled: &if-rspec-fail-fast-disabled
   if: '$RSPEC_FAIL_FAST_ENABLED != "true"'
 
@@ -493,6 +496,8 @@
 
 .rails:rules:ee-and-foss-migration:minimal:
   rules:
+    - <<: *if-merge-request-rspec-minimal-disabled
+      when: never
     - <<: *if-merge-request-title-run-all-rspec
       when: never
     - <<: *if-merge-request
@@ -508,6 +513,8 @@
 
 .rails:rules:ee-and-foss-unit:minimal:
   rules:
+    - <<: *if-merge-request-rspec-minimal-disabled
+      when: never
     - <<: *if-merge-request-title-run-all-rspec
       when: never
     - <<: *if-merge-request
@@ -523,6 +530,8 @@
 
 .rails:rules:ee-and-foss-integration:minimal:
   rules:
+    - <<: *if-merge-request-rspec-minimal-disabled
+      when: never
     - <<: *if-merge-request-title-run-all-rspec
       when: never
     - <<: *if-merge-request
@@ -538,6 +547,8 @@
 
 .rails:rules:ee-and-foss-system:minimal:
   rules:
+    - <<: *if-merge-request-rspec-minimal-disabled
+      when: never
     - <<: *if-merge-request-title-run-all-rspec
       when: never
     - <<: *if-merge-request
@@ -553,6 +564,8 @@
 
 .rails:rules:ee-and-foss-fast_spec_helper:minimal:
   rules:
+    - <<: *if-merge-request-rspec-minimal-disabled
+      when: never
     - <<: *if-merge-request-title-run-all-rspec
       when: never
     - <<: *if-merge-request
@@ -578,6 +591,8 @@
   rules:
     - <<: *if-not-ee
       when: never
+    - <<: *if-merge-request-rspec-minimal-disabled
+      when: never
     - <<: *if-merge-request-title-run-all-rspec
       when: never
     - <<: *if-merge-request
@@ -596,6 +611,8 @@
 .rails:rules:ee-only-unit:minimal:
   rules:
     - <<: *if-not-ee
+      when: never
+    - <<: *if-merge-request-rspec-minimal-disabled
       when: never
     - <<: *if-merge-request-title-run-all-rspec
       when: never
@@ -616,6 +633,8 @@
   rules:
     - <<: *if-not-ee
       when: never
+    - <<: *if-merge-request-rspec-minimal-disabled
+      when: never
     - <<: *if-merge-request-title-run-all-rspec
       when: never
     - <<: *if-merge-request
@@ -634,6 +653,8 @@
 .rails:rules:ee-only-system:minimal:
   rules:
     - <<: *if-not-ee
+      when: never
+    - <<: *if-merge-request-rspec-minimal-disabled
       when: never
     - <<: *if-merge-request-title-run-all-rspec
       when: never
@@ -658,6 +679,8 @@
   rules:
     - <<: *if-not-ee
       when: never
+    - <<: *if-merge-request-rspec-minimal-disabled
+      when: never
     - <<: *if-merge-request
       changes: *ci-patterns
       when: never
@@ -680,6 +703,8 @@
 .rails:rules:as-if-foss-unit:minimal:
   rules:
     - <<: *if-not-ee
+      when: never
+    - <<: *if-merge-request-rspec-minimal-disabled
       when: never
     - <<: *if-merge-request
       changes: *ci-patterns
@@ -704,6 +729,8 @@
   rules:
     - <<: *if-not-ee
       when: never
+    - <<: *if-merge-request-rspec-minimal-disabled
+      when: never
     - <<: *if-merge-request
       changes: *ci-patterns
       when: never
@@ -726,6 +753,8 @@
 .rails:rules:as-if-foss-system:minimal:
   rules:
     - <<: *if-not-ee
+      when: never
+    - <<: *if-merge-request-rspec-minimal-disabled
       when: never
     - <<: *if-merge-request
       changes: *ci-patterns
