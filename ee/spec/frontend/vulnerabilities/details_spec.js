@@ -246,8 +246,8 @@ describe('Vulnerability Details', () => {
       ${{}}                                                                                                              | ${null}
       ${{ headers: TEST_HEADERS }}                                                                                       | ${null}
       ${{ headers: TEST_HEADERS, body: '[{"user_id":1,}]' }}                                                             | ${null}
-      ${{ headers: TEST_HEADERS, body: '[{"user_id":1,}]', status_code: '500' }}                                         | ${null}
-      ${{ headers: TEST_HEADERS, body: '[{"user_id":1,}]', status_code: '500', reason_phrase: 'INTERNAL SERVER ERROR' }} | ${[EXPECT_RESPONSE]}
+      ${{ headers: TEST_HEADERS, body: '[{"user_id":1,}]', statusCode: '500' }}                                         | ${null}
+      ${{ headers: TEST_HEADERS, body: '[{"user_id":1,}]', statusCode: '500', reasonPhrase: 'INTERNAL SERVER ERROR' }} | ${[EXPECT_RESPONSE]}
     `('shows response data for $response', ({ response, expectedData }) => {
       createWrapper({ response });
       expect(getSectionData('response')).toEqual(expectedData);
@@ -263,7 +263,7 @@ describe('Vulnerability Details', () => {
       ${[{}, { response: { headers: TEST_HEADERS, body: '[{"user_id":1,}]' } }]}                                                                                   | ${null}
       ${[{}, { response: { headers: TEST_HEADERS, body: '[{"user_id":1,}]', status_code: '200' } }]}                                                               | ${null}
       ${[{}, { response: { headers: TEST_HEADERS, body: '[{"user_id":1,}]', status_code: '200', reason_phrase: 'OK' } }]}                                          | ${null}
-      ${[{}, { name: SUPPORTING_MESSAGE_TYPES.RECORDED, response: { headers: TEST_HEADERS, body: '[{"user_id":1,}]', status_code: '200', reason_phrase: 'OK' } }]} | ${[EXPECT_RECORDED_RESPONSE]}
+      ${[{}, { name: SUPPORTING_MESSAGE_TYPES.RECORDED, response: { headers: TEST_HEADERS, body: '[{"user_id":1,}]', statusCode: '200', reasonPhrase: 'OK' } }]} | ${[EXPECT_RECORDED_RESPONSE]}
     `('shows response data for $supporting_messages', ({ supportingMessages, expectedData }) => {
       createWrapper({ supportingMessages });
       expect(getSectionData('recorded-response')).toEqual(expectedData);
