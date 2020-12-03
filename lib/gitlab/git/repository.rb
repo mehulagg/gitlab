@@ -789,7 +789,8 @@ module Gitlab
       # forced - should we use --force flag?
       # no_tags - should we use --no-tags flag?
       # prune - should we use --prune flag?
-      def fetch_remote(remote, ssh_auth: nil, forced: false, no_tags: false, prune: true)
+      # with_status - should we return a list of updated refs?
+      def fetch_remote(remote, ssh_auth: nil, forced: false, no_tags: false, prune: true, with_status: false)
         wrapped_gitaly_errors do
           gitaly_repository_client.fetch_remote(
             remote,
@@ -797,6 +798,7 @@ module Gitlab
             forced: forced,
             no_tags: no_tags,
             prune: prune,
+            with_status: with_status,
             timeout: GITLAB_PROJECTS_TIMEOUT
           )
         end

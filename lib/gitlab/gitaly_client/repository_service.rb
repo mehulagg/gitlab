@@ -70,7 +70,7 @@ module Gitlab
         end.join
       end
 
-      def fetch_remote(remote, ssh_auth:, forced:, no_tags:, timeout:, prune: true)
+      def fetch_remote(remote, ssh_auth:, forced:, no_tags:, timeout:, prune: true, with_status: false)
         request = Gitaly::FetchRemoteRequest.new(
           repository: @gitaly_repo, remote: remote, force: forced,
           no_tags: no_tags, timeout: timeout, no_prune: !prune
@@ -86,7 +86,17 @@ module Gitlab
           end
         end
 
-        GitalyClient.call(@storage, :repository_service, :fetch_remote, request, timeout: GitalyClient.long_timeout)
+        if with_status
+          response = GitalyClient.call(@storage, :repository_service, :fetch_remote_with_status, request, timeout: GitalyClient.long_timeout)
+
+          response.each do |rsp|
+            rsp.updates.each do |update|
+              yield update
+            end
+          end
+        else
+          GitalyClient.call(@storage, :repository_service, :fetch_remote, request, timeout: GitalyClient.long_timeout)
+        end
       end
 
       def create_repository

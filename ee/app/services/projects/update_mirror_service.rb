@@ -31,9 +31,13 @@ module Projects
       end
 
       checksum_before = project.repository.checksum
-
-      update_tags do
-        project.fetch_mirror(forced: true)
+      
+      if Feature.enabled?(:fetch_remote_with_status, project)
+        fast_update_tags
+      else
+        slow_update_tags do
+          project.fetch_mirror(forced: true)
+        end
       end
 
       update_branches
@@ -95,7 +99,49 @@ module Projects
       end
     end
 
-    def update_tags(&block)
+    TagUpdate = Struct.new(:name, :oldrev, :newrev)
+
+    # This strategy interprets the `fetch_remote_with_status` response to get a
+    # list of added or changed tags. It doesn't support deleted tags, but we
+    # never prune tags during pull mirror execution, so that's not a problem.
+    def fast_update_tags
+      updates = []
+
+      project.fetch_mirror(forced: true, with_status: true) do |status|
+        case status.update_type
+        when :fetched
+          # We need to look up the SHA for this update
+          updates << TagUpdate.new(status.from_ref, Gitlab::Git::BLANK_SHA, nil) if status.summary = '[new tag]'
+        when :tag_update
+          # FIXME: these are the short-form SHAs - is that acceptable?
+          oldrev, newrev = status.summary.split('..')
+          updates << TagUpdate.new(status.from_ref, oldrev, newrev)
+        end
+      end
+
+      # Nothing changed, so nothing to do - don't expire the cache
+      return if updates.empty?
+
+      # Expiring and refilling the cache immediately is the most efficient thing
+      # to do. Even though we might only need a couple of entries, the full tag
+      # list is almost certainly going to be needed shortly after.
+      repository.expire_tags_cache
+      tags = repository_tags_with_target.index_by(&:name)
+
+      updates.each do |update|
+        update.newrev ||= tags[update.name]&.dereferenced_target&.sha
+
+        next unless update.name && update.oldrev && update.newrev
+
+        update_tag(update)
+      end
+
+      
+    end
+
+    # This strategy calls `repository.tags` twice and detects the difference
+    # between the two calls.
+    def slow_update_tags
       old_tags = repository_tags_with_target.each_with_object({}) { |tag, tags| tags[tag.name] = tag }
 
       fetch_result = yield
@@ -110,21 +156,25 @@ module Projects
         tag_target = tag.dereferenced_target.sha
         old_tag_target = old_tag ? old_tag.dereferenced_target.sha : Gitlab::Git::BLANK_SHA
 
-        next if old_tag_target == tag_target
-
-        Git::TagPushService.new(
-          project,
-          current_user,
-          change: {
-            oldrev: old_tag_target,
-            newrev: tag_target,
-            ref: "#{Gitlab::Git::TAG_REF_PREFIX}#{tag.name}"
-          },
-          mirror_update: true
-        ).execute
+        update_tag(TagUpdate.new(tag.name, old_tag_target, tag_target))
       end
 
       fetch_result
+    end
+
+    def update_tag(update)
+      return if update.oldrev == update.newrev
+
+      Git::TagPushService.new(
+        project,
+        current_user,
+        change: {
+          oldrev: update.oldrev,
+          newrev: update.newrev,
+          ref: "#{Gitlab::Git::TAG_REF_PREFIX}#{update.name}"
+        },
+        mirror_update: true
+      ).execute
     end
 
     def update_lfs_objects
