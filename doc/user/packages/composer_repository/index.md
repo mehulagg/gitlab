@@ -15,6 +15,10 @@ Then, install the packages whenever you need to use them as a dependency.
 Only Composer 1.x is supported. Consider contributing or even adding support for
 [Composer 2.0 in the Package Registry](https://gitlab.com/gitlab-org/gitlab/-/issues/259840).
 
+Composer packages should be versioned based on the [Composer specification](https://getcomposer.org/doc/04-schema.md#version).
+Using an invalid version, such as one containing three dots(`1.0.0.0`), will result in an error(`Validation failed: Version is invalid`)
+when publishing the package to the Package Repository. 
+
 ## Create a Composer package
 
 If you do not have a Composer package, create one and check it in to
