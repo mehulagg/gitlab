@@ -17,10 +17,11 @@ export function createResolvers({ endpoints }) {
           data: { availableNamespaces },
         } = await client.query({ query: availableNamespacesQuery });
 
-        statusPoller = new StatusPoller({ client });
+        statusPoller = new StatusPoller({ client, interval: 3000 });
 
-        return axios.get(endpoints.status).then(({ data }) =>
-          data.importable_data.map(group => ({
+        return axios.get(endpoints.status).then(({ data }) => {
+          statusPoller.startPolling();
+          return data.importable_data.map(group => ({
             __typename: clientTypenames.BulkImportSourceGroup,
             ...group,
             status: STATUSES.NONE,
@@ -28,8 +29,8 @@ export function createResolvers({ endpoints }) {
               new_name: group.full_path,
               target_namespace: availableNamespaces[0].full_path,
             },
-          })),
-        );
+          }));
+        });
       },
 
       availableNamespaces: () =>
@@ -71,7 +72,7 @@ export function createResolvers({ endpoints }) {
             ],
           });
           groupManager.setImportStatus({ group, status: STATUSES.STARTED });
-          statusPoller.checkCurrentImports();
+          ``;
         } catch (e) {
           groupManager.setImportStatus({ group, status: STATUSES.NONE });
         }
