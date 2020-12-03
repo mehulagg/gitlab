@@ -282,9 +282,13 @@ export default {
           :key="`${index}:${identifier.url}`"
           class="gl-ml-0! gl-list-style-position-inside"
         >
-          <gl-link :href="identifier.url" data-testid="identifier" target="_blank">
+          <component
+            :is="identifier.url ? 'gl-link' : 'span'"
+            v-bind="identifier.url && { href: identifier.url, target: '_blank' }"
+            data-testid="identifier"
+          >
             {{ identifier.name }}
-          </gl-link>
+          </component>
         </li>
       </ul>
     </template>

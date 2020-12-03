@@ -23,8 +23,7 @@ module BillingPlansHelper
   end
 
   def use_new_purchase_flow?(namespace)
-    namespace.group? &&
-      namespace.actual_plan_name == Plan::FREE
+    namespace.group? && (namespace.actual_plan_name == Plan::FREE || namespace.trial_active?)
   end
 
   def show_contact_sales_button?(purchase_link_action)
@@ -33,7 +32,7 @@ module BillingPlansHelper
   end
 
   def experiment_tracking_data_for_button_click(button_label)
-    return {} unless Gitlab::Experimentation.enabled?(:contact_sales_btn_in_app)
+    return {} unless Gitlab::Experimentation.active?(:contact_sales_btn_in_app)
 
     {
       track: {

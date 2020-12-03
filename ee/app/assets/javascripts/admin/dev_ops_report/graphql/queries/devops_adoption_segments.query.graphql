@@ -1,0 +1,17 @@
+query devopsAdoptionSegments {
+  devopsAdoptionSegments {
+    nodes {
+      name
+      latestSnapshot {
+        issueOpened
+        mergeRequestOpened
+        mergeRequestApproved
+        runnerConfigured
+        pipelineSucceeded
+        deploySucceeded
+        securityScanSucceeded
+        recordedAt
+      }
+    }
+  }
+}

@@ -18,6 +18,7 @@ module EE
       add_authentication_token_field :saml_discovery_token, unique: false, token_generator: -> { Devise.friendly_token(8) }
 
       has_many :epics
+      has_many :epic_boards, class_name: 'Boards::EpicBoard', inverse_of: :group
 
       has_one :saml_provider
       has_many :scim_identities

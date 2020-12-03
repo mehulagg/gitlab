@@ -287,10 +287,6 @@ $mr-widget-min-height: 69px;
       margin-top: 0;
       margin-bottom: 0;
 
-      &.has-conflicts .fa-exclamation-triangle {
-        color: $orange-500;
-      }
-
       time {
         font-weight: $gl-font-weight-normal;
       }
@@ -505,19 +501,6 @@ $mr-widget-min-height: 69px;
 .diff-file .close-mr-link,
 .diff-file .reopen-mr-link {
   display: none;
-}
-
-#modal_merge_info .modal-dialog {
-  .dark {
-    margin-right: 40px;
-  }
-
-  .btn-clipboard {
-    margin-right: 20px;
-    margin-top: 5px;
-    position: absolute;
-    right: 0;
-  }
 }
 
 .mr-links {

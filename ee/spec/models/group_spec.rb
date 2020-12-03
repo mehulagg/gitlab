@@ -22,6 +22,8 @@ RSpec.describe Group do
     it { is_expected.to have_one(:group_wiki_repository) }
     it { is_expected.to belong_to(:push_rule) }
     it { is_expected.to have_many(:saml_group_links) }
+    it { is_expected.to have_many(:epics) }
+    it { is_expected.to have_many(:epic_boards).inverse_of(:group) }
 
     it_behaves_like 'model with wiki' do
       let(:container) { create(:group, :nested, :wiki_repo) }

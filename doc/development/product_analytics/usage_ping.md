@@ -395,7 +395,9 @@ Implemented using Redis methods [PFADD](https://redis.io/commands/pfadd) and [PF
 
    API requests are protected by checking for a valid CSRF token.
 
-   In order to be able to increment the values the related feature `usage_data<event_name>` should be enabled.
+   In order to increment the values, the related feature `usage_data_<event_name>` should be
+   set to `default_enabled: true`. For more information, see
+   [Feature flags in development of GitLab](../feature_flags/index.md).
 
    ```plaintext
    POST /usage_data/increment_unique_users
@@ -418,7 +420,10 @@ Implemented using Redis methods [PFADD](https://redis.io/commands/pfadd) and [PF
 
    Example usage for an existing event already defined in [known events](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/usage_data_counters/known_events/):
 
-   Note that `usage_data_api` and `usage_data_#{event_name}` should be enabled in order to be able to track events
+   Usage Data API is behind  `usage_data_api` feature flag which, as of GitLab 13.7, is
+   now set to `default_enabled: true`.
+
+   Each event tracked using Usage Data API is behind a feature flag `usage_data_#{event_name}` which should be `default_enabled: true`
 
    ```javascript
    import api from '~/api';
@@ -467,13 +472,17 @@ Next, get the unique events for the current week.
    start_date: Date.current.beginning_of_week, end_date: Date.current.end_of_week)
    ```
 
-Recommendations:
+##### Recommendations
 
-- Key should expire in 29 days for daily and 42 days for weekly.
-- If possible, data granularity should be a week. For example a key could be composed from the
-  metric's name and week of the year, `2020-33-{metric_name}`.
-- Use a [feature flag](../../operations/feature_flags.md) to have a control over the impact when
-  adding new metrics.
+We have the following recommendations for [Adding new events](#adding-new-events):
+
+- Event aggregation: weekly.
+- Key expiry time: 
+  - Daily: 29 days.
+  - Weekly: 42 days.
+- When adding new metrics, use a [feature flag](../../operations/feature_flags.md) to control the impact.
+- For feature flags triggered by another service, set `default_enabled: false`, 
+  - Events can be triggered using the `UsageData` API, which helps when there are > 10 events per change
 
 ##### Enable/Disable Redis HLL tracking
 

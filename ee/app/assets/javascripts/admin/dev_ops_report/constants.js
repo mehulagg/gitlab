@@ -4,9 +4,27 @@ export const MAX_REQUEST_COUNT = 10;
 
 export const DEVOPS_ADOPTION_SEGMENT_MODAL_ID = 'devopsSegmentModal';
 
+export const DATE_TIME_FORMAT = 'yyyy-mm-dd HH:MM';
+
+export const DEVOPS_ADOPTION_ERROR_KEYS = {
+  groups: 'groupsError',
+  segments: 'segmentsError',
+};
+
 export const DEVOPS_ADOPTION_STRINGS = {
   app: {
-    groupsError: s__('DevopsAdoption|There was an error fetching Groups'),
+    [DEVOPS_ADOPTION_ERROR_KEYS.groups]: s__(
+      'DevopsAdoption|There was an error fetching Groups. Please refresh the page to try again.',
+    ),
+    [DEVOPS_ADOPTION_ERROR_KEYS.segments]: s__(
+      'DevopsAdoption|There was an error fetching Segments. Please refresh the page to try again.',
+    ),
+    tableHeader: {
+      text: s__(
+        'DevopsAdoption|Feature adoption is based on usage over the last 30 days. Last updated: %{timestamp}.',
+      ),
+      button: s__('DevopsAdoption|Add new segment'),
+    },
   },
   emptyState: {
     title: s__('DevopsAdoption|Add a segment to get started'),

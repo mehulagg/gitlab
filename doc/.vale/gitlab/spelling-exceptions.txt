@@ -120,6 +120,7 @@ dequarantining
 DevOps
 discoverability
 Disqus
+Divio
 Dockerfile
 Dockerfiles
 dogfood
@@ -224,6 +225,7 @@ Kibana
 Kinesis
 Knative
 Kramdown
+Kroki
 Kubecost
 kubectl
 Kubernetes
@@ -343,6 +345,7 @@ prepend
 prepended
 prepending
 prepends
+Prettifier
 Pritaly
 profiler
 Prometheus

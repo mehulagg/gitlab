@@ -11,6 +11,8 @@ module EE
 
     override :read_only_message
     def read_only_message
+      return _('You are on a read-only GitLab instance.') if maintenance_mode?
+
       return super unless ::Gitlab::Geo.secondary?
 
       message = @limited_actions_message ? s_('Geo|You may be able to make a limited amount of changes or perform a limited amount of actions on this page.') : s_('Geo|If you want to make changes, you must visit the primary site.')
@@ -132,6 +134,12 @@ module EE
 
         next_unprocessed_event.created_at < EVENT_LAG_SHOW_THRESHOLD.ago
       end
+    end
+
+    def maintenance_mode?
+      return unless ::Feature.enabled?(:maintenance_mode)
+
+      ::Gitlab::CurrentSettings.maintenance_mode
     end
   end
 end

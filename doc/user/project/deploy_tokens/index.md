@@ -1,6 +1,6 @@
 ---
 stage: Release
-group: Progressive Delivery
+group: Release
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: howto
 ---
@@ -148,6 +148,9 @@ belong either to the specific group or to one of its subgroups.
 
 <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
 For an overview, see [Group Deploy Tokens](https://youtu.be/8kxTJvaD9ks).
+
+The Group Deploy Tokens UI is now accessible under **Settings > Repository**,
+not **Settings > CI/CD** as indicated in the video.
 
 To use a group deploy token:
 

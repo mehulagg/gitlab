@@ -240,6 +240,10 @@ Users can unlink SAML for a group from their profile page. This can be helpful i
 - You no longer want a group to be able to sign you in to GitLab.com.
 - Your SAML NameID has changed and so GitLab can no longer find your user.
 
+CAUTION: **Warning:**
+Unlinking an account removes all roles assigned to that user within the group. 
+If a user relinks their account, roles need to be reassigned.
+
 For example, to unlink the `MyOrg` account, the following **Disconnect** button is available under **Profile > Accounts**:
 
 ![Unlink Group SAML](img/unlink_group_saml.png)
@@ -261,7 +265,7 @@ Ensure your SAML identity provider sends an attribute statement named `Groups` o
 ```
 
 When SAML SSO is enabled for the top-level group, `Maintainer` and `Owner` level users
-see a new menu item in group **Settings -> SAML Group Links**. Each group can specify
+see a new menu item in group **Settings -> SAML Group Links**. Each group (parent or subgroup) can specify
 one or more group links to map a SAML identity provider group name to a GitLab access level.
 
 ![SAML Group Links navigation](img/saml_group_links_nav_v13_6.png)
@@ -279,10 +283,6 @@ If a user is a member of multiple SAML groups mapped to the same GitLab group,
 the user gets the highest access level from the groups. For example, if one group
 is linked as `Guest` and another `Maintainer`, a user in both groups gets `Maintainer` 
 access.
-
-CAUTION: **Warning:**
-Unlinking an account removes all roles assigned to that user within the group. 
-If a user relinks their account, roles need to be reassigned.
 
 ## Glossary
 

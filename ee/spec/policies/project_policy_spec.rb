@@ -527,6 +527,34 @@ RSpec.describe ProjectPolicy do
     end
   end
 
+  describe 'permissions for security bot' do
+    let_it_be(:current_user) { create(:user, :security_bot) }
+
+    let(:project) { private_project }
+
+    context 'when auto_fix feature is enabled' do
+      before do
+        build(:project_security_setting, project: project)
+      end
+
+      it { is_expected.to be_allowed(:reporter_access) }
+      it { is_expected.to be_allowed(:push_code) }
+      it { is_expected.to be_allowed(:create_merge_request_from) }
+      it { is_expected.to be_allowed(:create_vulnerability_feedback) }
+      it { is_expected.to be_allowed(:create_merge_request_in) }
+      it { is_expected.to be_allowed(:read_project) }
+    end
+
+    context 'when auto_fix feature is disabled' do
+      it { is_expected.to be_disallowed(:reporter_access) }
+      it { is_expected.to be_disallowed(:push_code) }
+      it { is_expected.to be_disallowed(:create_merge_request_from) }
+      it { is_expected.to be_disallowed(:create_vulnerability_feedback) }
+      it { is_expected.to be_disallowed(:create_merge_request_in) }
+      it { is_expected.to be_disallowed(:read_project) }
+    end
+  end
+
   describe 'read_threat_monitoring' do
     context 'when threat monitoring feature is available' do
       before do
@@ -1360,12 +1388,29 @@ RSpec.describe ProjectPolicy do
 
       before do
         enable_admin_mode!(current_user) if admin_mode
+        stub_licensed_features(oncall_schedules: true)
       end
 
       with_them do
         let(:current_user) { public_send(role) }
 
         it { is_expected.to(allowed ? be_allowed(policy) : be_disallowed(policy)) }
+
+        context 'with disabled feature flag' do
+          before do
+            stub_feature_flags(oncall_schedules_mvc: false)
+          end
+
+          it { is_expected.to(be_disallowed(policy)) }
+        end
+
+        context 'with unavailable license' do
+          before do
+            stub_licensed_features(oncall_schedules: false)
+          end
+
+          it { is_expected.to(be_disallowed(policy)) }
+        end
       end
     end
 
@@ -1384,12 +1429,29 @@ RSpec.describe ProjectPolicy do
 
       before do
         enable_admin_mode!(current_user) if admin_mode
+        stub_licensed_features(oncall_schedules: true)
       end
 
       with_them do
         let(:current_user) { public_send(role) }
 
         it { is_expected.to(allowed ? be_allowed(policy) : be_disallowed(policy)) }
+
+        context 'with disabled feature flag' do
+          before do
+            stub_feature_flags(oncall_schedules_mvc: false)
+          end
+
+          it { is_expected.to(be_disallowed(policy)) }
+        end
+
+        context 'with unavailable license' do
+          before do
+            stub_licensed_features(oncall_schedules: false)
+          end
+
+          it { is_expected.to(be_disallowed(policy)) }
+        end
       end
     end
   end

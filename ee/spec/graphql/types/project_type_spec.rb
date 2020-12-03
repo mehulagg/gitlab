@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe GitlabSchema.types['Project'] do
+  include GraphqlHelpers
+
   let_it_be(:project) { create(:project) }
   let_it_be(:user) { create(:user) }
   let_it_be(:vulnerability) { create(:vulnerability, project: project, severity: :high) }
@@ -355,5 +357,30 @@ RSpec.describe GitlabSchema.types['Project'] do
     subject { described_class.fields['codeCoverageSummary'] }
 
     it { is_expected.to have_graphql_type(Types::Ci::CodeCoverageSummaryType) }
+  end
+
+  describe 'compliance_frameworks' do
+    it 'queries in batches' do
+      projects = create_list(:project, 2, :with_compliance_framework)
+
+      projects.each { |p| p.add_maintainer(user) }
+
+      results = batch_sync(max_queries: 1) do
+        projects.flat_map do |p|
+          resolve_field(:compliance_frameworks, p)
+        end
+      end
+      frameworks = results.flat_map(&:items)
+
+      expect(frameworks).to match_array(projects.flat_map(&:compliance_management_frameworks))
+    end
+  end
+
+  private
+
+  def query_for_project(project)
+    graphql_query_for(
+      :projects, { ids: [global_id_of(project)] }, "nodes { #{query_nodes(:compliance_frameworks)} }"
+    )
   end
 end

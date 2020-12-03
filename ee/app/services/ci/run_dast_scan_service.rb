@@ -17,13 +17,10 @@ module Ci
 
     def self.ci_template_raw
       <<~YAML
-        include:
-        - template: DAST.gitlab-ci.yml
         stages:
-        - dast
-        dast:
-          rules:
-            - when: always
+          - dast
+        include:
+          - template: DAST-On-Demand-Scan.gitlab-ci.yml
       YAML
     end
 

@@ -20,4 +20,12 @@ RSpec.describe 'Geo read-only message', :geo do
 
     it_behaves_like 'Read-only instance', /You are on a secondary, read\-only Geo node\. If you want to make changes, you must visit the primary site.*Go to the primary site/
   end
+
+  context 'when in maintenance mode' do
+    before do
+      stub_application_setting(maintenance_mode: true)
+    end
+
+    it_behaves_like 'Read-only instance', /You are on a read\-only GitLab instance./
+  end
 end

@@ -43,6 +43,7 @@ module EE
 
       has_one :status_page_setting, inverse_of: :project, class_name: 'StatusPage::ProjectSetting'
       has_one :compliance_framework_setting, class_name: 'ComplianceManagement::ComplianceFramework::ProjectSettings', inverse_of: :project
+      has_many :compliance_management_frameworks, through: :compliance_framework_setting, source: 'compliance_management_framework'
       has_one :security_setting, class_name: 'ProjectSecuritySetting'
       has_one :vulnerability_statistic, class_name: 'Vulnerabilities::Statistic'
 
@@ -344,10 +345,6 @@ module EE
 
     def jira_issues_integration_available?
       feature_available?(:jira_issues_integration)
-    end
-
-    def jira_vulnerabilities_integration_available?
-      ::Feature.enabled?(:jira_for_vulnerabilities, self, default_enabled: false) && feature_available?(:jira_vulnerabilities_integration)
     end
 
     def multiple_approval_rules_available?

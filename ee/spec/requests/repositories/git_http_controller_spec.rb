@@ -97,16 +97,23 @@ RSpec.describe Repositories::GitHttpController, type: :request do
         it_behaves_like 'triggers Geo'
       end
 
-      context 'with personal snippet' do
-        let_it_be(:snippet) { create(:personal_snippet, :repository, author: user) }
-        let(:path) { "snippets/#{snippet.id}.git" }
+      context 'with a project wiki' do
+        let_it_be(:wiki) { create(:project_wiki, :empty_repo, project: project) }
+        let_it_be(:path) { "#{wiki.full_path}.git" }
 
         it_behaves_like 'triggers Geo'
       end
 
-      context 'with project snippet' do
+      context 'with a personal snippet' do
+        let_it_be(:snippet) { create(:personal_snippet, :repository, author: user) }
+        let_it_be(:path) { "snippets/#{snippet.id}.git" }
+
+        it_behaves_like 'triggers Geo'
+      end
+
+      context 'with a project snippet' do
         let_it_be(:snippet) { create(:project_snippet, :repository, author: user, project: project) }
-        let(:path) { "#{project.full_path}/snippets/#{snippet.id}.git" }
+        let_it_be(:path) { "#{project.full_path}/snippets/#{snippet.id}.git" }
 
         it_behaves_like 'triggers Geo'
       end

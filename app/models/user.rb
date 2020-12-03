@@ -289,6 +289,7 @@ class User < ApplicationRecord
 
   delegate :path, to: :namespace, allow_nil: true, prefix: true
   delegate :job_title, :job_title=, to: :user_detail, allow_nil: true
+  delegate :other_role, :other_role=, to: :user_detail, allow_nil: true
   delegate :bio, :bio=, :bio_html, to: :user_detail, allow_nil: true
   delegate :webauthn_xid, :webauthn_xid=, to: :user_detail, allow_nil: true
 
@@ -726,6 +727,7 @@ class User < ApplicationRecord
         u.name = 'GitLab Security Bot'
         u.website_url = Gitlab::Routing.url_helpers.help_page_url('user/application_security/security_bot/index.md')
         u.avatar = bot_avatar(image: 'security-bot.png')
+        u.confirmed_at = Time.zone.now
       end
     end
 

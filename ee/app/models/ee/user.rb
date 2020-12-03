@@ -256,11 +256,7 @@ module EE
     end
 
     def manageable_groups_eligible_for_subscription
-      manageable_groups
-        .where(parent_id: nil)
-        .left_joins(:gitlab_subscription)
-        .merge(GitlabSubscription.left_joins(:hosted_plan).where(plans: { name: [nil, *::Plan.default_plans] }))
-        .order(:name)
+      manageable_groups.eligible_for_subscription.order(:name)
     end
 
     def manageable_groups_eligible_for_trial

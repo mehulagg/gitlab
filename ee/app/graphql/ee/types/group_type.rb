@@ -7,9 +7,12 @@ module EE
 
       prepended do
         %i[epics group_timelogs].each do |feature|
-          field "#{feature}_enabled", GraphQL::BOOLEAN_TYPE, null: true, resolve: -> (group, args, ctx) do
-            group.feature_available?(feature)
-          end, description: "Indicates if #{feature.to_s.humanize} are enabled for namespace"
+          field "#{feature}_enabled", GraphQL::BOOLEAN_TYPE, null: true,
+                description: "Indicates if #{feature.to_s.humanize} are enabled for namespace"
+
+          define_method "#{feature}_enabled" do
+            object.feature_available?(feature)
+          end
         end
 
         field :epic, ::Types::EpicType, null: true,

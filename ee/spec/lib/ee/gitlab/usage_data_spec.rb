@@ -219,24 +219,6 @@ RSpec.describe Gitlab::UsageData do
     end
   end
 
-  describe 'code owner approval required' do
-    before do
-      create(:protected_branch, code_owner_approval_required: true)
-
-      create(:protected_branch,
-        code_owner_approval_required: true,
-        project: create(:project, :archived))
-
-      create(:protected_branch,
-        code_owner_approval_required: true,
-        project: create(:project, pending_delete: true))
-    end
-
-    it 'counts the projects actively requiring code owner approval' do
-      expect(described_class.system_usage_data[:counts][:projects_enforcing_code_owner_approval]).to eq(1)
-    end
-  end
-
   describe 'merge requests merged using approval rules' do
     before do
       create(:approval_merge_request_rule, merge_request: create(:merge_request, :merged))
