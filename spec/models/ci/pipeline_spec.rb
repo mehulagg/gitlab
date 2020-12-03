@@ -2578,6 +2578,14 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
           it 'receives a pending event once' do
             expect(WebMock).to have_requested_pipeline_hook('pending').once
           end
+
+          it 'builds hook data once' do
+            create(:pipelines_email_service, project: project)
+
+            expect(Gitlab::DataBuilder::Pipeline).to receive(:build).once.and_call_original
+
+            pipeline.execute_hooks
+          end
         end
 
         context 'when build is run' do
@@ -2632,12 +2640,20 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
       let(:enabled) { false }
 
       before do
+        expect(Gitlab::DataBuilder::Pipeline).not_to receive(:build)
+
         build_a.enqueue
         build_b.enqueue
       end
 
       it 'did not execute pipeline_hook after touched' do
         expect(WebMock).not_to have_requested(:post, hook.url)
+      end
+
+      it 'does not build hook data' do
+        expect(Gitlab::DataBuilder::Pipeline).not_to receive(:build)
+
+        pipeline.execute_hooks
       end
     end
 
