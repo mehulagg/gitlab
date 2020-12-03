@@ -92,7 +92,7 @@ class Projects::MergeRequests::DiffsController < Projects::MergeRequests::Applic
     return unless commit_id = params[:commit_id].presence
     return unless @merge_request.all_commits.exists?(sha: commit_id)
 
-    @commit ||= @project.commit(commit_id)
+    @commit ||= @project.commit(commit_id, sort_diff_files: true)
   end
   # rubocop: enable CodeReuse/ActiveRecord
 
@@ -122,7 +122,7 @@ class Projects::MergeRequests::DiffsController < Projects::MergeRequests::Applic
 
     if render_merge_ref_head_diff?
       return CompareService.new(@project, @merge_request.merge_ref_head.sha)
-        .execute(@project, @merge_request.target_branch)
+        .execute(@project, @merge_request.target_branch, sort_diff_files: true)
     end
 
     if @start_sha

@@ -47,8 +47,8 @@ module HasRepository
     repository.root_ref == branch
   end
 
-  def commit(ref = 'HEAD')
-    repository.commit(ref)
+  def commit(ref = 'HEAD', sort_diff_files: false)
+    repository.commit(ref, sort_diff_files: sort_diff_files)
   end
 
   def commit_by(oid:)

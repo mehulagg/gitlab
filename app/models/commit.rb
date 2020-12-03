@@ -24,7 +24,7 @@ class Commit
   attr_accessor :redacted_description_html
   attr_accessor :redacted_title_html
   attr_accessor :redacted_full_title_html
-  attr_reader :container
+  attr_reader :container, :sort_diff_files
 
   delegate :repository, to: :container
   delegate :project, to: :repository, allow_nil: true
@@ -131,11 +131,12 @@ class Commit
 
   attr_accessor :raw
 
-  def initialize(raw_commit, container)
+  def initialize(raw_commit, container, sort_diff_files: false)
     raise "Nil as raw commit passed" unless raw_commit
 
     @raw = raw_commit
     @container = container
+    @sort_diff_files = sort_diff_files
   end
 
   delegate \
@@ -477,7 +478,11 @@ class Commit
   end
 
   def diffs(diff_options = {})
-    Gitlab::Diff::FileCollection::Commit.new(self, diff_options: diff_options)
+    Gitlab::Diff::FileCollection::Commit.new(
+      self,
+      diff_options: diff_options,
+      sort_diff_files: sort_diff_files
+    )
   end
 
   def persisted?

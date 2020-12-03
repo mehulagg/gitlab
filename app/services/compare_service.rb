@@ -12,7 +12,7 @@ class CompareService
     @start_ref_name = new_start_ref_name
   end
 
-  def execute(target_project, target_ref, base_sha: nil, straight: false)
+  def execute(target_project, target_ref, base_sha: nil, straight: false, sort_diff_files: false)
     raw_compare = target_project.repository.compare_source_branch(target_ref, start_project.repository, start_ref_name, straight: straight)
 
     return unless raw_compare && raw_compare.base && raw_compare.head
@@ -20,6 +20,7 @@ class CompareService
     Compare.new(raw_compare,
                 start_project,
                 base_sha: base_sha,
-                straight: straight)
+                straight: straight,
+                sort_diff_files: sort_diff_files)
   end
 end

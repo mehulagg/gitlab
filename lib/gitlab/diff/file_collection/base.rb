@@ -6,7 +6,7 @@ module Gitlab
       class Base
         include Gitlab::Utils::StrongMemoize
 
-        attr_reader :project, :diff_options, :diff_refs, :fallback_diff_refs, :diffable
+        attr_reader :project, :diff_options, :diff_refs, :fallback_diff_refs, :diffable, :sort_diff_files
 
         delegate :count, :size, :real_size, to: :raw_diff_files
 
@@ -14,7 +14,7 @@ module Gitlab
           ::Commit.max_diff_options.merge(ignore_whitespace_change: false, expanded: false, include_stats: true)
         end
 
-        def initialize(diffable, project:, diff_options: nil, diff_refs: nil, fallback_diff_refs: nil)
+        def initialize(diffable, project:, diff_options: nil, diff_refs: nil, fallback_diff_refs: nil, sort_diff_files: false)
           diff_options = self.class.default_options.merge(diff_options || {})
 
           @diffable = diffable
@@ -24,10 +24,11 @@ module Gitlab
           @diff_refs = diff_refs
           @fallback_diff_refs = fallback_diff_refs
           @repository = project.repository
+          @sort_diff_files = sort_diff_files
         end
 
         def diffs
-          @diffs ||= diffable.raw_diffs(diff_options)
+          @diffs ||= sort_diffs(diffable.raw_diffs(diff_options))
         end
 
         def diff_files
@@ -35,7 +36,11 @@ module Gitlab
         end
 
         def raw_diff_files
-          @raw_diff_files ||= diffs.decorate! { |diff| decorate_diff!(diff) }
+          strong_memoize(:raw_diff_files) do
+            collection = diffs.decorate! { |diff| decorate_diff!(diff) }
+            collection = sort_diffs(collection) if sort_diff_files
+            collection
+          end
         end
 
         def diff_file_paths
@@ -110,6 +115,10 @@ module Gitlab
                                  diff_refs: diff_refs,
                                  fallback_diff_refs: fallback_diff_refs,
                                  stats: stats)
+        end
+
+        def sort_diffs(diffs)
+          Gitlab::Diff::FileCollectionSorter.new(diffs).sort
         end
       end
     end

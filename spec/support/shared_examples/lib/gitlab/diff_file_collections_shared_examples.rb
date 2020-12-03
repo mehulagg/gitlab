@@ -143,3 +143,29 @@ RSpec.shared_examples 'cacheable diff collection' do
     end
   end
 end
+
+shared_examples_for 'sortable diff files' do
+  subject { described_class.new(diffable, **collection_default_args.merge(sort_diff_files: sort_diff_files)) }
+
+  describe '#raw_diff_files' do
+    let(:raw_diff_files_paths) do
+      subject.raw_diff_files.map { |file| file.new_path.presence || file.old_path }
+    end
+
+    context 'when sort_diff_files is false (default)' do
+      let(:sort_diff_files) { false }
+
+      it 'returns unsorted diff files' do
+        expect(raw_diff_files_paths).to eq(unsorted_diff_files_paths)
+      end
+    end
+
+    context 'when sort_diff_files is true' do
+      let(:sort_diff_files) { true }
+
+      it 'returns sorted diff files' do
+        expect(raw_diff_files_paths).to eq(sorted_diff_files_paths)
+      end
+    end
+  end
+end

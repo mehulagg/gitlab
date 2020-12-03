@@ -408,7 +408,9 @@ class MergeRequestDiff < ApplicationRecord
     # When compare merge request versions we want diff A..B instead of A...B
     # so we handle cases when user does squash and rebase of the commits between versions.
     # For this reason we set straight to true by default.
-    CompareService.new(project, head_commit_sha).execute(project, sha, straight: true)
+    CompareService
+      .new(project, head_commit_sha)
+      .execute(project, sha, straight: true, sort_diff_files: true)
   end
   # rubocop: enable CodeReuse/ServiceClass
 
@@ -598,7 +600,7 @@ class MergeRequestDiff < ApplicationRecord
     return yield unless without_files? || diff_options[:ignore_whitespace_change]
     return yield unless diff_refs&.complete?
 
-    comparison = diff_refs.compare_in(repository.project)
+    comparison = diff_refs.compare_in(repository.project, sort_diff_files: true)
 
     return yield unless comparison
 
@@ -740,28 +742,7 @@ class MergeRequestDiff < ApplicationRecord
   end
 
   def sort_diffs(diffs)
-    diffs.sort do |a, b|
-      a_bits = (a.new_path.presence || a.old_path).split(::File::SEPARATOR)
-      b_bits = (b.new_path.presence || b.old_path).split(::File::SEPARATOR)
-
-      sort_bits(a_bits, b_bits)
-    end
-  end
-
-  def sort_bits(a_bits, b_bits)
-    a_bit = a_bits.shift
-    b_bit = b_bits.shift
-    comparison = a_bit <=> b_bit
-
-    if a_bits.size < b_bits.size
-      return 1 if a_bits.empty?
-    elsif a_bits.size > b_bits.size
-      return -1 if b_bits.empty?
-    end
-
-    return sort_bits(a_bits, b_bits) if comparison == 0
-
-    comparison
+    Gitlab::Diff::FileCollectionSorter.new(diffs).sort
   end
 end
 

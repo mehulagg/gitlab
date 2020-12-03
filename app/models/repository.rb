@@ -109,11 +109,11 @@ class Repository
     "#<#{self.class.name}:#{@disk_path}>"
   end
 
-  def commit(ref = nil)
+  def commit(ref = nil, sort_diff_files: false)
     return unless exists?
     return ref if ref.is_a?(::Commit)
 
-    find_commit(ref || root_ref)
+    find_commit(ref || root_ref, sort_diff_files: sort_diff_files)
   end
 
   # Finding a commit by the passed SHA
@@ -1157,14 +1157,14 @@ class Repository
 
   # TODO Genericize finder, later split this on finders by Ref or Oid
   # https://gitlab.com/gitlab-org/gitlab/issues/19877
-  def find_commit(oid_or_ref)
+  def find_commit(oid_or_ref, sort_diff_files: false)
     commit = if oid_or_ref.is_a?(Gitlab::Git::Commit)
                oid_or_ref
              else
                Gitlab::Git::Commit.find(raw_repository, oid_or_ref)
              end
 
-    ::Commit.new(commit, container) if commit
+    ::Commit.new(commit, container, sort_diff_files: sort_diff_files) if commit
   end
 
   def cache

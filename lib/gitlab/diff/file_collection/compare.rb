@@ -4,11 +4,12 @@ module Gitlab
   module Diff
     module FileCollection
       class Compare < Base
-        def initialize(compare, project:, diff_options:, diff_refs: nil)
+        def initialize(compare, project:, diff_options:, diff_refs: nil, sort_diff_files: false)
           super(compare,
-            project:      project,
+            project: project,
             diff_options: diff_options,
-            diff_refs:    diff_refs)
+            diff_refs: diff_refs,
+            sort_diff_files: sort_diff_files)
         end
 
         def unfold_diff_lines(positions)

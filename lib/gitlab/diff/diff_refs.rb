@@ -40,7 +40,7 @@ module Gitlab
         start_sha.present? && head_sha.present?
       end
 
-      def compare_in(project)
+      def compare_in(project, sort_diff_files: false)
         # We're at the initial commit, so just get that as we can't compare to anything.
         if Gitlab::Git.blank_ref?(start_sha)
           project.commit(head_sha)
@@ -50,7 +50,8 @@ module Gitlab
           CompareService.new(project, head_sha).execute(project,
                                                         start_sha,
                                                         base_sha: base_sha,
-                                                        straight: straight)
+                                                        straight: straight,
+                                                        sort_diff_files: sort_diff_files)
         end
       end
     end
