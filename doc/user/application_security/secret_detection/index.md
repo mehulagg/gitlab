@@ -40,19 +40,26 @@ The [default ruleset provided by Gitleaks](https://gitlab.com/gitlab-org/securit
 - Cloud services:
   - Amazon Web Services (AWS)
   - Google Cloud Platform (GCP)
+  - Heroku API
 - Encryption keys:
   - PKCS8
   - RSA
   - SSH
   - PGP
+  - DSA
+  - EC
 - Social media platforms:
   - Facebook API
   - Twitter API
 - Cloud SaaS vendors:
   - GitHub API
   - Slack Token
+  - Slack Webhook
   - Stripe API
+  - Twilio API
   - Generic API key strings starting with `api-`
+- Password in URL
+- Social Security Number
 
 ## Requirements
 
