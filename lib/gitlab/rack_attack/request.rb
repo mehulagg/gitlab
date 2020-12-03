@@ -10,7 +10,10 @@ module Gitlab
       def authenticated_user_id(request_formats)
         user_id = authenticated_user_id_ignoring_allowlist(request_formats)
 
-        return if Gitlab::RackAttack.user_allowlist.include?(user_id)
+        if Gitlab::RackAttack.user_allowlist.include?(user_id)
+          Gitlab::Instrumentation::Throttle.safelist = 'throttle_user_allowlist'
+          return
+        end
 
         user_id
       end
