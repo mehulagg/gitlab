@@ -1,4 +1,5 @@
 @import 'mixins_and_variables_and_functions';
+@import './../fontawesome_custom.scss';
 
 .title .edit-wiki-header {
   width: 780px;
@@ -156,4 +157,34 @@ ul.wiki-pages-list.content-list {
 
 .wiki-form .markdown-area {
   max-height: none;
+}
+
+.md {
+  .admonitionblock td.icon {
+    width: 1%;
+
+    [class^='fa icon-'] {
+      @extend .fa-2x;
+    }
+
+    .icon-note {
+      @extend .fa-thumb-tack;
+    }
+
+    .icon-tip {
+      @extend .fa-lightbulb-o;
+    }
+
+    .icon-warning {
+      @extend .fa-exclamation-triangle;
+    }
+
+    .icon-caution {
+      @extend .fa-fire;
+    }
+
+    .icon-important {
+      @extend .fa-exclamation-circle;
+    }
+  }
 }
