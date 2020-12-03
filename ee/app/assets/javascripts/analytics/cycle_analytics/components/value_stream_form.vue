@@ -54,9 +54,8 @@ const PRESET_OPTIONS = [
 
 const DEFAULT_STAGE_CONFIG = ['issue', 'plan', 'code', 'test', 'review', 'staging'].map(id => ({
   id,
-  title: capitalizeFirstCharacter(id),
+  name: capitalizeFirstCharacter(id),
   hidden: false,
-  custom: false,
 }));
 
 export default {
@@ -192,7 +191,7 @@ export default {
         <div class="gl-display-flex gl-flex-direction-row gl-justify-content-space-between">
           <div>
             <gl-form-input
-              v-model.trim="stage.title"
+              v-model.trim="stage.name"
               :name="`create-value-stream-stage-${i}`"
               :placeholder="s__('CreateValueStreamForm|Enter stage name')"
               :state="isValid"
