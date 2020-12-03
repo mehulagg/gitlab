@@ -941,7 +941,7 @@ msgstr ""
 msgid "(No changes)"
 msgstr ""
 
-msgid "(UTC%{offset}) %{timezone}"
+msgid "(UTC %{offset}) %{timezone}"
 msgstr ""
 
 msgid "(check progress)"
@@ -19158,6 +19158,12 @@ msgid "OnCallSchedules|The schedule could not be deleted. Please try again."
 msgstr ""
 
 msgid "OnCallSchedules|The schedule could not be updated. Please try again."
+msgstr ""
+
+msgid "OnCallSchedules|Try adding a rotation"
+msgstr ""
+
+msgid "OnCallSchedules|Your schedule has been successfully created and all alerts from this project will now be routed to this schedule. Currently, only one schedule can be created per project. More coming soon! To add individual users to this schedule, use the add a rotation button."
 msgstr ""
 
 msgid "OnDemandScans|Could not fetch scanner profiles. Please refresh the page, or try again later."

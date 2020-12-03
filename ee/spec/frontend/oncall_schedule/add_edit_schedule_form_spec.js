@@ -67,7 +67,7 @@ describe('AddEditScheduleForm', () => {
     it('formats each option', () => {
       findDropdownOptions().wrappers.forEach((option, index) => {
         const tz = mockTimezones[index];
-        const expectedValue = `(UTC${tz.formatted_offset}) ${tz.abbr} ${tz.name}`;
+        const expectedValue = `(UTC ${tz.formatted_offset}) ${tz.abbr} ${tz.name}`;
         expect(option.text()).toBe(expectedValue);
       });
     });
