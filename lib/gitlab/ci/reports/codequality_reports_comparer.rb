@@ -3,14 +3,7 @@
 module Gitlab
   module Ci
     module Reports
-      class CodequalityReportsComparer
-        include Gitlab::Utils::StrongMemoize
-
-        STATUS_SUCCESS = 'success'
-        STATUS_FAILED = 'failed'
-
-        attr_reader :base_report, :head_report
-
+      class CodequalityReportsComparer < ReportsComparer
         def initialize(base_report, head_report)
           @base_report = base_report || CodequalityReports.new
           @head_report = head_report
