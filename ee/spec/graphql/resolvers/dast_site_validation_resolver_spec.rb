@@ -5,10 +5,9 @@ require 'spec_helper'
 RSpec.describe Resolvers::DastSiteValidationResolver do
   include GraphqlHelpers
 
-  let_it_be(:target_url) { generate(:url) }
   let_it_be(:current_user) { create(:user) }
   let_it_be(:project) { create(:project) }
-  let_it_be(:dast_site_token1) { create(:dast_site_token, project: project, url: target_url) }
+  let_it_be(:dast_site_token1) { create(:dast_site_token, project: project, url: generate(:url)) }
   let_it_be(:dast_site_validation1) { create(:dast_site_validation, dast_site_token: dast_site_token1) }
   let_it_be(:dast_site_token2) { create(:dast_site_token, project: project, url: generate(:url)) }
   let_it_be(:dast_site_validation2) { create(:dast_site_validation, dast_site_token: dast_site_token2) }
@@ -24,12 +23,6 @@ RSpec.describe Resolvers::DastSiteValidationResolver do
   end
 
   subject { sync(resolver) }
-
-  context 'when resolving a single DAST site validation' do
-    let(:resolver) { dast_site_validations(target_url: target_url) }
-
-    it { is_expected.to contain_exactly(dast_site_validation1) }
-  end
 
   context 'when resolving multiple DAST site validations' do
     let(:args) { {} }

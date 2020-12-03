@@ -77,13 +77,6 @@ module EE
               description: 'DAST Site Profiles associated with the project',
               resolver: ::Resolvers::DastSiteProfileResolver
 
-        field :dast_site_validation,
-              ::Types::DastSiteValidationType,
-              null: true,
-              resolver: ::Resolvers::DastSiteValidationResolver.single,
-              description: 'DAST Site Validation associated with the project. Will always return `null` ' \
-                           'if `security_on_demand_scans_site_validation` is disabled'
-
         field :dast_site_validations,
               ::Types::DastSiteValidationType.connection_type,
               null: true,
