@@ -1,3 +1,4 @@
+import Visibility from 'visibilityjs';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { unwrapStagesWithNeeds } from '../unwrapping_utils';
 
@@ -40,4 +41,19 @@ const unwrapPipelineData = (mainPipelineProjectPath, data) => {
   };
 };
 
-export { unwrapPipelineData };
+const visibilityToggle = (queryRef, interval = 10000) => {
+
+  const stopStartQuery = (query) => {
+    if (!Visibility.hidden()) {
+      query.startPolling(interval)
+    } else {
+      query.stopPolling();
+    }
+  }
+
+  stopStartQuery(queryRef);
+  Visibility.change(stopStartQuery.bind(null, queryRef));
+}
+
+
+export { unwrapPipelineData, visibilityToggle };

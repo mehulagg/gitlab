@@ -4,7 +4,7 @@ import { __ } from '~/locale';
 import { DEFAULT, LOAD_FAILURE } from '../../constants';
 import getPipelineDetails from '../../graphql/queries/get_pipeline_details.query.graphql';
 import PipelineGraph from './graph_component.vue';
-import { unwrapPipelineData } from './utils';
+import { unwrapPipelineData, visibilityToggle } from './utils';
 
 export default {
   name: 'PipelineGraphWrapper',
@@ -35,6 +35,7 @@ export default {
   apollo: {
     pipeline: {
       query: getPipelineDetails,
+      pollInterval: 10000,
       variables() {
         return {
           projectPath: this.pipelineProjectPath,
@@ -48,6 +49,9 @@ export default {
         this.reportFailure(LOAD_FAILURE);
       },
     },
+  },
+  mounted() {
+    visibilityToggle(this.$apollo.queries.pipeline);
   },
   computed: {
     alert() {
