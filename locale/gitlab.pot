@@ -19106,13 +19106,13 @@ msgstr ""
 msgid "OnCallSchedules|Create on-call schedules  in GitLab"
 msgstr ""
 
-msgid "OnCallSchedules|Failed to add rotation"
-msgstr ""
-
 msgid "OnCallSchedules|Delete schedule"
 msgstr ""
 
 msgid "OnCallSchedules|Edit schedule"
+msgstr ""
+
+msgid "OnCallSchedules|Failed to add rotation"
 msgstr ""
 
 msgid "OnCallSchedules|Failed to add schedule"
