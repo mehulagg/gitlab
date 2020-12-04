@@ -4690,6 +4690,8 @@ Vulnerability sort values.
 | ----- | ----------- |
 | `detected_asc` | Detection timestamp in ascending order |
 | `detected_desc` | Detection timestamp in descending order |
+| `primary_identifier_asc` | Primary Identifier in ascending order |
+| `primary_identifier_desc` | Primary Identifier in descending order |
 | `report_type_asc` | Report Type in ascending order |
 | `report_type_desc` | Report Type in descending order |
 | `severity_asc` | Severity in ascending order |

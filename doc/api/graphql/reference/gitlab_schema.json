@@ -72318,6 +72318,18 @@
               "description": "State in ascending order",
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "primary_identifier_desc",
+              "description": "Primary Identifier in descending order",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "primary_identifier_asc",
+              "description": "Primary Identifier in ascending order",
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "possibleTypes": null

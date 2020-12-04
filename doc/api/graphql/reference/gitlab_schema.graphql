@@ -24847,6 +24847,16 @@ enum VulnerabilitySort {
   detected_desc
 
   """
+  Primary Identifier in ascending order
+  """
+  primary_identifier_asc
+
+  """
+  Primary Identifier in descending order
+  """
+  primary_identifier_desc
+
+  """
   Report Type in ascending order
   """
   report_type_asc
