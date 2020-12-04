@@ -18,6 +18,8 @@ container registry images of a project without having a user and a password.
 
 Deploy tokens can be managed by [maintainers only](../../permissions.md).
 
+Deploy tokens cannot be used with the GitLab API.
+
 If you have a key pair, you might want to use [deploy keys](../../../ssh/README.md#deploy-keys)
 instead.
 
@@ -60,9 +62,6 @@ following table along with GitLab version it was introduced in:
 | `write_registry`         | Allows write-access (push) to [container registry](../../packages/container_registry/index.md). | 12.10 |
 | `read_package_registry`  | Allows read access to the package registry. | 13.0 |
 | `write_package_registry` | Allows write access to the package registry. | 13.0 |
-
-NOTE:Note
-You cannot use a deploy token to download your job's artifacts](./pipelines/job_artifacts.md#downloading-the-latest-artifacts). Issue [#282535](https://gitlab.com/gitlab-org/gitlab/-/issues/282535) will grant read and write access for artifacts. 
 
 ## Deploy token custom username
 
