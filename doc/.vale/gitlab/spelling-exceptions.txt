@@ -172,6 +172,8 @@ globals
 Gmail
 Gollum
 Google
+goroutine
+goroutines
 Gosec
 Gradle
 Grafana
