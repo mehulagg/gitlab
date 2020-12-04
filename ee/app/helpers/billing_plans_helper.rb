@@ -15,6 +15,7 @@ module BillingPlansHelper
     {
       namespace_id: group.id,
       namespace_name: group.name,
+      add_seats_href: add_seats_url(group),
       plan_upgrade_href: plan_upgrade_url(group, plan),
       plan_renew_href: plan_renew_url(group),
       customer_portal_url: "#{EE::SUBSCRIPTIONS_URL}/subscriptions",
@@ -80,6 +81,12 @@ module BillingPlansHelper
   end
 
   private
+
+  def add_seats_url(group)
+    return unless group
+
+    "#{EE::SUBSCRIPTIONS_URL}/gitlab/namespaces/#{group.id}/extra_seats"
+  end
 
   def plan_purchase_url(group, plan)
     if use_new_purchase_flow?(group)
