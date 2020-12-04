@@ -33,8 +33,10 @@ This guide shows the recommended way of installing Container Host Security throu
 ### Supported container orchestrators
 Currently Kubernetes vx.x.x+ is the only supported container orchestrator.  OpenShift and other container orchestrators are not yet supported.
 
-### Supported Kubernetes providers
-Currently the following cloud providers are supported:
+## Supported Kubernetes providers
+
+The following cloud providers are supported:
+
 - Amazon EKS
 - Google GKE
 
