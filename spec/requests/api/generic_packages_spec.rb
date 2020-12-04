@@ -271,7 +271,7 @@ RSpec.describe API::GenericPackages do
         project.add_developer(user)
       end
 
-      shared_examples 'creates a package and package file' do |auth_header, should_set_build_info|
+      shared_examples 'creates a package and package file' do
         headers = workhorse_header.merge(auth_header)
 
         expect { upload_file(params, headers) }
@@ -299,19 +299,31 @@ RSpec.describe API::GenericPackages do
       end
 
       context 'when valid personal access token is used' do
-        it_behaves_like 'creates a package and package file', personal_access_token_header, false
+        it_behaves_like 'creates a package and package file' do
+          let(:auth_header) { personal_access_token_header }
+          let(:should_set_build_info) { false }
+        end
       end
 
       context 'when valid basic auth is used' do
-        it_behaves_like 'creates a package and package file', user_basic_auth_header(user), false
+        it_behaves_like 'creates a package and package file' do
+          let(:auth_header) { user_basic_auth_header(user) }
+          let(:should_set_build_info) { false }
+        end
       end
 
       context 'when valid deploy token is used' do
-        it_behaves_like 'creates a package and package file', deploy_token_header(deploy_token_wo.token), false
+        it_behaves_like 'creates a package and package file' do
+          let(:auth_header) { deploy_token_header(deploy_token_wo.token) }
+          let(:should_set_build_info) { false }
+        end
       end
 
       context 'when valid job token is used' do
-        it_behaves_like 'creates a package and package file', job_token_header, true
+        it_behaves_like 'creates a package and package file' do
+          let(:auth_header) { job_token_header }
+          let(:should_set_build_info) { true }
+        end
       end
 
       context 'event tracking' do
