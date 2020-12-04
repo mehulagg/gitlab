@@ -9,6 +9,11 @@ if [ $# -gt 1 ] || ([ $# = 1 ] && [ x$1 != xcheck ]); then
   exit 1
 fi
 
+if echo "$WORKHORSE_REF" | grep -v -q '^v\d\+\.\d\+\.\d\+' ; then
+  # Turn 'vmy-branch' into 'my-branch'
+  WORKHORSE_REF="${WORKHORSE_REF#v}"
+fi
+
 clean="$(git status --porcelain)"
 if [ -n "$clean" ] ; then
   echo 'error: working directory is not clean:'
