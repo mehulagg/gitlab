@@ -5,7 +5,6 @@ require 'spec_helper'
 RSpec.describe IncidentManagement::OncallRotations::CreateService do
   let_it_be_with_refind(:project) { create(:project) }
   let_it_be(:schedule) { create(:incident_management_oncall_schedule, project: project) }
-
   let_it_be(:user_with_permissions) { create(:user) }
   let_it_be(:user_without_permissions) { create(:user) }
   let_it_be(:current_user) { user_with_permissions }
