@@ -3,18 +3,17 @@
 require 'spec_helper'
 
 RSpec.describe PersonalAccessTokens::CreateService do
-
   describe '#execute' do
     let(:user) { create(:user) }
     let(:params) { { name: 'admin-token', impersonation: true, scopes: [:api], expires_at: Date.today + 1.month } }
 
     context 'when non-admin user' do
-      context 'when user creates their own token'
+      context 'when user creates their own token' do
         it 'creates audit logs with success message' do
           expect(::AuditEventService)
-            .to receive(:new)
-            .with(user, user, action: :custom, custom_message: /Created personal access token with id \d+/, ip_address: nil)
-            .and_call_original
+          .to receive(:new)
+          .with(user, user, action: :custom, custom_message: /Created personal access token with id \d+/, ip_address: nil)
+          .and_call_original
 
           PersonalAccessTokens::CreateService.new(current_user: user, target_user: user, params: params).execute
         end
@@ -51,11 +50,12 @@ RSpec.describe PersonalAccessTokens::CreateService do
       context 'with admin mode disabled' do
         it 'creates audit logs with failure message' do
           expect(::AuditEventService)
-          .to receive(:new)
-          .with(admin, user, action: :custom, custom_message: 'Attempted to create personal access token but failed with message: Not permitted to create', ip_address: nil)
-          .and_call_original
+            .to receive(:new)
+            .with(admin, user, action: :custom, custom_message: 'Attempted to create personal access token but failed with message: Not permitted to create', ip_address: nil)
+            .and_call_original
 
-        PersonalAccessTokens::CreateService.new(current_user: admin, target_user: user, params: params).execute
+          PersonalAccessTokens::CreateService.new(current_user: admin, target_user: user, params: params).execute
+        end
       end
     end
   end
