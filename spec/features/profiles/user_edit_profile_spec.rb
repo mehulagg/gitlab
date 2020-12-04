@@ -291,6 +291,10 @@ RSpec.describe 'User edit profile' do
 
         toggle_busy_status
         set_user_status_in_modal
+
+        wait_for_requests
+        visit root_path(user)
+
         open_edit_status_modal
 
         expect(busy_status.checked?).to eq(true)
