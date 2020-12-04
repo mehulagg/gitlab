@@ -145,7 +145,7 @@ describe('On-call schedule wrapper', () => {
 
     it('should render newly create schedule', async () => {
       mountComponentWithApollo();
-      await awaitApolloDomMock(wrapper, jest);
+      await awaitApolloDomMock(wrapper.vm, jest);
       expect(findSchedule().props('schedule')).toEqual(newlyCreatedSchedule);
     });
   });
