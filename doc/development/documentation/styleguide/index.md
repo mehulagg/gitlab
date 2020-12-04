@@ -1934,19 +1934,15 @@ the sha256sum. You can find the sha256sum on the
 
 ### Configuration documentation for source and Omnibus installations
 
-GitLab officially supports two installation methods: installations
-from source and Omnibus packages installations.
-
-Whenever there's a setting that's configurable for both installation methods,
-the preference is to document it in the CE documentation to avoid duplication.
-
-Configuration settings include:
+GitLab supports two installation methods: installations from source, and Omnibus
+packages. Possible configuration settings include:
 
 - Settings that touch configuration files in `config/`.
-- NGINX settings and settings in `lib/support/` in general.
+- NGINX settings.
+- Other settings in `lib/support/`.
 
-When you document a list of steps, it may entail editing the configuration file
-and reconfiguring or restarting GitLab. In that case, use these styles:
+Configuration procedures can require users to edit configuration files, reconfigure
+GitLab, or restart GitLab. Use these styles to document these steps:
 
 <!-- vale off -->
 
@@ -1981,13 +1977,11 @@ and reconfiguring or restarting GitLab. In that case, use these styles:
 
 In this case:
 
-- Before each step list the installation method is declared in bold.
-- Three dashes (`---`) are used to create a horizontal line and separate the two
-  methods.
-- The code blocks are indented one or more spaces under the list item to render
-  correctly.
-- Different highlighting languages are used for each configuration in the code block.
-- The [GitLab Restart](#gitlab-restart) section is used to explain a required
+- Bold the installation method's name.
+- Separate the methods with three dashes (`---`) to create a horizontal line.
+- Indent the code blocks to line up with the list item they belong to..
+- Use the appropriate syntax highlighting for each code block.
+- Use the [GitLab Restart](#gitlab-restart) section to explain any required
   restart or reconfigure of GitLab.
 
 ### Troubleshooting
