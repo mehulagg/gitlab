@@ -19,12 +19,9 @@ export const errorMsg = 'Something went wrong';
 export const getOncallSchedulesQueryResponse = {
   data: {
     project: {
-      __typename: 'Project',
       incidentManagementOncallSchedules: {
-        __typename: 'IncidentManagementOncallScheduleConnection',
         nodes: [
           {
-            __typename: 'IncidentManagementOncallSchedule',
             iid: '37',
             name: 'Test schedule',
             description: 'Description 1 lives here',
@@ -43,6 +40,7 @@ export const destroyScheduleResponse = {
     oncallScheduleDestroy: {
       errors: [],
       oncallSchedule: {
+        __typename: 'IncidentManagementOncallSchedule',
         iid: '1',
         name: 'Test',
         description: 'test',

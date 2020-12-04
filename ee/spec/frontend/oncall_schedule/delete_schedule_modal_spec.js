@@ -86,6 +86,14 @@ describe('DeleteScheduleModal', () => {
 
     fakeApollo = createMockApollo(requestHandlers);
 
+    fakeApollo.clients.defaultClient.cache.writeQuery({
+      query: getOncallSchedulesQuery,
+      variables: {
+        projectPath: 'group/project',
+      },
+      data: getOncallSchedulesQueryResponse.data,
+    });
+
     wrapper = shallowMount(DeleteScheduleModal, {
       localVue,
       apolloProvider: fakeApollo,
@@ -168,7 +176,7 @@ describe('DeleteScheduleModal', () => {
 
       console.log(findModal().props());
 
-      //expect(findModal().attributes('data-testid')).toBe(`delete-schedule-modal-${schedule.iid}`);
+      expect(findModal().attributes('data-testid')).toBe(`delete-schedule-modal-${schedule.iid}`);
     });
 
     it('displays flash if mutation had a recoverable error', async () => {
