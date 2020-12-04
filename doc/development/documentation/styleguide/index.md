@@ -1945,21 +1945,6 @@ In this case:
 - The [GitLab Restart](#gitlab-restart) section is used to explain a required
   restart or reconfigure of GitLab.
 
-### Troubleshooting
-
-For troubleshooting sections, provide as much context as possible so
-users can identify their problem and resolve it on their own. You
-can facilitate this by making sure the troubleshooting content addresses:
-
-1. The problem the user needs to solve.
-1. How the user can confirm they have the problem.
-1. Steps the user can take towards resolution of the problem.
-
-If the contents of each category can be summarized in one line and a list of
-steps aren't required, consider setting up a [table](#tables). Create headers of
-_Problem_ \| _Cause_ \| _Solution_ (or _Workaround_ if the fix is temporary), or
-_Error message_ \| _Solution_.
-
 ## Feature flags
 
 Learn how to [document features deployed behind flags](../feature_flags.md). For
