@@ -7,6 +7,7 @@ class Groups::BillingsController < Groups::ApplicationController
   before_action only: [:index] do
     push_frontend_feature_flag(:api_billable_member_list)
     push_frontend_feature_flag(:saas_manual_renew_button)
+    push_frontend_feature_flag(:saas_add_seats_button)
   end
 
   layout 'group_settings'
