@@ -122,12 +122,14 @@ class JiraService < IssueTrackerService
   end
 
   def fields
+    transition_id_help_url = help_page_url('user/project/integrations/jira', anchor: 'obtaining-a-transition-id')
+
     [
       { type: 'text', name: 'url', title: s_('JiraService|Web URL'), placeholder: 'https://jira.example.com', required: true },
       { type: 'text', name: 'api_url', title: s_('JiraService|Jira API URL'), placeholder: s_('JiraService|If different from Web URL') },
       { type: 'text', name: 'username', title: s_('JiraService|Username or Email'), placeholder: s_('JiraService|Use a username for server version and an email for cloud version'), required: true },
       { type: 'password', name: 'password', title: s_('JiraService|Password or API token'), placeholder: s_('JiraService|Use a password for server version and an API token for cloud version'), required: true },
-      { type: 'text', name: 'jira_issue_transition_id', title: s_('JiraService|Jira workflow transitions'), placeholder: s_('JiraService|e.g. 12, 24'), help: s_('JiraService|Set transition IDs for Jira workflow transitions.') }
+      { type: 'text', name: 'jira_issue_transition_id', title: s_('JiraService|Jira workflow transitions'), placeholder: s_('JiraService|e.g. 12, 24'), help: s_('JiraService|Set transition IDs for Jira workflow transitions. %{link_start}Learn more%{link_end}'.html_safe % { link_start: '<a href="#{transition_id_help_url}">'.html_safe, link_end: '</a>'.html_safe }) }
     ]
   end
 

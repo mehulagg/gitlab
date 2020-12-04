@@ -15474,19 +15474,19 @@ msgstr ""
 msgid "JiraService|Jira project key"
 msgstr ""
 
+msgid "JiraService|Jira workflow transitions"
+msgstr ""
+
 msgid "JiraService|Open Jira"
 msgstr ""
 
 msgid "JiraService|Password or API token"
 msgstr ""
 
+msgid "JiraService|Set transition IDs for Jira workflow transitions. %{link_start}Learn more%{link_end}"
+msgstr ""
+
 msgid "JiraService|This feature requires a Premium plan."
-msgstr ""
-
-msgid "JiraService|Transition ID(s)"
-msgstr ""
-
-msgid "JiraService|Use , or ; to separate multiple transition IDs"
 msgstr ""
 
 msgid "JiraService|Use a password for server version and an API token for cloud version"
@@ -15511,6 +15511,9 @@ msgid "JiraService|Web URL"
 msgstr ""
 
 msgid "JiraService|Work on Jira issues without leaving GitLab. Adds a Jira menu to access your list of Jira issues and view any issue as read-only."
+msgstr ""
+
+msgid "JiraService|e.g. 12, 24"
 msgstr ""
 
 msgid "JiraService|e.g. AB"
