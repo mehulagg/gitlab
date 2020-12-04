@@ -30,30 +30,14 @@ RSpec.describe Issue do
       context 'when issue title is "New: Incident"' do
         let(:issue) { build(:issue, project: project, author: author, title: 'New: Incident', iid: 503503) }
 
-        context 'when alerts service is active' do
-          before do
-            allow(project).to receive(:alerts_service_activated?).and_return(true)
-          end
-
-          context 'when the author is Alert Bot' do
-            it 'updates issue title with the IID' do
-              expect { issue.save }.to change { issue.title }.to("New: Incident 503503")
-            end
-          end
-
-          context 'when the author is not an Alert Bot' do
-            let(:author) { create(:user) }
-
-            it 'does not change issue title' do
-              expect { issue.save }.not_to change { issue.title }
-            end
+        context 'when the author is Alert Bot' do
+          it 'updates issue title with the IID' do
+            expect { issue.save }.to change { issue.title }.to("New: Incident 503503")
           end
         end
 
-        context 'when alerts service is not active' do
-          before do
-            allow(project).to receive(:alerts_service_activated?).and_return(false)
-          end
+        context 'when the author is not an Alert Bot' do
+          let(:author) { create(:user) }
 
           it 'does not change issue title' do
             expect { issue.save }.not_to change { issue.title }
