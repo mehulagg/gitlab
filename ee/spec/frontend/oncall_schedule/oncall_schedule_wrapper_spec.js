@@ -8,6 +8,7 @@ import AddScheduleModal from 'ee/oncall_schedules/components/add_schedule_modal.
 import createMockApollo from 'jest/helpers/mock_apollo_helper';
 import getOncallSchedulesQuery from 'ee/oncall_schedules/graphql/queries/get_oncall_schedules.query.graphql';
 import VueApollo from 'vue-apollo';
+import { preExistingSchedule, newlyCreatedSchedule } from './mocks/apollo_mock';
 
 const localVue = createLocalVue();
 localVue.use(VueApollo);
@@ -116,26 +117,12 @@ describe('On-call schedule wrapper', () => {
   });
 
   describe('Apollo', () => {
-    const olderSchedule = {
-      description: 'description',
-      iid: '1',
-      name: 'Monitor rotations',
-      timezone: 'Pacific/Honolulu',
-    };
-
-    const newlyCreatedSchedule = {
-      description: 'description',
-      iid: '2',
-      name: 'S-Monitor rotations',
-      timezone: 'Kyiv/EST',
-    };
-
     beforeEach(() => {
       getOncallSchedulesQuerySpy = jest.fn().mockResolvedValue({
         data: {
           project: {
             incidentManagementOncallSchedules: {
-              nodes: [olderSchedule, newlyCreatedSchedule],
+              nodes: [preExistingSchedule, newlyCreatedSchedule],
             },
           },
         },

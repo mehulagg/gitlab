@@ -83,3 +83,17 @@ export const updateScheduleResponse = {
     },
   },
 };
+
+export const preExistingSchedule = {
+  description: 'description',
+  iid: '1',
+  name: 'Monitor rotations',
+  timezone: 'Pacific/Honolulu',
+};
+
+export const newlyCreatedSchedule = {
+  description: 'description',
+  iid: '2',
+  name: 'S-Monitor rotations',
+  timezone: 'Kyiv/EST',
+};
