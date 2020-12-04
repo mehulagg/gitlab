@@ -16729,6 +16729,9 @@ msgstr ""
 msgid "Max access level"
 msgstr ""
 
+msgid "Max file size = 200KB."
+msgstr ""
+
 msgid "Max role"
 msgstr ""
 
@@ -27310,9 +27313,6 @@ msgid "The license was successfully uploaded and will be active from %{starts_at
 msgstr ""
 
 msgid "The maximum file size allowed is %{size}."
-msgstr ""
-
-msgid "The maximum file size allowed is 200KB."
 msgstr ""
 
 msgid "The merge conflicts for this merge request cannot be resolved through GitLab. Please try to resolve them locally."
