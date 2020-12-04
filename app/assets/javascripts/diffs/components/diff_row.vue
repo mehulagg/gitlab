@@ -44,13 +44,14 @@ export default {
     ...mapState({
       isHighlighted(state) {
         const line = this.line.left?.line_code ? this.line.left : this.line.right;
-        return utils.isHighlighted(state, line, this.isCommented);
+        return utils.isHighlighted(state, line, false);
       },
     }),
     classNameMap() {
       return {
         [CONTEXT_LINE_CLASS_NAME]: this.line.isContextLineLeft,
         [PARALLEL_DIFF_VIEW_TYPE]: true,
+        commented: this.isCommented,
       };
     },
     parallelViewLeftLineType() {
