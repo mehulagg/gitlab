@@ -180,7 +180,7 @@ When only one protocol is enabled:
 On top of these UI restrictions, GitLab will deny all Git actions on the protocol
 not selected.
 
-WARNING: **Important:**
+WARNING:
 Starting with [GitLab 10.7](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/18021),
 HTTP(S) protocol will be allowed for Git clone or fetch requests done by GitLab Runner
 from CI/CD jobs, even if _Only SSH_ was selected.

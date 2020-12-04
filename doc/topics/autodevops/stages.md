@@ -405,7 +405,7 @@ as it attempts to fetch the image using `CI_REGISTRY_PASSWORD`.
 > - Support for deploying a PostgreSQL version that supports Kubernetes 1.16+ was [introduced](https://gitlab.com/gitlab-org/cluster-integration/auto-deploy-image/-/merge_requests/49) in GitLab 12.9.
 > - Supported out of the box for new deployments as of GitLab 13.0.
 
-WARNING: **Deprecation:**
+WARNING:
 The default value for the `deploymentApiVersion` setting was changed from
 `extensions/v1beta` to `apps/v1` in [GitLab 13.0](https://gitlab.com/gitlab-org/charts/auto-deploy-app/-/issues/47).
 
