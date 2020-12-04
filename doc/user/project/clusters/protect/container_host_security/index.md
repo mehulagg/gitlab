@@ -28,9 +28,8 @@ This guide shows the recommended way of installing Container Host Security throu
 - Monitor system logs, process starts, files read/written/deleted, and network ports opened
 - Optionally block processes from starting or files from being read/written/deleted
 
-## Support
+## Supported container orchestrators
 
-### Supported container orchestrators
 Currently Kubernetes vx.x.x+ is the only supported container orchestrator.  OpenShift and other container orchestrators are not yet supported.
 
 ## Supported Kubernetes providers
