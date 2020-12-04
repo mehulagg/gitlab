@@ -373,9 +373,10 @@ Snowplow Micro is a Docker-based solution for testing frontend and backend event
 1. Ensure Docker is installed and running.
 
 1. Install [Snowplow Micro](https://github.com/snowplow-incubator/snowplow-micro) by cloning the settings in [this project](https://gitlab.com/gitlab-org/snowplow-micro-configuration):
+1. Navigate to the directory with the cloned project, and start the appropriate Docker
+   container with the following script:
 
    ```shell
-   git clone git@gitlab.com:gitlab-org/snowplow-micro-configuration.git
    ./snowplow-micro.sh
    ```
 
