@@ -312,7 +312,7 @@ Implemented using Redis methods [PFADD](https://redis.io/commands/pfadd) and [PF
      be `{i_compliance_credential_inventory}-2020-34`.
    - `expiry`: expiry time in days. Default: 29 days for daily aggregation and 6 weeks for weekly
      aggregation.
-   - `aggregation`: aggregation `:daily` or `:weekly`. The argument defines where we store the counting data in Redis, counting in `daily` keys or `weekly` keys. By selecting `daily` aggregation does not bring more detailed or fine grained data.
+   - `aggregation`: aggregation `:daily` or `:weekly`. The argument defines where we store the counting data in Redis, in `daily` keys or `weekly` keys. Aggregation on a `daily` basis does not pull more detailed or fine grained data.
      keys for data storage. For `daily` we keep a key for metric per day of the year, for `weekly` we
      keep a key for metric per week of the year.
    - `feature_flag`: optional. For details, see our [GitLab internal Feature flags](../feature_flags/) documentation.
