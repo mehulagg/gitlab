@@ -65,7 +65,7 @@ module RepositoryStorageMovable
       before_transition started: :replicated do |storage_move|
         storage_move.container.set_repository_writable!
 
-        storage_move.container.update_column(:repository_storage, storage_move.destination_storage_name)
+        storage_move.update_repository_storage(storage_move.destination_storage_name)
       end
 
       before_transition started: :failed do |storage_move|
@@ -90,6 +90,10 @@ module RepositoryStorageMovable
 
       container_klass.pick_repository_storage
     end
+  end
+
+  def update_repository_storage(new_storage)
+    raise NotImplementedError
   end
 
   def schedule_repository_storage_update_worker
