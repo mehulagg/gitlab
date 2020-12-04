@@ -88,6 +88,9 @@ variables:
   # https://gitlab.com/gitlab-org/gitlab/-/merge_requests/24887
   GIT_CLONE_PATH: "/builds/gitlab-org-forks/${CI_PROJECT_NAME}"
 
+  # FIXME: enabled for testing, to be removed before merge
+  RSPEC_MINIMAL_ENABLED: "true"
+
 include:
   - local: .gitlab/ci/build-images.gitlab-ci.yml
   - local: .gitlab/ci/cache-repo.gitlab-ci.yml
