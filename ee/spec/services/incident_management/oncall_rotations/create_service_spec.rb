@@ -82,7 +82,7 @@ RSpec.describe IncidentManagement::OncallRotations::CreateService do
         oncall_schedule = execute.payload[:oncall_rotation]
         expect(oncall_schedule).to be_a(::IncidentManagement::OncallRotation)
         expect(oncall_schedule.name).to eq('On-call rotation')
-        expect(oncall_schedule.length).to eq('1')
+        expect(oncall_schedule.length).to eq(1)
         expect(oncall_schedule.length_unit).to eq('days')
       end
     end
