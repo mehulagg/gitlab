@@ -50,8 +50,11 @@ If you think you have found an exception to this rule, contact the
 Technical Writing team.
 
 GitLab adds all troubleshooting information to the documentation, no matter how
-unlikely a user is to encounter a situation. For the [Troubleshooting sections](#troubleshooting),
-people in GitLab Support can merge additions themselves.
+unlikely a user is to encounter a situation.
+
+GitLab Support maintains their own
+[troubleshooting content](https://docs.gitlab.com/ee/administration/#support-team-docs)
+in the GitLab documentation.
 
 ### The documentation includes all media types
 
@@ -111,8 +114,6 @@ of GitLab more efficient.
 New information that would be useful toward the future usage or troubleshooting
 of GitLab should not be written directly in a forum or other messaging system,
 but added to a documentation MR and then referenced, as described above. 
-
-For example, you can add a [Troubleshooting topic](../structure.md#troubleshooting) if none exists.
 
 The more we reflexively add information to the documentation, the more
 the documentation helps others efficiently accomplish tasks and solve problems.
