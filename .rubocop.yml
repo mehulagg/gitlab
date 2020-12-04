@@ -33,6 +33,7 @@ AllCops:
     - 'plugins/**/*'
     - 'file_hooks/**/*'
     - 'workhorse/**/*'
+    - 'scripts/update-workhorse'
   CacheRootDirectory: tmp
   MaxFilesInCache: 18000
 
