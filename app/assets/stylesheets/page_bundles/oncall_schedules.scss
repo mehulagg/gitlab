@@ -31,6 +31,7 @@
 
 //// Copied from roadmaps.scss - adapted for on-call schedules
 $header-item-height: 60px;
+$item-height: 40px;
 $details-cell-width: px-to-rem(150px);
 $timeline-cell-height: 32px;
 $timeline-cell-width: 180px;
@@ -40,7 +41,7 @@ $gradient-gray: rgba(255, 255, 255, 0.001);
 $scroll-top-gradient: linear-gradient(to bottom, $gradient-dark-gray 0%, $gradient-gray 100%);
 $scroll-bottom-gradient: linear-gradient(to bottom, $gradient-gray 0%, $gradient-dark-gray 100%);
 $column-right-gradient: linear-gradient(to right, $gradient-dark-gray 0%, $gradient-gray 100%);
-$epic-details-cell-width: 150px;
+
 
 .schedule-shell {
   @include gl-relative;
@@ -89,7 +90,7 @@ $epic-details-cell-width: 150px;
 
   .timeline-header-item {
     // container size minus left panel width divided by 2 week timeframes
-    width: calc((100% - #{$epic-details-cell-width}) / 2);
+    width: calc((100% - #{$details-cell-width}) / 2);
 
     &:last-of-type .item-label {
       @include gl-border-r-0;
@@ -136,7 +137,163 @@ $epic-details-cell-width: 150px;
       width: $gl-vert-padding;
       background-color: var(--red-500, $red-500);
       border-radius: 50%;
-      transform: translateX(-3px);
+      transform: translateX(-2px);
     }
   }
 }
+
+@mixin roadmap-scroll-mixin {
+  height: $grid-size;
+  width: $details-cell-width;
+  pointer-events: none;
+}
+
+html.group-epics-roadmap-html {
+  height: 100%;
+  // We need to reset this just for Roadmap page
+  overflow-y: initial;
+}
+
+.with-performance-bar {
+  .group-epics-roadmap-body {
+    $header-size: $performance-bar-height + $header-height;
+    height: calc(100% - #{$header-size});
+  }
+}
+
+.group-epics-roadmap-body {
+  height: calc(100% - #{$header-height});
+
+  .page-with-contextual-sidebar {
+    height: 100%;
+  }
+
+  .group-epics-roadmap {
+    // This size is total of breadcrumb height and computed height of
+    // filters container (70px)
+    $header-size: $breadcrumb-min-height + 70px;
+    height: calc(100% - #{$header-size});
+  }
+
+  .group-epics-roadmap-wrapper,
+  .group-epics-roadmap .content {
+    height: 100%;
+  }
+}
+
+
+.group-epics-roadmap-wrapper {
+  padding-bottom: 0;
+}
+
+.roadmap-container {
+  overflow: hidden;
+  height: 100%;
+
+  &.overflow-reset {
+    overflow: initial;
+  }
+}
+
+.roadmap-timeline-section .timeline-header-blank::after,
+.list-section .details-cell::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: -$grid-size;
+  width: $grid-size;
+  pointer-events: none;
+  background: $column-right-gradient;
+}
+
+.epics-list-item {
+  &:hover {
+    .details-cell,
+    .timeline-cell {
+      background-color: var(--gray-50, $gray-50);
+    }
+  }
+
+  &.epics-list-item-empty {
+    height: 100%;
+
+    &:hover {
+      .details-cell,
+      .timeline-cell {
+        background-color: var(--white, $white);
+      }
+    }
+
+    .details-cell,
+    .details-cell::after,
+    .timeline-cell {
+      height: 100%;
+    }
+  }
+
+  &.newly-added-epic {
+    .details-cell {
+      animation: colorTransitionDetailsCell 3s;
+    }
+  }
+}
+
+.details-cell,
+.timeline-cell {
+  float: left;
+  height: $item-height;
+  border-bottom: $border-style;
+}
+
+.details-cell {
+  position: sticky;
+  position: -webkit-sticky;
+  left: 0;
+  line-height: 1.3;
+  width: $details-cell-width;
+  font-size: $code-font-size;
+  background-color: var(--white, $white);
+  z-index: 10;
+
+  &::after {
+    height: $item-height;
+  }
+}
+
+.epic-title,
+.epic-group-timeframe {
+  @include text-truncate;
+}
+
+.timeline-cell {
+  position: relative;
+ // width: $timeline-cell-width;
+  // container size minus left panel width divided by 2 week timeframes
+  width: calc((100% - #{$details-cell-width}) / 2);
+  background-color: transparent;
+  border-right: $border-style;
+
+  &:last-child {
+    border-right: 0;
+  }
+}
+
+.scroll-bottom-shadow {
+  @include roadmap-scroll-mixin;
+  position: fixed;
+  bottom: 0;
+  background: $scroll-bottom-gradient;
+  z-index: 2;
+}
+
+.timeline-cell,
+.milestone-timeline-cell {
+  .current-day-indicator {
+    top: -1px;
+    width: 2px;
+    height: calc(100% + 1px);
+    background-color: var(--red-500, $red-500);
+    pointer-events: none;
+  }
+}
+
