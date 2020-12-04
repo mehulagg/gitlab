@@ -281,8 +281,8 @@ To edit the content, you may need to edit the following:
 - The template. You can edit the template at `lib/gitlab/graphql/docs/templates/default.md.haml`.
   The actual renderer is at `Gitlab::Graphql::Docs::Renderer`.
 - The applicable `description` field in the code, which
-  [Updates machine-readable schema files], which is then used by the
-  rake task described earlier.
+  [Updates machine-readable schema files](#update-machine-readable-schema-files),
+  which is then used by the rake task described earlier.
 
 `@parsed_schema` is an instance variable that the `graphql-docs` gem expects to have available.
 `Gitlab::Graphql::Docs::Helper` defines the `object` method we currently use. This is also where you
