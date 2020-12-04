@@ -114,11 +114,13 @@ In most cases the anchors `\A` for beginning of text and `\z` for end of text sh
 
 ## Denial of Service (ReDoS) / Catastrophic Backtracking
 
-When a regular expression (regex) is matching against a string and can't find a match,
-it will sometimes backtrack to try other possibilities. For example when the regex `.*!$`
-is matching the string `hello!`, the `.*` will first match the entire string but then the `!`
-from the regex won't be able to match because the character has already been consumed.
-When that happens, the Ruby regex engine will _backtrack_ one character to allow the `!` to match.
+When a regular expression (regex) is used to search for a string and can't find a match,
+it may then backtrack to try other possibilities.
+
+For example when the regex `.*!$` matches the string `hello!`, the `.*` first matches
+the entire string but then the `!` from the regex is unable to match because the
+character has already been used. In that case, the Ruby regex engine _backtracks_
+one character to allow the `!` to match.
  
 [ReDoS](https://owasp.org/www-community/attacks/Regular_expression_Denial_of_Service_-_ReDoS)
 is an attack in which the attacker knows or controls the regular expression used.
