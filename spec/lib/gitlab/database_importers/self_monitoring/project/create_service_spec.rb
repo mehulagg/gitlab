@@ -119,7 +119,7 @@ RSpec.describe Gitlab::DatabaseImporters::SelfMonitoring::Project::CreateService
         expect(project.name).to eq(described_class::PROJECT_NAME)
         expect(project.description).to eq(
           'This project is automatically generated and helps monitor this GitLab instance. ' \
-          "[More information](#{docs_path})"
+          "[More information](#{docs_path})."
         )
         expect(File).to exist("doc/#{path}.md")
       end
