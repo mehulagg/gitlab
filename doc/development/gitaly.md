@@ -46,23 +46,21 @@ from inside `lib/gitlab/git`, see 'Modifying existing Git features'
 below.
 
 There should be no new code that touches Git repositories via
-disk access (e.g. Rugged, `git`, `rm -rf`) anywhere outside
-`lib/gitlab/git`.
+disk access (e.g. Rugged, `git`, `rm -rf`) anywhere in GitLab.
 
 The process for adding new Gitaly features is:
 
 - exploration / prototyping
-- design and create a new Gitaly RPC in [`gitaly-proto`](https://gitlab.com/gitlab-org/gitaly-proto)
+- design and create a new Gitaly RPC in [Gitaly](https://gitlab.com/gitlab-org/gitaly)
 - release a new version of `gitaly-proto`
 - write implementation and tests for the RPC [in Gitaly](https://gitlab.com/gitlab-org/gitaly), in Go or Ruby
 - release a new version of Gitaly
 - write client code in GitLab CE/EE, GitLab Workhorse or GitLab Shell that calls the new Gitaly RPC
 
 These steps often overlap. It is possible to use an unreleased version
-of Gitaly and `gitaly-proto` during testing and development.
+of Gitaly during testing and development.
 
-- See the [Gitaly repository](https://gitlab.com/gitlab-org/gitaly/blob/master/CONTRIBUTING.md#development-and-testing-with-a-custom-gitaly-proto) for instructions on writing server side code with an unreleased protocol.
-- See [below](#running-tests-with-a-locally-modified-version-of-gitaly) for instructions on running GitLab CE tests with a modified version of Gitaly.
+- See [below](#running-tests-with-a-locally-modified-version-of-gitaly) for instructions on running GitLab tests with a modified version of Gitaly.
 - In GDK run `gdk install` and restart `gdk run` (or `gdk run app`) to use a locally modified Gitaly version for development
 
 ### `gitaly-ruby`
@@ -243,6 +241,9 @@ the branch with the changes (`new-feature-branch`, for example):
    ```
 
 1. Run `bundle install` to use the modified RPC client.
+
+You'll need to re-run `bundle install` each time the Gitaly branch changes, since
+the SHA is embedded in `Gemfile.lock` when you run it.
 
 ---
 
