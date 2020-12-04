@@ -24,11 +24,33 @@ exports[`SidebarDatePicker renders expected template 1`] = `
       class="float-right d-flex"
     >
       <gl-icon-stub
+        arialabel="Help"
         class="help-icon gl-mr-2"
         name="question-o"
         size="16"
         tabindex="0"
       />
+       
+      <gl-popover-stub
+        boundary="viewport"
+        cssclasses=""
+        placement="left"
+        target="function() {
+                      return _vm.$refs.epicDatePopover.$el
+                    }"
+        triggers="focus"
+      >
+        <p>
+          These dates affect how your epics appear in the roadmap. Dates from milestones come from the milestones assigned to issues in the epic. You can also set fixed dates or remove them entirely.
+        </p>
+         
+        <gl-link-stub
+          href="/help/user/group/epics/index.md#start-date-and-due-date"
+          target="_blank"
+        >
+          More information
+        </gl-link-stub>
+      </gl-popover-stub>
        
       <gl-button-stub
         buttontextclasses=""
