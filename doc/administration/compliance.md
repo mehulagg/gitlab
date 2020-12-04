@@ -24,3 +24,31 @@ GitLab’s [security features](../security/README.md) may also help you meet rel
 |**[Auditor users](auditor_users.md)**<br>Auditor users are users who are given read-only access to all projects, groups, and other resources on the GitLab instance.|Premium+||
 |**[Credentials inventory](../user/admin_area/credentials_inventory.md)**<br>With a credentials inventory, GitLab administrators can keep track of the credentials used by all of the users in their GitLab instance. |Ultimate||
 |**Separation of Duties using [Protected branches](../user/project/protected_branches.md#protected-branches-approval-by-code-owners) and [custom CI Configuration Paths](../ci/pipelines/settings.md#custom-ci-configuration-path)**<br> GitLab Silver and Premium users can leverage GitLab's cross-project YAML configuration's to define deployers of code and developers of code. View the [Separation of Duties Deploy Project](https://gitlab.com/guided-explorations/separation-of-duties-deploy/blob/master/README.md) and [Separation of Duties Project](https://gitlab.com/guided-explorations/separation-of-duties/blob/master/README.md) to see how to use this set up to define these roles.|Premium+||
+
+## Compliance settings
+
+GitLab offers a variety of settings, at various levels of the application, intended to serve compliance-related functions. Below is a list of all "compliance settings" available in the application:
+
+- Instance-level
+  - MR approval rules
+    - etc
+  - Push rules
+    - Prohibit deletion of git tags with `git push` (`deny_delete_tag`)
+    - Require commit author is a GitLab user (`member_check`)
+    - Prohibit committing secrets to Git (`prevent_secrets`)
+    - Require commit author email pattern (`author_email_regex`)
+    - Require commit message pattern (`commit_message_regex`)
+    - Prohibit commit message pattern (`commit_message_negative_regex`)
+    - Prohibit committing files exceeding max size (`max_file_size`)
+    - Prohibit file name pattern (`file_name_regex`)
+    - Require branch name pattern (`branch_name_regex`)
+- Group-level
+  - MR approval rules
+    - etc
+  - Push rules
+    - etc
+- Project-level
+  - MR approval rules
+    - etc
+  - Push rules
+    - etc
