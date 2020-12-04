@@ -129,9 +129,6 @@ export default {
     collapsedText() {
       return this.selectedDateWords ? this.selectedDateWords : __('None');
     },
-    popoverUrl() {
-      return `${gon.gitlab_url}/help/user/group/epics/index.md#start-date-and-due-date`;
-    },
   },
   methods: {
     stopEditing() {
