@@ -4,13 +4,13 @@ group: Container Security
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
 
-# Getting started with GitLab's Container Network Security
+# Getting started with GitLab's Container Host Security
 
 The following installation steps are the recommended way of installing GitLab's Protect capabilities.  Although some capabilities can be installed through GMAv1, it is [recommended and preferred]() to install applications through GMAv2 exclusively when using Container Network Security.
 
 ## Installation steps
 
-The following steps are recommended to install and use Container Network Security through GitLab:
+The following steps are recommended to install and use Container Host Security through GitLab:
 
 1. [Install and connect at least one runner to GitLab](https://docs.gitlab.com/runner/)
 1. [Create a group](https://docs.gitlab.com/ee/user/group/#create-a-new-group)
@@ -20,44 +20,11 @@ The following steps are recommended to install and use Container Network Securit
   1. [Install the Ingress node via CI/CD (GMAv2)](https://docs.gitlab.com/ee/user/clusters/applications.html#install-ingress-using-gitlab-cicd)
   1. [Determine the external endpoint via the manual method](https://docs.gitlab.com/ee/user/clusters/applications.html#determining-the-external-endpoint-manually)
   1. Navigate to the Kubernetes page and enter the [DNS address for the external endpoint](https://docs.gitlab.com/ee/user/project/clusters/#base-domain) into the **Base domain** field on the Details tab.  Save the changes to the Kubernetes cluster.
-1. [Install and configure Cilium](https://docs.gitlab.com/ee/user/clusters/applications.html#install-cilium-using-gitlab-cicd)
+1. [Install and configure Falco](https://docs.gitlab.com/ee/user/clusters/applications.html#install-falco-using-gitlab-cicd) for activity monitoring
+1. [Install and configure AppArmor](https://docs.gitlab.com/ee/user/clusters/applications.html#install-apparmor-using-gitlab-cicd) for activity blocking
+1. [Configure Pod Security Policies](https://docs.gitlab.com/ee/user/clusters/applications.html#using-podsecuritypolicy-in-your-deployments) (required to be able to load AppArmor profiles)
 
-It is possible to install and manage Cilium in other ways, such as by installing Cilium manually into a Kubernetes cluster via GitLab's Helm chart and then connecting it back to GitLab. These methods are not currently documented or officially supported.
-
-## Managing Network Policies
-
-Managing NetworkPolicies through GitLab is advantageous over managing the policies in Kubernetes directly as Kubernetes does not provide a GUI editor, a change control process, or a revision history. Network Policies can be managed through GitLab in one of two ways:
-
-1. Management through a yaml file in each application's project (for projects using Auto DevOps) - [documentation](https://docs.gitlab.com/ee/topics/autodevops/stages.html#network-policy)
-1. Management through GitLab's Policy management UI (for projects not using Auto DevOps) - [documentation](https://docs.gitlab.com/ee/user/application_security/threat_monitoring/#container-network-policy-management)
-
-Each method comes with its own sets of Pros and Cons:
-
-| | yaml method | UI method |
-| Pros | A change control process is possible by requiring [MR Approvals](https://docs.gitlab.com/ee/user/project/merge_requests/merge_request_approvals.html). All changes are fully tracked and audited in the same way that Git tracks the history of any file in its repository. | The UI provides a simple rules editor for users who are less familiar with the yaml syntax of NetworkPolicies. This view is a live representation of the policies currently deployed in the Kubernetes cluster. The UI also allows for multiple network policies to be created per environment. |
-| Cons | Only one network policy can be deployed per environment (although that policy can be as detailed as is needed).  Additionally, the contents of the yaml file will not represent the actual state of policies that are deployed in Kubernetes if changes were made in Kubernetes directly rather than via the auto-deploy-values.yaml file. | Policy changes are not currently audited and a change control process is not currently available. |
-
-Users are encouraged to choose one of the two methods to manage their policies. If users attempt to use both methods simultaneously, when the application project pipeline is run, the contents of the NetworkPolicy in the auto-deploy-values.yaml file may override policies that are configured via the UI editor.
-
-## Monitoring throughput
-
-To view statistics for Container Network Security, you must have followed the installation steps above and also configured GitLab's integration with Prometheus. Additionally, if you are using custom Helm values for Cilium, you must enable Hubble with flow metrics for each namespace by adding the following lines to
-your [Cilium values](../../../../clusters/applications.md#install-cilium-using-gitlab-cicd):
-
-```yaml
-global:
-  hubble:
-    enabled: true
-    metrics:
-      enabled:
-        - 'flow:sourceContext=namespace;destinationContext=namespace'
-```
-
-Additional information about the statistics page is available in the [documentation that describes the Threat Management UI](https://docs.gitlab.com/ee/user/application_security/threat_monitoring/#container-network-policy).
-
-## Forwarding logs to a SIEM
-
-Cilium logs can be forwarded to a SIEM or an external logging system via syslog protocol by installing and configuring Fluentd.  Fluentd can be installed through GitLab in two ways: via the [GMAv1 method](https://docs.gitlab.com/ee/user/clusters/applications.html#fluentd) and via the [GMAv2 method](https://docs.gitlab.com/ee/user/clusters/applications.html#install-fluentd-using-gitlab-cicd). GitLab strongly encourages using only the [GMAv2 method](https://docs.gitlab.com/ee/user/clusters/applications.html#install-fluentd-using-gitlab-cicd) to install Fluentd.
+It is possible to install and manage Falco and AppArmor in other ways, such as by installing Falco and AppArmor manually into a Kubernetes cluster and then connecting it back to GitLab. These methods are not currently documented or officially supported.
 
 ## Troubleshooting
 

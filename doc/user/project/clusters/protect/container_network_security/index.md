@@ -4,7 +4,6 @@ group: Container Security
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
 
-
 # Container Network Security
 
 GitLab's Container Network Security capabilities provide basic firewalling functionality by leveraging Cilium NetworkPolicies to filter traffic going in and out of the cluster as well as traffic between pods inside the cluster.
@@ -12,7 +11,7 @@ much more.
 
 ## Overview
 
-It can be used to enforce L3, L4, and L7 policies and can prevent an attacker with control over one pod from spreading laterally to access other pods in the same cluster.
+Container Network Security can be used to enforce L3, L4, and L7 policies and can prevent an attacker with control over one pod from spreading laterally to access other pods in the same cluster. Both Ingress and Egress rules are supported.
 
 By default, Cilium is deployed in Detection-only mode and only logs attack attempts.  GitLab provides a set of out-of-the-box policies as examples and to help users get started.  As these policies usually need to be customized to match application-specific needs, these out-of-the-box policies come disabled by default.
 
@@ -30,7 +29,23 @@ This guide shows the recommended way of installing Container Network Security th
 - Ability to export logs to a SIEM
 - Statistics page showing volume of packets processed and dropped over time (Gold/Ultimate users only)
 - Management of NetworkPolicies through code in a project (Available for auto DevOps users only)
-- Management of NetworkPolicies through a UI policy manager (Gold/Ultimate users only)
+- Management of CiliumNetworkPolicies through a UI policy manager (Gold/Ultimate users only)
+
+## Support
+
+### Supported container orchestrators
+Currently Kubernetes vx.x.x+ is the only supported container orchestrator.  OpenShift and other container orchestrators are not yet supported.
+
+### Supported Kubernetes providers
+Currently the following cloud providers are supported:
+- Amazon EKS
+- Google GKE
+
+Container Network Security is not officially tested and supported for Azure or for self-hosted Kubernetes instances at this time; however, in theory it is possible to use it with those providers.
+
+### Supported NetworkPolicies
+
+Currently only the use of CiliumNetworkPolicies is officially supported through GitLab.  While generic Kubernetes NetworkPolicies or other kinds of NetworkPolicies may work, those are not tested or officially supported.
 
 ## Managing NetworkPolicies through GitLab vs your Cloud Provider
 
