@@ -182,7 +182,7 @@ describe('AddRotationModal', () => {
         },
       });
       createComponentWithApollo({ search: 'root' });
-      await awaitApolloDomMock();
+      await awaitApolloDomMock(wrapper.vm, jest);
       expect(userSearchQueryHandler).toHaveBeenCalledWith({ search: 'root' });
     });
 
