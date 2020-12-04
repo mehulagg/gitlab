@@ -4,6 +4,7 @@ import {
   DIFF_FILE_MANUAL_COLLAPSE,
   DIFF_FILE_AUTOMATIC_COLLAPSE,
 } from '../constants';
+import { uuids } from "./uuids";
 
 function fileSymlinkInformation(file, fileList) {
   const duplicates = fileList.filter(iteratedFile => iteratedFile.file_hash === file.file_hash);
@@ -32,8 +33,21 @@ function collapsed(file) {
   };
 }
 
+export function identifier({ file }){
+  return uuids({
+    seeds: [
+      file.blob.id,
+      file.file_hash,
+      file.file_identifier_hash,
+      file.content_sha,
+      file.blob.mode
+    ]
+  })[ 0 ];
+}
+
 export function prepareRawDiffFile({ file, allFiles }) {
   Object.assign(file, {
+    id: identifier({ file }),
     brokenSymlink: fileSymlinkInformation(file, allFiles),
     viewer: {
       ...file.viewer,
