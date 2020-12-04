@@ -19441,7 +19441,10 @@ msgstr ""
 msgid "Package type must be PyPi"
 msgstr ""
 
-msgid "PackageRegistry|%{name} version %{version} was created %{datetime}"
+msgid "PackageRegistry|%{name} version %{version} update was published to the registry %{datetime}"
+msgstr ""
+
+msgid "PackageRegistry|%{name} version %{version} was first created %{datetime}"
 msgstr ""
 
 msgid "PackageRegistry|%{name} version %{version} was updated %{datetime}"
@@ -19462,7 +19465,7 @@ msgstr ""
 msgid "PackageRegistry|App name: %{name}"
 msgstr ""
 
-msgid "PackageRegistry|Commit %{link} on branch %{branch}"
+msgid "PackageRegistry|Built by pipeline %{link} triggered %{datetime} by %{author}"
 msgstr ""
 
 msgid "PackageRegistry|Composer"
@@ -19520,6 +19523,9 @@ msgid "PackageRegistry|Copy yarn command"
 msgstr ""
 
 msgid "PackageRegistry|Copy yarn setup command"
+msgstr ""
+
+msgid "PackageRegistry|Created by commit %{link} on branch %{branch}"
 msgstr ""
 
 msgid "PackageRegistry|Delete Package Version"
@@ -19588,10 +19594,10 @@ msgstr ""
 msgid "PackageRegistry|Package Registry"
 msgstr ""
 
-msgid "PackageRegistry|Pip Command"
+msgid "PackageRegistry|Package has %{number} archived commits, pipeline builds and registry updates"
 msgstr ""
 
-msgid "PackageRegistry|Pipeline %{link} triggered %{datetime} by %{author}"
+msgid "PackageRegistry|Pip Command"
 msgstr ""
 
 msgid "PackageRegistry|Publish and share packages for a variety of common package managers. %{docLinkStart}More information%{docLinkEnd}"
@@ -19637,6 +19643,12 @@ msgid "PackageRegistry|Unable to fetch package version information."
 msgstr ""
 
 msgid "PackageRegistry|Unable to load package"
+msgstr ""
+
+msgid "PackageRegistry|Updated built by pipeline %{link} triggered %{datetime} by %{author}"
+msgstr ""
+
+msgid "PackageRegistry|Updated by commit %{link} on branch %{branch} %{datetime}"
 msgstr ""
 
 msgid "PackageRegistry|You are about to delete %{name}, this operation is irreversible, are you sure?"
