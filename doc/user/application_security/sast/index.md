@@ -189,7 +189,7 @@ the pipeline configuration, the last mention of the variable takes precedence.
 
 ### Overriding SAST jobs
 
-WARNING: **Deprecation:**
+WARNING:
 Beginning in GitLab 13.0, the use of [`only` and `except`](../../../ci/yaml/README.md#onlyexcept-basic)
 is no longer supported. When overriding the template, you must use [`rules`](../../../ci/yaml/README.md#rules) instead.
 

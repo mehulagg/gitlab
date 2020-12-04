@@ -86,7 +86,7 @@ file `basic_login_spec.rb`.
 
 See the [`RSpec.describe` outer block](#the-outer-rspecdescribe-block)
 
-WARNING: **Deprecation notice:**
+WARNING:
 The outer `context` [was deprecated](https://gitlab.com/gitlab-org/quality/team-tasks/-/issues/550) in `13.2`
 in adherence to RSpec 4.0 specifications. Use `RSpec.describe` instead.
 

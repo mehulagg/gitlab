@@ -268,7 +268,7 @@ postgres://user:password@postgres-host:postgres-port/postgres-database
 
 ### Upgrading PostgresSQL
 
-WARNING: **Deprecation:**
+WARNING:
 The variable `AUTO_DEVOPS_POSTGRES_CHANNEL` that controls default provisioned
 PostgreSQL was changed to `2` in [GitLab 13.0](https://gitlab.com/gitlab-org/gitlab/-/issues/210499).
 To keep using the old PostgreSQL, set the `AUTO_DEVOPS_POSTGRES_CHANNEL` variable to

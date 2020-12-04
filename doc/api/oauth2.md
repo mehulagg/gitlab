@@ -117,7 +117,7 @@ NOTE: **Note:**
 Check the [RFC spec](https://tools.ietf.org/html/rfc6749#section-4.2) for a
 detailed flow description.
 
-WARNING: **Important:**
+WARNING:
 Avoid using this flow for applications that store data outside of the GitLab
 instance. If you do, make sure to verify `application id` associated with the
 access token before granting access to the data
@@ -169,7 +169,7 @@ The credentials should only be used when:
   privileged application.
 - Other authorization grant types are not available (such as an authorization code).
 
-WARNING: **Important:**
+WARNING:
 Never store the user's credentials and only use this grant type when your client
 is deployed to a trusted environment, in 99% of cases
 [personal access tokens](../user/profile/personal_access_tokens.md) are a better

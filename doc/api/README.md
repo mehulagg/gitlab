@@ -478,7 +478,7 @@ Status: 200 OK
 ...
 ```
 
-WARNING: **Deprecation:**
+WARNING:
 The `Links` header is scheduled to be removed in GitLab 14.0 to be aligned with the
 [W3C `Link` specification](https://www.w3.org/wiki/LinkHeader). The `Link`
 header was [added in GitLab 13.1](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/33714)

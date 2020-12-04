@@ -511,7 +511,7 @@ To perform a [full scan](#full-scan) on the listed paths, use the `DAST_FULL_SCA
 
 ### Customizing the DAST settings
 
-WARNING: **Deprecation:**
+WARNING:
 Beginning in GitLab 13.0, the use of [`only` and `except`](../../../ci/yaml/README.md#onlyexcept-basic)
 is no longer supported. When overriding the template, you must use [`rules`](../../../ci/yaml/README.md#rules) instead.
 

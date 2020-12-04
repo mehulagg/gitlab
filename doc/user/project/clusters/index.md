@@ -143,7 +143,7 @@ important considerations for configuring Kubernetes clusters with GitLab.
 
 ### Security implications
 
-WARNING: **Important:**
+WARNING:
 The whole cluster security is based on a model where [developers](../../permissions.md)
 are trusted, so **only trusted users should be allowed to control your clusters**.
 
