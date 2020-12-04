@@ -98,18 +98,18 @@ When `kas` must atomically update multiple data structures in Redis, it uses
 [transactions](https://redis.io/topics/transactions) to ensure data consistency.
 Grouped data items must have the same expiration time.
 
-In addition to the existing `agentk` -> `kas` gRPC endpoint, `kas` exposes two new,
-separate gRPC endpoints for GitLab and for `kas` -> `kas` requests. Each endpoint
+In addition to the existing `agentk -> kas` gRPC endpoint, `kas` exposes two new,
+separate gRPC endpoints for GitLab and for `kas -> kas` requests. Each endpoint
 is a separate network listener, making it easier to control network access to endpoints
 and allowing separate configuration for each endpoint.
 
 Databases, like PostgreSQL, aren't used because the data is transient, with no need
 to reliably persist it.
 
-### GitLab -> `kas` external endpoint
+### `GitLab : kas` external endpoint
 
 GitLab authenticates with `kas` using JWT and the same shared secret used by the
-`kas` -> GitLab communication. The JWT issuer should be `gitlab` and the audience
+`kas -> GitLab` communication. The JWT issuer should be `gitlab` and the audience
 should be `gitlab-kas`.
 
 When accessed through this endpoint, `kas` plays the role of request router.
@@ -121,7 +121,7 @@ as client timeout. `kas` is notified of new agent connections through a
 [pub-sub channel](https://redis.io/topics/pubsub) channel to avoid frequent polling.
 When a suitable agent connects, `kas` routes the request to it.
 
-### `kas` -> `kas` internal endpoint
+### `kas : kas` internal endpoint
 
 This endpoint is an implementation detail, an internal API, and should not be used
 by any other system. It's protected by JWT using a secret, shared among all `kas`
