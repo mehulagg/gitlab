@@ -22,13 +22,6 @@ const I18N = {
 };
 
 export default {
-  props: {
-    hasPathNavigation: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-  },
   components: {
     GlAlert,
     GlButton,
@@ -40,6 +33,13 @@ export default {
   },
   directives: {
     GlModalDirective,
+  },
+  props: {
+    hasPathNavigation: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   computed: {
     ...mapState({

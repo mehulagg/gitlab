@@ -1,5 +1,5 @@
 import Api from 'ee/api';
-import { keyBy } from 'lodash';
+import { keyBy, pick } from 'lodash';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { __, sprintf } from '~/locale';
 import httpStatus from '~/lib/utils/http_status';
@@ -342,62 +342,81 @@ export const receiveCreateValueStreamSuccess = ({ commit, dispatch }, valueStrea
   return dispatch('fetchCycleAnalyticsData');
 };
 
+const pickUpdateableFields = stage => {
+  const updateable = ['hidden'];
+  return pick(stage, updateable);
+};
+
+const mergeStageData = (persistedStages, newStages) => {
+  const merged = persistedStages.map(stage => {
+    const newData = newStages.find(
+      ns => ns.name.toLowerCase().trim() === stage.title.toLowerCase().trim(),
+    );
+    console.log('All merged', {
+      ...stage,
+      ...newData,
+    });
+    return pickUpdateableFields({
+      ...stage,
+      ...newData,
+    });
+  });
+  console.log('mergeStageData', merged);
+  return merged;
+};
+
 /**
  * This is a stopgap solution until the value stream stages
  * can be modified via the value stream entity
  *
  * TODO: link to related BE issue
  */
-const updateValueStreamStages = (currentGroupPath, data, newStages, stageIds) => {
-  console.log('updateValueStreamStages::currentGroupPath', currentGroupPath);
-  console.log('updateValueStreamStages::data', data);
-  console.log('updateValueStreamStages::newStages', newStages);
-  console.log('updateValueStreamStages::stageIds', stageIds);
+const updateValueStreamStages = (currentGroupPath, data, newStages) => {
   const { id: valueStreamId } = data;
-  const promises = newStages.map(({ id: stageId, name, ...rest }) =>
-    Api.cycleAnalyticsUpdateStage({
+  const promises = newStages.map(({ id, index, name, ...rest }) => {
+    return Api.cycleAnalyticsUpdateStage({
       groupId: currentGroupPath,
       valueStreamId,
-      stageId,
-      // stageId: stageIds[name].id,
-      data: { name, ...rest },
-    }),
-  );
-
-  console.log('promises', promises);
-
-  return Promise.all(promises)
-    .then(r => {
-      console.log('promises done', r);
-      return;
-    })
-    .then(() => ({ data }));
+      stageId: id,
+      data: pickUpdateableFields({ ...rest }),
+    });
+  });
+  return Promise.all(promises).then(() => ({ data }));
 };
 
-const valueStreamStageIds = (groupId, newValueStream) => {
-  console.log('valueStreamStageIds', groupId, newValueStream);
-  return Api.cycleAnalyticsGroupStagesAndEvents({ groupId, valueStreamId: newValueStream.id }).then(
-    ({ data: { stages } }) =>
-      Promise.resolve({ stageIds: keyBy(stages, 'title'), data: newValueStream }),
-  );
+const triggerValueStreamPersistance = ({ currentGroupPath: groupId, newValueStream }) => {
+  const valueStreamId = newValueStream.id;
+  return Api.cycleAnalyticsUpdateStage({
+    groupId,
+    valueStreamId,
+    stageId: 'issue',
+    data: { hidden: true },
+  })
+    .then(() =>
+      Api.cycleAnalyticsGroupStagesAndEvents({
+        groupId,
+        valueStreamId,
+      }),
+    )
+    .then(({ data: { stages } }) => ({ data: newValueStream, stages }));
 };
 
 export const createValueStream = ({ commit, dispatch, getters }, data) => {
   const { currentGroupPath } = getters;
   commit(types.REQUEST_CREATE_VALUE_STREAM);
 
-  console.log('createValueStream::data', data);
-  const { name, stages } = data;
+  const { name, stages: newStages } = data;
 
   return Api.cycleAnalyticsCreateValueStream(currentGroupPath, { name })
     .then(({ data: newValueStream }) =>
-      // because this is a custom value stream at this point,
-      // the stages are persisted, so we need to fetch the ids
-      valueStreamStageIds(currentGroupPath, newValueStream),
+      triggerValueStreamPersistance({ currentGroupPath, newValueStream }),
     )
-    .then(({ data: newValueStream, stageIds }) =>
-      updateValueStreamStages(currentGroupPath, newValueStream, stages, stageIds),
-    )
+    .then(({ data: newValueStream, stages }) => {
+      console.log('stages', stages);
+      const finalStages = mergeStageData(stages, newStages);
+      console.log('finalStages', finalStages);
+      return updateValueStreamStages(currentGroupPath, newValueStream, newStages);
+    })
     .then(({ data: newValueStream }) => dispatch('receiveCreateValueStreamSuccess', newValueStream))
     .catch(({ response } = {}) => {
       const { data: { message, payload: { errors } } = null } = response;

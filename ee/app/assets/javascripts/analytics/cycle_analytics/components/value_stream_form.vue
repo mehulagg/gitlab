@@ -62,12 +62,20 @@ const PRESET_OPTIONS = [
   },
 ];
 
-const DEFAULT_STAGE_CONFIG = ['issue', 'plan', 'code', 'test', 'review', 'staging'].map(id => ({
-  id,
-  name: capitalizeFirstCharacter(id),
-  hidden: false,
-  custom: false,
-}));
+const DEFAULT_STAGE_CONFIG = ['issue', 'plan', 'code', 'test', 'review', 'staging'].map(
+  (id, index) => ({
+    id,
+    name: capitalizeFirstCharacter(id),
+    custom: false,
+    hidden: false,
+    index,
+  }),
+);
+
+const DIRECTION = {
+  UP: 'UP',
+  DOWN: 'DOWN',
+};
 
 export default {
   name: 'ValueStreamForm',
@@ -77,7 +85,6 @@ export default {
     GlForm,
     GlFormInput,
     GlFormGroup,
-    GlFormText,
     GlModal,
     GlFormRadioGroup,
   },
@@ -88,6 +95,12 @@ export default {
       default: () => ({}),
     },
     hasPathNavigation: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    // Forcing this to false until this is supported on the BE
+    canReorderDefaults: {
       type: Boolean,
       required: false,
       default: false,
@@ -141,6 +154,12 @@ export default {
         ],
       };
     },
+    hiddenStages() {
+      return this.stages.filter(stage => stage.hidden);
+    },
+    activeStages() {
+      return this.stages.filter(stage => !stage.hidden);
+    },
   },
   watch: {
     initialFormErrors(newErrors = {}) {
@@ -164,11 +183,16 @@ export default {
     onAddStage() {
       this.stages.push({ ...defaultStageFields });
     },
-    isFirstStage(i) {
-      return i === 0;
+    findPositionByIndex(index) {
+      return this.stages.findIndex(stage => stage.index === index);
     },
-    isLastStage(i) {
-      return i === this.stages?.length - 1;
+    isFirstActiveStage(stageIndex) {
+      const pos = this.findPositionByIndex(stageIndex);
+      return pos === 0;
+    },
+    isLastActiveStage(stageIndex) {
+      const pos = this.findPositionByIndex(stageIndex);
+      return pos === this.activeStages?.length - 1;
     },
     onSubmit() {
       const { name, stages } = this;
@@ -181,8 +205,28 @@ export default {
         }
       });
     },
+    handleMove(index, direction) {
+      const stage = this.stages[index];
+      this.stages[index] = {
+        ...stage,
+        // TODO: should be camelCased, then converted later on
+        move_after_id: direction === DIRECTION.DOWN ? index + 1 : null,
+        move_before_id: direction === DIRECTION.UP ? index - 1 : null,
+      };
+    },
+    onSetHidden(index, hidden = true) {
+      const stage = this.stages[index];
+      Vue.set(this.stages, index, { ...stage, hidden });
+    },
+    handleReset() {
+      this.name = '';
+      DEFAULT_STAGE_CONFIG.map((stage, index) => {
+        Vue.set(this.stages, index, { ...stage, hidden: false });
+      });
+    },
   },
   I18N,
+  DIRECTION,
 };
 </script>
 <template>
@@ -221,33 +265,83 @@ export default {
       <div v-if="hasPathNavigation">
         <hr />
         <gl-form-group
-          v-for="(stage, i) in stages"
-          :key="stage.id"
-          :label="sprintf(__('Stage %{i}'), { i: i + 1 })"
+          :label="$options.I18N.FIELD_NAME_LABEL"
+          label-for="create-value-stream-name"
+          :invalid-feedback="invalidFeedback"
+          :state="isValid"
         >
-          <div class="gl-display-flex gl-flex-direction-row gl-justify-content-space-between">
-            <div>
-              <gl-form-input
-                v-if="stage.custom"
-                v-model.trim="stage.name"
-                :name="`create-value-stream-stage-${i}`"
-                :placeholder="s__('CreateValueStreamForm|Enter stage name')"
-                :state="isValid"
-                required
-                @input="onHandleInput"
-              />
-              <span v-else>{{ stage.name }}</span>
-            </div>
-            <div>
-              <gl-button-group>
-                <gl-button :disabled="isLastStage(i)" icon="arrow-down" />
-                <gl-button :disabled="isFirstStage(i)" icon="arrow-up" />
-              </gl-button-group>
-              &nbsp;
-              <gl-button icon="archive" />
-            </div>
+          <div class="gl-display-flex gl-justify-content-space-between">
+            <gl-form-input
+              id="create-value-stream-name"
+              v-model.trim="name"
+              name="create-value-stream-name"
+              :placeholder="$options.I18N.FIELD_NAME_PLACEHOLDER"
+              :state="isValid"
+              required
+              @input="onHandleInput"
+            />
+            <gl-button
+              v-if="hiddenStages.length"
+              class="gl-ml-3"
+              variant="link"
+              @click="handleReset"
+              >{{ __('Restore defaults') }}</gl-button
+            >
           </div>
         </gl-form-group>
+      </div>
+      <div v-if="hasPathNavigation">
+        <hr />
+        <div v-for="(stage, activeStageIndex) in activeStages" :key="stage.id">
+          <gl-form-group
+            v-if="!stage.hidden"
+            :label="sprintf(__('Stage %{index}'), { index: activeStageIndex + 1 })"
+          >
+            <div class="gl-display-flex gl-flex-direction-row gl-justify-content-space-between">
+              <div>
+                <gl-form-input
+                  v-if="stage.custom"
+                  v-model.trim="stage.name"
+                  :name="`create-value-stream-stage-${i}`"
+                  :placeholder="s__('CreateValueStreamForm|Enter stage name')"
+                  :state="isValid"
+                  required
+                  @input="onHandleInput"
+                />
+                <span v-else>{{ stage.name }}</span>
+              </div>
+              <div>
+                <div v-if="canReorderDefaults">
+                  <gl-button-group>
+                    <gl-button
+                      :disabled="isLastActiveStage(stage.index)"
+                      icon="arrow-down"
+                      @click="handleMove(stage.index, $options.DIRECTION.DOWN)"
+                    />
+                    <gl-button
+                      :disabled="isFirstActiveStage(stage.index)"
+                      icon="arrow-up"
+                      @click="handleMove(stage.index, $options.DIRECTION.UP)"
+                    />
+                  </gl-button-group>
+                  &nbsp;
+                </div>
+                <gl-button icon="archive" @click="onSetHidden(stage.index)" />
+              </div>
+            </div>
+          </gl-form-group>
+        </div>
+        <div v-if="hiddenStages.length">
+          <hr />
+          <gl-form-group v-for="stage in hiddenStages" :key="stage.id">
+            <label class="gl-m-0 gl-vertical-align-middle gl-mr-3"
+              >{{ stage.name }} {{ __('(default)') }}</label
+            >
+            <gl-button variant="link" @click="onSetHidden(stage.index, false)">{{
+              s__('CreateValueStreamForm|Restore stage')
+            }}</gl-button>
+          </gl-form-group>
+        </div>
       </div>
     </gl-form>
   </gl-modal>
