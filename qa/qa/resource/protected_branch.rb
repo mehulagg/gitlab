@@ -63,8 +63,6 @@ module QA
       end
 
       def fabricate_via_api!
-        api_get
-      rescue ResourceNotFoundError
         populate_new_branch_if_required
 
         super
