@@ -13,41 +13,120 @@ module ExceedQueryLimitHelpers
     self
   end
 
+  def show_common_queries
+    @show_common_queries = true
+    self
+  end
+
+  def ignoring(pattern)
+    @ignoring_pattern = pattern
+    self
+  end
+
   def threshold
     @threshold.to_i
   end
 
   def expected_count
     if expected.is_a?(ActiveRecord::QueryRecorder)
-      expected.count
+      query_recorder_count(expected)
     else
       expected
     end
   end
 
   def actual_count
-    @actual_count ||= if @query
-                        recorder.log.select { |recorded| recorded =~ @query }.size
-                      else
-                        recorder.count
-                      end
+    @actual_count ||= query_recorder_count(recorder)
+  end
+
+  def query_recorder_count(query_recorder)
+    return query_recorder.count unless @query || @ignoring_pattern
+
+    query_log(query_recorder).size
+  end
+
+  def query_log(query_recorder)
+    filtered = query_recorder.log
+    filtered = filtered.select { |q| q =~ @query } if @query
+    filtered = filtered.reject { |q| q =~ @ignoring_pattern } if @ignoring_pattern
+    filtered
   end
 
   def recorder
     @recorder ||= ActiveRecord::QueryRecorder.new(skip_cached: skip_cached, &@subject_block)
   end
 
-  def count_queries(queries)
-    queries.each_with_object(Hash.new(0)) { |query, counts| counts[query] += 1 }
+  # Take a query recorder and produce a Hash[String, Hash[String, Int]] of the form:
+  #
+  # {
+  #   'INSERT INTO "some_table" VALUES' => {
+  #     '(1,2,3)' => 1,
+  #     '(4,5,6)' => 1
+  #   },
+  #   'SELECT * FROM "some_other_table"' => {
+  #     'WHERE id = 1 LIMIT 1' => 1,
+  #     '' => 2
+  #   }
+  # }
+  def count_queries(query_recorder)
+    queries = strip_marginalia_annotations(query_log(query_recorder))
+    queries.map { |q| query_group_key(q) }
+      .group_by(&:first)
+      .transform_values { |group| group.map(&:second).group_by(&:itself).transform_values(&:size) }
+  end
+
+  SELECT_QUERY = /^(?<prefix>SELECT .* FROM "?[a-z_]+"?) (?<suffix>.*)$/.freeze
+  UPDATE_QUERY = /^(?<prefix>UPDATE "?[a-z_]+"?) (?<suffix>.*)$/.freeze
+  INSERT_QUERY = /^(?<prefix>INSERT INTO "[a-z_]+" \((?:"[a-z_]+",?\s?)+\)) (?<suffix>.*)$/.freeze
+  DELETE_QUERY = /^(?<prefix>DELETE FROM "[a-z_]+") (?<suffix>.*)$/.freeze
+
+  def query_group_key(query)
+    m = [SELECT_QUERY, UPDATE_QUERY, INSERT_QUERY, DELETE_QUERY].reduce(nil) { |m, p| m || p.match(query) }
+
+    m ? [m[:prefix], m[:suffix]] : [query, '']
+  end
+
+  def diff_query_counts(expected, actual)
+    expected_counts = expected.transform_values do |suffixes|
+      suffixes.transform_values { |n| [n, 0] }
+    end
+    recorded_counts = actual.transform_values do |suffixes|
+      suffixes.transform_values { |n| [0, n] }
+    end
+
+    combined_counts = expected_counts.merge(recorded_counts) do |_k, exp, got|
+      exp.merge(got) do |_k, exp_counts, got_counts|
+        exp_counts.zip(got_counts).map { |a, b| a + b }
+      end
+    end
+
+    unless @show_common_queries
+      combined_counts = combined_counts.transform_values do |suffs|
+        suffs.reject { |_k, counts| counts.first == counts.second }
+      end
+    end
+
+    combined_counts.reject { |_prefix, suffs| suffs.empty? }
+  end
+
+  def diff_query_group_message(query, suffixes)
+    suffix_messages = suffixes.map do |s, counts|
+      "-- (expected: #{counts.first}, got: #{counts.second})\n   #{s}"
+    end
+
+    "#{query}...\n#{suffix_messages.join("\n")}"
   end
 
   def log_message
     if expected.is_a?(ActiveRecord::QueryRecorder)
-      counts = count_queries(strip_marginalia_annotations(expected.log))
-      extra_queries = strip_marginalia_annotations(@recorder.log).reject { |query| counts[query] -= 1 unless counts[query] == 0 }
-      extra_queries_display = count_queries(extra_queries).map { |query, count| "[#{count}] #{query}" }
+      diff_counts = diff_query_counts(count_queries(expected), count_queries(@recorder))
+      sections = diff_counts.map { |q, suffixes| diff_query_group_message(q, suffixes) }
 
-      (['Extra queries:'] + extra_queries_display).join("\n\n")
+      <<~MSG
+      Query Diff:
+      -----------
+      #{sections.join("\n\n")}
+      MSG
     else
       @recorder.log_message
     end
