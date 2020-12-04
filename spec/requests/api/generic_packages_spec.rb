@@ -271,8 +271,8 @@ RSpec.describe API::GenericPackages do
         project.add_developer(user)
       end
 
-      it 'creates package and package file when valid personal access token is used' do
-        headers = workhorse_header.merge(personal_access_token_header)
+      shared_examples 'creates a package and package file' do |auth_header, should_set_build_info|
+        headers = workhorse_header.merge(auth_header)
 
         expect { upload_file(params, headers) }
           .to change { project.packages.generic.count }.by(1)
@@ -284,71 +284,34 @@ RSpec.describe API::GenericPackages do
           package = project.packages.generic.last
           expect(package.name).to eq('mypackage')
           expect(package.version).to eq('0.0.1')
-          expect(package.original_build_info).to be_nil
+
+          if should_set_build_info
+            it 'sets package build info from ci' do
+              expect(package.original_build_info.pipeline).to eq(ci_build.pipeline)
+            end
+          else
+            expect(package.original_build_info).to be_nil
+          end
 
           package_file = package.package_files.last
           expect(package_file.file_name).to eq('myfile.tar.gz')
         end
       end
 
-      it 'creates package and package file when valid basic auth is used' do
-        headers = workhorse_header.merge(user_basic_auth_header(user))
-
-        expect { upload_file(params, headers) }
-          .to change { project.packages.generic.count }.by(1)
-          .and change { Packages::PackageFile.count }.by(1)
-
-        aggregate_failures do
-          expect(response).to have_gitlab_http_status(:created)
-
-          package = project.packages.generic.last
-          expect(package.name).to eq('mypackage')
-          expect(package.version).to eq('0.0.1')
-          expect(package.original_build_info).to be_nil
-
-          package_file = package.package_files.last
-          expect(package_file.file_name).to eq('myfile.tar.gz')
-        end
+      it 'when valid personal access token is used' do
+        it_behaves_like 'creates a package and package file', personal_access_token_header, false
       end
 
-      it 'creates package and package file when valid deploy token is used' do
-        headers = workhorse_header.merge(deploy_token_header(deploy_token_wo.token))
-
-        expect { upload_file(params, headers) }
-          .to change { project.packages.generic.count }.by(1)
-          .and change { Packages::PackageFile.count }.by(1)
-
-        aggregate_failures do
-          expect(response).to have_gitlab_http_status(:created)
-
-          package = project.packages.generic.last
-          expect(package.name).to eq('mypackage')
-          expect(package.version).to eq('0.0.1')
-          expect(package.original_build_info).to be_nil
-
-          package_file = package.package_files.last
-          expect(package_file.file_name).to eq('myfile.tar.gz')
-        end
+      it 'when valid basic auth is used' do
+        it_behaves_like 'creates a package and package file', user_basic_auth_header(user), false
       end
 
-      it 'creates package, package file, and package build info when valid job token is used' do
-        headers = workhorse_header.merge(job_token_header)
+      it 'when valid deploy token is used' do
+        it_behaves_like 'creates a package and package file', deploy_token_header(deploy_token_wo.token), false
+      end
 
-        expect { upload_file(params, headers) }
-          .to change { project.packages.generic.count }.by(1)
-          .and change { Packages::PackageFile.count }.by(1)
-
-        aggregate_failures do
-          expect(response).to have_gitlab_http_status(:created)
-
-          package = project.packages.generic.last
-          expect(package.name).to eq('mypackage')
-          expect(package.version).to eq('0.0.1')
-          expect(package.original_build_info.pipeline).to eq(ci_build.pipeline)
-
-          package_file = package.package_files.last
-          expect(package_file.file_name).to eq('myfile.tar.gz')
-        end
+      it 'when valid job token is used' do
+        it_behaves_like 'creates a package and package file', job_token_header, true
       end
 
       context 'event tracking' do
