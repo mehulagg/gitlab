@@ -122,7 +122,7 @@ of GitLab more efficient.
 
 - If the answer to a question exists in documentation, share the link to the
   documentation instead of rephrasing the information.
-- When you encounter new information not available in GitLab’s documentation (for
+- When you encounter new information not available in GitLab documentation (for
   example, when working on a support case or testing a feature), your first step
   should be to create a merge request (MR) to add this information to the
   documentation. You can then share the MR to communicate this information.
@@ -964,7 +964,7 @@ search engine optimization (SEO), use the imperative, where possible.
 | Do                                    | Don't                                                       |
 |:--------------------------------------|:------------------------------------------------------------|
 | Configure GDK                         | Configuring GDK                                             |
-| GitLab Release and Maintenance Policy | This section covers GitLab's Release and Maintenance Policy |
+| GitLab Release and Maintenance Policy | This section covers the GitLab Release and Maintenance Policy |
 | Backport to older releases            | Backporting to older releases                               |
 | GitLab Pages examples                 | Examples                                                    |
 
@@ -1925,12 +1925,12 @@ If the document resides outside of the GitLab CE/EE
 
 ### Installation guide
 
-**Ruby:**
 In [step 2 of the installation guide](../../../install/installation.md#2-ruby),
-we install Ruby from source. When a version update is needed,
-remember to change it throughout the code block and also replace
-the sha256sum. You can find the sha256sum on the
-[downloads page](https://www.ruby-lang.org/en/downloads/) of the Ruby website.
+we install Ruby from source. To update the guide for a new Ruby version:
+
+- Change the version throughout the code block.
+- Replace the sha256sum. It's available on the
+  [downloads page](https://www.ruby-lang.org/en/downloads/) of the Ruby website.
 
 ### Configuration documentation for source and Omnibus installations
 
