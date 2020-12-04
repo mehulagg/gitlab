@@ -78,7 +78,7 @@ module EE
       has_many :vulnerability_identifiers, class_name: 'Vulnerabilities::Identifier'
       has_many :vulnerability_scanners, class_name: 'Vulnerabilities::Scanner'
       has_many :vulnerability_exports, class_name: 'Vulnerabilities::Export'
-      has_many :vulnerability_remediations, class_name: 'Vulnerabilities::Remediation'
+      has_many :vulnerability_remediations, class_name: 'Vulnerabilities::Remediation', inverse_of: :project
 
       has_many :dast_site_profiles
       has_many :dast_site_tokens
