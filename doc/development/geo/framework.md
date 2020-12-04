@@ -453,8 +453,8 @@ can track verification state.
 
      def up
        add_concurrent_index :widgets, :verification_state, name: VERIFICATION_STATE_INDEX_NAME
-       add_concurrent_index :widgets, :verified_at, where: "(verification_state = 0)", order: { verified_at: 'ASC NULLS FIRST' },  name: PENDING_VERIFICATION_INDEX_NAME
-       add_concurrent_index :widgets, :verification_retry_at,  where: "(verification_state = 3)", order: { verification_retry_at: 'ASC  NULLS FIRST' }, name: FAILED_VERIFICATION_INDEX_NAME
+       add_concurrent_index :widgets, :verified_at, where: "(verification_state = 0)", order: { verified_at: 'ASC NULLS FIRST' }, name: PENDING_VERIFICATION_INDEX_NAME
+       add_concurrent_index :widgets, :verification_retry_at, where: "(verification_state = 3)", order: { verification_retry_at: 'ASC NULLS FIRST' }, name: FAILED_VERIFICATION_INDEX_NAME
        add_concurrent_index :widgets, :verification_state, where: "(verification_state = 0 OR verification_state = 3)", name: NEEDS_VERIFICATION_INDEX_NAME
      end
 
