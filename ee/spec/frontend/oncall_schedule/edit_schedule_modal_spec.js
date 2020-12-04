@@ -9,6 +9,7 @@ import UpdateScheduleModal, { i18n } from 'ee/oncall_schedules/components/edit_s
 import { UPDATE_SCHEDULE_ERROR } from 'ee/oncall_schedules/utils/error_messages';
 import { getOncallSchedulesQueryResponse, updateScheduleResponse } from './mocks/apollo_mock';
 import mockTimezones from './mocks/mockTimezones.json';
+import { awaitApolloDomMock } from './utils/index';
 
 const localVue = createLocalVue();
 const projectPath = 'group/project';
@@ -23,12 +24,6 @@ describe('UpdateScheduleModal', () => {
   let updateScheduleHandler;
 
   const findModal = () => wrapper.find(GlModal);
-
-  async function awaitApolloDomMock() {
-    await wrapper.vm.$nextTick(); // kick off the DOM update
-    await jest.runOnlyPendingTimers(); // kick off the mocked GQL stuff (promises)
-    await wrapper.vm.$nextTick(); // kick off the DOM update for flash
-  }
 
   async function destroySchedule(localWrapper) {
     await jest.runOnlyPendingTimers();

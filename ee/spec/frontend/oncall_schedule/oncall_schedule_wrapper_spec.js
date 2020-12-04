@@ -1,3 +1,4 @@
+import VueApollo from 'vue-apollo';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import { GlEmptyState, GlLoadingIcon, GlAlert } from '@gitlab/ui';
 import OnCallScheduleWrapper, {
@@ -7,7 +8,7 @@ import OnCallSchedule from 'ee/oncall_schedules/components/oncall_schedule.vue';
 import AddScheduleModal from 'ee/oncall_schedules/components/add_schedule_modal.vue';
 import createMockApollo from 'jest/helpers/mock_apollo_helper';
 import getOncallSchedulesQuery from 'ee/oncall_schedules/graphql/queries/get_oncall_schedules.query.graphql';
-import VueApollo from 'vue-apollo';
+import { awaitApolloDomMock } from './utils/index';
 
 const localVue = createLocalVue();
 localVue.use(VueApollo);
@@ -144,8 +145,7 @@ describe('On-call schedule wrapper', () => {
 
     it('should render newly create schedule', async () => {
       mountComponentWithApollo();
-      jest.runOnlyPendingTimers();
-      await wrapper.vm.$nextTick();
+      await awaitApolloDomMock(wrapper, jest);
       expect(findSchedule().props('schedule')).toEqual(newlyCreatedSchedule);
     });
   });

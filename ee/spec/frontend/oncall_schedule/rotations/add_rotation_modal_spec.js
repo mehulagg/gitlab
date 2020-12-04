@@ -7,6 +7,7 @@ import AddRotationModal from 'ee/oncall_schedules/components/rotations/add_rotat
 // import createOncallScheduleRotationMutation from 'ee/oncall_schedules/graphql/create_oncall_schedule_rotation.mutation.graphql';
 import usersSearchQuery from '~/graphql_shared/queries/users_search.query.graphql';
 import { participants } from '../mocks/apollo_mock';
+import { awaitApolloDomMock } from '../utils/index';
 
 const localVue = createLocalVue();
 const projectPath = 'group/project';
@@ -19,12 +20,6 @@ describe('AddRotationModal', () => {
   let wrapper;
   let fakeApollo;
   let userSearchQueryHandler;
-
-  async function awaitApolloDomMock() {
-    await wrapper.vm.$nextTick(); // kick off the DOM update
-    await jest.runOnlyPendingTimers(); // kick off the mocked GQL stuff (promises)
-    await wrapper.vm.$nextTick(); // kick off the DOM update for flash
-  }
 
   const createComponent = ({ data = {}, props = {}, loading = false } = {}) => {
     wrapper = shallowMount(AddRotationModal, {

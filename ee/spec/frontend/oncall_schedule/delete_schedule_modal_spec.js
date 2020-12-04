@@ -9,6 +9,7 @@ import DeleteScheduleModal, {
   i18n,
 } from 'ee/oncall_schedules/components/delete_schedule_modal.vue';
 import { getOncallSchedulesQueryResponse, destroyScheduleResponse } from './mocks/apollo_mock';
+import { awaitApolloDomMock } from './utils/index';
 
 const localVue = createLocalVue();
 const projectPath = 'group/project';
@@ -25,12 +26,6 @@ describe('DeleteScheduleModal', () => {
   const findModal = () => wrapper.find(GlModal);
   const findModalText = () => wrapper.find(GlSprintf);
   const findAlert = () => wrapper.find(GlAlert);
-
-  async function awaitApolloDomMock() {
-    await wrapper.vm.$nextTick(); // kick off the DOM update
-    await jest.runOnlyPendingTimers(); // kick off the mocked GQL stuff (promises)
-    await wrapper.vm.$nextTick(); // kick off the DOM update for flash
-  }
 
   async function destroySchedule(localWrapper) {
     await jest.runOnlyPendingTimers();
