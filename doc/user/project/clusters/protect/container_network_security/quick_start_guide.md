@@ -21,6 +21,7 @@ The following steps are recommended to install and use Container Network Securit
   1. [Determine the external endpoint via the manual method](https://docs.gitlab.com/ee/user/clusters/applications.html#determining-the-external-endpoint-manually)
   1. Navigate to the Kubernetes page and enter the [DNS address for the external endpoint](https://docs.gitlab.com/ee/user/project/clusters/#base-domain) into the **Base domain** field on the Details tab.  Save the changes to the Kubernetes cluster.
 1. [Install and configure Cilium](https://docs.gitlab.com/ee/user/clusters/applications.html#install-cilium-using-gitlab-cicd)
+1. Be sure to restart all pods that were running before Cilium was installed by running `kubectl get pods --all-namespaces -o custom-columns=NAMESPACE:.metadata.namespace,NAME:.metadata.name,HOSTNETWORK:.spec.hostNetwork --no-headers=true | grep '<none>' | awk '{print "-n "$1" "$2}' | xargs -L 1 -r kubectl delete pod` in your cluster
 
 It is possible to install and manage Cilium in other ways, such as by installing Cilium manually into a Kubernetes cluster via GitLab's Helm chart and then connecting it back to GitLab. These methods are not currently documented or officially supported.
 
@@ -59,6 +60,14 @@ Additional information about the statistics page is available in the [documentat
 
 Cilium logs can be forwarded to a SIEM or an external logging system via syslog protocol by installing and configuring Fluentd.  Fluentd can be installed through GitLab in two ways: via the [GMAv1 method](https://docs.gitlab.com/ee/user/clusters/applications.html#fluentd) and via the [GMAv2 method](https://docs.gitlab.com/ee/user/clusters/applications.html#install-fluentd-using-gitlab-cicd). GitLab strongly encourages using only the [GMAv2 method](https://docs.gitlab.com/ee/user/clusters/applications.html#install-fluentd-using-gitlab-cicd) to install Fluentd.
 
+## Viewing the logs
+
+Cilium logs can be viewed by running the following command in your Kubernetes cluster:
+
+```
+kubectl -n gitlab-managed-apps logs -l k8s-app=cilium -c cilium-monitor
+```
+
 ## Troubleshooting
 
 ### Trouble connecting to the cluster
@@ -66,6 +75,10 @@ Cilium logs can be forwarded to a SIEM or an external logging system via syslog 
 Occasionally your CI/CD pipeline may fail or have trouble connecting to the cluster.  Below are some initial troubleshooting steps that resolve the most common problems:
 
 1. [Clear the cluster cache](https://docs.gitlab.com/ee/user/project/clusters/#clearing-the-cluster-cache)
+1. If things still aren't working, a more assertive set of actions may help get things back into a good state:
+  1. Stop and [delete the problematic environment](https://docs.gitlab.com/ee/ci/environments/#delete-environments-through-the-ui) in GitLab
+  1. Delete the relevant namespace in Kubernetes by running `kubectl delete namespaces <insert-some-namespace-name>` in your Kubernetes cluster
+  1. Re-run the application project pipeline to re-deploy the application
 
 ### Using GMAv1 with GMAv2
 
