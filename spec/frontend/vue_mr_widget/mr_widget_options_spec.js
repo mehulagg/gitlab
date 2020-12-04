@@ -496,6 +496,24 @@ describe('mrWidgetOptions', () => {
           expect(vm.pollingInterval.stopTimer).toHaveBeenCalled();
         });
       });
+
+      describe('formattedHumanAccess', () => {
+        it('when user is a tool admin but not a member of project', () => {
+          vm.mr.humanAccess = null;
+
+          vm.formattedHumanAccess();
+
+          expect(vm.formattedHumanAccess()).toEqual('');
+        });
+
+        it('when user a member of the project', () => {
+          vm.mr.humanAccess = 'Owner';
+
+          vm.formattedHumanAccess();
+
+          expect(vm.formattedHumanAccess()).toEqual('owner');
+        });
+      });
     });
 
     describe('rendering relatedLinks', () => {

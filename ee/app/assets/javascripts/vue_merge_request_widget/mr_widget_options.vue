@@ -250,7 +250,7 @@ export default {
       class="mr-widget-workflow"
       :pipeline-path="mr.mergeRequestAddCiConfigPath"
       :pipeline-svg-path="mr.pipelinesEmptySvgPath"
-      :human-access="mr.humanAccess.toLowerCase()"
+      :human-access="formattedHumanAccess()"
       :user-callouts-path="mr.userCalloutsPath"
       :user-callout-feature-id="mr.suggestPipelineFeatureId"
       @dismiss="dismissSuggestPipelines"
