@@ -13,7 +13,7 @@ class TrialsController < ApplicationController
   feature_category :purchase
 
   def new
-    record_experiment_user(:remove_known_trial_form_fields)
+    record_experiment_user(:remove_known_trial_form_fields, experiment_user_context)
     record_experiment_user(:trimmed_skip_trial_copy)
   end
 
@@ -114,5 +114,13 @@ class TrialsController < ApplicationController
 
   def record_user_for_group_only_trials_experiment
     record_experiment_user(:group_only_trials)
+  end
+
+  def experiment_user_context
+    {
+      first_name_present: current_user.first_name.present?,
+      last_name_present: current_user.last_name.present?,
+      company_name_present: current_user.organization.present?
+    }
   end
 end

@@ -55,7 +55,7 @@ RSpec.describe TrialsController do
     end
 
     it 'calls record_experiment_user for the remove_known_trial_form_fields & trimmed_skip_trial_copy experiments' do
-      expect(controller).to receive(:record_experiment_user).with(:remove_known_trial_form_fields)
+      expect(controller).to receive(:record_experiment_user).with(:remove_known_trial_form_fields, experiment_user_context)
       expect(controller).to receive(:record_experiment_user).with(:trimmed_skip_trial_copy)
 
       subject
