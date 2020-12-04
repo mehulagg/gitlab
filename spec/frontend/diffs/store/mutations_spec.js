@@ -67,7 +67,7 @@ describe('DiffsStoreMutations', () => {
     });
   });
 
-  describe('SET_DIFF_DATA', () => {
+  describe('SET_DIFF_METADATA', () => {
     it('should not modify the existing state', () => {
       const state = {
         diffFiles: [
@@ -82,7 +82,7 @@ describe('DiffsStoreMutations', () => {
         diff_files: [diffFileMockData],
       };
 
-      mutations[types.SET_DIFF_DATA](state, diffMock);
+      mutations[types.SET_DIFF_METADATA](state, diffMock);
 
       expect(state.diffFiles[0][INLINE_DIFF_LINES_KEY]).toEqual([]);
     });
