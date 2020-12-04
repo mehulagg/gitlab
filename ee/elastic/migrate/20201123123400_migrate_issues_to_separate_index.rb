@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class MigrateIssuesToSeparateIndex < Elastic::Migration
+  batched!
+
   FIELDS = %w(
     id
     iid
@@ -28,7 +30,7 @@ class MigrateIssuesToSeparateIndex < Elastic::Migration
   end
 
   def completed?
-    true
+    false
   end
 
   private

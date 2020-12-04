@@ -12,7 +12,7 @@ module Elastic
     idempotent!
     urgency :throttled
 
-    def perform
+    def perform(migration_args = {})
       return false unless Gitlab::CurrentSettings.elasticsearch_indexing?
       return false unless helper.alias_exists?
 
@@ -23,6 +23,8 @@ module Elastic
           logger.info 'MigrationWorker: no migration available'
           break false
         end
+
+        migration.launch_options = migration_args
 
         unless helper.index_exists?(index_name: helper.migrations_index_name)
           logger.info 'MigrationWorker: creating migrations index'
@@ -49,8 +51,10 @@ module Elastic
         migration.migrate
 
         if migration.batched? && !migration.completed?
-          logger.info "MigrationWorker: migration[#{migration.name}] kicking off next migration batch"
-          Elastic::MigrationWorker.perform_in(migration.throttle_delay)
+          next_launch_options = migration.next_launch_options || {}
+          logger.info "MigrationWorker: migration[#{migration.name}] kicking off next migration batch with options: #{next_launch_options.inspect}"
+
+          Elastic::MigrationWorker.perform_in(migration.throttle_delay, next_launch_options)
         end
       end
     end

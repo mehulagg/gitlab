@@ -4,6 +4,7 @@ module Elastic
   class Migration
     include Elastic::MigrationOptions
 
+    attr_accessor :launch_options, :next_launch_options
     attr_reader :version
 
     def initialize(version)
