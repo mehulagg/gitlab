@@ -1512,16 +1512,16 @@ example:
 
 Use alert boxes to call attention to information.
 
-Alert boxes are generated automatically when the word `NOTE:` or `WARNING:`
-is followed by a line break. For example:
+Alert boxes are generated when the words `NOTE:` or `WARNING:` are followed by a
+line break. For example:
 
 ```markdown
 NOTE:
 This is something to note.
 ```
 
-If you want an alert box for multiple paragraphs, lists, or headers,
-use [blockquotes](#blockquotes) instead.
+To display an alert box for multiple paragraphs, lists, or headers, use
+[blockquotes](#blockquotes) instead.
 
 Alert boxes render only on the GitLab documentation site (<https://docs.gitlab.com>).
 In the GitLab product help, alert boxes appear as plain text.
@@ -1550,6 +1550,9 @@ This is something to note.
 
 ### Warning
 
+Use a warning to indicate deprecated features, or to provide a warning about
+procedures that have the potential for data loss. 
+
 ```markdown
 WARNING:
 This is something to be warned about.
@@ -1562,7 +1565,7 @@ This is something to be warned about.
 
 ## Blockquotes
 
-For highlighting a text inside a blue blockquote, use this format:
+For highlighting a text inside a blockquote, use this format:
 
 ```markdown
 > This is a blockquote.
