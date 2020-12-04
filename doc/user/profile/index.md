@@ -101,7 +101,7 @@ To change your `username`:
 1. Enter a new username under **Change username**.
 1. Click **Update username**.
 
-CAUTION: **Caution:**
+WARNING:
 It is currently not possible to change your username if it contains a
 project with [Container Registry](../packages/container_registry/index.md) tags,
 because the project cannot be moved.

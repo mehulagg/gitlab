@@ -146,7 +146,7 @@ When creating a Public deploy key, determine whether or not it can be defined fo
 very narrow usage, such as just a specific service, or if it needs to be defined for
 broader usage, such as full `read-write` access for all services.
 
-CAUTION: **Warning:**
+WARNING:
 Adding a public deploy key does not immediately expose any repository to it. Public
 deploy keys enable access from other systems, but access is not given to any project
 until a project maintainer chooses to make use of it.

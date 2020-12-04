@@ -673,7 +673,7 @@ adfind -h ad.example.org:636 -ssl -u "CN=GitLabSRV,CN=Users,DC=GitLab,DC=org" -u
 
 ### Rails console
 
-CAUTION: **Caution:**
+WARNING:
 It is very easy to create, read, modify, and destroy data with the rails
 console. Be sure to run commands exactly as listed.
 

@@ -482,7 +482,7 @@ To change your group path (group URL):
 1. Enter a new name under **Change group URL**.
 1. Click **Change group URL**.
 
-CAUTION: **Caution:**
+WARNING:
 It is currently not possible to rename a namespace if it contains a
 project with [Container Registry](../packages/container_registry/index.md) tags,
 because the project cannot be moved.

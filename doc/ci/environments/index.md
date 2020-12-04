@@ -121,7 +121,7 @@ Note that the `environment` keyword defines where the app is deployed. The envir
 `url` is exposed in various places within GitLab. Each time a job that has an environment specified
 succeeds, a deployment is recorded along with the Git SHA and environment name.
 
-CAUTION: **Caution:**
+WARNING:
 Some characters are not allowed in environment names. Use only letters,
 numbers, spaces, and `-`, `_`, `/`, `{`, `}`, or `.`. Also, it must not start nor end with `/`.
 

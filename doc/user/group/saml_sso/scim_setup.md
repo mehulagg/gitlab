@@ -116,7 +116,7 @@ You can then test the connection by clicking on **Test Connection**. If the conn
 Once enabled, the synchronization details and any errors appears on the
 bottom of the **Provisioning** screen, together with a link to the audit logs.
 
-CAUTION: **Warning:**
+WARNING:
 Once synchronized, changing the field mapped to `id` and `externalId` may cause a number of errors. These include provisioning errors, duplicate users, and may prevent existing users from accessing the GitLab group.
 
 ### Okta configuration steps

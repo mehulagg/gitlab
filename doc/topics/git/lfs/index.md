@@ -120,7 +120,7 @@ See the documentation on [File Locking](../../../user/project/file_lock.md).
 > - It's recommended for production use.
 > - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-lfs-objects-in-project-archives).
 
-CAUTION: **Warning:**
+WARNING:
 This feature might not be available to you. Check the **version history** note above for details.
 
 Prior to GitLab 13.5, [project source

@@ -270,7 +270,7 @@ For reference, GitLab.com's [auto-scaling shared runner](../user/gitlab_com/inde
 
 ## Supported web browsers
 
-CAUTION: **Caution:**
+WARNING:
 With GitLab 13.0 (May 2020) we have removed official support for Internet Explorer 11.
 
 GitLab supports the following web browsers:

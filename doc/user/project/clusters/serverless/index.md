@@ -8,7 +8,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 > Introduced in GitLab 11.5.
 
-CAUTION: **Caution:**
+WARNING:
 Serverless is currently in [alpha](https://about.gitlab.com/handbook/product/#alpha).
 
 ## Overview

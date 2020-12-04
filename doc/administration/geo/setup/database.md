@@ -44,7 +44,7 @@ The following guide assumes that:
   you have a new **secondary** server set up with the same versions of the OS,
   PostgreSQL, and GitLab on all nodes.
 
-CAUTION: **Warning:**
+WARNING:
 Geo works with streaming replication. Logical replication is not supported at this time.
 There is an [issue where support is being discussed](https://gitlab.com/gitlab-org/gitlab/-/issues/7420).
 
@@ -404,7 +404,7 @@ needed files for streaming replication.
 The directories used are the defaults that are set up in Omnibus. If you have
 changed any defaults, configure it as you see fit replacing the directories and paths.
 
-CAUTION: **Warning:**
+WARNING:
 Make sure to run this on the **secondary** server as it removes all PostgreSQL's
 data before running `pg_basebackup`.
 
@@ -421,7 +421,7 @@ data before running `pg_basebackup`.
 
 1. Execute the command below to start a backup/restore and begin the replication
 
-   CAUTION: **Warning:**
+   WARNING:
    Each Geo **secondary** node must have its own unique replication slot name.
    Using the same slot name between two secondaries will break PostgreSQL replication.
 

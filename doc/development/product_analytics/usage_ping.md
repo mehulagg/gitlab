@@ -740,7 +740,7 @@ appear to be associated to any of the services running, since they all appear to
 > - It's [deployed behind a feature flag](../../user/feature_flags.md), disabled by default.
 > - It's enabled on GitLab.com.
 
-CAUTION: **Warning:**
+WARNING:
 This feature is intended solely for internal GitLab use.
 
 In order to add data for aggregated metrics into Usage Ping payload you should add corresponding definition into  [`aggregated_metrics.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/usage_data_counters/aggregated_metrics.yml) file. Each aggregate definition includes following parts:

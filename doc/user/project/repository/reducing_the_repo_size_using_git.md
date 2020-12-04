@@ -302,7 +302,7 @@ increased, your only option is to:
 1. Prune all the unneeded stuff locally.
 1. Create a new project on GitLab and start using that instead.
 
-CAUTION: **Caution:**
+WARNING:
 This process is not suitable for removing sensitive data like password or keys from your repository.
 Information about commits, including file content, is cached in the database, and remain
 visible even after they have been removed from the repository.

@@ -286,7 +286,7 @@ below.
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/5426) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 11.6.
 > - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/211685) to GitLab Core in 13.1.
 
-CAUTION: **Warning:**
+WARNING:
 Interactive Web Terminals for the Web IDE is currently in **Beta**.
 Shared runners [do not yet support Interactive Web Terminals](https://gitlab.com/gitlab-org/gitlab/-/issues/24674),
 so you would need to use your own private runner to make use of this feature.

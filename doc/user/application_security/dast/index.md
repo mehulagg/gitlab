@@ -511,7 +511,7 @@ To perform a [full scan](#full-scan) on the listed paths, use the `DAST_FULL_SCA
 
 ### Customizing the DAST settings
 
-CAUTION: **Deprecation:**
+WARNING: **Deprecation:**
 Beginning in GitLab 13.0, the use of [`only` and `except`](../../../ci/yaml/README.md#onlyexcept-basic)
 is no longer supported. When overriding the template, you must use [`rules`](../../../ci/yaml/README.md#rules) instead.
 
@@ -827,7 +827,7 @@ Click **View details** to view the web console output which includes the list of
 
 ### JSON
 
-CAUTION: **Caution:**
+WARNING:
 The JSON report artifacts are not a public API of DAST and their format is expected to change in the future.
 
 The DAST tool always emits a JSON report file called `gl-dast-report.json` and

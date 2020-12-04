@@ -216,7 +216,7 @@ Recovery codes are not generated for WebAuthn devices.
 NOTE: **Note:**
 Recovery codes are not generated for U2F / WebAuthn devices.
 
-CAUTION: **Caution:**
+WARNING:
 Each code can be used only once to log in to your account.
 
 Immediately after successfully enabling two-factor authentication, you'll be

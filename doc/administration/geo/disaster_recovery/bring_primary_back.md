@@ -13,7 +13,7 @@ restore your original configuration. This process consists of two steps:
 1. Making the old **primary** node a **secondary** node.
 1. Promoting a **secondary** node to a **primary** node.
 
-CAUTION: **Caution:**
+WARNING:
 If you have any doubts about the consistency of the data on this node, we recommend setting it up from scratch.
 
 ## Configure the former **primary** node to be a **secondary** node

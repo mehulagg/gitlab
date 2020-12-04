@@ -109,7 +109,7 @@ Sidekiq::ScheduledSet.new.select { |r| r.klass == 'BackgroundMigrationWorker' }.
 
 ### What do I do if my background migrations are stuck?
 
-CAUTION: **Warning:**
+WARNING:
 The following operations can disrupt your GitLab performance.
 
 It is safe to re-execute these commands, especially if you have 1000+ pending jobs which would likely overflow your runtime memory.

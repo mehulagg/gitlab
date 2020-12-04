@@ -360,7 +360,7 @@ and the ignore case flag is set (`/regex pattern/i`). Here are some examples:
 - Use `^(?:(?!\.ext@domain\.com).)*$\r?` to mark users with email addresses
   NOT including `.ext@domain.com` as internal.
 
-CAUTION: **Warning:**
+WARNING:
 Be aware that this regex could lead to a
 [regular expression denial of service (ReDoS) attack](https://en.wikipedia.org/wiki/ReDoS).
 

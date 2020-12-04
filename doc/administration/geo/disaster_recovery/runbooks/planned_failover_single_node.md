@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: howto
 ---
 
-CAUTION: **Caution:**
+WARNING:
 This runbook is in **alpha**. For complete, production-ready documentation, see the
 [disaster recovery documentation](../index.md).
 
@@ -122,7 +122,7 @@ follow these steps to avoid unnecessary data loss:
 
 1. Finish replicating and verifying all data:
 
-   CAUTION: **Caution:**
+   WARNING:
    Not all data is automatically replicated. Read more about
    [what is excluded](../planned_failover.md#not-all-data-is-automatically-replicated).
 
@@ -151,7 +151,7 @@ follow these steps to avoid unnecessary data loss:
 
 1. In this final step, you need to permanently disable the **primary** node.
 
-   CAUTION: **Caution:**
+   WARNING:
    When the **primary** node goes offline, there may be data saved on the **primary** node
    that has not been replicated to the **secondary** node. This data should be treated
    as lost if you proceed.

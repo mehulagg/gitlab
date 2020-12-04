@@ -190,7 +190,7 @@ _The artifacts are stored by default in
    In some cases, you may need to run the [orphan artifact file cleanup Rake task](../raketasks/cleanup.md#remove-orphan-artifact-files)
    to clean up orphaned artifacts.
 
-CAUTION: **Caution:**
+WARNING:
 JUnit test report artifact (`junit.xml.gz`) migration
 [was not supported until GitLab 12.8](https://gitlab.com/gitlab-org/gitlab/-/issues/27698#note_317190991)
 by the `gitlab:artifacts:migrate` script.
@@ -243,7 +243,7 @@ _The artifacts are stored by default in
    In some cases, you may need to run the [orphan artifact file cleanup Rake task](../raketasks/cleanup.md#remove-orphan-artifact-files)
    to clean up orphaned artifacts.
 
-CAUTION: **Caution:**
+WARNING:
 JUnit test report artifact (`junit.xml.gz`) migration
 [was not supported until GitLab 12.8](https://gitlab.com/gitlab-org/gitlab/-/issues/27698#note_317190991)
 by the `gitlab:artifacts:migrate` script.
@@ -481,7 +481,7 @@ the number you want.
 
 #### Delete job artifacts from jobs completed before a specific date
 
-CAUTION: **Caution:**
+WARNING:
 These commands remove data permanently from the database and from disk. We
 highly recommend running them only under the guidance of a Support Engineer, or
 running them in a test environment with a backup of the instance ready to be
@@ -528,7 +528,7 @@ If you need to manually remove job artifacts associated with multiple jobs while
 
 #### Delete job artifacts and logs from jobs completed before a specific date
 
-CAUTION: **Caution:**
+WARNING:
 These commands remove data permanently from the database and from disk. We
 highly recommend running them only under the guidance of a Support Engineer, or
 running them in a test environment with a backup of the instance ready to be

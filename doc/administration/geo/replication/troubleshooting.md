@@ -467,7 +467,7 @@ to start again from scratch, there are a few steps that can help you:
 
 1. _(Optional)_ Rename other data folders and create new ones
 
-   CAUTION: **Caution:**
+   WARNING:
    You may still have files on the **secondary** node that have been removed from **primary** node but
    removal have not been reflected. If you skip this step, they will never be removed
    from this Geo node.

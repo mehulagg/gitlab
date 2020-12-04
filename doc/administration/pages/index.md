@@ -395,7 +395,7 @@ To do that:
 1. Check the **Disable public access to Pages sites** checkbox.
 1. Click **Save changes**.
 
-CAUTION: **Warning:**
+WARNING:
 For self-managed installations, all public websites remain private until they are
 redeployed. This issue will be resolved by
 [sourcing domain configuration from the GitLab API](https://gitlab.com/gitlab-org/gitlab/-/issues/218357).

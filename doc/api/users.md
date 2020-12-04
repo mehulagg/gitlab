@@ -1486,7 +1486,7 @@ Parameters:
 > - It's [deployed behind a feature flag](../user/feature_flags.md), disabled by default.
 > - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-an-administrators-ability-to-use-the-api-to-create-personal-access-tokens). **(CORE)**
 
-CAUTION: **Warning:**
+WARNING:
 This feature might not be available to you. Check the **version history** note above for details.
 
 > Requires admin permissions.

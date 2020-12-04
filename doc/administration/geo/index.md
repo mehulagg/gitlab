@@ -17,7 +17,7 @@ Geo is the solution for widely distributed development teams and for providing a
 
 ## Overview
 
-CAUTION: **Caution:**
+WARNING:
 Geo undergoes significant changes from release to release. Upgrades **are** supported and [documented](#updating-geo), but you should ensure that you're using the right version of the documentation for your installation.
 
 Fetching large repositories can take a long time for teams located far from a single GitLab instance.
@@ -207,7 +207,7 @@ secondary is paused fails. Do not pause replication before promoting a
 secondary. If the node is paused, be sure to resume before promoting. This
 issue has been fixed in GitLab 13.4 and later.
 
-CAUTION: **Caution:**
+WARNING:
 Pausing and resuming of replication is currently only supported for Geo installations using an
 Omnibus GitLab-managed database. External databases are currently not supported.
 
@@ -267,7 +267,7 @@ To find out how to disable Geo, see [Disabling Geo](replication/disable_geo.md).
 
 ## Limitations
 
-CAUTION: **Caution:**
+WARNING:
 This list of limitations only reflects the latest version of GitLab. If you are using an older version, extra limitations may be in place.
 
 - Pushing directly to a **secondary** node redirects (for HTTP) or proxies (for SSH) the request to the **primary** node instead of [handling it directly](https://gitlab.com/gitlab-org/gitlab/-/issues/1381), except when using Git over HTTP with credentials embedded within the URI. For example, `https://user:password@secondary.tld`.

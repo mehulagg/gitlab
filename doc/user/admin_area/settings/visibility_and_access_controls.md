@@ -74,7 +74,7 @@ To ensure only admin users can delete projects:
 By default, a project marked for deletion will be permanently removed with immediate effect.
 By default, a group marked for deletion will be permanently removed after 7 days.
 
-CAUTION: **Warning:**
+WARNING:
 The default behavior of [Delayed Project deletion](https://gitlab.com/gitlab-org/gitlab/-/issues/32935) in GitLab 12.6 was changed to
 [Immediate deletion](https://gitlab.com/gitlab-org/gitlab/-/issues/220382) in GitLab 13.2.
 
@@ -180,7 +180,7 @@ When only one protocol is enabled:
 On top of these UI restrictions, GitLab will deny all Git actions on the protocol
 not selected.
 
-CAUTION: **Important:**
+WARNING: **Important:**
 Starting with [GitLab 10.7](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/18021),
 HTTP(S) protocol will be allowed for Git clone or fetch requests done by GitLab Runner
 from CI/CD jobs, even if _Only SSH_ was selected.

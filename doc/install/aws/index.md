@@ -557,7 +557,7 @@ gitlab=# \q
 
 #### Set up Gitaly
 
-CAUTION: **Caution:**
+WARNING:
 In this architecture, having a single Gitaly server creates a single point of failure. Use
 [Gitaly Cluster](../../administration/gitaly/praefect.md) to remove this limitation.
 

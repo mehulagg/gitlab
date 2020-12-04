@@ -8,7 +8,7 @@ type: howto
 
 # Install GitLab on Microsoft Azure
 
-CAUTION: **Deprecated:**
+WARNING: **Deprecated:**
 The GitLab image in the Azure Marketplace is deprecated. You can track GitLab's
 efforts to [post a new image](https://gitlab.com/gitlab-com/alliances/microsoft/gitlab-tracker/-/issues/2).
 

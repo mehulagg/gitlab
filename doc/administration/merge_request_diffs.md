@@ -67,7 +67,7 @@ that only [stores outdated diffs](#alternative-in-database-storage) outside of d
 
 ## Using object storage
 
-CAUTION: **Warning:**
+WARNING:
 Currently migrating to object storage is **non-reversible**
 
 Instead of storing the external diffs on disk, we recommended the use of an object

@@ -85,7 +85,7 @@ To set up a basic Postfix mail server with IMAP access on Ubuntu, follow the
 
 ### Security concerns
 
-CAUTION: **Caution:**
+WARNING:
 Be careful when choosing the domain used for receiving incoming email.
 
 For example, suppose your top-level company domain is `hooli.com`.
@@ -112,7 +112,7 @@ Alternatively, use a dedicated domain for GitLab email communications such as
 See GitLab issue [#30366](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/30366)
 for a real-world example of this exploit.
 
-CAUTION: **Caution:**
+WARNING:
 Use a mail server that has been configured to reduce
 spam.
 A Postfix mail server that is running on a default configuration, for example,

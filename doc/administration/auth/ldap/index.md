@@ -615,7 +615,7 @@ By default, GitLab runs a group sync process every hour, on the hour.
 The values shown are in cron format. If needed, you can use a
 [Crontab Generator](http://www.crontabgenerator.com).
 
-CAUTION: **Important:**
+WARNING: **Important:**
 Do not start the sync process too frequently as this
 could lead to multiple syncs running concurrently. This is primarily a concern
 for installations with a large number of LDAP users. Please review the

@@ -149,7 +149,7 @@ After you have these prerequisites ready, follow these steps:
    In both cases, make sure that the value for the `containerDefinitions[].name` attribute is
    the same as the `Container name` defined in your targeted ECS service.
 
-   CAUTION: **Warning:**
+   WARNING:
    `CI_AWS_ECS_TASK_DEFINITION_FILE` takes precedence over `CI_AWS_ECS_TASK_DEFINITION` if both these environment
    variables are defined within your project.
 
@@ -181,7 +181,7 @@ After you have these prerequisites ready, follow these steps:
    task definition, making the cluster pull the newest version of your
    application.
 
-CAUTION: **Warning:**
+WARNING:
 The [`AWS/Deploy-ECS.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/AWS/Deploy-ECS.gitlab-ci.yml)
 template includes both the [`Jobs/Build.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Jobs/Build.gitlab-ci.yml)
 and [`Jobs/Deploy/ECS.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Jobs/Deploy/ECS.gitlab-ci.yml)

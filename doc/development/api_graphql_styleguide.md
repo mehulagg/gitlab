@@ -353,7 +353,7 @@ when the flag is disabled.
 A description is [appended](https://gitlab.com/gitlab-org/gitlab/-/blob/497b556/app/graphql/types/base_field.rb#L44-53)
 to the field indicating that it is behind a feature flag.
 
-CAUTION: **Caution:**
+WARNING:
 If a client queries for the field when the feature flag is disabled, the query
 fails. Consider this when toggling the visibility of the feature on or off on
 production.

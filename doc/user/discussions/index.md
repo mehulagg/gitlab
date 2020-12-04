@@ -206,7 +206,7 @@ top-level resolvable threads are not automatically resolved.
 You can add comments and threads to a particular commit under your
 project's **Repository > Commits**.
 
-CAUTION: **Attention:**
+WARNING: **Attention:**
 Threads created this way will be lost if the commit ID changes after a
 force push.
 

@@ -332,7 +332,7 @@ error during connect: Get http://docker:2376/v1.39/info: dial tcp: lookup docker
 
 You can delete images from your Container Registry in multiple ways.
 
-CAUTION: **Warning:**
+WARNING:
 Deleting images is a destructive action and can't be undone. To restore
 a deleted image, you must rebuild and re-upload it.
 
@@ -368,7 +368,7 @@ information, see the following endpoints:
 
 ### Delete images using GitLab CI/CD
 
-CAUTION: **Warning:**
+WARNING:
 GitLab CI/CD doesn't provide a built-in way to remove your images, but this example
 uses a third-party tool called [reg](https://github.com/genuinetools/reg)
 that talks to the GitLab Registry API. You are responsible for your own actions.
@@ -503,7 +503,7 @@ The cleanup policy:
 1. Excludes from the list any tags matching the `name_regex_keep` value (tags to preserve).
 1. Finally, the remaining tags in the list are deleted from the Container Registry.
 
-CAUTION: **Warning:**
+WARNING:
 On GitLab.com, the execution time for the cleanup policy is limited, and some of the tags may remain in
 the Container Registry after the policy runs. The next time the policy runs, the remaining tags are included,
 so it may take multiple runs for all tags to be deleted.

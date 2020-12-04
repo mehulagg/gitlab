@@ -13,7 +13,7 @@ failover with minimal effort, in a disaster situation.
 
 See [Geo limitations](../index.md#limitations) for more information.
 
-CAUTION: **Warning:**
+WARNING:
 Disaster recovery for multi-secondary configurations is in **Alpha**.
 For the latest updates, check the [Disaster Recovery epic for complete maturity](https://gitlab.com/groups/gitlab-org/-/epics/590).
 Multi-secondary configurations require the complete re-synchronization and re-configuration of all non-promoted secondaries and
@@ -36,7 +36,7 @@ order to avoid unnecessary data loss.
 
 ### Step 2. Permanently disable the **primary** node
 
-CAUTION: **Warning:**
+WARNING:
 If the **primary** node goes offline, there may be data saved on the **primary** node
 that has not been replicated to the **secondary** node. This data should be treated
 as lost if you proceed.
@@ -140,7 +140,7 @@ Note the following when promoting a secondary:
    secondary. If the node is paused, be sure to resume before promoting. This
    issue has been fixed in GitLab 13.4 and later.
 
-   CAUTION: **Caution:**
+   WARNING:
    If the secondary node [has been paused](../../geo/index.md#pausing-and-resuming-replication), this performs
    a point-in-time recovery to the last known state.
    Data that was created on the primary while the secondary was paused will be lost.
@@ -180,7 +180,7 @@ secondary is paused fails. Do not pause replication before promoting a
 secondary. If the node is paused, be sure to resume before promoting. This
 issue has been fixed in GitLab 13.4 and later.
 
-CAUTION: **Caution:**
+WARNING:
    If the secondary node [has been paused](../../geo/index.md#pausing-and-resuming-replication), this performs
 a point-in-time recovery to the last known state.
 Data that was created on the primary while the secondary was paused will be lost.

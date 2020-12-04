@@ -33,7 +33,7 @@ Pages domains are `*.gitlab.io`.
 | Project pages owned by a group | `projectname` | `http(s)://groupname.example.io/projectname`|
 | Project pages owned by a subgroup | `subgroup/projectname` | `http(s)://groupname.example.io/subgroup/projectname`|
 
-CAUTION: **Warning:**
+WARNING:
 There are some known [limitations](introduction.md#limitations)
 regarding namespaces served under the general domain name and HTTPS.
 Make sure to read that section.

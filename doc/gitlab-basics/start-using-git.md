@@ -453,7 +453,7 @@ git reset HEAD~1
 
 This leaves the changed files and folders unstaged in your local repository.
 
-CAUTION: **Warning:**
+WARNING:
 A Git commit should not usually be reversed, particularly if you already pushed it
 to the remote repository. Although you can undo a commit, the best option is to avoid
 the situation altogether by working carefully.

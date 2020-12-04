@@ -107,7 +107,7 @@ Once connected, run the following commands to confirm all user accounts:
 User.where('LENGTH(confirmation_token) = 32').where(confirmed_at: nil).find_each { |u| u.confirmed_at = Time.now; u.save }
 ```
 
-CAUTION: **Caution:**
+WARNING:
 The command described in this section may activate users who have not properly confirmed their email addresses.
 
 ## What about LDAP users?

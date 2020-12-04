@@ -1526,7 +1526,7 @@ guidelines, but for consistency you should try to use these values:
 | Color  | Markup     | Default keyword | Alternative keywords                                                 |
 |--------|------------|-----------------|----------------------------------------------------------------------|
 | Blue   | `NOTE:`    | `**Note:**`     |                                                                      |
-| Yellow | `CAUTION:` | `**Caution:**`  | `**Warning:**`, `**Important:**`                                     |
+| Yellow | `WARNING:` | `**Caution:**`  | `**Warning:**`, `**Important:**`                                     |
 | Red    | `DANGER:`  | `**Danger:**`   | `**Warning:**`, `**Important:**`, `**Deprecated:**`, `**Required:**` |
 | Green  | `TIP:`     | `**Tip:**`      |                                                                      |
 
@@ -1570,13 +1570,13 @@ This is a tip.
 ### Caution
 
 ```markdown
-CAUTION: **Caution:**
+WARNING:
 This is something to be cautious about.
 ```
 
 How it renders on the GitLab documentation site:
 
-CAUTION: **Caution:**
+WARNING:
 This is something to be cautious about.
 
 ### Danger

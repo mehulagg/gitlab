@@ -246,7 +246,7 @@ You can filter the selection dropdown by writing part of the namespace or projec
 NOTE: **Note:**
 If no namespaces or projects are selected, no Advanced Search indexing will take place.
 
-CAUTION: **Warning:**
+WARNING:
 If you have already indexed your instance, you will have to regenerate the index in order to delete all existing data
 for filtering to work correctly. To do this run the Rake tasks `gitlab:elastic:recreate_index` and
 `gitlab:elastic:clear_index_status`. Afterwards, removing a namespace or a project from the list will delete the data
@@ -333,7 +333,7 @@ export SECONDARY_INDEX="gitlab-production-$(date +%s)"
 
 ### Reclaiming the `gitlab-production` index name
 
-CAUTION: **Caution:**
+WARNING:
 It is highly recommended that you take a snapshot of your cluster to ensure
 there is a recovery path if anything goes wrong.
 
@@ -436,7 +436,7 @@ Under **Admin Area > Settings > General > Advanced Search > Elasticsearch zero-d
 
 Reindexing can be a lengthy process depending on the size of your Elasticsearch cluster.
 
-CAUTION: **Caution:**
+WARNING:
 After the reindexing is completed, the original index will be scheduled to be deleted after 14 days. You can cancel this action by pressing the cancel button.
 
 While the reindexing is running, you will be able to follow its progress under that same section.
@@ -579,7 +579,7 @@ This section may be helpful in the event that the other
 [basic instructions](#enabling-advanced-search) cause problems
 due to large volumes of data being indexed.
 
-CAUTION: **Warning:**
+WARNING:
 Indexing a large instance will generate a lot of Sidekiq jobs.
 Make sure to prepare for this task by having a [Scalable and Highly Available
 Setup](../administration/reference_architectures/index.md) or creating [extra
@@ -911,7 +911,7 @@ see details in the [update guide](../update/upgrading_from_source.md).
 
 **For a single node Elasticsearch cluster the functional cluster health status will be yellow** (never green) because the primary shard is allocated but replicas cannot be as there is no other node to which Elasticsearch can assign a replica. This also applies if you are using the [Amazon Elasticsearch](https://docs.aws.amazon.com/elasticsearch-service/latest/developerguide/aes-handling-errors.html#aes-handling-errors-yellow-cluster-status) service.
 
-CAUTION: **Warning:**
+WARNING:
 Setting the number of replicas to `0` is discouraged (this is not allowed in the GitLab Elasticsearch Integration menu). If you are planning to add more Elasticsearch nodes (for a total of more than 1 Elasticsearch) the number of replicas will need to be set to an integer value larger than `0`. Failure to do so will result in lack of redundancy (losing one node will corrupt the index).
 
 If you have a **hard requirement to have a green status for your single node Elasticsearch cluster**, please make sure you understand the risks outlined in the previous paragraph and then run the following query to set the number of replicas to `0`(the cluster will no longer try to create any shard replicas):

@@ -443,7 +443,7 @@ Make sure to replace `<X-Y-stable>` with the stable branch that matches the
 version you want to install. For example, if you want to install 11.8 you would
 use the branch name `11-8-stable`.
 
-CAUTION: **Caution:**
+WARNING:
 You can change `<X-Y-stable>` to `master` if you want the *bleeding edge* version, but never install `master` on a production server!
 
 ### Configure It

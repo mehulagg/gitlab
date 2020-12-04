@@ -209,7 +209,7 @@ sidekiq['queue_groups'] = [
 
 ### Disable Sidekiq cluster
 
-CAUTION: **Warning:**
+WARNING:
 Sidekiq cluster is [scheduled](https://gitlab.com/gitlab-com/gl-infra/scalability/-/issues/240)
 to be the only way to start Sidekiq in GitLab 14.0.
 
@@ -341,7 +341,7 @@ being equal to `max_concurrency`.
 
 Running a single Sidekiq process is the default in GitLab 12.10 and earlier.
 
-CAUTION: **Warning:**
+WARNING:
 Running Sidekiq directly is scheduled to be removed in GitLab
 [14.0](https://gitlab.com/gitlab-com/gl-infra/scalability/-/issues/240).
 
@@ -376,7 +376,7 @@ This tells the additional processes how often to check for enqueued jobs.
 
 ## Troubleshoot using the CLI
 
-CAUTION: **Warning:**
+WARNING:
 It's recommended to use `/etc/gitlab/gitlab.rb` to configure the Sidekiq processes.
 If you experience a problem, you should contact GitLab support. Use the command
 line at your own risk.

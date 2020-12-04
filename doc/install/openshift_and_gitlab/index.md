@@ -7,7 +7,7 @@ type: howto
 
 # How to install GitLab on OpenShift Origin 3
 
-CAUTION: **Deprecated:**
+WARNING: **Deprecated:**
 This article is deprecated. Use the official Kubernetes Helm charts for
 installing GitLab to OpenShift. Check out the
 [official installation docs](https://docs.gitlab.com/charts/installation/cloud/openshift.html)
@@ -27,7 +27,7 @@ For a video demonstration on installing GitLab on OpenShift, check the article [
 
 ## Prerequisites
 
-CAUTION: **Caution:**
+WARNING:
 This information is no longer up to date, as the current versions
 have changed and products have been renamed.
 

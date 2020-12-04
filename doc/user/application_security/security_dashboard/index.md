@@ -230,7 +230,7 @@ Dashboard regardless of how often the default branch is updated.
 
 That way, reports are created even if no code change happens.
 
-CAUTION: **Warning:**
+WARNING:
 Running Dependency Scanning from a scheduled pipeline might result in false negatives if your
 project doesn't have a lock file and isn't configured for Continuous Delivery. A lock file is a file
 that lists all transient dependencies and keeps track of their exact versions. The false negative

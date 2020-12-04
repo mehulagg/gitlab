@@ -99,7 +99,7 @@ When you click this link, an email address is generated and displayed, which sho
 by **you only**, to create issues in this project. You can save this address as a
 contact in your email client for easy access.
 
-CAUTION: **Caution:**
+WARNING:
 This is a private email address, generated just for you. **Keep it to yourself**,
 as anyone who knows it can create issues or merge requests as if they
 were you. If the address is compromised, or you'd like it to be regenerated for

@@ -129,7 +129,7 @@ A more detailed Composer CI/CD file is also available as a `.gitlab-ci.yml` temp
 1. Above the file list, click **Set up CI/CD**. If this button is not available, select **CI/CD Configuration** and then **Edit**.
 1. From the **Apply a template** list, select **Composer**.
 
-CAUTION: **Warning:**
+WARNING:
 Do not save unless you want to overwrite the existing CI/CD file.
 
 ## Install a Composer package
@@ -258,7 +258,7 @@ To install a package:
 
 Output indicates that the package has been successfully installed.
 
-CAUTION: **Important:**
+WARNING: **Important:**
 Never commit the `auth.json` file to your repository. To install packages from a CI/CD job,
 consider using the [`composer config`](https://getcomposer.org/doc/articles/handling-private-packages-with-satis.md#authentication) tool with your personal access token
 stored in a [GitLab CI/CD environment variable](../../../ci/variables/README.md) or in

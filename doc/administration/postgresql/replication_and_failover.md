@@ -985,7 +985,7 @@ after it has been restored to service.
   gitlab-ctl restart repmgrd
   ```
 
-  CAUTION: **Warning:**
+  WARNING:
   When the server is brought back online, and before
   you switch it to a standby node, repmgr will report that there are two masters.
   If there are any clients that are still attempting to write to the old master,
@@ -1326,7 +1326,7 @@ For further details, see [Patroni documentation on this subject](https://patroni
 
 ### Switching from repmgr to Patroni
 
-CAUTION: **Warning:**
+WARNING:
 Although switching from repmgr to Patroni is fairly straightforward the other way around is not. Rolling back from
 Patroni to repmgr can be complicated and may involve deletion of data directory. If you need to do that, please contact
 GitLab support.
@@ -1367,7 +1367,7 @@ As of GitLab 13.3, PostgreSQL 11.7 and 12.3 are both shipped with Omnibus GitLab
 uses PostgreSQL 11 by default. Therefore `gitlab-ctl pg-upgrade` does not automatically upgrade
 to PostgreSQL 12. If you want to upgrade to PostgreSQL 12, you must ask for it explicitly.
 
-CAUTION: **Warning:**
+WARNING:
 The procedure for upgrading PostgreSQL in a Patroni cluster is different than when upgrading using repmgr.
 The following outlines the key differences and important considerations that need to be accounted for when
 upgrading PostgreSQL.

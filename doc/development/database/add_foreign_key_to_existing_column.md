@@ -79,7 +79,7 @@ class AddNotValidForeignKeyToEmailsUser < ActiveRecord::Migration[5.2]
 end
 ```
 
-CAUTION: **Caution:**
+WARNING:
 Avoid using the `add_foreign_key` constraint more than once per migration file, unless the source and target tables are identical.
 
 #### Data migration to fix existing records

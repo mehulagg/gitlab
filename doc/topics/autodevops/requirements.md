@@ -133,7 +133,7 @@ You must manually configure your application (such as Ingress or Help) on AWS EC
 If you have both a valid `AUTO_DEVOPS_PLATFORM_TARGET` variable and a Kubernetes cluster tied to your project,
 only the deployment to Kubernetes runs.
 
-CAUTION: **Warning:**
+WARNING:
 Setting the `AUTO_DEVOPS_PLATFORM_TARGET` variable to `ECS` triggers jobs
 defined in the [`Jobs/Deploy/ECS.gitlab-ci.yml` template](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Jobs/Deploy/ECS.gitlab-ci.yml).
 However, it's not recommended to [include](../../ci/yaml/README.md#includetemplate)

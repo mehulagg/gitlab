@@ -21,7 +21,7 @@ deviations from this guide, they should be described in the
 
 ## Avoid using shell scripts
 
-CAUTION: **Caution:**
+WARNING:
 This is a must-read section.
 
 Having said all of the above, we recommend staying away from shell scripts

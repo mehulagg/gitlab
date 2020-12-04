@@ -52,7 +52,7 @@ If you set **Project Visibility** to public, you can limit access to some featur
 to **Only Project Members**. In addition, you can select the option to
 [Allow users to request access](../members/index.md#project-membership-and-requesting-access).
 
-CAUTION: **Caution:**
+WARNING:
 If you [reduce a project's visibility level](../../../public_access/public_access.md#reducing-visibility),
 that action unlinks all forks of that project.
 
@@ -253,7 +253,7 @@ to be deleted after a delayed period.
 When enabled, actual deletion happens after number of days
 specified in [instance settings](../../admin_area/settings/visibility_and_access_controls.md#default-deletion-delay).
 
-CAUTION: **Warning:**
+WARNING:
 The default behavior of [Delayed Project deletion](https://gitlab.com/gitlab-org/gitlab/-/issues/32935) in GitLab 12.6 was changed to
 [Immediate deletion](https://gitlab.com/gitlab-org/gitlab/-/issues/220382) in GitLab 13.2.
 
@@ -274,7 +274,7 @@ If you want to use the fork for yourself and don't need to send
 [merge requests](../merge_requests/index.md) to the upstream project,
 you can safely remove the fork relationship.
 
-CAUTION: **Caution:**
+WARNING:
 Once removed, the fork relationship cannot be restored. You will no longer be able to send merge requests to the source, and if anyone has forked your project, their fork will also lose the relationship.
 
 To do so:

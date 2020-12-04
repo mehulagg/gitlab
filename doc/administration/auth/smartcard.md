@@ -30,7 +30,7 @@ GitLab supports two authentication methods:
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/726) in [GitLab Premium](https://about.gitlab.com/pricing/) 11.6 as an experimental feature.
 
-CAUTION: **Caution:**
+WARNING:
 Smartcard authentication against local databases may change or be removed completely in future
 releases.
 

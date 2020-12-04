@@ -70,7 +70,7 @@ namespace that started the import process.
 > - It's not recommended for production use.
 > - To use it in GitLab self-managed instances, ask a GitLab administrator to enable it.
 
-CAUTION: **Warning:**
+WARNING:
 This feature might not be available to you. Check the **version history** note above for details.
 
 If you've enabled this feature, the importer tries to find a user in the GitLab user database with

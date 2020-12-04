@@ -134,7 +134,7 @@ stages:
 TIP: **Tip:**
 This information is automatically extracted and shown right in the merge request widget.
 
-CAUTION: **Caution:**
+WARNING:
 On self-managed instances, if a malicious actor compromises the Code Quality job
 definition they could execute privileged Docker commands on the runner
 host. Having proper access control policies mitigates this attack vector by

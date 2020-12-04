@@ -229,7 +229,7 @@ requests and the pipeline view. It's also used to provide data for security dash
 > - Introduced in GitLab 11.5.
 > - Requires GitLab Runner 11.5 and above.
 
-CAUTION: **Warning:**
+WARNING:
 This artifact is still valid but is **deprecated** in favor of the
 [artifacts:reports:license_scanning](../pipelines/job_artifacts.md#artifactsreportslicense_scanning)
 introduced in GitLab 12.8.

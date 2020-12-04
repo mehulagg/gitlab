@@ -14,7 +14,7 @@ and its documentation was moved to [a different location](vulnerability_findings
 This document now describes the new Vulnerabilities API that provides access to
 [Vulnerabilities](https://gitlab.com/groups/gitlab-org/-/epics/634).
 
-CAUTION: **Caution:**
+WARNING:
 This API is in an alpha stage and considered unstable.
 The response payload may be subject to change or breakage
 across GitLab releases.

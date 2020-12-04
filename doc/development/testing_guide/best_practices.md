@@ -720,7 +720,7 @@ at all possible.
 
 #### Test Snowplow events
 
-CAUTION: **Warning:**
+WARNING:
 Snowplow performs **runtime type checks** by using the [contracts gem](https://rubygems.org/gems/contracts).
 Since Snowplow is **by default disabled in tests and development**, it can be hard to
 **catch exceptions** when mocking `Gitlab::Tracking`.
@@ -792,7 +792,7 @@ describe "#==" do
 end
 ```
 
-CAUTION: **Caution:**
+WARNING:
 Only use simple values as input in the `where` block. Using procs, stateful
 objects, FactoryBot-created objects etc. can lead to
 [unexpected results](https://github.com/tomykaira/rspec-parameterized/issues/8).

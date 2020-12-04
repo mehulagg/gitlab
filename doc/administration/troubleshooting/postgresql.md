@@ -11,7 +11,7 @@ This page contains information about PostgreSQL the GitLab Support team uses
 when troubleshooting. GitLab makes this information public, so that anyone can
 make use of the Support team's collected knowledge.
 
-CAUTION: **Caution:**
+WARNING:
 Some procedures documented here may break your GitLab instance. Use at your
 own risk.
 

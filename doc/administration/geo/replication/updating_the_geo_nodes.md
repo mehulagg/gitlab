@@ -7,7 +7,7 @@ type: howto
 
 # Updating the Geo nodes **(PREMIUM ONLY)**
 
-CAUTION: **Warning:**
+WARNING:
 Read these sections carefully before updating your Geo nodes. Not following
 version-specific update steps may result in unexpected downtime. If you have
 any specific questions, [contact Support](https://about.gitlab.com/support/#contact-support).

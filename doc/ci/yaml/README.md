@@ -1079,7 +1079,7 @@ job:
 - If the pipeline is a scheduled pipeline, the job is **not** be added to the pipeline.
 - In **all other cases**, the job is added to the pipeline, with `when: on_success`.
 
-CAUTION: **Caution:**
+WARNING:
 If you use a `when:` clause as the final rule (not including `when: never`), two
 simultaneous pipelines may start. Both push pipelines and merge request pipelines can
 be triggered by the same event (a push to the source branch for an open merge request).
@@ -1330,7 +1330,7 @@ rules:
 To implement a rule similar to [`except:changes`](#onlychangesexceptchanges),
 use `when: never`.
 
-CAUTION: **Caution:**
+WARNING:
 You can use `rules: changes` with other pipeline types, but it is not recommended
 because `rules: changes` always evaluates to true when there is no Git `push` event.
 Tag pipelines, scheduled pipelines, and so on do **not** have a Git `push` event
@@ -1450,7 +1450,7 @@ job1:
     if: ($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH == "develop") && $MY_VARIABLE
 ```
 
-CAUTION: **Caution:**
+WARNING:
 [Before GitLab 13.3](https://gitlab.com/gitlab-org/gitlab/-/issues/230938),
 rules that use both `||` and `&&` may evaluate with an unexpected order of operations.
 
@@ -1758,7 +1758,7 @@ refs only:
 - `external_pull_requests`
 - `merge_requests` (see additional details about [using `only:changes` with pipelines for merge requests](#using-onlychanges-with-pipelines-for-merge-requests))
 
-CAUTION: **Caution:**
+WARNING:
 In pipelines with [sources other than the three above](../variables/predefined_variables.md)
 `changes` can't determine if a given file is new or old and always returns `true`.
 You can configure jobs to use `only: changes` with other `only: refs` keywords. However,
@@ -1787,7 +1787,7 @@ the `docker build` job is created, but only if changes were made to any of the f
 - Any of the files and subdirectories in the `dockerfiles` directory.
 - Any of the files with `rb`, `py`, `sh` extensions in the `more_scripts` directory.
 
-CAUTION: **Warning:**
+WARNING:
 If you use `only:changes` with [only allow merge requests to be merged if the pipeline succeeds](../../user/project/merge_requests/merge_when_pipeline_succeeds.md#only-allow-merge-requests-to-be-merged-if-the-pipeline-succeeds),
 you should [also use `only:merge_requests`](#using-onlychanges-with-pipelines-for-merge-requests). Otherwise it may not work as expected.
 
@@ -3423,7 +3423,7 @@ test:
     - bundle exec rspec_booster --job $CI_NODE_INDEX/$CI_NODE_TOTAL
 ```
 
-CAUTION: **Caution:**
+WARNING:
 Test Boosters reports usage statistics to the author.
 
 You can then navigate to the **Jobs** tab of a new pipeline build and see your RSpec

@@ -186,7 +186,7 @@ and the CI YAML file:
 
 The output from the above `terraform` commands should be viewable in the job logs.
 
-CAUTION: **Caution:**
+WARNING:
 Like any other job artifact, Terraform plan data is [viewable by anyone with Guest access](../permissions.md) to the repository.
 Neither Terraform nor GitLab encrypts the plan file by default. If your Terraform plan
 includes sensitive data such as passwords, access tokens, or certificates, GitLab strongly

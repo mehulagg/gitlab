@@ -23,7 +23,7 @@ link to expand the diff will be presented.
 NOTE: **Note:**
 Merge requests and branch comparison views will be affected.
 
-CAUTION: **Caution:**
+WARNING:
 This setting is experimental. An increased maximum will increase resource
 consumption of your instance. Keep this in mind when adjusting the maximum.
 
