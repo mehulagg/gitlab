@@ -1585,7 +1585,7 @@ For multiple paragraphs, use the symbol `>` before every line:
 > - Second item in the list
 ```
 
-It renders as:
+It renders on the GitLab documentation site as:
 
 > This is the first paragraph.
 >
