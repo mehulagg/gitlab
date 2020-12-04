@@ -35,10 +35,6 @@ module Elastic
       name.underscore
     end
 
-    def completed?
-      !!load_from_index&.dig('_source', 'completed')
-    end
-
     def self.persisted_versions(completed:)
       helper = Gitlab::Elastic::Helper.default
       helper.client

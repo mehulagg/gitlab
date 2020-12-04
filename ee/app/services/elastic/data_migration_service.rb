@@ -33,7 +33,7 @@ module Elastic
       def migration_has_finished_uncached?(name)
         migration = migrations.find { |migration| migration.name_for_key == name.underscore.to_s }
 
-        !!migration&.completed?
+        !!migration&.load_from_index&.dig('_source', 'completed')
       end
 
       def pending_migrations?
