@@ -224,6 +224,7 @@ export default {
                 name="warning"
                 class="date-warning-icon gl-mr-2 gl-ml-2"
                 tabindex="0"
+                :aria-label="__('Warning')"
               />
               <gl-popover
                 :target="() => $refs.fixedDatePopoverWarning.$el"
