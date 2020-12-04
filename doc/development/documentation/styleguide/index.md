@@ -1551,7 +1551,7 @@ This is something to note.
 ### Warning
 
 Use a warning to indicate deprecated features, or to provide a warning about
-procedures that have the potential for data loss. 
+procedures that have the potential for data loss.
 
 ```markdown
 WARNING:
@@ -1821,8 +1821,11 @@ GitLab Community Edition), don't split the product or feature name across lines.
 
 ### Product tier badges
 
-When a feature is available in paid tiers, add the corresponding tier to the
-header or other page element according to the feature's availability:
+All page title headers must have tier markup.
+
+For features available only in paid tiers, add the tier markup to the page
+heading, subheading, or other appropriate page element. If sections of a page
+apply only to higher tier levels, add tier markup to the subheading.
 
 | Tier in which feature is available                                     | Tier markup           |
 |:-----------------------------------------------------------------------|:----------------------|
@@ -1839,35 +1842,26 @@ header or other page element according to the feature's availability:
 | _Only_ GitLab.com Silver and higher tiers (no self-managed instances)  | `**(SILVER ONLY)**`   |
 | _Only_ GitLab.com Gold (no self-managed instances)                     | `**(GOLD ONLY)**`     |
 
-For clarity, all page title headers (H1s) must be have a tier markup for the
-lowest tier that has information on the documentation page.
-
-If sections of a page apply to higher tier levels, they can be separately
-labeled with their own tier markup.
-
-Whenever you have documentation related to the `gitlab.rb` file, you're working
-with a self-managed installation. The section or page probably applies only to
-self-managed instances. If so, include the relevant "`TIER` ONLY"
-[product badge](#product-tier-badges) at the highest applicable heading level.
+Documentation sections or pages mentioning the `gitlab.rb` file is referring to a
+self-managed instances. Include the relevant "`TIER` ONLY"
+[product badge](#product-tier-badges) at the highest applicable heading level in
+the page to prevent user confusion.
 
 #### Product badge display behavior
 
-When using the tier markup with headers, the documentation page displays the
-full tier badge with the header line.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab-docs/-/merge_requests/244) in GitLab 10.7.
 
-You can also use the tier markup with paragraphs, list items, and table cells.
-For these cases, the tier mention is represented by an information icon
-that displays the tiers when visitors point to the icon.
-For example:
+Tier markup displays differently depending on the location:
 
-- `**(STARTER)**` displays as **(STARTER)**
-- `**(STARTER ONLY)**` displays as **(STARTER ONLY)**
-- `**(SILVER ONLY)**` displays as **(SILVER ONLY)**
+- **In headings and subheadings:** the full tier badge displays.
+- **Paragraphs, list names, and table cells:** Only an information icon displays,
+  More verbose information displays when a user points to the icon, like this:
 
-#### How it works
+  - `**(STARTER)**` displays as **(STARTER)**
+  - `**(STARTER ONLY)**` displays as **(STARTER ONLY)**
+  - `**(SILVER ONLY)**` displays as **(SILVER ONLY)**
 
-Introduced by [!244](https://gitlab.com/gitlab-org/gitlab-docs/-/merge_requests/244),
-the special markup `**(STARTER)**` generates a `span` element to trigger the
+The special markup `**(STARTER)**` generates a `span` element to trigger the
 badges and tooltips (`<span class="badge-trigger starter">`). When the keyword
 _only_ is added, the corresponding GitLab.com badge isn't displayed.
 
@@ -1878,20 +1872,18 @@ sections are outlined in this section.
 
 ### GitLab restart
 
-There are many cases that a restart/reconfigure of GitLab is required. To avoid
-duplication, link to the special document that can be found in
-[`doc/administration/restart_gitlab.md`](../../../administration/restart_gitlab.md).
-Usually the text reads like:
+When a restart or reconfigure of GitLab is required, avoid duplication by linking
+to [`doc/administration/restart_gitlab.md`](../../../administration/restart_gitlab.md)
+with text like this, replacing 'reconfigure' with 'restart' as needed:
 
 ```markdown
 Save the file and [reconfigure GitLab](../../../administration/restart_gitlab.md)
 for the changes to take effect.
 ```
 
-If the document resides outside of the GitLab CE/EE
-`doc/` directory, use the full path instead of the relative link:
-`https://docs.gitlab.com/ee/administration/restart_gitlab.html`. Replace
-`reconfigure` with `restart` where appropriate.
+If the document resides outside of the `doc/` directory, use the full path
+instead of the relative link:
+`https://docs.gitlab.com/ee/administration/restart_gitlab.html`.
 
 ### Installation guide
 
