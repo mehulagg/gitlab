@@ -1543,7 +1543,7 @@ NOTE:
 This is something to note.
 ```
 
-How it renders on the GitLab documentation site:
+It renders on the GitLab documentation site as:
 
 NOTE:
 This is something to note.
