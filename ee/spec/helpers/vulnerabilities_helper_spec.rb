@@ -229,7 +229,7 @@ RSpec.describe VulnerabilitiesHelper do
     subject { helper.vulnerability_finding_data(vulnerability) }
 
     it 'returns finding information' do
-      expect(subject.to_hash).to match(
+      expect(subject.to_h).to match(
         description: finding.description,
         identifiers: kind_of(Array),
         issue_feedback: anything,
