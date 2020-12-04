@@ -272,29 +272,29 @@ RSpec.describe API::GenericPackages do
       end
 
       shared_examples 'creates a package and package file' do
-        headers = workhorse_header.merge(auth_header)
+        it 'creates a package and package file' do
+          headers = workhorse_header.merge(auth_header)
 
-        expect { upload_file(params, headers) }
-          .to change { project.packages.generic.count }.by(1)
-          .and change { Packages::PackageFile.count }.by(1)
+          expect { upload_file(params, headers) }
+            .to change { project.packages.generic.count }.by(1)
+            .and change { Packages::PackageFile.count }.by(1)
 
-        aggregate_failures do
-          expect(response).to have_gitlab_http_status(:created)
+          aggregate_failures do
+            expect(response).to have_gitlab_http_status(:created)
 
-          package = project.packages.generic.last
-          expect(package.name).to eq('mypackage')
-          expect(package.version).to eq('0.0.1')
+            package = project.packages.generic.last
+            expect(package.name).to eq('mypackage')
+            expect(package.version).to eq('0.0.1')
 
-          if should_set_build_info
-            it 'sets package build info from ci' do
+            if should_set_build_info
               expect(package.original_build_info.pipeline).to eq(ci_build.pipeline)
+            else
+              expect(package.original_build_info).to be_nil
             end
-          else
-            expect(package.original_build_info).to be_nil
-          end
 
-          package_file = package.package_files.last
-          expect(package_file.file_name).to eq('myfile.tar.gz')
+            package_file = package.package_files.last
+            expect(package_file.file_name).to eq('myfile.tar.gz')
+          end
         end
       end
 
