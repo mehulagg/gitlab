@@ -1252,7 +1252,7 @@ the replicas.
 Omnibus GitLab exposes several options allowing more control over the
 [Patroni restoration process](#recovering-the-patroni-cluster).
 
-Each option is shown below with its default value in the `gitlab.rb`.
+Each option is shown below with its default value in `/etc/gitlab/gitlab.rb`.
 
 ```ruby
 patroni['use_pg_rewind'] = true
