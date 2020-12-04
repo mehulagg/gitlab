@@ -11,14 +11,19 @@ import { s__ } from '~/locale';
 import ScheduleTimelineSection from './schedule/components/schedule_timeline_section.vue';
 import DeleteScheduleModal from './delete_schedule_modal.vue';
 import EditScheduleModal from './edit_schedule_modal.vue';
+import AddRotationModal from './rotations/add_rotation_modal.vue';
+
 import { getTimeframeForWeeksView } from './schedule/utils';
 import { PRESET_TYPES } from './schedule/constants';
 import { getFormattedTimezone } from '../utils/common_utils';
+import RotationsListSection from './schedule/components/rotations_list_section.vue';
 
 export const i18n = {
   scheduleForTz: s__('OnCallSchedules|On-call schedule for the %{tzShort}'),
   editScheduleLabel: s__('OnCallSchedules|Edit schedule'),
   deleteScheduleLabel: s__('OnCallSchedules|Delete schedule'),
+  rotationTitle: s__('OnCallSchedules|Rotations'),
+  addARotation: s__('OnCallSchedules|Add a rotation'),
 };
 
 export default {
@@ -33,6 +38,8 @@ export default {
     GlButton,
     DeleteScheduleModal,
     EditScheduleModal,
+    AddRotationModal,
+    RotationsListSection,
   },
   directives: {
     GlModal: GlModalDirective,
@@ -42,6 +49,11 @@ export default {
     schedule: {
       type: Object,
       required: true,
+    },
+    rotations: {
+      type: Array,
+      required: false,
+      default: () => [],
     },
   },
   computed: {
@@ -58,7 +70,7 @@ export default {
 
 <template>
   <div>
-    <gl-card>
+    <gl-card data-testid="outerCard">
       <template #header>
         <div class="gl-display-flex gl-justify-content-space-between gl-m-0">
           <span class="gl-font-weight-bold gl-font-lg">{{ schedule.name }}</span>
@@ -80,7 +92,6 @@ export default {
           </gl-button-group>
         </div>
       </template>
-
       <p class="gl-text-gray-500 gl-mb-5">
         <gl-sprintf :message="$options.i18n.scheduleForTz">
           <template #tzShort>{{ schedule.timezone }}</template>
@@ -88,11 +99,28 @@ export default {
         | {{ tzLong }}
       </p>
 
-      <div class="schedule-shell">
-        <schedule-timeline-section :preset-type="$options.presetType" :timeframe="timeframe" />
-      </div>
+      <gl-card header-class="gl-bg-transparent" data-testid="innerCard">
+        <template #header>
+          <div class="gl-display-flex gl-justify-content-space-between">
+            <h6 class="gl-m-0">{{ $options.i18n.rotationTitle }}</h6>
+            <gl-button v-gl-modal="'create-schedule-rotation-modal'" variant="link"
+              >{{ $options.i18n.addARotation }}
+            </gl-button>
+          </div>
+        </template>
+
+        <div class="schedule-shell">
+          <schedule-timeline-section :preset-type="$options.presetType" :timeframe="timeframe" />
+          <rotations-list-section
+            :preset-type="$options.presetType"
+            :rotations="rotations"
+            :timeframe="timeframe"
+          />
+        </div>
+      </gl-card>
     </gl-card>
     <delete-schedule-modal :schedule="schedule" />
     <edit-schedule-modal :schedule="schedule" />
+    <add-rotation-modal />
   </div>
 </template>
