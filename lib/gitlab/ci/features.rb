@@ -6,6 +6,10 @@ module Gitlab
     # Ci::Features is a class that aggregates all CI/CD feature flags in one place.
     #
     module Features
+      def self.service_probes_enabled?
+        ::Feature.enabled?(:ci_service_probes, default_enabled: true)
+      end
+
       def self.artifacts_exclude_enabled?
         ::Feature.enabled?(:ci_artifacts_exclude, default_enabled: true)
       end

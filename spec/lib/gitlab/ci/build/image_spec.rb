@@ -24,6 +24,10 @@ RSpec.describe Gitlab::Ci::Build::Image do
         it 'does not populate the ports' do
           expect(subject.ports).to be_empty
         end
+
+        it 'does not populate the probes' do
+          expect(subject.probes).to be_empty
+        end
       end
 
       context 'when image is defined as hash' do
@@ -45,6 +49,10 @@ RSpec.describe Gitlab::Ci::Build::Image do
           expect(port.number).to eq 80
           expect(port.protocol).to eq 'http'
           expect(port.name).to eq 'default_port'
+        end
+
+        it 'does not populate the probes' do
+          expect(subject.probes).to be_empty
         end
       end
 
@@ -85,15 +93,24 @@ RSpec.describe Gitlab::Ci::Build::Image do
         it 'does not populate the ports' do
           expect(subject.first.ports).to be_empty
         end
+
+        it 'does not populate the probes' do
+          expect(subject.first.probes).to be_empty
+        end
       end
 
       context 'when service is defined as hash' do
         let(:service_entrypoint) { '/bin/sh' }
         let(:service_alias) { 'db' }
         let(:service_command) { 'sleep 30' }
+        let(:service_probes) {[
+          { exec: { command: ['cmd', '-c'] }, http_get: { scheme: 'https', path: '/healthz', headers: ['x-custom: value'] }, tcp: { port: 80 },
+            initial_delay: 1, period: 1, timeout: 1, retries: 2 }
+        ]}
+
         let(:job) do
           create(:ci_build, options: { services: [{ name: service_image_name, entrypoint: service_entrypoint,
-                                                    alias: service_alias, command: service_command, ports: [80] }] })
+                                                    alias: service_alias, command: service_command, ports: [80], probes: service_probes }] })
         end
 
         it 'fabricates an non-empty array of objects' do
@@ -112,6 +129,17 @@ RSpec.describe Gitlab::Ci::Build::Image do
           expect(port.number).to eq 80
           expect(port.protocol).to eq 'http'
           expect(port.name).to eq 'default_port'
+
+          probe = subject.first.probes.first
+          expect(probe.exec.command).to eq ['cmd', '-c']
+          expect(probe.http_get.scheme).to eq 'https'
+          expect(probe.http_get.path).to eq '/healthz'
+          expect(probe.http_get.headers.first).to eq 'x-custom: value'
+          expect(probe.tcp.port).to eq 80
+          expect(probe.initial_delay).to eq 1
+          expect(probe.period).to eq 1
+          expect(probe.timeout).to eq 1
+          expect(probe.retries).to eq 2
         end
       end
 

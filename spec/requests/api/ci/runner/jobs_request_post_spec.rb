@@ -211,11 +211,11 @@ RSpec.describe API::Ci::Runner, :clean_gitlab_redis_shared_state do
             expect(json_response['token']).to eq(job.token)
             expect(json_response['job_info']).to eq(expected_job_info)
             expect(json_response['git_info']).to eq(expected_git_info)
-            expect(json_response['image']).to eq({ 'name' => 'ruby:2.7', 'entrypoint' => '/bin/sh', 'ports' => [] })
+            expect(json_response['image']).to eq({ 'name' => 'ruby:2.7', 'entrypoint' => '/bin/sh', 'ports' => [], 'probes' => [] })
             expect(json_response['services']).to eq([{ 'name' => 'postgres', 'entrypoint' => nil,
-                                                       'alias' => nil, 'command' => nil, 'ports' => [] },
+                                                       'alias' => nil, 'command' => nil, 'ports' => [], 'probes' => [] },
                                                      { 'name' => 'docker:stable-dind', 'entrypoint' => '/bin/sh',
-                                                       'alias' => 'docker', 'command' => 'sleep 30', 'ports' => [] }])
+                                                       'alias' => 'docker', 'command' => 'sleep 30', 'ports' => [], 'probes' => [] }])
             expect(json_response['steps']).to eq(expected_steps)
             expect(json_response['artifacts']).to eq(expected_artifacts)
             expect(json_response['cache']).to eq(expected_cache)
@@ -790,6 +790,46 @@ RSpec.describe API::Ci::Runner, :clean_gitlab_redis_shared_state do
 
             expect(response).to have_gitlab_http_status(:created)
             expect(json_response.dig('artifacts').first).not_to have_key('exclude')
+          end
+        end
+
+        describe 'a job with service probes' do
+          context 'when probes are defined' do
+            let(:job) do
+              create(:ci_build, pipeline: pipeline, token: 'test-job-token', name: 'test',
+                                stage: 'deploy', stage_idx: 1,
+                                options: { services: [ { name: 'docker:dind', probes: [{ exec: { command: ["cmd", "-c"] } }] } ] })
+            end
+
+            context 'when a runner supports this feature' do
+              it 'exposes service probes when the feature is enabled' do
+                stub_feature_flags(ci_service_probes: true)
+
+                request_job info: { features: { services: true, service_probes: true } }
+
+                expect(response).to have_gitlab_http_status(:created)
+                expect(json_response.dig('services').first).to include('probes' => [{ 'exec' => { 'command' => ["cmd", "-c"] } }])
+              end
+
+              it 'does not expose service probes when the feature is disabled' do
+                stub_feature_flags(ci_service_probes: false)
+
+                request_job info: { features: { services: true, service_probes: true } }
+
+                expect(response).to have_gitlab_http_status(:created)
+                expect(json_response.dig('services').first).not_to have_key('probes')
+              end
+            end
+
+            context 'when a runner does not support this feature' do
+              it 'does not expose the build at all' do
+                stub_feature_flags(ci_service_probes: true)
+
+                request_job info: { features: { services: true } }
+
+                expect(response).to have_gitlab_http_status(:no_content)
+              end
+            end
           end
         end
 

@@ -24,6 +24,7 @@ module Ci
     belongs_to :pipeline, class_name: 'Ci::Pipeline', foreign_key: :commit_id
 
     RUNNER_FEATURES = {
+      service_probes: -> (build) { build.supports_service_probes? },
       upload_multiple_artifacts: -> (build) { build.publishes_artifacts_reports? },
       refspecs: -> (build) { build.merge_request_ref? },
       artifacts_exclude: -> (build) { build.supports_artifacts_exclude? },
@@ -872,6 +873,11 @@ module Ci
 
     def multi_build_steps?
       options.dig(:release)&.any?
+    end
+
+    def supports_service_probes?
+      Gitlab::Ci::Features.service_probes_enabled? &&
+        options&.dig(:services)&.detect {|x| x.is_a?(Hash) && x.has_key?(:probes)}
     end
 
     def hide_secrets(data, metrics = ::Gitlab::Ci::Trace::Metrics.new)

@@ -15,7 +15,7 @@ module Gitlab
           include ::Gitlab::Config::Entry::Attributable
           include ::Gitlab::Config::Entry::Configurable
 
-          ALLOWED_KEYS = %i[name entrypoint command alias ports].freeze
+          ALLOWED_KEYS = %i[name entrypoint command alias ports probes].freeze
 
           validations do
             validates :config, hash_or_string: true
@@ -23,6 +23,7 @@ module Gitlab
             validates :config, disallowed_keys: %i[ports], unless: :with_image_ports?
             validates :name, type: String, presence: true
             validates :entrypoint, array_of_strings: true, allow_nil: true
+            validates :probes, absence: { message: 'feature is disabled' }, unless: :probes_enabled?
 
             validates :command, array_of_strings: true, allow_nil: true
             validates :alias, type: String, allow_nil: true
@@ -32,7 +33,10 @@ module Gitlab
           entry :ports, Entry::Ports,
             description: 'Ports used to expose the service'
 
-          attributes :ports
+          entry :probes, Entry::Probes,
+            description: 'Probes used to check service is ready on startup'
+
+          attributes :ports, :probes
 
           def alias
             value[:alias]
@@ -63,6 +67,10 @@ module Gitlab
 
           def skip_config_hash_validation?
             true
+          end
+
+          def probes_enabled?
+            ::Gitlab::Ci::Features.service_probes_enabled?
           end
         end
       end

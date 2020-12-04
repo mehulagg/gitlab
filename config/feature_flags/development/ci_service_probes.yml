@@ -1,0 +1,8 @@
+---
+name: ci_service_probes
+introduced_by_url: https://gitlab.com/gitlab-org/TODO
+rollout_issue_url: 
+milestone: 
+type: development
+group: group::continuous integration
+default_enabled: true

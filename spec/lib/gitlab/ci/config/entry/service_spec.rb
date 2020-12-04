@@ -47,6 +47,12 @@ RSpec.describe Gitlab::Ci::Config::Entry::Service do
         expect(entry.ports).to be_nil
       end
     end
+
+    describe '#probes' do
+      it "returns service's probes" do
+        expect(entry.probes).to be_nil
+      end
+    end
   end
 
   context 'when configuration is a hash' do
@@ -130,6 +136,64 @@ RSpec.describe Gitlab::Ci::Config::Entry::Service do
         describe '#ports' do
           it "returns image's ports" do
             expect(entry.ports).to eq ports
+          end
+        end
+      end
+    end
+
+    describe 'service probes' do
+      context 'when feature is enabled' do
+        before do
+          stub_feature_flags(ci_service_probes: true)
+          entry.compose!
+        end
+
+        context 'when configuration is valid' do
+          let(:config) do
+            { name: 'postgresql:9.5', probes: [{ exec: { command: ["cmd", "-c"] } }] }
+          end
+
+          it 'correctly parses the configuration' do
+            expect(entry).to be_valid
+            expect(entry.value).to eq config
+          end
+        end
+
+        context 'when configuration is not valid' do
+          let(:config) do
+            { name: 'postgresql:9.5', probes: [{ initial_delay: 10 }] }
+          end
+
+          it 'returns an error' do
+            expect(entry).not_to be_valid
+            expect(entry.errors)
+              .to include 'probes:probe config requires tcp, http_get or exec probe'
+          end
+        end
+      end
+
+      context 'when feature is disabled' do
+        before do
+          stub_feature_flags(ci_service_probes: false)
+          entry.compose!
+        end
+
+        context 'when configuration has been provided' do
+          let(:config) do
+            { name: 'postgresql:9.5', probes: [{ exec: { command: ["cmd", "-c"] }, initial_delay: 10 }] }
+          end
+
+          it 'returns an error' do
+            expect(entry).not_to be_valid
+            expect(entry.errors).to include 'service probes feature is disabled'
+          end
+        end
+
+        context 'when configuration is not present' do
+          let(:config) { { name: 'postgresql:9.5' } }
+
+          it 'is a valid configuration' do
+            expect(entry).to be_valid
           end
         end
       end

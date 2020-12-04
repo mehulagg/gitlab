@@ -4360,6 +4360,26 @@ RSpec.describe Ci::Build do
         it { is_expected.to be_falsey }
       end
     end
+
+    context 'when `service_probes` feature is required by build' do
+      before do
+        expect(build).to receive(:runner_required_feature_names) do
+          [:service_probes]
+        end
+      end
+
+      context 'when runner provides given feature' do
+        let(:runner_features) { { service_probes: true } }
+
+        it { is_expected.to be_truthy }
+      end
+
+      context 'when runner does not provide given feature' do
+        let(:runner_features) { {} }
+
+        it { is_expected.to be_falsey }
+      end
+    end
   end
 
   describe '#deployment_status' do
