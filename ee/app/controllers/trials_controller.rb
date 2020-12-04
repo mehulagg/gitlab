@@ -15,6 +15,7 @@ class TrialsController < ApplicationController
   def new
     record_experiment_user(:remove_known_trial_form_fields)
     record_experiment_user(:trimmed_skip_trial_copy)
+    record_experiment_user(:trial_registration_with_social_signin, trial_registration_with_social_signin_context)
   end
 
   def select
@@ -38,6 +39,8 @@ class TrialsController < ApplicationController
     if @result&.dig(:success)
       record_experiment_conversion_event(:remove_known_trial_form_fields)
       record_experiment_conversion_event(:trimmed_skip_trial_copy)
+      record_experiment_conversion_event(:trial_registration_with_social_signin)
+
       redirect_to group_url(@namespace, { trial: true })
     else
       render :select
@@ -114,5 +117,14 @@ class TrialsController < ApplicationController
 
   def record_user_for_group_only_trials_experiment
     record_experiment_user(:group_only_trials)
+  end
+
+  def trial_registration_with_social_signin_context
+    identities = current_user.identities.map(&:provider)
+
+    {
+      google_signon: identities.include?('google_oauth2'),
+      github_signon: identities.include?('github')
+    }
   end
 end
