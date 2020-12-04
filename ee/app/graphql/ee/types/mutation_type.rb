@@ -50,6 +50,7 @@ module EE
         mount_mutation ::Mutations::IncidentManagement::OncallSchedule::Create
         mount_mutation ::Mutations::IncidentManagement::OncallSchedule::Update
         mount_mutation ::Mutations::IncidentManagement::OncallSchedule::Destroy
+        mount_mutation ::Mutations::IncidentManagement::OncallRotation::Create
 
         prepend(Types::DeprecatedMutations)
       end
