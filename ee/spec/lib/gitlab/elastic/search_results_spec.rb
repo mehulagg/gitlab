@@ -262,6 +262,13 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :sidekiq_might_not_need
       expect(results.issues_count).to eq 1
     end
 
+    it 'does not raise exception by out of integer range iid' do
+      results = described_class.new(user, '20200623170000', limit_project_ids, public_and_internal_projects: false)
+
+      expect { results.objects('issues') }.not_to raise_exception
+      expect(results.issues_count).to eq 0
+    end
+
     it 'returns empty list when search by invalid iid' do
       results = described_class.new(user, '#222', limit_project_ids)
 
@@ -604,6 +611,13 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :sidekiq_might_not_need
 
       expect(merge_requests).to contain_exactly(@merge_request_2)
       expect(results.merge_requests_count).to eq 1
+    end
+
+    it 'does not raise exception by out of integer range iid' do
+      results = described_class.new(user, '20200623170000', limit_project_ids, public_and_internal_projects: false)
+
+      expect {results.objects('merge_requests') }.not_to raise_exception
+      expect(results.merge_requests_count).to eq 0
     end
 
     it 'returns empty list when search by invalid iid' do
