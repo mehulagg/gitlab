@@ -11,9 +11,9 @@ RSpec.describe PersonalAccessTokens::CreateService do
       context 'when user creates their own token' do
         it 'creates audit logs with success message' do
           expect(::AuditEventService)
-          .to receive(:new)
-          .with(user, user, action: :custom, custom_message: /Created personal access token with id \d+/, ip_address: nil)
-          .and_call_original
+            .to receive(:new)
+            .with(user, user, action: :custom, custom_message: /Created personal access token with id \d+/, ip_address: nil)
+            .and_call_original
 
           PersonalAccessTokens::CreateService.new(current_user: user, target_user: user, params: params).execute
         end
