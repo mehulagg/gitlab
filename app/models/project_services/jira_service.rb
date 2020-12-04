@@ -127,7 +127,7 @@ class JiraService < IssueTrackerService
       { type: 'text', name: 'api_url', title: s_('JiraService|Jira API URL'), placeholder: s_('JiraService|If different from Web URL') },
       { type: 'text', name: 'username', title: s_('JiraService|Username or Email'), placeholder: s_('JiraService|Use a username for server version and an email for cloud version'), required: true },
       { type: 'password', name: 'password', title: s_('JiraService|Password or API token'), placeholder: s_('JiraService|Use a password for server version and an API token for cloud version'), required: true },
-      { type: 'text', name: 'jira_issue_transition_id', title: s_('JiraService|Transition ID(s)'), placeholder: s_('JiraService|Use , or ; to separate multiple transition IDs') }
+      { type: 'text', name: 'jira_issue_transition_id', title: s_('JiraService|Jira workflow transitions'), placeholder: s_('JiraService|e.g. 12, 24'), help: s_('JiraService|Set transition IDs for Jira workflow transitions.') }
     ]
   end
 
