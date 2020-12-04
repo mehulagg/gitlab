@@ -46,6 +46,29 @@ RSpec.describe Vulnerabilities::Identifier do
     end
   end
 
+  describe '.order_by_external_id_' do
+    let_it_be(:identifier_1) { create(:vulnerabilities_identifier, external_id: 'ID-B') }
+    let_it_be(:identifier_2) { create(:vulnerabilities_identifier, external_id: 'ID-A') }
+    let_it_be(:identifier_3) { create(:vulnerabilities_identifier, external_id: 'ID-C') }
+    let_it_be(:identifier_4) { create(:vulnerabilities_identifier, external_id: 'ID-C') }
+
+    describe 'asc' do
+      let(:expected_value) { [identifier_2, identifier_1, identifier_4, identifier_3] }
+
+      subject { described_class.order_by_external_id_asc }
+
+      it { is_expected.to eq(expected_value) }
+    end
+
+    describe 'desc' do
+      let(:expected_value) { [identifier_4, identifier_3, identifier_1, identifier_2] }
+
+      subject { described_class.order_by_external_id_desc }
+
+      it { is_expected.to eq(expected_value) }
+    end
+  end
+
   describe 'type check methods' do
     shared_examples_for 'type check method' do |method:|
       with_them do

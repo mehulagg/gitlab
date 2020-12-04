@@ -325,6 +325,31 @@ RSpec.describe Vulnerabilities::Finding do
     end
   end
 
+  describe '.order_by_primary_identifier_' do
+    let_it_be(:identifier_1) { create(:vulnerabilities_identifier, external_id: 'ID-B') }
+    let_it_be(:identifier_2) { create(:vulnerabilities_identifier, external_id: 'ID-A') }
+    let_it_be(:identifier_3) { create(:vulnerabilities_identifier, external_id: 'ID-C') }
+    let_it_be(:finding_1) { create(:vulnerabilities_finding, primary_identifier: identifier_1) }
+    let_it_be(:finding_2) { create(:vulnerabilities_finding, primary_identifier: identifier_2) }
+    let_it_be(:finding_3) { create(:vulnerabilities_finding, primary_identifier: identifier_3) }
+
+    describe 'asc' do
+      let(:expected_value) { [finding_2, finding_1, finding_3] }
+
+      subject { described_class.order_by_primary_identifier_asc }
+
+      it { is_expected.to eq(expected_value) }
+    end
+
+    describe 'desc' do
+      let(:expected_value) { [finding_3, finding_1, finding_2] }
+
+      subject { described_class.order_by_primary_identifier_desc }
+
+      it { is_expected.to eq(expected_value) }
+    end
+  end
+
   describe '.batch_count_by_project_and_severity' do
     let(:pipeline) { create(:ci_pipeline, :success, project: project) }
     let(:project) { create(:project) }

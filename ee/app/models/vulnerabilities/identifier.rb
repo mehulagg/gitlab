@@ -26,6 +26,9 @@ module Vulnerabilities
 
     scope :with_fingerprint, -> (fingerprints) { where(fingerprint: fingerprints) }
 
+    scope :order_by_external_id_asc, -> { order(external_id: :asc, id: :desc) }
+    scope :order_by_external_id_desc, -> { order(external_id: :desc, id: :desc) }
+
     def cve?
       external_type.casecmp?('cve')
     end

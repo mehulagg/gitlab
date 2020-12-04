@@ -98,6 +98,8 @@ module Vulnerabilities
 
     scope :report_type, -> (type) { where(report_type: report_types[type]) }
     scope :ordered, -> { order(severity: :desc, confidence: :desc, id: :asc) }
+    scope :order_by_primary_identifier_asc, -> { joins(:primary_identifier).merge(Identifier.order_by_external_id_asc) }
+    scope :order_by_primary_identifier_desc, -> { joins(:primary_identifier).merge(Identifier.order_by_external_id_desc) }
 
     scope :by_report_types, -> (values) { where(report_type: values) }
     scope :by_projects, -> (values) { where(project_id: values) }
