@@ -1,5 +1,15 @@
 <script>
-import { GlAlert, GlLoadingIcon, GlTable, GlLink, GlSprintf, GlTooltipDirective } from '@gitlab/ui';
+import {
+  GlAlert,
+  GlIntersectionObserver,
+  GlLoadingIcon,
+  GlTable,
+  GlLink,
+  GlSkeletonLoading,
+  GlSprintf,
+  GlTooltipDirective,
+} from '@gitlab/ui';
+import produce from 'immer';
 import { s__ } from '~/locale';
 import TimeAgo from '~/vue_shared/components/time_ago_tooltip.vue';
 import { convertToSnakeCase } from '~/lib/utils/text_utility';
@@ -7,6 +17,7 @@ import { convertToSnakeCase } from '~/lib/utils/text_utility';
 import getAlerts from '~/alert_management/graphql/queries/get_alerts.query.graphql';
 
 export default {
+  alertsPerPage: 20,
   i18n: {
     noAlertsMsg: s__(
       'ThreatMonitoring|No alerts available to display. See %{linkStart}enabling threat alerts%{linkEnd} for more information on adding alerts to the list.',
@@ -25,31 +36,33 @@ export default {
     {
       key: 'startedAt',
       label: s__('ThreatMonitoring|Date and time'),
-      thClass: `w-15p`,
+      thClass: `gl-bg-white! w-15p`,
       tdClass: `gl-pl-6!`,
       sortable: true,
     },
     {
       key: 'alertLabel',
       label: s__('ThreatMonitoring|Name'),
-      thClass: `gl-pointer-events-none`,
+      thClass: `gl-bg-white! gl-pointer-events-none`,
     },
     {
       key: 'status',
       label: s__('ThreatMonitoring|Status'),
       thAttr: { 'data-testid': 'threat-alerts-status-header' },
-      thClass: `w-15p`,
+      thClass: `gl-bg-white! w-15p`,
       tdClass: `gl-pl-6!`,
       sortable: true,
     },
   ],
   components: {
     GlAlert,
+    GlIntersectionObserver,
+    GlLink,
     GlLoadingIcon,
+    GlSkeletonLoading,
+    GlSprintf,
     GlTable,
     TimeAgo,
-    GlLink,
-    GlSprintf,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -60,14 +73,15 @@ export default {
       query: getAlerts,
       variables() {
         return {
+          firstPageSize: this.$options.alertsPerPage,
           projectPath: this.projectPath,
           sort: this.sort,
         };
       },
-      update: ({ project }) => ({
-        list: project?.alertManagementAlerts.nodes || [],
-        pageInfo: project?.alertManagementAlerts.pageInfo || {},
-      }),
+      update: ({ project }) => project?.alertManagementAlerts.nodes || [],
+      result({ data }) {
+        this.pageInfo = data?.project?.alertManagementAlerts?.pageInfo;
+      },
       error() {
         this.errored = true;
       },
@@ -75,10 +89,9 @@ export default {
   },
   data() {
     return {
-      alerts: {},
+      alerts: [],
       errored: false,
       isErrorAlertDismissed: false,
-      // TODO implement infinite scrolling in #290705
       pageInfo: {},
       sort: 'STARTED_AT_DESC',
       sortBy: 'startedAt',
@@ -87,16 +100,16 @@ export default {
     };
   },
   computed: {
-    isEmpty() {
-      return !this.alerts?.list?.length;
-    },
-    loading() {
+    isLoadingAlerts() {
       return this.$apollo.queries.alerts.loading;
+    },
+    isLoadingFirstAlerts() {
+      return this.isLoadingAlerts && this.alerts.length === 0;
     },
     showNoAlertsMsg() {
       return (
-        this.alerts.list?.length === 0 &&
-        !this.loading &&
+        this.alerts.length === 0 &&
+        !this.isLoadingAlerts &&
         !this.errored &&
         !this.isErrorAlertDismissed
       );
@@ -106,6 +119,23 @@ export default {
     errorAlertDismissed() {
       this.errored = false;
       this.isErrorAlertDismissed = true;
+    },
+    fetchNextPage() {
+      if (this.pageInfo.hasNextPage) {
+        this.$apollo.queries.alerts.fetchMore({
+          variables: { nextPageCursor: this.pageInfo.endCursor },
+          updateQuery: (previousResult, { fetchMoreResult }) => {
+            const results = produce(fetchMoreResult, draftData => {
+              // eslint-disable-next-line no-param-reassign
+              draftData.project.alertManagementAlerts.nodes = [
+                ...previousResult.project.alertManagementAlerts.nodes,
+                ...draftData.project.alertManagementAlerts.nodes,
+              ];
+            });
+            return results;
+          },
+        });
+      }
     },
     fetchSortedData({ sortBy, sortDesc }) {
       const sortingDirection = sortDesc ? 'DESC' : 'ASC';
@@ -139,17 +169,18 @@ export default {
 
     <gl-table
       class="alert-management-table"
-      :items="alerts ? alerts.list : []"
+      :busy="isLoadingFirstAlerts"
+      :items="alerts"
       :fields="$options.fields"
-      :show-empty="true"
-      :busy="loading"
       stacked="md"
       :no-local-sorting="true"
       :sort-direction="sortDirection"
       :sort-desc.sync="sortDesc"
       :sort-by.sync="sortBy"
+      thead-class="gl-border-b-solid gl-border-b-1 gl-border-b-gray-100"
       sort-icon-left
       responsive
+      show-empty
       @sort-changed="fetchSortedData"
     >
       <template #cell(startedAt)="{ item }">
@@ -176,20 +207,30 @@ export default {
         </div>
       </template>
 
+      <template #table-busy>
+        <gl-skeleton-loading
+          v-for="n in $options.alertsPerPage"
+          :key="n"
+          class="gl-m-3 js-skeleton-loader"
+          :lines="1"
+          data-testid="threat-alerts-busy-state"
+        />
+      </template>
+
       <template #empty>
         <div data-testid="threat-alerts-empty-state">
           {{ s__('ThreatMonitoring|No alerts to display.') }}
         </div>
       </template>
-
-      <template #table-busy>
-        <gl-loading-icon
-          size="lg"
-          color="dark"
-          class="gl-mt-3"
-          data-testid="threat-alerts-busy-state"
-        />
-      </template>
     </gl-table>
+
+    <gl-intersection-observer
+      v-if="pageInfo.hasNextPage"
+      class="text-center"
+      @appear="fetchNextPage"
+    >
+      <gl-loading-icon v-if="isLoadingAlerts" size="md" />
+      <span v-else>&nbsp;</span>
+    </gl-intersection-observer>
   </div>
 </template>
