@@ -67,6 +67,7 @@ module Elastic
                       _name: context.name(self.es_type, :match, :search_terms),
                       fields: fields,
                       query: query,
+                      lenient: true,
                       default_operator: default_operator
                     }
                   }],
