@@ -4,7 +4,7 @@
     position: absolute;
     top: 48%;
     left: -$length;
-    border-top: 2px solid $border-color;
+    border-top: 2px solid var(--border-color, $border-color);
     width: $length;
     height: 1px;
   }
@@ -14,14 +14,14 @@
   display: inline-block;
   padding: 8px 10px 9px;
   width: 100%;
-  border: 1px solid $border-color;
+  border: 1px solid var(--border-color, $border-color);
   border-radius: $border-radius;
-  background-color: $white;
+  background-color: var(--white, $white);
 
   &:hover {
-    background-color: $gray-darker;
+    background-color: var(--gray-50, $gray-50);
     border: 1px solid $dropdown-toggle-active-border-color;
-    color: $gl-text-color;
+    color: var(--gl-text-color, $gl-text-color);
   }
 }
 
@@ -85,7 +85,14 @@
 
   // Dropdown button animation in mini pipeline graph
   &.ci-status-icon-success {
-    @include mini-pipeline-graph-color(var(--white, $white), $green-100, $green-200, $green-500, $green-600, $green-700);
+    @include mini-pipeline-graph-color(
+      var(--white, $white),
+      var(--green-200, $green-100),
+      var(--green-500, $green-200),
+      var(--green-600, $green-500),
+      var(--green-700 $green-600),
+      var(--green-100, $green-700)
+    );
   }
 
   &.ci-status-icon-failed {
