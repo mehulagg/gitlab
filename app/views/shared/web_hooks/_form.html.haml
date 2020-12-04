@@ -49,6 +49,12 @@
       %p.text-muted.ml-1
         = s_('Webhooks|This URL will be triggered when a confidential issue is created/updated/merged')
     %li
+      = form.check_box :member_events, class: 'form-check-input'
+      = form.label :member_events, class: 'list-label form-check-label ml-1' do
+        %strong= s_('Webhooks|Member events')
+      %p.text-muted.ml-1
+        = s_('Webhooks|This URL will be triggered when a member is added to a group')
+    %li
       = form.check_box :merge_requests_events, class: 'form-check-input'
       = form.label :merge_requests_events, class: 'list-label form-check-label ml-1' do
         %strong= s_('Webhooks|Merge request events')
