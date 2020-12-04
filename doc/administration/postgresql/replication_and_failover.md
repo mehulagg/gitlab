@@ -1249,7 +1249,7 @@ the replicas.
 
 #### Customizing Patroni failover behavior
 
-Omnibus exposes several options allowing more control over the
+Omnibus GitLab exposes several options allowing more control over the
 [Patroni restoration process](#recovering-the-patroni-cluster).
 
 Each option is shown below with its default value in the `gitlab.rb`.
