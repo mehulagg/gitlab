@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.shared_examples 'can move repositories storages' do
+RSpec.shared_examples 'handles repository moves' do
   describe 'associations' do
     it { is_expected.to belong_to(:container) }
   end
@@ -68,17 +68,6 @@ RSpec.shared_examples 'can move repositories storages' do
           storage_move.schedule!
 
           expect(container).to be_repository_read_only
-        end
-
-        context 'when the transition fails' do
-          it 'does not trigger ProjectUpdateRepositoryStorageWorker and adds an error' do
-            allow(storage_move.container).to receive(:set_repository_read_only!).and_raise(StandardError, 'foobar')
-            expect(repository_storage_worker).not_to receive(:perform_async)
-
-            storage_move.schedule!
-
-            expect(storage_move.errors[error_key]).to include('foobar')
-          end
         end
       end
 

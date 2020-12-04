@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe SnippetRepositoryStorageMove, type: :model do
-  it_behaves_like 'can move repositories storages' do
+  it_behaves_like 'handles repository moves' do
     let_it_be_with_refind(:container) { create(:snippet) }
 
     let(:repository_storage_factory_key) { :snippet_repository_storage_move }

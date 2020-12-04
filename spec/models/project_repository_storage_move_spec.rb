@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe ProjectRepositoryStorageMove, type: :model do
-  it_behaves_like 'can move repositories storages' do
+  it_behaves_like 'handles repository moves' do
     let_it_be_with_refind(:container) { create(:project) }
 
     let(:repository_storage_factory_key) { :project_repository_storage_move }
