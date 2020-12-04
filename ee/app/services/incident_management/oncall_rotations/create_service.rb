@@ -5,7 +5,7 @@ module IncidentManagement
     class CreateService
       # @param schedule [IncidentManagement::OncallSchedule]
       # @param project [Project]
-      # @param user [User]
+      # @param current_user [User]
       # @param params [Hash<Symbol,Any>]
       # @param params - name [String] The name of the on-call rotation.
       # @param params - length [Integer] The length of the rotation.
@@ -15,10 +15,10 @@ module IncidentManagement
       # @option opts  - participant [User] The user who is part of the rotation
       # @option opts  - color_palette [String] The color palette to assign to the on-call user, for example: "blue".
       # @option opts  - color_weight [String] The color weight to assign to for the on-call user, for example "500". Max 4 chars.
-      def initialize(schedule, project, user, params)
+      def initialize(schedule, project, current_user, params)
         @schedule = schedule
         @project = project
-        @current_user = user
+        @current_user = current_user
         @params = params
       end
 
@@ -53,8 +53,7 @@ module IncidentManagement
       end
 
       def available?
-        Feature.enabled?(:oncall_schedules_mvc, project) &&
-          project.feature_available?(:oncall_schedules)
+        ::Gitlab::IncidentManagement.oncall_schedules_available?(project)
       end
 
       def error(message)
