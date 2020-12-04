@@ -298,19 +298,19 @@ RSpec.describe API::GenericPackages do
         end
       end
 
-      it 'when valid personal access token is used' do
+      context 'when valid personal access token is used' do
         it_behaves_like 'creates a package and package file', personal_access_token_header, false
       end
 
-      it 'when valid basic auth is used' do
+      context 'when valid basic auth is used' do
         it_behaves_like 'creates a package and package file', user_basic_auth_header(user), false
       end
 
-      it 'when valid deploy token is used' do
+      context 'when valid deploy token is used' do
         it_behaves_like 'creates a package and package file', deploy_token_header(deploy_token_wo.token), false
       end
 
-      it 'when valid job token is used' do
+      context 'when valid job token is used' do
         it_behaves_like 'creates a package and package file', job_token_header, true
       end
 
