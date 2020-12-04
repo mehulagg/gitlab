@@ -1,5 +1,6 @@
-import Vuex from 'vuex';
+import { GlToggle } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
+import Vuex from 'vuex';
 import ToggleLabels from 'ee/boards/components/toggle_labels';
 import LocalStorageSync from '~/vue_shared/components/local_storage_sync.vue';
 
@@ -10,12 +11,14 @@ describe('ToggleLabels component', () => {
   let wrapper;
   let setShowLabels;
 
-  function createComponent() {
+  function createComponent(state = {}) {
     setShowLabels = jest.fn();
     return shallowMount(ToggleLabels, {
+      localVue,
       store: new Vuex.Store({
         state: {
           isShowingLabels: true,
+          ...state,
         },
         actions: {
           setShowLabels,
@@ -27,23 +30,29 @@ describe('ToggleLabels component', () => {
     });
   }
 
-  describe('onStorageUpdate', () => {
-    beforeEach(() => {
-      wrapper = createComponent();
-    });
+  afterEach(() => {
+    wrapper.destroy();
+    wrapper = null;
+  });
 
-    afterEach(() => {
-      wrapper.destroy();
-      wrapper = null;
-    });
+  it('onStorageUpdate parses empty value as false', async () => {
+    wrapper = createComponent();
 
-    it('parses empty value as false', async () => {
-      const localStorageSync = wrapper.find(LocalStorageSync);
-      localStorageSync.vm.$emit('input', '');
+    const localStorageSync = wrapper.find(LocalStorageSync);
+    localStorageSync.vm.$emit('input', '');
 
-      await wrapper.vm.$nextTick();
+    await wrapper.vm.$nextTick();
 
-      expect(setShowLabels).toHaveBeenCalledWith(expect.any(Object), false);
-    });
+    expect(setShowLabels).toHaveBeenCalledWith(expect.any(Object), false);
+  });
+
+  it('sets GlToggle value from store.isShowingLabels', () => {
+    wrapper = createComponent({ isShowingLabels: true });
+
+    expect(wrapper.find(GlToggle).props('value')).toEqual(true);
+
+    wrapper = createComponent({ isShowingLabels: false });
+
+    expect(wrapper.find(GlToggle).props('value')).toEqual(false);
   });
 });

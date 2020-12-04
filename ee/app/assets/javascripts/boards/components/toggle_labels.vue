@@ -11,13 +11,15 @@ export default {
   },
   computed: {
     ...mapState(['isShowingLabels']),
+    trackProperty() {
+      return this.isShowingLabels ? 'on' : 'off';
+    },
   },
   methods: {
     ...mapActions(['setShowLabels']),
     onToggle(val) {
       this.setShowLabels(val);
     },
-
     onStorageUpdate(val) {
       this.setShowLabels(parseBoolean(val));
     },
@@ -26,7 +28,7 @@ export default {
 </script>
 
 <template>
-  <div class="board-labels-toggle-wrapper d-flex align-items-center gl-ml-3">
+  <div class="board-labels-toggle-wrapper gl-display-flex gl-align-items-center gl-ml-3">
     <local-storage-sync
       storage-key="gl-show-board-labels"
       :value="JSON.stringify(isShowingLabels)"
@@ -35,7 +37,7 @@ export default {
     <gl-toggle
       :value="isShowingLabels"
       :label="__('Show labels')"
-      :data-track-property="isShowingLabels ? 'on' : 'off'"
+      :data-track-property="trackProperty"
       data-track-event="toggle"
       data-track-label="show_labels"
       label-position="left"
