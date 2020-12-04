@@ -1137,6 +1137,8 @@ and a simple solution would be to enable relative URLs in the Registry.
 
 ### Enable the Registry debug server
 
+The Registry debug server that can be helpful in diagnosing problems. The debug endpoint can be used for monitoring registry metrics and health, as well as profiling. Sensitive information may be available via the debug endpoint. Please be certain that access to the debug endpoint is locked down in a production environment.
+
 The optional debug server can be enabled by setting the registry debug address
 in your `gitlab.rb` configuration.
 
@@ -1152,6 +1154,8 @@ Use curl to request debug output from the debug server:
 curl localhost:5001/debug/health
 curl localhost:5001/debug/vars
 ```
+
+For more information, see 
 
 ### Advanced Troubleshooting
 
