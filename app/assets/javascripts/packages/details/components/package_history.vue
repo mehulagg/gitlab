@@ -5,7 +5,6 @@ import { s__ } from '~/locale';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import HistoryItem from '~/vue_shared/components/registry/history_item.vue';
 import { HISTORY_PIPELINES_LIMIT } from '~/packages/details/constants';
-import History_item from '../../../vue_shared/components/registry/history_item.vue';
 
 export default {
   name: 'PackageHistory',
@@ -18,11 +17,13 @@ export default {
     ),
     publishText: s__('PackageRegistry|Published to the %{project} Package Registry %{datetime}'),
     archivedPipelineMessage: s__(
-      'PackageRegistry|Paackage has %{number} archived commits, pipeline builds and registry updateds',
+      'PackageRegistry|Package has %{number} archived commits, pipeline builds and registry updates',
     ),
-    updatedByCommitText: s__('PackageRegistry|Updated by commit %{link} on branch %{branch}'),
+    updatedByCommitText: s__(
+      'PackageRegistry|Updated by commit %{link} on branch %{branch} %{datetime}',
+    ),
     updatedByPipelineText: s__(
-      'PackageRegistry|Updated built by pipeline %{link} triggered %{datetime} by %{author} %{datetime}',
+      'PackageRegistry|Updated built by pipeline %{link} triggered %{datetime} by %{author}',
     ),
     updatePublishText: s__(
       'PackageRegistry|%{name} version %{version} update was published to the registry %{datetime}',
@@ -100,7 +101,7 @@ export default {
 
       <template v-if="showPipelinesInfo">
         <!-- FIRST PIPELINE BLOCK -->
-        <history-item icon="commit" data-testid="commit">
+        <history-item icon="commit" data-testid="first-pipeline-commit">
           <gl-sprintf :message="$options.i18n.createdByCommitText">
             <template #link>
               <gl-link :href="firstPipeline.project.commit_url"
@@ -112,7 +113,7 @@ export default {
             </template>
           </gl-sprintf>
         </history-item>
-        <history-item icon="pipeline" data-testid="pipeline">
+        <history-item icon="pipeline" data-testid="first-pipeline-pipeline">
           <gl-sprintf :message="$options.i18n.createdByPipelineText">
             <template #link>
               <gl-link :href="firstPipeline.project.pipeline_url">#{{ firstPipeline.id }}</gl-link>
@@ -126,7 +127,11 @@ export default {
       </template>
       <!-- END OF FIRST PIPELINE BLOCK -->
 
-      <history-item v-if="lastPipelines.length === 0" icon="pencil" data-testid="updated-at">
+      <history-item
+        v-if="lastPipelines.length === 0"
+        icon="pencil"
+        data-testid="no-multi-pipelines-updated-at"
+      >
         <gl-sprintf :message="$options.i18n.updatedAtText">
           <template #name>
             <strong>{{ packageEntity.name }}</strong>
