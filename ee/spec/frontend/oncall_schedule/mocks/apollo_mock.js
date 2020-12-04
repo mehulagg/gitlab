@@ -19,9 +19,12 @@ export const errorMsg = 'Something went wrong';
 export const getOncallSchedulesQueryResponse = {
   data: {
     project: {
+      __typename: 'Project',
       incidentManagementOncallSchedules: {
+        __typename: 'IncidentManagementOncallScheduleConnection',
         nodes: [
           {
+            __typename: 'IncidentManagementOncallSchedule',
             iid: '37',
             name: 'Test schedule',
             description: 'Description 1 lives here',
@@ -35,22 +38,15 @@ export const getOncallSchedulesQueryResponse = {
   },
 };
 
-export const scheduleToDestroy = {
-  iid: '37',
-  name: 'Test schedule',
-  description: 'Description 1 lives here',
-  timezone: 'Pacific/Honolulu',
-};
-
 export const destroyScheduleResponse = {
   data: {
     oncallScheduleDestroy: {
       errors: [],
       oncallSchedule: {
-        iid: '37',
-        name: 'Test schedule',
-        description: 'Description 1 lives here',
-        timezone: 'Pacific/Honolulu',
+        iid: '1',
+        name: 'Test',
+        description: 'test',
+        timezone: 'Europe/Dublin',
       },
     },
   },

@@ -1,5 +1,5 @@
-mutation oncallScheduleDestroy($oncallScheduleDestroyInput: OncallScheduleDestroyInput!) {
-  oncallScheduleDestroy(input: $oncallScheduleDestroyInput) {
+mutation oncallScheduleDestroy($iid: String!, $projectPath: ID!) {
+  oncallScheduleDestroy(input: { iid: $iid, projectPath: $projectPath }) {
     errors
     oncallSchedule {
       iid
