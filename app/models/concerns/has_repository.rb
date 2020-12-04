@@ -147,7 +147,7 @@ module HasRepository
   # Set repository as writable again. Unlike setting it read-only, this will
   # succeed if the repository is already writable.
   def set_repository_writable!
-    with_lock doa
+    with_lock do
       raise ActiveRecord::RecordNotSaved, _('Database update failed') unless
         update_column(:repository_read_only, false)
 
