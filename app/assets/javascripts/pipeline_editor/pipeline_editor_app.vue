@@ -239,7 +239,7 @@ export default {
           <!-- editor should be mounted when its tab is visible, so the container has a size -->
           <gl-tab :title="$options.i18n.tabEdit" :lazy="!editorIsReady">
             <!-- editor should be mounted only once, when the tab is displayed -->
-            <text-editor v-model="contentModel" @editor-ready="editorIsReady = true" />
+            <text-editor v-model="contentModel" :project-path="projectPath" @editor-ready="editorIsReady = true" />
           </gl-tab>
 
           <gl-tab :title="$options.i18n.tabGraph">

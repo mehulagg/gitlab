@@ -92,7 +92,7 @@ export default {
     :id="`editor-lite-${fileGlobalId}`"
     ref="editor"
     data-editor-loading
-    @editor-ready="$emit('editor-ready')"
+    @editor-ready="$emit('editor-ready', editor)"
   >
     <pre class="editor-loading-content">{{ value }}</pre>
   </div>
