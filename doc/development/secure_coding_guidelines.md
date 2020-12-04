@@ -121,15 +121,15 @@ from the regex won't be able to match because the character has already been con
 When that happens, the Ruby regex engine will _backtrack_ one character to allow the `!` to match.
  
 [ReDoS](https://owasp.org/www-community/attacks/Regular_expression_Denial_of_Service_-_ReDoS)
-is a possible attack if the attacker knows or controls the regular expression used,
-and is able to enter user input that triggers this backtracking behavior in a way that
-makes execution time longer by several orders of magnitude.
+is an attack in which the attacker knows or controls the regular expression used.
+The attacker may be able to enter user input that triggers this backtracking behavior in a
+way that increases execution time by several orders of magnitude.
 
 ### Impact
 
 The resource, for example Unicorn, Puma, or Sidekiq, can be made to hang as it takes
-a long time to evaluate the bad regex match. The evaluation time can be long enough to
-consider that the process will hang "forever", requiring it to be terminated manually.
+a long time to evaluate the bad regex match. The evaluation time may require manual
+termination of the resource.
 
 ### Examples
 
@@ -141,7 +141,7 @@ User inputs used to create regular expressions:
 - [User-controlled domain name](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/25314)
 - [User-controlled email address](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/25122#note_289087459)
 
-Hardcoded regular expressions with backtracking issues
+Hardcoded regular expressions with backtracking issues:
 
 - [Repository name validation](https://gitlab.com/gitlab-org/gitlab/-/issues/220019)
 - [Link validation](https://gitlab.com/gitlab-org/gitlab/-/issues/218753), and [a bypass](https://gitlab.com/gitlab-org/gitlab/-/issues/273771)
@@ -180,8 +180,8 @@ For other regular expressions, here are a few guidelines:
 - Ruby supports some advanced regex features like [atomic groups](https://www.regular-expressions.info/atomic.html)
 and [possessive quantifiers](https://www.regular-expressions.info/possessive.html) that eleminate backtracking
 - Avoid nested quantifiers if possible (for example `(a+)+`)
-- Try to be as precise as possible in your regex and avoid the `.` if something else 
-can be used (e.g.: Use `_[^_]+_` instead of `_.*_` to match `_text here_`)
+- Try to be as precise as possible in your regex and avoid the `.` if there's an alternative
+  - For example, Use `_[^_]+_` instead of `_.*_` to match `_text here_`
 - If in doubt, don't hesitate to ping `@gitlab-com/gl-security/appsec`
 
 #### Go
