@@ -162,6 +162,7 @@ module API
       mount ::API::CommitStatuses
       mount ::API::ContainerRegistryEvent
       mount ::API::ContainerRepositories
+      mount ::API::DependencyProxy
       mount ::API::DeployKeys
       mount ::API::DeployTokens
       mount ::API::Deployments
@@ -186,6 +187,7 @@ module API
       mount ::API::ImportBitbucketServer
       mount ::API::ImportGithub
       mount ::API::IssueLinks
+      mount ::API::Invitations
       mount ::API::Issues
       mount ::API::JobArtifacts
       mount ::API::Jobs
@@ -209,7 +211,7 @@ module API
       mount ::API::ProjectPackages
       mount ::API::GroupPackages
       mount ::API::PackageFiles
-      mount ::API::NugetPackages
+      mount ::API::NugetProjectPackages
       mount ::API::PypiPackages
       mount ::API::ComposerPackages
       mount ::API::ConanProjectPackages
@@ -217,7 +219,8 @@ module API
       mount ::API::DebianGroupPackages
       mount ::API::DebianProjectPackages
       mount ::API::MavenPackages
-      mount ::API::NpmPackages
+      mount ::API::NpmProjectPackages
+      mount ::API::NpmInstancePackages
       mount ::API::GenericPackages
       mount ::API::GoProxy
       mount ::API::Pages

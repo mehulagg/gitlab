@@ -5,17 +5,10 @@ export default {
   components: {
     EditorLite,
   },
-  props: {
-    value: {
-      type: String,
-      required: false,
-      default: '',
-    },
-  },
 };
 </script>
 <template>
   <div class="gl-border-solid gl-border-gray-100 gl-border-1">
-    <editor-lite v-model="value" file-name="*.yml" :editor-options="{ readOnly: true }" />
+    <editor-lite file-name="*.yml" v-bind="$attrs" v-on="$listeners" />
   </div>
 </template>

@@ -19,6 +19,7 @@ RSpec.describe Namespace do
     it { is_expected.to have_one :aggregation_schedule }
     it { is_expected.to have_one :namespace_settings }
     it { is_expected.to have_many :custom_emoji }
+    it { is_expected.to have_many :namespace_onboarding_actions }
   end
 
   describe 'validations' do
@@ -687,7 +688,7 @@ RSpec.describe Namespace do
       let!(:project) { create(:project_empty_repo, namespace: namespace) }
 
       it 'has no repositories base directories to remove' do
-        allow(GitlabShellWorker).to receive(:perform_in)
+        expect(GitlabShellWorker).not_to receive(:perform_in)
 
         expect(File.exist?(path_in_dir)).to be(false)
 
@@ -1270,24 +1271,6 @@ RSpec.describe Namespace do
           expect(virtual_domain).to be_an_instance_of(Pages::VirtualDomain)
           expect(virtual_domain.lookup_paths).not_to be_empty
         end
-      end
-
-      it 'preloads project_feature and route' do
-        project2 = create(:project, namespace: namespace)
-        project3 = create(:project, namespace: namespace)
-
-        project.mark_pages_as_deployed
-        project2.mark_pages_as_deployed
-        project3.mark_pages_as_deployed
-
-        virtual_domain = namespace.pages_virtual_domain
-
-        queries = ActiveRecord::QueryRecorder.new { virtual_domain.lookup_paths }
-
-        # 1 to load projects
-        # 1 to preload project features
-        # 1 to load routes
-        expect(queries.count).to eq(3)
       end
     end
   end

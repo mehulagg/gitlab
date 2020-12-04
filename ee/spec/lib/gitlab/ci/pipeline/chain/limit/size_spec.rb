@@ -25,10 +25,6 @@ RSpec.describe ::Gitlab::Ci::Pipeline::Chain::Limit::Size do
       gold_plan = create(:gold_plan)
       create(:plan_limits, plan: gold_plan, ci_pipeline_size: 1)
       create(:gitlab_subscription, namespace: namespace, hosted_plan: gold_plan)
-      stub_ci_pipeline_yaml_file(YAML.dump({
-        rspec: { script: 'rspec' },
-        spinach: { script: 'spinach' }
-      }))
     end
 
     context 'when saving incomplete pipelines' do
@@ -73,7 +69,7 @@ RSpec.describe ::Gitlab::Ci::Pipeline::Chain::Limit::Size do
 
       it 'logs the error' do
         expect(Gitlab::ErrorTracking).to receive(:track_exception).with(
-          instance_of(EE::Gitlab::Ci::Limit::LimitExceededError),
+          instance_of(Gitlab::Ci::Limit::LimitExceededError),
           project_id: project.id, plan: namespace.actual_plan_name
         )
 

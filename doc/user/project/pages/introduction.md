@@ -1,7 +1,7 @@
 ---
 stage: Release
-group: Release Management
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+group: Release
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Exploring GitLab Pages
@@ -11,7 +11,7 @@ GitLab Pages offers.
 
 To familiarize yourself with GitLab Pages first:
 
-- Read an [introduction to GitLab Pages](index.md#overview).
+- Read an [introduction to GitLab Pages](index.md).
 - Learn [how to get started with Pages](index.md#getting-started).
 - Learn how to enable GitLab Pages
   across your GitLab instance on the [administrator documentation](../../../administration/pages/index.md).

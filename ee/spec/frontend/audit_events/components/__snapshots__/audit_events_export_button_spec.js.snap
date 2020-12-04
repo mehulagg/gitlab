@@ -7,7 +7,7 @@ exports[`AuditEventsExportButton component Audit Events CSV export button matche
   href="http://example.com/audit_log_reports.csv?created_after=2020-12-12"
   icon="export"
   size="medium"
-  title="Max size 15 MB"
+  title="Max 100,000 events"
   variant="default"
 >
   

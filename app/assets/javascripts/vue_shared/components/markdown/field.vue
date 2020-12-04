@@ -10,14 +10,14 @@ import { deprecatedCreateFlash as Flash } from '~/flash';
 import GLForm from '~/gl_form';
 import MarkdownHeader from './header.vue';
 import MarkdownToolbar from './toolbar.vue';
-import GlMentions from '~/vue_shared/components/gl_mentions.vue';
+import GfmAutocomplete from '~/vue_shared/components/gfm_autocomplete/gfm_autocomplete.vue';
 import Suggestions from '~/vue_shared/components/markdown/suggestions.vue';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import axios from '~/lib/utils/axios_utils';
 
 export default {
   components: {
-    GlMentions,
+    GfmAutocomplete,
     MarkdownHeader,
     MarkdownToolbar,
     GlIcon,
@@ -141,10 +141,9 @@ export default {
     addMultipleToDiscussionWarning() {
       return sprintf(
         __(
-          '%{icon}You are about to add %{usersTag} people to the discussion. They will all receive a notification.',
+          'You are about to add %{usersTag} people to the discussion. They will all receive a notification.',
         ),
         {
-          icon: '<i class="fa fa-exclamation-triangle" aria-hidden="true"></i>',
           usersTag: `<strong><span class="js-referenced-users-count">${this.referencedUsers.length}</span></strong>`,
         },
         false,
@@ -174,10 +173,11 @@ export default {
         members: this.enableAutocomplete && !this.glFeatures.tributeAutocomplete,
         issues: this.enableAutocomplete && !this.glFeatures.tributeAutocomplete,
         mergeRequests: this.enableAutocomplete && !this.glFeatures.tributeAutocomplete,
-        epics: this.enableAutocomplete,
+        epics: this.enableAutocomplete && !this.glFeatures.tributeAutocomplete,
         milestones: this.enableAutocomplete && !this.glFeatures.tributeAutocomplete,
         labels: this.enableAutocomplete && !this.glFeatures.tributeAutocomplete,
-        snippets: this.enableAutocomplete,
+        snippets: this.enableAutocomplete && !this.glFeatures.tributeAutocomplete,
+        vulnerabilities: this.enableAutocomplete,
       },
       true,
     );
@@ -246,9 +246,9 @@ export default {
     />
     <div v-show="!previewMarkdown" class="md-write-holder">
       <div class="zen-backdrop">
-        <gl-mentions v-if="glFeatures.tributeAutocomplete">
+        <gfm-autocomplete v-if="glFeatures.tributeAutocomplete">
           <slot name="textarea"></slot>
-        </gl-mentions>
+        </gfm-autocomplete>
         <slot v-else name="textarea"></slot>
         <a
           class="zen-control zen-control-leave js-zen-leave gl-text-gray-500"
@@ -293,6 +293,7 @@ export default {
     <template v-if="previewMarkdown && !markdownPreviewLoading">
       <div v-if="referencedCommands" class="referenced-commands" v-html="referencedCommands"></div>
       <div v-if="shouldShowReferencedUsers" class="referenced-users">
+        <gl-icon name="warning-solid" />
         <span v-html="addMultipleToDiscussionWarning"></span>
       </div>
     </template>

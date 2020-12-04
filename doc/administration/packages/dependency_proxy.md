@@ -1,14 +1,15 @@
 ---
 stage: Package
 group: Package
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# GitLab Dependency Proxy administration **(PREMIUM ONLY)**
+# GitLab Dependency Proxy administration
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/7934) in [GitLab Premium](https://about.gitlab.com/pricing/) 11.11.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/7934) in [GitLab Premium](https://about.gitlab.com/pricing/) 11.11.
+> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/273655) to [GitLab Core](https://about.gitlab.com/pricing/) in GitLab 13.6.
 
-GitLab can be utilized as a dependency proxy for a variety of common package managers.
+GitLab can be used as a dependency proxy for a variety of common package managers.
 
 This is the administration documentation. If you want to learn how to use the
 dependency proxies, see the [user guide](../../user/packages/dependency_proxy/index.md).
@@ -33,7 +34,7 @@ To enable the dependency proxy feature:
 
 **Installations from source**
 
-1. After the installation is complete, you will have to configure the `dependency_proxy`
+1. After the installation is complete, configure the `dependency_proxy`
    section in `config/gitlab.yml`. Set to `true` to enable it:
 
    ```yaml

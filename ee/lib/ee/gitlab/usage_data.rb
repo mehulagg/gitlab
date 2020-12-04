@@ -36,6 +36,12 @@ module EE
         },
         coverage_fuzzing: {
           name: :coverage_fuzzing_jobs
+        },
+        apifuzzer_fuzz: {
+          name: :api_fuzzing_jobs
+        },
+        apifuzzer_fuzz_dnd: {
+          name: :api_fuzzing_dnd_jobs
         }
       }.freeze
 
@@ -105,7 +111,10 @@ module EE
           return {} unless ::License.feature_available?(:requirements)
 
           {
-            requirements_created: count(RequirementsManagement::Requirement)
+            requirements_created: count(RequirementsManagement::Requirement),
+            requirement_test_reports_manual: count(RequirementsManagement::TestReport.without_build),
+            requirement_test_reports_ci: count(RequirementsManagement::TestReport.with_build),
+            requirements_with_test_report: distinct_count(RequirementsManagement::TestReport, :requirement_id)
           }
         end
 
@@ -191,14 +200,6 @@ module EE
                 ldap_keys: count(::LDAPKey),
                 ldap_users: count(::User.ldap, 'users.id'),
                 pod_logs_usages_total: redis_usage_data { ::Gitlab::UsageCounters::PodLogs.usage_totals[:total] },
-                projects_enforcing_code_owner_approval: count(::Project.without_deleted.non_archived.requiring_code_owner_approval),
-                merge_requests_with_added_rules: distinct_count(::ApprovalMergeRequestRule.with_added_approval_rules,
-                                                                :merge_request_id,
-                                                                start: approval_merge_request_rule_minimum_id,
-                                                                finish: approval_merge_request_rule_maximum_id),
-                merge_requests_with_optional_codeowners: distinct_count(::ApprovalMergeRequestRule.code_owner_approval_optional, :merge_request_id),
-                merge_requests_with_overridden_project_rules: merge_requests_with_overridden_project_rules,
-                merge_requests_with_required_codeowners: distinct_count(::ApprovalMergeRequestRule.code_owner_approval_required, :merge_request_id),
                 merged_merge_requests_using_approval_rules: count(::MergeRequest.merged.joins(:approval_rules), # rubocop: disable CodeReuse/ActiveRecord
                                                                   start: merge_request_minimum_id,
                                                                   finish: merge_request_maximum_id),
@@ -274,6 +275,22 @@ module EE
           }, approval_rules_counts)
         end
 
+        override :usage_activity_by_stage_enablement
+        def usage_activity_by_stage_enablement(time_period)
+          return super unless ::Gitlab::Geo.enabled?
+
+          super.merge({
+                      geo_secondary_web_oauth_users: distinct_count(
+                        OauthAccessGrant
+                            .where(time_period)
+                            .where(
+                              application_id: GeoNode.secondary_nodes.select(:oauth_application_id)
+                            ),
+                        :resource_owner_id
+                      )
+                  })
+        end
+
         # Omitted because no user, creator or author associated: `campaigns_imported_from_github`, `ldap_group_links`
         override :usage_activity_by_stage_manage
         def usage_activity_by_stage_manage(time_period)
@@ -293,8 +310,6 @@ module EE
         def usage_activity_by_stage_monitor(time_period)
           super.merge({
             operations_dashboard_users_with_projects_added: distinct_count(UsersOpsDashboardProject.joins(:user).merge(::User.active).where(time_period), :user_id),
-            projects_prometheus_active: distinct_count(::Project.with_active_prometheus_service.where(time_period), :creator_id),
-            projects_with_error_tracking_enabled: distinct_count(::Project.with_enabled_error_tracking.where(time_period), :creator_id),
             projects_incident_sla_enabled: count(::Project.with_enabled_incident_sla)
           })
         end
@@ -381,16 +396,44 @@ module EE
         def count_secure_pipelines(time_period)
           return {} if time_period.blank?
 
-          start = ::Ci::Pipeline.minimum(:id)
-          finish = ::Ci::Pipeline.maximum(:id)
           pipelines_with_secure_jobs = {}
 
-          ::Security::Scan.scan_types.each do |name, scan_type|
-            relation = ::Ci::Build.joins(:security_scans)
-                                .where(status: 'success', retried: [nil, false])
-                                .where('security_scans.scan_type = ?', scan_type)
-                                .where(time_period)
-            pipelines_with_secure_jobs["#{name}_pipeline".to_sym] = distinct_count(relation, :commit_id, start: start, finish: finish, batch: false)
+          # HLL batch counting always iterate over pkey of
+          # given relation, while ordinary batch count
+          # iterated over counted attribute, one-to-many joins
+          # can break batch size limitation, and lead to
+          # time outing batch queries, to avoid that
+          # different join strategy is used for HLL counter
+          if ::Feature.enabled?(:postgres_hll_batch_counting)
+            relation = ::Security::Scan.where(time_period).group(:created_at)
+
+            start = relation.select('MIN(id) as min_id').order('min_id ASC').first&.min_id
+            finish = relation.select('MAX(id) as max_id').order('max_id DESC').first&.max_id
+
+            ::Security::Scan.scan_types.each do |name, scan_type|
+              relation = ::Security::Scan.joins(:build)
+                           .where(ci_builds: { status: 'success', retried: [nil, false] })
+                           .where('security_scans.scan_type = ?', scan_type)
+                           .where(security_scans: time_period)
+
+              pipelines_with_secure_jobs["#{name}_pipeline".to_sym] =
+                if start && finish
+                  estimate_batch_distinct_count(relation, :commit_id, batch_size: 1000, start: start, finish: finish)
+                else
+                  0
+                end
+            end
+          else
+            start = ::Ci::Pipeline.minimum(:id)
+            finish = ::Ci::Pipeline.maximum(:id)
+
+            ::Security::Scan.scan_types.each do |name, scan_type|
+              relation = ::Ci::Build.joins(:security_scans)
+                           .where(status: 'success', retried: [nil, false])
+                           .where('security_scans.scan_type = ?', scan_type)
+                           .where(time_period)
+              pipelines_with_secure_jobs["#{name}_pipeline".to_sym] = distinct_count(relation, :commit_id, start: start, finish: finish, batch: false)
+            end
           end
 
           pipelines_with_secure_jobs

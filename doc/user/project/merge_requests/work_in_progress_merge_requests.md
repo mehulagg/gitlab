@@ -1,7 +1,7 @@
 ---
 stage: Create
 group: Source Code
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference, concepts
 ---
 
@@ -13,6 +13,12 @@ it as a **Draft**. This will disable the "Merge" button, preventing it from
 being merged, and it will stay disabled until the "Draft" flag has been removed.
 
 ![Blocked Merge Button](img/draft_blocked_merge_button_v13_2.png)
+
+When [pipelines for merged results](../../../ci/merge_request_pipelines/pipelines_for_merged_results/index.md)
+is enabled, draft merge requests run [merge request pipelines](../../../ci/merge_request_pipelines/index.md)
+only.
+
+To run pipelines for merged results, you must [remove the draft status](#removing-the-draft-flag-from-a-merge-request).
 
 ## Adding the "Draft" flag to a merge request
 
@@ -27,7 +33,7 @@ There are several ways to flag a merge request as a Draft:
   description will have the same effect.
 - **Deprecated** Add `[WIP]` or `WIP:` to the start of the merge request's title.
   **WIP** still works but was deprecated in favor of **Draft**. It will be removed in the next major version (GitLab 14.0).
-- Add the `/wip` [quick action](../quick_actions.md#quick-actions-for-issues-merge-requests-and-epics)
+- Add the `/draft` (or `/wip`) [quick action](../quick_actions.md#quick-actions-for-issues-merge-requests-and-epics)
   in a comment in the merge request. This is a toggle, and can be repeated
   to change the status back. Note that any other text in the comment will be discarded.
 - Add `draft:`, `Draft:`, `fixup!`, or `Fixup!` to the beginning of a commit message targeting the
@@ -43,7 +49,7 @@ Similar to above, when a Merge Request is ready to be merged, you can remove the
 - Remove `[Draft]`, `Draft:` or `(Draft)` from the start of the merge request's title. Clicking on
   **Remove the Draft: prefix from the title**, under the title box, when editing the merge
   request's description, will have the same effect.
-- Add the `/wip` [quick action](../quick_actions.md#quick-actions-for-issues-merge-requests-and-epics)
+- Add the `/draft` (or `/wip`) [quick action](../quick_actions.md#quick-actions-for-issues-merge-requests-and-epics)
   in a comment in the merge request. This is a toggle, and can be repeated
   to change the status back. Note that any other text in the comment will be discarded.
 - Click on the **Resolve Draft status** button near the bottom of the merge request description,

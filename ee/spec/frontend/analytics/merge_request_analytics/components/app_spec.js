@@ -1,9 +1,9 @@
 import { shallowMount } from '@vue/test-utils';
 import MergeRequestAnalyticsApp from 'ee/analytics/merge_request_analytics/components/app.vue';
-import DateRange from 'ee/analytics/shared/components/daterange.vue';
 import FilterBar from 'ee/analytics/merge_request_analytics/components/filter_bar.vue';
 import ThroughputChart from 'ee/analytics/merge_request_analytics/components/throughput_chart.vue';
 import ThroughputTable from 'ee/analytics/merge_request_analytics/components/throughput_table.vue';
+import DateRange from 'ee/analytics/shared/components/daterange.vue';
 import UrlSync from '~/vue_shared/components/url_sync.vue';
 
 describe('MergeRequestAnalyticsApp', () => {

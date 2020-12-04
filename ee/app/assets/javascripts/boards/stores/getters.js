@@ -3,12 +3,15 @@ import gettersCE from '~/boards/stores/getters';
 export default {
   ...gettersCE,
 
+  isSwimlanesOn: state => {
+    return Boolean(gon?.features?.swimlanes && state.isShowingEpicsSwimlanes);
+  },
   getIssuesByEpic: (state, getters) => (listId, epicId) => {
-    return getters.getIssues(listId).filter(issue => issue.epic && issue.epic.id === epicId);
+    return getters.getIssuesByList(listId).filter(issue => issue.epic && issue.epic.id === epicId);
   },
 
   getUnassignedIssues: (state, getters) => listId => {
-    return getters.getIssues(listId).filter(i => Boolean(i.epic) === false);
+    return getters.getIssuesByList(listId).filter(i => Boolean(i.epic) === false);
   },
 
   getEpicById: state => epicId => {
@@ -16,9 +19,6 @@ export default {
   },
 
   shouldUseGraphQL: state => {
-    return (
-      (gon?.features?.boardsWithSwimlanes && state.isShowingEpicsSwimlanes) ||
-      gon?.features?.graphqlBoardLists
-    );
+    return state.isShowingEpicsSwimlanes || gon?.features?.graphqlBoardLists;
   },
 };

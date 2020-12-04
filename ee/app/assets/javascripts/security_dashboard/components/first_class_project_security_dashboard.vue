@@ -9,6 +9,7 @@ import SecurityDashboardLayout from './security_dashboard_layout.vue';
 import VulnerabilitiesCountList from './vulnerability_count_list.vue';
 import Filters from './first_class_vulnerability_filters.vue';
 import CsvExportButton from './csv_export_button.vue';
+import { vulnerabilitiesSeverityCountScopes } from '../constants';
 
 export const BANNER_COOKIE_KEY = 'hide_vulnerabilities_introduction_banner';
 
@@ -34,11 +35,6 @@ export default {
       required: false,
       default: () => ({}),
     },
-    hasVulnerabilities: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
     vulnerabilitiesExportEndpoint: {
       type: String,
       required: false,
@@ -53,7 +49,7 @@ export default {
       shoudShowAutoFixUserCallout,
     };
   },
-  inject: ['dashboardDocumentation', 'autoFixDocumentation'],
+  inject: ['dashboardDocumentation', 'autoFixDocumentation', 'projectFullPath'],
   methods: {
     handleFilterChange(filters) {
       this.filters = filters;
@@ -63,12 +59,13 @@ export default {
       this.shoudShowAutoFixUserCallout = false;
     },
   },
+  vulnerabilitiesSeverityCountScopes,
 };
 </script>
 
 <template>
   <div>
-    <template v-if="hasVulnerabilities">
+    <template v-if="pipeline.id">
       <auto-fix-user-callout
         v-if="shoudShowAutoFixUserCallout"
         :help-page-path="autoFixDocumentation"
@@ -76,12 +73,17 @@ export default {
       />
       <security-dashboard-layout>
         <template #header>
-          <div class="mt-4 d-flex">
-            <h4 class="flex-grow mt-0 mb-0">{{ __('Vulnerabilities') }}</h4>
+          <div class="gl-mt-6 gl-display-flex">
+            <h4 class="gl-flex-grow-1 gl-my-0">{{ __('Vulnerability Report') }}</h4>
             <csv-export-button :vulnerabilities-export-endpoint="vulnerabilitiesExportEndpoint" />
           </div>
           <project-pipeline-status :pipeline="pipeline" />
-          <vulnerabilities-count-list :filters="filters" />
+          <vulnerabilities-count-list
+            class="gl-mt-6"
+            :scope="$options.vulnerabilitiesSeverityCountScopes.project"
+            :full-path="projectFullPath"
+            :filters="filters"
+          />
         </template>
         <template #sticky>
           <filters @filterChange="handleFilterChange" />

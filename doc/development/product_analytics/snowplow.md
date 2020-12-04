@@ -1,7 +1,7 @@
 ---
 stage: Growth
 group: Product Analytics
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Snowplow Guide
@@ -52,7 +52,7 @@ Tracking can be enabled at:
 - The instance level, which enables tracking on both the frontend and backend layers.
 - User level, though user tracking can be disabled on a per-user basis. GitLab tracking respects the [Do Not Track](https://www.eff.org/issues/do-not-track) standard, so any user who has enabled the Do Not Track option in their browser is not tracked at a user level.
 
-We utilize Snowplow for the majority of our tracking strategy and it is enabled on GitLab.com. On a self-managed instance, Snowplow can be enabled by navigating to:
+We use Snowplow for the majority of our tracking strategy and it is enabled on GitLab.com. On a self-managed instance, Snowplow can be enabled by navigating to:
 
 - **Admin Area > Settings > General** in the UI.
 - `admin/application_settings/integrations` in your browser.
@@ -98,7 +98,7 @@ sequenceDiagram
 
 ## Structured event taxonomy
 
-When adding new click events, we should add them in a way that's internally consistent. If we don't, it'll be very painful to perform analysis across features since each feature will be capturing events differently.
+When adding new click events, we should add them in a way that's internally consistent. If we don't, it is very painful to perform analysis across features since each feature captures events differently.
 
 The current method provides several attributes that are sent on each click event. Please try to follow these guidelines when specifying events to capture:
 
@@ -110,9 +110,13 @@ The current method provides several attributes that are sent on each click event
 | property  | text    | false    | Any additional property of the element, or object being acted on. |
 | value     | decimal | false    | Describes a numeric value or something directly related to the event. This could be the value of an input (e.g. `10` when clicking `internal` visibility). |
 
+### Web-specific parameters
+
+Snowplow JS adds many [web-specific parameters](https://docs.snowplowanalytics.com/docs/collecting-data/collecting-from-own-applications/snowplow-tracker-protocol/#Web-specific_parameters) to all web events by default.
+
 ## Implementing Snowplow JS (Frontend) tracking
 
-GitLab provides `Tracking`, an interface that wraps the [Snowplow JavaScript Tracker](https://github.com/snowplow/snowplow/wiki/javascript-tracker) for tracking custom events. There are a few ways to utilize tracking, but each generally requires at minimum, a `category` and an `action`. Additional data can be provided that adheres to our [Structured event taxonomy](#structured-event-taxonomy).
+GitLab provides `Tracking`, an interface that wraps the [Snowplow JavaScript Tracker](https://github.com/snowplow/snowplow/wiki/javascript-tracker) for tracking custom events. There are a few ways to use tracking, but each generally requires at minimum, a `category` and an `action`. Additional data can be provided that adheres to our [Structured event taxonomy](#structured-event-taxonomy).
 
 | field      | type   | default value              | description                                                                                                                                                                                                    |
 |:-----------|:-------|:---------------------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -294,7 +298,7 @@ Custom event tracking and instrumentation can be added by directly calling the `
 | `action`   | string | 'generic'     | The action being taken, which can be anything from a controller action like `create` to something like an Active Record callback.                                                                                                                                      |
 | `data`     | object | {}            | Additional data such as `label`, `property`, `value`, and `context` as described in [Structured event taxonomy](#structured-event-taxonomy). These are set as empty strings if you don't provide them. |
 
-Tracking can be viewed as either tracking user behavior, or can be utilized for instrumentation to monitor and visualize performance over time in an area or aspect of code.
+Tracking can be viewed as either tracking user behavior, or can be used for instrumentation to monitor and visualize performance over time in an area or aspect of code.
 
 For example:
 
@@ -417,7 +421,7 @@ Snowplow Micro is a Docker-based solution for testing frontend and backend event
 1. Send a test Snowplow event from the Rails console:
 
    ```ruby
-   Gitlab::Tracking.self_describing_event('iglu:com.gitlab/pageview_context/jsonschema/1-0-0', { page_type: 'MY_TYPE' }, context: nil )
+   Gitlab::Tracking.self_describing_event('iglu:com.gitlab/pageview_context/jsonschema/1-0-0', data: { page_type: 'MY_TYPE' }, context: nil)
    ```
 
 ### Snowplow Mini

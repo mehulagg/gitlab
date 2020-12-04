@@ -133,7 +133,7 @@ export default {
             variant="link"
             @click="toggleMilestonesExpanded"
           >
-            <gl-icon :name="expandButton.name" class="text-secondary" aria-hidden="true" />
+            <gl-icon :name="expandButton.name" class="text-secondary" />
           </gl-button>
         </span>
         <div class="gl-overflow-hidden gl-flex-grow-1 gl-mx-3 gl-font-weight-bold">
@@ -144,7 +144,7 @@ export default {
           class="gl-display-flex gl-align-items-center gl-justify-content-center text-secondary gl-white-space-nowrap"
           data-testid="count"
         >
-          <gl-icon name="clock" class="gl-mr-2" aria-hidden="true" />
+          <gl-icon name="clock" class="gl-mr-2" />
           <span :aria-label="milestonesCountText">{{ milestonesCount }}</span>
         </div>
       </div>

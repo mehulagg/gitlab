@@ -23,6 +23,8 @@ describe('Storage counter app', () => {
   const findUsageStatistics = () => wrapper.find(UsageStatistics);
   const findStorageInlineAlert = () => wrapper.find(StorageInlineAlert);
   const findProjectsTable = () => wrapper.find(ProjectsTable);
+  const findPrevButton = () => wrapper.find('[data-testid="prevButton"]');
+  const findNextButton = () => wrapper.find('[data-testid="nextButton"]');
 
   const createComponent = ({
     props = {},
@@ -255,6 +257,32 @@ describe('Storage counter app', () => {
       findProjectsTable().vm.$emit('search', sampleShortSearchTerm);
 
       expect(wrapper.vm.searchTerm).toBe('');
+    });
+  });
+
+  describe('renders projects table pagination component', () => {
+    const namespaceWithPageInfo = {
+      namespace: {
+        ...withRootStorageStatistics,
+        projects: {
+          ...withRootStorageStatistics.projects,
+          pageInfo: {
+            hasPreviousPage: false,
+            hasNextPage: true,
+          },
+        },
+      },
+    };
+    beforeEach(() => {
+      createComponent(namespaceWithPageInfo);
+    });
+
+    it('with disabled "Prev" button', () => {
+      expect(findPrevButton().attributes().disabled).toBe('disabled');
+    });
+
+    it('with enabled "Next" button', () => {
+      expect(findNextButton().attributes().disabled).toBeUndefined();
     });
   });
 });

@@ -1,6 +1,6 @@
+import { GlLoadingIcon, GlDropdown, GlDropdownItem, GlAlert, GlIcon } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import MetricChart from 'ee/analytics/productivity_analytics/components/metric_chart.vue';
-import { GlLoadingIcon, GlDropdown, GlDropdownItem, GlAlert, GlIcon } from '@gitlab/ui';
 import httpStatusCodes from '~/lib/utils/http_status';
 
 describe('MetricChart component', () => {

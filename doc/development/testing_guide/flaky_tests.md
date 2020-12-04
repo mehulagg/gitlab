@@ -1,7 +1,7 @@
 ---
 stage: none
 group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Flaky tests
@@ -18,16 +18,22 @@ When a test frequently fails in `master`,
 should be created.
 If the test cannot be fixed in a timely fashion, there is an impact on the
 productivity of all the developers, so it should be placed in quarantine by
-assigning the `:quarantine` metadata.
+assigning the `:quarantine` metadata with the issue URL.
 
-This means it will be skipped unless run with `--tag quarantine`:
+```ruby
+it 'should succeed', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/12345' do
+  expect(response).to have_gitlab_http_status(:ok)
+end
+```
+
+This means it is skipped unless run with `--tag quarantine`:
 
 ```shell
 bin/rspec --tag quarantine
 ```
 
 **Before putting a test in quarantine, you should make sure that a
-~"master:broken" issue exists for it so it won't stay in quarantine forever.**
+~"master:broken" issue exists for it so it doesn't stay in quarantine forever.**
 
 Once a test is in quarantine, there are 3 choices:
 

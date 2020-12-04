@@ -1,7 +1,7 @@
 ---
 stage: Package
 group: Package
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Composer packages in the Package Registry
@@ -70,14 +70,17 @@ so that anyone who can access the project can use the package as a dependency.
 
 Prerequisites:
 
-- A package in a GitLab repository.
+- A package in a GitLab repository. Composer packages should be versioned based on
+  the [Composer specification](https://getcomposer.org/doc/04-schema.md#version).
+  If the version is not valid, for example, it has three dots (`1.0.0.0`), an 
+  error (`Validation failed: Version is invalid`) occurs when you publish. 
 - A valid `composer.json` file.
 - The Packages feature is enabled in a GitLab repository.
 - The project ID, which is on the project's home page.
 - A [personal access token](../../../user/profile/personal_access_tokens.md) with the scope set to `api`.
 
   NOTE: **Note:**
-  [Deploy tokens](./../../project/deploy_tokens/index.md) are
+  [Deploy tokens](../../project/deploy_tokens/index.md) are
   [not yet supported](https://gitlab.com/gitlab-org/gitlab/-/issues/240897) for use with Composer.
 
 To publish the package:
@@ -116,7 +119,7 @@ You can publish a Composer package to the Package Registry as part of your CI/CD
 
 1. Run the pipeline.
 
-You can view the published package by going to **Packages & Registries > Package Registry** and selecting the **Composer** tab.
+To view the published package, go to **Packages & Registries > Package Registry** and select the **Composer** tab.
 
 ### Use a CI/CD template
 
@@ -140,7 +143,7 @@ Prerequisites:
 - A [personal access token](../../../user/profile/personal_access_tokens.md) with the scope set to, at minimum, `read_api`.
 
   NOTE: **Note:**
-  [Deploy tokens](./../../project/deploy_tokens/index.md) are
+  [Deploy tokens](../../project/deploy_tokens/index.md) are
   [not yet supported](https://gitlab.com/gitlab-org/gitlab/-/issues/240897) for use with Composer.
 
 To install a package:

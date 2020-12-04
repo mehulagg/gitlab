@@ -28,6 +28,10 @@ class User < ApplicationRecord
 
   DEFAULT_NOTIFICATION_LEVEL = :participating
 
+  INSTANCE_ACCESS_REQUEST_APPROVERS_TO_BE_NOTIFIED_LIMIT = 10
+
+  BLOCKED_PENDING_APPROVAL_STATE = 'blocked_pending_approval'.freeze
+
   add_authentication_token_field :incoming_email_token, token_generator: -> { SecureRandom.hex.to_i(16).to_s(36) }
   add_authentication_token_field :feed_token
   add_authentication_token_field :static_object_token
@@ -164,6 +168,7 @@ class User < ApplicationRecord
 
   has_many :issue_assignees, inverse_of: :assignee
   has_many :merge_request_assignees, inverse_of: :assignee
+  has_many :merge_request_reviewers, inverse_of: :reviewer
   has_many :assigned_issues, class_name: "Issue", through: :issue_assignees, source: :issue
   has_many :assigned_merge_requests, class_name: "MergeRequest", through: :merge_request_assignees, source: :merge_request
 
@@ -284,6 +289,7 @@ class User < ApplicationRecord
 
   delegate :path, to: :namespace, allow_nil: true, prefix: true
   delegate :job_title, :job_title=, to: :user_detail, allow_nil: true
+  delegate :other_role, :other_role=, to: :user_detail, allow_nil: true
   delegate :bio, :bio=, :bio_html, to: :user_detail, allow_nil: true
   delegate :webauthn_xid, :webauthn_xid=, to: :user_detail, allow_nil: true
 
@@ -341,6 +347,7 @@ class User < ApplicationRecord
 
   # Scopes
   scope :admins, -> { where(admin: true) }
+  scope :instance_access_request_approvers_to_be_notified, -> { admins.active.order_recent_sign_in.limit(INSTANCE_ACCESS_REQUEST_APPROVERS_TO_BE_NOTIFIED_LIMIT) }
   scope :blocked, -> { with_states(:blocked, :ldap_blocked) }
   scope :blocked_pending_approval, -> { with_states(:blocked_pending_approval) }
   scope :external, -> { where(external: true) }
@@ -350,6 +357,9 @@ class User < ApplicationRecord
   scope :deactivated, -> { with_state(:deactivated).non_internal }
   scope :without_projects, -> { joins('LEFT JOIN project_authorizations ON users.id = project_authorizations.user_id').where(project_authorizations: { user_id: nil }) }
   scope :by_username, -> (usernames) { iwhere(username: Array(usernames).map(&:to_s)) }
+  scope :by_name, -> (names) { iwhere(name: Array(names)) }
+  scope :by_user_email, -> (emails) { iwhere(email: Array(emails)) }
+  scope :by_emails, -> (emails) { joins(:emails).where(emails: { email: Array(emails).map(&:downcase) }) }
   scope :for_todos, -> (todos) { where(id: todos.select(:user_id)) }
   scope :with_emails, -> { preload(:emails) }
   scope :with_dashboard, -> (dashboard) { where(dashboard: dashboard) }
@@ -514,17 +524,15 @@ class User < ApplicationRecord
     # @param emails [String, Array<String>] email addresses to check
     # @param confirmed [Boolean] Only return users where the email is confirmed
     def by_any_email(emails, confirmed: false)
-      emails = Array(emails).map(&:downcase)
-
-      from_users = where(email: emails)
+      from_users = by_user_email(emails)
       from_users = from_users.confirmed if confirmed
 
-      from_emails = joins(:emails).where(emails: { email: emails })
+      from_emails = by_emails(emails)
       from_emails = from_emails.confirmed.merge(Email.confirmed) if confirmed
 
       items = [from_users, from_emails]
 
-      user_ids = Gitlab::PrivateCommitEmail.user_ids_for_emails(emails)
+      user_ids = Gitlab::PrivateCommitEmail.user_ids_for_emails(Array(emails).map(&:downcase))
       items << where(id: user_ids) if user_ids.present?
 
       from_union(items)
@@ -583,11 +591,13 @@ class User < ApplicationRecord
 
       sanitized_order_sql = Arel.sql(sanitize_sql_array([order, query: query]))
 
-      where(
-        fuzzy_arel_match(:name, query, lower_exact_match: true)
-          .or(fuzzy_arel_match(:username, query, lower_exact_match: true))
-          .or(arel_table[:email].eq(query))
-      ).reorder(sanitized_order_sql, :name)
+      search_query = if Feature.enabled?(:user_search_secondary_email)
+                       search_with_secondary_emails(query)
+                     else
+                       search_without_secondary_emails(query)
+                     end
+
+      search_query.reorder(sanitized_order_sql, :name)
     end
 
     # Limits the result set to users _not_ in the given query/list of IDs.
@@ -602,6 +612,18 @@ class User < ApplicationRecord
       reorder(:name)
     end
 
+    def search_without_secondary_emails(query)
+      return none if query.blank?
+
+      query = query.downcase
+
+      where(
+        fuzzy_arel_match(:name, query, lower_exact_match: true)
+          .or(fuzzy_arel_match(:username, query, lower_exact_match: true))
+          .or(arel_table[:email].eq(query))
+      )
+    end
+
     # searches user by given pattern
     # it compares name, email, username fields and user's secondary emails with given pattern
     # This method uses ILIKE on PostgreSQL.
@@ -612,15 +634,16 @@ class User < ApplicationRecord
       query = query.downcase
 
       email_table = Email.arel_table
-      matched_by_emails_user_ids = email_table
+      matched_by_email_user_id = email_table
         .project(email_table[:user_id])
         .where(email_table[:email].eq(query))
+        .take(1) # at most 1 record as there is a unique constraint
 
       where(
         fuzzy_arel_match(:name, query)
           .or(fuzzy_arel_match(:username, query))
           .or(arel_table[:email].eq(query))
-          .or(arel_table[:id].in(matched_by_emails_user_ids))
+          .or(arel_table[:id].eq(matched_by_email_user_id))
       )
     end
 
@@ -909,10 +932,11 @@ class User < ApplicationRecord
   # Returns the groups a user has access to, either through a membership or a project authorization
   def authorized_groups
     Group.unscoped do
-      Group.from_union([
-        groups,
-        authorized_projects.joins(:namespace).select('namespaces.*')
-      ])
+      if Feature.enabled?(:shared_group_membership_auth, self)
+        authorized_groups_with_shared_membership
+      else
+        authorized_groups_without_shared_membership
+      end
     end
   end
 
@@ -1224,7 +1248,7 @@ class User < ApplicationRecord
   end
 
   def solo_owned_groups
-    @solo_owned_groups ||= owned_groups.select do |group|
+    @solo_owned_groups ||= owned_groups.includes(:owners).select do |group|
       group.owners == [self]
     end
   end
@@ -1807,6 +1831,26 @@ class User < ApplicationRecord
 
   private
 
+  def authorized_groups_without_shared_membership
+    Group.from_union([
+      groups,
+      authorized_projects.joins(:namespace).select('namespaces.*')
+    ])
+  end
+
+  def authorized_groups_with_shared_membership
+    cte = Gitlab::SQL::CTE.new(:direct_groups, authorized_groups_without_shared_membership)
+    cte_alias = cte.table.alias(Group.table_name)
+
+    Group
+      .with(cte.to_arel)
+      .from_union([
+        Group.from(cte_alias),
+        Group.joins(:shared_with_group_links)
+             .where(group_group_links: { shared_with_group_id: Group.from(cte_alias) })
+    ])
+  end
+
   def default_private_profile_to_false
     return unless private_profile_changed? && private_profile.nil?
 
@@ -1843,15 +1887,15 @@ class User < ApplicationRecord
     valid = true
     error = nil
 
-    if Gitlab::CurrentSettings.domain_blacklist_enabled?
-      blocked_domains = Gitlab::CurrentSettings.domain_blacklist
+    if Gitlab::CurrentSettings.domain_denylist_enabled?
+      blocked_domains = Gitlab::CurrentSettings.domain_denylist
       if domain_matches?(blocked_domains, email)
         error = 'is not from an allowed domain.'
         valid = false
       end
     end
 
-    allowed_domains = Gitlab::CurrentSettings.domain_whitelist
+    allowed_domains = Gitlab::CurrentSettings.domain_allowlist
     unless allowed_domains.blank?
       if domain_matches?(allowed_domains, email)
         valid = true

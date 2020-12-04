@@ -10,6 +10,7 @@ module Gitlab
           attr_reader :compare_key
           attr_reader :confidence
           attr_reader :identifiers
+          attr_reader :links
           attr_reader :location
           attr_reader :metadata_version
           attr_reader :name
@@ -21,13 +22,15 @@ module Gitlab
           attr_reader :scan
           attr_reader :severity
           attr_reader :uuid
+          attr_reader :remediations
 
           delegate :file_path, :start_line, :end_line, to: :location
 
-          def initialize(compare_key:, identifiers:, location:, metadata_version:, name:, raw_metadata:, report_type:, scanner:, scan:, uuid:, confidence: nil, severity: nil) # rubocop:disable Metrics/ParameterLists
+          def initialize(compare_key:, identifiers:, links: [], remediations: [], location:, metadata_version:, name:, raw_metadata:, report_type:, scanner:, scan:, uuid:, confidence: nil, severity: nil) # rubocop:disable Metrics/ParameterLists
             @compare_key = compare_key
             @confidence = confidence
             @identifiers = identifiers
+            @links = links
             @location = location
             @metadata_version = metadata_version
             @name = name
@@ -37,6 +40,7 @@ module Gitlab
             @scan = scan
             @severity = severity
             @uuid = uuid
+            @remediations = remediations
 
             @project_fingerprint = generate_project_fingerprint
           end
@@ -46,6 +50,7 @@ module Gitlab
               compare_key
               confidence
               identifiers
+              links
               location
               metadata_version
               name
@@ -89,12 +94,10 @@ module Gitlab
           end
 
           def keys
-            @keys ||= identifiers.map do |identifier|
+            @keys ||= identifiers.reject(&:type_identifier?).map do |identifier|
               FindingKey.new(location_fingerprint: location&.fingerprint, identifier_fingerprint: identifier.fingerprint)
             end
           end
-
-          protected
 
           def primary_fingerprint
             primary_identifier&.fingerprint

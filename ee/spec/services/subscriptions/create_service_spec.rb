@@ -28,6 +28,7 @@ RSpec.describe Subscriptions::CreateService do
     }
   end
 
+  let_it_be(:customer_email) { 'first.last@gitlab.com' }
   let_it_be(:client) { Gitlab::SubscriptionPortal::Client }
   let_it_be(:create_service_params) { Gitlab::Json.parse(fixture_file('create_service_params.json', dir: 'ee')).deep_symbolize_keys }
 
@@ -44,11 +45,15 @@ RSpec.describe Subscriptions::CreateService do
 
     context 'when successfully creating a customer' do
       before do
-        allow(client).to receive(:create_customer).and_return(success: true, data: { success: true, 'customer' => { 'authentication_token' => 'token' } })
+        allow(client).to receive(:create_customer).and_return(success: true, data: { success: true, 'customer' => { 'authentication_token' => 'token', 'email' => customer_email } })
       end
 
       it 'creates a subscription with the returned authentication token' do
-        expect(client).to receive(:create_subscription).with(anything, user.email, 'token')
+        expect(client)
+          .to receive(:create_subscription)
+          .with(anything, customer_email, 'token')
+          .and_return(success: true, data: { success: true, subscription_id: 'xxx' })
+
         subject.execute
       end
 
@@ -59,6 +64,12 @@ RSpec.describe Subscriptions::CreateService do
 
         it 'returns the response hash' do
           expect(subject.execute).to eq(success: false, data: { errors: 'failed to create subscription' })
+        end
+
+        it 'does not create a namespace onboarding action' do
+          subject.execute
+
+          expect(NamespaceOnboardingAction.completed?(group, :subscription_created)).to eq(false)
         end
       end
 
@@ -75,7 +86,7 @@ RSpec.describe Subscriptions::CreateService do
 
     context 'passing the correct parameters to the client' do
       before do
-        allow(client).to receive(:create_customer).and_return(success: true, data: { success: true, customer: { authentication_token: 'token' } })
+        allow(client).to receive(:create_customer).and_return(success: true, data: { success: true, customer: { authentication_token: 'token', email: customer_email } })
         allow(client).to receive(:create_subscription).and_return(success: true, data: { success: true, subscription_id: 'xxx' })
       end
 
@@ -86,9 +97,15 @@ RSpec.describe Subscriptions::CreateService do
       end
 
       it 'passes the correct parameters for creating a subscription' do
-        expect(client).to receive(:create_subscription).with(create_service_params[:subscription], 'first.last@gitlab.com', 'token')
+        expect(client).to receive(:create_subscription).with(create_service_params[:subscription], customer_email, 'token')
 
         subject.execute
+      end
+
+      it 'creates a namespace onboarding action' do
+        subject.execute
+
+        expect(NamespaceOnboardingAction.completed?(group, :subscription_created)).to eq(true)
       end
     end
   end

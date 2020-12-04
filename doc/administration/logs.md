@@ -1,7 +1,7 @@
 ---
 stage: Monitor
 group: Health
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Log system
@@ -14,8 +14,8 @@ Find more about them [in Audit Events documentation](audit_events.md).
 System log files are typically plain text in a standard log file format.
 This guide talks about how to read and use these system log files.
 
-[Read more about how to customise logging on Omnibus GitLab
-installations](https://docs.gitlab.com/omnibus/settings/logs.html)
+Read more about how to
+[customize logging on Omnibus GitLab installations](https://docs.gitlab.com/omnibus/settings/logs.html)
 including adjusting log retention, log forwarding,
 switching logs from JSON to plain text logging, and more.
 
@@ -87,7 +87,7 @@ In addition, the log contains the originating IP address,
 (`remote_ip`), the user's ID (`user_id`), and username (`username`).
 
 Some endpoints such as `/search` may make requests to Elasticsearch if using
-[Advanced Search](../user/search/advanced_global_search.md). These will
+[Advanced Search](../user/search/advanced_global_search.md). These
 additionally log `elasticsearch_calls` and `elasticsearch_call_duration_s`,
 which correspond to:
 
@@ -367,9 +367,9 @@ After GitLab version 12.2, this file was renamed from `githost.log` to
 `git_json.log` and stored in JSON format.
 
 GitLab has to interact with Git repositories, but in some rare cases
-something can go wrong, and in this case you may need know what exactly
+something can go wrong. If this happens, you need to know exactly what
 happened. This log file contains all failed requests from GitLab to Git
-repositories. In the majority of cases this file will be useful for developers
+repositories. In the majority of cases this file is useful for developers
 only. For example:
 
 ```json
@@ -482,7 +482,7 @@ This file contains logging information about jobs before Sidekiq starts
 processing them, such as before being enqueued.
 
 This log file follows the same structure as
-[`sidekiq.log`](#sidekiqlog), so it will be structured as JSON if
+[`sidekiq.log`](#sidekiqlog), so it is structured as JSON if
 you've configured this for Sidekiq as mentioned above.
 
 ## `gitlab-shell.log`
@@ -605,7 +605,7 @@ installations from source.
 ## Unicorn Logs
 
 Starting with GitLab 13.0, Puma is the default web server used in GitLab
-all-in-one package based installations as well as GitLab Helm chart deployments.
+all-in-one package based installations, and GitLab Helm chart deployments.
 
 ### `unicorn_stdout.log`
 
@@ -664,6 +664,31 @@ Omnibus GitLab packages or in `/home/git/gitlab/log/exporter.log` for
 installations from source.
 
 It logs the progress of the export process.
+
+## `features_json.log`
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/59587) in GitLab 13.7.
+
+This file's location depends on how you installed GitLab:
+
+- For Omnibus GitLab packages: `/var/log/gitlab/gitlab-rails/features_json.log`
+- For installations from source: `/home/git/gitlab/log/features_json.log`
+
+The modification events from [Feature flags in development of GitLab](../development/feature_flags/index.md)
+are recorded in this file. For example:
+
+```json
+{"severity":"INFO","time":"2020-11-24T02:30:59.860Z","correlation_id":null,"key":"cd_auto_rollback","action":"enable","extra.thing":"true"}
+{"severity":"INFO","time":"2020-11-24T02:31:29.108Z","correlation_id":null,"key":"cd_auto_rollback","action":"enable","extra.thing":"true"}
+{"severity":"INFO","time":"2020-11-24T02:31:29.129Z","correlation_id":null,"key":"cd_auto_rollback","action":"disable","extra.thing":"false"}
+{"severity":"INFO","time":"2020-11-24T02:31:29.177Z","correlation_id":null,"key":"cd_auto_rollback","action":"enable","extra.thing":"Project:1"}
+{"severity":"INFO","time":"2020-11-24T02:31:29.183Z","correlation_id":null,"key":"cd_auto_rollback","action":"disable","extra.thing":"Project:1"}
+{"severity":"INFO","time":"2020-11-24T02:31:29.188Z","correlation_id":null,"key":"cd_auto_rollback","action":"enable_percentage_of_time","extra.percentage":"50"}
+{"severity":"INFO","time":"2020-11-24T02:31:29.193Z","correlation_id":null,"key":"cd_auto_rollback","action":"disable_percentage_of_time"}
+{"severity":"INFO","time":"2020-11-24T02:31:29.198Z","correlation_id":null,"key":"cd_auto_rollback","action":"enable_percentage_of_actors","extra.percentage":"50"}
+{"severity":"INFO","time":"2020-11-24T02:31:29.203Z","correlation_id":null,"key":"cd_auto_rollback","action":"disable_percentage_of_actors"}
+{"severity":"INFO","time":"2020-11-24T02:31:29.329Z","correlation_id":null,"key":"cd_auto_rollback","action":"remove"}
+```
 
 ## `auth.log`
 
@@ -726,21 +751,26 @@ was initiated, such as `1509705644.log`
 ## `sidekiq_exporter.log` and `web_exporter.log`
 
 If Prometheus metrics and the Sidekiq Exporter are both enabled, Sidekiq
-will start a Web server and listen to the defined port (default:
+starts a Web server and listen to the defined port (default:
 `8082`). By default, Sidekiq Exporter access logs are disabled but can
-be enabled via the `sidekiq['exporter_log_enabled'] = true` option in `/etc/gitlab/gitlab.rb`
-for Omnibus installations, or via the `sidekiq_exporter.log_enabled` option
-in `gitlab.yml` for installations from source. When enabled,
-access logs will be generated in
+be enabled:
+
+- For Omnibus GitLab installations, using the `sidekiq['exporter_log_enabled'] = true`
+  option in `/etc/gitlab/gitlab.rb`.
+- For installations from source, using the `sidekiq_exporter.log_enabled` option
+  in `gitlab.yml`.
+
+When enabled, access logs are generated in
 `/var/log/gitlab/gitlab-rails/sidekiq_exporter.log` for Omnibus GitLab
 packages or in `/home/git/gitlab/log/sidekiq_exporter.log` for
 installations from source.
 
-If Prometheus metrics and the Web Exporter are both enabled, Puma/Unicorn will
-start a Web server and listen to the defined port (default: `8083`). Access logs
-will be generated in `/var/log/gitlab/gitlab-rails/web_exporter.log` for
-Omnibus GitLab packages or in `/home/git/gitlab/log/web_exporter.log` for
-installations from source.
+If Prometheus metrics and the Web Exporter are both enabled, Puma/Unicorn
+starts a Web server and listen to the defined port (default: `8083`), and access logs
+are generated:
+
+- For Omnibus GitLab packages, in `/var/log/gitlab/gitlab-rails/web_exporter.log`.
+- For installations from source, in `/home/git/gitlab/log/web_exporter.log`.
 
 ## `database_load_balancing.log` **(PREMIUM ONLY)**
 
@@ -756,13 +786,11 @@ It's stored at:
 
 > Introduced in GitLab 12.6.
 
-This file lives in
-`/var/log/gitlab/gitlab-rails/elasticsearch.log` for Omnibus GitLab
-packages or in `/home/git/gitlab/log/elasticsearch.log` for installations
-from source.
+This file logs information related to the Elasticsearch Integration, including
+errors during indexing or searching Elasticsearch. It's stored at:
 
-It logs information related to the Elasticsearch Integration including
-errors during indexing or searching Elasticsearch.
+- `/var/log/gitlab/gitlab-rails/elasticsearch.log` for Omnibus GitLab packages.
+- `/home/git/gitlab/log/elasticsearch.log` for installations from source.
 
 Each line contains a JSON line that can be ingested by services like Elasticsearch and Splunk.
 Line breaks have been added to the following example line for clarity:
@@ -785,12 +813,12 @@ Line breaks have been added to the following example line for clarity:
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/17819) in GitLab 12.6.
 
-This file lives in
-`/var/log/gitlab/gitlab-rails/exceptions_json.log` for Omnibus GitLab
-packages or in `/home/git/gitlab/log/exceptions_json.log` for installations
-from source.
+This file logs the information about exceptions being tracked by
+`Gitlab::ErrorTracking`, which provides a standard and consistent way of
+[processing rescued exceptions](https://gitlab.com/gitlab-org/gitlab/blob/master/doc/development/logging.md#exception-handling). This file is stored in:
 
-It logs the information about exceptions being tracked by `Gitlab::ErrorTracking` which provides a standard and consistent way of [processing rescued exceptions](https://gitlab.com/gitlab-org/gitlab/blob/master/doc/development/logging.md#exception-handling).
+- `/var/log/gitlab/gitlab-rails/exceptions_json.log` for Omnibus GitLab packages.
+- `/home/git/gitlab/log/exceptions_json.log` for installations from source.
 
 Each line contains a JSON line that can be ingested by Elasticsearch. For example:
 
@@ -820,7 +848,7 @@ Omnibus GitLab packages or in `/home/git/gitlab/log/service_measurement.log` for
 installations from source.
 
 It contains only a single structured log with measurements for each service execution.
-It will contain measurements such as the number of SQL calls, `execution_time`, `gc_stats`, and `memory usage`.
+It contains measurements such as the number of SQL calls, `execution_time`, `gc_stats`, and `memory usage`.
 
 For example:
 
@@ -853,7 +881,9 @@ This file is stored in:
 - `/var/log/gitlab/gitlab-rails/update_mirror_service_json.log` for Omnibus GitLab installations.
 - `/home/git/gitlab/log/update_mirror_service_json.log` for installations from source.
 
-This file contains information about any errors that occurred during project mirroring.
+This file contains information about LFS errors that occurred during project mirroring.
+While we work to move other project mirroring errors into this log, the [general log](#productionlog)
+can be used.
 
 ```json
 {
@@ -945,7 +975,7 @@ For Omnibus GitLab installations, Alertmanager logs reside in `/var/log/gitlab/a
 
 ## Crond Logs
 
-For Omnibus GitLab installations, crond logs reside in `/var/log/gitlab/crond/`.
+For Omnibus GitLab installations, `crond` logs reside in `/var/log/gitlab/crond/`.
 
 ## Grafana Logs
 
@@ -963,17 +993,25 @@ For Omnibus GitLab installations, GitLab Monitor logs reside in `/var/log/gitlab
 
 For Omnibus GitLab installations, GitLab Exporter logs reside in `/var/log/gitlab/gitlab-exporter/`.
 
+## GitLab Kubernetes Agent Server
+
+For Omnibus GitLab installations, GitLab Kubernetes Agent Server logs reside
+in `/var/log/gitlab/gitlab-kas/`.
+
 ## Gathering logs
 
 When [troubleshooting](troubleshooting/index.md) issues that aren't localized to one of the
 previously listed components, it's helpful to simultaneously gather multiple logs and statistics
 from a GitLab instance.
 
+NOTE: **Note:**
+GitLab Support will often ask for one of these, and maintains the required tools.
+
 ### Briefly tail the main logs
 
 If the bug or error is readily reproducible, save the main GitLab logs
 [to a file](troubleshooting/linux_cheat_sheet.md#files--dirs) while reproducing the
-problem once or more times:
+problem a few times:
 
 ```shell
 sudo gitlab-ctl tail | tee /tmp/<case-ID-and-keywords>.log
@@ -985,15 +1023,12 @@ Conclude the log gathering with <kbd>Ctrl</kbd> + <kbd>C</kbd>.
 
 If performance degradations or cascading errors occur that can't readily be attributed to one
 of the previously listed GitLab components, [GitLabSOS](https://gitlab.com/gitlab-com/support/toolbox/gitlabsos/)
-can provide a perspective spanning all of Omnibus GitLab. For more details and instructions
-to run it, see [the GitLabSOS documentation](https://gitlab.com/gitlab-com/support/toolbox/gitlabsos/#gitlabsos).
-
-NOTE: **Note:**
-GitLab Support likes to use this custom-made tool.
+can provide a broader perspective of the GitLab instance. For more details and instructions
+to run it, read [the GitLabSOS documentation](https://gitlab.com/gitlab-com/support/toolbox/gitlabsos/#gitlabsos).
 
 ### Fast-stats
 
 [Fast-stats](https://gitlab.com/gitlab-com/support/toolbox/fast-stats) is a tool
 for creating and comparing performance statistics from GitLab logs.
-For more details and instructions to run it, see
-[read the documentation for fast-stats](https://gitlab.com/gitlab-com/support/toolbox/fast-stats#usage).
+For more details and instructions to run it, read the
+[documentation for fast-stats](https://gitlab.com/gitlab-com/support/toolbox/fast-stats#usage).

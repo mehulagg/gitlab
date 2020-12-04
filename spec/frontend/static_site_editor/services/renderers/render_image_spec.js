@@ -1,11 +1,13 @@
 import imageRenderer from '~/static_site_editor/services/renderers/render_image';
-import { mounts, project } from '../../mock_data';
+import { mounts, project, branch, baseUrl } from '../../mock_data';
 
 describe('rich_content_editor/renderers/render_image', () => {
   let renderer;
+  let imageRepository;
 
   beforeEach(() => {
-    renderer = imageRenderer.build(mounts, project);
+    renderer = imageRenderer.build(mounts, project, branch, baseUrl, imageRepository);
+    imageRepository = { get: () => null };
   });
 
   describe('build', () => {
@@ -27,34 +29,65 @@ describe('rich_content_editor/renderers/render_image', () => {
   });
 
   describe('render', () => {
+    let skipChildren;
     let context;
-    let result;
-    const skipChildren = jest.fn();
+    let node;
 
     beforeEach(() => {
-      const node = {
-        destination: '/some/path/image.png',
+      skipChildren = jest.fn();
+      context = { skipChildren };
+      node = {
         firstChild: {
           type: 'img',
           literal: 'Some Image',
         },
       };
-
-      context = { skipChildren };
-      result = renderer.render(node, context);
     });
 
-    it('invokes `skipChildren`', () => {
-      expect(skipChildren).toHaveBeenCalled();
-    });
+    it.each`
+      destination                                      | isAbsolute | src
+      ${'http://test.host/absolute/path/to/image.png'} | ${true}    | ${'http://test.host/absolute/path/to/image.png'}
+      ${'/relative/path/to/image.png'}                 | ${false}   | ${'http://test.host/user1/project1/-/raw/master/default/source/relative/path/to/image.png'}
+      ${'/target/image.png'}                           | ${false}   | ${'http://test.host/user1/project1/-/raw/master/source/with/target/image.png'}
+      ${'relative/to/current/image.png'}               | ${false}   | ${'http://test.host/user1/project1/-/raw/master/relative/to/current/image.png'}
+      ${'./relative/to/current/image.png'}             | ${false}   | ${'http://test.host/user1/project1/-/raw/master/./relative/to/current/image.png'}
+      ${'../relative/to/current/image.png'}            | ${false}   | ${'http://test.host/user1/project1/-/raw/master/../relative/to/current/image.png'}
+    `('returns an image with the correct attributes', ({ destination, isAbsolute, src }) => {
+      node.destination = destination;
 
-    it('returns an image', () => {
+      const result = renderer.render(node, context);
+
       expect(result).toEqual({
         type: 'openTag',
         tagName: 'img',
         selfClose: true,
         attributes: {
-          src: '/some/path/image.png',
+          'data-original-src': !isAbsolute ? destination : '',
+          src,
+          alt: 'Some Image',
+        },
+      });
+
+      expect(skipChildren).toHaveBeenCalled();
+    });
+
+    it('renders an image if a cached image is found in the repository, use the base64 content as the source', () => {
+      const imageContent = 'some-content';
+      const originalSrc = 'path/to/image.png';
+
+      imageRepository.get = () => imageContent;
+      renderer = imageRenderer.build(mounts, project, branch, baseUrl, imageRepository);
+      node.destination = originalSrc;
+
+      const result = renderer.render(node, context);
+
+      expect(result).toEqual({
+        type: 'openTag',
+        tagName: 'img',
+        selfClose: true,
+        attributes: {
+          'data-original-src': originalSrc,
+          src: `data:image;base64,${imageContent}`,
           alt: 'Some Image',
         },
       });

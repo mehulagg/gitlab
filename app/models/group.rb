@@ -71,6 +71,9 @@ class Group < Namespace
   has_many :group_deploy_tokens
   has_many :deploy_tokens, through: :group_deploy_tokens
 
+  has_one :dependency_proxy_setting, class_name: 'DependencyProxy::GroupSetting'
+  has_many :dependency_proxy_blobs, class_name: 'DependencyProxy::Blob'
+
   accepts_nested_attributes_for :variables, allow_destroy: true
 
   validate :visibility_level_allowed_by_projects
@@ -108,6 +111,8 @@ class Group < Namespace
     joins(projects: :project_authorizations)
       .where("project_authorizations.user_id IN (?)", user_ids)
   end
+
+  delegate :default_branch_name, to: :namespace_settings
 
   class << self
     def sort_by_attribute(method)
@@ -199,6 +204,10 @@ class Group < Namespace
 
   def packages_feature_enabled?
     ::Gitlab.config.packages.enabled
+  end
+
+  def dependency_proxy_feature_available?
+    ::Gitlab.config.dependency_proxy.enabled
   end
 
   def notification_email_for(user)
@@ -393,6 +402,13 @@ class Group < Namespace
       .where(source_id: self_and_hierarchy.reorder(nil).select(:id))
   end
 
+  def direct_and_indirect_members_with_inactive
+    GroupMember
+      .non_request
+      .non_invite
+      .where(source_id: self_and_hierarchy.reorder(nil).select(:id))
+  end
+
   def users_with_parents
     User
       .where(id: members_with_parents.select(:user_id))
@@ -414,6 +430,20 @@ class Group < Namespace
     User.from_union([
       User
         .where(id: direct_and_indirect_members.select(:user_id))
+        .reorder(nil),
+      project_users_with_descendants
+    ])
+  end
+
+  # Returns all users (also inactive) that are members of the group because:
+  # 1. They belong to the group
+  # 2. They belong to a project that belongs to the group
+  # 3. They belong to a sub-group or project in such sub-group
+  # 4. They belong to an ancestor group
+  def direct_and_indirect_users_with_inactive
+    User.from_union([
+      User
+        .where(id: direct_and_indirect_members_with_inactive.select(:user_id))
         .reorder(nil),
       project_users_with_descendants
     ])
@@ -582,12 +612,16 @@ class Group < Namespace
     ancestor_settings.allow_mfa_for_subgroups
   end
 
+  def has_project_with_service_desk_enabled?
+    Gitlab::ServiceDesk.supported? && all_projects.service_desk_enabled.exists?
+  end
+
   private
 
   def update_two_factor_requirement
     return unless saved_change_to_require_two_factor_authentication? || saved_change_to_two_factor_grace_period?
 
-    members_with_descendants.find_each(&:update_two_factor_requirement)
+    direct_and_indirect_members.find_each(&:update_two_factor_requirement)
   end
 
   def path_changed_hook

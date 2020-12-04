@@ -64,7 +64,7 @@ module QA
           # It doesn't work as a CSS selector.
           # So instead we use the name attribute as a locator
           within_element(:design_dropzone_content) do
-            page.attach_file("design_file", design_file_path, make_visible: { display: 'block' })
+            page.attach_file("upload_file", design_file_path, make_visible: { display: 'block' })
           end
 
           filename = ::File.basename(design_file_path)
@@ -106,6 +106,10 @@ module QA
 
         def has_design?(filename)
           has_element?(:design_file_name, text: filename)
+        end
+
+        def has_no_design?(filename)
+          has_no_element?(:design_file_name, text: filename)
         end
 
         def has_created_icon?

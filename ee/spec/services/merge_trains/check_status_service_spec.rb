@@ -11,7 +11,7 @@ RSpec.describe MergeTrains::CheckStatusService do
   before do
     stub_feature_flags(disable_merge_trains: false)
     stub_licensed_features(merge_pipelines: true, merge_trains: true)
-    project.update!(merge_pipelines_enabled: true)
+    project.update!(merge_pipelines_enabled: true, merge_trains_enabled: true)
   end
 
   describe '#execute' do

@@ -1,6 +1,6 @@
 import { shallowMount, createLocalVue } from '@vue/test-utils';
-import GroupRepositoryAnalytics from 'ee/analytics/repository_analytics/components/group_repository_analytics.vue';
 import DownloadTestCoverage from 'ee/analytics/repository_analytics/components/download_test_coverage.vue';
+import GroupRepositoryAnalytics from 'ee/analytics/repository_analytics/components/group_repository_analytics.vue';
 
 const localVue = createLocalVue();
 

@@ -1,7 +1,7 @@
 ---
 stage: none
 group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: index
 ---
 
@@ -23,7 +23,7 @@ Access the default page for admin area settings by navigating to **Admin Area > 
 | [Account and limit](account_and_limit_settings.md) **(STARTER)** | Set projects and maximum size limits, session duration, user options, and check feature availability for namespace plan. |
 | [Diff limits](../diff_limits.md) | Diff content limits. |
 | [Sign-up restrictions](sign_up_restrictions.md) | Configure the way a user creates a new account. |
-| [Sign in restrictions](sign_in_restrictions.md) | Set requirements for a user to sign-in. Enable mandatory two-factor authentication. |
+| [Sign in restrictions](sign_in_restrictions.md) | Set requirements for a user to sign in. Enable mandatory two-factor authentication. |
 | [Terms of Service and Privacy Policy](terms.md) | Include a Terms of Service agreement and Privacy Policy that all users must accept. |
 | [External Authentication](external_authorization.md#configuration) | External Classification Policy Authorization |
 | [Web terminal](../../../administration/integration/terminal.md#limiting-websocket-connection-time) | Set max session time for web terminal. |
@@ -34,7 +34,8 @@ Access the default page for admin area settings by navigating to **Admin Area > 
 | Option | Description |
 | ------ | ----------- |
 | [Elasticsearch](../../../integration/elasticsearch.md#enabling-advanced-search) | Elasticsearch integration. Elasticsearch AWS IAM. |
-| [PlantUML](../../../administration/integration/plantuml.md#gitlab) | Allow rendering of PlantUML diagrams in AsciiDoc documents. |
+| [Kroki](../../../administration/integration/kroki.md#enable-kroki-in-gitlab) | Allow rendering of diagrams in AsciiDoc and Markdown documents using [kroki.io](https://kroki.io). |
+| [PlantUML](../../../administration/integration/plantuml.md#gitlab) | Allow rendering of PlantUML diagrams in AsciiDoc and Markdown documents. |
 | [Slack application](../../../user/project/integrations/gitlab_slack_application.md#configuration) **(FREE ONLY)** | Slack integration allows you to interact with GitLab via slash commands in a chat window. This option is only available on GitLab.com, though it may be [available for self-managed instances in the future](https://gitlab.com/gitlab-org/gitlab/-/issues/28164). |
 | [Third party offers](third_party_offers.md) | Control the display of third party offers. |
 | [Snowplow](../../../development/product_analytics/snowplow.md) | Configure the Snowplow integration. |
@@ -63,7 +64,7 @@ Access the default page for admin area settings by navigating to **Admin Area > 
 | Option | Description |
 | ------ | ----------- |
 | [Continuous Integration and Deployment](continuous_integration.md) | Auto DevOps, runners and job artifacts. |
-| [Required pipeline configuration](continuous_integration.md#required-pipeline-configuration) **(PREMIUM ONLY)** | Set an instance-wide auto included [pipeline configuration](../../../ci/yaml/README.md). This pipeline configuration will be run after the project's own configuration. |
+| [Required pipeline configuration](continuous_integration.md#required-pipeline-configuration) **(PREMIUM ONLY)** | Set an instance-wide auto included [pipeline configuration](../../../ci/yaml/README.md). This pipeline configuration is run after the project's own configuration. |
 | [Package Registry](continuous_integration.md#package-registry-configuration) | Settings related to the use and experience of using GitLab's Package Registry. Note there are [risks involved](../../packages/container_registry/index.md#use-with-external-container-registries) in enabling some of these settings. |
 
 ## Reporting
@@ -98,7 +99,7 @@ Access the default page for admin area settings by navigating to **Admin Area > 
 
 | Option | Description |
 | ------ | ----------- |
-| Geo    | Geo allows you to replicate your GitLab instance to other geographical locations. Redirects to **Admin Area > Geo > Settings**, and will no longer be available at **Admin Area > Settings > Geo** in [GitLab 13.0](https://gitlab.com/gitlab-org/gitlab/-/issues/36896). |
+| Geo    | Geo allows you to replicate your GitLab instance to other geographical locations. Redirects to **Admin Area > Geo > Settings** are no longer available at **Admin Area > Settings > Geo** in [GitLab 13.0](https://gitlab.com/gitlab-org/gitlab/-/issues/36896). |
 
 ## Preferences
 

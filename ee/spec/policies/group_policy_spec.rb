@@ -285,11 +285,11 @@ RSpec.describe GroupPolicy do
   end
 
   describe 'per group SAML' do
-    context 'when group_saml is unavailable' do
-      def stub_group_saml_config(enabled)
-        allow(::Gitlab::Auth::GroupSaml::Config).to receive_messages(enabled?: enabled)
-      end
+    def stub_group_saml_config(enabled)
+      allow(::Gitlab::Auth::GroupSaml::Config).to receive_messages(enabled?: enabled)
+    end
 
+    context 'when group_saml is unavailable' do
       let(:current_user) { owner }
 
       context 'when group saml config is disabled' do
@@ -347,12 +347,13 @@ RSpec.describe GroupPolicy do
 
       context 'when group_saml_group_sync is licensed' do
         before do
+          stub_group_saml_config(true)
           stub_application_setting(check_namespace_plan: true)
         end
 
         before_all do
           create(:license, plan: License::ULTIMATE_PLAN)
-          create(:gitlab_subscription, :gold, namespace: group)
+          create(:gitlab_subscription, :silver, namespace: group)
         end
 
         context 'without an enabled SAML provider' do
@@ -395,6 +396,15 @@ RSpec.describe GroupPolicy do
 
           context 'admin' do
             let(:current_user) { admin }
+
+            it { is_expected.to be_allowed(:admin_saml_group_links) }
+          end
+
+          context 'when the group is a subgroup' do
+            let_it_be(:subgroup) { create(:group, :private, parent: group) }
+            let(:current_user) { owner }
+
+            subject { described_class.new(current_user, subgroup) }
 
             it { is_expected.to be_allowed(:admin_saml_group_links) }
           end
@@ -1174,7 +1184,7 @@ RSpec.describe GroupPolicy do
   end
 
   it_behaves_like 'model with wiki policies' do
-    let_it_be(:container) { create(:group_with_plan, plan: :silver_plan) }
+    let_it_be_with_refind(:container) { create(:group_with_plan, plan: :silver_plan) }
     let_it_be(:user) { owner }
 
     before_all do
@@ -1182,29 +1192,19 @@ RSpec.describe GroupPolicy do
     end
 
     before do
-      stub_application_setting(check_namespace_plan: true)
+      enable_namespace_license_check!
     end
 
     # We don't have feature toggles on groups yet, so we currently simulate
-    # this by toggling the feature flag instead.
+    # this by stubbing the license check instead.
     def set_access_level(access_level)
       case access_level
       when ProjectFeature::ENABLED
-        stub_feature_flags(group_wikis: true)
+        stub_licensed_features(group_wikis: true)
       when ProjectFeature::DISABLED
-        stub_feature_flags(group_wikis: false)
+        stub_licensed_features(group_wikis: false)
       when ProjectFeature::PRIVATE
         skip('Access level private is not supported yet for group wikis, see https://gitlab.com/gitlab-org/gitlab/-/issues/208412')
-      end
-    end
-
-    context 'when the feature flag is disabled on this group' do
-      before do
-        stub_feature_flags(group_wikis: create(:group))
-      end
-
-      it 'does not include the wiki permissions' do
-        expect_disallowed(*wiki_permissions[:all])
       end
     end
 
@@ -1218,8 +1218,6 @@ RSpec.describe GroupPolicy do
   end
 
   it_behaves_like 'update namespace limit policy'
-
-  include_examples 'analytics report embedding'
 
   context 'group access tokens' do
     it_behaves_like 'GitLab.com Core resource access tokens'
@@ -1250,6 +1248,42 @@ RSpec.describe GroupPolicy do
 
         it { is_expected.not_to be_allowed(:admin_resource_access_tokens)}
       end
+    end
+  end
+
+  describe ':read_group_release_stats' do
+    shared_examples 'read_group_release_stats permissions' do
+      context 'when user is logged out' do
+        let(:current_user) { nil }
+
+        it { is_expected.to be_disallowed(:read_group_release_stats) }
+      end
+
+      context 'when user is not a member of the group' do
+        let(:current_user) { create(:user) }
+
+        it { is_expected.to be_disallowed(:read_group_release_stats) }
+      end
+
+      context 'when user is guest' do
+        let(:current_user) { guest }
+
+        it { is_expected.to be_allowed(:read_group_release_stats) }
+      end
+    end
+
+    context 'when group is private' do
+      it_behaves_like 'read_group_release_stats permissions'
+    end
+
+    context 'when group is public' do
+      let(:group) { create(:group, :public) }
+
+      before do
+        group.add_guest(guest)
+      end
+
+      it_behaves_like 'read_group_release_stats permissions'
     end
   end
 end

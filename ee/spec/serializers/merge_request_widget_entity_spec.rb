@@ -246,6 +246,28 @@ RSpec.describe MergeRequestWidgetEntity do
     expect(subject.as_json).to include(:create_vulnerability_feedback_dismissal_path)
   end
 
+  describe '#can_read_vulnerabilities' do
+    context 'when security dashboard feature is available' do
+      before do
+        stub_licensed_features(security_dashboard: true)
+      end
+
+      it 'is set to true' do
+        expect(subject.as_json[:can_read_vulnerabilities]).to eq(true)
+      end
+    end
+
+    context 'when security dashboard feature is not available' do
+      before do
+        stub_licensed_features(security_dashboard: false)
+      end
+
+      it 'is set to false' do
+        expect(subject.as_json[:can_read_vulnerabilities]).to eq(false)
+      end
+    end
+  end
+
   describe '#can_read_vulnerability_feedback' do
     context 'when user has permissions to read vulnerability feedback' do
       before do

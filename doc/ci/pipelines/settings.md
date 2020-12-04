@@ -1,7 +1,7 @@
 ---
 stage: Verify
 group: Continuous Integration
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 disqus_identifier: 'https://docs.gitlab.com/ee/user/project/pipelines/settings.html'
 type: reference, howto
 ---
@@ -26,10 +26,11 @@ There are two options. Using:
 
 - `git clone`, which is slower since it clones the repository from scratch
   for every job, ensuring that the local working copy is always pristine.
-- `git fetch`, which is faster as it re-uses the local working copy (falling
+- `git fetch`, which is GitLab's default and faster as it re-uses the local working copy (falling
   back to clone if it doesn't exist).
+  This is recommended, especially for [large repositories](../large_repositories/index.md#git-strategy).
 
-The default Git strategy can be overridden by the [GIT_STRATEGY variable](../yaml/README.md#git-strategy)
+The configured Git strategy can be overridden by the [`GIT_STRATEGY` variable](../runners/README.md#git-strategy)
 in `.gitlab-ci.yml`.
 
 ## Git shallow clone
@@ -228,6 +229,16 @@ To avoid this scenario:
 1. Click **Save changes**.
 
 When enabled, any older deployments job are skipped when a new deployment starts.
+
+For more information, see [Deployment safety](../environments/deployment_safety.md).
+
+## Retry outdated jobs
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/211339) in GitLab 13.6.
+
+A deployment job can fail because a newer one has run. If you retry the failed deployment job, the
+environment could be overwritten with older source code. If you click **Retry**, a modal warns you
+about this and asks for confirmation.
 
 For more information, see [Deployment safety](../environments/deployment_safety.md).
 

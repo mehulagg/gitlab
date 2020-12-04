@@ -1,7 +1,7 @@
 ---
 stage: Enablement
 group: Database
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Database guides
@@ -57,9 +57,15 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 - [Query Count Limits](../query_count_limits.md)
 - [Creating enums](../creating_enums.md)
 - [Client-side connection-pool](client_side_connection_pool.md)
-- [Updating multiple values](./setting_multiple_values.md)
+- [Updating multiple values](setting_multiple_values.md)
+- [Constraints naming conventions](constraint_naming_convention.md)
+- [Query performance guidelines](../query_performance.md)
 
 ## Case studies
 
 - [Database case study: Filtering by label](../filtering_by_label.md)
 - [Database case study: Namespaces storage statistics](../namespaces_storage_statistics.md)
+
+## Miscellaneous
+
+- [Maintenance operations](maintenance_operations.md)

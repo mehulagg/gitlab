@@ -368,4 +368,56 @@ RSpec.describe EE::UserCalloutsHelper do
       end
     end
   end
+
+  describe '.show_new_user_signups_cap_reached?' do
+    subject { helper.show_new_user_signups_cap_reached? }
+
+    let(:user) { create(:user) }
+    let(:admin) { create(:user, admin: true) }
+
+    context 'when user is anonymous' do
+      before do
+        allow(helper).to receive(:current_user).and_return(nil)
+      end
+
+      it { is_expected.to eq(false) }
+    end
+
+    context 'when user is not an admin' do
+      before do
+        allow(helper).to receive(:current_user).and_return(user)
+      end
+
+      it { is_expected.to eq(false) }
+    end
+
+    context 'when feature flag is disabled' do
+      before do
+        allow(helper).to receive(:current_user).and_return(admin)
+        stub_feature_flags(admin_new_user_signups_cap: false)
+      end
+
+      it { is_expected.to eq(false) }
+    end
+
+    context 'when feature flag is enabled' do
+      where(:new_user_signups_cap, :active_user_count, :result) do
+        nil | 10 | false
+        10  | 9  | false
+        0   | 10 | true
+        1   | 1  | true
+      end
+
+      with_them do
+        before do
+          allow(helper).to receive(:current_user).and_return(admin)
+          allow(User.billable).to receive(:count).and_return(active_user_count)
+          allow(Gitlab::CurrentSettings.current_application_settings)
+            .to receive(:new_user_signups_cap).and_return(new_user_signups_cap)
+        end
+
+        it { is_expected.to eq(result) }
+      end
+    end
+  end
 end

@@ -4,6 +4,8 @@ require 'openssl'
 
 module Clusters
   module Applications
+    # DEPRECATED: This model represents the Helm 2 Tiller server.
+    # It is being kept around to enable the cleanup of the unused Tiller server.
     class Helm < ApplicationRecord
       self.table_name = 'clusters_applications_helm'
 
@@ -25,31 +27,13 @@ module Clusters
       end
 
       def set_initial_status
-        return unless not_installable?
-
-        self.status = status_states[:installable] if cluster&.platform_kubernetes_active?
+        # The legacy Tiller server is not installable, which is the initial status of every app
       end
 
-      # It can only be uninstalled if there are no other applications installed
-      # or with intermitent installation statuses in the database.
-      def allowed_to_uninstall?
-        strong_memoize(:allowed_to_uninstall) do
-          applications = nil
-
-          Clusters::Cluster::APPLICATIONS.each do |application_name, klass|
-            next if application_name == 'helm'
-
-            extra_apps = Clusters::Applications::Helm.where('EXISTS (?)', klass.select(1).where(cluster_id: cluster_id))
-
-            applications = applications ? applications.or(extra_apps) : extra_apps
-          end
-
-          !applications.exists?
-        end
-      end
-
+      # DEPRECATED: This command is only for development and testing purposes, to simulate
+      # a Helm 2 cluster with an existing Tiller server.
       def install_command
-        Gitlab::Kubernetes::Helm::InitCommand.new(
+        Gitlab::Kubernetes::Helm::V2::InitCommand.new(
           name: name,
           files: files,
           rbac: cluster.platform_kubernetes_rbac?
@@ -57,7 +41,7 @@ module Clusters
       end
 
       def uninstall_command
-        Gitlab::Kubernetes::Helm::ResetCommand.new(
+        Gitlab::Kubernetes::Helm::V2::ResetCommand.new(
           name: name,
           files: files,
           rbac: cluster.platform_kubernetes_rbac?
@@ -66,13 +50,6 @@ module Clusters
 
       def has_ssl?
         ca_key.present? && ca_cert.present?
-      end
-
-      def post_uninstall
-        cluster.kubeclient.delete_namespace(Gitlab::Kubernetes::Helm::NAMESPACE)
-      rescue Kubeclient::ResourceNotFoundError
-        # we actually don't care if the namespace is not present
-        # since we want to delete it anyway.
       end
 
       private
@@ -86,19 +63,19 @@ module Clusters
       end
 
       def create_keys_and_certs
-        ca_cert = Gitlab::Kubernetes::Helm::Certificate.generate_root
+        ca_cert = Gitlab::Kubernetes::Helm::V2::Certificate.generate_root
         self.ca_key = ca_cert.key_string
         self.ca_cert = ca_cert.cert_string
       end
 
       def tiller_cert
-        @tiller_cert ||= ca_cert_obj.issue(expires_in: Gitlab::Kubernetes::Helm::Certificate::INFINITE_EXPIRY)
+        @tiller_cert ||= ca_cert_obj.issue(expires_in: Gitlab::Kubernetes::Helm::V2::Certificate::INFINITE_EXPIRY)
       end
 
       def ca_cert_obj
         return unless has_ssl?
 
-        Gitlab::Kubernetes::Helm::Certificate
+        Gitlab::Kubernetes::Helm::V2::Certificate
           .from_strings(ca_key, ca_cert)
       end
     end

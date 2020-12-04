@@ -1,15 +1,15 @@
 import { GlColumnChart, GlLineChart, GlStackedColumnChart } from '@gitlab/ui/dist/charts';
 import { shallowMount } from '@vue/test-utils';
 
+import InsightsChart from 'ee/insights/components/insights_chart.vue';
+import InsightsChartError from 'ee/insights/components/insights_chart_error.vue';
+import { CHART_TYPES } from 'ee/insights/constants';
 import {
   chartInfo,
   barChartData,
   lineChartData,
   stackedBarChartData,
 } from 'ee_jest/insights/mock_data';
-import InsightsChart from 'ee/insights/components/insights_chart.vue';
-import InsightsChartError from 'ee/insights/components/insights_chart_error.vue';
-import { CHART_TYPES } from 'ee/insights/constants';
 import ResizableChartContainer from '~/vue_shared/components/resizable_chart/resizable_chart_container.vue';
 import ChartSkeletonLoader from '~/vue_shared/components/resizable_chart/skeleton_loader.vue';
 

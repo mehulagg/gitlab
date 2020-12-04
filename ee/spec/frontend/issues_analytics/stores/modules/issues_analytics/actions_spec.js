@@ -1,7 +1,7 @@
 import MockAdapter from 'axios-mock-adapter';
-import testAction from 'helpers/vuex_action_helper';
 import * as actions from 'ee/issues_analytics/stores/modules/issue_analytics/actions';
 import { TEST_HOST } from 'helpers/test_constants';
+import testAction from 'helpers/vuex_action_helper';
 import axios from '~/lib/utils/axios_utils';
 
 describe('Issue analytics store actions', () => {

@@ -1,7 +1,7 @@
 ---
 stage: none
 group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Shell scripting standards and style guidelines
@@ -92,7 +92,7 @@ use this job:
 
 ```yaml
 shfmt:
-  image: mvdan/shfmt:v3.1.0-alpine
+  image: mvdan/shfmt:v3.2.0-alpine
   stage: test
   before_script:
     - shfmt -version

@@ -1482,9 +1482,9 @@ RSpec.describe ApprovalState do
             )
           end
 
-          it 'returns the rules that are applicable to the merge request' do
+          it 'returns the rules that are applicable to the merge request target branch' do
             expect(subject.user_defined_rules.map(&:approval_rule)).to eq([
-              mr_rule, another_mr_rule
+              another_mr_rule
             ])
           end
 
@@ -1493,7 +1493,7 @@ RSpec.describe ApprovalState do
 
             it 'returns the rules that are applicable to the specified target_branch' do
               expect(subject.user_defined_rules.map(&:approval_rule)).to eq([
-                mr_rule, another_mr_rule
+                mr_rule
               ])
             end
           end

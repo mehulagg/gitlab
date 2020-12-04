@@ -59,7 +59,7 @@ module Projects
         raise TransferError.new(s_("TransferProject|Root namespace can't be updated if project has NPM packages"))
       end
 
-      attempt_transfer_transaction
+      proceed_to_transfer
     end
     # rubocop: enable CodeReuse/ActiveRecord
 
@@ -67,11 +67,14 @@ module Projects
       new_namespace.root_ancestor == project.namespace.root_ancestor
     end
 
-    def attempt_transfer_transaction
+    def proceed_to_transfer
       Project.transaction do
         project.expire_caches_before_rename(@old_path)
 
+        # Apply changes to the project
         update_namespace_and_visibility(@new_namespace)
+        update_shared_runners_settings
+        project.save!
 
         # Notifications
         project.send_move_instructions(@old_path)
@@ -84,9 +87,7 @@ module Projects
         # Move uploads
         move_project_uploads(project)
 
-        # If a project is being transferred to another group it means it can already
-        # have shared runners enabled but we need to check whether the new group allows that.
-        project.shared_runners_enabled = false if project.group && project.group.shared_runners_setting == 'disabled_and_unoverridable'
+        update_integrations
 
         project.old_path_with_namespace = @old_path
 
@@ -120,7 +121,6 @@ module Projects
       # Apply new namespace id and visibility level
       project.namespace = to_namespace
       project.visibility_level = to_namespace.visibility_level unless project.visibility_level_allowed_by_group?
-      project.save!
     end
 
     def update_repository_configuration(full_path)
@@ -207,6 +207,19 @@ module Projects
 
     def new_design_repo_path
       "#{new_path}#{::Gitlab::GlRepository::DESIGN.path_suffix}"
+    end
+
+    def update_shared_runners_settings
+      # If a project is being transferred to another group it means it can already
+      # have shared runners enabled but we need to check whether the new group allows that.
+      if project.group && project.group.shared_runners_setting == 'disabled_and_unoverridable'
+        project.shared_runners_enabled = false
+      end
+    end
+
+    def update_integrations
+      project.services.inherit.delete_all
+      Service.create_from_active_default_integrations(project, :project_id)
     end
   end
 end

@@ -1,0 +1,5 @@
+---
+title: Fix bug rendering labels in group wikis
+merge_request: 48763
+author:
+type: fixed

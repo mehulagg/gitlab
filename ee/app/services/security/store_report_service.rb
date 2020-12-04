@@ -47,18 +47,22 @@ module Security
         return
       end
 
-      vulnerability_params = finding.to_hash.except(:compare_key, :identifiers, :location, :scanner, :scan)
+      vulnerability_params = finding.to_hash.except(:compare_key, :identifiers, :location, :scanner, :scan, :links)
+      vulnerability_params[:uuid] = calculate_uuid_v5(finding)
       vulnerability_finding = create_or_find_vulnerability_finding(finding, vulnerability_params)
 
       update_vulnerability_scanner(finding)
 
       update_vulnerability_finding(vulnerability_finding, vulnerability_params)
+      reset_remediations_for(vulnerability_finding, finding)
 
       # The maximum number of identifiers is not used in validation
       # we just want to ignore the rest if a finding has more than that.
       finding.identifiers.take(Vulnerabilities::Finding::MAX_NUMBER_OF_IDENTIFIERS).map do |identifier| # rubocop: disable CodeReuse/ActiveRecord
         create_or_update_vulnerability_identifier_object(vulnerability_finding, identifier)
       end
+
+      create_or_update_vulnerability_links(finding, vulnerability_finding)
 
       create_vulnerability_pipeline_object(vulnerability_finding, pipeline)
 
@@ -79,8 +83,6 @@ module Security
           .create_with(create_params)
           .find_or_initialize_by(find_params)
 
-        vulnerability_finding.uuid = calculcate_uuid_v5(vulnerability_finding, find_params)
-
         vulnerability_finding.save!
         vulnerability_finding
       rescue ActiveRecord::RecordNotUnique
@@ -90,11 +92,11 @@ module Security
       end
     end
 
-    def calculcate_uuid_v5(vulnerability_finding, finding_params)
+    def calculate_uuid_v5(vulnerability_finding)
       uuid_v5_name_components = {
         report_type: vulnerability_finding.report_type,
-        primary_identifier_fingerprint: vulnerability_finding.primary_identifier&.fingerprint || finding_params.dig(:primary_identifier, :fingerprint),
-        location_fingerprint: vulnerability_finding.location_fingerprint,
+        primary_identifier_fingerprint: vulnerability_finding.primary_fingerprint,
+        location_fingerprint: vulnerability_finding.location.fingerprint,
         project_id: project.id
       }
 
@@ -103,8 +105,6 @@ module Security
       end
 
       name = uuid_v5_name_components.values.join('-')
-
-      Gitlab::AppLogger.debug(message: "Generating UUIDv5 with name: #{name}") if Gitlab.dev_env_or_com?
 
       Gitlab::Vulnerabilities::CalculateFindingUUID.call(name)
     end
@@ -123,6 +123,43 @@ module Security
       vulnerability_finding.finding_identifiers.find_or_create_by!(identifier: identifier_object)
       identifier_object.update!(identifier.to_hash)
     rescue ActiveRecord::RecordNotUnique
+    end
+
+    def create_or_update_vulnerability_links(finding, vulnerability_finding)
+      return if finding.links.blank?
+
+      finding.links.each do |link|
+        vulnerability_finding.finding_links.safe_find_or_create_by!(link.to_hash)
+      end
+    rescue ActiveRecord::RecordNotUnique
+    end
+
+    def reset_remediations_for(vulnerability_finding, finding)
+      existing_remediations = find_existing_remediations_for(finding)
+      new_remediations = build_new_remediations_for(finding, existing_remediations)
+
+      vulnerability_finding.remediations = existing_remediations + new_remediations
+    end
+
+    def find_existing_remediations_for(finding)
+      checksums = finding.remediations.map(&:checksum)
+
+      Vulnerabilities::Remediation.by_checksum(checksums)
+    end
+
+    def build_new_remediations_for(finding, existing_remediations)
+      find_missing_remediations_for(finding, existing_remediations)
+        .map { |remediation| build_vulnerability_remediation(remediation) }
+    end
+
+    def find_missing_remediations_for(finding, existing_remediations)
+      existing_remediation_checksums = existing_remediations.map(&:checksum)
+
+      finding.remediations.select { |remediation| !remediation.checksum.in?(existing_remediation_checksums) }
+    end
+
+    def build_vulnerability_remediation(remediation)
+      Vulnerabilities::Remediation.new(summary: remediation.summary, file: remediation.diff_file, checksum: remediation.checksum)
     end
 
     def create_vulnerability_pipeline_object(vulnerability_finding, pipeline)

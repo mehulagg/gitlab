@@ -1,14 +1,16 @@
 ---
 stage: Enablement
 group: Geo
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: howto
 ---
 
 # Updating the Geo nodes **(PREMIUM ONLY)**
 
 CAUTION: **Warning:**
-Please ensure you read these sections carefully before updating your Geo nodes! Not following version-specific update steps may result in unexpected downtime. Please [contact support](https://about.gitlab.com/support/#contact-support) if you have any specific questions.
+Read these sections carefully before updating your Geo nodes. Not following
+version-specific update steps may result in unexpected downtime. If you have
+any specific questions, [contact Support](https://about.gitlab.com/support/#contact-support).
 
 Updating Geo nodes involves performing:
 
@@ -20,9 +22,6 @@ Updating Geo nodes involves performing:
 
 NOTE: **Note:**
 These general update steps are not intended for [high-availability deployments](https://docs.gitlab.com/omnibus/update/README.html#multi-node--ha-deployment), and will cause downtime. If you want to avoid downtime, consider using [zero downtime updates](https://docs.gitlab.com/omnibus/update/README.html#zero-downtime-updates).
-
-DANGER: **Warning:**
-In GitLab 13.2 and later versions, promoting a secondary node to a primary while the secondary is paused fails. We are [investigating the issue](https://gitlab.com/gitlab-org/gitlab/-/issues/225173). Do not pause replication before promoting a secondary. If the node is paused, please resume before promoting.
 
 To update the Geo nodes when a new GitLab version is released, update **primary**
 and all **secondary** nodes:
@@ -50,4 +49,4 @@ everything is working correctly:
 1. Test the data replication by pushing code to the **primary** node and see if it
    is received by **secondary** nodes.
 
-If you encounter any issues, please consult the [Geo troubleshooting guide](troubleshooting.md).
+If you encounter any issues, see the [Geo troubleshooting guide](troubleshooting.md).

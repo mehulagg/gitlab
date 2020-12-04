@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlLineChart } from '@gitlab/ui/dist/charts';
+import { shallowMount } from '@vue/test-utils';
 import BurnupChart from 'ee/burndown_chart/components/burnup_chart.vue';
 import ResizableChartContainer from '~/vue_shared/components/resizable_chart/resizable_chart_container.vue';
 import { day1, day2, day3 } from '../mock_data';

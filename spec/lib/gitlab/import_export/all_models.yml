@@ -28,6 +28,7 @@ issues:
 - events
 - merge_requests_closing_issues
 - metrics
+- metric_images
 - timelogs
 - issuable_severity
 - issuable_sla
@@ -85,6 +86,7 @@ label:
 - issues
 - merge_requests
 - priorities
+- epic_board_labels
 milestone:
 - group
 - project
@@ -179,6 +181,7 @@ merge_requests:
 - user_mentions
 - system_note_metadata
 - note_authors
+- cleanup_schedule
 external_pull_requests:
 - project
 merge_request_diff:
@@ -195,6 +198,8 @@ merge_request_diff_files:
 merge_request_context_commits:
 - merge_request
 - diff_files
+cleanup_schedule:
+- merge_request
 ci_pipelines:
 - project
 - user
@@ -240,6 +245,7 @@ ci_pipelines:
 - vulnerability_findings
 - pipeline_config
 - security_scans
+- security_findings
 - daily_build_group_report_results
 - latest_builds
 - daily_report_results
@@ -317,6 +323,7 @@ push_access_levels:
 - protected_branch
 - user
 - group
+- deploy_key
 create_access_levels:
 - user
 - protected_tag
@@ -344,6 +351,7 @@ project:
 - services
 - campfire_service
 - confluence_service
+- datadog_service
 - discord_service
 - drone_ci_service
 - emails_on_push_service
@@ -535,6 +543,7 @@ project:
 - daily_build_group_report_results
 - jira_imports
 - compliance_framework_setting
+- compliance_management_frameworks
 - metrics_users_starred_dashboards
 - alert_management_alerts
 - repository_storage_moves
@@ -547,6 +556,8 @@ project:
 - pipeline_artifacts
 - terraform_states
 - alert_management_http_integrations
+- exported_protected_branches
+- incident_management_oncall_schedules
 award_emoji:
 - awardable
 - user
@@ -652,6 +663,7 @@ milestone_releases:
 evidences:
 - release
 design: &design
+- authors
 - issue
 - actions
 - versions

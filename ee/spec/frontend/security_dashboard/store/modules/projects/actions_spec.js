@@ -1,10 +1,10 @@
 import MockAdapter from 'axios-mock-adapter';
+import * as actions from 'ee/security_dashboard/store/modules/projects/actions';
+import * as types from 'ee/security_dashboard/store/modules/projects/mutation_types';
+import createState from 'ee/security_dashboard/store/modules/projects/state';
 import testAction from 'helpers/vuex_action_helper';
 import { TEST_HOST } from 'spec/test_constants';
 
-import createState from 'ee/security_dashboard/store/modules/projects/state';
-import * as types from 'ee/security_dashboard/store/modules/projects/mutation_types';
-import * as actions from 'ee/security_dashboard/store/modules/projects/actions';
 import axios from '~/lib/utils/axios_utils';
 
 import mockData from './data/mock_data.json';

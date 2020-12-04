@@ -1,7 +1,7 @@
 ---
 stage: none
 group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Reserved project and group names
@@ -82,6 +82,7 @@ Currently the following names are reserved as top level groups:
 - `s`
 - `search`
 - `sent_notifications`
+- `sitemap`
 - `sitemap.xml`
 - `sitemap.xml.gz`
 - `slash-command-logo.png`

@@ -1,9 +1,9 @@
-import Vuex from 'vuex';
+import { GlButton, GlDropdown } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
-import { GlButton, GlDropdown, GlFormGroup } from '@gitlab/ui';
+import Vuex from 'vuex';
 import ValueStreamSelect from 'ee/analytics/cycle_analytics/components/value_stream_select.vue';
-import { valueStreams } from '../mock_data';
 import { findDropdownItemText } from '../helpers';
+import { valueStreams } from '../mock_data';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -17,7 +17,6 @@ describe('ValueStreamSelect', () => {
   const mockToastShow = jest.fn();
   const streamName = 'Cool stream';
   const selectedValueStream = valueStreams[0];
-  const createValueStreamErrors = { name: ['Name field required'] };
   const deleteValueStreamError = 'Cannot delete default value stream';
 
   const fakeStore = ({ initialState = {} }) =>
@@ -54,14 +53,11 @@ describe('ValueStreamSelect', () => {
     });
 
   const findModal = modal => wrapper.find(`[data-testid="${modal}-value-stream-modal"]`);
-  const createSubmitButtonDisabledState = () =>
-    findModal('create').props('actionPrimary').attributes[1].disabled;
   const submitModal = modal => findModal(modal).vm.$emit('primary', mockEvent);
   const findSelectValueStreamDropdown = () => wrapper.find(GlDropdown);
   const findSelectValueStreamDropdownOptions = _wrapper => findDropdownItemText(_wrapper);
   const findCreateValueStreamButton = () => wrapper.find(GlButton);
   const findDeleteValueStreamButton = () => wrapper.find('[data-testid="delete-value-stream"]');
-  const findFormGroup = () => wrapper.find(GlFormGroup);
 
   beforeEach(() => {
     wrapper = createComponent({
@@ -153,90 +149,6 @@ describe('ValueStreamSelect', () => {
 
     it('does not display the select value stream dropdown', () => {
       expect(findSelectValueStreamDropdown().exists()).toBe(false);
-    });
-  });
-
-  describe('Create value stream form', () => {
-    it('submit button is disabled', () => {
-      expect(createSubmitButtonDisabledState()).toBe(true);
-    });
-
-    describe('form errors', () => {
-      beforeEach(() => {
-        wrapper = createComponent({
-          data: { name: streamName },
-          initialState: {
-            createValueStreamErrors,
-          },
-        });
-      });
-
-      it('renders the error', () => {
-        expect(findFormGroup().attributes('invalid-feedback')).toEqual(
-          createValueStreamErrors.name.join('\n'),
-        );
-      });
-
-      it('submit button is disabled', () => {
-        expect(createSubmitButtonDisabledState()).toBe(true);
-      });
-    });
-
-    describe('with valid fields', () => {
-      beforeEach(() => {
-        wrapper = createComponent({ data: { name: streamName } });
-      });
-
-      it('submit button is enabled', () => {
-        expect(createSubmitButtonDisabledState()).toBe(false);
-      });
-
-      describe('form submitted successfully', () => {
-        beforeEach(() => {
-          submitModal('create');
-        });
-
-        it('calls the "createValueStream" event when submitted', () => {
-          expect(createValueStreamMock).toHaveBeenCalledWith(expect.any(Object), {
-            name: streamName,
-          });
-        });
-
-        it('clears the name field', () => {
-          expect(wrapper.vm.name).toEqual('');
-        });
-
-        it('displays a toast message', () => {
-          expect(mockToastShow).toHaveBeenCalledWith(`'${streamName}' Value Stream created`, {
-            position: 'top-center',
-          });
-        });
-      });
-
-      describe('form submission fails', () => {
-        beforeEach(() => {
-          wrapper = createComponent({
-            data: { name: streamName },
-            initialState: {
-              createValueStreamErrors,
-            },
-          });
-
-          submitModal('create');
-        });
-
-        it('calls the createValueStream action', () => {
-          expect(createValueStreamMock).toHaveBeenCalled();
-        });
-
-        it('does not clear the name field', () => {
-          expect(wrapper.vm.name).toEqual(streamName);
-        });
-
-        it('does not display a toast message', () => {
-          expect(mockToastShow).not.toHaveBeenCalled();
-        });
-      });
     });
   });
 

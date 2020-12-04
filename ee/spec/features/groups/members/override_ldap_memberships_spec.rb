@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe 'Groups > Members > Maintainer/Owner can override LDAP access levels' do
   include WaitForRequests
+  include Spec::Support::Helpers::Features::MembersHelpers
 
   let(:johndoe)  { create(:user, name: 'John Doe') }
   let(:maryjane) { create(:user, name: 'Mary Jane') }
@@ -16,8 +17,6 @@ RSpec.describe 'Groups > Members > Maintainer/Owner can override LDAP access lev
   let!(:regular_member) { create(:group_member, :guest, group: group, user: maryjane, ldap: false) }
 
   before do
-    stub_feature_flags(vue_group_members_list: false)
-
     # We need to actually activate the LDAP config otherwise `Group#ldap_synced?` will always be false!
     allow(Gitlab.config.ldap).to receive_messages(enabled: true)
 
@@ -35,7 +34,7 @@ RSpec.describe 'Groups > Members > Maintainer/Owner can override LDAP access lev
 
     visit group_group_members_path(group)
 
-    within "#group_member_#{ldap_member.id}" do
+    within first_row do
       expect(page).not_to have_content 'LDAP'
       expect(page).not_to have_button 'Guest'
       expect(page).not_to have_button 'Edit permissions'
@@ -47,7 +46,7 @@ RSpec.describe 'Groups > Members > Maintainer/Owner can override LDAP access lev
 
     visit group_group_members_path(group)
 
-    within "#group_member_#{ldap_member.id}" do
+    within first_row do
       expect(page).to have_content 'LDAP'
       expect(page).to have_button 'Guest', disabled: true
       expect(page).to have_button 'Edit permissions'
@@ -55,29 +54,26 @@ RSpec.describe 'Groups > Members > Maintainer/Owner can override LDAP access lev
       click_button 'Edit permissions'
     end
 
-    expect(page).to have_content ldap_override_message
-
-    click_button 'Change permissions'
+    page.within('[role="dialog"]') do
+      expect(page).to have_content ldap_override_message
+      click_button 'Edit permissions'
+    end
 
     expect(page).not_to have_content ldap_override_message
-    expect(page).not_to have_button 'Change permissions'
 
-    within "#group_member_#{ldap_member.id}" do
+    within first_row do
       expect(page).not_to have_button 'Edit permissions'
       expect(page).to have_button 'Guest', disabled: false
     end
 
     refresh # controls should still be enabled after a refresh
 
-    within "#group_member_#{ldap_member.id}" do
+    within first_row do
       expect(page).not_to have_button 'Edit permissions'
       expect(page).to have_button 'Guest', disabled: false
 
       click_button 'Guest'
-
-      within '.dropdown-menu' do
-        click_link 'Revert to LDAP group sync settings'
-      end
+      click_button 'Revert to LDAP group sync settings'
 
       wait_for_requests
 
@@ -85,16 +81,14 @@ RSpec.describe 'Groups > Members > Maintainer/Owner can override LDAP access lev
       expect(page).to have_button 'Edit permissions'
     end
 
-    within "#group_member_#{regular_member.id}" do
+    within third_row do
       expect(page).not_to have_content 'LDAP'
       expect(page).not_to have_button 'Edit permissions'
       expect(page).to have_button 'Guest', disabled: false
 
       click_button 'Guest'
 
-      within '.dropdown-menu' do
-        expect(page).not_to have_content 'Revert to LDAP group sync settings'
-      end
+      expect(page).not_to have_content 'Revert to LDAP group sync settings'
     end
   end
 end

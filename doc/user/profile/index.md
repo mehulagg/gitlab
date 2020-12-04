@@ -2,7 +2,7 @@
 type: index, howto
 stage: Manage
 group: Access
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # User account
@@ -86,7 +86,7 @@ From there, you can:
 
 If you don't know your current password, select the 'I forgot my password' link.
 
-![Change your password](./img/change_password_v13_0.png)
+![Change your password](img/change_password_v13_0.png)
 
 ## Changing your username
 
@@ -198,6 +198,46 @@ or
 1. Click **Update profile settings**.
 
 You can also set your current status [using the API](../../api/users.md#user-status).
+
+If you previously selected the "Busy" checkbox, remember to deselect it when you become available again.
+
+## Busy status indicator
+
+> - Introduced in GitLab 13.6.
+> - It's [deployed behind a feature flag](../feature_flags.md), disabled by default.
+> - It's disabled on GitLab.com.
+> - It's not recommended for production use.
+> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-busy-status-feature).
+
+To indicate to others that you are busy, you can set an indicator
+
+![Busy status indicator](img/busy_status_indicator_v13_6.png)
+
+To set the busy status indicator, either:
+
+- Set it directly:
+
+  1. Click your avatar.
+  1. Click **Set status**, or **Edit status** if you have already set a status.
+  1. Select the **Busy** checkbox
+
+- Set it on your profile:
+
+  1. Click your avatar.
+  1. Select **Profile**.
+  1. Click **Edit profile** (**{pencil}**).
+  1. Select the **Busy** checkbox
+
+### Enable busy status feature
+
+The busy status feature is deployed behind a feature flag and is **disabled by default**.
+[GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md) can enable it for your instance from the [rails console](../../administration/feature_flags.md#start-the-gitlab-rails-console).
+
+To enable it:
+
+```ruby
+Feature.enable(:set_user_availability_status)
+```
 
 ## Commit email
 

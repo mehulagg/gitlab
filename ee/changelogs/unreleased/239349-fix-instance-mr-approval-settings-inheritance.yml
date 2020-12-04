@@ -1,5 +1,0 @@
----
-title: Fix permission to modify project MR rules on compliance-labeled projects
-merge_request: 40229
-author:
-type: fixed

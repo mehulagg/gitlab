@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlIcon } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import geoNodeHealthStatusComponent from 'ee/geo_nodes/components/geo_node_health_status.vue';
 import { HEALTH_STATUS_ICON, HEALTH_STATUS_CLASS } from 'ee/geo_nodes/constants';
 import { mockNodeDetails } from '../mock_data';

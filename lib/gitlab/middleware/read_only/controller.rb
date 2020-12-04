@@ -9,13 +9,12 @@ module Gitlab
         APPLICATION_JSON_TYPES = %W{#{APPLICATION_JSON} application/vnd.git-lfs+json}.freeze
         ERROR_MESSAGE = 'You cannot perform write operations on a read-only instance'
 
-        ALLOWLISTED_GIT_ROUTES = {
-          'repositories/git_http' => %w{git_upload_pack git_receive_pack}
+        ALLOWLISTED_GIT_READ_ONLY_ROUTES = {
+          'repositories/git_http' => %w{git_upload_pack}
         }.freeze
 
-        ALLOWLISTED_GIT_LFS_ROUTES = {
-          'repositories/lfs_api' => %w{batch},
-          'repositories/lfs_locks_api' => %w{verify create unlock}
+        ALLOWLISTED_GIT_LFS_BATCH_ROUTES = {
+          'repositories/lfs_api' => %w{batch}
         }.freeze
 
         ALLOWLISTED_GIT_REVISION_ROUTES = {
@@ -35,7 +34,7 @@ module Gitlab
         end
 
         def call
-          if disallowed_request? && Gitlab::Database.read_only?
+          if disallowed_request? && read_only?
             Gitlab::AppLogger.debug('GitLab ReadOnly: preventing possible non read-only operation')
 
             if json_request?
@@ -56,6 +55,11 @@ module Gitlab
         def disallowed_request?
           DISALLOWED_METHODS.include?(@env['REQUEST_METHOD']) &&
             !allowlisted_routes
+        end
+
+        # Overridden in EE module
+        def read_only?
+          Gitlab::Database.read_only?
         end
 
         def json_request?
@@ -88,7 +92,7 @@ module Gitlab
 
         # Overridden in EE module
         def allowlisted_routes
-          workhorse_passthrough_route? || internal_route? || lfs_route? || compare_git_revisions_route? || sidekiq_route? || session_route? || graphql_query?
+          workhorse_passthrough_route? || internal_route? || lfs_batch_route? || compare_git_revisions_route? || sidekiq_route? || session_route? || graphql_query?
         end
 
         # URL for requests passed through gitlab-workhorse to rails-web
@@ -96,9 +100,9 @@ module Gitlab
         def workhorse_passthrough_route?
           # Calling route_hash may be expensive. Only do it if we think there's a possible match
           return false unless request.post? &&
-            request.path.end_with?('.git/git-upload-pack', '.git/git-receive-pack')
+            request.path.end_with?('.git/git-upload-pack')
 
-          ALLOWLISTED_GIT_ROUTES[route_hash[:controller]]&.include?(route_hash[:action])
+          ALLOWLISTED_GIT_READ_ONLY_ROUTES[route_hash[:controller]]&.include?(route_hash[:action])
         end
 
         def internal_route?
@@ -112,15 +116,13 @@ module Gitlab
           ALLOWLISTED_GIT_REVISION_ROUTES[route_hash[:controller]]&.include?(route_hash[:action])
         end
 
-        def lfs_route?
+        # Batch upload requests are blocked in:
+        # https://gitlab.com/gitlab-org/gitlab/blob/master/app/controllers/repositories/lfs_api_controller.rb#L106
+        def lfs_batch_route?
           # Calling route_hash may be expensive. Only do it if we think there's a possible match
-          unless request.path.end_with?('/info/lfs/objects/batch',
-            '/info/lfs/locks', '/info/lfs/locks/verify') ||
-              %r{/info/lfs/locks/\d+/unlock\z}.match?(request.path)
-            return false
-          end
+          return unless request.path.end_with?('/info/lfs/objects/batch')
 
-          ALLOWLISTED_GIT_LFS_ROUTES[route_hash[:controller]]&.include?(route_hash[:action])
+          ALLOWLISTED_GIT_LFS_BATCH_ROUTES[route_hash[:controller]]&.include?(route_hash[:action])
         end
 
         def session_route?

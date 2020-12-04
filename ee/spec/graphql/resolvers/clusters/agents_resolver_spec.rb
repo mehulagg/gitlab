@@ -5,10 +5,13 @@ require 'spec_helper'
 RSpec.describe Resolvers::Clusters::AgentsResolver do
   include GraphqlHelpers
 
-  it { expect(described_class).to be < LooksAhead }
+  specify do
+    expect(described_class).to have_nullable_graphql_type(Types::Clusters::AgentType.connection_type)
+  end
 
-  it { expect(described_class.type).to eq(Types::Clusters::AgentType) }
-  it { expect(described_class.null).to be_truthy }
+  specify do
+    expect(described_class.field_options).to include(extras: include(:lookahead))
+  end
 
   describe '#resolve' do
     let_it_be(:user) { create(:user) }
@@ -35,6 +38,36 @@ RSpec.describe Resolvers::Clusters::AgentsResolver do
         .with(:agent_tokens).and_return(relation)
 
       expect(subject).to eq(relation)
+    end
+  end
+end
+
+RSpec.describe Resolvers::Clusters::AgentsResolver.single do
+  it { expect(described_class).to be < Resolvers::Clusters::AgentsResolver }
+
+  describe '.field_options' do
+    subject { described_class.field_options }
+
+    specify do
+      expect(subject).to include(
+        type: ::Types::Clusters::AgentType,
+        null: true,
+        extras: [:lookahead]
+      )
+    end
+  end
+
+  describe 'arguments' do
+    subject { described_class.arguments[argument] }
+
+    describe 'name' do
+      let(:argument) { 'name' }
+
+      it do
+        expect(subject).to be_present
+        expect(subject.type.to_s).to eq('String!')
+        expect(subject.description).to be_present
+      end
     end
   end
 end

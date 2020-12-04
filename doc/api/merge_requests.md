@@ -1,7 +1,7 @@
 ---
 stage: Create
 group: Source Code
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 type: reference, api
 ---
 
@@ -787,10 +787,17 @@ Shows information about the merge request including its files and changes.
 GET /projects/:id/merge_requests/:merge_request_iid/changes
 ```
 
+[Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/46190) in GitLab 13.6,
+diffs associated with the set of changes will have the same size limitations applied as other diffs
+returned by the API or viewed via the UI. When these limits impact the results, the `overflow`
+field will contain a value of `true`. Diff data without these limits applied can be retrieved by
+adding the `access_raw_diffs` parameter, however, it will be slower and more resource-intensive.
+
 Parameters:
 
-- `id` (required) - The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user
-- `merge_request_iid` (required) - The internal ID of the merge request
+- `id` (required) - The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user.
+- `merge_request_iid` (required) - The internal ID of the merge request.
+- `access_raw_diffs` (optional) - Retrieve change diffs without size limitations.
 
 ```json
 {
@@ -884,7 +891,8 @@ Parameters:
     "renamed_file": false,
     "deleted_file": false
     }
-  ]
+  ],
+  "overflow": false
 }
 ```
 
@@ -2464,4 +2472,4 @@ For approvals, please see [Merge Request Approvals](merge_request_approvals.md)
 ## List merge request state events
 
 To track which state was set, who did it, and when it happened, check out
-[Resource state events API](./resource_state_events.md#merge-requests).
+[Resource state events API](resource_state_events.md#merge-requests).

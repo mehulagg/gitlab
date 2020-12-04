@@ -91,6 +91,8 @@ exports[`JiraImportForm table body shows correct information in each cell 1`] = 
           >
             <!---->
              
+            <!---->
+             
             <span
               class="gl-new-dropdown-button-text"
             >
@@ -118,6 +120,7 @@ exports[`JiraImportForm table body shows correct information in each cell 1`] = 
               class="gl-search-box-by-type"
             >
               <svg
+                aria-hidden="true"
                 class="gl-search-box-by-type-search-icon gl-icon s16"
                 data-testid="search-icon"
               >
@@ -203,6 +206,8 @@ exports[`JiraImportForm table body shows correct information in each cell 1`] = 
           >
             <!---->
              
+            <!---->
+             
             <span
               class="gl-new-dropdown-button-text"
             >
@@ -230,6 +235,7 @@ exports[`JiraImportForm table body shows correct information in each cell 1`] = 
               class="gl-search-box-by-type"
             >
               <svg
+                aria-hidden="true"
                 class="gl-search-box-by-type-search-icon gl-icon s16"
                 data-testid="search-icon"
               >

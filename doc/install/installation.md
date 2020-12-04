@@ -1,7 +1,7 @@
 ---
 stage: Enablement
 group: Distribution
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: howto
 ---
 
@@ -90,6 +90,8 @@ The GitLab installation consists of setting up the following components:
 
 ## 1. Packages and dependencies
 
+### sudo
+
 `sudo` is not installed on Debian by default. Make sure your system is
 up-to-date and install it.
 
@@ -110,6 +112,8 @@ sudo apt-get install -y vim
 sudo update-alternatives --set editor /usr/bin/vim.basic
 ```
 
+### Build dependencies
+
 Install the required packages (needed to compile Ruby and native extensions to Ruby gems):
 
 ```shell
@@ -129,69 +133,33 @@ If you want to use Kerberos for user authentication, install `libkrb5-dev`
 sudo apt-get install libkrb5-dev
 ```
 
-Make sure you have the right version of Git installed:
+### Git
 
-```shell
-# Install Git
-sudo apt-get install -y git-core
+From GitLab 13.6, we recommend you use the [Git version provided by
+Gitaly](https://gitlab.com/gitlab-org/gitaly/-/issues/2729)
+that:
 
-# Make sure Git is version 2.29.0 or higher (recommended version is 2.29.0)
-git --version
-```
-
-Starting with GitLab 12.0, Git is required to be compiled with `libpcre2`.
-Find out if that's the case:
-
-```shell
-ldd $(command -v git) | grep pcre2
-```
-
-The output should contain `libpcre2-8.so.0`.
-
-If the system packaged Git is too old or not compiled with `pcre2`, remove it:
-
-```shell
-sudo apt-get remove git-core
-```
-
-On Ubuntu, install Git from [its official PPA](https://git-scm.com/download/linux):
-
-```shell
-# run as root!
-add-apt-repository ppa:git-core/ppa
-apt update
-apt install git
-# repeat libpcre2 check as above
-```
-
-On Debian, use the following compilation instructions:
+- Is always at the version required by GitLab.
+- May contain custom patches required for proper operation.
 
 ```shell
 # Install dependencies
-sudo apt-get install -y libcurl4-openssl-dev libexpat1-dev gettext libz-dev libssl-dev build-essential
+sudo apt-get install -y libcurl4-openssl-dev libexpat1-dev gettext libz-dev libssl-dev libpcre2-dev build-essential
 
-# Download and compile pcre2 from source
-curl --silent --show-error --location https://ftp.pcre.org/pub/pcre/pcre2-10.33.tar.gz --output pcre2.tar.gz
-tar -xzf pcre2.tar.gz
-cd pcre2-10.33
-chmod +x configure
-./configure --prefix=/usr --enable-jit
-make
-sudo make install
+# Clone the Gitaly repository
+git clone https://gitlab.com/gitlab-org/gitaly.git -b <X-Y-stable> /tmp/gitaly
 
-# Download and compile from source
-cd /tmp
-curl --remote-name --location --progress https://www.kernel.org/pub/software/scm/git/git-2.29.0.tar.gz
-echo 'fa08dc8424ef80c0f9bf307877f9e2e49f1a6049e873530d6747c2be770742ff  git-2.29.0.tar.gz' | shasum -a256 -c - && tar -xzf git-2.29.0.tar.gz
-cd git-2.29.0/
-./configure --with-libpcre
-make prefix=/usr/local all
-
-# Install into /usr/local/bin
-sudo make prefix=/usr/local install
-
-# When editing config/gitlab.yml later, change the git -> bin_path to /usr/local/bin/git
+# Compile and install Git
+cd /tmp/gitaly
+sudo make git GIT_PREFIX=/usr/local
 ```
+
+Replace `<X-Y-stable>` with the stable branch that matches the GitLab version you want to
+install. For example, if you want to install GitLab 13.6, use the branch name `13-6-stable`.
+
+When editing `config/gitlab.yml` later, change the `git -> bin_path` to `/usr/local/bin/git`.
+
+### GraphicsMagick
 
 For the [Custom Favicon](../user/admin_area/appearance.md#favicon) to work, GraphicsMagick
 needs to be installed.
@@ -199,6 +167,8 @@ needs to be installed.
 ```shell
 sudo apt-get install -y graphicsmagick
 ```
+
+### Mail server
 
 In order to receive mail notifications, make sure to install a mail server.
 By default, Debian is shipped with `exim4` but this
@@ -211,6 +181,8 @@ sudo apt-get install -y postfix
 ```
 
 Then select 'Internet Site' and press enter to confirm the hostname.
+
+### Exiftool
 
 [GitLab Workhorse](https://gitlab.com/gitlab-org/gitlab-workhorse#dependencies)
 requires `exiftool` to remove EXIF data from uploaded images.
@@ -250,12 +222,6 @@ cd ruby-2.7.2
 ./configure --disable-install-rdoc
 make
 sudo make install
-```
-
-Then install the Bundler gem (a version below 2.x):
-
-```shell
-sudo gem install bundler --no-document --version '< 2'
 ```
 
 ## 3. Go
@@ -463,22 +429,22 @@ Clone Community Edition:
 
 ```shell
 # Clone GitLab repository
-sudo -u git -H git clone https://gitlab.com/gitlab-org/gitlab-foss.git -b X-Y-stable gitlab
+sudo -u git -H git clone https://gitlab.com/gitlab-org/gitlab-foss.git -b <X-Y-stable> gitlab
 ```
 
 Clone Enterprise Edition:
 
 ```shell
 # Clone GitLab repository
-sudo -u git -H git clone https://gitlab.com/gitlab-org/gitlab.git -b X-Y-stable gitlab
+sudo -u git -H git clone https://gitlab.com/gitlab-org/gitlab.git -b <X-Y-stable> gitlab
 ```
 
-Make sure to replace `X-Y-stable` with the stable branch that matches the
+Make sure to replace `<X-Y-stable>` with the stable branch that matches the
 version you want to install. For example, if you want to install 11.8 you would
 use the branch name `11-8-stable`.
 
 CAUTION: **Caution:**
-You can change `X-Y-stable` to `master` if you want the *bleeding edge* version, but never install `master` on a production server!
+You can change `<X-Y-stable>` to `master` if you want the *bleeding edge* version, but never install `master` on a production server!
 
 ### Configure It
 

@@ -95,7 +95,8 @@ RSpec.describe Projects::MergeRequestsController do
               project,
               merge_request,
               'json',
-              diff_head: true))
+              diff_head: true,
+              view: 'inline'))
         end
       end
 
@@ -1998,10 +1999,6 @@ RSpec.describe Projects::MergeRequestsController do
   describe 'POST export_csv' do
     subject { post :export_csv, params: { namespace_id: project.namespace, project_id: project } }
 
-    before do
-      stub_feature_flags(export_merge_requests_as_csv: project)
-    end
-
     it 'redirects to the merge request index' do
       subject
 
@@ -2013,18 +2010,6 @@ RSpec.describe Projects::MergeRequestsController do
       expect(IssuableExportCsvWorker).to receive(:perform_async).with(:merge_request, user.id, project.id, anything)
 
       subject
-    end
-
-    context 'feature is disabled' do
-      before do
-        stub_feature_flags(export_merge_requests_as_csv: false)
-      end
-
-      it 'expects a 404 response' do
-        subject
-
-        expect(response).to have_gitlab_http_status(:not_found)
-      end
     end
   end
 end

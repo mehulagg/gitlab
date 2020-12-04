@@ -15,31 +15,29 @@ import DueDateSelectors from '~/due_date_select';
 import fileUpload from '~/lib/utils/file_upload';
 import EEMirrorRepos from './ee_mirror_repos';
 
-document.addEventListener('DOMContentLoaded', () => {
-  new UsersSelect();
-  new UserCallout();
+new UsersSelect();
+new UserCallout();
 
-  initDeployKeys();
-  initSettingsPanels();
+initDeployKeys();
+initSettingsPanels();
 
-  if (document.querySelector('.js-protected-refs-for-users')) {
-    new ProtectedBranchCreate({ hasLicense: true });
-    new ProtectedBranchEditList();
+if (document.querySelector('.js-protected-refs-for-users')) {
+  new ProtectedBranchCreate({ hasLicense: true });
+  new ProtectedBranchEditList();
 
-    new ProtectedTagCreate();
-    new ProtectedTagEditList();
-  } else {
-    new ProtectedBranchCreate({ hasLicense: false });
-    new CEProtectedBranchEditList();
+  new ProtectedTagCreate();
+  new ProtectedTagEditList();
+} else {
+  new ProtectedBranchCreate({ hasLicense: false });
+  new CEProtectedBranchEditList();
 
-    new CEProtectedTagCreate();
-    new CEProtectedTagEditList();
-  }
+  new CEProtectedTagCreate();
+  new CEProtectedTagEditList();
+}
 
-  const pushPullContainer = document.querySelector('.js-mirror-settings');
-  if (pushPullContainer) new EEMirrorRepos(pushPullContainer).init();
+const pushPullContainer = document.querySelector('.js-mirror-settings');
+if (pushPullContainer) new EEMirrorRepos(pushPullContainer).init();
 
-  new DueDateSelectors();
+new DueDateSelectors();
 
-  fileUpload('.js-choose-file', '.js-object-map-input');
-});
+fileUpload('.js-choose-file', '.js-object-map-input');

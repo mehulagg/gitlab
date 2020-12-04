@@ -1,7 +1,7 @@
 ---
 stage: Enablement
 group: Geo
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: howto
 ---
 
@@ -35,8 +35,8 @@ To enable GitLab replication, you must:
 
 1. Go to **Admin Area > Geo**.
 1. Press **Edit** on the **secondary** node.
-1. Enable the **Allow this secondary node to replicate content on Object Storage**
-   checkbox.
+1. In the **Synchronization Settings** section, find the **Allow this secondary node to replicate content on Object Storage**
+   checkbox to enable it.
 
 For LFS, follow the documentation to
 [set up LFS object storage](../../lfs/index.md#storing-lfs-objects-in-remote-object-storage).
@@ -72,7 +72,7 @@ If you are using Google Cloud Storage, consider using
 Or you can use the [Storage Transfer Service](https://cloud.google.com/storage-transfer/docs/),
 although this only supports daily synchronization.
 
-For manual synchronization, or scheduled by `cron`, please have a look at:
+For manual synchronization, or scheduled by `cron`, see:
 
 - [`s3cmd sync`](https://s3tools.org/s3cmd-sync)
 - [`gsutil rsync`](https://cloud.google.com/storage/docs/gsutil/commands/rsync)

@@ -7,7 +7,7 @@
 # @param known_keys [Set] the set of known finding keys stored by previous invocations of this service class.
 # @param deduplicate [Boolean] attribute to force running deduplication logic.
 module Security
-  class StoreScanService < ::BaseService
+  class StoreScanService
     def self.execute(artifact, known_keys, deduplicate)
       new(artifact, known_keys, deduplicate).execute
     end
@@ -19,6 +19,8 @@ module Security
     end
 
     def execute
+      return security_scan unless Feature.enabled?(:store_security_findings, project)
+
       StoreFindingsMetadataService.execute(security_scan, security_report)
       deduplicate_findings? ? update_deduplicated_findings : register_finding_keys
 
@@ -28,7 +30,7 @@ module Security
     private
 
     attr_reader :artifact, :known_keys, :deduplicate
-    delegate :security_report, to: :artifact, private: true
+    delegate :security_report, :project, to: :artifact, private: true
 
     def security_scan
       @security_scan ||= Security::Scan.safe_find_or_create_by!(build: artifact.job, scan_type: artifact.file_type)
@@ -55,7 +57,9 @@ module Security
     end
 
     def register_keys(keys)
-      keys.all? { |key| known_keys.add?(key) }
+      return false if known_keys.intersect?(keys.to_set)
+
+      known_keys.merge(keys)
     end
   end
 end

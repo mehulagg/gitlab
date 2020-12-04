@@ -1,6 +1,6 @@
+import { LICENSE_APPROVAL_STATUS } from 'ee/vue_shared/license_compliance/constants';
 import createStore from 'ee/vue_shared/license_compliance/store';
 import * as types from 'ee/vue_shared/license_compliance/store/mutation_types';
-import { LICENSE_APPROVAL_STATUS } from 'ee/vue_shared/license_compliance/constants';
 
 import { TEST_HOST } from 'spec/test_constants';
 import { approvedLicense } from '../mock_data';

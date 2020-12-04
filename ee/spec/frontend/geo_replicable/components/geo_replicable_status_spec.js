@@ -1,6 +1,6 @@
-import Vuex from 'vuex';
+import { GlIcon } from '@gitlab/ui';
 import { createLocalVue, mount } from '@vue/test-utils';
-import createStore from 'ee/geo_replicable/store';
+import Vuex from 'vuex';
 import GeoReplicableStatus from 'ee/geo_replicable/components/geo_replicable_status.vue';
 import {
   FILTER_STATES,
@@ -8,7 +8,7 @@ import {
   STATUS_ICON_CLASS,
   DEFAULT_STATUS,
 } from 'ee/geo_replicable/constants';
-import { GlIcon } from '@gitlab/ui';
+import createStore from 'ee/geo_replicable/store';
 import { MOCK_REPLICABLE_TYPE } from '../mock_data';
 
 const localVue = createLocalVue();

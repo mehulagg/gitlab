@@ -62,7 +62,7 @@ export default {
       type: String,
       required: true,
     },
-    autoDevopsPath: {
+    autoDevopsHelpPath: {
       type: String,
       required: true,
     },
@@ -337,12 +337,12 @@ export default {
         :message="emptyTabMessage"
       />
 
-      <div v-else-if="stateToRender === $options.stateMap.tableList" class="table-holder">
+      <div v-else-if="stateToRender === $options.stateMap.tableList">
         <pipelines-table-component
           :pipelines="state.pipelines"
           :pipeline-schedule-url="pipelineScheduleUrl"
           :update-graph-dropdown="updateGraphDropdown"
-          :auto-devops-help-path="autoDevopsPath"
+          :auto-devops-help-path="autoDevopsHelpPath"
           :view-type="viewType"
         />
       </div>

@@ -1,11 +1,14 @@
 import { queryToObject } from '~/lib/utils/url_utility';
 import createStore from './store';
-import initDropdownFilters from './dropdown_filter';
-import initGroupFilter from './group_filter';
+import { initTopbar } from './topbar';
+import { initSidebar } from './sidebar';
 
-export default () => {
-  const store = createStore({ query: queryToObject(window.location.search) });
+export const initSearchApp = () => {
+  // Similar to url_utility.decodeUrlParameter
+  // Our query treats + as %20.  This replaces the query + symbols with %20.
+  const sanitizedSearch = window.location.search.replace(/\+/g, '%20');
+  const store = createStore({ query: queryToObject(sanitizedSearch) });
 
-  initDropdownFilters(store);
-  initGroupFilter(store);
+  initTopbar(store);
+  initSidebar(store);
 };

@@ -1,7 +1,7 @@
 ---
 stage: Enablement
 group: Geo
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: howto
 ---
 
@@ -49,7 +49,12 @@ Geo provides:
 
 - Read-only **secondary** nodes: Maintain one **primary** GitLab node while still enabling read-only **secondary** nodes for each of your distributed teams.
 - Authentication system hooks: **Secondary** nodes receives all authentication data (like user accounts and logins) from the **primary** instance.
-- An intuitive UI: **Secondary** nodes utilize the same web interface your team has grown accustomed to. In addition, there are visual notifications that block write operations and make it clear that a user is on a **secondary** node.
+- An intuitive UI: **Secondary** nodes use the same web interface your team has grown accustomed to. In addition, there are visual notifications that block write operations and make it clear that a user is on a **secondary** node.
+
+### Gitaly Cluster
+
+Geo should not be confused with [Gitaly Cluster](../gitaly/praefect.md). For more information about
+the difference between Geo and Gitaly Cluster, see [Gitaly Cluster compared to Geo](../gitaly/praefect.md#gitaly-cluster-compared-to-geo).
 
 ## How it works
 
@@ -197,11 +202,20 @@ For information on how to update your Geo nodes to the latest GitLab version, se
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/35913) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.2.
 
 DANGER: **Warning:**
-In GitLab 13.2 and later versions, promoting a secondary node to a primary while the secondary is paused fails. We are [investigating the issue](https://gitlab.com/gitlab-org/gitlab/-/issues/225173). Do not pause replication before promoting a secondary. If the node is paused, please resume before promoting.
+In GitLab 13.2 and 13.3, promoting a secondary node to a primary while the
+secondary is paused fails. Do not pause replication before promoting a
+secondary. If the node is paused, be sure to resume before promoting. This
+issue has been fixed in GitLab 13.4 and later.
+
+CAUTION: **Caution:**
+Pausing and resuming of replication is currently only supported for Geo installations using an
+Omnibus GitLab-managed database. External databases are currently not supported.
 
 In some circumstances, like during [upgrades](replication/updating_the_geo_nodes.md) or a [planned failover](disaster_recovery/planned_failover.md), it is desirable to pause replication between the primary and secondary.
 
-Pausing and resuming replication is done via a command line tool from the secondary node.
+Pausing and resuming replication is done via a command line tool from the secondary node where the `postgresql` service is enabled.
+
+If `postgresql` is on a standalone database node, ensure that `gitlab.rb` on that node contains the configuration line `gitlab_rails['geo_node_name'] = 'node_name'`, where `node_name` is the same as the `geo_name_name` on the application node.
 
 **To Pause: (from secondary)**
 

@@ -16,7 +16,7 @@ RSpec.describe 'Getting code coverage summary in a project' do
       codeCoverageSummary {
         averageCoverage
         coverageCount
-        lastUpdatedAt
+        lastUpdatedOn
       }
     }
     QUERY
@@ -45,7 +45,7 @@ RSpec.describe 'Getting code coverage summary in a project' do
 
         expect(code_coverage_summary_graphql_data.dig('averageCoverage')).to eq(77.0)
         expect(code_coverage_summary_graphql_data.dig('coverageCount')).to eq(1)
-        expect(code_coverage_summary_graphql_data.dig('lastUpdatedAt')).to eq(daily_build_group_report_result.date.to_s)
+        expect(code_coverage_summary_graphql_data.dig('lastUpdatedOn')).to eq(daily_build_group_report_result.date.to_s)
       end
     end
 
@@ -65,15 +65,6 @@ RSpec.describe 'Getting code coverage summary in a project' do
       post_graphql(query, current_user: current_user)
 
       expect(code_coverage_summary_graphql_data).to be_nil
-    end
-  end
-
-  context 'when group_coverage_data_report flag is disabled' do
-    it 'returns a graphQL error field does not exist' do
-      stub_feature_flags(group_coverage_data_report: false)
-
-      post_graphql(query, current_user: current_user)
-      expect_graphql_errors_to_include(/Field 'codeCoverageSummary' doesn't exist on type 'Project'/)
     end
   end
 end

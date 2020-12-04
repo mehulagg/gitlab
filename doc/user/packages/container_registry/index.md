@@ -1,7 +1,7 @@
 ---
 stage: Package
 group: Package
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # GitLab Container Registry
@@ -127,7 +127,7 @@ To build and push to the Container Registry:
    docker push registry.example.com/group/project/image
    ```
 
-You can also view these commands by going to your project's **Packages & Registries > Container Registry**.
+To view these commands, go to your project's **Packages & Registries > Container Registry**.
 
 ## Build and push by using GitLab CI/CD
 
@@ -447,7 +447,7 @@ For the project where it's defined, tags matching the regex pattern are removed.
 The underlying layers and images remain.
 
 To delete the underlying layers and images that aren't associated with any tags, administrators can use
-[garbage collection](../../../administration/packages/container_registry.md#removing-unused-layers-not-referenced-by-manifests) with the `-m` switch.
+[garbage collection](../../../administration/packages/container_registry.md#removing-untagged-manifests-and-unreferenced-layers) with the `-m` switch.
 
 ### Enable the cleanup policy
 
@@ -468,7 +468,7 @@ Cleanup policies can be run on all projects, with these exceptions:
   ```
 
   There are performance risks with enabling it for all projects, especially if you
-  are using an [external registry](./index.md#use-with-external-container-registries).
+  are using an [external registry](index.md#use-with-external-container-registries).
 - For self-managed GitLab instances, you can enable or disable the cleanup policy for a specific
   project.
 
@@ -488,6 +488,8 @@ Cleanup policies can be run on all projects, with these exceptions:
 
 The cleanup policy collects all tags in the Container Registry and excludes tags
 until only the tags to be deleted remain.
+
+The cleanup policy searches for images based on the tag name. Support for the full path [has not yet been implemented](https://gitlab.com/gitlab-org/gitlab/-/issues/281071), but would allow you to clean up dynamically-named tags.
 
 The cleanup policy:
 
@@ -513,28 +515,30 @@ You can create a cleanup policy in [the API](#use-the-cleanup-policy-api) or the
 To create a cleanup policy in the UI:
 
 1. For your project, go to **Settings > CI/CD**.
-1. Expand the **Cleanup policy for tags** section.
+1. Expand the **Clean up image tags** section.
 1. Complete the fields.
 
    | Field                                                                     | Description                                                                                                       |
    |---------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------|
-   | **Cleanup policy**                                                        | Turn the policy on or off.                                                                                        |
-   | **Expiration interval**                                                   | How long tags are exempt from being deleted.                                                                      |
-   | **Expiration schedule**                                                   | How often the policy should run.                                                                                  |
-   | **Number of tags to retain**                                              | How many tags to _always_ keep for each image.                                                                    |
-   | **Tags with names matching this regex pattern expire:**              | The regex pattern that determines which tags to remove. This value cannot be blank. For all tags, use `.*`. See other [regex pattern examples](#regex-pattern-examples). |
-   | **Tags with names matching this regex pattern are preserved:**        | The regex pattern that determines which tags to preserve. The `latest` tag is always preserved. For all tags, use `.*`. See other [regex pattern examples](#regex-pattern-examples). |
+   | **Toggle** | Turn the policy on or off. |
+   | **Run cleanup** | How often the policy should run. |
+   | **Keep the most recent** | How many tags to _always_ keep for each image. |
+   | **Keep tags matching** | The regex pattern that determines which tags to preserve. The `latest` tag is always preserved. For all tags, use `.*`. See other [regex pattern examples](#regex-pattern-examples). |
+   | **Remove tags older than** | Remove only tags older than X days. |
+   | **Remove tags matching**  | The regex pattern that determines which tags to remove. This value cannot be blank. For all tags, use `.*`. See other [regex pattern examples](#regex-pattern-examples). |
 
-1. Click **Set cleanup policy**.
+1. Click **Save**.
 
 Depending on the interval you chose, the policy is scheduled to run.
 
 NOTE: **Note:**
-If you edit the policy and click **Set cleanup policy** again, the interval is reset.
+If you edit the policy and click **Save** again, the interval is reset.
 
 ### Regex pattern examples
 
 Cleanup policies use regex patterns to determine which tags should be preserved or removed, both in the UI and the API.
+
+Regex patterns are automatically surrounded with `\A` and `\Z` anchors. Do not include any `\A`, `\Z`, `^` or `$` token in the regex patterns as they are not necessary.
 
 Here are examples of regex patterns you may want to use:
 
@@ -580,7 +584,7 @@ See the API documentation for further details: [Edit project](../../../api/proje
 
 ### Use with external container registries
 
-When using an [external container registry](./../../../administration/packages/container_registry.md#use-an-external-container-registry-with-gitlab-as-an-auth-endpoint),
+When using an [external container registry](../../../administration/packages/container_registry.md#use-an-external-container-registry-with-gitlab-as-an-auth-endpoint),
 running a cleanup policy on a project may have some performance risks.
 If a project runs a policy to remove thousands of tags
 the GitLab background jobs may get backed up or fail completely.

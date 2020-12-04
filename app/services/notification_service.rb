@@ -353,7 +353,7 @@ class NotificationService
     issue = note.noteable
     support_bot = User.support_bot
 
-    return unless issue.service_desk_reply_to.present?
+    return unless issue.external_author.present?
     return unless issue.project.service_desk_enabled?
     return if note.author == support_bot
     return unless issue.subscribed?(support_bot, issue.project)
@@ -368,6 +368,20 @@ class NotificationService
     recipients.each do |recipient|
       mailer.new_release_email(recipient.user.id, release, recipient.reason).deliver_later
     end
+  end
+
+  def new_instance_access_request(user)
+    recipients = User.instance_access_request_approvers_to_be_notified # https://gitlab.com/gitlab-org/gitlab/-/issues/277016 will change this
+
+    return true if recipients.empty?
+
+    recipients.each do |recipient|
+      mailer.instance_access_request_email(user, recipient).deliver_later
+    end
+  end
+
+  def user_admin_rejection(name, email)
+    mailer.user_admin_rejection_email(name, email).deliver_later
   end
 
   # Members
@@ -490,6 +504,16 @@ class NotificationService
     end
   end
 
+  def issue_cloned(issue, new_issue, current_user)
+    recipients = NotificationRecipients::BuildService.build_recipients(issue, current_user, action: 'cloned')
+
+    recipients.map do |recipient|
+      email = mailer.issue_cloned_email(recipient.user, issue, new_issue, current_user, recipient.reason)
+      email.deliver_later
+      email
+    end
+  end
+
   def project_exported(project, current_user)
     return true unless notifiable?(current_user, :mention, project: project)
 
@@ -601,7 +625,7 @@ class NotificationService
     return if project.emails_disabled?
 
     owners_and_maintainers_without_invites(project).to_a.product(alerts).each do |recipient, alert|
-      mailer.prometheus_alert_fired_email(project.id, recipient.user.id, alert).deliver_later
+      mailer.prometheus_alert_fired_email(project, recipient.user, alert).deliver_later
     end
   end
 

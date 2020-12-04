@@ -18,7 +18,7 @@ RSpec.describe 'Billing plan pages', :feature do
   end
 
   before do
-    stub_experiment_for_user(contact_sales_btn_in_app: true)
+    stub_experiment_for_subject(contact_sales_btn_in_app: true)
     stub_full_request("#{EE::SUBSCRIPTIONS_URL}/gitlab_plans?plan=#{plan.name}")
       .to_return(status: 200, body: plans_data.to_json)
     stub_application_setting(check_namespace_plan: true)

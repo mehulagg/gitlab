@@ -2,7 +2,7 @@
 
 module Resolvers
   class EpicIssuesResolver < BaseResolver
-    type Types::EpicIssueType, null: true
+    type Types::EpicIssueType.connection_type, null: true
 
     alias_method :epic, :object
 

@@ -10,7 +10,7 @@
   = s_('Webhooks|Use this token to validate received payloads. It will be sent with the request in the X-Gitlab-Token HTTP header.')
 .form-group
   = form.label :url, s_('Webhooks|Trigger'), class: 'label-bold'
-  %ul.list-unstyled.prepend-left-20
+  %ul.list-unstyled.gl-ml-6
     %li
       = form.check_box :push_events, class: 'form-check-input'
       = form.label :push_events, class: 'list-label form-check-label ml-1' do
@@ -84,6 +84,12 @@
         %strong= s_('Webhooks|Feature Flag events')
       %p.text-muted.ml-1
         = s_('Webhooks|This URL is triggered when a feature flag is turned on or off')
+    %li
+      = form.check_box :releases_events, class: 'form-check-input'
+      = form.label :releases_events, class: 'list-label form-check-label ml-1' do
+        %strong= s_('Webhooks|Releases events')
+      %p.text-muted.ml-1
+        = s_('Webhooks|This URL is triggered when a release is created/updated')
 .form-group
   = form.label :enable_ssl_verification, s_('Webhooks|SSL verification'), class: 'label-bold checkbox'
   .form-check

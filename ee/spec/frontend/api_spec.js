@@ -1,6 +1,6 @@
 import MockAdapter from 'axios-mock-adapter';
-import Api from 'ee/api';
 import * as valueStreamAnalyticsConstants from 'ee/analytics/cycle_analytics/constants';
+import Api from 'ee/api';
 import * as analyticsMockData from 'ee_jest/analytics/cycle_analytics/mock_data';
 import axios from '~/lib/utils/axios_utils';
 import httpStatus from '~/lib/utils/http_status';
@@ -200,7 +200,7 @@ describe('Api', () => {
     });
   });
 
-  describe('Cycle analytics', () => {
+  describe('Value Stream Analytics', () => {
     const createdBefore = '2019-11-18';
     const createdAfter = '2019-08-18';
     const groupId = 'counting-54321';
@@ -755,83 +755,6 @@ describe('Api', () => {
         return Api.updateGeoNode(mockNode).then(({ data }) => {
           expect(data).toEqual(mockNode);
           expect(axios.put).toHaveBeenCalledWith(`${expectedUrl}/${mockNode.id}`, mockNode);
-        });
-      });
-    });
-  });
-
-  describe('Feature Flag User List', () => {
-    let expectedUrl;
-    let projectId;
-    let mockUserList;
-
-    beforeEach(() => {
-      projectId = 1000;
-      expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/projects/${projectId}/feature_flags_user_lists`;
-      mockUserList = {
-        name: 'mock_user_list',
-        user_xids: '1,2,3,4',
-        project_id: 1,
-        id: 1,
-        iid: 1,
-      };
-    });
-
-    describe('fetchFeatureFlagUserLists', () => {
-      it('GETs the right url', () => {
-        mock.onGet(expectedUrl).replyOnce(httpStatus.OK, []);
-
-        return Api.fetchFeatureFlagUserLists(projectId).then(({ data }) => {
-          expect(data).toEqual([]);
-        });
-      });
-    });
-
-    describe('createFeatureFlagUserList', () => {
-      it('POSTs data to the right url', () => {
-        const mockUserListData = {
-          name: 'mock_user_list',
-          user_xids: '1,2,3,4',
-        };
-        mock.onPost(expectedUrl, mockUserListData).replyOnce(httpStatus.OK, mockUserList);
-
-        return Api.createFeatureFlagUserList(projectId, mockUserListData).then(({ data }) => {
-          expect(data).toEqual(mockUserList);
-        });
-      });
-    });
-
-    describe('fetchFeatureFlagUserList', () => {
-      it('GETs the right url', () => {
-        mock.onGet(`${expectedUrl}/1`).replyOnce(httpStatus.OK, mockUserList);
-
-        return Api.fetchFeatureFlagUserList(projectId, 1).then(({ data }) => {
-          expect(data).toEqual(mockUserList);
-        });
-      });
-    });
-
-    describe('updateFeatureFlagUserList', () => {
-      it('PUTs the right url', () => {
-        mock
-          .onPut(`${expectedUrl}/1`)
-          .replyOnce(httpStatus.OK, { ...mockUserList, user_xids: '5' });
-
-        return Api.updateFeatureFlagUserList(projectId, {
-          ...mockUserList,
-          user_xids: '5',
-        }).then(({ data }) => {
-          expect(data).toEqual({ ...mockUserList, user_xids: '5' });
-        });
-      });
-    });
-
-    describe('deleteFeatureFlagUserList', () => {
-      it('DELETEs the right url', () => {
-        mock.onDelete(`${expectedUrl}/1`).replyOnce(httpStatus.OK, 'deleted');
-
-        return Api.deleteFeatureFlagUserList(projectId, 1).then(({ data }) => {
-          expect(data).toBe('deleted');
         });
       });
     });

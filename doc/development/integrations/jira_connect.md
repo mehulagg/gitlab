@@ -1,37 +1,37 @@
 ---
-stage: none
-group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+stage: Create
+group: Ecosystem
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Setting up a development environment
+# Set up a development environment
 
 The following are required to install and test the app:
 
-1. A Jira Cloud instance
+- A Jira Cloud instance. Atlassian provides [free instances for development and testing](https://developer.atlassian.com/platform/marketplace/getting-started/#free-developer-instances-to-build-and-test-your-app).
+- A GitLab instance available over the internet. For the app to work, Jira Cloud should
+  be able to connect to the GitLab instance through the internet. To easily expose your
+  local development environment, you can use tools like:
+  - [serveo](https://medium.com/automationmaster/how-to-forward-my-local-port-to-public-using-serveo-4979f352a3bf)
+  - [ngrok](https://ngrok.com).
 
-   Atlassian provides free instances for development and testing. [Click here to sign up](https://developer.atlassian.com/platform/marketplace/getting-started/#free-developer-instances-to-build-and-test-your-app).
+  These also take care of SSL for you because Jira requires all connections to the app
+  host to be over SSL.
 
-1. A GitLab instance available over the internet
+## Install the app in Jira
 
-   For the app to work, Jira Cloud should be able to connect to the GitLab instance through the internet.
+To install the app in Jira:
 
-   To easily expose your local development environment, you can use tools like
-   [serveo](https://medium.com/automationmaster/how-to-forward-my-local-port-to-public-using-serveo-4979f352a3bf)
-   or [ngrok](https://ngrok.com). These also take care of SSL for you because Jira
-   requires all connections to the app host to be over SSL.
+1. Enable Jira development mode to install apps that are not from the Atlassian
+   Marketplace:
 
-## Installing the app in Jira
-
-1. Enable Jira development mode to install apps that are not from the Atlassian Marketplace
-
-   1. Navigate to **Jira settings** (cog icon) > **Apps** > **Manage apps**.
+   1. In Jira, navigate to **Jira settings > Apps > Manage apps**.
    1. Scroll to the bottom of the **Manage apps** page and click **Settings**.
    1. Select **Enable development mode** and click **Apply**.
 
-1. Install the app
+1. Install the app:
 
-   1. Navigate to Jira, then choose **Jira settings** (cog icon) > **Apps** > **Manage apps**.
+   1. In Jira, navigate to **Jira settings > Apps > Manage apps**.
    1. Click **Upload app**.
    1. In the **From this URL** field, provide a link to the app descriptor. The host and port must point to your GitLab instance.
 
@@ -47,3 +47,37 @@ The following are required to install and test the app:
    You can also click **Getting Started** to open the configuration page rendered from your GitLab instance.
 
    _Note that any changes to the app descriptor requires you to uninstall then reinstall the app._
+
+### Troubleshooting
+
+If the app install failed, you might need to delete `jira_connect_installations` from your database.
+
+1. Open the [database console](https://gitlab.com/gitlab-org/gitlab-development-kit/-/blob/master/doc/howto/postgresql.md#access-postgresql).
+1. Run `TRUNCATE TABLE jira_connect_installations CASCADE;`.
+
+## Add a namespace
+
+To add a [namespace](../../user/group/index.md#namespaces) to Jira:
+
+1. Make sure you are logged in on your GitLab development instance.
+1. On the GitLab app page in Jira, click **Get started**.
+1. Open your browser's developer tools and navigate to the **Network** tab.
+1. Try to add the namespace in Jira.
+1. If the request fails with 401 "not authorized", copy the request as a cURL command
+   and paste it in your terminal.
+
+   ![Example Vulnerability](img/copy_curl.png)
+
+1. Go to your development instance (usually at: <http://localhost:3000>), open developer
+   tools, navigate to the Network tab and reload the page.
+1. Copy all cookies from the first request.
+
+   ![Example Vulnerability](img/copy_cookies.png)
+
+1. Append the cookies to the cURL command in your terminal:
+   `--cookies "<cookies from the request>"`.
+1. Submit the cURL request.
+1. If the response is `{"success":true}`, the namespace was added.
+1. Append the cookies to the cURL command in your terminal `--cookies "PASTE COOKIES HERE"`.
+1. Submit the cURL request.
+1. If the response is `{"success":true}` the namespace was added.

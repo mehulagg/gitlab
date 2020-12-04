@@ -10,12 +10,14 @@ module Packages
         composer_json
 
         ::Packages::Package.transaction do
-          ::Packages::Composer::Metadatum.upsert(
+          ::Packages::Composer::Metadatum.upsert({
             package_id: created_package.id,
             target_sha: target,
             composer_json: composer_json
-          )
+          })
         end
+
+        created_package
       end
 
       private

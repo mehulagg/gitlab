@@ -61,16 +61,6 @@ module IssuablesHelper
     end
   end
 
-  def issuable_json_path(issuable)
-    project = issuable.project
-
-    if issuable.is_a?(MergeRequest)
-      project_merge_request_path(project, issuable.iid, :json)
-    else
-      project_issue_path(project, issuable.iid, :json)
-    end
-  end
-
   def serialize_issuable(issuable, opts = {})
     serializer_klass = case issuable
                        when Issue
@@ -174,20 +164,13 @@ module IssuablesHelper
     h(title || default_label)
   end
 
-  def to_url_reference(issuable)
-    case issuable
-    when Issue
-      link_to issuable.to_reference, issue_url(issuable)
-    when MergeRequest
-      link_to issuable.to_reference, merge_request_url(issuable)
-    else
-      issuable.to_reference
-    end
-  end
-
-  def issuable_meta(issuable, project, text)
+  def issuable_meta(issuable, project)
     output = []
     output << "Opened #{time_ago_with_tooltip(issuable.created_at)} by ".html_safe
+
+    if issuable.is_a?(Issue) && issuable.service_desk_reply_to
+      output << "#{html_escape(issuable.service_desk_reply_to)} via "
+    end
 
     output << content_tag(:strong) do
       author_output = link_to_member(project, issuable.author, size: 24, mobile_classes: "d-none d-sm-inline")
@@ -210,7 +193,7 @@ module IssuablesHelper
 
     output << content_tag(:span, (sprite_icon('first-contribution', css_class: 'gl-icon gl-vertical-align-middle') if issuable.first_contribution?), class: 'has-tooltip gl-ml-2', title: _('1st contribution!'))
 
-    output << content_tag(:span, (issuable.task_status if issuable.tasks?), id: "task_status", class: "d-none d-sm-none d-md-inline-block gl-ml-3")
+    output << content_tag(:span, (issuable.task_status if issuable.tasks?), id: "task_status", class: "d-none d-md-inline-block gl-ml-3")
     output << content_tag(:span, (issuable.task_status_short if issuable.tasks?), id: "task_status_short", class: "d-md-none")
 
     output.join.html_safe
@@ -336,40 +319,8 @@ module IssuablesHelper
     issuable_path(issuable, close_reopen_params(issuable, :reopen))
   end
 
-  def close_reopen_issuable_path(issuable, should_inverse = false)
-    issuable.closed? ^ should_inverse ? reopen_issuable_path(issuable) : close_issuable_path(issuable)
-  end
-
-  def toggle_draft_issuable_path(issuable)
-    wip_event = issuable.work_in_progress? ? 'unwip' : 'wip'
-
-    issuable_path(issuable, { merge_request: { wip_event: wip_event } })
-  end
-
   def issuable_path(issuable, *options)
     polymorphic_path(issuable, *options)
-  end
-
-  def issuable_url(issuable, *options)
-    case issuable
-    when Issue
-      issue_url(issuable, *options)
-    when MergeRequest
-      merge_request_url(issuable, *options)
-    end
-  end
-
-  def issuable_button_visibility(issuable, closed)
-    return 'hidden' if issuable_button_hidden?(issuable, closed)
-  end
-
-  def issuable_button_hidden?(issuable, closed)
-    case issuable
-    when Issue
-      issue_button_hidden?(issuable, closed)
-    when MergeRequest
-      merge_request_button_hidden?(issuable, closed)
-    end
   end
 
   def issuable_author_is_current_user(issuable)
@@ -489,6 +440,21 @@ module IssuablesHelper
       iid: issuable[:iid],
       severity: issuable[:severity],
       timeTrackingLimitToHours: Gitlab::CurrentSettings.time_tracking_limit_to_hours
+    }
+  end
+
+  def sidebar_labels_data(issuable_sidebar, project)
+    {
+      allow_label_create: issuable_sidebar.dig(:current_user, :can_admin_label).to_s,
+      allow_scoped_labels: issuable_sidebar[:scoped_labels_available].to_s,
+      can_edit: issuable_sidebar.dig(:current_user, :can_edit).to_s,
+      iid: issuable_sidebar[:iid],
+      issuable_type: issuable_sidebar[:type],
+      labels_fetch_path: issuable_sidebar[:project_labels_path],
+      labels_manage_path: project_labels_path(project),
+      project_issues_path: issuable_sidebar[:project_issuables_path],
+      project_path: project.full_path,
+      selected_labels: issuable_sidebar[:labels].to_json
     }
   end
 

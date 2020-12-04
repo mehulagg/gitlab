@@ -1,6 +1,6 @@
-import Cookies from 'js-cookie';
-import { shallowMount } from '@vue/test-utils';
 import { GlTabs, GlTab } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
+import Cookies from 'js-cookie';
 
 import ComplianceDashboard from 'ee/compliance_dashboard/components/dashboard.vue';
 import MergeRequestGrid from 'ee/compliance_dashboard/components/merge_requests/grid.vue';

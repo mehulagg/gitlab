@@ -39,8 +39,8 @@ export default {
         <component :is="headingTag" class="gl-font-size-h2 gl-mt-0" data-testid="heading">
           <slot name="heading"></slot>
         </component>
-        <p class="gl-mb-0" data-testid="subheading">
-          <slot name="subheading"></slot>
+        <p class="gl-mb-0" data-testid="sub-heading">
+          <slot name="sub-heading"></slot>
         </p>
       </div>
 

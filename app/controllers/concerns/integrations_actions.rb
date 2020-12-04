@@ -43,6 +43,12 @@ module IntegrationsActions
     render json: {}, status: :ok
   end
 
+  def reset
+    flash[:notice] = s_('Integrations|This integration, and inheriting projects were reset.')
+
+    render json: {}, status: :ok
+  end
+
   private
 
   def integrations_enabled?
@@ -52,7 +58,7 @@ module IntegrationsActions
   def integration
     # Using instance variable `@service` still required as it's used in ServiceParams.
     # Should be removed once that is refactored to use `@integration`.
-    @integration = @service ||= find_or_initialize_integration(params[:id]) # rubocop:disable Gitlab/ModuleWithInstanceVariables
+    @integration = @service ||= find_or_initialize_non_project_specific_integration(params[:id]) # rubocop:disable Gitlab/ModuleWithInstanceVariables
   end
 
   def success_message

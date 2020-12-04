@@ -1,7 +1,7 @@
 ---
 stage: none
 group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Security
@@ -31,7 +31,7 @@ GitLab's CSP is used for the following:
 
 Some exceptions include:
 
-- Scripts from Google Analytics and Piwik if either is enabled.
+- Scripts from Google Analytics and Matomo if either is enabled.
 - Connecting with GitHub, Bitbucket, GitLab.com, etc. to allow project importing.
 - Connecting with Google, Twitter, GitHub, etc. to allow OAuth authentication.
 
@@ -66,7 +66,7 @@ Some resources on implementing Subresource Integrity:
 ## Including external resources
 
 External fonts, CSS, and JavaScript should never be used with the exception of
-Google Analytics and Piwik - and only when the instance has enabled it. Assets
+Google Analytics and Matomo - and only when the instance has enabled it. Assets
 should always be hosted and served locally from the GitLab instance. Embedded
 resources via `iframes` should never be used except in certain circumstances
 such as with reCAPTCHA, which cannot be used without an `iframe`.
@@ -83,3 +83,25 @@ inject scripts into the web app.
 Inline styles should be avoided in almost all cases, they should only be used
 when no alternatives can be found. This allows reusability of styles as well as
 readability.
+
+### Sanitize HTML output
+
+If you need to output raw HTML, you should sanitize it.
+
+If you are using Vue, you can use the[`v-safe-html` directive](https://gitlab-org.gitlab.io/gitlab-ui/?path=/story/directives-safe-html-directive--default) from GitLab UI.
+
+For other use cases, wrap a preconfigured version of [`dompurify`](https://www.npmjs.com/package/dompurify)
+that also allows the icons to be rendered:
+
+```javascript
+import { sanitize } from '~/lib/dompurify';
+
+const unsafeHtml = '<some unsafe content ... >';
+
+// ...
+
+element.appendChild(sanitize(unsafeHtml));
+```
+
+This `sanitize` function takes the same configuration as the
+original.

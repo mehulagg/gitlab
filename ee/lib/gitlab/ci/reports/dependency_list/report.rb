@@ -51,7 +51,7 @@ module Gitlab
 
           def augment_ancestors!
             @dependencies.each_value do |dep|
-              next unless dep.iid
+              next unless dep.location[:ancestors]
               next if dep.location[:top_level]
 
               if dep.vulnerabilities.empty?

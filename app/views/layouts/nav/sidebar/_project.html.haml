@@ -262,11 +262,19 @@
                   %span
                     = _('Incidents')
 
+            = render_if_exists 'projects/sidebar/oncall_schedules'
+
             - if project_nav_tab? :serverless
               = nav_link(controller: :functions) do
                 = link_to project_serverless_functions_path(@project), title: _('Serverless') do
                   %span
                     = _('Serverless')
+
+            - if project_nav_tab? :terraform
+              = nav_link(controller: :terraform) do
+                = link_to project_terraform_index_path(@project), title: _('Terraform') do
+                  %span
+                    = _('Terraform')
 
             - if project_nav_tab? :clusters
               - show_cluster_hint = show_gke_cluster_integration_callout?(@project)
@@ -374,6 +382,8 @@
               %strong.fly-out-top-item-name
                 = _('Members')
 
+      = render_if_exists 'projects/invite_members_side_nav_link', project: @project
+
       - if project_nav_tab? :settings
         = nav_link(path: sidebar_settings_paths) do
           = link_to edit_project_path(@project) do
@@ -417,7 +427,7 @@
                   = link_to project_settings_ci_cd_path(@project), title: _('CI / CD') do
                     %span
                       = _('CI / CD')
-              - if !@project.archived? && settings_operations_available?
+              - if settings_operations_available?
                 = nav_link(controller: [:operations]) do
                   = link_to project_settings_operations_path(@project), title: _('Operations'), data: { qa_selector: 'operations_settings_link' } do
                     = _('Operations')

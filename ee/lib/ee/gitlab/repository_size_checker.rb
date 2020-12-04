@@ -23,13 +23,12 @@ module EE
         [size, 0].max
       end
 
-      private
-
+      override :additional_repo_storage_available?
       def additional_repo_storage_available?
-        return false unless ::Gitlab::CurrentSettings.automatic_purchased_storage_allocation?
-
         !!namespace&.additional_repo_storage_by_namespace_enabled?
       end
+
+      private
 
       def total_repository_size_excess
         namespace&.total_repository_size_excess.to_i
@@ -48,7 +47,7 @@ module EE
       end
 
       def remaining_additional_purchased_storage
-        additional_purchased_storage - total_excess_without_current_project
+        [additional_purchased_storage - total_excess_without_current_project, 0].max
       end
     end
   end

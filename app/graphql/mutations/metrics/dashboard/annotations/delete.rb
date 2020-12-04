@@ -9,10 +9,9 @@ module Mutations
 
           authorize :delete_metrics_dashboard_annotation
 
-          argument :id,
-                  GraphQL::ID_TYPE,
+          argument :id, ::Types::GlobalIDType[::Metrics::Dashboard::Annotation],
                   required: true,
-                  description: 'The global ID of the annotation to delete'
+                  description: 'Global ID of the annotation to delete'
 
           def resolve(id:)
             annotation = authorized_find!(id: id)

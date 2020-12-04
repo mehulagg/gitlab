@@ -1,7 +1,7 @@
 ---
 stage: Verify
 group: Continuous Integration
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 disqus_identifier: 'https://docs.gitlab.com/ee/user/project/pipelines/job_artifacts.html'
 type: reference, howto
 ---
@@ -139,10 +139,10 @@ third party ports for other languages like JavaScript, Python, Ruby, and so on.
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/207528) in GitLab 13.0.
 > - Requires [GitLab Runner](https://docs.gitlab.com/runner/) 11.5 and above.
 
-The `terraform` report obtains a Terraform `tfplan.json` file. [JQ processing required to remove credentials](../../user/infrastructure/index.md#output-terraform-plan-information-into-a-merge-request). The collected Terraform
+The `terraform` report obtains a Terraform `tfplan.json` file. [JQ processing required to remove credentials](../../user/infrastructure/mr_integration.md#setup). The collected Terraform
 plan report uploads to GitLab as an artifact and displays
 in merge requests. For more information, see
-[Output `terraform plan` information into a merge request](../../user/infrastructure/index.md#output-terraform-plan-information-into-a-merge-request).
+[Output `terraform plan` information into a merge request](../../user/infrastructure/mr_integration.md).
 
 #### `artifacts:reports:codequality`
 
@@ -212,6 +212,17 @@ as artifacts.
 
 The collected DAST report uploads to GitLab as an artifact and is summarized in merge requests and the pipeline view. It's also used to provide data for security
 dashboards.
+
+#### `artifacts:reports:coverage_fuzzing` **(ULTIMATE)**
+
+> - Introduced in GitLab 13.4.
+> - Requires GitLab Runner 13.4 or later.
+
+The `coverage_fuzzing` report collects [coverage fuzzing bugs](../../user/application_security/coverage_fuzzing/index.md)
+as artifacts.
+
+The collected coverage fuzzing report uploads to GitLab as an artifact and is summarized in merge
+requests and the pipeline view. It's also used to provide data for security dashboards.
 
 #### `artifacts:reports:license_management` **(ULTIMATE)**
 

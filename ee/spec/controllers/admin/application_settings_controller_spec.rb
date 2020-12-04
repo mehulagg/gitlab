@@ -199,13 +199,6 @@ RSpec.describe Admin::ApplicationSettingsController do
       it_behaves_like 'settings for licensed features'
     end
 
-    context 'compliance frameworks' do
-      let(:settings) { { compliance_frameworks: [1, 2, 3, 4, 5] } }
-      let(:feature) { :admin_merge_request_approvers_rules }
-
-      it_behaves_like 'settings for licensed features'
-    end
-
     context 'required instance ci template' do
       let(:settings) { { required_instance_ci_template: 'Auto-DevOps' } }
       let(:feature) { :required_ci_templates }
@@ -298,7 +291,7 @@ RSpec.describe Admin::ApplicationSettingsController do
       let_it_be(:current_count) { 10 }
 
       around do |example|
-        Timecop.freeze { example.run }
+        freeze_time { example.run }
       end
 
       before_all do
@@ -319,6 +312,7 @@ RSpec.describe Admin::ApplicationSettingsController do
         expect(body).to start_with('<span id="LC1" class="line" lang="json">')
         expect(body).to include('<span class="nl">"license_key"</span>')
         expect(body).to include("<span class=\"s2\">\"#{yesterday.to_date}\"</span>")
+        expect(body).to include("<span class=\"s2\">\"#{yesterday.iso8601}\"</span>")
         expect(body).to include("<span class=\"mi\">#{max_count}</span>")
         expect(body).to include("<span class=\"mi\">#{current_count}</span>")
       end

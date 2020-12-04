@@ -1,7 +1,7 @@
 ---
 stage: none
 group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Profiling
@@ -16,7 +16,6 @@ There is a `Gitlab::Profiler.profile` method, and corresponding
 `bin/profile-url` script, that enable profiling a GET or POST request to a
 specific URL, either as an anonymous user (the default) or as a specific user.
 
-NOTE: **Note:**
 The first argument to the profiler is either a full URL
 (including the instance hostname) or an absolute path, including the
 leading slash.

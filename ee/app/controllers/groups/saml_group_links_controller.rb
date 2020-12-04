@@ -30,7 +30,7 @@ module Groups
     private
 
     def require_saml_group_links_enabled
-      render_404 unless ::Feature.enabled?(:saml_group_links, group)
+      render_404 unless ::Feature.enabled?(:saml_group_links, group, default_enabled: true)
     end
 
     def authorize_admin_saml_group_links!

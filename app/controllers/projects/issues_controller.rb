@@ -50,14 +50,10 @@ class Projects::IssuesController < Projects::ApplicationController
     real_time_feature_flag = :real_time_issue_sidebar
     real_time_enabled = Gitlab::ActionCable::Config.in_app? || Feature.enabled?(real_time_feature_flag, @project)
 
-    gon.push({ features: { real_time_feature_flag.to_s.camelize(:lower) => real_time_enabled } }, true)
+    push_to_gon_features(real_time_feature_flag, real_time_enabled)
 
     record_experiment_user(:invite_members_version_a)
     record_experiment_user(:invite_members_version_b)
-  end
-
-  before_action only: :index do
-    push_frontend_feature_flag(:scoped_labels, @project, type: :licensed)
   end
 
   around_action :allow_gitaly_ref_name_caching, only: [:discussions]
@@ -76,6 +72,8 @@ class Projects::IssuesController < Projects::ApplicationController
 
   feature_category :service_desk, [:service_desk]
   feature_category :importers, [:import_csv, :export_csv]
+
+  attr_accessor :vulnerability_id
 
   def index
     @issues = @issuables
@@ -127,6 +125,8 @@ class Projects::IssuesController < Projects::ApplicationController
 
     service = ::Issues::CreateService.new(project, current_user, create_params)
     @issue = service.execute
+
+    create_vulnerability_issue_link(issue)
 
     if service.discussions_to_resolve.count(&:resolved?) > 0
       flash[:notice] = if service.discussion_to_resolve_id
@@ -388,6 +388,9 @@ class Projects::IssuesController < Projects::ApplicationController
   def service_desk?
     action_name == 'service_desk'
   end
+
+  # Overridden in EE
+  def create_vulnerability_issue_link(issue); end
 end
 
 Projects::IssuesController.prepend_if_ee('EE::Projects::IssuesController')

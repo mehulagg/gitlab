@@ -1,7 +1,6 @@
+import { GlFormInput, GlButton } from '@gitlab/ui';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import Vuex from 'vuex';
-
-import { GlFormInput, GlButton } from '@gitlab/ui';
 
 import CreateEpicForm from 'ee/related_items_tree/components/create_epic_form.vue';
 import createDefaultStore from 'ee/related_items_tree/store';

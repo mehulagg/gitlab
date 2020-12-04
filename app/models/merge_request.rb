@@ -41,7 +41,14 @@ class MergeRequest < ApplicationRecord
   belongs_to :merge_user, class_name: "User"
   belongs_to :iteration, foreign_key: 'sprint_id'
 
-  has_internal_id :iid, scope: :target_project, track_if: -> { !importing? }, init: ->(s) { s&.target_project&.merge_requests&.maximum(:iid) }
+  has_internal_id :iid, scope: :target_project, track_if: -> { !importing? },
+    init: ->(mr, scope) do
+      if mr
+        mr.target_project&.merge_requests&.maximum(:iid)
+      elsif scope[:project]
+        where(target_project: scope[:project]).maximum(:iid)
+      end
+    end
 
   has_many :merge_request_diffs
   has_many :merge_request_context_commits, inverse_of: :merge_request
@@ -49,6 +56,7 @@ class MergeRequest < ApplicationRecord
 
   has_one :merge_request_diff,
     -> { order('merge_request_diffs.id DESC') }, inverse_of: :merge_request
+  has_one :cleanup_schedule, inverse_of: :merge_request
 
   belongs_to :latest_merge_request_diff, class_name: 'MergeRequestDiff'
   manual_inverse_association :latest_merge_request_diff, :merge_request
@@ -294,6 +302,7 @@ class MergeRequest < ApplicationRecord
   scope :preload_author, -> { preload(:author) }
   scope :preload_approved_by_users, -> { preload(:approved_by_users) }
   scope :preload_metrics, -> (relation) { preload(metrics: relation) }
+  scope :with_web_entity_associations, -> { preload(:author, :target_project) }
 
   scope :with_auto_merge_enabled, -> do
     with_state(:opened).where(auto_merge_enabled: true)
@@ -301,6 +310,40 @@ class MergeRequest < ApplicationRecord
 
   scope :including_metrics, -> do
     includes(:metrics)
+  end
+
+  scope :with_jira_issue_keys, -> { where('title ~ :regex OR merge_requests.description ~ :regex', regex: Gitlab::Regex.jira_issue_key_regex.source) }
+
+  scope :review_requested, -> do
+    where(reviewers_subquery.exists)
+  end
+
+  scope :no_review_requested, -> do
+    where(reviewers_subquery.exists.not)
+  end
+
+  scope :review_requested_to, ->(user) do
+    where(
+      reviewers_subquery
+        .where(Arel::Table.new("#{to_ability_name}_reviewers")[:user_id].eq(user))
+        .exists
+    )
+  end
+
+  scope :no_review_requested_to, ->(user) do
+    where(
+      reviewers_subquery
+        .where(Arel::Table.new("#{to_ability_name}_reviewers")[:user_id].eq(user))
+        .exists
+        .not
+    )
+  end
+
+  def self.total_time_to_merge
+    join_metrics
+      .merge(MergeRequest::Metrics.with_valid_time_to_merge)
+      .pluck(MergeRequest::Metrics.time_to_merge_expression)
+      .first
   end
 
   after_save :keep_around_commit, unless: :importing?
@@ -348,6 +391,12 @@ class MergeRequest < ApplicationRecord
     else
       super
     end
+  end
+
+  def self.reviewers_subquery
+    MergeRequestReviewer.arel_table
+      .project('true')
+      .where(Arel::Nodes::SqlLiteral.new("#{to_ability_name}_id = #{to_ability_name}s.id"))
   end
 
   def rebase_in_progress?
@@ -930,7 +979,7 @@ class MergeRequest < ApplicationRecord
   # rubocop: enable CodeReuse/ServiceClass
 
   def diffable_merge_ref?
-    merge_ref_head.present? && (Feature.enabled?(:display_merge_conflicts_in_diff, project) || can_be_merged?)
+    open? && merge_ref_head.present? && (Feature.enabled?(:display_merge_conflicts_in_diff, project) || can_be_merged?)
   end
 
   # Returns boolean indicating the merge_status should be rechecked in order to

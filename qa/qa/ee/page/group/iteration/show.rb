@@ -16,6 +16,12 @@ module QA
                 has_element?(:iteration_issue_link, issue_title: issue.title)
               end
             end
+
+            def has_no_issue?(issue)
+              within_element(:iteration_issues_container) do
+                has_no_element?(:iteration_issue_link, issue_title: issue.title)
+              end
+            end
           end
         end
       end

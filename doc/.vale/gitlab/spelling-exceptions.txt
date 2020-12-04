@@ -120,6 +120,7 @@ dequarantining
 DevOps
 discoverability
 Disqus
+Divio
 Dockerfile
 Dockerfiles
 dogfood
@@ -216,7 +217,7 @@ jsdom
 JupyterHub
 kanban
 kanbans
-Kaniko
+kaniko
 Karma
 Kerberos
 keyset
@@ -224,6 +225,7 @@ Kibana
 Kinesis
 Knative
 Kramdown
+Kroki
 Kubecost
 kubectl
 Kubernetes
@@ -231,6 +233,7 @@ Kubesec
 Laravel
 LDAP
 ldapsearch
+Lefthook
 Leiningen
 Libravatar
 liveness
@@ -251,6 +254,7 @@ Markdown
 markdownlint
 matcher
 matchers
+Matomo
 Mattermost
 mbox
 memoization
@@ -316,6 +320,7 @@ PgBouncer
 Phabricator
 phaser
 phasers
+phpenv
 Pipfile
 Pipfiles
 Piwik
@@ -340,6 +345,7 @@ prepend
 prepended
 prepending
 prepends
+Prettifier
 Pritaly
 profiler
 Prometheus
@@ -475,7 +481,10 @@ substrings
 subtree
 subtrees
 sudo
+swimlane
+swimlanes
 syslog
+tanuki
 tcpdump
 Thanos
 Tiller

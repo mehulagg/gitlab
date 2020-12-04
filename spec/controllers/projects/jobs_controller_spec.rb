@@ -15,6 +15,54 @@ RSpec.describe Projects::JobsController, :clean_gitlab_redis_shared_state do
   end
 
   describe 'GET index' do
+    describe 'pushing tracking_data to Gon' do
+      before do
+        stub_experiment(jobs_empty_state: experiment_active)
+        stub_experiment_for_subject(jobs_empty_state: in_experiment_group)
+
+        get_index
+      end
+
+      context 'when experiment not active' do
+        let(:experiment_active) { false }
+        let(:in_experiment_group) { false }
+
+        it 'does not push tracking_data to Gon' do
+          expect(Gon.tracking_data).to be_nil
+        end
+      end
+
+      context 'when experiment active and user in control group' do
+        let(:experiment_active) { true }
+        let(:in_experiment_group) { false }
+
+        it 'pushes tracking_data to Gon' do
+          expect(Gon.tracking_data).to match(
+            {
+              category: 'Growth::Activation::Experiment::JobsEmptyState',
+              action: 'click_button',
+              label: anything,
+              property: 'control_group'
+            }
+          )
+        end
+      end
+
+      context 'when experiment active and user in experimental group' do
+        let(:experiment_active) { true }
+        let(:in_experiment_group) { true }
+
+        it 'pushes tracking_data to gon' do
+          expect(Gon.tracking_data).to match(
+            category: 'Growth::Activation::Experiment::JobsEmptyState',
+            action: 'click_button',
+            label: anything,
+            property: 'experimental_group'
+          )
+        end
+      end
+    end
+
     context 'when scope is pending' do
       before do
         create(:ci_build, :pending, pipeline: pipeline)
@@ -805,18 +853,6 @@ RSpec.describe Projects::JobsController, :clean_gitlab_redis_shared_state do
           post_play
 
           expect(job.reload).to be_pending
-        end
-
-        context 'when FF ci_manual_bridges is disabled' do
-          before do
-            stub_feature_flags(ci_manual_bridges: false)
-          end
-
-          it 'returns 404' do
-            post_play
-
-            expect(response).to have_gitlab_http_status(:not_found)
-          end
         end
       end
     end

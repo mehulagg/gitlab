@@ -1,12 +1,12 @@
 ---
 stage: Monitor
 group: Health
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Alerts
 
-Alerts are a critical entity in your incident managment workflow. They represent a notable event that might indicate a service outage or disruption. GitLab provides a list view for triage and detail view for deeper investigation of what happened.
+Alerts are a critical entity in your incident management workflow. They represent a notable event that might indicate a service outage or disruption. GitLab provides a list view for triage and detail view for deeper investigation of what happened.
 
 ## Alert List
 
@@ -63,7 +63,7 @@ Alerts contain one of the following icons:
 
 ## Alert details page
 
-Navigate to the Alert details view by visiting the [Alert list](./alerts.md)
+Navigate to the Alert details view by visiting the [Alert list](alerts.md)
 and selecting an alert from the list. You need least Developer [permissions](../../user/permissions.md)
 to access alerts.
 
@@ -84,7 +84,7 @@ The **Alert details** tab has two sections. The top section provides a short lis
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/217768) in GitLab 13.2.
 
-The **Metrics** tab will display a metrics chart for alerts coming from Prometheus. If the alert originated from any other tool, the **Metrics** tab will be empty. To set up alerts for GitLab-managed Prometheus instances, see [Managed Prometheus instances](../metrics/alerts.md#managed-prometheus-instances). For externally-managed Prometheus instances, you will need to configure your alerting
+The **Metrics** tab displays a metrics chart for alerts coming from Prometheus. If the alert originated from any other tool, the **Metrics** tab is empty. To set up alerts for GitLab-managed Prometheus instances, see [Managed Prometheus instances](../metrics/alerts.md#managed-prometheus-instances). For externally-managed Prometheus instances, you must configure your alerting
 rules to display a chart in the alert. For information about how to configure
 your alerting rules, see [Embedding metrics based on alerts in incident issues](../metrics/embed.md#embedding-metrics-based-on-alerts-in-incident-issues). See
 [External Prometheus instances](../metrics/alerts.md#external-prometheus-instances)
@@ -127,7 +127,7 @@ To view the logs for an alert:
 The **Activity feed** tab is a log of activity on the alert. When you take action on an alert, this is logged as a system note. This gives you a linear
 timeline of the alert's investigation and assignment history.
 
-The following actions will result in a system note:
+The following actions result in a system note:
 
 - [Updating the status of an alert](#update-an-alerts-status)
 - [Creating an incident based on an alert](#create-an-incident-from-an-alert)
@@ -137,12 +137,12 @@ The following actions will result in a system note:
 
 ## Alert actions
 
-There are different actions avilable in GitLab to help triage and respond to alerts.
+There are different actions available in GitLab to help triage and respond to alerts.
 
 ### Update an alert's status
 
 The Alert detail view enables you to update the Alert Status.
-See [Create and manage alerts in GitLab](./alerts.md) for more details.
+See [Create and manage alerts in GitLab](alerts.md) for more details.
 
 ### Create an incident from an alert
 
@@ -168,11 +168,11 @@ To assign an alert:
 
 1. To display the list of current alerts, navigate to **Operations > Alerts**:
 
-   ![Alert List View Assignee(s)](./img/alert_list_assignees_v13_1.png)
+   ![Alert List View Assignee(s)](img/alert_list_assignees_v13_1.png)
 
 1. Select your desired alert to display its **Alert Details View**:
 
-   ![Alert Details View Assignee(s)](./img/alert_details_assignees_v13_1.png)
+   ![Alert Details View Assignee(s)](img/alert_details_assignees_v13_1.png)
 
 1. If the right sidebar is not expanded, select
    **{angle-double-right}** **Expand sidebar** to expand it.
@@ -180,7 +180,7 @@ To assign an alert:
    From the dropdown menu, select each user you want to assign to the alert.
    GitLab creates a [to-do item](../../user/todos.md) for each user.
 
-   ![Alert Details View Assignee(s)](./img/alert_todo_assignees_v13_1.png)
+   ![Alert Details View Assignee(s)](img/alert_todo_assignees_v13_1.png)
 
 After completing their portion of investigating or fixing the alert, users can
 unassign themselves from the alert. To remove an assignee, select **Edit** next to the **Assignee** dropdown menu
@@ -198,11 +198,11 @@ add a to-do item:
 1. Select your desired alert to display its **Alert Management Details View**.
 1. Select the **Add a To-Do** button in the right sidebar:
 
-   ![Alert Details Add a To-Do](./img/alert_detail_add_todo_v13_1.png)
+   ![Alert Details Add a To-Do](img/alert_detail_add_todo_v13_1.png)
 
 Select the **To-Do List** **{todo-done}** in the navigation bar to view your current to-do list.
 
-![Alert Details Added to do](./img/alert_detail_added_todo_v13_1.png)
+![Alert Details Added to do](img/alert_detail_added_todo_v13_1.png)
 
 ## Link runbooks to alerts
 
@@ -219,8 +219,7 @@ the correct runbook:
 
 ## View the environment that generated the alert
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/232492) in GitLab 13.5
-    behind a feature flag, disabled by default.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/232492) in GitLab 13.5 behind a feature flag, disabled by default.
 > - [Enabled by default](https://gitlab.com/gitlab-org/gitlab/-/issues/232492) in GitLab 13.6.
 
 CAUTION: **Warning:**

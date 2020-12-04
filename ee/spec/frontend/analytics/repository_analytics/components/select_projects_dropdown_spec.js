@@ -1,4 +1,3 @@
-import { shallowMount, createLocalVue } from '@vue/test-utils';
 import {
   GlDropdown,
   GlDropdownItem,
@@ -6,6 +5,7 @@ import {
   GlLoadingIcon,
   GlIcon,
 } from '@gitlab/ui';
+import { shallowMount, createLocalVue } from '@vue/test-utils';
 import SelectProjectsDropdown from 'ee/analytics/repository_analytics/components/select_projects_dropdown.vue';
 
 const localVue = createLocalVue();

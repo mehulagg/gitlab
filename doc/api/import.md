@@ -1,7 +1,7 @@
 ---
 stage: none
 group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Import API
@@ -53,7 +53,7 @@ Import your projects from Bitbucket Server to GitLab via the API.
 NOTE: **Note:**
 The Bitbucket Project Key is only used for finding the repository in Bitbucket.
 You must specify a `target_namespace` if you want to import the repository to a GitLab group.
-If you do not specify `target_namespace`, the project will import to your personal user namespace.
+If you do not specify `target_namespace`, the project imports to your personal user namespace.
 
 ```plaintext
 POST /import/bitbucket_server

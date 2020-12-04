@@ -61,10 +61,6 @@ module EE
         !::Gitlab::IpRestriction::Enforcer.new(subject).allows_current_ip?
       end
 
-      condition(:dependency_proxy_available) do
-        @subject.feature_available?(:dependency_proxy)
-      end
-
       condition(:cluster_deployments_available) do
         @subject.feature_available?(:cluster_deployments)
       end
@@ -82,7 +78,7 @@ module EE
       end
 
       condition(:group_saml_group_sync_available, scope: :subject) do
-        @subject.feature_available?(:group_saml_group_sync)
+        @subject.saml_group_sync_available?
       end
 
       condition(:group_timelogs_available) do
@@ -118,7 +114,10 @@ module EE
         enable :download_wiki_code
       end
 
-      rule { guest }.enable :read_wiki
+      rule { guest }.policy do
+        enable :read_wiki
+        enable :read_group_release_stats
+      end
 
       rule { reporter }.policy do
         enable :admin_list
@@ -166,12 +165,6 @@ module EE
         enable :change_prevent_group_forking
       end
 
-      rule { can?(:read_group) & dependency_proxy_available }
-        .enable :read_dependency_proxy
-
-      rule { developer & dependency_proxy_available }
-        .enable :admin_dependency_proxy
-
       rule { can?(:read_group) & epics_available }.enable :read_epic
 
       rule { can?(:read_group) & iterations_available }.enable :read_iteration
@@ -212,7 +205,7 @@ module EE
 
       rule { group_saml_config_enabled & group_saml_available & (admin | owner) }.enable :admin_group_saml
 
-      rule { group_saml_group_sync_available & group_saml_enabled & can?(:admin_group_saml) }.policy do
+      rule { group_saml_config_enabled & group_saml_group_sync_available & (admin | owner) }.policy do
         enable :admin_saml_group_links
       end
 
@@ -296,8 +289,6 @@ module EE
       rule { can?(:maintainer_access) & push_rules_available }.enable :change_push_rules
 
       rule { admin & is_gitlab_com }.enable :update_subscription_limit
-
-      rule { public_group }.enable :view_embedded_analytics_report
 
       rule { over_storage_limit }.policy do
         prevent :create_projects

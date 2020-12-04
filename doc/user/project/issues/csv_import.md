@@ -1,7 +1,7 @@
 ---
 stage: none
 group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Importing issues from CSV
@@ -11,7 +11,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 Issues can be imported to a project by uploading a CSV file with the columns
 `title` and `description`.
 
-The user uploading the CSV file will be set as the author of the imported issues.
+The user uploading the CSV file is set as the author of the imported issues.
 
 NOTE: **Note:**
 A permission level of [Developer](../../permissions.md), or higher, is required

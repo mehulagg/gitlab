@@ -1,7 +1,7 @@
 ---
 stage: none
 group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 comments: false
 type: index
 ---
@@ -143,7 +143,7 @@ The GitLab University curriculum is composed of GitLab videos, screencasts, pres
 
 ### 3.1. DevOps
 
-1. [XebiaLabs: DevOps Terminology](https://xebialabs.com/glossary/)
+1. [XebiaLabs: DevOps Terminology](https://digital.ai/glossary)
 1. [XebiaLabs: Periodic Table of DevOps Tools](https://digital.ai/periodic-table-of-devops-tools)
 1. [Puppet Labs: State of DevOps 2016 - Book](https://puppet.com/resources/report/2016-state-devops-report/)
 

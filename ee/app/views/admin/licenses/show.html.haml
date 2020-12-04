@@ -18,7 +18,8 @@
 
 - if @license.present?
   = render 'info'
-  = render 'breakdown'
+  .license-panel.gl-mt-5
+    = render 'breakdown'
 
 - if @licenses.present?
   = render 'license_history'

@@ -25,16 +25,18 @@ class ElasticDeleteProjectWorker
           bool: {
             should: [
               {
-                has_parent: {
-                  parent_type: 'project',
-                  query: {
-                    term: { id: project_id }
-                  }
+                term: {
+                  _id: es_id
                 }
               },
               {
                 term: {
-                  _id: es_id
+                  project_id: project_id
+                }
+              },
+              {
+                term: {
+                  target_project_id: project_id # handle merge_request which aliases project_id to target_project_id
                 }
               }
             ]

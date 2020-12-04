@@ -1,16 +1,17 @@
 ---
 stage: Secure
 group: Fuzz Testing
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference, howto
 ---
 
 # Web API Fuzz Testing **(ULTIMATE)**
 
 You can add web API fuzzing to your [GitLab CI/CD](../../../ci/README.md)
-pipelines. This helps you discover bugs and potential security issues that other QA processes may miss.
-API fuzzing performs fuzz testing of API operation parameters.
-Fuzz testing sets operation parameters to unexpected values in an effort to cause unexpected behavior and errors in the API backend.
+pipelines. This helps you discover bugs and potential security issues that other QA processes may
+miss. API fuzzing performs fuzz testing of API operation parameters. Fuzz testing sets operation
+parameters to unexpected values in an effort to cause unexpected behavior and errors in the API
+backend.
 
 We recommend that you use fuzz testing in addition to [GitLab Secure](../index.md)'s
 other security scanners and your own test processes. If you're using [GitLab CI/CD](../../../ci/README.md),
@@ -61,7 +62,7 @@ Examples of both configurations can be found here:
 
 - [Example OpenAPI v2 specification project](https://gitlab.com/gitlab-org/security-products/demos/api-fuzzing-example/-/tree/openapi)
 - [Example HTTP Archive (HAR) project](https://gitlab.com/gitlab-org/security-products/demos/api-fuzzing-example/-/tree/har)
-- [Example Postman Collection project](https://gitlab.com/gitlab-org/security-products/demos/api-fuzzing/postman-collection/)
+- [Example Postman Collection project](https://gitlab.com/gitlab-org/security-products/demos/api-fuzzing/postman-api-fuzzing-example)
 
 ### OpenAPI Specification
 
@@ -154,7 +155,7 @@ You can use various tools to generate HAR files:
 
 - [Fiddler](https://www.telerik.com/fiddler): Web debugging proxy
 - [Insomnia Core](https://insomnia.rest/): API client
-- [Chrome](https://www.google.com/chrome): Browser
+- [Chrome](https://www.google.com/chrome/): Browser
 - [Firefox](https://www.mozilla.org/en-US/firefox/): Browser
 
 DANGER: **Warning:**
@@ -636,6 +637,86 @@ variables:
   FUZZAPI_OVERRIDES_CMD: renew_token.py
   FUZZAPI_OVERRIDES_INTERVAL: 300
 ```
+
+### Header Fuzzing
+
+Header fuzzing is disabled by default due to the high number of false positives that occur with many
+technology stacks. When header fuzzing is enabled, you must specify a list of headers to include in
+fuzzing.
+
+Each profile in the default configuration file has an entry for `GeneralFuzzingCheck`. This check
+performs header fuzzing. Under the `Configuration` section, you must change the `HeaderFuzzing` and
+`Headers` settings to enable header fuzzing.
+
+This snippet shows the `Quick-10` profile's default configuration with header fuzzing disabled:
+
+```yaml
+- Name: Quick-10
+  DefaultProfile: Empty
+  Routes:
+  - Route: *Route0
+    Checks:
+    - Name: FormBodyFuzzingCheck
+      Configuration:
+        FuzzingCount: 10
+        UnicodeFuzzing: true
+    - Name: GeneralFuzzingCheck
+      Configuration:
+        FuzzingCount: 10
+        UnicodeFuzzing: true
+        HeaderFuzzing: false
+        Headers:
+    - Name: JsonFuzzingCheck
+      Configuration:
+        FuzzingCount: 10
+        UnicodeFuzzing: true
+    - Name: XmlFuzzingCheck
+      Configuration:
+        FuzzingCount: 10
+        UnicodeFuzzing: true
+```
+
+`HeaderFuzzing` is a boolean that turns header fuzzing on and off. The default setting is `false`
+for off. To turn header fuzzing on, change this setting to `true`:
+
+```yaml
+    - Name: GeneralFuzzingCheck
+      Configuration:
+        FuzzingCount: 10
+        UnicodeFuzzing: true
+        HeaderFuzzing: true
+        Headers:
+```
+
+`Headers` is a list of headers to fuzz. Only headers listed are fuzzed. For example, to fuzz a
+custom header `X-Custom` used by your APIs, add an entry for it using the syntax
+`- Name: HeaderName`, substituting `HeaderName` with the header to fuzz:
+
+```yaml
+    - Name: GeneralFuzzingCheck
+      Configuration:
+        FuzzingCount: 10
+        UnicodeFuzzing: true
+        HeaderFuzzing: true
+        Headers:
+          - Name: X-Custom
+```
+
+You now have a configuration to fuzz the header `X-Custom`. Use the same notation to list additional
+headers:
+
+```yaml
+    - Name: GeneralFuzzingCheck
+      Configuration:
+        FuzzingCount: 10
+        UnicodeFuzzing: true
+        HeaderFuzzing: true
+        Headers:
+          - Name: X-Custom
+          - Name: X-AnotherHeader
+```
+
+Repeat this configuration for each profile as needed.
 
 ## Running your first scan
 

@@ -1,6 +1,6 @@
 <script>
 import { mapActions, mapGetters } from 'vuex';
-import { GlFormGroup, GlDeprecatedButton } from '@gitlab/ui';
+import { GlFormGroup, GlButton } from '@gitlab/ui';
 import { convertToSnakeCase, dasherize } from '~/lib/utils/text_utility';
 import StepHeader from './step_header.vue';
 import StepSummary from './step_summary.vue';
@@ -8,7 +8,7 @@ import StepSummary from './step_summary.vue';
 export default {
   components: {
     GlFormGroup,
-    GlDeprecatedButton,
+    GlButton,
     StepHeader,
     StepSummary,
   },
@@ -66,9 +66,9 @@ export default {
       <div v-show="isActive" @keyup.enter="nextStep">
         <slot name="body" :active="isActive"></slot>
         <gl-form-group v-if="nextStepButtonText" class="gl-mt-3 gl-mb-0">
-          <gl-deprecated-button variant="success" :disabled="!isValid" @click="nextStep">
+          <gl-button variant="success" category="primary" :disabled="!isValid" @click="nextStep">
             {{ nextStepButtonText }}
-          </gl-deprecated-button>
+          </gl-button>
         </gl-form-group>
       </div>
       <step-summary v-if="isFinished" :is-editable="isEditable" :edit="edit">

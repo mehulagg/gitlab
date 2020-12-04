@@ -60,6 +60,18 @@ module EE
                 presence: { message: "can't be blank when indexing is enabled" },
                 if: ->(setting) { setting.elasticsearch_indexing? }
 
+      validates :secret_detection_revocation_token_types_url,
+                presence: { message: "can't be blank when secret detection token revocation is enabled" },
+                if: ->(setting) { setting.secret_detection_token_revocation_enabled? }
+
+      validates :secret_detection_token_revocation_url,
+                presence: { message: "can't be blank when secret detection token revocation is enabled" },
+                if: ->(setting) { setting.secret_detection_token_revocation_enabled? }
+
+      validates :secret_detection_token_revocation_token,
+                presence: { message: "can't be blank when secret detection token revocation is enabled" },
+                if: ->(setting) { setting.secret_detection_token_revocation_enabled? }
+
       validate :check_elasticsearch_url_scheme, if: :elasticsearch_url_changed?
 
       validates :elasticsearch_aws_region,
@@ -147,6 +159,10 @@ module EE
           pseudonymizer_enabled: false,
           repository_size_limit: 0,
           seat_link_enabled: Settings.gitlab['seat_link_enabled'],
+          secret_detection_token_revocation_enabled: false,
+          secret_detection_token_revocation_url: nil,
+          secret_detection_token_revocation_token: nil,
+          secret_detection_revocation_token_types_url: nil,
           slack_app_enabled: false,
           slack_app_id: nil,
           slack_app_secret: nil,
@@ -330,6 +346,11 @@ module EE
       cleaned = Array.wrap(values).reject(&:blank?).sort.uniq
 
       write_attribute(:compliance_frameworks, cleaned)
+    end
+
+    def should_apply_user_signup_cap?
+      ::Feature.enabled?(:admin_new_user_signups_cap) &&
+        ::Gitlab::CurrentSettings.new_user_signups_cap.present?
     end
 
     private

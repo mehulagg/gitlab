@@ -48,7 +48,6 @@ RSpec.describe Gitlab::ImportExport::Importer do
       [
         Gitlab::ImportExport::AvatarRestorer,
         Gitlab::ImportExport::RepoRestorer,
-        Gitlab::ImportExport::WikiRestorer,
         Gitlab::ImportExport::UploadsRestorer,
         Gitlab::ImportExport::LfsRestorer,
         Gitlab::ImportExport::StatisticsRestorer,
@@ -65,10 +64,36 @@ RSpec.describe Gitlab::ImportExport::Importer do
         end
       end
 
-      it 'restores the ProjectTree' do
-        expect(Gitlab::ImportExport::Project::TreeRestorer).to receive(:new).and_call_original
+      it 'calls RepoRestorer with project and wiki' do
+        wiki_repo_path = File.join(shared.export_path, Gitlab::ImportExport.wiki_repo_bundle_filename)
+        repo_path = File.join(shared.export_path, Gitlab::ImportExport.project_bundle_filename)
+        restorer = double(Gitlab::ImportExport::RepoRestorer)
+
+        expect(Gitlab::ImportExport::RepoRestorer).to receive(:new).with(path_to_bundle: repo_path, shared: shared, project: project).and_return(restorer)
+        expect(Gitlab::ImportExport::RepoRestorer).to receive(:new).with(path_to_bundle: wiki_repo_path, shared: shared, project: ProjectWiki.new(project)).and_return(restorer)
+        expect(Gitlab::ImportExport::RepoRestorer).to receive(:new).and_call_original
+
+        expect(restorer).to receive(:restore).and_return(true).twice
 
         importer.execute
+      end
+
+      context 'with sample_data_template' do
+        it 'initializes the Sample::TreeRestorer' do
+          project.create_or_update_import_data(data: { sample_data: true })
+
+          expect(Gitlab::ImportExport::Project::Sample::TreeRestorer).to receive(:new).and_call_original
+
+          importer.execute
+        end
+      end
+
+      context 'without sample_data_template' do
+        it 'initializes the ProjectTree' do
+          expect(Gitlab::ImportExport::Project::TreeRestorer).to receive(:new).and_call_original
+
+          importer.execute
+        end
       end
 
       it 'removes the import file' do

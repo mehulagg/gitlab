@@ -118,6 +118,16 @@ RSpec.describe Gitlab::UsageDataCounters::IssueActivityUniqueCounter, :clean_git
     end
   end
 
+  context 'for Issue cloned actions' do
+    it_behaves_like 'a tracked issue edit event' do
+      let(:action) { described_class::ISSUE_CLONED }
+
+      def track_action(params)
+        described_class.track_issue_cloned_action(**params)
+      end
+    end
+  end
+
   context 'for Issue relate actions' do
     it_behaves_like 'a tracked issue edit event' do
       let(:action) { described_class::ISSUE_RELATED }
@@ -164,36 +174,6 @@ RSpec.describe Gitlab::UsageDataCounters::IssueActivityUniqueCounter, :clean_git
 
       def track_action(params)
         described_class.track_issue_unlocked_action(**params)
-      end
-    end
-  end
-
-  context 'for Issue added to epic actions' do
-    it_behaves_like 'a tracked issue edit event' do
-      let(:action) { described_class::ISSUE_ADDED_TO_EPIC}
-
-      def track_action(params)
-        described_class.track_issue_added_to_epic_action(**params)
-      end
-    end
-  end
-
-  context 'for Issue removed from epic actions' do
-    it_behaves_like 'a tracked issue edit event' do
-      let(:action) { described_class::ISSUE_REMOVED_FROM_EPIC}
-
-      def track_action(params)
-        described_class.track_issue_removed_from_epic_action(**params)
-      end
-    end
-  end
-
-  context 'for Issue changed epic actions' do
-    it_behaves_like 'a tracked issue edit event' do
-      let(:action) { described_class::ISSUE_CHANGED_EPIC}
-
-      def track_action(params)
-        described_class.track_issue_changed_epic_action(**params)
       end
     end
   end

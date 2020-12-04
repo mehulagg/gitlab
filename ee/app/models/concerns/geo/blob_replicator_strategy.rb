@@ -48,12 +48,6 @@ module Geo
       carrierwave_uploader.path
     end
 
-    private
-
-    def download
-      ::Geo::BlobDownloadService.new(replicator: self).execute
-    end
-
     def replicate_destroy(event_data)
       ::Geo::FileRegistryRemovalService.new(
         replicable_name,
@@ -62,12 +56,14 @@ module Geo
       ).execute
     end
 
-    def deleted_params
-      { model_record_id: model_record.id, blob_path: blob_path }
+    private
+
+    def download
+      ::Geo::BlobDownloadService.new(replicator: self).execute
     end
 
-    def schedule_checksum_calculation
-      Geo::BlobVerificationPrimaryWorker.perform_async(replicable_name, model_record.id)
+    def deleted_params
+      { model_record_id: model_record.id, blob_path: blob_path }
     end
   end
 end

@@ -290,7 +290,7 @@ export const initializeCycleAnalytics = ({ dispatch, commit }, initialData = {})
 
   if (group?.fullPath) {
     return Promise.all([
-      dispatch('setPaths', { group, milestonesPath, labelsPath }),
+      dispatch('setPaths', { groupPath: group.fullPath, milestonesPath, labelsPath }),
       dispatch('filters/initialize', {
         selectedAuthor,
         selectedMilestone,

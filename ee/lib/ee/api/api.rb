@@ -13,7 +13,6 @@ module EE
         mount ::API::AuditEvents
         mount ::API::ProjectApprovalRules
         mount ::API::ProjectApprovalSettings
-        mount ::API::DependencyProxy
         mount ::API::EpicIssues
         mount ::API::EpicLinks
         mount ::API::Epics

@@ -1,7 +1,7 @@
 ---
 stage: Release
-group: Release Management
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+group: Release
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference
 disqus_identifier: 'https://docs.gitlab.com/ee/ci/environments.html'
 ---
@@ -34,8 +34,7 @@ currently being deployed or has been deployed on your servers.
 It's important to know that:
 
 - Environments are like tags for your CI jobs, describing where code gets deployed.
-- Deployments are created when [jobs](../yaml/README.md#introduction) deploy versions of code to environments,
-  so every environment can have one or more deployments.
+- Deployments are created when [GitLab CI/CD](../yaml/README.md) is used to deploy versions of code to environments.
 
 GitLab:
 
@@ -443,7 +442,7 @@ The configuration in this section provides a full development workflow where you
 - Tested.
 - Built.
 - Deployed as a Review App.
-- Deployed to a staging server once the merge request is merged.
+- Deployed to a staging server after the merge request is merged.
 - Finally, able to be manually deployed to the production server.
 
 The following combines the previous configuration examples, including:
@@ -698,7 +697,7 @@ stop_review:
 ```
 
 If you can't use [Pipelines for merge requests](../merge_request_pipelines/index.md),
-setting the [`GIT_STRATEGY`](../yaml/README.md#git-strategy) to `none` is necessary in the
+setting the [`GIT_STRATEGY`](../runners/README.md#git-strategy) to `none` is necessary in the
 `stop_review` job so that the [runner](https://docs.gitlab.com/runner/) won't
 try to check out the code after the branch is deleted.
 
@@ -894,6 +893,32 @@ longer visible on the environment page.
 
 If the alert requires a [rollback](#retrying-and-rolling-back), you can select the
 deployment tab from the environment page and select which deployment to roll back to.
+
+#### Auto Rollback **(ULTIMATE)**
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/35404) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.7.
+
+In a typical Continuous Deployment workflow, the CI pipeline tests every commit before deploying to
+production. However, problematic code can still make it to production. For example, inefficient code
+that is logically correct can pass tests even though it causes severe performance degradation.
+Operators and SREs monitor the system to catch such problems as soon as possible. If they find a
+problematic deployment, they can roll back to a previous stable version.
+
+GitLab Auto Rollback eases this workflow by automatically triggering a rollback when a
+[critical alert](../../operations/incident_management/alerts.md)
+is detected. GitLab selects and redeploys the most recent successful deployment.
+
+Limitations of GitLab Auto Rollback:
+
+- The rollback is skipped if a deployment is running when the alert is detected.
+- A rollback can happen only once in three minutes. If multiple alerts are detected at once, only
+  one rollback is performed.
+
+GitLab Auto Rollback is turned off by default. To turn it on:
+
+1. Visit **Project > Settings > CI/CD > Automatic deployment rollbacks**.
+1. Select the checkbox for **Enable automatic rollbacks**.
+1. Click **Save changes**.
 
 ### Monitoring environments
 

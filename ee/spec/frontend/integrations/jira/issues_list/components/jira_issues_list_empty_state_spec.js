@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlEmptyState, GlSprintf, GlButton } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 
 import JiraIssuesListEmptyState from 'ee/integrations/jira/issues_list/components/jira_issues_list_empty_state.vue';
 import { IssuableStates } from '~/issuable_list/constants';

@@ -28,7 +28,6 @@ import initUserPopovers from '~/user_popovers';
 import { mergeUrlParams } from '~/lib/utils/url_utility';
 import IssueAssignees from '~/vue_shared/components/issue/issue_assignees.vue';
 import { isScopedLabel } from '~/lib/utils/common_utils';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
 import { convertToCamelCase } from '~/lib/utils/text_utility';
 
@@ -36,7 +35,9 @@ export default {
   i18n: {
     openedAgo: __('opened %{timeAgoString} by %{user}'),
     openedAgoJira: __('opened %{timeAgoString} by %{user} in Jira'),
+    openedAgoServiceDesk: __('opened %{timeAgoString} by %{email} via %{user}'),
   },
+  inject: ['scopedLabelsAvailable'],
   components: {
     IssueAssignees,
     GlLink,
@@ -50,7 +51,6 @@ export default {
     GlTooltip,
     SafeHtml,
   },
-  mixins: [glFeatureFlagsMixin()],
   props: {
     issuable: {
       type: Object,
@@ -84,9 +84,6 @@ export default {
       const { title } = this.issuable.milestone;
 
       return this.issuableLink({ milestone_title: title });
-    },
-    scopedLabelsAvailable() {
-      return this.glFeatures.scopedLabels;
     },
     hasWeight() {
       return isNumber(this.issuable.weight);
@@ -210,6 +207,11 @@ export default {
     healthStatus() {
       return convertToCamelCase(this.issuable.health_status);
     },
+    openedMessage() {
+      if (this.isJiraIssue) return this.$options.i18n.openedAgoJira;
+      if (this.issuable.service_desk_reply_to) return this.$options.i18n.openedAgoServiceDesk;
+      return this.$options.i18n.openedAgo;
+    },
   },
   mounted() {
     // TODO: Refactor user popover to use its own component instead of
@@ -315,9 +317,7 @@ export default {
 
           <span data-testid="openedByMessage" class="gl-display-none d-sm-inline-block gl-mr-4">
             &middot;
-            <gl-sprintf
-              :message="isJiraIssue ? $options.i18n.openedAgoJira : $options.i18n.openedAgo"
-            >
+            <gl-sprintf :message="openedMessage">
               <template #timeAgoString>
                 <span>{{ issuableCreatedAt }}</span>
               </template>
@@ -329,6 +329,9 @@ export default {
                   :target="linkTarget"
                   >{{ issuableAuthor.name }}</gl-link
                 >
+              </template>
+              <template #email>
+                <span>{{ issuable.service_desk_reply_to }}</span>
               </template>
             </gl-sprintf>
           </span>

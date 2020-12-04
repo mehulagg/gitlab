@@ -11,6 +11,14 @@ module Resolvers
 
       delegate :issue_links, :created_issue_links, to: :object, private: true
 
+      def ready?(**args)
+        unless valid_link_type?(args)
+          raise Gitlab::Graphql::Errors::ArgumentError, 'Provide a valid vulnerability issue link type'
+        end
+
+        super
+      end
+
       def resolve(link_type: nil, **)
         issue_links_by_link_type(link_type)
       end
@@ -23,6 +31,17 @@ module Resolvers
           created_issue_links
         else
           issue_links.by_link_type(link_type)
+        end
+      end
+
+      def valid_link_type?(args)
+        if args[:link_type].class == String
+          link_type = args[:link_type].downcase
+          link_types = ::Vulnerabilities::IssueLink.link_types.keys
+
+          link_types.include?(link_type)
+        else
+          args[:link_type].nil?
         end
       end
     end

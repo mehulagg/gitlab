@@ -1,7 +1,7 @@
 ---
 stage: none
 group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Test Import Project
@@ -23,7 +23,6 @@ The first option is to simply [import the Project tarball file via the GitLab UI
 
 It should take up to 15 minutes for the project to fully import. You can head to the project's main page for the current status.
 
-NOTE: **Note:**
 This method ignores all the errors silently (including the ones related to `GITALY_DISABLE_REQUEST_LIMITS`) and is used by GitLab's users. For development and testing, check the other methods below.
 
 ### Importing via the `import-project` script

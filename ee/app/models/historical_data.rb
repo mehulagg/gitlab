@@ -12,13 +12,8 @@ class HistoricalData < ApplicationRecord
     def track!
       create!(
         recorded_at:        Time.current,
-        active_user_count:  License.load_license&.current_active_users_count
+        active_user_count:  License.load_license&.daily_billable_users_count
       )
-    end
-
-    # HistoricalData.at(Date.new(2014, 1, 1)).active_user_count
-    def at(date)
-      find_by(recorded_at: date.all_day)
     end
 
     def max_historical_user_count(license: nil, from: nil, to: nil)

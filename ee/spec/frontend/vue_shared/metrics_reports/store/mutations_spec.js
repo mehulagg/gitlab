@@ -1,6 +1,6 @@
-import state from 'ee/vue_shared/metrics_reports/store/state';
-import mutations from 'ee/vue_shared/metrics_reports/store/mutations';
 import * as types from 'ee/vue_shared/metrics_reports/store/mutation_types';
+import mutations from 'ee/vue_shared/metrics_reports/store/mutations';
+import state from 'ee/vue_shared/metrics_reports/store/state';
 
 describe('metrics reports mutations', () => {
   let mockState;

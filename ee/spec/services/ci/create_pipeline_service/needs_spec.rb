@@ -7,7 +7,7 @@ RSpec.describe Ci::CreatePipelineService do
 
   let_it_be(:downstream_project) { create(:project, name: 'project', namespace: create(:namespace, name: 'some')) }
   let(:project) { create(:project, :repository) }
-  let(:user) { create(:admin) }
+  let(:user) { project.owner }
   let(:service) { described_class.new(project, user, { ref: 'refs/heads/master' }) }
 
   let(:config) do
@@ -25,6 +25,7 @@ RSpec.describe Ci::CreatePipelineService do
   end
 
   before do
+    downstream_project.add_developer(user)
     stub_ci_pipeline_yaml_file(config)
   end
 

@@ -3,26 +3,20 @@
 class RegistrationsController < Devise::RegistrationsController
   include Recaptcha::Verify
   include AcceptsPendingInvitations
-  include RecaptchaExperimentHelper
+  include RecaptchaHelper
   include InvisibleCaptchaOnSignup
 
-  BLOCKED_PENDING_APPROVAL_STATE = 'blocked_pending_approval'.freeze
+  layout 'devise'
 
-  layout :choose_layout
-
-  skip_before_action :required_signup_info, :check_two_factor_requirement, only: [:welcome, :update_registration]
   prepend_before_action :check_captcha, only: :create
   before_action :whitelist_query_limiting, :ensure_destroy_prerequisites_met, only: [:destroy]
   before_action :load_recaptcha, only: :new
+  before_action :set_invite_params, only: :new
 
   feature_category :authentication_and_authorization
 
   def new
-    if experiment_enabled?(:signup_flow)
-      @resource = build_resource
-    else
-      redirect_to new_user_session_path(anchor: 'register-pane')
-    end
+    @resource = build_resource
   end
 
   def create
@@ -32,6 +26,11 @@ class RegistrationsController < Devise::RegistrationsController
     super do |new_user|
       persist_accepted_terms_if_required(new_user)
       set_role_required(new_user)
+
+      if pending_approval?
+        NotificationService.new.new_instance_access_request(new_user)
+      end
+
       yield new_user if block_given?
     end
 
@@ -49,30 +48,6 @@ class RegistrationsController < Devise::RegistrationsController
       redirect_to new_user_session_path, status: :see_other, notice: s_('Profiles|Account scheduled for removal.')
     else
       redirect_to profile_account_path, status: :see_other, alert: destroy_confirmation_failure_message
-    end
-  end
-
-  def welcome
-    return redirect_to new_user_registration_path unless current_user
-    return redirect_to path_for_signed_in_user(current_user) if current_user.role.present? && !current_user.setup_for_company.nil?
-  end
-
-  def update_registration
-    return redirect_to new_user_registration_path unless current_user
-
-    result = ::Users::SignupService.new(current_user, update_registration_params).execute
-
-    if result[:status] == :success
-      if ::Gitlab.com? && show_onboarding_issues_experiment?
-        track_experiment_event(:onboarding_issues, 'signed_up')
-        record_experiment_user(:onboarding_issues)
-      end
-
-      return redirect_to new_users_sign_up_group_path if experiment_enabled?(:onboarding_issues) && show_onboarding_issues_experiment?
-
-      redirect_to path_for_signed_in_user(current_user)
-    else
-      render :welcome
     end
   end
 
@@ -159,12 +134,14 @@ class RegistrationsController < Devise::RegistrationsController
     render action: 'new'
   end
 
-  def sign_up_params
-    params.require(:user).permit(:username, :email, :name, :first_name, :last_name, :password)
+  def pending_approval?
+    return false unless Gitlab::CurrentSettings.require_admin_approval_after_user_signup
+
+    resource.persisted? && resource.blocked_pending_approval?
   end
 
-  def update_registration_params
-    params.require(:user).permit(:role, :setup_for_company)
+  def sign_up_params
+    params.require(:user).permit(:username, :email, :name, :first_name, :last_name, :password)
   end
 
   def resource_name
@@ -183,47 +160,22 @@ class RegistrationsController < Devise::RegistrationsController
     Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab-foss/issues/42380')
   end
 
-  def path_for_signed_in_user(user)
-    if requires_confirmation?(user)
-      users_almost_there_path
-    else
-      stored_location_for(user) || dashboard_projects_path
-    end
-  end
-
-  def requires_confirmation?(user)
-    return false if user.confirmed?
-    return false if Feature.enabled?(:soft_email_confirmation)
-    return false if experiment_enabled?(:signup_flow)
-
-    true
-  end
-
   def load_recaptcha
     Gitlab::Recaptcha.load_configurations!
   end
 
-  # Part of an experiment to build a new sign up flow. Will be resolved
-  # with https://gitlab.com/gitlab-org/growth/engineering/issues/64
-  def choose_layout
-    if %w(welcome update_registration).include?(action_name) || experiment_enabled?(:signup_flow)
-      'devise_experimental_separate_sign_up_flow'
-    else
-      'devise'
-    end
-  end
-
-  def show_onboarding_issues_experiment?
-    !helpers.in_subscription_flow? &&
-      !helpers.in_invitation_flow? &&
-      !helpers.in_oauth_flow? &&
-      !helpers.in_trial_flow?
-  end
-
   def set_user_state
-    return unless Gitlab::CurrentSettings.require_admin_approval_after_user_signup
+    return unless set_blocked_pending_approval?
 
-    resource.state = BLOCKED_PENDING_APPROVAL_STATE
+    resource.state = User::BLOCKED_PENDING_APPROVAL_STATE
+  end
+
+  def set_blocked_pending_approval?
+    Gitlab::CurrentSettings.require_admin_approval_after_user_signup
+  end
+
+  def set_invite_params
+    @invite_email = ActionController::Base.helpers.sanitize(params[:invite_email])
   end
 end
 

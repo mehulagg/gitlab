@@ -7,12 +7,12 @@ module Types
 
     authorize :create_on_demand_dast_scan
 
-    field :id, GraphQL::ID_TYPE, null: false,
-          description: 'ID of the DAST scanner profile',
-          deprecated: { reason: 'Use `global_id`', milestone: '13.4' }
+    field :id, ::Types::GlobalIDType[::DastScannerProfile], null: false,
+          description: 'ID of the DAST scanner profile'
 
     field :global_id, ::Types::GlobalIDType[::DastScannerProfile], null: false,
           description: 'ID of the DAST scanner profile',
+          deprecated: { reason: 'Use `id`', milestone: '13.6' },
           method: :id
 
     field :profile_name, GraphQL::STRING_TYPE, null: true,
@@ -38,9 +38,10 @@ module Types
           'True to include the debug messages.'
 
     field :edit_path, GraphQL::STRING_TYPE, null: true,
-          description: 'Relative web path to the edit page of a scanner profile',
-          resolve: -> (obj, _args, _ctx) do
-            Rails.application.routes.url_helpers.edit_project_security_configuration_dast_profiles_dast_scanner_profile_path(obj.project, obj)
-          end
+          description: 'Relative web path to the edit page of a scanner profile'
+
+    def edit_path
+      Rails.application.routes.url_helpers.edit_project_security_configuration_dast_profiles_dast_scanner_profile_path(object.project, object)
+    end
   end
 end

@@ -1,7 +1,7 @@
 ---
 stage: Plan
 group: Project Management
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Project Issue Boards API
@@ -33,6 +33,7 @@ Example response:
 [
   {
     "id" : 1,
+    "name": "board1",
     "project": {
       "id": 5,
       "name": "Diaspora Project Site",
@@ -203,48 +204,12 @@ Example response:
       "web_url": "http://example.com/diaspora/diaspora-project-site"
     },
     "name": "newboard",
-    "milestone":   {
-      "id": 12
-      "title": "10.0"
-    },
-    "lists" : [
-      {
-        "id" : 1,
-        "label" : {
-          "name" : "Testing",
-          "color" : "#F0AD4E",
-          "description" : null
-        },
-        "position" : 1,
-        "max_issue_count": 0,
-        "max_issue_weight": 0,
-        "limit_metric":  null
-      },
-      {
-        "id" : 2,
-        "label" : {
-          "name" : "Ready",
-          "color" : "#FF0000",
-          "description" : null
-        },
-        "position" : 2,
-        "max_issue_count": 0,
-        "max_issue_weight": 0,
-        "limit_metric":  null
-      },
-      {
-        "id" : 3,
-        "label" : {
-          "name" : "Production",
-          "color" : "#FF5F00",
-          "description" : null
-        },
-        "position" : 3,
-        "max_issue_count": 0,
-        "max_issue_weight": 0,
-        "limit_metric":  null
-      }
-    ]
+    "lists" : [],
+    "group": null,
+    "milestone": null,
+    "assignee" : null,
+    "labels" : [],
+    "weight" : null
   }
 ```
 

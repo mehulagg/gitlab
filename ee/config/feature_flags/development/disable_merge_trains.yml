@@ -2,6 +2,7 @@
 name: disable_merge_trains
 introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/24844
 rollout_issue_url: 
-group: group::continuous integration
+milestone: '12.8'
 type: development
+group: group::continuous integration
 default_enabled: false

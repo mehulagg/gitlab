@@ -74,6 +74,8 @@ RSpec.describe Projects::MergeRequests::DiffsController do
   let(:merge_request) { create(:merge_request_with_diffs, target_project: project, source_project: project) }
 
   before do
+    stub_feature_flags(diffs_gradual_load: false)
+
     project.add_maintainer(user)
     sign_in(user)
   end
@@ -383,6 +385,7 @@ RSpec.describe Projects::MergeRequests::DiffsController do
         environment: nil,
         merge_request: merge_request,
         diff_view: :inline,
+        merge_ref_head_diff: nil,
         pagination_data: {
           current_page: nil,
           next_page: nil,

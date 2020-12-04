@@ -23,7 +23,7 @@ RSpec.describe Gitlab::GitAccessWiki do
   end
 
   describe 'group wiki access' do
-    let_it_be(:group) { create(:group, :private, :wiki_repo) }
+    let_it_be_with_refind(:group) { create(:group, :private, :wiki_repo) }
     let(:wiki) { create(:group_wiki, group: group) }
 
     describe '#push_access_check' do

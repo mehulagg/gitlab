@@ -20,6 +20,7 @@ UsageData/LargeTable:
     - :Gitlab::Runtime
     - :Gitaly::Server
     - :Gitlab::UsageData
+    - :Gitlab::UsageDataCounters
     - :License
     - :Rails
     - :Time
@@ -50,3 +51,5 @@ UsageData/DistinctCountByLargeForeignKey:
     - 'owner_id'
     - 'project_id'
     - 'user_id'
+    - 'resource_owner_id'
+    - 'requirement_id'

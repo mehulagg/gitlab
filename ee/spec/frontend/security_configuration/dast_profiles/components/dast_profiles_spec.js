@@ -1,9 +1,9 @@
-import { mount, shallowMount } from '@vue/test-utils';
-import { within } from '@testing-library/dom';
-import { merge } from 'lodash';
 import { GlDropdown, GlTabs } from '@gitlab/ui';
-import setWindowLocation from 'helpers/set_window_location_helper';
+import { within } from '@testing-library/dom';
+import { mount, shallowMount } from '@vue/test-utils';
+import { merge } from 'lodash';
 import DastProfiles from 'ee/security_configuration/dast_profiles/components/dast_profiles.vue';
+import setWindowLocation from 'helpers/set_window_location_helper';
 
 const TEST_NEW_DAST_SCANNER_PROFILE_PATH = '/-/on_demand_scans/scanner_profiles/new';
 const TEST_NEW_DAST_SITE_PROFILE_PATH = '/-/on_demand_scans/site_profiles/new';
@@ -171,36 +171,23 @@ describe('EE - DastProfiles', () => {
       createComponent();
     });
 
-    it('passes down the correct default props', () => {
-      expect(getProfilesComponent(profileType).props()).toEqual({
-        errorMessage: '',
-        errorDetails: [],
-        hasMoreProfilesToLoad: false,
-        isLoading: false,
-        profilesPerPage: expect.any(Number),
-        profiles: [],
-        fields: expect.any(Array),
-      });
-    });
+    it('passes down the loading state when loading is true', () => {
+      createComponent({ mocks: { $apollo: { queries: { [profileType]: { loading: true } } } } });
 
-    it.each([true, false])('passes down the loading state when loading is "%s"', loading => {
-      createComponent({ mocks: { $apollo: { queries: { [profileType]: { loading } } } } });
-
-      expect(getProfilesComponent(profileType).props('isLoading')).toBe(loading);
+      expect(getProfilesComponent(profileType).attributes('is-loading')).toBe('true');
     });
 
     it.each`
-      givenData                                                                   | propName                   | expectedPropValue
-      ${{ profileTypes: { [profileType]: { errorMessage: 'foo' } } }}             | ${'errorMessage'}          | ${'foo'}
-      ${{ profileTypes: { [profileType]: { errorDetails: ['foo'] } } }}           | ${'errorDetails'}          | ${['foo']}
-      ${{ profileTypes: { [profileType]: { pageInfo: { hasNextPage: true } } } }} | ${'hasMoreProfilesToLoad'} | ${true}
-      ${{ profileTypes: { [profileType]: { profiles: [{ foo: 'bar' }] } } }}      | ${'profiles'}              | ${[{ foo: 'bar' }]}
+      givenData                                                                   | propName                       | expectedPropValue
+      ${{ profileTypes: { [profileType]: { errorMessage: 'foo' } } }}             | ${'error-message'}             | ${'foo'}
+      ${{ profileTypes: { [profileType]: { errorDetails: ['foo'] } } }}           | ${'error-details'}             | ${'foo'}
+      ${{ profileTypes: { [profileType]: { pageInfo: { hasNextPage: true } } } }} | ${'has-more-profiles-to-load'} | ${'true'}
     `('passes down $propName correctly', async ({ givenData, propName, expectedPropValue }) => {
       wrapper.setData(givenData);
 
       await wrapper.vm.$nextTick();
 
-      expect(getProfilesComponent(profileType).props(propName)).toEqual(expectedPropValue);
+      expect(getProfilesComponent(profileType).attributes(propName)).toEqual(expectedPropValue);
     });
 
     it('fetches more results when "@load-more-profiles" is emitted', () => {

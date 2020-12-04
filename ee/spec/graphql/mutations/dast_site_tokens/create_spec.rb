@@ -18,6 +18,8 @@ RSpec.describe Mutations::DastSiteTokens::Create do
     allow(SecureRandom).to receive(:uuid).and_return(uuid)
   end
 
+  specify { expect(described_class).to require_graphql_authorizations(:create_on_demand_dast_scan) }
+
   describe '#resolve' do
     subject do
       mutation.resolve(
@@ -32,28 +34,6 @@ RSpec.describe Mutations::DastSiteTokens::Create do
 
         it 'raises an exception' do
           expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
-        end
-      end
-
-      context 'when the user is not associated with the project' do
-        it 'raises an exception' do
-          expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
-        end
-      end
-
-      context 'when the user is an owner' do
-        it 'returns the dast_site_token id' do
-          group.add_owner(user)
-
-          expect(subject[:id]).to eq(dast_site_token.to_global_id)
-        end
-      end
-
-      context 'when the user is a maintainer' do
-        it 'returns the dast_site_token id' do
-          project.add_maintainer(user)
-
-          expect(subject[:id]).to eq(dast_site_token.to_global_id)
         end
       end
 
@@ -90,14 +70,6 @@ RSpec.describe Mutations::DastSiteTokens::Create do
         context 'when on demand scan site validations feature is not enabled' do
           it 'raises an exception' do
             stub_feature_flags(security_on_demand_scans_site_validation: false)
-
-            expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
-          end
-        end
-
-        context 'when on demand scan licensed feature is not available' do
-          it 'raises an exception' do
-            stub_licensed_features(security_on_demand_scans: false)
 
             expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
           end

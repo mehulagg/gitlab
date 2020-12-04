@@ -1,7 +1,7 @@
 ---
 stage: Create
 group: Source Code
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 type: reference, index, howto
 ---
 
@@ -72,6 +72,7 @@ Use the switches to enable or disable the following features:
 | **Snippets**                      | ✓                         | Enables [sharing of code and text](../../snippets.md)                                                                                                                                          |
 | **Pages**                         | ✓                         | Allows you to [publish static websites](../pages/)                                                                                                                                             |
 | **Metrics Dashboard**             | ✓                         | Control access to [metrics dashboard](../integrations/prometheus.md)
+| **Requirements**                  | ✓                         | Control access to [Requirements Management](../requirements/index.md)
 
 Some features depend on others:
 
@@ -197,8 +198,8 @@ To rename a repository:
 
 1. Navigate to your project's **Settings > General**.
 1. Under **Advanced**, click **Expand**.
-1. Under "Rename repository", change the "Path" to your liking.
-1. Hit **Rename project**.
+1. Under **Change path**, update the repository's path.
+1. Click **Change path**.
 
 Remember that this can have unintended side effects since everyone with the
 old URL won't be able to push or pull. Read more about what happens with the

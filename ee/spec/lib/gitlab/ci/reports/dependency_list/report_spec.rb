@@ -44,6 +44,19 @@ RSpec.describe Gitlab::Ci::Reports::DependencyList::Report do
         expect(ancestors.last).to eq({ name: direct[:name], version: direct[:version] })
       end
 
+      context 'when dependency path info is not full' do
+        let(:orphan_dependency) { build :dependency, :with_vulnerabilities, iid: 3 }
+
+        before do
+          report.add_dependency(orphan_dependency)
+        end
+
+        it 'returns array of hashes' do
+          expect(dependencies).to be_an(Array)
+          expect(dependencies.first).to be_a(Hash)
+        end
+      end
+
       context 'with multiple dependency files matching same package manager' do
         let(:indirect_other) { build :dependency, :with_vulnerabilities, iid: 32 }
         let(:direct_other) { build :dependency, :direct, :with_vulnerabilities }

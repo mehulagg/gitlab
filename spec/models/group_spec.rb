@@ -28,6 +28,8 @@ RSpec.describe Group do
     it { is_expected.to have_many(:iterations) }
     it { is_expected.to have_many(:group_deploy_keys) }
     it { is_expected.to have_many(:services) }
+    it { is_expected.to have_one(:dependency_proxy_setting) }
+    it { is_expected.to have_many(:dependency_proxy_blobs) }
 
     describe '#members & #requesters' do
       let(:requester) { create(:user) }
@@ -796,20 +798,36 @@ RSpec.describe Group do
     end
   end
 
-  describe '#direct_and_indirect_members' do
+  context 'members-related methods' do
     let!(:group) { create(:group, :nested) }
     let!(:sub_group) { create(:group, parent: group) }
     let!(:maintainer) { group.parent.add_user(create(:user), GroupMember::MAINTAINER) }
     let!(:developer) { group.add_user(create(:user), GroupMember::DEVELOPER) }
     let!(:other_developer) { group.add_user(create(:user), GroupMember::DEVELOPER) }
 
-    it 'returns parents members' do
-      expect(group.direct_and_indirect_members).to include(developer)
-      expect(group.direct_and_indirect_members).to include(maintainer)
+    describe '#direct_and_indirect_members' do
+      it 'returns parents members' do
+        expect(group.direct_and_indirect_members).to include(developer)
+        expect(group.direct_and_indirect_members).to include(maintainer)
+      end
+
+      it 'returns descendant members' do
+        expect(group.direct_and_indirect_members).to include(other_developer)
+      end
     end
 
-    it 'returns descendant members' do
-      expect(group.direct_and_indirect_members).to include(other_developer)
+    describe '#direct_and_indirect_members_with_inactive' do
+      let!(:maintainer_blocked) { group.parent.add_user(create(:user, :blocked), GroupMember::MAINTAINER) }
+
+      it 'returns parents members' do
+        expect(group.direct_and_indirect_members_with_inactive).to include(developer)
+        expect(group.direct_and_indirect_members_with_inactive).to include(maintainer)
+        expect(group.direct_and_indirect_members_with_inactive).to include(maintainer_blocked)
+      end
+
+      it 'returns descendant members' do
+        expect(group.direct_and_indirect_members_with_inactive).to include(other_developer)
+      end
     end
   end
 
@@ -832,7 +850,7 @@ RSpec.describe Group do
     end
   end
 
-  describe '#direct_and_indirect_users' do
+  context 'user-related methods' do
     let(:user_a) { create(:user) }
     let(:user_b) { create(:user) }
     let(:user_c) { create(:user) }
@@ -851,14 +869,40 @@ RSpec.describe Group do
       project.add_developer(user_d)
     end
 
-    it 'returns member users on every nest level without duplication' do
-      expect(group.direct_and_indirect_users).to contain_exactly(user_a, user_b, user_c, user_d)
-      expect(nested_group.direct_and_indirect_users).to contain_exactly(user_a, user_b, user_c)
-      expect(deep_nested_group.direct_and_indirect_users).to contain_exactly(user_a, user_b, user_c)
+    describe '#direct_and_indirect_users' do
+      it 'returns member users on every nest level without duplication' do
+        expect(group.direct_and_indirect_users).to contain_exactly(user_a, user_b, user_c, user_d)
+        expect(nested_group.direct_and_indirect_users).to contain_exactly(user_a, user_b, user_c)
+        expect(deep_nested_group.direct_and_indirect_users).to contain_exactly(user_a, user_b, user_c)
+      end
+
+      it 'does not return members of projects belonging to ancestor groups' do
+        expect(nested_group.direct_and_indirect_users).not_to include(user_d)
+      end
     end
 
-    it 'does not return members of projects belonging to ancestor groups' do
-      expect(nested_group.direct_and_indirect_users).not_to include(user_d)
+    describe '#direct_and_indirect_users_with_inactive' do
+      let(:user_blocked_1) { create(:user, :blocked) }
+      let(:user_blocked_2) { create(:user, :blocked) }
+      let(:user_blocked_3) { create(:user, :blocked) }
+      let(:project_in_group) { create(:project, namespace: nested_group) }
+
+      before do
+        group.add_developer(user_blocked_1)
+        nested_group.add_developer(user_blocked_1)
+        deep_nested_group.add_developer(user_blocked_2)
+        project_in_group.add_developer(user_blocked_3)
+      end
+
+      it 'returns member users on every nest level without duplication' do
+        expect(group.direct_and_indirect_users_with_inactive).to contain_exactly(user_a, user_b, user_c, user_d, user_blocked_1, user_blocked_2, user_blocked_3)
+        expect(nested_group.direct_and_indirect_users_with_inactive).to contain_exactly(user_a, user_b, user_c, user_blocked_1, user_blocked_2, user_blocked_3)
+        expect(deep_nested_group.direct_and_indirect_users_with_inactive).to contain_exactly(user_a, user_b, user_c, user_blocked_1, user_blocked_2)
+      end
+
+      it 'returns members of projects belonging to group' do
+        expect(nested_group.direct_and_indirect_users_with_inactive).to include(user_blocked_3)
+      end
     end
   end
 
@@ -967,23 +1011,72 @@ RSpec.describe Group do
       context 'expanded group members' do
         let(:indirect_user) { create(:user) }
 
-        it 'enables two_factor_requirement for subgroup member' do
-          subgroup = create(:group, :nested, parent: group)
-          subgroup.add_user(indirect_user, GroupMember::OWNER)
+        context 'two_factor_requirement is enabled' do
+          context 'two_factor_requirement is also enabled for ancestor group' do
+            it 'enables two_factor_requirement for subgroup member' do
+              subgroup = create(:group, :nested, parent: group)
+              subgroup.add_user(indirect_user, GroupMember::OWNER)
 
-          group.update!(require_two_factor_authentication: true)
+              group.update!(require_two_factor_authentication: true)
 
-          expect(indirect_user.reload.require_two_factor_authentication_from_group).to be_truthy
+              expect(indirect_user.reload.require_two_factor_authentication_from_group).to be_truthy
+            end
+          end
+
+          context 'two_factor_requirement is disabled for ancestor group' do
+            it 'enables two_factor_requirement for subgroup member' do
+              subgroup = create(:group, :nested, parent: group, require_two_factor_authentication: true)
+              subgroup.add_user(indirect_user, GroupMember::OWNER)
+
+              group.update!(require_two_factor_authentication: false)
+
+              expect(indirect_user.reload.require_two_factor_authentication_from_group).to be_truthy
+            end
+
+            it 'enable two_factor_requirement for ancestor group member' do
+              ancestor_group = create(:group)
+              ancestor_group.add_user(indirect_user, GroupMember::OWNER)
+              group.update!(parent: ancestor_group)
+
+              group.update!(require_two_factor_authentication: true)
+
+              expect(indirect_user.reload.require_two_factor_authentication_from_group).to be_truthy
+            end
+          end
         end
 
-        it 'does not enable two_factor_requirement for ancestor group member' do
-          ancestor_group = create(:group)
-          ancestor_group.add_user(indirect_user, GroupMember::OWNER)
-          group.update!(parent: ancestor_group)
+        context 'two_factor_requirement is disabled' do
+          context 'two_factor_requirement is enabled for ancestor group' do
+            it 'enables two_factor_requirement for subgroup member' do
+              subgroup = create(:group, :nested, parent: group)
+              subgroup.add_user(indirect_user, GroupMember::OWNER)
 
-          group.update!(require_two_factor_authentication: true)
+              group.update!(require_two_factor_authentication: true)
 
-          expect(indirect_user.reload.require_two_factor_authentication_from_group).to be_falsey
+              expect(indirect_user.reload.require_two_factor_authentication_from_group).to be_truthy
+            end
+          end
+
+          context 'two_factor_requirement is also disabled for ancestor group' do
+            it 'disables two_factor_requirement for subgroup member' do
+              subgroup = create(:group, :nested, parent: group)
+              subgroup.add_user(indirect_user, GroupMember::OWNER)
+
+              group.update!(require_two_factor_authentication: false)
+
+              expect(indirect_user.reload.require_two_factor_authentication_from_group).to be_falsey
+            end
+
+            it 'disables two_factor_requirement for ancestor group member' do
+              ancestor_group = create(:group, require_two_factor_authentication: false)
+              indirect_user.update!(require_two_factor_authentication_from_group: true)
+              ancestor_group.add_user(indirect_user, GroupMember::OWNER)
+
+              group.update!(require_two_factor_authentication: false)
+
+              expect(indirect_user.reload.require_two_factor_authentication_from_group).to be_falsey
+            end
+          end
         end
       end
 
@@ -1612,6 +1705,49 @@ RSpec.describe Group do
 
         expect(subgroup.parent_allows_two_factor_authentication?).to eq(false)
       end
+    end
+  end
+
+  describe 'has_project_with_service_desk_enabled?' do
+    let_it_be(:group) { create(:group, :private) }
+
+    subject { group.has_project_with_service_desk_enabled? }
+
+    before do
+      allow(Gitlab::ServiceDesk).to receive(:supported?).and_return(true)
+    end
+
+    context 'when service desk is enabled' do
+      context 'for top level group' do
+        let_it_be(:project) { create(:project, group: group, service_desk_enabled: true) }
+
+        it { is_expected.to eq(true) }
+
+        context 'when service desk is not supported' do
+          before do
+            allow(Gitlab::ServiceDesk).to receive(:supported?).and_return(false)
+          end
+
+          it { is_expected.to eq(false) }
+        end
+      end
+
+      context 'for subgroup project' do
+        let_it_be(:subgroup) { create(:group, :private, parent: group)}
+        let_it_be(:project) { create(:project, group: subgroup, service_desk_enabled: true) }
+
+        it { is_expected.to eq(true) }
+      end
+    end
+
+    context 'when none of group child projects has service desk enabled' do
+      let_it_be(:project) { create(:project, group: group, service_desk_enabled: false) }
+
+      before do
+        project.update(service_desk_enabled: false)
+      end
+
+      it { is_expected.to eq(false) }
     end
   end
 end

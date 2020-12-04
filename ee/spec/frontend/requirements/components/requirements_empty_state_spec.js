@@ -1,6 +1,6 @@
+import { GlEmptyState, GlButton } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 
-import { GlEmptyState, GlButton } from '@gitlab/ui';
 import RequirementsEmptyState from 'ee/requirements/components/requirements_empty_state.vue';
 import { FilterState } from 'ee/requirements/constants';
 

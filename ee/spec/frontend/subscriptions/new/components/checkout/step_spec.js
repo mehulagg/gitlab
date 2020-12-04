@@ -1,10 +1,10 @@
-import Vuex from 'vuex';
+import { GlButton } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
-import { GlDeprecatedButton } from '@gitlab/ui';
-import createStore from 'ee/subscriptions/new/store';
-import * as constants from 'ee/subscriptions/new/constants';
+import Vuex from 'vuex';
 import Component from 'ee/subscriptions/new/components/checkout/step.vue';
 import StepSummary from 'ee/subscriptions/new/components/checkout/step_summary.vue';
+import * as constants from 'ee/subscriptions/new/constants';
+import createStore from 'ee/subscriptions/new/store';
 
 describe('Step', () => {
   const localVue = createLocalVue();
@@ -125,13 +125,13 @@ describe('Step', () => {
     it('is disabled when this step is not valid', () => {
       createComponent({ isValid: false });
 
-      expect(wrapper.find(GlDeprecatedButton).attributes('disabled')).toBe('true');
+      expect(wrapper.find(GlButton).attributes('disabled')).toBe('true');
     });
 
     it('is enabled when this step is valid', () => {
       createComponent();
 
-      expect(wrapper.find(GlDeprecatedButton).attributes('disabled')).toBeUndefined();
+      expect(wrapper.find(GlButton).attributes('disabled')).toBeUndefined();
     });
   });
 });

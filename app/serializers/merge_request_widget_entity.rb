@@ -2,6 +2,9 @@
 
 class MergeRequestWidgetEntity < Grape::Entity
   include RequestAwareEntity
+  include ProjectsHelper
+  include ApplicationHelper
+  include ApplicationSettingsHelper
 
   SUGGEST_PIPELINE = 'suggest_pipeline'
 
@@ -48,6 +51,10 @@ class MergeRequestWidgetEntity < Grape::Entity
     help_page_path('user/project/merge_requests/resolve_conflicts.md')
   end
 
+  expose :reviewing_and_managing_merge_requests_docs_path do |merge_request|
+    help_page_path('user/project/merge_requests/reviewing_and_managing_merge_requests.md', anchor: "checkout-merge-requests-locally-through-the-head-ref")
+  end
+
   expose :merge_request_pipelines_docs_path do |merge_request|
     help_page_path('ci/merge_request_pipelines/index.md')
   end
@@ -67,15 +74,15 @@ class MergeRequestWidgetEntity < Grape::Entity
     )
   end
 
-  expose :user_callouts_path, if: -> (*) { Feature.enabled?(:suggest_pipeline, default_enabled: true) } do |_merge_request|
+  expose :user_callouts_path do |_merge_request|
     user_callouts_path
   end
 
-  expose :suggest_pipeline_feature_id, if: -> (*) { Feature.enabled?(:suggest_pipeline, default_enabled: true) } do |_merge_request|
+  expose :suggest_pipeline_feature_id do |_merge_request|
     SUGGEST_PIPELINE
   end
 
-  expose :is_dismissed_suggest_pipeline, if: -> (*) { Feature.enabled?(:suggest_pipeline, default_enabled: true) } do |_merge_request|
+  expose :is_dismissed_suggest_pipeline do |_merge_request|
     current_user && current_user.dismissed_callout?(feature_name: SUGGEST_PIPELINE)
   end
 
@@ -85,6 +92,10 @@ class MergeRequestWidgetEntity < Grape::Entity
 
   expose :new_project_pipeline_path do |merge_request|
     new_project_pipeline_path(merge_request.project)
+  end
+
+  expose :source_project_default_url do |merge_request|
+    merge_request.source_project && default_url_to_repo(merge_request.source_project)
   end
 
   # Rendering and redacting Markdown can be expensive. These links are
@@ -129,7 +140,7 @@ class MergeRequestWidgetEntity < Grape::Entity
   end
 
   expose :security_reports_docs_path do |merge_request|
-    help_page_path('user/application_security/sast/index.md', anchor: 'reports-json-format')
+    help_page_path('user/application_security/index.md', anchor: 'viewing-security-scan-information-in-merge-requests')
   end
 
   private
@@ -151,6 +162,10 @@ class MergeRequestWidgetEntity < Grape::Entity
       can?(current_user, :create_pipeline, merge_request.source_project)
   end
 
+  def use_merge_base_with_merged_results?
+    object.actual_head_pipeline&.merge_request_event_type == :merged_result
+  end
+
   def head_pipeline_downloadable_path_for_report_type(file_type)
     object.head_pipeline&.present(current_user: current_user)
       &.downloadable_path_for_report_type(file_type)
@@ -159,11 +174,6 @@ class MergeRequestWidgetEntity < Grape::Entity
   def base_pipeline_downloadable_path_for_report_type(file_type)
     object.base_pipeline&.present(current_user: current_user)
       &.downloadable_path_for_report_type(file_type)
-  end
-
-  def use_merge_base_with_merged_results?
-    Feature.enabled?(:merge_base_pipelines, object.target_project) &&
-      object.actual_head_pipeline&.merge_request_event_type == :merged_result
   end
 
   def merge_base_pipeline_downloadable_path_for_report_type(file_type)

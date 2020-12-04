@@ -62,14 +62,14 @@
     .tree-controls {
       margin-bottom: 10px;
 
-      .btn,
+      .btn:not(.dropdown-toggle-split),
       .dropdown,
       .btn-group {
         width: 100%;
       }
 
       .btn {
-        margin: 10px 0 0;
+        margin-top: 10px;
       }
     }
   }

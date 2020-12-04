@@ -48,12 +48,13 @@ RSpec.describe Search::ProjectService do
       let!(:note) { create :note, project: project, noteable: merge_request }
       let!(:note2) { create :note, project: project2, noteable: merge_request2, note: note.note }
 
-      where(:project_level, :feature_access_level, :membership, :expected_count) do
+      where(:project_level, :feature_access_level, :membership, :admin_mode, :expected_count) do
         permission_table_for_reporter_feature_access
       end
 
       with_them do
         it "respects visibility" do
+          enable_admin_mode!(user) if admin_mode
           [project, project2].each do |project|
             update_feature_access_level(project, feature_access_level)
           end
@@ -76,12 +77,13 @@ RSpec.describe Search::ProjectService do
       let!(:note) { create :note_on_commit, project: project }
       let!(:note2) { create :note_on_commit, project: project2, note: note.note }
 
-      where(:project_level, :feature_access_level, :membership, :expected_count) do
+      where(:project_level, :feature_access_level, :membership, :admin_mode, :expected_count) do
         permission_table_for_guest_feature_access_and_non_private_project_only
       end
 
       with_them do
         it "respects visibility" do
+          enable_admin_mode!(user) if admin_mode
           [project, project2].each do |project|
             update_feature_access_level(project, feature_access_level)
             ElasticCommitIndexerWorker.new.perform(project.id)
@@ -109,12 +111,13 @@ RSpec.describe Search::ProjectService do
       let!(:note) { create :note, project: project, noteable: issue }
       let!(:note2) { create :note, project: project2, noteable: issue2, note: note.note }
 
-      where(:project_level, :feature_access_level, :membership, :expected_count) do
+      where(:project_level, :feature_access_level, :membership, :admin_mode, :expected_count) do
         permission_table_for_guest_feature_access
       end
 
       with_them do
         it "respects visibility" do
+          enable_admin_mode!(user) if admin_mode
           [project, project2].each do |project|
             update_feature_access_level(project, feature_access_level)
           end
@@ -134,12 +137,13 @@ RSpec.describe Search::ProjectService do
     context 'wiki' do
       let!(:project) { create(:project, project_level, :wiki_repo) }
 
-      where(:project_level, :feature_access_level, :membership, :expected_count) do
+      where(:project_level, :feature_access_level, :membership, :admin_mode, :expected_count) do
         permission_table_for_guest_feature_access
       end
 
       with_them do
         it "respects visibility" do
+          enable_admin_mode!(user) if admin_mode
           project.wiki.create_page('test.md', '# term')
           project.wiki.index_wiki_blobs
           update_feature_access_level(project, feature_access_level)
@@ -155,12 +159,13 @@ RSpec.describe Search::ProjectService do
     context 'milestone' do
       let!(:milestone) { create :milestone, project: project }
 
-      where(:project_level, :issues_access_level, :merge_requests_access_level, :membership, :expected_count) do
+      where(:project_level, :issues_access_level, :merge_requests_access_level, :membership, :admin_mode, :expected_count) do
         permission_table_for_milestone_access
       end
 
       with_them do
         it "respects visibility" do
+          enable_admin_mode!(user) if admin_mode
           project.update!(
             'issues_access_level' => issues_access_level,
             'merge_requests_access_level' => merge_requests_access_level

@@ -30,7 +30,7 @@ RSpec.describe Vulnerabilities::DismissService do
       let(:dismiss_findings) { false }
 
       it 'dismisses only vulnerability' do
-        Timecop.freeze do
+        freeze_time do
           dismiss_vulnerability
 
           expect(vulnerability.reload).to(
@@ -42,7 +42,7 @@ RSpec.describe Vulnerabilities::DismissService do
 
     context 'when the `dismiss_findings` argument is not false' do
       it 'dismisses a vulnerability and its associated findings' do
-        Timecop.freeze do
+        freeze_time do
           dismiss_vulnerability
 
           expect(vulnerability.reload).to(
@@ -57,7 +57,7 @@ RSpec.describe Vulnerabilities::DismissService do
       let(:service) { described_class.new(user, vulnerability, comment) }
 
       it 'dismisses a vulnerability and its associated findings with comment', :aggregate_failures do
-        Timecop.freeze do
+        freeze_time do
           dismiss_vulnerability
 
           aggregate_failures do
@@ -103,7 +103,12 @@ RSpec.describe Vulnerabilities::DismissService do
   end
 
   describe 'permissions' do
-    it { expect { dismiss_vulnerability }.to be_allowed_for(:admin) }
+    context 'when admin mode is enabled', :enable_admin_mode do
+      it { expect { dismiss_vulnerability }.to be_allowed_for(:admin) }
+    end
+    context 'when admin mode is disabled' do
+      it { expect { dismiss_vulnerability }.to be_denied_for(:admin) }
+    end
     it { expect { dismiss_vulnerability }.to be_allowed_for(:owner).of(project) }
     it { expect { dismiss_vulnerability }.to be_allowed_for(:maintainer).of(project) }
     it { expect { dismiss_vulnerability }.to be_allowed_for(:developer).of(project) }

@@ -120,7 +120,7 @@ RSpec.describe License do
     end
 
     describe "Historical active user count" do
-      let(:active_user_count) { described_class.current_active_users.count + 10 }
+      let(:active_user_count) { described_class.current.daily_billable_users_count + 10 }
       let(:date)              { described_class.current.starts_at }
       let!(:historical_data)  { HistoricalData.create!(recorded_at: date, active_user_count: active_user_count) }
 
@@ -136,7 +136,7 @@ RSpec.describe License do
 
           gl_license.restrictions = {
             previous_user_count: 1,
-            active_user_count: described_class.current_active_users.count - 1
+            active_user_count: described_class.current.daily_billable_users_count - 1
           }
 
           HistoricalData.delete_all
@@ -637,21 +637,6 @@ RSpec.describe License do
         end
       end
     end
-
-    describe '.current_active_users' do
-      before do
-        create(:group_member)
-        create(:group_member, user: create(:admin))
-        create(:group_member, user: create(:user, :bot))
-        create(:group_member, user: create(:user, :project_bot))
-        create(:group_member, user: create(:user, :ghost))
-        create(:group_member).user.deactivate!
-      end
-
-      it 'includes guests in the count' do
-        expect(license.current_active_users_count).to eq(2)
-      end
-    end
   end
 
   describe "#md5" do
@@ -816,7 +801,7 @@ RSpec.describe License do
     end
   end
 
-  describe '#current_active_users_count' do
+  describe '#daily_billable_users_count' do
     before_all do
       create(:group_member)
       create(:group_member, user: create(:admin))
@@ -829,17 +814,15 @@ RSpec.describe License do
 
     context 'when license is not for Ultimate plan' do
       it 'includes guests in the count' do
-        expect(license.current_active_users_count).to eq(3)
+        expect(license.daily_billable_users_count).to eq(3)
       end
     end
 
     context 'when license is for Ultimate plan' do
-      before do
-        allow(license).to receive(:plan).and_return(License::ULTIMATE_PLAN)
-      end
-
       it 'excludes guests in the count' do
-        expect(license.current_active_users_count).to eq(2)
+        new_license = create(:license, plan: License::ULTIMATE_PLAN)
+
+        expect(new_license.daily_billable_users_count).to eq(2)
       end
     end
   end
@@ -857,8 +840,8 @@ RSpec.describe License do
       expect(license.overage(14)).to eq(4)
     end
 
-    it 'returns the difference using current_active_users_count as user_count if no user_count argument provided' do
-      allow(license).to receive(:current_active_users_count) { 110 }
+    it 'returns the difference using daily_billable_users_count as user_count if no user_count argument provided' do
+      allow(license).to receive(:daily_billable_users_count) { 110 }
       allow(license).to receive(:restricted_user_count) { 100 }
 
       expect(license.overage).to eq(10)
@@ -874,7 +857,7 @@ RSpec.describe License do
   describe '#maximum_user_count' do
     subject { license.maximum_user_count }
 
-    where(:current_active_users_count, :historical_max, :expected) do
+    where(:daily_billable_users_count, :historical_max, :expected) do
       100 | 50  | 100
       50  | 100 | 100
       50  | 50  | 50
@@ -882,7 +865,7 @@ RSpec.describe License do
 
     with_them do
       before do
-        allow(license).to receive(:current_active_users_count) { current_active_users_count }
+        allow(license).to receive(:daily_billable_users_count) { daily_billable_users_count }
         allow(license).to receive(:historical_max) { historical_max }
       end
 
@@ -1116,7 +1099,7 @@ RSpec.describe License do
       with_them do
         before do
           allow(license).to receive(:restricted_user_count).and_return(restricted_user_count)
-          allow(license).to receive(:current_active_users_count).and_return(active_user_count)
+          allow(license).to receive(:daily_billable_users_count).and_return(active_user_count)
         end
 
         it { is_expected.not_to be_nil }
@@ -1128,7 +1111,7 @@ RSpec.describe License do
   describe '#active_user_count_threshold_reached?' do
     subject { license.active_user_count_threshold_reached? }
 
-    where(:restricted_user_count, :current_active_users_count, :result) do
+    where(:restricted_user_count, :daily_billable_users_count, :result) do
       10   | 9   | true
       nil  | 9   | false
       10   | 15  | false
@@ -1137,7 +1120,7 @@ RSpec.describe License do
 
     with_them do
       before do
-        allow(license).to receive(:current_active_users_count).and_return(current_active_users_count)
+        allow(license).to receive(:daily_billable_users_count).and_return(daily_billable_users_count)
         allow(license).to receive(:restricted_user_count).and_return(restricted_user_count)
       end
 

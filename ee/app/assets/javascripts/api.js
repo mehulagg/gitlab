@@ -55,7 +55,7 @@ export default {
       .get(url, {
         params: {
           search: query,
-          per_page: 20,
+          per_page: Api.DEFAULT_PER_PAGE,
           active: true,
         },
       })

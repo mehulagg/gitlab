@@ -1,13 +1,5 @@
 import mutations from 'ee/boards/stores/mutations';
-import {
-  mockIssue,
-  mockIssue2,
-  mockEpics,
-  mockEpic,
-  mockListsWithModel,
-  mockIssueWithModel,
-  mockIssue2WithModel,
-} from '../mock_data';
+import { mockIssue, mockIssue2, mockEpics, mockEpic, mockListsWithModel } from '../mock_data';
 
 const expectNotImplemented = action => {
   it('is not implemented', () => {
@@ -280,13 +272,13 @@ describe('RESET_EPICS', () => {
 describe('MOVE_ISSUE', () => {
   beforeEach(() => {
     const listIssues = {
-      'gid://gitlab/List/1': [mockListsWithModel.id, mockIssue2WithModel.id],
+      'gid://gitlab/List/1': [mockIssue.id, mockIssue2.id],
       'gid://gitlab/List/2': [],
     };
 
     const issues = {
-      '436': mockIssueWithModel,
-      '437': mockIssue2WithModel,
+      '436': mockIssue,
+      '437': mockIssue2,
     };
 
     state = {
@@ -300,15 +292,15 @@ describe('MOVE_ISSUE', () => {
     expect(state.issues['437'].epic.id).toEqual('gid://gitlab/Epic/40');
 
     mutations.MOVE_ISSUE(state, {
-      originalIssue: mockIssue2WithModel,
+      originalIssue: mockIssue2,
       fromListId: 'gid://gitlab/List/1',
       toListId: 'gid://gitlab/List/2',
       epicId,
     });
 
     const updatedListIssues = {
-      'gid://gitlab/List/1': [mockListsWithModel.id],
-      'gid://gitlab/List/2': [mockIssue2WithModel.id],
+      'gid://gitlab/List/1': [mockIssue.id],
+      'gid://gitlab/List/2': [mockIssue2.id],
     };
 
     expect(state.issuesByListId).toEqual(updatedListIssues);
@@ -319,15 +311,15 @@ describe('MOVE_ISSUE', () => {
     expect(state.issues['437'].epic.id).toEqual('gid://gitlab/Epic/40');
 
     mutations.MOVE_ISSUE(state, {
-      originalIssue: mockIssue2WithModel,
+      originalIssue: mockIssue2,
       fromListId: 'gid://gitlab/List/1',
       toListId: 'gid://gitlab/List/2',
       epicId: null,
     });
 
     const updatedListIssues = {
-      'gid://gitlab/List/1': [mockListsWithModel.id],
-      'gid://gitlab/List/2': [mockIssue2WithModel.id],
+      'gid://gitlab/List/1': [mockIssue.id],
+      'gid://gitlab/List/2': [mockIssue2.id],
     };
 
     expect(state.issuesByListId).toEqual(updatedListIssues);

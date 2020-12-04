@@ -1,12 +1,12 @@
-import Vue from 'vue';
 import { shallowMount } from '@vue/test-utils';
-import { TEST_HOST } from 'helpers/test_constants';
+import Vue from 'vue';
 import component from 'ee/approvals/components/approval_check_rule_popover.vue';
 import {
   VULNERABILITY_CHECK_NAME,
   LICENSE_CHECK_NAME,
   APPROVAL_RULE_CONFIGS,
 } from 'ee/approvals/constants';
+import { TEST_HOST } from 'helpers/test_constants';
 
 describe('Approval Check Popover', () => {
   let wrapper;

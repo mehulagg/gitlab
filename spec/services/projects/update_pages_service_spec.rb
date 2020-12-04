@@ -35,13 +35,11 @@ RSpec.describe Projects::UpdatePagesService do
         build.reload
       end
 
-      describe 'pages artifacts' do
-        it "doesn't delete artifacts after deploying" do
-          expect(execute).to eq(:success)
+      it "doesn't delete artifacts after deploying" do
+        expect(execute).to eq(:success)
 
-          expect(project.pages_metadatum).to be_deployed
-          expect(build.artifacts?).to eq(true)
-        end
+        expect(project.pages_metadatum).to be_deployed
+        expect(build.artifacts?).to eq(true)
       end
 
       it 'succeeds' do
@@ -71,6 +69,27 @@ RSpec.describe Projects::UpdatePagesService do
         expect(project.pages_metadatum.reload.pages_deployment_id).to eq(deployment.id)
       end
 
+      it 'fails if another deployment is in progress' do
+        subject.try_obtain_lease do
+          expect do
+            execute
+          end.to raise_error("Failed to deploy pages - other deployment is in progress")
+
+          expect(GenericCommitStatus.last.description).to eq("Failed to deploy pages - other deployment is in progress")
+        end
+      end
+
+      it 'does not fail if pages_metadata is absent' do
+        project.pages_metadatum.destroy!
+        project.reload
+
+        expect do
+          expect(execute).to eq(:success)
+        end.to change { project.pages_deployments.count }.by(1)
+
+        expect(project.pages_metadatum.reload.pages_deployment).to eq(project.pages_deployments.last)
+      end
+
       context 'when there is an old pages deployment' do
         let!(:old_deployment_from_another_project) { create(:pages_deployment) }
         let!(:old_deployment) { create(:pages_deployment, project: project) }
@@ -92,16 +111,6 @@ RSpec.describe Projects::UpdatePagesService do
 
           expect(PagesDeployment.find_by_id(old_deployment.id)).to be_nil
         end
-      end
-
-      it 'does not create deployment when zip_pages_deployments feature flag is disabled' do
-        stub_feature_flags(zip_pages_deployments: false)
-
-        expect do
-          expect(execute).to eq(:success)
-        end.not_to change { project.pages_deployments.count }
-
-        expect(project.pages_metadatum.reload.pages_deployment_id).to be_nil
       end
 
       it 'limits pages size' do

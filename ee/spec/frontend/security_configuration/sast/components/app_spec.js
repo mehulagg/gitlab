@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlLink, GlLoadingIcon, GlSprintf } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import SASTConfigurationApp from 'ee/security_configuration/sast/components/app.vue';
 import ConfigurationForm from 'ee/security_configuration/sast/components/configuration_form.vue';
 import { makeSastCiConfiguration } from './helpers';

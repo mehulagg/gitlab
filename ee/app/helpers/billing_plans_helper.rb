@@ -16,13 +16,14 @@ module BillingPlansHelper
       namespace_id: group.id,
       namespace_name: group.name,
       plan_upgrade_href: plan_upgrade_url(group, plan),
-      customer_portal_url: "#{EE::SUBSCRIPTIONS_URL}/subscriptions"
+      plan_renew_href: plan_renew_url(group),
+      customer_portal_url: "#{EE::SUBSCRIPTIONS_URL}/subscriptions",
+      billable_seats_href: billable_seats_href(group)
     }
   end
 
   def use_new_purchase_flow?(namespace)
-    namespace.group? &&
-      namespace.actual_plan_name == Plan::FREE
+    namespace.group? && (namespace.actual_plan_name == Plan::FREE || namespace.trial_active?)
   end
 
   def show_contact_sales_button?(purchase_link_action)
@@ -31,7 +32,7 @@ module BillingPlansHelper
   end
 
   def experiment_tracking_data_for_button_click(button_label)
-    return {} unless Gitlab::Experimentation.enabled?(:contact_sales_btn_in_app)
+    return {} unless Gitlab::Experimentation.active?(:contact_sales_btn_in_app)
 
     {
       track: {
@@ -48,9 +49,9 @@ module BillingPlansHelper
     plan.features.sort_by! { |feature| feature.highlight ? 0 : 1 }[0...4]
   end
 
-  def plan_purchase_or_upgrade_url(group, plan, current_plan)
+  def plan_purchase_or_upgrade_url(group, plan)
     if group.upgradable?
-      plan_upgrade_url(group, current_plan)
+      plan_upgrade_url(group, plan)
     else
       plan_purchase_url(group, plan)
     end
@@ -92,5 +93,17 @@ module BillingPlansHelper
     return unless group && plan&.id
 
     "#{EE::SUBSCRIPTIONS_URL}/gitlab/namespaces/#{group.id}/upgrade/#{plan.id}"
+  end
+
+  def plan_renew_url(group)
+    return unless group
+
+    "#{EE::SUBSCRIPTIONS_URL}/gitlab/namespaces/#{group.id}/renew"
+  end
+
+  def billable_seats_href(group)
+    return unless Feature.enabled?(:api_billable_member_list, group)
+
+    group_seat_usage_path(group)
   end
 end

@@ -1,47 +1,25 @@
+import { mapValues } from 'lodash';
 import Tracking from '~/tracking';
-import { getParameterValues } from '~/lib/utils/url_utility';
-import * as types from './mutation_types';
-import { ALL } from './constants';
-import { hasValidSelection } from './utils';
+import { SET_FILTER, SET_HIDE_DISMISSED } from './mutation_types';
+import { DISMISSAL_STATES } from './constants';
+import { convertObjectPropsToSnakeCase } from '~/lib/utils/common_utils';
 
-export const setFilter = ({ commit }, { filterId, optionId, lazy = false }) => {
-  commit(types.SET_FILTER, { filterId, optionId, lazy });
+export const setFilter = ({ commit }, filter) => {
+  // Convert the filter key to snake case and the selected option IDs to lower case. The API
+  // endpoint needs them to be in this format.
+  const convertedFilter = mapValues(convertObjectPropsToSnakeCase(filter), array =>
+    array.map(element => element.toLowerCase()),
+  );
 
-  Tracking.event(document.body.dataset.page, 'set_filter', {
-    label: filterId,
-    value: optionId,
-  });
+  commit(SET_FILTER, convertedFilter);
+
+  const [label, value] = Object.values(filter);
+  Tracking.event(document.body.dataset.page, 'set_filter', { label, value });
 };
 
-export const setFilterOptions = ({ commit, state }, { filterId, options, lazy = false }) => {
-  commit(types.SET_FILTER_OPTIONS, { filterId, options });
+export const setHideDismissed = ({ commit }, isHidden) => {
+  const value = isHidden ? DISMISSAL_STATES.DISMISSED : DISMISSAL_STATES.ALL;
+  commit(SET_HIDE_DISMISSED, value);
 
-  const { selection } = state.filters.find(({ id }) => id === filterId);
-  if (!hasValidSelection({ selection, options })) {
-    commit(types.SET_FILTER, { filterId, optionId: ALL, lazy });
-  }
-};
-
-export const setAllFilters = ({ commit }, payload) => {
-  commit(types.SET_ALL_FILTERS, payload);
-};
-
-export const lockFilter = ({ commit }, payload) => {
-  commit(types.SET_FILTER, payload);
-  commit(types.HIDE_FILTER, payload);
-};
-
-export const setHideDismissedToggleInitialState = ({ commit }) => {
-  const [urlParam] = getParameterValues('scope');
-  const showDismissed = urlParam === 'all';
-  commit(types.SET_TOGGLE_VALUE, { key: 'hideDismissed', value: !showDismissed });
-};
-
-export const setToggleValue = ({ commit }, { key, value }) => {
-  commit(types.SET_TOGGLE_VALUE, { key, value });
-
-  Tracking.event(document.body.dataset.page, 'set_toggle', {
-    label: key,
-    value,
-  });
+  Tracking.event(document.body.dataset.page, 'set_toggle', { label: 'scope', value });
 };

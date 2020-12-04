@@ -14,6 +14,11 @@ export default {
       default: '',
     },
   },
+  computed: {
+    qaSelector() {
+      return `filter_${this.text.toLowerCase().replace(' ', '_')}_dropdown`;
+    },
+  },
 };
 </script>
 
@@ -21,6 +26,7 @@ export default {
   <gl-dropdown-item
     is-check-item
     :is-checked="isChecked"
+    :data-qa-selector="qaSelector"
     @click.native.capture.stop="$emit('click')"
   >
     <slot>

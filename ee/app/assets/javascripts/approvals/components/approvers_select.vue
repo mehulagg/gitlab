@@ -1,11 +1,11 @@
 <script>
 import $ from 'jquery';
-import 'select2/select2';
 import { escape, debounce } from 'lodash';
 import Api from 'ee/api';
 import { __ } from '~/locale';
 import { TYPE_USER, TYPE_GROUP } from '../constants';
 import { renderAvatar } from '~/helpers/avatar_helper';
+import { loadCSSFile } from '~/lib/utils/css_utils';
 
 function addType(type) {
   return items => items.map(obj => Object.assign(obj, { type }));
@@ -97,18 +97,30 @@ export default {
     },
   },
   mounted() {
-    $(this.$refs.input)
-      .select2({
-        placeholder: __('Search users or groups'),
-        minimumInputLength: 0,
-        multiple: true,
-        closeOnSelect: false,
-        formatResult,
-        formatSelection,
-        query: debounce(({ term, callback }) => this.fetchGroupsAndUsers(term).then(callback), 250),
-        id: ({ type, id }) => `${type}${id}`,
+    import(/* webpackChunkName: 'select2' */ 'select2/select2')
+      .then(() => {
+        // eslint-disable-next-line promise/no-nesting
+        loadCSSFile(gon.select2_css_path)
+          .then(() => {
+            $(this.$refs.input)
+              .select2({
+                placeholder: __('Search users or groups'),
+                minimumInputLength: 0,
+                multiple: true,
+                closeOnSelect: false,
+                formatResult,
+                formatSelection,
+                query: debounce(({ term, callback }) => {
+                  // eslint-disable-next-line promise/no-nesting
+                  return this.fetchGroupsAndUsers(term).then(callback);
+                }, 250),
+                id: ({ type, id }) => `${type}${id}`,
+              })
+              .on('change', e => this.onChange(e));
+          })
+          .catch(() => {});
       })
-      .on('change', e => this.onChange(e));
+      .catch(() => {});
   },
   beforeDestroy() {
     $(this.$refs.input).select2('destroy');

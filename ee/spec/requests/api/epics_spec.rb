@@ -7,6 +7,7 @@ RSpec.describe API::Epics do
   let(:group) { create(:group) }
   let(:project) { create(:project, :public, group: group) }
   let(:label) { create(:group_label, group: group) }
+  let(:label2) { create(:group_label, group: group, title: 'label-2') }
   let!(:epic) { create(:labeled_epic, group: group, labels: [label]) }
   let(:params) { nil }
 
@@ -58,6 +59,13 @@ RSpec.describe API::Epics do
 
         expect(Array.wrap(json_response)).to all(include(*extra_date_fields))
       end
+    end
+  end
+
+  shared_context 'with labels' do
+    before do
+      create(:label_link, label: label, target: epic)
+      create(:label_link, label: label2, target: epic)
     end
   end
 
@@ -762,22 +770,47 @@ RSpec.describe API::Epics do
           expect(json_response['labels']).to be_empty
         end
 
-        it 'updates the epic with labels param as array' do
-          stub_const("Gitlab::QueryLimiting::Transaction::THRESHOLD", 110)
+        context 'with labels' do
+          include_context 'with labels'
 
-          params[:labels] = ['label1', 'label2', 'foo, bar', '&,?']
+          it 'updates the epic with labels param as array' do
+            stub_const("Gitlab::QueryLimiting::Transaction::THRESHOLD", 110)
 
-          put api(url, user), params: params
+            params[:labels] = ['label1', 'label2', 'foo, bar', '&,?']
 
-          expect(response).to have_gitlab_http_status(:ok)
-          expect(json_response['title']).to include 'new title'
-          expect(json_response['description']).to include 'new description'
-          expect(json_response['labels']).to include 'label1'
-          expect(json_response['labels']).to include 'label2'
-          expect(json_response['labels']).to include 'foo'
-          expect(json_response['labels']).to include 'bar'
-          expect(json_response['labels']).to include '&'
-          expect(json_response['labels']).to include '?'
+            put api(url, user), params: params
+
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(json_response['title']).to include 'new title'
+            expect(json_response['description']).to include 'new description'
+            expect(json_response['labels']).to include 'label1'
+            expect(json_response['labels']).to include 'label2'
+            expect(json_response['labels']).to include 'foo'
+            expect(json_response['labels']).to include 'bar'
+            expect(json_response['labels']).to include '&'
+            expect(json_response['labels']).to include '?'
+          end
+
+          it 'when adding labels, keeps existing labels and adds new' do
+            put api(url, user), params: { add_labels: '1, 2' }
+
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(json_response['labels']).to contain_exactly(label.title, label2.title, '1', '2')
+          end
+
+          it 'when removing labels, only removes those specified' do
+            put api(url, user), params: { remove_labels: label.title }
+
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(json_response['labels']).to eq([label2.title])
+          end
+
+          it 'when removing all labels, keeps no labels' do
+            put api(url, user), params: { remove_labels: "#{label.title}, #{label2.title}" }
+
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(json_response['labels']).to be_empty
+          end
         end
 
         context 'when state_event is close' do

@@ -1,10 +1,9 @@
 import { shallowMount } from '@vue/test-utils';
 
-import MilestoneTimelineComponent from 'ee/roadmap/components/milestone_timeline.vue';
 import MilestoneItem from 'ee/roadmap/components/milestone_item.vue';
-import { getTimeframeForMonthsView } from 'ee/roadmap/utils/roadmap_utils';
-
+import MilestoneTimelineComponent from 'ee/roadmap/components/milestone_timeline.vue';
 import { PRESET_TYPES } from 'ee/roadmap/constants';
+import { getTimeframeForMonthsView } from 'ee/roadmap/utils/roadmap_utils';
 
 import { mockTimeframeInitialDate, mockMilestone2, mockGroupId } from 'ee_jest/roadmap/mock_data';
 

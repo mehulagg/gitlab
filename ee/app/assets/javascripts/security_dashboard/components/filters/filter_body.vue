@@ -31,7 +31,7 @@ export default {
   },
   computed: {
     firstSelectedOption() {
-      return this.selectedOptions[0] || '-';
+      return this.selectedOptions[0]?.name || '-';
     },
     extraOptionCount() {
       return this.selectedOptions.length - 1;

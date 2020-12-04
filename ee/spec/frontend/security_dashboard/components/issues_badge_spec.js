@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlIcon, GlPopover, GlBadge } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import IssuesBadge from 'ee/security_dashboard/components/issues_badge.vue';
 import IssueLink from 'ee/vulnerabilities/components/issue_link.vue';
 

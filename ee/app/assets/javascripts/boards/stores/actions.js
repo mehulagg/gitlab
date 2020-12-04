@@ -7,7 +7,7 @@ import { historyPushState, parseBoolean } from '~/lib/utils/common_utils';
 import { mergeUrlParams, removeParams } from '~/lib/utils/url_utility';
 import actionsCE from '~/boards/stores/actions';
 import { BoardType, ListType } from '~/boards/constants';
-import { EpicFilterType, GroupByParamType } from '../constants';
+import { EpicFilterType, IterationFilterType, GroupByParamType } from '../constants';
 import boardsStoreEE from './boards_store_ee';
 import * as types from './mutation_types';
 import * as typesCE from '~/boards/stores/mutation_types';
@@ -22,13 +22,13 @@ import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import eventHub from '~/boards/eventhub';
 
 import createGqClient, { fetchPolicies } from '~/lib/graphql';
-import epicsSwimlanesQuery from '../queries/epics_swimlanes.query.graphql';
-import issueSetEpic from '../queries/issue_set_epic.mutation.graphql';
-import issueSetWeight from '../queries/issue_set_weight.mutation.graphql';
-import listsIssuesQuery from '~/boards/queries/lists_issues.query.graphql';
-import issueMoveListMutation from '../queries/issue_move_list.mutation.graphql';
-import listUpdateLimitMetrics from '../queries/list_update_limit_metrics.mutation.graphql';
-import updateBoardEpicUserPreferencesMutation from '../queries/updateBoardEpicUserPreferences.mutation.graphql';
+import epicsSwimlanesQuery from '../graphql/epics_swimlanes.query.graphql';
+import issueSetEpicMutation from '../graphql/issue_set_epic.mutation.graphql';
+import issueSetWeightMutation from '../graphql/issue_set_weight.mutation.graphql';
+import listsIssuesQuery from '~/boards/graphql/lists_issues.query.graphql';
+import issueMoveListMutation from '../graphql/issue_move_list.mutation.graphql';
+import listUpdateLimitMetricsMutation from '../graphql/list_update_limit_metrics.mutation.graphql';
+import updateBoardEpicUserPreferencesMutation from '../graphql/updateBoardEpicUserPreferences.mutation.graphql';
 
 const notImplemented = () => {
   /* eslint-disable-next-line @gitlab/require-i18n-strings */
@@ -79,6 +79,7 @@ export default {
       'epicId',
       'labelName',
       'milestoneTitle',
+      'iterationTitle',
       'releaseTag',
       'search',
       'weight',
@@ -94,6 +95,14 @@ export default {
     } else if (filterParams.epicId) {
       filterParams.epicId = fullEpicId(filterParams.epicId);
     }
+
+    if (
+      filters.iterationId === IterationFilterType.any ||
+      filters.iterationId === IterationFilterType.none
+    ) {
+      filterParams.iterationWildcardId = filters.iterationId.toUpperCase();
+    }
+
     commit(types.SET_FILTERS, filterParams);
   },
 
@@ -189,7 +198,7 @@ export default {
     if (getters.shouldUseGraphQL) {
       return gqlClient
         .mutate({
-          mutation: listUpdateLimitMetrics,
+          mutation: listUpdateLimitMetricsMutation,
           variables: {
             input: {
               listId,
@@ -330,10 +339,10 @@ export default {
 
   setActiveIssueEpic: async ({ getters }, input) => {
     const { data } = await gqlClient.mutate({
-      mutation: issueSetEpic,
+      mutation: issueSetEpicMutation,
       variables: {
         input: {
-          iid: String(getters.getActiveIssue.iid),
+          iid: String(getters.activeIssue.iid),
           epicId: input.epicId,
           projectPath: input.projectPath,
         },
@@ -349,10 +358,10 @@ export default {
 
   setActiveIssueWeight: async ({ commit, getters }, input) => {
     const { data } = await gqlClient.mutate({
-      mutation: issueSetWeight,
+      mutation: issueSetWeightMutation,
       variables: {
         input: {
-          iid: String(getters.getActiveIssue.iid),
+          iid: String(getters.activeIssue.iid),
           weight: input.weight,
           projectPath: input.projectPath,
         },
@@ -364,7 +373,7 @@ export default {
     }
 
     commit(typesCE.UPDATE_ISSUE_BY_ID, {
-      issueId: getters.getActiveIssue.id,
+      issueId: getters.activeIssue.id,
       prop: 'weight',
       value: data.issueSetWeight.issue.weight,
     });

@@ -1,7 +1,7 @@
 ---
 stage: Plan
 group: Project Management
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Issues API
@@ -60,6 +60,9 @@ GET /issues?state=opened
 | `due_date`          | string           | no         | Return issues that have no due date (`0`) or whose due date is this week, this month, between two weeks ago and next month, or which are overdue. Accepts: `0` (no due date), `overdue`, `week`, `month`, `next_month_and_previous_two_weeks`. _(Introduced in [GitLab 13.3](https://gitlab.com/gitlab-org/gitlab/-/issues/233420))_ |
 | `iids[]`            | integer array    | no         | Return only the issues having the given `iid`                                                                                                       |
 | `in`                | string           | no         | Modify the scope of the `search` attribute. `title`, `description`, or a string joining them with comma. Default is `title,description`             |
+| `iteration_id` **(STARTER)** | integer | no         | Return issues assigned to the given iteration ID. `None` returns issues that do not belong to an iteration. `Any` returns issues that belong to an iteration. Mutually exclusive with `iteration_title`. _([Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/118742) in [GitLab Starter](https://about.gitlab.com/pricing/) 13.6)_ |
+| `iteration_title` **(STARTER)** | string | no       | Return issues assigned to the iteration with the given title. Similar to `iteration_id` and mutually exclusive with `iteration_id`. _([Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/118742) in [GitLab Starter](https://about.gitlab.com/pricing/) 13.6)_ |
+| `milestone`         | string           | no         | The milestone title. `None` lists all issues with no milestone. `Any` lists all issues that have an assigned milestone.                             |
 | `labels`            | string           | no         | Comma-separated list of label names, issues must have all labels to be returned. `None` lists all issues with no labels. `Any` lists all issues with at least one label. `No+Label` (Deprecated) lists all issues with no labels. Predefined names are case-insensitive. |
 | `milestone`         | string           | no         | The milestone title. `None` lists all issues with no milestone. `Any` lists all issues that have an assigned milestone.                             |
 | `my_reaction_emoji` | string           | no         | Return issues reacted by the authenticated user by the given `emoji`. `None` returns issues not given a reaction. `Any` returns issues given at least one reaction. _([Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/14016) in GitLab 10.0)_ |
@@ -675,6 +678,7 @@ Example response:
   },
   "subscribed": true,
   "moved_to_id": null,
+  "service_desk_reply_to": "service.desk@gitlab.com",
   "epic_iid": null,
   "epic": null
 }
@@ -1626,6 +1630,61 @@ NOTE: **Note:**
 The `closed_by` attribute was [introduced in GitLab 10.6](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/17042). This value is only present for issues closed after GitLab 10.6 and if the user account that closed
 the issue still exists.
 
+## Promote an issue to an epic **(PREMIUM)**
+
+Promotes an issue to an epic by adding a comment with the `/promote`
+[quick action](../user/project/quick_actions.md).
+
+To learn more about promoting issues to epics, visit [Manage epics](../user/group/epics/manage_epics.md#promote-an-issue-to-an-epic).
+
+```plaintext
+POST /projects/:id/issues/:issue_iid/notes
+```
+
+Supported attributes:
+
+| Attribute   | Type           | Required | Description |
+| :---------- | :------------- | :------- | :---------- |
+| `id`        | integer/string | yes      | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user |
+| `issue_iid` | integer        | yes      | The internal ID of a project's issue |
+| `body`      | String         | yes      | The content of a note. Must contain `/promote` at the start of a new line. |
+
+Example request:
+
+```shell
+curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/5/issues/11/notes?body=Lets%20promote%20this%20to%20an%20epic%0A%0A%2Fpromote
+```
+
+Example response:
+
+```json
+{ 
+   "id":699,
+   "type":null,
+   "body":"Lets promote this to an epic",
+   "attachment":null,
+   "author": {
+      "id":1,
+      "name":"Alexandra Bashirian",
+      "username":"eileen.lowe",
+      "state":"active",
+      "avatar_url":"https://www.gravatar.com/avatar/e64c7d89f26bd1972efa854d13d7dd61?s=80&d=identicon",
+      "web_url":"https://gitlab.example.com/eileen.lowe"
+   },
+   "created_at":"2020-12-03T12:27:17.844Z",
+   "updated_at":"2020-12-03T12:27:17.844Z",
+   "system":false,
+   "noteable_id":461,
+   "noteable_type":"Issue",
+   "resolvable":false,
+   "confidential":false,
+   "noteable_iid":33,
+   "commands_changes": {
+      "promote_to_epic":true
+   }
+}
+```
+
 ## Set a time estimate for an issue
 
 Sets an estimated time of work for this issue.
@@ -1941,7 +2000,7 @@ GET /projects/:id/issues/:issue_iid/closed_by
 
 | Attribute   | Type           | Required | Description                        |
 | ----------- | ---------------| -------- | ---------------------------------- |
-| `id`        | integer/string | yes      | The ID or [URL-encoded path of the project](./README.md#namespaced-path-encoding) owned by the authenticated user |
+| `id`        | integer/string | yes      | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user |
 | `issue_iid` | integer        | yes      | The internal ID of a project issue |
 
 ```shell
@@ -2081,4 +2140,74 @@ Example response:
 ## List issue state events
 
 To track which state was set, who did it, and when it happened, check out
-[Resource state events API](./resource_state_events.md#issues).
+[Resource state events API](resource_state_events.md#issues).
+
+## Upload metric image
+
+Available only for Incident issues.
+
+```plaintext
+POST /projects/:id/issues/:issue_iid/metric_images
+```
+
+| Attribute   | Type    | Required | Description                          |
+|-------------|---------|----------|--------------------------------------|
+| `id`        | integer/string | yes      | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user  |
+| `issue_iid` | integer | yes      | The internal ID of a project's issue |
+| `file` | file | yes      | The image file to be uploaded |
+| `url` | string | no      | The URL to view more metric info |
+
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" --form 'file=@/path/to/file.png' \
+--form 'url=http://example.com' "https://gitlab.example.com/api/v4/projects/5/issues/93/metric_images"
+```
+
+Example response:
+
+```json
+{
+    "id": 23,
+    "created_at": "2020-11-13T00:06:18.084Z",
+    "filename": "file.png",
+    "file_path": "/uploads/-/system/issuable_metric_image/file/23/file.png",
+    "url": "http://example.com"
+}
+```
+
+## List metric images
+
+Available only for Incident issues.
+
+```plaintext
+GET /projects/:id/issues/:issue_iid/metric_images
+```
+
+| Attribute   | Type    | Required | Description                          |
+|-------------|---------|----------|--------------------------------------|
+| `id`        | integer/string | yes      | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user  |
+| `issue_iid` | integer | yes      | The internal ID of a project's issue |
+
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/issues/93/metric_images"
+```
+
+Example response:
+
+```json
+[
+    {
+        "id": 17,
+        "created_at": "2020-11-12T20:07:58.156Z",
+        "filename": "sample_2054",
+        "file_path": "/uploads/-/system/issuable_metric_image/file/17/sample_2054.png",
+        "url": "example.com/metric"
+    },
+    {
+        "id": 18,
+        "created_at": "2020-11-12T20:14:26.441Z",
+        "filename": "sample_2054",
+        "file_path": "/uploads/-/system/issuable_metric_image/file/18/sample_2054.png",
+        "url": "example.com/metric"
+    }
+]
+```

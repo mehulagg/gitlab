@@ -1,7 +1,7 @@
 ---
 stage: none
 group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Code Review Guidelines
@@ -104,13 +104,13 @@ with [domain expertise](#domain-experts).
    - If the license used by the new library hasn't been approved for use in
      GitLab, the license must be **approved by a [legal department member](https://about.gitlab.com/handbook/legal/)**.
      More information about license compatiblity can be found in our
-     [GitLab Licensing and Compatibility documentation](./licensing.md).
+     [GitLab Licensing and Compatibility documentation](licensing.md).
 1. If your merge request includes adding a new UI/UX paradigm (*1*), it must be
    **approved by a [UX lead](https://about.gitlab.com/company/team/)**.
 1. If your merge request includes a new dependency or a filesystem change, it must be
    **approved by a [Distribution team member](https://about.gitlab.com/company/team/)**. See how to work with the [Distribution team](https://about.gitlab.com/handbook/engineering/development/enablement/distribution/#how-to-work-with-distribution) for more details.
 1. If your merge request includes documentation changes, it must be **approved
-   by a [Technical writer](https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers)**, based on
+   by a [Technical writer](https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments)**, based on
    the appropriate [product category](https://about.gitlab.com/handbook/product/product-categories/).
 1. If your merge request includes end-to-end **and** non-end-to-end changes (*3*), it must be **approved
    by a [Software Engineer in Test](https://about.gitlab.com/handbook/engineering/quality/#individual-contributors)**.
@@ -390,8 +390,7 @@ When ready to merge:
 - When you set the MR to "Merge When Pipeline Succeeds", you should take over
   subsequent revisions for anything that would be spotted after that.
 
-NOTE: **Note:**
-Thanks to "Pipeline for Merged Results", authors won't have to rebase their
+Thanks to **Pipeline for Merged Results**, authors won't have to rebase their
 branch as frequently anymore (only when there are conflicts) since the Merge
 Results Pipeline will already incorporate the latest changes from `master`.
 This results in faster review/merge cycles since maintainers don't have to ask

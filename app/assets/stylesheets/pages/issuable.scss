@@ -1,19 +1,16 @@
 .issuable-warning-icon {
   background-color: $orange-50;
   border-radius: $border-radius-default;
+  color: $orange-600;
   width: $issuable-warning-size;
   height: $issuable-warning-size;
   text-align: center;
   margin-right: $issuable-warning-icon-margin;
   line-height: $gl-line-height-24;
-
-  .icon {
-    fill: $orange-600;
-    vertical-align: text-bottom;
-  }
 }
 
 .limit-container-width {
+  .flash-container,
   .detail-page-header,
   .page-content-header,
   .commit-box,
@@ -116,7 +113,7 @@
     position: absolute;
     bottom: 0;
     right: 0;
-    text-shadow: -1px -1px 2px $white, 1px -1px 2px $white, -1px 1px 2px $white, 1px 1px 2px $white;
+    filter: drop-shadow(0 0 0.5px $white) drop-shadow(0 0 1px $white) drop-shadow(0 0 2px $white);
   }
 }
 
@@ -201,10 +198,6 @@
 
     &:last-child {
       border: 0;
-    }
-
-    .select2-container span {
-      margin-top: 0;
     }
 
     &.assignee {
@@ -399,6 +392,13 @@
       text-align: center;
     }
 
+    .merge-icon {
+      height: 12px;
+      width: 12px;
+      bottom: -5px;
+      right: 4px;
+    }
+
     .sidebar-collapsed-icon {
       display: flex;
       flex-direction: column;
@@ -409,7 +409,7 @@
       text-align: center;
       color: $gl-text-color-secondary;
 
-      svg {
+      > svg {
         fill: $gl-text-color-secondary;
       }
 
@@ -417,7 +417,7 @@
       &:hover .todo-undone {
         color: $gl-text-color;
 
-        svg {
+        > svg {
           fill: $gl-text-color;
         }
       }
@@ -487,10 +487,6 @@
 
     .issuable-header-btn {
       display: none;
-    }
-
-    .merge-icon {
-      font-size: 10px;
     }
 
     .multiple-users {
@@ -701,10 +697,6 @@
 
 .issuable-list {
   li {
-    .issue-box {
-      display: flex;
-    }
-
     .issuable-info-container {
       flex: 1;
       display: flex;
@@ -895,29 +887,6 @@
         display: none;
       }
     }
-  }
-}
-
-.issuable-close-button,
-.issuable-close-toggle {
-  @include transition(border-color, color);
-}
-
-.issuable-close-dropdown {
-  .dropdown-menu {
-    min-width: 270px;
-    left: auto;
-    right: 0;
-  }
-
-  .description {
-    .text {
-      margin: 0;
-    }
-  }
-
-  .dropdown-toggle > .icon {
-    margin: 0 3px;
   }
 }
 

@@ -64,7 +64,7 @@ module Gitlab
         # - respond_to?(:gitlab)
         # - respond_to?(:gitlab, true)
         gitlab
-      rescue NoMethodError
+      rescue NameError
         nil
       end
 
@@ -190,7 +190,7 @@ module Gitlab
         %r{\A(ee/)?vendor/} => :backend,
         %r{\A(Gemfile|Gemfile.lock|Rakefile)\z} => :backend,
         %r{\A[A-Z_]+_VERSION\z} => :backend,
-        %r{\A\.rubocop(_todo)?\.yml\z} => :backend,
+        %r{\A\.rubocop((_manual)?_todo)?\.yml\z} => :backend,
         %r{\Afile_hooks/} => :backend,
 
         %r{\A(ee/)?qa/} => :qa,
@@ -267,6 +267,10 @@ module Gitlab
 
       def has_database_scoped_labels?(current_mr_labels)
         current_mr_labels.any? { |label| label.start_with?('database::') }
+      end
+
+      def has_ci_changes?
+        changed_files(%r{\A(\.gitlab-ci\.yml|\.gitlab/ci/)}).any?
       end
     end
   end

@@ -1,7 +1,7 @@
 ---
-stage: none
-group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+stage: Configure
+group: Configure
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Auto DevOps
@@ -38,18 +38,21 @@ For requirements, see [Requirements for Auto DevOps](requirements.md) for more i
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/41729) in GitLab 11.3.
 
-Auto DevOps is enabled by default for all projects and attempts to run on all pipelines
-in each project. An instance administrator can enable or disable this default in the
+On self-managed instances, Auto DevOps is enabled by default for all projects.
+It attempts to run on all pipelines in each project. An instance administrator can
+enable or disable this default in the
 [Auto DevOps settings](../../user/admin_area/settings/continuous_integration.md#auto-devops).
 Auto DevOps automatically disables in individual projects on their first pipeline failure,
-if it has not been explicitly enabled for the project.
+
+NOTE: **Note:**
+Auto DevOps is not enabled by default on GitLab.com.
 
 Since [GitLab 12.7](https://gitlab.com/gitlab-org/gitlab/-/issues/26655), Auto DevOps
 runs on pipelines automatically only if a [`Dockerfile` or matching buildpack](stages.md#auto-build)
 exists.
 
 If a [CI/CD configuration file](../../ci/yaml/README.md) is present in the project,
-it will continue to be used, whether or not Auto DevOps is enabled.
+it continues to be used, whether or not Auto DevOps is enabled.
 
 ## Quick start
 
@@ -146,7 +149,7 @@ any of the following places:
 The base domain variable `KUBE_INGRESS_BASE_DOMAIN` follows the same order of precedence
 as other environment [variables](../../ci/variables/README.md#priority-of-environment-variables).
 If the CI/CD variable is not set and the cluster setting is left blank, the instance-wide **Auto DevOps domain**
-setting will be used if set.
+setting is used if set.
 
 TIP: **Tip:**
 If you use the [GitLab managed app for Ingress](../../user/clusters/applications.md#ingress),
@@ -166,7 +169,7 @@ a base domain of `example.com`, you'd need a DNS entry like:
 ```
 
 In this case, the deployed applications are served from `example.com`, and `1.2.3.4`
-is the IP address of your load balancer; generally NGINX ([see requirements](#requirements)).
+is the IP address of your load balancer; generally NGINX ([see requirements](requirements.md)).
 Setting up the DNS record is beyond the scope of this document; check with your
 DNS provider for information.
 
@@ -183,7 +186,7 @@ See [Auto DevOps requirements for Amazon ECS](requirements.md#auto-devops-requir
 
 ## Enabling/Disabling Auto DevOps
 
-When first using Auto DevOps, review the [requirements](#requirements) to ensure
+When first using Auto DevOps, review the [requirements](requirements.md) to ensure
 all the necessary components to make full use of Auto DevOps are available. First-time
 users should follow the [quick start guide](quick_start_guide.md).
 
@@ -236,7 +239,7 @@ Auto DevOps at the group and project level, respectively.
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/38542) in GitLab 11.0.
 
-You can change the deployment strategy used by Auto DevOps by going to your
+You can change the deployment strategy used by Auto DevOps by visiting your
 project's **Settings > CI/CD > Auto DevOps**. The following options
 are available:
 
@@ -372,7 +375,7 @@ To fix this issue, you must either:
 
 ### Failure to create a Kubernetes namespace
 
-Auto Deploy will fail if GitLab can't create a Kubernetes namespace and
+Auto Deploy fails if GitLab can't create a Kubernetes namespace and
 service account for your project. For help debugging this issue, see
 [Troubleshooting failed deployment jobs](../../user/project/clusters/index.md#troubleshooting).
 
@@ -476,7 +479,7 @@ that works for this problem. Follow these steps to use the tool in Auto DevOps:
 ### Error: error initializing: Looks like "https://kubernetes-charts.storage.googleapis.com" is not a valid chart repository or cannot be reached
 
 As [announced in the official CNCF blogpost](https://www.cncf.io/blog/2020/10/07/important-reminder-for-all-helm-users-stable-incubator-repos-are-deprecated-and-all-images-are-changing-location/),
-the stable Helm chart repository will be deprecated and removed on November 13th, 2020.
+the stable Helm chart repository was deprecated and removed on November 13th, 2020.
 You may encounter this error after that date.
 
 Some GitLab features had dependencies on the stable chart. To mitigate the impact, we changed them
@@ -495,7 +498,7 @@ include:
   image: "registry.gitlab.com/gitlab-org/cluster-integration/auto-deploy-image:v1.0.5"
 ```
 
-Keep in mind that this approach will eventually stop working when the stable repository is removed,
+Keep in mind that this approach stops working when the stable repository is removed,
 so you must eventually fix your custom chart.
 
 To fix your custom chart:
@@ -521,6 +524,55 @@ To fix your custom chart:
 
 You can find more information in
 [issue #263778, "Migrate PostgreSQL from stable Helm repo"](https://gitlab.com/gitlab-org/gitlab/-/issues/263778).
+
+### Error: release .... failed: timed out waiting for the condition
+
+When getting started with Auto DevOps, you may encounter this error when first
+deploying your application:
+
+```plaintext
+INSTALL FAILED
+PURGING CHART
+Error: release staging failed: timed out waiting for the condition
+```
+
+This is most likely caused by a failed liveness (or readiness) probe attempted
+during the deployment process. By default, these probes are run against the root
+page of the deployed application on port 5000. If your application isn't configured
+to serve anything at the root page, or is configured to run on a specific port
+*other* than 5000, this check fails.
+
+If it fails, you should see these failures within the events for the relevant
+Kubernetes namespace. These events look like the following example:
+
+```plaintext
+LAST SEEN   TYPE      REASON                   OBJECT                                            MESSAGE
+3m20s       Warning   Unhealthy                pod/staging-85db88dcb6-rxd6g                      Readiness probe failed: Get http://10.192.0.6:5000/: dial tcp 10.192.0.6:5000: connect: connection refused
+3m32s       Warning   Unhealthy                pod/staging-85db88dcb6-rxd6g                      Liveness probe failed: Get http://10.192.0.6:5000/: dial tcp 10.192.0.6:5000: connect: connection refused
+```
+
+To change the port used for the liveness checks, pass
+[custom values to the Helm chart](customize.md#customize-values-for-helm-chart)
+used by Auto DevOps:
+
+1. Create a directory and file at the root of your repository named `.gitlab/auto-deploy-values.yaml`.
+
+1. Populate the file with the following content, replacing the port values with
+   the actual port number your application is configured to use:
+
+   ```yaml
+   service:
+     internalPort: <port_value>
+     externalPort: <port_value>
+   ```
+
+1. Commit your changes.
+
+After committing your changes, subsequent probes should use the newly-defined ports.
+The page that's probed can also be changed by overriding the `livenessProbe.path`
+and `readinessProbe.path` values (shown in the
+[default `values.yaml`](https://gitlab.com/gitlab-org/cluster-integration/auto-deploy-image/-/blob/master/assets/auto-deploy-app/values.yaml)
+file) in the same fashion.
 
 ## Development guides
 

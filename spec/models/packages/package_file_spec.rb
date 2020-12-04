@@ -5,6 +5,8 @@ RSpec.describe Packages::PackageFile, type: :model do
   describe 'relationships' do
     it { is_expected.to belong_to(:package) }
     it { is_expected.to have_one(:conan_file_metadatum) }
+    it { is_expected.to have_many(:package_file_build_infos).inverse_of(:package_file) }
+    it { is_expected.to have_many(:pipelines).through(:package_file_build_infos) }
   end
 
   describe 'validations' do
@@ -59,14 +61,14 @@ RSpec.describe Packages::PackageFile, type: :model do
     end
   end
 
-  describe '#update_file_metadata callback' do
+  describe '#update_file_store callback' do
     let_it_be(:package_file) { build(:package_file, :nuget, size: nil) }
 
     subject { package_file.save! }
 
     it 'updates metadata columns' do
       expect(package_file)
-        .to receive(:update_file_metadata)
+        .to receive(:update_file_store)
         .and_call_original
 
       # This expectation uses a stub because we can no longer test a change from

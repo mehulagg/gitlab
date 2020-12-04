@@ -33,7 +33,7 @@ describe('Filtered Search Manager (EE)', () => {
             ${FilteredSearchSpecHelper.createInputHTML()}
           </ul>
           <button class="clear-search" type="button">
-            <i class="fa fa-times"></i>
+            <svg class="s16 clear-search-icon" data-testid="close-icon"><use xlink:href="icons.svg#close" /></svg>
           </button>
         </form>
       </div>

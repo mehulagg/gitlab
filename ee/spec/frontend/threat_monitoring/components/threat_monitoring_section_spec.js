@@ -1,9 +1,9 @@
 import { shallowMount } from '@vue/test-utils';
-import createStore from 'ee/threat_monitoring/store';
-import ThreatMonitoringSection from 'ee/threat_monitoring/components/threat_monitoring_section.vue';
 import LoadingSkeleton from 'ee/threat_monitoring/components/loading_skeleton.vue';
 import StatisticsHistory from 'ee/threat_monitoring/components/statistics_history.vue';
 import StatisticsSummary from 'ee/threat_monitoring/components/statistics_summary.vue';
+import ThreatMonitoringSection from 'ee/threat_monitoring/components/threat_monitoring_section.vue';
+import createStore from 'ee/threat_monitoring/store';
 
 import { mockNominalHistory, mockAnomalousHistory } from '../mock_data';
 

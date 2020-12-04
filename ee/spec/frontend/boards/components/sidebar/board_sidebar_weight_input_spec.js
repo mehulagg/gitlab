@@ -1,9 +1,9 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlFormInput, GlForm } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import BoardSidebarWeightInput from 'ee/boards/components/sidebar/board_sidebar_weight_input.vue';
 import BoardEditableItem from '~/boards/components/sidebar/board_editable_item.vue';
-import createFlash from '~/flash';
 import { createStore } from '~/boards/stores';
+import createFlash from '~/flash';
 
 const TEST_WEIGHT = 1;
 const TEST_ISSUE = { id: 'gid://gitlab/Issue/1', iid: 9, weight: 0, referencePath: 'h/b#2' };

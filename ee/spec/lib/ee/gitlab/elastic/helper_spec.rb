@@ -53,6 +53,18 @@ RSpec.describe Gitlab::Elastic::Helper do
     end
   end
 
+  describe '#create_migrations_index' do
+    after do
+      helper.delete_index(index_name: helper.migrations_index_name)
+    end
+
+    it 'creates the index' do
+      expect { helper.create_migrations_index }
+             .to change { helper.index_exists?(index_name: helper.migrations_index_name) }
+             .from(false).to(true)
+    end
+  end
+
   describe '#create_empty_index' do
     context 'with an empty cluster' do
       context 'with alias and index' do

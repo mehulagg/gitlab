@@ -1,6 +1,3 @@
-import fromYaml from 'ee/threat_monitoring/components/policy_editor/lib/from_yaml';
-import toYaml from 'ee/threat_monitoring/components/policy_editor/lib/to_yaml';
-import { buildRule } from 'ee/threat_monitoring/components/policy_editor/lib/rules';
 import {
   EndpointMatchModeAny,
   EndpointMatchModeLabel,
@@ -14,6 +11,9 @@ import {
   RuleTypeFQDN,
   EntityTypes,
 } from 'ee/threat_monitoring/components/policy_editor/constants';
+import fromYaml from 'ee/threat_monitoring/components/policy_editor/lib/from_yaml';
+import { buildRule } from 'ee/threat_monitoring/components/policy_editor/lib/rules';
+import toYaml from 'ee/threat_monitoring/components/policy_editor/lib/to_yaml';
 
 describe('fromYaml', () => {
   let policy;

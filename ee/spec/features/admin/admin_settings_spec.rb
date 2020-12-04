@@ -7,7 +7,9 @@ RSpec.describe 'Admin updates EE-only settings' do
 
   before do
     stub_env('IN_MEMORY_APPLICATION_SETTINGS', 'false')
-    sign_in(create(:admin))
+    admin = create(:admin)
+    sign_in(admin)
+    gitlab_enable_admin_mode_sign_in(admin)
     allow(License).to receive(:feature_available?).and_return(true)
     allow(Gitlab::Elastic::Helper.default).to receive(:index_exists?).and_return(true)
   end
@@ -257,7 +259,7 @@ RSpec.describe 'Admin updates EE-only settings' do
 
     it 'loads seat link payload on click', :js do
       page.within('#js-seat-link-settings') do
-        expected_payload_content = /(?=.*"date")(?=.*"license_key")(?=.*"max_historical_user_count")(?=.*"active_users")/m
+        expected_payload_content = /(?=.*"date")(?=.*"timestamp")(?=.*"license_key")(?=.*"max_historical_user_count")(?=.*"active_users")/m
 
         expect(page).not_to have_content expected_payload_content
 

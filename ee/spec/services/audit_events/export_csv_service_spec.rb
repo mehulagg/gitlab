@@ -29,16 +29,9 @@ RSpec.describe AuditEvents::ExportCsvService do
     }
   end
 
-  subject { described_class.new(params) }
+  let(:export_csv_service) { described_class.new(params) }
 
-  it 'invokes the CSV builder with correct limit' do
-    csv_builder = instance_spy(CsvBuilder)
-    allow(CsvBuilder).to receive(:new).and_return(csv_builder)
-
-    subject.csv_data
-
-    expect(csv_builder).to have_received(:render).with(15.megabytes)
-  end
+  subject(:csv) { CSV.parse(export_csv_service.csv_data.to_a.join, headers: true) }
 
   it 'includes the appropriate headers' do
     expect(csv.headers).to eq([
@@ -97,9 +90,5 @@ RSpec.describe AuditEvents::ExportCsvService do
     specify 'Created At (UTC)' do
       expect(csv[0]['Created At (UTC)']).to eq('2020-02-20T12:00:00Z')
     end
-  end
-
-  def csv
-    CSV.parse(subject.csv_data, headers: true)
   end
 end

@@ -1,15 +1,17 @@
 import { mount } from '@vue/test-utils';
 import WeightSelect from 'ee/boards/components/weight_select.vue';
-import { GlButton, GlDeprecatedDropdown } from '@gitlab/ui';
+import { GlButton, GlDropdown, GlDropdownItem } from '@gitlab/ui';
 
 describe('WeightSelect', () => {
   let wrapper;
 
   const editButton = () => wrapper.find(GlButton);
   const valueContainer = () => wrapper.find('.value');
-  const weightDropdown = () => wrapper.find(GlDeprecatedDropdown);
-  const weightSelect = () => wrapper.find({ ref: 'weight-select' });
-
+  const weightDropdown = () => wrapper.find(GlDropdown);
+  const getWeightItemAtIndex = index =>
+    weightDropdown()
+      .findAll(GlDropdownItem)
+      .at(index);
   const defaultProps = {
     weights: ['Any', 'None', 0, 1, 2, 3],
     board: {
@@ -81,15 +83,16 @@ describe('WeightSelect', () => {
 
       describe('and a weight has been selected', () => {
         beforeEach(() => {
-          weightSelect().trigger('click');
+          editButton().trigger('click');
+          getWeightItemAtIndex(0).vm.$emit('click');
         });
 
         it('shows the value text', () => {
-          expect(valueContainer().isVisible()).toBeTruthy();
+          expect(valueContainer().isVisible()).toBe(true);
         });
 
         it('hides the weight dropdown', () => {
-          expect(weightDropdown().isVisible()).toBeFalsy();
+          expect(weightDropdown().isVisible()).toBe(false);
         });
       });
     });

@@ -49,6 +49,57 @@ RSpec.describe SearchHelper do
         expect(options[:data][:'multiple-assignees']).to eq('true')
       end
     end
+
+    describe 'iterations-endpoint' do
+      let_it_be(:group, refind: true) { create(:group) }
+      let_it_be(:project_under_group, refind: true) { create(:project, group: group) }
+
+      context 'when iterations are available' do
+        before do
+          stub_licensed_features(iterations: true)
+        end
+
+        it 'includes iteration endpoint in project context' do
+          @project = project_under_group
+
+          expect(options[:data]['iterations-endpoint']).to eq(expose_path(api_v4_projects_iterations_path(id: @project.id)))
+        end
+
+        it 'includes iteration endpoint in group context' do
+          @group = group
+
+          expect(options[:data]['iterations-endpoint']).to eq(expose_path(api_v4_groups_iterations_path(id: @group.id)))
+        end
+
+        it 'does not include iterations endpoint for projects under a namespace' do
+          @project = create(:project, namespace: create(:namespace))
+
+          expect(options[:data]['iterations-endpoint']).to be(nil)
+        end
+
+        it 'does not include iterations endpoint in dashboard context' do
+          expect(options[:data]['iterations-endpoint']).to be(nil)
+        end
+      end
+
+      context 'when iterations are not available' do
+        before do
+          stub_licensed_features(iterations: false)
+        end
+
+        it 'does not include iterations endpoint in project context' do
+          @project = project_under_group
+
+          expect(options[:data]['iterations-endpoint']).to be(nil)
+        end
+
+        it 'does not include iterations endpoint in group context' do
+          @group = group
+
+          expect(options[:data]['iterations-endpoint']).to be(nil)
+        end
+      end
+    end
   end
 
   describe 'search_autocomplete_opts' do
@@ -148,7 +199,7 @@ RSpec.describe SearchHelper do
     end
   end
 
-  describe '#highlight_and_truncate_issue' do
+  describe '#highlight_and_truncate_issuable' do
     let(:description) { 'hello world' }
     let(:issue) { create(:issue, description: description) }
     let(:user) { create(:user) }
@@ -160,7 +211,7 @@ RSpec.describe SearchHelper do
     end
 
     # Elasticsearch returns Elasticsearch::Model::HashWrapper class for the highlighting
-    subject { highlight_and_truncate_issue(issue, 'test', Elasticsearch::Model::HashWrapper.new(search_highlight)) }
+    subject { highlight_and_truncate_issuable(issue, 'test', Elasticsearch::Model::HashWrapper.new(search_highlight)) }
 
     context 'when description is not present' do
       let(:description) { nil }
@@ -176,11 +227,11 @@ RSpec.describe SearchHelper do
       using RSpec::Parameterized::TableSyntax
 
       where(:description, :search_highlight, :expected) do
-        'test'                                                                 | { 1 => { description: ['gitlabelasticsearch→test←gitlabelasticsearch'] } } | "<span class='gl-text-black-normal gl-font-weight-bold'>test</span>"
-        '<span style="color: blue;">this test should not be blue</span>'       | { 1 => { description: ['<span style="color: blue;">this gitlabelasticsearch→test←gitlabelasticsearch should not be blue</span>'] } } | "<span>this <span class='gl-text-black-normal gl-font-weight-bold'>test</span> should not be blue</span>"
-        '<a href="#" onclick="alert(\'XSS\')">Click Me test</a>'               | { 1 => { description: ['<a href="#" onclick="alert(\'XSS\')">Click Me gitlabelasticsearch→test←gitlabelasticsearch</a>'] } } | "<a href='#'>Click Me <span class='gl-text-black-normal gl-font-weight-bold'>test</span></a>"
-        '<script type="text/javascript">alert(\'Another XSS\');</script> test' | { 1 => { description: ['<script type="text/javascript">alert(\'Another XSS\');</script> gitlabelasticsearch→test←gitlabelasticsearch'] } } | "alert(&apos;Another XSS&apos;); <span class='gl-text-black-normal gl-font-weight-bold'>test</span>"
-        'Lorem test ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec.' | { 1 => { description: ['Lorem gitlabelasticsearch→test←gitlabelasticsearch ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec.'] } } | "Lorem <span class='gl-text-black-normal gl-font-weight-bold'>test</span> ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Don..."
+        'test'                                                                 | { 1 => { description: ['gitlabelasticsearch→test←gitlabelasticsearch'] } } | "<span class='gl-text-gray-900 gl-font-weight-bold'>test</span>"
+        '<span style="color: blue;">this test should not be blue</span>'       | { 1 => { description: ['<span style="color: blue;">this gitlabelasticsearch→test←gitlabelasticsearch should not be blue</span>'] } } | "<span>this <span class='gl-text-gray-900 gl-font-weight-bold'>test</span> should not be blue</span>"
+        '<a href="#" onclick="alert(\'XSS\')">Click Me test</a>'               | { 1 => { description: ['<a href="#" onclick="alert(\'XSS\')">Click Me gitlabelasticsearch→test←gitlabelasticsearch</a>'] } } | "<a href='#'>Click Me <span class='gl-text-gray-900 gl-font-weight-bold'>test</span></a>"
+        '<script type="text/javascript">alert(\'Another XSS\');</script> test' | { 1 => { description: ['<script type="text/javascript">alert(\'Another XSS\');</script> gitlabelasticsearch→test←gitlabelasticsearch'] } } | "alert(&apos;Another XSS&apos;); <span class='gl-text-gray-900 gl-font-weight-bold'>test</span>"
+        'Lorem test ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec.' | { 1 => { description: ['Lorem gitlabelasticsearch→test←gitlabelasticsearch ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec.'] } } | "Lorem <span class='gl-text-gray-900 gl-font-weight-bold'>test</span> ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Don..."
       end
 
       with_them do

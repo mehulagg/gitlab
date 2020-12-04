@@ -1,7 +1,7 @@
 ---
 stage: Package
 group: Package
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Container Registry API
@@ -280,7 +280,7 @@ This action doesn't delete blobs. To delete them and recycle disk space,
 Delete registry repository tags in bulk based on given criteria.
 
 <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
-For an overview, see [Utilize the Container Registry API to delete all tags except *](https://youtu.be/Hi19bKe_xsg).
+For an overview, see [Use the Container Registry API to delete all tags except *](https://youtu.be/Hi19bKe_xsg).
 
 ```plaintext
 DELETE /projects/:id/registry/repositories/:repository_id/tags

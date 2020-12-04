@@ -52,7 +52,7 @@ FactoryBot.define do
 
       after(:build) do |merge_request, evaluator|
         metrics = merge_request.build_metrics
-        metrics.merged_at = 1.week.ago
+        metrics.merged_at = 1.week.from_now
         metrics.merged_by = evaluator.merged_by
         metrics.pipeline = create(:ci_empty_pipeline)
       end
@@ -237,7 +237,7 @@ FactoryBot.define do
       target_branch { 'pages-deploy-target' }
 
       transient do
-        deployment { create(:deployment, :review_app) }
+        deployment { association(:deployment, :review_app) }
       end
 
       after(:build) do |merge_request, evaluator|

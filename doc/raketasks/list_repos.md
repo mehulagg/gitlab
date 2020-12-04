@@ -1,7 +1,7 @@
 ---
 stage: none
 group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Listing repository directories **(CORE ONLY)**
@@ -19,7 +19,6 @@ cd /home/git/gitlab
 sudo -u git -H bundle exec rake gitlab:list_repos RAILS_ENV=production
 ```
 
-NOTE: **Note:**
 The results use the default ordering of the GitLab Rails application.
 
 ## Limit search results

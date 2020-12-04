@@ -1,7 +1,7 @@
 ---
 stage: Enablement
 group: Geo
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: howto
 ---
 
@@ -35,7 +35,7 @@ to help identify if something is wrong:
 - Is the node's secondary tracking database connected?
 - Is the node's secondary tracking database up-to-date?
 
-![Geo health check](img/geo_node_healthcheck.png)
+![Geo health check](img/geo_node_dashboard.png)
 
 For information on how to resolve common errors reported from the UI, see
 [Fixing Common Errors](#fixing-common-errors).
@@ -720,7 +720,8 @@ GitLab cannot find or doesn't have permission to access the `database_geo.yml` c
 In an Omnibus GitLab installation, the file should be in `/var/opt/gitlab/gitlab-rails/etc`.
 If it doesn't exist or inadvertent changes have been made to it, run `sudo gitlab-ctl reconfigure` to restore it to its correct state.
 
-If this path is mounted on a remote volume, please check your volume configuration and that it has correct permissions.
+If this path is mounted on a remote volume, ensure your volume configuration
+has the correct permissions.
 
 ### An existing tracking database cannot be reused
 

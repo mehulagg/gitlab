@@ -1,10 +1,10 @@
 ---
 stage: none
 group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# DevOps Report
+# DevOps Report **(CORE)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/30469) in GitLab 9.3.
 > - [Renamed from Conversational Development Index](https://gitlab.com/gitlab-org/gitlab/-/issues/20976) in GitLab 12.6.
@@ -21,7 +21,7 @@ To see DevOps Report, go to **Admin Area > Analytics > DevOps Report**.
 ## DevOps Score
 
 DevOps Score displays the usage of GitLab's major features on your instance over
-the last 30 days, averaged over the number of active users in that time period. It also
+the last 30 days, averaged over the number of billable users in that time period. It also
 provides a Lead score per feature, which is calculated based on GitLab's analysis
 of top-performing instances based on [usage ping data](../settings/usage_statistics.md#usage-ping) that GitLab has
 collected. Your score is compared to the lead score of each feature and then expressed as a percentage at the bottom of said feature.

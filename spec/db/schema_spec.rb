@@ -86,7 +86,7 @@ RSpec.describe 'Database schema' do
     users_star_projects: %w[user_id],
     vulnerability_identifiers: %w[external_id],
     vulnerability_scanners: %w[external_id],
-    web_hooks: %w[service_id group_id]
+    web_hooks: %w[group_id]
   }.with_indifferent_access.freeze
 
   context 'for table' do
@@ -184,6 +184,7 @@ RSpec.describe 'Database schema' do
     "ApplicationSetting" => %w[repository_storages_weighted],
     "AlertManagement::Alert" => %w[payload],
     "Ci::BuildMetadata" => %w[config_options config_variables],
+    "ExperimentUser" => %w[context],
     "Geo::Event" => %w[payload],
     "GeoNodeStatus" => %w[status],
     "Operations::FeatureFlagScope" => %w[strategies],

@@ -1,10 +1,10 @@
 import MockAdapter from 'axios-mock-adapter';
 
-import testAction from 'helpers/vuex_action_helper';
-import { TEST_HOST } from 'helpers/test_constants';
-
-import * as actions from 'ee/insights/stores/modules/insights/actions';
 import { CHART_TYPES } from 'ee/insights/constants';
+import * as actions from 'ee/insights/stores/modules/insights/actions';
+import { TEST_HOST } from 'helpers/test_constants';
+import testAction from 'helpers/vuex_action_helper';
+
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 

@@ -1,8 +1,8 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlLink, GlIntersperse, GlPopover } from '@gitlab/ui';
-import { trimText } from 'helpers/text_helper';
+import { shallowMount } from '@vue/test-utils';
 import DependencyLocation from 'ee/dependencies/components/dependency_location.vue';
 import DependencyPathViewer from 'ee/dependencies/components/dependency_path_viewer.vue';
+import { trimText } from 'helpers/text_helper';
 import * as Paths from './mock_data';
 
 describe('Dependency Location component', () => {

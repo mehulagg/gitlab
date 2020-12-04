@@ -1,7 +1,0 @@
----
-name: feature_flags_related_issues
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/42023
-rollout_issue_url: 
-group: group::progressive delivery
-type: licensed
-default_enabled: true
