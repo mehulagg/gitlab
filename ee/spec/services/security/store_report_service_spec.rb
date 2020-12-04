@@ -66,7 +66,7 @@ RSpec.describe Security::StoreReportService, '#execute' do
       end
 
       it 'inserts all remediations' do
-        expect { subject }.to change { Vulnerabilities::Remediation.count }.by(remediations)
+        expect { subject }.to change { project.vulnerability_remediations.count }.by(remediations)
       end
 
       it 'inserts all vulnerabilties' do

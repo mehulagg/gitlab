@@ -144,7 +144,7 @@ module Security
     def find_existing_remediations_for(finding)
       checksums = finding.remediations.map(&:checksum)
 
-      Vulnerabilities::Remediation.by_checksum(checksums)
+      @project.vulnerability_remediations.by_checksum(checksums)
     end
 
     def build_new_remediations_for(finding, existing_remediations)
@@ -159,7 +159,7 @@ module Security
     end
 
     def build_vulnerability_remediation(remediation)
-      Vulnerabilities::Remediation.new(summary: remediation.summary, file: remediation.diff_file, checksum: remediation.checksum)
+      @project.vulnerability_remediations.new(summary: remediation.summary, file: remediation.diff_file, checksum: remediation.checksum)
     end
 
     def create_vulnerability_pipeline_object(vulnerability_finding, pipeline)
