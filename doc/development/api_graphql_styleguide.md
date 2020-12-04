@@ -1702,3 +1702,13 @@ For guidance, see the [GraphQL API](documentation/graphql_styleguide.md) page.
 ## Include a changelog entry
 
 All client-facing changes **must** include a [changelog entry](changelog.md).
+
+## Laziness
+
+If you need to manage laziness directly, then please see
+`Gitlab::Graphql::Lazy`, and in particular `Gitlab::Graphql::Laziness`, which
+contains `#force` and `#delay` which help implement the basic operations of
+creation and elimination of laziness, where needed.
+
+For dealing with lazy values without forcing them, use
+`Gitlab::Graphql::Lazy.with_value`.
