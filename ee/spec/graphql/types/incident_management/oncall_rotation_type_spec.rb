@@ -12,8 +12,8 @@ RSpec.describe GitlabSchema.types['IncidentManagementOncallRotation'] do
       id
       name
       starts_at
-      rotation_length
-      rotation_length_unit
+      length
+      length_unit
       participants
     ]
 

@@ -39,7 +39,7 @@ module Mutations
         def resolve(iid:, project_path:, participants:, **args)
           project = authorized_find!(full_path: project_path)
 
-          schedule = ::IncidentManagement::OncallSchedulesFinder.new(current_user, project, iids: iid)
+          schedule = ::IncidentManagement::OncallSchedulesFinder.new(current_user, project, iid: iid)
                                                                 .execute
                                                                 .first
 
