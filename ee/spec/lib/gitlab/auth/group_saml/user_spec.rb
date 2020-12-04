@@ -7,7 +7,7 @@ RSpec.describe Gitlab::Auth::GroupSaml::User do
   let(:uid) { 1234 }
   let(:saml_provider) { create(:saml_provider) }
   let(:group) { saml_provider.group }
-  let(:auth_hash) { OmniAuth::AuthHash.new(uid: uid, provider: 'group_saml', info: info_hash) }
+  let(:auth_hash) { OmniAuth::AuthHash.new(uid: uid, provider: 'group_saml', info: info_hash, extra: { raw_info: OneLogin::RubySaml::Attributes.new }) }
   let(:info_hash) do
     {
       name: generate(:name),
@@ -81,6 +81,23 @@ RSpec.describe Gitlab::Auth::GroupSaml::User do
 
         it 'creates the user SAML identity' do
           expect { find_and_update }.to change { Identity.count }.by(1)
+        end
+
+        context 'when user attributes are present' do
+          before do
+            auth_hash[:extra][:raw_info] =
+              OneLogin::RubySaml::Attributes.new(
+                'can_create_group' => %w(true), 'projects_limit' => %w(20)
+              )
+          end
+
+          it 'creates the user with correct can_create_group attribute' do
+            expect(find_and_update.can_create_group).to eq(true)
+          end
+
+          it 'creates the user with correct projects_limit attribute' do
+            expect(find_and_update.projects_limit).to eq(20)
+          end
         end
       end
 
