@@ -18,6 +18,8 @@
 # The tree structure of the entities results in the same structure for imported
 # Groups and Projects.
 class BulkImports::Entity < ApplicationRecord
+  include AfterCommitQueue
+
   self.table_name = 'bulk_import_entities'
 
   belongs_to :bulk_import, optional: false
@@ -62,6 +64,14 @@ class BulkImports::Entity < ApplicationRecord
 
     event :fail_op do
       transition any => :failed
+    end
+
+    after_transition created: :started do |state, _|
+      state.run_after_commit do
+        jid = BulkImports::ProcessEntityWorker.perform_async(id)
+
+        update(jid: jid) if jid
+      end
     end
   end
 
