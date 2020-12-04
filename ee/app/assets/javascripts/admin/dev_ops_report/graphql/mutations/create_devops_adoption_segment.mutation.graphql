@@ -1,0 +1,12 @@
+mutation($name: String!, $groupIds: [GroupID!]!) {
+  createDevopsAdoptionSegment(input: { name: $name, groupIds: $groupIds }) {
+    segment {
+      id
+      name
+      groups {
+        id
+      }
+    }
+    errors
+  }
+}

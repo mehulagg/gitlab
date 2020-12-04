@@ -23,7 +23,7 @@ RSpec.describe 'Project settings > [EE] Merge Requests', :js do
   it 'adds approver' do
     visit edit_project_path(project)
 
-    open_modal(text: 'Add approval rule')
+    open_modal(text: 'Add approval rule', expand: false)
     open_approver_select
 
     expect(find('.select2-results')).to have_content(user.name)
@@ -50,7 +50,7 @@ RSpec.describe 'Project settings > [EE] Merge Requests', :js do
   it 'adds approver group' do
     visit edit_project_path(project)
 
-    open_modal(text: 'Add approval rule')
+    open_modal(text: 'Add approval rule', expand: false)
     open_approver_select
 
     expect(find('.select2-results')).to have_content(group.name)
@@ -81,7 +81,7 @@ RSpec.describe 'Project settings > [EE] Merge Requests', :js do
 
       expect_avatar(find('.js-members'), rule.approvers)
 
-      open_modal
+      open_modal(text: 'Edit', expand: false)
       remove_approver(group.name)
       click_button "Update approval rule"
       wait_for_requests

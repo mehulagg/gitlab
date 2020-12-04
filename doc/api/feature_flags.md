@@ -1,6 +1,6 @@
 ---
 stage: Release
-group: Progressive Delivery
+group: Release
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
@@ -9,10 +9,6 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/9566) in [GitLab Premium](https://about.gitlab.com/pricing/) 12.5.
 > - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/212318) to [GitLab Starter](https://about.gitlab.com/pricing/) in 13.4.
 > - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/212318) to [GitLab Core](https://about.gitlab.com/pricing/) in 13.5.
-
-NOTE: **Note:**
-This API is behind a [feature flag](../operations/feature_flags.md#enable-or-disable-feature-flag-strategies).
-If this flag is not enabled in your environment, you can use the [legacy feature flags API](feature_flags_legacy.md).
 
 API for accessing resources of [GitLab Feature Flags](../operations/feature_flags.md).
 

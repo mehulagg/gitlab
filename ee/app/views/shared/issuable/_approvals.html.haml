@@ -3,8 +3,9 @@
 - return unless issuable.is_a?(MergeRequest)
 - return unless issuable.approval_feature_available?
 
-.form-group.row
-  .col-sm-2.col-form-label
-    = form.label :approver_ids, "Approval rules"
-  .col-sm-10
-    = render_if_exists 'shared/issuable/approver_suggestion', issuable: issuable, presenter: presenter
+- if !Feature.enabled?(:merge_request_reviewers, @project) || !Feature.enabled?(:mr_collapsed_approval_rules, @project)
+  .form-group.row
+    .col-sm-2.col-form-label
+      = form.label :approver_ids, "Approval rules"
+    .col-sm-10
+      = render_if_exists 'shared/issuable/approver_suggestion', issuable: issuable, presenter: presenter

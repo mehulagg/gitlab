@@ -10,7 +10,7 @@ module VulnerabilitiesHelper
 
     result = {
       timestamp: Time.now.to_i,
-      create_issue_url: create_issue_url_for(vulnerability),
+      new_issue_url: new_issue_url_for(vulnerability),
       create_jira_issue_url: create_jira_issue_url_for(vulnerability),
       related_jira_issues_path: project_integrations_jira_issues_path(vulnerability.project, vulnerability_ids: [vulnerability.id]),
       has_mr: !!vulnerability.finding.merge_request_feedback.try(:merge_request_iid),
@@ -27,10 +27,10 @@ module VulnerabilitiesHelper
     result.merge(vulnerability_data(vulnerability), vulnerability_finding_data(vulnerability))
   end
 
-  def create_issue_url_for(vulnerability)
+  def new_issue_url_for(vulnerability)
     return unless vulnerability.project.issues_enabled?
 
-    create_issue_project_security_vulnerability_path(vulnerability.project, vulnerability)
+    new_project_issue_path(vulnerability.project, { vulnerability_id: vulnerability.id })
   end
 
   def create_jira_issue_url_for(vulnerability)

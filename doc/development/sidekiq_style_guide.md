@@ -27,7 +27,7 @@ After adding a new queue, run `bin/rake
 gitlab:sidekiq:all_queues_yml:generate` to regenerate
 `app/workers/all_queues.yml` or `ee/app/workers/all_queues.yml` so that
 it can be picked up by
-[`sidekiq-cluster`](../administration/operations/extra_sidekiq_processes.md). 
+[`sidekiq-cluster`](../administration/operations/extra_sidekiq_processes.md).
 Additionally, run
 `bin/rake gitlab:sidekiq:sidekiq_queues_yml:generate` to regenerate
 `config/sidekiq_queues.yml`.
@@ -472,7 +472,7 @@ A job cannot be both high urgency and have external dependencies.
 Workers that are constrained by CPU or memory resource limitations should be
 annotated with the `worker_resource_boundary` method.
 
-Most workers tend to spend most of their time blocked, wait on network responses
+Most workers tend to spend most of their time blocked, waiting on network responses
 from other services such as Redis, PostgreSQL, and Gitaly. Since Sidekiq is a
 multi-threaded environment, these jobs can be scheduled with high concurrency.
 

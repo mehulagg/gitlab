@@ -153,6 +153,11 @@ module EE
         !@subject.feature_available?(:feature_flags_related_issues)
       end
 
+      with_scope :subject
+      condition(:oncall_schedules_available) do
+        ::Gitlab::IncidentManagement.oncall_schedules_available?(@subject)
+      end
+
       rule { visual_review_bot }.policy do
         prevent :read_note
         enable :create_note
@@ -178,8 +183,9 @@ module EE
         enable :read_deploy_board
         enable :admin_epic_issue
         enable :read_group_timelogs
-        enable :read_incident_management_oncall_schedule
       end
+
+      rule { oncall_schedules_available & can?(:reporter_access) }.enable :read_incident_management_oncall_schedule
 
       rule { can?(:developer_access) }.policy do
         enable :admin_board
@@ -242,10 +248,11 @@ module EE
         enable :modify_auto_fix_setting
         enable :modify_merge_request_author_setting
         enable :modify_merge_request_committer_setting
-        enable :admin_incident_management_oncall_schedule
       end
 
       rule { license_scanning_enabled & can?(:maintainer_access) }.enable :admin_software_license_policy
+
+      rule { oncall_schedules_available & can?(:maintainer_access) }.enable :admin_incident_management_oncall_schedule
 
       rule { auditor }.policy do
         enable :public_user_access

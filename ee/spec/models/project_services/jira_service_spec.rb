@@ -48,20 +48,16 @@ RSpec.describe JiraService do
 
     context 'when jira integration is not available for the project' do
       before do
-        allow(jira_service.project).to receive(:jira_vulnerabilities_integration_available?).and_return(false)
+        stub_feature_flags(jira_for_vulnerabilities: false)
       end
 
       context 'when vulnerabilities_enabled is set to false' do
-        before do
-          allow(jira_service).to receive(:vulnerabilities_enabled).and_return(false)
-        end
-
-        it { is_expected.to eq(false) }
+        it { is_expected.to be_falsey }
       end
 
       context 'when vulnerabilities_enabled is set to true' do
         before do
-          allow(jira_service).to receive(:vulnerabilities_enabled).and_return(true)
+          jira_service.vulnerabilities_enabled = true
         end
 
         it { is_expected.to eq(false) }
@@ -70,20 +66,16 @@ RSpec.describe JiraService do
 
     context 'when jira integration is available for the project' do
       before do
-        allow(jira_service.project).to receive(:jira_vulnerabilities_integration_available?).and_return(true)
+        stub_licensed_features(jira_vulnerabilities_integration: true)
       end
 
       context 'when vulnerabilities_enabled is set to false' do
-        before do
-          allow(jira_service).to receive(:vulnerabilities_enabled).and_return(false)
-        end
-
-        it { is_expected.to eq(false) }
+        it { is_expected.to be_falsey }
       end
 
       context 'when vulnerabilities_enabled is set to true' do
         before do
-          allow(jira_service).to receive(:vulnerabilities_enabled).and_return(true)
+          jira_service.vulnerabilities_enabled = true
         end
 
         it { is_expected.to eq(true) }

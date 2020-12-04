@@ -127,7 +127,7 @@ To build and push to the Container Registry:
    docker push registry.example.com/group/project/image
    ```
 
-You can also view these commands by going to your project's **Packages & Registries > Container Registry**.
+To view these commands, go to your project's **Packages & Registries > Container Registry**.
 
 ## Build and push by using GitLab CI/CD
 
@@ -489,6 +489,8 @@ Cleanup policies can be run on all projects, with these exceptions:
 The cleanup policy collects all tags in the Container Registry and excludes tags
 until only the tags to be deleted remain.
 
+The cleanup policy searches for images based on the tag name. Support for the full path [has not yet been implemented](https://gitlab.com/gitlab-org/gitlab/-/issues/281071), but would allow you to clean up dynamically-named tags.
+
 The cleanup policy:
 
 1. Collects all tags for a given repository in a list.
@@ -513,28 +515,30 @@ You can create a cleanup policy in [the API](#use-the-cleanup-policy-api) or the
 To create a cleanup policy in the UI:
 
 1. For your project, go to **Settings > CI/CD**.
-1. Expand the **Cleanup policy for tags** section.
+1. Expand the **Clean up image tags** section.
 1. Complete the fields.
 
    | Field                                                                     | Description                                                                                                       |
    |---------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------|
-   | **Cleanup policy**                                                        | Turn the policy on or off.                                                                                        |
-   | **Expiration interval**                                                   | How long tags are exempt from being deleted.                                                                      |
-   | **Expiration schedule**                                                   | How often the policy should run.                                                                                  |
-   | **Number of tags to retain**                                              | How many tags to _always_ keep for each image.                                                                    |
-   | **Tags with names matching this regex pattern expire:**              | The regex pattern that determines which tags to remove. This value cannot be blank. For all tags, use `.*`. See other [regex pattern examples](#regex-pattern-examples). |
-   | **Tags with names matching this regex pattern are preserved:**        | The regex pattern that determines which tags to preserve. The `latest` tag is always preserved. For all tags, use `.*`. See other [regex pattern examples](#regex-pattern-examples). |
+   | **Toggle** | Turn the policy on or off. |
+   | **Run cleanup** | How often the policy should run. |
+   | **Keep the most recent** | How many tags to _always_ keep for each image. |
+   | **Keep tags matching** | The regex pattern that determines which tags to preserve. The `latest` tag is always preserved. For all tags, use `.*`. See other [regex pattern examples](#regex-pattern-examples). |
+   | **Remove tags older than** | Remove only tags older than X days. |
+   | **Remove tags matching**  | The regex pattern that determines which tags to remove. This value cannot be blank. For all tags, use `.*`. See other [regex pattern examples](#regex-pattern-examples). |
 
-1. Click **Set cleanup policy**.
+1. Click **Save**.
 
 Depending on the interval you chose, the policy is scheduled to run.
 
 NOTE: **Note:**
-If you edit the policy and click **Set cleanup policy** again, the interval is reset.
+If you edit the policy and click **Save** again, the interval is reset.
 
 ### Regex pattern examples
 
 Cleanup policies use regex patterns to determine which tags should be preserved or removed, both in the UI and the API.
+
+Regex patterns are automatically surrounded with `\A` and `\Z` anchors. Do not include any `\A`, `\Z`, `^` or `$` token in the regex patterns as they are not necessary.
 
 Here are examples of regex patterns you may want to use:
 

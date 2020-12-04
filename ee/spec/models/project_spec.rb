@@ -2638,4 +2638,30 @@ RSpec.describe Project do
       project.add_template_export_job(current_user: user)
     end
   end
+
+  context 'indexing updates in Elasticsearch', :elastic do
+    before do
+      stub_ee_application_setting(elasticsearch_indexing: true)
+    end
+
+    context 'on update' do
+      let(:project) { create(:project, :public) }
+
+      context 'when updating the visibility_level' do
+        it 'triggers ElasticAssociationIndexerWorker to update issues' do
+          expect(ElasticAssociationIndexerWorker).to receive(:perform_async).with('Project', project.id, ['issues'])
+
+          project.update!(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
+        end
+      end
+
+      context 'when changing the title' do
+        it 'does not trigger ElasticAssociationIndexerWorker to update issues' do
+          expect(ElasticAssociationIndexerWorker).not_to receive(:perform_async)
+
+          project.update!(title: 'The new title')
+        end
+      end
+    end
+  end
 end

@@ -34,6 +34,8 @@ module Vulnerabilities
     has_many :finding_pipelines, class_name: 'Vulnerabilities::FindingPipeline', inverse_of: :finding, foreign_key: 'occurrence_id'
     has_many :pipelines, through: :finding_pipelines, class_name: 'Ci::Pipeline'
 
+    serialize :config_options, Serializers::JSON # rubocop:disable Cop/ActiveRecordSerialize
+
     attr_writer :sha
     attr_accessor :scan
 
@@ -90,6 +92,7 @@ module Vulnerabilities
 
     validates :metadata_version, presence: true
     validates :raw_metadata, presence: true
+    validates :details, json_schema: { filename: 'vulnerability_finding_details' }
 
     delegate :name, :external_id, to: :scanner, prefix: true, allow_nil: true
 

@@ -99,13 +99,12 @@ export default {
       return ((val / this.total) * 100).toFixed(0);
     },
   },
+  render() {
+    return this.$scopedSlots.default({
+      columns: this.columns,
+      loading: this.$apollo.queries.issues.loading,
+      total: this.total,
+    });
+  },
 };
 </script>
-
-<template>
-  <iteration-report-summary-cards
-    :columns="columns"
-    :loading="$apollo.queries.issues.loading"
-    :total="total"
-  />
-</template>

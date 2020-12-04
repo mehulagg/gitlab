@@ -79,6 +79,85 @@ RSpec.describe Vulnerabilities::Feedback do
     end
   end
 
+  describe 'callbacks' do
+    let_it_be(:project) { create(:project) }
+    let_it_be_with_refind(:pipeline) { create(:ci_pipeline, project: project) }
+
+    shared_examples 'touches the pipeline' do
+      context 'when feedback is for dismissal' do
+        let_it_be_with_refind(:feedback) { create(:vulnerability_feedback, :dismissal, project: project) }
+
+        context 'when pipeline is not assigned to feedback' do
+          it 'does not touch the pipeline' do
+            expect(pipeline).not_to receive(:touch)
+            subject
+          end
+        end
+
+        context 'when pipeline is assigned to feedback' do
+          before do
+            feedback.update(pipeline: pipeline)
+          end
+
+          context 'when pipeline was updated less than 5 minutes ago' do
+            before do
+              pipeline.touch(time: 3.minutes.ago)
+            end
+
+            it 'touches the pipeline' do
+              expect(pipeline).not_to receive(:touch)
+              subject
+            end
+          end
+
+          context 'when pipeline was updated more than 5 minutes ago' do
+            before do
+              pipeline.touch(time: 6.minutes.ago)
+            end
+
+            it 'touches the pipeline' do
+              expect(pipeline).to receive(:touch)
+              subject
+            end
+
+            context 'when pipeline touch raises ActiveRecord::StaleObjectError' do
+              before do
+                allow(pipeline).to receive(:touch).and_raise(ActiveRecord::StaleObjectError)
+              end
+
+              it 'does not raise an error' do
+                expect {subject}.not_to raise_error
+              end
+            end
+          end
+        end
+      end
+
+      context 'when feedback is not for dismissal' do
+        let_it_be_with_refind(:feedback) { create(:vulnerability_feedback, :issue) }
+
+        context 'when pipeline is not assigned to feedback' do
+          it 'does not touch the pipeline' do
+            expect(pipeline).not_to receive(:touch)
+            subject
+          end
+        end
+      end
+    end
+
+    context 'after_save :touch_pipeline' do
+      subject { feedback.update!(vulnerability_data: { category: 'dependency_scanning' }) }
+
+      it_behaves_like 'touches the pipeline'
+    end
+
+    context 'after_destroy :touch_pipeline' do
+      subject { feedback.destroy! }
+
+      it_behaves_like 'touches the pipeline'
+    end
+  end
+
   describe '.with_category' do
     it 'filters by category' do
       described_class.categories.each do |category, _|

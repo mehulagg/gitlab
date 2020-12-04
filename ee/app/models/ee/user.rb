@@ -33,6 +33,9 @@ module EE
       delegate :shared_runners_minutes_limit, :shared_runners_minutes_limit=,
                :extra_shared_runners_minutes_limit, :extra_shared_runners_minutes_limit=,
                to: :namespace
+      delegate :provisioned_by_group, :provisioned_by_group=,
+               :provisioned_by_group_id, :provisioned_by_group_id=,
+               to: :user_detail, allow_nil: true
 
       has_many :epics,                    foreign_key: :author_id
       has_many :requirements,             foreign_key: :author_id, inverse_of: :author, class_name: 'RequirementsManagement::Requirement'
@@ -256,11 +259,7 @@ module EE
     end
 
     def manageable_groups_eligible_for_subscription
-      manageable_groups
-        .where(parent_id: nil)
-        .left_joins(:gitlab_subscription)
-        .merge(GitlabSubscription.left_joins(:hosted_plan).where(plans: { name: [nil, *::Plan.default_plans] }))
-        .order(:name)
+      manageable_groups.eligible_for_subscription.order(:name)
     end
 
     def manageable_groups_eligible_for_trial

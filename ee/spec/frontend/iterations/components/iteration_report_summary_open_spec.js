@@ -1,9 +1,10 @@
 import IterationReportSummary from 'ee/iterations/components/iteration_report_summary_open.vue';
-import IterationReportSummaryCards from 'ee/iterations/components/iteration_report_summary_cards.vue';
 import { shallowMount } from '@vue/test-utils';
 
 describe('Iterations report summary', () => {
   let wrapper;
+  let slotSpy;
+
   const id = 3;
   const defaultProps = {
     fullPath: 'gitlab-org',
@@ -11,6 +12,8 @@ describe('Iterations report summary', () => {
   };
 
   const mountComponent = ({ props = defaultProps, loading = false, data = {} } = {}) => {
+    slotSpy = jest.fn();
+
     wrapper = shallowMount(IterationReportSummary, {
       propsData: props,
       data() {
@@ -20,6 +23,9 @@ describe('Iterations report summary', () => {
         $apollo: {
           queries: { issues: { loading } },
         },
+      },
+      scopedSlots: {
+        default: slotSpy,
       },
     });
   };
@@ -43,7 +49,7 @@ describe('Iterations report summary', () => {
     });
 
     it('passes data to cards component', () => {
-      expect(wrapper.find(IterationReportSummaryCards).props()).toEqual({
+      expect(slotSpy).toHaveBeenCalledWith({
         loading: false,
         columns: [
           {

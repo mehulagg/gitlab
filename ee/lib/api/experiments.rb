@@ -12,7 +12,7 @@ module API
       end
       get do
         experiments = Gitlab::Experimentation::EXPERIMENTS.keys.map do |experiment_key|
-          { key: experiment_key, enabled: Gitlab::Experimentation.enabled?(experiment_key) }
+          { key: experiment_key, enabled: Gitlab::Experimentation.active?(experiment_key) }
         end
 
         present experiments, with: EE::API::Entities::Experiment, current_user: current_user

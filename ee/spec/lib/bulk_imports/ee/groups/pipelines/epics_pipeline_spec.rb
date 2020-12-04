@@ -61,7 +61,8 @@ RSpec.describe BulkImports::EE::Groups::Pipelines::EpicsPipeline do
       expect(described_class.transformers)
         .to contain_exactly(
           { klass: BulkImports::Common::Transformers::HashKeyDigger, options: { key_path: %w[data group epics] } },
-          { klass: BulkImports::Common::Transformers::UnderscorifyKeysTransformer, options: nil }
+          { klass: BulkImports::Common::Transformers::UnderscorifyKeysTransformer, options: nil },
+          { klass: BulkImports::Common::Transformers::ProhibitedAttributesTransformer, options: nil }
         )
     end
 

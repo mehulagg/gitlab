@@ -324,7 +324,7 @@ whereas the `message` may repeat the location.
 As a visual example, this screenshot highlights where these fields are used when viewing a
 vulnerability as part of a pipeline view.
 
-![Example Vulnerability](example_vuln.png)
+![Example Vulnerability](img/example_vuln.png)
 
 For instance, a `message` for a vulnerability
 reported by Dependency Scanning gives information on the vulnerable dependency,
@@ -397,7 +397,9 @@ Not all vulnerabilities have CVEs, and a CVE can be identified multiple times. A
 isn't a stable identifier and you shouldn't assume it as such when tracking vulnerabilities.
 
 The maximum number of identifiers for a vulnerability is set as 20. If a vulnerability has more than 20 identifiers,
-the system will save only the first 20 of them.
+the system will save only the first 20 of them. Note that vulnerabilities in the [Pipeline
+Security](../../user/application_security/security_dashboard/#pipeline-security)
+tab do not enforce this limit and will show all identifiers present in the report artifact.
 
 ### Location
 

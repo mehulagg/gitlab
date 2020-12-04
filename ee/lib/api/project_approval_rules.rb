@@ -6,7 +6,7 @@ module API
 
     helpers ::API::Helpers::ProjectApprovalRulesHelpers
 
-    feature_category :code_review
+    feature_category :source_code_management
 
     params do
       requires :id, type: String, desc: 'The ID of a project'

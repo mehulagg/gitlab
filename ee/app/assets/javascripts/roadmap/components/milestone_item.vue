@@ -162,7 +162,7 @@ export default {
       <gl-popover
         :target="`milestone-item-${milestone.id}`"
         boundary="viewport"
-        placement="lefttop"
+        placement="left"
         triggers="hover"
         :title="milestone.title"
       >

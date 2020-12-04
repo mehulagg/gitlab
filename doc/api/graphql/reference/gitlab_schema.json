@@ -105,7 +105,7 @@
           "inputFields": [
             {
               "name": "awardableId",
-              "description": "The global id of the awardable resource",
+              "description": "The global ID of the awardable resource",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -2103,7 +2103,7 @@
             },
             {
               "name": "iid",
-              "description": "The iid of the alert to mutate",
+              "description": "The IID of the alert to mutate",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -2279,7 +2279,7 @@
             },
             {
               "name": "iid",
-              "description": "The iid of the alert to mutate",
+              "description": "The IID of the alert to mutate",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -2563,7 +2563,7 @@
           "inputFields": [
             {
               "name": "awardableId",
-              "description": "The global id of the awardable resource",
+              "description": "The global ID of the awardable resource",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -2679,7 +2679,7 @@
           "inputFields": [
             {
               "name": "awardableId",
-              "description": "The global id of the awardable resource",
+              "description": "The global ID of the awardable resource",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -2795,7 +2795,7 @@
           "inputFields": [
             {
               "name": "awardableId",
-              "description": "The global id of the awardable resource",
+              "description": "The global ID of the awardable resource",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -3305,7 +3305,7 @@
           "fields": [
             {
               "name": "assignee",
-              "description": "The board assignee.",
+              "description": "The board assignee",
               "args": [
 
               ],
@@ -3319,7 +3319,7 @@
             },
             {
               "name": "epics",
-              "description": "Epics associated with board issues.",
+              "description": "Epics associated with board issues",
               "args": [
                 {
                   "name": "issueFilters",
@@ -3382,7 +3382,7 @@
             },
             {
               "name": "hideBacklogList",
-              "description": "Whether or not backlog list is hidden.",
+              "description": "Whether or not backlog list is hidden",
               "args": [
 
               ],
@@ -3396,7 +3396,7 @@
             },
             {
               "name": "hideClosedList",
-              "description": "Whether or not closed list is hidden.",
+              "description": "Whether or not closed list is hidden",
               "args": [
 
               ],
@@ -3554,7 +3554,7 @@
             },
             {
               "name": "milestone",
-              "description": "The board milestone.",
+              "description": "The board milestone",
               "args": [
 
               ],
@@ -3582,7 +3582,7 @@
             },
             {
               "name": "weight",
-              "description": "Weight of the board.",
+              "description": "Weight of the board",
               "args": [
 
               ],
@@ -3869,7 +3869,7 @@
                 },
                 {
                   "name": "iidStartsWith",
-                  "description": "Filter epics by iid for autocomplete",
+                  "description": "Filter epics by IID for autocomplete",
                   "type": {
                     "kind": "SCALAR",
                     "name": "String",
@@ -7113,7 +7113,7 @@
           "inputFields": [
             {
               "name": "id",
-              "description": "Global id of the cluster agent that will be deleted",
+              "description": "Global ID of the cluster agent that will be deleted",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -8529,6 +8529,60 @@
           "name": "ComplianceFramework",
           "description": "Represents a ComplianceFramework associated with a Project",
           "fields": [
+            {
+              "name": "color",
+              "description": "Hexadecimal representation of compliance framework's label color",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "description",
+              "description": "Description of the compliance framework",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "id",
+              "description": "Compliance framework ID",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "ID",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
             {
               "name": "name",
               "description": "Name of the compliance framework",
@@ -10019,7 +10073,7 @@
             },
             {
               "name": "iid",
-              "description": "The iid of the alert to mutate",
+              "description": "The IID of the alert to mutate",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -10149,7 +10203,7 @@
           "inputFields": [
             {
               "name": "environmentId",
-              "description": "The global id of the environment to add an annotation to",
+              "description": "The global ID of the environment to add an annotation to",
               "type": {
                 "kind": "SCALAR",
                 "name": "EnvironmentID",
@@ -10159,7 +10213,7 @@
             },
             {
               "name": "clusterId",
-              "description": "The global id of the cluster to add an annotation to",
+              "description": "The global ID of the cluster to add an annotation to",
               "type": {
                 "kind": "SCALAR",
                 "name": "ClustersClusterID",
@@ -10971,7 +11025,7 @@
           "inputFields": [
             {
               "name": "noteableId",
-              "description": "The global id of the resource to add a note to",
+              "description": "The global ID of the resource to add a note to",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -11319,7 +11373,7 @@
           "inputFields": [
             {
               "name": "noteableId",
-              "description": "The global id of the resource to add a note to",
+              "description": "The global ID of the resource to add a note to",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -11897,7 +11951,7 @@
           "inputFields": [
             {
               "name": "noteableId",
-              "description": "The global id of the resource to add a note to",
+              "description": "The global ID of the resource to add a note to",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -11935,7 +11989,7 @@
             },
             {
               "name": "discussionId",
-              "description": "The global id of the discussion this note is in reply to",
+              "description": "The global ID of the discussion this note is in reply to",
               "type": {
                 "kind": "SCALAR",
                 "name": "DiscussionID",
@@ -13727,6 +13781,20 @@
               "deprecationReason": null
             },
             {
+              "name": "normalizedTargetUrl",
+              "description": "Normalized URL of the target to be scanned",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "profileName",
               "description": "The name of the site profile",
               "args": [
@@ -14507,7 +14575,7 @@
           "fields": [
             {
               "name": "id",
-              "description": "ID of the site validation",
+              "description": "Global ID of the site validation",
               "args": [
 
               ],
@@ -14525,7 +14593,7 @@
             },
             {
               "name": "status",
-              "description": "The status of the validation",
+              "description": "Status of the site validation",
               "args": [
 
               ],
@@ -16543,7 +16611,7 @@
             },
             {
               "name": "iid",
-              "description": "The iid of the issue to modify designs for",
+              "description": "The IID of the issue to modify designs for",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -16823,7 +16891,7 @@
             },
             {
               "name": "iid",
-              "description": "The iid of the issue to modify designs for",
+              "description": "The IID of the issue to modify designs for",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -17698,7 +17766,7 @@
           "inputFields": [
             {
               "name": "id",
-              "description": "The global id of the note to destroy",
+              "description": "The global ID of the note to destroy",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -17800,7 +17868,7 @@
           "inputFields": [
             {
               "name": "id",
-              "description": "The global id of the snippet to destroy",
+              "description": "The global ID of the snippet to destroy",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -18042,51 +18110,20 @@
               "name": "groups",
               "description": "Assigned groups",
               "args": [
-                {
-                  "name": "after",
-                  "description": "Returns the elements in the list that come after the specified cursor.",
-                  "type": {
-                    "kind": "SCALAR",
-                    "name": "String",
-                    "ofType": null
-                  },
-                  "defaultValue": null
-                },
-                {
-                  "name": "before",
-                  "description": "Returns the elements in the list that come before the specified cursor.",
-                  "type": {
-                    "kind": "SCALAR",
-                    "name": "String",
-                    "ofType": null
-                  },
-                  "defaultValue": null
-                },
-                {
-                  "name": "first",
-                  "description": "Returns the first _n_ elements from the list.",
-                  "type": {
-                    "kind": "SCALAR",
-                    "name": "Int",
-                    "ofType": null
-                  },
-                  "defaultValue": null
-                },
-                {
-                  "name": "last",
-                  "description": "Returns the last _n_ elements from the list.",
-                  "type": {
-                    "kind": "SCALAR",
-                    "name": "Int",
-                    "ofType": null
-                  },
-                  "defaultValue": null
-                }
+
               ],
               "type": {
-                "kind": "OBJECT",
-                "name": "GroupConnection",
-                "ofType": null
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "Group",
+                    "ofType": null
+                  }
+                }
               },
               "isDeprecated": false,
               "deprecationReason": null
@@ -18105,6 +18142,20 @@
                   "name": "ID",
                   "ofType": null
                 }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "latestSnapshot",
+              "description": "The latest adoption metrics for the segment",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "DevopsAdoptionSnapshot",
+                "ofType": null
               },
               "isDeprecated": false,
               "deprecationReason": null
@@ -18235,6 +18286,199 @@
                 "kind": "OBJECT",
                 "name": "DevopsAdoptionSegment",
                 "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "DevopsAdoptionSnapshot",
+          "description": "Snapshot",
+          "fields": [
+            {
+              "name": "deploySucceeded",
+              "description": "At least one deployment succeeded",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "endTime",
+              "description": "The end time for the snapshot where the data points were collected",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Time",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "issueOpened",
+              "description": "At least one issue was opened",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "mergeRequestApproved",
+              "description": "At least one merge request was approved",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "mergeRequestOpened",
+              "description": "At least one merge request was opened",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "pipelineSucceeded",
+              "description": "At least one pipeline succeeded",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "recordedAt",
+              "description": "The time the snapshot was recorded",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Time",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "runnerConfigured",
+              "description": "At least one runner was used",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "securityScanSucceeded",
+              "description": "At least one security scan succeeded",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "startTime",
+              "description": "The start time for the snapshot where the data points were collected",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Time",
+                  "ofType": null
+                }
               },
               "isDeprecated": false,
               "deprecationReason": null
@@ -19233,7 +19477,7 @@
           "inputFields": [
             {
               "name": "id",
-              "description": "The global id of the discussion",
+              "description": "The global ID of the discussion",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -20122,7 +20366,7 @@
                 },
                 {
                   "name": "iidStartsWith",
-                  "description": "Filter epics by iid for autocomplete",
+                  "description": "Filter epics by IID for autocomplete",
                   "type": {
                     "kind": "SCALAR",
                     "name": "String",
@@ -21131,7 +21375,7 @@
           "inputFields": [
             {
               "name": "iid",
-              "description": "The iid of the epic to mutate",
+              "description": "The IID of the epic to mutate",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -21173,7 +21417,7 @@
             },
             {
               "name": "issueIid",
-              "description": "The iid of the issue to be added",
+              "description": "The IID of the issue to be added",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -21660,7 +21904,7 @@
             },
             {
               "name": "blocked",
-              "description": "Indicates the issue is blocked",
+              "description": "Indicates the issue is blocked.",
               "args": [
 
               ],
@@ -21678,7 +21922,7 @@
             },
             {
               "name": "blockedByCount",
-              "description": "Count of issues blocking this issue",
+              "description": "Count of issues blocking this issue.",
               "args": [
 
               ],
@@ -21976,7 +22220,7 @@
             },
             {
               "name": "epic",
-              "description": "Epic to which this issue belongs",
+              "description": "Epic to which this issue belongs.",
               "args": [
 
               ],
@@ -22082,7 +22326,7 @@
             },
             {
               "name": "iteration",
-              "description": "Iteration of the issue",
+              "description": "Iteration of the issue.",
               "args": [
 
               ],
@@ -22424,7 +22668,7 @@
             },
             {
               "name": "statusPagePublishedIncident",
-              "description": "Indicates whether an issue is published to the status page",
+              "description": "Indicates whether an issue is published to the status page.",
               "args": [
 
               ],
@@ -22696,7 +22940,7 @@
             },
             {
               "name": "weight",
-              "description": "Weight of the issue",
+              "description": "Weight of the issue.",
               "args": [
 
               ],
@@ -23038,7 +23282,7 @@
           "inputFields": [
             {
               "name": "iid",
-              "description": "The iid of the epic to mutate",
+              "description": "The IID of the epic to mutate",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -23255,7 +23499,7 @@
           "inputFields": [
             {
               "name": "id",
-              "description": "The id of the epic_issue or epic that is being moved",
+              "description": "The ID of the epic_issue or epic that is being moved",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -23269,7 +23513,7 @@
             },
             {
               "name": "adjacentReferenceId",
-              "description": "The id of the epic_issue or issue that the actual epic or issue is switched with",
+              "description": "The ID of the epic_issue or issue that the actual epic or issue is switched with",
               "type": {
                 "kind": "SCALAR",
                 "name": "EpicTreeSortingID",
@@ -23310,7 +23554,7 @@
           "inputFields": [
             {
               "name": "baseEpicId",
-              "description": "The id of the base epic of the tree",
+              "description": "The ID of the base epic of the tree",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -24337,8 +24581,61 @@
               "deprecationReason": null
             },
             {
+              "name": "complianceFrameworks",
+              "description": "Compliance frameworks available to projects in this namespace. Available only when feature flag `ff_custom_compliance_frameworks` is enabled",
+              "args": [
+                {
+                  "name": "after",
+                  "description": "Returns the elements in the list that come after the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "before",
+                  "description": "Returns the elements in the list that come before the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "first",
+                  "description": "Returns the first _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "last",
+                  "description": "Returns the last _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "ComplianceFrameworkConnection",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "containerRepositories",
-              "description": "Container repositories of the project",
+              "description": "Container repositories of the group",
               "args": [
                 {
                   "name": "name",
@@ -24395,6 +24692,24 @@
                 "kind": "OBJECT",
                 "name": "ContainerRepositoryConnection",
                 "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "containerRepositoriesCount",
+              "description": "Number of container repositories in the group",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                }
               },
               "isDeprecated": false,
               "deprecationReason": null
@@ -24644,7 +24959,7 @@
                 },
                 {
                   "name": "iidStartsWith",
-                  "description": "Filter epics by iid for autocomplete",
+                  "description": "Filter epics by IID for autocomplete",
                   "type": {
                     "kind": "SCALAR",
                     "name": "String",
@@ -24803,7 +25118,7 @@
                 },
                 {
                   "name": "iidStartsWith",
-                  "description": "Filter epics by iid for autocomplete",
+                  "description": "Filter epics by IID for autocomplete",
                   "type": {
                     "kind": "SCALAR",
                     "name": "String",
@@ -24933,6 +25248,24 @@
                     "ofType": null
                   },
                   "defaultValue": null
+                },
+                {
+                  "name": "relations",
+                  "description": "Filter members by the given member relations",
+                  "type": {
+                    "kind": "LIST",
+                    "name": null,
+                    "ofType": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "ENUM",
+                        "name": "GroupMemberRelation",
+                        "ofType": null
+                      }
+                    }
+                  },
+                  "defaultValue": "[DIRECT, INHERITED]"
                 },
                 {
                   "name": "after",
@@ -26954,118 +27287,6 @@
           "possibleTypes": null
         },
         {
-          "kind": "OBJECT",
-          "name": "GroupConnection",
-          "description": "The connection type for Group.",
-          "fields": [
-            {
-              "name": "edges",
-              "description": "A list of edges.",
-              "args": [
-
-              ],
-              "type": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "OBJECT",
-                  "name": "GroupEdge",
-                  "ofType": null
-                }
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
-              "name": "nodes",
-              "description": "A list of nodes.",
-              "args": [
-
-              ],
-              "type": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "OBJECT",
-                  "name": "Group",
-                  "ofType": null
-                }
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
-              "name": "pageInfo",
-              "description": "Information to aid in pagination.",
-              "args": [
-
-              ],
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "OBJECT",
-                  "name": "PageInfo",
-                  "ofType": null
-                }
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            }
-          ],
-          "inputFields": null,
-          "interfaces": [
-
-          ],
-          "enumValues": null,
-          "possibleTypes": null
-        },
-        {
-          "kind": "OBJECT",
-          "name": "GroupEdge",
-          "description": "An edge in a connection.",
-          "fields": [
-            {
-              "name": "cursor",
-              "description": "A cursor for use in pagination.",
-              "args": [
-
-              ],
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
-                }
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
-              "name": "node",
-              "description": "The item at the end of the edge.",
-              "args": [
-
-              ],
-              "type": {
-                "kind": "OBJECT",
-                "name": "Group",
-                "ofType": null
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            }
-          ],
-          "inputFields": null,
-          "interfaces": [
-
-          ],
-          "enumValues": null,
-          "possibleTypes": null
-        },
-        {
           "kind": "SCALAR",
           "name": "GroupID",
           "description": "Identifier of Group",
@@ -27343,6 +27564,35 @@
           "possibleTypes": null
         },
         {
+          "kind": "ENUM",
+          "name": "GroupMemberRelation",
+          "description": "Group member relation",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
+          "enumValues": [
+            {
+              "name": "DIRECT",
+              "description": "Direct members",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "INHERITED",
+              "description": "Inherited members",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "DESCENDANTS",
+              "description": "Descendants members",
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "possibleTypes": null
+        },
+        {
           "kind": "OBJECT",
           "name": "GroupPermissions",
           "description": null,
@@ -27608,7 +27858,7 @@
           "inputFields": [
             {
               "name": "id",
-              "description": "The id of the integration to remove",
+              "description": "The ID of the integration to remove",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -27710,7 +27960,7 @@
           "inputFields": [
             {
               "name": "id",
-              "description": "The id of the integration to mutate",
+              "description": "The ID of the integration to mutate",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -27812,7 +28062,7 @@
           "inputFields": [
             {
               "name": "id",
-              "description": "The id of the integration to mutate",
+              "description": "The ID of the integration to mutate",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -28744,7 +28994,7 @@
             },
             {
               "name": "blocked",
-              "description": "Indicates the issue is blocked",
+              "description": "Indicates the issue is blocked.",
               "args": [
 
               ],
@@ -28762,7 +29012,7 @@
             },
             {
               "name": "blockedByCount",
-              "description": "Count of issues blocking this issue",
+              "description": "Count of issues blocking this issue.",
               "args": [
 
               ],
@@ -29060,7 +29310,7 @@
             },
             {
               "name": "epic",
-              "description": "Epic to which this issue belongs",
+              "description": "Epic to which this issue belongs.",
               "args": [
 
               ],
@@ -29152,7 +29402,7 @@
             },
             {
               "name": "iteration",
-              "description": "Iteration of the issue",
+              "description": "Iteration of the issue.",
               "args": [
 
               ],
@@ -29480,7 +29730,7 @@
             },
             {
               "name": "statusPagePublishedIncident",
-              "description": "Indicates whether an issue is published to the status page",
+              "description": "Indicates whether an issue is published to the status page.",
               "args": [
 
               ],
@@ -29752,7 +30002,7 @@
             },
             {
               "name": "weight",
-              "description": "Weight of the issue",
+              "description": "Weight of the issue.",
               "args": [
 
               ],
@@ -33243,7 +33493,7 @@
           "inputFields": [
             {
               "name": "jiraAccountId",
-              "description": "Jira account id of the user",
+              "description": "Jira account ID of the user",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -33885,7 +34135,7 @@
           "inputFields": [
             {
               "name": "id",
-              "description": "The global id of the snippet to update",
+              "description": "The global ID of the snippet to update",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -35868,6 +36118,20 @@
               },
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "totalTimeToMerge",
+              "description": "Total sum of time to merge, in seconds, for the collection of merge requests",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Float",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "inputFields": null,
@@ -36546,7 +36810,7 @@
             },
             {
               "name": "iid",
-              "description": "The iid of the merge request to mutate",
+              "description": "The IID of the merge request to mutate",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -36694,7 +36958,7 @@
             },
             {
               "name": "iid",
-              "description": "The iid of the merge request to mutate",
+              "description": "The IID of the merge request to mutate",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -36842,7 +37106,7 @@
             },
             {
               "name": "iid",
-              "description": "The iid of the merge request to mutate",
+              "description": "The IID of the merge request to mutate",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -36972,7 +37236,7 @@
             },
             {
               "name": "iid",
-              "description": "The iid of the merge request to mutate",
+              "description": "The IID of the merge request to mutate",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -37098,7 +37362,7 @@
             },
             {
               "name": "iid",
-              "description": "The iid of the merge request to mutate",
+              "description": "The IID of the merge request to mutate",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -37228,7 +37492,7 @@
             },
             {
               "name": "iid",
-              "description": "The iid of the merge request to mutate",
+              "description": "The IID of the merge request to mutate",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -37506,7 +37770,7 @@
             },
             {
               "name": "iid",
-              "description": "The iid of the merge request to mutate",
+              "description": "The IID of the merge request to mutate",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -40895,6 +41159,33 @@
               "deprecationReason": null
             },
             {
+              "name": "oncallScheduleUpdate",
+              "description": null,
+              "args": [
+                {
+                  "name": "input",
+                  "description": null,
+                  "type": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "OncallScheduleUpdateInput",
+                      "ofType": null
+                    }
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "OncallScheduleUpdatePayload",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "pipelineCancel",
               "description": null,
               "args": [
@@ -42072,6 +42363,59 @@
               "deprecationReason": null
             },
             {
+              "name": "complianceFrameworks",
+              "description": "Compliance frameworks available to projects in this namespace. Available only when feature flag `ff_custom_compliance_frameworks` is enabled",
+              "args": [
+                {
+                  "name": "after",
+                  "description": "Returns the elements in the list that come after the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "before",
+                  "description": "Returns the elements in the list that come before the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "first",
+                  "description": "Returns the first _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "last",
+                  "description": "Returns the last _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "ComplianceFrameworkConnection",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "containsLockedProjects",
               "description": "Includes at least one project where the repository size exceeds the limit",
               "args": [
@@ -42590,7 +42934,7 @@
           "inputFields": [
             {
               "name": "id",
-              "description": "The global id of the namespace to mutate",
+              "description": "The global ID of the namespace to mutate",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -43724,6 +44068,152 @@
           "kind": "OBJECT",
           "name": "OncallScheduleDestroyPayload",
           "description": "Autogenerated return type of OncallScheduleDestroy",
+          "fields": [
+            {
+              "name": "clientMutationId",
+              "description": "A unique identifier for the client performing the mutation.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "errors",
+              "description": "Errors encountered during execution of the mutation.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "SCALAR",
+                      "name": "String",
+                      "ofType": null
+                    }
+                  }
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "oncallSchedule",
+              "description": "The on-call schedule",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "IncidentManagementOncallSchedule",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "INPUT_OBJECT",
+          "name": "OncallScheduleUpdateInput",
+          "description": "Autogenerated input type of OncallScheduleUpdate",
+          "fields": null,
+          "inputFields": [
+            {
+              "name": "projectPath",
+              "description": "The project to update the on-call schedule in",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "ID",
+                  "ofType": null
+                }
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "iid",
+              "description": "The on-call schedule internal ID to update",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "name",
+              "description": "The name of the on-call schedule",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "description",
+              "description": "The description of the on-call schedule",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "timezone",
+              "description": "The timezone of the on-call schedule",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "clientMutationId",
+              "description": "A unique identifier for the client performing the mutation.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            }
+          ],
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "OncallScheduleUpdatePayload",
+          "description": "Autogenerated return type of OncallScheduleUpdate",
           "fields": [
             {
               "name": "clientMutationId",
@@ -44963,7 +45453,7 @@
           "inputFields": [
             {
               "name": "id",
-              "description": "The id of the pipeline to mutate",
+              "description": "The ID of the pipeline to mutate",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -45195,7 +45685,7 @@
           "inputFields": [
             {
               "name": "id",
-              "description": "The id of the pipeline to mutate",
+              "description": "The ID of the pipeline to mutate",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -45395,7 +45885,7 @@
           "inputFields": [
             {
               "name": "id",
-              "description": "The id of the pipeline to mutate",
+              "description": "The ID of the pipeline to mutate",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -46233,6 +46723,24 @@
                 "kind": "OBJECT",
                 "name": "ContainerRepositoryConnection",
                 "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "containerRepositoriesCount",
+              "description": "Number of container repositories in the project",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                }
               },
               "isDeprecated": false,
               "deprecationReason": null
@@ -48536,6 +49044,24 @@
                   "defaultValue": null
                 },
                 {
+                  "name": "relations",
+                  "description": "Filter members by the given member relations",
+                  "type": {
+                    "kind": "LIST",
+                    "name": null,
+                    "ofType": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "ENUM",
+                        "name": "ProjectMemberRelation",
+                        "ofType": null
+                      }
+                    }
+                  },
+                  "defaultValue": "[DIRECT, INHERITED]"
+                },
+                {
                   "name": "after",
                   "description": "Returns the elements in the list that come after the specified cursor.",
                   "type": {
@@ -50264,6 +50790,41 @@
           "possibleTypes": null
         },
         {
+          "kind": "ENUM",
+          "name": "ProjectMemberRelation",
+          "description": "Project member relation",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
+          "enumValues": [
+            {
+              "name": "DIRECT",
+              "description": "Direct members",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "INHERITED",
+              "description": "Inherited members",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "DESCENDANTS",
+              "description": "Descendants members",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "INVITED_GROUPS",
+              "description": "Invited Groups members",
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "possibleTypes": null
+        },
+        {
           "kind": "OBJECT",
           "name": "ProjectPermissions",
           "description": null,
@@ -51382,7 +51943,7 @@
           "inputFields": [
             {
               "name": "id",
-              "description": "The id of the integration to mutate",
+              "description": "The ID of the integration to mutate",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -51484,7 +52045,7 @@
           "inputFields": [
             {
               "name": "id",
-              "description": "The id of the integration to mutate",
+              "description": "The ID of the integration to mutate",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -54931,7 +55492,7 @@
           "inputFields": [
             {
               "name": "awardableId",
-              "description": "The global id of the awardable resource",
+              "description": "The global ID of the awardable resource",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -55135,7 +55696,7 @@
           "inputFields": [
             {
               "name": "id",
-              "description": "The global id of the DiffNote to update",
+              "description": "The global ID of the DiffNote to update",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -62791,6 +63352,20 @@
               "deprecationReason": null
             },
             {
+              "name": "downloadPath",
+              "description": "URL for downloading the version's JSON file",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "id",
               "description": "ID of the Terraform state version",
               "args": [
@@ -62817,6 +63392,20 @@
               "type": {
                 "kind": "OBJECT",
                 "name": "CiJob",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "serial",
+              "description": "Serial number of the version",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Int",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -64202,7 +64791,7 @@
           "inputFields": [
             {
               "name": "id",
-              "description": "The global id of the todo to mark as done",
+              "description": "The global ID of the todo to mark as done",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -64308,7 +64897,7 @@
           "inputFields": [
             {
               "name": "id",
-              "description": "The global id of the todo to restore",
+              "description": "The global ID of the todo to restore",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -64343,7 +64932,7 @@
           "inputFields": [
             {
               "name": "ids",
-              "description": "The global ids of the todos to restore (a maximum of 50 is supported at once)",
+              "description": "The global IDs of the todos to restore (a maximum of 50 is supported at once)",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -64451,7 +65040,7 @@
             },
             {
               "name": "updatedIds",
-              "description": "The ids of the updated todo items. Deprecated in 13.2: Use todos",
+              "description": "The IDs of the updated todo items. Deprecated in 13.2: Use todos",
               "args": [
 
               ],
@@ -64768,7 +65357,7 @@
           "inputFields": [
             {
               "name": "awardableId",
-              "description": "The global id of the awardable resource",
+              "description": "The global ID of the awardable resource",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -65412,7 +66001,7 @@
             },
             {
               "name": "iid",
-              "description": "The iid of the alert to mutate",
+              "description": "The IID of the alert to mutate",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -65686,7 +66275,7 @@
           "inputFields": [
             {
               "name": "id",
-              "description": "The board global id.",
+              "description": "The board global ID",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -65710,7 +66299,7 @@
             },
             {
               "name": "hideBacklogList",
-              "description": "Whether or not backlog list is hidden.",
+              "description": "Whether or not backlog list is hidden",
               "type": {
                 "kind": "SCALAR",
                 "name": "Boolean",
@@ -65720,7 +66309,7 @@
             },
             {
               "name": "hideClosedList",
-              "description": "Whether or not closed list is hidden.",
+              "description": "Whether or not closed list is hidden",
               "type": {
                 "kind": "SCALAR",
                 "name": "Boolean",
@@ -65730,7 +66319,7 @@
             },
             {
               "name": "assigneeId",
-              "description": "The id of user to be assigned to the board.",
+              "description": "The ID of user to be assigned to the board",
               "type": {
                 "kind": "SCALAR",
                 "name": "UserID",
@@ -65740,7 +66329,7 @@
             },
             {
               "name": "milestoneId",
-              "description": "The id of milestone to be assigned to the board.",
+              "description": "The ID of milestone to be assigned to the board",
               "type": {
                 "kind": "SCALAR",
                 "name": "MilestoneID",
@@ -65750,7 +66339,7 @@
             },
             {
               "name": "weight",
-              "description": "The weight value to be assigned to the board.",
+              "description": "The weight value to be assigned to the board",
               "type": {
                 "kind": "SCALAR",
                 "name": "Int",
@@ -65778,7 +66367,7 @@
             },
             {
               "name": "labelIds",
-              "description": "The IDs of labels to be added to the board.",
+              "description": "The IDs of labels to be added to the board",
               "type": {
                 "kind": "LIST",
                 "name": null,
@@ -65938,7 +66527,7 @@
           "fields": [
             {
               "name": "board",
-              "description": "The board after mutation.",
+              "description": "The board after mutation",
               "args": [
 
               ],
@@ -66353,7 +66942,7 @@
           "inputFields": [
             {
               "name": "iid",
-              "description": "The iid of the epic to mutate",
+              "description": "The IID of the epic to mutate",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -66585,7 +67174,7 @@
           "inputFields": [
             {
               "name": "id",
-              "description": "The global id of the note to update",
+              "description": "The global ID of the note to update",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -67115,7 +67704,7 @@
           "inputFields": [
             {
               "name": "id",
-              "description": "The global id of the note to update",
+              "description": "The global ID of the note to update",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -67281,7 +67870,7 @@
             },
             {
               "name": "iid",
-              "description": "The iid of the requirement to update",
+              "description": "The IID of the requirement to update",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -67393,7 +67982,7 @@
           "inputFields": [
             {
               "name": "id",
-              "description": "The global id of the snippet to update",
+              "description": "The global ID of the snippet to update",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,

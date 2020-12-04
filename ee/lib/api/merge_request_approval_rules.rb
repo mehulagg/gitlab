@@ -4,7 +4,7 @@ module API
   class MergeRequestApprovalRules < ::API::Base
     before { authenticate_non_get! }
 
-    feature_category :code_review
+    feature_category :source_code_management
 
     helpers do
       def find_merge_request_approval_rule(merge_request, id)

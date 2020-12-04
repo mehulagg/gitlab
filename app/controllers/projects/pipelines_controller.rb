@@ -39,7 +39,7 @@ class Projects::PipelinesController < Projects::ApplicationController
       .new(project, current_user, index_params)
       .execute
       .page(params[:page])
-      .per(30)
+      .per(20)
 
     @pipelines_count = limited_pipelines_count(project)
 
@@ -214,7 +214,9 @@ class Projects::PipelinesController < Projects::ApplicationController
   def config_variables
     respond_to do |format|
       format.json do
-        render json: Ci::ListConfigVariablesService.new(@project, current_user).execute(params[:sha])
+        result = Ci::ListConfigVariablesService.new(@project, current_user).execute(params[:sha])
+
+        result.nil? ? head(:no_content) : render(json: result)
       end
     end
   end

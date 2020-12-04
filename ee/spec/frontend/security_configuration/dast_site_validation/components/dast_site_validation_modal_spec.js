@@ -51,9 +51,6 @@ describe('DastSiteValidationModal', () => {
         {},
         {
           propsData: defaultProps,
-          provide: {
-            glFeatures: { securityOnDemandScansHttpHeaderValidation: true },
-          },
           attrs: {
             static: true,
             visible: true,
@@ -287,22 +284,6 @@ describe('DastSiteValidationModal', () => {
     });
   });
 
-  describe('with the "securityOnDemandScansHttpHeaderValidation" feature flag disabled', () => {
-    beforeEach(() => {
-      createFullComponent({
-        provide: {
-          glFeatures: {
-            securityOnDemandScansHttpHeaderValidation: false,
-          },
-        },
-      });
-    });
-
-    it('does not render the http-header validation method', () => {
-      expect(findRadioInputForValidationMethod('header')).toBe(null);
-    });
-  });
-
   describe.each(validationMethods)('"%s" validation submission', validationMethod => {
     beforeEach(async () => {
       createFullComponent();
@@ -318,7 +299,7 @@ describe('DastSiteValidationModal', () => {
         findValidateButton().trigger('click');
 
         expect(requestHandlers.dastSiteValidationCreate).toHaveBeenCalledWith({
-          projectFullPath: fullPath,
+          fullPath,
           dastSiteTokenId: tokenId,
           validationPath: wrapper.vm.validationPath,
           validationStrategy: wrapper.vm.validationMethod,

@@ -8,6 +8,10 @@ if $".include?(File.expand_path('fast_spec_helper.rb', __dir__))
   abort 'Aborting...'
 end
 
+# Enable deprecation warnings by default and make them more visible
+# to developers to ease upgrading to newer Ruby versions.
+Warning[:deprecated] = true unless ENV.key?('SILENCE_DEPRECATIONS')
+
 require './spec/deprecation_toolkit_env'
 
 require './spec/simplecov_env'
@@ -326,6 +330,13 @@ RSpec.configure do |config|
 
   config.around(:example, :request_store) do |example|
     Gitlab::WithRequestStore.with_request_store { example.run }
+  end
+
+  config.before(:example, :request_store) do
+    # Clear request store before actually starting the spec (the
+    # `around` above will have the request store enabled for all
+    # `before` blocks)
+    RequestStore.clear!
   end
 
   config.around do |example|
