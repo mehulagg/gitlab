@@ -41,6 +41,9 @@ export default {
       return this.checkReportStatus(this.isLoadingCodequality, this.loadingCodequalityFailed);
     },
   },
+  i18n: {
+    subHeading: s__('ciReport|This report is all Code Quality issues in the source branch.'),
+  },
   methods: {
     ...mapActions(['setPage']),
     translateText(type) {
@@ -70,7 +73,9 @@ export default {
       :has-issues="hasCodequalityIssues"
       :component="$options.componentNames.CodequalityIssueBody"
       class="codequality-report"
-    />
+    >
+      <template v-if="hasCodequalityIssues" #sub-heading>{{ $options.i18n.subHeading }}</template>
+    </report-section>
     <pagination-links
       :change="setPage"
       :page-info="pageInfo"
