@@ -181,6 +181,22 @@ Plan.default.actual_limits.update!(group_hooks: 100)
 
 Set the limit to `0` to disable it.
 
+## Pull Mirroring Interval
+
+On GitLab.com, the [maximum number of seconds between pull refreshes](../user/gitlab_com/index.md#webhooks) is limited to 5 minutes.
+
+To set this limit on a self-managed installation, where the default is `300 `seconds or 5 minutes, run the following in the
+[GitLab Rails console](operations/rails_console.md#starting-a-rails-console-session):
+
+```ruby
+# If limits don't exist for the default plan, you can create one with:
+# Plan.default.create_limits!
+
+Plan.default.actual_limits.update!(pull_mirror_interval_seconds: 300)
+```
+
+Set the limit to `0` to disable it.
+
 ## Incoming emails from auto-responders
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/30327) in GitLab 12.4.
