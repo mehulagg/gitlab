@@ -9,37 +9,37 @@ module Gitlab
         STATUS_SUCCESS = 'success'
         STATUS_FAILED = 'failed'
 
-        attr_reader :base_reports, :head_reports
+        attr_reader :base_report, :head_report
 
-        def initialize(base_reports, head_reports)
-          @base_reports = base_reports || AccessibilityReports.new
-          @head_reports = head_reports
+        def initialize(base_report, head_report)
+          @base_report = base_report || AccessibilityReports.new
+          @head_report = head_report
         end
 
         def status
-          head_reports.errors_count > 0 ? STATUS_FAILED : STATUS_SUCCESS
+          head_report.errors_count > 0 ? STATUS_FAILED : STATUS_SUCCESS
         end
 
         def existing_errors
           strong_memoize(:existing_errors) do
-            base_reports.all_errors
+            base_report.all_errors & head_report.all_errors
           end
         end
 
         def new_errors
           strong_memoize(:new_errors) do
-            head_reports.all_errors - base_reports.all_errors
+            head_report.all_errors - base_report.all_errors
           end
         end
 
         def resolved_errors
           strong_memoize(:resolved_errors) do
-            base_reports.all_errors - head_reports.all_errors
+            base_report.all_errors - head_report.all_errors
           end
         end
 
         def errors_count
-          head_reports.errors_count
+          head_report.errors_count
         end
 
         def resolved_count
