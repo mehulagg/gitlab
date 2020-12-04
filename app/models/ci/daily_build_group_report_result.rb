@@ -6,6 +6,7 @@ module Ci
 
     REPORT_WINDOW = 90.days
     PARAM_TYPES = %w[coverage].freeze
+    MAX_ITEMS = 1000
 
     belongs_to :last_pipeline, class_name: 'Ci::Pipeline', foreign_key: :last_pipeline_id
     belongs_to :project

@@ -1,44 +1,73 @@
 # frozen_string_literal: true
 
+# DailyBuildGroupReportResultsFinder
+#
+# Used to filter DailyBuildGroupReportResults by set of params
+#
+# Arguments:
+#   current_user
+#   params:
+#     project: integer
+#     ref_path: string
+#     start_date: date
+#     limit: integer
+#
 module Ci
   class DailyBuildGroupReportResultsFinder
     include Gitlab::Allowable
 
-    def initialize(current_user:, project:, ref_path:, start_date:, end_date:, limit: nil)
+    attr_accessor :params
+    attr_reader :current_user
+
+
+    def initialize(params: {}, current_user: nil)
+      @params = params
       @current_user = current_user
-      @project = project
-      @ref_path = ref_path
-      @start_date = start_date
-      @end_date = end_date
-      @limit = limit
     end
 
     def execute
       return none unless query_allowed?
 
-      query
+      binding.pry
+      collection = Ci::DailyBuildGroupReportResult.recent_results(query_params, limit: params[:limit])
+      collection = filter_report_results(collection)
     end
 
-    protected
+    private
 
-    attr_reader :current_user, :project, :ref_path, :start_date, :end_date, :limit
+    def filter_report_results(collection)
+      collection = by_projects_ids(collection)
+      collection = by_coverage(collection)
+      collection = by_ref_path(collection)
+      collection = by_date(collection)
+      collection
+    end
 
-    def query
-      Ci::DailyBuildGroupReportResult.recent_results(
-        query_params,
-        limit: limit
-      )
+    def by_projects_ids(items)
+      params[:project_ids].present? ? items.by_projects(params[:project_ids]) : items
+    end
+
+    def by_coverage(items)
+      params[:coverage].present? ? items.with_coverage : items
+    end
+
+    def by_ref_path(items)
+      params[:ref_path].present? ? items.where(ref_path: params[:ref_path]) : items.with_default_branch
+    end
+
+    def by_date(items)
+      params[:start_date].present? ? items.by_date(params[:start_date]) : items
     end
 
     def query_allowed?
-      can?(current_user, :read_build_report_results, project)
+      can?(current_user, :read_build_report_results, params[:project])
     end
 
     def query_params
       {
-        project_id: project,
-        ref_path: ref_path,
-        date: start_date..end_date
+        project_id: params[:project],
+        ref_path: params[:ref_path] || nil,
+        date: Date.parse(params[:start_date])..Date.current
       }
     end
 

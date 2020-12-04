@@ -18,11 +18,14 @@ RSpec.describe Ci::DailyBuildGroupReportResultsFinder do
     subject do
       described_class.new(
         current_user: current_user,
-        project: project,
-        ref_path: ref_path,
-        start_date: '2020-03-09',
-        end_date: '2020-03-10',
-        limit: limit
+        params: {
+          project: project,
+          project_ids: [project.id],
+          coverage: true,
+          ref_path: ref_path,
+          start_date: '2020-03-09',
+          limit: limit
+        }
       ).execute
     end
 
