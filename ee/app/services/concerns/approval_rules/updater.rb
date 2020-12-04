@@ -13,6 +13,10 @@ module ApprovalRules
         log_audit_event(rule)
         rule.reset
 
+        # KERRI: Now, update all the MR rules related to this rule where
+        #   "modified_from_project_rule" is false and the MR is open
+        #
+
         success
       else
         error(rule.errors.messages)
