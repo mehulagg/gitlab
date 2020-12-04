@@ -1247,6 +1247,23 @@ If you choose an arbitrary order you do not have any predetermined master.
 As opposed to repmgr, once the nodes are reconfigured you do not need any further action or additional command to join
 the replicas.
 
+#### Customizing Patroni failover behavior
+
+Omnibus exposes several options allowing more control over the
+[Patroni restoration process](#recovering-the-patroni-cluster).
+
+Each option is shown below with its default value in the `gitlab.rb`.
+
+```ruby
+patroni['use_pg_rewind'] = true
+patroni['remove_data_directory_on_rewind_failure'] = false
+patroni['remove_data_directory_on_diverged_timelines'] = false
+```
+
+[Review the Patroni documentation carefully](https://patroni.readthedocs.io/en/latest/SETTINGS.html#postgresql)
+before making changes as some of the options carry a risk of potential data
+loss if not fully understood.
+
 #### Database authorization for Patroni
 
 Patroni uses Unix socket to manage PostgreSQL instance. Therefore, the connection from the `local` socket must be trusted.
