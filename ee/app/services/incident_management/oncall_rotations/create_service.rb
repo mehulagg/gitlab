@@ -12,9 +12,9 @@ module IncidentManagement
       # @param params - length_unit [String] The unit of the rotation length. (One of 'hours', days', 'weeks')
       # @param params - starts_at [DateTime] The datetime the rotation starts on.
       # @param params - participants [Array<hash>] An array of hashes defining participants of the on-call rotations.
-      #                 - participant [User] The user who is part of the rotation
-      #                 - color_palette [String] The color palette to assign to the on-call user, for example: "blue".
-      #                 - color_weight [String] The color weight to assign to for the on-call user, for example "500". Max 4 chars.
+      # @option opts  - participant [User] The user who is part of the rotation
+      # @option opts  - color_palette [String] The color palette to assign to the on-call user, for example: "blue".
+      # @option opts  - color_weight [String] The color weight to assign to for the on-call user, for example "500". Max 4 chars.
       def initialize(schedule, project, user, params)
         @schedule = schedule
         @project = project
