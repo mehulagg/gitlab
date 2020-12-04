@@ -8,7 +8,7 @@ RSpec.describe ReleaseHighlight do
 
   before do
     allow(Dir).to receive(:glob).with(Rails.root.join('data', 'whats_new', '*.yml')).and_return(fixture_dir_glob)
-    allow(cache_mock).to receive(:fetch).with('release_highlight:file_paths', expires_in: 1.hour).and_yield
+    allow(cache_mock).to receive(:fetch).with('release_highlight:file_paths-1607115725', expires_in: 1.hour).and_yield
   end
 
   after do
@@ -81,7 +81,7 @@ RSpec.describe ReleaseHighlight do
       subject { ReleaseHighlight.paginated }
 
       before do
-        expect(cache_mock).to receive(:fetch).with('release_highlight:items:file-20201225_01_05:page-1', expires_in: 1.hour).and_yield
+        expect(cache_mock).to receive(:fetch).with('release_highlight:items:file-20201225_01_05:page-1-1607115725', expires_in: 1.hour).and_yield
       end
 
       it 'returns platform specific items and uses a cache key' do
