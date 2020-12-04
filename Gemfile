@@ -466,7 +466,7 @@ group :ed25519 do
 end
 
 # Gitaly GRPC protocol definitions
-gem 'gitaly', '~> 13.7.0.pre.rc1'
+gem 'gitaly', git: 'https://gitlab.com/gitlab-org/gitaly.git', branch: 'parsing-commit-trailers'
 
 gem 'grpc', '~> 1.30.2'
 
