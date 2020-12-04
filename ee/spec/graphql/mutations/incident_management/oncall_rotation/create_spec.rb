@@ -14,7 +14,7 @@ RSpec.describe Mutations::IncidentManagement::OncallRotation::Create do
       starts_at: "2020-01-10 09:00".in_time_zone(schedule.timezone),
       rotation_length: {
         length: 1,
-        unit: ::IncidentManagement::OncallRotation.rotation_length_units[:days]
+        unit: ::IncidentManagement::OncallRotation.length_units[:days]
       },
       participants: [
         {
@@ -87,7 +87,7 @@ RSpec.describe Mutations::IncidentManagement::OncallRotation::Create do
           end
 
           it 'raises an error' do
-            expect { resolve }.to raise_error(ActiveRecord::RecordInvalid, /participant does not have access to the project/)
+            expect { resolve }.to raise_error(ActiveRecord::RecordInvalid, /Participant does not have access to the project/)
           end
         end
 
