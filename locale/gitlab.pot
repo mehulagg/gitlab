@@ -29476,7 +29476,7 @@ msgstr ""
 msgid "Update your group name, description, avatar, and visibility."
 msgstr ""
 
-msgid "Update your project name, topics, description and avatar."
+msgid "Update your project name, topics, description, and avatar."
 msgstr ""
 
 msgid "UpdateProject|Cannot rename project because it contains container registry tags!"
