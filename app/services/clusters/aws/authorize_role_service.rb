@@ -29,7 +29,7 @@ module Clusters
       rescue *ERRORS => e
         Gitlab::ErrorTracking.track_exception(e)
 
-        Response.new(:unprocessable_entity, {})
+        Response.new(:unprocessable_entity, response_details(e))
       end
 
       private
@@ -46,6 +46,18 @@ module Clusters
 
       def credentials
         Clusters::Aws::FetchCredentialsService.new(role).execute
+      end
+
+      def response_details(exception)
+        message =
+          case exception
+          when ActiveRecord::RecordInvalid
+            exception.message
+          when ::Aws::STS::Errors::AccessDenied
+            "Acesss denied: #{exception.message}"
+          end
+
+        { message: message }.compact
       end
     end
   end
