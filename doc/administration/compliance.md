@@ -33,7 +33,7 @@ GitLab offers a variety of settings, at various levels of the application, inten
   - MR approval rules
     - etc
   - Push rules
-    - Prohibit deletion of git tags with `git push` (`deny_delete_tag`)
+    - Prohibit deletion of Git tags with `git push` (`deny_delete_tag`)
     - Require commit author is a GitLab user (`member_check`)
     - Prohibit committing secrets to Git (`prevent_secrets`)
     - Require commit author email pattern (`author_email_regex`)
