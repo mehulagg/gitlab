@@ -48,6 +48,16 @@ class Feature
           project.feature_available?(:my_licensed_feature)
           namespace.feature_available?(:my_licensed_feature)
         EOS
+      },
+      experiment: {
+        description: 'Short lived, percentage-of-time-based, used specifically to run A/B experiments using Gitlab::Experimentation.',
+        optional: false,
+        rollout_issue: true,
+        ee_only: false,
+        default_enabled: false,
+        example: <<-EOS
+          Gitlab::Experimentation.in_experiment_group?(:my_experiment, subject: current_user)
+        EOS
       }
     }.freeze
 
