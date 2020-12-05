@@ -226,7 +226,7 @@ module Gitlab
         desc _('Add email participant(s)')
         explanation _('Adds email participant(s)')
         params 'email1 email2'
-        types Issuable
+        types Issue
         condition do
           parent &&
             current_user.can?(:"admin_#{quick_action_target.to_ability_name}", parent)

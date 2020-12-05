@@ -627,6 +627,9 @@ msgstr ""
 msgid "%{message} showing first %{warnings_displayed}"
 msgstr ""
 
+msgid "%{message}."
+msgstr ""
+
 msgid "%{milestone_name} (Past due)"
 msgstr ""
 
@@ -1654,6 +1657,9 @@ msgstr ""
 msgid "Add email address"
 msgstr ""
 
+msgid "Add email participant(s)"
+msgstr ""
+
 msgid "Add environment"
 msgstr ""
 
@@ -1808,6 +1814,9 @@ msgid "Adds a to do."
 msgstr ""
 
 msgid "Adds an issue to an epic."
+msgstr ""
+
+msgid "Adds email participant(s)"
 msgstr ""
 
 msgid "Adjust your filters/search criteria above. If you believe this may be an error, please refer to the %{linkStart}Geo Troubleshooting%{linkEnd} documentation for more information."
@@ -18620,6 +18629,9 @@ msgstr ""
 msgid "No due date"
 msgstr ""
 
+msgid "No email participants were added. Either none were provided, or they already exist."
+msgstr ""
+
 msgid "No endpoint provided"
 msgstr ""
 
@@ -31954,6 +31966,9 @@ msgid "added %{created_at_timeago}"
 msgstr ""
 
 msgid "added a Zoom call to this issue"
+msgstr ""
+
+msgid "added email %{noun} %{emails}"
 msgstr ""
 
 msgid "ago"
