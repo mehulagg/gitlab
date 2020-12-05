@@ -15,6 +15,7 @@ module IncidentManagement
     belongs_to :oncall_schedule, inverse_of: 'oncall_rotations', foreign_key: 'oncall_schedule_id'
     has_many :oncall_participants, inverse_of: :oncall_rotation
     has_many :participants, through: :oncall_participants
+    has_many :shifts, class_name: 'IncidentManagement::OncallShifts', foreign_key: :oncall_rotation_id
 
     validates :name, presence: true, uniqueness: { scope: :oncall_schedule_id }, length: { maximum: NAME_LENGTH }
     validates :starts_at, presence: true
@@ -22,5 +23,9 @@ module IncidentManagement
     validates :length_unit, presence: true
 
     delegate :project, to: :oncall_schedule
+
+    def shift_duration
+      length.send(length_unit)
+    end
   end
 end
