@@ -68,8 +68,23 @@ export const destroyScheduleResponseWithErrors = {
 
 export const updateScheduleResponse = {
   data: {
-    oncallScheduleDestroy: {
+    oncallScheduleUpdate: {
       errors: [],
+      oncallSchedule: {
+        __typename: 'IncidentManagementOncallSchedule',
+        iid: '37',
+        name: 'Test schedule 2',
+        description: 'Description 2 lives here',
+        timezone: 'Pacific/Honolulu',
+      },
+    },
+  },
+};
+
+export const updateScheduleResponseWithErrors = {
+  data: {
+    oncallScheduleUpdate: {
+      errors: ['Houston, we have a problem'],
       oncallSchedule: {
         __typename: 'IncidentManagementOncallSchedule',
         iid: '37',
