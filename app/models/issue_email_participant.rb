@@ -7,6 +7,8 @@ class IssueEmailParticipant < ApplicationRecord
   validates :issue, presence: true
   validate :validate_email_format
 
+  before_save { self.email = email.downcase }
+
   def validate_email_format
     self.errors.add(:email, I18n.t(:invalid, scope: 'valid_email.validations.email')) unless ValidateEmail.valid?(self.email)
   end

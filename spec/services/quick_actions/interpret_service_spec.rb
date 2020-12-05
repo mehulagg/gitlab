@@ -1761,6 +1761,36 @@ RSpec.describe QuickActions::InterpretService do
         end
       end
     end
+
+    context 'invite_email command' do
+      it_behaves_like 'empty command', "No email participants were added. Either none were provided, or they already exist." do
+        let(:content) { '/invite_email' }
+        let(:issuable) { issue }
+      end
+
+      context 'with existing email participant' do
+        let(:content) { '/invite_email a@gitlab.com' }
+        let(:issuable) { issue }
+
+        before do
+          issuable.issue_email_participants.create!(email: "a@gitlab.com")
+        end
+
+        it_behaves_like 'empty command', "No email participants were added. Either none were provided, or they already exist."
+      end
+
+      context 'with new email participants' do
+        let(:content) { '/invite_email a@gitlab.com b@gitlab.com' }
+        let(:issuable) { issue }
+
+        it 'returns message' do
+          _, _, message = service.execute(content, issuable)
+
+          expect(message).to eq('Added email participants a@gitlab.com and b@gitlab.com.')
+          expect(issue.issue_email_participants.count).to eq(2)
+        end
+      end
+    end
   end
 
   describe '#explain' do

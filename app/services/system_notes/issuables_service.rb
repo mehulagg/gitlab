@@ -354,9 +354,7 @@ module SystemNotes
       create_note(NoteSummary.new(noteable, project, author, body, action: 'duplicate'))
     end
 
-    def add_email_participants(emails)
-      noun = "participant".pluralize(emails.split(" ").count)
-      body = "added email #{noun} #{emails}"
+    def add_email_participants(body)
       create_note(NoteSummary.new(noteable, project, author, body))
     end
 

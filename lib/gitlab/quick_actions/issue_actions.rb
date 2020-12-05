@@ -225,17 +225,27 @@ module Gitlab
 
         desc _('Add email participant(s)')
         explanation _('Adds email participant(s)')
-        execution_message do |emails|
-          _("Added email %{noun} %{emails}.") % { noun: "participant".pluralize(emails.split(" ").count), emails: emails } if emails
-        end
         params 'email1 email2'
         types Issuable
         condition do
           parent &&
             current_user.can?(:"admin_#{quick_action_target.to_ability_name}", parent)
         end
-        command :invite_email do |emails|
-          @updates[:add_email_participants] = emails
+        command :invite_email do |emails = ""|
+          added_emails = []
+          emails.split(' ').each do |email|
+            added_emails << email if quick_action_target.add_email_participant(email)
+          end
+
+          if added_emails.any?
+            message = _("added email %{noun} %{emails}") % { noun: "participant".pluralize(added_emails.count), emails: added_emails.to_sentence }
+            SystemNoteService.add_email_participants(quick_action_target, quick_action_target.project, current_user, message)
+            # Changes added -> Added for the execution message
+            message[0] = message[0].capitalize
+            @execution_message[:invite_email] = _("%{message}.") % { message: message }
+          else
+            @execution_message[:invite_email] = _("No email participants were added. Either none were provided, or they already exist.")
+          end
         end
 
         private

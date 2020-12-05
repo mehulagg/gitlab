@@ -433,6 +433,13 @@ class Issue < ApplicationRecord
     moved_to || duplicated_to
   end
 
+  def add_email_participant(email)
+    return false unless self.issue_email_participants.find_by(email: email.downcase).nil?
+
+    self.issue_email_participants.create!(email: email)
+    true
+  end
+
   private
 
   def ensure_metrics
