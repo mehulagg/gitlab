@@ -83,7 +83,7 @@ module Gitlab
           end
 
           event :verification_failed do
-            transition verification_started: :verification_failed
+            transition [:verification_pending, :verification_started, :verification_succeeded, :verification_failed] => :verification_failed
           end
 
           event :verification_pending do
