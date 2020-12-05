@@ -31965,10 +31965,10 @@ msgstr ""
 msgid "added %{created_at_timeago}"
 msgstr ""
 
-msgid "added a Zoom call to this issue"
+msgid "added %{emails}"
 msgstr ""
 
-msgid "added email %{noun} %{emails}"
+msgid "added a Zoom call to this issue"
 msgstr ""
 
 msgid "ago"

@@ -238,7 +238,7 @@ module Gitlab
           end
 
           if added_emails.any?
-            message = _("added email %{noun} %{emails}") % { noun: "participant".pluralize(added_emails.count), emails: added_emails.to_sentence }
+            message = _("added %{emails}") % { emails: added_emails.to_sentence }
             SystemNoteService.add_email_participants(quick_action_target, quick_action_target.project, current_user, message)
             # Changes added -> Added for the execution message
             message[0] = message[0].capitalize

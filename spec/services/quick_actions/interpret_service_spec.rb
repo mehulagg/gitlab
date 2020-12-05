@@ -1786,7 +1786,7 @@ RSpec.describe QuickActions::InterpretService do
         it 'returns message' do
           _, _, message = service.execute(content, issuable)
 
-          expect(message).to eq('Added email participants a@gitlab.com and b@gitlab.com.')
+          expect(message).to eq('Added a@gitlab.com and b@gitlab.com.')
           expect(issue.issue_email_participants.count).to eq(2)
         end
       end
