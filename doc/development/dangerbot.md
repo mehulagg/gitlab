@@ -32,7 +32,7 @@ from the start of the merge request.
 
 ### Disadvantages
 
-- It's not obvious Danger will update the old comment, thus you need to
+- It's not obvious Danger updates the old comment, thus you need to
   pay attention to it if it is updated or not.
 
 ## Run Danger locally
@@ -48,13 +48,12 @@ bin/rake danger_local
 On startup, Danger reads a [`Dangerfile`](https://gitlab.com/gitlab-org/gitlab/blob/master/Dangerfile)
 from the project root. GitLab's Danger code is decomposed into a set of helpers
 and plugins, all within the [`danger/`](https://gitlab.com/gitlab-org/gitlab-foss/tree/master/danger/)
-subdirectory, so ours just tells Danger to load it all. Danger will then run
+subdirectory, so ours just tells Danger to load it all. Danger then runs
 each plugin against the merge request, collecting the output from each. A plugin
 may output notifications, warnings, or errors, all of which are copied to the
-CI job's log. If an error happens, the CI job (and so the entire pipeline) will
-be failed.
+CI job's log. If an error happens, the CI job (and so the entire pipeline) fails.
 
-On merge requests, Danger will also copy the output to a comment on the MR
+On merge requests, Danger also copies the output to a comment on the MR
 itself, increasing visibility.
 
 ## Development guidelines
@@ -85,7 +84,7 @@ Danger is well-suited to prototyping and rapidly iterating on solutions, so if
 what we want to build is unclear, a solution in Danger can be thought of as a
 trial run to gather information about a product area. If you're doing this, make
 sure the problem you're trying to solve, and the outcomes of that prototyping,
-are captured in an issue or epic as you go along. This will help us to address
+are captured in an issue or epic as you go along. This helps us to address
 the need as part of the product in a future version of GitLab!
 
 ### Implementation details
@@ -110,7 +109,7 @@ At present, we do this by putting the code in a module in `lib/gitlab/danger/...
 and including it in the matching `danger/plugins/...` file. Specs can then be
 added in `spec/lib/gitlab/danger/...`.
 
-You'll only know if your `Dangerfile` works by pushing the branch that contains
+To know if your `Dangerfile` works, push the branch that contains
 it to GitLab. This can be quite frustrating, as it significantly increases the
 cycle time when developing a new task, or trying to debug something in an
 existing one. If you've followed the guidelines above, most of your code can
@@ -156,10 +155,10 @@ at GitLab so far:
   To work around this, you can add an [environment
   variable](../ci/variables/README.md) called
   `DANGER_GITLAB_API_TOKEN` with a personal API token to your
-  fork. That way the danger comments will be made from CI using that
+  fork. That way the danger comments are made from CI using that
   API token instead.
   Making the variable
-  [masked](../ci/variables/README.md#mask-a-custom-variable) will make sure
+  [masked](../ci/variables/README.md#mask-a-custom-variable) makes sure
   it doesn't show up in the job logs. The variable cannot be
   [protected](../ci/variables/README.md#protect-a-custom-variable),
   as it needs to be present for all feature branches.

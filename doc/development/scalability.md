@@ -16,7 +16,7 @@ scalability and reliability.
 _[diagram source - GitLab employees only](https://docs.google.com/drawings/d/1RTGtuoUrE0bDT-9smoHbFruhEMI4Ys6uNrufe5IA-VI/edit)_
 
 The diagram above shows a GitLab reference architecture scaled up for 50,000
-users. We will discuss each component below.
+users. We discuss each component below.
 
 ## Components
 
@@ -70,7 +70,7 @@ dates](https://gitlab.com/groups/gitlab-org/-/epics/2023). For example,
 the `events` and `audit_events` table are natural candidates for this
 kind of partitioning.
 
-Sharding is likely more difficult and will require significant changes
+Sharding is likely more difficult and requires significant changes
 to the schema and application. For example, if we have to store projects
 in many different databases, we immediately run into the question, "How
 can we retrieve data across different projects?" One answer to this is
@@ -78,7 +78,7 @@ to abstract data access into API calls that abstract the database from
 the application, but this is a significant amount of work.
 
 There are solutions that may help abstract the sharding to some extent
-from the application. For example, we will want to look at [Citus
+from the application. For example, we want to look at [Citus
 Data](https://www.citusdata.com/product/community) closely. Citus Data
 provides a Rails plugin that adds a [tenant ID to ActiveRecord
 models](https://www.citusdata.com/blog/2017/01/05/easily-scale-out-multi-tenant-apps/).
@@ -100,10 +100,9 @@ systems.
 
 A recent [database checkup shows a breakdown of the table sizes on
 GitLab.com](https://gitlab.com/gitlab-com/gl-infra/infrastructure/-/issues/8022#master-1022016101-8).
-Since `merge_request_diff_files` contains over 1 TB of data, we will want to
+Since `merge_request_diff_files` contains over 1 TB of data, we want to
 reduce/eliminate this table first. GitLab has support for [storing diffs in
-object storage](../administration/merge_request_diffs.md), which we [will
-want to do on
+object storage](../administration/merge_request_diffs.md), which we [want to do on
 GitLab.com](https://gitlab.com/gitlab-com/gl-infra/infrastructure/-/issues/7356).
 
 #### High availability
@@ -128,7 +127,7 @@ the read replicas. [Omnibus ships with both repmgr and Patroni](../administratio
 GitLab EE has [application support for load balancing using read
 replicas](../administration/database_load_balancing.md). This load
 balancer does some smart things that are not traditionally available in
-standard load balancers. For example, the application will only consider a
+standard load balancers. For example, the application only considers a
 replica if its replication lag is low (e.g. WAL data behind by < 100
 megabytes).
 
@@ -140,7 +139,7 @@ post](https://about.gitlab.com/blog/2017/10/02/scaling-the-gitlab-database/).
 As PostgreSQL forks a backend process for each request, PostgreSQL has a
 finite limit of connections that it can support, typically around 300 by
 default. Without a connection pooler like PgBouncer, it's quite possible to
-hit connection limits. Once the limits are reached, then GitLab will generate
+hit connection limits. Once the limits are reached, then GitLab generates
 errors or slow down as it waits for a connection to be available.
 
 #### High availability
