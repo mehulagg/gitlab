@@ -60,8 +60,7 @@ module Geo
     # Calculates checksum and asks the model/registry to update verification
     # state.
     def verify
-      # Deduplicate verification job
-      return unless model_record.verification_started?
+      model_record.verification_started! unless model_record.verification_started?
 
       calculation_started_at = Time.current
       checksum = model_record.calculate_checksum

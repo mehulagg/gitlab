@@ -147,37 +147,23 @@ RSpec.shared_examples 'a verifiable replicator' do
         stub_primary_node
       end
 
-      context 'when verification was started' do
-        before do
-          model_record.verification_started!
-        end
+      context 'when the checksum succeeds' do
+        it 'delegates checksum calculation and the state change to model_record' do
+          expect(model_record).to receive(:calculate_checksum).and_return('abc123')
+          expect(model_record).to receive(:verification_succeeded_with_checksum!).with('abc123', kind_of(Time))
 
-        context 'when the checksum succeeds' do
-          it 'delegates checksum calculation and the state change to model_record' do
-            expect(model_record).to receive(:calculate_checksum).and_return('abc123')
-            expect(model_record).to receive(:verification_succeeded_with_checksum!).with('abc123', kind_of(Time))
-
-            replicator.verify
-          end
-        end
-
-        context 'when an error is raised during calculate_checksum' do
-          it 'passes the error message' do
-            error = StandardError.new('Some exception')
-            allow(model_record).to receive(:calculate_checksum) do
-              raise error
-            end
-
-            expect(model_record).to receive(:verification_failed_with_message!).with('Error calculating the checksum', error)
-
-            replicator.verify
-          end
+          replicator.verify
         end
       end
 
-      context 'when verification was not started' do
-        it 'does not call calculate_checksum!' do
-          expect(model_record).not_to receive(:calculate_checksum)
+      context 'when an error is raised during calculate_checksum' do
+        it 'passes the error message' do
+          error = StandardError.new('Some exception')
+          allow(model_record).to receive(:calculate_checksum) do
+            raise error
+          end
+
+          expect(model_record).to receive(:verification_failed_with_message!).with('Error calculating the checksum', error)
 
           replicator.verify
         end
