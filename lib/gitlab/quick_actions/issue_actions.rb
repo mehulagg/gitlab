@@ -223,6 +223,21 @@ module Gitlab
           @execution_message[:remove_zoom] = result.message
         end
 
+        desc _('Add email participant(s)')
+        explanation _('Adds email participant(s)')
+        execution_message do |emails|
+          _("Added email %{noun} %{emails}.") % { noun: "participant".pluralize(emails.split(" ").count), emails: emails } if emails
+        end
+        params 'email1 email2'
+        types Issuable
+        condition do
+          parent &&
+            current_user.can?(:"admin_#{quick_action_target.to_ability_name}", parent)
+        end
+        command :invite_email do |emails|
+          @updates[:add_email_participants] = emails
+        end
+
         private
 
         def zoom_link_service

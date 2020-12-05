@@ -46,6 +46,7 @@ The following quick actions are applicable to descriptions, discussions and thre
 | `/duplicate <#issue>`                 | ✓     |               |      | Close this issue and mark as a duplicate of another issue. **(CORE)** Also, mark both as related. **(STARTER)**                                          |
 | `/epic <epic>`                        | ✓     |               |      | Add to epic `<epic>`. The `<epic>` value should be in the format of `&epic`, `group&epic`, or a URL to an epic. **(PREMIUM)**  |
 | `/estimate <<W>w <DD>d <hh>h <mm>m>`  | ✓     | ✓             |      | Set time estimate. For example, `/estimate 1w 3d 2h 14m`.                                                                        |
+| `/invite_email email1 email2`         | ✓     |               |      | Add one or more e-mail participants |
 | `/iteration *iteration:"iteration name"`     | ✓     |               |      | Set iteration. For example, to set the `Late in July` iteration: `/iteration *iteration:"Late in July"` ([introduced in GitLab 13.1](https://gitlab.com/gitlab-org/gitlab/-/issues/196795)). **(STARTER)** |
 | `/label ~label1 ~label2`              | ✓     | ✓             | ✓    | Add one or more labels. Label names can also start without a tilde (`~`), but mixed syntax is not supported.                      |
 | `/lock`                               | ✓     | ✓             |      | Lock the discussions.                                                                                                                 |

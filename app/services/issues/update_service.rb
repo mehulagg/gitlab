@@ -13,6 +13,7 @@ module Issues
     end
 
     def update(issue)
+      add_email_participants_from_quick_action(issue)
       create_merge_request_from_quick_action
 
       super
@@ -143,6 +144,21 @@ module Issues
       return unless create_merge_request_params
 
       MergeRequests::CreateFromIssueService.new(project, current_user, create_merge_request_params).execute
+    end
+
+    def add_email_participants_from_quick_action(issue)
+      add_email_participants_params = params.delete(:add_email_participants)
+      return unless add_email_participants_params
+
+      added_emails = []
+      add_email_participants_params.split(' ').each do |email|
+        unless issue.issue_email_participants.find_by(email: email)
+          issue.issue_email_participants.create!(email: email)
+          added_participants << email
+        end
+      end
+
+      SystemNoteService.add_email_participants(issue, issue.project, current_user, added_participants) if added_emails.any?
     end
 
     def handle_milestone_change(issue)
