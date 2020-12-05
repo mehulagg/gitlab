@@ -28,7 +28,11 @@ module EE
           # report no matching merge requests. To avoid this, we check
           # the write location to ensure the replica can make this query.
           track_session_metrics do
-            ::Gitlab::Database::LoadBalancing::Sticking.unstick_or_continue_sticking(:project, @project.id) # rubocop:disable Gitlab/ModuleWithInstanceVariables
+            if ::Feature.enabled?(:load_balancing_atomic_replica)
+              ::Gitlab::Database::LoadBalancing::Sticking.update_sticking_and_host(:project, @project.id) # rubocop:disable Gitlab/ModuleWithInstanceVariables
+            else
+              ::Gitlab::Database::LoadBalancing::Sticking.unstick_or_continue_sticking(:project, @project.id) # rubocop:disable Gitlab/ModuleWithInstanceVariables
+            end
           end
 
           super

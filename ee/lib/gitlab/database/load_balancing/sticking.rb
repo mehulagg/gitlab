@@ -38,10 +38,32 @@ module Gitlab
           end
         end
 
+        # Checks if we were able to caught-up with all the work and
+        # selects one of the available hosts if it has. This ensures
+        # atomic selection of the host to prevent the host list changing
+        # in another thread.
+        #
+        # Returns true if all available hosts have caught up.
+        def self.set_next_host_if_all_caught_up(namespace, id)
+          location = last_write_location_for(namespace, id)
+
+          return true unless location
+
+          load_balancer.set_next_host_if_all_caught_up(location).tap do |caught_up|
+            unstick(namespace, id) if caught_up
+          end
+        end
+
         # Sticks to the primary if necessary, otherwise unsticks an object (if
         # it was previously stuck to the primary).
         def self.unstick_or_continue_sticking(namespace, id)
           Session.current.use_primary! unless all_caught_up?(namespace, id)
+        end
+
+        def self.update_sticking_and_host(namespace, id)
+          caught_up = set_next_host_if_all_caught_up(namespace, id)
+
+          Session.current.use_primary unless caught_up
         end
 
         # Starts sticking to the primary for the given namespace and id, using

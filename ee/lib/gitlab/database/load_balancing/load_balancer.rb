@@ -128,6 +128,17 @@ module Gitlab
           @host_list.hosts.all? { |host| host.caught_up?(location) }
         end
 
+        def set_next_host_if_all_caught_up(location)
+          host_list, next_host = @host_list.hosts_and_use_next
+
+          return false unless next_host
+          return false unless host_list.hosts.all? { |host| host.caught_up?(location) }
+
+          RequestStore[CACHE_KEY] = next_host
+
+          true
+        end
+
         # Yields a block, retrying it upon error using an exponential backoff.
         def retry_with_backoff(retries = 3, time = 2)
           retried = 0

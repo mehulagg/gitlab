@@ -19,6 +19,13 @@ module Gitlab
           @mutex.synchronize { @hosts }
         end
 
+        def hosts_and_use_next
+          @mutex.synchronize do
+            next_host = unsafe_next_host
+            [@hosts, next_host]
+          end
+        end
+
         def length
           @mutex.synchronize { @hosts.length }
         end
@@ -51,20 +58,24 @@ module Gitlab
         # hosts were available.
         def next_host
           @mutex.synchronize do
-            break if @hosts.empty?
+            unsafe_next_host
+          end
+        end
 
-            started_at = @index
+        def unsafe_next_host
+          return if @hosts.empty?
 
-            loop do
-              host = @hosts[@index]
-              @index = (@index + 1) % @hosts.length
+          started_at = @index
 
-              break host if host.online?
+          loop do
+            host = @hosts[@index]
+            @index = (@index + 1) % @hosts.length
 
-              # Return nil once we have cycled through all hosts and none were
-              # available.
-              break if @index == started_at
-            end
+            return host if host.online?
+
+            # Return nil once we have cycled through all hosts and none were
+            # available.
+            return if @index == started_at
           end
         end
 

@@ -1,0 +1,8 @@
+---
+name: load_balancing_atomic_replica
+introduced_by_url: 
+rollout_issue_url: 
+milestone: '13.7'
+type: development
+group: 
+default_enabled: false
