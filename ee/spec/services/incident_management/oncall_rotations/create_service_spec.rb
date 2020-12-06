@@ -13,7 +13,7 @@ RSpec.describe IncidentManagement::OncallRotations::CreateService do
     [
       {
         user: current_user,
-        color_palette: 'black',
+        color_palette: 'blue',
         color_weight: '500'
       }
     ]
