@@ -14,9 +14,10 @@ RSpec.describe RepositoryForkWorker do
   describe "#perform" do
     let(:project) { create(:project, :public, :repository) }
     let(:forked_project) { create(:project, :repository, :import_scheduled) }
+    let(:create_repository) { true }
 
     before do
-      fork_project(project, forked_project.creator, target_project: forked_project, repository: true)
+      fork_project(project, forked_project.creator, target_project: forked_project, repository: create_repository)
     end
 
     shared_examples 'RepositoryForkWorker performing' do
@@ -102,6 +103,32 @@ RSpec.describe RepositoryForkWorker do
         end
 
         expect { perform! }.to raise_error(StandardError, error_message)
+      end
+
+      context 'with a pool repository', :clean_gitlab_redis_cache do
+        let(:forked_project) { create(:project, :import_scheduled) }
+        let!(:pool) { create(:pool_repository, :ready, source_project: project) }
+        let(:create_repository) { false }
+        let(:target_repository) { forked_project.repository }
+
+        it 'performs a fast fork by linking the object pool and doing a fetch' do
+          expect(forked_project.pool_repository).to be_nil
+          expect(target_repository.empty?).to be true
+          expect(target_repository.has_visible_content?).to be_falsey
+          expect(target_repository.branch_names).to be_empty
+          expect(target_repository.root_ref).to be_nil
+
+          perform!
+
+          # Reload the project since the repository state is memoized
+          target_project = Project.find(forked_project.id)
+          repository = target_project.repository
+          expect(target_project.pool_repository).to be_present
+          expect(repository.empty?).to be false
+          expect(repository.has_visible_content?).to be_truthy
+          expect(repository.branch_names).to be_present
+          expect(repository.root_ref).to be_present
+        end
       end
     end
 

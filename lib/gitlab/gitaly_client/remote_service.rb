@@ -43,6 +43,22 @@ module Gitlab
         GitalyClient.call(@storage, :remote_service, :remove_remote, request, timeout: GitalyClient.long_timeout).result
       end
 
+      def fetch_internal_remote(source_repository)
+        request = Gitaly::FetchInternalRemoteRequest.new(
+          repository: @gitaly_repo,
+          remote_repository: source_repository.gitaly_repository
+        )
+
+        GitalyClient.call(
+          @storage,
+          :remote_service,
+          :fetch_internal_remote,
+          request,
+          remote_storage: source_repository.storage,
+          timeout: GitalyClient.long_timeout
+        )
+      end
+
       def find_remote_root_ref(remote_name)
         request = Gitaly::FindRemoteRootRefRequest.new(
           repository: @gitaly_repo,

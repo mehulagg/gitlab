@@ -1,0 +1,8 @@
+---
+name: fast_fork
+introduced_by_url: 
+rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/291745
+milestone: '13.7'
+type: development
+group: 
+default_enabled: false
