@@ -8,6 +8,8 @@ RSpec.describe IncidentManagement::OncallParticipant do
 
   subject { build(:incident_management_oncall_participant, oncall_rotation: rotation, user: user) }
 
+  it { is_expected.to be_valid }
+
   before_all do
     rotation.project.add_developer(user)
   end
@@ -20,8 +22,8 @@ RSpec.describe IncidentManagement::OncallParticipant do
   describe '.validations' do
     it { is_expected.to validate_presence_of(:oncall_rotation) }
     it { is_expected.to validate_presence_of(:participant) }
-    it { is_expected.to validate_length_of(:color_weight).is_at_most(4) }
-    it { is_expected.to validate_length_of(:color_palette).is_at_most(10) }
+    it { is_expected.to validate_presence_of(:color_weight) }
+    it { is_expected.to validate_presence_of(:color_palette) }
 
     context 'when the participant already exists in the rotation' do
       before do

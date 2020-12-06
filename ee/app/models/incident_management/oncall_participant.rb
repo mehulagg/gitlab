@@ -6,12 +6,15 @@ module IncidentManagement
 
     self.table_name = 'incident_management_oncall_participants'
 
+    enum color_palette: Enums::DataVisualizationPalette.colors
+    enum color_weight: Enums::DataVisualizationPalette.weights
+
     belongs_to :oncall_rotation, foreign_key: :oncall_rotation_id
     belongs_to :participant, class_name: 'User', foreign_key: :user_id
 
     validates :oncall_rotation, presence: true
-    validates :color_palette, length: { maximum: 10 }
-    validates :color_weight, length: { maximum: 4 }
+    validates :color_palette, presence: true
+    validates :color_weight, presence: true
     validates :participant, presence: true, uniqueness: { scope: :oncall_rotation_id }
     validate  :participant_can_read_project, if: :participant, on: :create
 
