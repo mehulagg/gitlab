@@ -11,6 +11,7 @@ RSpec.describe IncidentManagement::OncallSchedulePolicy do
 
   before do
     stub_feature_flags(oncall_schedules_mvc: project)
+    stub_licensed_features(oncall_schedules: true)
   end
 
   describe 'rules' do
@@ -21,14 +22,14 @@ RSpec.describe IncidentManagement::OncallSchedulePolicy do
         project.add_reporter(user)
       end
 
-      it { is_expected.to be_disallowed :read_incident_management_oncall_schedule }
+      it { is_expected.to be_allowed :read_incident_management_oncall_schedule }
 
-      context 'licensed feature enabled' do
+      context 'licensed feature disabled' do
         before do
-          stub_licensed_features(oncall_schedules: true)
+          stub_licensed_features(oncall_schedules: false)
         end
 
-        it { is_expected.to be_allowed :read_incident_management_oncall_schedule }
+        it { is_expected.to be_disallowed :read_incident_management_oncall_schedule }
       end
     end
   end
