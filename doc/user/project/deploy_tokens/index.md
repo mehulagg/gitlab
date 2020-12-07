@@ -149,6 +149,9 @@ belong either to the specific group or to one of its subgroups.
 <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
 For an overview, see [Group Deploy Tokens](https://youtu.be/8kxTJvaD9ks).
 
+The Group Deploy Tokens UI is now accessible under **Settings > Repository**,
+not **Settings > CI/CD** as indicated in the video.
+
 To use a group deploy token:
 
 1. [Create](#creating-a-deploy-token) a deploy token for a group.
@@ -174,7 +177,7 @@ those variables:
 docker login -u $CI_DEPLOY_USER -p $CI_DEPLOY_PASSWORD $CI_REGISTRY
 ```
 
-NOTE: **Note:**
+NOTE:
 The special handling for the `gitlab-deploy-token` deploy token is not currently
 implemented for group deploy tokens. For the deploy token to be available for
 CI/CD jobs, it must be created at the project level. For details, see

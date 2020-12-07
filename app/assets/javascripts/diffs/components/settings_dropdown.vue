@@ -1,16 +1,22 @@
 <script>
 import { mapActions, mapGetters, mapState } from 'vuex';
-import { GlButtonGroup, GlButton, GlDropdown } from '@gitlab/ui';
+import { GlButtonGroup, GlButton, GlDropdown, GlFormCheckbox } from '@gitlab/ui';
+
+import eventHub from '../event_hub';
+import { EVT_VIEW_FILE_BY_FILE } from '../constants';
+import { SETTINGS_DROPDOWN } from '../i18n';
 
 export default {
+  i18n: SETTINGS_DROPDOWN,
   components: {
     GlButtonGroup,
     GlButton,
     GlDropdown,
+    GlFormCheckbox,
   },
   computed: {
     ...mapGetters('diffs', ['isInlineView', 'isParallelView']),
-    ...mapState('diffs', ['renderTreeList', 'showWhitespace']),
+    ...mapState('diffs', ['renderTreeList', 'showWhitespace', 'viewDiffsFileByFile']),
   },
   methods: {
     ...mapActions('diffs', [
@@ -19,6 +25,9 @@ export default {
       'setRenderTreeList',
       'setShowWhitespace',
     ]),
+    toggleFileByFile() {
+      eventHub.$emit(EVT_VIEW_FILE_BY_FILE, { setting: !this.viewDiffsFileByFile });
+    },
   },
 };
 </script>
@@ -83,6 +92,16 @@ export default {
         />
         {{ __('Show whitespace changes') }}
       </label>
+    </div>
+    <div class="gl-mt-3 gl-px-3">
+      <gl-form-checkbox
+        data-testid="file-by-file"
+        class="gl-mb-0"
+        :checked="viewDiffsFileByFile"
+        @input="toggleFileByFile"
+      >
+        {{ $options.i18n.fileByFile }}
+      </gl-form-checkbox>
     </div>
   </gl-dropdown>
 </template>

@@ -527,34 +527,6 @@ RSpec.describe ProjectPolicy do
     end
   end
 
-  describe 'permissions for security bot' do
-    let_it_be(:current_user) { create(:user, :security_bot) }
-
-    let(:project) { private_project }
-
-    context 'when auto_fix feature is enabled' do
-      before do
-        build(:project_security_setting, project: project)
-      end
-
-      it { is_expected.to be_allowed(:reporter_access) }
-      it { is_expected.to be_allowed(:push_code) }
-      it { is_expected.to be_allowed(:create_merge_request_from) }
-      it { is_expected.to be_allowed(:create_vulnerability_feedback) }
-      it { is_expected.to be_allowed(:create_merge_request_in) }
-      it { is_expected.to be_allowed(:read_project) }
-    end
-
-    context 'when auto_fix feature is disabled' do
-      it { is_expected.to be_disallowed(:reporter_access) }
-      it { is_expected.to be_disallowed(:push_code) }
-      it { is_expected.to be_disallowed(:create_merge_request_from) }
-      it { is_expected.to be_disallowed(:create_vulnerability_feedback) }
-      it { is_expected.to be_disallowed(:create_merge_request_in) }
-      it { is_expected.to be_disallowed(:read_project) }
-    end
-  end
-
   describe 'read_threat_monitoring' do
     context 'when threat monitoring feature is available' do
       before do

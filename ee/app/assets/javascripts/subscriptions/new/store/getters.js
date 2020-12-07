@@ -45,9 +45,14 @@ export const vat = (state, getters) => state.taxRate * getters.totalExVat;
 export const totalAmount = (_, getters) => getters.totalExVat + getters.vat;
 
 export const name = (state, getters) => {
-  if (state.isSetupForCompany && state.organizationName) return state.organizationName;
-  else if (getters.isGroupSelected) return getters.selectedGroupName;
-  else if (state.isSetupForCompany) return s__('Checkout|Your organization');
+  if (state.isSetupForCompany && state.organizationName) {
+    return state.organizationName;
+  } else if (getters.isGroupSelected && getters.isSelectedGroupPresent) {
+    return getters.selectedGroupName;
+  } else if (state.isSetupForCompany) {
+    return s__('Checkout|Your organization');
+  }
+
   return state.fullName;
 };
 
@@ -56,9 +61,20 @@ export const usersPresent = state => state.numberOfUsers > 0;
 export const isGroupSelected = state =>
   state.selectedGroup !== null && state.selectedGroup !== NEW_GROUP;
 
+export const isSelectedGroupPresent = (state, getters) => {
+  return (
+    getters.isGroupSelected && state.groupData.some(group => group.value === state.selectedGroup)
+  );
+};
+
 export const selectedGroupUsers = (state, getters) => {
-  if (!getters.isGroupSelected) return 1;
-  return state.groupData.find(group => group.value === state.selectedGroup).numberOfUsers;
+  if (!getters.isGroupSelected) {
+    return 1;
+  } else if (getters.isSelectedGroupPresent) {
+    return state.groupData.find(group => group.value === state.selectedGroup).numberOfUsers;
+  }
+
+  return null;
 };
 
 export const selectedGroupName = (state, getters) => {

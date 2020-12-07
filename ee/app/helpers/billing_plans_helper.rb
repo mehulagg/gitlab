@@ -32,7 +32,7 @@ module BillingPlansHelper
   end
 
   def experiment_tracking_data_for_button_click(button_label)
-    return {} unless Gitlab::Experimentation.enabled?(:contact_sales_btn_in_app)
+    return {} unless Gitlab::Experimentation.active?(:contact_sales_btn_in_app)
 
     {
       track: {

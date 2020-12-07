@@ -55,7 +55,6 @@ module EE
 
         field :compliance_frameworks, ::Types::ComplianceManagement::ComplianceFrameworkType.connection_type,
               description: 'Compliance frameworks associated with the project',
-              resolver: ::Resolvers::ComplianceFrameworksResolver,
               null: true
 
         field :security_dashboard_path, GraphQL::STRING_TYPE,
@@ -81,10 +80,16 @@ module EE
         field :dast_site_validation,
               ::Types::DastSiteValidationType,
               null: true,
+              resolver: ::Resolvers::DastSiteValidationResolver.single,
+              description: 'DAST Site Validation associated with the project. Will always return `null` ' \
+                           'if `security_on_demand_scans_site_validation` is disabled'
+
+        field :dast_site_validations,
+              ::Types::DastSiteValidationType.connection_type,
+              null: true,
               resolver: ::Resolvers::DastSiteValidationResolver,
-              description: 'DAST Site Validation associated with the project' do
-                argument :target_url, GraphQL::STRING_TYPE, required: true, description: 'target URL of the DAST Site Validation'
-              end
+              description: 'DAST Site Validations associated with the project. Will always return no nodes ' \
+                           'if `security_on_demand_scans_site_validation` is disabled'
 
         field :cluster_agent,
               ::Types::Clusters::AgentType,
@@ -140,6 +145,18 @@ module EE
 
         def security_dashboard_path
           Rails.application.routes.url_helpers.project_security_dashboard_index_path(object)
+        end
+
+        def compliance_frameworks
+          BatchLoader::GraphQL.for(object.id).batch(default_value: []) do |project_ids, loader|
+            results = ::ComplianceManagement::Framework.with_projects(project_ids)
+
+            results.each do |framework|
+              framework.project_ids.each do |project_id|
+                loader.call(project_id) { |xs| xs << framework }
+              end
+            end
+          end
         end
       end
     end

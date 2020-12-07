@@ -118,7 +118,7 @@ sequenceDiagram
 1. `GitLab::UsageData.to_json` [cascades down](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/usage_data.rb#L22) to ~400+ other counter method calls.
 1. The response of all methods calls are [merged together](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/usage_data.rb#L14) into a single JSON payload in `GitLab::UsageData.to_json`.
 1. The JSON payload is then [posted to the Versions application]( https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/services/submit_usage_ping_service.rb#L20)
-   If a firewall exception is needed, the required URL depends on several things. If 
+   If a firewall exception is needed, the required URL depends on several things. If
    the hostname is `version.gitlab.com`, the protocol is `TCP`, and the port number is `443`,
    the required URL is <https://version.gitlab.com/>.
 
@@ -137,7 +137,7 @@ There are several types of counters which are all found in `usage_data.rb`:
 - **Alternative Counters:** Used for settings and configurations
 - **Redis Counters:** Used for in-memory counts.
 
-NOTE: **Note:**
+NOTE:
 Only use the provided counter methods. Each counter method contains a built in fail safe to isolate each counter to avoid breaking the entire Usage Ping.
 
 ### Why batch counting
@@ -265,6 +265,45 @@ Examples of implementation:
 - Using Redis methods [`INCR`](https://redis.io/commands/incr), [`GET`](https://redis.io/commands/get), and [`Gitlab::UsageDataCounters::WikiPageCounter`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/usage_data_counters/wiki_page_counter.rb)
 - Using Redis methods [`HINCRBY`](https://redis.io/commands/hincrby), [`HGETALL`](https://redis.io/commands/hgetall), and [`Gitlab::UsageCounters::PodLogs`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/usage_counters/pod_logs.rb)
 
+##### UsageData API Tracking
+
+<!-- There's nearly identical content in `##### Adding new events`. If you fix errors here, you may need to fix the same errors in the other location. -->
+
+1. Track event using `UsageData` API
+
+   Increment event count using ordinary Redis counter, for given event name.
+
+   Tracking events using the `UsageData` API requires the `usage_data_api` feature flag to be enabled, which is enabled by default.
+
+   API requests are protected by checking for a valid CSRF token.
+
+   In order to be able to increment the values the related feature `usage_data_<event_name>` should be enabled.
+
+   ```plaintext
+   POST /usage_data/increment_counter
+   ```
+
+   | Attribute | Type | Required | Description |
+   | :-------- | :--- | :------- | :---------- |
+   | `event` | string | yes | The event name it should be tracked |
+
+   Response
+
+   - `200` if event was tracked
+   - `400 Bad request` if event parameter is missing
+   - `401 Unauthorized` if user is not authenticated
+   - `403 Forbidden` for invalid CSRF token provided
+
+1. Track events using JavaScript/Vue API helper which calls the API above
+
+   Note that `usage_data_api` and `usage_data_#{event_name}` should be enabled in order to be able to track events
+
+   ```javascript
+   import api from '~/api';
+
+   api.trackRedisCounterEvent('my_already_defined_event_name'),
+   ```
+
 #### Redis HLL Counters
 
 With `Gitlab::UsageDataCounters::HLLRedisCounter` we have available data structures used to count unique values.
@@ -387,6 +426,8 @@ Implemented using Redis methods [PFADD](https://redis.io/commands/pfadd) and [PF
      track_usage_event(:incident_management_incident_created, current_user.id)
    ```
 
+<!-- There's nearly identical content in `##### UsageData API Tracking`. If you find / fix errors here, you may need to fix errors in that section too. -->
+
 1. Track event using `UsageData` API
 
    Increment unique users count using Redis HLL, for given event name.
@@ -395,7 +436,9 @@ Implemented using Redis methods [PFADD](https://redis.io/commands/pfadd) and [PF
 
    API requests are protected by checking for a valid CSRF token.
 
-   In order to be able to increment the values the related feature `usage_data<event_name>` should be enabled.
+   In order to increment the values, the related feature `usage_data_<event_name>` should be
+   set to `default_enabled: true`. For more information, see
+   [Feature flags in development of GitLab](../feature_flags/index.md).
 
    ```plaintext
    POST /usage_data/increment_unique_users
@@ -418,7 +461,10 @@ Implemented using Redis methods [PFADD](https://redis.io/commands/pfadd) and [PF
 
    Example usage for an existing event already defined in [known events](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/usage_data_counters/known_events/):
 
-   Note that `usage_data_api` and `usage_data_#{event_name}` should be enabled in order to be able to track events
+   Usage Data API is behind  `usage_data_api` feature flag which, as of GitLab 13.7, is
+   now set to `default_enabled: true`.
+
+   Each event tracked using Usage Data API is behind a feature flag `usage_data_#{event_name}` which should be `default_enabled: true`
 
    ```javascript
    import api from '~/api';
@@ -472,20 +518,20 @@ Next, get the unique events for the current week.
 We have the following recommendations for [Adding new events](#adding-new-events):
 
 - Event aggregation: weekly.
-- Key expiry time: 
+- Key expiry time:
   - Daily: 29 days.
   - Weekly: 42 days.
 - When adding new metrics, use a [feature flag](../../operations/feature_flags.md) to control the impact.
-- For feature flags triggered by another service, set `default_enabled: false`, 
+- For feature flags triggered by another service, set `default_enabled: false`,
   - Events can be triggered using the `UsageData` API, which helps when there are > 10 events per change
 
 ##### Enable/Disable Redis HLL tracking
 
 Events are tracked behind [feature flags](../feature_flags/index.md) due to concerns for Redis performance and scalability.
 
-For a full list of events and coresponding feature flags see, [known_events](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/usage_data_counters/known_events/) files.
+For a full list of events and corresponding feature flags see, [known_events](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/usage_data_counters/known_events/) files.
 
-To enable or disable tracking for specific event within <https://gitlab.com> or <https://staging.gitlab.com>, run commands such as the following to
+To enable or disable tracking for specific event within <https://gitlab.com> or <https://about.staging.gitlab.com>, run commands such as the following to
 [enable or disable the corresponding feature](../feature_flags/index.md).
 
 ```shell
@@ -577,7 +623,7 @@ In those cases where operational metrics should be part of Usage Ping, a databas
 to provide useful data. Instead, Prometheus might be more appropriate, since most of GitLab's architectural
 components publish metrics to it that can be queried back, aggregated, and included as usage data.
 
-NOTE: **Note:**
+NOTE:
 Prometheus as a data source for Usage Ping is currently only available for single-node Omnibus installations
 that are running the [bundled Prometheus](../../administration/monitoring/prometheus/index.md) instance.
 
@@ -661,7 +707,7 @@ We also use `#database-lab` and [explain.depesz.com](https://explain.depesz.com/
 
 ### 5. Add the metric definition
 
-When adding, changing, or updating metrics, please update the [Event Dictionary's **Usage Ping** table](https://about.gitlab.com/handbook/product/product-analytics-guide#event-dictionary).
+When adding, changing, or updating metrics, please update the [Event Dictionary's **Usage Ping** table](https://about.gitlab.com/handbook/product/product-analytics-guide/#event-dictionary).
 
 ### 6. Add new metric to Versions Application
 
@@ -735,7 +781,7 @@ appear to be associated to any of the services running, since they all appear to
 > - It's [deployed behind a feature flag](../../user/feature_flags.md), disabled by default.
 > - It's enabled on GitLab.com.
 
-CAUTION: **Warning:**
+WARNING:
 This feature is intended solely for internal GitLab use.
 
 In order to add data for aggregated metrics into Usage Ping payload you should add corresponding definition into  [`aggregated_metrics.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/usage_data_counters/aggregated_metrics.yml) file. Each aggregate definition includes following parts:
@@ -863,44 +909,6 @@ The following is example content of the Usage Ping payload.
     "adapter": "postgresql",
     "version": "9.6.15",
     "pg_system_id": 6842684531675334351
-  },
-  "avg_cycle_analytics": {
-    "issue": {
-      "average": 999,
-      "sd": 999,
-      "missing": 999
-    },
-    "plan": {
-      "average": null,
-      "sd": 999,
-      "missing": 999
-    },
-    "code": {
-      "average": null,
-      "sd": 999,
-      "missing": 999
-    },
-    "test": {
-      "average": null,
-      "sd": 999,
-      "missing": 999
-    },
-    "review": {
-      "average": null,
-      "sd": 999,
-      "missing": 999
-    },
-    "staging": {
-      "average": null,
-      "sd": 999,
-      "missing": 999
-    },
-    "production": {
-      "average": null,
-      "sd": 999,
-      "missing": 999
-    },
-    "total": 999
   },
   "analytics_unique_visits": {
     "g_analytics_contribution": 999,

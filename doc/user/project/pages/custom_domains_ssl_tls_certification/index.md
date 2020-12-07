@@ -84,7 +84,7 @@ server running on your instance).
 
 ![DNS A record pointing to GitLab.com Pages server](img/dns_add_new_a_record_example_updated_2018.png)
 
-CAUTION: **Caution:**
+WARNING:
 Note that if you use your root domain for your GitLab Pages website
 **only**, and if your domain registrar supports this feature, you can
 add a DNS apex `CNAME` record instead of an `A` record. The main
@@ -157,7 +157,7 @@ Once you have added all the DNS records:
 As soon as your domain becomes active, your website will be available
 through your domain name.
 
-CAUTION: **Caution:**
+WARNING:
 Considering GitLab instances with domain verification enabled,
 if the domain cannot be verified for 7 days, it will be removed
 from the GitLab project.
@@ -167,7 +167,7 @@ from the GitLab project.
 > - Domain verification is **required for GitLab.com users**;
   for GitLab self-managed instances, your GitLab administrator has the option
   to [disabled custom domain verification](../../../../administration/pages/index.md#custom-domain-verification).
-> - [DNS propagation may take some time (up to 24h)](https://www.inmotionhosting.com/support/domain-names/dns-nameserver-changes/domain-names-dns-changes/),
+> - [DNS propagation may take some time (up to 24h)](https://www.inmotionhosting.com/support/domain-names/dns-nameserver-changes/complete-guide-to-dns-records/),
   although it's usually a matter of minutes to complete. Until it does, verification
   will fail and attempts to visit your domain will respond with a 404.
 > - Once your domain has been verified, leave the verification record

@@ -17,6 +17,10 @@ export const groupNodes = [
   },
 ];
 
+export const groupIds = ['foo', 'bar'];
+
+export const groupGids = ['gid://gitlab/Group/foo', 'gid://gitlab/Group/bar'];
+
 export const nextGroupNode = {
   __typename: 'Group',
   full_name: 'Baz',
@@ -64,3 +68,9 @@ export const devopsAdoptionTableHeaders = [
   'Scanning',
   '',
 ];
+
+export const segmentName = 'Foooo';
+
+export const genericErrorMessage = 'An error occured while saving the segment. Please try again.';
+
+export const dataErrorMessage = 'Name already taken.';

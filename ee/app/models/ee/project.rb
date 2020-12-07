@@ -43,6 +43,7 @@ module EE
 
       has_one :status_page_setting, inverse_of: :project, class_name: 'StatusPage::ProjectSetting'
       has_one :compliance_framework_setting, class_name: 'ComplianceManagement::ComplianceFramework::ProjectSettings', inverse_of: :project
+      has_many :compliance_management_frameworks, through: :compliance_framework_setting, source: 'compliance_management_framework'
       has_one :security_setting, class_name: 'ProjectSecuritySetting'
       has_one :vulnerability_statistic, class_name: 'Vulnerabilities::Statistic'
 
@@ -98,6 +99,8 @@ module EE
       has_many :sourced_pipelines, class_name: 'Ci::Sources::Project', foreign_key: :source_project_id
 
       has_many :incident_management_oncall_schedules, class_name: 'IncidentManagement::OncallSchedule', inverse_of: :project
+
+      elastic_index_dependant_association :issues, on_change: :visibility_level
 
       scope :with_shared_runners_limit_enabled, -> do
         if ::Ci::Runner.has_shared_runners_with_non_zero_public_cost?
@@ -179,8 +182,7 @@ module EE
       delegate :shared_runners_minutes, :shared_runners_seconds, :shared_runners_seconds_last_reset,
         to: :statistics, allow_nil: true
 
-      delegate :actual_shared_runners_minutes_limit,
-               :shared_runners_remaining_minutes_below_threshold?, to: :shared_runners_limit_namespace
+      delegate :actual_shared_runners_minutes_limit, to: :shared_runners_limit_namespace
 
       delegate :last_update_succeeded?, :last_update_failed?,
         :ever_updated_successfully?, :hard_failed?,
@@ -346,10 +348,6 @@ module EE
       feature_available?(:jira_issues_integration)
     end
 
-    def jira_vulnerabilities_integration_available?
-      ::Feature.enabled?(:jira_for_vulnerabilities, self, default_enabled: false) && feature_available?(:jira_vulnerabilities_integration)
-    end
-
     def multiple_approval_rules_available?
       feature_available?(:multiple_approval_rules)
     end
@@ -431,6 +429,12 @@ module EE
       return 0 unless feature_available?(:merge_request_approvers)
 
       super
+    end
+
+    def applicable_approval_rules_for_user(user_id, target_branch = nil)
+      visible_approval_rules(target_branch: target_branch).select do |rule|
+        rule.approvers.pluck(:id).include?(user_id)
+      end
     end
 
     def visible_approval_rules(target_branch: nil)

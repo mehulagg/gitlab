@@ -15,7 +15,8 @@ module EE
           end
 
           params :negatable_issue_filter_params_ee do
-            optional :iteration_id, types: [Integer, String], integer_none_any: true,
+            optional :iteration_id, types: [Integer, String],
+                     integer_or_custom_value: [IssuableFinder::Params::FILTER_NONE, IssuableFinder::Params::FILTER_ANY, ::Iteration::Current.title.downcase],
                      desc: 'Return issues which are assigned to the iteration with the given ID'
             optional :iteration_title, type: String,
                      desc: 'Return issues which are assigned to the iteration with the given title'

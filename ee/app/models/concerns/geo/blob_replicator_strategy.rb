@@ -48,18 +48,18 @@ module Geo
       carrierwave_uploader.path
     end
 
-    private
-
-    def download
-      ::Geo::BlobDownloadService.new(replicator: self).execute
-    end
-
     def replicate_destroy(event_data)
       ::Geo::FileRegistryRemovalService.new(
         replicable_name,
         model_record_id,
         event_data[:blob_path]
       ).execute
+    end
+
+    private
+
+    def download
+      ::Geo::BlobDownloadService.new(replicator: self).execute
     end
 
     def deleted_params

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module QA
-  RSpec.describe 'Manage' do
+  RSpec.describe 'Manage', quarantine: { only: :production, issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/290717', type: :bug } do
     describe 'prevent forking outside group' do
       let!(:group_for_fork) do
         Resource::Sandbox.fabricate_via_api! do |sandbox_group|

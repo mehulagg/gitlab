@@ -17,5 +17,11 @@ module Vulnerabilities
     validates :summary, presence: true, length: { maximum: 200 }
     validates :file, presence: true
     validates :checksum, presence: true
+
+    scope :by_checksum, -> (checksum) { where(checksum: checksum) }
+
+    def retrieve_upload(_identifier, paths)
+      Upload.find_by(model: self, path: paths)
+    end
   end
 end

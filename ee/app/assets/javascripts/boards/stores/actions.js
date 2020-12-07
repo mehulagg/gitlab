@@ -22,13 +22,13 @@ import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import eventHub from '~/boards/eventhub';
 
 import createGqClient, { fetchPolicies } from '~/lib/graphql';
-import epicsSwimlanesQuery from '../queries/epics_swimlanes.query.graphql';
-import issueSetEpic from '../queries/issue_set_epic.mutation.graphql';
-import issueSetWeight from '../queries/issue_set_weight.mutation.graphql';
-import listsIssuesQuery from '~/boards/queries/lists_issues.query.graphql';
-import issueMoveListMutation from '../queries/issue_move_list.mutation.graphql';
-import listUpdateLimitMetrics from '../queries/list_update_limit_metrics.mutation.graphql';
-import updateBoardEpicUserPreferencesMutation from '../queries/updateBoardEpicUserPreferences.mutation.graphql';
+import epicsSwimlanesQuery from '../graphql/epics_swimlanes.query.graphql';
+import issueSetEpicMutation from '../graphql/issue_set_epic.mutation.graphql';
+import issueSetWeightMutation from '../graphql/issue_set_weight.mutation.graphql';
+import listsIssuesQuery from '~/boards/graphql/lists_issues.query.graphql';
+import issueMoveListMutation from '../graphql/issue_move_list.mutation.graphql';
+import listUpdateLimitMetricsMutation from '../graphql/list_update_limit_metrics.mutation.graphql';
+import updateBoardEpicUserPreferencesMutation from '../graphql/updateBoardEpicUserPreferences.mutation.graphql';
 
 const notImplemented = () => {
   /* eslint-disable-next-line @gitlab/require-i18n-strings */
@@ -98,7 +98,8 @@ export default {
 
     if (
       filters.iterationId === IterationFilterType.any ||
-      filters.iterationId === IterationFilterType.none
+      filters.iterationId === IterationFilterType.none ||
+      filters.iterationId === IterationFilterType.current
     ) {
       filterParams.iterationWildcardId = filters.iterationId.toUpperCase();
     }
@@ -198,7 +199,7 @@ export default {
     if (getters.shouldUseGraphQL) {
       return gqlClient
         .mutate({
-          mutation: listUpdateLimitMetrics,
+          mutation: listUpdateLimitMetricsMutation,
           variables: {
             input: {
               listId,
@@ -339,7 +340,7 @@ export default {
 
   setActiveIssueEpic: async ({ getters }, input) => {
     const { data } = await gqlClient.mutate({
-      mutation: issueSetEpic,
+      mutation: issueSetEpicMutation,
       variables: {
         input: {
           iid: String(getters.activeIssue.iid),
@@ -358,7 +359,7 @@ export default {
 
   setActiveIssueWeight: async ({ commit, getters }, input) => {
     const { data } = await gqlClient.mutate({
-      mutation: issueSetWeight,
+      mutation: issueSetWeightMutation,
       variables: {
         input: {
           iid: String(getters.activeIssue.iid),

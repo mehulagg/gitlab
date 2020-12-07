@@ -13,7 +13,7 @@ The API can be explored interactively using the [GraphiQL IDE](../index.md#graph
 Each table below documents a GraphQL type. Types match loosely to models, but not all
 fields and methods on a model are available via GraphQL.
 
-CAUTION: **Caution:**
+WARNING:
 Fields that are deprecated are marked with **{warning-solid}**.
 Items (fields, enums, etc) that have been removed according to our [deprecation process](../index.md#deprecation-process) can be found
 in [Removed Items](../removed_items.md).
@@ -236,16 +236,16 @@ Represents a project or group board.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `assignee` | User | The board assignee. |
-| `epics` | BoardEpicConnection | Epics associated with board issues. |
-| `hideBacklogList` | Boolean | Whether or not backlog list is hidden. |
-| `hideClosedList` | Boolean | Whether or not closed list is hidden. |
+| `assignee` | User | The board assignee |
+| `epics` | BoardEpicConnection | Epics associated with board issues |
+| `hideBacklogList` | Boolean | Whether or not backlog list is hidden |
+| `hideClosedList` | Boolean | Whether or not closed list is hidden |
 | `id` | ID! | ID (global ID) of the board |
 | `labels` | LabelConnection | Labels of the board |
 | `lists` | BoardListConnection | Lists of the board |
-| `milestone` | Milestone | The board milestone. |
+| `milestone` | Milestone | The board milestone |
 | `name` | String | Name of the board |
-| `weight` | Int | Weight of the board. |
+| `weight` | Int | Weight of the board |
 
 ### BoardEpic
 
@@ -366,6 +366,45 @@ Represents the total number of issues and their weights for a particular day.
 | `date` | ISO8601Date! | Date for burnup totals |
 | `scopeCount` | Int! | Number of issues as of this day |
 | `scopeWeight` | Int! | Total weight of issues as of this day |
+
+### CiConfig
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| `errors` | String! => Array | Linting errors |
+| `mergedYaml` | String | Merged CI config YAML |
+| `stages` | CiConfigStage! => Array | Stages of the pipeline |
+| `status` | CiConfigStatus | Status of linting, can be either valid or invalid |
+
+### CiConfigGroup
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| `jobs` | CiConfigJob! => Array | Jobs in group |
+| `name` | String | Name of the job group |
+| `size` | Int | Size of the job group |
+
+### CiConfigJob
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| `groupName` | String | Name of the job group |
+| `name` | String | Name of the job |
+| `needs` | CiConfigNeed! => Array | Builds that must complete before the jobs run |
+| `stage` | String | Name of the job stage |
+
+### CiConfigNeed
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| `name` | String | Name of the need |
+
+### CiConfigStage
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| `groups` | CiConfigGroup! => Array | Groups of jobs for the stage |
+| `name` | String | Name of the stage |
 
 ### CiGroup
 
@@ -507,6 +546,9 @@ Represents a ComplianceFramework associated with a Project.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
+| `color` | String! | Hexadecimal representation of compliance framework's label color |
+| `description` | String! | Description of the compliance framework |
+| `id` | ID! | Compliance framework ID |
 | `name` | String! | Name of the compliance framework |
 
 ### ConfigureSastPayload
@@ -550,6 +592,7 @@ A container repository.
 | `location` | String! | URL of the container repository. |
 | `name` | String! | Name of the container repository. |
 | `path` | String! | Path of the container repository. |
+| `project` | Project! | Project of the container registry |
 | `status` | ContainerRepositoryStatus | Status of the container repository. |
 | `tagsCount` | Int! | Number of tags associated with this image. |
 | `updatedAt` | Time! | Timestamp when the container repository was updated. |
@@ -568,6 +611,7 @@ Details of a container repository.
 | `location` | String! | URL of the container repository. |
 | `name` | String! | Name of the container repository. |
 | `path` | String! | Path of the container repository. |
+| `project` | Project! | Project of the container registry |
 | `status` | ContainerRepositoryStatus | Status of the container repository. |
 | `tags` | ContainerRepositoryTagConnection | Tags of the container repository |
 | `tagsCount` | Int! | Number of tags associated with this image. |
@@ -827,6 +871,7 @@ Represents a DAST Site Profile.
 | ----- | ---- | ----------- |
 | `editPath` | String | Relative web path to the edit page of a site profile |
 | `id` | DastSiteProfileID! | ID of the site profile |
+| `normalizedTargetUrl` | String | Normalized URL of the target to be scanned |
 | `profileName` | String | The name of the site profile |
 | `targetUrl` | String | The URL of the target to be scanned |
 | `userPermissions` | DastSiteProfilePermissions! | Permissions for the current user on the resource |
@@ -1051,6 +1096,15 @@ Autogenerated return type of DestroyBoard.
 | Field | Type | Description |
 | ----- | ---- | ----------- |
 | `board` | Board | The board after mutation |
+| `clientMutationId` | String | A unique identifier for the client performing the mutation. |
+| `errors` | String! => Array | Errors encountered during execution of the mutation. |
+
+### DestroyComplianceFrameworkPayload
+
+Autogenerated return type of DestroyComplianceFramework.
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
 | `clientMutationId` | String | A unique identifier for the client performing the mutation. |
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 
@@ -1459,6 +1513,7 @@ Autogenerated return type of EpicTreeReorder.
 | `board` | Board | A single board of the group |
 | `boards` | BoardConnection | Boards of the group |
 | `codeCoverageActivities` | CodeCoverageActivityConnection | Represents the code coverage activity for this group |
+| `complianceFrameworks` | ComplianceFrameworkConnection | Compliance frameworks available to projects in this namespace. Available only when feature flag `ff_custom_compliance_frameworks` is enabled |
 | `containerRepositories` | ContainerRepositoryConnection | Container repositories of the group |
 | `containerRepositoriesCount` | Int! | Number of container repositories in the group |
 | `containsLockedProjects` | Boolean! | Includes at least one project where the repository size exceeds the limit |
@@ -2183,6 +2238,7 @@ Contains statistics about a milestone.
 | ----- | ---- | ----------- |
 | `actualRepositorySizeLimit` | Float | Size limit for repositories in the namespace in bytes |
 | `additionalPurchasedStorageSize` | Float | Additional storage purchased for the root namespace in bytes |
+| `complianceFrameworks` | ComplianceFrameworkConnection | Compliance frameworks available to projects in this namespace. Available only when feature flag `ff_custom_compliance_frameworks` is enabled |
 | `containsLockedProjects` | Boolean! | Includes at least one project where the repository size exceeds the limit |
 | `description` | String | Description of the namespace |
 | `descriptionHtml` | String | The GitLab Flavored Markdown rendering of `description` |
@@ -2259,6 +2315,16 @@ Autogenerated return type of OncallScheduleCreate.
 ### OncallScheduleDestroyPayload
 
 Autogenerated return type of OncallScheduleDestroy.
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| `clientMutationId` | String | A unique identifier for the client performing the mutation. |
+| `errors` | String! => Array | Errors encountered during execution of the mutation. |
+| `oncallSchedule` | IncidentManagementOncallSchedule | The on-call schedule |
+
+### OncallScheduleUpdatePayload
+
+Autogenerated return type of OncallScheduleUpdate.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
@@ -2399,7 +2465,8 @@ Autogenerated return type of PipelineRetry.
 | `dastScannerProfiles` | DastScannerProfileConnection | The DAST scanner profiles associated with the project |
 | `dastSiteProfile` | DastSiteProfile | DAST Site Profile associated with the project |
 | `dastSiteProfiles` | DastSiteProfileConnection | DAST Site Profiles associated with the project |
-| `dastSiteValidation` | DastSiteValidation | DAST Site Validation associated with the project |
+| `dastSiteValidation` | DastSiteValidation | DAST Site Validation associated with the project. Will always return `null` if `security_on_demand_scans_site_validation` is disabled |
+| `dastSiteValidations` | DastSiteValidationConnection | DAST Site Validations associated with the project. Will always return no nodes if `security_on_demand_scans_site_validation` is disabled |
 | `description` | String | Short description of the project |
 | `descriptionHtml` | String | The GitLab Flavored Markdown rendering of `description` |
 | `environment` | Environment | A single environment of the project |
@@ -3216,8 +3283,10 @@ Autogenerated return type of TerraformStateUnlock.
 | ----- | ---- | ----------- |
 | `createdAt` | Time! | Timestamp the version was created |
 | `createdByUser` | User | The user that created this version |
+| `downloadPath` | String | URL for downloading the version's JSON file |
 | `id` | ID! | ID of the Terraform state version |
 | `job` | CiJob | The job that created this version |
+| `serial` | Int | Serial number of the version |
 | `updatedAt` | Time! | Timestamp the version was updated |
 
 ### TerraformStateVersionRegistry
@@ -3907,6 +3976,15 @@ Types of blob viewers.
 | `rich` |  |
 | `simple` |  |
 
+### CiConfigStatus
+
+Values for YAML processor result.
+
+| Value | Description |
+| ----- | ----------- |
+| `INVALID` | The configuration file is not valid |
+| `VALID` | The configuration file is valid |
+
 ### CommitActionMode
 
 Mode of a commit action.
@@ -3989,6 +4067,7 @@ Status of a container repository.
 | ----- | ----------- |
 | `FAILED_VALIDATION` | Site validation process finished but failed |
 | `INPROGRESS_VALIDATION` | Site validation process is in progress |
+| `NONE` | No site validation exists |
 | `PASSED_VALIDATION` | Site validation process finished successfully |
 | `PENDING_VALIDATION` | Site validation process has not started |
 
@@ -4202,6 +4281,7 @@ Iteration ID wildcard values.
 | Value | Description |
 | ----- | ----------- |
 | `ANY` | An iteration is assigned |
+| `CURRENT` | Current iteration |
 | `NONE` | No iteration is assigned |
 
 ### JobArtifactFileType

@@ -123,31 +123,6 @@ html.group-epics-roadmap-html {
   }
 }
 
-.roadmap-shell {
-  position: relative;
-  height: 100%;
-  width: 100%;
-  overflow-x: auto;
-
-  .skeleton-loader {
-    position: absolute;
-    top: $header-item-height;
-    width: $details-cell-width;
-    height: 100%;
-    padding-top: $gl-padding-top;
-    padding-left: $gl-padding;
-    z-index: 4;
-
-    &::after {
-      height: 100%;
-    }
-  }
-
-  &.prevent-vertical-scroll {
-    overflow-y: hidden;
-  }
-}
-
 .roadmap-timeline-section .timeline-header-blank::after,
 .epics-list-section .epic-details-cell::after,
 .milestones-list-section .milestones-list-title::after,
@@ -322,10 +297,6 @@ html.group-epics-roadmap-html {
   &:last-child {
     border-right: 0;
   }
-}
-
-.epic-bar-wrapper {
-  position: relative;
 }
 
 .epic-bar {

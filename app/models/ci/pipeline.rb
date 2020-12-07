@@ -775,12 +775,10 @@ module Ci
           variables.append(key: 'CI_MERGE_REQUEST_SOURCE_BRANCH_SHA', value: source_sha.to_s)
           variables.append(key: 'CI_MERGE_REQUEST_TARGET_BRANCH_SHA', value: target_sha.to_s)
 
-          if Feature.enabled?(:ci_mr_diff_variables, project)
-            diff = self.merge_request_diff
-            if diff.present?
-              variables.append(key: 'CI_MERGE_REQUEST_DIFF_ID', value: diff.id.to_s)
-              variables.append(key: 'CI_MERGE_REQUEST_DIFF_BASE_SHA', value: diff.base_commit_sha)
-            end
+          diff = self.merge_request_diff
+          if diff.present?
+            variables.append(key: 'CI_MERGE_REQUEST_DIFF_ID', value: diff.id.to_s)
+            variables.append(key: 'CI_MERGE_REQUEST_DIFF_BASE_SHA', value: diff.base_commit_sha)
           end
 
           variables.concat(merge_request.predefined_variables)
@@ -833,9 +831,8 @@ module Ci
     end
 
     def execute_hooks
-      data = pipeline_data
-      project.execute_hooks(data, :pipeline_hooks)
-      project.execute_services(data, :pipeline_hooks)
+      project.execute_hooks(pipeline_data, :pipeline_hooks) if project.has_active_hooks?(:pipeline_hooks)
+      project.execute_services(pipeline_data, :pipeline_hooks) if project.has_active_services?(:pipeline_hooks)
     end
 
     # All the merge requests for which the current pipeline runs/ran against
@@ -975,7 +972,7 @@ module Ci
 
     def coverage_reports
       Gitlab::Ci::Reports::CoverageReports.new.tap do |coverage_reports|
-        latest_report_builds(Ci::JobArtifact.coverage_reports).each do |build|
+        latest_report_builds(Ci::JobArtifact.coverage_reports).includes(:project).find_each do |build|
           build.collect_coverage_reports!(coverage_reports)
         end
       end
@@ -1161,7 +1158,9 @@ module Ci
     end
 
     def pipeline_data
-      Gitlab::DataBuilder::Pipeline.build(self)
+      strong_memoize(:pipeline_data) do
+        Gitlab::DataBuilder::Pipeline.build(self)
+      end
     end
 
     def merge_request_diff_sha
