@@ -14,6 +14,7 @@ module EE
       override :list_creation_attrs
       def list_creation_attrs
         additional_attrs = %i[assignee_id milestone_id]
+        additional_attrs << :iteration_id if Feature.enabled?(:iteration_board_lists, board_parent)
         additional_attrs += EE_MAX_LIMITS_PARAMS if wip_limits_available?
 
         super + additional_attrs
@@ -28,7 +29,7 @@ module EE
 
       override :serialization_attrs
       def serialization_attrs
-        super.merge(user: true, milestone: true).tap do |attrs|
+        super.merge(user: true, milestone: true, iteration: true).tap do |attrs|
           attrs[:only] += EE_MAX_LIMITS_PARAMS if wip_limits_available?
         end
       end

@@ -16,6 +16,8 @@ module EE
             :assignee
           elsif params.key?('milestone_id')
             :milestone
+          elsif params.key?('iteration_id')
+            :iteration
           else
             super
           end
@@ -29,6 +31,8 @@ module EE
               find_user(board)
             when :milestone
               find_milestone(board)
+            when :iteration
+              find_iteration(board)
             else
               super
             end
@@ -51,6 +55,11 @@ module EE
         def find_milestone(board)
           milestones = milestone_finder(board).execute
           milestones.find_by(id: params['milestone_id']) # rubocop: disable CodeReuse/ActiveRecord
+        end
+
+        def find_iteration(board)
+          parent_params = ::IterationsFinder.params_for_parent(board.resource_parent, include_ancestors: true)
+          ::IterationsFinder.new(current_user, parent_params).find_by(id: params['iteration_id']) # rubocop: disable CodeReuse/ActiveRecord
         end
 
         # rubocop: disable CodeReuse/ActiveRecord

@@ -37,6 +37,7 @@ module Mutations
 
         private
 
+        # Overridden in EE
         def create_list(board, params)
           create_list_service =
             ::Boards::Lists::CreateService.new(board.resource_parent, current_user, params)
