@@ -12,16 +12,24 @@ The following installation steps are the recommended way of installing GitLab's 
 
 The following steps are recommended to install and use Container Network Security through GitLab:
 
-1. [Install and connect at least one runner to GitLab](https://docs.gitlab.com/runner/)
-1. [Create a group](https://docs.gitlab.com/ee/user/group/#create-a-new-group)
-1. [Connect a Kubernetes cluster to the group](https://docs.gitlab.com/ee/user/project/clusters/add_remove_clusters.html)
-1. [Create a cluster management project and associate it with the Kubernetes cluster](https://docs.gitlab.com/ee/user/clusters/management_project.html)
-1. Install and configure an Ingress node
-  1. [Install the Ingress node via CI/CD (GMAv2)](https://docs.gitlab.com/ee/user/clusters/applications.html#install-ingress-using-gitlab-cicd)
-  1. [Determine the external endpoint via the manual method](https://docs.gitlab.com/ee/user/clusters/applications.html#determining-the-external-endpoint-manually)
-  1. Navigate to the Kubernetes page and enter the [DNS address for the external endpoint](https://docs.gitlab.com/ee/user/project/clusters/#base-domain) into the **Base domain** field on the Details tab.  Save the changes to the Kubernetes cluster.
-1. [Install and configure Cilium](https://docs.gitlab.com/ee/user/clusters/applications.html#install-cilium-using-gitlab-cicd)
-1. Be sure to restart all pods that were running before Cilium was installed by running `kubectl get pods --all-namespaces -o custom-columns=NAMESPACE:.metadata.namespace,NAME:.metadata.name,HOSTNETWORK:.spec.hostNetwork --no-headers=true | grep '<none>' | awk '{print "-n "$1" "$2}' | xargs -L 1 -r kubectl delete pod` in your cluster
+1. [Install at least one runner and connect it to GitLab](https://docs.gitlab.com/runner/).
+1. [Create a group](../../../../group/#create-a-new-group).
+1. [Connect a Kubernetes cluster to the group](../../add_remove_clusters.md).
+1. [Create a cluster management project and associate it with the Kubernetes cluster](../../../../clusters/management_project.md).
+
+1. Install and configure an Ingress node:
+
+   - [Install the Ingress node via CI/CD (GMAv2)](../../../../clusters/applications.md#install-ingress-using-gitlab-cicd).
+   - [Determine the external endpoint via the manual method](../../../../clusters/applications.md#determining-the-external-endpoint-manually).
+   - Navigate to the Kubernetes page and enter the [DNS address for the external endpoint](../../index.md#base-domain)
+     into the **Base domain** field on the **Details** tab. Save the changes to the Kubernetes
+     cluster.
+
+1. [Install and configure Cilium](../../../../clusters/applications.md#install-cilium-using-gitlab-cicd).
+1. Be sure to restart all pods that were running before Cilium was installed by running this command
+   in your cluster:
+
+   `kubectl get pods --all-namespaces -o custom-columns=NAMESPACE:.metadata.namespace,NAME:.metadata.name,HOSTNETWORK:.spec.hostNetwork --no-headers=true | grep '<none>' | awk '{print "-n "$1" "$2}' | xargs -L 1 -r kubectl delete pod`
 
 It is possible to install and manage Cilium in other ways, such as by installing Cilium manually into a Kubernetes cluster via GitLab's Helm chart and then connecting it back to GitLab. These methods are not currently documented or officially supported.
 
