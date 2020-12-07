@@ -34,7 +34,7 @@ module Types
             description: 'Unit of the on-call rotation length'
 
       field :participants,
-            ::Types::IncidentManagement::OncallUserType.connection_type,
+            ::Types::IncidentManagement::OncallParticipantType.connection_type,
             null: true,
             description: 'Participants of the on-call rotation'
 
