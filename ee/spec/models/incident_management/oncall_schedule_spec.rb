@@ -7,8 +7,8 @@ RSpec.describe IncidentManagement::OncallSchedule do
 
   describe '.associations' do
     it { is_expected.to belong_to(:project) }
-    it { is_expected.to have_many(:oncall_rotations) }
-    it { is_expected.to have_many(:oncall_participants).through(:oncall_rotations) }
+    it { is_expected.to have_many(:rotations) }
+    it { is_expected.to have_many(:participants).through(:rotations) }
   end
 
   describe '.validations' do

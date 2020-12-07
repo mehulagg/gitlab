@@ -6,7 +6,7 @@ RSpec.describe IncidentManagement::OncallParticipant do
   let_it_be(:rotation) { create(:incident_management_oncall_rotation) }
   let_it_be(:user) { create(:user) }
 
-  subject { build(:incident_management_oncall_participant, oncall_rotation: rotation, user: user) }
+  subject { build(:incident_management_oncall_participant, rotation: rotation, user: user) }
 
   it { is_expected.to be_valid }
 
@@ -15,35 +15,35 @@ RSpec.describe IncidentManagement::OncallParticipant do
   end
 
   describe '.associations' do
-    it { is_expected.to belong_to(:oncall_rotation) }
-    it { is_expected.to belong_to(:participant) }
+    it { is_expected.to belong_to(:rotation) }
+    it { is_expected.to belong_to(:user) }
   end
 
   describe '.validations' do
-    it { is_expected.to validate_presence_of(:oncall_rotation) }
-    it { is_expected.to validate_presence_of(:participant) }
+    it { is_expected.to validate_presence_of(:rotation) }
+    it { is_expected.to validate_presence_of(:user) }
     it { is_expected.to validate_presence_of(:color_weight) }
     it { is_expected.to validate_presence_of(:color_palette) }
 
     context 'when the participant already exists in the rotation' do
       before do
-        create(:incident_management_oncall_participant, oncall_rotation: rotation, user: user)
+        create(:incident_management_oncall_participant, rotation: rotation, user: user)
       end
 
       it 'has validation errors' do
         expect(subject).to be_invalid
-        expect(subject.errors.full_messages.to_sentence).to eq('Participant has already been taken')
+        expect(subject.errors.full_messages.to_sentence).to eq('User has already been taken')
       end
     end
 
     context 'when participant cannot read project' do
       let_it_be(:other_user) { create(:user) }
-      subject { build(:incident_management_oncall_participant, oncall_rotation: rotation, user: other_user) }
+      subject { build(:incident_management_oncall_participant, rotation: rotation, user: other_user) }
 
       context 'on creation' do
         it 'has validation errors' do
           expect(subject).to be_invalid
-          expect(subject.errors.full_messages.to_sentence).to eq('Participant does not have access to the project')
+          expect(subject.errors.full_messages.to_sentence).to eq('User does not have access to the project')
         end
       end
 

@@ -6,13 +6,13 @@ RSpec.describe IncidentManagement::OncallRotation do
   let_it_be(:schedule) { create(:incident_management_oncall_schedule) }
 
   describe '.associations' do
-    it { is_expected.to belong_to(:oncall_schedule) }
-    it { is_expected.to have_many(:oncall_participants) }
-    it { is_expected.to have_many(:participants).through(:oncall_participants) }
+    it { is_expected.to belong_to(:schedule) }
+    it { is_expected.to have_many(:participants) }
+    it { is_expected.to have_many(:users).through(:participants) }
   end
 
   describe '.validations' do
-    subject { build(:incident_management_oncall_rotation, oncall_schedule: schedule, name: 'Test rotation') }
+    subject { build(:incident_management_oncall_rotation, schedule: schedule, name: 'Test rotation') }
 
     it { is_expected.to validate_presence_of(:name) }
     it { is_expected.to validate_length_of(:name).is_at_most(200) }
@@ -23,7 +23,7 @@ RSpec.describe IncidentManagement::OncallRotation do
 
     context 'when the oncall rotation with the same name exists' do
       before do
-        create(:incident_management_oncall_rotation, oncall_schedule: schedule, name: 'Test rotation' )
+        create(:incident_management_oncall_rotation, schedule: schedule, name: 'Test rotation')
       end
 
       it 'has validation errors' do
