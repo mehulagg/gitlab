@@ -1004,9 +1004,6 @@ docker build:
       allow_failure: true
 ```
 
-Additional job configuration may be added to rules in the future. If something
-useful is not available, please [open an issue](https://gitlab.com/gitlab-org/gitlab/-/issues).
-
 #### Rules clauses
 
 Available rule clauses are:
@@ -1082,7 +1079,7 @@ job:
 - If the pipeline is a scheduled pipeline, the job is **not** be added to the pipeline.
 - In **all other cases**, the job is added to the pipeline, with `when: on_success`.
 
-CAUTION: **Caution:**
+WARNING:
 If you use a `when:` clause as the final rule (not including `when: never`), two
 simultaneous pipelines may start. Both push pipelines and merge request pipelines can
 be triggered by the same event (a push to the source branch for an open merge request).
@@ -1333,7 +1330,7 @@ rules:
 To implement a rule similar to [`except:changes`](#onlychangesexceptchanges),
 use `when: never`.
 
-CAUTION: **Caution:**
+WARNING:
 You can use `rules: changes` with other pipeline types, but it is not recommended
 because `rules: changes` always evaluates to true when there is no Git `push` event.
 Tag pipelines, scheduled pipelines, and so on do **not** have a Git `push` event
@@ -1453,13 +1450,13 @@ job1:
     if: ($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH == "develop") && $MY_VARIABLE
 ```
 
-CAUTION: **Caution:**
+WARNING:
 [Before GitLab 13.3](https://gitlab.com/gitlab-org/gitlab/-/issues/230938),
 rules that use both `||` and `&&` may evaluate with an unexpected order of operations.
 
 ### `only`/`except` (basic)
 
-NOTE: **Note:**
+NOTE:
 The [`rules`](#rules) syntax is an improved, more powerful solution for defining
 when jobs should run or not. Consider using `rules` instead of `only/except` to get
 the most out of your pipelines.
@@ -1612,8 +1609,8 @@ Feature.enable(:allow_unsafe_ruby_regexp)
 
 ### `only`/`except` (advanced)
 
-GitLab supports both simple and complex strategies, so it's possible to use an
-array and a hash configuration scheme.
+GitLab supports multiple strategies, and it's possible to use an
+array or a hash configuration scheme.
 
 Four keys are available:
 
@@ -1761,7 +1758,7 @@ refs only:
 - `external_pull_requests`
 - `merge_requests` (see additional details about [using `only:changes` with pipelines for merge requests](#using-onlychanges-with-pipelines-for-merge-requests))
 
-CAUTION: **Caution:**
+WARNING:
 In pipelines with [sources other than the three above](../variables/predefined_variables.md)
 `changes` can't determine if a given file is new or old and always returns `true`.
 You can configure jobs to use `only: changes` with other `only: refs` keywords. However,
@@ -1790,7 +1787,7 @@ the `docker build` job is created, but only if changes were made to any of the f
 - Any of the files and subdirectories in the `dockerfiles` directory.
 - Any of the files with `rb`, `py`, `sh` extensions in the `more_scripts` directory.
 
-CAUTION: **Warning:**
+WARNING:
 If you use `only:changes` with [only allow merge requests to be merged if the pipeline succeeds](../../user/project/merge_requests/merge_when_pipeline_succeeds.md#only-allow-merge-requests-to-be-merged-if-the-pipeline-succeeds),
 you should [also use `only:merge_requests`](#using-onlychanges-with-pipelines-for-merge-requests). Otherwise it may not work as expected.
 
@@ -2548,16 +2545,13 @@ environment, using the `production`
 For more information, see
 [Available settings for `kubernetes`](../environments/index.md#configuring-kubernetes-deployments).
 
-NOTE: **Note:**
+NOTE:
 Kubernetes configuration is not supported for Kubernetes clusters
 that are [managed by GitLab](../../user/project/clusters/index.md#gitlab-managed-clusters).
 To follow progress on support for GitLab-managed clusters, see the
 [relevant issue](https://gitlab.com/gitlab-org/gitlab/-/issues/38054).
 
 #### Dynamic environments
-
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/21971) in GitLab 8.12 and GitLab Runner 1.6.
-> - The `$CI_ENVIRONMENT_SLUG` was [introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/22864) in GitLab 8.15.
 
 Use CI/CD [variables](../variables/README.md) to dynamically name environments.
 
@@ -3273,8 +3267,6 @@ and bring back the old behavior.
 
 ### `coverage`
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/20428) in GitLab 8.17.
-
 Use `coverage` to configure how code coverage is extracted from the
 job output.
 
@@ -3431,7 +3423,7 @@ test:
     - bundle exec rspec_booster --job $CI_NODE_INDEX/$CI_NODE_TOTAL
 ```
 
-CAUTION: **Caution:**
+WARNING:
 Test Boosters reports usage statistics to the author.
 
 You can then navigate to the **Jobs** tab of a new pipeline build and see your RSpec
@@ -3513,9 +3505,9 @@ In [GitLab 13.5](https://gitlab.com/gitlab-org/gitlab/-/issues/201938) and later
 can use [`when:manual`](#whenmanual) in the same job as `trigger`. In GitLab 13.4 and
 earlier, using them together causes the error `jobs:#{job-name} when should be on_success, on_failure or always`.
 
-#### Simple `trigger` syntax for multi-project pipelines
+#### Basic `trigger` syntax for multi-project pipelines
 
-The simplest way to configure a downstream trigger is to use `trigger` keyword
+You can configure a downstream trigger by using the `trigger` keyword
 with a full path to a downstream project:
 
 ```yaml
@@ -3889,7 +3881,7 @@ tags. These options cannot be used together, so choose one:
 - To create a release automatically when commits are pushed or merged to the default branch,
   using a new Git tag that is defined with variables:
 
-  NOTE: **Note:**
+  NOTE:
   Environment variables set in `before_script` or `script` are not available for expanding
   in the same job. Read more about
   [potentially making variables available for expanding](https://gitlab.com/gitlab-org/gitlab-runner/-/issues/6400).

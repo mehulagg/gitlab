@@ -165,7 +165,7 @@ export default {
 <template>
   <span class="epic-timeline-cell" data-qa-selector="epic_timeline_cell">
     <current-day-indicator :preset-type="presetType" :timeframe-item="timeframeItem" />
-    <div class="epic-bar-wrapper">
+    <div class="gl-relative">
       <a
         v-if="hasStartDate"
         :id="generateKey(epic)"

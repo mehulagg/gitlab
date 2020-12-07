@@ -14,7 +14,6 @@ module EE
         mount_mutation ::Mutations::Issues::SetWeight
         mount_mutation ::Mutations::Issues::SetEpic
         mount_mutation ::Mutations::Issues::PromoteToEpic
-        mount_mutation ::Mutations::Environments::CanaryIngress::Update
         mount_mutation ::Mutations::EpicTree::Reorder
         mount_mutation ::Mutations::Epics::Update
         mount_mutation ::Mutations::Epics::Create

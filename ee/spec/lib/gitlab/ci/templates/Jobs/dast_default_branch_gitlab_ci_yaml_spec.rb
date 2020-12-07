@@ -47,8 +47,8 @@ RSpec.describe 'Jobs/DAST-Default-Branch-Deploy.gitlab-ci.yml' do
     end
 
     context 'when project has no license' do
-      it 'includes no DAST jobs' do
-        expect(build_names).to eq %w(placeholder)
+      it 'includes dast_unlicensed job' do
+        expect(build_names).to eq %w(placeholder dast_unlicensed)
       end
     end
 

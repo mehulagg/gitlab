@@ -4,7 +4,7 @@ module Elastic
   class MigrationRecord
     attr_reader :version, :name, :filename
 
-    delegate :migrate, :skip_migration?, :completed?, to: :migration
+    delegate :migrate, :skip_migration?, :completed?, :batched?, :throttle_delay, to: :migration
 
     def initialize(version:, name:, filename:)
       @version = version

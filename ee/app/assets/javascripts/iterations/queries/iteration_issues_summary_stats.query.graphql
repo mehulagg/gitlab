@@ -1,5 +1,6 @@
 query IterationIssuesSummaryStats($id: ID!) {
   iteration(id: $id) {
+    id
     report {
       stats {
         total {
