@@ -21,5 +21,39 @@ namespace :gitlab do
         failures.each { |f| puts "- #{f}" }
       end
     end
+
+    # Example for all projects:
+    #
+    #   $ bin/rake gitlab:git:checksum_projects
+    #   1,cfa3f06ba235c13df0bb28e079bcea62c5848af2
+    #   2,
+    #   3,3f3fb58a8106230e3a6c6b48adc2712fb3b6ef87
+    #   4,0000000000000000000000000000000000000000
+    #
+    # Example with a list of project IDs:
+    #
+    #   $ PROJECT_IDS="1,3" bin/rake gitlab:git:checksum_projects
+    #   1,cfa3f06ba235c13df0bb28e079bcea62c5848af2
+    #   3,3f3fb58a8106230e3a6c6b48adc2712fb3b6ef87
+    #
+    # - Projects which do not exist are skipped
+    # - Projects which do not have a repository, output blank next to the ID
+    # - Projects with a repository which is empty, output all zeroes
+    desc 'GitLab | Git | Generate checksum of project repository refs'
+    task checksum_projects: :environment do
+      project_ids = ENV['PROJECT_IDS']&.split(',')
+      relation = Project
+      relation = relation.where(id: project_ids) if project_ids.present?
+
+      relation.find_each(batch_size: 100) do |project|
+        next unless project.repo_exists?
+
+        result = project.repository.checksum
+      rescue => e
+        result = "Ignored error: #{e.message}"
+      ensure
+        puts "#{project.id},#{result}"
+      end
+    end
   end
 end
