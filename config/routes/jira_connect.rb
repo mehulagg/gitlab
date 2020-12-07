@@ -13,4 +13,6 @@ namespace :jira_connect do
   end
 
   resources :subscriptions, only: [:index, :create, :destroy]
+
+  resources :deployments, only: [:index]
 end

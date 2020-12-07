@@ -102,6 +102,15 @@ class Deployment < ApplicationRecord
         Deployments::ExecuteHooksWorker.perform_async(id)
       end
     end
+
+    after_transition any => any do |deployment|
+      next unless Feature.enabled?(:jira_sync_builds, deployment.project)
+
+      deployment.run_after_commit do
+        seq_id = ::Atlassian::JiraConnect::Client.generate_update_sequence_id
+        Deployments::SyncJiraWorker.perform_async(id, seq_id)
+      end
+    end
   end
 
   enum status: {

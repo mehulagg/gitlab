@@ -62,6 +62,7 @@ class JiraConnect::AppDescriptorController < JiraConnect::ApplicationController
     }
 
     modules.merge!(build_information_module)
+    modules.merge!(deployment_information_module)
 
     modules
   end
@@ -72,6 +73,26 @@ class JiraConnect::AppDescriptorController < JiraConnect::ApplicationController
 
   def doc_url
     'https://docs.gitlab.com/ee/user/project/integrations/jira.html#gitlab-jira-integration'
+  end
+
+  # See: https://developer.atlassian.com/cloud/jira/software/modules/deployment/
+  def deployment_information_module
+    {
+      "jiraDeploymentInfoProvider": {
+        "homeUrl": home_url,
+        "logoUrl": view_context.image_url('gitlab_logo.png'),
+        "documentationUrl": doc_url,
+        "actions": {
+          "listDeployments": {
+            "templateUrl": "#{relative_to_base_path(jira_connect_deployments_path)}?jira_issue_key={issue.key}"
+          }
+        },
+        "name": {
+          "value": "GitLab Deployments"
+        },
+        "key": "gitlab-deployments"
+      }
+    }
   end
 
   # See: https://developer.atlassian.com/cloud/jira/software/modules/build/
