@@ -1,0 +1,5 @@
+---
+title: 'On-demand scans: automatically select DAST profile when only one is available'
+merge_request: 48940
+author:
+type: changed

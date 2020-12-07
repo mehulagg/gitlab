@@ -6,7 +6,7 @@ import DastScannerProfileForm from 'ee/security_configuration/dast_scanner_profi
 import { SCAN_TYPE } from 'ee/security_configuration/dast_scanner_profiles/constants';
 import dastScannerProfileCreateMutation from 'ee/security_configuration/dast_scanner_profiles/graphql/dast_scanner_profile_create.mutation.graphql';
 import dastScannerProfileUpdateMutation from 'ee/security_configuration/dast_scanner_profiles/graphql/dast_scanner_profile_update.mutation.graphql';
-import { scannerProfiles } from 'ee_jest/on_demand_scans/mock_data';
+import { scannerProfiles } from 'ee_jest/on_demand_scans/mocks/mock_data';
 import { TEST_HOST } from 'helpers/test_constants';
 import { redirectTo } from '~/lib/utils/url_utility';
 

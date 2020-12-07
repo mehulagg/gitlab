@@ -7,6 +7,7 @@ export const scannerProfiles = [
     scanType: 'PASSIVE',
     useAjaxSpider: false,
     showDebugMessages: false,
+    editPath: '/scanner_profile/edit/1',
   },
   {
     id: 'gid://gitlab/DastScannerProfile/2',
@@ -16,6 +17,7 @@ export const scannerProfiles = [
     scanType: 'ACTIVE',
     useAjaxSpider: true,
     showDebugMessages: true,
+    editPath: '/scanner_profile/edit/2',
   },
 ];
 
@@ -24,12 +26,14 @@ export const siteProfiles = [
     id: 'gid://gitlab/DastSiteProfile/1',
     profileName: 'Site profile #1',
     targetUrl: 'https://foo.com',
+    editPath: '/site_profiles/edit/1',
     validationStatus: 'PENDING_VALIDATION',
   },
   {
     id: 'gid://gitlab/DastSiteProfile/2',
     profileName: 'Site profile #2',
     targetUrl: 'https://bar.com',
+    editPath: '/site_profiles/edit/2',
     validationStatus: 'PASSED_VALIDATION',
   },
 ];
