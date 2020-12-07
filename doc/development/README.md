@@ -136,12 +136,10 @@ In these cases, use the following workflow:
    - Request final review and approval from the VP of Development,
      the DRI for Development Guidelines, @clefelhocz1.
 
-1. Once the reviews and appropriate approvals are complete, the
-[Technical writer assigned to development guidelines](https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments-to-development-guidelines)
-checks for required approvals, fixes any remaining [Trivial changes](#trivial-changes),
-as well as fixes required to comply with documentation
-guidelines. That writer may also ask for additional approvals as suggested
-above, before merging the MR.
+1. Once the reviews and appropriate approvals are complete, assign the merge request to the
+   [technical writer designated to development guidelines] (https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments-to-development-guidelines)
+   for final content review and merge. That writer may also ask for additional approvals as
+   suggested above before merging the MR.
 
 ## UX and Frontend guides
 
