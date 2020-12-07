@@ -11,10 +11,25 @@ class ElasticDeleteProjectWorker
   idempotent!
 
   def perform(project_id, es_id)
+    remove_issues(project_id, es_id) if Elastic::DataMigrationService.migration_has_finished?(:migrate_issues_to_separate_index)
     remove_project_and_children_documents(project_id, es_id)
   end
 
   private
+
+  def remove_issues(project_id, es_id)
+    client.delete_by_query({
+      index: Issue.__elasticsearch__.index_name,
+      routing: es_id,
+      body: {
+        query: {
+          term: {
+            project_id: project_id
+          }
+        }
+      }
+    })
+  end
 
   def remove_project_and_children_documents(project_id, es_id)
     client.delete_by_query({

@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe 'admin/application_settings/_elasticsearch_form' do
   let_it_be(:admin) { create(:admin) }
   let(:page) { Capybara::Node::Simple.new(rendered) }
+  let(:pending_migrations) { false }
 
   before do
     assign(:application_setting, application_setting)
@@ -19,6 +20,7 @@ RSpec.describe 'admin/application_settings/_elasticsearch_form' do
     before do
       allow(Gitlab::CurrentSettings).to(receive(:elasticsearch_indexing?)).and_return(es_indexing)
       allow(Gitlab::CurrentSettings).to(receive(:elasticsearch_pause_indexing?)).and_return(true)
+      allow(Elastic::DataMigrationService).to(receive(:pending_migrations?)).and_return(pending_migrations)
     end
 
     context 'indexing is enabled' do
@@ -35,6 +37,16 @@ RSpec.describe 'admin/application_settings/_elasticsearch_form' do
 
         expect(rendered).to have_css('input[id=application_setting_elasticsearch_pause_indexing]')
         expect(rendered).not_to have_css('input[id=application_setting_elasticsearch_pause_indexing][disabled="disabled"]')
+      end
+
+      context 'pending migrations' do
+        let(:pending_migrations) { true }
+
+        it 'renders a disabled pause checkbox' do
+          render
+
+          expect(rendered).to have_css('input[id=application_setting_elasticsearch_pause_indexing][disabled="disabled"]')
+        end
       end
     end
 

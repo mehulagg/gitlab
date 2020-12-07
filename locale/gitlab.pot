@@ -10296,6 +10296,9 @@ msgstr ""
 msgid "Elasticsearch HTTP client timeout value in seconds."
 msgstr ""
 
+msgid "Elasticsearch indexing"
+msgstr ""
+
 msgid "Elasticsearch indexing restrictions"
 msgstr ""
 
@@ -20194,6 +20197,9 @@ msgstr ""
 msgid "Pause"
 msgstr ""
 
+msgid "Pause Elasticsearch indexing"
+msgstr ""
+
 msgid "Pause replication"
 msgstr ""
 
@@ -27970,6 +27976,9 @@ msgid "There are no projects shared with this group yet"
 msgstr ""
 
 msgid "There are no variables yet."
+msgstr ""
+
+msgid "There are pending advanced search migrations. This setting is disabled."
 msgstr ""
 
 msgid "There are running deployments on the environment. Please retry later."

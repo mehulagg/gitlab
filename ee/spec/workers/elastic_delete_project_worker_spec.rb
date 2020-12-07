@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe ElasticDeleteProjectWorker, :elastic do
+RSpec.describe ElasticDeleteProjectWorker, :elastic, :sidekiq_inline do
   subject { described_class.new }
 
   # Create admin user and search globally to avoid dealing with permissions in
@@ -36,6 +36,7 @@ RSpec.describe ElasticDeleteProjectWorker, :elastic do
     expect(MergeRequest.elastic_search('*', **search_options).records).to include(merge_request)
 
     subject.perform(project.id, project.es_id)
+
     ensure_elasticsearch_index!
 
     expect(Project.elastic_search('*', **search_options).total_count).to be(0)

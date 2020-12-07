@@ -77,7 +77,15 @@ module Elastic
 
     class_methods do
       def __elasticsearch__
-        @__elasticsearch__ ||= ::Elastic::MultiVersionClassProxy.new(self)
+        if use_separate_indices?
+          @__elasticsearch_separate__ ||= ::Elastic::MultiVersionClassProxy.new(self, use_separate_indices: true)
+        else
+          @__elasticsearch__ ||= ::Elastic::MultiVersionClassProxy.new(self)
+        end
+      end
+
+      def use_separate_indices?
+        Gitlab::Elastic::Helper::ES_SEPARATE_CLASSES.include?(self) && Elastic::DataMigrationService.migration_has_finished?(:migrate_issues_to_separate_index)
       end
 
       # Mark a dependant association as needing to be updated when a specific
