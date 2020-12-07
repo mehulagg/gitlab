@@ -12,10 +12,30 @@ RSpec.describe 'gitlab:elastic namespace rake tasks', :elastic do
 
     before do
       es_helper.delete_index
+      delete_standalone_indices
     end
 
-    it 'creates an index' do
+    after do
+      delete_standalone_indices
+    end
+
+    it 'creates the default index', :aggregate_failures do
       expect { subject }.to change { es_helper.index_exists? }.from(false).to(true)
+    end
+
+    it 'creates the migrations index if it does not exist' do
+      migration_index_name = es_helper.migrations_index_name
+      es_helper.delete_index(index_name: migration_index_name)
+
+      expect { subject }.to change { es_helper.index_exists?(index_name: migration_index_name) }.from(false).to(true)
+    end
+
+    Gitlab::Elastic::Helper::ES_SEPARATE_CLASSES.each do |class_name|
+      it "creates separate #{class_name} index" do
+        proxy = ::Elastic::Latest::ApplicationClassProxy.new(class_name, use_separate_indices: true)
+        alias_name = "#{es_helper.target_name}-#{proxy.index_name}"
+        expect { subject }.to change { es_helper.index_exists?(index_name: alias_name) }.from(false).to(true)
+      end
     end
 
     it 'marks all migrations as completed' do
@@ -117,6 +137,17 @@ RSpec.describe 'gitlab:elastic namespace rake tasks', :elastic do
       expect { run_rake_task 'gitlab:elastic:index' }.to change {
         Gitlab::CurrentSettings.elasticsearch_indexing?
       }.from(false).to(true)
+    end
+  end
+
+  private
+
+  def delete_standalone_indices
+    Gitlab::Elastic::Helper::ES_SEPARATE_CLASSES.each do |class_name|
+      proxy = ::Elastic::Latest::ApplicationClassProxy.new(class_name, use_separate_indices: true)
+      alias_name = "#{es_helper.target_name}-#{proxy.index_name}"
+      index_name = es_helper.target_index_name(target: alias_name)
+      es_helper.delete_index(index_name: index_name)
     end
   end
 end

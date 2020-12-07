@@ -98,7 +98,7 @@ module Gitlab
           new_index_name = "#{target_name}-#{proxy.index_name}-#{Time.now.strftime("%Y%m%d-%H%M")}"
 
           if with_alias ? index_exists?(index_name: alias_name) : index_exists?(index_name: new_index_name)
-            raise "Index under '#{with_alias ? target_name : new_index_name}' already exists"
+            raise "Index under '#{with_alias ? alias_name : new_index_name}' already exists"
           end
 
           settings = proxy.settings
@@ -164,8 +164,8 @@ module Gitlab
         client.indices.exists?(index: index_name || target_name) # rubocop:disable CodeReuse/ActiveRecord
       end
 
-      def alias_exists?(name: nil)
-        client.indices.exists_alias(name: name || target_name)
+      def alias_exists?(name: target_name)
+        client.indices.exists_alias(name: name)
       end
 
       # Calls Elasticsearch refresh API to ensure data is searchable
