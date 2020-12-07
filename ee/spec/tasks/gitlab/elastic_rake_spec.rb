@@ -15,6 +15,7 @@ RSpec.describe 'gitlab:elastic namespace rake tasks', :elastic do
       delete_standalone_indices
     end
 
+    # prevent issues with the elastic rspec helper
     after do
       delete_standalone_indices
     end
@@ -43,6 +44,16 @@ RSpec.describe 'gitlab:elastic namespace rake tasks', :elastic do
       it 'creates an index at the specified name' do
         expect { subject }.to change { es_helper.index_exists?(index_name: secondary_index_name) }.from(false).to(true)
       end
+
+      Gitlab::Elastic::Helper::ES_SEPARATE_CLASSES.each do |class_name|
+        describe "#{class_name}" do
+          it "does not create a standalone index" do
+            proxy = ::Elastic::Latest::ApplicationClassProxy.new(class_name, use_separate_indices: true)
+            alias_name = "#{es_helper.target_name}-#{proxy.index_name}"
+            expect { subject }.not_to change { es_helper.alias_exists?(name: alias_name) }
+          end
+        end
+      end
     end
 
     it 'creates the migrations index if it does not exist' do
@@ -54,7 +65,7 @@ RSpec.describe 'gitlab:elastic namespace rake tasks', :elastic do
 
     Gitlab::Elastic::Helper::ES_SEPARATE_CLASSES.each do |class_name|
       describe "#{class_name}" do
-        it "creates a separate index" do
+        it "creates a standalone index" do
           proxy = ::Elastic::Latest::ApplicationClassProxy.new(class_name, use_separate_indices: true)
           alias_name = "#{es_helper.target_name}-#{proxy.index_name}"
           expect { subject }.to change { es_helper.index_exists?(index_name: alias_name) }.from(false).to(true)
