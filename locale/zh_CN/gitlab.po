@@ -24809,8 +24809,8 @@ msgstr "发布"
 msgid "Releases are based on Git tags and mark specific points in a project's development history. They can contain information about the type of changes and can also deliver binaries, like compiled versions of your software."
 msgstr "发布基于Git标签，并标记项目开发历史中的特定点。它们可以包含有关更改类型的信息，还可以提供二进制文件，例如软件的编译版本。"
 
-msgid "Releases are based on Git tags. We recommend tags that use semantic versioning, for example %{codeStart}v1.0%{codeEnd}, %{codeStart}v2.0-pre%{codeEnd}."
-msgstr "发布基于Git标签。我们建议使用语义化版本标签，例如%{codeStart}v1.0%{codeEnd}, %{codeStart}v2.0-pre%{codeEnd}。"
+msgid "Releases are based on Git tags. We recommend tags that use semantic versioning, for example %{codeStart}v1.0.0%{codeEnd}, %{codeStart}v2.1.0-pre%{codeEnd}."
+msgstr "发布基于Git标签。我们建议使用语义化版本标签，例如%{codeStart}v1.0.0%{codeEnd}, %{codeStart}v2.1.0-pre%{codeEnd}。"
 
 msgid "Releases documentation"
 msgstr "发布文档"
