@@ -8,6 +8,7 @@ Set the title to: `Description of the original issue`
 
 ## Prior to starting the security release work
 
+- [ ] Verify if the issue you're working on is confidential, if it's public you can fix it in the canonical repository without backports
 - [ ] Read the [security process for developers] if you are not familiar with it.
 - [ ] Mark this [issue as related] to the Security Release Tracking Issue. You can find it on the topic of the `#releases` Slack channel.
 - Fill out the [Links section](#links):
