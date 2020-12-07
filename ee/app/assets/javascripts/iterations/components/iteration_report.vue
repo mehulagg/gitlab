@@ -13,9 +13,6 @@ import BurnCharts from 'ee/burndown_chart/components/burn_charts.vue';
 import { formatDate } from '~/lib/utils/datetime_utility';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { __ } from '~/locale';
-import IterationReportSummaryCards from './iteration_report_summary_cards.vue';
-import IterationReportSummaryClosed from './iteration_report_summary_closed.vue';
-import IterationReportSummaryOpen from './iteration_report_summary_open.vue';
 import IterationForm from './iteration_form.vue';
 import IterationReportTabs from './iteration_report_tabs.vue';
 import query from '../queries/iteration.query.graphql';
@@ -43,9 +40,6 @@ export default {
     GlEmptyState,
     GlLoadingIcon,
     IterationForm,
-    IterationReportSummaryCards,
-    IterationReportSummaryClosed,
-    IterationReportSummaryOpen,
     IterationReportTabs,
   },
   apollo: {

@@ -5,8 +5,8 @@ import MockAdapter from 'axios-mock-adapter';
 import BurnCharts from 'ee/burndown_chart/components/burn_charts.vue';
 import BurndownChart from 'ee/burndown_chart/components/burndown_chart.vue';
 import BurnupChart from 'ee/burndown_chart/components/burnup_chart.vue';
-import IterationReportSummaryOpen from 'ee/iterations/components/iteration_report_summary_open.vue';
-import IterationReportSummaryCards from 'ee/iterations/components/iteration_report_summary_cards.vue';
+// import IterationReportSummaryOpen from 'ee/iterations/components/iteration_report_summary_open.vue';
+// import IterationReportSummaryCards from 'ee/iterations/components/iteration_report_summary_cards.vue';
 import { useFakeDate } from 'helpers/fake_date';
 import { day1, day2, day3, day4 } from '../mock_data';
 
@@ -117,24 +117,24 @@ describe('burndown_chart', () => {
     expect(findBurnupChart().props('issuesSelected')).toBe(false);
   });
 
-  it('renders IterationReportSummaryOpen for open iteration', () => {
-    expect(wrapper.find(IterationReportSummaryOpen).props()).toEqual({
-      iterationId: iteration.id,
-      namespaceType: Namespace.Group,
-      fullPath: defaultProps.fullPath,
-    });
-  });
+  // it('renders IterationReportSummaryOpen for open iteration', () => {
+  //   expect(wrapper.find(IterationReportSummaryOpen).props()).toEqual({
+  //     iterationId: iteration.id,
+  //     namespaceType: Namespace.Group,
+  //     fullPath: defaultProps.fullPath,
+  //   });
+  // });
 
-  it('renders IterationReportCards for closed iterations', async () => {
-    await wrapper.setData({
-      iteration: {
-        ...iteration,
-        state: 'closed',
-      },
-    });
+  // it('renders IterationReportCards for closed iterations', async () => {
+  //   await wrapper.setData({
+  //     iteration: {
+  //       ...iteration,
+  //       state: 'closed',
+  //     },
+  //   });
 
-    expect(wrapper.find(IterationReportSummaryCards).exists()).toBe(true);
-  });
+  //   expect(wrapper.find(IterationReportSummaryCards).exists()).toBe(true);
+  // });
 
   it('uses burndown data computed from burnup data', () => {
     createComponent({
