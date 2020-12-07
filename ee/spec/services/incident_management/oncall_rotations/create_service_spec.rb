@@ -86,14 +86,21 @@ RSpec.describe IncidentManagement::OncallRotations::CreateService do
     end
 
     context 'with valid params' do
-      it 'successfully creates an on-call rotation' do
+      it 'successfully creates an on-call rotation with participants' do
         expect(execute).to be_success
 
-        oncall_schedule = execute.payload[:oncall_rotation]
-        expect(oncall_schedule).to be_a(::IncidentManagement::OncallRotation)
-        expect(oncall_schedule.name).to eq('On-call rotation')
-        expect(oncall_schedule.length).to eq(1)
-        expect(oncall_schedule.length_unit).to eq('days')
+        oncall_rotation = execute.payload[:oncall_rotation]
+        expect(oncall_rotation).to be_a(::IncidentManagement::OncallRotation)
+        expect(oncall_rotation.name).to eq('On-call rotation')
+        expect(oncall_rotation.length).to eq(1)
+        expect(oncall_rotation.length_unit).to eq('days')
+
+        expect(oncall_rotation.participants.length).to eq(1)
+        expect(oncall_rotation.participants.first).to have_attributes(
+          **participants.first,
+          rotation: oncall_rotation,
+          persisted?: true
+        )
       end
     end
   end
