@@ -36,7 +36,7 @@ module EE
             allowed = super || geo_node_update_route? || geo_api_route?
 
             return true if allowed
-            return false if maintenance_mode?
+            return false if ::Gitlab.maintenance_mode?
             return false unless ::Gitlab::Geo.secondary?
 
             git_write_routes
@@ -90,13 +90,7 @@ module EE
 
           override :read_only?
           def read_only?
-            maintenance_mode? || super
-          end
-
-          def maintenance_mode?
-            return unless ::Feature.enabled?(:maintenance_mode)
-
-            ::Gitlab::CurrentSettings.maintenance_mode
+            ::Gitlab.maintenance_mode? || super
           end
         end
       end

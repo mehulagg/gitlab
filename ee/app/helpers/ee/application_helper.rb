@@ -13,7 +13,7 @@ module EE
     def read_only_message
       message = ::Gitlab::Geo.secondary? ? geo_secondary_read_only_message : super
 
-      return message unless maintenance_mode?
+      return message unless ::Gitlab.maintenance_mode?
       return maintenance_mode_message.concat(message) if message
 
       maintenance_mode_message
@@ -155,12 +155,6 @@ module EE
 
         next_unprocessed_event.created_at < EVENT_LAG_SHOW_THRESHOLD.ago
       end
-    end
-
-    def maintenance_mode?
-      return unless ::Feature.enabled?(:maintenance_mode)
-
-      ::Gitlab::CurrentSettings.maintenance_mode
     end
   end
 end
