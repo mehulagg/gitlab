@@ -330,7 +330,7 @@ You may force the application to put your current user in the experiment group b
 adding a query string parameter to the URL of experiment entry URL. The experiment works 
 only for this URL and won't work for the subsequent pages.
 
-For example for to enable `EXPERIMENT_KEY` experiment add `force_experiment=EXPERIMENT_KEY` 
+For example to enable `EXPERIMENT_KEY` experiment add `force_experiment=EXPERIMENT_KEY` 
 to the URL
 
 ```shell
