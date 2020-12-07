@@ -666,6 +666,79 @@ RSpec.describe API::MergeRequests do
         end
       end
 
+      context 'filter by reviewer' do
+        let_it_be(:review_requested_mr1) do
+          create(:merge_request, :unique_branches, author: user, reviewers: [user2], source_project: project2, target_project: project2)
+        end
+
+        let_it_be(:review_requested_mr2) do
+          create(:merge_request, :unique_branches, author: user2, reviewers: [user], source_project: project2, target_project: project2)
+        end
+
+        let(:params) { { scope: :all } }
+
+        context 'when reviewer_id is provided' do
+          let(:params) { super().merge(reviewer_id: reviewer_id) }
+
+          context 'when reviewer_id is an id' do
+            let(:reviewer_id) { user2.id }
+
+            it 'returns review requested merge requests for the given user' do
+              get api('/merge_requests', user), params: params
+
+              expect_response_contain_exactly(review_requested_mr1.id)
+            end
+          end
+
+          context 'when reviewer_id is Any' do
+            let(:reviewer_id) { 'Any' }
+
+            it 'returns review requested merge requests for any user' do
+              get api('/merge_requests', user), params: params
+
+              expect_response_contain_exactly(review_requested_mr1.id, review_requested_mr2.id)
+            end
+          end
+
+          context 'when reviewer_id is None' do
+            let(:reviewer_id) { 'None' }
+
+            it 'returns merge requests that has no assigned reviewers' do
+              get api('/merge_requests', user), params: params
+
+              expect_response_contain_exactly(
+                merge_request.id,
+                merge_request_closed.id,
+                merge_request_merged.id,
+                merge_request_locked.id,
+                merge_request2.id
+              )
+            end
+          end
+        end
+
+        context 'when reviewer_username is provided' do
+          let(:params) { super().merge(reviewer_username: user2.username) }
+
+          it 'returns review requested merge requests for the given user' do
+            get api('/merge_requests', user), params: params
+
+            expect_response_contain_exactly(review_requested_mr1.id)
+          end
+        end
+
+        context 'when both reviewer_id and reviewer_username is provided' do
+          let(:params) { super().merge(reviewer_id: user2.id, reviewer_username: user2.username) }
+
+          it 'returns a 400' do
+            get api('/merge_requests', user), params: params
+
+            expect(response).to have_gitlab_http_status(:bad_request)
+            expect(json_response['error']).to eq('reviewer_id, reviewer_username are mutually exclusive')
+          end
+        end
+      end
+
       it 'returns an array of merge requests assigned to the given user' do
         merge_request3 = create(:merge_request, :simple, author: user, assignees: [user2], source_project: project2, target_project: project2, source_branch: 'other-branch')
 

@@ -21,6 +21,14 @@ module API
                  coerce_with: Validations::Validators::CheckAssigneesCount.coerce,
                  desc: 'Return merge requests which are assigned to the user with the given username'
         mutually_exclusive :assignee_id, :assignee_username
+        optional :reviewer_id,
+                 types: [Integer, String],
+                 integer_none_any: true,
+                 desc: 'Return merge requests which have the user as a reviewer with the given ID'
+        optional :reviewer_username,
+                 type: String,
+                 desc: 'Return merge requests which have the user as a reviewer with the given username'
+        mutually_exclusive :reviewer_id, :reviewer_username
 
         optional :labels,
                  type: Array[String],
