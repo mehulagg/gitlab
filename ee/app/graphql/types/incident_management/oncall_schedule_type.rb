@@ -27,6 +27,12 @@ module Types
             GraphQL::STRING_TYPE,
             null: false,
             description: 'Time zone of the on-call schedule'
+
+      field :oncall_rotations,
+            OncallRotationType.connection_type,
+            null: false,
+            description: 'On-call rotations for the on-call schedule'
+
     end
   end
 end

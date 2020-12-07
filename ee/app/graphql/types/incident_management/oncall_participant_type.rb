@@ -3,9 +3,14 @@
 module Types
   module IncidentManagement
     # rubocop: disable Graphql/AuthorizeTypes
-    class OncallUserType < BaseObject
-      graphql_name 'OncallUserType'
-      description 'The rotation user and color palette'
+    class OncallParticipantType < BaseObject
+      graphql_name 'OncallParticipantType'
+      description 'The rotation participant and color palette'
+
+      field :id,
+            Types::GlobalIDType[::IncidentManagement::OncallParticipant],
+            null: false,
+            description: 'ID of the on-call participant'
 
       field :user, Types::UserType,
                 null: false,
