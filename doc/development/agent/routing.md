@@ -118,7 +118,7 @@ If a request from GitLab comes but no connected agent can handle it, `kas` block
 and waits for a suitable agent to connect to it or to another `kas` instance. It
 stops waiting when the client disconnects, or when some long timeout happens, such
 as client timeout. `kas` is notified of new agent connections through a
-[pub-sub channel](https://redis.io/topics/pubsub) channel to avoid frequent polling.
+[pub-sub channel](https://redis.io/topics/pubsub) to avoid frequent polling.
 When a suitable agent connects, `kas` routes the request to it.
 
 ### `kas : kas` internal endpoint
@@ -194,6 +194,9 @@ service KasApi {
     }
     // Connected agents for a particular agent id.
     rpc ConnectedAgentsById (ConnectedAgentsByIdRequest) returns (ConnectedAgentsByIdResponse) {
+    }
+    // Depends on the need, but here is the call from the example above.
+    rpc GetPods (GetPodsRequest) returns (GetPodsResponse) {
     }
 }
 
