@@ -326,9 +326,9 @@ For visibility, please also share any commands run against production in the `#s
 
 ### Manually force the current user to be in the experiment group
 
-You may force the application to put your current user in the experiment group by 
-adding a query string parameter to the URL of any page that checks if the user is in either the experiment group or the control group. The experiment works 
-only for this URL and won't work for subsequent pages or when submitting forms unless links and forms forward the query parameter.
+You may force the application to put your current user in the experiment group. To do so 
+add a query string parameter to the URL of any page where the experiment runs. If you do so, 
+the experiment will work only for this URL and won't work after following links or submitting forms.
 
 For example, to forcibly enable the `EXPERIMENT_KEY` experiment, add `force_experiment=EXPERIMENT_KEY` 
 to the URL:
