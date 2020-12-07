@@ -20,10 +20,10 @@ module EE
       base.belongs_to :user
       base.belongs_to :milestone
 
-      base.validates :user, presence: true, if: :assignee?
-      base.validates :milestone, presence: true, if: :milestone?
-      base.validates :user_id, uniqueness: { scope: :board_id }, if: :assignee?
-      base.validates :milestone_id, uniqueness: { scope: :board_id }, if: :milestone?
+      base.validates :user, presence: { message: -> (object, data) { _('not found') } }, if: :assignee?
+      base.validates :milestone, presence: { message: -> (object, data) { _('not found') } }, if: :milestone?
+      base.validates :user_id, uniqueness: { scope: :board_id }, if: :user_id?
+      base.validates :milestone_id, uniqueness: { scope: :board_id }, if: :milestone_id?
       base.validates :max_issue_count, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
       base.validates :max_issue_weight, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
       base.validates :limit_metric, inclusion: {

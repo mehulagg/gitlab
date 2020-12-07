@@ -33,7 +33,7 @@ module Boards
 
       def target(board)
         strong_memoize(:target) do
-          available_labels.find(params[:label_id])
+          available_labels.find_by(id: params[:label_id])
         end
       end
 
