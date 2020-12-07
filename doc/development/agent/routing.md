@@ -131,7 +131,7 @@ When accessed through this endpoint, `kas` uses the request itself to determine
 which `agentk` to send the request to. It prevents request cycles by only following
 the instructions in the request, rather than doing discovery. It's the responsibility
 of the `kas` receiving the request from the _external_ endpoint to retry and re-route
-requests. This method ensures a single central component of each request can determine
+requests. This method ensures a single central component for each request can determine
 how a request is routed, rather than distributing the decision across several `kas` instances.
 
 ### API definitions
