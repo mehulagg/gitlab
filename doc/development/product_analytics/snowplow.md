@@ -469,7 +469,26 @@ For GitLab.com, we're setting up a [QA and Testing environment](https://gitlab.c
 
 ### Standard Schema
 
-| Field Name             | Required            | Description                                  |
-|------------------------|---------------------|----------------------------------------------|
-| app_id                 | **{check-circle}**  | Unique identifier for website / application  |
-| base_currency          | **{dotted-circle}** | Base currency code according to ISO_4217     |
+| Field Name               | Required            | Description                                  |
+|--------------------------|---------------------|----------------------------------------------|
+| app_id                   | **{check-circle}**  | Unique identifier for website / application  |
+| base_currency            | **{dotted-circle}** | Base currency code according to ISO_4217     |
+| br_colordepth            | **{dotted-circle}** ||
+  br_cookies               | **{dotted-circle}** ||
+  br_family                | **{dotted-circle}** ||
+  br_features_director     | **{dotted-circle}** ||
+  br_features_flash        | **{dotted-circle}** ||
+  br_features_gears        | **{dotted-circle}** ||
+  br_features_java         | **{dotted-circle}** ||
+  br_features_pdf          | **{dotted-circle}** ||
+  br_features_quicktime    | **{dotted-circle}** ||
+  br_features_realplayer   | **{dotted-circle}** ||
+  br_features_silverlight  | **{dotted-circle}** ||
+  br_features_windowsmedia | **{dotted-circle}** ||
+  br_lang                  | **{dotted-circle}** ||
+  br_name                  | **{dotted-circle}** ||
+  br_renderengine          | **{dotted-circle}** ||
+  br_type                  | **{dotted-circle}** ||
+  br_version               | **{dotted-circle}** ||
+  br_viewheight            | **{dotted-circle}** ||
+  br_viewwidth             | **{dotted-circle}** ||
