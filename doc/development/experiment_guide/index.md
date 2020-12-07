@@ -324,7 +324,6 @@ For visibility, please also share any commands run against production in the `#s
   /chatops run feature delete signup_flow_experiment_percentage
   ```
 
-
 ### Manually force the current user to be in the experiment group
 
 You may force the application to put your current user in the experiment group by 
@@ -332,6 +331,7 @@ adding a query string parameter to the URL of experiment entry URL.
 
 For example for to enable `EXPERIMENT_KEY` experiment add `force_experiment=EXPERIMENT_KEY` 
 to the URL
+
 ```
 https://gitlab.com/<EXPERIMENT_ENTRY_URL>?force_experiment=<EXPERIMENT_KEY>
 ```
