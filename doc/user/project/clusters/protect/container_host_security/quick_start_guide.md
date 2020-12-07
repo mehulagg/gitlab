@@ -14,21 +14,22 @@ The following steps are recommended to install and use Container Host Security t
 
 1. [Install at least one runner and connect it to GitLab](https://docs.gitlab.com/runner/).
 1. [Create a group](../../../../group/#create-a-new-group).
-1. [Connect a Kubernetes cluster to the group](../../../../project/clusters/add_remove_clusters.html).
-1. [Create a cluster management project and associate it with the Kubernetes cluster](../../../../clusters/management_project.html).
+1. [Connect a Kubernetes cluster to the group](../../add_remove_clusters.md).
+1. [Create a cluster management project and associate it with the Kubernetes cluster](../../../../clusters/management_project.md).
+
 1. Install and configure an Ingress node:
 
-   - [Install the Ingress node via CI/CD (GMAv2)](../../../../clusters/applications.html#install-ingress-using-gitlab-cicd).
-   - [Determine the external endpoint via the manual method](../../../../clusters/applications.html#determining-the-external-endpoint-manually).
-   - Navigate to the Kubernetes page and enter the [DNS address for the external endpoint](../../../../project/clusters/#base-domain)
+   - [Install the Ingress node via CI/CD (GMAv2)](../../../../clusters/applications.md#install-ingress-using-gitlab-cicd).
+   - [Determine the external endpoint via the manual method](../../../../clusters/applications.md#determining-the-external-endpoint-manually).
+   - Navigate to the Kubernetes page and enter the [DNS address for the external endpoint](../../clusters/#base-domain)
      into the **Base domain** field on the **Details** tab. Save the changes to the Kubernetes
      cluster.
 
-1. [Install and configure Falco](../../../../clusters/applications.html#install-falco-using-gitlab-cicd)
+1. [Install and configure Falco](../../../../clusters/applications.md#install-falco-using-gitlab-cicd)
    for activity monitoring.
-1. [Install and configure AppArmor](../../../../clusters/applications.html#install-apparmor-using-gitlab-cicd)
+1. [Install and configure AppArmor](../../../../clusters/applications.md#install-apparmor-using-gitlab-cicd)
    for activity blocking.
-1. [Configure Pod Security Policies](../../../../clusters/applications.html#using-podsecuritypolicy-in-your-deployments)
+1. [Configure Pod Security Policies](../../../../clusters/applications.md#using-podsecuritypolicy-in-your-deployments)
    (required to be able to load AppArmor profiles).
 
 It is possible to install and manage Falco and AppArmor in other ways, such as by installing Falco and AppArmor manually into a Kubernetes cluster and then connecting it back to GitLab. These methods are not currently documented or officially supported.
