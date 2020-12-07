@@ -422,7 +422,7 @@ process of including formatting in translated strings.
 
 #### Including Angle Brackets
 
-If a string contains angles brackets (`<`/`>`) that are not used for HTML, it is still be flagged by the
+If a string contains angles brackets (`<`/`>`) that are not used for HTML, it is still flagged by the
 `rake gettext:lint` linter.
 To avoid this error, use the applicable HTML entity code (`&lt;` or `&gt;`) instead:
 
@@ -518,7 +518,7 @@ class MyPresenter
 end
 ```
 
-The translation method (`_`) is called when the class is loaded for the first time and translates the text to the default locale. Regardless of the user's locale, these values are not be translated a second time.
+The translation method (`_`) is called when the class is loaded for the first time and translates the text to the default locale. Regardless of the user's locale, these values are not translated a second time.
 
 Similar thing happens when using class methods with memoization.
 
