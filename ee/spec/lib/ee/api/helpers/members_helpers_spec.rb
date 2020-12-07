@@ -43,7 +43,7 @@ RSpec.describe EE::API::Helpers::MembersHelpers do
     let(:search_term) { nil }
     let(:order_by) { nil }
 
-    subject { members_helpers.billed_users_for(group, search_term, order_by) }
+    subject { members_helpers.billed_users_for(group, search_term, order_by: order_by) }
 
     context 'when a search parameter is present' do
       let(:search_term) { 'John' }
@@ -66,6 +66,8 @@ RSpec.describe EE::API::Helpers::MembersHelpers do
     end
 
     context 'when a search parameter is not present' do
+      subject { members_helpers.billed_users_for(group, search_term) }
+
       it 'returns expected users in name asc order' do
         allow(group).to receive(:billed_user_members).and_return([john_doe, john_smith, sophie, maria])
 
@@ -74,6 +76,8 @@ RSpec.describe EE::API::Helpers::MembersHelpers do
 
       context 'and when a sorting parameter is provided (eg name descending)' do
         let(:order_by) { 'name_desc' }
+
+        subject { members_helpers.billed_users_for(group, search_term, order_by: order_by) }
 
         it 'sorts results accordingly' do
           expect(subject).to eq([sophie, maria, john_smith, john_doe].map(&:user))
