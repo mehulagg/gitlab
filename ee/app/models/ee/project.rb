@@ -23,6 +23,7 @@ module EE
       include ProjectSecurityScannersInformation
 
       ignore_columns :mirror_last_update_at, :mirror_last_successful_update_at, remove_after: '2019-12-15', remove_with: '12.6'
+      ignore_columns :pull_mirror_branch_prefix, remove_after: '2021-02-22', remove_with: '14.0'
 
       before_save :set_override_pull_mirror_available, unless: -> { ::Gitlab::CurrentSettings.mirror_available }
       before_save :set_next_execution_timestamp_to_now, if: ->(project) { project.mirror? && project.mirror_changed? && project.import_state }
@@ -204,9 +205,6 @@ module EE
                         less_than: ::Gitlab::Pages::MAX_SIZE / 1.megabyte }
 
       validates :approvals_before_merge, numericality: true, allow_blank: true
-
-      validates :pull_mirror_branch_prefix, length: { maximum: 50 }
-      validate :check_pull_mirror_branch_prefix
 
       with_options if: :mirror? do
         validates :import_url, presence: true
@@ -776,15 +774,6 @@ module EE
           (public? && namespace.public? || namespace.feature_available_in_plan?(feature))
       else
         globally_available
-      end
-    end
-
-    def check_pull_mirror_branch_prefix
-      return if pull_mirror_branch_prefix.blank?
-      return unless pull_mirror_branch_prefix_changed?
-
-      unless ::Gitlab::GitRefValidator.validate("#{pull_mirror_branch_prefix}master")
-        errors.add(:pull_mirror_branch_prefix, _('Invalid Git ref'))
       end
     end
 

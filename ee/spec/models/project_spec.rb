@@ -338,16 +338,6 @@ RSpec.describe Project do
         project2.update(mirror: true, import_url: generate(:url), mirror_user: project.creator)
       end.to change { ProjectImportState.where(project: project2).count }.from(0).to(1)
     end
-
-    describe 'pull_mirror_branch_prefix' do
-      it { is_expected.to validate_length_of(:pull_mirror_branch_prefix).is_at_most(50) }
-
-      it 'rejects invalid git refs' do
-        project = build(:project, pull_mirror_branch_prefix: 'an invalid prefix..')
-
-        expect(project).not_to be_valid
-      end
-    end
   end
 
   describe 'setting up a mirror' do
