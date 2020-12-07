@@ -102,6 +102,7 @@ To authenticate to the Package Registry, you must use one of the following:
 - It's not recommended, but you can use [OAuth tokens](../../../api/oauth2.md#resource-owner-password-credentials-flow).
   Standard OAuth tokens cannot authenticate to the GitLab NPM Registry. You must use a personal access token with OAuth headers.
 - A [CI job token](#authenticate-with-a-ci-job-token).
+- Your NPM package name must be in the format of [@scope:package-name](#package-naming-convention). It must match exactly, including the case.
 
 ### Authenticate with a personal access token or deploy token
 
