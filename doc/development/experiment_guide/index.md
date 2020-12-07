@@ -331,7 +331,7 @@ You may force the application to put your current user in the experiment group b
 adding a query string parameter to the URL of experiment entry URL.
 
 For example for to enable `EXPERIMENT_KEY` experiment add `force_experiment=EXPERIMENT_KEY` 
-to the 
+to the URL
 ```
 https://gitlab.com/<EXPERIMENT_ENTRY_URL>?force_experiment=<EXPERIMENT_KEY>
 ```
