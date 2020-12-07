@@ -1,6 +1,7 @@
 import '~/pages/groups/edit';
 import initAccessRestrictionField from 'ee/groups/settings/access_restriction_field';
 import validateRestrictedIpAddress from 'ee/groups/settings/access_restriction_field/validate_ip_address';
+import initComplianceFrameworkLabelsList from 'ee/groups/settings/compliance_framework_labels/init_list';
 import { __ } from '~/locale';
 
 initAccessRestrictionField('.js-allowed-email-domains', {
@@ -8,9 +9,12 @@ initAccessRestrictionField('.js-allowed-email-domains', {
   regexErrorMessage: __('The domain you entered is misformatted.'),
   disallowedValueErrorMessage: __('The domain you entered is not allowed.'),
 });
+
 initAccessRestrictionField(
   '.js-ip-restriction',
   { placeholder: __('Enter IP address range') },
   'ip_restriction_field',
   validateRestrictedIpAddress,
 );
+
+initComplianceFrameworkLabelsList();
