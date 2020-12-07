@@ -47,11 +47,15 @@ kubectl -n gitlab-managed-apps logs -l app=falco
 
 Occasionally your CI/CD pipeline may fail or have trouble connecting to the cluster.  Below are some initial troubleshooting steps that resolve the most common problems:
 
-1. [Clear the cluster cache](https://docs.gitlab.com/ee/user/project/clusters/#clearing-the-cluster-cache)
-1. If things still aren't working, a more assertive set of actions may help get things back into a good state:
-  1. Stop and [delete the problematic environment](https://docs.gitlab.com/ee/ci/environments/#delete-environments-through-the-ui) in GitLab
-  1. Delete the relevant namespace in Kubernetes by running `kubectl delete namespaces <insert-some-namespace-name>` in your Kubernetes cluster
-  1. Re-run the application project pipeline to re-deploy the application
+1. [Clear the cluster cache](../../../../project/clusters/#clearing-the-cluster-cache)
+1. If things still aren't working, a more assertive set of actions may help get things back to a
+   good state:
+
+   - Stop and [delete the problematic environment](../../../../../ci/environments/#delete-environments-through-the-ui)
+     in GitLab.
+   - Delete the relevant namespace in Kubernetes by running
+     `kubectl delete namespaces <insert-some-namespace-name>` in your Kubernetes cluster.
+   - Re-run the application project pipeline to re-deploy the application.
 
 ### Using GMAv1 with GMAv2
 
