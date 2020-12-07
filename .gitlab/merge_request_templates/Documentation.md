@@ -15,7 +15,7 @@
 
 ## Author's checklist (required)
 
-- [ ] Follow the [Documentation Guidelines](https://docs.gitlab.com/ee/development/documentation/) and [Style Guide](https://docs.gitlab.com/ee/development/documentation/styleguide.html).
+- [ ] Follow the [Documentation Guidelines](https://docs.gitlab.com/ee/development/documentation/) and [Style Guide](https://docs.gitlab.com/ee/development/documentation/styleguide).
 - If you have **Developer** permissions or higher:
   - [ ] Ensure that the [product tier badge](https://docs.gitlab.com/ee/development/documentation/styleguide/index.html#product-tier-badges) is added to doc's `h1`.
   - [ ] Apply the ~documentation label, plus:
