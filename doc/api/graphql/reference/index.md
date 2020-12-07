@@ -4102,6 +4102,36 @@ Status of a container repository.
 | `HEADER` | Header validation |
 | `TEXT_FILE` | Text file validation |
 
+### DataVisualizationColorEnum
+
+Color of the data visualization palette.
+
+| Value | Description |
+| ----- | ----------- |
+| `AQUA` | Aqua color |
+| `BLUE` | Blue color |
+| `GREEN` | Green color |
+| `MAGENTA` | Magenta color |
+| `ORANGE` | Orange color |
+
+### DataVisualizationWeightEnum
+
+Weight of the data visualization palette.
+
+| Value | Description |
+| ----- | ----------- |
+| `WEIGHT_100` | 100 weight |
+| `WEIGHT_200` | 200 weight |
+| `WEIGHT_300` | 300 weight |
+| `WEIGHT_400` | 400 weight |
+| `WEIGHT_50` | 50 weight |
+| `WEIGHT_500` | 500 weight |
+| `WEIGHT_600` | 600 weight |
+| `WEIGHT_700` | 700 weight |
+| `WEIGHT_800` | 800 weight |
+| `WEIGHT_900` | 900 weight |
+| `WEIGHT_950` | 950 weight |
+
 ### DesignCollectionCopyState
 
 Copy state of a DesignCollection.
