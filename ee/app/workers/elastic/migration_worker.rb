@@ -47,7 +47,7 @@ module Elastic
       if migration.persisted? && !migration.batched?
         logger.info "MigrationWorker: migration[#{migration.name}] did not execute migrate method since it was already executed. Waiting for migration to complete"
       else
-        logger.info "MigrationWorker: migration[#{migration.name}] executing migrate method"
+        logger.info "MigrationWorker: migration[#{migration.name}] executing migrate method (launch_options:#{migration.launch_options.inspect})"
         migration.migrate
 
         if migration.batched? && !migration.completed?

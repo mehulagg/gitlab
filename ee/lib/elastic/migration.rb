@@ -4,8 +4,8 @@ module Elastic
   class Migration
     include Elastic::MigrationOptions
 
-    attr_accessor :launch_options, :next_launch_options
-    attr_reader :version
+    attr_accessor :launch_options
+    attr_reader :version, :next_launch_options
 
     def initialize(version)
       @version = version
@@ -27,6 +27,10 @@ module Elastic
 
     def client
       helper.client
+    end
+
+    def set_next_launch_options(options)
+      @next_launch_options = options
     end
 
     def log(message)

@@ -164,8 +164,8 @@ module Gitlab
         client.indices.exists?(index: index_name || target_name) # rubocop:disable CodeReuse/ActiveRecord
       end
 
-      def alias_exists?
-        client.indices.exists_alias(name: target_name)
+      def alias_exists?(name: nil)
+        client.indices.exists_alias(name: name || target_name)
       end
 
       # Calls Elasticsearch refresh API to ensure data is searchable
@@ -180,7 +180,7 @@ module Gitlab
       end
 
       def documents_count(index_name: nil)
-        index = index_name || target_index_name
+        index = target_index_name(target: index_name || target_index_name)
 
         client.indices.stats.dig('indices', index, 'primaries', 'docs', 'count')
       end
@@ -237,11 +237,13 @@ module Gitlab
       end
 
       # This method is used when we need to get an actual index name (if it's used through an alias)
-      def target_index_name
-        if alias_exists?
-          client.indices.get_alias(name: target_name).each_key.first
+      def target_index_name(target: nil)
+        target ||= target_name
+
+        if alias_exists?(name: target)
+          client.indices.get_alias(name: target).each_key.first
         else
-          target_name
+          target
         end
       end
 
