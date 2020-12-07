@@ -15303,6 +15303,124 @@
           "possibleTypes": null
         },
         {
+          "kind": "ENUM",
+          "name": "DataVisualizationColorEnum",
+          "description": "Color of the data visualization palette",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
+          "enumValues": [
+            {
+              "name": "BLUE",
+              "description": "Blue color",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "ORANGE",
+              "description": "Orange color",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "AQUA",
+              "description": "Aqua color",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "GREEN",
+              "description": "Green color",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "MAGENTA",
+              "description": "Magenta color",
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "possibleTypes": null
+        },
+        {
+          "kind": "ENUM",
+          "name": "DataVisualizationWeightEnum",
+          "description": "Weight of the data visualization palette",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
+          "enumValues": [
+            {
+              "name": "WEIGHT_50",
+              "description": "50 weight",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "WEIGHT_100",
+              "description": "100 weight",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "WEIGHT_200",
+              "description": "200 weight",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "WEIGHT_300",
+              "description": "300 weight",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "WEIGHT_400",
+              "description": "400 weight",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "WEIGHT_500",
+              "description": "500 weight",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "WEIGHT_600",
+              "description": "600 weight",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "WEIGHT_700",
+              "description": "700 weight",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "WEIGHT_800",
+              "description": "800 weight",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "WEIGHT_900",
+              "description": "900 weight",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "WEIGHT_950",
+              "description": "950 weight",
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "possibleTypes": null
+        },
+        {
           "kind": "SCALAR",
           "name": "Date",
           "description": "Date represented in ISO 8601",
@@ -45788,8 +45906,8 @@
               "name": "colorPalette",
               "description": "The color palette to assign to the on-call user, for example: \"blue\".",
               "type": {
-                "kind": "SCALAR",
-                "name": "String",
+                "kind": "ENUM",
+                "name": "DataVisualizationColorEnum",
                 "ofType": null
               },
               "defaultValue": null
@@ -45798,8 +45916,8 @@
               "name": "colorWeight",
               "description": "The color weight to assign to for the on-call user, for example \"500\". Max 4 chars. For easy identification of the user.",
               "type": {
-                "kind": "SCALAR",
-                "name": "String",
+                "kind": "ENUM",
+                "name": "DataVisualizationWeightEnum",
                 "ofType": null
               },
               "defaultValue": null

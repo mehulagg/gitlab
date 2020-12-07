@@ -19,8 +19,8 @@ RSpec.describe Mutations::IncidentManagement::OncallRotation::Create do
       participants: [
         {
           username: current_user.username,
-          color_weight: "500",
-          color_palette: "black"
+          color_weight: ::IncidentManagement::OncallParticipant.color_weights['50'],
+          color_palette: ::IncidentManagement::OncallParticipant.color_palettes[:blue]
         }
       ]
     }
@@ -79,8 +79,8 @@ RSpec.describe Mutations::IncidentManagement::OncallRotation::Create do
               participants: [
                 {
                   username: other_user.username,
-                  color_weight: "500",
-                  color_palette: "black"
+                  color_weight: ::IncidentManagement::OncallParticipant.color_weights['50'],
+                  color_palette: ::IncidentManagement::OncallParticipant.color_palettes[:blue]
                 }
               ]
             )
