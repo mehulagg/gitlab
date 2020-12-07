@@ -8,7 +8,7 @@ module EE
         extend ::Gitlab::Utils::Override
 
         class << self
-          include ::SortingHelper
+          include ::MemberSortOptionsHelper
 
           def member_sort_options
             member_sort_options_hash.keys
@@ -84,11 +84,11 @@ module EE
           ).for_member(member).security_event
         end
 
-        def billed_users_for(group, search_term, order_by)
+        def billed_users_for(group, search_term, order_by: 'name_asc')
           users = ::User.id_in(group.billed_user_ids)
           users = users.search(search_term) if search_term
 
-          users.sort_by_attribute(order_by || 'name_asc')
+          users.sort_by_attribute(order_by)
         end
       end
     end
