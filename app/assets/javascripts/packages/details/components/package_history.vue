@@ -1,7 +1,7 @@
 <script>
 import { GlLink, GlSprintf } from '@gitlab/ui';
-import { first } from 'lodash';
-import { s__ } from '~/locale';
+import { first, last } from 'lodash';
+import { s__, n__ } from '~/locale';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import HistoryItem from '~/vue_shared/components/registry/history_item.vue';
 import { HISTORY_PIPELINES_LIMIT } from '~/packages/details/constants';
@@ -16,17 +16,8 @@ export default {
       'PackageRegistry|Built by pipeline %{link} triggered %{datetime} by %{author}',
     ),
     publishText: s__('PackageRegistry|Published to the %{project} Package Registry %{datetime}'),
-    archivedPipelineMessage: s__(
-      'PackageRegistry|Package has %{number} archived commits, pipeline builds and registry updates',
-    ),
-    updatedByCommitText: s__(
-      'PackageRegistry|Updated by commit %{link} on branch %{branch} %{datetime}',
-    ),
-    updatedByPipelineText: s__(
-      'PackageRegistry|Updated built by pipeline %{link} triggered %{datetime} by %{author}',
-    ),
-    updatePublishText: s__(
-      'PackageRegistry|%{name} version %{version} update was published to the registry %{datetime}',
+    combinedUpdateText: s__(
+      'PackageRegistry|Version %{version} updated by commit %{link} on branch %{branch}, built by pipeline %{pipeline} and published to the registry %{datetime}',
     ),
   },
   components: {
@@ -62,20 +53,21 @@ export default {
         .slice(-HISTORY_PIPELINES_LIMIT)
         .filter(p => p.id !== this.firstPipeline.id);
     },
+    lastPipeline() {
+      return last(this.lastPipelines);
+    },
     showPipelinesInfo() {
       return Boolean(this.firstPipeline?.id);
     },
     archiviedLines() {
       return Math.max(this.pipelines.length - HISTORY_PIPELINES_LIMIT - 1, 0);
     },
-    updatedDate() {
-      if (this.firstPipeline) {
-        return new Date(this.firstPipeline.created_at).getTime() >
-          new Date(this.packageEntity.updated_at)
-          ? this.firstPipeline.created_at
-          : this.packageEntity.updated_at;
-      }
-      return this.packageEntity.updated_at;
+    archivedPipelineMessage() {
+      return n__(
+        'Package has %{strongStart}%d%{strongEnd} archived update',
+        'Package has %{strongStart}%d%{strongEnd} archived updates',
+        this.archiviedLines,
+      );
     },
   },
 };
@@ -125,25 +117,6 @@ export default {
           </gl-sprintf>
         </history-item>
       </template>
-      <!-- END OF FIRST PIPELINE BLOCK -->
-
-      <history-item
-        v-if="lastPipelines.length === 0"
-        icon="pencil"
-        data-testid="no-multi-pipelines-updated-at"
-      >
-        <gl-sprintf :message="$options.i18n.updatedAtText">
-          <template #name>
-            <strong>{{ packageEntity.name }}</strong>
-          </template>
-          <template #version>
-            <strong>{{ packageEntity.version }}</strong>
-          </template>
-          <template #datetime>
-            <time-ago-tooltip :time="updatedDate" />
-          </template>
-        </gl-sprintf>
-      </history-item>
 
       <!-- PUBLISHED LINE -->
       <history-item icon="package" data-testid="published">
@@ -158,55 +131,53 @@ export default {
       </history-item>
 
       <history-item v-if="archiviedLines" icon="history" data-testid="archived">
-        <gl-sprintf :message="$options.i18n.archivedPipelineMessage">
-          <template #number>
-            <strong>{{ archiviedLines }}</strong>
+        <gl-sprintf :message="archivedPipelineMessage">
+          <template #strong="{content}">
+            <strong>{{ content }}</strong>
           </template>
         </gl-sprintf>
       </history-item>
 
-      <!-- PIPELINS LIST BLOCK -->
+      <!-- PIPELINES LIST ENTRIES -->
+      <history-item
+        v-for="pipeline in lastPipelines"
+        :key="pipeline.id"
+        icon="pencil"
+        data-testid="pipeline-entry"
+      >
+        <gl-sprintf :message="$options.i18n.combinedUpdateText">
+          <template #version>
+            <strong>{{ packageEntity.version }}</strong>
+          </template>
+          <template #link>
+            <gl-link :href="pipeline.project.commit_url">#{{ pipeline.sha.slice(0, 8) }}</gl-link>
+          </template>
+          <template #branch>
+            <strong>{{ pipeline.ref }}</strong>
+          </template>
+          <template #pipeline>
+            <gl-link :href="pipeline.project.pipeline_url">#{{ pipeline.id }}</gl-link>
+          </template>
+          <template #datetime>
+            <time-ago-tooltip :time="pipeline.created_at" />
+          </template>
+        </gl-sprintf>
+      </history-item>
 
-      <template v-for="pipeline in lastPipelines">
-        <history-item :key="`commit-${pipeline.id}`" icon="commit" data-testid="commit">
-          <gl-sprintf :message="$options.i18n.updatedByCommitText">
-            <template #link>
-              <gl-link :href="pipeline.project.commit_url">#{{ pipeline.sha.slice(0, 8) }}</gl-link>
-            </template>
-            <template #branch>
-              <strong>{{ pipeline.ref }}</strong>
-            </template>
-            <template #datetime>
-              <time-ago-tooltip :time="pipeline.created_at" />
-            </template>
-          </gl-sprintf>
-        </history-item>
-        <history-item :key="`pipeline-${pipeline.id}`" icon="pipeline" data-testid="pipeline">
-          <gl-sprintf :message="$options.i18n.updatedByPipelineText">
-            <template #link>
-              <gl-link :href="pipeline.project.pipeline_url">#{{ pipeline.id }}</gl-link>
-            </template>
-            <template #datetime>
-              <time-ago-tooltip :time="pipeline.created_at" />
-            </template>
-            <template #author>{{ pipeline.user.name }}</template>
-          </gl-sprintf>
-        </history-item>
-
-        <history-item :key="`updated-at-${pipeline.id}`" icon="pencil" data-testid="updated-at">
-          <gl-sprintf :message="$options.i18n.updatePublishText">
-            <template #name>
-              <strong>{{ packageEntity.name }}</strong>
-            </template>
-            <template #version>
-              <strong>{{ packageEntity.version }}</strong>
-            </template>
-            <template #datetime>
-              <time-ago-tooltip :time="pipeline.created_at" />
-            </template>
-          </gl-sprintf>
-        </history-item>
-      </template>
+      <!-- UPDATED AT ENTRY -->
+      <history-item v-if="lastPipeline" icon="pencil" data-testid="updated-at">
+        <gl-sprintf :message="$options.i18n.updatedAtText">
+          <template #name>
+            <strong>{{ packageEntity.name }}</strong>
+          </template>
+          <template #version>
+            <strong>{{ packageEntity.version }}</strong>
+          </template>
+          <template #datetime>
+            <time-ago-tooltip :time="lastPipeline.created_at" />
+          </template>
+        </gl-sprintf>
+      </history-item>
     </ul>
   </div>
 </template>

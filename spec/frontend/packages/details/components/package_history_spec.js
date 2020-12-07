@@ -61,17 +61,15 @@ describe('Package History', () => {
     );
   });
   describe.each`
-    name                               | amount                         | icon          | text                                                                      | timeAgoTooltip                 | link
-    ${'created-on'}                    | ${HISTORY_PIPELINES_LIMIT + 2} | ${'clock'}    | ${'Test package version 1.0.0 was first created'}                         | ${mavenPackage.created_at}     | ${null}
-    ${'no-multi-pipelines-updated-at'} | ${1}                           | ${'pencil'}   | ${'Test package version 1.0.0 was updated'}                               | ${mavenPackage.updated_at}     | ${null}
-    ${'no-multi-pipelines-updated-at'} | ${0}                           | ${'pencil'}   | ${'Test package version 1.0.0 was updated'}                               | ${mavenPackage.updated_at}     | ${null}
-    ${'first-pipeline-commit'}         | ${HISTORY_PIPELINES_LIMIT + 2} | ${'commit'}   | ${'Created by commit #sha-baz on branch branch-name'}                     | ${null}                        | ${mockPipelineInfo.project.commit_url}
-    ${'first-pipeline-pipeline'}       | ${HISTORY_PIPELINES_LIMIT + 2} | ${'pipeline'} | ${'Built by pipeline #1 triggered  by foo'}                               | ${mockPipelineInfo.created_at} | ${mockPipelineInfo.project.pipeline_url}
-    ${'published'}                     | ${HISTORY_PIPELINES_LIMIT + 2} | ${'package'}  | ${'Published to the baz project Package Registry'}                        | ${mavenPackage.created_at}     | ${null}
-    ${'archived'}                      | ${HISTORY_PIPELINES_LIMIT + 2} | ${'history'}  | ${'Package has 1 archived commits, pipeline builds and registry updates'} | ${null}                        | ${null}
-    ${'commit'}                        | ${HISTORY_PIPELINES_LIMIT + 2} | ${'commit'}   | ${'Updated by commit #sha-baz on branch branch-name'}                     | ${mavenPackage.created_at}     | ${mockPipelineInfo.project.commit_url}
-    ${'pipeline'}                      | ${HISTORY_PIPELINES_LIMIT + 2} | ${'pipeline'} | ${'Updated built by pipeline #3 triggered  by foo'}                       | ${mockPipelineInfo.created_at} | ${mockPipelineInfo.project.pipeline_url}
-    ${'updated-at'}                    | ${HISTORY_PIPELINES_LIMIT + 2} | ${'pencil'}   | ${'Test package version 1.0.0 update was published to the registry'}      | ${mavenPackage.updated_at}     | ${null}
+    name                         | amount                         | icon          | text                                                                                                                    | timeAgoTooltip                 | link
+    ${'created-on'}              | ${HISTORY_PIPELINES_LIMIT + 2} | ${'clock'}    | ${'Test package version 1.0.0 was first created'}                                                                       | ${mavenPackage.created_at}     | ${null}
+    ${'updated-at'}              | ${HISTORY_PIPELINES_LIMIT + 2} | ${'pencil'}   | ${'Test package version 1.0.0 was updated'}                                                                             | ${mavenPackage.updated_at}     | ${null}
+    ${'first-pipeline-commit'}   | ${HISTORY_PIPELINES_LIMIT + 2} | ${'commit'}   | ${'Created by commit #sha-baz on branch branch-name'}                                                                   | ${null}                        | ${mockPipelineInfo.project.commit_url}
+    ${'first-pipeline-pipeline'} | ${HISTORY_PIPELINES_LIMIT + 2} | ${'pipeline'} | ${'Built by pipeline #1 triggered  by foo'}                                                                             | ${mockPipelineInfo.created_at} | ${mockPipelineInfo.project.pipeline_url}
+    ${'published'}               | ${HISTORY_PIPELINES_LIMIT + 2} | ${'package'}  | ${'Published to the baz project Package Registry'}                                                                      | ${mavenPackage.created_at}     | ${null}
+    ${'archived'}                | ${HISTORY_PIPELINES_LIMIT + 2} | ${'history'}  | ${'Package has 1 archived update'}                                                                                      | ${null}                        | ${null}
+    ${'archived'}                | ${HISTORY_PIPELINES_LIMIT + 3} | ${'history'}  | ${'Package has 2 archived updates'}                                                                                     | ${null}                        | ${null}
+    ${'pipeline-entry'}          | ${HISTORY_PIPELINES_LIMIT + 2} | ${'pencil'}   | ${'Version 1.0.0 updated by commit #sha-baz on branch branch-name, built by pipeline #3 and published to the registry'} | ${mavenPackage.created_at}     | ${mockPipelineInfo.project.commit_url}
   `(
     'with $amount pipelines history element $name',
     ({ name, icon, text, timeAgoTooltip, link, amount }) => {
