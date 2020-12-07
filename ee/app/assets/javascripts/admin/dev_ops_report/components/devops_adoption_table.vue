@@ -6,6 +6,7 @@ import DevopsAdoptionDeleteModal from './devops_adoption_delete_modal.vue';
 import {
   DEVOPS_ADOPTION_TABLE_TEST_IDS,
   DEVOPS_ADOPTION_STRINGS,
+  DEVOPS_ADOPTION_SEGMENT_MODAL_ID,
   DEVOPS_ADOPTION_SEGMENT_DELETE_MODAL_ID,
 } from '../constants';
 
@@ -24,6 +25,7 @@ export default {
     DevopsAdoptionDeleteModal,
   },
   i18n: DEVOPS_ADOPTION_STRINGS.table,
+  devopsSegmentModalId: DEVOPS_ADOPTION_SEGMENT_MODAL_ID,
   devopsSegmentDeleteModalId: DEVOPS_ADOPTION_SEGMENT_DELETE_MODAL_ID,
   directives: {
     GlModal: GlModalDirective,
@@ -180,14 +182,24 @@ export default {
               :container="popoverContainerId(item.name)"
               triggers="hover focus"
               placement="left"
+              show
             >
-              <gl-button
-                v-gl-modal="$options.devopsSegmentDeleteModalId"
-                category="tertiary"
-                variant="danger"
-                @click="setSelectedSegment(item)"
-                >{{ $options.i18n.deleteButton }}</gl-button
-              >
+              <div class="gl-display-inline-flex gl-flex-direction-column">
+                <gl-button
+                  v-gl-modal="$options.devopsSegmentModalId"
+                  category="tertiary"
+                  class="gl-w-max-content"
+                  @click="setSelectedSegment(item)"
+                  >{{ $options.i18n.editButton }}</gl-button
+                >
+                <gl-button
+                  v-gl-modal="$options.devopsSegmentDeleteModalId"
+                  category="tertiary"
+                  variant="danger"
+                  @click="setSelectedSegment(item)"
+                  >{{ $options.i18n.deleteButton }}</gl-button
+                >
+              </div>
             </gl-popover>
           </div>
         </div>

@@ -46,6 +46,7 @@ export const DEVOPS_ADOPTION_STRINGS = {
     error: s__('DevopsAdoption|An error occured while saving the segment. Please try again.'),
   },
   table: {
+    editButton: s__('DevopsAdoption|Edit segment'),
     deleteButton: s__('DevopsAdoption|Delete segment'),
   },
   deleteModal: {
