@@ -40,17 +40,15 @@ module Gitlab
           end
         end
 
-        def errors_count
-          head_report.degradations_count
-        end
-
         def resolved_count
           resolved_errors.size
         end
 
         def total_count
-          existing_errors.size + new_errors.size
+          head_report.degradations_count
         end
+
+        alias_method :errors_count, :total_count
       end
     end
   end
