@@ -30,7 +30,7 @@ class MigrateIssuesToSeparateIndex < Elastic::Migration
 
       options = {
         slice: 0,
-        max_slices: helper.get_settings.dig('number_of_shards').to_i
+        max_slices: get_number_of_shards
       }
       log "Setting next_launch_options to #{options.inspect}"
       set_next_launch_options(options)
@@ -53,7 +53,7 @@ class MigrateIssuesToSeparateIndex < Elastic::Migration
 
       set_next_launch_options(
         slice: slice + 1,
-        max_slices: number_of_shards
+        max_slices: max_slices
       )
     end
 
@@ -121,7 +121,7 @@ class MigrateIssuesToSeparateIndex < Elastic::Migration
     helper.documents_count(index_name: issues_index_name)
   end
 
-  def number_of_shards
+  def get_number_of_shards
     helper.get_settings.dig('number_of_shards').to_i
   end
 
