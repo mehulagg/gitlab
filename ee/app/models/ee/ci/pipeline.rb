@@ -80,6 +80,10 @@ module EE
         end
       end
 
+      def needs_touch?
+        updated_at < 5.minutes.ago
+      end
+
       def triggers_subscriptions?
         # Currently we trigger subscriptions only for tags.
         tag? && project_has_subscriptions?

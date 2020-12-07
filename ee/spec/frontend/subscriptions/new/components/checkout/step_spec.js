@@ -1,4 +1,4 @@
-import { GlDeprecatedButton } from '@gitlab/ui';
+import { GlButton } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
 import Component from 'ee/subscriptions/new/components/checkout/step.vue';
@@ -125,13 +125,13 @@ describe('Step', () => {
     it('is disabled when this step is not valid', () => {
       createComponent({ isValid: false });
 
-      expect(wrapper.find(GlDeprecatedButton).attributes('disabled')).toBe('true');
+      expect(wrapper.find(GlButton).attributes('disabled')).toBe('true');
     });
 
     it('is enabled when this step is valid', () => {
       createComponent();
 
-      expect(wrapper.find(GlDeprecatedButton).attributes('disabled')).toBeUndefined();
+      expect(wrapper.find(GlButton).attributes('disabled')).toBeUndefined();
     });
   });
 });

@@ -355,6 +355,14 @@
   :weight: 1
   :idempotent:
   :tags: []
+- :name: geo:geo_destroy
+  :feature_category: :geo_replication
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
 - :name: geo:geo_event
   :feature_category: :geo_replication
   :has_external_dependencies:
@@ -386,14 +394,6 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent:
-  :tags: []
-- :name: geo:geo_framework_repository_destroy
-  :feature_category: :geo_replication
-  :has_external_dependencies:
-  :urgency: :low
-  :resource_boundary: :unknown
-  :weight: 1
-  :idempotent: true
   :tags: []
 - :name: geo:geo_hashed_storage_attachments_migration
   :feature_category: :geo_replication
@@ -700,14 +700,6 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent:
-  :tags: []
-- :name: environments_canary_ingress_update
-  :feature_category: :continuous_delivery
-  :has_external_dependencies: true
-  :urgency: :low
-  :resource_boundary: :unknown
-  :weight: 1
-  :idempotent: true
   :tags: []
 - :name: group_saml_group_sync
   :feature_category: :authentication_and_authorization

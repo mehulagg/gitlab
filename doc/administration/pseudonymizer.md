@@ -1,6 +1,6 @@
 ---
-stage: none
-group: unassigned
+stage: Enablement
+group: Distribution
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
@@ -12,7 +12,7 @@ As GitLab's database hosts sensitive information, using it unfiltered for analyt
 implies high security requirements. To help alleviate this constraint, the Pseudonymizer
 service is used to export GitLab's data in a pseudonymized way.
 
-CAUTION: **Warning:**
+WARNING:
 This process is not impervious. If the source data is available, it's possible for
 a user to correlate data to the pseudonymized version.
 

@@ -1,5 +1,5 @@
 <script>
-import { mapActions, mapGetters } from 'vuex';
+import { mapActions, mapGetters, mapState } from 'vuex';
 import { cloneDeep } from 'lodash';
 import {
   GlDropdownItem,
@@ -14,7 +14,7 @@ import IssuableAssignees from '~/sidebar/components/assignees/issuable_assignees
 import BoardEditableItem from '~/boards/components/sidebar/board_editable_item.vue';
 import MultiSelectDropdown from '~/vue_shared/components/sidebar/multiselect_dropdown.vue';
 import getIssueParticipants from '~/vue_shared/components/sidebar/queries/getIssueParticipants.query.graphql';
-import searchUsers from '~/boards/queries/users_search.query.graphql';
+import searchUsers from '~/boards/graphql/users_search.query.graphql';
 
 export default {
   noSearchDelay: 0,
@@ -75,6 +75,7 @@ export default {
   },
   computed: {
     ...mapGetters(['activeIssue']),
+    ...mapState(['isSettingAssignees']),
     assigneeText() {
       return n__('Assignee', '%d Assignees', this.selected.length);
     },
@@ -131,7 +132,7 @@ export default {
 </script>
 
 <template>
-  <board-editable-item :title="assigneeText" @close="saveAssignees">
+  <board-editable-item :loading="isSettingAssignees" :title="assigneeText" @close="saveAssignees">
     <template #collapsed>
       <issuable-assignees :users="selected" @assign-self="assignSelf" />
     </template>

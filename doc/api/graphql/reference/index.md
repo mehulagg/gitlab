@@ -13,7 +13,7 @@ The API can be explored interactively using the [GraphiQL IDE](../index.md#graph
 Each table below documents a GraphQL type. Types match loosely to models, but not all
 fields and methods on a model are available via GraphQL.
 
-CAUTION: **Caution:**
+WARNING:
 Fields that are deprecated are marked with **{warning-solid}**.
 Items (fields, enums, etc) that have been removed according to our [deprecation process](../index.md#deprecation-process) can be found
 in [Removed Items](../removed_items.md).
@@ -236,16 +236,16 @@ Represents a project or group board.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `assignee` | User | The board assignee. |
-| `epics` | BoardEpicConnection | Epics associated with board issues. |
-| `hideBacklogList` | Boolean | Whether or not backlog list is hidden. |
-| `hideClosedList` | Boolean | Whether or not closed list is hidden. |
+| `assignee` | User | The board assignee |
+| `epics` | BoardEpicConnection | Epics associated with board issues |
+| `hideBacklogList` | Boolean | Whether or not backlog list is hidden |
+| `hideClosedList` | Boolean | Whether or not closed list is hidden |
 | `id` | ID! | ID (global ID) of the board |
 | `labels` | LabelConnection | Labels of the board |
 | `lists` | BoardListConnection | Lists of the board |
-| `milestone` | Milestone | The board milestone. |
+| `milestone` | Milestone | The board milestone |
 | `name` | String | Name of the board |
-| `weight` | Int | Weight of the board. |
+| `weight` | Int | Weight of the board |
 
 ### BoardEpic
 
@@ -366,6 +366,45 @@ Represents the total number of issues and their weights for a particular day.
 | `date` | ISO8601Date! | Date for burnup totals |
 | `scopeCount` | Int! | Number of issues as of this day |
 | `scopeWeight` | Int! | Total weight of issues as of this day |
+
+### CiConfig
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| `errors` | String! => Array | Linting errors |
+| `mergedYaml` | String | Merged CI config YAML |
+| `stages` | CiConfigStage! => Array | Stages of the pipeline |
+| `status` | CiConfigStatus | Status of linting, can be either valid or invalid |
+
+### CiConfigGroup
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| `jobs` | CiConfigJob! => Array | Jobs in group |
+| `name` | String | Name of the job group |
+| `size` | Int | Size of the job group |
+
+### CiConfigJob
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| `groupName` | String | Name of the job group |
+| `name` | String | Name of the job |
+| `needs` | CiConfigNeed! => Array | Builds that must complete before the jobs run |
+| `stage` | String | Name of the job stage |
+
+### CiConfigNeed
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| `name` | String | Name of the need |
+
+### CiConfigStage
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| `groups` | CiConfigGroup! => Array | Groups of jobs for the stage |
+| `name` | String | Name of the stage |
 
 ### CiGroup
 
@@ -507,6 +546,9 @@ Represents a ComplianceFramework associated with a Project.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
+| `color` | String! | Hexadecimal representation of compliance framework's label color |
+| `description` | String! | Description of the compliance framework |
+| `id` | ID! | Compliance framework ID |
 | `name` | String! | Name of the compliance framework |
 
 ### ConfigureSastPayload
@@ -550,6 +592,7 @@ A container repository.
 | `location` | String! | URL of the container repository. |
 | `name` | String! | Name of the container repository. |
 | `path` | String! | Path of the container repository. |
+| `project` | Project! | Project of the container registry |
 | `status` | ContainerRepositoryStatus | Status of the container repository. |
 | `tagsCount` | Int! | Number of tags associated with this image. |
 | `updatedAt` | Time! | Timestamp when the container repository was updated. |
@@ -568,6 +611,7 @@ Details of a container repository.
 | `location` | String! | URL of the container repository. |
 | `name` | String! | Name of the container repository. |
 | `path` | String! | Path of the container repository. |
+| `project` | Project! | Project of the container registry |
 | `status` | ContainerRepositoryStatus | Status of the container repository. |
 | `tags` | ContainerRepositoryTagConnection | Tags of the container repository |
 | `tagsCount` | Int! | Number of tags associated with this image. |
@@ -827,6 +871,7 @@ Represents a DAST Site Profile.
 | ----- | ---- | ----------- |
 | `editPath` | String | Relative web path to the edit page of a site profile |
 | `id` | DastSiteProfileID! | ID of the site profile |
+| `normalizedTargetUrl` | String | Normalized URL of the target to be scanned |
 | `profileName` | String | The name of the site profile |
 | `targetUrl` | String | The URL of the target to be scanned |
 | `userPermissions` | DastSiteProfilePermissions! | Permissions for the current user on the resource |
@@ -887,8 +932,8 @@ Represents a DAST Site Validation.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `id` | DastSiteValidationID! | ID of the site validation |
-| `status` | DastSiteProfileValidationStatusEnum! | The status of the validation |
+| `id` | DastSiteValidationID! | Global ID of the site validation |
+| `status` | DastSiteProfileValidationStatusEnum! | Status of the site validation |
 
 ### DastSiteValidationCreatePayload
 
@@ -1054,6 +1099,15 @@ Autogenerated return type of DestroyBoard.
 | `clientMutationId` | String | A unique identifier for the client performing the mutation. |
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 
+### DestroyComplianceFrameworkPayload
+
+Autogenerated return type of DestroyComplianceFramework.
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| `clientMutationId` | String | A unique identifier for the client performing the mutation. |
+| `errors` | String! => Array | Errors encountered during execution of the mutation. |
+
 ### DestroyContainerRepositoryPayload
 
 Autogenerated return type of DestroyContainerRepository.
@@ -1104,9 +1158,27 @@ Segment.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `groups` | GroupConnection | Assigned groups |
+| `groups` | Group! => Array | Assigned groups |
 | `id` | ID! | ID of the segment |
+| `latestSnapshot` | DevopsAdoptionSnapshot | The latest adoption metrics for the segment |
 | `name` | String! | Name of the segment |
+
+### DevopsAdoptionSnapshot
+
+Snapshot.
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| `deploySucceeded` | Boolean! | At least one deployment succeeded |
+| `endTime` | Time! | The end time for the snapshot where the data points were collected |
+| `issueOpened` | Boolean! | At least one issue was opened |
+| `mergeRequestApproved` | Boolean! | At least one merge request was approved |
+| `mergeRequestOpened` | Boolean! | At least one merge request was opened |
+| `pipelineSucceeded` | Boolean! | At least one pipeline succeeded |
+| `recordedAt` | Time! | The time the snapshot was recorded |
+| `runnerConfigured` | Boolean! | At least one runner was used |
+| `securityScanSucceeded` | Boolean! | At least one security scan succeeded |
+| `startTime` | Time! | The start time for the snapshot where the data points were collected |
 
 ### DiffPosition
 
@@ -1309,8 +1381,8 @@ Relationship between an epic and an issue.
 | `alertManagementAlert` | AlertManagementAlert | Alert associated to this issue |
 | `assignees` | UserConnection | Assignees of the issue |
 | `author` | User! | User that created the issue |
-| `blocked` | Boolean! | Indicates the issue is blocked |
-| `blockedByCount` | Int | Count of issues blocking this issue |
+| `blocked` | Boolean! | Indicates the issue is blocked. |
+| `blockedByCount` | Int | Count of issues blocking this issue. |
 | `closedAt` | Time | Timestamp of when the issue was closed |
 | `confidential` | Boolean! | Indicates the issue is confidential |
 | `createdAt` | Time! | Timestamp of when the issue was created |
@@ -1323,14 +1395,14 @@ Relationship between an epic and an issue.
 | `downvotes` | Int! | Number of downvotes the issue has received |
 | `dueDate` | Time | Due date of the issue |
 | `emailsDisabled` | Boolean! | Indicates if a project has email notifications disabled: `true` if email notifications are disabled |
-| `epic` | Epic | Epic to which this issue belongs |
+| `epic` | Epic | Epic to which this issue belongs. |
 | `epicIssueId` | ID! | ID of the epic-issue relation |
 | `healthStatus` | HealthStatus | Current health status. Returns null if `save_issuable_health_status` feature flag is disabled. |
 | `humanTimeEstimate` | String | Human-readable time estimate of the issue |
 | `humanTotalTimeSpent` | String | Human-readable total time reported as spent on the issue |
 | `id` | ID | Global ID of the epic-issue relation |
 | `iid` | ID! | Internal ID of the issue |
-| `iteration` | Iteration | Iteration of the issue |
+| `iteration` | Iteration | Iteration of the issue. |
 | `labels` | LabelConnection | Labels of the issue |
 | `metricImages` | MetricImage! => Array | Metric images associated to the issue. |
 | `milestone` | Milestone | Milestone of the issue |
@@ -1344,7 +1416,7 @@ Relationship between an epic and an issue.
 | `severity` | IssuableSeverity | Severity level of the incident |
 | `slaDueAt` | Time | Timestamp of when the issue SLA expires. |
 | `state` | IssueState! | State of the issue |
-| `statusPagePublishedIncident` | Boolean | Indicates whether an issue is published to the status page |
+| `statusPagePublishedIncident` | Boolean | Indicates whether an issue is published to the status page. |
 | `subscribed` | Boolean! | Indicates the currently logged in user is subscribed to the issue |
 | `taskCompletionStatus` | TaskCompletionStatus! | Task completion status of the issue |
 | `timeEstimate` | Int! | Time estimate of the issue |
@@ -1360,7 +1432,7 @@ Relationship between an epic and an issue.
 | `userPermissions` | IssuePermissions! | Permissions for the current user on the resource |
 | `webPath` | String! | Web path of the issue |
 | `webUrl` | String! | Web URL of the issue |
-| `weight` | Int | Weight of the issue |
+| `weight` | Int | Weight of the issue. |
 
 ### EpicPermissions
 
@@ -1441,7 +1513,9 @@ Autogenerated return type of EpicTreeReorder.
 | `board` | Board | A single board of the group |
 | `boards` | BoardConnection | Boards of the group |
 | `codeCoverageActivities` | CodeCoverageActivityConnection | Represents the code coverage activity for this group |
-| `containerRepositories` | ContainerRepositoryConnection | Container repositories of the project |
+| `complianceFrameworks` | ComplianceFrameworkConnection | Compliance frameworks available to projects in this namespace. Available only when feature flag `ff_custom_compliance_frameworks` is enabled |
+| `containerRepositories` | ContainerRepositoryConnection | Container repositories of the group |
+| `containerRepositoriesCount` | Int! | Number of container repositories in the group |
 | `containsLockedProjects` | Boolean! | Includes at least one project where the repository size exceeds the limit |
 | `customEmoji` | CustomEmojiConnection | Custom emoji within this namespace. Available only when feature flag `custom_emoji` is enabled |
 | `description` | String | Description of the namespace |
@@ -1608,8 +1682,8 @@ Represents a recorded measurement (object count) for the Admins.
 | `alertManagementAlert` | AlertManagementAlert | Alert associated to this issue |
 | `assignees` | UserConnection | Assignees of the issue |
 | `author` | User! | User that created the issue |
-| `blocked` | Boolean! | Indicates the issue is blocked |
-| `blockedByCount` | Int | Count of issues blocking this issue |
+| `blocked` | Boolean! | Indicates the issue is blocked. |
+| `blockedByCount` | Int | Count of issues blocking this issue. |
 | `closedAt` | Time | Timestamp of when the issue was closed |
 | `confidential` | Boolean! | Indicates the issue is confidential |
 | `createdAt` | Time! | Timestamp of when the issue was created |
@@ -1622,13 +1696,13 @@ Represents a recorded measurement (object count) for the Admins.
 | `downvotes` | Int! | Number of downvotes the issue has received |
 | `dueDate` | Time | Due date of the issue |
 | `emailsDisabled` | Boolean! | Indicates if a project has email notifications disabled: `true` if email notifications are disabled |
-| `epic` | Epic | Epic to which this issue belongs |
+| `epic` | Epic | Epic to which this issue belongs. |
 | `healthStatus` | HealthStatus | Current health status. Returns null if `save_issuable_health_status` feature flag is disabled. |
 | `humanTimeEstimate` | String | Human-readable time estimate of the issue |
 | `humanTotalTimeSpent` | String | Human-readable total time reported as spent on the issue |
 | `id` | ID! | ID of the issue |
 | `iid` | ID! | Internal ID of the issue |
-| `iteration` | Iteration | Iteration of the issue |
+| `iteration` | Iteration | Iteration of the issue. |
 | `labels` | LabelConnection | Labels of the issue |
 | `metricImages` | MetricImage! => Array | Metric images associated to the issue. |
 | `milestone` | Milestone | Milestone of the issue |
@@ -1641,7 +1715,7 @@ Represents a recorded measurement (object count) for the Admins.
 | `severity` | IssuableSeverity | Severity level of the incident |
 | `slaDueAt` | Time | Timestamp of when the issue SLA expires. |
 | `state` | IssueState! | State of the issue |
-| `statusPagePublishedIncident` | Boolean | Indicates whether an issue is published to the status page |
+| `statusPagePublishedIncident` | Boolean | Indicates whether an issue is published to the status page. |
 | `subscribed` | Boolean! | Indicates the currently logged in user is subscribed to the issue |
 | `taskCompletionStatus` | TaskCompletionStatus! | Task completion status of the issue |
 | `timeEstimate` | Int! | Time estimate of the issue |
@@ -1657,7 +1731,7 @@ Represents a recorded measurement (object count) for the Admins.
 | `userPermissions` | IssuePermissions! | Permissions for the current user on the resource |
 | `webPath` | String! | Web path of the issue |
 | `webUrl` | String! | Web URL of the issue |
-| `weight` | Int | Weight of the issue |
+| `weight` | Int | Weight of the issue. |
 
 ### IssueMoveListPayload
 
@@ -2164,6 +2238,7 @@ Contains statistics about a milestone.
 | ----- | ---- | ----------- |
 | `actualRepositorySizeLimit` | Float | Size limit for repositories in the namespace in bytes |
 | `additionalPurchasedStorageSize` | Float | Additional storage purchased for the root namespace in bytes |
+| `complianceFrameworks` | ComplianceFrameworkConnection | Compliance frameworks available to projects in this namespace. Available only when feature flag `ff_custom_compliance_frameworks` is enabled |
 | `containsLockedProjects` | Boolean! | Includes at least one project where the repository size exceeds the limit |
 | `description` | String | Description of the namespace |
 | `descriptionHtml` | String | The GitLab Flavored Markdown rendering of `description` |
@@ -2240,6 +2315,16 @@ Autogenerated return type of OncallScheduleCreate.
 ### OncallScheduleDestroyPayload
 
 Autogenerated return type of OncallScheduleDestroy.
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| `clientMutationId` | String | A unique identifier for the client performing the mutation. |
+| `errors` | String! => Array | Errors encountered during execution of the mutation. |
+| `oncallSchedule` | IncidentManagementOncallSchedule | The on-call schedule |
+
+### OncallScheduleUpdatePayload
+
+Autogenerated return type of OncallScheduleUpdate.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
@@ -2375,11 +2460,13 @@ Autogenerated return type of PipelineRetry.
 | `containerExpirationPolicy` | ContainerExpirationPolicy | The container expiration policy of the project |
 | `containerRegistryEnabled` | Boolean | Indicates if the project stores Docker container images in a container registry |
 | `containerRepositories` | ContainerRepositoryConnection | Container repositories of the project |
+| `containerRepositoriesCount` | Int! | Number of container repositories in the project |
 | `createdAt` | Time | Timestamp of the project creation |
 | `dastScannerProfiles` | DastScannerProfileConnection | The DAST scanner profiles associated with the project |
 | `dastSiteProfile` | DastSiteProfile | DAST Site Profile associated with the project |
 | `dastSiteProfiles` | DastSiteProfileConnection | DAST Site Profiles associated with the project |
-| `dastSiteValidation` | DastSiteValidation | DAST Site Validation associated with the project |
+| `dastSiteValidation` | DastSiteValidation | DAST Site Validation associated with the project. Will always return `null` if `security_on_demand_scans_site_validation` is disabled |
+| `dastSiteValidations` | DastSiteValidationConnection | DAST Site Validations associated with the project. Will always return no nodes if `security_on_demand_scans_site_validation` is disabled |
 | `description` | String | Short description of the project |
 | `descriptionHtml` | String | The GitLab Flavored Markdown rendering of `description` |
 | `environment` | Environment | A single environment of the project |
@@ -2637,6 +2724,16 @@ Autogenerated return type of ReleaseCreate.
 | `clientMutationId` | String | A unique identifier for the client performing the mutation. |
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `release` | Release | The release after mutation |
+
+### ReleaseDeletePayload
+
+Autogenerated return type of ReleaseDelete.
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| `clientMutationId` | String | A unique identifier for the client performing the mutation. |
+| `errors` | String! => Array | Errors encountered during execution of the mutation. |
+| `release` | Release | The deleted release. |
 
 ### ReleaseEvidence
 
@@ -3186,8 +3283,10 @@ Autogenerated return type of TerraformStateUnlock.
 | ----- | ---- | ----------- |
 | `createdAt` | Time! | Timestamp the version was created |
 | `createdByUser` | User | The user that created this version |
+| `downloadPath` | String | URL for downloading the version's JSON file |
 | `id` | ID! | ID of the Terraform state version |
 | `job` | CiJob | The job that created this version |
+| `serial` | Int | Serial number of the version |
 | `updatedAt` | Time! | Timestamp the version was updated |
 
 ### TerraformStateVersionRegistry
@@ -3395,7 +3494,7 @@ Autogenerated return type of UpdateBoard.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `board` | Board | The board after mutation. |
+| `board` | Board | The board after mutation |
 | `clientMutationId` | String | A unique identifier for the client performing the mutation. |
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 
@@ -3877,6 +3976,15 @@ Types of blob viewers.
 | `rich` |  |
 | `simple` |  |
 
+### CiConfigStatus
+
+Values for YAML processor result.
+
+| Value | Description |
+| ----- | ----------- |
+| `INVALID` | The configuration file is not valid |
+| `VALID` | The configuration file is valid |
+
 ### CommitActionMode
 
 Mode of a commit action.
@@ -3959,6 +4067,7 @@ Status of a container repository.
 | ----- | ----------- |
 | `FAILED_VALIDATION` | Site validation process finished but failed |
 | `INPROGRESS_VALIDATION` | Site validation process is in progress |
+| `NONE` | No site validation exists |
 | `PASSED_VALIDATION` | Site validation process finished successfully |
 | `PENDING_VALIDATION` | Site validation process has not started |
 
@@ -4047,6 +4156,16 @@ Epic ID wildcard values.
 | ----- | ----------- |
 | `ANY` | Any epic is assigned |
 | `NONE` | No epic is assigned |
+
+### GroupMemberRelation
+
+Group member relation.
+
+| Value | Description |
+| ----- | ----------- |
+| `DESCENDANTS` | Descendants members |
+| `DIRECT` | Direct members |
+| `INHERITED` | Inherited members |
 
 ### HealthStatus
 
@@ -4162,6 +4281,7 @@ Iteration ID wildcard values.
 | Value | Description |
 | ----- | ----------- |
 | `ANY` | An iteration is assigned |
+| `CURRENT` | Current iteration |
 | `NONE` | No iteration is assigned |
 
 ### JobArtifactFileType
@@ -4335,6 +4455,17 @@ Values for sorting projects.
 | `SKIPPED` |  |
 | `SUCCESS` |  |
 | `WAITING_FOR_RESOURCE` |  |
+
+### ProjectMemberRelation
+
+Project member relation.
+
+| Value | Description |
+| ----- | ----------- |
+| `DESCENDANTS` | Descendants members |
+| `DIRECT` | Direct members |
+| `INHERITED` | Inherited members |
+| `INVITED_GROUPS` | Invited Groups members |
 
 ### RegistryState
 

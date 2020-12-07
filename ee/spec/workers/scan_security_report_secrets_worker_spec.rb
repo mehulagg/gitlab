@@ -66,6 +66,7 @@ RSpec.describe  ScanSecurityReportSecretsWorker do
       expect(key[:type]).to eql(revocation_key_type)
       expect(key[:token]).to eql(api_key)
       expect(key[:location]).to include(file)
+      expect(key[:location]).to include('raw')
     end
   end
 end

@@ -1,8 +1,9 @@
 import { GlDropdown, GlDropdownItem, GlEmptyState, GlLoadingIcon, GlTab, GlTabs } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import IterationForm from 'ee/iterations/components/iteration_form.vue';
+import IterationReportSummaryOpen from 'ee/iterations/components/iteration_report_summary_open.vue';
+import IterationReportSummaryClosed from 'ee/iterations/components/iteration_report_summary_closed.vue';
 import IterationReport from 'ee/iterations/components/iteration_report.vue';
-import IterationReportSummary from 'ee/iterations/components/iteration_report_summary.vue';
 import IterationReportTabs from 'ee/iterations/components/iteration_report_tabs.vue';
 import { Namespace } from 'ee/iterations/constants';
 
@@ -72,6 +73,7 @@ describe('Iterations report', () => {
       descriptionHtml: 'The first week of June',
       startDate: '2020-06-02',
       dueDate: '2020-06-08',
+      state: 'opened',
     };
 
     describe('user without edit permission', () => {
@@ -104,6 +106,37 @@ describe('Iterations report', () => {
       it('hides actions dropdown', () => {
         expect(findActionsDropdown().exists()).toBe(false);
       });
+
+      it('renders IterationReportSummaryOpen for open iteration', () => {
+        expect(wrapper.find(IterationReportSummaryOpen).props()).toEqual({
+          iterationId: iteration.id,
+          namespaceType: Namespace.Group,
+          fullPath: defaultProps.fullPath,
+        });
+      });
+
+      it('renders IterationReportSummaryClosed for closed iteration', async () => {
+        await wrapper.setData({
+          iteration: {
+            ...iteration,
+            state: 'closed',
+          },
+        });
+
+        expect(wrapper.find(IterationReportSummaryClosed).props()).toEqual({
+          iterationId: iteration.id,
+        });
+      });
+
+      it('shows IterationReportTabs component', () => {
+        const iterationReportTabs = wrapper.find(IterationReportTabs);
+
+        expect(iterationReportTabs.props()).toEqual({
+          fullPath: defaultProps.fullPath,
+          iterationId: iteration.id,
+          namespaceType: Namespace.Group,
+        });
+      });
     });
 
     describe('user with edit permission', () => {
@@ -134,22 +167,6 @@ describe('Iterations report', () => {
             null,
             '/edit',
           );
-        });
-
-        it('passes correct props to IterationReportSummary', () => {
-          const iterationReportSummary = wrapper.find(IterationReportSummary);
-
-          expect(iterationReportSummary.props('fullPath')).toBe(defaultProps.fullPath);
-          expect(iterationReportSummary.props('iterationId')).toBe(iteration.id);
-          expect(iterationReportSummary.props('namespaceType')).toBe(Namespace.Group);
-        });
-
-        it('passes correct props to IterationReportTabs', () => {
-          const iterationReportTabs = wrapper.find(IterationReportTabs);
-
-          expect(iterationReportTabs.props('fullPath')).toBe(defaultProps.fullPath);
-          expect(iterationReportTabs.props('iterationId')).toBe(iteration.id);
-          expect(iterationReportTabs.props('namespaceType')).toBe(Namespace.Group);
         });
       });
 

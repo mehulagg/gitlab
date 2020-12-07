@@ -1,12 +1,12 @@
 ---
-stage: none
-group: unassigned
+stage: Enablement
+group: Distribution
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Understanding Unicorn and unicorn-worker-killer
 
-NOTE: **Note:**
+NOTE:
 Starting with GitLab 13.0, Puma is the default web server used in GitLab
 all-in-one package based installations as well as GitLab Helm chart deployments.
 

@@ -1523,6 +1523,16 @@ RSpec.describe User do
       expect(feed_token).not_to be_blank
       expect(user.reload.feed_token).to eq feed_token
     end
+
+    it 'ensures no feed token when disabled' do
+      allow(Gitlab::CurrentSettings).to receive(:disable_feed_token).and_return(true)
+
+      user = create(:user, feed_token: nil)
+      feed_token = user.feed_token
+
+      expect(feed_token).to be_blank
+      expect(user.reload.feed_token).to be_blank
+    end
   end
 
   describe 'static object token' do
@@ -2068,32 +2078,16 @@ RSpec.describe User do
     end
 
     describe 'secondary email matching' do
-      context 'feature flag :user_search_secondary_email is enabled' do
-        it 'returns users with a matching secondary email' do
-          expect(described_class.search(email.email)).to include(email.user)
-        end
-
-        it 'does not return users with a matching part of secondary email' do
-          expect(described_class.search(email.email[1...-1])).to be_empty
-        end
-
-        it 'returns users with a matching secondary email regardless of the casing' do
-          expect(described_class.search(email.email.upcase)).to include(email.user)
-        end
+      it 'returns users with a matching secondary email' do
+        expect(described_class.search(email.email)).to include(email.user)
       end
 
-      context 'feature flag :user_search_secondary_email is disabled' do
-        before do
-          stub_feature_flags(user_search_secondary_email: false)
-        end
+      it 'does not return users with a matching part of secondary email' do
+        expect(described_class.search(email.email[1...-1])).to be_empty
+      end
 
-        it 'does not return users with a matching secondary email' do
-          expect(described_class.search(email.email)).not_to include(email.user)
-        end
-
-        it 'does not return users with a matching part of secondary email' do
-          expect(described_class.search(email.email[1...-1])).to be_empty
-        end
+      it 'returns users with a matching secondary email regardless of the casing' do
+        expect(described_class.search(email.email.upcase)).to include(email.user)
       end
     end
 

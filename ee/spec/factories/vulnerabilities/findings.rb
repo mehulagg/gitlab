@@ -198,6 +198,14 @@ FactoryBot.define do
       end
     end
 
+    trait :with_pipeline do
+      after(:create) do |finding|
+        pipeline = create(:ci_pipeline, project: finding.project)
+
+        finding.pipelines = [pipeline]
+      end
+    end
+
     trait :identifier do
       after(:build) do |finding|
         identifier = build(

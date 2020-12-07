@@ -84,6 +84,7 @@ export default {
 
     <template #cell(issueOpened)="{ item }">
       <devops-adoption-table-cell-flag
+        v-if="item.latestSnapshot"
         :data-testid="$options.testids.ISSUES"
         :enabled="item.latestSnapshot.issueOpened"
       />
@@ -91,6 +92,7 @@ export default {
 
     <template #cell(mergeRequestOpened)="{ item }">
       <devops-adoption-table-cell-flag
+        v-if="item.latestSnapshot"
         :data-testid="$options.testids.MRS"
         :enabled="item.latestSnapshot.mergeRequestOpened"
       />
@@ -98,6 +100,7 @@ export default {
 
     <template #cell(mergeRequestApproved)="{ item }">
       <devops-adoption-table-cell-flag
+        v-if="item.latestSnapshot"
         :data-testid="$options.testids.APPROVALS"
         :enabled="item.latestSnapshot.mergeRequestApproved"
       />
@@ -105,6 +108,7 @@ export default {
 
     <template #cell(runnerConfigured)="{ item }">
       <devops-adoption-table-cell-flag
+        v-if="item.latestSnapshot"
         :data-testid="$options.testids.RUNNERS"
         :enabled="item.latestSnapshot.runnerConfigured"
       />
@@ -112,6 +116,7 @@ export default {
 
     <template #cell(pipelineSucceeded)="{ item }">
       <devops-adoption-table-cell-flag
+        v-if="item.latestSnapshot"
         :data-testid="$options.testids.PIPELINES"
         :enabled="item.latestSnapshot.pipelineSucceeded"
       />
@@ -119,6 +124,7 @@ export default {
 
     <template #cell(deploySucceeded)="{ item }">
       <devops-adoption-table-cell-flag
+        v-if="item.latestSnapshot"
         :data-testid="$options.testids.DEPLOYS"
         :enabled="item.latestSnapshot.deploySucceeded"
       />
@@ -126,6 +132,7 @@ export default {
 
     <template #cell(securityScanSucceeded)="{ item }">
       <devops-adoption-table-cell-flag
+        v-if="item.latestSnapshot"
         :data-testid="$options.testids.SCANNING"
         :enabled="item.latestSnapshot.securityScanSucceeded"
       />

@@ -165,7 +165,7 @@ export default {
 <template>
   <span class="epic-timeline-cell" data-qa-selector="epic_timeline_cell">
     <current-day-indicator :preset-type="presetType" :timeframe-item="timeframeItem" />
-    <div class="epic-bar-wrapper">
+    <div class="gl-relative">
       <a
         v-if="hasStartDate"
         :id="generateKey(epic)"
@@ -190,12 +190,7 @@ export default {
           </div>
         </div>
       </a>
-      <gl-popover
-        :target="generateKey(epic)"
-        :title="epic.title"
-        triggers="hover"
-        placement="lefttop"
-      >
+      <gl-popover :target="generateKey(epic)" :title="epic.title" triggers="hover" placement="left">
         <p class="text-secondary m-0">{{ timeframeString(epic) }}</p>
         <p class="m-0">{{ popoverWeightText }}</p>
       </gl-popover>

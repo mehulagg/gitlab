@@ -5,7 +5,7 @@ require 'spec_helper'
 RSpec.describe Projects::IssuesController, '(JavaScript fixtures)', type: :controller do
   include JavaScriptFixturesHelpers
 
-  let(:admin) { create(:admin, feed_token: 'feedtoken:coldfeed') }
+  let(:user) { create(:user, feed_token: 'feedtoken:coldfeed') }
   let(:namespace) { create(:namespace, name: 'frontend-fixtures' )}
   let(:project) { create(:project_empty_repo, namespace: namespace, path: 'issues-project') }
 
@@ -16,7 +16,8 @@ RSpec.describe Projects::IssuesController, '(JavaScript fixtures)', type: :contr
   end
 
   before do
-    sign_in(admin)
+    project.add_maintainer(user)
+    sign_in(user)
   end
 
   after do
@@ -38,11 +39,6 @@ RSpec.describe Projects::IssuesController, '(JavaScript fixtures)', type: :contr
 
   it 'issues/closed-issue.html' do
     render_issue(create(:closed_issue, project: project))
-  end
-
-  it 'issues/issue-with-task-list.html' do
-    issue = create(:issue, project: project, description: '- [ ] Task List Item')
-    render_issue(issue)
   end
 
   it 'issues/issue_list.html' do

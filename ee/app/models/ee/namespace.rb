@@ -39,6 +39,22 @@ module EE
       scope :include_gitlab_subscription_with_hosted_plan, -> { includes(gitlab_subscription: :hosted_plan) }
       scope :join_gitlab_subscription, -> { joins("LEFT OUTER JOIN gitlab_subscriptions ON gitlab_subscriptions.namespace_id=namespaces.id") }
 
+      scope :top_most, -> { where(parent_id: nil) }
+
+      scope :in_active_trial, -> do
+        left_joins(gitlab_subscription: :hosted_plan)
+          .where(gitlab_subscriptions: { trial: true, trial_ends_on: Date.today.. })
+      end
+
+      scope :in_default_plan, -> do
+        left_joins(gitlab_subscription: :hosted_plan)
+          .where(plans: { name: [nil, *::Plan.default_plans] })
+      end
+
+      scope :eligible_for_subscription, -> do
+        top_most.in_active_trial.or(top_most.in_default_plan)
+      end
+
       scope :eligible_for_trial, -> do
         left_joins(gitlab_subscription: :hosted_plan)
           .where(
@@ -249,17 +265,6 @@ module EE
         actual_shared_runners_minutes_limit.nonzero?
     end
 
-    def shared_runners_remaining_minutes_percent
-      return 0 if shared_runners_remaining_minutes.to_f <= 0
-      return 0 if actual_shared_runners_minutes_limit.to_f == 0
-
-      (shared_runners_remaining_minutes.to_f * 100) / actual_shared_runners_minutes_limit.to_f
-    end
-
-    def shared_runners_remaining_minutes_below_threshold?
-      shared_runners_remaining_minutes_percent.to_i <= last_ci_minutes_usage_notification_level.to_i
-    end
-
     def any_project_with_shared_runners_enabled?
       all_projects.with_shared_runners.any?
     end
@@ -427,10 +432,6 @@ module EE
         start_date: created_at,
         seats: 0
       )
-    end
-
-    def shared_runners_remaining_minutes
-      [actual_shared_runners_minutes_limit.to_f - ci_minutes_quota.total_minutes_used.to_f, 0].max
     end
 
     def total_repository_size_excess_calculation(repository_size_limit, project_level: true)

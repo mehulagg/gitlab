@@ -36,7 +36,7 @@ module QA
             epic.visit!
           end
 
-          it 'adds/removes issue to/from epic', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/526' do
+          it 'adds/removes issue to/from epic', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/526', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/283932', type: :investigating } do
             EE::Page::Group::Epic::Show.perform do |show|
               show.add_issue_to_epic(issue.web_url)
 
