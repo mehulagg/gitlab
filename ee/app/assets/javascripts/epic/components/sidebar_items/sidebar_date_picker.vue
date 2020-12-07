@@ -1,13 +1,6 @@
 <script>
 import { uniqueId } from 'lodash';
-import {
-  GlLoadingIcon,
-  GlButton,
-  GlIcon,
-  GlTooltipDirective,
-  GlPopover,
-  GlLink,
-} from '@gitlab/ui';
+import { GlLoadingIcon, GlButton, GlIcon, GlTooltipDirective, GlPopover, GlLink } from '@gitlab/ui';
 
 import { __, s__ } from '~/locale';
 import { dateInWords } from '~/lib/utils/datetime_utility';
