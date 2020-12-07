@@ -6,7 +6,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Getting started with GitLab's Container Host Security
 
-The following installation steps are the recommended way of installing GitLab's Protect capabilities.  Although some capabilities can be installed through GMAv1, it is [recommended and preferred]() to install applications through GMAv2 exclusively when using Container Network Security.
+The following installation steps are the recommended way of installing GitLab's Protect capabilities.  Although some capabilities can be installed through GMAv1, it is [recommended and preferred](#using-gmav1-with-gmav2) to install applications through GMAv2 exclusively when using Container Network Security.
 
 ## Installation steps
 
@@ -62,47 +62,7 @@ Occasionally your CI/CD pipeline may fail or have trouble connecting to the clus
 
 When users use GMAv1 and GMAv2 together on the same cluster, they may experience problems with applications being uninstalled or removed from the cluster.  This is due to the fact that GMAv2 actively uninstalls applications that are installed via GMAv1 and not configured to be installed via GMAv2. It is possible to use a mixture of applications installed via GMAv1 and GMAv2 by ensuring that the GMAv1 applications are installed **after** the GMAv2 cluster management project pipeline runs.  GMAv1 applications will need to be re-installed after each run of that pipeline.  This approach is not recommended as it is error prone and can lead to downtime as applications are uninstalled and later re-installed.  The preferred and recommended path is to install all necessary components via GMAv2 and the cluster management project when using Container Network Security.
 
-NOTE: **Note:**
-These diagrams use the term _Kubernetes_ for simplicity. In practice, Sidekiq connects to a Helm
-Tiller daemon running in a pod in the cluster.
+**Related documentation links:**
 
-#### GitLab Managed Apps v1 (GMAv1)
-
-GitLab Managed Apps v1 (GMAv1) allows you to install capabilities into your Kubernetes cluster from the GitLab web interface with a one-click setup process. GitLab
-uses Sidekiq (a background processing service) to facilitate this.
-
-```mermaid
-  sequenceDiagram
-    autonumber
-    GitLab->>+Sidekiq: Install a GitLab Managed App
-    Sidekiq->>+Kubernetes: Helm install
-    Kubernetes-->>-Sidekiq: Installation complete
-    Sidekiq-->>-GitLab: Refresh UI
-```
-
-Although this installation method is easier because it's a point-and-click action in the user
-interface, it's inflexible and harder to debug. If something goes wrong, you can't see the
-deployment logs, and your deployment may be removed or overwritten if you deploy any applications through GMAv2.
-
-#### GitLab Managed Apps v2 (GMAv2)
-
-However, the next generation of GitLab Managed Apps V2 ([CI/CD-based GitLab Managed Apps](https://gitlab.com/groups/gitlab-org/-/epics/2103))
-don't use Sidekiq to deploy. All the applications are deployed using a GitLab CI/CD pipeline and
-therefore, by runners.
-
-```mermaid
-sequenceDiagram
-  autonumber
-  GitLab->>+GitLab: Trigger pipeline
-  GitLab->>+Runner: Run deployment job
-  Runner->>+Kubernetes: Helm install
-  Kubernetes-->>-Runner: Installation is complete
-  Runner-->>-GitLab: Report job status and update pipeline
-```
-
-Debugging is easier because you have access to the raw logs of these jobs (the Helm Tiller output is
-available as an artifact in case of failure), and the flexibility is much better. Since these
-deployments are only triggered when a pipeline is running (most likely when there's a new commit in
-the cluster management repository), every action has a paper trail and follows the classic merge
-request workflow (approvals, merge, deploy). The Network Policy (Cilium) Managed App, and Container
-Host Security (Falco) are deployed with this model.
+- [GitLab Managed Apps v1 (GMAv1)](https://docs.gitlab.com/ee/user/clusters/applications.html#install-with-one-click)
+- [GitLab Managed Apps v2 (GMAv2)](https://docs.gitlab.com/ee/user/clusters/management_project.html)
