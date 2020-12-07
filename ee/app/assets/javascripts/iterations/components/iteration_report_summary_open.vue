@@ -43,9 +43,10 @@ export default {
       validator: value => Object.values(Namespace).includes(value),
     },
     displayValue: {
-      type: String, // TODO enum
+      type: String,
       required: false,
       default: 'count',
+      validator: val => ['count', 'weight'].includes(val),
     },
   },
   data() {
@@ -63,6 +64,7 @@ export default {
         fullPath: this.fullPath,
         id: getIdFromGraphQLId(this.iterationId),
         isGroup: this.namespaceType === Namespace.Group,
+        displayValue: this.displayValue,
       };
     },
     completedPercent() {

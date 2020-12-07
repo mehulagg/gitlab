@@ -339,19 +339,28 @@ export default {
         </gl-button>
       </gl-button-group>
     </div>
-    <iteration-report-summary-cards
-      v-if="iterationState === 'closed'"
-      :columns="columns"
-      :loading="this.$apollo.queries.report.loading"
-      :total="report.stats.total"
-    />
-    <iteration-report-summary-open
-      v-else
-      :full-path="fullPath"
-      :iteration-id="iterationId"
-      :namespace-type="namespaceType"
-      :display-value="issuesSelected ? 'total' : 'weight'"
-    />
+    <template v-if="iterationId">
+      <iteration-report-summary-cards
+        v-if="iterationState === 'closed'"
+        :columns="columns"
+        :loading="this.$apollo.queries.report.loading"
+        :total="report.stats.total"
+      />
+      <iteration-report-summary-open
+        v-else
+        :full-path="fullPath"
+        :iteration-id="iterationId"
+        :namespace-type="namespaceType"
+        :display-value="issuesSelected ? 'count' : 'weight'"
+      >
+        <iteration-report-summary-cards
+          slot-scope="{ columns: openColumns, loading: summaryLoading, total }"
+          :columns="openColumns"
+          :loading="summaryLoading"
+          :total="total"
+        />
+      </iteration-report-summary-open>
+    </template>
     <div class="row">
       <gl-alert v-if="error" variant="danger" class="col-12" @dismiss="error = ''">
         {{ error }}

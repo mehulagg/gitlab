@@ -226,19 +226,6 @@ export default {
       </div>
       <h3 ref="title" class="page-title">{{ iteration.title }}</h3>
       <div ref="description" v-html="iteration.descriptionHtml"></div>
-      <component
-        :is="summaryComponent"
-        :full-path="fullPath"
-        :iteration-id="iteration.id"
-        :namespace-type="namespaceType"
-      >
-        <iteration-report-summary-cards
-          slot-scope="{ columns, loading: summaryLoading, total }"
-          :columns="columns"
-          :loading="summaryLoading"
-          :total="total"
-        />
-      </component>
       <burn-charts
         :start-date="iteration.startDate"
         :due-date="iteration.dueDate"
