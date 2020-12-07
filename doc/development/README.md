@@ -123,6 +123,7 @@ In these cases, use the following workflow:
    - [Quality](https://about.gitlab.com/handbook/engineering/quality/)
    - [Infrastructure](https://about.gitlab.com/handbook/engineering/infrastructure/)
    - [Technical Writing](https://about.gitlab.com/handbook/engineering/ux/technical-writing/)
+
    If the MR is authored by an appropriate EM or Staff Engineer,
    you may skip this requirement.
 
