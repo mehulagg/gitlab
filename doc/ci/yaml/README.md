@@ -3668,18 +3668,17 @@ The trigger token is different than the [`trigger`](#trigger) keyword.
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/32022) in GitLab 12.3.
 
-`interruptible` is used to indicate that a job should be canceled if made redundant by a newer pipeline run. Defaults to `false`.
+`interruptible` is used to indicate that a running job should be canceled if made redundant by a newer pipeline run.
+Note that pending jobs are always considered interruptible. Defaults to `false`.
 This value is used only if the [automatic cancellation of redundant pipelines feature](../pipelines/settings.md#auto-cancel-pending-pipelines)
 is enabled.
 
 When enabled, a pipeline on the same branch is canceled when:
 
 - It's made redundant by a newer pipeline run.
-- Either all jobs are set as interruptible, or any uninterruptible jobs haven't started.
+- Either all jobs are set as interruptible, or any uninterruptible jobs haven't started (not pending).
 
 Set jobs as interruptible that can be safely canceled once started (for instance, a build job).
-
-Pending jobs are always considered interruptible.
 
 For example:
 
@@ -3712,7 +3711,7 @@ In the example above, a new pipeline run causes an existing running pipeline to 
 - Canceled, if only `step-1` is running or pending.
 - Not canceled, once `step-2` starts running.
 
-When an uninterruptible job is running, the pipeline can never be canceled, regardless of the final job's state.
+When an uninterruptible job is running, the pipeline cannot be canceled, regardless of the final job's state.
 
 ### `resource_group`
 
