@@ -5546,6 +5546,96 @@ enum DastSiteValidationStrategyEnum {
 }
 
 """
+Color of the data visualization palette
+"""
+enum DataVisualizationColorEnum {
+  """
+  Aqua color
+  """
+  AQUA
+
+  """
+  Blue color
+  """
+  BLUE
+
+  """
+  Green color
+  """
+  GREEN
+
+  """
+  Magenta color
+  """
+  MAGENTA
+
+  """
+  Orange color
+  """
+  ORANGE
+}
+
+"""
+Weight of the data visualization palette
+"""
+enum DataVisualizationWeightEnum {
+  """
+  100 weight
+  """
+  WEIGHT_100
+
+  """
+  200 weight
+  """
+  WEIGHT_200
+
+  """
+  300 weight
+  """
+  WEIGHT_300
+
+  """
+  400 weight
+  """
+  WEIGHT_400
+
+  """
+  50 weight
+  """
+  WEIGHT_50
+
+  """
+  500 weight
+  """
+  WEIGHT_500
+
+  """
+  600 weight
+  """
+  WEIGHT_600
+
+  """
+  700 weight
+  """
+  WEIGHT_700
+
+  """
+  800 weight
+  """
+  WEIGHT_800
+
+  """
+  900 weight
+  """
+  WEIGHT_900
+
+  """
+  950 weight
+  """
+  WEIGHT_950
+}
+
+"""
 Date represented in ISO 8601
 """
 scalar Date
@@ -15222,12 +15312,12 @@ input OncallUserInputType {
   """
   The color palette to assign to the on-call user, for example: "blue".
   """
-  colorPalette: String
+  colorPalette: DataVisualizationColorEnum
 
   """
   The color weight to assign to for the on-call user, for example "500". Max 4 chars. For easy identification of the user.
   """
-  colorWeight: String
+  colorWeight: DataVisualizationWeightEnum
 
   """
   The username of the user to participate in the on-call rotation. i.e user_one

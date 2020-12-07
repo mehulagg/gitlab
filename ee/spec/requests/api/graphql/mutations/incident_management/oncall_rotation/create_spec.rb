@@ -24,8 +24,8 @@ RSpec.describe 'Creating a new on-call schedule' do
       participants: [
         {
           username: current_user.username,
-          colorWeight: "500",
-          colorPalette: "black"
+          colorWeight: "WEIGHT_500",
+          colorPalette: "BLUE"
         }
       ]
     }
