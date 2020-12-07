@@ -106,8 +106,8 @@ slonik version 2.2.5
 ## Slony User
 
 Next we must set up a PostgreSQL user that Slony can use to replicate your
-database. To do so, log in to your production database using `psql` using a
-super user account. Once done run the following SQL queries:
+database. To do so, sign in to your production database using `psql` using a
+super-user account. After signing in, run the following SQL queries:
 
 ```sql
 CREATE ROLE slony WITH SUPERUSER LOGIN REPLICATION ENCRYPTED PASSWORD 'password string here';
@@ -115,15 +115,15 @@ ALTER ROLE slony SET statement_timeout TO 0;
 ```
 
 Make sure you replace "password string here" with the actual password for the
-user. A password is *required*. This user must be created on _both_ the old and
+user. A password is required. This user must be created on both the old and
 new database server using the same password.
 
-After the user has been created, make sure you note down the password, as you
-need it later on.
+After creating the user, be sure to note the password, as the password is needed
+later.
 
 ## Configuring Slony
 
-Now we can finally start configuring Slony. Slony uses a configuration file for
+We can now start configuring Slony. Slony uses a configuration file for
 most of the work so we need to set this one up. This configuration file
 specifies where to put log files, how Slony should connect to the databases,
 etc.
