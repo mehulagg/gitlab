@@ -137,6 +137,7 @@ module Gitlab
       encrypted_key
       import_url
       elasticsearch_url
+      jwt
       otp_attempt
       sentry_dsn
       trace
