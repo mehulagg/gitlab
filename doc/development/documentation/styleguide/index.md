@@ -1799,9 +1799,7 @@ in the GitLab product documentation.
 
 ### Avoid line breaks in names
 
-Don't split names containing spaces across multiple lines. This includes product names,
-feature names, and non-GitLab product names. Line breaks inside these strings makes
-searching and grepping for names more complicated, and causes problems if names change.
+If a feature or product name contains spaces, don't split the name with a line break. When names change, it is more complicated to search or grep text that has line breaks.
 
 ### Product tier badges
 
