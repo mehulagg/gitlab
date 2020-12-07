@@ -17563,7 +17563,7 @@ CREATE TABLE vulnerability_remediations (
     summary text NOT NULL,
     file text NOT NULL,
     checksum bytea NOT NULL,
-    project_id bigint,
+    project_id bigint NOT NULL,
     CONSTRAINT check_ac0ccabff3 CHECK ((char_length(summary) <= 200)),
     CONSTRAINT check_fe3325e3ba CHECK ((char_length(file) <= 255))
 );
