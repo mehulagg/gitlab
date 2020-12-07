@@ -23,8 +23,8 @@ The following aspects of a project are imported:
 - Labels (GitLab.com & 8.7+)
 - Release note descriptions (GitLab.com & 8.12+)
 - Pull request review comments (GitLab.com & 10.2+)
-- Pull request reviews (GitLab.com & 13.7)
-- Pull request "merged by" information (GitLab.com & 13.7)
+- Pull request reviews (GitLab.com & 13.7+)
+- Pull request "merged by" information (GitLab.com & 13.7+)
 - Regular issue and pull request comments
 - [Git Large File Storage (LFS) Objects](../../../topics/git/lfs/index.md)
 
