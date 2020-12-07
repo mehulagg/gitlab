@@ -1,4 +1,4 @@
-import { GlLoadingIcon, GlIcon, GlPopover, GlLink } from '@gitlab/ui';
+import { GlLoadingIcon, GlIcon, GlPopover, GlLink, GlButton } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import SidebarDatepicker from 'ee/epic/components/sidebar_items/sidebar_date_picker.vue';
 import { TEST_HOST } from 'helpers/test_constants';
