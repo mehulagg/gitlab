@@ -22,20 +22,21 @@ TIP: **Tip:**
 When you enable 2FA, don't forget to back up your [recovery codes](#recovery-codes)!
 
 In addition to time-based one time passwords (TOTP), GitLab supports U2F
-(universal 2nd factor) and WebAuthn (experimental) devices as the second factor of authentication. After
-enabled, in addition to supplying your username and password to log in, you're
-be prompted to activate your U2F / WebAuthn device (usually by pressing a button on it),
-and it performs secure authentication on your behalf.
+(universal 2nd factor) and WebAuthn (experimental) devices as the second factor
+of authentication. After being enabled, in addition to supplying your username
+and password to sign in, you're prompted to activate your U2F / WebAuthn device
+(usually by pressing a button on it) which performs secure authentication on
+your behalf.
 
-It is highly recommended that you set up 2FA with both a
-[one-time password authenticator](#one-time-password) or use [FortiAuthenticator](#one-time-password-via-fortiauthenticator)
-and a [U2F device](#u2f-device) or a [WebAuthn device](#webauthn-device), so you can still access your account
-if you lose your U2F / WebAuthn device.
+It's highly recommended that you set up 2FA with both a [one-time password authenticator](#one-time-password)
+or use [FortiAuthenticator](#one-time-password-via-fortiauthenticator) and a
+[U2F device](#u2f-device) or a [WebAuthn device](#webauthn-device), so you can
+still access your account if you lose your U2F / WebAuthn device.
 
 ## Enabling 2FA
 
-There are multiple ways to enable two-factor authentication: via a one time password authenticator
-or a U2F / WebAuthn device.
+There are multiple ways to enable two-factor authentication: by using a one-time
+password authenticator or a U2F / WebAuthn device.
 
 ### One-time password
 
