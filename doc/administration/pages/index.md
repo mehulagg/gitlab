@@ -181,7 +181,7 @@ behavior:
 
 1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
 
-NOTE:
+WARNING:
 `inplace_chroot` option might not work with the other features, such as [Pages Access Control](#access-control).
 The [GitLab Pages README](https://gitlab.com/gitlab-org/gitlab-pages#caveats) has more information about caveats and workarounds.
 
