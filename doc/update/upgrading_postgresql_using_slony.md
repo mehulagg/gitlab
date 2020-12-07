@@ -250,7 +250,7 @@ following:
  ... more rows here ...
 ```
 
-Now we can initialize the required tables and what not that Slony uses for
+Now we can initialize the required tables and things that Slony uses for
 its replication process. To do so, run the following on the old database:
 
 ```shell
