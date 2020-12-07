@@ -74,6 +74,14 @@ module Gitlab
           known_events.select { |event| event[:category] == category.to_s }.map { |event| event[:name] }
         end
 
+        def unique_events_in_contexts
+          event_results = known_events.each_with_object({}) do |event, hash|
+            valid_context_list.each do |plan|
+              hash["#{event[:name]}_#{plan}"] = unique_events(event_names: event[:name], start_date: 4.weeks.ago.to_date, end_date: Date.current, context: plan)
+            end
+          end
+        end
+
         def unique_events_data
           categories.each_with_object({}) do |category, category_results|
             events_names = events_for_category(category)

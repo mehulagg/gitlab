@@ -33,6 +33,10 @@ module RedisTracking
     return unless metric_feature_enabled?(feature, feature_default_enabled)
     return unless visitor_id
 
+    if current_context.present? && Feature.enabled?(:redis_hll_plan_level_tracking)
+      Gitlab::UsageDataCounters::HLLRedisCounter.track_event_in_context(visitor_id, event_name, current_context)
+    end
+
     Gitlab::UsageDataCounters::HLLRedisCounter.track_event(visitor_id, event_name)
   end
 
@@ -51,5 +55,13 @@ module RedisTracking
     uuid = SecureRandom.uuid
     cookies[:visitor_id] = { value: uuid, expires: 24.months }
     uuid
+  end
+
+  def current_context
+    if ::Gitlab.com?
+      Namespace.by_path(params[:namespace_id])&.actual_plan_name
+    else
+      License.current.plan
+    end
   end
 end
