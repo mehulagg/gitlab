@@ -58,10 +58,17 @@ const DEFAULT_STAGE_CONFIG = ['issue', 'plan', 'code', 'test', 'review', 'stagin
     id,
     name: capitalizeFirstCharacter(id),
     custom: false,
-    hidden: index % 3 === 0,
+    hidden: false,
     index,
+    move_after_id: null,
+    move_before_id: null,
   }),
 );
+
+const DIRECTION = {
+  UP: 'UP',
+  DOWN: 'DOWN',
+};
 
 export default {
   name: 'ValueStreamForm',
@@ -134,6 +141,9 @@ export default {
     hiddenStages() {
       return this.stages.filter(stage => stage.hidden);
     },
+    activeStages() {
+      return this.stages.filter(stage => !stage.hidden);
+    },
   },
   watch: {
     initialFormErrors(newErrors = {}) {
@@ -155,26 +165,38 @@ export default {
       this.errors = validate({ name });
     }, DATA_REFETCH_DELAY),
     findPositionByIndex(index) {
-      this.stages.findIndex(stage => stage.index === index);
+      return this.stages.findIndex(stage => stage.index === index);
     },
-    isFirstStage(index) {
-      const pos = this.findPositionByIndex(index);
+    isFirstActiveStage(stageIndex) {
+      const pos = this.findPositionByIndex(stageIndex);
       return pos === 0;
     },
-    isLastStage(index) {
-      const pos = this.findPositionByIndex(index);
-      return pos === this.stages?.length - 1;
+    isLastActiveStage(stageIndex) {
+      const pos = this.findPositionByIndex(stageIndex);
+      return pos === this.activeStages?.length - 1;
     },
     onSubmit() {
       const { name, stages } = this;
+      console.log('stages', this.stages);
       return this.createValueStream({ name, stages }).then(() => {
         if (!this.hasFormErrors) {
           this.$toast.show(sprintf(this.$options.I18N.CREATED, { name }), {
             position: 'top-center',
           });
           this.name = '';
+          // reset the additional fields
         }
       });
+    },
+    handleMove(index, direction) {
+      console.log('move', index, direction);
+      const stage = this.stages[index];
+      this.stages[index] = {
+        ...stage,
+        // TODO: should be camelCased, then converted later on
+        move_after_id: direction === DIRECTION.DOWN ? index + 1 : null,
+        move_before_id: direction === DIRECTION.UP ? index - 1 : null,
+      };
     },
     onHide(index) {
       this.stages[index] = {
@@ -184,6 +206,7 @@ export default {
     },
   },
   I18N,
+  DIRECTION,
 };
 </script>
 <template>
@@ -222,10 +245,10 @@ export default {
       </div>
       <div v-if="hasPathNavigation">
         <hr />
-        <div v-for="stage in stages" :key="stage.id">
+        <div v-for="(stage, activeStageIndex) in activeStages" :key="stage.id">
           <gl-form-group
             v-if="!stage.hidden"
-            :label="sprintf(__('Stage %{index}'), { index: stage.index })"
+            :label="sprintf(__('Stage %{index}'), { index: activeStageIndex + 1 })"
           >
             <div class="gl-display-flex gl-flex-direction-row gl-justify-content-space-between">
               <div>
@@ -242,11 +265,19 @@ export default {
               </div>
               <div>
                 <gl-button-group>
-                  <gl-button :disabled="isLastStage(index)" icon="arrow-down" />
-                  <gl-button :disabled="isFirstStage(index)" icon="arrow-up" />
+                  <gl-button
+                    :disabled="isLastActiveStage(stage.index)"
+                    icon="arrow-down"
+                    @click="handleMove(stage.index, $options.DIRECTION.DOWN)"
+                  />
+                  <gl-button
+                    :disabled="isFirstActiveStage(stage.index)"
+                    icon="arrow-up"
+                    @click="handleMove(stage.index, $options.DIRECTION.UP)"
+                  />
                 </gl-button-group>
                 &nbsp;
-                <gl-button icon="archive" @click="onHide(index)" />
+                <gl-button icon="archive" @click="onHide(stage.index)" />
               </div>
             </div>
           </gl-form-group>

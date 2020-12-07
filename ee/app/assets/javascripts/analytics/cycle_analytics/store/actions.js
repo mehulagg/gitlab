@@ -354,14 +354,21 @@ const updateValueStreamStages = (currentGroupPath, data, newStages, stageIds) =>
   console.log('updateValueStreamStages::newStages', newStages);
   console.log('updateValueStreamStages::stageIds', stageIds);
   const { id: valueStreamId } = data;
-  const promises = newStages.map(({ id: stageId, name, ...rest }) =>
-    Api.cycleAnalyticsUpdateStage({
-      groupId: currentGroupPath,
-      valueStreamId,
-      stageId,
-      // stageId: stageIds[name].id,
-      data: { name, ...rest },
-    }),
+  const promises = newStages.map(
+    ({ id: stageId, move_after_id, move_before_id, index, name, ...rest }) => {
+      let additionalParams = {};
+      // TODO: add all then exclude empty values
+      if (move_after_id) additionalParams['move_after_id'] = move_after_id;
+      if (move_before_id) additionalParams['move_before_id'] = move_before_id;
+      console.log('Final params', stageId, { ...rest, ...additionalParams });
+      return Api.cycleAnalyticsUpdateStage({
+        groupId: currentGroupPath,
+        valueStreamId,
+        stageId,
+        // stageId: stageIds[name].id,
+        data: { ...rest, ...additionalParams },
+      });
+    },
   );
 
   console.log('promises', promises);
@@ -376,9 +383,25 @@ const updateValueStreamStages = (currentGroupPath, data, newStages, stageIds) =>
 
 const valueStreamStageIds = (groupId, newValueStream) => {
   console.log('valueStreamStageIds', groupId, newValueStream);
-  return Api.cycleAnalyticsGroupStagesAndEvents({ groupId, valueStreamId: newValueStream.id }).then(
-    ({ data: { stages } }) =>
-      Promise.resolve({ stageIds: keyBy(stages, 'title'), data: newValueStream }),
+  const { id: valueStreamId } = newValueStream;
+  // We need to update a stage trigger the persistence of stages
+  return (
+    Api.cycleAnalyticsGroupStagesAndEvents({ groupId, valueStreamId })
+      // .then(() =>
+      //   Api.cycleAnalyticsUpdateStage({
+      //     groupId,
+      //     valueStreamId,
+      //     stageId: 'issue',
+      //     data: { hidden: true },
+      //   }),
+      // )
+      // .then(() => Api.cycleAnalyticsGroupStagesAndEvents({ groupId, valueStreamId }))
+      .then(({ data: { stages } }) =>
+        Promise.resolve({
+          stageIds: keyBy(stages, 'title'),
+          data: { ...newValueStream, id: valueStreamId },
+        }),
+      )
   );
 };
 
@@ -400,6 +423,7 @@ export const createValueStream = ({ commit, dispatch, getters }, data) => {
     )
     .then(({ data: newValueStream }) => dispatch('receiveCreateValueStreamSuccess', newValueStream))
     .catch(({ response } = {}) => {
+      console.log('CATCH', response);
       const { data: { message, payload: { errors } } = null } = response;
       commit(types.RECEIVE_CREATE_VALUE_STREAM_ERROR, { message, errors });
     });
