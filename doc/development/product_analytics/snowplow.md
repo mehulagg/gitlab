@@ -464,3 +464,12 @@ Snowplow Micro is a Docker-based solution for testing frontend and backend event
 Snowplow Mini can be used for testing frontend and backend events on a production, staging and local development environment.
 
 For GitLab.com, we're setting up a [QA and Testing environment](https://gitlab.com/gitlab-org/telemetry/-/issues/266) using Snowplow Mini.
+
+## Snowplow Schema
+
+### Standard Schema
+
+| Field Name             | Required            | Description                                  |
+|------------------------|---------------------|----------------------------------------------|
+| app_id                 | **{check-circle}**  | Unique identifier for website / application  |
+| base_currency          | **{dotted-circle}** | Base currency code according to ISO_4217     |
