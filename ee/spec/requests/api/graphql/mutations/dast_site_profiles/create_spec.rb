@@ -32,7 +32,9 @@ RSpec.describe 'Creating a DAST Site Profile' do
         allow(DastSiteProfile).to receive(:create!).and_raise(StandardError)
       end
 
-      it_behaves_like 'a mutation that returns top-level errors', errors: ['Internal server error']
+      it_behaves_like 'a mutation that returns top-level errors' do
+        let(:match_errors) { contain_exactly(include('Internal server error')) }
+      end
     end
   end
 end

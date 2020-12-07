@@ -339,6 +339,13 @@ class MergeRequest < ApplicationRecord
     )
   end
 
+  def self.total_time_to_merge
+    join_metrics
+      .merge(MergeRequest::Metrics.with_valid_time_to_merge)
+      .pluck(MergeRequest::Metrics.time_to_merge_expression)
+      .first
+  end
+
   after_save :keep_around_commit, unless: :importing?
 
   alias_attribute :project, :target_project
@@ -972,7 +979,7 @@ class MergeRequest < ApplicationRecord
   # rubocop: enable CodeReuse/ServiceClass
 
   def diffable_merge_ref?
-    merge_ref_head.present? && (Feature.enabled?(:display_merge_conflicts_in_diff, project) || can_be_merged?)
+    open? && merge_ref_head.present? && (Feature.enabled?(:display_merge_conflicts_in_diff, project) || can_be_merged?)
   end
 
   # Returns boolean indicating the merge_status should be rechecked in order to

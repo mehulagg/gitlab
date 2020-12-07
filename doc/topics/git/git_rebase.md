@@ -1,7 +1,7 @@
 ---
 stage: Create
 group: Source Code
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 type: concepts, howto
 description: "Introduction to Git rebase, force-push, and resolving merge conflicts through the command line."
 ---
@@ -24,7 +24,7 @@ Git. There are the following rebase options:
 
 ### Before rebasing
 
-CAUTION: **Warning:**
+WARNING:
 `git rebase` rewrites the commit history. It **can be harmful** to do it in
 shared branches. It can cause complex and hard to resolve merge conflicts. In
 these cases, instead of rebasing your branch against the default branch,
@@ -263,7 +263,7 @@ To fix conflicts locally, you can use the following method:
    git rebase --continue
    ```
 
-   CAUTION: **Caution:**
+   WARNING:
    Up to this point, you can run `git rebase --abort` to stop the process.
    Git aborts the rebase and rolls back the branch to the state you had before
    running `git rebase`.

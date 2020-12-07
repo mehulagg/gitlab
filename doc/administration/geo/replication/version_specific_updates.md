@@ -1,7 +1,7 @@
 ---
 stage: Enablement
 group: Geo
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: howto
 ---
 
@@ -10,6 +10,10 @@ type: howto
 Check this document if it includes instructions for the version you are updating.
 These steps go together with the [general steps](updating_the_geo_nodes.md#general-update-steps)
 for updating Geo nodes.
+
+## Updating to GitLab 13.5
+
+In GitLab 13.5, there is a [regression that prevents viewing a list of container repositories and registries](https://gitlab.com/gitlab-org/gitlab/-/issues/285475) on Geo secondaries. This issue is fixed in GitLab 13.6.1 and later.
 
 ## Updating to GitLab 13.3
 
@@ -50,7 +54,7 @@ the recommended procedure, see the
 
 ## Updating to GitLab 12.9
 
-CAUTION: **Warning:**
+WARNING:
 GitLab 12.9.0 through GitLab 12.9.3 are affected by [a bug that stops
 repository verification](https://gitlab.com/gitlab-org/gitlab/-/issues/213523).
 The issue is fixed in GitLab 12.9.4. Upgrade to GitLab 12.9.4 or later.
@@ -199,14 +203,14 @@ For the recommended procedure, see the
 
 ## Updating to GitLab 12.0
 
-CAUTION: **Warning:**
+WARNING:
 This version is affected by a [bug that results in new LFS objects not being
 replicated to Geo secondary nodes](https://gitlab.com/gitlab-org/gitlab/-/issues/32696).
 The issue is fixed in GitLab 12.1; be sure to upgrade to GitLab 12.1 or later.
 
 ## Updating to GitLab 11.11
 
-CAUTION: **Warning:**
+WARNING:
 This version is affected by a [bug that results in new LFS objects not being
 replicated to Geo secondary nodes](https://gitlab.com/gitlab-org/gitlab/-/issues/32696).
 The issue is fixed in GitLab 12.1; be sure to upgrade to GitLab 12.1 or later.
@@ -372,7 +376,7 @@ the now-unused SSH keys from your secondaries, as they may cause problems if the
 
 ### Hashed Storage
 
-CAUTION: **Warning:**
+WARNING:
 Hashed storage is in **Alpha**. It is considered experimental and not
 production-ready. See [Hashed Storage](../../repository_storage_types.md) for more detail.
 
@@ -383,7 +387,7 @@ migrated we recommend leaving Hashed Storage enabled.
 
 ## Updating to GitLab 10.1
 
-CAUTION: **Warning:**
+WARNING:
 Hashed storage is in **Alpha**. It is considered experimental and not
 production-ready. See [Hashed Storage](../../repository_storage_types.md) for more detail.
 

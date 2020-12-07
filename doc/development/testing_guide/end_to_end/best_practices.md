@@ -1,7 +1,7 @@
 ---
 stage: none
 group: Development
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # End-to-end testing Best Practices
@@ -374,7 +374,7 @@ end
 
 We are creating custom negatable matchers in `qa/spec/support/matchers`.
 
-NOTE: **Note:**
+NOTE:
 We need to create custom negatable matchers only for the predicate methods we've added to the test framework, and only if we're using `not_to`. If we use `to have_no_*` a negatable matcher is not necessary but it increases code readability.
 
 ### Why we need negatable matchers

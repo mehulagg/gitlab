@@ -1,7 +1,7 @@
 ---
 stage: Manage
 group: Import
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 type: reference, howto
 ---
 
@@ -129,7 +129,7 @@ The following items will NOT be exported:
 - Merge Request Approvers
 - Awards
 
-NOTE: **Note:**
+NOTE:
 For more details on the specific data persisted in a project export, see the
 [`import_export.yml`](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/import_export/project/import_export.yml) file.
 
@@ -173,12 +173,12 @@ To export a project and its data, follow these steps:
 1. Click on **Import project** to begin importing. Your newly imported project
    page will appear soon.
 
-NOTE: **Note:**
+NOTE:
 If use of the `Internal` visibility level
 [is restricted](../../../public_access/public_access.md#restricting-the-use-of-public-or-internal-projects),
 all imported projects are given the visibility of `Private`.
 
-NOTE: **Note:**
+NOTE:
 The maximum import file size can be set by the Administrator, default is 50MB.
 As an administrator, you can modify the maximum import file size. To do so, use the `max_import_size` option in the [Application settings API](../../../api/settings.md#change-application-settings) or the [Admin UI](../../admin_area/settings/account_and_limit_settings.md).
 

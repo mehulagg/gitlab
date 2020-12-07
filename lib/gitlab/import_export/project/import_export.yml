@@ -220,6 +220,7 @@ excluded_attributes:
     - :duplicated_to_id
     - :promoted_to_epic_id
     - :blocking_issues_count
+    - :service_desk_reply_to
   merge_request:
     - :milestone_id
     - :sprint_id
@@ -341,6 +342,7 @@ excluded_attributes:
     - :protected_environment_id
   boards:
     - :milestone_id
+    - :iteration_id
   lists:
     - :board_id
     - :label_id

@@ -41,6 +41,22 @@ module Gitlab
               other.external_id == external_id
           end
 
+          def type_identifier?
+            cwe? || wasc?
+          end
+
+          def cve?
+            external_type.to_s.casecmp?('cve')
+          end
+
+          def cwe?
+            external_type.to_s.casecmp?('cwe')
+          end
+
+          def wasc?
+            external_type.to_s.casecmp?('wasc')
+          end
+
           private
 
           def generate_fingerprint

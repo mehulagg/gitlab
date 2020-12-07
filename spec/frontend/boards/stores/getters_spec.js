@@ -10,24 +10,6 @@ import {
 } from '../mock_data';
 
 describe('Boards - Getters', () => {
-  describe('labelToggleState', () => {
-    it('should return "on" when isShowingLabels is true', () => {
-      const state = {
-        isShowingLabels: true,
-      };
-
-      expect(getters.labelToggleState(state)).toBe('on');
-    });
-
-    it('should return "off" when isShowingLabels is false', () => {
-      const state = {
-        isShowingLabels: false,
-      };
-
-      expect(getters.labelToggleState(state)).toBe('off');
-    });
-  });
-
   describe('isSidebarOpen', () => {
     it('returns true when activeId is not equal to 0', () => {
       const state = {
@@ -51,52 +33,8 @@ describe('Boards - Getters', () => {
       window.gon = { features: {} };
     });
 
-    describe('when boardsWithSwimlanes is true', () => {
-      beforeEach(() => {
-        window.gon = { features: { boardsWithSwimlanes: true } };
-      });
-
-      describe('when isShowingEpicsSwimlanes is true', () => {
-        it('returns true', () => {
-          const state = {
-            isShowingEpicsSwimlanes: true,
-          };
-
-          expect(getters.isSwimlanesOn(state)).toBe(true);
-        });
-      });
-
-      describe('when isShowingEpicsSwimlanes is false', () => {
-        it('returns false', () => {
-          const state = {
-            isShowingEpicsSwimlanes: false,
-          };
-
-          expect(getters.isSwimlanesOn(state)).toBe(false);
-        });
-      });
-    });
-
-    describe('when boardsWithSwimlanes is false', () => {
-      describe('when isShowingEpicsSwimlanes is true', () => {
-        it('returns false', () => {
-          const state = {
-            isShowingEpicsSwimlanes: true,
-          };
-
-          expect(getters.isSwimlanesOn(state)).toBe(false);
-        });
-      });
-
-      describe('when isShowingEpicsSwimlanes is false', () => {
-        it('returns false', () => {
-          const state = {
-            isShowingEpicsSwimlanes: false,
-          };
-
-          expect(getters.isSwimlanesOn(state)).toBe(false);
-        });
-      });
+    it('returns false', () => {
+      expect(getters.isSwimlanesOn()).toBe(false);
     });
   });
 

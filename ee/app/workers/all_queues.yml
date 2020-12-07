@@ -355,6 +355,14 @@
   :weight: 1
   :idempotent:
   :tags: []
+- :name: geo:geo_destroy
+  :feature_category: :geo_replication
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
 - :name: geo:geo_event
   :feature_category: :geo_replication
   :has_external_dependencies:
@@ -693,14 +701,6 @@
   :weight: 1
   :idempotent:
   :tags: []
-- :name: environments_canary_ingress_update
-  :feature_category: :continuous_delivery
-  :has_external_dependencies: true
-  :urgency: :low
-  :resource_boundary: :unknown
-  :weight: 1
-  :idempotent: true
-  :tags: []
 - :name: group_saml_group_sync
   :feature_category: :authentication_and_authorization
   :has_external_dependencies:
@@ -798,6 +798,14 @@
   :idempotent: true
   :tags:
   - :requires_disk_io
+- :name: set_user_status_based_on_user_cap_setting
+  :feature_category: :users
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
 - :name: status_page_publish
   :feature_category: :incident_management
   :has_external_dependencies: true

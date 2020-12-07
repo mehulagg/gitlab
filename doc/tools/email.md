@@ -1,7 +1,7 @@
 ---
 stage: none
 group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: howto, reference
 ---
 
@@ -31,7 +31,7 @@ at their primary email address.
 
    ![compose an email](email2.png)
 
-NOTE: **Note:**
+NOTE:
 [Starting with GitLab 13.0](https://gitlab.com/gitlab-org/gitlab/-/issues/31509), email notifications can be sent only once every 10 minutes. This helps minimize performance issues.
 
 ## Unsubscribing from emails

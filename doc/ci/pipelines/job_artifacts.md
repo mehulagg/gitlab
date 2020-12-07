@@ -1,7 +1,7 @@
 ---
 stage: Verify
 group: Continuous Integration
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 disqus_identifier: 'https://docs.gitlab.com/ee/user/project/pipelines/job_artifacts.html'
 type: reference, howto
 ---
@@ -213,12 +213,23 @@ as artifacts.
 The collected DAST report uploads to GitLab as an artifact and is summarized in merge requests and the pipeline view. It's also used to provide data for security
 dashboards.
 
+#### `artifacts:reports:coverage_fuzzing` **(ULTIMATE)**
+
+> - Introduced in GitLab 13.4.
+> - Requires GitLab Runner 13.4 or later.
+
+The `coverage_fuzzing` report collects [coverage fuzzing bugs](../../user/application_security/coverage_fuzzing/index.md)
+as artifacts.
+
+The collected coverage fuzzing report uploads to GitLab as an artifact and is summarized in merge
+requests and the pipeline view. It's also used to provide data for security dashboards.
+
 #### `artifacts:reports:license_management` **(ULTIMATE)**
 
 > - Introduced in GitLab 11.5.
 > - Requires GitLab Runner 11.5 and above.
 
-CAUTION: **Warning:**
+WARNING:
 This artifact is still valid but is **deprecated** in favor of the
 [artifacts:reports:license_scanning](../pipelines/job_artifacts.md#artifactsreportslicense_scanning)
 introduced in GitLab 12.8.
@@ -337,7 +348,7 @@ in the GitLab UI to do this:
 It's possible to download the latest artifacts of a job via a well known URL
 so you can use it for scripting purposes.
 
-NOTE: **Note:**
+NOTE:
 The latest artifacts are created by jobs in the **most recent** successful pipeline
 for the specific ref. If you run two types of pipelines for the same ref, timing determines the latest
 artifact. For example, if a merge request creates a branch pipeline at the same time as a scheduled pipeline, the pipeline that completed most recently creates the latest artifact.

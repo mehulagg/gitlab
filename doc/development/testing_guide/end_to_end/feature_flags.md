@@ -1,7 +1,7 @@
 ---
 stage: none
 group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Testing with feature flags
@@ -17,7 +17,7 @@ and `GITLAB_ADMIN_PASSWORD`.
 Please be sure to include the tag `:requires_admin` so that the test can be skipped in environments
 where admin access is not available.
 
-CAUTION: **Caution:**
+WARNING:
 You are strongly advised to [enable feature flags only for a group, project, user](../../feature_flags/development.md#feature-actors),
 or [feature group](../../feature_flags/development.md#feature-groups). This makes it possible to
 test a feature in a shared environment without affecting other users.

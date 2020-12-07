@@ -1,7 +1,7 @@
 ---
 stage: none
 group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Sidekiq Style Guide
@@ -27,7 +27,7 @@ After adding a new queue, run `bin/rake
 gitlab:sidekiq:all_queues_yml:generate` to regenerate
 `app/workers/all_queues.yml` or `ee/app/workers/all_queues.yml` so that
 it can be picked up by
-[`sidekiq-cluster`](../administration/operations/extra_sidekiq_processes.md). 
+[`sidekiq-cluster`](../administration/operations/extra_sidekiq_processes.md).
 Additionally, run
 `bin/rake gitlab:sidekiq:sidekiq_queues_yml:generate` to regenerate
 `config/sidekiq_queues.yml`.
@@ -251,26 +251,6 @@ module AuthorizedProjectUpdate
 end
 ```
 
-#### Troubleshooting
-
-If the automatic deduplication were to cause issues in certain
-queues. This can be temporarily disabled by enabling a feature flag
-named `disable_<queue name>_deduplication`. For example to disable
-deduplication for the `AuthorizedProjectsWorker`, we would enable the
-feature flag `disable_authorized_projects_deduplication`.
-
-From ChatOps:
-
-```shell
-/chatops run feature set disable_authorized_projects_deduplication true
-```
-
-From the rails console:
-
-```ruby
-Feature.enable!(:disable_authorized_projects_deduplication)
-```
-
 ## Limited capacity worker
 
 It is possible to limit the number of concurrent running jobs for a worker class
@@ -492,7 +472,7 @@ A job cannot be both high urgency and have external dependencies.
 Workers that are constrained by CPU or memory resource limitations should be
 annotated with the `worker_resource_boundary` method.
 
-Most workers tend to spend most of their time blocked, wait on network responses
+Most workers tend to spend most of their time blocked, waiting on network responses
 from other services such as Redis, PostgreSQL, and Gitaly. Since Sidekiq is a
 multi-threaded environment, these jobs can be scheduled with high concurrency.
 

@@ -1,7 +1,7 @@
 ---
 stage: Package
 group: Package
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # GitLab Generic Packages Repository **(CORE)**
@@ -13,7 +13,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 > - It's recommended for production use.
 > - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-generic-packages-in-the-package-registry).
 
-CAUTION: **Warning:**
+WARNING:
 This feature might not be available to you. Check the **version history** note above for details.
 
 Publish generic files, like release binaries, in your project’s Package Registry. Then, install the packages whenever you need to use them as a dependency.
@@ -79,7 +79,7 @@ GET /projects/:id/packages/generic/:package_name/:package_version/:file_name
 | `package_version`  | string          | yes      | The package version.                                                                |
 | `file_name`        | string          | yes      | The file name.                                                                      |
 
-The file context is served in the response body. The response content type will be `application/octet-stream`.
+The file context is served in the response body. The response content type is `application/octet-stream`.
 
 Example request that uses a personal access token:
 

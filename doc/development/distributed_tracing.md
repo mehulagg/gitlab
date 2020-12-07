@@ -1,7 +1,7 @@
 ---
 stage: Monitor
 group: Health
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Distributed Tracing - development guidelines
@@ -180,7 +180,7 @@ This configuration string uses the Jaeger driver `opentracing://jaeger` with the
 | `sampler_param` | `0.01` | Use a ratio of `0.01` to configure the `probabalistic` sampler to randomly sample _1%_ of traces. |
 | `service_name` | `api` | Override the service name used by the Jaeger backend. This parameter takes precedence over the application-supplied value. |
 
-NOTE: **Note:**
+NOTE:
 The same `GITLAB_TRACING` value should to be configured in the environment
 variables for all GitLab processes, including Workhorse, Gitaly, Rails, and Sidekiq.
 

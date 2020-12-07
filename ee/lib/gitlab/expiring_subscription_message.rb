@@ -120,7 +120,7 @@ module Gitlab
     end
 
     def require_notification?
-      return false if expiring_auto_renew?
+      return false if expiring_auto_renew? || ::License.future_dated.present?
 
       auto_renew_choice_exists? && expired_subscribable_within_notification_window?
     end

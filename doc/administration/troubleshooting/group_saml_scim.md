@@ -1,7 +1,7 @@
 ---
 stage: Manage
 group: Access
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference
 ---
 
@@ -22,7 +22,7 @@ This section includes relevant screenshots of the following example configuratio
 - [Azure Active Directory](#azure-active-directory)
 - [OneLogin](#onelogin)
 
-CAUTION: **Caution:**
+WARNING:
 These screenshots are updated only as needed by GitLab Support. They are **not** official documentation.
 
 If you are currently having an issue with GitLab, you may want to check your [support options](https://about.gitlab.com/support/).

@@ -1,7 +1,7 @@
 ---
 stage: none
 group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference
 ---
 
@@ -14,7 +14,7 @@ To access the Admin Area, either:
 - Click the Admin Area icon (**{admin}**).
 - Visit `/admin` on your self-managed instance.
 
-NOTE: **Note:**
+NOTE:
 Only admin users can access the Admin Area.
 
 ## Admin Area sections

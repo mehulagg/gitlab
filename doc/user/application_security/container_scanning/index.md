@@ -2,7 +2,7 @@
 type: reference, howto
 stage: Protect
 group: Container Security
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Container Scanning **(ULTIMATE)**
@@ -212,7 +212,7 @@ container_scanning:
     GIT_STRATEGY: fetch
 ```
 
-CAUTION: **Deprecated:**
+WARNING:
 GitLab 13.0 and later doesn't support [`only` and `except`](../../../ci/yaml/README.md#onlyexcept-basic).
 When overriding the template, you must use [`rules`](../../../ci/yaml/README.md#rules)
 instead.

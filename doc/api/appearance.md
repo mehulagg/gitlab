@@ -1,7 +1,7 @@
 ---
 stage: Manage
 group: Access
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Appearance API **(CORE ONLY)**
@@ -94,7 +94,7 @@ Upload a logo to your GitLab instance.
 
 To upload an avatar from your file system, use the `--form` argument. This causes
 cURL to post data using the header `Content-Type: multipart/form-data`. The
-`file=` parameter must point to an image file on your file system and be 
+`file=` parameter must point to an image file on your file system and be
 preceded by `@`.
 
 ```plaintext

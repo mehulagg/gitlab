@@ -1,7 +1,7 @@
 ---
 stage: Enablement
 group: Geo
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: howto
 ---
 
@@ -35,7 +35,7 @@ to help identify if something is wrong:
 - Is the node's secondary tracking database connected?
 - Is the node's secondary tracking database up-to-date?
 
-![Geo health check](img/geo_node_healthcheck.png)
+![Geo health check](img/geo_node_dashboard.png)
 
 For information on how to resolve common errors reported from the UI, see
 [Fixing Common Errors](#fixing-common-errors).
@@ -308,7 +308,7 @@ log data to build up in `pg_xlog`. Removing the unused slots can reduce the amou
    sudo gitlab-psql
    ```
 
-   Note: **Note:** Using `gitlab-rails dbconsole` will not work, because managing replication slots requires superuser permissions.
+   Note: Using `gitlab-rails dbconsole` will not work, because managing replication slots requires superuser permissions.
 
 1. View your replication slots with:
 
@@ -467,7 +467,7 @@ to start again from scratch, there are a few steps that can help you:
 
 1. _(Optional)_ Rename other data folders and create new ones
 
-   CAUTION: **Caution:**
+   WARNING:
    You may still have files on the **secondary** node that have been removed from **primary** node but
    removal have not been reflected. If you skip this step, they will never be removed
    from this Geo node.

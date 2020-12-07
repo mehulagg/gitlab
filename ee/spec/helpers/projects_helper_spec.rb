@@ -150,7 +150,6 @@ RSpec.describe ProjectsHelper do
           project: { id: project.id, name: project.name },
           project_full_path: project.full_path,
           vulnerabilities_export_endpoint: "/api/v4/security/projects/#{project.id}/vulnerability_exports",
-          vulnerability_feedback_help_path: '/help/user/application_security/index#interacting-with-the-vulnerabilities',
           no_vulnerabilities_svg_path: start_with('/assets/illustrations/issues-'),
           empty_state_svg_path: start_with('/assets/illustrations/security-dashboard-empty-state'),
           dashboard_documentation: '/help/user/application_security/security_dashboard/index',
@@ -250,11 +249,12 @@ RSpec.describe ProjectsHelper do
     using RSpec::Parameterized::TableSyntax
 
     where(:ability, :nav_tabs) do
-      :read_dependencies               | [:dependencies]
-      :read_feature_flag               | [:operations]
-      :read_licenses                   | [:licenses]
-      :read_project_security_dashboard | [:security, :security_configuration]
-      :read_threat_monitoring          | [:threat_monitoring]
+      :read_dependencies                          | [:dependencies]
+      :read_feature_flag                          | [:operations]
+      :read_licenses                              | [:licenses]
+      :read_project_security_dashboard            | [:security, :security_configuration]
+      :read_threat_monitoring                     | [:threat_monitoring]
+      :read_incident_management_oncall_schedule   | [:oncall_schedule]
     end
 
     with_them do
@@ -351,6 +351,40 @@ RSpec.describe ProjectsHelper do
       let_it_be(:archived_project) { create(:project, :archived, marked_for_deletion_at: 10.minutes.ago) }
 
       it { expect(helper.scheduled_for_deletion?(archived_project)).to be true }
+    end
+  end
+
+  describe '#can_view_operations_tab?' do
+    let_it_be(:user) { create(:user) }
+
+    before do
+      allow(helper).to receive(:current_user).and_return(user)
+      allow(helper).to receive(:can?).and_return(false)
+    end
+
+    subject { helper.send(:can_view_operations_tab?, user, project) }
+
+    where(:ability) do
+      [
+        :read_incident_management_oncall_schedule
+      ]
+    end
+
+    with_them do
+      it 'includes operations tab' do
+        allow(helper).to receive(:can?).with(user, ability, project).and_return(true)
+
+        is_expected.to be(true)
+      end
+
+      context 'when operations feature is disabled' do
+        it 'does not include operations tab' do
+          allow(helper).to receive(:can?).with(user, ability, project).and_return(true)
+          project.project_feature.update_attribute(:operations_access_level, ProjectFeature::DISABLED)
+
+          is_expected.to be(false)
+        end
+      end
     end
   end
 end

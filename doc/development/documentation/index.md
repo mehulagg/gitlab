@@ -1,7 +1,7 @@
 ---
 stage: none
 group: Documentation Guidelines
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 description: Learn how to contribute to GitLab Documentation.
 ---
 
@@ -93,7 +93,7 @@ belongs to, as well as an information block as described below:
   ```plaintext
   To determine the technical writer assigned to the Stage/Group
   associated with this page, see
-  https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+  https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
   ```
 
 For example, the following metadata would be at the beginning of a product
@@ -104,7 +104,7 @@ feature:
 ---
 stage: Monitor
 group: APM
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 ```
 
@@ -381,7 +381,7 @@ on how the left-side navigation menu is built and updated.
 
 ## Previewing the changes live
 
-NOTE: **Note:**
+NOTE:
 To preview your changes to documentation locally, follow this
 [development guide](https://gitlab.com/gitlab-org/gitlab-docs/blob/master/README.md#development-when-contributing-to-gitlab-documentation) or [these instructions for GDK](https://gitlab.com/gitlab-org/gitlab-development-kit/blob/master/doc/howto/gitlab_docs.md).
 

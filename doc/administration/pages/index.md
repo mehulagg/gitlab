@@ -1,7 +1,7 @@
 ---
 stage: Release
-group: Release Management
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+group: Release
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 description: 'Learn how to administer GitLab Pages.'
 ---
 
@@ -16,7 +16,7 @@ description: 'Learn how to administer GitLab Pages.'
 GitLab Pages allows for hosting of static sites. It must be configured by an
 administrator. Separate [user documentation](../../user/project/pages/index.md) is available.
 
-NOTE: **Note:**
+NOTE:
 This guide is for Omnibus GitLab installations. If you have installed
 GitLab from source, see
 [GitLab Pages administration for source installations](source.md).
@@ -68,7 +68,7 @@ Before proceeding with the Pages configuration, you will need to:
    so that your users don't have to bring their own.
 1. (Only for custom domains) Have a **secondary IP**.
 
-NOTE: **Note:**
+NOTE:
 If your GitLab instance and the Pages daemon are deployed in a private network or behind a firewall, your GitLab Pages websites will only be accessible to devices/users that have access to the private network.
 
 ### Add the domain to the Public Suffix List
@@ -101,7 +101,7 @@ where `example.io` is the domain under which GitLab Pages will be served
 and `192.0.2.1` is the IPv4 address of your GitLab instance and `2001::1` is the
 IPv6 address. If you don't have IPv6, you can omit the AAAA record.
 
-NOTE: **Note:**
+NOTE:
 You should not use the GitLab domain to serve user pages. For more information see the [security section](#security).
 
 ## Configuration
@@ -181,7 +181,7 @@ behavior:
 
 1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
 
-NOTE: **Note:**
+NOTE:
 `inplace_chroot` option might not work with the other features, such as [Pages Access Control](#access-control).
 The [GitLab Pages README](https://gitlab.com/gitlab-org/gitlab-pages#caveats) has more information about caveats and workarounds.
 
@@ -395,7 +395,7 @@ To do that:
 1. Check the **Disable public access to Pages sites** checkbox.
 1. Click **Save changes**.
 
-CAUTION: **Warning:**
+WARNING:
 For self-managed installations, all public websites remain private until they are
 redeployed. This issue will be resolved by
 [sourcing domain configuration from the GitLab API](https://gitlab.com/gitlab-org/gitlab/-/issues/218357).
@@ -426,6 +426,42 @@ For installation from source, this can be fixed by installing the custom Certifi
 Authority (CA) in the system certificate store.
 
 For Omnibus, this is fixed by [installing a custom CA in Omnibus GitLab](https://docs.gitlab.com/omnibus/settings/ssl.html#install-custom-public-certificates).
+
+### Zip serving and cache configuration
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab-pages/-/merge_requests/392) in GitLab 13.7.
+
+DANGER: **Warning:**
+These are advanced settings. The recommended default values are set inside GitLab Pages. You should
+change these settings only if absolutely necessary. Use extreme caution.
+
+GitLab Pages can serve content from zip archives through object storage (an
+[issue](https://gitlab.com/gitlab-org/gitlab-pages/-/issues/485) exists for supporting disk storage
+as well). It uses an in-memory cache to increase the performance when serving content from a zip
+archive. You can modify the cache behavior by changing the following configuration flags.
+
+| Setting | Description |
+| ------- | ----------- |
+| `zip_cache_expiration` | The cache expiration interval of zip archives. Must be greater than zero to avoid serving stale content. Default is 60s. |
+| `zip_cache_cleanup` | The interval at which archives are cleaned from memory if they have already expired. Default is 30s. |
+| `zip_cache_refresh` | The time interval in which an archive is extended in memory if accessed before `zip_cache_expiration`. This works together with `zip_cache_expiration` to determine if an archive is extended in memory. See the [example below](#zip-cache-refresh-example) for important details. Default is 30s. |
+| `zip_open_timeout` | The maximum time allowed to open a zip archive. Increase this time for big archives or slow network connections, as doing so may affect the latency of serving Pages. Default is 30s. |
+
+#### Zip cache refresh example
+
+Archives are refreshed in the cache (extending the time they are held in memory) if they're accessed
+before `zip_cache_expiration`, and the time left before expiring is less than or equal to
+`zip_cache_refresh`. For example, if `archive.zip` is accessed at time 0s, it expires in 60s (the
+default for `zip_cache_expiration`). In the example below, if the archive is opened again after 15s
+it is **not** refreshed because the time left for expiry (45s) is greater than `zip_cache_refresh`
+(default 30s). However, if the archive is accessed again after 45s (from the first time it was
+opened) it's refreshed. This extends the time the archive remains in memory from
+`45s + zip_cache_expiration (60s)`, for a total of 105s.
+
+After an archive reaches `zip_cache_expiration`, it's marked as expired and removed on the next
+`zip_cache_cleanup` interval.
+
+![Zip cache configuration](img/zip_cache_configuration.png)
 
 ## Activate verbose logging for daemon
 
@@ -663,6 +699,77 @@ gitlab_pages['domain_config_source'] = nil
 
 For other common issues, see the [troubleshooting section](#failed-to-connect-to-the-internal-gitlab-api)
 or report an issue.
+
+## Using object storage
+
+> [Introduced](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5577) in GitLab 13.6.
+
+[Read more about using object storage with GitLab](../object_storage.md).
+
+### Object storage settings
+
+The following settings are:
+
+- Nested under `pages:` and then `object_store:` on source installations.
+- Prefixed by `pages_object_store_` on Omnibus GitLab installations.
+
+| Setting | Description | Default |
+|---------|-------------|---------|
+| `enabled` | Whether object storage is enabled. | `false` |
+| `remote_directory` | The name of the bucket where Pages site content is stored. | |
+| `connection` | Various connection options described below. | |
+
+#### S3-compatible connection settings
+
+See [the available connection settings for different providers](../object_storage.md#connection-settings).
+
+In Omnibus installations:
+
+1. Add the following lines to `/etc/gitlab/gitlab.rb` and replace the values with the ones you want:
+
+   ```ruby
+   gitlab_rails['pages_object_store_enabled'] = true
+   gitlab_rails['pages_object_store_remote_directory'] = "pages"
+   gitlab_rails['pages_object_store_connection'] = {
+     'provider' => 'AWS',
+     'region' => 'eu-central-1',
+     'aws_access_key_id' => 'AWS_ACCESS_KEY_ID',
+     'aws_secret_access_key' => 'AWS_SECRET_ACCESS_KEY'
+   }
+   ```
+
+   If you use AWS IAM profiles, be sure to omit the AWS access key and secret access key/value
+   pairs:
+
+   ```ruby
+   gitlab_rails['pages_object_store_connection'] = {
+     'provider' => 'AWS',
+     'region' => 'eu-central-1',
+     'use_iam_profile' => true
+   }
+   ```
+
+1. Save the file and [reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure)
+   for the changes to take effect.
+
+In installations from source:
+
+1. Edit `/home/git/gitlab/config/gitlab.yml` and add or amend the following lines:
+
+   ```yaml
+   pages:
+     object_store:
+       enabled: true
+       remote_directory: "pages" # The bucket name
+       connection:
+         provider: AWS # Only AWS supported at the moment
+         aws_access_key_id: AWS_ACESS_KEY_ID
+         aws_secret_access_key: AWS_SECRET_ACCESS_KEY
+         region: eu-central-1
+   ```
+
+1. Save the file and [restart GitLab](../restart_gitlab.md#installations-from-source)
+   for the changes to take effect.
 
 ## Backup
 

@@ -1,7 +1,7 @@
 ---
 stage: Verify
 group: Runner
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference
 ---
 
@@ -67,7 +67,7 @@ GitLab Runner with the Shell executor.
 
 1. Choose a MySQL root password and type it twice when asked.
 
-   NOTE: **Note:**
+   NOTE:
    As a security measure, you can run `mysql_secure_installation` to
    remove anonymous users, drop the test database, and disable remote logins by
    the root user.

@@ -2,7 +2,7 @@
 type: reference, howto
 stage: Secure
 group: Threat Insights
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # GitLab Security Dashboard, Security Center, and Vulnerability Reports **(ULTIMATE)**
@@ -192,7 +192,7 @@ You can export all your vulnerabilities in CSV (comma separated values) format b
 ready, the CSV report downloads to your local machine. The report contains all vulnerabilities for
 the projects defined in the Security Dashboard, as filters don't apply to the export function.
 
-NOTE: **Note:**
+NOTE:
 It may take several minutes for the download to start if your project contains
 thousands of vulnerabilities. Don't close the page until the download finishes.
 
@@ -230,7 +230,7 @@ Dashboard regardless of how often the default branch is updated.
 
 That way, reports are created even if no code change happens.
 
-CAUTION: **Warning:**
+WARNING:
 Running Dependency Scanning from a scheduled pipeline might result in false negatives if your
 project doesn't have a lock file and isn't configured for Continuous Delivery. A lock file is a file
 that lists all transient dependencies and keeps track of their exact versions. The false negative
@@ -249,7 +249,7 @@ to configure daily security scans.
 Each vulnerability report contains vulnerabilities from the latest scans that were merged
 into the default branch.
 
-![Vulnerability Report](img/group_vulnerability_report_v13_4.png)
+![Vulnerability Report](img/group_vulnerability_report_v13_7.png)
 
 You can filter which vulnerabilities the vulnerability report displays by:
 

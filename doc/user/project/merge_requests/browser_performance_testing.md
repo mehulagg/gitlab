@@ -1,7 +1,7 @@
 ---
 stage: Verify
 group: Testing
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference, howto
 ---
 
@@ -44,7 +44,7 @@ between the source and target branches, and shows the information in the merge r
 For an example Performance job, see
 [Configuring Browser Performance Testing](#configuring-browser-performance-testing).
 
-NOTE: **Note:**
+NOTE:
 If the Browser Performance report has no data to compare, such as when you add the
 Browser Performance job in your `.gitlab-ci.yml` for the very first time,
 the Browser Performance report widget doesn't show. It must have run at least
@@ -72,7 +72,7 @@ using Docker-in-Docker.
        URL: https://example.com
    ```
 
-NOTE: **Note:**
+NOTE:
 For versions before 12.4, see the information for [older GitLab versions](#gitlab-versions-123-and-older).
 If you are using a Kubernetes cluster, use [`template: Jobs/Browser-Performance-Testing.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Jobs/Browser-Performance-Testing.gitlab-ci.yml)
 instead.

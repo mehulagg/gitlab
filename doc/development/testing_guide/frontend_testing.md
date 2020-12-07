@@ -1,7 +1,7 @@
 ---
 stage: none
 group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Frontend testing standards and style guidelines
@@ -25,17 +25,19 @@ If you are looking for a guide on Vue component testing, you can jump right away
 
 ## Jest
 
-We have started to migrate frontend tests to the [Jest](https://jestjs.io) testing framework (see also the corresponding
-[epic](https://gitlab.com/groups/gitlab-org/-/epics/895)).
-
+We use Jest to write frontend unit and integration tests.
 Jest tests can be found in `/spec/frontend` and `/ee/spec/frontend` in EE.
-
-Most examples have a Jest and Karma example. See the Karma examples only as explanation to what's going on in the code, should you stumble over some use cases during your discovery. The Jest examples are the one you should follow.
 
 ## Karma test suite
 
-While GitLab is switching over to [Jest](https://jestjs.io) you'll still find Karma tests in our application. [Karma](http://karma-runner.github.io/) is a test runner which uses [Jasmine](https://jasmine.github.io/) as its test
-framework. Jest also uses Jasmine as foundation, that's why it's looking quite similar.
+While GitLab has switched over to [Jest](https://jestjs.io) you'll still find Karma tests in our
+application because some of our specs require a browser and can't be easiliy migrated to Jest.
+Those specs will eventually drop Karma in favor of either Jest or RSpec. You can track this migration
+in the [related epic](https://gitlab.com/groups/gitlab-org/-/epics/4900).
+
+[Karma](http://karma-runner.github.io/) is a test runner which uses
+[Jasmine](https://jasmine.github.io/) as its test framework. Jest also uses Jasmine as foundation,
+that's why it's looking quite similar.
 
 Karma tests live in `spec/javascripts/` and `/ee/spec/javascripts` in EE.
 
@@ -46,19 +48,6 @@ Keep in mind that in a CI environment, these tests are run in a headless
 browser and you will not have access to certain APIs, such as
 [`Notification`](https://developer.mozilla.org/en-US/docs/Web/API/notification),
 which have to be stubbed.
-
-### When should I use Jest over Karma?
-
-If you need to update an existing Karma test file (found in `spec/javascripts`), you do not
-need to migrate the whole spec to Jest. Simply updating the Karma spec to test your change
-is fine. It is probably more appropriate to migrate to Jest in a separate merge request.
-
-If you create a new test file, it needs to be created in Jest. This will
-help support our migration and we think you'll love using Jest.
-
-As always, please use discretion. Jest solves a lot of issues we experienced in Karma and
-provides a better developer experience, however there are potentially unexpected issues
-which could arise (especially with testing against browser specific features).
 
 ### Differences to Karma
 
@@ -114,37 +103,6 @@ describe('Component', () => {
 ```
 
 Remember that the performance of each test depends on the environment.
-
-### Timout error due to async components
-
-If your component is fetching some other components asynchroneously based on some conditions, it might happen so that your Jest suite for this component will become flaky timing out from time to time. 
-
-```javascript
-// ide.vue
-export default {
-  components: {
-    'error-message': () => import('./error_message.vue'),
-    'gl-button': () => import('@gitlab/ui/src/components/base/button/button.vue'),
-    ...
-};
-```
-
-To address this issue, you can "help" Jest by stubbing the async components so that Jest would not need to fetch those asynchroneously at the run-time.
-
-```javascript
-// ide_spec.js
-import { GlButton } from '@gitlab/ui';
-import ErrorMessage from '~/ide/components/error_message.vue';
-...
-return shallowMount(ide, {
-  ...
-  stubs: {
-    ErrorMessage,
-    GlButton,
-    ...
-  },
-})
-```
 
 ## What and how to test
 
@@ -234,8 +192,8 @@ Following you'll find some general common practices you will find as part of our
 When it comes to querying DOM elements in your tests, it is best to uniquely and semantically target
 the element.
 
-Preferentially, this is done by targeting what the user actually sees using [DOM Testing Library](https://testing-library.com/docs/dom-testing-library/intro).
-When selecting by text it is best to use [`getByRole` or `findByRole`](https://testing-library.com/docs/dom-testing-library/api-queries#byrole)
+Preferentially, this is done by targeting what the user actually sees using [DOM Testing Library](https://testing-library.com/docs/dom-testing-library/intro/).
+When selecting by text it is best to use [`getByRole` or `findByRole`](https://testing-library.com/docs/dom-testing-library/api-queries/#byrole)
 as these enforce accessibility best practices as well. The examples below demonstrate the order of preference.
 
 When writing Vue component unit tests, it can be wise to query children by component, so that the unit test can focus on comprehensive value coverage
@@ -776,11 +734,10 @@ Please consult the [official Jest docs](https://jestjs.io/docs/en/jest-object#mo
 
 For running the frontend tests, you need the following commands:
 
-- `rake frontend:fixtures` (re-)generates [fixtures](#frontend-test-fixtures).
-- `yarn test` executes the tests.
-- `yarn jest` executes only the Jest tests.
-
-As long as the fixtures don't change, `yarn test` is sufficient (and saves you some time).
+- `rake frontend:fixtures` (re-)generates [fixtures](#frontend-test-fixtures). Make sure that
+  fixtures are up-to-date before running tests that require them.
+- `yarn jest` runs Jest tests.
+- `yarn karma` runs Karma tests.
 
 ### Live testing and focused testing -- Jest
 

@@ -1,7 +1,7 @@
 ---
 stage: Create
 group: Source Code
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 type: reference
 ---
 
@@ -327,7 +327,7 @@ login <gitlab_user_name>
 password <personal_access_token>
 ```
 
-NOTE: **Note:**
+NOTE:
 On Windows, Go reads `~/_netrc` instead of `~/.netrc`.
 
 ### Authenticate Git fetches

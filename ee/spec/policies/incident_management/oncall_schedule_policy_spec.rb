@@ -9,6 +9,11 @@ RSpec.describe IncidentManagement::OncallSchedulePolicy do
 
   subject(:policy) { described_class.new(user, oncall_schedule) }
 
+  before do
+    stub_licensed_features(oncall_schedules: true)
+    stub_feature_flags(oncall_schedules_mvc: project)
+  end
+
   describe 'rules' do
     it { is_expected.to be_disallowed :read_incident_management_oncall_schedule }
 

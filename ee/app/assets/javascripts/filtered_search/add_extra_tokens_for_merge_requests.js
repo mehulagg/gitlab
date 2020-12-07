@@ -41,7 +41,7 @@ const approvers = {
 
 export default (IssuableTokenKeys, disableTargetBranchFilter = false) => {
   addExtraTokensForMergeRequests(IssuableTokenKeys, disableTargetBranchFilter);
-  const tokenPosition = 2;
+  const tokenPosition = 3;
 
   IssuableTokenKeys.tokenKeys.splice(tokenPosition, 0, ...[approvers.token]);
   IssuableTokenKeys.tokenKeysWithAlternative.splice(tokenPosition, 0, ...[approvers.token]);

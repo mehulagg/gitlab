@@ -2,7 +2,7 @@
 disqus_identifier: 'https://docs.gitlab.com/ee/workflow/todos.html'
 stage: Plan
 group: Project Management
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # GitLab To-Do List **(CORE)**
@@ -62,7 +62,7 @@ item.
 
 To-do item triggers aren't affected by [GitLab notification email settings](profile/notifications.md).
 
-NOTE: **Note:**
+NOTE:
 When a user no longer has access to a resource related to a to-do item (such as
 an issue, merge request, project, or group), for security reasons GitLab
 deletes any related to-do items within the next hour. Deletion is delayed to

@@ -32,6 +32,7 @@ class Environment < ApplicationRecord
   has_one :last_visible_deployment, -> { visible.distinct_on_environment }, inverse_of: :environment, class_name: 'Deployment'
   has_one :last_visible_deployable, through: :last_visible_deployment, source: 'deployable', source_type: 'CommitStatus'
   has_one :last_visible_pipeline, through: :last_visible_deployable, source: 'pipeline'
+  has_one :upcoming_deployment, -> { running.order('deployments.id DESC') }, class_name: 'Deployment'
   has_one :latest_opened_most_severe_alert, -> { order_severity_with_open_prometheus_alert }, class_name: 'AlertManagement::Alert', inverse_of: :environment
 
   before_validation :nullify_external_url
@@ -384,7 +385,37 @@ class Environment < ApplicationRecord
     !!deployment_platform&.cluster&.application_elastic_stack_available?
   end
 
+  def rollout_status
+    return unless rollout_status_available?
+
+    result = rollout_status_with_reactive_cache
+
+    result || ::Gitlab::Kubernetes::RolloutStatus.loading
+  end
+
+  def ingresses
+    return unless rollout_status_available?
+
+    deployment_platform.ingresses(deployment_namespace)
+  end
+
+  def patch_ingress(ingress, data)
+    return unless rollout_status_available?
+
+    deployment_platform.patch_ingress(deployment_namespace, ingress, data)
+  end
+
   private
+
+  def rollout_status_available?
+    has_terminals?
+  end
+
+  def rollout_status_with_reactive_cache
+    with_reactive_cache do |data|
+      deployment_platform.rollout_status(self, data)
+    end
+  end
 
   def has_metrics_and_can_query?
     has_metrics? && prometheus_adapter.can_query?

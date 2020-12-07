@@ -88,7 +88,7 @@ module QA
 
         Page::Project::Pipeline::Show.perform do |show|
           expect(show).to have_passed
-          expect(show).to have_no_job("downstream_job")
+          expect(show).not_to have_job("downstream_job")
 
           show.expand_child_pipeline
 

@@ -9,6 +9,7 @@ export const EpicFilterType = {
 export const IterationFilterType = {
   any: 'Any',
   none: 'None',
+  current: 'Current',
 };
 
 export const GroupByParamType = {

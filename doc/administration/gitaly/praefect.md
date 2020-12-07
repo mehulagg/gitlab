@@ -1,7 +1,7 @@
 ---
 stage: Create
 group: Gitaly
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference
 ---
 
@@ -12,7 +12,7 @@ be run in a clustered configuration to increase fault tolerance. In this
 configuration, every Git repository is stored on every Gitaly node in the
 cluster. Multiple clusters (or shards), can be configured.
 
-NOTE: **Note:**
+NOTE:
 Gitaly Clusters can be created using [GitLab Core](https://about.gitlab.com/pricing/#self-managed)
 and higher tiers. However, technical support is limited to GitLab Premium and Ultimate customers
 only. Not available in GitLab.com.
@@ -47,17 +47,39 @@ The availability objectives for Gitaly clusters are:
   [Faster outage detection](https://gitlab.com/gitlab-org/gitaly/-/issues/2608)
   is planned to improve this to less than 1 second.
 
-The current version supports:
+Gitaly Cluster supports:
 
-- Eventual consistency of the secondary replicas.
-- Automatic failover from the primary to the secondary.
-- Reporting of possible data loss if replication queue is non empty.
-- Marking the newly promoted primary read only if possible data loss is
-  detected.
+- [Strong consistency](#strong-consistency) of the secondary replicas.
+- [Automatic failover](#automatic-failover-and-leader-election) from the primary to the secondary.
+- Reporting of possible data loss if replication queue is non-empty.
+- Marking repositories as [read only](#read-only-mode) if data loss is detected to prevent data inconsistencies.
 
 Follow the [HA Gitaly epic](https://gitlab.com/groups/gitlab-org/-/epics/1489)
 for improvements including
 [horizontally distributing reads](https://gitlab.com/groups/gitlab-org/-/epics/2013).
+
+## Gitaly Cluster compared to Geo
+
+Gitaly Cluster and [Geo](../geo/index.md) both provide redundancy. However the redundancy of:
+
+- Gitaly Cluster provides fault tolerance for data storage and is invisible to the user. Users are
+  not aware when Gitaly Cluster is used.
+- Geo provides [replication](../geo/index.md) and [disaster recovery](../geo/disaster_recovery/index.md) for
+  an entire instance of GitLab. Users know when they are using Geo for
+  [replication](../geo/index.md). Geo [replicates multiple datatypes](../geo/replication/datatypes.md#limitations-on-replicationverification),
+  including Git data.
+
+The following table outlines the major differences between Gitaly Cluster and Geo:
+
+| Tool           | Nodes    | Locations | Latency tolerance  | Failover                                             | Consistency                   | Provides redundancy for |
+|:---------------|:---------|:----------|:-------------------|:-----------------------------------------------------|:------------------------------|:------------------------|
+| Gitaly Cluster | Multiple | Single    | Approximately 1 ms | [Automatic](#automatic-failover-and-leader-election) | [Strong](#strong-consistency) | Data storage in Git     |
+| Geo            | Multiple | Multiple  | Up to one minute   | [Manual](../geo/disaster_recovery/index.md)          | Eventual                      | Entire GitLab instance  |
+
+For more information, see:
+
+- [Gitaly architecture](index.md#architecture).
+- Geo [use cases](../geo/index.md#use-cases) and [architecture](../geo/index.md#architecture).
 
 ## Cluster or shard
 
@@ -69,8 +91,8 @@ Gitaly supports multiple models of scaling:
 - Sharding using [repository storage paths](../repository_storage_paths.md), where each repository
   is stored on the assigned Gitaly node. All requests are routed to this node.
 
-| Cluster | Shard |
-|---|---|
+| Cluster                                           | Shard                                         |
+|:--------------------------------------------------|:----------------------------------------------|
 | ![Cluster example](img/cluster_example_v13_3.png) | ![Shard example](img/shard_example_v13_3.png) |
 
 Generally, Gitaly Cluster can replace sharded configurations, at the expense of additional storage
@@ -122,9 +144,7 @@ package (highly recommended), follow the steps below:
 Before beginning, you should already have a working GitLab instance. [Learn how
 to install GitLab](https://about.gitlab.com/install/).
 
-Provision a PostgreSQL server (PostgreSQL 11 or newer). Configuration through
-the Omnibus GitLab distribution is not yet supported. Follow this
-[issue](https://gitlab.com/gitlab-org/gitaly/-/issues/2476) for updates.
+Provision a PostgreSQL server (PostgreSQL 11 or newer).
 
 Prepare all your new nodes by [installing
 GitLab](https://about.gitlab.com/install/).
@@ -168,7 +188,7 @@ We note in the instructions below where these secrets are required.
 
 ### PostgreSQL
 
-NOTE: **Note:**
+NOTE:
 Do not store the GitLab application database and the Praefect
 database on the same PostgreSQL server if using
 [Geo](../geo/index.md). The replication state is internal to each instance
@@ -267,7 +287,7 @@ The `praefect` user and its password should be included in the file (default is
 `userlist.txt`) used by PgBouncer if the [`auth_file`](https://www.pgbouncer.org/config.html#auth_file)
 configuration option is set.
 
-NOTE: **Note:**
+NOTE:
 By default PgBouncer uses port `6432` to accept incoming
 connections. You can change it by setting the [`listen_port`](https://www.pgbouncer.org/config.html#listen_port)
 configuration option. We recommend setting it to the default port value (`5432`) used by
@@ -278,7 +298,7 @@ PostgreSQL instances. Otherwise you should change the configuration parameter
 
 > [Introduced](https://gitlab.com/gitlab-org/gitaly/-/issues/2634) in GitLab 13.4, Praefect nodes can no longer be designated as `primary`.
 
-NOTE: **Note:**
+NOTE:
 If there are multiple Praefect nodes, complete these steps for **each** node.
 
 To complete this section you need a [configured PostgreSQL server](#postgresql), including:
@@ -378,7 +398,7 @@ application server, or a Gitaly node.
    so we use `default` here as well. This cluster has three Gitaly nodes `gitaly-1`,
    `gitaly-2`, and `gitaly-3`, which are intended to be replicas of each other.
 
-   CAUTION: **Caution:**
+   WARNING:
    If you have data on an already existing storage called
    `default`, you should configure the virtual storage with another name and
    [migrate the data to the Gitaly Cluster storage](#migrate-existing-repositories-to-gitaly-cluster)
@@ -478,6 +498,7 @@ To configure Praefect with TLS:
 **For Omnibus GitLab**
 
 1. Create certificates for Praefect servers.
+
 1. On the Praefect servers, create the `/etc/gitlab/ssl` directory and copy your key
    and certificate there:
 
@@ -496,7 +517,8 @@ To configure Praefect with TLS:
    praefect['key_path'] = "/etc/gitlab/ssl/key.pem"
    ```
 
-1. Save the file and [reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
+1. Save the file and [reconfigure](../restart_gitlab.md#omnibus-gitlab-reconfigure).
+
 1. On the Praefect clients (including each Gitaly server), copy the certificates,
    or their certificate authority, into `/etc/gitlab/trusted-certs`:
 
@@ -509,8 +531,10 @@ To configure Praefect with TLS:
 
    ```ruby
    git_data_dirs({
-     'default' => { 'gitaly_address' => 'tls://praefect1.internal:3305' },
-     'storage1' => { 'gitaly_address' => 'tls://praefect2.internal:3305' },
+     "default" => {
+       "gitaly_address" => 'tls://LOAD_BALANCER_SERVER_ADDRESS:2305',
+       "gitaly_token" => 'PRAEFECT_EXTERNAL_TOKEN'
+     }
    })
    ```
 
@@ -545,14 +569,11 @@ To configure Praefect with TLS:
      repositories:
        storages:
          default:
-           gitaly_address: tls://praefect1.internal:3305
-           path: /some/local/path
-         storage1:
-           gitaly_address: tls://praefect2.internal:3305
+           gitaly_address: tls://LOAD_BALANCER_SERVER_ADDRESS:3305
            path: /some/local/path
    ```
 
-   NOTE: **Note:**
+   NOTE:
    `/some/local/path` should be set to a local folder that exists, however no
    data is stored in this folder. This requirement is scheduled to be removed when
    [this issue](https://gitlab.com/gitlab-org/gitaly/-/issues/1282) is resolved.
@@ -581,7 +602,7 @@ To configure Praefect with TLS:
 
 ### Gitaly
 
-NOTE: **Note:**
+NOTE:
 Complete these steps for **each** Gitaly node.
 
 To complete this section you need:
@@ -742,7 +763,7 @@ internal traffic from the GitLab application to the Praefect nodes. The
 specifics on which load balancer to use or the exact configuration is beyond the
 scope of the GitLab documentation.
 
-NOTE: **Note:**
+NOTE:
 The load balancer must be configured to accept traffic from the Gitaly nodes in
 addition to the GitLab nodes. Some requests handled by
 [`gitaly-ruby`](index.md#gitaly-ruby) sidecar processes call into the main Gitaly
@@ -757,7 +778,7 @@ Big-IP LTM, and Citrix Net Scaler. This documentation outlines what ports
 and protocols you need configure.
 
 | LB Port | Backend Port | Protocol |
-|---------|--------------|----------|
+|:--------|:-------------|:---------|
 | 2305    | 2305         | TCP      |
 
 ### GitLab
@@ -796,7 +817,7 @@ Particular attention should be shown to:
 1. Disable the default Gitaly service running on the GitLab host. It isn't needed
    because GitLab connects to the configured cluster.
 
-   CAUTION: **Caution:**
+   WARNING:
    If you have existing data stored on the default Gitaly storage,
    you should [migrate the data your Gitaly Cluster storage](#migrate-existing-repositories-to-gitaly-cluster)
    first.
@@ -813,6 +834,8 @@ Particular attention should be shown to:
    - `LOAD_BALANCER_SERVER_ADDRESS` with the IP address or hostname of the load
      balancer.
    - `PRAEFECT_EXTERNAL_TOKEN` with the real secret
+
+   If you are using TLS, the `gitaly_address` should begin with `tls://`.
 
    ```ruby
    git_data_dirs({
@@ -1093,7 +1116,7 @@ available:
 - In GitLab 13.3 and later, `-partially-replicated` that specifies whether to display a list of
   [outdated replicas of writable repositories](#outdated-replicas-of-writable-repositories).
 
-NOTE: **Note:**
+NOTE:
 `dataloss` is still in beta and the output format is subject to change.
 
 To check for outdated replicas of read-only repositories, run:
@@ -1191,7 +1214,7 @@ Praefect provides the following subcommands to re-enable writes:
   sudo /opt/gitlab/embedded/bin/praefect -config /var/opt/gitlab/praefect/config.toml accept-dataloss -virtual-storage <virtual-storage> -repository <relative-path> -authoritative-storage <storage-name>
   ```
 
-CAUTION: **Caution:**
+WARNING:
 `accept-dataloss` causes permanent data loss by overwriting other versions of the repository. Data
 [recovery efforts](#data-recovery) must be performed before using it.
 
@@ -1255,23 +1278,27 @@ Gitaly Cluster automatically.
 
 Repositories may be moved from one storage location using the [Project repository storage moves API](../../api/project_repository_storage_moves.md):
 
+NOTE:
+The Project repository storage moves API [cannot move all repository types](../../api/project_repository_storage_moves.md#limitations).
+
 To move repositories to Gitaly Cluster:
 
-1. [Schedule a move](../../api/project_repository_storage_moves.md#schedule-a-repository-storage-move-for-a-project)
-   for the first repository using the API. For example:
+1. [Schedule repository storage moves for all projects on a storage shard](../../api/project_repository_storage_moves.md#schedule-repository-storage-moves-for-all-projects-on-a-storage-shard) using the API. For example:
 
    ```shell
    curl --request POST --header "Private-Token: <your_access_token>" --header "Content-Type: application/json" \
-   --data '{"destination_storage_name":"praefect"}' "https://gitlab.example.com/api/v4/projects/123/repository_storage_moves"
+   --data '{"source_storage_name":"gitaly","destination_storage_name":"praefect"}' "https://gitlab.example.com/api/v4/project_repository_storage_moves"
    ```
 
-1. Using the ID that is returned, [query the repository move](../../api/project_repository_storage_moves.md#get-a-single-repository-storage-move-for-a-project)
+1. [Query the most recent repository moves](../../api/project_repository_storage_moves.md#retrieve-all-project-repository-storage-moves)
    using the API. The query indicates either:
-   - The move has completed successfully. The `state` field is `finished`.
-   - The move is in progress. Re-query the repository move until it completes successfully.
-   - The move has failed. Most failures are temporary and are solved by rescheduling the move.
+   - The moves have completed successfully. The `state` field is `finished`.
+   - The moves are in progress. Re-query the repository move until it completes successfully.
+   - The moves have failed. Most failures are temporary and are solved by rescheduling the move.
 
-1. Once the move is successful, repeat these steps for all repositories for your projects.
+1. Once the moves are complete, [query projects](../../api/projects.md#list-all-projects)
+   using the API to confirm that all projects have moved. No projects should be returned
+   with `repository_storage` field set to the old storage.
 
 ## Debugging Praefect
 

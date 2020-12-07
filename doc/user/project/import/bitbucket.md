@@ -2,12 +2,12 @@
 type: reference, howto
 stage: Manage
 group: Import
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Import your project from Bitbucket Cloud to GitLab
 
-NOTE: **Note:**
+NOTE:
 The Bitbucket Cloud importer works only with Bitbucket.org, not with Bitbucket
 Server (aka Stash). If you are trying to import projects from Bitbucket Server, use
 [the Bitbucket Server importer](bitbucket_server.md).

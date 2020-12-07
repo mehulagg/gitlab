@@ -1,7 +1,7 @@
 ---
 stage: Create
 group: Gitaly
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference
 ---
 
@@ -121,7 +121,7 @@ bundle exec rake gitlab:features:disable_rugged
 
 Most of this code exists in the `lib/gitlab/git/rugged_impl` directory.
 
-NOTE: **Note:**
+NOTE:
 You should NOT need to add or modify code related to
 Rugged unless explicitly discussed with the [Gitaly
 Team](https://gitlab.com/groups/gl-gitaly/group_members). This code does
@@ -181,7 +181,7 @@ Normally, GitLab CE/EE tests use a local clone of Gitaly in
 `GITALY_SERVER_VERSION`. The `GITALY_SERVER_VERSION` file supports also
 branches and SHA to use a custom commit in <https://gitlab.com/gitlab-org/gitaly>.
 
-NOTE: **Note:**
+NOTE:
 With the introduction of auto-deploy for Gitaly, the format of
 `GITALY_SERVER_VERSION` was aligned with Omnibus syntax.
 It no longer supports `=revision`, it evaluates the file content as a Git
@@ -190,6 +190,10 @@ reference (branch or SHA). Only if it matches a semver does it prepend a `v`.
 If you want to run tests locally against a modified version of Gitaly you
 can replace `tmp/tests/gitaly` with a symlink. This is much faster
 because it avoids a Gitaly re-install each time you run `rspec`.
+
+Make sure this directory contains the files `config.toml` and `praefect.config.toml`.
+You can copy them from `config.toml.example` and `config.praefect.toml.example` respectively.
+After copying, make sure to edit them so everything points to the correct paths.
 
 ```shell
 rm -rf tmp/tests/gitaly
@@ -312,7 +316,7 @@ Here are the steps to gate a new feature in Gitaly behind a feature flag.
 
 1. Test in a Rails console by setting the feature flag:
 
-   NOTE: **Note:**
+   NOTE:
    Pay attention to the name of the flag and the one used in the Rails console.
    There is a difference between them (dashes replaced by underscores and name
    prefix is changed). Make sure to prefix all flags with `gitaly_`.

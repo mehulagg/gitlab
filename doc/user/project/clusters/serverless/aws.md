@@ -1,7 +1,7 @@
 ---
 stage: Configure
 group: Configure
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Deploying AWS Lambda function using GitLab CI/CD
@@ -229,7 +229,7 @@ provider:
 From there, you can reference them in your functions as well.
 Remember to add `A_VARIABLE` to your GitLab CI/CD variables under **Settings > CI/CD > Variables** to be picked up and deployed with your function.
 
-NOTE: **Note:**
+NOTE:
 Anyone with access to the AWS environment may be able to see the values of those
 variables persisted in the lambda definition.
 

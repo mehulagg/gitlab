@@ -1,7 +1,7 @@
 ---
 stage: Secure
 group: Fuzz Testing
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference, howto
 ---
 
@@ -155,7 +155,7 @@ You can use various tools to generate HAR files:
 
 - [Fiddler](https://www.telerik.com/fiddler): Web debugging proxy
 - [Insomnia Core](https://insomnia.rest/): API client
-- [Chrome](https://www.google.com/chrome): Browser
+- [Chrome](https://www.google.com/chrome/): Browser
 - [Firefox](https://www.mozilla.org/en-US/firefox/): Browser
 
 DANGER: **Warning:**

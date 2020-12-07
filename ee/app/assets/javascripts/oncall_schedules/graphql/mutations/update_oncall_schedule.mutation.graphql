@@ -1,0 +1,11 @@
+mutation oncallScheduleUpdate($oncallScheduleUpdateInput: oncallScheduleUpdateInput!) {
+  oncallScheduleUpdate(input: $oncallScheduleUpdateInput) {
+    errors
+    oncallSchedule {
+      iid
+      name
+      description
+      timezone
+    }
+  }
+}

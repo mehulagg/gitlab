@@ -1,7 +1,7 @@
 ---
 stage: Growth
 group: Conversion
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: howto
 ---
 
@@ -75,7 +75,7 @@ You can also specify a custom location and filename for the license:
   gitlab_rails['initial_license_file'] = "/path/to/license/file"
   ```
 
-CAUTION: **Caution:**
+WARNING:
 These methods only add a license at the time of installation. Use the
 **{admin}** **Admin Area** in the web user interface to renew or upgrade licenses.
 

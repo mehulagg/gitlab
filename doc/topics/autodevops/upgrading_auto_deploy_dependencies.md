@@ -1,7 +1,7 @@
 ---
 stage: Release
-group: Progressive Delivery
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+group: Release
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference
 ---
 
@@ -184,7 +184,7 @@ include:
   - remote: https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Jobs/Deploy.latest.gitlab-ci.yml
 ```
 
-CAUTION: **Warning:**
+WARNING:
 Using a beta or unstable `auto-deploy-image` could cause unrecoverable damage to
 your environments. Do not test it with important projects or environments.
 

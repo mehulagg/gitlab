@@ -1,7 +1,7 @@
 ---
 stage: none
 group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Performance Guidelines
@@ -282,7 +282,7 @@ Currently supported profiling targets are:
 - Puma worker
 - Sidekiq
 
-NOTE: **Note:**
+NOTE:
 The Puma master process is not supported. Neither is Unicorn.
 Sending SIGUSR2 to either of those will trigger restarts. In the case of Puma,
 take care to only send the signal to Puma workers.

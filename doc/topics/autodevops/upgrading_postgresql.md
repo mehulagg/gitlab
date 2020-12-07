@@ -1,7 +1,7 @@
 ---
 stage: Configure
 group: Configure
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Upgrading PostgreSQL for Auto DevOps
@@ -168,7 +168,7 @@ pvc-9085e3d3-5239-11ea-9c8d-42010a8e0096   8Gi        RWO            Retain     
 
 ## Install new PostgreSQL
 
-CAUTION: **Caution:**
+WARNING:
 Using the newer version of PostgreSQL deletes
 the older 0.7.1 PostgreSQL. To prevent the underlying data from being
 deleted, you can choose to retain the [persistent volume](#retain-persistent-volumes).

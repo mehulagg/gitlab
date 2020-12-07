@@ -18,8 +18,6 @@ RSpec.describe Namespace do
   it { is_expected.to have_one(:namespace_limit) }
   it { is_expected.to have_one(:elasticsearch_indexed_namespace) }
 
-  it { is_expected.to delegate_method(:extra_shared_runners_minutes).to(:namespace_statistics) }
-  it { is_expected.to delegate_method(:shared_runners_minutes).to(:namespace_statistics) }
   it { is_expected.to delegate_method(:shared_runners_seconds).to(:namespace_statistics) }
   it { is_expected.to delegate_method(:shared_runners_seconds_last_reset).to(:namespace_statistics) }
   it { is_expected.to delegate_method(:trial?).to(:gitlab_subscription) }
@@ -169,6 +167,130 @@ RSpec.describe Namespace do
 
         it 'returns namespace with subscription set' do
           is_expected.to eq(gold_plan.id)
+        end
+      end
+    end
+
+    describe '.top_most' do
+      let_it_be(:namespace) { create(:namespace) }
+      let_it_be(:sub_namespace) { create(:namespace, parent: namespace) }
+
+      subject { described_class.top_most.ids }
+
+      it 'only contains root namespace' do
+        is_expected.to eq([namespace.id])
+      end
+    end
+
+    describe '.in_active_trial' do
+      let_it_be(:namespaces) do
+        [
+            create(:namespace),
+            create(:namespace_with_plan),
+            create(:namespace_with_plan, trial_ends_on: Date.tomorrow)
+        ]
+      end
+
+      it 'is consistent to trial_active? method' do
+        namespaces.each do |ns|
+          consistent = described_class.in_active_trial.include?(ns) == !!ns.trial_active?
+
+          expect(consistent).to be true
+        end
+      end
+    end
+
+    describe '.in_default_plan' do
+      subject { described_class.in_default_plan.ids }
+
+      where(:plan_name, :expect_in_default_plan) do
+        ::Plan::FREE | true
+        ::Plan::DEFAULT | true
+        ::Plan::BRONZE | false
+        ::Plan::SILVER | false
+        ::Plan::GOLD | false
+      end
+
+      with_them do
+        it 'returns expected result' do
+          namespace = create(:namespace_with_plan, plan: "#{plan_name}_plan")
+
+          is_expected.to eq(expect_in_default_plan ? [namespace.id] : [])
+        end
+      end
+
+      it 'includes namespace with no subscription' do
+        namespace = create(:namespace)
+
+        is_expected.to eq([namespace.id])
+      end
+    end
+
+    describe '.eligible_for_subscription' do
+      let_it_be(:namespace) { create :namespace }
+      let_it_be(:sub_namespace) { create(:namespace, parent: namespace) }
+
+      subject { described_class.eligible_for_subscription.ids }
+
+      context 'when there is no subscription' do
+        it { is_expected.to eq([namespace.id]) }
+      end
+
+      context 'when there is a subscription' do
+        context 'with a plan that is eligible for a trial' do
+          where(plan: ::Plan::PLANS_ELIGIBLE_FOR_TRIAL)
+
+          with_them do
+            context 'and has not yet been trialed' do
+              before do
+                create :gitlab_subscription, plan, namespace: namespace
+                create :gitlab_subscription, plan, namespace: sub_namespace
+              end
+
+              it { is_expected.to eq([namespace.id]) }
+            end
+
+            context 'but has already had a trial' do
+              before do
+                create :gitlab_subscription, plan, :expired_trial, namespace: namespace
+                create :gitlab_subscription, plan, :expired_trial, namespace: sub_namespace
+              end
+
+              it { is_expected.to eq([namespace.id]) }
+            end
+
+            context 'but is currently being trialed' do
+              before do
+                create :gitlab_subscription, plan, :active_trial, namespace: namespace
+                create :gitlab_subscription, plan, :active_trial, namespace: sub_namespace
+              end
+
+              it { is_expected.to eq([namespace.id]) }
+            end
+          end
+        end
+
+        context 'in active trial gold plan' do
+          before do
+            create :gitlab_subscription, ::Plan::GOLD, :active_trial, namespace: namespace
+            create :gitlab_subscription, ::Plan::GOLD, :active_trial, namespace: sub_namespace
+          end
+
+          it { is_expected.to eq([namespace.id]) }
+        end
+
+        context 'with a paid plan and not in trial' do
+          where(plan: ::Plan::PAID_HOSTED_PLANS)
+
+          with_them do
+            context 'and has not yet been trialed' do
+              before do
+                create :gitlab_subscription, plan, namespace: namespace
+              end
+
+              it { is_expected.to be_empty }
+            end
+          end
         end
       end
     end
@@ -645,71 +767,6 @@ RSpec.describe Namespace do
       it "returns false" do
         is_expected.to eq(false)
       end
-    end
-  end
-
-  describe '#shared_runners_remaining_minutes_percent' do
-    let(:namespace) { build(:namespace) }
-
-    subject { namespace.shared_runners_remaining_minutes_percent }
-
-    it 'returns the minutes left as a percent of the limit' do
-      stub_minutes_used_and_limit(8, 10)
-
-      expect(subject).to eq(20)
-    end
-
-    it 'returns 100 when minutes used are 0' do
-      stub_minutes_used_and_limit(0, 10)
-
-      expect(subject).to eq(100)
-    end
-
-    it 'returns 0 when the limit is 0' do
-      stub_minutes_used_and_limit(0, 0)
-
-      expect(subject).to eq(0)
-    end
-
-    it 'returns 0 when the limit is nil' do
-      stub_minutes_used_and_limit(nil, nil)
-
-      expect(subject).to eq(0)
-    end
-
-    it 'returns 0 when minutes used are over the limit' do
-      stub_minutes_used_and_limit(11, 10)
-
-      expect(subject).to eq(0)
-    end
-
-    it 'returns 0 when minutes used are equal to the limit' do
-      stub_minutes_used_and_limit(10, 10)
-
-      expect(subject).to eq(0)
-    end
-
-    def stub_minutes_used_and_limit(minutes_used, limit)
-      allow(namespace).to receive(:shared_runners_minutes).and_return(minutes_used)
-      allow(namespace).to receive(:actual_shared_runners_minutes_limit).and_return(limit)
-    end
-  end
-
-  describe '#shared_runners_remaining_minutes_below_threshold?' do
-    let(:namespace) { build(:namespace, last_ci_minutes_usage_notification_level: 30) }
-
-    subject { namespace.shared_runners_remaining_minutes_below_threshold? }
-
-    it 'is true when minutes left is below the notification level' do
-      allow(namespace).to receive(:shared_runners_remaining_minutes_percent).and_return(10)
-
-      expect(subject).to be_truthy
-    end
-
-    it 'is false when minutes left is not below the notification level' do
-      allow(namespace).to receive(:shared_runners_remaining_minutes_percent).and_return(80)
-
-      expect(subject).to be_falsey
     end
   end
 

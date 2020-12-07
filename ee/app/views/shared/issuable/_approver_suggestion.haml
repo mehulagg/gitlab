@@ -1,0 +1,21 @@
+- issuable = local_assigns.fetch(:issuable)
+- presenter = local_assigns.fetch(:presenter)
+
+- can_update_approvers = can?(current_user, :update_approvers, issuable)
+
+#js-mr-approvals-input{ data: { 'project_id': @target_project.id,
+  'can_edit': can?(current_user, :update_approvers, issuable).to_s,
+  'allow_multi_rule': @target_project.multiple_approval_rules_available?.to_s,
+  'mr_id': issuable.iid,
+  'mr_settings_path': presenter.api_approval_settings_path,
+  'eligible_approvers_docs_path': help_page_path('user/project/merge_requests/merge_request_approvals', anchor: 'eligible-approvers'),
+  'project_settings_path': presenter.api_project_approval_settings_path } }
+  = sprite_icon('spinner', size: 24, css_class: 'gl-spinner')
+- if can_update_approvers
+  - approver_presenter = MergeRequestApproverPresenter.new(issuable, skip_user: current_user)
+  - if approver_presenter.show_code_owner_tips?
+    .form-text.text-muted
+      = _('Tip: add a')
+      = link_to 'CODEOWNERS', help_page_path('user/project/code_owners'), target: '_blank', tabindex: -1
+      = _('to automatically add approvers based on file paths and file types.')
+= render 'projects/merge_requests/code_owner_approval_rules', merge_request: @mr_presenter

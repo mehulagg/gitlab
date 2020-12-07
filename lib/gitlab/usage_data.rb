@@ -47,7 +47,6 @@ module Gitlab
             .merge(system_usage_data_weekly)
             .merge(features_usage_data)
             .merge(components_usage_data)
-            .merge(cycle_analytics_usage_data)
             .merge(object_store_usage_data)
             .merge(topology_usage_data)
             .merge(usage_activity_by_stage)
@@ -248,12 +247,6 @@ module Gitlab
             aggregated_metrics_weekly
           )
         }
-      end
-
-      def cycle_analytics_usage_data
-        Gitlab::CycleAnalytics::UsageData.new.to_json
-      rescue ActiveRecord::StatementInvalid
-        { avg_cycle_analytics: {} }
       end
 
       # rubocop:disable CodeReuse/ActiveRecord
@@ -770,6 +763,7 @@ module Gitlab
           action_monthly_active_users_web_ide_edit: redis_usage_data { counter.count_web_ide_edit_actions(**date_range) },
           action_monthly_active_users_sfe_edit: redis_usage_data { counter.count_sfe_edit_actions(**date_range) },
           action_monthly_active_users_snippet_editor_edit: redis_usage_data { counter.count_snippet_editor_edit_actions(**date_range) },
+          action_monthly_active_users_sse_edit: redis_usage_data { counter.count_sse_edit_actions(**date_range) },
           action_monthly_active_users_ide_edit: redis_usage_data { counter.count_edit_using_editor(**date_range) }
         }
       end

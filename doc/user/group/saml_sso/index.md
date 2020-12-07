@@ -2,7 +2,7 @@
 type: reference, howto
 stage: Manage
 group: Access
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # SAML SSO for GitLab.com groups **(SILVER ONLY)**
@@ -45,7 +45,7 @@ GitLab.com uses the SAML NameID to identify users. The NameID element:
 The relevant field name and recommended value for supported providers are in the [provider specific notes](#providers).
 appropriate corresponding field.
 
-CAUTION: **Warning:**
+WARNING:
 Once users have signed into GitLab using the SSO SAML setup, changing the `NameID` breaks the configuration and potentially locks users out of the GitLab group.
 
 #### NameID Format
@@ -73,7 +73,7 @@ After you set up your identity provider to work with GitLab, you must configure 
 
 ![Group SAML Settings for GitLab.com](img/group_saml_settings_v13_3.png)
 
-NOTE: **Note:**
+NOTE:
 Please note that the certificate [fingerprint algorithm](#additional-providers-and-setup-options) must be in SHA1. When configuring the identity provider, use a secure signature algorithm.
 
 ### SSO enforcement
@@ -92,7 +92,7 @@ When SSO enforcement is enabled for a group, users can't share a project in the 
 
 ## Providers
 
-NOTE: **Note:**
+NOTE:
 GitLab is unable to provide support for IdPs that are not listed here.
 
 | Provider | Documentation |
@@ -240,11 +240,18 @@ Users can unlink SAML for a group from their profile page. This can be helpful i
 - You no longer want a group to be able to sign you in to GitLab.com.
 - Your SAML NameID has changed and so GitLab can no longer find your user.
 
+WARNING:
+Unlinking an account removes all roles assigned to that user within the group.
+If a user relinks their account, roles need to be reassigned.
+
 For example, to unlink the `MyOrg` account, the following **Disconnect** button is available under **Profile > Accounts**:
 
 ![Unlink Group SAML](img/unlink_group_saml.png)
 
 ## Group Sync
+
+<i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
+For a demo of Group Sync using Azure, see [Demo: SAML Group Sync](https://youtu.be/Iqvo2tJfXjg).
 
 When the SAML response includes a user and their group memberships from the SAML identity provider,
 GitLab uses that information to automatically manage that user's GitLab group memberships.
@@ -261,7 +268,7 @@ Ensure your SAML identity provider sends an attribute statement named `Groups` o
 ```
 
 When SAML SSO is enabled for the top-level group, `Maintainer` and `Owner` level users
-see a new menu item in group **Settings -> SAML Group Links**. Each group can specify
+see a new menu item in group **Settings -> SAML Group Links**. Each group (parent or subgroup) can specify
 one or more group links to map a SAML identity provider group name to a GitLab access level.
 
 ![SAML Group Links navigation](img/saml_group_links_nav_v13_6.png)
@@ -270,14 +277,14 @@ To link the SAML `Freelancers` group in the attribute statement example above:
 
 1. Enter `Freelancers` in the `SAML Group Name` field.
 1. Choose the desired `Access Level`.
-1. **Save** the group link. 
-1. Repeat to add additional group links if desired. 
+1. **Save** the group link.
+1. Repeat to add additional group links if desired.
 
 ![SAML Group Links](img/saml_group_links_v13_6.png)
 
-If a user is a member of multiple SAML groups mapped to the same GitLab group, 
+If a user is a member of multiple SAML groups mapped to the same GitLab group,
 the user gets the highest access level from the groups. For example, if one group
-is linked as `Guest` and another `Maintainer`, a user in both groups gets `Maintainer` 
+is linked as `Guest` and another `Maintainer`, a user in both groups gets `Maintainer`
 access.
 
 ## Glossary

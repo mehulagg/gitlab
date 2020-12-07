@@ -67,9 +67,9 @@ RSpec.describe 'Epic show', :js do
 
       it 'shows Roadmap timeline with child epics' do
         page.within('.js-epic-tabs-content #roadmap') do
-          expect(page).to have_selector('.roadmap-container .roadmap-shell')
+          expect(page).to have_selector('.roadmap-container .js-roadmap-shell')
 
-          page.within('.roadmap-shell .epics-list-section') do
+          page.within('.js-roadmap-shell .epics-list-section') do
             expect(page).not_to have_content(not_child.title)
             expect(find('.epic-item-container:nth-child(1) .epics-list-item .epic-title')).to have_content('Child epic B')
             expect(find('.epic-item-container:nth-child(2) .epics-list-item .epic-title')).to have_content('Child epic A')

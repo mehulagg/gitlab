@@ -1,7 +1,7 @@
 ---
 stage: none
 group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference, index
 description: 'Read through the GitLab User documentation to learn how to use, configure, and customize GitLab and GitLab.com to your own needs.'
 ---
@@ -60,7 +60,7 @@ With GitLab Enterprise Edition, you can also:
   - [Multiple Assignees for Issues](project/issues/multiple_assignees_for_issues.md). **(STARTER)**
   - [Multiple Issue Boards](project/issue_board.md#multiple-issue-boards).
 - Create formal relationships between issues with [Related Issues](project/issues/related_issues.md).
-- Use [Burndown Charts](project/milestones/burndown_charts.md) to track progress during a sprint or while working on a new version of their software.
+- Use [Burndown Charts](project/milestones/burndown_and_burnup_charts.md) to track progress during a sprint or while working on a new version of their software.
 - Leverage [Elasticsearch](../integration/elasticsearch.md) with [Advanced Search](search/advanced_global_search.md) and [Advanced Search Syntax](search/advanced_search_syntax.md) for faster, more advanced code search across your entire GitLab instance.
 - [Authenticate users with Kerberos](../integration/kerberos.md).
 - [Mirror a repository](project/repository/repository_mirroring.md) from elsewhere on your local server.

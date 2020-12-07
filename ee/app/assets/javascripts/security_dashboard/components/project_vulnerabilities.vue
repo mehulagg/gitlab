@@ -1,12 +1,17 @@
 <script>
-import produce from 'immer';
 import { GlAlert, GlLoadingIcon, GlIntersectionObserver } from '@gitlab/ui';
+import produce from 'immer';
 import { __ } from '~/locale';
-import VulnerabilityList from './vulnerability_list.vue';
-import vulnerabilitiesQuery from '../graphql/project_vulnerabilities.graphql';
 import securityScannersQuery from '../graphql/project_security_scanners.graphql';
-import { VULNERABILITIES_PER_PAGE } from '../store/constants';
+import vulnerabilitiesQuery from '../graphql/project_vulnerabilities.query.graphql';
+import vulnerabilitiesQueryAutoFix from '../graphql/project_vulnerabilities_autofix.query.graphql';
 import { preparePageInfo } from '../helpers';
+import { VULNERABILITIES_PER_PAGE } from '../store/constants';
+import VulnerabilityList from './vulnerability_list.vue';
+
+const query = gon?.features?.secureVulnerabilityAutofixIndicator
+  ? vulnerabilitiesQueryAutoFix
+  : vulnerabilitiesQuery;
 
 export default {
   name: 'ProjectVulnerabilitiesApp',
@@ -36,7 +41,7 @@ export default {
   },
   apollo: {
     vulnerabilities: {
-      query: vulnerabilitiesQuery,
+      query,
       variables() {
         return {
           fullPath: this.projectFullPath,

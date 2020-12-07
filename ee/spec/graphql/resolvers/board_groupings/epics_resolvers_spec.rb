@@ -50,18 +50,6 @@ RSpec.describe Resolvers::BoardGroupings::EpicsResolver do
       end
     end
 
-    context 'when boards_with_swimlanes is disabled' do
-      before do
-        stub_feature_flags(boards_with_swimlanes: false)
-      end
-
-      it 'returns nil' do
-        result = resolve_board_epics(board)
-
-        expect(result).to be_nil
-      end
-    end
-
     context 'when user can access the group' do
       before do
         group.add_developer(current_user)

@@ -1,7 +1,7 @@
 ---
 stage: Verify
 group: Continuous Integration
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 comments: false
 description: "Learn how to use GitLab CI/CD, the GitLab built-in Continuous Integration, Continuous Deployment, and Continuous Delivery toolset to build, test, and deploy your application."
 type: index
@@ -55,7 +55,7 @@ at the repository's root. This file creates a [pipeline](pipelines/index.md), wh
 To get started with GitLab CI/CD, we recommend you read through
 the following documents:
 
-- [How GitLab CI/CD works](introduction/index.md#how-gitlab-cicd-works).
+- [Get started with GitLab CI/CD](quick_start/README.md).
 - [Fundamental pipeline architectures](pipelines/pipeline_architectures.md).
 - [GitLab CI/CD basic workflow](introduction/index.md#basic-cicd-workflow).
 - [Step-by-step guide for writing `.gitlab-ci.yml` for the first time](../user/project/pages/getting_started/pages_from_scratch.md).
@@ -73,7 +73,7 @@ to your needs:
 
 ![Use a `.gitlab-ci.yml` template](img/add_file_template_11_10.png)
 
-While building your `.gitlab-ci.yml`, you can use the [CI/CD configuration visualization](yaml/visualization.md) to facilate your writing experience.
+While building your `.gitlab-ci.yml`, you can use the [CI/CD configuration visualization](yaml/visualization.md) to facilitate your writing experience.
 
 For a broader overview, see the [CI/CD getting started](quick_start/README.md) guide.
 

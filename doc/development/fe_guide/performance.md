@@ -1,7 +1,7 @@
 ---
 stage: none
 group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Performance
@@ -119,21 +119,21 @@ browser's developer console while on any page within GitLab.
   ```
 
   Note that `waitForCSSLoaded()` methods supports receiving the action in different ways:
-    
+
   - With a callback:
-  
+
     ```javascript
       waitForCSSLoaded(action)
     ```
-    
+
   - With `then()`:
-  
+
     ```javascript
       waitForCSSLoaded().then(action);
     ```
-    
+
   - With `await` followed by `action`:
-  
+
     ```javascript
       await waitForCSSLoaded;
       action();

@@ -1,7 +1,7 @@
 ---
 stage: none
 group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 description: "Learn how GitLab docs' global navigation works and how to add new items."
 ---
 
@@ -292,7 +292,7 @@ and the following syntax rules.
   an "information" icon on the nav to make the user aware that the feature is
   EE-only.
 
-CAUTION: **Caution:**
+WARNING:
 All links present on the data file must end in `.html`, not `.md`. Do not
 start any relative link with a forward slash `/`.
 

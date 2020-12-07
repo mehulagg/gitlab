@@ -1,7 +1,7 @@
 ---
 stage: none
 group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Tooling
@@ -46,7 +46,7 @@ yarn eslint-fix
 
 If manual changes are required, a list of changes will be sent to the console.
 
-CAUTION: **Caution:**
+WARNING:
 Limit use to global rule updates. Otherwise, the changes can lead to huge Merge Requests.
 
 ### Disabling ESLint in new files

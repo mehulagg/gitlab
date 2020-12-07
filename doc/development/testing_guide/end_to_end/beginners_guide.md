@@ -1,7 +1,7 @@
 ---
 stage: none
 group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Beginner's guide to writing end-to-end tests
@@ -52,7 +52,7 @@ For information about the distribution of tests per level in GitLab, see
 - Finally, discuss the proposed test with the developer(s) involved in implementing
   the feature and the lower-level tests.
 
-CAUTION: **Caution:**
+WARNING:
 Check both [GitLab Community Edition](https://gitlab-org.gitlab.io/gitlab-foss/coverage-ruby/#_AllFiles) and
 [GitLab Enterprise Edition](https://gitlab-org.gitlab.io/gitlab/coverage-ruby/#_AllFiles) coverage projects
 for previously-written tests for this feature. For analyzing the code coverage,
@@ -86,7 +86,7 @@ file `basic_login_spec.rb`.
 
 See the [`RSpec.describe` outer block](#the-outer-rspecdescribe-block)
 
-CAUTION: **Deprecation notice:**
+WARNING:
 The outer `context` [was deprecated](https://gitlab.com/gitlab-org/quality/team-tasks/-/issues/550) in `13.2`
 in adherence to RSpec 4.0 specifications. Use `RSpec.describe` instead.
 
@@ -349,3 +349,9 @@ Where `<test_file>` is:
 
 - `qa/specs/features/browser_ui/1_manage/login/login_spec.rb` when running the Login example.
 - `qa/specs/features/browser_ui/2_plan/issues/issue_spec.rb` when running the Issue example.
+
+## End-to-end test merge request template
+
+When submitting a new end-to-end test, use the ["New End to End Test"](https://gitlab.com/gitlab-org/gitlab/-/blob/master/.gitlab/merge_request_templates/New%20End%20To%20End%20Test.md)
+merge request description template for additional
+steps that are required prior a successful merge.

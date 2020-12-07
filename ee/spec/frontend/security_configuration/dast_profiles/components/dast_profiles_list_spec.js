@@ -14,6 +14,7 @@ describe('EE - DastProfilesList', () => {
   const createComponentFactory = (mountFn = shallowMount) => (options = {}) => {
     const defaultProps = {
       profiles: [],
+      tableLabel: 'Profiles Table',
       fields: ['profileName', 'targetUrl', 'validationStatus'],
       hasMorePages: false,
       profilesPerPage: 10,
@@ -27,9 +28,6 @@ describe('EE - DastProfilesList', () => {
       merge(
         {},
         {
-          provide: {
-            glFeatures: { securityOnDemandScansSiteValidation: true },
-          },
           propsData: defaultProps,
         },
         options,
@@ -46,7 +44,7 @@ describe('EE - DastProfilesList', () => {
   const createFullComponent = createComponentFactory(mount);
 
   const withinComponent = () => within(wrapper.element);
-  const getTable = () => withinComponent().getByRole('table', { name: /site profiles/i });
+  const getTable = () => withinComponent().getByRole('table', { name: /profiles table/i });
   const getAllRowGroups = () => within(getTable()).getAllByRole('rowgroup');
   const getTableBody = () => {
     // first item is the table head
@@ -140,53 +138,23 @@ describe('EE - DastProfilesList', () => {
         expect(editLink).not.toBe(null);
         expect(editLink.getAttribute('href')).toBe(profile.editPath);
       });
+    });
 
-      describe('with site validation enabled', () => {
-        describe.each`
-          status           | statusEnum                 | label                  | hasValidateButton
-          ${'pending'}     | ${'PENDING_VALIDATION'}    | ${''}                  | ${true}
-          ${'in-progress'} | ${'INPROGRESS_VALIDATION'} | ${'Validating...'}     | ${false}
-          ${'passed'}      | ${'PASSED_VALIDATION'}     | ${'Validated'}         | ${false}
-          ${'failed'}      | ${'FAILED_VALIDATION'}     | ${'Validation failed'} | ${true}
-        `('profile with validation $status', ({ statusEnum, label, hasValidateButton }) => {
-          const profile = profiles.find(({ validationStatus }) => validationStatus === statusEnum);
-
-          it(`should show correct label`, () => {
-            const validationStatusCell = getTableRowForProfile(profile).cells[2];
-            expect(validationStatusCell.innerText).toContain(label);
-          });
-
-          it(`should ${hasValidateButton ? '' : 'not '}render validate button`, () => {
-            const actionsCell = getTableRowForProfile(profile).cells[3];
-            const validateButton = within(actionsCell).queryByRole('button', {
-              name: /validate/i,
-            });
-
-            if (hasValidateButton) {
-              expect(validateButton).not.toBeNull();
-            } else {
-              expect(validateButton).toBeNull();
-            }
-          });
+    describe('profile list with scoped slots', () => {
+      beforeEach(() => {
+        createFullComponent({
+          propsData: { profiles },
+          scopedSlots: {
+            'cell(profileName)': '<b>{{props.item.profileName}}</b>',
+            actions: '<button>hello</button>',
+          },
         });
       });
+      it.each(profiles)('renders list item %# correctly', profile => {
+        const [profileCell, , , actionsCell] = getTableRowForProfile(profile).cells;
 
-      describe('without site validation enabled', () => {
-        beforeEach(() => {
-          createFullComponent({
-            provide: {
-              glFeatures: { securityOnDemandScansSiteValidation: false },
-            },
-            propsData: { profiles },
-          });
-        });
-
-        it.each(profiles)('profile %# should not have validate button and status', profile => {
-          const [, , validationStatusCell, actionsCell] = getTableRowForProfile(profile).cells;
-
-          expect(within(actionsCell).queryByRole('button', { name: /validate/i })).toBe(null);
-          expect(validationStatusCell.innerText).toBe('');
-        });
+        expect(profileCell.innerHTML).toContain(`<b>${profile.profileName}</b>`);
+        expect(within(actionsCell).getByRole('button', { name: /hello/i })).not.toBe(null);
       });
     });
 

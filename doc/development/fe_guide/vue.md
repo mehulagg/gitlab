@@ -1,7 +1,7 @@
 ---
 stage: none
 group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Vue
@@ -91,7 +91,7 @@ return new Vue({
       },
     });
   },
-}
+});
 ```
 
 > When adding an `id` attribute to mount a Vue application, please make sure this `id` is unique across the codebase

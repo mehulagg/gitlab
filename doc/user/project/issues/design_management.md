@@ -1,7 +1,7 @@
 ---
 stage: Create
 group: Knowledge
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 ---
 
 # Design Management **(CORE)**
@@ -170,7 +170,7 @@ Once selected, click the **Delete selected** button to confirm the deletion:
 
 ![Delete multiple designs](img/delete_multiple_designs_v12_4.png)
 
-NOTE: **Note:**
+NOTE:
 Only the latest version of the designs can be deleted.
 Deleted designs are not permanently lost; they can be
 viewed by browsing previous versions.

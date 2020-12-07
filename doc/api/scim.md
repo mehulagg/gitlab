@@ -2,7 +2,7 @@
 type: reference, howto
 stage: Manage
 group: Access
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # SCIM API (SYSTEM ONLY) **(SILVER ONLY)**
@@ -33,7 +33,7 @@ Parameters:
 | `startIndex` | integer | no    | The 1-based index indicating where to start returning results from. A value of less than one will be interpreted as 1. |
 | `count` | integer | no    | Desired maximum number of query results. |
 
-NOTE: **Note:**
+NOTE:
 Pagination follows the [SCIM spec](https://tools.ietf.org/html/rfc7644#section-3.4.2.4) rather than GitLab pagination as used elsewhere. If records change between requests it is possible for a page to either be missing records that have moved to a different page or repeat records from a previous request.
 
 Example request:

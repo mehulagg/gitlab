@@ -17,10 +17,10 @@ request removing the feature flag or the merge request where the default value o
 the feature flag is set to enabled. If the feature contains any database migrations, it
 *should* include a changelog entry for the database changes.
 
-CAUTION: **Caution:**
+WARNING:
 All newly-introduced feature flags should be [disabled by default](process.md#feature-flags-in-gitlab-development).
 
-NOTE: **Note:**
+NOTE:
 This document is the subject of continued work as part of an epic to [improve internal usage of Feature Flags](https://gitlab.com/groups/gitlab-org/-/epics/3551). Raise any suggestions as new issues and attach them to the epic.
 
 ## Risk of a broken master (main) branch
@@ -502,10 +502,6 @@ of `Feature.enabled?` and `Feature.disabled?` returning always `true` unless fea
 is persisted.
 
 Make sure behavior under feature flag doesn't go untested in some non-specific contexts.
-
-See the
-[testing guide](../testing_guide/best_practices.md#feature-flags-in-tests)
-for information and examples on how to stub feature flags in tests.
 
 ### `stub_feature_flags: false`
 

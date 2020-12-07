@@ -1,7 +1,7 @@
 ---
 stage: Growth
 group: Expansion
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Invitations API
@@ -21,7 +21,7 @@ levels are defined in the `Gitlab::Access` module. Currently, these levels are v
 - Maintainer (`40`)
 - Owner (`50`) - Only valid to set for groups
 
-CAUTION: **Caution:**
+WARNING:
 Due to [an issue](https://gitlab.com/gitlab-org/gitlab/-/issues/219299),
 projects in personal namespaces don't show owner (`50`) permission.
 

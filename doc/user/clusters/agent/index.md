@@ -1,7 +1,7 @@
 ---
 stage: Configure
 group: Configure
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # GitLab Kubernetes Agent **(PREMIUM ONLY)**
@@ -9,7 +9,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/223061) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.4.
 > - It's disabled on GitLab.com. Rolling this feature out to GitLab.com is [planned](https://gitlab.com/groups/gitlab-org/-/epics/3834).
 
-CAUTION: **Warning:**
+WARNING:
 This feature might not be available to you. Check the **version history** note above for details.
 
 The [GitLab Kubernetes Agent](https://gitlab.com/gitlab-org/cluster-integration/gitlab-agent)
@@ -93,7 +93,7 @@ chart](https://gitlab.com/gitlab-org/charts/gitlab). If you don't already have
 GitLab installed, please refer to our [installation
 documentation](https://docs.gitlab.com/ee/install/README.html).
 
-NOTE: **Note:**
+NOTE:
 GitLab plans to include the KAS on [GitLab.com](https://gitlab.com/groups/gitlab-org/-/epics/3834).
 
 #### Install with Omnibus
@@ -161,23 +161,9 @@ gitops:
 ```
 
 GitLab [versions 13.7 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/259669) also
-supports manifest projects containing multiple directories (or subdirectories)
-of YAML files. To use multiple YAML files, specify a `paths` attribute:
-
-```yaml
-gitops:
-  manifest_projects:
-  - id: "path-to/your-manifest-project-number1"
-  paths:
-      # Read all .yaml files from team1/app1 directory.
-      # See https://github.com/bmatcuk/doublestar#about and
-      # https://pkg.go.dev/github.com/bmatcuk/doublestar/v2#Match for globbing rules.
-    - glob: '/team1/app1/*.yaml'
-      # Read all .yaml files from team2/apps and all subdirectories
-    - glob: '/team2/apps/**/*.yaml'
-      # If 'paths' is not specified or is an empty list, the configuration below is used
-    - glob: '/**/*.{yaml,yml,json}'
-```
+supports manifest projects containing
+multiple directories (or subdirectories) of YAML files. For more information see our
+documentation on the [Kubernetes Agent configuration respository](repository.md).
 
 ### Create an Agent record in GitLab
 
@@ -223,7 +209,7 @@ the Agent in subsequent steps. You can create an Agent record either:
   }
   ```
 
-  NOTE: **Note:**
+  NOTE:
   GraphQL only displays the token one time after creating it.
 
   If you are new to using the GitLab GraphQL API, refer to the
@@ -392,9 +378,12 @@ subjects:
 In a previous step, you configured a `config.yaml` to point to the GitLab projects
 the Agent should synchronize. In each of those projects, you must create a `manifest.yaml`
 file for the Agent to monitor. You can auto-generate this `manifest.yaml` with a
-templating engine or other means. Only public projects are supported as
-manifest projects. Support for private projects is planned in the issue
-[Agent authorization for private manifest projects](https://gitlab.com/gitlab-org/gitlab/-/issues/220912).
+templating engine or other means.
+
+The agent is authorized to download manifests for the configuration
+project, and public projects. Support for other private projects is
+planned in the issue [Agent authorization for private manifest
+projects](https://gitlab.com/gitlab-org/gitlab/-/issues/220912).
 
 Each time you commit and push a change to this file, the Agent logs the change:
 

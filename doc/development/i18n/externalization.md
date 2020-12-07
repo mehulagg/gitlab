@@ -1,7 +1,7 @@
 ---
 stage: Manage
 group: Import
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Internationalization for GitLab
@@ -756,7 +756,7 @@ aren't in the message with ID `1 pipeline`.
 
 ## Adding a new language
 
-NOTE: **Note:**
+NOTE:
 [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/221012) in GitLab 13.3:
 Languages with less than 2% of translations won't be available in the UI.
 

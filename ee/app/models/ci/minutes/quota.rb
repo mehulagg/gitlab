@@ -48,7 +48,21 @@ module Ci
           total_minutes_used >= total_minutes
       end
 
+      def total_minutes_used
+        @total_minutes_used ||= namespace.shared_runners_seconds.to_i / 60
+      end
+
+      def percent_total_minutes_remaining
+        return 0 if total_minutes == 0
+
+        100 * total_minutes_remaining.to_i / total_minutes
+      end
+
       private
+
+      def total_minutes_remaining
+        [total_minutes.to_i - total_minutes_used, 0].max
+      end
 
       def monthly_minutes_used_up?
         namespace.shared_runners_minutes_limit_enabled? &&
@@ -61,7 +75,6 @@ module Ci
           purchased_minutes_used >= purchased_minutes
       end
 
-      # TODO: maps to NamespaceStatistics#shared_runners_minutes(include_extra: false)
       def monthly_minutes_used
         total_minutes_used - purchased_minutes_used
       end
@@ -70,7 +83,6 @@ module Ci
         total_minutes_used <= monthly_minutes
       end
 
-      # TODO: maps to NamespaceStatistics#extra_shared_runners_minutes
       def purchased_minutes_used
         return 0 if no_minutes_purchased? || monthly_minutes_available?
 
@@ -88,11 +100,6 @@ module Ci
       # TODO: maps to Namespace#actual_shared_runners_minutes_limit(include_extra: true)
       def total_minutes
         @total_minutes ||= monthly_minutes + purchased_minutes
-      end
-
-      # TODO: maps to NamespaceStatistics#shared_runners_minutes(include_extra: true)
-      def total_minutes_used
-        @total_minutes_used ||= namespace.shared_runners_seconds.to_i / 60
       end
 
       # TODO: maps to Namespace#actual_shared_runners_minutes_limit(include_extra: false)

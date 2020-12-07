@@ -3,7 +3,7 @@
   %section.settings.issues-feature.no-animate#js-issue-settings{ class: [('expanded' if expanded), ('hidden' if @project.project_feature.send(:issues_access_level) == 0)] }
     .settings-header
       %h4.settings-title.js-settings-toggle.js-settings-toggle-trigger-only= _('Default issue template')
-      %button.btn.btn-default.js-settings-toggle= expanded ? _('Collapse') : _('Expand')
+      %button.gl-button.btn.btn-default.js-settings-toggle= expanded ? _('Collapse') : _('Expand')
       %p= _('Set a default template for issue descriptions.')
 
     .settings-content
@@ -18,4 +18,4 @@
             .text-secondary
               - link_start = '<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe % { url: help_page_path('user/markdown') }
               = _('Description parsed with %{link_start}GitLab Flavored Markdown%{link_end}').html_safe % { link_start: link_start, link_end: '</a>'.html_safe }
-        = f.submit _('Save changes'), class: "btn btn-success"
+        = f.submit _('Save changes'), class: "gl-button btn btn-success"

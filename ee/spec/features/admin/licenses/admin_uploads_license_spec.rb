@@ -136,6 +136,7 @@ RSpec.describe "Admin uploads license", :js do
       it "doesn't upload license" do
         attach_and_upload(path)
 
+        find('.gl-alert details').click
         expect(page).to have_content("This license has already expired.")
       end
     end

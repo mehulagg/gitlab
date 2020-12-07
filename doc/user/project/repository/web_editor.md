@@ -1,7 +1,7 @@
 ---
 stage: Create
 group: Editor
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: howto
 ---
 
@@ -53,7 +53,7 @@ has already been created, which creates a link to the license itself.
 
 ![New file button](img/web_editor_template_dropdown_buttons.png)
 
-NOTE: **Note:**
+NOTE:
 The **Set up CI/CD** button will not appear on an empty repository. You have to at
 least add a file in order for the button to show up.
 
@@ -106,7 +106,7 @@ The new branch, and later its merge request, will be marked as related to this i
 Once merged, the MR will automatically close the issue.
 You can see a **Create merge request** dropdown below the issue description.
 
-NOTE: **Note:**
+NOTE:
 You won't see the **Create merge request** button if there is already a branch with the same
 name or a referenced merge request or your project has an active
 fork relationship.

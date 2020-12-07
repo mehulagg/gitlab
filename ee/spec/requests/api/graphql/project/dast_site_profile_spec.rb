@@ -18,6 +18,7 @@ RSpec.describe 'Query.project(fullPath).dastSiteProfile' do
             profileName
             targetUrl
             validationStatus
+            normalizedTargetUrl
           }
         }
       }
@@ -92,10 +93,10 @@ RSpec.describe 'Query.project(fullPath).dastSiteProfile' do
     end
 
     context 'when there is no associated dast_site_validation' do
-      it 'returns a pending validation status' do
+      it 'returns a none validation status' do
         dast_site_profile.dast_site_validation.destroy!
 
-        expect(dast_site_profile_response['validationStatus']).to eq('PENDING_VALIDATION')
+        expect(dast_site_profile_response['validationStatus']).to eq('NONE')
       end
     end
   end

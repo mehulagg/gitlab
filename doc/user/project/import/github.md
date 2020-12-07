@@ -2,7 +2,7 @@
 type: reference, howto
 stage: Manage
 group: Import
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Import your project from GitHub to GitLab
@@ -60,7 +60,7 @@ must meet one of the following conditions prior to the import:
 
 - Have previously logged in to a GitLab account using the GitHub icon.
 - Have a GitHub account with a
-  [primary email address](https://docs.github.com/en/github/setting-up-and-managing-your-github-user-account/setting-your-commit-email-address)
+  [primary email address](https://docs.github.com/en/free-pro-team@latest/github/setting-up-and-managing-your-github-user-account/setting-your-commit-email-address)
   that matches their GitLab account's email address.
 
 If a user referenced in the project is not found in GitLab's database, the project creator (typically the user
@@ -89,12 +89,12 @@ Before you begin, ensure that any GitHub users who you want to map to GitLab use
 
 - A GitLab account that has logged in using the GitHub icon
   \- or -
-- A GitLab account with an email address that matches the [public email address](https://docs.github.com/en/github/setting-up-and-managing-your-github-user-account/setting-your-commit-email-address) of the GitHub user
+- A GitLab account with an email address that matches the [public email address](https://docs.github.com/en/free-pro-team@latest/github/setting-up-and-managing-your-github-user-account/setting-your-commit-email-address) of the GitHub user
 
 User-matching attempts occur in that order, and if a user is not identified either way, the activity is associated with
 the user account that is performing the import.
 
-NOTE: **Note:**
+NOTE:
 If you are using a self-managed GitLab instance or if you are importing from GitHub Enterprise, this process requires that you have configured
 [GitHub integration](../../../integration/github.md).
 
@@ -106,7 +106,7 @@ If you are using a self-managed GitLab instance or if you are importing from Git
 
 ### Using a GitHub token
 
-NOTE: **Note:**
+NOTE:
 Using a personal access token to import projects is not recommended. If you are a GitLab.com user,
 you can use a personal access token to import your project from GitHub, but this method cannot
 associate all user activity (such as issues and pull requests) with matching GitLab users.
@@ -154,7 +154,7 @@ of the above are automatically configured. **(PREMIUM)**
 
 ## Improving the speed of imports on self-managed instances
 
-NOTE: **Note:**
+NOTE:
 Admin access to the GitLab server is required.
 
 For large projects it may take a while to import all data. To reduce the time necessary, you can increase the number of

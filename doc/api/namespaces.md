@@ -1,7 +1,7 @@
 ---
 stage: none
 group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Namespaces API
@@ -113,7 +113,7 @@ once a day.
 ]
 ```
 
-NOTE: **Note:**
+NOTE:
 Only group maintainers/owners are presented with `members_count_with_descendants`, as well as `plan` **(BRONZE ONLY)**.
 
 ## Search for namespace

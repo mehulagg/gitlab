@@ -1,7 +1,7 @@
 ---
 stage: none
 group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference
 disqus_identifier: 'https://docs.gitlab.com/ee/workflow/shortcuts.html'
 ---
@@ -47,7 +47,7 @@ for example comments, replies, issue descriptions, and merge request description
 | <kbd>⌘</kbd> (Mac) / <kbd>Ctrl</kbd> + <kbd>i</kbd>                    | Italicize the selected text (surround it with `_`). |
 | <kbd>⌘</kbd> (Mac) / <kbd>Ctrl</kbd> + <kbd>k</kbd>                    | Add a link (surround the selected text with `[]()`). |
 
-NOTE: **Note:**
+NOTE:
 The shortcuts for editing in text fields are always enabled, even when
 other keyboard shortcuts are disabled as explained above.
 

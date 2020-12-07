@@ -1,7 +1,7 @@
 ---
 stage: Verify
 group: Continuous Integration
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference, index
 last_update: 2019-07-03
 ---
@@ -188,7 +188,7 @@ can create pipelines in the parent project for merge requests
 from a forked project. In the merge request, go to the **Pipelines** and click
 **Run Pipeline** button.
 
-CAUTION: **Caution:**
+WARNING:
 Fork merge requests could contain malicious code that tries to steal secrets in the
 parent project when the pipeline runs, even before merge. Reviewers must carefully
 check the changes in the merge request before triggering the pipeline. GitLab shows

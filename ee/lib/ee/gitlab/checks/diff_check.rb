@@ -58,10 +58,14 @@ module EE
 
         def path_locks_validation
           lambda do |diff|
-            path = if diff.renamed_file?
-                     diff.old_path
+            path = if ::Feature.enabled?(:diff_check_with_paths_changed_rpc, project)
+                     diff.path
                    else
-                     diff.new_path || diff.old_path
+                     if diff.renamed_file?
+                       diff.old_path
+                     else
+                       diff.new_path || diff.old_path
+                     end
                    end
 
             lock_info = project.find_path_lock(path)
@@ -72,12 +76,24 @@ module EE
           end
         end
 
+        def new_file?(path)
+          path.status == :ADDED
+        end
+
         def file_name_validation
           lambda do |diff|
-            if (diff.renamed_file || diff.new_file) && blacklisted_regex = push_rule.filename_denylisted?(diff.new_path)
-              return unless blacklisted_regex.present?
+            if ::Feature.enabled?(:diff_check_with_paths_changed_rpc, project)
+              if new_file?(diff) && denylisted_regex = push_rule.filename_denylisted?(diff.path)
+                return unless denylisted_regex.present?
 
-              "File name #{diff.new_path} was blacklisted by the pattern #{blacklisted_regex}."
+                "File name #{diff.path} was blacklisted by the pattern #{denylisted_regex}."
+              end
+            else
+              if (diff.renamed_file || diff.new_file) && denylisted_regex = push_rule.filename_denylisted?(diff.new_path)
+                return unless denylisted_regex.present?
+
+                "File name #{diff.new_path} was blacklisted by the pattern #{denylisted_regex}."
+              end
             end
           rescue ::PushRule::MatchError => e
             raise ::Gitlab::GitAccess::ForbiddenError, e.message

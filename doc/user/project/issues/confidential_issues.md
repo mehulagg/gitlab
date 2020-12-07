@@ -1,7 +1,7 @@
 ---
 stage: Plan
 group: Project Management
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Confidential issues
@@ -46,7 +46,7 @@ system note in the issue's comments.
 
 ## Indications of a confidential issue
 
-NOTE: **Note:**
+NOTE:
 If you don't have [enough permissions](#permissions-and-access-to-confidential-issues),
 you won't be able to see the confidential issues at all.
 

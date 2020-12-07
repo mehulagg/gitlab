@@ -1,7 +1,7 @@
 ---
 stage: none
 group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Getting started with an offline GitLab Installation
@@ -11,7 +11,7 @@ instance entirely offline.
 
 ## Installation
 
-NOTE: **Note:**
+NOTE:
 This guide assumes the server is Ubuntu 18.04. Instructions for other servers may vary.
 This guide also assumes the server host resolves as `my-host`, which you should replace with your
 server's name.

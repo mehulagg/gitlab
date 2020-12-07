@@ -1,7 +1,7 @@
 ---
-stage: none
-group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+stage: Create
+group: Ecosystem
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Integrate your GitLab instance with GitHub
@@ -19,7 +19,7 @@ When you create an OAuth 2 app in GitHub, you need the following information:
 - The URL of your GitLab instance, such as `https://gitlab.example.com`.
 - The authorization callback URL; in this case, `https://gitlab.example.com/users/auth`. Include the port number if your GitLab instance uses a non-default port.
 
-NOTE: **Note:**
+NOTE:
 To prevent an [OAuth2 covert redirect](https://oauth.net/advisories/2014-1-covert-redirect/) vulnerability, append `/users/auth` to the end of the GitHub authorization callback URL.
 
 See [Initial OmniAuth Configuration](omniauth.md#initial-omniauth-configuration) for initial settings.

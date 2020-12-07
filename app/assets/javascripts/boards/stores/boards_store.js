@@ -22,7 +22,7 @@ import ListLabel from '../models/label';
 import ListAssignee from '../models/assignee';
 import ListMilestone from '../models/milestone';
 
-import createBoardMutation from '../queries/board.mutation.graphql';
+import createBoardMutation from '../graphql/board.mutation.graphql';
 
 const PER_PAGE = 20;
 export const gqlClient = createDefaultClient();
@@ -302,11 +302,7 @@ const boardsStore = {
   onNewListIssueResponse(list, issue, data) {
     issue.refreshData(data);
 
-    if (
-      !gon.features.boardsWithSwimlanes &&
-      !gon.features.graphqlBoardLists &&
-      list.issues.length > 1
-    ) {
+    if (list.issues.length > 1) {
       const moveBeforeId = list.issues[1].id;
       this.moveIssue(issue.id, null, null, null, moveBeforeId);
     }

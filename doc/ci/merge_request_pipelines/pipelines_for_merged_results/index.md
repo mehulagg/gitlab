@@ -1,7 +1,7 @@
 ---
 stage: Verify
 group: Continuous Integration
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference
 last_update: 2019-07-03
 ---
@@ -59,7 +59,7 @@ To enable pipelines for merged results for your project:
 1. Check **Enable merged results pipelines.**.
 1. Click **Save changes**.
 
-CAUTION: **Caution:**
+WARNING:
 If you select the check box but don't configure your CI/CD to use
 pipelines for merge requests, your merge requests may become stuck in an
 unresolved state or your pipelines may be dropped.

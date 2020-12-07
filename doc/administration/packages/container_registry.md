@@ -1,7 +1,7 @@
 ---
 stage: Package
 group: Package
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # GitLab Container Registry administration
@@ -93,7 +93,7 @@ auth:
     rootcertbundle: /root/certs/certbundle
 ```
 
-CAUTION: **Caution:**
+WARNING:
 If `auth` is not set up, users can pull Docker images without authentication.
 
 ## Container Registry domain configuration
@@ -374,7 +374,7 @@ driver for the Container Registry.
 
 [Read more about using object storage with GitLab](../object_storage.md).
 
-CAUTION: **Warning:**
+WARNING:
 GitLab does not back up Docker images that are not stored on the
 file system. Enable backups with your object storage provider if
 desired.

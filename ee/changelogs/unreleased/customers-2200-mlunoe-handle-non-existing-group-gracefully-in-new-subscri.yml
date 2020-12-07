@@ -1,0 +1,6 @@
+---
+title: Fix the user experience when the user is unauthorized or trying to subscribe
+  for a non-existing group
+merge_request: 48626
+author:
+type: fixed
