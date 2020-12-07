@@ -141,6 +141,7 @@
   - ".gitlab-ci.yml"
   - ".gitlab/ci/**/*"
   - "*_VERSION"
+  - "workhorse/**/*"
 
 .db-patterns: &db-patterns
   - "{,ee/}{,spec/}{db,migrations}/**/*"
@@ -680,6 +681,10 @@
     - <<: *if-master-schedule-nightly
     - <<: *if-merge-request
       changes: [".gitlab/ci/rails.gitlab-ci.yml"]
+
+.workhorse:rules
+  rules:
+    - changes: ["workhorse/**/*"]
 
 ##################
 # Releases rules #

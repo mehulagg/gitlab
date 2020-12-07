@@ -1,4 +1,6 @@
 workhorse:
+  extends:
+    - .workhorse:rules
   image: golang:1.14
   stage: test
   needs: []
