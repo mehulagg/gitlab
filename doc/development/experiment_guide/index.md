@@ -327,12 +327,13 @@ For visibility, please also share any commands run against production in the `#s
 ### Manually force the current user to be in the experiment group
 
 You may force the application to put your current user in the experiment group by 
-adding a query string parameter to the URL of experiment entry URL.
+adding a query string parameter to the URL of experiment entry URL. The experiment works 
+only for this URL and won't work for the subsequent pages.
 
 For example for to enable `EXPERIMENT_KEY` experiment add `force_experiment=EXPERIMENT_KEY` 
 to the URL
 
-```
+```shell
 https://gitlab.com/<EXPERIMENT_ENTRY_URL>?force_experiment=<EXPERIMENT_KEY>
 ```
 
