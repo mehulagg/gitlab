@@ -115,6 +115,7 @@ In these cases, use the following workflow:
 1. Request a peer review from a member of your team.
 1. Request a review and approval of an Engineering Manager (EM)
    or Staff Engineer whose responsible in the area in question:
+
    - [Frontend](https://about.gitlab.com/handbook/engineering/frontend/)
    - [Backend](https://about.gitlab.com/handbook/engineering/)
    - [Database](https://about.gitlab.com/handbook/engineering/development/database/)
