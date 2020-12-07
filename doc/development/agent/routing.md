@@ -57,7 +57,7 @@ flowchart LR
   agentk3p1 -- "gRPC" --> kas2
 ```
 
-For this architecture, this diagram shows a request to `agentk1p1` for the list of pods:
+For this architecture, this diagram shows a request to `agentk 3, Pod1` for the list of pods:
 
 ```mermaid
 sequenceDiagram
