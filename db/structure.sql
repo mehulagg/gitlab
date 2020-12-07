@@ -13049,6 +13049,23 @@ CREATE SEQUENCE incident_management_oncall_schedules_id_seq
 
 ALTER SEQUENCE incident_management_oncall_schedules_id_seq OWNED BY incident_management_oncall_schedules.id;
 
+CREATE TABLE incident_management_oncall_shifts (
+    id bigint NOT NULL,
+    oncall_rotation_id bigint NOT NULL,
+    user_id bigint NOT NULL,
+    starts_at timestamp with time zone NOT NULL,
+    ends_at timestamp with time zone NOT NULL
+);
+
+CREATE SEQUENCE incident_management_oncall_shifts_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE incident_management_oncall_shifts_id_seq OWNED BY incident_management_oncall_shifts.id;
+
 CREATE TABLE index_statuses (
     id integer NOT NULL,
     project_id integer NOT NULL,
@@ -18272,6 +18289,8 @@ ALTER TABLE ONLY incident_management_oncall_rotations ALTER COLUMN id SET DEFAUL
 
 ALTER TABLE ONLY incident_management_oncall_schedules ALTER COLUMN id SET DEFAULT nextval('incident_management_oncall_schedules_id_seq'::regclass);
 
+ALTER TABLE ONLY incident_management_oncall_shifts ALTER COLUMN id SET DEFAULT nextval('incident_management_oncall_shifts_id_seq'::regclass);
+
 ALTER TABLE ONLY index_statuses ALTER COLUMN id SET DEFAULT nextval('index_statuses_id_seq'::regclass);
 
 ALTER TABLE ONLY insights ALTER COLUMN id SET DEFAULT nextval('insights_id_seq'::regclass);
@@ -19487,6 +19506,9 @@ ALTER TABLE ONLY incident_management_oncall_rotations
 
 ALTER TABLE ONLY incident_management_oncall_schedules
     ADD CONSTRAINT incident_management_oncall_schedules_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY incident_management_oncall_shifts
+    ADD CONSTRAINT incident_management_oncall_shifts_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY index_statuses
     ADD CONSTRAINT index_statuses_pkey PRIMARY KEY (id);
@@ -21427,6 +21449,12 @@ CREATE UNIQUE INDEX index_inc_mgmnt_oncall_participants_on_user_id_and_rotation_
 CREATE UNIQUE INDEX index_inc_mgmnt_oncall_rotations_on_oncall_schedule_id_and_id ON incident_management_oncall_rotations USING btree (oncall_schedule_id, id);
 
 CREATE UNIQUE INDEX index_inc_mgmnt_oncall_rotations_on_oncall_schedule_id_and_name ON incident_management_oncall_rotations USING btree (oncall_schedule_id, name);
+
+CREATE INDEX index_inc_mgmnt_oncall_shifts_on_oncall_rotation_id ON incident_management_oncall_shifts USING btree (oncall_rotation_id);
+
+CREATE INDEX index_inc_mgmnt_oncall_shifts_on_oncall_user_id ON incident_management_oncall_shifts USING btree (user_id);
+
+CREATE UNIQUE INDEX index_inc_mgmnt_oncall_shifts_on_rotation_id_and_starts_at ON incident_management_oncall_shifts USING btree (oncall_rotation_id, starts_at);
 
 CREATE INDEX index_incident_management_oncall_schedules_on_project_id ON incident_management_oncall_schedules USING btree (project_id);
 
@@ -24133,6 +24161,9 @@ ALTER TABLE ONLY epic_issues
 ALTER TABLE ONLY ci_refs
     ADD CONSTRAINT fk_rails_4249db8cc3 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY incident_management_oncall_shifts
+    ADD CONSTRAINT fk_rails_424ce7bee2 FOREIGN KEY (oncall_rotation_id) REFERENCES incident_management_oncall_rotations(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY ci_resources
     ADD CONSTRAINT fk_rails_430336af2d FOREIGN KEY (resource_group_id) REFERENCES ci_resource_groups(id) ON DELETE CASCADE;
 
@@ -24918,6 +24949,9 @@ ALTER TABLE ONLY pool_repositories
 
 ALTER TABLE ONLY group_group_links
     ADD CONSTRAINT fk_rails_d3a0488427 FOREIGN KEY (shared_group_id) REFERENCES namespaces(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY incident_management_oncall_shifts
+    ADD CONSTRAINT fk_rails_d3fbcb0bae FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY vulnerability_issue_links
     ADD CONSTRAINT fk_rails_d459c19036 FOREIGN KEY (vulnerability_id) REFERENCES vulnerabilities(id) ON DELETE CASCADE;

@@ -2,8 +2,6 @@
 
 module IncidentManagement
   class OncallRotation < ApplicationRecord
-    self.table_name = 'incident_management_oncall_rotations'
-
     enum length_unit: {
       hours: 0,
       days:  1,
@@ -15,6 +13,7 @@ module IncidentManagement
     belongs_to :oncall_schedule, inverse_of: 'oncall_rotations', foreign_key: 'oncall_schedule_id'
     has_many :oncall_participants, inverse_of: :oncall_rotation
     has_many :participants, through: :oncall_participants
+    has_many :oncall_shifts, foreign_key: :oncall_rotation_id
 
     validates :name, presence: true, uniqueness: { scope: :oncall_schedule_id }, length: { maximum: NAME_LENGTH }
     validates :starts_at, presence: true
