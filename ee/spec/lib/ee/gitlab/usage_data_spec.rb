@@ -21,15 +21,15 @@ RSpec.describe Gitlab::UsageData do
       projects.last.creator.block # to get at least one non-active User
 
       pipeline = create(:ci_pipeline, project: projects[0])
-      create(:ci_build, name: 'container_scanning', pipeline: pipeline)
-      create(:ci_build, name: 'dast', pipeline: pipeline)
-      create(:ci_build, name: 'dependency_scanning', pipeline: pipeline)
+      create(:ee_ci_build, :container_scanning, pipeline: pipeline)
+      create(:ee_ci_build, :dast, pipeline: pipeline)
+      create(:ee_ci_build, :dependency_scanning, pipeline: pipeline)
       create(:ci_build, name: 'license_management', pipeline: pipeline)
       create(:ee_ci_build, name: 'license_scanning', pipeline: pipeline)
-      create(:ci_build, name: 'sast', pipeline: pipeline)
-      create(:ci_build, name: 'secret_detection', pipeline: pipeline)
-      create(:ci_build, name: 'coverage_fuzzing', pipeline: pipeline)
-      create(:ci_build, name: 'apifuzzer_fuzz', pipeline: pipeline)
+      create(:ee_ci_build, :sast, pipeline: pipeline)
+      create(:ee_ci_build, :secret_detection, pipeline: pipeline)
+      create(:ee_ci_build, :coverage_fuzzing, pipeline: pipeline)
+      create(:ee_ci_build, :api_fuzzing, pipeline: pipeline)
       create(:ci_build, name: 'apifuzzer_fuzz_dnd', pipeline: pipeline)
       create(:ci_pipeline, source: :ondemand_dast_scan, project: projects[0])
 

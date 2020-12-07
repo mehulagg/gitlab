@@ -14,34 +14,44 @@ module EE
 
       SECURE_PRODUCT_TYPES = {
         container_scanning: {
-          name: :container_scanning_jobs
+          name: :container_scanning_jobs,
+          scan_type: :container_scanning
         },
         dast: {
-          name: :dast_jobs
+          name: :dast_jobs,
+          scan_type: :dast
         },
         dependency_scanning: {
-          name: :dependency_scanning_jobs
+          name: :dependency_scanning_jobs,
+          scan_type: :dependency_scanning
         },
         license_management: {
-          name: :license_management_jobs
+          name: :license_management_jobs,
+          scan_type: :license_management
         },
         license_scanning: {
-          name: :license_scanning_jobs
+          name: :license_scanning_jobs,
+          scan_type: :license_scanning
         },
         sast: {
-          name: :sast_jobs
+          name: :sast_jobs,
+          scan_type: :sast
         },
         secret_detection: {
-          name: :secret_detection_jobs
+          name: :secret_detection_jobs,
+          scan_type: :secret_detection
         },
         coverage_fuzzing: {
-          name: :coverage_fuzzing_jobs
+          name: :coverage_fuzzing_jobs,
+          scan_type: :coverage_fuzzing
         },
         apifuzzer_fuzz: {
-          name: :api_fuzzing_jobs
+          name: :api_fuzzing_jobs,
+          scan_type: :api_fuzzing
         },
         apifuzzer_fuzz_dnd: {
-          name: :api_fuzzing_dnd_jobs
+          name: :api_fuzzing_dnd_jobs,
+          scan_type: :api_fuzzing
         }
       }.freeze
 
@@ -142,18 +152,21 @@ module EE
         end
         # rubocop:enable CodeReuse/ActiveRecord, UsageData/LargeTable
 
+        # rubocop:disable CodeReuse/ActiveRecord
         def security_products_usage
-          results = SECURE_PRODUCT_TYPES
-                      .except(*LICENSE_MANAGEMENT_TYPES)
-                      .each_with_object({}) do |(secure_type, attribs), response|
-            response[attribs[:name]] = count(::Ci::Build.where(name: secure_type))
+          results = SECURE_PRODUCT_TYPES.except(*LICENSE_MANAGEMENT_TYPES)
+                                        .each_with_object({}) do |(_, attribs), response|
+            response[attribs[:name]] = count(::Security::Scan.joins(:build).where(scan_type: attribs[:scan_type]),
+                                             :build_id,
+                                             start: ::Security::Scan.minimum(:build_id),
+                                             finish: ::Security::Scan.maximum(:build_id))
           end
 
           # handle license rename https://gitlab.com/gitlab-org/gitlab/issues/8911
           results[SECURE_PRODUCT_TYPES[:license_management][:name]] = count(::Ci::Build.where(name: LICENSE_MANAGEMENT_TYPES))
-
           results
         end
+        # rubocop:enable CodeReuse/ActiveRecord
 
         def on_demand_pipelines_usage
           { dast_on_demand_pipelines: count(::Ci::Pipeline.ondemand_dast_scan) }
