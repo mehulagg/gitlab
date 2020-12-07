@@ -23,6 +23,28 @@ RSpec.describe 'gitlab:elastic namespace rake tasks', :elastic do
       expect { subject }.to change { es_helper.index_exists? }.from(false).to(true)
     end
 
+    context 'when SKIP_ALIAS environment variable is set' do
+      let(:secondary_index_name) { "gitlab-test-#{Time.now.strftime("%Y%m%d-%H%M")}"}
+
+      before do
+        stub_env('SKIP_ALIAS', '1')
+      end
+
+      after do
+        es_helper.delete_index(index_name: secondary_index_name)
+      end
+
+      subject { run_rake_task('gitlab:elastic:create_empty_index', secondary_index_name) }
+
+      it 'does not alias the new index' do
+        expect { subject }.not_to change { es_helper.alias_exists?(name: es_helper.target_name) }
+      end
+
+      it 'creates an index at the specified name' do
+        expect { subject }.to change { es_helper.index_exists?(index_name: secondary_index_name) }.from(false).to(true)
+      end
+    end
+
     it 'creates the migrations index if it does not exist' do
       migration_index_name = es_helper.migrations_index_name
       es_helper.delete_index(index_name: migration_index_name)
@@ -31,10 +53,12 @@ RSpec.describe 'gitlab:elastic namespace rake tasks', :elastic do
     end
 
     Gitlab::Elastic::Helper::ES_SEPARATE_CLASSES.each do |class_name|
-      it "creates separate #{class_name} index" do
-        proxy = ::Elastic::Latest::ApplicationClassProxy.new(class_name, use_separate_indices: true)
-        alias_name = "#{es_helper.target_name}-#{proxy.index_name}"
-        expect { subject }.to change { es_helper.index_exists?(index_name: alias_name) }.from(false).to(true)
+      describe "#{class_name}" do
+        it "creates a separate index" do
+          proxy = ::Elastic::Latest::ApplicationClassProxy.new(class_name, use_separate_indices: true)
+          alias_name = "#{es_helper.target_name}-#{proxy.index_name}"
+          expect { subject }.to change { es_helper.index_exists?(index_name: alias_name) }.from(false).to(true)
+        end
       end
     end
 

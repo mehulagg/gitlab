@@ -57,7 +57,7 @@ namespace :gitlab do
       logger.info("Indexing snippets... " + "done".color(:green))
     end
 
-    desc "GitLab | Elasticsearch | Create empty indices and assign an alias for each"
+    desc "GitLab | Elasticsearch | Create empty indices and assigns an alias for each"
     task :create_empty_index, [:target_name] => [:environment] do |t, args|
       with_alias = ENV["SKIP_ALIAS"].nil?
       options = {}
@@ -67,15 +67,21 @@ namespace :gitlab do
 
       helper = Gitlab::Elastic::Helper.new(target_name: args[:target_name])
       index_name = helper.create_empty_index(with_alias: with_alias, options: options)
-      standalone_index_names = helper.create_standalone_indices(with_alias: with_alias, options: options)
+
+      # with_alias is used to support reclaiming the production index for indexes created prior to 13.0
+      # if someone sets the `SKIP_ALIAS` environment variable, we assume they are trying to reclaim the original
+      # production index name and do not wish to create standalone indices
+      if with_alias
+        standalone_index_names = helper.create_standalone_indices(options: options)
+        standalone_index_names.each do |index_name|
+          puts "Index '#{index_name}' has been created.".color(:green)
+        end
+      end
 
       helper.create_migrations_index unless helper.index_exists?(index_name: helper.migrations_index_name)
       ::Elastic::DataMigrationService.mark_all_as_completed!
 
       puts "Index '#{index_name}' has been created.".color(:green)
-      standalone_index_names.each do |index_name|
-        puts "Index '#{index_name}' has been created.".color(:green)
-      end
       puts "Alias '#{helper.target_name}' → '#{index_name}' has been created".color(:green) if with_alias
     end
 

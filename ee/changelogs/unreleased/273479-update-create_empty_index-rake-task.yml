@@ -1,0 +1,5 @@
+---
+title: Support separate index for issues in create_empty_index rake task
+merge_request: 49370
+author:
+type: changed
