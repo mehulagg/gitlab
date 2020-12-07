@@ -28,7 +28,7 @@ change this accordingly.
 Slony only replicates data and not any schema changes. As a result we must
 ensure that all databases have the same database structure.
 
-To do so, generate a dump of our current database. This dump only
+To do so, generate a dump of the current database. This dump only
 contains the structure, not any data. To generate this dump run the following
 command on your active database server:
 
