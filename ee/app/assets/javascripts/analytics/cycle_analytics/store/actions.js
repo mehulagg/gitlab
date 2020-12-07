@@ -385,24 +385,21 @@ const valueStreamStageIds = (groupId, newValueStream) => {
   console.log('valueStreamStageIds', groupId, newValueStream);
   const { id: valueStreamId } = newValueStream;
   // We need to update a stage trigger the persistence of stages
-  return (
-    Api.cycleAnalyticsGroupStagesAndEvents({ groupId, valueStreamId })
-      // .then(() =>
-      //   Api.cycleAnalyticsUpdateStage({
-      //     groupId,
-      //     valueStreamId,
-      //     stageId: 'issue',
-      //     data: { hidden: true },
-      //   }),
-      // )
-      // .then(() => Api.cycleAnalyticsGroupStagesAndEvents({ groupId, valueStreamId }))
-      .then(({ data: { stages } }) =>
-        Promise.resolve({
-          stageIds: keyBy(stages, 'title'),
-          data: { ...newValueStream, id: valueStreamId },
-        }),
-      )
-  );
+  // Api.cycleAnalyticsGroupStagesAndEvents({ groupId, valueStreamId })
+  // .then(() => )
+  return Api.cycleAnalyticsUpdateStage({
+    groupId,
+    valueStreamId,
+    stageId: 'issue',
+    data: { hidden: true },
+  })
+    .then(() => Api.cycleAnalyticsGroupStagesAndEvents({ groupId, valueStreamId }))
+    .then(({ data: { stages } }) => {
+      return {
+        stageIds: keyBy(stages, 'title'),
+        data: { ...newValueStream, id: valueStreamId },
+      };
+    });
 };
 
 export const createValueStream = ({ commit, dispatch, getters }, data) => {
