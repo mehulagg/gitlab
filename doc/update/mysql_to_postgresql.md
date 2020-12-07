@@ -84,13 +84,13 @@ need to enable the bundled PostgreSQL:
    postgresql['enable'] = true
    ```
 
-1. Edit `/etc/gitlab/gitlab.rb` to use the bundled PostgreSQL. Please check
-   all the settings beginning with `db_`, such as `gitlab_rails['db_adapter']`
-   and alike. You could just comment all of them out to just use
-   the defaults.
+1. Edit `/etc/gitlab/gitlab.rb` to use the bundled PostgreSQL. Review all of the
+   settings beginning with `db_` (such as `gitlab_rails['db_adapter']`). To use
+   the default values, you can comment all of them out.
 
 1. [Reconfigure GitLab](../administration/restart_gitlab.md#omnibus-gitlab-reconfigure)
    for the changes to take effect.
+
 1. Start Unicorn and PostgreSQL so that we can prepare the schema:
 
    ```shell
