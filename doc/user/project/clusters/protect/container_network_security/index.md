@@ -57,5 +57,5 @@ Some cloud providers offer integrations with Cilium or offer other ways to manag
 
 ## Roadmap
 
-You can find more information on the product direction of the WAF in
+You can find more information on the product direction of Container Network Security at
 [Category Direction - Container Network Security](https://about.gitlab.com/direction/protect/container_network_security/).
