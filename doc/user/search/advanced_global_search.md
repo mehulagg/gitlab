@@ -43,7 +43,7 @@ The Advanced Search can be useful in various scenarios.
 
 ### Faster searches
 
-Advanced Search is based on Lucene which uses an inveerted index, and result and query caching that provides results in 1-2 in most cases.  
+Advanced Search is based on Lucene, which uses an inverted index that provides results in 1-2 seconds in most cases.  
 
 ### Promote innersourcing
 
