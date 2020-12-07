@@ -13634,6 +13634,23 @@ CREATE SEQUENCE members_id_seq
 
 ALTER SEQUENCE members_id_seq OWNED BY members.id;
 
+CREATE TABLE merge_request_approval_settings (
+    id bigint NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    namespace_id bigint,
+    allow_author_approval boolean DEFAULT true NOT NULL
+);
+
+CREATE SEQUENCE merge_request_approval_settings_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE merge_request_approval_settings_id_seq OWNED BY merge_request_approval_settings.id;
+
 CREATE TABLE merge_request_assignees (
     id bigint NOT NULL,
     user_id integer NOT NULL,
@@ -18289,6 +18306,8 @@ ALTER TABLE ONLY lists ALTER COLUMN id SET DEFAULT nextval('lists_id_seq'::regcl
 
 ALTER TABLE ONLY members ALTER COLUMN id SET DEFAULT nextval('members_id_seq'::regclass);
 
+ALTER TABLE ONLY merge_request_approval_settings ALTER COLUMN id SET DEFAULT nextval('merge_request_approval_settings_id_seq'::regclass);
+
 ALTER TABLE ONLY merge_request_assignees ALTER COLUMN id SET DEFAULT nextval('merge_request_assignees_id_seq'::regclass);
 
 ALTER TABLE ONLY merge_request_blocks ALTER COLUMN id SET DEFAULT nextval('merge_request_blocks_id_seq'::regclass);
@@ -19542,6 +19561,9 @@ ALTER TABLE ONLY lists
 
 ALTER TABLE ONLY members
     ADD CONSTRAINT members_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY merge_request_approval_settings
+    ADD CONSTRAINT merge_request_approval_settings_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY merge_request_assignees
     ADD CONSTRAINT merge_request_assignees_pkey PRIMARY KEY (id);
@@ -21544,6 +21566,8 @@ CREATE INDEX index_members_on_source_id_and_source_type ON members USING btree (
 CREATE INDEX index_members_on_user_id ON members USING btree (user_id);
 
 CREATE INDEX index_members_on_user_id_created_at ON members USING btree (user_id, created_at) WHERE ((ldap = true) AND ((type)::text = 'GroupMember'::text) AND ((source_type)::text = 'Namespace'::text));
+
+CREATE INDEX index_merge_request_approval_settings_on_namespace_id ON merge_request_approval_settings USING btree (namespace_id);
 
 CREATE INDEX index_merge_request_assignees_on_merge_request_id ON merge_request_assignees USING btree (merge_request_id);
 
@@ -25044,6 +25068,9 @@ ALTER TABLE ONLY cluster_groups
 
 ALTER TABLE ONLY project_tracing_settings
     ADD CONSTRAINT fk_rails_fe56f57fc6 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY merge_request_approval_settings
+    ADD CONSTRAINT fk_rails_fe7b2a135f FOREIGN KEY (namespace_id) REFERENCES namespaces(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY resource_label_events
     ADD CONSTRAINT fk_rails_fe91ece594 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL;
