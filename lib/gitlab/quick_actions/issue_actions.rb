@@ -229,6 +229,7 @@ module Gitlab
         types Issue
         condition do
           parent &&
+            Feature.enabled?(:issue_email_participants) &&
             current_user.can?(:"admin_#{quick_action_target.to_ability_name}", parent)
         end
         command :invite_email do |emails = ""|
