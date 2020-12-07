@@ -78,6 +78,23 @@ kubectl -n gitlab-managed-apps logs -l k8s-app=cilium -c cilium-monitor
 
 ## Troubleshooting
 
+### Traffic is not being blocked as expected
+
+By default, Cilium is installed in Audit mode only, meaning that NetworkPolicies will log policy violations, but will not block any traffic. To set Cilium to Blocking mode, you need to add the following lines to the `.gitlab/managed-apps/cilium/values.yaml` file in your cluster management project.
+
+```yaml
+config:
+  policyAuditMode: false
+
+agent:
+  monitor:
+    eventTypes: ["drop"]
+```
+
+### Traffic is not being allowed as expected
+
+Keep in mind that when Cilium is set to blocking mode (rather than Audit mode), NetworkPolicies operate on an allow-list basis. If one or more NetworkPolicies apply to a node, then all traffic that does not match at least one Policy will be blocked. To resolve, add NetworkPolicies defining the traffic that you want to have allowed in to the node.
+
 ### Trouble connecting to the cluster
 
 Occasionally your CI/CD pipeline may fail or have trouble connecting to the cluster.  Below are some initial troubleshooting steps that resolve the most common problems:
