@@ -362,13 +362,13 @@ print the result to STDOUT as well as logging it to a file. Make sure to replace
 
 ## Stopping Replication
 
-At some point the two databases are in sync. Once this is the case, you must
-plan for a few minutes of downtime. This small downtime window is used to
-stop the replication process, remove any Slony data from both databases, restart
-GitLab so it can use the new database, etc.
+At some point, the two databases are in sync. If this is the case, you must plan
+for a few minutes of downtime. This small downtime window is used to stop the
+replication process, remove any Slony data from both databases, and restart
+GitLab so it can use the new database.
 
 First, let's stop all of GitLab. Omnibus users can do so by running the
-following on their GitLab server(s):
+following on their GitLab servers:
 
 ```shell
 sudo gitlab-ctl stop unicorn
@@ -376,13 +376,13 @@ sudo gitlab-ctl stop sidekiq
 sudo gitlab-ctl stop mailroom
 ```
 
-If you have any other processes that use PostgreSQL you should also stop those.
+If you have any other processes that use PostgreSQL, you should also stop those.
 
-Once everything has been stopped you should update any configuration settings,
-DNS records, etc so they all point to the new database.
+After everything has been stopped, be sure to update any configuration settings
+and DNS records so they all point to the new database.
 
-Once the settings have been taken care of we need to stop the replication
-process. It's crucial that no new data is written to the databases at this point
+When the settings have been taken care of, we need to stop the replication
+process. It's crucial that no new data is written to the databases at this point,
 as this data is discarded.
 
 To stop replication, run the following on both database servers:
