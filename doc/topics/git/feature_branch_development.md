@@ -137,8 +137,10 @@ To rebase against the `release-X-Y` branch, follow these steps:
 
    1. Commit your change(s) with an appropriate comment:
 
+   1. Fix conflicts, and then continue the rebase::
+
       ```shell
-      git commit -m "Fixing conflicts with release-X-Y branch"
+      git rebase --continue
       ```
 
    1. Continue the rebase process:
