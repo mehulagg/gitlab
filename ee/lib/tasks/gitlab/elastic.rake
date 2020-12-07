@@ -85,7 +85,7 @@ namespace :gitlab do
       puts "Alias '#{helper.target_name}' → '#{index_name}' has been created".color(:green) if with_alias
     end
 
-    desc "GitLab | Elasticsearch | Delete index"
+    desc "GitLab | Elasticsearch | Delete all indices"
     task :delete_index, [:target_name] => [:environment] do |t, args|
       helper = Gitlab::Elastic::Helper.new(target_name: args[:target_name])
 
@@ -93,6 +93,18 @@ namespace :gitlab do
         puts "Index/alias '#{helper.target_name}' has been deleted".color(:green)
       else
         puts "Index/alias '#{helper.target_name}' was not found".color(:green)
+      end
+
+      Gitlab::Elastic::Helper::ES_SEPARATE_CLASSES.each do |class_name|
+        proxy = ::Elastic::Latest::ApplicationClassProxy.new(class_name, use_separate_indices: true)
+        alias_name = "#{helper.target_name}-#{proxy.index_name}"
+        index_name = helper.target_index_name(target: alias_name)
+
+        if helper.delete_index(index_name: index_name)
+          puts "Index '#{index_name}'/alias '#{alias_name}' has been deleted".color(:green)
+        else
+          puts "Index '#{index_name}'/alias '#{alias_name}'was not found".color(:green)
+        end
       end
     end
 

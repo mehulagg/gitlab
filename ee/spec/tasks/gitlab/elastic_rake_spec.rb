@@ -91,6 +91,16 @@ RSpec.describe 'gitlab:elastic namespace rake tasks', :elastic do
     it 'removes the index' do
       expect { subject }.to change { es_helper.index_exists? }.from(true).to(false)
     end
+
+    Gitlab::Elastic::Helper::ES_SEPARATE_CLASSES.each do |class_name|
+      describe "#{class_name}" do
+        it 'removes the standalone index' do
+          proxy = ::Elastic::Latest::ApplicationClassProxy.new(class_name, use_separate_indices: true)
+          alias_name = "#{es_helper.target_name}-#{proxy.index_name}"
+          expect { subject }.to change { es_helper.index_exists?(index_name: alias_name) }.from(true).to(false)
+        end
+      end
+    end
   end
 
   context "with elasticsearch_indexing enabled" do
