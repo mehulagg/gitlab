@@ -21,7 +21,7 @@ The following steps are recommended to install and use Container Host Security t
 
    - [Install the Ingress node via CI/CD (GMAv2)](../../../../clusters/applications.md#install-ingress-using-gitlab-cicd).
    - [Determine the external endpoint via the manual method](../../../../clusters/applications.md#determining-the-external-endpoint-manually).
-   - Navigate to the Kubernetes page and enter the [DNS address for the external endpoint](../../clusters/#base-domain)
+   - Navigate to the Kubernetes page and enter the [DNS address for the external endpoint](../../#base-domain)
      into the **Base domain** field on the **Details** tab. Save the changes to the Kubernetes
      cluster.
 
@@ -48,7 +48,7 @@ kubectl -n gitlab-managed-apps logs -l app=falco
 
 Occasionally your CI/CD pipeline may fail or have trouble connecting to the cluster.  Below are some initial troubleshooting steps that resolve the most common problems:
 
-1. [Clear the cluster cache](../../../../project/clusters/#clearing-the-cluster-cache)
+1. [Clear the cluster cache](../../#clearing-the-cluster-cache)
 1. If things still aren't working, a more assertive set of actions may help get things back to a
    good state:
 
