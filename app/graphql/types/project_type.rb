@@ -189,6 +189,12 @@ module Types
           description: 'Build pipeline of the project',
           resolver: Resolvers::ProjectPipelineResolver
 
+    field :ci_cd_settings,
+          Types::Ci::CiCdSettingType,
+          null: true,
+          description: 'Ci Cd settings for the project',
+          resolver: Resolvers::Ci::CiCdSettingResolver
+
     field :sentry_detailed_error,
           Types::ErrorTracking::SentryDetailedErrorType,
           null: true,
