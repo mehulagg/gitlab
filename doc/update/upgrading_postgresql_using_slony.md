@@ -62,7 +62,7 @@ server.
 
 ## Installing Slony
 
-Slony is used to upgrade the database without requiring a long downtime.
+Use Slony to upgrade the database without requiring a long downtime.
 Slony can be downloaded from <https://www.slony.info/>. If you have installed
 PostgreSQL using your operating system's package manager you may also be able to
 install Slony using said package manager.
@@ -250,7 +250,7 @@ following:
  ... more rows here ...
 ```
 
-Now we can initialize the required tables and things that Slony uses for
+Now we can initialize the required tables and what not that Slony uses for
 its replication process. To do so, run the following on the old database:
 
 ```shell
