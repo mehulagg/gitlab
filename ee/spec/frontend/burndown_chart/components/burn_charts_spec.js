@@ -5,8 +5,8 @@ import MockAdapter from 'axios-mock-adapter';
 import BurnCharts from 'ee/burndown_chart/components/burn_charts.vue';
 import BurndownChart from 'ee/burndown_chart/components/burndown_chart.vue';
 import BurnupChart from 'ee/burndown_chart/components/burnup_chart.vue';
-// import IterationReportSummaryOpen from 'ee/iterations/components/iteration_report_summary_open.vue';
-// import IterationReportSummaryCards from 'ee/iterations/components/iteration_report_summary_cards.vue';
+import IterationReportSummaryOpen from 'ee/iterations/components/iteration_report_summary_open.vue';
+import IterationReportSummaryCards from 'ee/iterations/components/iteration_report_summary_cards.vue';
 import { useFakeDate } from 'helpers/fake_date';
 import { day1, day2, day3, day4 } from '../mock_data';
 
@@ -20,7 +20,7 @@ describe('burndown_chart', () => {
   let wrapper;
   let mock;
 
-  const findChartsTitle = () => wrapper.find({ ref: 'chartsTitle' });
+  const findFilterLabel = () => wrapper.find({ ref: 'filterLabel' });
   const findIssuesButton = () => wrapper.find({ ref: 'totalIssuesButton' });
   const findWeightButton = () => wrapper.find({ ref: 'totalWeightButton' });
   const findActiveButtons = () =>
@@ -31,6 +31,7 @@ describe('burndown_chart', () => {
   const findNewBurndownChartButton = () => wrapper.find({ ref: 'newBurndown' });
 
   const defaultProps = {
+    fullPath: 'gitlab-org/subgroup',
     startDate: '2020-08-07',
     dueDate: '2020-09-09',
     openIssuesCount: [],
@@ -103,7 +104,7 @@ describe('burndown_chart', () => {
   it('sets section title and chart title correctly', () => {
     createComponent();
 
-    expect(findChartsTitle().text()).toBe('Charts');
+    expect(findFilterLabel().text()).toBe('Filter by');
     expect(findBurndownChart().props().showTitle).toBe(true);
   });
 
@@ -117,24 +118,42 @@ describe('burndown_chart', () => {
     expect(findBurnupChart().props('issuesSelected')).toBe(false);
   });
 
-  // it('renders IterationReportSummaryOpen for open iteration', () => {
-  //   expect(wrapper.find(IterationReportSummaryOpen).props()).toEqual({
-  //     iterationId: iteration.id,
-  //     namespaceType: Namespace.Group,
-  //     fullPath: defaultProps.fullPath,
-  //   });
-  // });
+  it('renders IterationReportSummaryOpen for open iteration', () => {
+    createComponent({
+      data: {
+        report: {
+          stats: {},
+        },
+      },
+      props: {
+        iterationState: 'open',
+        iterationId: 'gid://gitlab/Iteration/11',
+      },
+    });
 
-  // it('renders IterationReportCards for closed iterations', async () => {
-  //   await wrapper.setData({
-  //     iteration: {
-  //       ...iteration,
-  //       state: 'closed',
-  //     },
-  //   });
+    expect(wrapper.find(IterationReportSummaryOpen).props()).toEqual({
+      iterationId: 'gid://gitlab/Iteration/11',
+      displayValue: 'count',
+      namespaceType: 'group',
+      fullPath: defaultProps.fullPath,
+    });
+  });
 
-  //   expect(wrapper.find(IterationReportSummaryCards).exists()).toBe(true);
-  // });
+  it('renders IterationReportCards for closed iterations', async () => {
+    createComponent({
+      data: {
+        report: {
+          stats: {},
+        },
+      },
+      props: {
+        iterationState: 'closed',
+        iterationId: 'gid://gitlab/Iteration/1',
+      },
+    });
+
+    expect(wrapper.find(IterationReportSummaryCards).exists()).toBe(true);
+  });
 
   it('uses burndown data computed from burnup data', () => {
     createComponent({

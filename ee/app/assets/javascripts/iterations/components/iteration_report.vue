@@ -132,11 +132,6 @@ export default {
           return { text: __('Open'), variant: 'success' };
       }
     },
-    summaryComponent() {
-      return this.iteration.state === 'closed'
-        ? IterationReportSummaryClosed
-        : IterationReportSummaryOpen;
-    },
   },
   mounted() {
     this.boundOnPopState = this.onPopState.bind(this);

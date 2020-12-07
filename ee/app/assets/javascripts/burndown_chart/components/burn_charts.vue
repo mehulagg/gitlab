@@ -144,9 +144,6 @@ export default {
     parent() {
       return this.iterationId ? 'iteration' : 'milestone';
     },
-    title() {
-      return __('Charts');
-    },
     issueButtonCategory() {
       return this.issuesSelected ? 'primary' : 'secondary';
     },
@@ -295,7 +292,7 @@ export default {
       </gl-sprintf>
     </gl-alert>
     <div class="burndown-header gl-display-flex gl-align-items-center gl-flex-wrap">
-      <h3 ref="chartsTitle">{{ title }}</h3>
+      <label ref="filterLabel" class="gl-mb-0">{{ __('Filter by') }}</label>
       <gl-button-group>
         <gl-button
           ref="totalIssuesButton"
