@@ -48,7 +48,7 @@ kubectl -n gitlab-managed-apps logs -l app=falco
 
 Occasionally your CI/CD pipeline may fail or have trouble connecting to the cluster.  Below are some initial troubleshooting steps that resolve the most common problems:
 
-1. [Clear the cluster cache](../../#clearing-the-cluster-cache)
+1. [Clear the cluster cache](../../index.md#clearing-the-cluster-cache)
 1. If things still aren't working, a more assertive set of actions may help get things back to a
    good state:
 
