@@ -6,8 +6,7 @@ RSpec.describe Gitlab::SampleDataTemplate do
   describe '.all' do
     it 'returns all templates' do
       expected = %w[
-        basic
-        serenity_valley
+        sample
       ]
 
       expect(described_class.all).to be_an(Array)

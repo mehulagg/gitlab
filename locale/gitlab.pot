@@ -4346,9 +4346,6 @@ msgstr ""
 msgid "Based on"
 msgstr ""
 
-msgid "Basic Sample Data template with Issues, Merge Requests and Milestones."
-msgstr ""
-
 msgid "Be careful. Changing the project's namespace can have unintended side effects."
 msgstr ""
 
@@ -12741,6 +12738,9 @@ msgid "Get a free instance review"
 msgstr ""
 
 msgid "Get started"
+msgstr ""
+
+msgid "Get started with a project that follows best practices for setting up GitLab for your own organization, including sample Issues, Merge Requests, and Milestones."
 msgstr ""
 
 msgid "Get started with error tracking"
@@ -21754,9 +21754,6 @@ msgstr ""
 msgid "ProjectTemplates|Android"
 msgstr ""
 
-msgid "ProjectTemplates|Basic"
-msgstr ""
-
 msgid "ProjectTemplates|GitLab Cluster Management"
 msgstr ""
 
@@ -21811,7 +21808,7 @@ msgstr ""
 msgid "ProjectTemplates|SalesforceDX"
 msgstr ""
 
-msgid "ProjectTemplates|Serenity Valley"
+msgid "ProjectTemplates|Sample GitLab Project"
 msgstr ""
 
 msgid "ProjectTemplates|Serverless Framework/JS"
@@ -23854,9 +23851,6 @@ msgstr ""
 msgid "SSL Verification:"
 msgstr ""
 
-msgid "Sample Data"
-msgstr ""
-
 msgid "Satisfied"
 msgstr ""
 
@@ -24785,9 +24779,6 @@ msgid "Separate topics with commas."
 msgstr ""
 
 msgid "September"
-msgstr ""
-
-msgid "Serenity Valley Sample Data template."
 msgstr ""
 
 msgid "SeriesFinalConjunction|and"
