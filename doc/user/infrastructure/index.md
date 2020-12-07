@@ -62,3 +62,9 @@ This template also includes some opinionated decisions, which you can override:
   `init`, `validate`, `build`, and `deploy`. These stages
   [run the Terraform commands](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Terraform/Base.latest.gitlab-ci.yml)
   `init`, `validate`, `plan`, `plan-json`, and `apply`. The `apply` command only runs on `master`.
+
+WARNING:
+Like any other job artifact, Terraform plan data is [viewable by anyone with Guest access](../permissions.md) to the repository.
+Neither Terraform nor GitLab encrypts the plan file by default. If your Terraform plan
+includes sensitive data such as passwords, access tokens, or certificates, GitLab strongly
+recommends encrypting plan output or modifying the project visibility settings.
