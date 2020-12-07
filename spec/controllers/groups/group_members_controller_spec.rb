@@ -93,6 +93,23 @@ RSpec.describe Groups::GroupMembersController do
       sign_in(user)
     end
 
+    context 'when adding the first user' do
+      before do
+        group.add_owner(user)
+      end
+
+      it 'schedules a namespace onboarding user added worker' do
+        expect(NamespaceOnboardingUserAddedWorker)
+          .to receive(:perform_async).with(group.id)
+
+        post :create, params: {
+                        group_id: group,
+                        user_ids: group_user.id,
+                        access_level: Gitlab::Access::GUEST
+                      }
+      end
+    end
+
     context 'when user does not have enough rights' do
       before do
         group.add_developer(user)

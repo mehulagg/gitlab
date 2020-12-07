@@ -16,6 +16,7 @@ module Members
 
     def after_execute(args)
       # overridden in EE::Members modules
+      NamespaceOnboardingUserAddedWorker.perform_async(args[:member].source_id) if args[:member].is_a?(GroupMember)
     end
 
     private
