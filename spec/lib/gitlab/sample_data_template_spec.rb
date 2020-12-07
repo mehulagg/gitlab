@@ -18,7 +18,7 @@ RSpec.describe Gitlab::SampleDataTemplate do
     subject { described_class.find(query) }
 
     context 'when there is a match' do
-      let(:query) { :basic }
+      let(:query) { :sample }
 
       it { is_expected.to be_a(described_class) }
     end
