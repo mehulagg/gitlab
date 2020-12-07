@@ -97,6 +97,32 @@ To that end, we encourage creation of new RuboCop rules in the codebase.
 When creating a new cop that could be applied to multiple applications, we encourage you
 to add it to our [GitLab Styles](https://gitlab.com/gitlab-org/gitlab-styles) gem.
 
+### Resolving RuboCop exceptions
+
+Often, we find ourselves looking to resolve exceptions over multiple commits. Therefore,
+we want to keep track of the exception list so we can track our progress.
+
+The current exceptions for a particular Cop maybe larger than the default
+[exclude limit of 15](https://docs.rubocop.org/rubocop/1.2/usage/basic_usage.html#command-line-flags)
+when auto generating the `.rubocop_todo.yml`. In that scenario, we should add the exception list to
+the `.rubocop_manual_todo.yml`.  
+
+The benefit of doing this will ensure our list isn't mistakenly removed by another auto generation of
+the `.rubocop_todo.yml` due to the aforementioned exclude limit. This will also allow us to have 
+better visibility into which exceptions are currently being resolved. 
+
+A typical way to generate the initial list would be to run the todo auto generation with `exclude limit`
+set to a high number. 
+
+```shell
+bundle exec rubocop --auto-gen-config --auto-gen-only-exclude --exclude-limit=10000
+```
+
+You can then take the list for the Cop being actively resolved and place it in the 
+`.rubocop_manual_todo.yml`. In this scenario, be sure to only commit changes to the
+`.rubocop_todo.yml` that were intended as higher `exclude limit` will make the `.rubocop_todo.yml`
+hard to parse.
+
 ## Database migrations
 
 See the dedicated [Database Migrations Style Guide](../migration_style_guide.md).
