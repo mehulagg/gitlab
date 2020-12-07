@@ -17,6 +17,7 @@ RSpec.describe IncidentManagement::OncallParticipant do
   describe '.associations' do
     it { is_expected.to belong_to(:rotation) }
     it { is_expected.to belong_to(:user) }
+    it { is_expected.to have_many(:shifts) }
   end
 
   describe '.validations' do

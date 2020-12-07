@@ -32,20 +32,20 @@ module IncidentManagement
 
         return error_too_many_participants if participant_params.size > MAXIMUM_PARTICIPANTS
 
-        oncall_rotation = schedule.rotations.create(params.except(:participants))
-
-        return error_in_create(oncall_rotation) unless oncall_rotation.persisted?
-
-        new_participants = Array(participant_params).map do |participant|
+        participants = participant_params.map do |participant|
           OncallParticipant.new(
-            rotation: oncall_rotation,
             user: participant[:user],
             color_palette: participant[:color_palette],
             color_weight: participant[:color_weight]
           )
         end
 
-        OncallParticipant.bulk_insert!(new_participants)
+        oncall_rotation = schedule.rotations.create(
+          **params.except(:participants),
+          participants: participants
+        )
+
+        return error_in_create(oncall_rotation) unless oncall_rotation.persisted?
 
         success(oncall_rotation)
       end
