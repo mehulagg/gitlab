@@ -103,7 +103,7 @@ export default {
         return data?.ciConfig ?? {};
       },
       error() {
-        this.handleCiConfigError();
+        this.reportFailure(LOAD_FAILURE_UNKNOWN);
       },
     },
   },
@@ -179,9 +179,6 @@ export default {
       } else {
         this.reportFailure(LOAD_FAILURE_UNKNOWN);
       }
-    },
-    handleCiConfigError() {
-      this.reportFailure(LOAD_FAILURE_UNKNOWN);
     },
     dismissFailure() {
       this.showFailureAlert = false;
