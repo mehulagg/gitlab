@@ -30,7 +30,7 @@ This guide shows the recommended way of installing Container Host Security throu
 
 ## Supported container orchestrators
 
-Currently Kubernetes vx.x.x+ is the only supported container orchestrator.  OpenShift and other container orchestrators are not yet supported.
+Currently Kubernetes v1.14+ is the only supported container orchestrator.  OpenShift and other container orchestrators are not yet supported.
 
 ## Supported Kubernetes providers
 
@@ -43,5 +43,5 @@ Container Host Security is not officially tested and supported for Azure or for 
 
 ## Roadmap
 
-You can find more information on the product direction of the WAF in
+You can find more information on the product direction of Container Host Security at
 [Category Direction - Container Host Security](https://about.gitlab.com/direction/protect/container_host_security/).
