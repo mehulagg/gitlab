@@ -333,6 +333,11 @@ RSpec.describe Vulnerabilities::Feedback do
       end
 
       it { is_expected.to eq(finding) }
+      it 'sets the finding_uuid' do
+        feedback.reload
+
+        expect(feedback.finding_uuid).to eq(finding.uuid)
+      end
     end
   end
 end

@@ -34,6 +34,7 @@ module Vulnerabilities
       preload(:author, :comment_author, :project, :issue, :merge_request, :pipeline)
     end
 
+    before_save :set_finding_uuid
     after_save :touch_pipeline, if: :for_dismissal?
     after_destroy :touch_pipeline, if: :for_dismissal?
 
@@ -100,6 +101,10 @@ module Vulnerabilities
         report_type: category,
         project_fingerprint: project_fingerprint
       )
+    end
+
+    def set_finding_uuid
+      self.finding_uuid = finding&.uuid
     end
   end
 end
