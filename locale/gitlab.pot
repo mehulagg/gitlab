@@ -19426,6 +19426,11 @@ msgstr ""
 msgid "Package file size limits"
 msgstr ""
 
+msgid "Package has %{strongStart}%d%{strongEnd} archived update"
+msgid_plural "Package has %{strongStart}%d%{strongEnd} archived updates"
+msgstr[0] ""
+msgstr[1] ""
+
 msgid "Package recipe already exists"
 msgstr ""
 
@@ -19439,9 +19444,6 @@ msgid "Package type must be NuGet"
 msgstr ""
 
 msgid "Package type must be PyPi"
-msgstr ""
-
-msgid "PackageRegistry|%{name} version %{version} update was published to the registry %{datetime}"
 msgstr ""
 
 msgid "PackageRegistry|%{name} version %{version} was first created %{datetime}"
@@ -19594,9 +19596,6 @@ msgstr ""
 msgid "PackageRegistry|Package Registry"
 msgstr ""
 
-msgid "PackageRegistry|Package has %{number} archived commits, pipeline builds and registry updates"
-msgstr ""
-
 msgid "PackageRegistry|Pip Command"
 msgstr ""
 
@@ -19645,10 +19644,7 @@ msgstr ""
 msgid "PackageRegistry|Unable to load package"
 msgstr ""
 
-msgid "PackageRegistry|Updated built by pipeline %{link} triggered %{datetime} by %{author}"
-msgstr ""
-
-msgid "PackageRegistry|Updated by commit %{link} on branch %{branch} %{datetime}"
+msgid "PackageRegistry|Version %{version} updated by commit %{link} on branch %{branch}, built by pipeline %{pipeline} and published to the registry %{datetime}"
 msgstr ""
 
 msgid "PackageRegistry|You are about to delete %{name}, this operation is irreversible, are you sure?"
