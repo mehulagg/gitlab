@@ -10,7 +10,7 @@ The GitLab CI/CD pipeline includes a `danger-review` job that uses [Danger](http
 to perform a variety of automated checks on the code under test.
 
 Danger is a gem that runs in the CI environment, like any other analysis tool.
-What sets it apart from, e.g., RuboCop, is that it's designed to allow you to
+What sets it apart from (for example, RuboCop) is that it's designed to allow you to
 easily write arbitrary code to test properties of your code or changes. To this
 end, it provides a set of common helpers and access to information about what
 has actually changed in your environment, then simply runs your code!
@@ -74,11 +74,11 @@ often face similar challenges, after all. Think about how you could fulfill the
 same need while ensuring everyone can benefit from the work, and do that instead
 if you can.
 
-If a standard tool (e.g. `rubocop`) exists for a task, it is better to use it
-directly, rather than calling it via Danger. Running and debugging the results
-of those tools locally is easier if Danger isn't involved, and unless you're
-using some Danger-specific functionality, there's no benefit to including it in
-the Danger run.
+If a standard tool (for example, `rubocop`) exists for a task, it's better to
+use it directly, rather than calling it by using Danger. Running and debugging
+the results of those tools locally is easier if Danger isn't involved, and
+unless you're using some Danger-specific functionality, there's no benefit to
+including it in the Danger run.
 
 Danger is well-suited to prototyping and rapidly iterating on solutions, so if
 what we want to build is unclear, a solution in Danger can be thought of as a
@@ -109,16 +109,17 @@ At present, we do this by putting the code in a module in `lib/gitlab/danger/...
 and including it in the matching `danger/plugins/...` file. Specs can then be
 added in `spec/lib/gitlab/danger/...`.
 
-To know if your `Dangerfile` works, push the branch that contains
-it to GitLab. This can be quite frustrating, as it significantly increases the
-cycle time when developing a new task, or trying to debug something in an
-existing one. If you've followed the guidelines above, most of your code can
-be exercised locally in RSpec, minimizing the number of cycles you need to go
-through in CI. However, you can speed these cycles up somewhat by emptying the
+To determine if your `Dangerfile` works, push the branch that contains it to
+GitLab. This can be quite frustrating, as it significantly increases the cycle
+time when developing a new task, or trying to debug something in an existing
+one. If you've followed the guidelines above, most of your code can be exercised
+locally in RSpec, minimizing the number of cycles you need to go through in CI.
+However, you can speed these cycles up somewhat by emptying the
 `.gitlab/ci/rails.gitlab-ci.yml` file in your merge request. Just don't forget
 to revert the change before merging!
 
-To enable the Dangerfile on another existing GitLab project, run the following extra steps, based on [this procedure](https://danger.systems/guides/getting_started.html#creating-a-bot-account-for-danger-to-use):
+To enable the Dangerfile on another existing GitLab project, run the following
+extra steps, based on [this procedure](https://danger.systems/guides/getting_started.html#creating-a-bot-account-for-danger-to-use):
 
 1. Add `@gitlab-bot` to the project as a `reporter`.
 1. Add the `@gitlab-bot`'s `GITLAB_API_PRIVATE_TOKEN` value as a value for a new CI/CD
