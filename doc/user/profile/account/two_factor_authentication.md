@@ -234,7 +234,7 @@ from the [two-factor authentication account settings page](#regenerate-2fa-recov
 
 Logging in with 2FA enabled is only slightly different than a normal login.
 Enter your username and password credentials as you normally would, and you're
-be presented with a second prompt, depending on which type of 2FA you've enabled.
+presented with a second prompt, depending on which type of 2FA you've enabled.
 
 ### Log in via a one-time password
 
