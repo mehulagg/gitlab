@@ -83,7 +83,7 @@ RSpec.describe Elastic::MigrationWorker, :elastic do
             if batched && !completed
               # default throttle_delay is 5.minutes
               expect( Elastic::MigrationWorker).to receive(:perform_in)
-                .with(5.minutes)
+                .with(5.minutes, {})
             else
               expect( Elastic::MigrationWorker).not_to receive(:perform_in)
             end
