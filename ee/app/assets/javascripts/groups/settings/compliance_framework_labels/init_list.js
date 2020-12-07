@@ -10,9 +10,7 @@ const apolloProvider = new VueApollo({
   defaultClient: createDefaultClient(),
 });
 
-export default () => {
-  const el = document.querySelector('#js-compliance-framework-labels-list');
-
+export default el => {
   if (!el) {
     return false;
   }

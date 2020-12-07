@@ -17,4 +17,4 @@ initAccessRestrictionField(
   validateRestrictedIpAddress,
 );
 
-initComplianceFrameworkLabelsList();
+initComplianceFrameworkLabelsList(document.querySelector('#js-compliance-framework-labels-list'));

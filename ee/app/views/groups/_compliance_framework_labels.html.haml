@@ -1,4 +1,4 @@
-- return unless Feature.enabled?(:ff_custom_compliance_frameworks)
+- return unless License.feature_available?(:custom_compliance_frameworks) && Feature.enabled?(:ff_custom_compliance_frameworks)
 - expanded = expanded_by_default?
 
 %section.settings.no-animate#js-compliance-frameworks-settings{ class: ('expanded' if expanded) }

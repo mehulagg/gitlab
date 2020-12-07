@@ -30,6 +30,6 @@ export default {
         :scoped="isScoped"
       />
     </div>
-    <p class="gl-w-full gl-m-0!">{{ framework.description }}</p>
+    <p class="gl-w-full gl-m-0!" data-testid="compliance-framework-label-description">{{ framework.description }}</p>
   </div>
 </template>
