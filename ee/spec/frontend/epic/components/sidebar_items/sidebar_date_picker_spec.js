@@ -203,12 +203,24 @@ describe('SidebarDatePicker', () => {
     });
   });
 
-  it('renders expected template', () => {
-    createComponent({
-      fieldName: 'datetype_test',
-    });
+  it('renders help icon', () => {
+    createComponent();
 
-    expect(wrapper.element).toMatchSnapshot();
+    expect(wrapper.find(GlIcon).attributes('arialabel')).toBe('Help');
+  });
+
+  it('renders edit button', () => {
+    createComponent();
+
+    expect(wrapper.find(GlButton).text()).toBe('Edit');
+  });
+
+  it('renders an abbreviation', () => {
+    createComponent();
+
+    expect(wrapper.find('abbr').attributes('title')).toBe(
+      'Select an issue with milestone to set date',
+    );
   });
 
   it('renders collapse button when `showToggleSidebar` prop is `true`', () => {
