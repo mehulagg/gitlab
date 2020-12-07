@@ -1,0 +1,5 @@
+---
+title: Create a rake command to mark reindex job failed
+merge_request: 48938
+author:
+type: added

@@ -1,14 +1,20 @@
 <script>
-import { GlFormGroup, GlFormInput, GlButton } from '@gitlab/ui';
-import { __, sprintf } from '~/locale';
+import { GlFormGroup, GlFormInput, GlButton, GlSprintf, GlLink } from '@gitlab/ui';
+import { __, s__, sprintf } from '~/locale';
 
 export default {
   components: {
     GlFormGroup,
     GlFormInput,
     GlButton,
+    GlSprintf,
+    GlLink,
   },
   props: {
+    docsPath: {
+      type: String,
+      required: true,
+    },
     emails: {
       type: Array,
       required: true,
@@ -16,7 +22,7 @@ export default {
   },
   data() {
     return {
-      numberOfInputs: Math.max(this.emails.length, 2),
+      numberOfInputs: Math.max(this.emails.length, 1),
     };
   },
   methods: {
@@ -37,22 +43,29 @@ export default {
     },
   },
   i18n: {
-    inviteTeammatesLabel: __('Invite teammates (optional)'),
-    inviteTeammatesDescription: __(
-      'Invited users will be added with developer level permissions. You can always change this later.',
+    inviteMembersLabel: s__('InviteMember|Invite Members (optional)'),
+    inviteMembersDescription: s__(
+      'InviteMember|Invited users will be added with developer level permissions. %{linkStart}View the documentation%{linkEnd} to see how to change this later.',
     ),
     emailLabel: __('Email %{number}'),
-    emailPlaceholder: __('teammate%{number}@company.com'),
-    inviteAnother: __('Invite another teammate'),
+    emailPlaceholder: __('member%{number}@company.com'),
+    inviteAnother: s__('InviteMember|Invite another member'),
   },
 };
 </script>
 <template>
   <div class="gl-mb-6">
-    <gl-form-group
-      :label="$options.i18n.inviteTeammatesLabel"
-      :description="$options.i18n.inviteTeammatesDescription"
-    />
+    <gl-form-group :label="$options.i18n.inviteMembersLabel">
+      <template #description>
+        <gl-sprintf :message="$options.i18n.inviteMembersDescription">
+          <template #link="{ content }">
+            <gl-link :href="docsPath" target="_blank">
+              {{ content }}
+            </gl-link>
+          </template>
+        </gl-sprintf>
+      </template>
+    </gl-form-group>
     <gl-form-group
       v-for="(number, index) in numberOfInputs"
       :key="number"

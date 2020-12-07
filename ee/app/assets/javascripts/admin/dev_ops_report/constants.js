@@ -21,7 +21,7 @@ export const DEVOPS_ADOPTION_STRINGS = {
     ),
     tableHeader: {
       text: s__(
-        'DevopsAdoption|Feature adoption is based on usage over the last 30 days. Last updated: %{timestamp}.',
+        'DevopsAdoption|Feature adoption is based on usage in the last calendar month. Last updated: %{timestamp}.',
       ),
       button: s__('DevopsAdoption|Add new segment'),
     },

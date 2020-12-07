@@ -79,6 +79,21 @@ module BillingPlansHelper
     _('Seats usage data is updated every day at 12:00pm UTC')
   end
 
+  def upgrade_button_css_classes(namespace, plan, is_current_plan)
+    css_classes = %w[btn btn-success gl-button]
+
+    css_classes << 'disabled' if is_current_plan && !namespace.trial_active?
+    css_classes << 'invisible' if plan.deprecated?
+
+    css_classes.join(' ')
+  end
+
+  def available_plans(plans_data, current_plan)
+    return plans_data unless ::Feature.enabled?(:hide_deprecated_billing_plans)
+
+    plans_data.filter { |plan_data| !plan_data.deprecated? || plan_data.code == current_plan&.code }
+  end
+
   private
 
   def plan_purchase_url(group, plan)

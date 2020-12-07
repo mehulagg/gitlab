@@ -947,7 +947,7 @@ msgstr ""
 msgid "(No changes)"
 msgstr ""
 
-msgid "(UTC%{offset}) %{timezone}"
+msgid "(UTC %{offset}) %{timezone}"
 msgstr ""
 
 msgid "(check progress)"
@@ -1251,6 +1251,9 @@ msgid "A merge request approval is required when a security report contains a ne
 msgstr ""
 
 msgid "A merge request approval is required when the license compliance report contains a denied license."
+msgstr ""
+
+msgid "A merge request hasn't yet been merged"
 msgstr ""
 
 msgid "A new Auto DevOps pipeline has been created, go to %{pipelines_link_start}Pipelines page%{pipelines_link_end} for details"
@@ -1963,6 +1966,9 @@ msgstr ""
 msgid "AdminSettings|Auto DevOps domain"
 msgstr ""
 
+msgid "AdminSettings|Disable feed token"
+msgstr ""
+
 msgid "AdminSettings|Elasticsearch, PlantUML, Slack application, Third party offers, Snowplow, Amazon EKS have moved to Settings &gt; General."
 msgstr ""
 
@@ -1970,6 +1976,9 @@ msgid "AdminSettings|Enable shared runners for new projects"
 msgstr ""
 
 msgid "AdminSettings|Environment variables are protected by default"
+msgstr ""
+
+msgid "AdminSettings|Feed token"
 msgstr ""
 
 msgid "AdminSettings|Go to General Settings"
@@ -3677,9 +3686,6 @@ msgstr ""
 msgid "Are you sure you want to delete this SSH key?"
 msgstr ""
 
-msgid "Are you sure you want to delete this board?"
-msgstr ""
-
 msgid "Are you sure you want to delete this device? This action cannot be undone."
 msgstr ""
 
@@ -4480,9 +4486,6 @@ msgstr ""
 msgid "Blog"
 msgstr ""
 
-msgid "Board scope"
-msgstr ""
-
 msgid "Board scope affects which issues are displayed for anyone who visits this board"
 msgstr ""
 
@@ -4535,6 +4538,30 @@ msgid "Boards|Expand"
 msgstr ""
 
 msgid "Boards|View scope"
+msgstr ""
+
+msgid "Board|Are you sure you want to delete this board?"
+msgstr ""
+
+msgid "Board|Board scope"
+msgstr ""
+
+msgid "Board|Create board"
+msgstr ""
+
+msgid "Board|Create new board"
+msgstr ""
+
+msgid "Board|Delete board"
+msgstr ""
+
+msgid "Board|Edit board"
+msgstr ""
+
+msgid "Board|Enter board name"
+msgstr ""
+
+msgid "Board|Failed to delete board. Please try again."
 msgstr ""
 
 msgid "Board|Load more issues"
@@ -7937,9 +7964,6 @@ msgstr ""
 msgid "Create and provide your GitHub %{link_start}Personal Access Token%{link_end}. You will need to select the %{code_open}repo%{code_close} scope, so we can display a list of your public and private repositories which are available to import."
 msgstr ""
 
-msgid "Create board"
-msgstr ""
-
 msgid "Create branch"
 msgstr ""
 
@@ -7995,9 +8019,6 @@ msgid "Create new"
 msgstr ""
 
 msgid "Create new Value Stream"
-msgstr ""
-
-msgid "Create new board"
 msgstr ""
 
 msgid "Create new branch"
@@ -8154,6 +8175,9 @@ msgid "Cron time zone"
 msgstr ""
 
 msgid "Crossplane"
+msgstr ""
+
+msgid "Current"
 msgstr ""
 
 msgid "Current Branch"
@@ -8917,9 +8941,6 @@ msgstr ""
 msgid "Delete badge"
 msgstr ""
 
-msgid "Delete board"
-msgstr ""
-
 msgid "Delete comment"
 msgstr ""
 
@@ -9613,7 +9634,7 @@ msgstr ""
 msgid "DevopsAdoption|DevOps adoption uses segments to track adoption across key features. Segments are a way to track multiple related projects and groups at once. For example, you could create a segment for the engineering department or a particular product team."
 msgstr ""
 
-msgid "DevopsAdoption|Feature adoption is based on usage over the last 30 days. Last updated: %{timestamp}."
+msgid "DevopsAdoption|Feature adoption is based on usage in the last calendar month. Last updated: %{timestamp}."
 msgstr ""
 
 msgid "DevopsAdoption|Issues"
@@ -10053,9 +10074,6 @@ msgstr ""
 msgid "Edit application"
 msgstr ""
 
-msgid "Edit board"
-msgstr ""
-
 msgid "Edit comment"
 msgstr ""
 
@@ -10468,9 +10486,6 @@ msgid "Enter an integer number number between 0 and 100"
 msgstr ""
 
 msgid "Enter at least three characters to search"
-msgstr ""
-
-msgid "Enter board name"
 msgstr ""
 
 msgid "Enter domain"
@@ -11479,9 +11494,6 @@ msgid "Failed to create resources"
 msgstr ""
 
 msgid "Failed to create wiki"
-msgstr ""
-
-msgid "Failed to delete board. Please try again."
 msgstr ""
 
 msgid "Failed to deploy to"
@@ -15012,9 +15024,6 @@ msgstr ""
 msgid "Invite Members"
 msgstr ""
 
-msgid "Invite another teammate"
-msgstr ""
-
 msgid "Invite group"
 msgstr ""
 
@@ -15022,9 +15031,6 @@ msgid "Invite member"
 msgstr ""
 
 msgid "Invite team members"
-msgstr ""
-
-msgid "Invite teammates (optional)"
 msgstr ""
 
 msgid "Invite your team"
@@ -15096,6 +15102,15 @@ msgstr ""
 msgid "InviteMembers|Invite team members"
 msgstr ""
 
+msgid "InviteMember|Invite Members (optional)"
+msgstr ""
+
+msgid "InviteMember|Invite another member"
+msgstr ""
+
+msgid "InviteMember|Invited users will be added with developer level permissions. %{linkStart}View the documentation%{linkEnd} to see how to change this later."
+msgstr ""
+
 msgid "InviteMember|Oops, this feature isn't ready yet"
 msgstr ""
 
@@ -15151,9 +15166,6 @@ msgid "InviteReminderEmail|This is a friendly reminder that %{inviter} invited y
 msgstr ""
 
 msgid "Invited"
-msgstr ""
-
-msgid "Invited users will be added with developer level permissions. You can always change this later."
 msgstr ""
 
 msgid "Invocations"
@@ -19176,6 +19188,12 @@ msgid "OnCallSchedules|The schedule could not be deleted. Please try again."
 msgstr ""
 
 msgid "OnCallSchedules|The schedule could not be updated. Please try again."
+msgstr ""
+
+msgid "OnCallSchedules|Try adding a rotation"
+msgstr ""
+
+msgid "OnCallSchedules|Your schedule has been successfully created and all alerts from this project will now be routed to this schedule. Currently, only one schedule can be created per project. More coming soon! To add individual users to this schedule, use the add a rotation button."
 msgstr ""
 
 msgid "OnDemandScans|Could not fetch scanner profiles. Please refresh the page, or try again later."
@@ -27095,6 +27113,9 @@ msgstr ""
 msgid "The %{link_start}true-up model%{link_end} allows having more users, and additional users will incur a retroactive charge on renewal."
 msgstr ""
 
+msgid "The %{plan_name} is no longer available to purchase. For more information about how this will impact you, check our %{faq_link_start}frequently asked questions%{faq_link_end}."
+msgstr ""
+
 msgid "The %{type} contains the following error:"
 msgid_plural "The %{type} contains the following errors:"
 msgstr[0] ""
@@ -27104,6 +27125,9 @@ msgid "The Advanced Search in GitLab is a powerful search service that saves you
 msgstr ""
 
 msgid "The CSV export will be created in the background. Once finished, it will be sent to %{strong_open}%{email}%{strong_close} in an attachment."
+msgstr ""
+
+msgid "The Compliance Dashboard gives you the ability to see a group's merge request activity by providing a high-level view for all projects in the group."
 msgstr ""
 
 msgid "The GitLab user to which the Jira user %{jiraDisplayName} will be mapped"
@@ -32646,6 +32670,9 @@ msgstr ""
 msgid "math|There was an error rendering this math block"
 msgstr ""
 
+msgid "member%{number}@company.com"
+msgstr ""
+
 msgid "merge request"
 msgid_plural "merge requests"
 msgstr[0] ""
@@ -33307,9 +33334,6 @@ msgid "syntax is incorrect."
 msgstr ""
 
 msgid "tag name"
-msgstr ""
-
-msgid "teammate%{number}@company.com"
 msgstr ""
 
 msgid "the correct format."

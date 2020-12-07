@@ -49,4 +49,12 @@ RSpec.describe ComplianceManagement::FrameworkPolicy do
 
     it { is_expected.to be_disallowed(:manage_compliance_framework) }
   end
+
+  context 'feature is disabled' do
+    before do
+      stub_feature_flags(ff_custom_compliance_framework: false)
+    end
+
+    it { is_expected.to be_disallowed(:manage_compliance_framework) }
+  end
 end

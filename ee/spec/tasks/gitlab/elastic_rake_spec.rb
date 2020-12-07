@@ -119,4 +119,28 @@ RSpec.describe 'gitlab:elastic namespace rake tasks', :elastic do
       }.from(false).to(true)
     end
   end
+
+  describe 'mark_reindex_failed' do
+    subject { run_rake_task('gitlab:elastic:mark_reindex_failed') }
+
+    context 'when there is a running reindex job' do
+      before do
+        Elastic::ReindexingTask.create!
+      end
+
+      it 'marks the current reindex job as failed' do
+        expect { subject }.to change {Elastic::ReindexingTask.running?}.from(true).to(false)
+      end
+
+      it 'prints a message after marking it as failed' do
+        expect { subject }.to output("Marked the current reindexing job as failed.\n").to_stdout
+      end
+    end
+
+    context 'when no running reindex job' do
+      it 'just prints a message' do
+        expect { subject }.to output("Did not find the current running reindexing job.\n").to_stdout
+      end
+    end
+  end
 end

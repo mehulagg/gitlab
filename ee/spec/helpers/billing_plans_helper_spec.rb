@@ -179,4 +179,58 @@ RSpec.describe BillingPlansHelper do
       helper.plan_purchase_or_upgrade_url(group, plan)
     end
   end
+
+  describe '#upgrade_button_css_classe' do
+    using RSpec::Parameterized::TableSyntax
+
+    let(:plan) { double('Plan', deprecated?: false) }
+
+    it 'returns button-related classes only' do
+      expect(helper.upgrade_button_css_classes(nil, plan, false)).to eq('btn btn-success gl-button')
+    end
+
+    where(:is_current_plan, :trial_active, :result) do
+      false | false | 'btn btn-success gl-button'
+      false | true  | 'btn btn-success gl-button'
+      true  | true  | 'btn btn-success gl-button'
+      true  | false | 'btn btn-success gl-button disabled'
+      false | false | 'btn btn-success gl-button'
+    end
+
+    with_them do
+      let(:namespace) { Hashie::Mash.new(trial_active: trial_active) }
+
+      subject { helper.upgrade_button_css_classes(namespace, plan, is_current_plan) }
+
+      it { is_expected.to include(result) }
+    end
+
+    context 'when plan is deprecated' do
+      let(:deprecated_plan) { double('Plan', deprecated?: true) }
+
+      it 'returns invisible class' do
+        expect(helper.upgrade_button_css_classes(nil, deprecated_plan, false)).to include('invisible')
+      end
+    end
+  end
+
+  describe '#available_plans' do
+    let(:plan) { double('Plan', deprecated?: false, code: 'silver') }
+    let(:deprecated_plan) { double('Plan', deprecated?: true, code: 'bronze') }
+    let(:plans_data) { [plan, deprecated_plan] }
+
+    context 'when namespace is on an active plan' do
+      it 'returns plans without deprecated' do
+        expect(helper.available_plans(plans_data, nil)).to eq([plan])
+      end
+    end
+
+    context 'when namespace is on a deprecated plan' do
+      let(:current_plan) { Hashie::Mash.new(code: 'bronze') }
+
+      it 'returns plans with a deprecated plan' do
+        expect(helper.available_plans(plans_data, current_plan)).to eq(plans_data)
+      end
+    end
+  end
 end

@@ -348,7 +348,7 @@ describe('DevopsAdoptionApp', () => {
 
         it('displays the header text', () => {
           const text =
-            'Feature adoption is based on usage over the last 30 days. Last updated: 2020-10-31 23:59.';
+            'Feature adoption is based on usage in the last calendar month. Last updated: 2020-10-31 23:59.';
           expect(getByText(wrapper.element, text)).not.toBeNull();
         });
 

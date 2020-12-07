@@ -10,13 +10,14 @@ describe('AddScheduleModal', () => {
   const projectPath = 'group/project';
   const mutate = jest.fn();
   const mockHideModal = jest.fn();
+  const formData =
+    getOncallSchedulesQueryResponse.data.project.incidentManagementOncallSchedules.nodes[0];
 
   const createComponent = ({ data = {}, props = {} } = {}) => {
     wrapper = shallowMount(AddScheduleModal, {
       data() {
         return {
-          form:
-            getOncallSchedulesQueryResponse.data.project.incidentManagementOncallSchedules.nodes[0],
+          form: formData,
           ...data,
         };
       },
@@ -60,7 +61,14 @@ describe('AddScheduleModal', () => {
       findModal().vm.$emit('primary', { preventDefault: jest.fn() });
       expect(mutate).toHaveBeenCalledWith({
         mutation: expect.any(Object),
-        variables: { oncallScheduleCreateInput: expect.objectContaining({ projectPath }) },
+        update: expect.any(Function),
+        variables: {
+          oncallScheduleCreateInput: {
+            projectPath,
+            ...formData,
+            timezone: formData.timezone.identifier,
+          },
+        },
       });
     });
 

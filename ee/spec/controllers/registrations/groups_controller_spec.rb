@@ -68,45 +68,7 @@ RSpec.describe Registrations::GroupsController do
       it { is_expected.to have_gitlab_http_status(:redirect) }
       it { is_expected.to redirect_to(new_users_sign_up_project_path(namespace_id: user.groups.last.id)) }
 
-      context 'inviting teammates' do
-        context 'with no valid emails in the params' do
-          it 'does not add teammates' do
-            expect { subject }.to change(Member, :count).by(1)
-          end
-
-          it 'does not call the Members::CreateService' do
-            expect(Members::CreateService).not_to receive(:new)
-          end
-        end
-
-        context 'with valid emails in the params' do
-          before do
-            params[:emails] = ['a@a.a', 'b@b.b', '', '', 'x', 'y']
-          end
-
-          it 'adds users with developer access and ignores blank emails' do
-            expect_next_instance_of(Group) do |group|
-              expect(group).to receive(:add_users).with(
-                ['a@a.a', 'b@b.b', 'x', 'y'],
-                Gitlab::Access::DEVELOPER,
-                expires_at: nil,
-                current_user: user
-              ).and_call_original
-            end
-
-            subject
-          end
-
-          it 'sends invitations to valid emails only' do
-            subject
-
-            emails = assigns(:group).members.pluck(:invite_email)
-
-            expect(emails).to include('a@a.a', 'b@b.b')
-            expect(emails).not_to include('x', 'y')
-          end
-        end
-      end
+      it_behaves_like GroupInviteMembers
 
       context 'when the group cannot be saved' do
         let(:params) { { name: '', path: '' } }

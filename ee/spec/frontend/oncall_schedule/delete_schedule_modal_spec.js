@@ -1,19 +1,25 @@
-/* eslint-disable no-unused-vars */
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import createMockApollo from 'jest/helpers/mock_apollo_helper';
 import { GlModal, GlAlert, GlSprintf } from '@gitlab/ui';
 import VueApollo from 'vue-apollo';
 import waitForPromises from 'helpers/wait_for_promises';
+import getOncallSchedulesQuery from 'ee/oncall_schedules/graphql/queries/get_oncall_schedules.query.graphql';
 import destroyOncallScheduleMutation from 'ee/oncall_schedules/graphql/mutations/destroy_oncall_schedule.mutation.graphql';
 import DeleteScheduleModal, {
   i18n,
 } from 'ee/oncall_schedules/components/delete_schedule_modal.vue';
-import { getOncallSchedulesQueryResponse, destroyScheduleResponse } from './mocks/apollo_mock';
+import {
+  getOncallSchedulesQueryResponse,
+  destroyScheduleResponse,
+  destroyScheduleResponseWithErrors,
+} from './mocks/apollo_mock';
 
 const localVue = createLocalVue();
 const projectPath = 'group/project';
 const mutate = jest.fn();
 const mockHideModal = jest.fn();
+const schedule =
+  getOncallSchedulesQueryResponse.data.project.incidentManagementOncallSchedules.nodes[0];
 
 localVue.use(VueApollo);
 
@@ -29,14 +35,14 @@ describe('DeleteScheduleModal', () => {
   async function awaitApolloDomMock() {
     await wrapper.vm.$nextTick(); // kick off the DOM update
     await jest.runOnlyPendingTimers(); // kick off the mocked GQL stuff (promises)
-    await wrapper.vm.$nextTick(); // kick off the DOM update for flash
+    await wrapper.vm.$nextTick(); // kick off the DOM update
   }
 
   async function destroySchedule(localWrapper) {
     await jest.runOnlyPendingTimers();
     await localWrapper.vm.$nextTick();
 
-    localWrapper.vm.$emit('primary');
+    localWrapper.find(GlModal).vm.$emit('primary', { preventDefault: jest.fn() });
   }
 
   const createComponent = ({ data = {}, props = {} } = {}) => {
@@ -47,8 +53,7 @@ describe('DeleteScheduleModal', () => {
         };
       },
       propsData: {
-        schedule:
-          getOncallSchedulesQueryResponse.data.project.incidentManagementOncallSchedules.nodes[0],
+        schedule,
         ...props,
       },
       provide: {
@@ -70,13 +75,27 @@ describe('DeleteScheduleModal', () => {
     localVue.use(VueApollo);
     destroyScheduleHandler = destroyHandler;
 
-    const requestHandlers = [[destroyOncallScheduleMutation, destroyScheduleHandler]];
+    const requestHandlers = [
+      [getOncallSchedulesQuery, jest.fn().mockResolvedValue(getOncallSchedulesQueryResponse)],
+      [destroyOncallScheduleMutation, destroyScheduleHandler],
+    ];
 
     fakeApollo = createMockApollo(requestHandlers);
+
+    fakeApollo.clients.defaultClient.cache.writeQuery({
+      query: getOncallSchedulesQuery,
+      variables: {
+        projectPath: 'group/project',
+      },
+      data: getOncallSchedulesQueryResponse.data,
+    });
 
     wrapper = shallowMount(DeleteScheduleModal, {
       localVue,
       apolloProvider: fakeApollo,
+      propsData: {
+        schedule,
+      },
       provide: {
         projectPath,
       },
@@ -109,8 +128,7 @@ describe('DeleteScheduleModal', () => {
       expect(mutate).toHaveBeenCalledWith({
         mutation: expect.any(Object),
         update: expect.anything(),
-        // TODO: Once the BE is complete for the mutation update this spec to use the correct params
-        variables: expect.anything(),
+        variables: { iid: '37', projectPath },
       });
     });
 
@@ -134,6 +152,34 @@ describe('DeleteScheduleModal', () => {
   });
 
   describe('with mocked Apollo client', () => {
-    // TODO: Once the BE is complete for the mutation add specs here for that via a destroyHandler
+    it('has the name of the schedule to delete based on getOncallSchedulesQuery', async () => {
+      createComponentWithApollo();
+
+      await jest.runOnlyPendingTimers();
+      await wrapper.vm.$nextTick();
+
+      expect(findModal().attributes('data-testid')).toBe(`delete-schedule-modal-${schedule.iid}`);
+    });
+
+    it('calls a mutation with correct parameters and destroys a schedule', async () => {
+      createComponentWithApollo();
+
+      await destroySchedule(wrapper);
+
+      expect(destroyScheduleHandler).toHaveBeenCalled();
+    });
+
+    it('displays alert if mutation had a recoverable error', async () => {
+      createComponentWithApollo({
+        destroyHandler: jest.fn().mockResolvedValue(destroyScheduleResponseWithErrors),
+      });
+
+      await destroySchedule(wrapper);
+      await awaitApolloDomMock();
+
+      const alert = findAlert();
+      expect(alert.exists()).toBe(true);
+      expect(alert.text()).toContain('Houston, we have a problem');
+    });
   });
 });

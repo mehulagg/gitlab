@@ -13,12 +13,12 @@ Notifications are sent via email.
 
 ## Receiving notifications
 
-GitLab notifies you for one of the following reasons:
+You receive notifications for one of the following reasons:
 
 - You participate in an issue, merge request, epic or design. In this context, _participate_ means comment, or edit.
 - You enable notifications in an issue, merge request, or epic. To enable notifications, click the **Notifications** toggle in the sidebar to _on_.
 
-While notifications are enabled, GitLab notifies you of actions occurring in that issue, merge request, or epic.
+While notifications are enabled, you receive notification of actions occurring in that issue, merge request, or epic.
 
 NOTE:
 Notifications can be blocked by an administrator, preventing them from being sent.
@@ -209,7 +209,7 @@ you've created or mentions you.
 
 If an open merge request becomes unmergeable due to conflict, its author is notified about the cause.
 If a user has also set the merge request to automatically merge once pipeline succeeds,
-then that user is notified.
+then that user is also notified.
 
 ## Design email notifications
 
