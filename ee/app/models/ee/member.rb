@@ -5,6 +5,12 @@ module EE
     extend ActiveSupport::Concern
     extend ::Gitlab::Utils::Override
 
+    prepended do
+      scope :with_csv_entity_associations, -> do
+        includes(:user, source: [:route, children: :route, projects: :route])
+      end
+    end
+
     class_methods do
       extend ::Gitlab::Utils::Override
 
@@ -44,5 +50,15 @@ module EE
       user.using_license_seat?
     end
     # rubocop: enable Naming/PredicateName
+
+    def source_kind
+      source.is_a?(Group) && source.parent.present? ? 'Sub group' : source.class.to_s
+    end
+
+    def direct_inherited_memberships_path
+      return unless source.is_a?(Group)
+
+      source.children.map(&:full_path) + source.projects.map(&:full_path)
+    end
   end
 end

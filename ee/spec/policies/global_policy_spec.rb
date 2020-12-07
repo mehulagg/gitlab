@@ -237,4 +237,56 @@ RSpec.describe GlobalPolicy do
       end
     end
   end
+
+  describe 'export_user_permissions' do
+    let(:licensed) { true }
+    let(:flag_enabled) { true }
+
+    shared_examples 'allowed to export user permissions' do
+      it { is_expected.to be_allowed(:export_user_permissions) }
+    end
+
+    shared_examples 'not allowed to export user permissions' do
+      it { is_expected.to be_disallowed(:export_user_permissions) }
+    end
+
+    before do
+      stub_licensed_features(export_user_permissions: licensed)
+      stub_feature_flags(export_user_permissions_feature_flag: flag_enabled)
+    end
+
+    context 'when user is an admin', :enable_admin_mode do
+      let(:current_user) { admin }
+
+      context 'when licensed and feature enabled' do
+        it_behaves_like 'allowed to export user permissions'
+      end
+
+      context 'when not licensed' do
+        let(:licensed) { false }
+
+        it_behaves_like 'not allowed to export user permissions'
+      end
+
+      context 'when feature flag is not enabled' do
+        let(:flag_enabled) { false }
+
+        it_behaves_like 'not allowed to export user permissions'
+      end
+    end
+
+    context 'when user is not an admin' do
+      let(:current_user) { user }
+
+      context 'when licensed' do
+        it_behaves_like 'not allowed to export user permissions'
+      end
+
+      context 'when not licensed' do
+        let(:licensed) { false }
+
+        it_behaves_like 'not allowed to export user permissions'
+      end
+    end
+  end
 end
