@@ -21,18 +21,22 @@ export const DAST_SITE_VALIDATION_METHODS = {
 };
 
 export const DAST_SITE_VALIDATION_STATUS = {
+  NONE: 'NONE',
   PENDING: 'PENDING_VALIDATION',
   INPROGRESS: 'INPROGRESS_VALIDATION',
   PASSED: 'PASSED_VALIDATION',
   FAILED: 'FAILED_VALIDATION',
 };
 
+const INPROGRESS_VALIDATION_PROPS = {
+  label: s__('DastSiteValidation|Validating...'),
+  cssClass: 'gl-text-blue-300',
+  tooltipText: s__('DastSiteValidation|The validation is in progress. Please wait...'),
+};
+
 export const DAST_SITE_VALIDATION_STATUS_PROPS = {
-  [DAST_SITE_VALIDATION_STATUS.INPROGRESS]: {
-    label: s__('DastSiteValidation|Validating...'),
-    cssClass: 'gl-text-blue-300',
-    tooltipText: s__('DastSiteValidation|The validation is in progress. Please wait...'),
-  },
+  [DAST_SITE_VALIDATION_STATUS.PENDING]: INPROGRESS_VALIDATION_PROPS,
+  [DAST_SITE_VALIDATION_STATUS.INPROGRESS]: INPROGRESS_VALIDATION_PROPS,
   [DAST_SITE_VALIDATION_STATUS.PASSED]: {
     label: s__('DastSiteValidation|Validated'),
     cssClass: 'gl-text-green-500',

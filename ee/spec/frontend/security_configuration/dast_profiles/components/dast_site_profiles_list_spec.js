@@ -87,11 +87,12 @@ describe('EE - DastSiteProfileList', () => {
 
     describe.each`
       status           | statusEnum                 | label                  | hasValidateButton
-      ${'pending'}     | ${'PENDING_VALIDATION'}    | ${''}                  | ${true}
+      ${'no'}          | ${'NONE'}                  | ${''}                  | ${true}
+      ${'pending'}     | ${'PENDING_VALIDATION'}    | ${'Validating...'}     | ${false}
       ${'in-progress'} | ${'INPROGRESS_VALIDATION'} | ${'Validating...'}     | ${false}
       ${'passed'}      | ${'PASSED_VALIDATION'}     | ${'Validated'}         | ${false}
       ${'failed'}      | ${'FAILED_VALIDATION'}     | ${'Validation failed'} | ${true}
-    `('profile with validation $status', ({ statusEnum, label, hasValidateButton }) => {
+    `('profile with $status validation', ({ statusEnum, label, hasValidateButton }) => {
       const profile = siteProfiles.find(({ validationStatus }) => validationStatus === statusEnum);
 
       it(`should show correct label`, () => {

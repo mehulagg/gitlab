@@ -8,7 +8,7 @@ import DastSiteValidationModal from 'ee/security_configuration/dast_site_validat
 import ProfilesList from './dast_profiles_list.vue';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
-const { PENDING, FAILED } = DAST_SITE_VALIDATION_STATUS;
+const { NONE, FAILED } = DAST_SITE_VALIDATION_STATUS;
 
 export default {
   components: {
@@ -37,11 +37,11 @@ export default {
     shouldShowValidationBtn(status) {
       return (
         this.glFeatures.securityOnDemandScansSiteValidation &&
-        (status === PENDING || status === FAILED)
+        (status === NONE || status === FAILED)
       );
     },
     shouldShowValidationStatus(status) {
-      return this.glFeatures.securityOnDemandScansSiteValidation && status !== PENDING;
+      return this.glFeatures.securityOnDemandScansSiteValidation && status !== NONE;
     },
     showValidationModal() {
       this.$refs['dast-site-validation-modal'].show();
