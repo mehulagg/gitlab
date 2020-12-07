@@ -12,7 +12,7 @@ recommended for ease of future upgrades or keeping the data you create.
 
 ## Initial setup
 
-This guide configures a Digital Ocean droplet and set up Docker
+This guide configures a Digital Ocean droplet and sets up Docker
 locally on either macOS or Linux.
 
 ### On macOS
