@@ -8,7 +8,7 @@ import BurndownChart from './burndown_chart.vue';
 import BurnupChart from './burnup_chart.vue';
 import IterationReportSummaryCards from '../../iterations/components/iteration_report_summary_cards.vue';
 import IterationReportSummaryOpen from '../../iterations/components/iteration_report_summary_open.vue';
-import BurnupQuery from '../queries/burnup.query.graphql';
+import BurnupQuery from '../graphql/burnup.query.graphql';
 import BurndownChartData from '../burn_chart_data';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import axios from '~/lib/utils/axios_utils';
@@ -83,7 +83,7 @@ export default {
         return {
           id: this.iterationId || this.milestoneId,
           isIteration: Boolean(this.iterationId),
-          displayValue: this.displayValue,
+          weight: !this.issuesSelected,
         };
       },
       update(data) {
