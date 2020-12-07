@@ -41,7 +41,6 @@ describe('subscription table row', () => {
 
   const createComponent = ({
     props = {},
-    apiBillableMemberListFeatureEnabled = true,
     billableSeatsHref = BILLABLE_SEATS_URL,
   } = {}) => {
     if (wrapper) {
@@ -54,7 +53,6 @@ describe('subscription table row', () => {
         ...props,
       },
       provide: {
-        apiBillableMemberListFeatureEnabled,
         billableSeatsHref,
       },
       store,

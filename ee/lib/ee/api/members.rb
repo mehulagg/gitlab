@@ -51,8 +51,6 @@ module EE
           get ":id/billable_members" do
             group = find_group!(params[:id])
 
-            not_found! unless ::Feature.enabled?(:api_billable_member_list, group)
-
             bad_request!(nil) if group.subgroup?
             bad_request!(nil) unless ::Ability.allowed?(current_user, :admin_group_member, group)
 

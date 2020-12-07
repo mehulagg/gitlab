@@ -9,6 +9,5 @@ class Groups::SeatUsageController < Groups::ApplicationController
   feature_category :purchase
 
   def show
-    render_404 unless Feature.enabled?(:api_billable_member_list, @group)
   end
 end

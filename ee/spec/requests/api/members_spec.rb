@@ -377,18 +377,6 @@ RSpec.describe API::Members do
       end
     end
 
-    context 'when feature is disabled' do
-      before do
-        stub_feature_flags(api_billable_member_list: false)
-      end
-
-      it 'returns error' do
-        subject
-
-        expect(response).to have_gitlab_http_status(:not_found)
-      end
-    end
-
     context 'with non owner' do
       it 'returns error' do
         get api(url, maintainer)

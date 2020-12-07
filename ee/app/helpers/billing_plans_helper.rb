@@ -102,8 +102,6 @@ module BillingPlansHelper
   end
 
   def billable_seats_href(group)
-    return unless Feature.enabled?(:api_billable_member_list, group)
-
     group_seat_usage_path(group)
   end
 end

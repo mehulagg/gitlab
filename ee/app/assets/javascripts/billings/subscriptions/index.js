@@ -31,7 +31,6 @@ export default (containerId = 'js-billing-plans') => {
       planRenewHref,
       customerPortalUrl,
       billableSeatsHref,
-      apiBillableMemberListFeatureEnabled: gon?.features?.apiBillableMemberList || false,
     },
     render(createElement) {
       return createElement(SubscriptionApp);
