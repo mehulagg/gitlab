@@ -3,15 +3,18 @@
 module Gitlab
   module Elastic
     class Helper
-      ES_ENABLED_CLASSES = [
+      ES_MAPPINGS_CLASSES = [
           Project,
-          Issue,
           MergeRequest,
           Snippet,
           Note,
           Milestone,
           ProjectWiki,
           Repository
+      ].freeze
+
+      ES_SEPARATE_CLASSES = [
+        Issue
       ].freeze
 
       attr_reader :version, :client
@@ -40,13 +43,13 @@ module Gitlab
       end
 
       def default_settings
-        ES_ENABLED_CLASSES.inject({}) do |settings, klass|
+        ES_MAPPINGS_CLASSES.inject({}) do |settings, klass|
           settings.deep_merge(klass.__elasticsearch__.settings.to_hash)
         end
       end
 
       def default_mappings
-        mappings = ES_ENABLED_CLASSES.inject({}) do |m, klass|
+        mappings = ES_MAPPINGS_CLASSES.inject({}) do |m, klass|
           m.deep_merge(klass.__elasticsearch__.mappings.to_hash)
         end
         mappings.deep_merge(::Elastic::Latest::CustomLanguageAnalyzers.custom_analyzers_mappings)
@@ -85,6 +88,43 @@ module Gitlab
         client.indices.create create_index_options
 
         migrations_index_name
+      end
+
+      def standalone_indices_proxies
+        ES_SEPARATE_CLASSES.map do |class_name|
+          ::Elastic::Latest::ApplicationClassProxy.new(class_name, use_separate_indices: true)
+        end
+      end
+
+      def create_standalone_indices(options: {})
+        standalone_indices_proxies.map do |proxy|
+          alias_name = proxy.index_name
+          new_index_name = "#{alias_name}-#{Time.now.strftime("%Y%m%d-%H%M")}"
+
+          if alias_exists?(name: alias_name)
+            raise "Index under '#{alias_name}' already exists"
+          end
+
+          settings = proxy.settings
+          settings.merge!(options[:settings]) if options[:settings]
+
+          mappings = proxy.mappings
+          mappings.merge!(options[:mappings]) if options[:mappings]
+
+          create_index_options = {
+            index: new_index_name,
+            body: {
+              settings: settings.to_hash,
+              mappings: mappings.to_hash
+            }
+          }.merge(additional_index_options)
+
+          client.indices.create create_index_options
+
+          client.indices.put_alias(name: alias_name, index: new_index_name)
+
+          new_index_name
+        end
       end
 
       def create_empty_index(with_alias: true, options: {})
@@ -126,15 +166,24 @@ module Gitlab
         client.indices.exists?(index: index_name || target_name) # rubocop:disable CodeReuse/ActiveRecord
       end
 
-      def alias_exists?
-        client.indices.exists_alias(name: target_name)
+      def alias_exists?(name: nil)
+        client.indices.exists_alias(name: name || target_name)
       end
 
       # Calls Elasticsearch refresh API to ensure data is searchable
       # immediately.
       # https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-refresh.html
+      # By default refreshes main and standalone_indices
       def refresh_index(index_name: nil)
-        client.indices.refresh(index: index_name || target_name)
+        indices = if index_name.nil?
+                    [target_name] + standalone_indices_proxies.map(&:index_name)
+                  else
+                    [index_name]
+                  end
+
+        indices.each do |index|
+          client.indices.refresh(index: index)
+        end
       end
 
       def index_size(index_name: nil)
@@ -142,7 +191,7 @@ module Gitlab
       end
 
       def documents_count(index_name: nil)
-        index = index_name || target_index_name
+        index = target_index_name(target: index_name || target_index_name)
 
         client.indices.stats.dig('indices', index, 'primaries', 'docs', 'count')
       end
@@ -199,11 +248,13 @@ module Gitlab
       end
 
       # This method is used when we need to get an actual index name (if it's used through an alias)
-      def target_index_name
-        if alias_exists?
-          client.indices.get_alias(name: target_name).each_key.first
+      def target_index_name(target: nil)
+        target ||= target_name
+
+        if alias_exists?(name: target)
+          client.indices.get_alias(name: target).each_key.first
         else
-          target_name
+          target
         end
       end
 

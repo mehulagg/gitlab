@@ -92,6 +92,11 @@ module EE
       project.feature_available?(:multiple_issue_assignees)
     end
 
+    # override
+    def __elasticsearch__(&block)
+      @__elasticsearch__ ||= ::Elastic::MultiVersionInstanceProxy.new(self, use_separate_indices: Elastic::DataMigrationService.migration_has_finished?(:migrate_issues_to_separate_index))
+    end
+
     def blocked?
       blocking_issues_ids.any?
     end

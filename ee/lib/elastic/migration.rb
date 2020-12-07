@@ -3,6 +3,7 @@
 module Elastic
   class Migration
     include Elastic::MigrationOptions
+    include Elastic::MigrationLaunchOptions
 
     attr_reader :version
 

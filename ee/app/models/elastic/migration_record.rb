@@ -4,7 +4,7 @@ module Elastic
   class MigrationRecord
     attr_reader :version, :name, :filename
 
-    delegate :migrate, :skip_migration?, :completed?, :batched?, :throttle_delay, to: :migration
+    delegate :migrate, :skip_migration?, :completed?, :batched?, :throttle_delay, :pause_indexing?, to: :migration
 
     def initialize(version:, name:, filename:)
       @version = version
@@ -29,6 +29,10 @@ module Elastic
       client.get(index: index_name, id: version)
     rescue Elasticsearch::Transport::Transport::Errors::NotFound
       nil
+    end
+
+    def name_for_key
+      name.underscore
     end
 
     def self.persisted_versions(completed:)

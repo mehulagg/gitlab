@@ -35,6 +35,11 @@ module Elastic
         logger.info "MigrationWorker: migration[#{migration.name}] updating with completed: #{completed}"
         migration.save!(completed: completed)
 
+        if completed && migration.pause_indexing?
+          logger.info 'MigrationWorker: unpausing indexing'
+          Gitlab::CurrentSettings.update!(elasticsearch_pause_indexing: false)
+        end
+
         Elastic::DataMigrationService.drop_migration_has_finished_cache!(migration)
       end
     end
@@ -45,6 +50,11 @@ module Elastic
       if migration.persisted? && !migration.batched?
         logger.info "MigrationWorker: migration[#{migration.name}] did not execute migrate method since it was already executed. Waiting for migration to complete"
       else
+        if migration.pause_indexing?
+          logger.info 'MigrationWorker: Pausing indexing'
+          Gitlab::CurrentSettings.update!(elasticsearch_pause_indexing: true)
+        end
+
         logger.info "MigrationWorker: migration[#{migration.name}] executing migrate method"
         migration.migrate
 

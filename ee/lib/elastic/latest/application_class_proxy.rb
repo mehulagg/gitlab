@@ -70,14 +70,7 @@ module Elastic
                       default_operator: default_operator
                     }
                   }],
-                  filter: [{
-                    term: {
-                      type: {
-                        _name: context.name(:doc, :is_a, self.es_type),
-                        value: self.es_type
-                      }
-                    }
-                  }]
+                  filter: filter_by_type
                 }
               }
             }
@@ -95,6 +88,21 @@ module Elastic
         query_hash[:highlight] = highlight_options(fields)
 
         query_hash
+      end
+
+      def filter_by_type
+        return [] if use_separate_indices
+
+        [
+          {
+            term: {
+              type: {
+                _name: context.name(:doc, :is_a, self.es_type),
+                value: self.es_type
+              }
+            }
+          }
+        ]
       end
 
       def iid_query_hash(iid)

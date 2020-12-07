@@ -5,9 +5,10 @@ module Elastic
   class MultiVersionClassProxy
     include MultiVersionUtil
 
-    def initialize(data_target)
+    def initialize(data_target, use_separate_indices: false)
       @data_target = data_target
       @data_class = get_data_class(data_target)
+      @use_separate_indices = use_separate_indices
 
       generate_forwarding
     end

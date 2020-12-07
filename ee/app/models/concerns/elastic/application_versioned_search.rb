@@ -77,7 +77,7 @@ module Elastic
 
     class_methods do
       def __elasticsearch__
-        @__elasticsearch__ ||= ::Elastic::MultiVersionClassProxy.new(self)
+        @__elasticsearch__ ||= ::Elastic::MultiVersionClassProxy.new(self, use_separate_indices: Gitlab::Elastic::Helper::ES_SEPARATE_CLASSES.include?(self))
       end
 
       # Mark a dependant association as needing to be updated when a specific

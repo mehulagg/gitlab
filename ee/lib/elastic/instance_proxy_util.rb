@@ -6,10 +6,16 @@ module Elastic
   module InstanceProxyUtil
     extend ActiveSupport::Concern
 
-    def initialize(target)
+    def initialize(target, use_separate_indices: false)
       super(target)
 
-      config = version_namespace.const_get('Config', false)
+      const_name = if use_separate_indices
+                     "#{target.class.name}Config"
+                   else
+                     'Config'
+                   end
+
+      config = version_namespace.const_get(const_name, false)
 
       @index_name = config.index_name
       @document_type = config.document_type

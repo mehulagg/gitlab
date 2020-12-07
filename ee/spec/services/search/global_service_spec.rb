@@ -118,6 +118,9 @@ RSpec.describe Search::GlobalService do
           allow(Elastic::DataMigrationService).to receive(:migration_has_finished?)
             .with(:add_new_data_to_issues_documents)
             .and_return(false)
+          allow(Elastic::DataMigrationService).to receive(:migration_has_finished?)
+            .with(:migrate_issues_to_separate_index)
+            .and_return(false)
         end
 
         where(:project_level, :feature_access_level, :membership, :admin_mode, :expected_count) do
@@ -183,6 +186,9 @@ RSpec.describe Search::GlobalService do
           before do
             allow(Elastic::DataMigrationService).to receive(:migration_has_finished?)
               .with(:add_new_data_to_issues_documents)
+              .and_return(false)
+            allow(Elastic::DataMigrationService).to receive(:migration_has_finished?)
+              .with(:migrate_issues_to_separate_index)
               .and_return(false)
           end
 

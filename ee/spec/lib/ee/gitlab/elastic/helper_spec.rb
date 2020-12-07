@@ -40,6 +40,10 @@ RSpec.describe Gitlab::Elastic::Helper do
   end
 
   describe '#default_mappings' do
+    it 'has only one type' do
+      expect(helper.default_mappings.keys).to match_array %i(doc)
+    end
+
     context 'custom analyzers' do
       let(:custom_analyzers_mappings) { { doc: { properties: { title: { fields: { custom: true } } } } } }
 
@@ -62,6 +66,22 @@ RSpec.describe Gitlab::Elastic::Helper do
       expect { helper.create_migrations_index }
              .to change { helper.index_exists?(index_name: helper.migrations_index_name) }
              .from(false).to(true)
+    end
+  end
+
+  describe '#create_standalone_indices' do
+    after do
+      @indices.each do |index|
+        helper.delete_index(index_name: index)
+      end
+    end
+
+    it 'creates standalone indices' do
+      @indices = helper.create_standalone_indices
+
+      @indices.each do |index|
+        helper.index_exists?(index_name: index)
+      end
     end
   end
 
