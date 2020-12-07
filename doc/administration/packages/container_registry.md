@@ -1159,7 +1159,6 @@ curl localhost:5001/debug/health
 curl localhost:5001/debug/vars
 ```
 
-For more information, see 
 
 ### Advanced Troubleshooting
 
