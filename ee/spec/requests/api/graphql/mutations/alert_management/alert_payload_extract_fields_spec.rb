@@ -7,6 +7,7 @@ RSpec.describe 'Extracting fields from alert payload' do
 
   let_it_be(:project) { create(:project) }
   let_it_be(:maintainer) { create(:user) }
+  let_it_be(:developer) { create(:user) }
   let(:current_user) { maintainer }
   let(:variables) do
     {
@@ -42,13 +43,15 @@ RSpec.describe 'Extracting fields from alert payload' do
 
   before_all do
     project.add_maintainer(maintainer)
+    project.add_developer(developer)
   end
 
   before do
+    stub_licensed_features(multiple_alert_http_integrations: true)
     post_graphql_mutation(mutation, current_user: current_user)
   end
 
-  it 'works' do
+  it 'returns parsed alert fields from sample payload' do
     expect(response).to have_gitlab_http_status(:success)
     expect(payload_alert_fields).to eq([
       {
@@ -59,7 +62,25 @@ RSpec.describe 'Extracting fields from alert payload' do
     ])
   end
 
-  context 'without license'
-  context 'without feature flag'
-  context 'without user permission'
+  context 'without license' do
+    before do
+      stub_licensed_features(multiple_alert_http_integrations: false)
+    end
+
+    it_behaves_like 'a mutation that returns a top-level access error'
+  end
+
+  context 'without feature flag' do
+    before do
+      stub_feature_flags(multiple_http_integrations_custom_mapping: false)
+    end
+
+    it_behaves_like 'a mutation that returns a top-level access error'
+  end
+
+  context 'without user permission' do
+    let(:current_user) { developer }
+
+    it_behaves_like 'a mutation that returns a top-level access error'
+  end
 end
