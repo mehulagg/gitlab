@@ -32,6 +32,7 @@ Amazon S3 or Google Cloud Storage. Its features include:
 Read more on setting up and [using GitLab Managed Terraform states](terraform_state.md)
 
 ### Security Concerns
+WARNING:
 Like any other job artifact, Terraform plan data is viewable by anyone including unauthenticated users if your project and repository are public.
 Neither Terraform nor GitLab encrypts the plan file by default. If your Terraform plan
 includes sensitive data such as passwords, access tokens, ssh keys or certificates, GitLab strongly
