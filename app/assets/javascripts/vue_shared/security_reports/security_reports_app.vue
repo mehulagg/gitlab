@@ -125,6 +125,9 @@ export default {
     hasSecretDetectionReports() {
       return this.availableSecurityReports.includes(REPORT_TYPE_SECRET_DETECTION);
     },
+    isLoadingReportArtifacts() {
+      return this.$apollo.queries.reportArtifacts.loading;
+    },
     shouldShowDownloadGuidance() {
       return !this.canShowDownloads && this.summaryStatus !== LOADING;
     },
@@ -274,7 +277,7 @@ export default {
     <template v-if="canShowDownloads" #action-buttons>
       <security-report-download-dropdown
         :artifacts="reportArtifacts"
-        :loading="$apollo.queries.reportArtifacts.loading"
+        :loading="isLoadingReportArtifacts"
       />
     </template>
   </report-section>
@@ -310,7 +313,7 @@ export default {
     <template v-if="canShowDownloads" #action-buttons>
       <security-report-download-dropdown
         :artifacts="reportArtifacts"
-        :loading="$apollo.queries.reportArtifacts.loading"
+        :loading="isLoadingReportArtifacts"
       />
     </template>
   </report-section>
