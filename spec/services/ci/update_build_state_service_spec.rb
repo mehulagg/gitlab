@@ -80,7 +80,12 @@ RSpec.describe Ci::UpdateBuildStateService do
 
   context 'when build has a checksum' do
     let(:params) do
-      { checksum: 'crc32:12345678', state: 'failed', failure_reason: 'script_failure' }
+      {
+        checksum: 'crc32:12345678',
+        state: 'failed',
+        failure_reason: 'script_failure',
+        exit_code: 42
+      }
     end
 
     context 'when build does not have associated trace chunks' do
@@ -89,6 +94,15 @@ RSpec.describe Ci::UpdateBuildStateService do
 
         expect(build).to be_failed
         expect(result.status).to eq 200
+      end
+
+      it 'updates the allow_failure flag' do
+        expect(build)
+          .to receive(:conditionally_allow_failure!)
+          .with(42)
+          .and_call_original
+
+        subject.execute
       end
 
       it 'does not increment invalid trace metric' do
@@ -109,6 +123,15 @@ RSpec.describe Ci::UpdateBuildStateService do
         subject.execute
 
         expect(build).to be_failed
+      end
+
+      it 'updates the allow_failure flag' do
+        expect(build)
+          .to receive(:conditionally_allow_failure!)
+          .with(42)
+          .and_call_original
+
+        subject.execute
       end
 
       it 'responds with 200 OK status' do

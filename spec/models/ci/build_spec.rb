@@ -4718,9 +4718,13 @@ RSpec.describe Ci::Build do
       create(:ci_build, pipeline: pipeline)
     end
 
+    subject(:conditionally_allow_failure) do
+      job.conditionally_allow_failure!(1)
+    end
+
     context 'when exit_codes are not defined' do
       it 'does not change allow_failure' do
-        expect { job.conditionally_allow_failure!(1) }
+        expect { conditionally_allow_failure }
           .not_to change { job.reload.allow_failure }
       end
     end
@@ -4732,7 +4736,7 @@ RSpec.describe Ci::Build do
       end
 
       it 'does not change allow_failure' do
-        expect { job.conditionally_allow_failure!(1) }
+        expect { conditionally_allow_failure }
           .not_to change { job.reload.allow_failure }
       end
     end
@@ -4744,7 +4748,7 @@ RSpec.describe Ci::Build do
       end
 
       it 'does change allow_failure' do
-        expect { job.conditionally_allow_failure!(1) }
+        expect { conditionally_allow_failure }
           .to change { job.reload.allow_failure }
       end
     end
@@ -4758,7 +4762,7 @@ RSpec.describe Ci::Build do
       end
 
       it 'does not change allow_failure' do
-        expect { job.conditionally_allow_failure!(1) }
+        expect { conditionally_allow_failure }
           .not_to change { job.reload.allow_failure }
       end
     end
