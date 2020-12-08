@@ -62,7 +62,7 @@ global:
         - 'flow:sourceContext=namespace;destinationContext=namespace'
 ```
 
-Additional information about the statistics page is available in the [documentation that describes the Threat Management UI](https://docs.gitlab.com/ee/user/application_security/threat_monitoring/#container-network-policy).
+Additional information about the statistics page is available in the [documentation that describes the Threat Management UI](../../../../application_security/threat_monitoring/index.md#container-network-policy).
 
 ## Forwarding logs to a SIEM
 
