@@ -179,7 +179,7 @@ module IssuablesHelper
       author_output << issuable_meta_author_slot(issuable.author, css_class: 'ml-1')
 
       if status = user_status(issuable.author)
-        author_output << "#{status}".html_safe
+        author_output << "#{status}".html_safe if show_status_emoji?(issuable.author&.status)
       end
 
       author_output
