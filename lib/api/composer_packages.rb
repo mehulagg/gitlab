@@ -38,6 +38,8 @@ module API
           packages = ::Packages::Composer::PackagesFinder.new(current_user, user_group).execute
 
           if params[:package_name].present?
+            grab_sha!
+
             packages = packages.with_name(params[:package_name])
           end
 
@@ -47,6 +49,16 @@ module API
 
       def presenter
         @presenter ||= ::Packages::Composer::PackagesPresenter.new(user_group, packages)
+      end
+
+      # Handles a SHA value after a $ in the package name.
+      # It will assign the sha to a param and remove it from the
+      # `package_name` param.
+      def grab_sha!
+        if idx = params[:package_name].index('$')
+          params[:sha] = params[:package_name][(idx + 1)..-1]
+          params[:package_name] = params[:package_name][0..(idx - 1)]
+        end
       end
     end
 
@@ -93,6 +105,7 @@ module API
 
       get ':id/-/packages/composer/*package_name', requirements: COMPOSER_ENDPOINT_REQUIREMENTS, file_path: true do
         not_found! if packages.empty?
+        not_found! if params[:sha].blank?
 
         presenter.package_versions
       end
