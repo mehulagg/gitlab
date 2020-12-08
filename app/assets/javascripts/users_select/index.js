@@ -837,12 +837,16 @@ UsersSelect.prototype.renderApprovalRules = function(elsClassName, approvalRules
   const renderApprovalRulesCount =
     count > 1 ? `<span class="ml-1">(+${count}&nbsp;rules)</span>` : '';
 
-  return count
-    ? `<div class="gl-display-flex gl-font-sm">
-        <span class="gl-text-truncate" title="${rule.name}">${rule.name}</span>
-        ${renderApprovalRulesCount}
-      </div>`
-    : '';
+  if (!count) {
+    return '';
+  }
+
+  const ruleName = rule.rule_type === 'code_owner' ? __('Code Owner') : rule.name;
+
+  return `<div class="gl-display-flex gl-font-sm">
+    <span class="gl-text-truncate" title="${ruleName}">${ruleName}</span>
+    ${renderApprovalRulesCount}
+  </div>`;
 };
 
 export default UsersSelect;
