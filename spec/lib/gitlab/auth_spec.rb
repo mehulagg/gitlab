@@ -189,11 +189,25 @@ RSpec.describe Gitlab::Auth, :use_clean_rails_memory_store_caching do
             end
           end
 
-          context 'when bot user is not a project member' do
-            it 'fails to authenticate project access token' do
-              build.update(user: project_bot_user)
+          context 'fails to authenticate project access token' do
+            context 'when project bot is not a project member' do
+              it 'fails' do
+                build.update(user: project_bot_user)
 
-              expect(subject).to eq(Gitlab::Auth::Result.new(nil, nil, nil, nil))
+                expect(subject).to eq(Gitlab::Auth::Result.new(nil, nil, nil, nil))
+              end
+            end
+
+            context 'when project bot is blocked' do
+              before do
+                project_bot_user.block!
+              end
+
+              it 'fails' do
+                build.update(user: project_bot_user)
+
+                expect(subject).to eq(Gitlab::Auth::Result.new(nil, nil, nil, nil))
+              end
             end
           end
         end
