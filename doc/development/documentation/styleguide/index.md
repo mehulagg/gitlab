@@ -1821,11 +1821,38 @@ GitLab Community Edition), don't split the product or feature name across lines.
 
 ### Product tier badges
 
-All page title headers must have tier markup.
+Tier badges are displayed as orange text next to a heading. For example:
 
-For features available only in paid tiers, add the tier markup to the page
-heading, subheading, or other appropriate page element. If sections of a page
-apply only to higher tier levels, add tier markup to the subheading.
+![Tier badge](img/tier_badge.png)
+
+- You must assign a tier badge to [all H1 topic headings](#product-tier-badges-on-headings).
+- If a topic applies to a tier other than Core, you must assign a tier badge to the topic heading.
+- If a section of a topic applies to a tier other than Core, you must assign a tier badge in the
+  [relevant section](#product-tier-badges-on-other-content).
+
+#### Product tier badges on headings
+
+To add a tier badge to a heading, add the relevant [tier badge](#available-product-tier-badges)
+after the heading text. For example:
+
+```markdown
+# Heading title `**(CORE)**`
+```
+
+#### Product tier badges on other content
+
+In paragraphs, list names, and table cells, when you add a tier badge,
+an information icon displays. More verbose information displays when a user points to the icon:
+
+- `**(STARTER)**` displays as **(STARTER)**
+- `**(STARTER ONLY)**` displays as **(STARTER ONLY)**
+- `**(SILVER ONLY)**` displays as **(SILVER ONLY)**
+
+The `**(STARTER)**` generates a `span` element to trigger the
+badges and tooltips (`<span class="badge-trigger starter">`). When the keyword
+_only_ is added, the corresponding GitLab.com badge isn't displayed.
+
+#### Available product tier badges
 
 | Tier in which feature is available                                     | Tier badge           |
 |:-----------------------------------------------------------------------|:----------------------|
@@ -1843,28 +1870,9 @@ apply only to higher tier levels, add tier markup to the subheading.
 | _Only_ GitLab.com Gold (no self-managed instances)                     | `**(GOLD ONLY)**`     |
 
 Topics that mention the `gitlab.rb` file are referring to
-self-managed instances of GitLab. To prevent confusion, include the relevant "`TIER` ONLY"
-[product badge](#product-tier-badges) on the highest applicable heading level on
+self-managed instances of GitLab. To prevent confusion, include the relevant `TIER ONLY`
+tier badge on the highest applicable heading level on
 the page.
-
-#### Product badge display behavior
-
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-docs/-/merge_requests/244) in GitLab 10.7.
-
-Tier markup displays differently depending on the location:
-
-- **In headings:** The full tier badge displays.
-- **In paragraphs, list names, and table cells:** Only an information icon displays.
-
-  More verbose information displays when a user points to the icon, like this:
-
-  - `**(STARTER)**` displays as **(STARTER)**
-  - `**(STARTER ONLY)**` displays as **(STARTER ONLY)**
-  - `**(SILVER ONLY)**` displays as **(SILVER ONLY)**
-
-The special markup `**(STARTER)**` generates a `span` element to trigger the
-badges and tooltips (`<span class="badge-trigger starter">`). When the keyword
-_only_ is added, the corresponding GitLab.com badge isn't displayed.
 
 ## Specific sections
 
