@@ -994,6 +994,14 @@ module Ci
       ::Gitlab.com? ? 500_000 : 0
     end
 
+    def conditionally_allow_failure!(exit_code)
+      return unless ::Gitlab::Ci::Features.allow_failure_with_exit_codes?
+
+      if options.dig(:allow_failure, :exit_codes).to_a.include?(exit_code)
+        update_columns(allow_failure: true)
+      end
+    end
+
     protected
 
     def run_status_commit_hooks!
