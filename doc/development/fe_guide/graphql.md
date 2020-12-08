@@ -666,7 +666,7 @@ In this example, Apollo will store the data with the stable `dastSiteProfiles` c
 To retrieve that data from the cache, you'd then only need to provide the `$fullPath` variable,
 omitting pagination-specifie variables like `after` or `before`:
 
-```js
+```javascript
 const data = store.readQuery({
   query: dastSiteProfilesQuery,
   variables: {
@@ -675,7 +675,7 @@ const data = store.readQuery({
 });
 ```
 
-Read more about the `@connection` directive: https://www.apollographql.com/docs/react/v2/caching/cache-interaction/#the-connection-directive
+Read more about the `@connection` directive in [Apollo's documentation](https://www.apollographql.com/docs/react/v2/caching/cache-interaction/#the-connection-directive).
 
 ### Managing performance
 
