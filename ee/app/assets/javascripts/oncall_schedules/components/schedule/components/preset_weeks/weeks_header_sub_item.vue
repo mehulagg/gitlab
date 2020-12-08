@@ -5,10 +5,6 @@ import CommonMixin from '../../mixins/common_mixin';
 export default {
   mixins: [CommonMixin],
   props: {
-    currentDate: {
-      type: Date,
-      required: true,
-    },
     timeframeItem: {
       type: Date,
       required: true,
@@ -38,9 +34,7 @@ export default {
     },
   },
   mounted() {
-    this.$nextTick(() => {
-      this.indicatorStyle = this.getIndicatorStyles();
-    });
+    this.indicatorStyle = this.getIndicatorStyles();
   },
   methods: {
     getSubItemValueClass(subItem) {
@@ -68,7 +62,7 @@ export default {
     <span
       v-if="hasToday"
       :style="indicatorStyle"
-      class="current-day-indicator-header preset-weeks gl-absolute"
+      class="current-day-indicator-header preset-weeks"
     ></span>
   </div>
 </template>

@@ -50,30 +50,28 @@ describe('On-call schedule', () => {
     wrapper = null;
   });
 
-  const findOuterCard = () => wrapper.findByTestId('outerCard');
-  const findInnerCard = () => wrapper.findByTestId('innerCard');
-  const findOuterCardHeader = () => findOuterCard().find('.gl-card-header');
-  const findInnerCardHeader = () => findInnerCard().find('.gl-card-header');
-  const findOuterCardDescription = () => findOuterCard().find('.gl-card-body');
-  const findInnerCardDescription = () => findInnerCard().find('.gl-card-body');
-  const findAddRotationsBtn = () => findInnerCardHeader().find(GlButton);
-  const findScheduleTimeline = () => findInnerCardDescription().find(ScheduleTimelineSection);
-  const findRotationsList = () => findInnerCardDescription().find(RotationsListSection);
+  const findScheduleHeader = () => wrapper.findByTestId('scheduleHeader');
+  const findRotationsHeader = () => wrapper.findByTestId('rotationsHeader');
+  const findSchedule = () => wrapper.findByTestId('scheduleBody');
+  const findRotations = () => wrapper.findByTestId('rotationsBody');
+  const findAddRotationsBtn = () => findRotationsHeader().find(GlButton);
+  const findScheduleTimeline = () => findRotations().find(ScheduleTimelineSection);
+  const findRotationsList = () => findRotations().find(RotationsListSection);
 
   it('shows schedule title', () => {
-    expect(findOuterCardHeader().text()).toBe(mockSchedule.name);
+    expect(findScheduleHeader().text()).toBe(mockSchedule.name);
   });
 
   it('shows timezone info', () => {
     const shortTz = i18n.scheduleForTz.replace('%{tzShort}', lastTz.identifier);
     const longTz = formattedTimezone;
-    const description = findOuterCardDescription().text();
+    const description = findSchedule().text();
     expect(description).toContain(shortTz);
     expect(description).toContain(longTz);
   });
 
   it('renders rotations header', () => {
-    expect(findInnerCardHeader().text()).toContain(i18n.rotationTitle);
+    expect(findRotationsHeader().text()).toContain(i18n.rotationTitle);
     expect(findAddRotationsBtn().text()).toContain(i18n.addARotation);
   });
 

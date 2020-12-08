@@ -3,7 +3,7 @@ import WeeksHeaderSubItemComponent from 'ee/oncall_schedules/components/schedule
 import { getTimeframeForWeeksView } from 'ee/oncall_schedules/components/schedule/utils';
 import { PRESET_TYPES } from 'ee/oncall_schedules/components/schedule/constants';
 
-describe('MonthsHeaderSubItemComponent', () => {
+describe('WeeksHeaderSubItemComponent', () => {
   let wrapper;
   const mockTimeframeInitialDate = new Date(2018, 0, 1);
   const mockTimeframeWeeks = getTimeframeForWeeksView(mockTimeframeInitialDate);
@@ -14,8 +14,12 @@ describe('MonthsHeaderSubItemComponent', () => {
   }) {
     wrapper = shallowMount(WeeksHeaderSubItemComponent, {
       propsData: {
-        currentDate,
         timeframeItem,
+      },
+      data() {
+        return {
+          currentDate,
+        };
       },
     });
   }

@@ -8,7 +8,7 @@ describe('CurrentDayIndicator', () => {
 
   const mockTimeframeInitialDate = new Date(2018, 0, 1);
   const mockTimeframeWeeks = getTimeframeForWeeksView(mockTimeframeInitialDate);
-  const mockTimeframeItem = getTimeframeForWeeksView(mockTimeframeInitialDate)[0];
+  const mockTimeframeItem = mockTimeframeWeeks[0];
 
   function mountComponent() {
     wrapper = shallowMount(CurrentDayIndicator, {
@@ -30,54 +30,18 @@ describe('CurrentDayIndicator', () => {
     }
   });
 
-  describe('data', () => {
-    it('initializes currentDate and indicatorStyles props with default values', () => {
-      const currentDate = new Date();
-      expect(wrapper.vm.currentDate.getDate()).toBe(currentDate.getDate());
-      expect(wrapper.vm.currentDate.getMonth()).toBe(currentDate.getMonth());
-      expect(wrapper.vm.currentDate.getFullYear()).toBe(currentDate.getFullYear());
-      expect(wrapper.vm.indicatorStyles).toBeDefined();
+  it('renders span element containing class `current-day-indicator`', async () => {
+    await wrapper.setData({
+      currentDate: mockTimeframeItem,
     });
+    expect(wrapper.classes('current-day-indicator')).toBe(true);
   });
 
-  describe('computed', () => {
-    describe('hasToday', () => {
-      it('returns true when presetType is WEEKS and currentDate is within current week', () => {
-        wrapper.setData({
-          currentDate: mockTimeframeWeeks[0],
-        });
-
-        wrapper.setProps({
-          presetType: PRESET_TYPES.WEEKS,
-          timeframeItem: mockTimeframeWeeks[0],
-        });
-
-        return wrapper.vm.$nextTick(() => {
-          expect(wrapper.vm.hasToday).toBe(true);
-        });
-      });
+  it('sets correct styles', async () => {
+    const left = 100 / DAYS_IN_WEEK / 2;
+    await wrapper.setData({
+      currentDate: mockTimeframeItem,
     });
-  });
-
-  describe('methods', () => {
-    describe('getIndicatorStyles', () => {
-      it('returns object containing `left` offset', () => {
-        const left = 100 / DAYS_IN_WEEK / 2;
-        expect(wrapper.vm.getIndicatorStyles()).toEqual(
-          expect.objectContaining({
-            left: `${left}%`,
-          }),
-        );
-      });
-    });
-  });
-
-  describe('template', () => {
-    it('renders span element containing class `current-day-indicator`', async () => {
-      await wrapper.setData({
-        currentDate: mockTimeframeWeeks[0],
-      });
-      expect(wrapper.classes('current-day-indicator')).toBe(true);
-    });
+    expect(wrapper.attributes('style')).toEqual(`left: ${left}%;`);
   });
 });

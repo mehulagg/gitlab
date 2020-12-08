@@ -13,6 +13,7 @@ exports[`RotationsListSectionComponent renders component layout 1`] = `
      
     <span
       class="timeline-cell"
+      data-testid="timelineCell"
     >
       <current-day-indicator-stub
         presettype="WEEKS"
@@ -21,6 +22,7 @@ exports[`RotationsListSectionComponent renders component layout 1`] = `
     </span>
     <span
       class="timeline-cell"
+      data-testid="timelineCell"
     >
       <current-day-indicator-stub
         presettype="WEEKS"

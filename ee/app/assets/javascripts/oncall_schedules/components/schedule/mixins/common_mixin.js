@@ -1,6 +1,14 @@
 import { DAYS_IN_WEEK } from '../constants';
 
 export default {
+  data() {
+    const currentDate = new Date();
+    currentDate.setHours(0, 0, 0, 0);
+
+    return {
+      currentDate,
+    };
+  },
   computed: {
     hasToday() {
       const timeframeItem = new Date(this.timeframeItem.getTime());

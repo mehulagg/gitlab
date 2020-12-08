@@ -27,7 +27,7 @@ describe('RotationsListSectionComponent', () => {
   }
 
   beforeEach(() => {
-    mountComponent({});
+    mountComponent();
   });
 
   afterEach(() => {
@@ -37,7 +37,7 @@ describe('RotationsListSectionComponent', () => {
     }
   });
 
-  const findTimelineCells = () => wrapper.findAll('.timeline-cell');
+  const findTimelineCells = () => wrapper.findAll('[data-testid="timelineCell"]');
 
   it('renders component layout', () => {
     expect(wrapper.element).toMatchSnapshot();
@@ -47,7 +47,7 @@ describe('RotationsListSectionComponent', () => {
     expect(findTimelineCells().length).toBe(mockTimeframeWeeks.length);
   });
 
-  it('renders  current day indicator in the first timeline cell', () => {
+  it('renders current day indicator in the first timeline cell', () => {
     expect(
       findTimelineCells()
         .at(0)

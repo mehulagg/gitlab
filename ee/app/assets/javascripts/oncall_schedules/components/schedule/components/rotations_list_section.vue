@@ -26,7 +26,12 @@ export default {
   <div class="list-section">
     <div class="list-item list-item-empty clearfix">
       <span class="details-cell"></span>
-      <span v-for="(timeframeItem, index) in timeframe" :key="index" class="timeline-cell">
+      <span
+        v-for="(timeframeItem, index) in timeframe"
+        :key="index"
+        class="timeline-cell"
+        data-testid="timelineCell"
+      >
         <current-day-indicator :preset-type="presetType" :timeframe-item="timeframeItem" />
       </span>
     </div>

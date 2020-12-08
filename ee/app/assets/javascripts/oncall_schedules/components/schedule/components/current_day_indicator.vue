@@ -14,22 +14,16 @@ export default {
     },
   },
   data() {
-    const currentDate = new Date();
-    currentDate.setHours(0, 0, 0, 0);
-
     return {
-      currentDate,
       indicatorStyles: {},
     };
   },
   mounted() {
-    this.$nextTick(() => {
-      this.indicatorStyles = this.getIndicatorStyles();
-    });
+    this.indicatorStyles = this.getIndicatorStyles();
   },
 };
 </script>
 
 <template>
-  <span v-if="hasToday" :style="indicatorStyles" class="current-day-indicator gl-absolute"></span>
+  <span v-if="hasToday" :style="indicatorStyles" class="current-day-indicator"></span>
 </template>

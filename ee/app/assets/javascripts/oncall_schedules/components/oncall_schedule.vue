@@ -77,9 +77,12 @@ export default {
 
 <template>
   <div>
-    <gl-card data-testid="outerCard">
+    <gl-card>
       <template #header>
-        <div class="gl-display-flex gl-justify-content-space-between gl-m-0">
+        <div
+          class="gl-display-flex gl-justify-content-space-between gl-m-0"
+          data-testid="scheduleHeader"
+        >
           <span class="gl-font-weight-bold gl-font-lg">{{ schedule.name }}</span>
           <gl-button-group>
             <gl-button
@@ -99,16 +102,19 @@ export default {
           </gl-button-group>
         </div>
       </template>
-      <p class="gl-text-gray-500 gl-mb-5">
+      <p class="gl-text-gray-500 gl-mb-5" data-testid="scheduleBody">
         <gl-sprintf :message="$options.i18n.scheduleForTz">
           <template #tzShort>{{ schedule.timezone }}</template>
         </gl-sprintf>
         | {{ tzLong }}
       </p>
 
-      <gl-card header-class="gl-bg-transparent" data-testid="innerCard">
+      <gl-card header-class="gl-bg-transparent">
         <template #header>
-          <div class="gl-display-flex gl-justify-content-space-between">
+          <div
+            class="gl-display-flex gl-justify-content-space-between"
+            data-testid="rotationsHeader"
+          >
             <h6 class="gl-m-0">{{ $options.i18n.rotationTitle }}</h6>
             <gl-button v-gl-modal="$options.addRotationModalId" variant="link"
               >{{ $options.i18n.addARotation }}
@@ -116,7 +122,7 @@ export default {
           </div>
         </template>
 
-        <div class="schedule-shell">
+        <div class="schedule-shell" data-testid="rotationsBody">
           <schedule-timeline-section :preset-type="$options.presetType" :timeframe="timeframe" />
           <rotations-list-section
             :preset-type="$options.presetType"
