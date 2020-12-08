@@ -12,6 +12,7 @@
 class JsonSchemaValidator < ActiveModel::EachValidator
   FILENAME_ALLOWED = /\A[a-z0-9_-]*\Z/.freeze
   FilenameError = Class.new(StandardError)
+  JSON_VALIDATOR_MAX_DRAFT_VERSION = 4
 
   def initialize(options)
     raise ArgumentError, "Expected 'filename' as an argument" unless options[:filename]
@@ -29,7 +30,11 @@ class JsonSchemaValidator < ActiveModel::EachValidator
   private
 
   def valid_schema?(value)
-    JSON::Validator.validate(schema_path, value)
+    if options[:draft].to_i > JSON_VALIDATOR_MAX_DRAFT_VERSION
+      JSONSchemer.schema(Pathname.new(schema_path)).valid?(value)
+    else
+      JSON::Validator.validate(schema_path, value)
+    end
   end
 
   def schema_path
