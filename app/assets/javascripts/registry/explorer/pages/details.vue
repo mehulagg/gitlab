@@ -119,11 +119,10 @@ export default {
 
         if (data?.destroyContainerRepositoryTags?.errors[0]) {
           throw new Error();
-        } else {
-          await this.$apollo.queries.image.refetch();
-          this.deleteAlertType =
-            itemsToBeDeleted.length === 0 ? ALERT_SUCCESS_TAG : ALERT_SUCCESS_TAGS;
         }
+        await this.$apollo.queries.image.refetch();
+        this.deleteAlertType =
+          itemsToBeDeleted.length === 0 ? ALERT_SUCCESS_TAG : ALERT_SUCCESS_TAGS;
       } catch (e) {
         this.deleteAlertType = itemsToBeDeleted.length === 0 ? ALERT_DANGER_TAG : ALERT_DANGER_TAGS;
       }
