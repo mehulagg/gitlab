@@ -39,7 +39,7 @@ therefore, it indicates that it cannot be done by regular users of GitLab.com.
 
 For features disabled by default, **do not** document them if they:
 
-- Cannot be used due to security concerns;
+- Cannot be used due to security concerns; or
 - Would leave data in a corrupt state; or
 - Result in no usable change.
 
