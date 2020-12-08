@@ -487,7 +487,6 @@ RSpec.describe GlobalPolicy do
       let(:current_user) { project_bot }
 
       it { is_expected.not_to be_allowed(:log_in) }
-      it { is_expected.to be_allowed(:token_log_in) }
     end
 
     context 'migration bot' do
