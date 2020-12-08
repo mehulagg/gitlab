@@ -1853,8 +1853,9 @@ the page.
 
 Tier markup displays differently depending on the location:
 
-- **In headings and subheadings:** the full tier badge displays.
-- **Paragraphs, list names, and table cells:** Only an information icon displays,
+- **In headings:** The full tier badge displays.
+- **In paragraphs, list names, and table cells:** Only an information icon displays.
+
   More verbose information displays when a user points to the icon, like this:
 
   - `**(STARTER)**` displays as **(STARTER)**
