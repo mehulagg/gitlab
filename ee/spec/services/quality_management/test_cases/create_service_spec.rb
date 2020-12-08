@@ -48,17 +48,6 @@ RSpec.describe QualityManagement::TestCases::CreateService do
             expect(new_issue.labels.map(&:title)).to eq([label.title])
           end
         end
-
-        context 'when quality_test_cases feature flag is disabled' do
-          before do
-            stub_feature_flags(quality_test_cases: false)
-          end
-
-          it 'responds with errors' do
-            expect(service.execute).to be_error
-            expect(service.execute.message).to eq("Test cases are not available for this project")
-          end
-        end
       end
     end
 
