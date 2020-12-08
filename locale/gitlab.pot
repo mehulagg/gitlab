@@ -3417,7 +3417,7 @@ msgstr ""
 msgid "Any label"
 msgstr ""
 
-msgid "Any member with Developer or higher permissions to the project."
+msgid "Any member with at least Developer permissions on the project."
 msgstr ""
 
 msgid "Any milestone"
@@ -3566,13 +3566,13 @@ msgstr[1] ""
 msgid "ApprovalRule|Approval rules"
 msgstr ""
 
+msgid "ApprovalRule|Approvals required"
+msgstr ""
+
 msgid "ApprovalRule|Approvers"
 msgstr ""
 
 msgid "ApprovalRule|Name"
-msgstr ""
-
-msgid "ApprovalRule|No. approvals required"
 msgstr ""
 
 msgid "ApprovalRule|Rule name"
@@ -6847,9 +6847,6 @@ msgstr ""
 msgid "Code Owners"
 msgstr ""
 
-msgid "Code Owners to the merge request changes."
-msgstr ""
-
 msgid "Code Quality"
 msgstr ""
 
@@ -8876,6 +8873,9 @@ msgid "Define a custom deploy freeze pattern with %{cronSyntaxStart}cron syntax%
 msgstr ""
 
 msgid "Define a custom pattern with cron syntax"
+msgstr ""
+
+msgid "Define approval settings."
 msgstr ""
 
 msgid "Define custom rules for what constitutes spam, independent of Akismet"
@@ -16031,9 +16031,6 @@ msgstr ""
 msgid "Learn more about adding certificates to your project by following the %{docs_link_start}documentation on GitLab Pages%{docs_link_end}."
 msgstr ""
 
-msgid "Learn more about approvals."
-msgstr ""
-
 msgid "Learn more about custom project templates"
 msgstr ""
 
@@ -16056,6 +16053,9 @@ msgid "Learn more in the"
 msgstr ""
 
 msgid "Learn more in the|pipeline schedules documentation"
+msgstr ""
+
+msgid "Learn more."
 msgstr ""
 
 msgid "Leave"
@@ -16880,6 +16880,9 @@ msgid "Members can be added by project %{i_open}Maintainers%{i_close} or %{i_ope
 msgstr ""
 
 msgid "Members invited to %{strong_start}%{group_name}%{strong_end}"
+msgstr ""
+
+msgid "Members listed as CODEOWNERS of affected files."
 msgstr ""
 
 msgid "Members of %{group} can also merge into this branch: %{branch}"
@@ -24245,16 +24248,16 @@ msgstr ""
 msgid "Security report is out of date. Run %{newPipelineLinkStart}a new pipeline%{newPipelineLinkEnd} for the target branch (%{targetBranchName})"
 msgstr ""
 
-msgid "SecurityApprovals|License Scanning must be enabled. %{linkStart}More information%{linkEnd}"
+msgid "SecurityApprovals|Configurable if security scanners are enabled. %{linkStart}Learn more.%{linkEnd}"
 msgstr ""
 
-msgid "SecurityApprovals|One or more of the security scanners must be enabled. %{linkStart}More information%{linkEnd}"
+msgid "SecurityApprovals|License Scanning must be enabled. %{linkStart}More information%{linkEnd}"
 msgstr ""
 
 msgid "SecurityApprovals|Requires approval for Denied licenses. %{linkStart}More information%{linkEnd}"
 msgstr ""
 
-msgid "SecurityApprovals|Requires approval for vulnerabilities of Critical, High, or Unknown severity. %{linkStart}More information%{linkEnd}"
+msgid "SecurityApprovals|Requires approval for vulnerabilities of Critical, High, or Unknown severity. %{linkStart}Learn more.%{linkEnd}"
 msgstr ""
 
 msgid "SecurityConfiguration|An error occurred while creating the merge request."
@@ -24944,9 +24947,6 @@ msgid "Set .gitlab-ci.yml to enable or configure SAST security scanning using th
 msgstr ""
 
 msgid "Set a default template for issue descriptions."
-msgstr ""
-
-msgid "Set a number of approvals required, the approvers and other approval settings."
 msgstr ""
 
 msgid "Set a password on your account to pull or push via %{protocol}."
@@ -30910,7 +30910,7 @@ msgstr ""
 msgid "While it's rare to have no vulnerabilities, it can happen. In any event, we ask that you please double check your settings to make sure you've set up your dashboard correctly."
 msgstr ""
 
-msgid "Who can be an approver?"
+msgid "Who can approve?"
 msgstr ""
 
 msgid "Who can see this group?"
