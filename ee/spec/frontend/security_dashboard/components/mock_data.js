@@ -3,6 +3,38 @@ export const generateVulnerabilities = () => [
     id: 'id_0',
     detectedAt: '2020-07-29T15:36:54Z',
     solutions: true,
+    mergeRequestLinks: {
+      nodes: [
+        {
+          merge_request: {
+            url: 'www.testmr.com/1',
+            status: 'status_warning',
+            auto_fix: true,
+            __typename: 'mergeRequestDetail',
+          },
+          __typename: 'mergeRequest',
+        },
+        {
+          merge_request: {
+            url: 'www.testmr.com/2',
+            status: 'merge',
+            auto_fix: false,
+            __typename: 'mergeRequestDetail',
+          },
+          __typename: 'mergeRequest',
+        },
+        {
+          merge_request: {
+            url: 'www.testmr.com/3',
+            status: 'status_canceled',
+            auto_fix: true,
+            __typename: 'mergeRequestDetail',
+          },
+          __typename: 'mergeRequest',
+        },
+      ],
+      __typename: 'mergeRequestLinks',
+    },
     identifiers: [
       {
         externalType: 'cve',

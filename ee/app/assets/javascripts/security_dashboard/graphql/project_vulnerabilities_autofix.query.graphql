@@ -23,7 +23,16 @@ query project(
     ) {
       nodes {
         ...Vulnerability
-        solutions
+        solutions @client
+        mergeRequestLinks @client {
+          nodes {
+            merge_request {
+              url
+              status
+              auto_fix
+            }
+          }
+        }
       }
       pageInfo {
         ...PageInfo
