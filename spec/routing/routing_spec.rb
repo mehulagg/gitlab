@@ -3,6 +3,7 @@
 require 'spec_helper'
 
 # user                       GET    /users/:username/
+# user_gpg_keys              GET    /:username.gpg
 # user_groups                GET    /users/:username/groups(.:format)
 # user_projects              GET    /users/:username/projects(.:format)
 # user_contributed_projects  GET    /users/:username/contributed(.:format)
@@ -14,6 +15,12 @@ RSpec.describe UsersController, "routing" do
     allow_any_instance_of(::Constraints::UserUrlConstrainer).to receive(:matches?).and_return(true)
 
     expect(get("/User")).to route_to('users#show', username: 'User')
+  end
+
+  it "to #gpg_keys" do
+    allow_any_instance_of(::Constraints::UserUrlConstrainer).to receive(:matches?).and_return(true)
+
+    expect(get("/User.gpg")).to route_to('users#gpg_keys', username: 'foo')
   end
 
   it "to #groups" do
@@ -194,12 +201,6 @@ RSpec.describe Profiles::GpgKeysController, "routing" do
 
   it "to #destroy" do
     expect(delete("/profile/gpg_keys/1")).to route_to('profiles/gpg_keys#destroy', id: '1')
-  end
-
-  it "to #get_keys" do
-    allow_any_instance_of(::Constraints::UserUrlConstrainer).to receive(:matches?).and_return(true)
-
-    expect(get("/foo.gpg")).to route_to('profiles/gpg_keys#get_keys', username: 'foo')
   end
 end
 
