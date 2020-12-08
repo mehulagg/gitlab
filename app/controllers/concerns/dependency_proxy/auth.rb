@@ -11,8 +11,6 @@ module DependencyProxy
     end
 
     def authenticate_user_from_jwt_token!
-      return unless dependency_proxy_for_private_groups?
-
       authenticate_with_http_token do |token, _|
         user = user_from_token(token)
         sign_in(user) if user
@@ -22,10 +20,6 @@ module DependencyProxy
     end
 
     private
-
-    def dependency_proxy_for_private_groups?
-      Feature.enabled?(:dependency_proxy_for_private_groups, default_enabled: false)
-    end
 
     def request_bearer_token!
       # unfortunately, we cannot use https://api.rubyonrails.org/classes/ActionController/HttpAuthentication/Token.html#method-i-authentication_request

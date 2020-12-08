@@ -17,30 +17,7 @@ RSpec.describe Groups::DependencyProxyForContainersController do
       request.headers['HTTP_AUTHORIZATION'] = nil
     end
 
-    context 'feature flag disabled' do
-      before do
-        stub_feature_flags(dependency_proxy_for_private_groups: false)
-      end
-
-      it { is_expected.to have_gitlab_http_status(:ok) }
-    end
-
     it { is_expected.to have_gitlab_http_status(:unauthorized) }
-  end
-
-  shared_examples 'feature flag disabled with private group' do
-    before do
-      stub_feature_flags(dependency_proxy_for_private_groups: false)
-    end
-
-    it 'redirects', :aggregate_failures do
-      group.update!(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
-
-      subject
-
-      expect(response).to have_gitlab_http_status(:redirect)
-      expect(response.location).to end_with(new_user_session_path)
-    end
   end
 
   shared_examples 'without permission' do
@@ -119,7 +96,6 @@ RSpec.describe Groups::DependencyProxyForContainersController do
 
       it_behaves_like 'without a token'
       it_behaves_like 'without permission'
-      it_behaves_like 'feature flag disabled with private group'
 
       context 'remote token request fails' do
         let(:token_response) do
@@ -190,7 +166,6 @@ RSpec.describe Groups::DependencyProxyForContainersController do
 
       it_behaves_like 'without a token'
       it_behaves_like 'without permission'
-      it_behaves_like 'feature flag disabled with private group'
 
       context 'remote blob request fails' do
         let(:blob_response) do
