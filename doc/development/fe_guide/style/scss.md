@@ -94,7 +94,7 @@ ul {
 }
 
 // Best
-// no new styles, use .gl-text-white!
+// prefer an existing utility class over adding existing styles
 ```0
 
 Class names are also preferable to IDs. Rules that use IDs
@@ -123,7 +123,7 @@ renaming without breaking styling.
 
 Before adding a new variable for a color or a size, guarantee:
 
-- There isn't as existing one.
+- There isn't an existing one.
 - There isn't a similar one we can use instead.
 
 ## Linting
