@@ -1827,7 +1827,7 @@ For features available only in paid tiers, add the tier markup to the page
 heading, subheading, or other appropriate page element. If sections of a page
 apply only to higher tier levels, add tier markup to the subheading.
 
-| Tier in which feature is available                                     | Tier markup           |
+| Tier in which feature is available                                     | Tier badge           |
 |:-----------------------------------------------------------------------|:----------------------|
 | GitLab Core and GitLab.com Free, and their higher tiers                | `**(CORE)**`          |
 | GitLab Starter and GitLab.com Bronze, and their higher tiers           | `**(STARTER)**`       |
