@@ -86,4 +86,51 @@ RSpec.describe 'Groups > Billing', :js do
       end
     end
   end
+
+  context 'with feature flags' do
+    using RSpec::Parameterized::TableSyntax
+
+    where(:api_billable_member_list, :saas_manual_renew_button, :saas_add_seats_button) do
+      true | true | true
+      true | false | true
+      true | true | false
+      true | false | false
+      false | true | true
+      false | false | true
+      false | false | false
+    end
+
+    with_them do
+      let(:plan) { 'bronze' }
+
+      let!(:subscription) do
+        create(:gitlab_subscription, namespace: group, hosted_plan: nil, seats: 15)
+      end
+
+      before do
+        stub_full_request("#{EE::SUBSCRIPTIONS_URL}/gitlab_plans?plan=#{plan}")
+            .to_return(status: 200, body: File.new(Rails.root.join('ee/spec/fixtures/gitlab_com_plans.json')))
+
+        allow(Gitlab).to receive(:com?).and_return(true)
+        stub_application_setting(check_namespace_plan: true)
+
+        group.add_owner(user)
+        sign_in(user)
+
+        stub_feature_flags(api_billable_member_list: api_billable_member_list)
+        stub_feature_flags(saas_manual_renew_button: saas_manual_renew_button)
+        stub_feature_flags(saas_add_seats_button: saas_add_seats_button)
+      end
+
+      it 'pushes the correct feature flags' do
+        visit group_billings_path(group)
+
+        expect(page).to have_pushed_frontend_feature_flags(
+          api_billable_member_list: api_billable_member_list,
+          saas_manual_renew_button: saas_manual_renew_button,
+          saas_add_seats_button: saas_add_seats_button
+        )
+      end
+    end
+  end
 end
