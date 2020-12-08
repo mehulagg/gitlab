@@ -3673,10 +3673,10 @@ Note that pending jobs are always considered interruptible. Defaults to `false`.
 This value is used only if the [automatic cancellation of redundant pipelines feature](../pipelines/settings.md#auto-cancel-pending-pipelines)
 is enabled.
 
-When enabled, a pipeline on the same branch is canceled when:
+When enabled, a pipeline is immediately canceled when a new pipeline starts on the same branch if either of the following is true:
 
-- It's made redundant by a newer pipeline run.
-- Either all jobs are set as interruptible, or any uninterruptible jobs haven't started (not pending).
+- All jobs in the pipeline are set as interruptible.
+- Any uninterruptible jobs have not started yet.
 
 Set jobs as interruptible that can be safely canceled once started (for instance, a build job).
 
