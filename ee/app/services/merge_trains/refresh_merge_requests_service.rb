@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 module MergeTrains
+  # TODO: Rename to RefreshTrainService
   class RefreshMergeRequestsService < BaseService
     include ::Gitlab::ExclusiveLeaseHelpers
     include ::Gitlab::Utils::StrongMemoize

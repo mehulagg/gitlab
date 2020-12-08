@@ -3,6 +3,9 @@
 module AutoMerge
   class MergeTrainService < AutoMerge::BaseService
     def execute(merge_request)
+      # TODO: This could be MergeTrain.add_car!(merge_request, current_user)
+      # and could be done inside the block because now it has an implicit coupling
+      # with it being persisted inside the block.
       merge_request.build_merge_train(user: current_user,
                                       target_project: merge_request.target_project,
                                       target_branch: merge_request.target_branch)

@@ -434,35 +434,37 @@ RSpec.describe MergeTrain do
     end
   end
 
-  describe '#first_in_train?' do
-    subject { merge_train.first_in_train? }
+  describe '#mergeable?' do
+    subject { merge_train.mergeable? }
 
     let(:merge_train) { merge_request.merge_train }
     let!(:merge_request) { create_merge_request_on_train }
 
-    it { is_expected.to be_truthy }
+    context 'when merge train has successful pipeline' do
+      before do
+        merge_train.update!(pipeline: create(:ci_pipeline, :success, project: merge_request.project))
+      end
 
-    context 'when the other merge request is on the merge train' do
-      let(:merge_train) { merge_request_2.merge_train }
-      let!(:merge_request_2) { create_merge_request_on_train(source_branch: 'improve/awesome') }
+      context 'when merge request is first on train' do
+        it { is_expected.to be_truthy }
+      end
 
-      it { is_expected.to be_falsy }
+      context 'when the other merge request is on the merge train' do
+        let(:merge_train) { merge_request_2.merge_train }
+        let!(:merge_request_2) { create_merge_request_on_train(source_branch: 'improve/awesome') }
+
+        it { is_expected.to be_falsy }
+      end
     end
-  end
 
-  describe '#follower_in_train?' do
-    subject { merge_train.follower_in_train? }
+    context 'when merge train has non successful pipeline' do
+      before do
+        merge_train.update!(pipeline: create(:ci_pipeline, :failed, project: merge_request.project))
+      end
 
-    let(:merge_train) { merge_request.merge_train }
-    let!(:merge_request) { create_merge_request_on_train }
-
-    it { is_expected.to be_falsy }
-
-    context 'when the other merge request is on the merge train' do
-      let(:merge_train) { merge_request_2.merge_train }
-      let!(:merge_request_2) { create_merge_request_on_train(source_branch: 'improve/awesome') }
-
-      it { is_expected.to be_truthy }
+      context 'when merge request is first on train' do
+        it { is_expected.to be_falsey }
+      end
     end
   end
 
