@@ -553,6 +553,11 @@ Rails/SaveBang:
     - 'ee/spec/**/*.rb'
     - 'qa/spec/**/*.rb'
     - 'qa/qa/specs/**/*.rb'
+  Exclude:
+    - 'spec/migrations/**/*.rb'
+    - 'spec/lib/gitlab/background_migration/**/*.rb'
+    - 'ee/spec/migrations/**/*.rb'
+    - 'ee/spec/lib/gitlab/background_migration/**/*.rb'
 
 Cop/PutProjectRoutesUnderScope:
   Include:
