@@ -120,7 +120,7 @@ bundle exec rubocop --auto-gen-config --auto-gen-only-exclude --exclude-limit=10
 
 You can then move the list from the freshly generated `.rubocop_todo.yml` for the Cop being actively 
 resolved and place it in the `.rubocop_manual_todo.yml`. In this scenario, do not commit auto generated 
-changes to the `.rubocop_todo.yml` as an `exclude limit` that is higher than 15 will make the
+changes to the `.rubocop_todo.yml` with an `exclude limit` above 15, as that makes the
 `.rubocop_todo.yml` hard to parse.
 
 ## Database migrations
