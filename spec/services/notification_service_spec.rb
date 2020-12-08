@@ -304,10 +304,10 @@ RSpec.describe NotificationService, :mailer do
 
       subject { notification.new_note(note) }
 
-      context 'on service desk issue' do
+      context 'issue_email_participants' do
         before do
           allow(Notify).to receive(:service_desk_new_note_email)
-                             .with(Integer, Integer).and_return(mailer)
+                             .with(Integer, Integer, String).and_return(mailer)
 
           allow(::Gitlab::IncomingEmail).to receive(:enabled?) { true }
           allow(::Gitlab::IncomingEmail).to receive(:supports_wildcard?) { true }
@@ -318,7 +318,7 @@ RSpec.describe NotificationService, :mailer do
 
         def should_email!
           expect(Notify).to receive(:service_desk_new_note_email)
-            .with(issue.id, note.id)
+            .with(issue.id, note.id, issue.external_author)
         end
 
         def should_not_email!
@@ -347,11 +347,11 @@ RSpec.describe NotificationService, :mailer do
         let(:project) { issue.project }
         let(:note) { create(:note, noteable: issue, project: project) }
 
-        context 'a non-service-desk issue' do
+        context 'do not exist' do
           it_should_not_email!
         end
 
-        context 'a service-desk issue' do
+        context 'do exist' do
           before do
             issue.update!(external_author: 'service.desk@example.com')
             issue.issue_email_participants.create!(email: 'service.desk@example.com')
@@ -363,22 +363,6 @@ RSpec.describe NotificationService, :mailer do
           end
 
           it_should_email!
-
-          context 'where the project has disabled the feature' do
-            before do
-              project.update!(service_desk_enabled: false)
-            end
-
-            it_should_not_email!
-          end
-
-          context 'when the support bot has unsubscribed' do
-            before do
-              issue.unsubscribe(User.support_bot, project)
-            end
-
-            it_should_not_email!
-          end
         end
       end
 

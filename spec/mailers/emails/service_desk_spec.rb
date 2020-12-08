@@ -161,7 +161,7 @@ RSpec.describe Emails::ServiceDesk do
     let_it_be(:note) { create(:note_on_issue, noteable: issue, project: project) }
     let_it_be(:default_text) { note.note }
 
-    subject { ServiceEmailClass.service_desk_new_note_email(issue.id, note.id) }
+    subject { ServiceEmailClass.service_desk_new_note_email(issue.id, note.id, "someone@gitlab.com") }
 
     it_behaves_like 'read template from repository', 'new_note'
 

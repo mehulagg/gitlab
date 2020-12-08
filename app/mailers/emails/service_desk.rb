@@ -17,7 +17,7 @@ module Emails
         send_from_user_email: false,
         sender_name: @project.service_desk_setting&.outgoing_name
       )
-      options = service_desk_options(email_sender, 'thank_you')
+      options = service_desk_options(email_sender, 'thank_you', @issue.external_author)
                   .merge(subject: "Re: #{subject_base}")
 
       mail_new_thread(@issue, options)
