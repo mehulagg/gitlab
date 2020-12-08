@@ -9,6 +9,7 @@ module Ci
     include Sortable
     include Artifactable
     include FileStoreMounter
+    include EachBatch
     extend Gitlab::Ci::Model
 
     TEST_REPORT_FILE_TYPES = %w[junit].freeze

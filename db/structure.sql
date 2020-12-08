@@ -20535,6 +20535,8 @@ CREATE UNIQUE INDEX epic_user_mentions_on_epic_id_and_note_id_index ON epic_user
 
 CREATE UNIQUE INDEX epic_user_mentions_on_epic_id_index ON epic_user_mentions USING btree (epic_id) WHERE (note_id IS NULL);
 
+CREATE INDEX expired_artifacts_temp_index ON ci_job_artifacts USING btree (expire_at) WHERE (expire_at IS NULL);
+
 CREATE INDEX finding_links_on_vulnerability_occurrence_id ON vulnerability_finding_links USING btree (vulnerability_occurrence_id);
 
 CREATE INDEX idx_audit_events_on_entity_id_desc_author_id_created_at ON audit_events USING btree (entity_id, entity_type, id DESC, author_id, created_at);
