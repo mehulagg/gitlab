@@ -22,6 +22,19 @@ Amazon S3 or Google Cloud Storage. Its features include:
 - Locking and unlocking state.
 - Remote Terraform plan and apply execution.
 
+## Security Concerns
+
+WARNING:
+Like any other job artifact, Terraform plan data is viewable by anyone including unauthenticated users if your project and repository are public.
+Neither Terraform nor GitLab encrypts the plan file by default. If your Terraform plan
+includes sensitive data such as passwords, access tokens, ssh keys or certificates, GitLab strongly
+recommends encrypting plan output or modifying the project visibility settings as those sensitive
+information may be included in the plan output.
+
+### Mitigation
+
+If you plan in using sensitive information such as the one highlighted above (but not limited to), we strongly recommend that you disable [public pipelines](https://docs.gitlab.com/ee/ci/pipelines/settings.html#visibility-of-pipelines)
+
 ## Permissions for using Terraform
 
 In GitLab version 13.1, [Maintainer access](../permissions.md) was required to use a
@@ -185,12 +198,6 @@ and the CI YAML file:
    `gitlab-terraform plan` commands.
 
 The output from the above `terraform` commands should be viewable in the job logs.
-
-WARNING:
-Like any other job artifact, Terraform plan data is [viewable by anyone with Guest access](../permissions.md) to the repository.
-Neither Terraform nor GitLab encrypts the plan file by default. If your Terraform plan
-includes sensitive data such as passwords, access tokens, or certificates, GitLab strongly
-recommends encrypting plan output or modifying the project visibility settings.
 
 ### Example project
 
