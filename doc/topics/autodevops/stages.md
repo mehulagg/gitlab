@@ -176,9 +176,7 @@ To learn more, see [Secret Detection](../../user/application_security/secret_det
 
 > Introduced in [GitLab Ultimate](https://about.gitlab.com/pricing/) 10.7.
 
-Dependency Scanning uses the
-[Dependency Scanning Docker image](https://gitlab.com/gitlab-org/security-products/dependency-scanning)
-to run analysis on the project dependencies and check for potential security issues.
+Dependency Scanning runs analysis on the project dependencies and check for potential security issues.
 The Auto Dependency Scanning stage is skipped on licenses other than
 [Ultimate](https://about.gitlab.com/pricing/) and requires
 [GitLab Runner](https://docs.gitlab.com/runner/) 11.5 or above.
