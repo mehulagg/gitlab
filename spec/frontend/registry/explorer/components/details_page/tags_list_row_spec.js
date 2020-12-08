@@ -65,7 +65,7 @@ describe('tags list row', () => {
     });
 
     it("does not exist when the row can't be deleted", () => {
-      const customTag = { ...tag, canDelete: '' };
+      const customTag = { ...tag, canDelete: false };
 
       mountComponent({ ...defaultProps, tag: customTag });
 
