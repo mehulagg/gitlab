@@ -37,6 +37,10 @@ export default {
       required: false,
       default: false,
     },
+    index: {
+      type: Number,
+      required: true,
+    },
   },
   computed: {
     ...mapGetters('diffs', ['fileLineCoverage']),
@@ -114,7 +118,11 @@ export default {
 
 <template>
   <div :class="classNameMap" class="diff-grid-row diff-tr line_holder">
-    <div class="diff-grid-left left-side">
+    <div
+      class="diff-grid-left left-side"
+      @dragover.prevent
+      @drop="$emit('stopdragging', { ...line.left, index })"
+    >
       <template v-if="line.left">
         <div
           :class="classNameMapCellLeft"
@@ -129,10 +137,12 @@ export default {
             :title="addCommentTooltipLeft"
           >
             <button
+              draggable
               type="button"
               class="add-diff-note note-button js-add-diff-note-button qa-diff-comment"
               :disabled="line.left.commentsDisabled"
               @click="handleCommentButton(line.left)"
+              @dragstart="$emit('startdragging', { ...line.left, index })"
             >
               <gl-icon :size="12" name="comment" />
             </button>
@@ -185,7 +195,11 @@ export default {
         <div class="diff-td line_content with-coverage parallel left-side empty-cell"></div>
       </template>
     </div>
-    <div v-if="!inline" class="diff-grid-right right-side">
+    <div
+      v-if="!inline"
+      class="diff-grid-right right-side"
+      @drop="$emit('stopdragging', { ...line.right, index })"
+    >
       <template v-if="line.right">
         <div :class="classNameMapCellRight" class="diff-td diff-line-num new_line">
           <span
@@ -196,10 +210,12 @@ export default {
             :title="addCommentTooltipRight"
           >
             <button
+              draggable
               type="button"
               class="add-diff-note note-button js-add-diff-note-button qa-diff-comment"
               :disabled="line.right.commentsDisabled"
               @click="handleCommentButton(line.right)"
+              @dragstart="$emit('startdragging', { ...line.right, index })"
             >
               <gl-icon :size="12" name="comment" />
             </button>

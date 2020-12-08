@@ -1,5 +1,5 @@
 <script>
-import { mapGetters, mapState } from 'vuex';
+import { mapGetters, mapState, mapActions } from 'vuex';
 import draftCommentsMixin from '~/diffs/mixins/draft_comments';
 import DraftNote from '~/batch_comments/components/draft_note.vue';
 import DiffRow from './diff_row.vue';
@@ -35,6 +35,11 @@ export default {
       default: false,
     },
   },
+  data() {
+    return {
+      dragStart: null,
+    };
+  },
   computed: {
     ...mapGetters('diffs', ['commitId']),
     ...mapState({
@@ -52,11 +57,39 @@ export default {
     },
   },
   methods: {
+    ...mapActions(['setSelectedCommentPosition']),
+    ...mapActions('diffs', ['showCommentForm']),
     showCommentLeft(line) {
       return !this.inline || line.left;
     },
     showCommentRight(line) {
       return !this.inline || (line.right && !line.left);
+    },
+    onStartDragging(line) {
+      this.dragStart = line;
+    },
+    onStopDragging(line) {
+      const pick = ({ line_code, new_line, old_line, type, index }) => ({
+        line_code,
+        new_line,
+        old_line,
+        type,
+        index,
+      });
+      const startLine = pick(this.dragStart);
+      const targetLine = pick(line);
+      let start = startLine;
+      let end = targetLine;
+
+      if (startLine.index >= targetLine.index) {
+        start = targetLine;
+        end = startLine;
+      }
+
+      const updatedLineRange = { start, end };
+
+      this.setSelectedCommentPosition(updatedLineRange);
+      this.showCommentForm({ lineCode: end.line_code, fileHash: this.diffFile.file_hash });
     },
   },
   userColorScheme: window.gon.user_color_scheme,
@@ -94,6 +127,9 @@ export default {
         :is-bottom="index + 1 === diffLinesLength"
         :is-commented="index >= commentedLines.startLine && index <= commentedLines.endLine"
         :inline="inline"
+        :index="index"
+        @startdragging="onStartDragging"
+        @stopdragging="onStopDragging"
       />
       <div
         v-if="line.renderCommentRow"
