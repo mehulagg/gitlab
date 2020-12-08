@@ -155,7 +155,7 @@ To add or edit the default merge request approval rule:
 
 1. Click **Add approval rule**, or **Edit**.
    - Add or change the **Rule name**.
-   - Set the number of required approvals in **No. approvals required**. The minimum value is `0`.
+   - Set the number of required approvals in **Approvals required**. The minimum value is `0`.
    - (Optional) Search for users or groups that will be [eligible to approve](#eligible-approvers)
      merge requests and click the **Add** button to add them as approvers. Before typing
      in the search field, approvers will be suggested based on the previous authors of
@@ -191,7 +191,7 @@ the same steps as [Adding / editing a default approval rule](#adding--editing-a-
 MR approvals can be configured to be optional.
 This can be useful if you're working on a team where approvals are appreciated, but not required.
 
-To configure an approval to be optional, set the number of required approvals in **No. approvals required** to `0`.
+To configure an approval to be optional, set the number of required approvals in **Approvals required** to `0`.
 
 You can also set an optional approval rule through the [Merge requests approvals API](../../../api/merge_request_approvals.md#update-merge-request-level-rule), by setting the `approvals_required` attribute to `0`.
 

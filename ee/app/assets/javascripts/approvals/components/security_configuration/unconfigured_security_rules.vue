@@ -46,10 +46,10 @@ export default {
         {
           name: VULNERABILITY_CHECK_NAME,
           description: s__(
-            'SecurityApprovals|One or more of the security scanners must be enabled. %{linkStart}More information%{linkEnd}',
+            'SecurityApprovals|Configurable if security scanners are enabled. %{linkStart}Learn more.%{linkEnd}',
           ),
           enableDescription: s__(
-            'SecurityApprovals|Requires approval for vulnerabilities of Critical, High, or Unknown severity. %{linkStart}More information%{linkEnd}',
+            'SecurityApprovals|Requires approval for vulnerabilities of Critical, High, or Unknown severity. %{linkStart}Learn more.%{linkEnd}',
           ),
           docsPath: this.vulnerabilityCheckHelpPagePath,
         },

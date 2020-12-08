@@ -6,8 +6,8 @@
     %h4.settings-title.js-settings-toggle.js-settings-toggle-trigger-only= _("Merge request approvals")
     %button.btn.js-settings-toggle{ type: 'button' }= expanded ? _("Collapse") : _("Expand")
     %p
-      = _("Set a number of approvals required, the approvers and other approval settings.")
-      = link_to _("Learn more about approvals."), help_page_path("user/project/merge_requests/merge_request_approvals"), target: '_blank'
+      = _("Define approval settings.")
+      = link_to _("Learn more."), help_page_path("user/project/merge_requests/merge_request_approvals"), target: '_blank'
 
   .settings-content
     = form_for @project, remote: true, html: { class: "merge-request-approval-settings-form js-mr-approvals-form" }, authenticity_token: true do |f|

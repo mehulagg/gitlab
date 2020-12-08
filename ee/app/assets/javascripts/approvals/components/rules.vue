@@ -4,7 +4,7 @@ import { s__ } from '~/locale';
 const HEADERS = {
   name: s__('ApprovalRule|Name'),
   members: s__('ApprovalRule|Approvers'),
-  approvalsRequired: s__('ApprovalRule|No. approvals required'),
+  approvalsRequired: s__('ApprovalRule|Approvals required'),
   branches: s__('Target branch'),
 };
 
