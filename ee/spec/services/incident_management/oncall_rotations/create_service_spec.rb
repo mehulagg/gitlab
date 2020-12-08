@@ -69,7 +69,7 @@ RSpec.describe IncidentManagement::OncallRotations::CreateService do
     end
 
     context 'when an on-call rotation already exists' do
-      let!(:oncall_schedule) { create(:incident_management_oncall_rotation, oncall_schedule: schedule, name: 'On-call rotation') }
+      let!(:oncall_rotation) { create(:incident_management_oncall_rotation, schedule: schedule, name: 'On-call rotation') }
 
       it_behaves_like 'error response', 'Name has already been taken'
     end

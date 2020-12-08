@@ -6,7 +6,7 @@ RSpec.describe IncidentManagement::OncallRotationPolicy do
   let_it_be(:project) { create(:project) }
   let_it_be(:user) { create(:user) }
   let_it_be(:oncall_schedule) { create(:incident_management_oncall_schedule, project: project) }
-  let_it_be_with_refind(:oncall_rotation) { create(:incident_management_oncall_rotation, oncall_schedule: oncall_schedule) }
+  let_it_be_with_refind(:oncall_rotation) { create(:incident_management_oncall_rotation, schedule: oncall_schedule) }
 
   subject(:policy) { described_class.new(user, oncall_rotation) }
 

@@ -26,14 +26,14 @@ module IncidentManagement
         return error_no_license unless available?
         return error_no_permissions unless allowed?
 
-        oncall_rotation = schedule.oncall_rotations.create(params.except(:participants))
+        oncall_rotation = schedule.rotations.create(params.except(:participants))
 
         return error_in_create(oncall_rotation) unless oncall_rotation.persisted?
 
         new_participants = Array(params[:participants]).map do |participant|
           OncallParticipant.new(
-            oncall_rotation: oncall_rotation,
-            participant: participant[:user],
+            rotation: oncall_rotation,
+            user: participant[:user],
             color_palette:  participant[:color_palette],
             color_weight: participant[:color_weight]
           )
