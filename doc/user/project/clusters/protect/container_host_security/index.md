@@ -6,20 +6,30 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Container Host Security
 
-GitLab's Container Host Security provides Intrusion Detection and Prevention capabilities that can monitor and (optionally) block activity inside the containers themselves. This is done by leveraging an integration with Falco to provide the monitoring capabilities and an integration with Pod Security Policies and AppArmor to provide blocking capabilities.
+GitLab's Container Host Security provides Intrusion Detection and Prevention capabilities that can
+monitor and (optionally) block activity inside the containers themselves. This is done by leveraging
+an integration with Falco to provide the monitoring capabilities and an integration with Pod
+Security Policies and AppArmor to provide blocking capabilities.
 
 ## Overview
 
-Container Host Security can be used to monitor and block activity inside a container as well as to enforce security policies across the entire Kubernetes cluster. Falco profiles allow for users to define the activity they want to monitor for and detect.  Among other things, this can include system log entries, process starts, file activity, and network ports opened. AppArmor is used to block any undesired activity via AppArmor profiles.  These profiles are loaded into the cluster when referenced by Pod Security Policies.
+Container Host Security can be used to monitor and block activity inside a container as well as to
+enforce security policies across the entire Kubernetes cluster. Falco profiles allow for users to
+define the activity they want to monitor for and detect. Among other things, this can include system
+log entries, process starts, file activity, and network ports opened. AppArmor is used to block any
+undesired activity via AppArmor profiles. These profiles are loaded into the cluster when
+referenced by Pod Security Policies.
 
-By default, Container Host Security is deployed into the cluster in monitor mode only, with no default profiles or rules running out-of-the-box. Activity monitoring and blocking begins only when users define profiles for these technologies.
+By default, Container Host Security is deployed into the cluster in monitor mode only, with no
+default profiles or rules running out-of-the-box. Activity monitoring and blocking begins only when
+users define profiles for these technologies.
 
 ## Installation
 
-See the [installation guide](quick_start_guide.md) for the recommended steps to install GitLab's Container Host Security capabilities.
-
-NOTE: **Note:**
-This guide shows the recommended way of installing Container Host Security through GMAv2; however, it is also possible to do a manual installation through our Helm chart.
+See the [installation guide](quick_start_guide.md) for the recommended steps to install GitLab's
+Container Host Security capabilities. This guide shows the recommended way of installing Container
+Host Security through GMAv2. However, it's also possible to do a manual installation through our
+Helm chart.
 
 ## Features
 
