@@ -15,6 +15,13 @@ RSpec.shared_examples 'write access for a read-only GitLab (EE) instance in main
 
     it_behaves_like 'allowlisted /admin/geo requests'
 
+    it "expects a PUT request to /admin/application_settings/general to be allowed" do
+      response = request.send(:put, "/api/v4/application/settings")
+
+      expect(response).not_to be_redirect
+      expect(subject).not_to disallow_request
+    end
+
     context 'on Geo secondary' do
       before do
         allow(::Gitlab::Geo).to receive(:secondary?).and_return(true)

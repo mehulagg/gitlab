@@ -230,5 +230,41 @@ RSpec.describe ApplicationSettings::UpdateService do
         include_examples 'worker is not called'
       end
     end
+
+    context 'maintenance mode' do
+      context 'enabled' do
+        before do
+          stub_application_setting(maintenance_mode: true)
+        end
+
+        context 'when user is an admin' do
+          before do
+            user.update_attributes!(role: :admin)
+            user.save!
+            puts "user.admin? #{user.admin?}"
+          end
+
+          it 'returns success' do
+            expect(service.execute).to be(true)
+          end
+        end
+
+        context 'when user is not an admin' do
+          it 'returns error params' do
+            expect(service.execute).to be(false)
+          end
+        end
+      end
+
+      context 'disabled' do
+        before do
+          stub_application_setting(maintenance_mode: false)
+        end
+
+        it 'returns success' do
+          expect(service.execute).to be(true)
+        end
+      end
+    end
   end
 end

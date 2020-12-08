@@ -8,6 +8,8 @@ module EE
 
       override :execute
       def execute
+        return false unless check_maintenance_mode_and_allow?
+
         # Repository size limit comes as MB from the view
         limit = params.delete(:repository_size_limit)
         application_setting.repository_size_limit = ::Gitlab::Utils.try_megabytes_to_bytes(limit) if limit
@@ -63,6 +65,14 @@ module EE
         return if ::Gitlab::Elastic::Helper.default.index_exists?
 
         ::Gitlab::Elastic::Helper.default.create_empty_index
+      end
+
+      def check_maintenance_mode_and_allow?
+        return true unless ::Gitlab.maintenance_mode?
+        return true if current_user.admin?
+
+        application_setting.errors.add(:maintenance_mode, 'Application Settings can only be updated by admins during maintenance mode.')
+        return false
       end
     end
   end

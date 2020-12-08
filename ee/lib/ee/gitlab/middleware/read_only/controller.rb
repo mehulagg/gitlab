@@ -33,7 +33,7 @@ module EE
           # secondary either
           override :allowlisted_routes
           def allowlisted_routes
-            allowed = super || geo_node_update_route? || geo_api_route?
+            allowed = super || geo_node_update_route? || geo_api_route? || admin_settings_update?
 
             return true if allowed
             return false if ::Gitlab.maintenance_mode?
@@ -44,6 +44,10 @@ module EE
 
           def git_write_routes
             geo_proxy_git_ssh_route? || geo_proxy_git_http_route? || lfs_locks_route?
+          end
+
+          def admin_settings_update?
+            request.path.include?('/api/v4/application/settings')
           end
 
           def geo_node_update_route?

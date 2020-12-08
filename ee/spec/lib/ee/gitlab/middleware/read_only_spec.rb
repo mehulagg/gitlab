@@ -7,7 +7,7 @@ RSpec.describe Gitlab::Middleware::ReadOnly do
     before do
       stub_application_setting(maintenance_mode: true)
     end
-
+    ##
     it_behaves_like 'write access for a read-only GitLab (EE) instance in maintenance mode'
   end
 
