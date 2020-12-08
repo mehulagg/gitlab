@@ -74,6 +74,17 @@ RSpec.describe IncidentManagement::OncallRotations::CreateService do
       it_behaves_like 'error response', 'Name has already been taken'
     end
 
+    context 'when too many participants' do
+      before do
+        stub_const('IncidentManagement::OncallRotations::CreateService::MAXIMUM_PARTICIPANTS', 0)
+      end
+
+      it 'has an informative error message' do
+        expect(execute).to be_error
+        expect(execute.message).to eq("A maximum of #{IncidentManagement::OncallRotations::CreateService::MAXIMUM_PARTICIPANTS} participants can be added")
+      end
+    end
+
     context 'with valid params' do
       it 'successfully creates an on-call rotation' do
         expect(execute).to be_success

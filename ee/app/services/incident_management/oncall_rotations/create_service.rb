@@ -3,6 +3,8 @@
 module IncidentManagement
   module OncallRotations
     class CreateService
+      MAXIMUM_PARTICIPANTS = 100
+
       # @param schedule [IncidentManagement::OncallSchedule]
       # @param project [Project]
       # @param current_user [User]
@@ -26,15 +28,19 @@ module IncidentManagement
         return error_no_license unless available?
         return error_no_permissions unless allowed?
 
+        participant_params = Array(params[:participants])
+
+        return error_too_many_participants if participant_params.size > MAXIMUM_PARTICIPANTS
+
         oncall_rotation = schedule.rotations.create(params.except(:participants))
 
         return error_in_create(oncall_rotation) unless oncall_rotation.persisted?
 
-        new_participants = Array(params[:participants]).map do |participant|
+        new_participants = Array(participant_params).map do |participant|
           OncallParticipant.new(
             rotation: oncall_rotation,
             user: participant[:user],
-            color_palette:  participant[:color_palette],
+            color_palette: participant[:color_palette],
             color_weight: participant[:color_weight]
           )
         end
@@ -62,6 +68,10 @@ module IncidentManagement
 
       def success(oncall_rotation)
         ServiceResponse.success(payload: { oncall_rotation: oncall_rotation })
+      end
+
+      def error_too_many_participants
+        error("A maximum of #{MAXIMUM_PARTICIPANTS} participants can be added")
       end
 
       def error_no_permissions
