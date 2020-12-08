@@ -111,5 +111,5 @@ When users use GMAv1 and GMAv2 together on the same cluster, they may experience
 
 **Related documentation links:**
 
-- [GitLab Managed Apps v1 (GMAv1)](https://docs.gitlab.com/ee/user/clusters/applications.html#install-with-one-click)
-- [GitLab Managed Apps v2 (GMAv2)](https://docs.gitlab.com/ee/user/clusters/management_project.html)
+- [GitLab Managed Apps v1 (GMAv1)](../../../../clusters/applications.md#install-with-one-click)
+- [GitLab Managed Apps v2 (GMAv2)](../../../../clusters/management_project.md)
