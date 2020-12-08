@@ -26,14 +26,6 @@ module Geo::ReplicableRegistry
     def registry_consistency_worker_enabled?
       replicator_class.enabled?
     end
-
-    def verification_pending_batch(batch_size:)
-      [] # TODO: https://gitlab.com/gitlab-org/gitlab/-/issues/13981
-    end
-
-    def verification_failed_batch(batch_size:)
-      [] # TODO: https://gitlab.com/gitlab-org/gitlab/-/issues/13981
-    end
   end
 
   def replicator_class
@@ -42,6 +34,7 @@ module Geo::ReplicableRegistry
 
   included do
     include ::Delay
+    include ::Geo::VerificationState
 
     scope :failed, -> { with_state(:failed) }
     scope :needs_sync_again, -> { failed.retry_due }
