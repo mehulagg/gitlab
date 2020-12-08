@@ -14,12 +14,12 @@ import {
 } from '@gitlab/ui';
 import { s__, __ } from '~/locale';
 import usersSearchQuery from '~/graphql_shared/queries/users_search.query.graphql';
-import createOncallScheduleRotationMutation from '../../graphql/create_oncall_schedule_rotation.mutation.graphql';
+import createOncallScheduleRotationMutation from '../../../graphql/create_oncall_schedule_rotation.mutation.graphql';
 import {
   LENGTH_ENUM,
   CHEVRON_SKIPPING_SHADE_ENUM,
   CHEVRON_SKIPPING_PALETTE_ENUM,
-} from '../../constants';
+} from '../../../constants';
 
 export default {
   i18n: {

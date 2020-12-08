@@ -11,10 +11,10 @@ import { s__ } from '~/locale';
 import ScheduleTimelineSection from './schedule/components/schedule_timeline_section.vue';
 import DeleteScheduleModal from './delete_schedule_modal.vue';
 import EditScheduleModal from './edit_schedule_modal.vue';
-import AddRotationModal from './rotations/add_rotation_modal.vue';
+import AddRotationModal from './rotations/components/add_rotation_modal.vue';
 
 import { getTimeframeForWeeksView } from './schedule/utils';
-import { PRESET_TYPES } from './schedule/constants';
+import { PRESET_TYPES } from '../constants';
 import { getFormattedTimezone } from '../utils/common_utils';
 import RotationsListSection from './schedule/components/rotations_list_section.vue';
 

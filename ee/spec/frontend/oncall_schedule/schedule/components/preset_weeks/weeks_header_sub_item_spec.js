@@ -1,7 +1,7 @@
 import { shallowMount } from '@vue/test-utils';
 import WeeksHeaderSubItemComponent from 'ee/oncall_schedules/components/schedule/components/preset_weeks/weeks_header_sub_item.vue';
 import { getTimeframeForWeeksView } from 'ee/oncall_schedules/components/schedule/utils';
-import { PRESET_TYPES } from 'ee/oncall_schedules/components/schedule/constants';
+import { PRESET_TYPES } from 'ee/oncall_schedules/constants';
 
 describe('MonthsHeaderSubItemComponent', () => {
   let wrapper;

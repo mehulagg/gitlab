@@ -1,0 +1,54 @@
+[{
+    "id": "gid://gitlab/IncidentManagement::OncallRotation/2",
+    "name": "Rotation 242",
+    "startsAt": "2020-12-09T09:00:53Z",
+    "length": 1,
+    "lengthUnit": "WEEKS",
+    "participants": {
+      "nodes": [
+        {
+          "user": {
+            "id": "gid://gitlab/User/1",
+            "username": "root"
+          },
+          "colorWeight": "500",
+          "colorPalette": "blue"
+        },
+        {
+            "user": {
+              "id": "gid://gitlab/User/2",
+              "username": "david"
+            },
+            "colorWeight": "500",
+            "colorPalette": "magenta"
+          }
+      ]
+    }
+  },
+  {
+    "id": "gid://gitlab/IncidentManagement::OncallRotation/3",
+    "name": "Rotation 244",
+    "startsAt": "2020-12-16T09:00:53Z",
+    "length": 1,
+    "lengthUnit": "WEEKS",
+    "participants": {
+      "nodes": [
+        {
+          "user": {
+            "id": "gid://gitlab/User/3",
+            "username": "root 2"
+          },
+          "colorWeight": "500",
+          "colorPalette": "orange"
+        },
+        {
+            "user": {
+              "id": "gid://gitlab/User/4",
+              "username": "david 2"
+            },
+            "colorWeight": "500",
+            "colorPalette": "aqua"
+          }
+      ]
+    }
+  }]

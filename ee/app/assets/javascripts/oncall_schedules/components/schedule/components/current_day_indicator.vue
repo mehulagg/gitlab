@@ -1,5 +1,5 @@
 <script>
-import CommonMixin from '../mixins/common_mixin';
+import CommonMixin from '../../../mixins/common_mixin';
 
 export default {
   mixins: [CommonMixin],
