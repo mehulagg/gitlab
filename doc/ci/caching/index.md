@@ -316,6 +316,36 @@ rspec:
     - rspec spec
 ```
 
+You'll sometimes have groups of gems that only make sense for particular jobs.
+In this example, you might not want to have production specific gems installed
+on the testing job and want to skip installing them, but you want to tie the
+cache key to the `Gemfile.lock` file to make the caching more efficient. To do
+this, you can use the `prefix` keyword to generate separate caches for each job:
+
+```yaml
+cache:
+  key:
+    files:
+      - Gemfile.lock
+    prefix: ${CI_JOB_NAME}
+  paths:
+    - vendor/ruby
+
+test_job:
+  stage: test
+  before_script:
+    - bundle install --without production --path vendor/ruby
+  script:
+    - bundle exec rspec
+
+deploy_job:
+  stage: production
+  before_script:
+    - bundle install --without test --path vendor/ruby
+  script:
+    - bundle exec deploy
+```
+
 ### Caching Go dependencies
 
 Assuming your project is using [Go Modules](https://github.com/golang/go/wiki/Modules) to install
