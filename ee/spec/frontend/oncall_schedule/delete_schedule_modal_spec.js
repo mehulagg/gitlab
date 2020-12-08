@@ -27,6 +27,7 @@ describe('DeleteScheduleModal', () => {
   let wrapper;
   let fakeApollo;
   let destroyScheduleHandler;
+  const modalId = 'deleteScheduleModalId';
 
   const findModal = () => wrapper.find(GlModal);
   const findModalText = () => wrapper.find(GlSprintf);
@@ -53,6 +54,7 @@ describe('DeleteScheduleModal', () => {
         };
       },
       propsData: {
+        modalId,
         schedule,
         ...props,
       },
@@ -95,6 +97,7 @@ describe('DeleteScheduleModal', () => {
       apolloProvider: fakeApollo,
       propsData: {
         schedule,
+        modalId,
       },
       provide: {
         projectPath,

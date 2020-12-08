@@ -60,6 +60,12 @@ export default {
     GlAvatarLabeled,
     GlAlert,
   },
+  props: {
+    modalId: {
+      type: String,
+      required: true,
+    },
+  },
   apollo: {
     participants: {
       query: usersSearchQuery,
@@ -169,7 +175,7 @@ export default {
 <template>
   <gl-modal
     ref="createScheduleRotationModal"
-    modal-id="create-schedule-rotation-modal"
+    :modal-id="modalId"
     size="sm"
     :title="$options.i18n.addRotation"
     :action-primary="actionsProps.primary"

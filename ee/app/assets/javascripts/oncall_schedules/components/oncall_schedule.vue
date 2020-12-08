@@ -26,8 +26,15 @@ export const i18n = {
   addARotation: s__('OnCallSchedules|Add a rotation'),
 };
 
+const addRotationModalId = 'addRotationModal';
+const editScheduleModalId = 'editScheduleModal';
+const deleteScheduleModalId = 'deleteScheduleModal';
+
 export default {
   i18n,
+  addRotationModalId,
+  editScheduleModalId,
+  deleteScheduleModalId,
   presetType: PRESET_TYPES.WEEKS,
   inject: ['timezones'],
   components: {
@@ -76,14 +83,14 @@ export default {
           <span class="gl-font-weight-bold gl-font-lg">{{ schedule.name }}</span>
           <gl-button-group>
             <gl-button
-              v-gl-modal.updateScheduleModal
+              v-gl-modal="$options.editScheduleModalId"
               v-gl-tooltip
               :title="$options.i18n.editScheduleLabel"
               icon="pencil"
               :aria-label="$options.i18n.editScheduleLabel"
             />
             <gl-button
-              v-gl-modal.deleteScheduleModal
+              v-gl-modal="$options.deleteScheduleModalId"
               v-gl-tooltip
               :title="$options.i18n.deleteScheduleLabel"
               icon="remove"
@@ -103,7 +110,7 @@ export default {
         <template #header>
           <div class="gl-display-flex gl-justify-content-space-between">
             <h6 class="gl-m-0">{{ $options.i18n.rotationTitle }}</h6>
-            <gl-button v-gl-modal="'create-schedule-rotation-modal'" variant="link"
+            <gl-button v-gl-modal="$options.addRotationModalId" variant="link"
               >{{ $options.i18n.addARotation }}
             </gl-button>
           </div>
@@ -119,8 +126,8 @@ export default {
         </div>
       </gl-card>
     </gl-card>
-    <delete-schedule-modal :schedule="schedule" />
-    <edit-schedule-modal :schedule="schedule" />
-    <add-rotation-modal />
+    <delete-schedule-modal :schedule="schedule" :modal-id="$options.deleteScheduleModalId" />
+    <edit-schedule-modal :schedule="schedule" :modal-id="$options.editScheduleModalId" />
+    <add-rotation-modal :modal-id="$options.addRotationModalId" />
   </div>
 </template>

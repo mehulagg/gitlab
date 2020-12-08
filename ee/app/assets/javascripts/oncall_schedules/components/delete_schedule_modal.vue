@@ -25,6 +25,10 @@ export default {
       type: Object,
       required: true,
     },
+    modalId: {
+      type: String,
+      required: true,
+    },
   },
   data() {
     return {
@@ -88,7 +92,7 @@ export default {
 <template>
   <gl-modal
     ref="deleteScheduleModal"
-    modal-id="deleteScheduleModal"
+    :modal-id="modalId"
     size="sm"
     :data-testid="`delete-schedule-modal-${schedule.iid}`"
     :title="$options.i18n.deleteSchedule"
