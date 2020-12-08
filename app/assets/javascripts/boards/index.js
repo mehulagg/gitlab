@@ -40,8 +40,8 @@ import {
   NavigationType,
   convertObjectPropsToCamelCase,
   parseBoolean,
-  urlParamsToObject,
 } from '~/lib/utils/common_utils';
+import { queryToObject } from '~/lib/utils/url_utility';
 import mountMultipleBoardsSwitcher from './mount_multiple_boards_switcher';
 
 Vue.use(VueApollo);
@@ -130,6 +130,15 @@ export default () => {
         ...endpoints,
         boardType: this.parent,
         disabled: this.disabled,
+        boardConfig: {
+          milestoneId: parseInt($boardApp.dataset.boardMilestoneId, 10),
+          milestoneTitle: $boardApp.dataset.boardMilestoneTitle || '',
+          iterationId: parseInt($boardApp.dataset.boardIterationId, 10),
+          iterationTitle: $boardApp.dataset.boardIterationTitle || '',
+          assigneeUsername: $boardApp.dataset.boardAssigneeUsername,
+          labels: JSON.parse($boardApp.dataset.labels || []),
+          weight: parseInt($boardApp.dataset.boardWeight, 10),
+        },
       });
       boardsStore.setEndpoints(endpoints);
       boardsStore.rootPath = this.boardsEndpoint;
@@ -192,7 +201,7 @@ export default () => {
         this.filterManager.updateTokens();
       },
       performSearch() {
-        this.setFilters(convertObjectPropsToCamelCase(urlParamsToObject(window.location.search)));
+        this.setFilters(convertObjectPropsToCamelCase(queryToObject(window.location.search)));
         if (this.isSwimlanesOn) {
           this.resetEpics();
           this.resetIssues();

@@ -2,6 +2,8 @@ import IssuableFilteredSearchTokenKeys from 'ee_else_ce/filtered_search/issuable
 import FilteredSearchManager from 'ee_else_ce/filtered_search/filtered_search_manager';
 import FilteredSearchContainer from '../filtered_search/container';
 import boardsStore from './stores/boards_store';
+import { updateHistory } from '~/lib/utils/url_utility';
+import { transformBoardConfig } from './boards_util';
 
 export default class FilteredSearchBoards extends FilteredSearchManager {
   constructor(store, vuexstore, updateUrl = false, cantEdit = []) {
@@ -24,6 +26,11 @@ export default class FilteredSearchBoards extends FilteredSearchManager {
     this.cantEditWithValue = cantEdit.filter(i => typeof i === 'object');
 
     this.vuexstore = vuexstore;
+    if (vuexstore.getters.shouldUseGraphQL) {
+      updateHistory({
+        url: `?${transformBoardConfig(this.vuexstore.state.boardConfig)}`,
+      });
+    }
   }
 
   updateObject(path) {
@@ -31,7 +38,9 @@ export default class FilteredSearchBoards extends FilteredSearchManager {
     this.store.path = `${path.substr(1)}${groupByParam ? `&group_by=${groupByParam}` : ''}`;
 
     if (this.vuexstore.getters.shouldUseGraphQL) {
-      boardsStore.updateFiltersUrl();
+      updateHistory({
+        url: `?${path.substr(1)}${groupByParam ? `&group_by=${groupByParam}` : ''}`,
+      });
       boardsStore.performSearch();
     } else if (this.updateUrl) {
       boardsStore.updateFiltersUrl();

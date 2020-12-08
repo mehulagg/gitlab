@@ -32,11 +32,11 @@ export const addIssueToList = ({ state, listId, issueId, moveBeforeId, moveAfter
 
 export default {
   [mutationTypes.SET_INITIAL_BOARD_DATA](state, data) {
-    const { boardType, disabled, showPromotion, ...endpoints } = data;
+    const { boardType, disabled, boardConfig, ...endpoints } = data;
     state.endpoints = endpoints;
     state.boardType = boardType;
     state.disabled = disabled;
-    state.showPromotion = showPromotion;
+    state.boardConfig = boardConfig;
   },
 
   [mutationTypes.RECEIVE_BOARD_LISTS_SUCCESS]: (state, lists) => {

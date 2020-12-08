@@ -15,6 +15,7 @@ export default () => ({
   pageInfoByListId: {},
   issues: {},
   filterParams: {},
+  boardConfig: {},
   error: undefined,
   // TODO: remove after ce/ee split of board_content.vue
   isShowingEpicsSwimlanes: false,

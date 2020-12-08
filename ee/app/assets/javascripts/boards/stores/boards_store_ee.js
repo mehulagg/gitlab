@@ -57,7 +57,9 @@ class BoardsStoreEE {
         this.store.scopedLabels = {
           enabled: parseBoolean(scopedLabels),
         };
-        this.initBoardFilters();
+        if (!gon.features.graphqlBoardLists) {
+          this.initBoardFilters();
+        }
       }
     };
 

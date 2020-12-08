@@ -2,6 +2,7 @@ import { sortBy } from 'lodash';
 import { ListType } from './constants';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import boardsStore from '~/boards/stores/boards_store';
+import { objectToQuery } from '~/lib/utils/url_utility';
 
 export function getMilestone() {
   return null;
@@ -106,6 +107,76 @@ export function moveIssueListHelper(issue, fromList, toList) {
   }
 
   return updatedIssue;
+}
+
+const NO_ITERATION_TITLE = 'No+Iteration';
+const NO_MILESTONE_TITLE = 'No+Milestone';
+
+export function transformBoardConfig(boardConfig) {
+  let updatedBoardConfig = {};
+  const updateFilterPath = (key, value) => {
+    if (!value) return;
+    const queryParam = { [key]: value };
+    updatedBoardConfig = Object.assign(queryParam, updatedBoardConfig);
+  };
+
+  let { milestoneTitle } = boardConfig;
+  if (boardConfig.milestoneId === 0) {
+    milestoneTitle = NO_MILESTONE_TITLE;
+  }
+  if (milestoneTitle) {
+    updateFilterPath('milestone_title', milestoneTitle);
+    // this.store.cantEdit.push('milestone');
+  }
+
+  let { iterationTitle } = boardConfig;
+  if (boardConfig.iterationId === 0) {
+    iterationTitle = NO_ITERATION_TITLE;
+  }
+
+  if (iterationTitle) {
+    updateFilterPath('iteration_id', iterationTitle);
+    // this.store.cantEdit.push('iteration');
+  }
+
+  let { weight } = boardConfig;
+  if (weight !== -1) {
+    if (weight === 0) {
+      weight = '0';
+    }
+    if (weight === -2) {
+      /* eslint-disable-next-line @gitlab/require-i18n-strings */
+      weight = 'None';
+    }
+
+    updateFilterPath('weight', weight);
+  }
+
+  updateFilterPath('assignee_username', boardConfig.assigneeUsername);
+  // if (boardConfig.assigneeUsername) {
+  //   this.store.cantEdit.push('assignee');
+  // }
+
+  const filterPath = objectToQuery(updatedBoardConfig).split('&');
+
+  boardConfig.labels.forEach(label => {
+    const labelTitle = encodeURIComponent(label.title);
+    const param = `label_name[]=${labelTitle}`;
+    const labelIndex = filterPath.indexOf(param);
+
+    if (labelIndex === -1) {
+      filterPath.push(param);
+    }
+
+    // this.store.cantEdit.push({
+    //   name: 'label',
+    //   value: label.title,
+    // });
+  });
+
+  const updatedFilterPath = filterPath.join('&');
+
+  return updatedFilterPath;
 }
 
 export default {
