@@ -1,0 +1,132 @@
+# The project for this functionality is located at https://gitlab.com/gitlab-org/5-minute-production-app/deploy-template
+# Copied from https://gitlab.com/gitlab-org/5-minute-production-app/deploy-template/-/blob/v2.0.0/deploy.yml
+include:
+  # workflow rules to prevent duplicate detached pipelines
+  - template: 'Workflows/Branch-Pipelines.gitlab-ci.yml'
+  # auto devops build
+  - template: 'Jobs/Build.gitlab-ci.yml'
+
+stages:
+  - build
+  - test
+  - provision
+  - deploy
+  - domain
+  - destroy
+
+variables:
+  TF_VAR_ENVIRONMENT_NAME: ${CI_PROJECT_PATH_SLUG}_${CI_PROJECT_ID}_${CI_COMMIT_REF_SLUG}
+  TF_VAR_SHORT_ENVIRONMENT_NAME: ${CI_PROJECT_ID}-${CI_COMMIT_REF_SLUG}
+  TF_ADDRESS: ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${CI_COMMIT_REF_SLUG}
+
+cache:
+  paths:
+    - .terraform
+
+.needs_aws_vars:
+  rules:
+    - if: '$AWS_ACCESS_KEY_ID && $AWS_SECRET_ACCESS_KEY && $AWS_DEFAULT_REGION'
+      when: on_success
+    - when: never
+
+.needs_aws_domain_protected_branch:
+  rules:
+    - if: '$AWS_ACCESS_KEY_ID && $AWS_SECRET_ACCESS_KEY && $AWS_DEFAULT_REGION && $CERT_DOMAIN && $CERT_EMAIL && $CI_COMMIT_REF_PROTECTED == "true"'
+      when: manual
+
+terraform_plan:
+  stage: test
+  image: registry.gitlab.com/gitlab-org/5-minute-production-app/deploy-template/master
+  extends: .needs_aws_vars
+  resource_group: terraform
+  before_script:
+    - cp /*.tf .
+    - cp /deploy.sh .
+  script:
+    - gitlab-terraform init
+    - gitlab-terraform plan
+    - gitlab-terraform plan-json
+  artifacts:
+    paths:
+      - plan.cache
+    reports:
+      terraform: plan.json
+
+terraform_apply:
+  stage: provision
+  image: registry.gitlab.com/gitlab-org/5-minute-production-app/deploy-template/master
+  extends: .needs_aws_vars
+  resource_group: terraform
+  before_script:
+    - cp /*.tf .
+    - cp /deploy.sh .
+  script:
+    - gitlab-terraform apply
+  artifacts:
+    paths:
+      - plan.cache
+    reports:
+      terraform: plan.json
+
+deploy:
+  stage: deploy
+  image: registry.gitlab.com/gitlab-org/5-minute-production-app/deploy-template/master
+  extends: .needs_aws_vars
+  resource_group: deploy
+  before_script:
+    - cp /*.tf .
+    - cp /deploy.sh .
+    - cp /conf.nginx .
+    - cp /nossl.conf.nginx .
+  script:
+    - ./deploy.sh
+  artifacts:
+    reports:
+      dotenv: deploy.env
+  environment:
+    name: $CI_COMMIT_REF_SLUG
+    url: $DYNAMIC_ENVIRONMENT_URL
+    on_stop: terraform_destroy
+
+setup_instructions:
+  stage: domain
+  image: registry.gitlab.com/gitlab-org/5-minute-production-app/deploy-template/master
+  extends: .needs_aws_domain_protected_branch
+  before_script:
+    - cp /*.tf .
+    - cp /setup_instructions.sh .
+  script:
+    - ./setup_instructions.sh
+
+ssl_certificate:
+  stage: domain
+  image: registry.gitlab.com/gitlab-org/5-minute-production-app/deploy-template/master
+  extends: .needs_aws_domain_protected_branch
+  before_script:
+    - cp /*.tf .
+    - cp /conf.nginx .
+    - cp /ssl_certificate.sh .
+  script:
+    - ./ssl_certificate.sh
+  environment:
+    name: $CI_COMMIT_REF_SLUG
+    url: https://$CERT_DOMAIN
+    on_stop: terraform_destroy
+
+terraform_destroy:
+  variables:
+    GIT_STRATEGY: none
+  stage: destroy
+  image: registry.gitlab.com/gitlab-org/5-minute-production-app/deploy-template/master
+  before_script:
+    - cp /*.tf .
+    - cp /deploy.sh .
+  script:
+    - gitlab-terraform destroy -auto-approve
+  environment:
+    name: $CI_COMMIT_REF_SLUG
+    action: stop
+  rules:
+    - if: '$AWS_ACCESS_KEY_ID && $AWS_SECRET_ACCESS_KEY && $AWS_DEFAULT_REGION && $CI_COMMIT_REF_PROTECTED == "false"'
+      when: manual
+    - when: never
