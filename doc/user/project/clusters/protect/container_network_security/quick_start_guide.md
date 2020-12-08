@@ -66,7 +66,7 @@ Additional information about the statistics page is available in the [documentat
 
 ## Forwarding logs to a SIEM
 
-Cilium logs can be forwarded to a SIEM or an external logging system via syslog protocol by installing and configuring Fluentd.  Fluentd can be installed through GitLab in two ways: via the [GMAv1 method](https://docs.gitlab.com/ee/user/clusters/applications.html#fluentd) and via the [GMAv2 method](https://docs.gitlab.com/ee/user/clusters/applications.html#install-fluentd-using-gitlab-cicd). GitLab strongly encourages using only the [GMAv2 method](https://docs.gitlab.com/ee/user/clusters/applications.html#install-fluentd-using-gitlab-cicd) to install Fluentd.
+Cilium logs can be forwarded to a SIEM or an external logging system via syslog protocol by installing and configuring Fluentd. Fluentd can be installed through GitLab in two ways: via the [GMAv1 method](../../../../clusters/applications.md#fluentd) and via the [GMAv2 method](../../../../clusters/applications.md#install-fluentd-using-gitlab-cicd). GitLab strongly encourages using only the GMAv2 method to install Fluentd.
 
 ## Viewing the logs
 
