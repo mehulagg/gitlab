@@ -21,6 +21,7 @@ describe('UpdateScheduleModal', () => {
   let wrapper;
   let fakeApollo;
   let updateScheduleHandler;
+  const modalId = 'updateModalId';
 
   const findModal = () => wrapper.find(GlModal);
 
@@ -47,6 +48,7 @@ describe('UpdateScheduleModal', () => {
         };
       },
       propsData: {
+        modalId,
         schedule:
           getOncallSchedulesQueryResponse.data.project.incidentManagementOncallSchedules.nodes[0],
         ...props,
@@ -99,7 +101,7 @@ describe('UpdateScheduleModal', () => {
 
   describe('renders update modal with the correct schedule information', () => {
     it('renders name of correct modal id', () => {
-      expect(findModal().attributes('modalid')).toBe('updateScheduleModal');
+      expect(findModal().attributes('modalid')).toBe(modalId);
     });
 
     it('renders name of schedule to update', () => {

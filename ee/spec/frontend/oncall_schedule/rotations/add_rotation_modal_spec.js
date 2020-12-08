@@ -34,6 +34,7 @@ describe('AddRotationModal', () => {
         };
       },
       propsData: {
+        modalId: 'modalId',
         ...props,
       },
       provide: {
@@ -58,6 +59,9 @@ describe('AddRotationModal', () => {
 
     wrapper = shallowMount(AddRotationModal, {
       localVue,
+      propsData: {
+        modalId: 'modalId',
+      },
       apolloProvider: fakeApollo,
       data() {
         return {
