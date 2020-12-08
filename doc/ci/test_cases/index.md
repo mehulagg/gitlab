@@ -8,7 +8,7 @@ type: reference
 
 # Test Cases **(ULTIMATE)**
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/233479) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.6.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/233479) in GitLab 13.6.
 > - It's [deployed behind a feature flag](../../user/feature_flags.md), enabled by default.
 > - [Became enabled by default](https://gitlab.com/gitlab-org/gitlab/-/issues/241983) on GitLab 13.6.
 > - It's enabled on GitLab.com.
