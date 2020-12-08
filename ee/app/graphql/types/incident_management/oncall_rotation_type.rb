@@ -37,10 +37,6 @@ module Types
             ::Types::IncidentManagement::OncallParticipantType.connection_type,
             null: true,
             description: 'Participants of the on-call rotation'
-
-      def participants
-        object.oncall_participants
-      end
     end
   end
 end

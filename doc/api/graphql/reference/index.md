@@ -1658,7 +1658,7 @@ Describes an incident management on-call schedule.
 | `description` | String | Description of the on-call schedule |
 | `iid` | ID! | Internal ID of the on-call schedule |
 | `name` | String! | Name of the on-call schedule |
-| `oncallRotations` | IncidentManagementOncallRotationConnection! | On-call rotations for the on-call schedule |
+| `rotations` | IncidentManagementOncallRotationConnection! | On-call rotations for the on-call schedule |
 | `timezone` | String! | Time zone of the on-call schedule |
 
 ### InstanceSecurityDashboard

@@ -10643,7 +10643,7 @@ type IncidentManagementOncallSchedule {
   """
   On-call rotations for the on-call schedule
   """
-  oncallRotations(
+  rotations(
     """
     Returns the elements in the list that come after the specified cursor.
     """
