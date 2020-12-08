@@ -11,10 +11,12 @@ export default {
   components: {
     EnvironmentItem,
     GlLoadingIcon,
+    GlModal,
     DeployBoard: () => import('ee_component/environments/components/deploy_board_component.vue'),
     CanaryDeploymentCallout: () =>
       import('ee_component/environments/components/canary_deployment_callout.vue'),
     EnvironmentAlert: () => import('ee_component/environments/components/environment_alert.vue'),
+    CanaryUpdateModal: () => import('ee_component/environments/components/canary_update_modal.vue'),
   },
   props: {
     environments: {
@@ -57,6 +59,12 @@ export default {
       required: false,
       default: '',
     },
+  },
+  data() {
+    return {
+      canaryWeight: 0,
+      environmentToChange: null,
+    };
   },
   computed: {
     sortedEnvironments() {
@@ -139,11 +147,22 @@ export default {
         sortBy(env => (env.isFolder ? -1 : 1)),
       )(environments);
     },
+    changeCanaryWeight(model, weight) {
+      this.environmentToChange = model;
+      this.canaryWeight = weight;
+
+      this.$refs['canary-change-modal'].show();
+    },
   },
 };
 </script>
 <template>
   <div class="ci-table" role="grid">
+    <canary-update-modal
+      ref="canary-change-modal"
+      :environment="environmentToChange"
+      :weight="canaryWeight"
+    />
     <div class="gl-responsive-table-row table-row-header" role="row">
       <div class="table-section" :class="tableData.name.spacing" role="columnheader">
         {{ tableData.name.title }}
@@ -185,6 +204,7 @@ export default {
             :is-loading="model.isLoadingDeployBoard"
             :is-empty="model.isEmptyDeployBoard"
             :logs-path="model.logs_path"
+            @changeCanaryWeight="changeCanaryWeight(model, $event)"
           />
         </div>
       </div>

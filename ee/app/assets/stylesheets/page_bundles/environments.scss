@@ -32,6 +32,9 @@
       width: 100%;
     }
 
+    .deploy-board-canary-ingress {
+      order: 7;
+    }
     .deploy-board-actions {
       order: 3;
       align-self: center;
@@ -53,7 +56,6 @@
       order: 2;
       flex-wrap: wrap;
       margin: auto auto 15px 0;
-
     }
 
     .deploy-board-empty-state-title {
