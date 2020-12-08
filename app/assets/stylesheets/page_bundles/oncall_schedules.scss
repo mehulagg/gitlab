@@ -181,3 +181,13 @@ $column-right-gradient: linear-gradient(to right, $gradient-dark-gray 0%, $gradi
     transform: translateX(-50%);
   }
 }
+
+.gl-token {
+  .gl-avatar-labeled-label {
+    @include gl-text-white;
+  }
+
+  .gl-token-close {
+    @include gl-display-none;
+  }
+}
