@@ -28,19 +28,21 @@ module Mutations
         raise_resource_not_available_error! unless feature_enabled?(project)
         raise_resource_not_available_error! unless license_available?(project)
 
-        {
-          payload_alert_fields: [
-            ::AlertManagement::AlertPayloadField.new(
-              project: project,
-              path: 'foo.bar',
-              label: 'Bar',
-              type: 'string'
-            )
-          ]
-        }
+        params = args.slice(:payload)
+
+        response ::AlertManagement::ExtractAlertPayloadFieldsService
+          .new(container: project, current_user: current_user, params: params)
+          .execute
       end
 
       private
+
+      def response(result)
+        {
+          payload_alert_fields: result.payload[:payload_alert_fields],
+          errors: result.errors
+        }.compact
+      end
 
       def find_object(full_path:)
         resolve_project(full_path: full_path)
