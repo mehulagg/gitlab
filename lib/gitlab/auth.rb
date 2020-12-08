@@ -200,7 +200,7 @@ module Gitlab
 
         return unless valid_scoped_token?(token, all_available_scopes)
 
-        if token.user.can?(:log_in) || token.user.can?(:token_log_in)
+        if token.user.project_bot? || token.user.can?(:log_in)
           Gitlab::Auth::Result.new(token.user, nil, :personal_access_token, abilities_for_scopes(token.scopes))
         end
       end
@@ -285,7 +285,7 @@ module Gitlab
         return unless build.project.builds_enabled?
 
         if build.user
-          return unless build.user.can?(:log_in) || build.user.can?(:token_log_in)
+          return unless build.user.can?(:log_in) || (build.user.project_bot? && build.project.bots&.include?(build.user))
 
           # If user is assigned to build, use restricted credentials of user
           Gitlab::Auth::Result.new(build.user, build.project, :build, build_authentication_abilities)

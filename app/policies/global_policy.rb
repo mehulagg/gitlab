@@ -57,10 +57,6 @@ class GlobalPolicy < BasePolicy
     prevent :receive_notifications
   end
 
-  rule { ~log_in && project_bot }.policy do
-    enable :token_log_in
-  end
-
   rule { deactivated }.policy do
     prevent :access_git
     prevent :access_api

@@ -177,14 +177,24 @@ RSpec.describe Gitlab::Auth, :use_clean_rails_memory_store_caching do
           let_it_be(:project_bot_user) { create(:user, :project_bot) }
           let_it_be(:project_access_token) { create(:personal_access_token, user: project_bot_user) }
 
-          before do
-            project.add_maintainer(project_bot_user)
+          context 'when project bot is a project maintainer' do
+            before do
+              project.add_maintainer(project_bot_user)
+            end
+
+            it 'recognizes project access token' do
+              build.update(user: project_bot_user)
+
+              expect(subject).to eq(Gitlab::Auth::Result.new(build.user, build.project, :build, described_class.build_authentication_abilities))
+            end
           end
 
-          it 'recognizes project access token' do
-            build.update(user: project_bot_user)
+          context 'when bot user is not a project member' do
+            it 'fails to authenticate project access token' do
+              build.update(user: project_bot_user)
 
-            expect(subject).to eq(Gitlab::Auth::Result.new(build.user, build.project, :build, described_class.build_authentication_abilities))
+              expect(subject).to eq(Gitlab::Auth::Result.new(nil, nil, nil, nil))
+            end
           end
         end
 
