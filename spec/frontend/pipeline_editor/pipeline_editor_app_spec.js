@@ -353,7 +353,7 @@ describe('~/pipeline_editor/pipeline_editor_app.vue', () => {
   });
 
   describe('displays fetch content errors', () => {
-    it('no error is show when data is set', async () => {
+    it('no error is shown when data is set', async () => {
       mockBlobContentData.mockResolvedValue(mockCiYml);
       createComponentWithApollo();
 
