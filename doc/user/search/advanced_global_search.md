@@ -43,7 +43,7 @@ The Advanced Search can be useful in various scenarios.
 
 ### Faster searches
 
-Advanced Search is based on Lucene, which uses an inverted index that provides results in 1-2 seconds in most cases.  
+Advanced Search is based on Elasticsearch, which is a purpose built full text search engine that can be horizontally scaled so that it can provide search results in 1-2 seconds in most cases.  
 
 ### Promote innersourcing
 
