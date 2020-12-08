@@ -1842,10 +1842,10 @@ apply only to higher tier levels, add tier markup to the subheading.
 | _Only_ GitLab.com Silver and higher tiers (no self-managed instances)  | `**(SILVER ONLY)**`   |
 | _Only_ GitLab.com Gold (no self-managed instances)                     | `**(GOLD ONLY)**`     |
 
-Documentation sections or pages mentioning the `gitlab.rb` file is referring to a
-self-managed instances. Include the relevant "`TIER` ONLY"
-[product badge](#product-tier-badges) at the highest applicable heading level in
-the page to prevent user confusion.
+Topics that mention the `gitlab.rb` file are referring to
+self-managed instances of GitLab. To prevent confusion, include the relevant "`TIER` ONLY"
+[product badge](#product-tier-badges) on the highest applicable heading level on
+the page.
 
 #### Product badge display behavior
 
