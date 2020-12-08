@@ -328,7 +328,7 @@ For visibility, please also share any commands run against production in the `#s
 
 You may force the application to put your current user in the experiment group. To do so 
 add a query string parameter to the URL of any page where the experiment runs. If you do so, 
-the experiment will work only for this URL and won't work after following links or submitting forms.
+the experiment will work only for this request and won't work after following links or submitting forms.
 
 For example, to forcibly enable the `EXPERIMENT_KEY` experiment, add `force_experiment=EXPERIMENT_KEY` 
 to the URL:
