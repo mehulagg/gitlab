@@ -35,7 +35,7 @@ export default {
       return {
         tagName,
         className,
-        text: this.$route.meta.nameGenerator(this.$store.state),
+        text: this.$route.meta.nameGenerator(),
         path: { to: this.$route.name },
       };
     },
@@ -53,7 +53,7 @@ export default {
     ></li>
     <li v-if="!isRootRoute">
       <router-link ref="rootRouteLink" :to="rootRoute.path">
-        {{ rootRoute.meta.nameGenerator($store.state) }}
+        {{ rootRoute.meta.nameGenerator() }}
       </router-link>
       <component :is="divider.tagName" :class="divider.classList" v-html="divider.innerHTML" />
     </li>

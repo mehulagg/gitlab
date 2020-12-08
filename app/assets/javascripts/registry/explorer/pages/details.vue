@@ -36,6 +36,7 @@ export default {
     TagsLoader,
     EmptyTagsState,
   },
+  inject: ['breadCrumbState'],
   directives: {
     GlResizeObserver: GlResizeObserverDirective,
   },
@@ -51,6 +52,7 @@ export default {
       },
       result({ data }) {
         this.tagsPageInfo = data.containerRepository?.tags?.pageInfo;
+        this.breadCrumbState.updateName(data.containerRepository?.name);
       },
       error() {
         createFlash({ message: FETCH_IMAGES_LIST_ERROR_MESSAGE });

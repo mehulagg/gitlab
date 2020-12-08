@@ -44,6 +44,10 @@ describe('Details Page', () => {
 
   const routeId = 1;
 
+  const breadCrumbState = {
+    updateName: jest.fn(),
+  };
+
   const cleanTags = tagsMock.map(t => {
     const result = { ...t };
     // eslint-disable-next-line no-underscore-dangle
@@ -89,6 +93,11 @@ describe('Details Page', () => {
             id: routeId,
           },
         },
+      },
+      provide() {
+        return {
+          breadCrumbState,
+        };
       },
       ...options,
     });
@@ -436,6 +445,16 @@ describe('Details Page', () => {
 
         expect(findPartialCleanupAlert().exists()).toBe(false);
       });
+    });
+  });
+
+  describe('Breadcrumb connection', () => {
+    it('when the details are fetched updates the name', async () => {
+      mountComponent();
+
+      await waitForApolloRequestRender();
+
+      expect(breadCrumbState.updateName).toHaveBeenCalledWith(containerRepositoryMock.name);
     });
   });
 });
