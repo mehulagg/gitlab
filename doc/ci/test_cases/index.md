@@ -30,6 +30,8 @@ To create a test case in a GitLab project:
 You can view all test cases in the project in the Test Cases list. Filter the
 issue list with a search query, including labels or the test case's title.
 
+Users with Guest or higher [permissions](../../user/permissions.md) can view test cases.
+
 ![Test case list page](img/test_case_list_v13_6.png)
 
 To view a test case:
@@ -39,9 +41,26 @@ To view a test case:
 
 ![An example test case page](img/test_case_show_v13_6.png)
 
+## Edit a test case
+
+You can edit a test case's title and description.
+
+Users with Reporter or higher [permissions](../../user/permissions.md) can edit test cases.
+However, users who are demoted to the Guest role, can still edit test cases they have created while
+in a higher role.
+
+To edit a test case:
+
+1. [View a test case](#view-a-test-case).
+1. Select the **Edit title and description** button (**{pencil}**).
+1. Edit the test case's title or description.
+1. Select **Save changes**.
+
 ## Archive a test case
 
 When you want to stop using a test case, you can archive it. You can [reopen an archived test case](#reopen-an-archived-test-case) later.
+
+Users with Reporter or higher [permissions](../../user/permissions.md) can archive test cases.
 
 To archive a test case, on the test case's page, select the **Archive test case** button.
 
@@ -53,5 +72,7 @@ To view archived test cases:
 ## Reopen an archived test case
 
 If you decide to start using an archived test case again, you can reopen it.
+
+Users with Reporter or higher [permissions](../../user/permissions.md) can reopen test cases.
 
 To reopen an archived test case, on the test case's page, select the **Reopen test case** button.
