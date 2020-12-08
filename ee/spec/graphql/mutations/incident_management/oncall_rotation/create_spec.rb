@@ -87,7 +87,7 @@ RSpec.describe Mutations::IncidentManagement::OncallRotation::Create do
           end
 
           it 'raises an error' do
-            expect { resolve }.to raise_error(ActiveRecord::RecordInvalid, /Participant does not have access to the project/)
+            expect { resolve }.to raise_error(ActiveRecord::RecordInvalid, /User does not have access to the project/)
           end
         end
 
