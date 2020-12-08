@@ -6,7 +6,7 @@ module Projects::OnDemandScansHelper
       'help-page-path' => help_page_path('user/application_security/dast/index', anchor: 'on-demand-scans'),
       'dast-site-validation-docs-path' => help_page_path('user/application_security/dast/index', anchor: 'dast-site-validation'),
       'empty-state-svg-path' => image_path('illustrations/empty-state/ondemand-scan-empty.svg'),
-      'default-branch' => project.default_branch,
+      'default-branch' => project.default_branch_or_master,
       'project-path' => project.path_with_namespace,
       'scanner-profiles-library-path' => project_security_configuration_dast_profiles_path(project, anchor: 'scanner-profiles'),
       'site-profiles-library-path' => project_security_configuration_dast_profiles_path(project, anchor: 'site-profiles'),
