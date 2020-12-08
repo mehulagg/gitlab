@@ -8,4 +8,4 @@ type: reference, howto
 GitLab can integrate with our partners in a number of ways. This page has
 specific information on how do this with each.
 
-* [Anchore](security_partners/anchore.md)
+- [Anchore](security_partners/anchore.md)
