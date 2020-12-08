@@ -665,6 +665,20 @@ RSpec.describe QuickActions::InterpretService do
       end
     end
 
+    shared_examples 'reviewer command' do
+      it 'assigns to a single user' do
+        _, updates, _ = service.execute(content, issuable)
+
+        expect(updates).to eq(reviewer_ids: [developer.id])
+      end
+
+      it 'returns the assign message' do
+        _, _, message = service.execute(content, issuable)
+
+        expect(message).to eq("Assigned #{developer.to_reference}.")
+      end
+    end
+
     it_behaves_like 'reopen command' do
       let(:content) { '/reopen' }
       let(:issuable) { issue }
@@ -779,6 +793,18 @@ RSpec.describe QuickActions::InterpretService do
 
       it_behaves_like 'assign command' do
         let(:content) { "/assign @#{developer.username}" }
+        let(:issuable) { merge_request }
+      end
+    end
+
+    context 'reviewer command with one user' do
+      it_behaves_like 'reviewer command' do
+        let(:content) { "/reviewer @#{developer.username}" }
+        let(:issuable) { merge_request }
+      end
+
+      it_behaves_like 'reviewer command' do
+        let(:content) { "/assign_for_review @#{developer.username}" }
         let(:issuable) { merge_request }
       end
     end

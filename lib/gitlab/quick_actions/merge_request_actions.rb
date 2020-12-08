@@ -8,6 +8,34 @@ module Gitlab
 
       included do
         # MergeRequest only quick actions definitions
+
+        desc _('Assign for review')
+        explanation do |users|
+          _('Assigns %{assignee_users_sentence} to review this merge request.') % { assignee_users_sentence: reviewer_users_sentence(users) }
+        end
+        execution_message do |users = nil|
+          if users.blank?
+            _("Failed to assign a user because no user was found.")
+          else
+            _('Assigned %{assignee_users_sentence} to review this merge request.') % { assignee_users_sentence: reviewer_users_sentence(users) }
+          end
+        end
+        params do
+          '@user1 @user2'
+        end
+        types MergeRequest
+        condition do
+          current_user.can?(:"admin_#{quick_action_target.to_ability_name}", project)
+        end
+        parse_params do |assignee_param|
+          extract_users(assignee_param)
+        end
+        command :reviewer, :assign_for_review do |users|
+          next if users.empty?
+
+          @updates[:reviewer_ids] ||= quick_action_target.assignees.map(&:id)
+        end
+
         desc do
           if Feature.enabled?(:merge_orchestration_service, quick_action_target.project, default_enabled: true)
             if preferred_strategy = preferred_auto_merge_strategy(quick_action_target)
@@ -143,6 +171,10 @@ module Gitlab
 
       def preferred_auto_merge_strategy(merge_request)
         merge_orchestration_service.preferred_auto_merge_strategy(merge_request)
+      end
+
+      def reviewer_users_sentence(users)
+        users.map(&:to_reference).to_sentence
       end
     end
   end
