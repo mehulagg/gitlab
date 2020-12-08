@@ -241,6 +241,22 @@ RSpec.describe AlertManagement::AlertsFinder, '#execute' do
         end
       end
 
+      context 'use operations domain as default' do
+        let_it_be(:alert) do
+          create(:alert_management_alert,
+                 :with_fingerprint,
+                 project: project,
+                 domain: 'threat_monitoring',
+                 title: 'Title',
+                 description: 'Desc',
+                 service: 'Service',
+                 monitoring_tool: 'Monitor'
+                )
+        end
+
+        it { is_expected.not_to include(['threat_monitoring']) }
+      end
+
       context 'assignee username given' do
         let_it_be(:assignee) { create(:user) }
         let_it_be(:alert) { create(:alert_management_alert, project: project, assignees: [assignee]) }
