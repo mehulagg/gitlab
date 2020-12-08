@@ -103,6 +103,17 @@ module API
           present latest_pipeline, with: Entities::Ci::Pipeline
         end
 
+        desc 'Unlocks artifacts from all the pipelines' do
+          detail 'This feature was introduced in GitLab 13.7'
+          success Entities::Ci::Pipeline
+        end
+        get ':id/pipelines/unlock_artifacts' do
+          authorize! :read_pipeline, latest_pipeline
+          
+          user_project.ci_pipelines.update_all(locked: 0)
+          present latest_pipeline, with: Entities::Ci::Pipeline
+        end
+
         desc 'Gets a specific pipeline for the project' do
           detail 'This feature was introduced in GitLab 8.11'
           success Entities::Ci::Pipeline
