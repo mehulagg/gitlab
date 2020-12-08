@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_12_08_025254) do
+ActiveRecord::Schema.define(version: 2020_12_08_031224) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -124,6 +124,9 @@ ActiveRecord::Schema.define(version: 2020_12_08_025254) do
     t.index ["package_file_id"], name: "index_package_file_registry_on_repository_id"
     t.index ["retry_at"], name: "index_package_file_registry_on_retry_at"
     t.index ["state"], name: "index_package_file_registry_on_state"
+    t.index ["verification_retry_at"], name: "package_file_registry_failed_verification", order: "NULLS FIRST", where: "((state = 2) AND (verification_state = 3))"
+    t.index ["verification_state"], name: "package_file_registry_needs_verification", where: "((state = 2) AND ((verification_state = 0) OR (verification_state = 3)))"
+    t.index ["verified_at"], name: "package_file_registry_pending_verification", order: "NULLS FIRST", where: "((state = 2) AND (verification_state = 0))"
   end
 
   create_table "project_registry", id: :serial, force: :cascade do |t|
