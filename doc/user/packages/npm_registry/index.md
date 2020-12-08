@@ -456,3 +456,11 @@ If you get this error, ensure that:
 - The scoped packages URL includes a trailing slash:
   - Correct: `//gitlab.example.com/api/v4/packages/npm/`
   - Incorrect: `//gitlab.example.com/api/v4/packages/npm`
+
+### `npm publish` returns `npm ERR! 400 Bad Request`
+
+If you get this error, your package name may not meet the
+[@scope:package-name package naming convention](#package-naming-convention).
+
+Ensure the name meets the convention exactly, including the case.
+Then try to publish again.
