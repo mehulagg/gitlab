@@ -115,12 +115,18 @@ export default {
             id: this.queryVariables.id,
             tagNames: itemsToBeDeleted.map(i => i.name),
           },
+          awaitRefetchQueries: true,
+          refetchQueries: [
+            {
+              query: getContainerRepositoryDetailsQuery,
+              variables: this.queryVariables,
+            },
+          ],
         });
 
         if (data?.destroyContainerRepositoryTags?.errors[0]) {
           throw new Error();
         }
-        await this.$apollo.queries.image.refetch();
         this.deleteAlertType =
           itemsToBeDeleted.length === 0 ? ALERT_SUCCESS_TAG : ALERT_SUCCESS_TAGS;
       } catch (e) {
