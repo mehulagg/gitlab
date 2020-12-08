@@ -45,7 +45,7 @@ when you view the package details:
 
 ![Package CI/CD activity](img/package_activity_v12_10.png)
 
-You can view which pipeline published the package, and the commit and user who triggered it. However, the history is limited to 5 updates of a given package.
+You can view which pipeline published the package, and the commit and user who triggered it. However, the history is limited to five updates of a given package.
 
 ## Download a package
 
