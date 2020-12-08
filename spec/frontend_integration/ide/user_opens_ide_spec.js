@@ -79,8 +79,7 @@ describe('IDE: User opens IDE', () => {
     beforeEach(async () => {
       vm = startWebIDE(container, { path: 'README.md' });
 
-      // a new tab is open for README.md
-      await findByText(document.querySelector('.multi-file-edit-pane'), 'README.md');
+      await ideHelper.waitForTabToOpen('README.md');
     });
 
     it('opens the file and its contents are shown in Monaco', async () => {
@@ -92,8 +91,7 @@ describe('IDE: User opens IDE', () => {
     beforeEach(async () => {
       vm = startWebIDE(container, { path: 'Gemfile.zip' });
 
-      // a new tab is open for Gemfile.zip
-      await findByText(document.querySelector('.multi-file-edit-pane'), 'Gemfile.zip');
+      await ideHelper.waitForTabToOpen('Gemfile.zip');
     });
 
     it('shows download viewer', async () => {
@@ -108,8 +106,7 @@ describe('IDE: User opens IDE', () => {
     beforeEach(async () => {
       vm = startWebIDE(container, { path: 'files/images/logo-white.png' });
 
-      // a new tab is open for logo-white.png
-      await findByText(document.querySelector('.multi-file-edit-pane'), 'logo-white.png');
+      await ideHelper.waitForTabToOpen('logo-white.png');
     });
 
     it('shows image viewer', async () => {
