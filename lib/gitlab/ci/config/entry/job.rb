@@ -31,6 +31,7 @@ module Gitlab
 
               validates :dependencies, array_of_strings: true
               validates :resource_group, type: String
+              validates :allow_failure, hash_or_boolean: true
             end
 
             validates :start_in, duration: { limit: '1 week' }, if: :delayed?
@@ -117,9 +118,14 @@ module Gitlab
             description: 'Parallel configuration for this job.',
             inherit: false
 
+          entry :allow_failure, ::Gitlab::Ci::Config::Entry::AllowFailure,
+            description: 'Indicates whether this job is allowed to fail or not.',
+            inherit: false
+
           attributes :script, :tags, :when, :dependencies,
                      :needs, :retry, :parallel, :start_in,
-                     :interruptible, :timeout, :resource_group, :release
+                     :interruptible, :timeout, :resource_group,
+                     :release, :allow_failure
 
           def self.matching?(name, config)
             !name.to_s.start_with?('.') &&
@@ -166,10 +172,28 @@ module Gitlab
               release: release_value,
               after_script: after_script_value,
               ignore: ignored?,
+              allow_failure: allow_failure_options,
               needs: needs_defined? ? needs_value : nil,
               resource_group: resource_group,
               scheduling_type: needs_defined? ? :dag : :stage
             ).compact
+          end
+
+          def ignored?
+            return manual_action? unless allow_failure_defined?
+            return false if allow_failure_value.is_a?(Hash)
+
+            allow_failure_value
+          end
+
+          private
+
+          def allow_failure_options
+            return unless ::Gitlab::Ci::Features.allow_failure_with_exit_codes?
+
+            if allow_failure_defined? && allow_failure_value.is_a?(Hash)
+              allow_failure_value
+            end
           end
         end
       end

@@ -2216,6 +2216,69 @@ RSpec.describe Ci::CreatePipelineService do
         end
       end
 
+      context 'with allow_failure and exit_codes', :aggregate_failures do
+        let(:config) do
+          <<-EOY
+            job-1:
+              script: exit 42
+              allow_failure:
+                exit_codes: 42
+              rules:
+                - if: $CI_COMMIT_REF_NAME == "master"
+                  allow_failure: false
+
+            job-2:
+              script: exit 42
+              allow_failure:
+                exit_codes: 42
+              rules:
+                - if: $CI_COMMIT_REF_NAME == "master"
+                  allow_failure: true
+
+            job-3:
+              script: exit 42
+              allow_failure:
+                exit_codes: 42
+              rules:
+                - if: $CI_COMMIT_REF_NAME == "master"
+                  when: manual
+          EOY
+        end
+
+        it 'creates a pipeline' do
+          expect(pipeline).to be_persisted
+          expect(build_names).to contain_exactly(
+            'job-1', 'job-2', 'job-3'
+          )
+        end
+
+        it 'assigns job:allow_failure values to the builds' do
+          expect(find_job('job-1').allow_failure).to eq(false)
+          expect(find_job('job-2').allow_failure).to eq(true)
+          expect(find_job('job-3').allow_failure).to eq(false)
+        end
+
+        it 'removes exit_codes if allow_failure is specified' do
+          expect(find_job('job-1').options.dig(:allow_failure, :exit_codes)).to eq([])
+          expect(find_job('job-2').options.dig(:allow_failure, :exit_codes)).to eq([])
+          expect(find_job('job-3').options.dig(:allow_failure, :exit_codes)).to eq([42])
+        end
+
+        context 'with ci_allow_failure_with_exit_codes disabled' do
+          before do
+            allow(::Gitlab::Ci::Features)
+              .to receive(:allow_failure_with_exit_codes?)
+              .and_return(true, true, true, false)
+          end
+
+          it 'does not remove exit_codes' do
+            expect(find_job('job-1').options.dig(:allow_failure, :exit_codes)).to eq([42])
+            expect(find_job('job-2').options.dig(:allow_failure, :exit_codes)).to eq([42])
+            expect(find_job('job-3').options.dig(:allow_failure, :exit_codes)).to eq([42])
+          end
+        end
+      end
+
       context 'with deploy freeze period `if:` clause' do
         # '0 23 * * 5' == "At 23:00 on Friday."", '0 7 * * 1' == "At 07:00 on Monday.""
         let!(:freeze_period) { create(:ci_freeze_period, project: project, freeze_start: '0 23 * * 5', freeze_end: '0 7 * * 1') }

@@ -8,15 +8,34 @@ module Gitlab
 
         Result = Struct.new(:when, :start_in, :allow_failure) do
           def build_attributes
-            {
+            attributes = {
               when: self.when,
               options: { start_in: start_in }.compact,
               allow_failure: allow_failure
             }.compact
+
+            attributes[:options].merge!(override_exit_codes) if allow_failure_specified?
+            attributes
           end
 
           def pass?
             self.when != 'never'
+          end
+
+          private
+
+          def allow_failure_specified?
+            return false unless allow_failure_enabled?
+
+            !allow_failure.nil?
+          end
+
+          def override_exit_codes
+            { allow_failure: { exit_codes: [] } }
+          end
+
+          def allow_failure_enabled?
+            ::Gitlab::Ci::Features.allow_failure_with_exit_codes?
           end
         end
 
