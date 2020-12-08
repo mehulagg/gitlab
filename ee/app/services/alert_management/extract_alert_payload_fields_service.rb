@@ -5,19 +5,28 @@ module AlertManagement
     alias_method :project, :container
 
     def execute
-      return error(_('Feature not available')) unless available?
+      return error('Feature not available') unless available?
 
-      success([
-        ::AlertManagement::AlertPayloadField.new(
-          project: project,
-          path: 'foo.bar',
-          label: 'Bar',
-          type: 'string'
-        )
-      ])
+      payload = parse_payload
+      error('Failed to parse payload') unless payload
+      error('Payload size exceeded') unless valid_payload_size?(payload)
+
+      fields = Gitlab::AlertManagement::AlertPayloadFieldExtractor
+        .new(project).extract(payload)
+
+      success(fields)
     end
 
     private
+
+    def parse_payload
+      Gitlab::Json.parse(params[:payload])
+    rescue JSON::ParserError
+    end
+
+    def valid_payload_size?(payload)
+      Gitlab::Utils::DeepSize.new(payload).valid?
+    end
 
     def success(fields)
       ServiceResponse.success(payload: { payload_alert_fields: fields })
