@@ -362,7 +362,7 @@ module EE
           end
 
           results.merge!(count_secure_pipelines(time_period))
-          results.merge!(count_secure_jobs(time_period))
+          results.merge!(count_secure_scans(time_period))
 
           results[:"#{prefix}unique_users_all_secure_scanners"] = distinct_count(::Ci::Build.where(name: SECURE_PRODUCT_TYPES.keys).where(time_period), :user_id)
 
@@ -379,7 +379,7 @@ module EE
 
         # rubocop:disable CodeReuse/ActiveRecord
         # rubocop: disable UsageData/LargeTable
-        def count_secure_jobs(time_period)
+        def count_secure_scans(time_period)
           start = ::Security::Scan.minimum(:build_id)
           finish = ::Security::Scan.maximum(:build_id)
 
