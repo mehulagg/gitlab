@@ -361,6 +361,7 @@ module EE
                                                                           finish: user_maximum_id)
           end
 
+          results.merge!(count_secure_user_scans(time_period))
           results.merge!(count_secure_pipelines(time_period))
           results.merge!(count_secure_scans(time_period))
 
@@ -376,6 +377,23 @@ module EE
         # rubocop:enable CodeReuse/ActiveRecord
 
         private
+
+        # rubocop:disable UsageData/LargeTable
+        # rubocop:disable CodeReuse/ActiveRecord
+        def count_secure_user_scans(time_period)
+          {}.tap do |user_secure_scans|
+            ::Security::Scan.scan_types.each do |name, scan_type|
+              scans_query = ::Ci::Build.joins(:security_scans)
+                              .where("security_scans.scan_type": scan_type)
+                              .merge(::CommitStatus.latest.success)
+                              .where(time_period)
+
+              user_secure_scans["user_#{name}_scans".to_sym] = distinct_count(scans_query, :user_id, start: user_minimum_id, finish: user_maximum_id)
+            end
+          end
+        end
+        # rubocop:enable UsageData/LargeTable
+        # rubocop:enable CodeReuse/ActiveRecord
 
         # rubocop:disable CodeReuse/ActiveRecord
         # rubocop: disable UsageData/LargeTable
