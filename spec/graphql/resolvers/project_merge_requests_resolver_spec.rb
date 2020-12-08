@@ -8,6 +8,7 @@ RSpec.describe Resolvers::ProjectMergeRequestsResolver do
   let_it_be(:project) { create(:project, :repository) }
   let_it_be(:current_user) { create(:user) }
   let_it_be(:other_user) { create(:user) }
+  let_it_be(:reviewer) { create(:user) }
 
   let_it_be(:merge_request_with_author_and_assignee) do
     create(:merge_request,
@@ -15,7 +16,8 @@ RSpec.describe Resolvers::ProjectMergeRequestsResolver do
            source_project: project,
            target_project: project,
            author: other_user,
-           assignee: other_user)
+           assignee: other_user,
+           reviewers: [reviewer])
   end
 
   before do
@@ -45,6 +47,20 @@ RSpec.describe Resolvers::ProjectMergeRequestsResolver do
 
     it 'does not find anything' do
       result = resolve_mr(project, author_username: 'unknown-user')
+
+      expect(result).to be_empty
+    end
+  end
+
+  context 'by reviewer' do
+    it 'filters merge requests by reviewer username' do
+      result = resolve_mr(project, reviewer_username: reviewer.username)
+
+      expect(result).to eq([merge_request_with_author_and_assignee])
+    end
+
+    it 'does not find anything' do
+      result = resolve_mr(project, reviewer_username: 'unknown-user')
 
       expect(result).to be_empty
     end
