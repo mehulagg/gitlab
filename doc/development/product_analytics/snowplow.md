@@ -469,137 +469,138 @@ For GitLab.com, we're setting up a [QA and Testing environment](https://gitlab.c
 
 ### Standard Schema
 
-| Field Name               | Required            | Description                                 |
-|--------------------------|---------------------|---------------------------------------------|
-| app_id                   | **{check-circle}**  | Unique identifier for website / application |
-| base_currency            | **{dotted-circle}** | Base currency code according to ISO_4217    |
-| br_colordepth            | **{dotted-circle}** |                                             |
-| br_cookies               | **{dotted-circle}** |                                             |
-| br_family                | **{dotted-circle}** |                                             |
-| br_features_director     | **{dotted-circle}** |                                             |
-| br_features_flash        | **{dotted-circle}** |                                             |
-| br_features_gears        | **{dotted-circle}** |                                             |
-| br_features_java         | **{dotted-circle}** |                                             |
-| br_features_pdf          | **{dotted-circle}** |                                             |
-| br_features_quicktime    | **{dotted-circle}** |                                             |
-| br_features_realplayer   | **{dotted-circle}** |                                             |
-| br_features_silverlight  | **{dotted-circle}** |                                             |
-| br_features_windowsmedia | **{dotted-circle}** |                                             |
-| br_lang                  | **{dotted-circle}** |                                             |
-| br_name                  | **{dotted-circle}** |                                             |
-| br_renderengine          | **{dotted-circle}** |                                             |
-| br_type                  | **{dotted-circle}** |                                             |
-| br_version               | **{dotted-circle}** |                                             |
-| br_viewheight            | **{dotted-circle}** |                                             |
-| br_viewwidth             | **{dotted-circle}** |                                             |
-| collector_tstamp         | **{dotted-circle}** |                                             |
-| contexts                 | **{dotted-circle}** |                                             |
-| derived_contexts         | **{dotted-circle}** |                                             |
-| derived_tstamp           | **{dotted-circle}** |                                             |
-| doc_charset              | **{dotted-circle}** |                                             |
-| doc_height               | **{dotted-circle}** |                                             |
-| doc_width                | **{dotted-circle}** |                                             |
-| domain_sessionid         | **{dotted-circle}** |                                             |
-| domain_sessionidx        | **{dotted-circle}** |                                             |
-| domain_userid            | **{dotted-circle}** |                                             |
-| dvce_created_tstamp      | **{dotted-circle}** |                                             |
-| dvce_ismobile            | **{dotted-circle}** |                                             |
-| dvce_screenheight        | **{dotted-circle}** |                                             |
-| dvce_screenwidth         | **{dotted-circle}** |                                             |
-| dvce_sent_tstamp         | **{dotted-circle}** |                                             |
-| dvce_type                | **{dotted-circle}** |                                             |
-| etl_tags                 | **{dotted-circle}** |                                             |
-| etl_tstamp               | **{dotted-circle}** |                                             |
-| event                    | **{dotted-circle}** |                                             |
-| event_fingerprint        | **{dotted-circle}** |                                             |
-| event_format             | **{dotted-circle}** |                                             |
-| event_id                 | **{dotted-circle}** |                                             |
-| event_name               | **{dotted-circle}** |                                             |
-| event_vendor             | **{dotted-circle}** |                                             |
-| event_version            | **{dotted-circle}** |                                             |
-| geo_city                 | **{dotted-circle}** |                                             |
-| geo_country              | **{dotted-circle}** |                                             |
-| geo_latitude             | **{dotted-circle}** |                                             |
-| geo_longitude            | **{dotted-circle}** |                                             |
-| geo_region               | **{dotted-circle}** |                                             |
-| geo_region_name          | **{dotted-circle}** |                                             |
-| geo_timezone             | **{dotted-circle}** |                                             |
-| geo_zipcode              | **{dotted-circle}** |                                             |
-| ip_domain                | **{dotted-circle}** |                                             |
-| ip_isp                   | **{dotted-circle}** |                                             |
-| ip_netspeed              | **{dotted-circle}** |                                             |
-| ip_organization          | **{dotted-circle}** |                                             |
-| mkt_campaign             | **{dotted-circle}** |                                             |
-| mkt_clickid              | **{dotted-circle}** |                                             |
-| mkt_content              | **{dotted-circle}** |                                             |
-| mkt_medium               | **{dotted-circle}** |                                             |
-| mkt_network              | **{dotted-circle}** |                                             |
-| mkt_source               | **{dotted-circle}** |                                             |
-| mkt_term                 | **{dotted-circle}** |                                             |
-| name_tracker             | **{dotted-circle}** |                                             |
-| network_userid           | **{dotted-circle}** |                                             |
-| os_family                | **{dotted-circle}** |                                             |
-| os_manufacturer          | **{dotted-circle}** |                                             |
-| os_name                  | **{dotted-circle}** |                                             |
-| os_timezone              | **{dotted-circle}** |                                             |
-| page_referrer            | **{dotted-circle}** |                                             |
-| page_title               | **{dotted-circle}** |                                             |
-| page_url                 | **{dotted-circle}** |                                             |
-| page_urlfragment         | **{dotted-circle}** |                                             |
-| page_urlhost             | **{dotted-circle}** |                                             |
-| page_urlpath             | **{dotted-circle}** |                                             |
-| page_urlport             | **{dotted-circle}** |                                             |
-| page_urlquery            | **{dotted-circle}** |                                             |
-| page_urlscheme           | **{dotted-circle}** |                                             |
-| platform                 | **{dotted-circle}** |                                             |
-| pp_xoffset_max           | **{dotted-circle}** |                                             |
-| pp_xoffset_min           | **{dotted-circle}** |                                             |
-| pp_yoffset_max           | **{dotted-circle}** |                                             |
-| pp_yoffset_min           | **{dotted-circle}** |                                             |
-| refr_domain_userid       | **{dotted-circle}** |                                             |
-| refr_dvce_tstamp         | **{dotted-circle}** |                                             |
-| refr_medium              | **{dotted-circle}** |                                             |
-| refr_source              | **{dotted-circle}** |                                             |
-| refr_term                | **{dotted-circle}** |                                             |
-| refr_urlfragment         | **{dotted-circle}** |                                             |
-| refr_urlhost             | **{dotted-circle}** |                                             |
-| refr_urlpath             | **{dotted-circle}** |                                             |
-| refr_urlport             | **{dotted-circle}** |                                             |
-| refr_urlquery            | **{dotted-circle}** |                                             |
-| refr_urlscheme           | **{dotted-circle}** |                                             |
-| se_action                | **{dotted-circle}** |                                             |
-| se_category              | **{dotted-circle}** |                                             |
-| se_label                 | **{dotted-circle}** |                                             |
-| se_property              | **{dotted-circle}** |                                             |
-| se_value                 | **{dotted-circle}** |                                             |
-| ti_category              | **{dotted-circle}** |                                             |
-| ti_currency              | **{dotted-circle}** |                                             |
-| ti_name                  | **{dotted-circle}** |                                             |
-| ti_orderid               | **{dotted-circle}** |                                             |
-| ti_price                 | **{dotted-circle}** |                                             |
-| ti_price_base            | **{dotted-circle}** |                                             |
-| ti_quantity              | **{dotted-circle}** |                                             |
-| ti_sku                   | **{dotted-circle}** |                                             |
-| tr_affiliation           | **{dotted-circle}** |                                             |
-| tr_city                  | **{dotted-circle}** |                                             |
-| tr_country               | **{dotted-circle}** |                                             |
-| tr_currency              | **{dotted-circle}** |                                             |
-| tr_orderid               | **{dotted-circle}** |                                             |
-| tr_shipping              | **{dotted-circle}** |                                             |
-| tr_shipping_base         | **{dotted-circle}** |                                             |
-| tr_state                 | **{dotted-circle}** |                                             |
-| tr_tax                   | **{dotted-circle}** |                                             |
-| tr_tax_base              | **{dotted-circle}** |                                             |
-| tr_total                 | **{dotted-circle}** |                                             |
-| tr_total_base            | **{dotted-circle}** |                                             |
-| true_tstamp              | **{dotted-circle}** |                                             |
-| txn_id                   | **{dotted-circle}** |                                             |
-| unstruct_event           | **{dotted-circle}** |                                             |
-| uploaded_at              | **{dotted-circle}** |                                             |
-| user_fingerprint         | **{dotted-circle}** |                                             |
-| user_id                  | **{dotted-circle}** |                                             |
-| user_ipaddress           | **{dotted-circle}** |                                             |
-| useragent                | **{dotted-circle}** |                                             |
-| v_collector              | **{dotted-circle}** |                                             |
-| v_etl                    | **{dotted-circle}** |                                             |
-| v_tracker                | **{dotted-circle}** |                                             |
+| Field Name               | Required            | Type    | Description                                                  |
+|--------------------------|---------------------|---------|--------------------------------------------------------------|
+| app_id                   | **{check-circle}**  |         | Unique identifier for website / application                  |
+| base_currency            | **{dotted-circle}** |         | Base currency code according to ISO_4217                     |
+| br_colordepth            | **{dotted-circle}** | integer | Browser color depth                                          |
+| br_cookies               | **{dotted-circle}** | boolean | Does the browser permit cookies?                             |
+| br_family                | **{dotted-circle}** |         |                                                              |
+| br_features_director     | **{dotted-circle}** | boolean | Director plugin installed?                                   |
+| br_features_flash        | **{dotted-circle}** | boolean | Flash plugin installed?                                      |
+| br_features_gears        | **{dotted-circle}** | boolean | Google gears installed?                                      |
+| br_features_java         | **{dotted-circle}** | boolean | Java plugin installed?                                       |
+| br_features_pdf          | **{dotted-circle}** | boolean | Adobe PDF plugin installed?                                  |
+| br_features_quicktime    | **{dotted-circle}** | boolean | Quicktime plugin installed?                                  |
+| br_features_realplayer   | **{dotted-circle}** | boolean | Realplayer plugin installed?                                 |
+| br_features_silverlight  | **{dotted-circle}** | boolean | Silverlight plugin installed?                                |
+| br_features_windowsmedia | **{dotted-circle}** | boolean | Windows media plugin installed?                              |
+| br_lang                  | **{dotted-circle}** | string  | Language the browser is set to                               |
+| br_name                  | **{dotted-circle}** |         |                                                              |
+| br_renderengine          | **{dotted-circle}** |         |                                                              |
+| br_type                  | **{dotted-circle}** |         |                                                              |
+| br_version               | **{dotted-circle}** |         |                                                              |
+| br_viewheight            | **{dotted-circle}** | string  | Browser viewport height                                      |
+| br_viewwidth             | **{dotted-circle}** | string  | Browser viewport width                                       |
+| collector_tstamp         | **{dotted-circle}** |         |                                                              |
+| contexts                 | **{dotted-circle}** |         |                                                              |
+| derived_contexts         | **{dotted-circle}** |         |                                                              |
+| derived_tstamp           | **{dotted-circle}** |         |                                                              |
+| doc_charset              | **{dotted-circle}** | string  | Web page’s character encoding                                |
+| doc_height               | **{dotted-circle}** | string  | Web page height                                              |
+| doc_width                | **{dotted-circle}** | string  | Web page width                                               |
+| domain_sessionid         | **{dotted-circle}** |         |                                                              |
+| domain_sessionidx        | **{dotted-circle}** |         |                                                              |
+| domain_userid            | **{dotted-circle}** |         |                                                              |
+| dvce_created_tstamp      | **{dotted-circle}** |         |                                                              |
+| dvce_ismobile            | **{dotted-circle}** |         |                                                              |
+| dvce_screenheight        | **{dotted-circle}** |         |                                                              |
+| dvce_screenwidth         | **{dotted-circle}** |         |                                                              |
+| dvce_sent_tstamp         | **{dotted-circle}** |         |                                                              |
+| dvce_type                | **{dotted-circle}** |         |                                                              |
+| etl_tags                 | **{dotted-circle}** |         |                                                              |
+| etl_tstamp               | **{dotted-circle}** |         |                                                              |
+| event                    | **{dotted-circle}** |         |                                                              |
+| event_fingerprint        | **{dotted-circle}** |         |                                                              |
+| event_format             | **{dotted-circle}** |         |                                                              |
+| event_id                 | **{dotted-circle}** |         |                                                              |
+| event_name               | **{dotted-circle}** |         |                                                              |
+| event_vendor             | **{dotted-circle}** |         |                                                              |
+| event_version            | **{dotted-circle}** |         |                                                              |
+| geo_city                 | **{dotted-circle}** |         |                                                              |
+| geo_country              | **{dotted-circle}** |         |                                                              |
+| geo_latitude             | **{dotted-circle}** |         |                                                              |
+| geo_longitude            | **{dotted-circle}** |         |                                                              |
+| geo_region               | **{dotted-circle}** |         |                                                              |
+| geo_region_name          | **{dotted-circle}** |         |                                                              |
+| geo_timezone             | **{dotted-circle}** |         |                                                              |
+| geo_zipcode              | **{dotted-circle}** |         |                                                              |
+| ip_domain                | **{dotted-circle}** |         |                                                              |
+| ip_isp                   | **{dotted-circle}** |         |                                                              |
+| ip_netspeed              | **{dotted-circle}** |         |                                                              |
+| ip_organization          | **{dotted-circle}** |         |                                                              |
+| mkt_campaign             | **{dotted-circle}** |         |                                                              |
+| mkt_clickid              | **{dotted-circle}** |         |                                                              |
+| mkt_content              | **{dotted-circle}** |         |                                                              |
+| mkt_medium               | **{dotted-circle}** |         |                                                              |
+| mkt_network              | **{dotted-circle}** |         |                                                              |
+| mkt_source               | **{dotted-circle}** |         |                                                              |
+| mkt_term                 | **{dotted-circle}** |         |                                                              |
+| name_tracker             | **{dotted-circle}** |         |                                                              |
+| network_userid           | **{dotted-circle}** |         |                                                              |
+| os_family                | **{dotted-circle}** |         |                                                              |
+| os_manufacturer          | **{dotted-circle}** |         |                                                              |
+| os_name                  | **{dotted-circle}** |         |                                                              |
+| os_timezone              | **{dotted-circle}** | string  | Time zone of client device’s OS                              |
+| page_referrer            | **{dotted-circle}** | string  | Referrer URL                                                 |
+| page_title               | **{dotted-circle}** | string  | Page title                                                   |
+| page_url                 | **{dotted-circle}** | string  | Page URL                                                     |
+| page_urlfragment         | **{dotted-circle}** |         |                                                              |
+| page_urlhost             | **{dotted-circle}** |         |                                                              |
+| page_urlpath             | **{dotted-circle}** |         |                                                              |
+| page_urlport             | **{dotted-circle}** |         |                                                              |
+| page_urlquery            | **{dotted-circle}** |         |                                                              |
+| page_urlscheme           | **{dotted-circle}** |         |                                                              |
+| platform                 | **{dotted-circle}** |         |                                                              |
+| pp_xoffset_max           | **{dotted-circle}** | integer | Maximum page x offset seen in the last ping period           |
+| pp_xoffset_min           | **{dotted-circle}** | integer | Minimum page x offset seen in the last ping period           |
+| pp_yoffset_max           | **{dotted-circle}** | integer | Maximum page y offset seen in the last ping period           |
+| pp_yoffset_min           | **{dotted-circle}** | integer | Minimum page y offset seen in the last ping period           |
+| refr_domain_userid       | **{dotted-circle}** |         |                                                              |
+| refr_dvce_tstamp         | **{dotted-circle}** |         |                                                              |
+| refr_medium              | **{dotted-circle}** |         |                                                              |
+| refr_source              | **{dotted-circle}** |         |                                                              |
+| refr_term                | **{dotted-circle}** |         |                                                              |
+| refr_urlfragment         | **{dotted-circle}** |         |                                                              |
+| refr_urlhost             | **{dotted-circle}** |         |                                                              |
+| refr_urlpath             | **{dotted-circle}** |         |                                                              |
+| refr_urlport             | **{dotted-circle}** |         |                                                              |
+| refr_urlquery            | **{dotted-circle}** |         |                                                              |
+| refr_urlscheme           | **{dotted-circle}** |         |                                                              |
+| se_action                | **{dotted-circle}** |         |                                                              |
+| se_category              | **{dotted-circle}** |         |                                                              |
+| se_label                 | **{dotted-circle}** |         |                                                              |
+| se_property              | **{dotted-circle}** |         |                                                              |
+| se_value                 | **{dotted-circle}** |         |                                                              |
+| ti_category              | **{dotted-circle}** | string  | Item category                                                |
+| ti_currency              | **{dotted-circle}** | string  | Currency                                                     |
+| ti_name                  | **{dotted-circle}** | string  | Item name                                                    |
+| ti_orderid               | **{dotted-circle}** | string  | Order ID                                                     |
+| ti_price                 | **{dotted-circle}** | decimal | Item price                                                   |
+| ti_price_base            | **{dotted-circle}** |         |                                                              |
+| ti_quantity              | **{dotted-circle}** | integer | Item quantity                                                |
+| ti_sku                   | **{dotted-circle}** | string  | Item SKU                                                     |
+| tr_affiliation           | **{dotted-circle}** | string  | Transaction affiliation (e.g. channel)                       |
+| tr_city                  | **{dotted-circle}** | string  | Delivery address: city                                       |
+| tr_country               | **{dotted-circle}** | string  | Delivery address: country                                    |
+| tr_currency              | **{dotted-circle}** | string  | Transaction Currency                                         |
+| tr_orderid               | **{dotted-circle}** | string  | Order ID                                                     |
+| tr_shipping              | **{dotted-circle}** | decimal | Delivery cost charged                                        |
+| tr_shipping_base         | **{dotted-circle}** |         |                                                              |
+| tr_state                 | **{dotted-circle}** | string  | Delivery address: state                                      |
+| tr_tax                   | **{dotted-circle}** | decimal | Transaction tax value (i.e. amount of VAT included)          |
+| tr_tax_base              | **{dotted-circle}** |         |                                                              |
+| tr_total                 | **{dotted-circle}** | decimal | Transaction total value                                      |
+| tr_total_base            | **{dotted-circle}** |         |                                                              |
+| true_tstamp              | **{dotted-circle}** |         |                                                              |
+| txn_id                   | **{dotted-circle}** |         |                                                              |
+| unstruct_event           | **{dotted-circle}** |         |                                                              |
+| uploaded_at              | **{dotted-circle}** |         |                                                              |
+| user_fingerprint         | **{dotted-circle}** | integer | User identifier based on (hopefully unique) browser features |
+| user_id                  | **{dotted-circle}** |         |                                                              |
+| user_ipaddress           | **{dotted-circle}** |         |                                                              |
+| useragent                | **{dotted-circle}** | string  | Useragent (a.k.a. browser string)                            |
+| v_collector              | **{dotted-circle}** |         |                                                              |
+| v_etl                    | **{dotted-circle}** |         |                                                              |
+| v_tracker                | **{dotted-circle}** |         |                                                              |
+
