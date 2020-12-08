@@ -1826,7 +1826,7 @@ Tier badges are displayed as orange text next to a heading. For example:
 ![Tier badge](img/tier_badge.png)
 
 - You must assign a tier badge to [all H1 topic headings](#product-tier-badges-on-headings).
-- If a topic applies to a tier other than Core, you must assign a tier badge to the topic heading.
+- If an H2 or higher topic applies to a tier other than Core, you must assign a tier badge to the topic heading.
 - If a section of a topic applies to a tier other than Core, you must assign a tier badge in the
   [relevant section](#product-tier-badges-on-other-content).
 
