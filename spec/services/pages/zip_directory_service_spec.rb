@@ -3,23 +3,44 @@
 require 'spec_helper'
 
 RSpec.describe Pages::ZipDirectoryService do
-  let(:dirs) do
+  let(:valid_dirs) do
     [
       "public",
       "public/nested"
     ]
   end
 
-  let(:files) do
+  let(:valid_files) do
     [
       ["public/index.html", "index"],
       ["public/nested/nested.html", "nested"]
     ]
   end
 
-  let(:links) do
+  let(:valid_links) do
     [
-      ["public/link.html", "../index.html"]
+      ["public/link.html", "./index.html"],
+      ["public/nested/nested_link.html", "../index.html"]
+    ]
+  end
+
+  let(:dirs) do
+    valid_dirs + [
+      "another_dir"
+    ]
+  end
+
+  let(:files) do
+    valid_files + [
+      "top_level_file.html",
+      "another_dir/index.html"
+    ]
+  end
+
+  let(:links) do
+    valid_links + [
+      ["public/broken_link.html", "./absent.html"],
+      ["public/outside_link.html", "../top_level_file.html"]
     ]
   end
 
@@ -48,21 +69,21 @@ RSpec.describe Pages::ZipDirectoryService do
       described_class.new(dir, archive).execute
 
       Zip::File.open(archive) do |zip_file|
-        expect(zip_file.entries.count).to eq(dirs.count + files.count + links.count)
+        expect(zip_file.entries.count).to eq(valid_dirs.count + valid_files.count + valid_links.count)
 
-        dirs.each do |dir|
+        valid_dirs.each do |dir|
           entry = zip_file.glob(dir).first
           expect(entry.name).to eq(dir + "/")
           expect(entry.ftype).to eq(:directory)
         end
 
-        files.each do |file_name, file_content|
+        valid_files.each do |file_name, file_content|
           entry = zip_file.glob(file_name).first
           expect(entry.name).to eq(file_name)
           expect(entry.get_input_stream.read).to eq(file_content)
         end
 
-        links.each do |new_name, target|
+        valid_links.each do |new_name, target|
           entry = zip_file.glob(new_name).first
           expect(entry.name).to eq(new_name)
           expect(entry.get_input_stream.read).to eq(target)

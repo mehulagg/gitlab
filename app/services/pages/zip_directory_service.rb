@@ -24,21 +24,33 @@ module Pages
         disk_file_path = File.join(@input_dir, zipfile_path)
 
         if File.directory? disk_file_path
-          recursively_deflate_directory(zipfile, disk_file_path, zipfile_path)
+          recursively_zip_directory(zipfile, disk_file_path, zipfile_path)
         else
           put_into_archive(zipfile, disk_file_path, zipfile_path)
         end
       end
     end
 
-    def recursively_deflate_directory(zipfile, disk_file_path, zipfile_path)
+    def recursively_zip_directory(zipfile, disk_file_path, zipfile_path)
       zipfile.mkdir zipfile_path
       subdir = Dir.entries(disk_file_path) - %w[. ..]
       write_entries zipfile, subdir, zipfile_path
     end
 
     def put_into_archive(zipfile, disk_file_path, zipfile_path)
+      return if File.symlink?(disk_file_path) && !valid_symlink?(disk_file_path)
+
       zipfile.add(zipfile_path, disk_file_path)
+    end
+
+    def valid_symlink?(disk_file_path)
+      Pathname.new(disk_file_path).realpath.fnmatch?(public_dir_glob)
+    rescue
+      false
+    end
+
+    def public_dir_glob
+      File.join(@input_dir, PUBLIC_DIR, "/*")
     end
   end
 end
