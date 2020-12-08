@@ -40,15 +40,15 @@ export default {
     notImplemented();
   },
 
-  [mutationTypes.REQUEST_ADD_BOARD]: () => {
+  [mutationTypes.REQUEST_CREATE_BOARD]: () => {
     notImplemented();
   },
 
-  [mutationTypes.RECEIVE_ADD_BOARD_SUCCESS]: () => {
+  [mutationTypes.RECEIVE_CREATE_BOARD_SUCCESS]: () => {
     notImplemented();
   },
 
-  [mutationTypes.RECEIVE_ADD_BOARD_ERROR]: () => {
+  [mutationTypes.RECEIVE_CREATE_BOARD_ERROR]: () => {
     notImplemented();
   },
 
