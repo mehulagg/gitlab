@@ -8,15 +8,15 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 ## `build`
 
-Contains various files for the build process.
+Various files for the build process.
 
 ### `build/deployment`
 
-Contains a [Kustomize](https://kustomize.io/) package to install `agentk`.
+A [`kpt`](https://googlecontainertools.github.io/kpt/) package that bundles some [Kustomize](https://kustomize.io/) layers and components. Can be used as is or to create a custom package to install `agentk`.
 
 ## `cmd`
 
-Contains commands - binaries that this repository produces. They are:
+Commands - binaries that this repository produces. They are:
 
 - `kas` is the GitLab Kubernetes Agent Server binary.
 - `agentk` is the GitLab Kubernetes Agent binary.
@@ -25,11 +25,39 @@ Each of these directories contain application bootstrap code for reading configu
 
 ## `examples`
 
-Contains Git submodules to the example projects.
+Git submodules for the example projects.
 
 ## `internal`
 
-Contains the main code of both `gitlab-kas` and `agentk` as well as various supporting building blocks.
+The main code of both `gitlab-kas` and `agentk` as well as various supporting building blocks.
+
+### `internal/agentk`
+
+Main `agentk` logic, including the API implementation for agent modules.
+
+### `internal/api`
+
+Structs that represent some important pieces of data.
+
+### `internal/gitaly`
+
+Stuff to work with Gitaly.
+
+### `internal/gitlab`
+
+GitLab REST client.
+
+### `internal/kas`
+
+API implementation for the server modules. Nothing else at the moment as all of the server logic is split into server modules. The bootstrapping "glue" that wires the modules together lives in `cmd/kas/kasapp`.
+
+### `internal/module`
+
+Modules that implement server and agent-side functionality. See [documentation on modules](TODO) for more information. 
+
+### `internal/tool`
+
+Various building blocks. `internal/tool/testing` contains mocks and helpers for testing. [`gomock`](https://pkg.go.dev/github.com/golang/mock) is used to generate mocks.
 
 ## `it`
 
@@ -41,7 +69,7 @@ Contains exported packages.
 
 ### `pkg/agentcfg`
 
-Contains protobuf definitions of the `agentk` configuration file.
+Contains protobuf definitions of the `agentk` configuration file. This is what you can 
 
 ### `pkg/kascfg`
 
