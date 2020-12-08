@@ -91,6 +91,9 @@ export default {
           this.itemsToBeDeleted?.length > 1 ? 'bulk_registry_tag_delete' : 'registry_tag_delete',
       };
     },
+    showPagination() {
+      return this.tagsPageInfo.hasPreviousPage || this.tagsPageInfo.hasNextPage;
+    },
   },
   methods: {
     deleteTags(toBeDeleted) {
@@ -184,6 +187,7 @@ export default {
         <tags-list :tags="tags" :is-mobile="isMobile" @delete="deleteTags" />
         <div class="gl-display-flex gl-justify-content-center">
           <gl-keyset-pagination
+            v-if="showPagination"
             :has-next-page="tagsPageInfo.hasNextPage"
             :has-previous-page="tagsPageInfo.hasPreviousPage"
             class="gl-mt-3"
