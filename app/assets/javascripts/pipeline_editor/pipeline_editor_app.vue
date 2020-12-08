@@ -16,7 +16,6 @@ const MR_TARGET_BRANCH = 'merge_request[target_branch]';
 
 const COMMIT_FAILURE = 'COMMIT_FAILURE';
 const DEFAULT_FAILURE = 'DEFAULT_FAILURE';
-const INVALID_CI_CONFIG = 'INVALID_CI_CONFIG';
 const LOAD_FAILURE_NO_FILE = 'LOAD_FAILURE_NO_FILE';
 const LOAD_FAILURE_NO_REF = 'LOAD_FAILURE_NO_REF';
 const LOAD_FAILURE_UNKNOWN = 'LOAD_FAILURE_UNKNOWN';
@@ -137,11 +136,6 @@ export default {
         case COMMIT_FAILURE:
           return {
             text: this.$options.errorTexts[COMMIT_FAILURE],
-            variant: 'danger',
-          };
-        case INVALID_CI_CONFIG:
-          return {
-            text: this.$options.errorTexts[INVALID_CI_CONFIG],
             variant: 'danger',
           };
         default:
