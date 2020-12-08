@@ -55,10 +55,6 @@ describe('MonthsPresetMixin', () => {
     describe('isTimeframeUnderEndDateForMonth', () => {
       const timeframeItem = new Date(2018, 0, 10); // Jan 10, 2018
 
-      beforeEach(() => {
-        wrapper = createComponent({});
-      });
-
       it('returns true if provided timeframeItem is under epicEndDate', () => {
         const epicEndDate = new Date(2018, 0, 26); // Jan 26, 2018
 
@@ -129,15 +125,31 @@ describe('MonthsPresetMixin', () => {
     describe('getTimelineBarWidthForMonths', () => {
       it('returns calculated width value based on Epic.startDate and Epic.endDate', () => {
         wrapper = createComponent({
-          timeframeItem: mockTimeframeMonths[0],
+          timeframeItem: mockTimeframeMonths[1],
           epic: {
             ...mockEpic,
             startDate: new Date(2017, 11, 15), // Dec 15, 2017
-            endDate: new Date(2018, 1, 15), // Feb 15, 2017
+            endDate: new Date(2018, 1, 15), // Feb 15, 2018
           },
         });
 
-        expect(Math.floor(wrapper.vm.getTimelineBarWidthForMonths())).toBe(546);
+        /*
+          The epic timeline bar width calculation:
+
+          - The width of the bar should account for 31 - 15 = 16 days from December.
+          - The width of the bar should fully account for all of January (31 days).
+          - The width of the bar should account for only 15 days  
+
+           Dec: 16 days / 31 days  * 180px ~= 92.9px
+         + Jan: 31 days                     = 180px
+         + Feb: 15 days / 28 days  * 180px ~= 96.43px
+         ---------------------------------------------------
+                                     Total ~= 369px
+        */
+        const expectedTimelineBarWidth = 369; // in px.
+        expect(Math.floor(wrapper.vm.getTimelineBarWidthForMonths())).toBe(
+          expectedTimelineBarWidth,
+        );
       });
     });
   });

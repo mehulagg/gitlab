@@ -72,6 +72,22 @@ describe('WeeksPresetMixin', () => {
 
       it('returns true if provided timeframeItem is under epicEndDate', () => {
         const epicEndDate = new Date(2018, 0, 3); // Jan 3, 2018
+        /*
+          Visual illustration of the example spec:
+
+          - Each item in mockTimeframeWeeks represents a week.
+            For example, the item 2017-12-17 represents -
+            the timeframe representing the week starting on Dec 17, 2017
+
+          mockTimeframeWeeks = 
+          [
+            2017-12-17, <- the epic starting on Jan 3, 2018 is in this timeframe
+            2017-12-24,
+            2017-12-31, <- the epic ending on Jan 15, 2018 is in this timeframe.
+            2018-01-07, <- the provided timeframeItem (Jan 7, 2018) points to this timeframe.
+            ...
+          ]
+        */
 
         wrapper = createComponent({
           epic: { ...mockEpic, endDate: epicEndDate },
@@ -82,6 +98,19 @@ describe('WeeksPresetMixin', () => {
 
       it('returns false if provided timeframeItem is NOT under epicEndDate', () => {
         const epicEndDate = new Date(2018, 0, 15); // Jan 15, 2018
+        /*
+          Visual illustration of the example spec:
+
+          mockTimeframeWeeks = 
+          [
+            2017-12-17, <- the epic starting on Jan 3, 2018 is in this timeframe
+            2017-12-24,
+            2017-12-31,
+            2018-01-07, <- the provided timeframeItem (Jan 7, 2018) points to this timeframe.
+            2018-01-14, <- the epic ending on Jan 15, 2018 is in this timeframe.
+            ...
+          ]
+        */
 
         wrapper = createComponent({
           epic: { ...mockEpic, endDate: epicEndDate },
@@ -138,7 +167,7 @@ describe('WeeksPresetMixin', () => {
     describe('getTimelineBarWidthForWeeks', () => {
       it('returns calculated width value based on Epic.startDate and Epic.endDate', () => {
         wrapper = createComponent({
-          timeframeItem: mockTimeframeWeeks[0],
+          timeframeItem: mockTimeframeWeeks[2],
           epic: {
             ...mockEpic,
             startDate: new Date(2018, 0, 1), // Jan 1, 2018
@@ -146,7 +175,29 @@ describe('WeeksPresetMixin', () => {
           },
         });
 
-        expect(Math.floor(wrapper.vm.getTimelineBarWidthForWeeks())).toBe(1208);
+        /*
+          Visual illustration of the example spec:
+          
+          - Each timeframe is 180px wide.
+          - The timebar width should be approximately 720px + 154.3px + 154.3px or 849px.
+          - In the below, [2017-12-31] is understood as a timeframe that covers -
+            the week starting on Dec 31, 2017 (ending on Jan 6, 2018).
+
+          mockTimeframeWeeks = 
+             Epic start date                                  Epic end date
+             Jan 1, 2018                                      Feb 2, 2018
+               .                                                   .
+               .                                                   .                           
+          [ [2017-12-31][2018-01-07][2018-01-14][2018-01-21][2018-01-28] ]
+               <--------------- timeline bar width ---------------->
+               <--   --><---- 180px * 3 frames = 720px ----><--  -->
+                  ^                                             ^
+             approximately 154px                                ^
+                                                        ~ approximately 154px
+        */
+        const expectedTimelineBarWidth = 848; // in px;
+
+        expect(Math.floor(wrapper.vm.getTimelineBarWidthForWeeks())).toBe(expectedTimelineBarWidth);
       });
     });
   });
