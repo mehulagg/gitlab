@@ -49,6 +49,15 @@ RSpec.describe RedisTracking do
     expect(Gitlab::UsageDataCounters::HLLRedisCounter).not_to receive(:track_event)
   end
 
+  def expect_no_tracking_with_context
+    expect(Gitlab::UsageDataCounters::HLLRedisCounter).not_to receive(:track_event_in_context)
+  end
+
+  def expect_tracking_with_context
+    expect(Gitlab::UsageDataCounters::HLLRedisCounter).to receive(:track_event_in_context)
+      .with(instance_of(String), 'g_compliance_approval_rules', instance_of(String))
+  end
+
   context 'with feature disabled' do
     it 'does not track the event' do
       stub_feature_flags(feature => false)
@@ -115,6 +124,63 @@ RSpec.describe RedisTracking do
         expect_no_tracking
 
         get :new
+      end
+    end
+
+    context 'with context tracking' do
+      let(:namespace) { create(:namespace) }
+
+      before do
+        stub_feature_flags(feature => true)
+        sign_in(user)
+      end
+
+      context 'with redis_hll_plan_level_tracking feature enabled' do
+        before do
+          stub_feature_flags(redis_hll_plan_level_tracking: true)
+        end
+
+        context 'for gitlab.com' do
+          before do
+            expect(Gitlab).to receive(:com?).at_least(:once).and_return(true)
+          end
+
+          it 'tracks the event for context when there is a namespace' do
+            expect_tracking
+            expect_tracking_with_context
+
+            get :index, params: { namespace_id: namespace.path }
+          end
+
+          it 'does not track the event for context with no namespace' do
+            expect_tracking
+            expect_no_tracking_with_context
+
+            get :index
+          end
+        end
+
+        context 'when is not gitlab.com' do
+          before do
+            expect(Gitlab).to receive(:com?).at_least(:once).and_return(false)
+          end
+
+          it 'tracks the event for context when there is a license' do
+            expect_tracking
+            expect_tracking_with_context
+
+            get :index
+          end
+
+          it 'does not track the event in context when there is no license' do
+            expect(License).to receive(:current).and_return(nil)
+
+            expect_tracking
+            expect_no_tracking_with_context
+
+            get :index
+          end
+        end
       end
     end
 

@@ -59,9 +59,9 @@ module RedisTracking
 
   def current_context
     if ::Gitlab.com?
-      Namespace.by_path(params[:namespace_id])&.actual_plan_name
+      Namespace.by_path(params[:namespace_id])&.actual_plan_name if params[:namespace_id].present?
     else
-      License.current.plan
+      License.current&.plan
     end
   end
 end
