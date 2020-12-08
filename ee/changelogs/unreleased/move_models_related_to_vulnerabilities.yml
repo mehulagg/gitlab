@@ -1,0 +1,5 @@
+---
+title: Move only models related to vulnerabilities to EE
+merge_request: 49495
+author:
+type: changed
