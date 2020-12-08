@@ -82,7 +82,7 @@ export default {
       return this.$apollo.queries.image.loading || this.mutationLoading;
     },
     tags() {
-      return this.image.tags.nodes || [];
+      return this.image?.tags?.nodes || [];
     },
     showPartialCleanupWarning() {
       return this.image?.expirationPolicyStartedAt && !this.dismissPartialCleanupWarning;
