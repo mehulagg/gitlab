@@ -16,6 +16,6 @@ Inside the container, GitLab's Container Host Security provides Intrusion Detect
 
 The following capabilities are available to protect deployed applications in Kubernetes:
 
-- Web Application Firewall - [overview]() - [installation guide]()
-- Container Network Security - [overview]() - [installation guide]()
-- Container Host Security - [overview]() - [installation guide]()
+- Web Application Firewall - [overview](web_application_firewall/index.md) - [installation guide](web_application_firewall/quick_start_guide.md)
+- Container Network Security - [overview](container_network_security/index.md) - [installation guide](container_network_security/quick_start_guide.md)
+- Container Host Security - [overview](container_host_security/index.md) - [installation guide](container_host_security/quick_start_guide.md)
