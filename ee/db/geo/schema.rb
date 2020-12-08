@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_09_24_184638) do
+ActiveRecord::Schema.define(version: 2020_12_08_025254) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -119,6 +119,8 @@ ActiveRecord::Schema.define(version: 2020_09_24_184638) do
     t.integer "verification_retry_count"
     t.datetime_with_timezone "verified_at"
     t.datetime_with_timezone "verification_retry_at"
+    t.integer "verification_state", limit: 2, default: 0, null: false
+    t.datetime_with_timezone "verification_started_at"
     t.index ["package_file_id"], name: "index_package_file_registry_on_repository_id"
     t.index ["retry_at"], name: "index_package_file_registry_on_retry_at"
     t.index ["state"], name: "index_package_file_registry_on_state"
