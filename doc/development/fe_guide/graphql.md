@@ -664,7 +664,7 @@ query DastSiteProfiles($fullPath: ID!, $after: String, $before: String, $first: 
 In this example, Apollo will store the data with the stable `dastSiteProfiles` cache key.
 
 To retrieve that data from the cache, you'd then only need to provide the `$fullPath` variable,
-omitting pagination variables:
+omitting pagination-specifie variables like `after` or `before`:
 
 ```js
 const data = store.readQuery({
