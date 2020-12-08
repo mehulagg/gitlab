@@ -59,7 +59,6 @@ module Gitlab
           end
 
           before_transition any => :verification_failed do |instance, _|
-            instance.verification_checksum = nil
             instance.verification_retry_count ||= 0
             instance.verification_retry_count += 1
             instance.verification_retry_at = instance.next_retry_time(instance.verification_retry_count)
@@ -67,10 +66,8 @@ module Gitlab
           end
 
           before_transition any => :verification_succeeded do |instance, _|
-            instance.verification_retry_count = 0
-            instance.verification_retry_at = nil
-            instance.verification_failure = nil
             instance.verified_at = Time.current
+            instance.clear_verification_failure_fields!
           end
 
           event :verification_started do
@@ -138,7 +135,9 @@ module Gitlab
           # This query performs a write, so we need to wrap it in a transaction
           # to stick to the primary database.
           self.transaction do
-            self.connection.execute(query).to_a.map { |row| row[self.primary_key] }
+            self.connection.execute(query).to_a.map do |row|
+              row[self.verification_state_model_key.to_s]
+            end
           end
         end
 
@@ -155,9 +154,14 @@ module Gitlab
             UPDATE #{table_name}
             SET "verification_state" = #{started_enum_value},
               "verification_started_at" = NOW()
-            WHERE #{self.primary_key} IN (#{relation.select(self.primary_key).to_sql})
-            RETURNING #{self.primary_key}
+            WHERE #{self.verification_state_model_key} IN (#{relation.select(self.verification_state_model_key).to_sql})
+            RETURNING #{self.verification_state_model_key}
           SQL
+        end
+
+        # Overridden in ReplicableRegistry
+        def verification_state_model_key
+          self.primary_key
         end
 
         # Fail verification for records which started verification a long time ago
@@ -175,6 +179,13 @@ module Gitlab
             relation.update_all(attrs)
           end
         end
+      end
+
+      # Overridden by ReplicableRegistry
+      def clear_verification_failure_fields!
+        self.verification_retry_count = 0
+        self.verification_retry_at = nil
+        self.verification_failure = nil
       end
 
       # Provides a safe and easy way to manage the verification state for a
@@ -222,6 +233,8 @@ module Gitlab
 
         self.verification_failure = message
         self.verification_failure += ": #{error.message}" if error.respond_to?(:message)
+        self.verification_failure.truncate(255)
+        self.verification_checksum = nil
 
         self.verification_failed!
       end
