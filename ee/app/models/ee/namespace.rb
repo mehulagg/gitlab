@@ -29,6 +29,7 @@ module EE
       has_one :namespace_limit, inverse_of: :namespace
       has_one :gitlab_subscription
       has_one :elasticsearch_indexed_namespace
+      has_one :merge_request_approval_settings, inverse_of: :namespace, class_name: 'MergeRequestApprovalSetting'
 
       has_many :compliance_management_frameworks, class_name: "ComplianceManagement::Framework"
 

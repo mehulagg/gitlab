@@ -1,0 +1,8 @@
+{
+  "type": "object",
+  "properties": {
+    "namespace_id": { "type": "integer" },
+    "allow_author_approval": { "type": "boolean" }
+  },
+  "additionalProperties": false
+}

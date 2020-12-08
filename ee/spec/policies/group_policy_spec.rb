@@ -1288,4 +1288,35 @@ RSpec.describe GroupPolicy do
       it_behaves_like 'read_group_release_stats permissions'
     end
   end
+
+  describe ':read_merge_request_approval_settings' do
+    using RSpec::Parameterized::TableSyntax
+
+    let(:policy) { :read_merge_request_approval_settings }
+
+    where(:role, :licensed, :allowed) do
+      :guest      | true  | false
+      :guest      | false | false
+      :reporter   | true  | false
+      :reporter   | false | false
+      :developer  | true  | false
+      :developer  | false | false
+      :maintainer | true  | false
+      :maintainer | false | false
+      :owner      | true  | true
+      :owner      | false | false
+      :admin      | true  | true
+      :admin      | false | false
+    end
+
+    with_them do
+      let(:current_user) { public_send(role) }
+
+      before do
+        stub_licensed_features(group_merge_request_approval_settings: licensed)
+      end
+
+      it { is_expected.to(allowed ? be_allowed(policy) : be_disallowed(policy)) }
+    end
+  end
 end
