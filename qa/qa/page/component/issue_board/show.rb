@@ -60,7 +60,7 @@ module QA
 
           def boards_list_cards_area_with_index(index)
             wait_boards_list_finish_loading do
-              within_element_by_index(:board_list, index) do
+              within_element(:board_list, index: index) do
                 find_element(:board_list_cards_area)
               end
             end
@@ -68,7 +68,7 @@ module QA
 
           def boards_list_header_with_index(index)
             wait_boards_list_finish_loading do
-              within_element_by_index(:board_list, index) do
+              within_element(:board_list, index: index) do
                 find_element(:board_list_header)
               end
             end
@@ -76,7 +76,7 @@ module QA
 
           def card_of_list_with_index(index)
             wait_boards_list_finish_loading do
-              within_element_by_index(:board_list, index) do
+              within_element(:board_list, index: index) do
                 find_element(:board_card)
               end
             end

@@ -71,30 +71,30 @@ module QA
         end
 
         def collapse_replies
-          click_element :collapse_replies_button
+          click_element(:collapse_replies_button)
         end
 
         # Attachment option should be an absolute path
         def comment(text, attachment: nil, filter: :all_activities)
           method("select_#{filter}_filter").call
-          fill_element :comment_field, "#{text}\n"
+          fill_element(:comment_field, "#{text}\n")
 
           unless attachment.nil?
             QA::Page::Component::Dropzone.new(self, '.new-note')
               .attach_file(attachment)
           end
 
-          click_element :comment_button
+          click_element(:comment_button)
         end
 
         def edit_comment(text)
-          click_element :note_edit_button
-          fill_element :reply_field, text
-          click_element :reply_comment_button
+          click_element(:note_edit_button)
+          fill_element(:reply_field, text)
+          click_element(:reply_comment_button)
         end
 
         def expand_replies
-          click_element :expand_replies_button
+          click_element(:expand_replies_button)
         end
 
         def has_comment?(comment_text)
@@ -111,12 +111,12 @@ module QA
 
         def reply_to_discussion(position, reply_text)
           type_reply_to_discussion(position, reply_text)
-          click_element :reply_comment_button
+          click_element(:reply_comment_button)
         end
 
         def resolve_discussion_at_index(index)
-          within_element_by_index(:discussion_content, index) do
-            click_element :resolve_discussion_button
+          within_element(:discussion_content, index: index) do
+            click_element(:resolve_discussion_button)
           end
         end
 
@@ -145,10 +145,10 @@ module QA
         end
 
         def start_discussion(text)
-          fill_element :comment_field, text
-          click_element :note_dropdown
-          click_element :discussion_menu_item
-          click_element :comment_button
+          fill_element(:comment_field, text)
+          click_element(:note_dropdown)
+          click_element(:discussion_menu_item)
+          click_element(:comment_button)
 
           has_comment?(text)
         end
@@ -159,7 +159,7 @@ module QA
 
         def type_reply_to_discussion(position, reply_text)
           all_elements(:discussion_reply_tab, minimum: position)[position - 1].click
-          fill_element :reply_field, reply_text
+          fill_element(:reply_field, reply_text)
         end
 
         def wait_for_loading
@@ -171,7 +171,7 @@ module QA
         def select_filter_with_text(text)
           retry_on_exception do
             click_element(:title)
-            click_element :discussion_filter_dropdown
+            click_element(:discussion_filter_dropdown)
             find_element(:filter_menu_item, text: text).click
 
             wait_for_loading

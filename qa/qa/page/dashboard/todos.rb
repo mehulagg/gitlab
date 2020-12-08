@@ -22,7 +22,7 @@ module QA
 
         def has_latest_todo_item_with_content?(action, title)
           within_element(:todos_list_container) do
-            within_element_by_index(:todo_item_container, 0) do
+            within_element(:todo_item_container, index: 0) do
               has_element?(:todo_action_name_content, text: action) && has_element?(:todo_target_title_content, text: title)
             end
           end

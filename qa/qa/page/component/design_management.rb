@@ -99,7 +99,7 @@ module QA
         end
 
         def has_annotation?(note)
-          within_element_by_index(:design_discussion_content, 0) do
+          within_element(:design_discussion_content, index: 0) do
             has_element?(:note_content, text: note)
           end
         end

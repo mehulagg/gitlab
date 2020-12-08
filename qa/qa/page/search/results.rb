@@ -32,10 +32,9 @@ module QA
         end
 
         def has_file_with_content?(file_name, file_text)
-          within_element_by_index(:result_item_content, 0) do
-            break false unless has_element?(:file_title_content, text: file_name)
-
-            has_element?(:file_text_content, text: file_text)
+          within_element(:result_item_content, index: 0) do
+            has_element?(:file_title_content, text: file_name) &&
+              has_element?(:file_text_content, text: file_text)
           end
         end
 

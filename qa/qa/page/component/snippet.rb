@@ -99,51 +99,19 @@ module QA
         end
 
         def has_file_name?(file_name, file_number = nil)
-          if file_number
-            within_element_by_index(:file_title_content, file_number - 1) do
-              has_text?(file_name)
-            end
-          else
-            within_element(:file_title_content) do
-              has_text?(file_name)
-            end
-          end
+          has_text_within_element?(:file_title_content, file_name, index: file_number)
         end
 
         def has_no_file_name?(file_name, file_number = nil)
-          if file_number
-            within_element_by_index(:file_title_content, file_number - 1) do
-              has_no_text?(file_name)
-            end
-          else
-            within_element(:file_title_content) do
-              has_no_text?(file_name)
-            end
-          end
+          has_no_text_within_element?(:file_title_content, file_name, index: file_number)
         end
 
         def has_file_content?(file_content, file_number = nil)
-          if file_number
-            within_element_by_index(:file_content, file_number - 1) do
-              has_text?(file_content)
-            end
-          else
-            within_element(:file_content) do
-              has_text?(file_content)
-            end
-          end
+          has_text_within_element?(:file_content, file_content, index: file_number)
         end
 
         def has_no_file_content?(file_content, file_number = nil)
-          if file_number
-            within_element_by_index(:file_content, file_number - 1) do
-              has_no_text?(file_content)
-            end
-          else
-            within_element(:file_content) do
-              has_no_text?(file_content)
-            end
-          end
+          has_no_text_within_element?(:file_content, file_content, index: file_number)
         end
 
         def has_embed_dropdown?

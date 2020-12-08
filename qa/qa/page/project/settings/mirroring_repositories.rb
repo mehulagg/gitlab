@@ -67,7 +67,7 @@ module QA
           def public_key(url)
             row_index = find_repository_row_index url
 
-            within_element_by_index(:mirrored_repository_row, row_index) do
+            within_element(:mirrored_repository_row, index: row_index) do
               find_element(:copy_public_key_button)['data-clipboard-text']
             end
           end
@@ -87,7 +87,7 @@ module QA
           def update(url)
             row_index = find_repository_row_index url
 
-            within_element_by_index(:mirrored_repository_row, row_index) do
+            within_element(:mirrored_repository_row, index: row_index) do
               # When a repository is first mirrored, the update process might
               # already be started, so the button is already "clicked"
               click_element :update_now_button unless has_element? :updating_button
@@ -99,14 +99,14 @@ module QA
             refresh
 
             wait_until(max_duration: 180, sleep_interval: 1) do
-              within_element_by_index(:mirrored_repository_row, row_index) do
+              within_element(:mirrored_repository_row, index: row_index) do
                 last_update = find_element(:mirror_last_update_at_cell, wait: 0)
                 last_update.has_text?('just now') || last_update.has_text?('seconds')
               end
             end
 
             # Fail early if the page still shows that there has been no update
-            within_element_by_index(:mirrored_repository_row, row_index) do
+            within_element(:mirrored_repository_row, index: row_index) do
               find_element(:mirror_last_update_at_cell, wait: 0).assert_no_text('Never')
               assert_no_element(:mirror_error_badge)
             end

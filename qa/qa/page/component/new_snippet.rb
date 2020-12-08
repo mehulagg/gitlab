@@ -49,7 +49,7 @@ module QA
 
         def fill_file_name(name, file_number = nil)
           if file_number
-            within_element_by_index(:file_holder_container, file_number - 1) do
+            within_element(:file_holder_container, index: file_number - 1) do
               fill_element(:file_name_field, name)
             end
           else
@@ -59,11 +59,11 @@ module QA
 
         def fill_file_content(content, file_number = nil)
           if file_number
-            within_element_by_index(:file_holder_container, file_number - 1) do
+            within_element(:file_holder_container, index: file_number - 1) do
               text_area.set(content)
             end
           else
-            text_area.set content
+            text_area.set(content)
           end
         end
 

@@ -274,14 +274,14 @@ module QA
         sleep 1
       end
 
-      def within_element(name, text: nil)
-        page.within(element_selector_css(name), text: text) do
-          yield
-        end
-      end
+      def within_element(name, text: nil, index: nil)
+        container = if index
+                      all_elements(name, text: text, minimum: index + 1)[index]
+                    else
+                      element_selector_css(name)
+                    end
 
-      def within_element_by_index(name, index)
-        page.within all_elements(name, minimum: index + 1)[index] do
+        page.within(container) do
           yield
         end
       end
@@ -369,6 +369,24 @@ module QA
             @views.push(Page::View.new(path, view.elements))
           end
         end
+      end
+
+      private
+
+      def has_text_within_element?(element, text, index: nil, zero_index: true, negate: false)
+        index -= 1 if index && zero_index
+
+        within_element(element, index: index) do
+          if negate
+            has_no_text?(text)
+          else
+            has_text?(text)
+          end
+        end
+      end
+
+      def has_no_text_within_element?(element, text, index: nil, zero_index: true)
+        has_text_within_element?(element, text, index: nil, zero_index: true, negate: true)
       end
     end
   end
