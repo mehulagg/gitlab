@@ -113,4 +113,4 @@ include:
   - local: .gitlab/ci/notify.gitlab-ci.yml
   - local: .gitlab/ci/dast.gitlab-ci.yml
   - local: .gitlab/ci/workhorse.gitlab-ci.yml
-  - local: .gitlab/ci/API-Fuzzing.gitlab-ci.yml
+  - local: API-Fuzzing.gitlab-ci.yml
