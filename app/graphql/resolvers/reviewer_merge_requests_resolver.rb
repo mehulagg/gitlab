@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
 module Resolvers
-  class AssignedMergeRequestsResolver < UserMergeRequestsResolverBase
+  class ReviewerMergeRequestsResolver < UserMergeRequestsResolverBase
     type ::Types::MergeRequestType.connection_type, null: true
     accept_author
-    accept_reviewer
+    accept_assignee
 
     def user_role
-      :assignee
+      :reviewer
     end
   end
 end
