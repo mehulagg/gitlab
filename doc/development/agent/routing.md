@@ -67,8 +67,8 @@ sequenceDiagram
   Redis-->-kas1: List of connected agents<br />with agent_id=3
   Note right of kas1: kas1 picks a specific agentk instance<br />to address and talks to<br />the corresponding kas instance,<br />specifying which agentk instance<br />to route the request to.
   kas1->>+kas2: Get the list of running Pods<br />from agentk 3, Pod1
-  kas2->>+agentk3p1: Get list of Pods
-  agentk3p1["agentk 3, Pod1"]->>-kas2: Get list of Pods
+  kas2->>+agentk 3 Pod1: Get list of Pods
+  agentk 3 Pod1->>-kas2: Get list of Pods
   kas2-->>-kas1: List of running Pods<br />from agentk 3, Pod1
   kas1-->>-GitLab: List of running Pods<br />from agentk with agent_id=3
 ```
