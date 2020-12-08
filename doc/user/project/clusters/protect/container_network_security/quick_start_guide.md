@@ -37,15 +37,13 @@ It is possible to install and manage Cilium in other ways, such as by installing
 
 Managing NetworkPolicies through GitLab is advantageous over managing the policies in Kubernetes directly as Kubernetes does not provide a GUI editor, a change control process, or a revision history. Network Policies can be managed through GitLab in one of two ways:
 
-- Management through a yaml file in each application's project (for projects using Auto DevOps):
-  [documentation](../../../../../topics/autodevops/stages.md#network-policy)
-- Management through GitLab's Policy management UI (for projects not using Auto DevOps):
-  [documentation](../../../../application_security/threat_monitoring/index.md#container-network-policy-management) (Ultimate/Gold only)
+1. Management through a yaml file in each application's project (for projects using Auto DevOps) - [documentation](https://docs.gitlab.com/ee/topics/autodevops/stages.html#network-policy)
+1. Management through GitLab's Policy management UI (for projects not using Auto DevOps) - [documentation](https://docs.gitlab.com/ee/user/application_security/threat_monitoring/#container-network-policy-management) (Ultimate/Gold only)
 
 Each method comes with its own sets of Pros and Cons:
 
 | | yaml method | UI method (Ultimate/Gold only) |
-| Pros | A change control process is possible by requiring [MR Approvals](https://docs.gitlab.com/ee/user/project/merge_requests/merge_request_approvals.html). All changes are fully tracked and audited in the same way that Git tracks the history of any file in its repository. | The UI provides a simple rules editor for users who are less familiar with the yaml syntax of NetworkPolicies. This view is a live representation of the policies currently deployed in the Kubernetes cluster. The UI also allows for multiple network policies to be created per environment. |
+| Pros | A change control process is possible by requiring [MR Approvals](../../../merge_requests/merge_request_approvals.md). All changes are fully tracked and audited in the same way that Git tracks the history of any file in its repository. | The UI provides a simple rules editor for users who are less familiar with the yaml syntax of NetworkPolicies. This view is a live representation of the policies currently deployed in the Kubernetes cluster. The UI also allows for multiple network policies to be created per environment. |
 | Cons | Only one network policy can be deployed per environment (although that policy can be as detailed as is needed).  Additionally, the contents of the yaml file will not represent the actual state of policies that are deployed in Kubernetes if changes were made in Kubernetes directly rather than via the auto-deploy-values.yaml file. | Policy changes are not currently audited and a change control process is not currently available. |
 
 Users are encouraged to choose one of the two methods to manage their policies. If users attempt to use both methods simultaneously, when the application project pipeline is run, the contents of the NetworkPolicy in the auto-deploy-values.yaml file may override policies that are configured via the UI editor.
