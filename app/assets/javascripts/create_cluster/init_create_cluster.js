@@ -17,7 +17,13 @@ export default document => {
   const callout = document.querySelector('.gcp-signup-offer');
   PersistentUserCallout.factory(callout);
 
-  initGkeDropdowns();
+  initGkeDropdowns()
+    .then(() => {
+      if (isProjectLevelCluster(page)) {
+        initGkeNamespace();
+      }
+    })
+    .catch(() => {});
 
   import(/* webpackChunkName: 'eks_cluster' */ '~/create_cluster/eks_cluster')
     .then(({ default: initCreateEKSCluster }) => {
@@ -28,8 +34,4 @@ export default document => {
       }
     })
     .catch(() => {});
-
-  if (isProjectLevelCluster(page)) {
-    initGkeNamespace();
-  }
 };
