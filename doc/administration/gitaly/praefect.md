@@ -1111,15 +1111,14 @@ useful for identifying potential data loss after a failover. The following param
 available:
 
 - `-virtual-storage` that specifies which virtual storage to check. The default behavior is to
-  display outdated replicas of read-only repositories as they generally require administrator
-  action.
+  display outdated replicas of read-only repositories as they might require administrator action.
 - In GitLab 13.3 and later, `-partially-replicated` that specifies whether to display a list of
   [outdated replicas of writable repositories](#outdated-replicas-of-writable-repositories).
 
 NOTE:
 `dataloss` is still in beta and the output format is subject to change.
 
-To check for outdated replicas of read-only repositories, run:
+To check for repositories with outdated primaries, run:
 
 ```shell
 sudo /opt/gitlab/embedded/bin/praefect -config /var/opt/gitlab/praefect/config.toml dataloss [-virtual-storage <virtual-storage>]
@@ -1131,24 +1130,45 @@ Every configured virtual storage is checked if none is specified:
 sudo /opt/gitlab/embedded/bin/praefect -config /var/opt/gitlab/praefect/config.toml dataloss
 ```
 
-The number of potentially unapplied changes to repositories is listed for each replica. Listed
-repositories might have the latest changes but it is not guaranteed. Only outdated replicas of
-read-only repositories are listed by default. For example:
+Repositories which have assigned storage nodes that contain an outdated copy of the repository are listed
+in the output. A number of useful information is printed for each repository:
+
+1. A repository's relative path to the storage directory identifies each repository and groups the related
+   information.
+1. The repository's current status is printed in parentheses next to the disk path. If the repository's primary
+   is outdated, the repository is in `read-only` mode and can't accept writes. Otherwise, the mode is `writable`.
+1. The primary field lists the repository's current primary. If the repository has no primary, the field shows
+   `No Primary`.
+1. The In-Sync Storages lists replicas which have replicated the latest successful write and all writes
+   preceeding it.
+1. The Outdated Storages lists replicas which contain an outdated copy of the repository. Replicas which have no copy
+   of the repository but should contain it are also listed here. The maximum number of changes the replica is missing
+   is listed next to replica. It's important to notice that the outdated replicas may be fully up to date or contain
+   later changes but Praefect can't guarantee it.
+
+Whether a replica is assigned to host the repository is listed with each replica's status. `assigned host` is printed
+next to replicas which are assigned to store the repository. The text is omitted if the replica contains a copy of
+the repository but is not assigned to store the repository. Such replicas won't be kept in-sync by Praefect but may
+act as replication sources to bring assigned replicas up to date. In future, Praefect may remove repositories from unassigned hosts when the repository is fully replicated on all of the assigned hosts. (https://gitlab.com/gitlab-org/gitaly/-/issues/3361)
+
+Example output:
 
 ```shell
 Virtual storage: default
-  Primary: gitaly-3
   Outdated repositories:
-    @hashed/2c/62/2c624232cdd221771294dfbb310aca000a0df6ac8b66b696d90ef06fdefb64a3.git (read-only):
-      gitaly-2 is behind by 1 change or less
-      gitaly-3 is behind by 2 changes or less
+    @hashed/3f/db/3fdba35f04dc8c462986c992bcf875546257113072a909c162f7e470e581e278.git (read-only):
+      Primary: gitaly-1
+      In-Sync Storages:
+        gitaly-2, assigned host
+      Outdated Storages:
+        gitaly-1 is behind by 3 changes or less, assigned host
+        gitaly-3 is behind by 3 changes or less
 ```
 
 A confirmation is printed out when every repository is writable. For example:
 
 ```shell
 Virtual storage: default
-  Primary: gitaly-1
   All repositories are writable!
 ```
 
@@ -1156,8 +1176,8 @@ Virtual storage: default
 
 > [Introduced](https://gitlab.com/gitlab-org/gitaly/-/issues/3019) in GitLab 13.3.
 
-To also list information for outdated replicas of writable repositories, use the
-`-partially-replicated` parameter.
+To also list information of repositories whose primary is up to date but one or more assigned
+replicas are outdated, use the `-partially-replicated` flag.
 
 A repository is writable if the primary has the latest changes. Secondaries might be temporarily
 outdated while they are waiting to replicate the latest changes.
@@ -1170,21 +1190,23 @@ Example output:
 
 ```shell
 Virtual storage: default
-  Primary: gitaly-3
   Outdated repositories:
-    @hashed/2c/62/2c624232cdd221771294dfbb310aca000a0df6ac8b66b696d90ef06fdefb64a3.git (read-only):
-      gitaly-2 is behind by 1 change or less
-      gitaly-3 is behind by 2 changes or less
-    @hashed/4b/22/4b227777d4dd1fc61c6f884f48641d02b4d121d3fd328cb08b5531fcacdabf8a.git (writable):
-      gitaly-2 is behind by 1 change or less
+    @hashed/3f/db/3fdba35f04dc8c462986c992bcf875546257113072a909c162f7e470e581e278.git (writable):
+      Primary: gitaly-1
+      In-Sync Storages:
+        gitaly-1, assigned host
+      Outdated Storages:
+        gitaly-2 is behind by 3 changes or less, assigned host
+        gitaly-3 is behind by 3 changes or less
 ```
 
-With the `-partially-replicated` flag set, a confirmation is printed out if every replica is fully up to date.
+With the `-partially-replicated` flag set, a confirmation is printed out if every assigned replica is fully up to
+date.
+
 For example:
 
 ```shell
 Virtual storage: default
-  Primary: gitaly-1
   All repositories are up to date!
 ```
 
