@@ -35,6 +35,11 @@ export default {
       default: '',
     },
   },
+  inject: {
+    addSeatsHref: {
+      default: '',
+    },
+  },
   computed: {
     ...mapState(['isLoadingSubscription', 'hasErrorSubscription', 'plan', 'tables', 'endpoint']),
     ...mapGetters(['isFreePlan']),
@@ -44,8 +49,14 @@ export default {
 
       return `${this.namespaceName}: ${planName} ${suffix}`;
     },
+    addSeatsButton() {
+      return {
+        text: s__('SubscriptionTable|Add Seats'),
+        href: this.addSeatsHref,
+      };
+    },
     upgradeButton() {
-      if (!this.isFreePlan && !this.plan.upgradable) {
+      if (!this.plan.upgradable) {
         return null;
       }
 
@@ -70,17 +81,15 @@ export default {
       };
     },
     manageButton() {
-      if (this.isFreePlan) {
-        return null;
-      }
-
       return {
         text: s__('SubscriptionTable|Manage'),
         href: this.customerPortalUrl,
       };
     },
     buttons() {
-      return [this.upgradeButton, this.renewButton, this.manageButton].filter(Boolean);
+      return this.isFreePlan
+        ? [this.upgradeButton].filter(Boolean)
+        : [this.renewButton, this.manageButton].filter(Boolean);
     },
     visibleRows() {
       let tableKey = TABLE_TYPE_DEFAULT;
