@@ -2,6 +2,7 @@ import { pick } from 'lodash';
 
 import boardListsQuery from 'ee_else_ce/boards/graphql/board_lists.query.graphql';
 import createGqClient, { fetchPolicies } from '~/lib/graphql';
+import axios from '~/lib/utils/axios_utils';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { BoardType, ListType, inactiveId, DEFAULT_LABELS } from '~/boards/constants';
 import * as types from './mutation_types';
@@ -26,6 +27,7 @@ import issueSetLabelsMutation from '../graphql/issue_set_labels.mutation.graphql
 import issueSetDueDateMutation from '../graphql/issue_set_due_date.mutation.graphql';
 import issueSetSubscriptionMutation from '../graphql/issue_set_subscription.mutation.graphql';
 import issueSetMilestoneMutation from '../graphql/issue_set_milestone.mutation.graphql';
+import createBoardMutation from '../graphql/board.mutation.graphql';
 
 const notImplemented = () => {
   /* eslint-disable-next-line @gitlab/require-i18n-strings */
@@ -481,6 +483,52 @@ export default {
       prop: 'subscribed',
       value: data.issueSetSubscription.issue.subscribed,
     });
+  },
+
+  createBoard: board => {
+    const boardPayload = { ...board };
+    boardPayload.label_ids = (board.labels || []).map(b => b.id);
+
+    if (boardPayload.label_ids.length === 0) {
+      boardPayload.label_ids = [''];
+    }
+
+    if (boardPayload.assignee) {
+      boardPayload.assignee_id = boardPayload.assignee.id;
+    }
+
+    if (boardPayload.milestone) {
+      boardPayload.milestone_id = boardPayload.milestone.id;
+    }
+
+    if (boardPayload.id) {
+      const input = {
+        ...pick(boardPayload, ['hideClosedList', 'hideBacklogList']),
+        id: this.generateBoardGid(boardPayload.id),
+      };
+
+      return Promise.all([
+        axios.put(this.generateBoardsPath(boardPayload.id), { board: boardPayload }),
+        gqlClient.mutate({
+          mutation: createBoardMutation,
+          variables: input,
+        }),
+      ]);
+    }
+
+    return axios
+      .post(this.generateBoardsPath(), { board: boardPayload })
+      .then(resp => resp.data)
+      .then(data => {
+        gqlClient.mutate({
+          mutation: createBoardMutation,
+          variables: {
+            ...pick(boardPayload, ['hideClosedList', 'hideBacklogList']),
+            id: this.generateBoardGid(data.id),
+          },
+        });
+        return data;
+      });
   },
 
   fetchBacklog: () => {

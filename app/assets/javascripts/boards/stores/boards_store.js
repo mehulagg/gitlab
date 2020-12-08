@@ -812,19 +812,16 @@ const boardsStore = {
       ]);
     }
 
-    return axios
-      .post(this.generateBoardsPath(), { board: boardPayload })
-      .then(resp => resp.data)
-      .then(data => {
-        gqlClient.mutate({
-          mutation: createBoardMutation,
-          variables: {
-            ...pick(boardPayload, ['hideClosedList', 'hideBacklogList']),
-            id: this.generateBoardGid(data.id),
-          },
-        });
-        return data;
+    return axios.post(this.generateBoardsPath(), { board: boardPayload }).then(({ data }) => {
+      gqlClient.mutate({
+        mutation: createBoardMutation,
+        variables: {
+          ...pick(boardPayload, ['hideClosedList', 'hideBacklogList']),
+          id: this.generateBoardGid(data.id),
+        },
       });
+      return data;
+    });
   },
 
   deleteBoard({ id }) {

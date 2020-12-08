@@ -81,11 +81,14 @@ export default {
       required: false,
       default: false,
     },
+    currentBoard: {
+      type: Object,
+      required: true,
+    },
   },
   data() {
     return {
       board: { ...boardDefaults, ...this.currentBoard },
-      currentBoard: boardsStore.state.currentBoard,
       currentPage: boardsStore.state.currentPage,
       isLoading: false,
     };
