@@ -30,7 +30,7 @@ class JsonSchemaValidator < ActiveModel::EachValidator
   private
 
   def valid_schema?(value)
-    if options[:draft].to_i > JSON_VALIDATOR_MAX_DRAFT_VERSION
+    if draft_version > JSON_VALIDATOR_MAX_DRAFT_VERSION
       JSONSchemer.schema(Pathname.new(schema_path)).valid?(value)
     else
       JSON::Validator.validate(schema_path, value)
@@ -39,5 +39,9 @@ class JsonSchemaValidator < ActiveModel::EachValidator
 
   def schema_path
     Rails.root.join('app', 'validators', 'json_schemas', "#{options[:filename]}.json").to_s
+  end
+
+  def draft_version
+    options[:draft] || JSON_VALIDATOR_MAX_DRAFT_VERSION
   end
 end
