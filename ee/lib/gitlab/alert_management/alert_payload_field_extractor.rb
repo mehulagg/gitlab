@@ -8,19 +8,56 @@ module Gitlab
       end
 
       def extract(payload)
-        [
-          ::AlertManagement::AlertPayloadField.new(
-            project: project,
-            path: 'foo.bar',
-            label: 'Bar',
-            type: 'string'
-          )
-        ]
+        deep_traverse(payload.deep_stringify_keys)
+          .map { |path, value| field(path, value) }
+          .compact
       end
 
       private
 
       attr_reader :project
+
+      def field(path, value)
+        type = type_of(value)
+        return unless type
+
+        label = path.last.humanize
+
+        ::AlertManagement::AlertPayloadField.new(
+          project: project,
+          path: path.join('.'),
+          label: label,
+          type: type
+        )
+      end
+
+      # TODO: Code duplication with Gitlab::InlineHash#merge_keys ahead!
+      def deep_traverse(hash)
+        return to_enum(__method__, hash) unless block_given?
+
+        pairs = hash.map { |k, v| [[k], v] }
+
+        until pairs.empty?
+          key, value = pairs.shift
+
+          if value.is_a?(Hash)
+            value.each { |k, v| pairs.unshift [key + [k], v] }
+          else
+            yield key, value
+          end
+        end
+      end
+
+      def type_of(value)
+        case value
+        when /^\d{4}/ # assume it's a datetime
+          'datetime'
+        when String
+          'string'
+        when Numeric
+          'numeric'
+        end
+      end
     end
   end
 end

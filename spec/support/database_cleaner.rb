@@ -8,7 +8,7 @@ RSpec.configure do |config|
   # Ensure all sequences are reset at the start of the suite run
   config.before(:suite) do
     setup_database_cleaner
-    DatabaseCleaner.clean_with(:truncation)
+    DatabaseCleaner.clean_with(:transaction)
   end
 
   config.append_after(:context, :migration) do

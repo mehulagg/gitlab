@@ -16,14 +16,12 @@ RSpec.describe 'Extracting fields from alert payload' do
     }
   end
 
-  let(:payload_json) { Gitlab::Json.generate(payload) }
-
-  let(:payload) do
-    {
-      foo: {
-        bar: 'value'
+  let(:payload_json) do
+    <<~JSON
+      {
+        "key": "value"
       }
-    }
+    JSON
   end
 
   let(:mutation) do
@@ -55,8 +53,8 @@ RSpec.describe 'Extracting fields from alert payload' do
     expect(response).to have_gitlab_http_status(:success)
     expect(payload_alert_fields).to eq([
       {
-        'path' => 'foo.bar',
-        'label' => 'Bar',
+        'path' => 'key',
+        'label' => 'Key',
         'type' => 'string'
       }
     ])
