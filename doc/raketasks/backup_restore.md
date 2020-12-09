@@ -840,6 +840,18 @@ Read more about [configuring NFS mounts](../administration/nfs.md)
 
 ### Restore for installation from source
 
+First ensure your backup tar file is in the backup directory described in the
+`gitlab.yml` configuration:
+
+```yaml
+  ## Backup settings
+  backup:
+    path: "tmp/backups"   # Relative paths are relative to Rails.root (default: tmp/backups/)
+
+```
+
+ The default is `/home/git/gitlab/tmp/backups`. It needs to be owned by the `git` user. Now we can begin the backup procedure:
+
 ```shell
 # Stop processes that are connected to the database
 sudo service gitlab stop
