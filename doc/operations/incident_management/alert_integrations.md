@@ -64,11 +64,18 @@ and you can [customize the payload](#customize-the-alert-payload-outside-of-gitl
       in your external service.
    1. _(Optional)_ To generate a test alert to test the new integration, enter a
       sample payload, then click **Save and test alert payload**.Valid JSON is required.
+   1. _(Optional)_ Setup [custom alert fields mapping](#custom-alert-fields-mapping) for your endpoint.
    1. Click **Save Integration**.
 
 The new HTTP Endpoint displays in the [integrations list](#integrations-list).
 You can edit the integration by selecting the **{pencil}** pencil icon on the right
 side of the integrations list.
+
+#### Custom alert fields mapping
+If you've provided a sample alert payload, you can create a custom fields mapping for your endpoint. The default GitLab alert keys are listed in the left most column. In the second column opposite to each GitLab field select which field from your payload will be mapped to which GitLab field. Title field has a fallback. As title is required for triggering the alert - specify it for the case first mapped field will be empty. If you setup the mapping and then  "Save and Test Payload" your mapping will be applied to the test alert and on. If you edit sample payload - you'll have to update the mapping.
+
+![Alert Management List](img/custom_alert_mapping_v13_8.png)
+
 
 ### External Prometheus integration
 
