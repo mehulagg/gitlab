@@ -19,10 +19,10 @@ describe('SubscriptionTable component', () => {
   let store;
   let wrapper;
 
-  const findAddSeatsButton = () => wrapper.findByTestId('add-seats');
+  const findAddSeatsButton = () => wrapper.findByTestId('add-seats-button');
   const findButtonProps = () =>
     wrapper.findAll('a').wrappers.map(x => ({ text: x.text(), href: x.attributes('href') }));
-  const findRenewButton = () => findButtonProps().filter(({ text }) => text === 'Renew');
+  const findRenewButton = () => wrapper.findByTestId('renew-button');
 
   const createComponent = (
     options = {},
@@ -170,7 +170,7 @@ describe('SubscriptionTable component', () => {
       });
 
       it(testDescription, () => {
-        expect(findRenewButton().length > 0).toBe(expectedBehavior);
+        expect(findRenewButton().exists()).toBe(expectedBehavior);
       });
     },
   );
