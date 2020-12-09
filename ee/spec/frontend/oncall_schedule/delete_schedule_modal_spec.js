@@ -8,6 +8,7 @@ import destroyOncallScheduleMutation from 'ee/oncall_schedules/graphql/mutations
 import DeleteScheduleModal, {
   i18n,
 } from 'ee/oncall_schedules/components/delete_schedule_modal.vue';
+import { deleteScheduleModalId } from 'ee/oncall_schedules/components/oncall_schedule';
 import {
   getOncallSchedulesQueryResponse,
   destroyScheduleResponse,
@@ -27,7 +28,6 @@ describe('DeleteScheduleModal', () => {
   let wrapper;
   let fakeApollo;
   let destroyScheduleHandler;
-  const modalId = 'deleteScheduleModalId';
 
   const findModal = () => wrapper.find(GlModal);
   const findModalText = () => wrapper.find(GlSprintf);
@@ -54,7 +54,7 @@ describe('DeleteScheduleModal', () => {
         };
       },
       propsData: {
-        modalId,
+        modalId: deleteScheduleModalId,
         schedule,
         ...props,
       },
@@ -97,7 +97,7 @@ describe('DeleteScheduleModal', () => {
       apolloProvider: fakeApollo,
       propsData: {
         schedule,
-        modalId,
+        modalId: deleteScheduleModalId,
       },
       provide: {
         projectPath,

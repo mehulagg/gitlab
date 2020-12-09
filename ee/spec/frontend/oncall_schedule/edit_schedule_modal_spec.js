@@ -6,6 +6,7 @@ import waitForPromises from 'helpers/wait_for_promises';
 import getOncallSchedulesQuery from 'ee/oncall_schedules/graphql/queries/get_oncall_schedules.query.graphql';
 import updateOncallScheduleMutation from 'ee/oncall_schedules/graphql/mutations/update_oncall_schedule.mutation.graphql';
 import UpdateScheduleModal, { i18n } from 'ee/oncall_schedules/components/edit_schedule_modal.vue';
+import { editScheduleModalId } from 'ee/oncall_schedules/components/oncall_schedule';
 import {
   getOncallSchedulesQueryResponse,
   updateScheduleResponse,
@@ -26,7 +27,6 @@ describe('UpdateScheduleModal', () => {
   let wrapper;
   let fakeApollo;
   let updateScheduleHandler;
-  const modalId = 'updateModalId';
 
   const findModal = () => wrapper.find(GlModal);
   const findAlert = () => wrapper.find(GlAlert);
@@ -53,7 +53,7 @@ describe('UpdateScheduleModal', () => {
         };
       },
       propsData: {
-        modalId,
+        modalId: editScheduleModalId,
         schedule,
         ...props,
       },
@@ -100,6 +100,7 @@ describe('UpdateScheduleModal', () => {
         };
       },
       propsData: {
+        modalId: editScheduleModalId,
         schedule,
       },
       provide: {
@@ -124,7 +125,7 @@ describe('UpdateScheduleModal', () => {
 
   describe('renders update modal with the correct schedule information', () => {
     it('renders name of correct modal id', () => {
-      expect(findModal().attributes('modalid')).toBe(modalId);
+      expect(findModal().attributes('modalid')).toBe(editScheduleModalId);
     });
 
     it('renders name of schedule to update', () => {

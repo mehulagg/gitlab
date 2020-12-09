@@ -1,5 +1,4 @@
 <script>
-import { PRESET_TYPES } from '../../constants';
 import CommonMixin from '../../mixins/common_mixin';
 
 export default {
@@ -9,12 +8,6 @@ export default {
       type: Date,
       required: true,
     },
-  },
-  data() {
-    return {
-      presetType: PRESET_TYPES.WEEKS,
-      indicatorStyle: {},
-    };
   },
   computed: {
     headerSubItems() {
@@ -33,15 +26,12 @@ export default {
       return headerSubItems;
     },
   },
-  mounted() {
-    this.indicatorStyle = this.getIndicatorStyles();
-  },
   methods: {
     getSubItemValueClass(subItem) {
       // Show dark color text only for current & upcoming dates
-      if (subItem.getTime() === this.currentDate.getTime()) {
+      if (subItem.getTime() === this.$options.currentDate.getTime()) {
         return 'label-dark label-bold';
-      } else if (subItem > this.currentDate) {
+      } else if (subItem > this.$options.currentDate) {
         return 'label-dark';
       }
       return '';
@@ -61,7 +51,7 @@ export default {
     >
     <span
       v-if="hasToday"
-      :style="indicatorStyle"
+      :style="getIndicatorStyles()"
       class="current-day-indicator-header preset-weeks"
     ></span>
   </div>

@@ -1,25 +1,23 @@
 import { shallowMount } from '@vue/test-utils';
 import WeeksHeaderSubItemComponent from 'ee/oncall_schedules/components/schedule/components/preset_weeks/weeks_header_sub_item.vue';
 import { getTimeframeForWeeksView } from 'ee/oncall_schedules/components/schedule/utils';
-import { PRESET_TYPES } from 'ee/oncall_schedules/components/schedule/constants';
+import { useFakeDate } from 'helpers/fake_date';
 
 describe('WeeksHeaderSubItemComponent', () => {
   let wrapper;
+  // January 3rd, 2018 - current date (faked)
+  useFakeDate(2018, 0, 3);
+  const today = new Date();
+  // January 1st, 2018 is the first  day of the week-long timeframe
+  // so as long as current date (faked January 3rd, 2018) is within week timeframe
+  // current indicator will be rendered
   const mockTimeframeInitialDate = new Date(2018, 0, 1);
   const mockTimeframeWeeks = getTimeframeForWeeksView(mockTimeframeInitialDate);
 
-  function mountComponent({
-    currentDate = mockTimeframeWeeks[0],
-    timeframeItem = mockTimeframeWeeks[0],
-  }) {
+  function mountComponent({ timeframeItem = mockTimeframeWeeks[0] }) {
     wrapper = shallowMount(WeeksHeaderSubItemComponent, {
       propsData: {
         timeframeItem,
-      },
-      data() {
-        return {
-          currentDate,
-        };
       },
     });
   }
@@ -33,13 +31,6 @@ describe('WeeksHeaderSubItemComponent', () => {
       wrapper.destroy();
       wrapper = null;
     }
-  });
-
-  describe('data', () => {
-    it('initializes `presetType` and `indicatorStyles` data props', () => {
-      expect(wrapper.vm.presetType).toBe(PRESET_TYPES.WEEKS);
-      expect(wrapper.vm.indicatorStyle).toBeDefined();
-    });
   });
 
   describe('computed', () => {
@@ -57,21 +48,12 @@ describe('WeeksHeaderSubItemComponent', () => {
   describe('methods', () => {
     describe('getSubItemValueClass', () => {
       it('returns string containing `label-dark` when provided subItem is greater than current week day', () => {
-        mountComponent({
-          currentDate: new Date(2018, 0, 1), // Jan 1, 2018
-        });
-        const subItem = new Date(2018, 0, 25); // Jan 25, 2018
-
+        const subItem = new Date(2018, 0, 25); // Jan 25, 2018 but faked today is  Jan 3, 2018
         expect(wrapper.vm.getSubItemValueClass(subItem)).toBe('label-dark');
       });
 
       it('returns string containing `label-dark label-bold` when provided subItem is same as current week day', () => {
-        const currentDate = new Date(2018, 0, 25);
-        mountComponent({
-          currentDate,
-        });
-        const subItem = currentDate;
-
+        const subItem = today;
         expect(wrapper.vm.getSubItemValueClass(subItem)).toBe('label-dark label-bold');
       });
     });

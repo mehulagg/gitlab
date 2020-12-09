@@ -1,14 +1,7 @@
 import { DAYS_IN_WEEK } from '../constants';
 
 export default {
-  data() {
-    const currentDate = new Date();
-    currentDate.setHours(0, 0, 0, 0);
-
-    return {
-      currentDate,
-    };
-  },
+  currentDate: null,
   computed: {
     hasToday() {
       const timeframeItem = new Date(this.timeframeItem.getTime());
@@ -24,10 +17,16 @@ export default {
         );
 
       return (
-        this.currentDate.getTime() >= headerSubItems[0].getTime() &&
-        this.currentDate.getTime() <= headerSubItems[headerSubItems.length - 1].getTime()
+        this.$options.currentDate.getTime() >= headerSubItems[0].getTime() &&
+        this.$options.currentDate.getTime() <= headerSubItems[headerSubItems.length - 1].getTime()
       );
     },
+  },
+  beforeCreate() {
+    const currentDate = new Date();
+    currentDate.setHours(0, 0, 0, 0);
+
+    this.$options.currentDate = currentDate;
   },
   methods: {
     getIndicatorStyles() {

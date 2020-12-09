@@ -5,7 +5,6 @@ export default {
   components: {
     WeeksHeaderItem,
   },
-
   props: {
     presetType: {
       type: String,

@@ -13,17 +13,9 @@ export default {
       required: true,
     },
   },
-  data() {
-    return {
-      indicatorStyles: {},
-    };
-  },
-  mounted() {
-    this.indicatorStyles = this.getIndicatorStyles();
-  },
 };
 </script>
 
 <template>
-  <span v-if="hasToday" :style="indicatorStyles" class="current-day-indicator"></span>
+  <span v-if="hasToday" :style="getIndicatorStyles()" class="current-day-indicator"></span>
 </template>

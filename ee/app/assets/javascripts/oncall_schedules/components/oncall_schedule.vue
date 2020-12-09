@@ -26,9 +26,9 @@ export const i18n = {
   addARotation: s__('OnCallSchedules|Add a rotation'),
 };
 
-const addRotationModalId = 'addRotationModal';
-const editScheduleModalId = 'editScheduleModal';
-const deleteScheduleModalId = 'deleteScheduleModal';
+export const addRotationModalId = 'addRotationModal';
+export const editScheduleModalId = 'editScheduleModal';
+export const deleteScheduleModalId = 'deleteScheduleModal';
 
 export default {
   i18n,
