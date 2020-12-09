@@ -1,5 +1,5 @@
 import { useOverclockTimers } from 'test_helpers/utils/overclock_timers';
-import { findByText, screen } from '@testing-library/dom';
+import { screen } from '@testing-library/dom';
 import * as ideHelper from './helpers/ide_helper';
 import startWebIDE from './helpers/start';
 
@@ -144,8 +144,7 @@ describe('IDE: User opens IDE', () => {
     beforeEach(async () => {
       vm = startWebIDE(container, { path: 'abracadabra/hocus-focus.txt' });
 
-      // a new tab is open for hocus-focus.txt
-      await findByText(document.querySelector('.multi-file-edit-pane'), 'hocus-focus.txt');
+      await ideHelper.waitForTabToOpen('hocus-focus.txt');
     });
 
     it('create new folders and file in the left sidebar', () => {

@@ -26,7 +26,7 @@ export const waitForMonacoEditor = () =>
   new Promise(resolve => window.monaco.editor.onDidCreateEditor(resolve));
 
 export const findMonacoEditor = () =>
-  screen.findByLabelText(/Editor content;/).then(x => x.closest('.monaco-editor'));
+  screen.findAllByLabelText(/Editor content;/).then(([x]) => x.closest('.monaco-editor'));
 
 export const findMonacoDiffEditor = () =>
   screen.findAllByLabelText(/Editor content;/).then(([x]) => x.closest('.monaco-diff-editor'));

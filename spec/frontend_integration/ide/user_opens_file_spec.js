@@ -33,8 +33,6 @@ describe('IDE: User opens a file in the Web IDE', () => {
       expect(ideHelper.getFilesList()).toEqual(
         expect.arrayContaining(['html', 'js', 'images', 'logo-white.png']),
       );
-
-      expect(ideHelper.getFilesList()).toEqual(expect.arrayContaining(['logo-white.png']));
     });
   });
 
@@ -54,7 +52,6 @@ describe('IDE: User opens a file in the Web IDE', () => {
       });
 
       it('shows diff editor', async () => {
-        // expect(await ideHelper.findMonacoEditor()).not.toBeDefined();
         expect(await ideHelper.findMonacoDiffEditor()).toBeDefined();
       });
     });
