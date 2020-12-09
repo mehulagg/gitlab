@@ -529,7 +529,7 @@ You can use the following fake tokens as examples:
 | Health check token    | `Tu7BgjR9qeZTEyRzGG2P`                                             |
 | Request profile token | `7VgpS4Ax5utVD2esNstz`                                             |
 
-### Terms list
+### Usage list
 
 | Usage | Guidance |
 |-|-|
