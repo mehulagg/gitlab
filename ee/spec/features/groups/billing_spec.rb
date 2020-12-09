@@ -56,16 +56,35 @@ RSpec.describe 'Groups > Billing', :js do
     end
 
     it 'shows the proper title and subscription data' do
-      visit group_billings_path(group)
-
+      extra_seats_url = "#{EE::SUBSCRIPTIONS_URL}/gitlab/namespaces/#{group.id}/extra_seats"
+      renew_url = "#{EE::SUBSCRIPTIONS_URL}/gitlab/namespaces/#{group.id}/renew"
       upgrade_url =
         "#{EE::SUBSCRIPTIONS_URL}/gitlab/namespaces/#{group.id}/upgrade/bronze-external-id"
+
+      visit group_billings_path(group)
 
       expect(page).to have_content("#{group.name} is currently using the Bronze plan")
       within subscription_table do
         expect(page).to have_content("start date #{formatted_date(subscription.start_date)}")
         expect(page).to have_link("Upgrade", href: upgrade_url)
         expect(page).to have_link("Manage", href: "#{EE::SUBSCRIPTIONS_URL}/subscriptions")
+        expect(page).to have_link("Add seats", href: extra_seats_url)
+        expect(page).to have_link("Renew", href: renew_url)
+      end
+    end
+
+    context 'with disabled feature flags' do
+      before do
+        stub_feature_flags(saas_manual_renew_button: false)
+        stub_feature_flags(saas_add_seats_button: false)
+        visit group_billings_path(group)
+      end
+
+      it 'does not show "Add Seats" button' do
+        within subscription_table do
+          expect(page).not_to have_link("Add seats")
+          expect(page).not_to have_link("Renew")
+        end
       end
     end
   end
@@ -91,14 +110,11 @@ RSpec.describe 'Groups > Billing', :js do
   context 'with feature flags' do
     using RSpec::Parameterized::TableSyntax
 
-    where(:api_billable_member_list, :saas_manual_renew_button, :saas_add_seats_button) do
-      true | true | true
-      true | false | true
-      true | true | false
-      true | false | false
-      false | true | true
-      false | false | true
-      false | false | false
+    where(:saas_manual_renew_button, :saas_add_seats_button) do
+      true | true
+      true | false
+      false | true
+      false | false
     end
 
     let(:plan) { 'bronze' }
