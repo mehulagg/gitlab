@@ -56,7 +56,7 @@ export default {
       return this.isFreePlan || this.plan.upgradable;
     },
     canRenew() {
-      return this.glFeatures.saasManualRenewButton && this.plan.trial && !this.isFreePlan;
+      return this.glFeatures.saasManualRenewButton && !this.isFreePlan;
     },
     addSeatsButton() {
       return this.canAddSeats
@@ -80,18 +80,12 @@ export default {
         : this.customerPortalUrl;
     },
     renewButton() {
-      if (!this.glFeatures.saasManualRenewButton) {
-        return null;
-      }
-
-      if (this.isFreePlan) {
-        return null;
-      }
-
-      return {
-        text: s__('SubscriptionTable|Renew'),
-        href: this.planRenewHref,
-      };
+      return this.canRenew
+        ? {
+            text: s__('SubscriptionTable|Renew'),
+            href: this.planRenewHref,
+          }
+        : null;
     },
     manageButton() {
       return !this.isFreePlan
