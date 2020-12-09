@@ -1,10 +1,11 @@
-import '@testing-library/jest-dom/extend-expect';
 import { omit } from 'lodash';
 import { createWrapper } from '@vue/test-utils';
 import initVulnerabilityReport from 'ee/security_dashboard/first_class_init';
 import ReportsNotConfigured from 'ee/security_dashboard/components/empty_states/reports_not_configured.vue';
 import { DASHBOARD_TYPES } from 'ee/security_dashboard/store/constants';
 import { TEST_HOST } from 'jest/helpers/test_constants';
+
+const isEmptyDiv = el => !el.children.length && el.matches('div');
 
 const TEST_DATASET = {
   dashboardDocumentation: '/test/dashboard_page',
@@ -73,6 +74,7 @@ describe('Vulnerability Report', () => {
 
         it('shows that reports are not configured and provides a link to the help page', () => {
           const reportsNotConfigured = wrapper.find(ReportsNotConfigured);
+
           expect(reportsNotConfigured.exists()).toBe(true);
           expect(reportsNotConfigured.props()).toMatchObject({
             helpPath: TEST_DATASET.securityDashboardHelpPath,
@@ -85,7 +87,7 @@ describe('Vulnerability Report', () => {
       createComponent({ data: { groupFullPath: '/test/' }, type: DASHBOARD_TYPES.GROUP });
 
       // These assertions will be expanded in issue #220290
-      expect(root).not.toBeEmptyDOMElement();
+      expect(isEmptyDiv(root)).toBe(false);
     });
 
     it('sets up instance-level', () => {
@@ -95,7 +97,7 @@ describe('Vulnerability Report', () => {
       });
 
       // These assertions will be expanded in issue #220290
-      expect(root).not.toBeEmptyDOMElement();
+      expect(isEmptyDiv(root)).toBe(false);
     });
   });
 
@@ -103,7 +105,7 @@ describe('Vulnerability Report', () => {
     it('does not have an element', () => {
       const vm = initVulnerabilityReport(null, null);
 
-      expect(root).toBeEmptyDOMElement();
+      expect(isEmptyDiv(root)).toBe(true);
       expect(vm).toBe(null);
     });
 
