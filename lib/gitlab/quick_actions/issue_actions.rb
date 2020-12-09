@@ -245,8 +245,13 @@ module Gitlab
         end
         command :invite_email do |emails = ""|
           added_emails = []
+          existing_emails = quick_action_target.email_participants_downcase
+
           emails.split(' ').each do |email|
-            added_emails << email if quick_action_target.add_email_participant(email)
+            unless existing_emails.include?(email.downcase)
+              quick_action_target.issue_email_participants.create!(email: email)
+              added_emails << email
+            end
           end
 
           if added_emails.any?

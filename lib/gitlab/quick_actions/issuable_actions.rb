@@ -94,7 +94,7 @@ module Gitlab
 
         desc _('Remove all or specific label(s)')
         explanation do |labels_param = nil|
-          label_references = labels_param.present? ? is(labels_param) : []
+          label_references = labels_param.present? ? find_label_references(labels_param) : []
           if label_references.any?
             _("Removes %{label_references} %{label_text}.") %
               { label_references: label_references.join(' '), label_text: 'label'.pluralize(label_references.count) }
