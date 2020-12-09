@@ -106,6 +106,14 @@ Guided Exploration project pipeline. It was tested on:
 The example can be copied to your own group or instance for testing. More details
 on what other GitLab CI patterns are demonstrated are available at the project page.
 
+
+## Troubleshooting
+
+### 403 - error checking push permissions
+
+If this error is presented to you, it might originate from an outside HTTP(S) proxy.
+Setting `http_proxy` / `https_proxy` [environment variables](https://docs.gitlab.com/ee/administration/packages/container_registry.html#running-the-docker-daemon-with-a-proxy) can help in this scenario.
+
 <!-- ## Troubleshooting
 
 Include any troubleshooting steps that you can foresee. If you know beforehand what issues
