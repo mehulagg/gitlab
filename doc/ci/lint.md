@@ -1,10 +1,11 @@
 ---
 stage: none
 group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
-
-# CI Lint
+<!-- markdownlint-disable MD044 -->
+# Validate .gitlab-ci.yml syntax with the CI Lint tool
+<!-- markdownlint-enable MD044 -->
 
 If you want to test the validity of your GitLab CI/CD configuration before committing
 the changes, you can use the CI Lint tool. This tool checks for syntax and logical
@@ -17,7 +18,8 @@ in your project and click **CI lint**.
 ## Validate basic logic and syntax
 
 By default, the CI lint checks the syntax of your CI YAML configuration and also runs
-some basic logical validations.
+some basic logical validations. Configuration added with the [`includes` keyword](yaml/README.md#include),
+is also validated.
 
 To use the CI lint, paste a complete CI configuration (`.gitlab-ci.yml` for example)
 into the text box and click **Validate**:

@@ -6,12 +6,12 @@ import InlineDiffView from '~/diffs/components/inline_diff_view.vue';
 import NotDiffableViewer from '~/vue_shared/components/diff_viewer/viewers/not_diffable.vue';
 import NoPreviewViewer from '~/vue_shared/components/diff_viewer/viewers/no_preview.vue';
 import ParallelDiffView from '~/diffs/components/parallel_diff_view.vue';
-import ImageDiffOverlay from '~/diffs/components/image_diff_overlay.vue';
 import NoteForm from '~/notes/components/note_form.vue';
 import DiffDiscussions from '~/diffs/components/diff_discussions.vue';
 import { IMAGE_DIFF_POSITION_TYPE } from '~/diffs/constants';
 import diffFileMockData from '../mock_data/diff_file';
 import { diffViewerModes } from '~/ide/constants';
+import DiffView from '~/diffs/components/diff_view.vue';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -33,7 +33,7 @@ describe('DiffContent', () => {
     diffFile: JSON.parse(JSON.stringify(diffFileMockData)),
   };
 
-  const createComponent = ({ props, state } = {}) => {
+  const createComponent = ({ props, state, provide } = {}) => {
     const fakeStore = new Vuex.Store({
       getters: {
         getNoteableData() {
@@ -55,6 +55,10 @@ describe('DiffContent', () => {
           namespaced: true,
           getters: {
             draftsForFile: () => () => true,
+            draftForLine: () => () => true,
+            shouldRenderDraftRow: () => () => true,
+            hasParallelDraftLeft: () => () => true,
+            hasParallelDraftRight: () => () => true,
           },
         },
         diffs: {
@@ -68,6 +72,7 @@ describe('DiffContent', () => {
             isInlineView: isInlineViewGetterMock,
             isParallelView: isParallelViewGetterMock,
             getCommentFormForDiffFile: getCommentFormForDiffFileGetterMock,
+            diffLines: () => () => [...diffFileMockData.parallel_diff_lines],
           },
           actions: {
             saveDiffDiscussion: saveDiffDiscussionMock,
@@ -77,6 +82,8 @@ describe('DiffContent', () => {
       },
     });
 
+    const glFeatures = provide ? { ...provide.glFeatures } : {};
+
     wrapper = shallowMount(DiffContentComponent, {
       propsData: {
         ...defaultProps,
@@ -84,6 +91,7 @@ describe('DiffContent', () => {
       },
       localVue,
       store: fakeStore,
+      provide: { glFeatures },
     });
   };
 
@@ -110,6 +118,16 @@ describe('DiffContent', () => {
       createComponent({ props: { diffFile: textDiffFile } });
 
       expect(wrapper.find(ParallelDiffView).exists()).toBe(true);
+    });
+
+    it('should render diff view if `unifiedDiffComponents` are true', () => {
+      isParallelViewGetterMock.mockReturnValue(true);
+      createComponent({
+        props: { diffFile: textDiffFile },
+        provide: { glFeatures: { unifiedDiffComponents: true } },
+      });
+
+      expect(wrapper.find(DiffView).exists()).toBe(true);
     });
 
     it('renders rendering more lines loading icon', () => {
@@ -146,14 +164,6 @@ describe('DiffContent', () => {
 
   describe('with image files', () => {
     const imageDiffFile = { ...defaultProps.diffFile, viewer: { name: diffViewerModes.image } };
-
-    it('should have image diff view in place', () => {
-      getCommentFormForDiffFileGetterMock.mockReturnValue(() => true);
-      createComponent({ props: { diffFile: imageDiffFile } });
-
-      expect(wrapper.find(InlineDiffView).exists()).toBe(false);
-      expect(wrapper.find(ImageDiffOverlay).exists()).toBe(true);
-    });
 
     it('renders diff file discussions', () => {
       getCommentFormForDiffFileGetterMock.mockReturnValue(() => true);

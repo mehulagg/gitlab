@@ -1,7 +1,7 @@
 ---
 stage: Plan
-group: Portfolio Management
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+group: Product Planning
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Epics API **(PREMIUM)**
@@ -38,11 +38,11 @@ are paginated.
 
 Read more on [pagination](README.md#pagination).
 
-CAUTION: **Deprecation:**
+WARNING:
 > `reference` attribute in response is deprecated in favour of `references`.
 > Introduced [GitLab 12.6](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/20354)
 
-NOTE: **Note:**
+NOTE:
 > `references.relative` is relative to the group that the epic is being requested. When epic is fetched from its origin group
 > `relative` format would be the same as `short` format and when requested cross groups it is expected to be the same as `full` format.
 
@@ -67,10 +67,10 @@ GET /groups/:id/epics?state=opened
 | `sort`              | string           | no         | Return epics sorted in `asc` or `desc` order. Default is `desc`                                                             |
 | `search`            | string           | no         | Search epics against their `title` and `description`                                                                        |
 | `state`             | string           | no         | Search epics against their `state`, possible filters: `opened`, `closed` and `all`, default: `all`                          |
-| `created_after`     | datetime         | no         | Return epics created on or after the given time                                                                             |
-| `created_before`    | datetime         | no         | Return epics created on or before the given time                                                                            |
-| `updated_after`     | datetime         | no         | Return epics updated on or after the given time                                                                             |
-| `updated_before`    | datetime         | no         | Return epics updated on or before the given time                                                                            |
+| `created_after`     | datetime         | no         | Return epics created on or after the given time. Expected in ISO 8601 format (`2019-03-15T08:00:00Z`) |
+| `created_before`    | datetime         | no         | Return epics created on or before the given time. Expected in ISO 8601 format (`2019-03-15T08:00:00Z`) |
+| `updated_after`     | datetime         | no         | Return epics updated on or after the given time. Expected in ISO 8601 format (`2019-03-15T08:00:00Z`) |
+| `updated_before`    | datetime         | no         | Return epics updated on or before the given time. Expected in ISO 8601 format (`2019-03-15T08:00:00Z`) |
 | `include_ancestor_groups` | boolean    | no         | Include epics from the requested group's ancestors. Default is `false`                                                      |
 | `include_descendant_groups` | boolean  | no         | Include epics from the requested group's descendants. Default is `true`                                                     |
 | `my_reaction_emoji` | string           | no         | Return epics reacted by the authenticated user by the given emoji. `None` returns epics not given a reaction. `Any` returns epics given at least one reaction. Introduced in [GitLab 13.0](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/31479)|
@@ -251,7 +251,7 @@ Example response:
 
 Creates a new epic.
 
-NOTE: **Note:**
+NOTE:
 Starting with GitLab [11.3](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/6448), `start_date` and `end_date` should no longer be assigned
 directly, as they now represent composite values. You can configure it via the `*_is_fixed` and
 `*_fixed` fields instead.
@@ -333,7 +333,7 @@ Example response:
 
 Updates an epic.
 
-NOTE: **Note:**
+NOTE:
 Starting with GitLab [11.3](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/6448), `start_date` and `end_date` should no longer be assigned
 directly, as they now represent composite values. You can configure it via the `*_is_fixed` and
 `*_fixed` fields instead.
@@ -349,7 +349,9 @@ PUT /groups/:id/epics/:epic_iid
 | `title`             | string           | no         | The title of an epic |
 | `description`       | string           | no         | The description of an epic. Limited to 1,048,576 characters.  |
 | `confidential`      | boolean          | no         | Whether the epic should be confidential |
-| `labels`            | string           | no         | The comma separated list of labels |
+| `labels`            | string           | no         | Comma-separated label names for an issue. Set to an empty string to unassign all labels. |
+| `add_labels`        | string           | no         | Comma-separated label names to add to an issue. |
+| `remove_labels`     | string           | no         | Comma-separated label names to remove from an issue. |
 | `updated_at`        | string           | no         | When the epic was updated. Date time string, ISO 8601 formatted, for example `2016-03-11T03:45:40Z` . Requires administrator or project/group owner privileges ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/255309) in GitLab 13.5) |
 | `start_date_is_fixed` | boolean        | no         | Whether start date should be sourced from `start_date_fixed` or from milestones (since 11.3) |
 | `start_date_fixed`  | string           | no         | The fixed start date of an epic (since 11.3) |

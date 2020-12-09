@@ -12,6 +12,9 @@ import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { parseBoolean } from '~/lib/utils/common_utils';
 import axios from '~/lib/utils/axios_utils';
 
+const NO_ITERATION_TITLE = 'No+Iteration';
+const NO_MILESTONE_TITLE = 'No+Milestone';
+
 class BoardsStoreEE {
   initEESpecific(boardsStore) {
     this.$boardApp = document.getElementById('board-app');
@@ -39,6 +42,8 @@ class BoardsStoreEE {
           dataset: {
             boardMilestoneId,
             boardMilestoneTitle,
+            boardIterationTitle,
+            boardIterationId,
             boardAssigneeUsername,
             labels,
             boardWeight,
@@ -53,6 +58,8 @@ class BoardsStoreEE {
           // iterationTitle: iterationTitle || '',
           // board.iterationTitle === currentIterationTitle
           currentIteration: parseBoolean(currentIteration),
+          iterationId: parseInt(boardIterationId, 10),
+          iterationTitle: boardIterationTitle || '',
           assigneeUsername: boardAssigneeUsername,
           labels: JSON.parse(labels || []),
           weight: parseInt(boardWeight, 10),
@@ -105,14 +112,25 @@ class BoardsStoreEE {
 
     let { milestoneTitle } = this.store.boardConfig;
     if (this.store.boardConfig.milestoneId === 0) {
-      /* eslint-disable-next-line @gitlab/require-i18n-strings */
-      milestoneTitle = 'No+Milestone';
+      milestoneTitle = NO_MILESTONE_TITLE;
     } else {
       milestoneTitle = encodeURIComponent(milestoneTitle);
     }
     if (milestoneTitle) {
       updateFilterPath('milestone_title', milestoneTitle);
       this.store.cantEdit.push('milestone');
+    }
+
+    let { iterationTitle } = this.store.boardConfig;
+    if (this.store.boardConfig.iterationId === 0) {
+      iterationTitle = NO_ITERATION_TITLE;
+    } else {
+      iterationTitle = encodeURIComponent(iterationTitle);
+    }
+
+    if (iterationTitle) {
+      updateFilterPath('iteration_id', iterationTitle);
+      this.store.cantEdit.push('iteration');
     }
 
     let { weight } = this.store.boardConfig;

@@ -31,10 +31,21 @@ export const transformChartDataForGlCharts = (
   };
 
   switch (type) {
+    case CHART_TYPES.BAR:
+      formattedData.datasets = [
+        {
+          name: 'all',
+          data: labels.map((label, i) => [label, datasets[0].data[i]]),
+        },
+      ];
+      break;
     case CHART_TYPES.STACKED_BAR:
-      formattedData.datasets = datasets.map(dataset => dataset.data);
-      formattedData.seriesNames = datasets.map(dataset => dataset.label);
-
+      formattedData.datasets.push(
+        ...datasets.map(dataset => ({
+          name: dataset.label,
+          data: dataset.data,
+        })),
+      );
       break;
     case CHART_TYPES.LINE:
       formattedData.datasets.push(
@@ -48,7 +59,6 @@ export const transformChartDataForGlCharts = (
     default:
       formattedData.datasets = { all: labels.map((label, i) => [label, datasets[0].data[i]]) };
   }
-
   return formattedData;
 };
 

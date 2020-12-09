@@ -10,7 +10,7 @@ RSpec.describe BulkImports::Common::Extractors::GraphqlExtractor do
   let(:context) do
     instance_double(
       BulkImports::Pipeline::Context,
-      entities: [import_entity]
+      entity: import_entity
     )
   end
 
@@ -41,12 +41,11 @@ RSpec.describe BulkImports::Common::Extractors::GraphqlExtractor do
     end
 
     context 'when variables are present' do
-      let(:query) { { query: double(to_s: 'test', variables: { full_path: :source_full_path }) } }
+      let(:variables) { { foo: :bar } }
+      let(:query) { { query: double(to_s: 'test', variables: variables) } }
 
       it 'builds graphql query variables for import entity' do
-        expected_variables = { full_path: import_entity.source_full_path }
-
-        expect(graphql_client).to receive(:execute).with(anything, expected_variables)
+        expect(graphql_client).to receive(:execute).with(anything, variables)
 
         subject.extract(context).first
       end

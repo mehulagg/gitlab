@@ -1,7 +1,7 @@
 ---
 stage: none
 group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Getting started with GitLab GraphQL API
@@ -41,11 +41,11 @@ The examples below:
 
 - Can be run directly against GitLab 11.0 or later, though some of the types and fields
 may not be supported in older versions.
-- Will work against GitLab.com without any further setup. Make sure you are signed in and
+- Works against GitLab.com without any further setup. Make sure you are signed in and
 navigate to the [GraphiQL Explorer](https://gitlab.com/-/graphql-explorer).
 
 If you want to run the queries locally, or on a self-managed instance,
-you will need to either:
+you must either:
 
 - Create the `gitlab-org` group with a project called `graphql-sandbox` under it. Create
 several issues within the project.
@@ -53,7 +53,7 @@ several issues within the project.
 
 Please refer to [running GraphiQL](index.md#graphiql) for more information.
 
-NOTE: **Note:**
+NOTE:
 If you are running GitLab 11.0 to 12.0, enable the `graphql`
 [feature flag](../features.md#set-or-create-a-feature).
 
@@ -64,7 +64,7 @@ The GitLab GraphQL API can be used to perform:
 - Queries for data retrieval.
 - [Mutations](#mutations) for creating, updating, and deleting data.
 
-NOTE: **Note:**
+NOTE:
 In the GitLab GraphQL API, `id` refers to a
 [Global ID](https://graphql.org/learn/global-object-identification/),
 which is an object identifier in the format of `"gid://gitlab/Issue/123"`.
@@ -133,7 +133,7 @@ More about queries:
 ### Authorization
 
 Authorization uses the same engine as the GitLab application (and GitLab.com). So if you've signed in to GitLab
-and use GraphiQL, all queries will be performed as you, the signed in user. For more information, see the
+and use GraphiQL, all queries are performed as you, the signed in user. For more information, see the
 [GitLab API documentation](../README.md#authentication).
 
 ### Mutations
@@ -173,7 +173,7 @@ mutation {
 ```
 
 Example: Add a comment to the issue (we're using the ID of the `GitLab.com` issue - but
-if you're using a local instance, you'll need to get the ID of an issue you can write to).
+if you're using a local instance, you must get the ID of an issue you can write to).
 
 ```graphql
 mutation {
@@ -314,9 +314,9 @@ Pagination is a way of only asking for a subset of the records (say, the first 1
 If we want more of them, we can make another request for the next 10 from the server
 (in the form of something like "please give me the next 10 records").
 
-By default, GitLab's GraphQL API will return only the first 100 records of any collection.
+By default, GitLab's GraphQL API returns only the first 100 records of any collection.
 This can be changed by using `first` or `last` arguments. Both arguments take a value,
-so `first: 10` will return the first 10 records, and `last: 10` the last 10 records.
+so `first: 10` returns the first 10 records, and `last: 10` the last 10 records.
 
 Example: Retrieve only the first 2 issues (slicing). The `cursor` field gives us a position from which
 we can retrieve further records relative to that one.

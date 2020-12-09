@@ -1,4 +1,4 @@
-import { LOADING, ERROR, SUCCESS } from '../store/constants';
+import { LOADING, ERROR, SUCCESS } from '~/reports/constants';
 
 export default {
   methods: {

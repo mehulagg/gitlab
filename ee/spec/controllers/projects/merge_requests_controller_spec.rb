@@ -4,8 +4,8 @@ require 'spec_helper'
 
 RSpec.shared_examples 'authorize read pipeline' do
   context 'public project with private builds' do
+    let_it_be(:project) { create(:project, :public, :builds_private) }
     let(:comparison_status) { {} }
-    let(:project) { create(:project, :public, :builds_private) }
 
     it 'restricts access to signed out users' do
       sign_out user
@@ -50,10 +50,11 @@ end
 RSpec.describe Projects::MergeRequestsController do
   include ProjectForksHelper
 
-  let(:project)       { create(:project, :repository) }
-  let(:merge_request) { create(:merge_request_with_diffs, source_project: project, author: create(:user)) }
-  let(:user)          { project.creator }
-  let(:viewer)        { user }
+  let_it_be_with_refind(:project) { create(:project, :repository) }
+  let_it_be(:author) { create(:user) }
+  let(:merge_request) { create(:merge_request_with_diffs, source_project: project, author: author) }
+  let(:user) { project.creator }
+  let(:viewer) { user }
 
   before do
     sign_in(viewer)
@@ -93,6 +94,10 @@ RSpec.describe Projects::MergeRequestsController do
   end
 
   describe 'PUT update' do
+    let_it_be_with_reload(:merge_request) do
+      create(:merge_request_with_diffs, source_project: project, author: author)
+    end
+
     before do
       project.update(approvals_before_merge: 2)
     end
@@ -371,7 +376,7 @@ RSpec.describe Projects::MergeRequestsController do
   end
 
   describe 'GET #dependency_scanning_reports' do
-    let(:merge_request) { create(:ee_merge_request, :with_dependency_scanning_reports, source_project: project, author: create(:user)) }
+    let_it_be_with_reload(:merge_request) { create(:ee_merge_request, :with_dependency_scanning_reports, source_project: project, author: author) }
     let(:params) do
       {
         namespace_id: project.namespace.to_param,
@@ -443,7 +448,7 @@ RSpec.describe Projects::MergeRequestsController do
   end
 
   describe 'GET #container_scanning_reports' do
-    let(:merge_request) { create(:ee_merge_request, :with_container_scanning_reports, source_project: project, author: create(:user)) }
+    let_it_be_with_reload(:merge_request) { create(:ee_merge_request, :with_container_scanning_reports, source_project: project, author: author) }
     let(:params) do
       {
         namespace_id: project.namespace.to_param,
@@ -515,7 +520,7 @@ RSpec.describe Projects::MergeRequestsController do
   end
 
   describe 'GET #sast_reports' do
-    let(:merge_request) { create(:ee_merge_request, :with_sast_reports, source_project: project, author: create(:user)) }
+    let_it_be_with_reload(:merge_request) { create(:ee_merge_request, :with_sast_reports, source_project: project, author: author) }
     let(:params) do
       {
         namespace_id: project.namespace.to_param,
@@ -587,7 +592,7 @@ RSpec.describe Projects::MergeRequestsController do
   end
 
   describe 'GET #coverage_fuzzing_reports' do
-    let(:merge_request) { create(:ee_merge_request, :with_coverage_fuzzing_reports, source_project: project, author: create(:user)) }
+    let_it_be_with_reload(:merge_request) { create(:ee_merge_request, :with_coverage_fuzzing_reports, source_project: project, author: author) }
 
     let(:params) do
       {
@@ -733,7 +738,7 @@ RSpec.describe Projects::MergeRequestsController do
   end
 
   describe 'GET #secret_detection_reports' do
-    let(:merge_request) { create(:ee_merge_request, :with_secret_detection_reports, source_project: project, author: create(:user)) }
+    let_it_be_with_reload(:merge_request) { create(:ee_merge_request, :with_secret_detection_reports, source_project: project, author: author) }
     let(:params) do
       {
         namespace_id: project.namespace.to_param,
@@ -806,7 +811,7 @@ RSpec.describe Projects::MergeRequestsController do
   end
 
   describe 'GET #dast_reports' do
-    let(:merge_request) { create(:ee_merge_request, :with_dast_reports, source_project: project) }
+    let_it_be_with_reload(:merge_request) { create(:ee_merge_request, :with_dast_reports, source_project: project) }
     let(:params) do
       {
         namespace_id: project.namespace.to_param,
@@ -878,7 +883,7 @@ RSpec.describe Projects::MergeRequestsController do
   end
 
   describe 'GET #license_scanning_reports' do
-    let(:merge_request) { create(:ee_merge_request, :with_license_scanning_reports, source_project: project, author: create(:user)) }
+    let_it_be_with_reload(:merge_request) { create(:ee_merge_request, :with_license_scanning_reports, source_project: project, author: author) }
     let(:comparison_status) { { status: :parsed, data: { new_licenses: [], existing_licenses: [], removed_licenses: [] } } }
 
     let(:params) do
@@ -973,6 +978,7 @@ RSpec.describe Projects::MergeRequestsController do
 
     context "when a user is NOT authorized to read licenses on a project" do
       let(:project) { create(:project, :repository, :private) }
+      let(:merge_request) { create(:ee_merge_request, :with_license_scanning_reports, source_project: project, author: create(:user)) }
       let(:viewer) { create(:user) }
 
       it 'returns a report' do
@@ -984,6 +990,7 @@ RSpec.describe Projects::MergeRequestsController do
 
     context "when a user is authorized to read the licenses" do
       let(:project) { create(:project, :repository, :private) }
+      let(:merge_request) { create(:ee_merge_request, :with_license_scanning_reports, source_project: project, author: create(:user)) }
       let(:viewer) { create(:user) }
 
       before do
@@ -1017,7 +1024,7 @@ RSpec.describe Projects::MergeRequestsController do
   end
 
   describe 'GET #metrics_reports' do
-    let(:merge_request) { create(:ee_merge_request, :with_metrics_reports, source_project: project, author: create(:user)) }
+    let_it_be_with_reload(:merge_request) { create(:ee_merge_request, :with_metrics_reports, source_project: project, author: author) }
 
     let(:params) do
       {

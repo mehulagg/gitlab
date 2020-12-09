@@ -3,7 +3,6 @@
 - adjourned_date = adjourned_deletion ? permanent_deletion_date(Time.now.utc).to_s : nil;
 - admin_help_path = help_page_path('user/admin_area/settings/visibility_and_access_controls', anchor: 'default-deletion-delay')
 - recovery_help_path = help_page_path('user/project/settings/index', anchor: 'delete-a-project')
-- confirm_phrase = s_('DeleteProject|Delete %{name}') % { name: project.full_name }
 
 - unless project.marked_for_deletion?
   .sub-section
@@ -20,7 +19,7 @@
       %p= permanent_delete_message(project)
       %p
         %strong= _('Are you ABSOLUTELY SURE you wish to delete this project?')
-      #js-project-delete-button{ data: { form_path: project_path(project), confirm_phrase: confirm_phrase } }
+      #js-project-delete-button{ data: { form_path: project_path(project), confirm_phrase: project.path } }
 - else
   = render 'projects/settings/restore', project: project
 

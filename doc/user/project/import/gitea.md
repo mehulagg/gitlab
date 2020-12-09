@@ -2,7 +2,7 @@
 type: reference, howto
 stage: Manage
 group: Import
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Import your project from Gitea to GitLab
@@ -11,7 +11,7 @@ Import your projects from Gitea to GitLab with minimal effort.
 
 ## Overview
 
-NOTE: **Note:**
+NOTE:
 This requires Gitea `v1.0.0` or newer.
 
 - At its current state, Gitea importer can import:

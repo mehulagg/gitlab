@@ -56,7 +56,7 @@ RSpec.describe Issue, :elastic do
     end
   end
 
-  it "searches issues" do
+  it "searches issues", :aggregate_failures do
     Sidekiq::Testing.inline! do
       create :issue, title: 'bla-bla term1', project: project
       create :issue, description: 'bla-bla term2', project: project
@@ -107,6 +107,7 @@ RSpec.describe Issue, :elastic do
 
   it "returns json with all needed elements" do
     assignee = create(:user)
+    project = create(:project, :internal)
     issue = create :issue, project: project, assignees: [assignee]
 
     expected_hash = issue.attributes.extract!(
@@ -129,8 +130,19 @@ RSpec.describe Issue, :elastic do
     })
 
     expected_hash['assignee_id'] = [assignee.id]
+    expected_hash['issues_access_level'] = ProjectFeature::ENABLED
+    expected_hash['visibility_level'] = Gitlab::VisibilityLevel::INTERNAL
 
     expect(issue.__elasticsearch__.as_indexed_json).to eq(expected_hash)
+  end
+
+  it 'handles a project missing project_feature' do
+    issue = create :issue, project: project
+    allow(issue.project).to receive(:project_feature).and_return(nil)
+
+    expect(Gitlab::ErrorTracking).to receive(:track_exception)
+
+    expect(issue.__elasticsearch__.as_indexed_json['issues_access_level']).to eq(ProjectFeature::PRIVATE)
   end
 
   context 'field length limits' do

@@ -1,7 +1,7 @@
 ---
-stage: none
-group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+stage: Enablement
+group: Distribution
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Fast lookup of authorized SSH keys in the database
@@ -9,7 +9,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/1631) in [GitLab Starter](https://about.gitlab.com/pricing/) 9.3.
 > - [Available in](https://gitlab.com/gitlab-org/gitlab/-/issues/3953) GitLab Community Edition 10.4.
 
-NOTE: **Note:**
+NOTE:
 This document describes a drop-in replacement for the
 `authorized_keys` file. For normal (non-deploy key) users, consider using
 [SSH certificates](ssh_certificates.md). They are even faster, but are not a
@@ -80,18 +80,18 @@ Confirm that SSH is working by commenting out your user's key in the `authorized
 A successful pull would mean that GitLab was able to find the key in the database,
 since it is not present in the file anymore.
 
-NOTE: **Note:**
+NOTE:
 For Omnibus Docker, `AuthorizedKeysCommand` is setup by default in
 GitLab 11.11 and later.
 
-NOTE: **Note:**
+NOTE:
 For Installations from source, the command would be located at
 `/home/git/gitlab-shell/bin/gitlab-shell-authorized-keys-check` if [the install from source](../../install/installation.md#install-gitlab-shell) instructions were followed.
 You might want to consider creating a wrapper script somewhere else since this command needs to be
 owned by `root` and not be writable by group or others. You could also consider changing the ownership of this command
 as required, but that might require temporary ownership changes during `gitlab-shell` upgrades.
 
-CAUTION: **Caution:**
+WARNING:
 Do not disable writes until SSH is confirmed to be working
 perfectly, because the file will quickly become out-of-date.
 
@@ -196,7 +196,8 @@ the database. The following instructions can be used to build OpenSSH 7.5:
    yes | cp pam-ssh-conf-$timestamp /etc/pam.d/sshd
    ```
 
-1. Verify the installed version. In another window, attempt to login to the server:
+1. Verify the installed version. In another window, attempt to sign in to the
+   server:
 
    ```shell
    ssh -v <your-centos-machine>
@@ -204,7 +205,7 @@ the database. The following instructions can be used to build OpenSSH 7.5:
 
    You should see a line that reads: "debug1: Remote protocol version 2.0, remote software version OpenSSH_7.5"
 
-   If not, you may need to restart `sshd` (e.g. `systemctl restart sshd.service`).
+   If not, you may need to restart `sshd` (for example, `systemctl restart sshd.service`).
 
 1. *IMPORTANT!* Open a new SSH session to your server before exiting to make
    sure everything is working! If you need to downgrade, simple install the

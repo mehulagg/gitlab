@@ -20,8 +20,6 @@
   = render 'shared/issuable/form/title', issuable: issuable, form: form, has_wip_commits: commits && commits.detect(&:work_in_progress?)
 #js-suggestions{ data: { project_path: @project.full_path } }
 
-= render 'shared/form_elements/apply_template_warning', issuable: issuable
-
 = render 'shared/issuable/form/type_selector', issuable: issuable, form: form
 
 = render 'shared/form_elements/description', model: issuable, form: form, project: project
@@ -34,7 +32,7 @@
         = form.label :confidential, class: 'form-check-label' do
           This issue is confidential and should only be visible to team members with at least Reporter access.
 
-= render 'shared/issuable/form/metadata', issuable: issuable, form: form, project: project
+= render 'shared/issuable/form/metadata', issuable: issuable, form: form, project: project, presenter: presenter
 
 = render_if_exists 'shared/issuable/approvals', issuable: issuable, presenter: presenter, form: form
 
@@ -90,3 +88,6 @@
   = form.hidden_field :issue_type
 
 = form.hidden_field :lock_version
+
+- if @vulnerability_id
+  = hidden_field_tag 'vulnerability_id', @vulnerability_id

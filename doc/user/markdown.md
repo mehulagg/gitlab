@@ -1,7 +1,7 @@
 ---
 stage: Create
 group: Source Code
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 type: reference, howto
 ---
 
@@ -15,14 +15,14 @@ website uses an extended Kramdown gem, [GitLab Kramdown](https://gitlab.com/gitl
 Consult the [GitLab Kramdown Guide](https://about.gitlab.com/handbook/markdown-guide/)
 for a complete Kramdown reference.
 
-NOTE: **Note:**
+NOTE:
 We encourage you to view this document as [rendered by GitLab itself](https://gitlab.com/gitlab-org/gitlab/blob/master/doc/user/markdown.md).
 
 ## GitLab Flavored Markdown (GFM)
 
 GitLab uses "GitLab Flavored Markdown" (GFM). It extends the [CommonMark specification](https://spec.commonmark.org/current/)
 (which is based on standard Markdown) in several ways to add additional useful functionality.
-It was inspired by [GitHub Flavored Markdown](https://docs.github.com/en/github/writing-on-github/basic-writing-and-formatting-syntax).
+It was inspired by [GitHub Flavored Markdown](https://docs.github.com/en/free-pro-team@latest/github/writing-on-github/basic-writing-and-formatting-syntax).
 
 You can use GFM in the following areas:
 
@@ -162,6 +162,7 @@ Color written inside backticks is followed by a color "chip":
 ### Diagrams and flowcharts
 
 It's possible to generate diagrams and flowcharts from text in GitLab using [Mermaid](https://mermaidjs.github.io/) or [PlantUML](https://plantuml.com).
+It's also possible to use [Kroki](https://kroki.io) to create a wide variety of diagrams.
 
 #### Mermaid
 
@@ -230,6 +231,11 @@ end
 #### PlantUML
 
 To make PlantUML available in GitLab, a GitLab administrator needs to enable it first. Read more in [PlantUML & GitLab](../administration/integration/plantuml.md).
+
+#### Kroki
+
+To make Kroki available in GitLab, a GitLab administrator needs to enable it first.
+Read more in the [Kroki integration](../administration/integration/kroki.md) page.
 
 ### Emoji
 
@@ -425,6 +431,7 @@ GFM recognizes the following:
 | merge request                   | `!123`                     | `namespace/project!123`                 | `project!123`                  |
 | snippet                         | `$123`                     | `namespace/project$123`                 | `project$123`                  |
 | epic **(ULTIMATE)**             | `&123`                     | `group1/subgroup&123`                   |                                |
+| vulnerability **(ULTIMATE)** *(1)* | `[vulnerability:123]`   | `[vulnerability:namespace/project/123]` | `[vulnerability:project/123]`  |
 | label by ID                     | `~123`                     | `namespace/project~123`                 | `project~123`                  |
 | one-word label by name          | `~bug`                     | `namespace/project~bug`                 | `project~bug`                  |
 | multi-word label by name        | `~"feature request"`       | `namespace/project~"feature request"`   | `project~"feature request"`    |
@@ -438,6 +445,26 @@ GFM recognizes the following:
 | repository file line references | `[README](doc/README#L13)` |                                         |                                |
 | [alert](../operations/incident_management/alerts.md) | `^alert#123` | `namespace/project^alert#123`    | `project^alert#123`            |
 
+1. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/281035) in GitLab 13.6.
+
+    The Vulnerability special references feature is under development but ready for production use.
+    It is deployed behind a feature flag that is **disabled by default**.
+    [GitLab administrators with access to the GitLab Rails console](../administration/feature_flags.md)
+    can opt to enable it for your instance.
+    It's disabled on GitLab.com.
+
+    To disable it:
+
+    ```ruby
+    Feature.disable(:vulnerability_special_references)
+    ```
+
+    To enable it:
+
+    ```ruby
+    Feature.enable(:vulnerability_special_references)
+    ```
+
 For example, referencing an issue by using `#123` will format the output as a link
 to issue number 123 with text `#123`. Likewise, a link to issue number 123 will be
 recognized and formatted with text `#123`.
@@ -450,7 +477,7 @@ In addition to this, links to some objects are also recognized and formatted. So
 
 ### Task lists
 
-> If this is not rendered correctly, [view it in GitLab itself](https://gitlab.com/gitlab-org/gitlab/blob/master/doc/user/markdown.md#task-lists).
+If this section is not rendered correctly, [view it in GitLab itself](https://gitlab.com/gitlab-org/gitlab/blob/master/doc/user/markdown.md#task-lists).
 
 You can add task lists anywhere Markdown is supported, but you can only "click"
 to toggle the boxes if they are in issues, merge requests, or comments. In other
@@ -532,7 +559,7 @@ If this snippet was placed on a page at `<your_wiki>/documentation/main`,
 it would link to `<your_wiki>/documentation/related`:
 
 ```markdown
-[Link to Related Page](./related)
+[Link to Related Page](related)
 ```
 
 If this snippet was placed on a page at `<your_wiki>/documentation/related/content`,
@@ -546,7 +573,7 @@ If this snippet was placed on a page at `<your_wiki>/documentation/main`,
 it would link to `<your_wiki>/documentation/related.md`:
 
 ```markdown
-[Link to Related Page](./related.md)
+[Link to Related Page](related.md)
 ```
 
 If this snippet was placed on a page at `<your_wiki>/documentation/related/content`,
@@ -753,6 +780,7 @@ But let's throw in a <b>tag</b>.
 
 There are multiple ways to emphasize text in Markdown. You can italicize, bold, strikethrough,
 as well as combine these emphasis styles together.
+Strikethrough is not part of the core Markdown standard, but is part of GFM.
 
 Examples:
 
@@ -773,9 +801,6 @@ Strong emphasis, aka bold, with double **asterisks** or __underscores__.
 Combined emphasis with **asterisks and _underscores_**.
 
 Strikethrough uses two tildes. ~~Scratch this.~~
-
-NOTE: **Note:**
-Strikethrough is not part of the core Markdown standard, but is part of GFM.
 
 #### Multiple underscores in words and mid-word emphasis
 
@@ -1242,7 +1267,7 @@ Do not change to reference style links.
 
 Some text to show that the reference links can follow later.
 
-NOTE: **Note:**
+NOTE:
 Relative links do not allow the referencing of project files in a wiki
 page, or a wiki page in a project file. The reason for this is that a wiki is always
 in a separate Git repository in GitLab. For example, `[I'm a reference-style link](style)`

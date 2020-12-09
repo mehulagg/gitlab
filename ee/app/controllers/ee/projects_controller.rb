@@ -47,6 +47,11 @@ module EE
       end
     end
 
+    override :project_feature_attributes
+    def project_feature_attributes
+      super + [:requirements_access_level]
+    end
+
     override :project_params_attributes
     def project_params_attributes
       super + project_params_ee
@@ -83,13 +88,16 @@ module EE
         group_with_project_templates_id
       ]
 
-      if allow_merge_pipelines_params?
-        attrs << %i[merge_pipelines_enabled]
-      end
+      attrs << %i[merge_pipelines_enabled] if allow_merge_pipelines_params?
+      attrs << %i[merge_trains_enabled] if allow_merge_trains_params?
 
       attrs += merge_request_rules_params
 
       attrs += compliance_framework_params
+
+      if ::Gitlab::Ci::Features.auto_rollback_available?(project)
+        attrs << :auto_rollback_enabled
+      end
 
       if allow_mirror_params?
         attrs + mirror_params
@@ -120,7 +128,7 @@ module EE
         attrs << :merge_requests_disable_committers_approval
       end
 
-      if can?(current_user, :modify_overriding_approvers_per_merge_request_setting, project)
+      if can?(current_user, :modify_approvers_rules, project)
         attrs << :disable_overriding_approvers_per_merge_request
       end
 
@@ -133,6 +141,10 @@ module EE
 
     def allow_merge_pipelines_params?
       project&.feature_available?(:merge_pipelines)
+    end
+
+    def allow_merge_trains_params?
+      project&.feature_available?(:merge_trains)
     end
 
     def compliance_framework_params

@@ -1,9 +1,9 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlIcon } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 
 import EpicHeader from 'ee/epic/components/epic_header.vue';
-import createStore from 'ee/epic/store';
 import { statusType } from 'ee/epic/constants';
+import createStore from 'ee/epic/store';
 import TimeagoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import UserAvatarLink from '~/vue_shared/components/user_avatar/user_avatar_link.vue';
 

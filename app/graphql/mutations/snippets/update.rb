@@ -7,10 +7,9 @@ module Mutations
 
       graphql_name 'UpdateSnippet'
 
-      argument :id,
-               GraphQL::ID_TYPE,
+      argument :id, ::Types::GlobalIDType[::Snippet],
                required: true,
-               description: 'The global id of the snippet to update'
+               description: 'The global ID of the snippet to update'
 
       argument :title, GraphQL::STRING_TYPE,
                required: false,

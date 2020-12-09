@@ -1,3 +1,9 @@
+---
+stage: Manage
+group: Import
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Merging translations from CrowdIn
 
 CrowdIn automatically syncs the `gitlab.pot` file with the CrowdIn service, presenting
@@ -57,7 +63,7 @@ have been fixed on master.
 
 ## Recreate the GitLab integration in CrowdIn
 
-NOTE: **Note:**
+NOTE:
 These instructions work only for GitLab Team Members.
 
 If for some reason the GitLab integration in CrowdIn does not exist, it can be

@@ -1,5 +1,5 @@
-import createState from 'ee/threat_monitoring/store/modules/network_policies/state';
 import * as getters from 'ee/threat_monitoring/store/modules/network_policies/getters';
+import createState from 'ee/threat_monitoring/store/modules/network_policies/state';
 
 describe('networkPolicies module getters', () => {
   let state;

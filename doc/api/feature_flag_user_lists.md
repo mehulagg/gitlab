@@ -1,7 +1,7 @@
 ---
 stage: Release
-group: Progressive Delivery
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+group: Release
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Feature flag user lists API **(CORE)**
@@ -13,7 +13,7 @@ API for accessing GitLab Feature Flag User Lists.
 
 Users with Developer or higher [permissions](../user/permissions.md) can access the Feature Flag User Lists API.
 
-NOTE: **Note:**
+NOTE:
 `GET` requests return twenty results at a time because the API results
 are [paginated](README.md#pagination). You can change this value.
 
@@ -25,9 +25,10 @@ Gets all feature flag user lists for the requested project.
 GET /projects/:id/feature_flags_user_lists
 ```
 
-| Attribute           | Type             | Required   | Description                                                                                                                 |
-| ------------------- | ---------------- | ---------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `id`                | integer/string   | yes        | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding).                                            |
+| Attribute | Type           | Required | Description                                                                      |
+| --------- | -------------- | -------- | -------------------------------------------------------------------------------- |
+| `id`      | integer/string | yes      | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding). |
+| `search`  | string         | no       | Return user lists matching the search criteria.                                  |
 
 ```shell
 curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/1/feature_flags_user_lists"

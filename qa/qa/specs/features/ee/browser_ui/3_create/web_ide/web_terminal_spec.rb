@@ -3,7 +3,7 @@
 module QA
   # This test was quarantined because relative URL isn't supported
   # See https://gitlab.com/gitlab-org/gitlab/issues/13833
-  context 'Create', :runner, :quarantine do
+  RSpec.describe 'Create', :runner, :quarantine do
     describe 'Web IDE web terminal' do
       before do
         project = Resource::Project.fabricate_via_api! do |project|

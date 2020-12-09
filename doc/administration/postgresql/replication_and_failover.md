@@ -1,7 +1,7 @@
 ---
 stage: Enablement
 group: Database
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # PostgreSQL replication and failover with Omnibus GitLab **(PREMIUM ONLY)**
@@ -35,7 +35,7 @@ You also need to take into consideration the underlying network topology, making
 sure you have redundant connectivity between all Database and GitLab instances
 to avoid the network becoming a single point of failure.
 
-NOTE: **Note:**
+NOTE:
 As of GitLab 13.3, PostgreSQL 12 is shipped with Omnibus GitLab. Clustering for PostgreSQL 12 is only supported with
 Patroni. See the [Patroni](#patroni) section for further details. The support for repmgr will not be extended beyond
 PostgreSQL 11.
@@ -460,7 +460,7 @@ Check the [Troubleshooting section](#troubleshooting) before proceeding.
    # END user configuration
    ```
 
-   NOTE: **Note:**
+   NOTE:
    `pgbouncer_role` was introduced with GitLab 10.3.
 
 1. Run `gitlab-ctl reconfigure`
@@ -579,18 +579,19 @@ in the Troubleshooting section before proceeding.
 
 ### Ensure GitLab is running
 
-At this point, your GitLab instance should be up and running. Verify you are
-able to login, and create issues and merge requests. If you have troubles check
+At this point, your GitLab instance should be up and running. Verify you're able
+to sign in, and create issues and merge requests. If you encounter issues, see
 the [Troubleshooting section](#troubleshooting).
 
 ## Example configuration
 
-Here we'll show you some fully expanded example configurations.
+This section describes several fully expanded example configurations.
 
 ### Example recommended setup
 
-This example uses 3 Consul servers, 3 PgBouncer servers (with associated internal load balancer),
-3 PostgreSQL servers, and 1 application node.
+This example uses three Consul servers, three PgBouncer servers (with an
+associated internal load balancer), three PostgreSQL servers, and one
+application node.
 
 We start with all servers on the same 10.6.0.0/16 private network range, they
 can connect to each freely other on those addresses.
@@ -984,7 +985,7 @@ after it has been restored to service.
   gitlab-ctl restart repmgrd
   ```
 
-  CAUTION: **Warning:**
+  WARNING:
   When the server is brought back online, and before
   you switch it to a standby node, repmgr will report that there are two masters.
   If there are any clients that are still attempting to write to the old master,
@@ -1147,7 +1148,7 @@ If you're running into an issue with a component not outlined here, be sure to c
 
 ## Patroni
 
-NOTE: **Note:**
+NOTE:
 Starting from GitLab 13.1, Patroni is available for **experimental** use to replace repmgr. Due to its
 experimental nature, Patroni support is **subject to change without notice.**
 
@@ -1325,7 +1326,7 @@ For further details, see [Patroni documentation on this subject](https://patroni
 
 ### Switching from repmgr to Patroni
 
-CAUTION: **Warning:**
+WARNING:
 Although switching from repmgr to Patroni is fairly straightforward the other way around is not. Rolling back from
 Patroni to repmgr can be complicated and may involve deletion of data directory. If you need to do that, please contact
 GitLab support.
@@ -1344,7 +1345,7 @@ You can switch an exiting database cluster to use Patroni instead of repmgr with
    sudo gitlab-ctl stop postgresql
    ```
 
-   NOTE: **Note:**
+   NOTE:
    Ensure that there is no `walsender` process running on the primary node.
    `ps aux | grep walsender` must not show any running process.
 
@@ -1366,7 +1367,7 @@ As of GitLab 13.3, PostgreSQL 11.7 and 12.3 are both shipped with Omnibus GitLab
 uses PostgreSQL 11 by default. Therefore `gitlab-ctl pg-upgrade` does not automatically upgrade
 to PostgreSQL 12. If you want to upgrade to PostgreSQL 12, you must ask for it explicitly.
 
-CAUTION: **Warning:**
+WARNING:
 The procedure for upgrading PostgreSQL in a Patroni cluster is different than when upgrading using repmgr.
 The following outlines the key differences and important considerations that need to be accounted for when
 upgrading PostgreSQL.
@@ -1400,7 +1401,7 @@ Considering these, you should carefully plan your PostgreSQL upgrade:
    gitlab-ctl patroni members
    ```
 
-   NOTE: **Note:**
+   NOTE:
    `gitlab-ctl pg-upgrade` tries to detect the role of the node. If for any reason the auto-detection
    does not work or you believe it did not detect the role correctly, you can use the `--leader` or `--replica`
    arguments to manually override it.
@@ -1445,7 +1446,7 @@ Considering these, you should carefully plan your PostgreSQL upgrade:
    sudo gitlab-ctl pg-upgrade -V 12
    ```
 
-NOTE: **Note:**
+NOTE:
 Reverting PostgreSQL upgrade with `gitlab-ctl revert-pg-upgrade` has the same considerations as
 `gitlab-ctl pg-upgrade`. You should follow the same procedure by first stopping the replicas,
 then reverting the leader, and finally reverting the replicas.

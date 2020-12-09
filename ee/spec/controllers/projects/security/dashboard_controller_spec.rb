@@ -36,7 +36,7 @@ RSpec.describe Projects::Security::DashboardController do
 
         expect(response).to have_gitlab_http_status(:ok)
         expect(response).to render_template(:index)
-        expect(response.body).to have_css('div#js-security-report-app[data-has-vulnerabilities="false"]')
+        expect(response.body).to have_css('div#js-project-security-dashboard[data-has-vulnerabilities="false"]')
       end
     end
 
@@ -50,7 +50,7 @@ RSpec.describe Projects::Security::DashboardController do
 
         expect(response).to have_gitlab_http_status(:ok)
         expect(response).to render_template(:index)
-        expect(response.body).to have_css('div#js-security-report-app[data-has-vulnerabilities="true"]')
+        expect(response.body).to have_css('div#js-project-security-dashboard[data-has-vulnerabilities="true"]')
       end
     end
   end

@@ -2,23 +2,25 @@
 disqus_identifier: 'https://docs.gitlab.com/ee/workflow/notifications.html'
 stage: Plan
 group: Project Management
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # GitLab Notification Emails
 
-GitLab Notifications allow you to stay informed about what's happening in GitLab. With notifications enabled, you can receive updates about activity in issues, merge requests, and epics. Notifications are sent via email.
+GitLab Notifications allow you to stay informed about what's happening in GitLab. With notifications
+enabled, you can receive updates about activity in issues, merge requests, epics, and designs.
+Notifications are sent via email.
 
 ## Receiving notifications
 
 You will receive notifications for one of the following reasons:
 
-- You participate in an issue, merge request, or epic. In this context, _participate_ means comment, or edit.
+- You participate in an issue, merge request, epic or design. In this context, _participate_ means comment, or edit.
 - You enable notifications in an issue, merge request, or epic. To enable notifications, click the **Notifications** toggle in the sidebar to _on_.
 
 While notifications are enabled, you will receive notification of actions occurring in that issue, merge request, or epic.
 
-NOTE: **Note:**
+NOTE:
 Notifications can be blocked by an admin, preventing them from being sent.
 
 ## Tuning your notifications
@@ -167,7 +169,7 @@ In most of the below cases, the notification will be sent to:
 - Subscribers: anyone who manually subscribed to the issue, merge request, or epic **(ULTIMATE)**
 - Custom: Users with notification level "custom" who turned on notifications for any of the events present in the table below
 
-NOTE: **Note:**
+NOTE:
 To minimize the number of notifications that do not require any action, from [GitLab 12.9 onwards](https://gitlab.com/gitlab-org/gitlab/-/issues/616), eligible approvers are no longer notified for all the activities in their projects. To receive them they have to change their user notification settings to **Watch** instead.
 
 | Event                  | Sent to |
@@ -209,6 +211,18 @@ If an open merge request becomes unmergeable due to conflict, its author will be
 If a user has also set the merge request to automatically merge once pipeline succeeds,
 then that user will also be notified.
 
+## Design email notifications
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/217095) in GitLab 13.6.
+
+Email notifications are sent to the participants when comments are made on a design.
+
+The participants are:
+
+- Authors of the design (can be multiple people if different authors have uploaded different versions of the design).
+- Authors of comments on the design.
+- Anyone that is `@mentioned` in a comment on the design.
+
 ## Filtering email
 
 Notification email messages include GitLab-specific headers. You can filter the notification emails based on the content of these headers to better manage your notifications. For example, you could filter all emails for a specific project where you are being assigned either a merge request or issue.
@@ -242,5 +256,5 @@ reason `assigned` will have this sentence in the footer:
 
 - `You are receiving this email because you have been assigned an item on <configured GitLab hostname>.`
 
-NOTE: **Note:**
+NOTE:
 Notification of other events is being considered for inclusion in the `X-GitLab-NotificationReason` header. For details, see this [related issue](https://gitlab.com/gitlab-org/gitlab/-/issues/20689).

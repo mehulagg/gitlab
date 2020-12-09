@@ -62,7 +62,7 @@ module QA
       it 'shows vulnerability details', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/949' do
         Flow::Login.sign_in_unless_signed_in
         @project.visit!
-        Page::Project::Menu.perform(&:click_on_security_dashboard)
+        Page::Project::Menu.perform(&:click_on_vulnerability_report)
 
         EE::Page::Project::Secure::SecurityDashboard.perform do |security_dashboard|
           expect(security_dashboard).to have_vulnerability(description: vulnerability_name)

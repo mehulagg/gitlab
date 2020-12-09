@@ -2,7 +2,7 @@
 type: reference, concepts
 stage: Enablement
 group: Distribution
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Reference architectures
@@ -47,7 +47,7 @@ When scaling GitLab, there are several factors to consider:
 - A load balancer is added in front to distribute traffic across the application nodes.
 - The application nodes connects to a shared file server and PostgreSQL and Redis services on the backend.
 
-NOTE: **Note:**
+NOTE:
 Depending on your workflow, the following recommended reference architectures
 may need to be adapted accordingly. Your workload is influenced by factors
 including how active your users are, how much automation you use, mirroring,
@@ -151,7 +151,27 @@ is recommended.
 instance to other geographical locations as a read-only fully operational instance
 that can also be promoted in case of disaster.
 
-## Configuring select components with Cloud Native Helm
+## Deviating from the suggested reference architectures
+
+As a general rule of thumb, the further away you move from the Reference Architectures,
+the harder it will be get support for it. With any deviation, you're introducing
+a layer of complexity that will add challenges to finding out where potential
+issues might lie.
+
+The reference architectures use the official GitLab Linux packages (Omnibus
+GitLab) to install and configure the various components (with one notable exception being the suggested select Cloud Native installation method described below). The components are
+installed on separate machines (virtualized or bare metal), with machine hardware
+requirements listed in the "Configuration" column and equivalent VM standard sizes listed
+in GCP/AWS/Azure columns of each [available reference architecture](#available-reference-architectures).
+
+Running components on Docker (including Compose) with the same specs should be fine, as Docker is well known in terms of support.
+However, it is still an additional layer and may still add some support complexities, such as not being able to run `strace` easily in containers.
+
+Other technologies, like [Docker swarm](https://docs.docker.com/engine/swarm/)
+are not officially supported, but can be implemented at your own risk. In that
+case, GitLab Support will not be able to help you.
+
+### Configuring select components with Cloud Native Helm
 
 We also provide [Helm charts](https://docs.gitlab.com/charts/) as a Cloud Native installation
 method for GitLab. For the reference architectures, select components can be set up in this

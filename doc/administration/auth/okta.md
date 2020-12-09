@@ -2,7 +2,7 @@
 type: reference
 stage: Manage
 group: Access
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Okta SSO provider
@@ -14,7 +14,9 @@ The following documentation enables Okta as a SAML provider.
 
 ## Configure the Okta application
 
-1. On Okta go to the admin section and choose to **Add an App**.
+The following guidance is based on this Okta article, on adding a [SAML Application with an Okta Developer account](https://support.okta.com/help/s/article/Why-can-t-I-add-a-SAML-Application-with-an-Okta-Developer-account?language=en_US):
+
+1. On Okta admin section, make sure to select Classic UI view in the top left corner. From there, choose to **Add an App**.
 1. When the app screen comes up you see another button to **Create an App** and
    choose SAML 2.0 on the next screen.
 1. Now, very important, add a logo
@@ -156,7 +158,7 @@ You might want to try this out on an incognito browser window.
 
 ## Configuring groups
 
-NOTE: **Note:**
+NOTE:
 Make sure the groups exist and are assigned to the Okta app.
 
 You can take a look of the [SAML documentation](../../integration/saml.md#saml-groups) on configuring groups.

@@ -1,7 +1,7 @@
 import { mount } from '@vue/test-utils';
+import DismissButton from 'ee/vue_shared/security_reports/components/dismiss_button.vue';
 import component from 'ee/vue_shared/security_reports/components/modal_footer.vue';
 import SplitButton from 'ee/vue_shared/security_reports/components/split_button.vue';
-import DismissButton from 'ee/vue_shared/security_reports/components/dismiss_button.vue';
 import createState from 'ee/vue_shared/security_reports/store/state';
 
 describe('Security Reports modal footer', () => {

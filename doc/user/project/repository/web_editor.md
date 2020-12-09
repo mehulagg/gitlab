@@ -1,7 +1,7 @@
 ---
 stage: Create
 group: Editor
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: howto
 ---
 
@@ -29,6 +29,11 @@ When you are satisfied with your new file, click **Commit Changes** at the botto
 
 ![Create file editor](img/web_editor_new_file_editor.png)
 
+### Shortcuts
+
+You can use handy shortcuts when editing a file through the Web Editor, which are the same as
+the WEB IDE's. For details, see the documentation for [Command Palette](../web_ide/index.md#command-palette).
+
 ### Template dropdowns
 
 When starting a new project, there are some common files that the new project
@@ -48,7 +53,7 @@ has already been created, which creates a link to the license itself.
 
 ![New file button](img/web_editor_template_dropdown_buttons.png)
 
-NOTE: **Note:**
+NOTE:
 The **Set up CI/CD** button will not appear on an empty repository. You have to at
 least add a file in order for the button to show up.
 
@@ -101,13 +106,13 @@ The new branch, and later its merge request, will be marked as related to this i
 Once merged, the MR will automatically close the issue.
 You can see a **Create merge request** dropdown below the issue description.
 
-NOTE: **Note:**
+NOTE:
 You won't see the **Create merge request** button if there is already a branch with the same
 name or a referenced merge request or your project has an active
 fork relationship.
 If you would like to make this button appear, a possible workaround is to [remove your project's
 fork relationship](../settings/index.md#removing-a-fork-relationship). Once removed, the fork
-relationship cannot be restored, and you will no longer be able to send merge requests to the source.
+relationship cannot be restored. This project will no longer be able to receive or send merge requests to the source project or other forks.
 
 ![Create Button](img/web_editor_new_branch_from_issue_create_button_v12_6.png)
 

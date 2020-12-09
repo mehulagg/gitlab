@@ -17,9 +17,9 @@ module Repositories
       end
 
       if download_request?
-        render json: { objects: download_objects! }
+        render json: { objects: download_objects! }, content_type: LfsRequest::CONTENT_TYPE
       elsif upload_request?
-        render json: { objects: upload_objects! }
+        render json: { objects: upload_objects! }, content_type: LfsRequest::CONTENT_TYPE
       else
         raise "Never reached"
       end
@@ -31,6 +31,7 @@ module Repositories
           message: _('Server supports batch API only, please update your Git LFS client to version 1.0.1 and up.'),
           documentation_url: "#{Gitlab.config.gitlab.url}/help"
         },
+        content_type: LfsRequest::CONTENT_TYPE,
         status: :not_implemented
       )
     end
@@ -91,14 +92,24 @@ module Repositories
       {
         upload: {
           href: "#{project.http_url_to_repo}/gitlab-lfs/objects/#{object[:oid]}/#{object[:size]}",
-          header: {
-            Authorization: authorization_header,
-            # git-lfs v2.5.0 sets the Content-Type based on the uploaded file. This
-            # ensures that Workhorse can intercept the request.
-            'Content-Type': LFS_TRANSFER_CONTENT_TYPE
-          }.compact
+          header: upload_headers
         }
       }
+    end
+
+    def upload_headers
+      headers = {
+        Authorization: authorization_header,
+        # git-lfs v2.5.0 sets the Content-Type based on the uploaded file. This
+        # ensures that Workhorse can intercept the request.
+        'Content-Type': LFS_TRANSFER_CONTENT_TYPE
+      }
+
+      if Feature.enabled?(:lfs_chunked_encoding, project)
+        headers['Transfer-Encoding'] = 'chunked'
+      end
+
+      headers
     end
 
     def lfs_check_batch_operation!

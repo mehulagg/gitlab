@@ -1,16 +1,1 @@
-export default () => ({
-  paths: {
-    head: null,
-    base: null,
-    diffEndpoint: null,
-  },
-
-  isLoading: false,
-  hasError: false,
-
-  newIssues: [],
-  resolvedIssues: [],
-  allIssues: [],
-  baseReportOutofDate: false,
-  hasBaseReport: false,
-});
+export { default } from '~/vue_shared/security_reports/store/modules/sast/state';

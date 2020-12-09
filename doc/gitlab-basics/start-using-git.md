@@ -1,7 +1,7 @@
 ---
 stage: Create
 group: Source Code
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: howto, tutorial
 description: "Introduction to using Git through the command line."
 ---
@@ -49,7 +49,7 @@ prompt, terminal, and command line) of your preference. Here are some suggestion
 
 - For macOS users:
   - Built-in: [Terminal](https://blog.teamtreehouse.com/introduction-to-the-mac-os-x-command-line). Press <kbd>⌘ command</kbd> + <kbd>space</kbd> and type "terminal" to find it.
-  - [iTerm2](https://www.iterm2.com/), which you can integrate with [zsh](https://git-scm.com/book/id/v2/Appendix-A%3A-Git-in-Other-Environments-Git-in-Zsh) and [oh my zsh](https://ohmyz.sh/) for color highlighting, among other handy features for Git users.
+  - [iTerm2](https://iterm2.com/), which you can integrate with [zsh](https://git-scm.com/book/id/v2/Appendix-A%3A-Git-in-Other-Environments-Git-in-Zsh) and [oh my zsh](https://ohmyz.sh/) for color highlighting, among other handy features for Git users.
 - For Windows users:
   - Built-in: **cmd**. Click the search icon on the bottom navbar on Windows and type "cmd" to find it.
   - [PowerShell](https://docs.microsoft.com/en-us/powershell/scripting/windows-powershell/install/installing-windows-powershell?view=powershell-7): a Windows "powered up" shell, from which you can execute a greater number of commands.
@@ -127,7 +127,7 @@ to our computer:
     Create one before cloning.
   - If you don't have 2FA enabled, use your account's password.
 
-NOTE: **Note:**
+NOTE:
 Authenticating via SSH is GitLab's recommended method. You can read more about credential storage
 in the [Git Credentials documentation](https://git-scm.com/book/en/v2/Git-Tools-Credential-Storage).
 
@@ -280,7 +280,7 @@ To add a remote repository to your local copy:
 1. On your computer, open the terminal in the directory you've initialized, paste the command you copied, and press <kbd>enter</kbd>:
 
    ```shell
-   git remote add origin <git@gitlab.com:username/projectpath.git
+   git remote add origin git@gitlab.com:username/projectpath.git
    ```
 
 After you've done that, you can [stage your files](#add-and-commit-local-changes) and [upload them to GitLab](#send-changes-to-gitlabcom).
@@ -400,7 +400,7 @@ git add .
 git commit -m "COMMENT TO DESCRIBE THE INTENTION OF THE COMMIT"
 ```
 
-NOTE: **Note:**
+NOTE:
 The `.` character means _all file changes in the current directory and all subdirectories_.
 
 ### Send changes to GitLab.com
@@ -420,7 +420,7 @@ git push origin master
 On certain occasions, Git won't allow you to push to your repository, and then
 you'll need to [force an update](../topics/git/git_rebase.md#force-push).
 
-NOTE: **Note:**
+NOTE:
 To create a merge request from a fork to an upstream repository, see the
 [forking workflow](../user/project/repository/forking_workflow.md).
 
@@ -453,7 +453,7 @@ git reset HEAD~1
 
 This leaves the changed files and folders unstaged in your local repository.
 
-CAUTION: **Warning:**
+WARNING:
 A Git commit should not usually be reversed, particularly if you already pushed it
 to the remote repository. Although you can undo a commit, the best option is to avoid
 the situation altogether by working carefully.

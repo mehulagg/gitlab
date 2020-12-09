@@ -17,6 +17,13 @@ module EE
       super + %w(path_locks)
     end
 
+    override :sidebar_operations_paths
+    def sidebar_operations_paths
+      super + %w[
+        oncall_schedules
+      ]
+    end
+
     override :get_project_nav_tabs
     def get_project_nav_tabs(project, current_user)
       nav_tabs = super
@@ -39,7 +46,29 @@ module EE
         nav_tabs << :project_insights
       end
 
+      if can?(current_user, :read_requirement, project)
+        nav_tabs << :requirements
+      end
+
+      if can?(current_user, :read_incident_management_oncall_schedule, project)
+        nav_tabs << :oncall_schedule
+      end
+
       nav_tabs
+    end
+
+    override :project_permissions_settings
+    def project_permissions_settings(project)
+      super.merge(
+        requirementsAccessLevel: project.requirements_access_level
+      )
+    end
+
+    override :project_permissions_panel_data
+    def project_permissions_panel_data(project)
+      super.merge(
+        requirementsAvailable: project.feature_available?(:requirements)
+      )
     end
 
     override :default_url_to_repo
@@ -135,6 +164,7 @@ module EE
         projects/security/configuration#show
         projects/security/sast_configuration#show
         projects/security/vulnerabilities#show
+        projects/security/vulnerability_report#index
         projects/security/dashboard#index
         projects/on_demand_scans#index
         projects/dast_profiles#index
@@ -193,15 +223,16 @@ module EE
         {
           has_vulnerabilities: 'false',
           empty_state_svg_path: image_path('illustrations/security-dashboard_empty.svg'),
-          security_dashboard_help_path: help_page_path('user/application_security/security_dashboard/index')
-        }
+          security_dashboard_help_path: help_page_path('user/application_security/security_dashboard/index'),
+          no_vulnerabilities_svg_path: image_path('illustrations/issues.svg'),
+          project_full_path: project.full_path
+        }.merge!(security_dashboard_pipeline_data(project))
       else
         {
           has_vulnerabilities: 'true',
           project: { id: project.id, name: project.name },
           project_full_path: project.full_path,
           vulnerabilities_export_endpoint: api_v4_security_projects_vulnerability_exports_path(id: project.id),
-          vulnerability_feedback_help_path: help_page_path("user/application_security/index", anchor: "interacting-with-the-vulnerabilities"),
           empty_state_svg_path: image_path('illustrations/security-dashboard-empty-state.svg'),
           no_vulnerabilities_svg_path: image_path('illustrations/issues.svg'),
           dashboard_documentation: help_page_path('user/application_security/security_dashboard/index'),
@@ -317,6 +348,13 @@ module EE
           }
         }
       }
+    end
+
+    override :view_operations_tab_ability
+    def view_operations_tab_ability
+      super + [
+        :read_incident_management_oncall_schedule
+      ]
     end
   end
 end

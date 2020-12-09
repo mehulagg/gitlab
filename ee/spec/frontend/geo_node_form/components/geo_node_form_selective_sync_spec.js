@@ -1,7 +1,7 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlFormGroup, GlSprintf } from '@gitlab/ui';
-import GeoNodeFormSelectiveSync from 'ee/geo_node_form/components/geo_node_form_selective_sync.vue';
+import { shallowMount } from '@vue/test-utils';
 import GeoNodeFormNamespaces from 'ee/geo_node_form/components/geo_node_form_namespaces.vue';
+import GeoNodeFormSelectiveSync from 'ee/geo_node_form/components/geo_node_form_selective_sync.vue';
 import GeoNodeFormShards from 'ee/geo_node_form/components/geo_node_form_shards.vue';
 import { SELECTIVE_SYNC_MORE_INFO, OBJECT_STORAGE_MORE_INFO } from 'ee/geo_node_form/constants';
 import { MOCK_NODE, MOCK_SELECTIVE_SYNC_TYPES, MOCK_SYNC_SHARDS } from '../mock_data';

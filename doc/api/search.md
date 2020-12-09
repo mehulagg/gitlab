@@ -1,7 +1,7 @@
 ---
 stage: Create
 group: Source Code
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 type: reference, api
 ---
 
@@ -26,6 +26,8 @@ GET /search
 | `search`      | string   | yes        | The search query  |
 | `state`       | string   | no        | Filter by state. Issues and merge requests are supported; it is ignored for other scopes. |
 | `confidential` | boolean   | no         | Filter by confidentiality. Issues scope is supported; it is ignored for other scopes. |
+| `order_by`    | string   | no         | Allowed values are `created_at` only. If this is not set, the results will either be sorted by `created_at` in descending order for basic search, or by the most relevant documents when using advanced search.|
+| `sort`    | string   | no         | Allowed values are `asc` or `desc` only. If this is not set, the results will either be sorted by `created_at` in descending order for basic search, or by the most relevant documents when using advanced search.|
 
 Search the expression within the specified scope. Currently these scopes are supported: projects, issues, merge_requests, milestones, snippet_titles, users.
 
@@ -127,7 +129,8 @@ Example response:
 ]
 ```
 
-**Note**: `assignee` column is deprecated, now we show it as a single-sized array `assignees` to conform to the GitLab EE API.
+NOTE:
+`assignee` column is deprecated, now we show it as a single-sized array `assignees` to conform to the GitLab EE API.
 
 ### Scope: merge_requests
 
@@ -289,7 +292,7 @@ Example response:
 ]
 ```
 
-NOTE: **Note:**
+NOTE:
 `filename` is deprecated in favor of `path`. Both return the full path of the file inside the repository, but in the future `filename` will be only the file name and not the full path. For details, see [issue 34521](https://gitlab.com/gitlab-org/gitlab/-/issues/34521).
 
 ### Scope: commits **(STARTER)**
@@ -361,7 +364,7 @@ Example response:
 ]
 ```
 
-NOTE: **Note:**
+NOTE:
 `filename` is deprecated in favor of `path`. Both return the full path of the file inside the repository, but in the future `filename` will be only the file name and not the full path. For details, see [issue 34521](https://gitlab.com/gitlab-org/gitlab/-/issues/34521).
 
 ### Scope: notes **(STARTER)**
@@ -436,6 +439,8 @@ GET /groups/:id/search
 | `search`      | string   | yes        | The search query  |
 | `state`       | string   | no        | Filter by state. Issues and merge requests are supported; it is ignored for other scopes. |
 | `confidential` | boolean   | no         | Filter by confidentiality. Issues scope is supported; it is ignored for other scopes. |
+| `order_by`    | string   | no         | Allowed values are `created_at` only. If this is not set, the results will either be sorted by `created_at` in descending order for basic search, or by the most relevant documents when using advanced search.|
+| `sort`    | string   | no         | Allowed values are `asc` or `desc` only. If this is not set, the results will either be sorted by `created_at` in descending order for basic search, or by the most relevant documents when using advanced search.|
 
 Search the expression within the specified scope. Currently these scopes are supported: projects, issues, merge_requests, milestones, users.
 
@@ -537,7 +542,8 @@ Example response:
 ]
 ```
 
-**Note**: `assignee` column is deprecated, now we show it as a single-sized array `assignees` to conform to the GitLab EE API.
+NOTE:
+`assignee` column is deprecated, now we show it as a single-sized array `assignees` to conform to the GitLab EE API.
 
 ### Scope: merge_requests
 
@@ -668,7 +674,7 @@ Example response:
 ]
 ```
 
-NOTE **Note:**
+NOTE:
 `filename` is deprecated in favor of `path`. Both return the full path of the file inside the repository, but in the future `filename` will be only the file name and not the full path. For details, see [issue 34521](https://gitlab.com/gitlab-org/gitlab/-/issues/34521).
 
 ### Scope: commits **(STARTER)**
@@ -740,7 +746,7 @@ Example response:
 ]
 ```
 
-NOTE **Note:**
+NOTE:
 `filename` is deprecated in favor of `path`. Both return the full path of the file inside the repository, but in the future `filename` will be only the file name and not the full path. For details, see [issue 34521](https://gitlab.com/gitlab-org/gitlab/-/issues/34521).
 
 ### Scope: notes **(STARTER)**
@@ -816,6 +822,8 @@ GET /projects/:id/search
 | `ref`         | string   | no         | The name of a repository branch or tag to search on. The project's default branch is used by default. This is only applicable for scopes: commits, blobs, and wiki_blobs.  |
 | `state`       | string   | no        | Filter by state. Issues and merge requests are supported; it is ignored for other scopes. |
 | `confidential` | boolean   | no         | Filter by confidentiality. Issues scope is supported; it is ignored for other scopes. |
+| `order_by`    | string   | no         | Allowed values are `created_at` only. If this is not set, the results will either be sorted by `created_at` in descending order for basic search, or by the most relevant documents when using advanced search.|
+| `sort`    | string   | no         | Allowed values are `asc` or `desc` only. If this is not set, the results will either be sorted by `created_at` in descending order for basic search, or by the most relevant documents when using advanced search.|
 
 Search the expression within the specified scope. Currently these scopes are supported: issues, merge_requests, milestones, notes, wiki_blobs, commits, blobs, users.
 
@@ -884,7 +892,8 @@ Example response:
 ]
 ```
 
-**Note**: `assignee` column is deprecated, now we show it as a single-sized array `assignees` to conform to the GitLab EE API.
+NOTE:
+`assignee` column is deprecated, now we show it as a single-sized array `assignees` to conform to the GitLab EE API.
 
 ### Scope: merge_requests
 
@@ -1062,7 +1071,7 @@ Example response:
 ]
 ```
 
-NOTE: **Note:**
+NOTE:
 `filename` is deprecated in favor of `path`. Both return the full path of the file inside the repository, but in the future `filename` will be only the file name and not the full path. For details, see [issue 34521](https://gitlab.com/gitlab-org/gitlab/-/issues/34521).
 
 ### Scope: commits
@@ -1136,7 +1145,7 @@ Example response:
 ]
 ```
 
-NOTE: **Note:**
+NOTE:
 `filename` is deprecated in favor of `path`. Both return the full path of the file inside the repository, but in the future `filename` will be only the file name and not the full path. For details, see [issue 34521](https://gitlab.com/gitlab-org/gitlab/-/issues/34521).
 
 ### Scope: users

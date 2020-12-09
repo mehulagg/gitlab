@@ -1,14 +1,13 @@
-import { shallowMount, createLocalVue } from '@vue/test-utils';
-import Vuex from 'vuex';
 import { GlButton } from '@gitlab/ui';
-
+import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Draggable from 'vuedraggable';
+import Vuex from 'vuex';
 
 import TreeRoot from 'ee/related_items_tree/components/tree_root.vue';
 
+import { treeItemChevronBtnClassName } from 'ee/related_items_tree/constants';
 import createDefaultStore from 'ee/related_items_tree/store';
 import * as epicUtils from 'ee/related_items_tree/utils/epic_utils';
-import { treeItemChevronBtnClassName } from 'ee/related_items_tree/constants';
 
 import {
   mockQueryResponse,

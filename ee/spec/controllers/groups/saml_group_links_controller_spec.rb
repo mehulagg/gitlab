@@ -11,7 +11,7 @@ RSpec.describe Groups::SamlGroupLinksController do
   end
 
   before do
-    stub_licensed_features(group_saml: true)
+    stub_licensed_features(group_saml: true, group_saml_group_sync: true)
     stub_feature_flags(saml_group_links: true)
 
     sign_in(user)

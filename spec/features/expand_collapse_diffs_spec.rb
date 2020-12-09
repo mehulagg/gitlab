@@ -8,7 +8,11 @@ RSpec.describe 'Expand and collapse diffs', :js do
 
   before do
     stub_feature_flags(increased_diff_limits: false)
-    sign_in(create(:admin))
+    allow(Gitlab::CurrentSettings).to receive(:diff_max_patch_bytes).and_return(100.kilobytes)
+
+    admin = create(:admin)
+    sign_in(admin)
+    gitlab_enable_admin_mode_sign_in(admin)
 
     # Ensure that undiffable.md is in .gitattributes
     project.repository.copy_gitattributes(branch)

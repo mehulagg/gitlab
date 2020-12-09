@@ -12,7 +12,7 @@ import {
 import groupIterationsQuery from '../queries/group_iterations.query.graphql';
 import currentIterationQuery from '../queries/issue_iteration.query.graphql';
 import setIssueIterationMutation from '../queries/set_iteration_on_issue.mutation.graphql';
-import { iterationSelectTextMap } from '../constants';
+import { iterationSelectTextMap, iterationDisplayState } from '../constants';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 
 export default {
@@ -58,7 +58,7 @@ export default {
         };
       },
       update(data) {
-        return data?.project?.issue?.iteration?.id;
+        return data?.project?.issue?.iteration;
       },
     },
     iterations: {
@@ -71,6 +71,7 @@ export default {
         return {
           fullPath: this.groupPath,
           title: search,
+          state: iterationDisplayState,
         };
       },
       update(data) {
@@ -94,13 +95,13 @@ export default {
       return this.iterations.find(({ id }) => id === this.currentIteration);
     },
     iterationTitle() {
-      return this.iteration?.title;
+      return this.currentIteration?.title;
     },
     iterationUrl() {
-      return this.iteration?.webUrl;
+      return this.currentIteration?.webUrl;
     },
     showNoIterationContent() {
-      return !this.editing && !this.currentIteration;
+      return !this.editing && !this.currentIteration?.id;
     },
   },
   mounted() {
@@ -120,7 +121,7 @@ export default {
       });
     },
     setIteration(iterationId) {
-      if (iterationId === this.currentIteration) return;
+      if (iterationId === this.currentIteration?.id) return;
 
       this.editing = false;
 
@@ -136,8 +137,6 @@ export default {
         .then(({ data }) => {
           if (data.issueSetIteration?.errors?.length) {
             createFlash(data.issueSetIteration.errors[0]);
-          } else {
-            this.currentIteration = data.issueSetIteration?.issue?.iteration?.id;
           }
         })
         .catch(() => {
@@ -154,7 +153,9 @@ export default {
       }
     },
     isIterationChecked(iterationId = undefined) {
-      return iterationId === this.currentIteration || (!this.currentIteration && !iterationId);
+      return (
+        iterationId === this.currentIteration?.id || (!this.currentIteration?.id && !iterationId)
+      );
     },
   },
 };

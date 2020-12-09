@@ -1,5 +1,5 @@
-import { mount } from '@vue/test-utils';
 import { GlEmptyState, GlButton, GlLink } from '@gitlab/ui';
+import { mount } from '@vue/test-utils';
 import DashboardNotConfigured from 'ee/security_dashboard/components/empty_states/instance_dashboard_not_configured.vue';
 
 describe('first class instance security dashboard empty state', () => {

@@ -1,7 +1,7 @@
 ---
 stage: Create
 group: Editor
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 type: reference, api
 ---
 
@@ -21,7 +21,7 @@ Valid values for snippet visibility levels are:
 | Visibility | Description                                         |
 |:-----------|:----------------------------------------------------|
 | `private`  | Snippet is visible only to the snippet creator.     |
-| `internal` | Snippet is visible for any logged in user.          |
+| `internal` | Snippet is visible for any logged in user except [external users](../user/permissions.md#external-users).          |
 | `public`   | Snippet can be accessed without any authentication. |
 
 ## List all snippets for a user
@@ -189,7 +189,7 @@ Hello World snippet
 
 Create a new snippet.
 
-NOTE: **Note:**
+NOTE:
 The user must have permission to create new snippets.
 
 ```plaintext
@@ -272,7 +272,7 @@ Example response:
 
 Update an existing snippet.
 
-NOTE: **Note:**
+NOTE:
 The user must have permission to change an existing snippet.
 
 ```plaintext
@@ -451,7 +451,7 @@ Example response:
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/12655) in GitLab 9.4.
 
-NOTE: **Note:**
+NOTE:
 Available only for administrators.
 
 ```plaintext

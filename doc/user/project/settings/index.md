@@ -1,13 +1,13 @@
 ---
 stage: Create
 group: Source Code
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 type: reference, index, howto
 ---
 
 # Project settings
 
-NOTE: **Note:**
+NOTE:
 Only project maintainers and administrators have the [permissions](../../permissions.md#project-members-permissions)
 to access a project settings.
 
@@ -37,7 +37,7 @@ You can select a framework label to identify that your project has certain compl
 - SOC 2 - Service Organization Control 2
 - SOX - Sarbanes-Oxley
 
-NOTE: **Note:**
+NOTE:
 Compliance framework labels do not affect your project settings.
 
 ### Sharing and permissions
@@ -52,7 +52,7 @@ If you set **Project Visibility** to public, you can limit access to some featur
 to **Only Project Members**. In addition, you can select the option to
 [Allow users to request access](../members/index.md#project-membership-and-requesting-access).
 
-CAUTION: **Caution:**
+WARNING:
 If you [reduce a project's visibility level](../../../public_access/public_access.md#reducing-visibility),
 that action unlinks all forks of that project.
 
@@ -72,6 +72,7 @@ Use the switches to enable or disable the following features:
 | **Snippets**                      | ✓                         | Enables [sharing of code and text](../../snippets.md)                                                                                                                                          |
 | **Pages**                         | ✓                         | Allows you to [publish static websites](../pages/)                                                                                                                                             |
 | **Metrics Dashboard**             | ✓                         | Control access to [metrics dashboard](../integrations/prometheus.md)
+| **Requirements**                  | ✓                         | Control access to [Requirements Management](../requirements/index.md)
 
 Some features depend on others:
 
@@ -80,7 +81,7 @@ Some features depend on others:
   - **Issue Boards**
   - [**Service Desk**](#service-desk)
 
-  NOTE: **Note:**
+  NOTE:
   When the **Issues** option is disabled, you can still access **Milestones**
   from merge requests.
 
@@ -185,7 +186,7 @@ Next, to unarchive the project:
 
 #### Renaming a repository
 
-NOTE: **Note:**
+NOTE:
 Only project maintainers and administrators have the [permissions](../../permissions.md#project-members-permissions) to rename a
 repository. Not to be confused with a project's name where it can also be
 changed from the [general project settings](#general-project-settings).
@@ -197,8 +198,8 @@ To rename a repository:
 
 1. Navigate to your project's **Settings > General**.
 1. Under **Advanced**, click **Expand**.
-1. Under "Rename repository", change the "Path" to your liking.
-1. Hit **Rename project**.
+1. Under **Change path**, update the repository's path.
+1. Click **Change path**.
 
 Remember that this can have unintended side effects since everyone with the
 old URL won't be able to push or pull. Read more about what happens with the
@@ -206,7 +207,7 @@ old URL won't be able to push or pull. Read more about what happens with the
 
 #### Transferring an existing project into another namespace
 
-NOTE: **Note:**
+NOTE:
 Only project owners and administrators have the [permissions](../../permissions.md#project-members-permissions)
 to transfer a project.
 
@@ -228,13 +229,13 @@ Once done, you will be taken to the new project's namespace. At this point,
 read what happens with the
 [redirects from the old project to the new one](../index.md#redirects-when-changing-repository-paths).
 
-NOTE: **Note:**
+NOTE:
 GitLab administrators can use the administration interface to move any project to any
 namespace if needed.
 
 #### Delete a project
 
-NOTE: **Note:**
+NOTE:
 Only project owners and administrators have [permissions](../../permissions.md#project-members-permissions) to delete a project.
 
 To delete a project:
@@ -252,7 +253,7 @@ to be deleted after a delayed period.
 When enabled, actual deletion happens after number of days
 specified in [instance settings](../../admin_area/settings/visibility_and_access_controls.md#default-deletion-delay).
 
-CAUTION: **Warning:**
+WARNING:
 The default behavior of [Delayed Project deletion](https://gitlab.com/gitlab-org/gitlab/-/issues/32935) in GitLab 12.6 was changed to
 [Immediate deletion](https://gitlab.com/gitlab-org/gitlab/-/issues/220382) in GitLab 13.2.
 
@@ -273,7 +274,7 @@ If you want to use the fork for yourself and don't need to send
 [merge requests](../merge_requests/index.md) to the upstream project,
 you can safely remove the fork relationship.
 
-CAUTION: **Caution:**
+WARNING:
 Once removed, the fork relationship cannot be restored. You will no longer be able to send merge requests to the source, and if anyone has forked your project, their fork will also lose the relationship.
 
 To do so:
@@ -282,7 +283,7 @@ To do so:
 1. Under **Remove fork relationship**, click the likewise-labeled button.
 1. Confirm the action by typing the project's path as instructed.
 
-NOTE: **Note:**
+NOTE:
 Only project owners have the [permissions](../../permissions.md#project-members-permissions)
 to remove a fork relationship.
 

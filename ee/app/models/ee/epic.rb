@@ -18,6 +18,7 @@ module EE
       include EpicTreeSorting
       include Presentable
       include IdInOrdered
+      include Todoable
 
       enum state_id: {
         opened: ::Epic.available_states[:opened],
@@ -50,7 +51,7 @@ module EE
       has_many :children, class_name: "Epic", foreign_key: :parent_id
       has_many :events, as: :target, dependent: :delete_all # rubocop:disable Cop/ActiveRecordDependent
 
-      has_internal_id :iid, scope: :group, init: ->(s) { s&.group&.epics&.maximum(:iid) }
+      has_internal_id :iid, scope: :group
 
       has_many :epic_issues
       has_many :issues, through: :epic_issues

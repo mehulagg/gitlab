@@ -1,7 +1,7 @@
 ---
 stage: Protect
 group: Container Security
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 
@@ -55,7 +55,7 @@ If you are using a self-managed instance of GitLab, you need to configure the
 [Google OAuth2 OmniAuth Provider](../../integration/google.md) before
 you can configure a cluster on GKE. Once this is set up, you can follow the steps on the [quick start guide](quick_start_guide.md) to get started.
 
-NOTE: **Note:**
+NOTE:
 This guide shows how the WAF can be deployed using Auto DevOps. The WAF
 is available by default to all applications no matter how they are deployed,
 as long as they are using Ingress.

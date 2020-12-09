@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Getting started with an offline GitLab Installation
 
 This is a step-by-step guide that helps you install, configure, and use a self-managed GitLab
@@ -5,21 +11,19 @@ instance entirely offline.
 
 ## Installation
 
-NOTE: **Note:**
+NOTE:
 This guide assumes the server is Ubuntu 18.04. Instructions for other servers may vary.
-
-NOTE: **Note:**
-This guide assumes the server host resolves as `my-host`, which you should replace with your
+This guide also assumes the server host resolves as `my-host`, which you should replace with your
 server's name.
 
 Follow the installation instructions [as outlined in the omnibus install
 guide](https://about.gitlab.com/install/#ubuntu), but make sure to specify an `http`
-URL for the `EXTERNAL_URL` installation step. Once installed, we will manually
+URL for the `EXTERNAL_URL` installation step. Once installed, we can manually
 configure the SSL ourselves.
 
 It is strongly recommended to setup a domain for IP resolution rather than bind
 to the server's IP address. This better ensures a stable target for our certs' CN
-and will make long-term resolution simpler.
+and makes long-term resolution simpler.
 
 ```shell
 sudo EXTERNAL_URL="http://my-host.internal" install gitlab-ee

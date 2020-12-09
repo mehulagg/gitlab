@@ -8,8 +8,9 @@
       = f.label :setup_for_company, setup_for_company_label_text, class: 'label-bold'
       .d-flex.flex-column.flex-lg-row
         .flex-grow-1
-          = f.radio_button :setup_for_company, true
+          = f.radio_button :setup_for_company, true, class: 'js-setup-for-company'
           = f.label :setup_for_company, _('My company or team'), class: 'normal', value: 'true'
         .flex-grow-1
-          = f.radio_button :setup_for_company, false
+          = f.radio_button :setup_for_company, false, class: 'js-setup-for-me'
           = f.label :setup_for_company, _('Just me'), class: 'normal', value: 'false'
+      = render_if_exists 'devise/shared/email_opted_in', f: f, hidden: true

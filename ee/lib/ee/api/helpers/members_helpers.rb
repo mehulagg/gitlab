@@ -7,6 +7,14 @@ module EE
         extend ActiveSupport::Concern
         extend ::Gitlab::Utils::Override
 
+        class << self
+          include ::SortingHelper
+
+          def member_sort_options
+            member_sort_options_hash.keys
+          end
+        end
+
         prepended do
           params :optional_filter_params_ee do
             optional :with_saml_identity, type: Grape::API::Boolean, desc: "List only members with linked SAML identity"
@@ -27,6 +35,14 @@ module EE
           end
 
           members
+        end
+
+        override :source_members
+        def source_members(source)
+          return super if source.is_a?(Project)
+          return super unless source.minimal_access_role_allowed?
+
+          source.all_group_members
         end
         # rubocop: enable CodeReuse/ActiveRecord
 
@@ -68,14 +84,11 @@ module EE
           ).for_member(member).security_event
         end
 
-        def paginate_billable_from_user_ids(user_ids)
-          paginated = paginate(::Kaminari.paginate_array(user_ids.sort))
+        def billed_users_for(group, search_term, order_by)
+          users = ::User.id_in(group.billed_user_ids)
+          users = users.search(search_term) if search_term
 
-          users_as_hash = ::User.id_in(paginated).index_by(&:id)
-
-          # map! ensures same paginatable array is manipulated
-          # instead of creating a new non-paginatable array
-          paginated.map! { |user_id| users_as_hash[user_id] }
+          users.sort_by_attribute(order_by || 'name_asc')
         end
       end
     end

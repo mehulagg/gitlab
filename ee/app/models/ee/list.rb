@@ -67,7 +67,7 @@ module EE
     def as_json(options = {})
       super.tap do |json|
         if options.key?(:user)
-          json[:user] = UserSerializer.new.represent(user).as_json
+          json[:user] = ::UserSerializer.new.represent(user).as_json
         end
 
         if options.key?(:milestone)

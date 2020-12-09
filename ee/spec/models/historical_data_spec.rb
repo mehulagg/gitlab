@@ -5,7 +5,7 @@ require 'spec_helper'
 RSpec.describe HistoricalData do
   before do
     (1..12).each do |i|
-      described_class.create!(date: Date.new(2014, i, 1), active_user_count: i * 100)
+      described_class.create!(recorded_at: Date.new(2014, i, 1), active_user_count: i * 100)
     end
   end
 
@@ -21,23 +21,21 @@ RSpec.describe HistoricalData do
     end
   end
 
-  describe ".at" do
-    it "returns the historical data at the specified date" do
-      expect(described_class.at(Date.new(2014, 8, 1)).active_user_count).to eq(800)
-    end
-  end
-
   describe ".track!" do
     before do
-      allow(License).to receive(:current_active_users).and_return([1, 2, 3, 4, 5])
+      allow(User).to receive(:billable).and_return([1, 2, 3, 4, 5])
     end
 
     it "creates a new historical data record" do
-      described_class.track!
+      freeze_time do
+        described_class.track!
 
-      data = described_class.last
-      expect(data.date).to eq(Date.today)
-      expect(data.active_user_count).to eq(5)
+        data = described_class.last
+        # Database time has microsecond precision, while Ruby time has nanosecond precision,
+        # which is why we need the be_within matcher even though we're freezing time.
+        expect(data.recorded_at).to be_within(1e-6.seconds).of(Time.current)
+        expect(data.active_user_count).to eq(5)
+      end
     end
   end
 
@@ -45,7 +43,7 @@ RSpec.describe HistoricalData do
     context 'with multiple historical data points for the current license' do
       before do
         (1..3).each do |i|
-          described_class.create!(date: Time.current - i.days, active_user_count: i * 100)
+          described_class.create!(recorded_at: Time.current - i.days, active_user_count: i * 100)
         end
       end
 
@@ -106,7 +104,7 @@ RSpec.describe HistoricalData do
 
       context 'with stats before the license period' do
         before do
-          described_class.create!(date: license.starts_at.ago(2.days), active_user_count: 10)
+          described_class.create!(recorded_at: license.starts_at.ago(2.days), active_user_count: 10)
         end
 
         it 'ignore those records' do
@@ -116,7 +114,7 @@ RSpec.describe HistoricalData do
 
       context 'with stats after the license period' do
         before do
-          described_class.create!(date: license.expires_at.in(2.days), active_user_count: 10)
+          described_class.create!(recorded_at: license.expires_at.in(2.days), active_user_count: 10)
         end
 
         it 'ignore those records' do
@@ -126,8 +124,8 @@ RSpec.describe HistoricalData do
 
       context 'with stats inside license period' do
         before do
-          described_class.create!(date: license.starts_at.in(2.days), active_user_count: 10)
-          described_class.create!(date: license.starts_at.in(5.days), active_user_count: 15)
+          described_class.create!(recorded_at: license.starts_at.in(2.days), active_user_count: 10)
+          described_class.create!(recorded_at: license.starts_at.in(5.days), active_user_count: 15)
         end
 
         it 'returns max value for active_user_count' do
@@ -147,10 +145,10 @@ RSpec.describe HistoricalData do
     end
 
     before_all do
-      described_class.create!(date: license.starts_at - 1.day, active_user_count: 1)
-      described_class.create!(date: license.expires_at + 1.day, active_user_count: 2)
-      described_class.create!(date: now - 1.year - 1.day, active_user_count: 3)
-      described_class.create!(date: now + 1.day, active_user_count: 4)
+      described_class.create!(recorded_at: license.starts_at - 1.day, active_user_count: 1)
+      described_class.create!(recorded_at: license.expires_at + 1.day, active_user_count: 2)
+      described_class.create!(recorded_at: now - 1.year - 1.day, active_user_count: 3)
+      described_class.create!(recorded_at: now + 1.day, active_user_count: 4)
     end
 
     around do |example|

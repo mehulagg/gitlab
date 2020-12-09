@@ -145,7 +145,6 @@ class Note < ApplicationRecord
   after_save :expire_etag_cache, unless: :importing?
   after_save :touch_noteable, unless: :importing?
   after_destroy :expire_etag_cache
-  after_save :store_mentions!, if: :any_mentionable_attributes_changed?
   after_commit :notify_after_create, on: :create
   after_commit :notify_after_destroy, on: :destroy
 
@@ -197,8 +196,8 @@ class Note < ApplicationRecord
         .map(&:position)
     end
 
-    def count_for_collection(ids, type)
-      user.select('noteable_id', 'COUNT(*) as count')
+    def count_for_collection(ids, type, count_column = 'COUNT(*) as count')
+      user.select(:noteable_id, count_column)
         .group(:noteable_id)
         .where(noteable_type: type, noteable_id: ids)
     end
@@ -548,8 +547,8 @@ class Note < ApplicationRecord
 
   private
 
-  # Using this method followed by a call to `save` may result in ActiveRecord::RecordNotUnique exception
-  # in a multithreaded environment. Make sure to use it within a `safe_ensure_unique` block.
+  # Using this method followed by a call to *save* may result in *ActiveRecord::RecordNotUnique* exception
+  # in a multi-threaded environment. Make sure to use it within a *safe_ensure_unique* block.
   def model_user_mention
     return if user_mentions.is_a?(ActiveRecord::NullRelation)
 

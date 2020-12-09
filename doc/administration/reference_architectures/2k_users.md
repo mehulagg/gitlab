@@ -2,7 +2,7 @@
 reading_time: true
 stage: Enablement
 group: Distribution
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Reference architecture: up to 2,000 users **(CORE ONLY)**
@@ -25,6 +25,46 @@ For a full list of reference architectures, see
 | Monitoring node                          | 1      | 2 vCPU, 1.8 GB memory   | n1-highcpu-2   | c5.large     | F2s v2  |
 | Object storage                           | n/a    | n/a                     | n/a            | n/a          | n/a     |
 | NFS server (optional, not recommended)   | 1      | 4 vCPU, 3.6 GB memory   | n1-highcpu-4   | c5.xlarge    | F4s v2  |
+
+```mermaid
+stateDiagram-v2
+    [*] --> LoadBalancer
+    LoadBalancer --> ApplicationServer
+
+    ApplicationServer --> Gitaly
+    ApplicationServer --> Redis
+    ApplicationServer --> Database
+    ApplicationServer --> ObjectStorage
+
+    ApplicationMonitoring -->ApplicationServer
+    ApplicationMonitoring -->Redis
+    ApplicationMonitoring -->Database
+
+
+    state Database {
+      "PG_Node"
+    }
+    state Redis {
+      "Redis_Node"
+    }
+
+    state Gitaly {
+      "Gitaly"
+    }
+
+    state ApplicationServer {
+      "AppServ_1..2"
+    }
+
+    state LoadBalancer {
+      "LoadBalancer"
+    }
+
+    state ApplicationMonitoring {
+      "Prometheus"
+      "Grafana"
+    }
+```
 
 The Google Cloud Platform (GCP) architectures were built and tested using the
 [Intel Xeon E5 v3 (Haswell)](https://cloud.google.com/compute/docs/cpu-platforms)
@@ -356,6 +396,13 @@ are supported and can be added if needed.
 
 ## Configure Gitaly
 
+NOTE:
+[Gitaly Cluster](../gitaly/praefect.md) support
+for the Reference Architectures is being
+worked on as a [collaborative effort](https://gitlab.com/gitlab-org/quality/reference-architectures/-/issues/1) between the Quality Engineering and Gitaly teams. When this component has been verified
+some Architecture specs will likely change as a result to support the new
+and improved designed.
+
 [Gitaly](../gitaly/index.md) server node requirements are dependent on data,
 specifically the number of projects and those projects' sizes. It's recommended
 that a Gitaly server node stores no more than 5TB of data. Although this
@@ -384,7 +431,7 @@ Be sure to note the following items:
   to restrict access to the Gitaly server. Another option is to
   [use TLS](#gitaly-tls-support).
 
-NOTE: **Note:**
+NOTE:
 The token referred to throughout the Gitaly documentation is an arbitrary
 password selected by the administrator. This token is unrelated to tokens
 created for the GitLab API or other similar web API tokens.
@@ -478,7 +525,7 @@ nodes (including the Gitaly node using the certificate) and on all client nodes
 that communicate with it following the procedure described in
 [GitLab custom certificate configuration](https://docs.gitlab.com/omnibus/settings/ssl.html#install-custom-public-certificates).
 
-NOTE: **Note:**
+NOTE:
 The self-signed certificate must specify the address you use to access the
 Gitaly server. If you are addressing the Gitaly server by a hostname, you can
 either use the Common Name field for this, or add it as a Subject Alternative
@@ -859,7 +906,7 @@ on what features you intend to use:
 | [Merge request diffs](../merge_request_diffs.md#using-object-storage) | Yes |
 | [Mattermost](https://docs.mattermost.com/administration/config-settings.html#file-storage)| No |
 | [Packages](../packages/index.md#using-object-storage) (optional feature) | Yes |
-| [Dependency Proxy](../packages/dependency_proxy.md#using-object-storage) (optional feature) **(PREMIUM ONLY)** | Yes |
+| [Dependency Proxy](../packages/dependency_proxy.md#using-object-storage) (optional feature) | Yes |
 | [Pseudonymizer](../pseudonymizer.md#configuration) (optional feature) **(ULTIMATE ONLY)** | No |
 | [Autoscale runner caching](https://docs.gitlab.com/runner/configuration/autoscale.html#distributed-runners-caching) (optional for improved performance) | No |
 | [Terraform state files](../terraform_state.md#using-object-storage) | Yes |

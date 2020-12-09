@@ -15,6 +15,17 @@ RSpec.describe Ci::Build do
 
   let(:job) { create(:ci_build, pipeline: pipeline) }
   let(:artifact) { create(:ee_ci_job_artifact, :sast, job: job, project: job.project) }
+  let(:valid_secrets) do
+    {
+      DATABASE_PASSWORD: {
+        vault: {
+          engine: { name: 'kv-v2', path: 'kv-v2' },
+          path: 'production/db',
+          field: 'password'
+        }
+      }
+    }
+  end
 
   describe '.license_scan' do
     subject(:build) { described_class.license_scan.first }
@@ -475,7 +486,15 @@ RSpec.describe Ci::Build do
   end
 
   describe 'ci_secrets_management_available?' do
-    subject(:build) { job.ci_secrets_management_available? }
+    subject { job.ci_secrets_management_available? }
+
+    context 'when build has no project' do
+      before do
+        job.update!(project: nil)
+      end
+
+      it { is_expected.to be false }
+    end
 
     context 'when secrets management feature is available' do
       before do
@@ -495,18 +514,6 @@ RSpec.describe Ci::Build do
   end
 
   describe '#runner_required_feature_names' do
-    let(:valid_secrets) do
-      {
-        DATABASE_PASSWORD: {
-          vault: {
-            engine: { name: 'kv-v2', path: 'kv-v2' },
-            path: 'production/db',
-            field: 'password'
-          }
-        }
-      }
-    end
-
     let(:build) { create(:ci_build, secrets: secrets) }
 
     subject { build.runner_required_feature_names }
@@ -544,6 +551,58 @@ RSpec.describe Ci::Build do
         let(:secrets) { {} }
 
         it { is_expected.not_to include(:vault_secrets) }
+      end
+    end
+  end
+
+  describe "secrets management usage data" do
+    context 'when secrets management feature is not available' do
+      before do
+        stub_licensed_features(ci_secrets_management: false)
+      end
+
+      it 'does not track unique users' do
+        expect(Gitlab::UsageDataCounters::HLLRedisCounter).not_to receive(:track_event)
+
+        create(:ci_build, secrets: valid_secrets)
+      end
+    end
+
+    context 'when secrets management feature is available' do
+      before do
+        stub_licensed_features(ci_secrets_management: true)
+      end
+
+      context 'when there are secrets defined' do
+        context 'on create' do
+          it 'tracks unique users' do
+            ci_build = build(:ci_build, secrets: valid_secrets)
+
+            expect(Gitlab::UsageDataCounters::HLLRedisCounter).to receive(:track_event).with(ci_build.user_id, 'i_ci_secrets_management_vault_build_created')
+
+            ci_build.save!
+          end
+        end
+
+        context 'on update' do
+          it 'does not track unique users' do
+            ci_build = create(:ci_build, secrets: valid_secrets)
+
+            expect(Gitlab::UsageDataCounters::HLLRedisCounter).not_to receive(:track_event)
+
+            ci_build.success
+          end
+        end
+      end
+    end
+
+    context 'when there are no secrets defined' do
+      let(:secrets) { {} }
+
+      it 'does not track unique users' do
+        expect(Gitlab::UsageDataCounters::HLLRedisCounter).not_to receive(:track_event)
+
+        create(:ci_build, secrets: {})
       end
     end
   end

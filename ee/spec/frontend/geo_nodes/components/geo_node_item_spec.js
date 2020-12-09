@@ -1,7 +1,7 @@
 import { shallowMount } from '@vue/test-utils';
 
-import geoNodeItemComponent from 'ee/geo_nodes/components/geo_node_item.vue';
 import GeoNodeDetails from 'ee/geo_nodes/components/geo_node_details.vue';
+import geoNodeItemComponent from 'ee/geo_nodes/components/geo_node_item.vue';
 import eventHub from 'ee/geo_nodes/event_hub';
 import { mockNode, mockNodeDetails } from '../mock_data';
 

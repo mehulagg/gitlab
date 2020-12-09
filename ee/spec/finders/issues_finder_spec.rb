@@ -8,8 +8,6 @@ RSpec.describe IssuesFinder do
     include_context 'IssuesFinder#execute context'
 
     context 'scope: all' do
-      let_it_be(:group) { create(:group) }
-
       let(:scope) { 'all' }
 
       describe 'filter by weight' do
@@ -132,8 +130,8 @@ RSpec.describe IssuesFinder do
       end
 
       context 'filter by iteration' do
-        let_it_be(:iteration_1) { create(:iteration, group: group) }
-        let_it_be(:iteration_2) { create(:iteration, group: group) }
+        let_it_be(:iteration_1) { create(:iteration, group: group, start_date: 2.days.from_now, due_date: 3.days.from_now) }
+        let_it_be(:iteration_2) { create(:iteration, group: group, start_date: 4.days.from_now, due_date: 5.days.from_now) }
 
         let_it_be(:iteration_1_issue) { create(:issue, project: project1, iteration: iteration_1) }
         let_it_be(:iteration_2_issue) { create(:issue, project: project1, iteration: iteration_2) }
@@ -154,6 +152,34 @@ RSpec.describe IssuesFinder do
           end
         end
 
+        context 'filter issues by current iteration' do
+          let(:current_iteration) { nil }
+          let(:params) { { group_id: group, iteration_id: ::Iteration::Constants::Current.title } }
+          let!(:current_iteration_issue) { create(:issue, project: project1, iteration: current_iteration) }
+
+          context 'when no current iteration is found' do
+            it 'returns no issues' do
+              expect(issues).to be_empty
+            end
+          end
+
+          context 'when current iteration exists' do
+            let(:current_iteration) { create(:iteration, :started, group: group, start_date: Date.today, due_date: 1.day.from_now) }
+
+            it 'returns filtered issues' do
+              expect(issues).to contain_exactly(current_iteration_issue)
+            end
+
+            context 'filter by negated current iteration' do
+              let(:params) { { group_id: group, not: { iteration_id: ::Iteration::Constants::Current.title } } }
+
+              it 'returns filtered issues' do
+                expect(issues).to contain_exactly(issue1, iteration_1_issue, iteration_2_issue)
+              end
+            end
+          end
+        end
+
         context 'filter issues by iteration' do
           let(:params) { { iteration_id: iteration_1.id } }
 
@@ -167,6 +193,22 @@ RSpec.describe IssuesFinder do
 
           it 'returns all issues with the iteration' do
             expect(issues).to contain_exactly(iteration_1_issue, iteration_2_issue)
+          end
+        end
+
+        context 'filter issue by iteration title' do
+          let(:params) { { iteration_title: iteration_1.title } }
+
+          it 'returns all issues with the iteration title' do
+            expect(issues).to contain_exactly(iteration_1_issue)
+          end
+        end
+
+        context 'filter issue by negated iteration title' do
+          let(:params) { { not: { iteration_title: iteration_1.title } } }
+
+          it 'returns all issues that do not match the iteration title' do
+            expect(issues).to contain_exactly(issue1, issue2, issue3, issue4, iteration_2_issue)
           end
         end
 

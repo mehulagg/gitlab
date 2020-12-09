@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Icons and SVG Illustrations
 
 We manage our own icon and illustration library in the [`gitlab-svgs`](https://gitlab.com/gitlab-org/gitlab-svgs)
@@ -16,7 +22,7 @@ Our goal is to replace one by one all inline SVG Icons (as those currently bloat
 
 ### Usage in HAML/Rails
 
-To use a sprite Icon in HAML or Rails we use a specific helper function :
+To use a sprite Icon in HAML or Rails we use a specific helper function:
 
 ```ruby
 sprite_icon(icon_name, size: nil, css_class: '')
@@ -41,6 +47,8 @@ sprite_icon(icon_name, size: nil, css_class: '')
   <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="/assets/icons.svg#issues"></use>
 </svg>
 ```
+
+**Please note:** The `icon(icon_name, options: {})` helper function is deprecated and should not be used anymore.
 
 ### Usage in Vue
 

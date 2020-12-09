@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlDropdown, GlDropdownItem } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import Component from 'ee/registrations/components/visibility_level_dropdown.vue';
 
 describe('Visibility Level Dropdown', () => {

@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'snowplow-tracker'
-
 module Gitlab
   module Tracking
     SNOWPLOW_NAMESPACE = 'gl'
@@ -16,8 +14,8 @@ module Gitlab
         Gitlab::Tracking.event(category, action.to_s, **args)
       end
 
-      def track_self_describing_event(schema_url, event_data_json, **args)
-        Gitlab::Tracking.self_describing_event(schema_url, event_data_json, **args)
+      def track_self_describing_event(schema_url, data:, **args)
+        Gitlab::Tracking.self_describing_event(schema_url, data: data, **args)
       end
     end
 
@@ -27,16 +25,12 @@ module Gitlab
       end
 
       def event(category, action, label: nil, property: nil, value: nil, context: nil)
-        return unless enabled?
-
-        snowplow.track_struct_event(category, action, label, property, value, context, (Time.now.to_f * 1000).to_i)
+        snowplow.event(category, action, label: label, property: property, value: value, context: context)
+        product_analytics.event(category, action, label: label, property: property, value: value, context: context)
       end
 
-      def self_describing_event(schema_url, event_data_json, context: nil)
-        return unless enabled?
-
-        event_json = SnowplowTracker::SelfDescribingJson.new(schema_url, event_data_json)
-        snowplow.track_self_describing_event(event_json, context, (Time.now.to_f * 1000).to_i)
+      def self_describing_event(schema_url, data:, context: nil)
+        snowplow.self_describing_event(schema_url, data: data, context: context)
       end
 
       def snowplow_options(group)
@@ -54,19 +48,11 @@ module Gitlab
       private
 
       def snowplow
-        @snowplow ||= SnowplowTracker::Tracker.new(
-          emitter,
-          SnowplowTracker::Subject.new,
-          SNOWPLOW_NAMESPACE,
-          Gitlab::CurrentSettings.snowplow_app_id
-        )
+        @snowplow ||= Gitlab::Tracking::Destinations::Snowplow.new
       end
 
-      def emitter
-        SnowplowTracker::AsyncEmitter.new(
-          Gitlab::CurrentSettings.snowplow_collector_hostname,
-          protocol: 'https'
-        )
+      def product_analytics
+        @product_analytics ||= Gitlab::Tracking::Destinations::ProductAnalytics.new
       end
     end
   end

@@ -5,10 +5,11 @@ import ZenMode from '~/zen_mode';
 import '~/notes/index';
 import loadAwardsHandler from '~/awards_handler';
 
-document.addEventListener('DOMContentLoaded', () => {
-  new ZenMode(); // eslint-disable-line no-new
-  initEpicApp();
-  new ShortcutsEpic(); // eslint-disable-line no-new
+initEpicApp();
+
+requestIdleCallback(() => {
   new EpicTabs(); // eslint-disable-line no-new
+  new ShortcutsEpic(); // eslint-disable-line no-new
   loadAwardsHandler();
+  new ZenMode(); // eslint-disable-line no-new
 });

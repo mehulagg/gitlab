@@ -50,6 +50,22 @@ bundle exec guard
 
 When using spring and guard together, use `SPRING=1 bundle exec guard` instead to make use of spring.
 
+### Ruby warnings
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/47767) in GitLab 13.7.
+
+We've enabled [deprecation warnings](https://ruby-doc.org/core-2.7.2/Warning.html)
+by default when running specs. Making these warnings more visible to developers
+helps upgrading to newer Ruby versions.
+
+You can silence deprecation warnings by setting the environment variable
+`SILENCE_DEPRECATIONS`, for example:
+
+```shell
+# silence all deprecation warnings
+SILENCE_DEPRECATIONS=1 bin/rspec spec/models/project_spec.rb
+```
+
 ### Test speed
 
 GitLab has a massive test suite that, without [parallelization](ci.md#test-suite-parallelization-on-the-ci), can take hours
@@ -311,7 +327,7 @@ Use the coverage reports to ensure your tests cover 100% of your code.
 
 ### System / Feature tests
 
-NOTE: **Note:**
+NOTE:
 Before writing a new system test, [please consider **not**
 writing one](testing_levels.md#consider-not-writing-a-system-test)!
 
@@ -361,7 +377,7 @@ Finished in 34.51 seconds (files took 0.76702 seconds to load)
 1 example, 0 failures
 ```
 
-Note: `live_debug` only works on JavaScript enabled specs.
+`live_debug` only works on JavaScript enabled specs.
 
 #### Run `:js` spec in a visible browser
 
@@ -584,9 +600,9 @@ this trait should be either fixed to not rely on Sidekiq processing jobs, or the
 `:sidekiq_might_not_need_inline` trait should be updated to `:sidekiq_inline` if
 the processing of background jobs is needed/expected.
 
-NOTE: **Note:**
-The usage of `perform_enqueued_jobs` is only useful for testing delayed mail
-deliveries since our Sidekiq workers aren't inheriting from `ApplicationJob` / `ActiveJob::Base`.
+The usage of `perform_enqueued_jobs` is useful only for testing delayed mail
+deliveries, because our Sidekiq workers aren't inheriting from `ApplicationJob`
+/ `ActiveJob::Base`.
 
 #### DNS
 
@@ -602,6 +618,32 @@ it "really connects to Prometheus", :permit_dns do
 
 And if you need more specific control, the DNS blocking is implemented in
 `spec/support/helpers/dns_helpers.rb` and these methods can be called elsewhere.
+
+#### Stubbing File methods
+
+In the situations where you need to
+[stub](https://relishapp.com/rspec/rspec-mocks/v/3-9/docs/basics/allowing-messages)
+methods such as `File.read`, make sure to:
+
+1. Stub `File.read` for only the filepath you are interested in.
+1. Call the original implementation for other filepaths.
+
+Otherwise `File.read` calls from other parts of the codebase get
+stubbed incorrectly. You should use the `stub_file_read`, and
+`expect_file_read` helper methods which does the stubbing for
+`File.read` correctly.
+
+```ruby
+# bad, all Files will read and return nothing
+allow(File).to receive(:read)
+
+# good
+stub_file_read(my_filepath)
+
+# also OK
+allow(File).to receive(:read).and_call_original
+allow(File).to receive(:read).with(my_filepath)
+```
 
 #### Filesystem
 
@@ -678,7 +720,7 @@ at all possible.
 
 #### Test Snowplow events
 
-CAUTION: **Warning:**
+WARNING:
 Snowplow performs **runtime type checks** by using the [contracts gem](https://rubygems.org/gems/contracts).
 Since Snowplow is **by default disabled in tests and development**, it can be hard to
 **catch exceptions** when mocking `Gitlab::Tracking`.
@@ -750,7 +792,7 @@ describe "#==" do
 end
 ```
 
-CAUTION: **Caution:**
+WARNING:
 Only use simple values as input in the `where` block. Using procs, stateful
 objects, FactoryBot-created objects etc. can lead to
 [unexpected results](https://github.com/tomykaira/rspec-parameterized/issues/8).

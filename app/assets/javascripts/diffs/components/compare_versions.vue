@@ -6,7 +6,7 @@ import { polyfillSticky } from '~/lib/utils/sticky';
 import CompareDropdownLayout from './compare_dropdown_layout.vue';
 import SettingsDropdown from './settings_dropdown.vue';
 import DiffStats from './diff_stats.vue';
-import { CENTERED_LIMITED_CONTAINER_CLASSES } from '../constants';
+import { CENTERED_LIMITED_CONTAINER_CLASSES, EVT_EXPAND_ALL_FILES } from '../constants';
 import eventHub from '../event_hub';
 
 export default {
@@ -65,13 +65,9 @@ export default {
     polyfillSticky(this.$el);
   },
   methods: {
-    ...mapActions('diffs', [
-      'setInlineDiffViewType',
-      'setParallelDiffViewType',
-      'toggleShowTreeList',
-    ]),
+    ...mapActions('diffs', ['setInlineDiffViewType', 'setParallelDiffViewType', 'setShowTreeList']),
     expandAllFiles() {
-      eventHub.$emit('mr:diffs:expandAllFiles');
+      eventHub.$emit(EVT_EXPAND_ALL_FILES);
     },
   },
 };
@@ -92,7 +88,7 @@ export default {
         class="gl-mr-3 js-toggle-tree-list"
         :title="toggleFileBrowserTitle"
         :selected="showTreeList"
-        @click="toggleShowTreeList"
+        @click="setShowTreeList({ showTreeList: !showTreeList })"
       />
       <gl-sprintf
         v-if="showDropdowns"

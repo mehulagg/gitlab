@@ -34,7 +34,7 @@ module AlertManagement
     has_many :ordered_notes, -> { fresh }, as: :noteable, class_name: 'Note'
     has_many :user_mentions, class_name: 'AlertManagement::AlertUserMention', foreign_key: :alert_management_alert_id
 
-    has_internal_id :iid, scope: :project, init: ->(s) { s.project.alert_management_alerts.maximum(:iid) }
+    has_internal_id :iid, scope: :project
 
     sha_attribute :fingerprint
 
@@ -67,6 +67,11 @@ module AlertManagement
       low: 3,
       info: 4,
       unknown: 5
+    }
+
+    enum domain: {
+      operations: 0,
+      threat_monitoring: 1
     }
 
     state_machine :status, initial: :triggered do
@@ -263,3 +268,5 @@ module AlertManagement
     end
   end
 end
+
+AlertManagement::Alert.prepend_if_ee('EE::AlertManagement::Alert')

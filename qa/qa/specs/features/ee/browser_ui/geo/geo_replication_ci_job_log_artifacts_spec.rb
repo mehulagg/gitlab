@@ -65,11 +65,7 @@ module QA
             dashboard.go_to_project(@project.name)
           end
 
-          Page::Project::Menu.perform(&:click_ci_cd_pipelines)
-          Page::Project::Pipeline::Index.perform do |index|
-            index.wait_for_latest_pipeline_replication
-            index.click_on_latest_pipeline
-          end
+          Flow::Pipeline.visit_latest_pipeline(pipeline_condition: 'replication')
 
           Page::Project::Pipeline::Show.perform do |pipeline|
             pipeline.wait_for_pipeline_job_replication(@pipeline_job_name)
@@ -98,11 +94,7 @@ module QA
             dashboard.go_to_project(@project.name)
           end
 
-          Page::Project::Menu.perform(&:click_ci_cd_pipelines)
-          Page::Project::Pipeline::Index.perform do |index|
-            index.wait_for_latest_pipeline_replication
-            index.click_on_latest_pipeline
-          end
+          Flow::Pipeline.visit_latest_pipeline(pipeline_condition: 'replication')
 
           Page::Project::Pipeline::Show.perform do |pipeline|
             pipeline.wait_for_pipeline_job_replication(@pipeline_job_name)

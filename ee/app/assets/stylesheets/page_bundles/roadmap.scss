@@ -1,0 +1,535 @@
+@import 'page_bundles/mixins_and_variables_and_functions';
+
+$header-item-height: 60px;
+$item-height: 50px;
+$details-cell-width: px-to-rem(320px);
+$timeline-cell-height: 32px;
+$timeline-cell-width: 180px;
+$border-style: 1px solid var(--gray-100, $gray-100);
+$roadmap-gradient-dark-gray: rgba(0, 0, 0, 0.15);
+$roadmap-gradient-gray: rgba(255, 255, 255, 0.001);
+$scroll-top-gradient: linear-gradient(to bottom, $roadmap-gradient-dark-gray 0%, $roadmap-gradient-gray 100%);
+$scroll-bottom-gradient: linear-gradient(to bottom, $roadmap-gradient-gray 0%, $roadmap-gradient-dark-gray 100%);
+$column-right-gradient: linear-gradient(to right, $roadmap-gradient-dark-gray 0%, $roadmap-gradient-gray 100%);
+
+@keyframes colorTransitionDetailsCell {
+  from {
+    background-color: var(--blue-100, $blue-100);
+  }
+
+  to {
+    background-color: var(--white, $white);
+  }
+}
+
+@mixin roadmap-scroll-mixin {
+  height: $grid-size;
+  width: $details-cell-width;
+  pointer-events: none;
+}
+
+html.group-epics-roadmap-html {
+  height: 100%;
+  // We need to reset this just for Roadmap page
+  overflow-y: initial;
+}
+
+.with-performance-bar {
+  .group-epics-roadmap-body {
+    $header-size: $performance-bar-height + $header-height;
+    height: calc(100% - #{$header-size});
+  }
+}
+
+.group-epics-roadmap-body {
+  height: calc(100% - #{$header-height});
+
+  .page-with-contextual-sidebar {
+    height: 100%;
+  }
+
+  .group-epics-roadmap {
+    // This size is total of breadcrumb height and computed height of
+    // filters container (70px)
+    $header-size: $breadcrumb-min-height + 70px;
+    height: calc(100% - #{$header-size});
+  }
+
+  .group-epics-roadmap-wrapper,
+  .group-epics-roadmap .content {
+    height: 100%;
+  }
+}
+
+.epics-details-filters {
+  .btn-group {
+    .dropdown-toggle {
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+
+    .btn-sort-direction {
+      border-left: 0;
+
+      &:hover {
+        border-color: var(--gray-darkest, $gray-darkest);
+      }
+    }
+
+    @include media-breakpoint-down(xs) {
+      display: flex;
+
+      .dropdown-menu-sort {
+        // This is a hack to fix dropdown alignment in small screens
+        // where Bootstrap applies inline `transform: translate3d(...)`
+        // and since our dropdown button has sort direction button
+        // present, alignment needs to compensate for that space
+        // without which it appears shifted towards left.
+        //
+        // One more approach is to override `transform` using `!important`
+        // but that too involves using magic number
+        margin-left: 27px;
+      }
+    }
+  }
+}
+
+.epics-roadmap-filters {
+  .epics-details-filters {
+    .btn-roadmap-preset {
+      padding: 7px $gl-btn-padding;
+    }
+  }
+}
+
+.group-epics-roadmap-wrapper {
+  padding-bottom: 0;
+}
+
+.breadcrumbs.group-epics-roadmap {
+  border-bottom: $border-style;
+
+  .breadcrumbs-container {
+    border-bottom: 0;
+  }
+}
+
+.roadmap-container {
+  overflow: hidden;
+  height: 100%;
+
+  &.overflow-reset {
+    overflow: initial;
+  }
+}
+
+.roadmap-timeline-section .timeline-header-blank::after,
+.epics-list-section .epic-details-cell::after,
+.milestones-list-section .milestones-list-title::after,
+.skeleton-loader::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: -$grid-size;
+  width: $grid-size;
+  pointer-events: none;
+  background: $column-right-gradient;
+}
+
+.roadmap-timeline-section {
+  position: sticky;
+  position: -webkit-sticky;
+  top: 0;
+  z-index: 20;
+
+  .timeline-header-blank,
+  .timeline-header-item {
+    float: left;
+    height: $header-item-height;
+    border-bottom: $border-style;
+    background-color: var(--white, $white);
+  }
+
+  .timeline-header-blank {
+    position: sticky;
+    position: -webkit-sticky;
+    top: 0;
+    left: 0;
+    width: $details-cell-width;
+    z-index: 2;
+
+    &::after {
+      height: $header-item-height;
+    }
+  }
+
+  .timeline-header-item {
+    width: $timeline-cell-width;
+
+    &:last-of-type .item-label {
+      border-right: 0;
+    }
+
+    .item-label,
+    .item-sublabel .sublabel-value {
+      color: var(--gray-400, $gray-400);
+      font-weight: 400;
+
+      &.label-dark {
+        color: $gray-900;
+      }
+
+      &.label-bold {
+        font-weight: 600;
+      }
+    }
+
+    .item-label {
+      padding: $gl-padding-8 $gl-padding;
+      border-right: $border-style;
+      border-bottom: $border-style;
+    }
+
+    .item-sublabel {
+      position: relative;
+      display: flex;
+
+      .sublabel-value {
+        flex-grow: 1;
+        flex-basis: 0;
+        text-align: center;
+        font-size: $code-font-size;
+        line-height: 1.5;
+        padding: 2px 0;
+      }
+    }
+
+    .current-day-indicator-header {
+      bottom: 0;
+      height: $gl-vert-padding;
+      width: $gl-vert-padding;
+      background-color: var(--red-500, $red-500);
+      border-radius: 50%;
+      transform: translateX(-3px);
+    }
+  }
+
+  &.scroll-top-shadow .timeline-header-blank::before {
+    @include roadmap-scroll-mixin;
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -$grid-size;
+    border-top: 1px solid var(--white, $white);
+    background: $scroll-top-gradient;
+  }
+}
+
+.epics-list-section {
+  height: calc(100% - 60px);
+}
+
+.epics-list-item {
+  &:hover {
+    .epic-details-cell,
+    .epic-timeline-cell {
+      background-color: var(--gray-50, $gray-50);
+    }
+  }
+
+  &.epics-list-item-empty {
+    height: 100%;
+
+    &:hover {
+      .epic-details-cell,
+      .epic-timeline-cell {
+        background-color: var(--white, $white);
+      }
+    }
+
+    .epic-details-cell,
+    .epic-details-cell::after,
+    .epic-timeline-cell {
+      height: 100%;
+    }
+  }
+
+  &.newly-added-epic {
+    .epic-details-cell {
+      animation: colorTransitionDetailsCell 3s;
+    }
+  }
+}
+
+.epic-details-cell,
+.epic-timeline-cell {
+  float: left;
+  height: $item-height;
+  border-bottom: $border-style;
+}
+
+.epic-details-cell {
+  position: sticky;
+  position: -webkit-sticky;
+  left: 0;
+  line-height: 1.3;
+  width: $details-cell-width;
+  font-size: $code-font-size;
+  background-color: var(--white, $white);
+  z-index: 10;
+
+  &::after {
+    height: $item-height;
+  }
+}
+
+.epic-title,
+.epic-group-timeframe {
+  @include text-truncate;
+}
+
+.epic-timeline-cell {
+  position: relative;
+  width: $timeline-cell-width;
+  background-color: transparent;
+  border-right: $border-style;
+
+  &:last-child {
+    border-right: 0;
+  }
+}
+
+.epic-bar {
+  position: absolute;
+  top: 5px;
+  height: 40px;
+  background-color: var(--blue-600, $blue-600);
+  will-change: width, left;
+  z-index: 5;
+
+  &:hover {
+    background-color: var(--blue-700, $blue-700);
+  }
+}
+
+.epic-bar-inner {
+  position: sticky;
+  position: -webkit-sticky;
+  left: $details-cell-width;
+  color: var(--white, $white);
+}
+
+.epic-bar-title {
+  line-height: 1.2;
+}
+
+.epic-bar-progress {
+  background-color: var(--blue-300, $blue-300);
+
+  .progress-bar {
+    background-color: var(--white, $white);
+  }
+}
+
+.epic-bar-child-epic {
+  background-color: var(--white, $white);
+  border: 1px solid var(--blue-600, $blue-600);
+
+  &:hover {
+    background-color: var(--white, $white);
+    border: 1px solid var(--blue-700, $blue-700);
+    text-decoration: none;
+
+    .epic-bar-progress .progress-bar {
+      background-color: var(--blue-700, $blue-700);
+    }
+  }
+
+  .epic-bar-inner {
+    color: var(--blue-600, $blue-600);
+
+    &:hover {
+      color: var(--blue-700, $blue-700);
+    }
+  }
+
+  .epic-bar-progress {
+    background-color: var(--blue-200, $blue-200);
+
+    .progress-bar {
+      background-color: var(--blue-600, $blue-600);
+    }
+  }
+}
+
+.epic-scroll-bottom-shadow {
+  @include roadmap-scroll-mixin;
+  position: fixed;
+  bottom: 0;
+  background: $scroll-bottom-gradient;
+  z-index: 2;
+}
+
+.epic-timeline-cell,
+.milestone-timeline-cell {
+  .current-day-indicator {
+    top: -1px;
+    width: 2px;
+    height: calc(100% + 1px);
+    background-color: var(--red-500, $red-500);
+    pointer-events: none;
+  }
+}
+
+.milestones-list-section {
+  .milestones-list-items {
+    .milestone-timeline-cell {
+      height: $timeline-cell-height;
+      width: $timeline-cell-width;
+    }
+
+    .timeline-bar-wrapper {
+      height: $timeline-cell-height;
+      color: var(--gray-500, $gray-500);
+    }
+
+    .milestone-start-and-end {
+      display: none;
+      border-left: 2px dotted var(--gray-900, $gray-900);
+      border-right: 2px dotted var(--gray-900, $gray-900);
+      opacity: 0.5;
+      top: 1px;
+    }
+
+    .milestone-item-details {
+      z-index: 1;
+
+      &:hover .milestone-start-and-end {
+        display: block;
+      }
+    }
+
+    .milestone-item-title {
+      left: $details-cell-width + $grid-size;
+      height: 30px;
+      z-index: 2;
+    }
+
+    a.milestone-url {
+      color: inherit;
+      max-width: 100%;
+
+      &:hover {
+        color: var(--gray-900, $gray-900);
+        cursor: pointer;
+
+        .timeline-bar {
+          background-color: var(--gray-900, $gray-900);
+
+          &::before {
+            background-color: var(--gray-900, $gray-900);
+          }
+
+          &::after {
+            border-color: var(--gray-900, $gray-900);
+          }
+        }
+      }
+    }
+
+    .milestone-small,
+    .milestone-minimum {
+      .milestone-item-title {
+        width: 100%;
+        text-indent: -9999px;
+
+        &::after {
+          position: absolute;
+          left: 0;
+        }
+      }
+    }
+
+    .milestone-small {
+      .milestone-item-title::after {
+        content: '...';
+        text-indent: 0;
+      }
+    }
+
+    .milestone-minimum {
+      // We need important here to overwrite inline width which depends on dates
+      width: 8px !important;
+
+      .milestone-item-title::after {
+        content: '.';
+        text-indent: 5px;
+      }
+
+      .timeline-bar {
+        height: 0;
+
+        &::before {
+          display: none;
+        }
+      }
+
+      .milestone-start-and-end {
+        border-left: 0;
+      }
+    }
+
+    .timeline-bar {
+      width: 100%;
+      background-color: var(--gray-500, $gray-500);
+      height: 2px;
+      z-index: 1;
+      bottom: 4px;
+
+      &::before,
+      &::after {
+        content: '';
+        position: absolute;
+        top: -3px;
+        height: 8px;
+      }
+
+      &::before {
+        width: 2px;
+        background-color: var(--gray-500, $gray-500);
+      }
+
+      &::after {
+        right: -3px;
+        width: 8px;
+        border: 2px solid var(--gray-500, $gray-500);
+        border-radius: 4px;
+        background-color: var(--white, $white);
+      }
+    }
+  }
+
+  .milestones-list-title {
+    height: 100%;
+    left: 0;
+    width: $details-cell-width;
+    font-size: $code-font-size;
+    background-color: var(--white, $white);
+    z-index: 2;
+
+    &::after {
+      height: 100%;
+    }
+  }
+}
+
+.milestone-item-type {
+  .gl-icon {
+    padding-right: $gl-spacing-scale-1;
+  }
+}
+
+.milestone-item-date {
+  color: var(--gray-500, $gray-500);
+  padding-top: $gl-spacing-scale-1;
+}

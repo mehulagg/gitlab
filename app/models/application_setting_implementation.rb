@@ -58,9 +58,10 @@ module ApplicationSettingImplementation
         default_projects_limit: Settings.gitlab['default_projects_limit'],
         default_snippet_visibility: Settings.gitlab.default_projects_features['visibility_level'],
         diff_max_patch_bytes: Gitlab::Git::Diff::DEFAULT_MAX_PATCH_BYTES,
+        disable_feed_token: false,
         disabled_oauth_sign_in_sources: [],
         dns_rebinding_protection_enabled: true,
-        domain_whitelist: Settings.gitlab['domain_whitelist'],
+        domain_allowlist: Settings.gitlab['domain_allowlist'],
         dsa_key_restriction: 0,
         ecdsa_key_restriction: 0,
         ed25519_key_restriction: 0,
@@ -120,7 +121,7 @@ module ApplicationSettingImplementation
         repository_checks_enabled: true,
         repository_storages_weighted: { default: 100 },
         repository_storages: ['default'],
-        require_admin_approval_after_user_signup: false,
+        require_admin_approval_after_user_signup: true,
         require_two_factor_authentication: false,
         restricted_visibility_levels: Settings.gitlab['restricted_visibility_levels'],
         rsa_key_restriction: 0,
@@ -168,7 +169,9 @@ module ApplicationSettingImplementation
         user_show_add_ssh_key_message: true,
         wiki_page_max_content_bytes: 50.megabytes,
         container_registry_delete_tags_service_timeout: 250,
-        container_registry_expiration_policies_worker_capacity: 0
+        container_registry_expiration_policies_worker_capacity: 0,
+        kroki_enabled: false,
+        kroki_url: nil
       }
     end
 
@@ -203,19 +206,19 @@ module ApplicationSettingImplementation
   end
 
   def domain_allowlist_raw
-    array_to_string(self.domain_whitelist)
+    array_to_string(self.domain_allowlist)
   end
 
   def domain_denylist_raw
-    array_to_string(self.domain_blacklist)
+    array_to_string(self.domain_denylist)
   end
 
   def domain_allowlist_raw=(values)
-    self.domain_whitelist = strings_to_array(values)
+    self.domain_allowlist = strings_to_array(values)
   end
 
   def domain_denylist_raw=(values)
-    self.domain_blacklist = strings_to_array(values)
+    self.domain_denylist = strings_to_array(values)
   end
 
   def domain_denylist_file=(file)
@@ -242,7 +245,7 @@ module ApplicationSettingImplementation
   end
 
   # This method separates out the strings stored in the
-  # application_setting.outbound_local_requests_allowlist array into 2 arrays;
+  # application_setting.outbound_local_requests_whitelist array into 2 arrays;
   # an array of IPAddr objects (`[IPAddr.new('127.0.0.1')]`), and an array of
   # domain strings (`['www.example.com']`).
   def outbound_local_requests_allowlist_arrays

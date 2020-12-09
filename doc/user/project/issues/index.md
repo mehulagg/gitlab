@@ -1,7 +1,7 @@
 ---
 stage: Plan
 group: Project Management
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Issues
@@ -95,12 +95,13 @@ While you can view and manage the full details of an issue on the [issue page](#
 you can also work with multiple issues at a time using the [Issues List](#issues-list),
 [Issue Boards](#issue-boards), Issue references, and [Epics](#epics)**(PREMIUM)**.
 
-Key actions for Issues include:
+Key actions for issues include:
 
 - [Creating issues](managing_issues.md#create-a-new-issue)
 - [Moving issues](managing_issues.md#moving-issues)
 - [Closing issues](managing_issues.md#closing-issues)
 - [Deleting issues](managing_issues.md#deleting-issues)
+- [Promoting issues](managing_issues.md#promote-an-issue-to-an-epic) **(PREMIUM)**
 
 ### Issue page
 

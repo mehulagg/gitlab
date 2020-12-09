@@ -84,6 +84,7 @@ export default {
     packagesSize: s__('UsageQuota|Packages'),
     wikiSize: s__('UsageQuota|Wiki'),
     snippetsSize: s__('UsageQuota|Snippets'),
+    uploadsSize: s__('UsageQuota|Uploads'),
   },
 };
 </script>

@@ -20,16 +20,17 @@ module EE
       has_many :approver_users, through: :approvers, source: :user
       has_many :approver_groups, as: :target, dependent: :delete_all # rubocop:disable Cop/ActiveRecordDependent
       has_many :approval_rules, class_name: 'ApprovalMergeRequestRule', inverse_of: :merge_request do
-        def preload_users
+        def applicable_to_branch(branch)
           ActiveRecord::Associations::Preloader.new.preload(
             self,
             [:users, :groups, approval_project_rule: [:users, :groups, :protected_branches]]
           )
 
           self.select do |rule|
+            next true unless rule.approval_project_rule.present?
             next true if rule.overridden?
 
-            rule
+            rule.approval_project_rule.applies_to_branch?(branch)
           end
         end
       end
@@ -271,6 +272,12 @@ module EE
       return [] unless actual_head_pipeline && base_pipeline
 
       (base_pipeline.security_scans.pluck(:scan_type) - actual_head_pipeline.security_scans.pluck(:scan_type)).uniq
+    end
+
+    def applicable_approval_rules_for_user(user_id)
+      approval_rules.applicable_to_branch(target_branch).select do |rule|
+        rule.approvers.pluck(:id).include?(user_id)
+      end
     end
 
     private

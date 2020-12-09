@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Migrating from MySQL to PostgreSQL
 
 This guide documents how to take a working GitLab instance that uses MySQL and
@@ -5,7 +11,7 @@ migrate it to a PostgreSQL database.
 
 ## Requirements
 
-NOTE: **Note:**
+NOTE:
 Support for MySQL was removed in GitLab 12.1. This procedure should be performed
 **before** installing GitLab 12.1.
 

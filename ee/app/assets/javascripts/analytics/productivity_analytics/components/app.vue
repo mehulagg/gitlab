@@ -206,7 +206,7 @@ export default {
         :chart-data="getColumnChartData(chartKeys.main)"
       >
         <gl-column-chart
-          :data="{ full: getColumnChartData(chartKeys.main) }"
+          :bars="[{ name: 'full', data: getColumnChartData(chartKeys.main) }]"
           :option="getColumnChartOption(chartKeys.main)"
           :y-axis-title="__('Merge requests')"
           :x-axis-title="__('Days')"
@@ -257,7 +257,7 @@ export default {
               "
             >
               <gl-column-chart
-                :data="{ full: getColumnChartData(chartKeys.timeBasedHistogram) }"
+                :bars="[{ name: 'full', data: getColumnChartData(chartKeys.timeBasedHistogram) }]"
                 :option="getColumnChartOption(chartKeys.timeBasedHistogram)"
                 :y-axis-title="s__('ProductivityAnalytics|Merge requests')"
                 :x-axis-title="s__('ProductivityAnalytics|Hours')"
@@ -283,7 +283,7 @@ export default {
               "
             >
               <gl-column-chart
-                :data="{ full: getColumnChartData(chartKeys.commitBasedHistogram) }"
+                :bars="[{ name: 'full', data: getColumnChartData(chartKeys.commitBasedHistogram) }]"
                 :option="getColumnChartOption(chartKeys.commitBasedHistogram)"
                 :y-axis-title="s__('ProductivityAanalytics|Merge requests')"
                 :x-axis-title="getMetricLabel(chartKeys.commitBasedHistogram)"

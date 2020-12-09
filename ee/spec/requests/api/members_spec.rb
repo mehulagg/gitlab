@@ -3,6 +3,119 @@
 require 'spec_helper'
 
 RSpec.describe API::Members do
+  include EE::API::Helpers::MembersHelpers
+
+  context 'group members endpoints for group with minimal access feature' do
+    let_it_be(:group) { create(:group) }
+    let_it_be(:minimal_access_member) { create(:group_member, :minimal_access, source: group) }
+    let_it_be(:owner) { create(:user) }
+
+    before do
+      group.add_owner(owner)
+    end
+
+    describe "GET /groups/:id/members" do
+      subject do
+        get api("/groups/#{group.id}/members", owner)
+        json_response
+      end
+
+      it 'returns user with minimal access when feature is available' do
+        stub_licensed_features(minimal_access_role: true)
+
+        expect(subject.map { |u| u['id'] }).to match_array [owner.id, minimal_access_member.user_id]
+      end
+
+      it 'does not return user with minimal access when feature is unavailable' do
+        stub_licensed_features(minimal_access_role: false)
+
+        expect(subject.map { |u| u['id'] }).not_to include(minimal_access_member.user_id)
+      end
+    end
+
+    describe 'POST /groups/:id/members' do
+      let(:stranger) { create(:user) }
+
+      subject do
+        post api("/groups/#{group.id}/members", owner),
+             params: { user_id: stranger.id, access_level: Member::MINIMAL_ACCESS }
+      end
+
+      context 'when minimal access role is not available' do
+        it 'does not create a member' do
+          expect do
+            subject
+          end.not_to change { group.all_group_members.count }
+
+          expect(response).to have_gitlab_http_status(:bad_request)
+          expect(json_response['message']).to eq({ 'access_level' => ['is not included in the list'] })
+        end
+      end
+
+      context 'when minimal access role is available' do
+        it 'creates a member' do
+          stub_licensed_features(minimal_access_role: true)
+
+          expect do
+            subject
+          end.to change { group.all_group_members.count }.by(1)
+
+          expect(response).to have_gitlab_http_status(:created)
+          expect(json_response['id']).to eq(stranger.id)
+        end
+      end
+    end
+
+    describe 'PUT /groups/:id/members/:user_id' do
+      let(:expires_at) { 2.days.from_now.to_date }
+
+      context 'when minimal access role is available' do
+        it 'updates the member' do
+          stub_licensed_features(minimal_access_role: true)
+
+          put api("/groups/#{group.id}/members/#{minimal_access_member.user_id}", owner),
+              params: {  expires_at: expires_at, access_level: Member::MINIMAL_ACCESS }
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_response['id']).to eq(minimal_access_member.user_id)
+          expect(json_response['expires_at']).to eq(expires_at.to_s)
+        end
+      end
+
+      context 'when minimal access role is not available' do
+        it 'does not update the member' do
+          put api("/groups/#{group.id}/members/#{minimal_access_member.user_id}", owner),
+              params: {  expires_at: expires_at, access_level: Member::MINIMAL_ACCESS }
+
+          expect(response).to have_gitlab_http_status(:not_found)
+        end
+      end
+    end
+
+    describe 'DELETE /groups/:id/members/:user_id' do
+      context 'when minimal access role is available' do
+        it 'deletes the member' do
+          stub_licensed_features(minimal_access_role: true)
+          expect do
+            delete api("/groups/#{group.id}/members/#{minimal_access_member.user_id}", owner)
+          end.to change { group.all_group_members.count }.by(-1)
+
+          expect(response).to have_gitlab_http_status(:no_content)
+        end
+      end
+
+      context 'when minimal access role is not available' do
+        it 'does not delete the member' do
+          expect do
+            delete api("/groups/#{group.id}/members/#{minimal_access_member.id}", owner)
+
+            expect(response).to have_gitlab_http_status(:not_found)
+          end.not_to change { group.all_group_members.count }
+        end
+      end
+    end
+  end
+
   context 'group members endpoint for group managed accounts' do
     let(:group) { create(:group) }
     let(:owner) { create(:user) }
@@ -228,7 +341,7 @@ RSpec.describe API::Members do
       end
     end
 
-    let_it_be(:nested_user) { create(:user) }
+    let_it_be(:nested_user) { create(:user, name: 'Scott Anderson') }
     let_it_be(:nested_group) do
       create(:group, parent: group) do |nested_group|
         nested_group.add_developer(nested_user)
@@ -236,9 +349,10 @@ RSpec.describe API::Members do
     end
 
     let(:url) { "/groups/#{group.id}/billable_members" }
+    let(:params) { {} }
 
     subject do
-      get api(url, owner)
+      get api(url, owner), params: params
       json_response
     end
 
@@ -250,7 +364,7 @@ RSpec.describe API::Members do
         end
       end
 
-      let!(:linked_group_user) { create(:user) }
+      let!(:linked_group_user) { create(:user, name: 'Scott McNeil') }
       let!(:linked_group) do
         create(:group) do |linked_group|
           linked_group.add_developer(linked_group_user)
@@ -263,6 +377,45 @@ RSpec.describe API::Members do
         subject
 
         expect_paginated_array_response(*[owner, maintainer, nested_user, project_user, linked_group_user].map(&:id))
+      end
+
+      context 'with seach params provided' do
+        let(:params) { { search: nested_user.name } }
+
+        it 'returns the relevant billable users' do
+          subject
+
+          expect_paginated_array_response([nested_user.id])
+        end
+      end
+
+      context 'with search and sort params provided' do
+        it 'accepts only sorting options defined in a list' do
+          EE::API::Helpers::MembersHelpers.member_sort_options.each do |sorting|
+            get api(url, owner), params: { search: 'name', sort: sorting }
+            expect(response).to have_gitlab_http_status(:ok)
+          end
+        end
+
+        it 'does not accept query string not defined in a list' do
+          defined_query_strings = EE::API::Helpers::MembersHelpers.member_sort_options
+          sorting = 'fake_sorting'
+
+          get api(url, owner), params: { search: 'name', sort: sorting }
+
+          expect(defined_query_strings).not_to include(sorting)
+          expect(response).to have_gitlab_http_status(:bad_request)
+        end
+
+        context 'when a specific sorting is provided' do
+          let(:params) { { search: 'Scott', sort: 'name_desc' } }
+
+          it 'returns the relevant billable users' do
+            subject
+
+            expect_paginated_array_response(*[linked_group_user, nested_user].map(&:id))
+          end
+        end
       end
     end
 

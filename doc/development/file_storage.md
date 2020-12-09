@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # File Storage in GitLab
 
 We use the [CarrierWave](https://github.com/carrierwaveuploader/carrierwave) gem to handle file upload, store and retrieval.
@@ -42,6 +48,7 @@ they are still not 100% standardized. You can see them below:
 | CI Artifacts (CE)                     | yes    | `shared/artifacts/:disk_hash[0..1]/:disk_hash[2..3]/:disk_hash/:year_:month_:date/:job_id/:job_artifact_id` (`:disk_hash` is SHA256 digest of `project_id`) | `JobArtifactUploader`  | Ci::JobArtifact  |
 | LFS Objects (CE)                      | yes    | `shared/lfs-objects/:hex/:hex/:object_hash`                   | `LfsObjectUploader`    | LfsObject  |
 | External merge request diffs          | yes    | `shared/external-diffs/merge_request_diffs/mr-:parent_id/diff-:id` | `ExternalDiffUploader` | MergeRequestDiff |
+| Issuable metric images                | yes    | `uploads/-/system/issuable_metric_image/file/:id/:filename` | `IssuableMetricImageUploader` | IssuableMetricImage |
 
 CI Artifacts and LFS Objects behave differently in CE and EE. In CE they inherit the `GitlabUploader`
 while in EE they inherit the `ObjectStorage` and store files in and S3 API compatible object store.
@@ -50,10 +57,10 @@ In the case of Issues/MR/Notes Markdown attachments, there is a different approa
 instead of basing the path into a mutable variable `:project_path_with_namespace`, it's possible to use the
 hash of the project ID instead, if project migrates to the new approach (introduced in 10.2).
 
-> Note: We provide an [all-in-one Rake task](../administration/raketasks/uploads/migrate.md) to migrate all uploads to object
-> storage in one go. If a new Uploader class or model type is introduced, make
-> sure you add a Rake task invocation corresponding to it to the
-> [category list](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/tasks/gitlab/uploads/migrate.rake).
+We provide an [all-in-one Rake task](../administration/raketasks/uploads/migrate.md)
+to migrate all uploads to object storage in one go. If a new Uploader class or model
+type is introduced, make sure you add a Rake task invocation corresponding to it to the
+[category list](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/tasks/gitlab/uploads/migrate.rake).
 
 ### Path segments
 
@@ -101,7 +108,7 @@ The `CarrierWave::Uploader#store_dir` is overridden to
 
 ### Using `ObjectStorage::Extension::RecordsUploads`
 
-> Note: this concern will automatically include `RecordsUploads::Concern` if not already included.
+This concern will automatically include `RecordsUploads::Concern` if not already included.
 
 The `ObjectStorage::Concern` uploader will search for the matching `Upload` to select the correct object store. The `Upload` is mapped using `#store_dirs + identifier` for each store (LOCAL/REMOTE).
 

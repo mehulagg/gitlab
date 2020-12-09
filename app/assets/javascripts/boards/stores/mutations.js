@@ -93,16 +93,13 @@ export default {
     Vue.set(state, 'boardLists', backupList);
   },
 
-  [mutationTypes.REQUEST_REMOVE_LIST]: () => {
-    notImplemented();
+  [mutationTypes.REMOVE_LIST]: (state, listId) => {
+    Vue.delete(state.boardLists, listId);
   },
 
-  [mutationTypes.RECEIVE_REMOVE_LIST_SUCCESS]: () => {
-    notImplemented();
-  },
-
-  [mutationTypes.RECEIVE_REMOVE_LIST_ERROR]: () => {
-    notImplemented();
+  [mutationTypes.REMOVE_LIST_FAILURE](state, listsBackup) {
+    state.error = s__('Boards|An error occurred while removing the list. Please try again.');
+    state.boardLists = listsBackup;
   },
 
   [mutationTypes.REQUEST_ISSUES_FOR_LIST]: (state, { listId, fetchNext }) => {
@@ -144,6 +141,10 @@ export default {
     }
 
     Vue.set(state.issues[issueId], prop, value);
+  },
+
+  [mutationTypes.SET_ASSIGNEE_LOADING](state, isLoading) {
+    state.isSettingAssignees = isLoading;
   },
 
   [mutationTypes.REQUEST_ADD_ISSUE]: () => {
@@ -204,16 +205,28 @@ export default {
     notImplemented();
   },
 
+  [mutationTypes.CREATE_ISSUE_FAILURE]: state => {
+    state.error = s__('Boards|An error occurred while creating the issue. Please try again.');
+  },
+
   [mutationTypes.ADD_ISSUE_TO_LIST]: (state, { list, issue, position }) => {
-    const listIssues = state.issuesByListId[list.id];
-    listIssues.splice(position, 0, issue.id);
-    Vue.set(state.issuesByListId, list.id, listIssues);
+    addIssueToList({
+      state,
+      listId: list.id,
+      issueId: issue.id,
+      atIndex: position,
+    });
     Vue.set(state.issues, issue.id, issue);
   },
 
-  [mutationTypes.ADD_ISSUE_TO_LIST_FAILURE]: (state, { list, issue }) => {
+  [mutationTypes.ADD_ISSUE_TO_LIST_FAILURE]: (state, { list, issueId }) => {
     state.error = s__('Boards|An error occurred while creating the issue. Please try again.');
+    removeIssueFromList({ state, listId: list.id, issueId });
+  },
+
+  [mutationTypes.REMOVE_ISSUE_FROM_LIST]: (state, { list, issue }) => {
     removeIssueFromList({ state, listId: list.id, issueId: issue.id });
+    Vue.delete(state.issues, issue.id);
   },
 
   [mutationTypes.SET_CURRENT_PAGE]: () => {

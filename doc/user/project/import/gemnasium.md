@@ -2,7 +2,7 @@
 type: reference, howto
 stage: Manage
 group: Import
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Gemnasium **(ULTIMATE)**
@@ -107,7 +107,7 @@ back to both GitLab and GitHub when completed.
 
    ![Security Dashboard](../../application_security/security_dashboard/img/pipeline_security_dashboard_v13_3.png)
 
-NOTE: **Note:**
+NOTE:
 If you don't commit very often to your project, you may want to use
 [scheduled pipelines](../../../ci/pipelines/schedules.md) to run the job on a regular
 basis.

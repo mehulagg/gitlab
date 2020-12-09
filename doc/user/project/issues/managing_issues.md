@@ -1,15 +1,21 @@
 ---
 stage: Plan
 group: Project Management
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Managing issues
 
 [GitLab Issues](index.md) are the fundamental medium for collaborating on ideas and
-planning work in GitLab. [Creating](#create-a-new-issue), [moving](#moving-issues),
-[closing](#closing-issues), and [deleting](#deleting-issues) are key actions that
-you can do with issues.
+planning work in GitLab.
+
+Key actions for issues include:
+
+- [Creating issues](#create-a-new-issue)
+- [Moving issues](#moving-issues)
+- [Closing issues](#closing-issues)
+- [Deleting issues](#deleting-issues)
+- [Promoting issues](#promote-an-issue-to-an-epic) **(PREMIUM)**
 
 ## Create a new issue
 
@@ -28,10 +34,10 @@ There are many ways to get to the New Issue form from within a project:
 
   ![New issue from the issue list view](img/new_issue_from_tracker_list.png)
 
-- From an **opened issue** in your project, click **New Issue** to create a new
-  issue in the same project:
+- From an **open issue** in your project, click the vertical ellipsis (**{ellipsis_v}**) button
+  to open a dropdown menu, and then click **New Issue** to create a new issue in the same project:
 
-  ![New issue from an open issue](img/new_issue_from_open_issue.png)
+  ![New issue from an open issue](img/new_issue_from_open_issue_v13_6.png)
 
 - From your **Project's Dashboard**, click the plus sign (**+**) to open a dropdown
   menu with a few options. Select **New Issue** to create an issue in that project:
@@ -93,7 +99,7 @@ When you click this link, an email address is generated and displayed, which sho
 by **you only**, to create issues in this project. You can save this address as a
 contact in your email client for easy access.
 
-CAUTION: **Caution:**
+WARNING:
 This is a private email address, generated just for you. **Keep it to yourself**,
 as anyone who knows it can create issues or merge requests as if they
 were you. If the address is compromised, or you'd like it to be regenerated for
@@ -106,7 +112,7 @@ this project, where:
 - The email body becomes the issue description.
 - [Markdown](../../markdown.md) and [quick actions](../quick_actions.md) are supported.
 
-NOTE: **Note:**
+NOTE:
 In GitLab 11.7, we updated the format of the generated email address. However the
 older format is still supported, allowing existing aliases or contacts to continue working.
 
@@ -178,7 +184,7 @@ end; nil
 When you decide that an issue is resolved, or no longer needed, you can close the issue
 using the close button:
 
-![close issue - button](img/button_close_issue.png)
+![close issue - button](img/button_close_issue_v13_6.png)
 
 You can also close an issue from the [Issue Boards](../issue_board.md) by dragging an issue card
 from its list and dropping it into the **Closed** list.
@@ -187,7 +193,7 @@ from its list and dropping it into the **Closed** list.
 
 ### Closing issues automatically
 
-NOTE: **Note:**
+NOTE:
 For performance reasons, automatic issue closing is disabled for the very first
 push from an existing repository.
 
@@ -279,6 +285,23 @@ Users with [project owner permission](../../permissions.md) can delete an issue 
 editing it and clicking on the delete button.
 
 ![delete issue - button](img/delete_issue.png)
+
+## Promote an issue to an epic **(PREMIUM)**
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/3777) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 11.6.
+> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/37081) to [GitLab Premium](https://about.gitlab.com/pricing/) in 12.8.
+> - Promoting issues to epics via the UI [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/233974) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.6.
+
+You can promote an issue to an epic in the immediate parent group.
+
+To promote an issue to an epic:
+
+1. In an issue, select the vertical ellipsis (**{ellipsis_v}**) button.
+1. Select **Promote to epic**.
+
+Alternatively, you can use the `/promote` [quick action](../quick_actions.md#quick-actions-for-issues-merge-requests-and-epics).
+
+Read more about promoting an issue to an epic on the [Manage epics page](../../group/epics/manage_epics.md#promote-an-issue-to-an-epic).
 
 ## Add an issue to an iteration **(STARTER)**
 

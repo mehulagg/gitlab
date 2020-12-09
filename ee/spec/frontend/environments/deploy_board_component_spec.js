@@ -1,5 +1,6 @@
-import Vue from 'vue';
+import { GlTooltip, GlIcon, GlLoadingIcon } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
+import Vue from 'vue';
 import DeployBoard from 'ee/environments/components/deploy_board_component.vue';
 import { deployBoardMockData, environment } from './mock_data';
 
@@ -52,6 +53,15 @@ describe('Deploy Board', () => {
       expect(buttons.at(0).attributes('href')).toEqual(deployBoardMockData.rollback_url);
       expect(buttons.at(1).attributes('href')).toEqual(deployBoardMockData.abort_url);
     });
+
+    it('sets up a tooltip for the legend', () => {
+      const iconSpan = wrapper.find('[data-testid="legend-tooltip-target"]');
+      const tooltip = wrapper.find(GlTooltip);
+      const icon = iconSpan.find(GlIcon);
+
+      expect(tooltip.props('target')()).toBe(iconSpan.element);
+      expect(icon.props('name')).toBe('question');
+    });
   });
 
   describe('with empty state', () => {
@@ -85,7 +95,7 @@ describe('Deploy Board', () => {
     });
 
     it('should render loading spinner', () => {
-      expect(wrapper.find('.fa-spin')).toBeDefined();
+      expect(wrapper.find(GlLoadingIcon).exists()).toBe(true);
     });
   });
 

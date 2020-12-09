@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module QA
-  context 'Create' do
+  RSpec.describe 'Create' do
     describe 'Codeowners' do
       # Create one user to be the assigned approver and another user who will not be an approver
       let(:approver) { Resource::User.fabricate_or_use(Runtime::Env.gitlab_qa_username_1, Runtime::Env.gitlab_qa_password_1) }

@@ -5,7 +5,7 @@ import { GlLoadingIcon } from '@gitlab/ui';
 import defaultSortableConfig from '~/sortable/sortable_config';
 import BoardCardLayout from '~/boards/components/board_card_layout.vue';
 import eventHub from '~/boards/eventhub';
-import BoardNewIssue from '~/boards/components/board_new_issue.vue';
+import BoardNewIssue from '~/boards/components/board_new_issue_new.vue';
 import { ISSUABLE } from '~/boards/constants';
 
 export default {
@@ -103,7 +103,11 @@ export default {
     showIssue(issue) {
       this.setActiveId({ id: issue.id, sidebarType: ISSUABLE });
     },
+    handleDragOnStart() {
+      document.body.classList.add('is-dragging');
+    },
     handleDragOnEnd(params) {
+      document.body.classList.remove('is-dragging');
       const { newIndex, oldIndex, from, to, item } = params;
       const { issueId, issueIid, issuePath } = item.dataset;
       const { children } = to;
@@ -163,6 +167,8 @@ export default {
         v-if="list.isExpanded"
         v-bind="treeRootOptions"
         class="board-cell gl-p-2 gl-m-0 gl-h-full"
+        data-testid="tree-root-wrapper"
+        @start="handleDragOnStart"
         @end="handleDragOnEnd"
       >
         <board-card-layout

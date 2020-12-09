@@ -26,7 +26,7 @@ export default {
       required: false,
       default: null,
     },
-    openPath: {
+    openedPath: {
       type: String,
       required: false,
       default: '',
@@ -43,7 +43,7 @@ export default {
     },
   },
   computed: {
-    open() {
+    opened() {
       return this.total - (this.closed + (this.merged || 0));
     },
     showMerged() {
@@ -54,9 +54,7 @@ export default {
 </script>
 
 <template>
-  <div
-    class="gl-display-flex gl-flex-direction-column gl-flex-shrink-0 gl-mr-6 gl-mb-5 js-issues-container"
-  >
+  <div class="gl-display-flex gl-flex-direction-column gl-flex-shrink-0 gl-mr-6 gl-mb-5">
     <span class="gl-mb-2">
       {{ label }}
       <gl-badge variant="muted" size="sm">{{ total }}</gl-badge>
@@ -65,8 +63,8 @@ export default {
       <span class="gl-white-space-pre-wrap" data-testid="open-stat">
         <gl-sprintf :message="__('Open: %{open}')">
           <template #open>
-            <gl-link v-if="openPath" :href="openPath">{{ open }}</gl-link>
-            <template v-else>{{ open }}</template>
+            <gl-link v-if="openedPath" :href="openedPath">{{ opened }}</gl-link>
+            <template v-else>{{ opened }}</template>
           </template>
         </gl-sprintf>
       </span>

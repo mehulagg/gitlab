@@ -12,6 +12,8 @@ module API
     helpers ::API::Helpers::Packages::BasicAuthHelpers
     include ::API::Helpers::Packages::BasicAuthHelpers::Constants
 
+    feature_category :package_registry
+
     default_format :json
 
     rescue_from ArgumentError do |e|
@@ -125,7 +127,7 @@ module API
           track_package_event('push_package', :pypi)
 
           ::Packages::Pypi::CreatePackageService
-            .new(authorized_user_project, current_user, declared_params)
+            .new(authorized_user_project, current_user, declared_params.merge(build: current_authenticated_job))
             .execute
 
           created!

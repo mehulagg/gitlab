@@ -13,6 +13,7 @@ RSpec.describe Issue do
     it { is_expected.to have_many(:resource_weight_events) }
     it { is_expected.to have_many(:resource_iteration_events) }
     it { is_expected.to have_one(:issuable_sla) }
+    it { is_expected.to have_many(:metric_images) }
   end
 
   describe 'modules' do
@@ -207,6 +208,25 @@ RSpec.describe Issue do
         it 'returns only issues in selected iterations' do
           expect(described_class.count).to eq 3
           expect(described_class.in_iterations([iteration1])).to eq [iteration1_issue]
+        end
+      end
+
+      describe '.not_in_iterations' do
+        it 'returns issues not in selected iterations' do
+          expect(described_class.count).to eq 3
+          expect(described_class.not_in_iterations([iteration1])).to eq [iteration2_issue, issue_no_iteration]
+        end
+      end
+
+      describe '.with_iteration_title' do
+        it 'returns only issues with iterations that match the title' do
+          expect(described_class.with_iteration_title(iteration1.title)).to eq [iteration1_issue]
+        end
+      end
+
+      describe '.without_iteration_title' do
+        it 'returns only issues without iterations or have iterations that do not match the title' do
+          expect(described_class.without_iteration_title(iteration1.title)).to contain_exactly(issue_no_iteration, iteration2_issue)
         end
       end
     end
@@ -476,36 +496,33 @@ RSpec.describe Issue do
     context 'when updating an Issue' do
       let(:project) { create(:project, :public) }
       let(:issue) { create(:issue, project: project, confidential: true) }
+      let!(:note) { create(:note, noteable: issue, project: project) }
+      let!(:system_note) { create(:note, :system, noteable: issue, project: project) }
 
-      before do
-        Sidekiq::Testing.disable! do
-          create(:note, note: 'the_normal_note', noteable: issue, project: project)
-        end
-        Sidekiq::Testing.inline! do
-          project.maintain_elasticsearch_update
+      context 'when changing the confidential value' do
+        it 'updates issue notes excluding system notes' do
+          expect_any_instance_of(Note).to receive(:maintain_elasticsearch_update) do |instance|
+            expect(instance.id).to eq(note.id)
+          end
 
-          issue.update!(update_field => update_value)
-          ensure_elasticsearch_index!
+          issue.update!(confidential: false)
         end
       end
 
-      context 'when changing the confidential value' do
-        let(:update_field) { :confidential }
-        let(:update_value) { false }
-
+      context 'when changing the author' do
         it 'updates issue notes excluding system notes' do
-          expect(issue.elasticsearch_issue_notes_need_updating?).to eq(true)
-          expect(Note.elastic_search('the_normal_note', options: { project_ids: [issue.project.id] }).present?).to eq(true)
+          expect_any_instance_of(Note).to receive(:maintain_elasticsearch_update) do |instance|
+            expect(instance.id).to eq(note.id)
+          end
+
+          issue.update!(author: create(:user))
         end
       end
 
       context 'when changing the title' do
-        let(:update_field) { :title }
-        let(:update_value) { 'abc' }
-
         it 'does not update issue notes' do
-          expect(issue.elasticsearch_issue_notes_need_updating?).to eq(false)
-          expect(Note.elastic_search('the_normal_note', options: { project_ids: [issue.project.id] }).present?).to eq(false)
+          expect_any_instance_of(Note).not_to receive(:maintain_elasticsearch_update)
+          issue.update!(title: 'the new title')
         end
       end
     end
@@ -739,13 +756,13 @@ RSpec.describe Issue do
         project.add_developer(user)
         other_project_blocking_issue.project.add_developer(user)
 
-        expect(issue.blocked_by_issues(user)).to match_array([blocking_issue, blocked_by_issue, other_project_blocking_issue, confidential_blocked_by_issue])
+        expect(issue.blocked_by_issues_for(user)).to match_array([blocking_issue, blocked_by_issue, other_project_blocking_issue, confidential_blocked_by_issue])
       end
     end
 
     context 'when user cannot read issues' do
       it 'returns empty array' do
-        expect(issue.blocked_by_issues(user)).to be_empty
+        expect(issue.blocked_by_issues_for(user)).to be_empty
       end
     end
 
@@ -754,7 +771,7 @@ RSpec.describe Issue do
         guest = create(:user)
         project.add_guest(guest)
 
-        expect(issue.blocked_by_issues(guest)).to match_array([blocking_issue, blocked_by_issue])
+        expect(issue.blocked_by_issues_for(guest)).to match_array([blocking_issue, blocked_by_issue])
       end
     end
   end
@@ -823,6 +840,121 @@ RSpec.describe Issue do
     end
   end
 
+  context 'when changing state of blocking issues' do
+    let_it_be(:project) { create(:project) }
+    let_it_be(:blocking_issue1) { create(:issue, project: project) }
+    let_it_be(:blocking_issue2) { create(:issue, project: project) }
+    let_it_be(:blocked_issue) { create(:issue, project: project) }
+    let_it_be(:blocked_by_blocked_issue) { create(:issue, project: project) }
+
+    before_all do
+      create(:issue_link, source: blocking_issue1, target: blocked_issue, link_type: IssueLink::TYPE_BLOCKS)
+      create(:issue_link, source: blocking_issue2, target: blocked_issue, link_type: IssueLink::TYPE_BLOCKS)
+      create(:issue_link, source: blocked_issue, target: blocked_by_blocked_issue, link_type: IssueLink::TYPE_BLOCKS)
+    end
+
+    before do
+      blocked_issue.update(blocking_issues_count: 0)
+    end
+
+    context 'when blocked issue is closed' do
+      it 'updates blocking and blocked issues cache' do
+        blocked_issue.close
+
+        expect(blocking_issue1.reload.blocking_issues_count).to eq(0)
+        expect(blocking_issue2.reload.blocking_issues_count).to eq(0)
+        expect(blocked_issue.reload.blocking_issues_count).to eq(1)
+      end
+    end
+
+    context 'when blocked issue is reopened' do
+      before do
+        blocked_issue.close
+        blocked_issue.update(blocking_issues_count: 0)
+        blocking_issue1.update(blocking_issues_count: 0)
+        blocking_issue2.update(blocking_issues_count: 0)
+      end
+
+      it 'updates blocking and blocked issues cache' do
+        blocked_issue.reopen
+
+        expect(blocking_issue1.reload.blocking_issues_count).to eq(1)
+        expect(blocking_issue2.reload.blocking_issues_count).to eq(1)
+        expect(blocked_issue.reload.blocking_issues_count).to eq(1)
+      end
+    end
+  end
+
+  describe '#can_be_promoted_to_epic?' do
+    before do
+      stub_licensed_features(epics: true)
+    end
+
+    let_it_be(:user) { create(:user) }
+    let(:group) { nil }
+
+    subject { issue.can_be_promoted_to_epic?(user, group) }
+
+    context 'when project on the issue does not have a parent group' do
+      let(:project) { create(:project) }
+      let(:issue) { create(:issue, project: project) }
+
+      before do
+        project.add_developer(user)
+      end
+
+      it { is_expected.to be_falsey }
+    end
+
+    context 'when project on the issue is in a subgroup' do
+      let(:parent_group) { create(:group) }
+      let(:group) { create(:group, parent: parent_group) }
+      let(:project) { create(:project, group: group) }
+      let(:issue) { create(:issue, project: project) }
+
+      before do
+        group.add_developer(user)
+        project.add_developer(user)
+      end
+
+      it { is_expected.to be_truthy }
+    end
+
+    context 'when project has a parent group' do
+      let_it_be(:group)   { create(:group) }
+      let_it_be(:project) { create(:project, group: group) }
+      let_it_be(:issue) { create(:issue, project: project) }
+
+      context 'when a user is not a project member' do
+        it { is_expected.to be_falsey }
+      end
+
+      context 'when a user is a project member' do
+        before do
+          project.add_developer(user)
+        end
+
+        it { is_expected.to be_falsey }
+      end
+
+      context 'when a user is a group member' do
+        before do
+          group.add_developer(user)
+        end
+
+        it { is_expected.to be_truthy }
+
+        context 'when issue is an incident' do
+          before do
+            issue.update!(issue_type: :incident)
+          end
+
+          it { is_expected.to be_falsey }
+        end
+      end
+    end
+  end
+
   describe '#supports_iterations?' do
     let(:group) { build_stubbed(:group) }
     let(:project_with_group) { build_stubbed(:project, group: group) }
@@ -877,6 +1009,22 @@ RSpec.describe Issue do
       it 'returns the expected value' do
         expect(subject).to eq(sla_available)
       end
+    end
+  end
+
+  describe '.with_issue_type' do
+    let_it_be(:project) { create(:project) }
+    let_it_be(:issue) { create(:issue, project: project) }
+    let_it_be(:test_case) { create(:quality_test_case, project: project) }
+
+    it 'gives issues with test case type' do
+      expect(described_class.with_issue_type('test_case'))
+        .to contain_exactly(test_case)
+    end
+
+    it 'gives issues with the given issue types list' do
+      expect(described_class.with_issue_type(%w(issue test_case)))
+        .to contain_exactly(issue, test_case)
     end
   end
 end

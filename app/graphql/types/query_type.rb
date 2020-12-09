@@ -24,7 +24,6 @@ module Types
 
     field :current_user, Types::UserType,
           null: true,
-          resolve: -> (_obj, _args, context) { context[:current_user] },
           description: "Get information about current user"
 
     field :namespace, Types::NamespaceType,
@@ -50,10 +49,14 @@ module Types
     field :milestone, ::Types::MilestoneType,
           null: true,
           description: 'Find a milestone' do
-      argument :id, ::Types::GlobalIDType[Milestone],
-               required: true,
-               description: 'Find a milestone by its ID'
-    end
+            argument :id, ::Types::GlobalIDType[Milestone], required: true, description: 'Find a milestone by its ID'
+          end
+
+    field :container_repository, Types::ContainerRepositoryDetailsType,
+          null: true,
+          description: 'Find a container repository' do
+            argument :id, ::Types::GlobalIDType[::ContainerRepository], required: true, description: 'The global ID of the container repository'
+          end
 
     field :user, Types::UserType,
           null: true,
@@ -88,6 +91,11 @@ module Types
       description: 'Get runner setup instructions',
       resolver: Resolvers::Ci::RunnerSetupResolver
 
+    field :ci_config, Types::Ci::Config::ConfigType, null: true,
+      description: 'Get linted and processed contents of a CI config. Should not be requested more than once per request.',
+      resolver: Resolvers::Ci::ConfigResolver,
+      complexity: 126 # AUTHENTICATED_COMPLEXITY / 2 + 1
+
     def design_management
       DesignManagementObject.new(nil)
     end
@@ -104,6 +112,17 @@ module Types
       # See: https://gitlab.com/gitlab-org/gitlab/-/issues/257883
       id = ::Types::GlobalIDType[Milestone].coerce_isolated_input(id)
       GitlabSchema.find_by_gid(id)
+    end
+
+    def container_repository(id:)
+      # TODO: remove this line when the compatibility layer is removed
+      # See: https://gitlab.com/gitlab-org/gitlab/-/issues/257883
+      id = ::Types::GlobalIDType[::ContainerRepository].coerce_isolated_input(id)
+      GitlabSchema.find_by_gid(id)
+    end
+
+    def current_user
+      context[:current_user]
     end
   end
 end

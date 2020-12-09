@@ -1,7 +1,7 @@
 ---
 stage: Package
 group: Package
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # GitLab Container Registry administration
@@ -93,7 +93,7 @@ auth:
     rootcertbundle: /root/certs/certbundle
 ```
 
-CAUTION: **Caution:**
+WARNING:
 If `auth` is not set up, users can pull Docker images without authentication.
 
 ## Container Registry domain configuration
@@ -170,7 +170,7 @@ If your certificate provider provides the CA Bundle certificates, append them to
 1. Save the file and [restart GitLab](../restart_gitlab.md#installations-from-source) for the changes to take effect.
 1. Make the relevant changes in NGINX as well (domain, port, TLS certificates path).
 
-Users should now be able to login to the Container Registry with their GitLab
+Users should now be able to sign in to the Container Registry with their GitLab
 credentials using:
 
 ```shell
@@ -234,7 +234,7 @@ registry_nginx['ssl_certificate_key'] = "/etc/gitlab/ssl/certificate.key"
 1. Save the file and [restart GitLab](../restart_gitlab.md#installations-from-source) for the changes to take effect.
 1. Make the relevant changes in NGINX as well (domain, port, TLS certificates path).
 
-Users should now be able to login to the Container Registry using their GitLab
+Users should now be able to sign in to the Container Registry using their GitLab
 credentials:
 
 ```shell
@@ -374,7 +374,7 @@ driver for the Container Registry.
 
 [Read more about using object storage with GitLab](../object_storage.md).
 
-CAUTION: **Warning:**
+WARNING:
 GitLab does not back up Docker images that are not stored on the
 file system. Enable backups with your object storage provider if
 desired.
@@ -397,6 +397,20 @@ To configure the `s3` storage driver in Omnibus:
    }
    ```
 
+   To avoid using static credentials, use an
+   [IAM role](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.html)
+   and omit `accesskey` and `secretkey`. Make sure that your IAM profile follows
+   [the permissions documented by Docker](https://docs.docker.com/registry/storage-drivers/s3/#s3-permission-scopes).
+
+   ```ruby
+   registry['storage'] = {
+     's3' => {
+       'bucket' => 'your-s3-bucket',
+       'region' => 'your-s3-region'
+     }
+   }
+   ```
+
    - `regionendpoint` is only required when configuring an S3 compatible service such as MinIO. It takes a URL such as `http://127.0.0.1:9000`.
    - `your-s3-bucket` should be the name of a bucket that exists, and can't include subdirectories.
 
@@ -412,8 +426,8 @@ when you [deployed your Docker registry](https://docs.docker.com/registry/deploy
 ```yaml
 storage:
   s3:
-    accesskey: 's3-access-key'
-    secretkey: 's3-secret-key-for-access-key'
+    accesskey: 's3-access-key'                # Not needed if IAM role used
+    secretkey: 's3-secret-key-for-access-key' # Not needed if IAM role used
     bucket: 'your-s3-bucket'
     region: 'your-s3-region'
     regionendpoint: 'your-s3-regionendpoint'
@@ -584,7 +598,7 @@ on how to achieve that.
 ## Use an external container registry with GitLab as an auth endpoint
 
 If you use an external container registry, some features associated with the
-container registry may be unavailable or have [inherent risks](./../../user/packages/container_registry/index.md#use-with-external-container-registries).
+container registry may be unavailable or have [inherent risks](../../user/packages/container_registry/index.md#use-with-external-container-registries).
 
 **Omnibus GitLab**
 
@@ -806,7 +820,7 @@ If you did not change the default location of the configuration file, run:
 sudo gitlab-ctl registry-garbage-collect
 ```
 
-This command will take some time to complete, depending on the amount of
+This command takes some time to complete, depending on the amount of
 layers you have stored.
 
 If you changed the location of the Container Registry `config.yml`:
@@ -815,11 +829,11 @@ If you changed the location of the Container Registry `config.yml`:
 sudo gitlab-ctl registry-garbage-collect /path/to/config.yml
 ```
 
-You may also [remove all unreferenced manifests](#removing-unused-layers-not-referenced-by-manifests),
+You may also [remove all untagged manifests and unreferenced layers](#removing-untagged-manifests-and-unreferenced-layers),
 although this is a way more destructive operation, and you should first
 understand the implications.
 
-### Removing unused layers not referenced by manifests
+### Removing untagged manifests and unreferenced layers
 
 > [Introduced](https://gitlab.com/gitlab-org/omnibus-gitlab/-/merge_requests/3097) in Omnibus GitLab 11.10.
 
@@ -827,17 +841,19 @@ DANGER: **Warning:**
 This is a destructive operation.
 
 The GitLab Container Registry follows the same default workflow as Docker Distribution:
-retain all layers, even ones that are unreferenced directly to allow all content
-to be accessed using context addressable identifiers.
+retain untagged manifests and all layers, even ones that are not referenced directly. All content
+can be accessed by using context addressable identifiers.
 
-However, in most workflows, you don't care about old layers if they are not directly
-referenced by the registry tag. The `registry-garbage-collect` command supports the
+However, in most workflows, you don't care about untagged manifests and old layers if they are not directly
+referenced by a tagged manifest. The `registry-garbage-collect` command supports the
 `-m` switch to allow you to remove all unreferenced manifests and layers that are
 not directly accessible via `tag`:
 
 ```shell
 sudo gitlab-ctl registry-garbage-collect -m
 ```
+
+Without the `-m` flag, the Container Registry only removes layers that are not referenced by any manifest, tagged or not.
 
 Since this is a way more destructive operation, this behavior is disabled by default.
 You are likely expecting this way of operation, but before doing that, ensure
@@ -851,7 +867,7 @@ You can perform garbage collection without stopping the Container Registry by pu
 it in read-only mode and by not using the built-in command. On large instances
 this could require Container Registry to be in read-only mode for a while.
 During this time,
-you will be able to pull from the Container Registry, but you will not be able to
+you are able to pull from the Container Registry, but you are not able to
 push.
 
 By default, the [registry storage path](#configure-storage-for-the-container-registry)
@@ -880,7 +896,7 @@ To enable the read-only mode:
    sudo gitlab-ctl reconfigure
    ```
 
-   This will set the Container Registry into the read only mode.
+   This command sets the Container Registry into the read only mode.
 
 1. Next, trigger one of the garbage collect commands:
 
@@ -892,7 +908,7 @@ To enable the read-only mode:
    sudo /opt/gitlab/embedded/bin/registry garbage-collect -m /var/opt/gitlab/registry/config.yml
    ```
 
-   This will start the garbage collection, which might take some time to complete.
+   This command starts the garbage collection, which might take some time to complete.
 
 1. Once done, in `/etc/gitlab/gitlab.rb` change it back to read-write mode:
 
@@ -919,7 +935,7 @@ To enable the read-only mode:
 
 Ideally, you want to run the garbage collection of the registry regularly on a
 weekly basis at a time when the registry is not being in-use.
-The simplest way is to add a new crontab job that it will run periodically
+The simplest way is to add a new crontab job that it runs periodically
 once a week.
 
 Create a file under `/etc/cron.d/registry-garbage-collect`:
@@ -931,6 +947,8 @@ PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 # Run every Sunday at 04:05am
 5 4 * * 0  root gitlab-ctl registry-garbage-collect
 ```
+
+You may want to add the `-m` flag to [remove untagged manifests and unreferenced layers](#removing-untagged-manifests-and-unreferenced-layers).
 
 ## Troubleshooting
 
@@ -1137,7 +1155,7 @@ curl localhost:5001/debug/vars
 
 ### Advanced Troubleshooting
 
-We will use a concrete example in the past to illustrate how to
+We use a concrete example to illustrate how to
 diagnose a problem with the S3 setup.
 
 #### Unexpected 403 error during push
@@ -1209,14 +1227,14 @@ To verify that the certificates are properly installed, run:
 mitmproxy --port 9000
 ```
 
-This will run mitmproxy on port `9000`. In another window, run:
+This command runs mitmproxy on port `9000`. In another window, run:
 
 ```shell
 curl --proxy http://localhost:9000 https://httpbin.org/status/200
 ```
 
-If everything is set up correctly, you will see information on the mitmproxy window and
-no errors from the curl commands.
+If everything is set up correctly, information is displayed on the mitmproxy window and
+no errors are generated by the curl commands.
 
 #### Running the Docker daemon with a proxy
 
@@ -1230,12 +1248,12 @@ export HTTPS_PROXY="https://localhost:9000"
 docker daemon --debug
 ```
 
-This will launch the Docker daemon and proxy all connections through mitmproxy.
+This command launches the Docker daemon and proxies all connections through mitmproxy.
 
 #### Running the Docker client
 
-Now that we have mitmproxy and Docker running, we can attempt to login and push
-a container image. You may need to run as root to do this. For example:
+Now that we have mitmproxy and Docker running, we can attempt to sign in and
+push a container image. You may need to run as root to do this. For example:
 
 ```shell
 docker login s3-testing.myregistry.com:5050
@@ -1255,4 +1273,4 @@ The above image shows:
 What does this mean? This strongly suggests that the S3 user does not have the right
 [permissions to perform a HEAD request](https://docs.aws.amazon.com/AmazonS3/latest/API/API_HeadObject.html).
 The solution: check the [IAM permissions again](https://docs.docker.com/registry/storage-drivers/s3/).
-Once the right permissions were set, the error will go away.
+Once the right permissions were set, the error goes away.

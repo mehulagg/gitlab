@@ -69,7 +69,6 @@ class Snippet < ApplicationRecord
 
   validates :visibility_level, inclusion: { in: Gitlab::VisibilityLevel.values }
 
-  after_save :store_mentions!, if: :any_mentionable_attributes_changed?
   after_create :create_statistics
 
   # Scopes
@@ -213,7 +212,8 @@ class Snippet < ApplicationRecord
   def blobs
     return [] unless repository_exists?
 
-    repository.ls_files(default_branch).map { |file| Blob.lazy(repository, default_branch, file) }
+    branch = default_branch
+    list_files(branch).map { |file| Blob.lazy(repository, branch, file) }
   end
 
   def hook_attrs

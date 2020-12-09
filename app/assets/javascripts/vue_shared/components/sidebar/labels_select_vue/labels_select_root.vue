@@ -105,6 +105,11 @@ export default {
       required: false,
       default: __('Manage group labels'),
     },
+    isEditing: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   data() {
     return {
@@ -130,6 +135,11 @@ export default {
     },
     showDropdownContents(showDropdownContents) {
       this.setContentIsOnViewport(showDropdownContents);
+    },
+    isEditing(newVal) {
+      if (newVal) {
+        this.toggleDropdownContents();
+      }
     },
   },
   mounted() {
@@ -266,7 +276,7 @@ export default {
       </dropdown-value>
       <dropdown-button v-show="dropdownButtonVisible" class="gl-mt-2" />
       <dropdown-contents
-        v-if="dropdownButtonVisible && showDropdownContents"
+        v-show="dropdownButtonVisible && showDropdownContents"
         ref="dropdownContents"
       />
     </template>

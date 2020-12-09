@@ -1,7 +1,7 @@
 ---
-stage: none
-group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+stage: Enablement
+group: Distribution
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 description: 'Learn how to install, configure, update, and maintain your GitLab instance.'
 ---
 
@@ -135,7 +135,7 @@ Learn how to install, configure, update, and maintain your GitLab instance.
 
 - [Issue closing pattern](issue_closing_pattern.md): Customize how to close an issue from commit messages.
 - [Gitaly](gitaly/index.md): Configuring Gitaly, GitLab's Git repository storage service.
-- [Default labels](../user/admin_area/labels.md): Create labels that will be automatically added to every new project.
+- [Default labels](../user/admin_area/labels.md): Create labels that are automatically added to every new project.
 - [Restrict the use of public or internal projects](../public_access/public_access.md#restricting-the-use-of-public-or-internal-projects): Restrict the use of visibility levels for users when they create a project or a snippet.
 - [Custom project templates](../user/admin_area/custom_project_templates.md): Configure a set of projects to be used as custom templates when creating a new project. **(PREMIUM ONLY)**
 
@@ -143,7 +143,7 @@ Learn how to install, configure, update, and maintain your GitLab instance.
 
 - [Container Registry](packages/container_registry.md): Configure Container Registry with GitLab.
 - [Package Registry](packages/index.md): Enable GitLab to act as an NPM Registry and a Maven Repository.
-- [Dependency Proxy](packages/dependency_proxy.md): Configure the Dependency Proxy, a local proxy for frequently used upstream images/packages. **(PREMIUM ONLY)**
+- [Dependency Proxy](packages/dependency_proxy.md): Configure the Dependency Proxy, a local proxy for frequently used upstream images/packages.
 
 ### Repository settings
 
@@ -219,7 +219,7 @@ information useful for troubleshooting, but if you are experiencing trouble with
 GitLab instance, you should check your [support options](https://about.gitlab.com/support/)
 before referring to these documents.
 
-CAUTION: **Warning:**
+WARNING:
 Using the commands listed in the documentation below could result in data loss or
 other damage to a GitLab instance, and should only be used by experienced administrators
 who are aware of the risks.

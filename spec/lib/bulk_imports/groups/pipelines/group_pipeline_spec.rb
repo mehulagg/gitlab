@@ -7,20 +7,18 @@ RSpec.describe BulkImports::Groups::Pipelines::GroupPipeline do
     let(:user) { create(:user) }
     let(:parent) { create(:group) }
     let(:entity) do
-      instance_double(
-        BulkImports::Entity,
+      create(
+        :bulk_import_entity,
         source_full_path: 'source/full/path',
         destination_name: 'My Destination Group',
         destination_namespace: parent.full_path
       )
     end
 
-    let(:entities) { [entity] }
     let(:context) do
-      instance_double(
-        BulkImports::Pipeline::Context,
+      BulkImports::Pipeline::Context.new(
         current_user: user,
-        entities: entities
+        entity: entity
       )
     end
 
@@ -74,7 +72,6 @@ RSpec.describe BulkImports::Groups::Pipelines::GroupPipeline do
 
   describe 'pipeline parts' do
     it { expect(described_class).to include_module(BulkImports::Pipeline) }
-    it { expect(described_class).to include_module(BulkImports::Pipeline::Attributes) }
     it { expect(described_class).to include_module(BulkImports::Pipeline::Runner) }
 
     it 'has extractors' do
@@ -92,13 +89,17 @@ RSpec.describe BulkImports::Groups::Pipelines::GroupPipeline do
     it 'has transformers' do
       expect(described_class.transformers)
         .to contain_exactly(
-          { klass: BulkImports::Common::Transformers::GraphqlCleanerTransformer, options: nil },
+          { klass: BulkImports::Common::Transformers::HashKeyDigger, options: { key_path: %w[data group] } },
           { klass: BulkImports::Common::Transformers::UnderscorifyKeysTransformer, options: nil },
-          { klass: BulkImports::Groups::Transformers::GroupAttributesTransformer, options: nil })
+          { klass: BulkImports::Common::Transformers::ProhibitedAttributesTransformer, options: nil },
+          { klass: BulkImports::Groups::Transformers::GroupAttributesTransformer, options: nil }
+        )
     end
 
     it 'has loaders' do
-      expect(described_class.loaders).to contain_exactly({ klass: BulkImports::Groups::Loaders::GroupLoader, options: nil })
+      expect(described_class.loaders).to contain_exactly({
+        klass: BulkImports::Groups::Loaders::GroupLoader, options: nil
+      })
     end
   end
 end

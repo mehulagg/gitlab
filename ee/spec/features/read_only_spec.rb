@@ -13,12 +13,19 @@ RSpec.describe 'Geo read-only message', :geo do
     sign_in(user)
   end
 
-  it 'shows read-only banner when on a Geo secondary' do
-    stub_current_geo_node(secondary)
+  context 'when on a Geo secondary' do
+    before do
+      stub_current_geo_node(secondary)
+    end
 
-    visit root_dashboard_path
+    it_behaves_like 'Read-only instance', /You are on a secondary, read\-only Geo node\. If you want to make changes, you must visit the primary site.*Go to the primary site/
+  end
 
-    expect(page).to have_content('You are on a secondary, read-only Geo node. If you want to make changes, you must visit the primary site.')
-    expect(page).to have_content('Go to the primary site')
+  context 'when in maintenance mode' do
+    before do
+      stub_application_setting(maintenance_mode: true)
+    end
+
+    it_behaves_like 'Read-only instance', /This GitLab instance is undergoing maintenance and is operating in read\-only mode./
   end
 end

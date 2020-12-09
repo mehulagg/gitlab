@@ -2,7 +2,7 @@
 type: reference, howto
 stage: Create
 group: Knowledge
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Wiki settings **(CORE ONLY)**
@@ -30,7 +30,7 @@ This setting is not available through the [Admin Area settings](../../user/admin
 In order to configure this setting, use either the Rails console
 or the [Application settings API](../../api/settings.md).
 
-NOTE: **Note:**
+NOTE:
 The value of the limit **must** be in bytes. The minimum value is 1024 bytes.
 
 #### Through the Rails console

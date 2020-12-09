@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlDropdownItem } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import SortingField from 'ee/audit_events/components/sorting_field.vue';
 
 describe('SortingField component', () => {

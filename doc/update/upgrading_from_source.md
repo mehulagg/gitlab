@@ -1,10 +1,13 @@
 ---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 comments: false
 ---
 
 # Upgrading Community Edition and Enterprise Edition from source
 
-NOTE: **Note:**
+NOTE:
 Users wishing to upgrade to 12.0.0 will have to take some extra steps. See the
 version specific upgrade instructions for 12.0.0 for more details.
 
@@ -58,8 +61,8 @@ sudo service gitlab stop
 
 ### 3. Update Ruby
 
-NOTE: Beginning in GitLab 12.2, we only support Ruby 2.6 or higher, and dropped
-support for Ruby 2.5. Be sure to upgrade if necessary.
+NOTE: Beginning in GitLab 13.6, we only support Ruby 2.7 or higher, and dropped
+support for Ruby 2.6. Be sure to upgrade if necessary.
 
 You can check which version you are running with `ruby -v`.
 
@@ -67,19 +70,13 @@ Download Ruby and compile it:
 
 ```shell
 mkdir /tmp/ruby && cd /tmp/ruby
-curl --remote-name --progress https://cache.ruby-lang.org/pub/ruby/2.6/ruby-2.6.6.tar.gz
-echo '2d78048e293817f38d4ede4ebc7873013e97bb0b  ruby-2.6.6.tar.gz' | shasum -c - && tar xzf ruby-2.6.6.tar.gz
-cd ruby-2.6.6
+curl --remote-name --progress https://cache.ruby-lang.org/pub/ruby/2.7/ruby-2.7.2.tar.gz
+echo 'cb9731a17487e0ad84037490a6baf8bfa31a09e8  ruby-2.7.2.tar.gz' | shasum -c - && tar xzf ruby-2.7.2.tar.gz
+cd ruby-2.7.2
 
 ./configure --disable-install-rdoc
 make
 sudo make install
-```
-
-Install Bundler:
-
-```shell
-sudo gem install bundler --no-document --version '< 2'
 ```
 
 ### 4. Update Node.js
@@ -122,7 +119,7 @@ rm go1.13.5.linux-amd64.tar.gz
 
 ### 6. Update Git
 
-CAUTION: **Caution:**
+WARNING:
 From GitLab 13.1, you must use at least Git v2.24 (previous minimum version was v2.22).
 Git v2.28 is recommended.
 
@@ -132,7 +129,7 @@ To check you are running the minimum required Git version, see
 In Debian or Ubuntu:
 
 ```shell
-# Make sure Git is version 2.24.0 or higher
+# Make sure Git is version 2.29.0 or higher
 git --version
 
 # Remove packaged Git
@@ -166,7 +163,7 @@ sudo make prefix=/usr/local install
 
 ### 7. Update PostgreSQL
 
-CAUTION: **Caution:**
+WARNING:
 From GitLab 13.0, you must use at least PostgreSQL 11.
 
 The latest version of GitLab might depend on a more recent PostgreSQL version than what you are currently running (see the [PostgreSQL requirements](../install/requirements.md#postgresql-requirements)).

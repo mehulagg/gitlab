@@ -9,6 +9,7 @@ module EE
       def execute(board)
         unless parent.feature_available?(:scoped_issue_board)
           params.delete(:milestone_id)
+          params.delete(:iteration_id)
           params.delete(:assignee_id)
           params.delete(:label_ids)
           params.delete(:labels)
@@ -19,6 +20,7 @@ module EE
 
         set_assignee
         set_milestone
+        set_iteration
         set_labels
 
         super

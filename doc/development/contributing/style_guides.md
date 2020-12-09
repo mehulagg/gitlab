@@ -2,7 +2,7 @@
 type: reference, dev
 stage: none
 group: Development
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Style guides
@@ -17,33 +17,50 @@ we suggest investigating to see if a plugin exists. For instance here is the
 
 ## Pre-push static analysis
 
-We strongly recommend installing
-[Lefthook](https://github.com/Arkweid/lefthook) to automatically check for
-static analysis offenses before pushing your changes.
+We strongly recommend installing [Lefthook](https://github.com/Arkweid/lefthook) to automatically check
+for static analysis offenses before pushing your changes.
 
-After installing `overcommit`, run the following in your GitLab source directory:
+To install `lefthook`, run the following in your GitLab source directory:
 
 ```shell
-# Make sure to uninstall Overcommit first
+# 1. Make sure to uninstall Overcommit first
 overcommit --uninstall
 
-# Install lefthook
-gem install lefthook && lefthook install -f
+# If using rbenv, at this point you may need to do: rbenv rehash
+
+# 2. Install lefthook...
+
+## With Homebrew (macOS)
+brew install Arkweid/lefthook/lefthook
+
+## Or with Go
+go get github.com/Arkweid/lefthook
+
+## Or with Rubygems
+gem install lefthook
+
+### You may need to run the following if you're using rbenv
+rbenv rehash
+
+# 3. Install the Git hooks
+lefthook install -f
 ```
 
-Before you push your changes, Lefthook will then automatically run Danger checks, as well
-as RuboCop, ES Lint, HAML Lint, and SCSS Lint for the changed files.
-
-This saves you time as you don't have to wait for the same errors to be detected by CI/CD.
+Before you push your changes, Lefthook then automatically run Danger checks, and other checks
+for changed files. This saves you time as you don't have to wait for the same errors to be detected
+by CI/CD.
 
 Lefthook relies on a pre-push hook to prevent commits that violate its ruleset.
-If you wish to override this behavior, pass the environment variable `LEFTHOOK=0`.
-That is, `LEFTHOOK=0 git push`.
+To override this behavior, pass the environment variable `LEFTHOOK=0`. That is,
+`LEFTHOOK=0 git push`.
 
 You can also:
 
 - Define [local configuration](https://github.com/Arkweid/lefthook/blob/master/docs/full_guide.md#local-config).
 - Skip [checks per tag on the fly](https://github.com/Arkweid/lefthook/blob/master/docs/full_guide.md#skip-some-tags-on-the-fly).
+  For example, `LEFTHOOK_EXCLUDE=frontend git push origin`.
+- Run [hooks manually](https://github.com/Arkweid/lefthook/blob/master/docs/full_guide.md#run-githook-group-directly).
+  For example, `lefthook run pre-push`.
 
 ## Ruby, Rails, RSpec
 
@@ -110,7 +127,7 @@ We're following [Ciro Santilli's Markdown Style Guide](https://cirosantilli.com/
 
 ## Documentation
 
-See the dedicated [Documentation Style Guide](../documentation/styleguide.md).
+See the dedicated [Documentation Style Guide](../documentation/styleguide/index.md).
 
 ## Python
 

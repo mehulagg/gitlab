@@ -1,7 +1,7 @@
 ---
 stage: Enablement
 group: Distribution
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference
 ---
 
@@ -45,7 +45,13 @@ Please consider using a virtual machine to run GitLab.
 
 ### Ruby versions
 
-GitLab requires Ruby (MRI) 2.6. Beginning in GitLab 12.2, we no longer support Ruby 2.5 and lower.
+From GitLab 13.6:
+
+- Ruby 2.7 and later is required.
+
+From GitLab 12.2:
+
+- Ruby 2.6 and later is required.
 
 You must use the standard MRI implementation of Ruby.
 We love [JRuby](https://www.jruby.org/) and [Rubinius](https://github.com/rubinius/rubinius#the-rubinius-language-platform), but GitLab
@@ -56,6 +62,10 @@ needs several Gems that have native extensions.
 The minimum required Go version is 1.13.
 
 ### Git versions
+
+From GitLab 13.6:
+
+- Git 2.29.x and later is required.
 
 From GitLab 13.1:
 
@@ -96,7 +106,7 @@ Apart from a local hard drive you can also mount a volume that supports the netw
 
 If you have enough RAM and a recent CPU the speed of GitLab is mainly limited by hard drive seek times. Having a fast drive (7200 RPM and up) or a solid state drive (SSD) will improve the responsiveness of GitLab.
 
-NOTE: **Note:**
+NOTE:
 Since file system performance may affect GitLab's overall performance, [we don't recommend using AWS EFS for storage](../administration/nfs.md#avoid-using-awss-elastic-file-system-efs).
 
 ### CPU
@@ -148,7 +158,7 @@ GitLab version | Minimum PostgreSQL version
 You must also ensure the `pg_trgm` and `btree_gist` extensions are [loaded into every
 GitLab database](postgresql_extensions.html).
 
-NOTE: **Note:**
+NOTE:
 Support for [PostgreSQL 9.6 and 10 has been removed in GitLab 13.0](https://about.gitlab.com/releases/2020/05/22/gitlab-13-0-released/#postgresql-11-is-now-the-minimum-required-version-to-install-gitlab) so that GitLab can benefit from PostgreSQL 11 improvements, such as partitioning. For the schedule of transitioning to PostgreSQL 12, see [the related epic](https://gitlab.com/groups/gitlab-org/-/epics/2184).
 
 #### Additional requirements for GitLab Geo
@@ -216,7 +226,7 @@ Redis stores all user sessions and the background task queue.
 The storage requirements for Redis are minimal, about 25kB per user.
 Sidekiq processes the background jobs with a multithreaded process.
 This process starts with the entire Rails stack (200MB+) but it can grow over time due to memory leaks.
-On a very active server (10,000 active users) the Sidekiq process can use 1GB+ of memory.
+On a very active server (10,000 billable users) the Sidekiq process can use 1GB+ of memory.
 
 ## Prometheus and its exporters
 
@@ -260,7 +270,7 @@ For reference, GitLab.com's [auto-scaling shared runner](../user/gitlab_com/inde
 
 ## Supported web browsers
 
-CAUTION: **Caution:**
+WARNING:
 With GitLab 13.0 (May 2020) we have removed official support for Internet Explorer 11.
 
 GitLab supports the following web browsers:
@@ -276,7 +286,7 @@ For the listed web browsers, GitLab supports:
 - The current and previous major versions of browsers.
 - The current minor version of a supported major version.
 
-NOTE: **Note:**
+NOTE:
 We don't support running GitLab with JavaScript disabled in the browser and have no plans of supporting that
 in the future because we have features such as Issue Boards which require JavaScript extensively.
 

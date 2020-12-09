@@ -26,6 +26,10 @@ module QA
             element :child_pipeline
           end
 
+          view 'app/assets/javascripts/reports/components/report_section.vue' do
+            element :expand_report_button
+          end
+
           view 'app/assets/javascripts/vue_shared/components/ci_icon.vue' do
             element :status_icon, 'ci-status-icon-${status}' # rubocop:disable QA/ElementWithPattern
           end
@@ -68,6 +72,10 @@ module QA
             has_element? :child_pipeline
           end
 
+          def has_no_child_pipeline?
+            has_no_element? :child_pipeline
+          end
+
           def click_job(job_name)
             click_element(:job_link, text: job_name)
           end
@@ -75,6 +83,12 @@ module QA
           def expand_child_pipeline
             within_element(:child_pipeline) do
               click_element(:expand_pipeline_button)
+            end
+          end
+
+          def expand_license_report
+            within_element(:license_report_widget) do
+              click_element(:expand_report_button)
             end
           end
 

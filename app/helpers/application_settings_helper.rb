@@ -49,12 +49,12 @@ module ApplicationSettingsHelper
     all_protocols_enabled? || Gitlab::CurrentSettings.enabled_git_access_protocol == 'http'
   end
 
-  def enabled_project_button(project, protocol)
+  def enabled_protocol_button(container, protocol)
     case protocol
     when 'ssh'
-      ssh_clone_button(project, append_link: false)
+      ssh_clone_button(container, append_link: false)
     else
-      http_clone_button(project, append_link: false)
+      http_clone_button(container, append_link: false)
     end
   end
 
@@ -198,12 +198,13 @@ module ApplicationSettingsHelper
       :default_project_visibility,
       :default_projects_limit,
       :default_snippet_visibility,
+      :disable_feed_token,
       :disabled_oauth_sign_in_sources,
-      :domain_blacklist,
-      :domain_blacklist_enabled,
+      :domain_denylist,
+      :domain_denylist_enabled,
       # TODO Remove domain_denylist_raw in APIv5 (See https://gitlab.com/gitlab-org/gitlab-foss/issues/67204)
       :domain_denylist_raw,
-      :domain_whitelist,
+      :domain_allowlist,
       # TODO Remove domain_allowlist_raw in APIv5 (See https://gitlab.com/gitlab-org/gitlab-foss/issues/67204)
       :domain_allowlist_raw,
       :outbound_local_requests_allowlist_raw,
@@ -254,6 +255,8 @@ module ApplicationSettingsHelper
       :password_authentication_enabled_for_git,
       :performance_bar_allowed_group_path,
       :performance_bar_enabled,
+      :kroki_enabled,
+      :kroki_url,
       :plantuml_enabled,
       :plantuml_url,
       :polling_interval_multiplier,
@@ -393,6 +396,10 @@ module ApplicationSettingsHelper
 
   def show_documentation_base_url_field?
     Feature.enabled?(:help_page_documentation_redirect)
+  end
+
+  def signup_enabled?
+    !!Gitlab::CurrentSettings.signup_enabled
   end
 end
 

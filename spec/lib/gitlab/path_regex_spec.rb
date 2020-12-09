@@ -107,7 +107,7 @@ RSpec.describe Gitlab::PathRegex do
   end
 
   let(:sitemap_words) do
-    %w(sitemap.xml sitemap.xml.gz)
+    %w(sitemap sitemap.xml sitemap.xml.gz)
   end
 
   let(:ee_top_level_words) do
@@ -177,7 +177,7 @@ RSpec.describe Gitlab::PathRegex do
 
     # We ban new items in this list, see https://gitlab.com/gitlab-org/gitlab/-/issues/215362
     it 'does not allow expansion' do
-      expect(described_class::TOP_LEVEL_ROUTES.size).to eq(43)
+      expect(described_class::TOP_LEVEL_ROUTES.size).to eq(44)
     end
   end
 
@@ -433,36 +433,114 @@ RSpec.describe Gitlab::PathRegex do
     it { is_expected.not_to match('gitlab.git') }
   end
 
-  shared_examples 'invalid snippet routes' do
-    it { is_expected.not_to match('gitlab-org/gitlab/snippets/1.git') }
-    it { is_expected.not_to match('snippets/1.git') }
-    it { is_expected.not_to match('gitlab-org/gitlab/snippets/') }
-    it { is_expected.not_to match('/gitlab-org/gitlab/snippets/1') }
-    it { is_expected.not_to match('gitlab-org/gitlab/snippets/foo') }
-    it { is_expected.not_to match('root/snippets/1') }
-    it { is_expected.not_to match('/snippets/1') }
-    it { is_expected.not_to match('snippets/') }
-    it { is_expected.not_to match('snippets/foo') }
+  context 'repository routes' do
+    # Paths that match a known container
+    let_it_be(:container_paths) do
+      [
+        'gitlab-org',
+        'gitlab-org/gitlab-test',
+        'gitlab-org/gitlab-test/snippets/1',
+        'gitlab-org/gitlab-test/snippets/foo', # ambiguous, we allow creating a sub-group called 'snippets'
+        'snippets/1'
+      ]
+    end
+
+    # Paths that never match a container
+    let_it_be(:invalid_paths) do
+      [
+        'gitlab/',
+        '/gitlab',
+        'gitlab/foo/',
+        '?gitlab',
+        'git lab',
+        '/snippets/1',
+        'snippets/foo',
+        'gitlab-org/gitlab/snippets/'
+      ]
+    end
+
+    let_it_be(:git_paths) { container_paths.map { |path| path + '.git' } }
+    let_it_be(:snippet_paths) { container_paths.grep(%r{snippets/\d}) }
+    let_it_be(:wiki_git_paths) { (container_paths - snippet_paths).map { |path| path + '.wiki.git' } }
+    let_it_be(:invalid_git_paths) { invalid_paths.map { |path| path + '.git' } }
+
+    def expect_route_match(paths)
+      paths.each { |path| is_expected.to match(path) }
+    end
+
+    def expect_no_route_match(paths)
+      paths.each { |path| is_expected.not_to match(path) }
+    end
+
+    describe '.repository_route_regex' do
+      subject { %r{\A#{described_class.repository_route_regex}\z} }
+
+      it 'matches the expected paths' do
+        expect_route_match(container_paths)
+        expect_no_route_match(invalid_paths + git_paths)
+      end
+    end
+
+    describe '.repository_git_route_regex' do
+      subject { %r{\A#{described_class.repository_git_route_regex}\z} }
+
+      it 'matches the expected paths' do
+        expect_route_match(git_paths + wiki_git_paths)
+        expect_no_route_match(container_paths + invalid_paths + invalid_git_paths)
+      end
+    end
+
+    describe '.repository_wiki_git_route_regex' do
+      subject { %r{\A#{described_class.repository_wiki_git_route_regex}\z} }
+
+      it 'matches the expected paths' do
+        expect_route_match(wiki_git_paths)
+        expect_no_route_match(git_paths + invalid_git_paths)
+      end
+
+      it { is_expected.not_to match('snippets/1.wiki.git') }
+    end
+
+    describe '.full_snippets_repository_path_regex' do
+      subject { described_class.full_snippets_repository_path_regex }
+
+      it 'matches the expected paths' do
+        expect_route_match(snippet_paths)
+        expect_no_route_match(container_paths - snippet_paths + git_paths + invalid_paths)
+      end
+
+      it { is_expected.not_to match('root/snippets/1') }
+      it { is_expected.not_to match('gitlab-org/gitlab-test/snippets/foo') }
+    end
   end
 
-  describe '.full_snippets_repository_path_regex' do
-    subject { described_class.full_snippets_repository_path_regex }
+  describe '.container_image_regex' do
+    subject { described_class.container_image_regex }
 
-    it { is_expected.to match('gitlab-org/gitlab/snippets/1') }
-    it { is_expected.to match('snippets/1') }
+    it { is_expected.to match('gitlab-foss') }
+    it { is_expected.to match('gitlab_foss') }
+    it { is_expected.to match('gitlab-org/gitlab-foss') }
+    it { is_expected.to match('100px.com/100px.ruby') }
 
-    it_behaves_like 'invalid snippet routes'
+    it 'only matches at most one slash' do
+      expect(subject.match('foo/bar/baz')[0]).to eq('foo/bar')
+    end
+
+    it 'does not match other non-word characters' do
+      expect(subject.match('ruby:2.7.0')[0]).to eq('ruby')
+    end
   end
 
-  describe '.personal_and_project_snippets_path_regex' do
-    subject { %r{\A#{described_class.personal_and_project_snippets_path_regex}\z} }
+  describe '.container_image_blob_sha_regex' do
+    subject { described_class.container_image_blob_sha_regex }
 
-    it { is_expected.to match('gitlab-org/gitlab/snippets') }
-    it { is_expected.to match('snippets') }
+    it { is_expected.to match('sha256:asdf1234567890ASDF') }
+    it { is_expected.to match('foo:123') }
+    it { is_expected.to match('a12bc3f590szp') }
+    it { is_expected.not_to match('') }
 
-    it { is_expected.not_to match('gitlab-org/gitlab/snippets/1') }
-    it { is_expected.not_to match('snippets/1') }
-
-    it_behaves_like 'invalid snippet routes'
+    it 'does not match malicious characters' do
+      expect(subject.match('sha256:asdf1234%2f')[0]).to eq('sha256:asdf1234')
+    end
   end
 end

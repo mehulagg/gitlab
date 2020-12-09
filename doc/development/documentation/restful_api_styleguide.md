@@ -38,11 +38,15 @@ The following can be used as a template to get started:
 ````markdown
 ## Descriptive title
 
+> Version history note.
+
 One or two sentence description of what endpoint does.
 
 ```plaintext
 METHOD /endpoint
 ```
+
+Supported attributes:
 
 | Attribute   | Type     | Required | Description           |
 |:------------|:---------|:---------|:----------------------|
@@ -64,6 +68,9 @@ Example response:
 ]
 ```
 ````
+
+Adjust the [version history note accordingly](styleguide/index.md#version-text-in-the-version-history)
+to describe the GitLab release that introduced the API call.
 
 ## Method description
 
@@ -100,13 +107,13 @@ Rendered example:
 
 ## cURL Examples
 
-The following sections include a set of [cURL](https://curl.haxx.se) examples
+The following sections include a set of [cURL](https://curl.se/) examples
 you can use in the API documentation.
 
-CAUTION: **Caution:**
+WARNING:
 Do not use information for real users, URLs, or tokens. For documentation, refer to our
-relevant style guide sections on [Fake user information](styleguide.md#fake-user-information),
-[Fake URLs](styleguide.md#fake-urls), and [Fake tokens](styleguide.md#fake-tokens).
+relevant style guide sections on [Fake user information](styleguide/index.md#fake-user-information),
+[Fake URLs](styleguide/index.md#fake-urls), and [Fake tokens](styleguide/index.md#fake-tokens).
 
 ### Simple cURL command
 

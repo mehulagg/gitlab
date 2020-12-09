@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe 'User edit profile' do
+  include Spec::Support::Helpers::Features::NotesHelpers
+
   let(:user) { create(:user) }
 
   before do
@@ -18,6 +20,10 @@ RSpec.describe 'User edit profile' do
   def visit_user
     visit user_path(user)
     wait_for_requests
+  end
+
+  def toggle_busy_status
+    find('[data-testid="user-availability-checkbox"]').set(true)
   end
 
   it 'changes user profile' do
@@ -180,18 +186,49 @@ RSpec.describe 'User edit profile' do
           expect(page).to have_emoji('speech_balloon')
         end
       end
+
+      it 'sets the users status to busy' do
+        busy_status = find('[data-testid="user-availability-checkbox"]')
+
+        expect(busy_status.checked?).to eq(false)
+
+        toggle_busy_status
+        submit_settings
+        visit profile_path
+
+        expect(busy_status.checked?).to eq(true)
+      end
+
+      context 'with set_user_availability_status feature flag disabled' do
+        before do
+          stub_feature_flags(set_user_availability_status: false)
+          visit root_path(user)
+        end
+
+        it 'does not display the availability checkbox' do
+          expect(page).not_to have_css('[data-testid="user-availability-checkbox"]')
+        end
+      end
     end
 
     context 'user menu' do
       let(:issue) { create(:issue, project: project)}
       let(:project) { create(:project) }
 
-      def open_user_status_modal
+      def open_modal(button_text)
         find('.header-user-dropdown-toggle').click
 
         page.within ".header-user" do
-          click_button 'Set status'
+          click_button button_text
         end
+      end
+
+      def open_user_status_modal
+        open_modal 'Set status'
+      end
+
+      def open_edit_status_modal
+        open_modal  'Edit status'
       end
 
       def set_user_status_in_modal
@@ -244,6 +281,19 @@ RSpec.describe 'User edit profile' do
         within('.cover-status') do
           expect(page).to have_emoji(emoji)
         end
+      end
+
+      it 'sets the users status to busy' do
+        open_user_status_modal
+        busy_status = find('[data-testid="user-availability-checkbox"]')
+
+        expect(busy_status.checked?).to eq(false)
+
+        toggle_busy_status
+        set_user_status_in_modal
+        open_edit_status_modal
+
+        expect(busy_status.checked?).to eq(true)
       end
 
       it 'opens the emoji modal again after closing it' do
@@ -307,11 +357,7 @@ RSpec.describe 'User edit profile' do
           expect(page).to have_content user_status.message
         end
 
-        find('.header-user-dropdown-toggle').click
-
-        page.within ".header-user" do
-          click_button 'Edit status'
-        end
+        open_edit_status_modal
 
         find('.js-clear-user-status-button').click
         set_user_status_in_modal
@@ -333,11 +379,7 @@ RSpec.describe 'User edit profile' do
           expect(page).to have_content user_status.message
         end
 
-        find('.header-user-dropdown-toggle').click
-
-        page.within ".header-user" do
-          click_button 'Edit status'
-        end
+        open_edit_status_modal
 
         page.within "#set-user-status-modal" do
           click_button 'Remove status'
@@ -355,6 +397,58 @@ RSpec.describe 'User edit profile' do
 
         within('.js-toggle-emoji-menu') do
           expect(page).to have_emoji('speech_balloon')
+        end
+      end
+
+      context 'note header' do
+        let(:project) { create(:project_empty_repo, :public) }
+        let(:issue) { create(:issue, project: project) }
+        let(:emoji) { "stuffed_flatbread" }
+
+        before do
+          project.add_guest(user)
+          create(:user_status, user: user, message: 'Taking notes', emoji: emoji)
+
+          visit(project_issue_path(project, issue))
+
+          add_note("This is a comment")
+          visit(project_issue_path(project, issue))
+
+          wait_for_requests
+        end
+
+        it 'displays the status emoji' do
+          first_note = page.find_all(".main-notes-list .timeline-entry").first
+
+          expect(first_note).to have_emoji(emoji)
+        end
+
+        it 'clears the status emoji' do
+          open_edit_status_modal
+
+          page.within "#set-user-status-modal" do
+            click_button 'Remove status'
+          end
+
+          visit(project_issue_path(project, issue))
+          wait_for_requests
+
+          first_note = page.find_all(".main-notes-list .timeline-entry").first
+
+          expect(first_note).not_to have_css('.user-status-emoji')
+        end
+      end
+
+      context 'with set_user_availability_status feature flag disabled' do
+        before do
+          stub_feature_flags(set_user_availability_status: false)
+          visit root_path(user)
+        end
+
+        it 'does not display the availability checkbox' do
+          open_user_status_modal
+
+          expect(page).not_to have_css('[data-testid="user-availability-checkbox"]')
         end
       end
     end

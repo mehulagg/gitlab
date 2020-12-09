@@ -1,8 +1,8 @@
 import Vue from 'vue';
 
 import WeeksHeaderSubItemComponent from 'ee/roadmap/components/preset_weeks/weeks_header_sub_item.vue';
-import { getTimeframeForWeeksView } from 'ee/roadmap/utils/roadmap_utils';
 import { PRESET_TYPES } from 'ee/roadmap/constants';
+import { getTimeframeForWeeksView } from 'ee/roadmap/utils/roadmap_utils';
 
 import mountComponent from 'helpers/vue_mount_component_helper';
 import { mockTimeframeInitialDate } from '../../mock_data';

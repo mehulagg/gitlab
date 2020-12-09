@@ -1,7 +1,7 @@
 ---
 stage: Manage
 group: Access
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Permissions
@@ -36,7 +36,7 @@ usernames. A GitLab administrator can configure the GitLab instance to
 
 ## Project members permissions
 
-NOTE: **Note:**
+NOTE:
 In GitLab 11.0, the Master role was renamed to Maintainer.
 
 While Maintainer is the highest project-level role, some actions can only be performed by a personal namespace or group owner,
@@ -159,11 +159,12 @@ The following table depicts the various user permission levels in a project.
 | Manage Terraform state                            |         |            |             | ✓        | ✓      |
 | Manage license policy **(ULTIMATE)**              |         |            |             | ✓        | ✓      |
 | Edit comments (posted by any user)                |         |            |             | ✓        | ✓      |
+| Reposition comments on images (posted by any user)|✓ (*11*) | ✓ (*11*)   |  ✓ (*11*)   | ✓        | ✓      |
 | Manage Error Tracking                             |         |            |             | ✓        | ✓      |
 | Delete wiki pages                                 |         |            |             | ✓        | ✓      |
 | View project Audit Events                         |         |            |             | ✓        | ✓      |
 | Manage [push rules](../push_rules/push_rules.md)  |         |            |             | ✓        | ✓      |
-| Manage [project access tokens](./project/settings/project_access_tokens.md) **(CORE ONLY)** |         |            |             | ✓        | ✓      |
+| Manage [project access tokens](project/settings/project_access_tokens.md) **(CORE ONLY)** |         |            |             | ✓        | ✓      |
 | Switch visibility level                           |         |            |             |          | ✓      |
 | Transfer project to another namespace             |         |            |             |          | ✓      |
 | Rename project                                    |         |            |             |          | ✓      |
@@ -180,14 +181,15 @@ The following table depicts the various user permission levels in a project.
 1. Guest users are able to perform this action on public and internal projects, but not private projects. This doesn't apply to [external users](#external-users) where explicit access must be given even if the project is internal.
 1. Guest users can only view the confidential issues they created themselves.
 1. If **Public pipelines** is enabled in **Project Settings > CI/CD**.
-1. Not allowed for Guest, Reporter, Developer, Maintainer, or Owner. See [Protected Branches](./project/protected_branches.md).
-1. If the [branch is protected](./project/protected_branches.md#using-the-allowed-to-merge-and-allowed-to-push-settings), this depends on the access Developers and Maintainers are given.
+1. Not allowed for Guest, Reporter, Developer, Maintainer, or Owner. See [Protected Branches](project/protected_branches.md).
+1. If the [branch is protected](project/protected_branches.md#using-the-allowed-to-merge-and-allowed-to-push-settings), this depends on the access Developers and Maintainers are given.
 1. Guest users can access GitLab [**Releases**](project/releases/index.md) for downloading assets but are not allowed to download the source code nor see repository information like tags and commits.
 1. Actions are limited only to records owned (referenced) by user.
-1. When [Share Group Lock](./group/index.md#share-with-group-lock) is enabled the project can't be shared with other groups. It does not affect group with group sharing.
+1. When [Share Group Lock](group/index.md#share-with-group-lock) is enabled the project can't be shared with other groups. It does not affect group with group sharing.
 1. For information on eligible approvers for merge requests, see
    [Eligible approvers](project/merge_requests/merge_request_approvals.md#eligible-approvers).
 1. Owner permission is only available at the group or personal namespace level (and for instance admins) and is inherited by its projects.
+1. Applies only to comments on [Design Management](project/issues/design_management.md) designs.
 
 ## Project features permissions
 
@@ -233,7 +235,7 @@ read through the documentation on [permissions and access to confidential issues
 
 ## Group members permissions
 
-NOTE: **Note:**
+NOTE:
 In GitLab 11.0, the Master role was renamed to Maintainer.
 
 Any user can remove themselves from a group, unless they are the last Owner of
@@ -245,8 +247,8 @@ group.
 | Browse group                                           | ✓     | ✓        | ✓         | ✓          | ✓     |
 | View group wiki pages **(PREMIUM)**                    | ✓ (6) | ✓        | ✓         | ✓          | ✓     |
 | View Insights charts **(ULTIMATE)**                    | ✓     | ✓        | ✓         | ✓          | ✓     |
-| View group epic **(ULTIMATE)**                         | ✓     | ✓        | ✓         | ✓          | ✓     |
-| Create/edit group epic **(ULTIMATE)**                  |       | ✓        | ✓         | ✓          | ✓     |
+| View group epic **(PREMIUM)**                         | ✓     | ✓        | ✓         | ✓          | ✓     |
+| Create/edit group epic **(PREMIUM)**                  |       | ✓        | ✓         | ✓          | ✓     |
 | Manage group labels                                    |       | ✓        | ✓         | ✓          | ✓     |
 | See a container registry                               |       | ✓        | ✓         | ✓          | ✓     |
 | Pull [packages](packages/index.md)                     |       | ✓        | ✓         | ✓          | ✓     |
@@ -256,7 +258,7 @@ group.
 | Share (invite) groups with groups                      |       |          |           |            | ✓     |
 | Create/edit/delete group milestones                    |       |          | ✓         | ✓          | ✓     |
 | Create/edit/delete iterations                          |       |          | ✓         | ✓          | ✓     |
-| Enable/disable a dependency proxy **(PREMIUM)**        |       |          | ✓         | ✓          | ✓     |
+| Enable/disable a dependency proxy                      |       |          | ✓         | ✓          | ✓     |
 | Create and edit group wiki pages **(PREMIUM)**         |       |          | ✓         | ✓          | ✓     |
 | Use security dashboard **(ULTIMATE)**                  |       |          | ✓         | ✓          | ✓     |
 | Create/edit/delete metrics dashboard annotations       |       |          | ✓         | ✓          | ✓     |
@@ -270,7 +272,7 @@ group.
 | Create/Delete group deploy tokens                      |       |          |           |            | ✓     |
 | Manage group members                                   |       |          |           |            | ✓     |
 | Delete group                                           |       |          |           |            | ✓     |
-| Delete group epic **(ULTIMATE)**                       |       |          |           |            | ✓     |
+| Delete group epic **(PREMIUM)**                       |       |          |           |            | ✓     |
 | Edit SAML SSO Billing **(SILVER ONLY)**                | ✓     | ✓        | ✓         | ✓          | ✓ (4) |
 | View group Audit Events                                |       |          |           |            | ✓     |
 | Disable notification emails                            |       |          |           |            | ✓     |
@@ -314,6 +316,10 @@ External users:
 - Can only access public projects and projects to which they are explicitly granted access,
   thus hiding all other internal or private ones from them (like being
   logged out).
+- Can only access public groups and groups to which they are explicitly granted access,
+  thus hiding all other internal or private ones from them (like being
+  logged out).
+- Can only access public snippets.
 
 Access can be granted by adding the user as member to the project or group.
 Like usual users, they receive a role in the project or group with all
@@ -325,7 +331,7 @@ always take into account the
 [project's visibility and permissions settings](project/settings/index.md#sharing-and-permissions)
 as well as the permission level of the user.
 
-NOTE: **Note:**
+NOTE:
 External users still count towards a license seat.
 
 An administrator can flag a user as external by either of the following methods:
@@ -354,7 +360,7 @@ and the ignore case flag is set (`/regex pattern/i`). Here are some examples:
 - Use `^(?:(?!\.ext@domain\.com).)*$\r?` to mark users with email addresses
   NOT including `.ext@domain.com` as internal.
 
-CAUTION: **Warning:**
+WARNING:
 Be aware that this regex could lead to a
 [regular expression denial of service (ReDoS) attack](https://en.wikipedia.org/wiki/ReDoS).
 
@@ -401,6 +407,11 @@ automatically have access to projects and subgroups underneath. To support such 
 Users with minimal access can list the group in the UI and through the API. However, they cannot see
 details such as projects or subgroups. They do not have access to the group's page or list any of its subgroups or projects.
 
+### Minimal access users take license seats
+
+Users with even a "minimal access" role are counted against your number of license seats. This
+requirement does not apply for [GitLab Gold/Ultimate](https://about.gitlab.com/pricing/) subscriptions.
+
 ## Project features
 
 Project features like wiki and issues can be hidden from users depending on
@@ -413,7 +424,7 @@ which visibility level you select on project settings.
 
 ## GitLab CI/CD permissions
 
-NOTE: **Note:**
+NOTE:
 In GitLab 11.0, the Master role was renamed to Maintainer.
 
 GitLab CI/CD permissions rely on the role the user has in GitLab. There are four
@@ -447,10 +458,10 @@ instance and project. In addition, all admins can use the admin interface under
 
 ### Job permissions
 
-NOTE: **Note:**
+NOTE:
 In GitLab 11.0, the Master role was renamed to Maintainer.
 
-NOTE: **Note:**
+NOTE:
 GitLab 8.12 has a completely redesigned job permissions system.
 Read all about the [new model and its implications](project/new_ci_build_permissions_model.md).
 

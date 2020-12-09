@@ -5,7 +5,7 @@
 %p
   = _("Dear Administrator,")
 %p
-  = html_escape(_("We would like to inform you that your subscription GitLab Enterprise Edition %{plan_name} is nearing its user limit. You have %{active_user_count} active users, which is almost at the user limit of %{maximum_user_count}.")) % { plan_name: @license.plan.titleize, active_user_count: @license.current_active_users_count, maximum_user_count: @license.restricted_user_count }
+  = html_escape(_("We would like to inform you that your subscription GitLab Enterprise Edition %{plan_name} is nearing its user limit. You have %{active_user_count} active users, which is almost at the user limit of %{maximum_user_count}.")) % { plan_name: @license.plan.titleize, active_user_count: @license.daily_billable_users_count, maximum_user_count: @license.restricted_user_count }
 %p
   = html_escape(_("If the number of active users exceeds the user limit, you will be charged for the number of %{users_over_license_link} at your next license reconciliation.")) % { users_over_license_link: users_over_license_link }
 

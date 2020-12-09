@@ -22,6 +22,7 @@ RSpec.describe "Issues > User edits issue", :js do
 
     context "from edit page" do
       before do
+        stub_licensed_features(multiple_issue_assignees: false)
         visit edit_project_issue_path(project, issue)
       end
 
@@ -137,6 +138,33 @@ RSpec.describe "Issues > User edits issue", :js do
 
             expect(page).not_to have_text('verisimilitude')
           end
+        end
+
+        it 'can remove label without removing label added via quick action', :aggregate_failures do
+          # Add `syzygy` label with a quick action
+          note = find('#note-body')
+          page.within '.timeline-content-form' do
+            note.native.send_keys('/label ~syzygy')
+          end
+          click_button 'Comment'
+
+          wait_for_requests
+
+          page.within '.block.labels' do
+            # Remove `verisimilitude` label
+            within '.gl-label' do
+              click_button
+            end
+
+            wait_for_requests
+
+            expect(page).to have_text('syzygy')
+            expect(page).not_to have_text('verisimilitude')
+          end
+
+          expect(page).to have_text('removed verisimilitude label')
+          expect(page).not_to have_text('removed syzygy verisimilitude labels')
+          expect(issue.reload.labels.map(&:title)).to contain_exactly('syzygy')
         end
       end
 

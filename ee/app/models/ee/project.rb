@@ -38,12 +38,12 @@ module EE
       has_one :push_rule, ->(project) { project&.feature_available?(:push_rules) ? all : none }
       has_one :index_status
 
-      has_one :jenkins_service
       has_one :github_service
       has_one :gitlab_slack_application_service
 
       has_one :status_page_setting, inverse_of: :project, class_name: 'StatusPage::ProjectSetting'
       has_one :compliance_framework_setting, class_name: 'ComplianceManagement::ComplianceFramework::ProjectSettings', inverse_of: :project
+      has_many :compliance_management_frameworks, through: :compliance_framework_setting, source: 'compliance_management_framework'
       has_one :security_setting, class_name: 'ProjectSecuritySetting'
       has_one :vulnerability_statistic, class_name: 'Vulnerabilities::Statistic'
 
@@ -98,6 +98,10 @@ module EE
 
       has_many :sourced_pipelines, class_name: 'Ci::Sources::Project', foreign_key: :source_project_id
 
+      has_many :incident_management_oncall_schedules, class_name: 'IncidentManagement::OncallSchedule', inverse_of: :project
+
+      elastic_index_dependant_association :issues, on_change: :visibility_level
+
       scope :with_shared_runners_limit_enabled, -> do
         if ::Ci::Runner.has_shared_runners_with_non_zero_public_cost?
           with_shared_runners
@@ -134,7 +138,6 @@ module EE
       scope :with_security_reports, -> { where('EXISTS (?)', ::Ci::JobArtifact.security_reports.scoped_project.select(1)) }
       scope :with_github_service_pipeline_events, -> { joins(:github_service).merge(GithubService.pipeline_hooks) }
       scope :with_active_prometheus_service, -> { joins(:prometheus_service).merge(PrometheusService.active) }
-      scope :with_enabled_error_tracking, -> { joins(:error_tracking_setting).where(project_error_tracking_settings: { enabled: true }) }
       scope :with_enabled_incident_sla, -> { joins(:incident_management_setting).where(project_incident_management_settings: { sla_timer: true }) }
       scope :mirrored_with_enabled_pipelines, -> do
         joins(:project_feature).mirror.where(mirror_trigger_builds: true,
@@ -150,7 +153,7 @@ module EE
       scope :with_designs, -> { where(id: ::DesignManagement::Design.select(:project_id).distinct) }
       scope :with_deleting_user, -> { includes(:deleting_user) }
       scope :with_compliance_framework_settings, -> { preload(:compliance_framework_setting) }
-      scope :has_vulnerabilities, -> { joins(:vulnerabilities).group(:id) }
+      scope :has_vulnerabilities, -> { joins(:project_setting).merge(::ProjectSetting.has_vulnerabilities) }
       scope :has_vulnerability_statistics, -> { joins(:vulnerability_statistic) }
       scope :with_vulnerability_statistics, -> { includes(:vulnerability_statistic) }
 
@@ -165,20 +168,34 @@ module EE
       scope :without_unlimited_repository_size_limit, -> { where.not(repository_size_limit: 0) }
       scope :without_repository_size_limit, -> { where(repository_size_limit: nil) }
 
+      scope :order_by_total_repository_size_excess_desc, -> (limit) do
+        excess_arel = ::ProjectStatistics.arel_table[:repository_size] +
+                   ::ProjectStatistics.arel_table[:lfs_objects_size] -
+                   arel_table.coalesce(arel_table[:repository_size_limit], limit, 0)
+        alias_node = Arel::Nodes::SqlLiteral.new('excess_storage')
+
+        select(*arel.projections, excess_arel.as(alias_node))
+          .joins(:statistics)
+          .order(excess_arel.desc)
+      end
+
       delegate :shared_runners_minutes, :shared_runners_seconds, :shared_runners_seconds_last_reset,
         to: :statistics, allow_nil: true
 
-      delegate :actual_shared_runners_minutes_limit,
-               :shared_runners_minutes_used?,
-               :shared_runners_remaining_minutes_below_threshold?, to: :shared_runners_limit_namespace
+      delegate :actual_shared_runners_minutes_limit, to: :shared_runners_limit_namespace
 
       delegate :last_update_succeeded?, :last_update_failed?,
         :ever_updated_successfully?, :hard_failed?,
         to: :import_state, prefix: :mirror, allow_nil: true
 
       delegate :merge_pipelines_enabled, :merge_pipelines_enabled=, :merge_pipelines_enabled?, :merge_pipelines_were_disabled?, to: :ci_cd_settings
-      delegate :merge_trains_enabled?, to: :ci_cd_settings
+      delegate :merge_trains_enabled, :merge_trains_enabled=, :merge_trains_enabled?, to: :ci_cd_settings
+
+      delegate :auto_rollback_enabled, :auto_rollback_enabled=, :auto_rollback_enabled?, to: :ci_cd_settings
       delegate :closest_gitlab_subscription, to: :namespace
+      delegate :jira_vulnerabilities_integration_enabled?, to: :jira_service, allow_nil: true
+
+      delegate :requirements_access_level, to: :project_feature, allow_nil: true
 
       validates :repository_size_limit,
         numericality: { only_integer: true, greater_than_or_equal_to: 0, allow_nil: true }
@@ -195,6 +212,17 @@ module EE
         validates :import_url, presence: true
         validates :mirror_user, presence: true
       end
+
+      # Because we use default_value_for we need to be sure
+      # requirements_enabled= method does exist even if we rollback migration.
+      # Otherwise many tests from spec/migrations will fail.
+      def requirements_enabled=(value)
+        if has_attribute?(:requirements_enabled)
+          write_attribute(:requirements_enabled, value)
+        end
+      end
+
+      default_value_for :requirements_enabled, true
 
       accepts_nested_attributes_for :status_page_setting, update_only: true, allow_destroy: true
       accepts_nested_attributes_for :compliance_framework_setting, update_only: true, allow_destroy: true
@@ -230,12 +258,6 @@ module EE
       override :with_api_entity_associations
       def with_api_entity_associations
         super.preload(group: [:ip_restrictions, :saml_provider])
-      end
-    end
-
-    def has_regulated_settings?
-      strong_memoize(:has_regulated_settings) do
-        compliance_framework_setting&.compliance_management_framework&.merge_request_approval_rules_enforced?
       end
     end
 
@@ -293,7 +315,7 @@ module EE
     end
 
     def shared_runners_available?
-      super && !shared_runners_limit_namespace.shared_runners_minutes_used?
+      super && !::Ci::Minutes::Quota.new(shared_runners_limit_namespace).minutes_used_up?
     end
 
     def link_pool_repository
@@ -407,6 +429,12 @@ module EE
       return 0 unless feature_available?(:merge_request_approvers)
 
       super
+    end
+
+    def applicable_approval_rules_for_user(user_id, target_branch = nil)
+      visible_approval_rules(target_branch: target_branch).select do |rule|
+        rule.approvers.pluck(:id).include?(user_id)
+      end
     end
 
     def visible_approval_rules(target_branch: nil)
@@ -556,7 +584,6 @@ module EE
     def disabled_services
       strong_memoize(:disabled_services) do
         super.tap do |services|
-          services.push('jenkins') unless feature_available?(:jenkins_integration)
           services.push('github') unless feature_available?(:github_project_service_integration)
           ::Gitlab::CurrentSettings.slack_app_enabled ? services.push('slack_slash_commands') : services.push('gitlab_slack_application')
         end
@@ -634,7 +661,7 @@ module EE
     end
 
     override :lfs_http_url_to_repo
-    def lfs_http_url_to_repo(operation)
+    def lfs_http_url_to_repo(operation = nil)
       return super unless ::Gitlab::Geo.secondary_with_primary?
       return super if operation == GIT_LFS_DOWNLOAD_OPERATION # download always comes from secondary
 
@@ -662,9 +689,8 @@ module EE
     def disable_overriding_approvers_per_merge_request
       strong_memoize(:disable_overriding_approvers_per_merge_request) do
         next super unless License.feature_available?(:admin_merge_request_approvers_rules)
-        next super unless has_regulated_settings?
 
-        ::Gitlab::CurrentSettings.disable_overriding_approvers_per_merge_request?
+        ::Gitlab::CurrentSettings.disable_overriding_approvers_per_merge_request? || super
       end
     end
     alias_method :disable_overriding_approvers_per_merge_request?, :disable_overriding_approvers_per_merge_request
@@ -672,9 +698,9 @@ module EE
     def merge_requests_author_approval
       strong_memoize(:merge_requests_author_approval) do
         next super unless License.feature_available?(:admin_merge_request_approvers_rules)
-        next super unless has_regulated_settings?
+        next false if ::Gitlab::CurrentSettings.prevent_merge_requests_author_approval?
 
-        !::Gitlab::CurrentSettings.prevent_merge_requests_author_approval?
+        super
       end
     end
     alias_method :merge_requests_author_approval?, :merge_requests_author_approval
@@ -682,9 +708,8 @@ module EE
     def merge_requests_disable_committers_approval
       strong_memoize(:merge_requests_disable_committers_approval) do
         next super unless License.feature_available?(:admin_merge_request_approvers_rules)
-        next super unless has_regulated_settings?
 
-        ::Gitlab::CurrentSettings.prevent_merge_requests_committers_approval?
+        ::Gitlab::CurrentSettings.prevent_merge_requests_committers_approval? || super
       end
     end
     alias_method :merge_requests_disable_committers_approval?, :merge_requests_disable_committers_approval
@@ -703,6 +728,16 @@ module EE
     override :predefined_variables
     def predefined_variables
       super.concat(requirements_ci_variables)
+    end
+
+    def add_template_export_job(current_user:, after_export_strategy: nil, params: {})
+      job_id = ProjectTemplateExportWorker.perform_async(current_user.id, self.id, after_export_strategy, params)
+
+      if job_id
+        ::Gitlab::AppLogger.info(message: 'Template Export job started', project_id: self.id, job_id: job_id)
+      else
+        ::Gitlab::AppLogger.error(message: 'Template Export job failed to start', project_id: self.id)
+      end
     end
 
     private

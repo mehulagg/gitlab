@@ -88,7 +88,18 @@ module Vulnerabilities
     end
 
     def touch_pipeline
-      pipeline&.touch
+      pipeline&.touch if pipeline&.needs_touch?
+    rescue ActiveRecord::StaleObjectError
+      # Often the pipeline has already been updated by creating vulnerability feedback
+      # in batches. In this case, we can ignore the exception as it's already been touched.
+    end
+
+    def finding
+      Finding.find_by(
+        project_id: project_id,
+        report_type: category,
+        project_fingerprint: project_fingerprint
+      )
     end
   end
 end

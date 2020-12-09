@@ -13,6 +13,10 @@ export const DIFF_FILE = {
   ),
   fork: __('Fork'),
   cancel: __('Cancel'),
-  collapsed: __('This diff is collapsed.'),
-  expand: __('Click to expand it.'),
+  autoCollapsed: __('Files with large changes are collapsed by default.'),
+  expand: __('Expand file'),
+};
+
+export const SETTINGS_DROPDOWN = {
+  fileByFile: __('Show one file at a time'),
 };

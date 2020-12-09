@@ -18,11 +18,11 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :sidekiq_might_not_need
     let(:results) { described_class.new(user, 'hello world', limit_project_ids) }
 
     where(:scope, :results_method, :expected) do
-      'projects'       | :projects       | { 1 => 'test <span class="gl-text-black-normal gl-font-weight-bold">highlight</span>' }
-      'milestones'     | :milestones     | { 1 => 'test <span class="gl-text-black-normal gl-font-weight-bold">highlight</span>' }
-      'notes'          | :notes          | { 1 => 'test <span class="gl-text-black-normal gl-font-weight-bold">highlight</span>' }
-      'issues'         | :issues         | { 1 => 'test <span class="gl-text-black-normal gl-font-weight-bold">highlight</span>' }
-      'merge_requests' | :merge_requests | { 1 => 'test <span class="gl-text-black-normal gl-font-weight-bold">highlight</span>' }
+      'projects'       | :projects       | { 1 => 'test <span class="gl-text-gray-900 gl-font-weight-bold">highlight</span>' }
+      'milestones'     | :milestones     | { 1 => 'test <span class="gl-text-gray-900 gl-font-weight-bold">highlight</span>' }
+      'notes'          | :notes          | { 1 => 'test <span class="gl-text-gray-900 gl-font-weight-bold">highlight</span>' }
+      'issues'         | :issues         | { 1 => 'test <span class="gl-text-gray-900 gl-font-weight-bold">highlight</span>' }
+      'merge_requests' | :merge_requests | { 1 => 'test <span class="gl-text-gray-900 gl-font-weight-bold">highlight</span>' }
       'blobs'          | nil             | nil
       'wiki_blobs'     | nil             | nil
       'commits'        | nil             | nil
@@ -32,7 +32,7 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :sidekiq_might_not_need
 
     with_them do
       it 'returns the expected highlight map' do
-        expect(results).to receive(results_method).and_return([{ _source: { id: 1 }, highlight: 'test <span class="gl-text-black-normal gl-font-weight-bold">highlight</span>' }]) if results_method
+        expect(results).to receive(results_method).and_return([{ _source: { id: 1 }, highlight: 'test <span class="gl-text-gray-900 gl-font-weight-bold">highlight</span>' }]) if results_method
         expect(results.highlight_map(scope)).to eq(expected)
       end
     end
@@ -85,12 +85,13 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :sidekiq_might_not_need
   describe 'parse_search_result' do
     let(:project) { double(:project) }
     let(:content) { "foo\nbar\nbaz\n" }
+    let(:path) { 'path/file.ext' }
     let(:blob) do
       {
         'blob' => {
           'commit_sha' => 'sha',
           'content' => content,
-          'path' => 'path/file.ext'
+          'path' => path
         }
       }
     end
@@ -182,6 +183,21 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :sidekiq_might_not_need
           project: project,
           data: expected_data
         )
+      end
+    end
+
+    context 'file path in the blob contains potential backtracking regex attack pattern' do
+      let(:path) { '/group/project/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab.(a+)+$' }
+
+      it 'still parses the basename from the path with reasonable amount of time' do
+        Timeout.timeout(3.seconds) do
+          parsed = described_class.parse_search_result({ '_source' => blob }, project)
+
+          expect(parsed).to be_kind_of(::Gitlab::Search::FoundBlob)
+          expect(parsed).to have_attributes(
+            basename: '/group/project/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab'
+          )
+        end
       end
     end
   end

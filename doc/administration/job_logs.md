@@ -1,7 +1,7 @@
 ---
 stage: Verify
 group: Runner
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference
 ---
 
@@ -30,7 +30,7 @@ it would be `/home/git/gitlab`.
 
 ## Changing the job logs local location
 
-To change the location where the job logs will be stored, follow the steps below.
+To change the location where the job logs are stored, follow the steps below.
 
 **In Omnibus installations:**
 
@@ -42,6 +42,45 @@ To change the location where the job logs will be stored, follow the steps below
 
 1. Save the file and [reconfigure GitLab](restart_gitlab.md#omnibus-gitlab-reconfigure) for the
    changes to take effect.
+
+Alternatively, if you have existing job logs you can follow
+these steps to move the logs to a new location without losing any data.
+
+1. Pause continuous integration data processing by updating this setting in `/etc/gitlab/gitlab.rb`.
+   Jobs in progress are not affected, based on how [data flow](#data-flow) works.
+
+   ```ruby
+   sidekiq['experimental_queue_selector'] = true
+   sidekiq['queue_groups'] = [
+     "feature_category!=continuous_integration"
+   ]
+   ```
+
+1. Save the file and [reconfigure GitLab](restart_gitlab.md#omnibus-gitlab-reconfigure) for the
+   changes to take effect.
+1. Set the new storage location in `/etc/gitlab/gitlab.rb`:
+
+   ```ruby
+   gitlab_ci['builds_directory'] = '/mnt/to/gitlab-ci/builds'
+   ```
+
+1. Save the file and [reconfigure GitLab](restart_gitlab.md#omnibus-gitlab-reconfigure) for the
+   changes to take effect.
+1. Use `rsync` to move job logs from the current location to the new location:
+
+   ```shell
+   sudo rsync -avzh --remove-source-files --ignore-existing --progress /var/opt/gitlab/gitlab-ci/builds/ /mnt/to/gitlab-ci/builds`
+   ```
+
+   Use `--ignore-existing` so you don't override new job logs with older versions of the same log.
+1. Unpause continuous integration data processing by editing `/etc/gitlab/gitlab.rb` and removing the `sidekiq` setting you updated earlier.
+1. Save the file and [reconfigure GitLab](restart_gitlab.md#omnibus-gitlab-reconfigure) for the
+   changes to take effect.
+1. Remove the old job logs storage location:
+
+   ```shell
+   sudo rm -rf /var/opt/gitlab/gitlab-ci/builds`
+   ```
 
 **In installations from source:**
 
@@ -78,12 +117,12 @@ you can do so using one of the following options:
 
 There isn't a way to automatically expire old job logs, but it's safe to remove
 them if they're taking up too much space. If you remove the logs manually, the
-job output in the UI will be empty.
+job output in the UI is empty.
 
 For example, to delete all job logs older than 60 days, run the following from a shell in your GitLab instance:
 
 DANGER: **Warning:**
-This command will permanently delete the log files and is irreversible.
+This command permanently deletes the log files and is irreversible.
 
 ```shell
 find /var/opt/gitlab/gitlab-rails/shared/artifacts -name "job.log" -mtime +60 -delete
@@ -93,7 +132,7 @@ find /var/opt/gitlab/gitlab-rails/shared/artifacts -name "job.log" -mtime +60 -d
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/18169) in GitLab 10.4.
 
-NOTE: **Note:**
+NOTE:
 This beta feature is off by default. See below for how to [enable or disable](#enabling-incremental-logging) it.
 
 By combining the process with object storage settings, we can completely bypass
@@ -104,8 +143,8 @@ The data flow is the same as described in the [data flow section](#data-flow)
 with one change: _the stored path of the first two phases is different_. This incremental
 log architecture stores chunks of logs in Redis and a persistent store (object storage or database) instead of
 file storage. Redis is used as first-class storage, and it stores up-to 128KB
-of data. Once the full chunk is sent, it is flushed to a persistent store, either object storage (temporary directory) or database.
-After a while, the data in Redis and a persistent store will be archived to [object storage](#uploading-logs-to-object-storage).
+of data. After the full chunk is sent, it is flushed to a persistent store, either object storage (temporary directory) or database.
+After a while, the data in Redis and a persistent store is archived to [object storage](#uploading-logs-to-object-storage).
 
 The data are stored in the following Redis namespace: `Gitlab::Redis::SharedState`.
 
@@ -114,9 +153,9 @@ Here is the detailed data flow:
 1. The runner picks a job from GitLab
 1. The runner sends a piece of log to GitLab
 1. GitLab appends the data to Redis
-1. Once the data in Redis reach 128KB, the data is flushed to a persistent store (object storage or the database).
+1. After the data in Redis reaches 128KB, the data is flushed to a persistent store (object storage or the database).
 1. The above steps are repeated until the job is finished.
-1. Once the job is finished, GitLab schedules a Sidekiq worker to archive the log.
+1. After the job is finished, GitLab schedules a Sidekiq worker to archive the log.
 1. The Sidekiq worker archives the log to object storage and cleans up the log
    in Redis and a persistent store (object storage or the database).
 
@@ -145,10 +184,10 @@ Feature.enabled?(:ci_enable_live_trace)
 Feature.enable(:ci_enable_live_trace)
 ```
 
-NOTE: **Note:**
-The transition period will be handled gracefully. Upcoming logs will be
-generated with the incremental architecture, and on-going logs will stay with the
-legacy architecture, which means that on-going logs won't be forcibly
+NOTE:
+The transition period is handled gracefully. Upcoming logs are 
+generated with the incremental architecture, and on-going logs stay with the
+legacy architecture, which means that on-going logs aren't forcibly
 re-generated with the incremental architecture.
 
 **To disable incremental logging (trace):**
@@ -157,10 +196,10 @@ re-generated with the incremental architecture.
 Feature.disable('ci_enable_live_trace')
 ```
 
-NOTE: **Note:**
-The transition period will be handled gracefully. Upcoming logs will be generated
-with the legacy architecture, and on-going incremental logs will stay with the incremental
-architecture, which means that on-going incremental logs won't be forcibly re-generated
+NOTE:
+The transition period is handled gracefully. Upcoming logs are generated
+with the legacy architecture, and on-going incremental logs stay with the incremental
+architecture, which means that on-going incremental logs aren't forcibly re-generated
 with the legacy architecture.
 
 ### Potential implications
@@ -170,13 +209,13 @@ In some cases, having data stored on Redis could incur data loss:
 1. **Case 1: When all data in Redis are accidentally flushed**
    - On going incremental logs could be recovered by re-sending logs (this is
      supported by all versions of GitLab Runner).
-   - Finished jobs which have not archived incremental logs will lose the last part
+   - Finished jobs which have not archived incremental logs lose the last part
      (~128KB) of log data.
 
 1. **Case 2: When Sidekiq workers fail to archive (e.g., there was a bug that
    prevents archiving process, Sidekiq inconsistency, etc.)**
-   - Currently all log data in Redis will be deleted after one week. If the
-     Sidekiq workers can't finish by the expiry date, the part of log data will be lost.
+   - All log data in Redis is deleted after one week. If the
+     Sidekiq workers can't finish by the expiry date, the part of log data is lost.
 
 Another issue that might arise is that it could consume all memory on the Redis
 instance. If the number of jobs is 1000, 128MB (128KB * 1000) is consumed.

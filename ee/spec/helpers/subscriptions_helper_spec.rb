@@ -50,7 +50,6 @@ RSpec.describe SubscriptionsHelper do
     describe 'new_user' do
       where(:referer, :expected_result) do
         'http://example.com/users/sign_up/welcome?foo=bar'             | 'true'
-        'http://example.com/users/sign_up/update_registration?foo=bar' | 'true'
         'http://example.com'                                           | 'false'
         nil                                                            | 'false'
       end

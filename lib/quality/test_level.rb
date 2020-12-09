@@ -12,12 +12,17 @@ module Quality
         lib/gitlab/background_migration
         lib/ee/gitlab/background_migration
       ],
+      frontend_fixture: %w[
+        frontend/fixtures
+      ],
       unit: %w[
         bin
         channels
         config
         db
         dependencies
+        elastic
+        elastic_integration
         factories
         finders
         frontend
@@ -43,7 +48,6 @@ module Quality
         validators
         views
         workers
-        elastic_integration
         tooling
       ],
       integration: %w[
@@ -63,7 +67,7 @@ module Quality
     end
 
     def pattern(level)
-      @patterns[level] ||= "#{prefix}spec/#{folders_pattern(level)}{,/**/}*_spec.rb"
+      @patterns[level] ||= "#{prefix}spec/#{folders_pattern(level)}{,/**/}*#{suffix(level)}"
     end
 
     def regexp(level)
@@ -76,6 +80,9 @@ module Quality
       # spec/lib/gitlab/background_migration and tests under spec/lib are unit by default
       when regexp(:migration), regexp(:background_migration)
         :migration
+      # Detect frontend fixture before matching other unit tests
+      when regexp(:frontend_fixture)
+        :frontend_fixture
       when regexp(:unit)
         :unit
       when regexp(:integration)
@@ -92,6 +99,15 @@ module Quality
     end
 
     private
+
+    def suffix(level)
+      case level
+      when :frontend_fixture
+        ".rb"
+      else
+        "_spec.rb"
+      end
+    end
 
     def migration_and_background_migration_folders
       TEST_LEVEL_FOLDERS.fetch(:migration) + TEST_LEVEL_FOLDERS.fetch(:background_migration)

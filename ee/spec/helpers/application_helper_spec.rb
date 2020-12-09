@@ -6,6 +6,8 @@ RSpec.describe ApplicationHelper do
   include EE::GeoHelpers
 
   describe '#read_only_message', :geo do
+    let(:default_maintenance_mode_message) { 'This GitLab instance is undergoing maintenance and is operating in read-only mode.' }
+
     context 'when not in a Geo secondary' do
       it 'returns a fallback message if database is readonly' do
         expect(Gitlab::Database).to receive(:read_only?) { true }
@@ -15,6 +17,54 @@ RSpec.describe ApplicationHelper do
 
       it 'returns nil when database is not read_only' do
         expect(helper.read_only_message).to be_nil
+      end
+
+      context 'maintenance mode' do
+        context 'enabled' do
+          before do
+            stub_application_setting(maintenance_mode: true)
+          end
+
+          it 'returns default message' do
+            expect(helper.read_only_message).to match(default_maintenance_mode_message)
+          end
+
+          it 'returns user set custom maintenance mode message' do
+            custom_message = 'Maintenance window ends at 00:00.'
+            stub_application_setting(maintenance_mode_message: custom_message)
+
+            expect(helper.read_only_message).to match(/#{custom_message}/)
+          end
+
+          context 'when database is read-only' do
+            it 'stacks read-only and maintenance mode messages' do
+              expect(Gitlab::Database).to receive(:read_only?).twice { true }
+
+              expect(helper.read_only_message).to match('You are on a read-only GitLab instance')
+              expect(helper.read_only_message).to match(/#{default_maintenance_mode_message}/)
+            end
+          end
+        end
+
+        context 'disabled' do
+          it 'returns nil' do
+            stub_application_setting(maintenance_mode: false)
+
+            expect(helper.read_only_message).to be_nil
+          end
+        end
+      end
+    end
+
+    context 'on a geo secondary' do
+      context 'maintenance mode on' do
+        it 'returns messages for both' do
+          expect(Gitlab::Geo).to receive(:secondary?).twice { true }
+          stub_application_setting(maintenance_mode: true)
+
+          expect(helper.read_only_message).to match(/you must visit the primary site/)
+          expect(helper.read_only_message).to match(/#{default_maintenance_mode_message}/)
+        end
       end
     end
 
@@ -105,29 +155,39 @@ RSpec.describe ApplicationHelper do
       it 'returns paths for autocomplete_sources_controller' do
         expect_autocomplete_data_sources(object, noteable_type, [:members, :issues, :mergeRequests, :labels, :epics, :commands, :milestones])
       end
+
+      context 'when vulnerabilities are enabled' do
+        before do
+          stub_licensed_features(security_dashboard: true)
+        end
+
+        it 'returns paths for autocomplete_sources_controller with vulnerabilities' do
+          expect_autocomplete_data_sources(object, noteable_type, [:members, :issues, :mergeRequests, :labels, :epics, :vulnerabilities, :commands, :milestones])
+        end
+      end
     end
 
     context 'project' do
       let(:object) { create(:project) }
       let(:noteable_type) { Issue }
 
-      context 'when epics are enabled' do
+      context 'when epics and vulnerabilities are enabled' do
         before do
-          stub_licensed_features(epics: true)
+          stub_licensed_features(epics: true, security_dashboard: true)
         end
 
         it 'returns paths for autocomplete_sources_controller for personal projects' do
-          expect_autocomplete_data_sources(object, noteable_type, [:members, :issues, :mergeRequests, :labels, :milestones, :commands, :snippets])
+          expect_autocomplete_data_sources(object, noteable_type, [:members, :issues, :mergeRequests, :labels, :milestones, :commands, :snippets, :vulnerabilities])
         end
 
-        it 'returns paths for autocomplete_sources_controller including epics for group projects' do
+        it 'returns paths for autocomplete_sources_controller including epics and vulnerabilities for group projects' do
           object.update!(group: create(:group))
 
-          expect_autocomplete_data_sources(object, noteable_type, [:members, :issues, :mergeRequests, :labels, :milestones, :commands, :snippets, :epics])
+          expect_autocomplete_data_sources(object, noteable_type, [:members, :issues, :mergeRequests, :labels, :milestones, :commands, :snippets, :epics, :vulnerabilities])
         end
       end
 
-      context 'when epics are disabled' do
+      context 'when epics and vulnerabilities are disabled' do
         it 'returns paths for autocomplete_sources_controller' do
           expect_autocomplete_data_sources(object, noteable_type, [:members, :issues, :mergeRequests, :labels, :milestones, :commands, :snippets])
         end

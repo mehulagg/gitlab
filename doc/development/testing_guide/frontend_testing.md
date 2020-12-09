@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Frontend testing standards and style guidelines
 
 There are two types of test suites you'll encounter while developing frontend code
@@ -19,18 +25,19 @@ If you are looking for a guide on Vue component testing, you can jump right away
 
 ## Jest
 
-We have started to migrate frontend tests to the [Jest](https://jestjs.io) testing framework (see also the corresponding
-[epic](https://gitlab.com/groups/gitlab-org/-/epics/895)).
-
+We use Jest to write frontend unit and integration tests.
 Jest tests can be found in `/spec/frontend` and `/ee/spec/frontend` in EE.
-
-NOTE: **Note:**
-Most examples have a Jest and Karma example. See the Karma examples only as explanation to what's going on in the code, should you stumble over some use cases during your discovery. The Jest examples are the one you should follow.
 
 ## Karma test suite
 
-While GitLab is switching over to [Jest](https://jestjs.io) you'll still find Karma tests in our application. [Karma](http://karma-runner.github.io/) is a test runner which uses [Jasmine](https://jasmine.github.io/) as its test
-framework. Jest also uses Jasmine as foundation, that's why it's looking quite similar.
+While GitLab has switched over to [Jest](https://jestjs.io) you'll still find Karma tests in our
+application because some of our specs require a browser and can't be easiliy migrated to Jest.
+Those specs will eventually drop Karma in favor of either Jest or RSpec. You can track this migration
+in the [related epic](https://gitlab.com/groups/gitlab-org/-/epics/4900).
+
+[Karma](http://karma-runner.github.io/) is a test runner which uses
+[Jasmine](https://jasmine.github.io/) as its test framework. Jest also uses Jasmine as foundation,
+that's why it's looking quite similar.
 
 Karma tests live in `spec/javascripts/` and `/ee/spec/javascripts` in EE.
 
@@ -41,19 +48,6 @@ Keep in mind that in a CI environment, these tests are run in a headless
 browser and you will not have access to certain APIs, such as
 [`Notification`](https://developer.mozilla.org/en-US/docs/Web/API/notification),
 which have to be stubbed.
-
-### When should I use Jest over Karma?
-
-If you need to update an existing Karma test file (found in `spec/javascripts`), you do not
-need to migrate the whole spec to Jest. Simply updating the Karma spec to test your change
-is fine. It is probably more appropriate to migrate to Jest in a separate merge request.
-
-If you create a new test file, it needs to be created in Jest. This will
-help support our migration and we think you'll love using Jest.
-
-As always, please use discretion. Jest solves a lot of issues we experienced in Karma and
-provides a better developer experience, however there are potentially unexpected issues
-which could arise (especially with testing against browser specific features).
 
 ### Differences to Karma
 
@@ -198,8 +192,8 @@ Following you'll find some general common practices you will find as part of our
 When it comes to querying DOM elements in your tests, it is best to uniquely and semantically target
 the element.
 
-Preferentially, this is done by targeting what the user actually sees using [DOM Testing Library](https://testing-library.com/docs/dom-testing-library/intro).
-When selecting by text it is best to use [`getByRole` or `findByRole`](https://testing-library.com/docs/dom-testing-library/api-queries#byrole)
+Preferentially, this is done by targeting what the user actually sees using [DOM Testing Library](https://testing-library.com/docs/dom-testing-library/intro/).
+When selecting by text it is best to use [`getByRole` or `findByRole`](https://testing-library.com/docs/dom-testing-library/api-queries/#byrole)
 as these enforce accessibility best practices as well. The examples below demonstrate the order of preference.
 
 When writing Vue component unit tests, it can be wise to query children by component, so that the unit test can focus on comprehensive value coverage
@@ -305,7 +299,6 @@ it('tests a promise rejection', async () => {
 
 You can also simply return a promise from the test function.
 
-NOTE: **Note:**
 Using the `done` and `done.fail` callbacks is discouraged when working with
 promises. They should only be used when testing callback-based code.
 
@@ -741,11 +734,10 @@ Please consult the [official Jest docs](https://jestjs.io/docs/en/jest-object#mo
 
 For running the frontend tests, you need the following commands:
 
-- `rake frontend:fixtures` (re-)generates [fixtures](#frontend-test-fixtures).
-- `yarn test` executes the tests.
-- `yarn jest` executes only the Jest tests.
-
-As long as the fixtures don't change, `yarn test` is sufficient (and saves you some time).
+- `rake frontend:fixtures` (re-)generates [fixtures](#frontend-test-fixtures). Make sure that
+  fixtures are up-to-date before running tests that require them.
+- `yarn jest` runs Jest tests.
+- `yarn karma` runs Karma tests.
 
 ### Live testing and focused testing -- Jest
 
@@ -755,7 +747,7 @@ While you work on a test suite, you may want to run these specs in watch mode, s
 # Watch and rerun all specs matching the name icon
 yarn jest --watch icon
 
-# Watch and rerun one specifc file
+# Watch and rerun one specific file
 yarn jest --watch path/to/spec/file.spec.js
 ```
 
@@ -893,6 +885,32 @@ it.each([
     expect(renderPipeline(status)).toEqual(icon)
  }
 );
+```
+
+**Note**: only use template literal block if pretty print is **not** needed for spec output. For example, empty strings, nested objects etc.
+
+For example, when testing the difference between an empty search string and a non-empty search string, the use of the array block syntax with the pretty print option would be preferred. That way the differences between an empty string e.g. `''` and a non-empty string e.g. `'search string'` would be visible in the spec output. Whereas with a template literal block, the empty string would be shown as a space, which could lead to a confusing developer experience
+
+```javascript
+// bad
+it.each`
+    searchTerm | expected
+    ${''} | ${{ issue: { users: { nodes: [] } } }}
+    ${'search term'} | ${{ issue: { other: { nested: [] } } }}
+`('when search term is $searchTerm, it returns $expected', ({ searchTerm, expected }) => {
+  expect(search(searchTerm)).toEqual(expected)
+});
+
+// good
+it.each([
+    ['', { issue: { users: { nodes: [] } } }],
+    ['search term', { issue: { other: { nested: [] } } }],
+])('when search term is %p, expect to return %p',
+ (searchTerm, expected) => {
+    expect(search(searchTerm)).toEqual(expected)
+ }
+);
+
 ```
 
 ```javascript

@@ -7,6 +7,7 @@ module QA
         module Epic
           class Show < QA::Page::Base
             include QA::Page::Component::Issuable::Common
+            include QA::Page::Component::Note
 
             view 'ee/app/assets/javascripts/epic/components/epic_header.vue' do
               element :close_reopen_epic_button
@@ -39,11 +40,6 @@ module QA
               # Clicking the title blurs the input
               click_element :title
               click_element :add_issue_button
-            end
-
-            def add_comment_to_epic(comment)
-              fill_element :comment_field, comment
-              click_element :comment_button
             end
 
             def remove_issue_from_epic

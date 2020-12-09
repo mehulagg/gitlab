@@ -1,0 +1,5 @@
+---
+title: Remove .issue-box element from Requirements (list)
+merge_request: 48001
+author: Takuya Noguchi
+type: performance

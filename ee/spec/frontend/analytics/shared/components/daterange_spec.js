@@ -1,6 +1,6 @@
+import { GlDaterangePicker } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
 import Daterange from 'ee/analytics/shared/components/daterange.vue';
-import { GlDaterangePicker } from '@gitlab/ui';
 
 const defaultProps = {
   startDate: new Date(2019, 8, 1),

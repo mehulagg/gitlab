@@ -39,7 +39,12 @@ module Resolvers
 
     argument :iid_starts_with, GraphQL::STRING_TYPE,
              required: false,
-             description: 'Filter epics by iid for autocomplete'
+             description: 'Filter epics by IID for autocomplete'
+
+    argument :include_descendant_groups, GraphQL::BOOLEAN_TYPE,
+             required: false,
+             description: 'Include epics from descendant groups',
+             default_value: true
 
     type Types::EpicType, null: true
 

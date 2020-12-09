@@ -2,7 +2,7 @@
 type: reference, dev
 stage: none
 group: Development
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Issues workflow
@@ -206,6 +206,13 @@ Examples of feature labels are `~wiki`, `~ldap`, `~api`, `~issues`, `~"merge req
 #### Naming and color convention
 
 Feature labels are all-lowercase.
+
+### Facet labels
+
+To track additional information or context about created issues, developers may
+add _facet labels_. Facet labels are also sometimes used for issue prioritization
+or for measurements (such as time to close). An example of a facet label is the
+~customer label, which indicates customer interest.
 
 ### Department labels
 

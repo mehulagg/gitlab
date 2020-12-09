@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlModal, GlLink, GlIntersperse } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 
 import LicenseComponentLinks, {
   VISIBLE_COMPONENT_COUNT,

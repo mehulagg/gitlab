@@ -1,5 +1,5 @@
-import { mount } from '@vue/test-utils';
 import { GlPagination, GlTable } from '@gitlab/ui';
+import { mount } from '@vue/test-utils';
 
 import AuditEventsTable from 'ee/audit_events/components/audit_events_table.vue';
 import createEvents from '../mock_data';

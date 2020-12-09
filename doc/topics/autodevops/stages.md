@@ -1,3 +1,9 @@
+---
+stage: Configure
+group: Configure
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Stages of Auto DevOps
 
 The following sections describe the stages of [Auto DevOps](index.md).
@@ -58,7 +64,7 @@ value. The default builder is `heroku/buildpacks:18` but a different builder
 can be selected using the CI variable `AUTO_DEVOPS_BUILD_IMAGE_CNB_BUILDER`.
 
 Cloud Native Buildpacks (CNBs) are an evolution of Heroku buildpacks, and
-will eventually supersede Herokuish-based builds within Auto DevOps. For more
+GitLab expects them to eventually supersede Herokuish-based builds within Auto DevOps. For more
 information, see [this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/212692).
 
 Builds using Cloud Native Buildpacks support the same options as builds using
@@ -72,7 +78,7 @@ Heroku buildpacks, with the following caveats:
 - The `/bin/herokuish` command is not present in the resulting image, and prefixing
   commands with `/bin/herokuish procfile exec` is no longer required (nor possible).
 
-NOTE: **Note:**
+NOTE:
 Auto Test still uses Herokuish, as test suite detection is not
 yet part of the Cloud Native Buildpack specification. For more information, see
 [this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/212689).
@@ -90,7 +96,7 @@ Check the [currently supported languages](#currently-supported-languages).
 Auto Test uses tests you already have in your application. If there are no
 tests, it's up to you to add them.
 
-NOTE: **Note:**
+NOTE:
 Not all buildpacks supported by [Auto Build](#auto-build) are supported by Auto Test.
 Auto Test uses [Herokuish](https://gitlab.com/gitlab-org/gitlab/-/issues/212689), *not*
 Cloud Native Buildpacks, and only buildpacks that implement the
@@ -144,7 +150,7 @@ out. The merge request widget also displays any
 Static Application Security Testing (SAST) uses the
 [SAST Docker image](https://gitlab.com/gitlab-org/security-products/sast) to run static
 analysis on the current code, and checks for potential security issues. The
-Auto SAST stage will be skipped on licenses other than
+Auto SAST stage is skipped on licenses other than
 [Ultimate](https://about.gitlab.com/pricing/), and requires
 [GitLab Runner](https://docs.gitlab.com/runner/) 11.5 or above.
 
@@ -161,10 +167,7 @@ see the documentation.
 > - [Select functionality made available in all tiers](../../user/application_security/secret_detection/#making-secret-detection-available-to-all-gitlab-tiers) in 13.3
 
 Secret Detection uses the
-[Secret Detection Docker image](https://gitlab.com/gitlab-org/security-products/analyzers/secrets) to run Secret Detection on the current code, and checks for leaked secrets. The
-Auto Secret Detection stage runs only on the
-[Ultimate](https://about.gitlab.com/pricing/) tier, and requires
-[GitLab Runner](https://docs.gitlab.com/runner/) 11.5 or above.
+[Secret Detection Docker image](https://gitlab.com/gitlab-org/security-products/analyzers/secrets) to run Secret Detection on the current code, and checks for leaked secrets. Auto Secret Detection requires [GitLab Runner](https://docs.gitlab.com/runner/) 11.5 or above.
 
 After creating the report, it's uploaded as an artifact which you can later
 download and evaluate. The merge request widget also displays any security
@@ -251,7 +254,7 @@ In GitLab 11.4 and later, [local Tiller](https://gitlab.com/gitlab-org/gitlab-fo
 used. Previous versions of GitLab had a Tiller installed in the project
 namespace.
 
-CAUTION: **Caution:**
+WARNING:
 Your apps should *not* be manipulated outside of Helm (using Kubernetes directly).
 This can cause confusion with Helm not detecting the change and subsequent
 deploys with Auto DevOps can undo your changes. Also, if you change something
@@ -370,7 +373,7 @@ In GitLab 11.4 and later, a
 used. Previous versions of GitLab had a Tiller installed in the project
 namespace.
 
-CAUTION: **Caution:**
+WARNING:
 Your apps should *not* be manipulated outside of Helm (using Kubernetes directly).
 This can cause confusion with Helm not detecting the change and subsequent
 deploys with Auto DevOps can undo your changes. Also, if you change something
@@ -384,16 +387,16 @@ in the first place, and thus not realize that it needs to re-apply the old confi
 [GitLab Deploy Tokens](../../user/project/deploy_tokens/index.md#gitlab-deploy-token)
 are created for internal and private projects when Auto DevOps is enabled, and the
 Auto DevOps settings are saved. You can use a Deploy Token for permanent access to
-the registry. After you manually revoke the GitLab Deploy Token, it won't be
+the registry. After you manually revoke the GitLab Deploy Token, it isn't
 automatically created.
 
 If the GitLab Deploy Token can't be found, `CI_REGISTRY_PASSWORD` is
 used.
 
-NOTE: **Note:**
-`CI_REGISTRY_PASSWORD` is only valid during deployment. Kubernetes will be able
-to successfully pull the container image during deployment, but if the image must
-be pulled again, such as after pod eviction, Kubernetes will fail to do so
+NOTE:
+`CI_REGISTRY_PASSWORD` is only valid during deployment. Kubernetes can
+successfully pull the container image during deployment, but if the image must
+be pulled again, such as after pod eviction, Kubernetes cannot do so
 as it attempts to fetch the image using `CI_REGISTRY_PASSWORD`.
 
 ### Kubernetes 1.16+
@@ -402,7 +405,7 @@ as it attempts to fetch the image using `CI_REGISTRY_PASSWORD`.
 > - Support for deploying a PostgreSQL version that supports Kubernetes 1.16+ was [introduced](https://gitlab.com/gitlab-org/cluster-integration/auto-deploy-image/-/merge_requests/49) in GitLab 12.9.
 > - Supported out of the box for new deployments as of GitLab 13.0.
 
-CAUTION: **Deprecation:**
+WARNING:
 The default value for the `deploymentApiVersion` setting was changed from
 `extensions/v1beta` to `apps/v1` in [GitLab 13.0](https://gitlab.com/gitlab-org/charts/auto-deploy-app/-/issues/47).
 
@@ -452,7 +455,7 @@ initialization completes, GitLab deploys a second release with the application
 deployment as normal.
 
 Note that a post-install hook means that if any deploy succeeds,
-`DB_INITIALIZE` won't be processed thereafter.
+`DB_INITIALIZE` isn't processed thereafter.
 
 If present, `DB_MIGRATE` is run as a shell command within an application pod as
 a Helm pre-upgrade hook.
@@ -489,7 +492,7 @@ the standard health checks, which expect a successful HTTP response on port
 the [`sidekiq_alive` gem](https://rubygems.org/gems/sidekiq_alive).
 
 To work with Sidekiq, you must also ensure your deployments have
-access to a Redis instance. Auto DevOps won't deploy this instance for you, so
+access to a Redis instance. Auto DevOps doesn't deploy this instance for you, so
 you must:
 
 - Maintain your own Redis instance.
@@ -528,7 +531,7 @@ and accept traffic to and from any source. You can use
 [NetworkPolicy](https://kubernetes.io/docs/concepts/services-networking/network-policies/)
 to restrict connections to and from selected pods, namespaces, and the Internet.
 
-NOTE: **Note:**
+NOTE:
 You must use a Kubernetes network plugin that implements support for
 `NetworkPolicy`. The default network plugin for Kubernetes (`kubenet`)
 [does not implement](https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/#kubenet)
@@ -680,4 +683,4 @@ for updates.
 
 This stage is enabled by default. You can disable it by adding the
 `CODE_INTELLIGENCE_DISABLED` environment variable. Read more about
-[disabling Auto DevOps jobs](../../topics/autodevops/customize.md#disable-jobs).  
+[disabling Auto DevOps jobs](../../topics/autodevops/customize.md#disable-jobs).

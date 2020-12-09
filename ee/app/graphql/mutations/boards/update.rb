@@ -8,7 +8,7 @@ module Mutations
       argument :id,
                ::Types::GlobalIDType[::Board],
                required: true,
-               description: 'The board global id.'
+               description: 'The board global ID'
 
       argument :name,
                 GraphQL::STRING_TYPE,
@@ -29,17 +29,26 @@ module Mutations
                ::Types::GlobalIDType[::User],
                required: false,
                loads: ::Types::UserType,
-               description: 'The id of user to be assigned to the board.'
+               description: 'The ID of user to be assigned to the board'
 
+      # Cannot pre-load ::Types::MilestoneType because we are also assigning values like:
+      # ::Timebox::None(0), ::Timebox::Upcoming(-2) or ::Timebox::Started(-3), that cannot be resolved to a DB record.
       argument :milestone_id,
                ::Types::GlobalIDType[::Milestone],
                required: false,
-               description: 'The id of milestone to be assigned to the board.'
+               description: 'The ID of milestone to be assigned to the board'
+
+      # Cannot pre-load ::Types::IterationType because we are also assigning values like:
+      # ::Iteration::Constants::None(0) or ::Iteration::Constants::Current(-4), that cannot be resolved to a DB record.
+      argument :iteration_id,
+               ::Types::GlobalIDType[::Iteration],
+               required: false,
+               description: 'The ID of iteration to be assigned to the board.'
 
       argument :weight,
                GraphQL::INT_TYPE,
                required: false,
-               description: 'The weight value to be assigned to the board.'
+               description: 'The weight value to be assigned to the board'
 
       argument :labels, [GraphQL::STRING_TYPE],
                required: false,
@@ -47,12 +56,12 @@ module Mutations
 
       argument :label_ids, [::Types::GlobalIDType[::Label]],
                required: false,
-               description: 'The IDs of labels to be added to the board.'
+               description: 'The IDs of labels to be added to the board'
 
       field :board,
             Types::BoardType,
             null: true,
-            description: "The board after mutation."
+            description: "The board after mutation"
 
       authorize :admin_board
 
@@ -106,6 +115,9 @@ module Mutations
           ::GitlabSchema.parse_gid(label_id, expected_type: ::Label).model_id
         end
 
+        # we need this because we also pass `gid://gitlab/Iteration/-4` or `gid://gitlab/Iteration/-4`
+        # as `iteration_id` when we scope board to `Iteration::Constants::Current` or `Iteration::Constants::None`
+        args[:iteration_id] = args[:iteration_id].model_id if args[:iteration_id]
         args
       end
 

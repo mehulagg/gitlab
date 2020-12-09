@@ -1,5 +1,5 @@
-import * as getters from 'ee/license_compliance/store/modules/list/getters';
 import { REPORT_STATUS } from 'ee/license_compliance/store/modules/list/constants';
+import * as getters from 'ee/license_compliance/store/modules/list/getters';
 import { LICENSE_APPROVAL_CLASSIFICATION } from 'ee/vue_shared/license_compliance/constants';
 
 describe('Licenses getters', () => {

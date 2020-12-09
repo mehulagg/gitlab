@@ -1,5 +1,5 @@
-import mutations from 'ee/analytics/cycle_analytics/store/mutations';
 import * as types from 'ee/analytics/cycle_analytics/store/mutation_types';
+import mutations from 'ee/analytics/cycle_analytics/store/mutations';
 
 import {
   issueStage,
@@ -16,7 +16,7 @@ import {
 
 let state = null;
 
-describe('Cycle analytics mutations', () => {
+describe('Value Stream Analytics mutations', () => {
   beforeEach(() => {
     state = {};
   });

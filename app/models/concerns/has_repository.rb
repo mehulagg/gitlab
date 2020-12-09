@@ -88,7 +88,7 @@ module HasRepository
 
     group_branch_default_name = group&.default_branch_name if respond_to?(:group)
 
-    group_branch_default_name || Gitlab::CurrentSettings.default_branch_name
+    (group_branch_default_name || Gitlab::CurrentSettings.default_branch_name).presence
   end
 
   def reload_default_branch
@@ -107,6 +107,11 @@ module HasRepository
 
   def http_url_to_repo
     Gitlab::RepositoryUrlBuilder.build(repository.full_path, protocol: :http)
+  end
+
+  # Is overridden in EE::Project for Geo support
+  def lfs_http_url_to_repo(_operation = nil)
+    http_url_to_repo
   end
 
   def web_url(only_path: nil)

@@ -1,9 +1,8 @@
 import Vue from 'vue';
 
-import mountComponent from 'helpers/vue_mount_component_helper';
-
 import TableHeaderComponent from 'ee/group_member_contributions/components/table_header.vue';
 import defaultColumns from 'ee/group_member_contributions/constants';
+import mountComponent from 'helpers/vue_mount_component_helper';
 
 import { mockSortOrders } from '../mock_data';
 

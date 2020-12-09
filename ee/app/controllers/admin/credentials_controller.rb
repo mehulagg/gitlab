@@ -48,4 +48,9 @@ class Admin::CredentialsController < Admin::ApplicationController
   def users
     nil
   end
+
+  override :revocable
+  def revocable
+    nil
+  end
 end

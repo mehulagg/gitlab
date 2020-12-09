@@ -80,7 +80,10 @@ export default {
       return this.isOpen ? __('Opened') : __('Closed');
     },
     stateIconName() {
-      return this.item.type === ChildType.Epic ? 'epic' : 'issues';
+      if (this.item.type === ChildType.Epic) {
+        return this.isOpen ? 'epic' : 'epic-closed';
+      }
+      return this.isOpen ? 'issues' : 'issue-closed';
     },
     stateIconClass() {
       return this.isOpen

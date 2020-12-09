@@ -302,7 +302,7 @@ module Gitlab
       private :archive_file_path
 
       def archive_version_path
-        return '' unless Feature.enabled?(:include_lfs_blobs_in_archive)
+        return '' unless Feature.enabled?(:include_lfs_blobs_in_archive, default_enabled: true)
 
         '@v2'
       end
@@ -465,6 +465,18 @@ module Gitlab
         Gitlab::Git::DiffStatsCollection.new(stats)
       rescue CommandError, TypeError
         empty_diff_stats
+      end
+
+      def find_changed_paths(commits)
+        processed_commits = commits.reject { |ref| ref.blank? || Gitlab::Git.blank_ref?(ref) }
+
+        return [] if processed_commits.empty?
+
+        wrapped_gitaly_errors do
+          gitaly_commit_client.find_changed_paths(processed_commits)
+        end
+      rescue CommandError, TypeError, NoRepository
+        []
       end
 
       # Returns a RefName for a given SHA

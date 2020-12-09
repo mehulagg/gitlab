@@ -9,10 +9,9 @@ RSpec.describe 'getting an issue list for a project' do
 
   let_it_be(:project) { create(:project, :repository, :public) }
   let_it_be(:current_user) { create(:user) }
-  let_it_be(:issues, reload: true) do
-    [create(:issue, project: project, discussion_locked: true),
-     create(:issue, :with_alert, project: project)]
-  end
+  let_it_be(:issue_a, reload: true) { create(:issue, project: project, discussion_locked: true) }
+  let_it_be(:issue_b, reload: true) { create(:issue, :with_alert, project: project) }
+  let_it_be(:issues, reload: true) { [issue_a, issue_b] }
 
   let(:fields) do
     <<~QUERY
@@ -143,16 +142,14 @@ RSpec.describe 'getting an issue list for a project' do
   describe 'sorting and pagination' do
     let_it_be(:data_path) { [:project, :issues] }
 
-    def pagination_query(params, page_info)
-      graphql_query_for(
-        'project',
-        { 'fullPath' => sort_project.full_path },
-        query_graphql_field('issues', params, "#{page_info} edges { node { iid dueDate} }")
+    def pagination_query(params)
+      graphql_query_for(:project, { full_path: sort_project.full_path },
+        query_graphql_field(:issues, params, "#{page_info} nodes { iid }")
       )
     end
 
     def pagination_results_data(data)
-      data.map { |issue| issue.dig('node', 'iid').to_i }
+      data.map { |issue| issue.dig('iid').to_i }
     end
 
     context 'when sorting by due date' do
@@ -165,7 +162,7 @@ RSpec.describe 'getting an issue list for a project' do
 
       context 'when ascending' do
         it_behaves_like 'sorted paginated query' do
-          let(:sort_param)       { 'DUE_DATE_ASC' }
+          let(:sort_param)       { :DUE_DATE_ASC }
           let(:first_param)      { 2 }
           let(:expected_results) { [due_issue3.iid, due_issue5.iid, due_issue1.iid, due_issue4.iid, due_issue2.iid] }
         end
@@ -173,7 +170,7 @@ RSpec.describe 'getting an issue list for a project' do
 
       context 'when descending' do
         it_behaves_like 'sorted paginated query' do
-          let(:sort_param)       { 'DUE_DATE_DESC' }
+          let(:sort_param)       { :DUE_DATE_DESC }
           let(:first_param)      { 2 }
           let(:expected_results) { [due_issue1.iid, due_issue5.iid, due_issue3.iid, due_issue4.iid, due_issue2.iid] }
         end
@@ -190,7 +187,7 @@ RSpec.describe 'getting an issue list for a project' do
 
       context 'when ascending' do
         it_behaves_like 'sorted paginated query' do
-          let(:sort_param)       { 'RELATIVE_POSITION_ASC' }
+          let(:sort_param)       { :RELATIVE_POSITION_ASC }
           let(:first_param)      { 2 }
           let(:expected_results) { [relative_issue5.iid, relative_issue3.iid, relative_issue1.iid, relative_issue4.iid, relative_issue2.iid] }
         end
@@ -210,7 +207,7 @@ RSpec.describe 'getting an issue list for a project' do
 
       context 'when ascending' do
         it_behaves_like 'sorted paginated query' do
-          let(:sort_param)       { 'PRIORITY_ASC' }
+          let(:sort_param)       { :PRIORITY_ASC }
           let(:first_param)      { 2 }
           let(:expected_results) { [priority_issue3.iid, priority_issue1.iid, priority_issue2.iid, priority_issue4.iid] }
         end
@@ -218,7 +215,7 @@ RSpec.describe 'getting an issue list for a project' do
 
       context 'when descending' do
         it_behaves_like 'sorted paginated query' do
-          let(:sort_param)       { 'PRIORITY_DESC' }
+          let(:sort_param)       { :PRIORITY_DESC }
           let(:first_param)      { 2 }
           let(:expected_results) { [priority_issue1.iid, priority_issue3.iid, priority_issue2.iid, priority_issue4.iid] }
         end
@@ -237,7 +234,7 @@ RSpec.describe 'getting an issue list for a project' do
 
       context 'when ascending' do
         it_behaves_like 'sorted paginated query' do
-          let(:sort_param)       { 'LABEL_PRIORITY_ASC' }
+          let(:sort_param)       { :LABEL_PRIORITY_ASC }
           let(:first_param)      { 2 }
           let(:expected_results) { [label_issue3.iid, label_issue1.iid, label_issue2.iid, label_issue4.iid] }
         end
@@ -245,7 +242,7 @@ RSpec.describe 'getting an issue list for a project' do
 
       context 'when descending' do
         it_behaves_like 'sorted paginated query' do
-          let(:sort_param)       { 'LABEL_PRIORITY_DESC' }
+          let(:sort_param)       { :LABEL_PRIORITY_DESC }
           let(:first_param)      { 2 }
           let(:expected_results) { [label_issue2.iid, label_issue3.iid, label_issue1.iid, label_issue4.iid] }
         end
@@ -262,7 +259,7 @@ RSpec.describe 'getting an issue list for a project' do
 
       context 'when ascending' do
         it_behaves_like 'sorted paginated query' do
-          let(:sort_param)       { 'MILESTONE_DUE_ASC' }
+          let(:sort_param)       { :MILESTONE_DUE_ASC }
           let(:first_param)      { 2 }
           let(:expected_results) { [milestone_issue2.iid, milestone_issue3.iid, milestone_issue1.iid] }
         end
@@ -270,7 +267,7 @@ RSpec.describe 'getting an issue list for a project' do
 
       context 'when descending' do
         it_behaves_like 'sorted paginated query' do
-          let(:sort_param)       { 'MILESTONE_DUE_DESC' }
+          let(:sort_param)       { :MILESTONE_DUE_DESC }
           let(:first_param)      { 2 }
           let(:expected_results) { [milestone_issue3.iid, milestone_issue2.iid, milestone_issue1.iid] }
         end
@@ -412,6 +409,44 @@ RSpec.describe 'getting an issue list for a project' do
       issues_data = Gitlab::Json.parse(response.body)['data']['project']['issues']['edges']
       expect(issues_data.count).to eq(3)
       expect(response_assignee_ids(issues_data)).to match_array(assignees_as_global_ids(new_issues))
+    end
+  end
+
+  describe 'N+1 query checks' do
+    let(:extra_iid_for_second_query) { issue_b.iid.to_s }
+    let(:search_params) { { iids: [issue_a.iid.to_s] } }
+
+    def execute_query
+      query = graphql_query_for(
+        :project,
+        { full_path: project.full_path },
+        query_graphql_field(:issues, search_params, [
+          query_graphql_field(:nodes, nil, requested_fields)
+        ])
+      )
+      post_graphql(query, current_user: current_user)
+    end
+
+    context 'when requesting `user_notes_count`' do
+      let(:requested_fields) { [:user_notes_count] }
+
+      before do
+        create_list(:note_on_issue, 2, noteable: issue_a, project: project)
+        create(:note_on_issue, noteable: issue_b, project: project)
+      end
+
+      include_examples 'N+1 query check'
+    end
+
+    context 'when requesting `user_discussions_count`' do
+      let(:requested_fields) { [:user_discussions_count] }
+
+      before do
+        create_list(:note_on_issue, 2, noteable: issue_a, project: project)
+        create(:note_on_issue, noteable: issue_b, project: project)
+      end
+
+      include_examples 'N+1 query check'
     end
   end
 end

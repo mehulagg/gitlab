@@ -2,7 +2,7 @@
 type: reference, howto
 stage: Secure
 group: Threat Insights
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # GitLab Security Dashboard, Security Center, and Vulnerability Reports **(ULTIMATE)**
@@ -65,22 +65,37 @@ the analyzer outputs an
 
 ## Project Security Dashboard
 
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/235558) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.6.
+
+At the project level, the Security Dashboard displays a chart with the number of vulnerabilities over time.
+Access it by navigating to **Security & Compliance > Security Dashboard**. Currently, we display historical
+data up to 365 days.
+
+![Project Security Dashboard](img/project_security_dashboard_chart_v13_6.png)
+
+Filter the historical data by clicking on the corresponding legend name. The image above, for example, shows
+only the graph for vulnerabilities with **high** severity.
+
+### Vulnerability Report
+
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/6165) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 11.1.
 
-At the project level, the Security Dashboard displays the vulnerabilities that exist in your project's
-[default branch](../../project/repository/branches/index.md#default-branch). Access it by navigating
-to **Security & Compliance > Security Dashboard**. By default, the Security Dashboard is filtered to
+The vulnerabilities that exist in your project's
+[default branch](../../project/repository/branches/index.md#default-branch) are accessed by navigating to
+**Security & Compliance > Vulnerability Report**. By default, the Vulnerability Report is filtered to
 display all detected and confirmed vulnerabilities.
 
-The Security Dashboard first displays the time at which the last pipeline completed on the project's
-default branch. There's also a link to view this in more detail.
+The Vulnerability Report first displays the time at which the last pipeline completed on the project's
+default branch. There's also a link to view this in more detail. In the case of any pipeline failures,
+the number of failures is indicated. The failure notification takes you directly to
+the **Failed jobs** tab of the pipeline page.
 
-The Security Dashboard next displays the total number of vulnerabilities by severity (for example,
+The Vulnerability Report next displays the total number of vulnerabilities by severity (for example,
 Critical, High, Medium, Low, Info, Unknown). Below this, a table shows each vulnerability's status, severity,
 and description. Clicking a vulnerability takes you to its [Vulnerability Details](../vulnerabilities)
 page to view more information about that vulnerability.
 
-![Project Security Dashboard](img/project_security_dashboard_v13_5.png)
+![Project Vulnerability Report](img/project_security_dashboard_v13_5.png)
 
 You can filter the vulnerabilities by one or more of the following:
 
@@ -95,7 +110,7 @@ You can also dismiss vulnerabilities in the table:
 1. Select the checkbox for each vulnerability you want to dismiss.
 1. In the menu that appears, select the reason for dismissal and click **Dismiss Selected**.
 
-![Project Security Dashboard](img/project_security_dashboard_dismissal_v13_4.png)
+![Project Vulnerability Report](img/project_security_dashboard_dismissal_v13_4.png)
 
 ## Group Security Dashboard
 
@@ -127,10 +142,10 @@ Next to the timeline chart is a list of projects, grouped and sorted by the seve
 | B | One or more "low" |
 | A | Zero vulnerabilities |
 
-Projects with no vulnerability tests configured will not appear in the list. Additionally, dismissed
+Projects with no vulnerability tests configured don't appear in the list. Additionally, dismissed
 vulnerabilities are excluded.
 
-Navigate to the group's [vulnerability report](#vulnerability-report) to view the vulnerabilities found.
+Navigate to the group's [vulnerability report](#vulnerability-report-1) to view the vulnerabilities found.
 
 ## Instance Security Center
 
@@ -177,7 +192,7 @@ You can export all your vulnerabilities in CSV (comma separated values) format b
 ready, the CSV report downloads to your local machine. The report contains all vulnerabilities for
 the projects defined in the Security Dashboard, as filters don't apply to the export function.
 
-NOTE: **Note:**
+NOTE:
 It may take several minutes for the download to start if your project contains
 thousands of vulnerabilities. Don't close the page until the download finishes.
 
@@ -210,12 +225,12 @@ are discovered.
 
 To ensure the information on the Security Dashboard is regularly updated,
 [configure a scheduled pipeline](../../../ci/pipelines/schedules.md) to run a
-daily security scan. This will update the information displayed on the Security
+daily security scan. This updates the information displayed on the Security
 Dashboard regardless of how often the default branch is updated.
 
 That way, reports are created even if no code change happens.
 
-CAUTION: **Warning:**
+WARNING:
 Running Dependency Scanning from a scheduled pipeline might result in false negatives if your
 project doesn't have a lock file and isn't configured for Continuous Delivery. A lock file is a file
 that lists all transient dependencies and keeps track of their exact versions. The false negative
@@ -234,7 +249,7 @@ to configure daily security scans.
 Each vulnerability report contains vulnerabilities from the latest scans that were merged
 into the default branch.
 
-![Vulnerability Report](img/group_vulnerability_report_v13_4.png)
+![Vulnerability Report](img/group_vulnerability_report_v13_7.png)
 
 You can filter which vulnerabilities the vulnerability report displays by:
 

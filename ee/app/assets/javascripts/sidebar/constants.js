@@ -19,6 +19,8 @@ export const iterationSelectTextMap = {
   iterationSelectFail: __('Failed to set iteration on this issue. Please try again.'),
 };
 
+export const iterationDisplayState = 'opened';
+
 export const healthStatusForRestApi = {
   NO_STATUS: '0',
   [healthStatus.ON_TRACK]: 'on_track',

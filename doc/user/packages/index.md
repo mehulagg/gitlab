@@ -1,7 +1,7 @@
 ---
 stage: Package
 group: Package
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Packages & Registries
@@ -32,14 +32,13 @@ You can also use the [API](../../api/packages.md) to administer the Package Regi
 
 ## Accepting contributions
 
-The below table lists formats that are not supported, but are accepting Community contributions for. Consider contributing to GitLab. This [development documentation](../../development/packages.md) will
-guide you through the process.
+The below table lists formats that are not supported, but are accepting Community contributions for. Consider contributing to GitLab. This [development documentation](../../development/packages.md)
+guides you through the process.
 
 | Format | Status |
 | ------ | ------ |
 | Chef      | [#36889](https://gitlab.com/gitlab-org/gitlab/-/issues/36889) |
 | CocoaPods | [#36890](https://gitlab.com/gitlab-org/gitlab/-/issues/36890) |
-| CocoaPods | [#36891](https://gitlab.com/gitlab-org/gitlab/-/issues/36891) |
 | Conda     | [#36891](https://gitlab.com/gitlab-org/gitlab/-/issues/36891) |
 | CRAN      | [#36892](https://gitlab.com/gitlab-org/gitlab/-/issues/36892) |
 | Debian    | [WIP: Merge Request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/44746) |

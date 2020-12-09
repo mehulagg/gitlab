@@ -1,7 +1,7 @@
 ---
 stage: Manage
 group: Access
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: howto
 ---
 
@@ -23,17 +23,17 @@ or directly from the Admin Area. To do this:
 
 A blocked user:
 
-- Will not be able to login.
+- Cannot log in.
 - Cannot access Git repositories or the API.
-- Will not receive any notifications from GitLab.
-- Will not be able to use [slash commands](../../integration/slash_commands.md).
+- Does not receive any notifications from GitLab.
+- Cannot use [slash commands](../../integration/slash_commands.md).
 
-Personal projects, and group and user history of the blocked user will be left intact.
+Personal projects, and group and user history of the blocked user are left intact.
 
 Users can also be blocked using the [GitLab API](../../api/users.md#block-user).
 
-NOTE: **Note:**
-A blocked user does not consume a [seat](../../subscriptions/self_managed/index.md#choose-the-number-of-users).
+NOTE:
+A blocked user does not consume a [seat](../../subscriptions/self_managed/index.md#billable-users).
 
 ## Unblocking a user
 
@@ -46,6 +46,6 @@ A blocked user can be unblocked from the Admin Area. To do this:
 
 Users can also be unblocked using the [GitLab API](../../api/users.md#unblock-user).
 
-NOTE: **Note:**
-Unblocking a user will change the user's state to active and it consumes a
-[seat](../../subscriptions/self_managed/index.md#choose-the-number-of-users).
+NOTE:
+Unblocking a user changes the user's state to active and consumes a
+[seat](../../subscriptions/self_managed/index.md#billable-users).

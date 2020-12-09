@@ -1,7 +1,7 @@
 ---
 stage: Plan
 group: Project Management
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Import your Jira project issues to GitLab
@@ -56,7 +56,7 @@ Make sure you have the integration set up before trying to import Jira issues.
 
 To import Jira issues to a GitLab project, follow the steps below.
 
-NOTE: **Note:**
+NOTE:
 Importing Jira issues is done as an asynchronous background job, which
 may result in delays based on import queues load, system load, or other factors.
 Importing large projects may take several minutes depending on the size of the import.

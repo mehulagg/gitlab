@@ -19,6 +19,8 @@ module QA
     autoload :Saml, 'qa/flow/saml'
     autoload :User, 'qa/flow/user'
     autoload :MergeRequest, 'qa/flow/merge_request'
+    autoload :Pipeline, 'qa/flow/pipeline'
+    autoload :SignUp, 'qa/flow/sign_up'
   end
 
   ##
@@ -180,8 +182,12 @@ module QA
       autoload :Menu, 'qa/page/main/menu'
       autoload :OAuth, 'qa/page/main/oauth'
       autoload :TwoFactorAuth, 'qa/page/main/two_factor_auth'
-      autoload :SignUp, 'qa/page/main/sign_up'
       autoload :Terms, 'qa/page/main/terms'
+    end
+
+    module Registration
+      autoload :SignUp, 'qa/page/registration/sign_up'
+      autoload :Welcome, 'qa/page/registration/welcome'
     end
 
     module Settings
@@ -301,14 +307,12 @@ module QA
 
         module Services
           autoload :Jira, 'qa/page/project/settings/services/jira'
+          autoload :Jenkins, 'qa/page/project/settings/services/jenkins'
+          autoload :Prometheus, 'qa/page/project/settings/services/prometheus'
         end
         autoload :Operations, 'qa/page/project/settings/operations'
         autoload :Incidents, 'qa/page/project/settings/incidents'
         autoload :Integrations, 'qa/page/project/settings/integrations'
-
-        module Services
-          autoload :Prometheus, 'qa/page/project/settings/services/prometheus'
-        end
       end
 
       module SubMenus
@@ -402,6 +406,7 @@ module QA
 
     module Layout
       autoload :Banner, 'qa/page/layout/banner'
+      autoload :Flash, 'qa/page/layout/flash'
       autoload :PerformanceBar, 'qa/page/layout/performance_bar'
     end
 
@@ -429,6 +434,7 @@ module QA
           autoload :OutboundRequests, 'qa/page/admin/settings/component/outbound_requests'
           autoload :AccountAndLimit, 'qa/page/admin/settings/component/account_and_limit'
           autoload :PerformanceBar, 'qa/page/admin/settings/component/performance_bar'
+          autoload :SignUpRestrictions, 'qa/page/admin/settings/component/sign_up_restrictions'
         end
       end
 

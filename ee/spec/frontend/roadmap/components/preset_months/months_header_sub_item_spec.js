@@ -1,8 +1,8 @@
 import Vue from 'vue';
 
 import MonthsHeaderSubItemComponent from 'ee/roadmap/components/preset_months/months_header_sub_item.vue';
-import { getTimeframeForMonthsView } from 'ee/roadmap/utils/roadmap_utils';
 import { PRESET_TYPES } from 'ee/roadmap/constants';
+import { getTimeframeForMonthsView } from 'ee/roadmap/utils/roadmap_utils';
 
 import mountComponent from 'helpers/vue_mount_component_helper';
 import { mockTimeframeInitialDate } from '../../mock_data';

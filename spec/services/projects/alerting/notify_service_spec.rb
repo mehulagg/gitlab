@@ -54,7 +54,6 @@ RSpec.describe Projects::Alerting::NotifyService do
           shared_examples 'assigns the alert properties' do
             it 'ensure that created alert has all data properly assigned' do
               subject
-
               expect(last_alert_attributes).to match(
                 project_id: project.id,
                 title: payload_raw.fetch(:title),
@@ -62,6 +61,7 @@ RSpec.describe Projects::Alerting::NotifyService do
                 severity: payload_raw.fetch(:severity),
                 status: AlertManagement::Alert.status_value(:triggered),
                 events: 1,
+                domain: 'operations',
                 hosts: payload_raw.fetch(:hosts),
                 payload: payload_raw.with_indifferent_access,
                 issue_id: nil,
@@ -129,6 +129,12 @@ RSpec.describe Projects::Alerting::NotifyService do
                   it { expect { subject }.to change { issue.reload.state }.from('opened').to('closed') }
                   it { expect { subject }.to change(ResourceStateEvent, :count).by(1) }
                 end
+
+                context 'with issue enabled' do
+                  let(:issue_enabled) { true }
+
+                  it_behaves_like 'does not process incident issues'
+                end
               end
             end
 
@@ -181,6 +187,7 @@ RSpec.describe Projects::Alerting::NotifyService do
                 status: AlertManagement::Alert.status_value(:triggered),
                 events: 1,
                 hosts: [],
+                domain: 'operations',
                 payload: payload_raw.with_indifferent_access,
                 issue_id: nil,
                 description: nil,
@@ -247,23 +254,6 @@ RSpec.describe Projects::Alerting::NotifyService do
       end
     end
 
-    context 'with an Alerts Service' do
-      let_it_be_with_reload(:integration) { create(:alerts_service, project: project) }
-
-      it_behaves_like 'notifcations are handled correctly' do
-        let(:source) { 'Generic Alert Endpoint' }
-      end
-
-      context 'with deactivated Alerts Service' do
-        before do
-          integration.update!(active: false)
-        end
-
-        it_behaves_like 'does not process incident issues due to error', http_status: :forbidden
-        it_behaves_like 'does not an create alert management alert'
-      end
-    end
-
     context 'with an HTTP Integration' do
       let_it_be_with_reload(:integration) { create(:alert_management_http_integration, project: project) }
 
@@ -278,7 +268,7 @@ RSpec.describe Projects::Alerting::NotifyService do
           integration.update!(active: false)
         end
 
-        it_behaves_like 'does not process incident issues due to error', http_status: :unauthorized
+        it_behaves_like 'does not process incident issues due to error', http_status: :forbidden
         it_behaves_like 'does not an create alert management alert'
       end
     end

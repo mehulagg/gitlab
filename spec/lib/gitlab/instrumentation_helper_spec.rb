@@ -34,7 +34,10 @@ RSpec.describe Gitlab::InstrumentationHelper do
         :redis_shared_state_calls,
         :redis_shared_state_duration_s,
         :redis_shared_state_read_bytes,
-        :redis_shared_state_write_bytes
+        :redis_shared_state_write_bytes,
+        :db_count,
+        :db_write_count,
+        :db_cached_count
       ]
 
       expect(described_class.keys).to eq(expected_keys)
@@ -46,10 +49,10 @@ RSpec.describe Gitlab::InstrumentationHelper do
 
     subject { described_class.add_instrumentation_data(payload) }
 
-    it 'adds nothing' do
+    it 'adds only DB counts by default' do
       subject
 
-      expect(payload).to eq({})
+      expect(payload).to eq(db_count: 0, db_cached_count: 0, db_write_count: 0)
     end
 
     context 'when Gitaly calls are made' do
@@ -95,6 +98,16 @@ RSpec.describe Gitlab::InstrumentationHelper do
         # Gitaly
         expect(payload[:gitaly_calls]).to be_nil
         expect(payload[:gitaly_duration]).to be_nil
+      end
+    end
+
+    context 'when the request matched a Rack::Attack safelist' do
+      it 'logs the safelist name' do
+        Gitlab::Instrumentation::Throttle.safelist = 'foobar'
+
+        subject
+
+        expect(payload[:throttle_safelist]).to eq('foobar')
       end
     end
   end

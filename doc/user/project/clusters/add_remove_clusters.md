@@ -1,7 +1,7 @@
 ---
 stage: Configure
 group: Configure
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Adding and removing Kubernetes clusters
@@ -13,7 +13,7 @@ GitLab offers integrated cluster creation for the following Kubernetes providers
 
 GitLab can also integrate with any standard Kubernetes provider, either on-premise or hosted.
 
-NOTE: **Note:**
+NOTE:
 Watch the webcast [Scalable app deployment with GitLab and Google Cloud Platform](https://about.gitlab.com/webcast/scalable-app-deploy/)
 and learn how to spin up a Kubernetes cluster managed by Google Cloud Platform (GCP)
 in a few clicks.
@@ -94,7 +94,11 @@ GitLab creates the following resources for RBAC clusters.
 | Environment namespace | `Namespace`          | Contains all environment-specific resources                                                                | Deploying to a cluster |
 | Environment namespace | `ServiceAccount`     | Uses namespace of environment                                                                              | Deploying to a cluster |
 | Environment namespace | `Secret`             | Token for environment ServiceAccount                                                                       | Deploying to a cluster |
-| Environment namespace | `RoleBinding`        | [`edit`](https://kubernetes.io/docs/reference/access-authn-authz/rbac/#user-facing-roles) roleRef          | Deploying to a cluster |
+| Environment namespace | `RoleBinding`        | [`admin`](https://kubernetes.io/docs/reference/access-authn-authz/rbac/#user-facing-roles) roleRef         | Deploying to a cluster |
+
+The environment namespace `RoleBinding` was
+[updated](https://gitlab.com/gitlab-org/gitlab/-/issues/31113) in GitLab 13.6
+to `admin` roleRef. Previously, the `edit` roleRef was used.
 
 ### ABAC cluster resources
 
@@ -256,7 +260,7 @@ To add a Kubernetes cluster to your project, group, or instance:
          kubectl apply -f gitlab-admin-service-account.yaml --username=admin --password=<password>
          ```
 
-         NOTE: **Note:**
+         NOTE:
          Basic Authentication can be turned on and the password credentials
          can be obtained using the Google Cloud Console.
 
@@ -291,7 +295,7 @@ To add a Kubernetes cluster to your project, group, or instance:
          token:      <authentication_token>
          ```
 
-      NOTE: **Note:**
+      NOTE:
       For GKE clusters, you need the
       `container.clusterRoleBindings.create` permission to create a cluster
       role binding. You can follow the [Google Cloud
@@ -326,7 +330,7 @@ integration to work properly.
 
 ![RBAC](img/rbac_v13_1.png)
 
-CAUTION: **Caution:**
+WARNING:
 Disabling RBAC means that any application running in the cluster,
 or user who can authenticate to the cluster, has full API access. This is a
 [security concern](index.md#security-implications), and may not be desirable.

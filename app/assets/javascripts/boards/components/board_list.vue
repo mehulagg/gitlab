@@ -6,7 +6,6 @@ import boardCard from './board_card.vue';
 import eventHub from '../eventhub';
 import boardsStore from '../stores/boards_store';
 import { sprintf, __ } from '~/locale';
-import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import {
   getBoardSortableDefaultOptions,
@@ -16,9 +15,7 @@ import {
 
 // This component is being replaced in favor of './board_list_new.vue' for GraphQL boards
 
-if (gon.features && gon.features.multiSelectBoard) {
-  Sortable.mount(new MultiDrag());
-}
+Sortable.mount(new MultiDrag());
 
 export default {
   name: 'BoardList',
@@ -27,7 +24,6 @@ export default {
     boardNewIssue,
     GlLoadingIcon,
   },
-  mixins: [glFeatureFlagMixin()],
   props: {
     disabled: {
       type: Boolean,
@@ -100,12 +96,11 @@ export default {
   mounted() {
     // TODO: Use Draggable in ./board_list_new.vue to drag & drop issue
     // https://gitlab.com/gitlab-org/gitlab/-/issues/218164
-    const multiSelectOpts = {};
-    if (gon.features && gon.features.multiSelectBoard) {
-      multiSelectOpts.multiDrag = true;
-      multiSelectOpts.selectedClass = 'js-multi-select';
-      multiSelectOpts.animation = 500;
-    }
+    const multiSelectOpts = {
+      multiDrag: true,
+      selectedClass: 'js-multi-select',
+      animation: 500,
+    };
 
     const options = getBoardSortableDefaultOptions({
       scroll: true,

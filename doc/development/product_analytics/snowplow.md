@@ -1,7 +1,7 @@
 ---
 stage: Growth
 group: Product Analytics
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Snowplow Guide
@@ -10,7 +10,7 @@ This guide provides an overview of how Snowplow works, and implementation detail
 
 For more information about Product Analytics, see:
 
-- [Product Analytics Guide](index.md)
+- [Product Analytics Guide](https://about.gitlab.com/handbook/product/product-analytics-guide/)
 - [Usage Ping Guide](usage_ping.md)
 
 More useful links:
@@ -52,7 +52,7 @@ Tracking can be enabled at:
 - The instance level, which enables tracking on both the frontend and backend layers.
 - User level, though user tracking can be disabled on a per-user basis. GitLab tracking respects the [Do Not Track](https://www.eff.org/issues/do-not-track) standard, so any user who has enabled the Do Not Track option in their browser is not tracked at a user level.
 
-We utilize Snowplow for the majority of our tracking strategy and it is enabled on GitLab.com. On a self-managed instance, Snowplow can be enabled by navigating to:
+We use Snowplow for the majority of our tracking strategy and it is enabled on GitLab.com. On a self-managed instance, Snowplow can be enabled by navigating to:
 
 - **Admin Area > Settings > General** in the UI.
 - `admin/application_settings/integrations` in your browser.
@@ -98,7 +98,7 @@ sequenceDiagram
 
 ## Structured event taxonomy
 
-When adding new click events, we should add them in a way that's internally consistent. If we don't, it'll be very painful to perform analysis across features since each feature will be capturing events differently.
+When adding new click events, we should add them in a way that's internally consistent. If we don't, it is very painful to perform analysis across features since each feature captures events differently.
 
 The current method provides several attributes that are sent on each click event. Please try to follow these guidelines when specifying events to capture:
 
@@ -110,9 +110,13 @@ The current method provides several attributes that are sent on each click event
 | property  | text    | false    | Any additional property of the element, or object being acted on. |
 | value     | decimal | false    | Describes a numeric value or something directly related to the event. This could be the value of an input (e.g. `10` when clicking `internal` visibility). |
 
+### Web-specific parameters
+
+Snowplow JS adds many [web-specific parameters](https://docs.snowplowanalytics.com/docs/collecting-data/collecting-from-own-applications/snowplow-tracker-protocol/#Web-specific_parameters) to all web events by default.
+
 ## Implementing Snowplow JS (Frontend) tracking
 
-GitLab provides `Tracking`, an interface that wraps the [Snowplow JavaScript Tracker](https://github.com/snowplow/snowplow/wiki/javascript-tracker) for tracking custom events. There are a few ways to utilize tracking, but each generally requires at minimum, a `category` and an `action`. Additional data can be provided that adheres to our [Structured event taxonomy](#structured-event-taxonomy).
+GitLab provides `Tracking`, an interface that wraps the [Snowplow JavaScript Tracker](https://github.com/snowplow/snowplow/wiki/javascript-tracker) for tracking custom events. There are a few ways to use tracking, but each generally requires at minimum, a `category` and an `action`. Additional data can be provided that adheres to our [Structured event taxonomy](#structured-event-taxonomy).
 
 | field      | type   | default value              | description                                                                                                                                                                                                    |
 |:-----------|:-------|:---------------------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -294,7 +298,7 @@ Custom event tracking and instrumentation can be added by directly calling the `
 | `action`   | string | 'generic'     | The action being taken, which can be anything from a controller action like `create` to something like an Active Record callback.                                                                                                                                      |
 | `data`     | object | {}            | Additional data such as `label`, `property`, `value`, and `context` as described in [Structured event taxonomy](#structured-event-taxonomy). These are set as empty strings if you don't provide them. |
 
-Tracking can be viewed as either tracking user behavior, or can be utilized for instrumentation to monitor and visualize performance over time in an area or aspect of code.
+Tracking can be viewed as either tracking user behavior, or can be used for instrumentation to monitor and visualize performance over time in an area or aspect of code.
 
 For example:
 
@@ -366,47 +370,78 @@ Snowplow Micro is a Docker-based solution for testing frontend and backend event
 - Look at the [Snowplow Micro repository](https://github.com/snowplow-incubator/snowplow-micro)
 - Watch our [installation guide recording](https://www.youtube.com/watch?v=OX46fo_A0Ag)
 
-1. Install [Snowplow Micro](https://github.com/snowplow-incubator/snowplow-micro):
+1. Ensure Docker is installed and running.
+
+1. Install [Snowplow Micro](https://github.com/snowplow-incubator/snowplow-micro) by cloning the settings in [this project](https://gitlab.com/gitlab-org/snowplow-micro-configuration):
+1. Navigate to the directory with the cloned project, and start the appropriate Docker
+   container with the following script:
 
    ```shell
-   docker run --mount type=bind,source=$(pwd)/example,destination=/config -p 9090:9090 snowplow/snowplow-micro:latest --collector-config /config/micro.conf --iglu /config/iglu.json
-   ```
-
-1. Install Snowplow Micro by cloning the settings in [this project](https://gitlab.com/gitlab-org/snowplow-micro-configuration):
-
-   ```shell
-   git clone git@gitlab.com:gitlab-org/snowplow-micro-configuration.git
    ./snowplow-micro.sh
    ```
 
-1. Update port in SQL to set `9090`:
+1. Update your instance's settings to enable Snowplow events and point to the Snowplow Micro collector:
 
    ```shell
    gdk psql -d gitlabhq_development
    update application_settings set snowplow_collector_hostname='localhost:9090', snowplow_enabled=true, snowplow_cookie_domain='.gitlab.com';
    ```
 
-1. Update `app/assets/javascripts/tracking.js` to [remove this line](https://gitlab.com/snippets/1918635):
+1. Update `DEFAULT_SNOWPLOW_OPTIONS` in `app/assets/javascripts/tracking.js` to remove `forceSecureTracker: true`:
 
-   ```javascript
-   forceSecureTracker: true
+   ```diff
+   diff --git a/app/assets/javascripts/tracking.js b/app/assets/javascripts/tracking.js
+   index 0a1211d0a76..3b98c8f28f2 100644
+   --- a/app/assets/javascripts/tracking.js
+   +++ b/app/assets/javascripts/tracking.js
+   @@ -7,7 +7,6 @@ const DEFAULT_SNOWPLOW_OPTIONS = {
+      appId: '',
+      userFingerprint: false,
+      respectDoNotTrack: true,
+   -  forceSecureTracker: true,
+      eventMethod: 'post',
+      contexts: { webPage: true, performanceTiming: true },
+      formTracking: false,
+
    ```
 
-1. Update `lib/gitlab/tracking.rb` to [add these lines](https://gitlab.com/snippets/1918635):
+1. Update `snowplow_options` in `lib/gitlab/tracking.rb` to add `protocol` and `port`:
 
-   ```ruby
-   protocol: 'http',
-   port: 9090,
+   ```diff
+   diff --git a/lib/gitlab/tracking.rb b/lib/gitlab/tracking.rb
+   index 618e359211b..e9084623c43 100644
+   --- a/lib/gitlab/tracking.rb
+   +++ b/lib/gitlab/tracking.rb
+   @@ -41,7 +41,9 @@ def snowplow_options(group)
+              cookie_domain: Gitlab::CurrentSettings.snowplow_cookie_domain,
+              app_id: Gitlab::CurrentSettings.snowplow_app_id,
+              form_tracking: additional_features,
+   -          link_click_tracking: additional_features
+   +          link_click_tracking: additional_features,
+   +          protocol: 'http',
+   +          port: 9090
+            }.transform_keys! { |key| key.to_s.camelize(:lower).to_sym }
+          end
    ```
 
-1. Update `lib/gitlab/tracking.rb` to [change async emitter from https to http](https://gitlab.com/snippets/1918635):
+1. Update `emitter` in `lib/gitlab/tracking/destinations/snowplow.rb` to change `protocol`:
 
-   ```ruby
-   SnowplowTracker::AsyncEmitter.new(Gitlab::CurrentSettings.snowplow_collector_hostname, protocol: 'http'),
+   ```diff
+   diff --git a/lib/gitlab/tracking/destinations/snowplow.rb b/lib/gitlab/tracking/destinations/snowplow.rb
+   index 4fa844de325..5dd9d0eacfb 100644
+   --- a/lib/gitlab/tracking/destinations/snowplow.rb
+   +++ b/lib/gitlab/tracking/destinations/snowplow.rb
+   @@ -40,7 +40,7 @@ def tracker
+            def emitter
+              SnowplowTracker::AsyncEmitter.new(
+                Gitlab::CurrentSettings.snowplow_collector_hostname,
+   -            protocol: 'https'
+   +            protocol: 'http'
+              )
+            end
+          end
+
    ```
-
-1. Enable Snowplow in the admin area, Settings::Integrations::Snowplow to point to:
-   `http://localhost:3000/admin/application_settings/integrations#js-snowplow-settings`.
 
 1. Restart GDK:
 
@@ -417,8 +452,10 @@ Snowplow Micro is a Docker-based solution for testing frontend and backend event
 1. Send a test Snowplow event from the Rails console:
 
    ```ruby
-   Gitlab::Tracking.self_describing_event('iglu:com.gitlab/pageview_context/jsonschema/1-0-0', { page_type: 'MY_TYPE' }, context: nil )
+   Gitlab::Tracking.self_describing_event('iglu:com.gitlab/pageview_context/jsonschema/1-0-0', data: { page_type: 'MY_TYPE' }, context: nil)
    ```
+   
+1. Navigate to `localhost:9090/micro/good` to see the event.
 
 ### Snowplow Mini
 

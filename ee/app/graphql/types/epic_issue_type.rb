@@ -13,18 +13,18 @@ module Types
           description: 'ID of the epic-issue relation'
 
     field :relation_path, GraphQL::STRING_TYPE, null: true,
-          description: 'URI path of the epic-issue relation',
-          resolve: -> (issue, args, ctx) do
-            issue.group_epic_issue_path(ctx[:current_user])
-          end
+          description: 'URI path of the epic-issue relation'
 
-    field :id, GraphQL::ID_TYPE, null: true, resolve: -> (issue, args, ctx) do
-      issue.to_global_id
-    end, description: 'Global ID of the epic-issue relation'
+    field :id, GraphQL::ID_TYPE, null: true,
+          description: 'Global ID of the epic-issue relation'
 
     def epic_issue_id
       "gid://gitlab/EpicIssue/#{object.epic_issue_id}"
     end
-    # rubocop: enable Graphql/AuthorizeTypes
+
+    def relation_path
+      object.group_epic_issue_path(context[:current_user])
+    end
   end
+  # rubocop: enable Graphql/AuthorizeTypes
 end

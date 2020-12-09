@@ -1,8 +1,8 @@
 import { shallowMount } from '@vue/test-utils';
 import { merge } from 'lodash';
 import IncidentSla from 'ee/issue_show/components/incidents/incident_sla.vue';
-import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import { formatTime } from '~/lib/utils/datetime_utility';
+import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 
 jest.mock('~/lib/utils/datetime_utility');
 

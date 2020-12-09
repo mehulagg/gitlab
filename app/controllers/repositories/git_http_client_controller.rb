@@ -6,7 +6,7 @@ module Repositories
     include KerberosSpnegoHelper
     include Gitlab::Utils::StrongMemoize
 
-    attr_reader :authentication_result, :redirected_path, :container
+    attr_reader :authentication_result, :redirected_path
 
     delegate :actor, :authentication_abilities, to: :authentication_result, allow_nil: true
     delegate :type, to: :authentication_result, allow_nil: true, prefix: :auth_result
@@ -75,14 +75,24 @@ module Repositories
       headers['Www-Authenticate'] = challenges.join("\n") if challenges.any?
     end
 
+    def container
+      parse_repo_path unless defined?(@container)
+
+      @container
+    end
+
     def project
       parse_repo_path unless defined?(@project)
 
       @project
     end
 
+    def repository_path
+      @repository_path ||= params[:repository_path]
+    end
+
     def parse_repo_path
-      @container, @project, @repo_type, @redirected_path = Gitlab::RepoPath.parse("#{params[:namespace_id]}/#{params[:repository_id]}")
+      @container, @project, @repo_type, @redirected_path = Gitlab::RepoPath.parse(repository_path)
     end
 
     def render_missing_personal_access_token

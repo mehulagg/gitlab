@@ -15,12 +15,18 @@ module Types
     field :created_at, Types::TimeType, null: false, description: 'Timestamp when the container repository was created.'
     field :updated_at, Types::TimeType, null: false, description: 'Timestamp when the container repository was updated.'
     field :expiration_policy_started_at, Types::TimeType, null: true, description: 'Timestamp when the cleanup done by the expiration policy was started on the container repository.'
+    field :expiration_policy_cleanup_status, Types::ContainerRepositoryCleanupStatusEnum, null: true, description: 'The tags cleanup status for the container repository.'
     field :status, Types::ContainerRepositoryStatusEnum, null: true, description: 'Status of the container repository.'
     field :tags_count, GraphQL::INT_TYPE, null: false, description: 'Number of tags associated with this image.'
     field :can_delete, GraphQL::BOOLEAN_TYPE, null: false, description: 'Can the current user delete the container repository.'
+    field :project, Types::ProjectType, null: false, description: 'Project of the container registry'
 
     def can_delete
       Ability.allowed?(current_user, :update_container_image, object)
+    end
+
+    def project
+      Gitlab::Graphql::Loaders::BatchModelLoader.new(Project, object.project_id).find
     end
   end
 end

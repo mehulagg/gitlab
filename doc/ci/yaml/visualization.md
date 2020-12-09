@@ -1,3 +1,9 @@
+---
+stage: Verify
+group: Pipeline Authoring
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Visualize your CI/CD configuration
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/241722) in GitLab 13.5.
@@ -6,7 +12,7 @@
 > - It's not recommended for production use.
 > - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-cicd-configuration-visualization). **(CORE ONLY)**
 
-CAUTION: **Warning:**
+WARNING:
 This feature might not be available to you. Check the **version history** note above for details.
 
 To see a visualization of your `gitlab-ci.yml` configuration, navigate to any CI/CD

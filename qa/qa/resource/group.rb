@@ -36,7 +36,6 @@ module QA
 
             Page::Group::New.perform do |group_new|
               group_new.set_path(path)
-              group_new.set_description(description)
               group_new.set_visibility('Public')
               group_new.create
             end
@@ -44,7 +43,7 @@ module QA
             # Ensure that the group was actually created
             group_show.wait_until(sleep_interval: 1) do
               group_show.has_text?(path) &&
-                group_show.has_new_project_or_subgroup_dropdown?
+                group_show.has_new_project_and_new_subgroup_buttons?
             end
           end
         end

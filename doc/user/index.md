@@ -1,7 +1,7 @@
 ---
 stage: none
 group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference, index
 description: 'Read through the GitLab User documentation to learn how to use, configure, and customize GitLab and GitLab.com to your own needs.'
 ---
@@ -10,7 +10,7 @@ description: 'Read through the GitLab User documentation to learn how to use, co
 
 Welcome to GitLab! We're glad to have you here!
 
-As a GitLab user you'll have access to all the features
+As a GitLab user you have access to all the features
 your [subscription](https://about.gitlab.com/pricing/)
 includes, except [GitLab administrator](../administration/index.md)
 settings, unless you have admin privileges to install, configure,
@@ -60,7 +60,7 @@ With GitLab Enterprise Edition, you can also:
   - [Multiple Assignees for Issues](project/issues/multiple_assignees_for_issues.md). **(STARTER)**
   - [Multiple Issue Boards](project/issue_board.md#multiple-issue-boards).
 - Create formal relationships between issues with [Related Issues](project/issues/related_issues.md).
-- Use [Burndown Charts](project/milestones/burndown_charts.md) to track progress during a sprint or while working on a new version of their software.
+- Use [Burndown Charts](project/milestones/burndown_and_burnup_charts.md) to track progress during a sprint or while working on a new version of their software.
 - Leverage [Elasticsearch](../integration/elasticsearch.md) with [Advanced Search](search/advanced_global_search.md) and [Advanced Search Syntax](search/advanced_search_syntax.md) for faster, more advanced code search across your entire GitLab instance.
 - [Authenticate users with Kerberos](../integration/kerberos.md).
 - [Mirror a repository](project/repository/repository_mirroring.md) from elsewhere on your local server.
@@ -71,6 +71,17 @@ With GitLab Enterprise Edition, you can also:
 - Scan your code for vulnerabilities and [display them in merge requests](application_security/sast/index.md).
 
 You can also [integrate](project/integrations/overview.md) GitLab with numerous third-party applications, such as Mattermost, Microsoft Teams, HipChat, Trello, Slack, Bamboo CI, Jira, and a lot more.
+
+## User types
+
+There are several types of users in GitLab:
+
+- Regular users and GitLab.com users. <!-- Note: further description TBA -->
+- [Groups](group/index.md) of users.
+- GitLab [admin area](admin_area/index.md) user.
+- [GitLab Administrator](../administration/index.md) with full access to
+  self-managed instances' features and settings.
+- [Internal users](../development/internal_users.md).
 
 ## Projects
 
@@ -164,7 +175,7 @@ such as Trello, Jira, etc.
 ## Webhooks
 
 Configure [webhooks](project/integrations/webhooks.md) to listen for
-specific events like pushes, issues or merge requests. GitLab will send a
+specific events like pushes, issues or merge requests. GitLab sends a
 POST request with data to the webhook URL.
 
 ## API

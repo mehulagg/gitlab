@@ -121,8 +121,8 @@ export default {
         :format-tooltip-text="formatTooltipText"
         :include-legend-avg-max="false"
       >
-        <template slot="tooltipTitle">{{ tooltip.title }}</template>
-        <template slot="tooltipContent">
+        <template slot="tooltip-title">{{ tooltip.title }}</template>
+        <template slot="tooltip-content">
           <div>{{ tooltip.total }}</div>
           <div>{{ tooltip.completed }}</div>
         </template>

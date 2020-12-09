@@ -1,10 +1,10 @@
 import MockAdapter from 'axios-mock-adapter';
-import testAction from 'helpers/vuex_action_helper';
 import * as actions from 'ee/geo_settings/store/actions';
 import * as types from 'ee/geo_settings/store/mutation_types';
 import state from 'ee/geo_settings/store/state';
-import axios from '~/lib/utils/axios_utils';
+import testAction from 'helpers/vuex_action_helper';
 import { deprecatedCreateFlash as flash } from '~/flash';
+import axios from '~/lib/utils/axios_utils';
 import { MOCK_BASIC_SETTINGS_DATA, MOCK_APPLICATION_SETTINGS_FETCH_RESPONSE } from '../mock_data';
 
 jest.mock('~/flash');

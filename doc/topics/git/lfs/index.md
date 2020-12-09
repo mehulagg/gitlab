@@ -1,7 +1,7 @@
 ---
 stage: Create
 group: Source Code
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 type: reference, howto
 disqus_identifier: 'https://docs.gitlab.com/ee/workflow/lfs/lfs/index.html'
 ---
@@ -43,7 +43,7 @@ Documentation for GitLab instance administrators is under [LFS administration do
 - Git LFS always assumes HTTPS so if you have GitLab server on HTTP you will have
   to add the URL to Git configuration manually (see [troubleshooting](#troubleshooting))
 
-NOTE: **Note:**
+NOTE:
 With 8.12 GitLab added LFS support to SSH. The Git LFS communication
 still goes over HTTP, but now the SSH client passes the correct credentials
 to the Git LFS client, so no action is required by the user.
@@ -114,10 +114,13 @@ See the documentation on [File Locking](../../../user/project/file_lock.md).
 ## LFS objects in project archives
 
 > - Support for including Git LFS blobs inside [project source downloads](../../../user/project/repository/index.md) was [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/15079) in GitLab 13.5.
-> - It's [deployed behind a feature flag](../../../user/feature_flags.md), disabled by default.
-> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-lfs-objects-in-project-archives). **(CORE ONLY)**
+> - It was [deployed behind a feature flag](../../../user/feature_flags.md), disabled by default.
+> - [Became enabled by default](https://gitlab.com/gitlab-org/gitlab/-/issues/268409) on GitLab 13.6.
+> - It's enabled on GitLab.com.
+> - It's recommended for production use.
+> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-lfs-objects-in-project-archives).
 
-CAUTION: **Warning:**
+WARNING:
 This feature might not be available to you. Check the **version history** note above for details.
 
 Prior to GitLab 13.5, [project source
@@ -139,10 +142,10 @@ Technical details about how this works can be found in the [development document
 
 ### Enable or disable LFS objects in project archives
 
-_LFS objects in project archives_ is under development and not ready for production use. It is
-deployed behind a feature flag that is **disabled by default**.
+_LFS objects in project archives_ is under development but ready for production use.
+It is deployed behind a feature flag that is **enabled by default**.
 [GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
-can enable it.
+can opt to disable it.
 
 To enable it:
 
@@ -216,7 +219,7 @@ git config --add lfs.url "http://gitlab.example.com/group/project.git/info/lfs"
 
 ### Credentials are always required when pushing an object
 
-NOTE: **Note:**
+NOTE:
 With 8.12 GitLab added LFS support to SSH. The Git LFS communication
 still goes over HTTP, but now the SSH client passes the correct credentials
 to the Git LFS client, so no action is required by the user.

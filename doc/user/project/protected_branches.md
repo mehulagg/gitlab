@@ -1,7 +1,7 @@
 ---
 stage: Create
 group: Source Code
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 type: reference, howto
 ---
 
@@ -21,7 +21,7 @@ By default, a protected branch does four simple things:
 - It prevents **anyone** from force pushing to the branch.
 - It prevents **anyone** from deleting the branch.
 
-NOTE: **Note:**
+NOTE:
 A GitLab admin is allowed to push to the protected branches.
 
 See the [Changelog](#changelog) section for changes over time.

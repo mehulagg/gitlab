@@ -11,8 +11,7 @@ RSpec.describe Gitlab::GitAccess do
   let(:actor) { user }
   let(:project) { create(:project, :repository) }
   let(:repository) { project.repository }
-  let(:namespace_path) { nil }
-  let(:project_path) { nil }
+  let(:repository_path) { "#{project.full_path}.git" }
   let(:protocol) { 'web' }
   let(:authentication_abilities) { %i[read_project download_code push_code] }
   let(:redirected_path) { nil }
@@ -38,7 +37,7 @@ RSpec.describe Gitlab::GitAccess do
     let(:primary_repo_url) { geo_primary_http_url_to_repo(project) }
     let(:primary_repo_ssh_url) { geo_primary_ssh_url_to_repo(project) }
 
-    it_behaves_like 'a read-only GitLab instance'
+    it_behaves_like 'git access for a read-only GitLab instance'
   end
 
   describe "push_rule_check" do
@@ -408,8 +407,6 @@ RSpec.describe Gitlab::GitAccess do
   end
 
   describe '#check_push_access!' do
-    let(:project_path) { project.path }
-    let(:namespace_path) { project&.namespace&.path }
     let(:protocol) { 'ssh' }
     let(:unprotected_branch) { 'unprotected_branch' }
 
@@ -771,8 +768,7 @@ RSpec.describe Gitlab::GitAccess do
       project,
       protocol,
       authentication_abilities: authentication_abilities,
-      namespace_path: namespace_path,
-      repository_path: project_path,
+      repository_path: repository_path,
       redirected_path: redirected_path
     )
   end

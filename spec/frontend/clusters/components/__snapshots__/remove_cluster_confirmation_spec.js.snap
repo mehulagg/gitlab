@@ -14,6 +14,8 @@ exports[`Remove cluster confirmation modal renders splitbutton with modal includ
     >
       <!---->
        
+      <!---->
+       
       <span
         class="gl-new-dropdown-button-text"
       >
@@ -51,6 +53,7 @@ exports[`Remove cluster confirmation modal renders splitbutton with modal includ
           type="button"
         >
           <svg
+            aria-hidden="true"
             class="gl-icon s16 gl-new-dropdown-item-check-icon"
             data-testid="mobile-issue-close-icon"
           >
@@ -105,6 +108,7 @@ exports[`Remove cluster confirmation modal renders splitbutton with modal includ
           type="button"
         >
           <svg
+            aria-hidden="true"
             class="gl-icon s16 gl-new-dropdown-item-check-icon gl-visibility-hidden"
             data-testid="mobile-issue-close-icon"
           >

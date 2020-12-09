@@ -162,6 +162,16 @@ RSpec.describe Gitlab::ExpiringSubscriptionMessage do
               end
             end
 
+            context 'when a future dated license is applied' do
+              before do
+                create(:license, created_at: Time.current, data: build(:gitlab_license, starts_at: expired_date, expires_at: Date.current + 13.months).export)
+              end
+
+              it 'returns nil' do
+                expect(subject).to be nil
+              end
+            end
+
             context 'with namespace' do
               let(:namespace) { double(:namespace, name: 'No Limit Records') }
 

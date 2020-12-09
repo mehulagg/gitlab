@@ -5,18 +5,20 @@ module Gitlab
     module ReplicableModel
       extend ActiveSupport::Concern
       include Checksummable
-      include ::ShaAttribute
 
       included do
         # If this hook turns out not to apply to all Models, perhaps we should extract a `ReplicableBlobModel`
         after_create_commit -> { replicator.handle_after_create_commit if replicator.respond_to?(:handle_after_create_commit) }
         after_destroy -> { replicator.handle_after_destroy if replicator.respond_to?(:handle_after_destroy) }
 
-        scope :checksummed, -> { where.not(verification_checksum: nil) }
-        scope :checksum_failed, -> { where.not(verification_failure: nil) }
+        # Temporarily defining `verification_succeeded` and
+        # `verification_failed` for unverified models while verification is
+        # under development to avoid breaking GeoNodeStatusCheck code.
+        # TODO: Remove these after including `Gitlab::Geo::VerificationState` on
+        # all models. https://gitlab.com/gitlab-org/gitlab/-/issues/280768
+        scope :verification_succeeded, -> { none }
+        scope :verification_failed, -> { none }
         scope :available_replicables, -> { all }
-
-        sha_attribute :verification_checksum
       end
 
       class_methods do
@@ -46,13 +48,13 @@ module Gitlab
         raise NotImplementedError, 'There is no Replicator defined for this model'
       end
 
-      # Clear model verification checksum and force recalculation
-      def calculate_checksum!
-        self.verification_checksum = nil
+      # Returns a checksum of the file (assumed to be a "blob" type)
+      #
+      # @return [String] SHA256 hash of the carrierwave file
+      def calculate_checksum
+        return unless checksummable?
 
-        return unless needs_checksum?
-
-        self.verification_checksum = self.class.hexdigest(replicator.carrierwave_uploader.path)
+        self.class.hexdigest(replicator.carrierwave_uploader.path)
       end
 
       # Checks whether model needs checksum to be performed

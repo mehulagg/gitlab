@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Adding a new Service Component to GitLab
 
 The GitLab product is made up of several service components that run as independent system processes in communication with each other. These services can be run on the same instance, or spread across different instances. A list of the existing components can be found in the [GitLab architecture overview](architecture.md).
@@ -25,7 +31,7 @@ The following outline re-uses the [maturity metric](https://about.gitlab.com/dir
 
 The initial step for integrating a new component with GitLab starts with creating a [Feature proposal in the issue tracker](https://gitlab.com/gitlab-org/gitlab/-/issues/new?issuable_template=Feature%20proposal).
 
-Identify the [product category](https://about.gitlab.com/handbook/product/categories/) the component falls under and assign the Engineering Manager and Product Manager responsible for that category.
+Identify the [product category](https://about.gitlab.com/handbook/product/product-categories/) the component falls under and assign the Engineering Manager and Product Manager responsible for that category.
 
 The general steps for getting any GitLab feature from proposal to release can be found in the [Product development flow](https://about.gitlab.com/handbook/product-development-flow/).
 
@@ -53,10 +59,8 @@ TIP: **Tip:**
 
 ## Bundling a service with GitLab
 
-NOTE: **Note:**
 Code shipped with GitLab needs to use a license approved by the Legal team. See the list of [existing approved licenses](https://about.gitlab.com/handbook/engineering/open-source/#using-open-source-libraries).
 
-NOTE: **Note:**
 Notify the [Distribution team](https://about.gitlab.com/handbook/engineering/development/enablement/distribution/) when adding a new dependency that must be compiled. We must be able to compile the dependency on all supported platforms.
 
 New services to be bundled with GitLab need to be available in the following environments.

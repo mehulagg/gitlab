@@ -1,7 +1,7 @@
 ---
 stage: Release
-group: Progressive Delivery
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+group: Release
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: howto
 ---
 
@@ -35,7 +35,7 @@ Some credentials are required to be able to run `aws` commands:
 1. Log in onto the console and create [a new IAM user](https://console.aws.amazon.com/iam/home#/home).
 1. Select your newly created user to access its details. Navigate to **Security credentials > Create a new access key**.
 
-   NOTE: **Note:**
+   NOTE:
    A new **Access key ID** and **Secret access key** pair will be generated. Please take a note of them right away.
 
 1. In your GitLab project, go to **Settings > CI / CD**. Set the following as
@@ -65,7 +65,7 @@ Some credentials are required to be able to run `aws` commands:
        - aws create-deployment ...
    ```
 
-   NOTE: **Note:**
+   NOTE:
    The image used in the example above
    (`registry.gitlab.com/gitlab-org/cloud-deploy/aws-base:latest`) is hosted on the [GitLab
    Container Registry](../../user/packages/container_registry/index.md) and is
@@ -149,11 +149,11 @@ After you have these prerequisites ready, follow these steps:
    In both cases, make sure that the value for the `containerDefinitions[].name` attribute is
    the same as the `Container name` defined in your targeted ECS service.
 
-   CAUTION: **Warning:**
+   WARNING:
    `CI_AWS_ECS_TASK_DEFINITION_FILE` takes precedence over `CI_AWS_ECS_TASK_DEFINITION` if both these environment
    variables are defined within your project.
 
-   NOTE: **Note:**
+   NOTE:
    If the name of the task definition you wrote in your JSON file is the same name
    as an existing task definition on AWS, then a new revision is created for it.
    Otherwise, a brand new task definition is created, starting at revision 1.
@@ -181,7 +181,7 @@ After you have these prerequisites ready, follow these steps:
    task definition, making the cluster pull the newest version of your
    application.
 
-CAUTION: **Warning:**
+WARNING:
 The [`AWS/Deploy-ECS.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/AWS/Deploy-ECS.gitlab-ci.yml)
 template includes both the [`Jobs/Build.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Jobs/Build.gitlab-ci.yml)
 and [`Jobs/Deploy/ECS.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Jobs/Deploy/ECS.gitlab-ci.yml)
@@ -239,7 +239,7 @@ pass three JSON input objects, based on existing templates:
 
    - [Template for the _Deploy to EC2_ step on AWS](https://docs.aws.amazon.com/codedeploy/latest/APIReference/API_CreateDeployment.html).
 
-1. Once you have completed these three templates based on your requirements, you
+1. After you have completed these three templates based on your requirements, you
    have two ways to pass in these JSON objects:
 
    - They can be three actual files located in your project. You must specify their path relative to
@@ -282,10 +282,39 @@ When running your project pipeline at this point:
   on the related JSON object's content. The deployment job finishes whenever the deployment to EC2
   is done or has failed.
 
-#### Deploy Amazon EKS 
+#### Custom build job for Auto DevOps
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/216008) in GitLab 13.6.
+
+To leverage [Auto DevOps](../../topics/autodevops/index.md) for your project when deploying to
+AWS EC2, first you must define [your AWS credentials as environment variables](#run-aws-commands-from-gitlab-cicd).
+
+Next, define a job for the `build` stage. To do so, you must reference the
+`Auto-DevOps.gitlab-ci.yml` template and include a job named `build_artifact` in your
+`.gitlab-ci.yml` file. For example:
+
+```yaml
+# .gitlab-ci.yml
+
+include:
+  - template: Auto-DevOps.gitlab-ci.yml
+
+variables:
+  - AUTO_DEVOPS_PLATFORM_TARGET: EC2
+
+build_artifact:
+  stage: build
+  script:
+    - <your build script goes here>
+  artifacts:
+    paths:
+      - <built artifact>
+```
+
+### Deploy to Amazon EKS
 
 - [How to deploy your application to a GitLab-managed Amazon EKS cluster with Auto DevOps](https://about.gitlab.com/blog/2020/05/05/deploying-application-eks/)
 
-#### Deploy to Google Cloud
+## Deploy to Google Cloud
 
 - [Deploying with GitLab on Google Cloud](https://about.gitlab.com/solutions/google-cloud-platform/)

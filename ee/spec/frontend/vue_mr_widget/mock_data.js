@@ -2,15 +2,19 @@ import mockData, { mockStore } from 'jest/vue_mr_widget/mock_data';
 
 export default {
   ...mockData,
-  vulnerability_feedback_help_path: '/help/user/application_security/index',
+  can_read_vulnerabilities: true,
   enabled_reports: {
     sast: false,
     container_scanning: false,
     dast: false,
     dependency_scanning: false,
     license_management: false,
-    secret_scanning: false,
+    secret_detection: false,
   },
+  container_scanning_comparison_path: '/container_scanning_comparison_path',
+  dependency_scanning_comparison_path: '/dependency_scanning_comparison_path',
+  dast_comparison_path: '/dast_comparison_path',
+  coverage_fuzzing_comparison_path: '/coverage_fuzzing_comparison_path',
 };
 
 // Browser Performance Testing
@@ -122,7 +126,19 @@ export const codequalityParsedIssues = [
     path: 'Gemfile.lock',
     line: 12,
     urlPath: 'foo/Gemfile.lock',
+    severity: 'minor',
   },
 ];
 
 export { mockStore };
+
+// TODO: Remove as part of https://gitlab.com/gitlab-org/gitlab/-/issues/249544
+export const pipelineJobs = [
+  {
+    artifacts: [
+      {
+        file_type: 'sast',
+      },
+    ],
+  },
+];

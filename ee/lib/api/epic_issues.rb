@@ -2,6 +2,8 @@
 
 module API
   class EpicIssues < ::API::Base
+    feature_category :epics
+
     before do
       authenticate!
       authorize_epics_feature!

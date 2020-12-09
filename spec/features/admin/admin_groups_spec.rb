@@ -4,16 +4,17 @@ require 'spec_helper'
 
 RSpec.describe 'Admin Groups' do
   include Select2Helper
+  include Spec::Support::Helpers::Features::MembersHelpers
 
   let(:internal) { Gitlab::VisibilityLevel::INTERNAL }
-  let(:user) { create :user }
-  let!(:group) { create :group }
-  let!(:current_user) { create(:admin) }
+
+  let_it_be(:user) { create :user }
+  let_it_be(:group) { create :group }
+  let_it_be(:current_user) { create(:admin) }
 
   before do
-    stub_feature_flags(vue_group_members_list: false)
-
     sign_in(current_user)
+    gitlab_enable_admin_mode_sign_in(current_user)
     stub_application_setting(default_group_visibility: internal)
   end
 
@@ -26,6 +27,17 @@ RSpec.describe 'Admin Groups' do
   end
 
   describe 'create a group' do
+    describe 'with expected fields' do
+      it 'renders from as expected', :aggregate_failures do
+        visit new_admin_group_path
+
+        expect(page).to have_field('name')
+        expect(page).to have_field('group_path')
+        expect(page).to have_field('group_visibility_level_0')
+        expect(page).to have_field('description')
+      end
+    end
+
     it 'creates new group' do
       visit admin_groups_path
 
@@ -176,7 +188,7 @@ RSpec.describe 'Admin Groups' do
 
       click_button 'Invite'
 
-      page.within '[data-qa-selector="members_list"]' do
+      page.within members_table do
         expect(page).to have_content(current_user.name)
         expect(page).to have_content('Developer')
       end

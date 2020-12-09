@@ -1,9 +1,9 @@
 <script>
-import { GlModal, GlIcon, GlSprintf, GlTruncate } from '@gitlab/ui';
+import { GlModal, GlIcon, GlSprintf, GlTruncate, GlLink } from '@gitlab/ui';
 import { n__, __ } from '~/locale';
 
 export default {
-  components: { GlModal, GlIcon, GlSprintf, GlTruncate },
+  components: { GlModal, GlIcon, GlSprintf, GlTruncate, GlLink },
   props: {
     scannedUrls: {
       required: true,
@@ -33,29 +33,11 @@ export default {
       // show only 15 scanned urls
       return this.scannedUrls.slice(0, 15);
     },
-    downloadButton() {
-      const buttonAttrs = {
-        text: __('Download as CSV'),
-        attributes: {
-          variant: 'success',
-          class: 'gl-button btn-success-secondary',
-          href: this.downloadLink,
-          download: '',
-          'data-testid': 'download-button',
-        },
-      };
-      return this.downloadLink ? buttonAttrs : null;
-    },
   },
 };
 </script>
 <template>
-  <gl-modal
-    :title="title"
-    title-tag="h5"
-    v-bind="$options.modal"
-    :action-secondary="downloadButton"
-  >
+  <gl-modal :title="title" title-tag="h5" v-bind="$options.modal">
     <!-- heading -->
     <div class="row gl-text-gray-400">
       <div class="col-1">{{ __('Method') }}</div>
@@ -80,9 +62,16 @@ export default {
       <b class="gl-vertical-align-middle">
         <gl-sprintf
           :message="
-            __('To view all %{scannedResourcesCount} scanned URLs, please download the CSV file')
+            __(
+              'To view all %{scannedResourcesCount} scanned URLs, %{linkStart}please download the CSV file%{linkEnd}',
+            )
           "
         >
+          <template #link="{ content }">
+            <gl-link download :href="downloadLink" data-testid="download-link">
+              {{ content }}
+            </gl-link>
+          </template>
           <template #scannedResourcesCount>
             {{ scannedResourcesCount }}
           </template>

@@ -4,6 +4,8 @@ module API
   class MergeTrains < ::API::Base
     include PaginationParams
 
+    feature_category :continuous_integration
+
     before do
       authorize_read_merge_trains!
     end

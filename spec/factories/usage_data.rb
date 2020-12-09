@@ -19,15 +19,16 @@ FactoryBot.define do
       create(:jira_import_state, :finished, project: projects[1], label: jira_label, imported_issues_count: 3)
       create(:jira_import_state, :scheduled, project: projects[1], label: jira_label)
       create(:prometheus_service, project: projects[1])
+      create(:service, project: projects[1], type: 'JenkinsService', active: true)
       create(:service, project: projects[0], type: 'SlackSlashCommandsService', active: true)
       create(:service, project: projects[1], type: 'SlackService', active: true)
       create(:service, project: projects[2], type: 'SlackService', active: true)
       create(:service, project: projects[2], type: 'MattermostService', active: false)
       create(:service, group: group, project: nil, type: 'MattermostService', active: true)
       create(:service, :template, type: 'MattermostService', active: true)
-      matermost_instance = create(:service, :instance, type: 'MattermostService', active: true)
-      create(:service, project: projects[1], type: 'MattermostService', active: true, inherit_from_id: matermost_instance.id)
-      create(:service, group: group, project: nil, type: 'SlackService', active: true, inherit_from_id: matermost_instance.id)
+      mattermost_instance = create(:service, :instance, type: 'MattermostService', active: true)
+      create(:service, project: projects[1], type: 'MattermostService', active: true, inherit_from_id: mattermost_instance.id)
+      create(:service, group: group, project: nil, type: 'SlackService', active: true, inherit_from_id: mattermost_instance.id)
       create(:service, project: projects[2], type: 'CustomIssueTrackerService', active: true)
       create(:project_error_tracking_setting, project: projects[0])
       create(:project_error_tracking_setting, project: projects[1], enabled: false)
@@ -51,6 +52,11 @@ FactoryBot.define do
       create(:sentry_issue, issue: projects[0].issues[0])
       create(:protected_branch, project: projects[0])
       create(:protected_branch, name: 'main', project: projects[0])
+
+      # Alert Management
+      create(:alert_management_http_integration, project: projects[0], name: 'DataDog')
+      create(:alert_management_http_integration, project: projects[0], name: 'DataCat')
+      create(:alert_management_http_integration, :inactive, project: projects[1], name: 'DataFox')
 
       # Tracing
       create(:project_tracing_setting, project: projects[0])

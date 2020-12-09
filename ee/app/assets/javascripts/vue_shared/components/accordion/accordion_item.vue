@@ -120,7 +120,7 @@ export default {
         :aria-labelledby="buttonId"
         role="region"
       >
-        <slot name="subTitle"></slot>
+        <slot name="sub-title"></slot>
         <div ref="content" :style="contentStyles"><slot name="default"></slot></div>
       </div>
     </template>

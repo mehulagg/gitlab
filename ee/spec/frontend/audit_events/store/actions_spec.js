@@ -1,7 +1,7 @@
-import testAction from 'helpers/vuex_action_helper';
-import createState from 'ee/audit_events/store/state';
 import * as actions from 'ee/audit_events/store/actions';
 import * as types from 'ee/audit_events/store/mutation_types';
+import createState from 'ee/audit_events/store/state';
+import testAction from 'helpers/vuex_action_helper';
 import * as urlUtility from '~/lib/utils/url_utility';
 
 describe('Audit Event actions', () => {

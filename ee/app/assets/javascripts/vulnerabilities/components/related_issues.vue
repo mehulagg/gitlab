@@ -1,6 +1,6 @@
 <script>
 import axios from 'axios';
-import { GlButton, GlAlert, GlSprintf, GlLink } from '@gitlab/ui';
+import { GlButton } from '@gitlab/ui';
 import RelatedIssuesStore from '~/related_issues/stores/related_issues_store';
 import RelatedIssuesBlock from '~/related_issues/components/related_issues_block.vue';
 import { issuableTypesMap, PathIdSeparator } from '~/related_issues/constants';
@@ -15,9 +15,6 @@ export default {
   components: {
     RelatedIssuesBlock,
     GlButton,
-    GlAlert,
-    GlSprintf,
-    GlLink,
   },
   props: {
     endpoint: {
@@ -60,7 +57,7 @@ export default {
       return Boolean(this.state.relatedIssues.find(i => i.lockIssueRemoval));
     },
     canCreateIssue() {
-      return !this.isIssueAlreadyCreated && !this.isFetching && Boolean(this.createIssueUrl);
+      return !this.isIssueAlreadyCreated && !this.isFetching && Boolean(this.newIssueUrl);
     },
   },
   inject: {
@@ -70,7 +67,7 @@ export default {
     projectFingerprint: {
       default: '',
     },
-    createIssueUrl: {
+    newIssueUrl: {
       default: '',
     },
     reportType: {
@@ -89,17 +86,7 @@ export default {
   methods: {
     createIssue() {
       this.isProcessingAction = true;
-      this.errorCreatingIssue = false;
-
-      return axios
-        .post(this.createIssueUrl)
-        .then(({ data: { web_url } }) => {
-          redirectTo(web_url);
-        })
-        .catch(() => {
-          this.isProcessingAction = false;
-          this.errorCreatingIssue = true;
-        });
+      redirectTo(this.newIssueUrl, { params: { vulnerability_id: this.vulnerabilityId } });
     },
     toggleFormVisibility() {
       this.isFormVisible = !this.isFormVisible;
@@ -218,28 +205,6 @@ export default {
 
 <template>
   <div>
-    <gl-alert
-      v-if="errorCreatingIssue"
-      variant="danger"
-      class="gl-mt-5"
-      @dismiss="errorCreatingIssue = false"
-    >
-      <p class="gl-font-weight-bold gl-mb-2">{{ $options.i18n.createIssueErrorTitle }}</p>
-      <p class="gl-mb-0">
-        <gl-sprintf :message="$options.i18n.createIssueErrorBody">
-          <template #tracking="{ content }">
-            <gl-link class="gl-display-inline-block" :href="issueTrackingHelpPath" target="_blank">
-              {{ content }}
-            </gl-link>
-          </template>
-          <template #permissions="{ content }">
-            <gl-link class="gl-display-inline-block" :href="permissionsHelpPath" target="_blank">
-              {{ content }}
-            </gl-link>
-          </template>
-        </gl-sprintf>
-      </p>
-    </gl-alert>
     <related-issues-block
       :help-path="helpPath"
       :is-fetching="isFetching"
@@ -264,7 +229,7 @@ export default {
       <template #headerText>
         {{ $options.i18n.relatedIssues }}
       </template>
-      <template v-if="canCreateIssue" #headerActions>
+      <template v-if="canCreateIssue" #header-actions>
         <gl-button
           ref="createIssue"
           variant="success"

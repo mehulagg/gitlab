@@ -1,10 +1,11 @@
 import { mount } from '@vue/test-utils';
 import StorageApp from 'ee/storage_counter/components/app.vue';
 import Project from 'ee/storage_counter/components/project.vue';
+import ProjectsTable from 'ee/storage_counter/components/projects_table.vue';
 import StorageInlineAlert from 'ee/storage_counter/components/storage_inline_alert.vue';
+import TemporaryStorageIncreaseModal from 'ee/storage_counter/components/temporary_storage_increase_modal.vue';
 import UsageGraph from 'ee/storage_counter/components/usage_graph.vue';
 import UsageStatistics from 'ee/storage_counter/components/usage_statistics.vue';
-import TemporaryStorageIncreaseModal from 'ee/storage_counter/components/temporary_storage_increase_modal.vue';
 import { formatUsageSize } from 'ee/storage_counter/utils';
 import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 import { namespaceData, withRootStorageStatistics } from '../mock_data';
@@ -21,6 +22,9 @@ describe('Storage counter app', () => {
   const findUsageGraph = () => wrapper.find(UsageGraph);
   const findUsageStatistics = () => wrapper.find(UsageStatistics);
   const findStorageInlineAlert = () => wrapper.find(StorageInlineAlert);
+  const findProjectsTable = () => wrapper.find(ProjectsTable);
+  const findPrevButton = () => wrapper.find('[data-testid="prevButton"]');
+  const findNextButton = () => wrapper.find('[data-testid="nextButton"]');
 
   const createComponent = ({
     props = {},
@@ -211,6 +215,74 @@ describe('Storage counter app', () => {
           modalId: StorageApp.modalId,
         });
       });
+    });
+  });
+
+  describe('filtering projects', () => {
+    beforeEach(() => {
+      createComponent({
+        additionalRepoStorageByNamespace: true,
+        namespace: withRootStorageStatistics,
+      });
+    });
+
+    const sampleSearchTerm = 'GitLab';
+    const sampleShortSearchTerm = '12';
+
+    it('triggers search if user enters search input', () => {
+      expect(wrapper.vm.searchTerm).toBe('');
+
+      findProjectsTable().vm.$emit('search', sampleSearchTerm);
+
+      expect(wrapper.vm.searchTerm).toBe(sampleSearchTerm);
+    });
+
+    it('triggers search if user clears the entered search input', () => {
+      const projectsTable = findProjectsTable();
+
+      expect(wrapper.vm.searchTerm).toBe('');
+
+      projectsTable.vm.$emit('search', sampleSearchTerm);
+
+      expect(wrapper.vm.searchTerm).toBe(sampleSearchTerm);
+
+      projectsTable.vm.$emit('search', '');
+
+      expect(wrapper.vm.searchTerm).toBe('');
+    });
+
+    it('does not trigger search if user enters short search input', () => {
+      expect(wrapper.vm.searchTerm).toBe('');
+
+      findProjectsTable().vm.$emit('search', sampleShortSearchTerm);
+
+      expect(wrapper.vm.searchTerm).toBe('');
+    });
+  });
+
+  describe('renders projects table pagination component', () => {
+    const namespaceWithPageInfo = {
+      namespace: {
+        ...withRootStorageStatistics,
+        projects: {
+          ...withRootStorageStatistics.projects,
+          pageInfo: {
+            hasPreviousPage: false,
+            hasNextPage: true,
+          },
+        },
+      },
+    };
+    beforeEach(() => {
+      createComponent(namespaceWithPageInfo);
+    });
+
+    it('with disabled "Prev" button', () => {
+      expect(findPrevButton().attributes().disabled).toBe('disabled');
+    });
+
+    it('with enabled "Next" button', () => {
+      expect(findNextButton().attributes().disabled).toBeUndefined();
     });
   });
 });

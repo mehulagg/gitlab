@@ -103,6 +103,10 @@ module Ci
       )
     end
 
+    scope :in_pipelines, ->(pipelines) do
+      where(pipeline: pipelines)
+    end
+
     scope :with_existing_job_artifacts, ->(query) do
       where('EXISTS (?)', ::Ci::JobArtifact.select(1).where('ci_builds.id = ci_job_artifacts.job_id').merge(query))
     end
@@ -375,8 +379,16 @@ module Ci
         Ci::BuildRunnerSession.where(build: build).delete_all
       end
 
-      after_transition any => [:skipped, :canceled] do |build|
-        build.deployment&.cancel
+      after_transition any => [:skipped, :canceled] do |build, transition|
+        if Feature.enabled?(:cd_skipped_deployment_status, build.project)
+          if transition.to_name == :skipped
+            build.deployment&.skip
+          else
+            build.deployment&.cancel
+          end
+        else
+          build.deployment&.cancel
+        end
       end
     end
 
@@ -569,14 +581,6 @@ module Ci
         variables.append(key: 'CI_DEPLOY_USER', value: gitlab_deploy_token.username)
         variables.append(key: 'CI_DEPLOY_PASSWORD', value: gitlab_deploy_token.token, public: false, masked: true)
       end
-    end
-
-    def dependency_variables
-      return [] if all_dependencies.empty?
-
-      Gitlab::Ci::Variables::Collection.new.concat(
-        Ci::JobVariable.where(job: all_dependencies).dotenv_source
-      )
     end
 
     def features
@@ -828,10 +832,6 @@ module Ci
       Gitlab::Ci::Build::Credentials::Factory.new(self).create!
     end
 
-    def all_dependencies
-      dependencies.all
-    end
-
     def has_valid_build_dependencies?
       dependencies.valid?
     end
@@ -916,11 +916,31 @@ module Ci
     end
 
     def collect_coverage_reports!(coverage_report)
+      project_path, worktree_paths = if Feature.enabled?(:smart_cobertura_parser, project)
+                                       # If the flag is disabled, we intentionally pass nil
+                                       # for both project_path and worktree_paths to fallback
+                                       # to the non-smart behavior of the parser
+                                       [project.full_path, pipeline.all_worktree_paths]
+                                     end
+
       each_report(Ci::JobArtifact::COVERAGE_REPORT_FILE_TYPES) do |file_type, blob|
-        Gitlab::Ci::Parsers.fabricate!(file_type).parse!(blob, coverage_report)
+        Gitlab::Ci::Parsers.fabricate!(file_type).parse!(
+          blob,
+          coverage_report,
+          project_path: project_path,
+          worktree_paths: worktree_paths
+        )
       end
 
       coverage_report
+    end
+
+    def collect_codequality_reports!(codequality_report)
+      each_report(Ci::JobArtifact::CODEQUALITY_REPORT_FILE_TYPES) do |file_type, blob|
+        Gitlab::Ci::Parsers.fabricate!(file_type).parse!(blob, codequality_report)
+      end
+
+      codequality_report
     end
 
     def collect_terraform_reports!(terraform_reports)
@@ -991,12 +1011,6 @@ module Ci
     def auto_retry
       strong_memoize(:auto_retry) do
         Gitlab::Ci::Build::AutoRetry.new(self)
-      end
-    end
-
-    def dependencies
-      strong_memoize(:dependencies) do
-        Ci::BuildDependencies.new(self)
       end
     end
 

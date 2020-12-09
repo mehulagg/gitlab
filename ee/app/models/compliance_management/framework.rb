@@ -59,18 +59,18 @@ module ComplianceManagement
     strip_attributes :name, :color
 
     belongs_to :namespace
+    has_many :project_settings, class_name: 'ComplianceManagement::ComplianceFramework::ProjectSettings'
+    has_many :projects, through: :project_settings
 
     validates :namespace, presence: true
     validates :name, presence: true, length: { maximum: 255 }
     validates :description, presence: true, length: { maximum: 255 }
     validates :color, color: true, allow_blank: false, length: { maximum: 10 }
+    validates :regulated, presence: true
     validates :namespace_id, uniqueness: { scope: :name }
 
-    def merge_request_approval_rules_enforced?
-      return false unless default_framework_definition
-
-      ::Gitlab::CurrentSettings.current_application_settings.compliance_frameworks.include?(default_framework_definition.id)
-    end
+    scope :with_projects, ->(project_ids) { includes(:projects).where(projects: { id: project_ids }) }
+    scope :with_namespaces, ->(namespace_ids) { includes(:namespace).where(namespaces: { id: namespace_ids })}
 
     def default_framework_definition
       strong_memoize(:default_framework_definition) do

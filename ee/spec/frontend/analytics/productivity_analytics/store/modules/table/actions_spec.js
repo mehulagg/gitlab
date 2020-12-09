@@ -1,10 +1,10 @@
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
-import testAction from 'helpers/vuex_action_helper';
-import { TEST_HOST } from 'helpers/test_constants';
 import * as actions from 'ee/analytics/productivity_analytics/store/modules/table/actions';
 import * as types from 'ee/analytics/productivity_analytics/store/modules/table/mutation_types';
 import getInitialState from 'ee/analytics/productivity_analytics/store/modules/table/state';
+import { TEST_HOST } from 'helpers/test_constants';
+import testAction from 'helpers/vuex_action_helper';
 import { mockMergeRequests } from '../../../mock_data';
 
 describe('Productivity analytics table actions', () => {

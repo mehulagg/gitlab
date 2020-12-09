@@ -9,6 +9,8 @@ module API
     include ::API::Helpers::Packages::BasicAuthHelpers::Constants
     include ::Gitlab::Utils::StrongMemoize
 
+    feature_category :package_registry
+
     content_type :json, 'application/json'
     default_format :json
 
@@ -130,7 +132,7 @@ module API
           track_package_event('push_package', :composer)
 
           ::Packages::Composer::CreatePackageService
-            .new(authorized_user_project, current_user, declared_params)
+            .new(authorized_user_project, current_user, declared_params.merge(build: current_authenticated_job))
             .execute
 
           created!
