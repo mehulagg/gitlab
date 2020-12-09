@@ -1,5 +1,3 @@
-# The project for this functionality is located at https://gitlab.com/gitlab-org/5-minute-production-app/deploy-template
-# Copied from https://gitlab.com/gitlab-org/5-minute-production-app/deploy-template/-/blob/v2.0.0/deploy.yml
 include:
   # workflow rules to prevent duplicate detached pipelines
   - template: 'Workflows/Branch-Pipelines.gitlab-ci.yml'
@@ -8,7 +6,6 @@ include:
 
 stages:
   - build
-  - test
   - provision
   - deploy
   - domain
@@ -29,28 +26,10 @@ cache:
       when: on_success
     - when: never
 
-.needs_aws_domain_protected_branch:
+.needs_aws_ssl_and_protected_branch:
   rules:
     - if: '$AWS_ACCESS_KEY_ID && $AWS_SECRET_ACCESS_KEY && $AWS_DEFAULT_REGION && $CERT_DOMAIN && $CERT_EMAIL && $CI_COMMIT_REF_PROTECTED == "true"'
       when: manual
-
-terraform_plan:
-  stage: test
-  image: registry.gitlab.com/gitlab-org/5-minute-production-app/deploy-template/master
-  extends: .needs_aws_vars
-  resource_group: terraform
-  before_script:
-    - cp /*.tf .
-    - cp /deploy.sh .
-  script:
-    - gitlab-terraform init
-    - gitlab-terraform plan
-    - gitlab-terraform plan-json
-  artifacts:
-    paths:
-      - plan.cache
-    reports:
-      terraform: plan.json
 
 terraform_apply:
   stage: provision
@@ -61,12 +40,10 @@ terraform_apply:
     - cp /*.tf .
     - cp /deploy.sh .
   script:
+    - gitlab-terraform init
+    - gitlab-terraform plan
+    - gitlab-terraform plan-json
     - gitlab-terraform apply
-  artifacts:
-    paths:
-      - plan.cache
-    reports:
-      terraform: plan.json
 
 deploy:
   stage: deploy
@@ -91,7 +68,7 @@ deploy:
 setup_instructions:
   stage: domain
   image: registry.gitlab.com/gitlab-org/5-minute-production-app/deploy-template/master
-  extends: .needs_aws_domain_protected_branch
+  extends: .needs_aws_ssl_and_protected_branch
   before_script:
     - cp /*.tf .
     - cp /setup_instructions.sh .
@@ -101,7 +78,7 @@ setup_instructions:
 ssl_certificate:
   stage: domain
   image: registry.gitlab.com/gitlab-org/5-minute-production-app/deploy-template/master
-  extends: .needs_aws_domain_protected_branch
+  extends: .needs_aws_ssl_and_protected_branch
   before_script:
     - cp /*.tf .
     - cp /conf.nginx .
