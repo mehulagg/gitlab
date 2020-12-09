@@ -16,7 +16,7 @@ is recommended over NFS where possible, due to better performance.
 
 WARNING:
 From GitLab 13.0, Gitaly support for NFS is deprecated. As of GitLab 14.0, NFS-related issues
-with Gitaly will no longer be addressed. Upgrade to [Gitaly Cluster](praefect.md) as soon as
+with Gitaly will no longer be addressed. Upgrade to [Gitaly Cluster](gitaly/praefect.md) as soon as
 possible. Watch for [tools to enable bulk move](https://gitlab.com/groups/gitlab-org/-/epics/4916)
 of projects to Gitaly Cluster.
 
