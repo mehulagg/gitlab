@@ -3,11 +3,9 @@
 class IssueEmailParticipant < ApplicationRecord
   belongs_to :issue
 
-  validates :email, presence: true, uniqueness: { scope: [:issue_id] }
+  validates :email, presence: true, uniqueness: { scope: [:issue_id], case_sensitive: false }
   validates :issue, presence: true
   validate :validate_email_format
-
-  before_save { self.email = email.downcase }
 
   def validate_email_format
     self.errors.add(:email, I18n.t(:invalid, scope: 'valid_email.validations.email')) unless ValidateEmail.valid?(self.email)

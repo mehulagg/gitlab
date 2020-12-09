@@ -12,7 +12,7 @@ RSpec.describe IssueEmailParticipant do
 
     it { is_expected.to validate_presence_of(:issue) }
     it { is_expected.to validate_presence_of(:email) }
-    it { is_expected.to validate_uniqueness_of(:email).scoped_to([:issue_id]) }
+    it { is_expected.to validate_uniqueness_of(:email).scoped_to([:issue_id]).ignoring_case_sensitivity }
 
     it_behaves_like 'an object with RFC3696 compliant email-formated attributes', :email
   end
