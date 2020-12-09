@@ -172,7 +172,7 @@ export default {
   },
   methods: {
     callBoardMutation(id) {
-      this.$apollo.mutate({
+      return this.$apollo.mutate({
         mutation: createBoardMutation,
         variables: {
           ...pick(this.boardPayload, ['hideClosedList', 'hideBacklogList']),
@@ -190,9 +190,9 @@ export default {
     },
     async createBoard() {
       const boardData = await getBoardsPath(this.endpoints.boardsEndpoint, this.boardPayload);
-      const response = await this.callBoardMutation(fullBoardId(boardData.id));
+      await this.callBoardMutation(fullBoardId(boardData.data.id));
 
-      return response.data || response;
+      return boardData.data || boardData;
     },
     submit() {
       if (this.board.name.length === 0) return;

@@ -27,7 +27,6 @@ import issueSetLabelsMutation from '../graphql/issue_set_labels.mutation.graphql
 import issueSetDueDateMutation from '../graphql/issue_set_due_date.mutation.graphql';
 import issueSetSubscriptionMutation from '../graphql/issue_set_subscription.mutation.graphql';
 import issueSetMilestoneMutation from '../graphql/issue_set_milestone.mutation.graphql';
-import createBoardMutation from '../graphql/board.mutation.graphql';
 
 const notImplemented = () => {
   /* eslint-disable-next-line @gitlab/require-i18n-strings */
