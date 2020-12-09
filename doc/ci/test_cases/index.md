@@ -30,7 +30,7 @@ To create a test case in a GitLab project:
 You can view all test cases in the project in the Test Cases list. Filter the
 issue list with a search query, including labels or the test case's title.
 
-Users with Guest or higher [permissions](../../user/permissions.md) can view test cases.
+Users with Reporter or higher [permissions](../../user/permissions.md) can view test cases.
 
 ![Test case list page](img/test_case_list_v13_6.png)
 
