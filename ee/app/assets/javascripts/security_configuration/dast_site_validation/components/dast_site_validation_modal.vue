@@ -11,9 +11,9 @@ import {
   GlSkeletonLoader,
   GlTruncate,
 } from '@gitlab/ui';
+import ModalCopyButton from '~/vue_shared/components/modal_copy_button.vue';
 import { __, s__ } from '~/locale';
 import * as Sentry from '~/sentry/wrapper';
-import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
 import download from '~/lib/utils/downloader';
 import { cleanLeadingSeparator, joinPaths, stripPathTail } from '~/lib/utils/url_utility';
 import {
@@ -31,7 +31,7 @@ export default {
   DAST_SITE_VALIDATION_MODAL_ID,
   components: {
     GlAlert,
-    ClipboardButton,
+    ModalCopyButton,
     GlButton,
     GlFormGroup,
     GlFormInput,
@@ -247,9 +247,10 @@ export default {
         :label="s__('DastSiteValidation|Step 2 - Add following HTTP header to your site')"
       >
         <code class="gl-p-3 gl-bg-black gl-text-white">{{ httpHeader }}</code>
-        <clipboard-button
+        <modal-copy-button
           :text="httpHeader"
           :title="s__('DastSiteValidation|Copy HTTP header to clipboard')"
+          :modal-id="modalProps.id"
         />
       </gl-form-group>
       <gl-form-group :label="locationStepLabel" class="mw-460">
