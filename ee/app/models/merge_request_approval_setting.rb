@@ -6,4 +6,8 @@ class MergeRequestApprovalSetting < ApplicationRecord
   default_value_for :allow_author_approval, true
 
   validates_inclusion_of :allow_author_approval, in: [true, false]
+
+  scope :find_or_initialize_by_namespace, ->(namespace) {
+    find_or_initialize_by(namespace: namespace)
+  }
 end

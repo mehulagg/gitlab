@@ -251,6 +251,7 @@ module EE
 
       rule { (admin | owner) & group_merge_request_approval_settings_enabled }.policy do
         enable :read_merge_request_approval_settings
+        enable :modify_merge_request_approval_settings
       end
 
       rule { needs_new_sso_session }.policy do
