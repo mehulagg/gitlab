@@ -379,6 +379,16 @@ RSpec.describe API::Members do
         expect_paginated_array_response(*[owner, maintainer, nested_user, project_user, linked_group_user].map(&:id))
       end
 
+      context 'when the current user does not have the :admin_group_member ability' do
+        it 'is a bad request' do
+          not_an_owner = create(:user)
+
+          get api(url, not_an_owner), params: params
+
+          expect(response).to have_gitlab_http_status(:bad_request)
+        end
+      end
+
       context 'with seach params provided' do
         let(:params) { { search: nested_user.name } }
 

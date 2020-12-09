@@ -57,7 +57,11 @@ module EE
             bad_request!(nil) unless ::Ability.allowed?(current_user, :admin_group_member, group)
 
             sorting = params[:sort] || 'id_asc'
-            users = paginate(billed_users_for(group, params[:search], order_by: sorting))
+            users = paginate(
+              BilledUsersFinder.new(group,
+                                    search_term: params[:search],
+                                    order_by: sorting).execute
+            )
 
             present users, with: ::API::Entities::UserBasic, current_user: current_user
           end

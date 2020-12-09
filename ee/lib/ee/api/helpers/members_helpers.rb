@@ -83,13 +83,6 @@ module EE
             action: :create
           ).for_member(member).security_event
         end
-
-        def billed_users_for(group, search_term, order_by: 'name_asc')
-          users = ::User.id_in(group.billed_user_ids)
-          users = users.search(search_term) if search_term
-
-          users.sort_by_attribute(order_by)
-        end
       end
     end
   end
