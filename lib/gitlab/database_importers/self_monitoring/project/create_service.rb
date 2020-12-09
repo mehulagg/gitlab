@@ -147,7 +147,7 @@ module Gitlab
               initialize_with_readme: true,
               visibility_level: VISIBILITY_LEVEL,
               name: PROJECT_NAME,
-              description: "This project is automatically generated and helps monitor this GitLab instance. [More information](#{docs_path}).",
+              description: "This project is automatically generated and helps monitor this GitLab instance. [Learn more](#{docs_path}).",
               namespace_id: group.id
             }
           end

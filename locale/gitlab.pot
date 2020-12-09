@@ -16729,7 +16729,7 @@ msgstr ""
 msgid "Max access level"
 msgstr ""
 
-msgid "Max file size = 200KB."
+msgid "Max file size is 200 KB."
 msgstr ""
 
 msgid "Max role"
