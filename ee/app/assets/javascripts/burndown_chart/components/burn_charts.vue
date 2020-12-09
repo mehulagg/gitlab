@@ -58,10 +58,7 @@ export default {
       type: String,
       required: false,
       default: 'group',
-      // default: Namespace.Group,
-      // validator: value => Object.values(Namespace).includes(value),
     },
-
     burndownEventsPath: {
       type: String,
       required: false,
