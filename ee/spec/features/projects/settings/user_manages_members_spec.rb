@@ -8,6 +8,7 @@ RSpec.describe "User manages members" do
   let_it_be(:user) { create(:user) }
 
   before do
+    stub_feature_flags(invite_members_group_modal: false)
     sign_in(user)
   end
 

@@ -13838,6 +13838,15 @@ msgstr ""
 msgid "GroupSAML|should be a random persistent ID, emails are discouraged"
 msgstr ""
 
+msgid "GroupSelect|No matching results"
+msgstr ""
+
+msgid "GroupSelect|Search groups"
+msgstr ""
+
+msgid "GroupSelect|Select a group"
+msgstr ""
+
 msgid "GroupSettings|Apply integration settings to all Projects"
 msgstr ""
 
@@ -15321,10 +15330,16 @@ msgstr ""
 msgid "Invite Members"
 msgstr ""
 
+msgid "Invite a group"
+msgstr ""
+
 msgid "Invite group"
 msgstr ""
 
 msgid "Invite member"
+msgstr ""
+
+msgid "Invite members"
 msgstr ""
 
 msgid "Invite team members"
@@ -15381,19 +15396,31 @@ msgstr ""
 msgid "InviteMembersModal|Invite"
 msgstr ""
 
+msgid "InviteMembersModal|Invite a group"
+msgstr ""
+
 msgid "InviteMembersModal|Invite team members"
 msgstr ""
 
 msgid "InviteMembersModal|Members were successfully added"
 msgstr ""
 
+msgid "InviteMembersModal|Search for a group to invite"
+msgstr ""
+
 msgid "InviteMembersModal|Search for members to invite"
+msgstr ""
+
+msgid "InviteMembersModal|Select a group to invite"
 msgstr ""
 
 msgid "InviteMembersModal|Some of the members could not be added"
 msgstr ""
 
-msgid "InviteMembersModal|You're inviting members to the %{name} %{type}"
+msgid "InviteMembersModal|You're inviting %{invitee} to the %{name} %{type}"
+msgstr ""
+
+msgid "InviteMembers|Invite a group"
 msgstr ""
 
 msgid "InviteMembers|Invite team members"
@@ -32554,6 +32581,9 @@ msgstr ""
 msgid "a design"
 msgstr ""
 
+msgid "a group"
+msgstr ""
+
 msgid "about 1 hour"
 msgid_plural "about %d hours"
 msgstr[0] ""
@@ -33274,6 +33304,9 @@ msgid "math|There was an error rendering this math block"
 msgstr ""
 
 msgid "member%{number}@company.com"
+msgstr ""
+
+msgid "members"
 msgstr ""
 
 msgid "merge request"

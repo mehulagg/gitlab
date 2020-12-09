@@ -12,7 +12,7 @@ export default {
     displayText: {
       type: String,
       required: false,
-      default: s__('InviteMembers|Invite team members'),
+      default: s__('InviteMembers|Invite a group'),
     },
     icon: {
       type: String,
@@ -27,7 +27,7 @@ export default {
   },
   methods: {
     openModal() {
-      eventHub.$emit('openModal');
+      eventHub.$emit('openInviteGroupModal');
     },
   },
 };

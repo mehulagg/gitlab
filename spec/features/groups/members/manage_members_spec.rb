@@ -11,6 +11,7 @@ RSpec.describe 'Groups > Members > Manage members' do
   let(:group) { create(:group) }
 
   before do
+    stub_feature_flags(invite_members_group_modal: false)
     sign_in(user1)
   end
 
