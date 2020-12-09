@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Jira::Requests::Issues::ListService do
+  include AfterNextHelpers
+
   let(:jira_service) { create(:jira_service) }
   let(:params) { {} }
 
@@ -33,15 +35,17 @@ RSpec.describe Jira::Requests::Issues::ListService do
 
     context 'with jira_service' do
       context 'when validations and params are ok' do
-        let(:client) { double(options: { site: 'https://jira.example.com' }) }
+        let(:jira_service) { create(:jira_service, url: 'https://jira.example.com') }
+        let(:response_body) { '' }
+        let(:response_headers) { { 'content-type' => '["application/json;charset=UTF-8"]' } }
 
         before do
-          expect(service).to receive(:client).at_least(:once).and_return(client)
+          stub_request(:get, /.*jira.example.com\/rest\/api\/2\/search.*/).to_return(status: 200, body: response_body, headers: response_headers)
         end
 
         context 'when the request to Jira returns an error' do
           before do
-            expect(client).to receive(:get).and_raise(Timeout::Error)
+            expect_next(JIRA::Client).to receive(:get).and_raise(Timeout::Error)
           end
 
           it 'returns an error response' do
@@ -50,10 +54,20 @@ RSpec.describe Jira::Requests::Issues::ListService do
           end
         end
 
-        context 'when the request does not return any values' do
+        context 'when jira runs on a subpath' do
+          let(:jira_service) { create(:jira_service, url: 'http://jira.example.com/jira') }
+
           before do
-            expect(client).to receive(:get).and_return([])
+            stub_request(:get, /.*jira.example.com\/jira\/rest\/api\/2\/search.*/).to_return(status: 200, body: "{}")
           end
+
+          it 'takes the subpath into account' do
+            expect(subject.success?).to be_truthy
+          end
+        end
+
+        context 'when the request does not return any values' do
+          let(:response_body) { [].to_json }
 
           it 'returns a payload with no issues' do
             payload = subject.payload
@@ -65,14 +79,12 @@ RSpec.describe Jira::Requests::Issues::ListService do
         end
 
         context 'when the request returns values' do
-          before do
-            expect(client).to receive(:get).and_return(
-              {
-                "total" => 375,
-                "startAt" => 0,
-                "issues" => [{ "key" => 'TST-1' }, { "key" => 'TST-2' }]
-              }
-            )
+          let(:response_body) do
+            {
+              total: 375,
+              startAt: 0,
+              issues: [{ key: 'TST-1' }, { key: 'TST-2' }]
+            }.to_json
           end
 
           it 'returns a payload with jira issues' do
@@ -88,7 +100,7 @@ RSpec.describe Jira::Requests::Issues::ListService do
           let(:params) { { page: 3, per_page: 20 } }
 
           it 'honors page and per_page' do
-            expect(client).to receive(:get).with(include('startAt=40&maxResults=20')).and_return([])
+            expect_next(JIRA::Client).to receive(:get).with(include('startAt=40&maxResults=20')).and_return([])
 
             subject
           end
@@ -98,14 +110,14 @@ RSpec.describe Jira::Requests::Issues::ListService do
           let(:params) { {} }
 
           it 'uses the default options' do
-            expect(client).to receive(:get).with(include('startAt=0&maxResults=100'))
+            expect_next(JIRA::Client).to receive(:get).with(include('startAt=0&maxResults=100'))
 
             subject
           end
         end
 
         it 'requests for default fields' do
-          expect(client).to receive(:get).with(include("fields=#{described_class::DEFAULT_FIELDS}")).and_return([])
+          expect_next(JIRA::Client).to receive(:get).with(include("fields=#{described_class::DEFAULT_FIELDS}")).and_return([])
 
           subject
         end

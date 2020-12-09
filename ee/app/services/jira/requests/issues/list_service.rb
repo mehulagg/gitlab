@@ -23,9 +23,14 @@ module Jira
 
         attr_reader :jql, :page, :per_page
 
+        # We have to add the context_path here because the Jira client is not taking it into account
         override :url
         def url
-          "#{base_api_url}/search?jql=#{CGI.escape(jql)}&startAt=#{start_at}&maxResults=#{per_page}&fields=#{DEFAULT_FIELDS}"
+          "#{context_path}#{base_api_url}/search?jql=#{CGI.escape(jql)}&startAt=#{start_at}&maxResults=#{per_page}&fields=#{DEFAULT_FIELDS}"
+        end
+
+        def context_path
+          client.options[:context_path] || ''
         end
 
         override :build_service_response
