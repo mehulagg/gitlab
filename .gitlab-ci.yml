@@ -8,7 +8,7 @@ stages:
   - review-prepare
   - review
   - dast
-  - fuzzing
+  - fuzz
   - qa
   - post-qa
   - pages
