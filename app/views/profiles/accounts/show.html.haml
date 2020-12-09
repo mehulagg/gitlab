@@ -79,6 +79,9 @@
           %strong= current_user.solo_owned_groups.map(&:name).join(', ')
         %p
           = s_('Profiles|You must transfer ownership or delete these groups before you can delete your account.')
+      - elsif !current_user.can_remove_self?
+        %p
+          = s_('Profiles|We are unable to verify your identity automatically. Please email personal-data-request@gitlab.com to begin the account deletion process.')
       - else
         %p
           = s_("Profiles|You don't have access to delete this user.")

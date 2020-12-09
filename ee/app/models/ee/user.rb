@@ -377,6 +377,14 @@ module EE
         board_id: board_id, epic_id: epic_id)
     end
 
+    # GitLab.com users should not be able to remove themselves
+    # when they cannot verify their local password, because it
+    # isn't set (using third party authentication).
+    override :can_remove_self?
+    def can_remove_self?
+      Gitlab.com? && !password_automatically_set?
+    end
+
     protected
 
     override :password_required?
