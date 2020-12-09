@@ -1,7 +1,7 @@
 import AxiosMockAdapter from 'axios-mock-adapter';
 import { TEST_HOST } from 'helpers/test_constants';
 import axios from '~/lib/utils/axios_utils';
-import boardsStore, { gqlClient } from '~/boards/stores/boards_store';
+import boardsStore from '~/boards/stores/boards_store';
 import eventHub from '~/boards/eventhub';
 import { listObj, listObjDuplicate } from './mock_data';
 

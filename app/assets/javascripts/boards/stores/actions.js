@@ -2,7 +2,6 @@ import { pick } from 'lodash';
 
 import boardListsQuery from 'ee_else_ce/boards/graphql/board_lists.query.graphql';
 import createGqClient, { fetchPolicies } from '~/lib/graphql';
-import axios from '~/lib/utils/axios_utils';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { BoardType, ListType, inactiveId, DEFAULT_LABELS } from '~/boards/constants';
 import * as types from './mutation_types';
