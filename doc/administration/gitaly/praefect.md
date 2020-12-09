@@ -1054,6 +1054,59 @@ To monitor strong consistency, you can use the following Prometheus metrics:
 - `gitaly_hook_transaction_voting_delay_seconds`: Client-side delay introduced
   by waiting for the transaction to be committed.
 
+## Replication factor
+
+Replication factor is the number of copies Praefect maintains of a given repository. Higher
+replication factor offers better redundancy and distribution of read workload with the downside
+of higher storage cost. By default, Praefect replicates repositories to every storage within a
+virtual storage.
+
+### Variable replication factor
+
+DANGER:
+The feature is not production ready yet. It is not possible to unset a replication factor once set
+without manually modifying database state. Variable replication factor requires repository specific
+primaries to be enabled by configuring the `per_repository` primary election strategy. The election
+strategy is not production ready yet.
+
+Praefect supports configuring a replication factor on a per repository basis. This is done by assigning
+specific storage nodes to host a repository.
+
+[In an upcoming release](https://gitlab.com/gitlab-org/gitaly/-/issues/3362), Praefect will support
+configuring a default replication factor for a virtual storage. The default replication factor gets
+applied to every newly created repository.
+
+Prafect does not store the actual replication factor but assigns enough storage's to host the repository
+so the desired replication factor is met. If a storage node is later removed from the virtual storage,
+replication factor of repositories assigned to the storage is decreased accordingly.
+
+Currently, the only way to configure a repository's replication factor is the `set-replication-factor`
+subcommand. `set-replication-factor` automatically assigns or unassigns random storage nodes as necessary to
+reach the desired replication factor for the repository.
+
+```shell
+sudo /opt/gitlab/embedded/bin/praefect -config /var/opt/gitlab/praefect/config.toml set-replication-factor -virtual-storage <virtual-storage> -repository <relative-path> -replication-factor <replication-factor>
+```
+
+* `-virtual-storage` is the virtual storage the repository is located in.
+* `-repository` is the repository's relative path in the storage.
+* `-replication-factor` is the desired replication factor of the repository. Minimum is one as the primary
+  needs to have a copy of the repository. Maximum replication factor is the number of storages within the
+  virtual storage.
+
+On success, the currently assigned host storages are printed out.
+
+For example:
+
+```shell
+sudo /opt/gitlab/embedded/bin/praefect -config /var/opt/gitlab/praefect/config.toml set-replication-factor -virtual-storage default -repository @hashed/3f/db/3fdba35f04dc8c462986c992bcf875546257113072a909c162f7e470e581e278.git -replication-factor 2
+``
+
+Output:
+```shell
+current assignments: praefect-internal-1, praefect-internal-2
+```
+
 ## Automatic failover and leader election
 
 Praefect regularly checks the health of each backend Gitaly node. This
