@@ -171,31 +171,26 @@ export default {
     }
   },
   methods: {
+    callBoardMutation(id) {
+      this.$apollo.mutate({
+        mutation: createBoardMutation,
+        variables: {
+          ...pick(this.boardPayload, ['hideClosedList', 'hideBacklogList']),
+          id,
+        },
+      });
+    },
     async updateBoard() {
-      const input = {
-        ...pick(this.boardPayload, ['hideClosedList', 'hideBacklogList']),
-        id: fullBoardId(this.boardPayload.id),
-      };
-
       const responses = await Promise.all([
         getBoardsPath(this.endpoints.boardsEndpoint, this.boardPayload),
-        this.$apollo.mutate({
-          mutation: createBoardMutation,
-          variables: input,
-        }),
+        this.callBoardMutation(fullBoardId(this.boardPayload.id)),
       ]);
 
       return responses[0].data;
     },
     async createBoard() {
       const boardData = await getBoardsPath(this.endpoints.boardsEndpoint, this.boardPayload);
-      const response = await this.$apollo.mutate({
-        mutation: createBoardMutation,
-        variables: {
-          ...pick(this.boardPayload, ['hideClosedList', 'hideBacklogList']),
-          id: fullBoardId(boardData.id),
-        },
-      });
+      const response = await this.callBoardMutation(fullBoardId(boardData.id));
 
       return response.data || response;
     },
@@ -214,21 +209,9 @@ export default {
             this.isLoading = false;
           });
       } else {
-        boardsStore
-          .createBoard(this.board)
-          .then(resp => {
-            // This handles 2 use cases
-            // - In create call we only get one parameter, the new board
-            // - In update call, due to Promise.all, we get REST response in
-            // array index 0
-
-            if (Array.isArray(resp)) {
-              return resp[0].data;
-            }
-            return resp.data ? resp.data : resp;
-          })
+        const boardAction = this.boardPayload.id ? this.updateBoard : this.createBoard;
+        boardAction()
           .then(data => {
-            this.isLoading = false;
             visitUrl(data.board_path);
           })
           .catch(() => {
