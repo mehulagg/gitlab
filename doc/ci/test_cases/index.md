@@ -18,6 +18,8 @@ use external test planning tools, which require additional overhead, context swi
 
 ## Create a test case
 
+Users with Reporter or higher [permissions](../../user/permissions.md) can create test cases.
+
 To create a test case in a GitLab project:
 
 1. Navigate to **CI/CD > Test Cases**.
