@@ -15,9 +15,10 @@ For data objects such as LFS, Uploads, Artifacts, etc., an [Object Storage servi
 is recommended over NFS where possible, due to better performance.
 
 WARNING:
-From GitLab 13.0, using NFS for Git repositories is deprecated. In GitLab 14.0,
-support for NFS for Git repositories is scheduled to be removed. Upgrade to
-[Gitaly Cluster](gitaly/praefect.md) as soon as possible.
+From GitLab 13.0, Gitaly support for NFS is deprecated. As of GitLab 14.0, NFS-related issues
+with Gitaly will no longer be addressed. Upgrade to [Gitaly Cluster](praefect.md) as soon as
+possible. Watch for [tools to enable bulk move](https://gitlab.com/groups/gitlab-org/-/epics/4916)
+of projects to Gitaly Cluster.
 
 Filesystem performance can impact overall GitLab performance, especially for
 actions that read or write to Git repositories. For steps you can use to test
