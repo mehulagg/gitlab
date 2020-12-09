@@ -63,6 +63,7 @@ export default {
         ? {
             text: s__('SubscriptionTable|Add Seats'),
             href: this.addSeatsHref,
+            testId: 'add-seats',
           }
         : null;
     },
@@ -138,6 +139,7 @@ export default {
             rel="noopener noreferrer"
             class="btn btn-inverted-secondary"
             :class="{ 'ml-2': index !== 0 }"
+            :data-testid="button.testId"
             >{{ button.text }}</a
           >
         </div>
