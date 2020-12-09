@@ -4,9 +4,9 @@ import { __, s__, sprintf } from '~/locale';
 import { mergeUrlParams, redirectTo, refreshCurrentPage } from '~/lib/utils/url_utility';
 
 import PipelineGraph from '~/pipelines/components/pipeline_graph/pipeline_graph.vue';
+import CiLint from './components/lint/ci_lint.vue';
 import CommitForm from './components/commit/commit_form.vue';
 import TextEditor from './components/text_editor.vue';
-import CiLint from './components/lint/ci_lint.vue';
 
 import commitCiFileMutation from './graphql/mutations/commit_ci_file.mutation.graphql';
 import getBlobContent from './graphql/queries/blob_content.graphql';
@@ -24,13 +24,13 @@ const LOAD_FAILURE_UNKNOWN = 'LOAD_FAILURE_UNKNOWN';
 export default {
   components: {
     CommitForm,
+    CiLint,
     GlAlert,
     GlLoadingIcon,
     GlTab,
     GlTabs,
     PipelineGraph,
     TextEditor,
-    CiLint,
   },
   props: {
     projectPath: {

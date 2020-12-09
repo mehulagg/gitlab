@@ -69,12 +69,12 @@ describe('CI Lint Results', () => {
     });
 
     it('renders with no errors or warnings defined', () => {
-      createComponent({ errors: undefined, warnings: undefined }, mount);
+      createComponent({ errors: undefined, warnings: undefined });
       expect(wrapper.exists()).toBe(true);
     });
 
     it('renders with no dryRun defined', () => {
-      createComponent({ dryRun: undefined }, mount);
+      createComponent({ dryRun: undefined });
       expect(wrapper.exists()).toBe(true);
     });
   });

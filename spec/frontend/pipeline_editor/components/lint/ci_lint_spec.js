@@ -1,4 +1,3 @@
-import { merge } from 'lodash';
 import { shallowMount, mount } from '@vue/test-utils';
 import { GlAlert, GlLink } from '@gitlab/ui';
 import CiLint from '~/pipeline_editor/components/lint/ci_lint.vue';
@@ -7,8 +6,8 @@ import { mockCiConfigQueryResponse, mockLintHelpPagePath } from '../../mock_data
 
 const mockCiConfig = mockCiConfigQueryResponse.data.ciConfig;
 
-const mergeCiCongig = config => {
-  return merge(mockCiConfig, config);
+const mergeCiConfig = config => {
+  return { ...mockCiConfig, ...config };
 };
 
 describe('~/pipeline_editor/components/lint/ci_lint.vue', () => {
@@ -26,9 +25,9 @@ describe('~/pipeline_editor/components/lint/ci_lint.vue', () => {
     });
   };
 
-  const findAllByTestId = selector => wrapper.findAll(`[data-testid="ci-lint-${selector}"]`);
+  const findAllByTestId = selector => wrapper.findAll(`[data-testid="${selector}"]`);
   const findAlert = () => wrapper.find(GlAlert);
-  const findLintParameters = () => findAllByTestId('parameter');
+  const findLintParameters = () => findAllByTestId('ci-lint-parameter');
   const findLintParameterAt = i => findLintParameters().at(i);
 
   afterEach(() => {
@@ -55,6 +54,7 @@ describe('~/pipeline_editor/components/lint/ci_lint.vue', () => {
 
     it('displays jobs', () => {
       expect(findLintParameters()).toHaveLength(3);
+
       expect(findLintParameterAt(0).text()).toBe('Test Job - job_test_1');
       expect(findLintParameterAt(1).text()).toBe('Test Job - job_test_2');
       expect(findLintParameterAt(2).text()).toBe('Build Job - job_build');
@@ -63,7 +63,7 @@ describe('~/pipeline_editor/components/lint/ci_lint.vue', () => {
     it('displays invalid results', () => {
       createComponent(
         {
-          ciConfig: mergeCiCongig({
+          ciConfig: mergeCiConfig({
             status: CI_CONFIG_STATUS_INVALID,
           }),
         },
