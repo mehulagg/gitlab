@@ -8,6 +8,10 @@ type: howto
 
 # Geo Glossary
 
+NOTE:
+We are updating the Geo documentation, user interface and commands to reflect these changes. Not all pages comply with
+these definitions yet.
+
  These are the defined terms to describe all aspects of Geo. Using a set of clearly
  defined terms helps us to communicate efficiently and avoids confusion. The language
  on this page aims to be [ubiquitous](https://about.gitlab.com/handbook/communication/#ubiquitous-language)
@@ -28,7 +32,6 @@ type: howto
 | Promoting                 | Changing the role of a site from secondary to primary.                                                                                                                                 | Geo-specific |                                                 |
 | Demoting                  | Changing the role of a site from primary to secondary.                                                                                                                                 | Geo-specific |                                                 |
 | Failover                  | The entire process that shifts users from a primary Site to a secondary site. This includes promoting a secondary, but contains other parts as well e.g. scheduling maintenance.       | Geo-specific |                                                 |
-
 
 # Examples
 
