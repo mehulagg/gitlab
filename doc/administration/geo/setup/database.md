@@ -133,6 +133,12 @@ The IP address that the secondary database will listen on
    # The unique identifier for the Geo node.
    gitlab_rails['geo_node_name'] = 'PRIMARY_NODE_NAME'
 
+   ##
+   ## Geo Primary role
+   ## - configure dependent flags automatically to enable Geo
+   ##
+   roles ['geo_primary_role']
+
    postgresql['sql_user_password'] = 'DB_USER_PASSWORD_HASH'
 
    # Every node that runs Puma or Sidekiq needs to have the database
@@ -171,12 +177,6 @@ The IP address that the secondary database will listen on
 
    ```ruby
    ##
-   ## Geo Primary role
-   ## - configure dependent flags automatically to enable Geo
-   ##
-   roles ['geo_primary_role']
-
-   ##
    ## Primary address
    ## - replace '<primary_node_ip>' with the public or VPC address of your Geo primary node
    ##
@@ -195,6 +195,12 @@ The IP address that the secondary database will listen on
    postgresql['max_replication_slots'] = 1
    # postgresql['max_wal_senders'] = 10
    # postgresql['wal_keep_segments'] = 10
+
+   ##
+   ## Disable automatic database migrations temporarily
+   ## (until PostgreSQL is restarted and listening on the private address).
+   ##
+   gitlab_rails['auto_migrate'] = false
    ```
 
 1. Optional: If you want to add another **secondary** node, the relevant setting would look like:
@@ -218,6 +224,19 @@ The IP address that the secondary database will listen on
 
    ```shell
    gitlab-ctl restart postgresql
+   ```
+
+1. Re-enable migrations now that PostgreSQL is restarted and listening on the
+   private address.
+
+   Edit `/etc/gitlab/gitlab.rb` and **change** the configuration to `true`:
+1. ```ruby
+   gitlab_rails['auto_migrate'] = true
+   ```
+
+   Save the file and reconfigure GitLab:
+   ```shell
+   gitlab-ctl reconfigure
    ```
 
 1. Execute the command below to define the node as **primary** node:
