@@ -75,4 +75,4 @@ If you decide to start using an archived test case again, you can reopen it.
 
 Users with Reporter or higher [permissions](../../user/permissions.md) can reopen test cases.
 
-To reopen an archived test case, on the test case's page, select the **Reopen test case** button.
+To reopen an archived test case, on the test case's page, select **Reopen test case**.
