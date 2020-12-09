@@ -85,6 +85,39 @@ RSpec.describe IncidentManagement::OncallRotations::CreateService do
       end
     end
 
+    context 'participants do not have access to the project' do
+      let(:participants) do
+        [
+          {
+            user: create(:user),
+            color_palette: 'blue',
+            color_weight: '500'
+          }
+        ]
+      end
+
+      it_behaves_like 'error response', 'User does not have access to the project'
+    end
+
+    context 'participant is included multiple times' do
+      let(:participants) do
+        [
+          {
+            user: current_user,
+            color_palette: 'blue',
+            color_weight: '500'
+          },
+          {
+            user: current_user,
+            color_palette: 'magenta',
+            color_weight: '500'
+          }
+        ]
+      end
+
+      it_behaves_like 'error response', 'A user can only participate in a rotation once'
+    end
+
     context 'with valid params' do
       it 'successfully creates an on-call rotation with participants' do
         expect(execute).to be_success
