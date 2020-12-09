@@ -24,7 +24,7 @@ describe('SubscriptionTable component', () => {
     wrapper.findAll('a').wrappers.map(x => ({ text: x.text(), href: x.attributes('href') }));
   const findRenewButton = () => findButtonProps().filter(({ text }) => text === 'Renew');
 
-  const factory = (
+  const createComponent = (
     options = {},
     { saasManualRenewButton = false, saasAddSeatsButton = false } = {},
   ) => {
@@ -53,7 +53,7 @@ describe('SubscriptionTable component', () => {
 
   describe('when created', () => {
     beforeEach(() => {
-      factory({
+      createComponent({
         propsData: {
           namespaceName: TEST_NAMESPACE_NAME,
           planUpgradeHref: '/url/',
@@ -80,7 +80,7 @@ describe('SubscriptionTable component', () => {
 
   describe('with success', () => {
     beforeEach(() => {
-      factory({ propsData: { namespaceName: TEST_NAMESPACE_NAME } });
+      createComponent({ propsData: { namespaceName: TEST_NAMESPACE_NAME } });
 
       store.state.isLoadingSubscription = false;
       store.commit(`${types.RECEIVE_SUBSCRIPTION_SUCCESS}`, mockDataSubscription.gold);
@@ -115,7 +115,7 @@ describe('SubscriptionTable component', () => {
         const planUpgradeHref = `${TEST_HOST}/plan/upgrade/${planName}`;
         const planRenewHref = `${TEST_HOST}/plan/renew`;
 
-        factory({
+        createComponent({
           propsData: {
             namespaceName: TEST_NAMESPACE_NAME,
             customerPortalUrl: CUSTOMER_PORTAL_URL,
@@ -151,7 +151,7 @@ describe('SubscriptionTable component', () => {
     'given plan with state: isFreePlan=$isFreePlan and feature flag saasManualRenewButton=$featureFlag',
     ({ planName, planCode, isFreePlan, featureFlag, testDescription, expectedBehavior }) => {
       beforeEach(() => {
-        factory(
+        createComponent(
           {
             propsData: { namespaceName: TEST_NAMESPACE_NAME },
           },
@@ -185,7 +185,7 @@ describe('SubscriptionTable component', () => {
     'Add seats button – given plan with state: planCode = $planCode and saasAddSeatsButton = $featureFlag',
     ({ planCode, featureFlag, expected, testDescription }) => {
       beforeEach(() => {
-        factory(
+        createComponent(
           {
             propsData: { namespaceName: TEST_NAMESPACE_NAME },
           },
