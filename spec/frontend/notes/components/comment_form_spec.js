@@ -240,12 +240,6 @@ describe('issue_comment_form component', () => {
         expect(findCommentButton().props('disabled')).toBe(false);
       });
 
-      it('should update buttons texts when it has note', () => {
-        mountComponent({ initialData: { note: 'Foo' } });
-
-        expect(findCloseReopenButton().text()).toBe('Comment & close issue');
-      });
-
       it('updates button text with noteable type', () => {
         mountComponent({ noteableType: constants.MERGE_REQUEST_NOTEABLE_TYPE });
 

@@ -105,15 +105,6 @@ MergeRequest.prototype.initMRBtnListeners = function() {
     if (shouldSubmit && $this.data('submitted')) {
       return;
     }
-
-    if (shouldSubmit) {
-      if ($this.hasClass('btn-comment-and-close') || $this.hasClass('btn-comment-and-reopen')) {
-        e.preventDefault();
-        e.stopImmediatePropagation();
-
-        _this.submitNoteForm($this.closest('form'), $this);
-      }
-    }
   });
 };
 

@@ -6,7 +6,6 @@ RSpec.shared_examples 'thread comments' do |resource_name|
   let(:toggle_selector) { "#{dropdown_selector} .dropdown-toggle" }
   let(:menu_selector) { "#{dropdown_selector} .dropdown-menu" }
   let(:submit_selector) { "#{form_selector} .js-comment-submit-button" }
-  let(:close_selector) { "#{form_selector} .btn-comment-and-close" }
   let(:comments_selector) { '.timeline > .note.timeline-entry' }
   let(:comment) { 'My comment' }
 
@@ -22,23 +21,6 @@ RSpec.shared_examples 'thread comments' do |resource_name|
     new_comment = all(comments_selector).last
 
     expect(new_comment).not_to have_selector '.discussion'
-  end
-
-  if resource_name == 'issue'
-    it "clicking 'Comment & close #{resource_name}' will post a comment and close the #{resource_name}" do
-      find("#{form_selector} .note-textarea").send_keys(comment)
-
-      click_button 'Comment & close issue'
-
-      wait_for_all_requests
-
-      expect(page).to have_content(comment)
-      expect(page).to have_content "@#{user.username} closed"
-
-      new_comment = all(comments_selector).last
-
-      expect(new_comment).not_to have_selector '.discussion'
-    end
   end
 
   describe 'when the toggle is clicked' do
@@ -252,18 +234,6 @@ RSpec.shared_examples 'thread comments' do |resource_name|
             end
 
             expect(page).not_to have_selector menu_selector
-          end
-
-          if resource_name =~ /(issue|merge request)/
-            it 'updates the close button text' do
-              expect(find(close_selector)).to have_content "Comment & close #{resource_name}"
-            end
-
-            it 'typing does not change the close button text' do
-              find("#{form_selector} .note-textarea").send_keys('b')
-
-              expect(find(close_selector)).to have_content "Comment & close #{resource_name}"
-            end
           end
 
           it 'has "Comment" selected when opening the menu', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/196825' do

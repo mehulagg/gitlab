@@ -417,18 +417,6 @@ export default {
                   </li>
                 </ul>
               </div>
-
-              <gl-button
-                v-if="canToggleIssueState"
-                :loading="isToggleStateButtonLoading"
-                category="secondary"
-                :variant="buttonVariant"
-                :class="[actionButtonClassNames, 'btn-comment btn-comment-and-close']"
-                :disabled="isSubmitting"
-                data-testid="close-reopen-button"
-                @click="handleSave(true)"
-                >{{ issueActionButtonTitle }}</gl-button
-              >
             </div>
           </form>
         </div>

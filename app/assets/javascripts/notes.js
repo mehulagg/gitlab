@@ -1126,47 +1126,6 @@ export default class Notes {
     return this.refresh();
   }
 
-  updateTargetButtons(e) {
-    let closetext;
-    let reopentext;
-    const textarea = $(e.target);
-    const form = textarea.parents('form');
-    const reopenbtn = form.find('.js-note-target-reopen');
-    const closebtn = form.find('.js-note-target-close');
-
-    if (textarea.val().trim().length > 0) {
-      reopentext = reopenbtn.attr('data-alternative-text');
-      closetext = closebtn.attr('data-alternative-text');
-      if (reopenbtn.text() !== reopentext) {
-        reopenbtn.text(reopentext);
-      }
-      if (closebtn.text() !== closetext) {
-        closebtn.text(closetext);
-      }
-      if (reopenbtn.is(':not(.btn-comment-and-reopen)')) {
-        reopenbtn.addClass('btn-comment-and-reopen');
-      }
-      if (closebtn.is(':not(.btn-comment-and-close)')) {
-        closebtn.addClass('btn-comment-and-close');
-      }
-    } else {
-      reopentext = reopenbtn.data('originalText');
-      closetext = closebtn.data('originalText');
-      if (reopenbtn.text() !== reopentext) {
-        reopenbtn.text(reopentext);
-      }
-      if (closebtn.text() !== closetext) {
-        closebtn.text(closetext);
-      }
-      if (reopenbtn.is('.btn-comment-and-reopen')) {
-        reopenbtn.removeClass('btn-comment-and-reopen');
-      }
-      if (closebtn.is('.btn-comment-and-close')) {
-        closebtn.removeClass('btn-comment-and-close');
-      }
-    }
-  }
-
   putEditFormInPlace($el) {
     const $editForm = $(this.getEditFormSelector($el));
     const $note = $el.closest('.note');

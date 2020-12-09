@@ -6943,12 +6943,6 @@ msgstr ""
 msgid "Comment"
 msgstr ""
 
-msgid "Comment & close %{noteable_name}"
-msgstr ""
-
-msgid "Comment & reopen %{noteable_name}"
-msgstr ""
-
 msgid "Comment & resolve thread"
 msgstr ""
 
@@ -26172,12 +26166,6 @@ msgid "Start the Runner!"
 msgstr ""
 
 msgid "Start thread"
-msgstr ""
-
-msgid "Start thread & close %{noteable_name}"
-msgstr ""
-
-msgid "Start thread & reopen %{noteable_name}"
 msgstr ""
 
 msgid "Start your Free Gold Trial"

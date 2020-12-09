@@ -10,8 +10,6 @@ class CommentTypeToggle {
     this.dropdownList = opts.dropdownList;
     this.noteTypeInput = opts.noteTypeInput;
     this.submitButton = opts.submitButton;
-    this.closeButton = opts.closeButton;
-    this.reopenButton = opts.reopenButton;
   }
 
   initDroplab() {
@@ -35,34 +33,6 @@ class CommentTypeToggle {
         },
       ],
     };
-
-    if (this.closeButton) {
-      config.InputSetter.push(
-        {
-          input: this.closeButton,
-          valueAttribute: 'data-close-text',
-        },
-        {
-          input: this.closeButton,
-          valueAttribute: 'data-close-text',
-          inputAttribute: 'data-alternative-text',
-        },
-      );
-    }
-
-    if (this.reopenButton) {
-      config.InputSetter.push(
-        {
-          input: this.reopenButton,
-          valueAttribute: 'data-reopen-text',
-        },
-        {
-          input: this.reopenButton,
-          valueAttribute: 'data-reopen-text',
-          inputAttribute: 'data-alternative-text',
-        },
-      );
-    }
 
     return config;
   }
