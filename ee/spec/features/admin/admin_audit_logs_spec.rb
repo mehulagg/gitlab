@@ -33,10 +33,10 @@ RSpec.describe 'Admin::AuditLogs', :js do
       stub_licensed_features(admin_audit_log: true)
     end
 
-    it 'has Audit Log button in head nav bar' do
+    it 'has Audit Events button in head nav bar' do
       visit admin_audit_logs_path
 
-      expect(page).to have_link('Audit Log', href: admin_audit_logs_path)
+      expect(page).to have_link('Audit Events', href: admin_audit_logs_path)
     end
 
     describe 'release created events' do
