@@ -72025,7 +72025,7 @@
         {
           "kind": "UNION",
           "name": "VulnerabilityDetail",
-          "description": "Represents a vulnerability detail. The fields with data will depend on the vulnerability detail type",
+          "description": "Represents a vulnerability detail field. The fields with data will depend on the vulnerability detail type",
           "fields": null,
           "inputFields": null,
           "interfaces": null,
@@ -72896,7 +72896,7 @@
         {
           "kind": "OBJECT",
           "name": "VulnerabilityDetailMarkdown",
-          "description": "Represents the vulnerability details markdown field",
+          "description": "Represents the vulnerability details Markdown field",
           "fields": [
             {
               "name": "description",
@@ -72966,7 +72966,7 @@
             },
             {
               "name": "value",
-              "description": "Value of the markdown field",
+              "description": "Value of the Markdown field",
               "args": [
 
               ],
@@ -73441,7 +73441,7 @@
         {
           "kind": "OBJECT",
           "name": "VulnerabilityDetailUrl",
-          "description": "Represents the vulnerability details url field",
+          "description": "Represents the vulnerability details URL field",
           "fields": [
             {
               "name": "description",
@@ -73485,7 +73485,7 @@
             },
             {
               "name": "href",
-              "description": "Href of the url",
+              "description": "Href of the URL",
               "args": [
 
               ],
@@ -73529,7 +73529,7 @@
             },
             {
               "name": "text",
-              "description": "Text of the url",
+              "description": "Text of the URL",
               "args": [
 
               ],

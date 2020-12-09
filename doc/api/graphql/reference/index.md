@@ -3822,14 +3822,14 @@ Represents the vulnerability details list value.
 
 ### VulnerabilityDetailMarkdown
 
-Represents the vulnerability details markdown field.
+Represents the vulnerability details Markdown field.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
 | `description` | VulnerabilityDetailLangText! => Array | Description of the field in given languages |
 | `fieldName` | String | Name of the field |
 | `name` | VulnerabilityDetailLangText! => Array | Name of the field in given languages |
-| `value` | VulnerabilityDetailLangText! | Value of the markdown field |
+| `value` | VulnerabilityDetailLangText! | Value of the Markdown field |
 
 ### VulnerabilityDetailModuleLocation
 
@@ -3879,15 +3879,15 @@ Represents the vulnerability details text field.
 
 ### VulnerabilityDetailUrl
 
-Represents the vulnerability details url field.
+Represents the vulnerability details URL field.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
 | `description` | VulnerabilityDetailLangText! => Array | Description of the field in given languages |
 | `fieldName` | String | Name of the field |
-| `href` | String! | Href of the url |
+| `href` | String! | Href of the URL |
 | `name` | VulnerabilityDetailLangText! => Array | Name of the field in given languages |
-| `text` | VulnerabilityDetailLangText | Text of the url |
+| `text` | VulnerabilityDetailLangText | Text of the URL |
 
 ### VulnerabilityDismissPayload
 

@@ -24720,7 +24720,7 @@ type VulnerabilityConnection {
 }
 
 """
-Represents a vulnerability detail. The fields with data will depend on the vulnerability detail type
+Represents a vulnerability detail field. The fields with data will depend on the vulnerability detail type
 """
 union VulnerabilityDetail = VulnerabilityDetailBase | VulnerabilityDetailCode | VulnerabilityDetailCommit | VulnerabilityDetailDiff | VulnerabilityDetailFileLocation | VulnerabilityDetailInt | VulnerabilityDetailList | VulnerabilityDetailMarkdown | VulnerabilityDetailModuleLocation | VulnerabilityDetailTable | VulnerabilityDetailText | VulnerabilityDetailUrl
 
@@ -24935,7 +24935,7 @@ type VulnerabilityDetailList {
 }
 
 """
-Represents the vulnerability details markdown field
+Represents the vulnerability details Markdown field
 """
 type VulnerabilityDetailMarkdown {
   """
@@ -24954,7 +24954,7 @@ type VulnerabilityDetailMarkdown {
   name: [VulnerabilityDetailLangText!]!
 
   """
-  Value of the markdown field
+  Value of the Markdown field
   """
   value: VulnerabilityDetailLangText!
 }
@@ -25070,7 +25070,7 @@ type VulnerabilityDetailText {
 }
 
 """
-Represents the vulnerability details url field
+Represents the vulnerability details URL field
 """
 type VulnerabilityDetailUrl {
   """
@@ -25084,7 +25084,7 @@ type VulnerabilityDetailUrl {
   fieldName: String
 
   """
-  Href of the url
+  Href of the URL
   """
   href: String!
 
@@ -25094,7 +25094,7 @@ type VulnerabilityDetailUrl {
   name: [VulnerabilityDetailLangText!]!
 
   """
-  Text of the url
+  Text of the URL
   """
   text: VulnerabilityDetailLangText
 }
