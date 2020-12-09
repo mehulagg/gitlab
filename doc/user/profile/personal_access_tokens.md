@@ -16,8 +16,6 @@ If you're unable to use [OAuth2](../../api/oauth2.md), you can use a personal ac
 
 You can also use personal access tokens with Git to authenticate over HTTP. Personal access tokens are required when [Two-Factor Authentication (2FA)](account/two_factor_authentication.md) is enabled. In both cases, you can authenticate with a token in place of your password.
 
-You can also use personal access tokens as passwords with Git to authenticate over HTTP(S).
-
 Personal access tokens expire on the date you define, at midnight UTC.
 
 - GitLab runs a check at 01:00 AM UTC every day to identify personal access tokens that expire in under seven days. The owners of these tokens are notified by email.
