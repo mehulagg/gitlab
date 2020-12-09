@@ -52,11 +52,14 @@ export default {
     canAddSeats() {
       return this.glFeatures.saasAddSeatsButton && !this.isFreePlan;
     },
-    canUpgrade() {
-      return this.isFreePlan || this.plan.upgradable;
+    canManage() {
+      return !this.isFreePlan;
     },
     canRenew() {
       return this.glFeatures.saasManualRenewButton && !this.isFreePlan;
+    },
+    canUpgrade() {
+      return this.isFreePlan || this.plan.upgradable;
     },
     addSeatsButton() {
       return this.canAddSeats
@@ -89,7 +92,7 @@ export default {
         : null;
     },
     manageButton() {
-      return !this.isFreePlan
+      return this.canManage
         ? {
             text: s__('SubscriptionTable|Manage'),
             href: this.customerPortalUrl,
