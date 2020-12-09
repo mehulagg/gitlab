@@ -19,7 +19,7 @@ module Gitlab
               end
 
               unless allowed_to_write_ref?
-                error("Insufficient permissions for protected ref '#{command.ref}'")
+                error("You do not have sufficient permission to run a pipeline on '#{command.ref}'. Please select a different branch or contact your admin for assistance.")
               end
             end
 
