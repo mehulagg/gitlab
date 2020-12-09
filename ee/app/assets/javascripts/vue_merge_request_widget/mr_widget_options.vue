@@ -317,6 +317,7 @@ export default {
         :secret-scanning-comparison-path="mr.secretScanningComparisonPath"
         :target-project-full-path="mr.targetProjectFullPath"
         :mr-iid="mr.iid"
+        :discover-project-security-path="mr.discoverProjectSecurityPath"
       />
       <grouped-security-reports-app
         v-else-if="shouldRenderExtendedSecurityReport"

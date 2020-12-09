@@ -53,6 +53,8 @@ export default class MergeRequestStore extends CEMergeRequestStore {
     // Paths are set on the first load of the page and not auto-refreshed
     super.setPaths(data);
 
+    this.discoverProjectSecurityPath = data.discover_project_security_path;
+
     // Security scan diff paths
     this.containerScanningComparisonPath = data.container_scanning_comparison_path;
     this.coverageFuzzingComparisonPath = data.coverage_fuzzing_comparison_path;

@@ -52,6 +52,12 @@ module EE
       merge_request.missing_security_scan_types if expose_missing_security_scan_types?
     end
 
+    def discover_project_security_path
+      if show_discover_project_security?(project)
+        project_security_discover_path(project)
+      end
+    end
+
     private
 
     def expose_mr_approval_path?
