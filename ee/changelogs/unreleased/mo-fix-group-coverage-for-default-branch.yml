@@ -1,0 +1,5 @@
+---
+title: Fix group code coverage for default branch
+merge_request: 49630
+author:
+type: fixed
