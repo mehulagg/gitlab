@@ -1,5 +1,12 @@
 <script>
-import { GlTable, GlButton, GlPopover, GlModalDirective } from '@gitlab/ui';
+import {
+  GlTable,
+  GlButton,
+  GlPopover,
+  GlModalDirective,
+  GlTooltipDirective,
+  GlIcon,
+} from '@gitlab/ui';
 import { s__ } from '~/locale';
 import DevopsAdoptionTableCellFlag from './devops_adoption_table_cell_flag.vue';
 import DevopsAdoptionDeleteModal from './devops_adoption_delete_modal.vue';
@@ -23,58 +30,69 @@ export default {
     GlButton,
     GlPopover,
     DevopsAdoptionDeleteModal,
+    GlIcon,
   },
   i18n: DEVOPS_ADOPTION_STRINGS.table,
   devopsSegmentModalId: DEVOPS_ADOPTION_SEGMENT_MODAL_ID,
   devopsSegmentDeleteModalId: DEVOPS_ADOPTION_SEGMENT_DELETE_MODAL_ID,
   directives: {
+    GlTooltip: GlTooltipDirective,
     GlModal: GlModalDirective,
   },
   tableHeaderFields: [
     {
       key: 'name',
       label: s__('DevopsAdoption|Segment'),
+      tooltip: null,
       ...fieldOptions,
     },
     {
       key: 'issueOpened',
       label: s__('DevopsAdoption|Issues'),
+      tooltip: s__('DevopsAdoption|At least 1 issue opened'),
       ...fieldOptions,
     },
     {
       key: 'mergeRequestOpened',
       label: s__('DevopsAdoption|MRs'),
+      tooltip: s__('DevopsAdoption|At least 1 MR opened'),
       ...fieldOptions,
     },
     {
       key: 'mergeRequestApproved',
       label: s__('DevopsAdoption|Approvals'),
+      tooltip: s__('DevopsAdoption|At least 1 approval on an MR'),
       ...fieldOptions,
     },
     {
       key: 'runnerConfigured',
       label: s__('DevopsAdoption|Runners'),
+      tooltip: s__('DevopsAdoption|Runner configured for project/group'),
       ...fieldOptions,
     },
     {
       key: 'pipelineSucceeded',
       label: s__('DevopsAdoption|Pipelines'),
+      tooltip: s__('DevopsAdoption|At least 1 pipeline successfully run'),
       ...fieldOptions,
     },
     {
       key: 'deploySucceeded',
       label: s__('DevopsAdoption|Deploys'),
+      tooltip: s__('DevopsAdoption|At least 1 deploy'),
       ...fieldOptions,
     },
     {
       key: 'securityScanSucceeded',
       label: s__('DevopsAdoption|Scanning'),
+      tooltip: s__('DevopsAdoption|At least 1 security scan of any type run in pipeline'),
       ...fieldOptions,
     },
     {
       key: 'actions',
       label: '',
       tdClass: 'actions-cell',
+      tooltip: null,
       ...fieldOptions,
     },
   ],
@@ -100,6 +118,9 @@ export default {
     setSelectedSegment(segment) {
       this.$emit('set-selected-segment', segment);
     },
+    slotName(key) {
+      return `head(${key})`;
+    },
   },
 };
 </script>
@@ -111,6 +132,19 @@ export default {
       thead-class="gl-border-t-0 gl-border-b-solid gl-border-b-1 gl-border-b-gray-100"
       stacked="sm"
     >
+      <template v-for="header in $options.tableHeaderFields" #[slotName(header.key)]>
+        <div :key="header.key" class="gl-display-flex gl-align-items-center">
+          <span>{{ header.label }}</span>
+          <gl-icon
+            v-if="header.tooltip"
+            v-gl-tooltip.hover="header.tooltip"
+            name="information-o"
+            class="gl-text-gray-200 gl-ml-1"
+            :size="14"
+          />
+        </div>
+      </template>
+
       <template #cell(name)="{ item }">
         <div :data-testid="$options.testids.SEGMENT">
           <strong>{{ item.name }}</strong>
