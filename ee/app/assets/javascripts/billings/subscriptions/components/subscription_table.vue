@@ -64,7 +64,7 @@ export default {
     addSeatsButton() {
       return this.canAddSeats
         ? {
-            text: s__('SubscriptionTable|Add Seats'),
+            text: s__('SubscriptionTable|Add seats'),
             href: this.addSeatsHref,
             testId: 'add-seats',
           }

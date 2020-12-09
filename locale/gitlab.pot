@@ -26441,7 +26441,7 @@ msgstr ""
 msgid "Subscription successfully deleted."
 msgstr ""
 
-msgid "SubscriptionTable|Add Seats"
+msgid "SubscriptionTable|Add seats"
 msgstr ""
 
 msgid "SubscriptionTable|An error occurred while loading billable members list"
