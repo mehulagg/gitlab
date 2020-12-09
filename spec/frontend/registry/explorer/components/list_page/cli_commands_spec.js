@@ -5,12 +5,6 @@ import Tracking from '~/tracking';
 import QuickstartDropdown from '~/registry/explorer/components/list_page/cli_commands.vue';
 import CodeInstruction from '~/vue_shared/components/registry/code_instruction.vue';
 import {
-  dockerLoginCommand,
-  dockerBuildCommand,
-  dockerPushCommand,
-} from '~/registry/explorer/utils';
-
-import {
   QUICK_START,
   LOGIN_COMMAND_LABEL,
   COPY_LOGIN_TITLE,
@@ -18,7 +12,9 @@ import {
   COPY_BUILD_TITLE,
   PUSH_COMMAND_LABEL,
   COPY_PUSH_TITLE,
-} from '~/registry/explorer//constants';
+} from '~/registry/explorer/constants';
+
+import { dockerCommands } from '../../mock_data';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -40,6 +36,7 @@ describe('cli_commands', () => {
       provide() {
         return {
           config,
+          ...dockerCommands,
         };
       },
     });
@@ -69,11 +66,11 @@ describe('cli_commands', () => {
   });
 
   describe.each`
-    index | labelText              | titleText           | genFunction           | trackedEvent
-    ${0}  | ${LOGIN_COMMAND_LABEL} | ${COPY_LOGIN_TITLE} | ${dockerLoginCommand} | ${'click_copy_login'}
-    ${1}  | ${BUILD_COMMAND_LABEL} | ${COPY_BUILD_TITLE} | ${dockerBuildCommand} | ${'click_copy_build'}
-    ${2}  | ${PUSH_COMMAND_LABEL}  | ${COPY_PUSH_TITLE}  | ${dockerPushCommand}  | ${'click_copy_push'}
-  `('code instructions at $index', ({ index, labelText, titleText, genFunction, trackedEvent }) => {
+    index | labelText              | titleText           | command                              | trackedEvent
+    ${0}  | ${LOGIN_COMMAND_LABEL} | ${COPY_LOGIN_TITLE} | ${dockerCommands.dockerLoginCommand} | ${'click_copy_login'}
+    ${1}  | ${BUILD_COMMAND_LABEL} | ${COPY_BUILD_TITLE} | ${dockerCommands.dockerBuildCommand} | ${'click_copy_build'}
+    ${2}  | ${PUSH_COMMAND_LABEL}  | ${COPY_PUSH_TITLE}  | ${dockerCommands.dockerPushCommand}  | ${'click_copy_push'}
+  `('code instructions at $index', ({ index, labelText, titleText, command, trackedEvent }) => {
     let codeInstruction;
 
     beforeEach(() => {
@@ -87,7 +84,7 @@ describe('cli_commands', () => {
     it(`has the correct props`, () => {
       expect(codeInstruction.props()).toMatchObject({
         label: labelText,
-        instruction: genFunction(config),
+        instruction: command,
         copyText: titleText,
         trackingAction: trackedEvent,
         trackingLabel: 'quickstart_dropdown',

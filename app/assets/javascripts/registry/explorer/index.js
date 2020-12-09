@@ -46,6 +46,11 @@ export default () => {
             isGroupPage: parseBoolean(isGroupPage),
             isAdmin: parseBoolean(isAdmin),
           },
+          /* eslint-disable @gitlab/require-i18n-strings */
+          dockerBuildCommand: `docker build -t ${config.repositoryUrl} .`,
+          dockerPushCommand: `docker push ${config.repositoryUrl}`,
+          dockerLoginCommand: `docker login ${config.registryHostUrlWithPort}`,
+          /* eslint-enable @gitlab/require-i18n-strings */
         };
       },
       render(createElement) {

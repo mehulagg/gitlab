@@ -285,3 +285,9 @@ export const graphQLDeleteImageRepositoryTagsMock = {
     },
   },
 };
+
+export const dockerCommands = {
+  dockerBuildCommand: 'foofoo',
+  dockerPushCommand: 'barbar',
+  dockerLoginCommand: 'bazbaz',
+};

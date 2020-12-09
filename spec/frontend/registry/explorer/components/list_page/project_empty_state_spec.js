@@ -3,6 +3,7 @@ import { shallowMount, createLocalVue } from '@vue/test-utils';
 import { GlSprintf } from '@gitlab/ui';
 import { GlEmptyState } from '../../stubs';
 import projectEmptyState from '~/registry/explorer/components/list_page/project_empty_state.vue';
+import { dockerCommands } from '../../mock_data';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -28,6 +29,7 @@ describe('Registry Project Empty state', () => {
       provide() {
         return {
           config,
+          ...dockerCommands,
         };
       },
     });

@@ -8,7 +8,6 @@ import {
   COPY_PUSH_TITLE,
   QUICK_START,
 } from '../../constants/index';
-import { dockerBuildCommand, dockerPushCommand, dockerLoginCommand } from '../../utils';
 
 export default {
   name: 'ProjectEmptyState',
@@ -20,7 +19,7 @@ export default {
     GlFormInputGroup,
     GlFormInput,
   },
-  inject: ['config'],
+  inject: ['config', 'dockerBuildCommand', 'dockerPushCommand', 'dockerLoginCommand'],
   i18n: {
     quickStart: QUICK_START,
     copyLoginTitle: COPY_LOGIN_TITLE,
@@ -35,17 +34,6 @@ export default {
     addImageText: s__(
       'ContainerRegistry|You can add an image to this registry with the following commands:',
     ),
-  },
-  computed: {
-    dockerBuildCommand() {
-      return dockerBuildCommand(this.config);
-    },
-    dockerPushCommand() {
-      return dockerPushCommand(this.config);
-    },
-    dockerLoginCommand() {
-      return dockerLoginCommand(this.config);
-    },
   },
 };
 </script>
