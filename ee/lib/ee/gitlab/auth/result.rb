@@ -13,7 +13,6 @@ module EE
 
         def geo?(for_project)
           type == :geo &&
-            project &&
             project == for_project
         end
       end
