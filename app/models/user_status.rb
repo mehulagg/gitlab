@@ -12,7 +12,7 @@ class UserStatus < ApplicationRecord
   enum availability: { not_set: 0, busy: 1 }
 
   validates :user, presence: true
-  validates :emoji, inclusion: { in: Gitlab::Emoji.emojis_names }
+  validates :emoji, inclusion: { in: Gitlab::Emoji.emojis_names }, allow_blank: true
   validates :message, length: { maximum: 100 }, allow_blank: true
 
   cache_markdown_field :message, pipeline: :emoji

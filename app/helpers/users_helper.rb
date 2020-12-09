@@ -70,7 +70,7 @@ module UsersHelper
   def show_status_emoji?(status)
     return false unless status
 
-    status.message.present? || status.emoji != UserStatus::DEFAULT_EMOJI
+    status.emoji.present?
   end
 
   def user_status(user)

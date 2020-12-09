@@ -32,17 +32,14 @@ RSpec.describe Users::SetStatusService do
       end
 
       context 'when the given availability value is not valid' do
-        let(:params) { { availability: 'not a valid value' } }
+        before do
+          params[:availability] = 'not a valid value'
+        end
 
         it 'does not update the status' do
           user_status = create(:user_status, user: current_user)
 
           expect { service.execute }.not_to change { user_status.reload }
-        end
-
-        it 'returns false' do
-          create(:user_status, user: current_user)
-          expect(service.execute).to be(false)
         end
       end
 
@@ -69,11 +66,21 @@ RSpec.describe Users::SetStatusService do
     context 'without params' do
       let(:params) { {} }
 
-      it 'deletes the status' do
-        status = create(:user_status, user: current_user)
+      shared_examples 'removes user status record' do
+        it 'deletes the status' do
+          status = create(:user_status, user: current_user)
 
-        expect { service.execute }
-          .to change { current_user.reload.status }.from(status).to(nil)
+          expect { service.execute }
+            .to change { current_user.reload.status }.from(status).to(nil)
+        end
+      end
+
+      it_behaves_like 'removes user status record'
+
+      context 'when not_set is given for availability' do
+        let(:params) { { availability: 'not_set' } }
+
+        it_behaves_like 'removes user status record'
       end
     end
   end
