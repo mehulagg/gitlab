@@ -54,11 +54,11 @@ of the cache by the `reactive_cache_lifetime` value.
 Once the lifetime has expired, no more background jobs will be enqueued and calling
 `#with_reactive_cache` will again return `nil` - starting the process all over again.
 
-### 1 MB hard limit
+### Please, set a hard limit
 
-`ReactiveCaching` has a 1 megabyte default limit. [This value is configurable](#selfreactive_cache_worker_finder).
+This can be done by setting something like, `self.reactive_cache_hard_limit = 1.megabytes` in the class that includes `ReactiveCaching`.
 
-If the data we're trying to cache has over 1 megabyte, it will not be cached and a handled `ReactiveCaching::ExceededReactiveCacheLimit` will be notified on Sentry.
+With this, if the data we're trying to cache has over 1 megabyte, it will not be cached and a handled `ReactiveCaching::ExceededReactiveCacheLimit` will be notified on Sentry. To more background on why we should do this, see this [internal issue](https://gitlab.com/gitlab-org/gitlab/-/issues/14015).
 
 ## When to use
 
