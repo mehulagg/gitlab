@@ -48,6 +48,8 @@ module QA
           tags_for_rspec.push(%W[--tag ~requires_#{key}]) unless QA::Runtime::Env.can_test? key
         end
 
+        tags_for_rspec.push(%w[--tag ~geo]) unless tags_for_rspec.include?(%w[--tag geo])
+
         tags_for_rspec
       end
 
