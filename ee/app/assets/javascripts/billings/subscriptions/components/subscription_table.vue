@@ -138,7 +138,7 @@ export default {
             target="_blank"
             rel="noopener noreferrer"
             class="btn btn-inverted-secondary"
-            :class="{ 'ml-2': index !== 0 }"
+            :class="{ 'gl-ml-3': index !== 0 }"
             :data-testid="button.testId"
             >{{ button.text }}</a
           >
