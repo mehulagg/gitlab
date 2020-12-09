@@ -6,5 +6,9 @@ FactoryBot.define do
     association :user, factory: :user
     color_palette { IncidentManagement::OncallParticipant.color_palettes.first.first }
     color_weight { IncidentManagement::OncallParticipant.color_weights.first.first }
+
+    trait :with_access do
+      after(:build) { |participant, _| participant.rotation.project.add_developer(participant.user) }
+    end
   end
 end
