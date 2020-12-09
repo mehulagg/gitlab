@@ -493,20 +493,22 @@ As a workaround, remove the [`retire.js`](analyzers.md#selecting-specific-analyz
 
 ## Troubleshooting
 
-### Working around missing support for certain language
+### Working around missing support for certain languages
 
 As noted in the ["Supported languages" section](#supported-languages-and-package-managers)
 some dependency definition files are not yet supported.
-
-Nonetheless, Dependency Scanning can be achieved by converting the definition file.
-Converters may be provided by the language, package manager or third-party tooling.
+Nonetheless, Dependency Scanning can be achieved if
+the language, a package manager or a third-party tool
+offer a possibility to convert the definition file
+into a supported format.
 
 Generally, the approach is the following:
 
 1. Define a dedicated converter job in your `.gitlab-ci.yml` file.
    Use a suitable Docker image and/or script to facilitate the conversion.
 1. Let that job upload the converted, supported file as an artifact.
-1. Make the `dependency_scanning` job depend on the converter job.
+1. Add [`dependencies: ["convert"]`](../../../ci/yaml/README.md#dependencies)
+   to your `dependency_scanning` job to make use of the converted definitions files.
 
 For example, the currently unsupported `poetry.lock` file can be
 [exported](https://python-poetry.org/docs/cli/#export)
@@ -527,7 +529,7 @@ convert:
   stage: convert
   image: <which-contains-poetry-or>
   script:
-    - <or-installs-poetry>
+    - <or-installs-poetry>  # See https://python-poetry.org/docs/#installation
     - poetry export --output "$PIP_REQUIREMENTS_FILE"
   artifacts:
     paths:
