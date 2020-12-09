@@ -27,9 +27,9 @@ describe('SubscriptionTable component', () => {
     jest.spyOn(store, 'dispatch').mockImplementation();
 
     wrapper = shallowMount(SubscriptionTable, {
-      ...options,
       store,
       localVue,
+      ...options,
     });
   };
 
