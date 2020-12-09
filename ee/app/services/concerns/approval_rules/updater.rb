@@ -13,9 +13,7 @@ module ApprovalRules
         log_audit_event(rule)
         rule.reset
 
-        # KERRI: Now, update all the MR rules related to this rule where
-        #   "modified_from_project_rule" is false and the MR is open
-        #
+        update_umodified_mr_approval_rules(rule)
 
         success
       else
@@ -24,6 +22,33 @@ module ApprovalRules
     end
 
     private
+
+    # Update all the MR rules related to this project rule where
+    #   "modified_from_project_rule" is false and the MR is unmerged
+    #
+    def update_umodified_mr_approval_rules(rule)
+      return unless rule.is_a?(ApprovalProjectRule)
+
+      # Find all unmodified MR rules based on this project rule for unmerged MRs
+      #
+      unmodified_rules = rule
+        .approval_merge_request_rules
+        .for_unmerged_merge_requests
+        .where(modified_from_project_rule: false) # rubocop: disable CodeReuse/ActiveRecord
+
+      if unmodified_rules.any?
+        params = {
+          name: rule.name,
+          approvals_required: rule.approvals_required,
+          user_ids: rule.users.collect(&:id),
+          group_ids: rule.groups.collect(&:id)
+        }
+
+        unmodified_rules.each do |mr_rule|
+          ::ApprovalRules::UpdateService.new(mr_rule, current_user, params).execute
+        end
+      end
+    end
 
     def with_audit_logged(&block)
       audit_context = {
