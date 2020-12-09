@@ -1,7 +1,7 @@
 <script>
 import { mapActions, mapState } from 'vuex';
 import {
-  GlDeprecatedButton,
+  GlButton,
   GlFormCheckbox,
   GlDeprecatedSkeletonLoading as GlSkeletonLoading,
   GlSprintf,
@@ -17,7 +17,7 @@ import { DASHBOARD_TYPES } from '../store/constants';
 export default {
   name: 'SecurityDashboardTableRow',
   components: {
-    GlDeprecatedButton,
+    GlButton,
     GlFormCheckbox,
     GlSkeletonLoading,
     GlSprintf,
@@ -128,12 +128,11 @@ export default {
       >
         <gl-skeleton-loading v-if="isLoading" class="mt-2 js-skeleton-loader" :lines="2" />
         <template v-else>
-          <gl-deprecated-button
+          <gl-button
             ref="vulnerability-title"
-            class="d-inline gl-reset-line-height gl-reset-text-align gl-white-space-normal"
-            variant="blank"
+            variant="link"
             @click="openModal({ vulnerability })"
-            >{{ vulnerability.name }}</gl-deprecated-button
+            >{{ vulnerability.name }}</gl-button
           >
           <template v-if="isDismissed">
             <gl-icon
