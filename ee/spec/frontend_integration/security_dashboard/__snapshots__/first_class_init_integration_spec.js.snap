@@ -1,5 +1,57 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Vulnerability Report default states project-level without a pipeline-id matches snapshot 1`] = `
+<div>
+  <div>
+    <section
+      class="row empty-state text-center"
+    >
+      <div
+        class="col-12"
+      >
+        <div
+          class="svg-250 svg-content"
+        >
+          <img
+            alt="Monitor vulnerabilities in your code"
+            class="gl-max-w-full"
+            src="/test/empty_state.svg"
+          />
+        </div>
+      </div>
+      <div
+        class="col-12"
+      >
+        <div
+          class="text-content gl-mx-auto gl-my-0 gl-p-5"
+        >
+          <h1
+            class="h4"
+          >
+            Monitor vulnerabilities in your code
+          </h1>
+          <p>
+          The security dashboard displays the latest security report. Use it to find and fix vulnerabilities.
+          </p>
+          <div>
+            <a
+              class="btn btn-success btn-md gl-button"
+              href="/test/security_dashboard_page"
+            >
+              <span
+                class="gl-button-text"
+              >
+                Learn more
+              </span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+`;
+
 exports[`Vulnerability Report default states project-level without pipeline-id matches snapshot 1`] = `
 <div>
   <div>

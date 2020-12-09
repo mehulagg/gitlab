@@ -1,9 +1,10 @@
 import '@testing-library/jest-dom/extend-expect';
-import { screen } from '@testing-library/dom';
+import { omit } from 'lodash';
+import { createWrapper } from '@vue/test-utils';
 import initVulnerabilityReport from 'ee/security_dashboard/first_class_init';
+import ReportsNotConfigured from 'ee/security_dashboard/components/empty_states/reports_not_configured.vue';
 import { DASHBOARD_TYPES } from 'ee/security_dashboard/store/constants';
 import { TEST_HOST } from 'jest/helpers/test_constants';
-import { enableExperimentalFragmentVariables } from 'graphql-tag';
 
 const TEST_DATASET = {
   dashboardDocumentation: '/test/dashboard_page',
@@ -28,7 +29,7 @@ const PROJECT_LEVEL_TEST_DATASET = {
 };
 
 describe('Vulnerability Report', () => {
-  let vm;
+  let wrapper;
   let root;
 
   beforeEach(() => {
@@ -41,10 +42,10 @@ describe('Vulnerability Report', () => {
   });
 
   afterEach(() => {
-    if (vm) {
-      vm.$destroy();
+    if (wrapper) {
+      wrapper.vm.$destroy();
     }
-    vm = null;
+    wrapper = null;
     root.remove();
   });
 
@@ -52,18 +53,14 @@ describe('Vulnerability Report', () => {
     const el = document.createElement('div');
     Object.assign(el.dataset, { ...TEST_DATASET, ...data });
     root.appendChild(el);
-    vm = initVulnerabilityReport(el, type);
-  };
-
-  const createEmptyComponent = () => {
-    vm = initVulnerabilityReport(null, null);
+    wrapper = createWrapper(initVulnerabilityReport(el, type));
   };
 
   describe('default states', () => {
     describe('project-level', () => {
-      describe('without pipeline-id', () => {
+      describe('without a pipeline-id', () => {
         beforeEach(() => {
-          const { pipelineId, ...dataWithoutPipelineId } = PROJECT_LEVEL_TEST_DATASET;
+          const dataWithoutPipelineId = omit(PROJECT_LEVEL_TEST_DATASET, 'pipelineId');
           createComponent({
             data: dataWithoutPipelineId,
             type: DASHBOARD_TYPES.PROJECT,
@@ -74,19 +71,12 @@ describe('Vulnerability Report', () => {
           expect(root).toMatchSnapshot();
         });
 
-        it('shows a message describing the feature', () => {
-          expect(
-            screen.getByText(
-              /The security dashboard displays the latest security report. Use it to find and fix vulnerabilities./i,
-            ),
-          ).not.toBe(null);
-        });
-
-        it('shows a "learn more" link to the help page', () => {
-          expect(screen.getByRole('link', { name: /learn more/i })).toHaveAttribute(
-            'href',
-            TEST_DATASET.securityDashboardHelpPath,
-          );
+        it('shows that reports are not configured and provides a link to the help page', () => {
+          const reportsNotConfigured = wrapper.find(ReportsNotConfigured);
+          expect(reportsNotConfigured.exists()).toBe(true);
+          expect(reportsNotConfigured.props()).toMatchObject({
+            helpPath: TEST_DATASET.securityDashboardHelpPath,
+          });
         });
       });
     });
@@ -111,7 +101,7 @@ describe('Vulnerability Report', () => {
 
   describe('error states', () => {
     it('does not have an element', () => {
-      createEmptyComponent();
+      const vm = initVulnerabilityReport(null, null);
 
       expect(root).toBeEmptyDOMElement();
       expect(vm).toBe(null);
