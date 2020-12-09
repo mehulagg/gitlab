@@ -13,6 +13,7 @@ module Packages
           ::Packages::Composer::Metadatum.upsert({
             package_id: created_package.id,
             target_sha: target,
+            version_cache_sha: versions_json.sha,
             composer_json: composer_json
           })
         end
@@ -21,6 +22,14 @@ module Packages
       end
 
       private
+
+      def versions_json
+        @versions_json ||= ::Gitlab::Composer::VersionsJson.new(sibling_packages)
+      end
+
+      def sibling_packages
+        created_package.project.packages.with_name(package_name)
+      end
 
       def created_package
         find_or_create_package!(:composer, name: package_name, version: package_version)
