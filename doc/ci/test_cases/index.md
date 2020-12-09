@@ -52,7 +52,7 @@ in a higher role.
 To edit a test case:
 
 1. [View a test case](#view-a-test-case).
-1. Select the **Edit title and description** button (**{pencil}**).
+1. Select **Edit title and description** (**{pencil}**).
 1. Edit the test case's title or description.
 1. Select **Save changes**.
 
