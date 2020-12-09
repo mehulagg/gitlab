@@ -182,6 +182,7 @@ export default {
     },
     async updateBoard() {
       const responses = await Promise.all([
+        // Remove unnecessary REST API call when https://gitlab.com/gitlab-org/gitlab/-/issues/282299#note_462996301 is resolved
         getBoardsPath(this.endpoints.boardsEndpoint, this.boardPayload),
         this.callBoardMutation(fullBoardId(this.boardPayload.id)),
       ]);
@@ -189,6 +190,7 @@ export default {
       return responses[0].data;
     },
     async createBoard() {
+      // TODO: change this to use `createBoard` mutation https://gitlab.com/gitlab-org/gitlab/-/issues/292466 is resolved
       const boardData = await getBoardsPath(this.endpoints.boardsEndpoint, this.boardPayload);
       await this.callBoardMutation(fullBoardId(boardData.data.id));
 
