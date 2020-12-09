@@ -44,7 +44,5 @@ export default {
 };
 </script>
 <template>
-  <gl-button icon="question" tabindex="0">
-    <gl-icon name="question" />
-  </gl-button>
+  <gl-button variant="link" icon="question" tabindex="0" />
 </template>
