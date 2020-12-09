@@ -1,0 +1,5 @@
+---
+title: Disable epic quick actions when creating new epics
+merge_request: 49470
+author:
+type: fixed

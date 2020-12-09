@@ -1,5 +1,8 @@
 @import 'page_bundles/mixins_and_variables_and_functions';
 
+/*
+  Update ee/app/assets/javascripts/roadmap/constants.js when making changes.
+*/
 $header-item-height: 60px;
 $item-height: 50px;
 $details-cell-width: px-to-rem(320px);

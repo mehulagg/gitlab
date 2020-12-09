@@ -16,7 +16,7 @@ through the [continuous methodologies](introduction/index.md#introduction-to-cic
 - Continuous Delivery (CD)
 - Continuous Deployment (CD)
 
-TIP: **Tip:**
+NOTE:
 Out-of-the-box management systems can decrease hours spent on maintaining toolchains by 10% or more.
 Watch our ["Mastering continuous software development"](https://about.gitlab.com/webcast/mastering-ci-cd/)
 webcast to learn about continuous methods and how GitLab’s built-in CI can help you simplify and scale software development.
@@ -142,7 +142,7 @@ Its feature set is listed on the table below according to DevOps stages.
 | [Auto Deploy](../topics/autodevops/stages.md#auto-deploy)                                       | Deploy your application to a production environment in a Kubernetes cluster.                                                   |
 | [Building Docker images](docker/using_docker_build.md)                                          | Maintain Docker-based projects using GitLab CI/CD.                                                                             |
 | [Canary Deployments](../user/project/canary_deployments.md) **(PREMIUM)**                       | Ship features to only a portion of your pods and let a percentage of your user base to visit the temporarily deployed feature. |
-| [Deploy Boards](../user/project/deploy_boards.md) **(PREMIUM)**                                 | Check the current health and status of each CI/CD environment running on Kubernetes.                                           |
+| [Deploy Boards](../user/project/deploy_boards.md)                                               | Check the current health and status of each CI/CD environment running on Kubernetes.                                           |
 | [Feature Flags](../operations/feature_flags.md) **(PREMIUM)**                                   | Deploy your features behind Feature Flags.                                                                                     |
 | [GitLab Pages](../user/project/pages/index.md)                                                  | Deploy static websites.                                                                                                        |
 | [GitLab Releases](../user/project/releases/index.md)                                            | Add release notes to Git tags.                                                                                                 |

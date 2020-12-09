@@ -54,7 +54,7 @@ end
 
 The query above iterates over the project creators and prints them out without duplications.
 
-NOTE: **Note:**
+NOTE:
 In case the column is not unique (no unique index definition), calling the `distinct` method on the relation is necessary.
 
 ## `EachBatch` in data migrations
@@ -162,7 +162,7 @@ Selecting only the `id` column and ordering by `id` is going to "force" the data
 
 ![Reading the index with extra filter](img/each_batch_users_table_filter_v13_7.png)
 
-NOTE: **Important:**
+NOTE:
 The number of scanned rows depends on the data distribution in the table.
 
 - Best case scenario: the first user was never logged in. The database reads only one row.
@@ -172,7 +172,7 @@ In this particular example the database had to read 10 rows (regardless of our b
 
 #### Improve filtering with `each_batch`
 
-##### Specialized conditinal index
+##### Specialized conditional index
 
 ```sql
 CREATE INDEX index_on_users_never_logged_in ON users (id) WHERE sign_in_count = 0
@@ -195,7 +195,7 @@ To address this problem, we have two options:
 - Create another, conditional index to cover the new query.
 - Replace the index with more generalized configuration.
 
-NOTE: **Note:**
+NOTE:
 Having multiple indexes on the same table and on the same columns could be a performance bottleneck when writing data.
 
 Let's consider the following index (avoid):
@@ -230,7 +230,7 @@ CREATE INDEX index_on_users_never_logged_in ON users (sign_in_count)
 
 Since `each_batch` builds range queries based on the `id` column, this index cannot be used efficiently. The DB reads the rows from the table or uses a bitmap search where the primary key index is also read.
 
-##### "Slow" iteraton
+##### "Slow" iteration
 
 Slow iteration means that we use a good index configuration to iterate over the table and apply filtering on the yielded relation.
 
@@ -266,7 +266,7 @@ on the query which often ends up in statement timeouts. We have an unknown numbe
 issues, the execution time and the accessed database rows depends on the data distribution in the
 `issues` table.
 
-NOTE: **Note:**
+NOTE:
 Using subqueries works only when the subquery returns a small number of rows.
 
 #### Improving Subqueries
@@ -369,4 +369,4 @@ end
 
 ### `EachBatch` vs `BatchCount`
 
-When adding new counters for usage ping, the preferred way to count records is using the `Gitlab::Database::BatchCount` class. The iteration logic implemented in `BatchCount` has similar performance characterisics like `EachBatch`. Most of the tips and suggestions for improving `BatchCount` mentioned above applies to `BatchCount` as well.
+When adding new counters for usage ping, the preferred way to count records is using the `Gitlab::Database::BatchCount` class. The iteration logic implemented in `BatchCount` has similar performance characteristics like `EachBatch`. Most of the tips and suggestions for improving `BatchCount` mentioned above applies to `BatchCount` as well.

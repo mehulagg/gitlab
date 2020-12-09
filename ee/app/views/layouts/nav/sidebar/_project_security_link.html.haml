@@ -21,7 +21,7 @@
           = link_to project_security_dashboard_index_path(@project), title: _('Security Dashboard') do
             %span= _('Security Dashboard')
 
-        = nav_link(path: 'projects/security/vulnerability_report#index') do
+        = nav_link(path: ['projects/security/vulnerability_report#index', 'projects/security/vulnerabilities#show']) do
           = link_to project_security_vulnerability_report_index_path(@project), title: _('Vulnerability Report'), data: { qa_selector: 'vulnerability_report_link' } do
             %span= _('Vulnerability Report')
 

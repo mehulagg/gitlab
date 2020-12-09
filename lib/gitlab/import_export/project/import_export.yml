@@ -342,10 +342,12 @@ excluded_attributes:
     - :protected_environment_id
   boards:
     - :milestone_id
+    - :iteration_id
   lists:
     - :board_id
     - :label_id
     - :milestone_id
+    - :iteration_id
   epic:
     - :start_date_sourcing_milestone_id
     - :due_date_sourcing_milestone_id

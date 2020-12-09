@@ -8811,6 +8811,7 @@ CREATE TABLE alert_management_alerts (
     payload jsonb DEFAULT '{}'::jsonb NOT NULL,
     prometheus_alert_id integer,
     environment_id integer,
+    domain smallint DEFAULT 0,
     CONSTRAINT check_2df3e2fdc1 CHECK ((char_length(monitoring_tool) <= 100)),
     CONSTRAINT check_5e9e57cadb CHECK ((char_length(description) <= 1000)),
     CONSTRAINT check_bac14dddde CHECK ((char_length(service) <= 100)),
@@ -9370,6 +9371,7 @@ CREATE TABLE application_settings (
     encrypted_cloud_license_auth_token_iv text,
     secret_detection_revocation_token_types_url text,
     cloud_license_enabled boolean DEFAULT false NOT NULL,
+    disable_feed_token boolean DEFAULT false NOT NULL,
     CONSTRAINT app_settings_registry_exp_policies_worker_capacity_positive CHECK ((container_registry_expiration_policies_worker_capacity >= 0)),
     CONSTRAINT check_17d9558205 CHECK ((char_length((kroki_url)::text) <= 1024)),
     CONSTRAINT check_2dba05b802 CHECK ((char_length(gitpod_url) <= 255)),
@@ -9846,7 +9848,8 @@ CREATE TABLE boards (
     group_id integer,
     weight integer,
     hide_backlog_list boolean DEFAULT false NOT NULL,
-    hide_closed_list boolean DEFAULT false NOT NULL
+    hide_closed_list boolean DEFAULT false NOT NULL,
+    iteration_id bigint
 );
 
 CREATE TABLE boards_epic_board_labels (
@@ -12135,6 +12138,27 @@ CREATE SEQUENCE evidences_id_seq
 
 ALTER SEQUENCE evidences_id_seq OWNED BY evidences.id;
 
+CREATE TABLE experiment_subjects (
+    id bigint NOT NULL,
+    experiment_id bigint NOT NULL,
+    user_id bigint,
+    group_id bigint,
+    project_id bigint,
+    variant smallint DEFAULT 0 NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    CONSTRAINT chk_has_one_subject CHECK ((num_nonnulls(user_id, group_id, project_id) = 1))
+);
+
+CREATE SEQUENCE experiment_subjects_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE experiment_subjects_id_seq OWNED BY experiment_subjects.id;
+
 CREATE TABLE experiment_users (
     id bigint NOT NULL,
     experiment_id bigint NOT NULL,
@@ -12986,6 +13010,44 @@ CREATE SEQUENCE import_failures_id_seq
 
 ALTER SEQUENCE import_failures_id_seq OWNED BY import_failures.id;
 
+CREATE TABLE incident_management_oncall_participants (
+    id bigint NOT NULL,
+    oncall_rotation_id bigint NOT NULL,
+    user_id bigint NOT NULL,
+    color_palette smallint NOT NULL,
+    color_weight smallint NOT NULL
+);
+
+CREATE SEQUENCE incident_management_oncall_participants_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE incident_management_oncall_participants_id_seq OWNED BY incident_management_oncall_participants.id;
+
+CREATE TABLE incident_management_oncall_rotations (
+    id bigint NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    oncall_schedule_id bigint NOT NULL,
+    length integer NOT NULL,
+    length_unit smallint NOT NULL,
+    starts_at timestamp with time zone NOT NULL,
+    name text NOT NULL,
+    CONSTRAINT check_5209fb5d02 CHECK ((char_length(name) <= 200))
+);
+
+CREATE SEQUENCE incident_management_oncall_rotations_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE incident_management_oncall_rotations_id_seq OWNED BY incident_management_oncall_rotations.id;
+
 CREATE TABLE incident_management_oncall_schedules (
     id bigint NOT NULL,
     created_at timestamp with time zone NOT NULL,
@@ -13590,7 +13652,8 @@ CREATE TABLE lists (
     milestone_id integer,
     max_issue_count integer DEFAULT 0 NOT NULL,
     max_issue_weight integer DEFAULT 0 NOT NULL,
-    limit_metric character varying(20)
+    limit_metric character varying(20),
+    iteration_id bigint
 );
 
 CREATE SEQUENCE lists_id_seq
@@ -13694,7 +13757,7 @@ CREATE TABLE merge_request_context_commit_diff_files (
     old_path text NOT NULL,
     diff text,
     "binary" boolean,
-    merge_request_context_commit_id bigint
+    merge_request_context_commit_id bigint NOT NULL
 );
 
 CREATE TABLE merge_request_context_commits (
@@ -17581,6 +17644,7 @@ CREATE TABLE vulnerability_remediations (
     summary text NOT NULL,
     file text NOT NULL,
     checksum bytea NOT NULL,
+    project_id bigint NOT NULL,
     CONSTRAINT check_ac0ccabff3 CHECK ((char_length(summary) <= 200)),
     CONSTRAINT check_fe3325e3ba CHECK ((char_length(file) <= 255))
 );
@@ -17709,7 +17773,8 @@ CREATE TABLE web_hooks (
     encrypted_url_iv character varying,
     deployment_events boolean DEFAULT false NOT NULL,
     releases_events boolean DEFAULT false NOT NULL,
-    feature_flag_events boolean DEFAULT false NOT NULL
+    feature_flag_events boolean DEFAULT false NOT NULL,
+    member_events boolean DEFAULT false NOT NULL
 );
 
 CREATE SEQUENCE web_hooks_id_seq
@@ -18144,6 +18209,8 @@ ALTER TABLE ONLY events ALTER COLUMN id SET DEFAULT nextval('events_id_seq'::reg
 
 ALTER TABLE ONLY evidences ALTER COLUMN id SET DEFAULT nextval('evidences_id_seq'::regclass);
 
+ALTER TABLE ONLY experiment_subjects ALTER COLUMN id SET DEFAULT nextval('experiment_subjects_id_seq'::regclass);
+
 ALTER TABLE ONLY experiment_users ALTER COLUMN id SET DEFAULT nextval('experiment_users_id_seq'::regclass);
 
 ALTER TABLE ONLY experiments ALTER COLUMN id SET DEFAULT nextval('experiments_id_seq'::regclass);
@@ -18225,6 +18292,10 @@ ALTER TABLE ONLY identities ALTER COLUMN id SET DEFAULT nextval('identities_id_s
 ALTER TABLE ONLY import_export_uploads ALTER COLUMN id SET DEFAULT nextval('import_export_uploads_id_seq'::regclass);
 
 ALTER TABLE ONLY import_failures ALTER COLUMN id SET DEFAULT nextval('import_failures_id_seq'::regclass);
+
+ALTER TABLE ONLY incident_management_oncall_participants ALTER COLUMN id SET DEFAULT nextval('incident_management_oncall_participants_id_seq'::regclass);
+
+ALTER TABLE ONLY incident_management_oncall_rotations ALTER COLUMN id SET DEFAULT nextval('incident_management_oncall_rotations_id_seq'::regclass);
 
 ALTER TABLE ONLY incident_management_oncall_schedules ALTER COLUMN id SET DEFAULT nextval('incident_management_oncall_schedules_id_seq'::regclass);
 
@@ -19306,6 +19377,9 @@ ALTER TABLE ONLY events
 ALTER TABLE ONLY evidences
     ADD CONSTRAINT evidences_pkey PRIMARY KEY (id);
 
+ALTER TABLE ONLY experiment_subjects
+    ADD CONSTRAINT experiment_subjects_pkey PRIMARY KEY (id);
+
 ALTER TABLE ONLY experiment_users
     ADD CONSTRAINT experiment_users_pkey PRIMARY KEY (id);
 
@@ -19435,6 +19509,12 @@ ALTER TABLE ONLY import_export_uploads
 ALTER TABLE ONLY import_failures
     ADD CONSTRAINT import_failures_pkey PRIMARY KEY (id);
 
+ALTER TABLE ONLY incident_management_oncall_participants
+    ADD CONSTRAINT incident_management_oncall_participants_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY incident_management_oncall_rotations
+    ADD CONSTRAINT incident_management_oncall_rotations_pkey PRIMARY KEY (id);
+
 ALTER TABLE ONLY incident_management_oncall_schedules
     ADD CONSTRAINT incident_management_oncall_schedules_pkey PRIMARY KEY (id);
 
@@ -19548,6 +19628,9 @@ ALTER TABLE ONLY merge_request_blocks
 
 ALTER TABLE ONLY merge_request_cleanup_schedules
     ADD CONSTRAINT merge_request_cleanup_schedules_pkey PRIMARY KEY (merge_request_id);
+
+ALTER TABLE ONLY merge_request_context_commit_diff_files
+    ADD CONSTRAINT merge_request_context_commit_diff_files_pkey PRIMARY KEY (merge_request_context_commit_id, relative_order);
 
 ALTER TABLE ONLY merge_request_context_commits
     ADD CONSTRAINT merge_request_context_commits_pkey PRIMARY KEY (id);
@@ -20435,6 +20518,8 @@ CREATE INDEX index_alert_assignees_on_alert_id ON alert_management_alert_assigne
 
 CREATE UNIQUE INDEX index_alert_assignees_on_user_id_and_alert_id ON alert_management_alert_assignees USING btree (user_id, alert_id);
 
+CREATE INDEX index_alert_management_alerts_on_domain ON alert_management_alerts USING btree (domain);
+
 CREATE INDEX index_alert_management_alerts_on_environment_id ON alert_management_alerts USING btree (environment_id) WHERE (environment_id IS NOT NULL);
 
 CREATE INDEX index_alert_management_alerts_on_issue_id ON alert_management_alerts USING btree (issue_id);
@@ -20535,6 +20620,8 @@ CREATE INDEX index_approval_rules_code_owners_rule_type ON approval_merge_reques
 
 CREATE INDEX index_approvals_on_merge_request_id ON approvals USING btree (merge_request_id);
 
+CREATE INDEX index_approvals_on_merge_request_id_and_created_at ON approvals USING btree (merge_request_id, created_at);
+
 CREATE UNIQUE INDEX index_approvals_on_user_id_and_merge_request_id ON approvals USING btree (user_id, merge_request_id);
 
 CREATE INDEX index_approver_groups_on_group_id ON approver_groups USING btree (group_id);
@@ -20620,6 +20707,8 @@ CREATE INDEX index_boards_epic_user_preferences_on_epic_id ON boards_epic_user_p
 CREATE INDEX index_boards_epic_user_preferences_on_user_id ON boards_epic_user_preferences USING btree (user_id);
 
 CREATE INDEX index_boards_on_group_id ON boards USING btree (group_id);
+
+CREATE INDEX index_boards_on_iteration_id ON boards USING btree (iteration_id);
 
 CREATE INDEX index_boards_on_milestone_id ON boards USING btree (milestone_id);
 
@@ -21171,6 +21260,14 @@ CREATE UNIQUE INDEX index_events_on_target_type_and_target_id_and_fingerprint ON
 
 CREATE INDEX index_evidences_on_release_id ON evidences USING btree (release_id);
 
+CREATE INDEX index_experiment_subjects_on_experiment_id ON experiment_subjects USING btree (experiment_id);
+
+CREATE INDEX index_experiment_subjects_on_group_id ON experiment_subjects USING btree (group_id);
+
+CREATE INDEX index_experiment_subjects_on_project_id ON experiment_subjects USING btree (project_id);
+
+CREATE INDEX index_experiment_subjects_on_user_id ON experiment_subjects USING btree (user_id);
+
 CREATE INDEX index_experiment_users_on_experiment_id ON experiment_users USING btree (experiment_id);
 
 CREATE INDEX index_experiment_users_on_user_id ON experiment_users USING btree (user_id);
@@ -21361,6 +21458,16 @@ CREATE INDEX index_import_failures_on_project_id_not_null ON import_failures USI
 
 CREATE INDEX index_imported_projects_on_import_type_creator_id_created_at ON projects USING btree (import_type, creator_id, created_at) WHERE (import_type IS NOT NULL);
 
+CREATE INDEX index_inc_mgmnt_oncall_participants_on_oncall_rotation_id ON incident_management_oncall_participants USING btree (oncall_rotation_id);
+
+CREATE INDEX index_inc_mgmnt_oncall_participants_on_oncall_user_id ON incident_management_oncall_participants USING btree (user_id);
+
+CREATE UNIQUE INDEX index_inc_mgmnt_oncall_participants_on_user_id_and_rotation_id ON incident_management_oncall_participants USING btree (user_id, oncall_rotation_id);
+
+CREATE UNIQUE INDEX index_inc_mgmnt_oncall_rotations_on_oncall_schedule_id_and_id ON incident_management_oncall_rotations USING btree (oncall_schedule_id, id);
+
+CREATE UNIQUE INDEX index_inc_mgmnt_oncall_rotations_on_oncall_schedule_id_and_name ON incident_management_oncall_rotations USING btree (oncall_schedule_id, name);
+
 CREATE INDEX index_incident_management_oncall_schedules_on_project_id ON incident_management_oncall_schedules USING btree (project_id);
 
 CREATE UNIQUE INDEX index_index_statuses_on_project_id ON index_statuses USING btree (project_id);
@@ -21510,6 +21617,8 @@ CREATE INDEX index_list_user_preferences_on_user_id ON list_user_preferences USI
 CREATE UNIQUE INDEX index_list_user_preferences_on_user_id_and_list_id ON list_user_preferences USING btree (user_id, list_id);
 
 CREATE UNIQUE INDEX index_lists_on_board_id_and_label_id ON lists USING btree (board_id, label_id);
+
+CREATE INDEX index_lists_on_iteration_id ON lists USING btree (iteration_id);
 
 CREATE INDEX index_lists_on_label_id ON lists USING btree (label_id);
 
@@ -21723,7 +21832,7 @@ CREATE INDEX index_notes_on_line_code ON notes USING btree (line_code);
 
 CREATE INDEX index_notes_on_note_trigram ON notes USING gin (note gin_trgm_ops);
 
-CREATE INDEX index_notes_on_noteable_id_and_noteable_type ON notes USING btree (noteable_id, noteable_type);
+CREATE INDEX index_notes_on_noteable_id_and_noteable_type_and_system ON notes USING btree (noteable_id, noteable_type, system);
 
 CREATE INDEX index_notes_on_project_id_and_id_and_system_false ON notes USING btree (project_id, id) WHERE (NOT system);
 
@@ -22659,7 +22768,7 @@ CREATE UNIQUE INDEX index_vulnerability_occurrences_on_uuid ON vulnerability_occ
 
 CREATE INDEX index_vulnerability_occurrences_on_vulnerability_id ON vulnerability_occurrences USING btree (vulnerability_id);
 
-CREATE UNIQUE INDEX index_vulnerability_remediations_on_checksum ON vulnerability_remediations USING btree (checksum);
+CREATE UNIQUE INDEX index_vulnerability_remediations_on_project_id_and_checksum ON vulnerability_remediations USING btree (project_id, checksum);
 
 CREATE UNIQUE INDEX index_vulnerability_scanners_on_project_id_and_external_id ON vulnerability_scanners USING btree (project_id, external_id);
 
@@ -22741,6 +22850,12 @@ CREATE UNIQUE INDEX one_canonical_wiki_page_slug_per_metadata ON wiki_page_slugs
 
 CREATE INDEX package_name_index ON packages_packages USING btree (name);
 
+CREATE INDEX packages_packages_failed_verification ON packages_package_files USING btree (verification_retry_at NULLS FIRST) WHERE (verification_state = 3);
+
+CREATE INDEX packages_packages_needs_verification ON packages_package_files USING btree (verification_state) WHERE ((verification_state = 0) OR (verification_state = 3));
+
+CREATE INDEX packages_packages_pending_verification ON packages_package_files USING btree (verified_at NULLS FIRST) WHERE (verification_state = 0);
+
 CREATE INDEX partial_index_ci_builds_on_scheduled_at_with_scheduled_jobs ON ci_builds USING btree (scheduled_at) WHERE ((scheduled_at IS NOT NULL) AND ((type)::text = 'Ci::Build'::text) AND ((status)::text = 'scheduled'::text));
 
 CREATE INDEX partial_index_deployments_for_legacy_successful_deployments ON deployments USING btree (id) WHERE ((finished_at IS NULL) AND (status = 2));
@@ -22759,13 +22874,9 @@ CREATE UNIQUE INDEX term_agreements_unique_index ON term_agreements USING btree 
 
 CREATE INDEX tmp_build_stage_position_index ON ci_builds USING btree (stage_id, stage_idx) WHERE (stage_idx IS NOT NULL);
 
-CREATE INDEX tmp_idx_blocked_by_type_links ON issue_links USING btree (target_id) WHERE (link_type = 2);
-
-CREATE INDEX tmp_idx_blocking_type_links ON issue_links USING btree (source_id) WHERE (link_type = 1);
-
-CREATE INDEX tmp_idx_index_issues_with_outdate_blocking_count ON issues USING btree (id) WHERE ((state_id = 1) AND (blocking_issues_count = 0));
-
 CREATE INDEX tmp_index_for_email_unconfirmation_migration ON emails USING btree (id) WHERE (confirmed_at IS NOT NULL);
+
+CREATE INDEX tmp_index_on_vulnerabilities_non_dismissed ON vulnerabilities USING btree (id) WHERE (state <> 2);
 
 CREATE UNIQUE INDEX unique_merge_request_metrics_by_merge_request_id ON merge_request_metrics USING btree (merge_request_id);
 
@@ -23157,6 +23268,9 @@ ALTER TABLE ONLY notes
 ALTER TABLE ONLY members
     ADD CONSTRAINT fk_2e88fb7ce9 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY lists
+    ADD CONSTRAINT fk_30f2a831f4 FOREIGN KEY (iteration_id) REFERENCES sprints(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY approvals
     ADD CONSTRAINT fk_310d714958 FOREIGN KEY (merge_request_id) REFERENCES merge_requests(id) ON DELETE CASCADE;
 
@@ -23352,6 +23466,9 @@ ALTER TABLE ONLY packages_package_files
 ALTER TABLE ONLY ci_builds
     ADD CONSTRAINT fk_87f4cefcda FOREIGN KEY (upstream_pipeline_id) REFERENCES ci_pipelines(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY experiment_subjects
+    ADD CONSTRAINT fk_88489af1b1 FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY vulnerabilities
     ADD CONSTRAINT fk_88b4d546ef FOREIGN KEY (start_date_sourcing_milestone_id) REFERENCES milestones(id) ON DELETE SET NULL;
 
@@ -23538,6 +23655,9 @@ ALTER TABLE ONLY issues
 ALTER TABLE ONLY issue_links
     ADD CONSTRAINT fk_c900194ff2 FOREIGN KEY (source_id) REFERENCES issues(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY experiment_subjects
+    ADD CONSTRAINT fk_ccc28f8ceb FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY todos
     ADD CONSTRAINT fk_ccf0373936 FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE CASCADE;
 
@@ -23597,6 +23717,9 @@ ALTER TABLE ONLY analytics_devops_adoption_segment_selections
 
 ALTER TABLE ONLY issues
     ADD CONSTRAINT fk_df75a7c8b8 FOREIGN KEY (promoted_to_epic_id) REFERENCES epics(id) ON DELETE SET NULL;
+
+ALTER TABLE ONLY experiment_subjects
+    ADD CONSTRAINT fk_dfc3e211d4 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY ci_resources
     ADD CONSTRAINT fk_e169a8e3d5 FOREIGN KEY (build_id) REFERENCES ci_builds(id) ON DELETE SET NULL;
@@ -23682,6 +23805,9 @@ ALTER TABLE ONLY ci_stages
 ALTER TABLE ONLY system_note_metadata
     ADD CONSTRAINT fk_fbd87415c9 FOREIGN KEY (description_version_id) REFERENCES description_versions(id) ON DELETE SET NULL;
 
+ALTER TABLE ONLY vulnerability_remediations
+    ADD CONSTRAINT fk_fc61a535a0 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY merge_requests
     ADD CONSTRAINT fk_fd82eae0b9 FOREIGN KEY (head_pipeline_id) REFERENCES ci_pipelines(id) ON DELETE SET NULL;
 
@@ -23723,6 +23849,9 @@ ALTER TABLE ONLY namespace_statistics
 
 ALTER TABLE ONLY clusters_applications_elastic_stacks
     ADD CONSTRAINT fk_rails_026f219f46 FOREIGN KEY (cluster_id) REFERENCES clusters(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY incident_management_oncall_participants
+    ADD CONSTRAINT fk_rails_032b12996a FOREIGN KEY (oncall_rotation_id) REFERENCES incident_management_oncall_rotations(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY events
     ADD CONSTRAINT fk_rails_0434b48643 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
@@ -23900,6 +24029,9 @@ ALTER TABLE ONLY saml_group_links
 
 ALTER TABLE ONLY group_custom_attributes
     ADD CONSTRAINT fk_rails_246e0db83a FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY incident_management_oncall_rotations
+    ADD CONSTRAINT fk_rails_256e0bc604 FOREIGN KEY (oncall_schedule_id) REFERENCES incident_management_oncall_schedules(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY analytics_devops_adoption_snapshots
     ADD CONSTRAINT fk_rails_25da9a92c0 FOREIGN KEY (segment_id) REFERENCES analytics_devops_adoption_segments(id) ON DELETE CASCADE;
@@ -24230,6 +24362,9 @@ ALTER TABLE ONLY resource_weight_events
 
 ALTER TABLE ONLY approval_project_rules
     ADD CONSTRAINT fk_rails_5fb4dd100b FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY incident_management_oncall_participants
+    ADD CONSTRAINT fk_rails_5fe86ea341 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY user_highest_roles
     ADD CONSTRAINT fk_rails_60f6c325a6 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
@@ -24947,6 +25082,9 @@ ALTER TABLE ONLY snippet_statistics
 
 ALTER TABLE ONLY project_security_settings
     ADD CONSTRAINT fk_rails_ed4abe1338 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY experiment_subjects
+    ADD CONSTRAINT fk_rails_ede5754774 FOREIGN KEY (experiment_id) REFERENCES experiments(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY ci_daily_build_group_report_results
     ADD CONSTRAINT fk_rails_ee072d13b3 FOREIGN KEY (last_pipeline_id) REFERENCES ci_pipelines(id) ON DELETE CASCADE;

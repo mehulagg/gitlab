@@ -37,7 +37,7 @@ export default {
     return {
       isLoadingGroups: false,
       requestCount: 0,
-      selectedSegmentId: null,
+      selectedSegment: null,
       errors: {
         [DEVOPS_ADOPTION_ERROR_KEYS.groups]: false,
         [DEVOPS_ADOPTION_ERROR_KEYS.segments]: false,
@@ -75,6 +75,9 @@ export default {
     isLoading() {
       return this.isLoadingGroups || this.$apollo.queries.devopsAdoptionSegments.loading;
     },
+    modalKey() {
+      return this.selectedSegment?.id;
+    },
   },
   created() {
     this.fetchGroups();
@@ -111,6 +114,12 @@ export default {
         })
         .catch(error => this.handleError(DEVOPS_ADOPTION_ERROR_KEYS.groups, error));
     },
+    setSelectedSegment(segment) {
+      this.selectedSegment = segment;
+    },
+    clearSelectedSegment() {
+      this.selectedSegment = null;
+    },
   },
 };
 </script>
@@ -126,8 +135,9 @@ export default {
   <div v-else>
     <devops-adoption-segment-modal
       v-if="hasGroupData"
+      :key="modalKey"
       :groups="groups.nodes"
-      :segment-id="selectedSegmentId"
+      :segment="selectedSegment"
     />
     <div v-if="hasSegmentsData" class="gl-mt-3">
       <div
@@ -139,12 +149,20 @@ export default {
             <template #timestamp>{{ timestamp }}</template>
           </gl-sprintf>
         </span>
-        <gl-button v-gl-modal="$options.devopsSegmentModalId">{{
+        <gl-button v-gl-modal="$options.devopsSegmentModalId" @click="clearSelectedSegment">{{
           $options.i18n.tableHeader.button
         }}</gl-button>
       </div>
-      <devops-adoption-table :segments="devopsAdoptionSegments.nodes" />
+      <devops-adoption-table
+        :segments="devopsAdoptionSegments.nodes"
+        :selected-segment="selectedSegment"
+        @set-selected-segment="setSelectedSegment"
+      />
     </div>
-    <devops-adoption-empty-state v-else :has-groups-data="hasGroupData" />
+    <devops-adoption-empty-state
+      v-else
+      :has-groups-data="hasGroupData"
+      @clear-selected-segment="clearSelectedSegment"
+    />
   </div>
 </template>

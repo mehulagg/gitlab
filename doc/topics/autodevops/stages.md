@@ -48,7 +48,7 @@ language:
 For the requirements of other languages and frameworks, read the
 [Heroku buildpacks documentation](https://devcenter.heroku.com/articles/buildpacks#officially-supported-buildpacks).
 
-TIP: **Tip:**
+NOTE:
 If Auto Build fails despite the project meeting the buildpack requirements, set
 a project variable `TRACE=true` to enable verbose logging, which may help you
 troubleshoot.
@@ -78,7 +78,7 @@ Heroku buildpacks, with the following caveats:
 - The `/bin/herokuish` command is not present in the resulting image, and prefixing
   commands with `/bin/herokuish procfile exec` is no longer required (nor possible).
 
-NOTE: **Note:**
+NOTE:
 Auto Test still uses Herokuish, as test suite detection is not
 yet part of the Cloud Native Buildpack specification. For more information, see
 [this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/212689).
@@ -96,7 +96,7 @@ Check the [currently supported languages](#currently-supported-languages).
 Auto Test uses tests you already have in your application. If there are no
 tests, it's up to you to add them.
 
-NOTE: **Note:**
+NOTE:
 Not all buildpacks supported by [Auto Build](#auto-build) are supported by Auto Test.
 Auto Test uses [Herokuish](https://gitlab.com/gitlab-org/gitlab/-/issues/212689), *not*
 Cloud Native Buildpacks, and only buildpacks that implement the
@@ -147,16 +147,13 @@ out. The merge request widget also displays any
 > - Introduced in [GitLab Ultimate](https://about.gitlab.com/pricing/) 10.3.
 > - Select functionality made available in all tiers beginning in 13.1
 
-Static Application Security Testing (SAST) uses the
-[SAST Docker image](https://gitlab.com/gitlab-org/security-products/sast) to run static
+Static Application Security Testing (SAST) runs static
 analysis on the current code, and checks for potential security issues. The
-Auto SAST stage is skipped on licenses other than
-[Ultimate](https://about.gitlab.com/pricing/), and requires
-[GitLab Runner](https://docs.gitlab.com/runner/) 11.5 or above.
+Auto SAST stage requires [GitLab Runner](https://docs.gitlab.com/runner/) 11.5 or above.
 
 After creating the report, it's uploaded as an artifact which you can later
 download and check out. The merge request widget also displays any security
-warnings.
+warnings on [Ultimate](https://about.gitlab.com/pricing/) licenses.
 
 To learn more about [how SAST works](../../user/application_security/sast/index.md),
 see the documentation.
@@ -171,7 +168,7 @@ Secret Detection uses the
 
 After creating the report, it's uploaded as an artifact which you can later
 download and evaluate. The merge request widget also displays any security
-warnings.
+warnings on [Ultimate](https://about.gitlab.com/pricing/) licenses.
 
 To learn more, see [Secret Detection](../../user/application_security/secret_detection/index.md).
 
@@ -179,9 +176,7 @@ To learn more, see [Secret Detection](../../user/application_security/secret_det
 
 > Introduced in [GitLab Ultimate](https://about.gitlab.com/pricing/) 10.7.
 
-Dependency Scanning uses the
-[Dependency Scanning Docker image](https://gitlab.com/gitlab-org/security-products/dependency-scanning)
-to run analysis on the project dependencies and check for potential security issues.
+Dependency Scanning runs analysis on the project's dependencies and checks for potential security issues.
 The Auto Dependency Scanning stage is skipped on licenses other than
 [Ultimate](https://about.gitlab.com/pricing/) and requires
 [GitLab Runner](https://docs.gitlab.com/runner/) 11.5 or above.
@@ -254,7 +249,7 @@ In GitLab 11.4 and later, [local Tiller](https://gitlab.com/gitlab-org/gitlab-fo
 used. Previous versions of GitLab had a Tiller installed in the project
 namespace.
 
-CAUTION: **Caution:**
+WARNING:
 Your apps should *not* be manipulated outside of Helm (using Kubernetes directly).
 This can cause confusion with Helm not detecting the change and subsequent
 deploys with Auto DevOps can undo your changes. Also, if you change something
@@ -288,7 +283,7 @@ see the documentation.
 To use a custom target instead of the auto-deployed review apps,
 set a `DAST_WEBSITE` environment variable to the URL for DAST to scan.
 
-DANGER: **Warning:**
+WARNING:
 If [DAST Full Scan](../../user/application_security/dast/index.md#full-scan) is
 enabled, GitLab strongly advises **not**
 to set `DAST_WEBSITE` to any staging or production environment. DAST Full Scan
@@ -373,7 +368,7 @@ In GitLab 11.4 and later, a
 used. Previous versions of GitLab had a Tiller installed in the project
 namespace.
 
-CAUTION: **Caution:**
+WARNING:
 Your apps should *not* be manipulated outside of Helm (using Kubernetes directly).
 This can cause confusion with Helm not detecting the change and subsequent
 deploys with Auto DevOps can undo your changes. Also, if you change something
@@ -393,7 +388,7 @@ automatically created.
 If the GitLab Deploy Token can't be found, `CI_REGISTRY_PASSWORD` is
 used.
 
-NOTE: **Note:**
+NOTE:
 `CI_REGISTRY_PASSWORD` is only valid during deployment. Kubernetes can
 successfully pull the container image during deployment, but if the image must
 be pulled again, such as after pod eviction, Kubernetes cannot do so
@@ -405,7 +400,7 @@ as it attempts to fetch the image using `CI_REGISTRY_PASSWORD`.
 > - Support for deploying a PostgreSQL version that supports Kubernetes 1.16+ was [introduced](https://gitlab.com/gitlab-org/cluster-integration/auto-deploy-image/-/merge_requests/49) in GitLab 12.9.
 > - Supported out of the box for new deployments as of GitLab 13.0.
 
-CAUTION: **Deprecation:**
+WARNING:
 The default value for the `deploymentApiVersion` setting was changed from
 `extensions/v1beta` to `apps/v1` in [GitLab 13.0](https://gitlab.com/gitlab-org/charts/auto-deploy-app/-/issues/47).
 
@@ -431,7 +426,7 @@ To use Auto Deploy on a Kubernetes 1.16+ cluster:
 1. If you are deploying your application for the first time and are using
    GitLab 12.9 or 12.10, set `AUTO_DEVOPS_POSTGRES_CHANNEL` to `2`.
 
-DANGER: **Warning:**
+WARNING:
 On GitLab 12.9 and 12.10, opting into
 `AUTO_DEVOPS_POSTGRES_CHANNEL` version `2` deletes the version `1` PostgreSQL
 database. Follow the [guide to upgrading PostgreSQL](upgrading_postgresql.md)
@@ -531,7 +526,7 @@ and accept traffic to and from any source. You can use
 [NetworkPolicy](https://kubernetes.io/docs/concepts/services-networking/network-policies/)
 to restrict connections to and from selected pods, namespaces, and the Internet.
 
-NOTE: **Note:**
+NOTE:
 You must use a Kubernetes network plugin that implements support for
 `NetworkPolicy`. The default network plugin for Kubernetes (`kubenet`)
 [does not implement](https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/#kubenet)

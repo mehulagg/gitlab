@@ -1,7 +1,7 @@
 import { GlAlert } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
-import ThreatMonitoringAlerts from 'ee/threat_monitoring/components/threat_alerts.vue';
+import ThreatMonitoringAlerts from 'ee/threat_monitoring/components/alerts/alerts.vue';
 import ThreatMonitoringApp from 'ee/threat_monitoring/components/app.vue';
 import ThreatMonitoringFilters from 'ee/threat_monitoring/components/threat_monitoring_filters.vue';
 import createStore from 'ee/threat_monitoring/store';
@@ -44,12 +44,14 @@ describe('ThreatMonitoringApp component', () => {
         emptyStateSvgPath,
         wafNoDataSvgPath,
         networkPolicyNoDataSvgPath,
-        documentationPath,
         newPolicyPath,
         showUserCallout: true,
         userCalloutId,
         userCalloutsPath,
         ...propsData,
+      },
+      provide: {
+        documentationPath,
       },
       store,
       ...options,

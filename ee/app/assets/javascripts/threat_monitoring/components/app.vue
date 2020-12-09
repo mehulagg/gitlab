@@ -3,7 +3,7 @@ import { mapActions } from 'vuex';
 import { GlAlert, GlEmptyState, GlIcon, GlLink, GlPopover, GlTabs, GlTab } from '@gitlab/ui';
 import { s__ } from '~/locale';
 import axios from '~/lib/utils/axios_utils';
-import ThreatAlerts from './threat_alerts.vue';
+import Alerts from './alerts/alerts.vue';
 import ThreatMonitoringFilters from './threat_monitoring_filters.vue';
 import ThreatMonitoringSection from './threat_monitoring_section.vue';
 import NetworkPolicyList from './network_policy_list.vue';
@@ -18,11 +18,12 @@ export default {
     GlPopover,
     GlTabs,
     GlTab,
-    ThreatAlerts,
+    Alerts,
     ThreatMonitoringFilters,
     ThreatMonitoringSection,
     NetworkPolicyList,
   },
+  inject: ['documentationPath'],
   props: {
     defaultEnvironmentId: {
       type: Number,
@@ -41,10 +42,6 @@ export default {
       required: true,
     },
     networkPolicyNoDataSvgPath: {
-      type: String,
-      required: true,
-    },
-    documentationPath: {
       type: String,
       required: true,
     },
@@ -173,7 +170,7 @@ export default {
         :title="s__('ThreatMonitoring|Alerts')"
         data-testid="threat-monitoring-alerts-tab"
       >
-        <threat-alerts />
+        <alerts />
       </gl-tab>
       <gl-tab ref="networkPolicyTab" :title="s__('ThreatMonitoring|Policies')">
         <network-policy-list

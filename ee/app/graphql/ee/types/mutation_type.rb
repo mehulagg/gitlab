@@ -10,11 +10,11 @@ module EE
         mount_mutation ::Mutations::Clusters::Agents::Delete
         mount_mutation ::Mutations::Clusters::AgentTokens::Create
         mount_mutation ::Mutations::Clusters::AgentTokens::Delete
+        mount_mutation ::Mutations::ComplianceManagement::Frameworks::Destroy
         mount_mutation ::Mutations::Issues::SetIteration
         mount_mutation ::Mutations::Issues::SetWeight
         mount_mutation ::Mutations::Issues::SetEpic
         mount_mutation ::Mutations::Issues::PromoteToEpic
-        mount_mutation ::Mutations::Environments::CanaryIngress::Update
         mount_mutation ::Mutations::EpicTree::Reorder
         mount_mutation ::Mutations::Epics::Update
         mount_mutation ::Mutations::Epics::Create

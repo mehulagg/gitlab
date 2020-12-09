@@ -82,7 +82,7 @@ All values are treated as strings and are only used for the
 Each page should ideally have metadata related to the stage and group it
 belongs to, as well as an information block as described below:
 
-- `stage`: The [Stage](https://about.gitlab.com/handbook/product/product-categories/#devops-stages)
+- `stage`: The [Stage](https://about.gitlab.com/handbook/product/categories/#devops-stages)
   to which the majority of the page's content belongs.
 - `group`: The [Group](https://about.gitlab.com/company/team/structure/#product-groups)
   to which the majority of the page's content belongs.
@@ -381,7 +381,7 @@ on how the left-side navigation menu is built and updated.
 
 ## Previewing the changes live
 
-NOTE: **Note:**
+NOTE:
 To preview your changes to documentation locally, follow this
 [development guide](https://gitlab.com/gitlab-org/gitlab-docs/blob/master/README.md#development-when-contributing-to-gitlab-documentation) or [these instructions for GDK](https://gitlab.com/gitlab-org/gitlab-development-kit/blob/master/doc/howto/gitlab_docs.md).
 
@@ -418,7 +418,7 @@ working on. If you don't, the remote docs branch isn't removed either,
 and the server where the Review Apps are hosted can eventually run out of
 disk space.
 
-TIP: **Tip:**
+NOTE:
 Someone with no merge rights to the GitLab projects (think of forks from
 contributors) cannot run the manual job. In that case, you can
 ask someone from the GitLab team who has the permissions to do that for you.

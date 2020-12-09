@@ -23,10 +23,11 @@ module Gitlab
           attr_reader :severity
           attr_reader :uuid
           attr_reader :remediations
+          attr_reader :details
 
           delegate :file_path, :start_line, :end_line, to: :location
 
-          def initialize(compare_key:, identifiers:, links: [], remediations: [], location:, metadata_version:, name:, raw_metadata:, report_type:, scanner:, scan:, uuid:, confidence: nil, severity: nil) # rubocop:disable Metrics/ParameterLists
+          def initialize(compare_key:, identifiers:, links: [], remediations: [], location:, metadata_version:, name:, raw_metadata:, report_type:, scanner:, scan:, uuid:, confidence: nil, severity: nil, details: {}) # rubocop:disable Metrics/ParameterLists
             @compare_key = compare_key
             @confidence = confidence
             @identifiers = identifiers
@@ -41,6 +42,7 @@ module Gitlab
             @severity = severity
             @uuid = uuid
             @remediations = remediations
+            @details = details
 
             @project_fingerprint = generate_project_fingerprint
           end
@@ -61,6 +63,7 @@ module Gitlab
               scan
               severity
               uuid
+              details
             ].each_with_object({}) do |key, hash|
               hash[key] = public_send(key) # rubocop:disable GitlabSecurity/PublicSend
             end

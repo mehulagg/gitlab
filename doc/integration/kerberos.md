@@ -49,7 +49,7 @@ sudo chmod 0600 /etc/http.keytab
 
 #### Installations from source
 
-NOTE: **Note:**
+NOTE:
 For source installations, make sure the `kerberos` gem group
 [has been installed](../install/installation.md#install-gems).
 
@@ -150,7 +150,7 @@ With that information at hand:
    1. If `block_auto_created_users` is false, the Kerberos user is
       authenticated and is signed in to GitLab.
 
-CAUTION: **Warning**
+WARNING:
 We recommend that you retain the default for `block_auto_created_users`.
 Kerberos users who create accounts on GitLab without administrator
 knowledge can be a security risk.
@@ -216,7 +216,7 @@ GitLab users with a linked Kerberos account can also `git pull` and `git push`
 using Kerberos tokens, i.e., without having to send their password with each
 operation.
 
-DANGER: **Warning:**
+WARNING:
 There is a [known issue](https://github.com/curl/curl/issues/1261) with `libcurl`
 older than version 7.64.1 wherein it won't reuse connections when negotiating.
 This leads to authorization issues when push is larger than `http.postBuffer`

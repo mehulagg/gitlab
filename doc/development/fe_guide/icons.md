@@ -48,8 +48,6 @@ sprite_icon(icon_name, size: nil, css_class: '')
 </svg>
 ```
 
-**Please note:** The `icon(icon_name, options: {})` helper function is deprecated and should not be used anymore.
-
 ### Usage in Vue
 
 [GitLab UI](https://gitlab-org.gitlab.io/gitlab-ui/), our components library, provides a component to display sprite icons.
@@ -92,7 +90,7 @@ Please use the following function inside JS to render an icon:
 
 ### Usage in HAML/Rails
 
-DANGER: **Warning:**
+WARNING:
 Do not use the `spinner` or `icon('spinner spin')` rails helpers to insert
 loading icons. These helpers rely on the Font Awesome icon library which is
 deprecated.

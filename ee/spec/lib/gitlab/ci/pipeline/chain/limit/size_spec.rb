@@ -64,7 +64,7 @@ RSpec.describe ::Gitlab::Ci::Pipeline::Chain::Limit::Size do
         subject
 
         expect(pipeline.errors.to_a)
-          .to include 'Pipeline size limit exceeded by 1 job!'
+          .to include 'Pipeline has too many jobs! Requested 2, but the limit is 1.'
       end
 
       it 'logs the error' do

@@ -86,7 +86,7 @@ RSpec.describe EE::Gitlab::Ci::Pipeline::Quota::Size do
 
       it 'returns infor about pipeline size limit exceeded' do
         expect(subject.message)
-          .to eq "Pipeline size limit exceeded by 1 job!"
+          .to eq "Pipeline has too many jobs! Requested 2, but the limit is 1."
       end
     end
   end

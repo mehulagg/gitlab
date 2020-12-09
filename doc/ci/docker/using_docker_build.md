@@ -37,7 +37,7 @@ during jobs, each with their own tradeoffs.
 An alternative to using `docker build` is to [use kaniko](using_kaniko.md).
 This avoids having to execute a runner in privileged mode.
 
-TIP: **Tip:**
+NOTE:
 To see how Docker and GitLab Runner are configured for shared runners on
 GitLab.com, see [GitLab.com shared
 runners](../../user/gitlab_com/index.md#shared-runners).
@@ -103,7 +103,7 @@ image in privileged mode.
 CI builds, follow the `docker-compose`
 [installation instructions](https://docs.docker.com/compose/install/).
 
-DANGER: **Warning:**
+WARNING:
 By enabling `--docker-privileged`, you are effectively disabling all of
 the security mechanisms of containers and exposing your host to privilege
 escalation which can lead to container breakout. For more information, check
@@ -368,7 +368,7 @@ build:
 The third approach is to bind-mount `/var/run/docker.sock` into the
 container so that Docker is available in the context of that image.
 
-NOTE: **Note:**
+NOTE:
 If you bind the Docker socket and you are
 [using GitLab Runner 11.11 or later](https://gitlab.com/gitlab-org/gitlab-runner/-/merge_requests/1261),
 you can no longer use `docker:19.03.12-dind` as a service. Volume bindings
@@ -567,7 +567,7 @@ of this file. You can do this with a command like:
 kubectl create configmap docker-daemon --namespace gitlab-runner --from-file /tmp/daemon.json
 ```
 
-NOTE: **Note:**
+NOTE:
 Make sure to use the namespace that GitLab Runner Kubernetes executor uses
 to create job pods in.
 
@@ -788,7 +788,7 @@ The steps in the `script` section for the `build` stage can be summed up to:
 
 ## Use the OverlayFS driver
 
-NOTE: **Note:**
+NOTE:
 The shared runners on GitLab.com use the `overlay2` driver by default.
 
 By default, when using `docker:dind`, Docker uses the `vfs` storage driver which

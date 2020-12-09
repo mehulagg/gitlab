@@ -13,6 +13,7 @@ module Gitlab
       extend ActiveSupport::Concern
       include ::ShaAttribute
       include Delay
+      include EachBatch
       include Gitlab::Geo::LogHelpers
 
       VERIFICATION_STATE_VALUES = {
@@ -33,8 +34,6 @@ module Gitlab
         scope :verification_failed, -> { with_verification_state(:verification_failed) }
         scope :checksummed, -> { where.not(verification_checksum: nil) }
         scope :not_checksummed, -> { where(verification_checksum: nil) }
-        scope :never_attempted_verification, -> { verification_pending.where(verification_started_at: nil) }
-        scope :needs_verification_again, -> { verification_pending.where.not(verification_started_at: nil).or(verification_failed) }
         scope :verification_timed_out, -> { verification_started.where("verification_started_at < ?", VERIFICATION_TIMEOUT.ago) }
         scope :needs_verification, -> { verification_pending.or(verification_failed) }
         # rubocop:enable CodeReuse/ActiveRecord
@@ -83,7 +82,7 @@ module Gitlab
           end
 
           event :verification_failed do
-            transition verification_started: :verification_failed
+            transition [:verification_pending, :verification_started, :verification_succeeded, :verification_failed] => :verification_failed
           end
 
           event :verification_pending do
@@ -93,8 +92,88 @@ module Gitlab
       end
 
       class_methods do
+        include Delay
+
         def verification_state_value(state_string)
           VERIFICATION_STATE_VALUES[state_string]
+        end
+
+        # Returns IDs of records that are pending verification.
+        #
+        # Atomically marks those records "verification_started" in the same DB
+        # query.
+        #
+        def verification_pending_batch(batch_size:)
+          relation = verification_pending.order(Gitlab::Database.nulls_first_order(:verified_at)).limit(batch_size) # rubocop:disable CodeReuse/ActiveRecord
+
+          start_verification_batch(relation)
+        end
+
+        # Returns IDs of records that failed to verify (calculate and save checksum).
+        #
+        # Atomically marks those records "verification_started" in the same DB
+        # query.
+        #
+        def verification_failed_batch(batch_size:)
+          relation = verification_failed.order(Gitlab::Database.nulls_first_order(:verification_retry_at)).limit(batch_size) # rubocop:disable CodeReuse/ActiveRecord
+
+          start_verification_batch(relation)
+        end
+
+        # @return [Integer] number of records that need verification
+        def needs_verification_count(limit:)
+          needs_verification.limit(limit).count # rubocop:disable CodeReuse/ActiveRecord
+        end
+
+        # Atomically marks the records as verification_started, with a
+        # verification_started_at time, and returns the primary key of each
+        # updated row. This allows VerificationBatchWorker to concurrently get
+        # unique batches of primary keys to process.
+        #
+        # @param [ActiveRecord::Relation] relation with appropriate where, order, and limit defined
+        # @return [Array<Integer>] primary key of each updated row
+        def start_verification_batch(relation)
+          query = start_verification_batch_query(relation)
+
+          # This query performs a write, so we need to wrap it in a transaction
+          # to stick to the primary database.
+          self.transaction do
+            self.connection.execute(query).to_a.map { |row| row[self.primary_key] }
+          end
+        end
+
+        # Returns a SQL statement which would update all the rows in the
+        # relation as verification_started, with a verification_started_at time,
+        # and returns the primary key of each updated row.
+        #
+        # @param [ActiveRecord::Relation] relation with appropriate where, order, and limit defined
+        # @return [String] SQL statement which would update all and return primary key of each row
+        def start_verification_batch_query(relation)
+          started_enum_value = VERIFICATION_STATE_VALUES[:verification_started]
+
+          <<~SQL.squish
+            UPDATE #{table_name}
+            SET "verification_state" = #{started_enum_value},
+              "verification_started_at" = NOW()
+            WHERE #{self.primary_key} IN (#{relation.select(self.primary_key).to_sql})
+            RETURNING #{self.primary_key}
+          SQL
+        end
+
+        # Fail verification for records which started verification a long time ago
+        def fail_verification_timeouts
+          attrs = {
+            verification_state: verification_state_value(:verification_failed),
+            verification_failure: "Verification timed out after #{VERIFICATION_TIMEOUT}",
+            verification_checksum: nil,
+            verification_retry_count: 1,
+            verification_retry_at: next_retry_time(1),
+            verified_at: Time.current
+          }
+
+          verification_timed_out.each_batch do |relation|
+            relation.update_all(attrs)
+          end
         end
       end
 

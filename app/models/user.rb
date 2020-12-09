@@ -591,13 +591,7 @@ class User < ApplicationRecord
 
       sanitized_order_sql = Arel.sql(sanitize_sql_array([order, query: query]))
 
-      search_query = if Feature.enabled?(:user_search_secondary_email)
-                       search_with_secondary_emails(query)
-                     else
-                       search_without_secondary_emails(query)
-                     end
-
-      search_query.reorder(sanitized_order_sql, :name)
+      search_with_secondary_emails(query).reorder(sanitized_order_sql, :name)
     end
 
     # Limits the result set to users _not_ in the given query/list of IDs.
@@ -1051,7 +1045,7 @@ class User < ApplicationRecord
   end
 
   def require_personal_access_token_creation_for_git_auth?
-    return false if allow_password_authentication_for_git? || ldap_user?
+    return false if allow_password_authentication_for_git? || password_based_omniauth_user?
 
     PersonalAccessTokensFinder.new(user: self, impersonation: false, state: 'active').execute.none?
   end
@@ -1069,7 +1063,7 @@ class User < ApplicationRecord
   end
 
   def allow_password_authentication_for_git?
-    Gitlab::CurrentSettings.password_authentication_enabled_for_git? && !ldap_user?
+    Gitlab::CurrentSettings.password_authentication_enabled_for_git? && !password_based_omniauth_user?
   end
 
   def can_change_username?
@@ -1147,6 +1141,18 @@ class User < ApplicationRecord
 
   def fork_of(project)
     namespace.find_fork_of(project)
+  end
+
+  def password_based_omniauth_user?
+    ldap_user? || crowd_user?
+  end
+
+  def crowd_user?
+    if identities.loaded?
+      identities.find { |identity| identity.provider == 'crowd' && identity.extern_uid.present? }
+    else
+      identities.with_any_extern_uid('crowd').exists?
+    end
   end
 
   def ldap_user?
@@ -1659,7 +1665,7 @@ class User < ApplicationRecord
   # we do this on read since migrating all existing users is not a feasible
   # solution.
   def feed_token
-    ensure_feed_token!
+    Gitlab::CurrentSettings.disable_feed_token ? nil : ensure_feed_token!
   end
 
   # Each existing user needs to have a `static_object_token`.

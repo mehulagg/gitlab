@@ -7,7 +7,7 @@ RSpec.shared_examples 'milestone board list' do
       post api(url, user), params: { milestone_id: other_milestone.id }
 
       expect(response).to have_gitlab_http_status(:bad_request)
-      expect(json_response.dig('message', 'error')).to eq('Milestone not found!')
+      expect(json_response.dig('message', 'error')).to eq('Milestone not found')
     end
 
     it 'returns 400 if milestone list feature is not available' do
@@ -16,8 +16,8 @@ RSpec.shared_examples 'milestone board list' do
       post api(url, user), params: { milestone_id: milestone.id }
 
       expect(response).to have_gitlab_http_status(:bad_request)
-      expect(json_response.dig('message', 'list_type'))
-        .to contain_exactly('Milestone lists not available with your current license')
+      expect(json_response.dig('message', 'error'))
+        .to eq('List type Milestone lists not available with your current license')
     end
 
     it 'creates a milestone list if milestone is found' do

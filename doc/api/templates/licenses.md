@@ -25,7 +25,7 @@ GET /templates/licenses
 | `popular` | boolean | no       | If passed, returns only popular licenses |
 
 ```shell
-curl https://gitlab.example.com/api/v4/templates/licenses?popular=1
+curl "https://gitlab.example.com/api/v4/templates/licenses?popular=1"
 ```
 
 Example response:
@@ -123,12 +123,12 @@ GET /templates/licenses/:key
 | `project`  | string | no       | The copyrighted project name |
 | `fullname` | string | no       | The full-name of the copyright holder |
 
-NOTE: **Note:**
+NOTE:
 If you omit the `fullname` parameter but authenticate your request, the name of
 the authenticated user replaces the copyright holder placeholder.
 
 ```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/templates/licenses/mit?project=My+Cool+Project
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/templates/licenses/mit?project=My+Cool+Project"
 ```
 
 Example response:

@@ -66,9 +66,8 @@ RSpec.describe Mutations::Boards::Lists::Create do
         context 'when milestone not found' do
           let(:list_create_params) { { milestone_id: "gid://gitlab/Milestone/#{non_existing_record_id}" } }
 
-          it 'raises an error' do
-            expect { subject }
-              .to raise_error(Gitlab::Graphql::Errors::ArgumentError, 'Milestone not found!')
+          it 'returns an error' do
+            expect(subject[:errors]).to include 'Milestone not found'
           end
         end
       end
@@ -97,9 +96,8 @@ RSpec.describe Mutations::Boards::Lists::Create do
         context 'when user not found' do
           let(:list_create_params) { { assignee_id: "gid://gitlab/User/#{non_existing_record_id}" } }
 
-          it 'raises an error' do
-            expect { subject }
-              .to raise_error(Gitlab::Graphql::Errors::ArgumentError, 'User not found!')
+          it 'returns an error' do
+            expect(subject[:errors]).to include 'Assignee not found'
           end
         end
       end

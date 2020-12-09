@@ -44,7 +44,7 @@ denied access.
 System hooks can be used, for example, for logging or changing information in an
 LDAP server.
 
-NOTE: **Note:**
+NOTE:
 We follow the same structure and deprecations as [Webhooks](../user/project/integrations/webhooks.md)
 for Push and Tag events, but we never display commits.
 
@@ -249,7 +249,7 @@ Please refer to `group_rename` and `user_rename` for that case.
 }
 ```
 
-If the user is blocked via LDAP, `state` will be `ldap_blocked`.
+If the user is blocked via LDAP, `state` is `ldap_blocked`.
 
 **User renamed:**
 

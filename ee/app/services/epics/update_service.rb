@@ -34,6 +34,11 @@ module Epics
       end
 
       todo_service.update_epic(epic, current_user, old_mentioned_users)
+
+      if epic.previous_changes.include?('confidential') && epic.confidential?
+        # don't enqueue immediately to prevent todos removal in case of a mistake
+        ::TodosDestroyer::ConfidentialEpicWorker.perform_in(::Todo::WAIT_FOR_DELETE, epic.id)
+      end
     end
 
     def handle_task_changes(epic)

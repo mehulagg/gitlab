@@ -12,7 +12,7 @@ This document presents an overview of the concepts of Continuous Integration,
 Continuous Delivery, and Continuous Deployment, as well as an introduction to
 GitLab CI/CD.
 
-TIP: **Tip:**
+NOTE:
 Out-of-the-box management systems can decrease hours spent on maintaining toolchains by 10% or more.
 Watch our ["Mastering continuous software development"](https://about.gitlab.com/webcast/mastering-ci-cd/)
 webcast to learn about continuous methods and how GitLab’s built-in CI can help you simplify and scale software development.
@@ -150,7 +150,7 @@ according to each stage (Verify, Package, Release).
    - Ship features to only a portion of your pods and let a percentage of your user base to visit the temporarily deployed feature with [Canary Deployments](../../user/project/canary_deployments.md). **(PREMIUM)**
    - Deploy your features behind [Feature Flags](../../operations/feature_flags.md).
    - Add release notes to any Git tag with [GitLab Releases](../../user/project/releases/index.md).
-   - View of the current health and status of each CI environment running on Kubernetes with [Deploy Boards](../../user/project/deploy_boards.md). **(PREMIUM)**
+   - View of the current health and status of each CI environment running on Kubernetes with [Deploy Boards](../../user/project/deploy_boards.md).
    - Deploy your application to a production environment in a Kubernetes cluster with [Auto Deploy](../../topics/autodevops/stages.md#auto-deploy).
 
 With GitLab CI/CD you can also:

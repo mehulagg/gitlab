@@ -5,6 +5,7 @@ import { GlLoadingIcon } from '@gitlab/ui';
 import { TABLE_TYPE_DEFAULT, TABLE_TYPE_FREE, TABLE_TYPE_TRIAL } from 'ee/billings/constants';
 import { s__ } from '~/locale';
 import SubscriptionTableRow from './subscription_table_row.vue';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
 export default {
   name: 'SubscriptionTable',
@@ -12,6 +13,7 @@ export default {
     SubscriptionTableRow,
     GlLoadingIcon,
   },
+  mixins: [glFeatureFlagsMixin()],
   props: {
     namespaceName: {
       type: String,
@@ -54,7 +56,11 @@ export default {
       };
     },
     renewButton() {
-      if (this.isFreePlan && !this.plan.trial && !gon.features.saasManualRenewButton) {
+      if (!this.glFeatures.saasManualRenewButton) {
+        return null;
+      }
+
+      if (this.isFreePlan) {
         return null;
       }
 

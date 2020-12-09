@@ -22,21 +22,16 @@ module EE
             def exceeded?
               return false unless enabled?
 
-              excessive_seeds_count > 0
+              seeds_size > ci_pipeline_size_limit
             end
 
             def message
               return unless exceeded?
 
-              'Pipeline size limit exceeded by ' \
-                "#{pluralize(excessive_seeds_count, 'job')}!"
+              "Pipeline has too many jobs! Requested #{seeds_size}, but the limit is #{ci_pipeline_size_limit}."
             end
 
             private
-
-            def excessive_seeds_count
-              @excessive ||= seeds_size - ci_pipeline_size_limit
-            end
 
             def ci_pipeline_size_limit
               strong_memoize(:ci_pipeline_size_limit) do

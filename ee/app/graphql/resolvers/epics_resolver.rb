@@ -52,7 +52,7 @@ module Resolvers
       validate_timeframe_params!(args)
       validate_starts_with_iid!(args)
 
-      super(args)
+      super(**args)
     end
 
     def resolve_with_lookahead(**args)

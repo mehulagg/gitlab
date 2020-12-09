@@ -65,6 +65,26 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Common do
       end
     end
 
+    context 'parsing finding.details' do
+      let(:artifact) { build(:ee_ci_job_artifact, :common_security_report) }
+
+      context 'when details are provided' do
+        it 'sets details from the report' do
+          vulnerability = report.findings.find { |x| x.compare_key == 'CVE-1020' }
+          expected_details = Gitlab::Json.parse(vulnerability.raw_metadata)['details']
+
+          expect(vulnerability.details).to eq(expected_details)
+        end
+      end
+
+      context 'when details are not provided' do
+        it 'sets empty hash' do
+          vulnerability = report.findings.find { |x| x.compare_key == 'CVE-1030' }
+          expect(vulnerability.details).to eq({})
+        end
+      end
+    end
+
     context 'parsing remediations' do
       let(:expected_remediation) { create(:ci_reports_security_remediation, diff: '') }
 

@@ -30,7 +30,25 @@ RSpec.describe Gitlab::Ci::Reports::Security::Finding do
         scanner: scanner,
         scan: nil,
         severity: :high,
-        uuid: 'cadf8cf0a8228fa92a0f4897a0314083bb38'
+        uuid: 'cadf8cf0a8228fa92a0f4897a0314083bb38',
+        details: {
+          'commit' => {
+            'name' => [
+              {
+                'lang' => 'en',
+                'value' => 'The Commit'
+              }
+            ],
+            'description' => [
+              {
+                'lang' => 'en',
+                'value' => 'Commit where the vulnerability was identified'
+              }
+            ],
+            'type' => 'commit',
+            'value' => '41df7b7eb3be2b5be2c406c2f6d28cd6631eeb19'
+          }
+        }
       }
     end
 
@@ -52,7 +70,25 @@ RSpec.describe Gitlab::Ci::Reports::Security::Finding do
           report_type: :sast,
           scanner: scanner,
           severity: :high,
-          uuid: 'cadf8cf0a8228fa92a0f4897a0314083bb38'
+          uuid: 'cadf8cf0a8228fa92a0f4897a0314083bb38',
+          details: {
+            'commit' => {
+              'name' => [
+                {
+                  'lang' => 'en',
+                  'value' => 'The Commit'
+                }
+              ],
+              'description' => [
+                {
+                  'lang' => 'en',
+                  'value' => 'Commit where the vulnerability was identified'
+                }
+              ],
+              'type' => 'commit',
+              'value' => '41df7b7eb3be2b5be2c406c2f6d28cd6631eeb19'
+            }
+          }
         )
       end
     end
@@ -100,7 +136,8 @@ RSpec.describe Gitlab::Ci::Reports::Security::Finding do
         scanner: occurrence.scanner,
         scan: occurrence.scan,
         severity: occurrence.severity,
-        uuid: occurrence.uuid
+        uuid: occurrence.uuid,
+        details: occurrence.details
       })
     end
   end

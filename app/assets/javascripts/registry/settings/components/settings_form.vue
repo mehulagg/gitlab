@@ -4,8 +4,6 @@ import Tracking from '~/tracking';
 import {
   UPDATE_SETTINGS_ERROR_MESSAGE,
   UPDATE_SETTINGS_SUCCESS_MESSAGE,
-} from '~/registry/shared/constants';
-import {
   SET_CLEANUP_POLICY_BUTTON,
   KEEP_HEADER_TEXT,
   KEEP_INFO_TEXT,
@@ -21,11 +19,11 @@ import {
   CADENCE_LABEL,
   EXPIRATION_POLICY_FOOTER_NOTE,
 } from '~/registry/settings/constants';
-import { formOptionsGenerator } from '~/registry/shared/utils';
+import { formOptionsGenerator } from '~/registry/settings/utils';
 import updateContainerExpirationPolicyMutation from '~/registry/settings/graphql/mutations/update_container_expiration_policy.graphql';
 import { updateContainerExpirationPolicy } from '~/registry/settings/graphql/utils/cache_update';
 import ExpirationDropdown from './expiration_dropdown.vue';
-import ExpirationTextarea from './expiration_textarea.vue';
+import ExpirationInput from './expiration_input.vue';
 import ExpirationToggle from './expiration_toggle.vue';
 import ExpirationRunText from './expiration_run_text.vue';
 
@@ -35,7 +33,7 @@ export default {
     GlButton,
     GlSprintf,
     ExpirationDropdown,
-    ExpirationTextarea,
+    ExpirationInput,
     ExpirationToggle,
     ExpirationRunText,
   },
@@ -202,7 +200,11 @@ export default {
         data-testid="cadence-dropdown"
         @input="onModelChange($event, 'cadence')"
       />
-      <expiration-run-text :value="prefilledForm.nextRunAt" class="gl-mb-0!" />
+      <expiration-run-text
+        :value="prefilledForm.nextRunAt"
+        :enabled="prefilledForm.enabled"
+        class="gl-mb-0!"
+      />
     </div>
     <gl-card class="gl-mt-7">
       <template #header>
@@ -229,14 +231,14 @@ export default {
             data-testid="keep-n-dropdown"
             @input="onModelChange($event, 'keepN')"
           />
-          <expiration-textarea
+          <expiration-input
             v-model="prefilledForm.nameRegexKeep"
             :error="apiErrors.nameRegexKeep"
             :disabled="isFieldDisabled"
             :label="$options.i18n.NAME_REGEX_KEEP_LABEL"
             :description="$options.i18n.NAME_REGEX_KEEP_DESCRIPTION"
             name="keep-regex"
-            data-testid="keep-regex-textarea"
+            data-testid="keep-regex-input"
             @input="onModelChange($event, 'nameRegexKeep')"
             @validation="setLocalErrors($event, 'nameRegexKeep')"
           />
@@ -268,7 +270,7 @@ export default {
             data-testid="older-than-dropdown"
             @input="onModelChange($event, 'olderThan')"
           />
-          <expiration-textarea
+          <expiration-input
             v-model="prefilledForm.nameRegex"
             :error="apiErrors.nameRegex"
             :disabled="isFieldDisabled"
@@ -276,7 +278,7 @@ export default {
             :placeholder="$options.i18n.NAME_REGEX_PLACEHOLDER"
             :description="$options.i18n.NAME_REGEX_DESCRIPTION"
             name="remove-regex"
-            data-testid="remove-regex-textarea"
+            data-testid="remove-regex-input"
             @input="onModelChange($event, 'nameRegex')"
             @validation="setLocalErrors($event, 'nameRegex')"
           />

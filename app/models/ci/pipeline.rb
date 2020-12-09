@@ -277,15 +277,17 @@ module Ci
     scope :internal, -> { where(source: internal_sources) }
     scope :no_child, -> { where.not(source: :parent_pipeline) }
     scope :ci_sources, -> { where(source: Enums::Ci::Pipeline.ci_sources.values) }
+    scope :ci_branch_sources, -> { where(source: Enums::Ci::Pipeline.ci_branch_sources.values) }
     scope :ci_and_parent_sources, -> { where(source: Enums::Ci::Pipeline.ci_and_parent_sources.values) }
     scope :for_user, -> (user) { where(user: user) }
     scope :for_sha, -> (sha) { where(sha: sha) }
     scope :for_source_sha, -> (source_sha) { where(source_sha: source_sha) }
     scope :for_sha_or_source_sha, -> (sha) { for_sha(sha).or(for_source_sha(sha)) }
     scope :for_ref, -> (ref) { where(ref: ref) }
+    scope :for_branch, -> (branch) { for_ref(branch).where(tag: false) }
     scope :for_id, -> (id) { where(id: id) }
     scope :for_iid, -> (iid) { where(iid: iid) }
-    scope :for_project, -> (project) { where(project: project) }
+    scope :for_project, -> (project_id) { where(project_id: project_id) }
     scope :created_after, -> (time) { where('ci_pipelines.created_at > ?', time) }
     scope :created_before_id, -> (id) { where('ci_pipelines.id < ?', id) }
     scope :before_pipeline, -> (pipeline) { created_before_id(pipeline.id).outside_pipeline_family(pipeline) }
@@ -310,9 +312,9 @@ module Ci
     # In general, please use `Ci::PipelinesForMergeRequestFinder` instead,
     # for checking permission of the actor.
     scope :triggered_by_merge_request, -> (merge_request) do
-      ci_sources.where(source: :merge_request_event,
-                       merge_request: merge_request,
-                       project: [merge_request.source_project, merge_request.target_project])
+      where(source: :merge_request_event,
+            merge_request: merge_request,
+            project: [merge_request.source_project, merge_request.target_project])
     end
 
     # Returns the pipelines in descending order (= newest first), optionally
@@ -851,15 +853,9 @@ module Ci
     end
 
     def same_family_pipeline_ids
-      if Feature.enabled?(:ci_root_ancestor_for_pipeline_family, project, default_enabled: false)
-        ::Gitlab::Ci::PipelineObjectHierarchy.new(
-          self.class.where(id: root_ancestor), options: { same_project: true }
-        ).base_and_descendants.select(:id)
-      else
-        ::Gitlab::Ci::PipelineObjectHierarchy.new(
-          base_and_ancestors(same_project: true), options: { same_project: true }
-        ).base_and_descendants.select(:id)
-      end
+      ::Gitlab::Ci::PipelineObjectHierarchy.new(
+        self.class.where(id: root_ancestor), options: { same_project: true }
+      ).base_and_descendants.select(:id)
     end
 
     def build_with_artifacts_in_self_and_descendants(name)

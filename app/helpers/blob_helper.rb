@@ -1,10 +1,6 @@
 # frozen_string_literal: true
 
 module BlobHelper
-  def no_highlight_files
-    %w(credits changelog news copying copyright license authors)
-  end
-
   def edit_blob_path(project = @project, ref = @ref, path = @path, options = {})
     project_edit_blob_path(project,
                            tree_join(ref, path),
@@ -332,8 +328,9 @@ module BlobHelper
   end
 
   def readable_blob(options, path, project, ref)
-    blob = options.delete(:blob)
-    blob ||= project.repository.blob_at(ref, path) rescue nil
+    blob = options.fetch(:blob) do
+      project.repository.blob_at(ref, path) rescue nil
+    end
 
     blob if blob&.readable_text?
   end

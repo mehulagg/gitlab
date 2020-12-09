@@ -31,7 +31,7 @@ The following outline re-uses the [maturity metric](https://about.gitlab.com/dir
 
 The initial step for integrating a new component with GitLab starts with creating a [Feature proposal in the issue tracker](https://gitlab.com/gitlab-org/gitlab/-/issues/new?issuable_template=Feature%20proposal).
 
-Identify the [product category](https://about.gitlab.com/handbook/product/product-categories/) the component falls under and assign the Engineering Manager and Product Manager responsible for that category.
+Identify the [product category](https://about.gitlab.com/handbook/product/categories/) the component falls under and assign the Engineering Manager and Product Manager responsible for that category.
 
 The general steps for getting any GitLab feature from proposal to release can be found in the [Product development flow](https://about.gitlab.com/handbook/product-development-flow/).
 
@@ -47,14 +47,14 @@ Adding a new service follows the same [merge request workflow](contributing/merg
 
 The first iteration should be to add the ability to connect and use the service as an externally installed component. Often this involves providing settings in GitLab to connect to the service, or allow connections from it. And then shipping documentation on how to install and configure the service with GitLab.
 
-TIP: **Tip:**
+NOTE:
 [Elasticsearch](../integration/elasticsearch.md#installing-elasticsearch) is an example of a service that has been integrated this way. And many of the other services, including internal projects like Gitaly, started off as separately installed alternatives.
 
 **For services that depend on the existing GitLab codebase:**
 
 The first iteration should be opt-in, either through the `gitlab.yml` configuration or through [feature flags](feature_flags/index.md). For these types of services it is often necessary to [bundle the service and its dependencies with GitLab](#bundling-a-service-with-gitlab) as part of the initial integration.
 
-TIP: **Tip:**
+NOTE:
 [ActionCable](https://docs.gitlab.com/omnibus/settings/actioncable.html) is an example of a service that has been added this way.
 
 ## Bundling a service with GitLab

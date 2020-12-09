@@ -1,8 +1,8 @@
 import Vue from 'vue';
+import mountInviteMembers from 'ee/groups/invite';
 import { STEPS, ONBOARDING_ISSUES_EXPERIMENT_FLOW_STEPS } from '../../constants';
 import ProgressBar from '../../components/progress_bar.vue';
 import VisibilityLevelDropdown from '../../components/visibility_level_dropdown.vue';
-import InviteTeammates from '../../components/invite_teammates.vue';
 
 function mountProgressBar() {
   const el = document.getElementById('progress-bar');
@@ -37,25 +37,8 @@ function mountVisibilityLevelDropdown() {
   });
 }
 
-function mountInviteTeammates() {
-  const el = document.querySelector('.js-invite-teammates');
-
-  if (!el) return null;
-
-  return new Vue({
-    el,
-    render(createElement) {
-      return createElement(InviteTeammates, {
-        props: {
-          emails: JSON.parse(el.dataset.emails),
-        },
-      });
-    },
-  });
-}
-
 export default () => {
   mountProgressBar();
   mountVisibilityLevelDropdown();
-  mountInviteTeammates();
+  mountInviteMembers();
 };

@@ -25,6 +25,12 @@ import mockData, {
   pipelineJobs,
 } from './mock_data';
 
+// Force Jest to transpile and cache
+// eslint-disable-next-line import/order, no-unused-vars
+import _GroupedSecurityReportsApp from 'ee/vue_shared/security_reports/grouped_security_reports_app.vue';
+// eslint-disable-next-line no-unused-vars
+import _Deployment from '~/vue_merge_request_widget/components/deployment/deployment.vue';
+
 const SAST_SELECTOR = '.js-sast-widget';
 const DAST_SELECTOR = '.js-dast-widget';
 const DEPENDENCY_SCANNING_SELECTOR = '.js-dependency-scanning-widget';
@@ -51,6 +57,7 @@ describe('ee merge request widget options', () => {
     delete mrWidgetOptions.extends.el; // Prevent component mounting
 
     gon.features = { asyncMrWidget: true };
+    gl.mrWidgetData = { ...mockData };
 
     Component = Vue.extend(mrWidgetOptions);
     mock = new MockAdapter(axios);
@@ -67,6 +74,7 @@ describe('ee merge request widget options', () => {
     // https://gitlab.com/gitlab-org/gitlab/-/issues/214032
     return waitForPromises().then(() => {
       vm.$destroy();
+      vm = null;
       mock.restore();
       gon.features = {};
     });

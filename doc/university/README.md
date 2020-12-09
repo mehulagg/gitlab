@@ -12,7 +12,7 @@ GitLab University is a great place to start when learning about version control 
 
 If you're looking for a GitLab subscription for _your university_, see our [GitLab for Education](https://about.gitlab.com/solutions/education/) page.
 
-CAUTION: **Caution:**
+WARNING:
 Some of the content in GitLab University may be out of date and we plan to
 [evaluate](https://gitlab.com/gitlab-org/gitlab/-/issues/20403) it.
 
@@ -29,7 +29,7 @@ The GitLab University curriculum is composed of GitLab videos, screencasts, pres
 ### 1.1. Version Control and Git
 
 1. [Version Control Systems](https://docs.google.com/presentation/d/16sX7hUrCZyOFbpvnrAFrg6tVO5_yT98IgdAqOmXwBho/edit#slide=id.g72f2e4906_2_29)
-1. [Katakoda: Learn Git Version Control using Interactive Browser-Based Scenarios](https://www.katacoda.com/courses/git)
+1. [Katacoda: Learn Git Version Control using Interactive Browser-Based Scenarios](https://www.katacoda.com/courses/git)
 
 ### 1.2. GitLab Basics
 
@@ -201,7 +201,7 @@ The GitLab University curriculum is composed of GitLab videos, screencasts, pres
 
 ## 5. Resources for GitLab Team Members
 
-NOTE: **Note:**
+NOTE:
 Some content can only be accessed by GitLab team members.
 
 1. [Sales Path](https://about.gitlab.com/handbook/sales/onboarding/)

@@ -653,7 +653,7 @@ The message should show that the package is downloading from the Package Registr
 Downloading from gitlab-maven: http://gitlab.example.com/api/v4/projects/PROJECT_ID/packages/maven/com/mycompany/mydepartment/my-project/1.0-SNAPSHOT/my-project-1.0-20200128.120857-1.pom
 ```
 
-TIP: **Tip:**
+NOTE:
 In the GitLab UI, on the Package Registry page for Maven, you can view and copy these commands.
 
 ### Use Gradle
@@ -793,7 +793,7 @@ mvn deploy \
 -Dorg.slf4j.simpleLogger.log.org.apache.maven.wagon.providers.http.httpclient.wire=trace
 ```
 
-CAUTION: **Caution:**
+WARNING:
 When you set these options, all network requests are logged and a large amount of output is generated.
 
 ### Useful Maven command-line options

@@ -1,18 +1,24 @@
 <script>
-import { GlSprintf, GlCard, GlButtonGroup, GlButton, GlModalDirective } from '@gitlab/ui';
+import {
+  GlSprintf,
+  GlCard,
+  GlButtonGroup,
+  GlButton,
+  GlModalDirective,
+  GlTooltipDirective,
+} from '@gitlab/ui';
 import { s__ } from '~/locale';
 import ScheduleTimelineSection from './schedule/components/schedule_timeline_section.vue';
 import DeleteScheduleModal from './delete_schedule_modal.vue';
 import EditScheduleModal from './edit_schedule_modal.vue';
 import { getTimeframeForWeeksView } from './schedule/utils';
 import { PRESET_TYPES } from './schedule/constants';
-import { getFormattedTimezone } from '../utils';
+import { getFormattedTimezone } from '../utils/common_utils';
 
 export const i18n = {
-  title: s__('OnCallSchedules|On-call schedule'),
   scheduleForTz: s__('OnCallSchedules|On-call schedule for the %{tzShort}'),
-  updateScheduleLabel: s__('OnCallSchedules|Edit schedule'),
-  destroyScheduleLabel: s__('OnCallSchedules|Delete schedule'),
+  editScheduleLabel: s__('OnCallSchedules|Edit schedule'),
+  deleteScheduleLabel: s__('OnCallSchedules|Delete schedule'),
 };
 
 export default {
@@ -30,6 +36,7 @@ export default {
   },
   directives: {
     GlModal: GlModalDirective,
+    GlTooltip: GlTooltipDirective,
   },
   props: {
     schedule: {
@@ -51,7 +58,6 @@ export default {
 
 <template>
   <div>
-    <h2>{{ $options.i18n.title }}</h2>
     <gl-card>
       <template #header>
         <div class="gl-display-flex gl-justify-content-space-between gl-m-0">
@@ -59,13 +65,17 @@ export default {
           <gl-button-group>
             <gl-button
               v-gl-modal.updateScheduleModal
+              v-gl-tooltip
+              :title="$options.i18n.editScheduleLabel"
               icon="pencil"
-              :aria-label="$options.i18n.updateScheduleLabel"
+              :aria-label="$options.i18n.editScheduleLabel"
             />
             <gl-button
               v-gl-modal.deleteScheduleModal
+              v-gl-tooltip
+              :title="$options.i18n.deleteScheduleLabel"
               icon="remove"
-              :aria-label="$options.i18n.destroyScheduleLabel"
+              :aria-label="$options.i18n.deleteScheduleLabel"
             />
           </gl-button-group>
         </div>

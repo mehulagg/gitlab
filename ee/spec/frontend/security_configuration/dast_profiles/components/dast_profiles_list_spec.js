@@ -4,7 +4,7 @@ import { mount, shallowMount, createWrapper } from '@vue/test-utils';
 import { merge } from 'lodash';
 import DastProfilesList from 'ee/security_configuration/dast_profiles/components/dast_profiles_list.vue';
 import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
-import { siteProfiles as profiles } from './mock_data';
+import { siteProfiles as profiles } from '../mocks/mock_data';
 
 const TEST_ERROR_MESSAGE = 'something went wrong';
 

@@ -15,15 +15,19 @@ that share a theme across projects and milestones.
 
 An epic's page contains the following tabs:
 
-- **Epics and Issues**: epics and issues added to this epic. Child epics, and their issues, are
-  shown in a tree view.
-  - Click the chevron (**>**) next to a parent epic to reveal the child epics and issues.
-  - Hover over the total counts to see a breakdown of open and closed items.
+- **Issues**: issues added to this epic.
+- **Epics and Issues**: epics and issues added to this epic.
+  Appears instead of the **Issues** tab if you have access to [multi-level epics](#multi-level-child-epics).
+  Child epics and their issues are shown in a tree view.
 
-  NOTE: **Note:**
-  The number provided here includes all epics associated with this project. The number includes epics for which users may not yet have permission.
+  - To reveal the child epics and issues, select the chevron (**>**) next to a parent epic.
+  - To see a breakdown of open and closed items, hover over the total counts.
 
-- **Roadmap**: a roadmap view of child epics which have start and due dates.
+    The number provided here includes all epics associated with this project. The number includes
+    epics for which users may not yet have permission.
+
+- [**Roadmap**](#roadmap-in-epics): a roadmap view of child epics which have start and due dates.
+  Appears if you have access to [multi-level epics](#multi-level-child-epics).
 
 ![epic view](img/epic_view_v13.0.png)
 
@@ -101,35 +105,18 @@ steps to create, move, reorder, or delete child epics.
 
 To set a **Start date** and **Due date** for an epic, select one of the following:
 
-- **Fixed**: Enter a fixed value.
-- **From milestones**: Inherit a dynamic value from the milestones that are assigned to the epic's issues.
-  Note that GitLab 12.5 replaced this option with **Inherited**.
-- **Inherited**: Inherit a dynamic value from the epic's issues, child epics, and milestones ([Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/7332) in GitLab 12.5 to replace **From milestones**).
-
-### From milestones
-
-> [Replaced](https://gitlab.com/gitlab-org/gitlab/-/issues/7332) in GitLab 12.5 by **Inherited**.
-
-If you select **From milestones** for the start date, GitLab automatically sets the date to be earliest
-start date across all milestones that are assigned to the issues that belong to the epic.
-If you select **From milestones** for the due date, GitLab sets the date to be the latest due date across
-all milestones that are assigned to those issues.
-
-These are dynamic dates which are recalculated if any of the following occur:
-
-- Milestones are re-assigned to the issues.
-- Milestone dates change.
-- Issues are added or removed from the epic.
+- **Fixed**: enter a fixed value.
+- **Inherited**: inherit a dynamic value from the epic's issues, child epics, and milestones.
 
 ### Inherited
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/7332) in GitLab 12.5 to replace **From milestones**.
 
-If you select:
+If you select **Inherited**:
 
-- **Inherited** for the start date, GitLab scans all child epics and issues assigned to the epic,
+- For the **start date**: GitLab scans all child epics and issues assigned to the epic,
   and sets the start date to match the earliest found start date or milestone.
-- **Inherited** for the due date, GitLab sets the due date to match the latest due date or
+- For the **due date**: GitLab sets the due date to match the latest due date or
   milestone found among its child epics and issues.
 
 These are dynamic dates and recalculated if any of the following occur:
@@ -143,7 +130,7 @@ Because the epic's dates can inherit dates from its children, the start date and
 If the start date of a child epic on the lowest level changes, that becomes the earliest possible start date for its parent epic.
 The parent epic's start date then reflects this change and propagates upwards to the top epic.
 
-## Roadmap in epics
+## Roadmap in epics **(ULTIMATE)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/7327) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 11.10.
 

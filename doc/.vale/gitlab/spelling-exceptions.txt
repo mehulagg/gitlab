@@ -172,6 +172,8 @@ globals
 Gmail
 Gollum
 Google
+goroutine
+goroutines
 Gosec
 Gradle
 Grafana
@@ -212,6 +214,7 @@ JavaScript
 Jenkins
 Jenkinsfile
 Jira
+jq
 jQuery
 jsdom
 JupyterHub
@@ -300,6 +303,7 @@ NGINX
 Nokogiri
 npm
 Nurtch
+nyc
 OAuth
 offboarded
 offboarding
@@ -349,6 +353,8 @@ Prettifier
 Pritaly
 profiler
 Prometheus
+protobuf
+protobufs
 proxied
 proxies
 proxyable

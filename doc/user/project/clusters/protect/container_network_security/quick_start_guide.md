@@ -37,8 +37,8 @@ It is possible to install and manage Cilium in other ways, such as by installing
 
 Managing NetworkPolicies through GitLab is advantageous over managing the policies in Kubernetes directly as Kubernetes does not provide a GUI editor, a change control process, or a revision history. Network Policies can be managed through GitLab in one of two ways:
 
-1. Management through a yaml file in each application's project (for projects using Auto DevOps) - [documentation](https://docs.gitlab.com/ee/topics/autodevops/stages.html#network-policy)
-1. Management through GitLab's Policy management UI (for projects not using Auto DevOps) - [documentation](https://docs.gitlab.com/ee/user/application_security/threat_monitoring/#container-network-policy-management) (Ultimate/Gold only)
+1. Management through a yaml file in each application's project (for projects using Auto DevOps) - [documentation](../../../../../topics/autodevops/stages.md#network-policy)
+1. Management through GitLab's Policy management UI (for projects not using Auto DevOps) - [documentation](../../../../application_security/threat_monitoring/index.md#container-network-policy-management) (Ultimate/Gold only)
 
 Each method comes with its own sets of Pros and Cons:
 
@@ -99,7 +99,7 @@ Keep in mind that when Cilium is set to blocking mode (rather than Audit mode), 
 
 Occasionally your CI/CD pipeline may fail or have trouble connecting to the cluster.  Below are some initial troubleshooting steps that resolve the most common problems:
 
-1. [Clear the cluster cache](https://docs.gitlab.com/ee/user/project/clusters/#clearing-the-cluster-cache)
+1. [Clear the cluster cache](../../index.md#clearing-the-cluster-cache)
 1. If things still aren't working, a more assertive set of actions may help get things back into a good state:
   1. Stop and [delete the problematic environment](../../../../../ci/environments/index.md#delete-environments-through-the-ui) in GitLab.
   1. Delete the relevant namespace in Kubernetes by running `kubectl delete namespaces <insert-some-namespace-name>` in your Kubernetes cluster

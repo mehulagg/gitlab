@@ -9,9 +9,10 @@ module IncidentManagement
 
     def perform(incident_id)
       @incident = Issue.find_by_id(incident_id)
-      @project = incident&.project
+      return unless incident&.sla_available?
 
-      return unless incident && project
+      @project = incident&.project
+      return unless project
 
       @label = incident_exceeded_sla_label
       return if incident.label_ids.include?(label.id)

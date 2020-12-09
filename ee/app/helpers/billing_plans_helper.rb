@@ -15,6 +15,7 @@ module BillingPlansHelper
     {
       namespace_id: group.id,
       namespace_name: group.name,
+      add_seats_href: add_seats_url(group),
       plan_upgrade_href: plan_upgrade_url(group, plan),
       plan_renew_href: plan_renew_url(group),
       customer_portal_url: "#{EE::SUBSCRIPTIONS_URL}/subscriptions",
@@ -79,7 +80,28 @@ module BillingPlansHelper
     _('Seats usage data is updated every day at 12:00pm UTC')
   end
 
+  def upgrade_button_css_classes(namespace, plan, is_current_plan)
+    css_classes = %w[btn btn-success gl-button]
+
+    css_classes << 'disabled' if is_current_plan && !namespace.trial_active?
+    css_classes << 'invisible' if plan.deprecated?
+
+    css_classes.join(' ')
+  end
+
+  def available_plans(plans_data, current_plan)
+    return plans_data unless ::Feature.enabled?(:hide_deprecated_billing_plans)
+
+    plans_data.filter { |plan_data| !plan_data.deprecated? || plan_data.code == current_plan&.code }
+  end
+
   private
+
+  def add_seats_url(group)
+    return unless group
+
+    "#{EE::SUBSCRIPTIONS_URL}/gitlab/namespaces/#{group.id}/extra_seats"
+  end
 
   def plan_purchase_url(group, plan)
     if use_new_purchase_flow?(group)
@@ -102,8 +124,6 @@ module BillingPlansHelper
   end
 
   def billable_seats_href(group)
-    return unless Feature.enabled?(:api_billable_member_list, group)
-
     group_seat_usage_path(group)
   end
 end

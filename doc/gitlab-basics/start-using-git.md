@@ -29,7 +29,7 @@ can download GitLab's [Git Cheat Sheet](https://about.gitlab.com/images/press/gi
 > - <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>&nbsp;Watch the [GitLab Source Code Management Walkthrough](https://www.youtube.com/watch?v=wTQ3aXJswtM) video.
 > - Learn how GitLab became the backbone of [Worldline](https://about.gitlab.com/customers/worldline/)’s development environment.
 
-TIP: **Tip:**
+NOTE:
 To help you visualize what you're doing locally, there are
 [Git GUI apps](https://git-scm.com/download/gui/) you can install.
 
@@ -127,7 +127,7 @@ to our computer:
     Create one before cloning.
   - If you don't have 2FA enabled, use your account's password.
 
-NOTE: **Note:**
+NOTE:
 Authenticating via SSH is GitLab's recommended method. You can read more about credential storage
 in the [Git Credentials documentation](https://git-scm.com/book/en/v2/Git-Tools-Credential-Storage).
 
@@ -234,7 +234,7 @@ To clone `https://gitlab.com/gitlab-tests/sample-project/` via HTTPS:
 git clone https://gitlab.com/gitlab-tests/sample-project.git
 ```
 
-TIP: **Troubleshooting:**
+NOTE:
 On Windows, if you entered incorrect passwords multiple times and GitLab is responding `Access denied`,
 you may have to add your namespace (user name or group name) to clone through HTTPS:
 `git clone https://namespace@gitlab.com/gitlab-org/gitlab.git`.
@@ -400,7 +400,7 @@ git add .
 git commit -m "COMMENT TO DESCRIBE THE INTENTION OF THE COMMIT"
 ```
 
-NOTE: **Note:**
+NOTE:
 The `.` character means _all file changes in the current directory and all subdirectories_.
 
 ### Send changes to GitLab.com
@@ -420,7 +420,7 @@ git push origin master
 On certain occasions, Git won't allow you to push to your repository, and then
 you'll need to [force an update](../topics/git/git_rebase.md#force-push).
 
-NOTE: **Note:**
+NOTE:
 To create a merge request from a fork to an upstream repository, see the
 [forking workflow](../user/project/repository/forking_workflow.md).
 
@@ -453,7 +453,7 @@ git reset HEAD~1
 
 This leaves the changed files and folders unstaged in your local repository.
 
-CAUTION: **Warning:**
+WARNING:
 A Git commit should not usually be reversed, particularly if you already pushed it
 to the remote repository. Although you can undo a commit, the best option is to avoid
 the situation altogether by working carefully.

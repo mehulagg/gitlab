@@ -19,11 +19,14 @@ module EE
 
       base.belongs_to :user
       base.belongs_to :milestone
+      base.belongs_to :iteration
 
       base.validates :user, presence: true, if: :assignee?
       base.validates :milestone, presence: true, if: :milestone?
+      base.validates :iteration, presence: true, if: :iteration?
       base.validates :user_id, uniqueness: { scope: :board_id }, if: :assignee?
       base.validates :milestone_id, uniqueness: { scope: :board_id }, if: :milestone?
+      base.validates :iteration_id, uniqueness: { scope: :board_id }, if: :iteration?
       base.validates :max_issue_count, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
       base.validates :max_issue_weight, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
       base.validates :limit_metric, inclusion: {
@@ -32,11 +35,14 @@ module EE
           allow_nil: true
       }
       base.validates :list_type,
-        exclusion: { in: %w[assignee], message: _('Assignee lists not available with your current license') },
+        exclusion: { in: %w[assignee], message: -> (_object, _data) { _('Assignee lists not available with your current license') } },
         unless: -> { board&.resource_parent&.feature_available?(:board_assignee_lists) }
       base.validates :list_type,
-        exclusion: { in: %w[milestone], message: _('Milestone lists not available with your current license') },
+        exclusion: { in: %w[milestone], message: -> (_object, _data) { _('Milestone lists not available with your current license') } },
         unless: -> { board&.resource_parent&.feature_available?(:board_milestone_lists) }
+      base.validates :list_type,
+        exclusion: { in: %w[iteration], message: -> (_object, _data) { _('Iteration lists not available with your current license') } },
+        unless: -> { board&.resource_parent&.feature_available?(:iterations) }
 
       base.scope :without_types, ->(list_types) { where.not(list_type: list_types) }
     end
@@ -58,6 +64,8 @@ module EE
         user.to_reference
       when 'milestone'
         milestone.title
+      when 'iteration'
+        iteration.title
       else
         super
       end
@@ -78,11 +86,11 @@ module EE
 
     module ClassMethods
       def destroyable_types
-        super + [:assignee, :milestone]
+        super + [:assignee, :milestone, :iteration]
       end
 
       def movable_types
-        super + [:assignee, :milestone]
+        super + [:assignee, :milestone, :iteration]
       end
     end
   end

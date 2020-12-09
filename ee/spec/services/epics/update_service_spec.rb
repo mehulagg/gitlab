@@ -216,6 +216,12 @@ RSpec.describe Epics::UpdateService do
           end
         end
       end
+
+      it 'schedules deletion of todos when epic becomes confidential' do
+        expect(TodosDestroyer::ConfidentialEpicWorker).to receive(:perform_in).with(Todo::WAIT_FOR_DELETE, epic.id)
+
+        update_epic(confidential: true)
+      end
     end
 
     context 'when Epic has tasks' do

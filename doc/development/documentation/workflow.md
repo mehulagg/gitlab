@@ -62,7 +62,7 @@ To update GitLab documentation:
    - The [Markdown Guide](https://about.gitlab.com/handbook/markdown-guide/).
 1. Follow GitLab's [Merge Request Guidelines](../contributing/merge_request_workflow.md#merge-request-guidelines).
 
-TIP: **Tip:**
+NOTE:
 Work in a fork if you do not have Developer access to the GitLab project.
 
 Request help from the Technical Writing team if you:
@@ -146,7 +146,7 @@ Remember:
   advance of a milestone release and for larger documentation changes.
 - You can request a post-merge Technical Writer review of documentation if it's important to get the
   code with which it ships merged as soon as possible. In this case, the author of the original MR
-  will address the feedback provided by the Technical Writer in a follow-up MR.
+  can address the feedback provided by the Technical Writer in a follow-up MR.
 - The Technical Writer can also help decide that documentation can be merged without Technical
   writer review, with the review to occur soon after merge.
 

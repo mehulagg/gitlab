@@ -19,27 +19,6 @@ module EE
 
           private
 
-          override :authorize_list_type_resource!
-          def authorize_list_type_resource!(board, params)
-            super
-
-            if params[:milestone_id]
-              milestones = ::Boards::MilestonesFinder.new(board, current_user).execute
-
-              unless milestones.id_in(params[:milestone_id]).exists?
-                raise ::Gitlab::Graphql::Errors::ArgumentError, 'Milestone not found!'
-              end
-            end
-
-            if params[:assignee_id]
-              users = ::Boards::UsersFinder.new(board, current_user).execute
-
-              unless users.with_user(params[:assignee_id]).exists?
-                raise ::Gitlab::Graphql::Errors::ArgumentError, 'User not found!'
-              end
-            end
-          end
-
           override :create_list_params
           def create_list_params(args)
             params = super

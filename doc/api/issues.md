@@ -16,11 +16,11 @@ are paginated.
 
 Read more on [pagination](README.md#pagination).
 
-DANGER: **Deprecated:**
+WARNING:
 The `reference` attribute in responses is deprecated in favor of `references`.
 Introduced in [GitLab 12.6](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/20354).
 
-NOTE: **Note:**
+NOTE:
 The `references.relative` attribute is relative to the group or project of the issue being requested.
 When an issue is fetched from its project, the `relative` format is the same as the `short` format,
 and when requested across groups or projects it's expected to be the same as the `full` format.
@@ -197,11 +197,11 @@ the `health_status` parameter:
 ]
 ```
 
-DANGER: **Deprecated:**
+WARNING:
 The `assignee` column is deprecated. We now show it as a single-sized array `assignees` to conform
 to the GitLab EE API.
 
-NOTE: **Note:**
+NOTE:
 The `closed_by` attribute was [introduced in GitLab 10.6](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/17042).
 This value is only present for issues closed after GitLab 10.6 and if the user account
 that closed the issue still exists.
@@ -375,10 +375,10 @@ the `health_status` parameter:
 ]
 ```
 
-DANGER: **Deprecated:**
+WARNING:
 The `assignee` column is deprecated. We now show it as a single-sized array `assignees` to conform to the GitLab EE API.
 
-NOTE: **Note:**
+NOTE:
 The `closed_by` attribute was [introduced in GitLab 10.6](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/17042).
 This value is only present for issues closed after GitLab 10.6 and if the user account that closed
 the issue still exists.
@@ -558,10 +558,10 @@ the `health_status` parameter:
 ]
 ```
 
-DANGER: **Deprecated:**
+WARNING:
 The `assignee` column is deprecated. We now show it as a single-sized array `assignees` to conform to the GitLab EE API.
 
-NOTE: **Note:**
+NOTE:
 The `closed_by` attribute was [introduced in GitLab 10.6](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/17042). This value is only present for issues closed after GitLab 10.6 and if the user account that closed
 the issue still exists.
 
@@ -716,15 +716,15 @@ the `epic` property:
 }
 ```
 
-DANGER: **Deprecated:**
+WARNING:
 The `assignee` column is deprecated. We now show it as a single-sized array `assignees` to conform
 to the GitLab EE API.
 
-DANGER: **Deprecated:**
+WARNING:
 The `epic_iid` attribute is deprecated, and [will be removed in version 5](https://gitlab.com/gitlab-org/gitlab/-/issues/35157).
 Please use `iid` of the `epic` attribute instead.
 
-NOTE: **Note:**
+NOTE:
 The `closed_by` attribute was [introduced in GitLab 10.6](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/17042).
 This value is only present for issues closed after GitLab 10.6 and if the user account
 that closed the issue still exists.
@@ -878,14 +878,14 @@ property:
 ]
 ```
 
-DANGER: **Deprecated:**
+WARNING:
 The `assignee` column is deprecated. We now show it as a single-sized array `assignees` to conform to the GitLab EE API.
 
-DANGER: **Deprecated:**
+WARNING:
 The `epic_iid` attribute is deprecated and [will be removed in version 5](https://gitlab.com/gitlab-org/gitlab/-/issues/35157).
 Please use `iid` of the `epic` attribute instead.
 
-NOTE: **Note:**
+NOTE:
 The `closed_by` attribute was [introduced in GitLab 10.6](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/17042). This value is only present for issues closed after GitLab 10.6 and if the user account that closed
 the issue still exists.
 
@@ -1006,10 +1006,10 @@ the `health_status` parameter:
 ]
 ```
 
-DANGER: **Deprecated:**
+WARNING:
 The `assignee` column is deprecated. We now show it as a single-sized array `assignees` to conform to the GitLab EE API.
 
-NOTE: **Note:**
+NOTE:
 The `closed_by` attribute was [introduced in GitLab 10.6](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/17042). This value is only present for issues closed after GitLab 10.6 and if the user account that closed
 the issue still exists.
 
@@ -1159,11 +1159,11 @@ the `health_status` parameter:
 ]
 ```
 
-NOTE: **Note:**
+NOTE:
 The `closed_by` attribute was [introduced in GitLab 10.6](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/17042). This value is only present for issues closed after GitLab 10.6 and if the user account that closed
 the issue still exists.
 
-DANGER: **Deprecated:**
+WARNING:
 `assignee` column is deprecated. We now show it as a single-sized array `assignees` to conform to the GitLab EE API.
 
 ## Delete an issue
@@ -1324,10 +1324,10 @@ the `health_status` parameter:
 ]
 ```
 
-DANGER: **Deprecated:**
+WARNING:
 The `assignee` column is deprecated. We now show it as a single-sized array `assignees` to conform to the GitLab EE API.
 
-NOTE: **Note:**
+NOTE:
 The `closed_by` attribute was [introduced in GitLab 10.6](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/17042). This value is only present for issues closed after GitLab 10.6 and if the user account that closed
 the issue still exists.
 
@@ -1433,10 +1433,10 @@ the `weight` parameter:
 }
 ```
 
-DANGER: **Deprecated:**
+WARNING:
 The `assignee` column is deprecated. We now show it as a single-sized array `assignees` to conform to the GitLab EE API.
 
-NOTE: **Note:**
+NOTE:
 The `closed_by` attribute was [introduced in GitLab 10.6](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/17042). This value is only present for issues closed after GitLab 10.6 and if the user account that closed
 the issue still exists.
 
@@ -1623,10 +1623,10 @@ Example response:
 }
 ```
 
-DANGER: **Deprecated:**
+WARNING:
 The `assignee` column is deprecated. We now show it as a single-sized array `assignees` to conform to the GitLab EE API.
 
-NOTE: **Note:**
+NOTE:
 The `closed_by` attribute was [introduced in GitLab 10.6](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/17042). This value is only present for issues closed after GitLab 10.6 and if the user account that closed
 the issue still exists.
 
@@ -1652,13 +1652,13 @@ Supported attributes:
 Example request:
 
 ```shell
-curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/5/issues/11/notes?body=Lets%20promote%20this%20to%20an%20epic%0A%0A%2Fpromote
+curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/issues/11/notes?body=Lets%20promote%20this%20to%20an%20epic%0A%0A%2Fpromote"
 ```
 
 Example response:
 
 ```json
-{ 
+{
    "id":699,
    "type":null,
    "body":"Lets promote this to an epic",

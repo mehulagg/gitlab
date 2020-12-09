@@ -5,9 +5,6 @@ class ApplicationSetting < ApplicationRecord
   include CacheMarkdownField
   include TokenAuthenticatable
   include ChronicDurationAttribute
-  include IgnorableColumns
-
-  ignore_column :namespace_storage_size_limit, remove_with: '13.5', remove_after: '2020-09-22'
 
   INSTANCE_REVIEW_MIN_USERS = 50
   GRAFANA_URL_ERROR_MESSAGE = 'Please check your Grafana URL setting in ' \
@@ -370,11 +367,11 @@ class ApplicationSetting < ApplicationRecord
 
   validates :eks_access_key_id,
             length: { in: 16..128 },
-            if: :eks_integration_enabled?
+            if: -> (setting) { setting.eks_integration_enabled? && setting.eks_access_key_id.present? }
 
   validates :eks_secret_access_key,
             presence: true,
-            if: :eks_integration_enabled?
+            if: -> (setting) { setting.eks_integration_enabled? && setting.eks_access_key_id.present? }
 
   validates_with X509CertificateCredentialsValidator,
                  certificate: :external_auth_client_cert,
@@ -425,6 +422,9 @@ class ApplicationSetting < ApplicationRecord
   attr_encrypted :ci_jwt_signing_key, encryption_options_base_truncated_aes_256_gcm
   attr_encrypted :secret_detection_token_revocation_token, encryption_options_base_truncated_aes_256_gcm
   attr_encrypted :cloud_license_auth_token, encryption_options_base_truncated_aes_256_gcm
+
+  validates :disable_feed_token,
+            inclusion: { in: [true, false], message: 'must be a boolean value' }
 
   before_validation :ensure_uuid!
 
