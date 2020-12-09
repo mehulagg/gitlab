@@ -60,18 +60,6 @@ describe('RECEIVE_RECENT_BOARDS_ERROR', () => {
   expectNotImplemented(mutations.RECEIVE_RECENT_BOARDS_ERROR);
 });
 
-describe('REQUEST_CREATE_BOARD', () => {
-  expectNotImplemented(mutations.REQUEST_CREATE_BOARD);
-});
-
-describe('RECEIVE_CREATE_BOARD_SUCCESS', () => {
-  expectNotImplemented(mutations.RECEIVE_CREATE_BOARD_SUCCESS);
-});
-
-describe('RECEIVE_CREATE_BOARD_ERROR', () => {
-  expectNotImplemented(mutations.RECEIVE_CREATE_BOARD_ERROR);
-});
-
 describe('REQUEST_REMOVE_BOARD', () => {
   expectNotImplemented(mutations.REQUEST_REMOVE_BOARD);
 });
