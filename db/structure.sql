@@ -14634,7 +14634,8 @@ ALTER SEQUENCE packages_build_infos_id_seq OWNED BY packages_build_infos.id;
 CREATE TABLE packages_composer_metadata (
     package_id bigint NOT NULL,
     target_sha bytea NOT NULL,
-    composer_json jsonb DEFAULT '{}'::jsonb NOT NULL
+    composer_json jsonb DEFAULT '{}'::jsonb NOT NULL,
+    version_cache_sha bytea
 );
 
 CREATE TABLE packages_conan_file_metadata (
