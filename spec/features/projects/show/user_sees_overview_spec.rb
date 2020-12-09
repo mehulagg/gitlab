@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe 'Projects > Show > User sees Git instructions' do
+RSpec.describe 'Projects > Show > User sees overview' do
   let_it_be(:user) { create(:user) }
 
   shared_examples_for 'redirects to the sign in page' do
@@ -122,13 +122,11 @@ RSpec.describe 'Projects > Show > User sees Git instructions' do
     context 'when project is not empty' do
       let_it_be(:project) { create(:project, :public, :repository) }
 
-      before do
-        visit(project_path(project))
-      end
-
       context 'when not signed in' do
         before do
           allow(Gitlab.config.gitlab).to receive(:host).and_return('www.example.com')
+
+          visit(project_path(project))
         end
 
         include_examples 'shows details of non empty project'
