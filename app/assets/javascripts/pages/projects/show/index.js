@@ -1,5 +1,9 @@
+/* eslint-disable no-new */
 import initTree from 'ee_else_ce/repository';
-import initBlob from '~/blob_edit/blob_bundle';
+import $ from 'jquery';
+import BlobFileDropzone from '../../../blob/blob_file_dropzone';
+import NewCommitForm from '../../../new_commit_form';
+import { disableButtonIfEmptyField } from '~/lib/utils/common_utils';
 import ShortcutsNavigation from '~/behaviors/shortcuts/shortcuts_navigation';
 import NotificationsForm from '~/notifications_form';
 import UserCallout from '~/user_callout';
@@ -26,7 +30,16 @@ new UserCallout({
 // Project show page loads different overview content based on user preferences
 const treeSlider = document.getElementById('js-tree-list');
 if (treeSlider) {
-  initBlob();
+  const uploadBlobForm = $('.js-upload-blob-form');
+
+  if (uploadBlobForm.length) {
+    const method = uploadBlobForm.data('method');
+
+    new BlobFileDropzone(uploadBlobForm, method);
+    new NewCommitForm(uploadBlobForm);
+
+    disableButtonIfEmptyField(uploadBlobForm.find('.js-commit-message'), '.btn-upload-file');
+  }
   initTree();
 }
 

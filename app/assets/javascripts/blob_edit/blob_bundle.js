@@ -3,9 +3,8 @@
 import $ from 'jquery';
 import NewCommitForm from '../new_commit_form';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
-import BlobFileDropzone from '../blob/blob_file_dropzone';
 import initPopover from '~/blob/suggest_gitlab_ci_yml';
-import { disableButtonIfEmptyField, setCookie } from '~/lib/utils/common_utils';
+import { setCookie } from '~/lib/utils/common_utils';
 import Tracking from '~/tracking';
 
 const initPopovers = () => {
@@ -40,7 +39,6 @@ const initPopovers = () => {
 
 export default () => {
   const editBlobForm = $('.js-edit-blob-form');
-  const uploadBlobForm = $('.js-upload-blob-form');
   const deleteBlobForm = $('.js-delete-blob-form');
 
   if (editBlobForm.length) {
@@ -78,15 +76,6 @@ export default () => {
 
     // returning here blocks page navigation
     window.onbeforeunload = () => '';
-  }
-
-  if (uploadBlobForm.length) {
-    const method = uploadBlobForm.data('method');
-
-    new BlobFileDropzone(uploadBlobForm, method);
-    new NewCommitForm(uploadBlobForm);
-
-    disableButtonIfEmptyField(uploadBlobForm.find('.js-commit-message'), '.btn-upload-file');
   }
 
   if (deleteBlobForm.length) {
