@@ -86,6 +86,7 @@ class Service < ApplicationRecord
   scope :pipeline_hooks, -> { where(pipeline_events: true, active: true) }
   scope :wiki_page_hooks, -> { where(wiki_page_events: true, active: true) }
   scope :deployment_hooks, -> { where(deployment_events: true, active: true) }
+  scope :member_hooks, -> { where(member_events: true, active: true) }
   scope :alert_hooks, -> { where(alert_events: true, active: true) }
   scope :deployment, -> { where(category: 'deployment') }
 

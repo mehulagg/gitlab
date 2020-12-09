@@ -63,6 +63,8 @@ class GroupMember < Member
 
   def post_create_hook
     run_after_commit_or_now { notification_service.new_group_member(self) }
+    add_group_member_data = Gitlab::HookData::GroupMemberBuilder.new(self).build(create)
+    group.execute_services(add_group_member_data, :member_hooks)
 
     super
   end
