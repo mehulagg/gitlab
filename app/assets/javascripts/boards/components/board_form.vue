@@ -146,6 +146,15 @@ export default {
         text: this.$options.i18n.cancelButtonText,
       };
     },
+    boardPayload() {
+      const { assignee, milestone, labels } = this.board;
+      return {
+        ...this.board,
+        assignee_id: assignee?.id,
+        milestone_id: milestone?.id,
+        label_ids: labels.length ? labels.map(b => b.id) : [''],
+      };
+    },
   },
   mounted() {
     this.resetFormState();
