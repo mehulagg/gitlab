@@ -36,7 +36,7 @@ at each tier, see the
 
 ## Choose the number of users
 
-NOTE: **Note:**
+NOTE:
 Applied only to groups.
 
 A GitLab.com subscription uses a concurrent (_seat_) model. You pay for a
@@ -48,7 +48,7 @@ Every occupied seat is counted in the subscription, with the following exception
 
 - Members with Guest permissions on a Gold subscription.
 
-TIP: **Tip:**
+NOTE:
 To support the open source community and encourage the development of open
 source projects, GitLab grants access to **Gold** features for all GitLab.com
 **public** projects, regardless of the subscription.
@@ -88,7 +88,7 @@ To subscribe to GitLab.com:
   1. Select the namespace from the drop-down list to associate the subscription.
   1. Proceed to checkout.
 
-TIP: **Tip:**
+NOTE:
 You can also go to the [**My Account**](https://customers.gitlab.com/customers/edit)
 page to add or change the GitLab.com account link.
 
@@ -101,7 +101,7 @@ to the **Billing** section of the relevant namespace:
   under your profile.
 - **For groups**: From the group page (*not* from a project in the group), go to **Settings > Billing**.
 
-  NOTE: **Note:**
+  NOTE:
   You must have Owner level [permissions](../../user/permissions.md) to view a group's billing page.
 
   The following table describes details of your subscription for groups:
@@ -132,7 +132,7 @@ log in and verify or update:
 - The invoice contact details on the **Account details** page.
 - The credit card on file on the **Payment Methods** page.
 
-TIP: **Tip:**
+NOTE:
 Contact our [support team](https://support.gitlab.com/hc/en-us/requests/new?ticket_form_id=360000071293)
 if you need assistance accessing the Customers Portal or if you need to change
 the contact person who manages your subscription.

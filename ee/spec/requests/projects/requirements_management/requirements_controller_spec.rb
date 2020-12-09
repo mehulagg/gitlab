@@ -132,6 +132,7 @@ RSpec.describe Projects::RequirementsManagement::RequirementsController do
 
         it_behaves_like 'handle uploads authorize request' do
           let(:uploader_class) { FileUploader }
+          let(:maximum_size) { Gitlab::CurrentSettings.max_attachment_size.megabytes }
         end
       end
 

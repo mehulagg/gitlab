@@ -295,7 +295,7 @@ When the user is authenticated and `simple` is not set this returns something li
 ]
 ```
 
-NOTE: **Note:**
+NOTE:
 For users of GitLab [Silver, Premium, or higher](https://about.gitlab.com/pricing/),
 the `marked_for_deletion_at` attribute has been deprecated, and will be removed
 in API v5 in favor of the `marked_for_deletion_on` attribute.

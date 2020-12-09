@@ -7,7 +7,7 @@ type: reference, howto
 
 # Project access tokens
 
-NOTE: **Note:**
+NOTE:
 Project access tokens are supported for self-managed instances on Core and above. They are also supported on GitLab.com Bronze and above.
 
 > - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/2587) in GitLab 13.0.

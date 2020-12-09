@@ -30,6 +30,8 @@
   - 1
 - - analytics_code_review_metrics
   - 1
+- - analytics_devops_adoption_create_snapshot
+  - 1
 - - analytics_instance_statistics_counter_job
   - 1
 - - approve_blocked_users
@@ -139,6 +141,8 @@
 - - github_import_advance_stage
   - 1
 - - github_importer
+  - 1
+- - gitlab_performance_bar_stats
   - 1
 - - gitlab_shell
   - 2

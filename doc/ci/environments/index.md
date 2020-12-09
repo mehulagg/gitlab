@@ -386,7 +386,7 @@ If you are deploying to a [Kubernetes cluster](../../user/project/clusters/index
 associated with your project, you can configure these deployments from your
 `gitlab-ci.yml` file.
 
-NOTE: **Note:**
+NOTE:
 Kubernetes configuration isn't supported for Kubernetes clusters that are
 [managed by GitLab](../../user/project/clusters/index.md#gitlab-managed-clusters).
 To follow progress on support for GitLab-managed clusters, see the

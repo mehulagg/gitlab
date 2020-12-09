@@ -182,7 +182,7 @@ RSpec.describe API::Issues, :mailer do
       end
 
       context 'filtering by iteration' do
-        let_it_be(:iteration_1) { create(:iteration, group: group) }
+        let_it_be(:iteration_1) { create(:iteration, group: group, start_date: Date.today) }
         let_it_be(:iteration_2) { create(:iteration, group: group) }
         let_it_be(:iteration_1_issue) { create(:issue, project: group_project, iteration: iteration_1) }
         let_it_be(:iteration_2_issue) { create(:issue, project: group_project, iteration: iteration_2) }
@@ -204,6 +204,12 @@ RSpec.describe API::Issues, :mailer do
           get api('/issues', user), params: { iteration_id: 'Any' }
 
           expect_response_contain_exactly(iteration_1_issue.id, iteration_2_issue.id)
+        end
+
+        it 'returns no issues on user dashboard issues list' do
+          get api('/issues', user), params: { iteration_id: 'Current' }
+
+          expect(json_response).to be_empty
         end
 
         it 'returns issues with a specific iteration title' do
@@ -242,6 +248,20 @@ RSpec.describe API::Issues, :mailer do
 
     it_behaves_like 'exposes epic' do
       let!(:issue_with_epic) { create(:issue, project: group_project, epic: epic) }
+    end
+
+    context 'filtering by iteration' do
+      let_it_be(:iteration_1) { create(:iteration, group: group, start_date: Date.today) }
+      let_it_be(:iteration_2) { create(:iteration, group: group) }
+      let_it_be(:iteration_1_issue) { create(:issue, project: group_project, iteration: iteration_1) }
+      let_it_be(:iteration_2_issue) { create(:issue, project: group_project, iteration: iteration_2) }
+      let_it_be(:no_iteration_issue) { create(:issue, project: group_project) }
+
+      it 'returns issues with Current iteration' do
+        get api("/groups/#{group.id}/issues", user), params: { iteration_id: 'Current', scope: 'all' }
+
+        expect_response_contain_exactly(iteration_1_issue.id)
+      end
     end
   end
 
@@ -291,6 +311,20 @@ RSpec.describe API::Issues, :mailer do
       subject { get api("/projects/#{group_project.id}/issues", user) }
 
       it_behaves_like 'exposes epic'
+    end
+
+    context 'filtering by iteration' do
+      let_it_be(:iteration_1) { create(:iteration, group: group, start_date: Date.today) }
+      let_it_be(:iteration_2) { create(:iteration, group: group) }
+      let_it_be(:iteration_1_issue) { create(:issue, project: group_project, iteration: iteration_1) }
+      let_it_be(:iteration_2_issue) { create(:issue, project: group_project, iteration: iteration_2) }
+      let_it_be(:no_iteration_issue) { create(:issue, project: group_project) }
+
+      it 'returns issues with Current iteration' do
+        get api("/projects/#{group_project.id}/issues", user), params: { iteration_id: 'Current', scope: 'all' }
+
+        expect_response_contain_exactly(iteration_1_issue.id)
+      end
     end
   end
 

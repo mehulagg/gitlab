@@ -2,7 +2,7 @@ import { mount, shallowMount } from '@vue/test-utils';
 import { merge } from 'lodash';
 import ProfileSelector from 'ee/on_demand_scans/components/profile_selector/profile_selector.vue';
 import OnDemandScansSiteProfileSelector from 'ee/on_demand_scans/components/profile_selector/site_profile_selector.vue';
-import { siteProfiles } from '../../mock_data';
+import { siteProfiles } from '../../mocks/mock_data';
 
 const TEST_LIBRARY_PATH = '/test/site/profiles/library/path';
 const TEST_NEW_PATH = '/test/new/site/profile/path';
@@ -34,8 +34,8 @@ describe('OnDemandScansSiteProfileSelector', () => {
             newSiteProfilePath: TEST_NEW_PATH,
             glFeatures: { securityOnDemandScansSiteValidation: true },
           },
-          scopedSlots: {
-            summary: '<div slot-scope="{ profile }">{{ profile.profileName }}\'s summary</div>',
+          slots: {
+            summary: `<div>${profiles[0].profileName}'s summary</div>`,
           },
         },
         options,
@@ -53,7 +53,7 @@ describe('OnDemandScansSiteProfileSelector', () => {
 
   it('renders properly with profiles', () => {
     createFullComponent({
-      propsData: { profiles, value: profiles[0] },
+      propsData: { profiles, value: profiles[0].id },
     });
 
     expect(wrapper.element).toMatchSnapshot();

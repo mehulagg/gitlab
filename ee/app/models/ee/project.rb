@@ -78,6 +78,7 @@ module EE
       has_many :vulnerability_identifiers, class_name: 'Vulnerabilities::Identifier'
       has_many :vulnerability_scanners, class_name: 'Vulnerabilities::Scanner'
       has_many :vulnerability_exports, class_name: 'Vulnerabilities::Export'
+      has_many :vulnerability_remediations, class_name: 'Vulnerabilities::Remediation', inverse_of: :project
 
       has_many :dast_site_profiles
       has_many :dast_site_tokens
@@ -182,8 +183,7 @@ module EE
       delegate :shared_runners_minutes, :shared_runners_seconds, :shared_runners_seconds_last_reset,
         to: :statistics, allow_nil: true
 
-      delegate :actual_shared_runners_minutes_limit,
-               :shared_runners_remaining_minutes_below_threshold?, to: :shared_runners_limit_namespace
+      delegate :actual_shared_runners_minutes_limit, to: :shared_runners_limit_namespace
 
       delegate :last_update_succeeded?, :last_update_failed?,
         :ever_updated_successfully?, :hard_failed?,

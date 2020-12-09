@@ -770,73 +770,6 @@ RSpec.describe Namespace do
     end
   end
 
-  describe '#shared_runners_remaining_minutes_percent' do
-    let(:namespace) { build(:namespace) }
-
-    subject { namespace.shared_runners_remaining_minutes_percent }
-
-    it 'returns the minutes left as a percent of the limit' do
-      stub_minutes_used_and_limit(8, 10)
-
-      expect(subject).to eq(20)
-    end
-
-    it 'returns 100 when minutes used are 0' do
-      stub_minutes_used_and_limit(0, 10)
-
-      expect(subject).to eq(100)
-    end
-
-    it 'returns 0 when the limit is 0' do
-      stub_minutes_used_and_limit(0, 0)
-
-      expect(subject).to eq(0)
-    end
-
-    it 'returns 0 when the limit is nil' do
-      stub_minutes_used_and_limit(nil, nil)
-
-      expect(subject).to eq(0)
-    end
-
-    it 'returns 0 when minutes used are over the limit' do
-      stub_minutes_used_and_limit(11, 10)
-
-      expect(subject).to eq(0)
-    end
-
-    it 'returns 0 when minutes used are equal to the limit' do
-      stub_minutes_used_and_limit(10, 10)
-
-      expect(subject).to eq(0)
-    end
-
-    def stub_minutes_used_and_limit(minutes_used, limit)
-      seconds_used = minutes_used.present? ? minutes_used * 60 : minutes_used
-      allow(namespace).to receive(:shared_runners_seconds).and_return(seconds_used)
-
-      allow(namespace).to receive(:actual_shared_runners_minutes_limit).and_return(limit)
-    end
-  end
-
-  describe '#shared_runners_remaining_minutes_below_threshold?' do
-    let(:namespace) { build(:namespace, last_ci_minutes_usage_notification_level: 30) }
-
-    subject { namespace.shared_runners_remaining_minutes_below_threshold? }
-
-    it 'is true when minutes left is below the notification level' do
-      allow(namespace).to receive(:shared_runners_remaining_minutes_percent).and_return(10)
-
-      expect(subject).to be_truthy
-    end
-
-    it 'is false when minutes left is not below the notification level' do
-      allow(namespace).to receive(:shared_runners_remaining_minutes_percent).and_return(80)
-
-      expect(subject).to be_falsey
-    end
-  end
-
   describe '#actual_plan' do
     context 'when namespace does not have a subscription associated' do
       it 'generates a subscription and returns default plan' do
@@ -1790,23 +1723,16 @@ RSpec.describe Namespace do
 
     subject { namespace.additional_repo_storage_by_namespace_enabled? }
 
-    where(:namespace_storage_limit, :additional_repo_storage_by_namespace, :automatic_purchased_storage_allocation, :result) do
-      false | false | false | false
-      false | false | true  | false
-      false | true  | false | false
-      true  | false | false | false
-      false | true  | true  | true
-      true  | true  | false | false
-      true  | false | true  | false
-      true  | true  | true  | false
+    where(:namespace_storage_limit, :automatic_purchased_storage_allocation, :result) do
+      false | false | false
+      false | true  | true
+      true  | false | false
+      true  | true  | false
     end
 
     with_them do
       before do
-        stub_feature_flags(
-          namespace_storage_limit: namespace_storage_limit,
-          additional_repo_storage_by_namespace: additional_repo_storage_by_namespace
-        )
+        stub_feature_flags(namespace_storage_limit: namespace_storage_limit)
         stub_application_setting(automatic_purchased_storage_allocation: automatic_purchased_storage_allocation)
       end
 

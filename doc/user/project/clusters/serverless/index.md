@@ -87,7 +87,7 @@ memory. **RBAC must be enabled.**
 1. After the Knative installation has finished, you can wait for the IP address or hostname to be displayed in the
    **Knative Endpoint** field or [retrieve the Istio Ingress Endpoint manually](../../../clusters/applications.md#determining-the-external-endpoint-manually).
 
-   NOTE: **Note:**
+   NOTE:
    Running `kubectl` commands on your cluster requires setting up access to the cluster first.
    For clusters created on GKE, see [GKE Cluster Access](https://cloud.google.com/kubernetes-engine/docs/how-to/cluster-access-for-kubectl),
    for other platforms [Install kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/).
@@ -376,7 +376,7 @@ The sample function can now be triggered from any HTTP client using a simple `PO
      --header "Content-Type: application/json" \
      --request POST \
      --data '{"GitLab":"FaaS"}' \
-     http://functions-echo.functions-1.functions.example.com/
+     "http://functions-echo.functions-1.functions.example.com/"
      ```
 
   1. Using a web-based tool (such as Postman or Restlet)
@@ -443,7 +443,7 @@ To run a function locally:
 1. Invoke your function:
 
    ```shell
-   curl http://localhost:8080
+   curl "http://localhost:8080"
    ```
 
 ## Deploying Serverless applications
@@ -767,7 +767,7 @@ or with other versions of Python.
 1. Create a Kubernetes secret to hold your TLS certificate, `cert.pem`, and
    the private key `cert.pk`:
 
-   NOTE: **Note:**
+   NOTE:
    Running `kubectl` commands on your cluster requires setting up access to the cluster first.
    For clusters created on GKE, see
    [GKE Cluster Access](https://cloud.google.com/kubernetes-engine/docs/how-to/cluster-access-for-kubectl).

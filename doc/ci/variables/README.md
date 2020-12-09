@@ -798,7 +798,7 @@ deploy_staging:
     - if: '$RELEASE =~ $STAGINGRELS'
 ```
 
-NOTE: **Note:**
+NOTE:
 The available regular expression syntax is limited. See [related issue](https://gitlab.com/gitlab-org/gitlab/-/issues/35438)
 for more details.
 

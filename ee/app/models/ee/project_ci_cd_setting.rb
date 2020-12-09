@@ -25,7 +25,7 @@ module EE
     end
 
     def auto_rollback_enabled?
-      super && ::Gitlab::Ci::Features.auto_rollback_available?(project)
+      super && project.feature_available?(:auto_rollback)
     end
 
     private

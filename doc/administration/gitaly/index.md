@@ -69,7 +69,7 @@ this default configuration used by:
 However, Gitaly can be deployed to its own server, which can benefit GitLab installations that span
 multiple machines.
 
-NOTE: **Note:**
+NOTE:
 When configured to run on their own servers, Gitaly servers
 [must be upgraded](https://docs.gitlab.com/omnibus/update/#upgrading-gitaly-servers) before Gitaly
 clients in your cluster.
@@ -122,7 +122,7 @@ The following list depicts the network architecture of Gitaly:
 - Authentication is done through a static token which is shared among the Gitaly and GitLab Rails
   nodes.
 
-DANGER: **Warning:**
+WARNING:
 Gitaly servers must not be exposed to the public internet as Gitaly's network traffic is unencrypted
 by default. The use of firewall is highly recommended to restrict access to the Gitaly server.
 Another option is to [use TLS](#enable-tls-support).
@@ -141,7 +141,7 @@ We assume your GitLab installation has three repository storages:
 
 You can use as few as one server with one repository storage if desired.
 
-NOTE: **Note:**
+NOTE:
 The token referred to throughout the Gitaly documentation is just an arbitrary password selected by
 the administrator. It is unrelated to tokens created for the GitLab API or other similar web API
 tokens.
@@ -434,7 +434,7 @@ server (with `gitaly_address`) unless you setup with special
            path: /some/local/path
    ```
 
-   NOTE: **Note:**
+   NOTE:
    `/some/local/path` should be set to a local folder that exists, however no data is stored in
    this folder. This requirement is scheduled to be removed when
    [this issue](https://gitlab.com/gitlab-org/gitaly/-/issues/1282) is resolved.
@@ -451,7 +451,7 @@ server (with `gitaly_address`) unless you setup with special
 When you tail the Gitaly logs on your Gitaly server, you should see requests coming in. One sure way
 to trigger a Gitaly request is to clone a repository from GitLab over HTTP or HTTPS.
 
-DANGER: **Warning:**
+WARNING:
 If you have [server hooks](../server_hooks.md) configured, either per repository or globally, you
 must move these to the Gitaly servers. If you have multiple Gitaly servers, copy your server hooks
 to all Gitaly servers.
@@ -647,7 +647,7 @@ To configure Gitaly with TLS:
            path: /some/local/path
    ```
 
-   NOTE: **Note:**
+   NOTE:
    `/some/local/path` should be set to a local folder that exists, however no data is stored
    in this folder. This requirement is scheduled to be removed when
    [Gitaly issue #1282](https://gitlab.com/gitlab-org/gitaly/-/issues/1282) is resolved.
@@ -723,7 +723,7 @@ We recommend:
 - At least 300MB memory per worker.
 - No more than one worker per core.
 
-NOTE: **Note:**
+NOTE:
 `gitaly-ruby` is planned to be eventually removed. To track progress, see the
 [Remove the Gitaly-Ruby sidecar](https://gitlab.com/groups/gitlab-org/-/epics/2862) epic.
 
@@ -805,7 +805,7 @@ You can observe the behavior of this queue using the Gitaly logs and Prometheus:
   - `gitaly_rate_limiting_queued`.
   - `gitaly_rate_limiting_seconds`.
 
-NOTE: **Note:**
+NOTE:
 Though the name of the Prometheus metric contains `rate_limiting`, it is a concurrency limiter, not
 a rate limiter. If a Gitaly client makes 1000 requests in a row very quickly, concurrency does not
 exceed 1 and the concurrency limiter has no effect.

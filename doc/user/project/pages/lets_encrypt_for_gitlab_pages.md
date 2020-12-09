@@ -13,7 +13,7 @@ This method is still valid but was **deprecated** in favor of the
 introduced in GitLab 12.1.
 
 If you have a GitLab Pages website served under your own domain,
-you might want to secure it with a SSL/TSL certificate.
+you might want to secure it with a SSL/TLS certificate.
 
 [Let's Encrypt](https://letsencrypt.org) is a free, automated, and
 open source Certificate Authority.
@@ -67,7 +67,7 @@ might be slightly different. Follow the
    sudo certbot certonly -a manual -d example.com --register-unsafely-without-email
    ```
 
-   TIP: **Tip:**
+   NOTE:
    Read through CertBot's documentation on their
    [command line options](https://certbot.eff.org/docs/using.html#certbot-command-line-options).
 

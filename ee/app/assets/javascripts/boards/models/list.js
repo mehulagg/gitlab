@@ -3,22 +3,10 @@ import List from '~/boards/models/list';
 import ListAssignee from '~/boards/models/assignee';
 import ListMilestone from '~/boards/models/milestone';
 
-const EE_TYPES = {
-  promotion: {
-    isPreset: true,
-    isExpandable: false,
-    isBlank: true,
-  },
-};
-
 class ListEE extends List {
   constructor(...args) {
     super(...args);
     this.totalWeight = args[0]?.totalWeight || 0;
-  }
-
-  getTypeInfo(type) {
-    return EE_TYPES[type] || super.getTypeInfo(type);
   }
 
   getIssues(...args) {

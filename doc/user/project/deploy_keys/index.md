@@ -108,7 +108,7 @@ keys that were [made available to your entire GitLab instance](#public-deploy-ke
 After a key is added, you can edit it to update its title, or switch between `read-only`
 and `read-write` access.
 
-NOTE: **Note:**
+NOTE:
 If you have enabled a privately or publicly accessible or deploy key for your
 project, and if you then update the access level for this key from `read-only` to
 `read-write`, the change will be only for the **current project**.
@@ -134,7 +134,7 @@ Instance administrators can add public deploy keys:
 After adding a key, it will be available to any shared systems. Project maintainers
 or higher can [authorize a public deploy key](#project-deploy-keys) to start using it with the project.
 
-NOTE: **Note:**
+NOTE:
 The **Publicly accessible deploy keys** tab within Project's CI/CD settings only appears
 if there is at least one Public deploy key configured.
 

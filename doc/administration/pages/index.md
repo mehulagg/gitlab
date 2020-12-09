@@ -16,7 +16,7 @@ description: 'Learn how to administer GitLab Pages.'
 GitLab Pages allows for hosting of static sites. It must be configured by an
 administrator. Separate [user documentation](../../user/project/pages/index.md) is available.
 
-NOTE: **Note:**
+NOTE:
 This guide is for Omnibus GitLab installations. If you have installed
 GitLab from source, see
 [GitLab Pages administration for source installations](source.md).
@@ -68,7 +68,7 @@ Before proceeding with the Pages configuration, you will need to:
    so that your users don't have to bring their own.
 1. (Only for custom domains) Have a **secondary IP**.
 
-NOTE: **Note:**
+NOTE:
 If your GitLab instance and the Pages daemon are deployed in a private network or behind a firewall, your GitLab Pages websites will only be accessible to devices/users that have access to the private network.
 
 ### Add the domain to the Public Suffix List
@@ -101,7 +101,7 @@ where `example.io` is the domain under which GitLab Pages will be served
 and `192.0.2.1` is the IPv4 address of your GitLab instance and `2001::1` is the
 IPv6 address. If you don't have IPv6, you can omit the AAAA record.
 
-NOTE: **Note:**
+NOTE:
 You should not use the GitLab domain to serve user pages. For more information see the [security section](#security).
 
 ## Configuration
@@ -181,7 +181,7 @@ behavior:
 
 1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
 
-NOTE: **Note:**
+NOTE:
 `inplace_chroot` option might not work with the other features, such as [Pages Access Control](#access-control).
 The [GitLab Pages README](https://gitlab.com/gitlab-org/gitlab-pages#caveats) has more information about caveats and workarounds.
 
@@ -210,7 +210,7 @@ control over how the Pages daemon runs and serves content in your environment.
 | `external_https` |  Configure Pages to bind to one or more secondary IP addresses, serving HTTPS requests. Multiple addresses can be given as an array, along with exact ports, for example `['1.2.3.4', '1.2.3.5:8063']`. Sets value for `listen_https`.
 | `gitlab_client_http_timeout`  | GitLab API HTTP client connection timeout in seconds (default: 10s).
 | `gitlab_client_jwt_expiry`  | JWT Token expiry time in seconds (default: 30s).
-| `domain_config_source` | Domain configuration source (default: `disk`)
+| `domain_config_source` | Domain configuration source (default: `auto`)
 | `gitlab_id` |  The OAuth application public ID. Leave blank to automatically fill when Pages authenticates with GitLab.
 | `gitlab_secret` |  The OAuth application secret. Leave blank to automatically fill when Pages authenticates with GitLab.
 | `gitlab_server` |  Server to use for authentication when access control is enabled; defaults to GitLab `external_url`.
@@ -375,7 +375,7 @@ Pages access control is disabled by default. To enable it:
 1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
 1. Users can now configure it in their [projects' settings](../../user/project/pages/pages_access_control.md).
 
-NOTE: **Important:**
+NOTE:
 For this setting to be effective with multi-node setups, it has to be applied to
 all the App nodes and Sidekiq nodes.
 
@@ -431,7 +431,7 @@ For Omnibus, this is fixed by [installing a custom CA in Omnibus GitLab](https:/
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-pages/-/merge_requests/392) in GitLab 13.7.
 
-DANGER: **Warning:**
+WARNING:
 These are advanced settings. The recommended default values are set inside GitLab Pages. You should
 change these settings only if absolutely necessary. Use extreme caution.
 
@@ -575,7 +575,7 @@ your main application server.
 
 To configure GitLab Pages on a separate server:
 
-DANGER: **Warning:**
+WARNING:
 The following procedure includes steps to back up and edit the
 `gitlab-secrets.json` file. This file contains secrets that control
 database encryption. Proceed with caution.
@@ -668,13 +668,14 @@ Pages server.
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/217912) in GitLab 13.3.
 
 GitLab Pages can use different sources to get domain configuration.
-The default value is `nil`; however, GitLab Pages will default to `disk`.
+The default value is `nil`; however, GitLab Pages will default to `auto`.
 
    ```ruby
    gitlab_pages['domain_config_source'] = nil
    ```
 
-You can specify `gitlab` to enable [API-based configuration](#gitlab-api-based-configuration).
+If left unchanged, GitLab Pages tries to use any available source (either `gitlab` or `disk`). The
+preferred source is `gitlab`, which uses [API-based configuration](#gitlab-api-based-configuration).
 
 For more details see this [blog post](https://about.gitlab.com/blog/2020/08/03/how-gitlab-pages-uses-the-gitlab-api-to-serve-content/).
 
@@ -691,14 +692,85 @@ was used prior to GitLab 13.0. Follow these steps to enable it:
 
 1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure) for the changes to take effect.
 
-If you encounter an issue, you can disable it by choosing `disk` or `nil`:
+If you encounter an issue, you can disable it by choosing `disk`:
 
 ```ruby
-gitlab_pages['domain_config_source'] = nil
+gitlab_pages['domain_config_source'] = "disk"
 ```
 
 For other common issues, see the [troubleshooting section](#failed-to-connect-to-the-internal-gitlab-api)
 or report an issue.
+
+## Using object storage
+
+> [Introduced](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5577) in GitLab 13.6.
+
+[Read more about using object storage with GitLab](../object_storage.md).
+
+### Object storage settings
+
+The following settings are:
+
+- Nested under `pages:` and then `object_store:` on source installations.
+- Prefixed by `pages_object_store_` on Omnibus GitLab installations.
+
+| Setting | Description | Default |
+|---------|-------------|---------|
+| `enabled` | Whether object storage is enabled. | `false` |
+| `remote_directory` | The name of the bucket where Pages site content is stored. | |
+| `connection` | Various connection options described below. | |
+
+#### S3-compatible connection settings
+
+See [the available connection settings for different providers](../object_storage.md#connection-settings).
+
+In Omnibus installations:
+
+1. Add the following lines to `/etc/gitlab/gitlab.rb` and replace the values with the ones you want:
+
+   ```ruby
+   gitlab_rails['pages_object_store_enabled'] = true
+   gitlab_rails['pages_object_store_remote_directory'] = "pages"
+   gitlab_rails['pages_object_store_connection'] = {
+     'provider' => 'AWS',
+     'region' => 'eu-central-1',
+     'aws_access_key_id' => 'AWS_ACCESS_KEY_ID',
+     'aws_secret_access_key' => 'AWS_SECRET_ACCESS_KEY'
+   }
+   ```
+
+   If you use AWS IAM profiles, be sure to omit the AWS access key and secret access key/value
+   pairs:
+
+   ```ruby
+   gitlab_rails['pages_object_store_connection'] = {
+     'provider' => 'AWS',
+     'region' => 'eu-central-1',
+     'use_iam_profile' => true
+   }
+   ```
+
+1. Save the file and [reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure)
+   for the changes to take effect.
+
+In installations from source:
+
+1. Edit `/home/git/gitlab/config/gitlab.yml` and add or amend the following lines:
+
+   ```yaml
+   pages:
+     object_store:
+       enabled: true
+       remote_directory: "pages" # The bucket name
+       connection:
+         provider: AWS # Only AWS supported at the moment
+         aws_access_key_id: AWS_ACESS_KEY_ID
+         aws_secret_access_key: AWS_SECRET_ACCESS_KEY
+         region: eu-central-1
+   ```
+
+1. Save the file and [restart GitLab](../restart_gitlab.md#installations-from-source)
+   for the changes to take effect.
 
 ## Backup
 

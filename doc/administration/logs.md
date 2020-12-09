@@ -117,7 +117,7 @@ The ActionCable connection or channel class is used as the `controller`.
 }
 ```
 
-NOTE: **Note:**
+NOTE:
 Starting with GitLab 12.5, if an error occurs, an
 `exception` field is included with `class`, `message`, and
 `backtrace`. Previous versions included an `error` field instead of
@@ -383,7 +383,7 @@ only. For example:
 
 ## `audit_json.log`
 
-NOTE: **Note:**
+NOTE:
 Most log entries only exist in [GitLab Starter](https://about.gitlab.com/pricing/), however a few exist in GitLab Core.
 
 This file lives in `/var/log/gitlab/gitlab-rails/audit_json.log` for
@@ -998,13 +998,29 @@ For Omnibus GitLab installations, GitLab Exporter logs reside in `/var/log/gitla
 For Omnibus GitLab installations, GitLab Kubernetes Agent Server logs reside
 in `/var/log/gitlab/gitlab-kas/`.
 
+## Performance bar stats
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/48149) in GitLab 13.7.
+
+This file lives in `/var/log/gitlab/gitlab-rails/performance_bar_json.log` for
+Omnibus GitLab packages or in `/home/git/gitlab/log/performance_bar_json.log` for
+installations from source.
+
+Performance bar statistics (currently only duration of SQL queries) are recorded in that file. For example:
+
+```json
+{"severity":"INFO","time":"2020-12-04T09:29:44.592Z","correlation_id":"33680b1490ccd35981b03639c406a697","filename":"app/models/ci/pipeline.rb","filenum":"395","method":"each_with_object","request_id":"rYHomD0VJS4","duration_ms":26.889,"type": "sql"}
+```
+
+These statistics are logged on .com only, disabled on self-deployments.
+
 ## Gathering logs
 
 When [troubleshooting](troubleshooting/index.md) issues that aren't localized to one of the
 previously listed components, it's helpful to simultaneously gather multiple logs and statistics
 from a GitLab instance.
 
-NOTE: **Note:**
+NOTE:
 GitLab Support will often ask for one of these, and maintains the required tools.
 
 ### Briefly tail the main logs

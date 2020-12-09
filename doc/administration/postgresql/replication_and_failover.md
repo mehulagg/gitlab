@@ -35,7 +35,7 @@ You also need to take into consideration the underlying network topology, making
 sure you have redundant connectivity between all Database and GitLab instances
 to avoid the network becoming a single point of failure.
 
-NOTE: **Note:**
+NOTE:
 As of GitLab 13.3, PostgreSQL 12 is shipped with Omnibus GitLab. Clustering for PostgreSQL 12 is only supported with
 Patroni. See the [Patroni](#patroni) section for further details. The support for repmgr will not be extended beyond
 PostgreSQL 11.
@@ -460,7 +460,7 @@ Check the [Troubleshooting section](#troubleshooting) before proceeding.
    # END user configuration
    ```
 
-   NOTE: **Note:**
+   NOTE:
    `pgbouncer_role` was introduced with GitLab 10.3.
 
 1. Run `gitlab-ctl reconfigure`
@@ -1148,7 +1148,7 @@ If you're running into an issue with a component not outlined here, be sure to c
 
 ## Patroni
 
-NOTE: **Note:**
+NOTE:
 Starting from GitLab 13.1, Patroni is available for **experimental** use to replace repmgr. Due to its
 experimental nature, Patroni support is **subject to change without notice.**
 
@@ -1345,7 +1345,7 @@ You can switch an exiting database cluster to use Patroni instead of repmgr with
    sudo gitlab-ctl stop postgresql
    ```
 
-   NOTE: **Note:**
+   NOTE:
    Ensure that there is no `walsender` process running on the primary node.
    `ps aux | grep walsender` must not show any running process.
 
@@ -1401,7 +1401,7 @@ Considering these, you should carefully plan your PostgreSQL upgrade:
    gitlab-ctl patroni members
    ```
 
-   NOTE: **Note:**
+   NOTE:
    `gitlab-ctl pg-upgrade` tries to detect the role of the node. If for any reason the auto-detection
    does not work or you believe it did not detect the role correctly, you can use the `--leader` or `--replica`
    arguments to manually override it.
@@ -1446,7 +1446,7 @@ Considering these, you should carefully plan your PostgreSQL upgrade:
    sudo gitlab-ctl pg-upgrade -V 12
    ```
 
-NOTE: **Note:**
+NOTE:
 Reverting PostgreSQL upgrade with `gitlab-ctl revert-pg-upgrade` has the same considerations as
 `gitlab-ctl pg-upgrade`. You should follow the same procedure by first stopping the replicas,
 then reverting the leader, and finally reverting the replicas.

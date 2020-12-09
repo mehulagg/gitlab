@@ -58,7 +58,7 @@ must disable the **primary** node.
    sudo systemctl disable gitlab-runsvdir
    ```
 
-   NOTE: **Note:**
+   NOTE:
    (**CentOS only**) In CentOS 6 or older, there is no easy way to prevent GitLab from being
    started if the machine reboots isn't available (see [Omnibus GitLab issue #3058](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/3058)).
    It may be safest to uninstall the GitLab package completely:
@@ -67,7 +67,7 @@ must disable the **primary** node.
    yum remove gitlab-ee
    ```
 
-   NOTE: **Note:**
+   NOTE:
    (**Ubuntu 14.04 LTS**) If you are using an older version of Ubuntu
    or any other distribution based on the Upstart init system, you can prevent GitLab
    from starting if the machine reboots by doing the following:
@@ -134,7 +134,7 @@ Note the following when promoting a secondary:
 
 1. Promote the **secondary** node to the **primary** node.
 
-   DANGER: **Warning:**
+   WARNING:
    In GitLab 13.2 and 13.3, promoting a secondary node to a primary while the
    secondary is paused fails. Do not pause replication before promoting a
    secondary. If the node is paused, be sure to resume before promoting. This
@@ -174,7 +174,7 @@ conjunction with multiple servers, as it can only
 perform changes on a **secondary** with only a single machine. Instead, you must
 do this manually.
 
-DANGER: **Warning:**
+WARNING:
 In GitLab 13.2 and 13.3, promoting a secondary node to a primary while the
 secondary is paused fails. Do not pause replication before promoting a
 secondary. If the node is paused, be sure to resume before promoting. This
@@ -301,7 +301,7 @@ secondary domain, like changing Git remotes and API URLs.
    external_url 'https://<new_external_url>'
    ```
 
-   NOTE: **Note:**
+   NOTE:
    Changing `external_url` won't prevent access via the old secondary URL, as
    long as the secondary DNS records are still intact.
 

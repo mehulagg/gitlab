@@ -12,4 +12,14 @@ RSpec.describe Boards::EpicBoard do
   describe 'validations' do
     it { is_expected.to validate_length_of(:name).is_at_most(255) }
   end
+
+  describe '.order_by_name_asc' do
+    let_it_be(:board1) { create(:epic_board, name: 'B') }
+    let_it_be(:board2) { create(:epic_board, name: 'a') }
+    let_it_be(:board3) { create(:epic_board, name: 'A') }
+
+    it 'returns in case-insensitive alphabetical order and then by ascending ID' do
+      expect(described_class.order_by_name_asc).to eq [board2, board3, board1]
+    end
+  end
 end

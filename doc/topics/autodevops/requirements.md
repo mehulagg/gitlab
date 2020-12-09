@@ -34,7 +34,7 @@ To make full use of Auto DevOps with Kubernetes, you need:
      [`nginx-ingress`](https://github.com/helm/charts/tree/master/stable/nginx-ingress)
      Helm chart to install Ingress manually.
 
-     NOTE: **Note:**
+     NOTE:
      If you use your own Ingress instead of the one provided by GitLab's managed
      apps, ensure you're running at least version 0.9.0 of NGINX Ingress and
      [enable Prometheus metrics](https://github.com/helm/charts/tree/master/stable/nginx-ingress#prometheus-metrics)

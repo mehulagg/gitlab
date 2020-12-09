@@ -46,14 +46,14 @@ For information about project and group milestones API, see:
 - [Project Milestones API](../../../api/milestones.md)
 - [Group Milestones API](../../../api/group_milestones.md)
 
-NOTE: **Note:**
+NOTE:
 If you're in a group and click **Issues > Milestones**, you'll see group milestones and the milestones
 of projects in this group.
 If you're in a project and click **Issues > Milestones**, you'll only see this project's milestones.
 
 ## Creating milestones
 
-NOTE: **Note:**
+NOTE:
 A permission level of [Developer or higher](../../permissions.md) is required to create milestones.
 
 ### New project milestone
@@ -76,11 +76,11 @@ To create a **group milestone**:
 1. Enter the title, an optional description, an optional start date, and an optional due date.
 1. Click **New milestone**.
 
-![New group milestone](img/milestones_new_group_milestone.png)
+![New group milestone](img/milestones_new_group_milestone_v13_5.png)
 
 ## Editing milestones
 
-NOTE: **Note:**
+NOTE:
 A permission level of [Developer or higher](../../permissions.md) is required to edit milestones.
 
 To edit a milestone:

@@ -68,7 +68,7 @@ The `whitespace` tokenizer was selected in order to have more control over how t
 
 Please see the `code` filter for an explanation on how tokens are split.
 
-NOTE: **Note:**
+NOTE:
 Currently the [Elasticsearch code_analyzer doesn't account for all code cases](../integration/elasticsearch.md#known-issues).
 
 #### `code_search_analyzer`
@@ -119,7 +119,7 @@ Patterns:
 - `'"((?:\\"|[^"]|\\")*)"'`: captures terms inside quotes, removing the quotes
 - `"'((?:\\'|[^']|\\')*)'"`: same as above, for single-quotes
 - `'\.([^.]+)(?=\.|\s|\Z)'`: separate terms with periods in-between
-- `'([\p{L}_.-]+)'`: some common chars in file names to keep the whole filename intact (eg. `my_file-ñame.txt`)
+- `'([\p{L}_.-]+)'`: some common chars in file names to keep the whole filename intact (for example `my_file-ñame.txt`)
 - `'([\p{L}\d_]+)'`: letters, numbers and underscores are the most common tokens in programming. Always capture them greedily regardless of context.
 
 ## Gotchas
@@ -129,7 +129,7 @@ Patterns:
 
 ## Zero downtime reindexing with multiple indices
 
-NOTE: **Note:**
+NOTE:
 This is not applicable yet as multiple indices functionality is not fully implemented.
 
 Currently GitLab can only handle a single version of setting. Any setting/schema changes would require reindexing everything from scratch. Since reindexing can take a long time, this can cause search functionality downtime.
@@ -168,7 +168,7 @@ The global configurations per version are now in the `Elastic::(Version)::Config
 
 ### Creating new version of schema
 
-NOTE: **Note:**
+NOTE:
 This is not applicable yet as multiple indices functionality is not fully implemented.
 
 Folders like `ee/lib/elastic/v12p1` contain snapshots of search logic from different versions. To keep a continuous Git history, the latest version lives under `ee/lib/elastic/latest`, but its classes are aliased under an actual version (e.g. `ee/lib/elastic/v12p3`). When referencing these classes, never use the `Latest` namespace directly, but use the actual version (e.g. `V12p3`).
@@ -188,7 +188,7 @@ If the current version is `v12p1`, and we need to create a new version for `v12p
 
 > This functionality was introduced by [#234046](https://gitlab.com/gitlab-org/gitlab/-/issues/234046).
 
-NOTE: **Note:**
+NOTE:
 This only supported for indices created with GitLab 13.0 or greater.
 
 Migrations are stored in the [`ee/elastic/migrate/`](https://gitlab.com/gitlab-org/gitlab/-/tree/master/ee/elastic/migrate) folder with `YYYYMMDDHHMMSS_migration_name.rb`
@@ -218,10 +218,10 @@ Any update to the Elastic index mappings should be replicated in [`Elastic::Late
 
 ### Migration options supported by the [`Elastic::MigrationWorker`](https://gitlab.com/gitlab-org/gitlab/blob/master/ee/app/workers/elastic/migration_worker.rb)
 
-- `batched!` - Allow the migration to run in batches. If set, the [`Elastic::MigrationWorker`](https://gitlab.com/gitlab-org/gitlab/blob/master/ee/app/workers/elastic/migration_worker.rb) 
+- `batched!` - Allow the migration to run in batches. If set, the [`Elastic::MigrationWorker`](https://gitlab.com/gitlab-org/gitlab/blob/master/ee/app/workers/elastic/migration_worker.rb)
 will re-enqueue itself with a delay which is set using the `throttle_delay` option described below. The batching
-must be handled within the `migrate` method, this setting controls the re-enqueuing only.  
- 
+must be handled within the `migrate` method, this setting controls the re-enqueuing only.
+
 - `throttle_delay` - Sets the wait time in between batch runs. This time should be set high enough to allow each migration batch
 enough time to finish. Additionally, the time should be less than 30 minutes since that is how often the
 [`Elastic::MigrationWorker`](https://gitlab.com/gitlab-org/gitlab/blob/master/ee/app/workers/elastic/migration_worker.rb)

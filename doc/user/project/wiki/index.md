@@ -34,7 +34,7 @@ message.
 
 ## Creating a new wiki page
 
-NOTE: **Note:**
+NOTE:
 Requires Developer [permissions](../../permissions.md).
 
 Create a new page by clicking the **New page** button that can be found
@@ -226,4 +226,4 @@ Example for `_sidebar` (using Markdown format):
 - [Sidebar](_sidebar)
 ```
 
-Support for displaying a generated TOC with a custom side navigation is planned.
+Support for displaying a generated table of contents with a custom side navigation is planned.

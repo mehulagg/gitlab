@@ -12,7 +12,7 @@ be run in a clustered configuration to increase fault tolerance. In this
 configuration, every Git repository is stored on every Gitaly node in the
 cluster. Multiple clusters (or shards), can be configured.
 
-NOTE: **Note:**
+NOTE:
 Gitaly Clusters can be created using [GitLab Core](https://about.gitlab.com/pricing/#self-managed)
 and higher tiers. However, technical support is limited to GitLab Premium and Ultimate customers
 only. Not available in GitLab.com.
@@ -188,7 +188,7 @@ We note in the instructions below where these secrets are required.
 
 ### PostgreSQL
 
-NOTE: **Note:**
+NOTE:
 Do not store the GitLab application database and the Praefect
 database on the same PostgreSQL server if using
 [Geo](../geo/index.md). The replication state is internal to each instance
@@ -287,7 +287,7 @@ The `praefect` user and its password should be included in the file (default is
 `userlist.txt`) used by PgBouncer if the [`auth_file`](https://www.pgbouncer.org/config.html#auth_file)
 configuration option is set.
 
-NOTE: **Note:**
+NOTE:
 By default PgBouncer uses port `6432` to accept incoming
 connections. You can change it by setting the [`listen_port`](https://www.pgbouncer.org/config.html#listen_port)
 configuration option. We recommend setting it to the default port value (`5432`) used by
@@ -298,7 +298,7 @@ PostgreSQL instances. Otherwise you should change the configuration parameter
 
 > [Introduced](https://gitlab.com/gitlab-org/gitaly/-/issues/2634) in GitLab 13.4, Praefect nodes can no longer be designated as `primary`.
 
-NOTE: **Note:**
+NOTE:
 If there are multiple Praefect nodes, complete these steps for **each** node.
 
 To complete this section you need a [configured PostgreSQL server](#postgresql), including:
@@ -573,7 +573,7 @@ To configure Praefect with TLS:
            path: /some/local/path
    ```
 
-   NOTE: **Note:**
+   NOTE:
    `/some/local/path` should be set to a local folder that exists, however no
    data is stored in this folder. This requirement is scheduled to be removed when
    [this issue](https://gitlab.com/gitlab-org/gitaly/-/issues/1282) is resolved.
@@ -602,7 +602,7 @@ To configure Praefect with TLS:
 
 ### Gitaly
 
-NOTE: **Note:**
+NOTE:
 Complete these steps for **each** Gitaly node.
 
 To complete this section you need:
@@ -763,7 +763,7 @@ internal traffic from the GitLab application to the Praefect nodes. The
 specifics on which load balancer to use or the exact configuration is beyond the
 scope of the GitLab documentation.
 
-NOTE: **Note:**
+NOTE:
 The load balancer must be configured to accept traffic from the Gitaly nodes in
 addition to the GitLab nodes. Some requests handled by
 [`gitaly-ruby`](index.md#gitaly-ruby) sidecar processes call into the main Gitaly
@@ -1116,7 +1116,7 @@ available:
 - In GitLab 13.3 and later, `-partially-replicated` that specifies whether to display a list of
   [outdated replicas of writable repositories](#outdated-replicas-of-writable-repositories).
 
-NOTE: **Note:**
+NOTE:
 `dataloss` is still in beta and the output format is subject to change.
 
 To check for outdated replicas of read-only repositories, run:
@@ -1278,7 +1278,7 @@ Gitaly Cluster automatically.
 
 Repositories may be moved from one storage location using the [Project repository storage moves API](../../api/project_repository_storage_moves.md):
 
-NOTE: **Note:**
+NOTE:
 The Project repository storage moves API [cannot move all repository types](../../api/project_repository_storage_moves.md#limitations).
 
 To move repositories to Gitaly Cluster:

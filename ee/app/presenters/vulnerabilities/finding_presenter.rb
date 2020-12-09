@@ -4,6 +4,10 @@ module Vulnerabilities
   class FindingPresenter < Gitlab::View::Presenter::Delegated
     presents :finding
 
+    def title
+      name
+    end
+
     def blob_path
       return '' unless sha.present?
       return '' unless location.present? && location['file'].present?

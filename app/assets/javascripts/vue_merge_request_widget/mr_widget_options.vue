@@ -197,6 +197,9 @@ export default {
     shouldShowAccessibilityReport() {
       return this.mr.accessibilityReportPath;
     },
+    formattedHumanAccess() {
+      return (this.mr.humanAccess || '').toLowerCase();
+    },
   },
   watch: {
     state(newVal, oldVal) {
@@ -434,7 +437,7 @@ export default {
       class="mr-widget-workflow"
       :pipeline-path="mr.mergeRequestAddCiConfigPath"
       :pipeline-svg-path="mr.pipelinesEmptySvgPath"
-      :human-access="mr.humanAccess.toLowerCase()"
+      :human-access="formattedHumanAccess"
       :user-callouts-path="mr.userCalloutsPath"
       :user-callout-feature-id="mr.suggestPipelineFeatureId"
       @dismiss="dismissSuggestPipelines"
@@ -464,7 +467,7 @@ export default {
       <security-reports-app
         v-if="shouldRenderSecurityReport"
         :pipeline-id="mr.pipeline.id"
-        :project-id="mr.targetProjectId"
+        :project-id="mr.sourceProjectId"
         :security-reports-docs-path="mr.securityReportsDocsPath"
       />
 

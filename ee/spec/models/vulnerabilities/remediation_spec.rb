@@ -3,6 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe Vulnerabilities::Remediation do
+  it { is_expected.to belong_to(:project).required }
   it { is_expected.to have_many(:finding_remediations).class_name('Vulnerabilities::FindingRemediation') }
   it { is_expected.to have_many(:findings).through(:finding_remediations) }
 

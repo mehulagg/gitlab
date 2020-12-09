@@ -4,7 +4,7 @@ require 'spec_helper'
 
 RSpec.describe TrialsController do
   let_it_be(:user) { create(:user, email_opted_in: true, last_name: 'Doe') }
-  let_it_be(:experiment_user_context) do
+  let_it_be(:remove_known_trial_form_fields_context) do
     {
       first_name_present: user.first_name.present?,
       last_name_present: user.last_name.present?,
@@ -55,7 +55,7 @@ RSpec.describe TrialsController do
     end
 
     it 'calls record_experiment_user for the remove_known_trial_form_fields & trimmed_skip_trial_copy experiments' do
-      expect(controller).to receive(:record_experiment_user).with(:remove_known_trial_form_fields)
+      expect(controller).to receive(:record_experiment_user).with(:remove_known_trial_form_fields, remove_known_trial_form_fields_context)
       expect(controller).to receive(:record_experiment_user).with(:trimmed_skip_trial_copy)
 
       subject

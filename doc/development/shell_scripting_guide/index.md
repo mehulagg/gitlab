@@ -72,8 +72,8 @@ shell check:
     - shellcheck scripts/**/*.sh  # path to your shell scripts
 ```
 
-TIP: **Tip:**
-By default, ShellCheck will use the [shell detection](https://github.com/koalaman/shellcheck/wiki/SC2148#rationale)
+NOTE:
+By default, ShellCheck uses the [shell detection](https://github.com/koalaman/shellcheck/wiki/SC2148#rationale)
 to determine the shell dialect in use. If the shell file is out of your control and ShellCheck cannot
 detect the dialect, use `-s` flag to specify it: `-s sh` or `-s bash`.
 
@@ -100,14 +100,14 @@ shfmt:
     - shfmt -i 2 -ci -d scripts  # path to your shell scripts
 ```
 
-TIP: **Tip:**
-By default, shfmt will use the [shell detection](https://github.com/mvdan/sh#shfmt) similar to one of ShellCheck
+NOTE:
+By default, shfmt uses the [shell detection](https://github.com/mvdan/sh#shfmt) similar to one of ShellCheck
 and ignore files starting with a period. To override this, use `-ln` flag to specify the shell dialect:
 `-ln posix` or `-ln bash`.
 
 ## Testing
 
-NOTE: **Note:**
+NOTE:
 This is a work in progress.
 
 It is an [ongoing effort](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/64016) to evaluate different tools for the

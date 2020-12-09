@@ -20,6 +20,7 @@ describe('SubscriptionTable component', () => {
 
   const findButtonProps = () =>
     wrapper.findAll('a').wrappers.map(x => ({ text: x.text(), href: x.attributes('href') }));
+  const findRenewButton = () => findButtonProps().filter(({ text }) => text === 'Renew');
 
   const factory = (options = {}) => {
     store = new Vuex.Store(initialStore());
@@ -130,26 +131,39 @@ describe('SubscriptionTable component', () => {
     },
   );
 
-  describe('render button', () => {
-    window.gon = { features: {} };
+  describe.each`
+    planName        | planCode    | isFreePlan | isTrialPlan | featureFlag | expectedBehavior | testDescription
+    ${'free'}       | ${null}     | ${true}    | ${false}    | ${true}     | ${false}         | ${'does not render the renew button for free plan'}
+    ${'gold-trial'} | ${null}     | ${false}   | ${true}     | ${true}     | ${false}         | ${'does not render the renew button for trial plan'}
+    ${'silver'}     | ${'silver'} | ${false}   | ${false}    | ${true}     | ${true}          | ${'renders the renew button for paid plans if feature flag is on'}
+    ${'silver'}     | ${'silver'} | ${false}   | ${false}    | ${false}    | ${false}         | ${'does not render the renew button for paid plans if feature flag is off'}
+  `(
+    'given plan with state: isFreePlan=$isFreePlan and feature flag saasManualRenewButton=$featureFlag',
+    ({ planName, planCode, isFreePlan, featureFlag, testDescription, expectedBehavior }) => {
+      beforeEach(() => {
+        factory({
+          propsData: { namespaceName: TEST_NAMESPACE_NAME },
+          provide: {
+            glFeatures: {
+              saasManualRenewButton: featureFlag,
+            },
+          },
+        });
 
-    afterEach(() => {
-      window.gon.features = {};
-    });
+        Object.assign(store.state, {
+          isLoadingSubscription: false,
+          isFreePlan,
+          plan: {
+            code: planCode,
+            name: planName,
+            upgradable: true,
+          },
+        });
+      });
 
-    it('renders the renew button when feature flag is on', () => {
-      gon.features.saasManualRenewButton = true;
-      factory({ propsData: { namespaceName: TEST_NAMESPACE_NAME } });
-      expect(findButtonProps()).toStrictEqual([
-        { text: 'Upgrade', href: '' },
-        { text: 'Renew', href: '' },
-      ]);
-    });
-
-    it('does not render the renew button when the feature flag is off', () => {
-      gon.features.saasManualRenewButton = false;
-      factory({ propsData: { namespaceName: TEST_NAMESPACE_NAME } });
-      expect(findButtonProps()).toStrictEqual([{ text: 'Upgrade', href: '' }]);
-    });
-  });
+      it(testDescription, () => {
+        expect(findRenewButton().length > 0).toBe(expectedBehavior);
+      });
+    },
+  );
 });

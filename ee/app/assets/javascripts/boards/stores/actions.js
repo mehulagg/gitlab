@@ -1,12 +1,10 @@
 import { pick } from 'lodash';
-import Cookies from 'js-cookie';
 import axios from '~/lib/utils/axios_utils';
 import boardsStore from '~/boards/stores/boards_store';
-import { __ } from '~/locale';
-import { historyPushState, parseBoolean } from '~/lib/utils/common_utils';
+import { historyPushState } from '~/lib/utils/common_utils';
 import { mergeUrlParams, removeParams } from '~/lib/utils/url_utility';
 import actionsCE from '~/boards/stores/actions';
-import { BoardType, ListType } from '~/boards/constants';
+import { BoardType } from '~/boards/constants';
 import { EpicFilterType, IterationFilterType, GroupByParamType } from '../constants';
 import boardsStoreEE from './boards_store_ee';
 import * as types from './mutation_types';
@@ -98,7 +96,8 @@ export default {
 
     if (
       filters.iterationId === IterationFilterType.any ||
-      filters.iterationId === IterationFilterType.none
+      filters.iterationId === IterationFilterType.none ||
+      filters.iterationId === IterationFilterType.current
     ) {
       filterParams.iterationWildcardId = filters.iterationId.toUpperCase();
     }
@@ -227,22 +226,6 @@ export default {
     });
   },
 
-  showPromotionList: ({ state, dispatch }) => {
-    if (
-      !state.showPromotion ||
-      parseBoolean(Cookies.get('promotion_issue_board_hidden')) ||
-      state.disabled
-    ) {
-      return;
-    }
-    dispatch('addList', {
-      id: 'promotion',
-      listType: ListType.promotion,
-      title: __('Improve Issue Boards'),
-      position: 0,
-    });
-  },
-
   fetchAllBoards: () => {
     notImplemented();
   },
@@ -260,10 +243,6 @@ export default {
   },
 
   updateIssueWeight: () => {
-    notImplemented();
-  },
-
-  togglePromotionState: () => {
     notImplemented();
   },
 

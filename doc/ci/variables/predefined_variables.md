@@ -14,7 +14,7 @@ Some of the predefined environment variables are available only if a minimum
 version of [GitLab Runner](https://docs.gitlab.com/runner/) is used. Consult the table below to find the
 version of GitLab Runner that's required.
 
-NOTE: **Note:**
+NOTE:
 Starting with GitLab 9.0, we have deprecated some variables. Read the
 [9.0 Renaming](deprecated_variables.md#gitlab-90-renamed-variables) section to find out their replacements.
 **To avoid problems with deprecated and removed variables in future releases, you are strongly advised to use the new variables.**
@@ -49,6 +49,10 @@ Kubernetes-specific environment variables are detailed in the
 | `CI_CONFIG_PATH`                              | 9.4    | 0.5    | The path to CI configuration file. Defaults to `.gitlab-ci.yml`                                                                                                                                                                                                                                                                                                   |
 | `CI_DEBUG_TRACE`                              | all    | 1.7    | Whether [debug logging (tracing)](README.md#debug-logging) is enabled                                                                                                                                                                                                                                                                                      |
 | `CI_DEFAULT_BRANCH`                           | 12.4   | all    | The name of the default branch for the project.                                                                                                                                                                                                                                                                                                            |
+| `CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX`               | 13.7    | all    | The image prefix for pulling images through the Dependency Proxy. |
+| `CI_DEPENDENCY_PROXY_SERVER`                           | 13.7    | all    | The server for logging in to the Dependency Proxy. This is equivelant to `$CI_SERVER_HOST:$CI_SERVER_PORT`. |
+| `CI_DEPENDENCY_PROXY_PASSWORD`                         | 13.7    | all    | The password to use to pull images through the Dependency Proxy. |
+| `CI_DEPENDENCY_PROXY_USER`                             | 13.7    | all    | The username to use to pull images through the Dependency Proxy. |
 | `CI_DEPLOY_FREEZE`                            | 13.2   | all    | Included with the value `true` if the pipeline runs during a [deploy freeze window](../../user/project/releases/index.md#prevent-unintentional-releases-by-setting-a-deploy-freeze).                                                                                                                                                                                                                                    |
 | `CI_DEPLOY_PASSWORD`                          | 10.8   | all    | Authentication password of the [GitLab Deploy Token](../../user/project/deploy_tokens/index.md#gitlab-deploy-token), only present if the Project has one related.                                                                                                                                                                                                                                    |
 | `CI_DEPLOY_USER`                              | 10.8   | all    | Authentication username of the [GitLab Deploy Token](../../user/project/deploy_tokens/index.md#gitlab-deploy-token), only present if the Project has one related.                                                                                                                                                                                                                                    |

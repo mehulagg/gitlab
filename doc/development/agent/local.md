@@ -9,19 +9,19 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 You can run `kas` and `agentk` locally to test the [Kubernetes Agent](index.md) yourself.
 
 1. Create a `cfg.yaml` file from the contents of
-   [`kas_config_example.yaml`](https://gitlab.com/gitlab-org/cluster-integration/gitlab-agent/-/blob/master/doc/kas_config_example.yaml), or this example:
+   [`config_example.yaml`](https://gitlab.com/gitlab-org/cluster-integration/gitlab-agent/-/blob/master/pkg/kascfg/config_example.yaml), or this example:
 
    ```yaml
-   listen_agent:
-     network: tcp
-     address: 127.0.0.1:8150
-     websocket: false
+   agent:
+    listen:
+       network: tcp
+       address: 127.0.0.1:8150
+       websocket: false
+     gitops:
+       poll_period: "10s"
    gitlab:
      address: http://localhost:3000
      authentication_secret_file: /Users/tkuah/code/ee-gdk/gitlab/.gitlab_kas_secret
-   agent:
-     gitops:
-       poll_period: "10s"
    ```
 
 1. Create a `token.txt`. This is the token for
@@ -38,12 +38,12 @@ You can run `kas` and `agentk` locally to test the [Kubernetes Agent](index.md) 
    gdk start
    # Stop GDK's version of kas
    gdk stop gitlab-k8s-agent
-
+    
    # Start kas
    bazel run //cmd/kas -- --configuration-file="$(pwd)/cfg.yaml"
    ```
 
-1. In a new terminal window, run this command to start agentk:
+1. In a new terminal window, run this command to start `agentk`:
 
    ```shell
    bazel run //cmd/agentk -- --kas-address=grpc://127.0.0.1:8150 --token-file="$(pwd)/token.txt"

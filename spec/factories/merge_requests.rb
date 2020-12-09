@@ -159,6 +159,18 @@ FactoryBot.define do
       end
     end
 
+    trait :with_codequality_reports do
+      after(:build) do |merge_request|
+        merge_request.head_pipeline = build(
+          :ci_pipeline,
+          :success,
+          :with_codequality_reports,
+          project: merge_request.source_project,
+          ref: merge_request.source_branch,
+          sha: merge_request.diff_head_sha)
+      end
+    end
+
     trait :unique_branches do
       source_branch { generate(:branch) }
       target_branch { generate(:branch) }
@@ -256,7 +268,7 @@ FactoryBot.define do
       source_project = merge_request.source_project
 
       # Fake `fetch_ref!` if we don't have repository
-      # We have too many existing tests replying on this behaviour
+      # We have too many existing tests relying on this behaviour
       unless [target_project, source_project].all?(&:repository_exists?)
         allow(merge_request).to receive(:fetch_ref!)
       end

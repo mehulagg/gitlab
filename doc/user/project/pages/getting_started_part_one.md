@@ -80,7 +80,7 @@ To understand Pages domains clearly, read the examples below.
 
 ## URLs and baseurls
 
-NOTE: **Note:**
+NOTE:
 The `baseurl` option might be called named differently in some static site generators.
 
 Every Static Site Generator (SSG) default configuration expects

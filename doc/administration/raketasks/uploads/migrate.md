@@ -55,7 +55,7 @@ The Rake task uses three parameters to find uploads to migrate:
 | `model_class`    | string        | Type of the model to migrate from.                     |
 | `mount_point`    | string/symbol | Name of the model's column the uploader is mounted on. |
 
-NOTE: **Note:**
+NOTE:
 These parameters are mainly internal to GitLab's structure, you may want to refer to the task list
 instead below.
 

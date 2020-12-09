@@ -269,9 +269,9 @@ You can exclude specific directories from the backup by adding the environment v
 - `repositories` (Git repositories data)
 
 All wikis will be backed up as part of the `repositories` group. Non-existent wikis will be skipped during a backup.
-
-NOTE: **Note:**
-When [backing up and restoring Helm Charts](https://docs.gitlab.com/charts/architecture/backup-restore.html), there is an additional option `packages`, which refers to any packages managed by the GitLab [package registry](../user/packages/package_registry/index.md).
+  
+NOTE:
+When [backing up and restoring Helm Charts](https://docs.gitlab.com/charts/architecture/backup-restore.html), there is an additional option `packages`, which refers to any packages managed by the GitLab [package registry](../user/packages/package_registry/index.md).   
 For more information see [command line arguments](https://docs.gitlab.com/charts/architecture/backup-restore.html#command-line-arguments).
 
 All wikis are backed up as part of the `repositories` group. Non-existent
@@ -948,7 +948,7 @@ installed version of GitLab, the restore command aborts with an error
 message. Install the [correct GitLab version](https://packages.gitlab.com/gitlab/),
 and then try again.
 
-NOTE: **Note:**
+NOTE:
 There is a known issue with restore not working with `pgbouncer`. [Read more about backup and restore with `pgbouncer`](#backup-and-restore-for-installations-using-pgbouncer).
 
 ### Restore for Docker image and GitLab Helm chart installations

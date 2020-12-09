@@ -250,7 +250,7 @@ export default {
       class="mr-widget-workflow"
       :pipeline-path="mr.mergeRequestAddCiConfigPath"
       :pipeline-svg-path="mr.pipelinesEmptySvgPath"
-      :human-access="mr.humanAccess.toLowerCase()"
+      :human-access="formattedHumanAccess"
       :user-callouts-path="mr.userCalloutsPath"
       :user-callout-feature-id="mr.suggestPipelineFeatureId"
       @dismiss="dismissSuggestPipelines"
@@ -311,7 +311,7 @@ export default {
       <security-reports-app
         v-if="shouldRenderBaseSecurityReport"
         :pipeline-id="mr.pipeline.id"
-        :project-id="mr.targetProjectId"
+        :project-id="mr.sourceProjectId"
         :security-reports-docs-path="mr.securityReportsDocsPath"
         :sast-comparison-path="mr.sastComparisonPath"
         :secret-scanning-comparison-path="mr.secretScanningComparisonPath"

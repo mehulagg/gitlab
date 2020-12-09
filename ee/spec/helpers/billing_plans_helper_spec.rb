@@ -13,15 +13,15 @@ RSpec.describe BillingPlansHelper do
 
     context 'when group and plan with ID present' do
       it 'returns data attributes' do
-        upgrade_href =
-          "#{EE::SUBSCRIPTIONS_URL}/gitlab/namespaces/#{group.id}/upgrade/#{plan.id}"
-        renew_href =
-          "#{EE::SUBSCRIPTIONS_URL}/gitlab/namespaces/#{group.id}/renew"
+        add_seats_href = "#{EE::SUBSCRIPTIONS_URL}/gitlab/namespaces/#{group.id}/extra_seats"
+        upgrade_href = "#{EE::SUBSCRIPTIONS_URL}/gitlab/namespaces/#{group.id}/upgrade/#{plan.id}"
+        renew_href = "#{EE::SUBSCRIPTIONS_URL}/gitlab/namespaces/#{group.id}/renew"
         billable_seats_href = helper.group_seat_usage_path(group)
 
         expect(helper.subscription_plan_data_attributes(group, plan))
           .to eq(namespace_id: group.id,
                  namespace_name: group.name,
+                 add_seats_href: add_seats_href,
                  plan_upgrade_href: upgrade_href,
                  plan_renew_href: renew_href,
                  customer_portal_url: customer_portal_url,
@@ -41,6 +41,7 @@ RSpec.describe BillingPlansHelper do
       let(:plan) { Hashie::Mash.new(id: nil) }
 
       it 'returns data attributes without upgrade href' do
+        add_seats_href = "#{EE::SUBSCRIPTIONS_URL}/gitlab/namespaces/#{group.id}/extra_seats"
         renew_href = "#{EE::SUBSCRIPTIONS_URL}/gitlab/namespaces/#{group.id}/renew"
         billable_seats_href = helper.group_seat_usage_path(group)
 
@@ -49,6 +50,7 @@ RSpec.describe BillingPlansHelper do
                  namespace_name: group.name,
                  customer_portal_url: customer_portal_url,
                  billable_seats_href: billable_seats_href,
+                 add_seats_href: add_seats_href,
                  plan_renew_href: renew_href,
                  plan_upgrade_href: nil)
       end
@@ -177,6 +179,60 @@ RSpec.describe BillingPlansHelper do
       expect(helper).to receive(:plan_purchase_url)
 
       helper.plan_purchase_or_upgrade_url(group, plan)
+    end
+  end
+
+  describe '#upgrade_button_css_classe' do
+    using RSpec::Parameterized::TableSyntax
+
+    let(:plan) { double('Plan', deprecated?: false) }
+
+    it 'returns button-related classes only' do
+      expect(helper.upgrade_button_css_classes(nil, plan, false)).to eq('btn btn-success gl-button')
+    end
+
+    where(:is_current_plan, :trial_active, :result) do
+      false | false | 'btn btn-success gl-button'
+      false | true  | 'btn btn-success gl-button'
+      true  | true  | 'btn btn-success gl-button'
+      true  | false | 'btn btn-success gl-button disabled'
+      false | false | 'btn btn-success gl-button'
+    end
+
+    with_them do
+      let(:namespace) { Hashie::Mash.new(trial_active: trial_active) }
+
+      subject { helper.upgrade_button_css_classes(namespace, plan, is_current_plan) }
+
+      it { is_expected.to include(result) }
+    end
+
+    context 'when plan is deprecated' do
+      let(:deprecated_plan) { double('Plan', deprecated?: true) }
+
+      it 'returns invisible class' do
+        expect(helper.upgrade_button_css_classes(nil, deprecated_plan, false)).to include('invisible')
+      end
+    end
+  end
+
+  describe '#available_plans' do
+    let(:plan) { double('Plan', deprecated?: false, code: 'silver') }
+    let(:deprecated_plan) { double('Plan', deprecated?: true, code: 'bronze') }
+    let(:plans_data) { [plan, deprecated_plan] }
+
+    context 'when namespace is on an active plan' do
+      it 'returns plans without deprecated' do
+        expect(helper.available_plans(plans_data, nil)).to eq([plan])
+      end
+    end
+
+    context 'when namespace is on a deprecated plan' do
+      let(:current_plan) { Hashie::Mash.new(code: 'bronze') }
+
+      it 'returns plans with a deprecated plan' do
+        expect(helper.available_plans(plans_data, current_plan)).to eq(plans_data)
+      end
     end
   end
 end

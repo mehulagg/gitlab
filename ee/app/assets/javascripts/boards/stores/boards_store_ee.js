@@ -4,25 +4,20 @@
   modify the passed parameter in conformity with non-ee BoardsStore.
 */
 
-import { sortBy } from 'lodash';
-import Cookies from 'js-cookie';
 import { __, sprintf } from '~/locale';
 import sidebarEventHub from '~/sidebar/event_hub';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { parseBoolean } from '~/lib/utils/common_utils';
 import axios from '~/lib/utils/axios_utils';
 
+const NO_ITERATION_TITLE = 'No+Iteration';
+const NO_MILESTONE_TITLE = 'No+Milestone';
+
 class BoardsStoreEE {
   initEESpecific(boardsStore) {
     this.$boardApp = document.getElementById('board-app');
     this.store = boardsStore;
-    this.store.addPromotionState = () => {
-      this.addPromotion();
-    };
     this.store.loadList = (listPath, listType) => this.loadList(listPath, listType);
-    this.store.removePromotionState = () => {
-      this.removePromotion();
-    };
 
     const superSetCurrentBoard = this.store.setCurrentBoard.bind(this.store);
     this.store.setCurrentBoard = board => {
@@ -39,6 +34,8 @@ class BoardsStoreEE {
           dataset: {
             boardMilestoneId,
             boardMilestoneTitle,
+            boardIterationTitle,
+            boardIterationId,
             boardAssigneeUsername,
             labels,
             boardWeight,
@@ -49,6 +46,8 @@ class BoardsStoreEE {
         this.store.boardConfig = {
           milestoneId: parseInt(boardMilestoneId, 10),
           milestoneTitle: boardMilestoneTitle || '',
+          iterationId: parseInt(boardIterationId, 10),
+          iterationTitle: boardIterationTitle || '',
           assigneeUsername: boardAssigneeUsername,
           labels: JSON.parse(labels || []),
           weight: parseInt(boardWeight, 10),
@@ -101,14 +100,25 @@ class BoardsStoreEE {
 
     let { milestoneTitle } = this.store.boardConfig;
     if (this.store.boardConfig.milestoneId === 0) {
-      /* eslint-disable-next-line @gitlab/require-i18n-strings */
-      milestoneTitle = 'No+Milestone';
+      milestoneTitle = NO_MILESTONE_TITLE;
     } else {
       milestoneTitle = encodeURIComponent(milestoneTitle);
     }
     if (milestoneTitle) {
       updateFilterPath('milestone_title', milestoneTitle);
       this.store.cantEdit.push('milestone');
+    }
+
+    let { iterationTitle } = this.store.boardConfig;
+    if (this.store.boardConfig.iterationId === 0) {
+      iterationTitle = NO_ITERATION_TITLE;
+    } else {
+      iterationTitle = encodeURIComponent(iterationTitle);
+    }
+
+    if (iterationTitle) {
+      updateFilterPath('iteration_id', iterationTitle);
+      this.store.cantEdit.push('iteration');
     }
 
     let { weight } = this.store.boardConfig;
@@ -148,38 +158,6 @@ class BoardsStoreEE {
     this.store.filter.path = filterPath.join('&');
 
     this.store.updateFiltersUrl(true);
-  }
-
-  addPromotion() {
-    if (
-      !this.$boardApp.hasAttribute('data-show-promotion') ||
-      this.promotionIsHidden() ||
-      this.store.disabled
-    ) {
-      return;
-    }
-
-    this.store.addList({
-      id: 'promotion',
-      list_type: 'promotion',
-      title: __('Improve Issue boards'),
-      position: 0,
-    });
-
-    this.store.state.lists = sortBy(this.store.state.lists, 'position');
-  }
-
-  removePromotion() {
-    this.store.removeList('promotion', 'promotion');
-
-    Cookies.set('promotion_issue_board_hidden', 'true', {
-      expires: 365 * 10,
-      path: '',
-    });
-  }
-
-  promotionIsHidden() {
-    return parseBoolean(Cookies.get('promotion_issue_board_hidden'));
   }
 
   setMaxIssueCountOnList(id, maxIssueCount) {

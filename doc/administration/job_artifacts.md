@@ -103,7 +103,7 @@ If you configure GitLab to store artifacts on object storage, you may also want 
 [eliminate local disk usage for job logs](job_logs.md#prevent-local-disk-usage).
 In both cases, job logs are archived and moved to object storage when the job completes.
 
-DANGER: **Warning:**
+WARNING:
 In a multi-server setup you must use one of the options to
 [eliminate local disk usage for job logs](job_logs.md#prevent-local-disk-usage), or job logs could be lost.
 
@@ -111,7 +111,7 @@ In a multi-server setup you must use one of the options to
 
 #### Object Storage Settings
 
-NOTE: **Note:**
+NOTE:
 In GitLab 13.2 and later, we recommend using the
 [consolidated object storage settings](object_storage.md#consolidated-object-storage-configuration).
 This section describes the earlier configuration format.
@@ -507,7 +507,7 @@ If you need to manually remove job artifacts associated with multiple jobs while
 
 1. Delete job artifacts older than a specific date:
 
-   NOTE: **Note:**
+   NOTE:
    This step also erases artifacts that users have chosen to
    ["keep"](../ci/pipelines/job_artifacts.md#browsing-artifacts).
 

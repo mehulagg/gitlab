@@ -24,7 +24,7 @@ Currently, there are four endpoints for simulating the following conditions:
 For obvious reasons, these endpoints are not enabled by default on `production`.
 They are enabled by default on **development** environments.
 
-DANGER: **Warning:**
+WARNING:
 It is required that you secure access to the chaos endpoints using a secret token.
 You should not enable them in production unless you absolutely know what you're doing.
 
@@ -66,8 +66,8 @@ GET /-/chaos/leakmem?memory_mb=1024&duration_s=50&async=true
 | `async`      | boolean | no       | Set to true to leak memory in a Sidekiq background worker process                    |
 
 ```shell
-curl http://localhost:3000/-/chaos/leakmem?memory_mb=1024&duration_s=10 --header 'X-Chaos-Secret: secret'
-curl http://localhost:3000/-/chaos/leakmem?memory_mb=1024&duration_s=10&token=secret
+curl "http://localhost:3000/-/chaos/leakmem?memory_mb=1024&duration_s=10" --header 'X-Chaos-Secret: secret'
+curl "http://localhost:3000/-/chaos/leakmem?memory_mb=1024&duration_s=10&token=secret"
 ```
 
 ## CPU spin
@@ -89,8 +89,8 @@ GET /-/chaos/cpu_spin?duration_s=50&async=true
 | `async`      | boolean | no       | Set to true to consume CPU in a Sidekiq background worker process     |
 
 ```shell
-curl http://localhost:3000/-/chaos/cpu_spin?duration_s=60 --header 'X-Chaos-Secret: secret'
-curl http://localhost:3000/-/chaos/cpu_spin?duration_s=60&token=secret
+curl "http://localhost:3000/-/chaos/cpu_spin?duration_s=60" --header 'X-Chaos-Secret: secret'
+curl "http://localhost:3000/-/chaos/cpu_spin?duration_s=60&token=secret"
 ```
 
 ## DB spin
@@ -114,8 +114,8 @@ GET /-/chaos/db_spin?duration_s=50&async=true
 | `async`      | boolean | no       | Set to true to perform the operation in a Sidekiq background worker process |
 
 ```shell
-curl http://localhost:3000/-/chaos/db_spin?interval_s=1&duration_s=60 --header 'X-Chaos-Secret: secret'
-curl http://localhost:3000/-/chaos/db_spin?interval_s=1&duration_s=60&token=secret
+curl "http://localhost:3000/-/chaos/db_spin?interval_s=1&duration_s=60" --header 'X-Chaos-Secret: secret'
+curl "http://localhost:3000/-/chaos/db_spin?interval_s=1&duration_s=60&token=secret"
 ```
 
 ## Sleep
@@ -136,8 +136,8 @@ GET /-/chaos/sleep?duration_s=50&async=true
 | `async`      | boolean | no       | Set to true to sleep in a Sidekiq background worker process            |
 
 ```shell
-curl http://localhost:3000/-/chaos/sleep?duration_s=60 --header 'X-Chaos-Secret: secret'
-curl http://localhost:3000/-/chaos/sleep?duration_s=60&token=secret
+curl "http://localhost:3000/-/chaos/sleep?duration_s=60" --header 'X-Chaos-Secret: secret'
+curl "http://localhost:3000/-/chaos/sleep?duration_s=60&token=secret"
 ```
 
 ## Kill
@@ -157,6 +157,6 @@ GET /-/chaos/kill?async=true
 | `async`      | boolean | no       | Set to true to kill a Sidekiq background worker process                |
 
 ```shell
-curl http://localhost:3000/-/chaos/kill --header 'X-Chaos-Secret: secret'
-curl http://localhost:3000/-/chaos/kill?token=secret
+curl "http://localhost:3000/-/chaos/kill" --header 'X-Chaos-Secret: secret'
+curl "http://localhost:3000/-/chaos/kill?token=secret"
 ```

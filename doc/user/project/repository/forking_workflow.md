@@ -26,7 +26,7 @@ Forking a project is, in most cases, a two-step process.
 
 1. Click a namespace to fork to. Only namespaces you have Developer and higher [permissions](../../permissions.md) for are shown.
 
-   NOTE: **Note:**
+   NOTE:
    The project path must be unique within the namespace.
 
    ![Choose namespace](img/forking_workflow_choose_namespace_v13_2.png)
@@ -63,7 +63,7 @@ When you are ready to send your code back to the upstream project,
 [create a merge request](../merge_requests/creating_merge_requests.md). For **Source branch**,
 choose your forked project's branch. For **Target branch**, choose the original project's branch.
 
-NOTE: **Note:**
+NOTE:
 When creating a merge request, if the forked project's visibility is more restrictive than the parent project (for example the fork is private, the parent is public), the target branch will default to the forked project's default branch. This prevents potentially exposing the private code of the forked project.
 
 ![Selecting branches](img/forking_workflow_branch_select.png)

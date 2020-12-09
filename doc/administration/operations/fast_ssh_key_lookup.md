@@ -9,7 +9,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/1631) in [GitLab Starter](https://about.gitlab.com/pricing/) 9.3.
 > - [Available in](https://gitlab.com/gitlab-org/gitlab/-/issues/3953) GitLab Community Edition 10.4.
 
-NOTE: **Note:**
+NOTE:
 This document describes a drop-in replacement for the
 `authorized_keys` file. For normal (non-deploy key) users, consider using
 [SSH certificates](ssh_certificates.md). They are even faster, but are not a
@@ -80,11 +80,11 @@ Confirm that SSH is working by commenting out your user's key in the `authorized
 A successful pull would mean that GitLab was able to find the key in the database,
 since it is not present in the file anymore.
 
-NOTE: **Note:**
+NOTE:
 For Omnibus Docker, `AuthorizedKeysCommand` is setup by default in
 GitLab 11.11 and later.
 
-NOTE: **Note:**
+NOTE:
 For Installations from source, the command would be located at
 `/home/git/gitlab-shell/bin/gitlab-shell-authorized-keys-check` if [the install from source](../../install/installation.md#install-gitlab-shell) instructions were followed.
 You might want to consider creating a wrapper script somewhere else since this command needs to be
@@ -139,7 +139,7 @@ the database. The following instructions can be used to build OpenSSH 7.5:
    ```shell
    sudo su -
    cd /tmp
-   curl --remote-name https://cdn.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-7.5p1.tar.gz
+   curl --remote-name "https://cdn.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-7.5p1.tar.gz"
    tar xzvf openssh-7.5p1.tar.gz
    yum install rpm-build gcc make wget openssl-devel krb5-devel pam-devel libX11-devel xmkmf libXt-devel
    ```

@@ -43,7 +43,7 @@ Documentation for GitLab instance administrators is under [LFS administration do
 - Git LFS always assumes HTTPS so if you have GitLab server on HTTP you will have
   to add the URL to Git configuration manually (see [troubleshooting](#troubleshooting))
 
-NOTE: **Note:**
+NOTE:
 With 8.12 GitLab added LFS support to SSH. The Git LFS communication
 still goes over HTTP, but now the SSH client passes the correct credentials
 to the Git LFS client, so no action is required by the user.
@@ -219,7 +219,7 @@ git config --add lfs.url "http://gitlab.example.com/group/project.git/info/lfs"
 
 ### Credentials are always required when pushing an object
 
-NOTE: **Note:**
+NOTE:
 With 8.12 GitLab added LFS support to SSH. The Git LFS communication
 still goes over HTTP, but now the SSH client passes the correct credentials
 to the Git LFS client, so no action is required by the user.

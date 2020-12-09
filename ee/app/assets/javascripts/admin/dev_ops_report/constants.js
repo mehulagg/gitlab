@@ -4,6 +4,8 @@ export const MAX_REQUEST_COUNT = 10;
 
 export const DEVOPS_ADOPTION_SEGMENT_MODAL_ID = 'devopsSegmentModal';
 
+export const DEVOPS_ADOPTION_SEGMENT_DELETE_MODAL_ID = 'devopsSegmentDeleteModal';
+
 export const DATE_TIME_FORMAT = 'yyyy-mm-dd HH:MM';
 
 export const DEVOPS_ADOPTION_ERROR_KEYS = {
@@ -21,7 +23,7 @@ export const DEVOPS_ADOPTION_STRINGS = {
     ),
     tableHeader: {
       text: s__(
-        'DevopsAdoption|Feature adoption is based on usage over the last 30 days. Last updated: %{timestamp}.',
+        'DevopsAdoption|Feature adoption is based on usage in the last calendar month. Last updated: %{timestamp}.',
       ),
       button: s__('DevopsAdoption|Add new segment'),
     },
@@ -34,14 +36,29 @@ export const DEVOPS_ADOPTION_STRINGS = {
     button: s__('DevopsAdoption|Add new segment'),
   },
   modal: {
-    title: s__('DevopsAdoption|New segment'),
-    button: s__('DevopsAdoption|Create new segment'),
+    addingTitle: s__('DevopsAdoption|New segment'),
+    editingTitle: s__('DevopsAdoption|Edit segment'),
+    addingButton: s__('DevopsAdoption|Create new segment'),
+    editingButton: s__('DevopsAdoption|Save changes'),
     cancel: __('Cancel'),
     namePlaceholder: s__('DevopsAdoption|My segment'),
+    filterPlaceholder: s__('DevopsAdoption|Filter by name'),
     nameLabel: s__('DevopsAdoption|Name'),
     selectedGroupsTextSingular: s__('DevopsAdoption|%{selectedCount} group selected (20 max)'),
     selectedGroupsTextPlural: s__('DevopsAdoption|%{selectedCount} groups selected (20 max)'),
     error: s__('DevopsAdoption|An error occured while saving the segment. Please try again.'),
+    noResults: s__('DevopsAdoption|No filter results.'),
+  },
+  table: {
+    editButton: s__('DevopsAdoption|Edit segment'),
+    deleteButton: s__('DevopsAdoption|Delete segment'),
+  },
+  deleteModal: {
+    title: s__('DevopsAdoption|Confirm delete segment'),
+    confirmationMessage: s__('DevopsAdoption|Are you sure that you would like to delete %{name}?'),
+    cancel: __('Cancel'),
+    confirm: s__('DevopsAdoption|Delete segment'),
+    error: s__('DevopsAdoption|An error occured while deleting the segment. Please try again.'),
   },
 };
 

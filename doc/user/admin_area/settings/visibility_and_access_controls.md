@@ -43,7 +43,7 @@ To do this:
 
 1. Uncheck the **Allow owners to manage default branch protection per group** checkbox.
 
-NOTE: **Note:**
+NOTE:
 GitLab administrators can still update the default branch protection of a group.
 
 ## Default project creation protection
@@ -208,7 +208,7 @@ To specify a custom Git clone URL for HTTP(S):
 1. Enter a root URL for **Custom Git clone URL for HTTP(S)**.
 1. Click on **Save changes**.
 
-NOTE: **Note:**
+NOTE:
 SSH clone URLs can be customized in `gitlab.rb` by setting `gitlab_rails['gitlab_ssh_host']` and
 other related settings.
 

@@ -371,6 +371,9 @@ msgstr ""
 msgid "%{authorsName}'s thread"
 msgstr ""
 
+msgid "%{board_target} not found"
+msgstr ""
+
 msgid "%{code_open}Masked%{code_close} variables are hidden in job logs (though they must match certain regexp requirements to do so)."
 msgstr ""
 
@@ -950,7 +953,7 @@ msgstr ""
 msgid "(No changes)"
 msgstr ""
 
-msgid "(UTC%{offset}) %{timezone}"
+msgid "(UTC %{offset}) %{timezone}"
 msgstr ""
 
 msgid "(check progress)"
@@ -1256,6 +1259,9 @@ msgstr ""
 msgid "A merge request approval is required when the license compliance report contains a denied license."
 msgstr ""
 
+msgid "A merge request hasn't yet been merged"
+msgstr ""
+
 msgid "A new Auto DevOps pipeline has been created, go to %{pipelines_link_start}Pipelines page%{pipelines_link_end} for details"
 msgstr ""
 
@@ -1334,6 +1340,9 @@ msgstr ""
 msgid "AWS Secret Access Key.  Only required if not using role instance credentials"
 msgstr ""
 
+msgid "AWS service error: %{error}"
+msgstr ""
+
 msgid "Abort"
 msgstr ""
 
@@ -1371,6 +1380,9 @@ msgid "Access denied for your LDAP account."
 msgstr ""
 
 msgid "Access denied! Please verify you can add deploy keys to this repository."
+msgstr ""
+
+msgid "Access denied: %{error}"
 msgstr ""
 
 msgid "Access expiration date"
@@ -1972,6 +1984,9 @@ msgstr ""
 msgid "AdminSettings|Auto DevOps domain"
 msgstr ""
 
+msgid "AdminSettings|Disable feed token"
+msgstr ""
+
 msgid "AdminSettings|Elasticsearch, PlantUML, Slack application, Third party offers, Snowplow, Amazon EKS have moved to Settings &gt; General."
 msgstr ""
 
@@ -1979,6 +1994,9 @@ msgid "AdminSettings|Enable shared runners for new projects"
 msgstr ""
 
 msgid "AdminSettings|Environment variables are protected by default"
+msgstr ""
+
+msgid "AdminSettings|Feed token"
 msgstr ""
 
 msgid "AdminSettings|Go to General Settings"
@@ -3042,6 +3060,9 @@ msgstr ""
 msgid "An error occurred while adding formatted title for epic"
 msgstr ""
 
+msgid "An error occurred while authorizing your role"
+msgstr ""
+
 msgid "An error occurred while checking group path. Please refresh and try again."
 msgstr ""
 
@@ -3286,6 +3307,9 @@ msgid "An error occurred while unsubscribing to notifications."
 msgstr ""
 
 msgid "An error occurred while updating approvers"
+msgstr ""
+
+msgid "An error occurred while updating assignees."
 msgstr ""
 
 msgid "An error occurred while updating configuration."
@@ -3684,9 +3708,6 @@ msgid "Are you sure you want to delete this %{typeOfComment}?"
 msgstr ""
 
 msgid "Are you sure you want to delete this SSH key?"
-msgstr ""
-
-msgid "Are you sure you want to delete this board?"
 msgstr ""
 
 msgid "Are you sure you want to delete this device? This action cannot be undone."
@@ -4489,9 +4510,6 @@ msgstr ""
 msgid "Blog"
 msgstr ""
 
-msgid "Board scope"
-msgstr ""
-
 msgid "Board scope affects which issues are displayed for anyone who visits this board"
 msgstr ""
 
@@ -4544,6 +4562,30 @@ msgid "Boards|Expand"
 msgstr ""
 
 msgid "Boards|View scope"
+msgstr ""
+
+msgid "Board|Are you sure you want to delete this board?"
+msgstr ""
+
+msgid "Board|Board scope"
+msgstr ""
+
+msgid "Board|Create board"
+msgstr ""
+
+msgid "Board|Create new board"
+msgstr ""
+
+msgid "Board|Delete board"
+msgstr ""
+
+msgid "Board|Edit board"
+msgstr ""
+
+msgid "Board|Enter board name"
+msgstr ""
+
+msgid "Board|Failed to delete board. Please try again."
 msgstr ""
 
 msgid "Board|Load more issues"
@@ -7318,9 +7360,6 @@ msgstr ""
 msgid "ContainerRegistry|%{title} was successfully scheduled for deletion"
 msgstr ""
 
-msgid "ContainerRegistry|%{toggleStatus} - Tags matching the patterns defined below will be scheduled for deletion"
-msgstr ""
-
 msgid "ContainerRegistry|Build an image"
 msgstr ""
 
@@ -7331,9 +7370,6 @@ msgid "ContainerRegistry|Cleanup policy for tags is disabled"
 msgstr ""
 
 msgid "ContainerRegistry|Cleanup policy successfully saved."
-msgstr ""
-
-msgid "ContainerRegistry|Cleanup policy:"
 msgstr ""
 
 msgid "ContainerRegistry|Cleanup timed out before it could delete all tags"
@@ -7366,9 +7402,6 @@ msgstr ""
 msgid "ContainerRegistry|Docker connection error"
 msgstr ""
 
-msgid "ContainerRegistry|Expiration interval:"
-msgstr ""
-
 msgid "ContainerRegistry|Expiration policies help manage the storage space used by the Container Registry, but the expiration policies for this registry are disabled. Contact your administrator to enable. %{docLinkStart}More information%{docLinkEnd}"
 msgstr ""
 
@@ -7376,9 +7409,6 @@ msgid "ContainerRegistry|Expiration policy is disabled"
 msgstr ""
 
 msgid "ContainerRegistry|Expiration policy will run in %{time}"
-msgstr ""
-
-msgid "ContainerRegistry|Expiration schedule:"
 msgstr ""
 
 msgid "ContainerRegistry|Filter by name"
@@ -7421,9 +7451,6 @@ msgid "ContainerRegistry|Not yet scheduled"
 msgstr ""
 
 msgid "ContainerRegistry|Note: Any policy update will result in a change to the scheduled run date and time"
-msgstr ""
-
-msgid "ContainerRegistry|Number of tags to retain:"
 msgstr ""
 
 msgid "ContainerRegistry|Published %{timeInfo}"
@@ -7500,12 +7527,6 @@ msgstr ""
 msgid "ContainerRegistry|Tags that match these rules are %{strongStart}removed%{strongEnd}, unless a rule above says to keep them."
 msgstr ""
 
-msgid "ContainerRegistry|Tags with names matching this regex pattern will %{italicStart}be preserved:%{italicEnd}"
-msgstr ""
-
-msgid "ContainerRegistry|Tags with names matching this regex pattern will %{italicStart}expire:%{italicEnd}"
-msgstr ""
-
 msgid "ContainerRegistry|Tags with names that match this regex pattern are kept. %{linkStart}More information%{linkEnd}"
 msgstr ""
 
@@ -7543,12 +7564,6 @@ msgid "ContainerRegistry|To widen your search, change or remove the filters abov
 msgstr ""
 
 msgid "ContainerRegistry|We are having trouble connecting to the Registry, which could be due to an issue with your project name or path. %{docLinkStart}More information%{docLinkEnd}"
-msgstr ""
-
-msgid "ContainerRegistry|Wildcards such as %{codeStart}.*-master%{codeEnd} or %{codeStart}release-.*%{codeEnd} are supported"
-msgstr ""
-
-msgid "ContainerRegistry|Wildcards such as %{codeStart}.*-test%{codeEnd} or %{codeStart}dev-.*%{codeEnd} are supported. To select all tags, use %{codeStart}.*%{codeEnd}"
 msgstr ""
 
 msgid "ContainerRegistry|With the Container Registry, every project can have its own space to store its Docker images. %{docLinkStart}More Information%{docLinkEnd}"
@@ -7705,6 +7720,9 @@ msgid "Copy URL"
 msgstr ""
 
 msgid "Copy branch name"
+msgstr ""
+
+msgid "Copy codes"
 msgstr ""
 
 msgid "Copy command"
@@ -7946,9 +7964,6 @@ msgstr ""
 msgid "Create and provide your GitHub %{link_start}Personal Access Token%{link_end}. You will need to select the %{code_open}repo%{code_close} scope, so we can display a list of your public and private repositories which are available to import."
 msgstr ""
 
-msgid "Create board"
-msgstr ""
-
 msgid "Create branch"
 msgstr ""
 
@@ -8004,9 +8019,6 @@ msgid "Create new"
 msgstr ""
 
 msgid "Create new Value Stream"
-msgstr ""
-
-msgid "Create new board"
 msgstr ""
 
 msgid "Create new branch"
@@ -8163,6 +8175,9 @@ msgid "Cron time zone"
 msgstr ""
 
 msgid "Crossplane"
+msgstr ""
+
+msgid "Current"
 msgstr ""
 
 msgid "Current Branch"
@@ -8926,9 +8941,6 @@ msgstr ""
 msgid "Delete badge"
 msgstr ""
 
-msgid "Delete board"
-msgstr ""
-
 msgid "Delete comment"
 msgstr ""
 
@@ -9607,13 +9619,25 @@ msgstr ""
 msgid "DevopsAdoption|Add new segment"
 msgstr ""
 
+msgid "DevopsAdoption|An error occured while deleting the segment. Please try again."
+msgstr ""
+
 msgid "DevopsAdoption|An error occured while saving the segment. Please try again."
 msgstr ""
 
 msgid "DevopsAdoption|Approvals"
 msgstr ""
 
+msgid "DevopsAdoption|Are you sure that you would like to delete %{name}?"
+msgstr ""
+
+msgid "DevopsAdoption|Confirm delete segment"
+msgstr ""
+
 msgid "DevopsAdoption|Create new segment"
+msgstr ""
+
+msgid "DevopsAdoption|Delete segment"
 msgstr ""
 
 msgid "DevopsAdoption|Deploys"
@@ -9622,7 +9646,13 @@ msgstr ""
 msgid "DevopsAdoption|DevOps adoption uses segments to track adoption across key features. Segments are a way to track multiple related projects and groups at once. For example, you could create a segment for the engineering department or a particular product team."
 msgstr ""
 
-msgid "DevopsAdoption|Feature adoption is based on usage over the last 30 days. Last updated: %{timestamp}."
+msgid "DevopsAdoption|Edit segment"
+msgstr ""
+
+msgid "DevopsAdoption|Feature adoption is based on usage in the last calendar month. Last updated: %{timestamp}."
+msgstr ""
+
+msgid "DevopsAdoption|Filter by name"
 msgstr ""
 
 msgid "DevopsAdoption|Issues"
@@ -9640,10 +9670,16 @@ msgstr ""
 msgid "DevopsAdoption|New segment"
 msgstr ""
 
+msgid "DevopsAdoption|No filter results."
+msgstr ""
+
 msgid "DevopsAdoption|Pipelines"
 msgstr ""
 
 msgid "DevopsAdoption|Runners"
+msgstr ""
+
+msgid "DevopsAdoption|Save changes"
 msgstr ""
 
 msgid "DevopsAdoption|Scanning"
@@ -10062,9 +10098,6 @@ msgstr ""
 msgid "Edit application"
 msgstr ""
 
-msgid "Edit board"
-msgstr ""
-
 msgid "Edit comment"
 msgstr ""
 
@@ -10479,9 +10512,6 @@ msgstr ""
 msgid "Enter at least three characters to search"
 msgstr ""
 
-msgid "Enter board name"
-msgstr ""
-
 msgid "Enter domain"
 msgstr ""
 
@@ -10842,9 +10872,6 @@ msgstr ""
 msgid "Epics|Leave empty to inherit from milestone dates"
 msgstr ""
 
-msgid "Epics|More information"
-msgstr ""
-
 msgid "Epics|Remove epic"
 msgstr ""
 
@@ -11088,7 +11115,16 @@ msgstr ""
 msgid "Error: %{error_message}"
 msgstr ""
 
+msgid "Error: No AWS credentials were supplied"
+msgstr ""
+
+msgid "Error: No AWS provision role found for user"
+msgstr ""
+
 msgid "Error: Unable to create deploy freeze"
+msgstr ""
+
+msgid "Error: Unable to find AWS role for current user"
 msgstr ""
 
 msgid "ErrorTracking|Active"
@@ -11301,6 +11337,9 @@ msgstr ""
 msgid "Experienced"
 msgstr ""
 
+msgid "ExperimentSubject|Must have exactly one of User, Group, or Project."
+msgstr ""
+
 msgid "Expiration"
 msgstr ""
 
@@ -11463,6 +11502,9 @@ msgstr ""
 msgid "Failed to clone this issue because target project doesn't exist."
 msgstr ""
 
+msgid "Failed to clone this issue: wrong parameters."
+msgstr ""
+
 msgid "Failed to create Merge Request. Please try again."
 msgstr ""
 
@@ -11488,9 +11530,6 @@ msgid "Failed to create resources"
 msgstr ""
 
 msgid "Failed to create wiki"
-msgstr ""
-
-msgid "Failed to delete board. Please try again."
 msgstr ""
 
 msgid "Failed to deploy to"
@@ -14362,15 +14401,6 @@ msgstr ""
 msgid "Imported requirements"
 msgstr ""
 
-msgid "Improve Issue Boards"
-msgstr ""
-
-msgid "Improve Issue boards"
-msgstr ""
-
-msgid "Improve Issue boards with GitLab Enterprise Edition."
-msgstr ""
-
 msgid "Improve Merge Requests and customer support with GitLab Enterprise Edition."
 msgstr ""
 
@@ -15021,9 +15051,6 @@ msgstr ""
 msgid "Invite Members"
 msgstr ""
 
-msgid "Invite another teammate"
-msgstr ""
-
 msgid "Invite group"
 msgstr ""
 
@@ -15031,9 +15058,6 @@ msgid "Invite member"
 msgstr ""
 
 msgid "Invite team members"
-msgstr ""
-
-msgid "Invite teammates (optional)"
 msgstr ""
 
 msgid "Invite your team"
@@ -15105,6 +15129,15 @@ msgstr ""
 msgid "InviteMembers|Invite team members"
 msgstr ""
 
+msgid "InviteMember|Invite Members (optional)"
+msgstr ""
+
+msgid "InviteMember|Invite another member"
+msgstr ""
+
+msgid "InviteMember|Invited users will be added with developer level permissions. %{linkStart}View the documentation%{linkEnd} to see how to change this later."
+msgstr ""
+
 msgid "InviteMember|Oops, this feature isn't ready yet"
 msgstr ""
 
@@ -15160,9 +15193,6 @@ msgid "InviteReminderEmail|This is a friendly reminder that %{inviter} invited y
 msgstr ""
 
 msgid "Invited"
-msgstr ""
-
-msgid "Invited users will be added with developer level permissions. You can always change this later."
 msgstr ""
 
 msgid "Invocations"
@@ -16903,6 +16933,18 @@ msgstr ""
 msgid "Members|2FA"
 msgstr ""
 
+msgid "Members|Access granted, ascending"
+msgstr ""
+
+msgid "Members|Access granted, descending"
+msgstr ""
+
+msgid "Members|Account, ascending"
+msgstr ""
+
+msgid "Members|Account, descending"
+msgstr ""
+
 msgid "Members|An error occurred while trying to enable LDAP override, please try again."
 msgstr ""
 
@@ -16966,7 +17008,19 @@ msgstr ""
 msgid "Members|LDAP override enabled."
 msgstr ""
 
+msgid "Members|Last sign-in, ascending"
+msgstr ""
+
+msgid "Members|Last sign-in, descending"
+msgstr ""
+
 msgid "Members|Leave \"%{source}\""
+msgstr ""
+
+msgid "Members|Max role, ascending"
+msgstr ""
+
+msgid "Members|Max role, descending"
 msgstr ""
 
 msgid "Members|Membership"
@@ -18003,9 +18057,6 @@ msgid "Multiple Prometheus integrations are not supported"
 msgstr ""
 
 msgid "Multiple domains are supported."
-msgstr ""
-
-msgid "Multiple issue boards"
 msgstr ""
 
 msgid "Multiple model types found: %{model_types}"
@@ -19190,6 +19241,12 @@ msgstr ""
 msgid "OnCallSchedules|The schedule could not be updated. Please try again."
 msgstr ""
 
+msgid "OnCallSchedules|Try adding a rotation"
+msgstr ""
+
+msgid "OnCallSchedules|Your schedule has been successfully created and all alerts from this project will now be routed to this schedule. Currently, only one schedule can be created per project. More coming soon! To add individual users to this schedule, use the add a rotation button."
+msgstr ""
+
 msgid "OnDemandScans|Could not fetch scanner profiles. Please refresh the page, or try again later."
 msgstr ""
 
@@ -19531,10 +19588,7 @@ msgstr ""
 msgid "Package type must be PyPi"
 msgstr ""
 
-msgid "PackageRegistry|%{name} version %{version} was created %{datetime}"
-msgstr ""
-
-msgid "PackageRegistry|%{name} version %{version} was updated %{datetime}"
+msgid "PackageRegistry|%{name} version %{version} was first created %{datetime}"
 msgstr ""
 
 msgid "PackageRegistry|Add Conan Remote"
@@ -19552,7 +19606,7 @@ msgstr ""
 msgid "PackageRegistry|App name: %{name}"
 msgstr ""
 
-msgid "PackageRegistry|Commit %{link} on branch %{branch}"
+msgid "PackageRegistry|Built by pipeline %{link} triggered %{datetime} by %{author}"
 msgstr ""
 
 msgid "PackageRegistry|Composer"
@@ -19610,6 +19664,9 @@ msgid "PackageRegistry|Copy yarn command"
 msgstr ""
 
 msgid "PackageRegistry|Copy yarn setup command"
+msgstr ""
+
+msgid "PackageRegistry|Created by commit %{link} on branch %{branch}"
 msgstr ""
 
 msgid "PackageRegistry|Delete Package Version"
@@ -19678,10 +19735,16 @@ msgstr ""
 msgid "PackageRegistry|Package Registry"
 msgstr ""
 
-msgid "PackageRegistry|Pip Command"
+msgid "PackageRegistry|Package has %{number} archived update"
 msgstr ""
 
-msgid "PackageRegistry|Pipeline %{link} triggered %{datetime} by %{author}"
+msgid "PackageRegistry|Package has %{number} archived updates"
+msgstr ""
+
+msgid "PackageRegistry|Package updated by commit %{link} on branch %{branch}, built by pipeline %{pipeline}, and published to the registry %{datetime}"
+msgstr ""
+
+msgid "PackageRegistry|Pip Command"
 msgstr ""
 
 msgid "PackageRegistry|Publish and share packages for a variety of common package managers. %{docLinkStart}More information%{docLinkEnd}"
@@ -20464,6 +20527,9 @@ msgstr ""
 msgid "Please convert %{linkStart}them to Git%{linkEnd}, and go through the %{linkToImportFlow} again."
 msgstr ""
 
+msgid "Please copy, download, or print your recovery codes before proceeding."
+msgstr ""
+
 msgid "Please create a password for your new account."
 msgstr ""
 
@@ -20747,6 +20813,9 @@ msgid "Previous unresolved discussion"
 msgstr ""
 
 msgid "Primary"
+msgstr ""
+
+msgid "Print codes"
 msgstr ""
 
 msgid "Prioritize"
@@ -23932,9 +24001,6 @@ msgstr ""
 msgid "Scope"
 msgstr ""
 
-msgid "Scoped issue boards"
-msgstr ""
-
 msgid "Scopes"
 msgstr ""
 
@@ -25175,6 +25241,9 @@ msgid "Sherlock Transactions"
 msgstr ""
 
 msgid "Should you ever lose your phone or access to your one time password secret, each of these recovery codes can be used one time each to regain access to your account. Please save them in a safe place, or you %{b_start}will%{b_end} lose access to your account."
+msgstr ""
+
+msgid "Should you ever lose your phone or access to your one time password secret, each of these recovery codes can be used one time each to regain access to your account. Please save them in a safe place, or you %{boldStart}will%{boldEnd} lose access to your account."
 msgstr ""
 
 msgid "Show all activity"
@@ -26916,6 +26985,9 @@ msgstr ""
 msgid "Terraform|An error occurred while loading your Terraform States"
 msgstr ""
 
+msgid "Terraform|Download JSON"
+msgstr ""
+
 msgid "Terraform|Find out how to use the %{linkStart}GitLab managed Terraform State%{linkEnd}"
 msgstr ""
 
@@ -27092,9 +27164,6 @@ msgstr ""
 msgid "Thanks for your purchase!"
 msgstr ""
 
-msgid "Thanks! Don't show me this again"
-msgstr ""
-
 msgid "That's it, well done!"
 msgstr ""
 
@@ -27107,6 +27176,9 @@ msgstr ""
 msgid "The %{link_start}true-up model%{link_end} allows having more users, and additional users will incur a retroactive charge on renewal."
 msgstr ""
 
+msgid "The %{plan_name} is no longer available to purchase. For more information about how this will impact you, check our %{faq_link_start}frequently asked questions%{faq_link_end}."
+msgstr ""
+
 msgid "The %{type} contains the following error:"
 msgid_plural "The %{type} contains the following errors:"
 msgstr[0] ""
@@ -27116,6 +27188,9 @@ msgid "The Advanced Search in GitLab is a powerful search service that saves you
 msgstr ""
 
 msgid "The CSV export will be created in the background. Once finished, it will be sent to %{strong_open}%{email}%{strong_close} in an attachment."
+msgstr ""
+
+msgid "The Compliance Dashboard gives you the ability to see a group's merge request activity by providing a high-level view for all projects in the group."
 msgstr ""
 
 msgid "The GitLab user to which the Jira user %{jiraDisplayName} will be mapped"
@@ -28149,6 +28224,9 @@ msgstr ""
 msgid "This merge request does not have accessibility reports"
 msgstr ""
 
+msgid "This merge request does not have codequality reports"
+msgstr ""
+
 msgid "This merge request is closed. To apply this suggestion, edit this file directly."
 msgstr ""
 
@@ -28323,10 +28401,28 @@ msgstr ""
 msgid "ThreatMonitoring|Container NetworkPolicies not detected"
 msgstr ""
 
+msgid "ThreatMonitoring|Date and time"
+msgstr ""
+
+msgid "ThreatMonitoring|Dismissed"
+msgstr ""
+
 msgid "ThreatMonitoring|Dropped Packets"
 msgstr ""
 
 msgid "ThreatMonitoring|Environment"
+msgstr ""
+
+msgid "ThreatMonitoring|In review"
+msgstr ""
+
+msgid "ThreatMonitoring|Name"
+msgstr ""
+
+msgid "ThreatMonitoring|No alerts available to display. See %{linkStart}enabling threat alerts%{linkEnd} for more information on adding alerts to the list."
+msgstr ""
+
+msgid "ThreatMonitoring|No alerts to display."
 msgstr ""
 
 msgid "ThreatMonitoring|No environments detected"
@@ -28344,6 +28440,9 @@ msgstr ""
 msgid "ThreatMonitoring|Requests"
 msgstr ""
 
+msgid "ThreatMonitoring|Resolved"
+msgstr ""
+
 msgid "ThreatMonitoring|Show last"
 msgstr ""
 
@@ -28356,10 +28455,16 @@ msgstr ""
 msgid "ThreatMonitoring|Statistics"
 msgstr ""
 
+msgid "ThreatMonitoring|Status"
+msgstr ""
+
 msgid "ThreatMonitoring|The firewall is not installed or has been disabled. To view this data, ensure the web application firewall is installed and enabled for your cluster."
 msgstr ""
 
 msgid "ThreatMonitoring|The graph below is an overview of traffic coming to your application as tracked by the Web Application Firewall (WAF). View the docs for instructions on how to access the WAF logs to see what type of malicious traffic is trying to access your app. The docs link is also accessible by clicking the \"?\" icon next to the title below."
+msgstr ""
+
+msgid "ThreatMonitoring|There was an error displaying the alerts. Confirm your endpoint's configuration details to ensure alerts appear."
 msgstr ""
 
 msgid "ThreatMonitoring|Threat Monitoring"
@@ -28378,6 +28483,9 @@ msgid "ThreatMonitoring|Total Packets"
 msgstr ""
 
 msgid "ThreatMonitoring|Total Requests"
+msgstr ""
+
+msgid "ThreatMonitoring|Unreviewed"
 msgstr ""
 
 msgid "ThreatMonitoring|View documentation"
@@ -29545,9 +29653,6 @@ msgstr ""
 msgid "Upgrade your plan to enable this feature of the Jira Integration."
 msgstr ""
 
-msgid "Upgrade your plan to improve Issue boards."
-msgstr ""
-
 msgid "Upgrade your plan to improve Merge Requests."
 msgstr ""
 
@@ -30579,6 +30684,9 @@ msgid "Waiting for performance data"
 msgstr ""
 
 msgid "Want to see the data? Please ask an administrator for access."
+msgstr ""
+
+msgid "Warning"
 msgstr ""
 
 msgid "Warning:"
@@ -32661,6 +32769,9 @@ msgstr ""
 msgid "math|There was an error rendering this math block"
 msgstr ""
 
+msgid "member%{number}@company.com"
+msgstr ""
+
 msgid "merge request"
 msgid_plural "merge requests"
 msgstr[0] ""
@@ -33322,9 +33433,6 @@ msgid "syntax is incorrect."
 msgstr ""
 
 msgid "tag name"
-msgstr ""
-
-msgid "teammate%{number}@company.com"
 msgstr ""
 
 msgid "the correct format."

@@ -7,7 +7,7 @@ module EE
       extend ::Gitlab::Utils::Override
       include ::Gitlab::Utils::StrongMemoize
 
-      LIMIT = ::Gitlab::Ci::Config::Entry::Needs::NEEDS_CROSS_PROJECT_DEPENDENCIES_LIMIT
+      CROSS_PROJECT_LIMIT = ::Gitlab::Ci::Config::Entry::Needs::NEEDS_CROSS_PROJECT_DEPENDENCIES_LIMIT
 
       override :cross_project
       def cross_project
@@ -36,21 +36,21 @@ module EE
         deps = specified_cross_project_dependencies
         return model_class.none unless deps.any?
 
-        relationship_fragments = build_cross_dependencies_fragments(deps, model_class.latest.success)
+        relationship_fragments = build_cross_project_dependencies_fragments(deps, model_class.latest.success)
         return model_class.none unless relationship_fragments.any?
 
-        model_class.from_union(relationship_fragments).limit(LIMIT)
+        model_class.from_union(relationship_fragments).limit(CROSS_PROJECT_LIMIT)
       end
 
-      def build_cross_dependencies_fragments(deps, search_scope)
+      def build_cross_project_dependencies_fragments(deps, search_scope)
         deps.inject([]) do |fragments, dep|
           next fragments unless dep[:artifacts]
 
-          fragments << build_cross_dependency_relationship_fragment(dep, search_scope)
+          fragments << build_cross_project_dependency_relationship_fragment(dep, search_scope)
         end
       end
 
-      def build_cross_dependency_relationship_fragment(dependency, search_scope)
+      def build_cross_project_dependency_relationship_fragment(dependency, search_scope)
         args = dependency.values_at(:job, :ref, :project)
         args = args.map { |value| ExpandVariables.expand(value, processable_variables) }
 
@@ -62,16 +62,8 @@ module EE
         processable.user
       end
 
-      def processable_variables
-        -> { processable.simple_variables_without_dependencies }
-      end
-
       def specified_cross_project_dependencies
         specified_cross_dependencies.select { |dep| dep[:project] }
-      end
-
-      def specified_cross_dependencies
-        Array(processable.options[:cross_dependencies])
       end
     end
   end

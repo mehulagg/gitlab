@@ -25,6 +25,16 @@ module EE
               max_page_size: 2000,
               resolver: ::Resolvers::EpicsResolver
 
+        field :epic_board,
+              ::Types::Boards::EpicBoardType, null: true,
+              description: 'Find a single epic board',
+              resolver: ::Resolvers::Boards::EpicBoardsResolver.single
+
+        field :epic_boards,
+              ::Types::Boards::EpicBoardType.connection_type, null: true,
+              description: 'Find epic boards',
+              resolver: ::Resolvers::Boards::EpicBoardsResolver
+
         field :iterations, ::Types::IterationType.connection_type, null: true,
               description: 'Find iterations',
               resolver: ::Resolvers::IterationsResolver

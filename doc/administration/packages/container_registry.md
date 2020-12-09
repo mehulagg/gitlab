@@ -468,7 +468,7 @@ you can pull from the Container Registry, but you cannot push.
    sudo aws --endpoint-url https://your-object-storage-backend.com s3 sync registry s3://mybucket
    ```
 
-   TIP: **Tip:**
+   NOTE:
    If you have a lot of data, you may be able to improve performance by
    [running parallel sync operations](https://aws.amazon.com/premiumsupport/knowledge-center/s3-improve-transfer-sync-command/).
 
@@ -485,7 +485,7 @@ you can pull from the Container Registry, but you cannot push.
    [`--dryrun`](https://docs.aws.amazon.com/cli/latest/reference/s3/sync.html)
    flag and run the command.
 
-   DANGER: **Warning:**
+   WARNING:
    The [`--delete`](https://docs.aws.amazon.com/cli/latest/reference/s3/sync.html)
    flag deletes files that exist in the destination but not in the source.
    If you swap the source and destination, all data in the Registry is deleted.
@@ -837,7 +837,7 @@ understand the implications.
 
 > [Introduced](https://gitlab.com/gitlab-org/omnibus-gitlab/-/merge_requests/3097) in Omnibus GitLab 11.10.
 
-DANGER: **Warning:**
+WARNING:
 This is a destructive operation.
 
 The GitLab Container Registry follows the same default workflow as Docker Distribution:
@@ -1137,6 +1137,12 @@ and a simple solution would be to enable relative URLs in the Registry.
 
 ### Enable the Registry debug server
 
+You can use the Container Registry debug server to diagnose problems. The debug endpoint can monitor metrics and health, as well as do profiling.
+
+WARNING:
+Sensitive information may be available from the debug endpoint.
+Access to the debug endpoint must be locked down in a production environment.
+
 The optional debug server can be enabled by setting the registry debug address
 in your `gitlab.rb` configuration.
 
@@ -1149,8 +1155,8 @@ After adding the setting, [reconfigure GitLab](../restart_gitlab.md#omnibus-gitl
 Use curl to request debug output from the debug server:
 
 ```shell
-curl localhost:5001/debug/health
-curl localhost:5001/debug/vars
+curl "localhost:5001/debug/health"
+curl "localhost:5001/debug/vars"
 ```
 
 ### Advanced Troubleshooting
@@ -1230,7 +1236,7 @@ mitmproxy --port 9000
 This command runs mitmproxy on port `9000`. In another window, run:
 
 ```shell
-curl --proxy http://localhost:9000 https://httpbin.org/status/200
+curl --proxy "http://localhost:9000" "https://httpbin.org/status/200"
 ```
 
 If everything is set up correctly, information is displayed on the mitmproxy window and

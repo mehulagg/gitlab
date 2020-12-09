@@ -5,6 +5,7 @@ class Analytics::DevopsAdoption::Segment < ApplicationRecord
 
   has_many :segment_selections
   has_many :groups, through: :segment_selections
+  has_many :projects, through: :segment_selections
   has_many :snapshots, inverse_of: :segment
   has_one :latest_snapshot, -> { order(recorded_at: :desc) }, inverse_of: :segment, class_name: 'Snapshot'
 

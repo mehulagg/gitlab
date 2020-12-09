@@ -94,7 +94,7 @@ one is located in `config.yml` of GitLab Shell.
 
 ## Using GitLab git-annex
 
-NOTE: **Note:**
+NOTE:
 Your Git remotes must be using the SSH protocol, not HTTP(S).
 
 Here is an example workflow of uploading a very large file and then checking it

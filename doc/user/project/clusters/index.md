@@ -45,17 +45,17 @@ versions at any given time. We regularly review the versions we support, and
 provide a three-month deprecation period before we remove support of a specific
 version. The range of supported versions is based on the evaluation of:
 
-- Our own needs.
 - The versions supported by major managed Kubernetes providers.
 - The versions [supported by the Kubernetes community](https://kubernetes.io/docs/setup/release/version-skew-policy/#supported-versions).
 
 GitLab supports the following Kubernetes versions, and you can upgrade your
 Kubernetes version to any supported version at any time:
 
-- 1.18
-- 1.17
-- 1.16
-- 1.15
+- 1.19 (support ends on February 22, 2022)
+- 1.18 (support ends on November 22, 2021)
+- 1.17 (support ends on September 22, 2021)
+- 1.16 (support ends on July 22, 2021)
+- 1.15 (support ends on May 22, 2021)
 - 1.14 (deprecated, support ends on December 22, 2020)
 
 Some GitLab features may support versions outside the range provided here.
@@ -378,7 +378,7 @@ Reasons for failure include:
   [`environment:name`](../../../ci/environments/index.md#defining-environments). If your job has no
   `environment:name` set, the Kubernetes credentials are not passed to it.
 
-NOTE: **Note:**
+NOTE:
 Project-level clusters upgraded from GitLab 12.0 or older may be configured
 in a way that causes this error. Ensure you deselect the
 [GitLab-managed cluster](#gitlab-managed-clusters) option if you want to manage

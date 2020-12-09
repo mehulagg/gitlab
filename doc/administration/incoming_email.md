@@ -44,7 +44,7 @@ Gmail, Google Apps, Yahoo! Mail, Outlook.com, and iCloud, as well as the
 Microsoft Exchange Server [does not support sub-addressing](#microsoft-exchange-server),
 and Microsoft Office 365 [does not support sub-addressing by default](#microsoft-office-365)
 
-TIP: **Tip:**
+NOTE:
 If your provider or server supports email sub-addressing, we recommend using it.
 A dedicated email address only supports Reply by Email functionality.
 A catch-all mailbox supports the same features as sub-addressing as of GitLab 11.7,
@@ -253,7 +253,7 @@ incoming_email:
 
 Example configuration for Gmail/G Suite. Assumes mailbox `gitlab-incoming@gmail.com`.
 
-NOTE: **Note:**
+NOTE:
 `incoming_email_email` cannot be a Gmail alias account.
 
 Example for Omnibus installs:
@@ -442,7 +442,7 @@ Example configurations for Microsoft Office 365 with IMAP enabled.
 
 ##### Sub-addressing mailbox
 
-NOTE: **Note:**
+NOTE:
 As of September 2020 sub-addressing support
 [has been added to Office 365](https://office365.uservoice.com/forums/273493-office-365-admin/suggestions/18612754-support-for-dynamic-email-aliases-in-office-36). This feature is not
 enabled by default, and must be enabled through PowerShell.
@@ -451,7 +451,7 @@ This series of PowerShell commands enables [sub-addressing](#email-sub-addressin
 at the organization level in Office 365. This allows all mailboxes in the organization
 to receive sub-addressed mail:
 
-NOTE: **Note:**
+NOTE:
 This series of commands enables sub-addressing at the organization
 level in Office 365. This allows all mailboxes in the organization
 to receive sub-addressed mail.

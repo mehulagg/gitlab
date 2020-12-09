@@ -4,6 +4,7 @@ exports[`UpdateScheduleModal renders update schedule modal layout 1`] = `
 <gl-modal-stub
   actioncancel="[object Object]"
   actionprimary="[object Object]"
+  data-testid="update-schedule-modal-37"
   modalclass=""
   modalid="updateScheduleModal"
   size="sm"

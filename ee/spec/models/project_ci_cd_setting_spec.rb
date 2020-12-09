@@ -81,26 +81,25 @@ RSpec.describe ProjectCiCdSetting do
 
     let(:project) { create(:project) }
 
-    where(:license_feature, :feature_flag, :actual_setting) do
-      true  | true  | true
-      false | true  | true
-      true  | false | true
-      false | false | true
-      true  | true  | false
-      false | true  | false
-      true  | false | false
-      false | false | false
+    where(:license_feature, :actual_setting) do
+      true  | true
+      false | true
+      true  | true
+      false | true
+      true  | false
+      false | false
+      true  | false
+      false | false
     end
 
     with_them do
       before do
         stub_licensed_features(auto_rollback: license_feature)
-        stub_feature_flags(cd_auto_rollback: feature_flag)
         project.auto_rollback_enabled = actual_setting
       end
 
       it 'is only enabled if set and both the license and the feature flag allows' do
-        expect(project.auto_rollback_enabled?).to be(actual_setting && license_feature && feature_flag)
+        expect(project.auto_rollback_enabled?).to be(actual_setting && license_feature)
       end
     end
   end

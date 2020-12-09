@@ -30,6 +30,11 @@ RSpec.describe Security::StoreReportService, '#execute' do
   subject { described_class.new(pipeline, report).execute }
 
   context 'without existing data' do
+    before(:all) do
+      checksum = 'f00bc6261fa512f0960b7fc3bfcce7fb31997cf32b96fa647bed5668b2c77fee'
+      create(:vulnerabilities_remediation, checksum: checksum)
+    end
+
     before do
       project.add_developer(user)
       allow(pipeline).to receive(:user).and_return(user)
@@ -66,7 +71,7 @@ RSpec.describe Security::StoreReportService, '#execute' do
       end
 
       it 'inserts all remediations' do
-        expect { subject }.to change { Vulnerabilities::Remediation.count }.by(remediations)
+        expect { subject }.to change { project.vulnerability_remediations.count }.by(remediations)
       end
 
       it 'inserts all vulnerabilties' do

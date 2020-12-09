@@ -102,7 +102,7 @@ can be a nested JSON object. For example:
 { "foo": { "bar": { "baz": 42 } } }
 ```
 
-TIP: **Tip:**
+NOTE:
 Ensure your requests are smaller than the
 [payload application limits](../../administration/instance_limits.md#generic-alert-json-payloads).
 
@@ -170,7 +170,7 @@ If the existing alert is already `resolved`, GitLab creates a new alert instead.
 
 ## Link to your Opsgenie Alerts
 
-DANGER: **Deprecated:**
+WARNING:
 We are building deeper integration with Opsgenie and other alerting tools through
 [HTTP endpoint integrations](#generic-http-endpoint) so you can see alerts within
 the GitLab interface. As a result, the previous direct link to Opsgenie Alerts from

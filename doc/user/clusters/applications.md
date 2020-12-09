@@ -178,7 +178,7 @@ to determine the external endpoint and it should be available within a few minut
 
 After you install Ingress, the external endpoint should be available within a few minutes.
 
-TIP: **Tip:**
+NOTE:
 This endpoint can be used for the
 [Auto DevOps base domain](../../topics/autodevops/index.md#auto-devops-base-domain)
 using the `KUBE_INGRESS_BASE_DOMAIN` environment variable.
@@ -740,7 +740,7 @@ for the available configuration options.
 Support for installing the Ingress managed application is provided by the GitLab Configure group.
 If you run into unknown issues, [open a new issue](https://gitlab.com/gitlab-org/gitlab/-/issues/new),
 and ping at least 2 people from the
-[Configure group](https://about.gitlab.com/handbook/product/product-categories/#configure-group).
+[Configure group](https://about.gitlab.com/handbook/product/categories/#configure-group).
 
 ### Install cert-manager using GitLab CI/CD
 
@@ -784,7 +784,7 @@ Support for installing the Cert Manager managed application is provided by the
 GitLab Configure group. If you run into unknown issues,
 [open a new issue](https://gitlab.com/gitlab-org/gitlab/-/issues/new), and ping at
 least 2 people from the
-[Configure group](https://about.gitlab.com/handbook/product/product-categories/#configure-group).
+[Configure group](https://about.gitlab.com/handbook/product/categories/#configure-group).
 
 ### Install Sentry using GitLab CI/CD
 
@@ -853,7 +853,7 @@ Support for installing the Sentry managed application is provided by the
 GitLab Health group. If you run into unknown issues,
 [open a new issue](https://gitlab.com/gitlab-org/gitlab/-/issues/new), and ping at
 least 2 people from the
-[Health group](https://about.gitlab.com/handbook/product/product-categories/#health-group).
+[Health group](https://about.gitlab.com/handbook/product/categories/#health-group).
 
 ### Install PostHog using GitLab CI/CD
 
@@ -930,7 +930,7 @@ for the available configuration options.
 Support for installing the Prometheus managed application is provided by the
 GitLab APM group. If you run into unknown issues,
 [open a new issue](https://gitlab.com/gitlab-org/gitlab/-/issues/new), and ping at
-least 2 people from the [APM group](https://about.gitlab.com/handbook/product/product-categories/#apm-group).
+least 2 people from the [APM group](https://about.gitlab.com/handbook/product/categories/#apm-group).
 
 ### Install GitLab Runner using GitLab CI/CD
 
@@ -968,7 +968,7 @@ Support for installing the GitLab Runner managed application is provided by the
 GitLab Runner group. If you run into unknown issues,
 [open a new issue](https://gitlab.com/gitlab-org/gitlab/-/issues/new), and ping at
 least 2 people from the
-[Runner group](https://about.gitlab.com/handbook/product/product-categories/#runner-group).
+[Runner group](https://about.gitlab.com/handbook/product/categories/#runner-group).
 
 ### Install Cilium using GitLab CI/CD
 
@@ -1017,7 +1017,7 @@ of all affected pods in all namespaces to ensure that they are
 [managed](https://docs.cilium.io/en/v1.8/operations/troubleshooting/#ensure-managed-pod)
 by the correct networking plugin.
 
-NOTE: **Note:**
+NOTE:
 Major upgrades might require additional setup steps. For more information, see
 the official [upgrade guide](https://docs.cilium.io/en/v1.8/operations/upgrade/).
 
@@ -1080,7 +1080,7 @@ Support for installing the Cilium managed application is provided by the
 GitLab Container Security group. If you run into unknown issues,
 [open a new issue](https://gitlab.com/gitlab-org/gitlab/-/issues/new), and ping at
 least 2 people from the
-[Container Security group](https://about.gitlab.com/handbook/product/product-categories/#container-security-group).
+[Container Security group](https://about.gitlab.com/handbook/product/categories/#container-security-group).
 
 ### Install Falco using GitLab CI/CD
 
@@ -1176,7 +1176,7 @@ Support for installing the Falco managed application is provided by the
 GitLab Container Security group. If you run into unknown issues,
 [open a new issue](https://gitlab.com/gitlab-org/gitlab/-/issues/new), and ping at
 least 2 people from the
-[Container Security group](https://about.gitlab.com/handbook/product/product-categories/#container-security-group).
+[Container Security group](https://about.gitlab.com/handbook/product/categories/#container-security-group).
 
 ### Install Vault using GitLab CI/CD
 
@@ -1278,7 +1278,7 @@ Support for installing the Vault managed application is provided by the
 GitLab Release Management group. If you run into unknown issues,
 [open a new issue](https://gitlab.com/gitlab-org/gitlab/-/issues/new), and ping at
 least 2 people from the
-[Release Management group](https://about.gitlab.com/handbook/product/product-categories/#release-management-group).
+[Release Management group](https://about.gitlab.com/handbook/product/categories/#release-management-group).
 
 ### Install JupyterHub using GitLab CI/CD
 
@@ -1335,7 +1335,7 @@ Support for installing the JupyterHub managed application is provided by the Git
 If you run into unknown issues,
 [open a new issue](https://gitlab.com/gitlab-org/gitlab/-/issues/new), and ping at
 least 2 people from the
-[Configure group](https://about.gitlab.com/handbook/product/product-categories/#configure-group).
+[Configure group](https://about.gitlab.com/handbook/product/categories/#configure-group).
 
 ### Install Elastic Stack using GitLab CI/CD
 
@@ -1363,7 +1363,7 @@ management project. Refer to the
 [chart](https://gitlab.com/gitlab-org/charts/elastic-stack) for all
 available configuration options.
 
-NOTE: **Note:**
+NOTE:
 In this alpha implementation of installing Elastic Stack through CI, reading the
 environment logs through Elasticsearch is unsupported. This is supported if
 [installed with the UI](#elastic-stack).
@@ -1371,7 +1371,7 @@ environment logs through Elasticsearch is unsupported. This is supported if
 Support for installing the Elastic Stack managed application is provided by the
 GitLab APM group. If you run into unknown issues,
 [open a new issue](https://gitlab.com/gitlab-org/gitlab/-/issues/new), and ping at
-least 2 people from the [APM group](https://about.gitlab.com/handbook/product/product-categories/#apm-group).
+least 2 people from the [APM group](https://about.gitlab.com/handbook/product/categories/#apm-group).
 
 ### Install Crossplane using GitLab CI/CD
 
@@ -1432,7 +1432,7 @@ Support for installing the Fluentd managed application is provided by the
 GitLab Container Security group. If you run into unknown issues,
 [open a new issue](https://gitlab.com/gitlab-org/gitlab/-/issues/new), and ping at
 least 2 people from the
-[Container Security group](https://about.gitlab.com/handbook/product/product-categories/#container-security-group).
+[Container Security group](https://about.gitlab.com/handbook/product/categories/#container-security-group).
 
 ### Install Knative using GitLab CI/CD
 
@@ -1461,7 +1461,7 @@ Support for installing the Knative managed application is provided by the
 GitLab Configure group. If you run into unknown issues,
 [open a new issue](https://gitlab.com/gitlab-org/gitlab/-/issues/new), and ping at
 least 2 people from the
-[Configure group](https://about.gitlab.com/handbook/product/product-categories/#configure-group).
+[Configure group](https://about.gitlab.com/handbook/product/categories/#configure-group).
 
 #### Knative Metrics
 
@@ -1565,7 +1565,7 @@ Support for installing the AppArmor managed application is provided by the
 GitLab Container Security group. If you run into unknown issues,
 [open a new issue](https://gitlab.com/gitlab-org/gitlab/-/issues/new), and ping
 at least 2 people from the
-[Container Security group](https://about.gitlab.com/handbook/product/product-categories/#container-security-group).
+[Container Security group](https://about.gitlab.com/handbook/product/categories/#container-security-group).
 
 ## Browse applications logs
 
