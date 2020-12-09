@@ -313,9 +313,7 @@ Implemented using Redis methods [PFADD](https://redis.io/commands/pfadd) and [PF
    - `expiry`: expiry time in days. Default: 29 days for daily aggregation and 6 weeks for weekly
      aggregation.
    - `aggregation`: may be set to a `:daily` or `:weekly` key. Defines how counting data is stored in Redis.
-     For `daily` we store a key for metric per day of the year, for `weekly` we store a key for metric per week of the year.
-     Aggregation on a `daily` basis does not pull more detailed or fine grained data, each value is aggregated over the same time period (week or month), with the
-     difference on collecting data from Redis when adding it to usage ping payload. For `:daily` aggregation event, when we collect weekly data we get last 7 days, when we collect monthly data we get last 28 days. For `:weekly` aggregation event, when we collect weekly data we get last complete week, when we collect monthly data we get last 4 complete weeks.
+     Aggregation on a `daily` basis does not pull more detailed of fine grained data.
    - `feature_flag`: optional. For details, see our [GitLab internal Feature flags](../feature_flags/) documentation.
 
 1. Track event in controller using `RedisTracking` module with `track_redis_hll_event(*controller_actions, name:, feature:, feature_default_enabled: false)`.
