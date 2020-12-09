@@ -3,7 +3,7 @@ import { joinPaths } from './lib/utils/url_utility';
 import { deprecatedCreateFlash as flash } from '~/flash';
 import { __ } from '~/locale';
 
-const DEFAULT_PER_PAGE = 20;
+const DEFAULT_PER_PAGE = 5;
 
 const Api = {
   DEFAULT_PER_PAGE,
@@ -831,11 +831,21 @@ const Api = {
       page: 1,
     };
 
+    /**
+     * doing all this because at the moment calling the API with an empty value for search will return nothing
+     */
+    const { search, ...rest } = options;
+    const passedOptions = rest;
+
+    if (search) {
+      passedOptions.search = search;
+    }
+
     return axios
       .get(url, {
         params: {
           ...defaults,
-          ...options,
+          ...passedOptions,
         },
       })
       .then(({ data, headers }) => {

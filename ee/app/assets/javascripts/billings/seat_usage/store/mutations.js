@@ -26,4 +26,8 @@ export default {
     state.isLoading = false;
     state.hasError = true;
   },
+
+  [types.SET_SEARCH](state, searchString) {
+    state.search = searchString ?? '';
+  },
 };

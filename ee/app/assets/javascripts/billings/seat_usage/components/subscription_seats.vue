@@ -7,6 +7,7 @@ import {
   GlPagination,
   GlLoadingIcon,
   GlTooltipDirective,
+  GlSearchBoxByClick,
 } from '@gitlab/ui';
 import { parseInt } from 'lodash';
 import { s__, sprintf } from '~/locale';
@@ -23,6 +24,7 @@ export default {
     GlAvatarLink,
     GlPagination,
     GlLoadingIcon,
+    GlSearchBoxByClick,
   },
   data() {
     return {
@@ -30,7 +32,15 @@ export default {
     };
   },
   computed: {
-    ...mapState(['isLoading', 'page', 'perPage', 'total', 'namespaceId', 'namespaceName']),
+    ...mapState([
+      'isLoading',
+      'page',
+      'perPage',
+      'total',
+      'namespaceId',
+      'namespaceName',
+      'search',
+    ]),
     ...mapGetters(['tableItems']),
     headingText() {
       return sprintf(s__('Billing|Users occupying seats in %{namespaceName} Group (%{total})'), {
@@ -46,7 +56,7 @@ export default {
         return parseInt(this.page, 10);
       },
       set(val) {
-        this.fetchBillableMembersList(val);
+        this.fetchBillableMembersList({ page: val, search: this.search });
       },
     },
     perPageFormatted() {
@@ -57,12 +67,15 @@ export default {
     },
   },
   created() {
-    this.fetchBillableMembersList(1);
+    this.fetchBillableMembersList();
   },
   methods: {
     ...mapActions(['fetchBillableMembersList']),
-    inputHandler(val) {
-      this.fetchBillableMembersList(val);
+    submitSearchHandler(val) {
+      this.fetchBillableMembersList({ search: val });
+    },
+    clearSearchHandler() {
+      this.fetchBillableMembersList();
     },
   },
   avatarSize: AVATAR_SIZE,
@@ -76,6 +89,12 @@ export default {
   <div class="gl-pt-4">
     <h4 data-testid="heading">{{ headingText }}</h4>
     <p>{{ subHeadingText }}</p>
+    <gl-search-box-by-click
+      :value="search"
+      :placeholder="__(`Type to search`)"
+      @submit="submitSearchHandler"
+      @clear="clearSearchHandler"
+    />
     <gl-table
       class="seats-table"
       :items="tableItems"

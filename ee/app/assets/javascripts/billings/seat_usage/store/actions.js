@@ -3,10 +3,12 @@ import * as types from './mutation_types';
 import createFlash from '~/flash';
 import { s__ } from '~/locale';
 
-export const fetchBillableMembersList = ({ dispatch, state }, page) => {
+export const fetchBillableMembersList = ({ dispatch, state, commit }, { page, search } = {}) => {
   dispatch('requestBillableMembersList');
 
-  return Api.fetchBillableGroupMembersList(state.namespaceId, { page })
+  commit(types.SET_SEARCH, search);
+
+  return Api.fetchBillableGroupMembersList(state.namespaceId, { page, search })
     .then(data => dispatch('receiveBillableMembersListSuccess', data))
     .catch(() => dispatch('receiveBillableMembersListError'));
 };
