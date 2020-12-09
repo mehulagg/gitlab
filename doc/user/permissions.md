@@ -42,37 +42,77 @@ In GitLab 11.0, the Master role was renamed to Maintainer.
 While Maintainer is the highest project-level role, some actions can only be performed by a personal namespace or group owner,
 or an instance administrator, who receives all permissions. For more information, see [projects members documentation](project/members/index.md).
 
-The following table depicts the various user permission levels in a project.
+Some permissions are available to one or all of the following roles, in
+ascending order:
 
+- Guest
+- Reporter
+- Developer
+- Maintainer
+- Owner
+
+The following sections show available permissions, based on role, in
+ascending order. For example, permissions available to users with the
+Guest role are available to all other roles.
+
+As shown in the following sections, some permissions are limited by
+tier.
+
+### Project members guest permissions
+
+The following list depicts user permission levels in a project,
+available to roles for all users (Guest and above).
+
+- General
+  - Download project (*1*)
+  - Leave comments (on issues and MRs)
+  - View dependency list (*1*)
+  - View [Design Management](project/issues/design_management.md) pages
+- Licenses
+  - View allowed and denied licenses **(ULTIMATE)** (*1*)
+  - View license compliance reports (*1*)
+  - View license list (*1*)
+  - View licences in the list of dependencies (*1*)
+- Issues
+  - Create new issues
+  - See related issues
+  - Create confidential issues
+  - View confidential issues that they created
+- Analytics
+  - View Issue analytics **(PREMIUM)**
+  - View Merge Request analytics **(STARTER)**
+  - View Value Stream analytics
+  - Manage user-starred metrics dashboards they created
+- Project
+  - View project code (*1*)
+  - Pull project code (*1*)
+  - View [Releases](project/releases/index.md) (*2*)
+  - View requirements **(ULTIMATE)**
+  - View insights **(ULTIMATE)** <!-- not sure -->
+- Security
+  - View Security reports
+- Publishing
+  - View View GitLab Pages protected by [access control](project/pages/introduction.md#gitlab-pages-access-control)
+  - View wiki pages
+- Jobs
+  - See a list of jobs
+  - See a job log
+  - Download and browse job artifacts
+
+1. Guest users can perform this action on public and internal projects, but not private projects. This doesn't apply to [external users](#external-users) where explicit access must be given even if the project is internal.
+1. If **Public pipelines** is enabled in **Project Settings > CI/CD**.
+
+### Project members reporter permissions
+
+### Project members developer permissions
+
+### Project members maintainer permissions
+
+### Project members owner permissions
+
+<!--
 | Action                                            | Guest   | Reporter   | Developer   |Maintainer| Owner (*10*) |
 |---------------------------------------------------|---------|------------|-------------|----------|--------|
-| Download project                                  | ✓ (*1*) | ✓          | ✓           | ✓        | ✓      |
-| Leave comments                                    | ✓       | ✓          | ✓           | ✓        | ✓      |
-| View allowed and denied licenses **(ULTIMATE)**   | ✓ (*1*) | ✓          | ✓           | ✓        | ✓      |
-| View License Compliance reports **(ULTIMATE)**    | ✓ (*1*) | ✓          | ✓           | ✓        | ✓      |
-| View Security reports **(ULTIMATE)**              | ✓ (*3*) | ✓          | ✓           | ✓        | ✓      |
-| View Dependency list **(ULTIMATE)**               | ✓ (*1*) | ✓          | ✓           | ✓        | ✓      |
-| View License list **(ULTIMATE)**                  | ✓ (*1*) | ✓          | ✓           | ✓        | ✓      |
-| View licenses in Dependency list **(ULTIMATE)**   | ✓ (*1*) | ✓          | ✓           | ✓        | ✓      |
-| View [Design Management](project/issues/design_management.md) pages | ✓   | ✓   | ✓    | ✓        | ✓      |
-| View project code                                 | ✓ (*1*) | ✓          | ✓           | ✓        | ✓      |
-| Pull project code                                 | ✓ (*1*) | ✓          | ✓           | ✓        | ✓      |
-| View GitLab Pages protected by [access control](project/pages/introduction.md#gitlab-pages-access-control) | ✓       | ✓          | ✓           | ✓        | ✓      |
-| View wiki pages                                   | ✓       | ✓          | ✓           | ✓        | ✓      |
-| See a list of jobs                                | ✓ (*3*) | ✓          | ✓           | ✓        | ✓      |
-| See a job log                                     | ✓ (*3*) | ✓          | ✓           | ✓        | ✓      |
-| Download and browse job artifacts                 | ✓ (*3*) | ✓          | ✓           | ✓        | ✓      |
-| Create new issue                                  | ✓       | ✓          | ✓           | ✓        | ✓      |
-| See related issues                                | ✓       | ✓          | ✓           | ✓        | ✓      |
-| Create confidential issue                         | ✓       | ✓          | ✓           | ✓        | ✓      |
-| View [Releases](project/releases/index.md)        | ✓ (*6*) | ✓          | ✓           | ✓        | ✓      |
-| View requirements **(ULTIMATE)**                  | ✓       | ✓          | ✓           | ✓        | ✓      |
-| View Insights **(ULTIMATE)**                      | ✓       | ✓          | ✓           | ✓        | ✓      |
-| View Issue analytics **(PREMIUM)**                | ✓       | ✓          | ✓           | ✓        | ✓      |
-| View Merge Request analytics **(STARTER)**        | ✓       | ✓          | ✓           | ✓        | ✓      |
-| View Value Stream analytics                       | ✓       | ✓          | ✓           | ✓        | ✓      |
-| Manage user-starred metrics dashboards (*7*)      | ✓       | ✓          | ✓           | ✓        | ✓      |
-| View confidential issues                          | (*2*)   | ✓          | ✓           | ✓        | ✓      |
 | Assign issues                                     |         | ✓          | ✓           | ✓        | ✓      |
 | Label issues                                      |         | ✓          | ✓           | ✓        | ✓      |
 | Set issue weight                                  |         | ✓          | ✓           | ✓        | ✓      |
@@ -189,7 +229,7 @@ The following table depicts the various user permission levels in a project.
 1. For information on eligible approvers for merge requests, see
    [Eligible approvers](project/merge_requests/merge_request_approvals.md#eligible-approvers).
 1. Owner permission is only available at the group or personal namespace level (and for instance admins) and is inherited by its projects.
-1. Applies only to comments on [Design Management](project/issues/design_management.md) designs.
+1. Applies only to comments on [Design Management](project/issues/design_management.md) designs. -->
 
 ## Project features permissions
 
