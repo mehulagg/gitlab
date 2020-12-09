@@ -48,7 +48,7 @@ Each method comes with its own sets of Pros and Cons:
 
 Users are encouraged to choose one of the two methods to manage their policies. If users attempt to use both methods simultaneously, when the application project pipeline is run, the contents of the NetworkPolicy in the auto-deploy-values.yaml file may override policies that are configured via the UI editor.
 
-## Monitoring throughput
+## Monitoring throughput `**(ULTIMATE)**`
 
 To view statistics for Container Network Security, you must have followed the installation steps above and also configured GitLab's integration with Prometheus. Additionally, if you are using custom Helm values for Cilium, you must enable Hubble with flow metrics for each namespace by adding the following lines to
 your [Cilium values](../../../../clusters/applications.md#install-cilium-using-gitlab-cicd):
