@@ -3971,9 +3971,6 @@ msgstr ""
 msgid "Audit Events is a way to keep track of important events that happened in GitLab."
 msgstr ""
 
-msgid "Audit Log"
-msgstr ""
-
 msgid "AuditLogs|(removed)"
 msgstr ""
 
