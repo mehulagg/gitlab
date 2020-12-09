@@ -10,7 +10,7 @@ module Groups
       feature_category :integrations
 
       def index
-        @integrations = Service.find_or_initialize_all_non_project_specific(Service.for_group(group)).sort_by(&:title)
+        @integrations = Service.find_or_initialize_all_non_project_specific(Service.for_group(group)).sort_by(&:title).reject { |integration| integration[:type] == 'AlertsService' }
       end
 
       def edit
