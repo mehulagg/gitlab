@@ -63,7 +63,7 @@ export default {
         ? {
             text: s__('SubscriptionTable|Add seats'),
             href: this.addSeatsHref,
-            testId: 'add-seats',
+            testId: 'add-seats-button',
           }
         : null;
     },
@@ -72,6 +72,7 @@ export default {
         ? {
             text: s__('SubscriptionTable|Upgrade'),
             href: this.upgradeButtonHref,
+            testId: 'upgrade-button',
           }
         : null;
     },
@@ -85,6 +86,7 @@ export default {
         ? {
             text: s__('SubscriptionTable|Renew'),
             href: this.planRenewHref,
+            testId: 'renew-button',
           }
         : null;
     },
@@ -93,6 +95,7 @@ export default {
         ? {
             text: s__('SubscriptionTable|Manage'),
             href: this.customerPortalUrl,
+            testId: 'manage-button',
           }
         : null;
     },
