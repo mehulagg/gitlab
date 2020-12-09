@@ -18,7 +18,6 @@ class GitlabDanger
   ].freeze
 
   CI_ONLY_RULES ||= %w[
-    metadata
     changelog
     specs
     roulette
@@ -26,6 +25,7 @@ class GitlabDanger
     sidekiq_queues
     specialization_labels
     ci_templates
+    metadata
   ].freeze
 
   MESSAGE_PREFIX = '==>'.freeze
