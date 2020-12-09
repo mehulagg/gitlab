@@ -92,7 +92,7 @@ available to roles for all users (Guest and above).
 - Security
   - View Security reports
 - Publishing
-  - View View GitLab Pages protected by [access control](project/pages/introduction.md#gitlab-pages-access-control)
+  - View GitLab Pages protected by [access control](project/pages/introduction.md#gitlab-pages-access-control)
   - View wiki pages
 - Jobs
   - See a list of jobs
