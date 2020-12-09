@@ -799,8 +799,9 @@ const boardsStore = {
 
     if (boardPayload.id) {
       const input = {
-        ...pick(boardPayload, ['hideClosedList', 'hideBacklogList']),
+        ...pick(boardPayload, ['hideClosedList', 'hideBacklogList', 'iterationId']),
         id: this.generateBoardGid(boardPayload.id),
+        iterationId: -4,
       };
 
       return Promise.all([

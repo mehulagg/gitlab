@@ -15,6 +15,7 @@ const boardDefaults = {
   assignee: {},
   assignee_id: undefined,
   weight: null,
+  iteration_id: undefined,
   hide_backlog_list: false,
   hide_closed_list: false,
 };
@@ -129,6 +130,12 @@ export default {
     }
   },
   methods: {
+    updateBoard(fields = {}) {
+      this.board = {
+        ...this.board,
+        ...fields,
+      };
+    },
     submit() {
       if (this.board.name.length === 0) return;
       this.isLoading = true;
@@ -226,6 +233,7 @@ export default {
           :project-id="projectId"
           :group-id="groupId"
           :weights="weights"
+          @update="updateBoard"
         />
       </form>
     </template>

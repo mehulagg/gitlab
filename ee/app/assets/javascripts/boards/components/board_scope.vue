@@ -62,7 +62,6 @@ export default {
   data() {
     return {
       expanded: false,
-      scopeToCurrentIteration: false, // TODO: load actual value from board
     };
   },
 
@@ -70,9 +69,16 @@ export default {
     expandButtonText() {
       return this.expanded ? __('Collapse') : __('Expand');
     },
+    currentIteration() {
+      return this.board.iterationId === -4; // TODO constant
+    },
   },
 
   methods: {
+    setCurrentIteration(current) {
+      const id = current ? -4 : null;
+      this.$emit('update', { iteration_id: id });
+    },
     handleLabelClick(label) {
       if (label.isAny) {
         this.board.labels = [];
@@ -120,10 +126,10 @@ export default {
         </div>
         <gl-form-checkbox
           :disabled="!canAdminBoard"
-          :checked="board.currentIteration"
+          :checked="currentIteration"
           class="gl-text-gray-500"
           data-testid="scope-to-current-iteration"
-          @change="board.currentIteration = !board.currentIteration"
+          @change="setCurrentIteration"
           >{{ __('Scope board to current iteration') }}
         </gl-form-checkbox>
       </div>

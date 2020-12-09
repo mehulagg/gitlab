@@ -1,11 +1,22 @@
-mutation UpdateBoard($id: ID!, $hideClosedList: Boolean, $hideBacklogList: Boolean) {
+mutation UpdateBoard(
+  $id: ID!
+  $hideClosedList: Boolean
+  $hideBacklogList: Boolean
+  $iterationId: ID
+) {
   updateBoard(
-    input: { id: $id, hideClosedList: $hideClosedList, hideBacklogList: $hideBacklogList }
+    input: {
+      id: $id
+      hideClosedList: $hideClosedList
+      hideBacklogList: $hideBacklogList
+      iterationId: $iterationId
+    }
   ) {
     board {
       id
       hideClosedList
       hideBacklogList
+      iterationId
     }
   }
 }
