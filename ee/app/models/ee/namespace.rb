@@ -300,21 +300,28 @@ module EE
     end
 
     def eligible_for_trial?
-      ::Gitlab.com? &&
-        !has_parent? &&
+      return false unless ::Gitlab::CurrentSettings.should_check_namespace_plan?
+
+      !has_parent? &&
         never_had_trial? &&
         plan_eligible_for_trial?
     end
 
     def trial_active?
+      return false unless ::Gitlab::CurrentSettings.should_check_namespace_plan?
+
       trial? && trial_ends_on.present? && trial_ends_on >= Date.today
     end
 
     def never_had_trial?
+      return true unless ::Gitlab::CurrentSettings.should_check_namespace_plan?
+
       trial_ends_on.nil?
     end
 
     def trial_expired?
+      return false unless ::Gitlab::CurrentSettings.should_check_namespace_plan?
+
       trial_ends_on.present? && trial_ends_on < Date.today
     end
 
@@ -354,6 +361,8 @@ module EE
     end
 
     def plan_eligible_for_trial?
+      return false unless ::Gitlab::CurrentSettings.should_check_namespace_plan?
+
       ::Plan::PLANS_ELIGIBLE_FOR_TRIAL.include?(actual_plan_name)
     end
 

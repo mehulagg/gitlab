@@ -12,11 +12,11 @@ RSpec.describe TrialsController do
     }
   end
 
-  let(:dev_env_or_com) { true }
+  let(:check_namespace_plan) { true }
   let(:logged_in) { true }
 
   before do
-    allow(::Gitlab).to receive(:dev_env_or_com?).and_return(dev_env_or_com)
+    stub_application_setting(check_namespace_plan: check_namespace_plan)
     sign_in(user) if logged_in
   end
 
@@ -34,16 +34,16 @@ RSpec.describe TrialsController do
     end
   end
 
-  shared_examples 'a dot-com only feature' do
+  shared_examples 'a feature related to namespace plans' do
     let(:success_status) { :ok }
 
-    context 'when not on gitlab.com and not in development environment' do
-      let(:dev_env_or_com) { false }
+    context 'when the check_namespace_plan setting is off' do
+      let(:check_namespace_plan) { false }
 
       it { is_expected.to have_gitlab_http_status(:not_found) }
     end
 
-    context 'when on gitlab.com or in dev environment' do
+    context 'when the check_namespace_plan setting is on' do
       it { is_expected.to have_gitlab_http_status(success_status) }
     end
   end
@@ -62,7 +62,7 @@ RSpec.describe TrialsController do
     end
 
     it_behaves_like 'an authenticated endpoint'
-    it_behaves_like 'a dot-com only feature'
+    it_behaves_like 'a feature related to namespace plans'
   end
 
   describe '#create_lead' do
@@ -81,7 +81,7 @@ RSpec.describe TrialsController do
     end
 
     it_behaves_like 'an authenticated endpoint'
-    it_behaves_like 'a dot-com only feature'
+    it_behaves_like 'a feature related to namespace plans'
 
     context 'on success' do
       let(:create_lead_result) { true }
@@ -144,7 +144,7 @@ RSpec.describe TrialsController do
     end
 
     it_behaves_like 'an authenticated endpoint'
-    it_behaves_like 'a dot-com only feature'
+    it_behaves_like 'a feature related to namespace plans'
 
     context 'when the group-only trials experiment is active' do
       before do
@@ -191,7 +191,7 @@ RSpec.describe TrialsController do
     end
 
     it_behaves_like 'an authenticated endpoint'
-    it_behaves_like 'a dot-com only feature'
+    it_behaves_like 'a feature related to namespace plans'
 
     context 'on success' do
       let(:apply_trial_result) { true }

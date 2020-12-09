@@ -10,7 +10,6 @@ RSpec.describe Groups::BillingsController do
     before do
       sign_in(user)
       stub_application_setting(check_namespace_plan: true)
-      allow(Gitlab::CurrentSettings).to receive(:should_check_namespace_plan?) { true }
     end
 
     def get_index

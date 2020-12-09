@@ -34,7 +34,7 @@ module EE
 
     def trials_allowed?(user)
       return unless user
-      return unless ::Gitlab.com?
+      return unless ::Gitlab::CurrentSettings.should_check_namespace_plan?
 
       Rails.cache.fetch(['users', user.id, 'trials_allowed?'], expires_in: 10.minutes) do
         !user.has_paid_namespace? && user.any_namespace_without_trial?

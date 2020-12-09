@@ -9,7 +9,6 @@ RSpec.describe Profiles::BillingsController do
     before do
       sign_in(user)
       stub_application_setting(check_namespace_plan: true)
-      allow(Gitlab).to receive(:com?) { true }
       allow_next_instance_of(FetchSubscriptionPlansService) do |instance|
         allow(instance).to receive(:execute)
       end
