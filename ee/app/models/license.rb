@@ -82,6 +82,7 @@ class License < ApplicationRecord
     generic_alert_fingerprinting
     github_project_service_integration
     group_allowed_email_domains
+    group_ci_cd_analytics
     group_coverage_reports
     group_forking_protection
     group_ip_restriction
