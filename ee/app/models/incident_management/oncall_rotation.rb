@@ -23,5 +23,9 @@ module IncidentManagement
     validates :length_unit, presence: true
 
     delegate :project, to: :schedule
+
+    def shift_duration
+      length.send(length_unit)
+    end
   end
 end
