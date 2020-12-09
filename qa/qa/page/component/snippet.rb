@@ -78,6 +78,11 @@ module QA
           base.view 'app/assets/javascripts/snippets/components/embed_dropdown.vue' do
             element :copy_button
           end
+
+          base.view 'app/assets/javascripts/blob/components/blob_header_default_actions.vue' do
+            element :default_actions_container
+            element :copy_contents_button
+          end
         end
 
         def has_snippet_title?(snippet_title)
@@ -215,7 +220,26 @@ module QA
           accept_alert do
             click_element(:delete_comment_button)
           end
-          wait_until(reload: false) { has_no_text?(comment) }
+          wait_until(reload: false) { has_no_element?(:note_content, text: comment) }
+        end
+
+        def click_copy_file_contents(file_number = nil)
+          if file_number
+            within_element_by_index(:default_actions_container, file_number - 1) do
+              click_element(:copy_contents_button)
+            end
+          else
+            within_element(:default_actions_container) do
+              click_element(:copy_contents_button)
+            end
+          end
+        end
+
+        def copy_file_contents_to_comment(file_number = nil)
+          click_copy_file_contents(file_number)
+          send_keys_to_element(:note_field, [:command, 'v'])
+          click_element(:comment_button)
+          wait_until(reload: false) { has_element?(:note_author_content) }
         end
       end
     end
