@@ -1781,12 +1781,26 @@ RSpec.describe QuickActions::InterpretService do
 
       context 'with new email participants' do
         let(:content) { '/invite_email a@gitlab.com b@gitlab.com' }
+        let(:subject) { service.execute(content, issuable) }
 
         it 'returns message' do
-          _, _, message = service.execute(content, issuable)
+          _, _, message = subject
 
           expect(message).to eq('Added a@gitlab.com and b@gitlab.com.')
-          expect(issue.issue_email_participants.count).to eq(2)
+        end
+
+        it 'adds 2 participants' do
+          expect { subject }.to change { issue.issue_email_participants.count }.by(2)
+        end
+
+        context 'with feature flag disabled' do
+          before do
+            stub_feature_flags(issue_email_participants: false)
+          end
+
+          it 'does not add any participants' do
+            expect { subject }.not_to change { issue.issue_email_participants.count }
+          end
         end
       end
     end
