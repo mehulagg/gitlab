@@ -127,8 +127,6 @@ describe('SubscriptionTable component', () => {
             upgradable,
           },
         });
-
-        return wrapper.vm.$nextTick();
       });
 
       it(snapshotDesc, () => {
