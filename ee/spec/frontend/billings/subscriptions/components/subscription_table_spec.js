@@ -182,7 +182,7 @@ describe('SubscriptionTable component', () => {
     ${null}     | ${true}     | ${false} | ${'does not render the button'}
     ${null}     | ${false}    | ${false} | ${'does not render the button'}
   `(
-    'given plan with state: planCode = $planCode and saasAddSeatsButton = $featureFlag',
+    'Add seats button – given plan with state: planCode = $planCode and saasAddSeatsButton = $featureFlag',
     ({ planCode, featureFlag, expected, testDescription }) => {
       beforeEach(() => {
         factory(
