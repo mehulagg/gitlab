@@ -121,12 +121,7 @@ RSpec.describe Issue, :elastic do
       'author_id',
       'confidential'
     ).merge({
-      'type' => issue.es_type,
-      'state' => issue.state,
-      'join_field' => {
-        'name' => issue.es_type,
-        'parent' => issue.es_parent
-      }
+      'state' => issue.state
     })
 
     expected_hash['assignee_id'] = [assignee.id]
