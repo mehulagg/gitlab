@@ -72,25 +72,6 @@ RSpec.describe Mutations::IncidentManagement::OncallRotation::Create do
           end
         end
 
-        context 'user does not have access to the project' do
-          before do
-            other_user = create(:user)
-            args.merge!(
-              participants: [
-                {
-                  username: other_user.username,
-                  color_weight: ::IncidentManagement::OncallParticipant.color_weights['50'],
-                  color_palette: ::IncidentManagement::OncallParticipant.color_palettes[:blue]
-                }
-              ]
-            )
-          end
-
-          it 'raises an error' do
-            expect { resolve }.to raise_error(ActiveRecord::RecordInvalid, /User does not have access to the project/)
-          end
-        end
-
         context 'schedule does not exist' do
           let(:schedule) { double(iid: non_existing_record_iid, timezone: 'UTC') }
 

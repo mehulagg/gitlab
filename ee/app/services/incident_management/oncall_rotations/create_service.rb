@@ -28,26 +28,29 @@ module IncidentManagement
         return error_no_license unless available?
         return error_no_permissions unless allowed?
 
-        participant_params = Array(params[:participants])
+        participants_params = Array(params[:participants])
+        return error_too_many_participants if participants_params.size > MAXIMUM_PARTICIPANTS
 
-        return error_too_many_participants if participant_params.size > MAXIMUM_PARTICIPANTS
+        OncallRotation.transaction do
+          oncall_rotation = schedule.rotations.create(params.except(:participants))
+          break error_in_create(oncall_rotation) unless oncall_rotation.persisted?
 
-        participants = participant_params.map do |participant|
-          OncallParticipant.new(
-            user: participant[:user],
-            color_palette: participant[:color_palette],
-            color_weight: participant[:color_weight]
+          participants = participants_for(oncall_rotation, participants_params)
+          break error_invalid_participants(participants) unless participants.all?(&:valid?)
+          break error_duplicate_participants if duplicated_users?(participants.map(&:user))
+
+          # BulkInsertSafe cannot be used here while OncallParticipant
+          # has a has_many association. https://gitlab.com/gitlab-org/gitlab/-/issues/247718
+          # We still want to bulk insert to avoid up to MAXIMUM_PARTICIPANTS
+          # consecutive insertions, but Gitlab::Database.bulk_insert
+          # does not include validations. Warning!
+          ::Gitlab::Database.bulk_insert( # rubocop:disable Gitlab/BulkInsert
+            OncallParticipant.table_name,
+            participant_rows(participants)
           )
+
+          success(oncall_rotation)
         end
-
-        oncall_rotation = schedule.rotations.create(
-          **params.except(:participants),
-          participants: participants
-        )
-
-        return error_in_create(oncall_rotation) unless oncall_rotation.persisted?
-
-        success(oncall_rotation)
       end
 
       private
@@ -62,6 +65,32 @@ module IncidentManagement
         ::Gitlab::IncidentManagement.oncall_schedules_available?(project)
       end
 
+      def participants_for(rotation, participants_params)
+        participants_params.map do |participant|
+          OncallParticipant.new(
+            rotation: rotation,
+            user: participant[:user],
+            color_palette: participant[:color_palette],
+            color_weight: participant[:color_weight]
+          )
+        end
+      end
+
+      def duplicated_users?(users)
+        users != users.uniq
+      end
+
+      def participant_rows(participants)
+        participants.map do |participant|
+          {
+            oncall_rotation_id: participant.oncall_rotation_id,
+            user_id: participant.user_id,
+            color_palette: OncallParticipant.color_palettes[participant.color_palette],
+            color_weight: OncallParticipant.color_weights[participant.color_weight]
+          }
+        end
+      end
+
       def error(message)
         ServiceResponse.error(message: message)
       end
@@ -74,6 +103,10 @@ module IncidentManagement
         error("A maximum of #{MAXIMUM_PARTICIPANTS} participants can be added")
       end
 
+      def error_duplicate_participants
+        error('A user can only participate in a rotation once')
+      end
+
       def error_no_permissions
         error('You have insufficient permissions to create an on-call rotation for this project')
       end
@@ -84,6 +117,10 @@ module IncidentManagement
 
       def error_in_create(oncall_rotation)
         error(oncall_rotation.errors.full_messages.to_sentence)
+      end
+
+      def error_invalid_participants(participants)
+        error(participants.flat_map { |participant| participant.errors.full_messages.to_sentence.presence }.compact.join(','))
       end
     end
   end
