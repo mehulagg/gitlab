@@ -31,11 +31,13 @@ RSpec.describe 'Epic show', :js do
     group.add_developer(user)
     stub_licensed_features(epics: true, subepics: true)
     sign_in(user)
-
-    visit group_epic_path(group, epic)
   end
 
   describe 'when sub-epics feature is available' do
+    before do
+      visit group_epic_path(group, epic)
+    end
+
     describe 'Epic metadata' do
       it 'shows epic tabs `Epics and Issues` and `Roadmap`' do
         page.within('.js-epic-tabs-container') do
@@ -89,8 +91,6 @@ RSpec.describe 'Epic show', :js do
 
   describe 'when sub-epics feature not is available' do
     before do
-      stub_licensed_features(epics: true, subepics: false)
-
       visit group_epic_path(group, epic)
     end
 
@@ -116,6 +116,10 @@ RSpec.describe 'Epic show', :js do
   end
 
   describe 'Epic metadata' do
+    before do
+      visit group_epic_path(group, epic)
+    end
+
     it_behaves_like 'page meta description', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nos commodius agimus. Ex rebus enim timiditas, non ex vocabulis nascitur. Ita prorsus, inquam; Duo...'
 
     it 'shows epic status, date and author in header' do
@@ -175,6 +179,10 @@ RSpec.describe 'Epic show', :js do
   end
 
   describe 'Epic sidebar' do
+    before do
+      visit group_epic_path(group, epic)
+    end
+
     describe 'Labels select' do
       it 'opens dropdown when `Edit` is clicked' do
         page.within('aside.right-sidebar') do
@@ -254,6 +262,44 @@ RSpec.describe 'Epic show', :js do
             expect(page).to have_selector('.js-labels-list')
           end
         end
+      end
+    end
+  end
+
+  describe 'epic actions' do
+    describe 'when open' do
+      let(:open_epic) { create(:epic, group: group) }
+
+      before do
+        visit group_epic_path(group, open_epic)
+      end
+
+      it 'can close an epic' do
+        expect(find('.issuable-status-box')).to have_content 'Open'
+
+        within '.timeline-content-form' do
+          click_button 'Close epic'
+        end
+
+        expect(find('.issuable-status-box')).to have_content 'Closed'
+      end
+    end
+
+    describe 'when closed' do
+      let(:closed_epic) { create(:epic, group: group, state: 'closed') }
+
+      before do
+        visit group_epic_path(group, closed_epic)
+      end
+
+      it 'can reopen an epic' do
+        expect(find('.issuable-status-box')).to have_content 'Closed'
+
+        within '.timeline-content-form' do
+          click_button 'Reopen epic'
+        end
+
+        expect(find('.issuable-status-box')).to have_content 'Open'
       end
     end
   end

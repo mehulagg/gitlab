@@ -278,51 +278,55 @@ describe('issue_comment_form component', () => {
           });
         });
 
-        describe('when merge request', () => {
+        describe.each`
+          type               | noteableType
+          ${'merge request'} | ${constants.MERGE_REQUEST_NOTEABLE_TYPE}
+          ${'epic'}          | ${constants.EPIC_NOTEABLE_TYPE}
+        `('when $type', ({ noteableType }) => {
           describe('when open', () => {
-            it('makes an API call to open the merge request', () => {
+            it(`makes an API call to open it`, () => {
               mountComponent({
-                noteableType: constants.MERGE_REQUEST_NOTEABLE_TYPE,
+                noteableType,
                 noteableData: { ...noteableDataMock, state: constants.OPENED },
                 mountFunction: mount,
               });
 
-              jest.spyOn(wrapper.vm, 'closeMergeRequest').mockResolvedValue();
+              jest.spyOn(wrapper.vm, 'closeIssuable').mockResolvedValue();
 
               findCloseReopenButton().trigger('click');
 
-              expect(wrapper.vm.closeMergeRequest).toHaveBeenCalled();
+              expect(wrapper.vm.closeIssuable).toHaveBeenCalled();
             });
           });
 
           describe('when closed', () => {
-            it('makes an API call to close the merge request', () => {
+            it('makes an API call to close it', () => {
               mountComponent({
-                noteableType: constants.MERGE_REQUEST_NOTEABLE_TYPE,
+                noteableType,
                 noteableData: { ...noteableDataMock, state: constants.CLOSED },
                 mountFunction: mount,
               });
 
-              jest.spyOn(wrapper.vm, 'reopenMergeRequest').mockResolvedValue();
+              jest.spyOn(wrapper.vm, 'reopenIssuable').mockResolvedValue();
 
               findCloseReopenButton().trigger('click');
 
-              expect(wrapper.vm.reopenMergeRequest).toHaveBeenCalled();
+              expect(wrapper.vm.reopenIssuable).toHaveBeenCalled();
             });
           });
+        });
 
-          it('should update MR count', async () => {
-            mountComponent({
-              noteableType: constants.MERGE_REQUEST_NOTEABLE_TYPE,
-              mountFunction: mount,
-            });
-
-            jest.spyOn(wrapper.vm, 'closeMergeRequest').mockResolvedValue();
-
-            await findCloseReopenButton().trigger('click');
-
-            expect(refreshUserMergeRequestCounts).toHaveBeenCalled();
+        it('when merge request, should update MR count', async () => {
+          mountComponent({
+            noteableType: constants.MERGE_REQUEST_NOTEABLE_TYPE,
+            mountFunction: mount,
           });
+
+          jest.spyOn(wrapper.vm, 'closeIssuable').mockResolvedValue();
+
+          await findCloseReopenButton().trigger('click');
+
+          expect(refreshUserMergeRequestCounts).toHaveBeenCalled();
         });
       });
     });

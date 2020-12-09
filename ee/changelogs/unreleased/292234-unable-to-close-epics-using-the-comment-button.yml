@@ -1,0 +1,5 @@
+---
+title: Fix `Close epic` button not working on epic page
+merge_request: 49597
+author:
+type: fixed
