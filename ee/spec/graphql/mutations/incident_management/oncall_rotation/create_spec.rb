@@ -70,25 +70,6 @@ RSpec.describe Mutations::IncidentManagement::OncallRotation::Create do
           end
         end
 
-        context 'user does not have access to the project' do
-          before do
-            other_user = create(:user)
-            args.merge!(
-              participants: [
-                {
-                  username: other_user.username,
-                  color_weight: ::IncidentManagement::OncallParticipant.color_weights['50'],
-                  color_palette: ::IncidentManagement::OncallParticipant.color_palettes[:blue]
-                }
-              ]
-            )
-          end
-
-          it 'raises an error' do
-            expect { resolve }.to raise_error(Gitlab::Graphql::Errors::ArgumentError, /User does not have access to the project/)
-          end
-        end
-
         context 'duplicate participants' do
           before do
             args[:participants] << args[:participants].first
