@@ -1,0 +1,5 @@
+---
+title: Fix console errors when changing filter
+merge_request: 49628
+author:
+type: fixed
