@@ -17,11 +17,13 @@ import RecentSearchesService from '~/filtered_search/services/recent_searches_se
 
 import {
   mockAvailableTokens,
+  mockMembershipToken,
   mockSortOptions,
   mockHistoryItems,
   tokenValueAuthor,
   tokenValueLabel,
   tokenValueMilestone,
+  tokenValueMembership,
 } from './mock_data';
 
 jest.mock('~/vue_shared/components/filtered_search_bar/filtered_search_utils', () => ({
@@ -410,6 +412,27 @@ describe('FilteredSearchBarRoot', () => {
       );
 
       wrapperFullMount.destroy();
+    });
+
+    describe('when token options have `title` attribute defined', () => {
+      it('renders search history items using the provided `title` attribute', async () => {
+        const wrapperFullMount = createComponent({
+          sortOptions: mockSortOptions,
+          tokens: [mockMembershipToken],
+          shallow: false,
+        });
+        wrapperFullMount.vm.recentSearchesStore.addRecentSearch([tokenValueMembership]);
+
+        await wrapperFullMount.vm.$nextTick();
+
+        expect(
+          wrapperFullMount
+            .find('.gl-search-box-by-click-menu .gl-search-box-by-click-history-item')
+            .text(),
+        ).toBe('Membership := Direct');
+
+        wrapperFullMount.destroy();
+      });
     });
 
     it('renders sort dropdown component', () => {
