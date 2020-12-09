@@ -8,6 +8,7 @@ stages:
   - review-prepare
   - review
   - dast
+  - fuzzing
   - qa
   - post-qa
   - pages
@@ -66,6 +67,11 @@ variables:
   ELASTIC_URL: "http://elastic:changeme@elasticsearch:9200"
   DOCKER_VERSION: "19.03.0"
   CACHE_CLASSES: "true"
+  #Fuzzing variables
+  FUZZAPI_PROFILE: Quick-10
+  FUZZAPI_POSTMAN_COLLECTION: postman_collection.json
+  FUZZAPI_TARGET_URL: ${CI_ENVIRONMENT_URL}
+
 
   # Preparing custom clone path to reduce space used by all random forks
   # on GitLab.com's Shared Runners. Our main forks - especially the security
@@ -110,3 +116,4 @@ include:
   - local: .gitlab/ci/notify.gitlab-ci.yml
   - local: .gitlab/ci/dast.gitlab-ci.yml
   - local: .gitlab/ci/workhorse.gitlab-ci.yml
+  - local: .gitlab/ci/API-Fuzzing.gitlab-ci.yml
