@@ -46,8 +46,8 @@ To view a test case:
 You can edit a test case's title and description.
 
 Users with Reporter or higher [permissions](../../user/permissions.md) can edit test cases.
-However, users who are demoted to the Guest role, can still edit test cases they have created while
-in a higher role.
+Users demoted to the Guest role can continue to edit the test cases they created
+when they were in the higher role.
 
 To edit a test case:
 
