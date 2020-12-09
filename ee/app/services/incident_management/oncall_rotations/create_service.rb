@@ -37,7 +37,7 @@ module IncidentManagement
         return error_in_create(oncall_rotation) unless oncall_rotation.persisted?
 
         new_participants = Array(participant_params).map do |participant|
-          return error_participant_has_no_permission unless participant[:user].can?(:read_project, project)
+          break unless participant[:user].can?(:read_project, project)
 
           OncallParticipant.new(
             rotation: oncall_rotation,
@@ -46,6 +46,8 @@ module IncidentManagement
             color_weight: participant[:color_weight]
           )
         end
+
+        return error_participant_has_no_permission if new_participants.nil?
 
         OncallParticipant.bulk_insert!(new_participants)
 
