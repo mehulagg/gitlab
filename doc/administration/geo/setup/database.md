@@ -60,7 +60,7 @@ A **unique name** for the primary Geo instance
 
 The plain text password for the `gitlab` database user
 
-* NOTE: **Note:**
+NOTE: **Note:**
 Until FDW settings are removed in GitLab version 14.0, avoid using single or double quotes in the
 password for PostgreSQL as that will lead to errors when reconfiguring.
 
@@ -68,7 +68,7 @@ password for PostgreSQL as that will lead to errors when reconfiguring.
 
 The hashed value of DB_USER_PASSWORD.
 
-* Generate a MD5 hash of DB_USER_PASSWORD with
+- Generate a MD5 hash of DB_USER_PASSWORD with
 
 ```shell
 gitlab-ctl pg-password-md5 gitlab
@@ -230,11 +230,13 @@ The IP address that the secondary database will listen on
    private address.
 
    Edit `/etc/gitlab/gitlab.rb` and **change** the configuration to `true`:
-1. ```ruby
+
+    ```ruby
    gitlab_rails['auto_migrate'] = true
    ```
 
    Save the file and reconfigure GitLab:
+
    ```shell
    gitlab-ctl reconfigure
    ```
