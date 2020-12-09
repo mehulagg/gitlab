@@ -50,7 +50,13 @@ export default {
       return `${this.namespaceName}: ${planName} ${suffix}`;
     },
     canAddSeats() {
-      return this.plan.trial || !this.glFeatures.saasAddSeatsButton;
+      return (this.glFeatures.saasAddSeatsButton || this.plan.trial) && !this.isFreePlan;
+    },
+    canUpgrade() {
+      return this.isFreePlan || this.plan.upgradable;
+    },
+    canRenew() {
+      return this.glFeatures.saasManualRenewButton && this.plan.trial && !this.isFreePlan;
     },
     addSeatsButton() {
       return this.canAddSeats
@@ -61,15 +67,17 @@ export default {
         : null;
     },
     upgradeButton() {
-      if (!this.plan.upgradable) {
-        return null;
-      }
-
-      return {
-        text: s__('SubscriptionTable|Upgrade'),
-        href:
-          !this.isFreePlan && this.planUpgradeHref ? this.planUpgradeHref : this.customerPortalUrl,
-      };
+      return this.canUpgrade
+        ? {
+            text: s__('SubscriptionTable|Upgrade'),
+            href: this.upgradeButtonHref,
+          }
+        : null;
+    },
+    upgradeButtonHref() {
+      return !this.isFreePlan && this.planUpgradeHref
+        ? this.planUpgradeHref
+        : this.customerPortalUrl;
     },
     renewButton() {
       if (!this.glFeatures.saasManualRenewButton) {
@@ -86,15 +94,15 @@ export default {
       };
     },
     manageButton() {
-      return {
-        text: s__('SubscriptionTable|Manage'),
-        href: this.customerPortalUrl,
-      };
+      return !this.isFreePlan
+        ? {
+            text: s__('SubscriptionTable|Manage'),
+            href: this.customerPortalUrl,
+          }
+        : null;
     },
     buttons() {
-      return this.isFreePlan
-        ? [this.upgradeButton, this.renewButton].filter(Boolean)
-        : [this.addSeatsButton, this.manageButton].filter(Boolean);
+      return [this.upgradeButton, this.renewButton, this.manageButton].filter(Boolean);
     },
     visibleRows() {
       let tableKey = TABLE_TYPE_DEFAULT;
