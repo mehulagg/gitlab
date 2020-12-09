@@ -847,7 +847,6 @@ First ensure your backup tar file is in the backup directory described in the
   ## Backup settings
   backup:
     path: "tmp/backups"   # Relative paths are relative to Rails.root (default: tmp/backups/)
-
 ```
 
  The default is `/home/git/gitlab/tmp/backups`. It needs to be owned by the `git` user. Now we can begin the backup procedure:
@@ -856,7 +855,7 @@ First ensure your backup tar file is in the backup directory described in the
 # Stop processes that are connected to the database
 sudo service gitlab stop
 
-bundle exec rake gitlab:backup:restore RAILS_ENV=production
+sudo -u git -H bundle exec rake gitlab:backup:restore RAILS_ENV=production
 ```
 
 Example output:
