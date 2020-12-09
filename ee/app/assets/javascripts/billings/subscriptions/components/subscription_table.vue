@@ -50,7 +50,7 @@ export default {
       return `${this.namespaceName}: ${planName} ${suffix}`;
     },
     canAddSeats() {
-      return (this.glFeatures.saasAddSeatsButton || this.plan.trial) && !this.isFreePlan;
+      return this.glFeatures.saasAddSeatsButton && !this.isFreePlan;
     },
     canUpgrade() {
       return this.isFreePlan || this.plan.upgradable;
@@ -96,7 +96,9 @@ export default {
         : null;
     },
     buttons() {
-      return [this.upgradeButton, this.renewButton, this.manageButton].filter(Boolean);
+      return [this.upgradeButton, this.addSeatsButton, this.renewButton, this.manageButton].filter(
+        Boolean,
+      );
     },
     visibleRows() {
       let tableKey = TABLE_TYPE_DEFAULT;
