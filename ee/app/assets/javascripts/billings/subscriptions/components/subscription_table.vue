@@ -49,15 +49,16 @@ export default {
 
       return `${this.namespaceName}: ${planName} ${suffix}`;
     },
+    canAddSeats() {
+      return this.plan.trial || !this.glFeatures.saasAddSeatsButton;
+    },
     addSeatsButton() {
-      if (!this.plan.trial && !this.glFeatures.saasAddSeatsButton) {
-        return null;
-      }
-
-      return {
-        text: s__('SubscriptionTable|Add Seats'),
-        href: this.addSeatsHref,
-      };
+      return this.canAddSeats
+        ? {
+            text: s__('SubscriptionTable|Add Seats'),
+            href: this.addSeatsHref,
+          }
+        : null;
     },
     upgradeButton() {
       if (!this.plan.upgradable) {
@@ -92,8 +93,8 @@ export default {
     },
     buttons() {
       return this.isFreePlan
-        ? [this.upgradeButton].filter(Boolean)
-        : [this.addSeatsButton, this.renewButton, this.manageButton].filter(Boolean);
+        ? [this.upgradeButton, this.renewButton].filter(Boolean)
+        : [this.addSeatsButton, this.manageButton].filter(Boolean);
     },
     visibleRows() {
       let tableKey = TABLE_TYPE_DEFAULT;
