@@ -5,7 +5,7 @@ import { GlLoadingIcon } from '@gitlab/ui';
 import { TABLE_TYPE_DEFAULT, TABLE_TYPE_FREE, TABLE_TYPE_TRIAL } from 'ee/billings/constants';
 import { s__ } from '~/locale';
 import SubscriptionTableRow from './subscription_table_row.vue';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
 export default {
   name: 'SubscriptionTable',
@@ -13,7 +13,7 @@ export default {
     SubscriptionTableRow,
     GlLoadingIcon,
   },
-  mixins: [glFeatureFlagsMixin()],
+  mixins: [glFeatureFlagMixin()],
   props: {
     namespaceName: {
       type: String,
@@ -50,6 +50,10 @@ export default {
       return `${this.namespaceName}: ${planName} ${suffix}`;
     },
     addSeatsButton() {
+      if (!this.plan.trial && !this.glFeatures.saasAddSeatsButton) {
+        return null;
+      }
+
       return {
         text: s__('SubscriptionTable|Add Seats'),
         href: this.addSeatsHref,
@@ -89,7 +93,7 @@ export default {
     buttons() {
       return this.isFreePlan
         ? [this.upgradeButton].filter(Boolean)
-        : [this.renewButton, this.manageButton].filter(Boolean);
+        : [this.addSeatsButton, this.renewButton, this.manageButton].filter(Boolean);
     },
     visibleRows() {
       let tableKey = TABLE_TYPE_DEFAULT;
