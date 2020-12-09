@@ -36,6 +36,11 @@ export default {
       type: Boolean,
       required: true,
     },
+    isInviteGroup: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
     name: {
       type: String,
       required: true,
@@ -63,6 +68,40 @@ export default {
     };
   },
   computed: {
+    nonMemberEmailsToInvite() {
+      if (this.isList) {
+        return this.filteredEmails;
+      } else if (this.isEmail) {
+        return this.newUsersToInvite;
+      }
+      return '';
+    },
+    memberIdsToInvite() {
+      if (this.isList) {
+        return this.filteredIds;
+      } else if (!this.isEmail) {
+        return this.newUsersToInvite;
+      }
+      return '';
+    },
+    isList() {
+      return this.newUsersToInvite.includes(',');
+    },
+    isEmail() {
+      return this.emailMatches(this.newUsersToInvite);
+    },
+    filteredEmails() {
+      return this.newUsersToInvite
+        .split(',')
+        .filter(value => this.emailMatches(value))
+        .join(',');
+    },
+    filteredIds() {
+      return this.newUsersToInvite
+        .split(',')
+        .filter(value => !Number.isNaN(Number(value)))
+        .join(',');
+    },
     inviteToName() {
       return this.name.toUpperCase();
     },
@@ -85,11 +124,19 @@ export default {
     },
     postData() {
       return {
-        user_id: this.newUsersToInvite,
         access_level: this.selectedAccessLevel,
         expires_at: this.selectedDate,
         format: 'json',
       };
+    },
+    invitePostData() {
+      return Object.assign(this.postData, { email: this.nonMemberEmailsToInvite });
+    },
+    addMemberPostData() {
+      return Object.assign(this.postData, { user_id: this.memberIdsToInvite });
+    },
+    fullPostData() {
+      return Object.assign(this.invitePostData, this.addMemberPostData);
     },
     selectedRoleName() {
       return Object.keys(this.accessLevels).find(
@@ -108,7 +155,7 @@ export default {
       this.$root.$emit('bv::hide::modal', this.modalId);
     },
     sendInvite() {
-      this.submitForm(this.postData);
+      this.submitForm();
       this.closeModal();
     },
     cancelInvite() {
@@ -120,13 +167,45 @@ export default {
     changeSelectedItem(item) {
       this.selectedAccessLevel = item;
     },
-    submitForm(formData) {
+    submitForm() {
       if (this.isProject) {
-        return Api.inviteProjectMembers(this.id, formData)
+        this.submitProjectInvites();
+      } else {
+        this.submitGroupInvites();
+      }
+      return this.fullPostData;
+    },
+    submitProjectInvites() {
+      if (this.nonMemberEmailsToInvite) {
+        this.submitInviteNonMembersToProject(this.invitePostData);
+      }
+
+      if (this.memberIdsToInvite) {
+        return Api.inviteProjectMembers(this.id, this.addMemberPostData)
           .then(this.showToastMessageSuccess)
           .catch(this.showToastMessageError);
       }
-      return Api.inviteGroupMember(this.id, formData)
+      return this.fullPostData;
+    },
+    submitGroupInvites() {
+      if (this.nonMemberEmailsToInvite) {
+        this.submitInviteNonMembersToGroup(this.invitePostData);
+      }
+
+      if (this.memberIdsToInvite) {
+        return Api.inviteGroupMember(this.id, this.addMemberPostData)
+          .then(this.showToastMessageSuccess)
+          .catch(this.showToastMessageError);
+      }
+      return this.fullPostData;
+    },
+    submitInviteNonMembersToProject() {
+      return Api.inviteNonMemberToProject(this.id, this.invitePostData)
+        .then(this.showToastMessageSuccess)
+        .catch(this.showToastMessageError);
+    },
+    submitInviteNonMembersToGroup() {
+      return Api.inviteNonMemberToGroup(this.id, this.invitePostData)
         .then(this.showToastMessageSuccess)
         .catch(this.showToastMessageError);
     },
@@ -137,6 +216,11 @@ export default {
       const message = error.response.data.message || this.$options.labels.toastMessageUnsuccessful;
 
       this.$toast.show(message, this.toastOptions);
+    },
+    emailMatches(value) {
+      const regex = /@/;
+
+      return value.match(regex) !== null;
     },
   },
   labels: {
@@ -174,6 +258,7 @@ export default {
           :label="$options.labels.newUsersToInvite"
           :aria-labelledby="$options.membersTokenSelectLabelId"
           :placeholder="$options.labels.userPlaceholder"
+          :is-invite-group="isInviteGroup"
         />
       </div>
 

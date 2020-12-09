@@ -20,6 +20,11 @@ export default {
       type: String,
       required: true,
     },
+    isInviteGroup: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   data() {
     return {
@@ -53,6 +58,21 @@ export default {
       this.loading = true;
       this.retrieveUsers(query);
     },
+    retrieveUsers: debounce(function debouncedRetrieveUsers() {
+      return Api.users(this.query, this.$options.queryOptions)
+        .then(response => {
+          this.users = response.data.map(token => ({
+            id: token.id,
+            name: token.name,
+            username: token.username,
+            avatar_url: token.avatar_url,
+          }));
+          this.loading = false;
+        })
+        .catch(() => {
+          this.loading = false;
+        });
+    }, USER_SEARCH_DELAY),
     retrieveUsers: debounce(function debouncedRetrieveUsers() {
       return Api.users(this.query, this.$options.queryOptions)
         .then(response => {
