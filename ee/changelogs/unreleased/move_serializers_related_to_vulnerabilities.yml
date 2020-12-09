@@ -1,5 +1,5 @@
 ---
-title: Move serializers related to vulnerability to EE
+title: Move serializers related to vulnerability findings to CE
 merge_request: 49502
 author:
 type: changed
