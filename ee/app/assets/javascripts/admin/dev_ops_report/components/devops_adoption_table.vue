@@ -1,5 +1,12 @@
 <script>
-import { GlTable, GlButton, GlPopover, GlModalDirective } from '@gitlab/ui';
+import {
+  GlTable,
+  GlButton,
+  GlPopover,
+  GlModalDirective,
+  GlIcon,
+  GlTooltipDirective,
+} from '@gitlab/ui';
 import { s__ } from '~/locale';
 import DevopsAdoptionTableCellFlag from './devops_adoption_table_cell_flag.vue';
 import DevopsAdoptionDeleteModal from './devops_adoption_delete_modal.vue';
@@ -23,11 +30,13 @@ export default {
     GlButton,
     GlPopover,
     DevopsAdoptionDeleteModal,
+    GlIcon,
   },
   i18n: DEVOPS_ADOPTION_STRINGS.table,
   devopsSegmentModalId: DEVOPS_ADOPTION_SEGMENT_MODAL_ID,
   devopsSegmentDeleteModalId: DEVOPS_ADOPTION_SEGMENT_DELETE_MODAL_ID,
   directives: {
+    GlTooltip: GlTooltipDirective,
     GlModal: GlModalDirective,
   },
   tableHeaderFields: [
@@ -113,7 +122,15 @@ export default {
     >
       <template #cell(name)="{ item }">
         <div :data-testid="$options.testids.SEGMENT">
-          <strong>{{ item.name }}</strong>
+          <strong v-if="item.latestSnapshot">{{ item.name }}</strong>
+          <template v-else>
+            <span class="gl-text-gray-400">{{ item.name }}</span>
+            <gl-icon
+              v-gl-tooltip.hover="$options.i18n.pendingTooltip"
+              name="hourglass"
+              class="gl-text-gray-400"
+            />
+          </template>
         </div>
       </template>
 

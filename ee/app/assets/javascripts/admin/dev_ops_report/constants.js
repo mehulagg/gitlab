@@ -50,6 +50,7 @@ export const DEVOPS_ADOPTION_STRINGS = {
   table: {
     editButton: s__('DevopsAdoption|Edit segment'),
     deleteButton: s__('DevopsAdoption|Delete segment'),
+    pendingTooltip: s__('DevopsAdoption|Segment data pending until the start of next month'),
   },
   deleteModal: {
     title: s__('DevopsAdoption|Confirm delete segment'),

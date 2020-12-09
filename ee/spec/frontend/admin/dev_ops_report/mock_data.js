@@ -54,6 +54,17 @@ export const devopsAdoptionSegmentsData = {
       },
       __typename: 'devopsSegment',
     },
+    {
+      name: 'Segment 2',
+      id: 2,
+      groups: [
+        {
+          id: 'gid://gitlab/Group/1',
+        },
+      ],
+      latestSnapshot: null,
+      __typename: 'devopsSegment',
+    },
   ],
   __typename: 'devopsAdoptionSegments',
 };

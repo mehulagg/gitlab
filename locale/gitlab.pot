@@ -9670,6 +9670,9 @@ msgstr ""
 msgid "DevopsAdoption|Segment"
 msgstr ""
 
+msgid "DevopsAdoption|Segment data pending until the start of next month"
+msgstr ""
+
 msgid "DevopsAdoption|There was an error fetching Groups. Please refresh the page to try again."
 msgstr ""
 
