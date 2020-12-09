@@ -5,7 +5,7 @@ import { GlLoadingIcon } from '@gitlab/ui';
 import { TABLE_TYPE_DEFAULT, TABLE_TYPE_FREE, TABLE_TYPE_TRIAL } from 'ee/billings/constants';
 import { s__ } from '~/locale';
 import SubscriptionTableRow from './subscription_table_row.vue';
-import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import glFeaturesFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
 export default {
   name: 'SubscriptionTable',
@@ -13,7 +13,7 @@ export default {
     SubscriptionTableRow,
     GlLoadingIcon,
   },
-  mixins: [glFeatureFlagMixin()],
+  mixins: [glFeaturesFlagMixin()],
   props: {
     namespaceName: {
       type: String,
