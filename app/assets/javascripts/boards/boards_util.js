@@ -1,4 +1,5 @@
 import { sortBy } from 'lodash';
+import axios from '~/lib/utils/axios_utils';
 import { ListType } from './constants';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import boardsStore from '~/boards/stores/boards_store';
@@ -106,6 +107,15 @@ export function moveIssueListHelper(issue, fromList, toList) {
   }
 
   return updatedIssue;
+}
+
+export function getBoardsPath(endpoint, id, board) {
+  const path = `${endpoint}${id ? `/${id}` : ''}.json`;
+
+  if (id) {
+    return axios.put(path, { board });
+  }
+  return axios.post(path, { board });
 }
 
 export default {
