@@ -1,6 +1,5 @@
 <script>
 import { GlDropdown } from '@gitlab/ui';
-import { mapGetters } from 'vuex';
 import Tracking from '~/tracking';
 import CodeInstruction from '~/vue_shared/components/registry/code_instruction.vue';
 import {
@@ -12,6 +11,7 @@ import {
   PUSH_COMMAND_LABEL,
   COPY_PUSH_TITLE,
 } from '../../constants/index';
+import { dockerBuildCommand, dockerPushCommand, dockerLoginCommand } from '../../utils';
 
 const trackingLabel = 'quickstart_dropdown';
 
@@ -20,6 +20,7 @@ export default {
     GlDropdown,
     CodeInstruction,
   },
+  inject: ['config'],
   mixins: [Tracking.mixin({ label: trackingLabel })],
   trackingLabel,
   i18n: {
@@ -32,7 +33,15 @@ export default {
     COPY_PUSH_TITLE,
   },
   computed: {
-    ...mapGetters(['dockerBuildCommand', 'dockerPushCommand', 'dockerLoginCommand']),
+    dockerBuildCommand() {
+      return dockerBuildCommand(this.config);
+    },
+    dockerPushCommand() {
+      return dockerPushCommand(this.config);
+    },
+    dockerLoginCommand() {
+      return dockerLoginCommand(this.config);
+    },
   },
 };
 </script>

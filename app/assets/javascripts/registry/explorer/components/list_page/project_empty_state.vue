@@ -1,6 +1,5 @@
 <script>
 import { GlEmptyState, GlSprintf, GlLink, GlFormInputGroup, GlFormInput } from '@gitlab/ui';
-import { mapState, mapGetters } from 'vuex';
 import { s__ } from '~/locale';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
 import {
@@ -9,6 +8,7 @@ import {
   COPY_PUSH_TITLE,
   QUICK_START,
 } from '../../constants/index';
+import { dockerBuildCommand, dockerPushCommand, dockerLoginCommand } from '../../utils';
 
 export default {
   name: 'ProjectEmptyState',
@@ -20,6 +20,7 @@ export default {
     GlFormInputGroup,
     GlFormInput,
   },
+  inject: ['config'],
   i18n: {
     quickStart: QUICK_START,
     copyLoginTitle: COPY_LOGIN_TITLE,
@@ -36,8 +37,15 @@ export default {
     ),
   },
   computed: {
-    ...mapState(['config']),
-    ...mapGetters(['dockerBuildCommand', 'dockerPushCommand', 'dockerLoginCommand']),
+    dockerBuildCommand() {
+      return dockerBuildCommand(this.config);
+    },
+    dockerPushCommand() {
+      return dockerPushCommand(this.config);
+    },
+    dockerLoginCommand() {
+      return dockerLoginCommand(this.config);
+    },
   },
 };
 </script>
