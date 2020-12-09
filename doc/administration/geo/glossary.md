@@ -28,14 +28,14 @@ these definitions yet.
 | Primary site              | A GitLab site that is configured to be read and writable. There can only be a single primary site.                                                                                     | Geo-specific | Geo deployment, Primary node                    |
 | Secondary site(s)         | GitLab site that is configured to be read-only. There can be one or more secondary sites.                                                                                              | Geo-specific | Geo deployment, Secondary node                  |
 | Geo deployment            | A collection of two or more GitLab sites with exactly one primary site being replicated by one or more secondary sites.                                                                | Geo-specific |                                                 |
-| Reference architecture(s) | A [specified configuration of GitLab for a number of users](../administration/reference_architectures/), possibly including multiple nodes and multiple sites. | GitLab       |                                                 |
+| Reference architecture(s) | A [specified configuration of GitLab for a number of users](../reference_architectures/), possibly including multiple nodes and multiple sites. | GitLab       |                                                 |
 | Promoting                 | Changing the role of a site from secondary to primary.                                                                                                                                 | Geo-specific |                                                 |
 | Demoting                  | Changing the role of a site from primary to secondary.                                                                                                                                 | Geo-specific |                                                 |
 | Failover                  | The entire process that shifts users from a primary Site to a secondary site. This includes promoting a secondary, but contains other parts as well e.g. scheduling maintenance.       | Geo-specific |                                                 |
 
-# Examples
+## Examples
 
-## Single-node site
+### Single-node site
 
 ```mermaid
  graph TD
@@ -44,7 +44,7 @@ these definitions yet.
   end
 ```
 
-## Multi-node site
+### Multi-node site
 
 ```mermaid
  graph TD
@@ -55,7 +55,7 @@ these definitions yet.
   end
 ```
 
-## Geo deployment
+### Geo deployment
 
 This Geo deployment has a multi-node primary site, a multi-node secondary site and another single-node secondary site:
 
