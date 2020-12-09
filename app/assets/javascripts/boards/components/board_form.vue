@@ -89,6 +89,11 @@ export default {
       required: true,
     },
   },
+  inject: {
+    endpoints: {
+      default: {},
+    },
+  },
   data() {
     return {
       board: { ...boardDefaults, ...this.currentBoard },
