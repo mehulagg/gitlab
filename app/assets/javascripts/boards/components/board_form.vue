@@ -182,7 +182,18 @@ export default {
 
       return responses[0].data;
     },
-    createBoard() {},
+    async createBoard() {
+      const boardData = await getBoardsPath(this.endpoints.boardsEndpoint, this.boardPayload);
+      const response = await this.$apollo.mutate({
+        mutation: createBoardMutation,
+        variables: {
+          ...pick(this.boardPayload, ['hideClosedList', 'hideBacklogList']),
+          id: fullBoardId(boardData.id),
+        },
+      });
+
+      return response.data || response;
+    },
     submit() {
       if (this.board.name.length === 0) return;
       this.isLoading = true;
