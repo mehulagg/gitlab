@@ -186,16 +186,18 @@ class Projects::PipelinesController < Projects::ApplicationController
 
   def charts
     @charts = {}
-    @charts[:week] = Gitlab::Ci::Charts::WeekChart.new(project)
-    @charts[:month] = Gitlab::Ci::Charts::MonthChart.new(project)
-    @charts[:year] = Gitlab::Ci::Charts::YearChart.new(project)
-    @charts[:pipeline_times] = Gitlab::Ci::Charts::PipelineTime.new(project)
-
     @counts = {}
-    @counts[:total] = @project.all_pipelines.count(:all)
-    @counts[:success] = @project.all_pipelines.success.count(:all)
-    @counts[:failed] = @project.all_pipelines.failed.count(:all)
-    @counts[:total_duration] = @project.all_pipelines.total_duration
+    unless Feature.enabled?(:graphql_pipeline_analytics)
+      @charts[:week] = Gitlab::Ci::Charts::WeekChart.new(project)
+      @charts[:month] = Gitlab::Ci::Charts::MonthChart.new(project)
+      @charts[:year] = Gitlab::Ci::Charts::YearChart.new(project)
+      @charts[:pipeline_times] = Gitlab::Ci::Charts::PipelineTime.new(project)
+
+      @counts[:total] = @project.all_pipelines.count(:all)
+      @counts[:success] = @project.all_pipelines.success.count(:all)
+      @counts[:failed] = @project.all_pipelines.failed.count(:all)
+      @counts[:total_duration] = @project.all_pipelines.total_duration
+    end
   end
 
   def test_report
