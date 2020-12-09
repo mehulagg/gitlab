@@ -155,7 +155,7 @@ module Gitlab
           transform_sub_relations!(data_hash, sub_relation_key, sub_relation_definition)
         end
 
-        @relation_factory.create(relation_factory_params(relation_key, data_hash))
+        @relation_factory.create(**relation_factory_params(relation_key, data_hash))
       end
 
       # Since we update the data hash in place as we restore relation items,
