@@ -97,6 +97,19 @@ export const generateVulnerabilities = () => [
     },
     scanner: {},
   },
+  {
+    id: 'id_5',
+    title: 'Vulnerability 5',
+    severity: 'high',
+    state: 'DETECTED',
+    location: {
+      path: '/v1/trees'
+    },
+    project: {
+      nameWithNamespace: 'Administrator / Security reports',
+    },
+    scanner: {},
+  },
 ];
 
 export const vulnerabilities = generateVulnerabilities();
