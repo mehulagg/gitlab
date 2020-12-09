@@ -109,10 +109,10 @@ export function moveIssueListHelper(issue, fromList, toList) {
   return updatedIssue;
 }
 
-export function getBoardsPath(endpoint, id, board) {
-  const path = `${endpoint}${id ? `/${id}` : ''}.json`;
+export function getBoardsPath(endpoint, board) {
+  const path = `${endpoint}${board.id ? `/${board.id}` : ''}.json`;
 
-  if (id) {
+  if (board.id) {
     return axios.put(path, { board });
   }
   return axios.post(path, { board });
@@ -124,4 +124,5 @@ export default {
   formatListIssues,
   fullBoardId,
   fullLabelId,
+  getBoardsPath,
 };

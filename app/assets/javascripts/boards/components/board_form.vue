@@ -1,11 +1,14 @@
 <script>
 import { GlModal } from '@gitlab/ui';
+import { pick } from 'lodash';
 import { __, s__ } from '~/locale';
 import { deprecatedCreateFlash as Flash } from '~/flash';
 import { visitUrl } from '~/lib/utils/url_utility';
 import boardsStore from '~/boards/stores/boards_store';
+import { fullBoardId, getBoardsPath } from '../boards_util';
 
 import BoardConfigurationOptions from './board_configuration_options.vue';
+import createBoardMutation from '../graphql/board.mutation.graphql';
 
 const boardDefaults = {
   id: false,
@@ -163,6 +166,23 @@ export default {
     }
   },
   methods: {
+    async updateBoard() {
+      const input = {
+        ...pick(this.boardPayload, ['hideClosedList', 'hideBacklogList']),
+        id: fullBoardId(this.boardPayload.id),
+      };
+
+      const responses = await Promise.all([
+        getBoardsPath(this.endpoints.boardsEndpoint, this.boardPayload),
+        this.$apollo.mutate({
+          mutation: createBoardMutation,
+          variables: input,
+        }),
+      ]);
+
+      return responses[0].data;
+    },
+    createBoard() {},
     submit() {
       if (this.board.name.length === 0) return;
       this.isLoading = true;
