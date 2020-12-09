@@ -85,6 +85,21 @@ RSpec.describe IncidentManagement::OncallRotations::CreateService do
       end
     end
 
+    context 'when participant cannot read project' do
+      let_it_be(:other_user) { create(:user) }
+      let(:participants) do
+        [
+          {
+            user: other_user,
+            color_palette: 'blue',
+            color_weight: '500'
+          }
+        ]
+      end
+
+      it_behaves_like 'error response', 'A participant has insufficient permissions to access the project'
+    end
+
     context 'with valid params' do
       it 'successfully creates an on-call rotation' do
         expect(execute).to be_success

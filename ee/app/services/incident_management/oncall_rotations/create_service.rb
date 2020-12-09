@@ -37,6 +37,8 @@ module IncidentManagement
         return error_in_create(oncall_rotation) unless oncall_rotation.persisted?
 
         new_participants = Array(participant_params).map do |participant|
+          return error_participant_has_no_permission unless participant[:user].can?(:read_project, project)
+
           OncallParticipant.new(
             rotation: oncall_rotation,
             user: participant[:user],
@@ -68,6 +70,10 @@ module IncidentManagement
 
       def success(oncall_rotation)
         ServiceResponse.success(payload: { oncall_rotation: oncall_rotation })
+      end
+
+      def error_participant_has_no_permission
+        error('A participant has insufficient permissions to access the project')
       end
 
       def error_too_many_participants
