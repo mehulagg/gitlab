@@ -29,6 +29,12 @@ describe('SubscriptionTable component', () => {
     wrapper = shallowMount(SubscriptionTable, {
       store,
       localVue,
+      provide: {
+        glFeatures: {
+          saasManualRenewButton: false,
+          saasAddSeatsButton: false,
+        },
+      },
       ...options,
     });
   };
