@@ -350,5 +350,8 @@ export default () => {
     toggleEpicsSwimlanes();
   }
 
-  mountMultipleBoardsSwitcher();
+  mountMultipleBoardsSwitcher({
+    boardsEndpoint: $boardApp.dataset.boardsEndpoint,
+    recentBoardsEndpoint: $boardApp.dataset.recentBoardsEndpoint,
+  });
 };

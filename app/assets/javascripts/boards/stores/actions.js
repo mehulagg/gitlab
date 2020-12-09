@@ -485,52 +485,6 @@ export default {
     });
   },
 
-  createBoard: board => {
-    const boardPayload = { ...board };
-    boardPayload.label_ids = (board.labels || []).map(b => b.id);
-
-    if (boardPayload.label_ids.length === 0) {
-      boardPayload.label_ids = [''];
-    }
-
-    if (boardPayload.assignee) {
-      boardPayload.assignee_id = boardPayload.assignee.id;
-    }
-
-    if (boardPayload.milestone) {
-      boardPayload.milestone_id = boardPayload.milestone.id;
-    }
-
-    if (boardPayload.id) {
-      const input = {
-        ...pick(boardPayload, ['hideClosedList', 'hideBacklogList']),
-        id: this.generateBoardGid(boardPayload.id),
-      };
-
-      return Promise.all([
-        axios.put(this.generateBoardsPath(boardPayload.id), { board: boardPayload }),
-        gqlClient.mutate({
-          mutation: createBoardMutation,
-          variables: input,
-        }),
-      ]);
-    }
-
-    return axios
-      .post(this.generateBoardsPath(), { board: boardPayload })
-      .then(resp => resp.data)
-      .then(data => {
-        gqlClient.mutate({
-          mutation: createBoardMutation,
-          variables: {
-            ...pick(boardPayload, ['hideClosedList', 'hideBacklogList']),
-            id: this.generateBoardGid(data.id),
-          },
-        });
-        return data;
-      });
-  },
-
   fetchBacklog: () => {
     notImplemented();
   },
