@@ -24,7 +24,6 @@ RSpec.describe 'Import/Export - Group Import', :js do
     let(:file) { File.join(Rails.root, 'spec', %w[fixtures group_export.tar.gz]) }
 
     context 'when using the pre-filled path', :sidekiq_inline do
-      # rubocop: disable CodeReuse/ActiveRecord
       it 'successfully imports the group' do
         group_name = 'Test Group Import'
 
@@ -47,11 +46,9 @@ RSpec.describe 'Import/Export - Group Import', :js do
         expect(group.path).to eq 'test-group-import'
         expect(group.import_state.status).to eq GroupImportState.state_machine.states[:finished].value
       end
-      # rubocop: enable CodeReuse/ActiveRecord
     end
 
     context 'when modifying the pre-filled path' do
-      # rubocop: disable CodeReuse/ActiveRecord
       it 'successfully imports the group' do
         visit new_group_path
 
@@ -68,7 +65,6 @@ RSpec.describe 'Import/Export - Group Import', :js do
         group = Group.find_by(name: 'Test Group Import')
         expect(group.path).to eq 'custom-path'
       end
-      # rubocop: enable CodeReuse/ActiveRecord
     end
 
     context 'when the path is already taken' do

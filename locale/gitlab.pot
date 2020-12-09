@@ -12796,9 +12796,6 @@ msgstr ""
 msgid "GitLab single sign-on URL"
 msgstr ""
 
-msgid "GitLab source URL"
-msgstr ""
-
 msgid "GitLab username"
 msgstr ""
 
@@ -13705,10 +13702,16 @@ msgstr ""
 msgid "GroupsNew|Create group"
 msgstr ""
 
+msgid "GroupsNew|GitLab source URL"
+msgstr ""
+
 msgid "GroupsNew|Import"
 msgstr ""
 
 msgid "GroupsNew|Import group"
+msgstr ""
+
+msgid "GroupsNew|Import groups from another instance of GitLab"
 msgstr ""
 
 msgid "GroupsNew|My Awesome Group"
@@ -13720,6 +13723,15 @@ msgstr ""
 msgid "GroupsNew|No import options available"
 msgstr ""
 
+msgid "GroupsNew|Personal access token"
+msgstr ""
+
+msgid "GroupsNew|Please fill in GitLab source URL."
+msgstr ""
+
+msgid "GroupsNew|Please fill in personal access token."
+msgstr ""
+
 msgid "GroupsNew|Provide credentials for another instance of GitLab to import your groups directly."
 msgstr ""
 
@@ -13727,6 +13739,9 @@ msgid "GroupsNew|To import a group, navigate to the group settings for the GitLa
 msgstr ""
 
 msgid "GroupsNew|Upload file"
+msgstr ""
+
+msgid "GroupsNew|e.g. h8d3f016698e..."
 msgstr ""
 
 msgid "GroupsTree|Are you sure you want to leave the \"%{fullName}\" group?"
@@ -14194,9 +14209,6 @@ msgid "Import group from file"
 msgstr ""
 
 msgid "Import groups"
-msgstr ""
-
-msgid "Import groups from another instance of GitLab"
 msgstr ""
 
 msgid "Import in progress"
@@ -19827,9 +19839,6 @@ msgstr ""
 msgid "Personal Access Token"
 msgstr ""
 
-msgid "Personal access token"
-msgstr ""
-
 msgid "Personal project creation is not allowed. Please contact your administrator with questions"
 msgstr ""
 
@@ -20320,12 +20329,6 @@ msgid "Please enter or upload a license."
 msgstr ""
 
 msgid "Please fill in a descriptive name for your group."
-msgstr ""
-
-msgid "Please fill in instance URL."
-msgstr ""
-
-msgid "Please fill in personal access token."
 msgstr ""
 
 msgid "Please fill out this field."

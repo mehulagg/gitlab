@@ -56,7 +56,7 @@ RSpec.describe 'Import/Export - Connect to another instance', :js do
 
       click_on 'Connect instance'
 
-      expect(page).to have_content 'Please fill in instance URL'
+      expect(page).to have_content 'Please fill in GitLab source URL'
     end
   end
 

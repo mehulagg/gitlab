@@ -2,7 +2,7 @@
 - group_path = root_url
 - group_path << parent.full_path + '/' if parent
 
-= form_with url: import_gitlab_group_path, class: 'group-form gl-show-field-errors' do |f|
+= form_with url: import_gitlab_group_path, class: 'group-form gl-show-field-errors', multipart: true do |f|
   = form_errors(@group)
 
   .gl-border-l-solid.gl-border-r-solid.gl-border-gray-100.gl-border-1.gl-p-5
@@ -10,16 +10,17 @@
       = _('Import group from file')
     %p
       = s_('GroupsNew|Provide credentials for another instance of GitLab to import your groups directly.')
-    %label.gl-pb-5.gl-font-weight-bold.gl-display-flex.gl-flex-direction-column
-      = _('New group name')
-      = f.text_field :name, placeholder: s_('GroupsNew|My Awesome Group'), class: 'js-autofill-group-name gl-form-input gl-mt-3 col-xs-12 col-sm-8',
+    .form-group.gl-display-flex.gl-flex-direction-column
+      = f.label :name, _('New group name'), for: 'import_group_name'
+      = f.text_field :name, placeholder: s_('GroupsNew|My Awesome Group'), class: 'js-autofill-group-name gl-form-input col-xs-12 col-sm-8',
         required: true,
         title: _('Please fill in a descriptive name for your group.'),
-        autofocus: true
+        autofocus: true,
+        id: 'import_group_name'
 
-    %label.gl-pb-5.gl-font-weight-bold.gl-display-flex.gl-flex-direction-column
-      = _('New group URL')
-      .input-group.gl-field-error-anchor.gl-mt-3.col-xs-12.col-sm-8.gl-p-0
+    .form-group.gl-display-flex.gl-flex-direction-column
+      = f.label :import_group_path, _('New group URL'), for: 'import_group_path'
+      .input-group.gl-field-error-anchor.col-xs-12.col-sm-8.gl-p-0
         .group-root-path.input-group-prepend.has-tooltip{ title: group_path, :'data-placement' => 'bottom' }
           .input-group-text
             %span
@@ -38,8 +39,8 @@
         %span.gl-path-suggestions
       %p.validation-success.gl-field-success.field-validation.hide= _('Group path is available.')
       %p.validation-pending.gl-field-error-ignore.field-validation.hide= _('Checking group path availability...')
-    %label.gl-pb-5.gl-font-weight-bold
-      = s_('GroupsNew|Upload file')
+    .form-group
+      = f.label :file, s_('GroupsNew|Upload file')
       .gl-font-weight-normal
         - import_export_link_start = '<a href="%{url}" target="_blank">'.html_safe % { url: help_page_path('user/group/settings/import_export') }
         = s_('GroupsNew|To import a group, navigate to the group settings for the GitLab source instance, %{link_start}generate an export file%{link_end}, and upload it here.').html_safe % { link_start: import_export_link_start, link_end: '</a>'.html_safe }
