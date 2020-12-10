@@ -249,17 +249,15 @@ module Gitlab
 
           emails.split(' ').each do |email|
             unless existing_emails.include?(email.downcase)
-              quick_action_target.issue_email_participants.create!(email: email)
-              added_emails << email
+              new_participant = quick_action_target.issue_email_participants.create(email: email)
+              added_emails << email if new_participant.persisted?
             end
           end
 
           if added_emails.any?
             message = _("added %{emails}") % { emails: added_emails.to_sentence }
             SystemNoteService.add_email_participants(quick_action_target, quick_action_target.project, current_user, message)
-            # Changes added -> Added for the execution message
-            message[0] = message[0].capitalize
-            @execution_message[:invite_email] = _("%{message}.") % { message: message }
+            @execution_message[:invite_email] = message.capitalize << "."
           else
             @execution_message[:invite_email] = _("No email participants were added. Either none were provided, or they already exist.")
           end

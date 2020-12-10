@@ -3,7 +3,7 @@
 class IssueEmailParticipant < ApplicationRecord
   belongs_to :issue
 
-  validates :email, presence: true, uniqueness: { scope: [:issue_id], case_sensitive: false }
+  validates :email, uniqueness: { scope: [:issue_id], case_sensitive: false }
   validates :issue, presence: true
   validate :validate_email_format
 

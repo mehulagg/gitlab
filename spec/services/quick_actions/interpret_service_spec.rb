@@ -1781,16 +1781,49 @@ RSpec.describe QuickActions::InterpretService do
 
       context 'with new email participants' do
         let(:content) { '/invite_email a@gitlab.com b@gitlab.com' }
-        let(:subject) { service.execute(content, issuable) }
+
+        subject(:add_emails) { service.execute(content, issuable) }
 
         it 'returns message' do
-          _, _, message = subject
+          _, _, message = add_emails
 
           expect(message).to eq('Added a@gitlab.com and b@gitlab.com.')
         end
 
         it 'adds 2 participants' do
-          expect { subject }.to change { issue.issue_email_participants.count }.by(2)
+          expect { add_emails }.to change { issue.issue_email_participants.count }.by(2)
+        end
+
+        context 'with invalid email' do
+          let(:content) { '/invite_email a@gitlab.com bad_email' }
+
+          it 'only adds valid emails' do
+            expect { add_emails }.to change { issue.issue_email_participants.count }.by(1)
+          end
+        end
+
+        context 'with existing email' do
+          let(:content) { '/invite_email a@gitlab.com existing@gitlab.com' }
+
+          it 'only adds new emails' do
+            issue.issue_email_participants.create!(email: 'existing@gitlab.com')
+
+            expect { add_emails }.to change { issue.issue_email_participants.count }.by(1)
+          end
+
+          it 'only adds new (case insensitive) emails' do
+            issue.issue_email_participants.create!(email: 'EXISTING@gitlab.com')
+
+            expect { add_emails }.to change { issue.issue_email_participants.count }.by(1)
+          end
+        end
+
+        context 'with duplicate email' do
+          let(:content) { '/invite_email a@gitlab.com a@gitlab.com' }
+
+          it 'only adds unique new emails' do
+            expect { add_emails }.to change { issue.issue_email_participants.count }.by(1)
+          end
         end
 
         context 'with feature flag disabled' do
@@ -1799,7 +1832,7 @@ RSpec.describe QuickActions::InterpretService do
           end
 
           it 'does not add any participants' do
-            expect { subject }.not_to change { issue.issue_email_participants.count }
+            expect { add_emails }.not_to change { issue.issue_email_participants.count }
           end
         end
       end
