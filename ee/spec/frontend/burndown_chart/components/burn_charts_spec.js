@@ -5,8 +5,8 @@ import MockAdapter from 'axios-mock-adapter';
 import BurnCharts from 'ee/burndown_chart/components/burn_charts.vue';
 import BurndownChart from 'ee/burndown_chart/components/burndown_chart.vue';
 import BurnupChart from 'ee/burndown_chart/components/burnup_chart.vue';
-import IterationReportSummaryOpen from 'ee/iterations/components/iteration_report_summary_open.vue';
-import IterationReportSummaryCards from 'ee/iterations/components/iteration_report_summary_cards.vue';
+import OpenTimeboxSummary from 'ee/burndown_chart/components/open_timebox_summary.vue';
+import TimeboxSummaryCards from 'ee/burndown_chart/components/timebox_summary_cards.vue';
 import { useFakeDate } from 'helpers/fake_date';
 import { day1, day2, day3, day4 } from '../mock_data';
 
@@ -44,6 +44,15 @@ describe('burndown_chart', () => {
       propsData: {
         ...defaultProps,
         ...props,
+      },
+      mocks: {
+        $apollo: {
+          queries: {
+            report: {
+              loading: false,
+            },
+          },
+        },
       },
       data() {
         return data;
@@ -131,7 +140,7 @@ describe('burndown_chart', () => {
       },
     });
 
-    expect(wrapper.find(IterationReportSummaryOpen).props()).toEqual({
+    expect(wrapper.find(OpenTimeboxSummary).props()).toEqual({
       iterationId: 'gid://gitlab/Iteration/11',
       displayValue: 'count',
       namespaceType: 'group',
@@ -139,7 +148,7 @@ describe('burndown_chart', () => {
     });
   });
 
-  it('renders IterationReportCards for closed iterations', async () => {
+  it('renders TimeboxSummaryCards for closed iterations', async () => {
     createComponent({
       data: {
         report: {
@@ -152,7 +161,7 @@ describe('burndown_chart', () => {
       },
     });
 
-    expect(wrapper.find(IterationReportSummaryCards).exists()).toBe(true);
+    expect(wrapper.find(TimeboxSummaryCards).exists()).toBe(true);
   });
 
   it('uses burndown data computed from burnup data', () => {

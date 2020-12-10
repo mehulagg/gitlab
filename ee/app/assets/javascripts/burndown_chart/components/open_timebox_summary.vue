@@ -1,14 +1,10 @@
 <script>
 import { __ } from '~/locale';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
-import IterationReportSummaryCards from './iteration_report_summary_cards.vue';
-import summaryStatsQuery from '../queries/iteration_issues_summary.query.graphql';
-import { Namespace } from '../constants';
+import summaryStatsQuery from '../graphql/iteration_issues_summary.query.graphql';
+import { Namespace } from '../../iterations/constants';
 
 export default {
-  components: {
-    IterationReportSummaryCards,
-  },
   apollo: {
     issues: {
       query: summaryStatsQuery,
@@ -66,14 +62,6 @@ export default {
         isGroup: this.namespaceType === Namespace.Group,
         displayValue: this.displayValue,
       };
-    },
-    completedPercent() {
-      const open = this.issues.open + this.issues.assigned;
-      const { closed } = this.issues;
-      if (closed <= 0) {
-        return 0;
-      }
-      return ((closed / (open + closed)) * 100).toFixed(0);
     },
     columns() {
       return [

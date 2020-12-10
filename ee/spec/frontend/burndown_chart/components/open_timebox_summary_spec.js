@@ -1,4 +1,4 @@
-import IterationReportSummary from 'ee/iterations/components/iteration_report_summary_open.vue';
+import OpenTimeboxSummary from 'ee/burndown_chart/components/open_timebox_summary.vue';
 import { shallowMount } from '@vue/test-utils';
 
 describe('Iterations report summary', () => {
@@ -14,7 +14,7 @@ describe('Iterations report summary', () => {
   const mountComponent = ({ props = defaultProps, loading = false, data = {} } = {}) => {
     slotSpy = jest.fn();
 
-    wrapper = shallowMount(IterationReportSummary, {
+    wrapper = shallowMount(OpenTimeboxSummary, {
       propsData: props,
       data() {
         return data;

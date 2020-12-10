@@ -6,8 +6,9 @@ import { __ } from '~/locale';
 import { getDayDifference, nDaysAfter, newDateAsLocaleTime } from '~/lib/utils/datetime_utility';
 import BurndownChart from './burndown_chart.vue';
 import BurnupChart from './burnup_chart.vue';
-import IterationReportSummaryCards from '../../iterations/components/iteration_report_summary_cards.vue';
-import IterationReportSummaryOpen from '../../iterations/components/iteration_report_summary_open.vue';
+import TimeboxSummaryCards from './timebox_summary_cards.vue';
+import OpenTimeboxSummary from './open_timebox_summary.vue';
+import { Namespace } from '../../iterations/constants';
 import BurnupQuery from '../graphql/burnup.query.graphql';
 import BurndownChartData from '../burn_chart_data';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
@@ -20,9 +21,9 @@ export default {
     GlButtonGroup,
     BurndownChart,
     BurnupChart,
-    IterationReportSummaryCards,
-    IterationReportSummaryOpen,
     GlSprintf,
+    OpenTimeboxSummary,
+    TimeboxSummaryCards,
   },
   mixins: [glFeatureFlagsMixin()],
   props: {
@@ -57,7 +58,7 @@ export default {
     namespaceType: {
       type: String,
       required: false,
-      default: 'group',
+      default: Namespace.Group,
     },
     burndownEventsPath: {
       type: String,
@@ -334,26 +335,26 @@ export default {
       </gl-button-group>
     </div>
     <template v-if="iterationId">
-      <iteration-report-summary-cards
+      <timebox-summary-cards
         v-if="iterationState === 'closed'"
         :columns="columns"
-        :loading="this.$apollo.queries.report.loading"
+        :loading="$apollo.queries.report.loading"
         :total="report.stats.total"
       />
-      <iteration-report-summary-open
+      <open-timebox-summary
         v-else
         :full-path="fullPath"
         :iteration-id="iterationId"
         :namespace-type="namespaceType"
         :display-value="issuesSelected ? 'count' : 'weight'"
       >
-        <iteration-report-summary-cards
+        <timebox-summary-cards
           slot-scope="{ columns: openColumns, loading: summaryLoading, total }"
           :columns="openColumns"
           :loading="summaryLoading"
           :total="total"
         />
-      </iteration-report-summary-open>
+      </open-timebox-summary>
     </template>
     <div class="row">
       <gl-alert v-if="error" variant="danger" class="col-12" @dismiss="error = ''">

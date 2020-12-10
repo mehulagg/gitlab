@@ -1,4 +1,4 @@
-import IterationReportSummaryCards from 'ee/iterations/components/iteration_report_summary_cards.vue';
+import TimeboxSummaryCards from 'ee/burndown_chart/components/timebox_summary_cards.vue';
 import { mount } from '@vue/test-utils';
 import { GlCard } from '@gitlab/ui';
 
@@ -24,7 +24,7 @@ describe('Iterations report summary cards', () => {
   };
 
   const mountComponent = (props = defaultProps) => {
-    wrapper = mount(IterationReportSummaryCards, {
+    wrapper = mount(TimeboxSummaryCards, {
       propsData: props,
     });
   };
