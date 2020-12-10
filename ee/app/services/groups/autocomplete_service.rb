@@ -34,7 +34,7 @@ module Groups
       # See https://gitlab.com/gitlab-org/gitlab/issues/6837
       EpicsFinder.new(current_user, finder_params)
         .execute
-        .select(:iid, :title)
+        .map { |epic| [epic.to_reference(full: true).html_safe, epic.title] }
     end
 
     def vulnerabilities
