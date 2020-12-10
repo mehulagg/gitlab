@@ -48,7 +48,7 @@ module EE
 
       def user_cap_increased?
         return false unless application_setting.previous_changes.key?(:new_user_signups_cap)
-        return false unless ::Feature.enabled?(:admin_new_user_signups_cap)
+        return false unless ::Feature.enabled?(:admin_new_user_signups_cap, default: true)
 
         previous_user_cap, current_user_cap = application_setting.previous_changes[:new_user_signups_cap]
 
