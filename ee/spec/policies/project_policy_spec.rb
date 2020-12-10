@@ -22,9 +22,9 @@ RSpec.describe ProjectPolicy do
 
     let(:additional_developer_permissions) do
       %i[
-        admin_vulnerability_feedback read_project_security_dashboard
+        admin_vulnerability_feedback read_project_audit_events read_project_security_dashboard
         read_vulnerability read_vulnerability_scanner create_vulnerability create_vulnerability_export admin_vulnerability
-        admin_vulnerability_issue_link read_merge_train
+        admin_vulnerability_issue_link admin_vulnerability_external_issue_link read_merge_train
       ]
     end
 

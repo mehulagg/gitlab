@@ -232,10 +232,16 @@ NOTE:
 If you manually copied your public SSH key make sure you copied the entire
 key starting with `ssh-ed25519` (or `ssh-rsa`) and ending with your email address.
 
+## Two-factor Authentication (2FA)
+
+You can set up two-factor authentication (2FA) for
+[Git over SSH](../security/two_factor_authentication.md#two-factor-authentication-2fa-for-git-over-ssh-operations).
+
 ## Testing that everything is set up correctly
 
-To test whether your SSH key was added correctly, run the following command in
-your terminal (replacing `gitlab.com` with your GitLab's instance domain):
+To test whether your SSH key was added correctly, run the following
+command in your terminal (replace `gitlab.com` with the domain of
+your GitLab instance):
 
 ```shell
 ssh -T git@gitlab.com
@@ -260,8 +266,8 @@ section to make sure you're connecting to the correct server. For example, you c
 the ECDSA key fingerprint shown above in the linked section.
 
 Once added to the list of known hosts, you should validate the
-authenticity of GitLab's host again. Run the above command once more, and
-you should only receive a _Welcome to GitLab, `@username`!_ message.
+authenticity of the GitLab host, once again. Run the above command
+again, and you should receive a _Welcome to GitLab, `@username`!_ message.
 
 If the welcome message doesn't appear, you can troubleshoot the problem by running `ssh`
 in verbose mode with the following command:

@@ -614,7 +614,7 @@
   :idempotent:
   :tags: []
 - :name: todos_destroyer:todos_destroyer_confidential_epic
-  :feature_category: :epic_tracking
+  :feature_category: :epics
   :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown

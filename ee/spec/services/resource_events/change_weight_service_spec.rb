@@ -8,7 +8,7 @@ RSpec.describe ResourceEvents::ChangeWeightService do
   let(:issue) { create(:issue, weight: 3) }
   let(:created_at_time) { Time.utc(2019, 1, 1, 12, 30, 48, '123.123'.to_r) }
 
-  subject { described_class.new([issue], user, created_at_time).execute }
+  subject { described_class.new(issue, user, created_at_time).execute }
 
   before do
     ResourceWeightEvent.new(issue: issue, user: user).save!
@@ -51,31 +51,16 @@ RSpec.describe ResourceEvents::ChangeWeightService do
     end
   end
 
+  it 'tracks issue usage data counters' do
+    expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).to receive(:track_issue_weight_changed_action).with(author: user)
+
+    subject
+  end
+
   def expect_event_record(record, weight:, created_at:)
     expect(record.issue).to eq(issue)
     expect(record.user).to eq(user)
     expect(record.weight).to eq(weight)
     expect(record.created_at).to be_like_time(created_at)
-  end
-
-  describe 'bulk issue weight updates' do
-    let(:issues) { create_list(:issue, 3, weight: 1) }
-
-    before do
-      issues.each { |issue| issue.update!(weight: 3) }
-    end
-
-    it 'bulk insert weight changes' do
-      expect do
-        described_class.new(issues, user, created_at_time).execute
-      end.to change { ResourceWeightEvent.count }.by(6)
-    end
-
-    it 'calls first_weight_event? once per resource' do
-      service = described_class.new(issues, user, created_at_time)
-      allow(service).to receive(:first_weight_event?).exactly(3).times
-
-      service.execute
-    end
   end
 end

@@ -55,10 +55,6 @@
   .issue-token-link:focus > & {
     background-color: $border-gray-normal;
   }
-
-  > .fa {
-    line-height: inherit;
-  }
 }
 
 .issue-token-title-standalone {
@@ -89,9 +85,5 @@
   .issue-token-link:focus + & {
     background-color: $border-gray-normal;
     outline: none;
-  }
-
-  > .fa {
-    font-size: 0.9em;
   }
 }

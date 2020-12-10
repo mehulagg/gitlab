@@ -1159,6 +1159,27 @@ RSpec.describe GroupPolicy do
     end
   end
 
+  describe ':read_group_audit_events' do
+    using RSpec::Parameterized::TableSyntax
+
+    let(:policy) { :read_group_audit_events }
+
+    where(:role, :allowed) do
+      :guest      | false
+      :reporter   | false
+      :developer  | true
+      :maintainer | true
+      :owner      | true
+      :admin      | true
+    end
+
+    with_them do
+      let(:current_user) { public_send(role) }
+
+      it { is_expected.to(allowed ? be_allowed(policy) : be_disallowed(policy)) }
+    end
+  end
+
   context 'when group is locked because storage usage limit exceeded' do
     let(:current_user) { owner }
     let(:policies) do

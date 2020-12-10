@@ -233,6 +233,7 @@ module EE
         enable :create_wiki
         enable :admin_merge_request
         enable :read_ci_minutes_quota
+        enable :read_group_audit_events
       end
 
       rule { security_dashboard_enabled & developer }.enable :read_group_security_dashboard

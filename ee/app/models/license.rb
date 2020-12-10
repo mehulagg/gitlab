@@ -135,6 +135,7 @@ class License < ApplicationRecord
     container_scanning
     coverage_fuzzing
     credentials_inventory
+    cilium_alerts
     custom_compliance_frameworks
     dast
     dependency_scanning

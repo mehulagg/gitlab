@@ -952,7 +952,7 @@ For other punctuation rules, refer to the
 - Add the corresponding [product badge](#product-tier-badges) according to the tier the
   feature belongs.
 - Our documentation site search engine prioritizes words used in headings and
-  subheadings. Make you subheading titles clear, descriptive, and complete to help
+  subheadings. Make your subheading titles clear, descriptive, and complete to help
   users find the right example, as shown in the section on [heading titles](#heading-titles).
 - See [Capitalization](#capitalization) for guidelines on capitalizing headings.
 
@@ -1811,9 +1811,9 @@ Tier badges are displayed as orange text next to a heading. For example:
 You must assign a tier badge:
 
 - To [all H1 topic headings](#product-tier-badges-on-headings).
-- To all H2 or higher topic headings that apply to a tier other than Core.
+- To topic headings that don't apply to the same tier as the H1.
 - To [sections of a topic](#product-tier-badges-on-other-content),
-  if they apply to a tier other than Core.
+  if they apply to a tier other than what applies to the H1.
 
 #### Product tier badges on headings
 

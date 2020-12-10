@@ -115,7 +115,7 @@ RSpec.describe Projects::RequirementsManagement::RequirementsController do
 
   describe 'POST #authorize' do
     subject do
-      post authorize_project_requirements_management_requirements_path(project),
+      post import_csv_authorize_project_requirements_management_requirements_path(project),
         headers: workhorse_headers
     end
 
