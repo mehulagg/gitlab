@@ -146,7 +146,7 @@ export default {
           <div class="gl-text-right">
             <slot name="actions" :profile="item"></slot>
 
-            <gl-button v-if="item.editPath" :href="item.editPath" class="gl-mx-5" size="small">{{
+            <gl-button v-if="item.editPath" :href="item.editPath" class="gl-ml-3" size="small">{{
               __('Edit')
             }}</gl-button>
 
@@ -156,7 +156,7 @@ export default {
               variant="danger"
               category="secondary"
               size="small"
-              class="gl-mr-3"
+              class="gl-mx-3"
               :title="s__('DastProfiles|Delete profile')"
               @click="prepareProfileDeletion(item.id)"
             />
