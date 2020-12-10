@@ -376,7 +376,7 @@ sudo gitlab-rake cache:clear
 
 ### Export a project
 
-Enter the Rails console while and capture its output:
+Enter the Rails console and capture its output:
 
 ```shell
 sudo gitlab-rails console | tee /tmp/<case-id-and-keywords>.txt
