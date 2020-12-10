@@ -8,6 +8,7 @@ module AlertManagement
 
     MONITORING_TOOL = Gitlab::AlertManagement::Payload::MONITORING_TOOLS.fetch(:cilium)
 
+    # https://gitlab.com/gitlab-org/gitlab/-/issues/292707
     def execute
       return bad_request unless valid_payload_size?
 
