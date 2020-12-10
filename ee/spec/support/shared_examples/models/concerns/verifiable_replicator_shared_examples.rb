@@ -326,32 +326,14 @@ RSpec.shared_examples 'a verifiable replicator' do
   end
 
   describe '#verify' do
-    context 'on a Geo primary' do
-      before do
-        stub_primary_node
-      end
+    it 'wraps the checksum calculation in track_checksum_attempt!' do
+      tracker = double('tracker')
+      allow(replicator).to receive(:verification_state_tracker).and_return(tracker)
 
-      context 'when the checksum succeeds' do
-        it 'delegates checksum calculation and the state change to model_record' do
-          expect(model_record).to receive(:calculate_checksum).and_return('abc123')
-          expect(model_record).to receive(:verification_succeeded_with_checksum!).with('abc123', kind_of(Time))
+      expect(model_record).to receive(:calculate_checksum).and_return('abc123')
+      expect(tracker).to receive(:track_checksum_attempt!).and_yield
 
-          replicator.verify
-        end
-      end
-
-      context 'when an error is raised during calculate_checksum' do
-        it 'passes the error message' do
-          error = StandardError.new('Some exception')
-          allow(model_record).to receive(:calculate_checksum) do
-            raise error
-          end
-
-          expect(model_record).to receive(:verification_failed_with_message!).with('Error calculating the checksum', error)
-
-          replicator.verify
-        end
-      end
+      replicator.verify
     end
   end
 end

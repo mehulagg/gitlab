@@ -157,6 +157,65 @@ RSpec.describe Gitlab::Geo::VerificationState do
     end
   end
 
+  describe '#track_checksum_attempt!' do
+    context 'when verification was not yet started' do
+      it 'starts verification' do
+        expect do
+          subject.track_checksum_attempt! do
+            'a_checksum_value'
+          end
+        end.to change { subject.verification_started_at }.from(nil)
+      end
+    end
+
+    context 'when verification was started' do
+      it 'does not update verification_started_at' do
+        subject.verification_started!
+        expected = subject.verification_started_at
+
+        subject.track_checksum_attempt! do
+          'a_checksum_value'
+        end
+
+        expect(subject.verification_started_at).to eq(expected)
+      end
+    end
+
+    it 'yields to the checksum calculation' do
+      expect do |probe|
+        subject.track_checksum_attempt!(&probe)
+      end.to yield_with_no_args
+    end
+
+    it 'calls track_checksum_result!' do
+      expect(subject).to receive(:track_checksum_result!).with('foo', instance_of(ActiveSupport::TimeWithZone))
+
+      subject.track_checksum_attempt! do
+        'foo'
+      end
+    end
+
+    context 'when an error occurs while yielding' do
+      it 'sets verification_failed' do
+        subject.track_checksum_attempt! do
+          raise 'an error'
+        end
+
+        expect(subject.reload.verification_failed?).to be_truthy
+      end
+    end
+  end
+
+  describe '#track_checksum_result!' do
+    it 'sets verification_succeeded' do
+      subject.verification_started!
+
+      subject.track_checksum_result!('foo', Time.current)
+
+      expect(subject.reload.verification_succeeded?).to be_truthy
+    end
+  end
+
   describe '#verification_succeeded_with_checksum!' do
     before do
       subject.verification_started!
