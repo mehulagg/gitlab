@@ -10,6 +10,28 @@ CREATE EXTENSION IF NOT EXISTS btree_gist;
 
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
+CREATE FUNCTION fn_set_issues_iid() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+  generated_iid int;
+BEGIN
+  INSERT INTO internal_ids
+    (project_id, usage, last_value)
+  VALUES
+    (NEW.project_id, 0, 0) -- issue usage enum value is 0
+  ON CONFLICT (usage, project_id) WHERE project_id IS NOT NULL DO UPDATE
+    SET last_value = internal_ids.last_value + 1
+  RETURNING last_value INTO generated_iid;
+
+  RAISE NOTICE 'generated_iid is %', generated_iid;
+
+  NEW.iid := generated_iid;
+
+  RETURN NEW;
+END
+$$;
+
 CREATE FUNCTION table_sync_function_2be879775d() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
@@ -23253,6 +23275,8 @@ ALTER INDEX product_analytics_events_experimental_pkey ATTACH PARTITION gitlab_p
 ALTER INDEX product_analytics_events_experimental_pkey ATTACH PARTITION gitlab_partitions_static.product_analytics_events_experimental_63_pkey;
 
 CREATE TRIGGER table_sync_trigger_ee39a25f9d AFTER INSERT OR DELETE OR UPDATE ON audit_events FOR EACH ROW EXECUTE PROCEDURE table_sync_function_2be879775d();
+
+CREATE TRIGGER tg_set_issues_id BEFORE INSERT ON issues FOR EACH ROW EXECUTE PROCEDURE fn_set_issues_iid();
 
 ALTER TABLE ONLY chat_names
     ADD CONSTRAINT fk_00797a2bf9 FOREIGN KEY (service_id) REFERENCES services(id) ON DELETE CASCADE;
