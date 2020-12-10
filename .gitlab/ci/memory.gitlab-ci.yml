@@ -55,3 +55,13 @@ memory-on-boot:
     reports:
       metrics: tmp/memory_on_boot_metrics.txt
     expire_in: 31d
+
+memory-gc-stats:
+  extends: .default-before_script
+  stage: prepare
+  script:
+    - ./collect_gc_stats.rb
+  artifacts:
+    paths:
+      - tmp/gc_settings_exp/*
+    expire_in: 14d
