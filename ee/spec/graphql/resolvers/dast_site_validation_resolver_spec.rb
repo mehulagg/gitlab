@@ -43,7 +43,7 @@ RSpec.describe Resolvers::DastSiteValidationResolver do
       it { is_expected.to contain_exactly(dast_site_validation3, dast_site_validation1) }
     end
 
-    context 'when one normalized_target_urls is specified' do
+    context 'when one normalized_target_url is specified' do
       let(:args) { { normalized_target_urls: [dast_site_validation2.url_base] } }
 
       it { is_expected.to contain_exactly(dast_site_validation2) }

@@ -13,6 +13,7 @@ class DastSiteValidationsFinder
     relation = by_project(relation)
     relation = by_url_base(relation)
     relation = by_state(relation)
+    relation = by_most_recent(relation)
 
     sort(relation)
   end
@@ -38,6 +39,14 @@ class DastSiteValidationsFinder
 
     relation.with_state(params[:state])
   end
+
+  # rubocop: disable CodeReuse/ActiveRecord
+  def by_most_recent(relation)
+    return relation unless params[:most_recent]
+
+    relation.select('*').from(relation.by_most_recent)
+  end
+  # rubocop: enable CodeReuse/ActiveRecord
 
   # rubocop: disable CodeReuse/ActiveRecord
   def sort(relation)

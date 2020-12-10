@@ -17,7 +17,7 @@ module Resolvers
     def resolve(**args)
       return DastSiteValidation.none unless allowed?
 
-      DastSiteValidationsFinder.new(project_id: project.id, url_base: url_base(args)).execute
+      DastSiteValidationsFinder.new(project_id: project.id, url_base: url_base(args), most_recent: true).execute
     end
 
     private

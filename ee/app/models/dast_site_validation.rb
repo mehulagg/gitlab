@@ -17,6 +17,12 @@ class DastSiteValidation < ApplicationRecord
     where(url_base: url_base)
   end
 
+  scope :by_most_recent, -> do
+    selection = Arel.sql("DISTINCT ON (#{table_name}.url_base) #{table_name}.*")
+
+    order(arel_table[:url_base].desc, arel_table[:id].desc).select(selection)
+  end
+
   before_create :set_normalized_url_base
 
   enum validation_strategy: { text_file: 0, header: 1 }
