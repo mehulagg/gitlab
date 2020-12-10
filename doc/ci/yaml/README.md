@@ -2183,31 +2183,27 @@ job3:
 WARNING:
 This feature might not be available to you. Check the **version history** note above for details.
 
-Use `allow_failure:exit_codes` to dynamically control if a job should be allowed to fail.
+Use `allow_failure:exit_codes` to dynamically control if a job should be allowed
+to fail. You can list which exit codes are considered failures. The job is allowed
+to fail for any other exit code. For example:
 
 ```yaml
-test_job:
+test_job_1:
   script:
+    - echo "Run a script that results in exit code 137. This job fails."
     - exit 137
+  allow_failure:
+    exit_codes: 137
+
+test_job_2:
+  script:
+    - echo "Run a script that results in exit code 1. This job is allowed to fail."
+    - exit 1
   allow_failure:
     exit_codes:
       - 137
       - 255
 ```
-
-In this example `test_job` will be marked as allowed to fail because the
-script's exit code is included in the `exit_codes` list.
-
-```yaml
-test_job:
-  script:
-    - exit 1
-  allow_failure:
-    exit_codes: 137
-```
-
-You can also specify only one value instead of a list. This job will not be
-allowed to fail because the exit codes do not match.
 
 ##### Enable or disable `allow_failure:exit_codes` **(CORE ONLY)**
 
