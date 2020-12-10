@@ -33,7 +33,7 @@ information may be included in the plan output.
 
 ### Mitigation
 
-If you plan in using sensitive information such as the one highlighted above (but not limited to), we strongly recommend that you disable [public pipelines](https://docs.gitlab.com/ee/ci/pipelines/settings.html#visibility-of-pipelines)
+If you plan in using sensitive information such as the one highlighted above (but not limited to), we strongly recommend that you disable [public pipelines](https://docs.gitlab.com/ee/ci/pipelines/settings.html#visibility-of-pipelines). **This will make artifacts accessible to users with Reporter role and above. GitLab administrators will also be able to access and read artifacts**. 
 
 ## Permissions for using Terraform
 
