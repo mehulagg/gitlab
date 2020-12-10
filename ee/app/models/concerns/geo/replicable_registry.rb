@@ -34,7 +34,8 @@ module Geo::ReplicableRegistry
 
   included do
     include ::Delay
-    include ::Geo::VerificationState
+    include ::Gitlab::Geo::VerificationState
+    extend ::Gitlab::Utils::Override
 
     scope :failed, -> { with_state(:failed) }
     scope :needs_sync_again, -> { failed.retry_due }
@@ -97,6 +98,40 @@ module Geo::ReplicableRegistry
       self.last_sync_failure += ": #{error.message}" if error.respond_to?(:message)
 
       super()
+    end
+
+    override :clear_verification_failure_fields
+    def clear_verification_failure_fields
+      super
+
+      self.verification_checksum_mismatch = nil
+      self.checksum_mismatch = false
+    end
+
+    override :track_checksum_result!
+    def track_checksum_result!(checksum, calculation_started_at)
+      unless matches_checksum?(checksum)
+        return verification_failed_due_to_mismatch!(checksum, calculation_started_at)
+      end
+
+      verification_succeeded_with_checksum!(checksum, calculation_started_at)
+    end
+
+    # Records a checksum mismatch
+    #
+    # @param [String] checksum value which does not match the primary checksum
+    def verification_failed_due_to_mismatch!(checksum, primary_checksum)
+      message = 'Checksum does not match the primary checksum'
+      details = { checksum: checksum, primary_checksum: primary_checksum }
+
+      log_info(message, details)
+
+      self.verification_failure = "#{message} #{details}"
+      self.verification_checksum = checksum
+      self.verification_checksum_mismatch = checksum
+      self.checksum_mismatch = true
+
+      self.verification_failed!
     end
   end
 end

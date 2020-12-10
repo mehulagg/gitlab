@@ -336,4 +336,29 @@ RSpec.shared_examples 'a verifiable replicator' do
       replicator.verify
     end
   end
+
+  describe '#verification_state_tracker' do
+    context 'on a Geo primary' do
+      before do
+        stub_primary_node
+      end
+
+      it 'returns model_record' do
+        expect(replicator.verification_state_tracker).to eq(model_record)
+      end
+    end
+
+    context 'on a Geo secondary' do
+      before do
+        stub_secondary_node
+      end
+
+      it 'returns registry' do
+        registry = double('registry')
+        allow(replicator).to receive(:registry).and_return(registry)
+
+        expect(replicator.verification_state_tracker).to eq(registry)
+      end
+    end
+  end
 end

@@ -59,7 +59,6 @@ module Gitlab
           end
 
           before_transition any => :verification_failed do |instance, _|
-            instance.verification_checksum = nil
             instance.verification_retry_count ||= 0
             instance.verification_retry_count += 1
             instance.verification_retry_at = instance.next_retry_time(instance.verification_retry_count)
@@ -67,10 +66,8 @@ module Gitlab
           end
 
           before_transition any => :verification_succeeded do |instance, _|
-            instance.verification_retry_count = 0
-            instance.verification_retry_at = nil
-            instance.verification_failure = nil
             instance.verified_at = Time.current
+            instance.clear_verification_failure_fields
           end
 
           event :verification_started do
@@ -177,6 +174,13 @@ module Gitlab
         end
       end
 
+      # Overridden by ReplicableRegistry
+      def clear_verification_failure_fields
+        self.verification_retry_count = 0
+        self.verification_retry_at = nil
+        self.verification_failure = nil
+      end
+
       # Provides a safe and easy way to manage the verification state for a
       # synchronous checksum calculation.
       #
@@ -237,6 +241,7 @@ module Gitlab
 
         self.verification_failure = message
         self.verification_failure += ": #{error.message}" if error.respond_to?(:message)
+        self.verification_checksum = nil
 
         self.verification_failed!
       end
