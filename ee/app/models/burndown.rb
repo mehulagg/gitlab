@@ -3,7 +3,7 @@
 class Burndown
   include Gitlab::Utils::StrongMemoize
 
-  attr_reader :issues, :start_date, :end_date, :due_date, :accurate
+  attr_reader :issues, :start_date, :end_date, :due_date
 
   def initialize(issues, start_date, due_date)
     @start_date = start_date
@@ -26,36 +26,14 @@ class Burndown
   end
 
   def empty?
-    issues.any? && legacy_data?
+    issues.any?
   end
 
   def valid?
     start_date && due_date
   end
 
-  # If all closed issues have no closed events, mark burndown chart as containing legacy data
-  def legacy_data?
-    strong_memoize(:legacy_data) do
-      closed_events = closed_issues
-      closed_events.any? && closed_issues_events_count == 0
-    end
-  end
-
-  def accurate?
-    closed_issues.count == closed_issues_events_count
-  end
-
   private
-
-  def closed_issues
-    issues.select(&:closed?)
-  end
-
-  def closed_issues_events_count
-    strong_memoize(:closed_issues_events_count) do
-      Event.closed_action.where(target: closed_issues).count
-    end
-  end
 
   def burndown_events
     issues

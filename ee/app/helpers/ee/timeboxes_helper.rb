@@ -2,19 +2,6 @@
 
 module EE
   module TimeboxesHelper
-    def burndown_chart(milestone)
-      if milestone.supports_milestone_charts?
-        issues = milestone.issues_visible_to_user(current_user)
-        Burndown.new(issues, milestone.start_date, milestone.due_date)
-      end
-    end
-
-    def can_generate_chart?(milestone, burndown)
-      return false unless milestone.supports_milestone_charts?
-
-      burndown&.valid? && !burndown&.empty?
-    end
-
     def show_burndown_charts_promotion?(milestone)
       milestone.is_a?(EE::Milestone) && !milestone.supports_milestone_charts? && show_promotions?
     end
