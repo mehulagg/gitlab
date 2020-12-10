@@ -1,0 +1,5 @@
+---
+title: Show job trace for manual job without refreshing the browser
+merge_request: 49752
+author:
+type: fixed
