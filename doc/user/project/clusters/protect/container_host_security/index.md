@@ -33,14 +33,15 @@ Helm chart.
 
 ## Features
 
-- Prevent containers from starting as root
-- Limit the privileges and system calls that are available to containers
-- Monitor system logs, process starts, files read/written/deleted, and network ports opened
-- Optionally block processes from starting or files from being read/written/deleted
+- Prevent containers from starting as root.
+- Limit the privileges and system calls available to containers.
+- Monitor system logs, process starts, files read/written/deleted, and network ports opened.
+- Optionally block processes from starting or files from being read/written/deleted.
 
 ## Supported container orchestrators
 
-Currently Kubernetes v1.14+ is the only supported container orchestrator.  OpenShift and other container orchestrators are not yet supported.
+Kubernetes v1.14+ is the only supported container orchestrator. OpenShift and other container
+orchestrators aren't supported.
 
 ## Supported Kubernetes providers
 
@@ -49,9 +50,10 @@ The following cloud providers are supported:
 - Amazon EKS
 - Google GKE
 
-Container Host Security is not officially tested and supported for Azure or for self-hosted Kubernetes instances at this time; however, in theory it is possible to use it with those providers.
+Although Container Host Security may function on Azure or self-hosted Kubernetes instances, it isn't
+officially tested and supported on those providers.
 
 ## Roadmap
 
-You can find more information on the product direction of Container Host Security at
-[Category Direction - Container Host Security](https://about.gitlab.com/direction/protect/container_host_security/).
+See the [Category Direction page](https://about.gitlab.com/direction/protect/container_host_security/)
+for more information on the product direction of Container Host Security.
