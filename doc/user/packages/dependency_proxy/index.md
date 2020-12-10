@@ -188,7 +188,7 @@ stored.
 To reclaim disk space used by image blobs that are no longer needed, use
 the [Dependency Proxy API](../../../api/dependency_proxy.md).
 
-## How the Dependency Proxy helps mitigiate Docker rate limiting
+## How the Dependency Proxy helps mitigate Docker rate limiting
 
 Docker introduced [rate limits on pull requests from Docker Hub](https://docs.docker.com/docker-hub/download-rate-limit/)
 in November 2019. The Dependency Proxy can help mitigate the rate limiting in
