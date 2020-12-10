@@ -376,13 +376,20 @@ sudo gitlab-rake cache:clear
 
 ### Export a project
 
+Enter the Rails console while and capture its output:
+
+```shell
+sudo gitlab-rails console | tee /tmp/<case-id-and-keywords>.txt
+```
+
+Then, export the project with debug logging activated:
+
 ```ruby
 u = User.find_by_username('<user>')
 # Sufficient permissions needed, see https://docs.gitlab.com/ee/user/permissions.html#project-members-permissions
 
 p = Project.find_by_full_path('<username-or-group>/<project-name>')
 
-# Log debug information
 ActiveRecord::Base.logger = Logger.new(STDOUT)
 Gitlab::Utils::Measuring.logger = Logger.new(STDOUT)
 
