@@ -62,6 +62,7 @@ memory-gc-stats:
     - .use-pg11
   stage: prepare
   script:
+    - mkdir -p tmp/gc_settings_exp
     - ./collect_gc_stats.rb
   artifacts:
     paths:
