@@ -44,7 +44,7 @@ class DastSiteValidationsFinder
   def by_most_recent(relation)
     return relation unless params[:most_recent]
 
-    relation.select('*').from(relation.by_most_recent)
+    relation.select('*').from(relation.by_most_recent, DastSiteValidation.table_name)
   end
   # rubocop: enable CodeReuse/ActiveRecord
 
