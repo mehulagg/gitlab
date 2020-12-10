@@ -46,6 +46,7 @@ apifuzzer_fuzz:
     variables:
         FUZZAPI_PROJECT: $CI_PROJECT_PATH
         FUZZAPI_API: http://apifuzzer:80
+        FUZZAPI_NEW_REPORT: 1
         TZ: America/Los_Angeles
     services:
         - name: $FUZZAPI_IMAGE
