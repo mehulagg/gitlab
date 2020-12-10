@@ -2184,8 +2184,8 @@ WARNING:
 This feature might not be available to you. Check the **version history** note above for details.
 
 Use `allow_failure:exit_codes` to dynamically control if a job should be allowed
-to fail. You can list which exit codes are considered failures. The job is allowed
-to fail for any other exit code. For example:
+to fail. You can list which exit codes are not considered failures. The job fails
+for any other exit code:
 
 ```yaml
 test_job_1:
