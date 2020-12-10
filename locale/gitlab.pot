@@ -7423,6 +7423,9 @@ msgstr ""
 msgid "ContainerRegistry|Keep these tags"
 msgstr ""
 
+msgid "ContainerRegistry|Last updated %{time}"
+msgstr ""
+
 msgid "ContainerRegistry|Login"
 msgstr ""
 
