@@ -13,7 +13,7 @@ applications are needed for [Review Apps](../../ci/review_apps/index.md) and
 You can install them after you [create a cluster](../project/clusters/add_remove_clusters.md). GitLab provides
 GitLab Managed Apps [using CI/CD](#install-using-gitlab-cicd-alpha). GitLab Managed Apps with [one-click installations](#install-with-one-click) have been deprecated, and will be removed in GitLab 14.0.
 
-## Install using GitLab CI/CD (alpha)
+## Install using GitLab CI/CD
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/20822) in GitLab 12.6.
 
@@ -83,7 +83,7 @@ applications you have configured. In case of pipeline failure, the
 output of the [Helm Tiller](https://v2.helm.sh/docs/install/#running-tiller-locally) binary
 is saved as a [CI job artifact](../../ci/pipelines/job_artifacts.md).
 
-#### Usage in GitLab versions 13.5 and below
+#### Usage in GitLab versions earlier than 13.5
 
 For GitLab versions 13.5 and below, the Ingress, Fluentd, Prometheus,
 and Sentry apps are fetched from the central Helm
@@ -991,10 +991,10 @@ at least 2 people from the
 
 Logs produced by pods running **GitLab Managed Apps** can be browsed using [**Log Explorer**](../project/clusters/kubernetes_pod_logs.md).
 
-## Install with one click (deprecated)
+## Install with one click
 
 WARNING:
-The one click installation method will be removed in GitLab 14.0. The removal of this feature from GitLab does not affect instaled applications to avoid breaking changes. Following 14.0, users will be able to take ownership of already installed applications using our documentation.
+The one click installation method will be removed in GitLab 14.0. The removal of this feature from GitLab does not affect installed applications to avoid breaking changes. Following 14.0, users will be able to take ownership of already installed applications using our documentation.
 
 Applications managed by GitLab are installed onto the `gitlab-managed-apps`
 namespace. This namespace:
