@@ -195,6 +195,7 @@ module EE
         enable :update_vulnerability_feedback
         enable :read_ci_minutes_quota
         enable :admin_feature_flags_issue_links
+        enable :read_project_audit_events
       end
 
       rule { can?(:developer_access) & iterations_available }.policy do

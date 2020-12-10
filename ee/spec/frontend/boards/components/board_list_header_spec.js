@@ -82,7 +82,7 @@ describe('Board List Header Component', () => {
 
   describe('Settings Button', () => {
     const hasSettings = [ListType.assignee, ListType.milestone, ListType.label];
-    const hasNoSettings = [ListType.backlog, ListType.blank, ListType.closed];
+    const hasNoSettings = [ListType.backlog, ListType.closed];
 
     it.each(hasSettings)('does render for List Type `%s`', listType => {
       createComponent({ listType });

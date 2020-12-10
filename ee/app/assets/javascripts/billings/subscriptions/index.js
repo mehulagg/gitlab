@@ -15,6 +15,7 @@ export default (containerId = 'js-billing-plans') => {
   const {
     namespaceId,
     namespaceName,
+    addSeatsHref,
     planUpgradeHref,
     planRenewHref,
     customerPortalUrl,
@@ -27,6 +28,7 @@ export default (containerId = 'js-billing-plans') => {
     provide: {
       namespaceId,
       namespaceName,
+      addSeatsHref,
       planUpgradeHref,
       planRenewHref,
       customerPortalUrl,

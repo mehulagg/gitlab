@@ -8,6 +8,7 @@ RSpec.describe List do
   describe 'relationships' do
     it { is_expected.to belong_to(:user) }
     it { is_expected.to belong_to(:milestone) }
+    it { is_expected.to belong_to(:iteration) }
   end
 
   describe 'validations' do
@@ -71,6 +72,33 @@ RSpec.describe List do
     describe '#title' do
       it 'returns the milestone title' do
         expect(subject.title).to eq('awesome-release')
+      end
+    end
+  end
+
+  context 'when it is an iteration type' do
+    let(:iteration) { build(:iteration, title: 'awesome-iteration') }
+
+    subject { described_class.new(list_type: :iteration, iteration: iteration, board: board) }
+
+    it { is_expected.to be_destroyable }
+    it { is_expected.to be_movable }
+
+    describe 'validations' do
+      it { is_expected.to validate_presence_of(:iteration) }
+
+      it 'is invalid when feature is not available' do
+        stub_licensed_features(iterations: false)
+
+        expect(subject).to be_invalid
+        expect(subject.errors[:list_type])
+          .to contain_exactly('Iteration lists not available with your current license')
+      end
+    end
+
+    describe '#title' do
+      it 'returns the iteration title' do
+        expect(subject.title).to eq('awesome-iteration')
       end
     end
   end

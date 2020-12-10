@@ -12,10 +12,6 @@ module Geo
       ::Gitlab::GitAccessSnippet
     end
 
-    def self.replication_enabled_by_default?
-      false
-    end
-
     def needs_checksum?
       false
     end

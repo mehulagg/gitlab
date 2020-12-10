@@ -1331,13 +1331,13 @@ msgstr ""
 msgid "AWS Access Key"
 msgstr ""
 
-msgid "AWS Access Key.  Only required if not using role instance credentials"
+msgid "AWS Access Key. Only required if not using role instance credentials"
 msgstr ""
 
 msgid "AWS Secret Access Key"
 msgstr ""
 
-msgid "AWS Secret Access Key.  Only required if not using role instance credentials"
+msgid "AWS Secret Access Key. Only required if not using role instance credentials"
 msgstr ""
 
 msgid "AWS service error: %{error}"
@@ -4616,9 +4616,6 @@ msgid "Branch name"
 msgstr ""
 
 msgid "Branch not loaded - %{branchId}"
-msgstr ""
-
-msgid "Branch prefix"
 msgstr ""
 
 msgid "BranchSwitcherPlaceholder|Search branches"
@@ -10695,6 +10692,9 @@ msgstr ""
 msgid "Environments|Deployment"
 msgstr ""
 
+msgid "Environments|Deployment %{status}"
+msgstr ""
+
 msgid "Environments|Enable review app"
 msgstr ""
 
@@ -10810,6 +10810,12 @@ msgid "Environments|This action will run the job defined by %{environment_name} 
 msgstr ""
 
 msgid "Environments|This action will run the job defined by %{name} for commit %{linkStart}%{commitId}%{linkEnd} putting the environment in a previous version. You can revert it by re-deploying the latest version of your application. Are you sure you want to continue?"
+msgstr ""
+
+msgid "Environments|Upcoming"
+msgstr ""
+
+msgid "Environments|Upcoming deployment"
 msgstr ""
 
 msgid "Environments|Updated"
@@ -14943,9 +14949,6 @@ msgstr ""
 msgid "Introducing Your DevOps Report"
 msgstr ""
 
-msgid "Invalid Git ref"
-msgstr ""
-
 msgid "Invalid Insights config file detected"
 msgstr ""
 
@@ -15415,6 +15418,9 @@ msgid "Iteration"
 msgstr ""
 
 msgid "Iteration changed to"
+msgstr ""
+
+msgid "Iteration lists not available with your current license"
 msgstr ""
 
 msgid "Iteration removed"
@@ -16768,6 +16774,9 @@ msgstr ""
 msgid "Max access level"
 msgstr ""
 
+msgid "Max file size is 200 KB."
+msgstr ""
+
 msgid "Max role"
 msgstr ""
 
@@ -17871,9 +17880,6 @@ msgid "Mirror settings are only available to GitLab administrators."
 msgstr ""
 
 msgid "Mirror user"
-msgstr ""
-
-msgid "Mirrored branches will have this prefix. If you enabled 'Only mirror protected branches' you need to include this prefix on protected branches in this project or nothing will be mirrored."
 msgstr ""
 
 msgid "Mirrored repositories"
@@ -20113,6 +20119,15 @@ msgstr ""
 msgid "Pipeline: %{status}"
 msgstr ""
 
+msgid "PipelineCharts|An error has ocurred when retrieving the analytics data"
+msgstr ""
+
+msgid "PipelineCharts|An error has ocurred when retrieving the pipelines data"
+msgstr ""
+
+msgid "PipelineCharts|An unknown error occurred while processing CI/CD analytics."
+msgstr ""
+
 msgid "PipelineCharts|CI / CD Analytics"
 msgstr ""
 
@@ -20126,6 +20141,9 @@ msgid "PipelineCharts|Success ratio:"
 msgstr ""
 
 msgid "PipelineCharts|Successful:"
+msgstr ""
+
+msgid "PipelineCharts|There was an error parsing the data for the charts."
 msgstr ""
 
 msgid "PipelineCharts|Total duration:"
@@ -24404,7 +24422,13 @@ msgstr ""
 msgid "SecurityReports|Dismissed '%{vulnerabilityName}'. Turn off the hide dismissed toggle to view."
 msgstr ""
 
+msgid "SecurityReports|Download %{artifactName}"
+msgstr ""
+
 msgid "SecurityReports|Download Report"
+msgstr ""
+
+msgid "SecurityReports|Download results"
 msgstr ""
 
 msgid "SecurityReports|Either you don't have permission to view this dashboard or the dashboard has not been setup. Please check your permission settings with your administrator or check your dashboard configurations to proceed."
@@ -24489,6 +24513,9 @@ msgid "SecurityReports|Security reports can only be accessed by authorized users
 msgstr ""
 
 msgid "SecurityReports|Security reports help page link"
+msgstr ""
+
+msgid "SecurityReports|Security scans have run"
 msgstr ""
 
 msgid "SecurityReports|Security scans have run. Go to the %{linkStart}pipelines tab%{linkEnd} to download the security reports"
@@ -26225,6 +26252,9 @@ msgstr ""
 msgid "StaticSiteEditor|An error occurred while submitting your changes."
 msgstr ""
 
+msgid "StaticSiteEditor|Automatic formatting changes"
+msgstr ""
+
 msgid "StaticSiteEditor|Branch could not be created."
 msgstr ""
 
@@ -26241,6 +26271,9 @@ msgid "StaticSiteEditor|Creating your merge request"
 msgstr ""
 
 msgid "StaticSiteEditor|Incompatible file content"
+msgstr ""
+
+msgid "StaticSiteEditor|Markdown formatting preferences introduced by the Static Site Editor"
 msgstr ""
 
 msgid "StaticSiteEditor|Return to site"
@@ -26478,6 +26511,9 @@ msgid "Subscription successfully created."
 msgstr ""
 
 msgid "Subscription successfully deleted."
+msgstr ""
+
+msgid "SubscriptionTable|Add seats"
 msgstr ""
 
 msgid "SubscriptionTable|An error occurred while loading billable members list"
@@ -27397,9 +27433,6 @@ msgid "The license was successfully uploaded and will be active from %{starts_at
 msgstr ""
 
 msgid "The maximum file size allowed is %{size}."
-msgstr ""
-
-msgid "The maximum file size allowed is 200KB."
 msgstr ""
 
 msgid "The merge conflicts for this merge request cannot be resolved through GitLab. Please try to resolve them locally."
@@ -29596,7 +29629,7 @@ msgstr ""
 msgid "Update your group name, description, avatar, and visibility."
 msgstr ""
 
-msgid "Update your project name, topics, description and avatar."
+msgid "Update your project name, topics, description, and avatar."
 msgstr ""
 
 msgid "UpdateProject|Cannot rename project because it contains container registry tags!"

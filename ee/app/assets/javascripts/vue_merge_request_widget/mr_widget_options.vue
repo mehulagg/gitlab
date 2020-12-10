@@ -315,6 +315,8 @@ export default {
         :security-reports-docs-path="mr.securityReportsDocsPath"
         :sast-comparison-path="mr.sastComparisonPath"
         :secret-scanning-comparison-path="mr.secretScanningComparisonPath"
+        :target-project-full-path="mr.targetProjectFullPath"
+        :mr-iid="mr.iid"
       />
       <grouped-security-reports-app
         v-else-if="shouldRenderExtendedSecurityReport"

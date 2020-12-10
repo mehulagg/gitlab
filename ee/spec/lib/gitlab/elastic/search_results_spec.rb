@@ -204,7 +204,7 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :sidekiq_might_not_need
 
   describe 'issues' do
     let(:scope) { 'issues' }
-    let!(:issue_1) { create(:issue, project: project_1, title: 'Hello world, here I am!', iid: 1) }
+    let!(:issue_1) { create(:issue, project: project_1, title: 'Hello world, here I am!', description: '20200623170000, see details in issue 287661', iid: 1) }
     let!(:issue_2) { create(:issue, project: project_1, title: 'Issue Two', description: 'Hello world, here I am!', iid: 2) }
     let!(:issue_3) { create(:issue, project: project_2, title: 'Issue Three', iid: 2) }
 
@@ -242,6 +242,14 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :sidekiq_might_not_need
       issues = results.objects('issues')
 
       expect(issues).to contain_exactly(issue_2)
+      expect(results.issues_count).to eq 1
+    end
+
+    it 'finds the issue with an out of integer range number in its description without exception' do
+      results = described_class.new(user, '20200623170000', limit_project_ids, public_and_internal_projects: false)
+      issues = results.objects('issues')
+
+      expect(issues).to contain_exactly(issue_1)
       expect(results.issues_count).to eq 1
     end
 
@@ -546,6 +554,7 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :sidekiq_might_not_need
         source_project: project_1,
         target_project: project_1,
         title: 'Hello world, here I am!',
+        description: '20200623170000, see details in issue 287661',
         iid: 1
       )
       @merge_request_2 = create(
@@ -598,6 +607,14 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :sidekiq_might_not_need
       merge_requests = results.objects('merge_requests')
 
       expect(merge_requests).to contain_exactly(@merge_request_2)
+      expect(results.merge_requests_count).to eq 1
+    end
+
+    it 'finds the MR with an out of integer range number in its description without exception' do
+      results = described_class.new(user, '20200623170000', limit_project_ids, public_and_internal_projects: false)
+      merge_requests = results.objects('merge_requests')
+
+      expect(merge_requests).to contain_exactly(@merge_request_1)
       expect(results.merge_requests_count).to eq 1
     end
 

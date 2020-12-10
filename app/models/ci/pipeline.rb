@@ -259,6 +259,16 @@ module Ci
         end
       end
 
+      after_transition any => any do |pipeline|
+        next unless Feature.enabled?(:jira_sync_builds, pipeline.project)
+
+        pipeline.run_after_commit do
+          # Passing the seq-id ensures this is idempotent
+          seq_id = ::Atlassian::JiraConnect::Client.generate_update_sequence_id
+          ::JiraConnect::SyncBuildsWorker.perform_async(pipeline.id, seq_id)
+        end
+      end
+
       after_transition any => [:success, :failed] do |pipeline|
         ref_status = pipeline.ci_ref&.update_status_by!(pipeline)
 
@@ -853,15 +863,9 @@ module Ci
     end
 
     def same_family_pipeline_ids
-      if Feature.enabled?(:ci_root_ancestor_for_pipeline_family, project, default_enabled: false)
-        ::Gitlab::Ci::PipelineObjectHierarchy.new(
-          self.class.where(id: root_ancestor), options: { same_project: true }
-        ).base_and_descendants.select(:id)
-      else
-        ::Gitlab::Ci::PipelineObjectHierarchy.new(
-          base_and_ancestors(same_project: true), options: { same_project: true }
-        ).base_and_descendants.select(:id)
-      end
+      ::Gitlab::Ci::PipelineObjectHierarchy.new(
+        self.class.where(id: root_ancestor), options: { same_project: true }
+      ).base_and_descendants.select(:id)
     end
 
     def build_with_artifacts_in_self_and_descendants(name)

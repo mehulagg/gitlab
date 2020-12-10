@@ -47,7 +47,7 @@ module QA
         end
       end
 
-      it 'User logs in to group with SAML SSO', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/673' do
+      it 'user logs in to group with SAML SSO', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/673' do
         managed_group_url = Flow::Saml.enable_saml_sso(@group, @saml_idp_service)
 
         Flow::Login.while_signed_in(as: user) do
@@ -67,7 +67,7 @@ module QA
         end
       end
 
-      it 'Lets group admin test settings', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/674' do
+      it 'lets group admin test settings', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/674' do
         incorrect_fingerprint = Digest::SHA1.hexdigest(rand.to_s)
 
         Flow::Saml.visit_saml_sso_settings(@group)
