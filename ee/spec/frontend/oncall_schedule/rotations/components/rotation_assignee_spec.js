@@ -51,9 +51,9 @@ describe('RotationAssignee', () => {
     it('should render an assignee schedule and rotation information in a popover', () => {
       expect(findPopOver().attributes('target')).toBe(assignee.user.id);
       // starts at the beginning of the rotation time
-      expect(findStartsAt()).toContain('12/16/2020');
+      expect(findStartsAt().text()).toContain('12/16/2020');
       // ends at the calculated length of the rotation for this user: rotation length * which user index assignee is at
-      expect(findEndsAt()).toContain('12/23/2020');
+      expect(findEndsAt().text()).toContain('12/23/2020');
     });
   });
 });
