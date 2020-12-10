@@ -57,7 +57,9 @@ memory-on-boot:
     expire_in: 31d
 
 memory-gc-stats:
-  extends: .default-before_script
+  extends:
+    - .default-before_script
+    - .use-pg11
   stage: prepare
   script:
     - ./collect_gc_stats.rb
