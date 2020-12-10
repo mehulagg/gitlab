@@ -27,12 +27,12 @@ The list displays the integration name, type, and status (enabled or disabled):
 
 ## Configuration
 
-GitLab can receive alerts via a [HTTP endpoint](#generic-http-endpoint) that you configure,
+GitLab can receive alerts via a HTTP endpoint that you configure,
 or the [Prometheus integration](#external-prometheus-integration).
 
-### Generic HTTP Endpoint **CORE**
+### Single HTTP Endpoint **CORE**
 
-Enabling the Generic HTTP Endpoint activates a unique HTTP endpoint that can
+Enabling the HTTP Endpoint in a GitLab projects activates it to
 receive alert payloads in JSON format. You can always
 [customize the payload](#customize-the-alert-payload-outside-of-gitlab) to your liking.
 
