@@ -8,8 +8,8 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/7934) in [GitLab Premium](https://about.gitlab.com/pricing/) 11.11.
 > - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/273655) to [GitLab Core](https://about.gitlab.com/pricing/) in GitLab 13.6.
-> - [Support for private groups](https://gitlab.com/gitlab-org/gitlab/-/issues/11582) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.7.
-> - Anonymous access to images in public groups is no longer available starting in [GitLab Premium](https://about.gitlab.com/pricing/) 13.7.
+> - [Support for private groups](https://gitlab.com/gitlab-org/gitlab/-/issues/11582) in [GitLab Core](https://about.gitlab.com/pricing/) 13.7.
+> - Anonymous access to images in public groups is no longer available starting in [GitLab Core](https://about.gitlab.com/pricing/) 13.7.
 
 The GitLab Dependency Proxy is a local proxy you can use for your frequently-accessed
 upstream images.
@@ -190,8 +190,10 @@ the [Dependency Proxy API](../../../api/dependency_proxy.md).
 
 ## How the Dependency Proxy helps mitigate Docker rate limiting
 
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/241639) in [GitLab Core](https://about.gitlab.com/pricing/) 13.7.
+
 Docker introduced [rate limits on pull requests from Docker Hub](https://docs.docker.com/docker-hub/download-rate-limit/)
-in November 2019. The Dependency Proxy can help mitigate the rate limiting in
+in November 2020. The Dependency Proxy can help mitigate the rate limiting in
 your [CI pipelines](../../../ci/README.md). Here is how it works.
 
 When you pull an image using a command like `docker pull` or in a `.gitlab-ci.yml`
@@ -203,20 +205,20 @@ how to build the image.
 1. Using the manifest, the Docker client requests a collection of layers, also
 known as blobs, one at a time.
 
-The Docker Hub rate limit is based on GET requests for the manifest. The Dependency Proxy
+The Docker Hub rate limit is based on the number of GET requests for the manifest. The Dependency Proxy
 will cache both the manifest and blobs for a given image, so when you request it again,
 Docker Hub does not have to be contacted.
 
-> If we cache the manifest, how do we know if a tagged image gets outdated?
+> If we cache the manifest, how do we know if a tagged image gets stale?
 
 If you are using an image tag like `alpine:latest`, the image will change
 over time. This means the manifest will contain different information about which
 blobs to request. So we need a way to check if the manifest is stale without
 causing the rate limit to be effected.
 
-Luckily, Docker has allowed HEAD requests for the manifest to not count towards
-the rate limit, and they include a digest (checksum) value in the header that can
-be used to determine if a manifest has changed.
+Luckily, Docker does not count HEAD requests for the image manifest towards the rate limit.
+For example, we can make a HEAD request for `alpine:latest`, view the digest (checksum)
+value returned in the header, and determine if a manifest has changed.
 
 The Dependency Proxy starts all requests with a HEAD request so we know whether or
 not the manifest needs to be re-pulled, and will only do so if it has become stale.
@@ -229,7 +231,7 @@ the manifest changes during that time.
 
 ### Checking your rate limit
 
-If you are curious about how many requests to Docker Hub you are using and how
+If you are curious about how many requests to Docker Hub you have made and how
 many remain, you can run these commands from your runner, or even within a CI
 script:
 
