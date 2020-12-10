@@ -109,9 +109,11 @@ module EE
       end
     end
 
+    override :post_create_hook
     def post_create_hook
-      add_group_member_data = Gitlab::HookData::GroupMemberBuilder
-      self.source.execute_hooks(add_group_member_data, :member_hooks)
+      data = Gitlab::HookData::GroupMemberBuilder.new(group_member).build(:create)
+
+      self.source.execute_hooks(data, :member_hooks)
     end
   end
 end
