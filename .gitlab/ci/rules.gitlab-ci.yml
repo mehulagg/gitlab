@@ -749,6 +749,26 @@
     - <<: *if-master-schedule-nightly
       allow_failure: true
 
+.reports:rules:fuzz:
+  rules:
+    - if: '$FUZZ_DISABLED || $GITLAB_FEATURES !~ /\bfuzz\b/'
+      when: never
+    - <<: *if-dot-com-gitlab-org-merge-request
+      changes: *frontend-patterns
+      allow_failure: true
+    - <<: *if-dot-com-gitlab-org-merge-request
+      changes: *code-qa-patterns
+      when: manual
+      allow_failure: true
+
+.reports:schedule-fuzz:
+  rules:
+    - if: '$FUZZ_DISABLED || $GITLAB_FEATURES !~ /\bfuzz\b/'
+      when: never
+    - <<: *if-master-schedule-nightly
+      allow_failure: true
+
+
 .reports:rules:license_scanning:
   rules:
     - if: '$LICENSE_SCANNING_DISABLED || $GITLAB_FEATURES !~ /\blicense_scanning\b/'
@@ -793,6 +813,24 @@
 .review:rules:review-performance:
   rules:
     - if: '$DAST_RUN == "true"'  # Skip this job when DAST is run
+      when: never
+    - <<: *if-not-ee
+      when: never
+    - <<: *if-dot-com-gitlab-org-merge-request
+      changes: *ci-review-patterns
+    - <<: *if-dot-com-gitlab-org-merge-request
+      changes: *frontend-patterns
+      allow_failure: true
+    - <<: *if-dot-com-gitlab-org-merge-request
+      changes: *code-qa-patterns
+      when: manual
+      allow_failure: true
+    - <<: *if-dot-com-gitlab-org-schedule
+      allow_failure: true
+
+.review:rules:review-performance:
+  rules:
+    - if: '$FUZZ_RUN == "true"'  # Skip this job when FUZZ is run
       when: never
     - <<: *if-not-ee
       when: never
