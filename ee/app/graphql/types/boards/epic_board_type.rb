@@ -14,6 +14,12 @@ module Types
 
       field :name, type: GraphQL::STRING_TYPE, null: true,
             description: 'Name of the board'
+
+      field :epic_lists,
+            Types::Boards::EpicListType.connection_type,
+            null: true,
+            description: 'Epic board lists',
+            resolver: Resolvers::Boards::EpicListsResolver
     end
   end
 end

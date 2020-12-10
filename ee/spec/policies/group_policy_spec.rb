@@ -5,7 +5,10 @@ require 'spec_helper'
 RSpec.describe GroupPolicy do
   include_context 'GroupPolicy context'
 
-  let(:epic_rules) { %i(read_epic create_epic admin_epic destroy_epic read_confidential_epic destroy_epic_link read_epic_board) }
+  let(:epic_rules) do
+    %i(read_epic create_epic admin_epic destroy_epic read_confidential_epic
+       destroy_epic_link read_epic_board read_epic_list)
+  end
 
   context 'when epics feature is disabled' do
     let(:current_user) { owner }
@@ -55,7 +58,7 @@ RSpec.describe GroupPolicy do
       let(:current_user) { guest }
 
       it { is_expected.to be_allowed(:read_epic, :read_epic_board) }
-      it { is_expected.to be_disallowed(*(epic_rules - [:read_epic, :read_epic_board])) }
+      it { is_expected.to be_disallowed(*(epic_rules - [:read_epic, :read_epic_board, :read_epic_list])) }
     end
 
     context 'when user is not member' do

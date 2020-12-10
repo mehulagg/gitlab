@@ -8,5 +8,7 @@ module Boards
     enum list_type: { backlog: 0, label: 1, closed: 2 }
 
     validates :position, presence: true
+
+    scope :without_types, ->(list_types) { where.not(list_type: list_types) }
   end
 end

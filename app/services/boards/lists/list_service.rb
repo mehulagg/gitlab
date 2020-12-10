@@ -2,14 +2,15 @@
 
 module Boards
   module Lists
-    class ListService < Boards::BaseService
-      def execute(board, create_default_lists: true)
-        if create_default_lists && !board.lists.backlog.exists?
-          board.lists.create(list_type: :backlog)
-        end
+    class ListService < BaseListService
+      private
 
-        lists = board.lists.preload_associated_models
-        params[:list_id].present? ? lists.where(id: params[:list_id]) : lists # rubocop: disable CodeReuse/ActiveRecord
+      def board_lists(board)
+        board.lists
+      end
+
+      def preload_lists(board)
+        board_lists(board).preload_associated_models
       end
     end
   end

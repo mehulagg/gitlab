@@ -6,6 +6,7 @@ module Resolvers
       include Gitlab::Graphql::Authorize::AuthorizeResource
 
       type Types::Boards::EpicBoardType.connection_type, null: true
+      authorize :read_epic_board
 
       when_single do
         argument :id, ::Types::GlobalIDType[::Boards::EpicBoard],
@@ -19,15 +20,7 @@ module Resolvers
         return unless Feature.enabled?(:epic_boards, group)
         return unless group.feature_available?(:epics)
 
-        authorize!
-
         ::Boards::EpicBoardsFinder.new(group, id: id&.model_id).execute
-      end
-
-      private
-
-      def authorize!
-        Ability.allowed?(context[:current_user], :read_epic_board, group) || raise_resource_not_available_error!
       end
     end
   end
