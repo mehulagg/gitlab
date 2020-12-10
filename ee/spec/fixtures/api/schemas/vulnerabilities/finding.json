@@ -13,6 +13,7 @@
   "properties" : {
     "name" : { "type": "string" },
     "project_fingerprint": { "type": "string" },
+    "uuid": { "type": ["string", "null"] }
     "create_vulnerability_feedback_issue_path": { "type": "string" },
     "create_vulnerability_feedback_merge_request_path": { "type": "string" },
     "create_vulnerability_feedback_dismissal_path": { "type": "string" },
