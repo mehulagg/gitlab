@@ -1,6 +1,6 @@
 <script>
 import $ from 'jquery';
-import { GlIcon, GlButton } from '@gitlab/ui';
+import { GlButton } from '@gitlab/ui';
 import { inserted } from '~/feature_highlight/feature_highlight_helper';
 import { mouseenter, debouncedMouseleave, togglePopover } from '~/shared/popover';
 
@@ -11,7 +11,6 @@ import { mouseenter, debouncedMouseleave, togglePopover } from '~/shared/popover
 export default {
   name: 'HelpPopover',
   components: {
-    GlIcon,
     GlButton,
   },
   props: {
