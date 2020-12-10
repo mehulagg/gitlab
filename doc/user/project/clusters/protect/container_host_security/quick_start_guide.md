@@ -7,7 +7,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 # Getting started with Container Host Security
 
 The following steps are recommended for installing Container Host Security. Although you can install
-some capabilities through GMAv1, we [recommended](#using-gmav1-with-gmav2) that you install
+some capabilities through GMAv1, we [recommend](#using-gmav1-with-gmav2) that you install
 applications through GMAv2 exclusively when using Container Network Security.
 
 ## Installation steps

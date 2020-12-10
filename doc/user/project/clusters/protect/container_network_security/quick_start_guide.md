@@ -4,9 +4,11 @@ group: Container Security
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
 
-# Getting started with GitLab's Container Network Security
+# Getting started with Container Network Security
 
-The following installation steps are the recommended way of installing GitLab's Protect capabilities.  Although some capabilities can be installed through GMAv1, it is [recommended and preferred](#using-gmav1-with-gmav2) to install applications through GMAv2 exclusively when using Container Network Security.
+The following steps are recommended for installing Container Network Security. Although you can
+install some capabilities through GMAv1, we [recommend](#using-gmav1-with-gmav2) that you install
+applications through GMAv2 exclusively when using Container Network Security.
 
 ## Installation steps
 
