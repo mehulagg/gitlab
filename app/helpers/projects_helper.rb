@@ -88,7 +88,7 @@ module ProjectsHelper
     project_link = build_project_breadcrumb_link(project)
 
     namespace_link = breadcrumb_list_item(namespace_link) unless project.group
-    project_link = breadcrumb_list_item project_link
+    project_link = breadcrumb_list_item(project_link, icon: !@skip_current_level_breadcrumb)
 
     "#{namespace_link} #{project_link}".html_safe
   end
@@ -792,7 +792,8 @@ module ProjectsHelper
 
     link_to project_path(project) do
       icon = project_icon(project, alt: project_name, class: 'avatar-tile', width: 15, height: 15) if project.avatar_url && !Rails.env.test?
-      [icon, content_tag("span", project_name, class: "breadcrumb-item-text js-breadcrumb-item-text")].join.html_safe
+      tag_name = @skip_current_level_breadcrumb ? 'strong' : 'span'
+      [icon, content_tag(tag_name, project_name, class: "breadcrumb-item-text js-breadcrumb-item-text")].join.html_safe
     end
   end
 

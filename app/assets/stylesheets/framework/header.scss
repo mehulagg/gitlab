@@ -385,8 +385,8 @@
       flex: 0 1 auto;
     }
 
-    &:last-of-type > .breadcrumbs-list-angle {
-      display: none;
+    &:last-of-type a {
+      color: $gl-text-color;
     }
   }
 }
@@ -418,10 +418,6 @@
   font-size: 12px;
   font-weight: 600;
   line-height: 16px;
-
-  a {
-    color: $gl-text-color;
-  }
 }
 
 .btn-sign-in {
