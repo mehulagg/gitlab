@@ -1,11 +1,12 @@
 <script>
-import { GlAlert, GlLoadingIcon, GlTab, GlTabs } from '@gitlab/ui';
+import { GlAlert, GlLoadingIcon, GlTabs } from '@gitlab/ui';
 import { __, s__, sprintf } from '~/locale';
 import { mergeUrlParams, redirectTo, refreshCurrentPage } from '~/lib/utils/url_utility';
 
 import PipelineGraph from '~/pipelines/components/pipeline_graph/pipeline_graph.vue';
 import CommitForm from './components/commit/commit_form.vue';
 import TextEditor from './components/text_editor.vue';
+import EditorLazyTab from './components/ui/editor_lazy_tab.vue';
 
 import commitCiFileMutation from './graphql/mutations/commit_ci_file.mutation.graphql';
 import getBlobContent from './graphql/queries/blob_content.graphql';
@@ -23,9 +24,9 @@ const LOAD_FAILURE_UNKNOWN = 'LOAD_FAILURE_UNKNOWN';
 export default {
   components: {
     CommitForm,
+    EditorLazyTab,
     GlAlert,
     GlLoadingIcon,
-    GlTab,
     GlTabs,
     PipelineGraph,
     TextEditor,
@@ -59,8 +60,6 @@ export default {
       ciConfigData: {},
       content: '',
       contentModel: '',
-      currentTabIndex: 0,
-      editorIsReady: false,
       failureType: null,
       failureReasons: [],
       isSaving: false,
@@ -109,9 +108,6 @@ export default {
   computed: {
     isBlobContentLoading() {
       return this.$apollo.queries.content.loading;
-    },
-    isVisualizeTabActive() {
-      return this.currentTabIndex === 1;
     },
     defaultCommitMessage() {
       return sprintf(this.$options.i18n.defaultCommitMessage, { sourcePath: this.ciConfigPath });
@@ -254,16 +250,14 @@ export default {
     <div class="gl-mt-4">
       <gl-loading-icon v-if="isBlobContentLoading" size="lg" class="gl-m-3" />
       <div v-else class="file-editor gl-mb-3">
-        <gl-tabs v-model="currentTabIndex">
-          <!-- editor should be mounted when its tab is visible, so the container has a size -->
-          <gl-tab :title="$options.i18n.tabEdit" :lazy="!editorIsReady">
-            <!-- editor should be mounted only once, when the tab is displayed -->
-            <text-editor v-model="contentModel" @editor-ready="editorIsReady = true" />
-          </gl-tab>
+        <gl-tabs>
+          <editor-lazy-tab :title="$options.i18n.tabEdit">
+            <text-editor v-model="contentModel" />
+          </editor-lazy-tab>
 
-          <gl-tab :title="$options.i18n.tabGraph" :lazy="!isVisualizeTabActive">
+          <editor-lazy-tab :title="$options.i18n.tabGraph">
             <pipeline-graph :pipeline-data="ciConfigData" />
-          </gl-tab>
+          </editor-lazy-tab>
         </gl-tabs>
       </div>
       <commit-form

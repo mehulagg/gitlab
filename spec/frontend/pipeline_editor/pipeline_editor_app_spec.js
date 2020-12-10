@@ -1,14 +1,6 @@
 import { nextTick } from 'vue';
 import { mount, shallowMount, createLocalVue } from '@vue/test-utils';
-import {
-  GlAlert,
-  GlButton,
-  GlFormInput,
-  GlFormTextarea,
-  GlLoadingIcon,
-  GlTabs,
-  GlTab,
-} from '@gitlab/ui';
+import { GlAlert, GlButton, GlFormInput, GlFormTextarea, GlLoadingIcon, GlTabs } from '@gitlab/ui';
 import waitForPromises from 'helpers/wait_for_promises';
 import VueApollo from 'vue-apollo';
 import createMockApollo from 'jest/helpers/mock_apollo_helper';
@@ -27,6 +19,8 @@ import {
 
 import CommitForm from '~/pipeline_editor/components/commit/commit_form.vue';
 import getCiConfig from '~/pipeline_editor/graphql/queries/ci_config.graphql';
+
+import EditorLazyTab from '~/pipeline_editor/components/ui/editor_lazy_tab.vue';
 import PipelineGraph from '~/pipelines/components/pipeline_graph/pipeline_graph.vue';
 import PipelineEditorApp from '~/pipeline_editor/pipeline_editor_app.vue';
 import TextEditor from '~/pipeline_editor/components/text_editor.vue';
@@ -124,7 +118,7 @@ describe('~/pipeline_editor/pipeline_editor_app.vue', () => {
 
   const findLoadingIcon = () => wrapper.find(GlLoadingIcon);
   const findAlert = () => wrapper.find(GlAlert);
-  const findTabAt = i => wrapper.findAll(GlTab).at(i);
+  const findTabAt = i => wrapper.findAll(EditorLazyTab).at(i);
   const findTextEditor = () => wrapper.find(TextEditor);
   const findCommitForm = () => wrapper.find(CommitForm);
   const findCommitBtnLoadingIcon = () => wrapper.find('[type="submit"]').find(GlLoadingIcon);
@@ -168,16 +162,6 @@ describe('~/pipeline_editor/pipeline_editor_app.vue', () => {
           .find(PipelineGraph)
           .exists(),
       ).toBe(true);
-    });
-
-    it('displays editor tab lazily, until editor is ready', async () => {
-      expect(findTabAt(0).attributes('lazy')).toBe('true');
-
-      findTextEditor().vm.$emit('editor-ready');
-
-      await nextTick();
-
-      expect(findTabAt(0).attributes('lazy')).toBe(undefined);
     });
   });
 
