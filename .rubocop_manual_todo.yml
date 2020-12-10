@@ -44,6 +44,10 @@ Graphql/ResolverType:
     - 'ee/app/graphql/resolvers/geo/terraform_state_version_registries_resolver.rb'
     - 'ee/app/graphql/resolvers/vulnerabilities_base_resolver.rb'
 
+Gitlab/PolicyRuleBoolean:
+  Exclude:
+    - 'ee/app/policies/ee/identity_provider_policy.rb'
+
 Rails/SaveBang:
   Exclude:
     - 'ee/spec/controllers/projects/merge_requests_controller_spec.rb'
