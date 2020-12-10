@@ -143,6 +143,21 @@ available only to users with Developer permissions and above.
   - Create/edit/delete a Cleanup policy <!-- Cleanup of what? -->
   - Create/edit/delete [Releases](project/releases/index.md)
   - Upload design management files <!-- Is this limited to issues? -->
+  - Create new environments
+  - Stop environments
+  - Enable review apps
+  - Add tags
+  - Create/edit/delete project milestones
+- Containers
+  - Read Terraform state
+  - Update a container registry
+  - Remove a container registry image
+- Security **(ULTIMATE)**
+  - Use security dashboard
+  - View vulnerability findings in Dependency list
+  - Create issue from vulnerability finding
+  - Dismiss vulnerability finding
+  - View vulnerability
 - Branches
   - Create new branches
   - Push to non-protected branches
@@ -152,7 +167,18 @@ available only to users with Developer permissions and above.
   - Assign MRs
   - Label MRs
   - Lock MR threads
-  - Approve MRs
+  - Approve MRs (*1*)
+  - Manage/Accept MRs
+- Analytics
+  - View project statistics
+  - View Pods logs
+- Code
+  - Create or update commit status
+- Jobs
+  - Cancel and retry jobs
+
+1. For information on eligible approvers for merge requests, see
+   [Eligible approvers](project/merge_requests/merge_request_approvals.md#eligible-approvers).
 
 ### Project members Maintainer permissions
 
