@@ -96,9 +96,6 @@ export default {
     hasNewPath() {
       return !isEmpty(this.newFeatureFlagPath);
     },
-    emptyStateTitle() {
-      return s__('FeatureFlags|Get started with feature flags');
-    },
   },
   created() {
     this.setFeatureFlagsOptions({ scope: this.scope, page: this.page });
@@ -246,7 +243,12 @@ export default {
           :error-state="shouldRenderErrorState"
           :error-title="s__(`FeatureFlags|There was an error fetching the feature flags.`)"
           :empty-state="shouldShowEmptyState"
-          :empty-title="emptyStateTitle"
+          :empty-title="s__('FeatureFlags|Get started with feature flags')"
+          :empty-description="
+            s__(
+              'FeatureFlags|Feature flags allow you to configure your code into different flavors by dynamically toggling certain functionality.',
+            )
+          "
           data-testid="feature-flags-tab"
           @dismissAlert="clearAlert"
           @changeTab="onFeatureFlagsTab"
@@ -266,7 +268,12 @@ export default {
           :error-state="shouldRenderErrorState"
           :error-title="s__(`FeatureFlags|There was an error fetching the user lists.`)"
           :empty-state="shouldShowEmptyState"
-          :empty-title="emptyStateTitle"
+          :empty-title="s__('FeatureFlags|Get started with user lists')"
+          :empty-description="
+            s__(
+              'FeatureFlags|User lists allow you to define a set of users to use with Feature Flags.',
+            )
+          "
           data-testid="user-lists-tab"
           @dismissAlert="clearAlert"
           @changeTab="onUserListsTab"
