@@ -110,5 +110,6 @@ on what other GitLab CI patterns are demonstrated are available at the project p
 
 ### 403 - error checking push permissions
 
-If this error is presented to you, it might originate from an outside HTTP(S) proxy.
-Setting `http_proxy` / `https_proxy` [environment variables](../../administration/packages/container_registry.md#running-the-docker-daemon-with-a-proxy) can help in this scenario.
+If you receive this error, it might be due to an outside proxy. Setting the `http_proxy`
+and `https_proxy` [environment variables](../../administration/packages/container_registry.md#running-the-docker-daemon-with-a-proxy)
+can fix the problem.
