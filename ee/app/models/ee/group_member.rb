@@ -108,5 +108,10 @@ module EE
         allowed_email_domain.email_matches_domain?(email)
       end
     end
+
+    def post_create_hook
+      add_group_member_data = Gitlab::HookData::GroupMemberBuilder
+      self.source.execute_hooks(add_group_member_data, :member_hooks)
+    end
   end
 end
