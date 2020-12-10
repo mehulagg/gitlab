@@ -1,5 +1,7 @@
 import { s__, __ } from '~/locale';
 
+export const MAX_SEGMENTS = 30;
+
 export const MAX_REQUEST_COUNT = 10;
 
 export const DEVOPS_ADOPTION_SEGMENT_MODAL_ID = 'devopsSegmentModal';
@@ -26,6 +28,7 @@ export const DEVOPS_ADOPTION_STRINGS = {
         'DevopsAdoption|Feature adoption is based on usage in the last calendar month. Last updated: %{timestamp}.',
       ),
       button: s__('DevopsAdoption|Add new segment'),
+      buttonTooltip: s__('DevopsAdoption|Maximum 30 segments allowed'),
     },
   },
   emptyState: {

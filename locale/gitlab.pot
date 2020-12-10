@@ -9649,6 +9649,9 @@ msgstr ""
 msgid "DevopsAdoption|MRs"
 msgstr ""
 
+msgid "DevopsAdoption|Maximum 30 segments allowed"
+msgstr ""
+
 msgid "DevopsAdoption|My segment"
 msgstr ""
 
