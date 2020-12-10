@@ -34,7 +34,8 @@ module Groups
       # See https://gitlab.com/gitlab-org/gitlab/issues/6837
       EpicsFinder.new(current_user, finder_params)
         .execute
-        .select(:iid, :title)
+        .preload(:group) # rubocop: disable CodeReuse/ActiveRecord
+        .select(:iid, :title, :group_id)
     end
 
     def vulnerabilities
