@@ -3,6 +3,7 @@ import { GlPagination } from '@gitlab/ui';
 import { __, sprintf } from '~/locale';
 import Api from '~/api';
 import createFlash from '~/flash';
+import Tracking from '~/tracking';
 import { urlParamsToObject } from '~/lib/utils/common_utils';
 import { updateHistory, setUrlParams } from '~/lib/utils/url_utility';
 
@@ -28,6 +29,8 @@ import {
   DEFAULT_PAGE_SIZE,
 } from '../constants';
 
+const trackingMixin = Tracking.mixin({ category: 'requirements' });
+
 export default {
   DEFAULT_PAGE_SIZE,
   AvailableSortOptions,
@@ -41,6 +44,7 @@ export default {
     RequirementCreateForm: RequirementForm,
     RequirementEditForm: RequirementForm,
   },
+  mixins: [trackingMixin],
   props: {
     projectPath: {
       type: String,
@@ -533,6 +537,13 @@ export default {
       this.prevPageCursor = '';
       this.nextPageCursor = '';
 
+      if (textSearch) {
+        this.track('filter', { property: 'text', value: textSearch });
+      }
+      if (authors.length) {
+        this.track('filter', { property: 'authors', value: authors });
+      }
+
       this.updateUrl();
     },
     handleSortRequirements(sortBy) {
@@ -545,6 +556,8 @@ export default {
     },
     handlePageChange(page) {
       const { startCursor, endCursor } = this.requirements.pageInfo;
+
+      this.track('navigation', { value: page });
 
       if (page > this.currentPage) {
         this.prevPageCursor = '';

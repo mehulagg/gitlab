@@ -11,6 +11,7 @@ import createRequirement from 'ee/requirements/queries/createRequirement.mutatio
 import updateRequirement from 'ee/requirements/queries/updateRequirement.mutation.graphql';
 
 import { TEST_HOST } from 'helpers/test_constants';
+import { mockTracking } from 'helpers/tracking_helper';
 import createFlash from '~/flash';
 import FilteredSearchBarRoot from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
 import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
@@ -77,9 +78,11 @@ const createComponent = ({
 
 describe('RequirementsRoot', () => {
   let wrapper;
+  let trackingSpy;
 
   beforeEach(() => {
     wrapper = createComponent();
+    trackingSpy = mockTracking('requirements', wrapper.element, jest.spyOn);
   });
 
   afterEach(() => {
@@ -781,6 +784,16 @@ describe('RequirementsRoot', () => {
         expect(global.window.location.href).toBe(
           `${TEST_HOST}/?page=1&state=opened&search=foo&sort=created_desc&author_username%5B%5D=root&author_username%5B%5D=john.doe`,
         );
+        expect(trackingSpy).toHaveBeenCalledWith('requirements', 'filter', {
+          category: 'requirements',
+          property: 'authors',
+          value: ['root', 'john.doe'],
+        });
+        expect(trackingSpy).toHaveBeenCalledWith('requirements', 'filter', {
+          category: 'requirements',
+          property: 'text',
+          value: 'foo',
+        });
       });
 
       it('updates props `textSearch` and `authorUsernames` with empty values when passed filters param is empty', () => {
@@ -793,6 +806,7 @@ describe('RequirementsRoot', () => {
 
         expect(wrapper.vm.authorUsernames).toEqual([]);
         expect(wrapper.vm.textSearch).toBe('');
+        expect(trackingSpy).not.toHaveBeenCalled();
       });
     });
 
@@ -828,6 +842,10 @@ describe('RequirementsRoot', () => {
         expect(global.window.location.href).toBe(
           `${TEST_HOST}/?page=2&state=opened&sort=created_desc&next=${mockPageInfo.endCursor}`,
         );
+        expect(trackingSpy).toHaveBeenCalledWith('requirements', 'navigation', {
+          category: 'requirements',
+          value: 2,
+        });
       });
 
       it('sets data prop `nextPageCursor` to empty string and `prevPageCursor` to `requirements.pageInfo.startCursor` when provided page param is less than currentPage', () => {
