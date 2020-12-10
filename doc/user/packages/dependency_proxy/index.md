@@ -187,3 +187,63 @@ stored.
 
 To reclaim disk space used by image blobs that are no longer needed, use
 the [Dependency Proxy API](../../../api/dependency_proxy.md).
+
+## How the Dependency Proxy helps mitigiate Docker rate limiting
+
+Docker introduced [rate limits on pull requests from Docker Hub](https://docs.docker.com/docker-hub/download-rate-limit/)
+in November 2019. The Dependency Proxy can help mitigate the rate limiting in
+your [CI pipelines](../../../ci/README.md). Here is how it works.
+
+When you pull an image using a command like `docker pull` or in a `.gitlab-ci.yml`
+file using `image: foo:latest`, the Docker client makes a collection of requests:
+
+1. First the image manifest is requested. The manifest contains information about
+how to build the image.
+
+1. Using the manifest, the Docker client requests a collection of layers, also
+known as blobs, one at a time.
+
+The Docker Hub rate limit is based on GET requests for the manifest. The Dependency Proxy
+will cache both the manifest and blobs for a given image, so when you request it again,
+Docker Hub does not have to be contacted.
+
+> If we cache the manifest, how do we know if a tagged image gets outdated?
+
+If you are using an image tag like `alpine:latest`, the image will change
+over time. This means the manifest will contain different information about which
+blobs to request. So we need a way to check if the manifest is stale without
+causing the rate limit to be effected.
+
+Luckily, Docker has allowed HEAD requests for the manifest to not count towards
+the rate limit, and they include a digest (checksum) value in the header that can
+be used to determine if a manifest has changed.
+
+The Dependency Proxy starts all requests with a HEAD request so we know whether or
+not the manifest needs to be re-pulled, and will only do so if it has become stale.
+
+This means that if you are running a pipeline that pulls `node:latest` every 5
+minutes, the Dependency Proxy will cache the entire image and only update it if
+`node:latest` changes, so instead of having 360 requests (which will go over the
+rate limit) to DockerHub for the image in 6 hours, you will only have 1 unless
+the manifest changes during that time.
+
+### Checking your rate limit
+
+If you are curious about how many requests to Docker Hub you are using and how
+many remain, you can run these commands from your runner, or even within a CI
+script:
+
+```shell
+# Note, you will need to have jq installed in order to run this command
+TOKEN=$(curl "https://auth.docker.io/token?service=registry.docker.io&scope=repository:ratelimitpreview/test:pull" | jq -r .token) && curl --head -H "Authorization: Bearer $TOKEN" https://registry-1.docker.io/v2/ratelimitpreview/test/manifests/latest 2>&1 | grep RateLimit
+...
+```
+
+This will output something like:
+
+```shell
+RateLimit-Limit: 100;w=21600
+RateLimit-Remaining: 98;w=21600
+```
+
+Which shows the total limit of 100 pulls in 6 hours, with 98 pulls remaining.
