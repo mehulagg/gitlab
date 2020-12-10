@@ -15,6 +15,7 @@ module BillingPlansHelper
     {
       namespace_id: namespace.id,
       namespace_name: namespace.name,
+      is_group: namespace.group?,
       add_seats_href: add_seats_url(namespace),
       plan_upgrade_href: plan_upgrade_url(namespace, plan),
       plan_renew_href: plan_renew_url(namespace),
