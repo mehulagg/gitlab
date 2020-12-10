@@ -1285,6 +1285,7 @@ RSpec.describe Notify do
     context 'for service desk issues' do
       before do
         issue.update!(external_author: 'service.desk@example.com')
+        issue.issue_external_participants.create!(email: 'service.desk@example.com')
       end
 
       def expect_sender(username)
