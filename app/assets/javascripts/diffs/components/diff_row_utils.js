@@ -35,7 +35,7 @@ export const lineCode = line => {
   return line.line_code || line.left?.line_code || line.right?.line_code;
 };
 
-export const classNameMapCell = (line, hll, isLoggedIn, isHover) => {
+export const classNameMapCell = ({ line, hll, isLoggedIn, isHover, cll }) => {
   if (!line) return [];
   const { type } = line;
 
@@ -43,6 +43,7 @@ export const classNameMapCell = (line, hll, isLoggedIn, isHover) => {
     type,
     {
       hll,
+      cll,
       [LINE_HOVER_CLASS_NAME]: isLoggedIn && isHover && !isContextLine(type) && !isMetaLine(type),
     },
   ];
@@ -70,14 +71,14 @@ export const addCommentTooltip = line => {
   return tooltip;
 };
 
-export const parallelViewLeftLineType = (line, hll) => {
+export const parallelViewLeftLineType = (line, hll, cll) => {
   if (line?.right?.type === NEW_NO_NEW_LINE_TYPE) {
     return OLD_NO_NEW_LINE_TYPE;
   }
 
   const lineTypeClass = line?.left ? line.left.type : EMPTY_CELL_TYPE;
 
-  return [lineTypeClass, { hll }];
+  return [lineTypeClass, { hll, cll }];
 };
 
 export const shouldShowCommentButton = (hover, context, meta, discussions) => {

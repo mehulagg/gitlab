@@ -59,16 +59,26 @@ export default {
       };
     },
     parallelViewLeftLineType() {
-      return utils.parallelViewLeftLineType(this.line, this.isHighlighted);
+      return utils.parallelViewLeftLineType(this.line, this.isHighlighted, this.isCommented);
     },
     coverageState() {
       return this.fileLineCoverage(this.filePath, this.line.right.new_line);
     },
     classNameMapCellLeft() {
-      return utils.classNameMapCell(this.line.left, this.isHighlighted, this.isLoggedIn);
+      return utils.classNameMapCell({
+        line: this.line.left,
+        hll: this.isHighlighted,
+        isLoggedIn: this.isLoggedIn,
+        cll: this.isCommented,
+      });
     },
     classNameMapCellRight() {
-      return utils.classNameMapCell(this.line.right, this.isHighlighted, this.isLoggedIn);
+      return utils.classNameMapCell({
+        line: this.line.right,
+        hll: this.isHighlighted,
+        isLoggedIn: this.isLoggedIn,
+        cll: this.isCommented,
+      });
     },
     addCommentTooltipLeft() {
       return utils.addCommentTooltip(this.line.left);
@@ -244,7 +254,7 @@ export default {
         <div
           v-gl-tooltip.hover
           :title="coverageState.text"
-          :class="[line.right.type, coverageState.class, { hll: isHighlighted }]"
+          :class="[line.right.type, coverageState.class, { hll: isHighlighted, cll: isCommented }]"
           class="diff-td line-coverage right-side"
         ></div>
         <div
@@ -255,6 +265,7 @@ export default {
             line.right.type,
             {
               hll: isHighlighted,
+              cll: isCommented,
             },
           ]"
           class="diff-td line_content with-coverage parallel right-side"

@@ -9,6 +9,8 @@ $white-code-color: $gl-text-color;
 $white-highlight: #fafe3d;
 $white-pre-hll-bg: #f8eec7;
 $white-hll-bg: #f8f8f8;
+$white-pre-cll-bg: #c9d9f8;
+$white-cll-bg: #f8f8f8;
 $white-over-bg: #ded7fc;
 $white-expanded-border: #e0e0e0;
 $white-expanded-bg: #f7f7f7;
@@ -140,6 +142,7 @@ pre.code,
     }
 
     &.is-over,
+    &.cll:not(.empty-cell).is-over,
     &.hll:not(.empty-cell).is-over {
       @include line-number-hover($white-over-bg);
     }
@@ -147,6 +150,11 @@ pre.code,
     &.hll:not(.empty-cell) {
       background-color: $line-number-select;
       border-color: $line-select-yellow-dark;
+    }
+
+    &.cll:not(.empty-cell) {
+      background-color: $line-number-commented;
+      border-color: $line-commented-blue-dark;
     }
   }
 
@@ -200,6 +208,10 @@ pre.code,
     &.hll:not(.empty-cell) {
       background-color: $line-select-yellow;
     }
+
+    &.cll:not(.empty-cell) {
+      background-color: $line-commented-blue;
+    }
   }
 
   .line-coverage {
@@ -216,12 +228,20 @@ pre.code,
     &.hll:not(.empty-cell) {
       background-color: $line-select-yellow;
     }
+
+    &.cll:not(.empty-cell) {
+      background-color: $line-commented-blue;
+    }
   }
 }
 
 // highlight line via anchor
 pre .hll {
   background-color: $white-pre-hll-bg !important;
+}
+
+pre .cll {
+  background-color: $white-pre-cll-bg !important;
 }
 
 // Search result highlight
@@ -235,6 +255,7 @@ span.highlight_word {
 }
 
 .hll { background-color: $white-hll-bg; }
+.cll { background-color: $white-cll-bg; }
 
 .c { color: $white-c;
   font-style: italic; }
