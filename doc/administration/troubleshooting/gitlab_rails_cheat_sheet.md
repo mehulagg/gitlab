@@ -464,8 +464,9 @@ User.billable.count
 ::HistoricalData.max_historical_user_count
 ```
 
+Using cURL and jq (up to a max 100, see the [pagination docs](../../api/README.md#pagination)):
+
 ```shell
-# Using curl and jq (up to a max 100, see pagination docs https://docs.gitlab.com/ee/api/#pagination
 curl --silent --header "Private-Token: ********************" "https://gitlab.example.com/api/v4/users?per_page=100&active" | jq --compact-output '.[] | [.id,.name,.username]'
 ```
 
@@ -491,10 +492,22 @@ users.each do |user|
 end
 ```
 
+### Deactivate Users that have no recent activity
+
+```ruby
+days_inactive = 90
+inactive_users = User.active.where("last_activity_on <= ?", days_inactive.days.ago)
+
+inactive_users.each do |user|
+    puts "user '#{user.username}': #{user.last_activity_on}"
+    user.deactivate!
+end
+```
+
 ### Block Users that have no recent activity
 
 ```ruby
-days_inactive = 60
+days_inactive = 90
 inactive_users = User.active.where("last_activity_on <= ?", days_inactive.days.ago)
 
 inactive_users.each do |user|

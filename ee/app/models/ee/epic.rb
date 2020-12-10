@@ -119,7 +119,7 @@ module EE
         public_only.or(where(confidential: true, group_id: groups))
       end
 
-      MAX_HIERARCHY_DEPTH = 5
+      MAX_HIERARCHY_DEPTH = 7
 
       def etag_caching_enabled?
         true

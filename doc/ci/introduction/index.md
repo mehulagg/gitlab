@@ -116,7 +116,7 @@ After you're happy with your implementation:
 ![GitLab workflow example](img/gitlab_workflow_example_11_9.png)
 
 GitLab CI/CD is capable of doing a lot more, but this workflow
-exemplifies GitLab's ability to track the entire process,
+exemplifies the ability of GitLab to track the entire process,
 without the need for an external tool to deliver your software.
 And, most usefully, you can visualize all the steps through
 the GitLab UI.
@@ -150,7 +150,7 @@ according to each stage (Verify, Package, Release).
    - Ship features to only a portion of your pods and let a percentage of your user base to visit the temporarily deployed feature with [Canary Deployments](../../user/project/canary_deployments.md). **(PREMIUM)**
    - Deploy your features behind [Feature Flags](../../operations/feature_flags.md).
    - Add release notes to any Git tag with [GitLab Releases](../../user/project/releases/index.md).
-   - View of the current health and status of each CI environment running on Kubernetes with [Deploy Boards](../../user/project/deploy_boards.md). **(PREMIUM)**
+   - View of the current health and status of each CI environment running on Kubernetes with [Deploy Boards](../../user/project/deploy_boards.md).
    - Deploy your application to a production environment in a Kubernetes cluster with [Auto Deploy](../../topics/autodevops/stages.md#auto-deploy).
 
 With GitLab CI/CD you can also:

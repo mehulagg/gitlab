@@ -7,6 +7,7 @@ import * as types from 'ee/billings/subscriptions/store/mutation_types';
 import { mockDataSubscription } from 'ee_jest/billings/mock_data';
 import { TEST_HOST } from 'helpers/test_constants';
 import Vuex from 'vuex';
+import { extendedWrapper } from '../../../../../../spec/frontend/helpers/vue_test_utils_helper';
 
 const TEST_NAMESPACE_NAME = 'GitLab.com';
 const CUSTOMER_PORTAL_URL = 'https://customers.gitlab.com/subscriptions';
@@ -18,28 +19,41 @@ describe('SubscriptionTable component', () => {
   let store;
   let wrapper;
 
+  const findAddSeatsButton = () => wrapper.findByTestId('add-seats');
   const findButtonProps = () =>
     wrapper.findAll('a').wrappers.map(x => ({ text: x.text(), href: x.attributes('href') }));
   const findRenewButton = () => findButtonProps().filter(({ text }) => text === 'Renew');
 
-  const factory = (options = {}) => {
+  const createComponent = (
+    options = {},
+    { saasManualRenewButton = false, saasAddSeatsButton = false } = {},
+  ) => {
     store = new Vuex.Store(initialStore());
     jest.spyOn(store, 'dispatch').mockImplementation();
 
-    wrapper = shallowMount(SubscriptionTable, {
-      ...options,
-      store,
-      localVue,
-    });
+    wrapper = extendedWrapper(
+      shallowMount(SubscriptionTable, {
+        store,
+        localVue,
+        provide: {
+          glFeatures: {
+            saasManualRenewButton,
+            saasAddSeatsButton,
+          },
+        },
+        ...options,
+      }),
+    );
   };
 
   afterEach(() => {
     wrapper.destroy();
+    wrapper = null;
   });
 
   describe('when created', () => {
     beforeEach(() => {
-      factory({
+      createComponent({
         propsData: {
           namespaceName: TEST_NAMESPACE_NAME,
           planUpgradeHref: '/url/',
@@ -49,8 +63,6 @@ describe('SubscriptionTable component', () => {
       });
 
       Object.assign(store.state, { isLoadingSubscription: true });
-
-      return wrapper.vm.$nextTick();
     });
 
     it('shows loading icon', () => {
@@ -68,7 +80,7 @@ describe('SubscriptionTable component', () => {
 
   describe('with success', () => {
     beforeEach(() => {
-      factory({ propsData: { namespaceName: TEST_NAMESPACE_NAME } });
+      createComponent({ propsData: { namespaceName: TEST_NAMESPACE_NAME } });
 
       store.state.isLoadingSubscription = false;
       store.commit(`${types.RECEIVE_SUBSCRIPTION_SUCCESS}`, mockDataSubscription.gold);
@@ -103,7 +115,7 @@ describe('SubscriptionTable component', () => {
         const planUpgradeHref = `${TEST_HOST}/plan/upgrade/${planName}`;
         const planRenewHref = `${TEST_HOST}/plan/renew`;
 
-        factory({
+        createComponent({
           propsData: {
             namespaceName: TEST_NAMESPACE_NAME,
             customerPortalUrl: CUSTOMER_PORTAL_URL,
@@ -121,8 +133,6 @@ describe('SubscriptionTable component', () => {
             upgradable,
           },
         });
-
-        return wrapper.vm.$nextTick();
       });
 
       it(snapshotDesc, () => {
@@ -141,14 +151,12 @@ describe('SubscriptionTable component', () => {
     'given plan with state: isFreePlan=$isFreePlan and feature flag saasManualRenewButton=$featureFlag',
     ({ planName, planCode, isFreePlan, featureFlag, testDescription, expectedBehavior }) => {
       beforeEach(() => {
-        factory({
-          propsData: { namespaceName: TEST_NAMESPACE_NAME },
-          provide: {
-            glFeatures: {
-              saasManualRenewButton: featureFlag,
-            },
+        createComponent(
+          {
+            propsData: { namespaceName: TEST_NAMESPACE_NAME },
           },
-        });
+          { saasManualRenewButton: featureFlag },
+        );
 
         Object.assign(store.state, {
           isLoadingSubscription: false,
@@ -163,6 +171,40 @@ describe('SubscriptionTable component', () => {
 
       it(testDescription, () => {
         expect(findRenewButton().length > 0).toBe(expectedBehavior);
+      });
+    },
+  );
+
+  describe.each`
+    planCode    | featureFlag | expected | testDescription
+    ${'silver'} | ${true}     | ${true}  | ${'renders the button'}
+    ${'silver'} | ${false}    | ${false} | ${'does not render the button'}
+    ${null}     | ${true}     | ${false} | ${'does not render the button'}
+    ${null}     | ${false}    | ${false} | ${'does not render the button'}
+  `(
+    'Add seats button – given plan with state: planCode = $planCode and saasAddSeatsButton = $featureFlag',
+    ({ planCode, featureFlag, expected, testDescription }) => {
+      beforeEach(() => {
+        createComponent(
+          {
+            propsData: { namespaceName: TEST_NAMESPACE_NAME },
+          },
+          {
+            saasAddSeatsButton: featureFlag,
+          },
+        );
+
+        Object.assign(store.state, {
+          isLoadingSubscription: false,
+          plan: {
+            code: planCode,
+            upgradable: true,
+          },
+        });
+      });
+
+      it(testDescription, () => {
+        expect(findAddSeatsButton().exists()).toBe(expected);
       });
     },
   );

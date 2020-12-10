@@ -1,5 +1,6 @@
-import { GlTable, GlButton } from '@gitlab/ui';
+import { GlTable, GlButton, GlIcon } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
+import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 import DevopsAdoptionTable from 'ee/admin/dev_ops_report/components/devops_adoption_table.vue';
 import DevopsAdoptionTableCellFlag from 'ee/admin/dev_ops_report/components/devops_adoption_table_cell_flag.vue';
 import { DEVOPS_ADOPTION_TABLE_TEST_IDS as TEST_IDS } from 'ee/admin/dev_ops_report/constants';
@@ -12,6 +13,9 @@ describe('DevopsAdoptionTable', () => {
     wrapper = mount(DevopsAdoptionTable, {
       propsData: {
         segments: devopsAdoptionSegmentsData.nodes,
+      },
+      directives: {
+        GlTooltip: createMockDirective(),
       },
     });
   };
@@ -32,13 +36,48 @@ describe('DevopsAdoptionTable', () => {
   const findColSubComponent = (colTestId, childComponent) =>
     findCol(colTestId).find(childComponent);
 
-  it('displays the correct table headers', () => {
-    const headers = findTable().findAll(`[data-testid="${TEST_IDS.TABLE_HEADERS}"]`);
+  describe('table headings', () => {
+    let headers;
 
-    expect(headers).toHaveLength(devopsAdoptionTableHeaders.length);
+    beforeEach(() => {
+      headers = findTable().findAll(`[data-testid="${TEST_IDS.TABLE_HEADERS}"]`);
+    });
 
-    devopsAdoptionTableHeaders.forEach((headerText, i) =>
-      expect(headers.at(i).text()).toEqual(headerText),
+    it('displays the correct number of headings', () => {
+      expect(headers).toHaveLength(devopsAdoptionTableHeaders.length);
+    });
+
+    describe.each(devopsAdoptionTableHeaders)(
+      'header fields',
+      ({ label, tooltip: tooltipText, index }) => {
+        let headerWrapper;
+
+        beforeEach(() => {
+          headerWrapper = headers.at(index);
+        });
+
+        it(`displays the correct table heading text for "${label}"`, () => {
+          expect(headerWrapper.text()).toBe(label);
+        });
+
+        describe(`helper information for "${label}"`, () => {
+          const expected = Boolean(tooltipText);
+
+          it(`${expected ? 'displays' : "doesn't display"} an information icon`, () => {
+            expect(headerWrapper.find(GlIcon).exists()).toBe(expected);
+          });
+
+          if (expected) {
+            it('includes a tooltip', () => {
+              const icon = headerWrapper.find(GlIcon);
+              const tooltip = getBinding(icon.element, 'gl-tooltip');
+
+              expect(tooltip).toBeDefined();
+              expect(tooltip.value).toBe(tooltipText);
+            });
+          }
+        });
+      },
     );
   });
 

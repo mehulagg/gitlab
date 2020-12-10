@@ -13,6 +13,7 @@ Settings.encrypted_settings['path'] = Settings.absolute(Settings.encrypted_setti
 Settings['ldap'] ||= Settingslogic.new({})
 Settings.ldap['enabled'] = false if Settings.ldap['enabled'].nil?
 Settings.ldap['prevent_ldap_sign_in'] = false if Settings.ldap['prevent_ldap_sign_in'].blank?
+Settings.ldap['secret_file'] = Settings.absolute(Settings.ldap['secret_file'] || File.join(Settings.encrypted_settings['path'], "ldap.yaml.enc"))
 
 Gitlab.ee do
   Settings.ldap['sync_time'] = 3600 if Settings.ldap['sync_time'].nil?
@@ -790,6 +791,12 @@ end
 Settings['forti_authenticator'] ||= Settingslogic.new({})
 Settings.forti_authenticator['enabled'] = false if Settings.forti_authenticator['enabled'].nil?
 Settings.forti_authenticator['port'] = 443 if Settings.forti_authenticator['port'].to_i == 0
+
+#
+# FortiToken Cloud
+#
+Settings['forti_token_cloud'] ||= Settingslogic.new({})
+Settings.forti_token_cloud['enabled'] = false if Settings.forti_token_cloud['enabled'].nil?
 
 #
 # Extra customization

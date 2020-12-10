@@ -1206,6 +1206,40 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
       end
     end
 
+    describe 'synching status to Jira' do
+      let(:worker) { ::JiraConnect::SyncBuildsWorker }
+
+      %i[prepare! run! skip! drop! succeed! cancel! block! delay!].each do |event|
+        context "when we call pipeline.#{event}" do
+          it 'triggers a Jira synch worker' do
+            expect(worker).to receive(:perform_async).with(pipeline.id, Integer)
+
+            pipeline.send(event)
+          end
+
+          context 'the feature is disabled' do
+            it 'does not trigger a worker' do
+              stub_feature_flags(jira_sync_builds: false)
+
+              expect(worker).not_to receive(:perform_async)
+
+              pipeline.send(event)
+            end
+          end
+
+          context 'the feature is enabled for this project' do
+            it 'does trigger a worker' do
+              stub_feature_flags(jira_sync_builds: pipeline.project)
+
+              expect(worker).to receive(:perform_async)
+
+              pipeline.send(event)
+            end
+          end
+        end
+      end
+    end
+
     describe '#duration', :sidekiq_inline do
       context 'when multiple builds are finished' do
         before do
@@ -2954,7 +2988,7 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
         stub_feature_flags(ci_store_pipeline_messages: false)
       end
 
-      it ' does not add pipeline error message' do
+      it 'does not add pipeline error message' do
         pipeline.add_error_message('The error message')
 
         expect(pipeline.messages).to be_empty
@@ -3994,6 +4028,72 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
       create(:ci_sources_pipeline, pipeline: downstream, source_job: bridge)
 
       bridge
+    end
+  end
+
+  describe 'test failure history processing' do
+    it 'performs the service asynchronously when the pipeline is completed' do
+      service = double
+
+      expect(Ci::TestFailureHistoryService).to receive(:new).with(pipeline).and_return(service)
+      expect(service).to receive_message_chain(:async, :perform_if_needed)
+
+      pipeline.succeed!
+    end
+  end
+
+  describe '#latest_test_report_builds' do
+    it 'returns pipeline builds with test report artifacts' do
+      test_build = create(:ci_build, :test_reports, pipeline: pipeline, project: project)
+      create(:ci_build, :artifacts, pipeline: pipeline, project: project)
+
+      expect(pipeline.latest_test_report_builds).to contain_exactly(test_build)
+    end
+
+    it 'preloads project on each build to avoid N+1 queries' do
+      create(:ci_build, :test_reports, pipeline: pipeline, project: project)
+
+      control_count = ActiveRecord::QueryRecorder.new do
+        pipeline.latest_test_report_builds.map(&:project).map(&:full_path)
+      end
+
+      multi_build_pipeline = create(:ci_empty_pipeline, status: :created, project: project)
+      create(:ci_build, :test_reports, pipeline: multi_build_pipeline, project: project)
+      create(:ci_build, :test_reports, pipeline: multi_build_pipeline, project: project)
+
+      expect { multi_build_pipeline.latest_test_report_builds.map(&:project).map(&:full_path) }
+        .not_to exceed_query_limit(control_count)
+    end
+  end
+
+  describe '#builds_with_failed_tests' do
+    it 'returns pipeline builds with test report artifacts' do
+      failed_build = create(:ci_build, :failed, :test_reports, pipeline: pipeline, project: project)
+      create(:ci_build, :success, :test_reports, pipeline: pipeline, project: project)
+
+      expect(pipeline.builds_with_failed_tests).to contain_exactly(failed_build)
+    end
+
+    it 'supports limiting the number of builds to fetch' do
+      create(:ci_build, :failed, :test_reports, pipeline: pipeline, project: project)
+      create(:ci_build, :failed, :test_reports, pipeline: pipeline, project: project)
+
+      expect(pipeline.builds_with_failed_tests(limit: 1).count).to eq(1)
+    end
+
+    it 'preloads project on each build to avoid N+1 queries' do
+      create(:ci_build, :failed, :test_reports, pipeline: pipeline, project: project)
+
+      control_count = ActiveRecord::QueryRecorder.new do
+        pipeline.builds_with_failed_tests.map(&:project).map(&:full_path)
+      end
+
+      multi_build_pipeline = create(:ci_empty_pipeline, status: :created, project: project)
+      create(:ci_build, :failed, :test_reports, pipeline: multi_build_pipeline, project: project)
+      create(:ci_build, :failed, :test_reports, pipeline: multi_build_pipeline, project: project)
+
+      expect { multi_build_pipeline.builds_with_failed_tests.map(&:project).map(&:full_path) }
+        .not_to exceed_query_limit(control_count)
     end
   end
 end

@@ -41,8 +41,7 @@ module QA
           push.commit_message = 'Create Secure compatible application to serve premade reports'
         end.project.visit!
 
-        Page::Project::Menu.perform(&:click_ci_cd_pipelines)
-        Page::Project::Pipeline::Index.perform(&:wait_for_latest_pipeline_success)
+        Flow::Pipeline.wait_for_latest_pipeline(pipeline_condition: 'succeeded')
       end
 
       before do

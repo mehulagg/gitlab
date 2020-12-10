@@ -3,6 +3,9 @@ query devopsAdoptionSegments {
     nodes {
       id
       name
+      groups {
+        id
+      }
       latestSnapshot {
         issueOpened
         mergeRequestOpened

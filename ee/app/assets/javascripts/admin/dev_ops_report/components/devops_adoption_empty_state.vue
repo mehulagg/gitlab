@@ -33,6 +33,7 @@ export default {
         v-gl-modal="$options.devopsSegmentModalId"
         :disabled="!hasGroupsData"
         variant="info"
+        @click="$emit('clear-selected-segment')"
         >{{ $options.i18n.button }}</gl-button
       >
     </template>

@@ -6,8 +6,10 @@ module EE
 
     private
 
-    override :usage_metrics
-    def usage_metrics
+    override :issue_usage_metrics
+    def issue_usage_metrics
+      return unless for_issue?
+
       case self
       when ResourceIterationEvent
         ::Gitlab::UsageDataCounters::IssueActivityUniqueCounter.track_issue_iteration_changed_action(author: user)

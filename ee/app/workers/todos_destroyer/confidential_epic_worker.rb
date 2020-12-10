@@ -5,7 +5,7 @@ module TodosDestroyer
     include ApplicationWorker
 
     queue_namespace :todos_destroyer
-    feature_category :epic_tracking
+    feature_category :epics
 
     def perform(epic_id)
       return unless epic_id

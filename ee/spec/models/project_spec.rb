@@ -14,7 +14,7 @@ RSpec.describe Project do
     it { is_expected.to delegate_method(:shared_runners_seconds).to(:statistics) }
     it { is_expected.to delegate_method(:shared_runners_seconds_last_reset).to(:statistics) }
 
-    it { is_expected.to delegate_method(:actual_shared_runners_minutes_limit).to(:shared_runners_limit_namespace) }
+    it { is_expected.to delegate_method(:ci_minutes_quota).to(:shared_runners_limit_namespace) }
     it { is_expected.to delegate_method(:shared_runners_minutes_limit_enabled?).to(:shared_runners_limit_namespace) }
 
     it { is_expected.to delegate_method(:closest_gitlab_subscription).to(:namespace) }
@@ -338,16 +338,6 @@ RSpec.describe Project do
       expect do
         project2.update(mirror: true, import_url: generate(:url), mirror_user: project.creator)
       end.to change { ProjectImportState.where(project: project2).count }.from(0).to(1)
-    end
-
-    describe 'pull_mirror_branch_prefix' do
-      it { is_expected.to validate_length_of(:pull_mirror_branch_prefix).is_at_most(50) }
-
-      it 'rejects invalid git refs' do
-        project = build(:project, pull_mirror_branch_prefix: 'an invalid prefix..')
-
-        expect(project).not_to be_valid
-      end
     end
   end
 

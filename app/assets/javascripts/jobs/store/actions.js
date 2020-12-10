@@ -13,6 +13,7 @@ import {
   scrollDown,
   scrollUp,
 } from '~/lib/utils/scroll_utils';
+import httpStatusCodes from '~/lib/utils/http_status';
 
 export const init = ({ dispatch }, { endpoint, logState, pagePath }) => {
   dispatch('setJobEndpoint', endpoint);
@@ -89,7 +90,7 @@ export const fetchJob = ({ state, dispatch }) => {
     if (!Visibility.hidden()) {
       // This check is needed to ensure the loading icon
       // is not shown for a finished job during a visibility change
-      if (!isTraceReadyForRender) {
+      if (!isTraceReadyForRender && state.job.started) {
         dispatch('startPollingTrace');
       }
       dispatch('restartPolling');
@@ -187,7 +188,11 @@ export const fetchTrace = ({ dispatch, state }) =>
         dispatch('startPollingTrace');
       }
     })
-    .catch(() => dispatch('receiveTraceError'));
+    .catch(e =>
+      e.response.status === httpStatusCodes.FORBIDDEN
+        ? dispatch('receiveTraceUnauthorizedError')
+        : dispatch('receiveTraceError'),
+    );
 
 export const startPollingTrace = ({ dispatch, commit }) => {
   const traceTimeout = setTimeout(() => {
@@ -208,6 +213,10 @@ export const receiveTraceSuccess = ({ commit }, log) => commit(types.RECEIVE_TRA
 export const receiveTraceError = ({ dispatch }) => {
   dispatch('stopPollingTrace');
   flash(__('An error occurred while fetching the job log.'));
+};
+export const receiveTraceUnauthorizedError = ({ dispatch }) => {
+  dispatch('stopPollingTrace');
+  flash(__('The current user is not authorized to access the job log.'));
 };
 /**
  * When the user clicks a collapsible line in the job
@@ -249,7 +258,7 @@ export const receiveJobsForStageError = ({ commit }) => {
   flash(__('An error occurred while fetching the jobs.'));
 };
 
-export const triggerManualJob = ({ state }, variables) => {
+export const triggerManualJob = ({ state, dispatch }, variables) => {
   const parsedVariables = variables.map(variable => {
     const copyVar = { ...variable };
     delete copyVar.id;
@@ -260,5 +269,6 @@ export const triggerManualJob = ({ state }, variables) => {
     .post(state.job.status.action.path, {
       job_variables_attributes: parsedVariables,
     })
+    .then(() => dispatch('fetchTrace'))
     .catch(() => flash(__('An error occurred while triggering the job.')));
 };

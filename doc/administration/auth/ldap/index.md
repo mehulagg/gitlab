@@ -67,7 +67,7 @@ in the application settings.
 When a user signs in to GitLab with LDAP for the first time, and their LDAP
 email address is the primary email address of an existing GitLab user, then
 the LDAP DN is associated with the existing user. If the LDAP email
-attribute is not found in GitLab's database, a new user is created.
+attribute is not found in the GitLab user database, a new user is created.
 
 In other words, if an existing GitLab user wants to enable LDAP sign-in for
 themselves, they should check that their GitLab email address matches their
@@ -357,6 +357,93 @@ This does not disable [using LDAP credentials for Git access](#git-password-auth
      ldap:
        prevent_ldap_sign_in: true
    ```
+
+1. [Restart GitLab](../../restart_gitlab.md#installations-from-source) for the changes to take effect.
+
+### Using encrypted credentials **(CORE ONLY)**
+
+Instead of having the LDAP integration credentials stored in plaintext in the configuration files, you can optionally
+use an encrypted file for the LDAP credentials. To use this feature, you first need to enable
+[GitLab encrypted configuration](../../encrypted_configuration.md).
+
+The encrypted configuration for LDAP exists in an encrypted YAML file. By default the file will be created at
+`shared/encrypted_configuration/ldap.yaml.enc`. This location is configurable in the GitLab configuration.
+
+The unencrypted contents of the file should be a subset of the secret settings from your `servers` block in the LDAP
+configuration.
+
+The supported configuration items for the encrypted file are:
+
+- `bind_dn`
+- `password`
+
+The encrypted contents can be configured with the [LDAP secret edit Rake command](../../raketasks/ldap.md#edit-secret).
+
+**Omnibus configuration**
+
+If initially your LDAP configuration looked like:
+
+1. In `/etc/gitlab/gitlab.rb`:
+
+  ```ruby
+    gitlab_rails['ldap_servers'] = {
+    'main' => {
+      # snip...
+      'bind_dn' => 'admin',
+      'password' => '123'
+      }
+    }
+  ```
+
+1. Edit the encrypted secret:
+
+   ```shell
+   sudo gitlab-rake gitlab:ldap:secret:edit EDITOR=vim
+   ```
+
+1. The unencrypted contents of the LDAP secret should be entered like:
+
+   ```yaml
+   main:
+     bind_dn: admin
+     password: '123'
+   ```
+
+1. Edit `/etc/gitlab/gitlab.rb` and remove the settings for `user_bn` and `password`.
+
+1. [Reconfigure GitLab](../../restart_gitlab.md#omnibus-gitlab-reconfigure) for the changes to take effect.
+
+**Source configuration**
+
+If initially your LDAP configuration looked like:
+
+1. In `config/gitlab.yaml`:
+
+   ```yaml
+   production:
+     ldap:
+       servers:
+         main:
+           # snip...
+           bind_dn: admin
+           password: '123'
+   ```
+
+1. Edit the encrypted secret:
+
+   ```shell
+   bundle exec rake gitlab:ldap:secret:edit EDITOR=vim RAILS_ENVIRONMENT=production
+   ```
+
+1. The unencrypted contents of the LDAP secret should be entered like:
+
+   ```yaml
+   main:
+    bind_dn: admin
+    password: '123'
+   ```
+
+1. Edit `config/gitlab.yaml` and remove the settings for `user_bn` and `password`.
 
 1. [Restart GitLab](../../restart_gitlab.md#installations-from-source) for the changes to take effect.
 

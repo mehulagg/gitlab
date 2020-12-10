@@ -132,7 +132,7 @@ RSpec.describe 'Global elastic search', :elastic, :sidekiq_inline do
       expect(page).to have_selector("span.line[lang='javascript']")
     end
 
-    it 'Ignores nonexistent projects from stale index' do
+    it 'ignores nonexistent projects from stale index' do
       stub_ee_application_setting(elasticsearch_search: true, elasticsearch_indexing: true)
 
       project_2.repository.create_file(

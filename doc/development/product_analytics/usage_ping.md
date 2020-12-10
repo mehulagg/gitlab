@@ -80,7 +80,7 @@ production: &base
 
 ## Usage Ping request flow
 
-The following example shows a basic request/response flow between a GitLab instance, the Versions Application, the License Application, Salesforce, GitLab's S3 Bucket, GitLab's Snowflake Data Warehouse, and Sisense:
+The following example shows a basic request/response flow between a GitLab instance, the Versions Application, the License Application, Salesforce, the GitLab S3 Bucket, the GitLab Snowflake Data Warehouse, and Sisense:
 
 ```mermaid
 sequenceDiagram
@@ -351,9 +351,8 @@ Implemented using Redis methods [PFADD](https://redis.io/commands/pfadd) and [PF
      be `{i_compliance_credential_inventory}-2020-34`.
    - `expiry`: expiry time in days. Default: 29 days for daily aggregation and 6 weeks for weekly
      aggregation.
-   - `aggregation`: aggregation `:daily` or `:weekly`. The argument defines how we build the Redis
-     keys for data storage. For `daily` we keep a key for metric per day of the year, for `weekly` we
-     keep a key for metric per week of the year.
+   - `aggregation`: may be set to a `:daily` or `:weekly` key. Defines how counting data is stored in Redis.
+     Aggregation on a `daily` basis does not pull more fine grained data.
    - `feature_flag`: optional. For details, see our [GitLab internal Feature flags](../feature_flags/) documentation.
 
 1. Track event in controller using `RedisTracking` module with `track_redis_hll_event(*controller_actions, name:, feature:, feature_default_enabled: false)`.
@@ -620,7 +619,7 @@ alt_usage_data(999)
 ### Prometheus Queries
 
 In those cases where operational metrics should be part of Usage Ping, a database or Redis query is unlikely
-to provide useful data. Instead, Prometheus might be more appropriate, since most of GitLab's architectural
+to provide useful data. Instead, Prometheus might be more appropriate, since most GitLab architectural
 components publish metrics to it that can be queried back, aggregated, and included as usage data.
 
 NOTE:

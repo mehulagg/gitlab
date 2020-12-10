@@ -19,6 +19,7 @@ module Jira
       @sort = params[:sort] || DEFAULT_SORT
       @sort_direction = params[:sort_direction] || DEFAULT_SORT_DIRECTION
       @vulnerability_ids = params[:vulnerability_ids]
+      @issue_ids = params[:issue_ids]
     end
 
     def execute
@@ -30,7 +31,7 @@ module Jira
 
     private
 
-    attr_reader :jira_project_key, :sort, :sort_direction, :search, :labels, :status, :reporter, :assignee, :state, :vulnerability_ids
+    attr_reader :jira_project_key, :sort, :sort_direction, :search, :labels, :status, :reporter, :assignee, :state, :vulnerability_ids, :issue_ids
 
     def jql_filters
       [
@@ -41,7 +42,8 @@ module Jira
         by_assignee,
         by_open_and_closed,
         by_summary_and_description,
-        by_vulnerability_ids
+        by_vulnerability_ids,
+        by_issue_ids
       ].compact.join(' AND ')
     end
 
@@ -100,6 +102,15 @@ module Jira
 
       vulnerability_ids
         .map { |vulnerability_id| %Q[description ~ "/-/security/vulnerabilities/#{escape_quotes(vulnerability_id.to_s)}"] }
+        .join(' OR ')
+        .then { |query| "(#{query})" }
+    end
+
+    def by_issue_ids
+      return if issue_ids.blank?
+
+      issue_ids
+        .map { |issue_id| %Q[id = #{escape_quotes(issue_id.to_s)}] }
         .join(' OR ')
         .then { |query| "(#{query})" }
     end

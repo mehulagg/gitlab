@@ -1,11 +1,18 @@
 <script>
-import { GlTable, GlButton, GlPopover, GlModalDirective } from '@gitlab/ui';
-import { s__ } from '~/locale';
+import {
+  GlTable,
+  GlButton,
+  GlPopover,
+  GlModalDirective,
+  GlTooltipDirective,
+  GlIcon,
+} from '@gitlab/ui';
 import DevopsAdoptionTableCellFlag from './devops_adoption_table_cell_flag.vue';
 import DevopsAdoptionDeleteModal from './devops_adoption_delete_modal.vue';
 import {
   DEVOPS_ADOPTION_TABLE_TEST_IDS,
   DEVOPS_ADOPTION_STRINGS,
+  DEVOPS_ADOPTION_SEGMENT_MODAL_ID,
   DEVOPS_ADOPTION_SEGMENT_DELETE_MODAL_ID,
 } from '../constants';
 
@@ -13,6 +20,19 @@ const fieldOptions = {
   thClass: 'gl-bg-white! gl-text-gray-400',
   thAttr: { 'data-testid': DEVOPS_ADOPTION_TABLE_TEST_IDS.TABLE_HEADERS },
 };
+
+const { table: i18n } = DEVOPS_ADOPTION_STRINGS;
+
+const headers = [
+  'name',
+  'issueOpened',
+  'mergeRequestOpened',
+  'mergeRequestApproved',
+  'runnerConfigured',
+  'pipelineSucceeded',
+  'deploySucceeded',
+  'securityScanSucceeded',
+].map(key => ({ key, ...i18n.headers[key], ...fieldOptions }));
 
 export default {
   name: 'DevopsAdoptionTable',
@@ -22,56 +42,19 @@ export default {
     GlButton,
     GlPopover,
     DevopsAdoptionDeleteModal,
+    GlIcon,
   },
-  i18n: DEVOPS_ADOPTION_STRINGS.table,
+  i18n,
+  devopsSegmentModalId: DEVOPS_ADOPTION_SEGMENT_MODAL_ID,
   devopsSegmentDeleteModalId: DEVOPS_ADOPTION_SEGMENT_DELETE_MODAL_ID,
   directives: {
+    GlTooltip: GlTooltipDirective,
     GlModal: GlModalDirective,
   },
   tableHeaderFields: [
-    {
-      key: 'name',
-      label: s__('DevopsAdoption|Segment'),
-      ...fieldOptions,
-    },
-    {
-      key: 'issueOpened',
-      label: s__('DevopsAdoption|Issues'),
-      ...fieldOptions,
-    },
-    {
-      key: 'mergeRequestOpened',
-      label: s__('DevopsAdoption|MRs'),
-      ...fieldOptions,
-    },
-    {
-      key: 'mergeRequestApproved',
-      label: s__('DevopsAdoption|Approvals'),
-      ...fieldOptions,
-    },
-    {
-      key: 'runnerConfigured',
-      label: s__('DevopsAdoption|Runners'),
-      ...fieldOptions,
-    },
-    {
-      key: 'pipelineSucceeded',
-      label: s__('DevopsAdoption|Pipelines'),
-      ...fieldOptions,
-    },
-    {
-      key: 'deploySucceeded',
-      label: s__('DevopsAdoption|Deploys'),
-      ...fieldOptions,
-    },
-    {
-      key: 'securityScanSucceeded',
-      label: s__('DevopsAdoption|Scanning'),
-      ...fieldOptions,
-    },
+    ...headers,
     {
       key: 'actions',
-      label: '',
       tdClass: 'actions-cell',
       ...fieldOptions,
     },
@@ -82,11 +65,11 @@ export default {
       type: Array,
       required: true,
     },
-  },
-  data() {
-    return {
-      selectedSegment: null,
-    };
+    selectedSegment: {
+      type: Object,
+      required: false,
+      default: null,
+    },
   },
   methods: {
     popoverContainerId(name) {
@@ -96,7 +79,10 @@ export default {
       return `popover_id_for_${name}`;
     },
     setSelectedSegment(segment) {
-      this.selectedSegment = segment;
+      this.$emit('set-selected-segment', segment);
+    },
+    slotName(key) {
+      return `head(${key})`;
     },
   },
 };
@@ -109,6 +95,19 @@ export default {
       thead-class="gl-border-t-0 gl-border-b-solid gl-border-b-1 gl-border-b-gray-100"
       stacked="sm"
     >
+      <template v-for="header in $options.tableHeaderFields" #[slotName(header.key)]>
+        <div :key="header.key" class="gl-display-flex gl-align-items-center">
+          <span>{{ header.label }}</span>
+          <gl-icon
+            v-if="header.tooltip"
+            v-gl-tooltip.hover="header.tooltip"
+            name="information-o"
+            class="gl-text-gray-200 gl-ml-1"
+            :size="14"
+          />
+        </div>
+      </template>
+
       <template #cell(name)="{ item }">
         <div :data-testid="$options.testids.SEGMENT">
           <strong>{{ item.name }}</strong>
@@ -181,13 +180,22 @@ export default {
               triggers="hover focus"
               placement="left"
             >
-              <gl-button
-                v-gl-modal="$options.devopsSegmentDeleteModalId"
-                category="tertiary"
-                variant="danger"
-                @click="setSelectedSegment(item)"
-                >{{ $options.i18n.deleteButton }}</gl-button
-              >
+              <div class="gl-display-inline-flex gl-flex-direction-column">
+                <gl-button
+                  v-gl-modal="$options.devopsSegmentModalId"
+                  category="tertiary"
+                  class="gl-w-max-content"
+                  @click="setSelectedSegment(item)"
+                  >{{ $options.i18n.editButton }}</gl-button
+                >
+                <gl-button
+                  v-gl-modal="$options.devopsSegmentDeleteModalId"
+                  category="tertiary"
+                  variant="danger"
+                  @click="setSelectedSegment(item)"
+                  >{{ $options.i18n.deleteButton }}</gl-button
+                >
+              </div>
             </gl-popover>
           </div>
         </div>

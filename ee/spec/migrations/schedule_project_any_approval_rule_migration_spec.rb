@@ -6,7 +6,7 @@ require_migration!
 RSpec.describe ScheduleProjectAnyApprovalRuleMigration do
   let(:namespaces) { table(:namespaces) }
   let(:projects) { table(:projects) }
-  let(:namespace) { namespaces.create(name: 'gitlab', path: 'gitlab-org') }
+  let(:namespace) { namespaces.create!(name: 'gitlab', path: 'gitlab-org') }
 
   def create_project(id, options = {})
     default_options = {
@@ -16,7 +16,7 @@ RSpec.describe ScheduleProjectAnyApprovalRuleMigration do
       approvals_before_merge: 2
     }
 
-    projects.create(default_options.merge(options))
+    projects.create!(default_options.merge(options))
   end
 
   it 'correctly schedules background migrations' do

@@ -13,5 +13,12 @@ module Types
     field :status, Types::DastSiteProfileValidationStatusEnum, null: false,
           description: 'Status of the site validation',
           method: :state
+
+    field :normalized_target_url, GraphQL::STRING_TYPE, null: true,
+          description: 'Normalized URL of the target to be validated'
+
+    def normalized_target_url
+      object.url_base
+    end
   end
 end
