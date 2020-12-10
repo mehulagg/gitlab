@@ -459,12 +459,24 @@ end
 ### Deactivate Users that have no recent activity
 
 ```ruby
-days_inactive = 91
+days_inactive = 90
 inactive_users = User.active.where("last_activity_on <= ?", days_inactive.days.ago)
 
 inactive_users.each do |user|
     puts "user '#{user.username}': #{user.last_activity_on}"
     user.deactivate!
+end
+```
+
+### Block Users that have no recent activity
+
+```ruby
+days_inactive = 90
+inactive_users = User.active.where("last_activity_on <= ?", days_inactive.days.ago)
+
+inactive_users.each do |user|
+    puts "user '#{user.username}': #{user.last_activity_on}"
+    user.block!
 end
 ```
 
