@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_dependency 'gitlab/query_limiting' # Fix for spring
+
 class GitlabSchema < GraphQL::Schema
   # Currently an IntrospectionQuery has a complexity of 179.
   # These values will evolve over time.
@@ -40,6 +42,7 @@ class GitlabSchema < GraphQL::Schema
         query[:max_depth] = max_query_depth(kwargs[:context])
       end
 
+      query_limiting_whitelist(kwargs[:max_complexity])
       super(queries, **kwargs)
     end
 
@@ -47,7 +50,16 @@ class GitlabSchema < GraphQL::Schema
       kwargs[:max_complexity] ||= max_query_complexity(kwargs[:context])
       kwargs[:max_depth] ||= max_query_depth(kwargs[:context])
 
+      query_limiting_whitelist(kwargs[:max_complexity])
       super(query_str, **kwargs)
+    end
+
+    def query_limiting_whitelist(complexity)
+      return if complexity.present?
+
+      # If there is no complexity, then we are in a test with allow_unlimited_graphql_complexity
+      # so we will also disable the query limiter
+      Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab/-/issues/292711')
     end
 
     def get_type(type_name)

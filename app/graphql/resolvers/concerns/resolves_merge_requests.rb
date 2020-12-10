@@ -40,6 +40,8 @@ module ResolvesMergeRequests
   def preloads
     {
       assignees: [:assignees],
+      reviewers: [:reviewers],
+      participants: MergeRequest.participant_includes,
       labels: [:labels],
       author: [:author],
       merged_at: [:metrics],

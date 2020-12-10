@@ -23,9 +23,7 @@ RSpec.describe 'getting merge request listings nested in a project' do
     graphql_query_for(
       :project,
       { full_path: project.full_path },
-      query_graphql_field(:merge_requests, search_params, [
-        query_graphql_field(:nodes, nil, fields)
-      ])
+      query_nodes(:merge_requests, fields, args: search_params)
     )
   end
 
@@ -253,6 +251,83 @@ RSpec.describe 'getting merge request listings nested in a project' do
       end
 
       include_examples 'N+1 query check'
+    end
+  end
+
+  describe 'performance' do
+    let(:mrs) { graphql_data_at(:project, :merge_requests, :nodes) }
+
+    let(:mr_fields) do
+      <<~SELECT
+      assignees { nodes { username } }
+      reviewers { nodes { username } }
+      headPipeline { status }
+      SELECT
+    end
+
+    let(:query) do
+      <<~GQL
+        query($first: Int) {
+          project(fullPath: "#{project.full_path}") {
+            mergeRequests(first: $first) {
+              nodes { #{mr_fields} }
+            }
+          }
+        }
+      GQL
+    end
+
+    before_all do
+      project.add_developer(current_user)
+      mrs = create_list(:merge_request, 10, :closed, :with_head_pipeline,
+                        source_project: project,
+                        author: current_user)
+      mrs.each do |mr|
+        mr.assignees << create(:user)
+        mr.assignees << current_user
+        mr.reviewers << create(:user)
+        mr.reviewers << current_user
+      end
+    end
+
+    def run_query(number)
+      post_graphql(query, current_user: current_user, variables: { first: number })
+    end
+
+    def user_collection
+      { 'nodes' => all(match(a_hash_including('username' => be_present))) }
+    end
+
+    it 'returns appropriate results' do
+      run_query(2)
+
+      expect(mrs.size).to eq(2)
+      expect(mrs).to all(
+        match(
+          a_hash_including(
+            'assignees' => user_collection,
+            'reviewers' => user_collection,
+            'headPipeline' => { 'status' => be_present }
+          )))
+    end
+
+    it 'can lookahead to eliminate N+1 queries', :use_clean_rails_memory_store_caching, :request_store do
+      expect { run_query(10) }.to issue_same_number_of_queries_as { run_query(1) }.or_fewer.ignoring_cached_queries
+    end
+
+    context 'fetching participants' do
+      let(:mr_fields) { 'participants { nodes { username } }' }
+
+      it 'returns appropriate results' do
+        run_query(2)
+
+        expect(mrs.size).to eq(2)
+        expect(mrs).to all(match(a_hash_including('participants' => user_collection)))
+      end
+
+      it 'can lookahead to eliminate N+1 queries', :use_clean_rails_memory_store_caching, :request_store do
+        expect { run_query(10) }.to issue_same_number_of_queries_as { run_query(1) }.or_fewer.ignoring_cached_queries
+      end
     end
   end
 

@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_dependency 'gitlab/query_limiting/transaction' # Fix for spring
+
 module Gitlab
   module QueryLimiting
     # Returns true if we should enable tracking of query counts.

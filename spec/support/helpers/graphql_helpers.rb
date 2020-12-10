@@ -245,7 +245,7 @@ module GraphqlHelpers
     return if max_depth <= 0
 
     allow_unlimited_graphql_complexity
-    allow_unlimited_graphql_depth
+    allow_unlimited_graphql_depth if max_depth > 1
     allow_high_graphql_recursion
     allow_high_graphql_transaction_threshold
 
