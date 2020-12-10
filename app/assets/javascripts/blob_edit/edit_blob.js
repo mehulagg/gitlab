@@ -6,7 +6,7 @@ import TemplateSelectorMediator from '../blob/file_template_mediator';
 import { addEditorMarkdownListeners } from '~/lib/utils/text_markdown';
 import EditorLite from '~/editor/editor_lite';
 import FileTemplateExtension from '~/editor/editor_file_template_ext';
-import { insertFinalNewline } from '~/ide/utils';
+import { insertFinalNewline } from '~/lib/utils/text_utility';
 
 export default class EditBlob {
   // The options object has:

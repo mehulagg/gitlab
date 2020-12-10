@@ -411,3 +411,13 @@ export const hasContent = obj => isString(obj) && obj.trim() !== '';
 export const isValidSha1Hash = str => {
   return /^[0-9a-f]{5,40}$/.test(str);
 };
+
+/**
+ * Adds a final newline to the content if it doesn't already exist
+ *
+ * @param {*} content Content
+ * @param {*} eol Type of newline: CRLF='\r\n', LF='\n', CR='\r'
+ */
+export function insertFinalNewline(content, eol = '\n') {
+  return content.slice(-eol.length) !== eol ? `${content}${eol}` : content;
+}
