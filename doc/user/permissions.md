@@ -64,7 +64,7 @@ The following list depicts user permission levels in a project,
 available to roles for all users (Guest and above).
 
 - General
-  - Download project (*1*)
+  <!-- - Download project (*1*) " as discussed in the issue #280534, then maybe Download Project should not be listed here because it has a duplicate meaning as in the below permission in Project" -->
   - Leave comments (on issues and MRs)
   - View dependency list (*1*)
   - View [Design Management](project/issues/design_management.md) pages
