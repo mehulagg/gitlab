@@ -465,3 +465,18 @@ If you get this error, your package name may not meet the
 
 Ensure the name meets the convention exactly, including the case.
 Then try to publish again.
+
+### `npm publish` returns `npm ERR! 500 Internal Server Error - PUT`
+
+This is a [known issue](https://gitlab.com/gitlab-org/gitlab/-/issues/238950) in at least `13.3.x+`.
+The error in the logs will appear as:
+
+>NoMethodError - undefined method `preferred_language' for #<Rack::Response
+
+This might be accompanied by another error:
+
+>Errno::EACCES","exception.message":"Permission denied
+
+This is usually a permissions issue with either `'packages_storage_path'` default `/var/opt/gitlab/gitlab-rails/shared/packages/`
+or if [object storage](https://docs.gitlab.com/ee/administration/packages/#using-object-storage) is used, a permissions issue
+with the remote bucket. In the latter, ensure the bucket exists and the GitLab has write access to it.
