@@ -148,6 +148,7 @@ available only to users with Developer permissions and above.
   - Enable review apps
   - Add tags
   - Create/edit/delete project milestones
+  - Manage Feature Flags **(PREMIUM)**
 - Containers
   - Read Terraform state
   - Update a container registry
@@ -158,6 +159,10 @@ available only to users with Developer permissions and above.
   - Create issue from vulnerability finding
   - Dismiss vulnerability finding
   - View vulnerability
+  - Create vulnerability from vulnerability finding
+  - Resolve vulnerability
+  - Dismiss vulnerability
+  - Revert vulnerability to detected state
 - Branches
   - Create new branches
   - Push to non-protected branches
@@ -172,13 +177,20 @@ available only to users with Developer permissions and above.
 - Analytics
   - View project statistics
   - View Pods logs
+  - Create / edit / delete metrics dashboard annotations
 - Code
   - Create or update commit status
+  - Apply code change suggestions
+  - Rewrite / remove Git tags
 - Jobs
   - Cancel and retry jobs
+  - Run CI/CD pipeline against a protected branch (*2*)
+- Publishing
+  - Create and edit wiki pages
 
 1. For information on eligible approvers for merge requests, see
    [Eligible approvers](project/merge_requests/merge_request_approvals.md#eligible-approvers).
+1. If the [branch is protected](project/protected_branches.md#using-the-allowed-to-merge-and-allowed-to-push-settings), this depends on the access Developers and Maintainers are given.
 
 ### Project members Maintainer permissions
 
@@ -187,66 +199,6 @@ available only to users with Developer permissions and above.
 <!--
 | Action                                            | Guest   | Reporter   | Developer   |Maintainer| Owner (*10*) |
 |---------------------------------------------------|---------|------------|-------------|----------|--------|
-| Assign issues                                     |         | ✓          | ✓           | ✓        | ✓      |
-| Label issues                                      |         | ✓          | ✓           | ✓        | ✓      |
-| Set issue weight                                  |         | ✓          | ✓           | ✓        | ✓      |
-| Lock issue threads                                |         | ✓          | ✓           | ✓        | ✓      |
-| Manage issue tracker                              |         | ✓          | ✓           | ✓        | ✓      |
-| Manage related issues                             |         | ✓          | ✓           | ✓        | ✓      |
-| Manage labels                                     |         | ✓          | ✓           | ✓        | ✓      |
-| Create code snippets                              |         | ✓          | ✓           | ✓        | ✓      |
-| See a commit status                               |         | ✓          | ✓           | ✓        | ✓      |
-| See a container registry                          |         | ✓          | ✓           | ✓        | ✓      |
-| See environments                                  |         | ✓          | ✓           | ✓        | ✓      |
-| See a list of merge requests                      |         | ✓          | ✓           | ✓        | ✓      |
-| View CI/CD analytics                              |         | ✓          | ✓           | ✓        | ✓      |
-| View Code Review analytics **(STARTER)**          |         | ✓          | ✓           | ✓        | ✓      |
-| View Repository analytics                         |         | ✓          | ✓           | ✓        | ✓      |
-| View Error Tracking list                          |         | ✓          | ✓           | ✓        | ✓      |
-| Create new merge request                          |         | ✓          | ✓           | ✓        | ✓      |
-| View metrics dashboard annotations                |         | ✓          | ✓           | ✓        | ✓      |
-| Create/edit requirements **(ULTIMATE)**           |         | ✓          | ✓           | ✓        | ✓      |
-| Pull [packages](packages/index.md)                |         | ✓          | ✓           | ✓        | ✓      |
-| Publish [packages](packages/index.md)             |         |            | ✓           | ✓        | ✓      |
-| Create/edit/delete a Cleanup policy               |         |            | ✓           | ✓        | ✓      |
-| Upload [Design Management](project/issues/design_management.md) files |  |  | ✓        | ✓        | ✓      |
-| Create/edit/delete [Releases](project/releases/index.md)|   |            | ✓           | ✓        | ✓      |
-| Create new branches                               |         |            | ✓           | ✓        | ✓      |
-| Push to non-protected branches                    |         |            | ✓           | ✓        | ✓      |
-| Force push to non-protected branches              |         |            | ✓           | ✓        | ✓      |
-| Remove non-protected branches                     |         |            | ✓           | ✓        | ✓      |
-| Assign merge requests                             |         |            | ✓           | ✓        | ✓      |
-| Label merge requests                              |         |            | ✓           | ✓        | ✓      |
-| Lock merge request threads                        |         |            | ✓           | ✓        | ✓      |
-| Approve merge requests (*9*)                      |         |            | ✓           | ✓        | ✓      |
-| Manage/Accept merge requests                      |         |            | ✓           | ✓        | ✓      |
-| View project statistics                           |         |            | ✓           | ✓        | ✓      |
-| Create new environments                           |         |            | ✓           | ✓        | ✓      |
-| Stop environments                                 |         |            | ✓           | ✓        | ✓      |
-| Enable Review Apps                                |         |            | ✓           | ✓        | ✓      |
-| View Pods logs                                    |         |            | ✓           | ✓        | ✓      |
-| Read Terraform state                              |         |            | ✓           | ✓        | ✓      |
-| Add tags                                          |         |            | ✓           | ✓        | ✓      |
-| Cancel and retry jobs                             |         |            | ✓           | ✓        | ✓      |
-| Create or update commit status                    |         |            | ✓ (*5*)     | ✓        | ✓      |
-| Update a container registry                       |         |            | ✓           | ✓        | ✓      |
-| Remove a container registry image                 |         |            | ✓           | ✓        | ✓      |
-| Create/edit/delete project milestones             |         |            | ✓           | ✓        | ✓      |
-| Use security dashboard **(ULTIMATE)**             |         |            | ✓           | ✓        | ✓      |
-| View vulnerability findings in Dependency list **(ULTIMATE)** |    |     | ✓           | ✓        | ✓      |
-| Create issue from vulnerability finding **(ULTIMATE)** |    |            | ✓           | ✓        | ✓      |
-| Dismiss vulnerability finding **(ULTIMATE)**      |         |            | ✓           | ✓        | ✓      |
-| View vulnerability **(ULTIMATE)**                 |         |            | ✓           | ✓        | ✓      |
-| Create vulnerability from vulnerability finding **(ULTIMATE)** |   |     | ✓           | ✓        | ✓      |
-| Resolve vulnerability **(ULTIMATE)**              |         |            | ✓           | ✓        | ✓      |
-| Dismiss vulnerability **(ULTIMATE)**              |         |            | ✓           | ✓        | ✓      |
-| Revert vulnerability to detected state **(ULTIMATE)** |     |            | ✓           | ✓        | ✓      |
-| Apply code change suggestions                     |         |            | ✓           | ✓        | ✓      |
-| Create and edit wiki pages                        |         |            | ✓           | ✓        | ✓      |
-| Rewrite/remove Git tags                           |         |            | ✓           | ✓        | ✓      |
-| Manage Feature Flags **(PREMIUM)**                |         |            | ✓           | ✓        | ✓      |
-| Create/edit/delete metrics dashboard annotations  |         |            | ✓           | ✓        | ✓      |
-| Run CI/CD pipeline against a protected branch     |         |            | ✓ (*5*)     | ✓        | ✓      |
 | Delete [packages](packages/index.md)              |         |            |             | ✓        | ✓      |
 | Request a CVE ID **(FREE ONLY)**                  |         |            |             | ✓        | ✓      |
 | Use environment terminals                         |         |            |             | ✓        | ✓      |
