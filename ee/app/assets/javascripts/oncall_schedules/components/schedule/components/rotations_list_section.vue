@@ -65,7 +65,12 @@ export default {
           />
         </gl-button-group>
       </span>
-      <span v-for="(timeframeItem, index) in timeframe" :key="index" class="timeline-cell" data-testid="timelineCell">
+      <span
+        v-for="(timeframeItem, index) in timeframe"
+        :key="index"
+        class="timeline-cell"
+        data-testid="timelineCell"
+      >
         <current-day-indicator :preset-type="presetType" :timeframe-item="timeframeItem" />
         <rotation-assignee :rotation="rotation" :assignee-index="index" />
       </span>

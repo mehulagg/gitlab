@@ -31,7 +31,6 @@ export default {
         new Date(this.rotation.startsAt),
         this.rotation.length * 7 * this.assigneeIndex,
       ).toLocaleString();
-      // eslint-disable-next-line @gitlab/require-i18n-strings
       return sprintf(__('Starts at %{startsAt}'), { startsAt });
     },
     endsAt() {
@@ -39,7 +38,6 @@ export default {
         new Date(this.rotation.startsAt),
         this.rotation.length * 7 * this.assigneeIndex + this.rotation.length * 7,
       ).toLocaleString();
-      // eslint-disable-next-line @gitlab/require-i18n-strings
       return sprintf(__('Ends at %{endsAt}'), { endsAt });
     },
   },

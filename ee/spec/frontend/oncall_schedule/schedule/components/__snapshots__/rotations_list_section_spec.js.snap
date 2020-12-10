@@ -8,8 +8,34 @@ exports[`RotationsListSectionComponent renders component layout 1`] = `
     class="list-item list-item-empty clearfix"
   >
     <span
-      class="details-cell"
-    />
+      class="details-cell gl-display-flex gl-justify-content-space-between gl-align-items-center gl-pl-3"
+    >
+      <span>
+        Rotation 242
+      </span>
+       
+      <gl-button-group-stub>
+        <gl-button-stub
+          aria-label="Edit rotation"
+          buttontextclasses=""
+          category="tertiary"
+          icon="pencil"
+          size="medium"
+          title="Edit rotation"
+          variant="default"
+        />
+         
+        <gl-button-stub
+          aria-label="Delete rotation"
+          buttontextclasses=""
+          category="tertiary"
+          icon="remove"
+          size="medium"
+          title="Delete rotation"
+          variant="default"
+        />
+      </gl-button-group-stub>
+    </span>
      
     <span
       class="timeline-cell"
@@ -19,6 +45,11 @@ exports[`RotationsListSectionComponent renders component layout 1`] = `
         presettype="WEEKS"
         timeframeitem="Mon Jan 01 2018 00:00:00 GMT+0000 (Greenwich Mean Time)"
       />
+       
+      <rotation-assignee-stub
+        assigneeindex="0"
+        rotation="[object Object]"
+      />
     </span>
     <span
       class="timeline-cell"
@@ -27,6 +58,11 @@ exports[`RotationsListSectionComponent renders component layout 1`] = `
       <current-day-indicator-stub
         presettype="WEEKS"
         timeframeitem="Mon Jan 08 2018 00:00:00 GMT+0000 (Greenwich Mean Time)"
+      />
+       
+      <rotation-assignee-stub
+        assigneeindex="1"
+        rotation="[object Object]"
       />
     </span>
   </div>
