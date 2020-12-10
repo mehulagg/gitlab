@@ -10,25 +10,47 @@ CREATE EXTENSION IF NOT EXISTS btree_gist;
 
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
-CREATE FUNCTION fn_set_issues_iid() RETURNS trigger
+CREATE FUNCTION fn_bulk_set_issues_iid() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-DECLARE
-  generated_iid int;
+  DECLARE row_count int;
+  DECLARE target_project_id int;
+  DECLARE last_generated_iid int;
 BEGIN
+  SELECT COUNT(*) INTO row_count FROM inserted_rows;
+  SELECT inserted_rows.project_id INTO target_project_id FROM inserted_rows LIMIT 1;
+
   INSERT INTO internal_ids
     (project_id, usage, last_value)
   VALUES
-    (NEW.project_id, 0, 0) -- issue usage enum value is 0
+    (target_project_id, 0, row_count) -- issue usage enum value is 0
   ON CONFLICT (usage, project_id) WHERE project_id IS NOT NULL DO UPDATE
-    SET last_value = internal_ids.last_value + 1
-  RETURNING last_value INTO generated_iid;
+    SET last_value = internal_ids.last_value + row_count
+  RETURNING last_value INTO last_generated_iid;
 
-  RAISE NOTICE 'generated_iid is %', generated_iid;
+  UPDATE issues
+  SET iid = mapped_iids.iid
+  FROM (
+    SELECT
+      inserted.id,
+      generated.iid
+    FROM (
+      SELECT
+        row_number() OVER (ORDER BY id) AS row_number,
+        inserted_rows.id AS id
+      FROM inserted_rows
+    ) AS inserted
+    INNER JOIN (
+      SELECT
+        i AS row_number,
+        (last_generated_iid - row_count + i) AS iid
+      FROM generate_series(1, row_count) AS i
+    ) AS generated
+    ON inserted.row_number = generated.row_number
+  ) AS mapped_iids
+  WHERE issues.id = mapped_iids.id;
 
-  NEW.iid := generated_iid;
-
-  RETURN NEW;
+  RETURN NULL;
 END
 $$;
 
@@ -23276,7 +23298,7 @@ ALTER INDEX product_analytics_events_experimental_pkey ATTACH PARTITION gitlab_p
 
 CREATE TRIGGER table_sync_trigger_ee39a25f9d AFTER INSERT OR DELETE OR UPDATE ON audit_events FOR EACH ROW EXECUTE PROCEDURE table_sync_function_2be879775d();
 
-CREATE TRIGGER tg_set_issues_id BEFORE INSERT ON issues FOR EACH ROW EXECUTE PROCEDURE fn_set_issues_iid();
+CREATE TRIGGER tg_bulk_set_issues_iid AFTER INSERT ON issues REFERENCING NEW TABLE AS inserted_rows FOR EACH STATEMENT EXECUTE PROCEDURE fn_bulk_set_issues_iid();
 
 ALTER TABLE ONLY chat_names
     ADD CONSTRAINT fk_00797a2bf9 FOREIGN KEY (service_id) REFERENCES services(id) ON DELETE CASCADE;

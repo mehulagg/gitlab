@@ -22,8 +22,6 @@ class AddTriggerToSetIssueIid < ActiveRecord::Migration[6.0]
           SET last_value = internal_ids.last_value + 1
         RETURNING last_value INTO generated_iid;
 
-        RAISE NOTICE 'generated_iid is %', generated_iid;
-
         NEW.iid := generated_iid;
 
         RETURN NEW;
@@ -31,11 +29,11 @@ class AddTriggerToSetIssueIid < ActiveRecord::Migration[6.0]
       $$
     SQL
 
-    create_trigger(:issues, :tg_set_issues_id, :fn_set_issues_iid, fires: 'BEFORE INSERT')
+    create_trigger(:issues, :tg_set_issues_iid, :fn_set_issues_iid, fires: 'BEFORE INSERT')
   end
 
   def down
-    drop_trigger(:issues, :tg_set_issues_id, if_exists: false)
+    drop_trigger(:issues, :tg_set_issues_iid, if_exists: false)
     drop_function(:fn_set_issues_iid, if_exists: false)
   end
 end
