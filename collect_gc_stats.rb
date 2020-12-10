@@ -49,7 +49,7 @@ ALL_SETTINGS = [
 
 ALL_ENV_VARS = ALL_SETTINGS.flat_map(&:keys)
 
-OUTFILE = 'gc_stats.csv'
+OUTFILE = './tmp/gc_settings_exp/gc_stats.csv'
 
 ALL_GCSTAT_KEYS = [
   :heap_allocated_pages,
@@ -93,7 +93,7 @@ USED_GCSTAT_KEYS = [
 ].freeze
 
 CSV_USED_GCSTAT_KEYS = USED_GCSTAT_KEYS.join(',')
-CSV_HEADER = "setting,value,#{CSV_USED_GCSTAT_KEYS},time_s\n"
+CSV_HEADER = "setting,value,#{CSV_USED_GCSTAT_KEYS},RSS,time_s\n"
 
 def print_env
   ALL_ENV_VARS.each { |v| print_envvar(v) }
@@ -125,18 +125,20 @@ def collect_stats(setting, value, outfile)
   File.open(outfile, 'a') { |f| f << ",#{time_s}\n" }
 end
 
-# run baseline calibration round
-File.open(OUTFILE, 'w') do |f|
-  f << CSV_HEADER
-end
-collect_stats('DEFAULTS', '', OUTFILE)
+elapsed = Benchmark.realtime do
+  # run baseline calibration round
+  File.open(OUTFILE, 'w') do |f|
+    f << CSV_HEADER
+  end
+  collect_stats('DEFAULTS', '', OUTFILE)
 
-ALL_SETTINGS.each_with_index do |settings_batch, n|
-  settings_batch.each do |setting, values|
-    values.each do |v|
-      collect_stats(setting, v, OUTFILE)
+  ALL_SETTINGS.each_with_index do |settings_batch, n|
+    settings_batch.each do |setting, values|
+      values.each do |v|
+        collect_stats(setting, v, OUTFILE)
+      end
     end
   end
 end
 
-puts "All done."
+puts "All done in #{elapsed} sec"

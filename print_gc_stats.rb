@@ -20,5 +20,8 @@ p gc_stats
 
 File.open(outfile, 'a') do |f|
   values = gc_stat_keys.map { |k| gc_stats[k] }
-  f << "#{values.join(',')}"
+  rss = `ps -p #{$$} -o rss=`.strip
+  line = "#{values.join(',')},#{rss}"
+  puts line + "\n"
+  f << line
 end
