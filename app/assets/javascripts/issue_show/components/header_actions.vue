@@ -150,7 +150,7 @@ export default {
           // Dispatch event which updates open/close state, shared among the issue show page
           document.dispatchEvent(new CustomEvent('issuable_vue_app:change', payload));
         })
-        .catch(() => createFlash({ message: __('Update failed. Please try again.') }))
+        .catch(() => createFlash({ message: __('Error occurred while updating the issue status') }))
         .finally(() => {
           this.toggleStateButtonLoading(false);
         });
@@ -192,7 +192,12 @@ export default {
 
 <template>
   <div class="detail-page-header-actions">
-    <gl-dropdown class="gl-display-block gl-display-sm-none!" block :text="dropdownText">
+    <gl-dropdown
+      class="gl-display-block gl-display-sm-none!"
+      block
+      :text="dropdownText"
+      :loading="isToggleStateButtonLoading"
+    >
       <gl-dropdown-item
         v-if="showToggleIssueStateButton"
         :disabled="isToggleStateButtonLoading"
