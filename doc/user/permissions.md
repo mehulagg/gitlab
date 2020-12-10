@@ -104,7 +104,55 @@ available to roles for all users (Guest and above).
 
 ### Project members Reporter permissions
 
+The following list depicts user permission levels in a project,
+available only to users with Reporter permissions and above.
+
+- General
+  - Manage labels <!-- unsure: is this only for issues? -->
+  - Pull [packages](packages/index.md)
+  - Create code snippets
+  - Create/edit requirements <!-- Unsure where this applies -->
+- Issues
+  - Assign
+  - Label
+  - Set issue weight
+  - Lock threads
+  - Manage issue tracker
+  - Manage related issues
+- Commits
+  - Set commit status
+- View
+  - See a container registry
+  - See environments
+- Merge Requests (MR)
+  - Create new MRs
+- Analytics
+  - View CI/CD analytics
+  - View Code Review analytics **(STARTER)**
+  - View Repository analytics
+  - View Error Tracking list <!-- Unsure: is this analytics? -->
+  - View metrics dashboard annotations
+
 ### Project members Developer permissions
+
+The following list depicts user permission levels in a project,
+available only to users with Developer permissions and above.
+
+- General
+  - Publish [packages](packages/index.md)
+  - Create/edit/delete a Cleanup policy <!-- Cleanup of what? -->
+  - Create/edit/delete [Releases](project/releases/index.md)
+  - Upload design management files <!-- Is this limited to issues? -->
+- Branches
+  - Create new branches
+  - Push to non-protected branches
+  - Force push to non-protected branches
+  - Remove non-protected branches
+- Merge Requests (MRs)
+  - Assign MRs
+  - Label MRs
+  - Lock MR threads
+  - Approve MRs
 
 ### Project members Maintainer permissions
 
