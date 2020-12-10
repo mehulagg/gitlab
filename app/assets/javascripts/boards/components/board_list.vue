@@ -7,6 +7,7 @@ import eventHub from '../eventhub';
 import boardsStore from '../stores/boards_store';
 import { sprintf, __ } from '~/locale';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
+import Tracking from '~/tracking';
 import {
   getBoardSortableDefaultOptions,
   sortableStart,
@@ -17,6 +18,8 @@ import {
 
 Sortable.mount(new MultiDrag());
 
+const trackingMixin = Tracking.mixin({ category: 'board_list' });
+
 export default {
   name: 'BoardList',
   components: {
@@ -24,6 +27,7 @@ export default {
     boardNewIssue,
     GlLoadingIcon,
   },
+  mixins: [trackingMixin],
   props: {
     disabled: {
       type: Boolean,
@@ -189,6 +193,7 @@ export default {
             issues,
             newIndex,
           });
+          this.track('multiple_issues_moved');
         } else {
           boardsStore.moveIssueToList(
             boardsStore.moving.list,
@@ -221,6 +226,7 @@ export default {
             Sortable.utils.deselect(el);
           });
           boardsStore.clearMultiSelect();
+          this.track('multiple_issues_moved');
           return;
         }
 
