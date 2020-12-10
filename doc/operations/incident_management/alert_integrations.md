@@ -172,7 +172,7 @@ If the existing alert is already `resolved`, GitLab creates a new alert instead.
 
 WARNING:
 We are building deeper integration with Opsgenie and other alerting tools through
-[HTTP endpoint integrations](#generic-http-endpoint) so you can see alerts within
+[HTTP endpoint integrations](#single-http-endpoint) so you can see alerts within
 the GitLab interface. As a result, the previous direct link to Opsgenie Alerts from
 the GitLab alerts list is scheduled for deprecation following the 13.7 release on December 22, 2020.
 
@@ -181,7 +181,7 @@ the GitLab alerts list is scheduled for deprecation following the 13.7 release o
 You can monitor alerts using a GitLab integration with [Opsgenie](https://www.atlassian.com/software/opsgenie).
 
 If you enable the Opsgenie integration, you can't have other GitLab alert
-services, such as [Generic Alerts](alert_integrations.md) or Prometheus alerts,
+services
 active at the same time.
 
 To enable Opsgenie integration:
