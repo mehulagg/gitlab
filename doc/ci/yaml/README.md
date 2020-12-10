@@ -2190,15 +2190,15 @@ to fail for any other exit code. For example:
 ```yaml
 test_job_1:
   script:
-    - echo "Run a script that results in exit code 137. This job fails."
-    - exit 137
+    - echo "Run a script that results in exit code 1. This job fails."
+    - exit 1
   allow_failure:
     exit_codes: 137
 
 test_job_2:
   script:
-    - echo "Run a script that results in exit code 1. This job is allowed to fail."
-    - exit 1
+    - echo "Run a script that results in exit code 137. This job is allowed to fail."
+    - exit 137
   allow_failure:
     exit_codes:
       - 137
