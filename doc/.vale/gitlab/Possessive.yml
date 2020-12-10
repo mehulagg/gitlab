@@ -6,7 +6,7 @@
 # For a list of all options, see https://errata-ai.gitbook.io/vale/getting-started/styles
 extends: existence
 message: 'Rewrite "%s" to not use "’s".'
-level: error
+level: warning
 ignorecase: true
 link: https://docs.gitlab.com/ee/development/documentation/styleguide/#contractions
 tokens:
