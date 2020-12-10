@@ -156,7 +156,7 @@ up confusion or verify that the end result matches what they had in mind, to
 database specialists to get input on the data model or specific queries, or to
 any other developer to get an in-depth review of the solution.
 
-If an author is unsure if a merge request needs a [domain expert's](#domain-experts) opinion, that
+If an author is unsure if a merge request needs a [domain expert's](#domain-experts) opinion,
 that indicates it does. Without it it's unlikely they have the required level of confidence in their
 solution.
 
