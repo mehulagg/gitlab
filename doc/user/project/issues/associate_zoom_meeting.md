@@ -16,7 +16,7 @@ members can join swiftly without requesting a link.
 
 ## Adding a zoom meeting to an issue
 
-To associate a zoom meeting with an issue, you can use GitLab's
+To associate a zoom meeting with an issue, you can use
 [quick actions](../quick_actions.md#quick-actions-for-issues-merge-requests-and-epics).
 
 In an issue, leave a comment using the `/zoom` quick action followed by a valid Zoom link:
