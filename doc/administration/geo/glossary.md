@@ -55,7 +55,41 @@ these definitions yet.
   end
 ```
 
-### Geo deployment
+### Geo deployment - Single-node sites
+
+This Geo deployment has a single-node primary site, a single-node secondary site:
+
+```mermaid
+ graph TD
+   subgraph Geo deployment
+   subgraph Primary[Primary site, single-node]
+    Node_1[GitLab node]
+  end
+  subgraph Secondary1[Secondary site 1, single-node]
+    Node_2[GitLab node]
+   end
+   end
+```
+
+### Geo deployment - Multi-node sites
+
+This Geo deployment has a multi-node primary site, a multi-node secondary site:
+
+```mermaid
+ graph TD
+   subgraph Geo deployment
+   subgraph Primary[Primary site, multi-node]
+    Node_1[Application node]
+    Node_2[Database node]
+  end
+  subgraph Secondary1[Secondary site 1, multi-node]
+    Node_5[Application node]
+    Node_6[Database node]
+   end
+   end
+```
+
+### Geo deployment - Mixed sites
 
 This Geo deployment has a multi-node primary site, a multi-node secondary site and another single-node secondary site:
 
