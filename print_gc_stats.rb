@@ -13,15 +13,22 @@ end
 outfile = ENV['OUTFILE']
 gc_stat_keys = ENV['GC_STAT_KEYS'].split(',').map(&:to_sym)
 
+GC::Profiler.enable
+
 nakayoshi_gc
 
 gc_stats = GC.stat
+gc_total_time = GC::Profiler.total_time
 p gc_stats
+
+require 'rdoc/rdoc'
+GC::Profiler.report
+GC::Profiler.disable
 
 File.open(outfile, 'a') do |f|
   values = gc_stat_keys.map { |k| gc_stats[k] }
   rss = `ps -p #{$$} -o rss=`.strip
-  line = "#{values.join(',')},#{rss}"
+  line = "#{values.join(',')},#{rss},#{gc_total_time}"
   puts line + "\n"
   f << line
 end

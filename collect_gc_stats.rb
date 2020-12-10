@@ -93,7 +93,7 @@ USED_GCSTAT_KEYS = [
 ].freeze
 
 CSV_USED_GCSTAT_KEYS = USED_GCSTAT_KEYS.join(',')
-CSV_HEADER = "setting,value,#{CSV_USED_GCSTAT_KEYS},RSS,time_s\n"
+CSV_HEADER = "setting,value,#{CSV_USED_GCSTAT_KEYS},RSS,gc_time_s,time_s\n"
 
 def print_env
   ALL_ENV_VARS.each { |v| print_envvar(v) }
