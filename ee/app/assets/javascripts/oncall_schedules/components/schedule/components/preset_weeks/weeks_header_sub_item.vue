@@ -1,5 +1,4 @@
 <script>
-import { PRESET_TYPES } from '../../../../constants';
 import CommonMixin from '../../../../mixins/common_mixin';
 
 export default {

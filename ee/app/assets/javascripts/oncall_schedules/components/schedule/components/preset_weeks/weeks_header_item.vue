@@ -1,7 +1,7 @@
 <script>
 import { monthInWords } from '~/lib/utils/datetime_utility';
 import WeeksHeaderSubItem from './weeks_header_sub_item.vue';
-import CommonMixin from '../../mixins/common_mixin';
+import CommonMixin from '../../../../mixins/common_mixin';
 
 export default {
   components: {
