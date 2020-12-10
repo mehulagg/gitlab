@@ -1,4 +1,9 @@
-query IterationIssuesSummary($fullPath: ID!, $id: ID!, $isGroup: Boolean = true) {
+query IterationIssuesSummary(
+  $fullPath: ID!
+  $id: ID!
+  $isGroup: Boolean = true
+  $weight: Boolean = false
+) {
   group(fullPath: $fullPath) @include(if: $isGroup) {
     openIssues: issues(
       iterationId: [$id]
@@ -6,8 +11,8 @@ query IterationIssuesSummary($fullPath: ID!, $id: ID!, $isGroup: Boolean = true)
       assigneeId: "none"
       includeSubgroups: true
     ) {
-      count
-      weight
+      count @skip(if: $weight)
+      weight @include(if: $weight)
     }
     assignedIssues: issues(
       iterationId: [$id]
@@ -15,26 +20,26 @@ query IterationIssuesSummary($fullPath: ID!, $id: ID!, $isGroup: Boolean = true)
       assigneeId: "any"
       includeSubgroups: true
     ) {
-      count
-      weight
+      count @skip(if: $weight)
+      weight @include(if: $weight)
     }
     closedIssues: issues(iterationId: [$id], state: closed, includeSubgroups: true) {
-      count
-      weight
+      count @skip(if: $weight)
+      weight @include(if: $weight)
     }
   }
   project(fullPath: $fullPath) @skip(if: $isGroup) {
     openIssues: issues(iterationId: [$id], state: opened, assigneeId: "none") {
-      count
-      weight
+      count @skip(if: $weight)
+      weight @include(if: $weight)
     }
     assignedIssues: issues(iterationId: [$id], state: opened, assigneeId: "any") {
-      count
-      weight
+      count @skip(if: $weight)
+      weight @include(if: $weight)
     }
     closedIssues: issues(iterationId: [$id], state: closed) {
-      count
-      weight
+      count @skip(if: $weight)
+      weight @include(if: $weight)
     }
   }
 }

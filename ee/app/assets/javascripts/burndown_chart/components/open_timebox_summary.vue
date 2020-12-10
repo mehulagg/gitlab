@@ -2,7 +2,7 @@
 import { __ } from '~/locale';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import summaryStatsQuery from '../graphql/iteration_issues_summary.query.graphql';
-import { Namespace } from '../../iterations/constants';
+import { Namespace, Unit } from '../constants';
 
 export default {
   apollo: {
@@ -41,8 +41,8 @@ export default {
     displayValue: {
       type: String,
       required: false,
-      default: 'count',
-      validator: val => ['count', 'weight'].includes(val),
+      default: Unit.count,
+      validator: val => Object.keys(Unit).includes(val),
     },
   },
   data() {
@@ -60,7 +60,7 @@ export default {
         fullPath: this.fullPath,
         id: getIdFromGraphQLId(this.iterationId),
         isGroup: this.namespaceType === Namespace.Group,
-        displayValue: this.displayValue,
+        weight: this.displayValue === Unit.weight,
       };
     },
     columns() {
