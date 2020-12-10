@@ -207,16 +207,6 @@ until the issue is reopened.
 You can then see issue statuses in the [issue list](#issues-list) and the
 [Epic tree](../../group/epics/index.md#issue-health-status-in-epic-tree).
 
-#### Disable issue health status
-
-This feature comes with the `:save_issuable_health_status` feature flag enabled by default. However, in some cases
-this feature is incompatible with old configuration. To turn off the feature while configuration is
-migrated, ask a GitLab administrator with Rails console access to run the following command:
-
-```ruby
-Feature.disable(:save_issuable_health_status)
-```
-
 ## Other Issue actions
 
 - [Create an issue from a template](../../project/description_templates.md#using-the-templates)
