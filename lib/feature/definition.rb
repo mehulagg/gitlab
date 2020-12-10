@@ -105,6 +105,10 @@ class Feature
       end
 
       def valid_usage!(key, type:, default_enabled:)
+        # Gitaly feature flags don't need defining for the common case of a dev
+        # flag that is disabled by default
+        return if key.start_with?(Gitaly::PREFIX) && type == :development && !default_enabled
+
         if definition = definitions[key.to_sym]
           definition.valid_usage!(type_in_code: type, default_enabled_in_code: default_enabled)
         elsif type_definition = self::TYPES[type]
