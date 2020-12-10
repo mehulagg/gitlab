@@ -1,7 +1,7 @@
-.card.project-members-groups
-  .card-header
-    = html_escape(_("Groups with access to %{strong_open}%{project_name}%{strong_close}")) % { project_name: sanitize(@project.name, tags: []), strong_open: '<strong>'.html_safe, strong_close: '</strong>'.html_safe }
-    %span.badge.badge-pill= group_links.size
+.card.card-without-border
+  = render 'shared/members/tab_pane/header' do
+    = render 'shared/members/tab_pane/title' do
+      = html_escape(_("Groups with access to %{strong_open}%{project_name}%{strong_close}")) % { project_name: sanitize(@project.name, tags: []), strong_open: '<strong>'.html_safe, strong_close: '</strong>'.html_safe }
   %ul.content-list.members-list
     - can_admin_member = can?(current_user, :admin_project_member, @project)
     - @group_links.each do |group_link|
