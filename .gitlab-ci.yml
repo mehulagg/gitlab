@@ -68,7 +68,7 @@ variables:
   DOCKER_VERSION: "19.03.0"
   CACHE_CLASSES: "true"
   #Fuzzing variables
-  FUZZAPI_PROFILE: Quick-20
+  FUZZAPI_PROFILE: Quick-10
   FUZZAPI_POSTMAN_COLLECTION: scripts/review_apps/Gitlab_postman_collection.json
   FUZZAPI_TARGET_URL: ${CI_ENVIRONMENT_URL}
 
