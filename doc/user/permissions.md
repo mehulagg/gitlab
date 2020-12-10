@@ -58,7 +58,7 @@ Guest role are available to all other roles.
 As shown in the following sections, some permissions are limited by
 tier.
 
-### Project members guest permissions
+### Project members Guest permissions
 
 The following list depicts user permission levels in a project,
 available to roles for all users (Guest and above).
@@ -102,13 +102,13 @@ available to roles for all users (Guest and above).
 1. Guest users can perform this action on public and internal projects, but not private projects. This doesn't apply to [external users](#external-users) where explicit access must be given even if the project is internal.
 1. If **Public pipelines** is enabled in **Project Settings > CI/CD**.
 
-### Project members reporter permissions
+### Project members Reporter permissions
 
-### Project members developer permissions
+### Project members Developer permissions
 
-### Project members maintainer permissions
+### Project members Maintainer permissions
 
-### Project members owner permissions
+### Project members Owner permissions
 
 <!--
 | Action                                            | Guest   | Reporter   | Developer   |Maintainer| Owner (*10*) |
