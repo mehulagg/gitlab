@@ -11,12 +11,13 @@ describe('Blob Editing', () => {
   const useMock = jest.fn();
   const mockInstance = {
     use: useMock,
-    getValue: jest.fn(),
+    setValue: jest.fn(),
+    getValue: jest.fn().mockReturnValue('test value'),
     focus: jest.fn(),
   };
   beforeEach(() => {
     setFixtures(
-      `<div class="js-edit-blob-form"><div id="file_path"></div><div id="editor"></div><input id="file-content"></div>`,
+      `<form class="js-edit-blob-form"><div id="file_path"></div><div id="editor"></div><textarea id="file-content"></textarea></form>`,
     );
     jest.spyOn(EditorLite.prototype, 'createInstance').mockReturnValue(mockInstance);
   });
@@ -49,5 +50,16 @@ describe('Blob Editing', () => {
       expect(useMock).toHaveBeenNthCalledWith(1, FileTemplateExtension);
       expect(useMock).toHaveBeenNthCalledWith(2, MarkdownExtension);
     });
+  });
+
+  it('adds trailing newline to the blob content on submit', async () => {
+    const form = document.querySelector('.js-edit-blob-form');
+    const fileContentEl = document.getElementById('file-content');
+
+    await initEditor();
+
+    form.submit();
+
+    expect(fileContentEl.value).toBe('test value\n');
   });
 });
