@@ -21,6 +21,8 @@ module IncidentManagement
 
     delegate :project, to: :rotation, allow_nil: true
 
+    scope :color_order, -> { order(:color_palette, :color_weight) }
+
     private
 
     def user_can_read_project

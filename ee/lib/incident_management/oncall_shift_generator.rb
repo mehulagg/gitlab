@@ -36,7 +36,7 @@ module IncidentManagement
     private
 
     attr_reader :rotation, :starts_at, :ends_at
-    delegate :participants, :shift_duration, to: :rotation
+    delegate :shift_duration, to: :rotation
 
     # Start time of the first shift represented in the
     # time range arguments. May be before starts_at.
@@ -61,8 +61,7 @@ module IncidentManagement
     # Position in an array of participants based on the
     # number of shifts which have elasped for the rotation.
     def participant_idx(elapsed_shifts_count)
-      # Subtracting 1 takes us from length to idx
-      (elapsed_shifts_count - 1) % participants.length
+      elapsed_shifts_count % participants.length
     end
 
     # Returns an UNSAVED shift, as this shift won't necessarily
@@ -75,6 +74,10 @@ module IncidentManagement
         starts_at: shift_starts_at,
         ends_at: shift_starts_at + shift_duration
       )
+    end
+
+    def participants
+      @participants ||= rotation.participants.color_order
     end
   end
 end
