@@ -7,6 +7,14 @@ RSpec.describe Projects::RequirementsManagement::RequirementsController do
 
   subject { get :index, params: { namespace_id: project.namespace, project_id: project } }
 
+  shared_examples 'response with 404 status' do
+    it 'returns 404' do
+      subject
+
+      expect(response).to have_gitlab_http_status(:not_found)
+    end
+  end
+
   describe 'GET #index' do
     context 'private project' do
       let(:project) { create(:project) }
@@ -35,11 +43,7 @@ RSpec.describe Projects::RequirementsManagement::RequirementsController do
             stub_licensed_features(requirements: false)
           end
 
-          it 'returns 404' do
-            subject
-
-            expect(response).to have_gitlab_http_status(:not_found)
-          end
+          it_behaves_like 'response with 404 status'
         end
       end
 
@@ -53,11 +57,7 @@ RSpec.describe Projects::RequirementsManagement::RequirementsController do
             stub_licensed_features(requirements: true)
           end
 
-          it 'returns 404' do
-            subject
-
-            expect(response).to have_gitlab_http_status(:not_found)
-          end
+          it_behaves_like 'response with 404 status'
         end
       end
 
@@ -85,14 +85,10 @@ RSpec.describe Projects::RequirementsManagement::RequirementsController do
           sign_in(user)
         end
 
-        it 'returns 404' do
-          subject
-
-          expect(response).to have_gitlab_http_status(:not_found)
-        end
+        it_behaves_like 'response with 404 status'
       end
 
-      context 'with requirements visible to project memebers' do
+      context 'with requirements visible to project members' do
         before do
           project.project_feature.update!({ requirements_access_level: ::ProjectFeature::PRIVATE })
         end
@@ -116,11 +112,7 @@ RSpec.describe Projects::RequirementsManagement::RequirementsController do
             sign_in(user)
           end
 
-          it 'returns 404' do
-            subject
-
-            expect(response).to have_gitlab_http_status(:not_found)
-          end
+          it_behaves_like 'response with 404 status'
         end
       end
 

@@ -7,7 +7,7 @@ module Mutations
 
       argument :iid, GraphQL::ID_TYPE,
                required: true,
-               description: "The iid of the epic to mutate"
+               description: "The IID of the epic to mutate"
 
       argument :group_path, GraphQL::ID_TYPE,
                required: true,

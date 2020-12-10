@@ -3,7 +3,6 @@ import { uniqueId } from 'lodash';
 import {
   GlAlert,
   GlButton,
-  GlIcon,
   GlModal,
   GlSkeletonLoader,
   GlTable,
@@ -14,7 +13,6 @@ export default {
   components: {
     GlAlert,
     GlButton,
-    GlIcon,
     GlModal,
     GlSkeletonLoader,
     GlTable,
@@ -25,6 +23,10 @@ export default {
   props: {
     profiles: {
       type: Array,
+      required: true,
+    },
+    tableLabel: {
+      type: String,
       required: true,
     },
     fields: {
@@ -54,6 +56,10 @@ export default {
       type: Boolean,
       required: false,
       default: false,
+    },
+    fullPath: {
+      type: String,
+      required: true,
     },
   },
   data() {
@@ -106,7 +112,7 @@ export default {
   <section>
     <div v-if="shouldShowTable">
       <gl-table
-        :aria-label="s__('DastProfiles|Site Profiles')"
+        :aria-label="tableLabel"
         :busy="isLoadingInitialProfiles"
         :fields="tableFields"
         :items="profiles"
@@ -132,29 +138,28 @@ export default {
           <strong>{{ value }}</strong>
         </template>
 
-        <template #cell(validationStatus)="{ value }">
-          <span>
-            <gl-icon
-              :size="16"
-              class="gl-vertical-align-text-bottom gl-text-gray-600"
-              name="information-o"
-            />
-            {{ value }}
-          </span>
+        <template v-for="slotName in Object.keys($scopedSlots)" #[slotName]="slotScope">
+          <slot :name="slotName" v-bind="slotScope"></slot>
         </template>
 
         <template #cell(actions)="{ item }">
           <div class="gl-text-right">
+            <slot name="actions" :profile="item"></slot>
+
+            <gl-button v-if="item.editPath" :href="item.editPath" class="gl-mx-5" size="small">{{
+              __('Edit')
+            }}</gl-button>
+
             <gl-button
               v-gl-tooltip.hover.focus
               icon="remove"
               variant="danger"
               category="secondary"
+              size="small"
               class="gl-mr-3"
               :title="s__('DastProfiles|Delete profile')"
               @click="prepareProfileDeletion(item.id)"
             />
-            <gl-button v-if="item.editPath" :href="item.editPath">{{ __('Edit') }}</gl-button>
           </div>
         </template>
 
@@ -197,5 +202,7 @@ export default {
       @ok="handleDelete"
       @cancel="handleCancel"
     />
+
+    <slot></slot>
   </section>
 </template>

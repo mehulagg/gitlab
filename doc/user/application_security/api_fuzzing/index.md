@@ -1,7 +1,7 @@
 ---
 stage: Secure
 group: Fuzz Testing
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference, howto
 ---
 
@@ -139,7 +139,7 @@ This is a minimal configuration for API Fuzzing. From here you can:
 - [Add authentication](#authentication).
 - Learn how to [handle false positives](#handling-false-positives).
 
-DANGER: **Warning:**
+WARNING:
 **NEVER** run fuzz testing against a production server. Not only can it perform *any* function that
 the API can, it may also trigger bugs in the API. This includes actions like modifying and deleting
 data. Only run fuzzing against a test server.
@@ -155,10 +155,10 @@ You can use various tools to generate HAR files:
 
 - [Fiddler](https://www.telerik.com/fiddler): Web debugging proxy
 - [Insomnia Core](https://insomnia.rest/): API client
-- [Chrome](https://www.google.com/chrome): Browser
+- [Chrome](https://www.google.com/chrome/): Browser
 - [Firefox](https://www.mozilla.org/en-US/firefox/): Browser
 
-DANGER: **Warning:**
+WARNING:
 HAR files may contain sensitive information such as authentication tokens, API keys, and session
 cookies. We recommend that you review the HAR file contents before adding them to a repository.
 
@@ -230,7 +230,7 @@ This is a minimal configuration for API Fuzzing. From here you can:
 - [Add authentication](#authentication).
 - Learn how to [handle false positives](#handling-false-positives).
 
-DANGER: **Warning:**
+WARNING:
 **NEVER** run fuzz testing against a production server. Not only can it perform *any* function that
 the API can, it may also trigger bugs in the API. This includes actions like modifying and deleting
 data. Only run fuzzing against a test server.
@@ -247,7 +247,7 @@ When used with GitLab's API fuzzer, Postman Collections must contain definitions
 test with valid data. The API fuzzer extracts all the API definitions and uses them to perform
 testing.
 
-DANGER: **Warning:**
+WARNING:
 Postman Collection files may contain sensitive information such as authentication tokens, API keys,
 and session cookies. We recommend that you review the Postman Collection file contents before adding
 them to a repository.
@@ -321,7 +321,7 @@ This is a minimal configuration for API Fuzzing. From here you can:
 - [Add authentication](#authentication).
 - Learn how to [handle false positives](#handling-false-positives).
 
-DANGER: **Warning:**
+WARNING:
 **NEVER** run fuzz testing against a production server. Not only can it perform *any* function that
 the API can, it may also trigger bugs in the API. This includes actions like modifying and deleting
 data. Only run fuzzing against a test server.

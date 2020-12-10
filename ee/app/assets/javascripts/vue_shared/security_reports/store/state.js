@@ -1,4 +1,5 @@
 import {
+  MODULE_API_FUZZING,
   MODULE_CONTAINER_SCANNING,
   MODULE_COVERAGE_FUZZING,
   MODULE_DAST,
@@ -16,7 +17,6 @@ export default () => ({
   sourceBranch: null,
   canReadVulnerabilityFeedback: false,
   vulnerabilityFeedbackPath: null,
-  vulnerabilityFeedbackHelpPath: null,
   createVulnerabilityFeedbackIssuePath: null,
   createVulnerabilityFeedbackMergeRequestPath: null,
   createVulnerabilityFeedbackDismissalPath: null,
@@ -24,6 +24,7 @@ export default () => ({
 
   reportTypes: [
     MODULE_CONTAINER_SCANNING,
+    MODULE_API_FUZZING,
     MODULE_COVERAGE_FUZZING,
     MODULE_DAST,
     MODULE_DEPENDENCY_SCANNING,

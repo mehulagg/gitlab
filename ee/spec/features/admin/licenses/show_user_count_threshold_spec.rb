@@ -41,10 +41,14 @@ RSpec.describe 'Display approaching user count limit banner', :js do
 
     context 'when admin is logged in' do
       before do
-        gitlab_sign_in(admin)
+        sign_in(admin)
       end
 
       context 'in admin area' do
+        before do
+          gitlab_enable_admin_mode_sign_in(admin)
+        end
+
         let(:visit_path) { admin_root_path }
 
         it_behaves_like 'a visible banner'

@@ -150,8 +150,11 @@ module Elastic
       # Query notes based on the various feature permission of the noteable_type.
       # Appends `noteable_type` (which will be removed in project_ids_filter)
       # for base model filtering.
+      # We do not implement `no_join_project` argument for notes class yet
+      # as this is not supported. This will need to be fixed when we move
+      # notes to a new index.
       override :pick_projects_by_membership
-      def pick_projects_by_membership(project_ids, user, _ = nil)
+      def pick_projects_by_membership(project_ids, user, _, _ = nil)
         noteable_type_to_feature.map do |noteable_type, feature|
           context.name(feature) do
             condition =

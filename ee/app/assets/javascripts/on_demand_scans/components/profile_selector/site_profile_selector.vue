@@ -1,13 +1,15 @@
 <script>
+import { DAST_SITE_VALIDATION_STATUS } from 'ee/security_configuration/dast_site_validation/constants';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import ProfileSelector from './profile_selector.vue';
-import SummaryCell from './summary_cell.vue';
+import { s__ } from '~/locale';
 
 export default {
   name: 'OnDemandScansSiteProfileSelector',
   components: {
     ProfileSelector,
-    SummaryCell,
   },
+  mixins: [glFeatureFlagsMixin()],
   props: {
     profiles: {
       type: Array,
@@ -23,6 +25,22 @@ export default {
       default: '',
     },
   },
+  computed: {
+    formattedProfiles() {
+      return this.profiles.map(profile => {
+        const isValidated = profile.validationStatus === DAST_SITE_VALIDATION_STATUS.PASSED;
+        const suffix = isValidated
+          ? s__('DastProfiles|Validated')
+          : s__('DastProfiles|Not Validated');
+        const addSuffix = str =>
+          this.glFeatures.securityOnDemandScansSiteValidation ? `${str} (${suffix})` : str;
+        return {
+          ...profile,
+          dropdownLabel: addSuffix(`${profile.profileName}: ${profile.targetUrl}`),
+        };
+      });
+    },
+  },
 };
 </script>
 
@@ -30,12 +48,7 @@ export default {
   <profile-selector
     :library-path="siteProfilesLibraryPath"
     :new-profile-path="newSiteProfilePath"
-    :profiles="
-      profiles.map(profile => ({
-        ...profile,
-        dropdownLabel: `${profile.profileName}: ${profile.targetUrl}`,
-      }))
-    "
+    :profiles="formattedProfiles"
     v-bind="$attrs"
     v-on="$listeners"
   >
@@ -47,10 +60,8 @@ export default {
       )
     }}</template>
     <template #new-profile>{{ s__('OnDemandScans|Create a new site profile') }}</template>
-    <template #summary="{ profile }">
-      <div class="row">
-        <summary-cell :label="s__('DastProfiles|Target URL')" :value="profile.targetUrl" />
-      </div>
+    <template #summary>
+      <slot name="summary"></slot>
     </template>
   </profile-selector>
 </template>

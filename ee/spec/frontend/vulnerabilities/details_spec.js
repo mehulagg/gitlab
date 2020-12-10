@@ -88,23 +88,40 @@ describe('Vulnerability Details', () => {
   });
 
   it('shows the vulnerability identifiers if they exist', () => {
+    const identifiersData = [
+      { name: '00', url: 'http://example.com/00' },
+      { name: '11', url: 'http://example.com/11' },
+      { name: '22', url: 'http://example.com/22' },
+      { name: '33' },
+      { name: '44' },
+      { name: '55' },
+    ];
+
     createWrapper({
-      identifiers: [{ url: '0', name: '00' }, { url: '1', name: '11' }, { url: '2', name: '22' }],
+      identifiers: identifiersData,
     });
 
     const identifiers = getAllById('identifier');
-    expect(identifiers).toHaveLength(3);
 
-    const checkIdentifier = index => {
+    expect(identifiers).toHaveLength(identifiersData.length);
+
+    const checkIdentifier = ({ name, url }, index) => {
       const identifier = identifiers.at(index);
-      expect(identifier.attributes('target')).toBe('_blank');
-      expect(identifier.attributes('href')).toBe(index.toString());
-      expect(identifier.text()).toBe(`${index}${index}`);
+
+      expect(identifier.text()).toBe(name);
+
+      if (url) {
+        expect(identifier.is(GlLink)).toBe(true);
+        expect(identifier.attributes()).toMatchObject({
+          target: '_blank',
+          href: url,
+        });
+      } else {
+        expect(identifier.is(GlLink)).toBe(false);
+      }
     };
 
-    for (let i = 0; i < identifiers.length; i += 1) {
-      checkIdentifier(i);
-    }
+    identifiersData.forEach(checkIdentifier);
   });
 
   describe('file link', () => {
@@ -224,29 +241,29 @@ describe('Vulnerability Details', () => {
     });
 
     it.each`
-      response                                                                                                           | expectedData
-      ${null}                                                                                                            | ${null}
-      ${{}}                                                                                                              | ${null}
-      ${{ headers: TEST_HEADERS }}                                                                                       | ${null}
-      ${{ headers: TEST_HEADERS, body: '[{"user_id":1,}]' }}                                                             | ${null}
-      ${{ headers: TEST_HEADERS, body: '[{"user_id":1,}]', status_code: '500' }}                                         | ${null}
-      ${{ headers: TEST_HEADERS, body: '[{"user_id":1,}]', status_code: '500', reason_phrase: 'INTERNAL SERVER ERROR' }} | ${[EXPECT_RESPONSE]}
+      response                                                                                                         | expectedData
+      ${null}                                                                                                          | ${null}
+      ${{}}                                                                                                            | ${null}
+      ${{ headers: TEST_HEADERS }}                                                                                     | ${null}
+      ${{ headers: TEST_HEADERS, body: '[{"user_id":1,}]' }}                                                           | ${null}
+      ${{ headers: TEST_HEADERS, body: '[{"user_id":1,}]', statusCode: '500' }}                                        | ${null}
+      ${{ headers: TEST_HEADERS, body: '[{"user_id":1,}]', statusCode: '500', reasonPhrase: 'INTERNAL SERVER ERROR' }} | ${[EXPECT_RESPONSE]}
     `('shows response data for $response', ({ response, expectedData }) => {
       createWrapper({ response });
       expect(getSectionData('response')).toEqual(expectedData);
     });
 
     it.each`
-      supportingMessages                                                                                                                                           | expectedData
-      ${null}                                                                                                                                                      | ${null}
-      ${[]}                                                                                                                                                        | ${null}
-      ${[{}]}                                                                                                                                                      | ${null}
-      ${[{}, { response: {} }]}                                                                                                                                    | ${null}
-      ${[{}, { response: { headers: TEST_HEADERS } }]}                                                                                                             | ${null}
-      ${[{}, { response: { headers: TEST_HEADERS, body: '[{"user_id":1,}]' } }]}                                                                                   | ${null}
-      ${[{}, { response: { headers: TEST_HEADERS, body: '[{"user_id":1,}]', status_code: '200' } }]}                                                               | ${null}
-      ${[{}, { response: { headers: TEST_HEADERS, body: '[{"user_id":1,}]', status_code: '200', reason_phrase: 'OK' } }]}                                          | ${null}
-      ${[{}, { name: SUPPORTING_MESSAGE_TYPES.RECORDED, response: { headers: TEST_HEADERS, body: '[{"user_id":1,}]', status_code: '200', reason_phrase: 'OK' } }]} | ${[EXPECT_RECORDED_RESPONSE]}
+      supportingMessages                                                                                                                                         | expectedData
+      ${null}                                                                                                                                                    | ${null}
+      ${[]}                                                                                                                                                      | ${null}
+      ${[{}]}                                                                                                                                                    | ${null}
+      ${[{}, { response: {} }]}                                                                                                                                  | ${null}
+      ${[{}, { response: { headers: TEST_HEADERS } }]}                                                                                                           | ${null}
+      ${[{}, { response: { headers: TEST_HEADERS, body: '[{"user_id":1,}]' } }]}                                                                                 | ${null}
+      ${[{}, { response: { headers: TEST_HEADERS, body: '[{"user_id":1,}]', status_code: '200' } }]}                                                             | ${null}
+      ${[{}, { response: { headers: TEST_HEADERS, body: '[{"user_id":1,}]', status_code: '200', reason_phrase: 'OK' } }]}                                        | ${null}
+      ${[{}, { name: SUPPORTING_MESSAGE_TYPES.RECORDED, response: { headers: TEST_HEADERS, body: '[{"user_id":1,}]', statusCode: '200', reasonPhrase: 'OK' } }]} | ${[EXPECT_RECORDED_RESPONSE]}
     `('shows response data for $supporting_messages', ({ supportingMessages, expectedData }) => {
       createWrapper({ supportingMessages });
       expect(getSectionData('recorded-response')).toEqual(expectedData);

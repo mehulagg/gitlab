@@ -7,7 +7,9 @@ RSpec.describe 'Admin updates EE-only settings' do
 
   before do
     stub_env('IN_MEMORY_APPLICATION_SETTINGS', 'false')
-    sign_in(create(:admin))
+    admin = create(:admin)
+    sign_in(admin)
+    gitlab_enable_admin_mode_sign_in(admin)
     allow(License).to receive(:feature_available?).and_return(true)
     allow(Gitlab::Elastic::Helper.default).to receive(:index_exists?).and_return(true)
   end
@@ -39,7 +41,7 @@ RSpec.describe 'Admin updates EE-only settings' do
     end
   end
 
-  it 'Enables external authentication' do
+  it 'enables external authentication' do
     visit general_admin_application_settings_path
     page.within('.as-external-auth') do
       check 'Enable classification control using an external service'
@@ -87,7 +89,7 @@ RSpec.describe 'Admin updates EE-only settings' do
       end
     end
 
-    it 'Allows limiting projects and namespaces to index', :aggregate_failures, :js do
+    it 'allows limiting projects and namespaces to index', :aggregate_failures, :js do
       project = create(:project)
       namespace = create(:namespace)
 
@@ -130,7 +132,7 @@ RSpec.describe 'Admin updates EE-only settings' do
       expect(ElasticsearchIndexedProject.exists?(project_id: project.id)).to be_truthy
     end
 
-    it 'Allows removing all namespaces and projects', :aggregate_failures, :js do
+    it 'allows removing all namespaces and projects', :aggregate_failures, :js do
       stub_ee_application_setting(elasticsearch_limit_indexing: true)
 
       namespace = create(:elasticsearch_indexed_namespace).namespace
@@ -175,7 +177,7 @@ RSpec.describe 'Admin updates EE-only settings' do
     end
   end
 
-  it 'Enable Slack application' do
+  it 'enable Slack application' do
     allow(Gitlab).to receive(:com?).and_return(true)
     visit general_admin_application_settings_path
 
@@ -192,13 +194,13 @@ RSpec.describe 'Admin updates EE-only settings' do
       visit templates_admin_application_settings_path
     end
 
-    it 'Render "Templates" section' do
+    it 'render "Templates" section' do
       page.within('.as-visibility-access') do
         expect(page).to have_content 'Templates'
       end
     end
 
-    it 'Render "Custom project templates" section' do
+    it 'render "Custom project templates" section' do
       page.within('.as-custom-project-templates') do
         expect(page).to have_content 'Custom project templates'
       end
@@ -215,7 +217,7 @@ RSpec.describe 'Admin updates EE-only settings' do
     context 'with LDAP enabled' do
       let(:ldap_setting) { true }
 
-      it 'Changes to allow group owners to manage ldap' do
+      it 'changes to allow group owners to manage ldap' do
         page.within('.as-visibility-access') do
           find('#application_setting_allow_group_owners_to_manage_ldap').set(false)
           click_button 'Save'
@@ -229,7 +231,7 @@ RSpec.describe 'Admin updates EE-only settings' do
     context 'with LDAP disabled' do
       let(:ldap_setting) { false }
 
-      it 'Does not show option to allow group owners to manage ldap' do
+      it 'does not show option to allow group owners to manage ldap' do
         expect(page).not_to have_css('#application_setting_allow_group_owners_to_manage_ldap')
       end
     end

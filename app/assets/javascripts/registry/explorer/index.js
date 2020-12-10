@@ -5,6 +5,7 @@ import RegistryExplorer from './pages/index.vue';
 import RegistryBreadcrumb from './components/registry_breadcrumb.vue';
 import { createStore } from './stores';
 import createRouter from './router';
+import { apolloProvider } from './graphql/index';
 
 Vue.use(Translate);
 Vue.use(GlToast);
@@ -18,8 +19,16 @@ export default () => {
 
   const { endpoint } = el.dataset;
 
+  // This is a mini state to help the breadcrumb have the correct name in the details page
+  const breadCrumbState = Vue.observable({
+    name: '',
+    updateName(value) {
+      this.name = value;
+    },
+  });
+
   const store = createStore();
-  const router = createRouter(endpoint);
+  const router = createRouter(endpoint, breadCrumbState);
   store.dispatch('setInitialState', el.dataset);
 
   const attachMainComponent = () =>
@@ -27,8 +36,12 @@ export default () => {
       el,
       store,
       router,
+      apolloProvider,
       components: {
         RegistryExplorer,
+      },
+      provide() {
+        return { breadCrumbState };
       },
       render(createElement) {
         return createElement('registry-explorer');
@@ -40,8 +53,8 @@ export default () => {
     const crumbs = [...document.querySelectorAll('.js-breadcrumbs-list li')];
     return new Vue({
       el: breadCrumbEl,
-      store,
       router,
+      apolloProvider,
       components: {
         RegistryBreadcrumb,
       },

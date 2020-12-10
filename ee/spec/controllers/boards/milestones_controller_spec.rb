@@ -22,7 +22,7 @@ RSpec.describe Boards::MilestonesController do
 
           expect(response).to have_gitlab_http_status(:ok)
 
-          expect(response.content_type).to eq('application/json')
+          expect(response.media_type).to eq('application/json')
           expect(json_response).to all(match_schema('entities/milestone', dir: 'ee'))
           expect(json_response.size).to eq(1)
         end

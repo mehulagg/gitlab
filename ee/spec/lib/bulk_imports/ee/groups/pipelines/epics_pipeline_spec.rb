@@ -43,7 +43,6 @@ RSpec.describe BulkImports::EE::Groups::Pipelines::EpicsPipeline do
 
   describe 'pipeline parts' do
     it { expect(described_class).to include_module(BulkImports::Pipeline) }
-    it { expect(described_class).to include_module(BulkImports::Pipeline::Attributes) }
     it { expect(described_class).to include_module(BulkImports::Pipeline::Runner) }
 
     it 'has extractors' do
@@ -62,7 +61,8 @@ RSpec.describe BulkImports::EE::Groups::Pipelines::EpicsPipeline do
       expect(described_class.transformers)
         .to contain_exactly(
           { klass: BulkImports::Common::Transformers::HashKeyDigger, options: { key_path: %w[data group epics] } },
-          { klass: BulkImports::Common::Transformers::UnderscorifyKeysTransformer, options: nil }
+          { klass: BulkImports::Common::Transformers::UnderscorifyKeysTransformer, options: nil },
+          { klass: BulkImports::Common::Transformers::ProhibitedAttributesTransformer, options: nil }
         )
     end
 

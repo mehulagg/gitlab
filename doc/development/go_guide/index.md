@@ -1,7 +1,7 @@
 ---
 stage: none
 group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Go standards and style guidelines
@@ -130,6 +130,8 @@ this [example](https://github.com/golangci/golangci-lint/blob/master/.golangci.e
 Once [recursive includes](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/56836)
 become available, you can share job templates like this
 [analyzer](https://gitlab.com/gitlab-org/security-products/ci-templates/raw/master/includes-dev/analyzer.yml).
+
+Go GitLab linter plugins are maintained in the [`gitlab-org/language-tools/go/linters`](https://gitlab.com/gitlab-org/language-tools/go/linters/) namespace.
 
 ## Dependencies
 
@@ -420,7 +422,7 @@ it displays its help message (if `cli` has been used).
 
 With the exception of [GitLab Runner](https://gitlab.com/gitlab-org/gitlab-runner),
 which publishes its own binaries, our Go binaries are created by projects
-managed by the [Distribution group](https://about.gitlab.com/handbook/product/product-categories/#distribution-group).
+managed by the [Distribution group](https://about.gitlab.com/handbook/product/categories/#distribution-group).
 
 The [Omnibus GitLab](https://gitlab.com/gitlab-org/omnibus-gitlab) project creates a
 single, monolithic operating system package containing all the binaries, while

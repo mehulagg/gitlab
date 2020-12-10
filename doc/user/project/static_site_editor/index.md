@@ -1,7 +1,7 @@
 ---
 stage: Create
 group: Static Site Editor
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 type: reference, how-to
 description: "The static site editor enables users to edit content on static websites without prior knowledge of the underlying templating language, site architecture or Git commands."
 ---
@@ -53,10 +53,15 @@ click of a button:
 
 ![Static Site Editor](img/wysiwyg_editor_v13_3.png)
 
-When an editor submits their changes, in the background, GitLab automatically
-creates a new branch, commits their changes, and opens a merge request. The
-editor lands directly on the merge request, and then they can assign it to
-a colleague for review.
+When an editor submits their changes, these are the following actions that GitLab
+performs automatically in the background:
+
+1. Creates a new branch.
+1. Commits their changes.
+   1. Fixes formatting according to the [Handbook Markdown Style Guide](https://about.gitlab.com/handbook/markdown-guide/) style guide and add them through another commit.
+1. Opens a merge request against the default branch.
+
+The editor can then navigate to the merge request to assign it to a colleague for review.
 
 ## Set up your project
 

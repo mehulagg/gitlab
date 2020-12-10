@@ -1,7 +1,7 @@
 ---
 stage: none
 group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference
 ---
 
@@ -14,7 +14,7 @@ To access the Admin Area, either:
 - Click the Admin Area icon (**{admin}**).
 - Visit `/admin` on your self-managed instance.
 
-NOTE: **Note:**
+NOTE:
 Only admin users can access the Admin Area.
 
 ## Admin Area sections
@@ -94,7 +94,7 @@ The list of projects can be sorted by:
 
 A user can choose to hide or show archived projects in the list.
 
-In the **Filter by name** field, type the project name you want to find, and GitLab will filter
+In the **Filter by name** field, type the project name you want to find, and GitLab filters
 them as you type.
 
 Select from the **Namespace** dropdown to filter only projects in that namespace.

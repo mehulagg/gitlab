@@ -1,5 +1,0 @@
----
-title: Change more Elasticsearch indexes to keyword type to save storage
-merge_request: 46640
-author:
-type: performance

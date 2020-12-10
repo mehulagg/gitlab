@@ -1,0 +1,5 @@
+---
+title: Fix security dashboard breadcrumb on vulnerability details page
+merge_request: 49431
+author:
+type: fixed

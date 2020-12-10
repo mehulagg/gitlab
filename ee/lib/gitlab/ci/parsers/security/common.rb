@@ -56,21 +56,26 @@ module Gitlab
           def create_vulnerability(report, data, version)
             identifiers = create_identifiers(report, data['identifiers'])
             links = create_links(report, data['links'])
+            location = create_location(data['location'] || {})
+            remediations = create_remediations(data['remediations'])
+
             report.add_finding(
               ::Gitlab::Ci::Reports::Security::Finding.new(
                 uuid: SecureRandom.uuid,
                 report_type: report.type,
-                name: data['message'],
+                name: finding_name(data, identifiers, location),
                 compare_key: data['cve'] || '',
-                location: create_location(data['location'] || {}),
+                location: location,
                 severity: parse_severity_level(data['severity']&.downcase),
                 confidence: parse_confidence_level(data['confidence']&.downcase),
                 scanner: create_scanner(report, data['scanner']),
                 scan: report&.scan,
                 identifiers: identifiers,
                 links: links,
+                remediations: remediations,
                 raw_metadata: data.to_json,
-                metadata_version: version))
+                metadata_version: version,
+                details: data['details'] || {}))
           end
 
           def create_scan(report, scan_data)
@@ -124,6 +129,12 @@ module Gitlab
               url: link['url'])
           end
 
+          def create_remediations(remediations_data)
+            remediations_data.to_a.compact.map do |remediation_data|
+              ::Gitlab::Ci::Reports::Security::Remediation.new(remediation_data['summary'], remediation_data['diff'])
+            end
+          end
+
           def parse_severity_level(input)
             return input if ::Vulnerabilities::Finding::SEVERITY_LEVELS.key?(input)
 
@@ -138,6 +149,16 @@ module Gitlab
 
           def create_location(location_data)
             raise NotImplementedError
+          end
+
+          private
+
+          def finding_name(data, identifiers, location)
+            return data['message'] if data['message'].present?
+            return data['name'] if data['name'].present?
+
+            identifier = identifiers.find(&:cve?) || identifiers.find(&:cwe?) || identifiers.first
+            "#{identifier.name} in #{location&.fingerprint_path}"
           end
         end
       end

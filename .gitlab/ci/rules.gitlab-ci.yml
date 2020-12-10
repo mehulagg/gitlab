@@ -106,6 +106,10 @@
   - ".gitlab/ci/build-images.gitlab-ci.yml"
   - ".gitlab/ci/qa.gitlab-ci.yml"
 
+.workhorse-patterns: &workhorse-patterns
+  - "GITLAB_WORKHORSE_VERSION"
+  - "workhorse/**/*"
+
 .yaml-lint-patterns: &yaml-lint-patterns
   - ".gitlab-ci.yml"
   - ".gitlab/ci/**/*.yml"
@@ -157,6 +161,7 @@
   - "{,ee/}fixtures/**/*"
   - "{,ee/}rubocop/**/*"
   - "{,ee/}spec/**/*"
+  - "{,spec/}tooling/**/*"
 
 .code-patterns: &code-patterns
   - "{package.json,yarn.lock}"
@@ -203,6 +208,7 @@
   - "{,ee/}fixtures/**/*"
   - "{,ee/}rubocop/**/*"
   - "{,ee/}spec/**/*"
+  - "{,spec/}tooling/**/*"
 
 .code-qa-patterns: &code-qa-patterns
   - "{package.json,yarn.lock}"
@@ -248,6 +254,7 @@
   - "{,ee/}fixtures/**/*"
   - "{,ee/}rubocop/**/*"
   - "{,ee/}spec/**/*"
+  - "{,spec/}tooling/**/*"
   # QA changes
   - ".dockerignore"
   - "qa/**/*"
@@ -399,6 +406,7 @@
       when: never
     - <<: *if-merge-request
       changes: *code-backstage-patterns
+      when: always
     - <<: *if-master-refs
       changes: *code-backstage-patterns
 
@@ -594,12 +602,9 @@
 
 .rails:rules:detect-tests:
   rules:
-    - <<: *if-not-ee
-      when: never
-    - <<: *if-security-merge-request
+    - <<: *if-default-refs
       changes: *code-backstage-patterns
-    - <<: *if-dot-com-gitlab-org-merge-request
-      changes: *code-backstage-patterns
+    - <<: *if-merge-request-title-run-all-rspec
 
 .rails:rules:rspec-foss-impact:
   rules:
@@ -651,8 +656,10 @@
       when: never
     - <<: *if-merge-request
       changes: *code-backstage-patterns
+      when: always
     - <<: *if-master-schedule-2-hourly
     - <<: *if-merge-request-title-run-all-rspec
+      when: always
 
 .rails:rules:rspec-feature-flags:
   rules:
@@ -915,6 +922,14 @@
         - "scripts/rspec_helpers.sh"
     - <<: *if-dot-com-ee-schedule
       changes: *code-backstage-patterns
+
+###################
+# workhorse rules #
+###################
+.workhorse:rules:workhorse:
+  rules:
+    - <<: *if-default-refs
+      changes: *workhorse-patterns
 
 ###################
 # yaml-lint rules #

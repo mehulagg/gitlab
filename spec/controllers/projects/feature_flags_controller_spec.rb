@@ -217,15 +217,6 @@ RSpec.describe Projects::FeatureFlagsController do
 
         expect(json_response['feature_flags'].count).to eq(3)
       end
-
-      it 'returns only version 1 flags when new version flags are disabled' do
-        stub_feature_flags(feature_flags_new_version: false)
-
-        subject
-
-        expected = [feature_flag_active.name, feature_flag_inactive.name].sort
-        expect(json_response['feature_flags'].map { |f| f['name'] }.sort).to eq(expected)
-      end
     end
   end
 
@@ -267,24 +258,6 @@ RSpec.describe Projects::FeatureFlagsController do
     end
 
     it 'routes based on iid' do
-      other_project = create(:project)
-      other_project.add_developer(user)
-      other_feature_flag = create(:operations_feature_flag, project: other_project,
-                                  name: 'other_flag')
-      params = {
-        namespace_id: other_project.namespace,
-        project_id: other_project,
-        iid: other_feature_flag.iid
-      }
-
-      get(:show, params: params, format: :json)
-
-      expect(response).to have_gitlab_http_status(:ok)
-      expect(json_response['name']).to eq(other_feature_flag.name)
-    end
-
-    it 'routes based on iid when new version flags are disabled' do
-      stub_feature_flags(feature_flags_new_version: false)
       other_project = create(:project)
       other_project.add_developer(user)
       other_feature_flag = create(:operations_feature_flag, project: other_project,
@@ -384,14 +357,6 @@ RSpec.describe Projects::FeatureFlagsController do
         expect(json_response['name']).to eq(new_version_feature_flag.name)
         expect(json_response['active']).to eq(new_version_feature_flag.active)
         expect(json_response['version']).to eq('new_version_flag')
-      end
-
-      it 'returns a 404 when new version flags are disabled' do
-        stub_feature_flags(feature_flags_new_version: false)
-
-        subject
-
-        expect(response).to have_gitlab_http_status(:not_found)
       end
 
       it 'returns strategies ordered by id' do
@@ -791,54 +756,6 @@ RSpec.describe Projects::FeatureFlagsController do
         expect(Operations::FeatureFlag.count).to eq(0)
       end
     end
-
-    context 'when version 2 flags are disabled' do
-      context 'and attempting to create a version 2 flag' do
-        let(:params) do
-          {
-            namespace_id: project.namespace,
-            project_id: project,
-            operations_feature_flag: {
-              name: 'my_feature_flag',
-              active: true,
-              version: 'new_version_flag'
-            }
-          }
-        end
-
-        it 'returns a 400' do
-          stub_feature_flags(feature_flags_new_version: false)
-
-          subject
-
-          expect(response).to have_gitlab_http_status(:bad_request)
-          expect(Operations::FeatureFlag.count).to eq(0)
-        end
-      end
-
-      context 'and attempting to create a version 1 flag' do
-        let(:params) do
-          {
-            namespace_id: project.namespace,
-            project_id: project,
-            operations_feature_flag: {
-              name: 'my_feature_flag',
-              active: true
-            }
-          }
-        end
-
-        it 'creates the flag' do
-          stub_feature_flags(feature_flags_new_version: false)
-
-          subject
-
-          expect(response).to have_gitlab_http_status(:ok)
-          expect(Operations::FeatureFlag.count).to eq(1)
-          expect(json_response['version']).to eq('legacy_flag')
-        end
-      end
-    end
   end
 
   describe 'DELETE destroy.json' do
@@ -912,15 +829,6 @@ RSpec.describe Projects::FeatureFlagsController do
 
       it 'deletes the flag' do
         expect { subject }.to change { Operations::FeatureFlag.count }.by(-1)
-      end
-
-      context 'when new version flags are disabled' do
-        it 'returns a 404' do
-          stub_feature_flags(feature_flags_new_version: false)
-
-          expect { subject }.not_to change { Operations::FeatureFlag.count }
-          expect(response).to have_gitlab_http_status(:not_found)
-        end
       end
     end
   end
@@ -1511,6 +1419,40 @@ RSpec.describe Projects::FeatureFlagsController do
         expect(response).to have_gitlab_http_status(:not_found)
       end
 
+      it 'returns not found when trying to update a gitlabUserList strategy with a user list from another project' do
+        user_list = create(:operations_feature_flag_user_list, project: project, name: 'My List', user_xids: 'user1,user2')
+        strategy = create(:operations_strategy, feature_flag: new_version_flag, name: 'gitlabUserList', parameters: {}, user_list: user_list)
+        other_project = create(:project)
+        other_user_list = create(:operations_feature_flag_user_list, project: other_project, name: 'Other List', user_xids: 'some,one')
+
+        put_request(new_version_flag, strategies_attributes: [{
+          id: strategy.id,
+          user_list_id: other_user_list.id
+        }])
+
+        expect(response).to have_gitlab_http_status(:not_found)
+        expect(strategy.reload.user_list).to eq(user_list)
+      end
+
+      it 'allows setting multiple gitlabUserList strategies to the same user list' do
+        user_list_a = create(:operations_feature_flag_user_list, project: project, name: 'My List A', user_xids: 'user1,user2')
+        user_list_b = create(:operations_feature_flag_user_list, project: project, name: 'My List B', user_xids: 'user3,user4')
+        strategy_a = create(:operations_strategy, feature_flag: new_version_flag, name: 'gitlabUserList', parameters: {}, user_list: user_list_a)
+        strategy_b = create(:operations_strategy, feature_flag: new_version_flag, name: 'gitlabUserList', parameters: {}, user_list: user_list_a)
+
+        put_request(new_version_flag, strategies_attributes: [{
+          id: strategy_a.id,
+          user_list_id: user_list_b.id
+        }, {
+          id: strategy_b.id,
+          user_list_id: user_list_b.id
+        }])
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(strategy_a.reload.user_list).to eq(user_list_b)
+        expect(strategy_b.reload.user_list).to eq(user_list_b)
+      end
+
       it 'updates an existing strategy' do
         strategy = create(:operations_strategy, feature_flag: new_version_flag, name: 'default', parameters: {})
 
@@ -1574,15 +1516,6 @@ RSpec.describe Projects::FeatureFlagsController do
 
         expect(response).to have_gitlab_http_status(:ok)
         expect(json_response['strategies'].first['scopes']).to eq([])
-      end
-
-      it 'does not update the flag if version 2 flags are disabled' do
-        stub_feature_flags(feature_flags_new_version: false)
-
-        put_request(new_version_flag, { name: 'some-other-name' })
-
-        expect(response).to have_gitlab_http_status(:not_found)
-        expect(new_version_flag.reload.name).to eq('new-feature')
       end
 
       it 'updates the flag when legacy feature flags are set to be read only' do

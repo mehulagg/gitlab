@@ -60,6 +60,7 @@ export default {
     accordionEventBus.$on(this.closeOtherItemsEvent, this.onCloseOtherAccordionItems);
   },
   destroyed() {
+    // eslint-disable-next-line @gitlab/no-global-event-off
     accordionEventBus.$off(this.closeOtherItemsEvent);
   },
   methods: {

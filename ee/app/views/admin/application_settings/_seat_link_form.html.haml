@@ -18,7 +18,7 @@
             - link_start = '<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe % { url: link_path }
             %p.mb-2= s_('%{link_start}Learn more%{link_end} about what information is shared with GitLab Inc.').html_safe % { link_start: link_start, link_end: '</a>'.html_safe }
 
-            %button.btn.js-payload-preview-trigger{ type: 'button', data: { payload_selector: ".#{payload_class}" } }
+            %button.btn.gl-button.js-payload-preview-trigger{ type: 'button', data: { payload_selector: ".#{payload_class}" } }
               .spinner.js-spinner.d-none
               .js-text.d-inline= _('Preview payload')
             %pre.usage-data.js-syntax-highlight.code.highlight.mt-2.d-none{ class: payload_class, data: { endpoint: seat_link_payload_admin_application_settings_path(format: :html) } }

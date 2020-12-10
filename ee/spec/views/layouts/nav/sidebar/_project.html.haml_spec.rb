@@ -64,7 +64,7 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
       let(:can_read_environment) { true }
       let(:can_read_pod_logs) { true }
 
-      it 'link is visible ' do
+      it 'link is visible' do
         expect(rendered).to have_link('Logs', href: project_logs_path(project))
       end
     end
@@ -73,7 +73,7 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
       let(:can_read_environment) { false }
       let(:can_read_pod_logs) { false }
 
-      it 'link is not visible ' do
+      it 'link is not visible' do
         expect(rendered).not_to have_link 'Logs'
       end
     end
@@ -82,7 +82,7 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
       let(:can_read_environment) { true }
       let(:can_read_pod_logs) { false }
 
-      it 'link is not visible ' do
+      it 'link is not visible' do
         expect(rendered).not_to have_link 'Logs'
       end
     end

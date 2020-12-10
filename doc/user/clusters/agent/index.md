@@ -1,7 +1,7 @@
 ---
 stage: Configure
 group: Configure
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # GitLab Kubernetes Agent **(PREMIUM ONLY)**
@@ -9,7 +9,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/223061) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.4.
 > - It's disabled on GitLab.com. Rolling this feature out to GitLab.com is [planned](https://gitlab.com/groups/gitlab-org/-/epics/3834).
 
-CAUTION: **Warning:**
+WARNING:
 This feature might not be available to you. Check the **version history** note above for details.
 
 The [GitLab Kubernetes Agent](https://gitlab.com/gitlab-org/cluster-integration/gitlab-agent)
@@ -56,6 +56,12 @@ There are several components that work in concert for the Agent to accomplish Gi
 
 These repositories might be the same GitLab project or separate projects.
 
+NOTE:
+GitLab recommends you use the same GitLab project for the agent configuration
+and manifest repositories. Our backlog contains issues for adding support for
+[private manifest repositories outside of the configuration project](https://gitlab.com/gitlab-org/gitlab/-/issues/220912) and
+[group level agents](https://gitlab.com/gitlab-org/gitlab/-/issues/283885).
+
 For more details, please refer to our [full architecture documentation](https://gitlab.com/gitlab-org/cluster-integration/gitlab-agent/-/blob/master/doc/architecture.md#high-level-architecture) in the Agent project.
 
 ## Get started with GitOps and the GitLab Agent
@@ -82,8 +88,8 @@ Upgrade your agent installations together with GitLab upgrades. To decide which 
 1. Open the [GITLAB_KAS_VERSION](https://gitlab.com/gitlab-org/gitlab/-/blob/master/GITLAB_KAS_VERSION) file from the GitLab Repository, which contains the latest `agentk` version associated with the `master` branch.
 1. Change the `master` branch and select the Git tag associated with your version. For instance, you could change it to GitLab [v13.5.3-ee release](https://gitlab.com/gitlab-org/gitlab/-/blob/v13.5.3-ee/GITLAB_KAS_VERSION)
 
-The available `agentk` versions can be found in
-[its container registry](https://gitlab.com/gitlab-org/cluster-integration/gitlab-agent/container_registry/eyJuYW1lIjoiZ2l0bGFiLW9yZy9jbHVzdGVyLWludGVncmF0aW9uL2dpdGxhYi1hZ2VudC9hZ2VudGsiLCJ0YWdzX3BhdGgiOiIvZ2l0bGFiLW9yZy9jbHVzdGVyLWludGVncmF0aW9uL2dpdGxhYi1hZ2VudC9yZWdpc3RyeS9yZXBvc2l0b3J5LzEyMjMyMDUvdGFncz9mb3JtYXQ9anNvbiIsImlkIjoxMjIzMjA1LCJjbGVhbnVwX3BvbGljeV9zdGFydGVkX2F0IjpudWxsfQ==).
+The available `agentk` and `kas` versions can be found in
+[the container registry](https://gitlab.com/gitlab-org/cluster-integration/gitlab-agent/container_registry/).
 
 ### Install the Kubernetes Agent Server
 
@@ -93,7 +99,7 @@ chart](https://gitlab.com/gitlab-org/charts/gitlab). If you don't already have
 GitLab installed, please refer to our [installation
 documentation](https://docs.gitlab.com/ee/install/README.html).
 
-NOTE: **Note:**
+NOTE:
 GitLab plans to include the KAS on [GitLab.com](https://gitlab.com/groups/gitlab-org/-/epics/3834).
 
 #### Install with Omnibus
@@ -161,23 +167,9 @@ gitops:
 ```
 
 GitLab [versions 13.7 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/259669) also
-supports manifest projects containing multiple directories (or subdirectories)
-of YAML files. To use multiple YAML files, specify a `paths` attribute:
-
-```yaml
-gitops:
-  manifest_projects:
-  - id: "path-to/your-manifest-project-number1"
-  paths:
-      # Read all .yaml files from team1/app1 directory.
-      # See https://github.com/bmatcuk/doublestar#about and
-      # https://pkg.go.dev/github.com/bmatcuk/doublestar/v2#Match for globbing rules.
-    - glob: '/team1/app1/*.yaml'
-      # Read all .yaml files from team2/apps and all subdirectories
-    - glob: '/team2/apps/**/*.yaml'
-      # If 'paths' is not specified or is an empty list, the configuration below is used
-    - glob: '/**/*.{yaml,yml,json}'
-```
+supports manifest projects containing
+multiple directories (or subdirectories) of YAML files. For more information see our
+documentation on the [Kubernetes Agent configuration respository](repository.md).
 
 ### Create an Agent record in GitLab
 
@@ -223,7 +215,7 @@ the Agent in subsequent steps. You can create an Agent record either:
   }
   ```
 
-  NOTE: **Note:**
+  NOTE:
   GraphQL only displays the token one time after creating it.
 
   If you are new to using the GitLab GraphQL API, refer to the
@@ -392,9 +384,12 @@ subjects:
 In a previous step, you configured a `config.yaml` to point to the GitLab projects
 the Agent should synchronize. In each of those projects, you must create a `manifest.yaml`
 file for the Agent to monitor. You can auto-generate this `manifest.yaml` with a
-templating engine or other means. Only public projects are supported as
-manifest projects. Support for private projects is planned in the issue
-[Agent authorization for private manifest projects](https://gitlab.com/gitlab-org/gitlab/-/issues/220912).
+templating engine or other means.
+
+The agent is authorized to download manifests for the configuration
+project, and public projects. Support for other private projects is
+planned in the issue [Agent authorization for private manifest
+projects](https://gitlab.com/gitlab-org/gitlab/-/issues/220912).
 
 Each time you commit and push a change to this file, the Agent logs the change:
 
@@ -548,7 +543,7 @@ issue is in progress, directly edit the deployment with the
 `kubectl edit deployment gitlab-kas` command, and change `--listen-websocket=true` to `--listen-websocket=false`. After running that command, you should be able to use
 `grpc://gitlab-kas.<YOUR-NAMESPACE>:5005`.
 
-#### Agent logs - Decompressor is not installed for grpc-encoding
+### Agent logs - Decompressor is not installed for grpc-encoding
 
 ```plaintext
 {"level":"warn","time":"2020-11-05T05:25:46.916Z","msg":"GetConfiguration.Recv failed","error":"rpc error: code = Unimplemented desc = grpc: Decompressor is not installed for grpc-encoding \"gzip\""}

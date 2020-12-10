@@ -4,7 +4,6 @@ import {
   setBaseBlobPath,
   setCanReadVulnerabilityFeedback,
   setVulnerabilityFeedbackPath,
-  setVulnerabilityFeedbackHelpPath,
   setPipelineId,
   requestContainerScanningDiff,
   requestDastDiff,
@@ -178,24 +177,6 @@ describe('security reports actions', () => {
         [
           {
             type: types.SET_VULNERABILITY_FEEDBACK_PATH,
-            payload: 'path',
-          },
-        ],
-        [],
-        done,
-      );
-    });
-  });
-
-  describe('setVulnerabilityFeedbackHelpPath', () => {
-    it('should commit set vulnerabulity feedback help path', done => {
-      testAction(
-        setVulnerabilityFeedbackHelpPath,
-        'path',
-        mockedState,
-        [
-          {
-            type: types.SET_VULNERABILITY_FEEDBACK_HELP_PATH,
             payload: 'path',
           },
         ],

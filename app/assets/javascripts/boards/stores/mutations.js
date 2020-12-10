@@ -32,11 +32,10 @@ export const addIssueToList = ({ state, listId, issueId, moveBeforeId, moveAfter
 
 export default {
   [mutationTypes.SET_INITIAL_BOARD_DATA](state, data) {
-    const { boardType, disabled, showPromotion, ...endpoints } = data;
+    const { boardType, disabled, ...endpoints } = data;
     state.endpoints = endpoints;
     state.boardType = boardType;
     state.disabled = disabled;
-    state.showPromotion = showPromotion;
   },
 
   [mutationTypes.RECEIVE_BOARD_LISTS_SUCCESS]: (state, lists) => {
@@ -141,6 +140,10 @@ export default {
     }
 
     Vue.set(state.issues[issueId], prop, value);
+  },
+
+  [mutationTypes.SET_ASSIGNEE_LOADING](state, isLoading) {
+    state.isSettingAssignees = isLoading;
   },
 
   [mutationTypes.REQUEST_ADD_ISSUE]: () => {

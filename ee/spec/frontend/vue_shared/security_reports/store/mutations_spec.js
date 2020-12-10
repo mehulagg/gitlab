@@ -49,14 +49,6 @@ describe('EE sast reports mutations', () => {
     });
   });
 
-  describe('SET_VULNERABILITY_FEEDBACK_HELP_PATH', () => {
-    it('should set the vulnerabilities help path', () => {
-      mutations[types.SET_VULNERABILITY_FEEDBACK_HELP_PATH](stateCopy, 'vulnerability_help_path');
-
-      expect(stateCopy.vulnerabilityFeedbackHelpPath).toEqual('vulnerability_help_path');
-    });
-  });
-
   describe('SET_PIPELINE_ID', () => {
     it('should set the pipeline id', () => {
       mutations[types.SET_PIPELINE_ID](stateCopy, 123);

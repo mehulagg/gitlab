@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import { mapActions, mapGetters, mapState } from 'vuex';
+import { mapActions, mapGetters } from 'vuex';
 
 import 'ee_else_ce/boards/models/issue';
 import 'ee_else_ce/boards/models/list';
@@ -9,7 +9,6 @@ import boardConfigToggle from 'ee_else_ce/boards/config_toggle';
 import toggleLabels from 'ee_else_ce/boards/toggle_labels';
 import toggleEpicsSwimlanes from 'ee_else_ce/boards/toggle_epics_swimlanes';
 import {
-  setPromotionState,
   setWeightFetchingState,
   setEpicFetchingState,
   getMilestoneTitle,
@@ -77,7 +76,6 @@ export default () => {
     el: $boardApp,
     components: {
       BoardContent,
-      Board: () => import('ee_else_ce/boards/components/board_column.vue'),
       BoardSidebar,
       BoardAddIssuesModal,
       BoardSettingsSidebar: () => import('~/boards/components/board_settings_sidebar.vue'),
@@ -114,8 +112,7 @@ export default () => {
       };
     },
     computed: {
-      ...mapState(['isShowingEpicsSwimlanes']),
-      ...mapGetters(['shouldUseGraphQL']),
+      ...mapGetters(['isSwimlanesOn', 'shouldUseGraphQL']),
       detailIssueVisible() {
         return Object.keys(this.detailIssue.issue).length;
       },
@@ -133,7 +130,6 @@ export default () => {
         ...endpoints,
         boardType: this.parent,
         disabled: this.disabled,
-        showPromotion: parseBoolean($boardApp.getAttribute('data-show-promotion')),
       });
       boardsStore.setEndpoints(endpoints);
       boardsStore.rootPath = this.boardsEndpoint;
@@ -154,7 +150,12 @@ export default () => {
       eventHub.$off('initialBoardLoad', this.initialBoardLoad);
     },
     mounted() {
-      this.filterManager = new FilteredSearchBoards(boardsStore.filter, true, boardsStore.cantEdit);
+      this.filterManager = new FilteredSearchBoards(
+        boardsStore.filter,
+        store,
+        true,
+        boardsStore.cantEdit,
+      );
       this.filterManager.setup();
 
       this.performSearch();
@@ -180,8 +181,6 @@ export default () => {
           .then(res => res.data)
           .then(lists => {
             lists.forEach(list => boardsStore.addList(list));
-            boardsStore.addBlankState();
-            setPromotionState(boardsStore);
             this.loading = false;
           })
           .catch(() => {
@@ -193,11 +192,11 @@ export default () => {
       },
       performSearch() {
         this.setFilters(convertObjectPropsToCamelCase(urlParamsToObject(window.location.search)));
-        if (gon.features.boardsWithSwimlanes && this.isShowingEpicsSwimlanes) {
+        if (this.isSwimlanesOn) {
           this.resetEpics();
           this.resetIssues();
           this.fetchEpicsSwimlanes({});
-        } else if (gon.features.graphqlBoardLists && !this.isShowingEpicsSwimlanes) {
+        } else if (gon.features.graphqlBoardLists) {
           this.fetchLists();
           this.resetIssues();
         }
@@ -303,7 +302,7 @@ export default () => {
 
   const issueBoardsModal = document.getElementById('js-add-issues-btn');
 
-  if (issueBoardsModal) {
+  if (issueBoardsModal && gon.features.addIssuesButton) {
     // eslint-disable-next-line no-new
     new Vue({
       el: issueBoardsModal,

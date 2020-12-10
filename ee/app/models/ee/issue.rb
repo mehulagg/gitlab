@@ -32,6 +32,7 @@ module EE
       scope :no_iteration, -> { where(sprint_id: nil) }
       scope :any_iteration, -> { where.not(sprint_id: nil) }
       scope :in_iterations, ->(iterations) { where(sprint_id: iterations) }
+      scope :not_in_iterations, ->(iterations) { where(sprint_id: nil).or(where.not(sprint_id: iterations)) }
       scope :with_iteration_title, ->(iteration_title) { joins(:iteration).where(sprints: { title: iteration_title }) }
       scope :without_iteration_title, ->(iteration_title) { left_outer_joins(:iteration).where('sprints.title != ? OR sprints.id IS NULL', iteration_title) }
       scope :on_status_page, -> do
@@ -55,6 +56,7 @@ module EE
 
       has_one :status_page_published_incident, class_name: 'StatusPage::PublishedIncident', inverse_of: :issue
       has_one :issuable_sla
+      has_many :metric_images, class_name: 'IssuableMetricImage'
 
       has_many :vulnerability_links, class_name: 'Vulnerabilities::IssueLink', inverse_of: :issue
       has_many :related_vulnerabilities, through: :vulnerability_links, source: :vulnerability
@@ -261,7 +263,6 @@ module EE
 
     def generic_alert_with_default_title?
       title == ::Gitlab::AlertManagement::Payload::Generic::DEFAULT_TITLE &&
-        project.alerts_service_activated? &&
         author == ::User.alert_bot
     end
 

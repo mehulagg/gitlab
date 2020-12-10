@@ -1,12 +1,17 @@
 import { GlForm, GlSkeletonLoader } from '@gitlab/ui';
-import { shallowMount, mount } from '@vue/test-utils';
+import { shallowMount, mount, createLocalVue } from '@vue/test-utils';
 import { merge } from 'lodash';
+import VueApollo from 'vue-apollo';
+import createApolloProvider from 'helpers/mock_apollo_helper';
 import OnDemandScansForm from 'ee/on_demand_scans/components/on_demand_scans_form.vue';
-import OnDemandScansScannerProfileSelector from 'ee/on_demand_scans/components/profile_selector/scanner_profile_selector.vue';
-import OnDemandScansSiteProfileSelector from 'ee/on_demand_scans/components/profile_selector/site_profile_selector.vue';
+import ScannerProfileSelector from 'ee/on_demand_scans/components/profile_selector/scanner_profile_selector.vue';
+import SiteProfileSelector from 'ee/on_demand_scans/components/profile_selector/site_profile_selector.vue';
 import dastOnDemandScanCreate from 'ee/on_demand_scans/graphql/dast_on_demand_scan_create.mutation.graphql';
+import dastScannerProfilesQuery from 'ee/security_configuration/dast_profiles/graphql/dast_scanner_profiles.query.graphql';
+import dastSiteProfilesQuery from 'ee/security_configuration/dast_profiles/graphql/dast_site_profiles.query.graphql';
+import * as responses from '../mocks/apollo_mocks';
+import { scannerProfiles, siteProfiles } from '../mocks/mock_data';
 import { redirectTo } from '~/lib/utils/url_utility';
-import { scannerProfiles, siteProfiles } from '../mock_data';
 
 const helpPagePath = '/application_security/dast/index#on-demand-scans';
 const projectPath = 'group/project';
@@ -22,18 +27,9 @@ const defaultProps = {
   defaultBranch,
 };
 
-const defaultMocks = {
-  $apollo: {
-    mutate: jest.fn(),
-    queries: {
-      scannerProfiles: {},
-      siteProfiles: {},
-    },
-    addSmartQuery: jest.fn(),
-  },
-};
-
 const pipelineUrl = `/${projectPath}/pipelines/123`;
+const [passiveScannerProfile, activeScannerProfile] = scannerProfiles;
+const [nonValidatedSiteProfile, validatedSiteProfile] = siteProfiles;
 
 jest.mock('~/lib/utils/url_utility', () => ({
   isAbsolute: jest.requireActual('~/lib/utils/url_utility').isAbsolute,
@@ -41,21 +37,55 @@ jest.mock('~/lib/utils/url_utility', () => ({
 }));
 
 describe('OnDemandScansForm', () => {
+  let localVue;
   let subject;
+  let requestHandlers;
 
   const findForm = () => subject.find(GlForm);
   const findByTestId = testId => subject.find(`[data-testid="${testId}"]`);
   const findAlert = () => findByTestId('on-demand-scan-error');
+  const findProfilesConflictAlert = () => findByTestId('on-demand-scans-profiles-conflict-alert');
   const findSubmitButton = () => findByTestId('on-demand-scan-submit-button');
 
-  const setFormData = () => {
-    subject.find(OnDemandScansScannerProfileSelector).vm.$emit('input', scannerProfiles[0].id);
-    subject.find(OnDemandScansSiteProfileSelector).vm.$emit('input', siteProfiles[0].id);
+  const setValidFormData = () => {
+    subject.find(ScannerProfileSelector).vm.$emit('input', passiveScannerProfile.id);
+    subject.find(SiteProfileSelector).vm.$emit('input', nonValidatedSiteProfile.id);
     return subject.vm.$nextTick();
   };
   const submitForm = () => findForm().vm.$emit('submit', { preventDefault: () => {} });
 
-  const subjectMounterFactory = (mountFn = shallowMount) => (options = {}) => {
+  const createMockApolloProvider = handlers => {
+    localVue.use(VueApollo);
+
+    requestHandlers = {
+      dastScannerProfiles: jest.fn().mockResolvedValue(responses.dastScannerProfiles()),
+      dastSiteProfiles: jest.fn().mockResolvedValue(responses.dastSiteProfiles()),
+      ...handlers,
+    };
+
+    return createApolloProvider([
+      [dastScannerProfilesQuery, requestHandlers.dastScannerProfiles],
+      [dastSiteProfilesQuery, requestHandlers.dastSiteProfiles],
+    ]);
+  };
+
+  const subjectMounterFactory = (mountFn = shallowMount) => (options = {}, withHandlers) => {
+    localVue = createLocalVue();
+    let defaultMocks = {
+      $apollo: {
+        mutate: jest.fn(),
+        queries: {
+          scannerProfiles: {},
+          siteProfiles: {},
+        },
+        addSmartQuery: jest.fn(),
+      },
+    };
+    let apolloProvider;
+    if (withHandlers) {
+      apolloProvider = createMockApolloProvider(withHandlers);
+      defaultMocks = {};
+    }
     subject = mountFn(
       OnDemandScansForm,
       merge(
@@ -68,9 +98,12 @@ describe('OnDemandScansForm', () => {
             siteProfilesLibraryPath,
             newScannerProfilePath,
             newSiteProfilePath,
+            glFeatures: {
+              securityOnDemandScansSiteValidation: true,
+            },
           },
         },
-        options,
+        { ...options, localVue, apolloProvider },
         {
           data() {
             return { ...options.data };
@@ -134,7 +167,7 @@ describe('OnDemandScansForm', () => {
     });
 
     it('becomes enabled when form is valid', async () => {
-      await setFormData();
+      await setValidFormData();
 
       expect(submitButton.props('disabled')).toBe(false);
     });
@@ -155,7 +188,7 @@ describe('OnDemandScansForm', () => {
         jest
           .spyOn(subject.vm.$apollo, 'mutate')
           .mockResolvedValue({ data: { dastOnDemandScanCreate: { pipelineUrl, errors: [] } } });
-        await setFormData();
+        await setValidFormData();
         submitForm();
       });
 
@@ -167,8 +200,8 @@ describe('OnDemandScansForm', () => {
         expect(subject.vm.$apollo.mutate).toHaveBeenCalledWith({
           mutation: dastOnDemandScanCreate,
           variables: {
-            dastScannerProfileId: scannerProfiles[0].id,
-            dastSiteProfileId: siteProfiles[0].id,
+            dastScannerProfileId: passiveScannerProfile.id,
+            dastSiteProfileId: nonValidatedSiteProfile.id,
             fullPath: projectPath,
           },
         });
@@ -186,7 +219,7 @@ describe('OnDemandScansForm', () => {
     describe('on top-level error', () => {
       beforeEach(async () => {
         jest.spyOn(subject.vm.$apollo, 'mutate').mockRejectedValue();
-        await setFormData();
+        await setValidFormData();
         submitForm();
       });
 
@@ -208,7 +241,7 @@ describe('OnDemandScansForm', () => {
         jest
           .spyOn(subject.vm.$apollo, 'mutate')
           .mockResolvedValue({ data: { dastOnDemandScanCreate: { pipelineUrl: null, errors } } });
-        await setFormData();
+        await setValidFormData();
         submitForm();
       });
 
@@ -224,6 +257,84 @@ describe('OnDemandScansForm', () => {
           expect(alert.text()).toContain(error);
         });
       });
+    });
+  });
+
+  describe.each`
+    description                                  | selectedScannerProfile   | selectedSiteProfile        | hasConflict
+    ${'a passive scan and a non-validated site'} | ${passiveScannerProfile} | ${nonValidatedSiteProfile} | ${false}
+    ${'a passive scan and a validated site'}     | ${passiveScannerProfile} | ${validatedSiteProfile}    | ${false}
+    ${'an active scan and a non-validated site'} | ${activeScannerProfile}  | ${nonValidatedSiteProfile} | ${true}
+    ${'an active scan and a validated site'}     | ${activeScannerProfile}  | ${validatedSiteProfile}    | ${false}
+  `(
+    'profiles conflict prevention',
+    ({ description, selectedScannerProfile, selectedSiteProfile, hasConflict }) => {
+      const setFormData = () => {
+        subject.find(ScannerProfileSelector).vm.$emit('input', selectedScannerProfile.id);
+        subject.find(SiteProfileSelector).vm.$emit('input', selectedSiteProfile.id);
+        return subject.vm.$nextTick();
+      };
+
+      it(
+        hasConflict
+          ? `warns about conflicting profiles when user selects ${description}`
+          : `does not report any conflict when user selects ${description}`,
+        async () => {
+          mountShallowSubject({
+            data: {
+              scannerProfiles,
+              siteProfiles,
+            },
+          });
+          await setFormData();
+
+          expect(findProfilesConflictAlert().exists()).toBe(hasConflict);
+          expect(findSubmitButton().props('disabled')).toBe(hasConflict);
+        },
+      );
+
+      describe('feature flag disabled', () => {
+        beforeEach(() => {
+          mountShallowSubject({
+            provide: {
+              glFeatures: {
+                securityOnDemandScansSiteValidation: false,
+              },
+            },
+            data: {
+              scannerProfiles,
+              siteProfiles,
+            },
+          });
+          return setFormData();
+        });
+
+        it(`does not report any conflict when user selects ${description}`, () => {
+          expect(findProfilesConflictAlert().exists()).toBe(false);
+          expect(findSubmitButton().props('disabled')).toBe(false);
+        });
+      });
+    },
+  );
+
+  describe.each`
+    profileType  | query                    | selector                  | profiles
+    ${'scanner'} | ${'dastScannerProfiles'} | ${ScannerProfileSelector} | ${scannerProfiles}
+    ${'site'}    | ${'dastSiteProfiles'}    | ${SiteProfileSelector}    | ${siteProfiles}
+  `('when there is a single $profileType profile', ({ query, selector, profiles }) => {
+    const [profile] = profiles;
+
+    beforeEach(() => {
+      mountShallowSubject(
+        {},
+        {
+          [query]: jest.fn().mockResolvedValue(responses[query]([profile])),
+        },
+      );
+    });
+
+    it('automatically selects the only available profile', () => {
+      expect(subject.find(selector).attributes('value')).toBe(profile.id);
     });
   });
 });

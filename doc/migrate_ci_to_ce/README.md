@@ -1,7 +1,7 @@
 ---
 stage: none
 group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: howto
 ---
 
@@ -80,7 +80,7 @@ sudo -u git -H bundle exec rake gitlab:backup:create RAILS_ENV=production SKIP=r
 If this fails you need to fix it before upgrading to 8.0. Also see
 <https://about.gitlab.com/get-help/>
 
-NOTE: **Note:**
+NOTE:
 For GitLab 12.1 and earlier, use `gitlab-rake gitlab:backup:create`.
 
 ### 2. Check source and target database types
@@ -324,8 +324,8 @@ properly forward the requests.**
 
 You should also make sure that you can:
 
-1. `curl https://YOUR_GITLAB_SERVER_FQDN/` from your previous GitLab CI server.
-1. `curl https://YOUR_CI_SERVER_FQDN/` from your GitLab CE (or EE) server.
+1. `curl "https://YOUR_GITLAB_SERVER_FQDN/"` from your previous GitLab CI server.
+1. `curl "https://YOUR_CI_SERVER_FQDN/"` from your GitLab CE (or EE) server.
 
 ### 2. Check NGINX configuration
 

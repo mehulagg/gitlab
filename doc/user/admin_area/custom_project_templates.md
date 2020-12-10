@@ -1,7 +1,7 @@
 ---
 stage: Manage
 group: Import
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference
 ---
 
@@ -23,7 +23,7 @@ Repository and database information that are copied over to each new project are
 identical to the data exported with
 [GitLab's Project Import/Export](../project/settings/import_export.md).
 
-NOTE: **Note:**
+NOTE:
 To set project templates at a group level,
 see [Custom group-level project templates](../group/custom_project_templates.md).
 
@@ -37,7 +37,7 @@ source for an entire GitLab instance by:
 1. Selecting a group to use.
 1. Pressing **Save changes**.
 
-NOTE: **Note:**
+NOTE:
 Projects below subgroups of the template group are **not** supported.
 
 <!-- ## Troubleshooting

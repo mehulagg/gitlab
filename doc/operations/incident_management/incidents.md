@@ -1,7 +1,7 @@
 ---
 stage: Monitor
 group: Health
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Incidents
@@ -121,7 +121,7 @@ display an arrow next to the column name.
 
 Incidents share the [Issues API](../../user/project/issues/index.md).
 
-TIP: **Tip:**
+NOTE:
 For a live example of the incident list in action, visit this
 [demo project](https://gitlab.com/gitlab-examples/ops/incident-setup/everyone/tanuki-inc/-/incidents).
 

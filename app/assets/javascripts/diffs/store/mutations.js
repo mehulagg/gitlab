@@ -36,6 +36,7 @@ export default {
       projectPath,
       dismissEndpoint,
       showSuggestPopover,
+      viewDiffsFileByFile,
     } = options;
     Object.assign(state, {
       endpoint,
@@ -45,6 +46,7 @@ export default {
       projectPath,
       dismissEndpoint,
       showSuggestPopover,
+      viewDiffsFileByFile,
     });
   },
 
@@ -64,17 +66,10 @@ export default {
     updateDiffFilesInState(state, files);
   },
 
-  [types.SET_DIFF_DATA](state, data) {
-    let files = state.diffFiles;
-
-    if (window.location.search.indexOf('diff_id') !== -1 && data.diff_files) {
-      files = prepareDiffData(data, files);
-    }
-
+  [types.SET_DIFF_METADATA](state, data) {
     Object.assign(state, {
       ...convertObjectPropsToCamelCase(data),
     });
-    updateDiffFilesInState(state, files);
   },
 
   [types.SET_DIFF_DATA_BATCH](state, data) {
@@ -247,8 +242,8 @@ export default {
   [types.TOGGLE_FOLDER_OPEN](state, path) {
     state.treeEntries[path].opened = !state.treeEntries[path].opened;
   },
-  [types.TOGGLE_SHOW_TREE_LIST](state) {
-    state.showTreeList = !state.showTreeList;
+  [types.SET_SHOW_TREE_LIST](state, showTreeList) {
+    state.showTreeList = showTreeList;
   },
   [types.VIEW_DIFF_FILE](state, fileId) {
     state.currentDiffFileId = fileId;
@@ -351,5 +346,8 @@ export default {
   },
   [types.SET_SHOW_SUGGEST_POPOVER](state) {
     state.showSuggestPopover = false;
+  },
+  [types.SET_FILE_BY_FILE](state, fileByFile) {
+    state.viewDiffsFileByFile = fileByFile;
   },
 };

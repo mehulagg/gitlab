@@ -245,7 +245,7 @@ RSpec.describe 'Scoped issue boards', :js do
 
           find('.board-card', match: :first)
 
-          expect(page).to have_selector('.board', count: 4)
+          expect(page).to have_selector('.board', count: 2)
           expect(all('.board').first).to have_selector('.board-card', count: 2)
           expect(all('.board').last).to have_selector('.board-card', count: 1)
         end
@@ -297,6 +297,9 @@ RSpec.describe 'Scoped issue boards', :js do
           visit project_boards_path(project)
 
           update_board_label(label_title)
+
+          wait_for_all_requests
+
           update_board_label(label_2_title)
 
           expect(page).to have_css('.js-visual-token')
@@ -455,7 +458,7 @@ RSpec.describe 'Scoped issue boards', :js do
     it "doesn't show the input when creating a board" do
       click_on_create_new_board
 
-      page.within '.js-boards-selector' do
+      page.within '.js-board-config-modal' do
         # To make sure the form is shown
         expect(page).to have_field('board-new-name')
 
@@ -469,14 +472,14 @@ RSpec.describe 'Scoped issue boards', :js do
   end
 
   def expect_dot_highlight(button_title)
-    button = first('.filter-dropdown-container .btn.btn-inverted')
+    button = first('.filter-dropdown-container .btn.gl-button')
     expect(button.text).to include(button_title)
     expect(button[:class]).to include('dot-highlight')
     expect(button['title']).to include('This board\'s scope is reduced')
   end
 
   def expect_no_dot_highlight(button_title)
-    button = first('.filter-dropdown-container .btn.btn-inverted')
+    button = first('.filter-dropdown-container .btn.gl-button')
     expect(button.text).to include(button_title)
     expect(button[:class]).not_to include('dot-highlight')
     expect(button['title']).not_to include('This board\'s scope is reduced')
@@ -540,7 +543,7 @@ RSpec.describe 'Scoped issue boards', :js do
 
     click_on_board_modal
 
-    click_button 'Create'
+    click_button 'Create board'
 
     wait_for_requests
 
@@ -569,7 +572,7 @@ RSpec.describe 'Scoped issue boards', :js do
 
     click_on_board_modal
 
-    click_button 'Save'
+    click_button 'Save changes'
 
     wait_for_requests
 
@@ -579,6 +582,6 @@ RSpec.describe 'Scoped issue boards', :js do
   # Click on modal to make sure the dropdown is closed (e.g. label scenario)
   #
   def click_on_board_modal
-    find('.board-config-modal').click
+    find('.board-config-modal .modal-content').click
   end
 end

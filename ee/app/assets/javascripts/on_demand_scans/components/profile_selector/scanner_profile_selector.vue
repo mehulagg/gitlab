@@ -1,15 +1,14 @@
 <script>
-import { SCAN_TYPE_OPTIONS } from 'ee/security_configuration/dast_scanner_profiles/constants';
+import { SCAN_TYPE_LABEL } from 'ee/security_configuration/dast_scanner_profiles/constants';
 import ProfileSelector from './profile_selector.vue';
-import SummaryCell from './summary_cell.vue';
-import { __, s__ } from '~/locale';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
 export default {
   name: 'OnDemandScansScannerProfileSelector',
   components: {
     ProfileSelector,
-    SummaryCell,
   },
+  mixins: [glFeatureFlagsMixin()],
   props: {
     profiles: {
       type: Array,
@@ -25,17 +24,18 @@ export default {
       default: '',
     },
   },
-  methods: {
-    getScanModeText(scanType) {
-      return SCAN_TYPE_OPTIONS.find(({ value }) => scanType === value)?.text;
-    },
-    getAjaxSpiderText(isEnabled) {
-      return isEnabled ? __('On') : __('Off');
-    },
-    getDebugMessageText(isEnabled) {
-      return isEnabled
-        ? s__('DastProfiles|Show debug messages')
-        : s__('DastProfiles|Hide debug messages');
+  computed: {
+    formattedProfiles() {
+      return this.profiles.map(profile => {
+        const addSuffix = str =>
+          this.glFeatures.securityOnDemandScansSiteValidation
+            ? `${str} (${SCAN_TYPE_LABEL[profile.scanType]})`
+            : str;
+        return {
+          ...profile,
+          dropdownLabel: addSuffix(profile.profileName),
+        };
+      });
     },
   },
 };
@@ -45,7 +45,7 @@ export default {
   <profile-selector
     :library-path="scannerProfilesLibraryPath"
     :new-profile-path="newScannerProfilePath"
-    :profiles="profiles.map(profile => ({ ...profile, dropdownLabel: profile.profileName }))"
+    :profiles="formattedProfiles"
     v-bind="$attrs"
     v-on="$listeners"
   >
@@ -57,33 +57,8 @@ export default {
       )
     }}</template>
     <template #new-profile>{{ s__('OnDemandScans|Create a new scanner profile') }}</template>
-    <template #summary="{ profile }">
-      <div class="row">
-        <summary-cell
-          :label="s__('DastProfiles|Scan mode')"
-          :value="getScanModeText(profile.scanType)"
-        />
-      </div>
-      <div class="row">
-        <summary-cell
-          :label="s__('DastProfiles|Spider timeout')"
-          :value="n__('%d minute', '%d minutes', profile.spiderTimeout)"
-        />
-        <summary-cell
-          :label="s__('DastProfiles|Target timeout')"
-          :value="n__('%d second', '%d seconds', profile.targetTimeout)"
-        />
-      </div>
-      <div class="row">
-        <summary-cell
-          :label="s__('DastProfiles|AJAX spider')"
-          :value="getAjaxSpiderText(profile.useAjaxSpider)"
-        />
-        <summary-cell
-          :label="s__('DastProfiles|Debug messages')"
-          :value="getDebugMessageText(profile.showDebugMessages)"
-        />
-      </div>
+    <template #summary>
+      <slot name="summary"></slot>
     </template>
   </profile-selector>
 </template>

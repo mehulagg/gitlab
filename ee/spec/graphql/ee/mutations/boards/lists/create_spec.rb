@@ -28,13 +28,13 @@ RSpec.describe Mutations::Boards::Lists::Create do
 
   describe '#ready?' do
     it 'raises an error if required arguments are missing' do
-      expect { mutation.ready?({ board_id: 'some id' }) }
+      expect { mutation.ready?(board_id: 'some id') }
         .to raise_error(Gitlab::Graphql::Errors::ArgumentError,
                         'one and only one of backlog or labelId or milestoneId or assigneeId is required')
     end
 
     it 'raises an error if too many required arguments are specified' do
-      expect { mutation.ready?({ board_id: 'some id', milestone_id: 'some milestone', assignee_id: 'some label' }) }
+      expect { mutation.ready?(board_id: 'some id', milestone_id: 'some milestone', assignee_id: 'some label') }
         .to raise_error(Gitlab::Graphql::Errors::ArgumentError,
                         'one and only one of backlog or labelId or milestoneId or assigneeId is required')
     end
@@ -66,9 +66,8 @@ RSpec.describe Mutations::Boards::Lists::Create do
         context 'when milestone not found' do
           let(:list_create_params) { { milestone_id: "gid://gitlab/Milestone/#{non_existing_record_id}" } }
 
-          it 'raises an error' do
-            expect { subject }
-              .to raise_error(Gitlab::Graphql::Errors::ArgumentError, 'Milestone not found!')
+          it 'returns an error' do
+            expect(subject[:errors]).to include 'Milestone not found'
           end
         end
       end
@@ -97,9 +96,8 @@ RSpec.describe Mutations::Boards::Lists::Create do
         context 'when user not found' do
           let(:list_create_params) { { assignee_id: "gid://gitlab/User/#{non_existing_record_id}" } }
 
-          it 'raises an error' do
-            expect { subject }
-              .to raise_error(Gitlab::Graphql::Errors::ArgumentError, 'User not found!')
+          it 'returns an error' do
+            expect(subject[:errors]).to include 'Assignee not found'
           end
         end
       end

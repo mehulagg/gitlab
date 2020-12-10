@@ -1,16 +1,12 @@
 import createStore from 'ee/security_dashboard/store/index';
 import {
   SET_FILTER,
-  TOGGLE_HIDE_DISMISSED,
+  SET_HIDE_DISMISSED,
 } from 'ee/security_dashboard/store/modules/filters/mutation_types';
 
 function expectRefreshDispatches(store, payload) {
-  expect(store.dispatch).toHaveBeenCalledTimes(2);
+  expect(store.dispatch).toHaveBeenCalledTimes(1);
   expect(store.dispatch).toHaveBeenCalledWith('vulnerabilities/fetchVulnerabilities', payload);
-  expect(store.dispatch).toHaveBeenCalledWith(
-    'vulnerabilities/fetchVulnerabilitiesHistory',
-    payload,
-  );
 }
 
 describe('mediator', () => {
@@ -38,7 +34,7 @@ describe('mediator', () => {
   });
 
   it('triggers fetching vulnerabilities after "Hide dismissed" toggle changes', () => {
-    store.commit(`filters/${TOGGLE_HIDE_DISMISSED}`);
+    store.commit(`filters/${SET_HIDE_DISMISSED}`);
 
     expectRefreshDispatches(store, store.state.filters.filters);
   });

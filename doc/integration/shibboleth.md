@@ -1,12 +1,12 @@
 ---
-stage: none
-group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+stage: Create
+group: Ecosystem
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Shibboleth OmniAuth Provider
 
-NOTE: **Note:**
+NOTE:
 The preferred approach for integrating a Shibboleth authentication system
 with GitLab 10 or newer is to use [GitLab's SAML integration](saml.md). This documentation is for Omnibus GitLab 9.x installs or older.
 
@@ -52,7 +52,7 @@ The following changes are needed to enable Shibboleth:
    RequestHeader set X_FORWARDED_PROTO 'https'
    ```
 
-   NOTE: **Note:**
+   NOTE:
    Starting from GitLab 11.4, OmniAuth is enabled by default. If you're using an
    earlier version, you must explicitly enable it in `/etc/gitlab/gitlab.rb`.
 

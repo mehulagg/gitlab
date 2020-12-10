@@ -30,7 +30,11 @@
   - 1
 - - analytics_code_review_metrics
   - 1
+- - analytics_devops_adoption_create_snapshot
+  - 1
 - - analytics_instance_statistics_counter_job
+  - 1
+- - approve_blocked_users
   - 1
 - - authorized_keys
   - 2
@@ -137,6 +141,8 @@
 - - github_import_advance_stage
   - 1
 - - github_importer
+  - 1
+- - gitlab_performance_bar_stats
   - 1
 - - gitlab_shell
   - 2
@@ -248,7 +254,11 @@
   - 1
 - - project_import_schedule
   - 1
+- - project_schedule_bulk_repository_shard_moves
+  - 1
 - - project_service
+  - 1
+- - project_template_export
   - 1
 - - project_update_repository_storage
   - 1
@@ -301,6 +311,8 @@
 - - self_monitoring_project_delete
   - 2
 - - service_desk_email_receiver
+  - 1
+- - set_user_status_based_on_user_cap_setting
   - 1
 - - status_page_publish
   - 1

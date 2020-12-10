@@ -19,7 +19,7 @@ class UsersController < ApplicationController
   prepend_before_action(only: [:show]) { authenticate_sessionless_user!(:rss) }
   before_action :user, except: [:exists, :suggests]
   before_action :authorize_read_user_profile!,
-                only: [:calendar, :calendar_activities, :groups, :projects, :contributed_projects, :starred_projects, :snippets]
+                only: [:calendar, :calendar_activities, :groups, :projects, :contributed, :starred, :snippets]
 
   feature_category :users
 
@@ -33,6 +33,8 @@ class UsersController < ApplicationController
       end
 
       format.json do
+        # In 13.8, this endpoint will be removed:
+        # https://gitlab.com/gitlab-org/gitlab/-/issues/289972
         load_events
         pager_json("events/_events", @events.count, events: @events)
       end
@@ -42,6 +44,11 @@ class UsersController < ApplicationController
   def activity
     respond_to do |format|
       format.html { render 'show' }
+
+      format.json do
+        load_events
+        pager_json("events/_events", @events.count, events: @events)
+      end
     end
   end
 

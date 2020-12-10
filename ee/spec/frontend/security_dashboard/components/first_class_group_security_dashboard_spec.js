@@ -6,6 +6,7 @@ import FirstClassGroupDashboard from 'ee/security_dashboard/components/first_cla
 import FirstClassGroupVulnerabilities from 'ee/security_dashboard/components/first_class_group_security_dashboard_vulnerabilities.vue';
 import Filters from 'ee/security_dashboard/components/first_class_vulnerability_filters.vue';
 import SecurityDashboardLayout from 'ee/security_dashboard/components/security_dashboard_layout.vue';
+import VulnerabilitiesCountList from 'ee/security_dashboard/components/vulnerability_count_list.vue';
 
 describe('First Class Group Dashboard Component', () => {
   let wrapper;
@@ -21,6 +22,7 @@ describe('First Class Group Dashboard Component', () => {
   const findFilters = () => wrapper.find(Filters);
   const findLoadingIcon = () => wrapper.find(GlLoadingIcon);
   const findEmptyState = () => wrapper.find(DashboardNotConfigured);
+  const findVulnerabilitiesCountList = () => wrapper.find(VulnerabilitiesCountList);
 
   const createWrapper = ({ data } = {}) => {
     return shallowMount(FirstClassGroupDashboard, {
@@ -107,6 +109,14 @@ describe('First Class Group Dashboard Component', () => {
 
     it('should not display the dashboard not configured component', () => {
       expect(findEmptyState().exists()).toBe(false);
+    });
+
+    it('should display the vulnerability count list with the correct data', () => {
+      expect(findVulnerabilitiesCountList().props()).toMatchObject({
+        scope: 'group',
+        fullPath: groupFullPath,
+        filters: wrapper.vm.filters,
+      });
     });
   });
 

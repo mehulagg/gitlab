@@ -1,7 +1,7 @@
 ---
 stage: Enablement
 group: Distribution
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: howto
 ---
 
@@ -215,19 +215,13 @@ Download Ruby and compile it:
 
 ```shell
 mkdir /tmp/ruby && cd /tmp/ruby
-curl --remote-name --progress https://cache.ruby-lang.org/pub/ruby/2.7/ruby-2.7.2.tar.gz
+curl --remote-name --progress "https://cache.ruby-lang.org/pub/ruby/2.7/ruby-2.7.2.tar.gz"
 echo 'cb9731a17487e0ad84037490a6baf8bfa31a09e8  ruby-2.7.2.tar.gz' | shasum -c - && tar xzf ruby-2.7.2.tar.gz
 cd ruby-2.7.2
 
 ./configure --disable-install-rdoc
 make
 sudo make install
-```
-
-Then install the Bundler gem (a version below 2.x):
-
-```shell
-sudo gem install bundler --no-document --version '< 2'
 ```
 
 ## 3. Go
@@ -241,7 +235,7 @@ page](https://golang.org/dl).
 # Remove former Go installation folder
 sudo rm -rf /usr/local/go
 
-curl --remote-name --progress https://dl.google.com/go/go1.13.5.linux-amd64.tar.gz
+curl --remote-name --progress "https://dl.google.com/go/go1.13.5.linux-amd64.tar.gz"
 echo '512103d7ad296467814a6e3f635631bd35574cab3369a97a323c9a585ccaa569  go1.13.5.linux-amd64.tar.gz' | shasum -a256 -c - && \
   sudo tar -C /usr/local -xzf go1.13.5.linux-amd64.tar.gz
 sudo ln -sf /usr/local/go/bin/{go,godoc,gofmt} /usr/local/bin/
@@ -263,10 +257,10 @@ we need to install through the following commands:
 
 ```shell
 # install node v12.x
-curl --location https://deb.nodesource.com/setup_12.x | sudo bash -
+curl --location "https://deb.nodesource.com/setup_12.x" | sudo bash -
 sudo apt-get install -y nodejs
 
-curl --silent --show-error https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
+curl --silent --show-error "https://dl.yarnpkg.com/debian/pubkey.gpg" | sudo apt-key add -
 echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
 sudo apt-get update
 sudo apt-get install yarn
@@ -284,7 +278,7 @@ sudo adduser --disabled-login --gecos 'GitLab' git
 
 ## 6. Database
 
-NOTE: **Note:**
+NOTE:
 In GitLab 12.1 and later, only PostgreSQL is supported. In GitLab 13.0 and later, we [require PostgreSQL 11+](requirements.md#postgresql-requirements).
 
 1. Install the database packages:
@@ -449,7 +443,7 @@ Make sure to replace `<X-Y-stable>` with the stable branch that matches the
 version you want to install. For example, if you want to install 11.8 you would
 use the branch name `11-8-stable`.
 
-CAUTION: **Caution:**
+WARNING:
 You can change `<X-Y-stable>` to `master` if you want the *bleeding edge* version, but never install `master` on a production server!
 
 ### Configure It
@@ -559,7 +553,7 @@ sudo -u git -H chmod o-rwx config/database.yml
 
 ### Install Gems
 
-NOTE: **Note:**
+NOTE:
 As of Bundler 1.5.2, you can invoke `bundle install -jN` (where `N` is the number of your processor cores) and enjoy parallel gems installation with measurable difference in completion time (~60% faster). Check the number of your cores with `nproc`. For more information, see this [post](https://thoughtbot.com/blog/parallel-gem-installing-using-bundler).
 
 Make sure you have `bundle` (run `bundle -v`):

@@ -18,6 +18,12 @@ module Resolvers
              description: 'Username of the author'
     end
 
+    def self.accept_reviewer
+      argument :reviewer_username, GraphQL::STRING_TYPE,
+             required: false,
+             description: 'Username of the reviewer'
+    end
+
     argument :iids, [GraphQL::STRING_TYPE],
               required: false,
               description: 'Array of IIDs of merge requests, for example `[1, 2]`'
@@ -52,7 +58,7 @@ module Resolvers
     argument :sort, Types::MergeRequestSortEnum,
              description: 'Sort merge requests by this criteria',
              required: false,
-             default_value: 'created_desc'
+             default_value: :created_desc
 
     def self.single
       ::Resolvers::MergeRequestResolver

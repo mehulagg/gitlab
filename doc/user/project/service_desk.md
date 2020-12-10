@@ -1,7 +1,7 @@
 ---
 stage: Plan
 group: Certify
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Service Desk
@@ -59,7 +59,7 @@ users will only see the thread through email.
 
 ## Configuring Service Desk
 
-NOTE: **Note:**
+NOTE:
 Service Desk is enabled on GitLab.com.
 You can skip step 1 below; you only need to enable it per project.
 
@@ -76,7 +76,7 @@ Follow these steps to do so:
    address's format. The older format is still supported, however, allowing existing aliases or
    contacts to continue working.
 
-   DANGER: **Warning:**
+   WARNING:
    This email address can be used by anyone to create an issue on this project, whether or not they
    have access to your GitLab instance. We recommend **putting this behind an alias** so it can be
    changed if needed, and **[enabling Akismet](../../integration/akismet.md)** on your GitLab
@@ -131,7 +131,7 @@ this name in the `From` header. The default display name is `GitLab Support Bot`
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/2201) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.0.
 
-NOTE: **Note:**
+NOTE:
 This feature is disabled by default. For steps to enable it, see [Enable custom email address](#enable-custom-email-address).
 
 If the `service_desk_email` feature flag is enabled in your configuration,

@@ -7,7 +7,9 @@ RSpec.describe 'Admin Dashboard' do
     let_it_be(:users_statistics) { create(:users_statistics) }
 
     before do
-      sign_in(create(:admin))
+      admin = create(:admin)
+      sign_in(admin)
+      gitlab_enable_admin_mode_sign_in(admin)
     end
 
     describe 'license' do

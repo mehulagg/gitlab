@@ -22,9 +22,9 @@ RSpec.describe ProjectPolicy do
 
     let(:additional_developer_permissions) do
       %i[
-        admin_vulnerability_feedback read_project_security_dashboard
+        admin_vulnerability_feedback read_project_audit_events read_project_security_dashboard
         read_vulnerability read_vulnerability_scanner create_vulnerability create_vulnerability_export admin_vulnerability
-        admin_vulnerability_issue_link read_merge_train
+        admin_vulnerability_issue_link admin_vulnerability_external_issue_link read_merge_train
       ]
     end
 
@@ -1339,6 +1339,92 @@ RSpec.describe ProjectPolicy do
       end
 
       it { is_expected.to(allowed ? be_allowed(policy) : be_disallowed(policy)) }
+    end
+  end
+
+  describe 'Incident Management on-call schedules' do
+    using RSpec::Parameterized::TableSyntax
+
+    context ':read_incident_management_oncall_schedule' do
+      let(:policy) { :read_incident_management_oncall_schedule }
+
+      where(:role, :admin_mode, :allowed) do
+        :guest      | nil   | false
+        :reporter   | nil   | true
+        :developer  | nil   | true
+        :maintainer | nil   | true
+        :owner      | nil   | true
+        :admin      | false | false
+        :admin      | true  | true
+      end
+
+      before do
+        enable_admin_mode!(current_user) if admin_mode
+        stub_licensed_features(oncall_schedules: true)
+      end
+
+      with_them do
+        let(:current_user) { public_send(role) }
+
+        it { is_expected.to(allowed ? be_allowed(policy) : be_disallowed(policy)) }
+
+        context 'with disabled feature flag' do
+          before do
+            stub_feature_flags(oncall_schedules_mvc: false)
+          end
+
+          it { is_expected.to(be_disallowed(policy)) }
+        end
+
+        context 'with unavailable license' do
+          before do
+            stub_licensed_features(oncall_schedules: false)
+          end
+
+          it { is_expected.to(be_disallowed(policy)) }
+        end
+      end
+    end
+
+    context ':admin_incident_management_oncall_schedule' do
+      let(:policy) { :admin_incident_management_oncall_schedule }
+
+      where(:role, :admin_mode, :allowed) do
+        :guest      | nil   | false
+        :reporter   | nil   | false
+        :developer  | nil   | false
+        :maintainer | nil   | true
+        :owner      | nil   | true
+        :admin      | false | false
+        :admin      | true  | true
+      end
+
+      before do
+        enable_admin_mode!(current_user) if admin_mode
+        stub_licensed_features(oncall_schedules: true)
+      end
+
+      with_them do
+        let(:current_user) { public_send(role) }
+
+        it { is_expected.to(allowed ? be_allowed(policy) : be_disallowed(policy)) }
+
+        context 'with disabled feature flag' do
+          before do
+            stub_feature_flags(oncall_schedules_mvc: false)
+          end
+
+          it { is_expected.to(be_disallowed(policy)) }
+        end
+
+        context 'with unavailable license' do
+          before do
+            stub_licensed_features(oncall_schedules: false)
+          end
+
+          it { is_expected.to(be_disallowed(policy)) }
+        end
+      end
     end
   end
 

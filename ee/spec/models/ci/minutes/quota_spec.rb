@@ -255,4 +255,69 @@ RSpec.describe Ci::Minutes::Quota do
       it { is_expected.to eq(result) }
     end
   end
+
+  describe '#total_minutes' do
+    subject { quota.total_minutes }
+
+    where(:namespace_monthly_limit, :application_monthly_limit, :purchased_minutes, :result) do
+      20  | 100 | 30 | 50
+      nil | 100 | 30 | 130
+      20  | 100 | 0  | 20
+      0   | 0   | 30 | 30
+      nil | 0   | 30 | 30
+    end
+
+    with_them do
+      before do
+        namespace.shared_runners_minutes_limit = namespace_monthly_limit
+        allow(::Gitlab::CurrentSettings).to receive(:shared_runners_minutes).and_return(application_monthly_limit)
+        allow(namespace).to receive(:extra_shared_runners_minutes_limit).and_return(purchased_minutes)
+      end
+
+      it { is_expected.to eq(result) }
+    end
+  end
+
+  describe '#total_minutes_used' do
+    subject { quota.total_minutes_used }
+
+    where(:expected_seconds, :expected_minutes) do
+      nil | 0
+      0   | 0
+      59  | 0
+      60  | 1
+      122 | 2
+    end
+
+    with_them do
+      before do
+        allow(namespace).to receive(:shared_runners_seconds).and_return(expected_seconds)
+      end
+
+      it { is_expected.to eq(expected_minutes) }
+    end
+  end
+
+  describe '#percent_total_minutes_remaining' do
+    subject { quota.percent_total_minutes_remaining }
+
+    where(:total_minutes_used, :monthly_minutes, :purchased_minutes, :result) do
+      0   | 0   | 0 | 0
+      10  | 0   | 0 | 0
+      0   | 70  | 30 | 100
+      60  | 70  | 30 | 40
+      100 | 70  | 30 | 0
+      120 | 70  | 30 | 0
+    end
+
+    with_them do
+      before do
+        allow(namespace).to receive(:shared_runners_seconds).and_return(total_minutes_used * 60)
+        allow(namespace).to receive(:shared_runners_minutes_limit).and_return(monthly_minutes)
+        allow(namespace).to receive(:extra_shared_runners_minutes_limit).and_return(purchased_minutes)
+      end
+
+      it { is_expected.to eq(result) }
+    end
+  end
 end

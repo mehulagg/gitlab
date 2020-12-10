@@ -6,6 +6,7 @@ import appStore from 'ee/vue_shared/security_reports/store';
 import { trackMrSecurityReportDetails } from 'ee/vue_shared/security_reports/store/constants';
 import * as sastTypes from 'ee/vue_shared/security_reports/store/modules/sast/mutation_types';
 import * as secretDetectionTypes from 'ee/vue_shared/security_reports/store/modules/secret_detection/mutation_types';
+import * as apiFuzzingTypes from 'ee/vue_shared/security_reports/store/modules/api_fuzzing/mutation_types';
 import * as types from 'ee/vue_shared/security_reports/store/mutation_types';
 import { trimText } from 'helpers/text_helper';
 import { mockTracking, unmockTracking } from 'helpers/tracking_helper';
@@ -22,6 +23,7 @@ import {
   dependencyScanningDiffSuccessMock,
   secretScanningDiffSuccessMock,
   coverageFuzzingDiffSuccessMock,
+  apiFuzzingDiffSuccessMock,
   mockFindings,
 } from './mock_data';
 
@@ -31,6 +33,7 @@ const DAST_DIFF_ENDPOINT = 'dast.json';
 const SAST_DIFF_ENDPOINT = 'sast.json';
 const PIPELINE_JOBS_ENDPOINT = 'jobs.json';
 const SECRET_DETECTION_DIFF_ENDPOINT = 'secret_detection.json';
+const API_FUZZING_DIFF_ENDPOINT = 'api_fuzzing.json';
 const COVERAGE_FUZZING_DIFF_ENDPOINT = 'coverage_fuzzing.json';
 
 describe('Grouped security reports app', () => {
@@ -49,11 +52,18 @@ describe('Grouped security reports app', () => {
     secretScanningHelpPath: 'path',
     canReadVulnerabilityFeedbackPath: true,
     vulnerabilityFeedbackPath: 'vulnerability_feedback_path.json',
-    vulnerabilityFeedbackHelpPath: 'path',
     coverageFuzzingHelpPath: 'path',
+    apiFuzzingHelpPath: 'path',
     pipelineId: 123,
     projectId: 321,
     projectFullPath: 'path',
+    apiFuzzingComparisonPath: API_FUZZING_DIFF_ENDPOINT,
+    containerScanningComparisonPath: CONTAINER_SCANNING_DIFF_ENDPOINT,
+    coverageFuzzingComparisonPath: COVERAGE_FUZZING_DIFF_ENDPOINT,
+    dastComparisonPath: DAST_DIFF_ENDPOINT,
+    dependencyScanningComparisonPath: DEPENDENCY_SCANNING_DIFF_ENDPOINT,
+    sastComparisonPath: SAST_DIFF_ENDPOINT,
+    secretScanningComparisonPath: SECRET_DETECTION_DIFF_ENDPOINT,
   };
 
   const defaultDastSummary = {
@@ -109,18 +119,9 @@ describe('Grouped security reports app', () => {
         dependencyScanning: true,
         secretDetection: true,
         coverageFuzzing: true,
+        apiFuzzing: true,
       },
     };
-
-    beforeEach(() => {
-      gl.mrWidgetData = gl.mrWidgetData || {};
-      gl.mrWidgetData.container_scanning_comparison_path = CONTAINER_SCANNING_DIFF_ENDPOINT;
-      gl.mrWidgetData.dependency_scanning_comparison_path = DEPENDENCY_SCANNING_DIFF_ENDPOINT;
-      gl.mrWidgetData.dast_comparison_path = DAST_DIFF_ENDPOINT;
-      gl.mrWidgetData.sast_comparison_path = SAST_DIFF_ENDPOINT;
-      gl.mrWidgetData.secret_scanning_comparison_path = SECRET_DETECTION_DIFF_ENDPOINT;
-      gl.mrWidgetData.coverage_fuzzing_comparison_path = COVERAGE_FUZZING_DIFF_ENDPOINT;
-    });
 
     describe('with error', () => {
       beforeEach(() => {
@@ -130,6 +131,7 @@ describe('Grouped security reports app', () => {
         mock.onGet(SAST_DIFF_ENDPOINT).reply(500);
         mock.onGet(SECRET_DETECTION_DIFF_ENDPOINT).reply(500);
         mock.onGet(COVERAGE_FUZZING_DIFF_ENDPOINT).reply(500);
+        mock.onGet(API_FUZZING_DIFF_ENDPOINT).reply(500);
 
         createWrapper(allReportProps);
 
@@ -143,6 +145,7 @@ describe('Grouped security reports app', () => {
             `secretDetection/${secretDetectionTypes.RECEIVE_DIFF_ERROR}`,
           ),
           waitForMutation(wrapper.vm.$store, types.RECEIVE_COVERAGE_FUZZING_DIFF_ERROR),
+          waitForMutation(wrapper.vm.$store, `apiFuzzing/${apiFuzzingTypes.RECEIVE_DIFF_ERROR}`),
         ]);
       });
 
@@ -185,6 +188,7 @@ describe('Grouped security reports app', () => {
         mock.onGet(SAST_DIFF_ENDPOINT).reply(200, {});
         mock.onGet(SECRET_DETECTION_DIFF_ENDPOINT).reply(200, {});
         mock.onGet(COVERAGE_FUZZING_DIFF_ENDPOINT).reply(200, {});
+        mock.onGet(API_FUZZING_DIFF_ENDPOINT).reply(200, {});
 
         createWrapper(allReportProps);
       });
@@ -206,6 +210,7 @@ describe('Grouped security reports app', () => {
         expect(wrapper.vm.$el.textContent).toContain('Container scanning is loading');
         expect(wrapper.vm.$el.textContent).toContain('DAST is loading');
         expect(wrapper.vm.$el.textContent).toContain('Coverage fuzzing is loading');
+        expect(wrapper.vm.$el.textContent).toContain('API fuzzing is loading');
       });
     });
 
@@ -218,6 +223,7 @@ describe('Grouped security reports app', () => {
         mock.onGet(SAST_DIFF_ENDPOINT).reply(200, emptyResponse);
         mock.onGet(SECRET_DETECTION_DIFF_ENDPOINT).reply(200, emptyResponse);
         mock.onGet(COVERAGE_FUZZING_DIFF_ENDPOINT).reply(200, emptyResponse);
+        mock.onGet(API_FUZZING_DIFF_ENDPOINT).reply(200, emptyResponse);
 
         createWrapper(allReportProps);
 
@@ -231,6 +237,7 @@ describe('Grouped security reports app', () => {
             `secretDetection/${secretDetectionTypes.RECEIVE_DIFF_SUCCESS}`,
           ),
           waitForMutation(wrapper.vm.$store, types.RECEIVE_COVERAGE_FUZZING_DIFF_SUCCESS),
+          waitForMutation(wrapper.vm.$store, `apiFuzzing/${apiFuzzingTypes.RECEIVE_DIFF_SUCCESS}`),
         ]);
       });
 
@@ -260,6 +267,14 @@ describe('Grouped security reports app', () => {
 
         // Renders DAST result
         expect(wrapper.vm.$el.textContent).toContain('DAST detected no vulnerabilities.');
+
+        // Renders Coverage Fuzzing result
+        expect(wrapper.vm.$el.textContent).toContain(
+          'Coverage fuzzing detected no vulnerabilities.',
+        );
+
+        // Renders API Fuzzing result
+        expect(wrapper.vm.$el.textContent).toContain('API fuzzing detected no vulnerabilities.');
       });
     });
 
@@ -271,6 +286,7 @@ describe('Grouped security reports app', () => {
         mock.onGet(SAST_DIFF_ENDPOINT).reply(200, sastDiffSuccessMock);
         mock.onGet(SECRET_DETECTION_DIFF_ENDPOINT).reply(200, secretScanningDiffSuccessMock);
         mock.onGet(COVERAGE_FUZZING_DIFF_ENDPOINT).reply(200, coverageFuzzingDiffSuccessMock);
+        mock.onGet(API_FUZZING_DIFF_ENDPOINT).reply(200, apiFuzzingDiffSuccessMock);
 
         createWrapper(allReportProps);
 
@@ -284,6 +300,7 @@ describe('Grouped security reports app', () => {
             `secretDetection/${secretDetectionTypes.RECEIVE_DIFF_SUCCESS}`,
           ),
           waitForMutation(wrapper.vm.$store, types.RECEIVE_COVERAGE_FUZZING_DIFF_SUCCESS),
+          waitForMutation(wrapper.vm.$store, `apiFuzzing/${apiFuzzingTypes.RECEIVE_DIFF_SUCCESS}`),
         ]);
       });
 
@@ -297,7 +314,7 @@ describe('Grouped security reports app', () => {
             wrapper.vm.$el.querySelector('[data-testid="report-section-code-text"]').textContent,
           ),
         ).toEqual(
-          'Security scanning detected 10 potential vulnerabilities 6 Critical 4 High and 0 Others',
+          'Security scanning detected 12 potential vulnerabilities 7 Critical 5 High and 0 Others',
         );
 
         // Renders the expand button
@@ -325,9 +342,14 @@ describe('Grouped security reports app', () => {
           'DAST detected 1 potential vulnerability 1 Critical 0 High and 0 Others',
         );
 
-        // Renders container scanning result
+        // Renders coverage fuzzing scanning result
         expect(trimText(wrapper.vm.$el.textContent)).toContain(
           'Coverage fuzzing detected 2 potential vulnerabilities 1 Critical 1 High and 0 Others',
+        );
+
+        // Renders api fuzzing scanning result
+        expect(trimText(wrapper.vm.$el.textContent)).toContain(
+          'API fuzzing detected 2 potential vulnerabilities 1 Critical 1 High and 0 Others',
         );
       });
 
@@ -353,6 +375,7 @@ describe('Grouped security reports app', () => {
         ${'dast'}                | ${dastDiffSuccessMock.fixed}               | ${dastDiffSuccessMock.added}
         ${'secret-scanning'}     | ${secretScanningDiffSuccessMock.fixed}     | ${secretScanningDiffSuccessMock.added}
         ${'coverage-fuzzing'}    | ${coverageFuzzingDiffSuccessMock.fixed}    | ${coverageFuzzingDiffSuccessMock.added}
+        ${'api-fuzzing'}         | ${apiFuzzingDiffSuccessMock.fixed}         | ${apiFuzzingDiffSuccessMock.added}
       `(
         'renders a grouped-issues-list with the correct props for "$reportType" issues',
         ({ reportType, resolvedIssues, unresolvedIssues }) => {
@@ -394,41 +417,60 @@ describe('Grouped security reports app', () => {
   });
 
   describe('coverage fuzzing reports', () => {
-    describe.each([true, false])(
-      'given coverage fuzzing comparison endpoint is /fuzzing and featureEnabled is %s',
-      shouldShowFuzzing => {
-        beforeEach(() => {
-          gl.mrWidgetData = gl.mrWidgetData || {};
-          gl.mrWidgetData.coverage_fuzzing_comparison_path = '/fuzzing';
-
-          createWrapper(
-            {
-              ...props,
-              enabledReports: {
-                coverageFuzzing: true,
-              },
+    describe.each([true, false])('given featureEnabled is %s', shouldShowFuzzing => {
+      beforeEach(() => {
+        createWrapper(
+          {
+            ...props,
+            enabledReports: {
+              coverageFuzzing: true,
             },
-            {},
-            {
-              glFeatures: { coverageFuzzingMrWidget: shouldShowFuzzing },
-            },
-          );
-        });
+          },
+          {},
+          {
+            glFeatures: { coverageFuzzingMrWidget: shouldShowFuzzing },
+          },
+        );
+      });
 
-        it(`${shouldShowFuzzing ? 'renders' : 'does not render'}`, () => {
-          expect(wrapper.find('[data-qa-selector="coverage_fuzzing_report"]').exists()).toBe(
-            shouldShowFuzzing,
-          );
-        });
-      },
-    );
+      it(`${shouldShowFuzzing ? 'renders' : 'does not render'}`, () => {
+        expect(wrapper.find('[data-qa-selector="coverage_fuzzing_report"]').exists()).toBe(
+          shouldShowFuzzing,
+        );
+      });
+    });
+  });
+
+  describe('api fuzzing reports', () => {
+    beforeEach(() => {
+      mock.onGet(API_FUZZING_DIFF_ENDPOINT).reply(200, apiFuzzingDiffSuccessMock);
+
+      createWrapper({
+        ...props,
+        enabledReports: {
+          apiFuzzing: true,
+        },
+      });
+
+      return waitForMutation(
+        wrapper.vm.$store,
+        `apiFuzzing/${apiFuzzingTypes.RECEIVE_DIFF_SUCCESS}`,
+      );
+    });
+
+    it('should set setApiFuzzingDiffEndpoint', () => {
+      expect(wrapper.vm.apiFuzzing.paths.diffEndpoint).toEqual(API_FUZZING_DIFF_ENDPOINT);
+    });
+
+    it('should display the correct numbers of vulnerabilities', () => {
+      expect(trimText(wrapper.text())).toContain(
+        'API fuzzing detected 2 potential vulnerabilities 1 Critical 1 High and 0 Others',
+      );
+    });
   });
 
   describe('container scanning reports', () => {
     beforeEach(() => {
-      gl.mrWidgetData = gl.mrWidgetData || {};
-      gl.mrWidgetData.container_scanning_comparison_path = CONTAINER_SCANNING_DIFF_ENDPOINT;
-
       mock.onGet(CONTAINER_SCANNING_DIFF_ENDPOINT).reply(200, containerScanningDiffSuccessMock);
 
       createWrapper({
@@ -456,9 +498,6 @@ describe('Grouped security reports app', () => {
 
   describe('dependency scanning reports', () => {
     beforeEach(() => {
-      gl.mrWidgetData = gl.mrWidgetData || {};
-      gl.mrWidgetData.dependency_scanning_comparison_path = DEPENDENCY_SCANNING_DIFF_ENDPOINT;
-
       mock.onGet(DEPENDENCY_SCANNING_DIFF_ENDPOINT).reply(200, dependencyScanningDiffSuccessMock);
 
       createWrapper({
@@ -486,9 +525,6 @@ describe('Grouped security reports app', () => {
 
   describe('dast reports', () => {
     beforeEach(() => {
-      gl.mrWidgetData = gl.mrWidgetData || {};
-      gl.mrWidgetData.dast_comparison_path = DAST_DIFF_ENDPOINT;
-
       mock.onGet(DAST_DIFF_ENDPOINT).reply(200, {
         ...dastDiffSuccessMock,
         base_report_out_of_date: true,
@@ -562,9 +598,6 @@ describe('Grouped security reports app', () => {
 
   describe('secret scanning reports', () => {
     const initSecretScan = (isEnabled = true) => {
-      gl.mrWidgetData = gl.mrWidgetData || {};
-      gl.mrWidgetData.secret_scanning_comparison_path = SECRET_DETECTION_DIFF_ENDPOINT;
-
       mock.onGet(SECRET_DETECTION_DIFF_ENDPOINT).reply(200, secretScanningDiffSuccessMock);
 
       createWrapper({
@@ -615,9 +648,6 @@ describe('Grouped security reports app', () => {
 
   describe('sast reports', () => {
     beforeEach(() => {
-      gl.mrWidgetData = gl.mrWidgetData || {};
-      gl.mrWidgetData.sast_comparison_path = SAST_DIFF_ENDPOINT;
-
       mock.onGet(SAST_DIFF_ENDPOINT).reply(200, { ...sastDiffSuccessMock });
 
       createWrapper({
@@ -643,9 +673,6 @@ describe('Grouped security reports app', () => {
 
   describe('Out of date report', () => {
     const createComponent = (extraProp, done) => {
-      gl.mrWidgetData = gl.mrWidgetData || {};
-      gl.mrWidgetData.sast_comparison_path = SAST_DIFF_ENDPOINT;
-
       mock
         .onGet(SAST_DIFF_ENDPOINT)
         .reply(200, { ...sastDiffSuccessMock, base_report_out_of_date: true });

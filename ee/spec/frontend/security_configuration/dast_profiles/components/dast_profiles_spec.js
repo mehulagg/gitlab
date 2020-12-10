@@ -171,36 +171,23 @@ describe('EE - DastProfiles', () => {
       createComponent();
     });
 
-    it('passes down the correct default props', () => {
-      expect(getProfilesComponent(profileType).props()).toEqual({
-        errorMessage: '',
-        errorDetails: [],
-        hasMoreProfilesToLoad: false,
-        isLoading: false,
-        profilesPerPage: expect.any(Number),
-        profiles: [],
-        fields: expect.any(Array),
-      });
-    });
+    it('passes down the loading state when loading is true', () => {
+      createComponent({ mocks: { $apollo: { queries: { [profileType]: { loading: true } } } } });
 
-    it.each([true, false])('passes down the loading state when loading is "%s"', loading => {
-      createComponent({ mocks: { $apollo: { queries: { [profileType]: { loading } } } } });
-
-      expect(getProfilesComponent(profileType).props('isLoading')).toBe(loading);
+      expect(getProfilesComponent(profileType).attributes('is-loading')).toBe('true');
     });
 
     it.each`
-      givenData                                                                   | propName                   | expectedPropValue
-      ${{ profileTypes: { [profileType]: { errorMessage: 'foo' } } }}             | ${'errorMessage'}          | ${'foo'}
-      ${{ profileTypes: { [profileType]: { errorDetails: ['foo'] } } }}           | ${'errorDetails'}          | ${['foo']}
-      ${{ profileTypes: { [profileType]: { pageInfo: { hasNextPage: true } } } }} | ${'hasMoreProfilesToLoad'} | ${true}
-      ${{ profileTypes: { [profileType]: { profiles: [{ foo: 'bar' }] } } }}      | ${'profiles'}              | ${[{ foo: 'bar' }]}
+      givenData                                                                   | propName                       | expectedPropValue
+      ${{ profileTypes: { [profileType]: { errorMessage: 'foo' } } }}             | ${'error-message'}             | ${'foo'}
+      ${{ profileTypes: { [profileType]: { errorDetails: ['foo'] } } }}           | ${'error-details'}             | ${'foo'}
+      ${{ profileTypes: { [profileType]: { pageInfo: { hasNextPage: true } } } }} | ${'has-more-profiles-to-load'} | ${'true'}
     `('passes down $propName correctly', async ({ givenData, propName, expectedPropValue }) => {
       wrapper.setData(givenData);
 
       await wrapper.vm.$nextTick();
 
-      expect(getProfilesComponent(profileType).props(propName)).toEqual(expectedPropValue);
+      expect(getProfilesComponent(profileType).attributes(propName)).toEqual(expectedPropValue);
     });
 
     it('fetches more results when "@load-more-profiles" is emitted', () => {

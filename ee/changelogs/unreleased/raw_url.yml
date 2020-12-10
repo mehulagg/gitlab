@@ -1,0 +1,5 @@
+---
+title: Pass the 'raw' URL instead of 'blob' URL in revocation api call
+merge_request: 49170
+author:
+type: added

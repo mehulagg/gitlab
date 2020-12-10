@@ -1,7 +1,7 @@
 ---
 stage: Configure
 group: Configure
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Auto DevOps
@@ -38,11 +38,14 @@ For requirements, see [Requirements for Auto DevOps](requirements.md) for more i
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/41729) in GitLab 11.3.
 
-Auto DevOps is enabled by default for all projects and attempts to run on all pipelines
-in each project. An instance administrator can enable or disable this default in the
+On self-managed instances, Auto DevOps is enabled by default for all projects.
+It attempts to run on all pipelines in each project. An instance administrator can
+enable or disable this default in the
 [Auto DevOps settings](../../user/admin_area/settings/continuous_integration.md#auto-devops).
 Auto DevOps automatically disables in individual projects on their first pipeline failure,
-if it has not been explicitly enabled for the project.
+
+NOTE:
+Auto DevOps is not enabled by default on GitLab.com.
 
 Since [GitLab 12.7](https://gitlab.com/gitlab-org/gitlab/-/issues/26655), Auto DevOps
 runs on pipelines automatically only if a [`Dockerfile` or matching buildpack](stages.md#auto-build)
@@ -120,7 +123,7 @@ Auto DevOps provides great defaults for all the stages and makes use of
 For an overview on the creation of Auto DevOps, read more
 [in this blog post](https://about.gitlab.com/blog/2017/06/29/whats-next-for-gitlab-ci/).
 
-NOTE: **Note:**
+NOTE:
 Kubernetes clusters can [be used without](../../user/project/clusters/index.md)
 Auto DevOps.
 
@@ -148,12 +151,12 @@ as other environment [variables](../../ci/variables/README.md#priority-of-enviro
 If the CI/CD variable is not set and the cluster setting is left blank, the instance-wide **Auto DevOps domain**
 setting is used if set.
 
-TIP: **Tip:**
+NOTE:
 If you use the [GitLab managed app for Ingress](../../user/clusters/applications.md#ingress),
 the URL endpoint should be automatically configured for you. All you must do
 is use its value for the `KUBE_INGRESS_BASE_DOMAIN` variable.
 
-NOTE: **Note:**
+NOTE:
 `AUTO_DEVOPS_DOMAIN` was [deprecated in GitLab 11.8](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/52363)
 and replaced with `KUBE_INGRESS_BASE_DOMAIN`, and removed in
 [GitLab 12.0](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/56959).
@@ -254,7 +257,7 @@ are available:
   - `master` branch is directly deployed to staging.
   - Manual actions are provided for incremental rollout to production.
 
-TIP: **Tip:**
+NOTE:
 Use the [blue-green deployment](../../ci/environments/incremental_rollouts.md#blue-green-deployment) technique
 to minimize downtime and risk.
 
@@ -407,7 +410,7 @@ If you receive this error, you can do one of the following actions:
   database by setting `AUTO_DEVOPS_POSTGRES_DELETE_V1` to a non-empty value and
   redeploying.
 
-  DANGER: **Warning:**
+  WARNING:
   Deleting the channel 1 PostgreSQL database permanently deletes the existing
   channel 1 database and all its data. See
   [Upgrading PostgreSQL](upgrading_postgresql.md)
@@ -421,7 +424,7 @@ If you receive this error, you can do one of the following actions:
   and persisted by Helm, regardless of whether or not your chart uses the
   variable.
 
-DANGER: **Warning:**
+WARNING:
 Setting `POSTGRES_ENABLED` to `false` permanently deletes any existing
 channel 1 database for your environment.
 

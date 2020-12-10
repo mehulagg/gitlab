@@ -24,6 +24,10 @@ module Gitlab
               super
             end
 
+            def fingerprint_path
+              fingerprint_data
+            end
+
             private
 
             def fingerprint_data

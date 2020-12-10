@@ -722,8 +722,7 @@ RSpec.describe API::Internal::Base do
           'ssh',
           {
             authentication_abilities: [:read_project, :download_code, :push_code],
-            namespace_path: project.namespace.path,
-            repository_path: project.path,
+            repository_path: "#{project.full_path}.git",
             redirected_path: nil
           }
         ).and_return(access_checker)
@@ -1337,8 +1336,12 @@ RSpec.describe API::Internal::Base do
       end
 
       context 'when the OTP is valid' do
-        it 'returns success' do
+        it 'registers a new OTP session and returns success' do
           allow_any_instance_of(Users::ValidateOtpService).to receive(:execute).with(otp).and_return(status: :success)
+
+          expect_next_instance_of(::Gitlab::Auth::Otp::SessionEnforcer) do |session_enforcer|
+            expect(session_enforcer).to receive(:update_session).once
+          end
 
           subject
 

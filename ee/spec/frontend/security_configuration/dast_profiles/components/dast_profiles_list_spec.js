@@ -4,6 +4,7 @@ import { mount, shallowMount, createWrapper } from '@vue/test-utils';
 import { merge } from 'lodash';
 import DastProfilesList from 'ee/security_configuration/dast_profiles/components/dast_profiles_list.vue';
 import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
+import { siteProfiles as profiles } from '../mocks/mock_data';
 
 const TEST_ERROR_MESSAGE = 'something went wrong';
 
@@ -13,11 +14,13 @@ describe('EE - DastProfilesList', () => {
   const createComponentFactory = (mountFn = shallowMount) => (options = {}) => {
     const defaultProps = {
       profiles: [],
+      tableLabel: 'Profiles Table',
       fields: ['profileName', 'targetUrl', 'validationStatus'],
       hasMorePages: false,
       profilesPerPage: 10,
       errorMessage: '',
       errorDetails: [],
+      fullPath: '/namespace/project',
     };
 
     wrapper = mountFn(
@@ -41,7 +44,7 @@ describe('EE - DastProfilesList', () => {
   const createFullComponent = createComponentFactory(mount);
 
   const withinComponent = () => within(wrapper.element);
-  const getTable = () => withinComponent().getByRole('table', { name: /site profiles/i });
+  const getTable = () => withinComponent().getByRole('table', { name: /profiles table/i });
   const getAllRowGroups = () => within(getTable()).getAllByRole('rowgroup');
   const getTableBody = () => {
     // first item is the table head
@@ -108,30 +111,6 @@ describe('EE - DastProfilesList', () => {
   });
 
   describe('with existing profiles', () => {
-    const profiles = [
-      {
-        id: 1,
-        profileName: 'Profile 1',
-        targetUrl: 'http://example-1.com',
-        editPath: '/1/edit',
-        validationStatus: 'Pending',
-      },
-      {
-        id: 2,
-        profileName: 'Profile 2',
-        targetUrl: 'http://example-2.com',
-        editPath: '/2/edit',
-        validationStatus: 'Pending',
-      },
-      {
-        id: 3,
-        profileName: 'Profile 2',
-        targetUrl: 'http://example-2.com',
-        editPath: '/3/edit',
-        validationStatus: 'Pending',
-      },
-    ];
-
     const getTableRowForProfile = profile => getAllTableRows()[profiles.indexOf(profile)];
 
     describe('profiles list', () => {
@@ -149,21 +128,33 @@ describe('EE - DastProfilesList', () => {
       });
 
       it.each(profiles)('renders list item %# correctly', profile => {
-        const [
-          profileCell,
-          targetUrlCell,
-          validationStatusCell,
-          actionsCell,
-        ] = getTableRowForProfile(profile).cells;
+        const [profileCell, targetUrlCell, , actionsCell] = getTableRowForProfile(profile).cells;
 
         expect(profileCell.innerText).toContain(profile.profileName);
         expect(targetUrlCell.innerText).toContain(profile.targetUrl);
-        expect(validationStatusCell.innerText).toContain(profile.validationStatus);
         expect(within(actionsCell).getByRole('button', { name: /delete/i })).not.toBe(null);
 
         const editLink = within(actionsCell).getByRole('link', { name: /edit/i });
         expect(editLink).not.toBe(null);
         expect(editLink.getAttribute('href')).toBe(profile.editPath);
+      });
+    });
+
+    describe('profile list with scoped slots', () => {
+      beforeEach(() => {
+        createFullComponent({
+          propsData: { profiles },
+          scopedSlots: {
+            'cell(profileName)': '<b>{{props.item.profileName}}</b>',
+            actions: '<button>hello</button>',
+          },
+        });
+      });
+      it.each(profiles)('renders list item %# correctly', profile => {
+        const [profileCell, , , actionsCell] = getTableRowForProfile(profile).cells;
+
+        expect(profileCell.innerHTML).toContain(`<b>${profile.profileName}</b>`);
+        expect(within(actionsCell).getByRole('button', { name: /hello/i })).not.toBe(null);
       });
     });
 

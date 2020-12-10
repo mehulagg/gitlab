@@ -1,14 +1,14 @@
 ---
 stage: Monitor
 group: Health
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Monitoring NGINX Ingress Controller with VTS metrics
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/13438) in GitLab 9.5.
 
-NOTE: **Note:**
+NOTE:
 [NGINX Ingress version 0.16](nginx_ingress.md) and above have built-in Prometheus metrics, which are different than the VTS based metrics.
 
 GitLab has support for automatically detecting and monitoring the Kubernetes NGINX Ingress controller. This is provided by leveraging the included VTS Prometheus metrics exporter in [version 0.9.0](https://github.com/kubernetes/ingress-nginx/blob/master/Changelog.md#09-beta1) through [0.15.x](https://github.com/kubernetes/ingress-nginx/blob/master/Changelog.md#0150).
@@ -27,7 +27,7 @@ GitLab has support for automatically detecting and monitoring the Kubernetes NGI
 
 ## Configuring NGINX Ingress monitoring
 
-If you have deployed NGINX Ingress using GitLab's [Kubernetes cluster integration](../../clusters/index.md#installing-applications), Prometheus [automatically monitors](#about-managed-nginx-ingress-deployments) it.
+If you have deployed NGINX Ingress using the GitLab [Kubernetes cluster integration](../../clusters/index.md#installing-applications), Prometheus [automatically monitors](#about-managed-nginx-ingress-deployments) it.
 
 For other deployments, there is [some configuration](#manually-setting-up-nginx-ingress-for-prometheus-monitoring) required depending on your installation:
 

@@ -39,28 +39,6 @@ RSpec.describe Projects::AlertManagementHelper do
       end
     end
 
-    context 'with alerts service' do
-      let_it_be(:alerts_service) { create(:alerts_service, project: project) }
-
-      context 'when alerts service is active' do
-        it 'enables alert management' do
-          expect(data).to include(
-            'alert-management-enabled' => 'true'
-          )
-        end
-      end
-
-      context 'when alerts service is inactive' do
-        it 'disables alert management' do
-          alerts_service.update!(active: false)
-
-          expect(data).to include(
-            'alert-management-enabled' => 'false'
-          )
-        end
-      end
-    end
-
     context 'with prometheus service' do
       let_it_be(:prometheus_service) { create(:prometheus_service, project: project) }
 
@@ -80,6 +58,38 @@ RSpec.describe Projects::AlertManagementHelper do
             'alert-management-enabled' => 'false'
           )
         end
+      end
+    end
+
+    context 'with http integration' do
+      let_it_be(:integration) { create(:alert_management_http_integration, project: project) }
+
+      context 'when integration is active' do
+        it 'enables alert management' do
+          expect(data).to include(
+            'alert-management-enabled' => 'true'
+          )
+        end
+      end
+
+      context 'when integration is inactive' do
+        it 'disables alert management' do
+          integration.update!(active: false)
+
+          expect(data).to include(
+            'alert-management-enabled' => 'false'
+          )
+        end
+      end
+    end
+
+    context 'with an alert' do
+      let_it_be(:alert) { create(:alert_management_alert, project: project) }
+
+      it 'enables alert management' do
+        expect(data).to include(
+          'alert-management-enabled' => 'true'
+        )
       end
     end
 

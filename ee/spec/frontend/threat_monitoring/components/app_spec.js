@@ -1,6 +1,7 @@
 import { GlAlert } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
+import ThreatMonitoringAlerts from 'ee/threat_monitoring/components/alerts/alerts.vue';
 import ThreatMonitoringApp from 'ee/threat_monitoring/components/app.vue';
 import ThreatMonitoringFilters from 'ee/threat_monitoring/components/threat_monitoring_filters.vue';
 import createStore from 'ee/threat_monitoring/store';
@@ -23,6 +24,7 @@ const userCalloutsPath = `${TEST_HOST}/user_callouts`;
 describe('ThreatMonitoringApp component', () => {
   let store;
   let wrapper;
+  window.gon = { features: {} };
 
   const factory = ({ propsData, state, options } = {}) => {
     store = createStore();
@@ -42,12 +44,14 @@ describe('ThreatMonitoringApp component', () => {
         emptyStateSvgPath,
         wafNoDataSvgPath,
         networkPolicyNoDataSvgPath,
-        documentationPath,
         newPolicyPath,
         showUserCallout: true,
         userCalloutId,
         userCalloutsPath,
         ...propsData,
+      },
+      provide: {
+        documentationPath,
       },
       store,
       ...options,
@@ -55,13 +59,16 @@ describe('ThreatMonitoringApp component', () => {
   };
 
   const findAlert = () => wrapper.find(GlAlert);
+  const findAlertsView = () => wrapper.find(ThreatMonitoringAlerts);
   const findFilters = () => wrapper.find(ThreatMonitoringFilters);
   const findWafSection = () => wrapper.find({ ref: 'wafSection' });
   const findNetworkPolicySection = () => wrapper.find({ ref: 'networkPolicySection' });
   const findEmptyState = () => wrapper.find({ ref: 'emptyState' });
   const findNetworkPolicyTab = () => wrapper.find({ ref: 'networkPolicyTab' });
+  const findAlertTab = () => wrapper.find('[data-testid="threat-monitoring-alerts-tab"]');
 
   afterEach(() => {
+    window.gon.features = {};
     wrapper.destroy();
     wrapper = null;
   });
@@ -124,6 +131,10 @@ describe('ThreatMonitoringApp component', () => {
       expect(findNetworkPolicyTab().element).toMatchSnapshot();
     });
 
+    it('does not show the alert tab', () => {
+      expect(findAlertTab().exists()).toBe(false);
+    });
+
     describe('dismissing the alert', () => {
       let mockAxios;
 
@@ -160,6 +171,19 @@ describe('ThreatMonitoringApp component', () => {
 
     it('does not render the alert', () => {
       expect(findAlert().exists()).toBe(false);
+    });
+  });
+
+  describe('alerts tab', () => {
+    beforeEach(() => {
+      window.gon.features.threatMonitoringAlerts = true;
+      factory({});
+    });
+    it('shows the alerts tab', () => {
+      expect(findAlertTab().exists()).toBe(true);
+    });
+    it('shows the default alerts component', () => {
+      expect(findAlertsView().exists()).toBe(true);
     });
   });
 });

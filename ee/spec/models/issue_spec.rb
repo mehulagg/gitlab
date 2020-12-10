@@ -13,6 +13,7 @@ RSpec.describe Issue do
     it { is_expected.to have_many(:resource_weight_events) }
     it { is_expected.to have_many(:resource_iteration_events) }
     it { is_expected.to have_one(:issuable_sla) }
+    it { is_expected.to have_many(:metric_images) }
   end
 
   describe 'modules' do
@@ -29,30 +30,14 @@ RSpec.describe Issue do
       context 'when issue title is "New: Incident"' do
         let(:issue) { build(:issue, project: project, author: author, title: 'New: Incident', iid: 503503) }
 
-        context 'when alerts service is active' do
-          before do
-            allow(project).to receive(:alerts_service_activated?).and_return(true)
-          end
-
-          context 'when the author is Alert Bot' do
-            it 'updates issue title with the IID' do
-              expect { issue.save }.to change { issue.title }.to("New: Incident 503503")
-            end
-          end
-
-          context 'when the author is not an Alert Bot' do
-            let(:author) { create(:user) }
-
-            it 'does not change issue title' do
-              expect { issue.save }.not_to change { issue.title }
-            end
+        context 'when the author is Alert Bot' do
+          it 'updates issue title with the IID' do
+            expect { issue.save }.to change { issue.title }.to("New: Incident 503503")
           end
         end
 
-        context 'when alerts service is not active' do
-          before do
-            allow(project).to receive(:alerts_service_activated?).and_return(false)
-          end
+        context 'when the author is not an Alert Bot' do
+          let(:author) { create(:user) }
 
           it 'does not change issue title' do
             expect { issue.save }.not_to change { issue.title }
@@ -207,6 +192,13 @@ RSpec.describe Issue do
         it 'returns only issues in selected iterations' do
           expect(described_class.count).to eq 3
           expect(described_class.in_iterations([iteration1])).to eq [iteration1_issue]
+        end
+      end
+
+      describe '.not_in_iterations' do
+        it 'returns issues not in selected iterations' do
+          expect(described_class.count).to eq 3
+          expect(described_class.not_in_iterations([iteration1])).to eq [iteration2_issue, issue_no_iteration]
         end
       end
 
@@ -488,36 +480,33 @@ RSpec.describe Issue do
     context 'when updating an Issue' do
       let(:project) { create(:project, :public) }
       let(:issue) { create(:issue, project: project, confidential: true) }
+      let!(:note) { create(:note, noteable: issue, project: project) }
+      let!(:system_note) { create(:note, :system, noteable: issue, project: project) }
 
-      before do
-        Sidekiq::Testing.disable! do
-          create(:note, note: 'the_normal_note', noteable: issue, project: project)
-        end
-        Sidekiq::Testing.inline! do
-          project.maintain_elasticsearch_update
+      context 'when changing the confidential value' do
+        it 'updates issue notes excluding system notes' do
+          expect_any_instance_of(Note).to receive(:maintain_elasticsearch_update) do |instance|
+            expect(instance.id).to eq(note.id)
+          end
 
-          issue.update!(update_field => update_value)
-          ensure_elasticsearch_index!
+          issue.update!(confidential: false)
         end
       end
 
-      context 'when changing the confidential value' do
-        let(:update_field) { :confidential }
-        let(:update_value) { false }
-
+      context 'when changing the author' do
         it 'updates issue notes excluding system notes' do
-          expect(issue.elasticsearch_issue_notes_need_updating?).to eq(true)
-          expect(Note.elastic_search('the_normal_note', options: { project_ids: [issue.project.id] }).present?).to eq(true)
+          expect_any_instance_of(Note).to receive(:maintain_elasticsearch_update) do |instance|
+            expect(instance.id).to eq(note.id)
+          end
+
+          issue.update!(author: create(:user))
         end
       end
 
       context 'when changing the title' do
-        let(:update_field) { :title }
-        let(:update_value) { 'abc' }
-
         it 'does not update issue notes' do
-          expect(issue.elasticsearch_issue_notes_need_updating?).to eq(false)
-          expect(Note.elastic_search('the_normal_note', options: { project_ids: [issue.project.id] }).present?).to eq(false)
+          expect_any_instance_of(Note).not_to receive(:maintain_elasticsearch_update)
+          issue.update!(title: 'the new title')
         end
       end
     end

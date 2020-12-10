@@ -6,10 +6,11 @@ import * as actions from './actions';
 import * as getters from './getters';
 import mutations from './mutations';
 import state from './state';
-import { MODULE_SAST, MODULE_SECRET_DETECTION } from './constants';
+import { MODULE_API_FUZZING, MODULE_SAST, MODULE_SECRET_DETECTION } from './constants';
 
 import sast from './modules/sast';
 import secretDetection from './modules/secret_detection';
+import apiFuzzing from './modules/api_fuzzing';
 
 Vue.use(Vuex);
 
@@ -18,6 +19,7 @@ export default () =>
     modules: {
       [MODULE_SAST]: sast,
       [MODULE_SECRET_DETECTION]: secretDetection,
+      [MODULE_API_FUZZING]: apiFuzzing,
       pipelineJobs,
     },
     actions,

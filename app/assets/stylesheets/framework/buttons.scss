@@ -200,8 +200,7 @@
     @include btn-orange;
   }
 
-  &.btn-close,
-  &.btn-close-color {
+  &.btn-close {
     @include btn-outline($white, $orange-500, $orange-500, $orange-50, $orange-600, $orange-600, $orange-100, $orange-700, $orange-700);
   }
 
@@ -230,17 +229,6 @@
 
   &.btn-icon {
     color: $gray-700;
-  }
-
-  .fa-caret-down,
-  .fa-chevron-down {
-    margin-left: 5px;
-  }
-
-  &.dropdown-toggle {
-    .fa-caret-down {
-      margin-left: 3px;
-    }
   }
 
   &.btn-text-field {
@@ -276,11 +264,8 @@
     width: 15px;
   }
 
-  svg,
-  .fa {
-    &:not(:last-child) {
-      margin-right: 5px;
-    }
+  svg:not(:last-child) {
+    margin-right: 5px;
   }
 }
 
@@ -370,23 +355,14 @@
 
 .btn-loading {
   &:not(.disabled) {
-    .fa,
     .spinner {
       display: none;
     }
-  }
-
-  .fa {
-    margin-right: 5px;
   }
 }
 
 .btn-build {
   margin-left: 10px;
-
-  i {
-    color: $gl-text-color-secondary;
-  }
 
   svg {
     fill: $gl-text-color-secondary;

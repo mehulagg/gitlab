@@ -14,8 +14,6 @@ RSpec.describe 'Issue Sidebar' do
   let_it_be(:issue_no_group) { create(:labeled_issue, project: project_without_group, labels: [label]) }
 
   before do
-    stub_feature_flags(vue_issue_header: false)
-
     sign_in(user)
   end
 
@@ -98,7 +96,9 @@ RSpec.describe 'Issue Sidebar' do
 
       context 'when user closes an issue' do
         it 'disables the edit button' do
-          page.find('[data-testid="close-issue-button"]').click
+          page.within('.detail-page-header') do
+            click_button 'Close issue'
+          end
 
           page.within('.health-status') do
             expect(page).to have_button('Edit', disabled: true)

@@ -1,7 +1,7 @@
 ---
 stage: Create
 group: Gitaly
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference, howto
 disqus_identifier: 'https://docs.gitlab.com/ee/administration/custom_hooks.html'
 ---
@@ -85,7 +85,7 @@ configuration:
   - GitLab 13.0 and earlier, this is set in `gitlab-shell/config.yml`.
   - GitLab 13.1 and later, this is set in `gitaly/config.toml` under the `[hooks]` section.
 
-NOTE: **Note:**
+NOTE:
 The `custom_hooks_dir` value in `gitlab-shell/config.yml` is still honored in GitLab 13.1 and later
 if the value in `gitaly/config.toml` is blank or non-existent.
 
@@ -152,7 +152,7 @@ Pre-receive and post-receive server hooks can also access the following Git envi
 | `GIT_PUSH_OPTION_COUNT`            | Number of push options. See [Git `pre-receive` documentation](https://git-scm.com/docs/githooks#pre-receive).                                                          |
 | `GIT_PUSH_OPTION_<i>`              | Value of push options where `i` is from `0` to `GIT_PUSH_OPTION_COUNT - 1`. See [Git `pre-receive` documentation](https://git-scm.com/docs/githooks#pre-receive).      |
 
-NOTE: **Note:**
+NOTE:
 While other environment variables can be passed to server hooks, your application should not rely on
 them as they can change.
 

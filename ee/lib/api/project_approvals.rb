@@ -2,7 +2,7 @@
 
 module API
   class ProjectApprovals < ::API::Base
-    feature_category :code_review
+    feature_category :source_code_management
 
     before { authenticate! }
     before { authorize! :update_approvers, user_project }

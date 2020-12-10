@@ -4,12 +4,14 @@ require 'spec_helper'
 
 RSpec.describe 'Admin::AuditLogs', :js do
   include Select2Helper
+  include AdminModeHelper
 
   let(:user) { create(:user) }
   let(:admin) { create(:admin, name: 'Bruce Wayne') }
 
   before do
     sign_in(admin)
+    gitlab_enable_admin_mode_sign_in(admin)
   end
 
   context 'unlicensed' do
@@ -131,6 +133,7 @@ RSpec.describe 'Admin::AuditLogs', :js do
 
         context 'when creation succeeds' do
           before do
+            enable_admin_mode!(admin)
             personal_access_token
           end
 
@@ -157,6 +160,7 @@ RSpec.describe 'Admin::AuditLogs', :js do
 
         context 'when revocation succeeds' do
           before do
+            enable_admin_mode!(admin)
             PersonalAccessTokens::RevokeService.new(admin, token: personal_access_token).execute
           end
 
@@ -186,6 +190,7 @@ RSpec.describe 'Admin::AuditLogs', :js do
         click_link 'Impersonate'
 
         visit(new_project_path)
+        find('[data-qa-selector="blank_project_link"]').click
 
         fill_in(:project_name, with: 'Gotham City')
 

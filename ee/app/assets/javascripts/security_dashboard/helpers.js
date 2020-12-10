@@ -31,7 +31,7 @@ export const severityFilter = {
 };
 
 export const scannerFilter = {
-  name: s__('Reports|Scanner'),
+  name: s__('SecurityReports|Scanner'),
   id: 'reportType',
   options: parseOptions(REPORT_TYPES),
   allOption: BASE_FILTERS.report_type,

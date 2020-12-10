@@ -20,8 +20,8 @@ const fixtureEndpoints = {
   customizableCycleAnalyticsStagesAndEvents: 'analytics/value_stream_analytics/stages.json', // customizable stages and events endpoint
   stageEvents: stage => `analytics/value_stream_analytics/stages/${stage}/records.json`,
   stageMedian: stage => `analytics/value_stream_analytics/stages/${stage}/median.json`,
-  recentActivityData: 'analytics/value_stream_analytics/summary.json',
-  timeMetricsData: 'analytics/value_stream_analytics/time_summary.json',
+  recentActivityData: 'analytics/metrics/value_stream_analytics/summary.json',
+  timeMetricsData: 'analytics/metrics/value_stream_analytics/time_summary.json',
   groupLabels: 'api/group_labels.json',
 };
 
@@ -161,17 +161,17 @@ export const customStageFormErrors = convertObjectPropsToCamelCase(rawCustomStag
 
 const dateRange = getDatesInRange(startDate, endDate, toYmd);
 
-export const apiTasksByTypeData = getJSONFixture('analytics/type_of_work/tasks_by_type.json').map(
-  labelData => {
-    // add data points for our mock date range
-    const maxValue = 10;
-    const series = dateRange.map(date => [date, Math.floor(Math.random() * Math.floor(maxValue))]);
-    return {
-      ...labelData,
-      series,
-    };
-  },
-);
+export const apiTasksByTypeData = getJSONFixture(
+  'analytics/charts/type_of_work/tasks_by_type.json',
+).map(labelData => {
+  // add data points for our mock date range
+  const maxValue = 10;
+  const series = dateRange.map(date => [date, Math.floor(Math.random() * Math.floor(maxValue))]);
+  return {
+    ...labelData,
+    series,
+  };
+});
 
 export const rawTasksByTypeData = transformRawTasksByTypeData(apiTasksByTypeData);
 export const transformedTasksByTypeData = getTasksByTypeData(apiTasksByTypeData);
@@ -264,5 +264,5 @@ export const selectedProjects = [
   },
 ];
 
-// Value returned from JSON fixture is 345600 for issue stage which equals 4d
-export const pathNavIssueMetric = '4d';
+// Value returned from JSON fixture is 172800 for issue stage which equals 2d
+export const pathNavIssueMetric = '2d';

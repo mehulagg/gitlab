@@ -1,7 +1,7 @@
 ---
 stage: Monitor
 group: Health
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Kubernetes clusters
@@ -20,7 +20,7 @@ Using the GitLab project Kubernetes integration, you can:
 - Detect and [monitor Kubernetes](#monitoring-your-kubernetes-cluster).
 - Use it with [Auto DevOps](#auto-devops).
 - Use [Web terminals](#web-terminals).
-- Use [Deploy Boards](#deploy-boards). **(PREMIUM)**
+- Use [Deploy Boards](#deploy-boards).
 - Use [Canary Deployments](#canary-deployments). **(PREMIUM)**
 - Use [deployment variables](#deployment-variables).
 - Use [role-based or attribute-based access controls](add_remove_clusters.md#access-controls).
@@ -45,18 +45,18 @@ versions at any given time. We regularly review the versions we support, and
 provide a three-month deprecation period before we remove support of a specific
 version. The range of supported versions is based on the evaluation of:
 
-- Our own needs.
 - The versions supported by major managed Kubernetes providers.
 - The versions [supported by the Kubernetes community](https://kubernetes.io/docs/setup/release/version-skew-policy/#supported-versions).
 
 GitLab supports the following Kubernetes versions, and you can upgrade your
 Kubernetes version to any supported version at any time:
 
-- 1.17
-- 1.16
-- 1.15
+- 1.19 (support ends on February 22, 2022)
+- 1.18 (support ends on November 22, 2021)
+- 1.17 (support ends on September 22, 2021)
+- 1.16 (support ends on July 22, 2021)
+- 1.15 (support ends on May 22, 2021)
 - 1.14 (deprecated, support ends on December 22, 2020)
-- 1.13 (deprecated, support ends on November 22, 2020)
 
 Some GitLab features may support versions outside the range provided here.
 
@@ -66,7 +66,7 @@ See [Adding and removing Kubernetes clusters](add_remove_clusters.md) for detail
 to:
 
 - Create a cluster in Google Cloud Platform (GCP) or Amazon Elastic Kubernetes Service
-  (EKS) using GitLab's UI.
+  (EKS) using the GitLab UI.
 - Add an integration to an existing cluster from any Kubernetes platform.
 
 ### Multiple Kubernetes clusters
@@ -143,7 +143,7 @@ important considerations for configuring Kubernetes clusters with GitLab.
 
 ### Security implications
 
-CAUTION: **Important:**
+WARNING:
 The whole cluster security is based on a model where [developers](../../permissions.md)
 are trusted, so **only trusted users should be allowed to control your clusters**.
 
@@ -237,7 +237,7 @@ A Kubernetes cluster can be the destination for a deployment job. If
   [deployment variables](#deployment-variables) are made available to your job
   and configuration is not required. You can immediately begin interacting with
   the cluster from your jobs using tools such as `kubectl` or `helm`.
-- You don't use GitLab's cluster integration you can still deploy to your
+- You don't use the GitLab cluster integration, you can still deploy to your
   cluster. However, you must configure Kubernetes tools yourself
   using [environment variables](../../../ci/variables/README.md#custom-environment-variables)
   before you can interact with the cluster from your jobs.
@@ -294,7 +294,7 @@ You can customize the deployment namespace in a few ways:
 When you customize the namespace, existing environments remain linked to their current
 namespaces until you [clear the cluster cache](#clearing-the-cluster-cache).
 
-CAUTION: **Warning:**
+WARNING:
 By default, anyone who can create a deployment job can access any CI variable within
 an environment's deployment job. This includes `KUBECONFIG`, which gives access to
 any secret available to the associated service account in your cluster.
@@ -316,9 +316,9 @@ the need to leave GitLab.
 
 [Read more about Canary Deployments](../canary_deployments.md)
 
-#### Deploy Boards **(PREMIUM)**
+#### Deploy Boards
 
-GitLab's Deploy Boards offer a consolidated view of the current health and
+GitLab Deploy Boards offer a consolidated view of the current health and
 status of each CI [environment](../../../ci/environments/index.md) running on Kubernetes,
 displaying the status of the pods in the deployment. Developers and other
 teammates can view the progress and status of a rollout, pod by pod, in the
@@ -378,7 +378,7 @@ Reasons for failure include:
   [`environment:name`](../../../ci/environments/index.md#defining-environments). If your job has no
   `environment:name` set, the Kubernetes credentials are not passed to it.
 
-NOTE: **Note:**
+NOTE:
 Project-level clusters upgraded from GitLab 12.0 or older may be configured
 in a way that causes this error. Ensure you deselect the
 [GitLab-managed cluster](#gitlab-managed-clusters) option if you want to manage

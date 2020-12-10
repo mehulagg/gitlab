@@ -98,7 +98,7 @@ async function shouldMergeUrlParams(wrapper, result) {
   expect(commonUtils.historyPushState).toHaveBeenCalled();
 }
 
-describe('Cycle Analytics component', () => {
+describe('Value Stream Analytics component', () => {
   let wrapper;
   let mock;
   let store;

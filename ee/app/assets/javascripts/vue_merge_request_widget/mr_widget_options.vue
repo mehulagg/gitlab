@@ -1,22 +1,18 @@
 <script>
+import { GlSafeHtmlDirective } from '@gitlab/ui';
 import GroupedMetricsReportsApp from 'ee/vue_shared/metrics_reports/grouped_metrics_reports_app.vue';
 import reportsMixin from 'ee/vue_shared/security_reports/mixins/reports_mixin';
 import { componentNames } from 'ee/reports/components/issue_body';
 import MrWidgetLicenses from 'ee/vue_shared/license_compliance/mr_widget_license_report.vue';
-import { GlSafeHtmlDirective } from '@gitlab/ui';
 import ReportSection from '~/reports/components/report_section.vue';
-import BlockingMergeRequestsReport from './components/blocking_merge_requests/blocking_merge_requests_report.vue';
-
 import { s__, __, sprintf } from '~/locale';
 import CEWidgetOptions from '~/vue_merge_request_widget/mr_widget_options.vue';
+import BlockingMergeRequestsReport from './components/blocking_merge_requests/blocking_merge_requests_report.vue';
 import MrWidgetGeoSecondaryNode from './components/states/mr_widget_secondary_geo_node.vue';
 import MrWidgetPolicyViolation from './components/states/mr_widget_policy_violation.vue';
 
-// import ExtensionsContainer from '~/vue_merge_request_widget/components/extensions/container';
-
 export default {
   components: {
-    // ExtensionsContainer,
     MrWidgetLicenses,
     MrWidgetGeoSecondaryNode,
     MrWidgetPolicyViolation,
@@ -242,6 +238,7 @@ export default {
     'dependencyScanning',
     'containerScanning',
     'coverageFuzzing',
+    'apiFuzzing',
     'secretDetection',
   ],
 };
@@ -254,7 +251,7 @@ export default {
       class="mr-widget-workflow"
       :pipeline-path="mr.mergeRequestAddCiConfigPath"
       :pipeline-svg-path="mr.pipelinesEmptySvgPath"
-      :human-access="mr.humanAccess.toLowerCase()"
+      :human-access="formattedHumanAccess"
       :user-callouts-path="mr.userCalloutsPath"
       :user-callout-feature-id="mr.suggestPipelineFeatureId"
       @dismiss="dismissSuggestPipelines"
@@ -271,7 +268,6 @@ export default {
       :service="service"
     />
     <div class="mr-section-container mr-widget-workflow">
-      <!-- <extensions-container :mr="mr" /> -->
       <blocking-merge-requests-report :mr="mr" />
       <grouped-codequality-reports-app
         v-if="shouldRenderCodeQuality"
@@ -316,8 +312,12 @@ export default {
       <security-reports-app
         v-if="shouldRenderBaseSecurityReport"
         :pipeline-id="mr.pipeline.id"
-        :project-id="mr.targetProjectId"
+        :project-id="mr.sourceProjectId"
         :security-reports-docs-path="mr.securityReportsDocsPath"
+        :sast-comparison-path="mr.sastComparisonPath"
+        :secret-scanning-comparison-path="mr.secretScanningComparisonPath"
+        :target-project-full-path="mr.targetProjectFullPath"
+        :mr-iid="mr.iid"
       />
       <grouped-security-reports-app
         v-else-if="shouldRenderExtendedSecurityReport"
@@ -328,13 +328,13 @@ export default {
         :enabled-reports="mr.enabledReports"
         :sast-help-path="mr.sastHelp"
         :dast-help-path="mr.dastHelp"
+        :api-fuzzing-help-path="mr.apiFuzzingHelp"
         :coverage-fuzzing-help-path="mr.coverageFuzzingHelp"
         :container-scanning-help-path="mr.containerScanningHelp"
         :dependency-scanning-help-path="mr.dependencyScanningHelp"
         :secret-scanning-help-path="mr.secretScanningHelp"
         :can-read-vulnerability-feedback="mr.canReadVulnerabilityFeedback"
         :vulnerability-feedback-path="mr.vulnerabilityFeedbackPath"
-        :vulnerability-feedback-help-path="mr.vulnerabilityFeedbackHelpPath"
         :create-vulnerability-feedback-issue-path="mr.createVulnerabilityFeedbackIssuePath"
         :create-vulnerability-feedback-merge-request-path="
           mr.createVulnerabilityFeedbackMergeRequestPath
@@ -349,6 +349,13 @@ export default {
         :mr-state="mr.state"
         :target-branch-tree-path="mr.targetBranchTreePath"
         :new-pipeline-path="mr.newPipelinePath"
+        :container-scanning-comparison-path="mr.containerScanningComparisonPath"
+        :api-fuzzing-comparison-path="mr.apiFuzzingComparisonPath"
+        :coverage-fuzzing-comparison-path="mr.coverageFuzzingComparisonPath"
+        :dast-comparison-path="mr.dastComparisonPath"
+        :dependency-scanning-comparison-path="mr.dependencyScanningComparisonPath"
+        :sast-comparison-path="mr.sastComparisonPath"
+        :secret-scanning-comparison-path="mr.secretScanningComparisonPath"
         class="js-security-widget"
       />
       <mr-widget-licenses

@@ -153,6 +153,11 @@ module EE
         !@subject.feature_available?(:feature_flags_related_issues)
       end
 
+      with_scope :subject
+      condition(:oncall_schedules_available) do
+        ::Gitlab::IncidentManagement.oncall_schedules_available?(@subject)
+      end
+
       rule { visual_review_bot }.policy do
         prevent :read_note
         enable :create_note
@@ -180,6 +185,8 @@ module EE
         enable :read_group_timelogs
       end
 
+      rule { oncall_schedules_available & can?(:reporter_access) }.enable :read_incident_management_oncall_schedule
+
       rule { can?(:developer_access) }.policy do
         enable :admin_board
         enable :read_vulnerability_feedback
@@ -188,6 +195,7 @@ module EE
         enable :update_vulnerability_feedback
         enable :read_ci_minutes_quota
         enable :admin_feature_flags_issue_links
+        enable :read_project_audit_events
       end
 
       rule { can?(:developer_access) & iterations_available }.policy do
@@ -215,6 +223,7 @@ module EE
         enable :create_vulnerability_export
         enable :admin_vulnerability
         enable :admin_vulnerability_issue_link
+        enable :admin_vulnerability_external_issue_link
       end
 
       rule { issues_disabled & merge_requests_disabled }.policy do
@@ -245,6 +254,8 @@ module EE
 
       rule { license_scanning_enabled & can?(:maintainer_access) }.enable :admin_software_license_policy
 
+      rule { oncall_schedules_available & can?(:maintainer_access) }.enable :admin_incident_management_oncall_schedule
+
       rule { auditor }.policy do
         enable :public_user_access
         prevent :request_access
@@ -264,6 +275,7 @@ module EE
         prevent :create_vulnerability
         prevent :admin_vulnerability
         prevent :admin_vulnerability_issue_link
+        prevent :admin_vulnerability_external_issue_link
       end
 
       rule { auditor & ~guest }.policy do
@@ -340,6 +352,7 @@ module EE
         enable :create_requirement_test_report
         enable :admin_requirement
         enable :update_requirement
+        enable :import_requirements
       end
 
       rule { requirements_available & owner }.enable :destroy_requirement

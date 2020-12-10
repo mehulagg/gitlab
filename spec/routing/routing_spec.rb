@@ -54,10 +54,6 @@ RSpec.describe "Mounted Apps", "routing" do
   it "to API" do
     expect(get("/api/issues")).to be_routable
   end
-
-  it "to Grack" do
-    expect(get("/gitlab/gitlabhq.git")).to be_routable
-  end
 end
 
 #     snippets GET    /snippets(.:format)          snippets#index
@@ -180,6 +176,30 @@ RSpec.describe Profiles::KeysController, "routing" do
     allow_any_instance_of(::Constraints::UserUrlConstrainer).to receive(:matches?).and_return(true)
 
     expect(get("/foo.keys")).to route_to('profiles/keys#get_keys', username: 'foo')
+  end
+end
+
+# keys GET    /gpg_keys      gpg_keys#index
+#  key POST   /gpg_keys      gpg_keys#create
+#      PUT    /gpg_keys/:id  gpg_keys#revoke
+#      DELETE /gpg_keys/:id  gpg_keys#desroy
+RSpec.describe Profiles::GpgKeysController, "routing" do
+  it "to #index" do
+    expect(get("/profile/gpg_keys")).to route_to('profiles/gpg_keys#index')
+  end
+
+  it "to #create" do
+    expect(post("/profile/gpg_keys")).to route_to('profiles/gpg_keys#create')
+  end
+
+  it "to #destroy" do
+    expect(delete("/profile/gpg_keys/1")).to route_to('profiles/gpg_keys#destroy', id: '1')
+  end
+
+  it "to #get_keys" do
+    allow_any_instance_of(::Constraints::UserUrlConstrainer).to receive(:matches?).and_return(true)
+
+    expect(get("/foo.gpg")).to route_to('profiles/gpg_keys#get_keys', username: 'foo')
   end
 end
 

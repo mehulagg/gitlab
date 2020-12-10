@@ -1,7 +1,7 @@
 ---
 stage: none
 group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference, howto, concepts
 ---
 
@@ -109,7 +109,7 @@ To create a subgroup:
 
    ![Subgroups page](img/create_new_group.png)
 
-1. Click the **Create group** button and you will be taken to the new group's
+1. Click the **Create group** button to be redirected to the new group's
    dashboard page.
 
 Follow the same process to create any subsequent groups.
@@ -159,10 +159,10 @@ this list using dropdown on the right side:
 
 ### Overriding the ancestor group membership
 
-NOTE: **Note:**
+NOTE:
 You must be an Owner of a group to be able to add members to it.
 
-NOTE: **Note:**
+NOTE:
 A user's permissions in a subgroup cannot be lower than in any of its ancestor groups.
 Therefore, you cannot reduce a user's permissions in a subgroup with respect to its ancestor groups.
 
@@ -170,10 +170,10 @@ To override a user's membership of an ancestor group (the first group they were
 added to), add the user to the new subgroup again with a higher set of permissions.
 
 For example, if User0 was first added to group `group-1/group-1-1` with Developer
-permissions, then they will inherit those permissions in every other subgroup
+permissions, then they inherit those permissions in every other subgroup
 of `group-1/group-1-1`. To give them Maintainer access to `group-1/group-1-1/group1-1-1`,
 you would add them again in that group as Maintainer. Removing them from that group,
-the permissions will fallback to those of the ancestor group.
+the permissions fall back to those of the ancestor group.
 
 ## Mentioning subgroups
 

@@ -1,0 +1,5 @@
+---
+title: Extend ability to read audit events to more roles
+merge_request: 49106
+author:
+type: added

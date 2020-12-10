@@ -1,7 +1,7 @@
 ---
-stage: none
-group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+stage: Enablement
+group: Distribution
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Maintenance Rake tasks **(CORE ONLY)**
@@ -272,7 +272,7 @@ clear it.
 
 To clear all exclusive leases:
 
-DANGER: **Warning:**
+WARNING:
 Don't run it while GitLab or Sidekiq is running
 
 ```shell

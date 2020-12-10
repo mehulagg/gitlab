@@ -18,6 +18,7 @@ module EE
       add_authentication_token_field :saml_discovery_token, unique: false, token_generator: -> { Devise.friendly_token(8) }
 
       has_many :epics
+      has_many :epic_boards, class_name: 'Boards::EpicBoard', inverse_of: :group
 
       has_one :saml_provider
       has_many :scim_identities
@@ -39,6 +40,8 @@ module EE
       has_many :project_templates, through: :projects, foreign_key: 'custom_project_templates_group_id'
 
       has_many :managed_users, class_name: 'User', foreign_key: 'managing_group_id', inverse_of: :managing_group
+      has_many :provisioned_user_details, class_name: 'UserDetail', foreign_key: 'provisioned_by_group_id', inverse_of: :provisioned_by_group
+      has_many :provisioned_users, through: :provisioned_user_details, source: :user
       has_many :cycle_analytics_stages, class_name: 'Analytics::CycleAnalytics::GroupStage'
       has_many :value_streams, class_name: 'Analytics::CycleAnalytics::GroupValueStream'
 
@@ -227,7 +230,7 @@ module EE
     end
 
     def saml_group_sync_available?
-      ::Feature.enabled?(:saml_group_links, self) &&
+      ::Feature.enabled?(:saml_group_links, self, default_enabled: true) &&
         feature_available?(:group_saml_group_sync) && root_ancestor.saml_enabled?
     end
 

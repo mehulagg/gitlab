@@ -1,7 +1,7 @@
 ---
 stage: Verify
 group: Continuous Integration
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: concepts, howto
 ---
 
@@ -37,7 +37,7 @@ during jobs, each with their own tradeoffs.
 An alternative to using `docker build` is to [use kaniko](using_kaniko.md).
 This avoids having to execute a runner in privileged mode.
 
-TIP: **Tip:**
+NOTE:
 To see how Docker and GitLab Runner are configured for shared runners on
 GitLab.com, see [GitLab.com shared
 runners](../../user/gitlab_com/index.md#shared-runners).
@@ -103,7 +103,7 @@ image in privileged mode.
 CI builds, follow the `docker-compose`
 [installation instructions](https://docs.docker.com/compose/install/).
 
-DANGER: **Warning:**
+WARNING:
 By enabling `--docker-privileged`, you are effectively disabling all of
 the security mechanisms of containers and exposing your host to privilege
 escalation which can lead to container breakout. For more information, check
@@ -363,6 +363,90 @@ build:
     - docker run my-docker-image /script/to/run/tests
 ```
 
+#### Use Docker socket binding
+
+The third approach is to bind-mount `/var/run/docker.sock` into the
+container so that Docker is available in the context of that image.
+
+NOTE:
+If you bind the Docker socket and you are
+[using GitLab Runner 11.11 or later](https://gitlab.com/gitlab-org/gitlab-runner/-/merge_requests/1261),
+you can no longer use `docker:19.03.12-dind` as a service. Volume bindings
+are done to the services as well, making these incompatible.
+
+To make Docker available in the context of the image:
+
+1. Install [GitLab Runner](https://docs.gitlab.com/runner/install/).
+1. From the command line, register a runner with the `docker` executor and share `/var/run/docker.sock`:
+
+   ```shell
+   sudo gitlab-runner register -n \
+     --url https://gitlab.com/ \
+     --registration-token REGISTRATION_TOKEN \
+     --executor docker \
+     --description "My Docker Runner" \
+     --docker-image "docker:19.03.12" \
+     --docker-volumes /var/run/docker.sock:/var/run/docker.sock
+   ```
+
+   This command registers a new runner to use the special
+   `docker:19.03.12` image, which is provided by Docker. **The command uses
+   the Docker daemon of the runner itself. Any containers spawned by Docker
+   commands are siblings of the runner rather than children of the runner.**
+   This may have complications and limitations that are unsuitable for your workflow.
+
+   Your `config.toml` file should not have an entry like this:
+
+   ```toml
+   [[runners]]
+     url = "https://gitlab.com/"
+     token = REGISTRATION_TOKEN
+     executor = "docker"
+     [runners.docker]
+       tls_verify = false
+       image = "docker:19.03.12"
+       privileged = false
+       disable_cache = false
+       volumes = ["/var/run/docker.sock:/var/run/docker.sock", "/cache"]
+     [runners.cache]
+       Insecure = false
+   ```
+
+1. Use `docker` in the build script. You don't need to
+   include the `docker:19.03.12-dind` service, like you do when you're using
+   the Docker-in-Docker executor:
+
+   ```yaml
+   image: docker:19.03.12
+
+   before_script:
+     - docker info
+
+   build:
+     stage: build
+     script:
+       - docker build -t my-docker-image .
+       - docker run my-docker-image /script/to/run/tests
+   ```
+
+This method avoids using Docker in privileged mode. However,
+the implications of this method are:
+
+- By sharing the Docker daemon, you are effectively disabling all
+  the security mechanisms of containers and exposing your host to privilege
+  escalation, which can lead to container breakout. For example, if a project
+  ran `docker rm -f $(docker ps -a -q)` it would remove the GitLab Runner
+  containers.
+- Concurrent jobs may not work; if your tests
+  create containers with specific names, they may conflict with each other.
+- Sharing files and directories from the source repository into containers may not
+  work as expected. Volume mounting is done in the context of the host
+  machine, not the build container. For example:
+
+   ```shell
+   docker run --rm -t -i -v $(pwd)/src:/home/app/src test-image:latest run_app_tests
+   ```
+
 #### Enable registry mirror for `docker:dind` service
 
 When the Docker daemon starts inside of the service container, it uses
@@ -483,7 +567,7 @@ of this file. You can do this with a command like:
 kubectl create configmap docker-daemon --namespace gitlab-runner --from-file /tmp/daemon.json
 ```
 
-NOTE: **Note:**
+NOTE:
 Make sure to use the namespace that GitLab Runner Kubernetes executor uses
 to create job pods in.
 
@@ -505,89 +589,146 @@ The configuration is picked up by the `dind` service.
       sub_path = "daemon.json"
 ```
 
-#### Use Docker socket binding
+## Authenticating with registry in Docker-in-Docker
 
-The third approach is to bind-mount `/var/run/docker.sock` into the
-container so that Docker is available in the context of that image.
+When you use Docker-in-Docker, the [normal authentication
+methods](using_docker_images.html#define-an-image-from-a-private-container-registry)
+won't work because a fresh Docker daemon is started with the service.
 
-NOTE: **Note:**
-If you bind the Docker socket [when using GitLab Runner 11.11 or
-newer](https://gitlab.com/gitlab-org/gitlab-runner/-/merge_requests/1261),
-you can no longer use `docker:19.03.12-dind` as a service because volume bindings
-are done to the services as well, making these incompatible.
+### Option 1: Run `docker login`
 
-In order to do that, follow the steps:
+In [`before_script`](../yaml/README.md#before_script) run `docker
+login`:
 
-1. Install [GitLab Runner](https://docs.gitlab.com/runner/install/).
-1. Register GitLab Runner from the command line to use `docker` and share `/var/run/docker.sock`:
+```yaml
+image: docker:19.03.13
 
-   ```shell
-   sudo gitlab-runner register -n \
-     --url https://gitlab.com/ \
-     --registration-token REGISTRATION_TOKEN \
-     --executor docker \
-     --description "My Docker Runner" \
-     --docker-image "docker:19.03.12" \
-     --docker-volumes /var/run/docker.sock:/var/run/docker.sock
-   ```
+variables:
+  DOCKER_TLS_CERTDIR: "/certs"
 
-   The above command registers a new runner to use the special
-   `docker:19.03.12` image which is provided by Docker. **Notice that it's using
-   the Docker daemon of the runner itself, and any containers spawned by Docker
-   commands are siblings of the runner rather than children of the runner.**
-   This may have complications and limitations that are unsuitable for your workflow.
+services:
+  - docker:19.03.13-dind
 
-   The above command creates a `config.toml` entry similar to this:
+build:
+  stage: build
+  before_script:
+    - echo "$DOCKER_REGISTRY_PASS" | docker login $DOCKER_REGISTRY --username $DOCKER_REGISTRY_USER --password-stdin
+  script:
+    - docker build -t my-docker-image .
+    - docker run my-docker-image /script/to/run/tests
+```
 
-   ```toml
-   [[runners]]
-     url = "https://gitlab.com/"
-     token = REGISTRATION_TOKEN
-     executor = "docker"
-     [runners.docker]
-       tls_verify = false
-       image = "docker:19.03.12"
-       privileged = false
-       disable_cache = false
-       volumes = ["/var/run/docker.sock:/var/run/docker.sock", "/cache"]
-     [runners.cache]
-       Insecure = false
-   ```
+To log in to Docker Hub, leave `$DOCKER_REGISTRY`
+empty or remove it.
 
-1. You can now use `docker` in the build script (note that you don't need to
-   include the `docker:19.03.12-dind` service as when using the Docker in Docker
-   executor):
+### Option 2: Mount `~/.docker/config.json` on each job
 
-   ```yaml
-   image: docker:19.03.12
+If you are an administrator for GitLab Runner, you can mount a file
+with the authentication configuration to `~/.docker/config.json`.
+Then every job that the runner picks up will be authenticated already. If you
+are using the official `docker:19.03.13` image, the home directory is
+under `/root`.
 
-   before_script:
-     - docker info
+If you mount the config file, any `docker` command
+that modifies the `~/.docker/config.json` (for example, `docker login`)
+fails, because the file is mounted as read-only. Do not change it from
+read-only, because other problems will occur.
 
-   build:
-     stage: build
-     script:
-       - docker build -t my-docker-image .
-       - docker run my-docker-image /script/to/run/tests
-   ```
+Here is an example of `/opt/.docker/config.json` that follows the
+[`DOCKER_AUTH_CONFIG`](using_docker_images.md#determining-your-docker_auth_config-data)
+documentation:
 
-While the above method avoids using Docker in privileged mode, you should be
-aware of the following implications:
+```json
+{
+    "auths": {
+        "https://index.docker.io/v1/": {
+            "auth": "bXlfdXNlcm5hbWU6bXlfcGFzc3dvcmQ="
+        }
+    }
+}
+```
 
-- By sharing the Docker daemon, you are effectively disabling all
-  the security mechanisms of containers and exposing your host to privilege
-  escalation which can lead to container breakout. For example, if a project
-  ran `docker rm -f $(docker ps -a -q)` it would remove the GitLab Runner
-  containers.
-- Concurrent jobs may not work; if your tests
-  create containers with specific names, they may conflict with each other.
-- Sharing files and directories from the source repository into containers may not
-  work as expected since volume mounting is done in the context of the host
-  machine, not the build container. For example:
+#### Docker
 
-   ```shell
-   docker run --rm -t -i -v $(pwd)/src:/home/app/src test-image:latest run_app_tests
-   ```
+Update the [volume
+mounts](https://docs.gitlab.com/runner/configuration/advanced-configuration.html#volumes-in-the-runnersdocker-section)
+to include the file.
+
+```toml
+[[runners]]
+  ...
+  executor = "docker"
+  [runners.docker]
+    ...
+    privileged = true
+    volumes = ["/opt/.docker/config.json:/root/.docker/config.json:ro"]
+```
+
+#### Kubernetes
+
+Create a [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/) with the content
+of this file. You can do this with a command like:
+
+```shell
+kubectl create configmap docker-client-config --namespace gitlab-runner --from-file /opt/.docker/config.json
+```
+
+Update the [volume
+mounts](https://docs.gitlab.com/runner/executors/kubernetes.html#using-volumes)
+to include the file.
+
+```toml
+[[runners]]
+  ...
+  executor = "kubernetes"
+  [runners.kubernetes]
+    image = "alpine:3.12"
+    privileged = true
+    [[runners.kubernetes.volumes.config_map]]
+      name = "docker-client-config"
+      mount_path = "/root/.docker/config.json"
+      # If you are running GitLab Runner 13.5
+      # or lower you can remove this
+      sub_path = "config.json"
+```
+
+### Option 3: Use `DOCKER_AUTH_CONFIG`
+
+If you already have
+[`DOCKER_AUTH_CONFIG`](using_docker_images.md#determining-your-docker_auth_config-data)
+defined, you can use the variable and save it in
+`~/.docker/config.json`.
+
+There are multiple ways to define this. For example:
+
+- Inside
+  [`pre_build_script`](https://docs.gitlab.com/runner/configuration/advanced-configuration.html#the-runners-section)
+  inside of the runner config file.
+- Inside [`before_script`](../yaml/README.md#before_script).
+- Inside of [`script`](../yaml/README.md#script).
+
+Below is an example of
+[`before_script`](../yaml/README.md#before_script). The same commands
+apply for any solution you implement.
+
+```yaml
+image: docker:19.03.13
+
+variables:
+  DOCKER_TLS_CERTDIR: "/certs"
+
+services:
+  - docker:19.03.13-dind
+
+build:
+  stage: build
+  before_script:
+    - mkdir -p $HOME/.docker
+    - echo $DOCKER_AUTH_CONFIG > $HOME/.docker/config.json
+  script:
+    - docker build -t my-docker-image .
+    - docker run my-docker-image /script/to/run/tests
+```
 
 ## Making Docker-in-Docker builds faster with Docker layer caching
 
@@ -647,7 +788,7 @@ The steps in the `script` section for the `build` stage can be summed up to:
 
 ## Use the OverlayFS driver
 
-NOTE: **Note:**
+NOTE:
 The shared runners on GitLab.com use the `overlay2` driver by default.
 
 By default, when using `docker:dind`, Docker uses the `vfs` storage driver which

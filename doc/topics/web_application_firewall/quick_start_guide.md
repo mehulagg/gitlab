@@ -1,7 +1,7 @@
 ---
 stage: Protect
 group: Container Security
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Getting started with the Web Application Firewall
@@ -30,7 +30,7 @@ Google account (for example, one that you use to access Gmail, Drive, etc.) or c
 1. To enable the required APIs and related services, follow the steps in the ["Before you begin" section of the Kubernetes Engine docs](https://cloud.google.com/kubernetes-engine/docs/quickstart#before-you-begin).
 1. Make sure you have created a [billing account](https://cloud.google.com/billing/docs/how-to/manage-billing-account).
 
-TIP: **Tip:**
+NOTE:
 Every new Google Cloud Platform (GCP) account receives [$300 in credit](https://console.cloud.google.com/freetrial),
 and in partnership with Google, GitLab is able to offer an additional $200 for new GCP accounts to get started with GitLab's
 Google Kubernetes Engine integration. All you have to do is [follow this link](https://cloud.google.com/partners/partnercredit/?PCN=a0n60000006Vpz4AAC) and apply for credit.
@@ -168,7 +168,7 @@ application will be monitored by the WAF automatically.
 
 Now we can make sure that Ingress is running properly with ModSecurity and send
 a request to ensure our application is responding correctly. You must connect to
-your cluster either using [Cloud Shell](https://cloud.google.com/shell/) or the [Google Cloud SDK](https://cloud.google.com/sdk/install).
+your cluster either using [Cloud Shell](https://cloud.google.com/shell/) or the [Google Cloud SDK](https://cloud.google.com/sdk/docs/install).
 
 1. After connecting to your cluster, check if the Ingress-NGINX controller is running and ModSecurity is enabled.
 
@@ -201,7 +201,7 @@ your cluster either using [Cloud Shell](https://cloud.google.com/shell/) or the 
    NAME  HOSTS  PORTS
    production-auto-deploy  fjdiaz-auto-devv-2.34.68.60.207.nip.io,le-16730183.34.68.60.207.nip.io  80, 443
 
-   $ curl --location --insecure fjdiaz-auto-devv-2.34.68.60.207.nip.io | grep 'Rails!' --after 2 --before 2
+   $ curl --location --insecure "fjdiaz-auto-devv-2.34.68.60.207.nip.io" | grep 'Rails!' --after 2 --before 2
    <body>
        <p>You're on Rails!</p>
    </body>
@@ -216,7 +216,7 @@ Now let's send a potentially malicious request, as if we were a scanner,
 checking for vulnerabilities within our application and examine the ModSecurity logs:
 
 ```shell
-$ curl --location --insecure fjdiaz-auto-devv-2.34.68.60.207.nip.io --header "User-Agent: absinthe" | grep 'Rails!' --after 2 --before 2
+$ curl --location --insecure "fjdiaz-auto-devv-2.34.68.60.207.nip.io" --header "User-Agent: absinthe" | grep 'Rails!' --after 2 --before 2
 <body>
     <p>You're on Rails!</p>
 </body>

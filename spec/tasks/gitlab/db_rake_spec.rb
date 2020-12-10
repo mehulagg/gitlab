@@ -235,8 +235,8 @@ RSpec.describe 'gitlab:db namespace rake task' do
     let(:indexes) { double('indexes') }
 
     context 'when no index_name is given' do
-      it 'rebuilds a random number of large indexes' do
-        expect(Gitlab::Database::Reindexing).to receive_message_chain('candidate_indexes.random_few').and_return(indexes)
+      it 'uses all candidate indexes' do
+        expect(Gitlab::Database::Reindexing).to receive(:candidate_indexes).and_return(indexes)
         expect(Gitlab::Database::Reindexing).to receive(:perform).with(indexes)
 
         run_rake_task('gitlab:db:reindex')
@@ -257,6 +257,34 @@ RSpec.describe 'gitlab:db namespace rake task' do
         expect(Gitlab::Database::PostgresIndex).to receive(:by_identifier).with('public.absent_index').and_raise(ActiveRecord::RecordNotFound)
 
         expect { run_rake_task('gitlab:db:reindex', '[public.absent_index]') }.to raise_error(ActiveRecord::RecordNotFound)
+      end
+    end
+  end
+
+  describe 'active' do
+    using RSpec::Parameterized::TableSyntax
+
+    let(:task) { 'gitlab:db:active' }
+    let(:self_monitoring) { double('self_monitoring') }
+
+    where(:needs_migration, :self_monitoring_project, :project_count, :exit_status, :exit_code) do
+      true | nil | nil | 1 | false
+      false | :self_monitoring | 1 | 1 | false
+      false | nil | 0 | 1 | false
+      false | :self_monitoring | 2 | 0 | true
+    end
+
+    with_them do
+      it 'exits 0 or 1 depending on user modifications to the database' do
+        allow_any_instance_of(ActiveRecord::MigrationContext).to receive(:needs_migration?).and_return(needs_migration)
+        allow_any_instance_of(ApplicationSetting).to receive(:self_monitoring_project).and_return(self_monitoring_project)
+        allow(Project).to receive(:count).and_return(project_count)
+
+        expect { run_rake_task(task) }.to raise_error do |error|
+          expect(error).to be_a(SystemExit)
+          expect(error.status).to eq(exit_status)
+          expect(error.success?).to be(exit_code)
+        end
       end
     end
   end

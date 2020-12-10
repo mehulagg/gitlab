@@ -1,4 +1,5 @@
 import { shallowMount } from '@vue/test-utils';
+import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 import DevopsAdoptionTableCellFlag from 'ee/admin/dev_ops_report/components/devops_adoption_table_cell_flag.vue';
 
 describe('DevopsAdoptionTableCellFlag', () => {
@@ -10,6 +11,9 @@ describe('DevopsAdoptionTableCellFlag', () => {
         enabled: true,
         ...props,
       },
+      directives: {
+        GlTooltip: createMockDirective(),
+      },
     });
   };
 
@@ -18,17 +22,35 @@ describe('DevopsAdoptionTableCellFlag', () => {
     wrapper = null;
   });
 
-  it('contains the circle-enabled class when enabled', () => {
-    createComponent();
+  describe('enabled', () => {
+    beforeEach(() => createComponent());
 
-    expect(wrapper.classes()).toContain('circle');
-    expect(wrapper.classes()).toContain('circle-enabled');
+    it('contains the circle-enabled class', () => {
+      expect(wrapper.classes()).toContain('circle');
+      expect(wrapper.classes()).toContain('circle-enabled');
+    });
+
+    it('contains a tooltip', () => {
+      const tooltip = getBinding(wrapper.element, 'gl-tooltip');
+
+      expect(tooltip).toBeDefined();
+      expect(tooltip.value).toBe('Adopted');
+    });
   });
 
-  it('does not contain the circle-enabled class when disabled', () => {
-    createComponent({ enabled: false });
+  describe('disabled', () => {
+    beforeEach(() => createComponent({ enabled: false }));
 
-    expect(wrapper.classes()).toContain('circle');
-    expect(wrapper.classes()).not.toContain('circle-enabled');
+    it('does not contain the circle-enabled class', () => {
+      expect(wrapper.classes()).toContain('circle');
+      expect(wrapper.classes()).not.toContain('circle-enabled');
+    });
+
+    it('contains a tooltip', () => {
+      const tooltip = getBinding(wrapper.element, 'gl-tooltip');
+
+      expect(tooltip).toBeDefined();
+      expect(tooltip.value).toBe('Not adopted');
+    });
   });
 });

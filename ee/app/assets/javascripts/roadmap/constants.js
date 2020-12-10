@@ -1,9 +1,16 @@
 import { s__ } from '~/locale';
 
+/*
+  Update the counterparts in roadmap.scss when making changes.
+*/
+
+// Counterpart: $details-cell-width in roadmap.scss
 export const EPIC_DETAILS_CELL_WIDTH = 320;
 
+// Counterpart: $item-height in roadmap.scss
 export const EPIC_ITEM_HEIGHT = 50;
 
+// Counterpart: $timeline-cell-width in roadmap.scss
 export const TIMELINE_CELL_MIN_WIDTH = 180;
 
 export const SCROLL_BAR_SIZE = 16;
@@ -63,3 +70,7 @@ export const EPIC_LEVEL_MARGIN = {
   3: 'ml-8',
   4: 'ml-10',
 };
+
+export const EPICS_LIMIT_DISMISSED_COOKIE_NAME = 'epics_limit_warning_dismissed';
+
+export const EPICS_LIMIT_DISMISSED_COOKIE_TIMEOUT = 365;

@@ -27,6 +27,7 @@ RSpec.describe User do
     it { is_expected.to have_many(:security_dashboard_projects) }
     it { is_expected.to have_many(:board_preferences) }
     it { is_expected.to have_many(:boards_epic_user_preferences).class_name('Boards::EpicUserPreference') }
+    it { is_expected.to have_many(:user_permission_export_uploads) }
   end
 
   describe 'nested attributes' do
@@ -94,6 +95,46 @@ RSpec.describe User do
 
       it 'returns users managed by the specified group' do
         expect(described_class.managed_by(group)).to match_array(managed_users)
+      end
+    end
+  end
+
+  describe 'after_create' do
+    describe '#perform_user_cap_check' do
+      let(:new_user_signups_cap) { nil }
+
+      before do
+        allow(Gitlab::CurrentSettings).to receive(:new_user_signups_cap).and_return(new_user_signups_cap)
+      end
+
+      context 'when feature is disabled' do
+        before do
+          stub_feature_flags(admin_new_user_signups_cap: false)
+        end
+
+        it 'does not call SetUserStatusBasedOnUserCapSettingWorker' do
+          expect(SetUserStatusBasedOnUserCapSettingWorker).not_to receive(:perform_async)
+
+          create(:user, state: 'blocked_pending_approval')
+        end
+      end
+
+      context 'when user cap is not set' do
+        it 'does not call SetUserStatusBasedOnUserCapSettingWorker' do
+          expect(SetUserStatusBasedOnUserCapSettingWorker).not_to receive(:perform_async)
+
+          create(:user, state: 'blocked_pending_approval')
+        end
+      end
+
+      context 'when user cap is set' do
+        let(:new_user_signups_cap) { 10 }
+
+        it 'enqueues SetUserStatusBasedOnUserCapSettingWorker' do
+          expect(SetUserStatusBasedOnUserCapSettingWorker).to receive(:perform_async).once
+
+          create(:user, state: 'blocked_pending_approval')
+        end
       end
     end
   end
@@ -978,6 +1019,7 @@ RSpec.describe User do
     let_it_be(:free_group_z) { create(:group, name: 'AZ', gitlab_subscription: create(:gitlab_subscription, :free)) }
     let_it_be(:free_group_a) { create(:group, name: 'AA', gitlab_subscription: create(:gitlab_subscription, :free)) }
     let_it_be(:sub_group) { create(:group, name: 'SubGroup', parent: free_group_a) }
+    let_it_be(:trial_group) { create(:group, name: 'AB', gitlab_subscription: create(:gitlab_subscription, :active_trial, :gold)) }
 
     subject { user.manageable_groups_eligible_for_subscription }
 
@@ -1026,6 +1068,30 @@ RSpec.describe User do
       it { is_expected.to eq [free_group_a, free_group_z] }
 
       it { is_expected.not_to include(sub_group) }
+    end
+
+    context 'developer of a trial group' do
+      before do
+        trial_group.add_developer(user)
+      end
+
+      it { is_expected.not_to include(trial_group) }
+    end
+
+    context 'owner of a trial group' do
+      before do
+        trial_group.add_owner(user)
+      end
+
+      it { is_expected.to include(trial_group) }
+    end
+
+    context 'maintainer of a trial group' do
+      before do
+        trial_group.add_maintainer(user)
+      end
+
+      it { is_expected.to include(trial_group) }
     end
   end
 

@@ -1,7 +1,7 @@
 ---
 stage: Verify
 group: Continuous Integration
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: howto
 ---
 
@@ -110,7 +110,7 @@ To use GitLab CI/CD with a Bitbucket Cloud repository:
    esac
 
    echo "Pushing status to $BITBUCKET_STATUS_API..."
-   curl --request POST $BITBUCKET_STATUS_API \
+   curl --request POST "$BITBUCKET_STATUS_API" \
    --user $BITBUCKET_USERNAME:$BITBUCKET_ACCESS_TOKEN \
    --header "Content-Type:application/json" \
    --silent \

@@ -5,7 +5,6 @@
 - @content_wrapper_class = "group-epics-roadmap-wrapper"
 - @content_class = "group-epics-roadmap"
 - breadcrumb_title _("Epics Roadmap")
-- epics_limit_feature = 'epics_limit_warning_dismissed'
 - sub_epics_feature_available = @group.feature_available?(:subepics)
 - allow_sub_epics = sub_epics_feature_available ? 'true' : 'false'
 - page_title _("Epics Roadmap")
@@ -16,15 +15,6 @@
 - if @epics_count != 0
   - if !Feature.enabled?(:async_filtering, @group)
     = render 'shared/epic/search_bar', type: :epics, show_roadmap_presets: true, hide_extra_sort_options: true
-
-  - if @epics_count > Groups::RoadmapController::EPICS_ROADMAP_LIMIT && show_callout?(epics_limit_feature)
-    .warning_message.mb-0.js-epics-limit-callout{ role: 'alert', data: { uid: epics_limit_feature } }
-      %button.js-close-callout.close{ type: "button", target: ".js-epics-limit-callout", "aria-hidden": true, "aria-label": _("Close") }
-        = sprite_icon("close")
-      %p
-        = s_("Some of your epics may not be visible. A roadmap is limited to the first 1,000 epics, in your selected sort order.")
-      %a.btn.btn-outline-warning#js-learn-more{ "href" => "https://docs.gitlab.com/ee/user/group/roadmap/" }
-        = _("Learn more")
 
   #js-roadmap{ data: { epics_path: group_epics_path(@group, format: :json),
     group_id: @group.id,

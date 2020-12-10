@@ -24,15 +24,7 @@ RSpec.describe 'Creating a DAST Site Profile' do
     it 'returns the dast_site_profile id' do
       subject
 
-      expect(mutation_response["id"]).to eq(dast_site_profile.to_global_id.to_s)
-    end
-
-    context 'when an unknown error occurs' do
-      before do
-        allow(DastSiteProfile).to receive(:create!).and_raise(StandardError)
-      end
-
-      it_behaves_like 'a mutation that returns top-level errors', errors: ['Internal server error']
+      expect(mutation_response).to include('id' => global_id_of(dast_site_profile))
     end
   end
 end

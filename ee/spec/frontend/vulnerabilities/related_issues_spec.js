@@ -1,8 +1,6 @@
-import { GlAlert } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
 import RelatedIssues from 'ee/vulnerabilities/components/related_issues.vue';
-import waitForPromises from 'helpers/wait_for_promises';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import httpStatusCodes from '~/lib/utils/http_status';
@@ -25,7 +23,7 @@ describe('Vulnerability related issues component', () => {
   };
 
   const vulnerabilityId = 5131;
-  const createIssueUrl = '/create/issue';
+  const newIssueUrl = '/new/issue';
   const projectFingerprint = 'project-fingerprint';
   const issueTrackingHelpPath = '/help/issue/tracking';
   const permissionsHelpPath = '/help/permissions';
@@ -40,7 +38,7 @@ describe('Vulnerability related issues component', () => {
       provide: {
         vulnerabilityId,
         projectFingerprint,
-        createIssueUrl,
+        newIssueUrl,
         reportType,
         issueTrackingHelpPath,
         permissionsHelpPath,
@@ -59,7 +57,6 @@ describe('Vulnerability related issues component', () => {
   const blockProp = prop => relatedIssuesBlock().props(prop);
   const blockEmit = (eventName, data) => relatedIssuesBlock().vm.$emit(eventName, data);
   const findCreateIssueButton = () => wrapper.find({ ref: 'createIssue' });
-  const findAlert = () => wrapper.find(GlAlert);
 
   afterEach(() => {
     wrapper.destroy();
@@ -283,14 +280,10 @@ describe('Vulnerability related issues component', () => {
   });
 
   describe('when linked issue is not yet created', () => {
-    const failCreateIssueAction = async () => {
-      mockAxios.onPost(createIssueUrl).reply(500);
-      expect(findAlert().exists()).toBe(false);
-      findCreateIssueButton().vm.$emit('click');
-      await waitForPromises();
-    };
+    let redirectToSpy;
 
     beforeEach(async () => {
+      redirectToSpy = jest.spyOn(urlUtility, 'redirectTo').mockImplementation(() => {});
       mockAxios.onGet(propsData.endpoint).replyOnce(httpStatusCodes.OK, [issue1, issue2]);
       createWrapper({ stubs: { RelatedIssuesBlock } });
       await axios.waitForAll();
@@ -300,34 +293,11 @@ describe('Vulnerability related issues component', () => {
       expect(findCreateIssueButton().exists()).toBe(true);
     });
 
-    it('calls create issue endpoint on click and redirects to new issue', async () => {
-      const issueUrl = `/group/project/-/security/vulnerabilities/${vulnerabilityId}/create_issue`;
-      const spy = jest.spyOn(urlUtility, 'redirectTo');
-      mockAxios.onPost(propsData.createIssueUrl).reply(200, {
-        web_url: issueUrl,
-      });
-
+    it('calls new issue endpoint on click', () => {
       findCreateIssueButton().vm.$emit('click');
-
-      await waitForPromises();
-
-      const [postRequest] = mockAxios.history.post;
-      expect(mockAxios.history.post).toHaveLength(1);
-      expect(postRequest.url).toBe(createIssueUrl);
-      expect(spy).toHaveBeenCalledWith(issueUrl);
-    });
-
-    it('shows an error message when issue creation fails', async () => {
-      await failCreateIssueAction();
-      expect(mockAxios.history.post).toHaveLength(1);
-      expect(findAlert().exists()).toBe(true);
-    });
-
-    it('dismisses the error message', async () => {
-      await failCreateIssueAction();
-      findAlert().vm.$emit('dismiss');
-      await wrapper.vm.$nextTick();
-      expect(findAlert().exists()).toBe(false);
+      expect(redirectToSpy).toHaveBeenCalledWith(newIssueUrl, {
+        params: { vulnerability_id: vulnerabilityId },
+      });
     });
   });
 
@@ -335,7 +305,7 @@ describe('Vulnerability related issues component', () => {
     it('hides the "Create Issue" button', () => {
       createWrapper({
         provide: {
-          createIssueUrl: undefined,
+          newIssueUrl: undefined,
         },
       });
 

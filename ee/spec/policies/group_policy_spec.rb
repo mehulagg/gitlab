@@ -5,10 +5,12 @@ require 'spec_helper'
 RSpec.describe GroupPolicy do
   include_context 'GroupPolicy context'
 
+  let(:epic_rules) { %i(read_epic create_epic admin_epic destroy_epic read_confidential_epic destroy_epic_link read_epic_board) }
+
   context 'when epics feature is disabled' do
     let(:current_user) { owner }
 
-    it { is_expected.to be_disallowed(:read_epic, :create_epic, :admin_epic, :destroy_epic, :read_confidential_epic, :destroy_epic_link) }
+    it { is_expected.to be_disallowed(*epic_rules) }
   end
 
   context 'when epics feature is enabled' do
@@ -19,53 +21,53 @@ RSpec.describe GroupPolicy do
     context 'when user is owner' do
       let(:current_user) { owner }
 
-      it { is_expected.to be_allowed(:read_epic, :create_epic, :admin_epic, :destroy_epic, :read_confidential_epic, :destroy_epic_link) }
+      it { is_expected.to be_allowed(*epic_rules) }
     end
 
     context 'when user is admin' do
       let(:current_user) { admin }
 
-      it { is_expected.to be_allowed(:read_epic, :create_epic, :admin_epic, :destroy_epic, :read_confidential_epic, :destroy_epic_link) }
+      it { is_expected.to be_allowed(*epic_rules) }
     end
 
     context 'when user is maintainer' do
       let(:current_user) { maintainer }
 
-      it { is_expected.to be_allowed(:read_epic, :create_epic, :admin_epic, :read_confidential_epic, :destroy_epic_link) }
+      it { is_expected.to be_allowed(*(epic_rules - [:destroy_epic])) }
       it { is_expected.to be_disallowed(:destroy_epic) }
     end
 
     context 'when user is developer' do
       let(:current_user) { developer }
 
-      it { is_expected.to be_allowed(:read_epic, :create_epic, :admin_epic, :read_confidential_epic, :destroy_epic_link) }
+      it { is_expected.to be_allowed(*(epic_rules - [:destroy_epic])) }
       it { is_expected.to be_disallowed(:destroy_epic) }
     end
 
     context 'when user is reporter' do
       let(:current_user) { reporter }
 
-      it { is_expected.to be_allowed(:read_epic, :create_epic, :admin_epic, :read_confidential_epic, :destroy_epic_link) }
+      it { is_expected.to be_allowed(*(epic_rules - [:destroy_epic])) }
       it { is_expected.to be_disallowed(:destroy_epic) }
     end
 
     context 'when user is guest' do
       let(:current_user) { guest }
 
-      it { is_expected.to be_allowed(:read_epic) }
-      it { is_expected.to be_disallowed(:create_epic, :admin_epic, :destroy_epic, :read_confidential_epic, :destroy_epic_link) }
+      it { is_expected.to be_allowed(:read_epic, :read_epic_board) }
+      it { is_expected.to be_disallowed(*(epic_rules - [:read_epic, :read_epic_board])) }
     end
 
     context 'when user is not member' do
       let(:current_user) { create(:user) }
 
-      it { is_expected.to be_disallowed(:read_epic, :create_epic, :admin_epic, :destroy_epic, :read_confidential_epic, :destroy_epic_link) }
+      it { is_expected.to be_disallowed(*epic_rules) }
     end
 
     context 'when user is anonymous' do
       let(:current_user) { nil }
 
-      it { is_expected.to be_disallowed(:read_epic, :create_epic, :admin_epic, :destroy_epic, :read_confidential_epic, :destroy_epic_link) }
+      it { is_expected.to be_disallowed(*epic_rules) }
     end
   end
 
@@ -285,11 +287,11 @@ RSpec.describe GroupPolicy do
   end
 
   describe 'per group SAML' do
-    context 'when group_saml is unavailable' do
-      def stub_group_saml_config(enabled)
-        allow(::Gitlab::Auth::GroupSaml::Config).to receive_messages(enabled?: enabled)
-      end
+    def stub_group_saml_config(enabled)
+      allow(::Gitlab::Auth::GroupSaml::Config).to receive_messages(enabled?: enabled)
+    end
 
+    context 'when group_saml is unavailable' do
       let(:current_user) { owner }
 
       context 'when group saml config is disabled' do
@@ -347,12 +349,13 @@ RSpec.describe GroupPolicy do
 
       context 'when group_saml_group_sync is licensed' do
         before do
+          stub_group_saml_config(true)
           stub_application_setting(check_namespace_plan: true)
         end
 
         before_all do
           create(:license, plan: License::ULTIMATE_PLAN)
-          create(:gitlab_subscription, :gold, namespace: group)
+          create(:gitlab_subscription, :silver, namespace: group)
         end
 
         context 'without an enabled SAML provider' do
@@ -395,6 +398,15 @@ RSpec.describe GroupPolicy do
 
           context 'admin' do
             let(:current_user) { admin }
+
+            it { is_expected.to be_allowed(:admin_saml_group_links) }
+          end
+
+          context 'when the group is a subgroup' do
+            let_it_be(:subgroup) { create(:group, :private, parent: group) }
+            let(:current_user) { owner }
+
+            subject { described_class.new(current_user, subgroup) }
 
             it { is_expected.to be_allowed(:admin_saml_group_links) }
           end
@@ -1130,6 +1142,27 @@ RSpec.describe GroupPolicy do
     using RSpec::Parameterized::TableSyntax
 
     let(:policy) { :read_ci_minutes_quota }
+
+    where(:role, :allowed) do
+      :guest      | false
+      :reporter   | false
+      :developer  | true
+      :maintainer | true
+      :owner      | true
+      :admin      | true
+    end
+
+    with_them do
+      let(:current_user) { public_send(role) }
+
+      it { is_expected.to(allowed ? be_allowed(policy) : be_disallowed(policy)) }
+    end
+  end
+
+  describe ':read_group_audit_events' do
+    using RSpec::Parameterized::TableSyntax
+
+    let(:policy) { :read_group_audit_events }
 
     where(:role, :allowed) do
       :guest      | false

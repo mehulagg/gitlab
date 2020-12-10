@@ -27,7 +27,17 @@ module EE
       supports_sla?
     end
 
+    def metric_images_available?
+      return false unless IssuableMetricImage.available_for?(project)
+
+      supports_metric_images?
+    end
+
     def supports_sla?
+      incident?
+    end
+
+    def supports_metric_images?
       incident?
     end
   end

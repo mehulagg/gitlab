@@ -1,7 +1,7 @@
 ---
 stage: Verify
 group: Continuous Integration
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 comments: false
 type: index, howto
 ---
@@ -189,8 +189,8 @@ pdf:
 ```
 
 Additionally, we have package management features like a built-in container, NPM, and Maven registry that you
-can leverage. You can see the complete list of packaging features (which includes links to documentation)
-in the [Packaging section of our documentation](../../README.md#package).
+can leverage. You can see the complete list of packaging features in the
+[Packages & Registries](../../user/packages/index.md) documentation.
 
 ## Integrated features
 

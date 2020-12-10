@@ -78,7 +78,7 @@ module EE
       end
 
       condition(:group_saml_group_sync_available, scope: :subject) do
-        @subject.feature_available?(:group_saml_group_sync)
+        @subject.saml_group_sync_available?
       end
 
       condition(:group_timelogs_available) do
@@ -165,7 +165,10 @@ module EE
         enable :change_prevent_group_forking
       end
 
-      rule { can?(:read_group) & epics_available }.enable :read_epic
+      rule { can?(:read_group) & epics_available }.policy do
+        enable :read_epic
+        enable :read_epic_board
+      end
 
       rule { can?(:read_group) & iterations_available }.enable :read_iteration
 
@@ -205,7 +208,7 @@ module EE
 
       rule { group_saml_config_enabled & group_saml_available & (admin | owner) }.enable :admin_group_saml
 
-      rule { group_saml_group_sync_available & group_saml_enabled & can?(:admin_group_saml) }.policy do
+      rule { group_saml_config_enabled & group_saml_group_sync_available & (admin | owner) }.policy do
         enable :admin_saml_group_links
       end
 
@@ -230,6 +233,7 @@ module EE
         enable :create_wiki
         enable :admin_merge_request
         enable :read_ci_minutes_quota
+        enable :read_group_audit_events
       end
 
       rule { security_dashboard_enabled & developer }.enable :read_group_security_dashboard

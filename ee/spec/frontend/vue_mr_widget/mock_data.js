@@ -3,7 +3,6 @@ import mockData, { mockStore } from 'jest/vue_mr_widget/mock_data';
 export default {
   ...mockData,
   can_read_vulnerabilities: true,
-  vulnerability_feedback_help_path: '/help/user/application_security/index',
   enabled_reports: {
     sast: false,
     container_scanning: false,
@@ -12,6 +11,11 @@ export default {
     license_management: false,
     secret_detection: false,
   },
+  container_scanning_comparison_path: '/container_scanning_comparison_path',
+  dependency_scanning_comparison_path: '/dependency_scanning_comparison_path',
+  dast_comparison_path: '/dast_comparison_path',
+  coverage_fuzzing_comparison_path: '/coverage_fuzzing_comparison_path',
+  api_fuzzing_comparison_path: '/api_fuzzing_comparison_path',
 };
 
 // Browser Performance Testing

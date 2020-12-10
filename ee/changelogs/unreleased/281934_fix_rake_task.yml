@@ -1,5 +1,0 @@
----
-title: Fix an issue in the create_empty_index rake task
-merge_request: 47575
-author:
-type: fixed

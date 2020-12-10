@@ -38,8 +38,22 @@ describe('Solution Card', () => {
       createComponent({ propsData: { remediation, hasRemediation: true } });
     });
 
-    it('renders the solution text', () => {
+    it('renders the remediation summary', () => {
       expect(findSolutionText().text()).toBe(remediation.summary);
+    });
+
+    describe('with remediation and solution', () => {
+      beforeEach(async () => {
+        await wrapper.setProps({ solution });
+      });
+
+      it('renders the solution title', () => {
+        expect(findSolutionTitle().text()).toBe('Solution');
+      });
+
+      it('takes the value of solution, if both are defined', () => {
+        expect(findSolutionText().text()).toBe(solution);
+      });
     });
 
     describe('with download patch', () => {

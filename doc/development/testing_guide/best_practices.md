@@ -50,6 +50,22 @@ bundle exec guard
 
 When using spring and guard together, use `SPRING=1 bundle exec guard` instead to make use of spring.
 
+### Ruby warnings
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/47767) in GitLab 13.7.
+
+We've enabled [deprecation warnings](https://ruby-doc.org/core-2.7.2/Warning.html)
+by default when running specs. Making these warnings more visible to developers
+helps upgrading to newer Ruby versions.
+
+You can silence deprecation warnings by setting the environment variable
+`SILENCE_DEPRECATIONS`, for example:
+
+```shell
+# silence all deprecation warnings
+SILENCE_DEPRECATIONS=1 bin/rspec spec/models/project_spec.rb
+```
+
 ### Test speed
 
 GitLab has a massive test suite that, without [parallelization](ci.md#test-suite-parallelization-on-the-ci), can take hours
@@ -311,7 +327,7 @@ Use the coverage reports to ensure your tests cover 100% of your code.
 
 ### System / Feature tests
 
-NOTE: **Note:**
+NOTE:
 Before writing a new system test, [please consider **not**
 writing one](testing_levels.md#consider-not-writing-a-system-test)!
 
@@ -432,7 +448,7 @@ instead of 30+ seconds in case of a regular `spec_helper`.
 
 ### `subject` and `let` variables
 
-GitLab's RSpec suite has made extensive use of `let`(along with its strict, non-lazy
+The GitLab RSpec suite has made extensive use of `let`(along with its strict, non-lazy
 version `let!`) variables to reduce duplication. However, this sometimes [comes at the cost of clarity](https://thoughtbot.com/blog/lets-not),
 so we need to set some guidelines for their use going forward:
 
@@ -704,7 +720,7 @@ at all possible.
 
 #### Test Snowplow events
 
-CAUTION: **Warning:**
+WARNING:
 Snowplow performs **runtime type checks** by using the [contracts gem](https://rubygems.org/gems/contracts).
 Since Snowplow is **by default disabled in tests and development**, it can be hard to
 **catch exceptions** when mocking `Gitlab::Tracking`.
@@ -776,7 +792,7 @@ describe "#==" do
 end
 ```
 
-CAUTION: **Caution:**
+WARNING:
 Only use simple values as input in the `where` block. Using procs, stateful
 objects, FactoryBot-created objects etc. can lead to
 [unexpected results](https://github.com/tomykaira/rspec-parameterized/issues/8).

@@ -1,5 +1,0 @@
----
-title: Change OOTB from `NetworkPolicy` to `CiliumNetworkPolicy`
-merge_request: 45579
-author:
-type: fixed

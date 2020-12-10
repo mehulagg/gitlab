@@ -75,12 +75,7 @@ export default {
       return this.list?.label?.description || this.list.title || '';
     },
     showListHeaderButton() {
-      return (
-        !this.disabled &&
-        this.listType !== ListType.closed &&
-        this.listType !== ListType.blank &&
-        this.listType !== ListType.promotion
-      );
+      return !this.disabled && this.listType !== ListType.closed;
     },
     showMilestoneListDetails() {
       return (
@@ -113,9 +108,6 @@ export default {
       return (
         this.listType !== ListType.backlog && this.showListHeaderButton && this.list.isExpanded
       );
-    },
-    showBoardListAndBoardInfo() {
-      return this.listType !== ListType.blank && this.listType !== ListType.promotion;
     },
     uniqueKey() {
       // eslint-disable-next-line @gitlab/require-i18n-strings
@@ -198,7 +190,8 @@ export default {
         :title="chevronTooltip"
         :icon="chevronIcon"
         class="board-title-caret no-drag gl-cursor-pointer"
-        variant="link"
+        category="tertiary"
+        size="small"
         @click="toggleExpanded"
       />
       <!-- EE start -->
@@ -277,7 +270,7 @@ export default {
         v-if="isSwimlanesHeader && !list.isExpanded"
         ref="collapsedInfo"
         aria-hidden="true"
-        class="board-header-collapsed-info-icon gl-mt-2 gl-cursor-pointer gl-text-gray-500"
+        class="board-header-collapsed-info-icon gl-cursor-pointer gl-text-gray-500"
       >
         <gl-icon name="information" />
       </span>
@@ -301,7 +294,6 @@ export default {
       <!-- EE end -->
 
       <div
-        v-if="showBoardListAndBoardInfo"
         class="issue-count-badge gl-display-inline-flex gl-pr-0 no-drag gl-text-gray-500"
         :class="{
           'gl-display-none!': !list.isExpanded && isSwimlanesHeader,

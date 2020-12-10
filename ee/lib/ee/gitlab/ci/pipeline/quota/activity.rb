@@ -5,7 +5,7 @@ module EE
     module Ci
       module Pipeline
         module Quota
-          class Activity < Ci::Limit
+          class Activity < ::Gitlab::Ci::Limit
             include ::Gitlab::Utils::StrongMemoize
             include ActionView::Helpers::TextHelper
 
@@ -21,24 +21,23 @@ module EE
             def exceeded?
               return false unless enabled?
 
-              excessive_pipelines_count > 0
+              alive_pipelines_count > ci_active_pipelines_limit
             end
 
             def message
               return unless exceeded?
 
-              'Active pipelines limit exceeded by ' \
-                "#{pluralize(excessive_pipelines_count, 'pipeline')}!"
+              'Project has too many active pipelines! ' \
+                "There are #{pluralize(alive_pipelines_count, 'active pipeline')}, "\
+                "but the limit is #{ci_active_pipelines_limit}."
             end
 
             private
 
-            def excessive_pipelines_count
-              @excessive ||= alive_pipelines_count - ci_active_pipelines_limit
-            end
-
             def alive_pipelines_count
-              @project.ci_pipelines.alive.count
+              strong_memoize(:alive_pipelines_limit) do
+                @project.ci_pipelines.alive.count
+              end
             end
 
             def ci_active_pipelines_limit

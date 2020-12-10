@@ -1,7 +1,7 @@
 ---
 stage: none
 group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Environment selection
@@ -19,7 +19,7 @@ We can specify what environments or pipelines to run tests against using the `on
 | `production` | Match against production | `Static` |
 | `pipeline` | Match against a pipeline | `Array` or `Static`|
 
-CAUTION: **Caution:**
+WARNING:
 You cannot specify `:production` and `{ <switch>: 'value' }` simultaneously.
 These options are mutually exclusive. If you want to specify production, you
 can control the `tld` and `domain` independently.
@@ -35,7 +35,7 @@ can control the `tld` and `domain` independently.
 | `dev.gitlab.org`                         | `only: { tld: '.org', domain: 'gitlab', subdomain: 'dev' }` | `(dev).gitlab.org` |
 | `staging.gitlab.com & domain.gitlab.com` | `only: { subdomain: %i[staging domain] }` | `(staging|domain).+.com`             |
 | `nightly`                                | `only: { pipeline: :nightly }` | "nightly" |
-| `nightly`, `canary` | `only_run_in_pipeline: [:nightly, :canary]` | ["nightly"](https://gitlab.com/gitlab-org/quality/nightly) and ["canary"](https://gitlab.com/gitlab-org/quality/canary) |
+| `nightly`, `canary` | `only: { pipeline: [:nightly, :canary] }` | ["nightly"](https://gitlab.com/gitlab-org/quality/nightly) and ["canary"](https://gitlab.com/gitlab-org/quality/canary) |
 
 ```ruby
 RSpec.describe 'Area' do

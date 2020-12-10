@@ -12,6 +12,7 @@ import BoardSidebarWeightInput from './sidebar/board_sidebar_weight_input.vue';
 import BoardSidebarLabelsSelect from '~/boards/components/sidebar/board_sidebar_labels_select.vue';
 import BoardSidebarDueDate from '~/boards/components/sidebar/board_sidebar_due_date.vue';
 import BoardSidebarSubscription from '~/boards/components/sidebar/board_sidebar_subscription.vue';
+import BoardSidebarMilestoneSelect from '~/boards/components/sidebar/board_sidebar_milestone_select.vue';
 
 export default {
   headerHeight: `${contentTop()}px`,
@@ -25,6 +26,7 @@ export default {
     BoardSidebarLabelsSelect,
     BoardSidebarDueDate,
     BoardSidebarSubscription,
+    BoardSidebarMilestoneSelect,
   },
   mixins: [glFeatureFlagsMixin()],
   computed: {
@@ -59,6 +61,7 @@ export default {
       <board-sidebar-labels-select />
       <board-sidebar-due-date />
       <board-sidebar-subscription />
+      <board-sidebar-milestone-select />
     </template>
   </gl-drawer>
 </template>

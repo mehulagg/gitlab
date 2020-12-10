@@ -37,12 +37,10 @@ module Types
             description: 'Indicates if latest test report was created by user'
 
       field :project, ProjectType, null: false,
-            description: 'Project to which the requirement belongs',
-            resolve: -> (obj, _args, _ctx) { Gitlab::Graphql::Loaders::BatchModelLoader.new(Project, obj.project_id).find }
+            description: 'Project to which the requirement belongs'
 
       field :author, UserType, null: false,
-            description: 'Author of the requirement',
-            resolve: -> (obj, _args, _ctx) { Gitlab::Graphql::Loaders::BatchModelLoader.new(User, obj.author_id).find }
+            description: 'Author of the requirement'
 
       field :test_reports, TestReportType.connection_type, null: true, complexity: 5,
             description: 'Test reports of the requirement',
@@ -53,6 +51,14 @@ module Types
 
       field :updated_at, Types::TimeType, null: false,
             description: 'Timestamp of when the requirement was last updated'
+
+      def project
+        Gitlab::Graphql::Loaders::BatchModelLoader.new(Project, object.project_id).find
+      end
+
+      def author
+        Gitlab::Graphql::Loaders::BatchModelLoader.new(User, object.author_id).find
+      end
     end
   end
 end

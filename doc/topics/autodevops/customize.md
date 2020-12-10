@@ -1,7 +1,7 @@
 ---
 stage: Configure
 group: Configure
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Customizing Auto DevOps
@@ -78,7 +78,7 @@ Use Base64 encoding if you need to pass complex values, such as newlines and
 spaces. Left unencoded, complex values like these can cause escaping issues
 due to how Auto DevOps uses the arguments.
 
-CAUTION: **Warning:**
+WARNING:
 Avoid passing secrets as Docker build arguments if possible, as they may be
 persisted in your image. See
 [this discussion of best practices with secrets](https://github.com/moby/moby/issues/13490) for details.
@@ -154,7 +154,7 @@ You can override the default values in the `values.yaml` file in the
   `HELM_UPGRADE_VALUES_FILE` [environment variable](#environment-variables) with
   the path and name.
 
-NOTE: **Note:**
+NOTE:
 For GitLab 12.5 and earlier, use the `HELM_UPGRADE_EXTRA_ARGS` environment variable
 to override the default chart values by setting `HELM_UPGRADE_EXTRA_ARGS` to `--values <my-values.yaml>`.
 
@@ -243,7 +243,7 @@ include:
 
 See the [Auto DevOps template](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Auto-DevOps.gitlab-ci.yml) for information on available jobs.
 
-DANGER: **Deprecated:**
+WARNING:
 Auto DevOps templates using the [`only`](../../ci/yaml/README.md#onlyexcept-basic) or
 [`except`](../../ci/yaml/README.md#onlyexcept-basic) syntax have switched
 to the [`rules`](../../ci/yaml/README.md#rules) syntax, starting in
@@ -268,7 +268,7 @@ postgres://user:password@postgres-host:postgres-port/postgres-database
 
 ### Upgrading PostgresSQL
 
-CAUTION: **Deprecation:**
+WARNING:
 The variable `AUTO_DEVOPS_POSTGRES_CHANNEL` that controls default provisioned
 PostgreSQL was changed to `2` in [GitLab 13.0](https://gitlab.com/gitlab-org/gitlab/-/issues/210499).
 To keep using the old PostgreSQL, set the `AUTO_DEVOPS_POSTGRES_CHANNEL` variable to
@@ -355,12 +355,12 @@ applications.
 | `ROLLOUT_STATUS_DISABLED`               | From GitLab 12.0, used to disable rollout status check because it does not support all resource types, for example, `cronjob`. |
 | `STAGING_ENABLED`                       | From GitLab 10.8, used to define a [deploy policy for staging and production environments](#deploy-policy-for-staging-and-production-environments). |
 
-TIP: **Tip:**
+NOTE:
 After you set up your replica variables using a
 [project variable](../../ci/variables/README.md#gitlab-cicd-environment-variables),
 you can scale your application by redeploying it.
 
-CAUTION: **Caution:**
+WARNING:
 You should *not* scale your application using Kubernetes directly. This can
 cause confusion with Helm not detecting the change, and subsequent deploys with
 Auto DevOps can undo your changes.
@@ -538,7 +538,7 @@ service:
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-ci-yml/-/merge_requests/160) in GitLab 10.8.
 
-TIP: **Tip:**
+NOTE:
 You can also set this inside your [project's settings](index.md#deployment-strategy).
 
 The normal behavior of Auto DevOps is to use continuous deployment, pushing
@@ -567,7 +567,7 @@ If you define `CANARY_ENABLED` with a non-empty value, then two manual jobs are 
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/5415) in GitLab 10.8.
 
-TIP: **Tip:**
+NOTE:
 You can also set this inside your [project's settings](index.md#deployment-strategy).
 
 When you're ready to deploy a new version of your app to production, you may want
@@ -615,7 +615,7 @@ With `INCREMENTAL_ROLLOUT_MODE` set to `manual` and with `STAGING_ENABLED`
 
 ![Rollout and staging enabled](img/rollout_staging_enabled.png)
 
-WARNING: **Deprecation:**
+WARNING:
 Before GitLab 11.4, the presence of the `INCREMENTAL_ROLLOUT_ENABLED` environment
 variable enabled this feature. This configuration is deprecated, and is scheduled to be
 removed in the future.
@@ -624,7 +624,7 @@ removed in the future.
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/7545) in GitLab 11.4.
 
-TIP: **Tip:**
+NOTE:
 You can also set this inside your [project's settings](index.md#deployment-strategy).
 
 This configuration is based on
@@ -662,5 +662,5 @@ The banner can be disabled for:
   - Through the REST API with an admin access token:
 
     ```shell
-    curl --data "value=true" --header "PRIVATE-TOKEN: <personal_access_token>" https://gitlab.example.com/api/v4/features/auto_devops_banner_disabled
+    curl --data "value=true" --header "PRIVATE-TOKEN: <personal_access_token>" "https://gitlab.example.com/api/v4/features/auto_devops_banner_disabled"
     ```

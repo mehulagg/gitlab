@@ -90,6 +90,8 @@ class Issue < ApplicationRecord
   alias_attribute :parent_ids, :project_id
   alias_method :issuing_parent, :project
 
+  alias_attribute :external_author, :service_desk_reply_to
+
   scope :in_projects, ->(project_ids) { where(project_id: project_ids) }
   scope :not_in_projects, ->(project_ids) { where.not(project_id: project_ids) }
 
@@ -306,6 +308,7 @@ class Issue < ApplicationRecord
     !moved? && persisted? &&
       user.can?(:admin_issue, self.project)
   end
+  alias_method :can_clone?, :can_move?
 
   def to_branch_name
     if self.confidential?

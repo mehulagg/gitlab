@@ -23,6 +23,7 @@ module EE
       include ProjectSecurityScannersInformation
 
       ignore_columns :mirror_last_update_at, :mirror_last_successful_update_at, remove_after: '2019-12-15', remove_with: '12.6'
+      ignore_columns :pull_mirror_branch_prefix, remove_after: '2021-02-22', remove_with: '14.0'
 
       before_save :set_override_pull_mirror_available, unless: -> { ::Gitlab::CurrentSettings.mirror_available }
       before_save :set_next_execution_timestamp_to_now, if: ->(project) { project.mirror? && project.mirror_changed? && project.import_state }
@@ -38,12 +39,12 @@ module EE
       has_one :push_rule, ->(project) { project&.feature_available?(:push_rules) ? all : none }
       has_one :index_status
 
-      has_one :jenkins_service
       has_one :github_service
       has_one :gitlab_slack_application_service
 
       has_one :status_page_setting, inverse_of: :project, class_name: 'StatusPage::ProjectSetting'
       has_one :compliance_framework_setting, class_name: 'ComplianceManagement::ComplianceFramework::ProjectSettings', inverse_of: :project
+      has_many :compliance_management_frameworks, through: :compliance_framework_setting, source: 'compliance_management_framework'
       has_one :security_setting, class_name: 'ProjectSecuritySetting'
       has_one :vulnerability_statistic, class_name: 'Vulnerabilities::Statistic'
 
@@ -78,6 +79,7 @@ module EE
       has_many :vulnerability_identifiers, class_name: 'Vulnerabilities::Identifier'
       has_many :vulnerability_scanners, class_name: 'Vulnerabilities::Scanner'
       has_many :vulnerability_exports, class_name: 'Vulnerabilities::Export'
+      has_many :vulnerability_remediations, class_name: 'Vulnerabilities::Remediation', inverse_of: :project
 
       has_many :dast_site_profiles
       has_many :dast_site_tokens
@@ -97,6 +99,10 @@ module EE
       has_many :downstream_projects, class_name: 'Project', through: :downstream_project_subscriptions, source: :downstream_project
 
       has_many :sourced_pipelines, class_name: 'Ci::Sources::Project', foreign_key: :source_project_id
+
+      has_many :incident_management_oncall_schedules, class_name: 'IncidentManagement::OncallSchedule', inverse_of: :project
+
+      elastic_index_dependant_association :issues, on_change: :visibility_level
 
       scope :with_shared_runners_limit_enabled, -> do
         if ::Ci::Runner.has_shared_runners_with_non_zero_public_cost?
@@ -165,20 +171,20 @@ module EE
       scope :without_repository_size_limit, -> { where(repository_size_limit: nil) }
 
       scope :order_by_total_repository_size_excess_desc, -> (limit) do
-        excess = ::ProjectStatistics.arel_table[:repository_size] +
+        excess_arel = ::ProjectStatistics.arel_table[:repository_size] +
                    ::ProjectStatistics.arel_table[:lfs_objects_size] -
-                   ::Project.arel_table.coalesce(::Project.arel_table[:repository_size_limit], limit, 0)
+                   arel_table.coalesce(arel_table[:repository_size_limit], limit, 0)
+        alias_node = Arel::Nodes::SqlLiteral.new('excess_storage')
 
-        joins(:statistics).order(
-          Arel.sql(Arel::Nodes::Descending.new(excess).to_sql)
-        )
+        select(*arel.projections, excess_arel.as(alias_node))
+          .joins(:statistics)
+          .order(excess_arel.desc)
       end
 
       delegate :shared_runners_minutes, :shared_runners_seconds, :shared_runners_seconds_last_reset,
         to: :statistics, allow_nil: true
 
-      delegate :actual_shared_runners_minutes_limit,
-               :shared_runners_remaining_minutes_below_threshold?, to: :shared_runners_limit_namespace
+      delegate :ci_minutes_quota, to: :shared_runners_limit_namespace
 
       delegate :last_update_succeeded?, :last_update_failed?,
         :ever_updated_successfully?, :hard_failed?,
@@ -200,9 +206,6 @@ module EE
                         less_than: ::Gitlab::Pages::MAX_SIZE / 1.megabyte }
 
       validates :approvals_before_merge, numericality: true, allow_blank: true
-
-      validates :pull_mirror_branch_prefix, length: { maximum: 50 }
-      validate :check_pull_mirror_branch_prefix
 
       with_options if: :mirror? do
         validates :import_url, presence: true
@@ -344,10 +347,6 @@ module EE
       feature_available?(:jira_issues_integration)
     end
 
-    def jira_vulnerabilities_integration_available?
-      ::Feature.enabled?(:jira_for_vulnerabilities, self, default_enabled: false) && feature_available?(:jira_vulnerabilities_integration)
-    end
-
     def multiple_approval_rules_available?
       feature_available?(:multiple_approval_rules)
     end
@@ -429,6 +428,12 @@ module EE
       return 0 unless feature_available?(:merge_request_approvers)
 
       super
+    end
+
+    def applicable_approval_rules_for_user(user_id, target_branch = nil)
+      visible_approval_rules(target_branch: target_branch).select do |rule|
+        rule.approvers.pluck(:id).include?(user_id)
+      end
     end
 
     def visible_approval_rules(target_branch: nil)
@@ -578,7 +583,6 @@ module EE
     def disabled_services
       strong_memoize(:disabled_services) do
         super.tap do |services|
-          services.push('jenkins') unless feature_available?(:jenkins_integration)
           services.push('github') unless feature_available?(:github_project_service_integration)
           ::Gitlab::CurrentSettings.slack_app_enabled ? services.push('slack_slash_commands') : services.push('gitlab_slack_application')
         end
@@ -725,6 +729,16 @@ module EE
       super.concat(requirements_ci_variables)
     end
 
+    def add_template_export_job(current_user:, after_export_strategy: nil, params: {})
+      job_id = ProjectTemplateExportWorker.perform_async(current_user.id, self.id, after_export_strategy, params)
+
+      if job_id
+        ::Gitlab::AppLogger.info(message: 'Template Export job started', project_id: self.id, job_id: job_id)
+      else
+        ::Gitlab::AppLogger.error(message: 'Template Export job failed to start', project_id: self.id)
+      end
+    end
+
     private
 
     def group_hooks
@@ -761,15 +775,6 @@ module EE
           (public? && namespace.public? || namespace.feature_available_in_plan?(feature))
       else
         globally_available
-      end
-    end
-
-    def check_pull_mirror_branch_prefix
-      return if pull_mirror_branch_prefix.blank?
-      return unless pull_mirror_branch_prefix_changed?
-
-      unless ::Gitlab::GitRefValidator.validate("#{pull_mirror_branch_prefix}master")
-        errors.add(:pull_mirror_branch_prefix, _('Invalid Git ref'))
       end
     end
 

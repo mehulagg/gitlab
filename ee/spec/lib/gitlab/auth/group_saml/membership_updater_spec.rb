@@ -6,13 +6,15 @@ RSpec.describe Gitlab::Auth::GroupSaml::MembershipUpdater do
   let(:user) { create(:user) }
   let(:saml_provider) { create(:saml_provider, default_membership_role: Gitlab::Access::DEVELOPER) }
   let(:group) { saml_provider.group }
-  let(:omniauth_auth_hash) do
-    OmniAuth::AuthHash.new(extra: {
-      raw_info: OneLogin::RubySaml::Attributes.new('groups' => %w(Developers Owners))
-    })
+  let(:auth_hash) do
+    Gitlab::Auth::GroupSaml::AuthHash.new(
+      OmniAuth::AuthHash.new(extra: {
+        raw_info: OneLogin::RubySaml::Attributes.new('groups' => %w(Developers Owners))
+      })
+    )
   end
 
-  subject(:update_membership) { described_class.new(user, saml_provider, omniauth_auth_hash).execute }
+  subject(:update_membership) { described_class.new(user, saml_provider, auth_hash).execute }
 
   it 'adds the user to the group' do
     subject

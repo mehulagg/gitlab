@@ -33,8 +33,7 @@ module Types
       field :snippet_repository_registries, ::Types::Geo::SnippetRepositoryRegistryType.connection_type,
             null: true,
             resolver: ::Resolvers::Geo::SnippetRepositoryRegistriesResolver,
-            description: 'Find snippet repository registries on this Geo node',
-            feature_flag: :geo_snippet_repository_replication
+            description: 'Find snippet repository registries on this Geo node'
       field :terraform_state_version_registries, ::Types::Geo::TerraformStateVersionRegistryType.connection_type,
             null: true,
             resolver: ::Resolvers::Geo::TerraformStateVersionRegistriesResolver,
