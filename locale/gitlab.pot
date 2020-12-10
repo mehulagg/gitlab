@@ -5149,9 +5149,6 @@ msgstr ""
 msgid "Channel handle (e.g. town-square)"
 msgstr ""
 
-msgid "Charts"
-msgstr ""
-
 msgid "Charts can't be displayed as the request for data has timed out. %{documentationLink}"
 msgstr ""
 
@@ -12030,6 +12027,9 @@ msgid "Fill in the fields below, turn on %{strong_open}Enable SAML authenticatio
 msgstr ""
 
 msgid "Filter"
+msgstr ""
+
+msgid "Filter by"
 msgstr ""
 
 msgid "Filter by %{issuable_type} that are currently closed."
