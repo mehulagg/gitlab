@@ -101,6 +101,7 @@ available to roles for all users (Guest and above).
 
 1. Guest users can perform this action on public and internal projects, but not private projects. This doesn't apply to [external users](#external-users) where explicit access must be given even if the project is internal.
 1. If **Public pipelines** is enabled in **Project Settings > CI/CD**.
+1. Applies only to comments on [Design Management](project/issues/design_management.md) designs.
 
 ### Project members Reporter permissions
 
@@ -119,7 +120,7 @@ available only to users with Reporter permissions and above.
   - Lock threads
   - Manage issue tracker
   - Manage related issues
-- Commits
+- Project
   - Set commit status
 - View
   - See a container registry
@@ -132,6 +133,8 @@ available only to users with Reporter permissions and above.
   - View Repository analytics
   - View Error Tracking list <!-- Unsure: is this analytics? -->
   - View metrics dashboard annotations
+
+1. Applies only to comments on [Design Management](project/issues/design_management.md) designs.
 
 ### Project members Developer permissions
 
@@ -149,6 +152,7 @@ available only to users with Developer permissions and above.
   - Add tags
   - Create/edit/delete project milestones
   - Manage Feature Flags **(PREMIUM)**
+  - Reposition comments on images (*3*)
 - Containers
   - Read Terraform state
   - Update a container registry
@@ -191,8 +195,57 @@ available only to users with Developer permissions and above.
 1. For information on eligible approvers for merge requests, see
    [Eligible approvers](project/merge_requests/merge_request_approvals.md#eligible-approvers).
 1. If the [branch is protected](project/protected_branches.md#using-the-allowed-to-merge-and-allowed-to-push-settings), this depends on the access Developers and Maintainers are given.
+1. Applies only to comments on [Design Management](project/issues/design_management.md) designs.
 
 ### Project members Maintainer permissions
+
+The following list depicts user permission levels in a project,
+available only to users with Maintainer permissions and above.
+
+- General
+  - Delete [packages](packages/index.md)
+  - Manage clusters
+  - Edit comments (posted by any user)
+  - Reposition comments on images
+  - Manage error tracking
+- Security
+  - Request a CVE ID **(FREE ONLY)**
+- Terminals
+  - Use environment terminals
+  - Run Web IDE's Interactive Web Terminals
+- Users / Groups
+  - Add new team members
+- Branches
+  - Enable / disable branch protection
+  - Push to protected branches
+  - Turn on/off protected branches for developers
+  - Manage [push rules](../push_rules/push_rules.md)
+- Project
+  - Enable/disable tag protections
+  - Edit project settings
+  - Edit project badges
+  - Export project
+  - Share (invite) projects with groups [Share Group Lock] (*1*)
+  - Add deploy keys to project
+  - Configure project hooks
+  - Manage Project Operations
+  - View project audit events <!-- Does this belong in analytics? -->
+  - Manage [project access tokens]() **(CORE ONLY)**
+- Containers
+  - Manage Terraform state
+- License
+  - Manage license policy **(ULTIMATE)**
+- Jobs (CI/CD)
+  - Manage runners
+  - Manage job triggers
+  - Manage CI/CD variables
+- Publishing
+  - Manage GitLab Pages
+  - Manage GitLab Pages domains and certificates
+  - Remove GitLab Pages
+  - Delete wiki pages
+
+1. When [Share Group Lock](group/index.md#share-with-group-lock) is enabled the project can't be shared with other groups. It does not affect group with group sharing.
 
 ### Project members Owner permissions
 
