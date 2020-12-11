@@ -42,7 +42,10 @@
             = f.label :visibility_level, class: 'label-bold' do
               = _('Visibility level')
             .js-visibility-level-dropdown{ data: { visibility_level_options: visibility_level_options.to_json, default_level: f.object.visibility_level } }
-        = render partial: 'shared/groups/invite_members'
+        - if experiment_enabled?(:trial_during_signup)
+          = render partial: 'shared/groups/trial_form'
+        - else
+          = render partial: 'shared/groups/invite_members'
         .row
           .form-group.col-sm-12.mb-0
             = button_tag class: %w[btn btn-success w-100] do

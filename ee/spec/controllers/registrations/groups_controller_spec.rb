@@ -29,6 +29,12 @@ RSpec.describe Registrations::GroupsController do
         expect(assigns(:group).visibility_level).to eq(Gitlab::CurrentSettings.default_group_visibility)
       end
 
+      it 'calls the record user method for trial_during_signup experiment' do
+        expect(controller).to receive(:record_experiment_user).with(:trial_during_signup)
+
+        subject
+      end
+
       context 'user without the ability to create a group' do
         let(:user) { create(:user, can_create_group: false) }
 
@@ -46,9 +52,11 @@ RSpec.describe Registrations::GroupsController do
   end
 
   describe 'POST #create' do
-    subject { post :create, params: { group: params } }
+    subject { post :create, params: { group: params }.merge(trial_form_params) }
 
     let(:params) { { name: 'Group name', path: 'group-path', visibility_level: Gitlab::VisibilityLevel::PRIVATE, emails: ['', ''] } }
+
+    let_it_be(:trial_form_params) { { trial: 'false' } }
 
     context 'with an unauthenticated user' do
       it { is_expected.to have_gitlab_http_status(:redirect) }
@@ -66,7 +74,93 @@ RSpec.describe Registrations::GroupsController do
       end
 
       it { is_expected.to have_gitlab_http_status(:redirect) }
-      it { is_expected.to redirect_to(new_users_sign_up_project_path(namespace_id: user.groups.last.id)) }
+      it { is_expected.to redirect_to(new_users_sign_up_project_path(namespace_id: user.groups.last.id, trial: false)) }
+
+      it 'calls the record user trial_during_signup experiment' do
+        expect(controller).to receive(:record_experiment_user).with(:trial_during_signup, trial_chosen: false)
+
+        subject
+      end
+
+      context 'in experiment group for trial_during_signup' do
+        let_it_be(:group) { create(:group) }
+        let_it_be(:trial_form_params) do
+          {
+            trial: 'true',
+            company_name: 'ACME',
+            company_size: '1-99',
+            phone_number: '11111111',
+            number_of_users: '17',
+            country: 'Norway'
+          }
+        end
+
+        let_it_be(:trial_user_params) do
+          {
+            work_email: user.email,
+            first_name: user.first_name,
+            last_name: user.last_name,
+            uid: user.id,
+            skip_email_confirmation:  true,
+            gitlab_com_trial: true,
+            provider: 'gitlab',
+            newsletter_segment: user.email_opted_in
+          }
+        end
+
+        let_it_be(:trial_params) do
+          {
+            trial_user: ActionController::Parameters.new(trial_form_params.except(:trial).merge(trial_user_params)).permit!
+          }
+        end
+
+        let_it_be(:apply_trial_params) do
+          {
+            uid: user.id,
+            trial_user: {
+              namespace_id: group.id,
+              gitlab_com_trial: true,
+              sync_to_gl: true
+            }
+          }
+        end
+
+        before do
+          allow(controller).to receive(:experiment_enabled?).with(:onboarding_issues).and_call_original
+          allow(controller).to receive(:experiment_enabled?).with(:trial_during_signup).and_return(true)
+        end
+
+        it 'calls the lead creation and trial apply services' do
+          expect_next_instance_of(Groups::CreateService) do |service|
+            expect(service).to receive(:execute).and_return(group)
+          end
+          expect_next_instance_of(GitlabSubscriptions::CreateLeadService) do |service|
+            expect(service).to receive(:execute).with(trial_params).and_return(success: true)
+          end
+          expect_next_instance_of(GitlabSubscriptions::ApplyTrialService) do |service|
+            expect(service).to receive(:execute).with(apply_trial_params).and_return({ success: true })
+          end
+
+          subject
+        end
+
+        context 'when user chooses no trial' do
+          let_it_be(:trial_form_params) { { trial: 'false' } }
+
+          it 'calls the record user trial_during_signup experiment' do
+            expect(controller).to receive(:record_experiment_user).with(:trial_during_signup, trial_chosen: false)
+
+            subject
+          end
+
+          it 'does not call trial_during_signup experiment methods' do
+            expect(controller).not_to receive(:create_lead)
+            expect(controller).not_to receive(:apply_trial)
+
+            subject
+          end
+        end
+      end
 
       it_behaves_like GroupInviteMembers
 
@@ -76,6 +170,13 @@ RSpec.describe Registrations::GroupsController do
         it 'does not create a group' do
           expect { subject }.not_to change { Group.count }
           expect(assigns(:group).errors).not_to be_blank
+        end
+
+        it 'does not call trial_during_signup experiment methods' do
+          expect(controller).not_to receive(:create_lead)
+          expect(controller).not_to receive(:apply_trial)
+
+          subject
         end
 
         it { is_expected.to have_gitlab_http_status(:ok) }

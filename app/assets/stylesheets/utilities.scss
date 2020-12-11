@@ -130,6 +130,7 @@
   display: flex;
 }
 
+
 // Will be moved to @gitlab/ui in https://gitlab.com/gitlab-org/gitlab-ui/-/issues/1085
 .gl-md-flex-direction-column {
   @media (min-width: $breakpoint-md) {
@@ -155,4 +156,18 @@
 
 .gl-w-40p {
   width: 40%;
+}
+
+// A CSS cross-browser fix for Select2 failure to display HTML5 required warnings
+// MR link https://gitlab.com/gitlab-org/gitlab/-/merge_requests/22716
+.gl-select2-html5-required-fix div.select2-container+select.select2 {
+  display: block !important;
+  width: 1px;
+  height: 1px;
+  z-index: -1;
+  opacity: 0;
+  margin: -3px auto 0;
+  background-image: none;
+  background-color: transparent;
+  border: 0;
 }

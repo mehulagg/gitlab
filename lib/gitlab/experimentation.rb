@@ -84,6 +84,9 @@ module Gitlab
       },
       trial_registration_with_social_signin: {
         tracking_category: 'Growth::Conversion::Experiment::TrialRegistrationWithSocialSigning'
+      },
+      trial_during_signup: {
+        tracking_category: 'Growth::Conversion::Experiment::TrialDuringSignup'
       }
     }.freeze
 
