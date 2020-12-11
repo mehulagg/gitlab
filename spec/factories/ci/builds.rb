@@ -486,6 +486,14 @@ FactoryBot.define do
       end
     end
 
+    trait :artifacts_not_downloadable do
+      options do
+        {
+          artifacts: { downloadable: false }
+        }
+      end
+    end
+
     trait :non_playable do
       status { 'created' }
       self.when { 'manual' }

@@ -9,10 +9,11 @@ class PipelineDetailsEntity < PipelineEntity
 
   expose :details do
     expose :artifacts do |pipeline, options|
-      rel = pipeline.downloadable_artifacts
+      rel = pipeline.downloadable_artifacts.select { |artifact| artifact.job.downloadable_artifacts? }
 
       BuildArtifactEntity.represent(rel, options)
     end
+
     expose :manual_actions, using: BuildActionEntity
     expose :scheduled_actions, using: BuildActionEntity
   end

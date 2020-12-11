@@ -719,6 +719,22 @@ RSpec.describe Ci::Build do
     end
   end
 
+  describe '#downloadable_artifacts?' do
+    subject { build.downloadable_artifacts? }
+
+    context 'artifacts with defaults' do
+      let(:build) { create(:ci_build, :artifacts) }
+
+      it { is_expected.to be_truthy }
+    end
+
+    context 'artifacts not downloadable' do
+      let(:build) { create(:ci_build, :artifacts, :artifacts_not_downloadable) }
+
+      it { is_expected.to be_falsy }
+    end
+  end
+
   describe '#artifacts_expired?' do
     subject { build.artifacts_expired? }
 

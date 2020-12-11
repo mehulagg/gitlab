@@ -741,6 +741,12 @@ module Ci
       artifacts_metadata?
     end
 
+    def downloadable_artifacts?
+      return true if options.dig(:artifacts, :downloadable).nil?
+
+      options.dig(:artifacts, :downloadable)
+    end
+
     def artifacts_metadata_entry(path, **options)
       artifacts_metadata.open do |metadata_stream|
         metadata = Gitlab::Ci::Build::Artifacts::Metadata.new(
