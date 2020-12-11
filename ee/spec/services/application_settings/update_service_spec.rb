@@ -232,6 +232,8 @@ RSpec.describe ApplicationSettings::UpdateService do
     end
 
     context 'maintenance mode' do
+      let(:opts) { {} }
+
       context 'enabled' do
         before do
           stub_application_setting(maintenance_mode: true)
@@ -239,8 +241,7 @@ RSpec.describe ApplicationSettings::UpdateService do
 
         context 'when user is an admin' do
           before do
-            user.update_attributes!(role: :admin)
-            user.save!
+            user.update!(admin: true)
             puts "user.admin? #{user.admin?}"
           end
 

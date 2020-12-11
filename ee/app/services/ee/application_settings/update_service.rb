@@ -72,7 +72,7 @@ module EE
         return true if current_user.admin?
 
         application_setting.errors.add(:maintenance_mode, 'Application Settings can only be updated by admins during maintenance mode.')
-        return false
+        false
       end
     end
   end
