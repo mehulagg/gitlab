@@ -192,6 +192,19 @@ You can use Vale:
 - [In a Git hook](#configure-pre-push-hooks). Vale only reports errors in the Git hook (the same
   configuration as the CI/CD pipelines), and does not report suggestions or warnings.
 
+#### Vale
+
+Vale returns three types of results: `suggestion`, `warning`, and `error`:
+
+- **Suggestion**-level results are writing tips, and are not displayed in CI
+  job output. Suggestions don't break CI.
+- **Warning**-level results are style guide violations, are not displayed in CI
+  job output, and should contain clear explanations of how to resolve the warning.
+  Warnings may be technical debt, or items that will become an error-level test
+  after the Technical Writing team completes cleanup for. Warnings don't break CI.
+- **Error**-level are style guide violations, and should contain clear explanations
+  of how to resolve the error. Errors break CI and are displayed in CI job output.
+
 ### Install linters
 
 At a minimum, install [markdownlint](#markdownlint) and [Vale](#vale) to match the checks run in
