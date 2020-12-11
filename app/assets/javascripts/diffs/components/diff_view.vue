@@ -70,6 +70,8 @@ export default {
       this.dragStart = line;
     },
     onDragOver(line) {
+      if (line.chunk !== this.dragStart.chunk) return;
+
       const pickLine = ({ line_code, new_line, old_line, type, index }) => ({
         line_code,
         new_line,
@@ -96,6 +98,7 @@ export default {
         lineCode: this.updatedLineRange.end.line_code,
         fileHash: this.diffFile.file_hash,
       });
+      this.dragStart = null;
     },
   },
   userColorScheme: window.gon.user_color_scheme,

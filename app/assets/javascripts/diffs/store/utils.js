@@ -44,8 +44,13 @@ export const parallelizeDiffLines = (diffLines, inline) => {
   let freeRightIndex = null;
   const lines = [];
 
+  let chunk = 0;
+
   for (let i = 0, diffLinesLength = diffLines.length, index = 0; i < diffLinesLength; i += 1) {
     const line = diffLines[i];
+    line.chunk = chunk;
+
+    if (isMeta(line)) chunk += 1;
 
     if (isRemoved(line) || inline) {
       lines.push({
