@@ -140,6 +140,95 @@ definition they could execute privileged Docker commands on the runner
 host. Having proper access control policies mitigates this attack vector by
 allowing access only to trusted actors.
 
+### Setting up a private runner for CodeQuality without DinD
+
+If you prefer to not use Docker-in-Docker and configure your own runners, there is a particular configuration that can
+greatly speed up job execution and not require your runner to operate in privileged mode. This alternative configuration
+uses socket binding to make the Runner's Docker daemon created for the job directly to the job environment. This comes
+with a [set of other considerations](https://docs.gitlab.com/ee/ci/docker/using_docker_build.html#use-docker-socket-binding)
+to be made, but may be preferable depending on your use case.
+
+**Register a new runner**
+
+```bash
+$ gitlab-runner register
+
+Runtime platform                                    arch=amd64 os=darwin pid=37601 revision=692ae235 version=11.9.0
+WARNING: Running in user-mode.
+WARNING: Use sudo for system-mode:
+WARNING: $ sudo gitlab-runner...
+
+# In this example, the project is on gitlab.com but I'm going to set up my own runner just for CQ to save myself a lot of money.
+Please enter the gitlab-ci coordinator URL (e.g. https://gitlab.com/):
+https://gitlab.com/
+
+# Get your token from the "Runners" section of https://gitlab.com/<namespace>/<project_name>/-/settings/ci_cd
+Please enter the gitlab-ci token for this runner:
+<token>
+
+# This is not _exactly_ required, but if there's more than one runner for the project (e.g. gitlab.com shared runners) you should use this to make sure the right runner picks up the job.
+Please enter the gitlab-ci description for this runner:
+[<machine_name>]: cq-sans-dind
+
+Please enter the gitlab-ci tags for this runner (comma separated):
+cq-sans-dind
+
+Registering runner... succeeded                     runner=rfJNmP6d
+
+Please enter the executor: shell, kubernetes, docker-ssh, parallels, ssh, virtualbox, docker+machine, docker-ssh+machine, docker:
+docker
+
+Please enter the default Docker image (e.g. ruby:2.1):
+docker:stable
+
+Runner registered successfully. Feel free to start it, but if it's running already the config should be automatically reloaded!
+```
+
+**Expose the job's docker daemon to the job container**
+
+Open up your runner `config.toml` file and modify `volumes`
+
+```diff
+- volumes = ["/cache"]
++ volumes = ["/cache", "/var/run/docker.sock:/var/run/docker.sock"]
+```
+
+**Full Runner Configuration from config.toml**
+
+```toml
+[[runners]]
+  name = "cq-sans-dind"
+  url = "https://gitlab.com/"
+  token = <token>
+  executor = "docker"
+  [runners.docker]
+    tls_verify = false
+    image = "docker:stable"
+    privileged = false
+    disable_entrypoint_overwrite = false
+    oom_kill_disable = false
+    disable_cache = false
+    volumes = ["/var/run/docker.sock:/var/run/docker.sock", "/cache"]
+    shm_size = 0
+  [runners.cache]
+    [runners.cache.s3]
+    [runners.cache.gcs]
+```
+
+**Results**
+
+- [x] Privileged mode is not used
+- [x] Docker-in-Docker is not used
+- [x] Docker images, including all CodeClimate images, are cached and not re-fetched for subsequent jobs
+
+Upon making a [small change](https://gitlab.com/drewcimino/test-code-quality-template/-/merge_requests/4/diffs?commit_id=1e705607aef7236c1b20bb6f637965f3f3e53a46) to an [open merge request](https://gitlab.com/drewcimino/test-code-quality-template/-/merge_requests/4/pipelines) running CodeQuality analysis, run time for the second pipeline is drastically shorter:
+
+![image](/uploads/654c80cb37bdf005261dd3a614cf0599/image.png)
+
+**Is this possible on gitlab.com shared runners?**
+
+No. Despite the shared runners being configured with `privileged=true`, they are not configured to expose `docker.sock` into the job container, and so socket binding cannot be used to make `docker` available in the context of the job script. DinD was chosen as a design decision by the runner team, instead of enabling this.
+
 ### Disabling the code quality job
 
 The `code_quality` job doesn't run if the `$CODE_QUALITY_DISABLED` environment
