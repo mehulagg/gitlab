@@ -18,6 +18,18 @@ then
   ((ERRORCODE++))
 fi
 
+# Test for non-standard spaces (NBSP, NNBSP) in documentation.
+echo '=> Checking for non-standard spaces...'
+echo
+grep --extended-regexp --recursive --color=auto '  ' doc/ >/dev/null 2>&1
+if [ $? -eq 0 ]
+then
+  echo '✖ ERROR: Non-standard spaces (NBSP, NNBSP) should not be used in documentation!
+         Replace with standard spaces:' >&2
+  grep --extended-regexp --recursive --color=auto '  ' doc/
+  ((ERRORCODE++))
+fi
+
 # Ensure that the CHANGELOG.md does not contain duplicate versions
 DUPLICATE_CHANGELOG_VERSIONS=$(grep --extended-regexp '^## .+' CHANGELOG.md | sed -E 's| \(.+\)||' | sort -r | uniq -d)
 echo '=> Checking for CHANGELOG.md duplicate entries...'
