@@ -188,11 +188,7 @@ class IssuableBaseService < BaseService
     change_additional_attributes(issuable)
     old_associations = associations_before_update(issuable)
 
-    label_ids = process_label_ids(params, existing_label_ids: issuable.label_ids)
-    if labels_changing?(issuable.label_ids, label_ids)
-      params[:label_ids] = label_ids
-      issuable.touch
-    end
+    change_labels(issuable)
 
     if issuable.changed? || params.present?
       issuable.assign_attributes(params)
@@ -295,10 +291,6 @@ class IssuableBaseService < BaseService
     update_task(issuable)
   end
 
-  def labels_changing?(old_label_ids, new_label_ids)
-    old_label_ids.sort != new_label_ids.sort
-  end
-
   def has_title_or_description_changed?(issuable)
     issuable.title_changed? || issuable.description_changed?
   end
@@ -346,6 +338,18 @@ class IssuableBaseService < BaseService
     end
   end
   # rubocop: enable CodeReuse/ActiveRecord
+
+  def change_labels(issuable)
+    label_ids = process_label_ids(params, existing_label_ids: issuable.label_ids)
+    if array_changing?(issuable.label_ids, label_ids)
+      params[:label_ids] = label_ids
+      issuable.touch
+    end
+  end
+
+  def array_changing?(old_array, new_array)
+    old_array.sort != new_array.sort
+  end
 
   def toggle_award(issuable)
     award = params.delete(:emoji_award)
