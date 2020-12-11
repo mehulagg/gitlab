@@ -17185,6 +17185,9 @@ msgstr ""
 msgid "Merge request %{mr_link} was reviewed by %{mr_author}"
 msgstr ""
 
+msgid "Merge request (MR) approvals"
+msgstr ""
+
 msgid "Merge request approvals"
 msgstr ""
 
@@ -17198,9 +17201,6 @@ msgid "Merge request was scheduled to merge after pipeline succeeds"
 msgstr ""
 
 msgid "Merge requests"
-msgstr ""
-
-msgid "Merge requests approvals"
 msgstr ""
 
 msgid "Merge requests are a place to propose changes you've made to a project and discuss those changes with others"
@@ -20830,6 +20830,12 @@ msgstr ""
 msgid "Prev"
 msgstr ""
 
+msgid "Prevent MR approvals by author."
+msgstr ""
+
+msgid "Prevent MR approvals from users who make commits to the MR."
+msgstr ""
+
 msgid "Prevent adding new members to project membership within this group"
 msgstr ""
 
@@ -20848,7 +20854,7 @@ msgstr ""
 msgid "Prevent users from changing their profile name"
 msgstr ""
 
-msgid "Prevent users from modifying merge request approvers list"
+msgid "Prevent users from modifying MR approval rules."
 msgstr ""
 
 msgid "Prevent users from performing write operations on GitLab while performing maintenance."
