@@ -148,7 +148,7 @@ uses socket binding to make the Runner's Docker daemon created for the job direc
 with a [set of other considerations](https://docs.gitlab.com/ee/ci/docker/using_docker_build.html#use-docker-socket-binding)
 to be made, but may be preferable depending on your use case.
 
-**Register a new runner**
+#### Register a new runner
 
 ```bash
 $ gitlab-runner register
@@ -184,7 +184,7 @@ docker:stable
 Runner registered successfully. Feel free to start it, but if it's running already the config should be automatically reloaded!
 ```
 
-**Expose the job's docker daemon to the job container**
+#### Expose the runner's docker daemon to the job container
 
 Open up your runner `config.toml` file and modify `volumes`
 
@@ -193,7 +193,7 @@ Open up your runner `config.toml` file and modify `volumes`
 + volumes = ["/cache", "/var/run/docker.sock:/var/run/docker.sock"]
 ```
 
-**Full Runner Configuration from config.toml**
+#### Full Runner Configuration from config.toml
 
 ```toml
 [[runners]]
@@ -215,7 +215,7 @@ Open up your runner `config.toml` file and modify `volumes`
     [runners.cache.gcs]
 ```
 
-**Results**
+#### Results
 
 - [x] Privileged mode is not used
 - [x] Docker-in-Docker is not used
@@ -225,7 +225,7 @@ Upon making a [small change](https://gitlab.com/drewcimino/test-code-quality-tem
 
 ![image](/uploads/654c80cb37bdf005261dd3a614cf0599/image.png)
 
-**Is this possible on gitlab.com shared runners?**
+#### Is this possible on gitlab.com shared runners?
 
 No. Despite the shared runners being configured with `privileged=true`, they are not configured to expose `docker.sock` into the job container, and so socket binding cannot be used to make `docker` available in the context of the job script. DinD was chosen as a design decision by the runner team, instead of enabling this.
 
