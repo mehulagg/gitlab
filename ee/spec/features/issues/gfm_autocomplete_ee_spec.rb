@@ -9,6 +9,7 @@ RSpec.describe 'GFM autocomplete EE', :js do
   let_it_be(:project) { create(:project, group: group) }
   let_it_be(:issue) { create(:issue, project: project) }
   let_it_be(:epic) { create(:epic, group: group) }
+  let_it_be(:iteration) { create(:iteration, group: group, start_date: Time.now, due_date: Time.now + 1.day) }
 
   before do
     project.add_maintainer(user)
@@ -85,6 +86,17 @@ RSpec.describe 'GFM autocomplete EE', :js do
         wait_for_requests
 
         expect(find('.tribute-container ul', visible: true).text).to have_content(epic.title)
+      end
+
+      it 'shows iterations' do
+        note = find('#note-body')
+        page.within('.timeline-content-form') do
+          note.native.send_keys('*iteration:')
+        end
+
+        wait_for_all_requests
+
+        expect(find('.tribute-container ul', visible: true).text).to have_content(iteration.title)
       end
     end
   end

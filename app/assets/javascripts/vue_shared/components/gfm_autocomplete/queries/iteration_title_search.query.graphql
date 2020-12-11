@@ -1,0 +1,10 @@
+query iterationTitleSearch($groupPath: ID!, $title: String) {
+  group(fullPath: $groupPath) {
+    iterations(title: $title) {
+      nodes {
+        iid
+        title
+      }
+    }
+  }
+}

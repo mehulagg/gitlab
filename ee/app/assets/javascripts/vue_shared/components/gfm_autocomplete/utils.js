@@ -7,6 +7,7 @@ import {
 export const GfmAutocompleteType = {
   ...GfmAutocompleteTypeFoss,
   Epics: 'epics',
+  Iterations: 'iterations',
 };
 
 export const tributeConfig = {
@@ -15,6 +16,16 @@ export const tributeConfig = {
   [GfmAutocompleteType.Epics]: {
     config: {
       trigger: '&',
+      fillAttr: 'iid',
+      lookup: value => `${value.iid}${value.title}`,
+      menuItemTemplate: ({ original }) =>
+        `<small>${original.iid}</small> ${escape(original.title)}`,
+    },
+  },
+
+  [GfmAutocompleteType.Iterations]: {
+    config: {
+      trigger: '*iteration:',
       fillAttr: 'iid',
       lookup: value => `${value.iid}${value.title}`,
       menuItemTemplate: ({ original }) =>

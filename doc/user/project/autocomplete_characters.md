@@ -8,6 +8,11 @@ description: "Autocomplete chars in Markdown fields."
 
 # Autocomplete characters
 
+> - Iterations autocomplete [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/232601) in [GitLab Starter](https://about.gitlab.com/pricing/) 13.7.
+> - It's deployed behind a feature flag, disabled by default.
+> - It's disabled for GitLab.com.
+> - It's not recommended for production use.
+
 The autocomplete characters provide a quick way of entering field values into
 Markdown fields. When you start typing a word in a Markdown field with one of
 the following characters, GitLab progressively autocompletes against a set of
@@ -24,6 +29,7 @@ matching values. The string matching is not case sensitive.
 | `$`       | Snippets |
 | `:`       | Emoji |
 | `/`       | Quick Actions |
+| `*iteration:` | Iterations |
 
 Up to 5 of the most relevant matches are displayed in a popup list. When you
 select an item from the list, the value is entered in the field. The more

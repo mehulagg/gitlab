@@ -15,6 +15,9 @@ if (el) {
       notesApp,
     },
     store,
+    provide: {
+      groupPath: el.dataset.groupPath,
+    },
     data() {
       const notesDataset = el.dataset;
       const parsedUserData = JSON.parse(notesDataset.currentUserData);
