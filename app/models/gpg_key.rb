@@ -14,6 +14,7 @@ class GpgKey < ApplicationRecord
   has_many :subkeys, class_name: 'GpgKeySubkey'
 
   scope :with_subkeys, -> { includes(:subkeys) }
+  scope :preload_users, -> { preload(:user) }
 
   validates :user, presence: true
 

@@ -66,6 +66,28 @@ RSpec.describe Admin::CredentialsController do
               expect(assigns(:credentials)).to match_array(ssh_keys)
             end
           end
+
+          context 'credential type specified as `gpg_keys`' do
+            it 'filters by gpg keys' do
+              gpg_key = create(:gpg_key)
+
+              get :index, params: { filter: 'gpg_keys' }
+
+              expect(assigns(:credentials)).to match_array([gpg_key])
+            end
+
+            context 'feature flag is disabled' do
+              before do
+                stub_feature_flags(credential_inventory_gpg_keys: false)
+              end
+
+              it 'responds with not found' do
+                get :index, params: { filter: 'gpg_keys' }
+
+                expect(response).to have_gitlab_http_status(:not_found)
+              end
+            end
+          end
         end
       end
 

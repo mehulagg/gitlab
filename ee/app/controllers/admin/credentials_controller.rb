@@ -8,6 +8,7 @@ class Admin::CredentialsController < Admin::ApplicationController
   helper_method :credentials_inventory_path, :user_detail_path, :personal_access_token_revoke_path, :revoke_button_available?, :ssh_key_delete_path
 
   before_action :check_license_credentials_inventory_available!, only: [:index, :revoke, :destroy]
+  before_action :check_gpg_keys_list_enabled!, only: [:index]
 
   track_unique_visits :index, target_id: 'i_compliance_credential_inventory'
 
@@ -17,6 +18,10 @@ class Admin::CredentialsController < Admin::ApplicationController
 
   def check_license_credentials_inventory_available!
     render_404 unless credentials_inventory_feature_available?
+  end
+
+  def check_gpg_keys_list_enabled!
+    render_404 if params[:filter] == 'gpg_keys' && !Feature.enabled?(:credential_inventory_gpg_keys)
   end
 
   override :credentials_inventory_path

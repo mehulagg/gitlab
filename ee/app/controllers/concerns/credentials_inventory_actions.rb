@@ -52,6 +52,8 @@ module CredentialsInventoryActions
       ::PersonalAccessTokensFinder.new({ users: users, impersonation: false, sort: 'id_desc' }).execute
     elsif show_ssh_keys?
       ::KeysFinder.new({ users: users, key_type: 'ssh' }).execute
+    elsif show_gpg_keys?
+      ::GpgKeysFinder.new(users: users).execute
     end
   end
 

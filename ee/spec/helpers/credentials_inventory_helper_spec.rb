@@ -51,6 +51,24 @@ RSpec.describe CredentialsInventoryHelper do
     end
   end
 
+  describe '#show_gpg_keys?' do
+    subject { show_gpg_keys? }
+
+    context 'when filtering by gpg_keys' do
+      let(:filter) { 'gpg_keys' }
+
+      it { is_expected.to be true }
+
+      context 'feature flag is disabled' do
+        before do
+          stub_feature_flags(credential_inventory_gpg_keys: false)
+        end
+
+        it { is_expected.to be false }
+      end
+    end
+  end
+
   describe '#show_personal_access_tokens?' do
     subject { show_personal_access_tokens? }
 
