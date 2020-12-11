@@ -242,13 +242,27 @@ module TestEnv
 
   def setup_workhorse
     start = Time.now
+    return if skip_compile_workhorse?
+
     puts "\n==> Setting up GitLab Workhorse..."
 
     FileUtils.rm_rf(workhorse_dir)
     Gitlab::SetupHelper::Workhorse.compile_into(workhorse_dir)
     Gitlab::SetupHelper::Workhorse.create_configuration(workhorse_dir, nil)
+    system(*%w[git rev-parse HEAD:workhorse], out: workhorse_tree_file)
 
     puts "    GitLab Workhorse set up in #{Time.now - start} seconds...\n"
+  end
+
+  def skip_compile_workhorse?
+    File.directory?(workhorse_dir) &&
+      IO.popen(%w[git status --porcelain workhorse], &:read).empty? &&
+      File.exist?(workhorse_tree_file) &&
+      IO.popen(%w[git rev-parse HEAD:workhorse], &:read) == File.read(workhorse_tree_file)
+  end
+
+  def workhorse_tree_file
+    File.join(workhorse_dir, 'WORKHORSE_TREE')
   end
 
   def workhorse_dir
