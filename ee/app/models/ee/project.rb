@@ -194,6 +194,7 @@ module EE
       delegate :merge_trains_enabled, :merge_trains_enabled=, :merge_trains_enabled?, to: :ci_cd_settings
 
       delegate :auto_rollback_enabled, :auto_rollback_enabled=, :auto_rollback_enabled?, to: :ci_cd_settings
+      delegate :protected_environments_rules_locked, :protected_environments_rules_locked=, :protected_environments_rules_locked?, to: :ci_cd_settings
       delegate :closest_gitlab_subscription, to: :namespace
       delegate :jira_vulnerabilities_integration_enabled?, to: :jira_service, allow_nil: true
 

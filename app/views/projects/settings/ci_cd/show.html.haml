@@ -32,6 +32,7 @@
     = render 'autodevops_form', auto_devops_enabled: @project.auto_devops_enabled?
 
 = render_if_exists 'projects/settings/ci_cd/protected_environments', expanded: expanded
+= render_if_exists 'projects/settings/ci_cd/protected_environments_locks', expanded: expanded
 
 %section.settings.no-animate#js-runners-settings{ class: ('expanded' if expanded || params[:expand_runners]), data: { qa_selector: 'runners_settings_content' } }
   .settings-header

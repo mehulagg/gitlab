@@ -86,6 +86,7 @@ module EE
         use_custom_template
         require_password_to_approve
         group_with_project_templates_id
+        protected_environments_rules_locked
       ]
 
       attrs << %i[merge_pipelines_enabled] if allow_merge_pipelines_params?
