@@ -934,6 +934,15 @@ RSpec.describe License do
 
       expect(license.maximum_user_count).to eq(300)
     end
+
+    it 'returns the highest historical data during the license period for an expired license' do
+      now = Time.current
+      license = build(:license, starts_at: now - 14.months, expires_at: now - 2.months )
+      create(:historical_data, recorded_at: license.expires_at - 1.month, active_user_count: 400)
+      create(:historical_data, recorded_at: now, active_user_count: 500)
+
+      expect(license.maximum_user_count).to eq(400)
+    end
   end
 
   describe '#ultimate?' do
