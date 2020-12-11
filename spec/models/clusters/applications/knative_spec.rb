@@ -150,7 +150,7 @@ RSpec.describe Clusters::Applications::Knative do
     subject { knative.install_command }
 
     it 'is initialized with latest version' do
-      expect(subject.version).to eq('0.9.0')
+      expect(subject.version).to eq('0.10.0')
     end
 
     it_behaves_like 'a command'
