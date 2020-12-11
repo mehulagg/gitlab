@@ -160,8 +160,7 @@ module EE
     end
 
     def sidebar_security_paths
-      %w[
-        projects/security/configuration#show
+      super + %w[
         projects/security/sast_configuration#show
         projects/security/vulnerabilities#show
         projects/security/vulnerability_report#index

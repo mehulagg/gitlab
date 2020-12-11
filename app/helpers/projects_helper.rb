@@ -767,6 +767,12 @@ module ProjectsHelper
     ]
   end
 
+  def sidebar_security_paths
+    %w[
+      projects/security/configuration#show
+    ]
+  end
+
   def user_can_see_auto_devops_implicitly_enabled_banner?(project, user)
     Ability.allowed?(user, :admin_project, project) &&
       project.has_auto_devops_implicitly_enabled? &&
