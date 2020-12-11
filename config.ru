@@ -21,6 +21,8 @@ def master_process?
   Prometheus::PidProvider.worker_id.in? %w(unicorn_master puma_master)
 end
 
+use Rack::Lint %w(test development).include?(['RAILS_ENV'])
+
 warmup do |app|
   # The following is necessary to ensure stale Prometheus metrics don't accumulate over time.
   # It needs to be done as early as here to ensure metrics files aren't deleted.
