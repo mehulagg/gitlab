@@ -921,6 +921,6 @@ RSpec.describe Service do
   end
 
   describe '.project_specific_services_names' do
-    it { expect(described_class.project_specific_services_names).to include('jenkins') }
+    it { expect(described_class.project_specific_services_names).to include('alerts', 'jenkins') }
   end
 end
