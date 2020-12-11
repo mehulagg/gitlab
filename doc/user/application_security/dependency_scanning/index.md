@@ -141,6 +141,16 @@ gemnasium-dependency_scanning:
     DS_REMEDIATE: "false"
 ```
 
+To override the `dependencies: []` setting add an override job as above, targetting this attribute::
+
+```yaml
+include:
+  - template: Dependency-Scanning.gitlab-ci.yml
+
+gemnasium-dependency_scanning:
+  dependencies: ["build"]
+```
+
 ### Available variables
 
 Dependency scanning can be [configured](#customizing-the-dependency-scanning-settings)
