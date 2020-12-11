@@ -7,7 +7,7 @@ import MergeRequestNote from 'ee/vue_shared/security_reports/components/merge_re
 import ModalFooter from 'ee/vue_shared/security_reports/components/modal_footer.vue';
 import SolutionCard from 'ee/vue_shared/security_reports/components/solution_card_vuex.vue';
 import VulnerabilityDetails from 'ee/vue_shared/security_reports/components/vulnerability_details.vue';
-import DeprecatedModal2 from '~/vue_shared/components/deprecated_modal_2.vue';
+import GlModal from '~/vue_shared/components/deprecated_modal_2.vue';
 import { __ } from '~/locale';
 
 export default {
@@ -17,7 +17,7 @@ export default {
     DismissalCommentModalFooter,
     IssueNote,
     MergeRequestNote,
-    Modal: DeprecatedModal2,
+    Modal: GlModal,
     ModalFooter,
     SolutionCard,
     VulnerabilityDetails,
