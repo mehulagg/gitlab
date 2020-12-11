@@ -111,7 +111,7 @@ There are two ways to define the URL to be scanned by DAST:
 If both values are set, the `DAST_WEBSITE` value takes precedence.
 
 The included template creates a `dast` job in your CI/CD pipeline and scans
-your project's source code for possible vulnerabilities.
+your project's running application for possible vulnerabilities.
 
 The results are saved as a
 [DAST report artifact](../../../ci/pipelines/job_artifacts.md#artifactsreportsdast)
@@ -128,6 +128,100 @@ image. Using the `DAST_VERSION` variable, you can choose how DAST updates:
 - Prevent all updates by pinning to a specific version (such as `1.6.4`).
 
 Find the latest DAST versions on the [Releases](https://gitlab.com/gitlab-org/security-products/dast/-/releases) page.
+
+### Deployment options
+
+Depending on the complexity of the target application, there are a few options as to how to deploy and configure
+the DAST template.
+
+#### Review Application
+
+Review applications are the most involved method of deploying your DAST target application. 
+The [Configuration](#Configuration) section references an example using Kubernetes. 
+
+A more simplified example a Review App deployment would be in our [Review Apps Nginx](https://gitlab.com/gitlab-examples/review-apps-nginx) template.
+
+To enable DAST for the above Review App the following yaml would need to be included in the
+`gitlab-ci.yml` file.
+
+```yaml
+stages:
+  - build
+  - review
+  - staging
+  - production
+
+include:
+  - template: DAST.gitlab-ci.yml
+
+variables:
+  DAST_FULL_SCAN_ENABLED: "true"
+  DAST_WEBSITE: http://$CI_BUILD_REF_SLUG.$APPS_DOMAIN
+```
+
+#### Docker Services
+
+If your application utilizes Docker containers you have another option for deploying and scanning with DAST.
+After your docker build job completes and is added to your container registry, you can utilize the image as a 
+[service](https://docs.gitlab.com/ee/ci/docker/using_docker_images.html#what-is-a-service). 
+
+By overriding the `dast` job, it is possible to link services necessary for the DAST analyzer to run against.
+
+```yaml
+stages:
+  - build
+  - analyze
+
+variables:
+  DAST_IMAGE: registry.gitlab.com/gitlab-org/security-products/analyzers/dast:1
+  DOCKER_DRIVER: overlay2
+  DAST_WEBSITE: http://example/
+
+deploy-image:
+  stage: build
+  extends: .use-docker-in-docker
+  script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    - export IMAGE=$CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG:$CI_COMMIT_SHA
+    - docker build -f Dockerfile -t $IMAGE .
+    - docker push $IMAGE
+
+dast:
+  stage: analyze
+  image: $DAST_IMAGE
+  services:
+    - name: $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG:$CI_COMMIT_SHA
+      alias: example
+  script:
+    - /analyze -t $DAST_WEBSITE
+  artifacts:
+    name: "gl-dast-report.json"
+    paths: [gl-dast-report.json]
+    expire_in: 1 week
+```
+
+Most applications utilize multiple services such as databases or caching services that the
+target application depends on. By default, services defined in the services fields can not communicate
+with one another. To enable this, the [feature flag](https://docs.gitlab.com/runner/configuration/feature-flags.html#available-feature-flags) `FF_NETWORK_PER_BUILD` must be enabled.
+
+```yaml
+dast:
+  stage: analyze
+  image: $DAST_IMAGE
+  services:
+    - name: $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG:$CI_COMMIT_SHA
+      alias: example
+    - name: mongo:3.6.20-xenial
+      alias: docdb
+  script:
+    - /analyze -t $DAST_WEBSITE
+  variables:
+    FF_NETWORK_PER_BUILD: 1
+  artifacts:
+    name: "gl-dast-report.json"
+    paths: [gl-dast-report.json]
+    expire_in: 1 week
+```
 
 ### When DAST scans run
 
