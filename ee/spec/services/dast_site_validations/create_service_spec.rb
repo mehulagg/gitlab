@@ -8,6 +8,8 @@ RSpec.describe DastSiteValidations::CreateService do
   let(:url_path) { SecureRandom.hex }
   let(:params) { { dast_site_token: dast_site_token, url_path: url_path, validation_strategy: :text_file } }
 
+  let!(:dast_site) { create(:dast_site, project: project, url: dast_site_token.url) }
+
   subject { described_class.new(container: project, params: params).execute }
 
   describe 'execute' do
@@ -43,6 +45,12 @@ RSpec.describe DastSiteValidations::CreateService do
 
       it 'communicates success' do
         expect(subject.status).to eq(:success)
+      end
+
+      it 'sets the dast_site_validation_id on the associated dast_site' do
+        dast_site.update_column(:dast_site_validation_id, nil)
+
+        expect(subject.payload).to eq(dast_site.dast_site_validation)
       end
 
       it 'attempts to validate' do

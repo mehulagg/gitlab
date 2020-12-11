@@ -7,6 +7,7 @@ module DastSiteValidations
       return ServiceResponse.success(payload: existing_validation) if existing_validation
 
       dast_site_validation = create_validation!
+      dast_site_validation.dast_site.update_column(:dast_site_validation_id, dast_site_validation.id)
 
       perform_async_validation(dast_site_validation)
     rescue ActiveRecord::RecordInvalid => err

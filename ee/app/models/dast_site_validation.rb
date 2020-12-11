@@ -22,6 +22,7 @@ class DastSiteValidation < ApplicationRecord
   enum validation_strategy: { text_file: 0, header: 1 }
 
   delegate :project, to: :dast_site_token, allow_nil: true
+  delegate :dast_site, to: :dast_site_token, allow_nil: true
 
   def validation_url
     "#{url_base}/#{url_path}"

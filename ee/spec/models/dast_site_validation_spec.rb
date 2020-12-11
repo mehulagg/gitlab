@@ -75,6 +75,12 @@ RSpec.describe DastSiteValidation, type: :model do
     end
   end
 
+  describe '#dast_site' do
+    it 'returns dast_site through dast_site_token' do
+      expect(subject.dast_site).to eq(subject.dast_site_token.dast_site)
+    end
+  end
+
   describe '#validation_url' do
     it 'formats the url correctly' do
       expect(subject.validation_url).to eq("#{subject.url_base}/#{subject.url_path}")
