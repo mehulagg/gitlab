@@ -243,8 +243,9 @@ RSpec.describe GroupMember do
     let(:user) { create(:user) }
 
     it 'execute webhooks' do
-      group = create(:group)
-      web_hook = create(:group_hook, member_hooks, group: group)
+      #binding.pry
+      web_hook = create(:group_hook, group: group, member_events: true)
+
 
       expect_next_instance_of(WebHookService, web_hook, an_instance_of(Hash), "member_hooks") do |service|
         expect(service).to receive(:async_execute)
@@ -254,10 +255,9 @@ RSpec.describe GroupMember do
     end
 
     it 'does not execute webhooks if feature flag is disabled' do
-      stub_feature_flags(group_hooks: false)
+      stub_feature_flags(group_webhooks: false)
 
-      group = create(:group)
-      hook = create(:group_hook, member_hooks, group: group)
+      web_hook = create(:group_hook, group: group, member_events: true)
 
       expect(WebHookService).not_to receive(:new)
 
