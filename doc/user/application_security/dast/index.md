@@ -134,7 +134,7 @@ Find the latest DAST versions on the [Releases](https://gitlab.com/gitlab-org/se
 Depending on the complexity of the target application, there are a few options as to how to deploy and configure
 the DAST template.
 
-#### Review Application
+#### Review App
 
 Review applications are the most involved method of deploying your DAST target application. 
 The [Configuration](#Configuration) section references an example using Kubernetes. 
