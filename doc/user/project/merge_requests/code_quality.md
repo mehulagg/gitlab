@@ -190,7 +190,7 @@ Open up your runner `config.toml` file and modify `volumes`
 
 ```diff
 - volumes = ["/cache"]
-+ volumes = ["/cache", "/var/run/docker.sock:/var/run/docker.sock"]
++ volumes = ["/cache", "/var/run/docker.sock:/var/run/docker.sock", "/builds:/builds"]
 ```
 
 #### Full Runner Configuration from config.toml
@@ -208,7 +208,7 @@ Open up your runner `config.toml` file and modify `volumes`
     disable_entrypoint_overwrite = false
     oom_kill_disable = false
     disable_cache = false
-    volumes = ["/var/run/docker.sock:/var/run/docker.sock", "/cache"]
+    volumes = ["/cache", "/var/run/docker.sock:/var/run/docker.sock", "/builds:/builds"]
     shm_size = 0
   [runners.cache]
     [runners.cache.s3]
