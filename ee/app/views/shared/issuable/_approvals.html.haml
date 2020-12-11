@@ -3,7 +3,7 @@
 - return unless issuable.is_a?(MergeRequest)
 - return unless issuable.approval_feature_available?
 
-- if !Feature.enabled?(:merge_request_reviewers, @project) || !Feature.enabled?(:mr_collapsed_approval_rules, @project)
+- if !Feature.enabled?(:merge_request_reviewers, @project, default_enabled: true) || !Feature.enabled?(:mr_collapsed_approval_rules, @project)
   .form-group.row
     .col-sm-2.col-form-label
       = form.label :approver_ids, "Approval rules"

@@ -115,9 +115,7 @@ It is also possible to manage multiple assignees:
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/216054) in GitLab 13.5.
 > - It's [deployed behind a feature flag](../../../user/feature_flags.md), enabled by default.
-> - It's disabled on GitLab.com.
-> - It's not recommended for production use.
-> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-merge-request-reviewers). **(CORE ONLY)**
+> - To disable it in GitLab self-managed instances, ask a GitLab administrator to [disable it](#enable-or-disable-merge-request-reviewers). **(CORE ONLY)**
 
 WARNING:
 This feature might not be available to you. Check the **version history** note above for details.
@@ -136,10 +134,9 @@ To request it, open the **Reviewers** drop-down box to search for the user you w
 
 #### Enable or disable Merge Request Reviewers **(CORE ONLY)**
 
-Merge Request Reviewers is under development and not ready for production use. It is
-deployed behind a feature flag that is **disabled by default**.
+It is deployed behind a feature flag that is **enabled by default**.
 [GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
-can enable it.
+can enable/disable it.
 
 To enable it:
 
