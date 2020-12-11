@@ -342,6 +342,35 @@ db:backup_and_restore:
   rules:
     - changes: ["lib/backup/**/*"]
 
+rspec:deprecations:
+  stage: post-test
+  extends:
+    - .default-retry
+    - .default-before_script
+    - .static-analysis-cache
+  variables:
+    SETUP_DB: "false"
+  dependencies:
+    - setup-test-env
+    - rspec migration pg11
+    - rspec unit pg11
+    - rspec integration pg11
+    - rspec system pg11
+    - rspec-ee migration pg11
+    - rspec-ee unit pg11
+    - rspec-ee integration pg11
+    - rspec-ee system pg11
+    - rspec-ee unit pg11 geo
+    - rspec-ee integration pg11 geo
+    - rspec-ee system pg11 geo
+  script:
+    - bundle exec rubocop --only Lint/LastKeywordArgument --parallel
+  artifacts:
+    expire_in: 31d
+    when: always
+    paths:
+      - deprecations/
+
 rspec:coverage:
   extends:
     - .coverage-base
