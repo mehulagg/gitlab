@@ -66,6 +66,7 @@ module Ci
 
     def mark_subsequent_stages_as_processable(build)
       build.pipeline.processables.skipped.after_stage(build.stage_idx).find_each do |processable|
+        processable.update!(user: current_user)
         Gitlab::OptimisticLocking.retry_lock(processable, &:process)
       end
     end

@@ -206,6 +206,10 @@ RSpec.describe Ci::RetryBuildService do
           expect(subsequent_build.reload).to be_created
           expect(subsequent_bridge.reload).to be_created
         end
+
+        it 'updates build ownership for subsequent processables' do
+          expect { service.execute(build) }.to change { subsequent_build.reload.user }.to(user)
+        end
       end
 
       context 'when pipeline has other builds' do
