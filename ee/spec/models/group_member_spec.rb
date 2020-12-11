@@ -237,4 +237,31 @@ RSpec.describe GroupMember do
       end
     end
   end
+
+  context 'fire webhook when new member is added to group' do
+    let(:group) { create(:group) }
+    let(:user) { create(:user) }
+
+    it 'execute webhooks' do
+      group = create(:group)
+      web_hook = create(:group_hook, member_hooks, group: group)
+
+      expect_next_instance_of(WebHookService, web_hook, an_instance_of(Hash), "member_hooks") do |service|
+        expect(service).to receive(:async_execute)
+      end
+
+      GroupMember.add_user(group, user, GroupMember::MAINTAINER)
+    end
+
+    it 'does not execute webhooks if feature flag is disabled' do
+      stub_feature_flags(group_hooks: false)
+
+      group = create(:group)
+      hook = create(:group_hook, member_hooks, group: group)
+
+      expect(WebHookService).not_to receive(:new)
+
+      GroupMember.add_user(group, user, GroupMember::MAINTAINER)
+    end
+  end
 end

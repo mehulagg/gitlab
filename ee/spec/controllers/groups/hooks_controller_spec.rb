@@ -40,7 +40,7 @@ RSpec.describe Groups::HooksController do
           url: 'http://example.com',
           wiki_page_events: true,
           deployment_events: true,
-          member_events: true
+          member_hooks: true
         }
 
         post :create, params: { group_id: group.to_param, hook: hook_params }
