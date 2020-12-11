@@ -72,6 +72,12 @@ class Settings < Settingslogic
       "#{gitlab.host}#{gitlab.relative_url_root}"
     end
 
+    def build_gitlab_dependency_proxy_server
+      custom_port = on_standard_port?(gitlab) ? '' : ":#{gitlab.port}"
+
+      "#{gitlab.host}#{custom_port}"
+    end
+
     def kerberos_protocol
       kerberos.https ? "https" : "http"
     end

@@ -371,6 +371,7 @@ Settings['dependency_proxy'] ||= Settingslogic.new({})
 Settings.dependency_proxy['enabled']      = true if Settings.dependency_proxy['enabled'].nil?
 Settings.dependency_proxy['storage_path'] = Settings.absolute(Settings.dependency_proxy['storage_path'] || File.join(Settings.shared['path'], "dependency_proxy"))
 Settings.dependency_proxy['object_store'] = ObjectStoreSettings.legacy_parse(Settings.dependency_proxy['object_store'])
+Settings.dependency_proxy['server'] ||= Settings.__send__(:build_gitlab_dependency_proxy_server)
 
 # For first iteration dependency proxy uses Rails server to download blobs.
 # To ensure acceptable performance we only allow feature to be used with
