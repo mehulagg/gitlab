@@ -45,11 +45,11 @@ or an instance administrator, who receives all permissions. For more information
 Some permissions are available to one or all of the following roles, in
 ascending order:
 
-- Guest
-- Reporter
-- Developer
-- Maintainer
-- Owner
+- [Guest](#project-members-guest-permissions)
+- [Reporter](#project-members-reporter-permissions)
+- [Developer](#project-members-developer-permissions)
+- [Maintainer](#project-members-maintainer-permissions)
+- [Owner](#project-members-owner-permissions)
 
 The following sections show available permissions, based on role, in
 ascending order. For example, permissions available to users with the
@@ -65,43 +65,47 @@ available to roles for all users (Guest and above).
 
 - General
   <!-- - Download project (*1*) " as discussed in the issue #280534, then maybe Download Project should not be listed here because it has a duplicate meaning as in the below permission in Project" -->
-  - Leave comments (on issues and MRs)
-  - View dependency list (*1*)
+  - Leave comments (on issues and MRs) <!-- Assumption -->
+  - View dependency list **(ULTIMATE)** (*1*) <!-- Is this issues, MRs, or both? -->
   - View [Design Management](project/issues/design_management.md) pages
-- Licenses
-  - View allowed and denied licenses **(ULTIMATE)** (*1*)
-  - View license compliance reports (*1*)
-  - View license list (*1*)
-  - View licences in the list of dependencies (*1*)
-- Issues
-  - Create new issues
-  - See related issues
-  - Create confidential issues
-  - View confidential issues that they created
+    - Reposition comments
 - Analytics
   - View Issue analytics **(PREMIUM)**
   - View Merge Request analytics **(STARTER)**
   - View Value Stream analytics
-  - Manage user-starred metrics dashboards they created
+  - Manage user-starred metrics dashboards they created (*5*)
+- Jobs
+  - See a list of jobs (*2*)
+  - See a job with [debug logging](../ci/variables/README.md/#debug-logging)
+  - See a job log (*2*)
+  - Download and browse job artifacts (*2*)
+- Issues
+  - Create new issues
+  - See related issues
+  - Create confidential issues (*4*)
+  - View confidential issues that they created (*4*)
+- Licenses **(ULTIMATE)**
+  - View allowed and denied licenses (*1*)
+  - View license compliance reports (*1*)
+  - View license list (*1*)
+  - View licences in the list of dependencies (*1*)
 - Project
   - View project code (*1*)
   - Pull project code (*1*)
   - View [Releases](project/releases/index.md) (*2*)
   - View requirements **(ULTIMATE)**
-  - View insights **(ULTIMATE)** <!-- not sure -->
-- Security
-  - View Security reports
+  - View insights **(ULTIMATE)** <!-- not sure, could be Analytics -->
 - Publishing
   - View GitLab Pages protected by [access control](project/pages/introduction.md#gitlab-pages-access-control)
   - View wiki pages
-- Jobs
-  - See a list of jobs
-  - See a job log
-  - Download and browse job artifacts
+- Security
+  - View Security reports **(ULTIMATE)** (*2*)
 
 1. Guest users can perform this action on public and internal projects, but not private projects. This doesn't apply to [external users](#external-users) where explicit access must be given even if the project is internal.
 1. If **Public pipelines** is enabled in **Project Settings > CI/CD**.
 1. Applies only to comments on [Design Management](project/issues/design_management.md) designs.
+1. Guest users can only view the confidential issues they created themselves.
+1. Actions limited to records owned (referenced) by user.
 
 ### Project members Reporter permissions
 
@@ -113,6 +117,14 @@ available only to users with Reporter permissions and above.
   - Pull [packages](packages/index.md)
   - Create code snippets
   - Create/edit requirements <!-- Unsure where this applies -->
+  - View [Design Management](project/issues/design_management.md) pages
+    - Reposition comments
+- Analytics
+  - View CI/CD analytics
+  - View Code Review analytics **(STARTER)**
+  - View Repository analytics
+  - View Error Tracking list <!-- Unsure: is this analytics? -->
+  - View metrics dashboard annotations
 - Issues
   - Assign
   - Label
@@ -120,19 +132,14 @@ available only to users with Reporter permissions and above.
   - Lock threads
   - Manage issue tracker
   - Manage related issues
+- Merge Requests (MR)
+  - Create new MRs
+  - See list of MRs
 - Project
   - Set commit status
 - View
   - See a container registry
   - See environments
-- Merge Requests (MR)
-  - Create new MRs
-- Analytics
-  - View CI/CD analytics
-  - View Code Review analytics **(STARTER)**
-  - View Repository analytics
-  - View Error Tracking list <!-- Unsure: is this analytics? -->
-  - View metrics dashboard annotations
 
 1. Applies only to comments on [Design Management](project/issues/design_management.md) designs.
 
@@ -153,10 +160,36 @@ available only to users with Developer permissions and above.
   - Create/edit/delete project milestones
   - Manage Feature Flags **(PREMIUM)**
   - Reposition comments on images (*3*)
+  - View [Design Management](project/issues/design_management.md) pages
+    - Reposition comments
+- Analytics
+  - View project statistics
+  - View Pods logs
+  - Create / edit / delete metrics dashboard annotations
+- Branches
+  - Create new branches
+  - Push to non-protected branches
+  - Force push to non-protected branches
+  - Remove non-protected branches
+- Code
+  - Create or update commit status
+  - Apply code change suggestions
+  - Rewrite / remove Git tags
 - Containers
   - Read Terraform state
   - Update a container registry
   - Remove a container registry image
+- Jobs
+  - Cancel and retry jobs
+  - Run CI/CD pipeline against a protected branch (*2*)
+- Merge Requests (MRs)
+  - Assign MRs
+  - Label MRs
+  - Lock MR threads
+  - Approve MRs (*1*)
+  - Manage/Accept MRs
+- Publishing
+  - Create and edit wiki pages
 - Security **(ULTIMATE)**
   - Use security dashboard
   - View vulnerability findings in Dependency list
@@ -167,35 +200,10 @@ available only to users with Developer permissions and above.
   - Resolve vulnerability
   - Dismiss vulnerability
   - Revert vulnerability to detected state
-- Branches
-  - Create new branches
-  - Push to non-protected branches
-  - Force push to non-protected branches
-  - Remove non-protected branches
-- Merge Requests (MRs)
-  - Assign MRs
-  - Label MRs
-  - Lock MR threads
-  - Approve MRs (*1*)
-  - Manage/Accept MRs
-- Analytics
-  - View project statistics
-  - View Pods logs
-  - Create / edit / delete metrics dashboard annotations
-- Code
-  - Create or update commit status
-  - Apply code change suggestions
-  - Rewrite / remove Git tags
-- Jobs
-  - Cancel and retry jobs
-  - Run CI/CD pipeline against a protected branch (*2*)
-- Publishing
-  - Create and edit wiki pages
 
 1. For information on eligible approvers for merge requests, see
    [Eligible approvers](project/merge_requests/merge_request_approvals.md#eligible-approvers).
 1. If the [branch is protected](project/protected_branches.md#using-the-allowed-to-merge-and-allowed-to-push-settings), this depends on the access Developers and Maintainers are given.
-1. Applies only to comments on [Design Management](project/issues/design_management.md) designs.
 
 ### Project members Maintainer permissions
 
@@ -208,42 +216,41 @@ available only to users with Maintainer permissions and above.
   - Edit comments (posted by any user)
   - Reposition comments on images
   - Manage error tracking
-- Security
-  - Request a CVE ID **(FREE ONLY)**
-- Terminals
-  - Use environment terminals
-  - Run Web IDE's Interactive Web Terminals
-- Users / Groups
   - Add new team members
 - Branches
   - Enable / disable branch protection
   - Push to protected branches
   - Turn on/off protected branches for developers
   - Manage [push rules](../push_rules/push_rules.md)
+- Containers
+  - Manage Terraform state
+- Jobs (CI/CD)
+  - Manage runners
+  - Manage job triggers
+  - Manage CI/CD variables
+- License
+  - Manage license policy **(ULTIMATE)**
 - Project
   - Enable/disable tag protections
   - Edit project settings
   - Edit project badges
   - Export project
-  - Share (invite) projects with groups [Share Group Lock] (*1*)
+  - Share (invite) projects with groups (*1*)
   - Add deploy keys to project
   - Configure project hooks
   - Manage Project Operations
   - View project audit events <!-- Does this belong in analytics? -->
-  - Manage [project access tokens]() **(CORE ONLY)**
-- Containers
-  - Manage Terraform state
-- License
-  - Manage license policy **(ULTIMATE)**
-- Jobs (CI/CD)
-  - Manage runners
-  - Manage job triggers
-  - Manage CI/CD variables
 - Publishing
   - Manage GitLab Pages
   - Manage GitLab Pages domains and certificates
   - Remove GitLab Pages
   - Delete wiki pages
+- Security
+  - Request a CVE ID **(FREE ONLY)**
+  - Manage [project access tokens](project/settings/project_access_tokens.md) **(CORE ONLY)** <!-- Could also be project -->
+- Terminals
+  - Use environment terminals
+  - Run Web IDE's Interactive Web Terminals
 
 1. When [Share Group Lock](group/index.md#share-with-group-lock) is enabled the project can't be shared with other groups. It does not affect group with group sharing.
 
@@ -253,49 +260,22 @@ The following list depicts user permission levels in a project,
 available only to users with Owner permissions.
 
 - General
+  - Disable notification emails
+- Branches
+  - Force push to protected branches
+  - Remove protected branches
+- CI/CD
+  - Delete pipelines
+- Issues
+  - Delete issues
+- MRs
+  - Delete MRs
 - Project
   - Transfer project to another namespace
   - Rename project
   - Delete project
   - Archive project
   - Remove fork relationship of a project
-- Issues
-  - Delete issues
-- CI/CD
-  - Delete pipelines
-- MRs
-  - Delete MRs
-
-<!--
-| Action                                            | Guest   | Reporter   | Developer   |Maintainer| Owner (*10*) |
-|---------------------------------------------------|---------|------------|-------------|----------|--------|
-| Switch visibility level                           |         |            |             |          | ✓      |
-| Transfer project to another namespace             |         |            |             |          | ✓      |
-| Rename project                                    |         |            |             |          | ✓      |
-| Remove fork relationship                          |         |            |             |          | ✓      |
-| Delete project                                    |         |            |             |          | ✓      |
-| Archive project                                   |         |            |             |          | ✓      |
-| Delete issues                                     |         |            |             |          | ✓      |
-| Delete pipelines                                  |         |            |             |          | ✓      |
-| Delete merge request                              |         |            |             |          | ✓      |
-| Disable notification emails                       |         |            |             |          | ✓      |
-| Force push to protected branches (*4*)            |         |            |             |          |        |
-| Remove protected branches (*4*)                   |         |            |             |          |        |
-
-1. Guest users are able to perform this action on public and internal projects, but not private projects. This doesn't apply to [external users](#external-users) where explicit access must be given even if the project is internal.
-1. Guest users can only view the confidential issues they created themselves.
-1. If **Public pipelines** is enabled in **Project Settings > CI/CD**.
-1. Not allowed for Guest, Reporter, Developer, Maintainer, or Owner. See [Protected Branches](project/protected_branches.md).
-1. If the [branch is protected](project/protected_branches.md#using-the-allowed-to-merge-and-allowed-to-push-settings), this depends on the access Developers and Maintainers are given.
-1. Guest users can access GitLab [**Releases**](project/releases/index.md) for downloading assets but are not allowed to download the source code nor see repository information like tags and commits.
-1. Actions are limited only to records owned (referenced) by user.
-1. When [Share Group Lock](group/index.md#share-with-group-lock) is enabled the project can't be shared with other groups. It does not affect group with group sharing.
-1. For information on eligible approvers for merge requests, see
-   [Eligible approvers](project/merge_requests/merge_request_approvals.md#eligible-approvers).
-1. Owner permission is only available at the group or personal namespace level (and for instance admins) and is inherited by its projects.
-1. Applies only to comments on [Design Management](project/issues/design_management.md) designs. -->
-
-## Project features permissions
 
 ### Wiki and issues
 
