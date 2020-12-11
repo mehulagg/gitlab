@@ -38,6 +38,7 @@ export default {
   data() {
     return {
       dragStart: null,
+      updatedLineRange: null,
     };
   },
   computed: {
@@ -68,16 +69,16 @@ export default {
     onStartDragging(line) {
       this.dragStart = line;
     },
-    onStopDragging(line) {
-      const pick = ({ line_code, new_line, old_line, type, index }) => ({
+    onDragOver(line) {
+      const pickLine = ({ line_code, new_line, old_line, type, index }) => ({
         line_code,
         new_line,
         old_line,
         type,
         index,
       });
-      const startLine = pick(this.dragStart);
-      const targetLine = pick(line);
+      const startLine = pickLine(this.dragStart);
+      const targetLine = pickLine(line);
       let start = startLine;
       let end = targetLine;
 
@@ -86,10 +87,15 @@ export default {
         end = startLine;
       }
 
-      const updatedLineRange = { start, end };
+      this.updatedLineRange = { start, end };
 
-      this.setSelectedCommentPosition(updatedLineRange);
-      this.showCommentForm({ lineCode: end.line_code, fileHash: this.diffFile.file_hash });
+      this.setSelectedCommentPosition(this.updatedLineRange);
+    },
+    onStopDragging() {
+      this.showCommentForm({
+        lineCode: this.updatedLineRange.end.line_code,
+        fileHash: this.diffFile.file_hash,
+      });
     },
   },
   userColorScheme: window.gon.user_color_scheme,
@@ -128,8 +134,10 @@ export default {
         :is-commented="index >= commentedLines.startLine && index <= commentedLines.endLine"
         :inline="inline"
         :index="index"
+        @enterdragging="onDragOver"
         @startdragging="onStartDragging"
         @stopdragging="onStopDragging"
+        @cancelcommentselection="setSelectedCommentPosition()"
       />
       <div
         v-if="line.renderCommentRow"

@@ -122,6 +122,11 @@ export default {
     handleCommentButton(line) {
       this.showCommentForm({ lineCode: line.line_code, fileHash: this.fileHash });
     },
+    onDragEnd(event) {
+      if (event.dataTransfer.dropEffect !== 'none') return;
+
+      this.$emit('cancelcommentselection');
+    },
   },
 };
 </script>
@@ -131,6 +136,8 @@ export default {
     <div
       class="diff-grid-left left-side"
       @dragover.prevent
+      @dragenter="$emit('enterdragging', { ...line.left, index })"
+      @dragend="onDragEnd"
       @drop="$emit('stopdragging', { ...line.left, index })"
     >
       <template v-if="line.left">
