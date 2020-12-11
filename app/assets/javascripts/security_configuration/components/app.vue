@@ -1,6 +1,7 @@
 <script>
 import { GlLink, GlSprintf, GlTable } from '@gitlab/ui';
 import { s__, sprintf } from '~/locale';
+import  ManageSast from './manage_sast.vue';
 
 export default {
   components: {
@@ -62,8 +63,8 @@ export default {
     getComponentForItem(item) {
       const COMPONENTS = {
         sast: ManageSast,
-        secret_detection: ManageSecretDetection,
-        dast: ManageDast
+        // secret_detection: ManageSecretDetection,
+        // dast: ManageDast
       };
       
       return COMPONENTS[item.type];

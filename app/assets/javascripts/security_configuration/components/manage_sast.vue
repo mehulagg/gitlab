@@ -1,14 +1,15 @@
 <script>
-    import {GLButton} from '@gitlab/ui';
+    import {GlButton} from '@gitlab/ui';
     export default { props: {
-        components: {
-            GLButton
-        },
         item: {
             type: Object,
             required: true
         }
-    } };
+    },
+    components: {
+        GlButton
+    }, 
+    };
 </script>
 
 <template>
