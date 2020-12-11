@@ -1,6 +1,6 @@
 <script>
 import { GlButton, GlLink, GlModalDirective } from '@gitlab/ui';
-import { mapGetters } from 'vuex';
+import { mapGetters, mapActions } from 'vuex';
 import { JOB_SIDEBAR } from '../constants';
 
 export default {
@@ -25,6 +25,9 @@ export default {
       required: true,
     },
   },
+  methods: {
+    ...mapActions(['fetchTrace']),
+  },
   computed: {
     ...mapGetters(['hasForwardDeploymentFailure']),
   },
@@ -37,6 +40,7 @@ export default {
     :aria-label="$options.i18n.retryLabel"
     category="primary"
     variant="info"
+    @click="fetchTrace"
     >{{ $options.i18n.retryLabel }}</gl-button
   >
   <gl-link v-else :href="href" data-method="post" rel="nofollow"
