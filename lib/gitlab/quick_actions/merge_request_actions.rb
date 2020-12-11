@@ -56,6 +56,32 @@ module Gitlab
           @updates[:merge] = params[:merge_request_diff_head_sha]
         end
 
+        types MergeRequest
+        desc do
+          _('Rebase source branch atop the latest changes in the target branch.')
+        end
+        explanation do
+          _('Rebase source branch atop the latest changes in the target branch.')
+        end
+        condition do
+          merge_request = quick_action_target
+
+          break false unless merge_request.source_branch_exists?
+
+          access_check = ::Gitlab::UserAccess
+                           .new(current_user, container: merge_request.source_project)
+
+          access_check.can_push_to_branch?(merge_request.source_branch)
+        end
+        command :rebase do
+          success = MergeRequests::RebaseService.new(quick_action_target.project, current_user)
+                      .execute(quick_action_target)
+
+          next unless success
+
+          @execution_message[:rebase] = _('Scheduled a rebase of the source branch.')
+        end
+
         desc 'Toggle the Draft status'
         explanation do
           noun = quick_action_target.to_ability_name.humanize(capitalize: false)
