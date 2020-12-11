@@ -189,6 +189,35 @@ RSpec.describe 'layouts/nav/sidebar/_group' do
       end
     end
 
+    context 'when audit events feature is enabled' do
+      before do
+        stub_licensed_features(audit_events: true)
+      end
+
+      context 'when the user does not have access to Audit Events' do
+        it 'is not visible' do
+          render
+
+          expect(rendered).not_to have_link 'Security & Compliance'
+          expect(rendered).not_to have_link 'Audit Events'
+        end
+      end
+
+      context 'when the user has access to Audit Events' do
+        before do
+          group.add_owner(user)
+          allow(view).to receive(:current_user).and_return(user)
+        end
+
+        it 'is visible' do
+          render
+
+          expect(rendered).to have_link 'Security & Compliance'
+          expect(rendered).to have_link 'Audit Events'
+        end
+      end
+    end
+
     context 'when security dashboard feature is disabled' do
       let(:group) { create(:group_with_plan, plan: :bronze_plan) }
 

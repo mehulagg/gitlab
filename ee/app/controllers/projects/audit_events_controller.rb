@@ -8,10 +8,7 @@ class Projects::AuditEventsController < Projects::ApplicationController
   include AuditEvents::Sortable
   include AuditEvents::DateRange
 
-  before_action :authorize_admin_project!
   before_action :check_audit_events_available!
-
-  layout 'project_settings'
 
   feature_category :audit_events
 
@@ -25,7 +22,8 @@ class Projects::AuditEventsController < Projects::ApplicationController
   private
 
   def check_audit_events_available!
-    render_404 unless @project.feature_available?(:audit_events) || LicenseHelper.show_promotions?(current_user)
+    render_404 unless can?(current_user, :read_project_audit_events, project) &&
+      (project.feature_available?(:audit_events) || LicenseHelper.show_promotions?(current_user))
   end
 
   def events

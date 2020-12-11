@@ -125,7 +125,7 @@ RSpec.describe 'Group navbar' do
     before do
       group.add_owner(user)
 
-      stub_licensed_features(security_dashboard: true, group_level_compliance_dashboard: true)
+      stub_licensed_features(security_dashboard: true, group_level_compliance_dashboard: true, audit_events: true)
 
       insert_after_nav_item(
         _('Merge Requests'),
@@ -134,7 +134,8 @@ RSpec.describe 'Group navbar' do
           nav_sub_items: [
             _('Security Dashboard'),
             _('Vulnerability Report'),
-            _('Compliance')
+            _('Compliance'),
+            _('Audit Events')
           ]
         }
       )

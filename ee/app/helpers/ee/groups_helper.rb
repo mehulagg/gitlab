@@ -117,7 +117,7 @@ module EE
     def get_group_sidebar_links
       links = super
 
-      resources = [:cycle_analytics, :merge_request_analytics, :repository_analytics]
+      resources = [:cycle_analytics, :merge_request_analytics, :repository_analytics, :audit_events]
 
       links += resources.select do |resource|
         can?(current_user, "read_group_#{resource}".to_sym, @group)
@@ -145,6 +145,10 @@ module EE
 
       if ::Feature.enabled?(:group_iterations, @group, default_enabled: true) && @group.feature_available?(:iterations) && can?(current_user, :read_iteration, @group)
         links << :iterations
+      end
+
+      if can?(current_user, :read_group_audit_events, @group)
+        nav_tabs << :audit_events
       end
 
       links

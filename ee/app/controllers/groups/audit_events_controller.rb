@@ -8,12 +8,9 @@ class Groups::AuditEventsController < Groups::ApplicationController
   include AuditEvents::DateRange
   include Analytics::UniqueVisitsHelper
 
-  before_action :authorize_admin_group!
   before_action :check_audit_events_available!
 
   track_unique_visits :index, target_id: 'g_compliance_audit_events'
-
-  layout 'group_settings'
 
   feature_category :audit_events
 
@@ -25,6 +22,11 @@ class Groups::AuditEventsController < Groups::ApplicationController
   end
 
   private
+
+  def check_audit_events_available!
+    render_404 unless can?(current_user, :read_group_audit_events, group) &&
+      group.feature_available?(:audit_events)
+  end
 
   def events
     strong_memoize(:events) do

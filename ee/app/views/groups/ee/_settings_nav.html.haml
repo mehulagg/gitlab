@@ -24,12 +24,6 @@
       %span
         Webhooks
 
-- if @group.feature_available?(:audit_events)
-  = nav_link(path: 'audit_events#index') do
-    = link_to group_audit_events_path(@group), title: 'Audit Events', data: { qa_selector: 'audit_events_settings_link' } do
-      %span
-        Audit Events
-
 - if show_usage_quotas_in_sidebar? && @group.parent.nil? && administration_nav_item_disabled
   = nav_link(path: 'usage_quotas#index') do
     = link_to group_usage_quotas_path(@group), title: s_('UsageQuota|Usage Quotas') do

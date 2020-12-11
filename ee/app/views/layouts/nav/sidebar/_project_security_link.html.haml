@@ -1,4 +1,4 @@
-- if any_project_nav_tab?([:security, :dependencies, :licenses])
+- if any_project_nav_tab?([:security, :dependencies, :licenses, :audit_events])
   - top_level_link = project_nav_tab?(:security) ? project_security_dashboard_index_path(@project) : project_dependencies_path(@project)
   - top_level_qa_selector = project_nav_tab?(:security) ? 'security_dashboard_link' : 'dependency_list_link'
 
@@ -49,6 +49,8 @@
         = nav_link(path: ['projects/security/configuration#show', 'projects/security/sast_configuration#show']) do
           = link_to project_security_configuration_path(@project), title: _('Configuration'), data: { qa_selector: 'security_configuration_link'} do
             %span= _('Configuration')
+
+      = render_if_exists 'projects/sidebar/audit_events'
 
 - elsif show_discover_project_security?(@project)
   = nav_link(path: project_security_discover_path(@project)) do

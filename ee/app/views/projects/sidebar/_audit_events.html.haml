@@ -1,0 +1,7 @@
+- return unless @project.feature_available?(:audit_events) || show_promotions?
+
+- if project_nav_tab?(:audit_events)
+  = nav_link(controller: :audit_events) do
+    = link_to project_audit_events_path(@project), title: "Audit Events", data: { qa_selector: 'audit_events_settings_link' } do
+      %span
+        = _('Audit Events')

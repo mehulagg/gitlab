@@ -45,7 +45,8 @@ RSpec.describe 'Project navbar' do
             _('Security Dashboard'),
             _('Vulnerability Report'),
             s_('OnDemandScans|On-demand Scans'),
-            _('Configuration')
+            _('Configuration'),
+            _('Audit Events')
           ]
         }
       )

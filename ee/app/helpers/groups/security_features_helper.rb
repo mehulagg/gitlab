@@ -30,6 +30,11 @@ module Groups::SecurityFeaturesHelper
     end
   end
 
+  def group_level_audit_events_available?(group)
+    group.feature_available?(:audit_events) &&
+      can?(current_user, :read_group_audit_events, group)
+  end
+
   def group_level_security_dashboard_data(group)
     {
       projects_endpoint: expose_url(api_v4_groups_projects_path(id: group.id)),
