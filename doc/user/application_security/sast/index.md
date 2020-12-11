@@ -414,7 +414,7 @@ Some analyzers make it possible to filter out vulnerabilities under a given thre
 
 | Environment variable          | Default value            | Description                                                                                                                                                                                                                 |
 |-------------------------------|--------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `SAST_EXCLUDED_PATHS`         | `spec, test, tests, tmp` | Exclude vulnerabilities from output based on the paths. This is a comma-separated list of patterns. Patterns can be globs, or file or folder paths (for example, `doc,spec` ). Parent directories also match patterns. **TIP:** Exclude temporary directories used by your build tool as these can generate false positives. |
+| `SAST_EXCLUDED_PATHS`         | `spec, test, tests, tmp` | Exclude vulnerabilities from output based on the paths. This is a comma-separated list of patterns. Patterns can be globs, or file or folder paths (for example, `doc,spec` ). Parent directories also match patterns. You might need to exclude temporary directories used by your build tool as these can generate false positives. |
 | `SEARCH_MAX_DEPTH`            | 4                        | Maximum number of directories traversed when searching for source code files. |
 | `SAST_BANDIT_EXCLUDED_PATHS`  |                          | Comma-separated list of paths to exclude from scan. Uses Python's [`fnmatch` syntax](https://docs.python.org/2/library/fnmatch.html); For example: `'*/tests/*, */venv/*'`                                                  |
 | `SAST_BRAKEMAN_LEVEL`         | 1                        | Ignore Brakeman vulnerabilities under given confidence level. Integer, 1=Low 3=High.                                                                                                                                        |
@@ -461,9 +461,14 @@ analyzer containers: `DOCKER_`, `CI`, `GITLAB_`, `FF_`, `HOME`, `PWD`, `OLDPWD`,
 
 ### Experimental features
 
-Receive early access to experimental features:
+You can receive early access to experimental features. Experimental features might be added,
+removed, or promoted to regular features at any time.
+
+Experimental features available are:
 
 - Enable scanning of iOS and Android apps using the [MobSF analyzer](https://gitlab.com/gitlab-org/security-products/analyzers/mobsf/).
+
+#### Enable experimental features
 
 To enable experimental features, add the following to your `.gitlab-ci.yml` file:
 
