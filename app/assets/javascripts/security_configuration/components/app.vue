@@ -11,16 +11,26 @@ export default {
   data: () => ({
     features: [
       {
-        manage: 'Please upgrade',
+        manage: 'Enable via Merge Request',
         name: 'Static Application Security Testing (SAST)',
         description: 'Analyze your source code for known vulnerabilities.',
-        link: 'user/application_security/sast/index'
+        link: 'user/application_security/sast/index',
+        type: 'sast'
       },
       {
-        manage: 'Show button',
+        manage: 'Available with upgrade or free trial',
         name: 'Dynamic Application Security Testing (DAST)',
         description: 'Analyze a review version of your web application.',
-        link: 'user/application_security/dast/index'
+        link: 'user/application_security/dast/index',
+        type: 'dast'
+      },
+      {
+        manage: '',
+        name: 'Secret Detection',
+        description: 'Analyze your source code and git history for secrets.',
+        link: 'user/application_security/secret_detection/index',
+        // fix me use imported constants
+        type: 'secret_detection'
       }
     ]
   }),
@@ -49,6 +59,16 @@ export default {
         featureName: item.name,
       });
     },
+    getComponentForItem(item) {
+      const COMPONENTS = {
+        sast: ManageSast,
+        secret_detection: ManageSecretDetection,
+        dast: ManageDast
+      };
+      
+      return COMPONENTS[item.type];
+
+    }
   }
 };
 </script>
@@ -76,13 +96,9 @@ export default {
         </div>
       </template>
 
-      <!-- <template #cell(manage)="{ item }">
-        <manage-feature
-          :feature="item"
-          :auto-devops-enabled="autoDevopsEnabled"
-          :create-sast-merge-request-path="createSastMergeRequestPath"
-        />
-      </template> -->
+      <template #cell(manage)="{ item }">
+        <component :is="getComponentForItem(item)" :item="item"></component>
+      </template>
     </gl-table>
   </article>
 </template>
