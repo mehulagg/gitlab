@@ -47,7 +47,7 @@ export default {
       <span
         class="details-cell gl-display-flex gl-justify-content-space-between gl-align-items-center gl-pl-3"
       >
-        <span>{{ rotation.name }}</span>
+        <span class="gl-str-truncated">{{ rotation.name }}</span>
         <gl-button-group>
           <gl-button
             v-gl-tooltip
@@ -72,7 +72,12 @@ export default {
         data-testid="timelineCell"
       >
         <current-day-indicator :preset-type="presetType" :timeframe-item="timeframeItem" />
-        <rotation-assignee :rotation="rotation" :assignee-index="index" />
+        <rotation-assignee
+          :assignee="rotation.participants.nodes[index]"
+          :assignee-index="index"
+          :rotation-length="rotation.length"
+          :rotation-starts-at="rotation.startsAt"
+        />
       </span>
     </div>
   </div>

@@ -10,7 +10,9 @@ exports[`RotationsListSectionComponent renders component layout 1`] = `
     <span
       class="details-cell gl-display-flex gl-justify-content-space-between gl-align-items-center gl-pl-3"
     >
-      <span>
+      <span
+        class="gl-str-truncated"
+      >
         Rotation 242
       </span>
        
@@ -47,8 +49,10 @@ exports[`RotationsListSectionComponent renders component layout 1`] = `
       />
        
       <rotation-assignee-stub
+        assignee="[object Object]"
         assigneeindex="0"
-        rotation="[object Object]"
+        rotationlength="1"
+        rotationstartsat="2020-12-09T09:00:53Z"
       />
     </span>
     <span
@@ -61,8 +65,10 @@ exports[`RotationsListSectionComponent renders component layout 1`] = `
       />
        
       <rotation-assignee-stub
+        assignee="[object Object]"
         assigneeindex="1"
-        rotation="[object Object]"
+        rotationlength="1"
+        rotationstartsat="2020-12-09T09:00:53Z"
       />
     </span>
   </div>

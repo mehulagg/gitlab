@@ -9,7 +9,8 @@
         {
           "user": {
             "id": "gid://gitlab/User/1",
-            "username": "root"
+            "username": "root",
+            "avatarUrl": "/url"
           },
           "colorWeight": "500",
           "colorPalette": "blue"
@@ -17,7 +18,8 @@
         {
             "user": {
               "id": "gid://gitlab/User/2",
-              "username": "david"
+              "username": "david",
+              "avatarUrl": "/url"
             },
             "colorWeight": "500",
             "colorPalette": "magenta"
@@ -36,7 +38,8 @@
         {
           "user": {
             "id": "gid://gitlab/User/3",
-            "username": "root 2"
+            "username": "root 2",
+            "avatarUrl": "/url"
           },
           "colorWeight": "500",
           "colorPalette": "orange"
@@ -44,7 +47,8 @@
         {
             "user": {
               "id": "gid://gitlab/User/4",
-              "username": "david 2"
+              "username": "david 2",
+              "avatarUrl": "/url"
             },
             "colorWeight": "500",
             "colorPalette": "aqua"

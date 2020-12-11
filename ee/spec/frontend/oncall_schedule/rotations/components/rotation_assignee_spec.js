@@ -6,8 +6,8 @@ import mockRotations from '../../mocks/mock_rotation.json';
 
 describe('RotationAssignee', () => {
   let wrapper;
-  const assignee = mockRotations[0].participants.nodes[1];
 
+  const assignee = mockRotations[0].participants.nodes[1];
   const findToken = () => wrapper.find(GlToken);
   const findAvatar = () => wrapper.find(GlAvatarLabeled);
   const findPopOver = () => wrapper.find(GlPopover);
@@ -18,8 +18,10 @@ describe('RotationAssignee', () => {
     wrapper = extendedWrapper(
       shallowMount(RotationAssignee, {
         propsData: {
+          assignee,
           assigneeIndex: 1,
-          rotation: mockRotations[0],
+          rotationLength: mockRotations[0].length,
+          rotationStartsAt: mockRotations[0].startsAt,
         },
       }),
     );

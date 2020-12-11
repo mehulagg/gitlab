@@ -17,26 +17,31 @@ export default {
       type: Number,
       required: true,
     },
-    rotation: {
+    assignee: {
       type: Object,
+      required: true,
+    },
+    rotationLength: {
+      type: Number,
+      required: true,
+    },
+    rotationStartsAt: {
+      type: String,
       required: true,
     },
   },
   computed: {
-    assignee() {
-      return this.rotation.participants.nodes[this.assigneeIndex];
-    },
     startsAt() {
       const startsAt = assigneeScheduleDateStart(
-        new Date(this.rotation.startsAt),
-        this.rotation.length * 7 * this.assigneeIndex,
+        new Date(this.rotationStartsAt),
+        this.rotationLength * 7 * this.assigneeIndex,
       ).toLocaleString();
       return sprintf(__('Starts at %{startsAt}'), { startsAt });
     },
     endsAt() {
       const endsAt = assigneeScheduleDateStart(
-        new Date(this.rotation.startsAt),
-        this.rotation.length * 7 * this.assigneeIndex + this.rotation.length * 7,
+        new Date(this.rotationStartsAt),
+        this.rotationLength * 7 * this.assigneeIndex + this.rotationLength * 7,
       ).toLocaleString();
       return sprintf(__('Ends at %{endsAt}'), { endsAt });
     },
@@ -66,7 +71,7 @@ export default {
       :target="assignee.user.id"
       :title="assignee.user.username"
       triggers="hover"
-      placement="top"
+      placement="left"
     >
       <p class="gl-m-0" data-testid="rotation-assignee-starts-at">{{ startsAt }}</p>
       <p class="gl-m-0" data-testid="rotation-assignee-ends-at">{{ endsAt }}</p>

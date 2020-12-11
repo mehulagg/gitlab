@@ -7,6 +7,7 @@ import {
   GlModalDirective,
   GlTooltipDirective,
 } from '@gitlab/ui';
+import { formatDate } from '~/lib/utils/datetime_utility';
 import { s__ } from '~/locale';
 import ScheduleTimelineSection from './schedule/components/schedule_timeline_section.vue';
 import DeleteScheduleModal from './delete_schedule_modal.vue';
@@ -15,7 +16,6 @@ import AddRotationModal from './rotations/components/add_rotation_modal.vue';
 
 import { getTimeframeForWeeksView } from './schedule/utils';
 import { PRESET_TYPES } from '../constants';
-import { getFormattedTimezone } from '../utils/common_utils';
 import RotationsListSection from './schedule/components/rotations_list_section.vue';
 
 export const i18n = {
@@ -66,10 +66,16 @@ export default {
   computed: {
     tzLong() {
       const selectedTz = this.timezones.find(tz => tz.identifier === this.schedule.timezone);
-      return getFormattedTimezone(selectedTz);
+      // eslint-disable-next-line @gitlab/require-i18n-strings
+      return `(UTC ${selectedTz.formatted_offset})`;
     },
     timeframe() {
       return getTimeframeForWeeksView();
+    },
+    scheduleRange() {
+      const range = { start: [this.timeframe[0]], end: [...this.timeframe].pop() };
+
+      return `${formatDate(range.start, 'mmmm d')} - ${formatDate(range.end, 'mmmm d')}`;
     },
   },
 };
@@ -77,10 +83,10 @@ export default {
 
 <template>
   <div>
-    <gl-card>
+    <gl-card class="gl-mt-5" header-class="gl-py-3">
       <template #header>
         <div
-          class="gl-display-flex gl-justify-content-space-between gl-m-0"
+          class="gl-display-flex gl-justify-content-space-between gl-align-items-center gl-m-0"
           data-testid="scheduleHeader"
         >
           <span class="gl-font-weight-bold gl-font-lg">{{ schedule.name }}</span>
@@ -108,6 +114,13 @@ export default {
         </gl-sprintf>
         | {{ tzLong }}
       </p>
+      <div class="gl-w-full gl-display-flex gl-align-items-center gl-pb-3">
+        <gl-button-group>
+          <gl-button icon="chevron-left" />
+          <gl-button icon="chevron-right" />
+        </gl-button-group>
+        <p class="gl-ml-3 gl-mt-4">{{ scheduleRange }}</p>
+      </div>
 
       <gl-card header-class="gl-bg-transparent">
         <template #header>
@@ -134,6 +147,6 @@ export default {
     </gl-card>
     <delete-schedule-modal :schedule="schedule" :modal-id="$options.deleteScheduleModalId" />
     <edit-schedule-modal :schedule="schedule" :modal-id="$options.editScheduleModalId" />
-    <add-rotation-modal :modal-id="$options.addRotationModalId" />
+    <add-rotation-modal :schedule="schedule" :modal-id="$options.addRotationModalId" />
   </div>
 </template>

@@ -65,6 +65,10 @@ export default {
       type: String,
       required: true,
     },
+    schedule: {
+      type: Object,
+      required: true,
+    },
   },
   apollo: {
     participants: {
@@ -78,7 +82,6 @@ export default {
         return nodes;
       },
       error(error) {
-        this.showErrorAlert = true;
         this.error = error;
       },
     },
@@ -100,8 +103,7 @@ export default {
           time: 0,
         },
       },
-      showErrorAlert: false,
-      error: '',
+      error: null,
     };
   },
   computed: {
@@ -150,7 +152,6 @@ export default {
         })
         .catch(error => {
           this.error = error;
-          this.showErrorAlert = true;
         })
         .finally(() => {
           this.loading = false;
@@ -182,7 +183,7 @@ export default {
     :action-cancel="actionsProps.cancel"
     @primary="createRotation"
   >
-    <gl-alert v-if="showErrorAlert" variant="danger" @dismiss="showErrorAlert = false">
+    <gl-alert v-if="error" variant="danger" @dismiss="error = null">
       {{ error || $options.i18n.errorMsg }}
     </gl-alert>
     <gl-form class="w-75 gl-xs-w-full!" @submit.prevent="createRotation">
@@ -277,8 +278,7 @@ export default {
               <span class="gl-white-space-nowrap"> {{ formatTime(n) }}</span>
             </gl-dropdown-item>
           </gl-dropdown>
-          <!-- TODO: // Replace with actual timezone following coming work -->
-          <span class="gl-pl-5"> {{ __('PST') }} </span>
+          <span class="gl-pl-5"> {{ schedule.timezone }} </span>
         </div>
       </gl-form-group>
     </gl-form>
