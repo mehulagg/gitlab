@@ -954,7 +954,7 @@ along with [Gitaly](#configure-gitaly), are recommended over using NFS whenever
 possible. However, if you intend to use GitLab Pages,
 [you must use NFS](troubleshooting.md#gitlab-pages-requires-nfs).
 
-For information about configuring NFS, see the [NFS documentation page](../nfs.md).
+For information about configuring NFS, see the [NFS documentation page](../nfs.md). NFS support is scheduled to be removed in GitLab 14.0. 
 
 <div align="right">
   <a type="button" class="btn btn-default" href="#setup-components">
