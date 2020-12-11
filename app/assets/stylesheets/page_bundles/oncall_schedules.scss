@@ -186,8 +186,4 @@ $column-right-gradient: linear-gradient(to right, $gradient-dark-gray 0%, $gradi
   .gl-avatar-labeled-label {
     @include gl-text-white;
   }
-
-  .gl-token-close {
-    @include gl-display-none;
-  }
 }

@@ -56,6 +56,7 @@ export default {
       :category-palette="assignee.colorPalette"
       :category-weight="assignee.colorWeight"
       class="gl-w-full gl-align-items-center"
+      :view-only="true"
     >
       <gl-avatar-labeled
         v-gl-tooltip="{ placement: 'bottom' }"

@@ -104,6 +104,11 @@ export default {
         },
       },
       error: null,
+      validationState: {
+        name: true,
+        participants: true,
+        startsOn: true,
+      },
     };
   },
   computed: {
@@ -117,15 +122,6 @@ export default {
           text: this.$options.i18n.cancel,
         },
       };
-    },
-    rotationNameIsValid() {
-      return this.form.name !== '';
-    },
-    rotationParticipantsAreValid() {
-      return this.form.participants.length > 0;
-    },
-    rotationStartsOnIsValid() {
-      return this.form.startsOn.date !== null || this.form.startsOn.date !== undefined;
     },
     noResults() {
       return this.participants.length === 0;
@@ -169,6 +165,15 @@ export default {
     setRotationStartsOnTime(time) {
       this.form.startsOn.time = time;
     },
+    validateForm(key) {
+      if (key === 'name') {
+        this.validationState.name = this.form.name !== '';
+      } else if (key === 'participants') {
+        this.validationState.participants = this.form.participants.length > 0;
+      } else if (key === 'startsOn') {
+        this.validationState.startsOn = this.form.startsOn.date !== null;
+      }
+    },
   },
 };
 </script>
@@ -192,9 +197,9 @@ export default {
         label-size="sm"
         label-for="rotation-name"
         :invalid-feedback="$options.i18n.fields.name.error"
-        :state="rotationNameIsValid"
+        :state="validationState.name"
       >
-        <gl-form-input id="rotation-name" v-model="form.name" />
+        <gl-form-input id="rotation-name" v-model="form.name" @blur.native="validateForm('name')" />
       </gl-form-group>
 
       <gl-form-group
@@ -202,7 +207,7 @@ export default {
         label-size="sm"
         label-for="rotation-participants"
         :invalid-feedback="$options.i18n.fields.participants.error"
-        :state="rotationParticipantsAreValid"
+        :state="validationState.participants"
       >
         <gl-token-selector
           v-model="form.participants"
@@ -210,6 +215,7 @@ export default {
           :loading="this.$apollo.queries.participants.loading"
           :container-class="'gl-h-13! gl-overflow-y-auto'"
           @text-input="filterParticipants"
+          @blur="validateForm('participants')"
         >
           <template #token-content="{ token }">
             <gl-avatar v-if="token.avatarUrl" :src="token.avatarUrl" :size="16" />
@@ -258,10 +264,14 @@ export default {
         label-size="sm"
         label-for="rotation-time"
         :invalid-feedback="$options.i18n.fields.startsOn.error"
-        :state="rotationStartsOnIsValid"
+        :state="validationState.startsOn"
       >
         <div class="gl-display-flex gl-align-items-center">
-          <gl-datepicker v-model="form.startsOn.date" class="gl-mr-3" />
+          <gl-datepicker
+            v-model="form.startsOn.date"
+            class="gl-mr-3"
+            @close="validateForm('startsOn')"
+          />
           <span> {{ __('at') }} </span>
           <gl-dropdown
             id="rotation-time"
