@@ -630,9 +630,6 @@ msgstr ""
 msgid "%{message} showing first %{warnings_displayed}"
 msgstr ""
 
-msgid "%{message}."
-msgstr ""
-
 msgid "%{milestone_name} (Past due)"
 msgstr ""
 
