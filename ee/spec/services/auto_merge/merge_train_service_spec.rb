@@ -5,7 +5,7 @@ require 'spec_helper'
 RSpec.describe AutoMerge::MergeTrainService do
   include ExclusiveLeaseHelpers
 
-  let_it_be(:project) { create(:project, :repository) }
+  let_it_be(:project) { create(:project, :repository, merge_pipelines_enabled: true, merge_trains_enabled: true) }
   let_it_be(:user) { create(:user) }
   let(:service) { described_class.new(project, user, params) }
   let(:params) { {} }
@@ -17,7 +17,6 @@ RSpec.describe AutoMerge::MergeTrainService do
 
   before do
     project.add_maintainer(user)
-    project.update!(merge_pipelines_enabled: true, merge_trains_enabled: true)
 
     allow(AutoMergeProcessWorker).to receive(:perform_async) { }
 

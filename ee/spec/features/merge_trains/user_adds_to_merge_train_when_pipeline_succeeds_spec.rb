@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe 'User adds to merge train when pipeline succeeds', :js do
-  let(:project) { create(:project, :repository) }
+  let(:project) { create(:project, :repository, merge_pipelines_enabled: true, merge_trains_enabled: true) }
   let(:user) { create(:user) }
 
   let!(:merge_request) do
@@ -18,7 +18,6 @@ RSpec.describe 'User adds to merge train when pipeline succeeds', :js do
     stub_feature_flags(disable_merge_trains: false)
     stub_licensed_features(merge_pipelines: true, merge_trains: true)
     project.add_maintainer(user)
-    project.update!(merge_pipelines_enabled: true, merge_trains_enabled: true)
 
     merge_request.update_head_pipeline
 

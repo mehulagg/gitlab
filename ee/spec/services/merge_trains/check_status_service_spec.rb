@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe MergeTrains::CheckStatusService do
-  let_it_be(:project) { create(:project, :repository) }
+  let_it_be(:project) { create(:project, :repository, merge_pipelines_enabled: true, merge_trains_enabled: true) }
   let_it_be(:maintainer) { create(:user).tap { |u| project.add_maintainer(u)} }
   let(:service) { described_class.new(project, maintainer) }
   let(:previous_ref) { 'refs/heads/master' }
@@ -11,7 +11,6 @@ RSpec.describe MergeTrains::CheckStatusService do
   before do
     stub_feature_flags(disable_merge_trains: false)
     stub_licensed_features(merge_pipelines: true, merge_trains: true)
-    project.update!(merge_pipelines_enabled: true, merge_trains_enabled: true)
   end
 
   describe '#execute' do

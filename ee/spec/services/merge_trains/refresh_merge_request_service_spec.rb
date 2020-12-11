@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe MergeTrains::RefreshMergeRequestService do
-  let_it_be(:project) { create(:project, :repository) }
+  let_it_be(:project) { create(:project, :repository, merge_pipelines_enabled: true, merge_trains_enabled: true) }
   let_it_be(:maintainer) { create(:user) }
   let(:service) { described_class.new(project, maintainer, require_recreate: require_recreate) }
   let(:require_recreate) { false }
@@ -12,7 +12,7 @@ RSpec.describe MergeTrains::RefreshMergeRequestService do
     stub_feature_flags(disable_merge_trains: false)
     project.add_maintainer(maintainer)
     stub_licensed_features(merge_pipelines: true, merge_trains: true)
-    project.update!(merge_pipelines_enabled: true, merge_trains_enabled: true)
+    project.update!(merge_pipelines_enabled: true, merge_trains_enabled: true) unless project.merge_pipelines_enabled == true && project.merge_trains_enabled == true
   end
 
   describe '#execute' do
@@ -90,10 +90,6 @@ RSpec.describe MergeTrains::RefreshMergeRequestService do
       it_behaves_like 'drops the merge request from the merge train' do
         let(:expected_reason) { 'project disabled merge trains' }
       end
-
-      after do
-        project.update!(merge_pipelines_enabled: true)
-      end
     end
 
     context 'when merge trains not enabled' do
@@ -103,10 +99,6 @@ RSpec.describe MergeTrains::RefreshMergeRequestService do
 
       it_behaves_like 'drops the merge request from the merge train' do
         let(:expected_reason) { 'project disabled merge trains' }
-      end
-
-      after do
-        project.update!(merge_pipelines_enabled: true)
       end
     end
 
