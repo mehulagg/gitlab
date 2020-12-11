@@ -44,15 +44,15 @@ module Gitlab
       class << self
         include Gitlab::Utils::UsageData
 
-        def track_event(value, event_name, time = Time.zone.now)
-          track(value, event_name, time: time)
+        def track_event(event_name, values:, time: Time.zone.now)
+          track(values, event_name, time: time)
         end
 
-        def track_event_in_context(value, event_name, context, time = Time.zone.now)
+        def track_event_in_context(event_name, values:, context:, time: Time.zone.now)
           return if context.blank?
           return unless context.in?(valid_context_list)
 
-          track(value, event_name, context: context, time: time)
+          track(values, event_name, context: context, time: time)
         end
 
         def unique_events(event_names:, start_date:, end_date:, context: '')

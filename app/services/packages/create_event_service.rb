@@ -7,7 +7,7 @@ module Packages
         if guest?
           ::Gitlab::UsageDataCounters::GuestPackageEventCounter.count(redis_event_name)
         else
-          ::Gitlab::UsageDataCounters::HLLRedisCounter.track_event(current_user.id, redis_event_name)
+          ::Gitlab::UsageDataCounters::HLLRedisCounter.track_event(redis_event_name, values: current_user.id)
         end
       end
 
