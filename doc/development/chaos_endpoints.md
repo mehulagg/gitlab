@@ -8,7 +8,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 As [Werner Vogels](https://twitter.com/Werner), the CTO at Amazon Web Services, famously put it, **Everything fails, all the time**.
 
-As a developer, it's as important to consider the failure modes in which your software may operate as much as normal operation. Doing so can mean the difference between a minor hiccup leading to a scattering of `500` errors experienced by a tiny fraction of users and a full site outage that affects all users for an extended period.
+As a developer, it's as important to consider the failure modes in which your software may operate as much as normal operation. Doing so can mean the difference between a minor hiccup leading to a scattering of `500` errors experienced by a tiny fraction of users, and a full site outage that affects all users for an extended period.
 
 To paraphrase [Tolstoy](https://en.wikipedia.org/wiki/Anna_Karenina_principle), _all happy servers are alike, but all failing servers are failing in their own way_. Luckily, there are ways we can attempt to simulate these failure modes, and the chaos endpoints are tools for assisting in this process.
 

@@ -128,7 +128,7 @@ also reduces pressure on the system as a whole.
 ## Refreshing import JIDs
 
 GitLab includes a worker called `Gitlab::Import::StuckProjectImportJobsWorker`
-that periodically runs and mark project imports as failed if they have been
+that periodically runs and marks project imports as failed if they have been
 running for more than 15 hours. For GitHub projects, this poses a bit of a
 problem: importing large projects could take several hours depending on how
 often we hit the GitHub rate limit (more on this below), but we don't want
@@ -151,7 +151,7 @@ because we need the Email address of users in order to map them to GitLab users.
 
 We handle this by doing the following:
 
-1. Once we hit the rate limit all jobs automatically reschedule themselves
+1. After we hit the rate limit all jobs automatically reschedule themselves
    in such a way that they are not executed until the rate limit has been reset.
 1. We cache the mapping of GitHub users to GitLab users in Redis.
 
