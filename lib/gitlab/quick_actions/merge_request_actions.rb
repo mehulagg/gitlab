@@ -79,7 +79,7 @@ module Gitlab
 
           next unless success
 
-          @execution_message[:rebase] = _('Scheduled a rebase of the source branch.')
+          @execution_message[:rebase] = _('Scheduled a rebase of branch #{quick_action_target.source_branch}.')
         end
 
         desc 'Toggle the Draft status'
