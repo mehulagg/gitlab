@@ -348,7 +348,7 @@ export default {
     },
     shouldShowDownloadGuidance() {
       let foo = LOADING;
-      debugger;
+      //debugger;
       return this.summaryStatus !== LOADING;
     },
   },

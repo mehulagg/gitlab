@@ -32,6 +32,11 @@ export default {
       default: 0,
     },    
   },
+  data() {
+    return {
+      reportArtifacts: [],
+    };
+  },  
   apollo: {
     reportArtifacts: {
       query: securityReportDownloadPathsQuery,
@@ -45,7 +50,8 @@ export default {
         };
       },
       update(data) {
-        return extractSecurityReportArtifacts(this.$options.reportTypes, data);
+        debugger;
+        return extractSecurityReportArtifacts(this.reportTypes, data);
       },
       error(error) {
         this.showError(error);
@@ -56,7 +62,7 @@ export default {
         }
 
         let foo =  this.reportArtifacts.map(({ reportType }) => reportType);
-        debugger;
+        //debugger;
         return foo;
         // // Query has completed, so populate the availableSecurityReports.
         // this.onCheckingAvailableSecurityReports(
@@ -67,7 +73,7 @@ export default {
   },
   computed: {
     isLoadingReportArtifacts() {
-      debugger;
+      //debugger;
       return this.$apollo.queries.reportArtifacts.loading;
     },
   },

@@ -1,4 +1,4 @@
-import { securityReportTypeEnumToReportType } from './constants';
+import { securityReportTypeEnumToReportType } from 'ee_else_ce/vue_shared/security_reports/constants';
 
 export const extractSecurityReportArtifacts = (reportTypes, data) => {
   const jobs = data.project?.mergeRequest?.headPipeline?.jobs?.nodes ?? [];
