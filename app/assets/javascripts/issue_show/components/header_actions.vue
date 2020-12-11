@@ -198,21 +198,13 @@ export default {
       :text="dropdownText"
       :loading="isToggleStateButtonLoading"
     >
-      <gl-dropdown-item
-        v-if="showToggleIssueStateButton"
-        :disabled="isToggleStateButtonLoading"
-        @click="toggleIssueState"
-      >
+      <gl-dropdown-item v-if="showToggleIssueStateButton" @click="toggleIssueState">
         {{ buttonText }}
       </gl-dropdown-item>
       <gl-dropdown-item v-if="canCreateIssue" :href="newIssuePath">
         {{ newIssueTypeText }}
       </gl-dropdown-item>
-      <gl-dropdown-item
-        v-if="canPromoteToEpic"
-        :disabled="isToggleStateButtonLoading"
-        @click="promoteToEpic"
-      >
+      <gl-dropdown-item v-if="canPromoteToEpic" @click="promoteToEpic">
         {{ __('Promote to epic') }}
       </gl-dropdown-item>
       <gl-dropdown-item v-if="!isIssueAuthor" :href="reportAbusePath">
