@@ -382,6 +382,8 @@ Project details include the following analytics:
 
 - Deployment Frequency
 
+For more information, see [Project Analytics API](../../api/project_analytics.md).
+
 ## Project APIs
 
 There are numerous [APIs](../../api/README.md) to use with your projects:
