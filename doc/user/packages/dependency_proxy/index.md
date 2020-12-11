@@ -185,7 +185,7 @@ stored.
 To reclaim disk space used by image blobs that are no longer needed, use
 the [Dependency Proxy API](../../../api/dependency_proxy.md).
 
-## How the Dependency Proxy helps mitigate Docker rate limiting
+## Docker Hub rate limits and the Dependency Proxy
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/241639) in [GitLab Core](https://about.gitlab.com/pricing/) 13.7.
 
