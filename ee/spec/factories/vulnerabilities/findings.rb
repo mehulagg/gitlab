@@ -218,7 +218,7 @@ FactoryBot.define do
       end
     end
 
-    ::Vulnerabilities::Finding::REPORT_TYPES.keys.each do |security_report_type|
+    ::Enums::Vulnerability.report_types.keys.each do |security_report_type|
       trait security_report_type do
         report_type { security_report_type }
       end

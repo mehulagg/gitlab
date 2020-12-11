@@ -27,7 +27,7 @@ module Vulnerabilities
       select(
         arel_table[:date],
         arel_table[:total].sum.as('total'),
-        *Finding::SEVERITY_LEVELS.map { |severity, _| arel_table[severity].sum.as(severity.to_s) }
+        *Enums::Vulnerability.severity_levels.map { |severity, _| arel_table[severity].sum.as(severity.to_s) }
       )
     end
     scope :grouped_by_date, -> (sort = :asc) do

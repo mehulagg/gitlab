@@ -82,9 +82,9 @@ RSpec.describe Vulnerabilities::Finding do
   end
 
   context 'order' do
-    let!(:finding1) { create(:vulnerabilities_finding, confidence: described_class::CONFIDENCE_LEVELS[:high], severity:   described_class::SEVERITY_LEVELS[:high]) }
-    let!(:finding2) { create(:vulnerabilities_finding, confidence: described_class::CONFIDENCE_LEVELS[:medium], severity: described_class::SEVERITY_LEVELS[:critical]) }
-    let!(:finding3) { create(:vulnerabilities_finding, confidence: described_class::CONFIDENCE_LEVELS[:high], severity:   described_class::SEVERITY_LEVELS[:critical]) }
+    let!(:finding1) { create(:vulnerabilities_finding, confidence: Enums::Vulnerability.confidence_levels[:high], severity:   Enums::Vulnerability.severity_levels[:high]) }
+    let!(:finding2) { create(:vulnerabilities_finding, confidence: Enums::Vulnerability.confidence_levels[:medium], severity: Enums::Vulnerability.severity_levels[:critical]) }
+    let!(:finding3) { create(:vulnerabilities_finding, confidence: Enums::Vulnerability.confidence_levels[:high], severity:   Enums::Vulnerability.severity_levels[:critical]) }
 
     it 'orders by severity and confidence' do
       expect(described_class.all.ordered).to eq([finding3, finding2, finding1])
@@ -139,7 +139,7 @@ RSpec.describe Vulnerabilities::Finding do
     subject { described_class.by_report_types(param) }
 
     context 'with one param' do
-      let(:param) { Vulnerabilities::Finding::REPORT_TYPES['sast'] }
+      let(:param) { Vulnerabilities::Finding.report_types['sast'] }
 
       it 'returns found record' do
         is_expected.to contain_exactly(vulnerability_sast)
@@ -149,11 +149,11 @@ RSpec.describe Vulnerabilities::Finding do
     context 'with array of params' do
       let(:param) do
         [
-          Vulnerabilities::Finding::REPORT_TYPES['dependency_scanning'],
-          Vulnerabilities::Finding::REPORT_TYPES['dast'],
-          Vulnerabilities::Finding::REPORT_TYPES['secret_detection'],
-          Vulnerabilities::Finding::REPORT_TYPES['coverage_fuzzing'],
-          Vulnerabilities::Finding::REPORT_TYPES['api_fuzzing']
+          Vulnerabilities::Finding.report_types['dependency_scanning'],
+          Vulnerabilities::Finding.report_types['dast'],
+          Vulnerabilities::Finding.report_types['secret_detection'],
+          Vulnerabilities::Finding.report_types['coverage_fuzzing'],
+          Vulnerabilities::Finding.report_types['api_fuzzing']
         ]
       end
 
@@ -168,7 +168,7 @@ RSpec.describe Vulnerabilities::Finding do
     end
 
     context 'without found record' do
-      let(:param) { Vulnerabilities::Finding::REPORT_TYPES['container_scanning']}
+      let(:param) { Enums::Vulnerability.report_types['container_scanning']}
 
       it 'returns empty collection' do
         is_expected.to be_empty

@@ -16,10 +16,8 @@ module Security
 
     has_one :build, through: :scan
 
-    # TODO: These are duplicated between this model and Vulnerabilities::Finding,
-    # we should create a shared module to encapculate this in one place.
-    enum confidence: Vulnerabilities::Finding::CONFIDENCE_LEVELS, _prefix: :confidence
-    enum severity: Vulnerabilities::Finding::SEVERITY_LEVELS, _prefix: :severity
+    enum confidence: Enums::Vulnerability.confidence_levels, _prefix: :confidence
+    enum severity: Enums::Vulnerability.severity_levels, _prefix: :severity
 
     validates :project_fingerprint, presence: true, length: { maximum: 40 }
     validates :position, presence: true

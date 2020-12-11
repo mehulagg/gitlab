@@ -39,41 +39,9 @@ module Vulnerabilities
     attr_writer :sha
     attr_accessor :scan
 
-    CONFIDENCE_LEVELS = {
-      # undefined: 0, no longer applicable
-      ignore: 1,
-      unknown: 2,
-      experimental: 3,
-      low: 4,
-      medium: 5,
-      high: 6,
-      confirmed: 7
-    }.with_indifferent_access.freeze
-
-    SEVERITY_LEVELS = {
-      # undefined: 0, no longer applicable
-      info: 1,
-      unknown: 2,
-      # experimental: 3, formerly used by confidence, no longer applicable
-      low: 4,
-      medium: 5,
-      high: 6,
-      critical: 7
-    }.with_indifferent_access.freeze
-
-    REPORT_TYPES = {
-      sast: 0,
-      dependency_scanning: 1,
-      container_scanning: 2,
-      dast: 3,
-      secret_detection: 4,
-      coverage_fuzzing: 5,
-      api_fuzzing: 6
-    }.with_indifferent_access.freeze
-
-    enum confidence: CONFIDENCE_LEVELS, _prefix: :confidence
-    enum report_type: REPORT_TYPES
-    enum severity: SEVERITY_LEVELS, _prefix: :severity
+    enum confidence: Enums::Vulnerability.confidence_levels, _prefix: :confidence
+    enum report_type: Enums::Vulnerability.report_types
+    enum severity: Enums::Vulnerability.severity_levels, _prefix: :severity
 
     validates :scanner, presence: true
     validates :project, presence: true
@@ -124,7 +92,7 @@ module Vulnerabilities
 
     def self.counted_by_severity
       group(:severity).count.transform_keys do |severity|
-        SEVERITY_LEVELS[severity]
+        severities[severity]
       end
     end
 

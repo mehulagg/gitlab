@@ -25,7 +25,7 @@ module Resolvers
     private
 
     def generate_missing_dates(calendar_entries, start_date, end_date)
-      severities = ::Vulnerabilities::Finding::SEVERITY_LEVELS.keys
+      severities = ::Enums::Vulnerability.severity_levels.keys
       (start_date..end_date)
         .each_with_object({}) { |date, result| result[date] = build_calendar_entry(date, calendar_entries[date], result[date - 1.day]) }
         .values

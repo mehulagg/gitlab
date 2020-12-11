@@ -6,7 +6,7 @@ module Security
   #
   class ScannedResourcesCountingService
     # @param [Ci::Pipeline] pipeline
-    # @param Array[Symbol] report_types Summary report types. Valid values are members of Vulnerabilities::Finding::REPORT_TYPES
+    # @param Array[Symbol] report_types Summary report types. Valid values are members of Enums::Vulnerability.report_types
     def initialize(pipeline, report_types)
       @pipeline = pipeline
       @report_types = report_types

@@ -136,13 +136,13 @@ module Gitlab
           end
 
           def parse_severity_level(input)
-            return input if ::Vulnerabilities::Finding::SEVERITY_LEVELS.key?(input)
+            return input if ::Enums::Vulnerability.severity_levels.key?(input)
 
             'unknown'
           end
 
           def parse_confidence_level(input)
-            return input if ::Vulnerabilities::Finding::CONFIDENCE_LEVELS.key?(input)
+            return input if ::Enums::Vulnerability.confidence_levels.key?(input)
 
             'unknown'
           end

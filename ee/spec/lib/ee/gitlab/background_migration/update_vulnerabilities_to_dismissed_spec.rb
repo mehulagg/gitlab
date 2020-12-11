@@ -12,9 +12,9 @@ RSpec.describe Gitlab::BackgroundMigration::UpdateVulnerabilitiesToDismissed, :m
   let(:identifiers) { table(:vulnerability_identifiers) }
   let(:feedback) { table(:vulnerability_feedback) }
 
-  let(:severity) { Vulnerabilities::Finding::SEVERITY_LEVELS[:unknown] }
-  let(:confidence) { Vulnerabilities::Finding::CONFIDENCE_LEVELS[:medium] }
-  let(:report_type) { Vulnerabilities::Finding::REPORT_TYPES[:sast] }
+  let(:severity) { Enums::Vulnerability.severity_levels[:unknown] }
+  let(:confidence) { Enums::Vulnerability.confidence_levels[:medium] }
+  let(:report_type) { Enums::Vulnerability.report_types[:sast] }
 
   let!(:user) { users.create!(id: 13, email: 'author@example.com', username: 'author', projects_limit: 10) }
   let!(:project) { projects.create!(id: 123, namespace_id: 12, name: 'gitlab', path: 'gitlab') }

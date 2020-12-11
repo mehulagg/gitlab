@@ -13,9 +13,9 @@ RSpec.describe Gitlab::BackgroundMigration::UpdateVulnerabilitiesFromDismissalFe
   let(:feedback) { table(:vulnerability_feedback) }
   let(:namespaces) { table(:namespaces)}
 
-  let(:severity) { Vulnerabilities::Finding::SEVERITY_LEVELS[:unknown] }
-  let(:confidence) { Vulnerabilities::Finding::CONFIDENCE_LEVELS[:medium] }
-  let(:report_type) { Vulnerabilities::Finding::REPORT_TYPES[:sast] }
+  let(:severity) { Enums::Vulnerability.severity_levels[:unknown] }
+  let(:confidence) { Enums::Vulnerability.confidence_levels[:medium] }
+  let(:report_type) { Enums::Vulnerability.report_types[:sast] }
 
   let!(:user) { users.create!(email: 'author@example.com', username: 'author', projects_limit: 10) }
   let!(:project) { projects.create!(namespace_id: namespace.id, name: 'gitlab', path: 'gitlab') }

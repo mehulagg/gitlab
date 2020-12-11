@@ -12,7 +12,7 @@ module Types
     field :total, GraphQL::INT_TYPE, null: false,
           description: 'Total number of vulnerabilities on a particular day'
 
-    ::Vulnerabilities::Finding::SEVERITY_LEVELS.keys.each do |severity|
+    ::Enums::Vulnerability.severity_levels.keys.each do |severity|
       field severity.to_s, GraphQL::INT_TYPE, null: false,
             description: "Total number of vulnerabilities on a particular day with #{severity} severity"
     end
