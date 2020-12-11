@@ -1,3 +1,4 @@
+/* eslint-disable max-classes-per-file */
 import { editor as monacoEditor, languages as monacoLanguages, Uri } from 'monaco-editor';
 import waitForPromises from 'helpers/wait_for_promises';
 import Editor from '~/editor/editor_lite';
@@ -242,29 +243,40 @@ describe('Base editor', () => {
 
   describe('extensions', () => {
     let instance;
-    const foo1 = jest.fn();
-    const foo2 = jest.fn();
-    const bar = jest.fn();
-    const MyExt1 = {
-      foo: foo1,
+    const alphaRes = jest.fn();
+    const betaRes = jest.fn();
+    const fooRes = jest.fn();
+    const barRes = jest.fn();
+    class AlphaClass {
+      // eslint-disable-next-line no-useless-constructor,no-empty-function
+      constructor() {}
+      // eslint-disable-next-line class-methods-use-this
+      alpha() {
+        return alphaRes;
+      }
+    }
+    class BetaClass {
+      // eslint-disable-next-line class-methods-use-this
+      beta() {
+        return betaRes;
+      }
+    }
+    const AlphaExt = new AlphaClass();
+    const BetaExt = new BetaClass();
+    const FooObjExt = {
+      foo() {
+        return fooRes;
+      },
     };
-    const MyExt2 = {
-      bar,
-    };
-    const MyExt3 = {
-      foo: foo2,
+    const BarObjExt = {
+      bar() {
+        return barRes;
+      },
     };
 
     describe('basic functionality', () => {
       beforeEach(() => {
         instance = editor.createInstance({ el: editorEl, blobPath, blobContent });
-      });
-
-      it('is extensible with the extensions', () => {
-        expect(instance.foo).toBeUndefined();
-
-        instance.use(MyExt1);
-        expect(instance.foo).toEqual(foo1);
       });
 
       it('does not fail if no extensions supplied', () => {
@@ -274,22 +286,47 @@ describe('Base editor', () => {
         expect(spy).not.toHaveBeenCalled();
       });
 
-      it('is extensible with multiple extensions', () => {
-        expect(instance.foo).toBeUndefined();
-        expect(instance.bar).toBeUndefined();
+      it("does not extend instance with extension's constructor", () => {
+        expect(instance.constructor).toBeDefined();
+        const { constructor } = instance;
 
-        instance.use([MyExt1, MyExt2]);
+        expect(AlphaExt.constructor).toBeDefined();
+        expect(AlphaExt.constructor).not.toEqual(constructor);
 
-        expect(instance.foo).toEqual(foo1);
-        expect(instance.bar).toEqual(bar);
+        instance.use(AlphaExt);
+        expect(instance.constructor).toBe(constructor);
+      });
+
+      it.each`
+        type                                        | extensions                | methods              | expectations
+        ${'ES6 classes'}                            | ${AlphaExt}               | ${['alpha']}         | ${[alphaRes]}
+        ${'multiple ES6 classes'}                   | ${[AlphaExt, BetaExt]}    | ${['alpha', 'beta']} | ${[alphaRes, betaRes]}
+        ${'simple objects'}                         | ${FooObjExt}              | ${['foo']}           | ${[fooRes]}
+        ${'multiple simple objects'}                | ${[FooObjExt, BarObjExt]} | ${['foo', 'bar']}    | ${[fooRes, barRes]}
+        ${'combination of ES6 classes and objects'} | ${[AlphaExt, BarObjExt]}  | ${['alpha', 'bar']}  | ${[alphaRes, barRes]}
+      `('is extensible with $type', ({ extensions, methods, expectations } = {}) => {
+        methods.forEach(method => {
+          expect(instance[method]).toBeUndefined();
+        });
+
+        instance.use(extensions);
+
+        methods.forEach(method => {
+          expect(instance[method]).toBeDefined();
+        });
+
+        expectations.forEach((expectation, i) => {
+          expect(instance[methods[i]].call()).toEqual(expectation);
+        });
       });
 
       it('uses the last definition of a method in case of an overlap', () => {
-        instance.use([MyExt1, MyExt2, MyExt3]);
+        const FooObjExt2 = { foo: 'foo2' };
+        instance.use([FooObjExt, BarObjExt, FooObjExt2]);
         expect(instance).toEqual(
           expect.objectContaining({
-            foo: foo2,
-            bar,
+            foo: 'foo2',
+            ...BarObjExt,
           }),
         );
       });
@@ -396,15 +433,15 @@ describe('Base editor', () => {
       });
 
       it('extends all instances if no specific instance is passed', () => {
-        editor.use(MyExt1);
-        expect(inst1.foo).toEqual(foo1);
-        expect(inst2.foo).toEqual(foo1);
+        editor.use(AlphaExt);
+        expect(inst1.alpha()).toEqual(alphaRes);
+        expect(inst2.alpha()).toEqual(alphaRes);
       });
 
       it('extends specific instance if it has been passed', () => {
-        editor.use(MyExt1, inst2);
-        expect(inst1.foo).toBeUndefined();
-        expect(inst2.foo).toEqual(foo1);
+        editor.use(AlphaExt, inst2);
+        expect(inst1.alpha).toBeUndefined();
+        expect(inst2.alpha()).toEqual(alphaRes);
       });
     });
   });
