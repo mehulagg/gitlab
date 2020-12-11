@@ -59,6 +59,7 @@ export default {
       noteableData: state => state.notes.noteableData,
       diffViewType: state => state.diffs.diffViewType,
     }),
+    ...mapState({ selectedCommentPosition: ({ notes }) => notes.selectedCommentPosition }),
     ...mapState('diffs', ['showSuggestPopover']),
     ...mapGetters('diffs', ['getDiffFileByHash', 'diffLines']),
     ...mapGetters([
@@ -125,6 +126,10 @@ export default {
       ];
 
       this.initAutoSave(this.noteableData, keys);
+    }
+
+    if (this.selectedCommentPosition) {
+      this.commentLineStart = this.selectedCommentPosition.start;
     }
   },
   methods: {
