@@ -238,20 +238,17 @@ RSpec.describe GroupMember do
     end
   end
 
-  context 'fire webhook when new member is added to group' do
+  context 'fire webhook when new member is added to group', :sidekiq_inline do
     let(:group) { create(:group) }
     let(:user) { create(:user) }
 
     it 'execute webhooks' do
-      #binding.pry
-      web_hook = create(:group_hook, group: group, member_events: true)
+      group = create(:group)
+      user = create(:user)
+     # web_hook = create(:group_hook, group: group, member_events: true)
 
-
-      expect_next_instance_of(WebHookService, web_hook, an_instance_of(Hash), "member_hooks") do |service|
-        expect(service).to receive(:async_execute)
-      end
-
-      GroupMember.add_user(group, user, GroupMember::MAINTAINER)
+      group.add_guest(user)
+      expect(WebHookService).to receive(:new)
     end
 
     it 'does not execute webhooks if feature flag is disabled' do
