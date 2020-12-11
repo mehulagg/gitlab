@@ -249,41 +249,26 @@ available only to users with Maintainer permissions and above.
 
 ### Project members Owner permissions
 
+The following list depicts user permission levels in a project,
+available only to users with Owner permissions.
+
+- General
+- Project
+  - Transfer project to another namespace
+  - Rename project
+  - Delete project
+  - Archive project
+  - Remove fork relationship of a project
+- Issues
+  - Delete issues
+- CI/CD
+  - Delete pipelines
+- MRs
+  - Delete MRs
+
 <!--
 | Action                                            | Guest   | Reporter   | Developer   |Maintainer| Owner (*10*) |
 |---------------------------------------------------|---------|------------|-------------|----------|--------|
-| Delete [packages](packages/index.md)              |         |            |             | ✓        | ✓      |
-| Request a CVE ID **(FREE ONLY)**                  |         |            |             | ✓        | ✓      |
-| Use environment terminals                         |         |            |             | ✓        | ✓      |
-| Run Web IDE's Interactive Web Terminals **(ULTIMATE ONLY)** |     |      |             | ✓        | ✓      |
-| Add new team members                              |         |            |             | ✓        | ✓      |
-| Enable/disable branch protection                  |         |            |             | ✓        | ✓      |
-| Push to protected branches                        |         |            |             | ✓        | ✓      |
-| Turn on/off protected branch push for devs        |         |            |             | ✓        | ✓      |
-| Enable/disable tag protections                    |         |            |             | ✓        | ✓      |
-| Edit project settings                             |         |            |             | ✓        | ✓      |
-| Edit project badges                               |         |            |             | ✓        | ✓      |
-| Export project                                    |         |            |             | ✓        | ✓      |
-| Share (invite) projects with groups               |         |            |             | ✓ (*8*)  | ✓ (*8*)|
-| Add deploy keys to project                        |         |            |             | ✓        | ✓      |
-| Configure project hooks                           |         |            |             | ✓        | ✓      |
-| Manage runners                                    |         |            |             | ✓        | ✓      |
-| Manage job triggers                               |         |            |             | ✓        | ✓      |
-| Manage CI/CD variables                            |         |            |             | ✓        | ✓      |
-| Manage GitLab Pages                               |         |            |             | ✓        | ✓      |
-| Manage GitLab Pages domains and certificates      |         |            |             | ✓        | ✓      |
-| Remove GitLab Pages                               |         |            |             | ✓        | ✓      |
-| Manage clusters                                   |         |            |             | ✓        | ✓      |
-| Manage Project Operations                         |         |            |             | ✓        | ✓      |
-| Manage Terraform state                            |         |            |             | ✓        | ✓      |
-| Manage license policy **(ULTIMATE)**              |         |            |             | ✓        | ✓      |
-| Edit comments (posted by any user)                |         |            |             | ✓        | ✓      |
-| Reposition comments on images (posted by any user)|✓ (*11*) | ✓ (*11*)   |  ✓ (*11*)   | ✓        | ✓      |
-| Manage Error Tracking                             |         |            |             | ✓        | ✓      |
-| Delete wiki pages                                 |         |            |             | ✓        | ✓      |
-| View project Audit Events                         |         |            |             | ✓        | ✓      |
-| Manage [push rules](../push_rules/push_rules.md)  |         |            |             | ✓        | ✓      |
-| Manage [project access tokens](project/settings/project_access_tokens.md) **(CORE ONLY)** |         |            |             | ✓        | ✓      |
 | Switch visibility level                           |         |            |             |          | ✓      |
 | Transfer project to another namespace             |         |            |             |          | ✓      |
 | Rename project                                    |         |            |             |          | ✓      |
