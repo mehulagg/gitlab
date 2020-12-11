@@ -127,7 +127,8 @@ export default () => {
         fullPath: $boardApp.dataset.fullPath,
       };
       this.setInitialBoardData({
-        ...endpoints,
+        boardId: $boardApp.dataset.boardId,
+        fullPath: $boardApp.dataset.fullPath,
         boardType: this.parent,
         disabled: this.disabled,
       });

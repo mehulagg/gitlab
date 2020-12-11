@@ -6,7 +6,7 @@ import '~/boards/models/assignee';
 import '~/boards/models/issue';
 import '~/boards/models/list';
 import { GlLabel } from '@gitlab/ui';
-import IssueCardInner from '~/boards/components/issue_card_inner.vue';
+import IssueCardInner from '~/boards/components/issue_card_inner_deprecated.vue';
 import { listObj } from './mock_data';
 import store from '~/boards/stores';
 
@@ -55,7 +55,6 @@ describe('Issue card component', () => {
       provide: {
         groupId: null,
         rootPath: '/',
-        scopedLabelsAvailable: false,
       },
     });
   });

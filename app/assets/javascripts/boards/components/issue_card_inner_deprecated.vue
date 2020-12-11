@@ -7,10 +7,9 @@ import { sprintf, __, n__ } from '~/locale';
 import TooltipOnTruncate from '~/vue_shared/components/tooltip_on_truncate.vue';
 import UserAvatarLink from '../../vue_shared/components/user_avatar/user_avatar_link.vue';
 import IssueDueDate from './issue_due_date.vue';
-import IssueTimeEstimate from './issue_time_estimate.vue';
-import eventHub from '../eventhub';
+import IssueTimeEstimate from './issue_time_estimate_deprecated.vue';
+import boardsStore from '../stores/boards_store';
 import { isScopedLabel } from '~/lib/utils/common_utils';
-import { updateHistory } from '~/lib/utils/url_utility';
 
 export default {
   components: {
@@ -42,7 +41,7 @@ export default {
       default: false,
     },
   },
-  inject: ['groupId', 'rootPath', 'scopedLabelsAvailable'],
+  inject: ['groupId', 'rootPath'],
   data() {
     return {
       limitBeforeCounter: 2,
@@ -127,19 +126,13 @@ export default {
     },
     filterByLabel(label) {
       if (!this.updateFilters) return;
-      const filterPath = window.location.search;
-      const filter = `label_name[]=${encodeURIComponent(label.title)}`;
+      const labelTitle = encodeURIComponent(label.title);
+      const filter = `label_name[]=${labelTitle}`;
 
-      if (filterPath.indexOf(filter) === -1) {
-        updateHistory({
-          url: `${filterPath}&${filter}`,
-        });
-        eventHub.$emit('performSearch');
-        eventHub.$emit('updateTokens');
-      }
+      boardsStore.toggleFilter(filter);
     },
     showScopedLabel(label) {
-      return this.scopedLabelsAvailable && isScopedLabel(label);
+      return boardsStore.scopedLabels.enabled && isScopedLabel(label);
     },
   },
 };

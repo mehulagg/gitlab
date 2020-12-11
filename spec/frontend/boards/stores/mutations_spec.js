@@ -23,24 +23,20 @@ describe('Board Store Mutations', () => {
 
   describe('SET_INITIAL_BOARD_DATA', () => {
     it('Should set initial Boards data to state', () => {
-      const endpoints = {
-        boardsEndpoint: '/boards/',
-        recentBoardsEndpoint: '/boards/',
-        listsEndpoint: '/boards/lists',
-        bulkUpdatePath: '/boards/bulkUpdate',
-        boardId: 1,
-        fullPath: 'gitlab-org',
-      };
+      const boardId = 1;
+      const fullPath = 'gitlab-org';
       const boardType = 'group';
       const disabled = false;
 
       mutations[types.SET_INITIAL_BOARD_DATA](state, {
-        ...endpoints,
+        boardId,
+        fullPath,
         boardType,
         disabled,
       });
 
-      expect(state.endpoints).toEqual(endpoints);
+      expect(state.boardId).toEqual(boardId);
+      expect(state.fullPath).toEqual(fullPath);
       expect(state.boardType).toEqual(boardType);
       expect(state.disabled).toEqual(disabled);
     });
