@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::Email::Handler::CreateNoteHandler do
+RSpec.describe Gitlab::Email::Handler::CreateNoteAuthorHandler do
   include_context :email_shared_context
   let!(:sent_notification) do
     SentNotification.record_note(note, user.id, mail_key)
@@ -12,14 +12,41 @@ RSpec.describe Gitlab::Email::Handler::CreateNoteHandler do
   let(:note)      { create(:diff_note_on_merge_request, project: project) }
   let(:user)      { create(:user) }
   let(:project)   { create(:project, :public, :repository) }
-  let(:email_raw) { fixture_file('emails/valid_reply.eml') }
+  let(:email_raw) { fixture_file('emails/valid_new_issue_note.eml') }
 
   it_behaves_like :reply_processing_shared_examples
 
   before do
-    stub_incoming_email_setting(enabled: true, address: "reply+%{key}@appmail.adventuretime.ooo")
+    stub_incoming_email_setting(enabled: true, address: "incoming+%{key}@appmail.adventuretime.ooo")
     stub_config_setting(host: 'localhost')
   end
+
+  context 'note create author' do
+    let!(:mail_key) { 'h5bp-html5-boilerplate-8-9zxqyu2tyzqeyuxxe083l0t6q-issue-34' }
+
+    it 'adds all attachments' do
+      # mail_key = 'h5bp-html5-boilerplate-8-9zxqyu2tyzqeyuxxe083l0t6q-issue-34'
+
+      expect_next_instance_of(Gitlab::Email::AttachmentUploader) do |uploader|
+        expect(uploader).to receive(:execute).with(upload_parent: project, uploader_class: FileUploader).and_return(
+          [
+            {
+              url: "uploads/image.png",
+              alt: "image",
+              markdown: markdown
+            }
+          ]
+        )
+      end
+
+      receiver.execute
+
+      note = noteable.notes.last
+      expect(note.note).to include(markdown)
+    end
+
+  end
+
 
   context "when the recipient address doesn't include a mail key" do
     let(:email_raw) { fixture_file('emails/valid_reply.eml').gsub(mail_key, "") }
@@ -86,7 +113,7 @@ RSpec.describe Gitlab::Email::Handler::CreateNoteHandler do
       it 'only executes the commands that the user can perform' do
         expect { receiver.execute }
           .to change { noteable.notes.user.count }.by(1)
-          .and change { user.todos_pending_count }.from(0).to(1)
+                .and change { user.todos_pending_count }.from(0).to(1)
 
         expect(noteable.reload).to be_open
       end
@@ -102,7 +129,7 @@ RSpec.describe Gitlab::Email::Handler::CreateNoteHandler do
 
         expect { receiver.execute }
           .to change { noteable.notes.user.count }.by(1)
-          .and change { user.todos_pending_count }.from(0).to(1)
+                .and change { user.todos_pending_count }.from(0).to(1)
 
         expect(noteable.reload).to be_closed
       end
@@ -175,32 +202,6 @@ RSpec.describe Gitlab::Email::Handler::CreateNoteHandler do
   context "when everything is fine" do
     before do
       setup_attachment
-    end
-
-    context 'note create author' do
-      let!(:mail_key) { 'h5bp-html5-boilerplate-8-9zxqyu2tyzqeyuxxe083l0t6q-issue-34' }
-
-      it 'adds all attachments' do
-        # mail_key = 'h5bp-html5-boilerplate-8-9zxqyu2tyzqeyuxxe083l0t6q-issue-34'
-
-        expect_next_instance_of(Gitlab::Email::AttachmentUploader) do |uploader|
-          expect(uploader).to receive(:execute).with(upload_parent: project, uploader_class: FileUploader).and_return(
-            [
-              {
-                url: "uploads/image.png",
-                alt: "image",
-                markdown: markdown
-              }
-            ]
-          )
-        end
-
-        receiver.execute
-
-        note = noteable.notes.last
-        expect(note.note).to include(markdown)
-      end
-
     end
 
     it_behaves_like 'a reply to existing comment'

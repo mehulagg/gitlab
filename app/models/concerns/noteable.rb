@@ -20,7 +20,7 @@ module Noteable
       %w(MergeRequest DesignManagement::Design)
     end
 
-    # `Noteable` class names that support replying to individual notes.
+    # `Noteable` class names that support creating individual notes.
     def email_creatable_types
       %w(Issue MergeRequest)
     end

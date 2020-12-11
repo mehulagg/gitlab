@@ -11,6 +11,7 @@ module Gitlab
         [
           CreateNoteHandler,
           CreateIssueHandler,
+          CreateNoteAuthorHandler,
           UnsubscribeHandler,
           CreateMergeRequestHandler,
           ServiceDeskHandler
