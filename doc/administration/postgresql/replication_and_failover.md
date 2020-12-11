@@ -945,7 +945,7 @@ standby nodes.
 
 #### Geo secondary site considerations
 
-When a Geo secondary site is replicating from a primary site that uses `regmgr` and `PgBouncer`, [replicating through PgBouncer is not supported](https://github.com/pgbouncer/pgbouncer/issues/382#issuecomment-517911529) and the secondary must replicate directly from the leader node in the `repmgr` cluster. Therefore, when there is a failover in the `repmgr` cluster, you will need to manually repoint your secondary site to replicate from the new leader with `gitlab-ctl replicate-geo-database --host=<new_leader_ip> --replication-slot=<slot_name>`. Note that this will re-sync your secondary site database and may take a long time depending on the amount of data to sync.
+When a Geo secondary site is replicating from a primary site that uses `repmgr` and `PgBouncer`, [replicating through PgBouncer is not supported](https://github.com/pgbouncer/pgbouncer/issues/382#issuecomment-517911529) and the secondary must replicate directly from the leader node in the `repmgr` cluster. Therefore, when there is a failover in the `repmgr` cluster, you will need to manually re-point your secondary site to replicate from the new leader with `gitlab-ctl replicate-geo-database --host=<new_leader_ip> --replication-slot=<slot_name>`. Note that this will re-sync your secondary site database and may take a long time depending on the amount of data to sync.
 
 ### Restore procedure
 
