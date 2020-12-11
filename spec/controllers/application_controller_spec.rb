@@ -917,12 +917,32 @@ RSpec.describe ApplicationController do
       expect(assigns(:current_context)).to include('meta.user' => user.username)
     end
 
-    it 'assigns the context when the action caused an error' do
-      allow(controller).to receive(:index) { raise 'Broken' }
+    it 'sets headers corresponding to the context' do
+      get :index, format: :json
 
-      expect { get :index, format: :json }.to raise_error('Broken')
+      expect(response.headers.to_h).to include('X-Gitlab-Context-Caller-Id' => 'AnonymousController#index',
+                                               'X-Gitlab-Context-Feature-Category' => 'issue_tracking',
+                                               'X-Gitlab-Context-User' => user.username)
+    end
 
-      expect(assigns(:current_context)).to include('meta.user' => user.username)
+    context 'when the action causes an error' do
+      before do
+        allow(controller).to receive(:index) { raise 'Broken' }
+      end
+
+      it 'assigns the context to a variable' do
+        expect { get :index, format: :json }.to raise_error('Broken')
+
+        expect(assigns(:current_context)).to include('meta.user' => user.username)
+      end
+
+      it 'sets headers from the context' do
+        expect { get :index, format: :json }.to raise_error('Broken')
+
+        expect(response.headers.to_h).to include('X-Gitlab-Context-Caller-Id' => 'AnonymousController#index',
+                                                 'X-Gitlab-Context-Feature-Category' => 'issue_tracking',
+                                                 'X-Gitlab-Context-User' => user.username)
+      end
     end
   end
 

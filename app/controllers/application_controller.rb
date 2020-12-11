@@ -276,7 +276,6 @@ class ApplicationController < ActionController::Base
     headers['X-XSS-Protection'] = '1; mode=block'
     headers['X-UA-Compatible'] = 'IE=edge'
     headers['X-Content-Type-Options'] = 'nosniff'
-    headers[Gitlab::Metrics::RequestsRackMiddleware::FEATURE_CATEGORY_HEADER] = feature_category
   end
 
   def default_cache_headers
@@ -472,6 +471,10 @@ class ApplicationController < ActionController::Base
       yield
     ensure
       @current_context = Labkit::Context.current.to_h
+
+      Labkit::Context.current.to_headers.each do |key, value|
+        response.headers[key] = value
+      end
     end
   end
 

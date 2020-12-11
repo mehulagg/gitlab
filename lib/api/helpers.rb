@@ -26,6 +26,13 @@ module API
       end
     end
 
+    # Override Grape::DSL::InsideRoute#error! to allow setting headers
+    # on all errors. See
+    # https://github.com/ruby-grape/grape/pull/1723#issuecomment-354129665
+    def error!(message, status, additional_headers = {})
+      super(message, status, additional_headers.merge(Labkit::Context.current.to_headers))
+    end
+
     def destroy_conditionally!(resource, last_updated: nil)
       last_updated ||= resource.updated_at
 

@@ -15,7 +15,7 @@ module Gitlab
 
       HEALTH_ENDPOINT = /^\/-\/(liveness|readiness|health|metrics)\/?$/.freeze
 
-      FEATURE_CATEGORY_HEADER = 'X-Gitlab-Feature-Category'
+      FEATURE_CATEGORY_HEADER = Labkit::Context.header_name(:feature_category)
       FEATURE_CATEGORY_DEFAULT = 'unknown'
 
       # These were the top 5 categories at a point in time, chosen as a

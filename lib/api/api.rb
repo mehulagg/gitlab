@@ -52,8 +52,6 @@ module API
       api_endpoint = env['api.endpoint']
       feature_category = api_endpoint.options[:for].try(:feature_category_for_app, api_endpoint).to_s
 
-      header[Gitlab::Metrics::RequestsRackMiddleware::FEATURE_CATEGORY_HEADER] = feature_category
-
       Gitlab::ApplicationContext.push(
         user: -> { @current_user },
         project: -> { @project },
@@ -61,6 +59,12 @@ module API
         caller_id: route.origin,
         feature_category: feature_category
       )
+    end
+
+    after do
+      Labkit::Context.current.to_headers.each do |key, value|
+        header[key] = value
+      end
     end
 
     before do

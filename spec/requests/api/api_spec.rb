@@ -97,31 +97,70 @@ RSpec.describe API::API do
     let_it_be(:project) { create(:project) }
     let_it_be(:user) { project.owner }
 
-    it 'logs all application context fields' do
-      allow_any_instance_of(Gitlab::GrapeLogging::Loggers::ContextLogger).to receive(:parameters) do
-        Labkit::Context.current.to_h.tap do |log_context|
-          expect(log_context).to match('correlation_id' => an_instance_of(String),
-                                       'meta.caller_id' => '/api/:version/projects/:id/issues',
-                                       'meta.project' => project.full_path,
-                                       'meta.root_namespace' => project.namespace.full_path,
-                                       'meta.user' => user.username,
-                                       'meta.feature_category' => 'issue_tracking')
+    context 'when all fields are present' do
+      it 'logs all application context fields' do
+        allow_any_instance_of(Gitlab::GrapeLogging::Loggers::ContextLogger).to receive(:parameters) do
+          Labkit::Context.current.to_h.tap do |log_context|
+            expect(log_context).to match('correlation_id' => an_instance_of(String),
+                                         'meta.caller_id' => '/api/:version/projects/:id/issues',
+                                         'meta.project' => project.full_path,
+                                         'meta.root_namespace' => project.namespace.full_path,
+                                         'meta.user' => user.username,
+                                         'meta.feature_category' => 'issue_tracking')
+          end
         end
+
+        get(api("/projects/#{project.id}/issues", user))
       end
 
-      get(api("/projects/#{project.id}/issues", user))
+      it 'puts context metadata in the headers' do
+        get(api("/projects/#{project.id}/issues", user))
+
+        expect(response.headers.to_h).to include('X-Gitlab-Context-Caller-Id' => '/api/:version/projects/:id/issues',
+                                                 'X-Gitlab-Context-Project' => project.full_path,
+                                                 'X-Gitlab-Context-Root-Namespace' => project.namespace.full_path,
+                                                 'X-Gitlab-Context-User' => user.username,
+                                                 'X-Gitlab-Context-Feature-Category' => 'issue_tracking')
+      end
     end
 
-    it 'skips fields that do not apply' do
-      allow_any_instance_of(Gitlab::GrapeLogging::Loggers::ContextLogger).to receive(:parameters) do
-        Labkit::Context.current.to_h.tap do |log_context|
-          expect(log_context).to match('correlation_id' => an_instance_of(String),
-                                       'meta.caller_id' => '/api/:version/users',
-                                       'meta.feature_category' => 'users')
+    context 'when only some fields are present' do
+      it 'skips fields that do not apply' do
+        allow_any_instance_of(Gitlab::GrapeLogging::Loggers::ContextLogger).to receive(:parameters) do
+          Labkit::Context.current.to_h.tap do |log_context|
+            expect(log_context).to match('correlation_id' => an_instance_of(String),
+                                         'meta.caller_id' => '/api/:version/users/:id',
+                                         'meta.feature_category' => 'users')
+          end
         end
+
+        get(api("/users/#{user.id}"))
       end
 
-      get(api('/users'))
+      it 'puts context metadata in the headers' do
+        get(api("/users/#{user.id}"))
+
+        expect(response.headers.to_h).to include('X-Gitlab-Context-Caller-Id' => '/api/:version/users/:id',
+                                                 'X-Gitlab-Context-Feature-Category' => 'users')
+      end
+    end
+
+    context 'when the request fails' do
+      it 'logs and puts context in headers' do
+        allow_any_instance_of(Gitlab::GrapeLogging::Loggers::ContextLogger).to receive(:parameters) do
+          Labkit::Context.current.to_h.tap do |log_context|
+            expect(log_context).to match('correlation_id' => an_instance_of(String),
+                                         'meta.caller_id' => '/api/:version/users',
+                                         'meta.feature_category' => 'users')
+          end
+        end
+
+        get(api('/users'))
+
+        expect(response).to have_gitlab_http_status(:forbidden)
+        expect(response.headers.to_h).to include('X-Gitlab-Context-Caller-Id' => '/api/:version/users',
+                                                 'X-Gitlab-Context-Feature-Category' => 'users')
+      end
     end
   end
 end
