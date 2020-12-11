@@ -298,7 +298,6 @@ module EE
 
       if can?(current_user, :read_project_security_dashboard, project)
         nav_tabs << :security
-        nav_tabs << :security_configuration
       end
 
       if can?(current_user, :read_on_demand_scans, @project)
