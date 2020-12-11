@@ -866,10 +866,9 @@
   resolved "https://registry.yarnpkg.com/@gitlab/svgs/-/svgs-1.176.0.tgz#3b6d415704ed36db87146cfa361f3f9e2c01f535"
   integrity sha512-cl3SlGmLF/bnPAxrg52eRQOxRSrU54AB3yfV9TLi2iNAg/Jws0nuvdVZ4LRKKyyzHmT6yfVusCIGCISzvON6ew==
 
-"@gitlab/ui@24.6.0":
-  version "24.6.0"
-  resolved "https://registry.yarnpkg.com/@gitlab/ui/-/ui-24.6.0.tgz#e27a00a12e264e993147b31f1965cd3fa861eef4"
-  integrity sha512-Gb2mmQyd34T2DNKiGHauqy9T1JMxh6vVshIMSM0nfNnnl66p1FJwlAg0e1scZml1DYaXaDGVDtGkvOqszeE7GQ==
+"@gitlab/ui@https://gitlab.com/gitlab-org/gitlab-ui/-/jobs/906128782/artifacts/raw/gitlab-ui.fix-bootstrap-native-lower-opacity.tgz":
+  version "24.7.0"
+  resolved "https://gitlab.com/gitlab-org/gitlab-ui/-/jobs/906128782/artifacts/raw/gitlab-ui.fix-bootstrap-native-lower-opacity.tgz#d60605c0241b26a05b3196bf542893529427f490"
   dependencies:
     "@babel/standalone" "^7.0.0"
     "@gitlab/vue-toasted" "^1.3.0"
