@@ -857,6 +857,69 @@ module Gitlab
         end
       end
 
+      # Initializes the convertion of an integer column to bigint
+      #
+      # It will be used for converting both a Primary Key and any Foreign Keys
+      # that may reference it.
+      #
+      # - The new bigint column is added with a hardcoded NOT NULL DEFAULT 0
+      #   which allows us to skip a very costly verification step once we
+      #   are ready to switch it to a Primary Key
+      # - It backfills the new column with the values of the existing primary key
+      #   by scheduling background jobs
+      # - It tracks the scheduled background jobs through the use of
+      #   Gitlab::Database::BackgroundMigrationJob
+      # - It sets up a trigger to keep the two columns in sync
+      # - It does not schedule a cleanup job: we have to do that with followup
+      #   post deployment migrations in the same or the next release (for large tables)
+      #
+      #   This needs to be done manually in a followup migration by using the
+      #   `cleanup_convert_primary_key_to_bigint` (not yet implemented - check #288005)
+      #
+      # table - The name of the database table containing the column
+      # primary_key - The name of the primary key column (most often :id)
+      # batch_size - The number of rows to schedule in a single background migration
+      # interval - The time interval between every background migration
+      def initialize_convertion_of_primary_key_to_bigint(
+        table,
+        primary_key: :id,
+        batch_size: 10_000,
+        interval: 2.minutes
+      )
+
+        unless table_exists?(table)
+          raise "Table #{primary_key} does not exist"
+        end
+
+        unless column_exists?(table, primary_key)
+          raise "Column #{primary_key} does not exist on #{table}"
+        end
+
+        check_trigger_permissions!(table)
+
+        tmp_column = "#{primary_key}_convert_to_bigint"
+        source_model = Gitlab::Database::DynamicModelHelpers.define_batchable_model(table)
+
+        add_column(table, tmp_column, :bigint, default: 0, null: false)
+
+        install_rename_triggers(table, primary_key, tmp_column)
+
+        queue_background_migration_jobs_by_range_at_intervals(
+          source_model,
+          'CopyColumnUsingBackgroundMigrationJob',
+          interval,
+          batch_size: batch_size,
+          other_job_arguments: [table, primary_key, primary_key, tmp_column],
+          track_jobs: true
+        )
+
+        if perform_background_migration_inline?
+          # To ensure the schema is up to date immediately we perform the
+          # migration inline in dev / test environments.
+          Gitlab::BackgroundMigration.steal('CopyColumnUsingBackgroundMigrationJob')
+        end
+      end
+
       # Performs a concurrent column rename when using PostgreSQL.
       def install_rename_triggers_for_postgresql(trigger, table, old, new)
         execute <<-EOF.strip_heredoc
