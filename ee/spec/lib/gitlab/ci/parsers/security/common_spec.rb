@@ -163,5 +163,14 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Common do
         expect(links.first).to be_a(::Gitlab::Ci::Reports::Security::Link)
       end
     end
+
+    describe 'setting the uuid' do
+      let(:finding_uuids) { report.findings.map(&:uuid) }
+      let(:expected_uuids) { %w(a92f8d89-d08d-59e6-9055-4430815edfc7 a92f8d89-d08d-59e6-9055-4430815edfc7 a92f8d89-d08d-59e6-9055-4430815edfc7) }
+
+      it 'sets the UUIDv5 for findings' do
+        expect(finding_uuids).to match_array(expected_uuids)
+      end
+    end
   end
 end

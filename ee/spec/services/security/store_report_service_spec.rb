@@ -2,19 +2,6 @@
 
 require 'spec_helper'
 
-UUID_REGEXP = Regexp.new("^([0-9a-f]{8})-([0-9a-f]{4})-([0-9a-f]{4})-" \
-                         "([0-9a-f]{2})([0-9a-f]{2})-([0-9a-f]{12})$").freeze
-
-RSpec::Matchers.define :be_uuid_v5 do
-  match do |string|
-    expect(string).to be_a(String)
-
-    uuid_components = string.downcase.scan(UUID_REGEXP).first
-    time_hi_and_version = uuid_components[2].to_i(16)
-    (time_hi_and_version >> 12) == 5
-  end
-end
-
 RSpec.describe Security::StoreReportService, '#execute' do
   let_it_be(:user) { create(:user) }
   let(:artifact) { create(:ee_ci_job_artifact, trait) }
@@ -76,12 +63,6 @@ RSpec.describe Security::StoreReportService, '#execute' do
 
       it 'inserts all vulnerabilties' do
         expect { subject }.to change { Vulnerability.count }.by(findings)
-      end
-
-      it 'calculates UUIDv5 for all findings' do
-        subject
-        uuids = Vulnerabilities::Finding.pluck(:uuid)
-        expect(uuids).to all(be_uuid_v5)
       end
     end
 
@@ -146,10 +127,6 @@ RSpec.describe Security::StoreReportService, '#execute' do
 
     it 'inserts only new findings and reuse existing ones' do
       expect { subject }.to change { Vulnerabilities::Finding.count }.by(32)
-    end
-
-    it 'calculates UUIDv5 for all findings' do
-      expect(Vulnerabilities::Finding.pluck(:uuid)).to all(be_a(String))
     end
 
     it 'inserts all finding pipelines (join model) for this new pipeline' do

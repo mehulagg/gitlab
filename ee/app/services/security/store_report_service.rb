@@ -48,7 +48,6 @@ module Security
       end
 
       vulnerability_params = finding.to_hash.except(:compare_key, :identifiers, :location, :scanner, :scan, :links)
-      vulnerability_params[:uuid] = calculate_uuid_v5(finding)
       vulnerability_finding = create_or_find_vulnerability_finding(finding, vulnerability_params)
 
       update_vulnerability_scanner(finding)
@@ -90,23 +89,6 @@ module Security
       rescue ActiveRecord::RecordInvalid => e
         Gitlab::ErrorTracking.track_and_raise_exception(e, create_params: create_params&.dig(:raw_metadata))
       end
-    end
-
-    def calculate_uuid_v5(vulnerability_finding)
-      uuid_v5_name_components = {
-        report_type: vulnerability_finding.report_type,
-        primary_identifier_fingerprint: vulnerability_finding.primary_fingerprint,
-        location_fingerprint: vulnerability_finding.location.fingerprint,
-        project_id: project.id
-      }
-
-      if uuid_v5_name_components.values.any?(&:nil?)
-        Gitlab::AppLogger.warn(message: "One or more UUID name components are nil", components: uuid_v5_name_components)
-      end
-
-      name = uuid_v5_name_components.values.join('-')
-
-      Gitlab::Vulnerabilities::CalculateFindingUUID.call(name)
     end
 
     def update_vulnerability_scanner(finding)
