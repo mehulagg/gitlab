@@ -855,21 +855,84 @@ RSpec.describe License do
   end
 
   describe '#maximum_user_count' do
-    subject { license.maximum_user_count }
-
-    where(:daily_billable_users_count, :historical_max, :expected) do
-      100 | 50  | 100
-      50  | 100 | 100
-      50  | 50  | 50
+    it 'returns zero when there is no data' do
+      expect(license.maximum_user_count).to eq(0)
     end
 
-    with_them do
-      before do
-        allow(license).to receive(:daily_billable_users_count) { daily_billable_users_count }
-        allow(license).to receive(:historical_max) { historical_max }
-      end
+    it 'returns historical data' do
+      create(:historical_data, active_user_count: 1)
 
-      it { is_expected.to eq(expected) }
+      expect(license.maximum_user_count).to eq(1)
+    end
+
+    it 'returns the billable users count' do
+      create(:instance_statistics_measurement, identifier: :billable_users, count: 2)
+
+      expect(license.maximum_user_count).to eq(2)
+    end
+
+    it 'returns the daily billable users count when it is higher than historical data' do
+      create(:historical_data, active_user_count: 50)
+      create(:instance_statistics_measurement, identifier: :billable_users, count: 100)
+
+      expect(license.maximum_user_count).to eq(100)
+    end
+
+    it 'returns historical data when it is higher than the billable users count' do
+      create(:historical_data, active_user_count: 100)
+      create(:instance_statistics_measurement, identifier: :billable_users, count: 50)
+
+      expect(license.maximum_user_count).to eq(100)
+    end
+
+    it 'returns the correct value when historical data and billable users are equal' do
+      create(:historical_data, active_user_count: 100)
+      create(:instance_statistics_measurement, identifier: :billable_users, count: 100)
+
+      expect(license.maximum_user_count).to eq(100)
+    end
+
+    it 'returns the highest value from historical data' do
+      create(:historical_data, recorded_at: license.expires_at - 4.months, active_user_count: 130)
+      create(:historical_data, recorded_at: license.expires_at - 3.months, active_user_count: 250)
+      create(:historical_data, recorded_at: license.expires_at - 1.month, active_user_count: 215)
+
+      expect(license.maximum_user_count).to eq(250)
+    end
+
+    it 'uses only the most recent billable users entry' do
+      create(:instance_statistics_measurement, recorded_at: license.expires_at - 3.months, identifier: :billable_users, count: 150)
+      create(:historical_data, recorded_at: license.expires_at - 3.months, active_user_count: 140)
+      create(:instance_statistics_measurement, recorded_at: license.expires_at - 2.months, identifier: :billable_users, count: 100)
+
+      expect(license.maximum_user_count).to eq(140)
+    end
+
+    it 'returns the highest historical data since the license started for a 1 year license' do
+      now = Time.current
+      license = build(:license, starts_at: now - 4.months, expires_at: now + 8.months )
+      create(:historical_data, recorded_at: license.starts_at - 1.day, active_user_count: 100)
+      create(:historical_data, recorded_at: now, active_user_count: 40)
+
+      expect(license.maximum_user_count).to eq(40)
+    end
+
+    it 'returns the highest historical data since the license started for a license that lasts 6 months' do
+      now = Time.current
+      license = build(:license, starts_at: now - 4.months, expires_at: now + 2.months )
+      create(:historical_data, recorded_at: license.starts_at - 1.day, active_user_count: 80)
+      create(:historical_data, recorded_at: now, active_user_count: 30)
+
+      expect(license.maximum_user_count).to eq(30)
+    end
+
+    it 'returns the highest historical data since the license started for a license that lasts two years' do
+      now = Time.current
+      license = build(:license, starts_at: now - 6.months, expires_at: now + 18.months )
+      create(:historical_data, recorded_at: license.starts_at - 1.day, active_user_count: 400)
+      create(:historical_data, recorded_at: now, active_user_count: 300)
+
+      expect(license.maximum_user_count).to eq(300)
     end
   end
 

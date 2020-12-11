@@ -478,7 +478,7 @@ class License < ApplicationRecord
   end
 
   def maximum_user_count
-    [historical_max, daily_billable_users_count].max
+    [historical_max(starts_at), daily_billable_users_count].max
   end
 
   def historical_max_with_default_period
