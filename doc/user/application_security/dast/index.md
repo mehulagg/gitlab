@@ -139,7 +139,7 @@ the DAST template.
 Review Apps are the most involved method of deploying your DAST target application. 
 The [Configuration](#Configuration) section references an example using Kubernetes. 
 
-A more simplified example a Review App deployment would be in our [Review Apps Nginx](https://gitlab.com/gitlab-examples/review-apps-nginx) template.
+A more simplified example of a Review App deployment is in our [Review Apps Nginx](https://gitlab.com/gitlab-examples/review-apps-nginx) template.
 
 To enable DAST for the above Review App the following yaml would need to be included in the
 `gitlab-ci.yml` file.
