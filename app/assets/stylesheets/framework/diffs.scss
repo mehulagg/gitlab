@@ -593,10 +593,6 @@ table.code {
     grid-template-columns: 1fr 1fr;
   }
 
-  .line_holder.commented {
-    box-shadow: -4px 0 0 $blue-500;
-  }
-
   .diff-grid-left,
   .diff-grid-right {
     display: grid;

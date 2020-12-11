@@ -55,7 +55,6 @@ export default {
       return {
         [CONTEXT_LINE_CLASS_NAME]: this.line.isContextLineLeft,
         [PARALLEL_DIFF_VIEW_TYPE]: true,
-        commented: this.isCommented,
       };
     },
     parallelViewLeftLineType() {
@@ -215,7 +214,10 @@ export default {
     <div
       v-if="!inline"
       class="diff-grid-right right-side"
-      @drop="$emit('stopdragging', { ...line.right, index })"
+      @dragover.prevent
+      @dragenter="$emit('enterdragging', { ...line.right, index })"
+      @dragend="onDragEnd"
+      @drop="$emit('stopdragging', { ...line.left, index })"
     >
       <template v-if="line.right">
         <div :class="classNameMapCellRight" class="diff-td diff-line-num new_line">
