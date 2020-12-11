@@ -35,34 +35,6 @@ SETTINGS = {
   'RUBY_GC_OLDMALLOC_LIMIT_GROWTH_FACTOR' => %w[1.4 1 0.8]
 }.freeze
 
-ALL_GCSTAT_KEYS = [
-  :heap_allocated_pages,
-  :heap_sorted_length,
-  :heap_allocatable_pages,
-  :heap_available_slots,
-  :heap_live_slots,
-  :heap_free_slots,
-  :heap_final_slots,
-  :heap_marked_slots,
-  :heap_eden_pages,
-  :heap_tomb_pages,
-  :total_allocated_pages,
-  :total_freed_pages,
-  :total_allocated_objects,
-  :total_freed_objects,
-  :malloc_increase_bytes,
-  :malloc_increase_bytes_limit,
-  :minor_gc_count,
-  :major_gc_count,
-  :compact_count,
-  :remembered_wb_unprotected_objects,
-  :remembered_wb_unprotected_objects_limit,
-  :old_objects,
-  :old_objects_limit,
-  :oldmalloc_increase_bytes,
-  :oldmalloc_increase_bytes_limit
-].freeze
-
 USED_GCSTAT_KEYS = [
   :minor_gc_count,
   :major_gc_count,
@@ -77,13 +49,13 @@ USED_GCSTAT_KEYS = [
 ].freeze
 
 CSV_USED_GCSTAT_KEYS = USED_GCSTAT_KEYS.join(',')
-CSV_HEADER = "setting,value,#{CSV_USED_GCSTAT_KEYS},RSS,gc_time_s,user_cpu_time_s,system_cpu_time_s,real_time_s\n"
+CSV_HEADER = "setting,value,#{CSV_USED_GCSTAT_KEYS},RSS,gc_time_s,cpu_utime_s,cpu_stime_s,real_time_s\n"
 
 def collect_stats(setting, value)
-  $stderr.puts "#{setting}=#{value}..."
+  warn "Testing #{setting} = #{value} ..."
   env = {
     setting => value,
-    'DESC' => "#{setting},#{value}",
+    'SETTING_CSV' => "#{setting},#{value}",
     'GC_STAT_KEYS' => CSV_USED_GCSTAT_KEYS
   }
   system(env, 'ruby', './print_gc_stats.rb')
@@ -93,7 +65,7 @@ par = ENV['PAR']&.to_i || 2
 batch_size = (SETTINGS.size.to_f / par).ceil
 batches = SETTINGS.each_slice(batch_size)
 
-$stderr.puts "Requested parallelism: #{par} (batches: #{batches.size}, batch size: #{batch_size})"
+warn "Requested parallelism: #{par} (batches: #{batches.size}, batch size: #{batch_size})"
 
 puts CSV_HEADER
 
@@ -111,4 +83,4 @@ elapsed = Benchmark.realtime do
   threads.each(&:join)
 end
 
-$stderr.puts "All done in #{elapsed} sec"
+warn "All done in #{elapsed} sec"

@@ -10,29 +10,29 @@ def nakayoshi_gc
   GC.compact
 end
 
-gc_stat_keys = ENV['GC_STAT_KEYS'].to_s.split(',').map(&:to_sym)
-
+# GC::Profiler is used elsewhere in the code base, so we provide a way for it
+# to be used exclusively by this script, or otherwise results will be tainted.
 module GC::Profiler
   class << self
-    attr_accessor :ignored
+    attr_accessor :use_exclusive
 
     %i[enable disable clear].each do |method|
       alias_method "#{method}_orig", "#{method}"
 
       define_method(method) do
-        if ignored
-          $stderr.puts "Ignoring #{method} call."
+        if use_exclusive
+          warn "GC::Profiler: ignoring call to #{method}"
           return
         end
 
-        send("#{method}_orig")
+        send("#{method}_orig") # rubocop: disable GitlabSecurity/PublicSend
       end
     end
   end
 end
 
 GC::Profiler.enable
-GC::Profiler.ignored = true
+GC::Profiler.use_exclusive = true
 
 require 'benchmark'
 
@@ -41,24 +41,27 @@ tms = Benchmark.measure do
   require_relative 'config/environment'
 end
 
-GC::Profiler.ignored = false
+GC::Profiler.use_exclusive = false
 
 nakayoshi_gc
 
 gc_stats = GC.stat
+warn gc_stats.inspect
+
 gc_total_time = GC::Profiler.total_time
-$stderr.puts(gc_stats)
 
 GC::Profiler.report($stderr)
 GC::Profiler.disable
 
+gc_stat_keys = ENV['GC_STAT_KEYS'].to_s.split(',').map(&:to_sym)
+
 values = []
-values << ENV['DESC']
+values << ENV['SETTING_CSV']
 values += gc_stat_keys.map { |k| gc_stats[k] }
 values << ::Gitlab::Metrics::System.memory_usage_rss
 values << gc_total_time
-values << tms.utime+tms.cutime
-values << tms.stime+tms.cstime
+values << tms.utime + tms.cutime
+values << tms.stime + tms.cstime
 values << tms.real
 
 puts values.join(',')
