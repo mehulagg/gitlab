@@ -22,6 +22,7 @@ module API
       expose :resolvable?, as: :resolvable
       expose :resolved?, as: :resolved, if: ->(note, options) { note.resolvable? }
       expose :resolved_by, using: Entities::UserBasic, if: ->(note, options) { note.resolvable? }
+      expose :resolved_at
 
       expose :confidential?, as: :confidential
 
