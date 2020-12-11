@@ -33,7 +33,7 @@ module Epics
 
     def track_event
       ::Gitlab::Tracking.event(
-        'epics', 'promote', property: 'issue_id', value: original_entity.id
+        'epics', 'promote', property: 'issue_id', value: original_entity.id, data: { project_id: issue.project.id, namespace_id: issue.project.group.id }
       )
     end
 
