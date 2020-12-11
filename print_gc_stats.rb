@@ -10,25 +10,55 @@ def nakayoshi_gc
   GC.compact
 end
 
-outfile = ENV['OUTFILE']
-gc_stat_keys = ENV['GC_STAT_KEYS'].split(',').map(&:to_sym)
+gc_stat_keys = ENV['GC_STAT_KEYS'].to_s.split(',').map(&:to_sym)
+
+module GC::Profiler
+  class << self
+    attr_accessor :ignored
+
+    %i[enable disable clear].each do |method|
+      alias_method "#{method}_orig", "#{method}"
+
+      define_method(method) do
+        if ignored
+          $stderr.puts "Ignoring #{method} call."
+          return
+        end
+
+        send("#{method}_orig")
+      end
+    end
+  end
+end
 
 GC::Profiler.enable
+GC::Profiler.ignored = true
+
+require 'benchmark'
+
+tms = Benchmark.measure do
+  require_relative 'config/boot'
+  require_relative 'config/environment'
+end
+
+GC::Profiler.ignored = false
 
 nakayoshi_gc
 
 gc_stats = GC.stat
 gc_total_time = GC::Profiler.total_time
-p gc_stats
+$stderr.puts(gc_stats)
 
-require 'rdoc/rdoc'
-GC::Profiler.report
+GC::Profiler.report($stderr)
 GC::Profiler.disable
 
-File.open(outfile, 'a') do |f|
-  values = gc_stat_keys.map { |k| gc_stats[k] }
-  rss = `ps -p #{$$} -o rss=`.strip
-  line = "#{values.join(',')},#{rss},#{gc_total_time}"
-  puts line + "\n"
-  f << line
-end
+values = []
+values << ENV['DESC']
+values += gc_stat_keys.map { |k| gc_stats[k] }
+values << ::Gitlab::Metrics::System.memory_usage_rss
+values << gc_total_time
+values << tms.utime+tms.cutime
+values << tms.stime+tms.cstime
+values << tms.real
+
+puts values.join(',')

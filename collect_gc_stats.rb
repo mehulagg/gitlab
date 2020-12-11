@@ -35,10 +35,6 @@ SETTINGS = {
   'RUBY_GC_OLDMALLOC_LIMIT_GROWTH_FACTOR' => %w[1.4 1 0.8]
 }.freeze
 
-OUTDIR = './tmp/gc_settings_exp'
-OUTFILE = OUTDIR + '/gc_stats.csv'
-TEMPFILES = "#{OUTDIR}/*.csv.*"
-
 ALL_GCSTAT_KEYS = [
   :heap_allocated_pages,
   :heap_sorted_length,
@@ -81,55 +77,38 @@ USED_GCSTAT_KEYS = [
 ].freeze
 
 CSV_USED_GCSTAT_KEYS = USED_GCSTAT_KEYS.join(',')
-CSV_HEADER = "setting,value,#{CSV_USED_GCSTAT_KEYS},RSS,gc_time_s,time_s\n"
+CSV_HEADER = "setting,value,#{CSV_USED_GCSTAT_KEYS},RSS,gc_time_s,user_cpu_time_s,system_cpu_time_s,real_time_s\n"
 
-def with_gc_setting(key, value, outfile)
-  ENV[key] = value
-  ENV['OUTFILE'] = outfile
-  ENV['GC_STAT_KEYS'] = CSV_USED_GCSTAT_KEYS
-  yield
-ensure
-  ENV.delete(key)
-  ENV.delete('OUTFILE')
-  ENV.delete('GC_STAT_KEYS')
-end
-
-def collect_stats(setting, value, outfile)
-  puts "#{outfile}: #{setting}=#{value}"
-  File.open(outfile, 'a') { |f| f << "#{setting},#{value}," }
-  time_s = Benchmark.realtime do
-    with_gc_setting(setting, value, outfile) do
-      system('bin/rails', 'runner', './print_gc_stats.rb')
-    end
-  end
-  File.open(outfile, 'a') { |f| f << ",#{time_s}\n" }
+def collect_stats(setting, value)
+  $stderr.puts "#{setting}=#{value}..."
+  env = {
+    setting => value,
+    'DESC' => "#{setting},#{value}",
+    'GC_STAT_KEYS' => CSV_USED_GCSTAT_KEYS
+  }
+  system(env, 'ruby', './print_gc_stats.rb')
 end
 
 par = ENV['PAR']&.to_i || 2
 batch_size = (SETTINGS.size.to_f / par).ceil
 batches = SETTINGS.each_slice(batch_size)
 
-puts "Requested parallelism: #{par} (batches: #{batches.size}, batch size: #{batch_size})"
+$stderr.puts "Requested parallelism: #{par} (batches: #{batches.size}, batch size: #{batch_size})"
+
+puts CSV_HEADER
 
 elapsed = Benchmark.realtime do
-  `rm -f #{TEMPFILES}`
-
-  batches.each_with_index do |settings_batch, n|
-    Process.fork do
-      batch_file = "#{OUTFILE}.#{n}"
+  threads = batches.each_with_index.map do |settings_batch, n|
+    Thread.new do
       settings_batch.each do |setting, values|
         values.each do |v|
-          collect_stats(setting, v, batch_file)
+          collect_stats(setting, v)
         end
       end
     end
   end
 
-  Process.waitall
-
-  File.open(OUTFILE, 'w') { |f| f << CSV_HEADER }
-ensure
-  `cat #{TEMPFILES} >> #{OUTFILE}`
+  threads.each(&:join)
 end
 
-puts "All done in #{elapsed} sec"
+$stderr.puts "All done in #{elapsed} sec"
