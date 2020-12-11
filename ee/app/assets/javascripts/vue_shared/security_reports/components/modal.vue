@@ -186,7 +186,7 @@ export default {
 };
 </script>
 <template>
-  <modal
+  <Modal
     id="modal-mrwidget-security-issue"
     :header-title-text="modal.title"
     data-qa-selector="vulnerability_modal_content"
@@ -275,5 +275,5 @@ export default {
         @downloadPatch="$emit('downloadPatch')"
       />
     </template>
-  </modal>
+  </Modal>
 </template>
