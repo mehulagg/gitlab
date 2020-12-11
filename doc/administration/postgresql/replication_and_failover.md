@@ -1247,10 +1247,26 @@ If you choose an arbitrary order you do not have any predetermined master.
 As opposed to repmgr, once the nodes are reconfigured you do not need any further action or additional command to join
 the replicas.
 
+#### Selecting the appropriate Patroni replication method
+
+[Review the Patroni documentation carefully](https://patroni.readthedocs.io/en/latest/SETTINGS.html#postgresql)
+before making changes as **_some of the options carry a risk of potential data
+loss if not fully understood_**. The [replication mode ](https://patroni.readthedocs.io/en/latest/replication_modes.html)
+configured determines the amount of tolerable data loss.
+
+NOTE: **Note:**
+**_Replication is not a backup strategy! There is no replacement for a well-considered and tested backup solution._**
+
+Omnibus GitLab defaults [`synchronous_commit`](https://www.postgresql.org/docs/11/runtime-config-wal.html#GUC-SYNCHRONOUS-COMMIT) to `on`.
+
+```ruby
+postgresql['synchronous_commit'] = 'on'
+gitlab['geo-postgresql']['synchronous_commit'] = 'on'
+```
+
 #### Customizing Patroni failover behavior
 
-Omnibus GitLab exposes several options allowing more control over the
-[Patroni restoration process](#recovering-the-patroni-cluster).
+Omnibus GitLab exposes several options allowing more control over the [Patroni restoration process](#recovering-the-patroni-cluster).
 
 Each option is shown below with its default value in `/etc/gitlab/gitlab.rb`.
 
@@ -1260,9 +1276,14 @@ patroni['remove_data_directory_on_rewind_failure'] = false
 patroni['remove_data_directory_on_diverged_timelines'] = false
 ```
 
-[Review the Patroni documentation carefully](https://patroni.readthedocs.io/en/latest/SETTINGS.html#postgresql)
-before making changes as some of the options carry a risk of potential data
-loss if not fully understood.
+[The upstream documentation will always be more up to date](https://patroni.readthedocs.io/en/latest/SETTINGS.html#postgresql), but the table below should provide a minimal overview of functionality.
+
+|Setting|Overview|
+|-|-|
+|`use_pg_rewind`|Try running `pg_rewind` on the former cluster leader before
+it rejoins the database cluster.|
+|`remove_data_directory_on_rewind_failure`|If `pg_rewind` fails, remove the local PostgreSQL data directory and re-replicate from the current cluster leader.|
+|`remove_data_directory_on_diverged_timelines`|If `pg_rewind` cannot be used and the former leader's timeline has diverged from the current one, then delete the local data directory and re-replicate from the current cluster leader.|
 
 #### Database authorization for Patroni
 
