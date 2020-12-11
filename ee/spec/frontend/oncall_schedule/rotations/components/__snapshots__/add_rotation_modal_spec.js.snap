@@ -20,6 +20,7 @@ exports[`AddRotationModal renders rotation modal layout 1`] = `
       label="Name"
       label-for="rotation-name"
       label-size="sm"
+      state="true"
     >
       <gl-form-input-stub
         id="rotation-name"
@@ -32,6 +33,7 @@ exports[`AddRotationModal renders rotation modal layout 1`] = `
       label="Participants"
       label-for="rotation-participants"
       label-size="sm"
+      state="true"
     >
       <gl-token-selector-stub
         autocomplete="off"
