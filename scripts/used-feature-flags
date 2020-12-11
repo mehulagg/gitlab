@@ -39,6 +39,8 @@ flags_paths.each do |flags_path|
   Dir.glob(flags_path).each do |path|
     feature_flag_name = File.basename(path, '.yml')
 
+    next if feature_flag_name.start_with?('gitaly_') # Ignore gitaly feature flags that are passed to Gitaly via gRPC
+
     all_flags[feature_flag_name] = File.exist?(File.join('tmp', 'feature_flags', feature_flag_name + '.used'))
   end
 end
