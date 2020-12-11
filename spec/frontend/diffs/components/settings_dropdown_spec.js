@@ -143,7 +143,7 @@ describe('Diff settings dropdown component', () => {
         });
       });
 
-      expect(wrapper.find('#show-whitespace').element.checked).toBe(false);
+      expect(wrapper.find('[data-testid="show-whitespace"]').element.checked).toBe(false);
     });
 
     it('sets as checked when showWhitespace is true', () => {
@@ -153,17 +153,21 @@ describe('Diff settings dropdown component', () => {
         });
       });
 
-      expect(wrapper.find('#show-whitespace').element.checked).toBe(true);
+      expect(wrapper.find('[data-testid="show-whitespace"]').element.checked).toBe(true);
     });
 
-    it('calls setShowWhitespace on change', () => {
+    it('calls setShowWhitespace on change', async () => {
       createComponent();
 
-      const checkbox = wrapper.find('#show-whitespace');
+      const checkbox = wrapper.find('[data-testid="show-whitespace"]');
+      checkbox.trigger('click');
 
-      checkbox.element.checked = true;
-      checkbox.trigger('change');
+      await vm.$nextTick();
 
+      // This action is not called, the real one in the component is.
+      // Calling the real action triggers some getters, which aren't mocked
+      //   in the setup for these tests. Those getters fail on missing
+      //   data, like `Cannot read property 'base_version_path' of null`
       expect(actions.setShowWhitespace).toHaveBeenCalledWith(expect.anything(), {
         showWhitespace: true,
         pushState: true,

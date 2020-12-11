@@ -28,6 +28,9 @@ export default {
     toggleFileByFile() {
       eventHub.$emit(EVT_VIEW_FILE_BY_FILE, { setting: !this.viewDiffsFileByFile });
     },
+    toggleWhitespace(updatedSetting) {
+      this.setShowWhitespace({ showWhitespace: updatedSetting, pushState: true });
+    },
   },
 };
 </script>
@@ -83,15 +86,13 @@ export default {
       </gl-button-group>
     </div>
     <div class="gl-mt-3 gl-px-3">
-      <label class="gl-mb-0">
-        <input
-          id="show-whitespace"
-          type="checkbox"
-          :checked="showWhitespace"
-          @change="setShowWhitespace({ showWhitespace: $event.target.checked, pushState: true })"
-        />
-        {{ __('Show whitespace changes') }}
-      </label>
+      <gl-form-checkbox
+        data-testid="show-whitespace"
+        :checked="showWhitespace"
+        @input="toggleWhitespace"
+      >
+        {{ $options.i18n.whitespace }}
+      </gl-form-checkbox>
     </div>
     <div class="gl-mt-3 gl-px-3">
       <gl-form-checkbox
