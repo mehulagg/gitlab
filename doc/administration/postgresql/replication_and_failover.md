@@ -1251,7 +1251,7 @@ the replicas.
 
 [Review the Patroni documentation carefully](https://patroni.readthedocs.io/en/latest/SETTINGS.html#postgresql)
 before making changes as **_some of the options carry a risk of potential data
-loss if not fully understood_**. The [replication mode ](https://patroni.readthedocs.io/en/latest/replication_modes.html)
+loss if not fully understood_**. The [replication mode](https://patroni.readthedocs.io/en/latest/replication_modes.html)
 configured determines the amount of tolerable data loss.
 
 NOTE: **Note:**
