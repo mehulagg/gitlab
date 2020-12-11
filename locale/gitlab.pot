@@ -5458,7 +5458,13 @@ msgstr ""
 msgid "Choose a type..."
 msgstr ""
 
+msgid "Choose any color"
+msgstr ""
+
 msgid "Choose any color."
+msgstr ""
+
+msgid "Choose any color. Or you can choose one of the suggested colors below"
 msgstr ""
 
 msgid "Choose between %{code_open}clone%{code_close} or %{code_open}fetch%{code_close} to get the recent application code"
@@ -9613,6 +9619,9 @@ msgstr ""
 msgid "DevopsAdoption|Add new segment"
 msgstr ""
 
+msgid "DevopsAdoption|Adopted"
+msgstr ""
+
 msgid "DevopsAdoption|An error occured while deleting the segment. Please try again."
 msgstr ""
 
@@ -9623,6 +9632,24 @@ msgid "DevopsAdoption|Approvals"
 msgstr ""
 
 msgid "DevopsAdoption|Are you sure that you would like to delete %{name}?"
+msgstr ""
+
+msgid "DevopsAdoption|At least 1 MR opened"
+msgstr ""
+
+msgid "DevopsAdoption|At least 1 approval on an MR"
+msgstr ""
+
+msgid "DevopsAdoption|At least 1 deploy"
+msgstr ""
+
+msgid "DevopsAdoption|At least 1 issue opened"
+msgstr ""
+
+msgid "DevopsAdoption|At least 1 pipeline successfully run"
+msgstr ""
+
+msgid "DevopsAdoption|At least 1 security scan of any type run in pipeline"
 msgstr ""
 
 msgid "DevopsAdoption|Confirm delete segment"
@@ -9655,6 +9682,9 @@ msgstr ""
 msgid "DevopsAdoption|MRs"
 msgstr ""
 
+msgid "DevopsAdoption|Maximum %{maxSegments} segments allowed"
+msgstr ""
+
 msgid "DevopsAdoption|My segment"
 msgstr ""
 
@@ -9667,7 +9697,13 @@ msgstr ""
 msgid "DevopsAdoption|No filter results."
 msgstr ""
 
+msgid "DevopsAdoption|Not adopted"
+msgstr ""
+
 msgid "DevopsAdoption|Pipelines"
+msgstr ""
+
+msgid "DevopsAdoption|Runner configured for project/group"
 msgstr ""
 
 msgid "DevopsAdoption|Runners"
@@ -11683,6 +11719,9 @@ msgid "Failed to update branch!"
 msgstr ""
 
 msgid "Failed to update environment!"
+msgstr ""
+
+msgid "Failed to update framework"
 msgstr ""
 
 msgid "Failed to update issue status"
@@ -15965,6 +16004,9 @@ msgstr ""
 msgid "Last seen"
 msgstr ""
 
+msgid "Last sign-in"
+msgstr ""
+
 msgid "Last successful sync"
 msgstr ""
 
@@ -16939,18 +16981,6 @@ msgstr ""
 msgid "Members|2FA"
 msgstr ""
 
-msgid "Members|Access granted, ascending"
-msgstr ""
-
-msgid "Members|Access granted, descending"
-msgstr ""
-
-msgid "Members|Account, ascending"
-msgstr ""
-
-msgid "Members|Account, descending"
-msgstr ""
-
 msgid "Members|An error occurred while trying to enable LDAP override, please try again."
 msgstr ""
 
@@ -17014,19 +17044,7 @@ msgstr ""
 msgid "Members|LDAP override enabled."
 msgstr ""
 
-msgid "Members|Last sign-in, ascending"
-msgstr ""
-
-msgid "Members|Last sign-in, descending"
-msgstr ""
-
 msgid "Members|Leave \"%{source}\""
-msgstr ""
-
-msgid "Members|Max role, ascending"
-msgstr ""
-
-msgid "Members|Max role, descending"
 msgstr ""
 
 msgid "Members|Membership"
@@ -20569,6 +20587,9 @@ msgstr ""
 msgid "Please enter a valid URL format, ex: http://www.example.com/home"
 msgstr ""
 
+msgid "Please enter a valid hex (#RRGGBB or #RGB) color value"
+msgstr ""
+
 msgid "Please enter a valid number"
 msgstr ""
 
@@ -21559,6 +21580,9 @@ msgstr ""
 msgid "ProjectSettings|Allow"
 msgstr ""
 
+msgid "ProjectSettings|Allow editing commit messages"
+msgstr ""
+
 msgid "ProjectSettings|Allow users to make copies of your repository to a new project"
 msgstr ""
 
@@ -21812,6 +21836,9 @@ msgid "ProjectSettings|When approved for merge, merge requests are queued and pi
 msgstr ""
 
 msgid "ProjectSettings|When conflicts arise the user is given the option to rebase"
+msgstr ""
+
+msgid "ProjectSettings|When enabled, commit authors will be able to edit commit messages on unprotected branches."
 msgstr ""
 
 msgid "ProjectSettings|When enabled, issues, merge requests, and snippets will always show thumbs-up and thumbs-down award emoji buttons."
@@ -23375,9 +23402,6 @@ msgstr ""
 msgid "Request Access"
 msgstr ""
 
-msgid "Request Headers"
-msgstr ""
-
 msgid "Request details"
 msgstr ""
 
@@ -23554,12 +23578,6 @@ msgid "Resolves IP addresses once and uses them to submit requests"
 msgstr ""
 
 msgid "Response"
-msgstr ""
-
-msgid "Response Headers"
-msgstr ""
-
-msgid "Response Status"
 msgstr ""
 
 msgid "Response didn't include `service_desk_address`"
@@ -25679,7 +25697,10 @@ msgstr ""
 msgid "Something went wrong while archiving a requirement."
 msgstr ""
 
-msgid "Something went wrong while closing the merge request. Please try again later"
+msgid "Something went wrong while closing the epic. Please try again later."
+msgstr ""
+
+msgid "Something went wrong while closing the merge request. Please try again later."
 msgstr ""
 
 msgid "Something went wrong while creating a requirement."
@@ -25766,7 +25787,10 @@ msgstr ""
 msgid "Something went wrong while reopening a requirement."
 msgstr ""
 
-msgid "Something went wrong while reopening the merge request. Please try again later"
+msgid "Something went wrong while reopening the epic. Please try again later."
+msgstr ""
+
+msgid "Something went wrong while reopening the merge request. Please try again later."
 msgstr ""
 
 msgid "Something went wrong while resolving this discussion. Please try again."
@@ -27290,6 +27314,9 @@ msgid "The contents of this group, its subgroups and projects will be permanentl
 msgstr ""
 
 msgid "The current issue"
+msgstr ""
+
+msgid "The current user is not authorized to access the job log."
 msgstr ""
 
 msgid "The data source is connected, but there is no data to display. %{documentationLink}"
@@ -30632,6 +30659,9 @@ msgstr ""
 msgid "Vulnerability|Activity"
 msgstr ""
 
+msgid "Vulnerability|Actual Response"
+msgstr ""
+
 msgid "Vulnerability|Actual received response is the one received when this fault was detected"
 msgstr ""
 
@@ -30686,6 +30716,9 @@ msgstr ""
 msgid "Vulnerability|Project"
 msgstr ""
 
+msgid "Vulnerability|Request"
+msgstr ""
+
 msgid "Vulnerability|Request/Response"
 msgstr ""
 
@@ -30702,6 +30735,9 @@ msgid "Vulnerability|Status"
 msgstr ""
 
 msgid "Vulnerability|The unmodified response is the original response that had no mutations done to the request"
+msgstr ""
+
+msgid "Vulnerability|Unmodified Response"
 msgstr ""
 
 msgid "Wait for the file to load to copy its contents"
@@ -31669,6 +31705,9 @@ msgstr ""
 msgid "You must disassociate %{domain} from all clusters it is attached to before deletion."
 msgstr ""
 
+msgid "You must have developer or higher permissions in the associated project to view job logs when debug trace is enabled. To disable debug trace, set the 'CI_DEBUG_TRACE' variable to 'false' in your pipeline configuration or CI/CD settings. If you need to view this job log, a project maintainer must add you to the project with developer permissions or higher."
+msgstr ""
+
 msgid "You must have maintainer access to force delete a lock"
 msgstr ""
 
@@ -31898,6 +31937,9 @@ msgid "Your U2F device did not send a valid JSON response."
 msgstr ""
 
 msgid "Your U2F device was registered!"
+msgstr ""
+
+msgid "Your Version"
 msgstr ""
 
 msgid "Your WebAuthn device did not send a valid JSON response."
@@ -32220,6 +32262,9 @@ msgstr ""
 msgid "ciReport|%{improvedNum} improved"
 msgstr ""
 
+msgid "ciReport|%{linkStartTag}Learn more about API Fuzzing%{linkEndTag}"
+msgstr ""
+
 msgid "ciReport|%{linkStartTag}Learn more about Container Scanning %{linkEndTag}"
 msgstr ""
 
@@ -32257,6 +32302,9 @@ msgid "ciReport|: Loading resulted in an error"
 msgstr ""
 
 msgid "ciReport|API Fuzzing"
+msgstr ""
+
+msgid "ciReport|API fuzzing"
 msgstr ""
 
 msgid "ciReport|All projects"

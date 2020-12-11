@@ -223,6 +223,7 @@ module EE
         enable :create_vulnerability_export
         enable :admin_vulnerability
         enable :admin_vulnerability_issue_link
+        enable :admin_vulnerability_external_issue_link
       end
 
       rule { issues_disabled & merge_requests_disabled }.policy do
@@ -274,6 +275,7 @@ module EE
         prevent :create_vulnerability
         prevent :admin_vulnerability
         prevent :admin_vulnerability_issue_link
+        prevent :admin_vulnerability_external_issue_link
       end
 
       rule { auditor & ~guest }.policy do

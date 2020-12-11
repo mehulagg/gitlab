@@ -8,13 +8,11 @@ module EE
 
         override :success?
         def success?
-          type == :geo || super
+          geo? || super
         end
 
-        def geo?(for_project)
-          type == :geo &&
-            project &&
-            project == for_project
+        def geo?
+          type == :geo
         end
       end
     end

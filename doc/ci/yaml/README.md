@@ -503,7 +503,7 @@ so you can only `include` public projects or templates.
 For example:
 
 ```yaml
-# File sourced from GitLab's template collection
+# File sourced from the GitLab template collection
 include:
   - template: Auto-DevOps.gitlab-ci.yml
 ```
@@ -2472,7 +2472,7 @@ environment. A new `stop_review_app` job is listed under `on_stop`.
 After the `review_app` job is finished, it triggers the
 `stop_review_app` job based on what is defined under `when`. In this case,
 it is set to `manual`, so it needs a [manual action](#whenmanual) from
-GitLab's user interface to run.
+the GitLab UI to run.
 
 Also in the example, `GIT_STRATEGY` is set to `none`. If the
 `stop_review_app` job is [automatically triggered](../environments/index.md#automatically-stopping-an-environment),
@@ -3174,7 +3174,7 @@ in GitLab 13.4.
 
 The [`artifacts:reports` keyword](../pipelines/job_artifacts.md#artifactsreports)
 is used for collecting test reports, code quality reports, and security reports from jobs.
-It also exposes these reports in GitLab's UI (merge requests, pipeline views, and security dashboards).
+It also exposes these reports in the GitLab UI (merge requests, pipeline views, and security dashboards).
 
 These are the available report types:
 
@@ -3282,6 +3282,11 @@ job1:
   script: rspec
   coverage: '/Code coverage: \d+\.\d+/'
 ```
+
+The coverage is shown in the UI if at least one line in the job output matches the regular expression.
+If there is more than one matched line in the job output, the last line is used.
+For the matched line, the first occurence of `\d+(\.\d+)?` is the code coverage.
+Leading zeros are removed.
 
 ### `retry`
 

@@ -8,6 +8,8 @@ module AlertManagement
 
     MONITORING_TOOL = Gitlab::AlertManagement::Payload::MONITORING_TOOLS.fetch(:cilium)
 
+    # Users of this service need to check the agent token before calling `execute`.
+    # https://gitlab.com/gitlab-org/gitlab/-/issues/292707 will handle token within the service.
     def execute
       return bad_request unless valid_payload_size?
 

@@ -184,7 +184,7 @@ module EE
       delegate :shared_runners_minutes, :shared_runners_seconds, :shared_runners_seconds_last_reset,
         to: :statistics, allow_nil: true
 
-      delegate :actual_shared_runners_minutes_limit, to: :shared_runners_limit_namespace
+      delegate :ci_minutes_quota, to: :shared_runners_limit_namespace
 
       delegate :last_update_succeeded?, :last_update_failed?,
         :ever_updated_successfully?, :hard_failed?,

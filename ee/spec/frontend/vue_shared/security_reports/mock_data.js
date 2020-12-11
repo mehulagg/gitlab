@@ -337,3 +337,11 @@ export const coverageFuzzingDiffSuccessMock = {
   base_report_out_of_date: false,
   head_report_created_at: '2020-01-10T10:00:00.000Z',
 };
+
+export const apiFuzzingDiffSuccessMock = {
+  added: [mockFindings[0], mockFindings[1]],
+  fixed: [mockFindings[2]],
+  base_report_created_at: '2020-01-01T10:00:00.000Z',
+  base_report_out_of_date: false,
+  head_report_created_at: '2020-01-10T10:00:00.000Z',
+};

@@ -620,6 +620,9 @@ production: &base
     enabled: false
     prevent_ldap_sign_in: false
 
+    # File location to read encrypted secrets from
+    # secret_file: /mnt/gitlab/ldap.yaml.enc # Default: shared/encrypted_settings/ldap.yaml.enc
+
     # This setting controls the number of seconds between LDAP permission checks
     # for each user. After this time has expired for a given user, their next
     # interaction with GitLab (a click in the web UI, a git pull, etc.) will be
@@ -1041,6 +1044,15 @@ production: &base
 
     # Access token for FortiAuthenticator API
     # access_token: 123s3cr3t456
+
+  # FortiToken Cloud settings
+  forti_token_cloud:
+    # Allow using FortiToken Cloud as OTP provider
+    enabled: false
+
+    # Client ID and Secret to access FortiToken Cloud API
+    # client_id: 'YOUR_FORTI_TOKEN_CLOUD_CLIENT_ID'
+    # client_secret: 'YOUR_FORTI_TOKEN_CLOUD_CLIENT_SECRET'
 
   # Shared file storage settings
   shared:

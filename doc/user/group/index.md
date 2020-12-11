@@ -130,7 +130,7 @@ give a user access to all projects in the group with one action.
 
 Add members to a group by navigating to the group's dashboard and clicking **Members**.
 
-![add members to group](img/add_new_members_v13_6.png)
+![add members to group](img/add_new_members_v13_7.png)
 
 Select the [permission level](../permissions.md#permissions), and add the new member. You can also set the expiring date for that user; this is the date on which they will no longer have access to your group.
 
@@ -377,7 +377,7 @@ In GitLab [8.15](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/822) and 
 1. Select the pencil icon in the row for the user you are editing.
 1. Select the brown `Edit permissions` button in the modal.
 
-![Setting manual permissions](img/manual_permissions_v13_6.png)
+![Setting manual permissions](img/manual_permissions_v13_7.png)
 
 Now you will be able to edit the user's permissions from the **Members** page.
 
@@ -746,20 +746,6 @@ To enable prevent project forking:
   for the group. **(STARTER ONLY)**
 - **Pipelines quota**: Keep track of the [pipeline quota](../admin_area/settings/continuous_integration.md) for the group.
 - **Integrations**: Configure [integrations](../admin_area/settings/project_integration_management.md) for your group.
-
-#### Storage usage quota **(STARTER)**
-
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/13294) in [GitLab Starter](https://about.gitlab.com/pricing/) 12.0.
-
-A group owner can check the aggregated storage usage for all the projects in a group, sub-groups included, in the **Storage** tab of the **Usage Quotas** page available to the group page settings list.
-
-![Group storage usage quota](img/group_storage_usage_quota.png)
-
-The total usage of the storage is updated if any relevant event that
-will affect its value is triggered (e.g., a commit push).
-For performance reasons, we may delay the update up to 1 hour and 30 minutes.
-
-If your namespace shows `N/A` as the total storage usage, you can trigger a recalculation by pushing a commit to any project in that namespace.
 
 #### Group push rules **(STARTER)**
 

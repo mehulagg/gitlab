@@ -15,6 +15,7 @@ export default {
   dependency_scanning_comparison_path: '/dependency_scanning_comparison_path',
   dast_comparison_path: '/dast_comparison_path',
   coverage_fuzzing_comparison_path: '/coverage_fuzzing_comparison_path',
+  api_fuzzing_comparison_path: '/api_fuzzing_comparison_path',
 };
 
 // Browser Performance Testing

@@ -62,6 +62,7 @@ class License < ApplicationRecord
     code_owner_approval_required
     commit_committer_check
     compliance_framework
+    custom_compliance_frameworks
     cross_project_pipelines
     custom_file_templates
     custom_file_templates_for_namespace
@@ -136,7 +137,6 @@ class License < ApplicationRecord
     coverage_fuzzing
     credentials_inventory
     cilium_alerts
-    custom_compliance_frameworks
     dast
     dependency_scanning
     devops_adoption

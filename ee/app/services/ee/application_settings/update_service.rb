@@ -15,13 +15,10 @@ module EE
         elasticsearch_namespace_ids = params.delete(:elasticsearch_namespace_ids)
         elasticsearch_project_ids = params.delete(:elasticsearch_project_ids)
 
-        previous_user_cap = application_setting.new_user_signups_cap
-
         if result = super
           find_or_create_index
           update_elasticsearch_containers(ElasticsearchIndexedNamespace, elasticsearch_namespace_ids)
           update_elasticsearch_containers(ElasticsearchIndexedProject, elasticsearch_project_ids)
-          auto_approve_blocked_users(previous_user_cap)
         end
 
         result
@@ -43,18 +40,22 @@ module EE
         new_container_ids.each { |id| klass.create!(klass.target_attr_name => id) }
       end
 
-      def auto_approve_blocked_users(previous_user_cap)
-        return if ::Feature.disabled?(:admin_new_user_signups_cap)
-        return if previous_user_cap.nil?
+      private
 
-        current_user_cap = application_setting.new_user_signups_cap
-
-        if current_user_cap.nil? || current_user_cap > previous_user_cap
-          ApproveBlockedUsersWorker.perform_async(current_user.id)
-        end
+      def should_auto_approve_blocked_users?
+        super || user_cap_increased?
       end
 
-      private
+      def user_cap_increased?
+        return false unless application_setting.previous_changes.key?(:new_user_signups_cap)
+        return false unless ::Feature.enabled?(:admin_new_user_signups_cap)
+
+        previous_user_cap, current_user_cap = application_setting.previous_changes[:new_user_signups_cap]
+
+        return false if previous_user_cap.nil?
+
+        current_user_cap.nil? || current_user_cap > previous_user_cap
+      end
 
       def find_or_create_index
         # The order of checks is important. We should not attempt to create a new index

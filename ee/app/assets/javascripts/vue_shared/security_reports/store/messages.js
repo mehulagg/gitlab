@@ -10,6 +10,7 @@ const CONTAINER_SCANNING = s__('ciReport|Container scanning');
 const DEPENDENCY_SCANNING = s__('ciReport|Dependency scanning');
 const SECRET_SCANNING = s__('ciReport|Secret scanning');
 const COVERAGE_FUZZING = s__('ciReport|Coverage fuzzing');
+const API_FUZZING = s__('ciReport|API fuzzing');
 
 export default {
   SAST,
@@ -18,6 +19,7 @@ export default {
   DEPENDENCY_SCANNING,
   SECRET_SCANNING,
   COVERAGE_FUZZING,
+  API_FUZZING,
   TRANSLATION_IS_LOADING,
   TRANSLATION_HAS_ERROR,
   SAST_IS_LOADING: sprintf(TRANSLATION_IS_LOADING, { reportType: SAST }),
@@ -42,4 +44,8 @@ export default {
     reportType: COVERAGE_FUZZING,
   }),
   COVERAGE_FUZZING_HAS_ERROR: sprintf(TRANSLATION_HAS_ERROR, { reportType: COVERAGE_FUZZING }),
+  API_FUZZING_IS_LOADING: sprintf(TRANSLATION_IS_LOADING, {
+    reportType: API_FUZZING,
+  }),
+  API_FUZZING_HAS_ERROR: sprintf(TRANSLATION_HAS_ERROR, { reportType: API_FUZZING }),
 };

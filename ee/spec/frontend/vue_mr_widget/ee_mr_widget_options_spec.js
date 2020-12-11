@@ -8,6 +8,7 @@ import {
   dependencyScanningDiffSuccessMock,
   secretScanningDiffSuccessMock,
   coverageFuzzingDiffSuccessMock,
+  apiFuzzingDiffSuccessMock,
 } from 'ee_jest/vue_shared/security_reports/mock_data';
 import { TEST_HOST } from 'helpers/test_constants';
 import { trimText } from 'helpers/text_helper';
@@ -37,6 +38,7 @@ const DEPENDENCY_SCANNING_SELECTOR = '.js-dependency-scanning-widget';
 const CONTAINER_SCANNING_SELECTOR = '.js-container-scanning';
 const SECRET_SCANNING_SELECTOR = '.js-secret-scanning';
 const COVERAGE_FUZZING_SELECTOR = '.js-coverage-fuzzing-widget';
+const API_FUZZING_SELECTOR = '.js-api-fuzzing-widget';
 
 describe('ee merge request widget options', () => {
   let vm;
@@ -924,6 +926,78 @@ describe('ee merge request widget options', () => {
               .querySelector(SECRET_SCANNING_SELECTOR)
               .textContent.trim(),
           ).toContain('Secret scanning: Loading resulted in an error');
+          done();
+        });
+      });
+    });
+  });
+
+  describe('API Fuzzing', () => {
+    const API_FUZZING_ENDPOINT = 'api_fuzzing_report';
+
+    beforeEach(() => {
+      gl.mrWidgetData = {
+        ...mockData,
+        enabled_reports: {
+          api_fuzzing: true,
+        },
+        api_fuzzing_comparison_path: API_FUZZING_ENDPOINT,
+        vulnerability_feedback_path: VULNERABILITY_FEEDBACK_ENDPOINT,
+      };
+    });
+
+    describe('when it is loading', () => {
+      it('should render loading indicator', () => {
+        mock.onGet(API_FUZZING_ENDPOINT).reply(200, apiFuzzingDiffSuccessMock);
+        mock.onGet(VULNERABILITY_FEEDBACK_ENDPOINT).reply(200, []);
+
+        vm = mountComponent(Component, { mrData: gl.mrWidgetData });
+
+        expect(
+          trimText(findExtendedSecurityWidget().querySelector(API_FUZZING_SELECTOR).textContent),
+        ).toContain('API fuzzing is loading');
+      });
+    });
+
+    describe('with successful request', () => {
+      beforeEach(() => {
+        mock.onGet(API_FUZZING_ENDPOINT).reply(200, apiFuzzingDiffSuccessMock);
+        mock.onGet(VULNERABILITY_FEEDBACK_ENDPOINT).reply(200, []);
+
+        vm = mountComponent(Component, { mrData: gl.mrWidgetData });
+      });
+
+      it('should render provided data', done => {
+        setImmediate(() => {
+          expect(
+            trimText(
+              findExtendedSecurityWidget().querySelector(
+                `${API_FUZZING_SELECTOR} .report-block-list-issue-description`,
+              ).textContent,
+            ),
+          ).toEqual(
+            'API fuzzing detected 2 potential vulnerabilities 1 Critical 1 High and 0 Others',
+          );
+          done();
+        });
+      });
+    });
+
+    describe('with failed request', () => {
+      beforeEach(() => {
+        mock.onGet(API_FUZZING_ENDPOINT).reply(500, {});
+        mock.onGet(VULNERABILITY_FEEDBACK_ENDPOINT).reply(500, []);
+
+        vm = mountComponent(Component, { mrData: gl.mrWidgetData });
+      });
+
+      it('should render error indicator', done => {
+        setImmediate(() => {
+          expect(
+            findExtendedSecurityWidget()
+              .querySelector(API_FUZZING_SELECTOR)
+              .textContent.trim(),
+          ).toContain('API fuzzing: Loading resulted in an error');
           done();
         });
       });

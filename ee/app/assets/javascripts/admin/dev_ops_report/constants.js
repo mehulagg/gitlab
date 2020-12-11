@@ -1,4 +1,6 @@
-import { s__, __ } from '~/locale';
+import { s__, __, sprintf } from '~/locale';
+
+export const MAX_SEGMENTS = 30;
 
 export const MAX_REQUEST_COUNT = 10;
 
@@ -26,6 +28,9 @@ export const DEVOPS_ADOPTION_STRINGS = {
         'DevopsAdoption|Feature adoption is based on usage in the last calendar month. Last updated: %{timestamp}.',
       ),
       button: s__('DevopsAdoption|Add new segment'),
+      buttonTooltip: sprintf(s__('DevopsAdoption|Maximum %{maxSegments} segments allowed'), {
+        maxSegments: MAX_SEGMENTS,
+      }),
     },
   },
   emptyState: {
@@ -52,6 +57,39 @@ export const DEVOPS_ADOPTION_STRINGS = {
   table: {
     editButton: s__('DevopsAdoption|Edit segment'),
     deleteButton: s__('DevopsAdoption|Delete segment'),
+    headers: {
+      name: {
+        label: s__('DevopsAdoption|Segment'),
+      },
+      issueOpened: {
+        label: s__('DevopsAdoption|Issues'),
+        tooltip: s__('DevopsAdoption|At least 1 issue opened'),
+      },
+      mergeRequestOpened: {
+        label: s__('DevopsAdoption|MRs'),
+        tooltip: s__('DevopsAdoption|At least 1 MR opened'),
+      },
+      mergeRequestApproved: {
+        label: s__('DevopsAdoption|Approvals'),
+        tooltip: s__('DevopsAdoption|At least 1 approval on an MR'),
+      },
+      runnerConfigured: {
+        label: s__('DevopsAdoption|Runners'),
+        tooltip: s__('DevopsAdoption|Runner configured for project/group'),
+      },
+      pipelineSucceeded: {
+        label: s__('DevopsAdoption|Pipelines'),
+        tooltip: s__('DevopsAdoption|At least 1 pipeline successfully run'),
+      },
+      deploySucceeded: {
+        label: s__('DevopsAdoption|Deploys'),
+        tooltip: s__('DevopsAdoption|At least 1 deploy'),
+      },
+      securityScanSucceeded: {
+        label: s__('DevopsAdoption|Scanning'),
+        tooltip: s__('DevopsAdoption|At least 1 security scan of any type run in pipeline'),
+      },
+    },
   },
   deleteModal: {
     title: s__('DevopsAdoption|Confirm delete segment'),
@@ -59,6 +97,10 @@ export const DEVOPS_ADOPTION_STRINGS = {
     cancel: __('Cancel'),
     confirm: s__('DevopsAdoption|Delete segment'),
     error: s__('DevopsAdoption|An error occured while deleting the segment. Please try again.'),
+  },
+  tableCell: {
+    trueText: s__('DevopsAdoption|Adopted'),
+    falseText: s__('DevopsAdoption|Not adopted'),
   },
 };
 

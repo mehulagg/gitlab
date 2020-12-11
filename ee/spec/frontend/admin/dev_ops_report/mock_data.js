@@ -66,15 +66,51 @@ export const devopsAdoptionSegmentsDataEmpty = {
 };
 
 export const devopsAdoptionTableHeaders = [
-  'Segment',
-  'Issues',
-  'MRs',
-  'Approvals',
-  'Runners',
-  'Pipelines',
-  'Deploys',
-  'Scanning',
-  '',
+  {
+    index: 0,
+    label: 'Segment',
+    tooltip: null,
+  },
+  {
+    index: 1,
+    label: 'Issues',
+    tooltip: 'At least 1 issue opened',
+  },
+  {
+    index: 2,
+    label: 'MRs',
+    tooltip: 'At least 1 MR opened',
+  },
+  {
+    index: 3,
+    label: 'Approvals',
+    tooltip: 'At least 1 approval on an MR',
+  },
+  {
+    index: 4,
+    label: 'Runners',
+    tooltip: 'Runner configured for project/group',
+  },
+  {
+    index: 5,
+    label: 'Pipelines',
+    tooltip: 'At least 1 pipeline successfully run',
+  },
+  {
+    index: 6,
+    label: 'Deploys',
+    tooltip: 'At least 1 deploy',
+  },
+  {
+    index: 7,
+    label: 'Scanning',
+    tooltip: 'At least 1 security scan of any type run in pipeline',
+  },
+  {
+    index: 8,
+    label: '',
+    tooltip: null,
+  },
 ];
 
 export const segmentName = 'Foooo';
