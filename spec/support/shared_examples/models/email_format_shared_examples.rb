@@ -6,7 +6,7 @@
 #   Note: You have access to `email_value` which is the email address value
 #         being currently tested).
 
-RSpec.shared_examples 'an object with email-formated attributes' do |*attributes|
+RSpec.shared_examples 'an object with email-formatted attributes' do |*attributes|
   attributes.each do |attribute|
     describe "specifically its :#{attribute} attribute" do
       %w[
@@ -27,9 +27,10 @@ RSpec.shared_examples 'an object with email-formated attributes' do |*attributes
         end
       end
 
-      %w[
-        foobar
-        test@test@example.com
+      [
+        nil,
+        'foobar',
+        'test@test@example.com'
       ].each do |invalid_email|
         context "with a value of '#{invalid_email}'" do
           let(:email_value) { invalid_email }
@@ -45,7 +46,7 @@ RSpec.shared_examples 'an object with email-formated attributes' do |*attributes
   end
 end
 
-RSpec.shared_examples 'an object with RFC3696 compliant email-formated attributes' do |*attributes|
+RSpec.shared_examples 'an object with RFC3696 compliant email-formatted attributes' do |*attributes|
   attributes.each do |attribute|
     describe "specifically its :#{attribute} attribute" do
       %w[
@@ -64,13 +65,14 @@ RSpec.shared_examples 'an object with RFC3696 compliant email-formated attribute
         end
       end
 
-      %w[
-        foobar
-        test@test@example.com
-        test.test.@example.com
-        .test.test@example.com
-        mailto:test@example.com
-        lol!'+=?><#$%^&*()@gmail.com
+      [
+        nil,
+        'foobar',
+        'test@test@example.com',
+        'test.test.@example.com',
+        '.test.test@example.com',
+        'mailto:test@example.com',
+        'lol!\'+=?><#$%^&*()@gmail.com'
       ].each do |invalid_email|
         context "with a value of '#{invalid_email}'" do
           let(:email_value) { invalid_email }
