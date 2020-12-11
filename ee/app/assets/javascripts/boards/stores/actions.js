@@ -234,10 +234,6 @@ export default {
     notImplemented();
   },
 
-  createBoard: () => {
-    notImplemented();
-  },
-
   deleteBoard: () => {
     notImplemented();
   },
