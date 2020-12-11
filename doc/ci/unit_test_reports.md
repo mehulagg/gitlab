@@ -63,6 +63,8 @@ Each entry in the panel will show the test name and its type from the list
 above. Clicking on the test name will open a modal window with details of its
 execution time and the error output.
 
+[Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/241759) in GitLab 13.7 but currently disabled under the `:test_failure_history` feature flag, when a test has failed for the last 14 days in the project's default branch (i.e. `master`), a message in the format of `Failed {n} time in {default_branch} in the last 14 days` will be displayed in the respective entry.
+
 ![Test Reports Widget](img/junit_test_report.png)
 
 ## How to set it up
