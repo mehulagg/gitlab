@@ -2,9 +2,19 @@ import { shallowMount, createLocalVue } from '@vue/test-utils';
 import createMockApollo from 'jest/helpers/mock_apollo_helper';
 import VueApollo from 'vue-apollo';
 import waitForPromises from 'helpers/wait_for_promises';
-import { GlDropdownItem, GlModal, GlAlert, GlTokenSelector } from '@gitlab/ui';
+import {
+  GlDropdownItem,
+  GlModal,
+  GlAlert,
+  GlTokenSelector,
+  GlFormGroup,
+  GlFormInput,
+  GlDatepicker,
+} from '@gitlab/ui';
 import { addRotationModalId } from 'ee/oncall_schedules/components/oncall_schedule';
-import AddRotationModal from 'ee/oncall_schedules/components/rotations/components/add_rotation_modal.vue';
+import AddRotationModal, {
+  i18n,
+} from 'ee/oncall_schedules/components/rotations/components/add_rotation_modal.vue';
 // import createOncallScheduleRotationMutation from 'ee/oncall_schedules/graphql/create_oncall_schedule_rotation.mutation.graphql';
 import usersSearchQuery from '~/graphql_shared/queries/users_search.query.graphql';
 import { getOncallSchedulesQueryResponse, participants } from '../../mocks/apollo_mock';
@@ -95,12 +105,36 @@ describe('AddRotationModal', () => {
   const findModal = () => wrapper.find(GlModal);
   const findRotationLength = () => wrapper.find('[id = "rotation-length"]');
   const findRotationStartsOn = () => wrapper.find('[id = "rotation-time"]');
+  const findRotationName = () => wrapper.find(GlFormInput);
+  const findRotationStartsAtDate = () => wrapper.find(GlDatepicker);
   const findUserSelector = () => wrapper.find(GlTokenSelector);
   const findDropdownOptions = () => wrapper.findAll(GlDropdownItem);
   const findAlert = () => wrapper.find(GlAlert);
+  const findInvalidFeedbackMessageByIndex = index =>
+    wrapper
+      .findAll(GlFormGroup)
+      .at(index)
+      .attributes('invalid-feedback');
 
   it('renders rotation modal layout', () => {
     expect(wrapper.element).toMatchSnapshot();
+  });
+
+  describe('Rotation form validation', () => {
+    it('should show feedback for an invalid name onBlur', async () => {
+      await findRotationName().vm.$emit('blur');
+      expect(findInvalidFeedbackMessageByIndex(0)).toBe(i18n.fields.name.error);
+    });
+
+    it('should show feedback for an invalid participants selection onBlur', async () => {
+      await findUserSelector().vm.$emit('blur');
+      expect(findInvalidFeedbackMessageByIndex(1)).toBe(i18n.fields.participants.error);
+    });
+
+    it('should show feedback for an invalid start date onBlur', async () => {
+      await findRotationStartsAtDate().vm.$emit('blur');
+      expect(findInvalidFeedbackMessageByIndex(3)).toBe(i18n.fields.startsOn.error);
+    });
   });
 
   describe('Rotation length and start time', () => {

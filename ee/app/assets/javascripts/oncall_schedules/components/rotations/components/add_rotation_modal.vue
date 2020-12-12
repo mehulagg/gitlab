@@ -21,26 +21,28 @@ import {
   CHEVRON_SKIPPING_PALETTE_ENUM,
 } from '../../../constants';
 
-export default {
-  i18n: {
-    selectParticipant: s__('OnCallSchedules|Select participant'),
-    addRotation: s__('OnCallSchedules|Add rotation'),
-    noResults: __('No matching results'),
-    cancel: __('Cancel'),
-    errorMsg: s__('OnCallSchedules|Failed to add rotation'),
-    fields: {
-      name: { title: __('Name'), error: s__('OnCallSchedules|Rotation name cannot be empty') },
-      participants: {
-        title: __('Participants'),
-        error: s__('OnCallSchedules|Rotation participants cannot be empty'),
-      },
-      length: { title: s__('OnCallSchedules|Rotation length') },
-      startsOn: {
-        title: __('Starts on'),
-        error: s__('OnCallSchedules|Rotation start date cannot be empty'),
-      },
+export const i18n = {
+  selectParticipant: s__('OnCallSchedules|Select participant'),
+  addRotation: s__('OnCallSchedules|Add rotation'),
+  noResults: __('No matching results'),
+  cancel: __('Cancel'),
+  errorMsg: s__('OnCallSchedules|Failed to add rotation'),
+  fields: {
+    name: { title: __('Name'), error: s__('OnCallSchedules|Rotation name cannot be empty') },
+    participants: {
+      title: __('Participants'),
+      error: s__('OnCallSchedules|Rotation participants cannot be empty'),
+    },
+    length: { title: s__('OnCallSchedules|Rotation length') },
+    startsOn: {
+      title: __('Starts on'),
+      error: s__('OnCallSchedules|Rotation start date cannot be empty'),
     },
   },
+};
+
+export default {
+  i18n,
   tokenColorPalette: {
     shade: CHEVRON_SKIPPING_SHADE_ENUM,
     palette: CHEVRON_SKIPPING_PALETTE_ENUM,

@@ -127,11 +127,6 @@ export default {
     <gl-alert v-if="error" variant="danger" class="gl-mt-n3 gl-mb-3" @dismiss="hideErrorAlert">
       {{ error || $options.i18n.errorMsg }}
     </gl-alert>
-    <add-edit-schedule-form
-      :is-name-invalid="isNameInvalid"
-      :is-timezone-invalid="isTimezoneInvalid"
-      :form="form"
-      @update-schedule-form="updateScheduleForm"
-    />
+    <add-edit-schedule-form :form="form" @update-schedule-form="updateScheduleForm" />
   </gl-modal>
 </template>

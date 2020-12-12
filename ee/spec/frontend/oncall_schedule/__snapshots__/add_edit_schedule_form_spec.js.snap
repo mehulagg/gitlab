@@ -9,10 +9,10 @@ exports[`AddEditScheduleForm renders modal layout 1`] = `
     label="Name"
     label-for="schedule-name"
     label-size="sm"
+    state="true"
   >
     <gl-form-input-stub
       id="schedule-name"
-      state="true"
       value="Test schedule"
     />
   </gl-form-group-stub>

@@ -128,8 +128,6 @@ export default {
       {{ error || $options.i18n.errorMsg }}
     </gl-alert>
     <add-edit-schedule-form
-      :is-name-invalid="isNameInvalid"
-      :is-timezone-invalid="isTimezoneInvalid"
       :form="form"
       :schedule="schedule"
       @update-schedule-form="updateScheduleForm"

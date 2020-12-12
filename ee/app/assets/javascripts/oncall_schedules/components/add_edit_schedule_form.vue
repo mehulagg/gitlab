@@ -52,14 +52,6 @@ export default {
       type: Object,
       required: true,
     },
-    isNameInvalid: {
-      type: Boolean,
-      required: true,
-    },
-    isTimezoneInvalid: {
-      type: Boolean,
-      required: true,
-    },
     schedule: {
       type: Object,
       required: false,
@@ -69,6 +61,10 @@ export default {
   data() {
     return {
       tzSearchTerm: '',
+      validationState: {
+        name: true,
+        timezone: true,
+      },
     };
   },
   computed: {
@@ -96,6 +92,13 @@ export default {
     isTimezoneSelected(tz) {
       return isEqual(tz, this.form.timezone);
     },
+    validateForm(key) {
+      if (key === 'name') {
+        this.validationState.name = this.form.name !== '';
+      } else if (key === 'timezone') {
+        this.validationState.timezone = !isEmpty(this.form.timezone);
+      }
+    },
   },
 };
 </script>
@@ -107,11 +110,12 @@ export default {
       :invalid-feedback="$options.i18n.fields.name.validation.empty"
       label-size="sm"
       label-for="schedule-name"
+      :state="validationState.name"
     >
       <gl-form-input
         id="schedule-name"
         :value="form.name"
-        :state="!isNameInvalid"
+        @blur.native="validateForm('name')"
         @input="$emit('update-schedule-form', { type: 'name', value: $event })"
       />
     </gl-form-group>
@@ -133,7 +137,7 @@ export default {
       label-size="sm"
       label-for="schedule-timezone"
       :description="$options.i18n.fields.timezone.description"
-      :state="!isTimezoneInvalid"
+      :state="validationState.timezone"
       :invalid-feedback="$options.i18n.fields.timezone.validation.empty"
     >
       <gl-dropdown
@@ -141,7 +145,8 @@ export default {
         :text="selectedTimezone"
         class="timezone-dropdown gl-w-full"
         :header-text="$options.i18n.selectTimezone"
-        :class="{ 'invalid-dropdown': isTimezoneInvalid }"
+        :class="{ 'invalid-dropdown': !validationState.timezone }"
+        @hide="validateForm('timezone')"
       >
         <gl-search-box-by-type v-model.trim="tzSearchTerm" />
         <gl-dropdown-item
