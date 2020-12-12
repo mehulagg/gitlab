@@ -14,5 +14,11 @@ RSpec.describe IssueEmailParticipant do
     it { is_expected.to validate_uniqueness_of(:email).scoped_to([:issue_id]).ignoring_case_sensitivity }
 
     it_behaves_like 'an object with RFC3696 compliant email-formatted attributes', :email
+
+    it 'is invalid if nil' do
+      subject.email = nil
+
+      expect(subject).to be_invalid
+    end
   end
 end
