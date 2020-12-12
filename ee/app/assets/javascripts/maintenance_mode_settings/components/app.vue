@@ -54,6 +54,7 @@ export default {
           id="maintenanceBannerMessage"
           v-model="bannerMessage"
           :placeholder="$options.i18n.bannerMessagePlaceholder"
+          data-qa-selector="maintenance_mode_banner"
         />
       </gl-form-group>
       <gl-button variant="success" type="submit">{{ $options.i18n.buttonText }}</gl-button>

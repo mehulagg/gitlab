@@ -28,3 +28,5 @@ module QA
     end
   end
 end
+
+QA::Page::Admin::Settings::General.prepend_if_ee('QA::EE::Page::Admin::Settings::General')

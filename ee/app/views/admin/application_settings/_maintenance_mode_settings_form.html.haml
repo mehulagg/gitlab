@@ -1,6 +1,6 @@
 - return unless ::Gitlab::Geo.license_allows? && Feature.enabled?(:maintenance_mode)
 
-%section.settings.no-animate#js-maintenance-mode-toggle{ class: ('expanded' if expanded_by_default?) }
+%section.settings.no-animate#js-maintenance-mode-toggle{ class: ('expanded' if expanded_by_default?), data: { qa_selector: 'maintenance_mode_content' } }
   .settings-header
     %h4
       = _('Maintenance mode')

@@ -7,10 +7,17 @@ module QA
         class Banner < QA::Page::Base
           view 'ee/app/helpers/ee/application_helper.rb' do
             element :read_only_message, 'You are on a secondary, %{b_open}read-only%{b_close} Geo node.' # rubocop:disable QA/ElementWithPattern
+            element :maintenance_mode_banner
           end
 
           def has_secondary_read_only_banner?
             page.has_text?('You are on a secondary, read-only Geo node.')
+          end
+
+          def has_maintenance_mode_banner?
+            # for local testing, check for text
+            page.has_text?('maintenance mode')
+            # has_element?(:maintenance_mode_banner)
           end
         end
       end
