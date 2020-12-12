@@ -8,7 +8,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 > Introduced in GitLab 11.5.
 
-CAUTION: **Caution:**
+WARNING:
 Serverless is currently in [alpha](https://about.gitlab.com/handbook/product/#alpha).
 
 ## Overview
@@ -49,7 +49,7 @@ To run Knative on GitLab, you need:
      clone the sample [Knative Ruby App](https://gitlab.com/knative-examples/knative-ruby-app) to get
      started.
 1. **Kubernetes Cluster:** An RBAC-enabled Kubernetes cluster is required to deploy Knative.
-   The simplest way to get started is to add a cluster using GitLab's [GKE integration](../add_remove_clusters.md).
+   The simplest way to get started is to add a cluster using the GitLab [GKE integration](../add_remove_clusters.md).
    The set of minimum recommended cluster specifications to run Knative is 3 nodes, 6 vCPUs, and 22.50 GB memory.
 1. **GitLab Runner:** A runner is required to run the CI jobs that deploy serverless
    applications or functions onto your cluster. You can install GitLab Runner
@@ -73,7 +73,7 @@ To run Knative on GitLab, you need:
 1. **Logging** (optional): Configuring logging allows you to view and search request logs for your serverless function/application.
    See [Configuring logging](#configuring-logging) for more information.
 
-## Installing Knative via GitLab's Kubernetes integration
+## Installing Knative via the GitLab Kubernetes integration
 
 The minimum recommended cluster size to run Knative is 3-nodes, 6 vCPUs, and 22.50 GB
 memory. **RBAC must be enabled.**
@@ -87,7 +87,7 @@ memory. **RBAC must be enabled.**
 1. After the Knative installation has finished, you can wait for the IP address or hostname to be displayed in the
    **Knative Endpoint** field or [retrieve the Istio Ingress Endpoint manually](../../../clusters/applications.md#determining-the-external-endpoint-manually).
 
-   NOTE: **Note:**
+   NOTE:
    Running `kubectl` commands on your cluster requires setting up access to the cluster first.
    For clusters created on GKE, see [GKE Cluster Access](https://cloud.google.com/kubernetes-engine/docs/how-to/cluster-access-for-kubectl),
    for other platforms [Install kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/).
@@ -123,7 +123,7 @@ which already has Knative installed. You must do the following:
    - For a GitLab managed cluster, if you added the cluster in [GitLab 12.1 or later](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/30235),
      then GitLab already has the required access and you can proceed to the next step.
 
-     Otherwise, you need to manually grant GitLab's service account the ability to manage
+     Otherwise, you need to manually grant the GitLab service account the ability to manage
      resources in the `serving.knative.dev` API group. Since every GitLab service account
      has the `edit` cluster role, the simplest way to do this is with an
      [aggregated ClusterRole](https://kubernetes.io/docs/reference/access-authn-authz/rbac/#aggregated-clusterroles)
@@ -376,7 +376,7 @@ The sample function can now be triggered from any HTTP client using a simple `PO
      --header "Content-Type: application/json" \
      --request POST \
      --data '{"GitLab":"FaaS"}' \
-     http://functions-echo.functions-1.functions.example.com/
+     "http://functions-echo.functions-1.functions.example.com/"
      ```
 
   1. Using a web-based tool (such as Postman or Restlet)
@@ -443,7 +443,7 @@ To run a function locally:
 1. Invoke your function:
 
    ```shell
-   curl http://localhost:8080
+   curl "http://localhost:8080"
    ```
 
 ## Deploying Serverless applications
@@ -767,7 +767,7 @@ or with other versions of Python.
 1. Create a Kubernetes secret to hold your TLS certificate, `cert.pem`, and
    the private key `cert.pk`:
 
-   NOTE: **Note:**
+   NOTE:
    Running `kubectl` commands on your cluster requires setting up access to the cluster first.
    For clusters created on GKE, see
    [GKE Cluster Access](https://cloud.google.com/kubernetes-engine/docs/how-to/cluster-access-for-kubectl).

@@ -37,7 +37,7 @@ exports[`MergeRequestTable component matches the snapshot 1`] = `
             </span>
              
             <gl-dropdown-stub
-              category="tertiary"
+              category="primary"
               class="w-100 metric-col"
               headertext=""
               menu-class="w-100 mw-100"

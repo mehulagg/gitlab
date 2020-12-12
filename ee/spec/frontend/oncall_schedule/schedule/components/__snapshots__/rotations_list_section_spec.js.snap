@@ -1,0 +1,34 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`RotationsListSectionComponent renders component layout 1`] = `
+<div
+  class="list-section"
+>
+  <div
+    class="list-item list-item-empty clearfix"
+  >
+    <span
+      class="details-cell"
+    />
+     
+    <span
+      class="timeline-cell"
+      data-testid="timelineCell"
+    >
+      <current-day-indicator-stub
+        presettype="WEEKS"
+        timeframeitem="Mon Jan 01 2018 00:00:00 GMT+0000 (Greenwich Mean Time)"
+      />
+    </span>
+    <span
+      class="timeline-cell"
+      data-testid="timelineCell"
+    >
+      <current-day-indicator-stub
+        presettype="WEEKS"
+        timeframeitem="Mon Jan 08 2018 00:00:00 GMT+0000 (Greenwich Mean Time)"
+      />
+    </span>
+  </div>
+</div>
+`;

@@ -28,34 +28,15 @@ RSpec.describe 'Automatic Deployment Rollbacks' do
     end
   end
 
-  context 'when cd_auto_rollback and auto_rollback are disabled' do
+  context 'when project does not have a license for auto_rollback feature' do
     before do
-      stub_feature_flags(cd_auto_rollback: false)
       stub_licensed_features(auto_rollback: false)
     end
 
     it_behaves_like 'the auto rollback feature is not available'
   end
 
-  context 'when cd_auto_rollback is disabled and auto_rollback is enabled' do
-    before do
-      stub_licensed_features(auto_rollback: true)
-      stub_feature_flags(cd_auto_rollback: false)
-    end
-
-    it_behaves_like 'the auto rollback feature is not available'
-  end
-
-  context 'when cd_auto_rollback is enabled and auto_rollback is disabled' do
-    before do
-      stub_feature_flags(cd_auto_rollback: true)
-      stub_licensed_features(auto_rollback: false)
-    end
-
-    it_behaves_like 'the auto rollback feature is not available'
-  end
-
-  context 'when cd_auto_rollback and auto_rollback are enabled' do
+  context 'when project has a license for auto_rollback feature' do
     before do
       stub_licensed_features(auto_rollback: true)
       project.add_maintainer(user)

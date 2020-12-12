@@ -6,25 +6,25 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Jenkins CI (deprecated) service
 
-NOTE: **Note:**
+NOTE:
 In GitLab 8.3, Jenkins integration using the
 [GitLab Hook Plugin](https://wiki.jenkins.io/display/JENKINS/GitLab+Hook+Plugin)
 was deprecated in favor of the
 [GitLab Plugin](https://wiki.jenkins.io/display/JENKINS/GitLab+Plugin).
 Please use documentation for the new [Jenkins CI service](jenkins.md).
 
-NOTE: **Note:**
+NOTE:
 This service was [removed in v13.0](https://gitlab.com/gitlab-org/gitlab/-/issues/1600)
 
 Integration includes:
 
-- Trigger Jenkins build after push to repo
+- Trigger Jenkins build after push to repository
 - Show build status on Merge Request page
 
 Requirements:
 
 - [Jenkins GitLab Hook plugin](https://wiki.jenkins.io/display/JENKINS/GitLab+Hook+Plugin)
-- Git clone access for Jenkins from GitLab repo (via SSH key)
+- Git clone access for Jenkins from GitLab repository (via SSH key)
 
 ## Jenkins
 

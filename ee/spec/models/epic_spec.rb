@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Epic do
+  include NestedEpicsHelper
+
   let_it_be(:user) { create(:user) }
   let_it_be(:group) { create(:group) }
   let(:project) { create(:project, group: group) }
@@ -185,31 +187,28 @@ RSpec.describe Epic do
 
       it 'returns false when level is too deep' do
         epic1 = create(:epic, group: group)
-        epic2 = create(:epic, group: group, parent: epic1)
-        epic3 = create(:epic, group: group, parent: epic2)
-        epic4 = create(:epic, group: group, parent: epic3)
-        epic5 = create(:epic, group: group, parent: epic4)
-        epic.parent = epic5
+        add_parents_to(epic: epic1, count: 6)
+
+        epic.parent = epic1
 
         expect(epic.valid_parent?).to be_falsey
       end
     end
 
     context 'when adding an Epic that has existing children' do
-      let(:parent_epic) { create(:epic, group: group) }
+      let_it_be(:parent_epic) { create(:epic, group: group) }
       let(:epic) { build(:epic, group: group) }
-      let(:child_epic1) { create(:epic, group: group, parent: epic)}
 
       it 'returns true when total depth after adding will not exceed limit' do
+        create(:epic, group: group, parent: epic)
+
         epic.parent = parent_epic
 
         expect(epic.valid_parent?).to be_truthy
       end
 
       it 'returns false when total depth after adding would exceed limit' do
-        child_epic2 = create(:epic, group: group, parent: child_epic1)
-        child_epic3 = create(:epic, group: group, parent: child_epic2)
-        create(:epic, group: group, parent: child_epic3)
+        add_children_to(epic: epic, count: 6)
 
         epic.parent = parent_epic
 
@@ -218,8 +217,8 @@ RSpec.describe Epic do
     end
 
     context 'when parent has ancestors and epic has children' do
-      let(:root_epic) { create(:epic, group: group) }
-      let(:parent_epic) { create(:epic, group: group, parent: root_epic) }
+      let_it_be(:root_epic) { create(:epic, group: group) }
+      let_it_be(:parent_epic) { create(:epic, group: group, parent: root_epic) }
       let(:epic) { build(:epic, group: group) }
       let(:child_epic1) { create(:epic, group: group, parent: epic)}
 
@@ -230,8 +229,8 @@ RSpec.describe Epic do
       end
 
       it 'returns false when total depth after adding would exceed limit' do
-        root_epic.update(parent: create(:epic, group: group))
-        create(:epic, group: group, parent: child_epic1)
+        add_parents_to(epic: root_epic, count: 2)
+        add_children_to(epic: child_epic1, count: 2)
 
         epic.parent = parent_epic
 

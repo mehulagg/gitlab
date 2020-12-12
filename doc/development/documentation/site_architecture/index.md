@@ -2,7 +2,6 @@
 stage: none
 group: unassigned
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
-description: "Learn how GitLab's documentation website is architectured."
 ---
 
 # Documentation site architecture
@@ -14,8 +13,8 @@ static site generator.
 
 ## Architecture
 
-While the source of the documentation content is stored in GitLab's respective product
-repositories, the source that is used to build the documentation
+While the source of the documentation content is stored in the repositories for
+each GitLab product, the source that is used to build the documentation
 site _from that content_ is located at <https://gitlab.com/gitlab-org/gitlab-docs>.
 
 The following diagram illustrates the relationship between the repositories
@@ -55,7 +54,7 @@ product, and all together are pulled to generate the docs website:
 - [GitLab Runner](https://gitlab.com/gitlab-org/gitlab-runner/tree/master/docs)
 - [GitLab Chart](https://gitlab.com/charts/gitlab/tree/master/doc)
 
-NOTE: **Note:**
+NOTE:
 In September 2019, we [moved towards a single codebase](https://gitlab.com/gitlab-org/gitlab/-/issues/2952),
 as such the docs for CE and EE are now identical. For historical reasons and
 in order not to break any existing links throughout the internet, we still
@@ -114,7 +113,7 @@ located in the [Dockerfiles directory](https://gitlab.com/gitlab-org/gitlab-docs
 
 If you need to rebuild the Docker images immediately (must have maintainer level permissions):
 
-CAUTION: **Caution:**
+WARNING:
 If you change the dockerfile configuration and rebuild the images, you can break the master
 pipeline in the main `gitlab` repository as well as in `gitlab-docs`. Create an image with
 a different name first and test it to ensure you do not break the pipelines.

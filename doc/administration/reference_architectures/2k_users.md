@@ -26,6 +26,46 @@ For a full list of reference architectures, see
 | Object storage                           | n/a    | n/a                     | n/a            | n/a          | n/a     |
 | NFS server (optional, not recommended)   | 1      | 4 vCPU, 3.6 GB memory   | n1-highcpu-4   | c5.xlarge    | F4s v2  |
 
+```mermaid
+stateDiagram-v2
+    [*] --> LoadBalancer
+    LoadBalancer --> ApplicationServer
+
+    ApplicationServer --> Gitaly
+    ApplicationServer --> Redis
+    ApplicationServer --> Database
+    ApplicationServer --> ObjectStorage
+
+    ApplicationMonitoring -->ApplicationServer
+    ApplicationMonitoring -->Redis
+    ApplicationMonitoring -->Database
+
+
+    state Database {
+      "PG_Node"
+    }
+    state Redis {
+      "Redis_Node"
+    }
+
+    state Gitaly {
+      "Gitaly"
+    }
+
+    state ApplicationServer {
+      "AppServ_1..2"
+    }
+
+    state LoadBalancer {
+      "LoadBalancer"
+    }
+
+    state ApplicationMonitoring {
+      "Prometheus"
+      "Grafana"
+    }
+```
+
 The Google Cloud Platform (GCP) architectures were built and tested using the
 [Intel Xeon E5 v3 (Haswell)](https://cloud.google.com/compute/docs/cpu-platforms)
 CPU platform. On different hardware you may find that adjustments, either lower
@@ -356,7 +396,7 @@ are supported and can be added if needed.
 
 ## Configure Gitaly
 
-NOTE: **Note:**
+NOTE:
 [Gitaly Cluster](../gitaly/praefect.md) support
 for the Reference Architectures is being
 worked on as a [collaborative effort](https://gitlab.com/gitlab-org/quality/reference-architectures/-/issues/1) between the Quality Engineering and Gitaly teams. When this component has been verified
@@ -391,7 +431,7 @@ Be sure to note the following items:
   to restrict access to the Gitaly server. Another option is to
   [use TLS](#gitaly-tls-support).
 
-NOTE: **Note:**
+NOTE:
 The token referred to throughout the Gitaly documentation is an arbitrary
 password selected by the administrator. This token is unrelated to tokens
 created for the GitLab API or other similar web API tokens.
@@ -485,7 +525,7 @@ nodes (including the Gitaly node using the certificate) and on all client nodes
 that communicate with it following the procedure described in
 [GitLab custom certificate configuration](https://docs.gitlab.com/omnibus/settings/ssl.html#install-custom-public-certificates).
 
-NOTE: **Note:**
+NOTE:
 The self-signed certificate must specify the address you use to access the
 Gitaly server. If you are addressing the Gitaly server by a hostname, you can
 either use the Common Name field for this, or add it as a Subject Alternative

@@ -271,6 +271,10 @@ module API
       authorize! :read_build, user_project
     end
 
+    def authorize_read_build_trace!(build)
+      authorize! :read_build_trace, build
+    end
+
     def authorize_destroy_artifacts!
       authorize! :destroy_artifacts, user_project
     end
@@ -550,8 +554,9 @@ module API
     def increment_unique_values(event_name, values)
       return unless values.present?
 
-      feature_name = "usage_data_#{event_name}"
-      return unless Feature.enabled?(feature_name)
+      feature_flag = "usage_data_#{event_name}"
+
+      return unless Feature.enabled?(feature_flag, default_enabled: true)
 
       Gitlab::UsageDataCounters::HLLRedisCounter.track_event(values, event_name)
     rescue => error

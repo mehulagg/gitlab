@@ -65,7 +65,7 @@ GET /users?active=true
 GET /users?blocked=true
 ```
 
-GitLab supports bot users such as the [alert bot](../operations/incident_management/generic_alerts.md)
+GitLab supports bot users such as the [alert bot](../operations/incident_management/alert_integrations.md)
 or the [support bot](../user/project/service_desk.md#support-bot-user).
 To exclude these users from the users' list, you can use the parameter `exclude_internal=true`
 ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/241144) in GitLab 13.4).
@@ -74,7 +74,7 @@ To exclude these users from the users' list, you can use the parameter `exclude_
 GET /users?exclude_internal=true
 ```
 
-NOTE: **Note:**
+NOTE:
 Username search is case insensitive.
 
 ### For admins
@@ -170,7 +170,7 @@ GET /users
 ]
 ```
 
-Users on GitLab [Starter, Bronze, or higher](https://about.gitlab.com/pricing/) also see the `shared_runners_minutes_limit`, and `extra_shared_runners_minutes_limit` parameters.
+Users on GitLab [Starter, Bronze, or higher](https://about.gitlab.com/pricing/) also see the `shared_runners_minutes_limit`, `extra_shared_runners_minutes_limit`, and `using_license_seat` parameters.
 
 ```json
 [
@@ -179,6 +179,7 @@ Users on GitLab [Starter, Bronze, or higher](https://about.gitlab.com/pricing/) 
     ...
     "shared_runners_minutes_limit": 133,
     "extra_shared_runners_minutes_limit": 133,
+    "using_license_seat": true
     ...
   }
 ]
@@ -332,7 +333,7 @@ Example Responses:
 }
 ```
 
-NOTE: **Note:**
+NOTE:
 The `plan` and `trial` parameters are only available on GitLab Enterprise Edition.
 
 Users on GitLab [Starter, Bronze, or higher](https://about.gitlab.com/pricing/) also see
@@ -384,10 +385,10 @@ Note that `force_random_password` and `reset_password` take priority
 over `password`. In addition, `reset_password` and
 `force_random_password` can be used together.
 
-NOTE: **Note:**
+NOTE:
 From [GitLab 12.1](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/29888/), `private_profile` defaults to `false`.
 
-NOTE: **Note:**
+NOTE:
 From [GitLab 13.2](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/35604), `bio` defaults to `""` instead of `null`.
 
 ```plaintext
@@ -823,7 +824,7 @@ Parameters:
 - `key` (required) - new SSH key
 - `expires_at` (optional) - The expiration date of the SSH key in ISO 8601 format (`YYYY-MM-DDTHH:MM:SSZ`)
 
-NOTE: **Note:**
+NOTE:
 This also adds an audit event, as described in [audit instance events](../administration/audit_events.md#instance-events). **(PREMIUM)**
 
 ## Delete SSH key for current user
@@ -1068,7 +1069,7 @@ curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://git
 
 Get a list of currently authenticated user's emails.
 
-NOTE: **Note:**
+NOTE:
 Due to [a bug](https://gitlab.com/gitlab-org/gitlab/-/issues/25077) this endpoint currently
 does not return the primary email address.
 
@@ -1097,7 +1098,7 @@ Parameters:
 
 Get a list of a specified user's emails. Available only for admin
 
-NOTE: **Note:**
+NOTE:
 Due to [a bug](https://gitlab.com/gitlab-org/gitlab/-/issues/25077) this endpoint currently
 does not return the primary email address.
 
@@ -1485,7 +1486,7 @@ Parameters:
 > - It's [deployed behind a feature flag](../user/feature_flags.md), disabled by default.
 > - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-an-administrators-ability-to-use-the-api-to-create-personal-access-tokens). **(CORE)**
 
-CAUTION: **Warning:**
+WARNING:
 This feature might not be available to you. Check the **version history** note above for details.
 
 > Requires admin permissions.
@@ -1528,7 +1529,7 @@ Example response:
 
 ## Get user activities (admin only)
 
-NOTE: **Note:**
+NOTE:
 This API endpoint is only available on 8.15 (EE) and 9.1 (CE) and above.
 
 Get the last activity date for all users, sorted from oldest to newest.

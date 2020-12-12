@@ -477,46 +477,6 @@ export const receiveCreateMergeRequestError = ({ commit }, { flashError }) => {
   }
 };
 
-export const setVulnerabilitiesHistoryEndpoint = ({ commit }, endpoint) => {
-  commit(types.SET_VULNERABILITIES_HISTORY_ENDPOINT, endpoint);
-};
-
-export const fetchVulnerabilitiesHistory = ({ state, dispatch }, params = {}) => {
-  if (!state.vulnerabilitiesHistoryEndpoint) {
-    return;
-  }
-  dispatch('requestVulnerabilitiesHistory');
-
-  axios({
-    method: 'GET',
-    url: state.vulnerabilitiesHistoryEndpoint,
-    params,
-  })
-    .then(response => {
-      const { data } = response;
-      dispatch('receiveVulnerabilitiesHistorySuccess', { data });
-    })
-    .catch(() => {
-      dispatch('receiveVulnerabilitiesHistoryError');
-    });
-};
-
-export const setVulnerabilitiesHistoryDayRange = ({ commit }, days) => {
-  commit(types.SET_VULNERABILITIES_HISTORY_DAY_RANGE, days);
-};
-
-export const requestVulnerabilitiesHistory = ({ commit }) => {
-  commit(types.REQUEST_VULNERABILITIES_HISTORY);
-};
-
-export const receiveVulnerabilitiesHistorySuccess = ({ commit }, { data }) => {
-  commit(types.RECEIVE_VULNERABILITIES_HISTORY_SUCCESS, data);
-};
-
-export const receiveVulnerabilitiesHistoryError = ({ commit }) => {
-  commit(types.RECEIVE_VULNERABILITIES_HISTORY_ERROR);
-};
-
 export const openDismissalCommentBox = ({ commit }) => {
   commit(types.OPEN_DISMISSAL_COMMENT_BOX);
 };

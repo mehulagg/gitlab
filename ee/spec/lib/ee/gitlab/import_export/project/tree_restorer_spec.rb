@@ -102,12 +102,10 @@ RSpec.describe Gitlab::ImportExport::Project::TreeRestorer do
 
     before do
       setup_import_export_config('complex', 'ee')
+      restored_project_json
     end
 
     it 'creates security setting' do
-      project = Project.find_by_path('project')
-
-      expect { restored_project_json }.to change { ProjectSecuritySetting.count }.from(0).to(1)
       expect(project.security_setting.auto_fix_dependency_scanning).to be_falsey
       expect(project.security_setting.auto_fix_container_scanning).to be_truthy
     end

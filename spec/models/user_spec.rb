@@ -1087,7 +1087,7 @@ RSpec.describe User do
         @user.update!(email: 'new_primary@example.com')
       end
 
-      it 'adds old primary to secondary emails when secondary is a new email ' do
+      it 'adds old primary to secondary emails when secondary is a new email' do
         @user.update!(email: 'new_primary@example.com')
         @user.reload
 
@@ -1523,6 +1523,16 @@ RSpec.describe User do
       expect(feed_token).not_to be_blank
       expect(user.reload.feed_token).to eq feed_token
     end
+
+    it 'ensures no feed token when disabled' do
+      allow(Gitlab::CurrentSettings).to receive(:disable_feed_token).and_return(true)
+
+      user = create(:user, feed_token: nil)
+      feed_token = user.feed_token
+
+      expect(feed_token).to be_blank
+      expect(user.reload.feed_token).to be_blank
+    end
   end
 
   describe 'static object token' do
@@ -1572,6 +1582,80 @@ RSpec.describe User do
       expect(user.encrypted_otp_secret_salt).to be_nil
       expect(user.otp_backup_codes).to be_nil
       expect(user.otp_grace_period_started_at).to be_nil
+    end
+  end
+
+  describe '#two_factor_otp_enabled?' do
+    let_it_be(:user) { create(:user) }
+
+    context 'when 2FA is enabled by an MFA Device' do
+      let(:user) { create(:user, :two_factor) }
+
+      it { expect(user.two_factor_otp_enabled?).to eq(true) }
+    end
+
+    context 'FortiAuthenticator' do
+      context 'when enabled via GitLab settings' do
+        before do
+          allow(::Gitlab.config.forti_authenticator).to receive(:enabled).and_return(true)
+        end
+
+        context 'when feature is disabled for the user' do
+          before do
+            stub_feature_flags(forti_authenticator: false)
+          end
+
+          it { expect(user.two_factor_otp_enabled?).to eq(false) }
+        end
+
+        context 'when feature is enabled for the user' do
+          before do
+            stub_feature_flags(forti_authenticator: user)
+          end
+
+          it { expect(user.two_factor_otp_enabled?).to eq(true) }
+        end
+      end
+
+      context 'when disabled via GitLab settings' do
+        before do
+          allow(::Gitlab.config.forti_authenticator).to receive(:enabled).and_return(false)
+        end
+
+        it { expect(user.two_factor_otp_enabled?).to eq(false) }
+      end
+    end
+
+    context 'FortiTokenCloud' do
+      context 'when enabled via GitLab settings' do
+        before do
+          allow(::Gitlab.config.forti_token_cloud).to receive(:enabled).and_return(true)
+        end
+
+        context 'when feature is disabled for the user' do
+          before do
+            stub_feature_flags(forti_token_cloud: false)
+          end
+
+          it { expect(user.two_factor_otp_enabled?).to eq(false) }
+        end
+
+        context 'when feature is enabled for the user' do
+          before do
+            stub_feature_flags(forti_token_cloud: user)
+          end
+
+          it { expect(user.two_factor_otp_enabled?).to eq(true) }
+        end
+      end
+
+      context 'when disabled via GitLab settings' do
+        before do
+          allow(::Gitlab.config.forti_token_cloud).to receive(:enabled).and_return(false)
+        end
+
+        it { expect(user.two_factor_otp_enabled?).to eq(false) }
+      end
     end
   end
 
@@ -2068,32 +2152,16 @@ RSpec.describe User do
     end
 
     describe 'secondary email matching' do
-      context 'feature flag :user_search_secondary_email is enabled' do
-        it 'returns users with a matching secondary email' do
-          expect(described_class.search(email.email)).to include(email.user)
-        end
-
-        it 'does not return users with a matching part of secondary email' do
-          expect(described_class.search(email.email[1...-1])).to be_empty
-        end
-
-        it 'returns users with a matching secondary email regardless of the casing' do
-          expect(described_class.search(email.email.upcase)).to include(email.user)
-        end
+      it 'returns users with a matching secondary email' do
+        expect(described_class.search(email.email)).to include(email.user)
       end
 
-      context 'feature flag :user_search_secondary_email is disabled' do
-        before do
-          stub_feature_flags(user_search_secondary_email: false)
-        end
+      it 'does not return users with a matching part of secondary email' do
+        expect(described_class.search(email.email[1...-1])).to be_empty
+      end
 
-        it 'does not return users with a matching secondary email' do
-          expect(described_class.search(email.email)).not_to include(email.user)
-        end
-
-        it 'does not return users with a matching part of secondary email' do
-          expect(described_class.search(email.email[1...-1])).to be_empty
-        end
+      it 'returns users with a matching secondary email regardless of the casing' do
+        expect(described_class.search(email.email.upcase)).to include(email.user)
       end
     end
 
@@ -2538,6 +2606,28 @@ RSpec.describe User do
       user.reload
 
       expect(user.verified_email?(email_unconfirmed.email)).to be_falsy
+    end
+  end
+
+  context 'crowd synchronized user' do
+    describe '#crowd_user?' do
+      it 'is true if provider is crowd' do
+        user = create(:omniauth_user, provider: 'crowd')
+
+        expect(user.crowd_user?).to be_truthy
+      end
+
+      it 'is false for other providers' do
+        user = create(:omniauth_user, provider: 'other-provider')
+
+        expect(user.crowd_user?).to be_falsey
+      end
+
+      it 'is false if no extern_uid is provided' do
+        user = create(:omniauth_user, extern_uid: nil)
+
+        expect(user.crowd_user?).to be_falsey
+      end
     end
   end
 

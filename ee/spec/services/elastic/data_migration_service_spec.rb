@@ -34,7 +34,7 @@ RSpec.describe Elastic::DataMigrationService, :elastic do
     let(:migration_name) { migration.name.underscore }
 
     it 'returns true if migration has finished' do
-      expect(subject.migration_has_finished_uncached?(migration_name)).to eq(false)
+      expect(subject.migration_has_finished_uncached?(migration_name)).to eq(true)
 
       migration.save!(completed: false)
       refresh_index!
@@ -51,7 +51,7 @@ RSpec.describe Elastic::DataMigrationService, :elastic do
   describe '.migration_has_finished?' do
     let(:migration) { subject.migrations.first }
     let(:migration_name) { migration.name.underscore }
-    let(:finished) { false }
+    let(:finished) { true }
 
     before do
       allow(Rails).to receive(:cache).and_return(ActiveSupport::Cache::MemoryStore.new)
@@ -67,6 +67,13 @@ RSpec.describe Elastic::DataMigrationService, :elastic do
   end
 
   describe '.mark_all_as_completed!' do
+    before do
+      # Clear out the migrations index since it is setup initially with
+      # everything finished migrating
+      es_helper.delete_index(index_name: es_helper.migrations_index_name)
+      es_helper.create_migrations_index
+    end
+
     it 'creates all migration versions' do
       expect(Elastic::MigrationRecord.persisted_versions(completed: true).count).to eq(0)
 

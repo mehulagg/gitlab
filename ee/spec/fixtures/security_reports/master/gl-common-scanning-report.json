@@ -18,7 +18,25 @@
                 {
                     "url": "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-1020"
                 }
-            ]
+            ],
+            "details": {
+                "commit": {
+                    "name": [
+                        {
+                            "lang": "en",
+                            "value": "The Commit"
+                        }
+                    ],
+                    "description": [
+                        {
+                            "lang": "en",
+                            "value": "Commit where the vulnerability was identified"
+                        }
+                    ],
+                    "type": "commit",
+                    "value": "41df7b7eb3be2b5be2c406c2f6d28cd6631eeb19"
+                }
+            }
         },
         {
             "id": "bb2fbeb1b71ea360ce3f86f001d4e84823c3ffe1a1f7d41ba7466b14cfa953d3",

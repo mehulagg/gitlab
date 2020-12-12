@@ -99,7 +99,7 @@ describe('EpicItemComponent', () => {
 
   describe('timeframeString', () => {
     it('returns timeframe string correctly when both start and end dates are defined', () => {
-      expect(wrapper.vm.timeframeString(mockEpic)).toBe('Jul 10, 2017 – Jun 2, 2018');
+      expect(wrapper.vm.timeframeString(mockEpic)).toBe('Nov 10, 2017 – Jun 2, 2018');
     });
 
     it('returns timeframe string correctly when no dates are defined', () => {
@@ -113,7 +113,7 @@ describe('EpicItemComponent', () => {
       const epic = { ...mockEpic, endDateUndefined: true };
       wrapper = createComponent({ epic });
 
-      expect(wrapper.vm.timeframeString(epic)).toBe('Jul 10, 2017 – No end date');
+      expect(wrapper.vm.timeframeString(epic)).toBe('Nov 10, 2017 – No end date');
     });
 
     it('returns timeframe string correctly when only end date is defined', () => {

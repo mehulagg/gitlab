@@ -25,6 +25,7 @@ class User < ApplicationRecord
   include IgnorableColumns
   include UpdateHighestRole
   include HasUserType
+  include Gitlab::Auth::Otp::Fortinet
 
   DEFAULT_NOTIFICATION_LEVEL = :participating
 
@@ -289,6 +290,7 @@ class User < ApplicationRecord
 
   delegate :path, to: :namespace, allow_nil: true, prefix: true
   delegate :job_title, :job_title=, to: :user_detail, allow_nil: true
+  delegate :other_role, :other_role=, to: :user_detail, allow_nil: true
   delegate :bio, :bio=, :bio_html, to: :user_detail, allow_nil: true
   delegate :webauthn_xid, :webauthn_xid=, to: :user_detail, allow_nil: true
 
@@ -590,13 +592,7 @@ class User < ApplicationRecord
 
       sanitized_order_sql = Arel.sql(sanitize_sql_array([order, query: query]))
 
-      search_query = if Feature.enabled?(:user_search_secondary_email)
-                       search_with_secondary_emails(query)
-                     else
-                       search_without_secondary_emails(query)
-                     end
-
-      search_query.reorder(sanitized_order_sql, :name)
+      search_with_secondary_emails(query).reorder(sanitized_order_sql, :name)
     end
 
     # Limits the result set to users _not_ in the given query/list of IDs.
@@ -726,6 +722,7 @@ class User < ApplicationRecord
         u.name = 'GitLab Security Bot'
         u.website_url = Gitlab::Routing.url_helpers.help_page_url('user/application_security/security_bot/index.md')
         u.avatar = bot_avatar(image: 'security-bot.png')
+        u.confirmed_at = Time.zone.now
       end
     end
 
@@ -815,7 +812,9 @@ class User < ApplicationRecord
   end
 
   def two_factor_otp_enabled?
-    otp_required_for_login? || Feature.enabled?(:forti_authenticator, self)
+    otp_required_for_login? ||
+    forti_authenticator_enabled?(self) ||
+    forti_token_cloud_enabled?(self)
   end
 
   def two_factor_u2f_enabled?
@@ -1050,7 +1049,7 @@ class User < ApplicationRecord
   end
 
   def require_personal_access_token_creation_for_git_auth?
-    return false if allow_password_authentication_for_git? || ldap_user?
+    return false if allow_password_authentication_for_git? || password_based_omniauth_user?
 
     PersonalAccessTokensFinder.new(user: self, impersonation: false, state: 'active').execute.none?
   end
@@ -1068,7 +1067,7 @@ class User < ApplicationRecord
   end
 
   def allow_password_authentication_for_git?
-    Gitlab::CurrentSettings.password_authentication_enabled_for_git? && !ldap_user?
+    Gitlab::CurrentSettings.password_authentication_enabled_for_git? && !password_based_omniauth_user?
   end
 
   def can_change_username?
@@ -1146,6 +1145,18 @@ class User < ApplicationRecord
 
   def fork_of(project)
     namespace.find_fork_of(project)
+  end
+
+  def password_based_omniauth_user?
+    ldap_user? || crowd_user?
+  end
+
+  def crowd_user?
+    if identities.loaded?
+      identities.find { |identity| identity.provider == 'crowd' && identity.extern_uid.present? }
+    else
+      identities.with_any_extern_uid('crowd').exists?
+    end
   end
 
   def ldap_user?
@@ -1658,7 +1669,7 @@ class User < ApplicationRecord
   # we do this on read since migrating all existing users is not a feasible
   # solution.
   def feed_token
-    ensure_feed_token!
+    Gitlab::CurrentSettings.disable_feed_token ? nil : ensure_feed_token!
   end
 
   # Each existing user needs to have a `static_object_token`.

@@ -77,6 +77,7 @@ if (process.env.NODE_ENV !== 'production' && gon?.test_env) {
 
 document.addEventListener('beforeunload', () => {
   // Unbind scroll events
+  // eslint-disable-next-line @gitlab/no-global-event-off
   $(document).off('scroll');
   // Close any open tooltips
   tooltips.dispose(document.querySelectorAll('.has-tooltip, [data-toggle="tooltip"]'));
@@ -136,10 +137,9 @@ function deferredInitialisation() {
   $('.remove-row').on('ajax:success', function removeRowAjaxSuccessCallback() {
     tooltips.dispose(this);
 
-    // eslint-disable-next-line no-jquery/no-fade
     $(this)
       .closest('li')
-      .fadeOut();
+      .addClass('gl-display-none!');
   });
 
   $('.js-remove-tr').on('ajax:before', function removeTRAjaxBeforeCallback() {
@@ -147,10 +147,9 @@ function deferredInitialisation() {
   });
 
   $('.js-remove-tr').on('ajax:success', function removeTRAjaxSuccessCallback() {
-    // eslint-disable-next-line no-jquery/no-fade
     $(this)
       .closest('tr')
-      .fadeOut();
+      .addClass('gl-display-none!');
   });
 
   const glTooltipDelay = localStorage.getItem('gl-tooltip-delay');

@@ -30,7 +30,8 @@ RSpec.describe GitlabSchema.types['Project'] do
       alert_management_alerts alert_management_alert alert_management_alert_status_counts
       container_expiration_policy service_desk_enabled service_desk_address
       issue_status_counts terraform_states alert_management_integrations
-
+      container_repositories container_repositories_count
+      pipeline_analytics total_pipeline_duration squash_read_only
     ]
 
     expect(described_class).to include_graphql_fields(*expected_fields)
@@ -78,6 +79,7 @@ RSpec.describe GitlabSchema.types['Project'] do
                                             :merged_before,
                                             :author_username,
                                             :assignee_username,
+                                            :reviewer_username,
                                             :milestone_title,
                                             :sort
                                            )
@@ -185,5 +187,12 @@ RSpec.describe GitlabSchema.types['Project'] do
         expect(subject).to be_empty
       end
     end
+  end
+
+  describe 'pipeline_analytics field' do
+    subject { described_class.fields['pipelineAnalytics'] }
+
+    it { is_expected.to have_graphql_type(Types::Ci::AnalyticsType) }
+    it { is_expected.to have_graphql_resolver(Resolvers::ProjectPipelineStatisticsResolver) }
   end
 end

@@ -38,6 +38,11 @@ module Tooling
       Knapsack.logger.info tests_to_run
       Knapsack.logger.info
 
+      if tests_to_run.empty?
+        Knapsack.logger.info 'No tests to run on this node, exiting.'
+        return
+      end
+
       exec(*rspec_command)
     end
 
@@ -55,7 +60,10 @@ module Tooling
     end
 
     def tests_to_run
-      return node_tests if filter_tests.empty?
+      if filter_tests.empty?
+        Knapsack.logger.info 'Running all node tests without filter'
+        return node_tests
+      end
 
       @tests_to_run ||= node_tests & filter_tests
     end

@@ -12,6 +12,7 @@ RSpec.describe "Admin::Users" do
   let!(:current_user) { create(:admin, last_activity_on: 5.days.ago) }
 
   before do
+    stub_feature_flags(vue_admin_users: false)
     sign_in(current_user)
     gitlab_enable_admin_mode_sign_in(current_user)
   end

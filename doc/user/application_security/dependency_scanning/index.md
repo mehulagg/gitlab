@@ -46,7 +46,7 @@ To run dependency scanning jobs, by default, you need GitLab Runner with the
 [`kubernetes`](https://docs.gitlab.com/runner/install/kubernetes.html) executor.
 If you're using the shared runners on GitLab.com, this is enabled by default.
 
-CAUTION: **Caution:**
+WARNING:
 If you use your own runners, make sure your installed version of Docker
 is **not** `19.03.0`. See [troubleshooting information](#error-response-from-daemon-error-processing-tar-file-docker-tar-relocation-error) for details.
 
@@ -64,7 +64,7 @@ The following languages and dependency managers are supported:
 | [Conan](https://conan.io/) | C, C++ | [`conan.lock`](https://docs.conan.io/en/latest/versioning/lockfiles.html) | [Gemnasium](https://gitlab.com/gitlab-org/security-products/gemnasium) |
 | [Golang](https://golang.org/) | Go | `go.sum` | [Gemnasium](https://gitlab.com/gitlab-org/security-products/gemnasium) |
 | [Gradle](https://gradle.org/), [Maven](https://maven.apache.org/) | Java | `build.gradle`, `build.gradle.kts`, `pom.xml` | [Gemnasium](https://gitlab.com/gitlab-org/security-products/gemnasium) |
-| [npm](https://www.npmjs.com/), [yarn](https://classic.yarnpkg.com/en/) | JavaScript | `package-lock.json`, `npm-shrinkwrap.json`, `yarn.lock` | [Gemnasium](https://gitlab.com/gitlab-org/security-products/gemnasium), [Retire.js](https://retirejs.github.io/retire.js/) |
+| [npm](https://www.npmjs.com/), [yarn](https://classic.yarnpkg.com/en/) 1.x | JavaScript | `package-lock.json`, `npm-shrinkwrap.json`, `yarn.lock` | [Gemnasium](https://gitlab.com/gitlab-org/security-products/gemnasium), [Retire.js](https://retirejs.github.io/retire.js/) |
 | [NuGet](https://www.nuget.org/) 4.9+ | .NET, C# | [`packages.lock.json`](https://docs.microsoft.com/en-us/nuget/consume-packages/package-references-in-project-files#enabling-lock-file) | [Gemnasium](https://gitlab.com/gitlab-org/security-products/gemnasium) |
 | [setuptools](https://setuptools.readthedocs.io/en/latest/), [pip](https://pip.pypa.io/en/stable/), [Pipenv](https://pipenv.pypa.io/en/latest/) | Python | `setup.py`, `requirements.txt`, `requirements.pip`, `requires.txt`, `Pipfile` | [Gemnasium](https://gitlab.com/gitlab-org/security-products/gemnasium) |
 | [sbt](https://www.scala-sbt.org/) 1.2 and below ([Ivy](http://ant.apache.org/ivy/)) | Scala | `build.sbt` | [Gemnasium](https://gitlab.com/gitlab-org/security-products/gemnasium) |
@@ -123,7 +123,7 @@ configuration, the last mention of the variable takes precedence.
 
 ### Overriding dependency scanning jobs
 
-CAUTION: **Deprecation:**
+WARNING:
 Beginning in GitLab 13.0, the use of [`only` and `except`](../../../ci/yaml/README.md#onlyexcept-basic)
 is no longer supported. When overriding the template, you must use [`rules`](../../../ci/yaml/README.md#rules) instead.
 

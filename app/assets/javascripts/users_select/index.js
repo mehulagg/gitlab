@@ -63,8 +63,7 @@ function UsersSelect(currentUser, els, options = {}) {
     const abilityName = $dropdown.data('abilityName');
     let $value = $block.find('.value');
     const $collapsedSidebar = $block.find('.sidebar-collapsed-user');
-    // eslint-disable-next-line no-jquery/no-fade
-    const $loading = $block.find('.block-loading').fadeOut();
+    const $loading = $block.find('.block-loading').addClass('gl-display-none');
     const selectedIdDefault = defaultNullUser && showNullUser ? 0 : null;
     let selectedId = $dropdown.data('selected');
     let assignTo;
@@ -205,16 +204,14 @@ function UsersSelect(currentUser, els, options = {}) {
       const data = {};
       data[abilityName] = {};
       data[abilityName].assignee_id = selected != null ? selected : null;
-      // eslint-disable-next-line no-jquery/no-fade
-      $loading.removeClass('hidden').fadeIn();
+      $loading.removeClass('gl-display-none');
       $dropdown.trigger('loading.gl.dropdown');
 
       return axios.put(issueURL, data).then(({ data }) => {
         let user = {};
         let tooltipTitle = user.name;
         $dropdown.trigger('loaded.gl.dropdown');
-        // eslint-disable-next-line no-jquery/no-fade
-        $loading.fadeOut();
+        $loading.addClass('gl-display-none');
         if (data.assignee) {
           user = {
             name: data.assignee.name,
@@ -796,7 +793,7 @@ UsersSelect.prototype.renderRowAvatar = function(issuableType, user, img) {
 
   const mergeIcon =
     issuableType === 'merge_request' && !user.can_merge
-      ? `${spriteIcon('warning-solid', 's12 merge-icon')}`
+      ? spriteIcon('warning-solid', 's12 merge-icon')
       : '';
 
   return `<span class="position-relative mr-2">

@@ -53,8 +53,7 @@ module QA
         end
 
         @project.visit!
-        Page::Project::Menu.perform(&:click_ci_cd_pipelines)
-        Page::Project::Pipeline::Index.perform(&:wait_for_latest_pipeline_success)
+        Flow::Pipeline.wait_for_latest_pipeline(pipeline_condition: 'succeeded')
 
         merge_request.visit!
       end

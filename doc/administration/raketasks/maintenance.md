@@ -1,6 +1,6 @@
 ---
-stage: none
-group: unassigned
+stage: Enablement
+group: Distribution
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
@@ -272,7 +272,7 @@ clear it.
 
 To clear all exclusive leases:
 
-DANGER: **Warning:**
+WARNING:
 Don't run it while GitLab or Sidekiq is running
 
 ```shell

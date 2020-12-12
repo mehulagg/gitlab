@@ -27,33 +27,21 @@ RSpec.describe 'Update Environment Canary Ingress', :clean_gitlab_redis_cache do
   end
 
   before do
-    stub_licensed_features(deploy_board: true, protected_environments: true)
+    stub_licensed_features(protected_environments: true)
     stub_kubeclient_ingresses(environment.deployment_namespace, response: kube_ingresses_response(with_canary: true))
   end
 
-  context 'when kubernetes accepted the patch request' do
+  context 'when environment is protected and allowed to be deployed by only operator' do
     before do
       stub_kubeclient_ingresses(environment.deployment_namespace, method: :patch, resource_path: "/production-auto-deploy")
+      create(:protected_environment, :maintainers_can_deploy, name: environment.name, project: project)
     end
 
-    it 'updates successfully' do
+    it 'fails to update' do
       post_graphql_mutation(mutation, current_user: actor)
 
-      expect(graphql_mutation_response(:environments_canary_ingress_update)['errors'])
-        .to be_empty
-    end
-
-    context 'when environment is protected and allowed to be deployed by only operator' do
-      before do
-        create(:protected_environment, :maintainers_can_deploy, name: environment.name, project: project)
-      end
-
-      it 'fails to update' do
-        post_graphql_mutation(mutation, current_user: actor)
-
-        expect(graphql_errors.first)
-          .to include('message' => "The resource that you are attempting to access does not exist or you don't have permission to perform this action")
-      end
+      expect(graphql_errors.first)
+        .to include('message' => "The resource that you are attempting to access does not exist or you don't have permission to perform this action")
     end
   end
 end

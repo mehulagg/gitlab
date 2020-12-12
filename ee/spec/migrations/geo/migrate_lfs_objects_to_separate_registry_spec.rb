@@ -46,7 +46,7 @@ RSpec.describe MigrateLfsObjectsToSeparateRegistry, :geo do
       expect(lfs_object_registry.all.count).to eq(3)
 
       entry = file_registry.find_by(file_id: 1)
-      entry.update(success: false, bytes: 10240, sha256: '10' * 64)
+      entry.update!(success: false, bytes: 10240, sha256: '10' * 64)
 
       expect(lfs_object_registry.where(lfs_object_id: 1, success: false, bytes: 10240, sha256: '10' * 64).count).to eq(1)
       # Ensure that *only* the correct lfs object is updated

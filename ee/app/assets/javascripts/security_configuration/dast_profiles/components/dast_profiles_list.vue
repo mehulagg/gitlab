@@ -3,38 +3,30 @@ import { uniqueId } from 'lodash';
 import {
   GlAlert,
   GlButton,
-  GlIcon,
   GlModal,
   GlSkeletonLoader,
   GlTable,
   GlTooltipDirective,
 } from '@gitlab/ui';
-import DastSiteValidationModal from 'ee/security_configuration/dast_site_validation/components/dast_site_validation_modal.vue';
-import {
-  DAST_SITE_VALIDATION_STATUS,
-  DAST_SITE_VALIDATION_STATUS_PROPS,
-} from 'ee/security_configuration/dast_site_validation/constants';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-
-const { PENDING, FAILED } = DAST_SITE_VALIDATION_STATUS;
 
 export default {
   components: {
     GlAlert,
     GlButton,
-    GlIcon,
     GlModal,
     GlSkeletonLoader,
     GlTable,
-    DastSiteValidationModal,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
   },
-  mixins: [glFeatureFlagsMixin()],
   props: {
     profiles: {
       type: Array,
+      required: true,
+    },
+    tableLabel: {
+      type: String,
       required: true,
     },
     fields: {
@@ -73,10 +65,8 @@ export default {
   data() {
     return {
       toBeDeletedProfileId: null,
-      validatingProfile: null,
     };
   },
-  statuses: DAST_SITE_VALIDATION_STATUS_PROPS,
   computed: {
     hasError() {
       return this.errorMessage !== '';
@@ -115,24 +105,6 @@ export default {
     handleCancel() {
       this.toBeDeletedProfileId = null;
     },
-    shouldShowValidationBtn(status) {
-      return (
-        this.glFeatures.securityOnDemandScansSiteValidation &&
-        (status === PENDING || status === FAILED)
-      );
-    },
-    shouldShowValidationStatus(status) {
-      return this.glFeatures.securityOnDemandScansSiteValidation && status !== PENDING;
-    },
-    showValidationModal() {
-      this.$refs['dast-site-validation-modal'].show();
-    },
-    setValidatingProfile(profile) {
-      this.validatingProfile = profile;
-      this.$nextTick(() => {
-        this.showValidationModal();
-      });
-    },
   },
 };
 </script>
@@ -140,7 +112,7 @@ export default {
   <section>
     <div v-if="shouldShowTable">
       <gl-table
-        :aria-label="s__('DastProfiles|Site Profiles')"
+        :aria-label="tableLabel"
         :busy="isLoadingInitialProfiles"
         :fields="tableFields"
         :items="profiles"
@@ -166,30 +138,13 @@ export default {
           <strong>{{ value }}</strong>
         </template>
 
-        <template #cell(validationStatus)="{ value }">
-          <template v-if="shouldShowValidationStatus(value)">
-            <span :class="$options.statuses[value].cssClass">
-              {{ $options.statuses[value].label }}
-            </span>
-            <gl-icon
-              v-gl-tooltip
-              name="question-o"
-              class="gl-vertical-align-text-bottom gl-text-gray-300 gl-ml-2"
-              :title="$options.statuses[value].tooltipText"
-            />
-          </template>
+        <template v-for="slotName in Object.keys($scopedSlots)" #[slotName]="slotScope">
+          <slot :name="slotName" v-bind="slotScope"></slot>
         </template>
 
         <template #cell(actions)="{ item }">
           <div class="gl-text-right">
-            <gl-button
-              v-if="shouldShowValidationBtn(item.validationStatus)"
-              variant="info"
-              category="secondary"
-              size="small"
-              @click="setValidatingProfile(item)"
-              >{{ s__('DastSiteValidation|Validate target site') }}</gl-button
-            >
+            <slot name="actions" :profile="item"></slot>
 
             <gl-button v-if="item.editPath" :href="item.editPath" class="gl-mx-5" size="small">{{
               __('Edit')
@@ -248,11 +203,6 @@ export default {
       @cancel="handleCancel"
     />
 
-    <dast-site-validation-modal
-      v-if="validatingProfile"
-      ref="dast-site-validation-modal"
-      :full-path="fullPath"
-      :target-url="validatingProfile.targetUrl"
-    />
+    <slot></slot>
   </section>
 </template>

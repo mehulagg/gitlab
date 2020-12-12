@@ -43,9 +43,10 @@ module QA
         end
 
         # Create a projected branch that requires approval from code owners
-        Resource::ProtectedBranch.fabricate! do |protected_branch|
+        Resource::ProtectedBranch.fabricate_via_browser_ui! do |protected_branch|
           protected_branch.branch_name = branch_name
           protected_branch.project = project
+          protected_branch.require_code_owner_approval = true
         end
 
         # Push a new CODEOWNERS file

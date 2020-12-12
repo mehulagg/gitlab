@@ -30,6 +30,11 @@ RSpec.describe Security::StoreReportService, '#execute' do
   subject { described_class.new(pipeline, report).execute }
 
   context 'without existing data' do
+    before(:all) do
+      checksum = 'f00bc6261fa512f0960b7fc3bfcce7fb31997cf32b96fa647bed5668b2c77fee'
+      create(:vulnerabilities_remediation, checksum: checksum)
+    end
+
     before do
       project.add_developer(user)
       allow(pipeline).to receive(:user).and_return(user)
@@ -37,11 +42,11 @@ RSpec.describe Security::StoreReportService, '#execute' do
 
     using RSpec::Parameterized::TableSyntax
 
-    where(:case_name, :trait, :scanners, :identifiers, :findings, :finding_identifiers, :finding_pipelines, :finding_links) do
-      'with SAST report'                | :sast                       | 3 | 17 | 33 | 39 | 33 | 0
-      'with exceeding identifiers'      | :with_exceeding_identifiers | 1 | 20 | 1  | 20 | 1  | 0
-      'with Dependency Scanning report' | :dependency_scanning        | 2 | 7  | 4  | 7  | 4  | 6
-      'with Container Scanning report'  | :container_scanning         | 1 | 8  | 8  | 8  | 8  | 8
+    where(:case_name, :trait, :scanners, :identifiers, :findings, :finding_identifiers, :finding_pipelines, :remediations) do
+      'with SAST report'                | :sast                            | 3 | 17 | 33 | 39 | 33 | 0
+      'with exceeding identifiers'      | :with_exceeding_identifiers      | 1 | 20 | 1  | 20 | 1  | 0
+      'with Dependency Scanning report' | :dependency_scanning_remediation | 1 | 3  | 2  | 3  | 2  | 1
+      'with Container Scanning report'  | :container_scanning              | 1 | 8  | 8  | 8  | 8  | 0
     end
 
     with_them do
@@ -63,6 +68,10 @@ RSpec.describe Security::StoreReportService, '#execute' do
 
       it 'inserts all finding pipelines (join model)' do
         expect { subject }.to change { Vulnerabilities::FindingPipeline.count }.by(finding_pipelines)
+      end
+
+      it 'inserts all remediations' do
+        expect { subject }.to change { project.vulnerability_remediations.count }.by(remediations)
       end
 
       it 'inserts all vulnerabilties' do

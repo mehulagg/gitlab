@@ -9,7 +9,7 @@ description: What to include in GitLab documentation pages.
 
 Use these standards to contribute content to the GitLab documentation.
 
-Before getting started, familiarize yourself with [GitLab's Documentation guidelines](index.md)
+Before getting started, familiarize yourself with [Documentation guidelines for GitLab](index.md)
 and the [Documentation Style Guide](styleguide/index.md).
 
 ## Components of a documentation page
@@ -39,7 +39,7 @@ pre-deployment and post-deployment tasks.
 
 ## Template for new docs
 
-Follow the [folder structure and file name guidelines](styleguide/index.md#folder-structure-overview)
+Follow the [folder structure and filename guidelines](styleguide/index.md#folder-structure-overview)
 and create a new topic by using this template:
 
 ```markdown

@@ -23,7 +23,7 @@ module EE
           end
           segment ':id/audit_events', feature_category: :audit_events do
             before do
-              authorize! :admin_project, user_project
+              authorize! :read_project_audit_events, user_project
               check_audit_events_available!(user_project)
               increment_unique_values('a_compliance_audit_events_api', current_user.id)
             end
@@ -97,7 +97,13 @@ module EE
           end
 
           def audit_log_finder_params
-            params.slice(:created_after, :created_before)
+            params
+              .slice(:created_after, :created_before)
+              .then { |params| filter_by_author(params) }
+          end
+
+          def filter_by_author(params)
+            can?(current_user, :admin_project, user_project) ? params : params.merge(author_id: current_user.id)
           end
 
           override :delete_project

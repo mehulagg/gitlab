@@ -7,7 +7,7 @@ type: howto
 
 # How to install GitLab on OpenShift Origin 3
 
-CAUTION: **Deprecated:**
+WARNING:
 This article is deprecated. Use the official Kubernetes Helm charts for
 installing GitLab to OpenShift. Check out the
 [official installation docs](https://docs.gitlab.com/charts/installation/cloud/openshift.html)
@@ -27,12 +27,12 @@ For a video demonstration on installing GitLab on OpenShift, check the article [
 
 ## Prerequisites
 
-CAUTION: **Caution:**
+WARNING:
 This information is no longer up to date, as the current versions
 have changed and products have been renamed.
 
 OpenShift 3 is not yet deployed on RedHat's offered [Online platform](https://www.openshift.com/),
-so in order to test it, we will use an [all-in-one Virtualbox image](https://www.okd.io/minishift/) that is
+so in order to test it, we will use an [all-in-one VirtualBox image](https://www.okd.io/minishift/) that is
 offered by the OpenShift developers and managed by Vagrant. If you haven't done
 already, go ahead and install the following components as they are essential to
 test OpenShift easily:
@@ -48,7 +48,7 @@ latest Origin release is used:
 - **OpenShift** `v1.3.0` (is pre-installed in the [VM image](https://app.vagrantup.com/openshift/boxes/origin-all-in-one))
 - **Kubernetes** `v1.3.0` (is pre-installed in the [VM image](https://app.vagrantup.com/openshift/boxes/origin-all-in-one))
 
-NOTE: **Note:**
+NOTE:
 If you intend to deploy GitLab on a production OpenShift cluster, there are some
 limitations to bare in mind. Read on the [limitations](#current-limitations)
 section for more information and follow the linked links for the relevant
@@ -267,7 +267,7 @@ And then let's import it in OpenShift:
 oc create -f openshift-template.json -n openshift
 ```
 
-NOTE: **Note:**
+NOTE:
 The `-n openshift` namespace flag is a trick to make the template available to all
 projects. If you recall from when we created the `gitlab` project, `oc` switched
 to it automatically, and that can be verified by the `oc status` command. If
@@ -314,7 +314,7 @@ If you are deploying to production you will want to change the **GitLab instance
 hostname** and use greater values for the volume sizes. If you don't provide a
 password for PostgreSQL, it will be created automatically.
 
-NOTE: **Note:**
+NOTE:
 The `gitlab.apps.10.2.2.2.nip.io` hostname that is used by default will
 resolve to the host with IP `10.2.2.2` which is the IP our VM uses. It is a
 trick to have distinct FQDNs pointing to services that are on our local network.
@@ -464,7 +464,7 @@ OpenShift's website about [autoscaling](https://docs.okd.io/3.11/dev_guide/pod_a
 As stated in the [all-in-one VM](https://www.okd.io/minishift/) page:
 
 > By default, OpenShift will not allow a container to run as root or even a
-non-random container assigned userid. Most Docker images in the Dockerhub do not
+non-random container assigned userid. Most Docker images in Docker Hub do not
 follow this best practice and instead run as root.
 
 The all-in-one VM we are using has this security turned off so it will not

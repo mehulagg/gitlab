@@ -7,13 +7,17 @@ import {
   canResend,
   canUpdate,
   canOverride,
+  parseSortParam,
+  buildSortHref,
 } from '~/members/utils';
+import { DEFAULT_SORT } from '~/members/constants';
 import { member as memberMock, group, invite } from './mock_data';
 
 const DIRECT_MEMBER_ID = 178;
 const INHERITED_MEMBER_ID = 179;
 const IS_CURRENT_USER_ID = 123;
 const IS_NOT_CURRENT_USER_ID = 124;
+const URL_HOST = 'https://localhost/';
 
 describe('Members Utils', () => {
   describe('generateBadges', () => {
@@ -117,6 +121,112 @@ describe('Members Utils', () => {
   describe('canOverride', () => {
     it('returns `false`', () => {
       expect(canOverride(memberMock)).toBe(false);
+    });
+  });
+
+  describe('parseSortParam', () => {
+    beforeEach(() => {
+      delete window.location;
+      window.location = new URL(URL_HOST);
+    });
+
+    describe('when `sort` param is not present', () => {
+      it('returns default sort options', () => {
+        window.location.search = '';
+
+        expect(parseSortParam(['account'])).toEqual(DEFAULT_SORT);
+      });
+    });
+
+    describe('when field passed in `sortableFields` argument does not have `sort` key defined', () => {
+      it('returns default sort options', () => {
+        window.location.search = '?sort=source_asc';
+
+        expect(parseSortParam(['source'])).toEqual(DEFAULT_SORT);
+      });
+    });
+
+    describe.each`
+      sortParam              | expected
+      ${'name_asc'}          | ${{ sortByKey: 'account', sortDesc: false }}
+      ${'name_desc'}         | ${{ sortByKey: 'account', sortDesc: true }}
+      ${'last_joined'}       | ${{ sortByKey: 'granted', sortDesc: false }}
+      ${'oldest_joined'}     | ${{ sortByKey: 'granted', sortDesc: true }}
+      ${'access_level_asc'}  | ${{ sortByKey: 'maxRole', sortDesc: false }}
+      ${'access_level_desc'} | ${{ sortByKey: 'maxRole', sortDesc: true }}
+      ${'recent_sign_in'}    | ${{ sortByKey: 'lastSignIn', sortDesc: false }}
+      ${'oldest_sign_in'}    | ${{ sortByKey: 'lastSignIn', sortDesc: true }}
+    `('when `sort` query string param is `$sortParam`', ({ sortParam, expected }) => {
+      it(`returns ${JSON.stringify(expected)}`, async () => {
+        window.location.search = `?sort=${sortParam}`;
+
+        expect(parseSortParam(['account', 'granted', 'expires', 'maxRole', 'lastSignIn'])).toEqual(
+          expected,
+        );
+      });
+    });
+  });
+
+  describe('buildSortHref', () => {
+    beforeEach(() => {
+      delete window.location;
+      window.location = new URL(URL_HOST);
+    });
+
+    describe('when field passed in `sortBy` argument does not have `sort` key defined', () => {
+      it('returns an empty string', () => {
+        expect(
+          buildSortHref({
+            sortBy: 'source',
+            sortDesc: false,
+            filteredSearchBarTokens: [],
+            filteredSearchBarSearchParam: 'search',
+          }),
+        ).toBe('');
+      });
+    });
+
+    describe('when there are no filter params set', () => {
+      it('sets `sort` param', () => {
+        expect(
+          buildSortHref({
+            sortBy: 'account',
+            sortDesc: false,
+            filteredSearchBarTokens: [],
+            filteredSearchBarSearchParam: 'search',
+          }),
+        ).toBe(`${URL_HOST}?sort=name_asc`);
+      });
+    });
+
+    describe('when filter params are set', () => {
+      it('merges the `sort` param with the filter params', () => {
+        window.location.search = '?two_factor=enabled&with_inherited_permissions=exclude';
+
+        expect(
+          buildSortHref({
+            sortBy: 'account',
+            sortDesc: false,
+            filteredSearchBarTokens: ['two_factor', 'with_inherited_permissions'],
+            filteredSearchBarSearchParam: 'search',
+          }),
+        ).toBe(`${URL_HOST}?two_factor=enabled&with_inherited_permissions=exclude&sort=name_asc`);
+      });
+    });
+
+    describe('when search param is set', () => {
+      it('merges the `sort` param with the search param', () => {
+        window.location.search = '?search=foobar';
+
+        expect(
+          buildSortHref({
+            sortBy: 'account',
+            sortDesc: false,
+            filteredSearchBarTokens: ['two_factor', 'with_inherited_permissions'],
+            filteredSearchBarSearchParam: 'search',
+          }),
+        ).toBe(`${URL_HOST}?search=foobar&sort=name_asc`);
+      });
     });
   });
 });

@@ -47,7 +47,6 @@ module Gitlab
             .merge(system_usage_data_weekly)
             .merge(features_usage_data)
             .merge(components_usage_data)
-            .merge(cycle_analytics_usage_data)
             .merge(object_store_usage_data)
             .merge(topology_usage_data)
             .merge(usage_activity_by_stage)
@@ -237,7 +236,9 @@ module Gitlab
 
       def system_usage_data_settings
         {
-          settings: {}
+          settings: {
+            ldap_encrypted_secrets_enabled: alt_usage_data(fallback: nil) { Gitlab::Auth::Ldap::Config.encrypted_secrets.active? }
+          }
         }
       end
 
@@ -248,12 +249,6 @@ module Gitlab
             aggregated_metrics_weekly
           )
         }
-      end
-
-      def cycle_analytics_usage_data
-        Gitlab::CycleAnalytics::UsageData.new.to_json
-      rescue ActiveRecord::StatementInvalid
-        { avg_cycle_analytics: {} }
       end
 
       # rubocop:disable CodeReuse/ActiveRecord
@@ -776,7 +771,7 @@ module Gitlab
       end
 
       def report_snowplow_events?
-        self_monitoring_project && Feature.enabled?(:product_analytics, self_monitoring_project)
+        self_monitoring_project && Feature.enabled?(:product_analytics_tracking, type: :ops)
       end
 
       def distinct_count_service_desk_enabled_projects(time_period)

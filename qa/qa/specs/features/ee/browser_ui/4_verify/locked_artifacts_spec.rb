@@ -56,7 +56,7 @@ module QA
             )
           end.project.visit!
 
-          Flow::Pipeline.visit_latest_pipeline(pipeline_condition: 'completion')
+          Flow::Pipeline.visit_latest_pipeline(pipeline_condition: 'completed')
 
           Page::Project::Pipeline::Show.perform do |pipeline|
             pipeline.click_job('test-artifacts')

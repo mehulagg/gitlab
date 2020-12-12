@@ -1,6 +1,6 @@
 ---
 stage: Release
-group: Release Management
+group: Release
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
@@ -142,7 +142,7 @@ PUT /projects/:id/releases/:tag_name/assets/links/:link_id
 | `filepath` | string     | no | Optional path for a [Direct Asset link](../../user/project/releases/index.md#permanent-links-to-release-assets).
 | `link_type`        | string         | no       | The type of the link: `other`, `runbook`, `image`, `package`. Defaults to `other`. |
 
-NOTE: **Note:**
+NOTE:
 You have to specify at least one of `name` or `url`
 
 Example request:

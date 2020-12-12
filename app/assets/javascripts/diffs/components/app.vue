@@ -10,7 +10,10 @@ import PanelResizer from '~/vue_shared/components/panel_resizer.vue';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { isSingleViewStyle } from '~/helpers/diffs_helper';
 import { updateHistory } from '~/lib/utils/url_utility';
-import eventHub from '../../notes/event_hub';
+
+import notesEventHub from '../../notes/event_hub';
+import eventHub from '../event_hub';
+
 import CompareVersions from './compare_versions.vue';
 import DiffFile from './diff_file.vue';
 import NoChanges from './no_changes.vue';
@@ -22,6 +25,7 @@ import MergeConflictWarning from './merge_conflict_warning.vue';
 import CollapsedFilesWarning from './collapsed_files_warning.vue';
 
 import { diffsApp } from '../utils/performance';
+import { fileByFile } from '../utils/preferences';
 
 import {
   TREE_LIST_WIDTH_STORAGE_KEY,
@@ -34,6 +38,7 @@ import {
   ALERT_OVERFLOW_HIDDEN,
   ALERT_MERGE_CONFLICT,
   ALERT_COLLAPSED_FILES,
+  EVT_VIEW_FILE_BY_FILE,
 } from '../constants';
 
 export default {
@@ -114,7 +119,7 @@ export default {
       required: false,
       default: false,
     },
-    viewDiffsFileByFile: {
+    fileByFileUserPreference: {
       type: Boolean,
       required: false,
       default: false,
@@ -154,6 +159,7 @@ export default {
       'conflictResolutionPath',
       'canMerge',
       'hasConflicts',
+      'viewDiffsFileByFile',
     ]),
     ...mapGetters('diffs', ['whichCollapsedTypes', 'isParallelView', 'currentDiffIndex']),
     ...mapGetters(['isNotesFetched', 'getNoteableData']),
@@ -254,7 +260,7 @@ export default {
       projectPath: this.projectPath,
       dismissEndpoint: this.dismissEndpoint,
       showSuggestPopover: this.showSuggestPopover,
-      viewDiffsFileByFile: this.viewDiffsFileByFile,
+      viewDiffsFileByFile: fileByFile(this.fileByFileUserPreference),
     });
 
     if (this.shouldShow) {
@@ -277,9 +283,8 @@ export default {
   },
   created() {
     this.adjustView();
+    this.subscribeToEvents();
 
-    eventHub.$once('fetchDiffData', this.fetchData);
-    eventHub.$on('refetchDiffData', this.refetchDiffData);
     this.CENTERED_LIMITED_CONTAINER_CLASSES = CENTERED_LIMITED_CONTAINER_CLASSES;
 
     this.unwatchDiscussions = this.$watch(
@@ -299,9 +304,7 @@ export default {
   },
   beforeDestroy() {
     diffsApp.deinstrument();
-
-    eventHub.$off('fetchDiffData', this.fetchData);
-    eventHub.$off('refetchDiffData', this.refetchDiffData);
+    this.unsubscribeFromEvents();
     this.removeEventListeners();
   },
   methods: {
@@ -319,7 +322,21 @@ export default {
       'scrollToFile',
       'setShowTreeList',
       'navigateToDiffFileIndex',
+      'setFileByFile',
     ]),
+    subscribeToEvents() {
+      notesEventHub.$once('fetchDiffData', this.fetchData);
+      notesEventHub.$on('refetchDiffData', this.refetchDiffData);
+      eventHub.$on(EVT_VIEW_FILE_BY_FILE, this.fileByFileListener);
+    },
+    unsubscribeFromEvents() {
+      eventHub.$off(EVT_VIEW_FILE_BY_FILE, this.fileByFileListener);
+      notesEventHub.$off('refetchDiffData', this.refetchDiffData);
+      notesEventHub.$off('fetchDiffData', this.fetchData);
+    },
+    fileByFileListener({ setting } = {}) {
+      this.setFileByFile({ fileByFile: setting });
+    },
     navigateToDiffFileNumber(number) {
       this.navigateToDiffFileIndex(number - 1);
     },
@@ -371,7 +388,7 @@ export default {
       }
 
       if (!this.isNotesFetched) {
-        eventHub.$emit('fetchNotesData');
+        notesEventHub.$emit('fetchNotesData');
       }
     },
     setDiscussions() {
@@ -429,7 +446,7 @@ export default {
       let showTreeList = true;
 
       if (storedTreeShow !== null) {
-        showTreeList = Boolean(storedTreeShow);
+        showTreeList = parseBoolean(storedTreeShow);
       } else if (!bp.isDesktop() || (!this.isBatchLoading && this.diffFiles.length <= 1)) {
         showTreeList = false;
       }
@@ -525,6 +542,7 @@ export default {
                 <template #total>{{ diffFiles.length }}</template>
               </gl-sprintf>
             </div>
+            <gl-loading-icon v-else-if="retrievingBatches" size="lg" />
           </template>
           <no-changes v-else :changes-empty-state-illustration="changesEmptyStateIllustration" />
         </div>

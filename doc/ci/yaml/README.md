@@ -375,7 +375,7 @@ The files defined by `include` are:
 - Always evaluated first and merged with the content of `.gitlab-ci.yml`,
   regardless of the position of the `include` keyword.
 
-TIP: **Tip:**
+NOTE:
 Use merging to customize and override included CI/CD configurations with local
 definitions. Local definitions in `.gitlab-ci.yml` override included definitions.
 
@@ -503,7 +503,7 @@ so you can only `include` public projects or templates.
 For example:
 
 ```yaml
-# File sourced from GitLab's template collection
+# File sourced from the GitLab template collection
 include:
   - template: Auto-DevOps.gitlab-ci.yml
 ```
@@ -747,14 +747,12 @@ job 5:
 
 #### Using your own runners
 
-When you use your own runners, GitLab Runner runs only one job at a time by default. See the
-`concurrent` flag in [runner global settings](https://docs.gitlab.com/runner/configuration/advanced-configuration.html#the-global-section)
-for more information.
+When you use your own runners, each runner runs only one job at a time by default.
+Jobs can run in parallel if they run on different runners.
 
-Jobs run on your own runners in parallel only if:
-
-- Run on different runners.
-- The runner's `concurrent` setting has been changed.
+If you have only one runner, jobs can run in parallel if the runner's
+[`concurrent` setting](https://docs.gitlab.com/runner/configuration/advanced-configuration.html#the-global-section)
+is greater than `1`.
 
 #### `.pre` and `.post`
 
@@ -1006,9 +1004,6 @@ docker build:
       allow_failure: true
 ```
 
-Additional job configuration may be added to rules in the future. If something
-useful is not available, please [open an issue](https://gitlab.com/gitlab-org/gitlab/-/issues).
-
 #### Rules clauses
 
 Available rule clauses are:
@@ -1084,7 +1079,7 @@ job:
 - If the pipeline is a scheduled pipeline, the job is **not** be added to the pipeline.
 - In **all other cases**, the job is added to the pipeline, with `when: on_success`.
 
-CAUTION: **Caution:**
+WARNING:
 If you use a `when:` clause as the final rule (not including `when: never`), two
 simultaneous pipelines may start. Both push pipelines and merge request pipelines can
 be triggered by the same event (a push to the source branch for an open merge request).
@@ -1200,8 +1195,8 @@ or excluded from a pipeline. In plain English, `if` rules can be interpreted as 
 `rules:if` differs slightly from `only:variables` by accepting only a single
 expression string per rule, rather than an array of them. Any set of expressions to be
 evaluated can be [conjoined into a single expression](../variables/README.md#conjunction--disjunction)
-by using `&&` or `||`, and use
-the [variable matching syntax](../variables/README.md#syntax-of-environment-variable-expressions).
+by using `&&` or `||`, and the [variable matching operators (`==`, `!=`, `=~` and `!~`)](../variables/README.md#syntax-of-environment-variable-expressions).
+
 Unlike variables in [`script`](../variables/README.md#syntax-of-environment-variables-in-job-scripts)
 sections, variables in rules expressions are always formatted as `$VARIABLE`.
 
@@ -1335,7 +1330,7 @@ rules:
 To implement a rule similar to [`except:changes`](#onlychangesexceptchanges),
 use `when: never`.
 
-CAUTION: **Caution:**
+WARNING:
 You can use `rules: changes` with other pipeline types, but it is not recommended
 because `rules: changes` always evaluates to true when there is no Git `push` event.
 Tag pipelines, scheduled pipelines, and so on do **not** have a Git `push` event
@@ -1422,7 +1417,7 @@ same rule.
 
 In the following example:
 
-- If the `Dockerfile` file or any file in `/docker/scripts` has changed, and var=blah,
+- If the `Dockerfile` file or any file in `/docker/scripts` has changed, and `$VAR` == "string value",
   then the job runs manually
 - Otherwise, the job isn't included in the pipeline.
 
@@ -1455,13 +1450,13 @@ job1:
     if: ($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH == "develop") && $MY_VARIABLE
 ```
 
-CAUTION: **Caution:**
+WARNING:
 [Before GitLab 13.3](https://gitlab.com/gitlab-org/gitlab/-/issues/230938),
 rules that use both `||` and `&&` may evaluate with an unexpected order of operations.
 
 ### `only`/`except` (basic)
 
-NOTE: **Note:**
+NOTE:
 The [`rules`](#rules) syntax is an improved, more powerful solution for defining
 when jobs should run or not. Consider using `rules` instead of `only/except` to get
 the most out of your pipelines.
@@ -1496,6 +1491,10 @@ In addition, `only` and `except` can use special keywords:
 | `tags`                   | When the Git reference for a pipeline is a tag.                                                                                                                                                                                  |
 | `triggers`               | For pipelines created by using a [trigger token](../triggers/README.md#trigger-token).                                                                                                                                           |
 | `web`                    | For pipelines created by using **Run pipeline** button in the GitLab UI, from the project's **CI/CD > Pipelines** section.                                                                                                       |
+
+Scheduled pipelines run on specific branches, so jobs configured with `only: branches`
+run on scheduled pipelines too. Add `except: schedules` to prevent jobs with `only: branches`
+from running on scheduled pipelines.
 
 In the example below, `job` runs only for refs that start with `issue-`,
 whereas all branches are skipped:
@@ -1584,7 +1583,7 @@ that begin with `issue-`, but you can use `/issue-.*/`.
 
 Regular expression flags must be appended after the closing `/`.
 
-TIP: **Tip:**
+NOTE:
 Use anchors `^` and `$` to avoid the regular expression
 matching only a substring of the tag name or branch name.
 For example, `/^issue-.*$/` is equivalent to `/^issue-/`,
@@ -1610,8 +1609,8 @@ Feature.enable(:allow_unsafe_ruby_regexp)
 
 ### `only`/`except` (advanced)
 
-GitLab supports both simple and complex strategies, so it's possible to use an
-array and a hash configuration scheme.
+GitLab supports multiple strategies, and it's possible to use an
+array or a hash configuration scheme.
 
 Four keys are available:
 
@@ -1759,7 +1758,7 @@ refs only:
 - `external_pull_requests`
 - `merge_requests` (see additional details about [using `only:changes` with pipelines for merge requests](#using-onlychanges-with-pipelines-for-merge-requests))
 
-CAUTION: **Caution:**
+WARNING:
 In pipelines with [sources other than the three above](../variables/predefined_variables.md)
 `changes` can't determine if a given file is new or old and always returns `true`.
 You can configure jobs to use `only: changes` with other `only: refs` keywords. However,
@@ -1788,7 +1787,7 @@ the `docker build` job is created, but only if changes were made to any of the f
 - Any of the files and subdirectories in the `dockerfiles` directory.
 - Any of the files with `rb`, `py`, `sh` extensions in the `more_scripts` directory.
 
-CAUTION: **Warning:**
+WARNING:
 If you use `only:changes` with [only allow merge requests to be merged if the pipeline succeeds](../../user/project/merge_requests/merge_when_pipeline_succeeds.md#only-allow-merge-requests-to-be-merged-if-the-pipeline-succeeds),
 you should [also use `only:merge_requests`](#using-onlychanges-with-pipelines-for-merge-requests). Otherwise it may not work as expected.
 
@@ -2271,9 +2270,6 @@ You can use [protected branches](../../user/project/protected_branches.md) to mo
 In [GitLab 13.5](https://gitlab.com/gitlab-org/gitlab/-/issues/201938) and later, you
 can use `when:manual` in the same job as [`trigger`](#trigger). In GitLab 13.4 and
 earlier, using them together causes the error `jobs:#{job-name} when should be on_success, on_failure or always`.
-It is deployed behind the `:ci_manual_bridges` [feature flag](../../user/feature_flags.md), which is **enabled by default**.
-[GitLab administrators with access to the Rails console](../../administration/feature_flags.md)
-can opt to disable it.
 
 ##### Protecting manual jobs **(PREMIUM)**
 
@@ -2476,7 +2472,7 @@ environment. A new `stop_review_app` job is listed under `on_stop`.
 After the `review_app` job is finished, it triggers the
 `stop_review_app` job based on what is defined under `when`. In this case,
 it is set to `manual`, so it needs a [manual action](#whenmanual) from
-GitLab's user interface to run.
+the GitLab UI to run.
 
 Also in the example, `GIT_STRATEGY` is set to `none`. If the
 `stop_review_app` job is [automatically triggered](../environments/index.md#automatically-stopping-an-environment),
@@ -2549,16 +2545,13 @@ environment, using the `production`
 For more information, see
 [Available settings for `kubernetes`](../environments/index.md#configuring-kubernetes-deployments).
 
-NOTE: **Note:**
+NOTE:
 Kubernetes configuration is not supported for Kubernetes clusters
 that are [managed by GitLab](../../user/project/clusters/index.md#gitlab-managed-clusters).
 To follow progress on support for GitLab-managed clusters, see the
 [relevant issue](https://gitlab.com/gitlab-org/gitlab/-/issues/38054).
 
 #### Dynamic environments
-
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/21971) in GitLab 8.12 and GitLab Runner 1.6.
-> - The `$CI_ENVIRONMENT_SLUG` was [introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/22864) in GitLab 8.15.
 
 Use CI/CD [variables](../variables/README.md) to dynamically name environments.
 
@@ -3181,7 +3174,7 @@ in GitLab 13.4.
 
 The [`artifacts:reports` keyword](../pipelines/job_artifacts.md#artifactsreports)
 is used for collecting test reports, code quality reports, and security reports from jobs.
-It also exposes these reports in GitLab's UI (merge requests, pipeline views, and security dashboards).
+It also exposes these reports in the GitLab UI (merge requests, pipeline views, and security dashboards).
 
 These are the available report types:
 
@@ -3274,8 +3267,6 @@ and bring back the old behavior.
 
 ### `coverage`
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/20428) in GitLab 8.17.
-
 Use `coverage` to configure how code coverage is extracted from the
 job output.
 
@@ -3291,6 +3282,11 @@ job1:
   script: rspec
   coverage: '/Code coverage: \d+\.\d+/'
 ```
+
+The coverage is shown in the UI if at least one line in the job output matches the regular expression.
+If there is more than one matched line in the job output, the last line is used.
+For the matched line, the first occurence of `\d+(\.\d+)?` is the code coverage.
+Leading zeros are removed.
 
 ### `retry`
 
@@ -3432,7 +3428,7 @@ test:
     - bundle exec rspec_booster --job $CI_NODE_INDEX/$CI_NODE_TOTAL
 ```
 
-CAUTION: **Caution:**
+WARNING:
 Test Boosters reports usage statistics to the author.
 
 You can then navigate to the **Jobs** tab of a new pipeline build and see your RSpec
@@ -3444,6 +3440,9 @@ job split into three separate jobs.
 
 Use `matrix:` to configure different variables for jobs that are running in parallel.
 There can be from 2 to 50 jobs.
+
+Jobs can only run in parallel if there are multiple runners, or a single runner is
+[configured to run multiple jobs concurrently](#using-your-own-runners).
 
 [In GitLab 13.5](https://gitlab.com/gitlab-org/gitlab/-/issues/26362) and later,
 you can have one-dimensional matrices with a single job.
@@ -3510,13 +3509,11 @@ hover over the downstream pipeline job.
 In [GitLab 13.5](https://gitlab.com/gitlab-org/gitlab/-/issues/201938) and later, you
 can use [`when:manual`](#whenmanual) in the same job as `trigger`. In GitLab 13.4 and
 earlier, using them together causes the error `jobs:#{job-name} when should be on_success, on_failure or always`.
-It is deployed behind the `:ci_manual_bridges` [feature flag](../../user/feature_flags.md), which is **enabled by default**.
-[GitLab administrators with access to the Rails console](../../administration/feature_flags.md)
-can opt to disable it.
+You [cannot start `manual` trigger jobs with the API](https://gitlab.com/gitlab-org/gitlab/-/issues/284086).
 
-#### Simple `trigger` syntax for multi-project pipelines
+#### Basic `trigger` syntax for multi-project pipelines
 
-The simplest way to configure a downstream trigger is to use `trigger` keyword
+You can configure a downstream trigger by using the `trigger` keyword
 with a full path to a downstream project:
 
 ```yaml
@@ -3663,18 +3660,18 @@ The trigger token is different than the [`trigger`](#trigger) keyword.
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/32022) in GitLab 12.3.
 
-`interruptible` is used to indicate that a job should be canceled if made redundant by a newer pipeline run. Defaults to `false`.
+`interruptible` is used to indicate that a running job should be canceled if made redundant by a newer pipeline run.
+Defaults to `false` (uninterruptible). Jobs that have not started yet (pending) are considered interruptible
+and safe to be cancelled.
 This value is used only if the [automatic cancellation of redundant pipelines feature](../pipelines/settings.md#auto-cancel-pending-pipelines)
 is enabled.
 
-When enabled, a pipeline on the same branch is canceled when:
+When enabled, a pipeline is immediately canceled when a new pipeline starts on the same branch if either of the following is true:
 
-- It's made redundant by a newer pipeline run.
-- Either all jobs are set as interruptible, or any uninterruptible jobs haven't started.
+- All jobs in the pipeline are set as interruptible.
+- Any uninterruptible jobs have not started yet.
 
 Set jobs as interruptible that can be safely canceled once started (for instance, a build job).
-
-Pending jobs are always considered interruptible.
 
 For example:
 
@@ -3707,7 +3704,7 @@ In the example above, a new pipeline run causes an existing running pipeline to 
 - Canceled, if only `step-1` is running or pending.
 - Not canceled, once `step-2` starts running.
 
-When an uninterruptible job is running, the pipeline can never be canceled, regardless of the final job's state.
+When an uninterruptible job is running, the pipeline cannot be canceled, regardless of the final job's state.
 
 ### `resource_group`
 
@@ -3890,7 +3887,7 @@ tags. These options cannot be used together, so choose one:
 - To create a release automatically when commits are pushed or merged to the default branch,
   using a new Git tag that is defined with variables:
 
-  NOTE: **Note:**
+  NOTE:
   Environment variables set in `before_script` or `script` are not available for expanding
   in the same job. Read more about
   [potentially making variables available for expanding](https://gitlab.com/gitlab-org/gitlab-runner/-/issues/6400).
@@ -3939,7 +3936,7 @@ You can use [Generic packages](../../user/packages/generic_packages/) to host yo
 For a complete example, see the [Release assets as Generic packages](https://gitlab.com/gitlab-org/release-cli/-/tree/master/docs/examples/release-assets-as-generic-package/)
 project.
 
-#### `releaser-cli` command line
+#### `release-cli` command line
 
 The entries under the `release` node are transformed into a `bash` command line and sent
 to the Docker container, which contains the [release-cli](https://gitlab.com/gitlab-org/release-cli).
@@ -4265,7 +4262,7 @@ job_name:
     - *some-script-before
   script:
     - *some-script
-  before_script:
+  after_script:
     - *some-script-after
 ```
 
@@ -4319,11 +4316,12 @@ into templates.
 
 ## Skip Pipeline
 
-If your commit message contains `[ci skip]` or `[skip ci]`, using any
-capitalization, the commit is created but the pipeline is skipped.
+To push a commit without triggering a pipeline, add `[ci skip]` or `[skip ci]`, using any
+capitalization, to your commit message.
 
-Alternatively, one can pass the `ci.skip` [Git push option](../../user/project/push_options.md#push-options-for-gitlab-cicd)
-if using Git 2.10 or newer.
+Alternatively, if you are using Git 2.10 or later, use the `ci.skip` [Git push option](../../user/project/push_options.md#push-options-for-gitlab-cicd).
+The `ci.skip` push option does not skip merge request
+pipelines.
 
 ## Processing Git pushes
 
@@ -4340,13 +4338,13 @@ The following keywords are deprecated.
 
 ### Globally-defined `types`
 
-DANGER: **Deprecated:**
+WARNING:
 `types` is deprecated, and could be removed in a future release.
 Use [`stages`](#stages) instead.
 
 ### Job-defined `type`
 
-DANGER: **Deprecated:**
+WARNING:
 `type` is deprecated, and could be removed in one of the future releases.
 Use [`stage`](#stage) instead.
 

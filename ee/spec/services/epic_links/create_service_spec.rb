@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe EpicLinks::CreateService do
+  include NestedEpicsHelper
+
   describe '#execute' do
     let(:group) { create(:group) }
     let(:user) { create(:user) }
@@ -148,34 +150,25 @@ RSpec.describe EpicLinks::CreateService do
 
             context 'when adding to an Epic that is already at maximum depth' do
               before do
-                epic1 = create(:epic, group: group)
-                epic2 = create(:epic, group: group, parent: epic1)
-                epic3 = create(:epic, group: group, parent: epic2)
-                epic4 = create(:epic, group: group, parent: epic3)
-
-                epic.update(parent: epic4)
+                add_parents_to(epic: epic, count: 6)
               end
 
-              let(:expected_error) { "This epic cannot be added. One or more epics would exceed the maximum depth (5) from its most distant ancestor." }
+              let(:expected_error) { "This epic cannot be added. One or more epics would exceed the maximum depth (#{Epic::MAX_HIERARCHY_DEPTH}) from its most distant ancestor." }
               let(:expected_code) { 409 }
 
               include_examples 'returns an error'
             end
 
             context 'when total depth after adding would exceed depth limit' do
-              let(:expected_error) { "This epic cannot be added. One or more epics would exceed the maximum depth (5) from its most distant ancestor." }
+              let(:expected_error) { "This epic cannot be added. One or more epics would exceed the maximum depth (#{Epic::MAX_HIERARCHY_DEPTH}) from its most distant ancestor." }
               let(:expected_code) { 409 }
 
               before do
-                epic1 = create(:epic, group: group)
+                add_parents_to(epic: epic, count: 1) # epic is on level 2
 
-                epic.update(parent: epic1) # epic is on level 2
-
-                # epic_to_add has 3 children (level 4 including epic_to_add)
-                # that would mean level 6 after relating epic_to_add on epic
-                epic2 = create(:epic, group: group, parent: epic_to_add)
-                epic3 = create(:epic, group: group, parent: epic2)
-                create(:epic, group: group, parent: epic3)
+                # epic_to_add has 5 children (level 6 including epic_to_add)
+                # that would mean level 8 after relating epic_to_add on epic
+                add_children_to(epic: epic_to_add, count: 5)
               end
 
               include_examples 'returns an error'
@@ -215,15 +208,11 @@ RSpec.describe EpicLinks::CreateService do
 
             context 'when total depth after adding would exceed limit' do
               before do
-                epic1 = create(:epic, group: group)
+                add_parents_to(epic: epic, count: 1) # epic is on level 2
 
-                epic.update(parent: epic1) # epic is on level 2
-
-                # epic_to_add has 3 children (level 4 including epic_to_add)
-                # that would mean level 6 after relating epic_to_add on epic
-                epic2 = create(:epic, group: group, parent: epic_to_add)
-                epic3 = create(:epic, group: group, parent: epic2)
-                create(:epic, group: group, parent: epic3)
+                # epic_to_add has 5 children (level 6 including epic_to_add)
+                # that would mean level 8 after relating epic_to_add on epic
+                add_children_to(epic: epic_to_add, count: 5)
               end
 
               let(:another_epic) { create(:epic) }

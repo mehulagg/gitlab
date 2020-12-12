@@ -18,7 +18,7 @@ RSpec.describe 'Path Locks', :js do
     wait_for_requests
   end
 
-  it 'Locking folders' do
+  it 'locking folders' do
     within '.tree-content-holder' do
       click_link "encoding"
     end
@@ -28,7 +28,7 @@ RSpec.describe 'Path Locks', :js do
     expect(page).to have_link('Unlock')
   end
 
-  it 'Locking files' do
+  it 'locking files' do
     page_tree = find('.tree-content-holder')
 
     within page_tree do
@@ -42,7 +42,7 @@ RSpec.describe 'Path Locks', :js do
     end
   end
 
-  it 'Unlocking files' do
+  it 'unlocking files' do
     within find('.tree-content-holder') do
       click_link "VERSION"
     end
@@ -60,7 +60,7 @@ RSpec.describe 'Path Locks', :js do
     end
   end
 
-  it 'Managing of lock list' do
+  it 'managing of lock list' do
     create :path_lock, path: 'encoding', user: user, project: project
 
     click_link "Locked Files"

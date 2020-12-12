@@ -1,10 +1,11 @@
 import Vue from 'vue';
 import { mount } from '@vue/test-utils';
+import { GlLoadingIcon } from '@gitlab/ui';
 import { setHTMLFixture } from 'helpers/fixtures';
 import PipelineStore from '~/pipelines/stores/pipeline_store';
 import GraphComponentLegacy from '~/pipelines/components/graph/graph_component_legacy.vue';
 import StageColumnComponentLegacy from '~/pipelines/components/graph/stage_column_component_legacy.vue';
-import linkedPipelinesColumn from '~/pipelines/components/graph/linked_pipelines_column.vue';
+import LinkedPipelinesColumnLegacy from '~/pipelines/components/graph/linked_pipelines_column_legacy.vue';
 import graphJSON from './mock_data_legacy';
 import linkedPipelineJSON from './linked_pipelines_mock_data';
 import PipelinesMediator from '~/pipelines/pipeline_details_mediator';
@@ -14,8 +15,8 @@ describe('graph component', () => {
   let mediator;
   let wrapper;
 
-  const findExpandPipelineBtn = () => wrapper.find('[data-testid="expandPipelineButton"]');
-  const findAllExpandPipelineBtns = () => wrapper.findAll('[data-testid="expandPipelineButton"]');
+  const findExpandPipelineBtn = () => wrapper.find('[data-testid="expand-pipeline-button"]');
+  const findAllExpandPipelineBtns = () => wrapper.findAll('[data-testid="expand-pipeline-button"]');
   const findStageColumns = () => wrapper.findAll(StageColumnComponentLegacy);
   const findStageColumnAt = i => findStageColumns().at(i);
 
@@ -42,7 +43,7 @@ describe('graph component', () => {
         },
       });
 
-      expect(wrapper.find('.gl-spinner').exists()).toBe(true);
+      expect(wrapper.find(GlLoadingIcon).exists()).toBe(true);
     });
   });
 
@@ -85,7 +86,7 @@ describe('graph component', () => {
       });
 
       it('should not include the loading icon', () => {
-        expect(wrapper.find('.fa-spinner').exists()).toBe(false);
+        expect(wrapper.find(GlLoadingIcon).exists()).toBe(false);
       });
 
       it('should include the stage column', () => {
@@ -146,14 +147,14 @@ describe('graph component', () => {
       });
 
       it('should render an upstream pipelines column at first position', () => {
-        expect(wrapper.find(linkedPipelinesColumn).exists()).toBe(true);
+        expect(wrapper.find(LinkedPipelinesColumnLegacy).exists()).toBe(true);
         expect(wrapper.find('.stage-column .stage-name').text()).toBe('Upstream');
       });
 
       it('should render a downstream pipelines column at last position', () => {
         const stageColumnNames = wrapper.findAll('.stage-column .stage-name');
 
-        expect(wrapper.find(linkedPipelinesColumn).exists()).toBe(true);
+        expect(wrapper.find(LinkedPipelinesColumnLegacy).exists()).toBe(true);
         expect(stageColumnNames.at(stageColumnNames.length - 1).text()).toBe('Downstream');
       });
 

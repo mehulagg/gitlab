@@ -8,10 +8,10 @@ exports[`DependenciesActions component matches the snapshot 1`] = `
     class="btn-group flex-grow-1 mr-2"
   >
     <gl-dropdown-stub
-      category="tertiary"
+      category="primary"
       class="flex-grow-1 text-center"
       headertext=""
-      right=""
+      right="true"
       size="medium"
       text="Severity"
       variant="default"

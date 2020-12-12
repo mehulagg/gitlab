@@ -4,7 +4,7 @@ module Types
   class MergeRequestType < BaseObject
     graphql_name 'MergeRequest'
 
-    connection_type_class(Types::CountableConnectionType)
+    connection_type_class(Types::MergeRequestConnectionType)
 
     implements(Types::Notes::NoteableType)
     implements(Types::CurrentUserTodos)
@@ -69,9 +69,11 @@ module Types
     field :merge_commit_sha, GraphQL::STRING_TYPE, null: true,
           description: 'SHA of the merge request commit (set once merged)'
     field :user_notes_count, GraphQL::INT_TYPE, null: true,
-          description: 'User notes count of the merge request'
+          description: 'User notes count of the merge request',
+          resolver: Resolvers::UserNotesCountResolver
     field :user_discussions_count, GraphQL::INT_TYPE, null: true,
-          description: 'Number of user discussions in the merge request'
+          description: 'Number of user discussions in the merge request',
+          resolver: Resolvers::UserDiscussionsCountResolver
     field :should_remove_source_branch, GraphQL::BOOLEAN_TYPE, method: :should_remove_source_branch?, null: true,
           description: 'Indicates if the source branch of the merge request will be deleted after merge'
     field :force_remove_source_branch, GraphQL::BOOLEAN_TYPE, method: :force_remove_source_branch?, null: true,
@@ -92,6 +94,8 @@ module Types
           description: 'Indicates if there is a rebase currently in progress for the merge request'
     field :default_merge_commit_message, GraphQL::STRING_TYPE, null: true,
           description: 'Default merge commit message of the merge request'
+    field :default_merge_commit_message_with_description, GraphQL::STRING_TYPE, null: true,
+          description: 'Default merge commit message of the merge request with description'
     field :merge_ongoing, GraphQL::BOOLEAN_TYPE, method: :merge_ongoing?, null: false,
           description: 'Indicates if a merge is currently occurring'
     field :source_branch_exists, GraphQL::BOOLEAN_TYPE,
@@ -115,7 +119,7 @@ module Types
           description: 'The pipeline running on the branch HEAD of the merge request'
     field :pipelines,
           null: true,
-          description: 'Pipelines for the merge request',
+          description: 'Pipelines for the merge request. Note: for performance reasons, no more than the most recent 500 pipelines will be returned.',
           resolver: Resolvers::MergeRequestPipelinesResolver
 
     field :milestone, Types::MilestoneType, null: true,
@@ -132,8 +136,7 @@ module Types
           description: 'Labels of the merge request'
     field :discussion_locked, GraphQL::BOOLEAN_TYPE,
           description: 'Indicates if comments on the merge request are locked to members only',
-          null: false,
-          resolve: -> (obj, _args, _ctx) { !!obj.discussion_locked }
+          null: false
     field :time_estimate, GraphQL::INT_TYPE, null: false,
           description: 'Time estimate of the merge request'
     field :total_time_spent, GraphQL::INT_TYPE, null: false,
@@ -154,6 +157,16 @@ module Types
 
     field :approved_by, Types::UserType.connection_type, null: true,
           description: 'Users who approved the merge request'
+    field :squash_on_merge, GraphQL::BOOLEAN_TYPE, null: false, method: :squash_on_merge?,
+          description: 'Indicates if squash on merge is enabled'
+    field :available_auto_merge_strategies, [GraphQL::STRING_TYPE], null: true, calls_gitaly: true,
+          description: 'Array of available auto merge strategies'
+    field :has_ci, GraphQL::BOOLEAN_TYPE, null: false, method: :has_ci?,
+          description: 'Indicates if the merge request has CI'
+    field :mergeable, GraphQL::BOOLEAN_TYPE, null: false, method: :mergeable?, calls_gitaly: true,
+          description: 'Indicates if the merge request is mergeable'
+    field :commits_without_merge_commits, Types::CommitType.connection_type, null: true,
+          calls_gitaly: true, description: 'Merge request commits excluding merge commits'
 
     def approved_by
       object.approved_by_users
@@ -200,6 +213,23 @@ module Types
     def source_branch_protected
       object.source_project.present? && ProtectedBranch.protected?(object.source_project, object.source_branch)
     end
+
+    def discussion_locked
+      !!object.discussion_locked
+    end
+
+    def default_merge_commit_message_with_description
+      object.default_merge_commit_message(include_description: true)
+    end
+
+    def available_auto_merge_strategies
+      AutoMergeService.new(object.project, current_user).available_strategies(object)
+    end
+
+    def commits_without_merge_commits
+      object.recent_commits.without_merge_commits
+    end
   end
 end
+
 Types::MergeRequestType.prepend_if_ee('::EE::Types::MergeRequestType')

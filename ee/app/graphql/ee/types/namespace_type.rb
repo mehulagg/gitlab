@@ -9,8 +9,7 @@ module EE
         field :additional_purchased_storage_size,
               GraphQL::FLOAT_TYPE,
               null: true,
-              description: 'Additional storage purchased for the root namespace in bytes',
-              resolve: -> (obj, _args, _ctx) { obj.additional_purchased_storage_size.megabytes }
+              description: 'Additional storage purchased for the root namespace in bytes'
 
         field :total_repository_size_excess,
               GraphQL::FLOAT_TYPE,
@@ -26,7 +25,7 @@ module EE
               GraphQL::BOOLEAN_TYPE,
               null: false,
               description: 'Includes at least one project where the repository size exceeds the limit',
-              resolve: -> (obj, _args, _ctx) { obj.contains_locked_projects? }
+              method: :contains_locked_projects?
 
         field :repository_size_excess_project_count,
               GraphQL::INT_TYPE,
@@ -37,24 +36,47 @@ module EE
               GraphQL::FLOAT_TYPE,
               null: true,
               description: 'Size limit for repositories in the namespace in bytes',
-              resolve: -> (obj, _args, _ctx) { obj.actual_size_limit }
+              method: :actual_size_limit
 
         field :storage_size_limit,
               GraphQL::FLOAT_TYPE,
               null: true,
-              description: 'Total storage limit of the root namespace in bytes',
-              resolve: -> (obj, _args, _ctx) { obj.root_storage_size.limit }
+              description: 'Total storage limit of the root namespace in bytes'
 
         field :is_temporary_storage_increase_enabled,
               GraphQL::BOOLEAN_TYPE,
               null: false,
               description: 'Status of the temporary storage increase',
-              resolve: -> (obj, _args, _ctx) { obj.temporary_storage_increase_enabled? }
+              method: :temporary_storage_increase_enabled?
 
         field :temporary_storage_increase_ends_on,
               ::Types::TimeType,
               null: true,
               description: 'Date until the temporary storage increase is active'
+
+        field :compliance_frameworks,
+              ::Types::ComplianceManagement::ComplianceFrameworkType.connection_type,
+              null: true,
+              description: 'Compliance frameworks available to projects in this namespace',
+              feature_flag: :ff_custom_compliance_frameworks
+
+        def additional_purchased_storage_size
+          object.additional_purchased_storage_size.megabytes
+        end
+
+        def storage_size_limit
+          object.root_storage_size.limit
+        end
+
+        def compliance_frameworks
+          BatchLoader::GraphQL.for(object.id).batch(default_value: []) do |namespace_ids, loader|
+            results = ::ComplianceManagement::Framework.with_namespaces(namespace_ids)
+
+            results.each do |framework|
+              loader.call(framework.namespace.id) { |xs| xs << framework }
+            end
+          end
+        end
       end
     end
   end

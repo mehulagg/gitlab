@@ -38,9 +38,8 @@ RSpec.describe 'Creating a DAST Site Profile' do
         dast_site_profile.destroy!
       end
 
-      it_behaves_like 'a mutation that returns top-level errors' do
-        let(:match_errors) { contain_exactly(include("Internal server error: Couldn't find DastSiteProfile")) }
-      end
+      it_behaves_like 'a mutation that returns top-level errors',
+        errors: [::Gitlab::Graphql::Authorize::AuthorizeResource::RESOURCE_ACCESS_ERROR]
     end
 
     context 'when wrong type of global id is passed' do

@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe API::Members do
+  include EE::API::Helpers::MembersHelpers
+
   context 'group members endpoints for group with minimal access feature' do
     let_it_be(:group) { create(:group) }
     let_it_be(:minimal_access_member) { create(:group_member, :minimal_access, source: group) }
@@ -339,7 +341,7 @@ RSpec.describe API::Members do
       end
     end
 
-    let_it_be(:nested_user) { create(:user) }
+    let_it_be(:nested_user) { create(:user, name: 'Scott Anderson') }
     let_it_be(:nested_group) do
       create(:group, parent: group) do |nested_group|
         nested_group.add_developer(nested_user)
@@ -347,9 +349,10 @@ RSpec.describe API::Members do
     end
 
     let(:url) { "/groups/#{group.id}/billable_members" }
+    let(:params) { {} }
 
     subject do
-      get api(url, owner)
+      get api(url, owner), params: params
       json_response
     end
 
@@ -361,7 +364,7 @@ RSpec.describe API::Members do
         end
       end
 
-      let!(:linked_group_user) { create(:user) }
+      let!(:linked_group_user) { create(:user, name: 'Scott McNeil') }
       let!(:linked_group) do
         create(:group) do |linked_group|
           linked_group.add_developer(linked_group_user)
@@ -375,17 +378,44 @@ RSpec.describe API::Members do
 
         expect_paginated_array_response(*[owner, maintainer, nested_user, project_user, linked_group_user].map(&:id))
       end
-    end
 
-    context 'when feature is disabled' do
-      before do
-        stub_feature_flags(api_billable_member_list: false)
+      context 'with seach params provided' do
+        let(:params) { { search: nested_user.name } }
+
+        it 'returns the relevant billable users' do
+          subject
+
+          expect_paginated_array_response([nested_user.id])
+        end
       end
 
-      it 'returns error' do
-        subject
+      context 'with search and sort params provided' do
+        it 'accepts only sorting options defined in a list' do
+          EE::API::Helpers::MembersHelpers.member_sort_options.each do |sorting|
+            get api(url, owner), params: { search: 'name', sort: sorting }
+            expect(response).to have_gitlab_http_status(:ok)
+          end
+        end
 
-        expect(response).to have_gitlab_http_status(:not_found)
+        it 'does not accept query string not defined in a list' do
+          defined_query_strings = EE::API::Helpers::MembersHelpers.member_sort_options
+          sorting = 'fake_sorting'
+
+          get api(url, owner), params: { search: 'name', sort: sorting }
+
+          expect(defined_query_strings).not_to include(sorting)
+          expect(response).to have_gitlab_http_status(:bad_request)
+        end
+
+        context 'when a specific sorting is provided' do
+          let(:params) { { search: 'Scott', sort: 'name_desc' } }
+
+          it 'returns the relevant billable users' do
+            subject
+
+            expect_paginated_array_response(*[linked_group_user, nested_user].map(&:id))
+          end
+        end
       end
     end
 

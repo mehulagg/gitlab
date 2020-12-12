@@ -12,6 +12,8 @@ RSpec.configure do |config|
 
     helper.create_empty_index(options: { settings: { number_of_replicas: 0 } })
     helper.create_migrations_index
+    ::Elastic::DataMigrationService.mark_all_as_completed!
+    refresh_index!
 
     example.run
 

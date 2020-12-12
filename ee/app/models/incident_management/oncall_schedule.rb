@@ -11,12 +11,16 @@ module IncidentManagement
     DESCRIPTION_LENGTH = 1000
 
     belongs_to :project, inverse_of: :incident_management_oncall_schedules
+    has_many :rotations, class_name: 'OncallRotation'
+    has_many :participants, class_name: 'OncallParticipant', through: :rotations
 
     has_internal_id :iid, scope: :project
 
     validates :name, presence: true, uniqueness: { scope: :project }, length: { maximum: NAME_LENGTH }
     validates :description, length: { maximum: DESCRIPTION_LENGTH }
     validates :timezone, presence: true, inclusion: { in: :timezones }
+
+    scope :for_iid, -> (iid) { where(iid: iid) }
 
     private
 

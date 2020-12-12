@@ -1,0 +1,5 @@
+---
+title: Avoid unnecessary Sidekiq retries for Security::TokenRevocationService
+merge_request: 48636
+author:
+type: performance

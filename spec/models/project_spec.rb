@@ -608,6 +608,7 @@ RSpec.describe Project, factory_default: :keep do
     it { is_expected.to delegate_method(:name).to(:owner).with_prefix(true).with_arguments(allow_nil: true) }
     it { is_expected.to delegate_method(:root_ancestor).to(:namespace).with_arguments(allow_nil: true) }
     it { is_expected.to delegate_method(:last_pipeline).to(:commit).with_arguments(allow_nil: true) }
+    it { is_expected.to delegate_method(:allow_editing_commit_messages?).to(:project_setting) }
   end
 
   describe 'reference methods' do
@@ -1531,6 +1532,42 @@ RSpec.describe Project, factory_default: :keep do
         end
 
         it_behaves_like 'with incoming email address'
+      end
+    end
+  end
+
+  describe '.service_desk_custom_address_enabled?' do
+    let_it_be(:project) { create(:project, service_desk_enabled: true) }
+
+    subject(:address_enabled) { project.service_desk_custom_address_enabled? }
+
+    context 'when service_desk_email is enabled' do
+      before do
+        allow(::Gitlab::ServiceDeskEmail).to receive(:enabled?).and_return(true)
+      end
+
+      it 'returns true' do
+        expect(address_enabled).to be_truthy
+      end
+
+      context 'when service_desk_custom_address flag is disabled' do
+        before do
+          stub_feature_flags(service_desk_custom_address: false)
+        end
+
+        it 'returns false' do
+          expect(address_enabled).to be_falsey
+        end
+      end
+    end
+
+    context 'when service_desk_email is disabled' do
+      before do
+        allow(::Gitlab::ServiceDeskEmail).to receive(:enabled?).and_return(false)
+      end
+
+      it 'returns false when service_desk_email is disabled' do
+        expect(address_enabled).to be_falsey
       end
     end
   end
@@ -4945,6 +4982,7 @@ RSpec.describe Project, factory_default: :keep do
       expect(project).to receive(:after_create_default_branch)
       expect(project).to receive(:refresh_markdown_cache!)
       expect(InternalId).to receive(:flush_records!).with(project: project)
+      expect(ProjectCacheWorker).to receive(:perform_async).with(project.id, [], [:repository_size])
       expect(DetectRepositoryLanguagesWorker).to receive(:perform_async).with(project.id)
       expect(project).to receive(:write_repository_config)
 
@@ -5035,11 +5073,11 @@ RSpec.describe Project, factory_default: :keep do
     end
   end
 
-  describe "#default_branch" do
-    context "with an empty repository" do
+  describe '#default_branch' do
+    context 'with an empty repository' do
       let_it_be(:project) { create(:project_empty_repo) }
 
-      context "group.default_branch_name is available" do
+      context 'group.default_branch_name is available' do
         let(:project_group) { create(:group) }
         let(:project) { create(:project, path: 'avatar', namespace: project_group) }
 
@@ -5052,19 +5090,19 @@ RSpec.describe Project, factory_default: :keep do
             .and_return('example_branch')
         end
 
-        it "returns the group default value" do
-          expect(project.default_branch).to eq("example_branch")
+        it 'returns the group default value' do
+          expect(project.default_branch).to eq('example_branch')
         end
       end
 
-      context "Gitlab::CurrentSettings.default_branch_name is available" do
+      context 'Gitlab::CurrentSettings.default_branch_name is available' do
         before do
           expect(Gitlab::CurrentSettings)
             .to receive(:default_branch_name)
             .and_return(example_branch_name)
         end
 
-        context "is missing or nil" do
+        context 'is missing or nil' do
           let(:example_branch_name) { nil }
 
           it "returns nil" do
@@ -5072,10 +5110,18 @@ RSpec.describe Project, factory_default: :keep do
           end
         end
 
-        context "is present" do
-          let(:example_branch_name) { "example_branch_name" }
+        context 'is blank' do
+          let(:example_branch_name) { '' }
 
-          it "returns the expected branch name" do
+          it 'returns nil' do
+            expect(project.default_branch).to be_nil
+          end
+        end
+
+        context 'is present' do
+          let(:example_branch_name) { 'example_branch_name' }
+
+          it 'returns the expected branch name' do
             expect(project.default_branch).to eq(example_branch_name)
           end
         end

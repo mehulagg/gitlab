@@ -37,8 +37,7 @@ module QA
           project_push.commit_message = 'Create Secure compatible application to serve premade reports'
         end.project.visit!
 
-        Page::Project::Menu.perform(&:click_ci_cd_pipelines)
-        Page::Project::Pipeline::Index.perform(&:wait_for_latest_pipeline_success)
+        Flow::Pipeline.wait_for_latest_pipeline(pipeline_condition: 'succeeded')
       end
 
       before do
@@ -70,7 +69,7 @@ module QA
       end
     end
 
-    describe 'License Compliance pipeline reports' do
+    describe 'License Compliance pipeline reports', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/241448', type: :bug } do
       let(:executor) {"qa-runner-#{Time.now.to_i}"}
 
       after do
@@ -103,8 +102,7 @@ module QA
         end
 
         @project.visit!
-        Page::Project::Menu.perform(&:click_ci_cd_pipelines)
-        Page::Project::Pipeline::Index.perform(&:wait_for_latest_pipeline_success)
+        Flow::Pipeline.wait_for_latest_pipeline(pipeline_condition: 'succeeded')
         Page::Project::Menu.perform(&:click_on_license_compliance)
       end
 
@@ -116,8 +114,7 @@ module QA
         end
 
         @project.visit!
-        Page::Project::Menu.perform(&:click_ci_cd_pipelines)
-        Page::Project::Pipeline::Index.perform(&:click_on_latest_pipeline)
+        Flow::Pipeline.visit_latest_pipeline
 
         Page::Project::Pipeline::Show.perform do |pipeline|
           pipeline.click_on_licenses

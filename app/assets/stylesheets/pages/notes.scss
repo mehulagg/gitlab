@@ -350,7 +350,7 @@ $note-form-margin-left: 72px;
             left: $gl-padding-24;
             right: 0;
             bottom: 0;
-            background: linear-gradient(rgba($white, 0.1) -100px, $white 100%);
+            background: linear-gradient(rgba($white, 0.1) -100px, $body-bg 100%);
           }
         }
       }
@@ -777,13 +777,6 @@ $note-form-margin-left: 72px;
     text-decoration: underline;
     outline: none;
     color: $blue-600;
-  }
-
-  .fa {
-    margin-right: 3px;
-    font-size: 10px;
-    line-height: 18px;
-    vertical-align: top;
   }
 }
 

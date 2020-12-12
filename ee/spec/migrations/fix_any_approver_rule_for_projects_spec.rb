@@ -5,16 +5,16 @@ require_migration!
 
 RSpec.describe FixAnyApproverRuleForProjects do
   let(:namespaces) { table(:namespaces) }
-  let(:namespace) { namespaces.create(name: 'gitlab', path: 'gitlab-org') }
+  let(:namespace) { namespaces.create!(name: 'gitlab', path: 'gitlab-org') }
   let(:projects) { table(:projects) }
   let(:approval_project_rules) { table(:approval_project_rules) }
 
   def create_project(id)
-    projects.create(id: id, namespace_id: namespace.id)
+    projects.create!(id: id, namespace_id: namespace.id)
   end
 
   def create_rule(id, project_id:, rule_type:)
-    approval_project_rules.create(
+    approval_project_rules.create!(
       id: id, project_id: project_id, rule_type: rule_type,
       approvals_required: 3, name: ApprovalRuleLike::ALL_MEMBERS)
   end

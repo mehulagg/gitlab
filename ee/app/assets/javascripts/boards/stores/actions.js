@@ -1,12 +1,10 @@
 import { pick } from 'lodash';
-import Cookies from 'js-cookie';
 import axios from '~/lib/utils/axios_utils';
 import boardsStore from '~/boards/stores/boards_store';
-import { __ } from '~/locale';
-import { historyPushState, parseBoolean } from '~/lib/utils/common_utils';
+import { historyPushState } from '~/lib/utils/common_utils';
 import { mergeUrlParams, removeParams } from '~/lib/utils/url_utility';
 import actionsCE from '~/boards/stores/actions';
-import { BoardType, ListType } from '~/boards/constants';
+import { BoardType } from '~/boards/constants';
 import { EpicFilterType, IterationFilterType, GroupByParamType } from '../constants';
 import boardsStoreEE from './boards_store_ee';
 import * as types from './mutation_types';
@@ -22,13 +20,13 @@ import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import eventHub from '~/boards/eventhub';
 
 import createGqClient, { fetchPolicies } from '~/lib/graphql';
-import epicsSwimlanesQuery from '../queries/epics_swimlanes.query.graphql';
-import issueSetEpic from '../queries/issue_set_epic.mutation.graphql';
-import issueSetWeight from '../queries/issue_set_weight.mutation.graphql';
-import listsIssuesQuery from '~/boards/queries/lists_issues.query.graphql';
-import issueMoveListMutation from '../queries/issue_move_list.mutation.graphql';
-import listUpdateLimitMetrics from '../queries/list_update_limit_metrics.mutation.graphql';
-import updateBoardEpicUserPreferencesMutation from '../queries/updateBoardEpicUserPreferences.mutation.graphql';
+import epicsSwimlanesQuery from '../graphql/epics_swimlanes.query.graphql';
+import issueSetEpicMutation from '../graphql/issue_set_epic.mutation.graphql';
+import issueSetWeightMutation from '../graphql/issue_set_weight.mutation.graphql';
+import listsIssuesQuery from '~/boards/graphql/lists_issues.query.graphql';
+import issueMoveListMutation from '../graphql/issue_move_list.mutation.graphql';
+import listUpdateLimitMetricsMutation from '../graphql/list_update_limit_metrics.mutation.graphql';
+import updateBoardEpicUserPreferencesMutation from '../graphql/updateBoardEpicUserPreferences.mutation.graphql';
 
 const notImplemented = () => {
   /* eslint-disable-next-line @gitlab/require-i18n-strings */
@@ -98,7 +96,8 @@ export default {
 
     if (
       filters.iterationId === IterationFilterType.any ||
-      filters.iterationId === IterationFilterType.none
+      filters.iterationId === IterationFilterType.none ||
+      filters.iterationId === IterationFilterType.current
     ) {
       filterParams.iterationWildcardId = filters.iterationId.toUpperCase();
     }
@@ -198,7 +197,7 @@ export default {
     if (getters.shouldUseGraphQL) {
       return gqlClient
         .mutate({
-          mutation: listUpdateLimitMetrics,
+          mutation: listUpdateLimitMetricsMutation,
           variables: {
             input: {
               listId,
@@ -227,22 +226,6 @@ export default {
     });
   },
 
-  showPromotionList: ({ state, dispatch }) => {
-    if (
-      !state.showPromotion ||
-      parseBoolean(Cookies.get('promotion_issue_board_hidden')) ||
-      state.disabled
-    ) {
-      return;
-    }
-    dispatch('addList', {
-      id: 'promotion',
-      listType: ListType.promotion,
-      title: __('Improve Issue Boards'),
-      position: 0,
-    });
-  },
-
   fetchAllBoards: () => {
     notImplemented();
   },
@@ -251,19 +234,11 @@ export default {
     notImplemented();
   },
 
-  createBoard: () => {
-    notImplemented();
-  },
-
   deleteBoard: () => {
     notImplemented();
   },
 
   updateIssueWeight: () => {
-    notImplemented();
-  },
-
-  togglePromotionState: () => {
     notImplemented();
   },
 
@@ -339,7 +314,7 @@ export default {
 
   setActiveIssueEpic: async ({ getters }, input) => {
     const { data } = await gqlClient.mutate({
-      mutation: issueSetEpic,
+      mutation: issueSetEpicMutation,
       variables: {
         input: {
           iid: String(getters.activeIssue.iid),
@@ -358,7 +333,7 @@ export default {
 
   setActiveIssueWeight: async ({ commit, getters }, input) => {
     const { data } = await gqlClient.mutate({
-      mutation: issueSetWeight,
+      mutation: issueSetWeightMutation,
       variables: {
         input: {
           iid: String(getters.activeIssue.iid),

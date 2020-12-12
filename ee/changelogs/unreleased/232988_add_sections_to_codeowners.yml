@@ -1,0 +1,5 @@
+---
+title: Extend Gitlab::Codeowners to include a method for returning the sections only
+merge_request: 48898
+author:
+type: added

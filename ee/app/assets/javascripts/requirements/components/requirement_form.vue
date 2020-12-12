@@ -118,7 +118,9 @@ export default {
     });
   },
   beforeDestroy() {
+    // eslint-disable-next-line @gitlab/no-global-event-off
     $(document).off('zen_mode:enter');
+    // eslint-disable-next-line @gitlab/no-global-event-off
     $(document).off('zen_mode:leave');
   },
   methods: {

@@ -1,5 +1,16 @@
 Please view this file on the master branch, on stable branches it's out of date.
 
+## 13.6.3 (2020-12-10)
+
+- No changes.
+
+## 13.6.2 (2020-12-07)
+
+### Security (1 change)
+
+- Cleanup todos for confidential epics that are no longer accessible by the user.
+
+
 ## 13.6.1 (2020-11-23)
 
 - No changes.
@@ -182,6 +193,13 @@ Please view this file on the master branch, on stable branches it's out of date.
 - Rename "cycle analytics" with "value stream analytics" under /ee/spec. !46745 (Takuya Noguchi)
 - Remove duplicated BS display properties from Quality Test Case. !47044 (Takuya Noguchi)
 - Remove duplicated BS display properties from member overriding UI. !47126 (Takuya Noguchi)
+
+
+## 13.5.5 (2020-12-07)
+
+### Security (1 change)
+
+- Cleanup todos for confidential epics that are no longer accessible by the user.
 
 
 ## 13.5.4 (2020-11-13)
@@ -427,6 +445,13 @@ Please view this file on the master branch, on stable branches it's out of date.
 - Text wrap the license name in Dependency List. !45242
 - Convert bootstrap alert to gl for project size limit. !45312
 - Remove bootstrap class in licensed user count. !45443
+
+
+## 13.4.7 (2020-12-07)
+
+### Security (1 change)
+
+- Cleanup todos for confidential epics that are no longer accessible by the user.
 
 
 ## 13.4.6 (2020-11-03)

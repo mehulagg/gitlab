@@ -6,7 +6,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Shibboleth OmniAuth Provider
 
-NOTE: **Note:**
+NOTE:
 The preferred approach for integrating a Shibboleth authentication system
 with GitLab 10 or newer is to use [GitLab's SAML integration](saml.md). This documentation is for Omnibus GitLab 9.x installs or older.
 
@@ -16,7 +16,7 @@ To enable the Shibboleth OmniAuth provider you must configure Apache Shibboleth 
 The installation and configuration of the module itself is out of the scope of this document.
 Check <https://wiki.shibboleth.net/confluence/display/SP3/Apache> for more information.
 
-You can find Apache config in [GitLab Recipes](https://gitlab.com/gitlab-org/gitlab-recipes/tree/master/web-server/apache).
+You can find Apache configuration in [GitLab Recipes](https://gitlab.com/gitlab-org/gitlab-recipes/tree/master/web-server/apache).
 
 The following changes are needed to enable Shibboleth:
 
@@ -40,7 +40,7 @@ The following changes are needed to enable Shibboleth:
    </Location>
    ```
 
-1. Exclude Shibboleth URLs from rewriting. Add `RewriteCond %{REQUEST_URI} !/Shibboleth.sso` and `RewriteCond %{REQUEST_URI} !/shibboleth-sp`. Config should look like this:
+1. Exclude Shibboleth URLs from rewriting. Add `RewriteCond %{REQUEST_URI} !/Shibboleth.sso` and `RewriteCond %{REQUEST_URI} !/shibboleth-sp`. Configuration should look like this:
 
    ```apache
    # Apache equivalent of Nginx try files
@@ -52,7 +52,7 @@ The following changes are needed to enable Shibboleth:
    RequestHeader set X_FORWARDED_PROTO 'https'
    ```
 
-   NOTE: **Note:**
+   NOTE:
    Starting from GitLab 11.4, OmniAuth is enabled by default. If you're using an
    earlier version, you must explicitly enable it in `/etc/gitlab/gitlab.rb`.
 

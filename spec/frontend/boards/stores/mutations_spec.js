@@ -33,19 +33,16 @@ describe('Board Store Mutations', () => {
       };
       const boardType = 'group';
       const disabled = false;
-      const showPromotion = false;
 
       mutations[types.SET_INITIAL_BOARD_DATA](state, {
         ...endpoints,
         boardType,
         disabled,
-        showPromotion,
       });
 
       expect(state.endpoints).toEqual(endpoints);
       expect(state.boardType).toEqual(boardType);
       expect(state.disabled).toEqual(disabled);
-      expect(state.showPromotion).toEqual(showPromotion);
     });
   });
 
@@ -513,6 +510,14 @@ describe('Board Store Mutations', () => {
 
       expect(state.issuesByListId['gid://gitlab/List/1']).not.toContain(mockIssue2.id);
       expect(state.issues).not.toContain(mockIssue2);
+    });
+  });
+
+  describe('SET_ASSIGNEE_LOADING', () => {
+    it('sets isSettingAssignees to the value passed', () => {
+      mutations.SET_ASSIGNEE_LOADING(state, true);
+
+      expect(state.isSettingAssignees).toBe(true);
     });
   });
 

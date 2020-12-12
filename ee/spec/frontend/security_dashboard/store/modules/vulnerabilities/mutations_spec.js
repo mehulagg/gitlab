@@ -1,4 +1,3 @@
-import { DAYS } from 'ee/security_dashboard/store/modules/vulnerabilities/constants';
 import * as types from 'ee/security_dashboard/store/modules/vulnerabilities/mutation_types';
 import mutations from 'ee/security_dashboard/store/modules/vulnerabilities/mutations';
 import createState from 'ee/security_dashboard/store/modules/vulnerabilities/state';
@@ -110,76 +109,6 @@ describe('vulnerabilities module mutations', () => {
 
     it('should set `loadingVulnerabilitiesErrorCode`', () => {
       expect(state.loadingVulnerabilitiesErrorCode).toBe(errorCode);
-    });
-  });
-
-  describe('SET_VULNERABILITIES_HISTORY_ENDPOINT', () => {
-    it('should set `vulnerabilitiesHistoryEndpoint` to `fakepath.json`', () => {
-      const endpoint = 'fakepath.json';
-
-      mutations[types.SET_VULNERABILITIES_HISTORY_ENDPOINT](state, endpoint);
-
-      expect(state.vulnerabilitiesHistoryEndpoint).toBe(endpoint);
-    });
-  });
-
-  describe('REQUEST_VULNERABILITIES_HISTORY', () => {
-    beforeEach(() => {
-      state.errorLoadingVulnerabilitiesHistory = true;
-      mutations[types.REQUEST_VULNERABILITIES_HISTORY](state);
-    });
-
-    it('should set `isLoadingVulnerabilitiesHistory` to `true`', () => {
-      expect(state.isLoadingVulnerabilitiesHistory).toBeTruthy();
-    });
-
-    it('should set `errorLoadingVulnerabilitiesHistory` to `false`', () => {
-      expect(state.errorLoadingVulnerabilitiesHistory).toBeFalsy();
-    });
-  });
-
-  describe('RECEIVE_VULNERABILITIES_HISTORY_SUCCESS', () => {
-    let payload;
-
-    beforeEach(() => {
-      payload = mockData;
-      mutations[types.RECEIVE_VULNERABILITIES_HISTORY_SUCCESS](state, payload);
-    });
-
-    it('should set `isLoadingVulnerabilitiesHistory` to `false`', () => {
-      expect(state.isLoadingVulnerabilitiesHistory).toBeFalsy();
-    });
-
-    it('should set `vulnerabilitiesHistory`', () => {
-      expect(state.vulnerabilitiesHistory).toBe(payload);
-    });
-  });
-
-  describe('RECEIVE_VULNERABILITIES_HISTORY_ERROR', () => {
-    it('should set `isLoadingVulnerabilitiesHistory` to `false`', () => {
-      mutations[types.RECEIVE_VULNERABILITIES_HISTORY_ERROR](state);
-
-      expect(state.isLoadingVulnerabilitiesHistory).toBeFalsy();
-    });
-  });
-
-  describe('SET_VULNERABILITIES_HISTORY_DAY_RANGE', () => {
-    it('should set the vulnerabilitiesHistoryDayRange to number of days', () => {
-      mutations[types.SET_VULNERABILITIES_HISTORY_DAY_RANGE](state, DAYS.THIRTY);
-
-      expect(state.vulnerabilitiesHistoryDayRange).toBe(DAYS.THIRTY);
-    });
-
-    it('should set the vulnerabilitiesHistoryMaxDayInterval to 7 if days are 60 and under', () => {
-      mutations[types.SET_VULNERABILITIES_HISTORY_DAY_RANGE](state, DAYS.THIRTY);
-
-      expect(state.vulnerabilitiesHistoryMaxDayInterval).toBe(7);
-    });
-
-    it('should set the vulnerabilitiesHistoryMaxDayInterval to 14 if over 60', () => {
-      mutations[types.SET_VULNERABILITIES_HISTORY_DAY_RANGE](state, DAYS.NINETY);
-
-      expect(state.vulnerabilitiesHistoryMaxDayInterval).toBe(14);
     });
   });
 

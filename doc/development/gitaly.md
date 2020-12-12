@@ -15,7 +15,7 @@ Workhorse and GitLab Shell.
 In May 2019, Bob Van Landuyt hosted a Deep Dive (GitLab team members only: `https://gitlab.com/gitlab-org/create-stage/issues/1`)
 on GitLab's [Gitaly project](https://gitlab.com/gitlab-org/gitaly) and how to contribute to it as a
 Ruby developer, to share his domain specific knowledge with anyone who may work in this part of the
-code base in the future.
+codebase in the future.
 
 You can find the [recording on YouTube](https://www.youtube.com/watch?v=BmlEWFS8ORo), and the slides
 on [Google Slides](https://docs.google.com/presentation/d/1VgRbiYih9ODhcPnL8dS0W98EwFYpJ7GXMPpX-1TM6YE/edit)
@@ -121,7 +121,7 @@ bundle exec rake gitlab:features:disable_rugged
 
 Most of this code exists in the `lib/gitlab/git/rugged_impl` directory.
 
-NOTE: **Note:**
+NOTE:
 You should NOT need to add or modify code related to
 Rugged unless explicitly discussed with the [Gitaly
 Team](https://gitlab.com/groups/gl-gitaly/group_members). This code does
@@ -181,7 +181,7 @@ Normally, GitLab CE/EE tests use a local clone of Gitaly in
 `GITALY_SERVER_VERSION`. The `GITALY_SERVER_VERSION` file supports also
 branches and SHA to use a custom commit in <https://gitlab.com/gitlab-org/gitaly>.
 
-NOTE: **Note:**
+NOTE:
 With the introduction of auto-deploy for Gitaly, the format of
 `GITALY_SERVER_VERSION` was aligned with Omnibus syntax.
 It no longer supports `=revision`, it evaluates the file content as a Git
@@ -316,7 +316,7 @@ Here are the steps to gate a new feature in Gitaly behind a feature flag.
 
 1. Test in a Rails console by setting the feature flag:
 
-   NOTE: **Note:**
+   NOTE:
    Pay attention to the name of the flag and the one used in the Rails console.
    There is a difference between them (dashes replaced by underscores and name
    prefix is changed). Make sure to prefix all flags with `gitaly_`.
@@ -345,7 +345,7 @@ the integration by using GDK:
    1. Check that the list of current metrics has the new counter for the feature flag:
 
       ```shell
-      curl --silent http://localhost:9236/metrics | grep go_find_all_tags
+      curl --silent "http://localhost:9236/metrics" | grep go_find_all_tags
       ```
 
 1. Once you observe the metrics for the new feature flag and it increments, you
@@ -375,5 +375,5 @@ the integration by using GDK:
    1. Verify the feature is on by observing the metrics for it:
 
       ```shell
-      curl --silent http://localhost:9236/metrics | grep go_find_all_tags
+      curl --silent "http://localhost:9236/metrics" | grep go_find_all_tags
       ```

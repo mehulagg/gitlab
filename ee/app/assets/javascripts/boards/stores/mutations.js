@@ -40,18 +40,6 @@ export default {
     notImplemented();
   },
 
-  [mutationTypes.REQUEST_ADD_BOARD]: () => {
-    notImplemented();
-  },
-
-  [mutationTypes.RECEIVE_ADD_BOARD_SUCCESS]: () => {
-    notImplemented();
-  },
-
-  [mutationTypes.RECEIVE_ADD_BOARD_ERROR]: () => {
-    notImplemented();
-  },
-
   [mutationTypes.REQUEST_REMOVE_BOARD]: () => {
     notImplemented();
   },

@@ -192,7 +192,9 @@ RSpec.describe Gitlab::Danger::CommitLinter do
         '[Ci skip] A commit message',
         '[API] A commit message',
         'api: A commit message',
-        'API: A commit message'
+        'API: A commit message',
+        'API: a commit message',
+        'API: a commit message'
       ].each do |message|
         context "when subject is '#{message}'" do
           let(:commit_message) { message }
@@ -209,8 +211,6 @@ RSpec.describe Gitlab::Danger::CommitLinter do
         '[ci skip]A commit message',
         '[Ci skip]  A commit message',
         '[ci skip] a commit message',
-        'API: a commit message',
-        'API: a commit message',
         'api: a commit message',
         '! A commit message'
       ].each do |message|
@@ -300,8 +300,10 @@ RSpec.describe Gitlab::Danger::CommitLinter do
         end
       end
 
-      context 'when details exceeds the max line length including a URL' do
-        let(:commit_message) { "A B C\n\nhttps://gitlab.com" + 'D' * described_class::MAX_LINE_LENGTH }
+      context 'when details exceeds the max line length including URLs' do
+        let(:commit_message) do
+          "A B C\n\nsome message with https://example.com and https://gitlab.com" + 'D' * described_class::MAX_LINE_LENGTH
+        end
 
         it_behaves_like 'a valid commit'
       end

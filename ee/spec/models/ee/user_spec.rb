@@ -1019,6 +1019,7 @@ RSpec.describe User do
     let_it_be(:free_group_z) { create(:group, name: 'AZ', gitlab_subscription: create(:gitlab_subscription, :free)) }
     let_it_be(:free_group_a) { create(:group, name: 'AA', gitlab_subscription: create(:gitlab_subscription, :free)) }
     let_it_be(:sub_group) { create(:group, name: 'SubGroup', parent: free_group_a) }
+    let_it_be(:trial_group) { create(:group, name: 'AB', gitlab_subscription: create(:gitlab_subscription, :active_trial, :gold)) }
 
     subject { user.manageable_groups_eligible_for_subscription }
 
@@ -1067,6 +1068,30 @@ RSpec.describe User do
       it { is_expected.to eq [free_group_a, free_group_z] }
 
       it { is_expected.not_to include(sub_group) }
+    end
+
+    context 'developer of a trial group' do
+      before do
+        trial_group.add_developer(user)
+      end
+
+      it { is_expected.not_to include(trial_group) }
+    end
+
+    context 'owner of a trial group' do
+      before do
+        trial_group.add_owner(user)
+      end
+
+      it { is_expected.to include(trial_group) }
+    end
+
+    context 'maintainer of a trial group' do
+      before do
+        trial_group.add_maintainer(user)
+      end
+
+      it { is_expected.to include(trial_group) }
     end
   end
 

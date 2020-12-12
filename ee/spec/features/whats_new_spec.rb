@@ -11,12 +11,14 @@ RSpec.describe "renders a `whats new` dropdown item", :js do
     sign_in(user)
   end
 
-  it 'shows notification count and removes it once viewed' do
+  it 'shows notification dot and count and removes it once viewed' do
     visit root_dashboard_path
 
-    find('.header-help-dropdown-toggle').click
-
     page.within '.header-help' do
+      expect(page).to have_selector('.notification-dot', visible: true)
+
+      find('.header-help-dropdown-toggle').click
+
       expect(page).to have_button(text: "See what's new at GitLab")
       expect(page).to have_selector('.js-whats-new-notification-count')
 
@@ -27,6 +29,7 @@ RSpec.describe "renders a `whats new` dropdown item", :js do
     find('.header-help-dropdown-toggle').click
 
     page.within '.header-help' do
+      expect(page).not_to have_selector('.notification-dot', visible: true)
       expect(page).to have_button(text: "See what's new at GitLab")
       expect(page).not_to have_selector('.js-whats-new-notification-count')
     end

@@ -67,7 +67,7 @@ in the application settings.
 When a user signs in to GitLab with LDAP for the first time, and their LDAP
 email address is the primary email address of an existing GitLab user, then
 the LDAP DN is associated with the existing user. If the LDAP email
-attribute is not found in GitLab's database, a new user is created.
+attribute is not found in the GitLab user database, a new user is created.
 
 In other words, if an existing GitLab user wants to enable LDAP sign-in for
 themselves, they should check that their GitLab email address matches their
@@ -91,7 +91,7 @@ There is a Rake task to check LDAP configuration. After configuring LDAP
 using the documentation below, see [LDAP check Rake task](../../raketasks/check.md#ldap-check)
 for information on the LDAP check Rake task.
 
-NOTE: **Note:**
+NOTE:
 The `encryption` value `simple_tls` corresponds to 'Simple TLS' in the LDAP
 library. `start_tls` corresponds to StartTLS, not to be confused with regular TLS.
 Normally, if you specify `simple_tls` it is on port 636, while `start_tls` (StartTLS)
@@ -175,7 +175,7 @@ production:
 | `password` | The password of the bind user. | no | `'your_great_password'` |
 | `encryption` | Encryption method. The `method` key is deprecated in favor of `encryption`. | yes | `'start_tls'` or `'simple_tls'` or `'plain'` |
 | `verify_certificates` | Enables SSL certificate verification if encryption method is `start_tls` or `simple_tls`. Defaults to true. | no | boolean |
-| `timeout` | Set a timeout, in seconds, for LDAP queries. This helps avoid blocking a request if the LDAP server becomes unresponsive. A value of 0 means there is no timeout. | no | `10` or `30` |
+| `timeout` | Set a timeout, in seconds, for LDAP queries. This helps avoid blocking a request if the LDAP server becomes unresponsive. A value of `0` means there is no timeout. (default: `10`) | no | `10` or `30` |
 | `active_directory` | This setting specifies if LDAP server is Active Directory LDAP server. For non-AD servers it skips the AD specific queries. If your LDAP server is not AD, set this to false. | no | boolean |
 | `allow_username_or_email_login` | If enabled, GitLab ignores everything after the first `@` in the LDAP username submitted by the user on sign-in. If you are using `uid: 'userPrincipalName'` on ActiveDirectory you need to disable this setting, because the userPrincipalName contains an `@`. | no | boolean |
 | `block_auto_created_users` | To maintain tight control over the number of billable users on your GitLab installation, enable this setting to keep new users blocked until they have been cleared by an administrator (default: false). | no | boolean |
@@ -357,6 +357,93 @@ This does not disable [using LDAP credentials for Git access](#git-password-auth
      ldap:
        prevent_ldap_sign_in: true
    ```
+
+1. [Restart GitLab](../../restart_gitlab.md#installations-from-source) for the changes to take effect.
+
+### Using encrypted credentials **(CORE ONLY)**
+
+Instead of having the LDAP integration credentials stored in plaintext in the configuration files, you can optionally
+use an encrypted file for the LDAP credentials. To use this feature, you first need to enable
+[GitLab encrypted configuration](../../encrypted_configuration.md).
+
+The encrypted configuration for LDAP exists in an encrypted YAML file. By default the file will be created at
+`shared/encrypted_configuration/ldap.yaml.enc`. This location is configurable in the GitLab configuration.
+
+The unencrypted contents of the file should be a subset of the secret settings from your `servers` block in the LDAP
+configuration.
+
+The supported configuration items for the encrypted file are:
+
+- `bind_dn`
+- `password`
+
+The encrypted contents can be configured with the [LDAP secret edit Rake command](../../raketasks/ldap.md#edit-secret).
+
+**Omnibus configuration**
+
+If initially your LDAP configuration looked like:
+
+1. In `/etc/gitlab/gitlab.rb`:
+
+  ```ruby
+    gitlab_rails['ldap_servers'] = {
+    'main' => {
+      # snip...
+      'bind_dn' => 'admin',
+      'password' => '123'
+      }
+    }
+  ```
+
+1. Edit the encrypted secret:
+
+   ```shell
+   sudo gitlab-rake gitlab:ldap:secret:edit EDITOR=vim
+   ```
+
+1. The unencrypted contents of the LDAP secret should be entered like:
+
+   ```yaml
+   main:
+     bind_dn: admin
+     password: '123'
+   ```
+
+1. Edit `/etc/gitlab/gitlab.rb` and remove the settings for `user_bn` and `password`.
+
+1. [Reconfigure GitLab](../../restart_gitlab.md#omnibus-gitlab-reconfigure) for the changes to take effect.
+
+**Source configuration**
+
+If initially your LDAP configuration looked like:
+
+1. In `config/gitlab.yaml`:
+
+   ```yaml
+   production:
+     ldap:
+       servers:
+         main:
+           # snip...
+           bind_dn: admin
+           password: '123'
+   ```
+
+1. Edit the encrypted secret:
+
+   ```shell
+   bundle exec rake gitlab:ldap:secret:edit EDITOR=vim RAILS_ENVIRONMENT=production
+   ```
+
+1. The unencrypted contents of the LDAP secret should be entered like:
+
+   ```yaml
+   main:
+    bind_dn: admin
+    password: '123'
+   ```
+
+1. Edit `config/gitlab.yaml` and remove the settings for `user_bn` and `password`.
 
 1. [Restart GitLab](../../restart_gitlab.md#installations-from-source) for the changes to take effect.
 
@@ -553,7 +640,7 @@ administrators. Specify a group CN for `admin_group` and all members of the
 LDAP group will be given administrator privileges. The configuration looks
 like the following.
 
-NOTE: **Note:**
+NOTE:
 Administrators are not synced unless `group_base` is also
 specified alongside `admin_group`. Also, only specify the CN of the admin
 group, as opposed to the full DN.
@@ -615,7 +702,7 @@ By default, GitLab runs a group sync process every hour, on the hour.
 The values shown are in cron format. If needed, you can use a
 [Crontab Generator](http://www.crontabgenerator.com).
 
-CAUTION: **Important:**
+WARNING:
 Do not start the sync process too frequently as this
 could lead to multiple syncs running concurrently. This is primarily a concern
 for installations with a large number of LDAP users. Please review the

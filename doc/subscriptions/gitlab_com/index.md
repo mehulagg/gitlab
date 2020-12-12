@@ -25,6 +25,8 @@ When applied to:
 - A **personal userspace**, all projects contain features with the
   subscription applied, but as it's not a group, group features aren't available.
 
+You can read more about [common misconceptions](https://about.gitlab.com/handbook/marketing/strategic-marketing/enablement/dotcom-subscriptions/#common-misconceptions) regarding a GitLab.com subscription to help avoid issues.
+
 ## Choose a GitLab.com tier
 
 Pricing is [tier-based](https://about.gitlab.com/pricing/), allowing you to choose
@@ -34,7 +36,7 @@ at each tier, see the
 
 ## Choose the number of users
 
-NOTE: **Note:**
+NOTE:
 Applied only to groups.
 
 A GitLab.com subscription uses a concurrent (_seat_) model. You pay for a
@@ -46,7 +48,7 @@ Every occupied seat is counted in the subscription, with the following exception
 
 - Members with Guest permissions on a Gold subscription.
 
-TIP: **Tip:**
+NOTE:
 To support the open source community and encourage the development of open
 source projects, GitLab grants access to **Gold** features for all GitLab.com
 **public** projects, regardless of the subscription.
@@ -86,7 +88,7 @@ To subscribe to GitLab.com:
   1. Select the namespace from the drop-down list to associate the subscription.
   1. Proceed to checkout.
 
-TIP: **Tip:**
+NOTE:
 You can also go to the [**My Account**](https://customers.gitlab.com/customers/edit)
 page to add or change the GitLab.com account link.
 
@@ -99,7 +101,7 @@ to the **Billing** section of the relevant namespace:
   under your profile.
 - **For groups**: From the group page (*not* from a project in the group), go to **Settings > Billing**.
 
-  NOTE: **Note:**
+  NOTE:
   You must have Owner level [permissions](../../user/permissions.md) to view a group's billing page.
 
   The following table describes details of your subscription for groups:
@@ -130,7 +132,7 @@ log in and verify or update:
 - The invoice contact details on the **Account details** page.
 - The credit card on file on the **Payment Methods** page.
 
-TIP: **Tip:**
+NOTE:
 Contact our [support team](https://support.gitlab.com/hc/en-us/requests/new?ticket_form_id=360000071293)
 if you need assistance accessing the Customers Portal or if you need to change
 the contact person who manages your subscription.
@@ -301,10 +303,42 @@ Be aware that:
   be deducted from your Additional Minutes quota immediately after your purchase of additional
   minutes.
 
+## Storage subscription
+
+Projects have a free storage quota of 10 GB. To exceed this quota you must first [purchase one or
+more storage subscription units](#purchase-more-storage). Each unit provides 10 GB of additional
+storage per namespace. A storage subscription is renewed annually. For more details, see
+[Usage Quotas](../../user/usage_quotas.md).
+
+When the amount of purchased storage reaches zero, all projects over the free storage quota are
+locked. Projects can only be unlocked by purchasing more storage subscription units.
+
+### Purchase more storage
+
+To purchase more storage for either a personal or group namespace:
+
+1. Sign in to GitLab.com.
+1. From either your personal homepage or the group's page, go to **Settings > Usage Quotas**.
+1. For each locked project, total by how much its **Usage** exceeds the free quota and purchased
+   storage. You must purchase the storage increment that exceeds this total.
+1. Click **Purchase more storage** and you are taken to the Customers Portal.
+1. Click **Add new subscription**.
+1. Scroll to **Purchase add-on subscriptions** and select **Buy storage subscription**.
+1. In the **Subscription details** section select the name of the user or group from the dropdown.
+1. Enter the desired quantity of storage packs.
+1. In the **Billing information** section select the payment method from the dropdown.
+1. Select the **Privacy Policy** and **Terms of Service** checkbox.
+1. Select **Buy subscription**.
+1. Sign out of the Customers Portal.
+1. Switch back to the GitLab.com tab and refresh the page.
+
+The **Purchased storage available** total is incremented by the amount purchased. All locked
+projects are unlocked and their excess usage is deducted from the additional storage.
+
 ## Customers Portal
 
-GitLab provides the [Customers Portal](../index.md#customers-portal) where you can
-manage your subscriptions and your account details.
+The GitLab [Customers Portal](../index.md#customers-portal) enables you to manage your subscriptions
+and account details.
 
 ## Contact Support
 

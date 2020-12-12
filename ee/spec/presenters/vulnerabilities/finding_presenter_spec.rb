@@ -6,6 +6,12 @@ RSpec.describe Vulnerabilities::FindingPresenter do
   let(:presenter) { described_class.new(occurrence) }
   let(:occurrence) { build_stubbed(:vulnerabilities_finding) }
 
+  describe '#title' do
+    subject { presenter.title }
+
+    it { is_expected.to eq occurrence.name }
+  end
+
   describe '#blob_path' do
     subject { presenter.blob_path }
 

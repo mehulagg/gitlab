@@ -39,11 +39,7 @@ describe('subscription table row', () => {
 
   const defaultProps = { header: HEADER, columns: COLUMNS };
 
-  const createComponent = ({
-    props = {},
-    apiBillableMemberListFeatureEnabled = true,
-    billableSeatsHref = BILLABLE_SEATS_URL,
-  } = {}) => {
+  const createComponent = ({ props = {}, billableSeatsHref = BILLABLE_SEATS_URL } = {}) => {
     if (wrapper) {
       throw new Error('wrapper already exists!');
     }
@@ -54,7 +50,6 @@ describe('subscription table row', () => {
         ...props,
       },
       provide: {
-        apiBillableMemberListFeatureEnabled,
         billableSeatsHref,
       },
       store,

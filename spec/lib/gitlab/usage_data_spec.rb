@@ -654,6 +654,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
 
     it { is_expected.to include(:kubernetes_agent_gitops_sync) }
     it { is_expected.to include(:static_site_editor_views) }
+    it { is_expected.to include(:package_guest_i_package_composer_guest_pull) }
   end
 
   describe '.usage_data_counters' do
@@ -838,24 +839,6 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
             uploads: 'uploads_object_store_config',
             packages: 'packages_object_store_config'
           })
-      end
-    end
-
-    describe '.cycle_analytics_usage_data' do
-      subject { described_class.cycle_analytics_usage_data }
-
-      it 'works when queries time out in new' do
-        allow(Gitlab::CycleAnalytics::UsageData)
-          .to receive(:new).and_raise(ActiveRecord::StatementInvalid.new(''))
-
-        expect { subject }.not_to raise_error
-      end
-
-      it 'works when queries time out in to_json' do
-        allow_any_instance_of(Gitlab::CycleAnalytics::UsageData)
-          .to receive(:to_json).and_raise(ActiveRecord::StatementInvalid.new(''))
-
-        expect { subject }.not_to raise_error
       end
     end
 
@@ -1053,6 +1036,14 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
 
           it_behaves_like('zero count')
         end
+      end
+    end
+
+    describe ".system_usage_data_settings" do
+      subject { described_class.system_usage_data_settings }
+
+      it 'gathers settings usage data', :aggregate_failures do
+        expect(subject[:settings][:ldap_encrypted_secrets_enabled]).to eq(Gitlab::Auth::Ldap::Config.encrypted_secrets.active?)
       end
     end
   end
@@ -1331,7 +1322,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
 
       context 'and product_analytics FF is enabled for it' do
         before do
-          stub_feature_flags(product_analytics: project)
+          stub_feature_flags(product_analytics_tracking: true)
 
           create(:product_analytics_event, project: project, se_category: 'epics', se_action: 'promote')
           create(:product_analytics_event, project: project, se_category: 'epics', se_action: 'promote', collector_tstamp: 2.days.ago)
@@ -1347,7 +1338,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
 
       context 'and product_analytics FF is disabled' do
         before do
-          stub_feature_flags(product_analytics: false)
+          stub_feature_flags(product_analytics_tracking: false)
         end
 
         it 'returns an empty hash' do

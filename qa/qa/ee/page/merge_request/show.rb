@@ -30,6 +30,8 @@ module QA
                 element :dependency_scan_report
                 element :container_scan_report
                 element :dast_scan_report
+                element :coverage_fuzzing_report
+                element :api_fuzzing_report
               end
 
               view 'app/assets/javascripts/reports/components/report_section.vue' do

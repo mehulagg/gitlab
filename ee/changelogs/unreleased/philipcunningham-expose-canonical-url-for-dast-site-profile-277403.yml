@@ -1,0 +1,5 @@
+---
+title: Expose normalizedTargetUrl on DastSiteProfile GraphQL type
+merge_request: 48727
+author:
+type: added

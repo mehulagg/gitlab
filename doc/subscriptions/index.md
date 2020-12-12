@@ -37,7 +37,7 @@ On a self-managed instance, a GitLab subscription provides the same set of
 features for _all_ users. On GitLab.com, you can apply a subscription to either
 a group or a personal namespace.
 
-NOTE: **Note:**
+NOTE:
 Subscriptions cannot be transferred between GitLab.com and GitLab self-managed.
 A new subscription must be purchased and applied as needed.
 
@@ -173,7 +173,7 @@ Find more information how to apply and renew at
 
 ## GitLab for Open Source subscriptions
 
-All [GitLab for Open Source](https://about.gitlab.com/solutions/open-source/program/)
+All [GitLab for Open Source](https://about.gitlab.com/solutions/open-source/join/)
 requests, including subscription renewals, must be made by using the application process.
 If you have any questions, send an email to `opensource@gitlab.com` for assistance.
 

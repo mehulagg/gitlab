@@ -26,7 +26,7 @@ To add a new charts version:
    version mapping. Note that only the `major.minor` version is needed.
 1. Create a new merge request and merge it.
 
-TIP: **Tip:**
+NOTE:
 It can be handy to create the future mappings since they are pretty much known.
 In that case, when a new GitLab version is released, you don't have to repeat
 this first step.
@@ -66,7 +66,7 @@ Visit `http://localhost:4000/12.0/` to see if everything works correctly.
 
 ## 3. Create the release merge request
 
-NOTE: **Note:**
+NOTE:
 To be [automated](https://gitlab.com/gitlab-org/gitlab-docs/-/issues/750).
 
 Now it's time to create the monthly release merge request that adds the new
@@ -125,7 +125,7 @@ versions (stable branches `X.Y` of the `gitlab-docs` project):
    update the dropdowns. Set these to automatically be merged when their
    pipelines succeed:
 
-   NOTE: **Note:**
+   NOTE:
    The `release-X-Y` branch needs to be present locally,
    and you need to have switched to it, otherwise the Rake task fails.
 
@@ -138,7 +138,7 @@ versions (stable branches `X.Y` of the `gitlab-docs` project):
    to check that their pipelines pass, and once all are merged, proceed to the
    following and final step.
 
-TIP: **Tip:**
+NOTE:
 In case a pipeline fails, see [troubleshooting](#troubleshooting).
 
 ## 5. Merge the release merge request
@@ -163,7 +163,7 @@ Releasing a new version is a long process that involves many moving parts.
 
 ### `test_internal_links_and_anchors` failing on dropdown merge requests
 
-DANGER: **Deprecated:**
+WARNING:
 We now pin versions in the `.gitlab-ci.yml` of the respective branch,
 so the steps below are deprecated.
 

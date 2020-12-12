@@ -1,0 +1,114 @@
+# frozen_string_literal: true
+
+require 'spec_helper'
+
+RSpec.describe Security::AutoFixService do
+  describe '#execute' do
+    subject(:execute_service) { described_class.new(project, pipeline).execute }
+
+    let(:pipeline) { create(:ee_ci_pipeline, :success, project: project) }
+    let(:project) { create(:project, :custom_repo, files: { 'yarn.lock' => yarn_lock_content }) }
+    let(:remediations_folder) { Rails.root.join('ee/spec/fixtures/security_reports/remediations') }
+
+    let(:yarn_lock_content) do
+      File.read(
+        File.join(remediations_folder, "yarn.lock")
+      )
+    end
+
+    let(:remediation_diff) do
+      Base64.encode64(
+        File.read(
+          File.join(remediations_folder, "remediation.patch")
+        )
+      )
+    end
+
+    shared_examples 'disabled auto-fix error' do
+      it 'returns error' do
+        result = execute_service
+
+        expect(result).to be_error
+        expect(result.message).to eq('Auto fix is disabled')
+      end
+    end
+
+    before do
+      stub_licensed_features(vulnerability_auto_fix: true)
+    end
+
+    context 'when remediations' do
+      let!(:vulnerability) do
+        create(:vulnerabilities_finding_with_remediation, :yarn_remediation, :identifier,
+               project: project,
+               pipelines: [pipeline],
+               report_type: :dependency_scanning,
+               summary: 'Test remediation')
+      end
+
+      it 'creates MR' do
+        result = execute_service
+
+        identifier = vulnerability.identifiers.last
+        merge_request = MergeRequest.last!
+
+        expect(result).to be_success
+        expect(merge_request.title).to eq("Resolve vulnerability: Cipher with no integrity")
+        expect(merge_request.description).to include("[#{identifier.external_id}](#{identifier.url})")
+      end
+
+      context 'when merge request exists' do
+        let(:feedback) { create(:vulnerability_feedback, :merge_request) }
+
+        before do
+          allow_next_found_instance_of(Vulnerabilities::Finding) do |finding|
+            allow(finding).to receive(:merge_request_feedback).and_return(feedback)
+          end
+        end
+
+        it 'does not create second merge request' do
+          execute_service
+
+          expect(Vulnerabilities::Feedback.count).to eq(1)
+        end
+      end
+    end
+
+    context 'with disabled auto-fix' do
+      before do
+        project.security_setting.update!(auto_fix_dependency_scanning: false, auto_fix_container_scanning: false)
+      end
+
+      it_behaves_like 'disabled auto-fix error'
+    end
+
+    context 'with disabled licensed feature' do
+      before do
+        stub_licensed_features(vulnerability_auto_fix: false)
+      end
+
+      it_behaves_like 'disabled auto-fix error'
+    end
+
+    context 'when feature flag is disabled' do
+      before do
+        stub_feature_flags(security_auto_fix: false)
+      end
+
+      it_behaves_like 'disabled auto-fix error'
+    end
+
+    context 'without remediations' do
+      before do
+        create(:vulnerabilities_finding, report_type: :dependency_scanning, pipelines: [pipeline], project: project)
+      end
+
+      it 'does not create merge request' do
+        result = execute_service
+
+        expect(result).to be_error
+        expect(result.message).to eq('Impossible to create Merge Requests')
+      end
+    end
+  end
+end

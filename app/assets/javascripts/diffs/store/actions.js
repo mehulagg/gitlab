@@ -44,9 +44,12 @@ import {
   EVT_PERF_MARK_FILE_TREE_START,
   EVT_PERF_MARK_FILE_TREE_END,
   EVT_PERF_MARK_DIFF_FILES_START,
+  DIFF_VIEW_FILE_BY_FILE,
+  DIFF_VIEW_ALL_FILES,
+  DIFF_FILE_BY_FILE_COOKIE_NAME,
 } from '../constants';
 import { diffViewerModes } from '~/ide/constants';
-import { isCollapsed } from '../diff_file';
+import { isCollapsed } from '../utils/diff_file';
 
 export const setBaseConfig = ({ commit }, options) => {
   const {
@@ -57,6 +60,7 @@ export const setBaseConfig = ({ commit }, options) => {
     projectPath,
     dismissEndpoint,
     showSuggestPopover,
+    viewDiffsFileByFile,
   } = options;
   commit(types.SET_BASE_CONFIG, {
     endpoint,
@@ -66,26 +70,38 @@ export const setBaseConfig = ({ commit }, options) => {
     projectPath,
     dismissEndpoint,
     showSuggestPopover,
+    viewDiffsFileByFile,
   });
 };
 
 export const fetchDiffFilesBatch = ({ commit, state, dispatch }) => {
+  const diffsGradualLoad = window.gon?.features?.diffsGradualLoad;
+  let perPage = DIFFS_PER_PAGE;
+  let increaseAmount = 1.4;
+
+  if (diffsGradualLoad) {
+    perPage = state.viewDiffsFileByFile ? 1 : 5;
+  }
+
+  const startPage = diffsGradualLoad ? 0 : 1;
   const id = window?.location?.hash;
   const isNoteLink = id.indexOf('#note') === 0;
   const urlParams = {
-    per_page: DIFFS_PER_PAGE,
     w: state.showWhitespace ? '0' : '1',
     view: 'inline',
   };
+  let totalLoaded = 0;
 
   commit(types.SET_BATCH_LOADING, true);
   commit(types.SET_RETRIEVING_BATCHES, true);
   eventHub.$emit(EVT_PERF_MARK_DIFF_FILES_START);
 
-  const getBatch = (page = 1) =>
+  const getBatch = (page = startPage) =>
     axios
-      .get(mergeUrlParams({ ...urlParams, page }, state.endpointBatch))
+      .get(mergeUrlParams({ ...urlParams, page, per_page: perPage }, state.endpointBatch))
       .then(({ data: { pagination, diff_files } }) => {
+        totalLoaded += diff_files.length;
+
         commit(types.SET_DIFF_DATA_BATCH, { diff_files });
         commit(types.SET_BATCH_LOADING, false);
 
@@ -97,7 +113,11 @@ export const fetchDiffFilesBatch = ({ commit, state, dispatch }) => {
           dispatch('setCurrentDiffFileIdFromNote', id.split('_').pop());
         }
 
-        if (!pagination.next_page) {
+        if (
+          (diffsGradualLoad &&
+            (totalLoaded === pagination.total_pages || pagination.total_pages === null)) ||
+          (!diffsGradualLoad && !pagination.next_page)
+        ) {
           commit(types.SET_RETRIEVING_BATCHES, false);
 
           // We need to check that the currentDiffFileId points to a file that exists
@@ -123,6 +143,16 @@ export const fetchDiffFilesBatch = ({ commit, state, dispatch }) => {
               }),
             );
           }
+
+          return null;
+        }
+
+        if (diffsGradualLoad) {
+          const nextPage = page + perPage;
+          perPage = Math.min(Math.ceil(perPage * increaseAmount), 30);
+          increaseAmount = Math.min(increaseAmount + 0.2, 2);
+
+          return nextPage;
         }
 
         return pagination.next_page;
@@ -155,11 +185,11 @@ export const fetchDiffFilesMeta = ({ commit, state }) => {
     .get(mergeUrlParams(urlParams, state.endpointMetadata))
     .then(({ data }) => {
       const strippedData = { ...data };
-
       delete strippedData.diff_files;
+
       commit(types.SET_LOADING, false);
       commit(types.SET_MERGE_REQUEST_DIFFS, data.merge_request_diffs || []);
-      commit(types.SET_DIFF_DATA, strippedData);
+      commit(types.SET_DIFF_METADATA, strippedData);
 
       worker.postMessage(prepareDiffData(data, state.diffFiles));
 
@@ -693,4 +723,15 @@ export const navigateToDiffFileIndex = ({ commit, state }, index) => {
   document.location.hash = fileHash;
 
   commit(types.VIEW_DIFF_FILE, fileHash);
+};
+
+export const setFileByFile = ({ commit }, { fileByFile }) => {
+  const fileViewMode = fileByFile ? DIFF_VIEW_FILE_BY_FILE : DIFF_VIEW_ALL_FILES;
+  commit(types.SET_FILE_BY_FILE, fileByFile);
+
+  Cookies.set(DIFF_FILE_BY_FILE_COOKIE_NAME, fileViewMode);
+
+  historyPushState(
+    mergeUrlParams({ [DIFF_FILE_BY_FILE_COOKIE_NAME]: fileViewMode }, window.location.href),
+  );
 };

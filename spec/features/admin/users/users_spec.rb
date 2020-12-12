@@ -15,6 +15,7 @@ RSpec.describe 'Admin::Users' do
 
   describe 'GET /admin/users' do
     before do
+      stub_feature_flags(vue_admin_users: false)
       visit admin_users_path
     end
 
@@ -207,11 +208,7 @@ RSpec.describe 'Admin::Users' do
       it 'shows confirmation and allows blocking and unblocking', :js do
         expect(page).to have_content(user.email)
 
-        find("[data-testid='user-action-button-#{user.id}']").click
-
-        within find("[data-testid='user-action-dropdown-#{user.id}']") do
-          find('li button', text: 'Block').click
-        end
+        click_action_in_user_dropdown(user.id, 'Block')
 
         wait_for_requests
 
@@ -233,13 +230,7 @@ RSpec.describe 'Admin::Users' do
 
         expect(page).to have_content(user.email)
 
-        find("[data-testid='user-action-button-#{user.id}']").click
-
-        within find("[data-testid='user-action-dropdown-#{user.id}']") do
-          find('li button', text: 'Unblock').click
-        end
-
-        wait_for_requests
+        click_action_in_user_dropdown(user.id, 'Unblock')
 
         expect(page).to have_content('Unblock user')
         expect(page).to have_content('You can always block their account again if needed.')
@@ -253,17 +244,11 @@ RSpec.describe 'Admin::Users' do
       end
     end
 
-    context 'when deactivating a user' do
-      it 'shows confirmation and allows deactivating', :js do
+    context 'when deactivating/re-activating a user' do
+      it 'shows confirmation and allows deactivating and re-activating', :js do
         expect(page).to have_content(user.email)
 
-        find("[data-testid='user-action-button-#{user.id}']").click
-
-        within find("[data-testid='user-action-dropdown-#{user.id}']") do
-          find('li button', text: 'Deactivate').click
-        end
-
-        wait_for_requests
+        click_action_in_user_dropdown(user.id, 'Deactivate')
 
         expect(page).to have_content('Deactivate user')
         expect(page).to have_content('Deactivating a user has the following effects')
@@ -276,7 +261,35 @@ RSpec.describe 'Admin::Users' do
 
         expect(page).to have_content('Successfully deactivated')
         expect(page).not_to have_content(user.email)
+
+        click_link 'Deactivated'
+
+        wait_for_requests
+
+        expect(page).to have_content(user.email)
+
+        click_action_in_user_dropdown(user.id, 'Activate')
+
+        expect(page).to have_content('Activate user')
+        expect(page).to have_content('You can always deactivate their account again if needed.')
+
+        find('.modal-footer button', text: 'Activate').click
+
+        wait_for_requests
+
+        expect(page).to have_content('Successfully activated')
+        expect(page).not_to have_content(user.email)
       end
+    end
+
+    def click_action_in_user_dropdown(user_id, action)
+      find("[data-testid='user-action-button-#{user_id}']").click
+
+      within find("[data-testid='user-action-dropdown-#{user_id}']") do
+        find('li button', text: action).click
+      end
+
+      wait_for_requests
     end
   end
 
@@ -406,6 +419,7 @@ RSpec.describe 'Admin::Users' do
 
   describe 'GET /admin/users/:id/edit' do
     before do
+      stub_feature_flags(vue_admin_users: false)
       visit admin_users_path
       click_link "edit_user_#{user.id}"
     end

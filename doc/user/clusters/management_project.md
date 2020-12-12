@@ -6,7 +6,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Cluster management project
 
-CAUTION: **Warning:**
+WARNING:
 This is an _alpha_ feature, and it is subject to change at any time without
 prior notice.
 
@@ -20,7 +20,7 @@ privileges.
 
 This can be useful for:
 
-- Creating pipelines to install cluster-wide applications into your cluster, see [Install using GitLab CI/CD (alpha)](applications.md#install-using-gitlab-cicd-alpha) for details.
+- Creating pipelines to install cluster-wide applications into your cluster, see [Install using GitLab CI/CD (alpha)](applications.md#install-using-gitlab-cicd) for details.
 - Any jobs that require `cluster-admin` privileges.
 
 ## Permissions

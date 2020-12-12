@@ -14,9 +14,8 @@ RSpec.describe Project do
     it { is_expected.to delegate_method(:shared_runners_seconds).to(:statistics) }
     it { is_expected.to delegate_method(:shared_runners_seconds_last_reset).to(:statistics) }
 
-    it { is_expected.to delegate_method(:actual_shared_runners_minutes_limit).to(:shared_runners_limit_namespace) }
+    it { is_expected.to delegate_method(:ci_minutes_quota).to(:shared_runners_limit_namespace) }
     it { is_expected.to delegate_method(:shared_runners_minutes_limit_enabled?).to(:shared_runners_limit_namespace) }
-    it { is_expected.to delegate_method(:shared_runners_remaining_minutes_below_threshold?).to(:shared_runners_limit_namespace) }
 
     it { is_expected.to delegate_method(:closest_gitlab_subscription).to(:namespace) }
 
@@ -46,6 +45,7 @@ RSpec.describe Project do
     it { is_expected.to have_many(:downstream_project_subscriptions) }
     it { is_expected.to have_many(:downstream_projects) }
     it { is_expected.to have_many(:vulnerability_historical_statistics).class_name('Vulnerabilities::HistoricalStatistic') }
+    it { is_expected.to have_many(:vulnerability_remediations).class_name('Vulnerabilities::Remediation') }
 
     it { is_expected.to have_one(:github_service) }
     it { is_expected.to have_many(:project_aliases) }
@@ -338,16 +338,6 @@ RSpec.describe Project do
       expect do
         project2.update(mirror: true, import_url: generate(:url), mirror_user: project.creator)
       end.to change { ProjectImportState.where(project: project2).count }.from(0).to(1)
-    end
-
-    describe 'pull_mirror_branch_prefix' do
-      it { is_expected.to validate_length_of(:pull_mirror_branch_prefix).is_at_most(50) }
-
-      it 'rejects invalid git refs' do
-        project = build(:project, pull_mirror_branch_prefix: 'an invalid prefix..')
-
-        expect(project).not_to be_valid
-      end
     end
   end
 
@@ -2636,6 +2626,45 @@ RSpec.describe Project do
       expect(ProjectTemplateExportWorker).to receive(:perform_async).with(user.id, project.id, nil, {})
 
       project.add_template_export_job(current_user: user)
+    end
+  end
+
+  context 'indexing updates in Elasticsearch', :elastic do
+    before do
+      stub_ee_application_setting(elasticsearch_indexing: true)
+    end
+
+    context 'on update' do
+      let(:project) { create(:project, :public) }
+      let!(:issue) { create(:issue, project: project) }
+
+      context 'when updating the visibility_level' do
+        it 'triggers ElasticAssociationIndexerWorker to update issues' do
+          expect(ElasticAssociationIndexerWorker).to receive(:perform_async).with('Project', project.id, ['issues'])
+
+          project.update!(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
+        end
+
+        it 'ensures all visibility_level updates are correctly applied in issue searches', :sidekiq_inline do
+          ensure_elasticsearch_index!
+          results = Issue.elastic_search('*', options: { public_and_internal_projects: true })
+          expect(results.count).to eq(1)
+
+          project.update!(visibility_level: Gitlab::VisibilityLevel::INTERNAL)
+          ensure_elasticsearch_index!
+
+          results = Issue.elastic_search('*', options: { public_and_internal_projects: true })
+          expect(results.count).to eq(0)
+        end
+      end
+
+      context 'when changing the title' do
+        it 'does not trigger ElasticAssociationIndexerWorker to update issues' do
+          expect(ElasticAssociationIndexerWorker).not_to receive(:perform_async)
+
+          project.update!(title: 'The new title')
+        end
+      end
     end
   end
 end

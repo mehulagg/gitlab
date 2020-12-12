@@ -15,7 +15,7 @@ deployed, your application is exposed to a new category of possible attacks,
 such as cross-site scripting or broken authentication flaws. This is where
 Dynamic Application Security Testing (DAST) comes into place.
 
-NOTE: **Note:**
+NOTE:
 The whitepaper ["A Seismic Shift in Application Security"](https://about.gitlab.com/resources/whitepaper-seismic-shift-application-security/)
 explains how 4 of the top 6 attacks were application based. Download it to learn how to protect your
 organization.
@@ -91,12 +91,22 @@ There are two ways to define the URL to be scanned by DAST:
 1. Set the `DAST_WEBSITE` [variable](../../../ci/yaml/README.md#variables).
 
 1. Add it in an `environment_url.txt` file at the root of your project.
-   This is great for testing in dynamic environments. In order to run DAST against
-   an app dynamically created during a GitLab CI/CD pipeline, have the app
-   persist its domain in an `environment_url.txt` file, and DAST
-   automatically parses that file to find its scan target.
-   You can see an [example](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Jobs/Deploy.gitlab-ci.yml)
-   of this in our Auto DevOps CI YAML.
+   This is useful for testing in dynamic environments. To run DAST against an application
+   dynamically created during a GitLab CI/CD pipeline, a job that runs prior to the DAST scan must
+   persist the application's domain in an `environment_url.txt` file. DAST automatically parses the
+   `environment_url.txt` file to find its scan target.
+
+   For example, in a job that runs prior to DAST, you could include code that looks similar to:
+
+   ```yaml
+   script:
+     - echo http://${CI_PROJECT_ID}-${CI_ENVIRONMENT_SLUG}.domain.com > environment_url.txt
+   artifacts:
+     paths: [environment_url.txt]
+     when: always
+   ```
+  
+   You can see an example of this in our [Auto DevOps CI YAML](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Jobs/Deploy.gitlab-ci.yml) file.
 
 If both values are set, the `DAST_WEBSITE` value takes precedence.
 
@@ -161,7 +171,7 @@ headers whose values you want masked. For details on how to mask headers, see
 
 It's also possible to authenticate the user before performing the DAST checks.
 
-NOTE: **Note:**
+NOTE:
 We highly recommended that you configure the scanner to authenticate to the application,
 otherwise it cannot check most of the application for security risks, as most
 of your application is likely not accessible without authentication. It is also recommended
@@ -194,7 +204,7 @@ The results are saved as a
 that you can later download and analyze.
 Due to implementation limitations, we always take the latest DAST artifact available.
 
-DANGER: **Warning:**
+WARNING:
 **NEVER** run an authenticated scan against a production server. When an authenticated
 scan is run, it may perform *any* function that the authenticated user can. This
 includes actions like modifying and deleting data, submitting forms, and following links.
@@ -501,7 +511,7 @@ To perform a [full scan](#full-scan) on the listed paths, use the `DAST_FULL_SCA
 
 ### Customizing the DAST settings
 
-CAUTION: **Deprecation:**
+WARNING:
 Beginning in GitLab 13.0, the use of [`only` and `except`](../../../ci/yaml/README.md#onlyexcept-basic)
 is no longer supported. When overriding the template, you must use [`rules`](../../../ci/yaml/README.md#rules) instead.
 
@@ -785,7 +795,7 @@ An on-demand DAST scan:
 
 ### Run an on-demand DAST scan
 
-NOTE: **Note:**
+NOTE:
 You must have permission to run an on-demand DAST scan against a protected branch.
 The default branch is automatically protected. For more information, see
 [Pipeline security on protected branches](../../../ci/pipelines/index.md#pipeline-security-on-protected-branches).
@@ -817,7 +827,7 @@ Click **View details** to view the web console output which includes the list of
 
 ### JSON
 
-CAUTION: **Caution:**
+WARNING:
 The JSON report artifacts are not a public API of DAST and their format is expected to change in the future.
 
 The DAST tool always emits a JSON report file called `gl-dast-report.json` and

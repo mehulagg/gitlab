@@ -7,9 +7,10 @@ type: reference, howto
 
 # Static Application Security Testing (SAST)
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/3775) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 10.3.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/3775) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 10.3.
+> - All open source (OSS) analyzers were moved to GitLab Core in GitLab 13.3.
 
-NOTE: **Note:**
+NOTE:
 The whitepaper ["A Seismic Shift in Application Security"](https://about.gitlab.com/resources/whitepaper-seismic-shift-application-security/)
 explains how 4 of the top 6 attacks were application based. Download it to learn how to protect your
 organization.
@@ -50,10 +51,10 @@ To run SAST jobs, by default, you need GitLab Runner with the
 [`kubernetes`](https://docs.gitlab.com/runner/install/kubernetes.html) executor.
 If you're using the shared runners on GitLab.com, this is enabled by default.
 
-CAUTION: **Caution:**
+WARNING:
 Our SAST jobs require a Linux container type. Windows containers are not yet supported.
 
-CAUTION: **Caution:**
+WARNING:
 If you use your own runners, make sure the Docker version installed
 is **not** `19.03.0`. See [troubleshooting information](#error-response-from-daemon-error-processing-tar-file-docker-tar-relocation-error) for details.
 
@@ -188,7 +189,7 @@ the pipeline configuration, the last mention of the variable takes precedence.
 
 ### Overriding SAST jobs
 
-CAUTION: **Deprecation:**
+WARNING:
 Beginning in GitLab 13.0, the use of [`only` and `except`](../../../ci/yaml/README.md#onlyexcept-basic)
 is no longer supported. When overriding the template, you must use [`rules`](../../../ci/yaml/README.md#rules) instead.
 
@@ -330,7 +331,7 @@ variables:
 
 If your project requires custom build configurations, it can be preferable to avoid
 compilation during your SAST execution and instead pass all job artifacts from an
-earlier stage within the pipeline. This is the current strategy when requiring
+earlier stage in the pipeline. This is the current strategy when requiring
 a `before_script` execution to prepare your scan job.
 
 To pass your project's dependencies as artifacts, the dependencies must be included
@@ -379,7 +380,10 @@ SAST can be [configured](#customizing-the-sast-settings) using environment varia
 
 #### Logging level
 
-To control the verbosity of logs set the `SECURE_LOG_LEVEL` environment variable. Messages of this logging level or higher are output. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/10880) in GitLab 13.1.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/10880) in GitLab 13.1.
+
+To control the verbosity of logs, set the `SECURE_LOG_LEVEL` environment variable. Messages of this
+logging level or higher are output.
 
 From highest to lowest severity, the logging levels are:
 
@@ -392,7 +396,7 @@ From highest to lowest severity, the logging levels are:
 #### Custom Certificate Authority
 
 To trust a custom Certificate Authority, set the `ADDITIONAL_CA_CERT_BUNDLE` variable to the bundle
-of CA certs that you want to trust within the SAST environment.
+of CA certs that you want to trust in the SAST environment.
 
 #### Docker images
 
@@ -410,8 +414,8 @@ Some analyzers make it possible to filter out vulnerabilities under a given thre
 
 | Environment variable          | Default value            | Description                                                                                                                                                                                                                 |
 |-------------------------------|--------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `SAST_EXCLUDED_PATHS`         | `spec, test, tests, tmp` | Exclude vulnerabilities from output based on the paths. This is a comma-separated list of patterns. Patterns can be globs, or file or folder paths (for example, `doc,spec` ). Parent directories also match patterns. |
-| `SEARCH_MAX_DEPTH`            | 4                        | Maximum number of directories traversed when searching for source code files. |
+| `SAST_EXCLUDED_PATHS`         | `spec, test, tests, tmp` | Exclude vulnerabilities from output based on the paths. This is a comma-separated list of patterns. Patterns can be globs, or file or folder paths (for example, `doc,spec` ). Parent directories also match patterns. You might need to exclude temporary directories used by your build tool as these can generate false positives. |
+| `SEARCH_MAX_DEPTH`            | 4                        | SAST searches the repository to detect the programming languages used, and selects the matching analyzers. Set the value of `SEARCH_MAX_DEPTH` to specify how many directory levels the search phase should span. After the analyzers have been selected, the _entire_ repository is analyzed. |
 | `SAST_BANDIT_EXCLUDED_PATHS`  |                          | Comma-separated list of paths to exclude from scan. Uses Python's [`fnmatch` syntax](https://docs.python.org/2/library/fnmatch.html); For example: `'*/tests/*, */venv/*'`                                                  |
 | `SAST_BRAKEMAN_LEVEL`         | 1                        | Ignore Brakeman vulnerabilities under given confidence level. Integer, 1=Low 3=High.                                                                                                                                        |
 | `SAST_FLAWFINDER_LEVEL`       | 1                        | Ignore Flawfinder vulnerabilities under given risk level. Integer, 0=No risk, 5=High risk.                                                                                                                                  |
@@ -451,15 +455,20 @@ all [custom environment variables](../../../ci/variables/README.md#custom-enviro
 to the underlying SAST analyzer images if
 [the SAST vendored template](#configuration) is used.
 
-CAUTION: **Caution:**
+WARNING:
 Variables having names starting with these prefixes are **not** propagated to the SAST Docker container and/or
 analyzer containers: `DOCKER_`, `CI`, `GITLAB_`, `FF_`, `HOME`, `PWD`, `OLDPWD`, `PATH`, `SHLVL`, `HOSTNAME`.
 
 ### Experimental features
 
-Receive early access to experimental features.
+You can receive early access to experimental features. Experimental features might be added,
+removed, or promoted to regular features at any time.
 
-Currently, this enables scanning of iOS and Android apps via the [MobSF analyzer](https://gitlab.com/gitlab-org/security-products/analyzers/mobsf/).
+Experimental features available are:
+
+- Enable scanning of iOS and Android apps using the [MobSF analyzer](https://gitlab.com/gitlab-org/security-products/analyzers/mobsf/).
+
+#### Enable experimental features
 
 To enable experimental features, add the following to your `.gitlab-ci.yml` file:
 
@@ -571,7 +580,7 @@ Once a vulnerability is found, you can interact with it. Read more on how to
 
 ## Vulnerabilities database
 
-Vulnerabilities contained within the vulnerability database can be searched
+Vulnerabilities contained in the vulnerability database can be searched
 and viewed at the [GitLab vulnerability advisory database](https://advisories.gitlab.com).
 
 ### Vulnerabilities database update

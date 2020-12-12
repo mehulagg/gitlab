@@ -409,7 +409,7 @@ class Project < ApplicationRecord
   delegate :forward_deployment_enabled, :forward_deployment_enabled=, :forward_deployment_enabled?, to: :ci_cd_settings, prefix: :ci
   delegate :actual_limits, :actual_plan_name, to: :namespace, allow_nil: true
   delegate :allow_merge_on_skipped_pipeline, :allow_merge_on_skipped_pipeline?,
-    :allow_merge_on_skipped_pipeline=, :has_confluence?,
+    :allow_merge_on_skipped_pipeline=, :has_confluence?, :allow_editing_commit_messages?,
     to: :project_setting
   delegate :active?, to: :prometheus_service, allow_nil: true, prefix: true
 
@@ -1843,6 +1843,7 @@ class Project < ApplicationRecord
     wiki.repository.expire_content_cache
 
     DetectRepositoryLanguagesWorker.perform_async(id)
+    ProjectCacheWorker.perform_async(self.id, [], [:repository_size])
 
     # The import assigns iid values on its own, e.g. by re-using GitHub ids.
     # Flush existing InternalId records for this project for consistency reasons.
@@ -1959,6 +1960,7 @@ class Project < ApplicationRecord
       .concat(predefined_project_variables)
       .concat(pages_variables)
       .concat(container_registry_variables)
+      .concat(dependency_proxy_variables)
       .concat(auto_devops_variables)
       .concat(api_variables)
   end
@@ -2007,6 +2009,18 @@ class Project < ApplicationRecord
   def api_variables
     Gitlab::Ci::Variables::Collection.new.tap do |variables|
       variables.append(key: 'CI_API_V4_URL', value: API::Helpers::Version.new('v4').root_url)
+    end
+  end
+
+  def dependency_proxy_variables
+    Gitlab::Ci::Variables::Collection.new.tap do |variables|
+      break variables unless Gitlab.config.dependency_proxy.enabled
+
+      variables.append(key: 'CI_DEPENDENCY_PROXY_SERVER', value: "#{Gitlab.config.gitlab.host}:#{Gitlab.config.gitlab.port}")
+      variables.append(
+        key: 'CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX',
+        value: "#{Gitlab.config.gitlab.host}:#{Gitlab.config.gitlab.port}/#{namespace.root_ancestor.path}#{DependencyProxy::URL_SUFFIX}"
+      )
     end
   end
 
@@ -2507,13 +2521,16 @@ class Project < ApplicationRecord
   end
 
   def service_desk_custom_address
-    return unless ::Gitlab::ServiceDeskEmail.enabled?
-    return unless ::Feature.enabled?(:service_desk_custom_address, self)
+    return unless service_desk_custom_address_enabled?
 
     key = service_desk_setting&.project_key
     return unless key.present?
 
     ::Gitlab::ServiceDeskEmail.address_for_key("#{full_path_slug}-#{key}")
+  end
+
+  def service_desk_custom_address_enabled?
+    ::Gitlab::ServiceDeskEmail.enabled? && ::Feature.enabled?(:service_desk_custom_address, self)
   end
 
   def root_namespace

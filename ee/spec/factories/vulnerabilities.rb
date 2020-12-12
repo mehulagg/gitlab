@@ -101,6 +101,21 @@ FactoryBot.define do
       end
     end
 
+    trait :with_pipeline do
+      after(:build) do |vulnerability|
+        finding = build(
+          :vulnerabilities_finding,
+          :identifier,
+          :with_pipeline,
+          vulnerability: vulnerability,
+          report_type: vulnerability.report_type,
+          project: vulnerability.project
+        )
+
+        vulnerability.findings = [finding]
+      end
+    end
+
     trait :with_findings do
       after(:build) do |vulnerability|
         findings_with_solution = build_list(

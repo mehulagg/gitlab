@@ -15,7 +15,9 @@ export default (containerId = 'js-billing-plans') => {
   const {
     namespaceId,
     namespaceName,
+    addSeatsHref,
     planUpgradeHref,
+    planRenewHref,
     customerPortalUrl,
     billableSeatsHref,
   } = containerEl.dataset;
@@ -26,10 +28,11 @@ export default (containerId = 'js-billing-plans') => {
     provide: {
       namespaceId,
       namespaceName,
+      addSeatsHref,
       planUpgradeHref,
+      planRenewHref,
       customerPortalUrl,
       billableSeatsHref,
-      apiBillableMemberListFeatureEnabled: gon?.features?.apiBillableMemberList || false,
     },
     render(createElement) {
       return createElement(SubscriptionApp);

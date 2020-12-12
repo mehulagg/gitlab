@@ -22,24 +22,10 @@ RSpec.describe 'shared/issuable/_approvals.html.haml' do
   end
 
   context 'has no approvers' do
-    context 'can override approvers' do
-      before do
-        render 'shared/issuable/approvals', form: form, issuable: merge_request, presenter: presenter
-      end
-
-      it 'shows suggested approvers' do
-        expect(rendered).to have_css('.suggested-approvers')
-      end
-    end
-
     context 'can not override approvers' do
       before do
         allow(view).to receive(:can?).with(user, :update_approvers, merge_request).and_return(false)
         render 'shared/issuable/approvals', form: form, issuable: merge_request, presenter: presenter
-      end
-
-      it 'hides suggested approvers' do
-        expect(rendered).not_to have_css('.suggested-approvers')
       end
 
       it 'hides select approvers field' do

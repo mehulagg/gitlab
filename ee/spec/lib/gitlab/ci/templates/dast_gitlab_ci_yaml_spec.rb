@@ -21,8 +21,72 @@ RSpec.describe 'DAST.gitlab-ci.yml' do
     end
 
     context 'when project has no license' do
-      it 'includes no jobs' do
-        expect { pipeline }.to raise_error(Ci::CreatePipelineService::CreateError)
+      let(:cluster) { create(:cluster, :project, :provided_by_gcp, projects: [project]) }
+
+      context 'when k8 is active' do
+        before do
+          allow(cluster).to receive(:active?).and_return(true)
+        end
+
+        it 'includes dast_unlicensed job' do
+          expect(build_names).to match_array(%w[dast_unlicensed])
+        end
+      end
+
+      context 'when DAST_WEBSITE is active' do
+        before do
+          create(:ci_variable, project: project, key: 'DAST_WEBSITE', value: 'http://example.com')
+        end
+
+        it 'includes dast_unlicensed job' do
+          expect(build_names).to match_array(%w[dast_unlicensed])
+        end
+      end
+
+      context 'when DAST_API_SPECIFICATION is set' do
+        before do
+          create(:ci_variable, project: project, key: 'DAST_API_SPECIFICATION', value: 'http://example/open-api-v2.json')
+        end
+
+        it 'includes dast_unlicensed job' do
+          expect(build_names).to match_array(%w[dast_unlicensed])
+        end
+      end
+
+      context 'when DAST_DISABLED' do
+        before do
+          create(:ci_variable, project: project, key: 'DAST_DISABLED', value: '1')
+        end
+
+        it 'includes no job' do
+          expect { pipeline }.to raise_error(Ci::CreatePipelineService::CreateError)
+        end
+      end
+
+      context 'when DAST_DISABLED_FOR_DEFAULT_BRANCH and CI_DEFAULT_BRANCH equals CI_COMMIT_REF_NAME' do
+        before do
+          create(:ci_variable, project: project, key: 'DAST_DISABLED_FOR_DEFAULT_BRANCH', value: '1')
+          create(:ci_variable, project: project, key: 'CI_DEFAULT_BRANCH', value: 'test_branch')
+          create(:ci_variable, project: project, key: 'CI_COMMIT_REF_NAME', value: 'test_branch')
+        end
+
+        it 'includes no job' do
+          expect { pipeline }.to raise_error(Ci::CreatePipelineService::CreateError)
+        end
+      end
+
+      context 'when not on default branch and review disabled and both DAST_WEBSITE and DAST_API_SPECIFICATION are not set' do
+        before do
+          create(:ci_variable, project: project, key: 'CI_DEFAULT_BRANCH', value: 'main')
+          create(:ci_variable, project: project, key: 'CI_COMMIT_REF_NAME', value: 'test_branch')
+          create(:ci_variable, project: project, key: 'REVIEW_DISABLED', value: '1')
+          create(:ci_variable, project: project, key: 'DAST_WEBSITE', value: nil)
+          create(:ci_variable, project: project, key: 'DAST_API_SPECIFICATION', value: nil)
+        end
+
+        it 'includes no job' do
+          expect { pipeline }.to raise_error(Ci::CreatePipelineService::CreateError)
+        end
       end
     end
 
@@ -56,7 +120,7 @@ RSpec.describe 'DAST.gitlab-ci.yml' do
             create(:ci_variable, project: project, key: 'DAST_WEBSITE', value: 'http://example.com')
           end
 
-          it 'includes job' do
+          it 'includes dast job' do
             expect(build_names).to match_array(%w[dast])
           end
         end
@@ -66,7 +130,7 @@ RSpec.describe 'DAST.gitlab-ci.yml' do
             create(:ci_variable, project: project, key: 'DAST_API_SPECIFICATION', value: 'http://my.api/api-specification.yml')
           end
 
-          it 'includes job' do
+          it 'includes dast job' do
             expect(build_names).to match_array(%w[dast])
           end
         end
@@ -104,7 +168,7 @@ RSpec.describe 'DAST.gitlab-ci.yml' do
             project.repository.create_branch(pipeline_branch)
           end
 
-          it 'includes job' do
+          it 'includes dast job' do
             expect(build_names).to match_array(%w[dast])
           end
         end
@@ -118,7 +182,7 @@ RSpec.describe 'DAST.gitlab-ci.yml' do
         end
 
         context 'when on default branch' do
-          it 'includes job' do
+          it 'includes dast job' do
             expect(build_names).to match_array(%w[dast])
           end
         end

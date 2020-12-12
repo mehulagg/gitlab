@@ -1,6 +1,6 @@
 ---
 stage: Release
-group: Progressive Delivery
+group: Release
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: howto
 ---
@@ -17,6 +17,8 @@ Deploy tokens allow you to download (`git clone`) or push and pull packages and
 container registry images of a project without having a user and a password.
 
 Deploy tokens can be managed by [maintainers only](../../permissions.md).
+
+Deploy tokens cannot be used with the GitLab API.
 
 If you have a key pair, you might want to use [deploy keys](../../../ssh/README.md#deploy-keys)
 instead.
@@ -36,7 +38,7 @@ project. Alternatively, you can also create [group-scoped deploy tokens](#group-
 1. Save the deploy token somewhere safe. After you leave or refresh
    the page, **you won't be able to access it again**.
 
-![Personal access tokens page](img/deploy_tokens.png)
+![Personal access tokens page](img/deploy_tokens_ui.png)
 
 ## Deploy token expiration
 
@@ -149,6 +151,9 @@ belong either to the specific group or to one of its subgroups.
 <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
 For an overview, see [Group Deploy Tokens](https://youtu.be/8kxTJvaD9ks).
 
+The Group Deploy Tokens UI is now accessible under **Settings > Repository**,
+not **Settings > CI/CD** as indicated in the video.
+
 To use a group deploy token:
 
 1. [Create](#creating-a-deploy-token) a deploy token for a group.
@@ -174,7 +179,7 @@ those variables:
 docker login -u $CI_DEPLOY_USER -p $CI_DEPLOY_PASSWORD $CI_REGISTRY
 ```
 
-NOTE: **Note:**
+NOTE:
 The special handling for the `gitlab-deploy-token` deploy token is not currently
 implemented for group deploy tokens. For the deploy token to be available for
 CI/CD jobs, it must be created at the project level. For details, see

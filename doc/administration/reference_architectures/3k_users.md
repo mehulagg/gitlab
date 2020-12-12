@@ -11,7 +11,7 @@ This page describes GitLab reference architecture for up to 3,000 users. For a
 full list of reference architectures, see
 [Available reference architectures](index.md#available-reference-architectures).
 
-NOTE: **Note:**
+NOTE:
 This reference architecture is designed to help your organization achieve a
 highly-available GitLab deployment. If you do not have the expertise or need to
 maintain a highly-available environment, you can have a simpler and less
@@ -36,6 +36,62 @@ costly-to-operate environment by using the
 | Monitoring node                            | 1           | 2 vCPU, 1.8 GB memory | n1-highcpu-2   | c5.large    | F2s v2  |
 | Object storage                             | n/a         | n/a                   | n/a            | n/a         | n/a     |
 | NFS server (optional, not recommended)     | 1           | 4 vCPU, 3.6 GB memory | n1-highcpu-4   | c5.xlarge   | F4s v2  |
+
+```mermaid
+stateDiagram-v2
+    [*] --> LoadBalancer
+    LoadBalancer --> ApplicationServer
+
+    ApplicationServer --> BackgroundJobs
+    ApplicationServer --> Gitaly
+    ApplicationServer --> Redis
+    ApplicationServer --> PgBouncer
+    PgBouncer --> Database
+    ApplicationServer --> ObjectStorage
+    BackgroundJobs --> ObjectStorage
+
+    ApplicationMonitoring -->ApplicationServer
+    ApplicationMonitoring -->Redis
+    ApplicationMonitoring -->PgBouncer
+    ApplicationMonitoring -->Database
+    ApplicationMonitoring -->BackgroundJobs
+
+    state Database {
+      "PG_Primary_Node"
+      "PG_Secondary_Node_1..2"
+    }
+    state Redis {
+      "R_Primary_Node"
+      "R_Replica_Node_1..2"
+      "R_Consul/Sentinel_1..3"
+    }
+
+    state Gitaly {
+      "Gitaly_1..2"
+    }
+
+    state BackgroundJobs {
+      "Sidekiq_1..4"
+    }
+
+    state ApplicationServer {
+      "GitLab_Rails_1..3"
+    }
+
+    state LoadBalancer {
+      "LoadBalancer_1"
+    }
+
+    state ApplicationMonitoring {
+      "Prometheus"
+      "Grafana"
+    }
+
+    state PgBouncer {
+      "Internal_Load_Balancer"
+      "PgBouncer_1..3"
+    }
+```
 
 The Google Cloud Platform (GCP) architectures were built and tested using the
 [Intel Xeon E5 v3 (Haswell)](https://cloud.google.com/compute/docs/cpu-platforms)
@@ -444,7 +500,7 @@ servers. The following IPs will be used as an example:
 - `10.6.0.12`: Consul/Sentinel 2
 - `10.6.0.13`: Consul/Sentinel 3
 
-NOTE: **Note:**
+NOTE:
 If you're using an external Redis Sentinel instance, be sure to exclude the
 `requirepass` parameter from the Sentinel configuration. This parameter causes
 clients to report `NOAUTH Authentication required.`.
@@ -1058,7 +1114,7 @@ Refer to your preferred Load Balancer's documentation for further guidance.
 
 ## Configure Gitaly
 
-NOTE: **Note:**
+NOTE:
 [Gitaly Cluster](../gitaly/praefect.md) support
 for the Reference Architectures is being
 worked on as a [collaborative effort](https://gitlab.com/gitlab-org/quality/reference-architectures/-/issues/1) between the Quality Engineering and Gitaly teams. When this component has been verified
@@ -1092,7 +1148,7 @@ Be sure to note the following items:
   to restrict access to the Gitaly server. Another option is to
   [use TLS](#gitaly-tls-support).
 
-NOTE: **Note:**
+NOTE:
 The token referred to throughout the Gitaly documentation is an arbitrary
 password selected by the administrator. This token is unrelated to tokens
 created for the GitLab API or other similar web API tokens.
@@ -1242,7 +1298,7 @@ nodes (including the Gitaly node using the certificate) and on all client nodes
 that communicate with it following the procedure described in
 [GitLab custom certificate configuration](https://docs.gitlab.com/omnibus/settings/ssl.html#install-custom-public-certificates).
 
-NOTE: **Note:**
+NOTE:
 The self-signed certificate must specify the address you use to access the
 Gitaly server. If you are addressing the Gitaly server by a hostname, you can
 either use the Common Name field for this, or add it as a Subject Alternative
@@ -1410,7 +1466,7 @@ To configure the Sidekiq nodes, one each one:
    run: sidekiq: (pid 30142) 77351s; run: log: (pid 29638) 77386s
    ```
 
-TIP: **Tip:**
+NOTE:
 You can also run [multiple Sidekiq processes](../operations/extra_sidekiq_processes.md).
 
 <div align="right">

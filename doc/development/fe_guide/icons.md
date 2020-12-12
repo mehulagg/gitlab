@@ -22,7 +22,7 @@ Our goal is to replace one by one all inline SVG Icons (as those currently bloat
 
 ### Usage in HAML/Rails
 
-To use a sprite Icon in HAML or Rails we use a specific helper function :
+To use a sprite Icon in HAML or Rails we use a specific helper function:
 
 ```ruby
 sprite_icon(icon_name, size: nil, css_class: '')
@@ -90,7 +90,7 @@ Please use the following function inside JS to render an icon:
 
 ### Usage in HAML/Rails
 
-DANGER: **Warning:**
+WARNING:
 Do not use the `spinner` or `icon('spinner spin')` rails helpers to insert
 loading icons. These helpers rely on the Font Awesome icon library which is
 deprecated.

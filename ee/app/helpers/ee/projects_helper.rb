@@ -17,6 +17,13 @@ module EE
       super + %w(path_locks)
     end
 
+    override :sidebar_operations_paths
+    def sidebar_operations_paths
+      super + %w[
+        oncall_schedules
+      ]
+    end
+
     override :get_project_nav_tabs
     def get_project_nav_tabs(project, current_user)
       nav_tabs = super
@@ -41,6 +48,10 @@ module EE
 
       if can?(current_user, :read_requirement, project)
         nav_tabs << :requirements
+      end
+
+      if can?(current_user, :read_incident_management_oncall_schedule, project)
+        nav_tabs << :oncall_schedule
       end
 
       nav_tabs
@@ -337,6 +348,13 @@ module EE
           }
         }
       }
+    end
+
+    override :view_operations_tab_ability
+    def view_operations_tab_ability
+      super + [
+        :read_incident_management_oncall_schedule
+      ]
     end
   end
 end

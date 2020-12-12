@@ -65,17 +65,43 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Common do
       end
     end
 
+    context 'parsing finding.details' do
+      let(:artifact) { build(:ee_ci_job_artifact, :common_security_report) }
+
+      context 'when details are provided' do
+        it 'sets details from the report' do
+          vulnerability = report.findings.find { |x| x.compare_key == 'CVE-1020' }
+          expected_details = Gitlab::Json.parse(vulnerability.raw_metadata)['details']
+
+          expect(vulnerability.details).to eq(expected_details)
+        end
+      end
+
+      context 'when details are not provided' do
+        it 'sets empty hash' do
+          vulnerability = report.findings.find { |x| x.compare_key == 'CVE-1030' }
+          expect(vulnerability.details).to eq({})
+        end
+      end
+    end
+
     context 'parsing remediations' do
+      let(:expected_remediation) { create(:ci_reports_security_remediation, diff: '') }
+
       it 'finds remediation with same cve' do
         vulnerability = report.findings.find { |x| x.compare_key == "CVE-1020" }
         remediation = { 'fixes' => [{ 'cve' => 'CVE-1020' }], 'summary' => '', 'diff' => '' }
+
         expect(Gitlab::Json.parse(vulnerability.raw_metadata).dig('remediations').first).to include remediation
+        expect(vulnerability.remediations.first.checksum).to eq(expected_remediation.checksum)
       end
 
       it 'finds remediation with same id' do
         vulnerability = report.findings.find { |x| x.compare_key == "CVE-1030" }
         remediation = { 'fixes' => [{ 'cve' => 'CVE', 'id' => 'bb2fbeb1b71ea360ce3f86f001d4e84823c3ffe1a1f7d41ba7466b14cfa953d3' }], 'summary' => '', 'diff' => '' }
+
         expect(Gitlab::Json.parse(vulnerability.raw_metadata).dig('remediations').first).to include remediation
+        expect(vulnerability.remediations.first.checksum).to eq(expected_remediation.checksum)
       end
 
       it 'does not find remediation with different id' do

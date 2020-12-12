@@ -107,7 +107,6 @@ RSpec.describe Projects::Security::ConfigurationController do
 
       context 'with sufficient permissions' do
         let(:user) { maintainer }
-        let(:setting) { project.security_setting }
 
         it 'shows auto fix disable for dependency scanning for json format' do
           get :show, params: { namespace_id: project.namespace, project_id: project, format: :json }
@@ -121,7 +120,7 @@ RSpec.describe Projects::Security::ConfigurationController do
 
           it 'processes request and updates setting' do
             expect(response).to have_gitlab_http_status(:ok)
-            expect(setting.auto_fix_dependency_scanning).to be_falsey
+            expect(project.security_setting.reload.auto_fix_dependency_scanning).to be_falsey
             expect(response[:dependency_scanning]).to be_falsey
           end
         end
@@ -130,6 +129,8 @@ RSpec.describe Projects::Security::ConfigurationController do
           let(:feature) { '' }
 
           it 'processes request and updates setting' do
+            setting = project.reload.security_setting
+
             expect(response).to have_gitlab_http_status(:ok)
             expect(setting.auto_fix_dependency_scanning).to be_falsey
             expect(setting.auto_fix_dast).to be_falsey
@@ -139,11 +140,10 @@ RSpec.describe Projects::Security::ConfigurationController do
 
         context 'without processable feature' do
           let(:feature) { :dep_scan }
-          let(:setting) { project.create_security_setting }
 
           it 'does not pass validation' do
             expect(response).to have_gitlab_http_status(:unprocessable_entity)
-            expect(setting.auto_fix_dependency_scanning).to be_truthy
+            expect(project.security_setting.auto_fix_dependency_scanning).to be_truthy
           end
         end
       end

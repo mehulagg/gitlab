@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`SubscriptionTable component given a bronze plan with state: isFreePlan=false, upgradable=true, isTrialPlan=false has Upgrade and Manage buttons 1`] = `
+exports[`SubscriptionTable component given a bronze plan with state: isFreePlan=false, upgradable=true, isTrialPlan=false has Upgrade and Renew and Manage buttons 1`] = `
 Array [
   Object {
     "href": "http://test.host/plan/upgrade/bronze",
@@ -13,7 +13,7 @@ Array [
 ]
 `;
 
-exports[`SubscriptionTable component given a free plan with state: isFreePlan=true, upgradable=true, isTrialPlan=false has Upgrade and Manage buttons 1`] = `
+exports[`SubscriptionTable component given a free plan with state: isFreePlan=true, upgradable=true, isTrialPlan=false has Upgrade and Renew and Manage buttons 1`] = `
 Array [
   Object {
     "href": "http://test.host/plan/upgrade/free",
@@ -26,7 +26,7 @@ Array [
 ]
 `;
 
-exports[`SubscriptionTable component given a gold plan with state: isFreePlan=false, upgradable=false, isTrialPlan=false has Manage button 1`] = `
+exports[`SubscriptionTable component given a gold plan with state: isFreePlan=false, upgradable=false, isTrialPlan=false has Renew and Manage buttons 1`] = `
 Array [
   Object {
     "href": "https://customers.gitlab.com/subscriptions",
