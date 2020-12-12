@@ -1,8 +1,12 @@
 <script>
-import { __, sprintf } from '~/locale';
+import { GlSprintf } from '@gitlab/ui';
+import { s__, sprintf } from '~/locale';
 import { toNounSeriesText } from '~/lib/utils/grammar';
 
 export default {
+  components: {
+    GlSprintf,
+  },
   props: {
     emails: {
       type: Array,
@@ -21,23 +25,25 @@ export default {
   },
   computed: {
     title() {
-      if (this.moreParticipantsAvailable) {
-        return this.lessParticipants.join(', ');
-      }
-      return sprintf(__('%{emails}'), {
-        emails: toNounSeriesText(this.emails),
-      });
+      return this.moreParticipantsAvailable
+        ? toNounSeriesText(this.lessParticipants, { onlyCommas: true })
+        : toNounSeriesText(this.emails);
     },
     lessParticipants() {
       return this.emails.slice(0, this.numberOfLessParticipants);
     },
     moreLabel() {
-      return sprintf(__('and %{moreCount} more'), {
+      return sprintf(s__('EmailParticipantsWarning|and %{moreCount} more'), {
         moreCount: this.emails.length - this.numberOfLessParticipants,
       });
     },
     moreParticipantsAvailable() {
       return !this.isShowingMoreParticipants && this.emails.length > this.numberOfLessParticipants;
+    },
+    message() {
+      return this.moreParticipantsAvailable
+        ? s__('EmailParticipantsWarning|%{emails}, %{andMore} will be notified of your comment.')
+        : s__('EmailParticipantsWarning|%{emails} will be notified of your comment.');
     },
   },
   methods: {
@@ -49,16 +55,16 @@ export default {
 </script>
 
 <template>
-  <div class="issuable-note-warning gl-border-t-1 gl-border-t-solid gl-border-t-gray-100">
-    {{ title }}
-    <button
-      v-if="moreParticipantsAvailable"
-      type="button"
-      class="btn-transparent btn-link"
-      @click="showMoreParticipants"
-    >
-      {{ moreLabel }}
-    </button>
-    {{ __(' will be notified of your comment.') }}
+  <div class="issuable-note-warning">
+    <gl-sprintf :message="message">
+      <template #andMore>
+        <button type="button" class="btn-transparent btn-link" @click="showMoreParticipants">
+          {{ moreLabel }}
+        </button>
+      </template>
+      <template #emails>
+        <span>{{ title }}</span>
+      </template>
+    </gl-sprintf>
   </div>
 </template>

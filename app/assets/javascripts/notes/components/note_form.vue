@@ -3,22 +3,18 @@
 import { mapGetters, mapActions, mapState } from 'vuex';
 import { mergeUrlParams } from '~/lib/utils/url_utility';
 import eventHub from '../event_hub';
-import NoteableWarning from '../../vue_shared/components/notes/noteable_warning.vue';
 import markdownField from '../../vue_shared/components/markdown/field.vue';
 import issuableStateMixin from '../mixins/issuable_state';
 import resolvable from '../mixins/resolvable';
 import { __, sprintf } from '~/locale';
 import { getDraft, updateDraft } from '~/lib/utils/autosave';
-import EmailParticipantsWarning from './email_participants_warning.vue';
-import CommentFormWrapper from './comment_form_wrapper.vue';
+import CommentFieldLayout from './comment_field_layout.vue';
 
 export default {
   name: 'NoteForm',
   components: {
-    NoteableWarning,
     markdownField,
-    EmailParticipantsWarning,
-    CommentFormWrapper,
+    CommentFieldLayout,
   },
   mixins: [issuableStateMixin, resolvable],
   props: {
@@ -326,15 +322,7 @@ export default {
     ></div>
     <div class="flash-container timeline-content"></div>
     <form :data-line-code="lineCode" class="edit-note common-note-form js-quick-submit gfm-form">
-      <comment-form-wrapper>
-        <noteable-warning
-          v-if="hasWarning(getNoteableData)"
-          :is-locked="isLocked(getNoteableData)"
-          :is-confidential="isConfidential(getNoteableData)"
-          :locked-noteable-docs-path="lockedIssueDocsPath"
-          :confidential-noteable-docs-path="confidentialIssueDocsPath"
-        />
-
+      <comment-field-layout :noteable-data="getNoteableData">
         <markdown-field
           :markdown-preview-path="markdownPreviewPath"
           :markdown-docs-path="markdownDocsPath"
@@ -367,11 +355,7 @@ export default {
             @input="onInput"
           ></textarea>
         </markdown-field>
-        <email-participants-warning
-          v-if="hasEmailParticipants()"
-          :emails="getNoteableData.issue_email_participants"
-        />
-      </comment-form-wrapper>
+      </comment-field-layout>
       <div class="note-form-actions clearfix">
         <template v-if="showBatchCommentsActions">
           <p v-if="showResolveDiscussionToggle">

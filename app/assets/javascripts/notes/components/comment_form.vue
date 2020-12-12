@@ -17,19 +17,16 @@ import {
 import { refreshUserMergeRequestCounts } from '~/commons/nav/user_merge_requests';
 import * as constants from '../constants';
 import eventHub from '../event_hub';
-import NoteableWarning from '~/vue_shared/components/notes/noteable_warning.vue';
 import markdownField from '~/vue_shared/components/markdown/field.vue';
 import userAvatarLink from '~/vue_shared/components/user_avatar/user_avatar_link.vue';
 import noteSignedOutWidget from './note_signed_out_widget.vue';
 import discussionLockedWidget from './discussion_locked_widget.vue';
 import issuableStateMixin from '../mixins/issuable_state';
-import EmailParticipantsWarning from './email_participants_warning.vue';
-import CommentFormWrapper from './comment_form_wrapper.vue';
+import CommentFieldLayout from './comment_field_layout.vue';
 
 export default {
   name: 'CommentForm',
   components: {
-    NoteableWarning,
     noteSignedOutWidget,
     discussionLockedWidget,
     markdownField,
@@ -37,8 +34,7 @@ export default {
     GlButton,
     TimelineEntryItem,
     GlIcon,
-    EmailParticipantsWarning,
-    CommentFormWrapper,
+    CommentFieldLayout,
   },
   mixins: [issuableStateMixin],
   props: {
@@ -322,18 +318,11 @@ export default {
         </div>
         <div class="timeline-content timeline-content-form">
           <form ref="commentForm" class="new-note common-note-form gfm-form js-main-target-form">
-            <comment-form-wrapper>
-              <div class="error-alert"></div>
-
-              <noteable-warning
-                v-if="hasWarning(getNoteableData)"
-                :is-locked="isLocked(getNoteableData)"
-                :is-confidential="isConfidential(getNoteableData)"
-                :noteable-type="noteableType"
-                :locked-noteable-docs-path="lockedIssueDocsPath"
-                :confidential-noteable-docs-path="confidentialIssueDocsPath"
-              />
-
+            <comment-field-layout
+              :with-error-alert="true"
+              :noteable-data="getNoteableData"
+              :noteable-type="noteableType"
+            >
               <markdown-field
                 ref="markdownField"
                 :is-submitting="isSubmitting"
@@ -362,11 +351,7 @@ export default {
                   @keydown.ctrl.enter="handleSave()"
                 ></textarea>
               </markdown-field>
-              <email-participants-warning
-                v-if="hasEmailParticipants()"
-                :emails="getNoteableData.issue_email_participants"
-              />
-            </comment-form-wrapper>
+            </comment-field-layout>
             <div class="note-form-actions">
               <div
                 class="btn-group gl-mr-3 comment-type-dropdown js-comment-type-dropdown droplab-dropdown"
