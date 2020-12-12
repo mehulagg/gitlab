@@ -1334,7 +1334,7 @@ RSpec.describe Notify do
       describe 'new note email' do
         let_it_be(:first_note) { create(:discussion_note_on_issue, note: 'Hello world') }
 
-        subject { described_class.service_desk_new_note_email(issue.id, first_note.id) }
+        subject { described_class.service_desk_new_note_email(issue.id, first_note.id, 'service.desk@example.com') }
 
         it_behaves_like 'an unsubscribeable thread'
 
