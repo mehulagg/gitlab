@@ -145,7 +145,7 @@ export default {
         {{ isEditing ? __('Edit iteration') : __('New iteration') }}
       </h3>
     </div>
-    <hr />
+    <hr class="gl-mt-0"/>
     <gl-form class="row common-note-form">
       <div class="col-md-6">
         <div class="form-group row">
