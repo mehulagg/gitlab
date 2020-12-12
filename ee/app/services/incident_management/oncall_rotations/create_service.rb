@@ -21,33 +21,25 @@ module IncidentManagement
         @schedule = schedule
         @project = project
         @current_user = current_user
-        @params = params
+        @rotation_params = params.except(:participants)
+        @participants_params = Array(params[:participants])
       end
 
       def execute
         return error_no_license unless available?
         return error_no_permissions unless allowed?
-
-        participants_params = Array(params[:participants])
         return error_too_many_participants if participants_params.size > MAXIMUM_PARTICIPANTS
+        return error_duplicate_participants if duplicated_users?
 
         OncallRotation.transaction do
-          oncall_rotation = schedule.rotations.create(params.except(:participants))
-          break error_in_create(oncall_rotation) unless oncall_rotation.persisted?
+          oncall_rotation = schedule.rotations.create(rotation_params)
+          break error_in_validation(oncall_rotation) unless oncall_rotation.persisted?
 
-          participants = participants_for(oncall_rotation, participants_params)
-          break error_invalid_participants(participants) unless participants.all?(&:valid?)
-          break error_duplicate_participants if duplicated_users?(participants.map(&:user))
+          participants = participants_for(oncall_rotation)
+          first_invalid_particpant = participants.find(&:invalid?)
+          break error_in_validation(first_invalid_particpant) if first_invalid_particpant
 
-          # BulkInsertSafe cannot be used here while OncallParticipant
-          # has a has_many association. https://gitlab.com/gitlab-org/gitlab/-/issues/247718
-          # We still want to bulk insert to avoid up to MAXIMUM_PARTICIPANTS
-          # consecutive insertions, but Gitlab::Database.bulk_insert
-          # does not include validations. Warning!
-          ::Gitlab::Database.bulk_insert( # rubocop:disable Gitlab/BulkInsert
-            OncallParticipant.table_name,
-            participant_rows(participants)
-          )
+          insert_participants(participants)
 
           success(oncall_rotation)
         end
@@ -55,7 +47,7 @@ module IncidentManagement
 
       private
 
-      attr_reader :schedule, :project, :current_user, :params, :participants
+      attr_reader :schedule, :project, :current_user, :rotation_params, :participants_params
 
       def allowed?
         Ability.allowed?(current_user, :admin_incident_management_oncall_schedule, project)
@@ -65,7 +57,13 @@ module IncidentManagement
         ::Gitlab::IncidentManagement.oncall_schedules_available?(project)
       end
 
-      def participants_for(rotation, participants_params)
+      def duplicated_users?
+        users = participants_params.map { |participant| participant[:user] }
+
+        users != users.uniq
+      end
+
+      def participants_for(rotation)
         participants_params.map do |participant|
           OncallParticipant.new(
             rotation: rotation,
@@ -74,10 +72,6 @@ module IncidentManagement
             color_weight: participant[:color_weight]
           )
         end
-      end
-
-      def duplicated_users?(users)
-        users != users.uniq
       end
 
       def participant_rows(participants)
@@ -89,6 +83,18 @@ module IncidentManagement
             color_weight: OncallParticipant.color_weights[participant.color_weight]
           }
         end
+      end
+
+      # BulkInsertSafe cannot be used here while OncallParticipant
+      # has a has_many association. https://gitlab.com/gitlab-org/gitlab/-/issues/247718
+      # We still want to bulk insert to avoid up to MAXIMUM_PARTICIPANTS
+      # consecutive insertions, but Gitlab::Database.bulk_insert
+      # does not include validations. Warning!
+      def insert_participants(participants)
+        ::Gitlab::Database.bulk_insert( # rubocop:disable Gitlab/BulkInsert
+          OncallParticipant.table_name,
+          participant_rows(participants)
+        )
       end
 
       def error(message)
@@ -115,12 +121,8 @@ module IncidentManagement
         error('Your license does not support on-call rotations')
       end
 
-      def error_in_create(oncall_rotation)
-        error(oncall_rotation.errors.full_messages.to_sentence)
-      end
-
-      def error_invalid_participants(participants)
-        error(participants.flat_map { |participant| participant.errors.full_messages.to_sentence.presence }.compact.join(','))
+      def error_in_validation(object)
+        error(object.errors.full_messages.to_sentence)
       end
     end
   end
