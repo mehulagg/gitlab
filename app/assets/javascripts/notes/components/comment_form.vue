@@ -315,7 +315,7 @@ export default {
         <div class="timeline-content timeline-content-form">
           <form ref="commentForm" class="new-note common-note-form gfm-form js-main-target-form">
             <comment-field-layout
-              :with-error-alert="true"
+              :with-alert-container="true"
               :noteable-data="getNoteableData"
               :noteable-type="noteableType"
             >
