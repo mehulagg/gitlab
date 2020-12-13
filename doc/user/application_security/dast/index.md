@@ -137,11 +137,11 @@ the DAST template.
 #### Review App
 
 Review Apps are the most involved method of deploying your DAST target application. 
-The [Configuration](#Configuration) section references an example using Kubernetes. 
+The [Configuration](./index.md#Configuration) section references an example using Kubernetes. 
 
-A more simplified example of a Review App deployment is in our [Review Apps Nginx](https://gitlab.com/gitlab-examples/review-apps-nginx) template.
+A more simplified example of a Review App deployment is in our [Review Apps NGINX](https://gitlab.com/gitlab-examples/review-apps-nginx) template.
 
-To enable DAST for the above Review App the following yaml would need to be included in the
+To enable DAST for the above Review App the following YAML would need to be included in the
 `gitlab-ci.yml` file.
 
 ```yaml
@@ -163,7 +163,7 @@ variables:
 
 If your application utilizes Docker containers you have another option for deploying and scanning with DAST.
 After your docker build job completes and your image is added to your container registry, you can utilize the image as a 
-[service](https://docs.gitlab.com/ee/ci/docker/using_docker_images.html#what-is-a-service). 
+[service](../../../ci/docker/using_docker_images.md#what-is-a-service). 
 
 By overriding the `dast` job, it is possible to link services necessary for the DAST analyzer to run against.
 
