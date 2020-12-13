@@ -71,9 +71,6 @@ msgstr ""
 msgid " or references (e.g. path/to/project!merge_request_id)"
 msgstr ""
 
-msgid " will be notified of your comment."
-msgstr ""
-
 msgid "\"%{path}\" did not exist on \"%{ref}\""
 msgstr ""
 
@@ -490,9 +487,6 @@ msgid "%{edit_in_new_fork_notice} Try to revert this commit again."
 msgstr ""
 
 msgid "%{edit_in_new_fork_notice} Try to upload a file again."
-msgstr ""
-
-msgid "%{emails}"
 msgstr ""
 
 msgid "%{extra} more downstream pipelines"
@@ -10315,6 +10309,15 @@ msgid "EmailError|You are not allowed to perform this action. If you believe thi
 msgstr ""
 
 msgid "EmailError|Your account has been blocked. If you believe this is in error, contact a staff member."
+msgstr ""
+
+msgid "EmailParticipantsWarning|%{emails} will be notified of your comment."
+msgstr ""
+
+msgid "EmailParticipantsWarning|%{emails}, %{andMore} will be notified of your comment."
+msgstr ""
+
+msgid "EmailParticipantsWarning|and %{moreCount} more"
 msgstr ""
 
 msgid "EmailToken|reset it"
@@ -32212,9 +32215,6 @@ msgid "among other things"
 msgstr ""
 
 msgid "and"
-msgstr ""
-
-msgid "and %{moreCount} more"
 msgstr ""
 
 msgid "any-approver for the merge request already exists"
