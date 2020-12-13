@@ -162,7 +162,7 @@ variables:
 #### Docker Services
 
 If your application utilizes Docker containers you have another option for deploying and scanning with DAST.
-After your docker build job completes and your image is added to your container registry, you can utilize the image as a 
+After your Docker build job completes and your image is added to your container registry, you can utilize the image as a 
 [service](../../../ci/docker/using_docker_images.md#what-is-a-service). 
 
 By overriding the `dast` job, it is possible to link services necessary for the DAST analyzer to run against.
