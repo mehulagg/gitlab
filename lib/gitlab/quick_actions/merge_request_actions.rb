@@ -66,7 +66,7 @@ module Gitlab
         condition do
           merge_request = quick_action_target
 
-          break false unless merge_request.source_branch_exists?
+          next false unless merge_request.source_branch_exists?
 
           access_check = ::Gitlab::UserAccess
                            .new(current_user, container: merge_request.source_project)
@@ -77,9 +77,14 @@ module Gitlab
           success = MergeRequests::RebaseService.new(quick_action_target.project, current_user)
                       .execute(quick_action_target)
 
-          next unless success
+          branch = quick_action_target.source_branch
 
-          @execution_message[:rebase] = _('Scheduled a rebase of branch #{quick_action_target.source_branch}.')
+          @execution_message[:rebase] =
+            if success
+              _('Scheduled a rebase of branch %{branch}')
+            else
+              _('Failed to schedule a rebase of %{branch}')
+            end % { branch: branch }
         end
 
         desc 'Toggle the Draft status'

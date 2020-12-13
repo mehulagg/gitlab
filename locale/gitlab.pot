@@ -11697,6 +11697,9 @@ msgstr ""
 msgid "Failed to save preferences."
 msgstr ""
 
+msgid "Failed to schedule a rebase of %{branch}"
+msgstr ""
+
 msgid "Failed to set due date because the date format is invalid."
 msgstr ""
 
@@ -22648,6 +22651,9 @@ msgstr ""
 msgid "Rebase in progress"
 msgstr ""
 
+msgid "Rebase source branch atop the latest changes in the target branch."
+msgstr ""
+
 msgid "Receive alerts from manually configured Prometheus servers."
 msgstr ""
 
@@ -24002,6 +24008,9 @@ msgid "Scheduled"
 msgstr ""
 
 msgid "Scheduled Deletion At - %{permanent_deletion_time}"
+msgstr ""
+
+msgid "Scheduled a rebase of branch %{branch}"
 msgstr ""
 
 msgid "Scheduled to merge this merge request (%{strategy})."
