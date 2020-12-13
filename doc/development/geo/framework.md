@@ -770,3 +770,373 @@ available in the Admin UI.
          description: 'Find widget registries on this Geo node',
          feature_flag: :geo_widget_replication # REMOVE THIS LINE
    ```
+
+
+### Repository Replicator Strategy
+
+Models that refer any repository on the disk
+can be easily supported by Geo with the `Geo::RepositoryReplicatorStrategy` module.
+
+For example, to add support for files referenced by a `Snippets` model with a
+`snippets` table, you would perform the following steps:
+
+#### Replication
+
+1. Include `Gitlab::Geo::ReplicableModel` in the `Snippet` class, and specify
+   the Replicator class `with_replicator Geo::SnippetReplicator`.
+
+   At this point the `Snippet` class should look like this:
+
+   ```ruby
+   # frozen_string_literal: true
+
+   class Snippet < ApplicationRecord
+     include ::Gitlab::Geo::ReplicableModel
+
+     with_replicator Geo::SnippetReplicator
+
+     # @param primary_key_in [Range, Snippet] arg to pass to primary_key_in scope
+     # @return [ActiveRecord::Relation<Snippet>] everything that should be synced to this node, restricted by primary key
+     def self.replicables_for_current_secondary(primary_key_in)
+       # Should be implemented. The idea of the method is to restrict
+       # the set of synced items depending on synchronization settings
+     end
+
+     # Geo checks this method in FrameworkRepositorySyncService to avoid
+     # snapshotting repositories using object pools
+     def pool_repository
+       nil
+     end
+     ...
+   end
+   ```
+
+   Pay some attention to method `pool_repository`. Not every repository type uses
+   repository pooling. As Geo prefers to use repository snapshoting it can lead to a data loss
+   so make sure to overwrite `pool_repository` so it returns nil for repositories that do not
+   have the pools.
+
+
+   If there is a common constraint for records to be available for replication,
+   make sure to also overwrite the `available_replicables` scope.
+
+1. Create `ee/app/replicators/geo/snippet_replicator.rb`. Implement the
+   `#repository` method which should return a `<Repository>` instance,
+   and implement the class method `.model` to return the `Snippet` class:
+
+   ```ruby
+   # frozen_string_literal: true
+
+   module Geo
+     class SnippetReplicator < Gitlab::Geo::Replicator
+       include ::Geo::RepositoryReplicatorStrategy
+
+       def self.model
+         ::Snippet
+       end
+
+       def repository
+         model_record.repository
+       end
+
+       def self.git_access_class
+         ::Gitlab::GitAccessSnippet
+       end
+
+       # The feature flag follows the format `geo_#{replicable_name}_replication`,
+       # so here it would be `geo_snippet_replication`
+       def self.replication_enabled_by_default?
+         false
+       end
+     end
+   end
+   ```
+
+1. Add this replicator class to the method `replicator_classes` in
+   `ee/lib/gitlab/geo.rb`:
+
+   ```ruby
+   REPLICATOR_CLASSES = [
+      ...
+      ::Geo::PackageFileReplicator,
+      ::Geo::SnippetReplicator
+   ]
+   end
+   ```
+
+1. Create `ee/spec/replicators/geo/snippet_replicator_spec.rb` and perform
+   the necessary setup to define the `model_record` variable for the shared
+   examples:
+
+   ```ruby
+   # frozen_string_literal: true
+
+   require 'spec_helper'
+
+   RSpec.describe Geo::SnippetReplicator do
+     let(:model_record) { build(:snippet) }
+
+     include_examples 'a repository replicator'
+   end
+   ```
+
+1. Create the `snippet_registry` table, with columns ordered according to [our guidelines](../ordering_table_columns.md) so Geo secondaries can track the sync and
+   verification state of each Snippet. This migration belongs in `ee/db/geo/migrate`:
+
+   ```ruby
+   # frozen_string_literal: true
+
+   class CreateSnippetRegistry < ActiveRecord::Migration[6.0]
+     include Gitlab::Database::MigrationHelpers
+
+     DOWNTIME = false
+
+     disable_ddl_transaction!
+
+     def up
+       create_table :snippet_registry, id: :bigserial, force: :cascade do |t|
+         t.datetime_with_timezone :retry_at
+         t.datetime_with_timezone :last_synced_at
+         t.datetime_with_timezone :created_at, null: false
+         t.bigint :snippet_id, null: false
+         t.integer :state, default: 0, null: false, limit: 2
+         t.integer :retry_count, default: 0, limit: 2
+         t.text :last_sync_failure
+         t.boolean :force_to_redownload
+         t.boolean :missing_on_primary
+
+         t.index :snippet_id, name: :index_snippet_registry_on_snippet_id, unique: true
+         t.index :retry_at
+         t.index :state
+        end
+
+        add_text_limit :snippet_registry, :last_sync_failure, 255
+      end
+
+      def down
+        drop_table :snippet_registry
+      end
+   end
+   ```
+
+1. Create `ee/app/models/geo/snippet_registry.rb`:
+
+   ```ruby
+   # frozen_string_literal: true
+
+   class Geo::SnippetRegistry < Geo::BaseRegistry
+     include Geo::ReplicableRegistry
+
+     MODEL_CLASS = ::Snippet
+     MODEL_FOREIGN_KEY = :snippet_id
+
+     belongs_to :snippet, class_name: 'Snippet'
+   end
+   ```
+
+1. Update `REGISTRY_CLASSES` in `ee/app/workers/geo/secondary/registry_consistency_worker.rb`.
+1. Add `snippet_registry` to `ActiveSupport::Inflector.inflections` in `config/initializers_before_autoloader/000_inflections.rb`.
+1. Create `ee/spec/factories/geo/snippet_registry.rb`:
+
+   ```ruby
+   # frozen_string_literal: true
+
+   FactoryBot.define do
+     factory :geo_snippet_registry, class: 'Geo::SnippetRegistry' do
+       snippet
+       state { Geo::SnippetRegistry.state_value(:pending) }
+
+       trait :synced do
+         state { Geo::SnippetRegistry.state_value(:synced) }
+         last_synced_at { 5.days.ago }
+       end
+
+       trait :failed do
+         state { Geo::SnippetRegistry.state_value(:failed) }
+         last_synced_at { 1.day.ago }
+         retry_count { 2 }
+         last_sync_failure { 'Random error' }
+       end
+
+       trait :started do
+         state { Geo::SnippetRegistry.state_value(:started) }
+         last_synced_at { 1.day.ago }
+         retry_count { 0 }
+       end
+     end
+   end
+   ```
+
+1. Create `ee/spec/models/geo/snippet_registry_spec.rb`:
+
+   ```ruby
+   # frozen_string_literal: true
+
+   require 'spec_helper'
+
+   RSpec.describe Geo::SnippetRegistry, :geo, type: :model do
+     let_it_be(:registry) { create(:geo_snippet_registry) }
+
+     specify 'factory is valid' do
+       expect(registry).to be_valid
+     end
+
+     include_examples 'a Geo framework registry'
+   end
+   ```
+
+Snippets should now be replicated by Geo.
+#### GraphQL API
+
+1. Add a new field to `GeoNodeType` in
+   `ee/app/graphql/types/geo/geo_node_type.rb`:
+
+   ```ruby
+   field :snippet_registries, ::Types::Geo::SnippetRegistryType.connection_type,
+         null: true,
+         resolver: ::Resolvers::Geo::SnippetRegistriesResolver,
+         description: 'Find snippet registries on this Geo node',
+         feature_flag: :geo_snippet_replication
+   ```
+
+1. Add the new `snippet_registries` field name to the `expected_fields` array in
+   `ee/spec/graphql/types/geo/geo_node_type_spec.rb`.
+1. Create `ee/app/graphql/resolvers/geo/snippet_registries_resolver.rb`:
+
+   ```ruby
+   # frozen_string_literal: true
+
+   module Resolvers
+     module Geo
+       class SnippetRegistriesResolver < BaseResolver
+         include RegistriesResolver
+       end
+     end
+   end
+   ```
+
+1. Create `ee/spec/graphql/resolvers/geo/snippet_registries_resolver_spec.rb`:
+
+   ```ruby
+   # frozen_string_literal: true
+
+   require 'spec_helper'
+
+   RSpec.describe Resolvers::Geo::SnippetRegistriesResolver do
+     it_behaves_like 'a Geo registries resolver', :geo_snippet_registry
+   end
+   ```
+
+1. Create `ee/app/finders/geo/snippet_registry_finder.rb`:
+
+   ```ruby
+   # frozen_string_literal: true
+
+   module Geo
+     class SnippetRegistryFinder
+       include FrameworkRegistryFinder
+     end
+   end
+   ```
+
+1. Create `ee/spec/finders/geo/snippet_registry_finder_spec.rb`:
+
+   ```ruby
+   # frozen_string_literal: true
+
+   require 'spec_helper'
+
+   RSpec.describe Geo::SnippetRegistryFinder do
+     it_behaves_like 'a framework registry finder', :geo_snippet_registry
+   end
+   ```
+
+1. Create `ee/app/graphql/types/geo/snnippet_registry_type.rb`:
+
+   ```ruby
+   # frozen_string_literal: true
+
+   module Types
+     module Geo
+       # rubocop:disable Graphql/AuthorizeTypes because it is included
+       class SnippetRegistryType < BaseObject
+         include ::Types::Geo::RegistryType
+
+         graphql_name 'SnippetRegistry'
+         description 'Represents the Geo sync and verification state of a snippet'
+
+         field :snippet_id, GraphQL::ID_TYPE, null: false, description: 'ID of the Snippet'
+       end
+     end
+   end
+   ```
+
+1. Create `ee/spec/graphql/types/geo/snippet_registry_type_spec.rb`:
+
+   ```ruby
+   # frozen_string_literal: true
+
+   require 'spec_helper'
+
+   RSpec.describe GitlabSchema.types['SnippetRegistry'] do
+     it_behaves_like 'a Geo registry type'
+
+     it 'has the expected fields (other than those included in RegistryType)' do
+       expected_fields = %i[snippet_id]
+
+       expect(described_class).to have_graphql_fields(*expected_fields).at_least
+     end
+   end
+   ```
+
+1. Add integration tests for providing Snippet registry data to the frontend via
+   the GraphQL API, by duplicating and modifying the following shared examples
+   in `ee/spec/requests/api/graphql/geo/registries_spec.rb`:
+
+   ```ruby
+   it_behaves_like 'gets registries for', {
+     field_name: 'snippetRegistries',
+     registry_class_name: 'SnippetRegistry',
+     registry_factory: :geo_snippet_registry,
+     registry_foreign_key_field_name: 'snippetId'
+   }
+   ```
+
+1. Update the GraphQL reference documentation:
+
+   ```shell
+   bundle exec rake gitlab:graphql:compile_docs
+   ```
+
+Individual snippet synchronization and verification data should now be available
+via the GraphQL API.
+
+#### Releasing the feature
+
+1. In `ee/app/replicators/geo/snippet_replicator.rb`, delete the `self.replication_enabled_by_default?` method:
+
+   ```ruby
+   module Geo
+     class SnippetReplicator < Gitlab::Geo::Replicator
+       ...
+
+       # REMOVE THIS METHOD
+       def self.replication_enabled_by_default?
+         false
+       end
+       # REMOVE THIS METHOD
+
+       ...
+     end
+   end
+   ```
+
+1. In `ee/app/graphql/types/geo/geo_node_type.rb`, remove the `feature_flag` option for the released type:
+
+   ```ruby
+   field :snippet_registries, ::Types::Geo::SnippetRegistryType.connection_type,
+         null: true,
+         resolver: ::Resolvers::Geo::SnippetRegistriesResolver,
+         description: 'Find snippet registries on this Geo node',
+         feature_flag: :geo_snippet_replication # REMOVE THIS LINE
+   ```
