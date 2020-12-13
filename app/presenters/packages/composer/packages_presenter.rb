@@ -20,7 +20,7 @@ module Packages
       end
 
       def package_versions(packages = @packages)
-        package_versions_json(packages).execute
+        package_versions_json(packages).json
       end
 
       def package_versions_sha(packages = @packages)

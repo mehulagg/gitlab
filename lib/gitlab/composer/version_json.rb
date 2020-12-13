@@ -9,12 +9,12 @@ module Gitlab
         @packages = packages
       end
 
-      def execute
+      def json
         { 'packages' => { @packages.first.name => package_versions_map(@packages) } }
       end
 
       def sha
-        Digest::SHA256.hexdigest(execute.to_json)
+        Digest::SHA256.hexdigest(json.to_json)
       end
 
       private

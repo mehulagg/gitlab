@@ -36,6 +36,7 @@ RSpec.describe Packages::Composer::CreatePackageService do
           expect(created_package.version).to eq 'dev-master'
           expect(created_package.composer_metadatum.target_sha).to eq branch.target
           expect(created_package.composer_metadatum.composer_json.to_json).to eq json
+          expect(created_package.composer_metadatum.version_cache_sha).to match /^[A-Fa-f0-9]{64}$/
         end
 
         it_behaves_like 'assigns the package creator' do
