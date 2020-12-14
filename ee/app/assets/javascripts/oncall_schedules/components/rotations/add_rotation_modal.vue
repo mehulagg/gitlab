@@ -135,9 +135,9 @@ export default {
           ...this.form.rotationLength,
           length: parseInt(this.form.rotationLength.length, 10),
         },
-        // eslint-disable-next-line @gitlab/require-i18n-strings
         participants: this.form.participants.map(({ username }) => ({
           username,
+          // eslint-disable-next-line @gitlab/require-i18n-strings
           colorWeight: 'WEIGHT_500',
           colorPalette: 'BLUE',
         })),

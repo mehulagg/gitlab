@@ -4,14 +4,15 @@ import VueApollo from 'vue-apollo';
 import waitForPromises from 'helpers/wait_for_promises';
 import { GlDropdownItem, GlModal, GlAlert, GlTokenSelector } from '@gitlab/ui';
 import AddRotationModal from 'ee/oncall_schedules/components/rotations/add_rotation_modal.vue';
-// import createOncallScheduleRotationMutation from 'ee/oncall_schedules/graphql/create_oncall_schedule_rotation.mutation.graphql';
 import usersSearchQuery from '~/graphql_shared/queries/users_search.query.graphql';
-import { participants } from '../mocks/apollo_mock';
+import { participants, getOncallSchedulesQueryResponse } from '../mocks/apollo_mock';
 
 const localVue = createLocalVue();
 const projectPath = 'group/project';
 const mutate = jest.fn();
 const mockHideModal = jest.fn();
+const schedule =
+  getOncallSchedulesQueryResponse.data.project.incidentManagementOncallSchedules.nodes[0];
 
 localVue.use(VueApollo);
 
@@ -35,6 +36,7 @@ describe('AddRotationModal', () => {
       },
       propsData: {
         ...props,
+        schedule,
       },
       provide: {
         projectPath,
@@ -67,6 +69,9 @@ describe('AddRotationModal', () => {
           },
           participants,
         };
+      },
+      propsData: {
+        schedule,
       },
       provide: {
         projectPath,
@@ -157,18 +162,18 @@ describe('AddRotationModal', () => {
   });
 
   describe('Rotation create', () => {
-    it('makes a request with `oncallScheduleRotationCreate` to create a schedule rotation', () => {
+    it('makes a request with `oncallRotationCreate` to create a schedule rotation', () => {
       mutate.mockResolvedValueOnce({});
       findModal().vm.$emit('primary', { preventDefault: jest.fn() });
       expect(mutate).toHaveBeenCalledWith({
         mutation: expect.any(Object),
-        variables: { oncallScheduleRotationCreate: expect.objectContaining({ projectPath }) },
+        variables: { OncallRotationCreateInput: expect.objectContaining({ projectPath }) },
       });
     });
 
     it('does not hide the rotation modal and shows error alert on fail', async () => {
       const error = 'some error';
-      mutate.mockResolvedValueOnce({ data: { oncallScheduleRotationCreate: { errors: [error] } } });
+      mutate.mockResolvedValueOnce({ data: { oncallRotationCreate: { errors: [error] } } });
       findModal().vm.$emit('primary', { preventDefault: jest.fn() });
       await waitForPromises();
       expect(mockHideModal).not.toHaveBeenCalled();
@@ -190,7 +195,5 @@ describe('AddRotationModal', () => {
       await awaitApolloDomMock();
       expect(userSearchQueryHandler).toHaveBeenCalledWith({ search: 'root' });
     });
-
-    // TODO: Once the BE is complete for the mutation add specs here for that via a creationHandler
   });
 });
