@@ -62,7 +62,7 @@ describe('Blob Editing', () => {
 
     await initEditor();
 
-    form.submit();
+    form.dispatchEvent(new Event('submit'));
 
     expect(fileContentEl.value).toBe('test value\n');
   });
