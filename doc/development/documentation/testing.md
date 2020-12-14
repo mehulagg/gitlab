@@ -196,13 +196,14 @@ You can use Vale:
 
 Vale returns three types of results: `suggestion`, `warning`, and `error`:
 
-- **Suggestion**-level results are writing tips, and are not displayed in CI
+- **Suggestion**-level results are writing tips and aren't displayed in CI
   job output. Suggestions don't break CI.
-- **Warning**-level results are style guide violations, are not displayed in CI
+- **Warning**-level results are [Style Guide](styleguide/index.md) violations, aren't displayed in CI
   job output, and should contain clear explanations of how to resolve the warning.
-  Warnings may be technical debt, or items that will become an error-level test
-  after the Technical Writing team completes cleanup for. Warnings don't break CI.
-- **Error**-level are style guide violations, and should contain clear explanations
+  Warnings may be technical debt, or can be future error-level test items
+  (after the Technical Writing team completes its cleanup). Warnings don't break CI.
+- **Error**-level results are Style Guide violations, and should contain clear explanations
+  about how to resolve the error. Errors break CI and are displayed in CI job output.
   of how to resolve the error. Errors break CI and are displayed in CI job output.
 
 ### Install linters
