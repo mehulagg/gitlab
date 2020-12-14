@@ -84,8 +84,6 @@ RSpec.describe Emails::ServiceDesk do
       let(:project) { create(:project, :custom_repo, files: { ".gitlab/service_desk_templates/#{template_key}.md" => template_content }) }
 
       it 'uses the text template from the template' do
-        puts issue.external_author
-
         is_expected.to have_body_text(template_content)
       end
     end
