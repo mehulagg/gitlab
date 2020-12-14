@@ -1,5 +1,5 @@
 ---
-title: ee Iteration report weight toggle affects summary stats
+title: Move iteration report summary stats underneath toggle buttons
 merge_request: 48659
 author:
 type: added
