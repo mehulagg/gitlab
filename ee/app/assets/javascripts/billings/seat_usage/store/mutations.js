@@ -30,4 +30,8 @@ export default {
   [types.SET_SEARCH](state, searchString) {
     state.search = searchString ?? '';
   },
+
+  [types.RESET_MEMBERS](state) {
+    state.members = [];
+  },
 };

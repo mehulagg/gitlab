@@ -7,7 +7,7 @@ import {
   GlPagination,
   GlLoadingIcon,
   GlTooltipDirective,
-  GlSearchBoxByClick,
+  GlSearchBoxByType,
 } from '@gitlab/ui';
 import { parseInt } from 'lodash';
 import { s__, sprintf } from '~/locale';
@@ -24,7 +24,7 @@ export default {
     GlAvatarLink,
     GlPagination,
     GlLoadingIcon,
-    GlSearchBoxByClick,
+    GlSearchBoxByType,
   },
   data() {
     return {
@@ -41,7 +41,7 @@ export default {
       'namespaceName',
       'search',
     ]),
-    ...mapGetters(['tableItems']),
+    ...mapGetters(['tableItems', 'isSearchStringTooShort']),
     headingText() {
       return sprintf(s__('Billing|Users occupying seats in %{namespaceName} Group (%{total})'), {
         total: this.total,
@@ -65,17 +65,21 @@ export default {
     totalFormatted() {
       return parseInt(this.total, 10);
     },
+    emptyTableText() {
+      if (this.isSearchStringTooShort) {
+        return s__('Billing|Enter at least three characters to search.');
+      }
+
+      return s__('Billing|No users to display.');
+    },
   },
   created() {
     this.fetchBillableMembersList();
   },
   methods: {
-    ...mapActions(['fetchBillableMembersList']),
-    submitSearchHandler(val) {
-      this.fetchBillableMembersList({ search: val });
-    },
-    clearSearchHandler() {
-      this.fetchBillableMembersList();
+    ...mapActions(['fetchBillableMembersList', 'setSearch']),
+    inputHandler(val) {
+      this.setSearch(val);
     },
   },
   avatarSize: AVATAR_SIZE,
@@ -89,11 +93,15 @@ export default {
   <div class="gl-pt-4">
     <h4 data-testid="heading">{{ headingText }}</h4>
     <p>{{ subHeadingText }}</p>
-    <gl-search-box-by-click
+    <p>
+      Search string: {{ search }}<br />
+      isSearchStringTooShort: {{ isSearchStringTooShort }}<br />
+      emptyTableText: {{ emptyTableText }}<br />
+    </p>
+    <gl-search-box-by-type
       :value="search"
       :placeholder="__(`Type to search`)"
-      @submit="submitSearchHandler"
-      @clear="clearSearchHandler"
+      @input="inputHandler"
     />
     <gl-table
       class="seats-table"
@@ -102,6 +110,7 @@ export default {
       :busy="isLoading"
       :show-empty="true"
       data-testid="table"
+      :empty-text="emptyTableText"
     >
       <template #cell(user)="data">
         <div class="gl-display-flex">
@@ -127,10 +136,6 @@ export default {
             >{{ s__('Billing|Private') }}</span
           >
         </div>
-      </template>
-
-      <template #empty>
-        {{ s__('Billing|No users to display.') }}
       </template>
 
       <template #table-busy>
