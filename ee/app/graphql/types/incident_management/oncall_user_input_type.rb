@@ -13,11 +13,11 @@ module Types
 
       argument :color_palette, ::Types::DataVisualizationPalette::ColorEnum,
                 required: false,
-                description: 'The color palette to assign to the on-call user, for example: "blue".'
+                description: 'A value of DataVisualizationColorEnum. The color from the palette to assign to the on-call user.'
 
       argument :color_weight, ::Types::DataVisualizationPalette::WeightEnum,
                 required: false,
-                description: 'The color weight to assign to for the on-call user, for example "500". Max 4 chars. For easy identification of the user.'
+                description: 'A value of DataVisualizationWeightEnum. The color weight to assign to for the on-call user, for example "500". Max 4 chars.'
     end
     # rubocop: enable Graphql/AuthorizeTypes
   end

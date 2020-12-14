@@ -1672,12 +1672,12 @@ Describes an incident management on-call rotation.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `id` | IncidentManagementOncallRotationID! | ID of the on-call rotation |
-| `length` | Int | Time zone of the on-call schedule |
-| `lengthUnit` | OncallRotationUnitEnum | Unit of the on-call rotation length |
-| `name` | String! | Name of the on-call rotation |
-| `participants` | OncallParticipantTypeConnection | Participants of the on-call rotation |
-| `startsAt` | Time | Start date of the on-call rotation |
+| `id` | IncidentManagementOncallRotationID! | ID of the on-call rotation. |
+| `length` | Int | Length of the on-call schedule, in the units specified by lengthUnit. |
+| `lengthUnit` | OncallRotationUnitEnum | Unit of the on-call rotation length. |
+| `name` | String! | Name of the on-call rotation. |
+| `participants` | OncallParticipantTypeConnection | Participants of the on-call rotation. |
+| `startsAt` | Time | Start date of the on-call rotation. |
 
 ### IncidentManagementOncallSchedule
 
@@ -4523,9 +4523,9 @@ Rotation length unit of an on-call rotation.
 
 | Value | Description |
 | ----- | ----------- |
-| `DAYS` | One Days |
-| `HOURS` | One Hours |
-| `WEEKS` | One Weeks |
+| `DAYS` | Days |
+| `HOURS` | Hours |
+| `WEEKS` | Weeks |
 
 ### PackageTypeEnum
 

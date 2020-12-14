@@ -10696,27 +10696,27 @@ Describes an incident management on-call rotation
 """
 type IncidentManagementOncallRotation {
   """
-  ID of the on-call rotation
+  ID of the on-call rotation.
   """
   id: IncidentManagementOncallRotationID!
 
   """
-  Time zone of the on-call schedule
+  Length of the on-call schedule, in the units specified by lengthUnit.
   """
   length: Int
 
   """
-  Unit of the on-call rotation length
+  Unit of the on-call rotation length.
   """
   lengthUnit: OncallRotationUnitEnum
 
   """
-  Name of the on-call rotation
+  Name of the on-call rotation.
   """
   name: String!
 
   """
-  Participants of the on-call rotation
+  Participants of the on-call rotation.
   """
   participants(
     """
@@ -10741,7 +10741,7 @@ type IncidentManagementOncallRotation {
   ): OncallParticipantTypeConnection
 
   """
-  Start date of the on-call rotation
+  Start date of the on-call rotation.
   """
   startsAt: Time
 }
@@ -15377,7 +15377,7 @@ input OncallRotationCreateInput {
   scheduleIid: String!
 
   """
-  The start date and time of the on-call rotation
+  The start date and time of the on-call rotation, in the timezone of the on-call schedule
   """
   startsAt: OncallRotationDateInputType!
 }
@@ -15437,17 +15437,17 @@ Rotation length unit of an on-call rotation
 """
 enum OncallRotationUnitEnum {
   """
-  One Days
+  Days
   """
   DAYS
 
   """
-  One Hours
+  Hours
   """
   HOURS
 
   """
-  One Weeks
+  Weeks
   """
   WEEKS
 }
@@ -15602,12 +15602,13 @@ The rotation user and color palette
 """
 input OncallUserInputType {
   """
-  The color palette to assign to the on-call user, for example: "blue".
+  A value of DataVisualizationColorEnum. The color from the palette to assign to the on-call user.
   """
   colorPalette: DataVisualizationColorEnum
 
   """
-  The color weight to assign to for the on-call user, for example "500". Max 4 chars. For easy identification of the user.
+  A value of DataVisualizationWeightEnum. The color weight to assign to for the
+  on-call user, for example "500". Max 4 chars.
   """
   colorWeight: DataVisualizationWeightEnum
 

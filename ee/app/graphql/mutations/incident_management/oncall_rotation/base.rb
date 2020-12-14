@@ -13,10 +13,10 @@ module Mutations
 
         private
 
-        def response(result, errors = nil)
+        def response(result)
           {
             oncall_rotation: result.payload[:oncall_rotation],
-            errors: errors.presence || result.errors
+            errors: result.errors
           }
         end
       end

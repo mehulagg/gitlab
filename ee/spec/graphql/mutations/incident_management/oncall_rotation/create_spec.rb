@@ -26,8 +26,6 @@ RSpec.describe Mutations::IncidentManagement::OncallRotation::Create do
     }
   end
 
-  specify { expect(described_class).to require_graphql_authorizations(:admin_incident_management_oncall_schedule) }
-
   describe '#resolve' do
     subject(:resolve) { mutation_for(project, current_user).resolve(iid: schedule.iid, project_path: project.full_path, participants: args[:participants], **args) }
 
@@ -87,7 +85,17 @@ RSpec.describe Mutations::IncidentManagement::OncallRotation::Create do
           end
 
           it 'raises an error' do
-            expect { resolve }.to raise_error(ActiveRecord::RecordInvalid, /User does not have access to the project/)
+            expect { resolve }.to raise_error(Gitlab::Graphql::Errors::ArgumentError, /User does not have access to the project/)
+          end
+        end
+
+        context 'duplicate participants' do
+          before do
+            args[:participants] << args[:participants].first
+          end
+
+          it 'raises an error' do
+            expect { resolve }.to raise_error(Gitlab::Graphql::Errors::ArgumentError, 'A duplicate username is included in the participant list')
           end
         end
 
@@ -113,7 +121,7 @@ RSpec.describe Mutations::IncidentManagement::OncallRotation::Create do
 
     context 'when resource is not accessible to the user' do
       it 'raises an error' do
-        expect { resolve }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
+        expect { resolve }.to raise_error(Gitlab::Graphql::Errors::ArgumentError, 'The schedule could not be found')
       end
     end
   end

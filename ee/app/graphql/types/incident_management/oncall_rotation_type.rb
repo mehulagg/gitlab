@@ -11,32 +11,32 @@ module Types
       field :id,
             Types::GlobalIDType[::IncidentManagement::OncallRotation],
             null: false,
-            description: 'ID of the on-call rotation'
+            description: 'ID of the on-call rotation.'
 
       field :name,
             GraphQL::STRING_TYPE,
             null: false,
-            description: 'Name of the on-call rotation'
+            description: 'Name of the on-call rotation.'
 
       field :starts_at,
             Types::TimeType,
             null: true,
-            description: 'Start date of the on-call rotation'
+            description: 'Start date of the on-call rotation.'
 
       field :length,
             GraphQL::INT_TYPE,
             null: true,
-            description: 'Time zone of the on-call schedule'
+            description: 'Length of the on-call schedule, in the units specified by lengthUnit.'
 
       field :length_unit,
             Types::IncidentManagement::OncallRotationLengthUnitEnum,
             null: true,
-            description: 'Unit of the on-call rotation length'
+            description: 'Unit of the on-call rotation length.'
 
       field :participants,
             ::Types::IncidentManagement::OncallParticipantType.connection_type,
             null: true,
-            description: 'Participants of the on-call rotation'
+            description: 'Participants of the on-call rotation.'
     end
   end
 end
