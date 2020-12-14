@@ -68,6 +68,7 @@ describe('On-call schedule', () => {
     expect(timeline.props()).toEqual({
       presetType: PRESET_TYPES.WEEKS,
       timeframe: mockWeeksTimeFrame,
+      schedule: mockSchedule,
     });
   });
 });

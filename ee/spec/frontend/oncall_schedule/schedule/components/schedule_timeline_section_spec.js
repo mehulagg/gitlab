@@ -6,11 +6,14 @@ import ScheduleTimelineSection, {
 import WeeksHeaderItem from 'ee/oncall_schedules/components/schedule/components/preset_weeks/weeks_header_item.vue';
 import { getTimeframeForWeeksView } from 'ee/oncall_schedules/components/schedule/utils';
 import { PRESET_TYPES } from 'ee/oncall_schedules/components/schedule/constants';
+import { getOncallSchedulesQueryResponse } from '../../mocks/apollo_mock';
 
 describe('RoadmapTimelineSectionComponent', () => {
   let wrapper;
   const mockTimeframeInitialDate = new Date(2018, 0, 1);
   const mockTimeframeWeeks = getTimeframeForWeeksView(mockTimeframeInitialDate);
+  const schedule =
+    getOncallSchedulesQueryResponse.data.project.incidentManagementOncallSchedules.nodes[0];
 
   const findRotations = () => wrapper.find(GlCard);
   const findAddRotation = () => wrapper.find(GlButton);
@@ -23,6 +26,7 @@ describe('RoadmapTimelineSectionComponent', () => {
       propsData: {
         presetType,
         timeframe,
+        schedule,
       },
       stubs: {
         GlCard,
