@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 class SnippetRepository < ApplicationRecord
-  include EachBatch
   include Shardable
 
   DEFAULT_EMPTY_FILE_NAME = 'snippetfile'
