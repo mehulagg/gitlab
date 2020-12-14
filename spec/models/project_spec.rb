@@ -1131,51 +1131,56 @@ RSpec.describe Project, factory_default: :keep do
   describe '#external_wiki' do
     let_it_be(:project) { create(:project) }
 
-    context 'with an active external wiki' do
-      before do
+    def subject
+      project.reload.external_wiki
+    end
+
+    it 'returns an active external wiki' do
+      create(:service, project: project, type: 'ExternalWikiService', active: true)
+
+      is_expected.to be_kind_of(ExternalWikiService)
+    end
+
+    it 'does not return an inactive external wiki' do
+      create(:service, project: project, type: 'ExternalWikiService', active: false)
+
+      is_expected.to eq(nil)
+    end
+  end
+
+  describe '#has_external_wiki' do
+    let_it_be(:project) { create(:project) }
+
+    def subject
+      project.reload.has_external_wiki
+    end
+
+    specify { is_expected.to eq(false) }
+
+    context 'when there is an active external wiki service' do
+      let!(:service) do
         create(:service, project: project, type: 'ExternalWikiService', active: true)
-        project.external_wiki
       end
 
-      it 'sets :has_external_wiki as true' do
-        expect(project.has_external_wiki).to be(true)
+      specify { is_expected.to eq(true) }
+
+      it 'becomes false if the external wiki service is destroyed' do
+        expect do
+          Service.find(service.id).delete
+        end.to change { subject }.to(false)
       end
 
-      it 'sets :has_external_wiki as false if an external wiki service is destroyed later' do
-        expect(project.has_external_wiki).to be(true)
-
-        project.services.external_wikis.first.destroy
-
-        expect(project.has_external_wiki).to be(false)
+      it 'becomes false if the external wiki service becomes inactive' do
+        expect do
+          service.update_column(:active, false)
+        end.to change { subject }.to(false)
       end
     end
 
-    context 'with an inactive external wiki' do
-      before do
-        create(:service, project: project, type: 'ExternalWikiService', active: false)
-      end
+    it 'is false when external wiki service is not active' do
+      create(:service, project: project, type: 'ExternalWikiService', active: false)
 
-      it 'sets :has_external_wiki as false' do
-        expect(project.has_external_wiki).to be(false)
-      end
-    end
-
-    context 'with no external wiki' do
-      before do
-        project.external_wiki
-      end
-
-      it 'sets :has_external_wiki as false' do
-        expect(project.has_external_wiki).to be(false)
-      end
-
-      it 'sets :has_external_wiki as true if an external wiki service is created later' do
-        expect(project.has_external_wiki).to be(false)
-
-        create(:service, project: project, type: 'ExternalWikiService', active: true)
-
-        expect(project.has_external_wiki).to be(true)
-      end
+      is_expected.to eq(false)
     end
   end
 

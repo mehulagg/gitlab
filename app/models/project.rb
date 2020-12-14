@@ -1330,19 +1330,9 @@ class Project < ApplicationRecord
   end
 
   def external_wiki
-    if has_external_wiki.nil?
-      cache_has_external_wiki
-    end
+    return unless has_external_wiki?
 
-    if has_external_wiki
-      @external_wiki ||= services.external_wikis.first
-    else
-      nil
-    end
-  end
-
-  def cache_has_external_wiki
-    update_column(:has_external_wiki, services.external_wikis.any?) if Gitlab::Database.read_write?
+    @external_wiki ||= services.external_wikis.first
   end
 
   def find_or_initialize_services
