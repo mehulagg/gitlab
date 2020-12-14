@@ -19525,9 +19525,6 @@ msgstr ""
 msgid "Owner"
 msgstr ""
 
-msgid "PST"
-msgstr ""
-
 msgid "Package Registry"
 msgstr ""
 
