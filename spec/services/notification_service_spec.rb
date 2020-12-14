@@ -352,14 +352,11 @@ RSpec.describe NotificationService, :mailer do
         end
 
         context 'do exist' do
+          let!(:issue_email_participant) { issue.issue_email_participants.create!(email: 'service.desk@example.com') }
+
           before do
             issue.update!(external_author: 'service.desk@example.com')
-            issue.issue_email_participants.create!(email: 'service.desk@example.com')
             project.update!(service_desk_enabled: true)
-          end
-
-          after do
-            issue.issue_email_participants.first.destroy!
           end
 
           it_should_email!
