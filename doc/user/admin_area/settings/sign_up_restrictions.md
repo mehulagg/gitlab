@@ -55,7 +55,7 @@ When the number of billable users reaches the user cap, any user who is added or
 [approved](../approving_users.md#approving-a-user) by an administrator before they can start using
 their account.
 
-If an admin increases or removes the user cap, the users in pending approval state will be
+If an administrator increases or removes the user cap, the users in pending approval state will be
 auto approved in a background job.
 
 ## Soft email confirmation
