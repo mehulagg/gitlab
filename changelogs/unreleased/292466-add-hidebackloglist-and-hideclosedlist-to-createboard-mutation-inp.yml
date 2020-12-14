@@ -1,0 +1,5 @@
+---
+title: Add `hideBacklogList` and `hideClosedList` to `createBoard` mutation input
+merge_request: 49947
+author:
+type: changed
