@@ -31,7 +31,7 @@ RSpec.describe '5-Minute-Production-App.gitlab-ci.yml' do
       end
 
       it 'creates a build and a test job' do
-        expect(build_names).to match_array(['build', 'terraform_apply', 'deploy', 'terraform_destroy'])
+        expect(build_names).to match_array(%w(build terraform_apply deploy terraform_destroy))
       end
     end
   end
