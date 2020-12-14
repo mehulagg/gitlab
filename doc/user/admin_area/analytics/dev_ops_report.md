@@ -35,3 +35,25 @@ improve your scores.
 Usage ping data is aggregated on GitLab's servers for analysis. Your usage
 information is **not sent** to any other GitLab instances. If you have just started using GitLab, it may take a few weeks for data to be
 collected before this feature is available.
+
+## DevOps Adoption
+
+DevOps Adoption shows you which segments of your organization are using GitLab's most essential features:
+
+- Issues
+- Merge Requests
+- Approvals
+- Runners
+- Pipelines
+- Deploys
+- Scanning
+
+Segments are arbitrary collections of GitLab groups and projects that you define. You might define a segment to represent a small team, a large department, or a whole organization. You are limited to creating a maximum of 20 segments, and each segment is limited to a maximum of 20 groups. Buttons to manage your segments appear in the DevOps Adoption section of the page.
+
+Some uses of DevOps Adoption include:
+
+- Verify whether you are getting the return on investment that you expected from GitLab.
+- Identify specific groups that are lagging in their adoption of GitLab so you can help them along in their DevOps journey.
+- Identify groups that have adopted specific features such as Pipelines and can provide tips to other groups interested in getting started with these features
+
+![DevOps Report](img/dev_ops_adoption_v13_7.png)
