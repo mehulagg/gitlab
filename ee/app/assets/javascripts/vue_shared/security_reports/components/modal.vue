@@ -7,7 +7,7 @@ import MergeRequestNote from 'ee/vue_shared/security_reports/components/merge_re
 import ModalFooter from 'ee/vue_shared/security_reports/components/modal_footer.vue';
 import SolutionCard from 'ee/vue_shared/security_reports/components/solution_card_vuex.vue';
 import VulnerabilityDetails from 'ee/vue_shared/security_reports/components/vulnerability_details.vue';
-import GlModal from '@gitlab/ui';
+import { GlModal } from '@gitlab/ui';
 import { __ } from '~/locale';
 
 export default {
@@ -187,8 +187,8 @@ export default {
 </script>
 <template>
   <gl-modal
-    id="modal-mrwidget-security-issue"
-    :header-title-text="modal.title"
+    modal-id="modal-mrwidget-security-issue"
+    :title="modal.title"
     data-qa-selector="vulnerability_modal_content"
     class="modal-security-report-dast"
   >
@@ -243,7 +243,7 @@ export default {
 
       <div v-if="modal.error" class="alert alert-danger">{{ modal.error }}</div>
     </slot>
-    <template #footer>
+    <template #modal-footer>
       <dismissal-comment-modal-footer
         v-if="modal.isCommentingOnDismissal"
         :is-dismissed="vulnerability.isDismissed"

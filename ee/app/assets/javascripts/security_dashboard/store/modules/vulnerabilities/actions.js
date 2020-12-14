@@ -22,8 +22,6 @@ import * as types from './mutation_types';
  * https://gitlab.com/gitlab-org/gitlab/issues/8519
  */
 
-const hideModal = () => $('#modal-mrwidget-security-issue').modal('hide');
-
 export const setPipelineId = ({ commit }, id) => commit(types.SET_PIPELINE_ID, id);
 
 export const setSourceBranch = ({ commit }, ref) => commit(types.SET_SOURCE_BRANCH, ref);
@@ -77,8 +75,8 @@ export const receiveVulnerabilitiesError = ({ commit }, errorCode) => {
   commit(types.RECEIVE_VULNERABILITIES_ERROR, errorCode);
 };
 
-export const openModal = ({ commit }, payload = {}) => {
-  $('#modal-mrwidget-security-issue').modal('show');
+export const setModalData = ({ commit }, payload = {}) => {
+  // $('#modal-mrwidget-security-issue').modal('show');
 
   commit(types.SET_MODAL_DATA, payload);
 };
@@ -232,7 +230,7 @@ export const dismissVulnerability = (
       }
     : {};
 
-  axios
+  return axios
     .post(vulnerability.create_vulnerability_feedback_dismissal_path, {
       vulnerability_feedback: {
         category: vulnerability.report_type,
@@ -269,7 +267,6 @@ export const requestDismissVulnerability = ({ commit }) => {
 
 export const receiveDismissVulnerabilitySuccess = ({ commit }, payload) => {
   commit(types.RECEIVE_DISMISS_VULNERABILITY_SUCCESS, payload);
-  hideModal();
 };
 
 export const receiveDismissVulnerabilityError = ({ commit }, { flashError }) => {
@@ -299,7 +296,7 @@ export const addDismissalComment = ({ dispatch }, { vulnerability, comment }) =>
         vulnerabilityName: vulnerability.name,
       });
 
-  axios
+  return axios
     .patch(url, {
       project_id: dismissal_feedback.project_id,
       id: dismissal_feedback.id,
@@ -324,7 +321,7 @@ export const deleteDismissalComment = ({ dispatch }, { vulnerability }) => {
     vulnerabilityName: vulnerability.name,
   });
 
-  axios
+  return axios
     .patch(url, {
       project_id: dismissal_feedback.project_id,
       comment: '',
@@ -346,7 +343,6 @@ export const requestAddDismissalComment = ({ commit }) => {
 
 export const receiveAddDismissalCommentSuccess = ({ commit }, payload) => {
   commit(types.RECEIVE_ADD_DISMISSAL_COMMENT_SUCCESS, payload);
-  hideModal();
 };
 
 export const receiveAddDismissalCommentError = ({ commit }) => {
@@ -359,7 +355,6 @@ export const requestDeleteDismissalComment = ({ commit }) => {
 
 export const receiveDeleteDismissalCommentSuccess = ({ commit }, payload) => {
   commit(types.RECEIVE_DELETE_DISMISSAL_COMMENT_SUCCESS, payload);
-  hideModal();
 };
 
 export const receiveDeleteDismissalCommentError = ({ commit }) => {
@@ -395,7 +390,6 @@ export const requestUndoDismiss = ({ commit }) => {
 
 export const receiveUndoDismissSuccess = ({ commit }, payload) => {
   commit(types.RECEIVE_REVERT_DISMISSAL_SUCCESS, payload);
-  hideModal();
 };
 
 export const receiveUndoDismissError = ({ commit }, { flashError }) => {

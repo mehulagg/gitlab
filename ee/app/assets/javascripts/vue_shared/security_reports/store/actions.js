@@ -196,7 +196,7 @@ export const dismissVulnerability = ({ state, dispatch }, comment) => {
     vulnerabilityName: state.modal.vulnerability.name,
   });
 
-  axios
+  return axios
     .post(state.createVulnerabilityFeedbackDismissalPath, {
       vulnerability_feedback: {
         category: state.modal.vulnerability.category,
@@ -245,7 +245,7 @@ export const addDismissalComment = ({ state, dispatch }, { comment }) => {
         vulnerabilityName: vulnerability.name,
       });
 
-  axios
+  return axios
     .patch(url, {
       project_id: dismissalFeedback.project_id,
       id: dismissalFeedback.id,
@@ -274,7 +274,7 @@ export const deleteDismissalComment = ({ state, dispatch }) => {
     vulnerabilityName: vulnerability.name,
   });
 
-  axios
+  return axios
     .patch(url, {
       project_id: dismissalFeedback.project_id,
       comment: '',
@@ -321,7 +321,7 @@ export const receiveAddDismissalCommentError = ({ commit }, error) => {
 export const revertDismissVulnerability = ({ state, dispatch }) => {
   dispatch('requestDismissVulnerability');
 
-  axios
+  return axios
     .delete(
       state.modal.vulnerability.dismissalFeedback.destroy_vulnerability_feedback_dismissal_path,
     )

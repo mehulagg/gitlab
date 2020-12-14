@@ -88,12 +88,20 @@ export default {
     },
   },
   methods: {
-    ...mapActions('vulnerabilities', ['openModal', 'selectVulnerability', 'deselectVulnerability']),
+    ...mapActions('vulnerabilities', [
+      'setModalData',
+      'selectVulnerability',
+      'deselectVulnerability',
+    ]),
     toggleVulnerability() {
       if (this.isSelected) {
         return this.deselectVulnerability(this.vulnerability);
       }
       return this.selectVulnerability(this.vulnerability);
+    },
+    openModal(payload) {
+      this.setModalData(payload);
+      this.$root.$emit('bv::show::modal', 'modal-mrwidget-security-issue');
     },
   },
 };

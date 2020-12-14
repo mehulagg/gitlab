@@ -25,10 +25,11 @@ export default {
     this.updateTooltipTitle();
   },
   methods: {
-    ...mapActions(['openModal']),
+    ...mapActions(['setModalData']),
     handleIssueClick() {
-      const { issue, status, openModal } = this;
-      openModal({ issue, status });
+      const { issue, status, setModalData } = this;
+      setModalData({ issue, status });
+      this.$root.$emit('bv::show::modal', 'modal-mrwidget-security-issue');
     },
     updateTooltipTitle() {
       // Only show the tooltip if the text is truncated with an ellipsis.

@@ -86,6 +86,21 @@ export default {
     ]),
     ...mapActions('pipelineJobs', ['fetchPipelineJobs']),
     ...mapActions('filters', ['lockFilter', 'setHideDismissedToggleInitialState']),
+    handleDismissVulnerability(payload) {
+      return this.dismissVulnerability(payload).then(this.hideModal);
+    },
+    handleAddDismissalComment(payload) {
+      return this.addDismissalComment(payload).then(this.hideModal);
+    },
+    handleDeleteDismissalComment(payload) {
+      return this.deleteDismissalComment(payload).then(this.hideModal);
+    },
+    handleRevertDismissVulnerability(payload) {
+      return this.undoDismiss(payload).then(this.hideModal);
+    },
+    hideModal() {
+      this.$root.$emit('bv::hide::modal', 'modal-mrwidget-security-issue');
+    },
   },
 };
 </script>
@@ -126,17 +141,17 @@ export default {
         :is-creating-issue="isCreatingIssue"
         :is-dismissing-vulnerability="isDismissingVulnerability"
         :is-creating-merge-request="isCreatingMergeRequest"
-        @addDismissalComment="addDismissalComment({ vulnerability, comment: $event })"
+        @addDismissalComment="handleAddDismissalComment({ vulnerability, comment: $event })"
         @editVulnerabilityDismissalComment="openDismissalCommentBox"
         @showDismissalDeleteButtons="showDismissalDeleteButtons"
         @hideDismissalDeleteButtons="hideDismissalDeleteButtons"
-        @deleteDismissalComment="deleteDismissalComment({ vulnerability })"
+        @deleteDismissalComment="handleDeleteDismissalComment({ vulnerability })"
         @closeDismissalCommentBox="closeDismissalCommentBox"
         @createMergeRequest="createMergeRequest({ vulnerability })"
         @createNewIssue="createIssue({ vulnerability })"
-        @dismissVulnerability="dismissVulnerability({ vulnerability, comment: $event })"
+        @dismissVulnerability="handleDismissVulnerability({ vulnerability, comment: $event })"
         @openDismissalCommentBox="openDismissalCommentBox"
-        @revertDismissVulnerability="undoDismiss({ vulnerability })"
+        @revertDismissVulnerability="handleRevertDismissVulnerability({ vulnerability })"
         @downloadPatch="downloadPatch({ vulnerability })"
       />
     </template>

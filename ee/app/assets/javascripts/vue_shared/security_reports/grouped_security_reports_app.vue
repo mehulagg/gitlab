@@ -435,6 +435,21 @@ export default {
     hasIssuesForReportType(reportType) {
       return Boolean(this[reportType]?.newIssues.length || this[reportType]?.resolvedIssues.length);
     },
+    handleDismissVulnerability(payload) {
+      return this.dismissVulnerability(payload).then(this.hideModal);
+    },
+    handleAddDismissalComment(payload) {
+      return this.addDismissalComment(payload).then(this.hideModal);
+    },
+    handleDeleteDismissalComment(payload) {
+      return this.deleteDismissalComment(payload).then(this.hideModal);
+    },
+    handleRevertDismissVulnerability(payload) {
+      return this.revertDismissVulnerability(payload).then(this.hideModal);
+    },
+    hideModal() {
+      this.$root.$emit('bv::hide::modal', 'modal-mrwidget-security-issue');
+    },
   },
   summarySlots: ['success', 'error', 'loading'],
 };
@@ -677,13 +692,13 @@ export default {
           @closeDismissalCommentBox="closeDismissalCommentBox()"
           @createMergeRequest="createMergeRequest"
           @createNewIssue="createNewIssue"
-          @dismissVulnerability="dismissVulnerability"
+          @dismissVulnerability="handleDismissVulnerability"
           @openDismissalCommentBox="openDismissalCommentBox()"
           @editVulnerabilityDismissalComment="openDismissalCommentBox()"
-          @revertDismissVulnerability="revertDismissVulnerability"
+          @revertDismissVulnerability="handleRevertDismissVulnerability"
           @downloadPatch="downloadPatch"
-          @addDismissalComment="addDismissalComment({ comment: $event })"
-          @deleteDismissalComment="deleteDismissalComment"
+          @addDismissalComment="handleAddDismissalComment({ comment: $event })"
+          @deleteDismissalComment="handleDeleteDismissalComment"
           @showDismissalDeleteButtons="showDismissalDeleteButtons"
           @hideDismissalDeleteButtons="hideDismissalDeleteButtons"
         />
