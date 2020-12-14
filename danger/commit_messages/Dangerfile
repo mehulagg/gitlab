@@ -93,7 +93,7 @@ end
 def lint_mr_title(mr_title)
   commit = Struct.new(:message, :sha).new(mr_title)
 
-  Gitlab::Danger::MergeRequestLinter.new(commit).lint_subject("merge request title")
+  Gitlab::Danger::MergeRequestLinter.new(commit).lint
 end
 
 def count_non_fixup_commits(commit_linters)

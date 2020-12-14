@@ -116,7 +116,7 @@ RSpec.describe Gitlab::Danger::CommitLinter do
     it 'stores messages in #failures' do
       commit_linter.add_problem(:details_line_too_long)
 
-      expect(commit_linter.problems).to eq({ details_line_too_long: described_class::PROBLEMS[:details_line_too_long] })
+      expect(commit_linter.problems).to eq({ details_line_too_long: described_class.problems_mapping[:details_line_too_long] })
     end
   end
 
@@ -138,7 +138,7 @@ RSpec.describe Gitlab::Danger::CommitLinter do
         let(:commit_message) { 'A B' }
 
         it 'adds a problem' do
-          expect(commit_linter).to receive(:add_problem).with(:subject_too_short, described_class::DEFAULT_SUBJECT_DESCRIPTION)
+          expect(commit_linter).to receive(:add_problem).with(:subject_too_short, described_class.subject_description)
 
           commit_linter.lint
         end
@@ -148,7 +148,7 @@ RSpec.describe Gitlab::Danger::CommitLinter do
         let(:commit_message) { 'A B ' + 'C' * described_class::MAX_LINE_LENGTH }
 
         it 'adds a problem' do
-          expect(commit_linter).to receive(:add_problem).with(:subject_too_long, described_class::DEFAULT_SUBJECT_DESCRIPTION)
+          expect(commit_linter).to receive(:add_problem).with(:subject_too_long, described_class.subject_description)
 
           commit_linter.lint
         end
@@ -170,8 +170,8 @@ RSpec.describe Gitlab::Danger::CommitLinter do
         let(:commit_message) { 'A ' + 'B' * described_class::MAX_LINE_LENGTH }
 
         it 'adds a problem' do
-          expect(commit_linter).to receive(:add_problem).with(:subject_too_short, described_class::DEFAULT_SUBJECT_DESCRIPTION)
-          expect(commit_linter).to receive(:add_problem).with(:subject_too_long, described_class::DEFAULT_SUBJECT_DESCRIPTION)
+          expect(commit_linter).to receive(:add_problem).with(:subject_too_short, described_class.subject_description)
+          expect(commit_linter).to receive(:add_problem).with(:subject_too_long, described_class.subject_description)
 
           commit_linter.lint
         end
@@ -181,7 +181,7 @@ RSpec.describe Gitlab::Danger::CommitLinter do
         let(:commit_message) { 'a B C' }
 
         it 'adds a problem' do
-          expect(commit_linter).to receive(:add_problem).with(:subject_starts_with_lowercase, described_class::DEFAULT_SUBJECT_DESCRIPTION)
+          expect(commit_linter).to receive(:add_problem).with(:subject_starts_with_lowercase, described_class.subject_description)
 
           commit_linter.lint
         end
@@ -218,7 +218,7 @@ RSpec.describe Gitlab::Danger::CommitLinter do
           let(:commit_message) { message }
 
           it 'adds a problem' do
-            expect(commit_linter).to receive(:add_problem).with(:subject_starts_with_lowercase, described_class::DEFAULT_SUBJECT_DESCRIPTION)
+            expect(commit_linter).to receive(:add_problem).with(:subject_starts_with_lowercase, described_class.subject_description)
 
             commit_linter.lint
           end
@@ -229,7 +229,7 @@ RSpec.describe Gitlab::Danger::CommitLinter do
         let(:commit_message) { 'A B C.' }
 
         it 'adds a problem' do
-          expect(commit_linter).to receive(:add_problem).with(:subject_ends_with_a_period, described_class::DEFAULT_SUBJECT_DESCRIPTION)
+          expect(commit_linter).to receive(:add_problem).with(:subject_ends_with_a_period, described_class.subject_description)
 
           commit_linter.lint
         end
