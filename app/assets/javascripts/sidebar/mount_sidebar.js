@@ -276,13 +276,13 @@ function mountSeverityComponent() {
 
 function mountCopyEmailComponent() {
   const el = document.getElementById('issuable-copy-email');
-  // todo guard on logged in/mobile button
+
   if (!el) return;
 
   // eslint-disable-next-line no-new
   new Vue({
     el,
-    render: createElement => createElement(CopyEmailToClipboard, {}),
+    render: createElement => createElement(CopyEmailToClipboard, { props: { copyText: 'xxx' } }),
   });
 }
 

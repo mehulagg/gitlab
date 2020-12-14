@@ -136,7 +136,7 @@
               %cite{ title: project_ref }
                 = project_ref
             = clipboard_button(text: project_ref, title: _('Copy reference'), placement: "left", boundary: 'viewport')
-      - if signed_in
+      - if signed_in && issuable_type == 'issue'
         .block.with-sub-blocks
           #issuable-copy-email
 

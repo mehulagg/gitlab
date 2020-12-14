@@ -1,32 +1,36 @@
 <script>
-import { __ } from '~/locale';
+import { __, sprintf } from '~/locale';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
 
 export default {
-  i18n: {
-    issueEmail: __('Issue email'),
-  },
   components: {
     ClipboardButton,
   },
   props: {
     copyText: {
       type: String,
-      required: false,
-      default: 'xxxxxxxxxxxxxxxxx',
+      required: true,
+    },
+  },
+  computed: {
+    emailText() {
+      return sprintf(__('Issue email: %{copyText}'), { copyText: this.copyText });
     },
   },
 };
 </script>
 
 <template>
-  <div class="gl-display-flex align-items-center gl-justify-content-space-between">
+  <div
+    class="copy-email-address gl-display-flex align-items-center gl-justify-content-space-between"
+  >
     <span
       style="width: 85%"
-      class="gl-overflow-hidden gl-text-overflow-ellipsis gl-white-space-nowrap"
-      >{{ `${$options.i18n.issueEmail}: ${copyText}` }}</span
+      class="gl-overflow-hidden gl-text-overflow-ellipsis gl-white-space-nowrap hide-collapsed"
+      >{{ emailText }}</span
     >
     <clipboard-button
+      class="copy-email-button gl-bg-none!"
       category="tertiary"
       :title="'Copy email'"
       :text="copyText"
