@@ -41,7 +41,6 @@ module Mutations
                 required: false,
                 description: copy_field_description(Types::BoardType, :hide_closed_list)
 
-
       authorize :admin_board
 
       def resolve(args)

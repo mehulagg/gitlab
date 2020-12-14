@@ -10987,6 +10987,26 @@
               "defaultValue": null
             },
             {
+              "name": "hideBacklogList",
+              "description": "Whether or not backlog list is hidden",
+              "type": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "hideClosedList",
+              "description": "Whether or not closed list is hidden",
+              "type": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
               "name": "clientMutationId",
               "description": "A unique identifier for the client performing the mutation.",
               "type": {

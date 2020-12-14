@@ -3986,6 +3986,16 @@ input CreateBoardInput {
   groupPath: ID
 
   """
+  Whether or not backlog list is hidden
+  """
+  hideBacklogList: Boolean
+
+  """
+  Whether or not closed list is hidden
+  """
+  hideClosedList: Boolean
+
+  """
   The IDs of labels to be added to the board.
   """
   labelIds: [LabelID!]
