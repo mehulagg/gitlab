@@ -11432,7 +11432,8 @@ CREATE TABLE container_repositories (
     updated_at timestamp without time zone NOT NULL,
     status smallint,
     expiration_policy_started_at timestamp with time zone,
-    expiration_policy_cleanup_status smallint DEFAULT 0 NOT NULL
+    expiration_policy_cleanup_status smallint DEFAULT 0 NOT NULL,
+    expiration_policy_completed_at timestamp with time zone
 );
 
 CREATE SEQUENCE container_repositories_id_seq
