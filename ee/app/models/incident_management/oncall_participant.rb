@@ -13,6 +13,7 @@ module IncidentManagement
 
     # Uniqueness validations added here should be duplicated
     # in IncidentManagement::OncallRotation::CreateService
+    # as bulk insertion skips validations
     validates :rotation, presence: true
     validates :color_palette, presence: true
     validates :color_weight, presence: true
