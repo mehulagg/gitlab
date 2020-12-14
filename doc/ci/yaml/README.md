@@ -3838,8 +3838,8 @@ description.
 > [Introduced](https://gitlab.com/gitlab-org/release-cli/-/merge_requests/67) in GitLab 13.7.
 
 You can specify a file in `$CI_PROJECT_DIR` that contains the description. The file must be relative
-to the project directory (`$CI_PROJECT_DIR`), and can't directly link outside it. The
-`./path/to/file` and file name can't contain spaces.
+to the project directory (`$CI_PROJECT_DIR`), and if the file is a symbolic link it can't reside
+outside of `$CI_PROJECT_DIR`. The `./path/to/file` and file name can't contain spaces.
 
 ```yaml
 job:
