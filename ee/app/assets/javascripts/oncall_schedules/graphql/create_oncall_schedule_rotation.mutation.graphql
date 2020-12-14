@@ -1,25 +1,21 @@
-#import "~/graphql_shared/fragments/user.fragment.graphql"
-
-mutation oncallScheduleRotationCreate(
-  $oncallScheduleRotationCreateInput: OncallScheduleRotationCreateInput!
-) {
-  oncallScheduleRotationCreate(input: $oncallScheduleRotationCreateInput) {
+mutation newRotation($OncallRotationCreateInput: OncallRotationCreateInput!) {
+  oncallRotationCreate(input: $OncallRotationCreateInput) {
     errors
-    oncallScheduleRotation {
-      iid
+    oncallRotation {
+      id
       name
+      startsAt
+      length
+      lengthUnit
       participants {
         nodes {
-          ...User
+          user {
+            id
+            username
+          }
+          colorWeight
+          colorPalette
         }
-      }
-      length {
-        value
-        type
-      }
-      startsOn {
-        date
-        time
       }
     }
   }

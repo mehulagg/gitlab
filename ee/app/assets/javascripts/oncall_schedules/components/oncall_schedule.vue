@@ -130,7 +130,6 @@ export default {
             :timeframe="timeframe"
           />
         </div>
-      </gl-card>
     </gl-card>
     <delete-schedule-modal :schedule="schedule" :modal-id="$options.deleteScheduleModalId" />
     <edit-schedule-modal :schedule="schedule" :modal-id="$options.editScheduleModalId" />
