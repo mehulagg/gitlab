@@ -374,6 +374,26 @@ Clear the cache:
 sudo gitlab-rake cache:clear
 ```
 
+### Export a repository
+
+We typically recommend exporting a project via [the Web interface](https://docs.gitlab.com/ee/user/project/settings/import_export.html#exporting-a-project-and-its-data) or via [the API](). In situations where this is not working as expected, it may be preferable to export a project directly via the Rails console with a snippet like this one:
+
+```ruby
+user = User.find_by_username('USERNAME')
+project = Project.find_by_full_path('PROJECT_PATH')
+Projects::ImportExport::ExportService.new(project, user).execute
+```
+
+If the project you wish to export is available at `https://gitlab.example.com/baltig/pipeline-templates`, the value to use for `PROJECT_PATH` would be `baltig/pipeline-templates`. 
+
+If this all runs successfully, you will see output like the following before being returned to the Rails console prompt:
+
+```
+=> nil
+```
+
+The exported project will be located within a `.tar.gz` file in `/var/opt/gitlab/gitlab-rails/uploads/-/system/import_export_upload/export_file/`. 
+
 ## Repository
 
 ### Search sequence of pushes to a repository
