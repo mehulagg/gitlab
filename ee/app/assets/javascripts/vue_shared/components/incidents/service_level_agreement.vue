@@ -9,6 +9,7 @@ export default {
     longTitle: s__('IncidentManagement|%{hours} hours, %{minutes} minutes remaining'),
     shortTitle: s__('IncidentManagement|%{minutes} minutes remaining'),
   },
+  FIFTEEN_MINUTES: 15 * 60 * 1000, // in milliseconds
   directives: {
     GlTooltip: GlTooltipDirective,
   },
@@ -19,12 +20,17 @@ export default {
       default: null,
     },
   },
+  data() {
+    return {
+      clientRemainingTime: null,
+    };
+  },
   computed: {
     shouldShow() {
       return isValidSlaDueAt(this.slaDueAt);
     },
     remainingTime() {
-      return calculateRemainingMilliseconds(this.slaDueAt);
+      return this.clientRemainingTime ?? calculateRemainingMilliseconds(this.slaDueAt);
     },
     slaText() {
       const remainingDuration = formatTime(this.remainingTime);
@@ -40,6 +46,24 @@ export default {
         return sprintf(this.$options.i18n.longTitle, { hours, minutes });
       }
       return sprintf(this.$options.i18n.shortTitle, { minutes });
+    },
+  },
+  mounted() {
+    this.timer = setInterval(() => this.refreshTime(), this.$options.FIFTEEN_MINUTES);
+  },
+  beforeDestroy() {
+    clearTimeout(this.timer);
+  },
+  methods: {
+    refreshTime() {
+      if (this.remainingTime > this.$options.FIFTEEN_MINUTES) {
+        // This may introduce drift, but it will be minimal given the length of time
+        // between updates.
+        this.clientRemainingTime = this.remainingTime - this.$options.FIFTEEN_MINUTES;
+      } else {
+        this.clientRemainingTime = 0;
+        clearTimeout(this.timer);
+      }
     },
   },
 };
