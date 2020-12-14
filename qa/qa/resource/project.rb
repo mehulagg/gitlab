@@ -10,12 +10,12 @@ module QA
       include Visibility
 
       attr_accessor :repository_storage # requires admin access
-      attr_writer :initialize_with_readme
       attr_writer :auto_devops_enabled
       attr_writer :github_personal_access_token
       attr_writer :github_repository_path
 
       attribute :default_branch
+      attribute :initialize_with_readme
       attribute :id
       attribute :name
       attribute :add_name_uuid
@@ -271,6 +271,14 @@ module QA
 
       def share_with_group(invitee, access_level = Resource::Members::AccessLevel::DEVELOPER)
         post Runtime::API::Request.new(api_client, "/projects/#{id}/share").url, { group_id: invitee.id, group_access: access_level }
+      end
+
+      def validate_via_api!
+        reload! unless api_resource
+
+        if initialize_with_readme && !has_file?('README.md')
+          raise ResourceFabricationFailedError, "Failed to fabricate project '#{full_path}', `initialize_with_readme` was `true` but no `README.md` was found."
+        end
       end
 
       private

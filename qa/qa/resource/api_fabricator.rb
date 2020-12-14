@@ -70,6 +70,10 @@ module QA
         process_api_response(parse_body(response))
       end
 
+      def validate_via_api!
+        # Optionally implemented in sub classes to validate a resource after fabrication
+      end
+
       private
 
       def resource_web_url(resource)

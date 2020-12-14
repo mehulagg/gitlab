@@ -29,6 +29,8 @@ module QA
         do_fabricate!(resource: resource, prepare_block: prepare_block, parents: parents) do
           log_fabrication(:browser_ui, resource, parents, args) { resource.fabricate!(*args) }
 
+          resource.validate_via_api!
+
           current_url
         end
       end
@@ -44,6 +46,8 @@ module QA
 
         do_fabricate!(resource: resource, prepare_block: prepare_block, parents: parents) do
           log_fabrication(:api, resource, parents, args) { resource.fabricate_via_api! }
+
+          resource.validate_via_api!
         end
       end
 
