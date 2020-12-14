@@ -57,7 +57,7 @@ describe('Incidents Published Cell', () => {
         ${0}  | ${7}    | ${'7 minutes remaining'}
         ${0}  | ${0}    | ${'0 minutes remaining'}
       `(
-        'returns the correct message for: hours: "$hours", hinutes: "$minutes"',
+        'returns the correct message for: hours: "$hours", minutes: "$minutes"',
         ({ hours, minutes, expectedMessage }) => {
           const testTime = hours * hoursInMilliseconds + minutes * minutesInMilliseconds;
           calculateRemainingMilliseconds.mockImplementation(() => testTime);
@@ -67,6 +67,24 @@ describe('Incidents Published Cell', () => {
           expect(wrapper.attributes('title')).toBe(expectedMessage);
         },
       );
+    });
+
+    describe('countdown timer', () => {
+      it('advances a countdown timer', () => {
+        const ONE_MINUTE = 60 * 1000; // ms
+        const FIVE_MINUTES = 5 * ONE_MINUTE;
+        const FIFTEEN_MINUTES = 15 * ONE_MINUTE;
+        const TWENTY_MINUTES = 20 * ONE_MINUTE;
+
+        calculateRemainingMilliseconds.mockImplementationOnce(() => TWENTY_MINUTES);
+
+        mountComponent({ slaDueAt: mockDateString });
+
+        jest.advanceTimersByTime(FIFTEEN_MINUTES);
+
+        expect(formatTime).toHaveBeenNthCalledWith(1, TWENTY_MINUTES);
+        expect(formatTime).toHaveBeenNthCalledWith(2, FIVE_MINUTES);
+      });
     });
   });
 });
