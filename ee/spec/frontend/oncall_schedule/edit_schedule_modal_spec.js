@@ -5,7 +5,9 @@ import VueApollo from 'vue-apollo';
 import waitForPromises from 'helpers/wait_for_promises';
 import getOncallSchedulesQuery from 'ee/oncall_schedules/graphql/queries/get_oncall_schedules.query.graphql';
 import updateOncallScheduleMutation from 'ee/oncall_schedules/graphql/mutations/update_oncall_schedule.mutation.graphql';
-import UpdateScheduleModal, { i18n } from 'ee/oncall_schedules/components/edit_schedule_modal.vue';
+import UpdateScheduleModal, {
+  i18n,
+} from 'ee/oncall_schedules/components/add_edit_schedule_modal.vue';
 import { editScheduleModalId } from 'ee/oncall_schedules/components/oncall_schedule';
 import {
   getOncallSchedulesQueryResponse,
@@ -55,6 +57,7 @@ describe('UpdateScheduleModal', () => {
       propsData: {
         modalId: editScheduleModalId,
         schedule,
+        isEditMode: true,
         ...props,
       },
       provide: {
@@ -67,7 +70,7 @@ describe('UpdateScheduleModal', () => {
         },
       },
     });
-    wrapper.vm.$refs.updateScheduleModal.hide = mockHideModal;
+    wrapper.vm.$refs.addUpdateScheduleModal.hide = mockHideModal;
   };
 
   function createComponentWithApollo({
@@ -101,6 +104,7 @@ describe('UpdateScheduleModal', () => {
       },
       propsData: {
         modalId: editScheduleModalId,
+        isEditMode: true,
         schedule,
       },
       provide: {
@@ -122,7 +126,6 @@ describe('UpdateScheduleModal', () => {
   it('renders update schedule modal layout', () => {
     expect(wrapper.element).toMatchSnapshot();
   });
-
   describe('renders update modal with the correct schedule information', () => {
     it('renders name of correct modal id', () => {
       expect(findModal().attributes('modalid')).toBe(editScheduleModalId);
@@ -167,15 +170,6 @@ describe('UpdateScheduleModal', () => {
   });
 
   describe('with mocked Apollo client', () => {
-    it('has the name of the schedule to update based on getOncallSchedulesQuery', async () => {
-      createComponentWithApollo();
-
-      await jest.runOnlyPendingTimers();
-      await wrapper.vm.$nextTick();
-
-      expect(findModal().attributes('data-testid')).toBe(`update-schedule-modal-${schedule.iid}`);
-    });
-
     it('calls a mutation with correct parameters and updates a schedule', async () => {
       createComponentWithApollo();
 

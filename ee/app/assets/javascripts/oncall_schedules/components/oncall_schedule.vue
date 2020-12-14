@@ -10,7 +10,7 @@ import {
 import { s__ } from '~/locale';
 import ScheduleTimelineSection from './schedule/components/schedule_timeline_section.vue';
 import DeleteScheduleModal from './delete_schedule_modal.vue';
-import EditScheduleModal from './edit_schedule_modal.vue';
+import EditScheduleModal from './add_edit_schedule_modal.vue';
 import AddRotationModal from './rotations/add_rotation_modal.vue';
 
 import { getTimeframeForWeeksView } from './schedule/utils';
@@ -133,7 +133,11 @@ export default {
       </gl-card>
     </gl-card>
     <delete-schedule-modal :schedule="schedule" :modal-id="$options.deleteScheduleModalId" />
-    <edit-schedule-modal :schedule="schedule" :modal-id="$options.editScheduleModalId" />
+    <edit-schedule-modal
+      :schedule="schedule"
+      :modal-id="$options.editScheduleModalId"
+      is-edit-mode
+    />
     <add-rotation-modal :modal-id="$options.addRotationModalId" />
   </div>
 </template>
