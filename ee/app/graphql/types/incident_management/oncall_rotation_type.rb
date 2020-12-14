@@ -37,6 +37,13 @@ module Types
             ::Types::IncidentManagement::OncallParticipantType.connection_type,
             null: true,
             description: 'Participants of the on-call rotation.'
+
+      field :shifts,
+            ::Types::IncidentManagement::OncallShiftType.connection_type,
+            null: true,
+            description: 'Blocks of time for which a participant is on-call.',
+            resolver: Resolvers::IncidentManagement::OncallShiftResolver
+
     end
   end
 end
