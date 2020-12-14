@@ -14,19 +14,37 @@ export default {
       type: Array,
       required: true,
     },
+    schedule: {
+      type: Object,
+      required: true,
+    },
   },
 };
 </script>
 
 <template>
-  <div class="timeline-section clearfix">
-    <span class="timeline-header-blank"></span>
-    <weeks-header-item
-      v-for="(timeframeItem, index) in timeframe"
-      :key="index"
-      :timeframe-index="index"
-      :timeframe-item="timeframeItem"
-      :timeframe="timeframe"
-    />
+  <div>
+    <gl-card header-class="gl-bg-transparent">
+      <template #header>
+        <div class="gl-display-flex gl-justify-content-space-between">
+          <h6 class="gl-m-0">{{ $options.i18n.rotationTitle }}</h6>
+          <gl-button v-gl-modal="'create-schedule-rotation-modal'" variant="link">{{
+            $options.i18n.addARotation
+          }}</gl-button>
+        </div>
+      </template>
+
+      <div class="timeline-section clearfix">
+        <span class="timeline-header-blank"></span>
+        <weeks-header-item
+          v-for="(timeframeItem, index) in timeframe"
+          :key="index"
+          :timeframe-index="index"
+          :timeframe-item="timeframeItem"
+          :timeframe="timeframe"
+        />
+      </div>
+    </gl-card>
+    <add-rotation-modal :schedule="schedule" />
   </div>
 </template>
