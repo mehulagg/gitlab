@@ -10,11 +10,6 @@ class SnippetRepositoryStorageMove < ApplicationRecord
   belongs_to :container, class_name: 'Snippet', inverse_of: :repository_storage_moves, foreign_key: :snippet_id
   alias_attribute :snippet, :container
 
-  override :update_repository_storage
-  def update_repository_storage(new_storage)
-    # TODO
-  end
-
   override :schedule_repository_storage_update_worker
   def schedule_repository_storage_update_worker
     SnippetUpdateRepositoryStorageWorker.perform_async(
