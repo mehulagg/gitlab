@@ -301,7 +301,7 @@ WARNING:
 Each code can be used only once to log in to your account.
 
 Immediately after successfully enabling two-factor authentication, you're
-prompted to download a set of generated recovery codes. Should you ever lose access
+prompted to copy, download, or print a set of generated recovery codes. Should you ever lose access
 to your one-time password authenticator, you can use one of these recovery codes to log in to
 your account. We suggest copying and printing them, or downloading them using
 the **Download codes** button for storage in a safe place. If you choose to
