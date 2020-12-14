@@ -11,29 +11,24 @@ class ElasticDeleteProjectWorker
   idempotent!
 
   def perform(project_id, es_id)
-    remove_issues(project_id, es_id) if Elastic::DataMigrationService.migration_has_finished?(:migrate_issues_to_separate_index)
     remove_project_and_children_documents(project_id, es_id)
   end
 
   private
 
-  def remove_issues(project_id, es_id)
-    client.delete_by_query({
-      index: Issue.__elasticsearch__.index_name,
-      routing: es_id,
-      body: {
-        query: {
-          term: {
-            project_id: project_id
-          }
-        }
-      }
-    })
+  def indices
+    helper = Gitlab::Elastic::Helper.default
+
+    if Elastic::DataMigrationService.migration_has_finished?(:migrate_issues_to_separate_index)
+      [helper.target_name] + helper.standalone_indices_proxies.map(&:index_name)
+    else
+      [helper.target_name]
+    end
   end
 
   def remove_project_and_children_documents(project_id, es_id)
     client.delete_by_query({
-      index: Project.__elasticsearch__.index_name,
+      index: indices,
       routing: es_id,
       body: {
         query: {

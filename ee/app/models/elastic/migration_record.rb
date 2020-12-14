@@ -13,10 +13,12 @@ module Elastic
       @migration = nil
     end
 
-    def save!(completed:)
+    def save!(completed: nil, state: {})
       raise 'Migrations index is not found' unless helper.index_exists?(index_name: index_name)
 
-      data = { completed: completed }.merge(timestamps(completed: completed))
+      completed = load_from_index&.dig('_source', 'completed') if completed.nil?
+
+      data = { completed: completed, state: load_state.merge(state) }.merge(timestamps(completed: completed))
 
       client.index index: index_name, type: '_doc', id: version, body: data
     end
@@ -29,6 +31,14 @@ module Elastic
       client.get(index: index_name, id: version)
     rescue Elasticsearch::Transport::Transport::Errors::NotFound
       nil
+    end
+
+    def load_state
+      load_from_index&.dig('_source', 'state')&.with_indifferent_access || {}
+    end
+
+    def halted?
+      !!load_state&.dig('halted')
     end
 
     def name_for_key

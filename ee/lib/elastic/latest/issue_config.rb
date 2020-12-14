@@ -7,14 +7,12 @@ module Elastic
       extend Elasticsearch::Model::Indexing::ClassMethods
       extend Elasticsearch::Model::Naming::ClassMethods
 
-      # ES6 requires a single type per index
-      self.document_type = 'issue'
-      self.index_name = [Rails.application.class.module_parent_name.downcase, Rails.env, document_type.pluralize].join('-')
+      self.document_type = 'doc'
+      self.index_name = [Rails.application.class.module_parent_name.downcase, Rails.env, 'issues'].join('-')
 
       settings Elastic::Latest::Config.settings.to_hash
 
       mappings dynamic: 'strict' do
-        # ES6 requires a single type per index, so we implement our own "type"
         indexes :type, type: :keyword
 
         indexes :id, type: :integer

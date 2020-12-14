@@ -83,6 +83,12 @@ RSpec.describe Gitlab::Elastic::Helper do
         expect(helper.index_exists?(index_name: index)).to be_truthy
       end
     end
+
+    it 'raises an exception when there is an existing index' do
+      @indices = helper.create_standalone_indices
+
+      expect { helper.create_standalone_indices }.to raise_error(/already exists/)
+    end
   end
 
   describe '#create_empty_index' do

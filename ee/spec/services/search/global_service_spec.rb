@@ -162,7 +162,7 @@ RSpec.describe Search::GlobalService do
       context 'using joins for global permission checks' do
         let(:results) { described_class.new(nil, search: '*').execute.objects('issues') }
         let(:es_host) { Gitlab::CurrentSettings.elasticsearch_url[0] }
-        let(:search_url) { Addressable::Template.new("#{es_host}/{index}/{doc_type}/_search{?params*}") }
+        let(:search_url) { Addressable::Template.new("#{es_host}/{index}/{doc}/_search{?params*}") }
 
         before do
           allow(Elastic::DataMigrationService).to receive(:migration_has_finished?).and_call_original

@@ -20,6 +20,10 @@ module Elastic
         migrations.sort_by(&:version)
       end
 
+      def [](version)
+        migrations.find { |m| m.version == version }
+      end
+
       def drop_migration_has_finished_cache!(migration)
         Rails.cache.delete cache_key(:migration_has_finished, migration.name_for_key)
       end
@@ -40,8 +44,6 @@ module Elastic
         migrations.reverse.any? do |migration|
           !migration_has_finished?(migration.name_for_key)
         end
-      rescue StandardError
-        nil
       end
 
       def mark_all_as_completed!

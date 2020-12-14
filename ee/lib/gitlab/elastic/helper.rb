@@ -67,6 +67,9 @@ module Gitlab
               completed: {
                 type: 'boolean'
               },
+              state: {
+                type: 'object'
+              },
               started_at: {
                 type: 'date'
               },
@@ -106,10 +109,10 @@ module Gitlab
           end
 
           settings = proxy.settings
-          settings.merge!(options[:settings]) if options[:settings]
+          settings = settings.merge(options[:settings]) if options[:settings]
 
           mappings = proxy.mappings
-          mappings.merge!(options[:mappings]) if options[:mappings]
+          mappings = mappings.merge(options[:mappings]) if options[:mappings]
 
           create_index_options = {
             index: new_index_name,

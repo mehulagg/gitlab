@@ -35,15 +35,16 @@
           .card-body
             .form-group
               .form-check
-                - disable_checkbox = !Gitlab::CurrentSettings.elasticsearch_indexing? || Elastic::DataMigrationService.pending_migrations?
+                - pending_migrations = Elastic::DataMigrationService.pending_migrations? && Gitlab::CurrentSettings.elasticsearch_pause_indexing? rescue false
+                - disable_checkbox = !Gitlab::CurrentSettings.elasticsearch_indexing? || pending_migrations
                 = f.check_box :elasticsearch_pause_indexing, class: 'form-check-input', data: { qa_selector: 'pause_checkbox' }, disabled: disable_checkbox
                 = f.label :elasticsearch_pause_indexing, class: 'form-check-label' do
                   = _('Pause Elasticsearch indexing')
                 .form-text.text-muted
                   = _('Changes are still tracked. Useful for cluster/index migrations.')
-                - if Elastic::DataMigrationService.pending_migrations?
+                - if pending_migrations
                   .form-text.text-warning
-                    = _('There are pending advanced search migrations. This setting is disabled.')
+                    = _('There are pending advanced search migrations. Indexing must remain paused until the migrations are completed.')
 
           .form-group
             .form-check

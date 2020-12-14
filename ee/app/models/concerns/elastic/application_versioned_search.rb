@@ -6,9 +6,15 @@ module Elastic
     FORWARDABLE_INSTANCE_METHODS = [:es_id, :es_parent].freeze
     FORWARDABLE_CLASS_METHODS = [:elastic_search, :es_import, :es_type, :index_name, :document_type, :mapping, :mappings, :settings, :import].freeze
 
+    # rubocop:disable Gitlab/ModuleWithInstanceVariables
     def __elasticsearch__(&block)
-      @__elasticsearch__ ||= ::Elastic::MultiVersionInstanceProxy.new(self)
+      if self.class.use_separate_indices?
+        @__elasticsearch_separate__ ||= ::Elastic::MultiVersionInstanceProxy.new(self, use_separate_indices: true)
+      else
+        @__elasticsearch__ ||= ::Elastic::MultiVersionInstanceProxy.new(self)
+      end
     end
+    # rubocop:enable Gitlab/ModuleWithInstanceVariables
 
     # Should be overridden in the models where some records should be skipped
     def searchable?

@@ -5,7 +5,7 @@ require 'spec_helper'
 RSpec.describe Elastic::Latest::IssueConfig do
   describe '.document_type' do
     it 'returns config' do
-      expect(described_class.document_type).to eq('issue')
+      expect(described_class.document_type).to eq('doc')
     end
   end
 
