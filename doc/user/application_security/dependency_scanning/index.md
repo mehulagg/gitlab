@@ -141,7 +141,7 @@ gemnasium-dependency_scanning:
     DS_REMEDIATE: "false"
 ```
 
-To override the `dependencies: []` setting add an override job as above, targetting this attribute::
+To override the `dependencies: []` attribute, add an override job as above, targeting this attribute:
 
 ```yaml
 include:
