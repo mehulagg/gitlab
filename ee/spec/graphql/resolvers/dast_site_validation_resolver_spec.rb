@@ -25,12 +25,6 @@ RSpec.describe Resolvers::DastSiteValidationResolver do
 
   subject { sync(resolver) }
 
-  context 'when resolving a single DAST site validation' do
-    let(:resolver) { dast_site_validations(target_url: target_url) }
-
-    it { is_expected.to contain_exactly(dast_site_validation1) }
-  end
-
   context 'when resolving multiple DAST site validations' do
     let(:args) { {} }
     let(:resolver) { dast_site_validations(args) }
