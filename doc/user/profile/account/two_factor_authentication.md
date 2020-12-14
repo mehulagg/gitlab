@@ -301,11 +301,14 @@ WARNING:
 Each code can be used only once to log in to your account.
 
 Immediately after successfully enabling two-factor authentication, you're
-prompted to copy, download, or print a set of generated recovery codes. Should you ever lose access
+prompted to download a set of generated recovery codes. Should you ever lose access
 to your one-time password authenticator, you can use one of these recovery codes to log in to
 your account. We suggest copying and printing them, or downloading them using
 the **Download codes** button for storage in a safe place. If you choose to
 download them, the file is called `gitlab-recovery-codes.txt`.
+
+The UI now includes **Copy codes** and **Print codes** buttons, for your convenience.
+[Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/267730) in GitLab 13.7.
 
 If you lose the recovery codes or just want to generate new ones, you can do so
 from the [two-factor authentication account settings page](#regenerate-2fa-recovery-codes) or
