@@ -60,7 +60,9 @@ memory-gc-stats:
   extends:
     - .default-before_script
     - .use-pg11
-  stage: prepare
+  stage: test
+  when: manual
+  allow_failure: true
   script:
     - scripts/perf/gc/collect_gc_stats.rb | tee tmp/stats.csv
   artifacts:
