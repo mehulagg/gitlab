@@ -448,3 +448,24 @@ Example Request:
 ```shell
 curl --request POST --header "Gitlab-Kas-Api-Request: <JWT token>" --header "Content-Type: application/json" --data '{"gitops_sync_count":1}' "http://localhost:3000/api/v4/internal/kubernetes/usage_metrics"
 ```
+
+### Kubernetes agent alert metrics
+
+Called from GitLab Kubernetes Agent Server (kas) to save alert detected by Cilium on Kubernetes Cluster
+
+
+| Attribute | Type   | Required | Description |
+|:----------|:-------|:---------|:------------|
+| `alert` | Hash | yes | Alerts detail. Currently same format as [3rd party alert](https://docs.gitlab.com/ee/operations/incident_management/alert_integrations.html#customize-the-alert-payload-outside-of-gitlab) |
+
+
+```plaintext
+POST internal/kubernetes/modules/cilium/network_alert
+```
+
+Example Request:
+
+```shell
+curl --request POST   --header "Gitlab-Kas-Api-Request: <JWT token>" --header "Authorization: Bearer <agent token>" --header "Content-Type: application/json" --data '"{\"alert\":{\"title\":\"minimal\",\"message\":\"network problem\",\"evalMatches\":[{\"value\":1,\"metric\":\"Count\",\"tags\":{}}]}}"' "http://localhost:3000/api/v4/internal/kubernetes/modules/cilium/network_alert"
+```
+
