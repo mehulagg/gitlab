@@ -138,7 +138,10 @@ module Gitlab
       extend Gitlab::SetupHelper
       class << self
         def configuration_toml(gitaly_dir, storage_paths)
-          nodes = [{ storage: 'default', address: "unix:#{gitaly_dir}/gitaly.socket", primary: true, token: 'secret' }]
+          nodes = [
+            { storage: 'default', address: "unix:#{gitaly_dir}/gitaly.socket", primary: true, token: 'secret' },
+            { storage: 'test_second_storage', address: "unix:#{gitaly_dir}/gitaly2.socket", primary: true, token: 'secret' },
+          ]
           storages = [{ name: 'default', node: nodes }]
           failover = { enabled: false }
           config = { socket_path: "#{gitaly_dir}/praefect.socket", memory_queue_enabled: true, virtual_storage: storages, failover: failover }
