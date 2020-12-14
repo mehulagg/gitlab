@@ -35,9 +35,7 @@ Graphql/IDType:
 Graphql/ResolverType:
   Exclude:
     - 'app/graphql/resolvers/base_resolver.rb'
-    - 'app/graphql/resolvers/ci/pipeline_stages_resolver.rb'
     - 'app/graphql/resolvers/merge_requests_resolver.rb'
-    - 'app/graphql/resolvers/users/group_count_resolver.rb'
     - 'ee/app/graphql/resolvers/vulnerabilities_base_resolver.rb'
 
 Rails/SaveBang:
