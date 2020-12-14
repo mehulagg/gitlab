@@ -32,6 +32,15 @@ module Mutations
                [Types::GlobalIDType[Label]],
                required: false,
                description: 'The IDs of labels to be added to the board.'
+      argument :hide_backlog_list,
+                GraphQL::BOOLEAN_TYPE,
+                required: false,
+                description: copy_field_description(Types::BoardType, :hide_backlog_list)
+      argument :hide_closed_list,
+                GraphQL::BOOLEAN_TYPE,
+                required: false,
+                description: copy_field_description(Types::BoardType, :hide_closed_list)
+
 
       authorize :admin_board
 
