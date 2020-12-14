@@ -3,12 +3,10 @@ import { GlLoadingIcon, GlButton, GlBadge } from '@gitlab/ui';
 import Api from 'ee/api';
 import { CancelToken } from 'axios';
 import SplitButton from 'ee/vue_shared/security_reports/components/split_button.vue';
+import vulnerabilityStateMutations from 'ee/security_dashboard/graphql/mutate_vulnerability_state';
 import axios from '~/lib/utils/axios_utils';
 import download from '~/lib/utils/downloader';
-import {
-  convertObjectPropsToSnakeCase,
-  convertObjectPropsToCamelCase,
-} from '~/lib/utils/common_utils';
+import { convertObjectPropsToSnakeCase } from '~/lib/utils/common_utils';
 import { redirectTo } from '~/lib/utils/url_utility';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { s__ } from '~/locale';
@@ -17,6 +15,8 @@ import ResolutionAlert from './resolution_alert.vue';
 import VulnerabilityStateDropdown from './vulnerability_state_dropdown.vue';
 import StatusDescription from './status_description.vue';
 import { VULNERABILITY_STATE_OBJECTS, FEEDBACK_TYPES, HEADER_ACTION_BUTTONS } from '../constants';
+
+const gidPrefix = 'gid://gitlab/Vulnerability/';
 
 export default {
   name: 'VulnerabilityHeader',
@@ -109,7 +109,9 @@ export default {
       handler(state) {
         const id = this.vulnerability[`${state}ById`];
 
-        if (id === undefined) return; // Don't do anything if there's no ID.
+        if (!id) {
+          return;
+        }
 
         this.isLoadingUser = true;
 
@@ -132,25 +134,31 @@ export default {
       const fn = this[action];
       if (typeof fn === 'function') fn();
     },
-    changeVulnerabilityState(newState) {
+
+    async changeVulnerabilityState({ action, payload }) {
       this.isLoadingVulnerability = true;
 
-      Api.changeVulnerabilityState(this.vulnerability.id, newState)
-        .then(({ data }) => {
-          Object.assign(this.vulnerability, convertObjectPropsToCamelCase(data));
-          this.$emit('vulnerability-state-change');
-        })
-        .catch(() => {
-          createFlash(
-            s__(
-              'VulnerabilityManagement|Something went wrong, could not update vulnerability state.',
-            ),
-          );
-        })
-        .finally(() => {
-          this.isLoadingVulnerability = false;
+      try {
+        const { data } = await this.$apollo.mutate({
+          mutation: vulnerabilityStateMutations[action],
+          variables: { id: `${gidPrefix}${this.vulnerability.id}`, ...payload },
         });
+        const queryName = Object.keys(data)[0];
+        Object.assign(this.vulnerability, data[queryName].vulnerability);
+        this.vulnerability.id = this.vulnerability.id.replace(gidPrefix, '');
+        this.vulnerability.state = this.vulnerability.state.toLowerCase();
+        this.$emit('vulnerability-state-change');
+      } catch (e) {
+        createFlash(
+          s__(
+            'VulnerabilityManagement|Something went wrong, could not update vulnerability state.',
+          ),
+        );
+      }
+
+      this.isLoadingVulnerability = false;
     },
+
     createMergeRequest() {
       this.isProcessingAction = true;
 

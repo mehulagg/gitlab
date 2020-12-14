@@ -17,6 +17,9 @@ export const VULNERABILITY_STATE_OBJECTS = {
     state: 'dismissed',
     displayName: s__('Dismiss'),
     description: s__('VulnerabilityManagement|Will not fix or a false-positive'),
+    payload: {
+      comment: s__('VulnerabilityManagement|Will not fix or a false-positive'),
+    },
   },
   confirmed: {
     action: 'confirm',
