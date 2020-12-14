@@ -6,7 +6,7 @@ import GfmAutoComplete from 'ee_else_ce/gfm_auto_complete';
 import { GlToast, GlModal, GlTooltipDirective, GlIcon, GlFormCheckbox } from '@gitlab/ui';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { __, s__ } from '~/locale';
-import Api from '~/api';
+// import Api from '~/api';
 import EmojiMenuInModal from './emoji_menu_in_modal';
 import { isUserBusy, isValidAvailibility } from './utils';
 import * as Emoji from '~/emoji';
@@ -163,6 +163,7 @@ export default {
     setStatus() {
       const { emoji, message, availability } = this;
 
+      /*
       Api.postUserStatus({
         emoji,
         message,
@@ -170,6 +171,7 @@ export default {
       })
         .then(this.onUpdateSuccess)
         .catch(this.onUpdateFail);
+        */
     },
     onUpdateSuccess() {
       this.$toast.show(s__('SetStatusModal|Status updated'), {

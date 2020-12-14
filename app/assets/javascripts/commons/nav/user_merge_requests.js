@@ -1,4 +1,4 @@
-import Api from '~/api';
+// import Api from '~/api';
 
 let channel;
 
@@ -20,7 +20,7 @@ function updateUserMergeRequestCounts(newCount) {
  * Refresh user counts (and broadcast if open)
  */
 export function refreshUserMergeRequestCounts() {
-  return Api.userCounts()
+  /* return Api.userCounts()
     .then(({ data }) => {
       const count = data.merge_requests;
 
@@ -29,7 +29,7 @@ export function refreshUserMergeRequestCounts() {
     })
     .catch(ex => {
       console.error(ex); // eslint-disable-line no-console
-    });
+    });*/
 }
 
 /**

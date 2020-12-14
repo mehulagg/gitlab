@@ -1,4 +1,4 @@
-import Api from '~/api';
+// import Api from '~/api';
 import AccessorUtilities from '~/lib/utils/accessor';
 import * as types from './mutation_types';
 import { getTopFrequentItems } from '../utils';
@@ -58,6 +58,7 @@ export const fetchSearchedItems = ({ state, dispatch }, searchQuery) => {
     params.order_by = 'last_activity_at';
   }
 
+  /* 
   return Api[state.namespace](searchQuery, params)
     .then(results => {
       dispatch('receiveSearchedItemsSuccess', results);
@@ -65,6 +66,7 @@ export const fetchSearchedItems = ({ state, dispatch }, searchQuery) => {
     .catch(() => {
       dispatch('receiveSearchedItemsError');
     });
+    */
 };
 
 export const setSearchQuery = ({ commit, dispatch }, query) => {
