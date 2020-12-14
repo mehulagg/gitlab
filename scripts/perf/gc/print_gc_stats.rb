@@ -36,9 +36,11 @@ GC::Profiler.use_exclusive = true
 
 require 'benchmark'
 
+RAILS_ROOT = ENV['RAILS_ROOT']
+
 tms = Benchmark.measure do
-  require_relative 'config/boot'
-  require_relative 'config/environment'
+  require RAILS_ROOT + 'config/boot'
+  require RAILS_ROOT + 'config/environment'
 end
 
 GC::Profiler.use_exclusive = false

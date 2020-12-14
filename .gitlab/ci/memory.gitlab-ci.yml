@@ -4,8 +4,8 @@ memory-gc-stats:
     - .use-pg11
   stage: prepare
   script:
-    - ./collect_gc_stats.rb | tee stats.csv
+    - scripts/perf/gc/collect_gc_stats.rb | tee tmp/stats.csv
   artifacts:
     paths:
-      - stats.csv
+      - tmp/stats.csv
     expire_in: 14d

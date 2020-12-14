@@ -51,14 +51,18 @@ USED_GCSTAT_KEYS = [
 CSV_USED_GCSTAT_KEYS = USED_GCSTAT_KEYS.join(',')
 CSV_HEADER = "setting,value,#{CSV_USED_GCSTAT_KEYS},RSS,gc_time_s,cpu_utime_s,cpu_stime_s,real_time_s\n"
 
+SCRIPT_PATH = __dir__
+RAILS_ROOT = "#{SCRIPT_PATH}/../../../"
+
 def collect_stats(setting, value)
   warn "Testing #{setting} = #{value} ..."
   env = {
     setting => value,
+    'RAILS_ROOT' => RAILS_ROOT,
     'SETTING_CSV' => "#{setting},#{value}",
     'GC_STAT_KEYS' => CSV_USED_GCSTAT_KEYS
   }
-  system(env, 'ruby', './print_gc_stats.rb')
+  system(env, 'ruby', "#{SCRIPT_PATH}/print_gc_stats.rb")
 end
 
 par = ENV['PAR']&.to_i || 2
