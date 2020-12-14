@@ -89,7 +89,11 @@ export default {
       </p>
 
       <div class="schedule-shell">
-        <schedule-timeline-section :preset-type="$options.presetType" :timeframe="timeframe" />
+        <schedule-timeline-section
+          :schedule="schedule"
+          :preset-type="$options.presetType"
+          :timeframe="timeframe"
+        />
       </div>
     </gl-card>
     <delete-schedule-modal :schedule="schedule" />

@@ -29,6 +29,10 @@ export default {
       type: Array,
       required: true,
     },
+    schedule: {
+      type: Object,
+      required: true,
+    },
   },
 };
 </script>
@@ -56,6 +60,6 @@ export default {
         />
       </div>
     </gl-card>
-    <add-rotation-modal />
+    <add-rotation-modal :schedule="schedule" />
   </div>
 </template>
