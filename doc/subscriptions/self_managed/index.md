@@ -135,6 +135,8 @@ count exceeds the number included in the subscription, known as the number of
 _users over license_, you must pay for the excess number of users either before
 renewal, or at the time of renewal. This is also known as the _true up_ process.
 
+To view the number of _Users over License_ go to the **Admin Area**.
+
 ### Add users to a subscription
 
 Self-managed instances can add users to a subscription any time during the
@@ -171,13 +173,6 @@ We recommend following these steps during renewal:
 
 1. In the first box, enter the total number of user licenses you’ll need for the upcoming year. Be sure this number is at least **equal to, or greater than** the number of billable users in the system at the time of performing the renewal.
 1. Enter the number of [users over license](#users-over-license) in the second box for the user overage incurred in your previous subscription term.
-
-   NOTE:
-   You can find the _users over license_ in your instance's **Admin** dashboard by clicking on the **Admin Area** in the top bar, or navigating to `/admin`.
-
-   The following table describes details of your admin dashboard and renewal terms:
-
-
 1. Review your renewal details and complete the payment process.
 1. A license for the renewal term is available for download on the [Manage Purchases](https://customers.gitlab.com/subscriptions) page on the relevant subscription card. Select **Copy license to clipboard** or **Download license** to get a copy.
 1. [Upload](../../user/admin_area/license.md#uploading-your-license) your new license to your instance.
