@@ -3,11 +3,11 @@
 require 'spec_helper'
 
 RSpec.describe IncidentManagement::OncallShiftGenerator do
-  let_it_be(:rotation_start_time) { Time.zone.parse('2020-12-08 00:00:00 UTC') }
+  let_it_be(:rotation_start_time) { Time.parse('2020-12-08 00:00:00').utc }
   let_it_be(:rotation) { create(:incident_management_oncall_rotation, starts_at: rotation_start_time) }
 
-  let(:current_time) { Time.parse('2020-12-08 15:00:00 UTC') }
-  let(:starts_at) { Time.zone.parse('2020-12-08 02:00:00 UTC') }
+  let(:current_time) { Time.parse('2020-12-08 15:00:00').utc }
+  let(:starts_at) { Time.parse('2020-12-08 02:00:00').utc }
   let(:ends_at) { starts_at + (shift_length * 2) }
   let(:shift_length) { rotation.shift_duration }
 
@@ -27,8 +27,8 @@ RSpec.describe IncidentManagement::OncallShiftGenerator do
           id: nil,
           rotation: rotation,
           participant: participants[shift_params[idx][0]],
-          starts_at: Time.parse(shift_params[idx][1] + 'UTC'),
-          ends_at: Time.parse(shift_params[idx][2] + 'UTC')
+          starts_at: Time.parse(shift_params[idx][1]).utc,
+          ends_at: Time.parse(shift_params[idx][2]).utc
         )
       end
       expect(shifts.length).to eq(shift_params.length)
@@ -55,7 +55,7 @@ RSpec.describe IncidentManagement::OncallShiftGenerator do
       {
         blue200: create(:incident_management_oncall_participant, :with_access, rotation: rotation, color_palette: :blue, color_weight: '200'),
         blue50: create(:incident_management_oncall_participant, :with_access, rotation: rotation, color_palette: :blue, color_weight: '50'),
-        magenta: create(:incident_management_oncall_participant, :with_access, rotation: rotation, color_palette: :magenta),
+        magenta: create(:incident_management_oncall_participant, :with_access, rotation: rotation, color_palette: :magenta)
       }
     end
 
@@ -83,7 +83,7 @@ RSpec.describe IncidentManagement::OncallShiftGenerator do
       # at rotation start time
       it_behaves_like 'unsaved rotations', [
         [:blue50, '2020-12-08 00:00:00', '2020-12-13 00:00:00'],
-        [:blue200, '2020-12-13 00:00:00', '2020-12-18 00:00:00'],
+        [:blue200, '2020-12-13 00:00:00', '2020-12-18 00:00:00']
       ]
     end
 
@@ -94,7 +94,7 @@ RSpec.describe IncidentManagement::OncallShiftGenerator do
       # starting at 2nd shift
       it_behaves_like 'unsaved rotations', [
         [:blue200, '2020-12-13 00:00:00', '2020-12-18 00:00:00'],
-        [:magenta, '2020-12-18 00:00:00', '2020-12-23 00:00:00'],
+        [:magenta, '2020-12-18 00:00:00', '2020-12-23 00:00:00']
       ]
     end
 
@@ -116,9 +116,9 @@ RSpec.describe IncidentManagement::OncallShiftGenerator do
       # Expect 3 shifts of 5 days starting with first user,
       # starting 7 weeks out
       it_behaves_like 'unsaved rotations', [
-        [:blue50,'2021-01-22 00:00:00', '2021-01-27 00:00:00'],
-        [:blue200,'2021-01-27 00:00:00', '2021-02-01 00:00:00'],
-        [:magenta,'2021-02-01 00:00:00', '2021-02-06 00:00:00']
+        [:blue50, '2021-01-22 00:00:00', '2021-01-27 00:00:00'],
+        [:blue200, '2021-01-27 00:00:00', '2021-02-01 00:00:00'],
+        [:magenta, '2021-02-01 00:00:00', '2021-02-06 00:00:00']
       ]
     end
 
