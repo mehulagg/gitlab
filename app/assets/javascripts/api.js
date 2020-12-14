@@ -129,13 +129,13 @@ const Api = {
     });
   },
 
-  inviteGroupMember(id, data) {
+  inviteGroupMembers(id, data) {
     const url = Api.buildUrl(this.groupMembersPath).replace(':id', encodeURIComponent(id));
 
     return axios.post(url, data);
   },
 
-  inviteNonMemberToGroup(id, data) {
+  inviteGroupMembersByEmail(id, data) {
     const url = Api.buildUrl(this.groupInvitationsPath).replace(':id', encodeURIComponent(id));
 
     return axios.post(url, data);
@@ -231,7 +231,7 @@ const Api = {
     return axios.post(url, data);
   },
 
-  inviteNonMemberToProject(id, data) {
+  inviteProjectMembersByEmail(id, data) {
     const url = Api.buildUrl(this.projectInvitationsPath).replace(':id', encodeURIComponent(id));
 
     return axios.post(url, data);

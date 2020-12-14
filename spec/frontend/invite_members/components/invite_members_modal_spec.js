@@ -1,6 +1,7 @@
 import { shallowMount } from '@vue/test-utils';
 import { GlDropdown, GlDropdownItem, GlDatepicker, GlSprintf, GlLink, GlModal } from '@gitlab/ui';
 import { stubComponent } from 'helpers/stub_component';
+import waitForPromises from 'helpers/wait_for_promises';
 import Api from '~/api';
 import InviteMembersModal from '~/invite_members/components/invite_members_modal.vue';
 
@@ -10,6 +11,15 @@ const isProject = false;
 const accessLevels = { Guest: 10, Reporter: 20, Developer: 30, Maintainer: 40, Owner: 50 };
 const defaultAccessLevel = '10';
 const helpLink = 'https://example.com';
+
+const user1 = { id: 1, name: 'Name One', username: 'one_1', avatar_url: '' };
+const user2 = { id: 2, name: 'Name Two', username: 'one_2', avatar_url: '' };
+const user3 = {
+  id: 'user-defined-token',
+  name: 'email@example.com',
+  username: 'one_2',
+  avatar_url: '',
+};
 
 const createComponent = (data = {}) => {
   return shallowMount(InviteMembersModal, {
@@ -50,6 +60,7 @@ describe('InviteMembersModal', () => {
   const findLink = () => wrapper.find(GlLink);
   const findCancelButton = () => wrapper.find({ ref: 'cancelButton' });
   const findInviteButton = () => wrapper.find({ ref: 'inviteButton' });
+  const clickInviteButton = () => findInviteButton().vm.$emit('click');
 
   describe('rendering the modal', () => {
     beforeEach(() => {
@@ -100,7 +111,6 @@ describe('InviteMembersModal', () => {
     describe('when inviting an existing user to group by user ID', () => {
       const postData = {
         user_id: '1',
-        email: '',
         access_level: '10',
         expires_at: undefined,
         format: 'json',
@@ -108,16 +118,16 @@ describe('InviteMembersModal', () => {
 
       describe('when invites are sent successfully', () => {
         beforeEach(() => {
-          wrapper = createComponent({ newUsersToInvite: '1' });
+          wrapper = createComponent({ newUsersToInvite: [user1] });
 
           wrapper.vm.$toast = { show: jest.fn() };
-          jest.spyOn(Api, 'inviteGroupMember').mockResolvedValue({ data: postData });
+          jest.spyOn(Api, 'inviteGroupMembers').mockResolvedValue({ data: postData });
 
-          findInviteButton().vm.$emit('click');
+          clickInviteButton();
         });
 
-        it('calls Api inviteGroupMember with the correct params', () => {
-          expect(Api.inviteGroupMember).toHaveBeenCalledWith(id, postData);
+        it('calls Api inviteGroupMembers with the correct params', () => {
+          expect(Api.inviteGroupMembers).toHaveBeenCalledWith(id, postData);
         });
 
         it('displays the successful toastMessage', () => {
@@ -130,17 +140,19 @@ describe('InviteMembersModal', () => {
 
       describe('when the invite received an api error message', () => {
         beforeEach(() => {
-          wrapper = createComponent({ newUsersToInvite: '123' });
+          wrapper = createComponent({ newUsersToInvite: [user1] });
 
           wrapper.vm.$toast = { show: jest.fn() };
           jest
-            .spyOn(Api, 'inviteGroupMember')
+            .spyOn(Api, 'inviteGroupMembers')
             .mockRejectedValue({ response: { data: { message: apiErrorMessage } } });
 
-          findInviteButton().vm.$emit('click');
+          clickInviteButton();
         });
 
-        it('displays the apiErrorMessage in the toastMessage', () => {
+        it('displays the apiErrorMessage in the toastMessage', async () => {
+          await waitForPromises;
+
           expect(wrapper.vm.$toast.show).toHaveBeenCalledWith(
             apiErrorMessage,
             wrapper.vm.toastOptions,
@@ -150,17 +162,19 @@ describe('InviteMembersModal', () => {
 
       describe('when any invite failed for any other reason', () => {
         beforeEach(() => {
-          wrapper = createComponent({ newUsersToInvite: '123,456' });
+          wrapper = createComponent({ newUsersToInvite: [user1, user2] });
 
           wrapper.vm.$toast = { show: jest.fn() };
           jest
-            .spyOn(Api, 'inviteGroupMember')
+            .spyOn(Api, 'inviteGroupMembers')
             .mockRejectedValue({ response: { data: { success: false } } });
 
-          findInviteButton().vm.$emit('click');
+          clickInviteButton();
         });
 
-        it('displays the generic error toastMessage', () => {
+        it('displays the generic error toastMessage', async () => {
+          await waitForPromises;
+
           expect(wrapper.vm.$toast.show).toHaveBeenCalledWith(
             genericErrorMessage,
             wrapper.vm.toastOptions,
@@ -174,22 +188,21 @@ describe('InviteMembersModal', () => {
         access_level: '10',
         expires_at: undefined,
         email: 'email@example.com',
-        user_id: '',
         format: 'json',
       };
 
       describe('when invites are sent successfully', () => {
         beforeEach(() => {
-          wrapper = createComponent({ newUsersToInvite: 'email@example.com' });
+          wrapper = createComponent({ newUsersToInvite: [user3] });
 
           wrapper.vm.$toast = { show: jest.fn() };
-          jest.spyOn(Api, 'inviteNonMemberToGroup').mockResolvedValue({ data: postData });
+          jest.spyOn(Api, 'inviteGroupMembersByEmail').mockResolvedValue({ data: postData });
 
-          findInviteButton().vm.$emit('click');
+          clickInviteButton();
         });
 
-        it('calls Api inviteNonMemberToGroup with the correct params', () => {
-          expect(Api.inviteNonMemberToGroup).toHaveBeenCalledWith(id, postData);
+        it('calls Api inviteGroupMembersByEmail with the correct params', () => {
+          expect(Api.inviteGroupMembersByEmail).toHaveBeenCalledWith(id, postData);
         });
 
         it('displays the successful toastMessage', () => {
@@ -202,17 +215,19 @@ describe('InviteMembersModal', () => {
 
       describe('when any invite failed for any reason', () => {
         beforeEach(() => {
-          wrapper = createComponent({ newUsersToInvite: '123,456' });
+          wrapper = createComponent({ newUsersToInvite: [user1, user2] });
 
           wrapper.vm.$toast = { show: jest.fn() };
           jest
-            .spyOn(Api, 'inviteGroupMember')
+            .spyOn(Api, 'inviteGroupMembers')
             .mockRejectedValue({ response: { data: { success: false } } });
 
-          findInviteButton().vm.$emit('click');
+          clickInviteButton();
         });
 
-        it('displays the generic error toastMessage', () => {
+        it('displays the generic error toastMessage', async () => {
+          await waitForPromises;
+
           expect(wrapper.vm.$toast.show).toHaveBeenCalledWith(
             genericErrorMessage,
             wrapper.vm.toastOptions,
@@ -223,30 +238,31 @@ describe('InviteMembersModal', () => {
 
     describe('when inviting members and non-members in same click', () => {
       const postData = {
-        user_id: '1',
         access_level: '10',
         expires_at: undefined,
-        email: 'email@example.com',
         format: 'json',
       };
 
+      const emailPostData = { ...postData, email: 'email@example.com' };
+      const idPostData = { ...postData, user_id: '1' };
+
       describe('when invites are sent successfully', () => {
         beforeEach(() => {
-          wrapper = createComponent({ newUsersToInvite: 'email@example.com,1' });
+          wrapper = createComponent({ newUsersToInvite: [user1, user3] });
 
           wrapper.vm.$toast = { show: jest.fn() };
-          jest.spyOn(Api, 'inviteNonMemberToGroup').mockResolvedValue({ data: postData });
-          jest.spyOn(Api, 'inviteGroupMember').mockResolvedValue({ data: postData });
+          jest.spyOn(Api, 'inviteGroupMembersByEmail').mockResolvedValue({ data: postData });
+          jest.spyOn(Api, 'inviteGroupMembers').mockResolvedValue({ data: postData });
 
-          findInviteButton().vm.$emit('click');
+          clickInviteButton();
         });
 
-        it('calls Api inviteNonMemberToGroup with the correct params', () => {
-          expect(Api.inviteNonMemberToGroup).toHaveBeenCalledWith(id, postData);
+        it('calls Api inviteGroupMembersByEmail with the correct params', () => {
+          expect(Api.inviteGroupMembersByEmail).toHaveBeenCalledWith(id, emailPostData);
         });
 
-        it('calls Api inviteGroupMember with the correct params', () => {
-          expect(Api.inviteGroupMember).toHaveBeenCalledWith(id, postData);
+        it('calls Api inviteGroupMembers with the correct params', () => {
+          expect(Api.inviteGroupMembers).toHaveBeenCalledWith(id, idPostData);
         });
 
         it('displays the successful toastMessage', () => {
@@ -259,20 +275,22 @@ describe('InviteMembersModal', () => {
 
       describe('when any invite failed for any reason', () => {
         beforeEach(() => {
-          wrapper = createComponent({ newUsersToInvite: '0,email@example.com' });
+          wrapper = createComponent({ newUsersToInvite: [user1, user3] });
 
           wrapper.vm.$toast = { show: jest.fn() };
 
           jest
-            .spyOn(Api, 'inviteNonMemberToGroup')
+            .spyOn(Api, 'inviteGroupMembersByEmail')
             .mockRejectedValue({ response: { data: { success: false } } });
 
-          jest.spyOn(Api, 'inviteGroupMember').mockResolvedValue({ data: postData });
+          jest.spyOn(Api, 'inviteGroupMembers').mockResolvedValue({ data: postData });
 
-          findInviteButton().vm.$emit('click');
+          clickInviteButton();
         });
 
-        it('displays the generic error toastMessage', () => {
+        it('displays the generic error toastMessage', async () => {
+          await waitForPromises;
+
           expect(wrapper.vm.$toast.show).toHaveBeenCalledWith(
             genericErrorMessage,
             wrapper.vm.toastOptions,

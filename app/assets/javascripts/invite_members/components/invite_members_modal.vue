@@ -9,6 +9,7 @@ import {
   GlButton,
   GlFormInput,
 } from '@gitlab/ui';
+import { partition, isString } from 'lodash';
 import eventHub from '../event_hub';
 import { s__, __, sprintf } from '~/locale';
 import Api from '~/api';
@@ -58,45 +59,11 @@ export default {
       visible: true,
       modalId: 'invite-members-modal',
       selectedAccessLevel: this.defaultAccessLevel,
-      newUsersToInvite: '',
+      newUsersToInvite: [],
       selectedDate: undefined,
     };
   },
   computed: {
-    nonMemberEmailsToInvite() {
-      if (this.isList) {
-        return this.filteredEmails;
-      } else if (this.isEmail) {
-        return this.newUsersToInvite;
-      }
-      return '';
-    },
-    memberIdsToInvite() {
-      if (this.isList) {
-        return this.filteredIds;
-      } else if (!this.isEmail) {
-        return this.newUsersToInvite;
-      }
-      return '';
-    },
-    isList() {
-      return this.newUsersToInvite.includes(',');
-    },
-    isEmail() {
-      return this.emailMatches(this.newUsersToInvite);
-    },
-    filteredEmails() {
-      return this.newUsersToInvite
-        .split(',')
-        .filter(value => this.emailMatches(value))
-        .join(',');
-    },
-    filteredIds() {
-      return this.newUsersToInvite
-        .split(',')
-        .filter(value => !Number.isNaN(Number(value)))
-        .join(',');
-    },
     inviteToName() {
       return this.name.toUpperCase();
     },
@@ -113,25 +80,16 @@ export default {
       return {
         onComplete: () => {
           this.selectedAccessLevel = this.defaultAccessLevel;
-          this.newUsersToInvite = '';
+          this.newUsersToInvite = [];
         },
       };
     },
-    postData() {
+    basePostData() {
       return {
         access_level: this.selectedAccessLevel,
         expires_at: this.selectedDate,
         format: 'json',
       };
-    },
-    invitePostData() {
-      return Object.assign(this.postData, { email: this.nonMemberEmailsToInvite });
-    },
-    addMemberPostData() {
-      return Object.assign(this.postData, { user_id: this.memberIdsToInvite });
-    },
-    fullPostData() {
-      return Object.assign(this.invitePostData, this.addMemberPostData);
     },
     selectedRoleName() {
       return Object.keys(this.accessLevels).find(
@@ -143,6 +101,17 @@ export default {
     eventHub.$on('openModal', this.openModal);
   },
   methods: {
+    partitionNewUsersToInvite() {
+      const [usersToInviteByEmail, usersToInviteById] = partition(
+        this.newUsersToInvite,
+        user => isString(user.id) && user.id.includes('user-defined-token'),
+      );
+
+      return [
+        usersToInviteByEmail.map(user => user.name).join(','),
+        usersToInviteById.map(user => user.id).join(','),
+      ];
+    },
     openModal() {
       this.$root.$emit('bv::show::modal', this.modalId);
     },
@@ -163,46 +132,38 @@ export default {
       this.selectedAccessLevel = item;
     },
     submitForm() {
-      if (this.isProject) {
-        this.submitProjectInvites();
-      } else {
-        this.submitGroupInvites();
-      }
-      return this.fullPostData;
-    },
-    submitProjectInvites() {
-      if (this.nonMemberEmailsToInvite) {
-        this.submitInviteNonMembersToProject(this.invitePostData);
+      const [usersToInviteByEmail, usersToInviteById] = this.partitionNewUsersToInvite();
+      const promises = [];
+
+      if (usersToInviteByEmail !== '') {
+        const apiInviteByEmail = this.isProject
+          ? Api.inviteProjectMembersByEmail.bind(Api)
+          : Api.inviteGroupMembersByEmail.bind(Api);
+
+        promises.push(apiInviteByEmail(this.id, this.inviteByEmailPostData(usersToInviteByEmail)));
       }
 
-      if (this.memberIdsToInvite) {
-        return Api.inviteProjectMembers(this.id, this.addMemberPostData)
-          .then(this.showToastMessageSuccess)
-          .catch(this.showToastMessageError);
-      }
-      return this.fullPostData;
-    },
-    submitGroupInvites() {
-      if (this.nonMemberEmailsToInvite) {
-        this.submitInviteNonMembersToGroup(this.invitePostData);
+      if (usersToInviteById !== '') {
+        const apiAddById = this.isProject
+          ? Api.inviteProjectMembers.bind(Api)
+          : Api.inviteGroupMembers.bind(Api);
+
+        promises.push(apiAddById(this.id, this.addByIdPostData(usersToInviteById)));
       }
 
-      if (this.memberIdsToInvite) {
-        return Api.inviteGroupMember(this.id, this.addMemberPostData)
-          .then(this.showToastMessageSuccess)
-          .catch(this.showToastMessageError);
-      }
-      return this.fullPostData;
-    },
-    submitInviteNonMembersToProject() {
-      return Api.inviteNonMemberToProject(this.id, this.invitePostData)
+      Promise.all(promises)
         .then(this.showToastMessageSuccess)
         .catch(this.showToastMessageError);
     },
-    submitInviteNonMembersToGroup() {
-      return Api.inviteNonMemberToGroup(this.id, this.invitePostData)
-        .then(this.showToastMessageSuccess)
-        .catch(this.showToastMessageError);
+    inviteByEmailPostData(usersToInviteByEmail) {
+      if (usersToInviteByEmail === undefined) return this.basePostData;
+
+      return { ...this.basePostData, email: usersToInviteByEmail };
+    },
+    addByIdPostData(usersToInviteById) {
+      if (usersToInviteById === undefined) return this.basePostData;
+
+      return { ...this.basePostData, user_id: usersToInviteById };
     },
     showToastMessageSuccess() {
       this.$toast.show(this.$options.labels.toastMessageSuccessful, this.toastOptions);
@@ -211,11 +172,6 @@ export default {
       const message = error.response.data.message || this.$options.labels.toastMessageUnsuccessful;
 
       this.$toast.show(message, this.toastOptions);
-    },
-    emailMatches(value) {
-      const regex = /@/;
-
-      return value.match(regex) !== null;
     },
   },
   labels: {

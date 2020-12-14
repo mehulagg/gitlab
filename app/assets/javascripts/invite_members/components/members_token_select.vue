@@ -35,16 +35,6 @@ export default {
     emailIsValid() {
       return this.emailMatches(this.query);
     },
-    newUsersToInvite() {
-      return this.selectedTokens
-        .map(obj => {
-          if (this.emailMatches(obj.name) && obj.id.includes('user-defined-token')) {
-            return obj.name;
-          }
-          return obj.id;
-        })
-        .join(',');
-    },
     placeholderText() {
       if (this.selectedTokens.length === 0) {
         return this.placeholder;
@@ -54,7 +44,7 @@ export default {
   },
   methods: {
     emailMatches(value) {
-      const regex = /@/;
+      const regex = /.+@/;
 
       return value.match(regex) !== null;
     },
@@ -80,7 +70,7 @@ export default {
         });
     }, USER_SEARCH_DELAY),
     handleInput() {
-      this.$emit('input', this.newUsersToInvite);
+      this.$emit('input', this.selectedTokens);
     },
     handleBlur() {
       this.hideDropdownWithNoItems = false;
@@ -126,6 +116,10 @@ export default {
         :label="dropdownItem.name"
         :sub-label="dropdownItem.username"
       />
+    </template>
+
+    <template #user-defined-token-content="{ inputText: text }">
+      {{ sprintf(__('Invite "%{text}" by email'), { text: text }) }}
     </template>
   </gl-token-selector>
 </template>
