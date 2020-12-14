@@ -341,7 +341,7 @@ class Project < ApplicationRecord
 
   has_many :daily_build_group_report_results, class_name: 'Ci::DailyBuildGroupReportResult'
 
-  has_many :repository_storage_moves, class_name: 'ProjectRepositoryStorageMove', inverse_of: :container
+  has_many :repository_storage_moves, class_name: 'ProjectRepositoryStorageMove'
 
   has_many :webide_pipelines, -> { webide_source }, class_name: 'Ci::Pipeline', inverse_of: :project
   has_many :reviews, inverse_of: :project
@@ -409,7 +409,7 @@ class Project < ApplicationRecord
   delegate :forward_deployment_enabled, :forward_deployment_enabled=, :forward_deployment_enabled?, to: :ci_cd_settings, prefix: :ci
   delegate :actual_limits, :actual_plan_name, to: :namespace, allow_nil: true
   delegate :allow_merge_on_skipped_pipeline, :allow_merge_on_skipped_pipeline?,
-    :allow_merge_on_skipped_pipeline=, :has_confluence?,
+    :allow_merge_on_skipped_pipeline=, :has_confluence?, :allow_editing_commit_messages?,
     to: :project_setting
   delegate :active?, to: :prometheus_service, allow_nil: true, prefix: true
 
@@ -1843,6 +1843,7 @@ class Project < ApplicationRecord
     wiki.repository.expire_content_cache
 
     DetectRepositoryLanguagesWorker.perform_async(id)
+    ProjectCacheWorker.perform_async(self.id, [], [:repository_size])
 
     # The import assigns iid values on its own, e.g. by re-using GitHub ids.
     # Flush existing InternalId records for this project for consistency reasons.
@@ -1959,6 +1960,7 @@ class Project < ApplicationRecord
       .concat(predefined_project_variables)
       .concat(pages_variables)
       .concat(container_registry_variables)
+      .concat(dependency_proxy_variables)
       .concat(auto_devops_variables)
       .concat(api_variables)
   end
@@ -2007,6 +2009,18 @@ class Project < ApplicationRecord
   def api_variables
     Gitlab::Ci::Variables::Collection.new.tap do |variables|
       variables.append(key: 'CI_API_V4_URL', value: API::Helpers::Version.new('v4').root_url)
+    end
+  end
+
+  def dependency_proxy_variables
+    Gitlab::Ci::Variables::Collection.new.tap do |variables|
+      break variables unless Gitlab.config.dependency_proxy.enabled
+
+      variables.append(key: 'CI_DEPENDENCY_PROXY_SERVER', value: "#{Gitlab.config.gitlab.host}:#{Gitlab.config.gitlab.port}")
+      variables.append(
+        key: 'CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX',
+        value: "#{Gitlab.config.gitlab.host}:#{Gitlab.config.gitlab.port}/#{namespace.root_ancestor.path}#{DependencyProxy::URL_SUFFIX}"
+      )
     end
   end
 
@@ -2096,6 +2110,39 @@ class Project < ApplicationRecord
     return [] unless auto_devops_enabled?
 
     (auto_devops || build_auto_devops)&.predefined_variables
+  end
+
+  RepositoryReadOnlyError = Class.new(StandardError)
+
+  # Tries to set repository as read_only, checking for existing Git transfers in
+  # progress beforehand. Setting a repository read-only will fail if it is
+  # already in that state.
+  #
+  # @return nil. Failures will raise an exception
+  def set_repository_read_only!(skip_git_transfer_check: false)
+    with_lock do
+      raise RepositoryReadOnlyError, _('Git transfer in progress') if
+        !skip_git_transfer_check && git_transfer_in_progress?
+
+      raise RepositoryReadOnlyError, _('Repository already read-only') if
+        self.class.where(id: id).pick(:repository_read_only)
+
+      raise ActiveRecord::RecordNotSaved, _('Database update failed') unless
+        update_column(:repository_read_only, true)
+
+      nil
+    end
+  end
+
+  # Set repository as writable again. Unlike setting it read-only, this will
+  # succeed if the repository is already writable.
+  def set_repository_writable!
+    with_lock do
+      raise ActiveRecord::RecordNotSaved, _('Database update failed') unless
+        update_column(:repository_read_only, false)
+
+      nil
+    end
   end
 
   def pushes_since_gc
@@ -2257,6 +2304,10 @@ class Project < ApplicationRecord
     super
 
     @storage = nil if storage_version_changed?
+  end
+
+  def reference_counter(type: Gitlab::GlRepository::PROJECT)
+    Gitlab::ReferenceCounter.new(type.identifier_for_container(self))
   end
 
   def badges
