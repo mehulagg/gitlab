@@ -293,7 +293,7 @@ export default {
       </gl-sprintf>
     </gl-alert>
     <div class="burndown-header gl-display-flex gl-align-items-center gl-flex-wrap">
-      <strong ref="filterLabel" class="gl-mb-0">{{ __('Filter by') }}</strong>
+      <strong ref="filterLabel">{{ __('Filter by') }}</strong>
       <gl-button-group>
         <gl-button
           ref="totalIssuesButton"
