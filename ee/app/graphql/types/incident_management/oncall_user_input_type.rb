@@ -17,7 +17,7 @@ module Types
 
       argument :color_weight, ::Types::DataVisualizationPalette::WeightEnum,
                 required: false,
-                description: 'A value of DataVisualizationWeightEnum. The color weight to assign to for the on-call user, for example "500". Max 4 chars.'
+                description: 'A value of DataVisualizationWeightEnum. The color weight to assign to for the on-call user.'
     end
     # rubocop: enable Graphql/AuthorizeTypes
   end

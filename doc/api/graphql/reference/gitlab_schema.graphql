@@ -15607,8 +15607,7 @@ input OncallUserInputType {
   colorPalette: DataVisualizationColorEnum
 
   """
-  A value of DataVisualizationWeightEnum. The color weight to assign to for the
-  on-call user, for example "500". Max 4 chars.
+  A value of DataVisualizationWeightEnum. The color weight to assign to for the on-call user.
   """
   colorWeight: DataVisualizationWeightEnum
 
