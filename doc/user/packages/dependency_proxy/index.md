@@ -209,6 +209,9 @@ the [Dependency Proxy API](../../../api/dependency_proxy.md).
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/241639) in [GitLab Core](https://about.gitlab.com/pricing/) 13.7.
 
+NOTE:Note
+Check out this [video](https://youtu.be/Nc4nUo7Pq08) demonstrating how to use the Dependency Proxy to avoid running into Docker Hub's rate limits.
+
 In November 2020, Docker introduced
 [rate limits on pull requests from Docker Hub](https://docs.docker.com/docker-hub/download-rate-limit/).
 If your GitLab [CI/CD configuration](../../../ci/README.md) uses

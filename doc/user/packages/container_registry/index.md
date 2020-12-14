@@ -40,6 +40,9 @@ If a project is public, so is the Container Registry.
 
 ## Use images from the Container Registry
 
+NOTE:Note
+Are you pulling container images from Docker Hub? Consider using the [GitLab Dependency Proxy](./dependency_proxy.md), which can help you to avoid running into a rate-limit and speed up your pipelines by pulling the image from the cache whenever possible.
+
 To download and run a container image hosted in the GitLab Container Registry:
 
 1. Copy the link to your container image:
