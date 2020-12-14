@@ -416,8 +416,8 @@ export const isValidSha1Hash = str => {
  * Adds a final newline to the content if it doesn't already exist
  *
  * @param {*} content Content
- * @param {*} eol Type of newline: CRLF='\r\n', LF='\n', CR='\r'
+ * @param {*} endOfLine Type of newline: CRLF='\r\n', LF='\n', CR='\r'
  */
-export function insertFinalNewline(content, eol = '\n') {
-  return content.slice(-eol.length) !== eol ? `${content}${eol}` : content;
+export function insertFinalNewline(content, endOfLine = '\n') {
+  return content.slice(-endOfLine.length) !== endOfLine ? `${content}${endOfLine}` : content;
 }

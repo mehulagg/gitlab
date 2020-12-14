@@ -16,9 +16,13 @@ describe('Blob Editing', () => {
     focus: jest.fn(),
   };
   beforeEach(() => {
-    setFixtures(
-      `<form class="js-edit-blob-form"><div id="file_path"></div><div id="editor"></div><textarea id="file-content"></textarea></form>`,
-    );
+    setFixtures(`
+      <form class="js-edit-blob-form">
+        <div id="file_path"></div>
+        <div id="editor"></div>
+        <textarea id="file-content"></textarea>
+      </form>
+    `);
     jest.spyOn(EditorLite.prototype, 'createInstance').mockReturnValue(mockInstance);
   });
 
