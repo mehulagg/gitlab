@@ -97,14 +97,18 @@ module Gitlab
           config = { socket_path: address.sub(/\Aunix:/, '') }
 
           if Rails.env.test?
+            config = {
+              # Override the set gitaly_address since Praefect is in the loop
+              socket_path: File.join(gitaly_dir, "gitaly.socket"),
+              auth: { token: 'secret' },
+              # Compared to production, tests run in constrained environments. This
+              # number is meant to grow with the number of concurrent rails requests /
+              # sidekiq jobs, and concurrency will be low anyway in test.
+              git: { catfile_cache_size: 5 }
+            }
+
             storage_path = Rails.root.join('tmp', 'tests', 'second_storage').to_s
             storages << { name: 'test_second_storage', path: storage_path }
-
-            config[:auth] = { token: 'secret' }
-            # Compared to production, tests run in constrained environments. This
-            # number is meant to grow with the number of concurrent rails requests /
-            # sidekiq jobs, and concurrency will be low anyway in test.
-            config[:git] = { catfile_cache_size: 5 }
           end
 
           config[:storage] = storages
