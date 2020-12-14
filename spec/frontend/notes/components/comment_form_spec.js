@@ -368,17 +368,6 @@ describe('issue_comment_form component', () => {
         });
       });
     });
-
-    describe('issue is confidential', () => {
-      it('shows information warning', () => {
-        mountComponent({
-          noteableData: { ...noteableDataMock, confidential: true },
-          mountFunction: mount,
-        });
-
-        expect(wrapper.find('[data-testid="confidential-warning"]').exists()).toBe(true);
-      });
-    });
   });
 
   describe('user is not logged in', () => {
