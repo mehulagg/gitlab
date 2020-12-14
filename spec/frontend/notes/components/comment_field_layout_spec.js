@@ -1,4 +1,5 @@
 import { mount } from '@vue/test-utils';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import CommentFieldLayout from '~/notes/components/comment_field_layout.vue';
 
 describe('Comment Field Layout Component', () => {
@@ -19,8 +20,8 @@ describe('Comment Field Layout Component', () => {
     confidential_issues_docs_path: CONFIDENTIAL_ISSUES_DOCS_PATH,
   };
 
-  const findIssuableNoteWarning = () => wrapper.find('[data-testid="confidential-warning"]');
-  const findEmailParticipantsWarning = () => wrapper.find('[data-testid="email-participants-warning"]');
+  const findIssuableNoteWarning = () => wrapper.findByTestId('confidential-warning');
+  const findEmailParticipantsWarning = () => wrapper.findByTestId('email-participants-warning');
 
   const createWrapper = (propOVerrides = { }) => {
     const props = propOVerrides;
@@ -28,11 +29,13 @@ describe('Comment Field Layout Component', () => {
     if (props.noteableData == null) 
       props.noteableData = noteableDataMock;
 
-    wrapper = mount(CommentFieldLayout, {
-      propsData: {
-        ...props,
-      },
-    });
+    wrapper = extendedWrapper(
+      mount(CommentFieldLayout, {
+        propsData: {
+          ...props,
+        },
+      })
+    );
   };
 
   describe('.error-alert', () => {
@@ -75,10 +78,10 @@ describe('Comment Field Layout Component', () => {
     });
 
     it('sets IssuableNoteWarning props', () => {
-      expect(findIssuableNoteWarning().vm.isLocked).toBe(false);
-      expect(findIssuableNoteWarning().vm.isConfidential).toBe(true);
-      expect(findIssuableNoteWarning().vm.lockedNoteableDocsPath).toEqual(LOCKED_DISCUSSION_DOCS_PATH);
-      expect(findIssuableNoteWarning().vm.confidentialNoteableDocsPath).toEqual(CONFIDENTIAL_ISSUES_DOCS_PATH);
+      expect(findIssuableNoteWarning().props('isLocked')).toBe(false);
+      expect(findIssuableNoteWarning().props('isConfidential')).toBe(true);
+      expect(findIssuableNoteWarning().props('lockedNoteableDocsPath')).toEqual(LOCKED_DISCUSSION_DOCS_PATH);
+      expect(findIssuableNoteWarning().props('confidentialNoteableDocsPath')).toEqual(CONFIDENTIAL_ISSUES_DOCS_PATH);
     });
   });
 
@@ -94,10 +97,10 @@ describe('Comment Field Layout Component', () => {
     });
 
     it('sets IssuableNoteWarning props', () => {
-      expect(findIssuableNoteWarning().vm.isConfidential).toBe(false);
-      expect(findIssuableNoteWarning().vm.isLocked).toBe(true);
-      expect(findIssuableNoteWarning().vm.lockedNoteableDocsPath).toEqual(LOCKED_DISCUSSION_DOCS_PATH);
-      expect(findIssuableNoteWarning().vm.confidentialNoteableDocsPath).toEqual(CONFIDENTIAL_ISSUES_DOCS_PATH);
+      expect(findIssuableNoteWarning().props('isConfidential')).toBe(false);
+      expect(findIssuableNoteWarning().props('isLocked')).toBe(true);
+      expect(findIssuableNoteWarning().props('lockedNoteableDocsPath')).toEqual(LOCKED_DISCUSSION_DOCS_PATH);
+      expect(findIssuableNoteWarning().props('confidentialNoteableDocsPath')).toEqual(CONFIDENTIAL_ISSUES_DOCS_PATH);
     });
   });
 
@@ -123,7 +126,7 @@ describe('Comment Field Layout Component', () => {
     });
 
     it('sets EmailParticipantsWarning props', () => {
-      expect(findEmailParticipantsWarning().vm.emails).toEqual(['someone@gitlab.com', 'another@gitlab.com']);
+      expect(findEmailParticipantsWarning().props('emails')).toEqual(['someone@gitlab.com', 'another@gitlab.com']);
     });
   });
 });
