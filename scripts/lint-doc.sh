@@ -21,12 +21,12 @@ fi
 # Test for non-standard spaces (NBSP, NNBSP) in documentation.
 echo '=> Checking for non-standard spaces...'
 echo
-grep --extended-regexp --recursive --color=auto '  ' doc/ >/dev/null 2>&1
+grep --extended-regexp --binary-file=without-match --recursive '[  ]' doc/ >/dev/null 2>&1
 if [ $? -eq 0 ]
 then
   echo '✖ ERROR: Non-standard spaces (NBSP, NNBSP) should not be used in documentation!
          Replace with standard spaces:' >&2
-  grep --extended-regexp --recursive --color=auto '  ' doc/
+  GREP_COLOR="0;101" grep --extended-regexp --binary-file=without-match --recursive --color=auto '[  ]' doc/
   ((ERRORCODE++))
 fi
 
