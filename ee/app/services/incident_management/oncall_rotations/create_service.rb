@@ -88,13 +88,10 @@ module IncidentManagement
       # BulkInsertSafe cannot be used here while OncallParticipant
       # has a has_many association. https://gitlab.com/gitlab-org/gitlab/-/issues/247718
       # We still want to bulk insert to avoid up to MAXIMUM_PARTICIPANTS
-      # consecutive insertions, but Gitlab::Database.bulk_insert
+      # consecutive insertions, but .insert_all
       # does not include validations. Warning!
       def insert_participants(participants)
-        ::Gitlab::Database.bulk_insert( # rubocop:disable Gitlab/BulkInsert
-          OncallParticipant.table_name,
-          participant_rows(participants)
-        )
+        OncallParticipant.insert_all(participant_rows(participants))
       end
 
       def error(message)
@@ -106,19 +103,19 @@ module IncidentManagement
       end
 
       def error_too_many_participants
-        error("A maximum of #{MAXIMUM_PARTICIPANTS} participants can be added")
+        error(_('A maximum of %{count} participants can be added') % { count: MAXIMUM_PARTICIPANTS })
       end
 
       def error_duplicate_participants
-        error('A user can only participate in a rotation once')
+        error(_('A user can only participate in a rotation once'))
       end
 
       def error_no_permissions
-        error('You have insufficient permissions to create an on-call rotation for this project')
+        error(_('You have insufficient permissions to create an on-call rotation for this project'))
       end
 
       def error_no_license
-        error('Your license does not support on-call rotations')
+        error(_('Your license does not support on-call rotations'))
       end
 
       def error_in_validation(object)

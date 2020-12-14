@@ -54,6 +54,13 @@ RSpec.describe IncidentManagement::OncallShift do
       let_it_be(:saturday) { friday + 1.day }
       let_it_be(:sunday) { saturday + 1.day }
 
+      # Using multiple participants in different rotations
+      # to be able to simultaneously save shifts which would
+      # conflict if they were part of the same rotation
+      let_it_be(:participant2) { create(:incident_management_oncall_participant, :with_access) }
+      let_it_be(:participant3) { create(:incident_management_oncall_participant, :with_access) }
+
+      # First rotation
       let_it_be(:mon_to_tue) { create_shift(monday, tuesday, participant) }
       let_it_be(:tue_to_wed) { create_shift(tuesday, wednesday, participant) }
       let_it_be(:wed_to_thu) { create_shift(wednesday, thursday, participant) }
@@ -61,11 +68,11 @@ RSpec.describe IncidentManagement::OncallShift do
       let_it_be(:fri_to_sat) { create_shift(friday, saturday, participant) }
       let_it_be(:sat_to_sun) { create_shift(saturday, sunday, participant) }
 
-      let_it_be(:participant2) { create(:incident_management_oncall_participant, :with_access) }
+      # Second rotation
       let_it_be(:mon_to_thu) { create_shift(monday, thursday, participant2) }
       let_it_be(:fri_to_sun) { create_shift(friday, sunday, participant2) }
 
-      let_it_be(:participant3) { create(:incident_management_oncall_participant, :with_access) }
+      # Third rotation
       let_it_be(:tue_to_sun) { create_shift(wednesday, sunday, participant3) }
 
       subject(:shifts) { described_class.for_timeframe(wednesday, saturday) }
