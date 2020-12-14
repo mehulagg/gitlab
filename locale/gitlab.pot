@@ -23345,7 +23345,7 @@ msgstr ""
 msgid "RepositoriesAnalytics|Please select projects to display."
 msgstr ""
 
-msgid "RepositoriesAnalytics|Projects with Tests"
+msgid "RepositoriesAnalytics|Projects with Coverage"
 msgstr ""
 
 msgid "RepositoriesAnalytics|Test Code Coverage"
@@ -23354,7 +23354,7 @@ msgstr ""
 msgid "RepositoriesAnalytics|There was an error fetching the projects."
 msgstr ""
 
-msgid "RepositoriesAnalytics|Total Number of Coverages"
+msgid "RepositoriesAnalytics|Jobs with Coverage"
 msgstr ""
 
 msgid "Repository"
