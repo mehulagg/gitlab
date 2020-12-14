@@ -20,6 +20,7 @@ import { refreshUserMergeRequestCounts } from '~/commons/nav/user_merge_requests
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import mergeRequestQueryVariablesMixin from '../../mixins/merge_request_query_variables';
 import { deprecatedCreateFlash as Flash } from '../../../flash';
+import MergeRequestStore from '../../stores/mr_widget_store';
 import statusIcon from '../mr_widget_status_icon.vue';
 import eventHub from '../../event_hub';
 import SquashBeforeMerge from './squash_before_merge.vue';
@@ -55,7 +56,7 @@ export default {
           mergeRequestsFfOnlyEnabled: data.mergeRequestsFfOnlyEnabled,
           onlyAllowMergeIfPipelineSucceeds: data.onlyAllowMergeIfPipelineSucceeds,
         };
-        this.removeSourceBranch = data.project.mergeRequest.userPermissions.removeSourceBranch;
+        this.removeSourceBranch = data.project.mergeRequest.shouldRemoveSourceBranch;
         this.commitMessage = data.project.mergeRequest.defaultMergeCommitMessage;
         this.squashBeforeMerge = data.project.mergeRequest.squashOnMerge;
         this.isSquashReadOnly = data.project.squashReadOnly;
@@ -152,8 +153,47 @@ export default {
 
       return this.mr.commits;
     },
+    commitsCount() {
+      if (this.glFeatures.mergeRequestWidgetGraphql) {
+        return this.state.commitCount || 0;
+      }
+
+      return this.mr.commitsCount;
+    },
+    preferredAutoMergeStrategy() {
+      if (this.glFeatures.mergeRequestWidgetGraphql) {
+        return MergeRequestStore.getPreferredAutoMergeStrategy(
+          this.state.availableAutoMergeStrategies,
+        );
+      }
+
+      return this.mr.preferredAutoMergeStrategy;
+    },
+    isSHAMismatch() {
+      if (this.glFeatures.mergeRequestWidgetGraphql) {
+        return this.mr.sha !== this.state.diffHeadSha;
+      }
+
+      return this.mr.isSHAMismatch;
+    },
+    squashIsSelected() {
+      if (this.glFeatures.mergeRequestWidgetGraphql) {
+        return this.squashReadOnly ? this.state.squashOnMerge : this.state.squash;
+      }
+
+      return this.mr.squashIsSelected;
+    },
+    isPipelineActive() {
+      if (this.glFeatures.mergeRequestWidgetGraphql) {
+        return this.pipeline?.active || false;
+      }
+
+      return this.mr.isPipelineActive;
+    },
     status() {
-      const { ciStatus } = this.mr;
+      const ciStatus = this.glFeatures.mergeRequestWidgetGraphql
+        ? this.pipeline?.status.toLowerCase()
+        : this.mr.ciStatus;
 
       if ((this.hasCI && !ciStatus) || this.hasPipelineMustSucceedConflict) {
         return PIPELINE_FAILED_STATE;
@@ -213,13 +253,13 @@ export default {
       return this.isMergeButtonDisabled;
     },
     shouldShowSquashBeforeMerge() {
-      const { commitsCount, enableSquashBeforeMerge, squashIsReadonly, squashIsSelected } = this.mr;
+      const { enableSquashBeforeMerge } = this.mr;
 
-      if (squashIsReadonly && !squashIsSelected) {
+      if (this.isSquashReadOnly && !this.squashIsSelected) {
         return false;
       }
 
-      return enableSquashBeforeMerge && commitsCount > 1;
+      return enableSquashBeforeMerge && this.commitsCount > 1;
     },
     shouldShowMergeControls() {
       return this.isMergeAllowed || this.isAutoMergeAvailable;
@@ -240,18 +280,26 @@ export default {
   },
   methods: {
     updateMergeCommitMessage(includeDescription) {
-      const { commitMessageWithDescription, commitMessage } = this.mr;
+      const commitMessage = this.glFeatures.mergeRequestWidgetGraphql
+        ? this.state.defaultMergeCommitMessage
+        : this.mr.commitMessage;
+      const commitMessageWithDescription = this.glFeatures.mergeRequestWidgetGraphql
+        ? this.state.defaultMergeCommitMessageWithDescription
+        : this.mr.commitMessageWithDescription;
       this.commitMessage = includeDescription ? commitMessageWithDescription : commitMessage;
     },
     handleMergeButtonClick(useAutoMerge, mergeImmediately = false) {
       if (mergeImmediately) {
         this.isMergingImmediately = true;
       }
+      const latestSha = this.glFeatures.mergeRequestWidgetGraphql
+        ? this.state.diffHeadSha
+        : this.mr.latestSHA;
 
       const options = {
-        sha: this.mr.latestSHA || this.mr.sha,
+        sha: latestSha || this.mr.sha,
         commit_message: this.commitMessage,
-        auto_merge_strategy: useAutoMerge ? this.mr.preferredAutoMergeStrategy : undefined,
+        auto_merge_strategy: useAutoMerge ? this.preferredAutoMergeStrategy : undefined,
         should_remove_source_branch: this.removeSourceBranch === true,
         squash: this.squashBeforeMerge,
       };
@@ -467,7 +515,7 @@ export default {
               </template>
             </div>
           </div>
-          <div v-if="mr.isSHAMismatch" class="d-flex align-items-center mt-2 js-sha-mismatch">
+          <div v-if="isSHAMismatch" class="d-flex align-items-center mt-2 js-sha-mismatch">
             <gl-icon name="warning-solid" class="text-warning mr-1" />
             <span class="text-warning">
               <gl-sprintf
@@ -491,15 +539,15 @@ export default {
         :merge-train-when-pipeline-succeeds-docs-path="mr.mergeTrainWhenPipelineSucceedsDocsPath"
       />
       <template v-if="shouldShowMergeControls">
-        <div v-if="mr.ffOnlyEnabled" class="mr-fast-forward-message">
+        <div v-if="!shouldShowMergeEdit" class="mr-fast-forward-message">
           {{ __('Fast-forward merge without a merge commit') }}
         </div>
         <commits-header
           v-if="shouldShowSquashEdit || shouldShowMergeEdit"
           :is-squash-enabled="squashBeforeMerge"
-          :commits-count="mr.commitsCount"
+          :commits-count="commitsCount"
           :target-branch="stateData.targetBranch"
-          :is-fast-forward-enabled="mr.ffOnlyEnabled"
+          :is-fast-forward-enabled="!shouldShowMergeEdit"
           :class="{ 'border-bottom': stateData.mergeError }"
         >
           <ul class="border-top content-list commits-list flex-list">

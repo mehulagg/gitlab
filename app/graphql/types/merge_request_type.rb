@@ -159,6 +159,8 @@ module Types
           description: 'Users who approved the merge request'
     field :squash_on_merge, GraphQL::BOOLEAN_TYPE, null: false, method: :squash_on_merge?,
           description: 'Indicates if squash on merge is enabled'
+    field :squash, GraphQL::BOOLEAN_TYPE, null: false,
+          description: 'Indicates if squash on merge is enabled'
     field :available_auto_merge_strategies, [GraphQL::STRING_TYPE], null: true, calls_gitaly: true,
           description: 'Array of available auto merge strategies'
     field :has_ci, GraphQL::BOOLEAN_TYPE, null: false, method: :has_ci?,

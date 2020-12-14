@@ -4,9 +4,11 @@ query readyToMergeQuery($projectPath: ID!, $iid: String!) {
     mergeRequestsFfOnlyEnabled
     squashReadOnly
     mergeRequest(iid: $iid) {
+      autoMergeEnabled
       shouldRemoveSourceBranch
       defaultMergeCommitMessage
       defaultMergeCommitMessageWithDescription
+      squash
       squashOnMerge
       availableAutoMergeStrategies
       hasCi
