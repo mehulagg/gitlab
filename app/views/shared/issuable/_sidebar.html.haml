@@ -136,7 +136,10 @@
               %cite{ title: project_ref }
                 = project_ref
             = clipboard_button(text: project_ref, title: _('Copy reference'), placement: "left", boundary: 'viewport')
-            #issuable-copy-email
+      - if signed_in
+        .block.with-sub-blocks
+          #issuable-copy-email
+
         - if issuable_type == 'merge_request'
           .sidebar-source-branch.sub-block
             .sidebar-collapsed-icon.dont-change-state

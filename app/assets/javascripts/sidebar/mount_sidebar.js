@@ -12,7 +12,7 @@ import sidebarParticipants from './components/participants/sidebar_participants.
 import sidebarSubscriptions from './components/subscriptions/sidebar_subscriptions.vue';
 import SidebarSeverity from './components/severity/sidebar_severity.vue';
 import Translate from '../vue_shared/translate';
-import Copy from '../vue_shared/components/copy_to_clipboardxx.vue';
+import CopyEmailToClipboard from '../vue_shared/components/copy_email_to_clipboard.vue';
 import createDefaultClient from '~/lib/graphql';
 import { isInIssuePage, isInIncidentPage, parseBoolean } from '~/lib/utils/common_utils';
 import createFlash from '~/flash';
@@ -276,13 +276,13 @@ function mountSeverityComponent() {
 
 function mountCopyEmailComponent() {
   const el = document.getElementById('issuable-copy-email');
-
+  // todo guard on logged in/mobile button
   if (!el) return;
 
   // eslint-disable-next-line no-new
   new Vue({
     el,
-    render: createElement => createElement(Copy, {}),
+    render: createElement => createElement(CopyEmailToClipboard, {}),
   });
 }
 
