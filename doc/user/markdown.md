@@ -1056,7 +1056,7 @@ are separated into their own lines:
 ```
 
 <!--
-Note: The example below uses HTML to force correct rendering on docs.gitlab.com,
+The example below uses HTML to force correct rendering on docs.gitlab.com,
 Markdown is fine in GitLab.
 -->
 

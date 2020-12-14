@@ -123,13 +123,13 @@ Within a directory, server hooks:
 - Are executed in alphabetical order.
 - Stop executing when a hook exits with a non-zero value.
 
-Note:
+`<hook_name>.d` must be either `pre-receive.d`, `post-receive.d`, or `update.d` to work properly.
+Any other names are ignored.
 
-- `<hook_name>.d` must be either `pre-receive.d`, `post-receive.d`, or `update.d` to work properly.
-  Any other names are ignored.
-- Files in `.d` directories must be executable and not match the backup file pattern (`*~`).
-- For `<project>.git` you need to [translate](repository_storage_types.md#translating-hashed-storage-paths)
-  your project name into the hashed storage format that GitLab uses.
+Files in `.d` directories must be executable and not match the backup file pattern (`*~`).
+
+For `<project>.git` you need to [translate](repository_storage_types.md#translating-hashed-storage-paths)
+your project name into the hashed storage format that GitLab uses.
 
 ## Environment Variables
 

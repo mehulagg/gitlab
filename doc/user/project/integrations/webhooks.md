@@ -409,7 +409,8 @@ X-Gitlab-Event: Issue Hook
 }
 ```
 
-NOTE: `assignee` and `assignee_id` keys are deprecated and now show the first assignee only.
+NOTE:
+`assignee` and `assignee_id` keys are deprecated and now show the first assignee only.
 
 ### Comment events
 
@@ -734,7 +735,8 @@ X-Gitlab-Event: Note Hook
 }
 ```
 
-NOTE: `assignee_id` field is deprecated and now shows the first assignee only.
+NOTE:
+`assignee_id` field is deprecated and now shows the first assignee only.
 
 #### Comment on code snippet
 
