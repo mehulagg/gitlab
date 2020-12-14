@@ -20,6 +20,7 @@ RSpec.describe IncidentManagement::OncallRotation do
     it { is_expected.to validate_uniqueness_of(:name).scoped_to(:oncall_schedule_id) }
     it { is_expected.to validate_presence_of(:starts_at) }
     it { is_expected.to validate_presence_of(:length) }
+    it { is_expected.to validate_numericality_of(:length) }
     it { is_expected.to validate_presence_of(:length_unit) }
 
     context 'when the oncall rotation with the same name exists' do
