@@ -528,6 +528,7 @@ You can use the following fake tokens as examples:
 
 | {::nomarkdown}<div style="width:140px">Usage</div>{:/} | Guidance |
 |-----------------------|-----|
+| admin, admin area     | Use **administration**, **administrator**, **administer**, or **Admin Area** instead. |.
 | and/or                | Use **or** instead, or another sensible construction. |
 | currently             | Do not use when talking about the product or its features. The documentation describes the product as it is today. |
 | easily                | Do not use. If the user doesn't find the process to be these things, we lose their trust. |
@@ -539,7 +540,7 @@ You can use the following fake tokens as examples:
 | i.e.                  | Do not use Latin abbreviations. Use **that is** instead. ([Vale](../testing.md#vale) rule: [`LatinTerms.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/LatinTerms.yml)) |
 | jargon                | Do not use. Define the term or [link to a definition](#links-to-external-documentation). |
 | may, might            | **Might** means something has the probability of occurring. **May** gives permission to do something. Consider **can** instead of **may**. |
-| me                    | Do not use first-person singular. Use **you**, **we**, or **us** instead. ([Vale](../testing.md#vale) rule: [`FirstPerson.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/FirstPerson.yml)) |
+| me, myself, mine      | Do not use first-person singular. Use **you**, **we**, or **us** instead. ([Vale](../testing.md#vale) rule: [`FirstPerson.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/FirstPerson.yml)) |
 | please                | Do not use. For details, see the [Microsoft style guide](https://docs.microsoft.com/en-us/style-guide/a-z-word-list-term-collections/p/please). |
 | profanity             | Do not use. Doing so may negatively affect other users and contributors, which is contrary to the GitLab value of [Diversity, Inclusion, and Belonging](https://about.gitlab.com/handbook/values/#diversity-inclusion). |
 | scalability           | Do not use when talking about increasing GitLab performance for additional users. The words scale or scaling are sometimes acceptable, but references to increasing GitLab performance for additional users should direct readers to the GitLab [reference architectures](../../../administration/reference_architectures/index.md) page. |
