@@ -14,6 +14,7 @@ class License < ApplicationRecord
   EES_FEATURES = %i[
     audit_events
     blocked_issues
+    board_iteration_lists
     code_owners
     code_review_analytics
     contribution_analytics

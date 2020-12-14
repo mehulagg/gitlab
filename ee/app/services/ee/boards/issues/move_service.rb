@@ -34,10 +34,14 @@ module EE
           assignee_ids = assignee_ids(issue)
           milestone_id = milestone_id(issue)
 
-          {
+          movement_args = {
             assignee_ids: assignee_ids,
             milestone_id: milestone_id
           }
+
+          movement_args[:sprint_id] = iteration_id(issue) if ::Feature.enabled?(:iteration_board_lists, parent)
+
+          movement_args
         end
 
         def milestone_id(issue)
@@ -47,6 +51,15 @@ module EE
           # Moving to a list which is not a 'milestone list' will keep
           # the already existent milestone.
           [issue.milestone_id, moving_to_list.milestone_id].compact.last
+        end
+
+        def iteration_id(issue)
+          # We want to nullify the issue iteration.
+          return if moving_to_list.backlog? && moving_from_list.iteration?
+
+          # Moving to a list which is not an 'iteration list' will keep
+          # the already existent iteration.
+          [issue.sprint_id, moving_to_list.iteration_id].compact.last
         end
 
         def assignee_ids(issue)
