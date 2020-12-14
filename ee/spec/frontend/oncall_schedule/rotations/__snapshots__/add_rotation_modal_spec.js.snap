@@ -509,7 +509,9 @@ exports[`AddRotationModal renders rotation modal layout 1`] = `
         <span
           class="gl-pl-5"
         >
-           PST 
+           {
+  "identifier": "Pacific/Honolulu"
+} 
         </span>
       </div>
     </gl-form-group-stub>
