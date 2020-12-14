@@ -56,7 +56,7 @@ When the number of billable users reaches the user cap, any user who is added or
 their account.
 
 If an administrator increases or removes the user cap, the users in pending approval state will be
-auto approved in a background job.
+automatically approved in a background job.
 
 ## Soft email confirmation
 
