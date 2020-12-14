@@ -38,7 +38,9 @@ apifuzzer_fuzz_unlicensed:
         - exit 1
 
 apifuzzer_fuzz:
+    needs: ["review-deploy"]
     stage: fuzz
+    timeout: 2h
     image:
         name: $FUZZAPI_IMAGE
         entrypoint: ["/bin/bash", "-l", "-c"]
