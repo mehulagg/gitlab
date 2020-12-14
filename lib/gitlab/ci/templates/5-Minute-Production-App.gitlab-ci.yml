@@ -6,10 +6,8 @@ include:
 
 stages:
   - build
-  - test
   - provision
   - deploy
-  - domain
   - destroy
 
 variables:
@@ -23,18 +21,13 @@ cache:
 
 .needs_aws_vars:
   rules:
-    - if: '$AWS_ACCESS_KEY_ID && $AWS_SECRET_ACCESS_KEY && $AWS_DEFAULT_REGION'
+    - if: '$AWS_ACCESS_KEY_ID && $AWS_SECRET_ACCESS_KEY && $AWS_DEFAULT_REGION && $CERT_EMAIL'
       when: on_success
     - when: never
 
-.needs_aws_ssl_and_protected_branch:
-  rules:
-    - if: '$AWS_ACCESS_KEY_ID && $AWS_SECRET_ACCESS_KEY && $AWS_DEFAULT_REGION && $CERT_DOMAIN && $CERT_EMAIL && $CI_COMMIT_REF_PROTECTED == "true"'
-      when: manual
-
 terraform_apply:
   stage: provision
-  image: registry.gitlab.com/gitlab-org/5-minute-production-app/deploy-template/stable
+  image: registry.gitlab.com/gitlab-org/5-minute-production-app/deploy-template/master
   extends: .needs_aws_vars
   resource_group: terraform
   before_script:
@@ -48,14 +41,13 @@ terraform_apply:
 
 deploy:
   stage: deploy
-  image: registry.gitlab.com/gitlab-org/5-minute-production-app/deploy-template/stable
+  image: registry.gitlab.com/gitlab-org/5-minute-production-app/deploy-template/master
   extends: .needs_aws_vars
   resource_group: deploy
   before_script:
     - cp /*.tf .
     - cp /deploy.sh .
     - cp /conf.nginx .
-    - cp /nossl.conf.nginx .
   script:
     - ./deploy.sh
   artifacts:
@@ -66,36 +58,11 @@ deploy:
     url: $DYNAMIC_ENVIRONMENT_URL
     on_stop: terraform_destroy
 
-setup_instructions:
-  stage: domain
-  image: registry.gitlab.com/gitlab-org/5-minute-production-app/deploy-template/stable
-  extends: .needs_aws_ssl_and_protected_branch
-  before_script:
-    - cp /*.tf .
-    - cp /setup_instructions.sh .
-  script:
-    - ./setup_instructions.sh
-
-ssl_certificate:
-  stage: domain
-  image: registry.gitlab.com/gitlab-org/5-minute-production-app/deploy-template/stable
-  extends: .needs_aws_ssl_and_protected_branch
-  before_script:
-    - cp /*.tf .
-    - cp /conf.nginx .
-    - cp /ssl_certificate.sh .
-  script:
-    - ./ssl_certificate.sh
-  environment:
-    name: $CI_COMMIT_REF_SLUG
-    url: https://$CERT_DOMAIN
-    on_stop: terraform_destroy
-
 terraform_destroy:
   variables:
     GIT_STRATEGY: none
   stage: destroy
-  image: registry.gitlab.com/gitlab-org/5-minute-production-app/deploy-template/stable
+  image: registry.gitlab.com/gitlab-org/5-minute-production-app/deploy-template/master
   before_script:
     - cp /*.tf .
     - cp /deploy.sh .
