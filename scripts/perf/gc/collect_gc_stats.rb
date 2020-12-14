@@ -1,6 +1,13 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
+####
+# Loads GitLab application classes with a variety of GC settings and prints
+# GC stats and timing data to standard out as CSV.
+#
+# The degree of parallelism can be increased by setting the PAR environment
+# variable (default: 2).
+
 require 'benchmark'
 
 SETTINGS = {
