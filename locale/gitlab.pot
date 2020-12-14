@@ -1196,19 +1196,19 @@ msgstr ""
 msgid "A CI/CD pipeline must run and be successful before merge."
 msgstr ""
 
-msgid "A GitBook site that uses Netlify for CI/CD instead of GitLab, but still with all the other great GitLab features."
+msgid "A GitBook site that uses Netlify for CI/CD instead of GitLab, but still with all the other great GitLab features"
 msgstr ""
 
 msgid "A Gitpod configured Webapplication in Spring and Java"
 msgstr ""
 
-msgid "A Hexo site that uses Netlify for CI/CD instead of GitLab, but still with all the other great GitLab features."
+msgid "A Hexo site that uses Netlify for CI/CD instead of GitLab, but still with all the other great GitLab features"
 msgstr ""
 
-msgid "A Hugo site that uses Netlify for CI/CD instead of GitLab, but still with all the other great GitLab features."
+msgid "A Hugo site that uses Netlify for CI/CD instead of GitLab, but still with all the other great GitLab features"
 msgstr ""
 
-msgid "A Jekyll site that uses Netlify for CI/CD instead of GitLab, but still with all the other great GitLab features."
+msgid "A Jekyll site that uses Netlify for CI/CD instead of GitLab, but still with all the other great GitLab features"
 msgstr ""
 
 msgid "A Let's Encrypt SSL certificate can not be obtained until your domain is verified."
@@ -1277,13 +1277,13 @@ msgstr ""
 msgid "A non-confidential epic cannot be assigned to a confidential parent epic"
 msgstr ""
 
-msgid "A plain HTML site that uses Netlify for CI/CD instead of GitLab, but still with all the other great GitLab features."
+msgid "A plain HTML site that uses Netlify for CI/CD instead of GitLab, but still with all the other great GitLab features"
 msgstr ""
 
 msgid "A platform value can be web, mob or app."
 msgstr ""
 
-msgid "A project boilerplate for Salesforce App development with Salesforce Developer tools."
+msgid "A project boilerplate for Salesforce App development with Salesforce Developer tools"
 msgstr ""
 
 msgid "A project containing issues for each audit inquiry in the HIPAA Audit Protocol published by the U.S. Department of Health & Human Services"
@@ -1292,10 +1292,10 @@ msgstr ""
 msgid "A project is where you house your files (repository), plan your work (issues), and publish your documentation (wiki), %{among_other_things_link}."
 msgstr ""
 
-msgid "A ready-to-go template for use with Android apps."
+msgid "A ready-to-go template for use with Android apps"
 msgstr ""
 
-msgid "A ready-to-go template for use with iOS Swift apps."
+msgid "A ready-to-go template for use with iOS Swift apps"
 msgstr ""
 
 msgid "A regular expression that will be used to find the test coverage output in the job log. Leave blank to disable"
@@ -1328,13 +1328,13 @@ msgstr ""
 msgid "AWS Access Key"
 msgstr ""
 
-msgid "AWS Access Key.  Only required if not using role instance credentials"
+msgid "AWS Access Key. Only required if not using role instance credentials"
 msgstr ""
 
 msgid "AWS Secret Access Key"
 msgstr ""
 
-msgid "AWS Secret Access Key.  Only required if not using role instance credentials"
+msgid "AWS Secret Access Key. Only required if not using role instance credentials"
 msgstr ""
 
 msgid "AWS service error: %{error}"
@@ -3312,6 +3312,9 @@ msgstr ""
 msgid "An error occurred while updating the comment"
 msgstr ""
 
+msgid "An error occurred while updating the configuration."
+msgstr ""
+
 msgid "An error occurred while updating the milestone."
 msgstr ""
 
@@ -3330,7 +3333,7 @@ msgstr ""
 msgid "An error ocurred while loading your content. Please try again."
 msgstr ""
 
-msgid "An example project for managing Kubernetes clusters integrated with GitLab."
+msgid "An example project for managing Kubernetes clusters integrated with GitLab"
 msgstr ""
 
 msgid "An example showing how to use Jsonnet with GitLab dynamic child pipelines"
@@ -3971,9 +3974,6 @@ msgstr ""
 msgid "Audit Events is a way to keep track of important events that happened in GitLab."
 msgstr ""
 
-msgid "Audit Log"
-msgstr ""
-
 msgid "AuditLogs|(removed)"
 msgstr ""
 
@@ -4359,9 +4359,6 @@ msgid "BambooService|You must set up automatic revision labeling and a repositor
 msgstr ""
 
 msgid "Based on"
-msgstr ""
-
-msgid "Basic Sample Data template with Issues, Merge Requests and Milestones."
 msgstr ""
 
 msgid "Be careful. Changing the project's namespace can have unintended side effects."
@@ -5452,7 +5449,13 @@ msgstr ""
 msgid "Choose a type..."
 msgstr ""
 
+msgid "Choose any color"
+msgstr ""
+
 msgid "Choose any color."
+msgstr ""
+
+msgid "Choose any color. Or you can choose one of the suggested colors below"
 msgstr ""
 
 msgid "Choose between %{code_open}clone%{code_close} or %{code_open}fetch%{code_close} to get the recent application code"
@@ -7122,6 +7125,24 @@ msgstr ""
 msgid "ComplianceDashboard|created by:"
 msgstr ""
 
+msgid "ComplianceFrameworks|Add framework"
+msgstr ""
+
+msgid "ComplianceFrameworks|All"
+msgstr ""
+
+msgid "ComplianceFrameworks|Error fetching compliance frameworks data. Please refresh the page"
+msgstr ""
+
+msgid "ComplianceFrameworks|Once you have created a compliance framework it will appear here."
+msgstr ""
+
+msgid "ComplianceFrameworks|Regulated"
+msgstr ""
+
+msgid "ComplianceFrameworks|There are no compliance frameworks set up yet"
+msgstr ""
+
 msgid "ComplianceFramework|GDPR"
 msgstr ""
 
@@ -7421,6 +7442,9 @@ msgid "ContainerRegistry|Keep the most recent:"
 msgstr ""
 
 msgid "ContainerRegistry|Keep these tags"
+msgstr ""
+
+msgid "ContainerRegistry|Last updated %{time}"
 msgstr ""
 
 msgid "ContainerRegistry|Login"
@@ -9607,6 +9631,9 @@ msgstr ""
 msgid "DevopsAdoption|Add new segment"
 msgstr ""
 
+msgid "DevopsAdoption|Adopted"
+msgstr ""
+
 msgid "DevopsAdoption|An error occured while deleting the segment. Please try again."
 msgstr ""
 
@@ -9617,6 +9644,24 @@ msgid "DevopsAdoption|Approvals"
 msgstr ""
 
 msgid "DevopsAdoption|Are you sure that you would like to delete %{name}?"
+msgstr ""
+
+msgid "DevopsAdoption|At least 1 MR opened"
+msgstr ""
+
+msgid "DevopsAdoption|At least 1 approval on an MR"
+msgstr ""
+
+msgid "DevopsAdoption|At least 1 deploy"
+msgstr ""
+
+msgid "DevopsAdoption|At least 1 issue opened"
+msgstr ""
+
+msgid "DevopsAdoption|At least 1 pipeline successfully run"
+msgstr ""
+
+msgid "DevopsAdoption|At least 1 security scan of any type run in pipeline"
 msgstr ""
 
 msgid "DevopsAdoption|Confirm delete segment"
@@ -9649,6 +9694,9 @@ msgstr ""
 msgid "DevopsAdoption|MRs"
 msgstr ""
 
+msgid "DevopsAdoption|Maximum %{maxSegments} segments allowed"
+msgstr ""
+
 msgid "DevopsAdoption|My segment"
 msgstr ""
 
@@ -9661,7 +9709,13 @@ msgstr ""
 msgid "DevopsAdoption|No filter results."
 msgstr ""
 
+msgid "DevopsAdoption|Not adopted"
+msgstr ""
+
 msgid "DevopsAdoption|Pipelines"
+msgstr ""
+
+msgid "DevopsAdoption|Runner configured for project/group"
 msgstr ""
 
 msgid "DevopsAdoption|Runners"
@@ -9674,6 +9728,9 @@ msgid "DevopsAdoption|Scanning"
 msgstr ""
 
 msgid "DevopsAdoption|Segment"
+msgstr ""
+
+msgid "DevopsAdoption|Segment data pending until the start of next month"
 msgstr ""
 
 msgid "DevopsAdoption|There was an error fetching Groups. Please refresh the page to try again."
@@ -10411,6 +10468,9 @@ msgid "Enable shared runners for all projects and subgroups in this group."
 msgstr ""
 
 msgid "Enable shared runners for this group"
+msgstr ""
+
+msgid "Enable shared runners for this project"
 msgstr ""
 
 msgid "Enable smartcn custom analyzer: Indexing"
@@ -11238,22 +11298,22 @@ msgstr ""
 msgid "Everything on your to-do list is marked as done."
 msgstr ""
 
-msgid "Everything you need to create a GitLab Pages site using Gatsby."
+msgid "Everything you need to create a GitLab Pages site using Gatsby"
 msgstr ""
 
-msgid "Everything you need to create a GitLab Pages site using GitBook."
+msgid "Everything you need to create a GitLab Pages site using GitBook"
 msgstr ""
 
-msgid "Everything you need to create a GitLab Pages site using Hexo."
+msgid "Everything you need to create a GitLab Pages site using Hexo"
 msgstr ""
 
-msgid "Everything you need to create a GitLab Pages site using Hugo."
+msgid "Everything you need to create a GitLab Pages site using Hugo"
 msgstr ""
 
-msgid "Everything you need to create a GitLab Pages site using Jekyll."
+msgid "Everything you need to create a GitLab Pages site using Jekyll"
 msgstr ""
 
-msgid "Everything you need to create a GitLab Pages site using plain HTML."
+msgid "Everything you need to create a GitLab Pages site using plain HTML"
 msgstr ""
 
 msgid "Evidence collection"
@@ -11679,6 +11739,9 @@ msgstr ""
 msgid "Failed to update environment!"
 msgstr ""
 
+msgid "Failed to update framework"
+msgstr ""
+
 msgid "Failed to update issue status"
 msgstr ""
 
@@ -11852,6 +11915,9 @@ msgstr ""
 msgid "FeatureFlags|Get started with feature flags"
 msgstr ""
 
+msgid "FeatureFlags|Get started with user lists"
+msgstr ""
+
 msgid "FeatureFlags|GitLab is moving to a new way of managing feature flags, and in 13.4, this feature flag will become read-only. Please create a new feature flag."
 msgstr ""
 
@@ -11964,6 +12030,9 @@ msgid "FeatureFlags|User List"
 msgstr ""
 
 msgid "FeatureFlags|User Lists"
+msgstr ""
+
+msgid "FeatureFlags|User lists allow you to define a set of users to use with Feature Flags."
 msgstr ""
 
 msgid "FeatureFlag|Percentage"
@@ -12776,6 +12845,9 @@ msgstr ""
 msgid "Get started"
 msgstr ""
 
+msgid "Get started with a project that follows best practices for setting up GitLab for your own organization, including sample Issues, Merge Requests, and Milestones"
+msgstr ""
+
 msgid "Get started with error tracking"
 msgstr ""
 
@@ -12891,6 +12963,9 @@ msgid "GitLab is a single application for the entire software development lifecy
 msgstr ""
 
 msgid "GitLab is obtaining a Let's Encrypt SSL certificate for this domain. This process can take some time. Please try again later."
+msgstr ""
+
+msgid "GitLab is undergoing maintenance and is operating in a read-only mode."
 msgstr ""
 
 msgid "GitLab member or Email address"
@@ -13070,7 +13145,7 @@ msgstr ""
 msgid "Go Back"
 msgstr ""
 
-msgid "Go Micro is a framework for micro service development."
+msgid "Go Micro is a framework for micro service development"
 msgstr ""
 
 msgid "Go back"
@@ -13631,6 +13706,12 @@ msgstr ""
 msgid "GroupSettings|Changing group URL can have unintended side effects."
 msgstr ""
 
+msgid "GroupSettings|Compliance frameworks"
+msgstr ""
+
+msgid "GroupSettings|Configure frameworks to apply enforceable rules to projects."
+msgstr ""
+
 msgid "GroupSettings|Custom project templates"
 msgstr ""
 
@@ -13853,7 +13934,7 @@ msgstr ""
 msgid "Guideline"
 msgstr ""
 
-msgid "HTTP Basic: Access denied\\nYou must use a personal access token with 'api' scope for Git over HTTP.\\nYou can generate one at %{profile_personal_access_tokens_url}"
+msgid "HTTP Basic: Access denied\\nYou must append your OTP code after your password\\nor use a personal access token with 'api' scope for Git over HTTP.\\nYou can generate one at %{profile_personal_access_tokens_url}"
 msgstr ""
 
 msgid "Hashed Storage must be enabled to use Geo"
@@ -14584,13 +14665,13 @@ msgstr ""
 msgid "Includes LFS objects. It can be overridden per group, or per project. 0 for unlimited."
 msgstr ""
 
-msgid "Includes an MVC structure to help you get started."
+msgid "Includes an MVC structure to help you get started"
 msgstr ""
 
-msgid "Includes an MVC structure, Gemfile, Rakefile, along with many others, to help you get started."
+msgid "Includes an MVC structure, Gemfile, Rakefile, along with many others, to help you get started"
 msgstr ""
 
-msgid "Includes an MVC structure, mvnw and pom.xml to help you get started."
+msgid "Includes an MVC structure, mvnw and pom.xml to help you get started"
 msgstr ""
 
 msgid "Incoming email"
@@ -15959,6 +16040,9 @@ msgstr ""
 msgid "Last seen"
 msgstr ""
 
+msgid "Last sign-in"
+msgstr ""
+
 msgid "Last successful sync"
 msgstr ""
 
@@ -16765,6 +16849,9 @@ msgstr ""
 msgid "Max access level"
 msgstr ""
 
+msgid "Max file size is 200 KB."
+msgstr ""
+
 msgid "Max role"
 msgstr ""
 
@@ -16930,18 +17017,6 @@ msgstr ""
 msgid "Members|2FA"
 msgstr ""
 
-msgid "Members|Access granted, ascending"
-msgstr ""
-
-msgid "Members|Access granted, descending"
-msgstr ""
-
-msgid "Members|Account, ascending"
-msgstr ""
-
-msgid "Members|Account, descending"
-msgstr ""
-
 msgid "Members|An error occurred while trying to enable LDAP override, please try again."
 msgstr ""
 
@@ -17005,19 +17080,7 @@ msgstr ""
 msgid "Members|LDAP override enabled."
 msgstr ""
 
-msgid "Members|Last sign-in, ascending"
-msgstr ""
-
-msgid "Members|Last sign-in, descending"
-msgstr ""
-
 msgid "Members|Leave \"%{source}\""
-msgstr ""
-
-msgid "Members|Max role, ascending"
-msgstr ""
-
-msgid "Members|Max role, descending"
 msgstr ""
 
 msgid "Members|Membership"
@@ -20557,6 +20620,9 @@ msgstr ""
 msgid "Please enter a valid URL format, ex: http://www.example.com/home"
 msgstr ""
 
+msgid "Please enter a valid hex (#RRGGBB or #RGB) color value"
+msgstr ""
+
 msgid "Please enter a valid number"
 msgstr ""
 
@@ -21547,6 +21613,9 @@ msgstr ""
 msgid "ProjectSettings|Allow"
 msgstr ""
 
+msgid "ProjectSettings|Allow editing commit messages"
+msgstr ""
+
 msgid "ProjectSettings|Allow users to make copies of your repository to a new project"
 msgstr ""
 
@@ -21802,6 +21871,9 @@ msgstr ""
 msgid "ProjectSettings|When conflicts arise the user is given the option to rebase"
 msgstr ""
 
+msgid "ProjectSettings|When enabled, commit authors will be able to edit commit messages on unprotected branches."
+msgstr ""
+
 msgid "ProjectSettings|When enabled, issues, merge requests, and snippets will always show thumbs-up and thumbs-down award emoji buttons."
 msgstr ""
 
@@ -21818,9 +21890,6 @@ msgid "ProjectTemplates|.NET Core"
 msgstr ""
 
 msgid "ProjectTemplates|Android"
-msgstr ""
-
-msgid "ProjectTemplates|Basic"
 msgstr ""
 
 msgid "ProjectTemplates|GitLab Cluster Management"
@@ -21877,7 +21946,7 @@ msgstr ""
 msgid "ProjectTemplates|SalesforceDX"
 msgstr ""
 
-msgid "ProjectTemplates|Serenity Valley"
+msgid "ProjectTemplates|Sample GitLab Project"
 msgstr ""
 
 msgid "ProjectTemplates|Serverless Framework/JS"
@@ -23363,9 +23432,6 @@ msgstr ""
 msgid "Request Access"
 msgstr ""
 
-msgid "Request Headers"
-msgstr ""
-
 msgid "Request details"
 msgstr ""
 
@@ -23542,12 +23608,6 @@ msgid "Resolves IP addresses once and uses them to submit requests"
 msgstr ""
 
 msgid "Response"
-msgstr ""
-
-msgid "Response Headers"
-msgstr ""
-
-msgid "Response Status"
 msgstr ""
 
 msgid "Response didn't include `service_desk_address`"
@@ -23918,9 +23978,6 @@ msgid "SSH public key"
 msgstr ""
 
 msgid "SSL Verification:"
-msgstr ""
-
-msgid "Sample Data"
 msgstr ""
 
 msgid "Satisfied"
@@ -24577,6 +24634,12 @@ msgstr ""
 msgid "SecurityReports|Undo dismiss"
 msgstr ""
 
+msgid "SecurityReports|Upgrade to interact, track and shift left with vulnerability management features in the UI."
+msgstr ""
+
+msgid "SecurityReports|Upgrade to manage vulnerabilities"
+msgstr ""
+
 msgid "SecurityReports|Vulnerability Report"
 msgstr ""
 
@@ -24857,9 +24920,6 @@ msgid "Separate topics with commas."
 msgstr ""
 
 msgid "September"
-msgstr ""
-
-msgid "Serenity Valley Sample Data template."
 msgstr ""
 
 msgid "SeriesFinalConjunction|and"
@@ -25232,6 +25292,9 @@ msgid "Shared runners"
 msgstr ""
 
 msgid "Shared runners are disabled for the parent group"
+msgstr ""
+
+msgid "Shared runners are disabled on group level"
 msgstr ""
 
 msgid "Shared runners disabled on group level"
@@ -25667,7 +25730,10 @@ msgstr ""
 msgid "Something went wrong while archiving a requirement."
 msgstr ""
 
-msgid "Something went wrong while closing the merge request. Please try again later"
+msgid "Something went wrong while closing the epic. Please try again later."
+msgstr ""
+
+msgid "Something went wrong while closing the merge request. Please try again later."
 msgstr ""
 
 msgid "Something went wrong while creating a requirement."
@@ -25754,7 +25820,10 @@ msgstr ""
 msgid "Something went wrong while reopening a requirement."
 msgstr ""
 
-msgid "Something went wrong while reopening the merge request. Please try again later"
+msgid "Something went wrong while reopening the epic. Please try again later."
+msgstr ""
+
+msgid "Something went wrong while reopening the merge request. Please try again later."
 msgstr ""
 
 msgid "Something went wrong while resolving this discussion. Please try again."
@@ -26498,6 +26567,9 @@ msgstr ""
 msgid "Subscription successfully deleted."
 msgstr ""
 
+msgid "SubscriptionTable|Add seats"
+msgstr ""
+
 msgid "SubscriptionTable|An error occurred while loading billable members list"
 msgstr ""
 
@@ -27015,6 +27087,9 @@ msgstr ""
 msgid "Terraform|Get started with Terraform"
 msgstr ""
 
+msgid "Terraform|Lock"
+msgstr ""
+
 msgid "Terraform|Locked"
 msgstr ""
 
@@ -27034,6 +27109,9 @@ msgid "Terraform|The Terraform report %{name} was generated in your pipelines."
 msgstr ""
 
 msgid "Terraform|Unknown User"
+msgstr ""
+
+msgid "Terraform|Unlock"
 msgstr ""
 
 msgid "Test"
@@ -27277,6 +27355,9 @@ msgstr ""
 msgid "The current issue"
 msgstr ""
 
+msgid "The current user is not authorized to access the job log."
+msgstr ""
+
 msgid "The data source is connected, but there is no data to display. %{documentationLink}"
 msgstr ""
 
@@ -27415,9 +27496,6 @@ msgid "The license was successfully uploaded and will be active from %{starts_at
 msgstr ""
 
 msgid "The maximum file size allowed is %{size}."
-msgstr ""
-
-msgid "The maximum file size allowed is 200KB."
 msgstr ""
 
 msgid "The merge conflicts for this merge request cannot be resolved through GitLab. Please try to resolve them locally."
@@ -27859,6 +27937,9 @@ msgid "There was an error trying to validate your query"
 msgstr ""
 
 msgid "There was an error updating the Geo Settings"
+msgstr ""
+
+msgid "There was an error updating the Maintenance Mode Settings"
 msgstr ""
 
 msgid "There was an error updating the dashboard, branch name is invalid."
@@ -28483,6 +28564,9 @@ msgid "ThreatMonitoring|The graph below is an overview of traffic coming to your
 msgstr ""
 
 msgid "ThreatMonitoring|There was an error displaying the alerts. Confirm your endpoint's configuration details to ensure alerts appear."
+msgstr ""
+
+msgid "ThreatMonitoring|There was an error while updating the status of the alert. Please try again."
 msgstr ""
 
 msgid "ThreatMonitoring|Threat Monitoring"
@@ -29614,7 +29698,7 @@ msgstr ""
 msgid "Update your group name, description, avatar, and visibility."
 msgstr ""
 
-msgid "Update your project name, topics, description and avatar."
+msgid "Update your project name, topics, description, and avatar."
 msgstr ""
 
 msgid "UpdateProject|Cannot rename project because it contains container registry tags!"
@@ -30620,6 +30704,9 @@ msgstr ""
 msgid "Vulnerability|Activity"
 msgstr ""
 
+msgid "Vulnerability|Actual Response"
+msgstr ""
+
 msgid "Vulnerability|Actual received response is the one received when this fault was detected"
 msgstr ""
 
@@ -30674,6 +30761,9 @@ msgstr ""
 msgid "Vulnerability|Project"
 msgstr ""
 
+msgid "Vulnerability|Request"
+msgstr ""
+
 msgid "Vulnerability|Request/Response"
 msgstr ""
 
@@ -30690,6 +30780,9 @@ msgid "Vulnerability|Status"
 msgstr ""
 
 msgid "Vulnerability|The unmodified response is the original response that had no mutations done to the request"
+msgstr ""
+
+msgid "Vulnerability|Unmodified Response"
 msgstr ""
 
 msgid "Wait for the file to load to copy its contents"
@@ -31657,6 +31750,9 @@ msgstr ""
 msgid "You must disassociate %{domain} from all clusters it is attached to before deletion."
 msgstr ""
 
+msgid "You must have developer or higher permissions in the associated project to view job logs when debug trace is enabled. To disable debug trace, set the 'CI_DEBUG_TRACE' variable to 'false' in your pipeline configuration or CI/CD settings. If you need to view this job log, a project maintainer must add you to the project with developer permissions or higher."
+msgstr ""
+
 msgid "You must have maintainer access to force delete a lock"
 msgstr ""
 
@@ -31886,6 +31982,9 @@ msgid "Your U2F device did not send a valid JSON response."
 msgstr ""
 
 msgid "Your U2F device was registered!"
+msgstr ""
+
+msgid "Your Version"
 msgstr ""
 
 msgid "Your WebAuthn device did not send a valid JSON response."
@@ -32163,6 +32262,9 @@ msgstr ""
 msgid "cannot be a date in the past"
 msgstr ""
 
+msgid "cannot be changed"
+msgstr ""
+
 msgid "cannot be changed if a personal project has container registry tags."
 msgstr ""
 
@@ -32205,6 +32307,9 @@ msgstr ""
 msgid "ciReport|%{improvedNum} improved"
 msgstr ""
 
+msgid "ciReport|%{linkStartTag}Learn more about API Fuzzing%{linkEndTag}"
+msgstr ""
+
 msgid "ciReport|%{linkStartTag}Learn more about Container Scanning %{linkEndTag}"
 msgstr ""
 
@@ -32242,6 +32347,9 @@ msgid "ciReport|: Loading resulted in an error"
 msgstr ""
 
 msgid "ciReport|API Fuzzing"
+msgstr ""
+
+msgid "ciReport|API fuzzing"
 msgstr ""
 
 msgid "ciReport|All projects"

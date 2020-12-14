@@ -26,6 +26,10 @@ export default {
       type: Object,
       required: true,
     },
+    modalId: {
+      type: String,
+      required: true,
+    },
   },
   data() {
     return {
@@ -112,7 +116,7 @@ export default {
 <template>
   <gl-modal
     ref="updateScheduleModal"
-    modal-id="updateScheduleModal"
+    :modal-id="modalId"
     size="sm"
     :data-testid="`update-schedule-modal-${schedule.iid}`"
     :title="$options.i18n.editSchedule"

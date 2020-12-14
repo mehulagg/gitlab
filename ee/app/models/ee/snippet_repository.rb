@@ -17,32 +17,33 @@ module EE
       def replicables_for_current_secondary(primary_key_in)
         node = ::Gitlab::Geo.current_node
 
-        replicables = if !node.selective_sync?
-                        all
-                      elsif node.selective_sync_by_namespaces?
-                        snippet_repositories_for_selected_namespaces
-                      elsif node.selective_sync_by_shards?
-                        snippet_repositories_for_selected_shards
-                      else
-                        self.none
-                      end
-
-        replicables.primary_key_in(primary_key_in)
+        if !node.selective_sync?
+          all.primary_key_in(primary_key_in)
+        elsif node.selective_sync_by_namespaces?
+          snippet_repositories_for_selected_namespaces(primary_key_in)
+        elsif node.selective_sync_by_shards?
+          snippet_repositories_for_selected_shards(primary_key_in)
+        else
+          self.none
+        end
       end
 
-      def snippet_repositories_for_selected_namespaces
-        personal_snippets = self.joins(:snippet).where(snippet: ::Snippet.only_personal_snippets)
+      def snippet_repositories_for_selected_namespaces(primary_key_in)
+        personal_snippets = self.where(snippet: ::Snippet.only_personal_snippets.primary_key_in(primary_key_in))
 
-        project_snippets = self.joins(snippet: :project).where(
-          'snippets.project_id IN(?)',
-          ::Gitlab::Geo.current_node.projects.select(:id)
-        )
+        project_snippets = self.where(snippet: ::Snippet.for_projects(::Gitlab::Geo.current_node.projects.select(:id))
+                                                   .primary_key_in(primary_key_in))
 
-        self.from_union([project_snippets, personal_snippets])
+        # We use `find_by_sql` here in order to perform the union operation and cast the results as
+        # Snippet repositories. If we use a `from_union`, it wraps the query in in a sub-select and
+        # it increases the query time by a surprising amount.
+        self.find_by_sql(::Gitlab::SQL::Union.new([project_snippets, personal_snippets]).to_sql)
       end
 
-      def snippet_repositories_for_selected_shards
-        self.for_repository_storage(::Gitlab::Geo.current_node.selective_sync_shards)
+      def snippet_repositories_for_selected_shards(primary_key_in)
+        self
+          .for_repository_storage(::Gitlab::Geo.current_node.selective_sync_shards)
+          .primary_key_in(primary_key_in)
       end
     end
 

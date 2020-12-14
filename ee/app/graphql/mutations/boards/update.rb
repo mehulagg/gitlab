@@ -31,10 +31,19 @@ module Mutations
                loads: ::Types::UserType,
                description: 'The ID of user to be assigned to the board'
 
+      # Cannot pre-load ::Types::MilestoneType because we are also assigning values like:
+      # ::Timebox::None(0), ::Timebox::Upcoming(-2) or ::Timebox::Started(-3), that cannot be resolved to a DB record.
       argument :milestone_id,
                ::Types::GlobalIDType[::Milestone],
                required: false,
                description: 'The ID of milestone to be assigned to the board'
+
+      # Cannot pre-load ::Types::IterationType because we are also assigning values like:
+      # ::Iteration::Predefined::None(0) or ::Iteration::Predefined::Current(-4), that cannot be resolved to a DB record.
+      argument :iteration_id,
+               ::Types::GlobalIDType[::Iteration],
+               required: false,
+               description: 'The ID of iteration to be assigned to the board.'
 
       argument :weight,
                GraphQL::INT_TYPE,
@@ -106,6 +115,9 @@ module Mutations
           ::GitlabSchema.parse_gid(label_id, expected_type: ::Label).model_id
         end
 
+        # we need this because we also pass `gid://gitlab/Iteration/-4` or `gid://gitlab/Iteration/-4`
+        # as `iteration_id` when we scope board to `Iteration::Predefined::Current` or `Iteration::Predefined::None`
+        args[:iteration_id] = args[:iteration_id].model_id if args[:iteration_id]
         args
       end
 

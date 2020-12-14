@@ -276,6 +276,12 @@ GitlabSecurity/PublicSend:
 Gitlab/DuplicateSpecLocation:
   Enabled: true
 
+Gitlab/PolicyRuleBoolean:
+  Enabled: true
+  Include:
+    - 'app/policies/**/*'
+    - 'ee/app/policies/**/*'
+
 Cop/InjectEnterpriseEditionModule:
   Enabled: true
   Exclude:
@@ -427,6 +433,7 @@ Scalability/FileUploads:
 
 Graphql/Descriptions:
   Enabled: true
+  AutoCorrect: true
   Include:
     - 'app/graphql/**/*'
     - 'ee/app/graphql/**/*'

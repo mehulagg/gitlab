@@ -349,7 +349,7 @@ module EE
     end
 
     def should_apply_user_signup_cap?
-      ::Feature.enabled?(:admin_new_user_signups_cap) &&
+      ::Feature.enabled?(:admin_new_user_signups_cap, default_enabled: true ) &&
         ::Gitlab::CurrentSettings.new_user_signups_cap.present?
     end
 

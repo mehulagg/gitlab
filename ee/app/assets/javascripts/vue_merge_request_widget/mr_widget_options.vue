@@ -238,6 +238,7 @@ export default {
     'dependencyScanning',
     'containerScanning',
     'coverageFuzzing',
+    'apiFuzzing',
     'secretDetection',
   ],
 };
@@ -317,6 +318,7 @@ export default {
         :secret-scanning-comparison-path="mr.secretScanningComparisonPath"
         :target-project-full-path="mr.targetProjectFullPath"
         :mr-iid="mr.iid"
+        :discover-project-security-path="mr.discoverProjectSecurityPath"
       />
       <grouped-security-reports-app
         v-else-if="shouldRenderExtendedSecurityReport"
@@ -327,6 +329,7 @@ export default {
         :enabled-reports="mr.enabledReports"
         :sast-help-path="mr.sastHelp"
         :dast-help-path="mr.dastHelp"
+        :api-fuzzing-help-path="mr.apiFuzzingHelp"
         :coverage-fuzzing-help-path="mr.coverageFuzzingHelp"
         :container-scanning-help-path="mr.containerScanningHelp"
         :dependency-scanning-help-path="mr.dependencyScanningHelp"
@@ -348,6 +351,7 @@ export default {
         :target-branch-tree-path="mr.targetBranchTreePath"
         :new-pipeline-path="mr.newPipelinePath"
         :container-scanning-comparison-path="mr.containerScanningComparisonPath"
+        :api-fuzzing-comparison-path="mr.apiFuzzingComparisonPath"
         :coverage-fuzzing-comparison-path="mr.coverageFuzzingComparisonPath"
         :dast-comparison-path="mr.dastComparisonPath"
         :dependency-scanning-comparison-path="mr.dependencyScanningComparisonPath"

@@ -190,7 +190,7 @@ module Gitlab
 
           RequestStore[ENSURE_CACHING_KEY] = true
 
-          if Feature.enabled?(:query_cache_for_load_balancing)
+          if Feature.enabled?(:query_cache_for_load_balancing, default_enabled: true)
             host.enable_query_cache!
           end
         end

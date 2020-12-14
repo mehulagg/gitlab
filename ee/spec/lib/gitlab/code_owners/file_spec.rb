@@ -153,6 +153,39 @@ RSpec.describe Gitlab::CodeOwners::File do
     end
   end
 
+  describe '#sections' do
+    subject { file.sections }
+
+    context 'when CODEOWNERS file contains sections' do
+      let(:file_content) do
+        <<~CONTENT
+        *.rb @ruby-owner
+
+        [Documentation]
+        *.md @gl-docs
+
+        [Test]
+        *_spec.rb @gl-test
+
+        [Documentation]
+        doc/* @gl-docs
+        CONTENT
+      end
+
+      it 'returns unique sections' do
+        is_expected.to match_array(%w[codeowners Documentation Test])
+      end
+    end
+
+    context 'when CODEOWNERS file is missing' do
+      let(:blob) { nil }
+
+      it 'returns a default section' do
+        is_expected.to match_array(['codeowners'])
+      end
+    end
+  end
+
   describe '#entry_for_path' do
     shared_examples_for "returns expected matches" do
       context 'for a path without matches' do

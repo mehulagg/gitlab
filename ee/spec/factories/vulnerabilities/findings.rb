@@ -23,6 +23,25 @@ FactoryBot.define do
         finding.raw_metadata = raw_metadata.to_json
       end
     end
+
+    trait :yarn_remediation do
+      after(:build) do |finding, evaluator|
+        if evaluator.summary
+          raw_metadata = Gitlab::Json.parse(finding.raw_metadata)
+          raw_metadata['remediations'] = [
+            {
+              summary: evaluator.summary,
+              diff: Base64.encode64(
+                File.read(
+                  File.join(
+                    Rails.root.join('ee/spec/fixtures/security_reports/remediations'), "remediation.patch")
+                ))
+            }
+          ]
+          finding.raw_metadata = raw_metadata.to_json
+        end
+      end
+    end
   end
 
   factory :vulnerabilities_finding, class: 'Vulnerabilities::Finding' do

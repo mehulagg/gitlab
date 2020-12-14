@@ -9,8 +9,6 @@ RSpec.describe 'Query.instanceSecurityDashboard.projects' do
   let_it_be(:other_project) { create(:project) }
   let_it_be(:user) { create(:user, security_dashboard_projects: [project]) }
 
-  let(:current_user) { user }
-
   before do
     project.add_developer(user)
     other_project.add_developer(user)
@@ -18,28 +16,26 @@ RSpec.describe 'Query.instanceSecurityDashboard.projects' do
     stub_licensed_features(security_dashboard: true)
   end
 
-  let(:fields) do
-    <<~QUERY
-    nodes {
-      id
-    }
-    QUERY
-  end
-
   let(:query) do
-    graphql_query_for('instanceSecurityDashboard', nil, query_graphql_field('projects', {}, fields))
+    graphql_query_for(:instance_security_dashboard, dashboard_fields)
   end
-
-  subject(:projects) { graphql_data.dig('instanceSecurityDashboard', 'projects', 'nodes') }
 
   context 'with logged in user' do
-    it_behaves_like 'a working graphql query' do
-      before do
-        post_graphql(query, current_user: current_user)
-      end
+    let(:current_user) { user }
 
-      it 'finds only projects that were added to instance security dashboard' do
-        expect(projects).to eq([{ "id" => GitlabSchema.id_from_object(project).to_s }])
+    context 'requesting projects in the dashboard' do
+      let(:dashboard_fields) { query_graphql_path(%i[projects nodes], 'id') }
+
+      subject(:projects) { graphql_data_at(:instance_security_dashboard, :projects, :nodes) }
+
+      it_behaves_like 'a working graphql query' do
+        before do
+          post_graphql(query, current_user: current_user)
+        end
+
+        it 'finds only projects that were added to instance security dashboard' do
+          expect(projects).to contain_exactly({ "id" => global_id_of(project) })
+        end
       end
     end
 
@@ -187,6 +183,10 @@ RSpec.describe 'Query.instanceSecurityDashboard.projects' do
 
   context 'with no user' do
     let(:current_user) { nil }
+
+    let(:dashboard_fields) { nil }
+
+    subject { graphql_data_at(:instance_security_dashboard) }
 
     it_behaves_like 'a working graphql query' do
       before do

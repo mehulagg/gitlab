@@ -71,6 +71,27 @@ RSpec.describe Vulnerabilities::FeedbackPolicy do
           is_expected.to be_disallowed(:create_vulnerability_feedback)
         end
       end
+
+      context 'with security bot' do
+        let(:current_user) { create(:user, :security_bot) }
+
+        before do
+          stub_licensed_features(vulnerability_auto_fix: true)
+        end
+
+        context 'when auto-fix is enabled' do
+          it { is_expected.to be_allowed(:create_vulnerability_feedback) }
+        end
+
+        context 'when auto-fix is disabled' do
+          before do
+            project.security_setting.update!(auto_fix_dependency_scanning: false,
+                                             auto_fix_container_scanning: false)
+          end
+
+          it { is_expected.to be_disallowed(:create_vulnerability_feedback) }
+        end
+      end
     end
   end
 

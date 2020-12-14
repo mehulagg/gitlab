@@ -6,7 +6,48 @@ RSpec.describe API::Projects do
   include ExternalAuthorizationServiceHelpers
 
   let(:user) { create(:user) }
+  let_it_be(:another_user) { create(:user) }
   let(:project) { create(:project, namespace: user.namespace) }
+
+  shared_examples 'inaccessable by reporter role and lower' do
+    context 'for reporter' do
+      before do
+        reporter = create(:user)
+        project.add_reporter(reporter)
+
+        get api(path, reporter)
+      end
+
+      it 'returns 403 response' do
+        expect(response).to have_gitlab_http_status(:forbidden)
+      end
+    end
+
+    context 'for guest' do
+      before do
+        guest = create(:user)
+        project.add_guest(guest)
+
+        get api(path, guest)
+      end
+
+      it 'returns 403 response' do
+        expect(response).to have_gitlab_http_status(:forbidden)
+      end
+    end
+
+    context 'for anonymous' do
+      before do
+        anonymous = create(:user)
+
+        get api(path, anonymous)
+      end
+
+      it 'returns 403 response' do
+        expect(response).to have_gitlab_http_status(:forbidden)
+      end
+    end
+  end
 
   describe 'GET /projects' do
     it 'does not break on license checks' do
@@ -515,13 +556,31 @@ RSpec.describe API::Projects do
     let_it_be(:project) { create(:project, :public, namespace: user.namespace) }
     let(:path) { "/projects/#{project.id}/audit_events" }
 
-    context 'when authenticated, as a user' do
-      it_behaves_like '403 response' do
-        let(:request) { get api(path, create(:user)) }
+    it_behaves_like 'inaccessable by reporter role and lower'
+
+    context 'when authenticated, as a member' do
+      let_it_be(:developer) { create(:user) }
+
+      before do
+        stub_licensed_features(audit_events: true)
+        project.add_developer(developer)
+      end
+
+      it 'returns only events authored by current user' do
+        project_audit_event_1 = create(:project_audit_event, entity_id: project.id, author_id: developer.id)
+        create(:project_audit_event, entity_id: project.id, author_id: 666)
+
+        get api(path, developer)
+
+        expect_response_contain_exactly(project_audit_event_1.id)
       end
     end
 
     context 'when authenticated, as a project owner' do
+      before do
+        project.add_maintainer(user)
+      end
+
       context 'audit events feature is not available' do
         before do
           stub_licensed_features(audit_events: false)
@@ -612,9 +671,46 @@ RSpec.describe API::Projects do
 
     let_it_be(:project_audit_event) { create(:project_audit_event, created_at: Date.new(2000, 1, 10), entity_id: project.id) }
 
-    context 'when authenticated, as a user' do
+    it_behaves_like 'inaccessable by reporter role and lower'
+
+    context 'when authenticated, as a guest' do
+      let_it_be(:guest) { create(:user) }
+
+      before do
+        stub_licensed_features(audit_events: true)
+        project.add_guest(guest)
+      end
+
       it_behaves_like '403 response' do
-        let(:request) { get api(path, create(:user)) }
+        let(:request) { get api(path, guest) }
+      end
+    end
+
+    context 'when authenticated, as a member' do
+      let_it_be(:developer) { create(:user) }
+
+      before do
+        stub_licensed_features(audit_events: true)
+        project.add_developer(developer)
+      end
+
+      it 'returns 200 response' do
+        audit_event = create(:project_audit_event, entity_id: project.id, author_id: developer.id)
+        path = "/projects/#{project.id}/audit_events/#{audit_event.id}"
+
+        get api(path, developer)
+
+        expect(response).to have_gitlab_http_status(:ok)
+      end
+
+      context 'existing audit event of a different user' do
+        let_it_be(:audit_event) { create(:project_audit_event, entity_id: project.id, author_id: another_user.id) }
+
+        let(:path) { "/projects/#{project.id}/audit_events/#{audit_event.id}" }
+
+        it_behaves_like '404 response' do
+          let(:request) { get api(path, developer) }
+        end
       end
     end
 

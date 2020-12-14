@@ -1,7 +1,7 @@
 - group = local_assigns.fetch(:group)
 - form = local_assigns.fetch(:form)
 
-- return unless group.shared_runner_minutes_supported?
+- return unless group.root?
 
 = render 'namespaces/shared_runners_minutes_setting', form: form
 - unless group.new_record?

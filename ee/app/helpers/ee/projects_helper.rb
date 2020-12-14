@@ -167,11 +167,11 @@ module EE
         projects/security/vulnerability_report#index
         projects/security/dashboard#index
         projects/on_demand_scans#index
-        projects/dast_profiles#index
-        projects/dast_site_profiles#new
-        projects/dast_site_profiles#edit
-        projects/dast_scanner_profiles#new
-        projects/dast_scanner_profiles#edit
+        projects/security/dast_profiles#show
+        projects/security/dast_site_profiles#new
+        projects/security/dast_site_profiles#edit
+        projects/security/dast_scanner_profiles#new
+        projects/security/dast_scanner_profiles#edit
         projects/dependencies#index
         projects/licenses#index
         projects/threat_monitoring#show
@@ -189,11 +189,18 @@ module EE
     def sidebar_on_demand_scans_paths
       %w[
         projects/on_demand_scans#index
-        projects/dast_profiles#index
-        projects/dast_site_profiles#new
-        projects/dast_site_profiles#edit
-        projects/dast_scanner_profiles#new
-        projects/dast_scanner_profiles#edit
+      ]
+    end
+
+    def sidebar_security_configuration_paths
+      %w[
+        projects/security/configuration#show
+        projects/security/sast_configuration#show
+        projects/security/dast_profiles#show
+        projects/security/dast_site_profiles#new
+        projects/security/dast_site_profiles#edit
+        projects/security/dast_scanner_profiles#new
+        projects/security/dast_scanner_profiles#edit
       ]
     end
 

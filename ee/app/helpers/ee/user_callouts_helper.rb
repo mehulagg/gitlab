@@ -91,7 +91,7 @@ module EE
     end
 
     def show_new_user_signups_cap_reached?
-      return false unless ::Feature.enabled?(:admin_new_user_signups_cap)
+      return false unless ::Feature.enabled?(:admin_new_user_signups_cap, default_enabled: true )
       return false unless current_user&.admin?
       return false if user_dismissed?(NEW_USER_SIGNUPS_CAP_REACHED)
 

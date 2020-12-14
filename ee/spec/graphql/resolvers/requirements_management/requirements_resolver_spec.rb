@@ -45,11 +45,11 @@ RSpec.describe Resolvers::RequirementsManagement::RequirementsResolver do
       describe 'sorting' do
         context 'when sorting by created_at' do
           it 'sorts requirements ascending' do
-            expect(resolve_requirements(sort: 'created_asc')).to eq([requirement1, requirement3, requirement2])
+            expect(resolve_requirements(sort: 'created_asc').to_a).to eq([requirement1, requirement3, requirement2])
           end
 
           it 'sorts requirements descending' do
-            expect(resolve_requirements(sort: 'created_desc')).to eq([requirement2, requirement3, requirement1])
+            expect(resolve_requirements(sort: 'created_desc').to_a).to eq([requirement2, requirement3, requirement1])
           end
         end
       end
@@ -89,7 +89,7 @@ RSpec.describe Resolvers::RequirementsManagement::RequirementsResolver do
 
       context 'single author exists' do
         let(:params) do
-          { author_username: other_user.username }
+          { author_username: [other_user.username] }
         end
 
         it 'filters requirements by author' do
@@ -99,7 +99,7 @@ RSpec.describe Resolvers::RequirementsManagement::RequirementsResolver do
 
       context 'single nonexistent author' do
         let(:params) do
-          { author_username: "nonsense" }
+          { author_username: ["nonsense"] }
         end
 
         it_behaves_like 'returns no items'
@@ -116,14 +116,6 @@ RSpec.describe Resolvers::RequirementsManagement::RequirementsResolver do
       context 'single author is not supplied' do
         let(:params) do
           {}
-        end
-
-        it_behaves_like 'returns unfiltered'
-      end
-
-      context 'single author is nil' do
-        let(:params) do
-          { author_username: nil }
         end
 
         it_behaves_like 'returns unfiltered'

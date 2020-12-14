@@ -39,9 +39,7 @@
             %p.validation-pending.gl-field-error-ignore.field-validation.hide= _('Checking group path availability...')
         .row
           .form-group.col-sm-12
-            = f.label :visibility_level, class: 'label-bold' do
-              = _('Visibility level')
-            .js-visibility-level-dropdown{ data: { visibility_level_options: visibility_level_options.to_json, default_level: f.object.visibility_level } }
+            = render partial: 'shared/groups/visibility_level', locals: { f: f }
         = render partial: 'shared/groups/invite_members'
         .row
           .form-group.col-sm-12.mb-0

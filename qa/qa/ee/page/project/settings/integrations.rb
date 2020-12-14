@@ -11,7 +11,7 @@ module QA
             def self.prepended(base)
               base.class_eval do
                 view 'app/views/shared/integrations/_index.html.haml' do
-                  element :jenkins_link, '{ data: { qa_selector: "#{integration.to_param' # rubocop:disable QA/ElementWithPattern
+                  element :jenkins_link, 'data: { qa_selector: "#{integration.to_param' # rubocop:disable QA/ElementWithPattern
                 end
               end
             end

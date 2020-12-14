@@ -236,7 +236,9 @@ module Gitlab
 
       def system_usage_data_settings
         {
-          settings: {}
+          settings: {
+            ldap_encrypted_secrets_enabled: alt_usage_data(fallback: nil) { Gitlab::Auth::Ldap::Config.encrypted_secrets.active? }
+          }
         }
       end
 
@@ -687,16 +689,12 @@ module Gitlab
       end
 
       def aggregated_metrics_monthly
-        return {} unless Feature.enabled?(:product_analytics_aggregated_metrics)
-
         {
           aggregated_metrics: ::Gitlab::UsageDataCounters::HLLRedisCounter.aggregated_metrics_monthly_data
         }
       end
 
       def aggregated_metrics_weekly
-        return {} unless Feature.enabled?(:product_analytics_aggregated_metrics)
-
         {
           aggregated_metrics: ::Gitlab::UsageDataCounters::HLLRedisCounter.aggregated_metrics_weekly_data
         }

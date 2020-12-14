@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
+import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import { GlAlert, GlButton, GlLoadingIcon, GlSprintf } from '@gitlab/ui';
 import { getByText } from '@testing-library/dom';
@@ -14,6 +15,7 @@ import DevopsAdoptionSegmentModal from 'ee/admin/dev_ops_report/components/devop
 import {
   DEVOPS_ADOPTION_STRINGS,
   DEVOPS_ADOPTION_SEGMENT_MODAL_ID,
+  MAX_SEGMENTS,
 } from 'ee/admin/dev_ops_report/constants';
 import * as Sentry from '~/sentry/wrapper';
 import {
@@ -67,6 +69,9 @@ describe('DevopsAdoptionApp', () => {
       apolloProvider: mockApollo,
       stubs: {
         GlSprintf,
+      },
+      directives: {
+        GlTooltip: createMockDirective(),
       },
       data() {
         return data;
@@ -354,9 +359,11 @@ describe('DevopsAdoptionApp', () => {
 
         describe('segment modal button', () => {
           let segmentButton;
+          let segmentButtonWrapper;
 
           beforeEach(() => {
             segmentButton = tableHeader.find(GlButton);
+            segmentButtonWrapper = wrapper.find("[data-testid='segmentButtonWrapper']");
           });
 
           afterEach(() => {
@@ -374,6 +381,33 @@ describe('DevopsAdoptionApp', () => {
 
             expect(rootEmit.mock.calls[0][0]).toContain('show');
             expect(rootEmit.mock.calls[0][1]).toBe(DEVOPS_ADOPTION_SEGMENT_MODAL_ID);
+          });
+
+          it('does not have a tooltip', () => {
+            const tooltip = getBinding(segmentButtonWrapper.element, 'gl-tooltip');
+
+            // Setting a directive's value to false tells it not to render
+            expect(tooltip.value).toBe(false);
+          });
+
+          describe('when there are more than the max number of segments', () => {
+            beforeEach(() => {
+              const data = {
+                nodes: Array(MAX_SEGMENTS + 1).fill(devopsAdoptionSegmentsData.nodes[0]),
+              };
+              wrapper.setData({ devopsAdoptionSegments: data });
+            });
+
+            it('disables the button', () => {
+              expect(segmentButton.props('disabled')).toBe(true);
+            });
+
+            it('has a tooltip', () => {
+              const tooltip = getBinding(segmentButtonWrapper.element, 'gl-tooltip');
+
+              expect(tooltip).toBeDefined();
+              expect(tooltip.value).toBe('Maximum 30 segments allowed');
+            });
           });
         });
       });

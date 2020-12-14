@@ -351,10 +351,6 @@ describe('fetchRecentBoards', () => {
   expectNotImplemented(actions.fetchRecentBoards);
 });
 
-describe('createBoard', () => {
-  expectNotImplemented(actions.createBoard);
-});
-
 describe('deleteBoard', () => {
   expectNotImplemented(actions.deleteBoard);
 });

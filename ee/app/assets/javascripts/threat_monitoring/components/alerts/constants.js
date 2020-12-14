@@ -8,6 +8,9 @@ export const MESSAGES = {
     "ThreatMonitoring|There was an error displaying the alerts. Confirm your endpoint's configuration details to ensure alerts appear.",
   ),
   NO_ALERTS: s__('ThreatMonitoring|No alerts to display.'),
+  UPDATE_STATUS_ERROR: s__(
+    'ThreatMonitoring|There was an error while updating the status of the alert. Please try again.',
+  ),
 };
 
 export const STATUSES = {
@@ -22,21 +25,23 @@ export const FIELDS = [
     key: 'startedAt',
     label: s__('ThreatMonitoring|Date and time'),
     thAttr: { 'data-testid': 'threat-alerts-started-at-header' },
-    thClass: `gl-w-15p`,
+    thClass: `gl-bg-white! gl-w-15p`,
     tdClass: `gl-pl-6!`,
     sortable: true,
   },
   {
     key: 'alertLabel',
     label: s__('ThreatMonitoring|Name'),
-    thClass: `gl-pointer-events-none`,
+    thClass: `gl-bg-white! gl-pointer-events-none`,
   },
   {
     key: 'status',
     label: s__('ThreatMonitoring|Status'),
     thAttr: { 'data-testid': 'threat-alerts-status-header' },
-    thClass: `gl-w-15p`,
+    thClass: `gl-bg-white! gl-w-15p`,
     tdClass: `gl-pl-6!`,
     sortable: true,
   },
 ];
+
+export const PAGE_SIZE = 20;

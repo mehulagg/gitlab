@@ -2,7 +2,7 @@ export const generateVulnerabilities = () => [
   {
     id: 'id_0',
     detectedAt: '2020-07-29T15:36:54Z',
-    solutions: true,
+    hasSolutions: true,
     identifiers: [
       {
         externalType: 'cve',
@@ -35,7 +35,7 @@ export const generateVulnerabilities = () => [
   {
     id: 'id_1',
     detectedAt: '2020-07-22T19:31:24Z',
-    solutions: false,
+    hasSolutions: false,
     identifiers: [
       {
         externalType: 'gemnasium',

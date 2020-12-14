@@ -13,7 +13,7 @@ System for Cross-domain Identity Management (SCIM), is an open standard that ena
 automation of user provisioning. When SCIM is provisioned for a GitLab group, membership of
 that group is synchronized between GitLab and the identity provider.
 
-GitLab's [SCIM API](../../../api/scim.md) implements part of [the RFC7644 protocol](https://tools.ietf.org/html/rfc7644).
+The GitLab [SCIM API](../../../api/scim.md) implements part of [the RFC7644 protocol](https://tools.ietf.org/html/rfc7644).
 
 ## Features
 
@@ -114,7 +114,7 @@ You can then test the connection by clicking on **Test Connection**. If the conn
    the application (`Users and groups`), otherwise, it syncs the whole Active Directory.
 
 Once enabled, the synchronization details and any errors appears on the
-bottom of the **Provisioning** screen, together with a link to the audit logs.
+bottom of the **Provisioning** screen, together with a link to the audit events.
 
 WARNING:
 Once synchronized, changing the field mapped to `id` and `externalId` may cause a number of errors. These include provisioning errors, duplicate users, and may prevent existing users from accessing the GitLab group.
@@ -240,7 +240,7 @@ To see how the `external_uid` compares to the value returned as the SAML NameId,
 
 Whether the value was changed or you need to map to a different field, ensure `id`, `externalId`, and `NameId` all map to the same field.
 
-If GitLab's `externalId` doesn't match the SAML NameId, it will need to be updated in order for the user to log in. Ideally your identity provider will be configured to do such an update, but in some cases it may be unable to do so, such as when looking up a user fails due to an ID change.
+If the GitLab `externalId` doesn't match the SAML NameId, it needs to be updated in order for the user to sign in. Ideally your identity provider is configured to do such an update, but in some cases it may be unable to do so, such as when looking up a user fails due to an ID change.
 
 Be cautious if you revise the fields used by your SCIM identity provider, typically `id` and `externalId`.
 We use these IDs to look up users. If the identity provider does not know the current values for these fields,
@@ -292,7 +292,7 @@ When testing the connection, you may encounter an error: **You appear to have en
 
 #### (Field) can't be blank sync error
 
-When checking the Audit Logs for the Provisioning, you can sometimes see the
+When checking the Audit Events for the Provisioning, you can sometimes see the
 error `Namespace can't be blank, Name can't be blank, and User can't be blank.`
 
 This is likely caused because not all required fields (such as first name and last name) are present for all users being mapped.

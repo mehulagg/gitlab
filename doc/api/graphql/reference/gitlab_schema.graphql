@@ -537,22 +537,22 @@ enum AlertManagementAlertSort {
   """
   Created at ascending order
   """
-  created_asc @deprecated(reason: "Use CREATED_ASC. Deprecated in 13.5")
+  created_asc @deprecated(reason: "Use CREATED_ASC. Deprecated in 13.5.")
 
   """
   Created at descending order
   """
-  created_desc @deprecated(reason: "Use CREATED_DESC. Deprecated in 13.5")
+  created_desc @deprecated(reason: "Use CREATED_DESC. Deprecated in 13.5.")
 
   """
   Updated at ascending order
   """
-  updated_asc @deprecated(reason: "Use UPDATED_ASC. Deprecated in 13.5")
+  updated_asc @deprecated(reason: "Use UPDATED_ASC. Deprecated in 13.5.")
 
   """
   Updated at descending order
   """
-  updated_desc @deprecated(reason: "Use UPDATED_DESC. Deprecated in 13.5")
+  updated_desc @deprecated(reason: "Use UPDATED_DESC. Deprecated in 13.5.")
 }
 
 """
@@ -588,6 +588,21 @@ type AlertManagementAlertStatusCountsType {
   Number of alerts with status TRIGGERED for the project
   """
   triggered: Int
+}
+
+"""
+Filters the alerts based on given domain
+"""
+enum AlertManagementDomainFilter {
+  """
+  Alerts for operations domain 
+  """
+  operations
+
+  """
+  Alerts for threat monitoring domain
+  """
+  threat_monitoring
 }
 
 """
@@ -1280,6 +1295,11 @@ type Board {
   id: ID!
 
   """
+  The board iteration.
+  """
+  iteration: Iteration
+
+  """
   Labels of the board
   """
   labels(
@@ -1420,7 +1440,7 @@ type BoardEpic implements CurrentUserTodos & Noteable {
 
     """
     List items overlapping a time frame defined by startDate..endDate (if one
-    date is provided, both must be present). Deprecated in 13.5: Use timeframe.end
+    date is provided, both must be present) Deprecated in 13.5: Use timeframe.end.
     """
     endDate: Time
 
@@ -1476,8 +1496,8 @@ type BoardEpic implements CurrentUserTodos & Noteable {
 
     """
     List items overlapping a time frame defined by startDate..endDate (if one
-    date is provided, both must be present). Deprecated in 13.5: Use
-    timeframe.start
+    date is provided, both must be present) Deprecated in 13.5: Use
+    timeframe.start.
     """
     startDate: Time
 
@@ -4910,9 +4930,9 @@ type DastScannerProfile {
   editPath: String
 
   """
-  ID of the DAST scanner profile. Deprecated in 13.6: Use `id`
+  ID of the DAST scanner profile Deprecated in 13.6: Use `id`.
   """
-  globalId: DastScannerProfileID! @deprecated(reason: "Use `id`. Deprecated in 13.6")
+  globalId: DastScannerProfileID! @deprecated(reason: "Use `id`. Deprecated in 13.6.")
 
   """
   ID of the DAST scanner profile
@@ -5034,9 +5054,9 @@ type DastScannerProfileCreatePayload {
   errors: [String!]!
 
   """
-  ID of the scanner profile.. Deprecated in 13.6: Use `id`
+  ID of the scanner profile. Deprecated in 13.6: Use `id`.
   """
-  globalId: DastScannerProfileID @deprecated(reason: "Use `id`. Deprecated in 13.6")
+  globalId: DastScannerProfileID @deprecated(reason: "Use `id`. Deprecated in 13.6.")
 
   """
   ID of the scanner profile.
@@ -7525,7 +7545,7 @@ type Epic implements CurrentUserTodos & Noteable {
 
     """
     List items overlapping a time frame defined by startDate..endDate (if one
-    date is provided, both must be present). Deprecated in 13.5: Use timeframe.end
+    date is provided, both must be present) Deprecated in 13.5: Use timeframe.end.
     """
     endDate: Time
 
@@ -7581,8 +7601,8 @@ type Epic implements CurrentUserTodos & Noteable {
 
     """
     List items overlapping a time frame defined by startDate..endDate (if one
-    date is provided, both must be present). Deprecated in 13.5: Use
-    timeframe.start
+    date is provided, both must be present) Deprecated in 13.5: Use
+    timeframe.start.
     """
     startDate: Time
 
@@ -8817,6 +8837,46 @@ enum EpicWildcardId {
   NONE
 }
 
+"""
+Represents an external issue
+"""
+type ExternalIssue {
+  """
+  Timestamp of when the issue was created
+  """
+  createdAt: Time
+
+  """
+  Type of external tracker
+  """
+  externalTracker: String
+
+  """
+  Relative reference of the issue in the external tracker
+  """
+  relativeReference: String
+
+  """
+  Status of the issue in the external tracker
+  """
+  status: String
+
+  """
+  Title of the issue in the external tracker
+  """
+  title: String
+
+  """
+  Timestamp of when the issue was updated
+  """
+  updatedAt: Time
+
+  """
+  URL to the issue in the external tracker
+  """
+  webUrl: String
+}
+
 type GeoNode {
   """
   The maximum concurrency of container repository sync for this secondary node
@@ -8959,8 +9019,7 @@ type GeoNode {
   selectiveSyncType: String
 
   """
-  Find snippet repository registries on this Geo node. Available only when
-  feature flag `geo_snippet_repository_replication` is enabled
+  Find snippet repository registries on this Geo node
   """
   snippetRepositoryRegistries(
     """
@@ -9159,8 +9218,8 @@ type Group {
   ): CodeCoverageActivityConnection
 
   """
-  Compliance frameworks available to projects in this namespace. Available only
-  when feature flag `ff_custom_compliance_frameworks` is enabled
+  Compliance frameworks available to projects in this namespace Available only
+  when feature flag `ff_custom_compliance_frameworks` is enabled.
   """
   complianceFrameworks(
     """
@@ -9225,7 +9284,7 @@ type Group {
   containsLockedProjects: Boolean!
 
   """
-  Custom emoji within this namespace. Available only when feature flag `custom_emoji` is enabled
+  Custom emoji within this namespace Available only when feature flag `custom_emoji` is enabled.
   """
   customEmoji(
     """
@@ -9275,7 +9334,7 @@ type Group {
 
     """
     List items overlapping a time frame defined by startDate..endDate (if one
-    date is provided, both must be present). Deprecated in 13.5: Use timeframe.end
+    date is provided, both must be present) Deprecated in 13.5: Use timeframe.end.
     """
     endDate: Time
 
@@ -9321,8 +9380,8 @@ type Group {
 
     """
     List items overlapping a time frame defined by startDate..endDate (if one
-    date is provided, both must be present). Deprecated in 13.5: Use
-    timeframe.start
+    date is provided, both must be present) Deprecated in 13.5: Use
+    timeframe.start.
     """
     startDate: Time
 
@@ -9393,7 +9452,7 @@ type Group {
 
     """
     List items overlapping a time frame defined by startDate..endDate (if one
-    date is provided, both must be present). Deprecated in 13.5: Use timeframe.end
+    date is provided, both must be present) Deprecated in 13.5: Use timeframe.end.
     """
     endDate: Time
 
@@ -9449,8 +9508,8 @@ type Group {
 
     """
     List items overlapping a time frame defined by startDate..endDate (if one
-    date is provided, both must be present). Deprecated in 13.5: Use
-    timeframe.start
+    date is provided, both must be present) Deprecated in 13.5: Use
+    timeframe.start.
     """
     startDate: Time
 
@@ -9676,7 +9735,7 @@ type Group {
 
     """
     List items overlapping a time frame defined by startDate..endDate (if one
-    date is provided, both must be present). Deprecated in 13.5: Use timeframe.end
+    date is provided, both must be present) Deprecated in 13.5: Use timeframe.end.
     """
     endDate: Time
 
@@ -9707,8 +9766,8 @@ type Group {
 
     """
     List items overlapping a time frame defined by startDate..endDate (if one
-    date is provided, both must be present). Deprecated in 13.5: Use
-    timeframe.start
+    date is provided, both must be present) Deprecated in 13.5: Use
+    timeframe.start.
     """
     startDate: Time
 
@@ -9884,7 +9943,7 @@ type Group {
 
     """
     List items overlapping a time frame defined by startDate..endDate (if one
-    date is provided, both must be present). Deprecated in 13.5: Use timeframe.end
+    date is provided, both must be present) Deprecated in 13.5: Use timeframe.end.
     """
     endDate: Time
 
@@ -9915,8 +9974,8 @@ type Group {
 
     """
     List items overlapping a time frame defined by startDate..endDate (if one
-    date is provided, both must be present). Deprecated in 13.5: Use
-    timeframe.start
+    date is provided, both must be present) Deprecated in 13.5: Use
+    timeframe.start.
     """
     startDate: Time
 
@@ -10218,7 +10277,7 @@ type Group {
 
   """
   Number of vulnerabilities per severity level, per day, for the projects in the
-  group and its subgroups. Deprecated in 13.3: Use `vulnerabilitiesCountByDay`
+  group and its subgroups Deprecated in 13.3: Use `vulnerabilitiesCountByDay`.
   """
   vulnerabilitiesCountByDayAndSeverity(
     """
@@ -10250,7 +10309,7 @@ type Group {
     First day for which to fetch vulnerability history
     """
     startDate: ISO8601Date!
-  ): VulnerabilitiesCountByDayAndSeverityConnection @deprecated(reason: "Use `vulnerabilitiesCountByDay`. Deprecated in 13.3")
+  ): VulnerabilitiesCountByDayAndSeverityConnection @deprecated(reason: "Use `vulnerabilitiesCountByDay`. Deprecated in 13.3.")
 
   """
   Represents vulnerable project counts for each grade
@@ -12012,22 +12071,22 @@ enum IssueSort {
   """
   Created at ascending order
   """
-  created_asc @deprecated(reason: "Use CREATED_ASC. Deprecated in 13.5")
+  created_asc @deprecated(reason: "Use CREATED_ASC. Deprecated in 13.5.")
 
   """
   Created at descending order
   """
-  created_desc @deprecated(reason: "Use CREATED_DESC. Deprecated in 13.5")
+  created_desc @deprecated(reason: "Use CREATED_DESC. Deprecated in 13.5.")
 
   """
   Updated at ascending order
   """
-  updated_asc @deprecated(reason: "Use UPDATED_ASC. Deprecated in 13.5")
+  updated_asc @deprecated(reason: "Use UPDATED_ASC. Deprecated in 13.5.")
 
   """
   Updated at descending order
   """
-  updated_desc @deprecated(reason: "Use UPDATED_DESC. Deprecated in 13.5")
+  updated_desc @deprecated(reason: "Use UPDATED_DESC. Deprecated in 13.5.")
 }
 
 """
@@ -14070,22 +14129,22 @@ enum MergeRequestSort {
   """
   Created at ascending order
   """
-  created_asc @deprecated(reason: "Use CREATED_ASC. Deprecated in 13.5")
+  created_asc @deprecated(reason: "Use CREATED_ASC. Deprecated in 13.5.")
 
   """
   Created at descending order
   """
-  created_desc @deprecated(reason: "Use CREATED_DESC. Deprecated in 13.5")
+  created_desc @deprecated(reason: "Use CREATED_DESC. Deprecated in 13.5.")
 
   """
   Updated at ascending order
   """
-  updated_asc @deprecated(reason: "Use UPDATED_ASC. Deprecated in 13.5")
+  updated_asc @deprecated(reason: "Use UPDATED_ASC. Deprecated in 13.5.")
 
   """
   Updated at descending order
   """
-  updated_desc @deprecated(reason: "Use UPDATED_DESC. Deprecated in 13.5")
+  updated_desc @deprecated(reason: "Use UPDATED_DESC. Deprecated in 13.5.")
 }
 
 """
@@ -14461,7 +14520,7 @@ enum MoveType {
 }
 
 type Mutation {
-  addAwardEmoji(input: AddAwardEmojiInput!): AddAwardEmojiPayload @deprecated(reason: "Use awardEmojiAdd. Deprecated in 13.2")
+  addAwardEmoji(input: AddAwardEmojiInput!): AddAwardEmojiPayload @deprecated(reason: "Use awardEmojiAdd. Deprecated in 13.2.")
   addProjectToSecurityDashboard(input: AddProjectToSecurityDashboardInput!): AddProjectToSecurityDashboardPayload
   adminSidekiqQueuesDeleteJobs(input: AdminSidekiqQueuesDeleteJobsInput!): AdminSidekiqQueuesDeleteJobsPayload
   alertSetAssignees(input: AlertSetAssigneesInput!): AlertSetAssigneesPayload
@@ -14483,7 +14542,7 @@ type Mutation {
   createClusterAgent(input: CreateClusterAgentInput!): CreateClusterAgentPayload
 
   """
-  . Available only when feature flag `custom_emoji` is enabled
+   Available only when feature flag `custom_emoji` is enabled.
   """
   createCustomEmoji(input: CreateCustomEmojiInput!): CreateCustomEmojiPayload
   createDevopsAdoptionSegment(input: CreateDevopsAdoptionSegmentInput!): CreateDevopsAdoptionSegmentPayload
@@ -14522,7 +14581,7 @@ type Mutation {
   Toggles the resolved state of a discussion
   """
   discussionToggleResolve(input: DiscussionToggleResolveInput!): DiscussionToggleResolvePayload
-  dismissVulnerability(input: DismissVulnerabilityInput!): DismissVulnerabilityPayload @deprecated(reason: "Use vulnerabilityDismiss. Deprecated in 13.5")
+  dismissVulnerability(input: DismissVulnerabilityInput!): DismissVulnerabilityPayload @deprecated(reason: "Use vulnerabilityDismiss. Deprecated in 13.5.")
   environmentsCanaryIngressUpdate(input: EnvironmentsCanaryIngressUpdateInput!): EnvironmentsCanaryIngressUpdatePayload
   epicAddIssue(input: EpicAddIssueInput!): EpicAddIssuePayload
   epicSetSubscription(input: EpicSetSubscriptionInput!): EpicSetSubscriptionPayload
@@ -14572,15 +14631,15 @@ type Mutation {
   releaseCreate(input: ReleaseCreateInput!): ReleaseCreatePayload
   releaseDelete(input: ReleaseDeleteInput!): ReleaseDeletePayload
   releaseUpdate(input: ReleaseUpdateInput!): ReleaseUpdatePayload
-  removeAwardEmoji(input: RemoveAwardEmojiInput!): RemoveAwardEmojiPayload @deprecated(reason: "Use awardEmojiRemove. Deprecated in 13.2")
+  removeAwardEmoji(input: RemoveAwardEmojiInput!): RemoveAwardEmojiPayload @deprecated(reason: "Use awardEmojiRemove. Deprecated in 13.2.")
   removeProjectFromSecurityDashboard(input: RemoveProjectFromSecurityDashboardInput!): RemoveProjectFromSecurityDashboardPayload
 
   """
   Repositions a DiffNote on an image (a `Note` where the `position.positionType` is `"image"`)
   """
   repositionImageDiffNote(input: RepositionImageDiffNoteInput!): RepositionImageDiffNotePayload
-  revertVulnerabilityToDetected(input: RevertVulnerabilityToDetectedInput!): RevertVulnerabilityToDetectedPayload @deprecated(reason: "Use vulnerabilityRevertToDetected. Deprecated in 13.5")
-  runDastScan(input: RunDASTScanInput!): RunDASTScanPayload @deprecated(reason: "Use DastOnDemandScanCreate. Deprecated in 13.4")
+  revertVulnerabilityToDetected(input: RevertVulnerabilityToDetectedInput!): RevertVulnerabilityToDetectedPayload @deprecated(reason: "Use vulnerabilityRevertToDetected. Deprecated in 13.5.")
+  runDastScan(input: RunDASTScanInput!): RunDASTScanPayload @deprecated(reason: "Use DastOnDemandScanCreate. Deprecated in 13.4.")
   terraformStateDelete(input: TerraformStateDeleteInput!): TerraformStateDeletePayload
   terraformStateLock(input: TerraformStateLockInput!): TerraformStateLockPayload
   terraformStateUnlock(input: TerraformStateUnlockInput!): TerraformStateUnlockPayload
@@ -14589,11 +14648,12 @@ type Mutation {
   todoRestore(input: TodoRestoreInput!): TodoRestorePayload
   todoRestoreMany(input: TodoRestoreManyInput!): TodoRestoreManyPayload
   todosMarkAllDone(input: TodosMarkAllDoneInput!): TodosMarkAllDonePayload
-  toggleAwardEmoji(input: ToggleAwardEmojiInput!): ToggleAwardEmojiPayload @deprecated(reason: "Use awardEmojiToggle. Deprecated in 13.2")
+  toggleAwardEmoji(input: ToggleAwardEmojiInput!): ToggleAwardEmojiPayload @deprecated(reason: "Use awardEmojiToggle. Deprecated in 13.2.")
   updateAlertStatus(input: UpdateAlertStatusInput!): UpdateAlertStatusPayload
   updateBoard(input: UpdateBoardInput!): UpdateBoardPayload
   updateBoardEpicUserPreferences(input: UpdateBoardEpicUserPreferencesInput!): UpdateBoardEpicUserPreferencesPayload
   updateBoardList(input: UpdateBoardListInput!): UpdateBoardListPayload
+  updateComplianceFramework(input: UpdateComplianceFrameworkInput!): UpdateComplianceFrameworkPayload
   updateContainerExpirationPolicy(input: UpdateContainerExpirationPolicyInput!): UpdateContainerExpirationPolicyPayload
   updateDevopsAdoptionSegment(input: UpdateDevopsAdoptionSegmentInput!): UpdateDevopsAdoptionSegmentPayload
   updateEpic(input: UpdateEpicInput!): UpdateEpicPayload
@@ -14652,8 +14712,8 @@ type Namespace {
   additionalPurchasedStorageSize: Float
 
   """
-  Compliance frameworks available to projects in this namespace. Available only
-  when feature flag `ff_custom_compliance_frameworks` is enabled
+  Compliance frameworks available to projects in this namespace Available only
+  when feature flag `ff_custom_compliance_frameworks` is enabled.
   """
   complianceFrameworks(
     """
@@ -15988,6 +16048,11 @@ type Project {
     assigneeUsername: String
 
     """
+    Filter query for given domain
+    """
+    domain: AlertManagementDomainFilter! = operations
+
+    """
     IID of the alert. For example, "1"
     """
     iid: String
@@ -16041,6 +16106,11 @@ type Project {
     Returns the elements in the list that come before the specified cursor.
     """
     before: String
+
+    """
+    Filter query for given domain
+    """
+    domain: AlertManagementDomainFilter! = operations
 
     """
     Returns the first _n_ elements from the list.
@@ -16847,7 +16917,7 @@ type Project {
 
     """
     List items overlapping a time frame defined by startDate..endDate (if one
-    date is provided, both must be present). Deprecated in 13.5: Use timeframe.end
+    date is provided, both must be present) Deprecated in 13.5: Use timeframe.end.
     """
     endDate: Time
 
@@ -16878,8 +16948,8 @@ type Project {
 
     """
     List items overlapping a time frame defined by startDate..endDate (if one
-    date is provided, both must be present). Deprecated in 13.5: Use
-    timeframe.start
+    date is provided, both must be present) Deprecated in 13.5: Use
+    timeframe.start.
     """
     startDate: Time
 
@@ -17054,6 +17124,11 @@ type Project {
     milestoneTitle: String
 
     """
+    Username of the reviewer
+    """
+    reviewerUsername: String
+
+    """
     Sort merge requests by this criteria
     """
     sort: MergeRequestSort = created_desc
@@ -17107,7 +17182,7 @@ type Project {
 
     """
     List items overlapping a time frame defined by startDate..endDate (if one
-    date is provided, both must be present). Deprecated in 13.5: Use timeframe.end
+    date is provided, both must be present) Deprecated in 13.5: Use timeframe.end.
     """
     endDate: Time
 
@@ -17138,8 +17213,8 @@ type Project {
 
     """
     List items overlapping a time frame defined by startDate..endDate (if one
-    date is provided, both must be present). Deprecated in 13.5: Use
-    timeframe.start
+    date is provided, both must be present) Deprecated in 13.5: Use
+    timeframe.start.
     """
     startDate: Time
 
@@ -18938,8 +19013,8 @@ type Query {
 
   """
   Number of vulnerabilities per severity level, per day, for the projects on the
-  current user's instance security dashboard. Deprecated in 13.3: Use
-  `vulnerabilitiesCountByDay`
+  current user's instance security dashboard Deprecated in 13.3: Use
+  `vulnerabilitiesCountByDay`.
   """
   vulnerabilitiesCountByDayAndSeverity(
     """
@@ -18971,7 +19046,7 @@ type Query {
     First day for which to fetch vulnerability history
     """
     startDate: ISO8601Date!
-  ): VulnerabilitiesCountByDayAndSeverityConnection @deprecated(reason: "Use `vulnerabilitiesCountByDay`. Deprecated in 13.3")
+  ): VulnerabilitiesCountByDayAndSeverityConnection @deprecated(reason: "Use `vulnerabilitiesCountByDay`. Deprecated in 13.3.")
 
   """
   Find a vulnerability
@@ -21459,9 +21534,9 @@ type Snippet implements Noteable {
   author: User
 
   """
-  Snippet blob. Deprecated in 13.3: Use `blobs`
+  Snippet blob Deprecated in 13.3: Use `blobs`.
   """
-  blob: SnippetBlob! @deprecated(reason: "Use `blobs`. Deprecated in 13.3")
+  blob: SnippetBlob! @deprecated(reason: "Use `blobs`. Deprecated in 13.3.")
 
   """
   Snippet blobs
@@ -21968,22 +22043,22 @@ enum Sort {
   """
   Created at ascending order
   """
-  created_asc @deprecated(reason: "Use CREATED_ASC. Deprecated in 13.5")
+  created_asc @deprecated(reason: "Use CREATED_ASC. Deprecated in 13.5.")
 
   """
   Created at descending order
   """
-  created_desc @deprecated(reason: "Use CREATED_DESC. Deprecated in 13.5")
+  created_desc @deprecated(reason: "Use CREATED_DESC. Deprecated in 13.5.")
 
   """
   Updated at ascending order
   """
-  updated_asc @deprecated(reason: "Use UPDATED_ASC. Deprecated in 13.5")
+  updated_asc @deprecated(reason: "Use UPDATED_ASC. Deprecated in 13.5.")
 
   """
   Updated at descending order
   """
-  updated_desc @deprecated(reason: "Use UPDATED_DESC. Deprecated in 13.5")
+  updated_desc @deprecated(reason: "Use UPDATED_DESC. Deprecated in 13.5.")
 }
 
 type StatusAction {
@@ -22821,9 +22896,9 @@ type TodoRestoreManyPayload {
   todos: [Todo!]!
 
   """
-  The IDs of the updated todo items. Deprecated in 13.2: Use todos
+  The IDs of the updated todo items Deprecated in 13.2: Use todos.
   """
-  updatedIds: [TodoID!]! @deprecated(reason: "Use todos. Deprecated in 13.2")
+  updatedIds: [TodoID!]! @deprecated(reason: "Use todos. Deprecated in 13.2.")
 }
 
 """
@@ -22918,9 +22993,9 @@ type TodosMarkAllDonePayload {
   todos: [Todo!]!
 
   """
-  Ids of the updated todos. Deprecated in 13.2: Use todos
+  Ids of the updated todos Deprecated in 13.2: Use todos.
   """
-  updatedIds: [TodoID!]! @deprecated(reason: "Use todos. Deprecated in 13.2")
+  updatedIds: [TodoID!]! @deprecated(reason: "Use todos. Deprecated in 13.2.")
 }
 
 """
@@ -23270,6 +23345,11 @@ input UpdateBoardInput {
   id: BoardID!
 
   """
+  The ID of iteration to be assigned to the board.
+  """
+  iterationId: IterationID
+
+  """
   The IDs of labels to be added to the board
   """
   labelIds: [LabelID!]
@@ -23353,6 +23433,56 @@ type UpdateBoardPayload {
   A unique identifier for the client performing the mutation.
   """
   clientMutationId: String
+
+  """
+  Errors encountered during execution of the mutation.
+  """
+  errors: [String!]!
+}
+
+"""
+Autogenerated input type of UpdateComplianceFramework
+"""
+input UpdateComplianceFrameworkInput {
+  """
+  A unique identifier for the client performing the mutation.
+  """
+  clientMutationId: String
+
+  """
+  New color representation of the compliance framework in hex format. e.g. #FCA121
+  """
+  color: String
+
+  """
+  New description for the compliance framework
+  """
+  description: String
+
+  """
+  The global ID of the compliance framework to update
+  """
+  id: ComplianceManagementFrameworkID!
+
+  """
+  New name for the compliance framework
+  """
+  name: String
+}
+
+"""
+Autogenerated return type of UpdateComplianceFramework
+"""
+type UpdateComplianceFrameworkPayload {
+  """
+  A unique identifier for the client performing the mutation.
+  """
+  clientMutationId: String
+
+  """
+  The compliance framework after mutation
+  """
+  complianceFramework: ComplianceFramework
 
   """
   Errors encountered during execution of the mutation.
@@ -24020,6 +24150,11 @@ type User {
     projectPath: String
 
     """
+    Username of the reviewer
+    """
+    reviewerUsername: String
+
+    """
     Sort merge requests by this criteria
     """
     sort: MergeRequestSort = created_desc
@@ -24105,6 +24240,11 @@ type User {
     projectPath: String
 
     """
+    Username of the reviewer
+    """
+    reviewerUsername: String
+
+    """
     Sort merge requests by this criteria
     """
     sort: MergeRequestSort = created_desc
@@ -24131,12 +24271,12 @@ type User {
   avatarUrl: String
 
   """
-  User email. Deprecated in 13.7: Use public_email
+  User email Deprecated in 13.7: Use public_email.
   """
-  email: String @deprecated(reason: "Use public_email. Deprecated in 13.7")
+  email: String @deprecated(reason: "Use public_email. Deprecated in 13.7.")
 
   """
-  Group count for the user. Available only when feature flag `user_group_counts` is enabled
+  Group count for the user Available only when feature flag `user_group_counts` is enabled.
   """
   groupCount: Int
 
@@ -24209,6 +24349,96 @@ type User {
   User's public email
   """
   publicEmail: String
+
+  """
+  Merge Requests assigned to the user for review
+  """
+  reviewRequestedMergeRequests(
+    """
+    Returns the elements in the list that come after the specified cursor.
+    """
+    after: String
+
+    """
+    Username of the assignee
+    """
+    assigneeUsername: String
+
+    """
+    Username of the author
+    """
+    authorUsername: String
+
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+
+    """
+    Returns the first _n_ elements from the list.
+    """
+    first: Int
+
+    """
+    Array of IIDs of merge requests, for example `[1, 2]`
+    """
+    iids: [String!]
+
+    """
+    Array of label names. All resolved merge requests will have all of these labels.
+    """
+    labels: [String!]
+
+    """
+    Returns the last _n_ elements from the list.
+    """
+    last: Int
+
+    """
+    Merge requests merged after this date
+    """
+    mergedAfter: Time
+
+    """
+    Merge requests merged before this date
+    """
+    mergedBefore: Time
+
+    """
+    Title of the milestone
+    """
+    milestoneTitle: String
+
+    """
+    The global ID of the project the authored merge requests should be in. Incompatible with projectPath.
+    """
+    projectId: ProjectID
+
+    """
+    The full-path of the project the authored merge requests should be in. Incompatible with projectId.
+    """
+    projectPath: String
+
+    """
+    Sort merge requests by this criteria
+    """
+    sort: MergeRequestSort = created_desc
+
+    """
+    Array of source branch names. All resolved merge requests will have one of these branches as their source.
+    """
+    sourceBranches: [String!]
+
+    """
+    A merge request state. If provided, all resolved merge requests will have this state.
+    """
+    state: MergeRequestState
+
+    """
+    Array of target branch names. All resolved merge requests will have one of these branches as their target.
+    """
+    targetBranches: [String!]
+  ): MergeRequestConnection
 
   """
   Snippets authored by the user
@@ -24603,9 +24833,19 @@ type VulnerabilitiesCountByDayEdge {
 }
 
 """
+Identifier of Vulnerabilities::ExternalIssueLink
+"""
+scalar VulnerabilitiesExternalIssueLinkID
+
+"""
 Represents a vulnerability
 """
 type Vulnerability implements Noteable {
+  """
+  Timestamp of when the vulnerability state was changed to confirmed
+  """
+  confirmedAt: Time
+
   """
   Description of the vulnerability
   """
@@ -24640,6 +24880,41 @@ type Vulnerability implements Noteable {
     """
     last: Int
   ): DiscussionConnection!
+
+  """
+  Timestamp of when the vulnerability state was changed to dismissed
+  """
+  dismissedAt: Time
+
+  """
+  List of external issue links related to the vulnerability
+  """
+  externalIssueLinks(
+    """
+    Returns the elements in the list that come after the specified cursor.
+    """
+    after: String
+
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+
+    """
+    Returns the first _n_ elements from the list.
+    """
+    first: Int
+
+    """
+    Returns the last _n_ elements from the list.
+    """
+    last: Int
+  ): VulnerabilityExternalIssueLinkConnection!
+
+  """
+  Indicates whether there is a solution available for this vulnerability.
+  """
+  hasSolutions: Boolean
 
   """
   GraphQL ID of the vulnerability
@@ -24727,6 +25002,11 @@ type Vulnerability implements Noteable {
   COVERAGE_FUZZING, API_FUZZING)
   """
   reportType: VulnerabilityReportType
+
+  """
+  Timestamp of when the vulnerability state was changed to resolved
+  """
+  resolvedAt: Time
 
   """
   Indicates whether the vulnerability is fixed on the default branch or not
@@ -24877,6 +25157,71 @@ type VulnerabilityEdge {
   The item at the end of the edge.
   """
   node: Vulnerability
+}
+
+"""
+Represents an external issue link of a vulnerability
+"""
+type VulnerabilityExternalIssueLink {
+  """
+  The external issue attached to the issue link
+  """
+  externalIssue: ExternalIssue
+
+  """
+  GraphQL ID of the external issue link
+  """
+  id: VulnerabilitiesExternalIssueLinkID!
+
+  """
+  Type of the external issue link
+  """
+  linkType: VulnerabilityExternalIssueLinkType!
+}
+
+"""
+The connection type for VulnerabilityExternalIssueLink.
+"""
+type VulnerabilityExternalIssueLinkConnection {
+  """
+  A list of edges.
+  """
+  edges: [VulnerabilityExternalIssueLinkEdge]
+
+  """
+  A list of nodes.
+  """
+  nodes: [VulnerabilityExternalIssueLink]
+
+  """
+  Information to aid in pagination.
+  """
+  pageInfo: PageInfo!
+}
+
+"""
+An edge in a connection.
+"""
+type VulnerabilityExternalIssueLinkEdge {
+  """
+  A cursor for use in pagination.
+  """
+  cursor: String!
+
+  """
+  The item at the end of the edge.
+  """
+  node: VulnerabilityExternalIssueLink
+}
+
+"""
+The type of the external issue link related to a vulnerability
+"""
+enum VulnerabilityExternalIssueLinkType {
+  """
+  Created link type
+  """
+  CREATED
 }
 
 """
@@ -25146,6 +25491,11 @@ type VulnerabilityPermissions {
   Indicates the user can perform `admin_vulnerability` on this resource
   """
   adminVulnerability: Boolean!
+
+  """
+  Indicates the user can perform `admin_vulnerability_external_issue_link` on this resource
+  """
+  adminVulnerabilityExternalIssueLink: Boolean!
 
   """
   Indicates the user can perform `admin_vulnerability_issue_link` on this resource

@@ -73,7 +73,7 @@ RSpec.describe EE::NamespacesHelper do
 
       context "when it's limited" do
         before do
-          allow(user_group).to receive(:shared_runners_minutes_limit_enabled?).and_return(true)
+          allow(user_group).to receive(:any_project_with_shared_runners_enabled?).and_return(true)
           allow(user_group).to receive(:shared_runners_seconds).and_return(100 * 60)
 
           user_group.update!(shared_runners_minutes_limit: 500)

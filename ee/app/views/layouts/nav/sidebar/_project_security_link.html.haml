@@ -46,7 +46,7 @@
             %span= _('Threat Monitoring')
 
       - if project_nav_tab?(:security_configuration)
-        = nav_link(path: ['projects/security/configuration#show', 'projects/security/sast_configuration#show']) do
+        = nav_link(path: sidebar_security_configuration_paths) do
           = link_to project_security_configuration_path(@project), title: _('Configuration'), data: { qa_selector: 'security_configuration_link'} do
             %span= _('Configuration')
 

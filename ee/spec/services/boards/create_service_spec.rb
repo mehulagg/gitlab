@@ -90,5 +90,9 @@ RSpec.describe Boards::CreateService, services: true do
     it_behaves_like 'setting a milestone scope' do
       subject { described_class.new(parent, double, milestone_id: milestone.id).execute.payload }
     end
+
+    it_behaves_like 'setting an iteration scope' do
+      subject { described_class.new(parent, nil, iteration_id: iteration.id).execute.payload }
+    end
   end
 end

@@ -60,13 +60,14 @@ RSpec.describe Projects::BoardsController do
         let(:user) { create(:user) }
         let(:milestone) { create(:milestone, project: project) }
         let(:label) { create(:label) }
+        let(:project_label) { create(:label, project: project) }
 
         let(:create_params) do
           { name: 'Backend',
             weight: 1,
             milestone_id: milestone.id,
             assignee_id: user.id,
-            label_ids: [label.id] }
+            label_ids: [label.id, project_label.id] }
         end
 
         it 'returns a successful 200 response' do
@@ -87,7 +88,8 @@ RSpec.describe Projects::BoardsController do
           board = Board.first
 
           expect(Board.count).to eq(1)
-          expect(board).to have_attributes(create_params.except(:assignee_id))
+          expect(board).to have_attributes(create_params.except(:assignee_id, :label_ids))
+          expect(board.labels).to eq([project_label])
           expect(board.assignee).to eq(user)
         end
       end
@@ -130,14 +132,15 @@ RSpec.describe Projects::BoardsController do
     let(:board) { create(:board, project: project, name: 'Backend') }
     let(:user) { create(:user) }
     let(:milestone) { create(:milestone, project: project) }
-    let(:label) { create(:label, project: project) }
+    let(:label) { create(:label) }
+    let(:project_label) { create(:label, project: project) }
 
     let(:update_params) do
       { name: 'Frontend',
         weight: 1,
         milestone_id: milestone.id,
         assignee_id: user.id,
-        label_ids: [label.id] }
+        label_ids: [label.id, project_label.id] }
     end
 
     context 'with valid params' do
@@ -156,7 +159,8 @@ RSpec.describe Projects::BoardsController do
       it 'updates board with valid params' do
         update_board board, update_params
 
-        expect(board.reload).to have_attributes(update_params.except(:assignee_id))
+        expect(board.reload).to have_attributes(update_params.except(:assignee_id, :label_ids))
+        expect(board.labels).to eq([project_label])
         expect(board.assignee).to eq(user)
       end
     end

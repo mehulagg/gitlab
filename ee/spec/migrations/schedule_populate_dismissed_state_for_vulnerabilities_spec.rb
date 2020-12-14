@@ -96,11 +96,13 @@ RSpec.describe SchedulePopulateDismissedStateForVulnerabilities do
       freeze_time do
         migrate!
 
-        expect(described_class::MIGRATION_CLASS)
-          .to be_scheduled_delayed_migration(3.minutes, 1)
+        ids = [vulnerability_1.id, vulnerability_2.id].sort
 
         expect(described_class::MIGRATION_CLASS)
-          .to be_scheduled_delayed_migration(6.minutes, 2)
+          .to be_scheduled_delayed_migration(3.minutes, ids[0])
+
+        expect(described_class::MIGRATION_CLASS)
+          .to be_scheduled_delayed_migration(6.minutes, ids[1])
 
         expect(BackgroundMigrationWorker.jobs.size).to eq(2)
       end

@@ -70,11 +70,13 @@ describe('MergeRequestStore', () => {
 
   describe('setPaths', () => {
     it.each([
+      'discover_project_security_path',
       'container_scanning_comparison_path',
       'dependency_scanning_comparison_path',
       'sast_comparison_path',
       'dast_comparison_path',
       'secret_scanning_comparison_path',
+      'api_fuzzing_comparison_path',
       'coverage_fuzzing_comparison_path',
     ])('should set %s path', property => {
       // Ensure something is set in the mock data

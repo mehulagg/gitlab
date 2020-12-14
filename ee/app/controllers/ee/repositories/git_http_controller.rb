@@ -47,7 +47,7 @@ module EE
       end
 
       def geo?
-        authentication_result.geo?(project)
+        authentication_result.geo?
       end
 
       override :access_actor

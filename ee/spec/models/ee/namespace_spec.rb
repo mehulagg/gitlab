@@ -621,73 +621,33 @@ RSpec.describe Namespace do
       it { is_expected.to be_falsey }
     end
 
-    context 'with project' do
-      context 'and disabled shared runners' do
-        let!(:project) do
-          create(:project,
-            namespace: namespace,
-            shared_runners_enabled: false)
-        end
+    context 'group with shared runners enabled project' do
+      let!(:project) { create(:project, namespace: namespace, shared_runners_enabled: true) }
 
-        it { is_expected.to be_falsey }
+      it { is_expected.to be_truthy }
+    end
+
+    context 'subgroup with shared runners enabled project' do
+      let(:namespace) { create(:group) }
+      let(:subgroup) { create(:group, parent: namespace) }
+      let!(:subproject) { create(:project, namespace: subgroup, shared_runners_enabled: true) }
+
+      it { is_expected.to be_truthy }
+    end
+
+    context 'with project and disabled shared runners' do
+      let!(:project) do
+        create(:project,
+          namespace: namespace,
+          shared_runners_enabled: false)
       end
 
-      context 'and enabled shared runners' do
-        let!(:project) do
-          create(:project,
-            namespace: namespace,
-            shared_runners_enabled: true)
-        end
-
-        it { is_expected.to be_truthy }
-      end
+      it { is_expected.to be_falsey }
     end
   end
 
-  describe '#actual_shared_runners_minutes_limit' do
-    subject { namespace.actual_shared_runners_minutes_limit }
-
-    context 'when no limit defined' do
-      it { is_expected.to be_zero }
-    end
-
-    context 'when application settings limit is set' do
-      before do
-        stub_application_setting(shared_runners_minutes: 1000)
-      end
-
-      it 'returns global limit' do
-        is_expected.to eq(1000)
-      end
-
-      context 'when namespace limit is set' do
-        before do
-          namespace.shared_runners_minutes_limit = 500
-        end
-
-        it 'returns namespace limit' do
-          is_expected.to eq(500)
-        end
-      end
-
-      context 'when extra minutes limit is set' do
-        before do
-          namespace.update_attribute(:extra_shared_runners_minutes_limit, 100)
-        end
-
-        it 'returns the extra minutes by default' do
-          is_expected.to eq(1100)
-        end
-
-        it 'can exclude the extra minutes if required' do
-          expect(namespace.actual_shared_runners_minutes_limit(include_extra: false)).to eq(1000)
-        end
-      end
-    end
-  end
-
-  describe '#shared_runner_minutes_supported?' do
-    subject { namespace.shared_runner_minutes_supported? }
+  describe '#root?' do
+    subject { namespace.root? }
 
     context 'when is subgroup' do
       before do
@@ -739,34 +699,6 @@ RSpec.describe Namespace do
 
     context 'without project' do
       it { is_expected.to be_falsey }
-    end
-  end
-
-  describe '#any_project_with_shared_runners_enabled?' do
-    subject { namespace.any_project_with_shared_runners_enabled? }
-
-    context 'subgroup with shared runners enabled project' do
-      let(:namespace) { create(:group) }
-      let(:subgroup) { create(:group, parent: namespace) }
-      let!(:subproject) { create(:project, namespace: subgroup, shared_runners_enabled: true) }
-
-      it "returns true" do
-        is_expected.to eq(true)
-      end
-    end
-
-    context 'group with shared runners enabled project' do
-      let!(:project) { create(:project, namespace: namespace, shared_runners_enabled: true) }
-
-      it "returns true" do
-        is_expected.to eq(true)
-      end
-    end
-
-    context 'group without projects' do
-      it "returns false" do
-        is_expected.to eq(false)
-      end
     end
   end
 

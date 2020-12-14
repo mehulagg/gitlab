@@ -11950,7 +11950,7 @@ ALTER SEQUENCE elastic_reindexing_tasks_id_seq OWNED BY elastic_reindexing_tasks
 CREATE TABLE elasticsearch_indexed_namespaces (
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
-    namespace_id integer
+    namespace_id integer NOT NULL
 );
 
 CREATE TABLE elasticsearch_indexed_projects (
@@ -14987,7 +14987,8 @@ CREATE TABLE plan_limits (
     debian_max_file_size bigint DEFAULT '3221225472'::bigint NOT NULL,
     project_feature_flags integer DEFAULT 200 NOT NULL,
     ci_max_artifact_size_api_fuzzing integer DEFAULT 0 NOT NULL,
-    ci_pipeline_deployments integer DEFAULT 500 NOT NULL
+    ci_pipeline_deployments integer DEFAULT 500 NOT NULL,
+    pull_mirror_interval_seconds integer DEFAULT 300 NOT NULL
 );
 
 CREATE SEQUENCE plan_limits_id_seq
@@ -15032,6 +15033,118 @@ CREATE SEQUENCE pool_repositories_id_seq
     CACHE 1;
 
 ALTER SEQUENCE pool_repositories_id_seq OWNED BY pool_repositories.id;
+
+CREATE VIEW postgres_index_bloat_estimates AS
+ SELECT (((relation_stats.nspname)::text || '.'::text) || (relation_stats.idxname)::text) AS identifier,
+    (
+        CASE
+            WHEN ((relation_stats.relpages)::double precision > relation_stats.est_pages_ff) THEN ((relation_stats.bs)::double precision * ((relation_stats.relpages)::double precision - relation_stats.est_pages_ff))
+            ELSE (0)::double precision
+        END)::bigint AS bloat_size_bytes
+   FROM ( SELECT COALESCE(((1)::double precision + ceil((rows_hdr_pdg_stats.reltuples / floor((((((rows_hdr_pdg_stats.bs - (rows_hdr_pdg_stats.pageopqdata)::numeric) - (rows_hdr_pdg_stats.pagehdr)::numeric) * (rows_hdr_pdg_stats.fillfactor)::numeric))::double precision / ((100)::double precision * (((4)::numeric + rows_hdr_pdg_stats.nulldatahdrwidth))::double precision)))))), (0)::double precision) AS est_pages_ff,
+            rows_hdr_pdg_stats.bs,
+            rows_hdr_pdg_stats.nspname,
+            rows_hdr_pdg_stats.tblname,
+            rows_hdr_pdg_stats.idxname,
+            rows_hdr_pdg_stats.relpages,
+            rows_hdr_pdg_stats.is_na
+           FROM ( SELECT rows_data_stats.maxalign,
+                    rows_data_stats.bs,
+                    rows_data_stats.nspname,
+                    rows_data_stats.tblname,
+                    rows_data_stats.idxname,
+                    rows_data_stats.reltuples,
+                    rows_data_stats.relpages,
+                    rows_data_stats.idxoid,
+                    rows_data_stats.fillfactor,
+                    (((((((rows_data_stats.index_tuple_hdr_bm + rows_data_stats.maxalign) -
+                        CASE
+                            WHEN ((rows_data_stats.index_tuple_hdr_bm % rows_data_stats.maxalign) = 0) THEN rows_data_stats.maxalign
+                            ELSE (rows_data_stats.index_tuple_hdr_bm % rows_data_stats.maxalign)
+                        END))::double precision + rows_data_stats.nulldatawidth) + (rows_data_stats.maxalign)::double precision) - (
+                        CASE
+                            WHEN (rows_data_stats.nulldatawidth = (0)::double precision) THEN 0
+                            WHEN (((rows_data_stats.nulldatawidth)::integer % rows_data_stats.maxalign) = 0) THEN rows_data_stats.maxalign
+                            ELSE ((rows_data_stats.nulldatawidth)::integer % rows_data_stats.maxalign)
+                        END)::double precision))::numeric AS nulldatahdrwidth,
+                    rows_data_stats.pagehdr,
+                    rows_data_stats.pageopqdata,
+                    rows_data_stats.is_na
+                   FROM ( SELECT n.nspname,
+                            i.tblname,
+                            i.idxname,
+                            i.reltuples,
+                            i.relpages,
+                            i.idxoid,
+                            i.fillfactor,
+                            (current_setting('block_size'::text))::numeric AS bs,
+                                CASE
+                                    WHEN ((version() ~ 'mingw32'::text) OR (version() ~ '64-bit|x86_64|ppc64|ia64|amd64'::text)) THEN 8
+                                    ELSE 4
+                                END AS maxalign,
+                            24 AS pagehdr,
+                            16 AS pageopqdata,
+                                CASE
+                                    WHEN (max(COALESCE(s.null_frac, (0)::real)) = (0)::double precision) THEN 2
+                                    ELSE (2 + (((32 + 8) - 1) / 8))
+                                END AS index_tuple_hdr_bm,
+                            sum((((1)::double precision - COALESCE(s.null_frac, (0)::real)) * (COALESCE(s.avg_width, 1024))::double precision)) AS nulldatawidth,
+                            (max(
+                                CASE
+                                    WHEN (i.atttypid = ('name'::regtype)::oid) THEN 1
+                                    ELSE 0
+                                END) > 0) AS is_na
+                           FROM ((( SELECT ct.relname AS tblname,
+                                    ct.relnamespace,
+                                    ic.idxname,
+                                    ic.attpos,
+                                    ic.indkey,
+                                    ic.indkey[ic.attpos] AS indkey,
+                                    ic.reltuples,
+                                    ic.relpages,
+                                    ic.tbloid,
+                                    ic.idxoid,
+                                    ic.fillfactor,
+                                    COALESCE(a1.attnum, a2.attnum) AS attnum,
+                                    COALESCE(a1.attname, a2.attname) AS attname,
+                                    COALESCE(a1.atttypid, a2.atttypid) AS atttypid,
+CASE
+ WHEN (a1.attnum IS NULL) THEN ic.idxname
+ ELSE ct.relname
+END AS attrelname
+                                   FROM (((( SELECT idx_data.idxname,
+    idx_data.reltuples,
+    idx_data.relpages,
+    idx_data.tbloid,
+    idx_data.idxoid,
+    idx_data.fillfactor,
+    idx_data.indkey,
+    generate_series(1, (idx_data.indnatts)::integer) AS attpos
+   FROM ( SELECT ci.relname AS idxname,
+      ci.reltuples,
+      ci.relpages,
+      i_1.indrelid AS tbloid,
+      i_1.indexrelid AS idxoid,
+      COALESCE((("substring"(array_to_string(ci.reloptions, ' '::text), 'fillfactor=([0-9]+)'::text))::smallint)::integer, 90) AS fillfactor,
+      i_1.indnatts,
+      (string_to_array(textin(int2vectorout(i_1.indkey)), ' '::text))::integer[] AS indkey
+     FROM (pg_index i_1
+       JOIN pg_class ci ON ((ci.oid = i_1.indexrelid)))
+    WHERE ((ci.relam = ( SELECT pg_am.oid
+       FROM pg_am
+      WHERE (pg_am.amname = 'btree'::name))) AND (ci.relpages > 0))) idx_data) ic
+                                     JOIN pg_class ct ON ((ct.oid = ic.tbloid)))
+                                     LEFT JOIN pg_attribute a1 ON (((ic.indkey[ic.attpos] <> 0) AND (a1.attrelid = ic.tbloid) AND (a1.attnum = ic.indkey[ic.attpos]))))
+                                     LEFT JOIN pg_attribute a2 ON (((ic.indkey[ic.attpos] = 0) AND (a2.attrelid = ic.idxoid) AND (a2.attnum = ic.attpos))))) i(tblname, relnamespace, idxname, attpos, indkey, indkey_1, reltuples, relpages, tbloid, idxoid, fillfactor, attnum, attname, atttypid, attrelname)
+                             JOIN pg_namespace n ON ((n.oid = i.relnamespace)))
+                             JOIN pg_stats s ON (((s.schemaname = n.nspname) AND (s.tablename = i.attrelname) AND (s.attname = i.attname))))
+                          GROUP BY n.nspname, i.tblname, i.idxname, i.reltuples, i.relpages, i.idxoid, i.fillfactor, (current_setting('block_size'::text))::numeric,
+                                CASE
+                                    WHEN ((version() ~ 'mingw32'::text) OR (version() ~ '64-bit|x86_64|ppc64|ia64|amd64'::text)) THEN 8
+                                    ELSE 4
+                                END, 24::integer, 16::integer) rows_data_stats) rows_hdr_pdg_stats) relation_stats
+  WHERE ((relation_stats.nspname = ANY (ARRAY["current_schema"(), 'gitlab_partitions_dynamic'::name, 'gitlab_partitions_static'::name])) AND (NOT relation_stats.is_na))
+  ORDER BY relation_stats.nspname, relation_stats.tblname, relation_stats.idxname;
 
 CREATE VIEW postgres_indexes AS
  SELECT (((pg_namespace.nspname)::text || '.'::text) || (pg_class.relname)::text) AS identifier,
@@ -15103,6 +15216,7 @@ CREATE TABLE postgres_reindex_actions (
     ondisk_size_bytes_end bigint,
     state smallint DEFAULT 0 NOT NULL,
     index_identifier text NOT NULL,
+    bloat_estimate_bytes_start bigint,
     CONSTRAINT check_f12527622c CHECK ((char_length(index_identifier) <= 255))
 );
 
@@ -15518,6 +15632,7 @@ CREATE TABLE project_settings (
     squash_option smallint DEFAULT 3,
     has_confluence boolean DEFAULT false NOT NULL,
     has_vulnerabilities boolean DEFAULT false NOT NULL,
+    allow_editing_commit_messages boolean DEFAULT false NOT NULL,
     CONSTRAINT check_bde223416c CHECK ((show_default_award_emojis IS NOT NULL))
 );
 
@@ -19350,6 +19465,9 @@ ALTER TABLE ONLY draft_notes
 ALTER TABLE ONLY elastic_reindexing_tasks
     ADD CONSTRAINT elastic_reindexing_tasks_pkey PRIMARY KEY (id);
 
+ALTER TABLE ONLY elasticsearch_indexed_namespaces
+    ADD CONSTRAINT elasticsearch_indexed_namespaces_pkey PRIMARY KEY (namespace_id);
+
 ALTER TABLE ONLY elasticsearch_indexed_projects
     ADD CONSTRAINT elasticsearch_indexed_projects_pkey PRIMARY KEY (project_id);
 
@@ -20866,15 +20984,13 @@ CREATE INDEX index_ci_pipelines_for_ondemand_dast_scans ON ci_pipelines USING bt
 
 CREATE INDEX index_ci_pipelines_on_auto_canceled_by_id ON ci_pipelines USING btree (auto_canceled_by_id);
 
-CREATE INDEX index_ci_pipelines_on_ci_ref_id ON ci_pipelines USING btree (ci_ref_id) WHERE (ci_ref_id IS NOT NULL);
+CREATE INDEX index_ci_pipelines_on_ci_ref_id_and_more ON ci_pipelines USING btree (ci_ref_id, id DESC, source, status) WHERE (ci_ref_id IS NOT NULL);
 
 CREATE INDEX index_ci_pipelines_on_external_pull_request_id ON ci_pipelines USING btree (external_pull_request_id) WHERE (external_pull_request_id IS NOT NULL);
 
 CREATE INDEX index_ci_pipelines_on_merge_request_id ON ci_pipelines USING btree (merge_request_id) WHERE (merge_request_id IS NOT NULL);
 
 CREATE INDEX index_ci_pipelines_on_pipeline_schedule_id ON ci_pipelines USING btree (pipeline_schedule_id);
-
-CREATE INDEX index_ci_pipelines_on_project_id_and_created_at ON ci_pipelines USING btree (project_id, created_at);
 
 CREATE INDEX index_ci_pipelines_on_project_id_and_id_desc ON ci_pipelines USING btree (project_id, id DESC);
 
@@ -21082,7 +21198,7 @@ CREATE INDEX index_dependency_proxy_blobs_on_group_id_and_file_name ON dependenc
 
 CREATE INDEX index_dependency_proxy_group_settings_on_group_id ON dependency_proxy_group_settings USING btree (group_id);
 
-CREATE INDEX index_dependency_proxy_manifests_on_group_id_and_digest ON dependency_proxy_manifests USING btree (group_id, digest);
+CREATE UNIQUE INDEX index_dependency_proxy_manifests_on_group_id_and_file_name ON dependency_proxy_manifests USING btree (group_id, file_name);
 
 CREATE INDEX index_deploy_key_id_on_protected_branch_push_access_levels ON protected_branch_push_access_levels USING btree (deploy_key_id);
 
@@ -21115,6 +21231,8 @@ CREATE INDEX index_deployments_on_environment_status_sha ON deployments USING bt
 CREATE INDEX index_deployments_on_id_and_status_and_created_at ON deployments USING btree (id, status, created_at);
 
 CREATE INDEX index_deployments_on_id_where_cluster_id_present ON deployments USING btree (id) WHERE (cluster_id IS NOT NULL);
+
+CREATE INDEX index_deployments_on_project_and_finished ON deployments USING btree (project_id, finished_at) WHERE (status = 2);
 
 CREATE INDEX index_deployments_on_project_id_and_id ON deployments USING btree (project_id, id DESC);
 
@@ -21173,8 +21291,6 @@ CREATE UNIQUE INDEX index_elastic_reindexing_tasks_on_in_progress ON elastic_rei
 CREATE INDEX index_elastic_reindexing_tasks_on_state ON elastic_reindexing_tasks USING btree (state);
 
 CREATE INDEX index_elasticsearch_indexed_namespaces_on_created_at ON elasticsearch_indexed_namespaces USING btree (created_at);
-
-CREATE UNIQUE INDEX index_elasticsearch_indexed_namespaces_on_namespace_id ON elasticsearch_indexed_namespaces USING btree (namespace_id);
 
 CREATE UNIQUE INDEX index_emails_on_confirmation_token ON emails USING btree (confirmation_token);
 
@@ -22451,6 +22567,8 @@ CREATE UNIQUE INDEX index_slack_integrations_on_team_id_and_alias ON slack_integ
 CREATE UNIQUE INDEX index_smartcard_identities_on_subject_and_issuer ON smartcard_identities USING btree (subject, issuer);
 
 CREATE INDEX index_smartcard_identities_on_user_id ON smartcard_identities USING btree (user_id);
+
+CREATE INDEX index_snippet_on_id_and_project_id ON snippets USING btree (id, project_id);
 
 CREATE UNIQUE INDEX index_snippet_repositories_on_disk_path ON snippet_repositories USING btree (disk_path);
 

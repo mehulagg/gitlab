@@ -1,20 +1,18 @@
 import { shallowMount } from '@vue/test-utils';
 import WeeksHeaderSubItemComponent from 'ee/oncall_schedules/components/schedule/components/preset_weeks/weeks_header_sub_item.vue';
 import { getTimeframeForWeeksView } from 'ee/oncall_schedules/components/schedule/utils';
-import { PRESET_TYPES } from 'ee/oncall_schedules/components/schedule/constants';
+import { useFakeDate } from 'helpers/fake_date';
 
-describe('MonthsHeaderSubItemComponent', () => {
+describe('WeeksHeaderSubItemComponent', () => {
   let wrapper;
+  // January 3rd, 2018 - current date (faked)
+  useFakeDate(2018, 0, 3);
   const mockTimeframeInitialDate = new Date(2018, 0, 1);
   const mockTimeframeWeeks = getTimeframeForWeeksView(mockTimeframeInitialDate);
 
-  function mountComponent({
-    currentDate = mockTimeframeWeeks[0],
-    timeframeItem = mockTimeframeWeeks[0],
-  }) {
+  function mountComponent({ timeframeItem = mockTimeframeWeeks[0] }) {
     wrapper = shallowMount(WeeksHeaderSubItemComponent, {
       propsData: {
-        currentDate,
         timeframeItem,
       },
     });
@@ -31,12 +29,7 @@ describe('MonthsHeaderSubItemComponent', () => {
     }
   });
 
-  describe('data', () => {
-    it('initializes `presetType` and `indicatorStyles` data props', () => {
-      expect(wrapper.vm.presetType).toBe(PRESET_TYPES.WEEKS);
-      expect(wrapper.vm.indicatorStyle).toBeDefined();
-    });
-  });
+  const findSublabelValues = () => wrapper.findAll('[data-testid="sublabel-value"]');
 
   describe('computed', () => {
     describe('headerSubItems', () => {
@@ -46,29 +39,6 @@ describe('MonthsHeaderSubItemComponent', () => {
         wrapper.vm.headerSubItems.forEach(subItem => {
           expect(subItem).toBeInstanceOf(Date);
         });
-      });
-    });
-  });
-
-  describe('methods', () => {
-    describe('getSubItemValueClass', () => {
-      it('returns string containing `label-dark` when provided subItem is greater than current week day', () => {
-        mountComponent({
-          currentDate: new Date(2018, 0, 1), // Jan 1, 2018
-        });
-        const subItem = new Date(2018, 0, 25); // Jan 25, 2018
-
-        expect(wrapper.vm.getSubItemValueClass(subItem)).toBe('label-dark');
-      });
-
-      it('returns string containing `label-dark label-bold` when provided subItem is same as current week day', () => {
-        const currentDate = new Date(2018, 0, 25);
-        mountComponent({
-          currentDate,
-        });
-        const subItem = currentDate;
-
-        expect(wrapper.vm.getSubItemValueClass(subItem)).toBe('label-dark label-bold');
       });
     });
   });
@@ -83,7 +53,29 @@ describe('MonthsHeaderSubItemComponent', () => {
     });
 
     it('renders element with class `current-day-indicator-header` when hasToday is true', () => {
+      // January 1st, 2018 is the first  day of the week-long timeframe
+      // so as long as current date (faked January 3rd, 2018) is within week timeframe
+      // current indicator will be rendered
       expect(wrapper.find('.current-day-indicator-header.preset-weeks').exists()).toBe(true);
+    });
+
+    it('sublabel has `label-dark` class when it is for the day greater than current week day', () => {
+      // Timeframe starts at Jan 1, 2018, faked today is Jan 3, 2018 (3rd item in a week timeframe)
+      // labels for dates after current have 'label-dark' class
+      expect(
+        findSublabelValues()
+          .at(3)
+          .classes(),
+      ).toContain('label-dark');
+    });
+
+    it("sublabel has `label-dark label-bold` classes when it is for today's date", () => {
+      // Timeframe starts at Jan 1, 2018, faked today is Jan 3, 2018 (3rd item in a week timeframe)
+      expect(
+        findSublabelValues()
+          .at(2)
+          .classes(),
+      ).toEqual(expect.arrayContaining(['label-dark', 'label-bold']));
     });
   });
 });

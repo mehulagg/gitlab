@@ -5,7 +5,9 @@ import { GlLoadingIcon } from '@gitlab/ui';
 import { TABLE_TYPE_DEFAULT, TABLE_TYPE_FREE, TABLE_TYPE_TRIAL } from 'ee/billings/constants';
 import { s__ } from '~/locale';
 import SubscriptionTableRow from './subscription_table_row.vue';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import glFeaturesFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+
+const createButtonProps = (text, href, testId) => ({ text, href, testId });
 
 export default {
   name: 'SubscriptionTable',
@@ -13,7 +15,7 @@ export default {
     SubscriptionTableRow,
     GlLoadingIcon,
   },
-  mixins: [glFeatureFlagsMixin()],
+  mixins: [glFeaturesFlagMixin()],
   props: {
     namespaceName: {
       type: String,
@@ -35,6 +37,11 @@ export default {
       default: '',
     },
   },
+  inject: {
+    addSeatsHref: {
+      default: '',
+    },
+  },
   computed: {
     ...mapState(['isLoadingSubscription', 'hasErrorSubscription', 'plan', 'tables', 'endpoint']),
     ...mapGetters(['isFreePlan']),
@@ -44,43 +51,45 @@ export default {
 
       return `${this.namespaceName}: ${planName} ${suffix}`;
     },
+    canAddSeats() {
+      return this.glFeatures.saasAddSeatsButton && !this.isFreePlan;
+    },
+    canRenew() {
+      return this.glFeatures.saasManualRenewButton && !this.isFreePlan;
+    },
+    canUpgrade() {
+      return this.isFreePlan || this.plan.upgradable;
+    },
+    canUpgradeEEPlan() {
+      return !this.isFreePlan && this.planUpgradeHref;
+    },
+    addSeatsButton() {
+      return this.canAddSeats
+        ? createButtonProps(s__('SubscriptionTable|Add seats'), this.addSeatsHref, 'add-seats')
+        : null;
+    },
     upgradeButton() {
-      if (!this.isFreePlan && !this.plan.upgradable) {
-        return null;
-      }
-
-      return {
-        text: s__('SubscriptionTable|Upgrade'),
-        href:
-          !this.isFreePlan && this.planUpgradeHref ? this.planUpgradeHref : this.customerPortalUrl,
-      };
+      return this.canUpgrade
+        ? createButtonProps(s__('SubscriptionTable|Upgrade'), this.upgradeButtonHref)
+        : null;
+    },
+    upgradeButtonHref() {
+      return this.canUpgradeEEPlan ? this.planUpgradeHref : this.customerPortalUrl;
     },
     renewButton() {
-      if (!this.glFeatures.saasManualRenewButton) {
-        return null;
-      }
-
-      if (this.isFreePlan) {
-        return null;
-      }
-
-      return {
-        text: s__('SubscriptionTable|Renew'),
-        href: this.planRenewHref,
-      };
+      return this.canRenew
+        ? createButtonProps(s__('SubscriptionTable|Renew'), this.planRenewHref)
+        : null;
     },
     manageButton() {
-      if (this.isFreePlan) {
-        return null;
-      }
-
-      return {
-        text: s__('SubscriptionTable|Manage'),
-        href: this.customerPortalUrl,
-      };
+      return !this.isFreePlan
+        ? createButtonProps(s__('SubscriptionTable|Manage'), this.customerPortalUrl)
+        : null;
     },
     buttons() {
-      return [this.upgradeButton, this.renewButton, this.manageButton].filter(Boolean);
+      return [this.upgradeButton, this.addSeatsButton, this.renewButton, this.manageButton].filter(
+        Boolean,
+      );
     },
     visibleRows() {
       let tableKey = TABLE_TYPE_DEFAULT;
@@ -119,7 +128,8 @@ export default {
             target="_blank"
             rel="noopener noreferrer"
             class="btn btn-inverted-secondary"
-            :class="{ 'ml-2': index !== 0 }"
+            :class="{ 'gl-ml-3': index !== 0 }"
+            :data-testid="button.testId"
             >{{ button.text }}</a
           >
         </div>

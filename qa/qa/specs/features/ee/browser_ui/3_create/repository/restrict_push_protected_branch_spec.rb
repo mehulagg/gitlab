@@ -47,7 +47,7 @@ module QA
 
           login
 
-          Resource::ProtectedBranch.fabricate! do |protected_branch|
+          Resource::ProtectedBranch.fabricate_via_browser_ui! do |protected_branch|
             protected_branch.branch_name = branch_name
             protected_branch.project = project
             protected_branch.allowed_to_merge = {
@@ -84,7 +84,7 @@ module QA
 
           project.add_member(user_maintainer, Resource::Members::AccessLevel::MAINTAINER)
 
-          Resource::ProtectedBranch.fabricate! do |protected_branch|
+          Resource::ProtectedBranch.fabricate_via_browser_ui! do |protected_branch|
             protected_branch.branch_name = branch_name
             protected_branch.project = project
             protected_branch.allowed_to_merge = {

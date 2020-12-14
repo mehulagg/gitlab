@@ -44,7 +44,7 @@ RSpec.describe Resolvers::EpicsResolver do
 
       context 'with iids' do
         it 'finds a specific epic with iids' do
-          expect(resolve_epics(iids: epic1.iid)).to contain_exactly(epic1)
+          expect(resolve_epics(iids: [epic1.iid.to_s])).to contain_exactly(epic1)
         end
 
         it 'finds multiple epics with iids' do

@@ -3,6 +3,7 @@ import createMockApollo from 'jest/helpers/mock_apollo_helper';
 import VueApollo from 'vue-apollo';
 import waitForPromises from 'helpers/wait_for_promises';
 import { GlDropdownItem, GlModal, GlAlert, GlTokenSelector } from '@gitlab/ui';
+import { addRotationModalId } from 'ee/oncall_schedules/components/oncall_schedule';
 import AddRotationModal from 'ee/oncall_schedules/components/rotations/add_rotation_modal.vue';
 // import createOncallScheduleRotationMutation from 'ee/oncall_schedules/graphql/create_oncall_schedule_rotation.mutation.graphql';
 import usersSearchQuery from '~/graphql_shared/queries/users_search.query.graphql';
@@ -34,6 +35,7 @@ describe('AddRotationModal', () => {
         };
       },
       propsData: {
+        modalId: addRotationModalId,
         ...props,
       },
       provide: {
@@ -58,6 +60,9 @@ describe('AddRotationModal', () => {
 
     wrapper = shallowMount(AddRotationModal, {
       localVue,
+      propsData: {
+        modalId: addRotationModalId,
+      },
       apolloProvider: fakeApollo,
       data() {
         return {

@@ -472,9 +472,8 @@ RSpec.describe 'Scoped issue boards', :js do
   end
 
   def expect_dot_highlight(button_title)
-    button = first('.filter-dropdown-container .btn.gl-button')
+    button = first('.filter-dropdown-container .btn.gl-button.dot-highlight')
     expect(button.text).to include(button_title)
-    expect(button[:class]).to include('dot-highlight')
     expect(button['title']).to include('This board\'s scope is reduced')
   end
 

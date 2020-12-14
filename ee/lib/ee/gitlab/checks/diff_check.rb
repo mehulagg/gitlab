@@ -58,7 +58,7 @@ module EE
 
         def path_locks_validation
           lambda do |diff|
-            path = if ::Feature.enabled?(:diff_check_with_paths_changed_rpc, project)
+            path = if ::Feature.enabled?(:diff_check_with_paths_changed_rpc, project, default_enabled: true)
                      diff.path
                    else
                      if diff.renamed_file?
@@ -82,7 +82,7 @@ module EE
 
         def file_name_validation
           lambda do |diff|
-            if ::Feature.enabled?(:diff_check_with_paths_changed_rpc, project)
+            if ::Feature.enabled?(:diff_check_with_paths_changed_rpc, project, default_enabled: true)
               if new_file?(diff) && denylisted_regex = push_rule.filename_denylisted?(diff.path)
                 return unless denylisted_regex.present?
 

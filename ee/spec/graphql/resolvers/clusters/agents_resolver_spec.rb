@@ -14,31 +14,38 @@ RSpec.describe Resolvers::Clusters::AgentsResolver do
   end
 
   describe '#resolve' do
-    let_it_be(:user) { create(:user) }
+    let_it_be(:project) { create(:project) }
+    let_it_be(:maintainer) { create(:user, maintainer_projects: [project]) }
+    let_it_be(:developer) { create(:user, developer_projects: [project]) }
+    let_it_be(:agents) { create_list(:cluster_agent, 2, project: project) }
 
-    let(:finder) { double(execute: relation) }
-    let(:relation) { double }
-    let(:project) { create(:project) }
-    let(:args) { Hash(key: 'value') }
-    let(:ctx) { Hash(current_user: user) }
+    let(:ctx) { { current_user: current_user } }
 
-    let(:lookahead) do
-      double(selects?: true).tap do |selection|
-        allow(selection).to receive(:selection).and_return(selection)
+    before do
+      stub_licensed_features(cluster_agents: true)
+    end
+
+    subject { resolve_agents }
+
+    context 'the current user has access to clusters' do
+      let(:current_user) { maintainer }
+
+      it 'finds all agents' do
+        expect(subject).to match_array(agents)
       end
     end
 
-    subject { resolve(described_class, obj: project, args: args.merge(lookahead: lookahead), ctx: ctx) }
+    context 'the current user does not have access to clusters' do
+      let(:current_user) { developer }
 
-    it 'calls the agents finder' do
-      expect(::Clusters::AgentsFinder).to receive(:new)
-        .with(project, user, params: args).and_return(finder)
-
-      expect(relation).to receive(:preload)
-        .with(:agent_tokens).and_return(relation)
-
-      expect(subject).to eq(relation)
+      it 'returns an empty result' do
+        expect(subject).to be_empty
+      end
     end
+  end
+
+  def resolve_agents(args = {})
+    resolve(described_class, obj: project, ctx: ctx, lookahead: positive_lookahead, args: args)
   end
 end
 

@@ -11,10 +11,12 @@ export default {
     license_management: false,
     secret_detection: false,
   },
+  discover_project_security_path: '/discover_project_security',
   container_scanning_comparison_path: '/container_scanning_comparison_path',
   dependency_scanning_comparison_path: '/dependency_scanning_comparison_path',
   dast_comparison_path: '/dast_comparison_path',
   coverage_fuzzing_comparison_path: '/coverage_fuzzing_comparison_path',
+  api_fuzzing_comparison_path: '/api_fuzzing_comparison_path',
 };
 
 // Browser Performance Testing

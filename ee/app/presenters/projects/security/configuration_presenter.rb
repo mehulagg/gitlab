@@ -82,8 +82,8 @@ module Projects
 
       def autofix_enabled
         {
-          dependency_scanning: project_settings.auto_fix_dependency_scanning,
-          container_scanning: project_settings.auto_fix_container_scanning
+          dependency_scanning: project_settings&.auto_fix_dependency_scanning,
+          container_scanning: project_settings&.auto_fix_container_scanning
         }
       end
 
@@ -177,7 +177,7 @@ module Projects
       end
 
       def project_settings
-        ProjectSecuritySetting.safe_find_or_create_for(project)
+        project.security_setting
       end
 
       def configuration_path(type)

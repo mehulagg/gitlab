@@ -17,7 +17,7 @@ describe('addSegmentToCache', () => {
       expect.objectContaining({
         data: {
           devopsAdoptionSegments: {
-            nodes: devopsAdoptionSegmentsData.nodes,
+            nodes: [devopsAdoptionSegmentsData.nodes[0]],
           },
         },
       }),

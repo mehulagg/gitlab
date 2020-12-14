@@ -1,12 +1,13 @@
 <script>
 import { monthInWords } from '~/lib/utils/datetime_utility';
-
 import WeeksHeaderSubItem from './weeks_header_sub_item.vue';
+import CommonMixin from '../../mixins/common_mixin';
 
 export default {
   components: {
     WeeksHeaderSubItem,
   },
+  mixins: [CommonMixin],
   props: {
     timeframeIndex: {
       type: Number,
@@ -20,14 +21,6 @@ export default {
       type: Array,
       required: true,
     },
-  },
-  data() {
-    const currentDate = new Date();
-    currentDate.setHours(0, 0, 0, 0);
-
-    return {
-      currentDate,
-    };
   },
   computed: {
     lastDayOfCurrentWeek() {
@@ -50,7 +43,7 @@ export default {
       return `${monthInWords(this.timeframeItem, true)} ${timeframeItemDate}`;
     },
     timelineHeaderClass() {
-      const currentDateTime = this.currentDate.getTime();
+      const currentDateTime = this.$options.currentDate.getTime();
       const lastDayOfCurrentWeekTime = this.lastDayOfCurrentWeek.getTime();
 
       if (
@@ -68,7 +61,9 @@ export default {
 
 <template>
   <span class="timeline-header-item">
-    <div :class="timelineHeaderClass" class="item-label">{{ timelineHeaderLabel }}</div>
-    <weeks-header-sub-item :timeframe-item="timeframeItem" :current-date="currentDate" />
+    <div :class="timelineHeaderClass" class="item-label" data-testid="timeline-header-label">
+      {{ timelineHeaderLabel }}
+    </div>
+    <weeks-header-sub-item :timeframe-item="timeframeItem" />
   </span>
 </template>

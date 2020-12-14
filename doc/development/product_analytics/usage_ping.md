@@ -80,7 +80,7 @@ production: &base
 
 ## Usage Ping request flow
 
-The following example shows a basic request/response flow between a GitLab instance, the Versions Application, the License Application, Salesforce, GitLab's S3 Bucket, GitLab's Snowflake Data Warehouse, and Sisense:
+The following example shows a basic request/response flow between a GitLab instance, the Versions Application, the License Application, Salesforce, the GitLab S3 Bucket, the GitLab Snowflake Data Warehouse, and Sisense:
 
 ```mermaid
 sequenceDiagram
@@ -619,7 +619,7 @@ alt_usage_data(999)
 ### Prometheus Queries
 
 In those cases where operational metrics should be part of Usage Ping, a database or Redis query is unlikely
-to provide useful data. Instead, Prometheus might be more appropriate, since most of GitLab's architectural
+to provide useful data. Instead, Prometheus might be more appropriate, since most GitLab architectural
 components publish metrics to it that can be queried back, aggregated, and included as usage data.
 
 NOTE:

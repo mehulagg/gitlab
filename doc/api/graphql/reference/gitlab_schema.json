@@ -1252,25 +1252,25 @@
               "name": "updated_desc",
               "description": "Updated at descending order",
               "isDeprecated": true,
-              "deprecationReason": "Use UPDATED_DESC. Deprecated in 13.5"
+              "deprecationReason": "Use UPDATED_DESC. Deprecated in 13.5."
             },
             {
               "name": "updated_asc",
               "description": "Updated at ascending order",
               "isDeprecated": true,
-              "deprecationReason": "Use UPDATED_ASC. Deprecated in 13.5"
+              "deprecationReason": "Use UPDATED_ASC. Deprecated in 13.5."
             },
             {
               "name": "created_desc",
               "description": "Created at descending order",
               "isDeprecated": true,
-              "deprecationReason": "Use CREATED_DESC. Deprecated in 13.5"
+              "deprecationReason": "Use CREATED_DESC. Deprecated in 13.5."
             },
             {
               "name": "created_asc",
               "description": "Created at ascending order",
               "isDeprecated": true,
-              "deprecationReason": "Use CREATED_ASC. Deprecated in 13.5"
+              "deprecationReason": "Use CREATED_ASC. Deprecated in 13.5."
             },
             {
               "name": "UPDATED_DESC",
@@ -1478,6 +1478,29 @@
 
           ],
           "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "ENUM",
+          "name": "AlertManagementDomainFilter",
+          "description": "Filters the alerts based on given domain",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
+          "enumValues": [
+            {
+              "name": "operations",
+              "description": "Alerts for operations domain ",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "threat_monitoring",
+              "description": "Alerts for threat monitoring domain",
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
           "possibleTypes": null
         },
         {
@@ -3427,6 +3450,20 @@
               "deprecationReason": null
             },
             {
+              "name": "iteration",
+              "description": "The board iteration.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "Iteration",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "labels",
               "description": "Labels of the board",
               "args": [
@@ -3743,7 +3780,7 @@
               "args": [
                 {
                   "name": "startDate",
-                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present). Deprecated in 13.5: Use timeframe.start",
+                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present) Deprecated in 13.5: Use timeframe.start.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Time",
@@ -3753,7 +3790,7 @@
                 },
                 {
                   "name": "endDate",
-                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present). Deprecated in 13.5: Use timeframe.end",
+                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present) Deprecated in 13.5: Use timeframe.end.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Time",
@@ -13527,7 +13564,7 @@
             },
             {
               "name": "globalId",
-              "description": "ID of the DAST scanner profile. Deprecated in 13.6: Use `id`",
+              "description": "ID of the DAST scanner profile Deprecated in 13.6: Use `id`.",
               "args": [
 
               ],
@@ -13541,7 +13578,7 @@
                 }
               },
               "isDeprecated": true,
-              "deprecationReason": "Use `id`. Deprecated in 13.6"
+              "deprecationReason": "Use `id`. Deprecated in 13.6."
             },
             {
               "name": "id",
@@ -13874,7 +13911,7 @@
             },
             {
               "name": "globalId",
-              "description": "ID of the scanner profile.. Deprecated in 13.6: Use `id`",
+              "description": "ID of the scanner profile. Deprecated in 13.6: Use `id`.",
               "args": [
 
               ],
@@ -13884,7 +13921,7 @@
                 "ofType": null
               },
               "isDeprecated": true,
-              "deprecationReason": "Use `id`. Deprecated in 13.6"
+              "deprecationReason": "Use `id`. Deprecated in 13.6."
             },
             {
               "name": "id",
@@ -21106,7 +21143,7 @@
               "args": [
                 {
                   "name": "startDate",
-                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present). Deprecated in 13.5: Use timeframe.start",
+                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present) Deprecated in 13.5: Use timeframe.start.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Time",
@@ -21116,7 +21153,7 @@
                 },
                 {
                   "name": "endDate",
-                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present). Deprecated in 13.5: Use timeframe.end",
+                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present) Deprecated in 13.5: Use timeframe.end.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Time",
@@ -24705,6 +24742,117 @@
           "possibleTypes": null
         },
         {
+          "kind": "OBJECT",
+          "name": "ExternalIssue",
+          "description": "Represents an external issue",
+          "fields": [
+            {
+              "name": "createdAt",
+              "description": "Timestamp of when the issue was created",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Time",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "externalTracker",
+              "description": "Type of external tracker",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "relativeReference",
+              "description": "Relative reference of the issue in the external tracker",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "status",
+              "description": "Status of the issue in the external tracker",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "title",
+              "description": "Title of the issue in the external tracker",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "updatedAt",
+              "description": "Timestamp of when the issue was updated",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Time",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "webUrl",
+              "description": "URL to the issue in the external tracker",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
           "kind": "SCALAR",
           "name": "Float",
           "description": "Represents signed double-precision fractional values as specified by [IEEE 754](https://en.wikipedia.org/wiki/IEEE_floating_point).",
@@ -25082,7 +25230,7 @@
             },
             {
               "name": "snippetRepositoryRegistries",
-              "description": "Find snippet repository registries on this Geo node. Available only when feature flag `geo_snippet_repository_replication` is enabled",
+              "description": "Find snippet repository registries on this Geo node",
               "args": [
                 {
                   "name": "ids",
@@ -25605,7 +25753,7 @@
             },
             {
               "name": "complianceFrameworks",
-              "description": "Compliance frameworks available to projects in this namespace. Available only when feature flag `ff_custom_compliance_frameworks` is enabled",
+              "description": "Compliance frameworks available to projects in this namespace Available only when feature flag `ff_custom_compliance_frameworks` is enabled.",
               "args": [
                 {
                   "name": "after",
@@ -25757,7 +25905,7 @@
             },
             {
               "name": "customEmoji",
-              "description": "Custom emoji within this namespace. Available only when feature flag `custom_emoji` is enabled",
+              "description": "Custom emoji within this namespace Available only when feature flag `custom_emoji` is enabled.",
               "args": [
                 {
                   "name": "after",
@@ -25856,7 +26004,7 @@
               "args": [
                 {
                   "name": "startDate",
-                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present). Deprecated in 13.5: Use timeframe.start",
+                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present) Deprecated in 13.5: Use timeframe.start.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Time",
@@ -25866,7 +26014,7 @@
                 },
                 {
                   "name": "endDate",
-                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present). Deprecated in 13.5: Use timeframe.end",
+                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present) Deprecated in 13.5: Use timeframe.end.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Time",
@@ -26095,7 +26243,7 @@
               "args": [
                 {
                   "name": "startDate",
-                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present). Deprecated in 13.5: Use timeframe.start",
+                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present) Deprecated in 13.5: Use timeframe.start.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Time",
@@ -26105,7 +26253,7 @@
                 },
                 {
                   "name": "endDate",
-                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present). Deprecated in 13.5: Use timeframe.end",
+                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present) Deprecated in 13.5: Use timeframe.end.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Time",
@@ -26774,7 +26922,7 @@
               "args": [
                 {
                   "name": "startDate",
-                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present). Deprecated in 13.5: Use timeframe.start",
+                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present) Deprecated in 13.5: Use timeframe.start.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Time",
@@ -26784,7 +26932,7 @@
                 },
                 {
                   "name": "endDate",
-                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present). Deprecated in 13.5: Use timeframe.end",
+                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present) Deprecated in 13.5: Use timeframe.end.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Time",
@@ -27230,7 +27378,7 @@
               "args": [
                 {
                   "name": "startDate",
-                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present). Deprecated in 13.5: Use timeframe.start",
+                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present) Deprecated in 13.5: Use timeframe.start.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Time",
@@ -27240,7 +27388,7 @@
                 },
                 {
                   "name": "endDate",
-                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present). Deprecated in 13.5: Use timeframe.end",
+                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present) Deprecated in 13.5: Use timeframe.end.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Time",
@@ -28093,7 +28241,7 @@
             },
             {
               "name": "vulnerabilitiesCountByDayAndSeverity",
-              "description": "Number of vulnerabilities per severity level, per day, for the projects in the group and its subgroups. Deprecated in 13.3: Use `vulnerabilitiesCountByDay`",
+              "description": "Number of vulnerabilities per severity level, per day, for the projects in the group and its subgroups Deprecated in 13.3: Use `vulnerabilitiesCountByDay`.",
               "args": [
                 {
                   "name": "startDate",
@@ -28170,7 +28318,7 @@
                 "ofType": null
               },
               "isDeprecated": true,
-              "deprecationReason": "Use `vulnerabilitiesCountByDay`. Deprecated in 13.3"
+              "deprecationReason": "Use `vulnerabilitiesCountByDay`. Deprecated in 13.3."
             },
             {
               "name": "vulnerabilityGrades",
@@ -32951,25 +33099,25 @@
               "name": "updated_desc",
               "description": "Updated at descending order",
               "isDeprecated": true,
-              "deprecationReason": "Use UPDATED_DESC. Deprecated in 13.5"
+              "deprecationReason": "Use UPDATED_DESC. Deprecated in 13.5."
             },
             {
               "name": "updated_asc",
               "description": "Updated at ascending order",
               "isDeprecated": true,
-              "deprecationReason": "Use UPDATED_ASC. Deprecated in 13.5"
+              "deprecationReason": "Use UPDATED_ASC. Deprecated in 13.5."
             },
             {
               "name": "created_desc",
               "description": "Created at descending order",
               "isDeprecated": true,
-              "deprecationReason": "Use CREATED_DESC. Deprecated in 13.5"
+              "deprecationReason": "Use CREATED_DESC. Deprecated in 13.5."
             },
             {
               "name": "created_asc",
               "description": "Created at ascending order",
               "isDeprecated": true,
-              "deprecationReason": "Use CREATED_ASC. Deprecated in 13.5"
+              "deprecationReason": "Use CREATED_ASC. Deprecated in 13.5."
             },
             {
               "name": "UPDATED_DESC",
@@ -38878,25 +39026,25 @@
               "name": "updated_desc",
               "description": "Updated at descending order",
               "isDeprecated": true,
-              "deprecationReason": "Use UPDATED_DESC. Deprecated in 13.5"
+              "deprecationReason": "Use UPDATED_DESC. Deprecated in 13.5."
             },
             {
               "name": "updated_asc",
               "description": "Updated at ascending order",
               "isDeprecated": true,
-              "deprecationReason": "Use UPDATED_ASC. Deprecated in 13.5"
+              "deprecationReason": "Use UPDATED_ASC. Deprecated in 13.5."
             },
             {
               "name": "created_desc",
               "description": "Created at descending order",
               "isDeprecated": true,
-              "deprecationReason": "Use CREATED_DESC. Deprecated in 13.5"
+              "deprecationReason": "Use CREATED_DESC. Deprecated in 13.5."
             },
             {
               "name": "created_asc",
               "description": "Created at ascending order",
               "isDeprecated": true,
-              "deprecationReason": "Use CREATED_ASC. Deprecated in 13.5"
+              "deprecationReason": "Use CREATED_ASC. Deprecated in 13.5."
             },
             {
               "name": "UPDATED_DESC",
@@ -40127,7 +40275,7 @@
                 "ofType": null
               },
               "isDeprecated": true,
-              "deprecationReason": "Use awardEmojiAdd. Deprecated in 13.2"
+              "deprecationReason": "Use awardEmojiAdd. Deprecated in 13.2."
             },
             {
               "name": "addProjectToSecurityDashboard",
@@ -40644,7 +40792,7 @@
             },
             {
               "name": "createCustomEmoji",
-              "description": ". Available only when feature flag `custom_emoji` is enabled",
+              "description": " Available only when feature flag `custom_emoji` is enabled.",
               "args": [
                 {
                   "name": "input",
@@ -41558,7 +41706,7 @@
                 "ofType": null
               },
               "isDeprecated": true,
-              "deprecationReason": "Use vulnerabilityDismiss. Deprecated in 13.5"
+              "deprecationReason": "Use vulnerabilityDismiss. Deprecated in 13.5."
             },
             {
               "name": "environmentsCanaryIngressUpdate",
@@ -42800,7 +42948,7 @@
                 "ofType": null
               },
               "isDeprecated": true,
-              "deprecationReason": "Use awardEmojiRemove. Deprecated in 13.2"
+              "deprecationReason": "Use awardEmojiRemove. Deprecated in 13.2."
             },
             {
               "name": "removeProjectFromSecurityDashboard",
@@ -42881,7 +43029,7 @@
                 "ofType": null
               },
               "isDeprecated": true,
-              "deprecationReason": "Use vulnerabilityRevertToDetected. Deprecated in 13.5"
+              "deprecationReason": "Use vulnerabilityRevertToDetected. Deprecated in 13.5."
             },
             {
               "name": "runDastScan",
@@ -42908,7 +43056,7 @@
                 "ofType": null
               },
               "isDeprecated": true,
-              "deprecationReason": "Use DastOnDemandScanCreate. Deprecated in 13.4"
+              "deprecationReason": "Use DastOnDemandScanCreate. Deprecated in 13.4."
             },
             {
               "name": "terraformStateDelete",
@@ -43151,7 +43299,7 @@
                 "ofType": null
               },
               "isDeprecated": true,
-              "deprecationReason": "Use awardEmojiToggle. Deprecated in 13.2"
+              "deprecationReason": "Use awardEmojiToggle. Deprecated in 13.2."
             },
             {
               "name": "updateAlertStatus",
@@ -43256,6 +43404,33 @@
               "type": {
                 "kind": "OBJECT",
                 "name": "UpdateBoardListPayload",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "updateComplianceFramework",
+              "description": null,
+              "args": [
+                {
+                  "name": "input",
+                  "description": null,
+                  "type": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "UpdateComplianceFrameworkInput",
+                      "ofType": null
+                    }
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "UpdateComplianceFrameworkPayload",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -43684,7 +43859,7 @@
             },
             {
               "name": "complianceFrameworks",
-              "description": "Compliance frameworks available to projects in this namespace. Available only when feature flag `ff_custom_compliance_frameworks` is enabled",
+              "description": "Compliance frameworks available to projects in this namespace Available only when feature flag `ff_custom_compliance_frameworks` is enabled.",
               "args": [
                 {
                   "name": "after",
@@ -47711,6 +47886,20 @@
                   "defaultValue": null
                 },
                 {
+                  "name": "domain",
+                  "description": "Filter query for given domain",
+                  "type": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "ENUM",
+                      "name": "AlertManagementDomainFilter",
+                      "ofType": null
+                    }
+                  },
+                  "defaultValue": "operations"
+                },
+                {
                   "name": "search",
                   "description": "Search query for title, description, service, or monitoring_tool.",
                   "type": {
@@ -47813,6 +48002,20 @@
                     "ofType": null
                   },
                   "defaultValue": null
+                },
+                {
+                  "name": "domain",
+                  "description": "Filter query for given domain",
+                  "type": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "ENUM",
+                      "name": "AlertManagementDomainFilter",
+                      "ofType": null
+                    }
+                  },
+                  "defaultValue": "operations"
                 },
                 {
                   "name": "search",
@@ -49697,7 +49900,7 @@
               "args": [
                 {
                   "name": "startDate",
-                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present). Deprecated in 13.5: Use timeframe.start",
+                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present) Deprecated in 13.5: Use timeframe.start.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Time",
@@ -49707,7 +49910,7 @@
                 },
                 {
                   "name": "endDate",
-                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present). Deprecated in 13.5: Use timeframe.end",
+                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present) Deprecated in 13.5: Use timeframe.end.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Time",
@@ -50197,6 +50400,16 @@
                   "defaultValue": null
                 },
                 {
+                  "name": "reviewerUsername",
+                  "description": "Username of the reviewer",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
                   "name": "after",
                   "description": "Returns the elements in the list that come after the specified cursor.",
                   "type": {
@@ -50279,7 +50492,7 @@
               "args": [
                 {
                   "name": "startDate",
-                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present). Deprecated in 13.5: Use timeframe.start",
+                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present) Deprecated in 13.5: Use timeframe.start.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Time",
@@ -50289,7 +50502,7 @@
                 },
                 {
                   "name": "endDate",
-                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present). Deprecated in 13.5: Use timeframe.end",
+                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present) Deprecated in 13.5: Use timeframe.end.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Time",
@@ -55256,7 +55469,7 @@
             },
             {
               "name": "vulnerabilitiesCountByDayAndSeverity",
-              "description": "Number of vulnerabilities per severity level, per day, for the projects on the current user's instance security dashboard. Deprecated in 13.3: Use `vulnerabilitiesCountByDay`",
+              "description": "Number of vulnerabilities per severity level, per day, for the projects on the current user's instance security dashboard Deprecated in 13.3: Use `vulnerabilitiesCountByDay`.",
               "args": [
                 {
                   "name": "startDate",
@@ -55333,7 +55546,7 @@
                 "ofType": null
               },
               "isDeprecated": true,
-              "deprecationReason": "Use `vulnerabilitiesCountByDay`. Deprecated in 13.3"
+              "deprecationReason": "Use `vulnerabilitiesCountByDay`. Deprecated in 13.3."
             },
             {
               "name": "vulnerability",
@@ -62601,7 +62814,7 @@
             },
             {
               "name": "blob",
-              "description": "Snippet blob. Deprecated in 13.3: Use `blobs`",
+              "description": "Snippet blob Deprecated in 13.3: Use `blobs`.",
               "args": [
 
               ],
@@ -62615,7 +62828,7 @@
                 }
               },
               "isDeprecated": true,
-              "deprecationReason": "Use `blobs`. Deprecated in 13.3"
+              "deprecationReason": "Use `blobs`. Deprecated in 13.3."
             },
             {
               "name": "blobs",
@@ -64084,25 +64297,25 @@
               "name": "updated_desc",
               "description": "Updated at descending order",
               "isDeprecated": true,
-              "deprecationReason": "Use UPDATED_DESC. Deprecated in 13.5"
+              "deprecationReason": "Use UPDATED_DESC. Deprecated in 13.5."
             },
             {
               "name": "updated_asc",
               "description": "Updated at ascending order",
               "isDeprecated": true,
-              "deprecationReason": "Use UPDATED_ASC. Deprecated in 13.5"
+              "deprecationReason": "Use UPDATED_ASC. Deprecated in 13.5."
             },
             {
               "name": "created_desc",
               "description": "Created at descending order",
               "isDeprecated": true,
-              "deprecationReason": "Use CREATED_DESC. Deprecated in 13.5"
+              "deprecationReason": "Use CREATED_DESC. Deprecated in 13.5."
             },
             {
               "name": "created_asc",
               "description": "Created at ascending order",
               "isDeprecated": true,
-              "deprecationReason": "Use CREATED_ASC. Deprecated in 13.5"
+              "deprecationReason": "Use CREATED_ASC. Deprecated in 13.5."
             },
             {
               "name": "UPDATED_DESC",
@@ -66795,7 +67008,7 @@
             },
             {
               "name": "updatedIds",
-              "description": "The IDs of the updated todo items. Deprecated in 13.2: Use todos",
+              "description": "The IDs of the updated todo items Deprecated in 13.2: Use todos.",
               "args": [
 
               ],
@@ -66817,7 +67030,7 @@
                 }
               },
               "isDeprecated": true,
-              "deprecationReason": "Use todos. Deprecated in 13.2"
+              "deprecationReason": "Use todos. Deprecated in 13.2."
             }
           ],
           "inputFields": null,
@@ -67072,7 +67285,7 @@
             },
             {
               "name": "updatedIds",
-              "description": "Ids of the updated todos. Deprecated in 13.2: Use todos",
+              "description": "Ids of the updated todos Deprecated in 13.2: Use todos.",
               "args": [
 
               ],
@@ -67094,7 +67307,7 @@
                 }
               },
               "isDeprecated": true,
-              "deprecationReason": "Use todos. Deprecated in 13.2"
+              "deprecationReason": "Use todos. Deprecated in 13.2."
             }
           ],
           "inputFields": null,
@@ -68093,6 +68306,16 @@
               "defaultValue": null
             },
             {
+              "name": "iterationId",
+              "description": "The ID of iteration to be assigned to the board.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "IterationID",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
               "name": "weight",
               "description": "The weight value to be assigned to the board",
               "type": {
@@ -68303,6 +68526,138 @@
               "type": {
                 "kind": "SCALAR",
                 "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "errors",
+              "description": "Errors encountered during execution of the mutation.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "SCALAR",
+                      "name": "String",
+                      "ofType": null
+                    }
+                  }
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "INPUT_OBJECT",
+          "name": "UpdateComplianceFrameworkInput",
+          "description": "Autogenerated input type of UpdateComplianceFramework",
+          "fields": null,
+          "inputFields": [
+            {
+              "name": "id",
+              "description": "The global ID of the compliance framework to update",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "ComplianceManagementFrameworkID",
+                  "ofType": null
+                }
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "name",
+              "description": "New name for the compliance framework",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "description",
+              "description": "New description for the compliance framework",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "color",
+              "description": "New color representation of the compliance framework in hex format. e.g. #FCA121",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "clientMutationId",
+              "description": "A unique identifier for the client performing the mutation.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            }
+          ],
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "UpdateComplianceFrameworkPayload",
+          "description": "Autogenerated return type of UpdateComplianceFramework",
+          "fields": [
+            {
+              "name": "clientMutationId",
+              "description": "A unique identifier for the client performing the mutation.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "complianceFramework",
+              "description": "The compliance framework after mutation",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "ComplianceFramework",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -70065,6 +70420,16 @@
                   "defaultValue": null
                 },
                 {
+                  "name": "reviewerUsername",
+                  "description": "Username of the reviewer",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
                   "name": "after",
                   "description": "Returns the elements in the list that come after the specified cursor.",
                   "type": {
@@ -70270,6 +70635,16 @@
                   "defaultValue": null
                 },
                 {
+                  "name": "reviewerUsername",
+                  "description": "Username of the reviewer",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
                   "name": "after",
                   "description": "Returns the elements in the list that come after the specified cursor.",
                   "type": {
@@ -70334,7 +70709,7 @@
             },
             {
               "name": "email",
-              "description": "User email. Deprecated in 13.7: Use public_email",
+              "description": "User email Deprecated in 13.7: Use public_email.",
               "args": [
 
               ],
@@ -70344,11 +70719,11 @@
                 "ofType": null
               },
               "isDeprecated": true,
-              "deprecationReason": "Use public_email. Deprecated in 13.7"
+              "deprecationReason": "Use public_email. Deprecated in 13.7."
             },
             {
               "name": "groupCount",
-              "description": "Group count for the user. Available only when feature flag `user_group_counts` is enabled",
+              "description": "Group count for the user Available only when feature flag `user_group_counts` is enabled.",
               "args": [
 
               ],
@@ -70525,6 +70900,221 @@
               "type": {
                 "kind": "SCALAR",
                 "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "reviewRequestedMergeRequests",
+              "description": "Merge Requests assigned to the user for review",
+              "args": [
+                {
+                  "name": "iids",
+                  "description": "Array of IIDs of merge requests, for example `[1, 2]`",
+                  "type": {
+                    "kind": "LIST",
+                    "name": null,
+                    "ofType": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "SCALAR",
+                        "name": "String",
+                        "ofType": null
+                      }
+                    }
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "sourceBranches",
+                  "description": "Array of source branch names. All resolved merge requests will have one of these branches as their source.",
+                  "type": {
+                    "kind": "LIST",
+                    "name": null,
+                    "ofType": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "SCALAR",
+                        "name": "String",
+                        "ofType": null
+                      }
+                    }
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "targetBranches",
+                  "description": "Array of target branch names. All resolved merge requests will have one of these branches as their target.",
+                  "type": {
+                    "kind": "LIST",
+                    "name": null,
+                    "ofType": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "SCALAR",
+                        "name": "String",
+                        "ofType": null
+                      }
+                    }
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "state",
+                  "description": "A merge request state. If provided, all resolved merge requests will have this state.",
+                  "type": {
+                    "kind": "ENUM",
+                    "name": "MergeRequestState",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "labels",
+                  "description": "Array of label names. All resolved merge requests will have all of these labels.",
+                  "type": {
+                    "kind": "LIST",
+                    "name": null,
+                    "ofType": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "SCALAR",
+                        "name": "String",
+                        "ofType": null
+                      }
+                    }
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "mergedAfter",
+                  "description": "Merge requests merged after this date",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Time",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "mergedBefore",
+                  "description": "Merge requests merged before this date",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Time",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "milestoneTitle",
+                  "description": "Title of the milestone",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "sort",
+                  "description": "Sort merge requests by this criteria",
+                  "type": {
+                    "kind": "ENUM",
+                    "name": "MergeRequestSort",
+                    "ofType": null
+                  },
+                  "defaultValue": "created_desc"
+                },
+                {
+                  "name": "projectPath",
+                  "description": "The full-path of the project the authored merge requests should be in. Incompatible with projectId.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "projectId",
+                  "description": "The global ID of the project the authored merge requests should be in. Incompatible with projectPath.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "ProjectID",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "authorUsername",
+                  "description": "Username of the author",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "assigneeUsername",
+                  "description": "Username of the assignee",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "after",
+                  "description": "Returns the elements in the list that come after the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "before",
+                  "description": "Returns the elements in the list that come before the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "first",
+                  "description": "Returns the first _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "last",
+                  "description": "Returns the last _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "MergeRequestConnection",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -71711,10 +72301,34 @@
           "possibleTypes": null
         },
         {
+          "kind": "SCALAR",
+          "name": "VulnerabilitiesExternalIssueLinkID",
+          "description": "Identifier of Vulnerabilities::ExternalIssueLink",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
           "kind": "OBJECT",
           "name": "Vulnerability",
           "description": "Represents a vulnerability",
           "fields": [
+            {
+              "name": "confirmedAt",
+              "description": "Timestamp of when the vulnerability state was changed to confirmed",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Time",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
             {
               "name": "description",
               "description": "Description of the vulnerability",
@@ -71800,6 +72414,91 @@
                   "name": "DiscussionConnection",
                   "ofType": null
                 }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "dismissedAt",
+              "description": "Timestamp of when the vulnerability state was changed to dismissed",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Time",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "externalIssueLinks",
+              "description": "List of external issue links related to the vulnerability",
+              "args": [
+                {
+                  "name": "after",
+                  "description": "Returns the elements in the list that come after the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "before",
+                  "description": "Returns the elements in the list that come before the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "first",
+                  "description": "Returns the first _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "last",
+                  "description": "Returns the last _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "VulnerabilityExternalIssueLinkConnection",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "hasSolutions",
+              "description": "Indicates whether there is a solution available for this vulnerability.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
               },
               "isDeprecated": false,
               "deprecationReason": null
@@ -72023,6 +72722,20 @@
               "type": {
                 "kind": "ENUM",
                 "name": "VulnerabilityReportType",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "resolvedAt",
+              "description": "Timestamp of when the vulnerability state was changed to resolved",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Time",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -72488,6 +73201,198 @@
 
           ],
           "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "VulnerabilityExternalIssueLink",
+          "description": "Represents an external issue link of a vulnerability",
+          "fields": [
+            {
+              "name": "externalIssue",
+              "description": "The external issue attached to the issue link",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "ExternalIssue",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "id",
+              "description": "GraphQL ID of the external issue link",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "VulnerabilitiesExternalIssueLinkID",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "linkType",
+              "description": "Type of the external issue link",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "ENUM",
+                  "name": "VulnerabilityExternalIssueLinkType",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "VulnerabilityExternalIssueLinkConnection",
+          "description": "The connection type for VulnerabilityExternalIssueLink.",
+          "fields": [
+            {
+              "name": "edges",
+              "description": "A list of edges.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "VulnerabilityExternalIssueLinkEdge",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "nodes",
+              "description": "A list of nodes.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "VulnerabilityExternalIssueLink",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "pageInfo",
+              "description": "Information to aid in pagination.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "PageInfo",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "VulnerabilityExternalIssueLinkEdge",
+          "description": "An edge in a connection.",
+          "fields": [
+            {
+              "name": "cursor",
+              "description": "A cursor for use in pagination.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "node",
+              "description": "The item at the end of the edge.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "VulnerabilityExternalIssueLink",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "ENUM",
+          "name": "VulnerabilityExternalIssueLinkType",
+          "description": "The type of the external issue link related to a vulnerability",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
+          "enumValues": [
+            {
+              "name": "CREATED",
+              "description": "Created link type",
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
           "possibleTypes": null
         },
         {
@@ -73275,6 +74180,24 @@
             {
               "name": "adminVulnerability",
               "description": "Indicates the user can perform `admin_vulnerability` on this resource",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "adminVulnerabilityExternalIssueLink",
+              "description": "Indicates the user can perform `admin_vulnerability_external_issue_link` on this resource",
               "args": [
 
               ],

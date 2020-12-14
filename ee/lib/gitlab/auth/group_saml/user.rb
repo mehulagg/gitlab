@@ -51,6 +51,14 @@ module Gitlab
         def build_new_user(skip_confirmation: false)
           super.tap do |user|
             user.provisioned_by_group_id = saml_provider.group_id
+
+            # rubocop:disable GitlabSecurity/PublicSend
+            AuthHash::ALLOWED_USER_ATTRIBUTES.each do |attribute|
+              next unless value = auth_hash.public_send(attribute)
+
+              user.public_send("#{attribute}=", value)
+            end
+            # rubocop:enable GitlabSecurity/PublicSend
           end
         end
 

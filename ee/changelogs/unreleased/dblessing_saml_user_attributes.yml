@@ -1,0 +1,5 @@
+---
+title: Allow SAML response to set certain user attributes on creation
+merge_request: 49394
+author:
+type: added

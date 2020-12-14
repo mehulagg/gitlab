@@ -43,6 +43,10 @@ module EE
       return unless resource_parent&.feature_available?(:scoped_issue_board)
 
       case milestone_id
+      when ::Milestone::None.id
+        ::Milestone::None
+      when ::Milestone::Any.id
+        ::Milestone::Any
       when ::Milestone::Upcoming.id
         ::Milestone::Upcoming
       when ::Milestone::Started.id
@@ -56,12 +60,12 @@ module EE
       return unless resource_parent&.feature_available?(:scoped_issue_board)
 
       case iteration_id
-      when ::Iteration::None.id
-        ::Iteration::None
-      when ::Iteration::Any.id
-        ::Iteration::Any
-      when ::Iteration::Current.id
-        ::Iteration::Current
+      when ::Iteration::Predefined::None.id
+        ::Iteration::Predefined::None
+      when ::Iteration::Predefined::Any.id
+        ::Iteration::Predefined::Any
+      when ::Iteration::Predefined::Current.id
+        ::Iteration::Predefined::Current
       else
         super
       end

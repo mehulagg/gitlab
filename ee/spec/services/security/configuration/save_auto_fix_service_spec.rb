@@ -4,7 +4,7 @@ require 'spec_helper'
 
 RSpec.describe Security::Configuration::SaveAutoFixService do
   describe '#execute' do
-    let_it_be(:project) { create(:project) }
+    let_it_be_with_reload(:project) { create(:project) }
 
     subject(:service) { described_class.new(project, feature) }
 
@@ -31,10 +31,6 @@ RSpec.describe Security::Configuration::SaveAutoFixService do
 
     context 'with not supported scanner type' do
       let(:feature) { :dep_scan }
-
-      before do
-        project.create_security_setting
-      end
 
       it 'does not change setting' do
         expect(project.security_setting.auto_fix_dependency_scanning).to be_truthy

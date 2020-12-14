@@ -162,7 +162,7 @@ enabled, your users will be linked to their LDAP accounts on their first sign-in
 For this to work, some prerequisites must be met:
 
 The Kerberos username must match the LDAP user's UID. You can choose which LDAP
-attribute is used as the UID in GitLab's [LDAP configuration](../administration/auth/ldap/index.md#configuration)
+attribute is used as the UID in the GitLab [LDAP configuration](../administration/auth/ldap/index.md#configuration)
 but for Active Directory, this should be `sAMAccountName`.
 
 The Kerberos realm must match the domain part of the LDAP user's Distinguished
@@ -220,7 +220,7 @@ WARNING:
 There is a [known issue](https://github.com/curl/curl/issues/1261) with `libcurl`
 older than version 7.64.1 wherein it won't reuse connections when negotiating.
 This leads to authorization issues when push is larger than `http.postBuffer`
-config. Ensure that Git is using at least `libcurl` 7.64.1 to avoid this. To
+configuration. Ensure that Git is using at least `libcurl` 7.64.1 to avoid this. To
 know the `libcurl` version installed, run `curl-config --version`.
 
 ### HTTP Git access with Kerberos token (passwordless authentication)

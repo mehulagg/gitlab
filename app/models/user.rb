@@ -25,6 +25,7 @@ class User < ApplicationRecord
   include IgnorableColumns
   include UpdateHighestRole
   include HasUserType
+  include Gitlab::Auth::Otp::Fortinet
 
   DEFAULT_NOTIFICATION_LEVEL = :participating
 
@@ -721,6 +722,7 @@ class User < ApplicationRecord
         u.name = 'GitLab Security Bot'
         u.website_url = Gitlab::Routing.url_helpers.help_page_url('user/application_security/security_bot/index.md')
         u.avatar = bot_avatar(image: 'security-bot.png')
+        u.confirmed_at = Time.zone.now
       end
     end
 
@@ -810,7 +812,9 @@ class User < ApplicationRecord
   end
 
   def two_factor_otp_enabled?
-    otp_required_for_login? || Feature.enabled?(:forti_authenticator, self)
+    otp_required_for_login? ||
+    forti_authenticator_enabled?(self) ||
+    forti_token_cloud_enabled?(self)
   end
 
   def two_factor_u2f_enabled?

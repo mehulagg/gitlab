@@ -7,6 +7,9 @@ module EE
 
     prepended do
       with_scope :subject
+      condition(:auto_fix_enabled) { @subject.security_setting&.auto_fix_enabled? }
+
+      with_scope :subject
       condition(:repository_mirrors_enabled) { @subject.feature_available?(:repository_mirrors) }
 
       with_scope :subject
@@ -49,6 +52,11 @@ module EE
       condition(:locked_merge_request_committer_setting) do
         License.feature_available?(:admin_merge_request_approvers_rules) &&
           ::Gitlab::CurrentSettings.prevent_merge_requests_committers_approval
+      end
+
+      with_scope :subject
+      condition(:project_activity_analytics_available) do
+        @subject.feature_available?(:project_activity_analytics)
       end
 
       condition(:project_merge_request_analytics_available) do
@@ -195,6 +203,7 @@ module EE
         enable :update_vulnerability_feedback
         enable :read_ci_minutes_quota
         enable :admin_feature_flags_issue_links
+        enable :read_project_audit_events
       end
 
       rule { can?(:developer_access) & iterations_available }.policy do
@@ -222,6 +231,13 @@ module EE
         enable :create_vulnerability_export
         enable :admin_vulnerability
         enable :admin_vulnerability_issue_link
+        enable :admin_vulnerability_external_issue_link
+      end
+
+      rule { security_bot & auto_fix_enabled }.policy do
+        enable :push_code
+        enable :create_merge_request_from
+        enable :create_vulnerability_feedback
       end
 
       rule { issues_disabled & merge_requests_disabled }.policy do
@@ -273,6 +289,7 @@ module EE
         prevent :create_vulnerability
         prevent :admin_vulnerability
         prevent :admin_vulnerability_issue_link
+        prevent :admin_vulnerability_external_issue_link
       end
 
       rule { auditor & ~guest }.policy do
@@ -339,6 +356,9 @@ module EE
 
       rule { can?(:read_merge_request) & code_review_analytics_enabled }.enable :read_code_review_analytics
 
+      rule { reporter & project_activity_analytics_available }
+        .enable :read_project_activity_analytics
+
       rule { reporter & project_merge_request_analytics_available }
         .enable :read_project_merge_request_analytics
 
@@ -372,6 +392,7 @@ module EE
     def lookup_access_level!
       return ::Gitlab::Access::NO_ACCESS if needs_new_sso_session?
       return ::Gitlab::Access::NO_ACCESS if visual_review_bot?
+      return ::Gitlab::Access::REPORTER if security_bot? && auto_fix_enabled?
 
       super
     end
