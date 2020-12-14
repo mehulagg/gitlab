@@ -256,7 +256,12 @@ class MergeRequest < ApplicationRecord
   scope :open_and_closed, -> { with_states(:opened, :closed) }
   scope :from_source_branches, ->(branches) { where(source_branch: branches) }
   scope :by_commit_sha, ->(sha) do
-    where('EXISTS (?)', MergeRequestDiff.select(1).where('merge_requests.latest_merge_request_diff_id = merge_request_diffs.id').by_commit_sha(sha)).reorder(nil)
+    where(
+      'EXISTS (?)',
+      MergeRequestDiff.select(1).where('merge_requests.latest_merge_request_diff_id = merge_request_diffs.id').by_commit_sha(sha)
+    ).or(
+      where(squash_commit_sha: sha)
+    ).reorder(nil)
   end
   scope :by_merge_commit_sha, -> (sha) do
     where(merge_commit_sha: sha)
