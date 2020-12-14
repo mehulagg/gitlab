@@ -20,7 +20,7 @@ To see DevOps Report, go to **Admin Area > Analytics > DevOps Report**.
 
 ## DevOps Score
 
-DevOps Score displays the usage of GitLab's major features on your instance over
+The DevOps Score tab displays the usage of GitLab's major features on your instance over
 the last 30 days, averaged over the number of billable users in that time period. It also
 provides a Lead score per feature, which is calculated based on GitLab's analysis
 of top-performing instances based on [usage ping data](../settings/usage_statistics.md#usage-ping) that GitLab has
@@ -38,7 +38,7 @@ collected before this feature is available.
 
 ## DevOps Adoption
 
-DevOps Adoption shows you which segments of your organization are using GitLab's most essential features:
+The DevOps Adoption tab shows you which segments of your organization are using GitLab's most essential features:
 
 - Issues
 - Merge Requests
