@@ -24,7 +24,7 @@ echo
 grep --extended-regexp --binary-file=without-match --recursive '[  ]' doc/ >/dev/null 2>&1
 if [ $? -eq 0 ]
 then
-  echo '✖ ERROR: Non-standard spaces (NBSP, NNBSP) should not be used in documentation!
++  echo '✖ ERROR: Non-standard spaces (NBSP, NNBSP) should not be used in documentation.
          https://docs.gitlab.com/ee/development/documentation/styleguide/index.html#spaces-between-words
          Replace with standard spaces:' >&2
   GREP_COLOR="0;101" grep --extended-regexp --binary-file=without-match --recursive --color=auto '[  ]' doc/
