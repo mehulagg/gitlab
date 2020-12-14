@@ -130,6 +130,7 @@ export default {
         <template v-else>
           <gl-button
             ref="vulnerability-title"
+            class="text-body"
             variant="link"
             @click="openModal({ vulnerability })"
             >{{ vulnerability.name }}</gl-button
