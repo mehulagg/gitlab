@@ -1362,6 +1362,8 @@ Note that `deployable_id` is the ID of the CI job.
 
 ### Member events
 
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/260347) in GitLab 13.7.
+
 Triggered when a user is added as a group member.
 
 **Request Header**:
