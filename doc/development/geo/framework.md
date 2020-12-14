@@ -771,10 +771,9 @@ available in the Admin UI.
          feature_flag: :geo_widget_replication # REMOVE THIS LINE
    ```
 
-
 ### Repository Replicator Strategy
 
-Models that refer any repository on the disk
+Models that refer to any repository on the disk
 can be easily supported by Geo with the `Geo::RepositoryReplicatorStrategy` module.
 
 For example, to add support for files referenced by a `Snippets` model with a
@@ -812,10 +811,9 @@ For example, to add support for files referenced by a `Snippets` model with a
    ```
 
    Pay some attention to method `pool_repository`. Not every repository type uses
-   repository pooling. As Geo prefers to use repository snapshoting it can lead to a data loss
-   so make sure to overwrite `pool_repository` so it returns nil for repositories that do not
-   have the pools.
-
+   repository pooling. As Geo prefers to use repository snapshotting, it can lead to data loss.
+   Make sure to overwrite `pool_repository` so it returns nil for repositories that do not
+   have pools.
 
    If there is a common constraint for records to be available for replication,
    make sure to also overwrite the `available_replicables` scope.
@@ -986,6 +984,7 @@ For example, to add support for files referenced by a `Snippets` model with a
    ```
 
 Snippets should now be replicated by Geo.
+
 #### GraphQL API
 
 1. Add a new field to `GeoNodeType` in
