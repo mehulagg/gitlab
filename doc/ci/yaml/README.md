@@ -3835,7 +3835,7 @@ description.
 
 ##### Read description from a file
 
-> [Introduced](https://gitlab.com/gitlab-org/release-cli/-/merge_requests/75) in GitLab 13.7.
+> [Introduced](https://gitlab.com/gitlab-org/release-cli/-/merge_requests/67) in GitLab 13.7.
 
 You can specify a file in `$CI_PROJECT_DIR` that contains the description. The file must be relative
 to the project directory (`$CI_PROJECT_DIR`), and can't directly link outside it. The
