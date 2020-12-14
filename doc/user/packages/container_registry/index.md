@@ -38,38 +38,43 @@ Only members of the project or group can access a private project's Container Re
 
 If a project is public, so is the Container Registry.
 
-## Use images from the Container Registry
+## Use images and charts from the Container Registry
 
-To download and run a container image hosted in the GitLab Container Registry:
+To download and run a Docker image or Helm chart hosted in the GitLab Container Registry:
 
 1. Copy the link to your container image:
    - Go to your project or group's **Packages & Registries > Container Registry**
-     and find the image you want.
-   - Next to the image name, click the **Copy** button.
+     and find the image or chart you want.
+   - Next to the name, click the **Copy** button.
 
     ![Container Registry image URL](img/container_registry_hover_path_13_4.png)
 
-1. Use `docker run` with the image link:
+1. Run the command:
 
-   ```shell
-   docker run [options] registry.example.com/group/project/image [arguments]
-   ```
+   - For Docker, use `docker run` with the image link:
 
-For more information on running Docker containers, visit the
-[Docker documentation](https://docs.docker.com/engine/userguide/intro/).
+     ```shell
+     docker run [options] registry.example.com/group/project/image [arguments]
+     ```
 
-## Image naming convention
+   - For Helm charts, use `helm install` with the chart link:
 
-Images follow this naming convention:
+     ```shell
+     helm install registry.example.com/group/project/image [arguments]
+     ```
+
+## Naming convention
+
+Images and charts in the Container Registry follow this naming convention:
 
 ```plaintext
-<registry URL>/<namespace>/<project>/<image>
+<registry URL>/<namespace>/<project>/<image_or_chart_name>
 ```
 
 If your project is `gitlab.example.com/mynamespace/myproject`, for example,
-then your image must be named `gitlab.example.com/mynamespace/myproject/my-app` at a minimum.
+then your image or chart must be named `gitlab.example.com/mynamespace/myproject/my-app` at a minimum.
 
-You can append additional names to the end of an image name, up to three levels deep.
+You can append additional names to the end of the name, up to three levels deep.
 
 For example, these are all valid image names for images within the project named `myproject`:
 
@@ -89,9 +94,9 @@ registry.example.com/mynamespace/myproject/my/image:rc1
 
 To build and push to the Container Registry, you can use Docker commands.
 
-### Authenticate with the Container Registry
+### Authenticate Docker with the Container Registry
 
-Before you can build and push images, you must authenticate with the Container Registry.
+Before you can build and push Docker images, you must authenticate with the Container Registry.
 
 To authenticate, you can use:
 
@@ -105,13 +110,13 @@ Both of these require the minimum scope to be:
 
 To authenticate, run the `docker` command. For example:
 
-   ```shell
-   docker login registry.example.com -u <username> -p <token>
-   ```
+```shell
+docker login registry.example.com -u <username> -p <token>
+```
 
 ### Build and push images by using Docker commands
 
-To build and push to the Container Registry:
+To build and push Docker images to the Container Registry:
 
 1. Authenticate with the Container Registry.
 
@@ -128,6 +133,50 @@ To build and push to the Container Registry:
    ```
 
 To view these commands, go to your project's **Packages & Registries > Container Registry**.
+
+## Build and push charts by using Helm commands
+
+With the launch of [Helm v3](https://helm.sh/docs/topics/registries/),
+you can use the Container Registry to store Helm charts. In the GitLab UI,
+you cannot [differentiate between Helm charts and Docker containers](https://gitlab.com/gitlab-org/gitlab/-/issues/38047).
+
+Also, due to the way Helm chart metadata is passed and stored by Docker, 
+GitLab cannot parse this data and meet performance standards.
+[Read more about these challenges](https://gitlab.com/gitlab-org/gitlab/-/issues/38047#note_298842890).
+
+### Authenticate Helm with the Container Registry
+
+Before you can build and push Helm charts, you must authenticate with the Container Registry.
+
+To authenticate, you can use:
+
+- A [personal access token](../../profile/personal_access_tokens.md).
+- A [deploy token](../../project/deploy_tokens/index.md).
+
+Both of these require the minimum scope to be:
+
+- For read (pull) access, `read_registry`.
+- For write (push) access, `write_registry`.
+
+To authenticate, run the `helm` command. For example:
+
+```shell
+helm registry login registry.example.com -u <username> -p <token>
+```
+
+### Push Helm charts to the Container Registry
+
+To push Helm charts to the Container Registry:
+
+1. Authenticate with the Container Registry.
+
+1. Run the command to push. For example:
+
+   ```shell
+   helm chart push registry.example.com/group/project/image
+   ```
+
+The Helm chart is now available on your project's **Packages & Registries > Container Registry**.
 
 ## Build and push by using GitLab CI/CD
 
@@ -602,15 +651,6 @@ Check the regex patterns to ensure they are valid.
 
 You can use [Rubular](https://rubular.com/) to check your regex.
 View some common [regex pattern examples](#regex-pattern-examples).
-
-## Use the Container Registry to store Helm Charts
-
-With the launch of [Helm v3](https://helm.sh/docs/topics/registries/),
-you can use the Container Registry to store Helm Charts. However, due to the way metadata is passed
-and stored by Docker, it is not possible for GitLab to parse this data and meet performance standards.
-[This epic](https://gitlab.com/groups/gitlab-org/-/epics/2313) updates the architecture of the Container Registry to support Helm Charts.
-
-[Read more about the above challenges](https://gitlab.com/gitlab-org/gitlab/-/issues/38047#note_298842890).
 
 ## Limitations
 
