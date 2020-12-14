@@ -1601,6 +1601,10 @@ The GitLab Technical Writing team determines which versions of
 documentation to display on this site based on the GitLab
 [Statement of Support](https://about.gitlab.com/support/statement-of-support.html#we-support-the-current-major-version-and-the-two-previous-major-versions).
 
+As the our [Contributor and Development](../../index.md) documentation does not
+include product features, these version text requirements do not apply to our
+[developer documentation](https://gitlab.com/gitlab-org/gitlab/-/tree/master/doc/development) directory.
+
 ### View older GitLab documentation versions
 
 Older versions of GitLab may no longer have documentation available from `docs.gitlab.com`.
