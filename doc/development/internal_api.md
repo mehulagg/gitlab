@@ -456,7 +456,7 @@ Called from GitLab Kubernetes Agent Server (kas) to save alert detected by Ciliu
 
 | Attribute | Type   | Required | Description |
 |:----------|:-------|:---------|:------------|
-| `alert` | Hash | yes | Alerts detail. Currently same format as [3rd party alert](https://docs.gitlab.com/ee/operations/incident_management/alert_integrations.html#customize-the-alert-payload-outside-of-gitlab) |
+| `alert` | Hash | yes | Alerts detail. Currently same format as [3rd party alert](/ee/operations/incident_management/alert_integrations.md#customize-the-alert-payload-outside-of-gitlab) |
 
 
 ```plaintext
