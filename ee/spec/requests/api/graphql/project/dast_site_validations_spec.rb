@@ -61,18 +61,40 @@ RSpec.describe 'Query.project(fullPath).dastSiteValidations' do
       project.add_developer(current_user)
     end
 
-    let(:expected_results) do
-      [
-        dast_site_validation4,
-        dast_site_validation3,
-        dast_site_validation2
-      ].map { |validation| global_id_of(validation)}
+    let(:data_path) { [:project, :dast_site_validations] }
+
+    # it 'returns a populated edges array containing the correct dast_site_validations' do
+    #   results = edges.map { |edge| edge['node']['id'] }
+
+    #   expect(results).to eq(expected_results)
+    # end
+
+    def pagination_query(arguments)
+      fields = all_graphql_fields_for('DastSiteValidation')
+
+      graphql_query_for(
+        :project,
+        { full_path: project.full_path },
+        query_nodes('dastSiteValidations', 'id', include_pagination_info: true, args: arguments)
+      )
     end
 
-    it 'returns a populated edges array containing the correct dast_site_validations' do
-      results = edges.map { |edge| edge['node']['id'] }
+    def pagination_results_data(dast_site_validations)
+      dast_site_validations.map { |issue| issue['id'] }
+    end
 
-      expect(results).to eq(expected_results)
+    it_behaves_like 'sorted paginated query' do
+      let(:sort_param) { nil }
+      let(:first_param) { 3 }
+
+      let(:expected_results) do
+        [
+          dast_site_validation4,
+          dast_site_validation3,
+          dast_site_validation2,
+          dast_site_validation1
+        ].map { |validation| global_id_of(validation)}
+      end
     end
   end
 end
