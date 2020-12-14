@@ -353,7 +353,7 @@ class NotificationService
 
     return unless issue.issue_email_participants.any?
 
-    recipients = issue.issue_email_participants.map { |participant| participant.email }
+    recipients = issue.issue_email_participants.pluck(:email)
     support_bot = User.support_bot
     recipients.delete(issue.external_author) if note.author == support_bot
 
