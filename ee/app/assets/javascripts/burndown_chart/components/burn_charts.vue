@@ -85,8 +85,8 @@ export default {
         };
       },
       update(data) {
-        const sparseBurnupData = data?.[this.parent]?.report.burnupTimeSeries || [];
-        const stats = data?.[this.parent]?.report?.stats || {};
+        const sparseBurnupData = data[this.parent]?.report.burnupTimeSeries || [];
+        const stats = data[this.parent]?.report?.stats || {};
 
         return {
           burnupData: this.padSparseBurnupData(sparseBurnupData),
@@ -121,6 +121,9 @@ export default {
     };
   },
   computed: {
+    loading() {
+      return this.$apollo.queries.report.loading;
+    },
     burnupData() {
       return this.report.burnupData;
     },
@@ -338,7 +341,7 @@ export default {
       <timebox-summary-cards
         v-if="iterationState === 'closed'"
         :columns="columns"
-        :loading="$apollo.queries.report.loading"
+        :loading="loading"
         :total="report.stats.total"
       />
       <open-timebox-summary
@@ -346,7 +349,7 @@ export default {
         :full-path="fullPath"
         :iteration-id="iterationId"
         :namespace-type="namespaceType"
-        :display-value="issuesSelected ? 'count' : 'weight'"
+        :display-value="displayValue"
       >
         <timebox-summary-cards
           slot-scope="{ columns: openColumns, loading: summaryLoading, total }"
@@ -357,7 +360,7 @@ export default {
       </open-timebox-summary>
     </template>
     <div class="row">
-      <gl-alert v-if="error" variant="danger" class="col-12" @dismiss="error = ''">
+      <gl-alert v-if="error" variant="danger" class="col-12" @dismiss="error = null">
         {{ error }}
       </gl-alert>
       <burndown-chart

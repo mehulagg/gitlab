@@ -148,7 +148,7 @@ describe('burndown_chart', () => {
     });
   });
 
-  it('renders TimeboxSummaryCards for closed iterations', async () => {
+  it('renders TimeboxSummaryCards for closed iterations', () => {
     createComponent({
       data: {
         report: {

@@ -42,7 +42,7 @@ export default {
       type: String,
       required: false,
       default: Unit.count,
-      validator: val => Object.keys(Unit).includes(val),
+      validator: val => Unit[val],
     },
   },
   data() {
