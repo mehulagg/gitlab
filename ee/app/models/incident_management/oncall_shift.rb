@@ -11,17 +11,13 @@ module IncidentManagement
     validates :participant, presence: true
     validates :starts_at, presence: true
     validates :ends_at, presence: true
-    validate :timeframes_do_not_overlap, if: :validate_timeframe?
+    validate :timeframes_do_not_overlap, if: :rotation
 
     scope :for_timeframe, -> (starts_at, ends_at) do
       where("tstzrange(starts_at, ends_at, '[)') && tstzrange(?, ?, '[)')", starts_at, ends_at)
     end
 
     private
-
-    def validate_timeframe?
-      rotation && (starts_at_changed? || ends_at_changed?)
-    end
 
     def timeframes_do_not_overlap
       return unless rotation.shifts.where.not(id: id).for_timeframe(starts_at, ends_at).exists?
