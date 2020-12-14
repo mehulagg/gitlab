@@ -246,7 +246,7 @@ module Gitlab
           added_emails = []
           existing_emails = quick_action_target.email_participants_downcase
 
-          emails.split(' ').each do |email|
+          emails.split(' ') do |email|
             unless existing_emails.include?(email.downcase)
               new_participant = quick_action_target.issue_email_participants.create(email: email)
               added_emails << email if new_participant.persisted?
