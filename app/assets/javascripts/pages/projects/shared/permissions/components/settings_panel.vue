@@ -139,6 +139,7 @@ export default {
       pagesAccessLevel: featureAccessLevel.EVERYONE,
       metricsDashboardAccessLevel: featureAccessLevel.PROJECT_MEMBERS,
       requirementsAccessLevel: featureAccessLevel.EVERYONE,
+      operationsAccessLevel: featureAccessLevel.EVERYONE,
       containerRegistryEnabled: true,
       lfsEnabled: true,
       requestAccessEnabled: true,
@@ -245,6 +246,10 @@ export default {
           featureAccessLevel.PROJECT_MEMBERS,
           this.requirementsAccessLevel,
         );
+        this.operationsAccessLevel = Math.min(
+          featureAccessLevel.PROJECT_MEMBERS,
+          this.operationsAccessLevel,
+        );
         if (this.pagesAccessLevel === featureAccessLevel.EVERYONE) {
           // When from Internal->Private narrow access for only members
           this.pagesAccessLevel = featureAccessLevel.PROJECT_MEMBERS;
@@ -270,6 +275,8 @@ export default {
           this.metricsDashboardAccessLevel = featureAccessLevel.EVERYONE;
         if (this.requirementsAccessLevel === featureAccessLevel.PROJECT_MEMBERS)
           this.requirementsAccessLevel = featureAccessLevel.EVERYONE;
+        if (this.operationsAccessLevel === featureAccessLevel.PROJECT_MEMBERS)
+          this.operationsAccessLevel = featureAccessLevel.EVERYONE;
 
         this.highlightChanges();
       }
@@ -494,6 +501,17 @@ export default {
           />
         </project-setting-row>
       </div>
+      <project-setting-row
+        ref="operations-settings"
+        :label="s__('ProjectSettings|Operations')"
+        :help-text="s__('ProjectSettings|Metrics, logs, error tracking and more')"
+      >
+        <project-feature-setting
+          v-model="operationsAccessLevel"
+          :options="featureAccessLevelOptions"
+          name="project[project_feature_attributes][operations_access_level]"
+        />
+      </project-setting-row>
       <project-setting-row
         v-if="requirementsAvailable"
         ref="requirements-settings"

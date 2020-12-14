@@ -20,6 +20,7 @@ const defaultProps = {
     buildsAccessLevel: 20,
     wikiAccessLevel: 20,
     snippetsAccessLevel: 20,
+    operationsAccessLevel: 20,
     pagesAccessLevel: 10,
     containerRegistryEnabled: true,
     lfsEnabled: true,
@@ -78,6 +79,8 @@ describe('Settings Panel', () => {
   const findRepositoryFeatureProjectRow = () => wrapper.find({ ref: 'repository-settings' });
   const findRepositoryFeatureSetting = () =>
     findRepositoryFeatureProjectRow().find(projectFeatureSetting);
+
+  const findOperationsRow = () => wrapper.find({ ref: 'operations-settings' });
 
   beforeEach(() => {
     wrapper = mountComponent();
@@ -554,6 +557,14 @@ describe('Settings Panel', () => {
         await wrapper.vm.$nextTick();
 
         expect(wrapper.find({ ref: 'allow-editing-commit-messages' }).exists()).toBe(true);
+      });
+    });
+  });
+
+  describe('Operations', () => {
+    it('should show the operations toggle', () => {
+      return wrapper.vm.$nextTick(() => {
+        expect(findOperationsRow().exists()).toBe(true);
       });
     });
   });
