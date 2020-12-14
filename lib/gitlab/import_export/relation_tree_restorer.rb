@@ -157,6 +157,8 @@ module Gitlab
 
         relation = @relation_factory.create(relation_factory_params(relation_key, data_hash))
 
+        relation.validate! # TODO: remove
+
         if relation && !relation.valid?
           @shared.logger.warn(
             message: "[Project/Group Import] Invalid object relation built",
