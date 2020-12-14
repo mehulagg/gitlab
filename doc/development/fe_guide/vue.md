@@ -231,6 +231,7 @@ Here's an example of a well structured unit test for [this Vue component](#appen
 
 ```javascript
 import { shallowMount } from '@vue/test-utils';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import { GlLoadingIcon } from '@gitlab/ui';
 import MockAdapter from 'axios-mock-adapter';
 import axios from '~/lib/utils/axios_utils';
@@ -265,17 +266,19 @@ describe('~/todos/app.vue', () => {
   // It is very helpful to separate setting up the component from
   // its collaborators (i.e. Vuex, axios, etc.)
   const createWrapper = (props = {}) => {
-    wrapper = shallowMount(App, {
-      propsData: {
-        path: TEST_TODO_PATH,
-        ...props,
-      },
-    });
+    wrapper = extendedWrapper(
+      shallowMount(App, {
+        propsData: {
+          path: TEST_TODO_PATH,
+          ...props,
+        },
+      })
+    );
   };
   // Helper methods greatly help test maintainability and readability.
   const findLoader = () => wrapper.find(GlLoadingIcon);
-  const findAddButton = () => wrapper.find('[data-testid="add-button"]');
-  const findTextInput = () => wrapper.find('[data-testid="text-input"]');
+  const findAddButton = () => wrapper.findByTestId('add-button');
+  const findTextInput = () => wrapper.findByTestId('text-input');
   const findTodoData = () => wrapper.findAll('[data-testid="todo-item"]').wrappers.map(wrapper => ({ text: wrapper.text() }));
 
   describe('when mounted and loading', () => {
@@ -322,6 +325,16 @@ describe('~/todos/app.vue', () => {
 
 The main return value of a Vue component is the rendered output. In order to test the component we
 need to test the rendered output. Visit the [Vue testing guide](https://vuejs.org/v2/guide/testing.html#Unit-Testing).
+
+### Child components
+
+1. Test any rendering functions we call **on** child components (i.e. `v-if`, `v-for` etc). Note: **on** child components, and **not** inside of child components.
+
+1. Test any props we are passing to child components (especially if the prop calculated in your component under the test, with the `computed` property, for example). Remember to use `.props()` and not `.vm.someProp`.
+
+1. Test we react correctly to any events emitted from child components.
+
+1. **Do not** test the output of the child components.
 
 ### Events
 

@@ -591,6 +591,21 @@ the mounting function (`mount` or `shallowMount`) to be used to mount the compon
     function createComponent({ mountFn = shallowMount } = {}) { }
     ```
 
+1. If you find yourself calling `wrapper.find('[data-testid="some-testid"]')` you may
+want to consider using `extendedWrapper`, this exposes `wrapper.findByTestId()` which can
+be used to find an element:
+
+    ```javascript
+    import { shallowMount } from '@vue/test-utils';
+    import { extendedWrapper } from 'helpers/vue_test_utils_helper';
+    import { SomeComponent } from 'components/some_component.vue';
+
+    let wrapper;
+
+    const createWrapper = () => { wrapper = extendedWrapper(shallowMount(SomeComponent)); };
+    const someButton = () => wrapper.findByTestId('someButton');
+    ```
+
 ### Setting component state
 
 1. Avoid using [`setProps`](https://vue-test-utils.vuejs.org/api/wrapper/#setprops) to set
@@ -614,7 +629,7 @@ component state wherever possible. Instead, set the component's
 
 ### Accessing component state
 
-1. When accessing props or attributes, prefer the `wrapper.props('myProp')` syntax over `wrapper.props().myProp`:
+1. When accessing props or attributes, prefer the `wrapper.props('myProp')` syntax over `wrapper.props().myProp` or `wrapper.vm.myProp`:
 
     ```javascript
     // good
