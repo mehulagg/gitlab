@@ -76,8 +76,6 @@ export const receiveVulnerabilitiesError = ({ commit }, errorCode) => {
 };
 
 export const setModalData = ({ commit }, payload = {}) => {
-  // $('#modal-mrwidget-security-issue').modal('show');
-
   commit(types.SET_MODAL_DATA, payload);
 };
 
