@@ -19,9 +19,9 @@ import {
   SEARCH_PLACEHOLDER_TEXT,
 } from '~/registry/explorer/constants';
 
-import getProjectContainerRepositories from '~/registry/explorer/graphql/queries/get_project_container_repositories.graphql';
-import getGroupContainerRepositories from '~/registry/explorer/graphql/queries/get_group_container_repositories.graphql';
-import deleteContainerRepository from '~/registry/explorer/graphql/mutations/delete_container_repository.graphql';
+import getProjectContainerRepositories from '~/registry/explorer/graphql/queries/get_project_container_repositories.query.graphql';
+import getGroupContainerRepositories from '~/registry/explorer/graphql/queries/get_group_container_repositories.query.graphql';
+import deleteContainerRepository from '~/registry/explorer/graphql/mutations/delete_container_repository.mutation.graphql';
 
 import {
   graphQLImageListMock,

@@ -18,9 +18,9 @@ import RegistryHeader from '../components/list_page/registry_header.vue';
 import ImageList from '../components/list_page/image_list.vue';
 import CliCommands from '../components/list_page/cli_commands.vue';
 
-import getProjectContainerRepositories from '../graphql/queries/get_project_container_repositories.graphql';
-import getGroupContainerRepositories from '../graphql/queries/get_group_container_repositories.graphql';
-import deleteContainerRepository from '../graphql/mutations/delete_container_repository.graphql';
+import getProjectContainerRepositories from '../graphql/queries/get_project_container_repositories.query.graphql';
+import getGroupContainerRepositories from '../graphql/queries/get_group_container_repositories.query.graphql';
+import deleteContainerRepository from '../graphql/mutations/delete_container_repository.mutation.graphql';
 
 import {
   DELETE_IMAGE_SUCCESS_MESSAGE,
