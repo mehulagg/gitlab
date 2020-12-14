@@ -38,6 +38,12 @@ export default {
   directives: {
     GlTooltip: GlTooltipDirective,
   },
+  props: {
+    filters: {
+      type: Object,
+      required: true,
+    },
+  },
   inject: ['documentationPath', 'projectPath'],
   apollo: {
     alerts: {
@@ -47,6 +53,7 @@ export default {
           firstPageSize: this.$options.PAGE_SIZE,
           projectPath: this.projectPath,
           sort: this.sort,
+          ...this.filters,
         };
       },
       update: ({ project }) => project?.alertManagementAlerts.nodes || [],

@@ -2,6 +2,7 @@ import { GlIntersectionObserver, GlSkeletonLoading } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
 import AlertsList from 'ee/threat_monitoring/components/alerts/alerts_list.vue';
 import AlertStatus from 'ee/threat_monitoring/components/alerts/alert_status.vue';
+import { DEFAULT_FILTERS } from 'ee/threat_monitoring/components/alerts/constants';
 import { mockAlerts } from '../../mock_data';
 
 const alerts = mockAlerts;
@@ -25,6 +26,7 @@ describe('AlertsList component', () => {
       },
     },
   };
+  const defaultProps = { filters: DEFAULT_FILTERS };
 
   const findUnconfiguredAlert = () => wrapper.find("[data-testid='threat-alerts-unconfigured']");
   const findErrorAlert = () => wrapper.find("[data-testid='threat-alerts-error']");
@@ -43,6 +45,7 @@ describe('AlertsList component', () => {
       mocks: {
         $apollo,
       },
+      propsData: defaultProps,
       provide: {
         documentationPath: '#',
         projectPath: '#',
