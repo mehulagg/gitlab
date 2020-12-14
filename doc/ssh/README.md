@@ -44,7 +44,7 @@ GitLab supports the use of RSA, DSA, ECDSA, and ED25519 keys.
 - GitLab has [deprecated](https://about.gitlab.com/releases/2018/06/22/gitlab-11-0-released/#support-for-dsa-ssh-keys) DSA keys in GitLab 11.0.
 - As noted in [Practical Cryptography With Go](https://leanpub.com/gocrypto/read#leanpub-auto-ecdsa), the security issues related to DSA also apply to ECDSA.
 
-TIP: **Tip:**
+NOTE:
 Available documentation suggests that ED25519 is more secure. If you use an RSA key, the US National Institute of Science and Technology in [Publication 800-57 Part 3 (PDF)](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-57Pt3r1.pdf) recommends a key size of at least 2048 bits.
 
 Therefore, our documentation focuses on the use of ED25519 and RSA keys.
@@ -215,7 +215,7 @@ Now you can copy the SSH key you created to your GitLab account. To do so, follo
 
    If you're using an RSA key, substitute accordingly.
 
-1. Navigate to `https://gitlab.com` and sign in.
+1. Navigate to `https://gitlab.com` or your local GitLab instance URL and sign in.
 1. Select your avatar in the upper right corner, and click **Settings**
 1. Click **SSH Keys**.
 1. Paste the public key that you copied into the **Key** text box.
@@ -232,10 +232,16 @@ NOTE:
 If you manually copied your public SSH key make sure you copied the entire
 key starting with `ssh-ed25519` (or `ssh-rsa`) and ending with your email address.
 
+## Two-factor Authentication (2FA)
+
+You can set up two-factor authentication (2FA) for
+[Git over SSH](../security/two_factor_authentication.md#two-factor-authentication-2fa-for-git-over-ssh-operations).
+
 ## Testing that everything is set up correctly
 
-To test whether your SSH key was added correctly, run the following command in
-your terminal (replacing `gitlab.com` with your GitLab's instance domain):
+To test whether your SSH key was added correctly, run the following
+command in your terminal (replace `gitlab.com` with the domain of
+your GitLab instance):
 
 ```shell
 ssh -T git@gitlab.com
@@ -260,8 +266,8 @@ section to make sure you're connecting to the correct server. For example, you c
 the ECDSA key fingerprint shown above in the linked section.
 
 Once added to the list of known hosts, you should validate the
-authenticity of GitLab's host again. Run the above command once more, and
-you should only receive a _Welcome to GitLab, `@username`!_ message.
+authenticity of the GitLab host, once again. Run the above command
+again, and you should receive a _Welcome to GitLab, `@username`!_ message.
 
 If the welcome message doesn't appear, you can troubleshoot the problem by running `ssh`
 in verbose mode with the following command:

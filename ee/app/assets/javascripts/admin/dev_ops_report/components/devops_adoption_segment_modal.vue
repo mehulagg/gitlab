@@ -6,10 +6,12 @@ import {
   GlModal,
   GlSprintf,
   GlAlert,
+  GlIcon,
 } from '@gitlab/ui';
-import { convertToGraphQLIds, TYPE_GROUP } from '~/graphql_shared/utils';
+import { getIdFromGraphQLId, convertToGraphQLIds, TYPE_GROUP } from '~/graphql_shared/utils';
 import * as Sentry from '~/sentry/wrapper';
 import createDevopsAdoptionSegmentMutation from '../graphql/mutations/create_devops_adoption_segment.mutation.graphql';
+import updateDevopsAdoptionSegmentMutation from '../graphql/mutations/update_devops_adoption_segment.mutation.graphql';
 import { DEVOPS_ADOPTION_STRINGS, DEVOPS_ADOPTION_SEGMENT_MODAL_ID } from '../constants';
 import { addSegmentToCache } from '../utils/cache_updates';
 
@@ -22,10 +24,11 @@ export default {
     GlFormCheckboxTree,
     GlSprintf,
     GlAlert,
+    GlIcon,
   },
   props: {
-    segmentId: {
-      type: String,
+    segment: {
+      type: Object,
       required: false,
       default: null,
     },
@@ -37,8 +40,9 @@ export default {
   i18n: DEVOPS_ADOPTION_STRINGS.modal,
   data() {
     return {
-      name: '',
-      checkboxValues: [],
+      name: this.segment?.name || '',
+      checkboxValues: this.segment ? this.checkboxValuesFromSegment() : [],
+      filter: '',
       loading: false,
       errors: [],
     };
@@ -55,14 +59,17 @@ export default {
     },
     primaryOptions() {
       return {
-        text: this.$options.i18n.button,
-        attributes: [
-          {
-            variant: 'info',
-            loading: this.loading,
-            disabled: !this.canSubmit,
-          },
-        ],
+        button: {
+          text: this.segment ? this.$options.i18n.editingButton : this.$options.i18n.addingButton,
+          attributes: [
+            {
+              variant: 'info',
+              loading: this.loading,
+              disabled: !this.canSubmit,
+            },
+          ],
+        },
+        callback: this.segment ? this.updateSegment : this.createSegment,
       };
     },
     canSubmit() {
@@ -70,6 +77,16 @@ export default {
     },
     displayError() {
       return this.errors[0];
+    },
+    modalTitle() {
+      return this.segment ? this.$options.i18n.editingTitle : this.$options.i18n.addingTitle;
+    },
+    filteredOptions() {
+      return this.filter
+        ? this.checkboxOptions.filter(option =>
+            option.label.toLowerCase().includes(this.filter.toLowerCase()),
+          )
+        : this.checkboxOptions;
     },
   },
   methods: {
@@ -98,10 +115,35 @@ export default {
         if (errors.length) {
           this.errors = errors;
         } else {
-          this.name = '';
-          this.checkboxValues = [];
+          this.closeModal();
+        }
+      } catch (error) {
+        this.errors.push(this.$options.i18n.error);
+        Sentry.captureException(error);
+      } finally {
+        this.loading = false;
+      }
+    },
+    async updateSegment() {
+      try {
+        this.loading = true;
+        const {
+          data: {
+            updateDevopsAdoptionSegment: { errors },
+          },
+        } = await this.$apollo.mutate({
+          mutation: updateDevopsAdoptionSegmentMutation,
+          variables: {
+            id: this.segment.id,
+            name: this.name,
+            groupIds: convertToGraphQLIds(TYPE_GROUP, this.checkboxValues),
+          },
+        });
 
-          this.$refs.modal.hide();
+        if (errors.length) {
+          this.errors = errors;
+        } else {
+          this.closeModal();
         }
       } catch (error) {
         this.errors.push(this.$options.i18n.error);
@@ -113,6 +155,12 @@ export default {
     clearErrors() {
       this.errors = [];
     },
+    closeModal() {
+      this.$refs.modal.hide();
+    },
+    checkboxValuesFromSegment() {
+      return this.segment.groups.map(({ id }) => getIdFromGraphQLId(id));
+    },
   },
   devopsSegmentModalId: DEVOPS_ADOPTION_SEGMENT_MODAL_ID,
 };
@@ -121,12 +169,12 @@ export default {
   <gl-modal
     ref="modal"
     :modal-id="$options.devopsSegmentModalId"
-    :title="$options.i18n.title"
+    :title="modalTitle"
     size="sm"
     scrollable
-    :action-primary="primaryOptions"
+    :action-primary="primaryOptions.button"
     :action-cancel="cancelOptions"
-    @primary.prevent="createSegment"
+    @primary.prevent="primaryOptions.callback"
   >
     <gl-alert v-if="errors.length" variant="danger" class="gl-mb-3" @dismiss="clearErrors">
       {{ displayError }}
@@ -142,15 +190,30 @@ export default {
         :disabled="loading"
       />
     </gl-form-group>
+    <gl-form-group class="gl-mb-3" data-testid="filter">
+      <gl-icon name="search" :size="18" class="gl-text-gray-300 gl-absolute gl-mt-3 gl-ml-3" />
+      <gl-form-input
+        v-model="filter"
+        class="gl-pl-7!"
+        type="text"
+        :placeholder="$options.i18n.filterPlaceholder"
+        :disabled="loading"
+      />
+    </gl-form-group>
     <gl-form-group class="gl-mb-0">
       <gl-form-checkbox-tree
+        v-if="filteredOptions.length"
+        :key="filteredOptions.length"
         v-model="checkboxValues"
         data-testid="groups"
-        :options="checkboxOptions"
+        :options="filteredOptions"
         :hide-toggle-all="true"
         :disabled="loading"
         class="gl-p-3 gl-pb-0 gl-mb-2 gl-border-1 gl-border-solid gl-border-gray-100 gl-rounded-base"
       />
+      <gl-alert v-else variant="info" :dismissible="false" data-testid="filter-warning">
+        {{ $options.i18n.noResults }}
+      </gl-alert>
       <div class="gl-text-gray-400" data-testid="groupsHelperText">
         <gl-sprintf
           :message="

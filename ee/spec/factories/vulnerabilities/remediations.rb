@@ -2,6 +2,7 @@
 
 FactoryBot.define do
   factory :vulnerabilities_remediation, class: 'Vulnerabilities::Remediation' do
+    project
     summary { 'Remediation Summary' }
     file { Tempfile.new }
 

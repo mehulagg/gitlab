@@ -57,8 +57,8 @@ export default {
       )
     }}</template>
     <template #new-profile>{{ s__('OnDemandScans|Create a new scanner profile') }}</template>
-    <template #summary="{ profile }">
-      <slot name="summary" :profile="profile"></slot>
+    <template #summary>
+      <slot name="summary"></slot>
     </template>
   </profile-selector>
 </template>

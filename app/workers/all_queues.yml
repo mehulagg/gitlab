@@ -877,15 +877,23 @@
   :tags: []
 - :name: jira_connect:jira_connect_sync_branch
   :feature_category: :integrations
-  :has_external_dependencies:
+  :has_external_dependencies: true
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
   :idempotent:
   :tags: []
+- :name: jira_connect:jira_connect_sync_builds
+  :feature_category: :integrations
+  :has_external_dependencies: true
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
 - :name: jira_connect:jira_connect_sync_merge_request
   :feature_category: :integrations
-  :has_external_dependencies:
+  :has_external_dependencies: true
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
@@ -1086,6 +1094,14 @@
   :idempotent: true
   :tags: []
 - :name: pipeline_background:ci_ref_delete_unlock_artifacts
+  :feature_category: :continuous_integration
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
+- :name: pipeline_background:ci_test_failure_history
   :feature_category: :continuous_integration
   :has_external_dependencies:
   :urgency: :low
@@ -1368,6 +1384,14 @@
   :weight: 1
   :idempotent: true
   :tags: []
+- :name: approve_blocked_pending_approval_users
+  :feature_category: :users
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
 - :name: authorized_keys
   :feature_category: :source_code_management
   :has_external_dependencies:
@@ -1609,6 +1633,14 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent:
+  :tags: []
+- :name: gitlab_performance_bar_stats
+  :feature_category: :metrics
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
   :tags: []
 - :name: gitlab_shell
   :feature_category: :source_code_management

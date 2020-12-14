@@ -1,9 +1,16 @@
 import { s__ } from '~/locale';
 
+/*
+  Update the counterparts in roadmap.scss when making changes.
+*/
+
+// Counterpart: $details-cell-width in roadmap.scss
 export const EPIC_DETAILS_CELL_WIDTH = 320;
 
+// Counterpart: $item-height in roadmap.scss
 export const EPIC_ITEM_HEIGHT = 50;
 
+// Counterpart: $timeline-cell-width in roadmap.scss
 export const TIMELINE_CELL_MIN_WIDTH = 180;
 
 export const SCROLL_BAR_SIZE = 16;

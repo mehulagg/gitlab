@@ -114,7 +114,8 @@ export const fetchDiffFilesBatch = ({ commit, state, dispatch }) => {
         }
 
         if (
-          (diffsGradualLoad && totalLoaded === pagination.total_pages) ||
+          (diffsGradualLoad &&
+            (totalLoaded === pagination.total_pages || pagination.total_pages === null)) ||
           (!diffsGradualLoad && !pagination.next_page)
         ) {
           commit(types.SET_RETRIEVING_BATCHES, false);
@@ -184,11 +185,11 @@ export const fetchDiffFilesMeta = ({ commit, state }) => {
     .get(mergeUrlParams(urlParams, state.endpointMetadata))
     .then(({ data }) => {
       const strippedData = { ...data };
-
       delete strippedData.diff_files;
+
       commit(types.SET_LOADING, false);
       commit(types.SET_MERGE_REQUEST_DIFFS, data.merge_request_diffs || []);
-      commit(types.SET_DIFF_DATA, strippedData);
+      commit(types.SET_DIFF_METADATA, strippedData);
 
       worker.postMessage(prepareDiffData(data, state.diffFiles));
 

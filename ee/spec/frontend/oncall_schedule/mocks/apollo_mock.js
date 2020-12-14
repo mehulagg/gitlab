@@ -22,10 +22,13 @@ export const getOncallSchedulesQueryResponse = {
       incidentManagementOncallSchedules: {
         nodes: [
           {
+            __typename: 'IncidentManagementOncallSchedule',
             iid: '37',
             name: 'Test schedule',
             description: 'Description 1 lives here',
-            timezone: 'Pacific/Honolulu',
+            timezone: {
+              identifier: 'Pacific/Honolulu',
+            },
           },
         ],
       },
@@ -33,18 +36,12 @@ export const getOncallSchedulesQueryResponse = {
   },
 };
 
-export const scheduleToDestroy = {
-  iid: '37',
-  name: 'Test schedule',
-  description: 'Description 1 lives here',
-  timezone: 'Pacific/Honolulu',
-};
-
 export const destroyScheduleResponse = {
   data: {
     oncallScheduleDestroy: {
       errors: [],
       oncallSchedule: {
+        __typename: 'IncidentManagementOncallSchedule',
         iid: '37',
         name: 'Test schedule',
         description: 'Description 1 lives here',
@@ -59,6 +56,7 @@ export const destroyScheduleResponseWithErrors = {
     oncallScheduleDestroy: {
       errors: ['Houston, we have a problem'],
       oncallSchedule: {
+        __typename: 'IncidentManagementOncallSchedule',
         iid: '37',
         name: 'Test schedule',
         description: 'Description 1 lives here',
@@ -70,9 +68,10 @@ export const destroyScheduleResponseWithErrors = {
 
 export const updateScheduleResponse = {
   data: {
-    oncallScheduleDestroy: {
+    oncallScheduleUpdate: {
       errors: [],
       oncallSchedule: {
+        __typename: 'IncidentManagementOncallSchedule',
         iid: '37',
         name: 'Test schedule 2',
         description: 'Description 2 lives here',
@@ -80,4 +79,33 @@ export const updateScheduleResponse = {
       },
     },
   },
+};
+
+export const updateScheduleResponseWithErrors = {
+  data: {
+    oncallScheduleUpdate: {
+      errors: ['Houston, we have a problem'],
+      oncallSchedule: {
+        __typename: 'IncidentManagementOncallSchedule',
+        iid: '37',
+        name: 'Test schedule 2',
+        description: 'Description 2 lives here',
+        timezone: 'Pacific/Honolulu',
+      },
+    },
+  },
+};
+
+export const preExistingSchedule = {
+  description: 'description',
+  iid: '1',
+  name: 'Monitor rotations',
+  timezone: 'Pacific/Honolulu',
+};
+
+export const newlyCreatedSchedule = {
+  description: 'description',
+  iid: '2',
+  name: 'S-Monitor rotations',
+  timezone: 'Kyiv/EST',
 };

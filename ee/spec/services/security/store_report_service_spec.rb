@@ -25,11 +25,17 @@ RSpec.describe Security::StoreReportService, '#execute' do
 
   before do
     stub_licensed_features(sast: true, dependency_scanning: true, container_scanning: true, security_dashboard: true)
+    allow(Security::AutoFixWorker).to receive(:perform_async)
   end
 
   subject { described_class.new(pipeline, report).execute }
 
   context 'without existing data' do
+    before(:all) do
+      checksum = 'f00bc6261fa512f0960b7fc3bfcce7fb31997cf32b96fa647bed5668b2c77fee'
+      create(:vulnerabilities_remediation, checksum: checksum)
+    end
+
     before do
       project.add_developer(user)
       allow(pipeline).to receive(:user).and_return(user)
@@ -66,7 +72,7 @@ RSpec.describe Security::StoreReportService, '#execute' do
       end
 
       it 'inserts all remediations' do
-        expect { subject }.to change { Vulnerabilities::Remediation.count }.by(remediations)
+        expect { subject }.to change { project.vulnerability_remediations.count }.by(remediations)
       end
 
       it 'inserts all vulnerabilties' do
@@ -216,6 +222,76 @@ RSpec.describe Security::StoreReportService, '#execute' do
         status: :error,
         message: "sast report already stored for this pipeline, skipping..."
       })
+    end
+  end
+
+  context 'start auto_fix' do
+    before do
+      stub_licensed_features(vulnerability_auto_fix: true)
+    end
+
+    context 'with auto fix supported report type' do
+      let(:trait) { :dependency_scanning }
+
+      context 'when auto fix enabled' do
+        it 'start auto fix worker' do
+          expect(Security::AutoFixWorker).to receive(:perform_async).with(pipeline.id)
+
+          subject
+        end
+      end
+
+      context 'when auto fix disabled' do
+        context 'when feature flag is disabled' do
+          before do
+            stub_feature_flags(security_auto_fix: false)
+          end
+
+          it 'does not start auto fix worker' do
+            expect(Security::AutoFixWorker).not_to receive(:perform_async)
+
+            subject
+          end
+        end
+
+        context 'when auto fix feature is disabled' do
+          before do
+            project.security_setting.update!(auto_fix_dependency_scanning: false)
+          end
+
+          it 'does not start auto fix worker' do
+            expect(Security::AutoFixWorker).not_to receive(:perform_async)
+
+            subject
+          end
+        end
+
+        context 'when licensed feature is unavailable' do
+          before do
+            stub_licensed_features(vulnerability_auto_fix: false)
+          end
+
+          it 'does not start auto fix worker' do
+            expect(Security::AutoFixWorker).not_to receive(:perform_async)
+
+            subject
+          end
+        end
+      end
+    end
+
+    context 'with auto fix not supported report type' do
+      let(:trait) { :sast }
+
+      before do
+        stub_licensed_features(vulnerability_auto_fix: true)
+      end
+
+      it 'does not start auto fix worker' do
+        expect(Security::AutoFixWorker).not_to receive(:perform_async)
+
+        subject
+      end
     end
   end
 end

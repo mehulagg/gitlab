@@ -10,10 +10,63 @@ RSpec.describe Ci::Minutes::Quota do
 
   let(:quota) { described_class.new(namespace) }
 
+  describe '#enabled?' do
+    let_it_be(:project) { create(:project, namespace: namespace) }
+
+    subject { quota.enabled? }
+
+    context 'when namespace is root' do
+      context 'when namespace has any project with shared runners enabled' do
+        before do
+          project.update!(shared_runners_enabled: true)
+        end
+
+        context 'when namespace has minutes limit' do
+          before do
+            allow(namespace).to receive(:shared_runners_minutes_limit).and_return(1000)
+          end
+
+          it { is_expected.to be_truthy }
+        end
+
+        context 'when namespace has unlimited minutes' do
+          before do
+            allow(namespace).to receive(:shared_runners_minutes_limit).and_return(0)
+          end
+
+          it { is_expected.to be_falsey }
+        end
+      end
+
+      context 'when namespace does not have projects with shared runners enabled' do
+        before do
+          project.update!(shared_runners_enabled: false)
+          allow(namespace).to receive(:shared_runners_minutes_limit).and_return(1000)
+        end
+
+        it { is_expected.to be_falsey }
+      end
+    end
+
+    context 'when namespace is not root' do
+      let(:parent) { create(:group) }
+      let!(:namespace) { create(:group, parent: parent) }
+      let!(:project) { create(:project, namespace: namespace, shared_runners_enabled: false) }
+
+      before do
+        namespace.update!(parent: parent)
+        project.update!(shared_runners_enabled: false)
+        allow(namespace).to receive(:shared_runners_minutes_limit).and_return(1000)
+      end
+
+      it { is_expected.to be_falsey }
+    end
+  end
+
   describe '#monthly_minutes_report' do
     context 'when unlimited' do
       before do
-        allow(namespace).to receive(:shared_runners_minutes_limit_enabled?).and_return(false)
+        allow(quota).to receive(:enabled?).and_return(false)
       end
 
       context 'when minutes are not used' do
@@ -43,7 +96,7 @@ RSpec.describe Ci::Minutes::Quota do
 
     context 'when limited' do
       before do
-        allow(namespace).to receive(:shared_runners_minutes_limit_enabled?).and_return(true)
+        allow(quota).to receive(:enabled?).and_return(true)
         namespace.shared_runners_minutes_limit = 100
       end
 
@@ -80,7 +133,7 @@ RSpec.describe Ci::Minutes::Quota do
   describe '#purchased_minutes_report' do
     context 'when limit enabled' do
       before do
-        allow(namespace).to receive(:shared_runners_minutes_limit_enabled?).and_return(true)
+        allow(quota).to receive(:enabled?).and_return(true)
         namespace.shared_runners_minutes_limit = 200
       end
 
@@ -186,7 +239,7 @@ RSpec.describe Ci::Minutes::Quota do
 
     with_them do
       before do
-        allow(namespace).to receive(:shared_runners_minutes_limit_enabled?).and_return(limit_enabled)
+        allow(quota).to receive(:enabled?).and_return(limit_enabled)
         namespace.shared_runners_minutes_limit = monthly_limit
         namespace.extra_shared_runners_minutes_limit = purchased_limit
         namespace.namespace_statistics.shared_runners_seconds = minutes_used.minutes
@@ -216,7 +269,7 @@ RSpec.describe Ci::Minutes::Quota do
 
     with_them do
       before do
-        allow(namespace).to receive(:shared_runners_minutes_limit_enabled?).and_return(limit_enabled)
+        allow(quota).to receive(:enabled?).and_return(limit_enabled)
         namespace.shared_runners_minutes_limit = monthly_limit
         namespace.extra_shared_runners_minutes_limit = purchased_limit
         namespace.namespace_statistics.shared_runners_seconds = minutes_used.minutes
@@ -246,10 +299,32 @@ RSpec.describe Ci::Minutes::Quota do
 
     with_them do
       before do
-        allow(namespace).to receive(:shared_runners_minutes_limit_enabled?).and_return(limit_enabled)
+        allow(quota).to receive(:enabled?).and_return(limit_enabled)
         namespace.shared_runners_minutes_limit = monthly_limit
         namespace.extra_shared_runners_minutes_limit = purchased_limit
         namespace.namespace_statistics.shared_runners_seconds = minutes_used.minutes
+      end
+
+      it { is_expected.to eq(result) }
+    end
+  end
+
+  describe '#total_minutes' do
+    subject { quota.total_minutes }
+
+    where(:namespace_monthly_limit, :application_monthly_limit, :purchased_minutes, :result) do
+      20  | 100 | 30 | 50
+      nil | 100 | 30 | 130
+      20  | 100 | 0  | 20
+      0   | 0   | 30 | 30
+      nil | 0   | 30 | 30
+    end
+
+    with_them do
+      before do
+        namespace.shared_runners_minutes_limit = namespace_monthly_limit
+        allow(::Gitlab::CurrentSettings).to receive(:shared_runners_minutes).and_return(application_monthly_limit)
+        allow(namespace).to receive(:extra_shared_runners_minutes_limit).and_return(purchased_minutes)
       end
 
       it { is_expected.to eq(result) }

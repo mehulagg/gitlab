@@ -10,7 +10,7 @@ import { GlAlert, GlFormGroup, GlModal, GlSkeletonLoader } from '@gitlab/ui';
 import DastSiteValidationModal from 'ee/security_configuration/dast_site_validation/components/dast_site_validation_modal.vue';
 import * as responses from '../mock_data/apollo_mock';
 import download from '~/lib/utils/downloader';
-import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
+import ModalCopyButton from '~/vue_shared/components/modal_copy_button.vue';
 
 jest.mock('~/lib/utils/downloader');
 
@@ -273,7 +273,7 @@ describe('DastSiteValidationModal', () => {
       });
 
       it('shows a button that copies the http-header to the clipboard', () => {
-        const clipboardButton = wrapper.find(ClipboardButton);
+        const clipboardButton = wrapper.find(ModalCopyButton);
 
         expect(clipboardButton.exists()).toBe(true);
         expect(clipboardButton.props()).toMatchObject({

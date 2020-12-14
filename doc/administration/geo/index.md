@@ -201,7 +201,7 @@ For information on how to update your Geo nodes to the latest GitLab version, se
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/35913) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.2.
 
-DANGER: **Warning:**
+WARNING:
 In GitLab 13.2 and 13.3, promoting a secondary node to a primary while the
 secondary is paused fails. Do not pause replication before promoting a
 secondary. If the node is paused, be sure to resume before promoting. This
@@ -256,6 +256,16 @@ For more information on tuning Geo, see [Tuning Geo](replication/tuning.md).
 ### Set up a location-aware Git URL
 
 For an example of how to set up a location-aware Git remote URL with AWS Route53, see [Location-aware Git remote URL with AWS Route53](replication/location_aware_git_url.md).
+
+### Backfill
+
+Once a **secondary** node is set up, it will start replicating missing data from
+the **primary** node in a process known as **backfill**. You can monitor the
+synchronization process on each Geo node from the **primary** node's **Geo Nodes**
+dashboard in your browser.
+
+Failures that happen during a backfill are scheduled to be retried at the end
+of the backfill.
 
 ## Remove Geo node
 

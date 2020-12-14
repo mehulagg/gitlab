@@ -1,6 +1,13 @@
 <script>
 import dateformat from 'dateformat';
-import { GlLoadingIcon, GlButton, GlSprintf, GlAlert, GlModalDirective } from '@gitlab/ui';
+import {
+  GlLoadingIcon,
+  GlButton,
+  GlSprintf,
+  GlAlert,
+  GlModalDirective,
+  GlTooltipDirective,
+} from '@gitlab/ui';
 import * as Sentry from '~/sentry/wrapper';
 import getGroupsQuery from '../graphql/queries/get_groups.query.graphql';
 import devopsAdoptionSegmentsQuery from '../graphql/queries/devops_adoption_segments.query.graphql';
@@ -11,6 +18,7 @@ import {
   DEVOPS_ADOPTION_STRINGS,
   DEVOPS_ADOPTION_ERROR_KEYS,
   MAX_REQUEST_COUNT,
+  MAX_SEGMENTS,
   DATE_TIME_FORMAT,
   DEVOPS_ADOPTION_SEGMENT_MODAL_ID,
 } from '../constants';
@@ -28,16 +36,18 @@ export default {
   },
   directives: {
     GlModal: GlModalDirective,
+    GlTooltip: GlTooltipDirective,
   },
   i18n: {
     ...DEVOPS_ADOPTION_STRINGS.app,
   },
+  maxSegments: MAX_SEGMENTS,
   devopsSegmentModalId: DEVOPS_ADOPTION_SEGMENT_MODAL_ID,
   data() {
     return {
       isLoadingGroups: false,
       requestCount: 0,
-      selectedSegmentId: null,
+      selectedSegment: null,
       errors: {
         [DEVOPS_ADOPTION_ERROR_KEYS.groups]: false,
         [DEVOPS_ADOPTION_ERROR_KEYS.segments]: false,
@@ -75,6 +85,15 @@ export default {
     isLoading() {
       return this.isLoadingGroups || this.$apollo.queries.devopsAdoptionSegments.loading;
     },
+    modalKey() {
+      return this.selectedSegment?.id;
+    },
+    segmentLimitReached() {
+      return this.devopsAdoptionSegments.nodes?.length > this.$options.maxSegments;
+    },
+    addSegmentButtonTooltipText() {
+      return this.segmentLimitReached ? this.$options.i18n.tableHeader.buttonTooltip : false;
+    },
   },
   created() {
     this.fetchGroups();
@@ -111,6 +130,12 @@ export default {
         })
         .catch(error => this.handleError(DEVOPS_ADOPTION_ERROR_KEYS.groups, error));
     },
+    setSelectedSegment(segment) {
+      this.selectedSegment = segment;
+    },
+    clearSelectedSegment() {
+      this.selectedSegment = null;
+    },
   },
 };
 </script>
@@ -126,8 +151,9 @@ export default {
   <div v-else>
     <devops-adoption-segment-modal
       v-if="hasGroupData"
+      :key="modalKey"
       :groups="groups.nodes"
-      :segment-id="selectedSegmentId"
+      :segment="selectedSegment"
     />
     <div v-if="hasSegmentsData" class="gl-mt-3">
       <div
@@ -139,12 +165,25 @@ export default {
             <template #timestamp>{{ timestamp }}</template>
           </gl-sprintf>
         </span>
-        <gl-button v-gl-modal="$options.devopsSegmentModalId">{{
-          $options.i18n.tableHeader.button
-        }}</gl-button>
+        <span v-gl-tooltip.hover="addSegmentButtonTooltipText" data-testid="segmentButtonWrapper">
+          <gl-button
+            v-gl-modal="$options.devopsSegmentModalId"
+            :disabled="segmentLimitReached"
+            @click="clearSelectedSegment"
+            >{{ $options.i18n.tableHeader.button }}</gl-button
+          ></span
+        >
       </div>
-      <devops-adoption-table :segments="devopsAdoptionSegments.nodes" />
+      <devops-adoption-table
+        :segments="devopsAdoptionSegments.nodes"
+        :selected-segment="selectedSegment"
+        @set-selected-segment="setSelectedSegment"
+      />
     </div>
-    <devops-adoption-empty-state v-else :has-groups-data="hasGroupData" />
+    <devops-adoption-empty-state
+      v-else
+      :has-groups-data="hasGroupData"
+      @clear-selected-segment="clearSelectedSegment"
+    />
   </div>
 </template>

@@ -21,6 +21,8 @@ module Security
       vulnerability_ids = create_all_vulnerabilities!
       mark_as_resolved_except(vulnerability_ids)
 
+      start_auto_fix
+
       success
     end
 
@@ -144,7 +146,7 @@ module Security
     def find_existing_remediations_for(finding)
       checksums = finding.remediations.map(&:checksum)
 
-      Vulnerabilities::Remediation.by_checksum(checksums)
+      @project.vulnerability_remediations.by_checksum(checksums)
     end
 
     def build_new_remediations_for(finding, existing_remediations)
@@ -159,7 +161,7 @@ module Security
     end
 
     def build_vulnerability_remediation(remediation)
-      Vulnerabilities::Remediation.new(summary: remediation.summary, file: remediation.diff_file, checksum: remediation.checksum)
+      @project.vulnerability_remediations.new(summary: remediation.summary, file: remediation.diff_file, checksum: remediation.checksum)
     end
 
     def create_vulnerability_pipeline_object(vulnerability_finding, pipeline)
@@ -218,6 +220,18 @@ module Security
 
     def put_warning_for(finding)
       Gitlab::AppLogger.warn(message: "Invalid vulnerability finding record found", finding: finding.to_hash)
+    end
+
+    def start_auto_fix
+      return unless auto_fix_enabled?
+
+      ::Security::AutoFixWorker.perform_async(pipeline.id)
+    end
+
+    def auto_fix_enabled?
+      return false unless project.security_setting.auto_fix_enabled?
+
+      project.security_setting.auto_fix_enabled_types.include?(report.type.to_sym)
     end
   end
 end

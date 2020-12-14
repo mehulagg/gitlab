@@ -61,6 +61,7 @@ The following table depicts the various user permission levels in a project.
 | View wiki pages                                   | ✓       | ✓          | ✓           | ✓        | ✓      |
 | See a list of jobs                                | ✓ (*3*) | ✓          | ✓           | ✓        | ✓      |
 | See a job log                                     | ✓ (*3*) | ✓          | ✓           | ✓        | ✓      |
+| See a job with [debug logging](../ci/variables/README.md#debug-logging) |         |            | ✓           | ✓        | ✓      |
 | Download and browse job artifacts                 | ✓ (*3*) | ✓          | ✓           | ✓        | ✓      |
 | Create new issue                                  | ✓       | ✓          | ✓           | ✓        | ✓      |
 | See related issues                                | ✓       | ✓          | ✓           | ✓        | ✓      |
@@ -378,7 +379,7 @@ project is internal or private, Guest users have all the abilities that are
 mentioned in the [permissions table above](#project-members-permissions) (they
 are unable to browse the project's repository, for example).
 
-TIP: **Tip:**
+NOTE:
 To prevent a guest user from creating projects, as an admin, you can edit the
 user's profile to mark the user as [external](#external-users).
 Beware though that even if a user is external, if they already have Reporter or

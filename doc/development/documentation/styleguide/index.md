@@ -141,7 +141,7 @@ the documentation helps others efficiently accomplish tasks and solve problems.
 
 If you have questions when considering, authoring, or editing documentation, ask
 the Technical Writing team. They're available on Slack in `#docs` or in GitLab by mentioning the
-writer for the applicable [DevOps stage](https://about.gitlab.com/handbook/product/product-categories/#devops-stages).
+writer for the applicable [DevOps stage](https://about.gitlab.com/handbook/product/categories/#devops-stages).
 Otherwise, forge ahead with your best effort. It does not need to be perfect;
 the team is happy to review and improve upon your content. Review the
 [Documentation guidelines](index.md) before you begin your first documentation MR.
@@ -336,12 +336,6 @@ Only use the GitLab name and trademarks in accordance with
 
 Don't use the possessive form of the word GitLab (`GitLab's`).
 
-### Point of view
-
-In most cases, it’s appropriate to use the second-person (you, yours) point of
-view, because it’s friendly and easy to understand. (Tested in
-[`FirstPerson.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/FirstPerson.yml).)
-
 ### Capitalization
 
 #### Headings
@@ -529,84 +523,33 @@ You can use the following fake tokens as examples:
 | Health check token    | `Tu7BgjR9qeZTEyRzGG2P`                                             |
 | Request profile token | `7VgpS4Ax5utVD2esNstz`                                             |
 
-### Language to avoid
+### Usage list
+<!-- vale off -->
 
-When creating documentation, limit or avoid the use of the following verb
-tenses, words, and phrases:
+| {::nomarkdown}<div style="width:140px">Usage</div>{:/} | Guidance |
+|-----------------------|-----|
+| and/or                | Use **or** instead, or another sensible construction. |
+| currently             | Do not use when talking about the product or its features. The documentation describes the product as it is today. |
+| easily                | Do not use. If the user doesn't find the process to be these things, we lose their trust. |
+| e.g.                  | Do not use Latin abbreviations. Use **for example**, **such as**, **for instance**, or **like** instead. ([Vale](../testing.md#vale) rule: [`LatinTerms.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/LatinTerms.yml)) |
+| future tense          | When possible, use present tense instead. For example, use `after you execute this command, GitLab displays the result` instead of `after you execute this command, GitLab will display the result`. ([Vale](../testing.md#vale) rule: [`FutureTense.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/FutureTense.yml)) |
+| handy                 | Do not use. If the user doesn't find the process to be these things, we lose their trust. |
+| high availability, HA | Do not use. Instead, direct readers to the GitLab [reference architectures](../../../administration/reference_architectures/index.md) for information about configuring GitLab for handling greater amounts of users. |
+| I                     | Do not use first-person singular. Use **you**, **we**, or **us** instead. ([Vale](../testing.md#vale) rule: [`FirstPerson.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/FirstPerson.yml)) |
+| i.e.                  | Do not use Latin abbreviations. Use **that is** instead. ([Vale](../testing.md#vale) rule: [`LatinTerms.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/LatinTerms.yml)) |
+| jargon                | Do not use. Define the term or [link to a definition](#links-to-external-documentation). |
+| may, might            | **Might** means something has the probability of occurring. **May** gives permission to do something. Consider **can** instead of **may**. |
+| me                    | Do not use first-person singular. Use **you**, **we**, or **us** instead. ([Vale](../testing.md#vale) rule: [`FirstPerson.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/FirstPerson.yml)) |
+| please                | Do not use. For details, see the [Microsoft style guide](https://docs.microsoft.com/en-us/style-guide/a-z-word-list-term-collections/p/please). |
+| profanity             | Do not use. Doing so may negatively affect other users and contributors, which is contrary to the GitLab value of [Diversity, Inclusion, and Belonging](https://about.gitlab.com/handbook/values/#diversity-inclusion). |
+| scalability           | Do not use when talking about increasing GitLab performance for additional users. The words scale or scaling are sometimes acceptable, but references to increasing GitLab performance for additional users should direct readers to the GitLab [reference architectures](../../../administration/reference_architectures/index.md) page. |
+| simply                | Do not use. If the user doesn't find the process to be these things, we lose their trust. |
+| slashes               | Instead of **and/or**, use **or** or another sensible construction. This rule also applies to other slashes, like **follow/unfollow**. Some exceptions (like **CI/CD**) are allowed. |
+| that                  | Do not use. Example: `the file that you save` can be `the file you save`. |
+| useful                | Do not use. If the user doesn't find the process to be these things, we lose their trust. |
+| via                   | Do not use Latin abbreviations. Use **with**, **through**, or **by using** instead. ([Vale](../testing.md#vale) rule: [`LatinTerms.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/LatinTerms.yml)) |
 
-- Avoid jargon when possible, and when not possible, define the term or
- [link to a definition](#links-to-external-documentation).
-- Avoid uncommon words when a more-common alternative is possible, ensuring that
-  content is accessible to more readers.
-- Don't write in the first person singular.
-  (Tested in [`FirstPerson.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/FirstPerson.yml).)
-  <!-- vale gitlab.FirstPerson = NO -->
-  - Instead of _I_ or _me_, use _we_, _you_, _us_, or _one_.
-  <!-- vale gitlab.FirstPerson = YES -->
-  - When possible, stay user focused by writing in the second person (_you_ or
-    the imperative).
-- Don't overuse "that". In many cases, you can remove "that" from a sentence
-  and improve readability.
-- Avoid use of the future tense:
-  - Instead of `after you execute this command, GitLab will display the result`, use
-    `after you execute this command, GitLab displays the result`.
-  - Only use the future tense to convey when the action or result actually
-    occurs at a future time.
-- Don't use slashes to clump different words together or as a replacement for
-  the word "or":
-  - Instead of "and/or," consider using "or," or use another sensible
-    construction.
-  - Other examples include "clone/fetch," author/assignee," and
-    "namespace/repository name." Break apart any such instances in an
-    appropriate way.
-  - Exceptions to this rule include commonly accepted technical terms, such as
-    CI/CD and TCP/IP.
-<!-- vale gitlab.LatinTerms = NO -->
-- We discourage the use of Latin abbreviations and terms, such as _e.g._,
-  _i.e._, _etc._, or _via_, as even native users of English can misunderstand
-  those terms. (Tested in [`LatinTerms.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/LatinTerms.yml).)
-  - Instead of _i.e._, use _that is_.
-  - Instead of _via_, use _through_.
-  - Instead of _e.g._, use _for example_, _such as_, _for instance_, or _like_.
-  - Instead of _etc._, either use _and so on_ or consider editing it out, as
-    it can be vague.
-<!-- vale gitlab.LatinTerms = YES -->
-<!-- vale gitlab.CurrentStatus = NO -->
-- Avoid using the word *currently* when talking about the product or its
-  features. The documentation describes the product as it is, and not as it
-  is planned to be in some indeterminate point in the future.
-<!-- vale gitlab.CurrentStatus = YES -->
-- Avoid using the word *scalability* when talking about increasing GitLab
-  performance for additional users. The words scale or scaling are sometimes
-  acceptable, but references to increasing GitLab performance for additional
-  users should direct readers to the GitLab
-  [reference architectures](../../../administration/reference_architectures/index.md)
-  page.
-- Avoid all forms of the phrases *high availability* and *HA*, and instead
-  direct readers to the GitLab [reference architectures](../../../administration/reference_architectures/index.md)
-  for information about configuring GitLab to have the performance needed for
-  additional users over time.
-- Don't use profanity or obscenities. Doing so may negatively affect other users
-  and contributors, which is contrary to the GitLab value of
-  [Diversity, Inclusion, and Belonging](https://about.gitlab.com/handbook/values/#diversity-inclusion).
-- Avoid the use of [racially-insensitive terminology or phrases](https://www.marketplace.org/2020/06/17/tech-companies-update-language-to-avoid-offensive-terms/). For example:
-  - Use *primary* and *secondary* for database and server relationships.
-  - Use *allowlist* and *denylist* to describe access control lists.
-- Avoid the word _please_. For details, see the [Microsoft style guide](https://docs.microsoft.com/en-us/style-guide/a-z-word-list-term-collections/p/please).
-<!-- vale gitlab.Simplicity = NO -->
-- Avoid words like _easily_, _simply_, _handy_, and _useful._ If the user
-  doesn't find the process to be these things, we lose their trust.
-<!-- vale gitlab.Simplicity = YES -->
-
-### Word usage clarifications
-
-- Don't use "may" and "might" interchangeably:
-  - Use "might" to indicate the probability of something occurring. "If you
-    skip this step, the import process might fail."
-  - Use "may" to indicate giving permission for someone to do something, or
-    consider using "can" instead. "You may select either option on this
-    screen." Or, "You can select either option on this screen."
-
+<!-- vale on -->
 ### Contractions
 
 Contractions are encouraged, and can create a friendly and informal tone,
@@ -943,7 +886,7 @@ For other punctuation rules, refer to the
 - When possible, avoid including words that might change in the future. Changing
   a heading changes its anchor URL, which affects other linked pages.
 - When introducing a new document, be careful for the headings to be
-  grammatically and syntactically correct. Mention an [assigned technical writer (TW)](https://about.gitlab.com/handbook/product/product-categories/)
+  grammatically and syntactically correct. Mention an [assigned technical writer (TW)](https://about.gitlab.com/handbook/product/categories/)
   for review.
   This is to ensure that no document with wrong heading is going live without an
   audit, thus preventing dead links and redirection issues when corrected.
@@ -952,7 +895,7 @@ For other punctuation rules, refer to the
 - Add the corresponding [product badge](#product-tier-badges) according to the tier the
   feature belongs.
 - Our documentation site search engine prioritizes words used in headings and
-  subheadings. Make you subheading titles clear, descriptive, and complete to help
+  subheadings. Make your subheading titles clear, descriptive, and complete to help
   users find the right example, as shown in the section on [heading titles](#heading-titles).
 - See [Capitalization](#capitalization) for guidelines on capitalizing headings.
 
@@ -1492,14 +1435,14 @@ interface:
 | Section                  | Description                                                                                                                 |
 |:-------------------------|:----------------------------------------------------------------------------------------------------------------------------|
 | **{overview}** Overview  | View your GitLab Dashboard, and administer projects, users, groups, jobs, runners, and Gitaly servers.                      |
-| **{monitor}** Monitoring | View GitLab system information, and information on background jobs, logs, health checks, requests profiles, and audit logs. |
+| **{monitor}** Monitoring | View GitLab system information, and information on background jobs, logs, health checks, requests profiles, and audit events. |
 | **{messages}** Messages  | Send and manage broadcast messages for your users.                                                                          |
 ```
 
 | Section                  | Description                                                                                                                 |
 |:-------------------------|:----------------------------------------------------------------------------------------------------------------------------|
 | **{overview}** Overview  | View your GitLab Dashboard, and administer projects, users, groups, jobs, runners, and Gitaly servers.                      |
-| **{monitor}** Monitoring | View GitLab system information, and information on background jobs, logs, health checks, requests profiles, and audit logs. |
+| **{monitor}** Monitoring | View GitLab system information, and information on background jobs, logs, health checks, requests profiles, and audit events. |
 | **{messages}** Messages  | Send and manage broadcast messages for your users.                                                                          |
 
 Use an icon when you find yourself having to describe an interface element. For
@@ -1551,7 +1494,7 @@ This is something to note.
 ### Warning
 
 Use a warning to indicate deprecated features, or to provide a warning about
-procedures that have the potential for data loss. 
+procedures that have the potential for data loss.
 
 ```markdown
 WARNING:
@@ -1799,32 +1742,47 @@ in the GitLab product documentation.
 
 ### Avoid line breaks in names
 
-Product names, feature names, and non-GitLab products that contain spaces
-shouldn't be split across lines.
-For example: GitLab Community Edition or Amazon Web Services.
-Splitting product or feature names across lines makes searching for these items
-more difficult, and can cause problems if names change.
-
-For example, the following Markdown content is _not_ formatted correctly:
-
-```markdown
-When entering a product or feature name that includes a space (such as GitLab
-Community Edition), don't split the product or feature name across lines.
-```
-
-Instead, it should appear similar to the following:
-
-```markdown
-When entering a product or feature name that includes a space (such as
-GitLab Community Edition), don't split the product or feature name across lines.
-```
+If a feature or product name contains spaces, don't split the name with a line break.
+When names change, it is more complicated to search or grep text that has line breaks.
 
 ### Product tier badges
 
-When a feature is available in paid tiers, add the corresponding tier to the
-header or other page element according to the feature's availability:
+Tier badges are displayed as orange text next to a heading. For example:
 
-| Tier in which feature is available                                     | Tier markup           |
+![Tier badge](img/tier_badge.png)
+
+You must assign a tier badge:
+
+- To [all H1 topic headings](#product-tier-badges-on-headings).
+- To topic headings that don't apply to the same tier as the H1.
+- To [sections of a topic](#product-tier-badges-on-other-content),
+  if they apply to a tier other than what applies to the H1.
+
+#### Product tier badges on headings
+
+To add a tier badge to a heading, add the relevant [tier badge](#available-product-tier-badges)
+after the heading text. For example:
+
+```markdown
+# Heading title `**(CORE)**`
+```
+
+#### Product tier badges on other content
+
+In paragraphs, list names, and table cells, an information icon displays when you
+add a tier badge. More verbose information displays when a user points to the icon:
+
+- `**(STARTER)**` displays as **(STARTER)**
+- `**(STARTER ONLY)**` displays as **(STARTER ONLY)**
+- `**(SILVER ONLY)**` displays as **(SILVER ONLY)**
+
+The `**(STARTER)**` generates a `span` element to trigger the
+badges and tooltips (`<span class="badge-trigger starter">`). When the keyword
+_only_ is added, the corresponding GitLab.com badge isn't displayed.
+
+#### Available product tier badges
+
+| Tier in which feature is available                                     | Tier badge           |
 |:-----------------------------------------------------------------------|:----------------------|
 | GitLab Core and GitLab.com Free, and their higher tiers                | `**(CORE)**`          |
 | GitLab Starter and GitLab.com Bronze, and their higher tiers           | `**(STARTER)**`       |
@@ -1839,37 +1797,10 @@ header or other page element according to the feature's availability:
 | _Only_ GitLab.com Silver and higher tiers (no self-managed instances)  | `**(SILVER ONLY)**`   |
 | _Only_ GitLab.com Gold (no self-managed instances)                     | `**(GOLD ONLY)**`     |
 
-For clarity, all page title headers (H1s) must be have a tier markup for the
-lowest tier that has information on the documentation page.
-
-If sections of a page apply to higher tier levels, they can be separately
-labeled with their own tier markup.
-
-Whenever you have documentation related to the `gitlab.rb` file, you're working
-with a self-managed installation. The section or page probably applies only to
-self-managed instances. If so, include the relevant "`TIER` ONLY"
-[product badge](#product-tier-badges) at the highest applicable heading level.
-
-#### Product badge display behavior
-
-When using the tier markup with headers, the documentation page displays the
-full tier badge with the header line.
-
-You can also use the tier markup with paragraphs, list items, and table cells.
-For these cases, the tier mention is represented by an information icon
-that displays the tiers when visitors point to the icon.
-For example:
-
-- `**(STARTER)**` displays as **(STARTER)**
-- `**(STARTER ONLY)**` displays as **(STARTER ONLY)**
-- `**(SILVER ONLY)**` displays as **(SILVER ONLY)**
-
-#### How it works
-
-Introduced by [!244](https://gitlab.com/gitlab-org/gitlab-docs/-/merge_requests/244),
-the special markup `**(STARTER)**` generates a `span` element to trigger the
-badges and tooltips (`<span class="badge-trigger starter">`). When the keyword
-_only_ is added, the corresponding GitLab.com badge isn't displayed.
+Topics that mention the `gitlab.rb` file are referring to
+self-managed instances of GitLab. To prevent confusion, include the relevant `TIER ONLY`
+tier badge on the highest applicable heading level on
+the page.
 
 ## Specific sections
 
@@ -1878,20 +1809,18 @@ sections are outlined in this section.
 
 ### GitLab restart
 
-There are many cases that a restart/reconfigure of GitLab is required. To avoid
-duplication, link to the special document that can be found in
-[`doc/administration/restart_gitlab.md`](../../../administration/restart_gitlab.md).
-Usually the text reads like:
+When a restart or reconfigure of GitLab is required, avoid duplication by linking
+to [`doc/administration/restart_gitlab.md`](../../../administration/restart_gitlab.md)
+with text like this, replacing 'reconfigure' with 'restart' as needed:
 
 ```markdown
 Save the file and [reconfigure GitLab](../../../administration/restart_gitlab.md)
 for the changes to take effect.
 ```
 
-If the document resides outside of the GitLab CE/EE
-`doc/` directory, use the full path instead of the relative link:
-`https://docs.gitlab.com/ee/administration/restart_gitlab.html`. Replace
-`reconfigure` with `restart` where appropriate.
+If the document resides outside of the `doc/` directory, use the full path
+instead of the relative link:
+`https://docs.gitlab.com/ee/administration/restart_gitlab.html`.
 
 ### Installation guide
 

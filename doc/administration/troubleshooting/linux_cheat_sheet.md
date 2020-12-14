@@ -23,7 +23,7 @@ on. Contributions are welcome to help add them.
 
 ## System Commands
 
-### Distro Information
+### Distribution Information
 
 ```shell
 # Debian/Ubuntu
@@ -200,7 +200,7 @@ or you can build it from source if you have the Rust compiler.
 
 #### How to use the tool
 
-First run the tool with no arguments other than the strace output file name to get
+First run the tool with no arguments other than the strace output filename to get
 a summary of the top processes sorted by time spent actively performing tasks. You
 can also sort based on total time, # of syscalls made, PID #, and # of child processes
 using the `-S` or `--sort` flag. The number of results defaults to 25 processes, but
@@ -303,7 +303,7 @@ nslookup example.com 1.1.1.1
 whois <ip_address> | grep -i "orgname\|netname"
 
 # Curl headers with redirect
-curl --head --location https://example.com
+curl --head --location "https://example.com"
 ```
 
 ## Package Management

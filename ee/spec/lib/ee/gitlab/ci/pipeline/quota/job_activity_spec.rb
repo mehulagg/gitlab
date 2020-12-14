@@ -119,7 +119,7 @@ RSpec.describe EE::Gitlab::Ci::Pipeline::Quota::JobActivity do
 
       it 'returns info about pipeline activity limit exceeded' do
         expect(subject.message)
-          .to eq "Active jobs limit exceeded by 2 jobs in the past 24 hours!"
+          .to eq "Project has too many active jobs created in the last 24 hours! There are 3 active jobs, but the limit is 1."
       end
     end
   end

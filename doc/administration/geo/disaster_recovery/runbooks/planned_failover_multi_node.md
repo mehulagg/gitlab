@@ -168,7 +168,7 @@ follow these steps to avoid unnecessary data loss:
    that has not been replicated to the **secondary** node. This data should be treated
    as lost if you proceed.
 
-   TIP: **Tip:**
+   NOTE:
    If you plan to [update the **primary** domain DNS record](../index.md#step-4-optional-updating-the-primary-domain-dns-record),
    you may wish to lower the TTL now to speed up propagation.
 
@@ -227,7 +227,7 @@ conjunction with multiple servers, as it can only
 perform changes on a **secondary** with only a single machine. Instead, you must
 do this manually.
 
-DANGER: **Warning:**
+WARNING:
 In GitLab 13.2 and 13.3, promoting a secondary node to a primary while the
 secondary is paused fails. Do not pause replication before promoting a
 secondary. If the node is paused, be sure to resume before promoting. This

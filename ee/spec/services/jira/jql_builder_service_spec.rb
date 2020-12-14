@@ -117,5 +117,13 @@ RSpec.describe Jira::JqlBuilderService do
         expect(subject).to eq('project = PROJECT_KEY AND (description ~ "/-/security/vulnerabilities/1" OR description ~ "/-/security/vulnerabilities/25") order by created DESC')
       end
     end
+
+    context 'with issue_ids params' do
+      let(:params) { { issue_ids: %w[1 25] } }
+
+      it 'builds jql' do
+        expect(subject).to eq('project = PROJECT_KEY AND (id = 1 OR id = 25) order by created DESC')
+      end
+    end
   end
 end

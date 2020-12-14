@@ -366,4 +366,67 @@ RSpec.describe Gitlab::Geo, :geo, :request_store do
       end
     end
   end
+
+  describe '.verification_enabled_replicator_classes' do
+    it 'returns an Array of replicator classes' do
+      result = described_class.verification_enabled_replicator_classes
+
+      expect(result).to be_an(Array)
+      expect(result).to include(Geo::PackageFileReplicator)
+    end
+
+    context 'when replication is disabled' do
+      before do
+        stub_feature_flags(geo_package_file_replication: false)
+      end
+
+      it 'does not return the replicator class' do
+        expect(described_class.verification_enabled_replicator_classes).not_to include(Geo::PackageFileReplicator)
+      end
+    end
+
+    context 'when verification is disabled' do
+      before do
+        stub_feature_flags(geo_package_file_verification: false)
+      end
+
+      it 'does not return the replicator class' do
+        expect(described_class.verification_enabled_replicator_classes).not_to include(Geo::PackageFileReplicator)
+      end
+    end
+  end
+
+  describe '.verification_max_capacity_per_replicator_class' do
+    let(:verification_max_capacity) { 12 }
+    let(:node) { double('node', verification_max_capacity: verification_max_capacity) }
+
+    before do
+      stub_current_geo_node(node)
+    end
+
+    context 'when there are no Replicator classes with verification enabled' do
+      it 'returns the total capacity' do
+        stub_feature_flags(geo_package_file_verification: false)
+        stub_feature_flags(geo_framework_verification: false)
+
+        expect(described_class.verification_max_capacity_per_replicator_class).to eq(verification_max_capacity)
+      end
+    end
+
+    context 'when there is 1 Replicator class with verification enabled' do
+      it 'returns half capacity' do
+        stub_feature_flags(geo_framework_verification: false)
+
+        expect(described_class.verification_max_capacity_per_replicator_class).to eq(verification_max_capacity / 2)
+      end
+    end
+
+    context 'when total capacity is set lower than the number of Replicators' do
+      let(:verification_max_capacity) { 1 }
+
+      it 'returns 1' do
+        expect(described_class.verification_max_capacity_per_replicator_class).to eq(1)
+      end
+    end
+  end
 end

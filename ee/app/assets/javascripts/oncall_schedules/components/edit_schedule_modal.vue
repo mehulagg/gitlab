@@ -26,6 +26,10 @@ export default {
       type: Object,
       required: true,
     },
+    modalId: {
+      type: String,
+      required: true,
+    },
   },
   data() {
     return {
@@ -66,7 +70,9 @@ export default {
     editScheduleVariables() {
       return {
         projectPath: this.projectPath,
-        ...this.form,
+        iid: this.schedule.iid,
+        name: this.form.name,
+        description: this.form.description,
         timezone: this.form.timezone.identifier,
       };
     },
@@ -79,14 +85,12 @@ export default {
       this.$apollo
         .mutate({
           mutation: updateOncallScheduleMutation,
-          variables: {
-            oncallScheduleEditInput: this.editScheduleVariables,
-          },
+          variables: this.editScheduleVariables,
           update(store, { data }) {
             updateStoreAfterScheduleEdit(store, getOncallSchedulesQuery, data, { projectPath });
           },
         })
-        .then(({ data: { oncallScheduleEdit: { errors: [error] } } }) => {
+        .then(({ data: { oncallScheduleUpdate: { errors: [error] } } }) => {
           if (error) {
             throw error;
           }
@@ -112,8 +116,9 @@ export default {
 <template>
   <gl-modal
     ref="updateScheduleModal"
-    modal-id="updateScheduleModal"
+    :modal-id="modalId"
     size="sm"
+    :data-testid="`update-schedule-modal-${schedule.iid}`"
     :title="$options.i18n.editSchedule"
     :action-primary="actionsProps.primary"
     :action-cancel="actionsProps.cancel"

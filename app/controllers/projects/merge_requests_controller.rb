@@ -21,7 +21,8 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
     :exposed_artifacts,
     :coverage_reports,
     :terraform_reports,
-    :accessibility_reports
+    :accessibility_reports,
+    :codequality_reports
   ]
   before_action :set_issuables_index, only: [:index]
   before_action :authenticate_user!, only: [:assign_related_issues]
@@ -36,13 +37,13 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
     push_frontend_feature_flag(:hide_jump_to_next_unresolved_in_threads, default_enabled: true)
     push_frontend_feature_flag(:merge_request_widget_graphql, @project)
     push_frontend_feature_flag(:unified_diff_components, @project)
-    push_frontend_feature_flag(:highlight_current_diff_row, @project)
     push_frontend_feature_flag(:default_merge_ref_for_diffs, @project)
     push_frontend_feature_flag(:core_security_mr_widget, @project, default_enabled: true)
     push_frontend_feature_flag(:core_security_mr_widget_counts, @project)
+    push_frontend_feature_flag(:core_security_mr_widget_downloads, @project, default_enabled: true)
     push_frontend_feature_flag(:remove_resolve_note, @project, default_enabled: true)
     push_frontend_feature_flag(:test_failure_history, @project)
-    push_frontend_feature_flag(:diffs_gradual_load, @project)
+    push_frontend_feature_flag(:diffs_gradual_load, @project, default_enabled: true)
 
     record_experiment_user(:invite_members_version_a)
     record_experiment_user(:invite_members_version_b)
@@ -193,6 +194,10 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
     else
       head :no_content
     end
+  end
+
+  def codequality_reports
+    reports_response(@merge_request.compare_codequality_reports)
   end
 
   def terraform_reports

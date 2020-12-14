@@ -48,7 +48,7 @@ language:
 For the requirements of other languages and frameworks, read the
 [Heroku buildpacks documentation](https://devcenter.heroku.com/articles/buildpacks#officially-supported-buildpacks).
 
-TIP: **Tip:**
+NOTE:
 If Auto Build fails despite the project meeting the buildpack requirements, set
 a project variable `TRACE=true` to enable verbose logging, which may help you
 troubleshoot.
@@ -147,16 +147,13 @@ out. The merge request widget also displays any
 > - Introduced in [GitLab Ultimate](https://about.gitlab.com/pricing/) 10.3.
 > - Select functionality made available in all tiers beginning in 13.1
 
-Static Application Security Testing (SAST) uses the
-[SAST Docker image](https://gitlab.com/gitlab-org/security-products/sast) to run static
+Static Application Security Testing (SAST) runs static
 analysis on the current code, and checks for potential security issues. The
-Auto SAST stage is skipped on licenses other than
-[Ultimate](https://about.gitlab.com/pricing/), and requires
-[GitLab Runner](https://docs.gitlab.com/runner/) 11.5 or above.
+Auto SAST stage requires [GitLab Runner](https://docs.gitlab.com/runner/) 11.5 or above.
 
 After creating the report, it's uploaded as an artifact which you can later
 download and check out. The merge request widget also displays any security
-warnings.
+warnings on [Ultimate](https://about.gitlab.com/pricing/) licenses.
 
 To learn more about [how SAST works](../../user/application_security/sast/index.md),
 see the documentation.
@@ -171,7 +168,7 @@ Secret Detection uses the
 
 After creating the report, it's uploaded as an artifact which you can later
 download and evaluate. The merge request widget also displays any security
-warnings.
+warnings on [Ultimate](https://about.gitlab.com/pricing/) licenses.
 
 To learn more, see [Secret Detection](../../user/application_security/secret_detection/index.md).
 
@@ -179,9 +176,7 @@ To learn more, see [Secret Detection](../../user/application_security/secret_det
 
 > Introduced in [GitLab Ultimate](https://about.gitlab.com/pricing/) 10.7.
 
-Dependency Scanning uses the
-[Dependency Scanning Docker image](https://gitlab.com/gitlab-org/security-products/dependency-scanning)
-to run analysis on the project dependencies and check for potential security issues.
+Dependency Scanning runs analysis on the project's dependencies and checks for potential security issues.
 The Auto Dependency Scanning stage is skipped on licenses other than
 [Ultimate](https://about.gitlab.com/pricing/) and requires
 [GitLab Runner](https://docs.gitlab.com/runner/) 11.5 or above.
@@ -288,7 +283,7 @@ see the documentation.
 To use a custom target instead of the auto-deployed review apps,
 set a `DAST_WEBSITE` environment variable to the URL for DAST to scan.
 
-DANGER: **Warning:**
+WARNING:
 If [DAST Full Scan](../../user/application_security/dast/index.md#full-scan) is
 enabled, GitLab strongly advises **not**
 to set `DAST_WEBSITE` to any staging or production environment. DAST Full Scan
@@ -431,7 +426,7 @@ To use Auto Deploy on a Kubernetes 1.16+ cluster:
 1. If you are deploying your application for the first time and are using
    GitLab 12.9 or 12.10, set `AUTO_DEVOPS_POSTGRES_CHANNEL` to `2`.
 
-DANGER: **Warning:**
+WARNING:
 On GitLab 12.9 and 12.10, opting into
 `AUTO_DEVOPS_POSTGRES_CHANNEL` version `2` deletes the version `1` PostgreSQL
 database. Follow the [guide to upgrading PostgreSQL](upgrading_postgresql.md)
@@ -623,7 +618,7 @@ may require commands to be wrapped as follows:
 Some of the reasons you may need to wrap commands:
 
 - Attaching using `kubectl exec`.
-- Using GitLab's [Web Terminal](../../ci/environments/index.md#web-terminals).
+- Using the GitLab [Web Terminal](../../ci/environments/index.md#web-terminals).
 
 For example, to start a Rails console from the application root directory, run:
 

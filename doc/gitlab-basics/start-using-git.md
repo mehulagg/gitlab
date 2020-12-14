@@ -29,7 +29,7 @@ can download GitLab's [Git Cheat Sheet](https://about.gitlab.com/images/press/gi
 > - <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>&nbsp;Watch the [GitLab Source Code Management Walkthrough](https://www.youtube.com/watch?v=wTQ3aXJswtM) video.
 > - Learn how GitLab became the backbone of [Worldline](https://about.gitlab.com/customers/worldline/)’s development environment.
 
-TIP: **Tip:**
+NOTE:
 To help you visualize what you're doing locally, there are
 [Git GUI apps](https://git-scm.com/download/gui/) you can install.
 
@@ -104,7 +104,7 @@ If you omit `--global` or use `--local`, the configuration will be applied only 
 repository.
 
 You can read more on how Git manages configurations in the
-[Git Config](https://git-scm.com/book/en/v2/Customizing-Git-Git-Configuration) documentation.
+[Git configuration documentation](https://git-scm.com/book/en/v2/Customizing-Git-Git-Configuration).
 
 ## Git authentication methods
 
@@ -183,7 +183,7 @@ changes to GitLab. This is referred to as **pushing** to GitLab, as this is achi
 [`git push`](#send-changes-to-gitlabcom).
 
 When the remote repository changes, your local copy will be behind it. You can update it with the new
-changes in the remote repo.
+changes in the remote repository.
 This is referred to as **pulling** from GitLab, as this is achieved by the command
 [`git pull`](#download-the-latest-changes-in-the-project).
 
@@ -234,7 +234,7 @@ To clone `https://gitlab.com/gitlab-tests/sample-project/` via HTTPS:
 git clone https://gitlab.com/gitlab-tests/sample-project.git
 ```
 
-TIP: **Troubleshooting:**
+NOTE:
 On Windows, if you entered incorrect passwords multiple times and GitLab is responding `Access denied`,
 you may have to add your namespace (user name or group name) to clone through HTTPS:
 `git clone https://namespace@gitlab.com/gitlab-org/gitlab.git`.

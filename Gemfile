@@ -66,7 +66,7 @@ gem 'attr_encrypted', '~> 3.1.0'
 gem 'u2f', '~> 0.2.1'
 
 # GitLab Pages
-gem 'validates_hostname', '~> 1.0.10'
+gem 'validates_hostname', '~> 1.0.11'
 gem 'rubyzip', '~> 2.0.0', require: 'zip'
 # GitLab Pages letsencrypt support
 gem 'acme-client', '~> 2.0', '>= 2.0.6'
@@ -119,7 +119,7 @@ gem 'fog-aws', '~> 3.7'
 # Locked until fog-google resolves https://github.com/fog/fog-google/issues/421.
 # Also see config/initializers/fog_core_patch.rb.
 gem 'fog-core', '= 2.1.0'
-gem 'fog-google', '~> 1.11'
+gem 'fog-google', '~> 1.12'
 gem 'fog-local', '~> 0.6'
 gem 'fog-openstack', '~> 1.0'
 gem 'fog-rackspace', '~> 0.1.1'
@@ -372,7 +372,7 @@ group :development, :test do
   gem 'spring', '~> 2.1.0'
   gem 'spring-commands-rspec', '~> 1.0.4'
 
-  gem 'gitlab-styles', '~> 5.1.0', require: false
+  gem 'gitlab-styles', '~> 5.3.0', require: false
 
   gem 'scss_lint', '~> 0.59.0', require: false
   gem 'haml_lint', '~> 0.36.0', require: false
@@ -430,7 +430,7 @@ end
 gem 'octokit', '~> 4.15'
 
 # https://gitlab.com/gitlab-org/gitlab/issues/207207
-gem 'gitlab-mail_room', '~> 0.0.7', require: 'mail_room'
+gem 'gitlab-mail_room', '~> 0.0.8', require: 'mail_room'
 
 gem 'email_reply_trimmer', '~> 0.1'
 gem 'html2text'
@@ -479,6 +479,7 @@ gem 'flipper', '~> 0.17.1'
 gem 'flipper-active_record', '~> 0.17.1'
 gem 'flipper-active_support_cache_store', '~> 0.17.1'
 gem 'unleash', '~> 0.1.5'
+gem 'gitlab-experiment', '~> 0.4.2'
 
 # Structured logging
 gem 'lograge', '~> 0.5'

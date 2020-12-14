@@ -42,7 +42,7 @@ module EE
       def handle_weight_change
         return unless issuable.previous_changes.include?('weight')
 
-        ::ResourceEvents::ChangeWeightService.new([issuable], current_user, Time.current).execute
+        ::ResourceEvents::ChangeWeightService.new(issuable, current_user, Time.current).execute
       end
 
       def handle_health_status_change

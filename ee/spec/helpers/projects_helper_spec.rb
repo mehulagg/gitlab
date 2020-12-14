@@ -210,11 +210,11 @@ RSpec.describe ProjectsHelper do
         projects/security/vulnerability_report#index
         projects/security/dashboard#index
         projects/on_demand_scans#index
-        projects/dast_profiles#index
-        projects/dast_site_profiles#new
-        projects/dast_site_profiles#edit
-        projects/dast_scanner_profiles#new
-        projects/dast_scanner_profiles#edit
+        projects/security/dast_profiles#show
+        projects/security/dast_site_profiles#new
+        projects/security/dast_site_profiles#edit
+        projects/security/dast_scanner_profiles#new
+        projects/security/dast_scanner_profiles#edit
         projects/dependencies#index
         projects/licenses#index
         projects/threat_monitoring#show
@@ -232,17 +232,30 @@ RSpec.describe ProjectsHelper do
     let(:expected_on_demand_scans_paths) do
       %w[
         projects/on_demand_scans#index
-        projects/dast_profiles#index
-        projects/dast_site_profiles#new
-        projects/dast_site_profiles#edit
-        projects/dast_scanner_profiles#new
-        projects/dast_scanner_profiles#edit
       ]
     end
 
     subject { helper.sidebar_on_demand_scans_paths }
 
     it { is_expected.to eq(expected_on_demand_scans_paths) }
+  end
+
+  describe '#sidebar_security_configuration_paths' do
+    let(:expected_security_configuration_paths) do
+      %w[
+        projects/security/configuration#show
+        projects/security/sast_configuration#show
+        projects/security/dast_profiles#show
+        projects/security/dast_site_profiles#new
+        projects/security/dast_site_profiles#edit
+        projects/security/dast_scanner_profiles#new
+        projects/security/dast_scanner_profiles#edit
+      ]
+    end
+
+    subject { helper.sidebar_security_configuration_paths }
+
+    it { is_expected.to eq(expected_security_configuration_paths) }
   end
 
   describe '#get_project_nav_tabs' do

@@ -64,7 +64,7 @@ module EE
       end
 
       def filter_by_current_iteration?
-        params[:iteration_id].to_s.casecmp(::Iteration::Current.title) == 0
+        params[:iteration_id].to_s.casecmp(::Iteration::Predefined::Current.title) == 0
       end
 
       def filter_by_iteration_title?

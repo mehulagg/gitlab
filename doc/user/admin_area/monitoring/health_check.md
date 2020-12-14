@@ -55,7 +55,7 @@ GET /-/health
 Example request:
 
 ```shell
-curl 'https://gitlab.example.com/-/health'
+curl "https://gitlab.example.com/-/health"
 ```
 
 Example response:
@@ -82,7 +82,7 @@ GET /-/readiness?all=1
 Example request:
 
 ```shell
-curl 'https://gitlab.example.com/-/readiness'
+curl "https://gitlab.example.com/-/readiness"
 ```
 
 Example response:
@@ -105,7 +105,7 @@ This check is being exempt from Rack Attack.
 
 ## Liveness
 
-DANGER: **Warning:**
+WARNING:
 In GitLab [12.4](https://about.gitlab.com/upcoming-releases/)
 the response body of the Liveness check was changed
 to match the example below.
@@ -121,7 +121,7 @@ GET /-/liveness
 Example request:
 
 ```shell
-curl 'https://gitlab.example.com/-/liveness'
+curl "https://gitlab.example.com/-/liveness"
 ```
 
 Example response:

@@ -3,6 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe Resolvers::EpicIssuesResolver do
+  include ::Gitlab::Graphql::Laziness
   include GraphqlHelpers
 
   let_it_be(:current_user) { create(:user) }
@@ -21,20 +22,22 @@ RSpec.describe Resolvers::EpicIssuesResolver do
   let_it_be(:epic_issue3) { create(:epic_issue, epic: epic2, issue: issue3, relative_position: 1) }
   let_it_be(:epic_issue4) { create(:epic_issue, epic: epic2, issue: issue4, relative_position: nil) }
 
-  specify do
-    expect(described_class).to have_nullable_graphql_type(Types::EpicIssueType.connection_type)
-  end
-
   before do
     group.add_developer(current_user)
     stub_licensed_features(epics: true)
   end
 
-  describe '#resolve' do
-    it 'finds all epic issues' do
-      result = [resolve_epic_issues(epic1), resolve_epic_issues(epic2)]
+  specify do
+    expect(described_class).to have_nullable_graphql_type(Types::EpicIssueType.connection_type)
+  end
 
-      expect(result).to contain_exactly([issue2, issue1], [issue3, issue4])
+  describe '#resolve' do
+    let(:epics) { [epic1, epic2] }
+
+    it 'finds all epic issues' do
+      result = epics.map { |epic| resolve_epic_issues(epic).to_a }
+
+      expect(result).to eq [[issue2, issue1], [issue3, issue4]]
     end
 
     it 'finds only epic issues that user can read' do
@@ -42,15 +45,15 @@ RSpec.describe Resolvers::EpicIssuesResolver do
 
       result =
         [
-          resolve_epic_issues(epic1, {}, { current_user: guest }),
-          resolve_epic_issues(epic2, {}, { current_user: guest })
+          resolve_epic_issues(epic1, user: guest).to_a,
+          resolve_epic_issues(epic2, user: guest).to_a
         ]
 
-      expect(result).to contain_exactly([], [issue1])
+      expect(result).to eq([[issue1], []])
     end
   end
 
-  def resolve_epic_issues(object, args = {}, context = { current_user: current_user })
-    resolve(described_class, obj: object, args: args, ctx: context)
+  def resolve_epic_issues(object, user: current_user)
+    force(resolve(described_class, obj: object, ctx: { current_user: user }))
   end
 end

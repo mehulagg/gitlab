@@ -1,6 +1,6 @@
 <script>
 import { mapActions, mapGetters } from 'vuex';
-import { GlIcon, GlLink, GlSprintf } from '@gitlab/ui';
+import { GlLink, GlSprintf } from '@gitlab/ui';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import ReportSection from '~/reports/components/report_section.vue';
 import { LOADING, ERROR, SLOT_SUCCESS, SLOT_LOADING, SLOT_ERROR } from '~/reports/constants';
@@ -8,18 +8,27 @@ import { s__ } from '~/locale';
 import { normalizeHeaders, parseIntPagination } from '~/lib/utils/common_utils';
 import createFlash from '~/flash';
 import Api from '~/api';
+import HelpIcon from './components/help_icon.vue';
+import SecurityReportDownloadDropdown from './components/security_report_download_dropdown.vue';
 import SecuritySummary from './components/security_summary.vue';
 import store from './store';
 import { MODULE_SAST, MODULE_SECRET_DETECTION } from './store/constants';
-import { REPORT_TYPE_SAST, REPORT_TYPE_SECRET_DETECTION } from './constants';
+import {
+  REPORT_TYPE_SAST,
+  REPORT_TYPE_SECRET_DETECTION,
+  reportTypeToSecurityReportTypeEnum,
+} from './constants';
+import securityReportDownloadPathsQuery from './queries/security_report_download_paths.query.graphql';
+import { extractSecurityReportArtifacts } from './utils';
 
 export default {
   store,
   components: {
-    GlIcon,
     GlLink,
     GlSprintf,
     ReportSection,
+    HelpIcon,
+    SecurityReportDownloadDropdown,
     SecuritySummary,
   },
   mixins: [glFeatureFlagsMixin()],
@@ -36,6 +45,11 @@ export default {
       type: String,
       required: true,
     },
+    discoverProjectSecurityPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
     sastComparisonPath: {
       type: String,
       required: false,
@@ -45,6 +59,21 @@ export default {
       type: String,
       required: false,
       default: '',
+    },
+    targetProjectFullPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    mrIid: {
+      type: Number,
+      required: false,
+      default: 0,
+    },
+    canDiscoverProjectSecurity: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
   },
   data() {
@@ -60,8 +89,44 @@ export default {
       status: ERROR,
     };
   },
+  apollo: {
+    reportArtifacts: {
+      query: securityReportDownloadPathsQuery,
+      variables() {
+        return {
+          projectPath: this.targetProjectFullPath,
+          iid: String(this.mrIid),
+          reportTypes: this.$options.reportTypes.map(
+            reportType => reportTypeToSecurityReportTypeEnum[reportType],
+          ),
+        };
+      },
+      skip() {
+        return !this.canShowDownloads;
+      },
+      update(data) {
+        return extractSecurityReportArtifacts(this.$options.reportTypes, data);
+      },
+      error(error) {
+        this.showError(error);
+      },
+      result({ loading }) {
+        if (loading) {
+          return;
+        }
+
+        // Query has completed, so populate the availableSecurityReports.
+        this.onCheckingAvailableSecurityReports(
+          this.reportArtifacts.map(({ reportType }) => reportType),
+        );
+      },
+    },
+  },
   computed: {
     ...mapGetters(['groupedSummaryText', 'summaryStatus']),
+    canShowDownloads() {
+      return this.glFeatures.coreSecurityMrWidgetDownloads;
+    },
     hasSecurityReports() {
       return this.availableSecurityReports.length > 0;
     },
@@ -71,23 +136,26 @@ export default {
     hasSecretDetectionReports() {
       return this.availableSecurityReports.includes(REPORT_TYPE_SECRET_DETECTION);
     },
-    isLoaded() {
-      return this.summaryStatus !== LOADING;
+    isLoadingReportArtifacts() {
+      return this.$apollo.queries.reportArtifacts.loading;
+    },
+    shouldShowDownloadGuidance() {
+      return !this.canShowDownloads && this.summaryStatus !== LOADING;
+    },
+    scansHaveRunMessage() {
+      return this.canShowDownloads
+        ? this.$options.i18n.scansHaveRun
+        : this.$options.i18n.scansHaveRunWithDownloadGuidance;
     },
   },
   created() {
-    this.checkAvailableSecurityReports(this.$options.reportTypes)
-      .then(availableSecurityReports => {
-        this.availableSecurityReports = Array.from(availableSecurityReports);
-        this.fetchCounts();
-      })
-      .catch(error => {
-        createFlash({
-          message: this.$options.i18n.apiError,
-          captureError: true,
-          error,
-        });
-      });
+    if (!this.canShowDownloads) {
+      this.checkAvailableSecurityReports(this.$options.reportTypes)
+        .then(availableSecurityReports => {
+          this.onCheckingAvailableSecurityReports(Array.from(availableSecurityReports));
+        })
+        .catch(this.showError);
+    }
   },
   methods: {
     ...mapActions(MODULE_SAST, {
@@ -150,19 +218,30 @@ export default {
         window.mrTabs.tabShown('pipelines');
       }
     },
+    onCheckingAvailableSecurityReports(availableSecurityReports) {
+      this.availableSecurityReports = availableSecurityReports;
+      this.fetchCounts();
+    },
+    showError(error) {
+      createFlash({
+        message: this.$options.i18n.apiError,
+        captureError: true,
+        error,
+      });
+    },
   },
   reportTypes: [REPORT_TYPE_SAST, REPORT_TYPE_SECRET_DETECTION],
   i18n: {
     apiError: s__(
       'SecurityReports|Failed to get security report information. Please reload the page or try again later.',
     ),
-    scansHaveRun: s__(
+    scansHaveRun: s__('SecurityReports|Security scans have run'),
+    scansHaveRunWithDownloadGuidance: s__(
       'SecurityReports|Security scans have run. Go to the %{linkStart}pipelines tab%{linkEnd} to download the security reports',
     ),
     downloadFromPipelineTab: s__(
       'SecurityReports|Go to the %{linkStart}pipelines tab%{linkEnd} to download the security reports',
     ),
-    securityReportsHelp: s__('SecurityReports|Security reports help page link'),
   },
   summarySlots: [SLOT_SUCCESS, SLOT_LOADING, SLOT_ERROR],
 };
@@ -179,18 +258,14 @@ export default {
       <span :key="slot">
         <security-summary :message="groupedSummaryText" />
 
-        <gl-link
-          target="_blank"
-          data-testid="help"
-          :href="securityReportsDocsPath"
-          :aria-label="$options.i18n.securityReportsHelp"
-        >
-          <gl-icon name="question" />
-        </gl-link>
+        <help-icon
+          :help-path="securityReportsDocsPath"
+          :discover-project-security-path="discoverProjectSecurityPath"
+        />
       </span>
     </template>
 
-    <template v-if="isLoaded" #sub-heading>
+    <template v-if="shouldShowDownloadGuidance" #sub-heading>
       <span class="gl-font-sm">
         <gl-sprintf :message="$options.i18n.downloadFromPipelineTab">
           <template #link="{ content }">
@@ -204,6 +279,13 @@ export default {
         </gl-sprintf>
       </span>
     </template>
+
+    <template v-if="canShowDownloads" #action-buttons>
+      <security-report-download-dropdown
+        :artifacts="reportArtifacts"
+        :loading="isLoadingReportArtifacts"
+      />
+    </template>
   </report-section>
 
   <!-- TODO: Remove this section when removing core_security_mr_widget_counts
@@ -216,7 +298,7 @@ export default {
     data-testid="security-mr-widget"
   >
     <template #error>
-      <gl-sprintf :message="$options.i18n.scansHaveRun">
+      <gl-sprintf :message="scansHaveRunMessage">
         <template #link="{ content }">
           <gl-link data-testid="show-pipelines" @click="activatePipelinesTab">{{
             content
@@ -224,14 +306,17 @@ export default {
         </template>
       </gl-sprintf>
 
-      <gl-link
-        target="_blank"
-        data-testid="help"
-        :href="securityReportsDocsPath"
-        :aria-label="$options.i18n.securityReportsHelp"
-      >
-        <gl-icon name="question" />
-      </gl-link>
+      <help-icon
+        :help-path="securityReportsDocsPath"
+        :discover-project-security-path="discoverProjectSecurityPath"
+      />
+    </template>
+
+    <template v-if="canShowDownloads" #action-buttons>
+      <security-report-download-dropdown
+        :artifacts="reportArtifacts"
+        :loading="isLoadingReportArtifacts"
+      />
     </template>
   </report-section>
 </template>

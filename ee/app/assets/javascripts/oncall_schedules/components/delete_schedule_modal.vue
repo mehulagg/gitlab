@@ -25,6 +25,10 @@ export default {
       type: Object,
       required: true,
     },
+    modalId: {
+      type: String,
+      required: true,
+    },
   },
   data() {
     return {
@@ -47,14 +51,17 @@ export default {
   },
   methods: {
     deleteSchedule() {
-      const { projectPath } = this;
+      const {
+        projectPath,
+        schedule: { iid },
+      } = this;
 
       this.loading = true;
       this.$apollo
         .mutate({
           mutation: destroyOncallScheduleMutation,
           variables: {
-            id: this.schedule.id,
+            iid,
             projectPath,
           },
           update(store, { data }) {
@@ -85,8 +92,9 @@ export default {
 <template>
   <gl-modal
     ref="deleteScheduleModal"
-    modal-id="deleteScheduleModal"
+    :modal-id="modalId"
     size="sm"
+    :data-testid="`delete-schedule-modal-${schedule.iid}`"
     :title="$options.i18n.deleteSchedule"
     :action-primary="primaryProps"
     :action-cancel="cancelProps"

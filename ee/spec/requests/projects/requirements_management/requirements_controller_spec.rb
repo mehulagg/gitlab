@@ -115,7 +115,7 @@ RSpec.describe Projects::RequirementsManagement::RequirementsController do
 
   describe 'POST #authorize' do
     subject do
-      post authorize_project_requirements_management_requirements_path(project),
+      post import_csv_authorize_project_requirements_management_requirements_path(project),
         headers: workhorse_headers
     end
 
@@ -132,6 +132,7 @@ RSpec.describe Projects::RequirementsManagement::RequirementsController do
 
         it_behaves_like 'handle uploads authorize request' do
           let(:uploader_class) { FileUploader }
+          let(:maximum_size) { Gitlab::CurrentSettings.max_attachment_size.megabytes }
         end
       end
 

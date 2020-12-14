@@ -375,7 +375,7 @@ The files defined by `include` are:
 - Always evaluated first and merged with the content of `.gitlab-ci.yml`,
   regardless of the position of the `include` keyword.
 
-TIP: **Tip:**
+NOTE:
 Use merging to customize and override included CI/CD configurations with local
 definitions. Local definitions in `.gitlab-ci.yml` override included definitions.
 
@@ -503,7 +503,7 @@ so you can only `include` public projects or templates.
 For example:
 
 ```yaml
-# File sourced from GitLab's template collection
+# File sourced from the GitLab template collection
 include:
   - template: Auto-DevOps.gitlab-ci.yml
 ```
@@ -1417,7 +1417,7 @@ same rule.
 
 In the following example:
 
-- If the `Dockerfile` file or any file in `/docker/scripts` has changed, and var=blah,
+- If the `Dockerfile` file or any file in `/docker/scripts` has changed, and `$VAR` == "string value",
   then the job runs manually
 - Otherwise, the job isn't included in the pipeline.
 
@@ -1583,7 +1583,7 @@ that begin with `issue-`, but you can use `/issue-.*/`.
 
 Regular expression flags must be appended after the closing `/`.
 
-TIP: **Tip:**
+NOTE:
 Use anchors `^` and `$` to avoid the regular expression
 matching only a substring of the tag name or branch name.
 For example, `/^issue-.*$/` is equivalent to `/^issue-/`,
@@ -2472,7 +2472,7 @@ environment. A new `stop_review_app` job is listed under `on_stop`.
 After the `review_app` job is finished, it triggers the
 `stop_review_app` job based on what is defined under `when`. In this case,
 it is set to `manual`, so it needs a [manual action](#whenmanual) from
-GitLab's user interface to run.
+the GitLab UI to run.
 
 Also in the example, `GIT_STRATEGY` is set to `none`. If the
 `stop_review_app` job is [automatically triggered](../environments/index.md#automatically-stopping-an-environment),
@@ -3174,7 +3174,7 @@ in GitLab 13.4.
 
 The [`artifacts:reports` keyword](../pipelines/job_artifacts.md#artifactsreports)
 is used for collecting test reports, code quality reports, and security reports from jobs.
-It also exposes these reports in GitLab's UI (merge requests, pipeline views, and security dashboards).
+It also exposes these reports in the GitLab UI (merge requests, pipeline views, and security dashboards).
 
 These are the available report types:
 
@@ -3282,6 +3282,11 @@ job1:
   script: rspec
   coverage: '/Code coverage: \d+\.\d+/'
 ```
+
+The coverage is shown in the UI if at least one line in the job output matches the regular expression.
+If there is more than one matched line in the job output, the last line is used.
+For the matched line, the first occurence of `\d+(\.\d+)?` is the code coverage.
+Leading zeros are removed.
 
 ### `retry`
 
@@ -3504,6 +3509,7 @@ hover over the downstream pipeline job.
 In [GitLab 13.5](https://gitlab.com/gitlab-org/gitlab/-/issues/201938) and later, you
 can use [`when:manual`](#whenmanual) in the same job as `trigger`. In GitLab 13.4 and
 earlier, using them together causes the error `jobs:#{job-name} when should be on_success, on_failure or always`.
+You [cannot start `manual` trigger jobs with the API](https://gitlab.com/gitlab-org/gitlab/-/issues/284086).
 
 #### Basic `trigger` syntax for multi-project pipelines
 
@@ -3654,18 +3660,18 @@ The trigger token is different than the [`trigger`](#trigger) keyword.
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/32022) in GitLab 12.3.
 
-`interruptible` is used to indicate that a job should be canceled if made redundant by a newer pipeline run. Defaults to `false`.
+`interruptible` is used to indicate that a running job should be canceled if made redundant by a newer pipeline run.
+Defaults to `false` (uninterruptible). Jobs that have not started yet (pending) are considered interruptible
+and safe to be cancelled.
 This value is used only if the [automatic cancellation of redundant pipelines feature](../pipelines/settings.md#auto-cancel-pending-pipelines)
 is enabled.
 
-When enabled, a pipeline on the same branch is canceled when:
+When enabled, a pipeline is immediately canceled when a new pipeline starts on the same branch if either of the following is true:
 
-- It's made redundant by a newer pipeline run.
-- Either all jobs are set as interruptible, or any uninterruptible jobs haven't started.
+- All jobs in the pipeline are set as interruptible.
+- Any uninterruptible jobs have not started yet.
 
 Set jobs as interruptible that can be safely canceled once started (for instance, a build job).
-
-Pending jobs are always considered interruptible.
 
 For example:
 
@@ -3698,7 +3704,7 @@ In the example above, a new pipeline run causes an existing running pipeline to 
 - Canceled, if only `step-1` is running or pending.
 - Not canceled, once `step-2` starts running.
 
-When an uninterruptible job is running, the pipeline can never be canceled, regardless of the final job's state.
+When an uninterruptible job is running, the pipeline cannot be canceled, regardless of the final job's state.
 
 ### `resource_group`
 
@@ -3930,7 +3936,7 @@ You can use [Generic packages](../../user/packages/generic_packages/) to host yo
 For a complete example, see the [Release assets as Generic packages](https://gitlab.com/gitlab-org/release-cli/-/tree/master/docs/examples/release-assets-as-generic-package/)
 project.
 
-#### `releaser-cli` command line
+#### `release-cli` command line
 
 The entries under the `release` node are transformed into a `bash` command line and sent
 to the Docker container, which contains the [release-cli](https://gitlab.com/gitlab-org/release-cli).
@@ -4256,7 +4262,7 @@ job_name:
     - *some-script-before
   script:
     - *some-script
-  before_script:
+  after_script:
     - *some-script-after
 ```
 
@@ -4332,13 +4338,13 @@ The following keywords are deprecated.
 
 ### Globally-defined `types`
 
-DANGER: **Deprecated:**
+WARNING:
 `types` is deprecated, and could be removed in a future release.
 Use [`stages`](#stages) instead.
 
 ### Job-defined `type`
 
-DANGER: **Deprecated:**
+WARNING:
 `type` is deprecated, and could be removed in one of the future releases.
 Use [`stage`](#stage) instead.
 

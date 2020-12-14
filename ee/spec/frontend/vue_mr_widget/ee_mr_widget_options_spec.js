@@ -8,6 +8,7 @@ import {
   dependencyScanningDiffSuccessMock,
   secretScanningDiffSuccessMock,
   coverageFuzzingDiffSuccessMock,
+  apiFuzzingDiffSuccessMock,
 } from 'ee_jest/vue_shared/security_reports/mock_data';
 import { TEST_HOST } from 'helpers/test_constants';
 import { trimText } from 'helpers/text_helper';
@@ -25,12 +26,19 @@ import mockData, {
   pipelineJobs,
 } from './mock_data';
 
+// Force Jest to transpile and cache
+// eslint-disable-next-line import/order, no-unused-vars
+import _GroupedSecurityReportsApp from 'ee/vue_shared/security_reports/grouped_security_reports_app.vue';
+// eslint-disable-next-line no-unused-vars
+import _Deployment from '~/vue_merge_request_widget/components/deployment/deployment.vue';
+
 const SAST_SELECTOR = '.js-sast-widget';
 const DAST_SELECTOR = '.js-dast-widget';
 const DEPENDENCY_SCANNING_SELECTOR = '.js-dependency-scanning-widget';
 const CONTAINER_SCANNING_SELECTOR = '.js-container-scanning';
 const SECRET_SCANNING_SELECTOR = '.js-secret-scanning';
 const COVERAGE_FUZZING_SELECTOR = '.js-coverage-fuzzing-widget';
+const API_FUZZING_SELECTOR = '.js-api-fuzzing-widget';
 
 describe('ee merge request widget options', () => {
   let vm;
@@ -51,6 +59,7 @@ describe('ee merge request widget options', () => {
     delete mrWidgetOptions.extends.el; // Prevent component mounting
 
     gon.features = { asyncMrWidget: true };
+    gl.mrWidgetData = { ...mockData };
 
     Component = Vue.extend(mrWidgetOptions);
     mock = new MockAdapter(axios);
@@ -67,6 +76,7 @@ describe('ee merge request widget options', () => {
     // https://gitlab.com/gitlab-org/gitlab/-/issues/214032
     return waitForPromises().then(() => {
       vm.$destroy();
+      vm = null;
       mock.restore();
       gon.features = {};
     });
@@ -916,6 +926,78 @@ describe('ee merge request widget options', () => {
               .querySelector(SECRET_SCANNING_SELECTOR)
               .textContent.trim(),
           ).toContain('Secret scanning: Loading resulted in an error');
+          done();
+        });
+      });
+    });
+  });
+
+  describe('API Fuzzing', () => {
+    const API_FUZZING_ENDPOINT = 'api_fuzzing_report';
+
+    beforeEach(() => {
+      gl.mrWidgetData = {
+        ...mockData,
+        enabled_reports: {
+          api_fuzzing: true,
+        },
+        api_fuzzing_comparison_path: API_FUZZING_ENDPOINT,
+        vulnerability_feedback_path: VULNERABILITY_FEEDBACK_ENDPOINT,
+      };
+    });
+
+    describe('when it is loading', () => {
+      it('should render loading indicator', () => {
+        mock.onGet(API_FUZZING_ENDPOINT).reply(200, apiFuzzingDiffSuccessMock);
+        mock.onGet(VULNERABILITY_FEEDBACK_ENDPOINT).reply(200, []);
+
+        vm = mountComponent(Component, { mrData: gl.mrWidgetData });
+
+        expect(
+          trimText(findExtendedSecurityWidget().querySelector(API_FUZZING_SELECTOR).textContent),
+        ).toContain('API fuzzing is loading');
+      });
+    });
+
+    describe('with successful request', () => {
+      beforeEach(() => {
+        mock.onGet(API_FUZZING_ENDPOINT).reply(200, apiFuzzingDiffSuccessMock);
+        mock.onGet(VULNERABILITY_FEEDBACK_ENDPOINT).reply(200, []);
+
+        vm = mountComponent(Component, { mrData: gl.mrWidgetData });
+      });
+
+      it('should render provided data', done => {
+        setImmediate(() => {
+          expect(
+            trimText(
+              findExtendedSecurityWidget().querySelector(
+                `${API_FUZZING_SELECTOR} .report-block-list-issue-description`,
+              ).textContent,
+            ),
+          ).toEqual(
+            'API fuzzing detected 2 potential vulnerabilities 1 Critical 1 High and 0 Others',
+          );
+          done();
+        });
+      });
+    });
+
+    describe('with failed request', () => {
+      beforeEach(() => {
+        mock.onGet(API_FUZZING_ENDPOINT).reply(500, {});
+        mock.onGet(VULNERABILITY_FEEDBACK_ENDPOINT).reply(500, []);
+
+        vm = mountComponent(Component, { mrData: gl.mrWidgetData });
+      });
+
+      it('should render error indicator', done => {
+        setImmediate(() => {
+          expect(
+            findExtendedSecurityWidget()
+              .querySelector(API_FUZZING_SELECTOR)
+              .textContent.trim(),
+          ).toContain('API fuzzing: Loading resulted in an error');
           done();
         });
       });

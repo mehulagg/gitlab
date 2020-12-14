@@ -61,7 +61,9 @@ In case the column is not unique (no unique index definition), calling the `dist
 
 When dealing with data migrations the preferred way to iterate over large volume of data is using `EachBatch`.
 
-A special case of data migration is a background migration where the actual data modification is executed in a background job. The migration code that determines the data ranges (slices) and schedules the background jobs uses `each_batch`. More info: [background migration scheduling](background_migrations.md#scheduling)
+A special case of data migration is a [background migration](background_migrations.md#scheduling)
+where the actual data modification is executed in a background job. The migration code that determines
+the data ranges (slices) and schedules the background jobs uses `each_batch`.
 
 ## Efficient usage of `each_batch`
 
@@ -172,7 +174,7 @@ In this particular example the database had to read 10 rows (regardless of our b
 
 #### Improve filtering with `each_batch`
 
-##### Specialized conditinal index
+##### Specialized conditional index
 
 ```sql
 CREATE INDEX index_on_users_never_logged_in ON users (id) WHERE sign_in_count = 0
@@ -230,7 +232,7 @@ CREATE INDEX index_on_users_never_logged_in ON users (sign_in_count)
 
 Since `each_batch` builds range queries based on the `id` column, this index cannot be used efficiently. The DB reads the rows from the table or uses a bitmap search where the primary key index is also read.
 
-##### "Slow" iteraton
+##### "Slow" iteration
 
 Slow iteration means that we use a good index configuration to iterate over the table and apply filtering on the yielded relation.
 
@@ -369,4 +371,4 @@ end
 
 ### `EachBatch` vs `BatchCount`
 
-When adding new counters for usage ping, the preferred way to count records is using the `Gitlab::Database::BatchCount` class. The iteration logic implemented in `BatchCount` has similar performance characterisics like `EachBatch`. Most of the tips and suggestions for improving `BatchCount` mentioned above applies to `BatchCount` as well.
+When adding new counters for usage ping, the preferred way to count records is using the `Gitlab::Database::BatchCount` class. The iteration logic implemented in `BatchCount` has similar performance characteristics like `EachBatch`. Most of the tips and suggestions for improving `BatchCount` mentioned above applies to `BatchCount` as well.

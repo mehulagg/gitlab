@@ -2,11 +2,15 @@
 
 class Vulnerabilities::FindingEntity < Grape::Entity
   include RequestAwareEntity
+  include VulnerabilitiesHelper
 
   expose :id, :report_type, :name, :severity, :confidence
   expose :scanner, using: Vulnerabilities::ScannerEntity
   expose :identifiers, using: Vulnerabilities::IdentifierEntity
   expose :project_fingerprint
+  expose :create_jira_issue_url do |occurrence|
+    create_jira_issue_url_for(occurrence)
+  end
   expose :create_vulnerability_feedback_issue_path do |occurrence|
     create_vulnerability_feedback_issue_path(occurrence.project)
   end

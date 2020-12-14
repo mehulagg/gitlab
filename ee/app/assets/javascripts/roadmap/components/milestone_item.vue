@@ -62,11 +62,11 @@ export default {
     },
     hasStartDate() {
       if (this.presetTypeQuarters) {
-        return this.hasStartDateForQuarter();
+        return this.hasStartDateForQuarter(this.timeframeItem);
       } else if (this.presetTypeMonths) {
-        return this.hasStartDateForMonth();
+        return this.hasStartDateForMonth(this.timeframeItem);
       } else if (this.presetTypeWeeks) {
-        return this.hasStartDateForWeek();
+        return this.hasStartDateForWeek(this.timeframeItem);
       }
       return false;
     },

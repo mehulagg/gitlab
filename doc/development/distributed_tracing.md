@@ -49,7 +49,7 @@ all subsystems at GitLab:
   - Correlation IDs should never be used to pass context (for example, a username or an IP address).
   - Correlation IDs should never be _parsed_, or manipulated in other ways (for example, split).
 
-The [LabKit library](https://gitlab.com/gitlab-org/labkit) provides a standardized interface for working with GitLab's
+The [LabKit library](https://gitlab.com/gitlab-org/labkit) provides a standardized interface for working with GitLab
 correlation IDs in the Go programming language. LabKit can be used as a
 reference implementation for developers working with tracing and correlation IDs
 on non-Go GitLab subsystems.
@@ -215,6 +215,6 @@ not set.
 
 By default, the Jaeger search UI is available at <http://localhost:16686/search>.
 
-TIP: **Tip:**
+NOTE:
 Don't forget that you must generate traces by using the application before
 they appear in the Jaeger UI.

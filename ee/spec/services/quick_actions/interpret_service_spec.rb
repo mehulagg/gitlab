@@ -503,6 +503,12 @@ RSpec.describe QuickActions::InterpretService do
             let(:target) { merge_request }
           end
 
+          context 'when target epic is not persisted yet' do
+            let(:target) { build(:epic, group: group) }
+
+            it_behaves_like 'quick action is unavailable', :child_epic
+          end
+
           context 'when passed child epic is nil' do
             let(:child_epic) { nil }
 
@@ -645,6 +651,12 @@ RSpec.describe QuickActions::InterpretService do
 
           it_behaves_like 'quick action is unavailable', :remove_child_epic do
             let(:target) { merge_request }
+          end
+
+          context 'when target epic is not persisted yet' do
+            let(:target) { build(:epic, group: group) }
+
+            it_behaves_like 'quick action is unavailable', :remove_child_epic
           end
 
           it_behaves_like 'epic relation is removed'
@@ -1176,6 +1188,12 @@ RSpec.describe QuickActions::InterpretService do
           it_behaves_like 'target epic does not exist', :parent
         end
 
+        context 'when target epic is not persisted yet' do
+          let(:target) { build(:epic, group: group) }
+
+          it_behaves_like 'quick action is unavailable', :parent_epic
+        end
+
         context 'when user has no permission to read epic' do
           let(:content) { "/parent_epic #{epic2&.to_reference(epic)}" }
 
@@ -1207,6 +1225,12 @@ RSpec.describe QuickActions::InterpretService do
             expect(message)
               .to eq("Removed parent epic #{epic2.group.name}&#{epic2.iid}.")
           end
+        end
+
+        context 'when target epic is not persisted yet' do
+          let(:target) { build(:epic, group: group) }
+
+          it_behaves_like 'quick action is unavailable', :remove_parent_epic
         end
 
         context 'when parent is not present' do

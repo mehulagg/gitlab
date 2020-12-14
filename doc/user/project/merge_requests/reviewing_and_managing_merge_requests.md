@@ -18,7 +18,7 @@ View all the merge requests within a project by navigating to **Project > Merge 
 When you access your project's merge requests, GitLab will present them in a list,
 and you can use the tabs available to quickly filter by open and closed. You can also [search and filter the results](../../search/index.md#filtering-issue-and-merge-request-lists).
 
-![Project merge requests list view](img/project_merge_requests_list_view.png)
+![Project merge requests list view](img/project_merge_requests_list_view_v13_5.png)
 
 ## View merge requests for all projects in a group
 
@@ -95,7 +95,7 @@ merge request:
 
 1. Go to the merge request's **Changes** tab.
 1. Click the cog icon (**{settings}**) to reveal the merge request's settings dropdown.
-1. Select or unselect the checkbox **Show one file at a time** to change the setting accordingly.
+1. Select or deselect the checkbox **Show one file at a time** to change the setting accordingly.
 
 This change overrides the choice you made in your user preferences and persists until you clear your
 browser's cookies or change this behavior again.
@@ -132,7 +132,7 @@ specific commit page.
 
 ![MR diff](img/merge_request_diff.png)
 
-TIP: **Tip:**
+NOTE:
 You can append `?w=1` while on the diffs page of a merge request to ignore any
 whitespace changes.
 

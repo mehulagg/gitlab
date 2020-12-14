@@ -56,6 +56,12 @@ There are several components that work in concert for the Agent to accomplish Gi
 
 These repositories might be the same GitLab project or separate projects.
 
+NOTE:
+GitLab recommends you use the same GitLab project for the agent configuration
+and manifest repositories. Our backlog contains issues for adding support for
+[private manifest repositories outside of the configuration project](https://gitlab.com/gitlab-org/gitlab/-/issues/220912) and
+[group level agents](https://gitlab.com/gitlab-org/gitlab/-/issues/283885).
+
 For more details, please refer to our [full architecture documentation](https://gitlab.com/gitlab-org/cluster-integration/gitlab-agent/-/blob/master/doc/architecture.md#high-level-architecture) in the Agent project.
 
 ## Get started with GitOps and the GitLab Agent
@@ -82,8 +88,8 @@ Upgrade your agent installations together with GitLab upgrades. To decide which 
 1. Open the [GITLAB_KAS_VERSION](https://gitlab.com/gitlab-org/gitlab/-/blob/master/GITLAB_KAS_VERSION) file from the GitLab Repository, which contains the latest `agentk` version associated with the `master` branch.
 1. Change the `master` branch and select the Git tag associated with your version. For instance, you could change it to GitLab [v13.5.3-ee release](https://gitlab.com/gitlab-org/gitlab/-/blob/v13.5.3-ee/GITLAB_KAS_VERSION)
 
-The available `agentk` versions can be found in
-[its container registry](https://gitlab.com/gitlab-org/cluster-integration/gitlab-agent/container_registry/eyJuYW1lIjoiZ2l0bGFiLW9yZy9jbHVzdGVyLWludGVncmF0aW9uL2dpdGxhYi1hZ2VudC9hZ2VudGsiLCJ0YWdzX3BhdGgiOiIvZ2l0bGFiLW9yZy9jbHVzdGVyLWludGVncmF0aW9uL2dpdGxhYi1hZ2VudC9yZWdpc3RyeS9yZXBvc2l0b3J5LzEyMjMyMDUvdGFncz9mb3JtYXQ9anNvbiIsImlkIjoxMjIzMjA1LCJjbGVhbnVwX3BvbGljeV9zdGFydGVkX2F0IjpudWxsfQ==).
+The available `agentk` and `kas` versions can be found in
+[the container registry](https://gitlab.com/gitlab-org/cluster-integration/gitlab-agent/container_registry/).
 
 ### Install the Kubernetes Agent Server
 
@@ -243,11 +249,14 @@ example [`resources.yml` file](#example-resourcesyml-file) in the following ways
   The agent can use the WebSockets or gRPC protocols to connect to the Agent Server.
   Select the option appropriate for your cluster configuration and GitLab architecture:
   - The `wss` scheme (an encrypted WebSockets connection) is specified by default
-    after you install `gitlab-kas` sub-chart or enable `kas` for Omnibus GitLab.
-    In this case, you must set `wss://GitLab.host.tld:443/-/kubernetes-agent` as
+    after you install the `gitlab-kas` sub-chart, or enable `gitlab-kas` for Omnibus GitLab.
+    When using the sub-chart, you must set `wss://kas.host.tld:443` as
+    `kas-address`, where `host.tld` is the domain you've setup for your GitLab installation.
+    When using Omnibus GitLab, you must set `wss://GitLab.host.tld:443/-/kubernetes-agent` as
     `kas-address`, where `GitLab.host.tld` is your GitLab hostname.
-  - Specify the `ws` scheme (such as `ws://GitLab.host.tld:80/-/kubernetes-agent`)
+  - When using the sub-chart, specify the `ws` scheme (such as `ws://kas.host.tld:80`)
     to use an unencrypted WebSockets connection.
+    When using the Omnibus GitLab, specify the `ws` scheme (such as `ws://GitLab.host.tld:80/-/kubernetes-agent`).
   - Specify the `grpc` scheme if both Agent and Server are installed in one cluster.
     In this case, you may specify `kas-address` value as
     `grpc://gitlab-kas.<your-namespace>:5005`) to use gRPC directly, where `gitlab-kas`
@@ -256,6 +265,10 @@ example [`resources.yml` file](#example-resourcesyml-file) in the following ways
     Follow the
     [Support TLS for gRPC communication issue](https://gitlab.com/gitlab-org/cluster-integration/gitlab-agent/-/issues/7)
     for progress updates.
+  - When deploying KAS through the [GitLab chart](https://docs.gitlab.com/charts/), it's possible to customize the `kas-address` for `wss` and `ws` schemes to whatever you need.
+    Check the [chart's KAS Ingress docs](https://docs.gitlab.com/charts/charts/gitlab/kas/#ingress)
+    to learn more about it.
+  - In the near future, Omnibus GitLab intends to provision `gitlab-kas` under a sub-domain by default, instead of the `/-/kubernetes-agent` path. Please follow [this issue](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5784) for details.
 - If you defined your own secret name, replace `gitlab-agent-token` with your
   secret name in the `secretName:` section.
 
@@ -303,7 +316,8 @@ spec:
         args:
         - --token-file=/config/token
         - --kas-address
-        - wss://gitlab.host.tld:443/-/kubernetes-agent
+        - wss://kas.host.tld:443 # change this line for the one below if using Omnibus GitLab
+        # - wss://gitlab.host.tld:443/-/kubernetes-agent
         volumeMounts:
         - name: token-volume
           mountPath: /config
@@ -537,7 +551,7 @@ issue is in progress, directly edit the deployment with the
 `kubectl edit deployment gitlab-kas` command, and change `--listen-websocket=true` to `--listen-websocket=false`. After running that command, you should be able to use
 `grpc://gitlab-kas.<YOUR-NAMESPACE>:5005`.
 
-#### Agent logs - Decompressor is not installed for grpc-encoding
+### Agent logs - Decompressor is not installed for grpc-encoding
 
 ```plaintext
 {"level":"warn","time":"2020-11-05T05:25:46.916Z","msg":"GetConfiguration.Recv failed","error":"rpc error: code = Unimplemented desc = grpc: Decompressor is not installed for grpc-encoding \"gzip\""}

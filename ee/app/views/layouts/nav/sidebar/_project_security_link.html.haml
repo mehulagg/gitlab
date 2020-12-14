@@ -21,7 +21,7 @@
           = link_to project_security_dashboard_index_path(@project), title: _('Security Dashboard') do
             %span= _('Security Dashboard')
 
-        = nav_link(path: 'projects/security/vulnerability_report#index') do
+        = nav_link(path: ['projects/security/vulnerability_report#index', 'projects/security/vulnerabilities#show']) do
           = link_to project_security_vulnerability_report_index_path(@project), title: _('Vulnerability Report'), data: { qa_selector: 'vulnerability_report_link' } do
             %span= _('Vulnerability Report')
 
@@ -46,7 +46,7 @@
             %span= _('Threat Monitoring')
 
       - if project_nav_tab?(:security_configuration)
-        = nav_link(path: ['projects/security/configuration#show', 'projects/security/sast_configuration#show']) do
+        = nav_link(path: sidebar_security_configuration_paths) do
           = link_to project_security_configuration_path(@project), title: _('Configuration'), data: { qa_selector: 'security_configuration_link'} do
             %span= _('Configuration')
 

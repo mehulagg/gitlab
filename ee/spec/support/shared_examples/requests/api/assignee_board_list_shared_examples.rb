@@ -7,7 +7,7 @@ RSpec.shared_examples 'assignee board list' do
       post api(url, user), params: { assignee_id: other_user.id }
 
       expect(response).to have_gitlab_http_status(:bad_request)
-      expect(json_response.dig('message', 'error')).to eq('User not found!')
+      expect(json_response.dig('message', 'error')).to eq('Assignee not found')
     end
 
     it 'returns 400 if assignee list feature is not available' do
@@ -16,8 +16,8 @@ RSpec.shared_examples 'assignee board list' do
       post api(url, user), params: { assignee_id: user.id }
 
       expect(response).to have_gitlab_http_status(:bad_request)
-      expect(json_response.dig('message', 'list_type'))
-          .to contain_exactly('Assignee lists not available with your current license')
+      expect(json_response.dig('message', 'error'))
+          .to eq('List type Assignee lists not available with your current license')
     end
 
     it 'creates an assignee list if user is found' do

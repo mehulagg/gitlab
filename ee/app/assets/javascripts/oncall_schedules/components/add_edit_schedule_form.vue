@@ -9,6 +9,7 @@ import {
   GlSearchBoxByType,
 } from '@gitlab/ui';
 import { s__, __ } from '~/locale';
+import { getFormattedTimezone } from '../utils/common_utils';
 
 export const i18n = {
   selectTimezone: s__('OnCallSchedules|Select timezone'),
@@ -90,7 +91,7 @@ export default {
   },
   methods: {
     getFormattedTimezone(tz) {
-      return __(`(UTC${tz.formatted_offset}) ${tz.abbr} ${tz.name}`);
+      return getFormattedTimezone(tz);
     },
     isTimezoneSelected(tz) {
       return isEqual(tz, this.form.timezone);

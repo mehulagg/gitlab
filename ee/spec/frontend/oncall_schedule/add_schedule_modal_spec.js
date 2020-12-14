@@ -2,6 +2,7 @@ import { shallowMount } from '@vue/test-utils';
 import { GlModal, GlAlert } from '@gitlab/ui';
 import waitForPromises from 'helpers/wait_for_promises';
 import AddScheduleModal from 'ee/oncall_schedules/components/add_schedule_modal.vue';
+import { addScheduleModalId } from 'ee/oncall_schedules/components/oncall_schedules_wrapper';
 import { getOncallSchedulesQueryResponse } from './mocks/apollo_mock';
 import mockTimezones from './mocks/mockTimezones.json';
 
@@ -10,18 +11,19 @@ describe('AddScheduleModal', () => {
   const projectPath = 'group/project';
   const mutate = jest.fn();
   const mockHideModal = jest.fn();
+  const formData =
+    getOncallSchedulesQueryResponse.data.project.incidentManagementOncallSchedules.nodes[0];
 
   const createComponent = ({ data = {}, props = {} } = {}) => {
     wrapper = shallowMount(AddScheduleModal, {
       data() {
         return {
-          form:
-            getOncallSchedulesQueryResponse.data.project.incidentManagementOncallSchedules.nodes[0],
+          form: formData,
           ...data,
         };
       },
       propsData: {
-        modalId: 'modalId',
+        modalId: addScheduleModalId,
         ...props,
       },
       provide: {
@@ -60,7 +62,14 @@ describe('AddScheduleModal', () => {
       findModal().vm.$emit('primary', { preventDefault: jest.fn() });
       expect(mutate).toHaveBeenCalledWith({
         mutation: expect.any(Object),
-        variables: { oncallScheduleCreateInput: expect.objectContaining({ projectPath }) },
+        update: expect.any(Function),
+        variables: {
+          oncallScheduleCreateInput: {
+            projectPath,
+            ...formData,
+            timezone: formData.timezone.identifier,
+          },
+        },
       });
     });
 

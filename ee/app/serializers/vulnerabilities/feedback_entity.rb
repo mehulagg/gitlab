@@ -12,6 +12,7 @@ class Vulnerabilities::FeedbackEntity < Grape::Entity
     expose :comment_timestamp
     expose :comment_author, using: UserEntity
   end
+  expose :finding_uuid
 
   expose :pipeline, if: -> (feedback, _) { feedback.pipeline.present? } do
     expose :id do |feedback|

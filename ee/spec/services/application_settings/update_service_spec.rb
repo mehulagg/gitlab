@@ -167,16 +167,16 @@ RSpec.describe ApplicationSettings::UpdateService do
 
     context 'user cap setting' do
       shared_examples 'worker is not called' do
-        it 'does not call ApproveBlockedUsersWorker' do
-          expect(ApproveBlockedUsersWorker).not_to receive(:perform_async)
+        it 'does not call ApproveBlockedPendingApprovalUsersWorker' do
+          expect(ApproveBlockedPendingApprovalUsersWorker).not_to receive(:perform_async)
 
           service.execute
         end
       end
 
       shared_examples 'worker is called' do
-        it 'calls ApproveBlockedUsersWorker' do
-          expect(ApproveBlockedUsersWorker).to receive(:perform_async)
+        it 'calls ApproveBlockedPendingApprovalUsersWorker' do
+          expect(ApproveBlockedPendingApprovalUsersWorker).to receive(:perform_async)
 
           service.execute
         end
@@ -198,7 +198,7 @@ RSpec.describe ApplicationSettings::UpdateService do
 
       context 'when new user cap is set to a number' do
         let(:setting) do
-          build(:application_setting, new_user_signups_cap: 10)
+          create(:application_setting, new_user_signups_cap: 10)
         end
 
         context 'when decreasing new user cap' do

@@ -13,7 +13,7 @@ module EE
     def read_only_message
       message = ::Gitlab::Geo.secondary? ? geo_secondary_read_only_message : super
 
-      return message unless maintenance_mode?
+      return message unless ::Gitlab.maintenance_mode?
       return maintenance_mode_message.concat(message) if message
 
       maintenance_mode_message
@@ -96,7 +96,7 @@ module EE
     def autocomplete_data_sources(object, noteable_type)
       return {} unless object && noteable_type
 
-      enabled_for_vulnerabilities = object.feature_available?(:security_dashboard) && ::Feature.enabled?(:vulnerability_special_references, object)
+      enabled_for_vulnerabilities = object.feature_available?(:security_dashboard)
 
       if object.is_a?(Group)
         {
@@ -155,12 +155,6 @@ module EE
 
         next_unprocessed_event.created_at < EVENT_LAG_SHOW_THRESHOLD.ago
       end
-    end
-
-    def maintenance_mode?
-      return unless ::Feature.enabled?(:maintenance_mode)
-
-      ::Gitlab::CurrentSettings.maintenance_mode
     end
   end
 end

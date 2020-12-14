@@ -4,8 +4,6 @@
   modify the passed parameter in conformity with non-ee BoardsStore.
 */
 
-import { sortBy } from 'lodash';
-import Cookies from 'js-cookie';
 import { __, sprintf } from '~/locale';
 import sidebarEventHub from '~/sidebar/event_hub';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
@@ -19,13 +17,7 @@ class BoardsStoreEE {
   initEESpecific(boardsStore) {
     this.$boardApp = document.getElementById('board-app');
     this.store = boardsStore;
-    this.store.addPromotionState = () => {
-      this.addPromotion();
-    };
     this.store.loadList = (listPath, listType) => this.loadList(listPath, listType);
-    this.store.removePromotionState = () => {
-      this.removePromotion();
-    };
 
     const superSetCurrentBoard = this.store.setCurrentBoard.bind(this.store);
     this.store.setCurrentBoard = board => {
@@ -166,38 +158,6 @@ class BoardsStoreEE {
     this.store.filter.path = filterPath.join('&');
 
     this.store.updateFiltersUrl(true);
-  }
-
-  addPromotion() {
-    if (
-      !this.$boardApp.hasAttribute('data-show-promotion') ||
-      this.promotionIsHidden() ||
-      this.store.disabled
-    ) {
-      return;
-    }
-
-    this.store.addList({
-      id: 'promotion',
-      list_type: 'promotion',
-      title: __('Improve Issue boards'),
-      position: 0,
-    });
-
-    this.store.state.lists = sortBy(this.store.state.lists, 'position');
-  }
-
-  removePromotion() {
-    this.store.removeList('promotion', 'promotion');
-
-    Cookies.set('promotion_issue_board_hidden', 'true', {
-      expires: 365 * 10,
-      path: '',
-    });
-  }
-
-  promotionIsHidden() {
-    return parseBoolean(Cookies.get('promotion_issue_board_hidden'));
   }
 
   setMaxIssueCountOnList(id, maxIssueCount) {

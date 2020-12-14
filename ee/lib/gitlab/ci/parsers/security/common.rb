@@ -74,7 +74,8 @@ module Gitlab
                 links: links,
                 remediations: remediations,
                 raw_metadata: data.to_json,
-                metadata_version: version))
+                metadata_version: version,
+                details: data['details'] || {}))
           end
 
           def create_scan(report, scan_data)

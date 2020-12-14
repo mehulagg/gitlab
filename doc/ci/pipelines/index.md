@@ -10,7 +10,7 @@ type: reference
 
 > Introduced in GitLab 8.8.
 
-TIP: **Tip:**
+NOTE:
 Watch the
 ["Mastering continuous software development"](https://about.gitlab.com/webcast/mastering-ci-cd/)
 webcast to see a comprehensive demo of a GitLab CI/CD pipeline.
@@ -260,6 +260,18 @@ The union of A, B, and C is (1, 4) and (6, 7). Therefore, the total running time
 ```plaintext
 (4 - 1) + (7 - 6) => 4
 ```
+
+#### How pipeline quota usage is calculated
+
+Pipeline quota usage is calculated as the sum of the duration of each individual job. This is slightly different to how pipeline _duration_ is [calculated](#how-pipeline-duration-is-calculated). Pipeline quota usage doesn't consider any overlap of jobs running in parallel.
+
+For example, a pipeline consists of the following jobs:
+
+- Job A takes 3 minutes.
+- Job B takes 3 minutes.
+- Job C takes 2 minutes.
+
+The pipeline quota usage is the sum of each job's duration. In this example, 8 runner minutes would be used, calculated as: 3 + 3 + 2.
 
 ### Pipeline security on protected branches
 

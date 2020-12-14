@@ -65,10 +65,6 @@ module Gitlab
         tracking_category: 'Growth::Expansion::Experiment::CustomizeHomepage',
         use_backwards_compatible_subject_index: true
       },
-      invite_email: {
-        tracking_category: 'Growth::Acquisition::Experiment::InviteEmail',
-        use_backwards_compatible_subject_index: true
-      },
       group_only_trials: {
         tracking_category: 'Growth::Conversion::Experiment::GroupOnlyTrials',
         use_backwards_compatible_subject_index: true
@@ -85,6 +81,9 @@ module Gitlab
       },
       trimmed_skip_trial_copy: {
         tracking_category: 'Growth::Conversion::Experiment::TrimmedSkipTrialCopy'
+      },
+      trial_registration_with_social_signin: {
+        tracking_category: 'Growth::Conversion::Experiment::TrialRegistrationWithSocialSigning'
       }
     }.freeze
 

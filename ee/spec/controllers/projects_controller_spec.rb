@@ -21,32 +21,39 @@ RSpec.describe ProjectsController do
     subject { get :show, params: { namespace_id: public_project.namespace.path, id: public_project.path } }
 
     context 'additional repo storage by namespace' do
-      using RSpec::Parameterized::TableSyntax
       let(:namespace) { public_project.namespace }
 
-      where(:automatic_purchased_storage_allocation, :additional_repo_storage_by_namespace, :expected_to_render) do
-        true | true | true
-        true | false | false
-        false | true | false
-        false | false | false
+      before do
+        allow_next_instance_of(EE::Namespace::RootExcessStorageSize) do |root_storage|
+          allow(root_storage).to receive(:usage_ratio).and_return(0.5)
+          allow(root_storage).to receive(:above_size_limit?).and_return(true)
+        end
+        stub_feature_flags(namespace_storage_limit: false)
+
+        namespace.add_owner(user)
       end
 
-      with_them do
+      context 'when automatic_purchased_storage_allocation setting is enabled' do
         before do
-          allow_next_instance_of(EE::Namespace::RootExcessStorageSize) do |root_storage|
-            allow(root_storage).to receive(:usage_ratio).and_return(0.5)
-            allow(root_storage).to receive(:above_size_limit?).and_return(true)
-          end
-          stub_application_setting(automatic_purchased_storage_allocation: automatic_purchased_storage_allocation)
-          stub_feature_flags(additional_repo_storage_by_namespace: additional_repo_storage_by_namespace, namespace_storage_limit: false)
-
-          namespace.add_owner(user)
+          stub_application_setting(automatic_purchased_storage_allocation: true)
         end
 
-        it do
+        it 'includes the CTA for additional purchased storage' do
           subject
 
-          expect(response.body.include?("Please purchase additional storage")).to eq(expected_to_render)
+          expect(response.body).to match(/Please purchase additional storage/)
+        end
+      end
+
+      context 'when automatic_purchased_storage_allocation setting is disabled' do
+        before do
+          stub_application_setting(automatic_purchased_storage_allocation: false)
+        end
+
+        it 'does not include the CTA for additional purchased storage' do
+          subject
+
+          expect(response.body).not_to match(/Please purchase additional storage/)
         end
       end
     end

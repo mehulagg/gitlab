@@ -58,6 +58,10 @@ class Projects::RequirementsManagement::RequirementsController < Projects::Appli
     FileUploader
   end
 
+  def maximum_size
+    Gitlab::CurrentSettings.max_attachment_size.megabytes
+  end
+
   def file_extension_whitelist
     EXTENSION_WHITELIST
   end

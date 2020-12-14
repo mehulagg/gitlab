@@ -63,7 +63,7 @@ Here's a list of the AWS services we will use, with links to pricing information
 
 ## Create an IAM EC2 instance role and profile
 
-As we'll be using [Amazon S3 object storage](#amazon-s3-object-storage), our EC2 instances need to have read, write, and list permissions for our S3 buckets. To avoid embedding AWS keys in our GitLab config, we'll make use of an [IAM Role](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html) to allow our GitLab instance with this access. We'll need to create an IAM policy to attach to our IAM role:
+As we'll be using [Amazon S3 object storage](#amazon-s3-object-storage), our EC2 instances need to have read, write, and list permissions for our S3 buckets. To avoid embedding AWS keys in our GitLab configuration, we'll make use of an [IAM Role](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html) to allow our GitLab instance with this access. We'll need to create an IAM policy to attach to our IAM role:
 
 ### Create an IAM Policy
 
@@ -312,7 +312,7 @@ We need a security group for our database that will allow inbound traffic from t
 
 ### Create the database
 
-DANGER: **Warning:**
+WARNING:
 Avoid using burstable instances (t class instances) for the database as this could lead to performance issues due to CPU credits running out during sustained periods of high load.
 
 Now, it's time to create the database:
@@ -349,7 +349,7 @@ Now that the database is created, let's move on to setting up Redis with ElastiC
 ElastiCache is an in-memory hosted caching solution. Redis maintains its own
 persistence and is used to store session data, temporary cache information, and background job queues for the GitLab application.
 
-DANGER: **Warning:**
+WARNING:
 GitLab recommends you use ElastiCache Redis version 5.0.x, because version 6.x contains
 a bug that [prevents Sidekiq from processing jobs](https://gitlab.com/gitlab-org/gitlab/-/issues/281683).
 
@@ -399,7 +399,7 @@ a bug that [prevents Sidekiq from processing jobs](https://gitlab.com/gitlab-org
 
 Since our GitLab instances will be in private subnets, we need a way to connect to these instances via SSH to make configuration changes, perform upgrades, etc. One way of doing this is via a [bastion host](https://en.wikipedia.org/wiki/Bastion_host), sometimes also referred to as a jump box.
 
-TIP: **Tip:**
+NOTE:
 If you do not want to maintain bastion hosts, you can set up [AWS Systems Manager Session Manager](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager.html) for access to instances. This is beyond the scope of this document.
 
 ### Create Bastion Host A

@@ -95,7 +95,9 @@ class Groups::OmniauthCallbacksController < OmniauthCallbacksController
 
   override :build_auth_user
   def build_auth_user(auth_user_class)
-    Gitlab::Auth::GroupSaml::User.new(oauth, @saml_provider)
+    super.tap do |auth_user|
+      auth_user.saml_provider = @saml_provider
+    end
   end
 
   override :fail_login

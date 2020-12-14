@@ -31,7 +31,7 @@ sprite_icon(icon_name, size: nil, css_class: '')
 - **icon_name**: Use the icon_name for the SVG sprite in the list of
   ([GitLab SVGs](https://gitlab-org.gitlab.io/gitlab-svgs)).
 - **size (optional)**: Use one of the following sizes : 16, 24, 32, 48, 72 (this
-  will be translated into a `s16` class)
+  is translated into a `s16` class)
 - **css_class (optional)**: If you want to add additional CSS classes.
 
 **Example**
@@ -47,8 +47,6 @@ sprite_icon(icon_name, size: nil, css_class: '')
   <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="/assets/icons.svg#issues"></use>
 </svg>
 ```
-
-**Please note:** The `icon(icon_name, options: {})` helper function is deprecated and should not be used anymore.
 
 ### Usage in Vue
 
@@ -92,7 +90,7 @@ Please use the following function inside JS to render an icon:
 
 ### Usage in HAML/Rails
 
-DANGER: **Warning:**
+WARNING:
 Do not use the `spinner` or `icon('spinner spin')` rails helpers to insert
 loading icons. These helpers rely on the Font Awesome icon library which is
 deprecated.

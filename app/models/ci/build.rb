@@ -190,6 +190,8 @@ module Ci
 
     scope :with_coverage, -> { where.not(coverage: nil) }
 
+    scope :for_project, -> (project_id) { where(project_id: project_id) }
+
     acts_as_taggable
 
     add_authentication_token_field :token, encrypted: :optional
@@ -535,6 +537,7 @@ module Ci
       strong_memoize(:variables) do
         Gitlab::Ci::Variables::Collection.new
           .concat(persisted_variables)
+          .concat(dependency_proxy_variables)
           .concat(job_jwt_variables)
           .concat(scoped_variables)
           .concat(job_variables)
@@ -580,6 +583,15 @@ module Ci
 
         variables.append(key: 'CI_DEPLOY_USER', value: gitlab_deploy_token.username)
         variables.append(key: 'CI_DEPLOY_PASSWORD', value: gitlab_deploy_token.token, public: false, masked: true)
+      end
+    end
+
+    def dependency_proxy_variables
+      Gitlab::Ci::Variables::Collection.new.tap do |variables|
+        break variables unless Gitlab.config.dependency_proxy.enabled
+
+        variables.append(key: 'CI_DEPENDENCY_PROXY_USER', value: ::Gitlab::Auth::CI_JOB_USER)
+        variables.append(key: 'CI_DEPENDENCY_PROXY_PASSWORD', value: token.to_s, public: false, masked: true)
       end
     end
 
@@ -992,6 +1004,15 @@ module Ci
       # NOTE: This is temporary and will be replaced later by a value
       # that would come from an actual application limit.
       ::Gitlab.com? ? 500_000 : 0
+    end
+
+    def debug_mode?
+      return false unless Feature.enabled?(:restrict_access_to_build_debug_mode, default_enabled: true)
+
+      # TODO: Have `debug_mode?` check against data on sent back from runner
+      # to capture all the ways that variables can be set.
+      # See (https://gitlab.com/gitlab-org/gitlab/-/issues/290955)
+      variables.any? { |variable| variable[:key] == 'CI_DEBUG_TRACE' && variable[:value].casecmp('true') == 0 }
     end
 
     protected

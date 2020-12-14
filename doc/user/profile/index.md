@@ -74,7 +74,7 @@ From there, you can:
 - Manage your [preferences](preferences.md#syntax-highlighting-theme)
   to customize your own GitLab experience
 - [View your active sessions](active_sessions.md) and revoke any of them if necessary
-- Access your audit log, a security log of important events involving your account
+- Access your audit events, a security log of important events involving your account
 
 ## Changing your password
 
@@ -106,7 +106,7 @@ It is currently not possible to change your username if it contains a
 project with [Container Registry](../packages/container_registry/index.md) tags,
 because the project cannot be moved.
 
-TIP: **Tip:**
+NOTE:
 If you want to retain ownership over the original namespace and
 protect the URL redirects, then instead of changing a group's path or renaming a
 username, you can create a new group and transfer projects to it.
@@ -305,7 +305,7 @@ you are asked to sign in again to verify your identity for security reasons.
 NOTE:
 When any session is signed out, or when a session is revoked
 via [Active Sessions](active_sessions.md), all **Remember me** tokens are revoked.
-While other sessions will remain active, the **Remember me** feature will not restore
+While other sessions remain active, the **Remember me** feature doesn't restore
 a session if the browser is closed or the existing session expires.
 
 ### Increased sign-in time

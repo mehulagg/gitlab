@@ -4,7 +4,7 @@ require 'spec_helper'
 
 RSpec.describe Vulnerabilities::FindingEntity do
   let_it_be(:user) { build(:user) }
-  let_it_be(:project) { build(:project) }
+  let_it_be_with_refind(:project) { create(:project) }
 
   let(:scanner) { build(:vulnerabilities_scanner, project: project) }
 
@@ -67,6 +67,7 @@ RSpec.describe Vulnerabilities::FindingEntity do
       end
 
       it 'does not contain vulnerability feedback paths' do
+        expect(subject[:create_jira_issue_url]).to be_falsey
         expect(subject[:create_vulnerability_feedback_issue_path]).to be_falsey
         expect(subject[:create_vulnerability_feedback_merge_request_path]).to be_falsey
         expect(subject[:create_vulnerability_feedback_dismissal_path]).to be_falsey
@@ -76,6 +77,10 @@ RSpec.describe Vulnerabilities::FindingEntity do
     context 'when allowed to admin vulnerability feedback' do
       before do
         project.add_developer(user)
+      end
+
+      it 'does not contain create jira issue path' do
+        expect(subject[:create_jira_issue_url]).to be_falsey
       end
 
       it 'contains vulnerability feedback dismissal path' do
@@ -90,8 +95,27 @@ RSpec.describe Vulnerabilities::FindingEntity do
         expect(subject).to include(:create_vulnerability_feedback_merge_request_path)
       end
 
+      context 'when jira service is configured' do
+        let_it_be(:jira_service) { create(:jira_service, project: project, issues_enabled: true, project_key: 'FE', vulnerabilities_enabled: true, vulnerabilities_issuetype: '10001') }
+
+        before do
+          stub_licensed_features(jira_vulnerabilities_integration: true)
+          allow_next_found_instance_of(JiraService) do |jira|
+            allow(jira).to receive(:jira_project_id).and_return('11223')
+          end
+        end
+
+        it 'does contains create jira issue path' do
+          expect(subject[:create_jira_issue_url]).to be_present
+        end
+      end
+
       context 'when disallowed to create issue' do
         let(:project) { create(:project, issues_access_level: ProjectFeature::DISABLED) }
+
+        it 'does not contain create jira issue path' do
+          expect(subject[:create_jira_issue_url]).to be_falsey
+        end
 
         it 'does not contain vulnerability feedback issue path' do
           expect(subject[:create_vulnerability_feedback_issue_path]).to be_falsey
@@ -108,6 +132,10 @@ RSpec.describe Vulnerabilities::FindingEntity do
 
       context 'when disallowed to create merge_request' do
         let(:project) { create(:project, merge_requests_access_level: ProjectFeature::DISABLED) }
+
+        it 'does not contain create jira issue path' do
+          expect(subject[:create_jira_issue_url]).to be_falsey
+        end
 
         it 'does not contain vulnerability feedback merge_request path' do
           expect(subject[:create_vulnerability_feedback_merge_request_path]).to be_falsey

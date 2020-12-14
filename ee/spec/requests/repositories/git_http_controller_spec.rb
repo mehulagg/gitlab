@@ -15,6 +15,33 @@ RSpec.describe Repositories::GitHttpController, type: :request do
     project.add_developer(user)
   end
 
+  describe 'POST #git_upload_pack' do
+    context 'geo pulls a personal snippet' do
+      let_it_be(:snippet) { create(:personal_snippet, :repository, author: user) }
+      let_it_be(:path) { "snippets/#{snippet.id}.git" }
+
+      before do
+        allow(::Gitlab::Geo::JwtRequestDecoder).to receive(:geo_auth_attempt?).and_return(true)
+      end
+
+      it 'allows access' do
+        allow_any_instance_of(::Gitlab::Geo::JwtRequestDecoder).to receive(:decode).and_return({ scope: "snippets/#{snippet.id}" })
+
+        clone_get(path, **env)
+
+        expect(response).to have_gitlab_http_status(:ok)
+      end
+
+      it 'does not allow access if scope is wrong' do
+        allow_any_instance_of(::Gitlab::Geo::JwtRequestDecoder).to receive(:decode).and_return({ scope: "wron-scope" })
+
+        clone_get(path, **env)
+
+        expect(response).to have_gitlab_http_status(:unauthorized)
+      end
+    end
+  end
+
   describe 'GET #info_refs' do
     context 'smartcard session required' do
       subject { clone_get(path, **env) }

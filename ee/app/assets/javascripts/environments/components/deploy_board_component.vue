@@ -164,7 +164,7 @@ export default {
             <gl-link
               v-if="deployBoardData.abort_url"
               :href="deployBoardData.abort_url"
-              class="btn btn-red btn-inverted"
+              class="btn btn-danger btn-inverted"
               data-method="post"
               rel="nofollow"
               >{{ __('Abort') }}</gl-link

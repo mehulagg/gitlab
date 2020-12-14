@@ -54,7 +54,13 @@ module EE
           end
 
           def audit_log_finder_params
-            params.slice(:created_after, :created_before)
+            params
+              .slice(:created_after, :created_before)
+              .then { |params| filter_by_author(params) }
+          end
+
+          def filter_by_author(params)
+            can?(current_user, :admin_group, user_group) ? params : params.merge(author_id: current_user.id)
           end
 
           override :delete_group
@@ -90,7 +96,7 @@ module EE
 
           segment ':id/audit_events' do
             before do
-              authorize! :admin_group, user_group
+              authorize! :read_group_audit_events, user_group
               check_audit_events_available!(user_group)
               increment_unique_values('a_compliance_audit_events_api', current_user.id)
             end

@@ -12,6 +12,14 @@ module EE
               description: 'Number of approvals left'
         field :approvals_required, GraphQL::INT_TYPE, null: true,
               description: 'Number of approvals required'
+        field :merge_trains_count, GraphQL::INT_TYPE, null: true,
+              description: ''
+      end
+
+      def merge_trains_count
+        return unless object.target_project.merge_trains_enabled?
+
+        MergeTrain.total_count_in_train(object)
       end
     end
   end

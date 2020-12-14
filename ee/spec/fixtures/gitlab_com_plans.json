@@ -90,7 +90,8 @@
         "purchase_link": {
             "action": "upgrade",
             "href": "http://customers.gitlab.com/subscriptions/new?plan_id=2c92a0ff5a840412015aa3cde86f2ba6"
-        }
+        },
+        "deprecated": true
     },
     {
         "id": "silver-external-id",

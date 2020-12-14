@@ -95,7 +95,7 @@ module EE
 
       attrs += compliance_framework_params
 
-      if ::Gitlab::Ci::Features.auto_rollback_available?(project)
+      if project&.feature_available?(:auto_rollback)
         attrs << :auto_rollback_enabled
       end
 

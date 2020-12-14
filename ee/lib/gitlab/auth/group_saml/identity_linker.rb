@@ -31,7 +31,8 @@ module Gitlab
         # rubocop: enable CodeReuse/ActiveRecord
 
         def update_group_membership
-          MembershipUpdater.new(current_user, saml_provider, oauth).execute
+          auth_hash = AuthHash.new(oauth)
+          MembershipUpdater.new(current_user, saml_provider, auth_hash).execute
         end
       end
     end

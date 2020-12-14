@@ -2,7 +2,8 @@
 
 query DastSiteProfiles($fullPath: ID!, $after: String, $before: String, $first: Int, $last: Int) {
   project(fullPath: $fullPath) {
-    siteProfiles: dastSiteProfiles(after: $after, before: $before, first: $first, last: $last) {
+    siteProfiles: dastSiteProfiles(after: $after, before: $before, first: $first, last: $last)
+      @connection(key: "dastSiteProfiles") {
       pageInfo {
         ...PageInfo
       }
@@ -11,6 +12,7 @@ query DastSiteProfiles($fullPath: ID!, $after: String, $before: String, $first: 
         node {
           id
           profileName
+          normalizedTargetUrl
           targetUrl
           editPath
           validationStatus

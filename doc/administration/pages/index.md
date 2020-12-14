@@ -204,13 +204,13 @@ control over how the Pages daemon runs and serves content in your environment.
 | `artifacts_server_url` |  API URL to proxy artifact requests to. Defaults to GitLab `external URL` + `/api/v4`, for example `https://gitlab.com/api/v4`.
 | `auth_redirect_uri` |  Callback URL for authenticating with GitLab. Defaults to project's subdomain of `pages_external_url` + `/auth`.
 | `auth_secret` |  Secret key for signing authentication requests. Leave blank to pull automatically from GitLab during OAuth registration.
-| `dir` |  Working directory for config and secrets files.
+| `dir` |  Working directory for configuration and secrets files.
 | `enable` |  Enable or disable GitLab Pages on the current system.
 | `external_http` |  Configure Pages to bind to one or more secondary IP addresses, serving HTTP requests. Multiple addresses can be given as an array, along with exact ports, for example `['1.2.3.4', '1.2.3.5:8063']`. Sets value for `listen_http`.
 | `external_https` |  Configure Pages to bind to one or more secondary IP addresses, serving HTTPS requests. Multiple addresses can be given as an array, along with exact ports, for example `['1.2.3.4', '1.2.3.5:8063']`. Sets value for `listen_https`.
 | `gitlab_client_http_timeout`  | GitLab API HTTP client connection timeout in seconds (default: 10s).
 | `gitlab_client_jwt_expiry`  | JWT Token expiry time in seconds (default: 30s).
-| `domain_config_source` | Domain configuration source (default: `disk`)
+| `domain_config_source` | Domain configuration source (default: `auto`)
 | `gitlab_id` |  The OAuth application public ID. Leave blank to automatically fill when Pages authenticates with GitLab.
 | `gitlab_secret` |  The OAuth application secret. Leave blank to automatically fill when Pages authenticates with GitLab.
 | `gitlab_server` |  Server to use for authentication when access control is enabled; defaults to GitLab `external_url`.
@@ -241,7 +241,7 @@ control over how the Pages daemon runs and serves content in your environment.
 | `pages_path` | The directory on disk where pages are stored, defaults to `GITLAB-RAILS/shared/pages`.
 | `pages_nginx[]` | |
 | `enable` | Include a virtual host `server{}` block for Pages inside NGINX. Needed for NGINX to proxy traffic back to the Pages daemon. Set to `false` if the Pages daemon should directly receive all requests, for example, when using [custom domains](index.md#custom-domains).
-| `FF_ENABLE_REDIRECTS` | Feature flag to disable redirects (enabled by default). Read the [redirects documentation](../../user/project/pages/redirects.md#disable-redirects) for more info. |
+| `FF_ENABLE_REDIRECTS` | Feature flag to disable redirects (enabled by default). Read the [redirects documentation](../../user/project/pages/redirects.md#disable-redirects) for more information. |
 
 ---
 
@@ -375,7 +375,7 @@ Pages access control is disabled by default. To enable it:
 1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
 1. Users can now configure it in their [projects' settings](../../user/project/pages/pages_access_control.md).
 
-NOTE: **Important:**
+NOTE:
 For this setting to be effective with multi-node setups, it has to be applied to
 all the App nodes and Sidekiq nodes.
 
@@ -431,7 +431,7 @@ For Omnibus, this is fixed by [installing a custom CA in Omnibus GitLab](https:/
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-pages/-/merge_requests/392) in GitLab 13.7.
 
-DANGER: **Warning:**
+WARNING:
 These are advanced settings. The recommended default values are set inside GitLab Pages. You should
 change these settings only if absolutely necessary. Use extreme caution.
 
@@ -575,7 +575,7 @@ your main application server.
 
 To configure GitLab Pages on a separate server:
 
-DANGER: **Warning:**
+WARNING:
 The following procedure includes steps to back up and edit the
 `gitlab-secrets.json` file. This file contains secrets that control
 database encryption. Proceed with caution.
@@ -668,13 +668,14 @@ Pages server.
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/217912) in GitLab 13.3.
 
 GitLab Pages can use different sources to get domain configuration.
-The default value is `nil`; however, GitLab Pages will default to `disk`.
+The default value is `nil`; however, GitLab Pages will default to `auto`.
 
    ```ruby
    gitlab_pages['domain_config_source'] = nil
    ```
 
-You can specify `gitlab` to enable [API-based configuration](#gitlab-api-based-configuration).
+If left unchanged, GitLab Pages tries to use any available source (either `gitlab` or `disk`). The
+preferred source is `gitlab`, which uses [API-based configuration](#gitlab-api-based-configuration).
 
 For more details see this [blog post](https://about.gitlab.com/blog/2020/08/03/how-gitlab-pages-uses-the-gitlab-api-to-serve-content/).
 
@@ -691,10 +692,10 @@ was used prior to GitLab 13.0. Follow these steps to enable it:
 
 1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure) for the changes to take effect.
 
-If you encounter an issue, you can disable it by choosing `disk` or `nil`:
+If you encounter an issue, you can disable it by choosing `disk`:
 
 ```ruby
-gitlab_pages['domain_config_source'] = nil
+gitlab_pages['domain_config_source'] = "disk"
 ```
 
 For other common issues, see the [troubleshooting section](#failed-to-connect-to-the-internal-gitlab-api)

@@ -230,6 +230,10 @@ RSpec.configure do |config|
       # tests, until we introduce it in user settings
       stub_feature_flags(forti_authenticator: false)
 
+      # Using FortiToken Cloud as OTP provider is disabled by default in
+      # tests, until we introduce it in user settings
+      stub_feature_flags(forti_token_cloud: false)
+
       enable_rugged = example.metadata[:enable_rugged].present?
 
       # Disable Rugged features by default
@@ -286,19 +290,13 @@ RSpec.configure do |config|
       ./ee/spec/elastic_integration
       ./ee/spec/finders
       ./ee/spec/lib
-      ./ee/spec/requests/admin
       ./ee/spec/serializers
       ./ee/spec/support/shared_examples/finders/geo
       ./ee/spec/support/shared_examples/graphql/geo
       ./spec/finders
-      ./spec/frontend
-      ./spec/helpers
       ./spec/lib
-      ./spec/requests
       ./spec/serializers
-      ./spec/support/shared_examples/requests
       ./spec/support/shared_examples/lib/gitlab
-      ./spec/views
       ./spec/workers
     )
 
