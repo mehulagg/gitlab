@@ -38,6 +38,8 @@ collected before this feature is available.
 
 ## DevOps Adoption
 
+[Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/247112) in GitLab 13.7.
+
 The DevOps Adoption tab shows you which segments of your organization are using GitLab's most essential features:
 
 - Issues
