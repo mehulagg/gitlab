@@ -37,7 +37,12 @@ export default {
       return this.isCollapsed ? 'chevron-right' : 'chevron-down';
     },
     bodyClass() {
-      return ['border-top', 'gl-pl-5', 'gl-pt-5', { 'gl-display-none': !this.showBody }];
+      return [
+        'gl-border-1',
+        'gl-border-t-solid',
+        'gl-border-gray-100',
+        { 'gl-display-none': !this.showBody },
+      ];
     },
     showBody() {
       return !this.loading && !this.isCollapsed;
