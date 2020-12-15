@@ -27,6 +27,7 @@ at GitLab@learn, in the Continuous Integration (CI) section.
 Additionally, it's possible to visualize the entire pipeline, including all cross-project
 inter-dependencies. **(PREMIUM)**
 
+Deleted a thing.
 ## Use cases
 
 Let's assume you deploy your web app from different projects in GitLab:
