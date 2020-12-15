@@ -334,7 +334,15 @@ need to test the rendered output. Visit the [Vue testing guide](https://vuejs.or
 
 1. Test we react correctly to any events emitted from child components.
 
-+1. **Do not** test the internal implementation of the child components.
+1. **Do not** test the internal implementation of the child components.
+
+```javascript
+// bad
+expect(findChildComponent().find('.error-alert').exists()).toBe(false);
+
+// good
+expect(findChildComponent().props('withAlertContainer')).toBe(false);
+```
 
 ### Events
 
