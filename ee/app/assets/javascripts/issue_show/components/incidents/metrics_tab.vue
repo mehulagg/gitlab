@@ -1,7 +1,7 @@
 <script>
 import { mapState, mapActions } from 'vuex';
 import { GlFormGroup, GlFormInput, GlLoadingIcon, GlModal } from '@gitlab/ui';
-import { s__ } from '~/locale';
+import { __, s__ } from '~/locale';
 import UploadDropzone from '~/vue_shared/components/upload_dropzone/upload_dropzone.vue';
 import MetricsImage from './metrics_image.vue';
 
@@ -60,8 +60,8 @@ export default {
     },
   },
   i18n: {
-    modalUpload: s__('Incidents|Upload'),
-    modalCancel: s__('Incidents|Cancel'),
+    modalUpload: __('Upload'),
+    modalCancel: __('Cancel'),
     modalTitle: s__('Incidents|Add a URL'),
     modalDescription: s__(
       'Incidents|You can optionally add a URL to link users to the original graph.',
@@ -90,7 +90,7 @@ export default {
     >
       <p>{{ $options.i18n.modalDescription }}</p>
       <gl-form-group
-        :label="s__('Incidents|URL')"
+        :label="__('URL')"
         :description="s__('Incidents|Must start with http or https')"
         label-for="upload-url-input"
       >
