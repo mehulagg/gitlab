@@ -43,7 +43,9 @@ export default class IntegrationSettingsForm {
     const formValid = this.$form.get(0).checkValidity() || this.formActive === false;
 
     if (formValid) {
-      this.$form.submit();
+      setTimeout(() => {
+        this.$form.submit();
+      }, 100);
     } else {
       eventHub.$emit('validateForm');
       this.vue.$store.dispatch('setIsSaving', false);
