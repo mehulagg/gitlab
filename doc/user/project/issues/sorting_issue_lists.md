@@ -34,3 +34,11 @@ different group issue list, for example), that ordering will be maintained.
 This ordering also affects [issue boards](../issue_board.md#how-gitlab-orders-issues-in-a-list).
 Changing the order in an issue list changes the ordering in an issue board,
 and vice versa.
+
+## Sorting by blocking issues
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/34247/) in GitLab 13.7.
+
+When you select **Blocking** sorting, the list of issues will change to sort descending by the
+number of issues they are blocking. This helps you determine the critical path for your backlog.
+
