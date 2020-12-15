@@ -28,7 +28,7 @@ module Packages
     private
 
     def filter_by_package_type(packages)
-      return packages unless params[:package_type]
+      return packages.without_package_internal unless params[:package_type]
 
       packages.with_package_type(params[:package_type])
     end

@@ -52,7 +52,7 @@ class Packages::Package < ApplicationRecord
     format: { with: Gitlab::Regex.generic_package_version_regex },
     if: :generic?
 
-  enum package_type: { maven: 1, npm: 2, conan: 3, nuget: 4, pypi: 5, composer: 6, generic: 7, golang: 8, debian: 9 }
+  enum package_type: { maven: 1, npm: 2, conan: 3, nuget: 4, pypi: 5, composer: 6, generic: 7, golang: 8, debian: 9, internal: 10 }
 
   scope :with_name, ->(name) { where(name: name) }
   scope :with_name_like, ->(name) { where(arel_table[:name].matches(name)) }
@@ -61,6 +61,7 @@ class Packages::Package < ApplicationRecord
   scope :with_version, ->(version) { where(version: version) }
   scope :without_version_like, -> (version) { where.not(arel_table[:version].matches(version)) }
   scope :with_package_type, ->(package_type) { where(package_type: package_type) }
+  scope :without_package_internal, -> { where.not(package_type: :internal) }
   scope :including_build_info, -> { includes(pipelines: :user) }
   scope :including_project_route, -> { includes(project: { namespace: :route }) }
   scope :including_tags, -> { includes(:tags) }
