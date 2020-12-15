@@ -47,9 +47,6 @@ export default {
     showBody() {
       return !this.loading && !this.isCollapsed;
     },
-    displayName() {
-      return this.url || this.filename;
-    },
   },
   methods: {
     toggleCollapsed() {
