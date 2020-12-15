@@ -15,6 +15,21 @@ module Geo::VerifiableRegistry
     def verification_state_model_key
       self::MODEL_FOREIGN_KEY
     end
+
+    override :verification_pending_batch_relation
+    def verification_pending_batch_relation(batch_size:)
+      super.synced
+    end
+
+    override :verification_failed_batch_relation
+    def verification_failed_batch_relation(batch_size:)
+      super.synced
+    end
+
+    override :needs_verification_relation
+    def needs_verification_relation
+      super.synced
+    end
   end
 
   included do
