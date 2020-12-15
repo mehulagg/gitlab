@@ -49,6 +49,5 @@ and vice versa.
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/34247/) in GitLab 13.7.
 
-When you select **Blocking** sorting, the list of issues will change to sort descending by the
-number of issues they are blocking. This helps you determine the critical path for your backlog.
-
+When you select to sort by **Blocking**, the issue list changes to sort descending by the
+number of issues each issue is blocking. You can use this to determine the critical path for your backlog.
