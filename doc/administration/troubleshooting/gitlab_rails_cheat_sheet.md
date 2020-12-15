@@ -388,7 +388,7 @@ If the project you wish to export is available at `https://gitlab.example.com/ba
 
 If this all runs successfully, you will see output like the following before being returned to the Rails console prompt:
 
-```
+```ruby
 => nil
 ```
 
