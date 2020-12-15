@@ -9,6 +9,7 @@ import {
   GlCard,
 } from '@gitlab/ui';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import JiraIssueCreationVulnerabilities from './jira_issue_creation_vulnerabilities.vue';
 import eventHub from '../event_hub';
 
 export default {
@@ -21,6 +22,7 @@ export default {
     GlLink,
     GlButton,
     GlCard,
+    JiraIssueCreationVulnerabilities,
   },
   mixins: [glFeatureFlagsMixin()],
   props: {
@@ -111,7 +113,7 @@ export default {
             v-if="enableJiraIssues && glFeatures.jiraForVulnerabilities"
             data-testid="jiraForVulnerabilities"
           >
-            {{ __('New stuff goes here') }}
+            <jira-issue-creation-vulnerabilities />
           </div>
         </template>
         <gl-card v-else class="gl-mt-7">
