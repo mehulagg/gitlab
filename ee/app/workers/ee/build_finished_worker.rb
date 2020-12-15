@@ -17,8 +17,7 @@ module EE
     private
 
     def revoke_secret_detection_token?(build)
-      ::Gitlab.com? &&
-        ::Gitlab::CurrentSettings.secret_detection_token_revocation_enabled? &&
+      ::Gitlab::CurrentSettings.secret_detection_token_revocation_enabled? &&
         secret_detection_vulnerability_found?(build)
     end
 

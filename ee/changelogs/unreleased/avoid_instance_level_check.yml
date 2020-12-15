@@ -1,0 +1,5 @@
+---
+title: Avoid restricting the revocation token work for GitLab.com only
+merge_request: 50087
+author:
+type: changed
