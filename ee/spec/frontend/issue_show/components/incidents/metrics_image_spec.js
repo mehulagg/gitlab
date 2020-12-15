@@ -1,5 +1,4 @@
 import { shallowMount, mount } from '@vue/test-utils';
-import merge from 'lodash/merge';
 import { GlLink } from '@gitlab/ui';
 import waitForPromises from 'helpers/wait_for_promises';
 import MetricsImage from 'ee/issue_show/components/incidents/metrics_image.vue';
@@ -13,16 +12,13 @@ const defaultProps = {
 describe('Metrics upload item', () => {
   let wrapper;
 
-  const mountComponent = (options = {}, mountMethod = mount) => {
-    wrapper = mountMethod(
-      MetricsImage,
-      merge(
-        {
-          propsData: defaultProps,
-        },
-        options,
-      ),
-    );
+  const mountComponent = (propsData = {}, mountMethod = mount) => {
+    wrapper = mountMethod(MetricsImage, {
+      propsData: {
+        ...defaultProps,
+        ...propsData,
+      },
+    });
   };
 
   afterEach(() => {
@@ -44,7 +40,7 @@ describe('Metrics upload item', () => {
 
   it('shows a link with the correct url', () => {
     const testUrl = 'test_url';
-    mountComponent({ propsData: { url: testUrl } });
+    mountComponent({ url: testUrl });
 
     expect(findImageLink().attributes('href')).toBe(testUrl);
     expect(findImageLink().text()).toBe(defaultProps.filename);
