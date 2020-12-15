@@ -330,7 +330,7 @@ need to test the rendered output. Visit the [Vue testing guide](https://vuejs.or
 
 1. Test any rendering functions we call **on** child components (i.e. `v-if`, `v-for` etc). Note: **on** child components, and **not** inside of child components.
 
-1. Test any props we are passing to child components (especially if the prop calculated in your component under the test, with the `computed` property, for example). Remember to use `.props()` and not `.vm.someProp`.
+1. Test any props we are passing to child components (especially if the prop is calculated in the component under test, with the `computed` property, for example). Remember to use `.props()` and not `.vm.someProp`.
 
 1. Test we react correctly to any events emitted from child components.
 
