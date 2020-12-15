@@ -547,6 +547,7 @@ You can use the following fake tokens as examples:
 | slashes               | Instead of **and/or**, use **or** or another sensible construction. This rule also applies to other slashes, like **follow/unfollow**. Some exceptions (like **CI/CD**) are allowed. |
 | that                  | Do not use. Example: `the file that you save` can be `the file you save`. |
 | useful                | Do not use. If the user doesn't find the process to be these things, we lose their trust. |
+| utilize               | Do not use. Use **use** instead. Utilize has a very specific meaning and can be used when indicating that the application is beyond its original intended use. Speakers who learned English as a second (or third) language may not always parse utilize as correctly and as consistently as use. In the end, remember that you can always replace utilize with use, but you can’t always replace use with utilize. The following articles have more information about use vs utilize: [1](https://eliteediting.com/resources/use-vs-utilize/), [2](https://donjones.com/2016/08/22/use-vs-utilize/), [3](https://grammarist.com/grammar/use-vs-utilize/). |
 | via                   | Do not use Latin abbreviations. Use **with**, **through**, or **by using** instead. ([Vale](../testing.md#vale) rule: [`LatinTerms.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/LatinTerms.yml)) |
 
 <!-- vale on -->
