@@ -67,7 +67,7 @@ variables:
   ELASTIC_URL: "http://elastic:changeme@elasticsearch:9200"
   DOCKER_VERSION: "19.03.0"
   CACHE_CLASSES: "true"
-  #Fuzzing variables
+  # Fuzzing variables
   FUZZAPI_PROFILE: Quick-20
   FUZZAPI_POSTMAN_COLLECTION: scripts/review_apps/Gitlab_postman_collection.json
   FUZZAPI_TARGET_URL: ${CI_ENVIRONMENT_URL}
