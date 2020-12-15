@@ -51,6 +51,10 @@ export default class SidebarMediator {
     return this.service.update(field, data);
   }
 
+  requestReview(userId) {
+    return this.service.requestReview(userId);
+  }
+
   setMoveToProjectId(projectId) {
     this.store.setMoveToProjectId(projectId);
   }

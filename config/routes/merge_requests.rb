@@ -9,6 +9,7 @@ resources :merge_requests, concerns: :awardable, except: [:new, :create, :show],
     get :ci_environments_status
     post :toggle_subscription
     post :remove_wip
+    post :request_review
     post :assign_related_issues
     get :discussions, format: :json
     post :rebase

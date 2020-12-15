@@ -46,13 +46,16 @@ export default {
     assignSelf() {
       this.$emit('assign-self');
     },
+    requestReview(id) {
+      this.$emit('request-review', id);
+    },
   },
 };
 </script>
 
 <template>
   <div>
-    <collapsed-reviewer-list :users="sortedReviewers" :issuable-type="issuableType" />
+    <!-- <collapsed-reviewer-list :users="sortedReviewers" :issuable-type="issuableType" /> -->
 
     <div class="value hide-collapsed">
       <template v-if="hasNoUsers">
@@ -66,6 +69,7 @@ export default {
         :users="sortedReviewers"
         :root-path="rootPath"
         :issuable-type="issuableType"
+        @request-review="requestReview"
       />
     </div>
   </div>

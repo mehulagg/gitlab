@@ -14,7 +14,7 @@ export default {
     GlTooltip: GlTooltipDirective,
   },
   props: {
-    user: {
+    reviewer: {
       type: Object,
       required: true,
     },
@@ -40,15 +40,15 @@ export default {
   },
   computed: {
     cannotMerge() {
-      return this.issuableType === 'merge_request' && !this.user.can_merge;
+      return this.issuableType === 'merge_request' && !this.reviewer.user.can_merge;
     },
     tooltipTitle() {
       if (this.cannotMerge && this.tooltipHasName) {
-        return sprintf(__('%{userName} (cannot merge)'), { userName: this.user.name });
+        return sprintf(__('%{userName} (cannot merge)'), { userName: this.reviewer.user.name });
       } else if (this.cannotMerge) {
         return __('Cannot merge');
       } else if (this.tooltipHasName) {
-        return this.user.name;
+        return this.reviewer.user.name;
       }
 
       return '';
@@ -61,7 +61,7 @@ export default {
       };
     },
     reviewerUrl() {
-      return this.user.web_url;
+      return this.reviewer.user.web_url;
     },
   },
 };
@@ -77,8 +77,13 @@ export default {
   >
     <!-- use d-flex so that slot can be appropriately styled -->
     <span class="d-flex">
-      <reviewer-avatar :user="user" :img-size="32" :issuable-type="issuableType" />
-      <slot :user="user"></slot>
+      <reviewer-avatar
+        :user="reviewer.user"
+        :can-merge="reviewer.can_merge"
+        :img-size="32"
+        :issuable-type="issuableType"
+      />
+      <slot :reviewer="reviewer"></slot>
     </span>
   </gl-link>
 </template>

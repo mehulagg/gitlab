@@ -212,6 +212,11 @@ class TodoService
     current_user.update_todos_count_cache
   end
 
+  def create_request_review_todo(target, author, reviewer)
+    attributes = attributes_for_todo(target.project, target, author, Todo::REVIEW_REQUESTED)
+    create_todos(User.find(reviewer.user_id), attributes)
+  end
+
   private
 
   def create_todos(users, attributes)

@@ -17,6 +17,10 @@ export default {
       type: Number,
       required: true,
     },
+    canMerge: {
+      type: Boolean,
+      required: true,
+    },
   },
   computed: {
     reviewerAlt() {
@@ -26,7 +30,7 @@ export default {
       return this.user.avatar || this.user.avatar_url || gon.default_avatar_url;
     },
     hasMergeIcon() {
-      return !this.user.can_merge;
+      return !this.canMerge;
     },
   },
 };

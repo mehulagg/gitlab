@@ -70,4 +70,10 @@ export default class SidebarService {
       move_to_project_id: moveToProjectId,
     });
   }
+
+  requestReview(userId) {
+    return axios.post('/root/duckduckgo/-/merge_requests/2/request_review', {
+      user_id: userId,
+    });
+  }
 }

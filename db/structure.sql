@@ -9343,8 +9343,6 @@ CREATE TABLE application_settings (
     elasticsearch_indexed_file_size_limit_kb integer DEFAULT 1024 NOT NULL,
     enforce_namespace_storage_limit boolean DEFAULT false NOT NULL,
     container_registry_delete_tags_service_timeout integer DEFAULT 250 NOT NULL,
-    kroki_url character varying,
-    kroki_enabled boolean,
     elasticsearch_client_request_timeout integer DEFAULT 0 NOT NULL,
     gitpod_enabled boolean DEFAULT false NOT NULL,
     gitpod_url text DEFAULT 'https://gitpod.io/'::text,
@@ -9363,18 +9361,20 @@ CREATE TABLE application_settings (
     secret_detection_token_revocation_url text,
     encrypted_secret_detection_token_revocation_token text,
     encrypted_secret_detection_token_revocation_token_iv text,
+    new_user_signups_cap integer,
     domain_denylist_enabled boolean DEFAULT false,
     domain_denylist text,
     domain_allowlist text,
-    new_user_signups_cap integer,
     encrypted_cloud_license_auth_token text,
     encrypted_cloud_license_auth_token_iv text,
     secret_detection_revocation_token_types_url text,
     cloud_license_enabled boolean DEFAULT false NOT NULL,
+    kroki_url text,
+    kroki_enabled boolean DEFAULT false NOT NULL,
     disable_feed_token boolean DEFAULT false NOT NULL,
     personal_access_token_prefix text,
     CONSTRAINT app_settings_registry_exp_policies_worker_capacity_positive CHECK ((container_registry_expiration_policies_worker_capacity >= 0)),
-    CONSTRAINT check_17d9558205 CHECK ((char_length((kroki_url)::text) <= 1024)),
+    CONSTRAINT check_17d9558205 CHECK ((char_length(kroki_url) <= 1024)),
     CONSTRAINT check_2dba05b802 CHECK ((char_length(gitpod_url) <= 255)),
     CONSTRAINT check_51700b31b5 CHECK ((char_length(default_branch_name) <= 255)),
     CONSTRAINT check_57123c9593 CHECK ((char_length(help_page_documentation_base_url) <= 255)),
@@ -13904,7 +13904,8 @@ CREATE TABLE merge_request_reviewers (
     id bigint NOT NULL,
     user_id bigint NOT NULL,
     merge_request_id bigint NOT NULL,
-    created_at timestamp with time zone NOT NULL
+    created_at timestamp with time zone NOT NULL,
+    reviewed boolean DEFAULT false NOT NULL
 );
 
 CREATE SEQUENCE merge_request_reviewers_id_seq
@@ -14988,9 +14989,9 @@ CREATE TABLE plan_limits (
     nuget_max_file_size bigint DEFAULT 524288000 NOT NULL,
     pypi_max_file_size bigint DEFAULT '3221225472'::bigint NOT NULL,
     generic_packages_max_file_size bigint DEFAULT '5368709120'::bigint NOT NULL,
+    project_feature_flags integer DEFAULT 200 NOT NULL,
     golang_max_file_size bigint DEFAULT 104857600 NOT NULL,
     debian_max_file_size bigint DEFAULT '3221225472'::bigint NOT NULL,
-    project_feature_flags integer DEFAULT 200 NOT NULL,
     ci_max_artifact_size_api_fuzzing integer DEFAULT 0 NOT NULL,
     ci_pipeline_deployments integer DEFAULT 500 NOT NULL,
     pull_mirror_interval_seconds integer DEFAULT 300 NOT NULL
@@ -16389,6 +16390,22 @@ CREATE SEQUENCE saml_providers_id_seq
     CACHE 1;
 
 ALTER SEQUENCE saml_providers_id_seq OWNED BY saml_providers.id;
+
+CREATE TABLE saved_replies (
+    id bigint NOT NULL,
+    user_id bigint NOT NULL,
+    title character varying,
+    note text
+);
+
+CREATE SEQUENCE saved_replies_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE saved_replies_id_seq OWNED BY saved_replies.id;
 
 CREATE TABLE schema_migrations (
     version character varying NOT NULL
@@ -17892,8 +17909,8 @@ CREATE TABLE web_hooks (
     encrypted_url character varying,
     encrypted_url_iv character varying,
     deployment_events boolean DEFAULT false NOT NULL,
-    releases_events boolean DEFAULT false NOT NULL,
     feature_flag_events boolean DEFAULT false NOT NULL,
+    releases_events boolean DEFAULT false NOT NULL,
     member_events boolean DEFAULT false NOT NULL
 );
 
@@ -18688,6 +18705,8 @@ ALTER TABLE ONLY routes ALTER COLUMN id SET DEFAULT nextval('routes_id_seq'::reg
 ALTER TABLE ONLY saml_group_links ALTER COLUMN id SET DEFAULT nextval('saml_group_links_id_seq'::regclass);
 
 ALTER TABLE ONLY saml_providers ALTER COLUMN id SET DEFAULT nextval('saml_providers_id_seq'::regclass);
+
+ALTER TABLE ONLY saved_replies ALTER COLUMN id SET DEFAULT nextval('saved_replies_id_seq'::regclass);
 
 ALTER TABLE ONLY scim_identities ALTER COLUMN id SET DEFAULT nextval('scim_identities_id_seq'::regclass);
 
@@ -20123,6 +20142,9 @@ ALTER TABLE ONLY saml_group_links
 
 ALTER TABLE ONLY saml_providers
     ADD CONSTRAINT saml_providers_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY saved_replies
+    ADD CONSTRAINT saved_replies_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY schema_migrations
     ADD CONSTRAINT schema_migrations_pkey PRIMARY KEY (version);
@@ -22507,6 +22529,8 @@ CREATE UNIQUE INDEX index_saml_group_links_on_group_id_and_saml_group_name ON sa
 
 CREATE INDEX index_saml_providers_on_group_id ON saml_providers USING btree (group_id);
 
+CREATE INDEX index_saved_replies_on_user_id ON saved_replies USING btree (user_id);
+
 CREATE INDEX index_scim_identities_on_group_id ON scim_identities USING btree (group_id);
 
 CREATE UNIQUE INDEX index_scim_identities_on_lower_extern_uid_and_group_id ON scim_identities USING btree (lower((extern_uid)::text), group_id);
@@ -24880,6 +24904,9 @@ ALTER TABLE ONLY resource_milestone_events
 
 ALTER TABLE ONLY term_agreements
     ADD CONSTRAINT fk_rails_a88721bcdf FOREIGN KEY (term_id) REFERENCES application_setting_terms(id);
+
+ALTER TABLE ONLY saved_replies
+    ADD CONSTRAINT fk_rails_a8bf5bf111 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY ci_pipeline_artifacts
     ADD CONSTRAINT fk_rails_a9e811a466 FOREIGN KEY (pipeline_id) REFERENCES ci_pipelines(id) ON DELETE CASCADE;

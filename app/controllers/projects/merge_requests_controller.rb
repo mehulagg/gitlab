@@ -334,6 +334,15 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
     redirect_to(index_path, notice: message)
   end
 
+  def request_review
+    reviewer = merge_request.merge_request_reviewers.find_by_user_id(params[:user_id])
+    reviewer.update(reviewed: false)
+
+    TodoService.new.create_request_review_todo(merge_request, current_user, reviewer)
+
+    head :ok
+  end
+
   protected
 
   alias_method :subscribable_resource, :merge_request

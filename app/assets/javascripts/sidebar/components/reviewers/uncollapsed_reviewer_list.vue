@@ -1,6 +1,7 @@
 <script>
 // NOTE! For the first iteration, we are simply copying the implementation of Assignees
 // It will soon be overhauled in Issue https://gitlab.com/gitlab-org/gitlab/-/issues/233736
+import { GlButton } from '@gitlab/ui';
 import { __, sprintf } from '~/locale';
 import ReviewerAvatarLink from './reviewer_avatar_link.vue';
 
@@ -8,6 +9,7 @@ const DEFAULT_RENDER_COUNT = 5;
 
 export default {
   components: {
+    GlButton,
     ReviewerAvatarLink,
   },
   props: {
@@ -54,7 +56,7 @@ export default {
       return this.showLess ? this.users.slice(0, uncollapsedLength) : this.users;
     },
     username() {
-      return `@${this.firstUser.username}`;
+      return `@${this.firstUser.user.username}`;
     },
   },
   methods: {
@@ -66,24 +68,36 @@ export default {
 </script>
 
 <template>
-  <reviewer-avatar-link
-    v-if="hasOneUser"
-    #default="{ user }"
-    tooltip-placement="left"
-    :tooltip-has-name="false"
-    :user="firstUser"
-    :root-path="rootPath"
-    :issuable-type="issuableType"
-  >
-    <div class="gl-ml-3 gl-line-height-normal">
-      <div class="author">{{ user.name }}</div>
-      <div class="username">{{ username }}</div>
-    </div>
-  </reviewer-avatar-link>
+  <div v-if="hasOneUser">
+    <reviewer-avatar-link
+      #default="{ reviewer }"
+      tooltip-placement="left"
+      :tooltip-has-name="false"
+      :reviewer="firstUser"
+      :root-path="rootPath"
+      :issuable-type="issuableType"
+    >
+      <div class="gl-ml-3 gl-line-height-normal">
+        <div class="author">{{ reviewer.user.name }}</div>
+        <div class="username">{{ username }}</div>
+      </div>
+    </reviewer-avatar-link>
+    <gl-button
+      v-if="firstUser.reviewed"
+      class="float-right"
+      icon="clear-all"
+      @click="$emit('request-review', firstUser.user.id)"
+    />
+  </div>
   <div v-else>
     <div class="user-list">
-      <div v-for="user in uncollapsedUsers" :key="user.id" class="user-item">
-        <reviewer-avatar-link :user="user" :root-path="rootPath" :issuable-type="issuableType" />
+      <div v-for="reviewer in uncollapsedUsers" :key="reviewer.user.id" class="user-item">
+        <reviewer-avatar-link
+          :user="reviewer.user"
+          :can-merge="reviewer.can_merge"
+          :root-path="rootPath"
+          :issuable-type="issuableType"
+        />
       </div>
     </div>
     <div v-if="renderShowMoreSection" class="user-list-more">
