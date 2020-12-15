@@ -54,17 +54,17 @@ apifuzzer_fuzz:
           alias: apifuzzer
           entrypoint: ["dotnet", "/peach/Peach.Web.dll"]
     allow_failure: true
-    rules:
-        - if: $FUZZAPI_D_TARGET_IMAGE
-          when: never
-        - if: $FUZZAPI_D_WORKER_IMAGE
-          when: never
-        - if: $API_FUZZING_DISABLED
-          when: never
-        - if: $API_FUZZING_DISABLED_FOR_DEFAULT_BRANCH &&
-                $CI_DEFAULT_BRANCH == $CI_COMMIT_REF_NAME
-          when: never
-        - if: $CI_COMMIT_BRANCH && $GITLAB_FEATURES =~ /\bapi_fuzzing\b/
+    # rules:
+    #     - if: $FUZZAPI_D_TARGET_IMAGE
+    #       when: never
+    #     - if: $FUZZAPI_D_WORKER_IMAGE
+    #       when: never
+    #     - if: $API_FUZZING_DISABLED
+    #       when: never
+    #     - if: $API_FUZZING_DISABLED_FOR_DEFAULT_BRANCH &&
+    #             $CI_DEFAULT_BRANCH == $CI_COMMIT_REF_NAME
+    #       when: never
+    #     - if: $CI_COMMIT_BRANCH && $GITLAB_FEATURES =~ /\bapi_fuzzing\b/
     script:
         #
         # Validate options
