@@ -192,11 +192,13 @@ namespace :gitlab do
         exit
       end
 
-      indexes = if args[:index_name]
-                  [Gitlab::Database::PostgresIndex.by_identifier(args[:index_name])]
-                else
-                  Gitlab::Database::Reindexing.candidate_indexes
-                end
+      indexes = Gitlab::Database::Reindexing.candidate_indexes
+
+      if args[:index_name]
+        indexes = indexes.where(identifier: args[:index_name])
+
+        raise "Index not found or not supported: #{args[:index_name]}" if indexes.empty?
+      end
 
       Gitlab::Database::Reindexing.perform(indexes)
     rescue => e
