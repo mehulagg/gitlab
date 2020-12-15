@@ -37,6 +37,11 @@ export default {
       type: Object,
       required: true,
     },
+    review: {
+      type: Object,
+      required: false,
+      default: null,
+    },
     isFirstFile: {
       type: Boolean,
       required: false,

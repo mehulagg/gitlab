@@ -26,6 +26,13 @@ import CollapsedFilesWarning from './collapsed_files_warning.vue';
 
 import { diffsApp } from '../utils/performance';
 import { fileByFile } from '../utils/preferences';
+import { getDerivedMergeRequestInformation } from '../utils/merge_request';
+import {
+  getReviewForFile,
+  getReviewsForMergeRequest,
+  markFileReviewed,
+  setReviewsForMergeRequest,
+} from '../utils/file_reviews';
 
 import {
   TREE_LIST_WIDTH_STORAGE_KEY,
@@ -39,6 +46,7 @@ import {
   ALERT_MERGE_CONFLICT,
   ALERT_COLLAPSED_FILES,
   EVT_VIEW_FILE_BY_FILE,
+  EVT_REVIEW_FILE,
 } from '../constants';
 
 export default {
@@ -128,9 +136,13 @@ export default {
   data() {
     const treeWidth =
       parseInt(localStorage.getItem(TREE_LIST_WIDTH_STORAGE_KEY), 10) || INITIAL_TREE_WIDTH;
+    const { mrPath } = getDerivedMergeRequestInformation({ endpoint: this.endpoint });
 
     return {
+      mrPath,
       treeWidth,
+      allReviews: getReviewsForMergeRequest(mrPath),
+      fileReviews: [],
       diffFilesLength: 0,
     };
   },
@@ -236,6 +248,9 @@ export default {
         this.adjustView();
       }
     },
+    diffs() {
+      this.fileReviews = this.diffs.map(file => getReviewForFile(this.allReviews, file));
+    },
     diffViewType() {
       this.adjustView();
     },
@@ -328,14 +343,22 @@ export default {
       notesEventHub.$once('fetchDiffData', this.fetchData);
       notesEventHub.$on('refetchDiffData', this.refetchDiffData);
       eventHub.$on(EVT_VIEW_FILE_BY_FILE, this.fileByFileListener);
+      eventHub.$on(EVT_REVIEW_FILE, this.reviewFile);
     },
     unsubscribeFromEvents() {
+      eventHub.$off(EVT_REVIEW_FILE, this.reviewFile);
       eventHub.$off(EVT_VIEW_FILE_BY_FILE, this.fileByFileListener);
       notesEventHub.$off('refetchDiffData', this.refetchDiffData);
       notesEventHub.$off('fetchDiffData', this.fetchData);
     },
     fileByFileListener({ setting } = {}) {
       this.setFileByFile({ fileByFile: setting });
+    },
+    reviewFile({ file } = {}) {
+      this.fileReviews = setReviewsForMergeRequest(
+        this.mrPath,
+        markFileReviewed(this.fileReviews, file),
+      );
     },
     navigateToDiffFileNumber(number) {
       this.navigateToDiffFileIndex(number - 1);
@@ -519,6 +542,7 @@ export default {
               v-for="(file, index) in diffs"
               :key="file.newPath"
               :file="file"
+              :review="fileReviews[index]"
               :is-first-file="index === 0"
               :is-last-file="index === diffs.length - 1"
               :help-page-path="helpPagePath"
