@@ -283,7 +283,7 @@ In GitLab 12.1 and later, only PostgreSQL is supported. In GitLab 13.0 and later
    wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
    RELEASE=$(lsb_release -cs) echo "deb http://apt.postgresql.org/pub/repos/apt/ ${RELEASE}"-pgdg main | sudo tee  /etc/apt/sources.list.d/pgdg.list
    sudo apt update
-   sudo apt -y install postgresql-11
+   sudo apt -y install postgresql-11 postgresql-client-11 libpq-dev
    ```
 
 1. Verify the PostgreSQL version you have is supported by the version of GitLab you're
