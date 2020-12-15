@@ -316,6 +316,7 @@ javascript:
 ```
 
 ### Flutter / Dart example
+
 This example `.gitlab-ci.yml` uses the [JUnit Report](https://pub.dev/packages/junitreport) package to convert the `flutter test` output into JUnit report XML format.
 
 ```yaml
