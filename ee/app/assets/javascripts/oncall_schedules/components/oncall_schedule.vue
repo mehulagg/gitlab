@@ -135,13 +135,18 @@ export default {
         </template>
 
         <div class="schedule-shell" data-testid="rotationsBody">
-          <schedule-timeline-section :preset-type="$options.presetType" :timeframe="timeframe" />
+          <schedule-timeline-section
+            :schedule="schedule"
+            :preset-type="$options.presetType"
+            :timeframe="timeframe"
+          />
           <rotations-list-section
             :preset-type="$options.presetType"
             :rotations="rotations"
             :timeframe="timeframe"
           />
         </div>
+      </gl-card>
     </gl-card>
     <delete-schedule-modal :schedule="schedule" :modal-id="$options.deleteScheduleModalId" />
     <edit-schedule-modal :schedule="schedule" :modal-id="$options.editScheduleModalId" />

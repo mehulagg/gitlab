@@ -87,12 +87,6 @@ export default {
       },
     },
   },
-  props: {
-    schedule: {
-      type: Object,
-      required: true,
-    },
-  },
   data() {
     return {
       participants: [],
