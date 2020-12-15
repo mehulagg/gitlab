@@ -7,16 +7,16 @@ type: reference, howto
 
 # GitLab Secure **(ULTIMATE)**
 
-GitLab can check your application for security vulnerabilities that may lead to unauthorized access,
-data leaks, denial of services, and more. GitLab reports vulnerabilities in the merge request so you
-can fix them before merging. The [Security Dashboard](security_dashboard/index.md) provides a
-high-level view of vulnerabilities detected in your projects, pipeline, and groups. The [Threat Monitoring](threat_monitoring/index.md)
-page provides runtime security metrics for application environments. With the information provided,
-you can immediately begin risk analysis and remediation.
+GitLab Secure improves the software development life cycle by minimizing risk and enhancing
+security. Spanning the entire life cycle, we enhance security both before and after changes are
+deployed in production. Before deployment, we scan code for security vulnerabilities that present
+risks such as unauthorized access, data leaks, and denial of services. This provides a checkpoint
+for software deployment, ensuring risks are identified in advance. After deployment we provide a
+dashboard view of vulnerabilities identified across your GitLab environment.
 
 <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
 For an overview of application security with GitLab, see
-[Security Deep Dive](https://www.youtube.com/watch?v=k4vEJnGYy84).
+[GitLab DevSecOps Tools in Action](https://www.youtube.com/watch?v=fPLEWnI4k6k).
 
 ## Quick start
 
