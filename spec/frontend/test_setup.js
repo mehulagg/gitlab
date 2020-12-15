@@ -5,6 +5,7 @@ import * as jqueryMatchers from 'custom-jquery-matchers';
 import { config as testUtilsConfig } from '@vue/test-utils';
 import Translate from '~/vue_shared/translate';
 import { initializeTestTimeout } from './helpers/timeout';
+import { failOnConsoleError, failOnConsoleWarn } from './helpers/fail_on_console';
 import { getJSONFixture, loadHTMLFixture, setHTMLFixture } from './helpers/fixtures';
 import { setupManualMocks } from './mocks/mocks_helper';
 import customMatchers from './matchers';
@@ -12,6 +13,9 @@ import customMatchers from './matchers';
 import './helpers/dom_shims';
 import './helpers/jquery';
 import '~/commons/bootstrap';
+
+failOnConsoleError();
+failOnConsoleWarn();
 
 process.on('unhandledRejection', global.promiseRejectionHandler);
 

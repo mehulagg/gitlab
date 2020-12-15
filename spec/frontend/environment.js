@@ -12,22 +12,6 @@ class CustomEnvironment extends JSDOMEnvironment {
     // Setup testURL so that window.location is setup properly
     super({ ...config, testURL: TEST_HOST }, context);
 
-    Object.assign(context.console, {
-      error(...args) {
-        throw new ErrorWithStack(
-          `Unexpected call of console.error() with:\n\n${args.join(', ')}`,
-          this.error,
-        );
-      },
-
-      warn(...args) {
-        throw new ErrorWithStack(
-          `Unexpected call of console.warn() with:\n\n${args.join(', ')}`,
-          this.warn,
-        );
-      },
-    });
-
     const { testEnvironmentOptions } = config;
     const { IS_EE } = testEnvironmentOptions;
     this.global.gon = {
@@ -77,7 +61,6 @@ class CustomEnvironment extends JSDOMEnvironment {
         this.teardown,
       );
     }
-
     await super.teardown();
   }
 }
