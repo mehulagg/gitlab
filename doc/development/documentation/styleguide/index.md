@@ -652,8 +652,10 @@ To stop the command, press <kbd>Control</kbd>+<kbd>C</kbd>.
 Use only standard spaces between words. The search engine for the documentation
 website doesn't split words separated with
 [non-breaking spaces](https://en.wikipedia.org/wiki/Non-breaking_space) when
-indexing, and fails to create expected individual search terms. (Tested in
-[`lint-doc.sh`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/scripts/lint-doc.sh).)
+indexing, and fails to create expected individual search terms. Tested in
+[`lint-doc.sh`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/scripts/lint-doc.sh).
+
+Don't use ` ` (NBSP) or ` ` (NNBSP).
 
 ## Lists
 
