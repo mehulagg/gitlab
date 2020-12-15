@@ -2802,9 +2802,6 @@ msgstr ""
 msgid "All changes are committed"
 msgstr ""
 
-msgid "All default stages are currently visible"
-msgstr ""
-
 msgid "All email addresses will be used to identify your commits."
 msgstr ""
 
@@ -8312,7 +8309,19 @@ msgstr ""
 msgid "CustomCycleAnalytics|Add stage"
 msgstr ""
 
+msgid "CustomCycleAnalytics|All default stages are currently visible"
+msgstr ""
+
+msgid "CustomCycleAnalytics|Default stages"
+msgstr ""
+
 msgid "CustomCycleAnalytics|Editing stage"
+msgstr ""
+
+msgid "CustomCycleAnalytics|End event"
+msgstr ""
+
+msgid "CustomCycleAnalytics|End event label"
 msgstr ""
 
 msgid "CustomCycleAnalytics|Enter a name for the stage"
@@ -8327,10 +8336,13 @@ msgstr ""
 msgid "CustomCycleAnalytics|Please select a start event first"
 msgstr ""
 
-msgid "CustomCycleAnalytics|Select start event"
+msgid "CustomCycleAnalytics|Recover hidden stage"
 msgstr ""
 
-msgid "CustomCycleAnalytics|Select stop event"
+msgid "CustomCycleAnalytics|Select end event"
+msgstr ""
+
+msgid "CustomCycleAnalytics|Select start event"
 msgstr ""
 
 msgid "CustomCycleAnalytics|Stage name already exists"
@@ -8339,16 +8351,10 @@ msgstr ""
 msgid "CustomCycleAnalytics|Start event"
 msgstr ""
 
-msgid "CustomCycleAnalytics|Start event changed, please select a valid stop event"
+msgid "CustomCycleAnalytics|Start event changed, please select a valid end event"
 msgstr ""
 
 msgid "CustomCycleAnalytics|Start event label"
-msgstr ""
-
-msgid "CustomCycleAnalytics|Stop event"
-msgstr ""
-
-msgid "CustomCycleAnalytics|Stop event label"
 msgstr ""
 
 msgid "CustomCycleAnalytics|Update stage"
@@ -8927,9 +8933,6 @@ msgid "Default project deletion protection"
 msgstr ""
 
 msgid "Default projects limit"
-msgstr ""
-
-msgid "Default stages"
 msgstr ""
 
 msgid "Default: Map a FogBugz account ID to a full name"

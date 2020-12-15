@@ -2,9 +2,8 @@ import { createLocalVue, mount } from '@vue/test-utils';
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 import Vuex from 'vuex';
-import CustomStageForm, {
-  initializeFormData,
-} from 'ee/analytics/cycle_analytics/components/custom_stage_form.vue';
+import CustomStageForm from 'ee/analytics/cycle_analytics/components/custom_stage_form.vue';
+import { initializeFormData } from 'ee/analytics/cycle_analytics/components/create_value_stream_form/utils';
 import { STAGE_ACTIONS } from 'ee/analytics/cycle_analytics/constants';
 import customStagesStore from 'ee/analytics/cycle_analytics/store/modules/custom_stages';
 import waitForPromises from 'helpers/wait_for_promises';
@@ -79,24 +78,32 @@ describe('CustomStageForm', () => {
   const findEvent = ev => wrapper.emitted()[ev];
 
   const sel = {
-    name: '[name="custom-stage-name"]',
-    startEvent: '[name="custom-stage-start-event"]',
-    startEventLabel: '[name="custom-stage-start-event-label"]',
-    endEvent: '[name="custom-stage-stop-event"]',
-    endEventLabel: '[name="custom-stage-stop-event-label"]',
-    submit: '.js-save-stage',
-    cancel: '.js-save-stage-cancel',
+    name: '[data-testid="custom-stage-name"] input',
+    startEvent: '[data-testid="custom-stage-start-event"] select',
+    startEventLabel: '[data-testid="custom-stage-start-event-label"]',
+    endEvent: '[data-testid="custom-stage-end-event"] select',
+    endEventLabel: '[data-testid="custom-stage-end-event-label"]',
+    submit: '[data-testid="save-custom-stage"]',
+    cancel: '[data-testid="cancel-custom-stage"]',
     invalidFeedback: '.invalid-feedback',
-    recoverStageDropdown: '.js-recover-hidden-stage-dropdown',
-    recoverStageDropdownTrigger: '.js-recover-hidden-stage-dropdown .dropdown-toggle',
-    hiddenStageDropdownOption: '.js-recover-hidden-stage-dropdown .dropdown-item',
+    recoverStageDropdown: '[data-testid="recover-hidden-stage-dropdown"]',
+    recoverStageDropdownTrigger: '[data-testid="recover-hidden-stage-dropdown"] .dropdown-toggle',
+    hiddenStageDropdownOption: '[data-testid="recover-hidden-stage-dropdown"] .dropdown-item',
   };
 
-  function getDropdownOption(_wrapper, dropdown, index) {
+  function getDropdownOptions(_wrapper, dropdown) {
+    return _wrapper.find(dropdown).findAll('option');
+  }
+
+  function getDropdownOptionsArray(_wrapper, dropdown) {
     return _wrapper
       .find(dropdown)
       .findAll('option')
-      .at(index);
+      .wrappers.map(w => w.attributes('value'));
+  }
+
+  function getDropdownOption(_wrapper, dropdown, index) {
+    return getDropdownOptions(_wrapper, dropdown).at(index);
   }
 
   function selectDropdownOption(_wrapper, dropdown, index) {
@@ -123,12 +130,12 @@ describe('CustomStageForm', () => {
     });
   }
 
-  const findNameField = _wrapper => _wrapper.find({ ref: 'name' });
-  const findNameFieldInput = _wrapper => _wrapper.find(sel.name);
+  const findNameField = _wrapper => _wrapper.find('[data-testid="custom-stage-name"]');
+  const findStartEventField = _wrapper => _wrapper.find('[data-testid="custom-stage-start-event"]');
 
   function setNameField(_wrapper, value = '') {
-    findNameFieldInput(_wrapper).setValue(value);
-    findNameFieldInput(_wrapper).trigger('change');
+    wrapper.find(sel.name).setValue(value);
+    wrapper.find(sel.name).trigger('change');
     return _wrapper.vm.$nextTick();
   }
 
@@ -148,7 +155,7 @@ describe('CustomStageForm', () => {
   describe.each([
     ['Name', sel.name, true],
     ['Start event', sel.startEvent, true],
-    ['Stop event', sel.endEvent, false],
+    ['End event', sel.endEvent, false],
     ['Submit', sel.submit, false],
     ['Cancel', sel.cancel, false],
   ])('Default state', (field, $sel, enabledState) => {
@@ -275,7 +282,7 @@ describe('CustomStageForm', () => {
     });
   });
 
-  describe('Stop event', () => {
+  describe('End event', () => {
     const startEventArrayIndex = mergeRequestCreatedIndex;
     const startEventDropdownIndex = startEventArrayIndex + 1;
     const currAllowed = startEvents[startEventArrayIndex].allowedEndEvents;
@@ -307,7 +314,7 @@ describe('CustomStageForm', () => {
       });
     });
 
-    it('will update the list of stop events when a start event is changed', () => {
+    it('will update the list of end events when a start event is changed', () => {
       let stopOptions = wrapper.find(sel.endEvent).findAll('option');
       const selectedStartEvent = startEvents[startEventDropdownIndex];
       expect(stopOptions).toHaveLength(1);
@@ -322,11 +329,11 @@ describe('CustomStageForm', () => {
       });
     });
 
-    it('will display all the valid stop events', () => {
+    it('will display all the valid end events', () => {
       let stopOptions = wrapper.find(sel.endEvent).findAll('option');
       const possibleEndEvents = stopEvents.filter(ev => currAllowed.includes(ev.identifier));
 
-      expect(stopOptions.at(0).html()).toEqual('<option value="">Select stop event</option>');
+      expect(stopOptions.at(0).html()).toEqual('<option value="">Select end event</option>');
 
       selectDropdownOption(wrapper, sel.startEvent, startEventDropdownIndex);
 
@@ -339,11 +346,11 @@ describe('CustomStageForm', () => {
       });
     });
 
-    it('will not display stop events that are not in the list of allowed stop events', () => {
+    it('will not display end events that are not in the list of allowed end events', () => {
       let stopOptions = wrapper.find(sel.endEvent).findAll('option');
       const excludedEndEvents = stopEvents.filter(ev => !currAllowed.includes(ev.identifier));
 
-      expect(stopOptions.at(0).html()).toEqual('<option value="">Select stop event</option>');
+      expect(stopOptions.at(0).html()).toEqual('<option value="">Select end event</option>');
 
       selectDropdownOption(wrapper, sel.startEvent, startEventArrayIndex + 1);
 
@@ -358,7 +365,7 @@ describe('CustomStageForm', () => {
       });
     });
 
-    describe('with a stop event selected and a change to the start event', () => {
+    describe('with a end event selected and a change to the start event', () => {
       beforeEach(() => {
         wrapper = createComponent();
 
@@ -378,27 +385,29 @@ describe('CustomStageForm', () => {
       });
 
       it('notifies that a start event needs to be selected first', () => {
+        wrapper.setData({ fields: { startEventIdentifier: '' } });
         return wrapper.vm.$nextTick().then(() => {
           expect(wrapper.text()).toContain('Please select a start event first');
         });
       });
 
-      it('will notify if the current start and stop event pair is not valid', () => {
+      it('will notify if the current start and end event pair is not valid', () => {
         selectDropdownOption(wrapper, sel.startEvent, 2);
 
         return wrapper.vm.$nextTick().then(() => {
           expect(wrapper.find(sel.invalidFeedback).exists()).toEqual(true);
           expect(wrapper.find(sel.invalidFeedback).text()).toContain(
-            'Start event changed, please select a valid stop event',
+            'Start event changed, please select a valid end event',
           );
         });
       });
 
-      it('will update the list of stop events', () => {
-        const se = wrapper.vm.endEventOptions;
+      it('will update the list of end events', () => {
+        const preEndEvents = getDropdownOptionsArray(wrapper, sel.endEvent);
         selectDropdownOption(wrapper, sel.startEvent, 2);
         return wrapper.vm.$nextTick().then(() => {
-          expect(se[1].value).not.toEqual(wrapper.vm.endEventOptions[1].value);
+          const opts = getDropdownOptionsArray(wrapper, sel.endEvent);
+          expect(preEndEvents).not.toEqual(opts);
         });
       });
 
@@ -410,7 +419,7 @@ describe('CustomStageForm', () => {
       });
     });
 
-    describe('Stop event label', () => {
+    describe('End event label', () => {
       beforeEach(() => {
         wrapper = createComponent();
       });
@@ -423,7 +432,7 @@ describe('CustomStageForm', () => {
         expect(wrapper.find(sel.startEventLabel).exists()).toEqual(false);
       });
 
-      it('will display the stop event label field if a label event is selected', () => {
+      it('will display the end event label field if a label event is selected', () => {
         expect(wrapper.find(sel.endEventLabel).exists()).toEqual(false);
 
         wrapper.setData({
@@ -498,9 +507,12 @@ describe('CustomStageForm', () => {
       beforeEach(() => {
         wrapper = createComponent();
         wrapper.find(sel.name).setValue('Cool stage');
-        return wrapper.vm
-          .$nextTick()
-          .then(() => setEventDropdowns({ startEventDropdownIndex, stopEventDropdownIndex }));
+        return wrapper.vm.$nextTick().then(() =>
+          setEventDropdowns({
+            startEventDropdownIndex,
+            stopEventDropdownIndex,
+          }),
+        );
       });
 
       afterEach(() => {
@@ -666,7 +678,9 @@ describe('CustomStageForm', () => {
             return wrapper.vm.$nextTick();
           })
           .then(() => {
-            expect(wrapper.vm.fields).toEqual({ ...formInitialData });
+            expect(wrapper.vm.fields).toEqual({
+              ...formInitialData,
+            });
           });
       });
     });
@@ -788,9 +802,9 @@ describe('CustomStageForm', () => {
     });
 
     it('renders the errors for the relevant fields', () => {
-      expect(wrapper.find({ ref: 'name' }).html()).toContain('is reserved');
-      expect(wrapper.find({ ref: 'name' }).html()).toContain('cant be blank');
-      expect(wrapper.find({ ref: 'startEventIdentifier' }).html()).toContain('cant be blank');
+      expect(findNameField(wrapper).html()).toContain('is reserved');
+      expect(findNameField(wrapper).html()).toContain('cant be blank');
+      expect(findStartEventField(wrapper).html()).toContain('cant be blank');
     });
   });
 
@@ -827,7 +841,13 @@ describe('CustomStageForm', () => {
         wrapper = createComponent({
           stubs: formFieldStubs,
           initialRootGetters: {
-            hiddenStages: () => [{ id: 'my-stage', title: 'My default stage', hidden: true }],
+            hiddenStages: () => [
+              {
+                id: 'my-stage',
+                title: 'My default stage',
+                hidden: true,
+              },
+            ],
           },
         });
       });
@@ -913,7 +933,10 @@ describe('CustomStageForm', () => {
           },
           errors: {},
         });
-        expect(res.fields).toEqual({ ...emptyFieldState, startEventIdentifier: 'start-event' });
+        expect(res.fields).toEqual({
+          ...emptyFieldState,
+          startEventIdentifier: 'start-event',
+        });
         expect(res.errors).toMatchObject({
           endEventIdentifier: [],
         });
@@ -929,7 +952,10 @@ describe('CustomStageForm', () => {
             name: ['is reserved'],
           },
         });
-        expect(res.fields).toEqual({ ...emptyFieldState, startEventIdentifier: 'start-event' });
+        expect(res.fields).toEqual({
+          ...emptyFieldState,
+          startEventIdentifier: 'start-event',
+        });
         expect(res.errors).toMatchObject({
           endEventIdentifier: [],
           name: ['is reserved'],
