@@ -1,7 +1,6 @@
 <script>
 import { GlDropdown, GlDropdownItem } from '@gitlab/ui';
-// TODO once backend is settled, update by either abstracting this out to app/assets/javascripts/graphql_shared or create new, modified query in #287757
-import updateAlertStatusMutation from '~/alert_management/graphql/mutations/update_alert_status.mutation.graphql';
+import updateAlertStatusMutation from '~/graphql_shared/mutations/update_alert_status.mutation.graphql';
 import { MESSAGES, STATUSES } from './constants';
 
 export default {

@@ -12,8 +12,7 @@ import {
 import produce from 'immer';
 import TimeAgo from '~/vue_shared/components/time_ago_tooltip.vue';
 import { convertToSnakeCase } from '~/lib/utils/text_utility';
-// TODO once backend is settled, update by either abstracting this out to app/assets/javascripts/graphql_shared or create new, modified query in #287757
-import getAlerts from '~/alert_management/graphql/queries/get_alerts.query.graphql';
+import getAlerts from '~/graphql_shared/queries/get_alerts.query.graphql';
 import { FIELDS, MESSAGES, PAGE_SIZE, STATUSES } from './constants';
 import AlertStatus from './alert_status.vue';
 
@@ -44,6 +43,7 @@ export default {
       query: getAlerts,
       variables() {
         return {
+          domain: 'threat_monitoring',
           firstPageSize: this.$options.PAGE_SIZE,
           projectPath: this.projectPath,
           sort: this.sort,

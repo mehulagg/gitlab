@@ -2,7 +2,7 @@ import { shallowMount } from '@vue/test-utils';
 import { GlDropdown, GlDropdownItem } from '@gitlab/ui';
 import waitForPromises from 'helpers/wait_for_promises';
 import AlertStatus from 'ee/threat_monitoring/components/alerts/alert_status.vue';
-import updateAlertStatusMutation from '~/alert_management/graphql/mutations/update_alert_status.mutation.graphql';
+import updateAlertStatusMutation from '~/graphql_shared/mutations/update_alert_status.mutation.graphql';
 import { mockAlerts } from '../../mock_data';
 
 const mockAlert = mockAlerts[0];
