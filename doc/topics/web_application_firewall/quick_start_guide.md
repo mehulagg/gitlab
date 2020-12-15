@@ -118,7 +118,7 @@ filled in the domain, click **Save changes**.
 
 Prometheus should also be installed. It is an open-source monitoring and
 alerting system that is used to supervise the deployed application.
-We will not install GitLab Runner as we use the shared runners that
+Install GitLab Runner is not required as we use the shared runners that
 GitLab.com provides.
 
 ## Enabling Auto DevOps (optional)
