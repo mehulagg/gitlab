@@ -65,6 +65,15 @@ users have to fix their `.gitlab-ci.yml` that could annoy their workflow.
 
 Please read [versioning](#versioning) section for introducing breaking change safely.
 
+### Best practices
+
+- Avoid using [global keywords](https://docs.gitlab.com/ee/ci/yaml/#global-keywords),
+  such as `image`, `stages` and `variables` at top-level.
+  When a parent `.gitlab-ci.yml` [includes](https://docs.gitlab.com/ee/ci/yaml/#include)
+  multiple templates, GitLab CI YAML processesor merges these templates into one
+  YAML file. As the consequence, each global keywords could be overridden by the
+  others and cause an unexpected behavior.
+
 ## Versioning
 
 Versioning allows you to introduce a new template without modifying the existing
