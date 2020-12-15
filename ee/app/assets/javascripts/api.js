@@ -46,6 +46,8 @@ export default {
   projectDeploymentFrequencyAnalyticsPath:
     '/api/:version/projects/:id/analytics/deployment_frequency',
   issueMetricImagesPath: '/api/:version/projects/:id/issues/:issue_iid/metric_images',
+  issueMetricSingleImagePath:
+    '/api/:version/projects/:id/issues/:issue_iid/metric_images/:image_id',
 
   userSubscription(namespaceId) {
     const url = Api.buildUrl(this.subscriptionPath).replace(':id', encodeURIComponent(namespaceId));
@@ -366,5 +368,14 @@ export default {
     }
 
     return axios.post(metricImagesUrl, formData, options);
+  },
+
+  deleteMetricImage({ issueIid, id, imageId }) {
+    const individualMetricImageUrl = Api.buildUrl(this.issueMetricSingleImagePath)
+      .replace(':id', encodeURIComponent(id))
+      .replace(':issue_iid', encodeURIComponent(issueIid))
+      .replace(':image_id', encodeURIComponent(imageId));
+
+    return axios.delete(individualMetricImageUrl);
   },
 };

@@ -1,7 +1,7 @@
 import { s__ } from '~/locale';
 import createFlash from '~/flash';
 import * as types from './mutation_types';
-import { getMetricImages, uploadMetricImage } from '../service';
+import { deleteMetricImage, getMetricImages, uploadMetricImage } from '../service';
 
 export const fetchMetricImages = async ({ state, commit }) => {
   commit(types.REQUEST_METRIC_IMAGES);
@@ -28,6 +28,17 @@ export const uploadImage = async ({ state, commit }, { files, url }) => {
   } catch (error) {
     commit(types.RECEIVE_METRIC_UPLOAD_ERROR);
     createFlash({ message: s__('Incidents|There was an issue uploading your image.') });
+  }
+};
+
+export const deleteImage = async ({ state, commit }, imageId) => {
+  const { issueIid, projectId } = state;
+
+  try {
+    await deleteMetricImage({ imageId, id: projectId, issueIid });
+    commit(types.RECEIVE_METRIC_DELETE_SUCCESS, imageId);
+  } catch (error) {
+    createFlash({ message: s__('Incidents|There was an issue deleting the image.') });
   }
 };
 
