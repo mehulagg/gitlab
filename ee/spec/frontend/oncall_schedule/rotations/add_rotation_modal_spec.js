@@ -3,7 +3,7 @@ import createMockApollo from 'jest/helpers/mock_apollo_helper';
 import VueApollo from 'vue-apollo';
 import waitForPromises from 'helpers/wait_for_promises';
 import { GlDropdownItem, GlModal, GlAlert, GlTokenSelector } from '@gitlab/ui';
-import { addRotationModalId } from 'ee/oncall_schedules/components/oncall_schedule';
+import { addRotationModalId } from 'ee/oncall_schedules/components/oncall_schedule.vue';
 import AddRotationModal from 'ee/oncall_schedules/components/rotations/add_rotation_modal.vue';
 import usersSearchQuery from '~/graphql_shared/queries/users_search.query.graphql';
 import { participants, getOncallSchedulesQueryResponse } from '../mocks/apollo_mock';
@@ -64,6 +64,7 @@ describe('AddRotationModal', () => {
       localVue,
       propsData: {
         modalId: addRotationModalId,
+        schedule,
       },
       apolloProvider: fakeApollo,
       data() {
@@ -74,9 +75,6 @@ describe('AddRotationModal', () => {
           },
           participants,
         };
-      },
-      propsData: {
-        schedule,
       },
       provide: {
         projectPath,

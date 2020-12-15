@@ -1,5 +1,4 @@
 import { shallowMount } from '@vue/test-utils';
-import { GlCard } from '@gitlab/ui';
 import ScheduleTimelineSection from 'ee/oncall_schedules/components/schedule/components/schedule_timeline_section.vue';
 import WeeksHeaderItem from 'ee/oncall_schedules/components/schedule/components/preset_weeks/weeks_header_item.vue';
 import { getTimeframeForWeeksView } from 'ee/oncall_schedules/components/schedule/utils';
@@ -23,9 +22,6 @@ describe('TimelineSectionComponent', () => {
         timeframe,
         schedule,
       },
-      stubs: {
-        GlCard,
-      },
     });
   }
 
@@ -34,10 +30,8 @@ describe('TimelineSectionComponent', () => {
   });
 
   afterEach(() => {
-    if (wrapper) {
-      wrapper.destroy();
-      wrapper = null;
-    }
+    wrapper.destroy();
+    wrapper = null;
   });
 
   it('renders component container element with class `timeline-section`', () => {

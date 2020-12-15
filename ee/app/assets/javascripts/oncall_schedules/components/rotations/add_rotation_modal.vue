@@ -64,6 +64,10 @@ export default {
       type: String,
       required: true,
     },
+    schedule: {
+      type: Object,
+      required: true,
+    },
   },
   apollo: {
     participants: {
@@ -79,12 +83,6 @@ export default {
       error(error) {
         this.error = error;
       },
-    },
-  },
-  props: {
-    schedule: {
-      type: Object,
-      required: true,
     },
   },
   data() {
