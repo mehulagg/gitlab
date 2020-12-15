@@ -26,6 +26,13 @@ import CollapsedFilesWarning from './collapsed_files_warning.vue';
 
 import { diffsApp } from '../utils/performance';
 import { fileByFile } from '../utils/preferences';
+import { getDerivedMergeRequestInformation } from '../utils/merge_request';
+import {
+  getReviewForFile,
+  getReviewsForMergeRequest,
+  markFileReviewed,
+  setReviewsForMergeRequest,
+} from '../utils/file_reviews';
 
 import {
   TREE_LIST_WIDTH_STORAGE_KEY,
@@ -128,9 +135,13 @@ export default {
   data() {
     const treeWidth =
       parseInt(localStorage.getItem(TREE_LIST_WIDTH_STORAGE_KEY), 10) || INITIAL_TREE_WIDTH;
+    const { mrPath } = getDerivedMergeRequestInformation({ endpoint: this.endpoint });
 
     return {
+      mrPath,
       treeWidth,
+      allReviews: getReviewsForMergeRequest(mrPath),
+      fileReviews: [],
       diffFilesLength: 0,
     };
   },
@@ -235,6 +246,9 @@ export default {
         this.refetchDiffData();
         this.adjustView();
       }
+    },
+    diffs() {
+      this.fileReviews = this.diffs.map(file => getReviewForFile(this.allReviews, file));
     },
     diffViewType() {
       this.adjustView();
@@ -519,6 +533,7 @@ export default {
               v-for="(file, index) in diffs"
               :key="file.newPath"
               :file="file"
+              :review="fileReviews[index]"
               :is-first-file="index === 0"
               :is-last-file="index === diffs.length - 1"
               :help-page-path="helpPagePath"
