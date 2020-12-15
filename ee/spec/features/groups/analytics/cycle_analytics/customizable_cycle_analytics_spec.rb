@@ -279,7 +279,7 @@ RSpec.describe 'Customizable Group Value Stream Analytics', :js do
   shared_examples 'can edit custom stages' do
     context 'Edit stage form' do
       let(:stage_form_class) { '.custom-stage-form' }
-      let(:stage_save_button) { '.js-save-stage' }
+      let(:stage_save_button) { '[data-testid="save-custom-stage"]' }
       let(:name_field) { 'custom-stage-name' }
       let(:start_event_field) { 'custom-stage-start-event' }
       let(:end_event_field) { 'custom-stage-stop-event' }
@@ -413,7 +413,7 @@ RSpec.describe 'Customizable Group Value Stream Analytics', :js do
 
           open_recover_stage_dropdown
 
-          expect(page.find('.js-recover-hidden-stage-dropdown')).to have_text(s_('CycleAnalyticsStage|Issue'))
+          expect(page.find("[data-testid='recover-hidden-stage-dropdown']")).to have_text(s_('CycleAnalyticsStage|Issue'))
         end
       end
 
