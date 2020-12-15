@@ -123,11 +123,7 @@ export default {
         </template>
 
         <div class="schedule-shell" data-testid="rotationsBody">
-          <schedule-timeline-section
-            :schedule="schedule"
-            :preset-type="$options.presetType"
-            :timeframe="timeframe"
-          />
+          <schedule-timeline-section :preset-type="$options.presetType" :timeframe="timeframe" />
           <rotations-list-section
             :preset-type="$options.presetType"
             :rotations="rotations"

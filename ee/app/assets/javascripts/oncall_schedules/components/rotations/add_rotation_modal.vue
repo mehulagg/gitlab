@@ -17,6 +17,7 @@ import usersSearchQuery from '~/graphql_shared/queries/users_search.query.graphq
 import createOncallScheduleRotationMutation from '../../graphql/create_oncall_schedule_rotation.mutation.graphql';
 import {
   LENGTH_ENUM,
+  HOURS_IN_DAY,
   CHEVRON_SKIPPING_SHADE_ENUM,
   CHEVRON_SKIPPING_PALETTE_ENUM,
 } from '../../constants';
@@ -40,6 +41,7 @@ export default {
       },
     },
   },
+  HOURS_IN_DAY,
   tokenColorPalette: {
     shade: CHEVRON_SKIPPING_SHADE_ENUM,
     palette: CHEVRON_SKIPPING_PALETTE_ENUM,
@@ -193,7 +195,7 @@ export default {
     :title="$options.i18n.addRotation"
     :action-primary="actionsProps.primary"
     :action-cancel="actionsProps.cancel"
-    @primary="createRotation"
+    @primary.prevent="createRotation"
   >
     <gl-alert v-if="error" variant="danger" @dismiss="error = ''">
       {{ error || $options.i18n.errorMsg }}
@@ -281,7 +283,7 @@ export default {
             class="gl-w-12 gl-pl-3"
           >
             <gl-dropdown-item
-              v-for="n in 24"
+              v-for="n in $options.HOURS_IN_DAY"
               :key="n"
               :is-checked="form.startsAt.time === n"
               is-check-item
