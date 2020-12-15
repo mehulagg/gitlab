@@ -199,6 +199,35 @@ authorization credentials. By default, content of specific headers are masked in
 reports. You can specify the list of all headers to be masked. For details, see
 [Hide sensitive information](dast/index.md#hide-sensitive-information).
 
+### View details of an API Fuzzing vulnerability
+
+Faults detected by API Fuzzing occur in the live web application, and require manual investigation to determine if they are vulnerabilities. Fuzzing faults are included as vulnerabilities with a severity of Unknown.
+
+To facilitate investigation of the fuzzing faults, detailed information is provided about the HTTP messages sent and received along with a description of the modification(s) made.
+
+To view details of a fuzzing fault:
+
+1. To see all faults detected:
+
+   - In a project, go to the project's **{shield}** **Security & Compliance** -> **Vulnerability Report** page. This page will show all vulnerabilities from the default branch only.
+   - Only in a merge request, go the merge request's **Security** section and click the **Expand** button. API Fuzzing faults will be available in a section "API Fuzzing detected N potential vulnerabilities". Clicking on the title will display the fault details.
+
+1. Click on the fault's title. The following details are provided:
+
+| Field            | Description                                                        |
+|:-----------------|:------------------------------------------------------------------ |
+| Description      | Description of the fault including what was modified.              |
+| Project          | Namespace and project in which the vulnerability was detected.     |
+| Method           | HTTP method used to detect the vulnerability.                      |
+| URL              | URL at which the vulnerability was detected.                       |
+| Request          | The HTTP request send that caused the fault.                       |
+| Unmodified Response | Response from an unmodified request. This is what a normal working response looks like. |
+| Actual Response  | Response received from fuzzed request.                             |
+| Evidence         | How we determined a fault occurred.                                |
+| Identifiers      | The fuzzing check used to find this fault.                         |
+| Severity         | Severity of the finding is always Unknown                          |
+| Scanner Type     | Scanner used to perform testing.                                   |
+
 ### Dismissing a vulnerability
 
 To dismiss a vulnerability, you must set its status to Dismissed. This dismisses the vulnerability
