@@ -27,7 +27,7 @@ module QA
         end
       end
 
-      Flow::Login.sign_in
+      Flow::SignUp.disable_sign_ups
 
       Resource::KubernetesCluster::ProjectCluster.fabricate! do |cluster_settings|
         cluster_settings.project = @project

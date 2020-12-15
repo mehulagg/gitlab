@@ -2,11 +2,11 @@
 require_relative 'cluster_with_prometheus.rb'
 
 module QA
-  RSpec.describe 'Monitor', :orchestrated, :kubernetes, :requires_admin, quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/241448', type: :investigating } do
+  RSpec.describe 'Monitor', :orchestrated, :ssh_tunnel, :requires_admin do
     include_context "cluster with Prometheus installed"
 
     before do
-      Flow::Login.sign_in_unless_signed_in
+      Flow::Login.sign_in_as_admin_tunnel
       @project.visit!
     end
 
