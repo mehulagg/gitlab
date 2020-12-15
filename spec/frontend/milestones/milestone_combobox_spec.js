@@ -29,19 +29,25 @@ describe('Milestone combobox component', () => {
   let searchApiCallSpy;
 
   const createComponent = (props = {}, attrs = {}) => {
+    const propsData = {
+      projectId,
+      groupId,
+      groupMilestonesAvailable,
+      extraLinks,
+      value: [],
+      ...props,
+    };
+
     wrapper = mount(MilestoneCombobox, {
-      propsData: {
-        projectId,
-        groupId,
-        groupMilestonesAvailable,
-        extraLinks,
-        value: [],
-        ...props,
-      },
+      propsData,
       attrs,
       listeners: {
         // simulate a parent component v-model binding
         input: selectedMilestone => {
+          // ugly hack because setProps plays bad with immediate watchers
+          // see https://github.com/vuejs/vue-test-utils/issues/1140 and
+          // https://github.com/vuejs/vue-test-utils/pull/1752
+          propsData.value = selectedMilestone;
           wrapper.setProps({ value: selectedMilestone });
         },
       },
@@ -339,7 +345,7 @@ describe('Milestone combobox component', () => {
             findFirstProjectMilestonesDropdownItem()
               .find('span')
               .classes('selected-item'),
-          ).toBe(false);
+          ).toBe(true);
 
           selectFirstProjectMilestone();
 
@@ -349,7 +355,7 @@ describe('Milestone combobox component', () => {
             findFirstProjectMilestonesDropdownItem()
               .find('span')
               .classes('selected-item'),
-          ).toBe(true);
+          ).toBe(false);
         });
 
         describe('when a project milestones is selected', () => {
@@ -366,18 +372,19 @@ describe('Milestone combobox component', () => {
             selectFirstProjectMilestone();
             await localVue.nextTick();
 
-            expect(findButtonContent().text()).toBe(s__('MilestoneCombobox|No milestone'));
+            expect(findButtonContent().text()).toBe('v1.0');
 
             selectFirstProjectMilestone();
-
             await localVue.nextTick();
-            expect(findButtonContent().text()).toBe('v1.0');
+
+            expect(findButtonContent().text()).toBe(s__('MilestoneCombobox|No milestone'));
           });
 
-          it('updates the v-model binding with the project milestone title', () => {
+          it('updates the v-model binding with the project milestone title', async () => {
             expect(wrapper.vm.value).toEqual([]);
 
             selectFirstProjectMilestone();
+            await localVue.nextTick();
 
             expect(wrapper.vm.value).toEqual(['v1.0']);
           });
@@ -469,7 +476,7 @@ describe('Milestone combobox component', () => {
             findFirstGroupMilestonesDropdownItem()
               .find('span')
               .classes('selected-item'),
-          ).toBe(false);
+          ).toBe(true);
 
           selectFirstGroupMilestone();
 
@@ -479,7 +486,7 @@ describe('Milestone combobox component', () => {
             findFirstGroupMilestonesDropdownItem()
               .find('span')
               .classes('selected-item'),
-          ).toBe(true);
+          ).toBe(false);
         });
 
         describe('when a group milestones is selected', () => {
@@ -496,18 +503,19 @@ describe('Milestone combobox component', () => {
             selectFirstGroupMilestone();
             await localVue.nextTick();
 
-            expect(findButtonContent().text()).toBe(s__('MilestoneCombobox|No milestone'));
+            expect(findButtonContent().text()).toBe('group-v1.0');
 
             selectFirstGroupMilestone();
-
             await localVue.nextTick();
-            expect(findButtonContent().text()).toBe('group-v1.0');
+
+            expect(findButtonContent().text()).toBe(s__('MilestoneCombobox|No milestone'));
           });
 
-          it('updates the v-model binding with the group milestone title', () => {
+          it('updates the v-model binding with the group milestone title', async () => {
             expect(wrapper.vm.value).toEqual([]);
 
             selectFirstGroupMilestone();
+            await localVue.nextTick();
 
             expect(wrapper.vm.value).toEqual(['group-v1.0']);
           });
