@@ -16,6 +16,9 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 > - The group-level Container Registry was [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/23315) in GitLab 12.10.
 > - Searching by image repository name was [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/31322) in GitLab 13.0.
 
+NOTE:
+If you pull container images from Docker Hub, you can also use the [GitLab Dependency Proxy](../dependency_proxy.md) to avoid running into rate limits and speed up your pipelines.
+
 With the Docker Container Registry integrated into GitLab, every GitLab project can
 have its own space to store its Docker images.
 
@@ -39,9 +42,6 @@ Only members of the project or group can access a private project's Container Re
 If a project is public, so is the Container Registry.
 
 ## Use images from the Container Registry
-
-NOTE:Note
-Are you pulling container images from Docker Hub? Consider using the [GitLab Dependency Proxy](../dependency_proxy.md#use-the-dependency-proxy-for-docker-images), which can help you to avoid running into a rate-limit and speed up your pipelines by pulling the image from the cache whenever possible.
 
 To download and run a container image hosted in the GitLab Container Registry:
 
