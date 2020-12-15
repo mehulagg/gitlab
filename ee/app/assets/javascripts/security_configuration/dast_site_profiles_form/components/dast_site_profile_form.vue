@@ -105,9 +105,11 @@ export default {
       const { errorMessage } = this.i18n;
 
       const variables = {
-        fullPath: this.fullPath,
-        ...(this.isEdit ? { id: this.siteProfile.id } : {}),
-        ...serializeFormObject(this.form.fields),
+        input: {
+          fullPath: this.fullPath,
+          ...(this.isEdit ? { id: this.siteProfile.id } : {}),
+          ...serializeFormObject(this.form.fields),
+        },
       };
 
       this.$apollo

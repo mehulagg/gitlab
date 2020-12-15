@@ -200,9 +200,11 @@ describe('OnDemandScansForm', () => {
         expect(subject.vm.$apollo.mutate).toHaveBeenCalledWith({
           mutation: dastOnDemandScanCreate,
           variables: {
-            dastScannerProfileId: passiveScannerProfile.id,
-            dastSiteProfileId: nonValidatedSiteProfile.id,
-            fullPath: projectPath,
+            input: {
+              dastScannerProfileId: passiveScannerProfile.id,
+              dastSiteProfileId: nonValidatedSiteProfile.id,
+              fullPath: projectPath,
+            },
           },
         });
       });

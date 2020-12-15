@@ -189,14 +189,16 @@ describe('DAST Scanner Profile', () => {
           expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledWith({
             mutation,
             variables: {
-              profileName,
-              spiderTimeout,
-              targetTimeout,
-              projectFullPath,
-              scanType,
-              useAjaxSpider,
-              showDebugMessages,
-              ...mutationVars,
+              input: {
+                profileName,
+                spiderTimeout,
+                targetTimeout,
+                fullPath: projectFullPath,
+                scanType,
+                useAjaxSpider,
+                showDebugMessages,
+                ...mutationVars,
+              },
             },
           });
         });

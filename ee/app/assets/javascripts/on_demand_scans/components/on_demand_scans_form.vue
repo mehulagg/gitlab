@@ -174,9 +174,11 @@ export default {
         .mutate({
           mutation: dastOnDemandScanCreateMutation,
           variables: {
-            fullPath: this.projectPath,
-            dastScannerProfileId: this.selectedScannerProfile.id,
-            dastSiteProfileId: this.selectedSiteProfile.id,
+            input: {
+              fullPath: this.projectPath,
+              dastScannerProfileId: this.selectedScannerProfile.id,
+              dastSiteProfileId: this.selectedSiteProfile.id,
+            },
           },
         })
         .then(({ data: { dastOnDemandScanCreate: { pipelineUrl, errors } } }) => {

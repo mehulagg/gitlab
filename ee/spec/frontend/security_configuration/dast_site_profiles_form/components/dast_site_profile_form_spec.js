@@ -173,10 +173,12 @@ describe('DastSiteProfileForm', () => {
 
         it('triggers GraphQL mutation', () => {
           expect(requestHandlers[mutationKind]).toHaveBeenCalledWith({
-            profileName,
-            targetUrl,
-            fullPath,
-            ...mutationVars,
+            input: {
+              profileName,
+              targetUrl,
+              fullPath,
+              ...mutationVars,
+            },
           });
         });
 

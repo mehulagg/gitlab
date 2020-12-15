@@ -172,8 +172,10 @@ export default {
         .mutate({
           mutation: deletion.mutation,
           variables: {
-            projectFullPath,
-            profileId,
+            input: {
+              projectFullPath,
+              profileId,
+            },
           },
           update(store, { data = {} }) {
             const errors = data[`${profileType}Delete`]?.errors ?? [];
