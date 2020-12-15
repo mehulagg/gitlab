@@ -3,12 +3,13 @@
 .row.flex-grow-1
   .d-flex.flex-column.align-items-center.w-100.p-3.gl-bg-gray-10
     .edit-group.d-flex.flex-column.align-items-center.pt-5
-      #progress-bar
+      - unless in_trial_onboarding_flow?
+        #progress-bar
       %h2.center= _('Create your group')
       %p
         %div= _('A group represents your organization in GitLab. Groups allow you to manage users and collaborate across multiple projects.')
 
-      = form_for @group, url: users_sign_up_groups_path, html: { class: 'gl-show-field-errors card w-100 p-3' } do |f|
+      = form_for @group, url: users_sign_up_groups_path(trial_flow: params[:trial_flow]), html: { class: 'gl-show-field-errors card w-100 p-3' } do |f|
         = form_errors(@group)
         .row
           .form-group.group-name-holder.col-sm-12

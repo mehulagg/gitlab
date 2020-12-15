@@ -19,15 +19,25 @@ module Registrations
       @group = Groups::CreateService.new(current_user, group_params).execute
 
       if @group.persisted?
-        invite_members(@group)
+        url_params = { namespace_id: @group.id }
+        if trial_onboarding_flow?
+          apply_trial
+          url_params[:trial_flow] = params[:trial_flow]
+        else
+          invite_members(@group)
+        end
 
-        redirect_to new_users_sign_up_project_path(namespace_id: @group.id)
+        redirect_to new_users_sign_up_project_path(url_params)
       else
         render action: :new
       end
     end
 
     private
+
+    def trial_onboarding_flow?
+      params[:trial_flow] == 'true' && experiment_enabled?(:trial_onboarding_issues)
+    end
 
     def authorize_create_group!
       access_denied! unless can?(current_user, :create_group)
@@ -39,6 +49,20 @@ module Registrations
 
     def group_params
       params.require(:group).permit(:name, :path, :visibility_level)
+    end
+
+    def apply_trial
+      apply_trial_params = {
+        uid: current_user.id,
+        trial_user: {
+          namespace_id: @group.id,
+          gitlab_com_trial: true,
+          sync_to_gl: true
+        }
+      }
+
+      result = GitlabSubscriptions::ApplyTrialService.new.execute(apply_trial_params)
+      result&.dig(:success)
     end
   end
 end

@@ -4,6 +4,30 @@ require 'spec_helper'
 
 RSpec.describe Registrations::WelcomeController do
   let_it_be(:user) { create(:user) }
+  let_it_be(:project) { create(:project) }
+
+  describe '#trial_getting_started' do
+    subject(:trial_getting_started) do
+      get :trial_getting_started, params: { learn_gitlab_project_id: project.id }
+    end
+
+    context 'without a signed in user' do
+      it { is_expected.to redirect_to new_user_session_path }
+    end
+
+    context 'with a signed in user' do
+      before do
+        sign_in(user)
+      end
+
+      it 'sets the learn_gitlab_project and renders' do
+        subject
+
+        expect(assigns(:learn_gitlab_project)).not_to be(nil)
+        is_expected.to render_template(:trial_getting_started)
+      end
+    end
+  end
 
   describe '#update' do
     let(:setup_for_company) { 'false' }

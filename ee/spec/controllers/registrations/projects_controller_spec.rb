@@ -48,8 +48,9 @@ RSpec.describe Registrations::ProjectsController do
   end
 
   describe 'POST #create' do
-    subject { post :create, params: { project: params } }
+    subject { post :create, params: { project: params }.merge(trial_flow_params) }
 
+    let_it_be(:trial_flow_params) { {} }
     let(:params) { { namespace_id: namespace.id, name: 'New project', path: 'project-path', visibility_level: Gitlab::VisibilityLevel::PRIVATE } }
 
     context 'with an unauthenticated user' do
@@ -58,10 +59,12 @@ RSpec.describe Registrations::ProjectsController do
     end
 
     context 'with an authenticated user' do
+      let_it_be(:trial_onboarding_issues_enabled) { false }
+
       before do
         namespace.add_owner(user)
         sign_in(user)
-        stub_experiment_for_subject(onboarding_issues: true)
+        stub_experiment_for_subject(onboarding_issues: true, trial_onboarding_issues: trial_onboarding_issues_enabled)
       end
 
       it 'creates a new project, a "Learn GitLab" project, sets a cookie and redirects to the experience level page' do
@@ -73,6 +76,29 @@ RSpec.describe Registrations::ProjectsController do
         expect(subject).to redirect_to(users_sign_up_experience_level_path(namespace_path: namespace.to_param))
         expect(namespace.projects.find_by_name(s_('Learn GitLab'))).to be_import_finished
         expect(cookies[:onboarding_issues_settings]).not_to be_nil
+      end
+
+      context 'when the trial onboarding is active' do
+        let_it_be(:trial_flow_params) { { trial_flow: true } }
+        let_it_be(:trial_onboarding_issues_enabled) { true }
+
+        it 'creates a new project, a "Learn GitLab - Gold trial" project, does not set a cookie' do
+          expect { subject }.to change { namespace.projects.pluck(:name) }.from([]).to(['New project', s_('Learn GitLab - Gold trial')])
+          Sidekiq::Worker.drain_all
+
+          expect(subject).to have_gitlab_http_status(:redirect)
+          expect(namespace.projects.find_by_name(s_('Learn GitLab - Gold trial'))).to be_import_finished
+          expect(cookies[:onboarding_issues_settings]).to be_nil
+        end
+
+        it 'redirects to the trial getting started page' do
+          project = create(:project)
+          expect_next_instance_of(::Projects::GitlabProjectsImportService) do |service|
+            expect(service).to receive(:execute).and_return(project)
+          end
+          Sidekiq::Worker.drain_all
+          expect(subject).to redirect_to(trial_getting_started_users_sign_up_welcome_path(learn_gitlab_project_id: project.id))
+        end
       end
 
       context 'when the project cannot be saved' do

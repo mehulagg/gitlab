@@ -95,6 +95,17 @@ RSpec.describe TrialsController do
       let(:create_lead_result) { true }
 
       it { is_expected.to redirect_to(select_trials_url) }
+
+      context 'when experiment trial_onboarding_issues is enabled' do
+        before do
+          stub_experiment_for_subject(trial_onboarding_issues: true)
+        end
+
+        it 'records trial_onboarding_issues experiment users' do
+          expect(controller).to receive(:record_experiment_user).with(:trial_onboarding_issues)
+          is_expected.to redirect_to(new_users_sign_up_group_path(trial_flow: true))
+        end
+      end
     end
 
     context 'on failure' do
