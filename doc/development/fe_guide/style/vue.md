@@ -603,7 +603,7 @@ be used to find an element:
     let wrapper;
 
     const createWrapper = () => { wrapper = extendedWrapper(shallowMount(SomeComponent)); };
-    const someButton = () => wrapper.findByTestId('someButton');
+    const someButton = () => wrapper.findByTestId('someButtonTestId');
     ```
 
 ### Setting component state
