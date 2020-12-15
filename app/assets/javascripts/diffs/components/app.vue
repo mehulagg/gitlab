@@ -46,6 +46,7 @@ import {
   ALERT_MERGE_CONFLICT,
   ALERT_COLLAPSED_FILES,
   EVT_VIEW_FILE_BY_FILE,
+  EVT_REVIEW_FILE,
 } from '../constants';
 
 export default {
@@ -342,14 +343,22 @@ export default {
       notesEventHub.$once('fetchDiffData', this.fetchData);
       notesEventHub.$on('refetchDiffData', this.refetchDiffData);
       eventHub.$on(EVT_VIEW_FILE_BY_FILE, this.fileByFileListener);
+      eventHub.$on(EVT_REVIEW_FILE, this.reviewFile);
     },
     unsubscribeFromEvents() {
+      eventHub.$off(EVT_REVIEW_FILE, this.reviewFile);
       eventHub.$off(EVT_VIEW_FILE_BY_FILE, this.fileByFileListener);
       notesEventHub.$off('refetchDiffData', this.refetchDiffData);
       notesEventHub.$off('fetchDiffData', this.fetchData);
     },
     fileByFileListener({ setting } = {}) {
       this.setFileByFile({ fileByFile: setting });
+    },
+    reviewFile({ file } = {}) {
+      this.fileReviews = setReviewsForMergeRequest(
+        this.mrPath,
+        markFileReviewed(this.fileReviews, file),
+      );
     },
     navigateToDiffFileNumber(number) {
       this.navigateToDiffFileIndex(number - 1);
