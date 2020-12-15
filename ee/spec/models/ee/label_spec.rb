@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe Label do
   describe 'associations' do
     it { is_expected.to have_many(:epic_board_labels).inverse_of(:label) }
+    it { is_expected.to have_many(:epic_lists).inverse_of(:label) }
   end
 
   describe '#scoped_label?' do
