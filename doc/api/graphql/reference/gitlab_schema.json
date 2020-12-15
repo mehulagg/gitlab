@@ -37000,6 +37000,20 @@
               "deprecationReason": null
             },
             {
+              "name": "securityAutoFix",
+              "description": "Indicates if the merge request is created by @GitLab-Security-Bot.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "shouldBeRebased",
               "description": "Indicates if the merge request will be rebased",
               "args": [
@@ -72623,6 +72637,20 @@
               "type": {
                 "kind": "UNION",
                 "name": "VulnerabilityLocation",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "mergeRequest",
+              "description": "Merge request that fixes the vulnerability.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "MergeRequest",
                 "ofType": null
               },
               "isDeprecated": false,
