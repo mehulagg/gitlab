@@ -16,7 +16,7 @@ variables:
     FUZZAPI_CONFIG: .gitlab-api-fuzzing.yml
     FUZZAPI_TIMEOUT: 30
     FUZZAPI_REPORT: gl-api-fuzzing-report.xml
-    FUZZAPI_POSTMAN_COLLECTION:  scripts/review_apps/Gitlab_postman_collection.json
+    FUZZAPI_POSTMAN_COLLECTION: scripts/review_apps/Gitlab_postman_collection.json
     #
     FUZZAPI_D_NETWORK: testing-net
     #
