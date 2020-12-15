@@ -46,6 +46,9 @@ module EE
             params.delete(:prevent_forking_outside_group) unless
               can?(current_user, :change_prevent_group_forking, group)
 
+            params.delete(:allow_merge_request_author_approval) unless
+              can?(current_user, :admin_merge_request_approval_settings, group)
+
             super
           end
 

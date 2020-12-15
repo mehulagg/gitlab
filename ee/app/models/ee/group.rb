@@ -448,6 +448,11 @@ module EE
       )
     end
 
+    def merge_request_approval_settings_available?
+      ::Feature.enabled?(:group_merge_request_approval_settings_feature_flag, self) &&
+        feature_available?(:group_merge_request_approval_settings)
+    end
+
     private
 
     def custom_project_templates_group_allowed

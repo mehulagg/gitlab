@@ -4,7 +4,7 @@ module EE
   module Groups
     module UpdateService
       extend ::Gitlab::Utils::Override
-      EE_SETTINGS_PARAMS = [:prevent_forking_outside_group].freeze
+      EE_SETTINGS_PARAMS = [:prevent_forking_outside_group, :allow_merge_request_author_approval].freeze
 
       override :execute
       def execute

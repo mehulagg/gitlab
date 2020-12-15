@@ -1,0 +1,5 @@
+---
+title: Add namespace setting to allow MR approval by author
+merge_request: 50027
+author:
+type: added

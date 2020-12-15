@@ -3,6 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe API::Groups do
+  using RSpec::Parameterized::TableSyntax
   include GroupAPIHelpers
 
   let_it_be(:group, reload: true) { create(:group) }
@@ -181,6 +182,32 @@ RSpec.describe API::Groups do
         end
       end
     end
+
+    context 'allow_merge_request_author_approval attribute' do
+      where(:flag_enabled, :feature_enabled, :exposed) do
+        true  | false | false
+        true  | true  | true
+        false | true  | false
+        false | false | false
+      end
+
+      with_them do
+        before do
+          stub_feature_flags(group_merge_request_approval_settings_feature_flag: flag_enabled)
+          stub_licensed_features(group_merge_request_approval_settings: feature_enabled)
+        end
+
+        it 'returns correct response' do
+          get api("/groups/#{group.id}", user)
+
+          if exposed
+            expect(json_response).to have_key 'allow_merge_request_author_approval'
+          else
+            expect(json_response).not_to have_key 'allow_merge_request_author_approval'
+          end
+        end
+      end
+    end
   end
 
   describe 'PUT /groups/:id' do
@@ -235,8 +262,6 @@ RSpec.describe API::Groups do
     end
 
     context 'default_branch_protection' do
-      using RSpec::Parameterized::TableSyntax
-
       let(:params) { { default_branch_protection: Gitlab::Access::PROTECTION_NONE } }
 
       context 'authenticated as an admin' do
@@ -289,8 +314,6 @@ RSpec.describe API::Groups do
     end
 
     context 'prevent_forking_outside_group' do
-      using RSpec::Parameterized::TableSyntax
-
       context 'authenticated as group owner' do
         where(:feature_enabled, :prevent_forking_outside_group, :result) do
           false | false | nil
@@ -313,6 +336,46 @@ RSpec.describe API::Groups do
 
             expect(response).to have_gitlab_http_status(:ok)
             expect(json_response['prevent_forking_outside_group']).to eq(result)
+          end
+        end
+      end
+    end
+
+    context 'allow_merge_request_author_approval' do
+      let(:params) { { allow_merge_request_author_approval: false } }
+
+      context 'when feature is available' do
+        before do
+          stub_feature_flags(group_merge_request_approval_settings_feature_flag: true)
+          stub_licensed_features(group_merge_request_approval_settings: true)
+        end
+
+        it 'updates the attribute', :aggregate_failures do
+          expect { subject }.to change { group.reload.allow_merge_request_author_approval }.from(true).to(false)
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_response['allow_merge_request_author_approval']).to eq(false)
+        end
+      end
+
+      context 'when feature is unavailable' do
+        where(:flag_enabled, :feature_enabled) do
+          true  | false
+          false | true
+          false | false
+        end
+
+        with_them do
+          before do
+            stub_feature_flags(group_merge_request_approval_settings_feature_flag: flag_enabled)
+            stub_licensed_features(group_merge_request_approval_settings: feature_enabled)
+          end
+
+          it 'does not update the attribute', :aggregate_failures do
+            expect { subject }.not_to change { group.reload.allow_merge_request_author_approval }
+
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(json_response['allow_merge_request_author_approval']).to be_nil
           end
         end
       end
@@ -358,8 +421,6 @@ RSpec.describe API::Groups do
     end
 
     context 'when creating a group with `default_branch_protection` attribute' do
-      using RSpec::Parameterized::TableSyntax
-
       let(:params) { attributes_for_group_api(default_branch_protection: Gitlab::Access::PROTECTION_NONE) }
 
       subject do

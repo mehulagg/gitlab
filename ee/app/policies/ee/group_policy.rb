@@ -109,6 +109,14 @@ module EE
 
       condition(:over_storage_limit, scope: :subject) { @subject.over_storage_limit? }
 
+      condition(:merge_request_approval_settings_available, scope: :subject) do
+        @subject.merge_request_approval_settings_available?
+      end
+
+      rule { merge_request_approval_settings_available & (admin | owner) }.policy do
+        enable :admin_merge_request_approval_settings
+      end
+
       rule { public_group | logged_in_viewable }.policy do
         enable :read_wiki
         enable :download_wiki_code

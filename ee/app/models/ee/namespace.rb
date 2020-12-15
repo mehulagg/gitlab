@@ -73,6 +73,8 @@ module EE
         where("EXISTS (?)", matcher)
       end
 
+      delegate :allow_merge_request_author_approval, to: :namespace_settings
+
       delegate :shared_runners_seconds, :shared_runners_seconds_last_reset, to: :namespace_statistics, allow_nil: true
 
       delegate :additional_purchased_storage_size, :additional_purchased_storage_size=,
