@@ -3,13 +3,13 @@
 require 'spec_helper'
 
 RSpec.describe Snippets::ScheduleBulkRepositoryShardMovesService do
-  before do
-    stub_storage_settings('test_second_storage' => { 'path' => 'tmp/tests/extra_storage' })
-  end
-
   let!(:snippet) { create(:snippet, :repository).tap { |snippet| snippet.create_repository } }
   let(:source_storage_name) { 'default' }
   let(:destination_storage_name) { 'test_second_storage' }
+
+  before do
+    stub_storage_settings(destination_storage_name => { 'path' => 'tmp/tests/extra_storage' })
+  end
 
   describe '#execute' do
     it 'schedules snippet repository storage moves' do
