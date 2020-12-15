@@ -8,20 +8,24 @@ module Pages
     PUBLIC_DIR = 'public'
 
     def initialize(input_dir)
-      @input_dir = File.realpath(input_dir)
-      @output_file = File.join(@input_dir, "@migrated.zip") # '@' to avoid any name collision with groups or projects
+      @input_dir = input_dir
     end
 
     def execute
-      FileUtils.rm_f(@output_file)
+      raise InvalidArchiveError unless valid_work_directory?
+
+      @input_dir = File.realpath(@input_dir)
+      output_file = File.join(@input_dir, "@migrated.zip") # '@' to avoid any name collision with groups or projects
+
+      FileUtils.rm_f(output_file)
 
       count = 0
-      ::Zip::File.open(@output_file, ::Zip::File::CREATE) do |zipfile|
+      ::Zip::File.open(output_file, ::Zip::File::CREATE) do |zipfile|
         write_entry(zipfile, PUBLIC_DIR)
         count = zipfile.entries.count
       end
 
-      [@output_file, count]
+      [output_file, count]
     end
 
     private
@@ -76,6 +80,14 @@ module Pages
     # happens if target of symlink isn't there
     rescue => e
       Gitlab::ErrorTracking.track_exception(e, input_dir: @input_dir, disk_file_path: disk_file_path)
+
+      false
+    end
+
+    def valid_work_directory?
+      Dir.exist?(@input_dir)
+    rescue => e
+      Gitlab::ErrorTracking.track_exception(e, input_dir: @input_dir)
 
       false
     end
