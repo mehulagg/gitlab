@@ -93,4 +93,10 @@ export default class FilteredSearchTokenKeys {
     this.tokenKeys.push(confidentialToken);
     this.tokenKeysWithAlternative.push(confidentialToken);
   }
+
+  removeTokensForKeys(keys) {
+    this.tokenKeys = this.tokenKeys.filter((tokenKey) => {
+      return !keys.includes(tokenKey.key);
+    });
+  }
 }
