@@ -254,8 +254,15 @@ The database used by Praefect is now configured.
 
 To reduce PostgreSQL resource consumption, we recommend setting up and configuring
 [PgBouncer](https://www.pgbouncer.org/) in front of the PostgreSQL instance. To do
-this, replace value of the `POSTGRESQL_SERVER_ADDRESS` with corresponding IP or host
-address of the PgBouncer instance.
+this, set value of the `praefect['database_host']` with corresponding IP or host
+address of the PgBouncer instance. Same for the `praefect['database_port']` setting.
+
+As PgBouncer allows to manage resources more efficiently Praefect still requires a
+direct connection to the PostgreSQL database as it utilises a [LISTEN](https://www.postgresql.org/docs/11/sql-listen.html)
+functionality that is [not supported](https://www.pgbouncer.org/features.html) by the
+PgBouncer with `pool_mode = transaction`. So `praefect['database_host_no_proxy']`
+and `praefect['database_port_no_proxy']` should use a direct connection, not a PgBouncer
+connection info.
 
 This documentation doesn't provide PgBouncer installation instructions,
 but you can:
@@ -370,6 +377,8 @@ application server, or a Gitaly node.
    praefect['database_user'] = 'praefect'
    praefect['database_password'] = 'PRAEFECT_SQL_PASSWORD'
    praefect['database_dbname'] = 'praefect_production'
+   praefect['database_host_no_proxy'] = 'POSTGRESQL_SERVER_ADDRESS'
+   praefect['database_port_no_proxy'] = 5432
    ```
 
    If you want to use a TLS client certificate, the options below can be used:
