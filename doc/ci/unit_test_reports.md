@@ -315,6 +315,24 @@ javascript:
         - junit.xml
 ```
 
+### Flutter / Dart example
+This example `.gitlab-ci.yml` uses the [JUnit Report](https://pub.dev/packages/junitreport) package to convert the `flutter test` output into JUnit report XML format.
+
+```yaml
+test:
+  stage: test
+  before_script:
+    - pub global activate junitreport
+    - export PATH="$PATH":"$HOME/.pub-cache/bin"
+  script:
+    - flutter test --machine | tojunit -o report.xml
+  artifacts:
+    when: always
+    reports:
+      junit: 
+        - report.xml
+```
+
 ## Viewing Unit test reports on GitLab
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/24792) in GitLab 12.5 behind a feature flag (`junit_pipeline_view`), disabled by default.
