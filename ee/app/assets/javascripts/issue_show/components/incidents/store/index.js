@@ -3,9 +3,9 @@ import state from './state';
 import * as actions from './actions';
 import mutations from './mutations';
 
-export default data =>
+export default initialState =>
   new Vuex.Store({
     actions,
     mutations,
-    state: state(data),
+    state: state(initialState),
   });
