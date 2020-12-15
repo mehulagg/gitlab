@@ -853,6 +853,9 @@ If you're running into an issue with a component not outlined here, be sure to c
 
 ## Repmgr
 
+NOTE:
+Using Patroni instead of Repmgr is supported for PostgreSQL 11 and required for PostgreSQL 12.
+
 ### Configuring Repmgr Nodes
 
 1. On the master database node, edit `/etc/gitlab/gitlab.rb` replacing values noted in the `# START user configuration` section:
@@ -1154,8 +1157,7 @@ after it has been restored to service.
 ## Patroni
 
 NOTE:
-Starting from GitLab 13.1, Patroni is available for **experimental** use to replace repmgr. Due to its
-experimental nature, Patroni support is **subject to change without notice.**
+Using Patroni instead of Repmgr is supported for PostgreSQL 11 and required for PostgreSQL 12.
 
 Patroni is an opinionated solution for PostgreSQL high-availability. It takes the control of PostgreSQL, overrides its
 configuration and manages its lifecycle (start, stop, restart). This is a more active approach when compared to repmgr.
