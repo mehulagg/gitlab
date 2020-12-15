@@ -1853,7 +1853,8 @@ packages. Possible configuration settings include:
 - Other settings in `lib/support/`.
 
 Configuration procedures can require users to edit configuration files, reconfigure
-GitLab, or restart GitLab. Use these styles to document these steps:
+GitLab, or restart GitLab. Use these styles to document these steps, replacing
+`PATH/TO` with the appropriate path:
 
 <!-- vale off -->
 
@@ -1866,7 +1867,7 @@ GitLab, or restart GitLab. Use these styles to document these steps:
    external_url "https://gitlab.example.com"
    ```
 
-1. Save the file and [reconfigure](path/to/administration/restart_gitlab.md#omnibus-gitlab-reconfigure)
+1. Save the file and [reconfigure](PATH/TO/administration/restart_gitlab.md#omnibus-gitlab-reconfigure)
    GitLab for the changes to take effect.
 
 ---
@@ -1880,7 +1881,7 @@ GitLab, or restart GitLab. Use these styles to document these steps:
      host: "gitlab.example.com"
    ```
 
-1. Save the file and [restart](path/to/administration/restart_gitlab.md#installations-from-source)
+1. Save the file and [restart](PATH/TO/administration/restart_gitlab.md#installations-from-source)
    GitLab for the changes to take effect.
 ````
 
