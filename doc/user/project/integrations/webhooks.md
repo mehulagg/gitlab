@@ -1603,7 +1603,7 @@ Missing intermediate certificates are a common point of verification failure.
 
 ## Example webhook receiver
 
-If you want to see GitLab's webhooks in action for testing purposes you can use
+If you want to see GitLab webhooks in action for testing purposes you can use
 a simple echo script running in a console session. For the following script to
 work you need to have Ruby installed.
 

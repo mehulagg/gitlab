@@ -160,7 +160,7 @@ them as they can change.
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/5073) in GitLab 8.10.
 
-To have custom error messages appear in GitLab's UI when a commit is declined or an error occurs
+To have custom error messages appear in the GitLab UI when a commit is declined or an error occurs
 during the Git hook, your script should:
 
 - Send the custom error messages to either the script's `stdout` or `stderr`.
@@ -168,7 +168,7 @@ during the Git hook, your script should:
 
 ### Example custom error message
 
-This hook script written in Bash generates the following message in GitLab's UI:
+This hook script written in Bash generates the following message in the GitLab UI:
 
 ```shell
 #!/bin/sh
