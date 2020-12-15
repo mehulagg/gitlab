@@ -70,6 +70,13 @@ RSpec.shared_examples 'write access for a read-only GitLab (EE) instance in main
           expect(subject).to disallow_request
         end
       end
+
+      it "expects a POST to /users/sign_in URL to be allowed" do
+        response = request.post('/users/sign_in')
+
+        expect(response).not_to be_redirect
+        expect(subject).not_to disallow_request
+      end
     end
   end
 end

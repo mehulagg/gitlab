@@ -24,6 +24,10 @@ module EE
             'repositories/lfs_locks_api' => %w{verify create unlock}
           }.freeze
 
+          ALLOWLISTED_SIGN_IN_ROUTES = {
+            'sessions' => %w{create}
+          }.freeze
+
           private
 
           # In addition to routes allowed in FOSS, allow geo node update route
@@ -36,7 +40,7 @@ module EE
             allowed = super || geo_node_update_route? || geo_api_route?
 
             return true if allowed
-            return false if ::Gitlab.maintenance_mode?
+            return sign_in_route? if ::Gitlab.maintenance_mode?
             return false unless ::Gitlab::Geo.secondary?
 
             git_write_routes
@@ -76,6 +80,12 @@ module EE
             ::Gitlab::Middleware::ReadOnly::API_VERSIONS.any? do |version|
               request.path.include?("/api/v#{version}/geo_replication")
             end
+          end
+
+          def sign_in_route?
+            return unless request.post? && request.path.start_with?('/users/sign_in')
+
+            ALLOWLISTED_SIGN_IN_ROUTES[route_hash[:controller]]&.include?(route_hash[:action])
           end
 
           def lfs_locks_route?
