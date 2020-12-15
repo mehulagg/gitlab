@@ -247,7 +247,11 @@ module Ci
 
       after_transition any => ::Ci::Pipeline.completed_statuses do |pipeline|
         pipeline.run_after_commit do
-          ::Ci::Pipelines::CreateArtifactWorker.perform_async(pipeline.id)
+          if pipeline.can_generate_coverage_reports?
+            ::Ci::Pipelines::Artifacts::CoverageReportWorker.perform_async(pipeline.id)
+          elsif pipeline.can_generate_codequality_reports?
+            ::Ci::Pipelines::Artifacts::CodequalityWorker.perform_async(pipeline.id)
+          end
         end
       end
 
@@ -964,8 +968,16 @@ module Ci
       pipeline_artifacts&.has_code_coverage?
     end
 
+    def has_codequality_reports?
+      pipeline_artifacts&.has_codequality?
+    end
+
     def can_generate_coverage_reports?
       has_reports?(Ci::JobArtifact.coverage_reports)
+    end
+
+    def can_generate_codequality_reports?
+      has_reports?(Ci::JobArtifact.codequality_reports)
     end
 
     def test_report_summary

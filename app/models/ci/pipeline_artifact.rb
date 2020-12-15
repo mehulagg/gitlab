@@ -14,7 +14,8 @@ module Ci
     EXPIRATION_DATE = 1.week.freeze
 
     DEFAULT_FILE_NAMES = {
-      code_coverage: 'code_coverage.json'
+      code_coverage: 'code_coverage.json',
+      codequality: 'codequality.json'
     }.freeze
 
     belongs_to :project, class_name: "Project", inverse_of: :pipeline_artifacts
@@ -30,15 +31,26 @@ module Ci
     update_project_statistics project_statistics_name: :pipeline_artifacts_size
 
     enum file_type: {
-      code_coverage: 1
+      code_coverage: 1,
+      codequality: 2
     }
 
-    def self.has_code_coverage?
-      where(file_type: :code_coverage).exists?
-    end
+    class << self
+      def has_code_coverage?
+        where(file_type: :code_coverage).exists?
+      end
 
-    def self.find_with_code_coverage
-      find_by(file_type: :code_coverage)
+      def find_with_code_coverage
+        find_by(file_type: :code_coverage)
+      end
+
+      def has_codequality?
+        where(file_type: :codequality).exists?
+      end
+
+      def find_with_codequality
+        find_by(file_type: :codequality)
+      end
     end
 
     def present
