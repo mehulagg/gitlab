@@ -52,6 +52,10 @@ module QA
       def admin_password
         Runtime::Env.admin_password || default_password
       end
+
+      def admin_tunnel_password
+        Runtime::Env.admin_tunnel_password || password
+      end
     end
   end
 end
