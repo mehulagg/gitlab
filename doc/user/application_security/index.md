@@ -201,6 +201,8 @@ reports. You can specify the list of all headers to be masked. For details, see
 
 ### View details of an API Fuzzing vulnerability
 
+> Introduced in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.7.
+
 Faults detected by API Fuzzing occur in the live web application, and require manual investigation to determine if they are vulnerabilities. Fuzzing faults are included as vulnerabilities with a severity of Unknown.
 
 To facilitate investigation of the fuzzing faults, detailed information is provided about the HTTP messages sent and received along with a description of the modification(s) made.
