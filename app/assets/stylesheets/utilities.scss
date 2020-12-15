@@ -156,3 +156,7 @@
 .gl-w-40p {
   width: 40%;
 }
+
+.gl-outline-dotted-2-gray-800 {
+  outline: $gl-border-size-1 dotted $gray-800;
+}

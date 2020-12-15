@@ -1,5 +1,10 @@
+import $ from 'jquery';
 import { PROJECT_BADGE } from '~/badges/constants';
-import initSettingsPanels from '~/settings_panels';
+import {
+  default as initSettingsPanels,
+  expandSection,
+  closeSection as collapseSection,
+} from '~/settings_panels';
 import setupTransferEdit from '~/transfer_edit';
 import initConfirmDangerModal from '~/confirm_danger_modal';
 import mountBadgeSettings from '~/pages/shared/mount_badge_settings';
@@ -10,6 +15,7 @@ import initProjectPermissionsSettings from '../shared/permissions';
 import initProjectDeleteButton from '~/projects/project_delete_button';
 import UserCallout from '~/user_callout';
 import initServiceDesk from '~/projects/settings_service_desk';
+import initSearch from '~/search_settings';
 
 document.addEventListener('DOMContentLoaded', () => {
   initFilePickers();
@@ -30,4 +36,16 @@ document.addEventListener('DOMContentLoaded', () => {
       '.js-general-settings-form, .js-mr-settings-form, .js-mr-approvals-form',
     ),
   );
+
+  initSearch({
+    rootSelector: '#content-body',
+    searchBoxSelector: '#search-settings-input',
+    sectionSelector: 'section.settings',
+    collapseSection(section) {
+      collapseSection($(section));
+    },
+    expandSection(section) {
+      expandSection($(section));
+    },
+  });
 });
