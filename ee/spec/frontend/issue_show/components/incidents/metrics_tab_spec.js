@@ -3,7 +3,7 @@ import Vuex from 'vuex';
 import MockAdapter from 'axios-mock-adapter';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import merge from 'lodash/merge';
-import { GlModal } from '@gitlab/ui';
+import { GlFormInput, GlModal } from '@gitlab/ui';
 import waitForPromises from 'helpers/wait_for_promises';
 import MetricsTab from 'ee/issue_show/components/incidents/metrics_tab.vue';
 import MetricsImage from 'ee/issue_show/components/incidents/metrics_image.vue';
@@ -66,7 +66,8 @@ describe('Metrics tab', () => {
   const findUploadDropzone = () => wrapper.find(UploadDropzone);
   const findImages = () => wrapper.findAll(MetricsImage);
   const findModal = () => wrapper.find(GlModal);
-  const submitModal = modal => findModal(modal).vm.$emit('primary', mockEvent);
+  const submitModal = () => findModal().vm.$emit('primary', mockEvent);
+  const cancelModal = () => findModal().vm.$emit('canceled');
 
   describe('empty state', () => {
     beforeEach(() => {
@@ -103,6 +104,8 @@ describe('Metrics tab', () => {
   });
 
   describe('add metric dialog', () => {
+    const testUrl = 'test url';
+
     it('should open the add metric dialog when clicked', async () => {
       mountComponent();
 
@@ -120,7 +123,7 @@ describe('Metrics tab', () => {
         },
       });
 
-      findModal().vm.$emit('canceled');
+      cancelModal();
 
       await waitForPromises();
 
@@ -128,7 +131,6 @@ describe('Metrics tab', () => {
     });
 
     it('should add files and url when selected', async () => {
-      const testUrl = 'test url';
       const testFiles = [{ name: 'test file' }];
 
       mountComponent({
@@ -139,14 +141,41 @@ describe('Metrics tab', () => {
 
       const dispatchSpy = jest.spyOn(store, 'dispatch');
 
-      submitModal(findModal());
+      submitModal();
 
       await waitForPromises();
 
       expect(dispatchSpy).toHaveBeenCalledWith('uploadImage', { files: testFiles, url: testUrl });
     });
 
-    // clears inputs upon success
-    // clears inputs upon failure
+    describe('url field', () => {
+      beforeEach(() => {
+        mountComponent({
+          data() {
+            return { modalVisible: true, modalUrl: testUrl };
+          },
+        });
+      });
+
+      it('should display the url field', () => {
+        expect(wrapper.find(GlFormInput).attributes('value')).toBe(testUrl);
+      });
+
+      it('should clear url when cancelled', async () => {
+        cancelModal();
+
+        await waitForPromises();
+
+        expect(wrapper.find(GlFormInput).attributes('value')).toBe('');
+      });
+
+      it('should clear url when submitted', async () => {
+        submitModal();
+
+        await waitForPromises();
+
+        expect(wrapper.find(GlFormInput).attributes('value')).toBe('');
+      });
+    });
   });
 });
