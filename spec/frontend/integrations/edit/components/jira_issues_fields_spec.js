@@ -12,9 +12,10 @@ describe('JiraIssuesFields', () => {
     editProjectPath: '/edit',
   };
 
-  const createComponent = props => {
+  const createComponent = (props, options = {}) => {
     wrapper = mount(JiraIssuesFields, {
       propsData: { ...defaultProps, ...props },
+      ...options,
     });
   };
 
@@ -28,6 +29,11 @@ describe('JiraIssuesFields', () => {
   const findEnableCheckbox = () => wrapper.find(GlFormCheckbox);
   const findProjectKey = () => wrapper.find(GlFormInput);
   const expectedBannerText = 'This is a Premium feature';
+  const findJiraForVulnerabilities = () => wrapper.find('[data-testid="jiraForVulnerabilities"]');
+  const setEnableCheckbox = async (isEnabled = true) => {
+    findEnableCheckbox().vm.$emit('input', isEnabled);
+    await wrapper.vm.$nextTick();
+  };
 
   describe('template', () => {
     describe('upgrade banner for non-Premium user', () => {
@@ -69,20 +75,16 @@ describe('JiraIssuesFields', () => {
       });
 
       describe('on enable issues', () => {
-        it('enables project_key input', () => {
-          findEnableCheckbox().vm.$emit('input', true);
+        it('enables project_key input', async () => {
+          await setEnableCheckbox(true);
 
-          return wrapper.vm.$nextTick().then(() => {
-            expect(findProjectKey().attributes('disabled')).toBeUndefined();
-          });
+          expect(findProjectKey().attributes('disabled')).toBeUndefined();
         });
 
-        it('requires project_key input', () => {
-          findEnableCheckbox().vm.$emit('input', true);
+        it('requires project_key input', async () => {
+          await setEnableCheckbox(true);
 
-          return wrapper.vm.$nextTick().then(() => {
-            expect(findProjectKey().attributes('required')).toBe('required');
-          });
+          expect(findProjectKey().attributes('required')).toBe('required');
         });
       });
     });
@@ -106,6 +108,36 @@ describe('JiraIssuesFields', () => {
         createComponent({ gitlabIssuesEnabled: false });
 
         expect(wrapper.text()).not.toContain(expectedText);
+      });
+    });
+
+    describe('Vulnerabilities creation', () => {
+      beforeEach(async () => {
+        createComponent(
+          { showJiraIssuesIntegration: true },
+          { provide: { glFeatures: { jiraForVulnerabilities: true } } },
+        );
+      });
+
+      it.each([true, false])(
+        'shows the section correctly when jira issues enables is: %s',
+        async hasJiraIssuesEnabled => {
+          await setEnableCheckbox(hasJiraIssuesEnabled);
+
+          expect(findJiraForVulnerabilities().exists()).toBe(hasJiraIssuesEnabled);
+        },
+      );
+
+      describe('with "" feature flag disabled', () => {
+        beforeEach(async () => {
+          createComponent(
+            { showJiraIssuesIntegration: true },
+            { provide: { glFeatures: { jiraForVulnerabilities: false } } },
+          );
+        });
+        it('does not show section', () => {
+          expect(findJiraForVulnerabilities().exists()).toBe(false);
+        });
       });
     });
   });

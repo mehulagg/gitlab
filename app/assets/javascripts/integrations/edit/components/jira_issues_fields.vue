@@ -8,6 +8,7 @@ import {
   GlButton,
   GlCard,
 } from '@gitlab/ui';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import eventHub from '../event_hub';
 
 export default {
@@ -21,6 +22,7 @@ export default {
     GlButton,
     GlCard,
   },
+  mixins: [glFeatureFlagsMixin()],
   props: {
     showJiraIssuesIntegration: {
       type: Boolean,
@@ -105,6 +107,12 @@ export default {
               }}
             </template>
           </gl-form-checkbox>
+          <div
+            v-if="enableJiraIssues && glFeatures.jiraForVulnerabilities"
+            data-testid="jiraForVulnerabilities"
+          >
+            {{ __('New stuff goes here') }}
+          </div>
         </template>
         <gl-card v-else class="gl-mt-7">
           <strong>{{ __('This is a Premium feature') }}</strong>
