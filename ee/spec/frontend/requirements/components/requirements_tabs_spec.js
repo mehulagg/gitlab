@@ -84,7 +84,7 @@ describe('RequirementsTabs', () => {
 
     it('does not render "New requirement" button when current tab is not "Open" tab', () => {
       wrapper.setProps({
-        filterBy: FilterState.closed,
+        filterBy: FilterState.archived,
       });
 
       return wrapper.vm.$nextTick(() => {
