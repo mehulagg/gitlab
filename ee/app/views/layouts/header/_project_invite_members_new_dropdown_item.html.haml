@@ -1,0 +1,3 @@
+- return unless Gitlab.dev_env_or_com? && can_import_members?
+
+%li= dropdown_invite_members_link(@project)

@@ -5,6 +5,10 @@ module EE
     module ApplicationController
       extend ActiveSupport::Concern
 
+      prepended do
+        before_action :record_invite_members_new_dropdown_experiment
+      end
+
       def check_group_feature_available!(feature)
         render_404 unless group.feature_available?(feature)
       end
@@ -16,6 +20,12 @@ module EE
         else
           super
         end
+      end
+
+      private
+
+      def record_invite_members_new_dropdown_experiment
+        record_experiment_user(:invite_members_new_dropdown)
       end
     end
   end

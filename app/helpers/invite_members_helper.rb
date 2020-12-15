@@ -23,3 +23,5 @@ module InviteMembersHelper
     experiment_enabled?(:invite_members_empty_group_version_a) && Ability.allowed?(current_user, :admin_group_member, group)
   end
 end
+
+InviteMembersHelper.prepend_if_ee('EE::InviteMembersHelper')

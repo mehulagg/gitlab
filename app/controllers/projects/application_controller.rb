@@ -89,3 +89,5 @@ class Projects::ApplicationController < ApplicationController
     return render_404 unless @project.feature_available?(:issues, current_user)
   end
 end
+
+Projects::ApplicationController.prepend_if_ee('EE::Projects::ApplicationController')

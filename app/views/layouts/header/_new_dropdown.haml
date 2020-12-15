@@ -16,6 +16,7 @@
           - if create_group_subgroup
             %li= link_to _('New subgroup'), new_group_path(parent_id: @group.id)
           = render_if_exists 'layouts/header/create_epic_new_dropdown_item'
+          = render_if_exists 'layouts/header/group_invite_members_new_dropdown_item'
           %li.divider
           %li.dropdown-bold-header GitLab
 
@@ -33,6 +34,7 @@
             %li= link_to _('New merge request'), project_new_merge_request_path(merge_project)
           - if create_project_snippet
             %li= link_to _('New snippet'), new_project_snippet_path(@project)
+          = render_if_exists 'layouts/header/project_invite_members_new_dropdown_item'
           %li.divider
           %li.dropdown-bold-header GitLab
       - if current_user.can_create_project?
