@@ -4,7 +4,7 @@ group: Project Management
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Sorting and ordering issue lists
+# Sorting and ordering issue lists **(CORE)**
 
 You can sort a list of issues several ways, including by:
 
@@ -29,18 +29,17 @@ similar to [issue boards](../issue_board.md#how-gitlab-orders-issues-in-a-list).
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/62178) in GitLab 12.2.
 
 When you select **Manual** sorting, you can change
-the order by dragging and dropping the issues. The changed order will persist. Everyone who visits the same list will see the reordered list, with some exceptions.
+the order by dragging and dropping the issues. The changed order persists, and
+everyone who visits the same list sees the updated issue order, with some exceptions.
 
 Each issue is assigned a relative order value, representing its relative
-order with respect to the other issues in the list. When you drag-and-drop reorder
-an issue, its relative order value changes accordingly.
+order with respect to the other issues on the list. When you drag-and-drop reorder
+an issue, its relative order value changes.
 
-In addition, any time that issue appears in a manually sorted list,
-the updated relative order value will be used for the ordering. This means that
-if issue `A` is drag-and-drop reordered to be above issue `B` by any user in
-a given list inside your GitLab instance, any time those two issues are subsequently
-loaded in any list in the same instance (could be a different project issue list or a
-different group issue list, for example), that ordering will be maintained.
+In addition, any time an issue appears in a manually sorted list,
+the updated relative order value is used for the ordering.
+So, if anyone drags issue `A` above issue `B` in your GitLab instance,
+this ordering is maintained whenever they appear together in any list.
 
 This ordering also affects [issue boards](../issue_board.md#how-gitlab-orders-issues-in-a-list).
 Changing the order in an issue list changes the ordering in an issue board,
