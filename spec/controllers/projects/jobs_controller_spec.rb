@@ -711,7 +711,7 @@ RSpec.describe Projects::JobsController, :clean_gitlab_redis_shared_state do
       let(:job) { create(:ci_build, pipeline: pipeline) }
 
       it 'returns no traces' do
-        expect(response).to have_gitlab_http_status(:ok)
+        expect(response).to have_gitlab_http_status(:no_content)
         expect(response).to match_response_schema('job/build_trace')
         expect(json_response['id']).to eq job.id
         expect(json_response['status']).to eq job.status

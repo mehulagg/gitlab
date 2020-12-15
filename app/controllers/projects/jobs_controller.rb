@@ -57,7 +57,7 @@ class Projects::JobsController < Projects::ApplicationController
             stream: stream,
             state: params[:state])
 
-          if build_details[:has_trace] && build_details[:started]
+          if build_details[:has_trace]
             render json: BuildTraceSerializer
               .new(project: @project, current_user: @current_user)
               .represent(build_trace)

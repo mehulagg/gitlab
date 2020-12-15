@@ -40,6 +40,7 @@ export const toggleSidebar = ({ dispatch, state }) => {
 };
 
 let eTagPoll;
+let isTraceReadyForRender;
 
 export const clearEtagPoll = () => {
   eTagPoll = null;
@@ -81,9 +82,15 @@ export const fetchJob = ({ state, dispatch }) => {
 
   Visibility.change(() => {
     if (!Visibility.hidden()) {
+      // This check is needed to ensure the loading icon
+      // is not shown for a finished job during a visibility change
+      if (!isTraceReadyForRender) {
+        dispatch('startPollingTrace');
+      }
       dispatch('restartPolling');
     } else {
       dispatch('stopPolling');
+      dispatch('stopPollingTrace');
     }
   });
 };
@@ -164,6 +171,8 @@ export const fetchTrace = ({ dispatch, state }) =>
       params: { state: state.traceState },
     })
     .then(({ data }) => {
+      isTraceReadyForRender = data.complete;
+
       dispatch('toggleScrollisInBottom', isScrolledToBottom());
       dispatch('receiveTraceSuccess', data);
 
