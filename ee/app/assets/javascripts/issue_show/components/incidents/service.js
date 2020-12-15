@@ -3,6 +3,8 @@ import Api from '~/api';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 
 export const issueMetricImagesPath = '/api/:version/projects/:id/issues/:issue_iid/metric_images';
+export const individualMetricImagePath =
+  '/api/:version/projects/:id/issues/:issue_iid/metric_images/:image_id'; // TODO: Clarify endpoint behaviour
 
 export const getMetricImages = async ({ issueIid, id }) => {
   const metricImagesUrl = Api.buildUrl(issueMetricImagesPath)
@@ -29,4 +31,14 @@ export const uploadMetricImage = async ({ issueIid, id, file, url = null }) => {
 
   const response = await axios.post(metricImagesUrl, formData, options);
   return convertObjectPropsToCamelCase(response.data);
+};
+
+export const deleteMetricImage = async ({ issueIid, id, imageId }) => {
+  const individualMetricImageUrl = Api.buildUrl(individualMetricImagePath)
+    .replace(':id', encodeURIComponent(id))
+    .replace(':issue_iid', encodeURIComponent(issueIid))
+    .replace(':image_id', encodeURIComponent(imageId));
+
+  const response = await axios.delete(individualMetricImageUrl);
+  return convertObjectPropsToCamelCase(response.data); // TODO: Confirm whether response is required
 };

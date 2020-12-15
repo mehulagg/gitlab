@@ -1,5 +1,6 @@
 <script>
 import { GlButton, GlCard, GlIcon, GlLink } from '@gitlab/ui';
+import { mapActions } from 'vuex';
 
 export default {
   components: {
@@ -30,6 +31,7 @@ export default {
   data() {
     return {
       isCollapsed: false,
+      isDeleting: false,
     };
   },
   computed: {
@@ -49,8 +51,17 @@ export default {
     },
   },
   methods: {
+    ...mapActions(['deleteImage']),
     toggleCollapsed() {
       this.isCollapsed = !this.isCollapsed;
+    },
+    async handleClick() {
+      try {
+        this.isDeleting = true;
+        await this.deleteImage(this.id);
+      } finally {
+        this.isDeleting = false;
+      }
     },
   },
 };
@@ -64,7 +75,7 @@ export default {
   >
     <template #header>
       <div class="gl-w-full gl-display-flex gl-flex-direction-row gl-justify-content-space-between">
-        <div class="gl-display-flex gl-flex-direction-row">
+        <div class="gl-display-flex gl-flex-direction-row gl-align-items-center gl-w-full">
           <gl-button
             class="collapsible-card-btn gl-display-flex gl-text-decoration-none gl-reset-color! gl-hover-text-blue-800! gl-shadow-none!"
             :aria-label="filename"
@@ -79,6 +90,7 @@ export default {
             {{ filename }}
           </gl-link>
           <span v-else>{{ filename }}</span>
+          <gl-button class="gl-ml-auto" icon="remove" :loading="isDeleting" @click="handleClick" />
         </div>
       </div>
     </template>

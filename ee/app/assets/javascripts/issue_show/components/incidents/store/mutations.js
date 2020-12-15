@@ -27,4 +27,11 @@ export default {
   [types.RECEIVE_METRIC_UPLOAD_ERROR](state) {
     state.isUploadingImage = false;
   },
+  [types.RECEIVE_METRIC_DELETE_SUCCESS](state, imageId) {
+    const metricIndex = state.metricImages.find(image => image.id === imageId);
+
+    if (metricIndex) {
+      state.metricImages.splice(metricIndex, 1);
+    }
+  },
 };
