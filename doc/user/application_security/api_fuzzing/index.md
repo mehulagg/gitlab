@@ -728,11 +728,13 @@ To prevent an excessive number of reported faults, the API fuzzing scanner limit
 
 ## Viewing fuzzing faults
 
-The API Fuzzing analyzer produces a JSON report that is collected and used to populate the faults into GitLab's vulnerability screens. Fuzzing faults show up as vulnerabilities with a severity of Unknown.
+The API Fuzzing analyzer produces a JSON report that is collected and used [to populate the faults into GitLab's vulnerability screens](../index.md#view-details-of-an-api-fuzzing-vulnerability). Fuzzing faults show up as vulnerabilities with a severity of Unknown.
 
 The faults that API fuzzing finds require manual investigation and aren't associated with a specific vulnerability type.
 They require investigation to determine if they are a security issue, and if they should be fixed. 
 See [handling false positives](#handling-false-positives) for information about configuration changes you can make to limit the number of false positives reported.
+
+[Read more about viewing details of an API Fuzzing vulnerability.](#view-details-of-an-api-fuzzing-vulnerability)
 
 ### Security Dashboard
 
