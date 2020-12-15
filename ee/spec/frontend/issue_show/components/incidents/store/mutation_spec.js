@@ -15,8 +15,15 @@ const testImages = [
 describe('Metric images mutations', () => {
   let state;
 
+  const createState = (customState = {}) => {
+    state = {
+      ...defaultState,
+      ...customState,
+    };
+  };
+
   beforeEach(() => {
-    state = { ...defaultState };
+    createState();
   });
 
   describe('REQUEST_METRIC_IMAGES', () => {
@@ -68,7 +75,7 @@ describe('Metric images mutations', () => {
     const newImage = testImages[1];
 
     beforeEach(() => {
-      state = { defaultState, metricImages: [initialImage] };
+      createState({ metricImages: [initialImage] });
       mutations[types.RECEIVE_METRIC_UPLOAD_SUCCESS](state, newImage);
     });
 
