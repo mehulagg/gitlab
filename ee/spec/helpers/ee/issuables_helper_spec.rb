@@ -53,7 +53,8 @@ RSpec.describe IssuablesHelper do
 
         expected_data = {
           canAdmin: true,
-          publishedIncidentUrl: nil
+          publishedIncidentUrl: nil,
+          uploadMetricsFeatureAvailable: false
         }
         expect(helper.issuable_initial_data(issue)).to include(expected_data)
       end
@@ -66,6 +67,20 @@ RSpec.describe IssuablesHelper do
           expect(helper.issuable_initial_data(issue)).to include(
             publishedIncidentUrl: 'http://status.com'
           )
+        end
+      end
+
+      context 'when incident metric upload is available' do
+        before do
+          stub_licensed_features(incident_metric_upload: true)
+        end
+
+        let_it_be(:issue) { create(:issue, author: user, description: 'issue text') }
+
+        it 'returns the correct data that includes uploadMetricsFeatureAvailable as true' do
+          @project = issue.project
+
+          expect(helper.issuable_initial_data(issue)).to include(uploadMetricsFeatureAvailable: true)
         end
       end
     end
