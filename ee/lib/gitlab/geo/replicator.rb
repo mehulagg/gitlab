@@ -267,14 +267,14 @@ module Gitlab
       end
 
       def handle_after_destroy
-        return false unless Gitlab::Geo.enabled?
+        return false unless Gitlab::Geo.primary?
         return unless self.class.enabled?
 
         publish(:deleted, **deleted_params)
       end
 
       def handle_after_update
-        return false unless Gitlab::Geo.enabled?
+        return false unless Gitlab::Geo.primary?
         return unless self.class.enabled?
 
         publish(:updated, **updated_params)
