@@ -2,18 +2,18 @@
 
 exports[`Metrics upload item render the metrics image component 1`] = `
 <gl-card-stub
-  bodyclass="border-top,gl-pl-5,gl-pt-5,[object Object]"
+  bodyclass="gl-border-1,gl-border-t-solid,gl-border-gray-100,[object Object]"
   class="collapsible-card border gl-p-0 gl-mb-5"
   footerclass=""
   headerclass="d-flex align-items-center border-bottom-0 gl-py-3"
 >
    
   <div
-    class="gl-display-flex gl-flex-wrap"
+    class="gl-display-flex gl-flex-direction-column"
     data-testid="metric-image-body"
   >
     <img
-      class="gl-w-full"
+      class="gl-max-w-full gl-align-self-center"
       src="test_file_path"
     />
   </div>
