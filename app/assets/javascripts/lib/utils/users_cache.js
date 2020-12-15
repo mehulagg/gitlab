@@ -1,4 +1,4 @@
-// import Api from '../../api';
+import { getUsers, getUser, getUserStatus } from '~/api/user_api';
 import Cache from './cache';
 
 class UsersCache extends Cache {
@@ -7,7 +7,7 @@ class UsersCache extends Cache {
       return Promise.resolve(this.get(username));
     }
 
-    return Api.users('', { username }).then(({ data }) => {
+    return getUsers('', { username }).then(({ data }) => {
       if (!data.length) {
         throw new Error(`User "${username}" could not be found!`);
       }
@@ -28,12 +28,10 @@ class UsersCache extends Cache {
       return Promise.resolve(this.get(userId));
     }
 
-    /*
-    return Api.user(userId).then(({ data }) => {
+    return getUser(userId).then(({ data }) => {
       this.internalStorage[userId] = data;
       return data;
     });
-    */
     // missing catch is intentional, error handling depends on use case
   }
 
@@ -42,8 +40,7 @@ class UsersCache extends Cache {
       return Promise.resolve(this.get(userId).status);
     }
 
-    /*
-    return Api.userStatus(userId).then(({ data }) => {
+    return getUserStatus(userId).then(({ data }) => {
       if (!this.hasData(userId)) {
         this.internalStorage[userId] = {};
       }
@@ -51,7 +48,6 @@ class UsersCache extends Cache {
 
       return data;
     });
-    */
     // missing catch is intentional, error handling depends on use case
   }
 }
