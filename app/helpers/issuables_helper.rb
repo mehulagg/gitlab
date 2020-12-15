@@ -249,6 +249,10 @@ module IssuablesHelper
     end
   end
 
+  def reviewer_issuables_count
+    current_user.reviewer_open_merge_requests_count
+  end
+
   def issuable_reference(issuable)
     @show_full_reference ? issuable.to_reference(full: true) : issuable.to_reference(@group || @project)
   end

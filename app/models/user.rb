@@ -1560,6 +1560,12 @@ class User < ApplicationRecord
     end
   end
 
+  def reviewer_open_merge_requests_count(force: false)
+    Rails.cache.fetch(['users', id, 'reviewer_open_merge_requests_count'], force: force, expires_in: 20.minutes) do
+      MergeRequestsFinder.new(self, reviewer_id: self.id, state: 'opened', non_archived: true).execute.count
+    end
+  end
+
   def assigned_open_issues_count(force: false)
     Rails.cache.fetch(['users', id, 'assigned_open_issues_count'], force: force, expires_in: 20.minutes) do
       IssuesFinder.new(self, assignee_id: self.id, state: 'opened', non_archived: true).execute.count
