@@ -70,7 +70,7 @@ RSpec.describe Packages::CreateEventService do
       end
 
       it 'tracks the event' do
-        expect(::Gitlab::UsageDataCounters::GuestPackageEventCounter).not_to receive(:count)
+        expect(::Gitlab::UsageDataCounters::PackageEventCounter).not_to receive(:count)
         expect(::Gitlab::UsageDataCounters::HLLRedisCounter).to receive(:track_event).with(user.id, Packages::Event.allowed_event_name(expected_scope, event_name, originator_type))
 
         subject
@@ -84,7 +84,7 @@ RSpec.describe Packages::CreateEventService do
         end
 
         it 'does not track the event' do
-          expect(::Gitlab::UsageDataCounters::GuestPackageEventCounter).not_to receive(:count)
+          expect(::Gitlab::UsageDataCounters::PackageEventCounter).not_to receive(:count)
 
           subject
         end
@@ -92,7 +92,7 @@ RSpec.describe Packages::CreateEventService do
 
       it 'tracks the event' do
         expect(::Gitlab::UsageDataCounters::HLLRedisCounter).not_to receive(:track_event)
-        expect(::Gitlab::UsageDataCounters::GuestPackageEventCounter).to receive(:count).with(Packages::Event.allowed_event_name(expected_scope, event_name, originator_type))
+        expect(::Gitlab::UsageDataCounters::PackageEventCounter).to receive(:count).with(Packages::Event.allowed_event_name(expected_scope, event_name, originator_type))
 
         subject
       end

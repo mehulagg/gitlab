@@ -5,17 +5,17 @@ namespace :gitlab do
   namespace :packages do
     namespace :events do
       task generate: :environment do
-        Rake::Task["gitlab:packages:events:generate_guest"].invoke
+        Rake::Task["gitlab:packages:events:generate_counts"].invoke
         Rake::Task["gitlab:packages:events:generate_unique"].invoke
       rescue => e
         logger.error("Error building events list: #{e}")
       end
 
-      task generate_guest: :environment do
+      task generate_counts: :environment do
         logger = Logger.new(STDOUT)
         logger.info('Building list of package events...')
 
-        path = Gitlab::UsageDataCounters::GuestPackageEventCounter::KNOWN_EVENTS_PATH
+        path = Gitlab::UsageDataCounters::PackageEventCounter::KNOWN_EVENTS_PATH
         File.open(path, "w") { |file| file << guest_events_list.to_yaml }
 
         logger.info("Events file `#{path}` generated successfully")

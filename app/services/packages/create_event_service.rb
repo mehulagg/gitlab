@@ -5,7 +5,7 @@ module Packages
     def execute
       if Feature.enabled?(:collect_package_events_redis) && redis_event_name
         if guest?
-          ::Gitlab::UsageDataCounters::GuestPackageEventCounter.count(redis_event_name)
+          ::Gitlab::UsageDataCounters::PackageEventCounter.count(redis_event_name)
         else
           ::Gitlab::UsageDataCounters::HLLRedisCounter.track_event(current_user.id, redis_event_name)
         end

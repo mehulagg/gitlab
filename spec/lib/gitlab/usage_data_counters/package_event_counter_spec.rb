@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::UsageDataCounters::GuestPackageEventCounter, :clean_gitlab_redis_shared_state do
+RSpec.describe Gitlab::UsageDataCounters::PackageEventCounter, :clean_gitlab_redis_shared_state do
   shared_examples_for 'usage counter with totals' do |counter|
     it 'increments counter and returns total count' do
       expect(described_class.read(counter)).to eq(0)
