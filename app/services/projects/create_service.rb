@@ -10,6 +10,7 @@ module Projects
       @initialize_with_readme = Gitlab::Utils.to_boolean(@params.delete(:initialize_with_readme))
       @import_data            = @params.delete(:import_data)
       @relations_block        = @params.delete(:relations_block)
+      @forked_from_project    = @params.delete(:forked_from_project)
     end
 
     def execute
@@ -18,6 +19,9 @@ module Projects
       end
 
       @project = Project.new(params)
+
+      # Assign an original project forked from
+      @project.forked_from_project = @forked_from_project if @forked_from_project
 
       # If a project is newly created it should have shared runners settings
       # based on its group having it enabled. This is like the "default value"
