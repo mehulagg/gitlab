@@ -36,8 +36,8 @@ module IncidentManagement
           break error_in_validation(oncall_rotation) unless oncall_rotation.persisted?
 
           participants = participants_for(oncall_rotation)
-          first_invalid_particpant = participants.find(&:invalid?)
-          break error_in_validation(first_invalid_particpant) if first_invalid_particpant
+          first_invalid_participant = participants.find(&:invalid?)
+          break error_in_validation(first_invalid_participant) if first_invalid_participant
 
           insert_participants(participants)
 

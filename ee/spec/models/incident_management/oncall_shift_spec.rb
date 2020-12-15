@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe IncidentManagement::OncallShift do
-  let_it_be(:participant) { create(:incident_management_oncall_participant, :with_access) }
+  let_it_be(:participant) { create(:incident_management_oncall_participant, :with_developer_access) }
 
   describe 'associations' do
     it { is_expected.to belong_to(:rotation) }
@@ -57,8 +57,8 @@ RSpec.describe IncidentManagement::OncallShift do
       # Using multiple participants in different rotations
       # to be able to simultaneously save shifts which would
       # conflict if they were part of the same rotation
-      let_it_be(:participant2) { create(:incident_management_oncall_participant, :with_access) }
-      let_it_be(:participant3) { create(:incident_management_oncall_participant, :with_access) }
+      let_it_be(:participant2) { create(:incident_management_oncall_participant, :with_developer_access) }
+      let_it_be(:participant3) { create(:incident_management_oncall_participant, :with_developer_access) }
 
       # First rotation
       let_it_be(:mon_to_tue) { create_shift(monday, tuesday, participant) }
