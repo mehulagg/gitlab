@@ -591,9 +591,7 @@ the mounting function (`mount` or `shallowMount`) to be used to mount the compon
     function createComponent({ mountFn = shallowMount } = {}) { }
     ```
 
-1. If you find yourself calling `wrapper.find('[data-testid="some-testid"]')` you may
-want to consider using `extendedWrapper`, this exposes `wrapper.findByTestId()` which can
-be used to find an element:
+1. Wrap calls to `mount` and `shallowMount` in `extendedWrapper`, this exposes `wrapper.findByTestId()`:
 
     ```javascript
     import { shallowMount } from '@vue/test-utils';
