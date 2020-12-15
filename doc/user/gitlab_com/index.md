@@ -509,23 +509,21 @@ NOTE:
 See [Rate limits](../../security/rate_limits.md) for administrator
 documentation.
 
-IP blocks usually happen when GitLab.com receives unusual traffic from a single
-IP address that the system views as potentially malicious based on rate limit
-settings. After the unusual traffic ceases, the IP address is automatically
-released depending on the type of block, as described below.
+GitLab.com's rate limits are changing in January 2021. See the limits
+[before 2020-01-18](#rate-limits-before-2021-01-18), and the new limits
+that will be in place [after 2020-01-18](#rate-limits-after-2021-01-18).
 
-If you receive a `403 Forbidden` error for all requests to GitLab.com, please
-check for any automated processes that may be triggering a block. For
-assistance, contact [GitLab Support](https://support.gitlab.com/hc/en-us)
-with details, such as the affected IP address.
+### Rate limiting responses
 
-### HAProxy API throttle
+When a request is rate limited, GitLab responds with a `429` status
+code.
 
-GitLab.com responds with HTTP status code `429` to API requests that exceed 10
-requests
-per second per IP address.
-
-The following example headers are included for all API requests:
+The response will contain additional headers depending on whether the
+rate limit is defined in Cloudflare, HAProxy, or the application
+settings. Rate limits from Cloudflare and the application settings
+respond with a [`Retry-After`
+header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Retry-After).
+HAProxy responds with the below headers:
 
 ```plaintext
 RateLimit-Limit: 600
@@ -535,24 +533,52 @@ RateLimit-Reset: 1563325137
 RateLimit-ResetTime: Wed, 17 Jul 2019 00:58:57 GMT
 ```
 
-Source:
+### Rate limits before 2021-01-18
 
-- Search for `rate_limit_http_rate_per_minute` and `rate_limit_sessions_per_second` in [GitLab.com's current HAProxy settings](https://gitlab.com/gitlab-cookbooks/gitlab-haproxy/blob/master/attributes/default.rb).
+Currently:
 
-### Pagination response headers
+1. **Protected paths** is limited to **10** requests per minute for a
+   given **IP address**.
+   1. See [protected paths throttle][#protected-paths-throttle] for more
+      details.
+1. **Raw endpoint** traffic is limited to **300** requests per minute
+   for a given **project, commit, and file path**.
+    1. This is the default for [rate limits on raw
+  endpoints](../../user/admin_area/settings/rate_limits_on_raw_endpoints.md).
+1. **All** traffic is limited to **600** requests per minute from a
+   given **IP address** when not covered by one of the limits above.
+   1. Search for `rate_limit_http_rate_per_minute` and
+      `rate_limit_sessions_per_second` in [GitLab.com's current HAProxy
+      settings](https://gitlab.com/gitlab-cookbooks/gitlab-haproxy/blob/master/attributes/default.rb).
 
-For performance reasons, if a query returns more than 10,000 records, GitLab
-doesn't return the following headers:
+### Rate limits after 2021-01-18
 
-- `x-total`.
-- `x-total-pages`.
-- `rel="last"` `link`.
+On 2020-01-18, we'll enable further [Rack
+Attack](../../security/rack_attack.md) settings on GitLab.com and use
+the below limits:
 
-### Rack Attack initializer
+1. **Unauthenticated** traffic will be limited to **500** requests per
+   minute from a given **IP address**.
+1. **Authenticated** traffic depends on whether it is to our API or not:
+   1. **API** traffic will be limited to **2,000** requests per minute
+      for a given **user**.
+   1. **All other HTTP** traffic will be limited to **1,000** requests per
+      minute for a given **user**.
+1. **Protected paths** will be limited to **10** requests per minute for
+   a given **IP address**.
+   1. See [protected paths throttle][#protected-paths-throttle] for more
+      details.
+1. **Raw endpoint** traffic will be limited to **300** requests per
+   minute for a given **project, commit, and file path**.
+    1. This is the default for [rate limits on raw
+  endpoints](../../user/admin_area/settings/rate_limits_on_raw_endpoints.md).
+1. **All** traffic will be limited to **2,000** requests per minute from
+   a given **IP address** when not covered by one of the limits above.
+   1. Search for `rate_limit_http_rate_per_minute` and
+      `rate_limit_sessions_per_second` in [GitLab.com's current HAProxy
+      settings](https://gitlab.com/gitlab-cookbooks/gitlab-haproxy/blob/master/attributes/default.rb).
 
-Details of rate limits enforced by [Rack Attack](../../security/rack_attack.md).
-
-#### Protected paths throttle
+### Protected paths throttle
 
 GitLab.com responds with HTTP status code `429` to POST requests at protected
 paths that exceed 10 requests per **minute** per IP address.
@@ -567,6 +593,18 @@ Retry-After: 60
 ```
 
 See [Protected Paths](../admin_area/settings/protected_paths.md) for more details.
+
+### IP blocks
+
+IP blocks usually happen when GitLab.com receives unusual traffic from a single
+IP address that the system views as potentially malicious based on rate limit
+settings. After the unusual traffic ceases, the IP address is automatically
+released depending on the type of block, as described below.
+
+If you receive a `403 Forbidden` error for all requests to GitLab.com, please
+check for any automated processes that may be triggering a block. For
+assistance, contact [GitLab Support](https://support.gitlab.com/hc/en-us)
+with details, such as the affected IP address.
 
 #### Git and container registry failed authentication ban
 
@@ -585,13 +623,14 @@ This limit:
 
 No response headers are provided.
 
-### Admin Area settings
+### Pagination response headers
 
-GitLab.com:
+For performance reasons, if a query returns more than 10,000 records, GitLab
+doesn't return the following headers:
 
-- Has [rate limits on raw endpoints](../../user/admin_area/settings/rate_limits_on_raw_endpoints.md)
-  set to the default.
-- Does not have the user and IP rate limits settings enabled.
+- `x-total`.
+- `x-total-pages`.
+- `rel="last"` `link`.
 
 ### Visibility settings
 
