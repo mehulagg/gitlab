@@ -164,12 +164,12 @@ Comments are displayed in threads, but can be displayed chronologically
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/235994) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.7.
 
-In many cases incidents will be associated to metrics. Screenshots of metric
-charts may be uploaded in the Metrics tab.
+In many cases, incidents are associated to metrics. You can upload screenshots of metric
+charts in the **Metrics** tab:
 
 ![Incident Metrics tab](img/incident_metrics_tab_v13_7.png)
 
-Uploading an image will give you the option of associating it with a URL, which will be added to the image as a link.
+When you upload an image, you can associate it with a URL to the original graph. Users can access the original graph by clicking the image:
 
 ![Metric image URL dialog](img/metric_image_url_dialog_v13_7.png)
 
