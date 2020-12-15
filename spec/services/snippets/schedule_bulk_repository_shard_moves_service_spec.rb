@@ -3,45 +3,10 @@
 require 'spec_helper'
 
 RSpec.describe Snippets::ScheduleBulkRepositoryShardMovesService do
-  let!(:snippet) { create(:snippet, :repository).tap { |snippet| snippet.create_repository } }
-  let(:source_storage_name) { 'default' }
-  let(:destination_storage_name) { 'test_second_storage' }
+  it_behaves_like 'schedules bulk repository shard moves' do
+    let_it_be_with_reload(:container) { create(:snippet, :repository).tap { |snippet| snippet.create_repository } }
 
-  before do
-    stub_storage_settings(destination_storage_name => { 'path' => 'tmp/tests/extra_storage' })
-  end
-
-  describe '#execute' do
-    it 'schedules snippet repository storage moves' do
-      expect { subject.execute(source_storage_name, destination_storage_name) }
-        .to change(SnippetRepositoryStorageMove, :count).by(1)
-
-      storage_move = snippet.repository_storage_moves.last!
-
-      expect(storage_move).to have_attributes(
-        source_storage_name: source_storage_name,
-        destination_storage_name: destination_storage_name,
-        state_name: :scheduled
-      )
-    end
-
-    context 'read-only repository' do
-      let!(:snippet) { create(:snippet, :repository, :read_only).tap { |snippet| snippet.create_repository } }
-
-      it 'does not get scheduled' do
-        expect(subject).to receive(:log_info)
-          .with("Snippet #{snippet.full_path} (#{snippet.id}) was skipped: Snippet is read only")
-        expect { subject.execute(source_storage_name, destination_storage_name) }
-          .to change(SnippetRepositoryStorageMove, :count).by(0)
-      end
-    end
-  end
-
-  describe '.enqueue' do
-    it 'defers to the worker' do
-      expect(::SnippetScheduleBulkRepositoryShardMovesWorker).to receive(:perform_async).with(source_storage_name, destination_storage_name)
-
-      described_class.enqueue(source_storage_name, destination_storage_name)
-    end
+    let(:move_service_klass) { SnippetRepositoryStorageMove }
+    let(:bulk_worker_klass) { ::SnippetScheduleBulkRepositoryShardMovesWorker }
   end
 end

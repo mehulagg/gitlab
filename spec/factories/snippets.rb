@@ -21,10 +21,6 @@ FactoryBot.define do
       visibility_level { Snippet::PRIVATE }
     end
 
-    trait :read_only do
-      repository_read_only { true }
-    end
-
     # Test repository - https://gitlab.com/gitlab-org/gitlab-test
     trait :repository do
       after :create do |snippet|
