@@ -34,4 +34,20 @@ RSpec.describe IncidentManagement::OncallRotation do
       end
     end
   end
+
+  describe '#shift_duration' do
+    let_it_be(:rotation) { create(:incident_management_oncall_rotation, schedule: schedule) }
+
+    subject { rotation.shift_duration }
+
+    it { is_expected.to eq(5.days) }
+
+    described_class.length_units.each_key do |unit|
+      context "with a length unit of #{unit}" do
+        let(:rotation) { build(:incident_management_oncall_rotation, schedule: schedule, length_unit: unit) }
+
+        it { is_expected.to be_a(ActiveSupport::Duration) }
+      end
+    end
+  end
 end

@@ -16,9 +16,9 @@ RSpec.describe IncidentManagement::OncallShiftGenerator do
   shared_context 'with three participants' do
     let_it_be(:participants) do
       {
-        blue200: create(:incident_management_oncall_participant, :with_access, rotation: rotation, color_palette: :blue, color_weight: '200'),
-        blue50: create(:incident_management_oncall_participant, :with_access, rotation: rotation, color_palette: :blue, color_weight: '50'),
-        magenta: create(:incident_management_oncall_participant, :with_access, rotation: rotation, color_palette: :magenta)
+        blue200: create(:incident_management_oncall_participant, :with_developer_access, rotation: rotation, color_palette: :blue, color_weight: '200'),
+        blue50: create(:incident_management_oncall_participant, :with_developer_access, rotation: rotation, color_palette: :blue, color_weight: '50'),
+        magenta: create(:incident_management_oncall_participant, :with_developer_access, rotation: rotation, color_palette: :magenta)
       }
     end
   end
@@ -58,7 +58,7 @@ RSpec.describe IncidentManagement::OncallShiftGenerator do
     end
 
     context 'with one participant' do
-      let_it_be(:participants) { { user: create(:incident_management_oncall_participant, :with_access, rotation: rotation) } }
+      let_it_be(:participants) { { user: create(:incident_management_oncall_participant, :with_developer_access, rotation: rotation) } }
 
       # Expect 3 shifts of 5 days starting, both for the same user
       it_behaves_like 'unsaved rotations', [
