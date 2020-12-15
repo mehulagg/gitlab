@@ -11,7 +11,7 @@ import TypeOfWorkCharts from './type_of_work_charts.vue';
 import UrlSync from '~/vue_shared/components/url_sync.vue';
 import { toYmd } from '../../shared/utils';
 import StageTableNav from './stage_table_nav.vue';
-import CustomStageForm from './create_value_stream_form/custom_stage_form.vue';
+import CustomStageForm from './custom_stage_form.vue';
 import PathNavigation from './path_navigation.vue';
 import FilterBar from './filter_bar.vue';
 import ValueStreamSelect from './value_stream_select.vue';

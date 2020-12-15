@@ -163,10 +163,11 @@ export default {
     handleUpdateFields(field, value) {
       this.fields = { ...this.fields, [field]: value };
       const newErrors = validateFields(this.fields);
-      newErrors.endEventIdentifier = this.eventMismatchError
-        ? [ERRORS.INVALID_EVENT_PAIRS]
-        : newErrors.endEventIdentifier;
-      this.errors = newErrors;
+      newErrors.endEventIdentifier =
+        this.fields.startEventIdentifier && this.eventMismatchError
+          ? [ERRORS.INVALID_EVENT_PAIRS]
+          : newErrors.endEventIdentifier;
+      this.errors = { ...this.errors, ...newErrors };
     },
   },
 };

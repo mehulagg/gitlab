@@ -96,7 +96,7 @@ export default {
     <div class="d-flex" :class="{ 'justify-content-between': startEventRequiresLabel }">
       <div :class="[startEventRequiresLabel ? 'w-50 mr-1' : 'w-100']">
         <gl-form-group
-          data-testid="custom-stage-start-event-identifier"
+          data-testid="custom-stage-start-event"
           :label="s__('CustomCycleAnalytics|Start event')"
           label-for="custom-stage-start-event"
           :state="!hasFieldErrors('startEventIdentifier')"
@@ -113,7 +113,7 @@ export default {
       </div>
       <div v-if="startEventRequiresLabel" class="w-50 ml-1">
         <gl-form-group
-          data-testid="custom-stage-start-event-label-id"
+          data-testid="custom-stage-start-event-label"
           :label="s__('CustomCycleAnalytics|Start event label')"
           label-for="custom-stage-start-event-label"
           :state="!hasFieldErrors('startEventLabelId')"
@@ -130,7 +130,7 @@ export default {
     <div class="d-flex" :class="{ 'justify-content-between': endEventRequiresLabel }">
       <div :class="[endEventRequiresLabel ? 'w-50 mr-1' : 'w-100']">
         <gl-form-group
-          data-testid="custom-stage-end-event-identifier"
+          data-testid="custom-stage-end-event"
           :label="s__('CustomCycleAnalytics|End event')"
           label-for="custom-stage-end-event"
           :state="!hasFieldErrors('endEventIdentifier')"
@@ -148,7 +148,7 @@ export default {
       </div>
       <div v-if="endEventRequiresLabel" class="w-50 ml-1">
         <gl-form-group
-          data-testid="custom-stage-end-event-label-id"
+          data-testid="custom-stage-end-event-label"
           :label="s__('CustomCycleAnalytics|End event label')"
           label-for="custom-stage-end-event-label"
           :state="!hasFieldErrors('endEventLabelId')"

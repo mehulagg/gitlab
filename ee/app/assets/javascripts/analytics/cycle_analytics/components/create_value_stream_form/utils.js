@@ -49,7 +49,7 @@ export const validateFields = fields => {
     newErrors.endEventIdentifier = [ERRORS.START_EVENT_REQUIRED];
   }
 
-  if (fields?.endEventIdentifier) {
+  if (fields?.startEventIdentifier && fields?.endEventIdentifier) {
     newErrors.endEventIdentifier = [];
   }
   return newErrors;

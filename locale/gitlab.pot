@@ -8276,6 +8276,12 @@ msgstr ""
 msgid "CustomCycleAnalytics|Editing stage"
 msgstr ""
 
+msgid "CustomCycleAnalytics|End event"
+msgstr ""
+
+msgid "CustomCycleAnalytics|End event label"
+msgstr ""
+
 msgid "CustomCycleAnalytics|Enter a name for the stage"
 msgstr ""
 
@@ -8286,6 +8292,9 @@ msgid "CustomCycleAnalytics|New stage"
 msgstr ""
 
 msgid "CustomCycleAnalytics|Please select a start event first"
+msgstr ""
+
+msgid "CustomCycleAnalytics|Select end event"
 msgstr ""
 
 msgid "CustomCycleAnalytics|Select start event"
@@ -8300,13 +8309,10 @@ msgstr ""
 msgid "CustomCycleAnalytics|Start event"
 msgstr ""
 
-msgid "CustomCycleAnalytics|Start event changed, please select a valid stop event"
+msgid "CustomCycleAnalytics|Start event changed, please select a valid end event"
 msgstr ""
 
 msgid "CustomCycleAnalytics|Start event label"
-msgstr ""
-
-msgid "CustomCycleAnalytics|Stop event"
 msgstr ""
 
 msgid "CustomCycleAnalytics|Stop event label"

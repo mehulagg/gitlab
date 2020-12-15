@@ -5,7 +5,7 @@ import MockAdapter from 'axios-mock-adapter';
 import Vuex from 'vuex';
 import AddStageButton from 'ee/analytics/cycle_analytics/components/add_stage_button.vue';
 import Component from 'ee/analytics/cycle_analytics/components/base.vue';
-import CustomStageForm from 'ee/analytics/cycle_analytics/components/create_value_stream_form/custom_stage_form.vue';
+import CustomStageForm from 'ee/analytics/cycle_analytics/components/custom_stage_form.vue';
 import DurationChart from 'ee/analytics/cycle_analytics/components/duration_chart.vue';
 import FilterBar from 'ee/analytics/cycle_analytics/components/filter_bar.vue';
 import Metrics from 'ee/analytics/cycle_analytics/components/metrics.vue';
