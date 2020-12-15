@@ -6,8 +6,19 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Sorting and ordering issue lists
 
-You can sort a list of issues several ways, including by issue creation date, milestone due date,
-etc. The available sorting options can change based on the context of the list.
+You can sort a list of issues several ways, including by:
+
+- Blocking
+- Created date
+- Due date
+- Label priority
+- Last updated
+- Milestone due date
+- Popularity
+- Priority
+- Weight
+
+The available sorting options can change based on the context of the list.
 For sorting by issue priority, see [Label Priority](../labels.md#label-priority).
 
 In group and project issue lists, it is also possible to order issues manually,
