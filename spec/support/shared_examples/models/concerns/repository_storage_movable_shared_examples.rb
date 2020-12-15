@@ -63,7 +63,6 @@ RSpec.shared_examples 'handles repository moves' do
 
       context 'and transits to scheduled' do
         it 'triggers the corresponding repository storage worker' do
-          skip unless repository_storage_worker # TODO remove after https://gitlab.com/gitlab-org/gitlab/-/issues/218991 is implemented
           expect(repository_storage_worker).to receive(:perform_async).with(container.id, 'test_second_storage', storage_move.id)
 
           storage_move.schedule!
@@ -73,7 +72,6 @@ RSpec.shared_examples 'handles repository moves' do
 
         context 'when the transition fails' do
           it 'does not trigger ProjectUpdateRepositoryStorageWorker and adds an error' do
-            skip unless repository_storage_worker # TODO remove after https://gitlab.com/gitlab-org/gitlab/-/issues/218991 is implemented
             allow(storage_move.container).to receive(:set_repository_read_only!).and_raise(StandardError, 'foobar')
             expect(repository_storage_worker).not_to receive(:perform_async)
 
