@@ -18,6 +18,12 @@ dashboard view of vulnerabilities identified across your GitLab environment.
 For an overview of application security with GitLab, see
 [GitLab DevSecOps Tools in Action](https://www.youtube.com/watch?v=fPLEWnI4k6k).
 
+A primary aim is to identify risks before code changes are deployed to production. GitLab Secure
+scans code changes, also known as a _merge request_, as part of the CI/CD pipeline. Scans run on the
+feature branch and find vulnerabilities before they're merged into the main branch. By finding
+vulnerabilities in the feature branch you can evaluate and mitigate the risk before deploying to
+production.
+
 ## Quick start
 
 Get started quickly with Dependency Scanning, License Scanning, Static Application Security
