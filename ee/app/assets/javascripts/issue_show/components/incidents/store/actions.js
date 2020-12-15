@@ -13,7 +13,7 @@ export const fetchMetricImages = async ({ state, dispatch }) => {
     dispatch('receiveMetricImagesSuccess', response);
   } catch (error) {
     dispatch('receiveMetricImagesError');
-    createFlash({ message: s__('Incidents|There was an issue loading metric images') });
+    createFlash({ message: s__('Incidents|There was an issue loading metric images.') });
   }
 };
 
