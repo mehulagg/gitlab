@@ -160,6 +160,19 @@ Beneath the highlight bar, GitLab displays a summary that includes the following
 Comments are displayed in threads, but can be displayed chronologically
 [in a timeline view](#timeline-view).
 
+### Metrics
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/235994) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.7.
+
+In many cases incidents will be associated to metrics. Screenshots of metric
+charts may be uploaded in the Metrics tab.
+
+![Incident Metrics tab](img/incident_metrics_tab_v13_7.png)
+
+Uploading an image will give you the option of associating it with a URL, which will be added to the image as a link.
+
+![Metric image URL dialog](img/metric_image_url_dialog_v13_7.png)
+
 ### Alert details
 
 Incidents show the details of linked alerts in a separate tab. To populate this
