@@ -68,7 +68,11 @@ export default {
         <highlight-bar :alert="alert" />
         <description-component v-bind="$attrs" />
       </gl-tab>
-      <gl-tab v-if="uploadMetricsFeatureAvailable" title="Metrics" data-testid="metrics-tab">
+      <gl-tab
+        v-if="uploadMetricsFeatureAvailable"
+        :title="s__('Incident|Metrics')"
+        data-testid="metrics-tab"
+      >
         <metrics-tab />
       </gl-tab>
       <gl-tab v-if="alert" class="alert-management-details" :title="s__('Incident|Alert details')">
