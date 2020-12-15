@@ -6,21 +6,29 @@ Connecting to GitLab requires being connected to a network on which a GitLab hos
 
 ## Intro & Technical Jargon
 
-OSI Model / TCP/IP Stack, Yadda Yadda
+Open Systems Interconnection (OSI) Model and TCP/IP Stack.
 
 ## Tools
 
-The following tools can come in handy when troubleshooting networking issues.
+The following tools are helpful in troubleshooting networking issues.
 
 ### Can A connect to B?
 
 #### ping
 
+sends request to target and reports back.
+
 #### traceroute
+
+print the route packets trace to network host
+
+#### tracepath
+
+traces path to destination
 
 #### mtr
 
-#### tracepath
+mtr combines the functionality of the traceroute and ping
 
 ### curl
 
@@ -28,11 +36,13 @@ The following tools can come in handy when troubleshooting networking issues.
 
 #### netstat
 
+Print network connections, routing tables,
+
 #### ss
 
-#### nmap
+similar to netstat, used to dump network and socket statistics.
 
-#### ip
+#### nmap
 
 ### DNS
 
@@ -42,20 +52,34 @@ DNS is a networking phonebook that translates domains to IP addresses.
 
 #### nslookup
 
-### What's going on here?
+### What's going on the network?
 
 #### tcpdump
 
-#### iptables
-
-#### nethogs
+captures packets
 
 #### ngrep
 
-### Network encryption 
+tcpdump + grep
+
+#### nethogs
+
+Net top tool grouping bandwidth per process
+
+### Other
+
+#### iptables
+
+firewalls n such
+
+#### ip
+
+network interface info and configuration
+
+### Encryption 
 
 The S in HTTPS stands for Secure. It's secure because it's encrypted. 
 
-Encryption at the network level uses Public Key Infrastructure to establish trusted connections and prevent transmitting data in plaintext. PKI includes certificates, certificate authorities, certificate trust stores, and more!
+Encryption at the network level uses Public Key Infrastructure to establish trusted connections and prevent transmitting data in plaintext. This includes certificates, certificate authorities, certificate trust stores, and more!
 
 See SSL Troubleshooting Guide
