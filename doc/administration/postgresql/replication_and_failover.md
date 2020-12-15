@@ -1179,7 +1179,7 @@ functional or does not have a leader, Patroni and by extension PostgreSQL will n
 API which can be accessed via its [default port](https://docs.gitlab.com/omnibus/package-information/defaults.html#patroni)
 on each node.
 
-#### Database authorization for Patroni
+### Database authorization for Patroni
 
 Patroni uses Unix socket to manage PostgreSQL instance. Therefore, the connection from the `local` socket must be trusted.
 
