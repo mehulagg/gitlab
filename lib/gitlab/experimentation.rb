@@ -87,6 +87,9 @@ module Gitlab
       },
       invite_members_empty_project_version_a: {
         tracking_category: 'Growth::Expansion::Experiment::InviteMembersEmptyProjectVersionA'
+      },
+      show_trial_status_in_sidebar: {
+        tracking_category: 'Growth::Conversion::Experiment::ShowTrialStatusInSidebar'
       }
     }.freeze
 
