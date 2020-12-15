@@ -435,7 +435,7 @@ Clone Enterprise Edition:
 
 ```shell
 # Clone GitLab repository
-sudo -u git -H git clone https://gitlab.com/gitlab-org/gitlab.git -b <X-Y-stable> gitlab
+sudo -u git -H git clone https://gitlab.com/gitlab-org/gitlab.git -b <X-Y-stable-ee> gitlab
 ```
 
 Make sure to replace `<X-Y-stable>` with the stable branch that matches the
