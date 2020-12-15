@@ -1,59 +1,59 @@
 Version: 1
 Name: Default
 Config:
-  CaCert:
-  CaKey:
-  ServerKey:
-  ClientCert:
-  ClientKey:
+  CaCert: 
+  CaKey: 
+  ServerKey: 
+  ClientCert: 
+  ClientKey: 
   ConnectTimeout: 30
   SendTimeout: 30
   ReceiveTimeout: 30
 Routes:
-  - &Route0
+- &Route0
   Order: 0
   Url: '**'
   Mutate: true
-  SwaggerUrl:
-  Script:
+  SwaggerUrl: 
+  Script: 
   Headers:
-   - Pattern: Host
+  - Pattern: Host
     Mutate: false
-   - Pattern: Connection
+  - Pattern: Connection
     Mutate: false
-   - Pattern: Content-Length
+  - Pattern: Content-Length
     Mutate: false
   ApiTokens:
-   - Name: Authorization
+  - Name: Authorization
     Where: Header
     Expiration: 120
     IsSignatureOfRequest: false
-   - Name: access_token
+  - Name: access_token
     Where: FormData
     Expiration: 120
     IsSignatureOfRequest: false
-   - Name: access_token
+  - Name: access_token
     Where: Query
     Expiration: 120
     IsSignatureOfRequest: false
-   - Name: X-API-Key
+  - Name: X-API-Key
     Where: Header
     Expiration: 120
     IsSignatureOfRequest: false
 Assertions:
- - Name: LogAnalysisAssertion
+- Name: LogAnalysisAssertion
   Configuration:
     UserEntries: []
- - Name: ResponseAnalysisAssertion
+- Name: ResponseAnalysisAssertion
   Configuration:
     UserEntries: []
- - Name: CustomBodyContainsAssertion
+- Name: CustomBodyContainsAssertion
   Configuration:
     IsRequired: false
     IsCaseSensitive: false
     IsRegex: false
     SearchString: ''
- - Name: CustomParameterContainsAssertion
+- Name: CustomParameterContainsAssertion
   Configuration:
     ComparisonType: Contains
     IsRequired: false
