@@ -35,21 +35,24 @@ describe('Inline edit form component', () => {
     });
   };
 
-  // it('does not render template selector if no templates exist', () => {
-  //   createComponent({ issuableTemplates: {}});
-  //
-  //   expect(vm.$el.querySelector('.js-issuable-selector-wrap')).toBeNull();
-  // });
+  it('does not render template selector if no templates exist', () => {
+    createComponent();
+
+    expect(vm.$el.querySelector('.js-issuable-selector-wrap')).toBeNull();
+  });
 
   it('renders template selector when templates exists', () => {
-    // createComponent({ issuableTemplates: {"": ['test']} });
-    createComponent({ issuableTemplates: {"test": [{"name": "test", "id": "test", "project_path": "test", "namespace_path": "test"}]}});
+    createComponent({
+      issuableTemplates: {
+        test: [{ name: 'test', id: 'test', project_path: 'test', namespace_path: 'test' }],
+      },
+    });
 
     expect(vm.$el.querySelector('.js-issuable-selector-wrap')).not.toBeNull();
   });
 
   it('hides locked warning by default', () => {
-    createComponent({});
+    createComponent();
 
     expect(vm.$el.querySelector('.alert')).toBeNull();
   });
@@ -76,13 +79,13 @@ describe('Inline edit form component', () => {
     });
 
     it('initialized Autosave on mount', () => {
-      createComponent({});
+      createComponent();
 
       expect(Autosave).toHaveBeenCalledTimes(2);
     });
 
     it('calls reset on autosave when eventHub emits appropriate events', () => {
-      createComponent({});
+      createComponent();
 
       eventHub.$emit('close.form');
 

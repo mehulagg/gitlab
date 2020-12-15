@@ -2541,23 +2541,6 @@ class Project < ApplicationRecord
     tracing_setting&.external_url
   end
 
-  def issuable_templates(issuable_type)
-    strong_memoize("#{issuable_type}_templates") do
-      template_dropdown_names(TemplateFinder.build(issuable_type.pluralize.to_sym, self).execute)
-    end
-  end
-
-  def template_dropdown_names(items)
-    grouped = items.group_by(&:category)
-    categories = grouped.keys
-
-    categories.each_with_object({}) do |category, hash|
-      hash[category] = grouped[category].map do |item|
-        { name: item.name, id: item.key, project_path: item.project_path, namespace_path: item.namespace_path }
-      end
-    end
-  end
-
   private
 
   def find_service(services, name)

@@ -9,7 +9,8 @@ module EE
       gitignores: ::Gitlab::Template::CustomGitignoreTemplate,
       gitlab_ci_ymls: ::Gitlab::Template::CustomGitlabCiYmlTemplate,
       metrics_dashboard_ymls: ::Gitlab::Template::CustomMetricsDashboardYmlTemplate,
-      issues: ::Gitlab::Template::IssueTemplate
+      issues: ::Gitlab::Template::IssueTemplate,
+      merge_requests: ::Gitlab::Template::MergeRequestTemplate
     ).freeze
 
     attr_reader :custom_templates

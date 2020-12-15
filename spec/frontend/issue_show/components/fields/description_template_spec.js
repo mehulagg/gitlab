@@ -14,7 +14,9 @@ describe('Issue description template component', () => {
     vm = new Component({
       propsData: {
         formState,
-        issuableTemplates: {"test": [{"name": "test", "id": "test", "project_path": "/", "namespace_path": "/"}]},
+        issuableTemplates: {
+          test: [{ name: 'test', id: 'test', project_path: '/', namespace_path: '/' }],
+        },
         projectPath: '/',
         projectNamespace: '/',
       },
@@ -23,7 +25,7 @@ describe('Issue description template component', () => {
 
   it('renders templates as JSON array in data attribute', () => {
     expect(vm.$el.querySelector('.js-issuable-selector').getAttribute('data-data')).toBe(
-      '{"test":[{"name":"test","id":"test","project_path":"\/","namespace_path":"\/"}]}',
+      '{"test":[{"name":"test","id":"test","project_path":"/","namespace_path":"/"}]}',
     );
   });
 
