@@ -2,6 +2,7 @@
 import { GlFormGroup, GlFormInput, GlFormSelect } from '@gitlab/ui';
 import { s__ } from '~/locale';
 import LabelsSelector from '../labels_selector.vue';
+import { startEventOptions, endEventOptions } from './utils';
 import {
   isStartEvent,
   isLabelEvent,
@@ -38,18 +39,11 @@ export default {
     },
   },
   computed: {
-    startEventOptions() {
-      return [
-        { value: null, text: s__('CustomCycleAnalytics|Select start event') },
-        ...this.events.filter(isStartEvent).map(eventToOption),
-      ];
+    startEvents() {
+      return startEventOptions(this.events);
     },
-    endEventOptions() {
-      const endEvents = getAllowedEndEvents(this.events, this.fields.startEventIdentifier);
-      return [
-        { value: null, text: s__('CustomCycleAnalytics|Select end event') },
-        ...eventsByIdentifier(this.events, endEvents).map(eventToOption),
-      ];
+    endEvents() {
+      return endEventOptions(this.events, this.fields.startEventIdentifier);
     },
     hasStartEvent() {
       return this.fields.startEventIdentifier;
@@ -106,7 +100,7 @@ export default {
             v-model="fields.startEventIdentifier"
             name="custom-stage-start-event"
             :required="true"
-            :options="startEventOptions"
+            :options="startEvents"
             @input="handleUpdateField('startEventIdentifier', $event)"
           />
         </gl-form-group>
@@ -139,7 +133,7 @@ export default {
           <gl-form-select
             v-model="fields.endEventIdentifier"
             name="custom-stage-end-event"
-            :options="endEventOptions"
+            :options="endEvents"
             :required="true"
             :disabled="!hasStartEvent"
             @input="handleUpdateField('endEventIdentifier', $event)"

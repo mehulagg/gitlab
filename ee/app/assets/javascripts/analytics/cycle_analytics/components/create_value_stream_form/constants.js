@@ -2,7 +2,7 @@ import { s__ } from '~/locale';
 
 export const I18N = {
   SELECT_START_EVENT: s__('CustomCycleAnalytics|Select start event'),
-  SELECT_END_EVENT: s__('CustomCycleAnalytics|Select stop event'),
+  SELECT_END_EVENT: s__('CustomCycleAnalytics|Select end event'),
 };
 
 export const ERRORS = {
