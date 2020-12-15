@@ -117,6 +117,8 @@ Profiles:
       Configuration:
         FuzzingCount: 10
         UnicodeFuzzing: true
+        HeaderFuzzing: false
+        Headers:
     - Name: JsonFuzzingCheck
       Configuration:
         FuzzingCount: 10
@@ -139,6 +141,8 @@ Profiles:
       Configuration:
         FuzzingCount: 10
         UnicodeFuzzing: true
+        HeaderFuzzing: false
+        Headers:
     - Name: JsonFuzzingCheck
       Configuration:
         FuzzingCount: 10
@@ -161,6 +165,8 @@ Profiles:
       Configuration:
         FuzzingCount: 20
         UnicodeFuzzing: true
+        HeaderFuzzing: false
+        Headers:
     - Name: JsonFuzzingCheck
       Configuration:
         FuzzingCount: 20
@@ -183,6 +189,8 @@ Profiles:
       Configuration:
         FuzzingCount: 50
         UnicodeFuzzing: true
+        HeaderFuzzing: false
+        Headers:
     - Name: JsonFuzzingCheck
       Configuration:
         FuzzingCount: 50
@@ -205,6 +213,8 @@ Profiles:
       Configuration:
         FuzzingCount: 100
         UnicodeFuzzing: true
+        HeaderFuzzing: false
+        Headers:
     - Name: JsonFuzzingCheck
       Configuration:
         FuzzingCount: 100
