@@ -199,9 +199,7 @@ You can import requirements to a project by uploading a CSV file with the column
 
 The user uploading the CSV file will be set as the author of the imported requirements.
 
-NOTE: **Note:**
-A permission level of [Reporter](../../permissions.md), or higher, is required
-to import requirements.
+Users with Reporter or higher [permissions](../../permissions.md) can import requirements.
 
 ### Prepare for the import
 
