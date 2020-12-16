@@ -78,15 +78,16 @@ export const fetchChildrenEpics = (state, { parentItem }) => {
 };
 
 export const receiveEpicsSuccess = (
-  { commit, dispatch, state, getters },
+  { commit, dispatch, state },
   { rawEpics, newEpic, timeframeExtended },
 ) => {
   const epicIds = [];
   const epics = rawEpics.reduce((filteredEpics, epic) => {
+    const { presetType, timeframe } = state;
     const formattedEpic = roadmapItemUtils.formatRoadmapItemDetails(
       epic,
-      getters.timeframeStartDate,
-      getters.timeframeEndDate,
+      roadmapItemUtils.timeframeStartDate(presetType, timeframe),
+      roadmapItemUtils.timeframeEndDate(presetType, timeframe),
     );
 
     formattedEpic.isChildEpic = false;
@@ -126,14 +127,15 @@ export const requestChildrenEpics = ({ commit }, { parentItemId }) => {
   commit(types.REQUEST_CHILDREN_EPICS, { parentItemId });
 };
 export const receiveChildrenSuccess = (
-  { commit, dispatch, getters },
+  { commit, dispatch, state },
   { parentItemId, rawChildren },
 ) => {
   const children = rawChildren.reduce((filteredChildren, epic) => {
+    const { presetType, timeframe } = state;
     const formattedChild = roadmapItemUtils.formatRoadmapItemDetails(
       epic,
-      getters.timeframeStartDate,
-      getters.timeframeEndDate,
+      roadmapItemUtils.timeframeStartDate(presetType, timeframe),
+      roadmapItemUtils.timeframeEndDate(presetType, timeframe),
     );
 
     formattedChild.isChildEpic = true;
@@ -180,13 +182,15 @@ export const fetchEpicsForTimeframe = ({ state, commit, dispatch }, { timeframe 
  *
  * @param extendAs An EXTEND_AS enum value
  */
-export const extendTimeframe = ({ commit, state, getters }, { extendAs }) => {
+export const extendTimeframe = ({ commit, state }, { extendAs }) => {
   const isExtendTypePrepend = extendAs === EXTEND_AS.PREPEND;
-
+  const { presetType, timeframe } = state;
   const timeframeToExtend = extendTimeframeForPreset({
     extendAs,
-    presetType: state.presetType,
-    initialDate: isExtendTypePrepend ? getters.timeframeStartDate : getters.timeframeEndDate,
+    presetType,
+    initialDate: isExtendTypePrepend
+      ? roadmapItemUtils.timeframeStartDate(presetType, timeframe)
+      : roadmapItemUtils.timeframeEndDate(presetType, timeframe),
   });
 
   if (isExtendTypePrepend) {
@@ -233,22 +237,24 @@ export const toggleEpic = ({ state, dispatch }, { parentItem }) => {
  * For epics that have no start or end date, this function updates their start and end dates
  * so that the epic bars get longer to appear infinitely scrolling.
  */
-export const refreshEpicDates = ({ commit, state, getters }) => {
+export const refreshEpicDates = ({ commit, state }) => {
   const epics = state.epics.map(epic => {
+    const { presetType, timeframe } = state;
+
     // Update child epic dates too
     if (epic.children?.edges?.length > 0) {
       epic.children.edges.map(childEpic =>
         roadmapItemUtils.processRoadmapItemDates(
           childEpic,
-          getters.timeframeStartDate,
-          getters.timeframeEndDate,
+          roadmapItemUtils.timeframeStartDate(presetType, timeframe),
+          roadmapItemUtils.timeframeEndDate(presetType, timeframe),
         ),
       );
     }
     return roadmapItemUtils.processRoadmapItemDates(
       epic,
-      getters.timeframeStartDate,
-      getters.timeframeEndDate,
+      roadmapItemUtils.timeframeStartDate(presetType, timeframe),
+      roadmapItemUtils.timeframeEndDate(presetType, timeframe),
     );
   });
 
@@ -298,15 +304,16 @@ export const fetchMilestones = ({ state, dispatch }) => {
 };
 
 export const receiveMilestonesSuccess = (
-  { commit, state, getters },
+  { commit, state },
   { rawMilestones, newMilestone }, // timeframeExtended
 ) => {
+  const { presetType, timeframe } = state;
   const milestoneIds = [];
   const milestones = rawMilestones.reduce((filteredMilestones, milestone) => {
     const formattedMilestone = roadmapItemUtils.formatRoadmapItemDetails(
       milestone,
-      getters.timeframeStartDate,
-      getters.timeframeEndDate,
+      roadmapItemUtils.timeframeStartDate(presetType, timeframe),
+      roadmapItemUtils.timeframeEndDate(presetType, timeframe),
     );
     // Exclude any Milestone that has invalid dates
     // or is already present in Roadmap timeline
@@ -332,12 +339,14 @@ export const receiveMilestonesFailure = ({ commit }) => {
   flash(s__('GroupRoadmap|Something went wrong while fetching milestones'));
 };
 
-export const refreshMilestoneDates = ({ commit, state, getters }) => {
+export const refreshMilestoneDates = ({ commit, state }) => {
+  const { presetType, timeframe } = state;
+
   const milestones = state.milestones.map(milestone =>
     roadmapItemUtils.processRoadmapItemDates(
       milestone,
-      getters.timeframeStartDate,
-      getters.timeframeEndDate,
+      roadmapItemUtils.timeframeStartDate(presetType, timeframe),
+      roadmapItemUtils.timeframeEndDate(presetType, timeframe),
     ),
   );
 

@@ -1,6 +1,7 @@
 import * as roadmapItemUtils from 'ee/roadmap/utils/roadmap_item_utils';
 
-import { parsePikadayDate } from '~/lib/utils/datetime_utility';
+import { PRESET_TYPES } from 'ee/roadmap/constants';
+import { dateFromString, parsePikadayDate } from '~/lib/utils/datetime_utility';
 
 import { rawEpics, mockGroupMilestonesQueryResponse } from '../mock_data';
 
@@ -124,6 +125,50 @@ describe('extractGroupMilestones', () => {
       expect.objectContaining({
         ...edges[0].node,
       }),
+    );
+  });
+});
+
+describe('lastTimeframeIndex', () => {
+  it('Should return last index of the timeframe array', () => {
+    const timeframe = [1, 2, 3, 4];
+
+    expect(roadmapItemUtils.lastTimeframeIndex(timeframe)).toBe(3);
+  });
+});
+
+describe.each`
+  presetType               | timeframe
+  ${PRESET_TYPES.QUARTERS} | ${[{ range: ['foo', 'bar', 'baz'] }, { range: ['abc', 'cde', 'efg'] }]}
+  ${PRESET_TYPES.MONTHS}   | ${['foo', 'bar', 'baz']}
+  ${PRESET_TYPES.WEEKS}    | ${['foo', 'bar', 'baz']}
+`('timeframeStartDate', ({ presetType, timeframe }) => {
+  it(`Should return first item of the timeframe range array when preset type is ${presetType}`, () => {
+    expect(roadmapItemUtils.timeframeStartDate(presetType, timeframe)).toBe('foo');
+  });
+});
+
+describe('timeframeEndDate', () => {
+  it.each`
+    presetType               | lastItem | timeframe
+    ${PRESET_TYPES.QUARTERS} | ${'efg'} | ${[{ range: ['foo', 'bar', 'baz'] }, { range: ['abc', 'cde', 'efg'] }]}
+    ${PRESET_TYPES.MONTHS}   | ${'baz'} | ${['foo', 'bar', 'baz']}
+  `(
+    `Should return last item of the timeframe range array when preset type is $presetType`,
+    ({ presetType, lastItem, timeframe }) => {
+      expect(roadmapItemUtils.timeframeEndDate(presetType, timeframe)).toBe(lastItem);
+    },
+  );
+
+  it('Should return last item of the timeframe array from the state when preset type is WEEKS', () => {
+    const timeframe = [
+      dateFromString('Dec 23 2018'),
+      dateFromString('Dec 30 2018'),
+      dateFromString('Jan 6 2019'),
+    ];
+
+    expect(roadmapItemUtils.timeframeEndDate(PRESET_TYPES.WEEKS, timeframe).getTime()).toBe(
+      dateFromString('Jan 13 2019').getTime(),
     );
   });
 });

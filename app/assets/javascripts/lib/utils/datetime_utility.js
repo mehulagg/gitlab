@@ -101,6 +101,11 @@ export function formatDateAsMonth(datetime, options = {}) {
 }
 
 /**
+ * Returns a date object corresponding to the given date string.
+ */
+export const dateFromString = dateString => new Date(dateFormat(dateString));
+
+/**
  * @example
  * dateFormat('2017-12-05','mmm d, yyyy h:MMtt Z' ) -> "Dec 5, 2017 12:00am GMT+0000"
  * @param {date} datetime
