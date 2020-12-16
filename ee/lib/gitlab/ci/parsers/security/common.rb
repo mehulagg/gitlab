@@ -7,8 +7,12 @@ module Gitlab
         class Common
           SecurityReportParserError = Class.new(Gitlab::Ci::Parsers::ParserError)
 
-          def parse!(json_data, report)
-            report_data = parse_report(json_data)
+          def initialize(json_data, report)
+            @json_data = json_data
+            @report = report
+          end
+
+          def parse!
             raise SecurityReportParserError, "Invalid report format" unless report_data.is_a?(Hash)
 
             create_scanner(report, report_data.dig('scan', 'scanner'))
@@ -26,10 +30,12 @@ module Gitlab
             raise SecurityReportParserError, "#{report.type} security report parsing failed"
           end
 
-          protected
+          private
 
-          def parse_report(json_data)
-            Gitlab::Json.parse!(json_data)
+          attr_reader :json_data, :report
+
+          def report_data
+            @report_data ||= Gitlab::Json.parse!(json_data)
           end
 
           # map remediations to relevant vulnerabilities
