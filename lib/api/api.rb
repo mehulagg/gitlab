@@ -156,6 +156,7 @@ module API
       mount ::API::BroadcastMessages
       mount ::API::Ci::Pipelines
       mount ::API::Ci::PipelineSchedules
+      mount ::API::Ci::PrometheusMetrics
       mount ::API::Ci::Runner
       mount ::API::Ci::Runners
       mount ::API::Commits
