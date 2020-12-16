@@ -526,7 +526,7 @@ You can use the following fake tokens as examples:
 ### Usage list
 <!-- vale off -->
 
-| Usage | Guidance |
+| {::nomarkdown}<div style="width:140px">Usage</div>{:/} | Guidance |
 |-----------------------|-----|
 | admin, admin area     | Use **administration**, **administrator**, **administer**, or **Admin Area** instead. |.
 | and/or                | Use **or** instead, or another sensible construction. |
