@@ -1609,6 +1609,7 @@ class User < ApplicationRecord
 
   def invalidate_merge_request_cache_counts
     Rails.cache.delete(['users', id, 'assigned_open_merge_requests_count'])
+    Rails.cache.delete(['users', id, 'reviewer_open_merge_requests_count'])
   end
 
   def invalidate_todos_done_count

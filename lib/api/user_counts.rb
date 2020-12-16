@@ -12,7 +12,8 @@ module API
         unauthorized! unless current_user
 
         {
-          merge_requests: current_user.assigned_open_merge_requests_count
+          merge_requests: current_user.assigned_open_merge_requests_count,
+          reviewer_merge_requests: current_user.reviewer_open_merge_requests_count,
         }
       end
     end

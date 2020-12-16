@@ -59,9 +59,9 @@
                 track_property: 'navigation',
                 container: 'body' } do
                 = sprite_icon('git-merge')
-                %span.badge.badge-pill.merge-requests-count{ class: ('hidden' if merge_requests_total_count == 0) }
+                %span.badge.badge-pill.merge-requests-count.js-merge-requests-count{ class: ('hidden' if merge_requests_total_count == 0) }
                   = number_with_delimiter(merge_requests_total_count)
-                = sprite_icon('chevron-down', css_class: 'caret-down')
+                = sprite_icon('chevron-down', css_class: 'caret-down gl-mx-0')
               .dropdown-menu.dropdown-menu-right
                 %ul
                   %li.dropdown-header
@@ -69,12 +69,12 @@
                   %li
                     = link_to assigned_mrs_dashboard_path do
                       = _('Assigned to you')
-                      %span.badge.gl-badge.badge-pill.badge-muted.float-right{ class: "gl-text-gray-300!" }
+                      %span.badge.gl-badge.badge-pill.badge-muted.float-right.js-assigned-mr-count{ class: "gl-text-gray-500! gl-font-weight-normal! gl-font-sm! gl-line-height-normal!" }
                         = merge_requests_assigned_count
                   %li
                     = link_to reviewer_mrs_dashboard_path do
                       = _('Review requests for you')
-                      %span.badge.gl-badge.badge-pill.badge-muted.float-right{ class: "gl-text-gray-300!" }
+                      %span.badge.gl-badge.badge-pill.badge-muted.float-right.js-reviewer-mr-count{ class: "gl-text-gray-500! gl-font-weight-normal! gl-font-sm! gl-line-height-normal!" }
                         = merge_requests_reviewer_count
           - if header_link?(:todos)
             = nav_link(controller: 'dashboard/todos', html_options: { class: "user-counter" }) do
