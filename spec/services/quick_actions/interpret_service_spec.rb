@@ -1826,6 +1826,14 @@ RSpec.describe QuickActions::InterpretService do
           end
         end
 
+        context 'with more than 6 emails' do
+          let(:content) { '/invite_email a@gitlab.com b@gitlab.com c@gitlab.com d@gitlab.com e@gitlab.com f@gitlab.com g@gitlab.com' }
+
+          it 'only adds 6 new emails' do
+            expect { add_emails }.to change { issue.issue_email_participants.count }.by(6)
+          end
+        end
+
         context 'with feature flag disabled' do
           before do
             stub_feature_flags(issue_email_participants: false)

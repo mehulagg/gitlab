@@ -236,7 +236,7 @@ module Gitlab
 
         desc _('Add email participant(s)')
         explanation _('Adds email participant(s)')
-        params 'email1@example.com email2@example.com'
+        params 'email1@example.com email2@example.com (max 6)'
         types Issue
         condition do
           Feature.enabled?(:issue_email_participants, parent) &&
@@ -246,7 +246,7 @@ module Gitlab
           added_emails = []
           existing_emails = quick_action_target.email_participants_downcase
 
-          emails.split(' ') do |email|
+          emails.split(' ').first(6).each do |email|
             unless existing_emails.include?(email.downcase)
               new_participant = quick_action_target.issue_email_participants.create(email: email)
               added_emails << email if new_participant.persisted?
