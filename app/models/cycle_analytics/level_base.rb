@@ -60,11 +60,7 @@ module CycleAnalytics
     end
 
     def [](stage_name)
-      if Feature.enabled?(:new_project_level_vsa_backend, resource_parent, default_enabled: true)
-        StageAdapter.new(build_stage(stage_name), options)
-      else
-        Gitlab::CycleAnalytics::Stage[stage_name].new(options: options)
-      end
+      StageAdapter.new(build_stage(stage_name), options)
     end
 
     def stage_params_by_name(name)
