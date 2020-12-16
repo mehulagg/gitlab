@@ -30,6 +30,8 @@ For an overview, see [GitLab 12.10 Introduces Requirements Management](https://w
 A paginated list of requirements is available in each project, and there you
 can create a new requirement.
 
+Users with Reporter or higher [permissions](../../permissions.md) can create requirements.
+
 To create a requirement:
 
 1. From your project page, go to **Requirements**.
