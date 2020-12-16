@@ -101,10 +101,20 @@ module Gitlab
 
           def expand_variables(data)
             if data.is_a?(String)
-              ExpandVariables.expand(data, context.variables)
+              expand(data)
             else
-              data.transform_values { |value| ExpandVariables.expand(value, context.variables) }
+              data.transform_values do |values|
+                if values.is_a?(Array)
+                  values.map { |value| expand(value) }
+                else
+                  expand(values)
+                end
+              end
             end
+          end
+
+          def expand(data)
+            ExpandVariables.expand(data, context.variables)
           end
         end
       end

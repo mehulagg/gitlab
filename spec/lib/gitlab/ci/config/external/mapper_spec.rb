@@ -10,7 +10,7 @@ RSpec.describe Gitlab::Ci::Config::External::Mapper do
   let(:local_file) { '/lib/gitlab/ci/templates/non-existent-file.yml' }
   let(:remote_url) { 'https://gitlab.com/gitlab-org/gitlab-foss/blob/1234/.gitlab-ci-1.yml' }
   let(:template_file) { 'Auto-DevOps.gitlab-ci.yml' }
-  let(:context_params) { { project: project, sha: '123456', user: user } }
+  let(:context_params) { { project: project, sha: '123456', user: user, variables: project.predefined_variables.to_runner_variables } }
   let(:context) { Gitlab::Ci::Config::External::Context.new(**context_params) }
 
   let(:file_content) do
