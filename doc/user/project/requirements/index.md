@@ -218,7 +218,7 @@ To import requirements:
 1. Select the file and click **Import requirements**.
 
 The file is processed in the background and a notification email is sent
-to you once the import is complete.
+to you after the import is complete.
 
 ### CSV file format
 
