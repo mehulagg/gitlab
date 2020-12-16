@@ -97,4 +97,8 @@ export default {
     text: s__('ProjectTemplates|GitLab Cluster Management'),
     icon: '.template-option .icon-cluster_management',
   },
+  cluster_management: {
+    text: s__('ProjectTemplates|Kotlin Native for Linux'),
+    icon: '.template-option .icon-gitlab_logo',
+  },
 };
