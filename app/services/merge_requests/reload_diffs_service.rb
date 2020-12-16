@@ -33,7 +33,7 @@ module MergeRequests
       # model, as that will interfere with other actions happening when
       # reloading the diff.
       MergeRequestDiff
-        .where(merge_request: merge_request)
+        .where(merge_request: merge_request, merge_head: false)
         .preload(merge_request: :target_project)
         .find_each do |merge_request_diff|
         next if merge_request_diff == new_diff

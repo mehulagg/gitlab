@@ -111,7 +111,7 @@ class MergeRequestDiff < ApplicationRecord
       .default_scoped
       .distinct
       .select("FIRST_VALUE(id) OVER (PARTITION BY merge_request_id ORDER BY created_at DESC) as id")
-      .where(merge_request: merge_requests)
+      .where(merge_request: merge_requests, merge_head: false)
 
     joins("INNER JOIN (#{inner_select.to_sql}) latest_diffs ON latest_diffs.id = merge_request_diffs.id")
       .includes(:merge_request_diff_commits)
@@ -196,15 +196,25 @@ class MergeRequestDiff < ApplicationRecord
   end
 
   def set_as_latest_diff
+    return if merge_head?
+
     MergeRequest
       .where('id = ? AND COALESCE(latest_merge_request_diff_id, 0) < ?', self.merge_request_id, self.id)
       .update_all(latest_merge_request_diff_id: self.id)
   end
 
   def ensure_commit_shas
-    self.start_commit_sha ||= merge_request.target_branch_sha
-    self.head_commit_sha  ||= merge_request.source_branch_sha
-    self.base_commit_sha  ||= find_base_sha
+    if merge_head
+      diff_refs = merge_request.merge_ref_head.diff_refs
+
+      self.start_commit_sha ||= diff_refs.start_sha
+      self.head_commit_sha  ||= diff_refs.head_sha
+      self.base_commit_sha  ||= diff_refs.base_sha
+    else
+      self.start_commit_sha ||= merge_request.target_branch_sha
+      self.head_commit_sha  ||= merge_request.source_branch_sha
+      self.base_commit_sha  ||= find_base_sha
+    end
   end
 
   # Override head_commit_sha to keep compatibility with merge request diff

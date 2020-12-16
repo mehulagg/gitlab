@@ -119,7 +119,7 @@ module MergeRequests
 
       merge_to_ref_success = merge_to_ref
 
-      update_diff_discussion_positions! if merge_to_ref_success
+      reload_merge_head_diff if merge_to_ref_success
 
       if merge_to_ref_success && can_git_merge?
         merge_request.mark_as_mergeable
@@ -128,7 +128,8 @@ module MergeRequests
       end
     end
 
-    def update_diff_discussion_positions!
+    def reload_merge_head_diff
+      MergeRequests::ReloadMergeHeadDiffService.new(merge_request).execute
       Discussions::CaptureDiffNotePositionsService.new(merge_request).execute
     end
 

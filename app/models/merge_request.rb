@@ -50,12 +50,15 @@ class MergeRequest < ApplicationRecord
       end
     end
 
-  has_many :merge_request_diffs
+  has_many :merge_request_diffs,
+    -> { where(merge_head: false) }
   has_many :merge_request_context_commits, inverse_of: :merge_request
   has_many :merge_request_context_commit_diff_files, through: :merge_request_context_commits, source: :diff_files
 
   has_one :merge_request_diff,
-    -> { order('merge_request_diffs.id DESC') }, inverse_of: :merge_request
+    -> { where(merge_head: false).order('merge_request_diffs.id DESC') }, inverse_of: :merge_request
+  has_one :merge_head_diff,
+    -> { where(merge_head: true) }, inverse_of: :merge_request, class_name: 'MergeRequestDiff'
   has_one :cleanup_schedule, inverse_of: :merge_request
 
   belongs_to :latest_merge_request_diff, class_name: 'MergeRequestDiff'
@@ -470,6 +473,7 @@ class MergeRequest < ApplicationRecord
         SELECT MAX(id)
         FROM merge_request_diffs
         WHERE merge_requests.id = merge_request_diffs.merge_request_id
+        AND merge_head IS FALSE
       )'.squish
 
     self.each_batch do |batch|
@@ -979,7 +983,7 @@ class MergeRequest < ApplicationRecord
   # rubocop: enable CodeReuse/ServiceClass
 
   def diffable_merge_ref?
-    open? && merge_ref_head.present? && (Feature.enabled?(:display_merge_conflicts_in_diff, project) || can_be_merged?)
+    open? && merge_head_diff.present? && (Feature.enabled?(:display_merge_conflicts_in_diff, project) || can_be_merged?)
   end
 
   # Returns boolean indicating the merge_status should be rechecked in order to

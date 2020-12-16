@@ -103,26 +103,21 @@ class Projects::MergeRequests::DiffsController < Projects::MergeRequests::Applic
     @merge_request_diff =
       if params[:diff_id].present?
         @merge_request.merge_request_diffs.viewable.find_by(id: params[:diff_id])
+      elsif render_merge_ref_head_diff?
+        @merge_request.merge_head_diff
       else
         @merge_request.merge_request_diff
       end
 
     return unless @merge_request_diff&.id
 
-    @comparable_diffs = @merge_request_diffs.select { |diff| diff.id < @merge_request_diff.id }
-
     if @start_sha = params[:start_sha].presence
-      @start_version = @comparable_diffs.find { |diff| diff.head_commit_sha == @start_sha }
+      @start_version = @merge_request_diffs.find { |diff| diff.id < @merge_request_diff.id && diff.head_commit_sha == @start_sha }
 
       unless @start_version
         @start_sha = @merge_request_diff.head_commit_sha
         @start_version = @merge_request_diff
       end
-    end
-
-    if render_merge_ref_head_diff?
-      return CompareService.new(@project, @merge_request.merge_ref_head.sha)
-        .execute(@project, @merge_request.target_branch)
     end
 
     if @start_sha
