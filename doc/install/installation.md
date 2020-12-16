@@ -102,16 +102,6 @@ apt-get upgrade -y
 apt-get install sudo -y
 ```
 
-During this installation, some files need to be edited manually. If you are familiar
-with vim, set it as default editor with the commands below. If you are not familiar
-with vim, skip this and keep using the default editor:
-
-```shell
-# Install vim and set as default editor
-sudo apt-get install -y vim
-sudo update-alternatives --set editor /usr/bin/vim.basic
-```
-
 ### Build dependencies
 
 Install the required packages (needed to compile Ruby and native extensions to Ruby gems):
@@ -842,7 +832,7 @@ sudo -u git -H bundle exec rake gitlab:check RAILS_ENV=production
 
 If all items are green, congratulations on successfully installing GitLab!
 
-TIP:  **Tip:**
+NOTE:
 Supply the `SANITIZE=true` environment variable to `gitlab:check` to omit project names from the output of the check command.
 
 ### Initial Login

@@ -21,6 +21,8 @@ module Security
       vulnerability_ids = create_all_vulnerabilities!
       mark_as_resolved_except(vulnerability_ids)
 
+      start_auto_fix
+
       success
     end
 
@@ -48,7 +50,6 @@ module Security
       end
 
       vulnerability_params = finding.to_hash.except(:compare_key, :identifiers, :location, :scanner, :scan, :links)
-      vulnerability_params[:uuid] = calculate_uuid_v5(finding)
       vulnerability_finding = create_or_find_vulnerability_finding(finding, vulnerability_params)
 
       update_vulnerability_scanner(finding)
@@ -90,23 +91,6 @@ module Security
       rescue ActiveRecord::RecordInvalid => e
         Gitlab::ErrorTracking.track_and_raise_exception(e, create_params: create_params&.dig(:raw_metadata))
       end
-    end
-
-    def calculate_uuid_v5(vulnerability_finding)
-      uuid_v5_name_components = {
-        report_type: vulnerability_finding.report_type,
-        primary_identifier_fingerprint: vulnerability_finding.primary_fingerprint,
-        location_fingerprint: vulnerability_finding.location.fingerprint,
-        project_id: project.id
-      }
-
-      if uuid_v5_name_components.values.any?(&:nil?)
-        Gitlab::AppLogger.warn(message: "One or more UUID name components are nil", components: uuid_v5_name_components)
-      end
-
-      name = uuid_v5_name_components.values.join('-')
-
-      Gitlab::Vulnerabilities::CalculateFindingUUID.call(name)
     end
 
     def update_vulnerability_scanner(finding)
@@ -218,6 +202,18 @@ module Security
 
     def put_warning_for(finding)
       Gitlab::AppLogger.warn(message: "Invalid vulnerability finding record found", finding: finding.to_hash)
+    end
+
+    def start_auto_fix
+      return unless auto_fix_enabled?
+
+      ::Security::AutoFixWorker.perform_async(pipeline.id)
+    end
+
+    def auto_fix_enabled?
+      return false unless project.security_setting.auto_fix_enabled?
+
+      project.security_setting.auto_fix_enabled_types.include?(report.type.to_sym)
     end
   end
 end

@@ -27,6 +27,11 @@ export default {
       type: Boolean,
       required: false,
     },
+    showUploadCsv: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   computed: {
     isOpenTab() {
@@ -80,6 +85,15 @@ export default {
       </li>
     </ul>
     <div v-if="isOpenTab && canCreateRequirement" class="nav-controls">
+      <gl-button
+        v-if="showUploadCsv"
+        category="secondary"
+        variant="default"
+        class="js-import-requirements qa-import-requirements-button"
+        :disabled="showCreateForm"
+        icon="import"
+        @click="$emit('click-import-requirements')"
+      />
       <gl-button
         category="primary"
         variant="success"

@@ -3,6 +3,7 @@ import { pick } from 'lodash';
 import boardListsQuery from 'ee_else_ce/boards/graphql/board_lists.query.graphql';
 import createGqClient, { fetchPolicies } from '~/lib/graphql';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
+import { convertObjectPropsToCamelCase, urlParamsToObject } from '~/lib/utils/common_utils';
 import { BoardType, ListType, inactiveId } from '~/boards/constants';
 import * as types from './mutation_types';
 import {
@@ -12,7 +13,6 @@ import {
   formatListsPageInfo,
   formatIssue,
 } from '../boards_util';
-import boardStore from '~/boards/stores/boards_store';
 import createFlash from '~/flash';
 import { __ } from '~/locale';
 import updateAssigneesMutation from '~/vue_shared/components/sidebar/queries/updateAssignees.mutation.graphql';
@@ -63,6 +63,18 @@ export default {
       'search',
     ]);
     commit(types.SET_FILTERS, filterParams);
+  },
+
+  performSearch({ dispatch }) {
+    dispatch(
+      'setFilters',
+      convertObjectPropsToCamelCase(urlParamsToObject(window.location.search)),
+    );
+
+    if (gon.features.graphqlBoardLists) {
+      dispatch('fetchLists');
+      dispatch('resetIssues');
+    }
   },
 
   fetchLists: ({ commit, state, dispatch }) => {
@@ -119,11 +131,7 @@ export default {
   },
 
   addList: ({ commit }, list) => {
-    // Temporarily using positioning logic from boardStore
-    commit(
-      types.RECEIVE_ADD_LIST_SUCCESS,
-      boardStore.updateListPosition({ ...list, doNotFetchIssues: true }),
-    );
+    commit(types.RECEIVE_ADD_LIST_SUCCESS, list);
   },
 
   fetchLabels: ({ state, commit }, searchTerm) => {

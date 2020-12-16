@@ -7,13 +7,15 @@ module Resolvers
     type Types::ExternalIssueType, null: true
 
     def resolve
+      return serialize_external_issue(object.external_issue, object.external_type) if object.external_issue.present?
+
       BatchLoader::GraphQL.for(object.external_issue_key).batch(key: object.external_type) do |external_issue_keys, loader, args|
         case args[:key]
         when 'jira'
           jira_issues(external_issue_keys).each do |external_issue|
             loader.call(
               external_issue.id,
-              ::Integrations::Jira::IssueSerializer.new.represent(external_issue, project: object.vulnerability.project)
+              serialize_external_issue(external_issue, args[:key])
             )
           end
         end
@@ -29,6 +31,12 @@ module Resolvers
       raise GraphQL::ExecutionError, result[:error] if result[:error].present?
 
       result[:issues]
+    end
+
+    def serialize_external_issue(external_issue, external_type)
+      case external_type
+      when 'jira' then ::Integrations::Jira::IssueSerializer.new.represent(external_issue, project: object.vulnerability.project)
+      end
     end
   end
 end

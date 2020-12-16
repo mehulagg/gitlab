@@ -40,7 +40,7 @@ class Groups::Analytics::CoverageReportsController < Groups::Analytics::Applicat
       current_user: current_user,
       group: @group,
       project_ids: params.permit(project_ids: [])[:project_ids],
-      ref_path: params.require(:ref_path),
+      ref_path: params[:ref_path],
       start_date: Date.parse(params.require(:start_date)),
       end_date: Date.parse(params.require(:end_date))
     }

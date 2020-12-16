@@ -44,6 +44,18 @@ RSpec.describe Board do
         stub_licensed_features(scoped_issue_board: true)
       end
 
+      it 'returns Milestone::None for started milestone id' do
+        board.milestone_id = Milestone::None.id
+
+        expect(board.milestone).to eq Milestone::None
+      end
+
+      it 'returns Milestone::Any for started milestone id' do
+        board.milestone_id = Milestone::Any.id
+
+        expect(board.milestone).to eq Milestone::Any
+      end
+
       it 'returns Milestone::Upcoming for upcoming milestone id' do
         board.milestone_id = Milestone::Upcoming.id
 
@@ -61,12 +73,6 @@ RSpec.describe Board do
         board.milestone_id = milestone.id
 
         expect(board.milestone).to eq milestone
-      end
-
-      it 'returns nil for invalid milestone id' do
-        board.milestone_id = -1
-
-        expect(board.milestone).to be_nil
       end
     end
 
@@ -95,22 +101,22 @@ RSpec.describe Board do
         stub_licensed_features(scoped_issue_board: true)
       end
 
-      it 'returns Iteration::None, when iteration_id is None.id' do
-        board.iteration_id = Iteration::None.id
+      it 'returns Iteration::Predefined::None, when iteration_id is None.id' do
+        board.iteration_id = Iteration::Predefined::None.id
 
-        expect(board.iteration).to eq Iteration::None
+        expect(board.iteration).to eq Iteration::Predefined::None
       end
 
-      it 'returns Iteration::Any, when iteration_id is Any.id' do
-        board.iteration_id = Iteration::Any.id
+      it 'returns Iteration::Predefined::Any, when iteration_id is Any.id' do
+        board.iteration_id = Iteration::Predefined::Any.id
 
-        expect(board.iteration).to eq Iteration::Any
+        expect(board.iteration).to eq Iteration::Predefined::Any
       end
 
-      it 'returns Iteration::Current, when iteration_id is Current.id' do
-        board.iteration_id = Iteration::Current.id
+      it 'returns ::Iteration::Predefined::Current, when iteration_id is Current.id' do
+        board.iteration_id = Iteration::Predefined::Current.id
 
-        expect(board.iteration).to eq Iteration::Current
+        expect(board.iteration).to eq Iteration::Predefined::Current
       end
 
       it 'returns iteration for valid iteration id' do

@@ -13,7 +13,7 @@ const notImplemented = () => {
 export const removeIssueFromList = ({ state, listId, issueId }) => {
   Vue.set(state.issuesByListId, listId, pull(state.issuesByListId[listId], issueId));
   const list = state.boardLists[listId];
-  Vue.set(state.boardLists, listId, { ...list, issuesSize: list.issuesSize - 1 });
+  Vue.set(state.boardLists, listId, { ...list, issuesCount: list.issuesCount - 1 });
 };
 
 export const addIssueToList = ({ state, listId, issueId, moveBeforeId, moveAfterId, atIndex }) => {
@@ -27,15 +27,16 @@ export const addIssueToList = ({ state, listId, issueId, moveBeforeId, moveAfter
   listIssues.splice(newIndex, 0, issueId);
   Vue.set(state.issuesByListId, listId, listIssues);
   const list = state.boardLists[listId];
-  Vue.set(state.boardLists, listId, { ...list, issuesSize: list.issuesSize + 1 });
+  Vue.set(state.boardLists, listId, { ...list, issuesCount: list.issuesCount + 1 });
 };
 
 export default {
   [mutationTypes.SET_INITIAL_BOARD_DATA](state, data) {
-    const { boardType, disabled, ...endpoints } = data;
+    const { boardType, disabled, boardConfig, ...endpoints } = data;
     state.endpoints = endpoints;
     state.boardType = boardType;
     state.disabled = disabled;
+    state.boardConfig = boardConfig;
   },
 
   [mutationTypes.RECEIVE_BOARD_LISTS_SUCCESS]: (state, lists) => {

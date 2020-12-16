@@ -13,12 +13,11 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Common do
 
     before do
       allow(parser).to receive(:create_location).and_return(location)
-      artifact.each_blob do |blob|
-        parser.parse!(blob, report)
-      end
+
+      artifact.each_blob { |blob| parser.parse!(blob, report) }
     end
 
-    context 'parsing finding.name' do
+    describe 'parsing finding.name' do
       let(:artifact) { build(:ee_ci_job_artifact, :common_security_report_with_blank_names) }
 
       context 'when message is provided' do
@@ -65,9 +64,7 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Common do
       end
     end
 
-    context 'parsing finding.details' do
-      let(:artifact) { build(:ee_ci_job_artifact, :common_security_report) }
-
+    describe 'parsing finding.details' do
       context 'when details are provided' do
         it 'sets details from the report' do
           vulnerability = report.findings.find { |x| x.compare_key == 'CVE-1020' }
@@ -85,7 +82,7 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Common do
       end
     end
 
-    context 'parsing remediations' do
+    describe 'parsing remediations' do
       let(:expected_remediation) { create(:ci_reports_security_remediation, diff: '') }
 
       it 'finds remediation with same cve' do
@@ -122,7 +119,7 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Common do
       end
     end
 
-    context 'parsing scanners' do
+    describe 'parsing scanners' do
       subject(:scanner) { report.findings.first.scanner }
 
       context 'when vendor is not missing in scanner' do
@@ -132,7 +129,7 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Common do
       end
     end
 
-    context 'parsing scan' do
+    describe 'parsing scan' do
       it 'returns scan object for each finding' do
         scans = report.findings.map(&:scan)
 
@@ -153,7 +150,7 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Common do
       end
     end
 
-    context 'parsing links' do
+    describe 'parsing links' do
       it 'returns links object for each finding', :aggregate_failures do
         links = report.findings.flat_map(&:links)
 
@@ -161,6 +158,19 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Common do
         expect(links.map(&:name)).to match_array([nil, 'CVE-1030'])
         expect(links.size).to eq(2)
         expect(links.first).to be_a(::Gitlab::Ci::Reports::Security::Link)
+      end
+    end
+
+    describe 'setting the uuid' do
+      let(:finding_uuids) { report.findings.map(&:uuid) }
+      let(:uuid_1_components) { "dependency_scanning-4ff8184cd18485b6e85d5b101e341b12eacd1b3b-33dc9f32c77dde16d39c69d3f78f27ca3114a7c5-#{pipeline.project_id}" }
+      let(:uuid_2_components) { "dependency_scanning-d55f9e66e79882ae63af9fd55cc822ab75307e31-33dc9f32c77dde16d39c69d3f78f27ca3114a7c5-#{pipeline.project_id}" }
+      let(:uuid_1) { Gitlab::UUID.v5(uuid_1_components) }
+      let(:uuid_2) { Gitlab::UUID.v5(uuid_2_components) }
+      let(:expected_uuids) { [uuid_1, uuid_2, nil] }
+
+      it 'sets the UUIDv5 for findings', :aggregate_failures do
+        expect(finding_uuids).to match_array(expected_uuids)
       end
     end
   end

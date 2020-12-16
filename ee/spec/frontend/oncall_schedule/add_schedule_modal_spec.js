@@ -2,6 +2,7 @@ import { shallowMount } from '@vue/test-utils';
 import { GlModal, GlAlert } from '@gitlab/ui';
 import waitForPromises from 'helpers/wait_for_promises';
 import AddScheduleModal from 'ee/oncall_schedules/components/add_schedule_modal.vue';
+import { addScheduleModalId } from 'ee/oncall_schedules/components/oncall_schedules_wrapper';
 import { getOncallSchedulesQueryResponse } from './mocks/apollo_mock';
 import mockTimezones from './mocks/mockTimezones.json';
 
@@ -22,7 +23,7 @@ describe('AddScheduleModal', () => {
         };
       },
       propsData: {
-        modalId: 'modalId',
+        modalId: addScheduleModalId,
         ...props,
       },
       provide: {

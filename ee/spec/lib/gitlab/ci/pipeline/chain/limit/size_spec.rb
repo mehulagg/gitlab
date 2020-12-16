@@ -13,7 +13,7 @@ RSpec.describe ::Gitlab::Ci::Pipeline::Chain::Limit::Size do
     double(:command,
       project: project,
       current_user: user,
-      stage_seeds: [double(:seed_1, size: 1), double(:seed_2, size: 1)])
+      pipeline_seed: double(:seed, size: 1))
   end
 
   let(:step) { described_class.new(pipeline, command) }
@@ -33,7 +33,7 @@ RSpec.describe ::Gitlab::Ci::Pipeline::Chain::Limit::Size do
           project: project,
           current_user: user,
           save_incompleted: true,
-          stage_seeds: [double(:seed_1, size: 1), double(:seed_2, size: 1)])
+          pipeline_seed: double(:seed, size: 2))
       end
 
       it 'drops the pipeline' do
@@ -83,7 +83,7 @@ RSpec.describe ::Gitlab::Ci::Pipeline::Chain::Limit::Size do
           project: project,
           current_user: user,
           save_incompleted: false,
-          stage_seeds: [double(:seed_1, size: 1), double(:seed_2, size: 1)])
+          pipeline_seed: double(:seed, size: 2))
       end
 
       it 'does not drop the pipeline' do

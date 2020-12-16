@@ -7,7 +7,7 @@ import { s__ } from '~/locale';
 import getOncallSchedulesQuery from '../graphql/queries/get_oncall_schedules.query.graphql';
 import { fetchPolicies } from '~/lib/graphql';
 
-const addScheduleModalId = 'addScheduleModal';
+export const addScheduleModalId = 'addScheduleModal';
 
 export const i18n = {
   title: s__('OnCallSchedules|On-call schedule'),

@@ -8,6 +8,7 @@ import defaultSortableConfig from '~/sortable/sortable_config';
 import { n__ } from '~/locale';
 import EpicLane from './epic_lane.vue';
 import IssuesLaneList from './issues_lane_list.vue';
+import { isListDraggable } from '~/boards/boards_util';
 
 export default {
   components: {
@@ -94,6 +95,9 @@ export default {
         }
       });
     },
+    isListDraggable(list) {
+      return isListDraggable(list);
+    },
   },
 };
 </script>
@@ -115,8 +119,8 @@ export default {
         v-for="list in lists"
         :key="list.id"
         :class="{
-          'is-collapsed': !list.isExpanded,
-          'is-draggable': !list.preset,
+          'is-collapsed': list.collapsed,
+          'is-draggable': isListDraggable(list),
         }"
         class="board gl-display-inline-block gl-px-3 gl-vertical-align-top gl-white-space-normal"
         :data-list-id="list.id"

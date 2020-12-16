@@ -21,6 +21,7 @@ RSpec.describe BillingPlansHelper do
         expect(helper.subscription_plan_data_attributes(group, plan))
           .to eq(namespace_id: group.id,
                  namespace_name: group.name,
+                 is_group: true,
                  add_seats_href: add_seats_href,
                  plan_upgrade_href: upgrade_href,
                  plan_renew_href: renew_href,
@@ -48,6 +49,7 @@ RSpec.describe BillingPlansHelper do
         expect(helper.subscription_plan_data_attributes(group, plan))
           .to eq(namespace_id: group.id,
                  namespace_name: group.name,
+                 is_group: true,
                  customer_portal_url: customer_portal_url,
                  billable_seats_href: billable_seats_href,
                  add_seats_href: add_seats_href,
@@ -55,18 +57,28 @@ RSpec.describe BillingPlansHelper do
                  plan_upgrade_href: nil)
       end
     end
+
+    context 'when namespace is passed in' do
+      it 'returns false for is_group' do
+        namespace = build(:namespace)
+
+        result = helper.subscription_plan_data_attributes(namespace, plan)
+
+        expect(result).to include(is_group: false)
+      end
+    end
   end
 
   describe '#use_new_purchase_flow?' do
     where type: ['Group', nil],
-          plan: Plan.all_plans,
-          trial_active: [true, false]
+      plan: Plan.all_plans,
+      trial_active: [true, false]
 
     with_them do
       let_it_be(:user) { create(:user) }
       let(:namespace) do
         create :namespace, type: type,
-               gitlab_subscription: create(:gitlab_subscription, hosted_plan: create("#{plan}_plan".to_sym))
+          gitlab_subscription: create(:gitlab_subscription, hosted_plan: create("#{plan}_plan".to_sym))
       end
 
       before do

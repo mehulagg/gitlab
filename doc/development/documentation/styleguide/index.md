@@ -526,21 +526,30 @@ You can use the following fake tokens as examples:
 ### Usage list
 <!-- vale off -->
 
-| Usage                         | Guidance                                                                                                                                                                                                                                                                                                                                  | [Vale](../testing.md#vale) Tests                                                                         |
-|-------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------|
-| currently                     | Do not use when talking about the product or its features. The documentation describes the product as it is today.                                                                                                                                                                                                                        | None                                                                                                     |
-| e.g., i.e., via               | Do not use Latin abbreviations.<br><br>- Instead of **e.g.**, use **for example**, **such as**, **for instance**, or **like**.<br>- Instead of **i.e.**, use **that is**.<br>- Instead of **via**, use **with**, **through**, or **by using**.                                                                                            | [`LatinTerms.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/LatinTerms.yml)   |
-| future tense                  | When possible, use present tense instead. For example, use `after you execute this command, GitLab displays the result` instead of `after you execute this command, GitLab will display the result`.                                                                                                                                      | [`FutureTense.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/FutureTense.yml) |
-| high availability, HA         | Do not use. Direct readers to the GitLab [reference architectures](../../../administration/reference_architectures/index.md) for information about configuring GitLab to have the performance needed for additional users over time.                                                                                                      | None                                                                                                     |
-| I, me                         | Do not use first-person singular. Use **you**, **we**, or **us** instead.                                                                                                                                                                                                                                                                 | [`FirstPerson.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/FirstPerson.yml) |
-| jargon                        | Do not use. Define the term or [link to a definition](#links-to-external-documentation).                                                                                                                                                                                                                                                  | None                                                                                                     |
-| may, might                    | **Might** means something has the probability of occurring. **May** gives permission to do something. Consider **can** instead of **may**.                                                                                                                                                                                                | None                                                                                                     |
-| please                        | Do not use. For details, see the [Microsoft style guide](https://docs.microsoft.com/en-us/style-guide/a-z-word-list-term-collections/p/please).                                                                                                                                                                                           | None                                                                                                     |
-| profanity                     | Do not use. Doing so may negatively affect other users and contributors, which is contrary to the GitLab value of [Diversity, Inclusion, and Belonging](https://about.gitlab.com/handbook/values/#diversity-inclusion).                                                                                                                   | None                                                                                                     |
-| scalability                   | Do not use when talking about increasing GitLab performance for additional users. The words scale or scaling are sometimes acceptable, but references to increasing GitLab performance for additional users should direct readers to the GitLab [reference architectures](../../../administration/reference_architectures/index.md) page. | None                                                                                                     |
-| simply, easily, handy, useful | Do not use. If the user doesn't find the process to be these things, we lose their trust.                                                                                                                                                                                                                                                 | None                                                                                                     |
-| slashes                       | Instead of **and/or** use **or** or another sensible construction. This rule applies to other slashes as well, like **follow/unfollow**. Exception like **CI/CD** are allowed.                                                                                                                                                            | None                                                                                                     |
-| that                          | Do not use. Example: `the file that you save` can be `the file you save`.                                                                                                                                                                                                                                                                 | None                                                                                                     |
+| Usage | Guidance |
+|-----------------------|-----|
+| admin, admin area     | Use **administration**, **administrator**, **administer**, or **Admin Area** instead. |.
+| and/or                | Use **or** instead, or another sensible construction. |
+| currently             | Do not use when talking about the product or its features. The documentation describes the product as it is today. |
+| easily                | Do not use. If the user doesn't find the process to be these things, we lose their trust. |
+| e.g.                  | Do not use Latin abbreviations. Use **for example**, **such as**, **for instance**, or **like** instead. ([Vale](../testing.md#vale) rule: [`LatinTerms.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/LatinTerms.yml)) |
+| future tense          | When possible, use present tense instead. For example, use `after you execute this command, GitLab displays the result` instead of `after you execute this command, GitLab will display the result`. ([Vale](../testing.md#vale) rule: [`FutureTense.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/FutureTense.yml)) |
+| handy                 | Do not use. If the user doesn't find the process to be these things, we lose their trust. |
+| high availability, HA | Do not use. Instead, direct readers to the GitLab [reference architectures](../../../administration/reference_architectures/index.md) for information about configuring GitLab for handling greater amounts of users. |
+| I                     | Do not use first-person singular. Use **you**, **we**, or **us** instead. ([Vale](../testing.md#vale) rule: [`FirstPerson.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/FirstPerson.yml)) |
+| i.e.                  | Do not use Latin abbreviations. Use **that is** instead. ([Vale](../testing.md#vale) rule: [`LatinTerms.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/LatinTerms.yml)) |
+| jargon                | Do not use. Define the term or [link to a definition](#links-to-external-documentation). |
+| may, might            | **Might** means something has the probability of occurring. **May** gives permission to do something. Consider **can** instead of **may**. |
+| me, myself, mine      | Do not use first-person singular. Use **you**, **we**, or **us** instead. ([Vale](../testing.md#vale) rule: [`FirstPerson.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/FirstPerson.yml)) |
+| please                | Do not use. For details, see the [Microsoft style guide](https://docs.microsoft.com/en-us/style-guide/a-z-word-list-term-collections/p/please). |
+| profanity             | Do not use. Doing so may negatively affect other users and contributors, which is contrary to the GitLab value of [Diversity, Inclusion, and Belonging](https://about.gitlab.com/handbook/values/#diversity-inclusion). |
+| scalability           | Do not use when talking about increasing GitLab performance for additional users. The words scale or scaling are sometimes acceptable, but references to increasing GitLab performance for additional users should direct readers to the GitLab [reference architectures](../../../administration/reference_architectures/index.md) page. |
+| simply                | Do not use. If the user doesn't find the process to be these things, we lose their trust. |
+| slashes               | Instead of **and/or**, use **or** or another sensible construction. This rule also applies to other slashes, like **follow/unfollow**. Some exceptions (like **CI/CD**) are allowed. |
+| that                  | Do not use. Example: `the file that you save` can be `the file you save`. |
+| useful                | Do not use. If the user doesn't find the process to be these things, we lose their trust. |
+| utilize               | Do not use. Use **use** instead. It's more succinct and easier for non-native English speakers to understand. |
+| via                   | Do not use Latin abbreviations. Use **with**, **through**, or **by using** instead. ([Vale](../testing.md#vale) rule: [`LatinTerms.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/LatinTerms.yml)) |
 
 <!-- vale on -->
 ### Contractions
@@ -646,6 +655,17 @@ To stop the command, press <kbd>Control</kbd>+<kbd>C</kbd>.
 When the docs are generated, the output is:
 
 To stop the command, press <kbd>Control</kbd>+<kbd>C</kbd>.
+
+### Spaces between words
+
+Use only standard spaces between words. The search engine for the documentation
+website doesn't split words separated with
+[non-breaking spaces](https://en.wikipedia.org/wiki/Non-breaking_space) when
+indexing, and fails to create expected individual search terms. Tests that search
+for certain words separated by regular spaces can't find words separated by
+non-breaking spaces.
+
+Tested in [`lint-doc.sh`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/scripts/lint-doc.sh).
 
 ## Lists
 
@@ -1428,14 +1448,14 @@ interface:
 | Section                  | Description                                                                                                                 |
 |:-------------------------|:----------------------------------------------------------------------------------------------------------------------------|
 | **{overview}** Overview  | View your GitLab Dashboard, and administer projects, users, groups, jobs, runners, and Gitaly servers.                      |
-| **{monitor}** Monitoring | View GitLab system information, and information on background jobs, logs, health checks, requests profiles, and audit logs. |
+| **{monitor}** Monitoring | View GitLab system information, and information on background jobs, logs, health checks, requests profiles, and audit events. |
 | **{messages}** Messages  | Send and manage broadcast messages for your users.                                                                          |
 ```
 
 | Section                  | Description                                                                                                                 |
 |:-------------------------|:----------------------------------------------------------------------------------------------------------------------------|
 | **{overview}** Overview  | View your GitLab Dashboard, and administer projects, users, groups, jobs, runners, and Gitaly servers.                      |
-| **{monitor}** Monitoring | View GitLab system information, and information on background jobs, logs, health checks, requests profiles, and audit logs. |
+| **{monitor}** Monitoring | View GitLab system information, and information on background jobs, logs, health checks, requests profiles, and audit events. |
 | **{messages}** Messages  | Send and manage broadcast messages for your users.                                                                          |
 
 Use an icon when you find yourself having to describe an interface element. For
@@ -1587,8 +1607,9 @@ elements:
 
 ## GitLab versions
 
-To help users be aware of recent product improvements or additions, we add
-GitLab version information to our documentation.
+GitLab product documentation pages (not including [Contributor and Development](../../README.md)
+pages in the `/development` directory) can include version information to help
+users be aware of recent improvements or additions.
 
 The GitLab Technical Writing team determines which versions of
 documentation to display on this site based on the GitLab
@@ -1834,7 +1855,8 @@ packages. Possible configuration settings include:
 - Other settings in `lib/support/`.
 
 Configuration procedures can require users to edit configuration files, reconfigure
-GitLab, or restart GitLab. Use these styles to document these steps:
+GitLab, or restart GitLab. Use these styles to document these steps, replacing
+`PATH/TO` with the appropriate path:
 
 <!-- vale off -->
 
@@ -1847,7 +1869,7 @@ GitLab, or restart GitLab. Use these styles to document these steps:
    external_url "https://gitlab.example.com"
    ```
 
-1. Save the file and [reconfigure](path/to/administration/restart_gitlab.md#omnibus-gitlab-reconfigure)
+1. Save the file and [reconfigure](PATH/TO/administration/restart_gitlab.md#omnibus-gitlab-reconfigure)
    GitLab for the changes to take effect.
 
 ---
@@ -1861,7 +1883,7 @@ GitLab, or restart GitLab. Use these styles to document these steps:
      host: "gitlab.example.com"
    ```
 
-1. Save the file and [restart](path/to/administration/restart_gitlab.md#installations-from-source)
+1. Save the file and [restart](PATH/TO/administration/restart_gitlab.md#installations-from-source)
    GitLab for the changes to take effect.
 ````
 

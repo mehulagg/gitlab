@@ -4,8 +4,9 @@ require 'spec_helper'
 
 RSpec.describe Boards::Lists::CreateService do
   describe '#execute' do
-    let_it_be(:project) { create(:project) }
-    let_it_be(:board) { create(:board, project: project) }
+    let_it_be(:group) { create(:group) }
+    let_it_be(:project) { create(:project, group: group) }
+    let_it_be(:board, refind: true) { create(:board, project: project) }
     let_it_be(:user) { create(:user) }
 
     context 'when assignee_id param is sent' do
@@ -31,7 +32,6 @@ RSpec.describe Boards::Lists::CreateService do
     end
 
     context 'when milestone_id param is sent' do
-      let_it_be(:user) { create(:user) }
       let_it_be(:milestone) { create(:milestone, project: project) }
 
       before_all do
@@ -49,6 +49,56 @@ RSpec.describe Boards::Lists::CreateService do
 
         expect(response.success?).to eq(true)
         expect(response.payload[:list].list_type).to eq('milestone')
+      end
+    end
+
+    context 'when iteration_id param is sent' do
+      let_it_be(:iteration) { create(:iteration, group: group) }
+
+      before_all do
+        group.add_developer(user)
+      end
+
+      subject(:service) { described_class.new(project, user, 'iteration_id' => iteration.id) }
+
+      before do
+        stub_licensed_features(iterations: true)
+      end
+
+      it 'creates an iteration list when param is valid' do
+        response = service.execute(board)
+
+        expect(response.success?).to eq(true)
+        expect(response.payload[:list].list_type).to eq('iteration')
+      end
+
+      context 'when iteration is from another group' do
+        let_it_be(:iteration) { create(:iteration) }
+
+        it 'returns an error' do
+          response = service.execute(board)
+
+          expect(response.success?).to eq(false)
+          expect(response.errors).to include('Iteration not found')
+        end
+      end
+
+      it 'returns an error when feature flag is disabled' do
+        stub_feature_flags(iteration_board_lists: false)
+
+        response = service.execute(board)
+
+        expect(response.success?).to eq(false)
+        expect(response.errors).to include('iteration_board_lists feature flag is disabled')
+      end
+
+      it 'returns an error when license is unavailable' do
+        stub_licensed_features(iterations: false)
+
+        response = service.execute(board)
+
+        expect(response.success?).to eq(false)
+        expect(response.errors).to include('Iteration lists not available with your current license')
       end
     end
 
@@ -90,7 +140,7 @@ RSpec.describe Boards::Lists::CreateService do
             it 'contains the expected max limits' do
               service = described_class.new(project, user, params)
 
-              attrs = service.create_list_attributes(nil, nil, nil)
+              attrs = service.send(:create_list_attributes, nil, nil, nil)
 
               if wip_limits_enabled
                 expect(attrs).to include(max_issue_count: expected_max_issue_count,

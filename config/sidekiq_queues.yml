@@ -198,6 +198,8 @@
   - 1
 - - namespaceless_project_destroy
   - 1
+- - namespaces_onboarding_user_added
+  - 1
 - - new_epic
   - 2
 - - new_issue
@@ -303,6 +305,8 @@
 - - requirements_management_import_requirements_csv
   - 1
 - - requirements_management_process_requirements_reports
+  - 1
+- - security_auto_fix
   - 1
 - - security_scans
   - 2

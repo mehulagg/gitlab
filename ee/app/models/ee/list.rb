@@ -81,6 +81,10 @@ module EE
         if options.key?(:milestone)
           json[:milestone] = MilestoneSerializer.new.represent(milestone).as_json
         end
+
+        if options.key?(:iteration)
+          json[:iteration] = IterationSerializer.new.represent(iteration).as_json
+        end
       end
     end
 

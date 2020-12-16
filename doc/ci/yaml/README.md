@@ -989,6 +989,7 @@ The job attributes you can use with `rules` are:
 - [`when`](#when): If not defined, defaults to `when: on_success`.
   - If used as `when: delayed`, `start_in` is also required.
 - [`allow_failure`](#allow_failure): If not defined, defaults to `allow_failure: false`.
+- [`variables`](#rulesvariables): If not defined, uses the [variables defined elsewhere](#variables).
 
 If a rule evaluates to true, and `when` has any value except `never`, the job is included in the pipeline.
 
@@ -1409,6 +1410,56 @@ job:
 ```
 
 In this example, if the first rule matches, then the job has `when: manual` and `allow_failure: true`.
+
+#### `rules:variables`
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/209864) in GitLab 13.7.
+> - It's [deployed behind a feature flag](../../user/feature_flags.md), disabled by default.
+> - It's disabled on GitLab.com.
+> - It's not recommended for production use.
+> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-rulesvariables). **(CORE ONLY)**
+
+WARNING:
+This feature might not be available to you. Check the **version history** note above for details.
+
+You can use [`variables`](#variables) in `rules:` to define variables for specific conditions.
+
+For example:
+
+```yaml
+job:
+  variables:
+    DEPLOY_VARIABLE: "default-deploy"
+  rules:
+    - if: $CI_COMMIT_REF_NAME =~ /master/
+      variables:                              # Override DEPLOY_VARIABLE defined
+        DEPLOY_VARIABLE: "deploy-production"  # at the job level.
+    - if: $CI_COMMIT_REF_NAME =~ /feature/
+      variables:
+        IS_A_FEATURE: "true"                  # Define a new variable.
+  script:
+    - echo "Run script with $DEPLOY_VARIABLE as an argument"
+    - echo "Run another script if $IS_A_FEATURE exists"
+```
+
+##### Enable or disable rules:variables **(CORE ONLY)**
+
+rules:variables is under development and not ready for production use. It is
+deployed behind a feature flag that is **disabled by default**.
+[GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
+can enable it.
+
+To enable it:
+
+```ruby
+Feature.enable(:ci_rules_variables)
+```
+
+To disable it:
+
+```ruby
+Feature.disable(:ci_rules_variables)
+```
 
 #### Complex rule clauses
 
@@ -2088,11 +2139,58 @@ build_job:
   needs:
     - project: $CI_PROJECT_PATH
       job: $DEPENDENCY_JOB_NAME
-      ref: $CI_COMMIT_BRANCH
+      ref: $ARTIFACTS_DOWNLOAD_REF
       artifacts: true
 ```
 
 Downloading artifacts from jobs that are run in [`parallel:`](#parallel) is not supported.
+
+To download artifacts between [parent-child pipelines](../parent_child_pipelines.md) use [`needs:pipeline`](#artifact-downloads-to-child-pipelines).
+Downloading artifacts from the same ref as the currently running pipeline is not
+recommended because artifacts could be overridden by concurrent pipelines running
+on the same ref.
+
+##### Artifact downloads to child pipelines
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/255983) in GitLab v13.7.
+
+A [child pipeline](../parent_child_pipelines.md) can download artifacts from a job in
+its parent pipeline or another child pipeline in the same parent-child pipeline hierarchy.
+
+For example, with the following parent pipeline that has a job that creates some artifacts:
+
+```yaml
+create-artifact:
+  stage: build
+  script: echo 'sample artifact' > artifact.txt
+  artifacts:
+    paths: [artifact.txt]
+
+child-pipeline:
+  stage: test
+  trigger:
+    include: child.yml
+    strategy: depend
+  variables:
+    PARENT_PIPELINE_ID: $CI_PIPELINE_ID
+```
+
+A job in the child pipeline can download artifacts from the `create-artifact` job in
+the parent pipeline:
+
+```yaml
+use-artifact:
+  script: cat artifact.txt
+  needs:
+    - pipeline: $PARENT_PIPELINE_ID
+      job: create-artifact
+```
+
+The `pipeline` attribute accepts a pipeline ID and it must be a pipeline present
+in the same parent-child pipeline hierarchy of the given pipeline.
+
+The `pipeline` attribute does not accept the current pipeline ID (`$CI_PIPELINE_ID`).
+To download artifacts from a job in the current pipeline, use the basic form of [`needs`](#artifact-downloads-with-needs).
 
 ### `tags`
 
@@ -3936,7 +4034,7 @@ You can use [Generic packages](../../user/packages/generic_packages/) to host yo
 For a complete example, see the [Release assets as Generic packages](https://gitlab.com/gitlab-org/release-cli/-/tree/master/docs/examples/release-assets-as-generic-package/)
 project.
 
-#### `releaser-cli` command line
+#### `release-cli` command line
 
 The entries under the `release` node are transformed into a `bash` command line and sent
 to the Docker container, which contains the [release-cli](https://gitlab.com/gitlab-org/release-cli).

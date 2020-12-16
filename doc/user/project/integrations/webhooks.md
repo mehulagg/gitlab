@@ -409,7 +409,8 @@ X-Gitlab-Event: Issue Hook
 }
 ```
 
-NOTE: `assignee` and `assignee_id` keys are deprecated and now show the first assignee only.
+NOTE:
+`assignee` and `assignee_id` keys are deprecated and now show the first assignee only.
 
 ### Comment events
 
@@ -734,7 +735,8 @@ X-Gitlab-Event: Note Hook
 }
 ```
 
-NOTE: `assignee_id` field is deprecated and now shows the first assignee only.
+NOTE:
+`assignee_id` field is deprecated and now shows the first assignee only.
 
 #### Comment on code snippet
 
@@ -1360,6 +1362,38 @@ X-Gitlab-Event: Deployment Hook
 
 Note that `deployable_id` is the ID of the CI job.
 
+### Member events
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/260347) in GitLab 13.7.
+
+Triggered when a user is added as a group member.
+
+**Request Header**:
+
+```plaintext
+X-Gitlab-Event: Member Hook
+```
+
+**Request Body**:
+
+```json
+{
+  "created_at": "2020-12-11T04:57:22Z",
+  "updated_at": "2020-12-11T04:57:22Z",
+  "group_name": "webhook-test",
+  "group_path": "webhook-test",
+  "group_id": 100,
+  "user_username": "test_user",
+  "user_name": "Test User",
+  "user_email": "testuser@webhooktest.com",
+  "user_id": 64,
+  "group_access": "Guest",
+  "group_plan": null,
+  "expires_at": "2020-12-14T00:00:00Z",
+  "event_name": "user_add_to_group"
+}
+```
+
 ### Feature Flag events
 
 Triggered when a feature flag is turned on or off.
@@ -1571,7 +1605,7 @@ Missing intermediate certificates are a common point of verification failure.
 
 ## Example webhook receiver
 
-If you want to see GitLab's webhooks in action for testing purposes you can use
+If you want to see GitLab webhooks in action for testing purposes you can use
 a simple echo script running in a console session. For the following script to
 work you need to have Ruby installed.
 

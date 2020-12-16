@@ -276,6 +276,12 @@ GitlabSecurity/PublicSend:
 Gitlab/DuplicateSpecLocation:
   Enabled: true
 
+Gitlab/PolicyRuleBoolean:
+  Enabled: true
+  Include:
+    - 'app/policies/**/*'
+    - 'ee/app/policies/**/*'
+
 Cop/InjectEnterpriseEditionModule:
   Enabled: true
   Exclude:
@@ -362,6 +368,8 @@ Cop/SidekiqOptionsQueue:
 
 Graphql/ResolverType:
   Enabled: true
+  Exclude:
+    - 'app/graphql/resolvers/base_resolver.rb'
   Include:
     - 'app/graphql/resolvers/**/*'
     - 'ee/app/graphql/resolvers/**/*'
@@ -427,12 +435,10 @@ Scalability/FileUploads:
 
 Graphql/Descriptions:
   Enabled: true
+  AutoCorrect: true
   Include:
     - 'app/graphql/**/*'
     - 'ee/app/graphql/**/*'
-
-RSpec/AnyInstanceOf:
-  Enabled: false
 
 # Cops for upgrade to gitlab-styles 3.1.0
 RSpec/ImplicitSubject:

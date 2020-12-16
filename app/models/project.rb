@@ -19,6 +19,7 @@ class Project < ApplicationRecord
   include Presentable
   include HasRepository
   include HasWiki
+  include CanMoveRepositoryStorage
   include Routable
   include GroupDescendant
   include Gitlab::SQL::Pattern
@@ -341,7 +342,7 @@ class Project < ApplicationRecord
 
   has_many :daily_build_group_report_results, class_name: 'Ci::DailyBuildGroupReportResult'
 
-  has_many :repository_storage_moves, class_name: 'ProjectRepositoryStorageMove'
+  has_many :repository_storage_moves, class_name: 'ProjectRepositoryStorageMove', inverse_of: :container
 
   has_many :webide_pipelines, -> { webide_source }, class_name: 'Ci::Pipeline', inverse_of: :project
   has_many :reviews, inverse_of: :project
@@ -2112,39 +2113,6 @@ class Project < ApplicationRecord
     (auto_devops || build_auto_devops)&.predefined_variables
   end
 
-  RepositoryReadOnlyError = Class.new(StandardError)
-
-  # Tries to set repository as read_only, checking for existing Git transfers in
-  # progress beforehand. Setting a repository read-only will fail if it is
-  # already in that state.
-  #
-  # @return nil. Failures will raise an exception
-  def set_repository_read_only!(skip_git_transfer_check: false)
-    with_lock do
-      raise RepositoryReadOnlyError, _('Git transfer in progress') if
-        !skip_git_transfer_check && git_transfer_in_progress?
-
-      raise RepositoryReadOnlyError, _('Repository already read-only') if
-        self.class.where(id: id).pick(:repository_read_only)
-
-      raise ActiveRecord::RecordNotSaved, _('Database update failed') unless
-        update_column(:repository_read_only, true)
-
-      nil
-    end
-  end
-
-  # Set repository as writable again. Unlike setting it read-only, this will
-  # succeed if the repository is already writable.
-  def set_repository_writable!
-    with_lock do
-      raise ActiveRecord::RecordNotSaved, _('Database update failed') unless
-        update_column(:repository_read_only, false)
-
-      nil
-    end
-  end
-
   def pushes_since_gc
     Gitlab::Redis::SharedState.with { |redis| redis.get(pushes_since_gc_redis_shared_state_key).to_i }
   end
@@ -2294,6 +2262,7 @@ class Project < ApplicationRecord
     end
   end
 
+  override :git_transfer_in_progress?
   def git_transfer_in_progress?
     GL_REPOSITORY_TYPES.any? do |type|
       reference_counter(type: type).value > 0
@@ -2304,10 +2273,6 @@ class Project < ApplicationRecord
     super
 
     @storage = nil if storage_version_changed?
-  end
-
-  def reference_counter(type: Gitlab::GlRepository::PROJECT)
-    Gitlab::ReferenceCounter.new(type.identifier_for_container(self))
   end
 
   def badges
@@ -2530,7 +2495,7 @@ class Project < ApplicationRecord
   end
 
   def service_desk_custom_address_enabled?
-    ::Gitlab::ServiceDeskEmail.enabled? && ::Feature.enabled?(:service_desk_custom_address, self)
+    ::Gitlab::ServiceDeskEmail.enabled? && ::Feature.enabled?(:service_desk_custom_address, self, default_enabled: true)
   end
 
   def root_namespace

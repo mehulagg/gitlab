@@ -70,6 +70,7 @@ describe('MergeRequestStore', () => {
 
   describe('setPaths', () => {
     it.each([
+      'discover_project_security_path',
       'container_scanning_comparison_path',
       'dependency_scanning_comparison_path',
       'sast_comparison_path',

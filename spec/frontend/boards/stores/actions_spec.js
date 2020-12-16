@@ -1,6 +1,5 @@
 import testAction from 'helpers/vuex_action_helper';
 import {
-  mockListsWithModel,
   mockLists,
   mockListsById,
   mockIssue,
@@ -31,6 +30,10 @@ const expectNotImplemented = action => {
 // We need this helper to make sure projectPath is including
 // subgroups when the movIssue action is called.
 const getProjectPath = path => path.split('#')[0];
+
+beforeEach(() => {
+  window.gon = { features: {} };
+});
 
 describe('setInitialBoardData', () => {
   it('sets data object', () => {
@@ -63,6 +66,24 @@ describe('setFilters', () => {
       state,
       [{ type: types.SET_FILTERS, payload: filters }],
       [],
+      done,
+    );
+  });
+});
+
+describe('performSearch', () => {
+  it('should dispatch setFilters action', done => {
+    testAction(actions.performSearch, {}, {}, [], [{ type: 'setFilters', payload: {} }], done);
+  });
+
+  it('should dispatch setFilters, fetchLists and resetIssues action when graphqlBoardLists FF is on', done => {
+    window.gon = { features: { graphqlBoardLists: true } };
+    testAction(
+      actions.performSearch,
+      {},
+      {},
+      [],
+      [{ type: 'setFilters', payload: {} }, { type: 'fetchLists' }, { type: 'resetIssues' }],
       done,
     );
   });
@@ -229,8 +250,8 @@ describe('createList', () => {
 describe('moveList', () => {
   it('should commit MOVE_LIST mutation and dispatch updateList action', done => {
     const initialBoardListsState = {
-      'gid://gitlab/List/1': mockListsWithModel[0],
-      'gid://gitlab/List/2': mockListsWithModel[1],
+      'gid://gitlab/List/1': mockLists[0],
+      'gid://gitlab/List/2': mockLists[1],
     };
 
     const state = {
@@ -252,7 +273,7 @@ describe('moveList', () => {
       [
         {
           type: types.MOVE_LIST,
-          payload: { movedList: mockListsWithModel[0], listAtNewIndex: mockListsWithModel[1] },
+          payload: { movedList: mockLists[0], listAtNewIndex: mockLists[1] },
         },
       ],
       [
@@ -271,8 +292,8 @@ describe('moveList', () => {
 
   it('should not commit MOVE_LIST or dispatch updateList if listId and replacedListId are the same', () => {
     const initialBoardListsState = {
-      'gid://gitlab/List/1': mockListsWithModel[0],
-      'gid://gitlab/List/2': mockListsWithModel[1],
+      'gid://gitlab/List/1': mockLists[0],
+      'gid://gitlab/List/2': mockLists[1],
     };
 
     const state = {
@@ -512,7 +533,7 @@ describe('moveIssue', () => {
     endpoints: { fullPath: 'gitlab-org', boardId: '1' },
     boardType: 'group',
     disabled: false,
-    boardLists: mockListsWithModel,
+    boardLists: mockLists,
     issuesByListId: listIssues,
     issues,
   };

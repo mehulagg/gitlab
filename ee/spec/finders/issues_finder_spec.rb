@@ -154,7 +154,7 @@ RSpec.describe IssuesFinder do
 
         context 'filter issues by current iteration' do
           let(:current_iteration) { nil }
-          let(:params) { { group_id: group, iteration_id: ::Iteration::Current.title } }
+          let(:params) { { group_id: group, iteration_id: ::Iteration::Predefined::Current.title } }
           let!(:current_iteration_issue) { create(:issue, project: project1, iteration: current_iteration) }
 
           context 'when no current iteration is found' do
@@ -171,7 +171,7 @@ RSpec.describe IssuesFinder do
             end
 
             context 'filter by negated current iteration' do
-              let(:params) { { group_id: group, not: { iteration_id: ::Iteration::Current.title } } }
+              let(:params) { { group_id: group, not: { iteration_id: ::Iteration::Predefined::Current.title } } }
 
               it 'returns filtered issues' do
                 expect(issues).to contain_exactly(issue1, iteration_1_issue, iteration_2_issue)

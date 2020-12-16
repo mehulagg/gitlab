@@ -1,24 +1,39 @@
 <script>
-import { GlAlert, GlLoadingIcon, GlTable, GlLink, GlSprintf, GlTooltipDirective } from '@gitlab/ui';
+import {
+  GlAlert,
+  GlIntersectionObserver,
+  GlLoadingIcon,
+  GlTable,
+  GlLink,
+  GlSkeletonLoading,
+  GlSprintf,
+  GlTooltipDirective,
+} from '@gitlab/ui';
+import produce from 'immer';
 import TimeAgo from '~/vue_shared/components/time_ago_tooltip.vue';
 import { convertToSnakeCase } from '~/lib/utils/text_utility';
 // TODO once backend is settled, update by either abstracting this out to app/assets/javascripts/graphql_shared or create new, modified query in #287757
 import getAlerts from '~/alert_management/graphql/queries/get_alerts.query.graphql';
-import { FIELDS, MESSAGES, STATUSES } from './constants';
+import { FIELDS, MESSAGES, PAGE_SIZE, STATUSES } from './constants';
+import AlertStatus from './alert_status.vue';
 
 export default {
+  PAGE_SIZE,
   i18n: {
     FIELDS,
     MESSAGES,
     STATUSES,
   },
   components: {
+    AlertStatus,
     GlAlert,
+    GlIntersectionObserver,
+    GlLink,
     GlLoadingIcon,
+    GlSkeletonLoading,
+    GlSprintf,
     GlTable,
     TimeAgo,
-    GlLink,
-    GlSprintf,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -29,14 +44,15 @@ export default {
       query: getAlerts,
       variables() {
         return {
+          firstPageSize: this.$options.PAGE_SIZE,
           projectPath: this.projectPath,
           sort: this.sort,
         };
       },
-      update: ({ project }) => ({
-        list: project?.alertManagementAlerts.nodes || [],
-        pageInfo: project?.alertManagementAlerts.pageInfo || {},
-      }),
+      update: ({ project }) => project?.alertManagementAlerts.nodes || [],
+      result({ data }) {
+        this.pageInfo = data?.project?.alertManagementAlerts?.pageInfo;
+      },
       error() {
         this.errored = true;
       },
@@ -44,9 +60,11 @@ export default {
   },
   data() {
     return {
-      alerts: {},
+      alerts: [],
       errored: false,
+      errorMsg: '',
       isErrorAlertDismissed: false,
+      pageInfo: {},
       sort: 'STARTED_AT_DESC',
       sortBy: 'startedAt',
       sortDesc: true,
@@ -55,25 +73,53 @@ export default {
   },
   computed: {
     isEmpty() {
-      return !this.alerts?.list?.length;
+      return !this.alerts.length;
     },
-    loading() {
+    isLoadingAlerts() {
       return this.$apollo.queries.alerts.loading;
     },
+    isLoadingFirstAlerts() {
+      return this.isLoadingAlerts && this.isEmpty;
+    },
     showNoAlertsMsg() {
-      return this.isEmpty && !this.loading && !this.errored && !this.isErrorAlertDismissed;
+      return this.isEmpty && !this.isLoadingAlerts && !this.errored && !this.isErrorAlertDismissed;
     },
   },
   methods: {
     errorAlertDismissed() {
       this.errored = false;
+      this.errorMsg = '';
       this.isErrorAlertDismissed = true;
+    },
+    fetchNextPage() {
+      if (this.pageInfo.hasNextPage) {
+        this.$apollo.queries.alerts.fetchMore({
+          variables: { nextPageCursor: this.pageInfo.endCursor },
+          updateQuery: (previousResult, { fetchMoreResult }) => {
+            const results = produce(fetchMoreResult, draftData => {
+              // eslint-disable-next-line no-param-reassign
+              draftData.project.alertManagementAlerts.nodes = [
+                ...previousResult.project.alertManagementAlerts.nodes,
+                ...draftData.project.alertManagementAlerts.nodes,
+              ];
+            });
+            return results;
+          },
+        });
+      }
     },
     fetchSortedData({ sortBy, sortDesc }) {
       const sortingDirection = sortDesc ? 'DESC' : 'ASC';
       const sortingColumn = convertToSnakeCase(sortBy).toUpperCase();
 
       this.sort = `${sortingColumn}_${sortingDirection}`;
+    },
+    handleAlertError(msg) {
+      this.errored = true;
+      this.errorMsg = msg;
+    },
+    handleStatusUpdate() {
+      this.$apollo.queries.alerts.refetch();
     },
   },
 };
@@ -96,22 +142,23 @@ export default {
       data-testid="threat-alerts-error"
       @dismiss="errorAlertDismissed"
     >
-      {{ $options.i18n.MESSAGES.ERROR }}
+      {{ errorMsg || $options.i18n.MESSAGES.ERROR }}
     </gl-alert>
 
     <gl-table
       class="alert-management-table"
-      :items="alerts ? alerts.list : []"
+      :busy="isLoadingFirstAlerts"
+      :items="alerts"
       :fields="$options.i18n.FIELDS"
-      :show-empty="true"
-      :busy="loading"
       stacked="md"
       :no-local-sorting="true"
       :sort-direction="sortDirection"
       :sort-desc.sync="sortDesc"
       :sort-by.sync="sortBy"
+      thead-class="gl-border-b-solid gl-border-b-1 gl-border-b-gray-100"
       sort-icon-left
       responsive
+      show-empty
       @sort-changed="fetchSortedData"
     >
       <template #cell(startedAt)="{ item }">
@@ -133,9 +180,22 @@ export default {
       </template>
 
       <template #cell(status)="{ item }">
-        <div data-testid="threat-alerts-status">
-          {{ $options.i18n.STATUSES[item.status] }}
-        </div>
+        <alert-status
+          :alert="item"
+          :project-path="projectPath"
+          @alert-error="handleAlertError"
+          @alert-update="handleStatusUpdate"
+        />
+      </template>
+
+      <template #table-busy>
+        <gl-skeleton-loading
+          v-for="n in $options.PAGE_SIZE"
+          :key="n"
+          class="gl-m-3 js-skeleton-loader"
+          :lines="1"
+          data-testid="threat-alerts-busy-state"
+        />
       </template>
 
       <template #empty>
@@ -143,15 +203,15 @@ export default {
           {{ $options.i18n.MESSAGES.NO_ALERTS }}
         </div>
       </template>
-
-      <template #table-busy>
-        <gl-loading-icon
-          size="lg"
-          color="dark"
-          class="gl-mt-3"
-          data-testid="threat-alerts-busy-state"
-        />
-      </template>
     </gl-table>
+
+    <gl-intersection-observer
+      v-if="pageInfo.hasNextPage"
+      class="text-center"
+      @appear="fetchNextPage"
+    >
+      <gl-loading-icon v-if="isLoadingAlerts" size="md" />
+      <span v-else>&nbsp;</span>
+    </gl-intersection-observer>
   </div>
 </template>

@@ -117,12 +117,6 @@ export default {
         });
       }
     },
-    showIssueCount() {
-      this.issuesSelected = true;
-    },
-    showIssueWeight() {
-      this.issuesSelected = false;
-    },
   },
 };
 </script>

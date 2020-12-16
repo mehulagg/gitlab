@@ -58,6 +58,7 @@ export default () => {
         all,
         canCreateRequirement,
         requirementsWebUrl,
+        requirementsImportCsvPath: importCsvPath,
       } = el.dataset;
       const stateFilterBy = filterBy ? FilterState[filterBy] : FilterState.opened;
 
@@ -82,6 +83,7 @@ export default () => {
         projectPath,
         canCreateRequirement,
         requirementsWebUrl,
+        importCsvPath,
       };
     },
     render(createElement) {
@@ -99,6 +101,7 @@ export default () => {
           emptyStatePath: this.emptyStatePath,
           canCreateRequirement: parseBoolean(this.canCreateRequirement),
           requirementsWebUrl: this.requirementsWebUrl,
+          importCsvPath: this.importCsvPath,
         },
       });
     },

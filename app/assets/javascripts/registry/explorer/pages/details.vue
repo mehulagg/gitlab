@@ -1,5 +1,4 @@
 <script>
-import { mapState } from 'vuex';
 import { GlKeysetPagination, GlResizeObserverDirective } from '@gitlab/ui';
 import { GlBreakpointInstance } from '@gitlab/ui/dist/utils';
 import createFlash from '~/flash';
@@ -13,8 +12,8 @@ import TagsList from '../components/details_page/tags_list.vue';
 import TagsLoader from '../components/details_page/tags_loader.vue';
 import EmptyTagsState from '../components/details_page/empty_tags_state.vue';
 
-import getContainerRepositoryDetailsQuery from '../graphql/queries/get_container_repository_details.graphql';
-import deleteContainerRepositoryTagsMutation from '../graphql/mutations/delete_container_repository_tags.graphql';
+import getContainerRepositoryDetailsQuery from '../graphql/queries/get_container_repository_details.query.graphql';
+import deleteContainerRepositoryTagsMutation from '../graphql/mutations/delete_container_repository_tags.mutation.graphql';
 
 import {
   ALERT_SUCCESS_TAG,
@@ -36,7 +35,7 @@ export default {
     TagsLoader,
     EmptyTagsState,
   },
-  inject: ['breadCrumbState'],
+  inject: ['breadCrumbState', 'config'],
   directives: {
     GlResizeObserver: GlResizeObserverDirective,
   },
@@ -71,7 +70,6 @@ export default {
     };
   },
   computed: {
-    ...mapState(['config']),
     queryVariables() {
       return {
         id: joinPaths(this.config.gidPrefix, `${this.$route.params.id}`),
@@ -185,7 +183,7 @@ export default {
       @dismiss="dismissPartialCleanupWarning = true"
     />
 
-    <details-header :image-name="image.name" />
+    <details-header :image="image" />
 
     <tags-loader v-if="isLoading" />
     <template v-else>

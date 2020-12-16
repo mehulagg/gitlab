@@ -20,11 +20,14 @@ import {
 } from '@gitlab/ui';
 import deployBoardSvg from 'ee_empty_states/icons/_deploy_board.svg';
 import { n__ } from '~/locale';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { STATUS_MAP, CANARY_STATUS } from '../constants';
+import CanaryIngress from './canary_ingress.vue';
 
 export default {
   components: {
     instanceComponent: () => import('ee_component/vue_shared/components/deployment_instance.vue'),
+    CanaryIngress,
     GlIcon,
     GlLoadingIcon,
     GlLink,
@@ -34,6 +37,7 @@ export default {
     GlTooltip: GlTooltipDirective,
     SafeHtml,
   },
+  mixins: [glFeatureFlagsMixin()],
   props: {
     deployBoardData: {
       type: Object,
@@ -64,6 +68,11 @@ export default {
     },
     canRenderEmptyState() {
       return this.isEmpty;
+    },
+    canRenderCanaryWeight() {
+      return (
+        this.glFeatures.canaryIngressWeightControl && !isEmpty(this.deployBoardData.canary_ingress)
+      );
     },
     instanceCount() {
       const { instances } = this.deployBoardData;
@@ -99,17 +108,22 @@ export default {
       };
     },
   },
+  methods: {
+    changeCanaryWeight(weight) {
+      this.$emit('changeCanaryWeight', weight);
+    },
+  },
 };
 </script>
 <template>
   <div class="js-deploy-board deploy-board">
     <gl-loading-icon v-if="isLoading" class="loading-icon" />
     <template v-else>
-      <div v-if="canRenderDeployBoard" class="deploy-board-information p-3">
-        <div class="deploy-board-information">
+      <div v-if="canRenderDeployBoard" class="deploy-board-information gl-p-5">
+        <div class="deploy-board-information gl-w-full">
           <section class="deploy-board-status">
             <span v-gl-tooltip :title="instanceIsCompletedText">
-              <span ref="percentage" class="text-center text-plain gl-font-lg"
+              <span ref="percentage" class="gl-text-center text-plain gl-font-lg"
                 >{{ deployBoardData.completion }}%</span
               >
               <span class="text text-center text-secondary">{{ __('Complete') }}</span>
@@ -152,6 +166,13 @@ export default {
             </div>
           </section>
 
+          <canary-ingress
+            v-if="canRenderCanaryWeight"
+            class="deploy-board-canary-ingress"
+            :canary-ingress="deployBoardData.canary_ingress"
+            @change="changeCanaryWeight"
+          />
+
           <section v-if="deployBoardActions" class="deploy-board-actions">
             <gl-link
               v-if="deployBoardData.rollback_url"
@@ -177,9 +198,9 @@ export default {
         <section v-safe-html="deployBoardSvg" class="deploy-board-empty-state-svg"></section>
 
         <section class="deploy-board-empty-state-text">
-          <span class="deploy-board-empty-state-title d-flex">
-            {{ __('Kubernetes deployment not found') }}
-          </span>
+          <span class="deploy-board-empty-state-title d-flex">{{
+            __('Kubernetes deployment not found')
+          }}</span>
           <span>
             To see deployment progress for your environments, make sure you are deploying to
             <code>$KUBE_NAMESPACE</code> and annotating with

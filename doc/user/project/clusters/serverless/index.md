@@ -9,7 +9,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 > Introduced in GitLab 11.5.
 
 WARNING:
-Serverless is currently in [alpha](https://about.gitlab.com/handbook/product/#alpha).
+Serverless is currently in [alpha](https://about.gitlab.com/handbook/product/gitlab-the-product/#alpha).
 
 ## Overview
 
@@ -450,7 +450,6 @@ To run a function locally:
 
 > Introduced in GitLab 11.5.
 
-12345678901234567890123456789012345678901234567890123456789012345678901234567890
 Serverless applications are an alternative to [serverless functions](#deploying-functions).
 They're useful in scenarios where an existing runtime does not meet the needs of
 an application, such as one written in a language that has no runtime available.

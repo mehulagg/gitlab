@@ -12,6 +12,7 @@ module EE
         mount_mutation ::Mutations::Clusters::AgentTokens::Delete
         mount_mutation ::Mutations::ComplianceManagement::Frameworks::Destroy
         mount_mutation ::Mutations::ComplianceManagement::Frameworks::Update
+        mount_mutation ::Mutations::ComplianceManagement::Frameworks::Create
         mount_mutation ::Mutations::Issues::SetIteration
         mount_mutation ::Mutations::Issues::SetWeight
         mount_mutation ::Mutations::Issues::SetEpic
@@ -29,6 +30,8 @@ module EE
         mount_mutation ::Mutations::Vulnerabilities::Resolve
         mount_mutation ::Mutations::Vulnerabilities::Confirm
         mount_mutation ::Mutations::Vulnerabilities::RevertToDetected
+        mount_mutation ::Mutations::Vulnerabilities::CreateExternalIssueLink
+        mount_mutation ::Mutations::Vulnerabilities::DestroyExternalIssueLink
         mount_mutation ::Mutations::Boards::Update
         mount_mutation ::Mutations::Boards::Lists::UpdateLimitMetrics
         mount_mutation ::Mutations::Boards::UpdateEpicUserPreferences

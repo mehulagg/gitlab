@@ -124,7 +124,7 @@ The following are required to run Geo:
 - Git-lfs 2.4.2+ on the user side when using LFS
 - All nodes must run the same GitLab version.
 
-Additionally, check GitLab's [minimum requirements](../../install/requirements.md),
+Additionally, check the GitLab [minimum requirements](../../install/requirements.md),
 and we recommend you use:
 
 - At least GitLab Enterprise Edition 10.0 for basic Geo features.
@@ -287,7 +287,6 @@ This list of limitations only reflects the latest version of GitLab. If you are 
 - Real-time updates of issues/merge requests (for example, via long polling) doesn't work on the **secondary** node.
 - [Selective synchronization](replication/configuration.md#selective-synchronization) applies only to files and repositories. Other datasets are replicated to the **secondary** node in full, making it inappropriate for use as an access control mechanism.
 - Object pools for forked project deduplication work only on the **primary** node, and are duplicated on the **secondary** node.
-- [External merge request diffs](../merge_request_diffs.md) will not be replicated if they are on-disk, and viewing merge requests will fail. However, external MR diffs in object storage **are** supported. The default configuration (in-database) does work.
 - GitLab Runners cannot register with a **secondary** node. Support for this is [planned for the future](https://gitlab.com/gitlab-org/gitlab/-/issues/3294).
 - Geo **secondary** nodes can not be configured to [use high-availability configurations of PostgreSQL](https://gitlab.com/groups/gitlab-org/-/epics/2536).
 

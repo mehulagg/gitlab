@@ -1,20 +1,22 @@
 # frozen_string_literal: true
 
 RSpec.shared_examples GroupInviteMembers do
-  context 'inviting members' do
-    context 'with no valid emails in the params' do
-      it 'does not add members' do
+  context 'when inviting members', :snowplow do
+    context 'without valid emails in the params' do
+      it 'only adds creator as member' do
         expect { subject }.to change(Member, :count).by(1)
       end
 
-      it 'does not call the Members::CreateService' do
-        expect(Members::CreateService).not_to receive(:new)
+      it 'does not track the event' do
+        subject
+
+        expect_no_snowplow_event
       end
     end
 
     context 'with valid emails in the params' do
       before do
-        params[:emails] = ['a@a.a', 'b@b.b', '', '', 'x', 'y']
+        group_params[:emails] = ['a@a.a', 'b@b.b', '', '', 'x', 'y']
       end
 
       it 'adds users with developer access and ignores blank emails' do
@@ -37,6 +39,12 @@ RSpec.shared_examples GroupInviteMembers do
 
         expect(emails).to include('a@a.a', 'b@b.b')
         expect(emails).not_to include('x', 'y')
+      end
+
+      it 'tracks the event' do
+        subject
+
+        expect_snowplow_event(category: anything, action: 'invite_members', label: 'new_group_form')
       end
     end
   end

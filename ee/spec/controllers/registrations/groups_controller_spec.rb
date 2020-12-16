@@ -46,9 +46,11 @@ RSpec.describe Registrations::GroupsController do
   end
 
   describe 'POST #create' do
-    subject { post :create, params: { group: params } }
+    let(:group_params) do
+      { name: 'Group name', path: 'group-path', visibility_level: Gitlab::VisibilityLevel::PRIVATE, emails: ['', ''] }
+    end
 
-    let(:params) { { name: 'Group name', path: 'group-path', visibility_level: Gitlab::VisibilityLevel::PRIVATE, emails: ['', ''] } }
+    subject { post :create, params: { group: group_params } }
 
     context 'with an unauthenticated user' do
       it { is_expected.to have_gitlab_http_status(:redirect) }
@@ -71,7 +73,7 @@ RSpec.describe Registrations::GroupsController do
       it_behaves_like GroupInviteMembers
 
       context 'when the group cannot be saved' do
-        let(:params) { { name: '', path: '' } }
+        let(:group_params) { { name: '', path: '' } }
 
         it 'does not create a group' do
           expect { subject }.not_to change { Group.count }

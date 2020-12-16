@@ -21,6 +21,27 @@ RSpec.describe 'Git LFS API and storage' do
   let(:sample_oid) { lfs_object.oid }
   let(:sample_size) { lfs_object.size }
 
+  context 'with group wikis' do
+    let_it_be(:group) { create(:group) }
+
+    # LFS is not supported on group wikis, so we override the shared examples
+    # to expect 404 responses instead.
+    [
+      'LFS http 200 response',
+      'LFS http 200 blob response',
+      'LFS http 403 response'
+    ].each do |examples|
+      shared_examples_for(examples) { it_behaves_like 'LFS http 404 response' }
+    end
+
+    it_behaves_like 'LFS http requests' do
+      let(:container) { create(:group_wiki, :empty_repo, group: group) }
+      let(:authorize_guest) { group.add_guest(user) }
+      let(:authorize_download) { group.add_reporter(user) }
+      let(:authorize_upload) { group.add_developer(user) }
+    end
+  end
+
   describe 'when handling lfs batch request' do
     let(:update_lfs_permissions) { }
     let(:update_user_permissions) { }

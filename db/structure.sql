@@ -9372,11 +9372,13 @@ CREATE TABLE application_settings (
     secret_detection_revocation_token_types_url text,
     cloud_license_enabled boolean DEFAULT false NOT NULL,
     disable_feed_token boolean DEFAULT false NOT NULL,
+    personal_access_token_prefix text,
     CONSTRAINT app_settings_registry_exp_policies_worker_capacity_positive CHECK ((container_registry_expiration_policies_worker_capacity >= 0)),
     CONSTRAINT check_17d9558205 CHECK ((char_length((kroki_url)::text) <= 1024)),
     CONSTRAINT check_2dba05b802 CHECK ((char_length(gitpod_url) <= 255)),
     CONSTRAINT check_51700b31b5 CHECK ((char_length(default_branch_name) <= 255)),
     CONSTRAINT check_57123c9593 CHECK ((char_length(help_page_documentation_base_url) <= 255)),
+    CONSTRAINT check_718b4458ae CHECK ((char_length(personal_access_token_prefix) <= 20)),
     CONSTRAINT check_85a39b68ff CHECK ((char_length(encrypted_ci_jwt_signing_key_iv) <= 255)),
     CONSTRAINT check_9a719834eb CHECK ((char_length(secret_detection_token_revocation_url) <= 255)),
     CONSTRAINT check_9c6c447a13 CHECK ((char_length(maintenance_mode_message) <= 255)),
@@ -10129,7 +10131,8 @@ CREATE TABLE ci_build_pending_states (
     build_id bigint NOT NULL,
     state smallint,
     failure_reason smallint,
-    trace_checksum bytea
+    trace_checksum bytea,
+    trace_bytesize bigint
 );
 
 CREATE SEQUENCE ci_build_pending_states_id_seq
@@ -11432,7 +11435,8 @@ CREATE TABLE container_repositories (
     updated_at timestamp without time zone NOT NULL,
     status smallint,
     expiration_policy_started_at timestamp with time zone,
-    expiration_policy_cleanup_status smallint DEFAULT 0 NOT NULL
+    expiration_policy_cleanup_status smallint DEFAULT 0 NOT NULL,
+    expiration_policy_completed_at timestamp with time zone
 );
 
 CREATE SEQUENCE container_repositories_id_seq
@@ -13847,6 +13851,7 @@ CREATE TABLE merge_request_diffs (
     external_diff_store integer DEFAULT 1,
     stored_externally boolean,
     files_count smallint,
+    sorted boolean DEFAULT false NOT NULL,
     CONSTRAINT check_93ee616ac9 CHECK ((external_diff_store IS NOT NULL))
 );
 
@@ -15216,6 +15221,7 @@ CREATE TABLE postgres_reindex_actions (
     ondisk_size_bytes_end bigint,
     state smallint DEFAULT 0 NOT NULL,
     index_identifier text NOT NULL,
+    bloat_estimate_bytes_start bigint,
     CONSTRAINT check_f12527622c CHECK ((char_length(index_identifier) <= 255))
 );
 
@@ -20983,7 +20989,7 @@ CREATE INDEX index_ci_pipelines_for_ondemand_dast_scans ON ci_pipelines USING bt
 
 CREATE INDEX index_ci_pipelines_on_auto_canceled_by_id ON ci_pipelines USING btree (auto_canceled_by_id);
 
-CREATE INDEX index_ci_pipelines_on_ci_ref_id ON ci_pipelines USING btree (ci_ref_id) WHERE (ci_ref_id IS NOT NULL);
+CREATE INDEX index_ci_pipelines_on_ci_ref_id_and_more ON ci_pipelines USING btree (ci_ref_id, id DESC, source, status) WHERE (ci_ref_id IS NOT NULL);
 
 CREATE INDEX index_ci_pipelines_on_external_pull_request_id ON ci_pipelines USING btree (external_pull_request_id) WHERE (external_pull_request_id IS NOT NULL);
 
@@ -21230,6 +21236,8 @@ CREATE INDEX index_deployments_on_environment_status_sha ON deployments USING bt
 CREATE INDEX index_deployments_on_id_and_status_and_created_at ON deployments USING btree (id, status, created_at);
 
 CREATE INDEX index_deployments_on_id_where_cluster_id_present ON deployments USING btree (id) WHERE (cluster_id IS NOT NULL);
+
+CREATE INDEX index_deployments_on_project_and_finished ON deployments USING btree (project_id, finished_at) WHERE (status = 2);
 
 CREATE INDEX index_deployments_on_project_id_and_id ON deployments USING btree (project_id, id DESC);
 
@@ -22269,6 +22277,8 @@ CREATE INDEX index_projects_on_creator_id_and_created_at_and_id ON projects USIN
 
 CREATE INDEX index_projects_on_creator_id_and_id ON projects USING btree (creator_id, id);
 
+CREATE INDEX index_projects_on_creator_id_import_type_and_created_at_partial ON projects USING btree (creator_id, import_type, created_at) WHERE (import_type IS NOT NULL);
+
 CREATE INDEX index_projects_on_description_trigram ON projects USING gin (description gin_trgm_ops);
 
 CREATE INDEX index_projects_on_id_and_archived_and_pending_delete ON projects USING btree (id) WHERE ((archived = false) AND (pending_delete = false));
@@ -22521,7 +22531,7 @@ CREATE INDEX index_security_findings_on_scanner_id ON security_findings USING bt
 
 CREATE INDEX index_security_findings_on_severity ON security_findings USING btree (severity);
 
-CREATE UNIQUE INDEX index_security_findings_on_uuid ON security_findings USING btree (uuid);
+CREATE UNIQUE INDEX index_security_findings_on_uuid_and_scan_id ON security_findings USING btree (uuid, scan_id);
 
 CREATE INDEX index_self_managed_prometheus_alert_events_on_environment_id ON self_managed_prometheus_alert_events USING btree (environment_id);
 
@@ -22564,6 +22574,8 @@ CREATE UNIQUE INDEX index_slack_integrations_on_team_id_and_alias ON slack_integ
 CREATE UNIQUE INDEX index_smartcard_identities_on_subject_and_issuer ON smartcard_identities USING btree (subject, issuer);
 
 CREATE INDEX index_smartcard_identities_on_user_id ON smartcard_identities USING btree (user_id);
+
+CREATE INDEX index_snippet_on_id_and_project_id ON snippets USING btree (id, project_id);
 
 CREATE UNIQUE INDEX index_snippet_repositories_on_disk_path ON snippet_repositories USING btree (disk_path);
 

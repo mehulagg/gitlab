@@ -26,12 +26,14 @@ export default {
       default: false,
     },
   },
-  inject: ['billableSeatsHref'],
+  inject: ['billableSeatsHref', 'isGroup'],
   computed: {
     ...mapState(['hasBillableGroupMembers']),
   },
   created() {
-    this.fetchHasBillableGroupMembers();
+    if (this.isGroup) {
+      this.fetchHasBillableGroupMembers();
+    }
   },
   methods: {
     ...mapActions(['fetchHasBillableGroupMembers']),

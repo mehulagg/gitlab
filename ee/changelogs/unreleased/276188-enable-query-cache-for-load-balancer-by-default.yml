@@ -1,0 +1,5 @@
+---
+title: Enable query cache for load balancer
+merge_request: 49708
+author:
+type: performance

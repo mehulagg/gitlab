@@ -160,7 +160,7 @@ gem 'asciidoctor', '~> 2.0.10'
 gem 'asciidoctor-include-ext', '~> 0.3.1', require: false
 gem 'asciidoctor-plantuml', '~> 0.0.12'
 gem 'asciidoctor-kroki', '~> 0.2.2', require: false
-gem 'rouge', '~> 3.25.0'
+gem 'rouge', '~> 3.26.0'
 gem 'truncato', '~> 0.7.11'
 gem 'bootstrap_form', '~> 4.2.0'
 gem 'nokogiri', '~> 1.10.9'
@@ -292,7 +292,6 @@ gem 'sassc-rails', '~> 2.1.0'
 gem 'terser', '1.0.2'
 
 gem 'addressable', '~> 2.7'
-gem 'font-awesome-rails', '~> 4.7'
 gem 'gemojione', '~> 3.3'
 gem 'gon', '~> 6.2'
 gem 'request_store', '~> 1.5'
@@ -372,7 +371,7 @@ group :development, :test do
   gem 'spring', '~> 2.1.0'
   gem 'spring-commands-rspec', '~> 1.0.4'
 
-  gem 'gitlab-styles', '~> 5.2.0', require: false
+  gem 'gitlab-styles', '~> 5.3.0', require: false
 
   gem 'scss_lint', '~> 0.59.0', require: false
   gem 'haml_lint', '~> 0.36.0', require: false
@@ -430,7 +429,7 @@ end
 gem 'octokit', '~> 4.15'
 
 # https://gitlab.com/gitlab-org/gitlab/issues/207207
-gem 'gitlab-mail_room', '~> 0.0.7', require: 'mail_room'
+gem 'gitlab-mail_room', '~> 0.0.8', require: 'mail_room'
 
 gem 'email_reply_trimmer', '~> 0.1'
 gem 'html2text'
@@ -479,7 +478,7 @@ gem 'flipper', '~> 0.17.1'
 gem 'flipper-active_record', '~> 0.17.1'
 gem 'flipper-active_support_cache_store', '~> 0.17.1'
 gem 'unleash', '~> 0.1.5'
-gem 'gitlab-experiment', '~> 0.4.2'
+gem 'gitlab-experiment', '~> 0.4.4'
 
 # Structured logging
 gem 'lograge', '~> 0.5'

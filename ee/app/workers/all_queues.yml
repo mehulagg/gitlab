@@ -838,6 +838,14 @@
   :idempotent: true
   :tags:
   - :requires_disk_io
+- :name: security_auto_fix
+  :feature_category: :vulnerability_management
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
 - :name: set_user_status_based_on_user_cap_setting
   :feature_category: :users
   :has_external_dependencies:

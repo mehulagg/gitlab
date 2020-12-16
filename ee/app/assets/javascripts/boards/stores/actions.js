@@ -1,7 +1,11 @@
 import { pick } from 'lodash';
 import axios from '~/lib/utils/axios_utils';
 import boardsStore from '~/boards/stores/boards_store';
-import { historyPushState } from '~/lib/utils/common_utils';
+import {
+  historyPushState,
+  convertObjectPropsToCamelCase,
+  urlParamsToObject,
+} from '~/lib/utils/common_utils';
 import { mergeUrlParams, removeParams } from '~/lib/utils/url_utility';
 import actionsCE from '~/boards/stores/actions';
 import { BoardType } from '~/boards/constants';
@@ -103,6 +107,22 @@ export default {
     }
 
     commit(types.SET_FILTERS, filterParams);
+  },
+
+  performSearch({ dispatch, getters }) {
+    dispatch(
+      'setFilters',
+      convertObjectPropsToCamelCase(urlParamsToObject(window.location.search)),
+    );
+
+    if (getters.isSwimlanesOn) {
+      dispatch('resetEpics');
+      dispatch('resetIssues');
+      dispatch('fetchEpicsSwimlanes', {});
+    } else if (gon.features.graphqlBoardLists) {
+      dispatch('fetchLists');
+      dispatch('resetIssues');
+    }
   },
 
   fetchEpicsSwimlanes({ state, commit, dispatch }, { withLists = true, endCursor = null }) {
@@ -212,7 +232,7 @@ export default {
             const list = data.boardListUpdateLimitMetrics?.list;
             commit(types.UPDATE_LIST_SUCCESS, {
               listId,
-              list: boardsStore.updateListPosition({ ...list, doNotFetchIssues: true }),
+              list,
             });
           }
         })
@@ -231,10 +251,6 @@ export default {
   },
 
   fetchRecentBoards: () => {
-    notImplemented();
-  },
-
-  createBoard: () => {
     notImplemented();
   },
 
@@ -295,14 +311,18 @@ export default {
     commit(types.TOGGLE_EPICS_SWIMLANES);
 
     if (state.isShowingEpicsSwimlanes) {
-      historyPushState(mergeUrlParams({ group_by: GroupByParamType.epic }, window.location.href));
+      historyPushState(
+        mergeUrlParams({ group_by: GroupByParamType.epic }, window.location.href, {
+          spreadArrays: true,
+        }),
+      );
       dispatch('fetchEpicsSwimlanes', {});
     } else if (!gon.features.graphqlBoardLists) {
-      historyPushState(removeParams(['group_by']));
+      historyPushState(removeParams(['group_by']), window.location.href, true);
       boardsStore.create();
       eventHub.$emit('initialBoardLoad');
     } else {
-      historyPushState(removeParams(['group_by']));
+      historyPushState(removeParams(['group_by']), window.location.href, true);
     }
   },
 

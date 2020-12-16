@@ -54,22 +54,21 @@ RSpec.describe Projects::RequirementsManagement::RequirementsController do
           stub_licensed_features(requirements: true)
         end
 
-        shared_examples 'response with 302 status' do
-          it 'returns 302 status and redirects to the correct path' do
+        shared_examples 'response with success status' do
+          it 'returns 200 status and success message' do
             subject
 
-            expect(flash[:notice]).to eq(_("Your requirements are being imported. Once finished, you'll receive a confirmation email."))
-            expect(response).to redirect_to(project_requirements_management_requirements_path(project))
-            expect(response).to have_gitlab_http_status(:found)
+            expect(response).to have_gitlab_http_status(:success)
+            expect(json_response).to eq('message' => "Your requirements are being imported. Once finished, you'll receive a confirmation email.")
           end
         end
 
-        it_behaves_like 'response with 302 status'
+        it_behaves_like 'response with success status'
 
         context 'when file extension is in upper case' do
           let(:file) { fixture_file_upload('spec/fixtures/csv_uppercase.CSV') }
 
-          it_behaves_like 'response with 302 status'
+          it_behaves_like 'response with success status'
         end
 
         it 'shows error when upload fails' do
@@ -79,8 +78,18 @@ RSpec.describe Projects::RequirementsManagement::RequirementsController do
 
           subject
 
-          expect(flash[:alert]).to include(_('File upload error.'))
-          expect(response).to redirect_to(project_requirements_management_requirements_path(project))
+          expect(json_response).to eq('message' => 'File upload error.')
+        end
+
+        context 'when file extension is not csv' do
+          let(:file) { fixture_file_upload('spec/fixtures/sample_doc.md') }
+
+          it 'returns error message' do
+            subject
+
+            expect(response).to have_gitlab_http_status(:success)
+            expect(json_response).to eq('message' => "The uploaded file was invalid. Supported file extensions are .csv.")
+          end
         end
       end
 

@@ -90,6 +90,7 @@ export const DEVOPS_ADOPTION_STRINGS = {
         tooltip: s__('DevopsAdoption|At least 1 security scan of any type run in pipeline'),
       },
     },
+    pendingTooltip: s__('DevopsAdoption|Segment data pending until the start of next month'),
   },
   deleteModal: {
     title: s__('DevopsAdoption|Confirm delete segment'),
