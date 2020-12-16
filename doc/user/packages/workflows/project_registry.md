@@ -38,7 +38,7 @@ Let's take a look at how you might create a public place to hold all of your pub
    that's displayed on the project overview page.
 1. Create an access token. All package types in the Package Registry are accessible by using
    [GitLab personal access tokens](../../profile/personal_access_tokens.md).
-   If you are using CI/CD, you can use CI job tokens (`CI_JOB_TOKEN`) to authenticate.
+   If you're using CI/CD, you can use CI job tokens (`CI_JOB_TOKEN`) to authenticate.
 1. Configure your local project and publish the package.
 
 You can upload all types of packages to the same project, or
