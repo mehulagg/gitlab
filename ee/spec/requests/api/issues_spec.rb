@@ -696,6 +696,55 @@ RSpec.describe API::Issues, :mailer do
     end
   end
 
+  describe 'DELETE /projects/:id/issues/:issue_id/metric_images/:metric_image_id' do
+    using RSpec::Parameterized::TableSyntax
+
+    let_it_be(:project) do
+      create(:project, :private, creator_id: user.id, namespace: user.namespace)
+    end
+
+    let_it_be(:issue) { create(:incident, project: project) }
+    let!(:image) { create(:issuable_metric_image, issue: issue) }
+
+    subject { delete api("/projects/#{project.id}/issues/#{issue.iid}/metric_images/#{image.id}", user2) }
+
+    shared_examples 'can_delete_metric_image' do
+      it 'can delete the metric images' do
+        subject
+
+        expect(response).to have_gitlab_http_status(:no_content)
+      end
+    end
+
+    shared_examples 'unauthorized_delete' do
+      it 'cannot delete the metric image' do
+        subject
+
+        expect(response).to have_gitlab_http_status(:not_found)
+      end
+    end
+
+    where(:user_role, :own_issue, :issue_confidential, :expected_status) do
+      :not_member | false | false | :unauthorized_delete
+      :guest      | false | true  | :unauthorized_delete
+      :guest      | true  | false | :can_delete_metric_image
+      :guest      | false | false | :can_delete_metric_image
+      :reporter   | true  | false | :can_delete_metric_image
+      :reporter   | false | false | :can_delete_metric_image
+    end
+
+    with_them do
+      before do
+        stub_licensed_features(incident_metric_upload: true)
+        project.send("add_#{user_role}", user2) unless user_role == :not_member
+        issue.update!(confidential: true) if issue_confidential
+        own_issue ? issue.update!(author: user2) : issue.update!(author: user)
+      end
+
+      it_behaves_like "#{params[:expected_status]}"
+    end
+  end
+
   private
 
   def epic_issue_response_for(epic_issue)
