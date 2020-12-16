@@ -164,7 +164,7 @@ module EE
 
       def parse_security_artifact_blob(security_report, blob)
         report_clone = security_report.clone_as_blank
-        ::Gitlab::Ci::Parsers.fabricate!(security_report.type).parse!(blob, report_clone)
+        ::Gitlab::Ci::Parsers.fabricate!(security_report.type, blob, report_clone).parse!
         security_report.merge!(report_clone)
       end
 

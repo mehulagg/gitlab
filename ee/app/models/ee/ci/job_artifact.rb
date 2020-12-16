@@ -120,7 +120,7 @@ module EE
 
         report = ::Gitlab::Ci::Reports::Security::Report.new(file_type, job.pipeline, nil).tap do |report|
           each_blob do |blob|
-            ::Gitlab::Ci::Parsers.fabricate!(file_type).parse!(blob, report)
+            ::Gitlab::Ci::Parsers.fabricate!(file_type, blob, report).parse!
           end
         end
 
