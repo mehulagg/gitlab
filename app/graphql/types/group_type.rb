@@ -96,7 +96,7 @@ module Types
           description: 'Number of container repositories in the group'
 
     field :group_package_setting,
-          Types::Groups::PackageSettingType,
+          Types::GroupPackageSettingType,
           null: true,
           description: 'The package settings for the group'
 

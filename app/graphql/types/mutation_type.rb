@@ -91,7 +91,7 @@ module Types
     mount_mutation Mutations::Ci::PipelineCancel
     mount_mutation Mutations::Ci::PipelineDestroy
     mount_mutation Mutations::Ci::PipelineRetry
-    mount_mutation Mutations::Groups::PackageSettings::Update
+    mount_mutation Mutations::GroupPackageSettings::Update
   end
 end
 
