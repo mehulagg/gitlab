@@ -10,7 +10,7 @@ module Gitlab
           attr_reader :project, :sha, :user, :parent_pipeline
           attr_reader :expandset, :execution_deadline
 
-          def initialize(project: nil, sha: nil, user: nil, parent_pipeline: nil)
+          def initialize(project: nil, sha: nil, user: nil, parent_pipeline: nil, variables: nil)
             @project = project
             @sha = sha
             @user = user
