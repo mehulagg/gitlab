@@ -148,10 +148,11 @@ export default class EditorLite {
     };
     if (instance) {
       initExtensions(instance);
-    } else {
-      this.instances.forEach((inst) => {
-        initExtensions(inst);
-      });
+      return instance;
     }
+    this.instances.forEach((inst) => {
+      initExtensions(inst);
+    });
+    return this;
   }
 }
