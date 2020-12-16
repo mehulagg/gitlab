@@ -67,14 +67,14 @@
                   %li.dropdown-header
                     = _('Merge requests')
                   %li
-                    = link_to assigned_mrs_dashboard_path do
+                    = link_to assigned_mrs_dashboard_path, class: 'gl-display-flex! gl-align-items-center' do
                       = _('Assigned to you')
-                      %span.badge.gl-badge.badge-pill.badge-muted.float-right.js-assigned-mr-count{ class: "gl-text-gray-500! gl-font-weight-normal! gl-font-sm! gl-line-height-normal!" }
+                      %span.badge.gl-badge.badge-pill.badge-muted.merge-request-badge.gl-ml-auto.js-assigned-mr-count{ class: "" }
                         = merge_requests_assigned_count
                   %li
-                    = link_to reviewer_mrs_dashboard_path do
+                    = link_to reviewer_mrs_dashboard_path, class: 'gl-display-flex! gl-align-items-center' do
                       = _('Review requests for you')
-                      %span.badge.gl-badge.badge-pill.badge-muted.float-right.js-reviewer-mr-count{ class: "gl-text-gray-500! gl-font-weight-normal! gl-font-sm! gl-line-height-normal!" }
+                      %span.badge.gl-badge.badge-pill.badge-muted.merge-request-badge.gl-ml-auto.js-reviewer-mr-count{ class: "" }
                         = merge_requests_reviewer_count
           - if header_link?(:todos)
             = nav_link(controller: 'dashboard/todos', html_options: { class: "user-counter" }) do
