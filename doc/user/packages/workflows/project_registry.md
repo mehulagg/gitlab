@@ -23,8 +23,8 @@ You might want to do this because:
 
 ## Example walkthrough
 
-There is no functionality specific to this feature. Instead, we are taking advantage of functionality available in each
-of the package management systems to publish different package types to the same place.
+No functionality is specific to this feature. Instead, we're taking advantage of the functionality
+of each package management system to publish different package types to the same place.
 
 - <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
   Watch a video of how to add Maven, NPM, and Conan packages to [the same project](https://youtu.be/ui2nNBwN35c).
