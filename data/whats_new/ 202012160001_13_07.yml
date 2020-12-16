@@ -1,0 +1,63 @@
+---
+- title: Auto rollback in case of failure
+  body: |
+      If you have a critical problem with a deployment, manual actions to fix it often take too long and lead to a degradation in production that impacts your users. Now, you can leverage an automatic rollback mechanism that reverts your deployment back to the last successful deployment. Also, when GitLab finds problems in production it automatically notifies you with an alert. This gives you peace of mind and precious development time to debug, investigate, and fix problems without causing downtime.
+  stage: Release
+  self-managed: true
+  gitlab-com: true
+  packages: [Ultimate]
+  url: https://docs.gitlab.com/ee/ci/environments/#auto-rollback
+  image_url: https://img.youtube.com/vi/G8fYYrxqF5E/hqdefault.jpg
+  published_at: 2020-12-22
+  release: 13.7
+- title: "Support `variables` for pipeline `rules`"
+  body: |
+        Previously, the `rules` keyword was limited in scope and only determined if a job should be included or excluded from pipelines. In this release, you can now decide if certain conditions are met and subsequently override variables in jobs, providing you with more flexibility when configuring your pipelines.
+  stage: Enablement 
+  self-managed: true
+  gitlab-com: true
+  packages: [Core, Starter, Premium, Ultimate]
+  url: https://docs.gitlab.com/ee/ci/yaml/#rulesvariables
+  image_url: https://about.gitlab.com/images/13_7/var.png
+  published_at: 2020-12-22
+  release: 13.7
+- title: Support for encrypted LDAP credentials
+  body: |
+        GitLab uses a unified configuration file, for example `gitlab.rb` in Omnibus GitLab, which makes
+        configuration easy across all of the bundled services. Included in this configruation file are some secrets, like the
+        credentials to authenticate to the LDAP server. While access to this file does require elevated privileges, best practice
+        is to separate secrets from configuration.
+        
+        Omnibus GitLab and Source installs now support [encrypted credentials](https://docs.gitlab.com/ee/administration/encrypted_configuration.html), with the first credential supported being LDAP. This reduces the sensitivity of the GitLab configuration file, and also helps to achieve customer compliance requirements.
+  stage: Enablement 
+  self-managed: true
+  gitlab-com: false
+  packages: [Core, Starter, Premium, Ultimate]
+  url: https://docs.gitlab.com/ee/administration/auth/ldap/index.html#using-encrypted-credentials
+
+  published_at: 2020-12-22
+  release: 13.7
+- title: Integrate alerting tools with multiple HTTP endpoints
+  body: |
+      Alert integrations are a critical part of your Incident management workflows, which is why it is important for you and your team to have granular control over the endpoints and auth tokens. The last thing you want is to take down all of your alerting by resetting a single auth token! Setting up a HTTP endpoint for each of your monitoring tools allows your team to separately manage each tool without impacting alerting from other tools.
+  stage: Monitor 
+  self-managed: true
+  gitlab-com: true
+  packages: [Premium, Ultimate]
+  url: https://docs.gitlab.com/ee/operations/incident_management/alert_integrations.html#http-endpoints
+  image_url: https://about.gitlab.com/images/13_7/multiple_http.png
+  published_at: 2020-12-22
+  release: 13.7
+- title: Avoid Docker rate limits and speed up your pipeline
+  body: |
+        For faster and more reliable builds, you can use the Dependency Proxy to cache the container images hosted on Docker Hub. But, when Docker started to enforce [rate limits on pull requests from Docker Hub](/blog/2020/10/30/mitigating-the-impact-of-docker-hub-pull-requests-limits/), you noticed that even when your image was pulled from the cache, Docker counted it against your limit. That's because the Dependency Proxy was only caching the image's layers (or blobs) and not the manifest, which contains information about how to build a given image. Since the manifest is required, a pull request was still required. This also means that if Docker Hub was unavailable, you couldn't pull your image.
+
+        Moving forward, the Dependency Proxy will cache both the image's layers and manifest. So, the first time you pull `alpine:latest`, the image will be added to the Dependency Proxy cache and count as one pull against your rate limit. The next time you pull `alpine:latest`, it will be pulled from the cache, even if Docker Hub is unavailable and will not count against your rate limit.
+  stage: Package 
+  self-managed: true
+  gitlab-com: true
+  packages: [core, starter, premium, ultimate]
+  url: https://docs.gitlab.com/ee/user/packages/dependency_proxy/#docker-hub-rate-limits-and-the-dependency-proxy
+ 
+  published_at: 2020-12-22
+  release: 13.7
