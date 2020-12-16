@@ -9,6 +9,8 @@ import {
   GlSkeletonLoader,
   GlSearchBoxByClick,
 } from '@gitlab/ui';
+import { get } from 'lodash';
+import getContainerRepositoriesQuery from 'shared_queries/container_registry/get_container_repositories.query.graphql';
 import Tracking from '~/tracking';
 import createFlash from '~/flash';
 
@@ -18,8 +20,7 @@ import RegistryHeader from '../components/list_page/registry_header.vue';
 import ImageList from '../components/list_page/image_list.vue';
 import CliCommands from '../components/list_page/cli_commands.vue';
 
-import getProjectContainerRepositoriesQuery from '../graphql/queries/get_project_container_repositories.query.graphql';
-import getGroupContainerRepositoriesQuery from '../graphql/queries/get_group_container_repositories.query.graphql';
+import getContainerRepositoriesDetails from '../graphql/queries/get_container_repositories_details.query.graphql';
 import deleteContainerRepositoryMutation from '../graphql/mutations/delete_container_repository.mutation.graphql';
 
 import {
@@ -74,10 +75,8 @@ export default {
     EMPTY_RESULT_MESSAGE,
   },
   apollo: {
-    images: {
-      query() {
-        return this.graphQlQuery;
-      },
+    baseImages: {
+      query: getContainerRepositoriesQuery,
       variables() {
         return this.queryVariables;
       },
@@ -92,33 +91,52 @@ export default {
         createFlash({ message: FETCH_IMAGES_LIST_ERROR_MESSAGE });
       },
     },
+    additionalDetails: {
+      query: getContainerRepositoriesDetails,
+      variables() {
+        return this.queryVariables;
+      },
+      update(data) {
+        return data[this.graphqlResource]?.containerRepositories.nodes;
+      },
+      error() {
+        createFlash({ message: FETCH_IMAGES_LIST_ERROR_MESSAGE });
+      },
+    },
   },
   data() {
     return {
-      images: [],
+      baseImages: [],
+      additionalDetails: [],
       pageInfo: {},
       containerRepositoriesCount: 0,
       itemToDelete: {},
       deleteAlertType: null,
       searchValue: null,
       name: null,
+      paginationVariables: {
+        first: GRAPHQL_PAGE_SIZE,
+      },
       mutationLoading: false,
+      fetchAdditionalDetails: false,
     };
   },
   computed: {
+    images() {
+      return this.baseImages.map((image, index) => ({
+        ...image,
+        ...get(this.additionalDetails, index, {}),
+      }));
+    },
     graphqlResource() {
       return this.config.isGroupPage ? 'group' : 'project';
-    },
-    graphQlQuery() {
-      return this.config.isGroupPage
-        ? getGroupContainerRepositoriesQuery
-        : getProjectContainerRepositoriesQuery;
     },
     queryVariables() {
       return {
         name: this.name,
         fullPath: this.config.isGroupPage ? this.config.groupPath : this.config.projectPath,
-        first: GRAPHQL_PAGE_SIZE,
+        isGroupPage: this.config.isGroupPage,
+        ...this.paginationVariables,
       };
     },
     tracking() {
@@ -127,7 +145,7 @@ export default {
       };
     },
     isLoading() {
-      return this.$apollo.queries.images.loading || this.mutationLoading;
+      return this.$apollo.queries.baseImages.loading || this.mutationLoading;
     },
     showCommands() {
       return Boolean(!this.isLoading && !this.config?.isGroupPage && this.images?.length);
@@ -177,29 +195,18 @@ export default {
     },
     fetchNextPage() {
       if (this.pageInfo?.hasNextPage) {
-        this.$apollo.queries.images.fetchMore({
-          variables: {
-            after: this.pageInfo?.endCursor,
-            first: GRAPHQL_PAGE_SIZE,
-          },
-          updateQuery(previousResult, { fetchMoreResult }) {
-            return fetchMoreResult;
-          },
-        });
+        this.paginationVariables = {
+          after: this.pageInfo?.endCursor,
+          first: GRAPHQL_PAGE_SIZE,
+        };
       }
     },
     fetchPreviousPage() {
       if (this.pageInfo?.hasPreviousPage) {
-        this.$apollo.queries.images.fetchMore({
-          variables: {
-            first: null,
-            before: this.pageInfo?.startCursor,
-            last: GRAPHQL_PAGE_SIZE,
-          },
-          updateQuery(previousResult, { fetchMoreResult }) {
-            return fetchMoreResult;
-          },
-        });
+        this.paginationVariables = {
+          before: this.pageInfo?.startCursor,
+          last: GRAPHQL_PAGE_SIZE,
+        };
       }
     },
   },
@@ -285,6 +292,7 @@ export default {
           <image-list
             v-if="images.length"
             :images="images"
+            :metadata-loading="this.$apollo.queries.additionalDetails.loading"
             :page-info="pageInfo"
             @delete="deleteImage"
             @prev-page="fetchPreviousPage"
