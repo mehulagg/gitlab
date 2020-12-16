@@ -88,33 +88,3 @@ Example response:
 }
 ```
 
-## Change logo
-
-Use API call to upload logo to your GitLab instance
-
-```plaintext
-PUT /application/appearance
-```
-
-| Attribute | Type           | Required               | Description |
-|-----------|----------------|------------------------|-------------|
-| `logo`    | string         | **{check-circle}** Yes | The file to be uploaded. |
-
-To upload avatar from your file system, use the `--form` argument. This causes
-cURL to post data using the header `Content-Type: multipart/form-data`. The
-`file=` parameter must point to an image file on your file system and be 
-preceded by `@`. For example:
-
-```shell
-curl --location --request PUT 'https://gitlab.example.com/api/v4/application/appearance?data=image/png' \
---header 'Content-Type: multipart/form-data' \
---header 'Authorization: Bearer xxxxxxxxxxxxxxxx' \
---form 'logo=@/path/to/logo.png'
-```
-
-Returned object:
-
-```json
-{
-   "logo":"/uploads/-/system/appearance/logo/1/logo.png",
-```
