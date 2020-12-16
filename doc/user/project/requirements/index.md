@@ -54,8 +54,9 @@ next to the requirement title.
 
 > The ability to mark a requirement as Satisfied [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/218607) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.5.
 
-You can edit a requirement (if you have the necessary privileges) from the requirements
-list page.
+You can edit a requirement from the requirements list page.
+
+Users with Reporter or higher [permissions](../../permissions.md) can edit requirements.
 
 To edit a requirement:
 
