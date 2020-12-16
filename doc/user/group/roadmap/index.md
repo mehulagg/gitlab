@@ -55,7 +55,7 @@ You can also filter epics in the Roadmap view by:
 - Label
 - Milestone
 
-![roadmap date range in weeks](img/roadmap_filters.png)
+![roadmap date range in weeks](img/roadmap_filters_v13_7.png)
 
 Roadmaps can also be [visualized inside an epic](../epics/index.md#roadmap-in-epics).
 
