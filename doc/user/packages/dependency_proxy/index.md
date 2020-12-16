@@ -120,6 +120,12 @@ dependency-proxy-pull-master:
     - docker pull "$CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX"/alpine:latest
 ```
 
+`CI_DEPENDENCY_PROXY_SERVER` and `CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX` include the server port. So if you use `CI_DEPENDENCY_PROXY_SERVER`, to log in, for example, you will need to explicitely include the port in your pull command and vise-versa:
+
+```shell
+docler pull gitlab.example.com:443/my-group/dependency_proxy/containers/alpine:latest
+```
+
 You can also use [custom environment variables](../../../ci/variables/README.md#custom-environment-variables) to store and access your personal access token or other valid credentials.
 
 ##### Authenticate with `DOCKER_AUTH_CONFIG`
@@ -158,11 +164,23 @@ named `DOCKER_AUTH_CONFIG` with a value of:
    }
    ```
 
+   Note that if you are going to use `$CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX` when referencing images, you need to explicitely include the port in your `DOCKER_AUTH_CONFIG` value:
+
+   ```json
+   {
+       "auths": {
+           "https://gitlab.example.com:443": {
+               "auth": "(Base64 content from above)"
+           }
+       }
+   }
+   ```
+
 1. Now reference the Dependency Proxy in your base image:
 
    ```yaml
    # .gitlab-ci.yml
-   image: "$CI_SERVER_HOST":"$CI_SERVER_PORT"/groupname/dependency_proxy/containers/node:latest
+   image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/node:latest
    ...
    ```
 
