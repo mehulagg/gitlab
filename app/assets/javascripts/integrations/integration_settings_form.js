@@ -44,7 +44,7 @@ export default class IntegrationSettingsForm {
 
     if (formValid) {
       setTimeout(() => {
-        this.$form.submit();
+        this.$form.trigger('submit');
       }, 100);
     } else {
       eventHub.$emit('validateForm');
