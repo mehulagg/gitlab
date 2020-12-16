@@ -1137,10 +1137,10 @@ When documenting navigation through the user interface:
 
 - Use the exact wording as shown in the UI, including any capital letters as-is.
 - Use bold text for navigation items and the char "greater than" (`>`) as a
-  separator. For example: `Navigate to your project's **Settings > CI/CD**`.
+  separator. For example: `Go to your project's **Settings > CI/CD**`.
 - If there are any expandable menus, make sure to mention that the user needs to
   expand the tab to find the settings you're referring to. For example:
-  `Navigate to your project's **Settings > CI/CD** and expand **General pipelines**`.
+  `Go to your project's **Settings > CI/CD** and expand **General pipelines**`.
 
 ### Navigational elements
 
