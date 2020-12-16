@@ -15,7 +15,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 > - In [GitLab 13.2](https://gitlab.com/gitlab-org/gitlab/-/issues/214375) and later, the Roadmap also shows milestones in projects in a group.
 > - In [GitLab 13.2](https://gitlab.com/gitlab-org/gitlab/-/issues/212494) and later, milestone bars can be collapsed and expanded.
 
-Epics and milestones within a group containing a start date or due date can be visualized in a form
+Epics and milestones in a group containing a start date or due date can be visualized in a form
 of a timeline (that is, a Gantt chart). The Roadmap page shows the epics and milestones in a
 group, one of its subgroups, or a project in one of the groups.
 
@@ -43,7 +43,7 @@ toggle the list of the milestone bars.
 > - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-filtering-roadmaps-by-milestone). **(PREMIUM ONLY)**
 
 When you want to explore a roadmap, there are several ways to make it easier by sorting epics or
-filtering them by waht's important for you.
+filtering them by what's important for you.
 
 A dropdown menu lets you to show only open or closed epics. By default, all epics are shown.
 
