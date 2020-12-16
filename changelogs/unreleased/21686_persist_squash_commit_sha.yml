@@ -1,0 +1,5 @@
+---
+title: Persist 'squash_commit_sha' when squashing
+merge_request: 50178
+author:
+type: added
