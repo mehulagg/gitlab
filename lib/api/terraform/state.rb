@@ -14,6 +14,8 @@ module API
       before do
         authenticate!
         authorize! :read_terraform_state, user_project
+
+        increment_unique_values('p_terraform_state_api', current_user.id)
       end
 
       params do
