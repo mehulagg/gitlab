@@ -118,9 +118,6 @@ These are reason why these changes are needed:
 This work is being done as part of dedicated epic: [Improve internal usage of
 Feature Flags](https://gitlab.com/groups/gitlab-org/-/epics/3551). This epic
 describes a meta reasons for making these changes.
-
-## [Who](#who)
-
 ### Blueprint
 
 Proposal:
@@ -142,24 +139,16 @@ DRIs:
 | Leadership                   | Craig Gomes            |
 | Engineering                  | Kamil Trzciński        |
 
-### [Stakeholders](#stakeholders)
+### Stakeholders
 
-| Role               | Person                | Title
-|--------------------|-----------------------|--------------------------------------------------------------------|
-| Executive Sponsor  | Christopher Lefelhocz | Senior Director of Development                                     |
-| Facilitator        | Darby Frey            | Senior Engineering Manager, Verify                                 |
-| DRI / Leadership   | Craig Gomes           | Backend Engineering Manager, Memory and Database                   |
-| DRI / Engineering  | Kamil Trzciński       | Distinguished Engineer, Ops and Enablement                         |
-| DRI / Product      | Kenny Johnston        | Senior Director of Product Management, Ops                         |
-| Functional Lead    | Ricky Wiens           | Backend Engineering Manager, Verify:Testing                        |
-| Functional Lead    | Anthony Sandoval      | Engineering Manager, Reliability                                   |
-| Functional Lead    | James Heimbuck        | Senior Product Manager, Verify:Testing                             |
-| Member             | Grzegorz Bizon        | Staff Backend Engineer, Verify                                     |
-| Member             | Michelle Gill         | Engineering Manager, Create:Source Code                            |
-| Member             | Wayne Haber           | Director of Engineering, Threat Management                         |
-| Member             | Doug Stull            | Senior Fullstack Engineer, Growth:Expansion                        |
-| Member             | Andrew Fontaine       | Senior Frontend Engineer, Release                                  |
-| Member             | Rémy Coutable         | Staff Backend Engineer, Engineering Productivity                   |
-| Member             | Marin Jankovski       | Senior Engineering Manager, Infrastructure, Delivery & Scalability |
+Stakeholders are roles or personas of individuals who are involved or in some way impacted by the usage of feature flags in the development of GitLab.
 
-<!-- vale gitlab.Spelling = YES -->
+| Role                 |
+|----------------------|
+| Delivery Engineer    |
+| Engineer             |
+| Engineering Director |
+| Engineering Manager  |
+| Product Manager      |
+| SRE                  |
+| Technical Writer     |
