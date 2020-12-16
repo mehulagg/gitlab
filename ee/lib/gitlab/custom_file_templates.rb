@@ -4,11 +4,12 @@ module Gitlab
   class CustomFileTemplates
     include ::Gitlab::Utils::StrongMemoize
 
-    attr_reader :finder, :project
+    attr_reader :finder, :project, :current_user
 
-    def initialize(finder, project)
+    def initialize(finder, project, current_user = nil)
       @finder = finder
       @project = project
+      @current_user = current_user
     end
 
     def enabled?
@@ -70,7 +71,7 @@ module Gitlab
         project
           .ancestors_upto(nil)
           .with_custom_file_templates
-          .select { |namespace| namespace.checked_file_template_project }
+          .select { |namespace| (template_project = namespace.checked_file_template_project) && current_user.can?(:read_project, template_project)}
           .map { |namespace| [namespace, namespace.checked_file_template_project] }
           .to_h
       end

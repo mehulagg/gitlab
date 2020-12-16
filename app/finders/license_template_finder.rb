@@ -15,9 +15,10 @@ class LicenseTemplateFinder
 
   attr_reader :project, :params
 
-  def initialize(project, params = {})
+  def initialize(project, current_user = nil, params = {})
     @project = project
     @params = params
+    @current_user = current_user
   end
 
   def execute

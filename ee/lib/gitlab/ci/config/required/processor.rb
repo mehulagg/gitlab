@@ -31,7 +31,7 @@ module Gitlab
           end
 
           def required_template
-            ::TemplateFinder.build(:gitlab_ci_ymls, nil, name: required_ci_template_name).execute
+            ::TemplateFinder.build(:gitlab_ci_ymls, nil, nil, name: required_ci_template_name).execute
           end
 
           def required_ci_template_name

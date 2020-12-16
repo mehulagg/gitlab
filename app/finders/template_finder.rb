@@ -13,23 +13,24 @@ class TemplateFinder
   ).freeze
 
   class << self
-    def build(type, project, params = {})
+    def build(type, project, current_user = nil, params = {})
       if type.to_s == 'licenses'
-        LicenseTemplateFinder.new(project, params) # rubocop: disable CodeReuse/Finder
+        LicenseTemplateFinder.new(project, current_user, params) # rubocop: disable CodeReuse/Finder
       else
-        new(type, project, params)
+        new(type, project, current_user, params)
       end
     end
   end
 
-  attr_reader :type, :project, :params
+  attr_reader :type, :project, :current_user, :params
 
   attr_reader :vendored_templates
   private :vendored_templates
 
-  def initialize(type, project, params = {})
+  def initialize(type, project, current_user = nil, params = {})
     @type = type
     @project = project
+    @current_user = current_user
     @params = params
 
     @vendored_templates = VENDORED_TEMPLATES.fetch(type)

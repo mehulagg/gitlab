@@ -7,11 +7,11 @@ module EE
     attr_reader :custom_templates
     private :custom_templates
 
-    def initialize(project, *args, &blk)
+    def initialize(project, current_user = nil, *args, &blk)
       super
 
       @custom_templates =
-        ::Gitlab::CustomFileTemplates.new(::Gitlab::Template::CustomLicenseTemplate, project)
+        ::Gitlab::CustomFileTemplates.new(::Gitlab::Template::CustomLicenseTemplate, project, current_user)
     end
 
     override :execute

@@ -206,23 +206,23 @@ module BlobHelper
   private :template_dropdown_names
 
   def licenses_for_select(project)
-    @licenses_for_select ||= template_dropdown_names(TemplateFinder.build(:licenses, project).execute)
+    @licenses_for_select ||= template_dropdown_names(TemplateFinder.build(:licenses, project, current_user).execute)
   end
 
   def gitignore_names(project)
-    @gitignore_names ||= template_dropdown_names(TemplateFinder.build(:gitignores, project).execute)
+    @gitignore_names ||= template_dropdown_names(TemplateFinder.build(:gitignores, project, current_user).execute)
   end
 
   def gitlab_ci_ymls(project)
-    @gitlab_ci_ymls ||= template_dropdown_names(TemplateFinder.build(:gitlab_ci_ymls, project).execute)
+    @gitlab_ci_ymls ||= template_dropdown_names(TemplateFinder.build(:gitlab_ci_ymls, project, current_user).execute)
   end
 
   def metrics_dashboard_ymls(project)
-    @metrics_dashboard_ymls ||= template_dropdown_names(TemplateFinder.build(:metrics_dashboard_ymls, project).execute)
+    @metrics_dashboard_ymls ||= template_dropdown_names(TemplateFinder.build(:metrics_dashboard_ymls, project, current_user).execute)
   end
 
   def dockerfile_names(project)
-    @dockerfile_names ||= template_dropdown_names(TemplateFinder.build(:dockerfiles, project).execute)
+    @dockerfile_names ||= template_dropdown_names(TemplateFinder.build(:dockerfiles, project, current_user).execute)
   end
 
   def blob_editor_paths(project)

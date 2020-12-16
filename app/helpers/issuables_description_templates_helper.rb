@@ -26,7 +26,7 @@ module IssuablesDescriptionTemplatesHelper
 
   def project_issuable_templates(project, issuable_type)
     strong_memoize("#{issuable_type}_templates") do
-      template_dropdown_names(TemplateFinder.build(issuable_type.pluralize.to_sym, project).execute)
+      template_dropdown_names(TemplateFinder.build(issuable_type.pluralize.to_sym, project, current_user).execute)
     end
   end
 

@@ -16,12 +16,12 @@ module EE
     attr_reader :custom_templates
     private :custom_templates
 
-    def initialize(type, project, *args, &blk)
+    def initialize(type, project, current_user = nil, *args, &blk)
       super
 
       if CUSTOM_TEMPLATES.key?(type)
         finder = CUSTOM_TEMPLATES.fetch(type)
-        @custom_templates = ::Gitlab::CustomFileTemplates.new(finder, project)
+        @custom_templates = ::Gitlab::CustomFileTemplates.new(finder, project, current_user)
       end
     end
 
