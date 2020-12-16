@@ -192,7 +192,7 @@ requirements_confirmation:
 
 ## Import requirements from a CSV file
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/246857) in GitLab 13.6.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/246857) in GitLab 13.7.
 
 Requirements can be imported to a project by uploading a CSV file with the columns
 `title` and `description`.
