@@ -13,7 +13,9 @@ import {
   GlAlert,
 } from '@gitlab/ui';
 import { s__, __ } from '~/locale';
+import createFlash, { FLASH_TYPES } from '~/flash';
 import usersSearchQuery from '~/graphql_shared/queries/users_search.query.graphql';
+import getOncallSchedulesQuery from '../../graphql/queries/get_oncall_schedules.query.graphql';
 import createOncallScheduleRotationMutation from '../../graphql/create_oncall_schedule_rotation.mutation.graphql';
 import {
   LENGTH_ENUM,
@@ -21,6 +23,7 @@ import {
   CHEVRON_SKIPPING_SHADE_ENUM,
   CHEVRON_SKIPPING_PALETTE_ENUM,
 } from '../../constants';
+import { updateStoreAfterRotationAdd } from '../../utils/cache_updates';
 
 export default {
   i18n: {
@@ -40,6 +43,7 @@ export default {
         error: s__('OnCallSchedules|Rotation start date cannot be empty'),
       },
     },
+    rotationCreated: s__('OnCallSchedules|Successfully created a new rotation'),
   },
   HOURS_IN_DAY,
   tokenColorPalette: {
@@ -153,16 +157,28 @@ export default {
   methods: {
     createRotation() {
       this.loading = true;
+      const { projectPath, schedule } = this;
+
       this.$apollo
         .mutate({
           mutation: createOncallScheduleRotationMutation,
           variables: { OncallRotationCreateInput: this.rotationVariables },
+          update(store, { data }) {
+            updateStoreAfterRotationAdd(store, getOncallSchedulesQuery, data, schedule.iid, {
+              projectPath,
+            });
+          },
         })
         .then(({ data: { oncallRotationCreate: { errors: [error] } } }) => {
           if (error) {
             throw error;
           }
+
           this.$refs.createScheduleRotationModal.hide();
+          return createFlash({
+            message: this.$options.i18n.rotationCreated,
+            type: FLASH_TYPES.SUCCESS,
+          });
         })
         .catch(error => {
           this.error = error;
