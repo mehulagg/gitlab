@@ -7,8 +7,6 @@ module Resolvers
     type Types::ExternalIssueType, null: true
 
     def resolve
-      return serialize_external_issue(object.external_issue, object.external_type) if object.external_issue.present?
-
       BatchLoader::GraphQL.for(object.external_issue_key).batch(key: object.external_type) do |external_issue_keys, loader, args|
         case args[:key]
         when 'jira'

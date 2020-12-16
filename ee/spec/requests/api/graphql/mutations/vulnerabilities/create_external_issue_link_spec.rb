@@ -98,10 +98,10 @@ RSpec.describe 'Creating an External Issue Link' do
           context 'and saving external issue link succeeds' do
             let(:external_issue_id) { '10000' }
 
-            it 'creates the external issue link', :aggregate_failures do
+            it 'creates the external issue link and returns nil for external issue to be fetched using query', :aggregate_failures do
               expect { post_graphql_mutation(mutation, current_user: current_user) }.to change(Vulnerabilities::ExternalIssueLink, :count).by(1)
               expect(mutation_response['errors']).to be_empty
-              expect(mutation_response.dig('externalIssueLink', 'externalIssue', 'relativeReference')).to eq('GV-5')
+              expect(mutation_response.dig('externalIssueLink', 'externalIssue')).to be_nil
             end
           end
 
