@@ -242,7 +242,7 @@ please let us know.
 
 You can help others by reporting successful configurations and probably share a
 few insights or provide warnings for common errors or pitfalls by sharing your
-experience [in the public Wiki](https://github.com/gitlabhq/gitlab-public-wiki/wiki/Custom-omniauth-provider-configurations).
+experience [in our public forums](https://forum.gitlab.com/c/how-to-use-gitlab/).
 
 While we can't officially support every possible authentication mechanism out there,
 we'd like to at least help those with specific needs.
