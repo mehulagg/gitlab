@@ -310,16 +310,22 @@ describe('Vulnerability Header', () => {
   });
 
   describe('status description', () => {
-    it('the status description is rendered and passed the correct data', () => {
-      const user = createRandomUser();
-      const vulnerability = {
+    let vulnerability;
+    let user;
+
+    beforeEach(() => {
+      user = createRandomUser();
+
+      vulnerability = {
         ...defaultVulnerability,
         state: 'confirmed',
         confirmedById: user.id,
       };
 
       createWrapper({ vulnerability });
+    });
 
+    it('the status description is rendered and passed the correct data', () => {
       return waitForPromises().then(() => {
         expect(findStatusDescription().exists()).toBe(true);
         expect(findStatusDescription().props()).toEqual({

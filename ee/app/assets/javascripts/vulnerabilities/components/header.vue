@@ -143,10 +143,12 @@ export default {
           mutation: vulnerabilityStateMutations[action],
           variables: { id: `${gidPrefix}${this.vulnerability.id}`, ...payload },
         });
-        const queryName = Object.keys(data)[0];
-        Object.assign(this.vulnerability, data[queryName].vulnerability);
-        this.vulnerability.id = this.vulnerability.id.replace(gidPrefix, '');
-        this.vulnerability.state = this.vulnerability.state.toLowerCase();
+        const [queryName] = Object.keys(data);
+        const { vulnerability } = data[queryName];
+        vulnerability.id = vulnerability.id.replace(gidPrefix, '');
+        vulnerability.state = vulnerability.state.toLowerCase();
+
+        Object.assign(this.vulnerability, vulnerability);
         this.$emit('vulnerability-state-change');
       } catch (e) {
         createFlash(
@@ -154,9 +156,9 @@ export default {
             'VulnerabilityManagement|Something went wrong, could not update vulnerability state.',
           ),
         );
+      } finally {
+        this.isLoadingVulnerability = false;
       }
-
-      this.isLoadingVulnerability = false;
     },
 
     createMergeRequest() {
