@@ -2,8 +2,9 @@ import Vuex from 'vuex';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import { GlLoadingIcon, GlPagination } from '@gitlab/ui';
 import MockAdapter from 'axios-mock-adapter';
-import { TEST_HOST } from 'spec/test_constants';
 import Mousetrap from 'mousetrap';
+import { TEST_HOST } from 'spec/test_constants';
+import { useLocalStorageSpy } from 'helpers/local_storage_helper';
 import App from '~/diffs/components/app.vue';
 import NoChanges from '~/diffs/components/no_changes.vue';
 import DiffFile from '~/diffs/components/diff_file.vue';
@@ -25,6 +26,8 @@ const mergeRequestDiff = { version_index: 1 };
 const TEST_ENDPOINT = `${TEST_HOST}/diff/endpoint`;
 const COMMIT_URL = `${TEST_HOST}/COMMIT/OLD`;
 const UPDATED_COMMIT_URL = `${TEST_HOST}/COMMIT/NEW`;
+const mrPath = TEST_ENDPOINT.replace(/\/endpoint$/, '');
+const fakeDate = [2020, 11, 15, 13, 25]; // 2020 December 15, 13:25 (1:25 PM)
 
 function getCollapsedFilesWarning(wrapper) {
   return wrapper.find(CollapsedFilesWarning);
@@ -35,6 +38,8 @@ describe('diffs/components/app', () => {
   let store;
   let wrapper;
   let mock;
+
+  useLocalStorageSpy();
 
   function createComponent(props = {}, extendStore = () => {}, provisions = {}) {
     const localVue = createLocalVue();
@@ -795,6 +800,61 @@ describe('diffs/components/app', () => {
           expect(store.state.diffs.viewDiffsFileByFile).toBe(setting);
         },
       );
+    });
+  });
+
+  describe('file reviews', () => {
+    describe('data', () => {
+      beforeEach(() => {
+        localStorage.clear();
+      });
+
+      it("sets the appropriate `allReviews` given what's in localStorage", () => {
+        const reviews = { abc: { '123': { date: new Date(...fakeDate).toISOString() } } };
+        localStorage.setItem(mrPath, JSON.stringify(reviews));
+
+        createComponent();
+
+        expect(localStorage.getItem).toHaveBeenCalledTimes(2);
+        expect(localStorage.getItem.mock.calls[1][0]).toBe(mrPath);
+        expect(wrapper.vm.allReviews).toStrictEqual(reviews);
+      });
+
+      it('sets the `fileReviews` to an empty array', () => {
+        createComponent();
+
+        expect(wrapper.vm.fileReviews).toStrictEqual([]);
+      });
+    });
+
+    describe('watchers', () => {
+      describe('diffFiles', () => {
+        it.each`
+          review               | fileId   | result
+          ${'review'}          | ${'123'} | ${{ date: new Date(...fakeDate).toISOString() }}
+          ${'undefined value'} | ${'098'} | ${undefined}
+        `(
+          'recomputes to the correct $review when the diff files change',
+          async ({ fileId, result }) => {
+            const reviews = { abc: { '123': { date: new Date(...fakeDate).toISOString() } } };
+            const diffFile = {
+              file_identifier_hash: 'abc',
+              id: fileId,
+              highlighted_diff_lines: [],
+            };
+            localStorage.setItem(mrPath, JSON.stringify(reviews));
+
+            createComponent();
+
+            expect(wrapper.vm.fileReviews).toStrictEqual([]);
+
+            store.state.diffs.diffFiles = [diffFile];
+            await wrapper.vm.$nextTick();
+
+            expect(wrapper.vm.fileReviews).toStrictEqual([result]);
+          },
+        );
+      });
     });
   });
 });
