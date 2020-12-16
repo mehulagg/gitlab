@@ -190,7 +190,7 @@ requirements_confirmation:
       requirements: tmp/requirements.json
 ```
 
-## Importing requirements from CSV
+## Import requirements from a CSV file
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/246857) in GitLab 13.6.
 
