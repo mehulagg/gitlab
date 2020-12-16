@@ -236,5 +236,18 @@ RSpec.describe Gitlab::Ci::Config::External::Mapper do
         end
       end
     end
+
+    context "when 'include' section uses project variable" do
+      let(:values) do
+        { include: { project: '$CI_PROJECT_PATH', file: local_file },
+          image: 'ruby:2.7' }
+      end
+
+      it 'expands the variable' do
+        expect(subject).to contain_exactly(
+          an_instance_of(Gitlab::Ci::Config::External::File::Project))
+        expect(subject.first.project_name).to eq(project.full_path)
+      end
+    end
   end
 end
