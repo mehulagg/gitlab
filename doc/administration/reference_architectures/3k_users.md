@@ -18,6 +18,10 @@ maintain a highly-available environment, you can have a simpler and less
 costly-to-operate environment by using the
 [2,000-user reference architecture](2k_users.md).
 
+NOTE:
+If you have fewer than 3,000 users and still want a highly-available GitLab deployment,
+you should still use this reference architecture but scale down the node sizes.
+
 > - **Supported users (approximate):** 3,000
 > - **High Availability:** Yes
 > - **Test requests per second (RPS) rates:** API: 60 RPS, Web: 6 RPS, Git: 6 RPS
