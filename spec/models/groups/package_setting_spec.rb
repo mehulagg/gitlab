@@ -24,8 +24,6 @@ RSpec.describe Groups::PackageSetting do
       valid_regexps = %w[SNAPSHOT .* v.+ v10.1.* (?:v.+|SNAPSHOT|TEMP)]
       invalid_regexps = ['[', '(?:v.+|SNAPSHOT|TEMP']
 
-      it { is_expected.to validate_presence_of(:name_regex) }
-
       valid_regexps.each do |valid_regexp|
         it { is_expected.to allow_value(valid_regexp).for(:maven_duplicate_exception_regex) }
       end

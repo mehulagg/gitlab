@@ -33,7 +33,7 @@ module Mutations
         def resolve(group_path:, **args)
           group = authorized_find!(full_path: project_path)
 
-          result = ::Group::PackageSettings::UpdateService
+          result = ::Groups::PackageSettings::UpdateService
             .new(container: group, current_user: current_user, params: args)
             .execute
 
