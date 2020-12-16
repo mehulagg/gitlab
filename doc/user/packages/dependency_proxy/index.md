@@ -62,7 +62,7 @@ Prerequisites:
 
 ### Authenticate with the Dependency Proxy
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/11582) authentication and support for private groups in [GitLab Core](https://about.gitlab.com/pricing/) 13.7.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/11582) in [GitLab Core](https://about.gitlab.com/pricing/) 13.7.
 > - It's [deployed behind a feature flag](../../feature_flags.md), disabled by default.
 > - [Became enabled by default](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/49519) in GitLab 13.7.
 > - It's enabled on GitLab.com.
