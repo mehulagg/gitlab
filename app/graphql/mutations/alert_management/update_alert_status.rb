@@ -9,8 +9,8 @@ module Mutations
                required: true,
                description: 'The status to set the alert'
 
-      def resolve(project_path:, iid:, status:)
-        alert = authorized_find!(project_path: project_path, iid: iid)
+      def resolve(project_path:, iid:, status:, domain:)
+        alert = authorized_find!(project_path: project_path, iid: iid, domain: domain)
         result = update_status(alert, status)
 
         track_usage_event(:incident_management_alert_status_changed, current_user.id)

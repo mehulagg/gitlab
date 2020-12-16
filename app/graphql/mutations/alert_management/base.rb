@@ -13,6 +13,11 @@ module Mutations
                required: true,
                description: "The IID of the alert to mutate"
 
+      argument :domain, Types::AlertManagement::DomainFilterEnum,
+               description: 'Update alert with given domain',
+               required: true,
+               default_value: 'operations'
+
       field :alert,
             Types::AlertManagement::AlertType,
             null: true,

@@ -852,6 +852,11 @@ input AlertSetAssigneesInput {
   clientMutationId: String
 
   """
+  Update alert with given domain
+  """
+  domain: AlertManagementDomainFilter! = operations
+
+  """
   The IID of the alert to mutate
   """
   iid: String!
@@ -905,6 +910,11 @@ input AlertTodoCreateInput {
   A unique identifier for the client performing the mutation.
   """
   clientMutationId: String
+
+  """
+  Update alert with given domain
+  """
+  domain: AlertManagementDomainFilter! = operations
 
   """
   The IID of the alert to mutate
@@ -3859,6 +3869,11 @@ input CreateAlertIssueInput {
   A unique identifier for the client performing the mutation.
   """
   clientMutationId: String
+
+  """
+  Update alert with given domain
+  """
+  domain: AlertManagementDomainFilter! = operations
 
   """
   The IID of the alert to mutate
@@ -23218,6 +23233,11 @@ input UpdateAlertStatusInput {
   A unique identifier for the client performing the mutation.
   """
   clientMutationId: String
+
+  """
+  Update alert with given domain
+  """
+  domain: AlertManagementDomainFilter! = operations
 
   """
   The IID of the alert to mutate

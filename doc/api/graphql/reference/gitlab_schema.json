@@ -2139,6 +2139,20 @@
               "defaultValue": null
             },
             {
+              "name": "domain",
+              "description": "Update alert with given domain",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "ENUM",
+                  "name": "AlertManagementDomainFilter",
+                  "ofType": null
+                }
+              },
+              "defaultValue": "operations"
+            },
+            {
               "name": "assigneeUsernames",
               "description": "The usernames to assign to the alert. Replaces existing assignees by default.",
               "type": {
@@ -2313,6 +2327,20 @@
                 }
               },
               "defaultValue": null
+            },
+            {
+              "name": "domain",
+              "description": "Update alert with given domain",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "ENUM",
+                  "name": "AlertManagementDomainFilter",
+                  "ofType": null
+                }
+              },
+              "defaultValue": "operations"
             },
             {
               "name": "clientMutationId",
@@ -10617,6 +10645,20 @@
                 }
               },
               "defaultValue": null
+            },
+            {
+              "name": "domain",
+              "description": "Update alert with given domain",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "ENUM",
+                  "name": "AlertManagementDomainFilter",
+                  "ofType": null
+                }
+              },
+              "defaultValue": "operations"
             },
             {
               "name": "clientMutationId",
@@ -67966,6 +68008,20 @@
                 }
               },
               "defaultValue": null
+            },
+            {
+              "name": "domain",
+              "description": "Update alert with given domain",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "ENUM",
+                  "name": "AlertManagementDomainFilter",
+                  "ofType": null
+                }
+              },
+              "defaultValue": "operations"
             },
             {
               "name": "status",
