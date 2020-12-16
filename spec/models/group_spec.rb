@@ -28,7 +28,7 @@ RSpec.describe Group do
     it { is_expected.to have_many(:iterations) }
     it { is_expected.to have_many(:group_deploy_keys) }
     it { is_expected.to have_many(:services) }
-    it { is_expected.to have_one(:group_package_setting) }
+    it { is_expected.to have_one(:package_setting) }
     it { is_expected.to have_one(:dependency_proxy_setting) }
     it { is_expected.to have_many(:dependency_proxy_blobs) }
     it { is_expected.to have_many(:dependency_proxy_manifests) }
@@ -49,18 +49,18 @@ RSpec.describe Group do
 
     context 'when creating a new group' do
       it 'automatically creates a group package setting row' do
-        expect(group.group_package_setting).to be_an_instance_of(GroupPackageSetting)
-        expect(group.group_package_setting).to be_persisted
+        expect(group.package_setting).to be_an_instance_of(Groups::PackageSetting)
+        expect(group.package_setting).to be_persisted
       end
 
       it 'does not create another group package setting if there is already one' do
         project = build(:group)
 
         expect do
-          group_package_setting = create(:group_package_setting, group: group)
+          package_setting = create(:group_package_setting, group: group)
 
-          expect(project.container_expiration_policy).to eq(container_expiration_policy)
-        end.to change { GroupPackageSetting.count }.by(1)
+          expect(project.package_setting).to eq(package_setting)
+        end.to change { Groups::PackageSetting.count }.by(1)
       end
     end
   end

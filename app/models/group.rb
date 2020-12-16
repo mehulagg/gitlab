@@ -71,7 +71,7 @@ class Group < Namespace
   has_many :group_deploy_tokens
   has_many :deploy_tokens, through: :group_deploy_tokens
 
-  has_one :group_package_setting, inverse_of: :group
+  has_one :package_setting, inverse_of: :group
   has_one :dependency_proxy_setting, class_name: 'DependencyProxy::GroupSetting'
   has_many :dependency_proxy_blobs, class_name: 'DependencyProxy::Blob'
   has_many :dependency_proxy_manifests, class_name: 'DependencyProxy::Manifest'
@@ -94,8 +94,8 @@ class Group < Namespace
 
   add_authentication_token_field :runners_token, encrypted: -> { Feature.enabled?(:groups_tokens_optional_encryption, default_enabled: true) ? :optional : :required }
 
-  after_create :group_package_setting,
-    unless: :group_package_setting
+  after_create :package_setting,
+    unless: :package_setting
   after_create :post_create_hook
   after_destroy :post_destroy_hook
   after_save :update_two_factor_requirement

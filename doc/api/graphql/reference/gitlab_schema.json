@@ -26725,7 +26725,7 @@
               ],
               "type": {
                 "kind": "OBJECT",
-                "name": "GroupPackageSetting",
+                "name": "PackageSetting",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -29005,51 +29005,6 @@
               "deprecationReason": null
             }
           ],
-          "possibleTypes": null
-        },
-        {
-          "kind": "OBJECT",
-          "name": "GroupPackageSetting",
-          "description": "The group level package registry settings",
-          "fields": [
-            {
-              "name": "mavenDuplicateExceptionRegex",
-              "description": "Packages with names matching this regex will be allowed when maven_duplicates_allowed is false.",
-              "args": [
-
-              ],
-              "type": {
-                "kind": "SCALAR",
-                "name": "UntrustedRegexp",
-                "ofType": null
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
-              "name": "mavenDuplicatesAllowed",
-              "description": "Indicates whether duplicate Maven packages are allowed for this group.",
-              "args": [
-
-              ],
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "SCALAR",
-                  "name": "Boolean",
-                  "ofType": null
-                }
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            }
-          ],
-          "inputFields": null,
-          "interfaces": [
-
-          ],
-          "enumValues": null,
           "possibleTypes": null
         },
         {
@@ -43754,33 +43709,6 @@
               "deprecationReason": null
             },
             {
-              "name": "updateGroupPackageSettings",
-              "description": null,
-              "args": [
-                {
-                  "name": "input",
-                  "description": null,
-                  "type": {
-                    "kind": "NON_NULL",
-                    "name": null,
-                    "ofType": {
-                      "kind": "INPUT_OBJECT",
-                      "name": "UpdateGroupPackageSettingsInput",
-                      "ofType": null
-                    }
-                  },
-                  "defaultValue": null
-                }
-              ],
-              "type": {
-                "kind": "OBJECT",
-                "name": "UpdateGroupPackageSettingsPayload",
-                "ofType": null
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
               "name": "updateImageDiffNote",
               "description": "Updates a DiffNote on an image (a `Note` where the `position.positionType` is `\"image\"`). If the body of the Note contains only quick actions, the Note will be destroyed during the update, and no Note will be returned",
               "args": [
@@ -43883,6 +43811,33 @@
               "type": {
                 "kind": "OBJECT",
                 "name": "UpdateNotePayload",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "updatePackageSettings",
+              "description": null,
+              "args": [
+                {
+                  "name": "input",
+                  "description": null,
+                  "type": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "UpdatePackageSettingsInput",
+                      "ofType": null
+                    }
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "UpdatePackageSettingsPayload",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -46551,6 +46506,51 @@
                 "kind": "OBJECT",
                 "name": "PackageFileRegistry",
                 "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "PackageSetting",
+          "description": "The group level package registry settings",
+          "fields": [
+            {
+              "name": "mavenDuplicateExceptionRegex",
+              "description": "Packages with names matching this regex will be allowed when maven_duplicates_allowed is false.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "UntrustedRegexp",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "mavenDuplicatesAllowed",
+              "description": "Indicates whether duplicate Maven packages are allowed for this group.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                }
               },
               "isDeprecated": false,
               "deprecationReason": null
@@ -69664,128 +69664,6 @@
         },
         {
           "kind": "INPUT_OBJECT",
-          "name": "UpdateGroupPackageSettingsInput",
-          "description": "Autogenerated input type of UpdateGroupPackageSettings",
-          "fields": null,
-          "inputFields": [
-            {
-              "name": "groupPath",
-              "description": "The group path where the group package setting is located",
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "SCALAR",
-                  "name": "ID",
-                  "ofType": null
-                }
-              },
-              "defaultValue": null
-            },
-            {
-              "name": "mavenDuplicatesAllowed",
-              "description": "Indicates whether duplicate Maven packages are allowed for this group.",
-              "type": {
-                "kind": "SCALAR",
-                "name": "Boolean",
-                "ofType": null
-              },
-              "defaultValue": null
-            },
-            {
-              "name": "mavenDuplicateExceptionRegex",
-              "description": "Packages with names matching this regex will be allowed when maven_duplicates_allowed is false.",
-              "type": {
-                "kind": "SCALAR",
-                "name": "UntrustedRegexp",
-                "ofType": null
-              },
-              "defaultValue": null
-            },
-            {
-              "name": "clientMutationId",
-              "description": "A unique identifier for the client performing the mutation.",
-              "type": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              },
-              "defaultValue": null
-            }
-          ],
-          "interfaces": null,
-          "enumValues": null,
-          "possibleTypes": null
-        },
-        {
-          "kind": "OBJECT",
-          "name": "UpdateGroupPackageSettingsPayload",
-          "description": "Autogenerated return type of UpdateGroupPackageSettings",
-          "fields": [
-            {
-              "name": "clientMutationId",
-              "description": "A unique identifier for the client performing the mutation.",
-              "args": [
-
-              ],
-              "type": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
-              "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
-              "args": [
-
-              ],
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "LIST",
-                  "name": null,
-                  "ofType": {
-                    "kind": "NON_NULL",
-                    "name": null,
-                    "ofType": {
-                      "kind": "SCALAR",
-                      "name": "String",
-                      "ofType": null
-                    }
-                  }
-                }
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
-              "name": "groupPackageSetting",
-              "description": "The group package setting after mutation",
-              "args": [
-
-              ],
-              "type": {
-                "kind": "OBJECT",
-                "name": "GroupPackageSetting",
-                "ofType": null
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            }
-          ],
-          "inputFields": null,
-          "interfaces": [
-
-          ],
-          "enumValues": null,
-          "possibleTypes": null
-        },
-        {
-          "kind": "INPUT_OBJECT",
           "name": "UpdateImageDiffNoteInput",
           "description": "Autogenerated input type of UpdateImageDiffNote",
           "fields": null,
@@ -70423,6 +70301,128 @@
               "type": {
                 "kind": "OBJECT",
                 "name": "Note",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "INPUT_OBJECT",
+          "name": "UpdatePackageSettingsInput",
+          "description": "Autogenerated input type of UpdatePackageSettings",
+          "fields": null,
+          "inputFields": [
+            {
+              "name": "groupPath",
+              "description": "The group path where the group package setting is located.",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "ID",
+                  "ofType": null
+                }
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "mavenDuplicatesAllowed",
+              "description": "Indicates whether duplicate Maven packages are allowed for this group.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "mavenDuplicateExceptionRegex",
+              "description": "Packages with names matching this regex will be allowed when maven_duplicates_allowed is false.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "UntrustedRegexp",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "clientMutationId",
+              "description": "A unique identifier for the client performing the mutation.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            }
+          ],
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "UpdatePackageSettingsPayload",
+          "description": "Autogenerated return type of UpdatePackageSettings",
+          "fields": [
+            {
+              "name": "clientMutationId",
+              "description": "A unique identifier for the client performing the mutation.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "errors",
+              "description": "Errors encountered during execution of the mutation.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "SCALAR",
+                      "name": "String",
+                      "ofType": null
+                    }
+                  }
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "packageSetting",
+              "description": "The group package setting after mutation.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "PackageSetting",
                 "ofType": null
               },
               "isDeprecated": false,

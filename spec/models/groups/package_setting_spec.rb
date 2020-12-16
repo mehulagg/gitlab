@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe GroupPackageSetting do
+RSpec.describe Groups::PackageSetting do
   describe 'relationships' do
     it { is_expected.to belong_to(:group) }
   end
