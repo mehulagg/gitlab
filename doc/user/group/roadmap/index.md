@@ -14,6 +14,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 > - Feature flag for milestones visible in roadmaps removed in [GitLab 13.0](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/29641).
 > - In [GitLab 13.2](https://gitlab.com/gitlab-org/gitlab/-/issues/214375) and later, the Roadmap also shows milestones in projects in a group.
 > - In [GitLab 13.2](https://gitlab.com/gitlab-org/gitlab/-/issues/212494) and later, milestone bars can be collapsed and expanded.
+> - Filtering roadmaps by milestone [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/218621) in GitLab 13.7.
 
 Epics and milestones within a group containing a start date or due date can be visualized in a form
 of a timeline (that is, a Gantt chart). The Roadmap page shows the epics and milestones in a
@@ -24,10 +25,13 @@ When you hover over an epic bar, a popover appears with the epic's title, start 
 weight completed.
 
 You can expand epics that contain child epics to show their child epics in the roadmap.
-You can click the chevron (**{chevron-down}**) next to the epic title to expand and collapse the child epics.
+You can click the chevron (**{chevron-down}**) next to the epic title to expand and collapse the
+child epics.
 
-On top of the milestone bars, you can see their title. When you hover a milestone bar or title, a popover appears with its title, start date and due date.
-You can also click the chevron (**{chevron-down}**) next to the **Milestones** heading to toggle the list of the milestone bars.
+On top of the milestone bars, you can see their title.
+When you hover over a milestone bar or title, a popover appears with its title, start date, and due
+date. You can also click the chevron (**{chevron-down}**) next to the **Milestones** heading to
+toggle the list of the milestone bars.
 
 ![roadmap view](img/roadmap_view_v13_2.png)
 
@@ -45,11 +49,11 @@ You can sort epics in the Roadmap view by:
 Each option contains a button that toggles the sort order between **ascending** and **descending**.
 The sort option and order persist when browsing Epics, including the [epics list view](../epics/index.md).
 
-There is an option to filter epics in the Roadmap viw by:
+You can also filter epics in the Roadmap view by:
 
 - Author
 - Label
-- Milestone - introduced in [GitLab 13.7](https://gitlab.com/gitlab-org/gitlab/-/issues/218621)
+- Milestone
 
 ![roadmap date range in weeks](img/roadmap_filters.png)
 
