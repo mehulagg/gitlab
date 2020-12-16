@@ -46,10 +46,12 @@ module Gitlab
 
           # convert location if String to canonical form
           def normalize_location(location)
+            expanded_location = expand_variables(location)
+
             if location.is_a?(String)
-              normalize_location_string(location)
+              normalize_location_string(expanded_location)
             else
-              location.deep_symbolize_keys
+              expanded_location.deep_symbolize_keys
             end
           end
 
@@ -95,6 +97,14 @@ module Gitlab
             raise AmbigiousSpecificationError, "Include `#{location.to_json}` needs to match exactly one accessor!" unless matching.one?
 
             matching.first
+          end
+
+          def expand_variables(data)
+            if data.is_a?(String)
+              ExpandVariables.expand(data, context.variables)
+            else
+              data.transform_values { |value| ExpandVariables.expand(value, context.variables) }
+            end
           end
         end
       end
