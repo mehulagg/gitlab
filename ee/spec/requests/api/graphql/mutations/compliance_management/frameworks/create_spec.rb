@@ -12,9 +12,11 @@ RSpec.describe 'Create a Compliance Framework' do
     graphql_mutation(
       :create_compliance_framework,
       namespace_path: namespace.full_path,
-      name: 'GDPR',
-      description: 'Example Description',
-      color: '#ABC123'
+      params: {
+        name: 'GDPR',
+        description: 'Example Description',
+        color: '#ABC123'
+      }
     )
   end
 

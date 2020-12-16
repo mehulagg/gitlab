@@ -10,9 +10,11 @@ RSpec.describe 'Update a compliance framework' do
   let(:current_user) { framework.namespace.owner }
   let(:params) do
     {
-      name: 'New Name',
-      description: 'New Description',
-      color: '#AAC112'
+      params: {
+        name: 'New Name',
+        description: 'New Description',
+        color: '#AAC112'
+      }
     }
   end
 
@@ -72,9 +74,11 @@ RSpec.describe 'Update a compliance framework' do
     context 'with invalid params' do
       let(:params) do
         {
-          name: '',
-          description: '',
-          color: 'NOTACOLOR'
+          params: {
+            name: '',
+            description: '',
+            color: 'NOTACOLOR'
+          }
         }
       end
 

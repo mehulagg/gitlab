@@ -9229,6 +9229,47 @@
           "possibleTypes": null
         },
         {
+          "kind": "INPUT_OBJECT",
+          "name": "ComplianceFrameworkInput",
+          "description": null,
+          "fields": null,
+          "inputFields": [
+            {
+              "name": "name",
+              "description": "New name for the compliance framework.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "description",
+              "description": "New description for the compliance framework.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "color",
+              "description": "New color representation of the compliance framework in hex format. e.g. #FCA121.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            }
+          ],
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
           "kind": "SCALAR",
           "name": "ComplianceManagementFrameworkID",
           "description": "Identifier of ComplianceManagement::Framework",
@@ -11341,44 +11382,12 @@
               "defaultValue": null
             },
             {
-              "name": "name",
-              "description": "Name of the compliance framework.",
+              "name": "params",
+              "description": "Parameters to update the compliance framework with.",
               "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
-                }
-              },
-              "defaultValue": null
-            },
-            {
-              "name": "description",
-              "description": "Description of the compliance framework.",
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
-                }
-              },
-              "defaultValue": null
-            },
-            {
-              "name": "color",
-              "description": "Color to represent the compliance framework as a hexadecimal value. e.g. #ABC123.",
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
-                }
+                "kind": "INPUT_OBJECT",
+                "name": "ComplianceFrameworkInput",
+                "ofType": null
               },
               "defaultValue": null
             },
@@ -68873,7 +68882,7 @@
           "inputFields": [
             {
               "name": "id",
-              "description": "The global ID of the compliance framework to update",
+              "description": "The global ID of the compliance framework to update.",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -68886,31 +68895,11 @@
               "defaultValue": null
             },
             {
-              "name": "name",
-              "description": "New name for the compliance framework",
+              "name": "params",
+              "description": "Parameters to update the compliance framework with.",
               "type": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              },
-              "defaultValue": null
-            },
-            {
-              "name": "description",
-              "description": "New description for the compliance framework",
-              "type": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              },
-              "defaultValue": null
-            },
-            {
-              "name": "color",
-              "description": "New color representation of the compliance framework in hex format. e.g. #FCA121",
-              "type": {
-                "kind": "SCALAR",
-                "name": "String",
+                "kind": "INPUT_OBJECT",
+                "name": "ComplianceFrameworkInput",
                 "ofType": null
               },
               "defaultValue": null
@@ -68951,7 +68940,7 @@
             },
             {
               "name": "complianceFramework",
-              "description": "The compliance framework after mutation",
+              "description": "The compliance framework after mutation.",
               "args": [
 
               ],
