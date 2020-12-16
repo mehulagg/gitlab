@@ -453,21 +453,29 @@ RSpec.describe Vulnerabilities::Finding do
   end
 
   describe '#remediations' do
-    let_it_be(:raw_remediation) { { summary: 'foo', diff: 'bar' }.stringify_keys }
-    let_it_be(:raw_metadata) { { remediations: [raw_remediation] }.to_json }
-    let_it_be(:finding) { create(:vulnerabilities_finding, raw_metadata: raw_metadata) }
+    let(:raw_remediation) { { summary: 'foo', diff: 'bar' }.stringify_keys }
+    let(:raw_metadata) { { remediations: [raw_remediation] }.to_json }
+    let(:finding) { create(:vulnerabilities_finding, raw_metadata: raw_metadata) }
 
-    subject { finding.reload.remediations }
+    subject { finding.remediations }
 
     context 'when the finding has associated remediation records' do
-      let_it_be(:persisted_remediation) { create(:vulnerabilities_remediation, findings: [finding]) }
-      let_it_be(:remediation_hash) { persisted_remediation.as_json(only: [:summary, :diff]) }
+      let!(:persisted_remediation) { create(:vulnerabilities_remediation, findings: [finding]) }
+      let(:remediation_hash) { persisted_remediation.as_json(only: [:summary, :diff]) }
 
       it { is_expected.to eq([remediation_hash]) }
     end
 
     context 'when the finding does not have associated remediation records' do
-      it { is_expected.to eq([raw_remediation]) }
+      context 'when the finding has remediations in `raw_metadata`' do
+        it { is_expected.to eq([raw_remediation]) }
+      end
+
+      context 'when the finding does not have remediations in `raw_metadata`' do
+        let(:raw_metadata) { {}.to_json }
+
+        it { is_expected.to eq([]) }
+      end
     end
   end
 

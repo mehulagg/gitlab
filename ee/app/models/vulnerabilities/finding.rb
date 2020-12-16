@@ -271,7 +271,7 @@ module Vulnerabilities
     end
 
     def remediations
-      return metadata.dig('remediations') unless super.present?
+      return metadata.dig('remediations').to_a unless super.present?
 
       super.as_json(only: [:summary, :diff])
     end
