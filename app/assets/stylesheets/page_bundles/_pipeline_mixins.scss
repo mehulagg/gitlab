@@ -85,14 +85,7 @@
 
   // Dropdown button animation in mini pipeline graph
   &.ci-status-icon-success {
-    @include mini-pipeline-graph-color(
-      var(--white, $white),
-      var(--green-200, $green-100),
-      var(--green-500, $green-200),
-      var(--green-600, $green-500),
-      var(--green-700 $green-600),
-      var(--green-100, $green-700)
-    );
+    @include mini-pipeline-graph-color(var(--white, $white), $green-100, $green-200, $green-500, $green-600, $green-700);
   }
 
   &.ci-status-icon-failed {

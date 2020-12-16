@@ -262,7 +262,7 @@
   }
 
   .link-commit {
-    color: $blue-600;
+    color: var(--blue-600, $blue-600);
   }
 }
 
