@@ -305,7 +305,7 @@ bundle exec stackprof --stackcollapse /tmp/stackprof.55769.c6c3906452.profile | 
 
 ## RSpec profiling
 
-GitLab's development environment also includes the
+The GitLab development environment also includes the
 [rspec_profiling](https://github.com/foraker/rspec_profiling) gem, which is used
 to collect data on spec execution times. This is useful for analyzing the
 performance of the test suite itself, or seeing how the performance of a spec

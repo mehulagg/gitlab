@@ -734,7 +734,7 @@ faults it reports.
 ## Viewing fuzzing faults
 
 The API Fuzzing analyzer produces a JSON report that is collected and used
-[to populate the faults into GitLab's vulnerability screens](../index.md#view-details-of-an-api-fuzzing-vulnerability).
+[to populate the faults into GitLab vulnerability screens](../index.md#view-details-of-an-api-fuzzing-vulnerability).
 Fuzzing faults show up as vulnerabilities with a severity of Unknown.
 
 The faults that API fuzzing finds require manual investigation and aren't associated with a specific
@@ -754,7 +754,7 @@ pipelines. For more information, see the [Security Dashboard documentation](../s
 
 ### Interacting with the vulnerabilities
 
-Fuzzing faults show up as vulnerabilities with a severity of Unknown. 
+Fuzzing faults show up as vulnerabilities with a severity of Unknown.
 Once a fault is found, you can interact with it. Read more on how to
 [interact with the vulnerabilities](../index.md#interacting-with-the-vulnerabilities).
 
