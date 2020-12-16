@@ -127,6 +127,7 @@ RSpec.describe 'Profile > Personal Access Tokens', :js do
         expect(feed_token).to eq(user.feed_token)
       end
     end
+
     context "when disabled" do
       it "does not display feed token" do
         allow(Gitlab::CurrentSettings).to receive(:disable_feed_token).and_return(true)
