@@ -37,6 +37,10 @@ RSpec.describe MergeRequests::MergeService do
         expect(merge_request.in_progress_merge_commit_sha).to be_nil
       end
 
+      it 'does not update squash_commit_sha if it is not a squash' do
+        expect(merge_request.squash_commit_sha).to be_nil
+      end
+
       it 'sends email to user2 about merge of new merge_request' do
         email = ActionMailer::Base.deliveries.last
         expect(email.to.first).to eq(user2.email)
@@ -75,6 +79,12 @@ RSpec.describe MergeRequests::MergeService do
 
           expect(merge_commit.message).to eq('Merge commit message')
           expect(squash_commit.message).to eq("Squash commit message\n")
+        end
+
+        it 'persists squash_commit_sha' do
+          squash_commit = merge_request.merge_commit.parents.last
+
+          expect(merge_request.squash_commit_sha).to eq(squash_commit.id)
         end
       end
     end
