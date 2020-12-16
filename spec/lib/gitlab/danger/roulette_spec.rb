@@ -247,14 +247,27 @@ RSpec.describe Gitlab::Danger::Roulette do
     end
 
     describe 'reviewer suggestion probability' do
+      let(:reduced_capacity_reviewer) do
+        teammate_with_capability('reduced_capacity_reviewer', 'reviewer backend', reduced_capacity: true)
+      end
+
       let(:reviewer) { teammate_with_capability('reviewer', 'reviewer backend') }
       let(:hungry_reviewer) { teammate_with_capability('hungry_reviewer', 'reviewer backend', hungry: true) }
+      let(:reduced_capacity_traintainer) do
+        teammate_with_capability('reduced_capacity_traintainer', 'trainee_maintainer backend', reduced_capacity: true)
+      end
+
       let(:traintainer) { teammate_with_capability('traintainer', 'trainee_maintainer backend') }
-      let(:hungry_traintainer) { teammate_with_capability('hungry_traintainer', 'trainee_maintainer backend', hungry: true) }
+      let(:hungry_traintainer) do
+        teammate_with_capability('hungry_traintainer', 'trainee_maintainer backend', hungry: true)
+      end
+
       let(:teammates) do
         [
+          reduced_capacity_reviewer.to_h,
           reviewer.to_h,
           hungry_reviewer.to_h,
+          reduced_capacity_traintainer.to_h,
           traintainer.to_h,
           hungry_traintainer.to_h
         ]
@@ -269,7 +282,7 @@ RSpec.describe Gitlab::Danger::Roulette do
       # Given smaller sample size, the variance would be larger,
       # but the test would take less time.
       let!(:sample_size) { 500 }
-      let!(:variance) { 0.1 }
+      let!(:variance) { 0.13 }
 
       before do
         # This test needs actual randomness to simulate probabilities
@@ -279,14 +292,16 @@ RSpec.describe Gitlab::Danger::Roulette do
           .to_return(body: teammate_json)
       end
 
-      it 'has 1:2:3:4 probability of picking reviewer, hungry_reviewer, traintainer, hungry_traintainer' do
+      it 'has correct probabilities for selecting a reviewer', :aggregate_failures do
         picks = Array.new(sample_size).map do
           spins = subject.spin(project, categories, timezone_experiment: timezone_experiment)
           spins.first.reviewer.name
         end
 
+        expect(probability(picks, 'reduced_capacity_reviewer')).to be_within(0.04).of(0.05)
         expect(probability(picks, 'reviewer')).to be_within(variance).of(0.1)
         expect(probability(picks, 'hungry_reviewer')).to be_within(variance).of(0.2)
+        expect(probability(picks, 'reduced_capacity_traintainer')).to be_within(variance).of(0.1)
         expect(probability(picks, 'traintainer')).to be_within(variance).of(0.3)
         expect(probability(picks, 'hungry_traintainer')).to be_within(variance).of(0.4)
       end
@@ -295,7 +310,7 @@ RSpec.describe Gitlab::Danger::Roulette do
         picks.count(role).to_f / picks.length
       end
 
-      def teammate_with_capability(name, capability, hungry: false)
+      def teammate_with_capability(name, capability, hungry: false, reduced_capacity: false)
         Gitlab::Danger::Teammate.new(
           {
             'name' => name,
@@ -303,7 +318,8 @@ RSpec.describe Gitlab::Danger::Roulette do
               'gitlab' => capability
             },
             'available' => true,
-            'hungry' => hungry
+            'hungry' => hungry,
+            'reduced_capacity' => reduced_capacity
           }
         )
       end
