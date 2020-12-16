@@ -70,7 +70,7 @@ if your project is located at `https://gitlab.com/foo/bar/my-proj`,
 [create your Conan package](../conan_repository/index.md) using `conan create . foo+bar+my-proj/channel`.
 `channel` is your package channel (such as `stable` or `beta`). 
 
-After your package is created, you are ready to [publish your package](../conan_repository/index.md#publish-a-conan-package),
+After you create your package, you're ready to [publish your package](../conan_repository/index.md#publish-a-conan-package),
 depending on your final package recipe. For example:
 
 ```shell
