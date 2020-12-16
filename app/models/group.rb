@@ -71,6 +71,7 @@ class Group < Namespace
   has_many :group_deploy_tokens
   has_many :deploy_tokens, through: :group_deploy_tokens
 
+  has_one :group_package_setting, inverse_of: :group
   has_one :dependency_proxy_setting, class_name: 'DependencyProxy::GroupSetting'
   has_many :dependency_proxy_blobs, class_name: 'DependencyProxy::Blob'
   has_many :dependency_proxy_manifests, class_name: 'DependencyProxy::Manifest'
