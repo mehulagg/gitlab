@@ -5,6 +5,7 @@ import MockAdapter from 'axios-mock-adapter';
 import Mousetrap from 'mousetrap';
 import { TEST_HOST } from 'spec/test_constants';
 import { useLocalStorageSpy } from 'helpers/local_storage_helper';
+import { useFakeDate } from 'helpers/fake_date';
 import App from '~/diffs/components/app.vue';
 import NoChanges from '~/diffs/components/no_changes.vue';
 import DiffFile from '~/diffs/components/diff_file.vue';
@@ -18,7 +19,7 @@ import axios from '~/lib/utils/axios_utils';
 import * as urlUtils from '~/lib/utils/url_utility';
 import diffsMockData from '../mock_data/merge_request_diffs';
 
-import { EVT_VIEW_FILE_BY_FILE } from '~/diffs/constants';
+import { EVT_VIEW_FILE_BY_FILE, EVT_REVIEW_FILE } from '~/diffs/constants';
 
 import eventHub from '~/diffs/event_hub';
 
@@ -854,6 +855,30 @@ describe('diffs/components/app', () => {
             expect(wrapper.vm.fileReviews).toStrictEqual([result]);
           },
         );
+      });
+    });
+
+    describe('control via event stream', () => {
+      useFakeDate(...fakeDate);
+
+      it('updates the stored & local reviews', async () => {
+        const review = { date: new Date(...fakeDate).toISOString() };
+        const reviews = [{ abc: { '123': review } }];
+
+        createComponent({}, str => {
+          Object.assign(str.state.diffs, {
+            diffFiles: [{ id: '123', file_identifier_hash: 'abc' }],
+          });
+        });
+        await wrapper.vm.$nextTick();
+
+        eventHub.$emit(EVT_REVIEW_FILE, { file: { id: '123', file_identifier_hash: 'abc' } });
+        await wrapper.vm.$nextTick();
+
+        expect(localStorage.setItem).toHaveBeenCalledTimes(1);
+        expect(localStorage.setItem).toHaveBeenCalledWith(mrPath, JSON.stringify(reviews[0]));
+        expect(wrapper.vm.allReviews).toStrictEqual(reviews[0]);
+        expect(wrapper.vm.fileReviews).toStrictEqual([review]);
       });
     });
   });
