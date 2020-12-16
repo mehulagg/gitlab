@@ -241,7 +241,7 @@ When importing requirements from a CSV file, it must be formatted in a certain w
 
 Sample CSV data:
 
-```csv
+```plaintext
 title,description
 My Requirement Title,My Requirement Description
 Another Title,"A description, with a comma"
