@@ -9911,12 +9911,13 @@ ALTER SEQUENCE boards_epic_boards_id_seq OWNED BY boards_epic_boards.id;
 
 CREATE TABLE boards_epic_lists (
     id bigint NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
     epic_board_id bigint NOT NULL,
     label_id bigint,
     "position" integer,
-    list_type smallint DEFAULT 1,
-    created_at timestamp with time zone NOT NULL,
-    updated_at timestamp with time zone NOT NULL
+    list_type smallint DEFAULT 1 NOT NULL,
+    CONSTRAINT boards_epic_lists_position_constraint CHECK (((list_type <> 1) OR (("position" IS NOT NULL) AND ("position" >= 0))))
 );
 
 CREATE SEQUENCE boards_epic_lists_id_seq
@@ -20848,6 +20849,8 @@ CREATE INDEX index_boards_epic_board_positions_on_epic_id ON boards_epic_board_p
 CREATE INDEX index_boards_epic_boards_on_group_id ON boards_epic_boards USING btree (group_id);
 
 CREATE INDEX index_boards_epic_lists_on_epic_board_id ON boards_epic_lists USING btree (epic_board_id);
+
+CREATE UNIQUE INDEX index_boards_epic_lists_on_epic_board_id_and_label_id ON boards_epic_lists USING btree (epic_board_id, label_id) WHERE (list_type = 1);
 
 CREATE INDEX index_boards_epic_lists_on_label_id ON boards_epic_lists USING btree (label_id);
 

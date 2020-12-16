@@ -19,6 +19,7 @@ module Types
             Types::Boards::EpicListType.connection_type,
             null: true,
             description: 'Epic board lists.',
+            extras: [:lookahead],
             resolver: Resolvers::Boards::EpicListsResolver
     end
   end
