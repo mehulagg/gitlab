@@ -77,9 +77,8 @@ depending on your final package recipe. For example:
 CONAN_LOGIN_USERNAME=<gitlab-username> CONAN_PASSWORD=<personal_access_token> conan upload MyPackage/1.0.0@foo+bar+my-proj/channel --all --remote=gitlab
 ```
 
-### Composer
+### All other package types
 
-It is currently not possible to publish a Composer package to a project that is different from where its code resides.
-
-If you attempt to publish a Composer package to a different project, you get a `404 Branch Not Found`
-or `404 Tag Not Found` error.
+[All package types supported by GitLab](../index.md) can be published in
+the same GitLab project. In previous releases, not all package types could
+be published in the same project.
