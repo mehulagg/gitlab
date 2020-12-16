@@ -1,0 +1,5 @@
+---
+title: Allow group owners to login to sso-enforced groups without sso
+merge_request: 50199
+author:
+type: changed
