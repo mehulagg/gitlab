@@ -1,9 +1,9 @@
 - namespace = local_assigns.fetch(:namespace)
 - minutes_quota = namespace.ci_minutes_quota
 
-- if namespace.any_project_with_shared_runners_enabled?
+- if minutes_quota.namespace_eligible?
   %li
-    %span.light Pipeline minutes quota:
+    %span.light= _('Pipeline minutes quota:')
     %strong
       = ci_minutes_report(minutes_quota.monthly_minutes_report)
       = link_to sprite_icon('question-o'), help_page_path('user/admin_area/settings/continuous_integration', anchor: 'shared-runners-pipeline-minutes-quota'), target: '_blank'

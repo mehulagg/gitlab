@@ -23,7 +23,7 @@ module Ci
           status = monthly_minutes_used_up? ? :over_quota : :under_quota
           Report.new(monthly_minutes_used, monthly_minutes, status)
         else
-          Report.new(monthly_minutes_used, 'Unlimited', :disabled)
+          Report.new(monthly_minutes_used, 'Not supported', :disabled)
         end
       end
 
@@ -65,11 +65,11 @@ module Ci
         100 * total_minutes_remaining.to_i / total_minutes
       end
 
-      private
-
       def namespace_eligible?
         namespace.root? && namespace.any_project_with_shared_runners_enabled?
       end
+
+      private
 
       def total_minutes_remaining
         [total_minutes.to_i - total_minutes_used, 0].max
