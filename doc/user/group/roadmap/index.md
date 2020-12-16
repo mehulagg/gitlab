@@ -45,6 +45,14 @@ You can sort epics in the Roadmap view by:
 Each option contains a button that toggles the sort order between **ascending** and **descending**.
 The sort option and order persist when browsing Epics, including the [epics list view](../epics/index.md).
 
+There is an option to filter epics in the Roadmap viw by:
+
+- Author
+- Label
+- Milestone - introduced in [GitLab 13.7](https://gitlab.com/gitlab-org/gitlab/-/issues/218621)
+
+
+
 Roadmaps can also be [visualized inside an epic](../epics/index.md#roadmap-in-epics).
 
 ## Timeline duration
