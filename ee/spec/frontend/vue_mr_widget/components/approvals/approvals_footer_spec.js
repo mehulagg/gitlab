@@ -1,4 +1,4 @@
-import { GlDeprecatedButton, GlButton, GlLoadingIcon, GlIcon } from '@gitlab/ui';
+import { GlButton, GlLoadingIcon, GlIcon } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
 import ApprovalsFooter from 'ee/vue_merge_request_widget/components/approvals/approvals_footer.vue';
 import ApprovalsList from 'ee/vue_merge_request_widget/components/approvals/approvals_list.vue';
@@ -28,8 +28,8 @@ describe('EE MRWidget approvals footer', () => {
   const findToggle = () => wrapper.find(GlButton);
   const findToggleIcon = () => findToggle().find(GlIcon);
   const findToggleLoadingIcon = () => findToggle().find(GlLoadingIcon);
-  const findExpandButton = () => wrapper.find(GlDeprecatedButton);
-  const findCollapseButton = () => wrapper.find(GlDeprecatedButton);
+  const findExpandButton = () => wrapper.find('[data-testid="approvers-expand-button"]');
+  const findCollapseButton = () => wrapper.find('[data-testid="approvers-collapse-button"]');
   const findList = () => wrapper.find(ApprovalsList);
   const findAvatars = () => wrapper.find(UserAvatarList);
 
