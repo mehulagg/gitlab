@@ -27,7 +27,7 @@ module QA
 
       context "Add project",
               testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/727',
-              quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/283925', type: :investigating } do
+              quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/283925', type: :investigating, only: :production } do
         before do
           Resource::Project.fabricate_via_browser_ui! do |project|
             project.name = 'audit-add-project-via-ui'
