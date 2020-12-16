@@ -15,6 +15,10 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 > - In [GitLab 13.2](https://gitlab.com/gitlab-org/gitlab/-/issues/214375) and later, the Roadmap also shows milestones in projects in a group.
 > - In [GitLab 13.2](https://gitlab.com/gitlab-org/gitlab/-/issues/212494) and later, milestone bars can be collapsed and expanded.
 > - Filtering roadmaps by milestone [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/218621) in GitLab 13.7.
+> - Filtering roadmaps by milestone is [deployed behind a feature flag](../../feature_flags.md), enabled by default.
+> - Filtering roadmaps by milestone is enabled on GitLab.com.
+> - Filtering roadmaps by milestone is recommended for production use.
+> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-filtering-roadmaps-by-milestone) **(PREMIUM ONLY)**
 
 Epics and milestones within a group containing a start date or due date can be visualized in a form
 of a timeline (that is, a Gantt chart). The Roadmap page shows the epics and milestones in a
@@ -104,6 +108,25 @@ the timeline header represent the days of the week.
 
 The timeline bar indicates the approximate position of an epic or milestone based on its start and
 due dates.
+
+## Enable or disable filtering roadmaps by milestone **(PREMIUM ONLY)**
+
+Filtering roadmaps by milestone is under development but ready for production use.
+It is deployed behind a feature flag that is **enabled by default**.
+[GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
+can opt to disable it.
+
+To enable it:
+
+```ruby
+Feature.enable(:async_filtering)
+```
+
+To disable it:
+
+```ruby
+Feature.disable(:async_filtering)
+```
 
 <!-- ## Troubleshooting
 
