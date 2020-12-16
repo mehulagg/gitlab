@@ -5,8 +5,10 @@
   = render 'shared/billings/billing_plan_header', namespace: namespace, plan: current_plan
 
 - if show_plans?(namespace)
-  .billing-plans.gl-mt-5.row
-    - plans_data.each do |plan|
+  - plans = available_plans(plans_data, current_plan)
+
+  .billing-plans.gl-mt-5.row.justify-content-center
+    - plans.each do |plan|
       - is_default_plan = current_plan.nil? && plan.default?
       - is_current = plan.code == current_plan&.code || is_default_plan
       .col-md-6.col-lg-3.gl-mb-5

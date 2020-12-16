@@ -12,7 +12,7 @@ From GitLab, you can trigger a Jenkins build when you push code to a repository,
 request is created. In return, the Jenkins pipeline status is shown on merge requests widgets and
 on the GitLab project's home page.
 
-To better understand GitLab's Jenkins integration, watch the following video:
+To better understand the GitLab Jenkins integration, watch the following video:
 
 - [GitLab workflow with Jira issues and Jenkins pipelines](https://youtu.be/Jn-_fyra7xQ)
 
@@ -29,14 +29,14 @@ Moving from a traditional CI plug-in to a single application for the entire soft
 life cycle can decrease hours spent on maintaining toolchains by 10% or more. For more details, see
 the ['GitLab vs. Jenkins' comparison page](https://about.gitlab.com/devops-tools/jenkins-vs-gitlab/).
 
-NOTE: **Note:**
+NOTE:
 This documentation focuses only on how to **configure** a Jenkins *integration* with
 GitLab. Learn how to **migrate** from Jenkins to GitLab CI/CD in our
 [Migrating from Jenkins](../ci/migration/jenkins.md) documentation.
 
 ## Configure GitLab integration with Jenkins
 
-GitLab's Jenkins integration requires installation and configuration in both GitLab and Jenkins.
+The GitLab Jenkins integration requires installation and configuration in both GitLab and Jenkins.
 In GitLab, you need to grant Jenkins access to the relevant projects. In Jenkins, you need to
 install and configure several plugins.
 
@@ -160,6 +160,9 @@ Configure the GitLab integration with Jenkins.
 
 ### Option 2: Webhook
 
+If you are unable to provide GitLab with your Jenkins server login, you can use this option
+to integrate GitLab and Jenkins.
+
 1. In the configuration of your Jenkins job, in the GitLab configuration section, click **Advanced**.
 1. Click the **Generate** button under the **Secret Token** field.
 1. Copy the resulting token, and save the job configuration.
@@ -200,7 +203,7 @@ If those are present, the request is exceeding the
 which is set to 10 seconds by default.
 
 To fix this the `gitlab_rails['webhook_timeout']` value must be increased
-in the `gitlab.rb` config file, followed by the [`gitlab-ctl reconfigure` command](../administration/restart_gitlab.md).
+in the `gitlab.rb` configuration file, followed by the [`gitlab-ctl reconfigure` command](../administration/restart_gitlab.md).
 
 If you don't find the errors above, but do find *duplicate* entries like below (in `/var/log/gitlab/gitlab-rail`), this
 could also indicate that [webhook requests are timing out](../user/project/integrations/webhooks.md#webhook-fails-or-multiple-webhook-requests-are-triggered):

@@ -1,0 +1,5 @@
+---
+title: Return NONE for GraphQL DastSiteValidation type status when there is no DAST site validation
+merge_request: 48751
+author:
+type: changed

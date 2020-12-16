@@ -32,6 +32,9 @@ export const deployBoardMockData = {
   rollback_url: 'url',
   completion: 100,
   status: 'found',
+  canary_ingress: {
+    canary_weight: 50,
+  },
 };
 
 export const environment = {

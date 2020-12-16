@@ -41,6 +41,8 @@ RSpec.describe VulnerabilitiesHelper do
                     :solution)
     end
 
+    let(:desired_serializer_fields) { %i[metadata identifiers name issue_feedback merge_request_feedback project project_fingerprint scanner] }
+
     before do
       vulnerability_serializer_stub = instance_double("VulnerabilitySerializer")
       expect(VulnerabilitySerializer).to receive(:new).and_return(vulnerability_serializer_stub)
@@ -48,7 +50,7 @@ RSpec.describe VulnerabilitiesHelper do
 
       finding_serializer_stub = instance_double("Vulnerabilities::FindingSerializer")
       expect(Vulnerabilities::FindingSerializer).to receive(:new).and_return(finding_serializer_stub)
-      expect(finding_serializer_stub).to receive(:represent).with(finding).and_return(finding_serializer_hash)
+      expect(finding_serializer_stub).to receive(:represent).with(finding, only: desired_serializer_fields).and_return(finding_serializer_hash)
     end
 
     around do |example|
@@ -227,7 +229,7 @@ RSpec.describe VulnerabilitiesHelper do
     subject { helper.vulnerability_finding_data(vulnerability) }
 
     it 'returns finding information' do
-      expect(subject).to match(
+      expect(subject.to_h).to match(
         description: finding.description,
         identifiers: kind_of(Array),
         issue_feedback: anything,

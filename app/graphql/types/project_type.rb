@@ -107,6 +107,8 @@ module Types
           description: 'Indicates if issues referenced by merge requests and commits within the default branch are closed automatically'
     field :suggestion_commit_message, GraphQL::STRING_TYPE, null: true,
           description: 'The commit message used to apply merge request suggestions'
+    field :squash_read_only, GraphQL::BOOLEAN_TYPE, null: false, method: :squash_readonly?,
+          description: 'Indicates if squash readonly is enabled'
 
     field :namespace, Types::NamespaceType, null: true,
           description: 'Namespace of the project'
@@ -188,6 +190,11 @@ module Types
           null: true,
           description: 'Build pipeline of the project',
           resolver: Resolvers::ProjectPipelineResolver
+
+    field :ci_cd_settings,
+          Types::Ci::CiCdSettingType,
+          null: true,
+          description: 'CI/CD settings for the project'
 
     field :sentry_detailed_error,
           Types::ErrorTracking::SentryDetailedErrorType,
@@ -304,6 +311,13 @@ module Types
           description: 'Terraform states associated with the project',
           resolver: Resolvers::Terraform::StatesResolver
 
+    field :pipeline_analytics, Types::Ci::AnalyticsType, null: true,
+          description: 'Pipeline analytics',
+          resolver: Resolvers::ProjectPipelineStatisticsResolver
+
+    field :total_pipeline_duration, GraphQL::INT_TYPE, null: true,
+          description: 'Total pipeline duration for all of the pipelines in a project'
+
     def label(title:)
       BatchLoader::GraphQL.for(title).batch(key: project) do |titles, loader, args|
         LabelsFinder
@@ -346,6 +360,10 @@ module Types
 
     def container_repositories_count
       project.container_repositories.size
+    end
+
+    def total_pipeline_duration
+      object.all_pipelines.total_duration
     end
 
     private

@@ -41,8 +41,8 @@ describe('subscription table row', () => {
 
   const createComponent = ({
     props = {},
-    apiBillableMemberListFeatureEnabled = true,
     billableSeatsHref = BILLABLE_SEATS_URL,
+    isGroup = true,
   } = {}) => {
     if (wrapper) {
       throw new Error('wrapper already exists!');
@@ -54,8 +54,8 @@ describe('subscription table row', () => {
         ...props,
       },
       provide: {
-        apiBillableMemberListFeatureEnabled,
         billableSeatsHref,
+        isGroup,
       },
       store,
       localVue,
@@ -91,13 +91,21 @@ describe('subscription table row', () => {
       .at(0)
       .find('[data-testid="seats-usage-button"]');
 
+  describe('dispatched actions', () => {
+    it('dispatches action when created if namespace is group', () => {
+      createComponent();
+      expect(store.dispatch).toHaveBeenCalledWith('fetchHasBillableGroupMembers');
+    });
+
+    it('does not dispatch action when created if namespace is not group', () => {
+      createComponent({ isGroup: false });
+      expect(store.dispatch).not.toHaveBeenCalledWith('fetchHasBillableGroupMembers');
+    });
+  });
+
   describe('default', () => {
     beforeEach(() => {
       createComponent();
-    });
-
-    it('dispatches correct actions when created', () => {
-      expect(store.dispatch).toHaveBeenCalledWith('fetchHasBillableGroupMembers');
     });
 
     it(`should render one header cell and ${COLUMNS.length} visible columns in total`, () => {

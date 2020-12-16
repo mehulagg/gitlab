@@ -61,7 +61,7 @@ export default {
         {
           key: 'projectCount',
           value: this.projectCount,
-          label: s__('RepositoriesAnalytics|Projects with Tests'),
+          label: s__('RepositoriesAnalytics|Projects with Coverage'),
         },
         {
           key: 'averageCoverage',
@@ -72,7 +72,7 @@ export default {
         {
           key: 'coverageCount',
           value: this.coverageCount,
-          label: s__('RepositoriesAnalytics|Total Number of Coverages'),
+          label: s__('RepositoriesAnalytics|Jobs with Coverage'),
         },
       ];
     },

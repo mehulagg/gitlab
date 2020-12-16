@@ -143,7 +143,7 @@ export default {
         : '';
     },
     constructResponse(response) {
-      const { body, status_code: statusCode, reason_phrase: reasonPhrase, headers = [] } = response;
+      const { body, statusCode, reasonPhrase, headers = [] } = response;
       const headerLines = this.getHeadersAsCodeBlockLines(headers);
 
       return statusCode && reasonPhrase && headerLines

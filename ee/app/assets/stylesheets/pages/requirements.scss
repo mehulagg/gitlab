@@ -21,10 +21,42 @@
     }
   }
 
-  .requirement-form-drawer.zen-mode {
-    // We need to override `z-index` provided to GlDrawer
-    // in Zen mode to enable full-screen editing.
-    z-index: auto !important;
+  .requirement-form-drawer {
+    &.zen-mode {
+      // We need to override `z-index` provided to GlDrawer
+      // in Zen mode to enable full-screen editing.
+      z-index: auto !important;
+    }
+
+    // Following overrides are done to
+    // elements within `issuable_body.vue`
+    // and are specific to requirements.
+    .title-container {
+      @include gl-border-b-solid;
+      @include gl-border-b-gray-100;
+      @include gl-border-b-1;
+
+      &,
+      .title {
+        @include gl-mb-3;
+      }
+
+      .title {
+        @include gl-font-size-markdown-h2;
+      }
+    }
+
+    .issuable-details {
+      @include gl-py-0;
+
+      li.md-header-toolbar {
+        @include gl-py-3;
+      }
+
+      .detail-page-description {
+        @include gl-border-none;
+      }
+    }
   }
 }
 

@@ -26,10 +26,17 @@ module QA
                 es.click_submit
               end
             end
+            sleep(90)
+            # wait for the change to propagate before inserting records or else
+            # Gitlab::CurrentSettings.elasticsearch_indexing and
+            # Elastic::ApplicationVersionedSearch::searchable? will be false
+            # this sleep can be removed after we're able to query logs via the API
+            # as per this issue https://gitlab.com/gitlab-org/quality/team-tasks/issues/395
           end
 
           def fabricate_via_api!
             @es_enabled ? api_put : resource_web_url(api_get)
+            sleep(90)
           end
 
           def resource_web_url(resource)

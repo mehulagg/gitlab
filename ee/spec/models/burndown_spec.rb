@@ -73,34 +73,6 @@ RSpec.describe Burndown do
       end
     end
 
-    it "sets attribute accurate to true" do
-      burndown = described_class.new(milestone.issues_visible_to_user(user), milestone.start_date, milestone.due_date)
-
-      expect(burndown).to be_accurate
-    end
-
-    it "is accurate with no issues" do
-      new_milestone = create(:milestone)
-      burndown = described_class.new(new_milestone.issues_visible_to_user(user), new_milestone.start_date, new_milestone.due_date)
-
-      new_milestone.project.add_maintainer(user)
-
-      expect(burndown).to be_accurate
-    end
-
-    context "when there are no closed issues" do
-      before do
-        milestone.issues.delete_all
-        create(:issue, issue_params.merge(created_at: milestone.start_date.end_of_day))
-      end
-
-      it "sets attribute empty to false" do
-        burndown = described_class.new(milestone.issues_visible_to_user(user), milestone.start_date, milestone.due_date)
-
-        expect(burndown).not_to be_empty
-      end
-    end
-
     it "ignores follow-up events with the same action" do
       create(:event, target: milestone.issues.first, created_at: milestone.start_date + 1.minute, action: :reopened)
       event1 = create(:closed_issue_event, target: milestone.issues.first, created_at: milestone.start_date + 2.minutes)
@@ -126,24 +98,6 @@ RSpec.describe Burndown do
           { created_at: Date.new(2017, 3, 3).beginning_of_day,  weight: 2, action: 'created' },
           { created_at: Date.new(2017, 3, 3).beginning_of_day,  weight: 2, action: 'reopened' }
         ])
-      end
-
-      it "sets attribute empty to true" do
-        burndown = described_class.new(milestone.issues_visible_to_user(user), milestone.start_date, milestone.due_date)
-
-        expect(burndown).to be_empty
-      end
-    end
-
-    context "when one but not all closed issues does not have a closed event" do
-      it "sets attribute accurate to false" do
-        Event.where(target: milestone.issues.closed.first, action: :closed).destroy_all # rubocop: disable Cop/DestroyAll
-        burndown = described_class.new(milestone.issues_visible_to_user(user), milestone.start_date, milestone.due_date)
-
-        aggregate_failures do
-          expect(burndown).not_to be_empty
-          expect(burndown).not_to be_accurate
-        end
       end
     end
   end

@@ -13,8 +13,8 @@ There is a Rake task for migrating uploads between different storage types.
 
 ## Migrate to object storage
 
-After [configuring the object storage](../../uploads.md#using-object-storage) for GitLab's
-uploads, use this task to migrate existing uploads from the local storage to the remote storage.
+After [configuring the object storage](../../uploads.md#using-object-storage) for uploads
+to GitLab, use this task to migrate existing uploads from the local storage to the remote storage.
 
 All of the processing is done in a background worker and requires **no downtime**.
 
@@ -55,8 +55,8 @@ The Rake task uses three parameters to find uploads to migrate:
 | `model_class`    | string        | Type of the model to migrate from.                     |
 | `mount_point`    | string/symbol | Name of the model's column the uploader is mounted on. |
 
-NOTE: **Note:**
-These parameters are mainly internal to GitLab's structure, you may want to refer to the task list
+NOTE:
+These parameters are mainly internal to the structure of GitLab, you may want to refer to the task list
 instead below.
 
 This task also accepts an environment variable which you can use to override
@@ -131,7 +131,7 @@ sudo -u git -H bundle exec rake "gitlab:uploads:migrate[DesignManagement::Design
 If you need to disable [object storage](../../object_storage.md) for any reason, you must first
 migrate your data out of object storage and back into your local storage.
 
-CAUTION: **Warning:**
+WARNING:
 **Extended downtime is required** so no new files are created in object storage during
 the migration. A configuration setting is planned to allow migrating
 from object storage to local files with only a brief moment of downtime for configuration changes.

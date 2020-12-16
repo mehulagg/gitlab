@@ -5,16 +5,10 @@ module Gitlab
     module Reports
       module Security
         class Report
-          attr_reader :created_at
-          attr_reader :type
-          attr_reader :pipeline
-          attr_reader :findings
-          attr_reader :scanners
-          attr_reader :identifiers
+          attr_reader :created_at, :type, :pipeline, :findings, :scanners, :identifiers
+          attr_accessor :scan, :scanned_resources, :error
 
-          attr_accessor :scan
-          attr_accessor :scanned_resources
-          attr_accessor :error
+          delegate :project_id, to: :pipeline
 
           def initialize(type, pipeline, created_at)
             @type = type

@@ -1,8 +1,11 @@
+import gql from 'graphql-tag';
 import {
   appendToPreviousResult,
   removeProfile,
   dastProfilesDeleteResponse,
+  updateSiteProfilesStatuses,
 } from 'ee/security_configuration/dast_profiles/graphql/cache_utils';
+import { siteProfiles } from '../mocks/mock_data';
 
 describe('EE - DastProfiles GraphQL CacheUtils', () => {
   describe('appendToPreviousResult', () => {
@@ -68,6 +71,47 @@ describe('EE - DastProfiles GraphQL CacheUtils', () => {
         [mockMutationName]: {
           __typename: mockPayloadTypeName,
           errors: [],
+        },
+      });
+    });
+  });
+
+  describe('updateSiteProfilesStatuses', () => {
+    it.each`
+      siteProfile        | status
+      ${siteProfiles[0]} | ${'PASSED_VALIDATION'}
+      ${siteProfiles[1]} | ${'FAILED_VALIDATION'}
+    `("set the profile's status in the cache", ({ siteProfile, status }) => {
+      const mockData = {
+        project: {
+          siteProfiles: {
+            edges: [{ node: siteProfile }],
+          },
+        },
+      };
+      const mockStore = {
+        readQuery: () => mockData,
+        writeFragment: jest.fn(),
+      };
+
+      updateSiteProfilesStatuses({
+        fullPath: 'full/path',
+        normalizedTargetUrl: siteProfile.normalizedTargetUrl,
+        status,
+        store: mockStore,
+      });
+
+      expect(mockStore.writeFragment).toHaveBeenCalledWith({
+        id: `DastSiteProfile:${siteProfile.id}`,
+        fragment: gql`
+          fragment profile on DastSiteProfile {
+            validationStatus
+            __typename
+          }
+        `,
+        data: {
+          validationStatus: status,
+          __typename: 'DastSiteProfile',
         },
       });
     });

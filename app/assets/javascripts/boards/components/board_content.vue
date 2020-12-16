@@ -3,7 +3,7 @@ import Draggable from 'vuedraggable';
 import { mapState, mapGetters, mapActions } from 'vuex';
 import { sortBy } from 'lodash';
 import { GlAlert } from '@gitlab/ui';
-import BoardColumn from 'ee_else_ce/boards/components/board_column.vue';
+import BoardColumn from './board_column.vue';
 import BoardColumnNew from './board_column_new.vue';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import defaultSortableConfig from '~/sortable/sortable_config';
@@ -59,13 +59,8 @@ export default {
       return this.canDragColumns ? options : {};
     },
   },
-  mounted() {
-    if (this.glFeatures.graphqlBoardLists) {
-      this.showPromotionList();
-    }
-  },
   methods: {
-    ...mapActions(['moveList', 'showPromotionList']),
+    ...mapActions(['moveList']),
     handleDragOnStart() {
       sortableStart();
     },
@@ -108,9 +103,6 @@ export default {
         :key="list.id"
         ref="board"
         :can-admin-list="canAdminList"
-        :class="{
-          'is-draggable': !list.preset,
-        }"
         :list="list"
         :disabled="disabled"
       />

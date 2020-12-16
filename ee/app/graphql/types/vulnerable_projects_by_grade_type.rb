@@ -15,7 +15,6 @@ module Types
 
     field :projects, Types::ProjectType.connection_type, null: false,
           description: 'Projects within this grade',
-          authorize: :read_project,
           complexity: 5
   end
   # rubocop: enable Graphql/AuthorizeTypes

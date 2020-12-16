@@ -2,7 +2,7 @@
 require 'spec_helper'
 
 RSpec.describe EE::API::Helpers::MembersHelpers do
-  subject(:members_helpers) { Class.new.include(described_class).new }
+  let(:members_helpers) { Class.new.include(described_class).new }
 
   before do
     allow(members_helpers).to receive(:current_user).and_return(create(:user))
@@ -21,6 +21,8 @@ RSpec.describe EE::API::Helpers::MembersHelpers do
   end
 
   describe '#log_audit_event' do
+    subject { members_helpers }
+
     it_behaves_like 'creates security_event', 'group' do
       let(:source) { create(:group) }
       let(:member) { create(:group_member, :owner, group: source, user: create(:user)) }
@@ -32,36 +34,50 @@ RSpec.describe EE::API::Helpers::MembersHelpers do
     end
   end
 
-  describe '#paginate_billable_from_user_ids' do
-    subject(:members_helpers) { Class.new.include(described_class, API::Helpers::Pagination).new }
+  describe '#billed_users_for' do
+    let_it_be(:group) { create(:group) }
+    let_it_be(:maria) { create(:group_member, group: group, user: create(:user, name: 'Maria Gomez')) }
+    let_it_be(:john_smith) { create(:group_member, group: group, user: create(:user, name: 'John Smith')) }
+    let_it_be(:john_doe) { create(:group_member, group: group, user: create(:user, name: 'John Doe')) }
+    let_it_be(:sophie) { create(:group_member, group: group, user: create(:user, name: 'Sophie Dupont')) }
+    let(:search_term) { nil }
+    let(:order_by) { nil }
 
-    let_it_be(:users) { create_list(:user, 3) }
-    let(:user_ids) { users.map(&:id) }
-    let(:page) { 1 }
-    let(:per_page) { 2 }
+    subject { members_helpers.billed_users_for(group, search_term, order_by) }
 
-    before do
-      allow(members_helpers).to receive(:params).and_return({ page: page, per_page: per_page })
-      allow(members_helpers).to receive(:header) { }
-      allow(members_helpers).to receive(:request).and_return(double(:request, url: ''))
+    context 'when a search parameter is present' do
+      let(:search_term) { 'John' }
+
+      context 'when a sorting parameter is provided (eg name descending)' do
+        let(:order_by) { 'name_desc' }
+
+        it 'sorts results accordingly' do
+          expect(subject).to eq([john_smith, john_doe].map(&:user))
+        end
+      end
+
+      context 'when a sorting parameter is not provided' do
+        let(:order_by) { nil }
+
+        it 'sorts results by name ascending' do
+          expect(subject).to eq([john_doe, john_smith].map(&:user))
+        end
+      end
     end
 
-    it 'returns paginated User array in asc order' do
-      results = members_helpers.paginate_billable_from_user_ids(user_ids.reverse)
+    context 'when a search parameter is not present' do
+      it 'returns expected users in name asc order' do
+        allow(group).to receive(:billed_user_members).and_return([john_doe, john_smith, sophie, maria])
 
-      expect(results).to all be_a(User)
-      expect(results.size).to eq(per_page)
-      expect(results.map { |result| result.id }).to eq(user_ids.first(2))
-    end
+        expect(subject).to eq([john_doe, john_smith, maria, sophie].map(&:user))
+      end
 
-    context 'when page is 2' do
-      let(:page) { 2 }
+      context 'and when a sorting parameter is provided (eg name descending)' do
+        let(:order_by) { 'name_desc' }
 
-      it 'returns User as paginated array' do
-        results = members_helpers.paginate_billable_from_user_ids(user_ids.reverse)
-
-        expect(results.size).to eq(1)
-        expect(results.map { |result| result.id }).to contain_exactly(user_ids.last)
+        it 'sorts results accordingly' do
+          expect(subject).to eq([sophie, maria, john_smith, john_doe].map(&:user))
+        end
       end
     end
   end

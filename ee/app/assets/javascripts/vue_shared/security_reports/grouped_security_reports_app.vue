@@ -19,6 +19,7 @@ import { fetchPolicies } from '~/lib/graphql';
 import securityReportSummaryQuery from './graphql/mr_security_report_summary.graphql';
 import {
   MODULE_CONTAINER_SCANNING,
+  MODULE_API_FUZZING,
   MODULE_COVERAGE_FUZZING,
   MODULE_DAST,
   MODULE_DEPENDENCY_SCANNING,
@@ -97,6 +98,11 @@ export default {
       default: '',
     },
     dastHelpPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    apiFuzzingHelpPath: {
       type: String,
       required: false,
       default: '',
@@ -185,6 +191,11 @@ export default {
       type: String,
       required: true,
     },
+    apiFuzzingComparisonPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
     containerScanningComparisonPath: {
       type: String,
       required: false,
@@ -222,6 +233,7 @@ export default {
       MODULE_SAST,
       MODULE_CONTAINER_SCANNING,
       MODULE_DAST,
+      MODULE_API_FUZZING,
       MODULE_COVERAGE_FUZZING,
       MODULE_DEPENDENCY_SCANNING,
       MODULE_SECRET_DETECTION,
@@ -252,6 +264,7 @@ export default {
       'groupedSecretDetectionText',
       'secretDetectionStatusIcon',
     ]),
+    ...mapGetters(MODULE_API_FUZZING, ['groupedApiFuzzingText', 'apiFuzzingStatusIcon']),
     ...mapGetters('pipelineJobs', ['hasFuzzingArtifacts', 'fuzzingJobsWithArtifact']),
     securityTab() {
       return `${this.pipelinePath}/security`;
@@ -264,6 +277,9 @@ export default {
     },
     hasDastReports() {
       return this.enabledReports.dast;
+    },
+    hasApiFuzzingReports() {
+      return this.enabledReports.apiFuzzing;
     },
     hasCoverageFuzzingReports() {
       // TODO: Remove feature flag in https://gitlab.com/gitlab-org/gitlab/-/issues/257839
@@ -292,6 +308,9 @@ export default {
     },
     dastDownloadLink() {
       return this.dastSummary?.scannedResourcesCsvPath || '';
+    },
+    hasApiFuzzingIssues() {
+      return this.hasIssuesForReportType(MODULE_API_FUZZING);
     },
     hasCoverageFuzzingIssues() {
       return this.hasIssuesForReportType(MODULE_COVERAGE_FUZZING);
@@ -359,6 +378,11 @@ export default {
       this.fetchCoverageFuzzingDiff();
       this.fetchPipelineJobs();
     }
+
+    if (this.apiFuzzingComparisonPath && this.hasApiFuzzingReports) {
+      this.setApiFuzzingDiffEndpoint(this.apiFuzzingComparisonPath);
+      this.fetchApiFuzzingDiff();
+    }
   },
   methods: {
     ...mapActions([
@@ -399,6 +423,10 @@ export default {
     ...mapActions(MODULE_SECRET_DETECTION, {
       setSecretDetectionDiffEndpoint: 'setDiffEndpoint',
       fetchSecretDetectionDiff: 'fetchDiff',
+    }),
+    ...mapActions(MODULE_API_FUZZING, {
+      setApiFuzzingDiffEndpoint: 'setDiffEndpoint',
+      fetchApiFuzzingDiff: 'fetchDiff',
     }),
     ...mapActions('pipelineJobs', ['fetchPipelineJobs', 'setPipelineJobsPath', 'setProjectId']),
     ...mapActions('pipelineJobs', {
@@ -613,6 +641,28 @@ export default {
             :resolved-issues="coverageFuzzing.resolvedIssues"
             :component="$options.componentNames.SecurityIssueBody"
             data-testid="coverage-fuzzing-issues-list"
+          />
+        </template>
+
+        <template v-if="hasApiFuzzingReports">
+          <summary-row
+            :status-icon="apiFuzzingStatusIcon"
+            :popover-options="apiFuzzingPopover"
+            class="js-api-fuzzing-widget"
+            data-qa-selector="api_fuzzing_report"
+          >
+            <template #summary>
+              <security-summary :message="groupedApiFuzzingText" />
+            </template>
+          </summary-row>
+
+          <grouped-issues-list
+            v-if="hasApiFuzzingIssues"
+            :unresolved-issues="apiFuzzing.newIssues"
+            :resolved-issues="apiFuzzing.resolvedIssues"
+            :component="$options.componentNames.SecurityIssueBody"
+            class="report-block-group-list"
+            data-testid="api-fuzzing-issues-list"
           />
         </template>
 

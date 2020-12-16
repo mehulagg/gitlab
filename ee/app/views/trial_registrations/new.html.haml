@@ -8,5 +8,10 @@
   = _('Start a Free Gold Trial')
 
 .signup-page
-  = render 'devise/shared/signup_box', url: trial_registrations_path, button_text: _('Continue'), show_omniauth_providers: false
+  = render 'devise/shared/signup_box',
+    url: trial_registrations_path,
+    button_text: _('Continue'),
+    show_omniauth_providers: social_signin_experiment_enabled?,
+    omniauth_providers_placement: :top
+
   = render 'devise/shared/sign_in_link'

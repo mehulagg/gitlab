@@ -7,10 +7,6 @@ Array [
     "text": "Upgrade",
   },
   Object {
-    "href": "http://test.host/plan/renew",
-    "text": "Renew",
-  },
-  Object {
     "href": "https://customers.gitlab.com/subscriptions",
     "text": "Manage",
   },
@@ -24,10 +20,6 @@ Array [
     "text": "Upgrade",
   },
   Object {
-    "href": "http://test.host/plan/renew",
-    "text": "Renew",
-  },
-  Object {
     "href": "https://customers.gitlab.com/subscriptions",
     "text": "Manage",
   },
@@ -37,10 +29,6 @@ Array [
 exports[`SubscriptionTable component given a gold plan with state: isFreePlan=false, upgradable=false, isTrialPlan=false has Renew and Manage buttons 1`] = `
 Array [
   Object {
-    "href": "http://test.host/plan/renew",
-    "text": "Renew",
-  },
-  Object {
     "href": "https://customers.gitlab.com/subscriptions",
     "text": "Manage",
   },
@@ -49,10 +37,6 @@ Array [
 
 exports[`SubscriptionTable component given a trial-gold plan with state: isFreePlan=false, upgradable=false, isTrialPlan=true has Manage button 1`] = `
 Array [
-  Object {
-    "href": "http://test.host/plan/renew",
-    "text": "Renew",
-  },
   Object {
     "href": "https://customers.gitlab.com/subscriptions",
     "text": "Manage",

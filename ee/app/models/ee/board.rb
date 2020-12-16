@@ -10,6 +10,7 @@ module EE
 
     prepended do
       belongs_to :milestone
+      belongs_to :iteration
 
       has_many :board_labels
       has_many :user_preferences, class_name: 'BoardUserPreference', inverse_of: :board
@@ -42,10 +43,29 @@ module EE
       return unless resource_parent&.feature_available?(:scoped_issue_board)
 
       case milestone_id
+      when ::Milestone::None.id
+        ::Milestone::None
+      when ::Milestone::Any.id
+        ::Milestone::Any
       when ::Milestone::Upcoming.id
         ::Milestone::Upcoming
       when ::Milestone::Started.id
         ::Milestone::Started
+      else
+        super
+      end
+    end
+
+    def iteration
+      return unless resource_parent&.feature_available?(:scoped_issue_board)
+
+      case iteration_id
+      when ::Iteration::Predefined::None.id
+        ::Iteration::Predefined::None
+      when ::Iteration::Predefined::Any.id
+        ::Iteration::Predefined::Any
+      when ::Iteration::Predefined::Current.id
+        ::Iteration::Predefined::Current
       else
         super
       end

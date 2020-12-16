@@ -27,6 +27,7 @@ class DastSiteValidation < ApplicationRecord
     "#{url_base}/#{url_path}"
   end
 
+  NONE_STATE = 'none'
   INITIAL_STATE = 'pending'
 
   state_machine :state, initial: INITIAL_STATE.to_sym do

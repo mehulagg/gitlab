@@ -4,7 +4,7 @@ module EE
   module Boards
     module BaseService
       # rubocop: disable CodeReuse/ActiveRecord
-      def set_assignee
+      def filter_assignee
         return unless params.key?(:assignee_id)
 
         assignee = ::User.find_by(id: params.delete(:assignee_id))
@@ -13,14 +13,9 @@ module EE
       # rubocop: enable CodeReuse/ActiveRecord
 
       # rubocop: disable CodeReuse/ActiveRecord
-      def set_milestone
-        return unless params.key?(:milestone_id)
-
-        milestone_id = params[:milestone_id]
-
-        return if [::Milestone::None.id,
-                   ::Milestone::Upcoming.id,
-                   ::Milestone::Started.id].include?(milestone_id)
+      def filter_milestone
+        return if params[:milestone_id].blank?
+        return if ::Milestone::Predefined::ALL.map(&:id).include?(params[:milestone_id].to_i)
 
         finder_params =
           case parent
@@ -30,13 +25,22 @@ module EE
             { project_ids: [parent.id], group_ids: parent.group&.self_and_ancestors }
           end
 
-        milestone = ::MilestonesFinder.new(finder_params).find_by(id: milestone_id)
+        milestone = ::MilestonesFinder.new(finder_params).find_by(id: params[:milestone_id])
 
-        params[:milestone_id] = milestone&.id
+        params.delete(:milestone_id) unless milestone
       end
       # rubocop: enable CodeReuse/ActiveRecord
 
-      def set_labels
+      def filter_iteration
+        return if params[:iteration_id].blank?
+        return if ::Iteration::Predefined::ALL.map(&:id).include?(params[:iteration_id].to_i)
+
+        iteration = IterationsFinder.new(current_user, iterations_finder_params).find_by(id: params[:iteration_id]) # rubocop: disable CodeReuse/ActiveRecord
+
+        params.delete(:iteration_id) unless iteration
+      end
+
+      def filter_labels
         if params.key?(:label_ids)
           params[:label_ids] = (labels_service.filter_labels_ids_in_param(:label_ids) || [])
         elsif params.key?(:labels)
@@ -46,6 +50,10 @@ module EE
 
       def labels_service
         @labels_service ||= ::Labels::AvailableLabelsService.new(current_user, parent, params)
+      end
+
+      def iterations_finder_params
+        IterationsFinder.params_for_parent(parent, include_ancestors: true).merge(state: 'all')
       end
     end
   end

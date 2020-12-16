@@ -31,8 +31,8 @@ run these tests on your local computer. This has the advantage of:
 
 - Speeding up the feedback loop. You can know of any problems with the changes in your branch
   without waiting for a CI/CD pipeline to run.
-- Lowering costs. Running tests locally is cheaper than running tests on GitLab's cloud
-  infrastructure.
+- Lowering costs. Running tests locally is cheaper than running tests on the cloud
+  infrastructure GitLab uses.
 
 To run tests locally, it's important to:
 
@@ -106,9 +106,9 @@ To run the `ui-docs-links` test locally:
    ```
 
 If you receive an error the first time you run this test, run `bundle install`, which
-installs GitLab's dependencies, and try again.
+installs the dependencies for GitLab, and try again.
 
-If you don't want to install all of GitLab's dependencies to test the links, you can:
+If you don't want to install all of the dependencies to test the links, you can:
 
 1. Open the `gitlab` directory in a terminal window.
 1. Install `haml-lint`:
@@ -192,6 +192,20 @@ You can use Vale:
 - [In a Git hook](#configure-pre-push-hooks). Vale only reports errors in the Git hook (the same
   configuration as the CI/CD pipelines), and does not report suggestions or warnings.
 
+#### Vale result types
+
+Vale returns three types of results: `suggestion`, `warning`, and `error`:
+
+- **Suggestion**-level results are writing tips and aren't displayed in CI
+  job output. Suggestions don't break CI.
+- **Warning**-level results are [Style Guide](styleguide/index.md) violations, aren't displayed in CI
+  job output, and should contain clear explanations of how to resolve the warning.
+  Warnings may be technical debt, or can be future error-level test items
+  (after the Technical Writing team completes its cleanup). Warnings don't break CI.
+- **Error**-level results are Style Guide violations, and should contain clear explanations
+  about how to resolve the error. Errors break CI and are displayed in CI job output.
+  of how to resolve the error. Errors break CI and are displayed in CI job output.
+
 ### Install linters
 
 At a minimum, install [markdownlint](#markdownlint) and [Vale](#vale) to match the checks run in
@@ -225,9 +239,9 @@ To match the versions of `markdownlint-cli` and `vale` used in the GitLab projec
 [versions used](https://gitlab.com/gitlab-org/gitlab-docs/-/blob/master/.gitlab-ci.yml#L447)
 when building the `image:docs-lint-markdown` Docker image containing these tools for CI/CD.
 
-| Tool               | Version  | Command                                   | Additional info |
-|--------------------|----------|-------------------------------------------|-----------------|
-| `markdownlint-cli` | Latest   | `yarn global add markdownlint-cli`        | n/a             |
+| Tool               | Version  | Command                                   | Additional information |
+|--------------------|----------|-------------------------------------------|------------------------|
+| `markdownlint-cli` | Latest   | `yarn global add markdownlint-cli`        | n/a                    |
 | `markdownlint-cli` | Specfic  | `yarn global add markdownlint-cli@0.23.2` | The `@` indicates a specific version, and this example updates the tool to version `0.23.2`. |
 | Vale               | Latest   | `brew update && brew upgrade vale`        | This command is for macOS only. |
 | Vale               | Specific | n/a                                       | Not possible using `brew`, but can be [directly downloaded](https://github.com/errata-ai/vale/releases). |

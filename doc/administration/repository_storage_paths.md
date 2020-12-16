@@ -40,35 +40,34 @@ storage2:
 
 ## Configure GitLab
 
-> **Warning:**
-> In order for [backups](../raketasks/backup_restore.md) to work correctly, the storage path must **not** be a
-> mount point and the GitLab user should have correct permissions for the parent
-> directory of the path. In Omnibus GitLab this is taken care of automatically,
-> but for source installations you should be extra careful.
->
-> The thing is that for compatibility reasons `gitlab.yml` has a different
-> structure than Omnibus. In `gitlab.yml` you indicate the path for the
-> repositories, for example `/home/git/repositories`, while in Omnibus you
-> indicate `git_data_dirs`, which for the example above would be `/home/git`.
-> Then, Omnibus creates a `repositories` directory under that path to use with
-> `gitlab.yml`.
->
-> This little detail matters because while restoring a backup, the current
-> contents of  `/home/git/repositories` [are moved to](https://gitlab.com/gitlab-org/gitlab/blob/033e5423a2594e08a7ebcd2379bd2331f4c39032/lib/backup/repository.rb#L54-56) `/home/git/repositories.old`,
-> so if `/home/git/repositories` is the mount point, then `mv` would be moving
-> things between mount points, and bad things could happen. Ideally,
-> `/home/git` would be the mount point, so then things would be moving within the
-> same mount point. This is guaranteed with Omnibus installations (because they
-> don't specify the full repository path but the parent path), but not for source
-> installations.
+In order for [backups](../raketasks/backup_restore.md) to work correctly, the storage path must **not** be a
+mount point and the GitLab user should have correct permissions for the parent
+directory of the path. In Omnibus GitLab this is taken care of automatically,
+but for source installations you should be extra careful.
+
+The thing is that for compatibility reasons `gitlab.yml` has a different
+structure than Omnibus. In `gitlab.yml` you indicate the path for the
+repositories, for example `/home/git/repositories`, while in Omnibus you
+indicate `git_data_dirs`, which for the example above would be `/home/git`.
+Then, Omnibus creates a `repositories` directory under that path to use with
+`gitlab.yml`.
+
+This little detail matters because while restoring a backup, the current
+contents of `/home/git/repositories` [are moved to](https://gitlab.com/gitlab-org/gitlab/blob/033e5423a2594e08a7ebcd2379bd2331f4c39032/lib/backup/repository.rb#L54-56) `/home/git/repositories.old`,
+so if `/home/git/repositories` is the mount point, then `mv` would be moving
+things between mount points, and bad things could happen. Ideally,
+`/home/git` would be the mount point, so then things would be moving within the
+same mount point. This is guaranteed with Omnibus installations (because they
+don't specify the full repository path but the parent path), but not for source
+installations.
 
 Now that you've read that big fat warning above, let's edit the configuration
 files and add the full paths of the alternative repository storage paths. In
 the example below, we add two more mount points that are named `nfs_1` and `nfs_2`
 respectively.
 
-NOTE: **Note:**
-This example uses NFS. We do not recommend using EFS for storage as it may impact GitLab's performance. See the [relevant documentation](nfs.md#avoid-using-awss-elastic-file-system-efs) for more details.
+NOTE:
+This example uses NFS. We do not recommend using EFS for storage as it may impact GitLab performance. See the [relevant documentation](nfs.md#avoid-using-awss-elastic-file-system-efs) for more details.
 
 **For installations from source**
 
@@ -89,7 +88,7 @@ This example uses NFS. We do not recommend using EFS for storage as it may impac
 
 1. [Restart GitLab](restart_gitlab.md#installations-from-source) for the changes to take effect.
 
-NOTE: **Note:**
+NOTE:
 We plan to replace [`gitlab_shell: repos_path` entry](https://gitlab.com/gitlab-org/gitlab-foss/-/blob/8-9-stable/config/gitlab.yml.example#L457) in `gitlab.yml` with `repositories: storages`. If you
 are upgrading from a version prior to 8.10, make sure to add the configuration
 as described in the step above. After you make the changes and confirm they are

@@ -8,13 +8,18 @@ RSpec.describe ElasticDeleteProjectWorker, :elastic do
   # Create admin user and search globally to avoid dealing with permissions in
   # these tests
   let(:user) { create(:admin) }
-  let(:search_options) { { options: { current_user: user, project_ids: :any } } }
 
   before do
     stub_ee_application_setting(elasticsearch_indexing: true)
   end
 
-  it 'deletes a project with all nested objects', :aggregate_failures do
+  # Extracted to a method as the `#elastic_search` methods using it below will
+  # mutate the hash and mess up the following searches
+  def search_options
+    { options: { current_user: user, project_ids: :any } }
+  end
+
+  it 'deletes a project with all nested objects' do
     project = create :project, :repository
     issue = create :issue, project: project
     milestone = create :milestone, project: project

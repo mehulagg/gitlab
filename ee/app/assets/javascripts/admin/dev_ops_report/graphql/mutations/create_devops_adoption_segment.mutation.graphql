@@ -6,6 +6,16 @@ mutation($name: String!, $groupIds: [GroupID!]!) {
       groups {
         id
       }
+      latestSnapshot {
+        issueOpened
+        mergeRequestOpened
+        mergeRequestApproved
+        runnerConfigured
+        pipelineSucceeded
+        deploySucceeded
+        securityScanSucceeded
+        recordedAt
+      }
     }
     errors
   }

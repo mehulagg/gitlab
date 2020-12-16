@@ -31,6 +31,10 @@ module Gitlab
         @blob&.path
       end
 
+      def sections
+        parsed_data.keys
+      end
+
       def entry_for_path(path)
         path = "/#{path}" unless path.start_with?('/')
 

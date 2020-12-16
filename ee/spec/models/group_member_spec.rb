@@ -237,4 +237,86 @@ RSpec.describe GroupMember do
       end
     end
   end
+
+  context 'group member webhooks', :sidekiq_inline do
+    let_it_be(:group) { create(:group_with_plan, plan: :gold_plan) }
+    let_it_be(:group_hook) { create(:group_hook, group: group, member_events: true) }
+    let(:user) { create(:user) }
+
+    context 'fires the webhook when a member is added' do
+      before do
+        WebMock.stub_request(:post, group_hook.url)
+      end
+
+      it 'execute webhooks' do
+        member = group.add_guest(user)
+
+        expect(WebMock).to have_requested(:post, group_hook.url).with(
+          headers: { 'Content-Type' => 'application/json', 'User-Agent' => "GitLab/#{Gitlab::VERSION}", 'X-Gitlab-Event' => 'Member Hook' },
+          body: {
+            created_at: member.created_at&.xmlschema,
+            updated_at: member.updated_at&.xmlschema,
+            group_name: group.name,
+            group_path: group.path,
+            group_id: group.id,
+            user_username: user.username,
+            user_name: user.name,
+            user_email: user.email,
+            user_id: user.id,
+            group_access: 'Guest',
+            expires_at: member.expires_at&.xmlschema,
+            group_plan: 'gold',
+            event_name: 'user_add_to_group'
+          }.to_json
+        )
+      end
+
+      context 'ancestor groups' do
+        let_it_be(:subgroup) { create(:group, parent: group) }
+        let_it_be(:subgroup_hook) { create(:group_hook, group: subgroup, member_events: true) }
+
+        it 'fires webhook twice when parent group has member_events webhook enabled' do
+          WebMock.stub_request(:post, subgroup_hook.url)
+
+          subgroup.add_guest(user)
+
+          expect(WebMock).to have_requested(:post, subgroup_hook.url)
+          expect(WebMock).to have_requested(:post, group_hook.url)
+        end
+
+        it 'fires webhook once when parent group has member_events webhook disabled' do
+          group_hook = create(:group_hook, group: group, member_events: false)
+
+          WebMock.stub_request(:post, subgroup_hook.url)
+
+          subgroup.add_guest(user)
+
+          expect(WebMock).to have_requested(:post, subgroup_hook.url)
+          expect(WebMock).not_to have_requested(:post, group_hook.url)
+        end
+      end
+    end
+
+    context 'does not execute webhook' do
+      before do
+        WebMock.stub_request(:post, group_hook.url)
+      end
+
+      it 'does not execute webhooks if group member events webhook is disabled' do
+        group_hook = create(:group_hook, group: group, member_events: false)
+
+        group.add_guest(user)
+
+        expect(WebMock).not_to have_requested(:post, group_hook.url)
+      end
+
+      it 'does not execute webhooks if feature flag is disabled' do
+        stub_feature_flags(group_webhooks: false)
+
+        group.add_guest(user)
+
+        expect(WebMock).not_to have_requested(:post, group_hook.url)
+      end
+    end
+  end
 end

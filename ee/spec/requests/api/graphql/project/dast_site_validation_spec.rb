@@ -65,9 +65,8 @@ RSpec.describe 'Query.project(fullPath).dastSiteValidation' do
         stub_feature_flags(security_on_demand_scans_site_validation: false)
       end
 
-      it 'returns populated edges array' do
-        subject
-        expect(graphql_errors.first['message']).to eq("Feature disabled")
+      it 'returns a null dast_site_validation' do
+        expect(dast_site_validation_response).to be_nil
       end
     end
 

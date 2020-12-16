@@ -16,6 +16,9 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 > - The group-level Container Registry was [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/23315) in GitLab 12.10.
 > - Searching by image repository name was [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/31322) in GitLab 13.0.
 
+NOTE:
+If you pull container images from Docker Hub, you can also use the [GitLab Dependency Proxy](../dependency_proxy/index.md#use-the-dependency-proxy-for-docker-images) to avoid running into rate limits and speed up your pipelines.
+
 With the Docker Container Registry integrated into GitLab, every GitLab project can
 have its own space to store its Docker images.
 
@@ -291,7 +294,7 @@ deploy:
     - master
 ```
 
-NOTE: **Note:**
+NOTE:
 This example explicitly calls `docker pull`. If you prefer to implicitly pull the
 built image using `image:`, and use either the [Docker](https://docs.gitlab.com/runner/executors/docker.html)
 or [Kubernetes](https://docs.gitlab.com/runner/executors/kubernetes.html) executor,
@@ -332,11 +335,11 @@ error during connect: Get http://docker:2376/v1.39/info: dial tcp: lookup docker
 
 You can delete images from your Container Registry in multiple ways.
 
-CAUTION: **Warning:**
+WARNING:
 Deleting images is a destructive action and can't be undone. To restore
 a deleted image, you must rebuild and re-upload it.
 
-NOTE: **Note:**
+NOTE:
 Administrators should review how to
 [garbage collect](../../../administration/packages/container_registry.md#container-registry-garbage-collection)
 the deleted images.
@@ -368,7 +371,7 @@ information, see the following endpoints:
 
 ### Delete images using GitLab CI/CD
 
-CAUTION: **Warning:**
+WARNING:
 GitLab CI/CD doesn't provide a built-in way to remove your images, but this example
 uses a third-party tool called [reg](https://github.com/genuinetools/reg)
 that talks to the GitLab Registry API. You are responsible for your own actions.
@@ -426,7 +429,7 @@ delete_image:
     - master
 ```
 
-TIP: **Tip:**
+NOTE:
 You can download the latest `reg` release from
 [the releases page](https://github.com/genuinetools/reg/releases), then update
 the code example by changing the `REG_SHA256` and `REG_VERSION` variables
@@ -503,7 +506,7 @@ The cleanup policy:
 1. Excludes from the list any tags matching the `name_regex_keep` value (tags to preserve).
 1. Finally, the remaining tags in the list are deleted from the Container Registry.
 
-CAUTION: **Warning:**
+WARNING:
 On GitLab.com, the execution time for the cleanup policy is limited, and some of the tags may remain in
 the Container Registry after the policy runs. The next time the policy runs, the remaining tags are included,
 so it may take multiple runs for all tags to be deleted.
@@ -531,7 +534,7 @@ To create a cleanup policy in the UI:
 
 Depending on the interval you chose, the policy is scheduled to run.
 
-NOTE: **Note:**
+NOTE:
 If you edit the policy and click **Save** again, the interval is reset.
 
 ### Regex pattern examples
@@ -577,7 +580,7 @@ Examples:
 - Select all tags, keep at least 1 tag per image, clean up any tag older than 14 days, run once a month, preserve any images with the name `master` and the policy is enabled:
 
   ```shell
-  curl --request PUT --header 'Content-Type: application/json;charset=UTF-8' --header "PRIVATE-TOKEN: <your_access_token>" --data-binary '{"container_expiration_policy_attributes":{"cadence":"1month","enabled":true,"keep_n":1,"older_than":"14d","name_regex":"","name_regex_delete":".*","name_regex_keep":".*-master"}}' 'https://gitlab.example.com/api/v4/projects/2'
+  curl --request PUT --header 'Content-Type: application/json;charset=UTF-8' --header "PRIVATE-TOKEN: <your_access_token>" --data-binary '{"container_expiration_policy_attributes":{"cadence":"1month","enabled":true,"keep_n":1,"older_than":"14d","name_regex":"","name_regex_delete":".*","name_regex_keep":".*-master"}}' "https://gitlab.example.com/api/v4/projects/2"
   ```
 
 See the API documentation for further details: [Edit project](../../../api/projects.md#edit-project).

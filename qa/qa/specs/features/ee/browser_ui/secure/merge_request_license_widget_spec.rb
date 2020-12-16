@@ -36,14 +36,13 @@ module QA
         end
 
         @project.visit!
-        Page::Project::Menu.perform(&:click_ci_cd_pipelines)
-        Page::Project::Pipeline::Index.perform(&:wait_for_latest_pipeline_success)
+        Flow::Pipeline.wait_for_latest_pipeline(pipeline_condition: 'succeeded')
 
         @merge_request = Resource::MergeRequest.fabricate_via_api! do |mr|
           mr.project = @project
           mr.source_branch = 'license-management-mr'
-          mr.target_branch = 'master'
-          mr.target = 'master'
+          mr.target_branch = @project.default_branch
+          mr.target = @project.default_branch
           mr.file_name = 'gl-license-scanning-report.json'
           mr.file_content =
             <<~FILE_UPDATE
@@ -95,8 +94,7 @@ module QA
         end
 
         @project.visit!
-        Page::Project::Menu.perform(&:click_ci_cd_pipelines)
-        Page::Project::Pipeline::Index.perform(&:wait_for_latest_pipeline_success)
+        Flow::Pipeline.wait_for_latest_pipeline(pipeline_condition: 'succeeded')
       end
 
       it 'manage licenses from the merge request', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/575' do

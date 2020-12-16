@@ -21,14 +21,17 @@ RSpec.describe Groups::TransferService, '#execute' do
       stub_ee_application_setting(elasticsearch_indexing: true)
     end
 
-    it 'reindexes projects', :elastic do
+    it 'reindexes projects and associated issues', :elastic do
       project1 = create(:project, :repository, :public, namespace: group)
       project2 = create(:project, :repository, :public, namespace: group)
       project3 = create(:project, :repository, :private, namespace: group)
 
       expect(Elastic::ProcessBookkeepingService).to receive(:track!).with(project1)
+      expect(ElasticAssociationIndexerWorker).to receive(:perform_async).with('Project', project1.id, ['issues'])
       expect(Elastic::ProcessBookkeepingService).to receive(:track!).with(project2)
+      expect(ElasticAssociationIndexerWorker).to receive(:perform_async).with('Project', project2.id, ['issues'])
       expect(Elastic::ProcessBookkeepingService).not_to receive(:track!).with(project3)
+      expect(ElasticAssociationIndexerWorker).not_to receive(:perform_async).with('Project', project3.id, ['issues'])
 
       transfer_service.execute(new_group)
 

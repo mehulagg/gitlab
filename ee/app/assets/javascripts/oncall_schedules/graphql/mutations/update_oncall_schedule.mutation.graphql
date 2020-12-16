@@ -1,0 +1,25 @@
+mutation oncallScheduleUpdate(
+  $iid: String!
+  $projectPath: ID!
+  $name: String
+  $description: String
+  $timezone: String
+) {
+  oncallScheduleUpdate(
+    input: {
+      iid: $iid
+      projectPath: $projectPath
+      name: $name
+      description: $description
+      timezone: $timezone
+    }
+  ) {
+    errors
+    oncallSchedule {
+      iid
+      name
+      description
+      timezone
+    }
+  }
+}

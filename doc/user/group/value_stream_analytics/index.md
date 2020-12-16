@@ -14,7 +14,7 @@ Value Stream Analytics measures the time spent to go from an
 (also known as cycle time) for each of your projects or groups. Value Stream Analytics displays the median time
 spent in each stage defined in the process.
 
-Value Stream Analytics can help you quickly dtermine the velocity of a given
+Value Stream Analytics can help you quickly determine the velocity of a given
 group. It points to bottlenecks in the development process, enabling management
 to uncover, triage, and identify the root cause of slowdowns in the software development life cycle.
 
@@ -22,7 +22,7 @@ For information on how to contribute to the development of Value Stream Analytic
 
 Group-level Value Stream Analytics is available via **Group > Analytics > Value Stream**.
 
-Note: [Project-level Value Stream Analytics](../../analytics/value_stream_analytics.md) is also available.
+[Project-level Value Stream Analytics](../../analytics/value_stream_analytics.md) is also available.
 
 ## Default stages
 

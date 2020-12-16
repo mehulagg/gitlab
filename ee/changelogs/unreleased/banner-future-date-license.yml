@@ -1,0 +1,5 @@
+---
+title: 'Do not display renewal banner if future dated license is applied'
+merge_request: 48283
+author:
+type: changed

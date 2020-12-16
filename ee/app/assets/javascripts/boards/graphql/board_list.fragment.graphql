@@ -1,0 +1,20 @@
+#import "~/boards/graphql/board_list_shared.fragment.graphql"
+
+fragment BoardListFragment on BoardList {
+  ...BoardListShared
+  maxIssueCount
+  totalWeight
+  assignee {
+    id
+    name
+    username
+    avatarUrl
+    webUrl
+  }
+  milestone {
+    id
+    title
+    webPath
+    description
+  }
+}

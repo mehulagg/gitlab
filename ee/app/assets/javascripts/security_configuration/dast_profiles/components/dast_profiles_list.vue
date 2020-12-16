@@ -146,9 +146,13 @@ export default {
           <div class="gl-text-right">
             <slot name="actions" :profile="item"></slot>
 
-            <gl-button v-if="item.editPath" :href="item.editPath" class="gl-mx-5" size="small">{{
-              __('Edit')
-            }}</gl-button>
+            <gl-button
+              v-if="item.editPath"
+              :href="item.editPath"
+              class="gl-ml-3 gl-my-1"
+              size="small"
+              >{{ __('Edit') }}</gl-button
+            >
 
             <gl-button
               v-gl-tooltip.hover.focus
@@ -156,7 +160,7 @@ export default {
               variant="danger"
               category="secondary"
               size="small"
-              class="gl-mr-3"
+              class="gl-mx-3 gl-my-1"
               :title="s__('DastProfiles|Delete profile')"
               @click="prepareProfileDeletion(item.id)"
             />

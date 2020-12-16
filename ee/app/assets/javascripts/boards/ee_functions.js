@@ -1,7 +1,3 @@
-export const setPromotionState = store => {
-  store.addPromotionState();
-};
-
 export const setWeightFetchingState = (issue, value) => {
   issue.setFetchingState('weight', value);
 };

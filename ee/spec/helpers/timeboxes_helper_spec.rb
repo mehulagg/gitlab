@@ -3,6 +3,26 @@
 require 'spec_helper'
 
 RSpec.describe TimeboxesHelper do
+  describe '#can_generate_chart?' do
+    using RSpec::Parameterized::TableSyntax
+
+    where(:supports_milestone_charts, :start_date, :due_date, :can_generate_chart) do
+      false | nil        | nil        | false
+      true  | Date.today | Date.today | true
+      true  | Date.today | nil        | false
+      true  | nil        | Date.today | false
+      true  | nil        | nil        | false
+    end
+
+    subject { helper.can_generate_chart?(milestone) }
+
+    let(:milestone) { double('Milestone', supports_milestone_charts?: supports_milestone_charts, start_date: start_date, due_date: due_date) }
+
+    with_them do
+      it { is_expected.to eq(can_generate_chart) }
+    end
+  end
+
   describe '#show_burndown_placeholder?' do
     let_it_be(:user) { build(:user) }
 

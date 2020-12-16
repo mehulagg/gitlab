@@ -92,7 +92,7 @@ module Vulnerabilities
 
     validates :metadata_version, presence: true
     validates :raw_metadata, presence: true
-    validates :details, json_schema: { filename: 'vulnerability_finding_details' }
+    validates :details, json_schema: { filename: 'vulnerability_finding_details', draft: 7 }
 
     delegate :name, :external_id, to: :scanner, prefix: true, allow_nil: true
 

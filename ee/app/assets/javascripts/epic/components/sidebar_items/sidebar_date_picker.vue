@@ -1,11 +1,10 @@
 <script>
 import { uniqueId } from 'lodash';
-import { GlLoadingIcon, GlButton, GlIcon, GlTooltipDirective } from '@gitlab/ui';
+import { GlLoadingIcon, GlButton, GlIcon, GlTooltipDirective, GlPopover, GlLink } from '@gitlab/ui';
 
 import { __, s__ } from '~/locale';
 import { dateInWords } from '~/lib/utils/datetime_utility';
 
-import popover from '~/vue_shared/directives/popover';
 import DatePicker from '~/vue_shared/components/pikaday.vue';
 import CollapsedCalendarIcon from '~/vue_shared/components/sidebar/collapsed_calendar_icon.vue';
 import ToggleSidebar from '~/vue_shared/components/sidebar/toggle_sidebar.vue';
@@ -14,9 +13,13 @@ const label = __('Date picker');
 const pickerLabel = __('Fixed date');
 
 export default {
+  dateHelpUrl: '/help/user/group/epics/index.md#start-date-and-due-date',
+  dateHelpValidMessage: s__(
+    'Epics|These dates affect how your epics appear in the roadmap. Dates from milestones come from the milestones assigned to issues in the epic. You can also set fixed dates or remove them entirely.',
+  ),
+  dateHelpInvalidUrlText: s__('Epics|How can I solve this?'),
   directives: {
     GlTooltip: GlTooltipDirective,
-    popover,
   },
   components: {
     GlIcon,
@@ -25,6 +28,8 @@ export default {
     ToggleSidebar,
     GlLoadingIcon,
     GlButton,
+    GlPopover,
+    GlLink,
   },
   props: {
     sidebarCollapsed: {
@@ -124,51 +129,8 @@ export default {
     collapsedText() {
       return this.selectedDateWords ? this.selectedDateWords : __('None');
     },
-    popoverOptions() {
-      return this.getPopoverConfig({
-        title: s__(
-          'Epics|These dates affect how your epics appear in the roadmap. Dates from milestones come from the milestones assigned to issues in the epic. You can also set fixed dates or remove them entirely.',
-        ),
-        content: `
-          <a
-            href="${gon.gitlab_url}/help/user/group/epics/index.md#start-date-and-due-date"
-            target="_blank"
-            rel="noopener noreferrer"
-          >${s__('Epics|More information')}</a>
-        `,
-      });
-    },
-    dateInvalidPopoverOptions() {
-      return this.getPopoverConfig({
-        title: this.dateInvalidTooltip,
-        content: `
-          <a
-            href="${gon.gitlab_url}/help/user/group/epics/index.md#start-date-and-due-date"
-            target="_blank"
-            rel="noopener noreferrer"
-          >${s__('Epics|How can I solve this?')}</a>
-        `,
-      });
-    },
   },
   methods: {
-    getPopoverConfig({ title, content }) {
-      return {
-        html: true,
-        trigger: 'focus',
-        container: 'body',
-        boundary: 'viewport',
-        template: `
-          <div class="popover" role="tooltip">
-            <div class="arrow"></div>
-            <div class="popover-header"></div>
-            <div class="popover-body"></div>
-          </div>
-        `,
-        title,
-        content,
-      };
-    },
     stopEditing() {
       this.editing = false;
       this.$emit('toggleDateType', true, true);
@@ -199,11 +161,23 @@ export default {
       <gl-loading-icon v-if="dateSaveInProgress" :inline="true" />
       <div class="float-right d-flex">
         <gl-icon
-          v-popover="popoverOptions"
+          ref="epicDatePopover"
           name="question-o"
           class="help-icon gl-mr-2"
           tabindex="0"
+          :aria-label="__('Help')"
         />
+        <gl-popover
+          :target="() => $refs.epicDatePopover.$el"
+          triggers="focus"
+          placement="left"
+          boundary="viewport"
+        >
+          <p>{{ $options.dateHelpValidMessage }}</p>
+          <gl-link :href="$options.dateHelpUrl" target="_blank">{{
+            __('More information')
+          }}</gl-link>
+        </gl-popover>
         <gl-button
           v-show="canUpdate && !editing"
           ref="editButton"
@@ -244,13 +218,29 @@ export default {
         <span v-else class="d-flex value-content gl-ml-1">
           <template v-if="dateFixed">
             <span>{{ dateFixedWords }}</span>
-            <gl-icon
-              v-if="isDateInvalid && selectedDateIsFixed"
-              v-popover="dateInvalidPopoverOptions"
-              name="warning"
-              class="date-warning-icon gl-mr-2 gl-ml-2"
-              tabindex="0"
-            />
+            <template v-if="isDateInvalid && selectedDateIsFixed">
+              <gl-icon
+                ref="fixedDatePopoverWarning"
+                name="warning"
+                class="date-warning-icon gl-mr-2 gl-ml-2"
+                tabindex="0"
+                :aria-label="__('Warning')"
+              />
+              <gl-popover
+                :target="() => $refs.fixedDatePopoverWarning.$el"
+                triggers="focus"
+                placement="left"
+                boundary="viewport"
+              >
+                <p>
+                  {{ dateInvalidTooltip }}
+                </p>
+                <gl-link :href="$options.dateHelpUrl" target="_blank">{{
+                  $options.dateHelpInvalidUrlText
+                }}</gl-link>
+              </gl-popover>
+            </template>
+
             <span v-if="selectedAndEditable" class="no-value d-flex">
               &nbsp;&ndash;&nbsp;
               <gl-button
@@ -281,13 +271,28 @@ export default {
         />
         <span class="gl-ml-2">{{ __('Inherited:') }}</span>
         <span class="value-content gl-ml-1">{{ dateFromMilestonesWords }}</span>
-        <gl-icon
-          v-if="isDateInvalid && !selectedDateIsFixed"
-          v-popover="dateInvalidPopoverOptions"
-          name="warning"
-          class="date-warning-icon gl-ml-2"
-          tabindex="0"
-        />
+        <template v-if="isDateInvalid && !selectedDateIsFixed">
+          <gl-icon
+            ref="datePopoverWarning"
+            name="warning"
+            class="date-warning-icon gl-ml-2"
+            tabindex="0"
+            :aria-label="__('Warning')"
+          />
+          <gl-popover
+            :target="() => $refs.datePopoverWarning.$el"
+            triggers="focus"
+            placement="left"
+            boundary="viewport"
+          >
+            <p>
+              {{ dateInvalidTooltip }}
+            </p>
+            <gl-link :href="$options.dateHelpUrl" target="_blank">{{
+              $options.dateHelpInvalidUrlText
+            }}</gl-link>
+          </gl-popover>
+        </template>
       </abbr>
     </div>
   </div>

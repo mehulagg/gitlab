@@ -552,6 +552,7 @@ project:
 - build_report_results
 - vulnerability_statistic
 - vulnerability_historical_statistics
+- vulnerability_remediations
 - product_analytics_events
 - pipeline_artifacts
 - terraform_states
@@ -645,6 +646,7 @@ boards:
 - lists
 - destroyable_lists
 - milestone
+- iteration
 - board_labels
 - board_assignee
 - assignee
@@ -654,6 +656,7 @@ boards:
 lists:
 - user
 - milestone
+- iteration
 - board
 - label
 - list_user_preferences

@@ -56,7 +56,7 @@ RSpec.describe 'DAST.gitlab-ci.yml' do
             create(:ci_variable, project: project, key: 'DAST_WEBSITE', value: 'http://example.com')
           end
 
-          it 'includes job' do
+          it 'includes dast job' do
             expect(build_names).to match_array(%w[dast])
           end
         end
@@ -66,7 +66,7 @@ RSpec.describe 'DAST.gitlab-ci.yml' do
             create(:ci_variable, project: project, key: 'DAST_API_SPECIFICATION', value: 'http://my.api/api-specification.yml')
           end
 
-          it 'includes job' do
+          it 'includes dast job' do
             expect(build_names).to match_array(%w[dast])
           end
         end
@@ -104,7 +104,7 @@ RSpec.describe 'DAST.gitlab-ci.yml' do
             project.repository.create_branch(pipeline_branch)
           end
 
-          it 'includes job' do
+          it 'includes dast job' do
             expect(build_names).to match_array(%w[dast])
           end
         end
@@ -118,7 +118,7 @@ RSpec.describe 'DAST.gitlab-ci.yml' do
         end
 
         context 'when on default branch' do
-          it 'includes job' do
+          it 'includes dast job' do
             expect(build_names).to match_array(%w[dast])
           end
         end

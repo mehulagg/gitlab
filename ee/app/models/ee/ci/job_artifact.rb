@@ -118,7 +118,7 @@ module EE
       strong_memoize(:security_report) do
         next unless file_type.in?(SECURITY_REPORT_FILE_TYPES)
 
-        report = ::Gitlab::Ci::Reports::Security::Report.new(file_type, nil, nil).tap do |report|
+        report = ::Gitlab::Ci::Reports::Security::Report.new(file_type, job.pipeline, nil).tap do |report|
           each_blob do |blob|
             ::Gitlab::Ci::Parsers.fabricate!(file_type).parse!(blob, report)
           end

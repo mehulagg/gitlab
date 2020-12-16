@@ -11,7 +11,7 @@ This page contains information about PostgreSQL the GitLab Support team uses
 when troubleshooting. GitLab makes this information public, so that anyone can
 make use of the Support team's collected knowledge.
 
-CAUTION: **Caution:**
+WARNING:
 Some procedures documented here may break your GitLab instance. Use at your
 own risk.
 
@@ -129,7 +129,7 @@ Quoting from issue [#1](https://gitlab.com/gitlab-org/gitlab/-/issues/30528):
 
 > "If a deadlock is hit, and we resolve it through aborting the transaction after a short period, then the retry mechanisms we already have will make the deadlocked piece of work try again, and it's unlikely we'll deadlock multiple times in a row."
 
-TIP: **Tip:**
+NOTE:
 In Support, our general approach to reconfiguring timeouts (applies also to the
 HTTP stack) is that it's acceptable to do it temporarily as a workaround. If it
 makes GitLab usable for the customer, then it buys time to understand the
@@ -169,7 +169,5 @@ It may take a little while to respond.
 {"idle_in_transaction_session_timeout"=>"1min"}
 ```
 
-NOTE: **Note:**
-These are Omnibus GitLab settings. If an external database, such as a
-customer's PostgreSQL installation or Amazon RDS is being used, these values
-don't get set, and would have to be set externally.
+NOTE:
+These are Omnibus GitLab settings. If an external database, such as a customer's PostgreSQL installation or Amazon RDS is being used, these values don't get set, and would have to be set externally.

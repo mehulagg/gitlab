@@ -89,6 +89,10 @@ module EE
         presenter(merge_request).create_vulnerability_feedback_dismissal_path(merge_request.project)
       end
 
+      expose :discover_project_security_path do |merge_request|
+        presenter(merge_request).discover_project_security_path
+      end
+
       expose :has_approvals_available do |merge_request|
         merge_request.approval_feature_available?
       end

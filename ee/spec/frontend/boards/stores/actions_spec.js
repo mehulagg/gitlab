@@ -7,18 +7,10 @@ import * as types from 'ee/boards/stores/mutation_types';
 import { TEST_HOST } from 'helpers/test_constants';
 import testAction from 'helpers/vuex_action_helper';
 import { formatListIssues } from '~/boards/boards_util';
-import { ListType } from '~/boards/constants';
 import * as typesCE from '~/boards/stores/mutation_types';
 import * as commonUtils from '~/lib/utils/common_utils';
 import { mergeUrlParams, removeParams } from '~/lib/utils/url_utility';
-import {
-  mockLists,
-  mockIssue,
-  mockIssue2,
-  mockEpic,
-  rawIssue,
-  mockListsWithModel,
-} from '../mock_data';
+import { mockLists, mockIssue, mockIssue2, mockEpic, rawIssue } from '../mock_data';
 
 const expectNotImplemented = action => {
   it('is not implemented', () => {
@@ -105,6 +97,41 @@ describe('setFilters', () => {
       [{ type: types.SET_FILTERS, payload: updatedFilters }],
       [{ type: 'setEpicSwimlanes' }],
     );
+  });
+});
+
+describe('performSearch', () => {
+  it('should dispatch setFilters action', done => {
+    testAction(actions.performSearch, {}, {}, [], [{ type: 'setFilters', payload: {} }], done);
+  });
+
+  it('should dispatch setFilters, fetchLists and resetIssues action when graphqlBoardLists FF is on', async () => {
+    window.gon = { features: { graphqlBoardLists: true } };
+    const getters = { isSwimlanesOn: false };
+
+    await testAction({
+      action: actions.performSearch,
+      state: { ...getters },
+      expectedActions: [
+        { type: 'setFilters', payload: {} },
+        { type: 'fetchLists' },
+        { type: 'resetIssues' },
+      ],
+    });
+  });
+
+  it('should dispatch setFilters, resetEpics, fetchEpicsSwimlanes and resetIssues action when isSwimlanesOn', async () => {
+    const getters = { isSwimlanesOn: true };
+    await testAction({
+      action: actions.performSearch,
+      state: { isShowingEpicsSwimlanes: true, ...getters },
+      expectedActions: [
+        { type: 'setFilters', payload: {} },
+        { type: 'resetEpics' },
+        { type: 'resetIssues' },
+        { type: 'fetchEpicsSwimlanes', payload: {} },
+      ],
+    });
   });
 });
 
@@ -344,34 +371,6 @@ describe('updateListWipLimit', () => {
   });
 });
 
-describe('showPromotionList', () => {
-  it('should dispatch addList action when conditions showPromotion is true', done => {
-    const state = {
-      endpoints: { fullPath: 'gitlab-org', boardId: '1' },
-      boardType: 'group',
-      disabled: false,
-      boardLists: [{ type: 'backlog' }, { type: 'closed' }],
-      showPromotion: true,
-    };
-
-    const promotionList = {
-      id: 'promotion',
-      listType: ListType.promotion,
-      title: 'Improve Issue Boards',
-      position: 0,
-    };
-
-    testAction(
-      actions.showPromotionList,
-      {},
-      state,
-      [],
-      [{ type: 'addList', payload: promotionList }],
-      done,
-    );
-  });
-});
-
 describe('fetchAllBoards', () => {
   expectNotImplemented(actions.fetchAllBoards);
 });
@@ -380,19 +379,11 @@ describe('fetchRecentBoards', () => {
   expectNotImplemented(actions.fetchRecentBoards);
 });
 
-describe('createBoard', () => {
-  expectNotImplemented(actions.createBoard);
-});
-
 describe('deleteBoard', () => {
   expectNotImplemented(actions.deleteBoard);
 });
 
 describe('updateIssueWeight', () => {
-  expectNotImplemented(actions.updateIssueWeight);
-});
-
-describe('togglePromotionState', () => {
   expectNotImplemented(actions.updateIssueWeight);
 });
 
@@ -465,8 +456,9 @@ describe('fetchIssuesForEpic', () => {
 
 describe('toggleEpicSwimlanes', () => {
   it('should commit mutation TOGGLE_EPICS_SWIMLANES', () => {
+    const startURl = `${TEST_HOST}/groups/gitlab-org/-/boards/1?group_by=epic`;
     global.jsdom.reconfigure({
-      url: `${TEST_HOST}/groups/gitlab-org/-/boards/1?group_by=epic`,
+      url: startURl,
     });
 
     const state = {
@@ -484,7 +476,11 @@ describe('toggleEpicSwimlanes', () => {
       [{ type: types.TOGGLE_EPICS_SWIMLANES }],
       [],
       () => {
-        expect(commonUtils.historyPushState).toHaveBeenCalledWith(removeParams(['group_by']));
+        expect(commonUtils.historyPushState).toHaveBeenCalledWith(
+          removeParams(['group_by']),
+          startURl,
+          true,
+        );
         expect(global.window.location.href).toBe(`${TEST_HOST}/groups/gitlab-org/-/boards/1`);
       },
     );
@@ -642,7 +638,7 @@ describe('moveIssue', () => {
     endpoints: { fullPath: 'gitlab-org', boardId: '1' },
     boardType: 'group',
     disabled: false,
-    boardLists: mockListsWithModel,
+    boardLists: mockLists,
     issuesByListId: listIssues,
     issues,
   };

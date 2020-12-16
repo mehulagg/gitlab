@@ -56,12 +56,12 @@ export default {
     <template>
       <board-assignee-dropdown />
       <board-sidebar-epic-select />
-      <board-sidebar-time-tracker class="swimlanes-sidebar-time-tracker" />
-      <board-sidebar-weight-input v-if="glFeatures.issueWeights" />
-      <board-sidebar-labels-select />
-      <board-sidebar-due-date />
-      <board-sidebar-subscription />
       <board-sidebar-milestone-select />
+      <board-sidebar-time-tracker class="swimlanes-sidebar-time-tracker" />
+      <board-sidebar-due-date />
+      <board-sidebar-labels-select />
+      <board-sidebar-weight-input v-if="glFeatures.issueWeights" />
+      <board-sidebar-subscription />
     </template>
   </gl-drawer>
 </template>

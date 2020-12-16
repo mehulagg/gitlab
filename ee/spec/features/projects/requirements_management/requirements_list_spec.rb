@@ -16,8 +16,8 @@ RSpec.describe 'Requirements list', :js do
       find('button.js-new-requirement').click
     end
 
-    page.within('.requirements-list-container') do
-      find('textarea#requirementTitle').native.send_keys title
+    page.within('.requirement-form-drawer') do
+      find('input#issuable-title').native.send_keys title
       find('button.js-requirement-save').click
 
       wait_for_all_requests
@@ -66,7 +66,7 @@ RSpec.describe 'Requirements list', :js do
         end
 
         page.within('.requirements-list-container') do
-          expect(page).to have_selector('.requirement-form')
+          expect(page).to have_selector('.requirement-form-drawer')
         end
       end
 
@@ -137,7 +137,7 @@ RSpec.describe 'Requirements list', :js do
         page.within('.requirement-form-drawer') do
           expect(page.find('.title-container')).to have_content(requirement1.title)
           expect(page.find('.title-container')).to have_selector('button.btn-edit')
-          expect(page.find('.description-container')).to have_content(requirement1.description)
+          expect(page.find('.description')).to have_content(requirement1.description)
         end
       end
 
@@ -148,8 +148,8 @@ RSpec.describe 'Requirements list', :js do
 
         page.within('.requirement-form-drawer') do
           expect(page.find('.gl-drawer-header span', match: :first)).to have_content("REQ-#{requirement1.iid}")
-          expect(page.find('textarea#requirementTitle')['value']).to have_content("#{requirement1.title}")
-          expect(page.find('textarea#requirementDescription')['value']).to have_content("#{requirement1.description}")
+          expect(page.find('input#issuable-title')['value']).to have_content("#{requirement1.title}")
+          expect(page.find('textarea#issuable-description')['value']).to have_content("#{requirement1.description}")
           expect(page.find('input[type="checkbox"]')['checked']).to eq(requirement1.last_test_report_state)
           expect(page.find('.js-requirement-save')).to have_content('Save changes')
         end
@@ -164,8 +164,8 @@ RSpec.describe 'Requirements list', :js do
         end
 
         page.within('.requirement-form-drawer') do
-          find('textarea#requirementTitle').native.send_keys requirement_title
-          find('textarea#requirementDescription').native.send_keys requirement_description
+          find('input#issuable-title').native.send_keys requirement_title
+          find('textarea#issuable-description').native.send_keys requirement_description
           find('input[type="checkbox"]').click
 
           click_button 'Save changes'

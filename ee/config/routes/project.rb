@@ -15,7 +15,7 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
           resources :requirements, only: [:index] do
             collection do
               post :import_csv
-              post :authorize
+              post 'import_csv/authorize', to: 'requirements#authorize'
             end
           end
         end

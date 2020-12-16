@@ -25,7 +25,7 @@ In either case, an outcome of the experiment should be posted to the issue with 
 Experiments' code quality can fail our standards for several reasons. These
 reasons can include not being added to the codebase for a long time, or because
 of fast iteration to retrieve data. However, having the experiment run (or not
-run) shouldn't impact GitLab's availability. To avoid or identify issues,
+run) shouldn't impact GitLab availability. To avoid or identify issues,
 experiments are initially deployed to a small number of users. Regardless,
 experiments still need tests.
 
@@ -279,6 +279,17 @@ Subsequent calls to this method for the same experiment and the same user have n
 
 Note that this data is completely separate from the [events tracking data](#implement-the-tracking-events). They are not linked together in any way.
 
+#### Add context
+
+You can add arbitrary context data in a hash which gets stored as part of the experiment user record.
+This data can then be used by data analytics dashboards.
+
+```ruby
+before_action do
+  record_experiment_user(:signup_flow, foo: 42)
+end
+```
+
 ### Record experiment conversion event
 
 Along with the tracking of backend and frontend events and the [recording of experiment participants](#record-experiment-user), we can also record when a user performs the desired conversion event action. For example:
@@ -312,6 +323,19 @@ For visibility, please also share any commands run against production in the `#s
   ```shell
   /chatops run feature delete signup_flow_experiment_percentage
   ```
+
+### Manually force the current user to be in the experiment group
+
+You may force the application to put your current user in the experiment group. To do so
+add a query string parameter to the path where the experiment runs. If you do so,
+the experiment will work only for this request and won't work after following links or submitting forms.
+
+For example, to forcibly enable the `EXPERIMENT_KEY` experiment, add `force_experiment=EXPERIMENT_KEY`
+to the URL:
+
+```shell
+https://gitlab.com/<EXPERIMENT_ENTRY_URL>?force_experiment=<EXPERIMENT_KEY>
+```
 
 ### Testing and test helpers
 

@@ -39,6 +39,12 @@ module ElasticsearchHelpers
     es_helper.refresh_index(index_name: es_helper.migrations_index_name)
   end
 
+  def warm_elasticsearch_migrations_cache!
+    ::Elastic::DataMigrationService.migrations.each do |migration|
+      ::Elastic::DataMigrationService.migration_has_finished?(migration.name.underscore.to_sym)
+    end
+  end
+
   def es_helper
     Gitlab::Elastic::Helper.default
   end

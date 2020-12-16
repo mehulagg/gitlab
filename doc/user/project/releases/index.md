@@ -223,7 +223,7 @@ To set a deploy freeze window in the UI, complete these steps:
 
 ![Deploy freeze modal for setting a deploy freeze period](img/deploy_freeze_v13_2.png)
 
-CAUTION: **Caution:**
+WARNING:
 To edit or delete a deploy freeze, use the [Freeze Periods API](../../../api/freeze_periods.md).
 
 If a project contains multiple freeze periods, all periods apply. If they overlap, the freeze covers the
@@ -470,7 +470,7 @@ In the API:
 > [Introduced](https://gitlab.com/gitlab-org/release-cli/-/merge_requests/6) in GitLab 12.10.
 
 The Release CLI is a command-line tool for managing GitLab Releases from the command line or from
-GitLab's CI/CD configuration file, `.gitlab-ci.yml`.
+the GitLab CI/CD configuration file, `.gitlab-ci.yml`.
 
 With it, you can create, update, modify, and delete releases right through the
 terminal.

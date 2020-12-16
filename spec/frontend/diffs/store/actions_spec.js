@@ -160,10 +160,10 @@ describe('DiffsStoreActions', () => {
         .onGet(
           mergeUrlParams(
             {
-              per_page: DIFFS_PER_PAGE,
               w: '1',
               view: 'inline',
               page: 1,
+              per_page: DIFFS_PER_PAGE,
             },
             endpointBatch,
           ),
@@ -172,10 +172,10 @@ describe('DiffsStoreActions', () => {
         .onGet(
           mergeUrlParams(
             {
-              per_page: DIFFS_PER_PAGE,
               w: '1',
               view: 'inline',
               page: 2,
+              per_page: DIFFS_PER_PAGE,
             },
             endpointBatch,
           ),
@@ -249,7 +249,7 @@ describe('DiffsStoreActions', () => {
           { type: types.SET_LOADING, payload: true },
           { type: types.SET_LOADING, payload: false },
           { type: types.SET_MERGE_REQUEST_DIFFS, payload: diffMetadata.merge_request_diffs },
-          { type: types.SET_DIFF_DATA, payload: noFilesData },
+          { type: types.SET_DIFF_METADATA, payload: noFilesData },
         ],
         [],
         () => {

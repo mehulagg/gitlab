@@ -131,4 +131,29 @@ RSpec.describe MergeRequestPresenter do
       it { is_expected.to eq(attribute_value) }
     end
   end
+
+  describe '#discover_project_security_path' do
+    let(:presenter) { described_class.new(merge_request, current_user: user) }
+    let(:can_discover_project_security) { true }
+
+    subject { presenter.discover_project_security_path }
+
+    before do
+      allow(presenter).to receive(:show_discover_project_security?) { can_discover_project_security }
+    end
+
+    context 'when project security is discoverable' do
+      it 'returns path' do
+        is_expected.to eq(presenter.project_security_discover_path(project))
+      end
+    end
+
+    context 'when project security is not discoverable' do
+      let(:can_discover_project_security) { false }
+
+      it 'returns nil' do
+        is_expected.to be_nil
+      end
+    end
+  end
 end

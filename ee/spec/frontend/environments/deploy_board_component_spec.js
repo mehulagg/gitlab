@@ -2,6 +2,7 @@ import { GlTooltip, GlIcon, GlLoadingIcon } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
 import Vue from 'vue';
 import DeployBoard from 'ee/environments/components/deploy_board_component.vue';
+import CanaryIngress from 'ee/environments/components/canary_ingress.vue';
 import { deployBoardMockData, environment } from './mock_data';
 
 const logsPath = `gitlab-org/gitlab-test/-/logs?environment_name=${environment.name}`;
@@ -11,6 +12,7 @@ describe('Deploy Board', () => {
 
   const createComponent = (props = {}) =>
     mount(Vue.extend(DeployBoard), {
+      provide: { glFeatures: { canaryIngressWeightControl: true } },
       propsData: {
         deployBoardData: deployBoardMockData,
         isLoading: false,
@@ -61,6 +63,12 @@ describe('Deploy Board', () => {
 
       expect(tooltip.props('target')()).toBe(iconSpan.element);
       expect(icon.props('name')).toBe('question');
+    });
+
+    it('renders the canary weight selector', () => {
+      const canary = wrapper.find(CanaryIngress);
+      expect(canary.exists()).toBe(true);
+      expect(canary.props('canaryIngress')).toEqual({ canary_weight: 50 });
     });
   });
 

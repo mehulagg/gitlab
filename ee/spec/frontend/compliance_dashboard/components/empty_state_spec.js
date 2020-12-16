@@ -1,4 +1,5 @@
 import { shallowMount } from '@vue/test-utils';
+import { GlEmptyState } from '@gitlab/ui';
 
 import EmptyState from 'ee/compliance_dashboard/components/empty_state.vue';
 
@@ -7,8 +8,7 @@ const IMAGE_PATH = 'empty.svg';
 describe('EmptyState component', () => {
   let wrapper;
 
-  const findImage = () => wrapper.find('img');
-  const findText = () => wrapper.find('.text-content');
+  const emptyStateProp = prop => wrapper.find(GlEmptyState).props(prop);
 
   const createComponent = (props = {}) => {
     return shallowMount(EmptyState, {
@@ -29,12 +29,12 @@ describe('EmptyState component', () => {
 
   describe('behaviour', () => {
     it('sets the empty SVG path', () => {
-      expect(findImage().element.getAttribute('src')).toEqual(IMAGE_PATH);
+      expect(emptyStateProp('svgPath')).toBe(IMAGE_PATH);
     });
 
-    it('renders a message', () => {
-      expect(findText().text()).toEqual(
-        "Merge requests are a place to propose changes you've made to a project and discuss those changes with others Interested parties can even contribute by pushing commits if they want to.",
+    it('sets the description', () => {
+      expect(emptyStateProp('description')).toBe(
+        "The Compliance Dashboard gives you the ability to see a group's merge request activity by providing a high-level view for all projects in the group.",
       );
     });
   });

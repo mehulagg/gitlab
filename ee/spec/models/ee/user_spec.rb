@@ -1571,4 +1571,42 @@ RSpec.describe User do
       end
     end
   end
+
+  describe '#can_remove_self?' do
+    let(:user) { create(:user) }
+
+    subject { user.can_remove_self? }
+
+    context 'not on GitLab.com' do
+      context 'when the password is not automatically set' do
+        it { is_expected.to eq true }
+      end
+
+      context 'when the password is automatically set' do
+        before do
+          user.password_automatically_set = true
+        end
+
+        it { is_expected.to eq true }
+      end
+    end
+
+    context 'on GitLab.com' do
+      before do
+        allow(::Gitlab).to receive(:com?).and_return(true)
+      end
+
+      context 'when the password is not automatically set' do
+        it { is_expected.to eq true }
+      end
+
+      context 'when the password is automatically set' do
+        before do
+          user.password_automatically_set = true
+        end
+
+        it { is_expected.to eq false }
+      end
+    end
+  end
 end

@@ -13,7 +13,7 @@ module Mutations
 
       argument :iid, GraphQL::STRING_TYPE,
                required: true,
-               description: 'The iid of the requirement to update'
+               description: 'The IID of the requirement to update'
 
       argument :last_test_report_state, Types::RequirementsManagement::TestReportStateEnum,
                required: false,

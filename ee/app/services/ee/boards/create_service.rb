@@ -7,8 +7,10 @@ module EE
 
       override :create_board!
       def create_board!
-        set_assignee
-        set_milestone
+        filter_assignee
+        filter_labels
+        filter_milestone
+        filter_iteration
 
         super
       end

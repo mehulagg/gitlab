@@ -108,5 +108,18 @@ module EE
         allowed_email_domain.email_matches_domain?(email)
       end
     end
+
+    override :post_create_hook
+    def post_create_hook
+      super
+
+      return unless self.source.feature_available?(:group_webhooks)
+      return unless GroupHook.where(group_id: self.source.self_and_ancestors).exists?
+
+      run_after_commit do
+        data = ::Gitlab::HookData::GroupMemberBuilder.new(self).build(:create)
+        self.source.execute_hooks(data, :member_hooks)
+      end
+    end
   end
 end

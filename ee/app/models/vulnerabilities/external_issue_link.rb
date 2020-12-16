@@ -18,5 +18,7 @@ module Vulnerabilities
                 message: N_('already has a "created" issue link')
               },
               if: :created?
+
+    attr_accessor :external_issue
   end
 end

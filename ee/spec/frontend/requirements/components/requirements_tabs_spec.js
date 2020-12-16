@@ -11,6 +11,7 @@ const createComponent = ({
   requirementsCount = mockRequirementsCount,
   showCreateForm = false,
   canCreateRequirement = true,
+  showUploadCsv = true,
 } = {}) =>
   shallowMount(RequirementsTabs, {
     propsData: {
@@ -18,6 +19,7 @@ const createComponent = ({
       requirementsCount,
       showCreateForm,
       canCreateRequirement,
+      showUploadCsv,
     },
   });
 
@@ -75,7 +77,7 @@ describe('RequirementsTabs', () => {
       });
 
       return wrapper.vm.$nextTick(() => {
-        const buttonEl = wrapper.find(GlButton);
+        const buttonEl = wrapper.findAll(GlButton).at(1);
 
         expect(buttonEl.exists()).toBe(true);
         expect(buttonEl.text()).toBe('New requirement');
@@ -113,9 +115,10 @@ describe('RequirementsTabs', () => {
       });
 
       return wrapper.vm.$nextTick(() => {
-        const buttonEl = wrapper.find(GlButton);
+        const buttonEl = wrapper.findAll(GlButton);
 
-        expect(buttonEl.props('disabled')).toBe(true);
+        expect(buttonEl.at(0).props('disabled')).toBe(true);
+        expect(buttonEl.at(1).props('disabled')).toBe(true);
       });
     });
   });

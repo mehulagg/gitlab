@@ -1,0 +1,5 @@
+---
+title: Fix displaying merge request dependencies with no metrics
+merge_request: 49466
+author:
+type: fixed

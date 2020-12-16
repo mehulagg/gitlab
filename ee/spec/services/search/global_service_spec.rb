@@ -108,6 +108,35 @@ RSpec.describe Search::GlobalService do
         end
       end
 
+      # Since newly created indices automatically have all migrations as
+      # finished we need a test to verify the old style searches work for
+      # instances which haven't finished the migration yet
+      context 'when add_new_data_to_issues_documents migration is not finished' do
+        let!(:issue) { create :issue, project: project }
+
+        before do
+          allow(Elastic::DataMigrationService).to receive(:migration_has_finished?)
+            .with(:add_new_data_to_issues_documents)
+            .and_return(false)
+        end
+
+        where(:project_level, :feature_access_level, :membership, :admin_mode, :expected_count) do
+          permission_table_for_guest_feature_access
+        end
+
+        with_them do
+          it "respects visibility" do
+            enable_admin_mode!(user) if admin_mode
+            update_feature_access_level(project, feature_access_level)
+            ensure_elasticsearch_index!
+
+            expect_search_results(user, 'issues', expected_count: expected_count) do |user|
+              described_class.new(user, search: issue.title).execute
+            end
+          end
+        end
+      end
+
       context 'sort by created_at' do
         let!(:project) { create(:project, :public) }
         let!(:old_result) { create(:issue, project: project, title: 'sorted old', created_at: 1.month.ago) }
@@ -120,6 +149,52 @@ RSpec.describe Search::GlobalService do
 
         include_examples 'search results sorted' do
           let(:results) { described_class.new(nil, search: 'sorted', sort: sort).execute }
+        end
+      end
+
+      context 'using joins for global permission checks' do
+        let(:results) { described_class.new(nil, search: '*').execute.objects('issues') }
+        let(:es_host) { Gitlab::CurrentSettings.elasticsearch_url[0] }
+        let(:search_url) { Addressable::Template.new("#{es_host}/{index}/doc/_search{?params*}") }
+
+        before do
+          ensure_elasticsearch_index!
+        end
+
+        context 'when add_new_data_to_issues_documents migration is finished' do
+          before do
+            allow(Elastic::DataMigrationService).to receive(:migration_has_finished?)
+              .with(:add_new_data_to_issues_documents)
+              .and_return(true)
+          end
+
+          it 'does not use joins to apply permissions' do
+            request = a_request(:get, search_url).with do |req|
+              expect(req.body).not_to include("has_parent")
+            end
+
+            results
+
+            expect(request).to have_been_made
+          end
+        end
+
+        context 'when add_new_data_to_issues_documents migration is not finished' do
+          before do
+            allow(Elastic::DataMigrationService).to receive(:migration_has_finished?)
+              .with(:add_new_data_to_issues_documents)
+              .and_return(false)
+          end
+
+          it 'uses joins to apply permissions' do
+            request = a_request(:get, search_url).with do |req|
+              expect(req.body).to include("has_parent")
+            end
+
+            results
+
+            expect(request).to have_been_made
+          end
         end
       end
     end

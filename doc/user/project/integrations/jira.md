@@ -6,7 +6,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # GitLab Jira integration
 
-If you need to use Jira to track work that's implemented in GitLab, GitLab's Jira integrations make the process of working across systems more efficient.
+If you need to use Jira to track work that's implemented in GitLab, Jira integrations with GitLab make the process of working across systems more efficient.
 
 This page is about the GitLab Jira integration, which is available in every GitLab project by default, allowing you to connect it to any Jira instance, whether Cloud or self-managed. To compare features with the complementary Jira Development Panel integration, see [Jira integrations](jira_integrations.md).
 
@@ -18,7 +18,7 @@ Features include:
   - GitLab links to the Jira issue.
   - The Jira issue adds a comment with details and a link back to the activity in GitLab.
 - **Mention that a commit or MR resolves or closes a specific Jira issue** and when it's merged to the default branch:
-  - GitLab's MR displays a note that it closed the Jira issue. Prior to the merge, MRs indicate which issue they close.
+  - The GitLab MR displays a note that it closed the Jira issue. Prior to the merge, MRs indicate which issue they close.
   - The Jira issue shows the activity and is closed or otherwise transitioned as specified in your GitLab settings.
 - **View a list of Jira issues directly in GitLab** **(PREMIUM)**
 
@@ -89,7 +89,7 @@ To enable users to view Jira issues inside the GitLab project, select **Enable J
 
 You can only display issues from a single Jira project within a given GitLab project.
 
-CAUTION: **Caution:**
+WARNING:
 If you enable Jira issues with the setting above, all users that have access to this GitLab project
 are able to view all issues from the specified Jira project.
 

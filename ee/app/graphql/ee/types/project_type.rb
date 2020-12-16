@@ -80,10 +80,16 @@ module EE
         field :dast_site_validation,
               ::Types::DastSiteValidationType,
               null: true,
+              resolver: ::Resolvers::DastSiteValidationResolver.single,
+              description: 'DAST Site Validation associated with the project. Will always return `null` ' \
+                           'if `security_on_demand_scans_site_validation` is disabled'
+
+        field :dast_site_validations,
+              ::Types::DastSiteValidationType.connection_type,
+              null: true,
               resolver: ::Resolvers::DastSiteValidationResolver,
-              description: 'DAST Site Validation associated with the project' do
-                argument :target_url, GraphQL::STRING_TYPE, required: true, description: 'target URL of the DAST Site Validation'
-              end
+              description: 'DAST Site Validations associated with the project. Will always return no nodes ' \
+                           'if `security_on_demand_scans_site_validation` is disabled'
 
         field :cluster_agent,
               ::Types::Clusters::AgentType,
@@ -120,35 +126,35 @@ module EE
               null: true,
               description: 'Incident Management On-call schedules of the project',
               resolver: ::Resolvers::IncidentManagement::OncallScheduleResolver
+      end
 
-        def dast_scanner_profiles
-          DastScannerProfilesFinder.new(project_ids: [object.id]).execute
-        end
+      def dast_scanner_profiles
+        DastScannerProfilesFinder.new(project_ids: [object.id]).execute
+      end
 
-        def requirement_states_count
-          return unless Ability.allowed?(current_user, :read_requirement, object)
+      def requirement_states_count
+        return unless Ability.allowed?(current_user, :read_requirement, object)
 
-          Hash.new(0).merge(object.requirements.counts_by_state)
-        end
+        Hash.new(0).merge(object.requirements.counts_by_state)
+      end
 
-        def sast_ci_configuration
-          return unless Ability.allowed?(current_user, :download_code, object)
+      def sast_ci_configuration
+        return unless Ability.allowed?(current_user, :download_code, object)
 
-          ::Security::CiConfiguration::SastParserService.new(object).configuration
-        end
+        ::Security::CiConfiguration::SastParserService.new(object).configuration
+      end
 
-        def security_dashboard_path
-          Rails.application.routes.url_helpers.project_security_dashboard_index_path(object)
-        end
+      def security_dashboard_path
+        Rails.application.routes.url_helpers.project_security_dashboard_index_path(object)
+      end
 
-        def compliance_frameworks
-          BatchLoader::GraphQL.for(object.id).batch(default_value: []) do |project_ids, loader|
-            results = ::ComplianceManagement::Framework.with_projects(project_ids)
+      def compliance_frameworks
+        BatchLoader::GraphQL.for(object.id).batch(default_value: []) do |project_ids, loader|
+          results = ::ComplianceManagement::Framework.with_projects(project_ids)
 
-            results.each do |framework|
-              framework.project_ids.each do |project_id|
-                loader.call(project_id) { |xs| xs << framework }
-              end
+          results.each do |framework|
+            framework.project_ids.each do |project_id|
+              loader.call(project_id) { |xs| xs << framework }
             end
           end
         end

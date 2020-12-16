@@ -19,12 +19,6 @@ RSpec.describe 'Coverage-Fuzzing.gitlab-ci.yml' do
       allow(project).to receive(:default_branch).and_return(default_branch)
     end
 
-    context 'when project has no license' do
-      it 'includes job to display error' do
-        expect(build_names).to match_array(%w[coverage_fuzzing_unlicensed])
-      end
-    end
-
     context 'when project has Ultimate license' do
       let(:license) { create(:license, plan: License::ULTIMATE_PLAN) }
 

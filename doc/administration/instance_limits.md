@@ -181,6 +181,23 @@ Plan.default.actual_limits.update!(group_hooks: 100)
 
 Set the limit to `0` to disable it.
 
+## Pull Mirroring Interval
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/237891) in GitLab 13.7.
+
+The [minimum time between pull refreshes](../user/project/repository/repository_mirroring.md)
+defaults to 300 seconds (5 minutes).
+
+To change this limit on a self-managed installation, run the following in the
+[GitLab Rails console](operations/rails_console.md#starting-a-rails-console-session):
+
+```ruby
+# If limits don't exist for the default plan, you can create one with:
+# Plan.default.create_limits!
+
+Plan.default.actual_limits.update!(pull_mirror_interval_seconds: 200)
+```
+
 ## Incoming emails from auto-responders
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/30327) in GitLab 12.4.
@@ -482,8 +499,8 @@ as the overall index size. This value defaults to `1024 KiB` (1 MiB) as any
 text files larger than this likely aren't meant to be read by humans.
 
 You must set a limit, as unlimited file sizes aren't supported. Setting this
-value to be greater than the amount of memory on GitLab's Sidekiq nodes causes
-GitLab's Sidekiq nodes to run out of memory, as they will pre-allocate this
+value to be greater than the amount of memory on GitLab Sidekiq nodes causes
+the GitLab Sidekiq nodes to run out of memory, as they will pre-allocate this
 amount of memory during indexing.
 
 ### Maximum field length
@@ -550,12 +567,12 @@ More information can be found in the [Push event activities limit and bulk push 
 
 On GitLab.com, the maximum file size for a package that's uploaded to the [GitLab Package Registry](../user/packages/package_registry/index.md) varies by format:
 
-- Conan: 3GB
+- Conan: 5GB
 - Generic: 5GB
-- Maven: 3GB
-- NPM: 500MB
-- NuGet: 500MB
-- PyPI: 3GB
+- Maven: 5GB
+- NPM: 5GB
+- NuGet: 5GB
+- PyPI: 5GB
 
 To set this limit on a self-managed installation, run the following in the
 [GitLab Rails console](operations/rails_console.md#starting-a-rails-console-session):

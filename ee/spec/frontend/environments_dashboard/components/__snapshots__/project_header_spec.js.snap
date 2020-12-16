@@ -53,7 +53,7 @@ exports[`Project Header matches the snapshot 1`] = `
     <gl-dropdown-stub
       category="primary"
       headertext=""
-      right=""
+      right="true"
       size="medium"
       text=""
       toggleclass="js-more-actions-toggle gl-display-flex gl-align-items-center gl-px-3! gl-bg-transparent gl-shadow-none!"

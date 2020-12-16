@@ -6,7 +6,7 @@ RSpec.describe GitlabSchema.types['DastSiteValidation'] do
   let_it_be(:dast_site_validation) { create(:dast_site_validation) }
   let_it_be(:project) { dast_site_validation.dast_site_token.project }
   let_it_be(:user) { create(:user) }
-  let_it_be(:fields) { %i[id status] }
+  let_it_be(:fields) { %i[id status normalizedTargetUrl] }
 
   let(:response) do
     GitlabSchema.execute(
@@ -42,6 +42,7 @@ RSpec.describe GitlabSchema.types['DastSiteValidation'] do
             dastSiteValidation(targetUrl: $targetUrl) {
               id
               status
+              normalizedTargetUrl
             }
           }
         }

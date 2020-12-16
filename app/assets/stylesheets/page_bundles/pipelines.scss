@@ -43,11 +43,6 @@
     .dropdown-toggle,
     .dropdown-menu {
       color: var(--gray-500, $gray-500);
-
-      .fa {
-        color: var(--gray-500, $gray-500);
-        font-size: 14px;
-      }
     }
 
     .btn-group.open .btn-default {

@@ -7,7 +7,7 @@ import VueApollo from 'vue-apollo';
 import DastSiteProfileForm from 'ee/security_configuration/dast_site_profiles_form/components/dast_site_profile_form.vue';
 import dastSiteProfileCreateMutation from 'ee/security_configuration/dast_site_profiles_form/graphql/dast_site_profile_create.mutation.graphql';
 import dastSiteProfileUpdateMutation from 'ee/security_configuration/dast_site_profiles_form/graphql/dast_site_profile_update.mutation.graphql';
-import { siteProfiles } from 'ee_jest/on_demand_scans/mock_data';
+import { siteProfiles } from 'ee_jest/on_demand_scans/mocks/mock_data';
 import * as responses from 'ee_jest/security_configuration/dast_site_profiles_form/mock_data/apollo_mock';
 import { TEST_HOST } from 'helpers/test_constants';
 import waitForPromises from 'jest/helpers/wait_for_promises';

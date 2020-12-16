@@ -5,7 +5,7 @@ import { parseBoolean } from '~/lib/utils/common_utils';
 export default class EpicTabs {
   constructor() {
     this.epicTreesEnabled = gon.features && gon.features.epicTrees;
-    this.wrapper = document.querySelector('.js-epic-container:not(.breadcrumbs)');
+    this.wrapper = document.querySelector('.js-epic-container');
     this.epicTabs = this.wrapper.querySelector('.js-epic-tabs-container');
     this.discussionFilterContainer = this.epicTabs.querySelector('.js-discussion-filter-container');
     const allowSubEpics = parseBoolean(this.epicTabs.dataset.allowSubEpics);

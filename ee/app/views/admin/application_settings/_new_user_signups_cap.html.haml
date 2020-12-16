@@ -1,4 +1,4 @@
-- return unless ::Feature.enabled?(:admin_new_user_signups_cap)
+- return unless ::Feature.enabled?(:admin_new_user_signups_cap, default_enabled: true )
 
 .form-group
   = form.label :new_user_signups_cap, s_('AdminArea|User cap'), class: 'label-bold'

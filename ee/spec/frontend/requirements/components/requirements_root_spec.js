@@ -44,6 +44,7 @@ const createComponent = ({
   loading = false,
   canCreateRequirement = true,
   requirementsWebUrl = '/gitlab-org/gitlab-shell/-/requirements',
+  importCsvPath = '/gitlab-org/gitlab-shell/-/requirements/import_csv',
 } = {}) =>
   shallowMount(RequirementsRoot, {
     propsData: {
@@ -54,6 +55,7 @@ const createComponent = ({
       emptyStatePath,
       canCreateRequirement,
       requirementsWebUrl,
+      importCsvPath,
     },
     mocks: {
       $apollo: {

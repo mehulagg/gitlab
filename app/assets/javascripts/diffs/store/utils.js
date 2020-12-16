@@ -16,7 +16,7 @@ import {
   SHOW_WHITESPACE,
   NO_SHOW_WHITESPACE,
 } from '../constants';
-import { prepareRawDiffFile } from '../diff_file';
+import { prepareRawDiffFile } from '../utils/diff_file';
 
 export const isAdded = line => ['new', 'new-nonewline'].includes(line.type);
 export const isRemoved = line => ['old', 'old-nonewline'].includes(line.type);
@@ -386,9 +386,9 @@ function deduplicateFilesList(files) {
   return Object.values(dedupedFiles);
 }
 
-export function prepareDiffData(diff, priorFiles = []) {
+export function prepareDiffData({ diff, priorFiles = [], meta = false }) {
   const cleanedFiles = (diff.diff_files || [])
-    .map((file, index, allFiles) => prepareRawDiffFile({ file, allFiles }))
+    .map((file, index, allFiles) => prepareRawDiffFile({ file, allFiles, meta }))
     .map(ensureBasicDiffFileLines)
     .map(prepareDiffFileLines)
     .map(finalizeDiffFile);

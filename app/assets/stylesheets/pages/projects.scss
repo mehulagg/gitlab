@@ -140,21 +140,8 @@
       margin-left: 0;
     }
 
-    .fa {
-      color: $layout-link-gray;
-    }
-
     svg {
       fill: $layout-link-gray;
-    }
-
-    .fa-caret-down {
-      margin-left: 3px;
-      line-height: 0;
-
-      &.dropdown-btn-icon {
-        margin-left: 0;
-      }
     }
 
     .notifications-icon {
@@ -170,13 +157,6 @@
   .count-badge,
   .btn-xs {
     height: 24px;
-  }
-
-  .dropdown-toggle,
-  .clone-dropdown-btn {
-    .fa {
-      color: unset;
-    }
   }
 
   .home-panel-action-button,
@@ -501,7 +481,7 @@
       top: 0;
       height: calc(100% - #{$browser-scrollbar-size});
 
-      .fa {
+      svg {
         top: 50%;
         margin-top: -$gl-padding-8;
       }

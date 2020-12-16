@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# When adding new user-configurable throttles, remember to update the documentation
+# in doc/user/admin_area/settings/user_and_ip_rate_limits.md
+#
 # Integration specs for throttling can be found in:
 # spec/requests/rack_attack_global_spec.rb
 module Gitlab
@@ -11,6 +14,13 @@ module Gitlab
       Rack::Attack.throttled_response_retry_after_header = true
       # Configure the throttles
       configure_throttles(rack_attack)
+
+      configure_user_allowlist
+    end
+
+    def self.configure_user_allowlist
+      @user_allowlist = nil
+      user_allowlist
     end
 
     def self.configure_throttles(rack_attack)
@@ -25,7 +35,7 @@ module Gitlab
       throttle_or_track(rack_attack, 'throttle_authenticated_api', Gitlab::Throttle.authenticated_api_options) do |req|
         if req.api_request? &&
            Gitlab::Throttle.settings.throttle_authenticated_api_enabled
-          req.authenticated_user_id([:api])
+          req.throttled_user_id([:api])
         end
       end
 
@@ -41,7 +51,7 @@ module Gitlab
       throttle_or_track(rack_attack, 'throttle_authenticated_web', Gitlab::Throttle.authenticated_web_options) do |req|
         if req.web_request? &&
            Gitlab::Throttle.settings.throttle_authenticated_web_enabled
-          req.authenticated_user_id([:api, :rss, :ics])
+          req.throttled_user_id([:api, :rss, :ics])
         end
       end
 
@@ -60,7 +70,7 @@ module Gitlab
            req.api_request? &&
            req.protected_path? &&
            Gitlab::Throttle.protected_paths_enabled?
-          req.authenticated_user_id([:api])
+          req.throttled_user_id([:api])
         end
       end
 
@@ -69,7 +79,7 @@ module Gitlab
            req.web_request? &&
            req.protected_path? &&
            Gitlab::Throttle.protected_paths_enabled?
-          req.authenticated_user_id([:api, :rss, :ics])
+          req.throttled_user_id([:api, :rss, :ics])
         end
       end
 
@@ -94,6 +104,14 @@ module Gitlab
       return true if dry_run_config == '*'
 
       dry_run_config.split(',').map(&:strip).include?(name)
+    end
+
+    def self.user_allowlist
+      @user_allowlist ||= begin
+        list = UserAllowlist.new(ENV['GITLAB_THROTTLE_USER_ALLOWLIST'])
+        Gitlab::AuthLogger.info(gitlab_throttle_user_allowlist: list.to_a)
+        list
+      end
     end
   end
 end

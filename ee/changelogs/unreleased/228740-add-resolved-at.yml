@@ -1,0 +1,5 @@
+---
+title: Add resolved_at field to vulnerability type in GraphQL
+merge_request: 49391
+author:
+type: changed

@@ -3,14 +3,9 @@ import Vuex from 'vuex';
 
 import BoardListHeader from 'ee/boards/components/board_list_header_new.vue';
 import getters from 'ee/boards/stores/getters';
-import { listObj } from 'jest/boards/mock_data';
+import { mockLabelList } from 'jest/boards/mock_data';
 import { ListType, inactiveId } from '~/boards/constants';
-import List from '~/boards/models/list';
 import sidebarEventHub from '~/sidebar/event_hub';
-
-// board_promotion_state tries to mount on the real DOM,
-// so we are mocking it in this test
-jest.mock('ee/boards/components/board_promotion_state', () => ({}));
 
 const localVue = createLocalVue();
 
@@ -42,21 +37,19 @@ describe('Board List Header Component', () => {
     const boardId = '1';
 
     const listMock = {
-      ...listObj,
-      list_type: listType,
+      ...mockLabelList,
+      listType,
       collapsed,
     };
 
     if (listType === ListType.assignee) {
       delete listMock.label;
-      listMock.user = {};
+      listMock.assignee = {};
     }
-
-    const list = new List({ ...listMock, doNotFetchIssues: true });
 
     if (withLocalStorage) {
       localStorage.setItem(
-        `boards.${boardId}.${list.type}.${list.id}.expanded`,
+        `boards.${boardId}.${listMock.listType}.${listMock.id}.expanded`,
         (!collapsed).toString(),
       );
     }
@@ -66,7 +59,7 @@ describe('Board List Header Component', () => {
       localVue,
       propsData: {
         disabled: false,
-        list,
+        list: listMock,
         isSwimlanesHeader,
       },
       provide: {
@@ -80,7 +73,7 @@ describe('Board List Header Component', () => {
 
   describe('Settings Button', () => {
     const hasSettings = [ListType.assignee, ListType.milestone, ListType.label];
-    const hasNoSettings = [ListType.backlog, ListType.blank, ListType.closed, ListType.promotion];
+    const hasNoSettings = [ListType.backlog, ListType.closed];
 
     it.each(hasSettings)('does render for List Type `%s`', listType => {
       createComponent({ listType });
@@ -116,7 +109,7 @@ describe('Board List Header Component', () => {
       });
 
       it('does not emit event when there is an active List', () => {
-        store.state.activeId = listObj.id;
+        store.state.activeId = mockLabelList.id;
         createComponent({ listType: hasSettings[0] });
         wrapper.vm.openSidebarSettings();
 
