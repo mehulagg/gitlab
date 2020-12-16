@@ -148,7 +148,11 @@ export default {
         vulnerability.id = vulnerability.id.replace(gidPrefix, '');
         vulnerability.state = vulnerability.state.toLowerCase();
 
-        Object.assign(this.vulnerability, vulnerability);
+        this.vulnerability = {
+          ...this.vulnerability,
+          ...vulnerability,
+        };
+
         this.$emit('vulnerability-state-change');
       } catch (e) {
         createFlash(
