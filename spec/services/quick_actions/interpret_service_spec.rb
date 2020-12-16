@@ -1763,7 +1763,7 @@ RSpec.describe QuickActions::InterpretService do
     end
 
     context 'invite_email command' do
-      let(:issuable) { issue }
+      let_it_be(:issuable) { issue }
 
       it_behaves_like 'empty command', "No email participants were added. Either none were provided, or they already exist." do
         let(:content) { '/invite_email' }

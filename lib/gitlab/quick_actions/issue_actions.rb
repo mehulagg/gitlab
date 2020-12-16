@@ -236,7 +236,7 @@ module Gitlab
 
         desc _('Add email participant(s)')
         explanation _('Adds email participant(s)')
-        params 'email1 email2'
+        params 'email1@example.com email2@example.com'
         types Issue
         condition do
           Feature.enabled?(:issue_email_participants, parent) &&

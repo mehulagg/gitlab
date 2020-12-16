@@ -15,7 +15,7 @@ RSpec.describe IssueEmailParticipant do
 
     it_behaves_like 'an object with RFC3696 compliant email-formatted attributes', :email
 
-    it 'is invalid if nil' do
+    it 'is invalid if the email is nil' do
       subject.email = nil
 
       expect(subject).to be_invalid

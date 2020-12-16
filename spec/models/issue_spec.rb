@@ -1262,7 +1262,7 @@ RSpec.describe Issue do
   end
 
   describe '#email_participants_downcase' do
-    it 'returns the most recent version' do
+    it 'returns a list of emails with all uppercase letters replaced with their lowercase counterparts' do
       participant = create(:issue_email_participant, email: 'SomEoNe@ExamPLe.com')
 
       expect(participant.issue.email_participants_downcase).to match([participant.email.downcase])
