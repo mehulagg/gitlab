@@ -21,7 +21,7 @@ notify-update-gitaly:
   script:
     - echo "NOTIFY_CHANNEL is ${NOTIFY_CHANNEL}"
     - echo "CI_PIPELINE_URL is ${CI_PIPELINE_URL}"
-    - scripts/slack ${NOTIFY_CHANNEL} "☠️ \`${GITALY_UPDATE_BRANCH}\` failed! ☠️ See ${CI_PIPELINE_URL} (triggered from ${MERGE_REQUEST_URL})" ci_failing "GitLab QA Bot"
+    - scripts/slack ${NOTIFY_CHANNEL} "<!subteam^S4VUVB937> ☠️ \`${GITALY_UPDATE_BRANCH}\` failed! ☠️ See ${CI_PIPELINE_URL} (triggered from ${MERGE_REQUEST_URL})" ci_failing "GitLab QA Bot"
 
 notify-security-pipeline:
   extends:
