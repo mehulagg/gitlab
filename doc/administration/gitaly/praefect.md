@@ -254,7 +254,7 @@ The database used by Praefect is now configured.
 
 To reduce PostgreSQL resource consumption, we recommend setting up and configuring
 [PgBouncer](https://www.pgbouncer.org/) in front of the PostgreSQL instance. To do
-this, set the corresponding IP or host address of the PgBouncer instance in the
+this, set the corresponding IP or host address of the PgBouncer instance in
 `/etc/gitlab/gitlab.rb` by changing the following settings:
 
 - `praefect['database_host']`, for the address.
@@ -269,11 +269,8 @@ PgBouncer with `pool_mode = transaction`.
 Therefore, `praefect['database_host_no_proxy']` and `praefect['database_port_no_proxy']`
 should be set to a direct connection and not a PgBouncer connection.
 
-Save the changes to `/etc/gitlab/gitlab.rb` and [reconfigure Praefect](../restart_gitlab.md#omnibus-gitlab-reconfigure):
-
-   ```shell
-   gitlab-ctl reconfigure
-   ```
+Save the changes to `/etc/gitlab/gitlab.rb` and
+[reconfigure Praefect](../restart_gitlab.md#omnibus-gitlab-reconfigure).
 
 This documentation doesn't provide PgBouncer installation instructions,
 but you can:
