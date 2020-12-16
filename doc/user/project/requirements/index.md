@@ -211,10 +211,11 @@ Before you import your file:
 
 To import requirements:
 
-1. Navigate to a project's Requirements list page.
-1. If existing requirements are present, click the import icon at the top right, next to the **Edit requirements** button.
-1. For a project without any requirements, click the button labeled **Import CSV** in the middle of the page.
-1. Select the file and click the **Import requirements** button.
+1. Navigate to a project's Requirements page.
+   - If the project already has existing requirements, click the import icon (**{import}**) at the
+     top right.
+   - For a project without any requirements, click **Import CSV** in the middle of the page.
+1. Select the file and click **Import requirements**.
 
 The file is processed in the background and a notification email is sent
 to you once the import is complete.
