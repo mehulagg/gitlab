@@ -1,5 +1,9 @@
+function getFileReviewsKey(mrPath) {
+  return `${mrPath}-file-reviews`;
+}
+
 export function getReviewsForMergeRequest(mrPath) {
-  const reviewsForMr = localStorage.getItem(mrPath);
+  const reviewsForMr = localStorage.getItem(getFileReviewsKey(mrPath));
   let reviews = {};
 
   if (reviewsForMr) {
@@ -14,7 +18,7 @@ export function getReviewsForMergeRequest(mrPath) {
 }
 
 export function setReviewsForMergeRequest(mrPath, reviews) {
-  localStorage.setItem(mrPath, JSON.stringify(reviews));
+  localStorage.setItem(getFileReviewsKey(mrPath), JSON.stringify(reviews));
 
   return reviews;
 }
