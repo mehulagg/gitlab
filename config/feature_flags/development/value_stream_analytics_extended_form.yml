@@ -1,0 +1,8 @@
+---
+name: value_stream_analytics_extended_form
+introduced_by_url:
+rollout_issue_url:
+milestone: '13.7'
+type: development
+group: group::optimize
+default_enabled: false
