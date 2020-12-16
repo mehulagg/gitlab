@@ -46,6 +46,23 @@ RSpec.describe Group do
         let(:namespace) { group }
       end
     end
+
+    context 'when creating a new group' do
+      it 'automatically creates a group package setting row' do
+        expect(group.group_package_setting).to be_an_instance_of(GroupPackageSetting)
+        expect(group.group_package_setting).to be_persisted
+      end
+
+      it 'does not create another group package setting if there is already one' do
+        project = build(:group)
+
+        expect do
+          group_package_setting = create(:group_package_setting, group: group)
+
+          expect(project.container_expiration_policy).to eq(container_expiration_policy)
+        end.to change { GroupPackageSetting.count }.by(1)
+      end
+    end
   end
 
   describe 'modules' do
