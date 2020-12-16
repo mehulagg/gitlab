@@ -32,7 +32,7 @@ can create a new requirement.
 
 To create a requirement:
 
-1. From your project page, go to **{requirements}** **Requirements**.
+1. From your project page, go to **Requirements**.
 1. Select **New requirement**.
 1. Enter a title and description and select **Create requirement**.
 
