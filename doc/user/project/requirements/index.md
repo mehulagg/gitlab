@@ -201,12 +201,13 @@ The user uploading the CSV file will be set as the author of the imported requir
 
 Users with Reporter or higher [permissions](../../permissions.md) can import requirements.
 
-### Prepare for the import
-
-- Consider importing a test file containing only a few requirements. There is no way to undo a large import without using the GitLab API.
-- Ensure your CSV file meets the [file format](#csv-file-format) requirements.
-
 ### Import the file
+
+Before you import your file:
+
+- Consider importing a test file containing only a few requirements. There is no way to undo a large
+  import without using the GitLab API.
+- Ensure your CSV file meets the [file format](#csv-file-format) requirements.
 
 To import requirements:
 
