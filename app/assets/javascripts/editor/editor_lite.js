@@ -96,10 +96,6 @@ export default class EditorLite {
 
     clearDomElement(el);
 
-    const uriFilePath = joinPaths(URI_PREFIX, blobGlobalId, blobPath);
-
-    const model = monacoEditor.createModel(blobContent, undefined, Uri.file(uriFilePath));
-
     monacoEditor.onDidCreateEditor(() => {
       delete el.dataset.editorLoading;
     });
@@ -108,11 +104,14 @@ export default class EditorLite {
       ...this.options,
       ...instanceOptions,
     });
-    instance.setModel(model);
+
+    const uriFilePath = joinPaths(URI_PREFIX, blobGlobalId, blobPath);
+    instance.setModel(monacoEditor.createModel(blobContent, undefined, Uri.file(uriFilePath)));
+
     instance.onDidDispose(() => {
       const index = this.instances.findIndex((inst) => inst === instance);
       this.instances.splice(index, 1);
-      model.dispose();
+      instance.getModel().dispose();
     });
     instance.updateModelLanguage = (path) => EditorLite.updateModelLanguage(path, instance);
     instance.use = (args) => this.use(args, instance);
