@@ -31,6 +31,14 @@ module Gitlab
         @project&.path
       end
 
+      def project_id
+        @project&.id
+      end
+
+      def namespace_id
+        @project&.namespace&.id
+      end
+
       def namespace_path
         @project&.namespace&.full_path
       end

@@ -170,7 +170,7 @@ export default class FileTemplateMediator {
     return new Promise(resolve => {
       const resolveFile = file => resolve(file);
 
-      Api.projectTemplate(this.projectId, type, query, data, resolveFile);
+      Api.projectTemplate(data.project_id, type, query, data.data, resolveFile);
     });
   }
 

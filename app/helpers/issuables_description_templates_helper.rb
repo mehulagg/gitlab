@@ -63,7 +63,14 @@ module IssuablesDescriptionTemplatesHelper
 
     categories.each_with_object({}) do |category, hash|
       hash[category] = grouped[category].map do |item|
-        { name: item.name, id: item.key, project_path: item&.try(:project_path), namespace_path: item&.try(:namespace_path) }
+        {
+          name: item.name,
+          id: item.key,
+          project_id: item&.try(:project_id),
+          project_path: item&.try(:project_path),
+          namespace_id: item&.try(:namespace_id),
+          namespace_path: item&.try(:namespace_path)
+        }
       end
     end
   end
