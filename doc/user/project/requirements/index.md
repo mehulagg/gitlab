@@ -194,7 +194,7 @@ requirements_confirmation:
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/246857) in GitLab 13.7.
 
-Requirements can be imported to a project by uploading a CSV file with the columns
+You can import requirements to a project by uploading a CSV file with the columns
 `title` and `description`.
 
 The user uploading the CSV file will be set as the author of the imported requirements.
