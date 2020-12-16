@@ -10,7 +10,7 @@ class CreateGroupPackageSettings < ActiveRecord::Migration[6.0]
   def up
     with_lock_retries do
       create_table :group_package_settings, if_not_exists: true, id: false do |t|
-        t.references :group, primary_key: true, index: true, null: false, foreign_key: { to_table: :namespaces, on_delete: :cascade }, type: :bigint
+        t.references :group, primary_key: true, index: false, null: false, foreign_key: { to_table: :namespaces, on_delete: :cascade }, type: :bigint
         t.boolean :maven_duplicates_allowed, null: false, default: true
         t.text :maven_duplicate_exception_regex, null: false, default: ''
       end
