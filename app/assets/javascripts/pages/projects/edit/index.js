@@ -15,7 +15,6 @@ import initProjectPermissionsSettings from '../shared/permissions';
 import initProjectDeleteButton from '~/projects/project_delete_button';
 import UserCallout from '~/user_callout';
 import initServiceDesk from '~/projects/settings_service_desk';
-import initSearch from '~/search_settings';
 
 document.addEventListener('DOMContentLoaded', () => {
   initFilePickers();
@@ -37,15 +36,19 @@ document.addEventListener('DOMContentLoaded', () => {
     ),
   );
 
-  initSearch({
-    rootSelector: '#content-body',
-    searchBoxSelector: '#search-settings-input',
-    sectionSelector: 'section.settings',
-    collapseSection(section) {
-      collapseSection($(section));
-    },
-    expandSection(section) {
-      expandSection($(section));
-    },
-  });
+  if (gon.features.searchSettingsInPage) {
+    import('~/search_settings').then(({ default: initSearch }) => {
+      initSearch({
+        rootSelector: '#content-body',
+        searchBoxSelector: '#search-settings-input',
+        sectionSelector: 'section.settings',
+        collapseSection(section) {
+          collapseSection($(section));
+        },
+        expandSection(section) {
+          expandSection($(section));
+        },
+      });
+    });
+  }
 });
