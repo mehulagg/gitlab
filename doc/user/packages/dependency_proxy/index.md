@@ -94,7 +94,7 @@ You can authenticate using:
 
 #### Authenticate within CI/CD
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/280582) in 13.7.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/280582) in GitLab 13.7.
 
 To work with the Dependency Proxy in [GitLab CI/CD](../../../ci/README.md), you can use:
 
