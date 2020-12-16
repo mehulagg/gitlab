@@ -61,5 +61,11 @@ FactoryBot.define do
     trait :allow_descendants_override_disabled_shared_runners do
       allow_descendants_override_disabled_shared_runners { true }
     end
+
+    trait :without_group_package_setting do
+      after :create do |group|
+        group.group_package_setting.destroy!
+      end
+    end
   end
 end

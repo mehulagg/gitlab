@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Groups
-  module PackageSetting
+  module GroupPackageSetting
     class UpdateService < BaseService
       include Gitlab::Utils::StrongMemoize
 

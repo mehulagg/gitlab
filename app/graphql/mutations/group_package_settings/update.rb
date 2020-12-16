@@ -30,9 +30,9 @@ module Mutations
             description: 'The group package setting after mutation.'
 
       def resolve(group_path:, **args)
-        group = authorized_find!(full_path: project_path)
+        group = authorized_find!(full_path: group_path)
 
-        result = ::Groups::PackageSetting::UpdateService
+        result = ::Groups::GroupPackageSetting::UpdateService
           .new(container: group, current_user: current_user, params: args)
           .execute
 
