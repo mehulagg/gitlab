@@ -230,7 +230,7 @@ They're useful to test permissions, redirections, what view is rendered etc.
 
 | Code path | Tests path | Testing engine | Notes |
 | --------- | ---------- | -------------- | ----- |
-| `app/controllers/` | `spec/requests/`, `spec/controllers/` | RSpec | Use [request specs] for new tests. For N+1 tests, use [request specs](../query_recorder.md#use-request-specs-instead-of-controller-specs) |
+| `app/controllers/` | `spec/requests/` | RSpec | Legacy controller specs which will be migrated. |
 | `app/mailers/` | `spec/mailers/` | RSpec | |
 | `lib/api/` | `spec/requests/api/` | RSpec | |
 | `app/assets/javascripts/` | `spec/javascripts/`, `spec/frontend/` | Karma & Jest | [More details below](#frontend-integration-tests) |
@@ -320,7 +320,7 @@ of a controller test. Testing a fat controller usually involves a lot of stubbin
 controller.instance_variable_set(:@user, user)
 ```
 
-and use methods which were deprecated in Rails 5 ([#23768](https://gitlab.com/gitlab-org/gitlab/-/issues/16260)).
+and use methods which were deprecated in Rails 5 ([#16260](https://gitlab.com/gitlab-org/gitlab/-/issues/16260)).
 
 ### About Karma
 
