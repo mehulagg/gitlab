@@ -275,7 +275,6 @@ Save the changes to `/etc/gitlab/gitlab.rb` and [reconfigure Praefect](../restar
    gitlab-ctl reconfigure
    ```
 
-
 This documentation doesn't provide PgBouncer installation instructions,
 but you can:
 
