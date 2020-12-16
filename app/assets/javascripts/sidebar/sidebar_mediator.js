@@ -52,7 +52,9 @@ export default class SidebarMediator {
   }
 
   requestReview(userId) {
-    return this.service.requestReview(userId);
+    return this.service.requestReview(userId).then(() => {
+      this.store.updateReviewer(userId);
+    });
   }
 
   setMoveToProjectId(projectId) {

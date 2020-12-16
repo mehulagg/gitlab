@@ -1,7 +1,7 @@
 <script>
 // NOTE! For the first iteration, we are simply copying the implementation of Assignees
 // It will soon be overhauled in Issue https://gitlab.com/gitlab-org/gitlab/-/issues/233736
-import { GlButton } from '@gitlab/ui';
+import { GlButton, GlTooltipDirective } from '@gitlab/ui';
 import { __, sprintf } from '~/locale';
 import ReviewerAvatarLink from './reviewer_avatar_link.vue';
 
@@ -11,6 +11,9 @@ export default {
   components: {
     GlButton,
     ReviewerAvatarLink,
+  },
+  directives: {
+    GlTooltip: GlTooltipDirective,
   },
   props: {
     users: {
@@ -30,6 +33,7 @@ export default {
   data() {
     return {
       showLess: true,
+      loading: false,
     };
   },
   computed: {
@@ -56,62 +60,42 @@ export default {
       return this.showLess ? this.users.slice(0, uncollapsedLength) : this.users;
     },
     username() {
-      return `@${this.firstUser.user.username}`;
+      return `@${this.firstUser.username}`;
     },
   },
   methods: {
     toggleShowLess() {
       this.showLess = !this.showLess;
     },
+    reRequestReview(userId) {
+      this.loading = true;
+      this.$emit('request-review', userId);
+    },
   },
 };
 </script>
 
 <template>
-  <div v-if="hasOneUser">
-    <reviewer-avatar-link
-      #default="{ reviewer }"
-      tooltip-placement="left"
-      :tooltip-has-name="false"
-      :reviewer="firstUser"
-      :root-path="rootPath"
-      :issuable-type="issuableType"
+  <div>
+    <div
+      v-for="(user, index) in users"
+      :key="user.id"
+      :class="{ 'gl-mb-3': index !== users.length - 1 }"
     >
-      <div class="gl-ml-3 gl-line-height-normal">
-        <div class="author">{{ reviewer.user.name }}</div>
-        <div class="username">{{ username }}</div>
-      </div>
-    </reviewer-avatar-link>
-    <gl-button
-      v-if="firstUser.reviewed"
-      class="float-right"
-      icon="clear-all"
-      @click="$emit('request-review', firstUser.user.id)"
-    />
-  </div>
-  <div v-else>
-    <div class="user-list">
-      <div v-for="reviewer in uncollapsedUsers" :key="reviewer.user.id" class="user-item">
-        <reviewer-avatar-link
-          :user="reviewer.user"
-          :can-merge="reviewer.can_merge"
-          :root-path="rootPath"
-          :issuable-type="issuableType"
-        />
-      </div>
-    </div>
-    <div v-if="renderShowMoreSection" class="user-list-more">
-      <button
-        type="button"
-        class="btn-link"
-        data-qa-selector="more_reviewers_link"
-        @click="toggleShowLess"
-      >
-        <template v-if="showLess">
-          {{ hiddenReviewersLabel }}
-        </template>
-        <template v-else>{{ __('- show less') }}</template>
-      </button>
+      <reviewer-avatar-link :user="user" :root-path="rootPath" :issuable-type="issuableType">
+        <div class="gl-ml-3">@{{ user.username }}</div>
+      </reviewer-avatar-link>
+      <gl-button
+        v-if="user.reviewed"
+        v-gl-tooltip.left
+        :title="__('Re-request review')"
+        :loading="loading"
+        class="float-right gl-text-gray-500!"
+        size="small"
+        icon="clear-all"
+        variant="link"
+        @click="reRequestReview(user.id)"
+      />
     </div>
   </div>
 </template>

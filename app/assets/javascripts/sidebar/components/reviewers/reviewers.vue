@@ -55,7 +55,7 @@ export default {
 
 <template>
   <div>
-    <!-- <collapsed-reviewer-list :users="sortedReviewers" :issuable-type="issuableType" /> -->
+    <collapsed-reviewer-list :users="sortedReviewers" :issuable-type="issuableType" />
 
     <div class="value hide-collapsed">
       <template v-if="hasNoUsers">
