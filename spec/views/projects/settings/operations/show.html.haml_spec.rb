@@ -14,16 +14,6 @@ RSpec.describe 'projects/settings/operations/show' do
     create(:project_tracing_setting, project: project)
   end
 
-  let_it_be(:prometheus_service) { create(:prometheus_service, project: project) }
-  let_it_be(:alerts_service) { create(:alerts_service, project: project) }
-
-  let(:operations_show_locals) do
-    {
-      prometheus_service: prometheus_service,
-      alerts_service: alerts_service
-    }
-  end
-
   before_all do
     project.add_maintainer(user)
   end
@@ -41,7 +31,7 @@ RSpec.describe 'projects/settings/operations/show' do
   describe 'Operations > Error Tracking' do
     context 'Settings page ' do
       it 'renders the Operations Settings page' do
-        render template: 'projects/settings/operations/show', locals: operations_show_locals
+        render template: 'projects/settings/operations/show'
 
         expect(rendered).to have_content _('Error tracking')
         expect(rendered).to have_content _('To link Sentry to GitLab, enter your Sentry URL and Auth Token')
@@ -52,7 +42,7 @@ RSpec.describe 'projects/settings/operations/show' do
   describe 'Operations > Tracing' do
     context 'with project.tracing_external_url' do
       it 'links to project.tracing_external_url' do
-        render template: 'projects/settings/operations/show', locals: operations_show_locals
+        render template: 'projects/settings/operations/show'
 
         expect(rendered).to have_link('Tracing', href: tracing_setting.external_url)
       end
@@ -66,7 +56,7 @@ RSpec.describe 'projects/settings/operations/show' do
         end
 
         it 'sanitizes external_url' do
-          render template: 'projects/settings/operations/show', locals: operations_show_locals
+          render template: 'projects/settings/operations/show'
 
           expect(tracing_setting.external_url).to eq(malicious_tracing_url)
           expect(rendered).to have_link('Tracing', href: cleaned_url)
@@ -82,7 +72,7 @@ RSpec.describe 'projects/settings/operations/show' do
       end
 
       it 'links to Tracing page' do
-        render template: 'projects/settings/operations/show', locals: operations_show_locals
+        render template: 'projects/settings/operations/show'
 
         expect(rendered).to have_link('Tracing', href: project_tracing_path(project))
       end
