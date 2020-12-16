@@ -358,7 +358,7 @@ We can use two approaches, often in combination, to track down memory issues:
 
 We can use `memory_profiler` for profiling.
 
-The [`memory_profiler`](https://github.com/SamSaffron/memory_profiler) gem is already present in GitLab's `Gemfile`,
+The [`memory_profiler`](https://github.com/SamSaffron/memory_profiler) gem is already present in the GitLab `Gemfile`,
 you just need to require it:
 
 ```ruby
