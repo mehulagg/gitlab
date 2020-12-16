@@ -30,7 +30,8 @@ export default {
 };
 </script>
 <template>
-  <div class="gl-display-flex">
+  <div>
+    <!-- TODO: inroduce actions in a separate MR if the diff is too big -->
     <gl-button-group class="gl-px-2">
       <gl-button
         :disabled="isLastActiveStage"

@@ -6,6 +6,7 @@ import { mapState, mapActions } from 'vuex';
 import { sprintf, __, s__ } from '~/locale';
 import { capitalizeFirstCharacter } from '~/lib/utils/text_utility';
 import { STAGE_SORT_DIRECTION } from './create_value_stream_form/constants';
+import DefaultStageFields from './create_value_stream_form/default_stage_fields.vue';
 import StageFieldActions from './create_value_stream_form/stage_field_actions.vue';
 import { DATA_REFETCH_DELAY } from '../../shared/constants';
 
@@ -47,13 +48,19 @@ const PRESET_OPTIONS = [
   },
 ];
 
-const DEFAULT_STAGE_CONFIG = ['issue', 'plan', 'code', 'test', 'review', 'staging'].map(id => ({
-  id,
-  defaultName: capitalizeFirstCharacter(id),
-  name: capitalizeFirstCharacter(id),
-  custom: true,
-  hidden: false,
-}));
+const DEFAULT_STAGE_CONFIG = ['issue', 'plan', 'code', 'test', 'review', 'staging'].map(
+  (id, i) => ({
+    id,
+    defaultName: capitalizeFirstCharacter(id),
+    name: capitalizeFirstCharacter(id),
+    startEventIdentifier: i % 3 === 0 ? 'Label added' : 'Issue Created',
+    endEventIdentifier: i % 3 === 0 ? 'Label removed' : 'Issue closed',
+    startEventLabel: i % 3 === 0 ? 'Label a' : null,
+    endEventLabel: i % 3 === 0 ? 'Label b' : null,
+    custom: true,
+    hidden: false,
+  }),
+);
 
 const swapArrayItems = (arr, left, right) => {
   // TODO: bounds checking
@@ -68,6 +75,7 @@ export default {
     GlFormInput,
     GlFormGroup,
     GlModal,
+    DefaultStageFields,
     StageFieldActions,
   },
   props: {
@@ -109,7 +117,7 @@ export default {
       initialFormErrors: 'createValueStreamErrors',
       isCreating: 'isCreatingValueStream',
     }),
-    isValid() {
+    validate() {
       return !this.errors.name?.length;
     },
     invalidFeedback() {
@@ -127,7 +135,7 @@ export default {
         text: this.$options.I18N.CREATE_VALUE_STREAM,
         attributes: [
           { variant: 'success' },
-          { disabled: !this.isValid },
+          { disabled: !this.validate },
           { loading: this.isLoading },
         ],
       };
@@ -158,17 +166,6 @@ export default {
       const { name } = this;
       this.errors = validate({ name });
     }, DATA_REFETCH_DELAY),
-    findPositionByIndex(index) {
-      return this.stages.findIndex(stage => stage.index === index);
-    },
-    // isFirstActiveStage(stageIndex) {
-    //   const pos = this.findPositionByIndex(stageIndex);
-    //   return pos === 0;
-    // },
-    // isLastActiveStage(stageIndex) {
-    //   const pos = this.findPositionByIndex(stageIndex);
-    //   return pos === this.activeStages?.length - 1;
-    // },
     onSubmit() {
       const { name, stages } = this;
       return this.createValueStream({
@@ -194,6 +191,14 @@ export default {
           : swapArrayItems(this.stages, index, index + 1);
 
       Vue.set(this, 'stages', newStages);
+    },
+    hasFieldErrors(stage) {
+      console.log('hasFieldErrors::stage', stage);
+      return false;
+    },
+    fieldErrors(index) {
+      console.log('fieldErrors::index', index);
+      return {};
     },
     onSetHidden(index, hidden = true) {
       const stage = this.stages[index];
@@ -226,7 +231,7 @@ export default {
           :label="$options.I18N.FIELD_NAME_LABEL"
           label-for="create-value-stream-name"
           :invalid-feedback="invalidFeedback"
-          :state="isValid"
+          :state="validate"
         >
           <div class="gl-display-flex gl-justify-content-space-between">
             <gl-form-input
@@ -234,7 +239,7 @@ export default {
               v-model.trim="name"
               name="create-value-stream-name"
               :placeholder="$options.I18N.FIELD_NAME_PLACEHOLDER"
-              :state="isValid"
+              :state="validate"
               required
               @input="onHandleInput"
             />
@@ -256,14 +261,11 @@ export default {
             v-if="!stage.hidden"
             :label="sprintf(__('Stage %{index}'), { index: activeStageIndex + 1 })"
           >
-            <div class="gl-display-flex gl-flex-direction-row gl-justify-content-space-between">
-              <!-- v-if="stage.custom" -->
-              <gl-form-input
-                v-model.trim="stage.name"
-                :name="`create-value-stream-stage-${activeStageIndex}`"
-                :placeholder="s__('CreateValueStreamForm|Enter stage name')"
-                :state="isValid"
-                required
+            <div class="gl-display-flex gl-flex-direction-row">
+              <default-stage-fields
+                :stage="stage"
+                :errors="fieldErrors"
+                :index="activeStageIndex"
                 @input="onHandleInput"
               />
               <stage-field-actions
