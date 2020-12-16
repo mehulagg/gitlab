@@ -1,10 +1,12 @@
 <script>
 import Vue from 'vue';
-import { GlButton, GlButtonGroup, GlForm, GlFormInput, GlFormGroup, GlModal } from '@gitlab/ui';
+import { GlButton, GlForm, GlFormInput, GlFormGroup, GlModal } from '@gitlab/ui';
 import { debounce } from 'lodash';
 import { mapState, mapActions } from 'vuex';
 import { sprintf, __, s__ } from '~/locale';
 import { capitalizeFirstCharacter } from '~/lib/utils/text_utility';
+import { STAGE_SORT_DIRECTION } from './create_value_stream_form/constants';
+import StageFieldActions from './create_value_stream_form/stage_field_actions.vue';
 import { DATA_REFETCH_DELAY } from '../../shared/constants';
 
 const ERRORS = {
@@ -53,11 +55,6 @@ const DEFAULT_STAGE_CONFIG = ['issue', 'plan', 'code', 'test', 'review', 'stagin
   hidden: false,
 }));
 
-const SORT_DIRECTION = {
-  UP: 'UP',
-  DOWN: 'DOWN',
-};
-
 const swapArrayItems = (arr, left, right) => {
   // TODO: bounds checking
   return [...arr.slice(0, left), arr[right], arr[left], ...arr.slice(right + 1, arr.length)];
@@ -67,11 +64,11 @@ export default {
   name: 'ValueStreamForm',
   components: {
     GlButton,
-    GlButtonGroup,
     GlForm,
     GlFormInput,
     GlFormGroup,
     GlModal,
+    StageFieldActions,
   },
   props: {
     initialData: {
@@ -164,14 +161,14 @@ export default {
     findPositionByIndex(index) {
       return this.stages.findIndex(stage => stage.index === index);
     },
-    isFirstActiveStage(stageIndex) {
-      const pos = this.findPositionByIndex(stageIndex);
-      return pos === 0;
-    },
-    isLastActiveStage(stageIndex) {
-      const pos = this.findPositionByIndex(stageIndex);
-      return pos === this.activeStages?.length - 1;
-    },
+    // isFirstActiveStage(stageIndex) {
+    //   const pos = this.findPositionByIndex(stageIndex);
+    //   return pos === 0;
+    // },
+    // isLastActiveStage(stageIndex) {
+    //   const pos = this.findPositionByIndex(stageIndex);
+    //   return pos === this.activeStages?.length - 1;
+    // },
     onSubmit() {
       const { name, stages } = this;
       return this.createValueStream({
@@ -192,7 +189,7 @@ export default {
     },
     handleMove({ index, direction }) {
       const newStages =
-        direction === SORT_DIRECTION.UP
+        direction === STAGE_SORT_DIRECTION.UP
           ? swapArrayItems(this.stages, index - 1, index)
           : swapArrayItems(this.stages, index, index + 1);
 
@@ -210,7 +207,7 @@ export default {
     },
   },
   I18N,
-  SORT_DIRECTION,
+  STAGE_SORT_DIRECTION,
 };
 </script>
 <template>
@@ -251,6 +248,7 @@ export default {
           </div>
         </gl-form-group>
       </div>
+      <!-- TODO: this should probably have an additional feature flag for the extended form  -->
       <div v-if="hasPathNavigation">
         <hr />
         <div v-for="(stage, activeStageIndex) in activeStages" :key="activeStageIndex">
@@ -268,33 +266,19 @@ export default {
                 required
                 @input="onHandleInput"
               />
-              <!-- <span v-else>{{ stage.name }}</span> -->
-              <gl-button-group v-if="canReorderDefaults" class="gl-px-2">
-                <gl-button
-                  :disabled="isLastActiveStage(activeStageIndex)"
-                  icon="arrow-down"
-                  @click="
-                    handleMove({
-                      index: activeStageIndex,
-                      direction: $options.SORT_DIRECTION.DOWN,
-                    })
-                  "
-                />
-                <gl-button
-                  :disabled="isFirstActiveStage(activeStageIndex)"
-                  icon="arrow-up"
-                  @click="
-                    handleMove({ index: activeStageIndex, direction: $options.SORT_DIRECTION.UP })
-                  "
-                />
-              </gl-button-group>
-              <gl-button icon="archive" @click="onSetHidden(activeStageIndex)" />
+              <stage-field-actions
+                :index="activeStageIndex"
+                :stage-count="activeStages.length"
+                @move="handleMove"
+                @hide="onSetHidden"
+              />
             </div>
           </gl-form-group>
         </div>
         <div v-if="hiddenStages.length">
           <hr />
           <gl-form-group v-for="(stage, hiddenStageIndex) in hiddenStages" :key="stage.id">
+            <!-- TODO: separate component -->
             <label class="gl-m-0 gl-vertical-align-middle gl-mr-3"
               >{{ stage.name }} {{ __('(default)') }}</label
             >
