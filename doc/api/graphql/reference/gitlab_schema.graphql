@@ -24927,6 +24927,11 @@ type Vulnerability implements Noteable {
   confirmedAt: Time
 
   """
+  ID of the user who confirmed the vulnerability
+  """
+  confirmedById: ID
+
+  """
   Description of the vulnerability
   """
   description: String

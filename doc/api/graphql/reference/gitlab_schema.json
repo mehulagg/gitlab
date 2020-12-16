@@ -72630,6 +72630,20 @@
               "deprecationReason": null
             },
             {
+              "name": "confirmedById",
+              "description": "ID of the user who confirmed the vulnerability",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "ID",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "description",
               "description": "Description of the vulnerability",
               "args": [

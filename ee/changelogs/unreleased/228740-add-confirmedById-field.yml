@@ -1,0 +1,5 @@
+---
+title: Add confirmedById field to vulnerability object in GraphQL
+merge_request: 50144
+author:
+type: changed
