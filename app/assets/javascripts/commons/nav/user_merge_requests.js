@@ -34,11 +34,12 @@ export function refreshUserMergeRequestCounts() {
     .then(({ data }) => {
       const assignedMergeRequests = data.merge_requests;
       const reviewerMergeRequests = data.reviewer_merge_requests;
+      const fullCount = assignedMergeRequests + reviewerMergeRequests;
 
       updateUserMergeRequestCounts(assignedMergeRequests);
       updateReviewerMergeRequestCounts(reviewerMergeRequests);
-      updateMergeRequestCounts(assignedMergeRequests + reviewerMergeRequests);
-      broadcastCount(assignedMergeRequests);
+      updateMergeRequestCounts(fullCount);
+      broadcastCount(fullCount);
     })
     .catch(ex => {
       console.error(ex); // eslint-disable-line no-console
@@ -73,7 +74,7 @@ export function openUserCountsBroadcast() {
     if (currentUserId) {
       channel = new BroadcastChannel(`mr_count_channel_${currentUserId}`);
       channel.onmessage = ev => {
-        updateUserMergeRequestCounts(ev.data);
+        updateMergeRequestCounts(ev.data);
       };
     }
   }
