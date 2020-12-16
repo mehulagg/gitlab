@@ -53,7 +53,6 @@ There is an option to filter epics in the Roadmap viw by:
 
 ![roadmap date range in weeks](img/roadmap_filters.png)
 
-
 Roadmaps can also be [visualized inside an epic](../epics/index.md#roadmap-in-epics).
 
 ## Timeline duration
