@@ -125,7 +125,6 @@ module EE
       end
     end
 
-    override :post_destroy_hook
     def post_destroy_hook
       super
 
