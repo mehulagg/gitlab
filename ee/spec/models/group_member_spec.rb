@@ -327,8 +327,6 @@ RSpec.describe GroupMember do
     end
 
     context 'does not execute webhook' do
-      let_it_be(:user) { create(:user) }
-
       before do
         WebMock.stub_request(:post, group_hook.url)
       end
