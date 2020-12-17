@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::Database::MigrationHelpers do
+  include TableSchemaHelpers
+
   let(:model) do
     ActiveRecord::Migration.new.extend(described_class)
   end
@@ -92,6 +94,52 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
         expect do
           model.add_timestamps_with_timezone(:foo)
         end.not_to raise_error
+      end
+    end
+  end
+
+  describe '#enhanced_create_table' do
+    let(:table_name) { :test_table }
+    let(:column_attributes) do
+      [
+        { name: 'id',         sql_type: 'bigint',                   null: false, default: nil    },
+        { name: 'created_at', sql_type: 'timestamp with time zone', null: false, default: nil    },
+        { name: 'updated_at', sql_type: 'timestamp with time zone', null: false, default: nil    },
+        { name: 'some_id',    sql_type: 'integer',                  null: false, default: nil    },
+        { name: 'active',     sql_type: 'boolean',                  null: false, default: 'true' },
+        { name: 'name',       sql_type: 'text',                     null: true,  default: nil    }
+      ]
+    end
+
+    context 'when no check constraints are defined' do
+      it 'creates the table as expected' do
+        model.enhanced_create_table table_name do |t|
+          t.timestamps_with_timezone
+          t.integer :some_id, null: false
+          t.boolean :active, null: false, default: true
+          t.text :name
+        end
+
+        expect_table_columns_to_match(column_attributes, table_name)
+      end
+    end
+
+    context 'when check constraints are defined' do
+      it 'creates the table as expected' do
+        model.enhanced_create_table :test_table do |t|
+          t.timestamps_with_timezone
+          t.integer :some_id, null: false
+          t.boolean :active, null: false, default: true
+          t.text :name
+
+          t.check_constraint :check_name_length, 'char_length(name) <= 255'
+          t.check_constraint :some_id_is_positive, 'some_id > 0'
+        end
+
+        expect_table_columns_to_match(column_attributes, table_name)
+
+        expect_check_constraint(table_name, 'check_name_length', 'char_length(name) <= 255')
+        expect_check_constraint(table_name, 'some_id_is_positive', 'some_id > 0')
       end
     end
   end

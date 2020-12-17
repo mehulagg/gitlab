@@ -70,6 +70,44 @@ module Gitlab
         end
       end
 
+      #
+      # Creates a new table, optionally allowing the caller to add check constraints to the table.
+      # Aside from that addition, this method should behave identically to Rails' `create_table` method.
+      #
+      # Example:
+      #
+      #     create_table :some_table do |t|
+      #       t.integer :thing, null: false
+      #       t.text :other_thing
+      #
+      #       t.check_constraint :thing_is_not_null, 'thing IS NOT NULL'
+      #       t.check_constraint :other_thing_length_limit, 'char_length(other_thing) <= 255'
+      #     end
+      #
+      # See Rails' `create_table` for more info on the available arguments.
+      def enhanced_create_table(table_name, **options, &block)
+        check_constraints = []
+
+        create_table(table_name, **options) do |t|
+          t.define_singleton_method(:check_constraint) do |name, definition|
+            check_constraints << { name: name, definition: definition }
+          end
+
+          t.instance_eval(&block)
+        end
+
+        return if check_constraints.empty?
+
+        constraint_clauses = check_constraints.map do |constraint|
+          "ADD CONSTRAINT #{quote_table_name(constraint[:name])} CHECK (#{constraint[:definition]})"
+        end
+
+        execute(<<~SQL)
+          ALTER TABLE #{quote_table_name(table_name)}
+          #{constraint_clauses.join(",\n")}
+        SQL
+      end
+
       # Creates a new index, concurrently
       #
       # Example:
