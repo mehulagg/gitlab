@@ -7,7 +7,7 @@ module FormHelper
     headline = n_('The %{type} contains the following error:', 'The %{type} contains the following errors:', model.errors.count) % { type: type }
     truncate = Array.wrap(truncate)
 
-    content_tag(:div, class: 'alert alert-danger', id: 'error_explanation') do
+    content_tag(:div, class: 'gl-alert gl-alert-danger gl-mb-5', id: 'error_explanation') do
       content_tag(:h4, headline) <<
         content_tag(:ul) do
           messages = model.errors.map do |attribute, message|
