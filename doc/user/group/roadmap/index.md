@@ -45,7 +45,7 @@ toggle the list of the milestone bars.
 When you want to explore a roadmap, there are several ways to make it easier by sorting epics or
 filtering them by what's important for you.
 
-A dropdown menu lets you to show only open or closed epics. By default, all epics are shown.
+A dropdown menu lets you show only open or closed epics. By default, all epics are shown.
 
 ![epics state dropdown](img/epics_state_dropdown_v12_10.png)
 
