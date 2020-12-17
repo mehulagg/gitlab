@@ -630,12 +630,8 @@ Follow these guidelines for punctuation:
 
 <!-- vale gitlab.Repetition = YES -->
 
-### Introductory text
-
-When you introduce an example or table, try to avoid extra words, like 
-**the following**, **above**, **below**, **earlier**, or **previous**.
-
-Use a colon at the end of the sentence.
+When you introduce an example or table, try to avoid extra words like 
+**the following** or **below**. Use a colon at the end of the sentence.
 
 Do:
 
@@ -647,11 +643,7 @@ Don't:
 
 - `The following example shows a pipeline with three stages:`
 - `The following example shows a pipeline with three stages.`
-- `As shown in the example above, a pipeline can have three stages.`
 - `As you can see in the table below, a pipeline can have three stages.`
-
-If you must refer to an example that isn't directly above or below the text,
-use **earlier** or **later** rather than **above** or **below**.
 
 ### Placeholder text
 
