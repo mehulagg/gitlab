@@ -13,12 +13,13 @@ import { get } from 'lodash';
 import getContainerRepositoriesQuery from 'shared_queries/container_registry/get_container_repositories.query.graphql';
 import Tracking from '~/tracking';
 import createFlash from '~/flash';
+import * as Sentry from '~/sentry/wrapper';
 
-import ProjectEmptyState from '../components/list_page/project_empty_state.vue';
-import GroupEmptyState from '../components/list_page/group_empty_state.vue';
+// import ProjectEmptyState from '../components/list_page/project_empty_state.vue';
+// import GroupEmptyState from '../components/list_page/group_empty_state.vue';
+// import ImageList from '../components/list_page/image_list.vue';
+// import CliCommands from '../components/list_page/cli_commands.vue';
 import RegistryHeader from '../components/list_page/registry_header.vue';
-import ImageList from '../components/list_page/image_list.vue';
-import CliCommands from '../components/list_page/cli_commands.vue';
 
 import getContainerRepositoriesDetails from '../graphql/queries/get_container_repositories_details.query.graphql';
 import deleteContainerRepositoryMutation from '../graphql/mutations/delete_container_repository.mutation.graphql';
@@ -42,9 +43,10 @@ export default {
   name: 'RegistryListApp',
   components: {
     GlEmptyState,
-    ProjectEmptyState,
-    GroupEmptyState,
-    ImageList,
+    ProjectEmptyState: () => import('../components/list_page/project_empty_state.vue'),
+    GroupEmptyState: () => import('../components/list_page/group_empty_state.vue'),
+    ImageList: () => import('../components/list_page/image_list.vue'),
+    CliCommands: () => import('../components/list_page/cli_commands.vue'),
     GlModal,
     GlSprintf,
     GlLink,
@@ -52,7 +54,6 @@ export default {
     GlSkeletonLoader,
     GlSearchBoxByClick,
     RegistryHeader,
-    CliCommands,
   },
   inject: ['config'],
   directives: {
@@ -87,11 +88,15 @@ export default {
         this.pageInfo = data[this.graphqlResource]?.containerRepositories?.pageInfo;
         this.containerRepositoriesCount = data[this.graphqlResource]?.containerRepositoriesCount;
       },
-      error() {
+      error(e) {
+        Sentry.captureException(e);
         createFlash({ message: FETCH_IMAGES_LIST_ERROR_MESSAGE });
       },
     },
     additionalDetails: {
+      skip() {
+        return !this.fetchAdditionalDetails;
+      },
       query: getContainerRepositoriesDetails,
       variables() {
         return this.queryVariables;
@@ -99,7 +104,8 @@ export default {
       update(data) {
         return data[this.graphqlResource]?.containerRepositories.nodes;
       },
-      error() {
+      error(e) {
+        Sentry.captureException(e);
         createFlash({ message: FETCH_IMAGES_LIST_ERROR_MESSAGE });
       },
     },
@@ -155,6 +161,11 @@ export default {
         ? DELETE_IMAGE_SUCCESS_MESSAGE
         : DELETE_IMAGE_ERROR_MESSAGE;
     },
+  },
+  mounted() {
+    setTimeout(() => {
+      this.fetchAdditionalDetails = true;
+    }, 100);
   },
   methods: {
     deleteImage(item) {
