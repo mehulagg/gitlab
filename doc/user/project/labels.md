@@ -241,7 +241,7 @@ means higher priority.
 
 ![Drag to change label priority](img/labels_drag_priority_v12_1.gif)
 
-On the merge request, and issue list pages (for both groups and projects) you
+On the merge request and issue list pages (for both groups and projects) you
 can sort by `Label priority` or `Priority`.
 
 If you sort by `Label priority`, GitLab uses this sort comparison order:
