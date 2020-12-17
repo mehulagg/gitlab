@@ -17,7 +17,7 @@ is recommended over NFS where possible, due to better performance.
 WARNING:
 From GitLab 13.0, using NFS for Git repositories is deprecated.
 From GitLab 14.0, technical support for NFS for Git repositories
-will no longer be provided. Upgrade to [Gitaly Cluster](../gitaly/praefect.md)
+will no longer be provided. Upgrade to [Gitaly Cluster](gitaly/praefect.md)
 as soon as possible.
 
 Filesystem performance can impact overall GitLab performance, especially for
