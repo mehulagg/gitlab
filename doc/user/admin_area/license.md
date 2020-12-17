@@ -120,6 +120,11 @@ You can upload and view more than one license, but only the latest license in th
 range is used as the active license. When you upload a future-dated license, it
 doesn't take effect until its applicable date.
 
+NOTE:
+A notification banner about an expiring licence may continue to be displayed even after a new licence has been uploaded.
+That happens in case the newly uploaded licence's start date is in the future and the expiring one is still active.
+The banner will disappear once the new licence becomes active.
+
 ## Troubleshooting
 
 ### There is no License tab in the Admin Area
@@ -140,3 +145,7 @@ without enough users is uploaded, GitLab displays a message prompting you to pur
 additional users. More information on how to determine the required number of users
 and how to add additional seats can be found in the
 [licensing FAQ](https://about.gitlab.com/pricing/licensing-faq/).
+
+#### I have uploaded a new licence but still see the notification banner about my licence expiring soon.
+
+This behaviour relates to #
