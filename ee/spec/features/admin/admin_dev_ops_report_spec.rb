@@ -63,6 +63,14 @@ RSpec.describe 'DevOps Report page', :js do
       end
     end
 
+    it 'shows the devops adoption tab when the tab param is set' do
+      visit admin_dev_ops_report_path(tab: 'devops_adoption')
+
+      within tabs_selector do
+        expect(page).to have_selector active_tab_selector, text: 'Adoption'
+      end
+    end
+
     context 'the devops score tab' do
       it 'has dismissable intro callout' do
         visit admin_dev_ops_report_path
