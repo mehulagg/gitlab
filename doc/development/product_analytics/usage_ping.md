@@ -153,7 +153,7 @@ For GitLab.com, there are extremely large tables with 15 second query timeouts, 
 | `merge_request_diff_files`   | 1082                   |
 | `events`                     | 514                    |
 
-There are two batch counting methods provided, `Ordinary Batch Counters` and `Distinct Batch Counters`. Batch counting requires indexes on columns to calculate max, min, and range queries. In some cases, a specialized index may need to be added on the columns involved in a counter.
+There is number of different batch counting methods provided: `Ordinary Batch Counters`, `Distinct Batch Counters`, `Sum Batch Counters` and `Estimated Batch Counters`. Batch counting requires indexes on columns to calculate max, min, and range queries. In some cases, a specialized index may need to be added on the columns involved in a counter.
 
 ### Ordinary Batch Counters
 
@@ -243,6 +243,41 @@ distinct_count(Project.group(:visibility_level), :creator_id)
 
 sum(Issue.group(:state_id), :weight))
 # returns => {1=>3542, 2=>6820}
+```
+
+### Estimated Batch Counters
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/48233) in GitLab 13.7.
+
+Handles `ActiveRecord::StatementInvalid` error
+
+It estimate distinct count of a given ActiveRecord_Relation on given column, with usage of HyperLogLog algorithm.
+Because of probabilistic nature of HyperLogLog algorithm its **results always includes some small error**, the highest
+encountered error rate was 4.9%. Correctly used `estimate_batch_distinct_count` enables efficient counting over columns that
+contains non unique values, which can not be assured by other counters. 
+
+Method: `estimate_batch_distinct_count(relation, column = nil, batch_size: nil, start: nil, finish: nil)`
+
+Arguments:
+
+- `relation` the ActiveRecord_Relation to perform the count
+- `column` the column to perform the distinct count, by default is the primary key
+- `batch_size`: if none set it uses default value 10 000 from `Gitlab::Database::PostgresHll::BatchDistinctCounter`
+- `start`: custom start of the batch counting in order to avoid complex min calculations
+- `end`: custom end of the batch counting in order to avoid complex min calculations
+
+Prerequisites:
+
+1. Supplied `relation` must have primary key defined as numeric column (eg: `id bigint NOT NULL`).
+1. `estimate_batch_distinct_count` can handled joined relation, but in order to utilize it ability to count over non-unique columns, joined relation **must NOT** have one-to-many relation (eg: `has_many :boards`)
+1. Both `start` and `end` arguments should always represents relation primary key values, event if estimated count refers to other column (eg: `estimate_batch_distinct_count(::Note, :author_id, start: ::Note.minimum(:id), finish: ::Note.maximum(:id))`)
+
+Examples:
+
+```ruby
+estimate_batch_distinct_count(::Project, :creator_id)
+estimate_batch_distinct_count(::Note.with_suggestions.where(time_period), :author_id, start: ::Note.minimum(:id), finish: ::Note.maximum(:id))
+estimate_batch_distinct_count(::Clusters::Applications::CertManager.where(time_period).available.joins(:cluster), 'clusters.user_id')
 ```
 
 ### Redis Counters
@@ -777,8 +812,6 @@ appear to be associated to any of the services running, since they all appear to
 ## Aggregated metrics
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/45979) in GitLab 13.6.
-> - It's [deployed behind a feature flag](../../user/feature_flags.md), disabled by default.
-> - It's enabled on GitLab.com.
 
 WARNING:
 This feature is intended solely for internal GitLab use.
