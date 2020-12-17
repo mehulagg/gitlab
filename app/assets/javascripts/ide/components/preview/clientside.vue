@@ -1,12 +1,13 @@
 <script>
 import { mapActions, mapGetters, mapState } from 'vuex';
-import { isEmpty } from 'lodash';
+import { isEmpty, debounce } from 'lodash';
 import { Manager } from 'smooshpack';
 import { listen } from 'codesandbox-api';
 import { GlLoadingIcon } from '@gitlab/ui';
 import Navigator from './navigator.vue';
 import { packageJsonPath } from '../../constants';
 import { createPathWithExt } from '../../utils';
+import eventHub from '../../eventhub';
 
 export default {
   components: {
@@ -61,13 +62,10 @@ export default {
       };
     },
   },
-  watch: {
-    entries: {
-      deep: true,
-      handler: 'update',
-    },
-  },
   mounted() {
+    this.onFilesChangeCallback = debounce(() => this.update(), 2000);
+    eventHub.$on('ide.files.change', this.onFilesChangeCallback);
+
     this.loading = true;
 
     return this.loadFileContent(packageJsonPath)
@@ -78,6 +76,8 @@ export default {
       .then(() => this.initPreview());
   },
   beforeDestroy() {
+    eventHub.$off('ide.files.change', this.onFilesChangeCallback);
+
     if (!isEmpty(this.manager)) {
       this.manager.listener();
     }

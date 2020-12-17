@@ -510,12 +510,15 @@ describe('IDE store file actions', () => {
 
   describe('changeFileContent', () => {
     let tmpFile;
+    let onFilesChange;
 
     beforeEach(() => {
       tmpFile = file('tmpFile');
       tmpFile.content = '\n';
       tmpFile.raw = '\n';
       store.state.entries[tmpFile.path] = tmpFile;
+      onFilesChange = jest.fn();
+      eventHub.$on('ide.files.change', onFilesChange);
     });
 
     it('updates file content', () => {
@@ -579,6 +582,17 @@ describe('IDE store file actions', () => {
         .then(() => {
           expect(store.state.changedFiles.length).toBe(0);
         });
+    });
+
+    it('triggers ide.files.change', async () => {
+      expect(onFilesChange).not.toHaveBeenCalled();
+
+      await store.dispatch('changeFileContent', {
+        path: tmpFile.path,
+        content: 'content\n',
+      });
+
+      expect(onFilesChange).toHaveBeenCalled();
     });
   });
 
