@@ -111,6 +111,10 @@ module EE
         @subject.feature_available?(:push_rules)
       end
 
+      condition(:group_merge_request_approval_settings_enabled) do
+        @subject.feature_available?(:group_merge_request_approval_settings)
+      end
+
       condition(:over_storage_limit, scope: :subject) { @subject.over_storage_limit? }
 
       rule { public_group | logged_in_viewable }.policy do
@@ -252,6 +256,10 @@ module EE
         enable :read_group_compliance_dashboard
         enable :read_group_credentials_inventory
         enable :admin_group_credentials_inventory
+      end
+
+      rule { (admin | owner) & group_merge_request_approval_settings_enabled }.policy do
+        enable :admin_merge_request_approval_settings
       end
 
       rule { needs_new_sso_session }.policy do
