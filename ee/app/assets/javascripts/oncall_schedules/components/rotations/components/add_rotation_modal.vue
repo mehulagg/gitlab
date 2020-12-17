@@ -17,6 +17,7 @@ import usersSearchQuery from '~/graphql_shared/queries/users_search.query.graphq
 import createOncallScheduleRotationMutation from '../../../graphql/create_oncall_schedule_rotation.mutation.graphql';
 import {
   LENGTH_ENUM,
+  HOURS_IN_DAY,
   CHEVRON_SKIPPING_SHADE_ENUM,
   CHEVRON_SKIPPING_PALETTE_ENUM,
 } from '../../../constants';
@@ -25,7 +26,6 @@ export default {
   i18n: {
     selectParticipant: s__('OnCallSchedules|Select participant'),
     addRotation: s__('OnCallSchedules|Add rotation'),
-    noResults: __('No matching results'),
     cancel: __('Cancel'),
     errorMsg: s__('OnCallSchedules|Failed to add rotation'),
     fields: {
@@ -34,13 +34,14 @@ export default {
         title: __('Participants'),
         error: s__('OnCallSchedules|Rotation participants cannot be empty'),
       },
-      length: { title: s__('OnCallSchedules|Rotation length') },
-      startsOn: {
+      rotationLength: { title: s__('OnCallSchedules|Rotation length') },
+      startsAt: {
         title: __('Starts on'),
         error: s__('OnCallSchedules|Rotation start date cannot be empty'),
       },
     },
   },
+  HOURS_IN_DAY,
   tokenColorPalette: {
     shade: CHEVRON_SKIPPING_SHADE_ENUM,
     palette: CHEVRON_SKIPPING_PALETTE_ENUM,
@@ -94,21 +95,16 @@ export default {
       form: {
         name: '',
         participants: [],
-        length: {
-          value: 1,
-          type: this.$options.LENGTH_ENUM.hours,
+        rotationLength: {
+          length: 1,
+          unit: this.$options.LENGTH_ENUM.hours,
         },
-        startsOn: {
+        startsAt: {
           date: null,
-          time: 0,
+          time: '0',
         },
       },
-      error: null,
-      validationState: {
-        name: true,
-        participants: true,
-        startsOn: true,
-      },
+      error: '',
     };
   },
   computed: {
@@ -123,8 +119,35 @@ export default {
         },
       };
     },
-    noResults() {
-      return this.participants.length === 0;
+    rotationNameIsValid() {
+      return this.form.name !== '';
+    },
+    rotationParticipantsAreValid() {
+      return this.form.participants.length > 0;
+    },
+    rotationStartsAtIsValid() {
+      return this.form.startsAt.date !== null || this.form.startsAt.date !== undefined;
+    },
+    rotationVariables() {
+      return {
+        projectPath: this.projectPath,
+        scheduleIid: this.schedule.iid,
+        name: this.form.name,
+        startsAt: {
+          ...this.form.startsAt,
+          time: this.formatTime(this.form.startsAt.time),
+        },
+        rotationLength: {
+          ...this.form.rotationLength,
+          length: parseInt(this.form.rotationLength.length, 10),
+        },
+        participants: this.form.participants.map(({ username }) => ({
+          username,
+          // eslint-disable-next-line @gitlab/require-i18n-strings
+          colorWeight: 'WEIGHT_500',
+          colorPalette: 'BLUE',
+        })),
+      };
     },
   },
   methods: {
@@ -133,28 +156,15 @@ export default {
       this.$apollo
         .mutate({
           mutation: createOncallScheduleRotationMutation,
-          variables: {
-            oncallScheduleRotationCreate: {
-              projectPath: this.projectPath,
-              ...this.form,
-            },
-          },
+          variables: { OncallRotationCreateInput: this.rotationVariables },
         })
-        .then(
-          ({
-            data: {
-              oncallScheduleRotationCreate: {
-                errors: [error],
-              },
-            },
-          }) => {
-            if (error) {
-              throw error;
-            }
-            this.$refs.createScheduleModal.hide();
-          },
-        )
-        .catch((error) => {
+        .then(({ data: { oncallRotationCreate: { errors: [error] } } }) => {
+          if (error) {
+            throw error;
+          }
+          this.$refs.createScheduleRotationModal.hide();
+        })
+        .catch(error => {
           this.error = error;
         })
         .finally(() => {
@@ -167,11 +177,11 @@ export default {
     filterParticipants(query) {
       this.ptSearchTerm = query;
     },
-    setRotationLengthType(type) {
-      this.form.length.type = type;
+    setRotationLengthType(unit) {
+      this.form.rotationLength.unit = unit;
     },
-    setRotationStartsOnTime(time) {
-      this.form.startsOn.time = time;
+    setRotationStartsAtTime(time) {
+      this.form.startsAt.time = time;
     },
     validateForm(key) {
       if (key === 'name') {
@@ -194,9 +204,9 @@ export default {
     :title="$options.i18n.addRotation"
     :action-primary="actionsProps.primary"
     :action-cancel="actionsProps.cancel"
-    @primary="createRotation"
+    @primary.prevent="createRotation"
   >
-    <gl-alert v-if="error" variant="danger" @dismiss="error = null">
+    <gl-alert v-if="error" variant="danger" @dismiss="error = ''">
       {{ error || $options.i18n.errorMsg }}
     </gl-alert>
     <gl-form class="w-75 gl-xs-w-full!" @submit.prevent="createRotation">
@@ -241,57 +251,53 @@ export default {
       </gl-form-group>
 
       <gl-form-group
-        :label="$options.i18n.fields.length.title"
+        :label="$options.i18n.fields.rotationLength.title"
         label-size="sm"
         label-for="rotation-length"
       >
         <div class="gl-display-flex">
           <gl-form-input
             id="rotation-length"
-            v-model="form.length.value"
+            v-model="form.rotationLength.length"
             type="number"
             class="gl-w-12 gl-mr-3"
             min="1"
           />
-          <gl-dropdown id="rotation-length" :text="form.length.type">
+          <gl-dropdown id="rotation-length" :text="form.rotationLength.unit.toLowerCase()">
             <gl-dropdown-item
-              v-for="type in $options.LENGTH_ENUM"
-              :key="type"
-              :is-checked="form.length.type === type"
+              v-for="unit in $options.LENGTH_ENUM"
+              :key="unit"
+              :is-checked="form.rotationLength.unit === unit"
               is-check-item
-              @click="setRotationLengthType(type)"
+              @click="setRotationLengthType(unit)"
             >
-              {{ type }}
+              {{ unit.toLowerCase() }}
             </gl-dropdown-item>
           </gl-dropdown>
         </div>
       </gl-form-group>
 
       <gl-form-group
-        :label="$options.i18n.fields.startsOn.title"
+        :label="$options.i18n.fields.startsAt.title"
         label-size="sm"
         label-for="rotation-time"
-        :invalid-feedback="$options.i18n.fields.startsOn.error"
-        :state="validationState.startsOn"
+        :invalid-feedback="$options.i18n.fields.startsAt.error"
+        :state="rotationStartsAtIsValid"
       >
         <div class="gl-display-flex gl-align-items-center">
-          <gl-datepicker
-            v-model="form.startsOn.date"
-            class="gl-mr-3"
-            @close="validateForm('startsOn')"
-          />
+          <gl-datepicker v-model="form.startsAt.date" class="gl-mr-3" />
           <span> {{ __('at') }} </span>
           <gl-dropdown
             id="rotation-time"
-            :text="formatTime(form.startsOn.time)"
+            :text="formatTime(form.startsAt.time)"
             class="gl-w-12 gl-pl-3"
           >
             <gl-dropdown-item
-              v-for="n in 24"
+              v-for="n in $options.HOURS_IN_DAY"
               :key="n"
-              :is-checked="form.startsOn.time === n"
+              :is-checked="form.startsAt.time === n"
               is-check-item
-              @click="setRotationStartsOnTime(n)"
+              @click="setRotationStartsAtTime(n)"
             >
               <span class="gl-white-space-nowrap"> {{ formatTime(n) }}</span>
             </gl-dropdown-item>
