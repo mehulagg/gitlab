@@ -1,0 +1,8 @@
+---
+name: webide_editor_lite
+introduced_by_url:
+rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/294252
+milestone: '13.7'
+type: development
+group: group::editor
+default_enabled: false
