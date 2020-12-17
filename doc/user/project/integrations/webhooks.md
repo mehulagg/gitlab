@@ -276,6 +276,7 @@ X-Gitlab-Event: Issue Hook
   "object_kind": "issue",
   "event_type": "issue",
   "user": {
+    "id": 1,
     "name": "Administrator",
     "username": "root",
     "avatar_url": "http://www.gravatar.com/avatar/e64c7d89f26bd1972efa854d13d7dd61?s=40\u0026d=identicon",
@@ -439,6 +440,7 @@ X-Gitlab-Event: Note Hook
 {
   "object_kind": "note",
   "user": {
+    "id": 1,
     "name": "Administrator",
     "username": "root",
     "avatar_url": "http://www.gravatar.com/avatar/e64c7d89f26bd1972efa854d13d7dd61?s=40\u0026d=identicon"
@@ -519,6 +521,7 @@ X-Gitlab-Event: Note Hook
 {
   "object_kind": "note",
   "user": {
+    "id": 1,
     "name": "Administrator",
     "username": "root",
     "avatar_url": "http://www.gravatar.com/avatar/e64c7d89f26bd1972efa854d13d7dd61?s=40\u0026d=identicon"
@@ -646,6 +649,7 @@ X-Gitlab-Event: Note Hook
 {
   "object_kind": "note",
   "user": {
+    "id": 1,
     "name": "Administrator",
     "username": "root",
     "avatar_url": "http://www.gravatar.com/avatar/e64c7d89f26bd1972efa854d13d7dd61?s=40\u0026d=identicon"
@@ -752,6 +756,7 @@ X-Gitlab-Event: Note Hook
 {
   "object_kind": "note",
   "user": {
+    "id": 1,
     "name": "Administrator",
     "username": "root",
     "avatar_url": "http://www.gravatar.com/avatar/e64c7d89f26bd1972efa854d13d7dd61?s=40\u0026d=identicon"
@@ -828,6 +833,7 @@ X-Gitlab-Event: Merge Request Hook
 {
   "object_kind": "merge_request",
   "user": {
+    "id": 1,
     "name": "Administrator",
     "username": "root",
     "avatar_url": "http://www.gravatar.com/avatar/e64c7d89f26bd1972efa854d13d7dd61?s=40\u0026d=identicon"
@@ -989,6 +995,7 @@ X-Gitlab-Event: Wiki Page Hook
 {
   "object_kind": "wiki_page",
   "user": {
+    "id": 1,
     "name": "Administrator",
     "username": "root",
     "avatar_url": "http://www.gravatar.com/avatar/e64c7d89f26bd1972efa854d13d7dd61?s=80\u0026d=identicon"
@@ -1080,6 +1087,7 @@ X-Gitlab-Event: Pipeline Hook
       "url": "http://192.168.64.1:3005/gitlab-org/gitlab-test/merge_requests/1"
    },
    "user":{
+      "id": 1,
       "name": "Administrator",
       "username": "root",
       "avatar_url": "http://www.gravatar.com/avatar/e32bd13e2add097461cb96824b7a829c?s=80\u0026d=identicon",
@@ -1349,6 +1357,7 @@ X-Gitlab-Event: Deployment Hook
   },
   "short_sha": "279484c0",
   "user": {
+    "id": 1,
     "name": "Administrator",
     "username": "root",
     "avatar_url": "https://www.gravatar.com/avatar/e64c7d89f26bd1972efa854d13d7dd61?s=80&d=identicon",
@@ -1428,6 +1437,7 @@ X-Gitlab-Event: Feature Flag Hook
     "http_url":"http://example.com/gitlabhq/gitlab-test.git"
   },
   "user": {
+    "id": 1,
     "name": "Administrator",
     "username": "root",
     "avatar_url": "https://www.gravatar.com/avatar/e64c7d89f26bd1972efa854d13d7dd61?s=80&d=identicon",
