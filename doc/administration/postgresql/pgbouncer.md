@@ -66,6 +66,10 @@ This content has been moved to a [new location](replication_and_failover.md#conf
 
 1. At this point, your instance should connect to the database through PgBouncer. If you are having issues, see the [Troubleshooting](#troubleshooting) section
 
+## Backups
+
+[To follow](../../raketasks/backup_restore.md#backup-and-restore-for-installations-using-pgbouncer)
+
 ## Enable Monitoring
 
 > [Introduced](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/3786) in GitLab 12.0.
