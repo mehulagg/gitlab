@@ -1235,6 +1235,9 @@ msgstr ""
 msgid "A basic page and serverless function that uses AWS Lambda, AWS API Gateway, and GitLab Pages"
 msgstr ""
 
+msgid "A basic template for developing Linux programs using Kotlin Native"
+msgstr ""
+
 msgid "A complete DevOps platform"
 msgstr ""
 
@@ -22025,6 +22028,9 @@ msgid "ProjectTemplates|Go Micro"
 msgstr ""
 
 msgid "ProjectTemplates|HIPAA Audit Protocol"
+msgstr ""
+
+msgid "ProjectTemplates|Kotlin Native for Linux"
 msgstr ""
 
 msgid "ProjectTemplates|Netlify/GitBook"
