@@ -18459,6 +18459,9 @@ msgstr ""
 msgid "NetworkPolicies|%{ifLabelStart}if%{ifLabelEnd} %{ruleType} %{isLabelStart}is%{isLabelEnd} %{ruleDirection} %{ruleSelector} %{directionLabelStart}and is outbound to a%{directionLabelEnd} %{rule} %{portsLabelStart}on%{portsLabelEnd} %{ports}"
 msgstr ""
 
+msgid "NetworkPolicies|%{labelStart}And%{labelEnd} %{spanStart}send an Alert to GitLab.%{spanEnd}"
+msgstr ""
+
 msgid "NetworkPolicies|%{labelStart}Then%{labelEnd} %{action} %{spanStart}the network traffic.%{spanEnd}"
 msgstr ""
 
@@ -18471,6 +18474,9 @@ msgstr ""
 msgid "NetworkPolicies|%{strongOpen}any%{strongClose} port"
 msgstr ""
 
+msgid "NetworkPolicies|+ Add alert"
+msgstr ""
+
 msgid "NetworkPolicies|.yaml"
 msgstr ""
 
@@ -18478,6 +18484,9 @@ msgid "NetworkPolicies|.yaml mode"
 msgstr ""
 
 msgid "NetworkPolicies|Actions"
+msgstr ""
+
+msgid "NetworkPolicies|Alerts are intended to be selectively used for a limited number of events that are potentially concerning and warrant a manual review. Alerts should not be used as a substitute for a SIEM or a logging tool. High volume alerts are likely to be dropped so as to preserve the stability of GitLab's integration with Kubernetes."
 msgstr ""
 
 msgid "NetworkPolicies|All selected"
