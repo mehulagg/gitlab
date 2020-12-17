@@ -44,146 +44,146 @@ or an instance administrator, who receives all permissions. For more information
 
 The following table depicts the various user permission levels in a project.
 
-| Action                                                                                                        | Guest    | Reporter | Developer | Maintainer | Owner (*10*) |
-|---------------------------------------------------------------------------------------------------------------|----------|----------|-----------|------------|--------------|
-| [Analytics](analytics/index.md): View Issue analytics **(PREMIUM)**                                           | ✓        | ✓        | ✓         | ✓          | ✓            |
-| [Analytics](analytics/index.md): View Merge Request analytics **(STARTER)**                                   | ✓        | ✓        | ✓         | ✓          | ✓            |
-| [Analytics](analytics/index.md): View Value Stream analytics                                                  | ✓        | ✓        | ✓         | ✓          | ✓            |
-| [Analytics](analytics/index.md): View CI/CD analytics                                                         |          | ✓        | ✓         | ✓          | ✓            |
-| [Analytics](analytics/index.md): View Code Review analytics **(STARTER)**                                     |          | ✓        | ✓         | ✓          | ✓            |
-| [Analytics](analytics/index.md): View Repository analytics                                                    |          | ✓        | ✓         | ✓          | ✓            |
-| [CI/CD](../ci/README.md): Download and browse job artifacts                                                   | ✓ (*3*)  | ✓        | ✓         | ✓          | ✓            |
-| [CI/CD](../ci/README.md): View a job log                                                                      | ✓ (*3*)  | ✓        | ✓         | ✓          | ✓            |
-| [CI/CD](../ci/README.md): View list of jobs                                                                   | ✓ (*3*)  | ✓        | ✓         | ✓          | ✓            |
-| [CI/CD](../ci/README.md): Add tags                                                                            |          |          | ✓         | ✓          | ✓            |
-| [CI/CD](../ci/README.md): Cancel and retry jobs                                                               |          |          | ✓         | ✓          | ✓            |
-| [CI/CD](../ci/README.md): Run CI/CD pipeline against a protected branch                                       |          |          | ✓ (*5*)   | ✓          | ✓            |
-| [CI/CD](../ci/README.md): View a job with [debug logging](../ci/variables/README.md#debug-logging)            |          |          | ✓         | ✓          | ✓            |
-| [CI/CD](../ci/README.md): Manage job triggers                                                                 |          |          |           | ✓          | ✓            |
-| [CI/CD](../ci/README.md): Manage runners                                                                      |          |          |           | ✓          | ✓            |
-| [CI/CD](../ci/README.md): Manage variables                                                                    |          |          |           | ✓          | ✓            |
-| [CI/CD](../ci/README.md): Run Web IDE's Interactive Web Terminals **(ULTIMATE ONLY)**                         |          |          |           | ✓          | ✓            |
-| [CI/CD](../ci/README.md): Delete pipelines                                                                    |          |          |           |            | ✓            |
-| [Clusters](project/clusters/index.md): View Pods logs                                                         |          |          | ✓         | ✓          | ✓            |
-| [Clusters](project/clusters/index.md): Manage clusters                                                        |          |          |           | ✓          | ✓            |
-| [Dependency scanning](application_security/dependency_scanning/index.md): View Dependency list **(ULTIMATE)** | ✓ (*1*)  | ✓        | ✓         | ✓          | ✓            |
-| [Environments](../ci/environments/index.md): View environments                                                |          | ✓        | ✓         | ✓          | ✓            |
-| [Environments](../ci/environments/index.md): Create new environments                                          |          |          | ✓         | ✓          | ✓            |
-| [Environments](../ci/environments/index.md): Stop environments                                                |          |          | ✓         | ✓          | ✓            |
-| [Environments](../ci/environments/index.md): Use environment terminals                                        |          |          |           | ✓          | ✓            |
-| [Error Tracking](../operations/error_tracking.md): View list                                                  |          | ✓        | ✓         | ✓          | ✓            |
-| [Error Tracking](../operations/error_tracking.md): Manage                                                     |          |          |           | ✓          | ✓            |
-| [Feature Flags](../operations/feature_flags.md): Manage **(PREMIUM)**                                         |          |          | ✓         | ✓          | ✓            |
-| [GitLab Pages](project/pages/index.md): View Pages protected by [access control](project/pages/introduction.md#gitlab-pages-access-control) | ✓   | ✓   | ✓   | ✓   | ✓     |
-| [GitLab Pages](project/pages/index.md): Manage                                                                |          |          |           | ✓          | ✓            |
-| [GitLab Pages](project/pages/index.md): Manage GitLab Pages domains and certificates                          |          |          |           | ✓          | ✓            |
-| [GitLab Pages](project/pages/index.md): Remove GitLab Pages                                                   |          |          |           | ✓          | ✓            |
-| [Issues](project/issues/index.md): Create                                                                     | ✓        | ✓        | ✓         | ✓          | ✓            |
-| [Issues](project/issues/index.md): Create confidential                                                        | ✓        | ✓        | ✓         | ✓          | ✓            |
-| [Issues](project/issues/index.md): See related issues                                                         | ✓        | ✓        | ✓         | ✓          | ✓            |
-| [Issues](project/issues/index.md): View [Design Management](project/issues/design_management.md) pages        | ✓        | ✓        | ✓         | ✓          | ✓            |
-| [Issues](project/issues/index.md): View confidential                                                          | (*2*)    | ✓        | ✓         | ✓          | ✓            |
-| [Issues](project/issues/index.md): Add Labels                                                                 |          | ✓        | ✓         | ✓          | ✓            |
-| [Issues](project/issues/index.md): Assign                                                                     |          | ✓        | ✓         | ✓          | ✓            |
-| [Issues](project/issues/index.md): Lock threads                                                               |          | ✓        | ✓         | ✓          | ✓            |
-| [Issues](project/issues/index.md): Manage related issues                                                      |          | ✓        | ✓         | ✓          | ✓            |
-| [Issues](project/issues/index.md): Manage tracker                                                             |          | ✓        | ✓         | ✓          | ✓            |
-| [Issues](project/issues/index.md): Set weight                                                                 |          | ✓        | ✓         | ✓          | ✓            |
-| [Issues](project/issues/index.md): Upload [Design Management](project/issues/design_management.md) files      |          |          | ✓         | ✓          | ✓            |
-| [Issues](project/issues/index.md): Delete                                                                     |          |          |           |            | ✓            |
-| [License Compliance](compliance/license_compliance/index.md): View License Compliance reports **(ULTIMATE)**  | ✓ (*1*)  | ✓        | ✓         | ✓          | ✓            |
-| [License Compliance](compliance/license_compliance/index.md): View License list **(ULTIMATE)**                | ✓ (*1*)  | ✓        | ✓         | ✓          | ✓            |
-| [License Compliance](compliance/license_compliance/index.md): View allowed and denied licenses **(ULTIMATE)** | ✓ (*1*)  | ✓        | ✓         | ✓          | ✓            |
-| [License Compliance](compliance/license_compliance/index.md): View licenses in Dependency list **(ULTIMATE)** | ✓ (*1*)  | ✓        | ✓         | ✓          | ✓            |
-| [License Compliance](compliance/license_compliance/index.md): Manage license policy **(ULTIMATE)**            |          |          |           | ✓          | ✓            |
-| [Merge requests](project/merge_requests/index.md) Create                                                      |          | ✓        | ✓         | ✓          | ✓            |
-| [Merge requests](project/merge_requests/index.md) See list                                                    |          | ✓        | ✓         | ✓          | ✓            |
-| [Merge requests](project/merge_requests/index.md) Apply code change suggestions                               |          |          | ✓         | ✓          | ✓            |
-| [Merge requests](project/merge_requests/index.md) Approve (*9*)                                               |          |          | ✓         | ✓          | ✓            |
-| [Merge requests](project/merge_requests/index.md) Assign                                                      |          |          | ✓         | ✓          | ✓            |
-| [Merge requests](project/merge_requests/index.md) Label merge requests                                        |          |          | ✓         | ✓          | ✓            |
-| [Merge requests](project/merge_requests/index.md) Lock threads                                                |          |          | ✓         | ✓          | ✓            |
-| [Merge requests](project/merge_requests/index.md) Manage/Accept                                               |          |          | ✓         | ✓          | ✓            |
-| [Merge requests](project/merge_requests/index.md) Delete                                                      |          |          |           |            | ✓            |
-| [Metrics](../operations/metrics/index.md): Manage user-starred metrics dashboards (*7*)                       | ✓        | ✓        | ✓         | ✓          | ✓            |
-| [Metrics](../operations/metrics/index.md): View metrics dashboard annotations                                 |          | ✓        | ✓         | ✓          | ✓            |
-| [Metrics](../operations/metrics/index.md): Create/edit/delete metrics dashboard annotations                   |          |          | ✓         | ✓          | ✓            |
-| [Milestones](project/milestones/index.md): Create/edit/delete                                                 |          |          | ✓         | ✓          | ✓            |
-| [Packages](packages/index.md): Pull                                                                           |          | ✓        | ✓         | ✓          | ✓            |
-| [Packages](packages/index.md): See a container registry                                                       |          | ✓        | ✓         | ✓          | ✓            |
-| [Packages](packages/index.md): Create/edit/delete cleanup policies                                            |          |          | ✓         | ✓          | ✓            |
-| [Packages](packages/index.md): Publish                                                                        |          |          | ✓         | ✓          | ✓            |
-| [Packages](packages/index.md): Remove a container registry image                                              |          |          | ✓         | ✓          | ✓            |
-| [Packages](packages/index.md): Update a container registry                                                    |          |          | ✓         | ✓          | ✓            |
-| [Packages](packages/index.md): Delete                                                                         |          |          |           | ✓          | ✓            |
-| [Projects](project/index.md): Leave comments                                                                  | ✓        | ✓        | ✓         | ✓          | ✓            |
-| [Projects](project/index.md): Download project                                                                | ✓ (*1*)  | ✓        | ✓         | ✓          | ✓            |
-| [Projects](project/index.md): Reposition comments on images (posted by any user)                              | ✓ (*11*) | ✓ (*11*) | ✓ (*11*)  | ✓          | ✓            |
-| [Projects](project/index.md): View Insights **(ULTIMATE)**                                                    | ✓        | ✓        | ✓         | ✓          | ✓            |
-| [Projects](project/index.md): View project code                                                               | ✓ (*1*)  | ✓        | ✓         | ✓          | ✓            |
-| [Projects](project/index.md): View Requirements **(ULTIMATE)**                                                | ✓        | ✓        | ✓         | ✓          | ✓            |
-| [Projects](project/index.md): Manage labels                                                                   |          | ✓        | ✓         | ✓          | ✓            |
-| [Projects](project/index.md): Enable Review Apps                                                              |          |          | ✓         | ✓          | ✓            |
-| [Projects](project/index.md): View project Audit Events                                                       |          |          | ✓ (*12*)  | ✓          | ✓            |
-| [Projects](project/index.md): View project statistics                                                         |          |          | ✓         | ✓          | ✓            |
-| [Projects](project/index.md): Add deploy keys                                                                 |          |          |           | ✓          | ✓            |
-| [Projects](project/index.md): Add new team members                                                            |          |          |           | ✓          | ✓            |
-| [Projects](project/index.md): Configure hooks                                                                 |          |          |           | ✓          | ✓            |
-| [Projects](project/index.md): Edit comments (posted by any user)                                              |          |          |           | ✓          | ✓            |
-| [Projects](project/index.md): Edit project badges                                                             |          |          |           | ✓          | ✓            |
-| [Projects](project/index.md): Edit project settings                                                           |          |          |           | ✓          | ✓            |
-| [Projects](project/index.md): Export project                                                                  |          |          |           | ✓          | ✓            |
-| [Projects](project/index.md): Manage [project access tokens](project/settings/project_access_tokens.md) **(CORE ONLY)** |        |        |         | ✓        | ✓          |
-| [Projects](project/index.md): Manage Project Operations                                                       |          |          |           | ✓          | ✓            |
-| [Projects](project/index.md): Share (invite) projects with groups                                             |          |          |           | ✓ (*8*)    | ✓ (*8*)      |
-| [Projects](project/index.md): Archive project                                                                 |          |          |           |            | ✓            |
-| [Projects](project/index.md): Delete project                                                                  |          |          |           |            | ✓            |
-| [Projects](project/index.md): Disable notification emails                                                     |          |          |           |            | ✓            |
-| [Projects](project/index.md): Rename project                                                                  |          |          |           |            | ✓            |
-| [Projects](project/index.md): Switch visibility level                                                         |          |          |           |            | ✓            |
-| [Projects](project/index.md): Transfer project to another namespace                                           |          |          |           |            | ✓            |
-| [Releases](project/releases/index.md): View                                                                   | ✓ (*6*)  | ✓        | ✓         | ✓          | ✓            |
-| [Repository](project/repository/index.md): Pull project code                                                  | ✓ (*1*)  | ✓        | ✓         | ✓          | ✓            |
-| [Repository](project/repository/index.md): See a commit status                                                |          | ✓        | ✓         | ✓          | ✓            |
-| [Releases](project/releases/index.md): Create/edit/delete                                                     |          |          | ✓         | ✓          | ✓            |
-| [Repository](project/repository/index.md): Create new branches                                                |          |          | ✓         | ✓          | ✓            |
-| [Repository](project/repository/index.md): Create or update commit status                                     |          |          | ✓ (*5*)   | ✓          | ✓            |
-| [Repository](project/repository/index.md): Force push to non-protected branches                               |          |          | ✓         | ✓          | ✓            |
-| [Repository](project/repository/index.md): Push to non-protected branches                                     |          |          | ✓         | ✓          | ✓            |
-| [Repository](project/repository/index.md): Remove non-protected branches                                      |          |          | ✓         | ✓          | ✓            |
-| [Repository](project/repository/index.md): Rewrite/remove Git tags                                            |          |          | ✓         | ✓          | ✓            |
-| [Repository](project/repository/index.md): Enable/disable branch protection                                   |          |          |           | ✓          | ✓            |
-| [Repository](project/repository/index.md): Enable/disable tag protections                                     |          |          |           | ✓          | ✓            |
-| [Repository](project/repository/index.md): Manage [push rules](../push_rules/push_rules.md)                   |          |          |           | ✓          | ✓            |
-| [Repository](project/repository/index.md): Push to protected branches                                         |          |          |           | ✓          | ✓            |
-| [Repository](project/repository/index.md): Turn on/off protected branch push for developers                   |          |          |           | ✓          | ✓            |
-| [Repository](project/repository/index.md): Remove fork relationship                                           |          |          |           |            | ✓            |
-| [Repository](project/repository/index.md): Force push to protected branches (*4*)                             |          |          |           |            |              |
-| [Repository](project/repository/index.md): Remove protected branches (*4*)                                    |          |          |           |            |              |
-| [Requirements Management](project/requirements/index.md): Archive/reopen **(ULTIMATE)**                       |          | ✓        | ✓         | ✓          | ✓            |
-| [Requirements Management](project/requirements/index.md): Create/edit **(ULTIMATE)**                          |          | ✓        | ✓         | ✓          | ✓            |
-| [Requirements Management](project/requirements/index.md): Import **(ULTIMATE)**                               |          | ✓        | ✓         | ✓          | ✓            |
-| [Security dashboard](application_security/security_dashboard/index.md#vulnerability-report): View Security reports **(ULTIMATE)**                           | ✓ (*3*)  | ✓ | ✓ | ✓ | ✓ |
-| [Security dashboard](application_security/security_dashboard/index.md#vulnerability-report): Create issue from vulnerability finding **(ULTIMATE)**         |          |   | ✓ | ✓ | ✓ |
-| [Security dashboard](application_security/security_dashboard/index.md#vulnerability-report): Create vulnerability from vulnerability finding **(ULTIMATE)** |          |   | ✓ | ✓ | ✓ |
-| [Security dashboard](application_security/security_dashboard/index.md#vulnerability-report): Dismiss vulnerability **(ULTIMATE)**                           |          |   | ✓ | ✓ | ✓ |
-| [Security dashboard](application_security/security_dashboard/index.md#vulnerability-report): Dismiss vulnerability finding **(ULTIMATE)**                   |          |   | ✓ | ✓ | ✓ |
-| [Security dashboard](application_security/security_dashboard/index.md#vulnerability-report): Resolve vulnerability **(ULTIMATE)**                           |          |   | ✓ | ✓ | ✓ |
-| [Security dashboard](application_security/security_dashboard/index.md#vulnerability-report): Revert vulnerability to detected state **(ULTIMATE)**          |          |   | ✓ | ✓ | ✓ |
-| [Security dashboard](application_security/security_dashboard/index.md#vulnerability-report): Use security dashboard **(ULTIMATE)**                          |          |   | ✓ | ✓ | ✓ |
-| [Security dashboard](application_security/security_dashboard/index.md#vulnerability-report): View vulnerability **(ULTIMATE)**                              |          |   | ✓ | ✓ | ✓ |
-| [Security dashboard](application_security/security_dashboard/index.md#vulnerability-report): View vulnerability findings in Dependency list **(ULTIMATE)**  |          |   | ✓ | ✓ | ✓ |
-| [Security dashboard](application_security/security_dashboard/index.md#vulnerability-report): Request a CVE ID **(FREE ONLY)**                               |          |   |   | ✓ | ✓ |
-| [Snippets](snippets.md): Create                                                                               |          | ✓        | ✓         | ✓          | ✓            |
-| [Terraform](infrastructure/index.md): Read Terraform state                                                    |          |          | ✓         | ✓          | ✓            |
-| [Terraform](infrastructure/index.md): Manage Terraform state                                                  |          |          |           | ✓          | ✓            |
-| [Test cases](../ci/test_cases/index.md): Archive                                                              |          | ✓        | ✓         | ✓          | ✓            |
-| [Test cases](../ci/test_cases/index.md): Create                                                               |          | ✓        | ✓         | ✓          | ✓            |
-| [Test cases](../ci/test_cases/index.md): Move                                                                 |          | ✓        | ✓         | ✓          | ✓            |
-| [Test cases](../ci/test_cases/index.md): Reopen                                                               |          | ✓        | ✓         | ✓          | ✓            |
-| [Wiki](project/wiki/index.md): View                                                                           | ✓        | ✓        | ✓         | ✓          | ✓            |
-| [Wiki](project/wiki/index.md): Create, edit                                                                   |          |          | ✓         | ✓          | ✓            |
-| [Wiki](project/wiki/index.md): Delete                                                                         |          |          |           | ✓          | ✓            |
+| Action                                                                                                            | Guest    | Reporter | Developer | Maintainer | Owner (*10*) |
+|-------------------------------------------------------------------------------------------------------------------|----------|----------|-----------|------------|--------------|
+| [**Analytics**](analytics/index.md): View Issue analytics **(PREMIUM)**                                           | ✓        | ✓        | ✓         | ✓          | ✓            |
+| [**Analytics**](analytics/index.md): View Merge Request analytics **(STARTER)**                                   | ✓        | ✓        | ✓         | ✓          | ✓            |
+| [**Analytics**](analytics/index.md): View Value Stream analytics                                                  | ✓        | ✓        | ✓         | ✓          | ✓            |
+| [**Analytics**](analytics/index.md): View CI/CD analytics                                                         |          | ✓        | ✓         | ✓          | ✓            |
+| [**Analytics**](analytics/index.md): View Code Review analytics **(STARTER)**                                     |          | ✓        | ✓         | ✓          | ✓            |
+| [**Analytics**](analytics/index.md): View Repository analytics                                                    |          | ✓        | ✓         | ✓          | ✓            |
+| [**CI/CD**](../ci/README.md): Download and browse job artifacts                                                   | ✓ (*3*)  | ✓        | ✓         | ✓          | ✓            |
+| [**CI/CD**](../ci/README.md): View a job log                                                                      | ✓ (*3*)  | ✓        | ✓         | ✓          | ✓            |
+| [**CI/CD**](../ci/README.md): View list of jobs                                                                   | ✓ (*3*)  | ✓        | ✓         | ✓          | ✓            |
+| [**CI/CD**](../ci/README.md): Cancel and retry jobs                                                               |          |          | ✓         | ✓          | ✓            |
+| [**CI/CD**](../ci/README.md): Run CI/CD pipeline against a protected branch                                       |          |          | ✓ (*5*)   | ✓          | ✓            |
+| [**CI/CD**](../ci/README.md): View a job with [debug logging](../ci/variables/README.md#debug-logging)            |          |          | ✓         | ✓          | ✓            |
+| [**CI/CD**](../ci/README.md): Manage job triggers                                                                 |          |          |           | ✓          | ✓            |
+| [**CI/CD**](../ci/README.md): Manage runners                                                                      |          |          |           | ✓          | ✓            |
+| [**CI/CD**](../ci/README.md): Manage variables                                                                    |          |          |           | ✓          | ✓            |
+| [**CI/CD**](../ci/README.md): Run Web IDE's Interactive Web Terminals **(ULTIMATE ONLY)**                         |          |          |           | ✓          | ✓            |
+| [**CI/CD**](../ci/README.md): Delete pipelines                                                                    |          |          |           |            | ✓            |
+| [**Clusters**](project/clusters/index.md): View Pods logs                                                         |          |          | ✓         | ✓          | ✓            |
+| [**Clusters**](project/clusters/index.md): Manage clusters                                                        |          |          |           | ✓          | ✓            |
+| [**Dependency scanning**](application_security/dependency_scanning/index.md): View Dependency list **(ULTIMATE)** | ✓ (*1*)  | ✓        | ✓         | ✓          | ✓            |
+| [**Environments**](../ci/environments/index.md): View environments                                                |          | ✓        | ✓         | ✓          | ✓            |
+| [**Environments**](../ci/environments/index.md): Create new environments                                          |          |          | ✓         | ✓          | ✓            |
+| [**Environments**](../ci/environments/index.md): Stop environments                                                |          |          | ✓         | ✓          | ✓            |
+| [**Environments**](../ci/environments/index.md): Use environment terminals                                        |          |          |           | ✓          | ✓            |
+| [**Error Tracking**](../operations/error_tracking.md): View list                                                  |          | ✓        | ✓         | ✓          | ✓            |
+| [**Error Tracking**](../operations/error_tracking.md): Manage                                                     |          |          |           | ✓          | ✓            |
+| [**Feature Flags**](../operations/feature_flags.md): Manage **(PREMIUM)**                                         |          |          | ✓         | ✓          | ✓            |
+| [**GitLab Pages**](project/pages/index.md): View Pages protected by [access control](project/pages/introduction.md#gitlab-pages-access-control) | ✓   | ✓   | ✓   | ✓   | ✓     |
+| [**GitLab Pages**](project/pages/index.md): Manage                                                                |          |          |           | ✓          | ✓            |
+| [**GitLab Pages**](project/pages/index.md): Manage GitLab Pages domains and certificates                          |          |          |           | ✓          | ✓            |
+| [**GitLab Pages**](project/pages/index.md): Remove GitLab Pages                                                   |          |          |           | ✓          | ✓            |
+| [**Issues**](project/issues/index.md): Create                                                                     | ✓        | ✓        | ✓         | ✓          | ✓            |
+| [**Issues**](project/issues/index.md): Create confidential                                                        | ✓        | ✓        | ✓         | ✓          | ✓            |
+| [**Issues**](project/issues/index.md): See related issues                                                         | ✓        | ✓        | ✓         | ✓          | ✓            |
+| [**Issues**](project/issues/index.md): View [Design Management](project/issues/design_management.md) pages        | ✓        | ✓        | ✓         | ✓          | ✓            |
+| [**Issues**](project/issues/index.md): View confidential                                                          | (*2*)    | ✓        | ✓         | ✓          | ✓            |
+| [**Issues**](project/issues/index.md): Add Labels                                                                 |          | ✓        | ✓         | ✓          | ✓            |
+| [**Issues**](project/issues/index.md): Assign                                                                     |          | ✓        | ✓         | ✓          | ✓            |
+| [**Issues**](project/issues/index.md): Lock threads                                                               |          | ✓        | ✓         | ✓          | ✓            |
+| [**Issues**](project/issues/index.md): Manage related issues                                                      |          | ✓        | ✓         | ✓          | ✓            |
+| [**Issues**](project/issues/index.md): Manage tracker                                                             |          | ✓        | ✓         | ✓          | ✓            |
+| [**Issues**](project/issues/index.md): Set weight                                                                 |          | ✓        | ✓         | ✓          | ✓            |
+| [**Issues**](project/issues/index.md): Upload [Design Management](project/issues/design_management.md) files      |          |          | ✓         | ✓          | ✓            |
+| [**Issues**](project/issues/index.md): Delete                                                                     |          |          |           |            | ✓            |
+| [**License Compliance**](compliance/license_compliance/index.md): View License Compliance reports **(ULTIMATE)**  | ✓ (*1*)  | ✓        | ✓         | ✓          | ✓            |
+| [**License Compliance**](compliance/license_compliance/index.md): View License list **(ULTIMATE)**                | ✓ (*1*)  | ✓        | ✓         | ✓          | ✓            |
+| [**License Compliance**](compliance/license_compliance/index.md): View allowed and denied licenses **(ULTIMATE)** | ✓ (*1*)  | ✓        | ✓         | ✓          | ✓            |
+| [**License Compliance**](compliance/license_compliance/index.md): View licenses in Dependency list **(ULTIMATE)** | ✓ (*1*)  | ✓        | ✓         | ✓          | ✓            |
+| [**License Compliance**](compliance/license_compliance/index.md): Manage license policy **(ULTIMATE)**            |          |          |           | ✓          | ✓            |
+| [**Merge requests**](project/merge_requests/index.md) Create                                                      |          | ✓        | ✓         | ✓          | ✓            |
+| [**Merge requests**](project/merge_requests/index.md) See list                                                    |          | ✓        | ✓         | ✓          | ✓            |
+| [**Merge requests**](project/merge_requests/index.md) Apply code change suggestions                               |          |          | ✓         | ✓          | ✓            |
+| [**Merge requests**](project/merge_requests/index.md) Approve (*9*)                                               |          |          | ✓         | ✓          | ✓            |
+| [**Merge requests**](project/merge_requests/index.md) Assign                                                      |          |          | ✓         | ✓          | ✓            |
+| [**Merge requests**](project/merge_requests/index.md) Label merge requests                                        |          |          | ✓         | ✓          | ✓            |
+| [**Merge requests**](project/merge_requests/index.md) Lock threads                                                |          |          | ✓         | ✓          | ✓            |
+| [**Merge requests**](project/merge_requests/index.md) Manage/Accept                                               |          |          | ✓         | ✓          | ✓            |
+| [**Merge requests**](project/merge_requests/index.md) Delete                                                      |          |          |           |            | ✓            |
+| [**Metrics**](../operations/metrics/index.md): Manage user-starred metrics dashboards (*7*)                       | ✓        | ✓        | ✓         | ✓          | ✓            |
+| [**Metrics**](../operations/metrics/index.md): View metrics dashboard annotations                                 |          | ✓        | ✓         | ✓          | ✓            |
+| [**Metrics**](../operations/metrics/index.md): Create/edit/delete metrics dashboard annotations                   |          |          | ✓         | ✓          | ✓            |
+| [**Milestones**](project/milestones/index.md): Create/edit/delete                                                 |          |          | ✓         | ✓          | ✓            |
+| [**Packages**](packages/index.md): Pull                                                                           |          | ✓        | ✓         | ✓          | ✓            |
+| [**Packages**](packages/index.md): See a container registry                                                       |          | ✓        | ✓         | ✓          | ✓            |
+| [**Packages**](packages/index.md): Create/edit/delete cleanup policies                                            |          |          | ✓         | ✓          | ✓            |
+| [**Packages**](packages/index.md): Publish                                                                        |          |          | ✓         | ✓          | ✓            |
+| [**Packages**](packages/index.md): Remove a container registry image                                              |          |          | ✓         | ✓          | ✓            |
+| [**Packages**](packages/index.md): Update a container registry                                                    |          |          | ✓         | ✓          | ✓            |
+| [**Packages**](packages/index.md): Delete                                                                         |          |          |           | ✓          | ✓            |
+| [**Projects**](project/index.md): Leave comments                                                                  | ✓        | ✓        | ✓         | ✓          | ✓            |
+| [**Projects**](project/index.md): Download project                                                                | ✓ (*1*)  | ✓        | ✓         | ✓          | ✓            |
+| [**Projects**](project/index.md): Reposition comments on images (posted by any user)                              | ✓ (*11*) | ✓ (*11*) | ✓ (*11*)  | ✓          | ✓            |
+| [**Projects**](project/index.md): View Insights **(ULTIMATE)**                                                    | ✓        | ✓        | ✓         | ✓          | ✓            |
+| [**Projects**](project/index.md): View project code                                                               | ✓ (*1*)  | ✓        | ✓         | ✓          | ✓            |
+| [**Projects**](project/index.md): View Requirements **(ULTIMATE)**                                                | ✓        | ✓        | ✓         | ✓          | ✓            |
+| [**Projects**](project/index.md): Manage labels                                                                   |          | ✓        | ✓         | ✓          | ✓            |
+| [**Projects**](project/index.md): Enable Review Apps                                                              |          |          | ✓         | ✓          | ✓            |
+| [**Projects**](project/index.md): View project Audit Events                                                       |          |          | ✓ (*12*)  | ✓          | ✓            |
+| [**Projects**](project/index.md): View project statistics                                                         |          |          | ✓         | ✓          | ✓            |
+| [**Projects**](project/index.md): Add deploy keys                                                                 |          |          |           | ✓          | ✓            |
+| [**Projects**](project/index.md): Add new team members                                                            |          |          |           | ✓          | ✓            |
+| [**Projects**](project/index.md): Configure hooks                                                                 |          |          |           | ✓          | ✓            |
+| [**Projects**](project/index.md): Edit comments (posted by any user)                                              |          |          |           | ✓          | ✓            |
+| [**Projects**](project/index.md): Edit project badges                                                             |          |          |           | ✓          | ✓            |
+| [**Projects**](project/index.md): Edit project settings                                                           |          |          |           | ✓          | ✓            |
+| [**Projects**](project/index.md): Export project                                                                  |          |          |           | ✓          | ✓            |
+| [**Projects**](project/index.md): Manage [project access tokens](project/settings/project_access_tokens.md) **(CORE ONLY)** |        |        |         | ✓        | ✓          |
+| [**Projects**](project/index.md): Manage Project Operations                                                       |          |          |           | ✓          | ✓            |
+| [**Projects**](project/index.md): Share (invite) projects with groups                                             |          |          |           | ✓ (*8*)    | ✓ (*8*)      |
+| [**Projects**](project/index.md): Archive project                                                                 |          |          |           |            | ✓            |
+| [**Projects**](project/index.md): Delete project                                                                  |          |          |           |            | ✓            |
+| [**Projects**](project/index.md): Disable notification emails                                                     |          |          |           |            | ✓            |
+| [**Projects**](project/index.md): Rename project                                                                  |          |          |           |            | ✓            |
+| [**Projects**](project/index.md): Switch visibility level                                                         |          |          |           |            | ✓            |
+| [**Projects**](project/index.md): Transfer project to another namespace                                           |          |          |           |            | ✓            |
+| [**Releases**](project/releases/index.md): View                                                                   | ✓ (*6*)  | ✓        | ✓         | ✓          | ✓            |
+| [**Releases**](project/releases/index.md): Create/edit/delete                                                     |          |          | ✓         | ✓          | ✓            |
+| [**Repository**](project/repository/index.md): Pull project code                                                  | ✓ (*1*)  | ✓        | ✓         | ✓          | ✓            |
+| [**Repository**](project/repository/index.md): Add tags                                                           |          |          | ✓         | ✓          | ✓            |
+| [**Repository**](project/repository/index.md): See a commit status                                                |          | ✓        | ✓         | ✓          | ✓            |
+| [**Repository**](project/repository/index.md): Create new branches                                                |          |          | ✓         | ✓          | ✓            |
+| [**Repository**](project/repository/index.md): Create or update commit status                                     |          |          | ✓ (*5*)   | ✓          | ✓            |
+| [**Repository**](project/repository/index.md): Force push to non-protected branches                               |          |          | ✓         | ✓          | ✓            |
+| [**Repository**](project/repository/index.md): Push to non-protected branches                                     |          |          | ✓         | ✓          | ✓            |
+| [**Repository**](project/repository/index.md): Remove non-protected branches                                      |          |          | ✓         | ✓          | ✓            |
+| [**Repository**](project/repository/index.md): Rewrite/remove Git tags                                            |          |          | ✓         | ✓          | ✓            |
+| [**Repository**](project/repository/index.md): Enable/disable branch protection                                   |          |          |           | ✓          | ✓            |
+| [**Repository**](project/repository/index.md): Enable/disable tag protections                                     |          |          |           | ✓          | ✓            |
+| [**Repository**](project/repository/index.md): Manage [push rules](../push_rules/push_rules.md)                   |          |          |           | ✓          | ✓            |
+| [**Repository**](project/repository/index.md): Push to protected branches                                         |          |          |           | ✓          | ✓            |
+| [**Repository**](project/repository/index.md): Turn on/off protected branch push for developers                   |          |          |           | ✓          | ✓            |
+| [**Repository**](project/repository/index.md): Remove fork relationship                                           |          |          |           |            | ✓            |
+| [**Repository**](project/repository/index.md): Force push to protected branches (*4*)                             |          |          |           |            |              |
+| [**Repository**](project/repository/index.md): Remove protected branches (*4*)                                    |          |          |           |            |              |
+| [**Requirements Management**](project/requirements/index.md): Archive/reopen **(ULTIMATE)**                       |          | ✓        | ✓         | ✓          | ✓            |
+| [**Requirements Management**](project/requirements/index.md): Create/edit **(ULTIMATE)**                          |          | ✓        | ✓         | ✓          | ✓            |
+| [**Requirements Management**](project/requirements/index.md): Import **(ULTIMATE)**                               |          | ✓        | ✓         | ✓          | ✓            |
+| [**Security dashboard**](application_security/security_dashboard/index.md#vulnerability-report): View Security reports **(ULTIMATE)**                           | ✓ (*3*)  | ✓ | ✓ | ✓ | ✓ |
+| [**Security dashboard**](application_security/security_dashboard/index.md#vulnerability-report): Create issue from vulnerability finding **(ULTIMATE)**         |          |   | ✓ | ✓ | ✓ |
+| [**Security dashboard**](application_security/security_dashboard/index.md#vulnerability-report): Create vulnerability from vulnerability finding **(ULTIMATE)** |          |   | ✓ | ✓ | ✓ |
+| [**Security dashboard**](application_security/security_dashboard/index.md#vulnerability-report): Dismiss vulnerability **(ULTIMATE)**                           |          |   | ✓ | ✓ | ✓ |
+| [**Security dashboard**](application_security/security_dashboard/index.md#vulnerability-report): Dismiss vulnerability finding **(ULTIMATE)**                   |          |   | ✓ | ✓ | ✓ |
+| [**Security dashboard**](application_security/security_dashboard/index.md#vulnerability-report): Resolve vulnerability **(ULTIMATE)**                           |          |   | ✓ | ✓ | ✓ |
+| [**Security dashboard**](application_security/security_dashboard/index.md#vulnerability-report): Revert vulnerability to detected state **(ULTIMATE)**          |          |   | ✓ | ✓ | ✓ |
+| [**Security dashboard**](application_security/security_dashboard/index.md#vulnerability-report): Use security dashboard **(ULTIMATE)**                          |          |   | ✓ | ✓ | ✓ |
+| [**Security dashboard**](application_security/security_dashboard/index.md#vulnerability-report): View vulnerability **(ULTIMATE)**                              |          |   | ✓ | ✓ | ✓ |
+| [**Security dashboard**](application_security/security_dashboard/index.md#vulnerability-report): View vulnerability findings in Dependency list **(ULTIMATE)**  |          |   | ✓ | ✓ | ✓ |
+| [**Security dashboard**](application_security/security_dashboard/index.md#vulnerability-report): Request a CVE ID **(FREE ONLY)**                               |          |   |   | ✓ | ✓ |
+| [**Snippets**](snippets.md): Create                                                                               |          | ✓        | ✓         | ✓          | ✓            |
+| [**Terraform**](infrastructure/index.md): Read Terraform state                                                    |          |          | ✓         | ✓          | ✓            |
+| [**Terraform**](infrastructure/index.md): Manage Terraform state                                                  |          |          |           | ✓          | ✓            |
+| [**Test cases**](../ci/test_cases/index.md): Archive                                                              |          | ✓        | ✓         | ✓          | ✓            |
+| [**Test cases**](../ci/test_cases/index.md): Create                                                               |          | ✓        | ✓         | ✓          | ✓            |
+| [**Test cases**](../ci/test_cases/index.md): Move                                                                 |          | ✓        | ✓         | ✓          | ✓            |
+| [**Test cases**](../ci/test_cases/index.md): Reopen                                                               |          | ✓        | ✓         | ✓          | ✓            |
+| [**Wiki**](project/wiki/index.md): View                                                                           | ✓        | ✓        | ✓         | ✓          | ✓            |
+| [**Wiki**](project/wiki/index.md): Create, edit                                                                   |          |          | ✓         | ✓          | ✓            |
+| [**Wiki**](project/wiki/index.md): Delete                                                                         |          |          |           | ✓          | ✓            |
 
 1. Guest users are able to perform this action on public and internal projects, but not private projects. This doesn't apply to [external users](#external-users) where explicit access must be given even if the project is internal.
 1. Guest users can only view the confidential issues they created themselves.
