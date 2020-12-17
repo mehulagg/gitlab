@@ -354,6 +354,16 @@ RSpec.describe ProjectPolicy do
           end
 
           it 'prevents access without a SAML session' do
+            is_expected.to allow_action(:read_project)
+          end
+        end
+
+        context 'as a group maintainer' do
+          before do
+            group.add_maintainer(current_user)
+          end
+
+          it 'prevents access without a SAML session' do
             is_expected.not_to allow_action(:read_project)
           end
         end

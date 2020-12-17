@@ -28,13 +28,14 @@ module Gitlab
           saml_enforced? && !active_session?
         end
 
-        def self.group_access_restricted?(group)
+        def self.group_access_restricted?(group, user: nil)
           return false unless group
           return false unless group.root_ancestor
 
           saml_provider = group.root_ancestor.saml_provider
 
           return false unless saml_provider
+          return false if group.root_ancestor.owned_by?(user)
 
           new(saml_provider).access_restricted?
         end

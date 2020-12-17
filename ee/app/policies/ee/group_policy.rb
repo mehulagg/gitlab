@@ -331,9 +331,8 @@ module EE
     def sso_enforcement_prevents_access?
       return false unless subject.persisted?
       return false if user&.admin?
-      return false if subject.owned_by?(user)
 
-      ::Gitlab::Auth::GroupSaml::SsoEnforcer.group_access_restricted?(subject)
+      ::Gitlab::Auth::GroupSaml::SsoEnforcer.group_access_restricted?(subject, user: user)
     end
 
     # Available in Core for self-managed but only paid, non-trial for .com to prevent abuse

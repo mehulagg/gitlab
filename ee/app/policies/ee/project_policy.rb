@@ -318,7 +318,7 @@ module EE
       rule { ~admin & owner & owner_cannot_destroy_project }.prevent :remove_project
 
       condition(:needs_new_sso_session) do
-        ::Gitlab::Auth::GroupSaml::SsoEnforcer.group_access_restricted?(subject.group)
+        ::Gitlab::Auth::GroupSaml::SsoEnforcer.group_access_restricted?(subject.group, user: user)
       end
 
       condition(:ip_enforcement_prevents_access) do
