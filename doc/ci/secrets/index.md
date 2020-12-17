@@ -168,3 +168,129 @@ You can also specify some attributes for the resulting Vault tokens, such as tim
 IP address range, and number of uses. The full list of options is available in
 [Vault's documentation on creating roles](https://www.vaultproject.io/api/auth/jwt#create-role)
 for the JSON web token method.
+
+## Troubleshooting
+
+### Updating `db_key_base` before upgrading to 13.6
+
+A GitLab instance with a `db_key_base` shorter than 32 characters
+will encounter a problem when upgrading to [GitLab 13.6](https://about.gitlab.com/releases/2020/11/22/gitlab-13-6-released/)
+because it starts checking the `db_key_base` size
+([gitlab!43950](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/43950/)).
+
+```plaintext
+== 20201008013434 GenerateCiJwtSigningKey: migrating ==========================
+STDERR:
+---- End output of "bash"  "/tmp/chef-script..." ----
+Ran "bash"  "/tmp/chef-script..." returned 1
+
+Deprecations:
+...
+
+===
+There was an error running gitlab-ctl reconfigure. Please check the output above for more
+details.
+===
+
+dpkg: error processing package gitlab-ee (--configure):
+ installed gitlab-ee package post-installation script subprocess returned error exit status 1
+E: Sub-process /usr/bin/dpkg returned an error code (1)
+```
+
+#### Quick work-around
+
+This problem can be addressed by skipping the related migration.
+Executing the following in a
+[Rails console](../../administration/operations/rails_console.md):
+
+```ruby
+ActiveRecord::Base.connection.execute("INSERT INTO schema_migrations VALUES ('20201008013434')")
+```
+
+After running `sudo gitlab-ctl reconfigure` to complete the upgrade,
+the above can be reverted with
+
+````ruby
+ActiveRecord::Base.connection.execute("DELETE FROM schema_migrations WHERE version='20201008013434')")
+```
+
+This workaround has the known side-effect of
+[the predefined `CI_JOB_JWT` variable](../variables/predefined_variables.md)
+not being available, which is used mostly for integration with Hashicorp Vault.
+
+#### Long-term solution
+
+The long-term solution is to update the `db_key_base` and
+to force a reset of each depent secret, key and token.
+You can so so as follows:
+
+1. Backup [your `gitlab-secrets.json` file](../../raketasks/backup_restore.md#storing-configuration-files).
+1. Using a text editor, fill the short `db_key_base` value in `gitlab-secrets.json` with `0`s to the desired length (64, 128, etc.)
+1. Run `sudo gitlab-ctl reconfigure` and `sudo gitlab-ctl restart`
+1. Check the output of `sudo gitlab-rails runner "puts Settings.attr_encrypted_db_key_base.size"`. If that shows the same length you extended `db_key_base` earlier, it's safe to proceed.
+1. Enter the [Rails console](../../administration/operations/rails_console.md).
+1. Run the following script to check the affected secrets:
+
+````ruby
+table_column_combos = [
+  [Namespace, "runners_token_encrypted"],
+  [Project, "runners_token_encrypted"],
+  [Ci::Build, "token_encrypted"],
+  [Ci::Runner, "token_encrypted"],
+  [ApplicationSetting, "runners_registration_token_encrypted"],
+  [Group, "runners_token_encrypted"],
+]
+table_column_combos.each do |table,column|
+  total = 0
+  bad = []
+  table.find_each do |data|
+    begin
+      total += 1
+      ::Gitlab::CryptoHelper.aes256_gcm_decrypt(data[column])
+    rescue => e
+      bad << data
+    end
+  end
+  puts "#{table.name}: #{bad.length} / #{total}"
+end
+````
+    curl -o /tmp/secrets.rb https://gitlab.com/snippets/1800209/raw
+    sudo gitlab-rails runner /tmp/secrets.rb
+
+1. Proceed with resetting them by running with the following script:
+
+````ruby
+table_column_combos = [
+  [Namespace, "runners_token_encrypted", "runners_token"],
+  [Project, "runners_token_encrypted", "runners_token"],
+  [Ci::Build, "token_encrypted", "token"],
+  [Ci::Runner, "token_encrypted", "token"],
+  [ApplicationSetting, "runners_registration_token_encrypted", "runners_registration_token"],
+  [Group, "runners_token_encrypted"],
+]
+
+table_column_combos.each do |table,column,column2|
+  total = 0
+  fixed = 0
+  removed = 0
+  bad = []
+  table.find_each do |data|
+    begin
+      total += 1
+      ::Gitlab::CryptoHelper.aes256_gcm_decrypt(data[column])
+    rescue => e
+      if data[column2].to_s.empty?
+        data[column] = nil
+        data.save()
+        removed += 1
+      else
+        data[column] = ::Gitlab::CryptoHelper.aes256_gcm_encrypt(data[column2])
+        data.save()
+        fixed += 1
+      end
+      bad << data
+    end
+  end
+  puts "Table: #{table.name}    Bad #{bad.length} / Good #{total}, Fixed #{fixed}, Removed #{removed}"
+end
+````
