@@ -1715,7 +1715,7 @@ in a later release:
 
 ```markdown
 > - [Introduced](<link-to-issue>) in GitLab 11.3.
-> - [Enhanced](<link-to-issue>) in GitLab 11.4.
+> - [Improved](<link-to-issue>) in GitLab 11.4.
 ```
 
 If a feature is moved to another tier:
