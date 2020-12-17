@@ -14,17 +14,19 @@ module Gitlab
               override :parse_report
             end
 
-            def parse_report(json_data)
-              report = super
+            def report_data
+              @report_data ||= begin
+                data = super
 
-              if report.is_a?(Array)
-                report = {
-                  "version" => self.class::DEPRECATED_REPORT_VERSION,
-                  "vulnerabilities" => report
-                }
+                if data.is_a?(Array)
+                  data = {
+                    "version" => self.class::DEPRECATED_REPORT_VERSION,
+                    "vulnerabilities" => data
+                  }
+                end
+
+                data
               end
-
-              report
             end
           end
         end
