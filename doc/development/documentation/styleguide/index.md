@@ -630,6 +630,28 @@ Follow these guidelines for punctuation:
 
 <!-- vale gitlab.Repetition = YES -->
 
+### Introductory text
+
+When you introduce an example or table, try to avoid extra words, like: 
+**the following**, **above**, **below**, **earlier**, or **previous**.
+
+Use a colon at the end of the sentence.
+
+Do:
+
+- `This example shows a pipeline with three stages:`
+- `You can use a variable for your username:`
+
+Don't: 
+
+- `The following example shows a pipeline with three stages:`
+- `The following example shows a pipeline with three stages.`
+- `As shown in the example above, a pipeline can have three stages.`
+- `As you can see in the table below...`
+
+If you must refer to an example that isn't directly above or below the text,
+use **earlier** or **later** rather than **above** or **below**.
+
 ### Placeholder text
 
 You might want to provide a command or configuration that
@@ -960,36 +982,6 @@ Important:
 Note that with Kramdown, it's possible to add a custom ID to an HTML element
 with Markdown markup, but they don't work in `/help`. Because of this, don't use
 this option.
-
-## Examples
-
-When you introduce an example, try to avoid extra words, like: 
-**the following**, **above**, **below**, **earlier**, or **previous**.
-
-Do:
-
-```markdown
-This example shows a pipeline with three stages:
-
-<code>
-```
-
-Don't:
-
-```markdown
-The following example shows a pipeline with three stages:
-
-<code>
-```
-
-Don't:
-
-```markdown
-As shown in the example above, a pipeline can have three stages.
-```
-
-If you must refer to an example that isn't directly above or below the text,
-use **earlier** or **later** rather than **above** or **below**.
 
 ## Links
 
