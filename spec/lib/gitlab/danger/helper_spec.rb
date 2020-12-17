@@ -357,6 +357,7 @@ RSpec.describe Gitlab::Danger::Helper do
         [:backend]            | '+ alt_usage_data(User.active)'                | ['usage_data.rb']
         [:backend]            | '+ count(User.active)'                         | ['user.rb']
         [:backend]            | '+ count(User.active)'                         | ['usage_data/topology.rb']
+        [:backend]            | '+ foo_count(User.active)'                     | ['usage_data.rb']
       end
 
       with_them do
