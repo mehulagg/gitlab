@@ -145,7 +145,3 @@ without enough users is uploaded, GitLab displays a message prompting you to pur
 additional users. More information on how to determine the required number of users
 and how to add additional seats can be found in the
 [licensing FAQ](https://about.gitlab.com/pricing/licensing-faq/).
-
-#### I have uploaded a new licence but still see the notification banner about my licence expiring soon.
-
-This behaviour relates to #
