@@ -16,7 +16,7 @@ import { s__, __ } from '~/locale';
 import createFlash, { FLASH_TYPES } from '~/flash';
 import usersSearchQuery from '~/graphql_shared/queries/users_search.query.graphql';
 import getOncallSchedulesQuery from '../../graphql/queries/get_oncall_schedules.query.graphql';
-import createOncallScheduleRotationMutation from '../../graphql/create_oncall_schedule_rotation.mutation.graphql';
+import createOncallScheduleRotationMutation from '../../graphql/mutations/create_oncall_schedule_rotation.mutation.graphql';
 import {
   LENGTH_ENUM,
   HOURS_IN_DAY,

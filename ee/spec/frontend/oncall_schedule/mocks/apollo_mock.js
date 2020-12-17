@@ -109,3 +109,59 @@ export const newlyCreatedSchedule = {
   name: 'S-Monitor rotations',
   timezone: 'Kyiv/EST',
 };
+
+export const createRotationResponse = {
+  data: {
+    oncallRotationCreate: {
+      errors: [],
+      oncallRotation: {
+        id: '37',
+        name: 'Test',
+        startsAt: '2020-12-17T12:00:00Z',
+        length: 5,
+        lengthUnit: 'WEEKS',
+        participants: {
+          nodes: [
+            {
+              user: { id: 'gid://gitlab/User/50', username: 'project_1_bot3', __typename: 'User' },
+              colorWeight: '500',
+              colorPalette: 'blue',
+              __typename: 'OncallParticipantType',
+            },
+          ],
+          __typename: 'OncallParticipantTypeConnection',
+        },
+        __typename: 'IncidentManagementOncallRotation',
+      },
+      __typename: 'OncallRotationCreatePayload',
+    },
+  },
+};
+
+export const createRotationResponseWithErrors = {
+  data: {
+    oncallRotationCreate: {
+      errors: ['Houston, we have a problem'],
+      oncallRotation: {
+        id: '37',
+        name: 'Test',
+        startsAt: '2020-12-17T12:00:00Z',
+        length: 5,
+        lengthUnit: 'WEEKS',
+        participants: {
+          nodes: [
+            {
+              user: { id: 'gid://gitlab/User/50', username: 'project_1_bot3', __typename: 'User' },
+              colorWeight: '500',
+              colorPalette: 'blue',
+              __typename: 'OncallParticipantType',
+            },
+          ],
+          __typename: 'OncallParticipantTypeConnection',
+        },
+        __typename: 'IncidentManagementOncallRotation',
+      },
+      __typename: 'OncallRotationCreatePayload',
+    },
+  },
+};
