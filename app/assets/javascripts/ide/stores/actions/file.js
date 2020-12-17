@@ -164,7 +164,7 @@ export const getRawFileData = ({ state, commit, dispatch, getters }, { path }) =
     });
 };
 
-export const changeFileContent = ({ commit, state, getters }, { path, content }) => {
+export const changeFileContent = ({ commit, dispatch, state, getters }, { path, content }) => {
   const file = state.entries[path];
 
   // It's possible for monaco to hit a race condition where it tries to update renamed files.
@@ -185,6 +185,8 @@ export const changeFileContent = ({ commit, state, getters }, { path, content })
   } else if (!file.changed && !file.tempFile && indexOfChangedFile !== -1) {
     commit(types.REMOVE_FILE_FROM_CHANGED, path);
   }
+
+  dispatch('triggerFilesChange');
 };
 
 export const restoreOriginalFile = ({ dispatch, state, commit }, path) => {
