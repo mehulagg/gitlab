@@ -15,7 +15,7 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Common do
         allow(parser).to receive(:create_location).and_return(location)
       end
 
-      artifact.each_blob { |blob| described_class.new(blob, report).parse! }
+      artifact.each_blob { |blob| described_class.parse!(blob, report) }
     end
 
     describe 'parsing finding.name' do
@@ -144,7 +144,7 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Common do
 
       it 'returns nil when scan is not a hash' do
         empty_report = Gitlab::Ci::Reports::Security::Report.new(artifact.file_type, pipeline, 2.weeks.ago)
-        described_class.new({}.to_json, empty_report).parse!
+        described_class.parse!({}.to_json, empty_report)
 
         expect(empty_report.scan).to be(nil)
       end

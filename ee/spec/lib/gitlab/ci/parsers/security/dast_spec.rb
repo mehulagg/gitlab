@@ -31,9 +31,7 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Dast do
       let(:artifact) { create(:ee_ci_job_artifact, report_format) }
 
       before do
-        artifact.each_blob do |blob|
-          described_class.new(blob, report).parse!
-        end
+        artifact.each_blob { |blob| described_class.parse!(blob, report) }
       end
 
       it 'parses all identifiers, findings and scanned resources' do
@@ -74,9 +72,7 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Dast do
       let(:artifact) { create(:ee_ci_job_artifact, 'dast') }
 
       before do
-        artifact.each_blob do |blob|
-          described_class.new(blob, report).parse!
-        end
+        artifact.each_blob { |blob| described_class.parse!(blob, report) }
       end
 
       let(:raw_json) do
@@ -97,7 +93,7 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Dast do
       end
 
       it 'skips invalid URLs' do
-        described_class.new(raw_json.to_json, report).parse!
+        described_class.parse!(raw_json.to_json, report)
         expect(report.scanned_resources).to be_empty
       end
 

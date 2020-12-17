@@ -8,9 +8,7 @@ RSpec.describe Gitlab::Ci::Parsers::Security::ContainerScanning do
   let(:report) { Gitlab::Ci::Reports::Security::Report.new(artifact.file_type, pipeline, 2.weeks.ago) }
 
   before do
-    artifact.each_blob do |blob|
-      described_class.new(blob, report).parse!
-    end
+    artifact.each_blob { |blob| described_class.parse!(blob, report) }
   end
 
   describe '#parse!' do

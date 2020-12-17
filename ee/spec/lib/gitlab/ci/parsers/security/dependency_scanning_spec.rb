@@ -21,9 +21,7 @@ RSpec.describe Gitlab::Ci::Parsers::Security::DependencyScanning do
       let(:artifact) { create(:ee_ci_job_artifact, report_format) }
 
       before do
-        artifact.each_blob do |blob|
-          described_class.new(blob, report).parse!
-        end
+        artifact.each_blob { |blob| described_class.parse!(blob, report) }
       end
 
       it "parses all identifiers and findings" do
@@ -55,7 +53,7 @@ RSpec.describe Gitlab::Ci::Parsers::Security::DependencyScanning do
         report_hash[:vulnerabilities][0][:location] = nil
       end
 
-      it { expect { described_class.new(report_hash.to_json, report).parse! }.not_to raise_error }
+      it { expect { described_class.parse!(report_hash.to_json, report) }.not_to raise_error }
     end
 
     context "when parsing a vulnerability with a missing cve" do
@@ -65,16 +63,14 @@ RSpec.describe Gitlab::Ci::Parsers::Security::DependencyScanning do
         report_hash[:vulnerabilities][0][:cve] = nil
       end
 
-      it { expect { described_class.new(report_hash.to_json, report).parse! }.not_to raise_error }
+      it { expect { described_class.parse!(report_hash.to_json, report) }.not_to raise_error }
     end
 
     context "when vulnerabilities have remediations" do
       let(:artifact) { create(:ee_ci_job_artifact, :dependency_scanning_remediation) }
 
       before do
-        artifact.each_blob do |blob|
-          described_class.new(blob, report).parse!
-        end
+        artifact.each_blob { |blob| described_class.parse!(blob, report) }
       end
 
       it "generates occurrence with expected remediation" do

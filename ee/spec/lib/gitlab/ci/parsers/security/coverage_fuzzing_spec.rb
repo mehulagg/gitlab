@@ -10,9 +10,7 @@ RSpec.describe Gitlab::Ci::Parsers::Security::CoverageFuzzing do
 
   describe '#parse!' do
     before do
-      artifact.each_blob do |blob|
-        described_class.new(blob, report).parse!
-      end
+      artifact.each_blob { |blob| described_class.parse!(blob, report) }
     end
 
     it 'parses all identifiers and findings' do

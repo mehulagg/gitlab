@@ -21,9 +21,7 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Sast do
         let(:artifact) { create(:ee_ci_job_artifact, report_format) }
 
         before do
-          artifact.each_blob do |blob|
-            described_class.new(blob, report).parse!
-          end
+          artifact.each_blob { |blob| described_class.parse!(blob, report) }
         end
 
         it "parses all identifiers and findings" do
@@ -55,7 +53,7 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Sast do
       let(:report) { Gitlab::Ci::Reports::Security::Report.new('sast', pipeline, created_at) }
       let(:blob) { Gitlab::Json.generate({}) }
 
-      it { expect(described_class.new((blob, report)).parse!).to be_empty }
+      it { expect(described_class.parse!(blob, report)).to be_empty }
     end
   end
 end
