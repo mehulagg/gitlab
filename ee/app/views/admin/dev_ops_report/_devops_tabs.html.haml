@@ -7,5 +7,5 @@
 .tab-content
   .tab-pane{ id: 'devops-score-pane', class: ('active' if params[:tab].nil?) }
     = render_ce 'admin/dev_ops_report/report'
-  .tab-pane{ id: 'devops-adoption-pane', class: ('active' if params[:tab] == 'devops_adoption') }
+  .tab-pane{ id: 'devops-adoption-pane', class: ('active' if params[:tab] == 'devops-adoption') }
     .js-devops-adoption{ data: { empty_state_svg_path: image_path('illustrations/monitoring/getting_started.svg') } }
