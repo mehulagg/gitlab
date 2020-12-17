@@ -121,7 +121,7 @@ range is used as the active license. When you upload a future-dated license, it
 doesn't take effect until its applicable date.
 
 NOTE:
-A notification banner about an expiring licence may continue to be displayed even after a new licence has been uploaded.
+For the GitLab versions lower than v13.7, a notification banner about an expiring licence may continue to be displayed even after a new licence has been uploaded.
 That happens in case the newly uploaded licence's start date is in the future and the expiring one is still active.
 The banner will disappear once the new licence becomes active.
 
