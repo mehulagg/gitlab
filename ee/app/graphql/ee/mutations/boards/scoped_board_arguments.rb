@@ -34,7 +34,7 @@ module EE
 
           argument :labels, [GraphQL::STRING_TYPE],
                    required: false,
-                   description: copy_field_description(Types::IssueType, :labels)
+                   description: copy_field_description(::Types::IssueType, :labels)
 
           argument :label_ids, [::Types::GlobalIDType[::Label]],
                    required: false,

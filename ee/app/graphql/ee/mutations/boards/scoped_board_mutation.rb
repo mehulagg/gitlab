@@ -6,9 +6,7 @@ module EE
       module ScopedBoardMutation
         extend ActiveSupport::Concern
 
-        prepended do
-          include ScopedBoardArguments
-        end
+        include ::EE::Mutations::Boards::ScopedBoardArguments
 
         def resolve(**args)
           parsed_params = parse_arguments(args)

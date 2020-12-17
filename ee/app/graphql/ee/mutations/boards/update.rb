@@ -4,7 +4,11 @@ module EE
   module Mutations
     module Boards
       module Update
-        include Mutations::Boards::ScopedBoardMutation
+        extend ActiveSupport::Concern
+
+        prepended do
+          include ::EE::Mutations::Boards::ScopedBoardMutation
+        end
       end
     end
   end
