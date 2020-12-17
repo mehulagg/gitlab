@@ -2,7 +2,7 @@
 
 module Groups
   module GroupPackageSetting
-    class UpdateService < BaseService
+    class UpdateService < Groups::BaseService
       include Gitlab::Utils::StrongMemoize
 
       ALLOWED_ATTRIBUTES = %i[maven_duplicates_allowed maven_duplicate_exception_regex].freeze
@@ -10,7 +10,7 @@ module Groups
       def execute
         return ServiceResponse.error(message: 'Access Denied', http_status: 403) unless allowed?
 
-        if group.group_package_setting.update(group_package_setting_params)
+        if group_package_setting.update(group_package_setting_params)
           ServiceResponse.success(payload: { group_package_setting: group_package_setting })
         else
           ServiceResponse.error(
@@ -24,12 +24,12 @@ module Groups
 
       def group_package_setting
         strong_memoize(:group_package_setting) do
-          @container.group_package_setting || @container.build_group_package_setting
+          @group.group_package_setting || @group.build_group_package_setting
         end
       end
 
       def allowed?
-        Ability.allowed?(current_user, :admin_group, @container)
+        Ability.allowed?(current_user, :create_package_settings, @group)
       end
 
       def group_package_setting_params

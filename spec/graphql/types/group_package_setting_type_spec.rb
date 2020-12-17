@@ -7,7 +7,7 @@ RSpec.describe GitlabSchema.types['GroupPackageSetting'] do
 
   specify { expect(described_class.description).to eq('The group level package registry settings') }
 
-  specify { expect(described_class).to require_graphql_authorizations(:admin_group) }
+  specify { expect(described_class).to require_graphql_authorizations(:read_package_settings) }
 
   describe 'maven_duplicate_exception_regex field' do
     subject { described_class.fields['mavenDuplicateExceptionRegex'] }

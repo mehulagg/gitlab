@@ -12,7 +12,7 @@ RSpec.describe ::Groups::GroupPackageSetting::UpdateService do
   let(:group_package_setting) { group.group_package_setting }
 
   describe '#execute' do
-    subject { described_class.new(container: group, current_user: user, params: params).execute }
+    subject { described_class.new(group, user, params).execute }
 
     RSpec.shared_examples 'returning a success' do
       it 'returns a success' do
@@ -48,7 +48,7 @@ RSpec.describe ::Groups::GroupPackageSetting::UpdateService do
             .not_to change { group_package_setting.reload.maven_duplicates_allowed }
         end
 
-        it_behaves_like 'returning an error', 'maven_duplicates_allowed is not included in the list', 400
+        it_behaves_like 'returning an error', 'Maven duplicates allowed is not included in the list', 400
       end
     end
 
@@ -63,7 +63,7 @@ RSpec.describe ::Groups::GroupPackageSetting::UpdateService do
     context 'with existing group package setting' do
       where(:user_role, :shared_examples_name) do
         :maintainer | 'updating the group package setting'
-        :developer  | 'denying access to group package setting'
+        :developer  | 'updating the group package setting'
         :reporter   | 'denying access to group package setting'
         :guest      | 'denying access to group package setting'
         :anonymous  | 'denying access to group package setting'
@@ -83,7 +83,7 @@ RSpec.describe ::Groups::GroupPackageSetting::UpdateService do
 
       where(:user_role, :shared_examples_name) do
         :maintainer | 'creating the group package setting'
-        :developer  | 'denying access to group package setting'
+        :developer  | 'creating the group package setting'
         :reporter   | 'denying access to group package setting'
         :guest      | 'denying access to group package setting'
         :anonymous  | 'denying access to group package setting'

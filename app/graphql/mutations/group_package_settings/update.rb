@@ -3,11 +3,11 @@
 module Mutations
   module GroupPackageSettings
     class Update < Mutations::BaseMutation
-      include ResolvesProject
+      include Mutations::ResolvesGroup
 
       graphql_name 'UpdateGroupPackageSettings'
 
-      authorize :admin_group
+      authorize :create_package_settings
 
       argument :group_path,
               GraphQL::ID_TYPE,
@@ -30,10 +30,10 @@ module Mutations
             description: 'The group package setting after mutation.'
 
       def resolve(group_path:, **args)
-        group = authorized_find!(full_path: group_path)
+        group = authorized_find!(group_path: group_path)
 
-        result = ::Groups::GroupPackageSetting::UpdateService
-          .new(container: group, current_user: current_user, params: args)
+        result = Groups::GroupPackageSetting::UpdateService
+          .new(group, current_user, args)
           .execute
 
         {
@@ -44,8 +44,8 @@ module Mutations
 
       private
 
-      def find_object(full_path:)
-        resolve_project(full_path: full_path)
+      def find_object(group_path:)
+        resolve_group(full_path: group_path)
       end
     end
   end
