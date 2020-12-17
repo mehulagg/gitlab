@@ -13,6 +13,11 @@ RSpec.describe ResourceEvents::ChangeStateService do
 
   shared_examples 'a state event' do
     %w[opened reopened closed locked].each do |state|
+      let(:event) { resource.resource_state_events.last }
+
+      let(:execute) do
+      end
+
       it "creates the expected event if resource has #{state} state" do
         described_class.new(user: user, resource: resource).execute(status: state, mentionable_source: source)
 
@@ -29,6 +34,17 @@ RSpec.describe ResourceEvents::ChangeStateService do
         expect(event.state).to eq(state)
 
         expect_event_source(event, source)
+      end
+
+      it "sets the created_at timestamp from the system_note_timestamp" do
+        Timecop.freeze do
+          resource.system_note_timestamp = Time.at(43)
+
+          described_class.new(user: user, resource: resource).execute(status: state, mentionable_source: source)
+          event = resource.resource_state_events.last
+
+          expect(event.created_at).to eq(Time.at(43))
+        end
       end
     end
   end
