@@ -641,13 +641,14 @@ Do:
 
 - `This example shows a pipeline with three stages:`
 - `You can use a variable for your username:`
+- `This table shows the permissions you can choose from:`
 
 Don't: 
 
 - `The following example shows a pipeline with three stages:`
 - `The following example shows a pipeline with three stages.`
 - `As shown in the example above, a pipeline can have three stages.`
-- `As you can see in the table below...`
+- `As you can see in the table below, a pipeline can have three stages.`
 
 If you must refer to an example that isn't directly above or below the text,
 use **earlier** or **later** rather than **above** or **below**.
