@@ -106,6 +106,10 @@ module SortingTitlesValuesHelper
     s_('SortOptions|Priority')
   end
 
+  def sort_title_merged_date
+    s_('SortOptions|Merged date')
+  end
+
   def sort_title_recently_created
     s_('SortOptions|Last created')
   end
@@ -273,6 +277,10 @@ module SortingTitlesValuesHelper
 
   def sort_value_priority
     'priority'
+  end
+
+  def sort_value_merged_date
+    'merged_date'
   end
 
   def sort_value_recently_created

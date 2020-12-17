@@ -1,6 +1,7 @@
 - sort_value = @sort
 - sort_title = issuable_sort_option_title(sort_value)
-- viewing_issues = controller.controller_name == 'issues' || controller.action_name == 'issues'
+- viewing_issues = [ controller.controller_name, controller.action_name ].include?('issues')
+- viewing_merged_merge_requests = [ controller.controller_name, controller.action_name ].include?('merge_requests') && params[:state] == 'merged'
 
 .dropdown.inline.gl-ml-3.issue-sort-dropdown
   .btn-group{ role: 'group' }
@@ -10,6 +11,7 @@
         = sprite_icon('chevron-down', css_class: "dropdown-menu-toggle-icon gl-top-3")
       %ul.dropdown-menu.dropdown-menu-right.dropdown-menu-selectable.dropdown-menu-sort
         %li
+          = sortable_item(sort_title_merged_date,       page_filter_path(sort: sort_value_merged_date),       sort_title) if viewing_merged_merge_requests
           = sortable_item(sort_title_priority,          page_filter_path(sort: sort_value_priority),          sort_title)
           = sortable_item(sort_title_created_date,      page_filter_path(sort: sort_value_created_date),      sort_title)
           = sortable_item(sort_title_recently_updated,  page_filter_path(sort: sort_value_recently_updated),  sort_title)

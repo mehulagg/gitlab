@@ -26,6 +26,7 @@ module SortingHelper
       sort_value_recently_updated  => sort_title_recently_updated,
       sort_value_popularity        => sort_title_popularity,
       sort_value_priority          => sort_title_priority,
+      sort_value_merged_date       => sort_title_merged_date,
       sort_value_upvotes           => sort_title_upvotes,
       sort_value_contacted_date    => sort_title_contacted_date,
       sort_value_relative_position => sort_title_relative_position,
