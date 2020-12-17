@@ -56,10 +56,10 @@ RSpec.describe Security::FindingsFinder do
 
         before(:all) do
           ds_content = File.read(artifact_ds.file.path)
-          Gitlab::Ci::Parsers::Security::DependencyScanning.new.parse!(ds_content, report_ds)
+          Gitlab::Ci::Parsers::Security::DependencyScanning.new(ds_content, report_ds).parse!
           report_ds.merge!(report_ds)
           sast_content = File.read(artifact_sast.file.path)
-          Gitlab::Ci::Parsers::Security::Sast.new.parse!(sast_content, report_sast)
+          Gitlab::Ci::Parsers::Security::Sast.new(sast_content, report_sast).parse!
           report_sast.merge!(report_sast)
 
           { artifact_ds => report_ds, artifact_sast => report_sast }.each do |artifact, report|
