@@ -93,7 +93,8 @@ RSpec.describe 'Batch diffs', :js do
       wait_for_requests
     end
 
-    it 'has the correct discussions applied to files across batched pages' do
+    it 'has the correct discussions applied to files across batched pages',
+       quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/293814' } do
       expect(page).to have_selector('.diff-files-holder .file-holder', count: 39)
 
       page.within('.diff-file.file-holder:first-of-type .notes .timeline-entry .note .note-text') do
