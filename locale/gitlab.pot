@@ -31157,7 +31157,7 @@ msgstr ""
 msgid "Webhooks|This URL will be triggered when a confidential issue is created/updated/merged"
 msgstr ""
 
-msgid "Webhooks|This URL will be triggered when a member is added to a group"
+msgid "Webhooks|This URL will be triggered when a member is added to a group, when their access level or expiration date is update, or when they are removed from the group."
 msgstr ""
 
 msgid "Webhooks|This URL will be triggered when a merge request is created/updated/merged"
