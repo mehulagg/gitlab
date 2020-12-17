@@ -7,6 +7,10 @@ module Gitlab
         class Common
           SecurityReportParserError = Class.new(Gitlab::Ci::Parsers::ParserError)
 
+          def self.parse!(json_data, report)
+            new(json_data, report).parse!
+          end
+
           def initialize(json_data, report)
             @json_data = json_data
             @report = report
