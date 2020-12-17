@@ -630,6 +630,8 @@ Follow these guidelines for punctuation:
 
 <!-- vale gitlab.Repetition = YES -->
 
+### Introductory text
+
 When you introduce an example or table, try to avoid extra words like 
 **the following** or **below**. Use a colon at the end of the sentence.
 
