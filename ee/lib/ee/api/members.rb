@@ -63,7 +63,7 @@ module EE
                                     order_by: sorting).execute
             )
 
-            present users, with: ::API::Entities::UserBasic, current_user: current_user
+            present users, with: ::EE::API::Entities::BillableMember, current_user: current_user
           end
         end
       end

@@ -486,12 +486,17 @@ RSpec.describe API::Members do
 
       include_context "group managed account with group members"
 
-      it_behaves_like 'members response with exposed emails' do
-        let(:emails) { gma_member.email }
+      context 'when members have a public_email' do
+        before do
+          allow(member).to receive(:public_email).and_return('public@email.com')
+          allow(gma_member).to receive(:public_email).and_return('public@email.com')
+        end
+
+        it { is_expected.to include(a_hash_including('email' => 'public@email.com')) }
       end
 
-      it_behaves_like 'members response with hidden emails' do
-        let(:emails) { member.email }
+      context 'when members have no public_email' do
+        it { is_expected.to include(a_hash_including('email' => '')) }
       end
     end
   end
