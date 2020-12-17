@@ -9003,7 +9003,9 @@ CREATE TABLE analytics_devops_adoption_snapshots (
     runner_configured boolean NOT NULL,
     pipeline_succeeded boolean NOT NULL,
     deploy_succeeded boolean NOT NULL,
-    security_scan_succeeded boolean NOT NULL
+    security_scan_succeeded boolean NOT NULL,
+    end_time timestamp without time zone,
+    CONSTRAINT check_0ad82e8f8c CHECK ((end_time IS NOT NULL))
 );
 
 CREATE SEQUENCE analytics_devops_adoption_snapshots_id_seq
