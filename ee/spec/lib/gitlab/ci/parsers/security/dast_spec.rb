@@ -10,7 +10,6 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Dast do
     let(:pipeline) { artifact.job.pipeline }
     let(:artifact) { create(:ee_ci_job_artifact, :dast) }
     let(:report) { Gitlab::Ci::Reports::Security::Report.new(artifact.file_type, pipeline, 2.weeks.ago) }
-    let(:parser) { described_class.new }
 
     where(:report_format,
           :occurrence_count,
@@ -33,7 +32,7 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Dast do
 
       before do
         artifact.each_blob do |blob|
-          parser.parse!(blob, report)
+          described_class.new(blob, report).parse!
         end
       end
 
@@ -76,7 +75,7 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Dast do
 
       before do
         artifact.each_blob do |blob|
-          parser.parse!(blob, report)
+          described_class.new(blob, report).parse!
         end
       end
 
@@ -98,7 +97,7 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Dast do
       end
 
       it 'skips invalid URLs' do
-        parser.parse!(raw_json.to_json, report)
+        described_class.new(raw_json.to_json, report).parse!
         expect(report.scanned_resources).to be_empty
       end
 

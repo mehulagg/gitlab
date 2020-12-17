@@ -10,8 +10,6 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Sast do
 
     let(:created_at) { 2.weeks.ago }
 
-    subject(:parser) { described_class.new }
-
     context "when parsing valid reports" do
       where(:report_format, :scanner_length) do
         :sast               | 4
@@ -24,7 +22,7 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Sast do
 
         before do
           artifact.each_blob do |blob|
-            parser.parse!(blob, report)
+            described_class.new(blob, report).parse!
           end
         end
 
@@ -57,7 +55,7 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Sast do
       let(:report) { Gitlab::Ci::Reports::Security::Report.new('sast', pipeline, created_at) }
       let(:blob) { Gitlab::Json.generate({}) }
 
-      it { expect(parser.parse!(blob, report)).to be_empty }
+      it { expect(described_class.new((blob, report)).parse!).to be_empty }
     end
   end
 end
