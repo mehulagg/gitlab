@@ -387,6 +387,9 @@ module ProjectsHelper
   def get_project_nav_tabs(project, current_user)
     nav_tabs = [:home]
 
+    # TODO: this needs to be wrapped additional conditions
+    nav_tabs << :security_configuration
+
     unless project.empty_repo?
       nav_tabs += [:files, :commits, :network, :graphs, :forks] if can?(current_user, :download_code, project)
       nav_tabs << :releases if can?(current_user, :read_release, project)
@@ -764,6 +767,12 @@ module ProjectsHelper
       feature_flags
       tracings
       terraform
+    ]
+  end
+
+  def sidebar_security_paths
+    %w[
+      projects/security/configuration#show
     ]
   end
 
