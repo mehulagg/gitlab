@@ -2129,7 +2129,13 @@ cluster alongside your instance, read how to
 are recommended over NFS wherever possible for improved performance. If you intend
 to use GitLab Pages, this currently [requires NFS](troubleshooting.md#gitlab-pages-requires-nfs).
 
-See how to [configure NFS](../nfs.md). In GitLab 14.0, support for NFS for Git repositories is scheduled to be removed.
+See how to [configure NFS](../nfs.md).
+
+WARNING:
+From GitLab 13.0, using NFS for Git repositories is deprecated.
+From GitLab 14.0, technical support for NFS for Git repositories
+will no longer be provided. Upgrade to [Gitaly Cluster](../gitaly/praefect.md)
+as soon as possible.
 
 <div align="right">
   <a type="button" class="btn btn-default" href="#setup-components">
