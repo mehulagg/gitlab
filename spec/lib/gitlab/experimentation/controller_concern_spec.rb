@@ -154,7 +154,8 @@ RSpec.describe Gitlab::Experimentation::ControllerConcern, type: :controller do
         cookies[:force_experiment] = 'test_experiment,another_experiment'
         get :index
 
-        is_expected.to eq(true)
+        expect(check_experiment(:test_experiment).to eq(true)
+        expect(check_experiment(:another_experiment).to eq(true)
       end
     end
   end
