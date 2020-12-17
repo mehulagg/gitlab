@@ -19295,6 +19295,9 @@ msgstr ""
 msgid "OnCallSchedules|Sets the default timezone for the schedule, for all participants"
 msgstr ""
 
+msgid "OnCallSchedules|Successfully created a new rotation"
+msgstr ""
+
 msgid "OnCallSchedules|The schedule could not be deleted. Please try again."
 msgstr ""
 
