@@ -73,6 +73,35 @@ export default class EditorLite {
     });
   }
 
+  static prepareInstance(el) {
+    if (!el) {
+      throw new Error(EDITOR_LITE_INSTANCE_ERROR_NO_EL);
+    }
+
+    clearDomElement(el);
+
+    monacoEditor.onDidCreateEditor(() => {
+      delete el.dataset.editorLoading;
+    });
+  }
+
+  static manageDefaultExtensions(instance, el, extensions) {
+    EditorLite.loadExtensions(extensions, instance)
+      .then(modules => {
+        if (modules) {
+          modules.forEach(module => {
+            instance.use(module.default);
+          });
+        }
+      })
+      .then(() => {
+        el.dispatchEvent(new Event('editor-ready'));
+      })
+      .catch(e => {
+        throw e;
+      });
+  }
+
   /**
    * Creates a monaco instance with the given options.
    *
@@ -86,27 +115,47 @@ export default class EditorLite {
     el = undefined,
     blobPath = '',
     blobContent = '',
+    originalBlobContent = '',
     blobGlobalId = uuids()[0],
     extensions = [],
+    diff = false,
     ...instanceOptions
   } = {}) {
-    if (!el) {
-      throw new Error(EDITOR_LITE_INSTANCE_ERROR_NO_EL);
+    EditorLite.prepareInstance(el);
+    let instance;
+
+    if (!diff) {
+      instance = monacoEditor.create(el, {
+        ...this.options,
+        ...instanceOptions,
+      });
+
+      const uriFilePath = joinPaths(URI_PREFIX, blobGlobalId, blobPath);
+      instance.setModel(monacoEditor.createModel(blobContent, undefined, Uri.file(uriFilePath)));
+    } else {
+      instance = monacoEditor.createDiffEditor(el, {
+        ...this.options,
+        ...instanceOptions,
+      });
+
+      const uriFilePath = joinPaths(URI_PREFIX, blobGlobalId, blobPath);
+      const originalModel = monacoEditor.createModel(
+        originalBlobContent,
+        undefined,
+        Uri.file(uriFilePath),
+      );
+      const modifiedModel = monacoEditor.createModel(blobContent, undefined, Uri.file(uriFilePath));
+
+      instance.setModel({
+        original: originalModel,
+        modified: modifiedModel,
+      });
     }
 
-    clearDomElement(el);
-
-    monacoEditor.onDidCreateEditor(() => {
-      delete el.dataset.editorLoading;
+    Object.assign(instance, {
+      updateModelLanguage: path => EditorLite.updateModelLanguage(path, instance),
+      use: args => this.use(args, instance),
     });
-
-    const instance = monacoEditor.create(el, {
-      ...this.options,
-      ...instanceOptions,
-    });
-
-    const uriFilePath = joinPaths(URI_PREFIX, blobGlobalId, blobPath);
-    instance.setModel(monacoEditor.createModel(blobContent, undefined, Uri.file(uriFilePath)));
 
     instance.onDidDispose(() => {
       const index = this.instances.findIndex((inst) => inst === instance);
@@ -116,26 +165,17 @@ export default class EditorLite {
         model.dispose();
       }
     });
-    instance.updateModelLanguage = (path) => EditorLite.updateModelLanguage(path, instance);
-    instance.use = (args) => this.use(args, instance);
-
-    EditorLite.loadExtensions(extensions, instance)
-      .then((modules) => {
-        if (modules) {
-          modules.forEach((module) => {
-            instance.use(module.default);
-          });
-        }
-      })
-      .then(() => {
-        el.dispatchEvent(new Event('editor-ready'));
-      })
-      .catch((e) => {
-        throw e;
-      });
+    EditorLite.manageDefaultExtensions(instance, el, extensions);
 
     this.instances.push(instance);
     return instance;
+  }
+
+  createDiffInstance(args) {
+    this.createInstance({
+      ...args,
+      diff: true,
+    });
   }
 
   dispose() {
