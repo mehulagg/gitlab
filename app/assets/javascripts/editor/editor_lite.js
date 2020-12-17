@@ -111,7 +111,10 @@ export default class EditorLite {
     instance.onDidDispose(() => {
       const index = this.instances.findIndex((inst) => inst === instance);
       this.instances.splice(index, 1);
-      instance.getModel().dispose();
+      const model = instance?.getModel();
+      if (model) {
+        model.dispose();
+      }
     });
     instance.updateModelLanguage = (path) => EditorLite.updateModelLanguage(path, instance);
     instance.use = (args) => this.use(args, instance);
