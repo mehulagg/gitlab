@@ -109,8 +109,8 @@ module API
       desc 'Reorder child epics'
       params do
         use :child_epic_id
-        optional :move_before_id, type: Integer, desc: 'The id of the epic that should be positioned before the child epic'
-        optional :move_after_id, type: Integer, desc: 'The id of the epic that should be positioned after the child epic'
+        optional :move_before_id, type: Integer, desc: 'The ID of the epic that should be positioned before the child epic'
+        optional :move_after_id, type: Integer, desc: 'The ID of the epic that should be positioned after the child epic'
       end
       put ':id/(-/)epics/:epic_iid/epics/:child_epic_id' do
         authorize_subepics_feature!

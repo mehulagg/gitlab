@@ -7,7 +7,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 # Releases API
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/41766) in GitLab 11.7.
-> - Using this API you can manipulate GitLab's [Release](../../user/project/releases/index.md) entries.
+> - Using this API you can manipulate GitLab [Release](../../user/project/releases/index.md) entries.
 > - For manipulating links as a release asset, see [Release Links API](links.md).
 > - Release Evidences were [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/26019) in GitLab 12.5.
 
@@ -376,7 +376,7 @@ Example request:
 ```shell
 curl --header 'Content-Type: application/json' --header "PRIVATE-TOKEN: gDybLx3yrUK_HLp3qPjS" \
      --data '{ "name": "New release", "tag_name": "v0.3", "description": "Super nice release", "milestones": ["v1.0", "v1.0-rc"], "assets": { "links": [{ "name": "hoge", "url": "https://google.com", "filepath": "/binaries/linux-amd64", "link_type":"other" }] } }' \
-     --request POST https://gitlab.example.com/api/v4/projects/24/releases
+     --request POST "https://gitlab.example.com/api/v4/projects/24/releases"
 ```
 
 Example response:

@@ -15,7 +15,7 @@ module Mutations
 
       argument :issue_iid, GraphQL::STRING_TYPE,
                required: true,
-               description: 'The iid of the issue to be added'
+               description: 'The IID of the issue to be added'
 
       field :epic_issue,
             Types::EpicIssueType,

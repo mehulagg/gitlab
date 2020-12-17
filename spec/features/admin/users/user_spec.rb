@@ -9,6 +9,7 @@ RSpec.describe 'Admin::Users::User' do
   before do
     sign_in(current_user)
     gitlab_enable_admin_mode_sign_in(current_user)
+    stub_feature_flags(vue_admin_users: false)
   end
 
   describe 'GET /admin/users/:id' do
@@ -37,9 +38,7 @@ RSpec.describe 'Admin::Users::User' do
         expect(page).to have_content(user.name)
         expect(page).to have_content('Pending approval')
         expect(page).to have_link('Approve user')
-        expect(page).to have_button('Block user')
-        expect(page).to have_button('Delete user')
-        expect(page).to have_button('Delete user and contributions')
+        expect(page).to have_link('Reject request')
       end
     end
 

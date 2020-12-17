@@ -105,7 +105,7 @@
           "inputFields": [
             {
               "name": "awardableId",
-              "description": "The global id of the awardable resource",
+              "description": "The global ID of the awardable resource",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -1252,25 +1252,25 @@
               "name": "updated_desc",
               "description": "Updated at descending order",
               "isDeprecated": true,
-              "deprecationReason": "Use UPDATED_DESC. Deprecated in 13.5"
+              "deprecationReason": "Use UPDATED_DESC. Deprecated in 13.5."
             },
             {
               "name": "updated_asc",
               "description": "Updated at ascending order",
               "isDeprecated": true,
-              "deprecationReason": "Use UPDATED_ASC. Deprecated in 13.5"
+              "deprecationReason": "Use UPDATED_ASC. Deprecated in 13.5."
             },
             {
               "name": "created_desc",
               "description": "Created at descending order",
               "isDeprecated": true,
-              "deprecationReason": "Use CREATED_DESC. Deprecated in 13.5"
+              "deprecationReason": "Use CREATED_DESC. Deprecated in 13.5."
             },
             {
               "name": "created_asc",
               "description": "Created at ascending order",
               "isDeprecated": true,
-              "deprecationReason": "Use CREATED_ASC. Deprecated in 13.5"
+              "deprecationReason": "Use CREATED_ASC. Deprecated in 13.5."
             },
             {
               "name": "UPDATED_DESC",
@@ -1478,6 +1478,29 @@
 
           ],
           "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "ENUM",
+          "name": "AlertManagementDomainFilter",
+          "description": "Filters the alerts based on given domain",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
+          "enumValues": [
+            {
+              "name": "operations",
+              "description": "Alerts for operations domain ",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "threat_monitoring",
+              "description": "Alerts for threat monitoring domain",
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
           "possibleTypes": null
         },
         {
@@ -2103,7 +2126,7 @@
             },
             {
               "name": "iid",
-              "description": "The iid of the alert to mutate",
+              "description": "The IID of the alert to mutate",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -2279,7 +2302,7 @@
             },
             {
               "name": "iid",
-              "description": "The iid of the alert to mutate",
+              "description": "The IID of the alert to mutate",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -2563,7 +2586,7 @@
           "inputFields": [
             {
               "name": "awardableId",
-              "description": "The global id of the awardable resource",
+              "description": "The global ID of the awardable resource",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -2679,7 +2702,7 @@
           "inputFields": [
             {
               "name": "awardableId",
-              "description": "The global id of the awardable resource",
+              "description": "The global ID of the awardable resource",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -2795,7 +2818,7 @@
           "inputFields": [
             {
               "name": "awardableId",
-              "description": "The global id of the awardable resource",
+              "description": "The global ID of the awardable resource",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -3305,7 +3328,7 @@
           "fields": [
             {
               "name": "assignee",
-              "description": "The board assignee.",
+              "description": "The board assignee",
               "args": [
 
               ],
@@ -3319,7 +3342,7 @@
             },
             {
               "name": "epics",
-              "description": "Epics associated with board issues.",
+              "description": "Epics associated with board issues",
               "args": [
                 {
                   "name": "issueFilters",
@@ -3382,7 +3405,7 @@
             },
             {
               "name": "hideBacklogList",
-              "description": "Whether or not backlog list is hidden.",
+              "description": "Whether or not backlog list is hidden",
               "args": [
 
               ],
@@ -3396,7 +3419,7 @@
             },
             {
               "name": "hideClosedList",
-              "description": "Whether or not closed list is hidden.",
+              "description": "Whether or not closed list is hidden",
               "args": [
 
               ],
@@ -3422,6 +3445,20 @@
                   "name": "ID",
                   "ofType": null
                 }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "iteration",
+              "description": "The board iteration.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "Iteration",
+                "ofType": null
               },
               "isDeprecated": false,
               "deprecationReason": null
@@ -3554,7 +3591,7 @@
             },
             {
               "name": "milestone",
-              "description": "The board milestone.",
+              "description": "The board milestone",
               "args": [
 
               ],
@@ -3582,7 +3619,7 @@
             },
             {
               "name": "weight",
-              "description": "Weight of the board.",
+              "description": "Weight of the board",
               "args": [
 
               ],
@@ -3743,7 +3780,7 @@
               "args": [
                 {
                   "name": "startDate",
-                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present). Deprecated in 13.5: Use timeframe.start",
+                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present) Deprecated in 13.5: Use timeframe.start.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Time",
@@ -3753,7 +3790,7 @@
                 },
                 {
                   "name": "endDate",
-                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present). Deprecated in 13.5: Use timeframe.end",
+                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present) Deprecated in 13.5: Use timeframe.end.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Time",
@@ -3869,7 +3906,7 @@
                 },
                 {
                   "name": "iidStartsWith",
-                  "description": "Filter epics by iid for autocomplete",
+                  "description": "Filter epics by IID for autocomplete",
                   "type": {
                     "kind": "SCALAR",
                     "name": "String",
@@ -5574,6 +5611,16 @@
               "defaultValue": null
             },
             {
+              "name": "iterationId",
+              "description": "Global ID of an existing iteration",
+              "type": {
+                "kind": "SCALAR",
+                "name": "IterationID",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
               "name": "assigneeId",
               "description": "Global ID of an existing user",
               "type": {
@@ -5844,6 +5891,16 @@
         },
         {
           "kind": "SCALAR",
+          "name": "BoardsEpicBoardID",
+          "description": "Identifier of Boards::EpicBoard",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "SCALAR",
           "name": "Boolean",
           "description": "Represents `true` or `false` values.",
           "fields": null,
@@ -5998,6 +6055,330 @@
 
           ],
           "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "CiConfig",
+          "description": null,
+          "fields": [
+            {
+              "name": "errors",
+              "description": "Linting errors",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "mergedYaml",
+              "description": "Merged CI config YAML",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "stages",
+              "description": "Stages of the pipeline",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "CiConfigStage",
+                    "ofType": null
+                  }
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "status",
+              "description": "Status of linting, can be either valid or invalid",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "ENUM",
+                "name": "CiConfigStatus",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "CiConfigGroup",
+          "description": null,
+          "fields": [
+            {
+              "name": "jobs",
+              "description": "Jobs in group",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "CiConfigJob",
+                    "ofType": null
+                  }
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "name",
+              "description": "Name of the job group",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "size",
+              "description": "Size of the job group",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Int",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "CiConfigJob",
+          "description": null,
+          "fields": [
+            {
+              "name": "groupName",
+              "description": "Name of the job group",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "name",
+              "description": "Name of the job",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "needs",
+              "description": "Builds that must complete before the jobs run",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "CiConfigNeed",
+                    "ofType": null
+                  }
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "stage",
+              "description": "Name of the job stage",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "CiConfigNeed",
+          "description": null,
+          "fields": [
+            {
+              "name": "name",
+              "description": "Name of the need",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "CiConfigStage",
+          "description": null,
+          "fields": [
+            {
+              "name": "groups",
+              "description": "Groups of jobs for the stage",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "CiConfigGroup",
+                    "ofType": null
+                  }
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "name",
+              "description": "Name of the stage",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "ENUM",
+          "name": "CiConfigStatus",
+          "description": "Values for YAML processor result",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
+          "enumValues": [
+            {
+              "name": "VALID",
+              "description": "The configuration file is valid",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "INVALID",
+              "description": "The configuration file is not valid",
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
           "possibleTypes": null
         },
         {
@@ -6366,13 +6747,9 @@
 
               ],
               "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "OBJECT",
-                  "name": "Pipeline",
-                  "ofType": null
-                }
+                "kind": "OBJECT",
+                "name": "Pipeline",
+                "ofType": null
               },
               "isDeprecated": false,
               "deprecationReason": null
@@ -7113,7 +7490,7 @@
           "inputFields": [
             {
               "name": "id",
-              "description": "Global id of the cluster agent that will be deleted",
+              "description": "Global ID of the cluster agent that will be deleted",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -8124,6 +8501,24 @@
               "deprecationReason": null
             },
             {
+              "name": "shortId",
+              "description": "Short SHA1 ID of the commit",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "signatureHtml",
               "description": "Rendered HTML of the commit signature",
               "args": [
@@ -8340,6 +8735,73 @@
           "possibleTypes": null
         },
         {
+          "kind": "OBJECT",
+          "name": "CommitConnection",
+          "description": "The connection type for Commit.",
+          "fields": [
+            {
+              "name": "edges",
+              "description": "A list of edges.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "CommitEdge",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "nodes",
+              "description": "A list of nodes.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "Commit",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "pageInfo",
+              "description": "Information to aid in pagination.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "PageInfo",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
           "kind": "INPUT_OBJECT",
           "name": "CommitCreateInput",
           "description": "Autogenerated input type of CommitCreate",
@@ -8502,6 +8964,51 @@
           "possibleTypes": null
         },
         {
+          "kind": "OBJECT",
+          "name": "CommitEdge",
+          "description": "An edge in a connection.",
+          "fields": [
+            {
+              "name": "cursor",
+              "description": "A cursor for use in pagination.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "node",
+              "description": "The item at the end of the edge.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "Commit",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
           "kind": "ENUM",
           "name": "CommitEncoding",
           "description": null,
@@ -8529,6 +9036,60 @@
           "name": "ComplianceFramework",
           "description": "Represents a ComplianceFramework associated with a Project",
           "fields": [
+            {
+              "name": "color",
+              "description": "Hexadecimal representation of compliance framework's label color",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "description",
+              "description": "Description of the compliance framework",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "id",
+              "description": "Compliance framework ID",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "ID",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
             {
               "name": "name",
               "description": "Name of the compliance framework",
@@ -8664,6 +9225,16 @@
           "interfaces": [
 
           ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "SCALAR",
+          "name": "ComplianceManagementFrameworkID",
+          "description": "Identifier of ComplianceManagement::Framework",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
           "enumValues": null,
           "possibleTypes": null
         },
@@ -9221,6 +9792,24 @@
               "deprecationReason": null
             },
             {
+              "name": "project",
+              "description": "Project of the container registry",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "Project",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "status",
               "description": "Status of the container repository.",
               "args": [
@@ -9515,6 +10104,24 @@
                 "ofType": {
                   "kind": "SCALAR",
                   "name": "String",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "project",
+              "description": "Project of the container registry",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "Project",
                   "ofType": null
                 }
               },
@@ -10019,7 +10626,7 @@
             },
             {
               "name": "iid",
-              "description": "The iid of the alert to mutate",
+              "description": "The IID of the alert to mutate",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -10149,7 +10756,7 @@
           "inputFields": [
             {
               "name": "environmentId",
-              "description": "The global id of the environment to add an annotation to",
+              "description": "The global ID of the environment to add an annotation to",
               "type": {
                 "kind": "SCALAR",
                 "name": "EnvironmentID",
@@ -10159,7 +10766,7 @@
             },
             {
               "name": "clusterId",
-              "description": "The global id of the cluster to add an annotation to",
+              "description": "The global ID of the cluster to add an annotation to",
               "type": {
                 "kind": "SCALAR",
                 "name": "ClustersClusterID",
@@ -10338,28 +10945,8 @@
               "defaultValue": null
             },
             {
-              "name": "assigneeId",
-              "description": "The ID of the user to be assigned to the board.",
-              "type": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              },
-              "defaultValue": null
-            },
-            {
-              "name": "milestoneId",
-              "description": "The ID of the milestone to be assigned to the board.",
-              "type": {
-                "kind": "SCALAR",
-                "name": "MilestoneID",
-                "ofType": null
-              },
-              "defaultValue": null
-            },
-            {
-              "name": "weight",
-              "description": "The weight of the board.",
+              "name": "hideBacklogList",
+              "description": "Whether or not backlog list is hidden",
               "type": {
                 "kind": "SCALAR",
                 "name": "Boolean",
@@ -10368,20 +10955,12 @@
               "defaultValue": null
             },
             {
-              "name": "labelIds",
-              "description": "The IDs of labels to be added to the board.",
+              "name": "hideClosedList",
+              "description": "Whether or not closed list is hidden",
               "type": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "LabelID",
-                    "ofType": null
-                  }
-                }
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
               },
               "defaultValue": null
             },
@@ -10715,6 +11294,150 @@
         },
         {
           "kind": "INPUT_OBJECT",
+          "name": "CreateComplianceFrameworkInput",
+          "description": "Autogenerated input type of CreateComplianceFramework",
+          "fields": null,
+          "inputFields": [
+            {
+              "name": "namespacePath",
+              "description": "Full path of the namespace to add the compliance framework to.",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "ID",
+                  "ofType": null
+                }
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "name",
+              "description": "Name of the compliance framework.",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "description",
+              "description": "Description of the compliance framework.",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "color",
+              "description": "Color to represent the compliance framework as a hexadecimal value. e.g. #ABC123.",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "clientMutationId",
+              "description": "A unique identifier for the client performing the mutation.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            }
+          ],
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "CreateComplianceFrameworkPayload",
+          "description": "Autogenerated return type of CreateComplianceFramework",
+          "fields": [
+            {
+              "name": "clientMutationId",
+              "description": "A unique identifier for the client performing the mutation.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "errors",
+              "description": "Errors encountered during execution of the mutation.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "SCALAR",
+                      "name": "String",
+                      "ofType": null
+                    }
+                  }
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "framework",
+              "description": "The created compliance framework.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "ComplianceFramework",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "INPUT_OBJECT",
           "name": "CreateCustomEmojiInput",
           "description": "Autogenerated input type of CreateCustomEmoji",
           "fields": null,
@@ -10971,7 +11694,7 @@
           "inputFields": [
             {
               "name": "noteableId",
-              "description": "The global id of the resource to add a note to",
+              "description": "The global ID of the resource to add a note to",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -11319,7 +12042,7 @@
           "inputFields": [
             {
               "name": "noteableId",
-              "description": "The global id of the resource to add a note to",
+              "description": "The global ID of the resource to add a note to",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -11897,7 +12620,7 @@
           "inputFields": [
             {
               "name": "noteableId",
-              "description": "The global id of the resource to add a note to",
+              "description": "The global ID of the resource to add a note to",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -11935,7 +12658,7 @@
             },
             {
               "name": "discussionId",
-              "description": "The global id of the discussion this note is in reply to",
+              "description": "The global ID of the discussion this note is in reply to",
               "type": {
                 "kind": "SCALAR",
                 "name": "DiscussionID",
@@ -12963,7 +13686,7 @@
             },
             {
               "name": "globalId",
-              "description": "ID of the DAST scanner profile. Deprecated in 13.6: Use `id`",
+              "description": "ID of the DAST scanner profile Deprecated in 13.6: Use `id`.",
               "args": [
 
               ],
@@ -12977,7 +13700,7 @@
                 }
               },
               "isDeprecated": true,
-              "deprecationReason": "Use `id`. Deprecated in 13.6"
+              "deprecationReason": "Use `id`. Deprecated in 13.6."
             },
             {
               "name": "id",
@@ -13310,7 +14033,7 @@
             },
             {
               "name": "globalId",
-              "description": "ID of the scanner profile.. Deprecated in 13.6: Use `id`",
+              "description": "ID of the scanner profile. Deprecated in 13.6: Use `id`.",
               "args": [
 
               ],
@@ -13320,7 +14043,7 @@
                 "ofType": null
               },
               "isDeprecated": true,
-              "deprecationReason": "Use `id`. Deprecated in 13.6"
+              "deprecationReason": "Use `id`. Deprecated in 13.6."
             },
             {
               "name": "id",
@@ -13722,6 +14445,20 @@
                   "name": "DastSiteProfileID",
                   "ofType": null
                 }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "normalizedTargetUrl",
+              "description": "Normalized URL of the target to be scanned",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
               },
               "isDeprecated": false,
               "deprecationReason": null
@@ -14324,6 +15061,12 @@
           "interfaces": null,
           "enumValues": [
             {
+              "name": "NONE",
+              "description": "No site validation exists",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "PENDING_VALIDATION",
               "description": "Site validation process has not started",
               "isDeprecated": false,
@@ -14524,6 +15267,20 @@
               "deprecationReason": null
             },
             {
+              "name": "normalizedTargetUrl",
+              "description": "Normalized URL of the target to be validated",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "status",
               "description": "Status of the site validation",
               "args": [
@@ -14535,6 +15292,73 @@
                 "ofType": {
                   "kind": "ENUM",
                   "name": "DastSiteProfileValidationStatusEnum",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "DastSiteValidationConnection",
+          "description": "The connection type for DastSiteValidation.",
+          "fields": [
+            {
+              "name": "edges",
+              "description": "A list of edges.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "DastSiteValidationEdge",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "nodes",
+              "description": "A list of nodes.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "DastSiteValidation",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "pageInfo",
+              "description": "Information to aid in pagination.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "PageInfo",
                   "ofType": null
                 }
               },
@@ -14704,6 +15528,51 @@
           "possibleTypes": null
         },
         {
+          "kind": "OBJECT",
+          "name": "DastSiteValidationEdge",
+          "description": "An edge in a connection.",
+          "fields": [
+            {
+              "name": "cursor",
+              "description": "A cursor for use in pagination.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "node",
+              "description": "The item at the end of the edge.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "DastSiteValidation",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
           "kind": "SCALAR",
           "name": "DastSiteValidationID",
           "description": "Identifier of DastSiteValidation",
@@ -14754,7 +15623,7 @@
           "inputFields": [
             {
               "name": "id",
-              "description": "The global ID of the annotation to delete",
+              "description": "Global ID of the annotation to delete",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -16543,7 +17412,7 @@
             },
             {
               "name": "iid",
-              "description": "The iid of the issue to modify designs for",
+              "description": "The IID of the issue to modify designs for",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -16823,7 +17692,7 @@
             },
             {
               "name": "iid",
-              "description": "The iid of the issue to modify designs for",
+              "description": "The IID of the issue to modify designs for",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -17586,6 +18455,94 @@
         },
         {
           "kind": "INPUT_OBJECT",
+          "name": "DestroyComplianceFrameworkInput",
+          "description": "Autogenerated input type of DestroyComplianceFramework",
+          "fields": null,
+          "inputFields": [
+            {
+              "name": "id",
+              "description": "The global ID of the compliance framework to destroy",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "ComplianceManagementFrameworkID",
+                  "ofType": null
+                }
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "clientMutationId",
+              "description": "A unique identifier for the client performing the mutation.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            }
+          ],
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "DestroyComplianceFrameworkPayload",
+          "description": "Autogenerated return type of DestroyComplianceFramework",
+          "fields": [
+            {
+              "name": "clientMutationId",
+              "description": "A unique identifier for the client performing the mutation.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "errors",
+              "description": "Errors encountered during execution of the mutation.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "SCALAR",
+                      "name": "String",
+                      "ofType": null
+                    }
+                  }
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "INPUT_OBJECT",
           "name": "DestroyContainerRepositoryInput",
           "description": "Autogenerated input type of DestroyContainerRepository",
           "fields": null,
@@ -17692,13 +18649,149 @@
         },
         {
           "kind": "INPUT_OBJECT",
+          "name": "DestroyContainerRepositoryTagsInput",
+          "description": "Autogenerated input type of DestroyContainerRepositoryTags",
+          "fields": null,
+          "inputFields": [
+            {
+              "name": "id",
+              "description": "ID of the container repository.",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "ContainerRepositoryID",
+                  "ofType": null
+                }
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "tagNames",
+              "description": "Container repository tag(s) to delete. Total number can't be greater than 20",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "SCALAR",
+                      "name": "String",
+                      "ofType": null
+                    }
+                  }
+                }
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "clientMutationId",
+              "description": "A unique identifier for the client performing the mutation.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            }
+          ],
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "DestroyContainerRepositoryTagsPayload",
+          "description": "Autogenerated return type of DestroyContainerRepositoryTags",
+          "fields": [
+            {
+              "name": "clientMutationId",
+              "description": "A unique identifier for the client performing the mutation.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "deletedTagNames",
+              "description": "Deleted container repository tags",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "SCALAR",
+                      "name": "String",
+                      "ofType": null
+                    }
+                  }
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "errors",
+              "description": "Errors encountered during execution of the mutation.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "SCALAR",
+                      "name": "String",
+                      "ofType": null
+                    }
+                  }
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "INPUT_OBJECT",
           "name": "DestroyNoteInput",
           "description": "Autogenerated input type of DestroyNote",
           "fields": null,
           "inputFields": [
             {
               "name": "id",
-              "description": "The global id of the note to destroy",
+              "description": "The global ID of the note to destroy",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -17800,7 +18893,7 @@
           "inputFields": [
             {
               "name": "id",
-              "description": "The global id of the snippet to destroy",
+              "description": "The global ID of the snippet to destroy",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -19409,7 +20502,7 @@
           "inputFields": [
             {
               "name": "id",
-              "description": "The global id of the discussion",
+              "description": "The global ID of the discussion",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -20172,7 +21265,7 @@
               "args": [
                 {
                   "name": "startDate",
-                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present). Deprecated in 13.5: Use timeframe.start",
+                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present) Deprecated in 13.5: Use timeframe.start.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Time",
@@ -20182,7 +21275,7 @@
                 },
                 {
                   "name": "endDate",
-                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present). Deprecated in 13.5: Use timeframe.end",
+                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present) Deprecated in 13.5: Use timeframe.end.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Time",
@@ -20298,7 +21391,7 @@
                 },
                 {
                   "name": "iidStartsWith",
-                  "description": "Filter epics by iid for autocomplete",
+                  "description": "Filter epics by IID for autocomplete",
                   "type": {
                     "kind": "SCALAR",
                     "name": "String",
@@ -21307,7 +22400,7 @@
           "inputFields": [
             {
               "name": "iid",
-              "description": "The iid of the epic to mutate",
+              "description": "The IID of the epic to mutate",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -21349,7 +22442,7 @@
             },
             {
               "name": "issueIid",
-              "description": "The iid of the issue to be added",
+              "description": "The IID of the issue to be added",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -21445,6 +22538,163 @@
                     }
                   }
                 }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "EpicBoard",
+          "description": "Represents an epic board",
+          "fields": [
+            {
+              "name": "id",
+              "description": "Global ID of the board",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "BoardsEpicBoardID",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "name",
+              "description": "Name of the board",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "EpicBoardConnection",
+          "description": "The connection type for EpicBoard.",
+          "fields": [
+            {
+              "name": "edges",
+              "description": "A list of edges.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "EpicBoardEdge",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "nodes",
+              "description": "A list of nodes.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "EpicBoard",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "pageInfo",
+              "description": "Information to aid in pagination.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "PageInfo",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "EpicBoardEdge",
+          "description": "An edge in a connection.",
+          "fields": [
+            {
+              "name": "cursor",
+              "description": "A cursor for use in pagination.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "node",
+              "description": "The item at the end of the edge.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "EpicBoard",
+                "ofType": null
               },
               "isDeprecated": false,
               "deprecationReason": null
@@ -22184,7 +23434,7 @@
             },
             {
               "name": "healthStatus",
-              "description": "Current health status. Returns null if `save_issuable_health_status` feature flag is disabled.",
+              "description": "Current health status.",
               "args": [
 
               ],
@@ -23214,7 +24464,7 @@
           "inputFields": [
             {
               "name": "iid",
-              "description": "The iid of the epic to mutate",
+              "description": "The IID of the epic to mutate",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -23431,7 +24681,7 @@
           "inputFields": [
             {
               "name": "id",
-              "description": "The id of the epic_issue or epic that is being moved",
+              "description": "The ID of the epic_issue or epic that is being moved",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -23445,7 +24695,7 @@
             },
             {
               "name": "adjacentReferenceId",
-              "description": "The id of the epic_issue or issue that the actual epic or issue is switched with",
+              "description": "The ID of the epic_issue or issue that the actual epic or issue is switched with",
               "type": {
                 "kind": "SCALAR",
                 "name": "EpicTreeSortingID",
@@ -23486,7 +24736,7 @@
           "inputFields": [
             {
               "name": "baseEpicId",
-              "description": "The id of the base epic of the tree",
+              "description": "The ID of the base epic of the tree",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -23611,6 +24861,117 @@
               "deprecationReason": null
             }
           ],
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "ExternalIssue",
+          "description": "Represents an external issue",
+          "fields": [
+            {
+              "name": "createdAt",
+              "description": "Timestamp of when the issue was created",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Time",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "externalTracker",
+              "description": "Type of external tracker",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "relativeReference",
+              "description": "Relative reference of the issue in the external tracker",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "status",
+              "description": "Status of the issue in the external tracker",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "title",
+              "description": "Title of the issue in the external tracker",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "updatedAt",
+              "description": "Timestamp of when the issue was updated",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Time",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "webUrl",
+              "description": "URL to the issue in the external tracker",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
           "possibleTypes": null
         },
         {
@@ -23991,7 +25352,7 @@
             },
             {
               "name": "snippetRepositoryRegistries",
-              "description": "Find snippet repository registries on this Geo node. Available only when feature flag `geo_snippet_repository_replication` is enabled",
+              "description": "Find snippet repository registries on this Geo node",
               "args": [
                 {
                   "name": "ids",
@@ -24513,6 +25874,59 @@
               "deprecationReason": null
             },
             {
+              "name": "complianceFrameworks",
+              "description": "Compliance frameworks available to projects in this namespace Available only when feature flag `ff_custom_compliance_frameworks` is enabled.",
+              "args": [
+                {
+                  "name": "after",
+                  "description": "Returns the elements in the list that come after the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "before",
+                  "description": "Returns the elements in the list that come before the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "first",
+                  "description": "Returns the first _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "last",
+                  "description": "Returns the last _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "ComplianceFrameworkConnection",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "containerRepositories",
               "description": "Container repositories of the group",
               "args": [
@@ -24613,7 +26027,7 @@
             },
             {
               "name": "customEmoji",
-              "description": "Custom emoji within this namespace. Available only when feature flag `custom_emoji` is enabled",
+              "description": "Custom emoji within this namespace Available only when feature flag `custom_emoji` is enabled.",
               "args": [
                 {
                   "name": "after",
@@ -24712,7 +26126,7 @@
               "args": [
                 {
                   "name": "startDate",
-                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present). Deprecated in 13.5: Use timeframe.start",
+                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present) Deprecated in 13.5: Use timeframe.start.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Time",
@@ -24722,7 +26136,7 @@
                 },
                 {
                   "name": "endDate",
-                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present). Deprecated in 13.5: Use timeframe.end",
+                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present) Deprecated in 13.5: Use timeframe.end.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Time",
@@ -24838,7 +26252,7 @@
                 },
                 {
                   "name": "iidStartsWith",
-                  "description": "Filter epics by iid for autocomplete",
+                  "description": "Filter epics by IID for autocomplete",
                   "type": {
                     "kind": "SCALAR",
                     "name": "String",
@@ -24866,12 +26280,92 @@
               "deprecationReason": null
             },
             {
+              "name": "epicBoard",
+              "description": "Find a single epic board",
+              "args": [
+                {
+                  "name": "id",
+                  "description": "Find an epic board by ID",
+                  "type": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "SCALAR",
+                      "name": "BoardsEpicBoardID",
+                      "ofType": null
+                    }
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "EpicBoard",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "epicBoards",
+              "description": "Find epic boards",
+              "args": [
+                {
+                  "name": "after",
+                  "description": "Returns the elements in the list that come after the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "before",
+                  "description": "Returns the elements in the list that come before the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "first",
+                  "description": "Returns the first _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "last",
+                  "description": "Returns the last _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "EpicBoardConnection",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "epics",
               "description": "Find epics",
               "args": [
                 {
                   "name": "startDate",
-                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present). Deprecated in 13.5: Use timeframe.start",
+                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present) Deprecated in 13.5: Use timeframe.start.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Time",
@@ -24881,7 +26375,7 @@
                 },
                 {
                   "name": "endDate",
-                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present). Deprecated in 13.5: Use timeframe.end",
+                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present) Deprecated in 13.5: Use timeframe.end.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Time",
@@ -24997,7 +26491,7 @@
                 },
                 {
                   "name": "iidStartsWith",
-                  "description": "Filter epics by iid for autocomplete",
+                  "description": "Filter epics by IID for autocomplete",
                   "type": {
                     "kind": "SCALAR",
                     "name": "String",
@@ -25550,7 +27044,7 @@
               "args": [
                 {
                   "name": "startDate",
-                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present). Deprecated in 13.5: Use timeframe.start",
+                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present) Deprecated in 13.5: Use timeframe.start.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Time",
@@ -25560,7 +27054,7 @@
                 },
                 {
                   "name": "endDate",
-                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present). Deprecated in 13.5: Use timeframe.end",
+                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present) Deprecated in 13.5: Use timeframe.end.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Time",
@@ -26006,7 +27500,7 @@
               "args": [
                 {
                   "name": "startDate",
-                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present). Deprecated in 13.5: Use timeframe.start",
+                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present) Deprecated in 13.5: Use timeframe.start.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Time",
@@ -26016,7 +27510,7 @@
                 },
                 {
                   "name": "endDate",
-                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present). Deprecated in 13.5: Use timeframe.end",
+                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present) Deprecated in 13.5: Use timeframe.end.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Time",
@@ -26869,7 +28363,7 @@
             },
             {
               "name": "vulnerabilitiesCountByDayAndSeverity",
-              "description": "Number of vulnerabilities per severity level, per day, for the projects in the group and its subgroups. Deprecated in 13.3: Use `vulnerabilitiesCountByDay`",
+              "description": "Number of vulnerabilities per severity level, per day, for the projects in the group and its subgroups Deprecated in 13.3: Use `vulnerabilitiesCountByDay`.",
               "args": [
                 {
                   "name": "startDate",
@@ -26946,7 +28440,7 @@
                 "ofType": null
               },
               "isDeprecated": true,
-              "deprecationReason": "Use `vulnerabilitiesCountByDay`. Deprecated in 13.3"
+              "deprecationReason": "Use `vulnerabilitiesCountByDay`. Deprecated in 13.3."
             },
             {
               "name": "vulnerabilityGrades",
@@ -27737,7 +29231,7 @@
           "inputFields": [
             {
               "name": "id",
-              "description": "The id of the integration to remove",
+              "description": "The ID of the integration to remove",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -27839,7 +29333,7 @@
           "inputFields": [
             {
               "name": "id",
-              "description": "The id of the integration to mutate",
+              "description": "The ID of the integration to mutate",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -27941,7 +29435,7 @@
           "inputFields": [
             {
               "name": "id",
-              "description": "The id of the integration to mutate",
+              "description": "The ID of the integration to mutate",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -29203,7 +30697,7 @@
             },
             {
               "name": "healthStatus",
-              "description": "Current health status. Returns null if `save_issuable_health_status` feature flag is disabled.",
+              "description": "Current health status.",
               "args": [
 
               ],
@@ -31727,25 +33221,25 @@
               "name": "updated_desc",
               "description": "Updated at descending order",
               "isDeprecated": true,
-              "deprecationReason": "Use UPDATED_DESC. Deprecated in 13.5"
+              "deprecationReason": "Use UPDATED_DESC. Deprecated in 13.5."
             },
             {
               "name": "updated_asc",
               "description": "Updated at ascending order",
               "isDeprecated": true,
-              "deprecationReason": "Use UPDATED_ASC. Deprecated in 13.5"
+              "deprecationReason": "Use UPDATED_ASC. Deprecated in 13.5."
             },
             {
               "name": "created_desc",
               "description": "Created at descending order",
               "isDeprecated": true,
-              "deprecationReason": "Use CREATED_DESC. Deprecated in 13.5"
+              "deprecationReason": "Use CREATED_DESC. Deprecated in 13.5."
             },
             {
               "name": "created_asc",
               "description": "Created at ascending order",
               "isDeprecated": true,
-              "deprecationReason": "Use CREATED_ASC. Deprecated in 13.5"
+              "deprecationReason": "Use CREATED_ASC. Deprecated in 13.5."
             },
             {
               "name": "UPDATED_DESC",
@@ -32457,6 +33951,12 @@
             {
               "name": "ANY",
               "description": "An iteration is assigned",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "CURRENT",
+              "description": "Current iteration",
               "isDeprecated": false,
               "deprecationReason": null
             }
@@ -33372,7 +34872,7 @@
           "inputFields": [
             {
               "name": "jiraAccountId",
-              "description": "Jira account id of the user",
+              "description": "Jira account ID of the user",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -34014,7 +35514,7 @@
           "inputFields": [
             {
               "name": "id",
-              "description": "The global id of the snippet to update",
+              "description": "The global ID of the snippet to update",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -34623,6 +36123,28 @@
               "deprecationReason": null
             },
             {
+              "name": "availableAutoMergeStrategies",
+              "description": "Array of available auto merge strategies",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "commitCount",
               "description": "Number of commits in the merge request",
               "args": [
@@ -34631,6 +36153,59 @@
               "type": {
                 "kind": "SCALAR",
                 "name": "Int",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "commitsWithoutMergeCommits",
+              "description": "Merge request commits excluding merge commits",
+              "args": [
+                {
+                  "name": "after",
+                  "description": "Returns the elements in the list that come after the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "before",
+                  "description": "Returns the elements in the list that come before the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "first",
+                  "description": "Returns the first _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "last",
+                  "description": "Returns the last _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "CommitConnection",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -34742,6 +36317,20 @@
             {
               "name": "defaultMergeCommitMessage",
               "description": "Default merge commit message of the merge request",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "defaultMergeCommitMessageWithDescription",
+              "description": "Default merge commit message of the merge request with description",
               "args": [
 
               ],
@@ -34962,6 +36551,24 @@
               "deprecationReason": null
             },
             {
+              "name": "hasCi",
+              "description": "Indicates if the merge request has CI",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "headPipeline",
               "description": "The pipeline running on the branch HEAD of the merge request",
               "args": [
@@ -35139,6 +36746,20 @@
               "deprecationReason": null
             },
             {
+              "name": "mergeTrainsCount",
+              "description": "",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Int",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "mergeWhenPipelineSucceeds",
               "description": "Indicates if the merge has been set to be merged when its pipeline succeeds (MWPS)",
               "args": [
@@ -35148,6 +36769,24 @@
                 "kind": "SCALAR",
                 "name": "Boolean",
                 "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "mergeable",
+              "description": "Indicates if the merge request is mergeable",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                }
               },
               "isDeprecated": false,
               "deprecationReason": null
@@ -35306,7 +36945,7 @@
             },
             {
               "name": "pipelines",
-              "description": "Pipelines for the merge request",
+              "description": "Pipelines for the merge request. Note: for performance reasons, no more than the most recent 500 pipelines will be returned.",
               "args": [
                 {
                   "name": "status",
@@ -35483,6 +37122,20 @@
               "deprecationReason": null
             },
             {
+              "name": "securityAutoFix",
+              "description": "Indicates if the merge request is created by @GitLab-Security-Bot.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "shouldBeRebased",
               "description": "Indicates if the merge request will be rebased",
               "args": [
@@ -35592,6 +37245,24 @@
                 "kind": "SCALAR",
                 "name": "Int",
                 "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "squashOnMerge",
+              "description": "Indicates if squash on merge is enabled",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                }
               },
               "isDeprecated": false,
               "deprecationReason": null
@@ -35994,6 +37665,20 @@
                   "name": "PageInfo",
                   "ofType": null
                 }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "totalTimeToMerge",
+              "description": "Total sum of time to merge, in seconds, for the collection of merge requests",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Float",
+                "ofType": null
               },
               "isDeprecated": false,
               "deprecationReason": null
@@ -36675,7 +38360,7 @@
             },
             {
               "name": "iid",
-              "description": "The iid of the merge request to mutate",
+              "description": "The IID of the merge request to mutate",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -36823,7 +38508,7 @@
             },
             {
               "name": "iid",
-              "description": "The iid of the merge request to mutate",
+              "description": "The IID of the merge request to mutate",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -36971,7 +38656,7 @@
             },
             {
               "name": "iid",
-              "description": "The iid of the merge request to mutate",
+              "description": "The IID of the merge request to mutate",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -37101,7 +38786,7 @@
             },
             {
               "name": "iid",
-              "description": "The iid of the merge request to mutate",
+              "description": "The IID of the merge request to mutate",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -37227,7 +38912,7 @@
             },
             {
               "name": "iid",
-              "description": "The iid of the merge request to mutate",
+              "description": "The IID of the merge request to mutate",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -37357,7 +39042,7 @@
             },
             {
               "name": "iid",
-              "description": "The iid of the merge request to mutate",
+              "description": "The IID of the merge request to mutate",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -37477,25 +39162,25 @@
               "name": "updated_desc",
               "description": "Updated at descending order",
               "isDeprecated": true,
-              "deprecationReason": "Use UPDATED_DESC. Deprecated in 13.5"
+              "deprecationReason": "Use UPDATED_DESC. Deprecated in 13.5."
             },
             {
               "name": "updated_asc",
               "description": "Updated at ascending order",
               "isDeprecated": true,
-              "deprecationReason": "Use UPDATED_ASC. Deprecated in 13.5"
+              "deprecationReason": "Use UPDATED_ASC. Deprecated in 13.5."
             },
             {
               "name": "created_desc",
               "description": "Created at descending order",
               "isDeprecated": true,
-              "deprecationReason": "Use CREATED_DESC. Deprecated in 13.5"
+              "deprecationReason": "Use CREATED_DESC. Deprecated in 13.5."
             },
             {
               "name": "created_asc",
               "description": "Created at ascending order",
               "isDeprecated": true,
-              "deprecationReason": "Use CREATED_ASC. Deprecated in 13.5"
+              "deprecationReason": "Use CREATED_ASC. Deprecated in 13.5."
             },
             {
               "name": "UPDATED_DESC",
@@ -37635,7 +39320,7 @@
             },
             {
               "name": "iid",
-              "description": "The iid of the merge request to mutate",
+              "description": "The IID of the merge request to mutate",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -38726,7 +40411,7 @@
                 "ofType": null
               },
               "isDeprecated": true,
-              "deprecationReason": "Use awardEmojiAdd. Deprecated in 13.2"
+              "deprecationReason": "Use awardEmojiAdd. Deprecated in 13.2."
             },
             {
               "name": "addProjectToSecurityDashboard",
@@ -39242,8 +40927,35 @@
               "deprecationReason": null
             },
             {
+              "name": "createComplianceFramework",
+              "description": null,
+              "args": [
+                {
+                  "name": "input",
+                  "description": null,
+                  "type": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "CreateComplianceFrameworkInput",
+                      "ofType": null
+                    }
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "CreateComplianceFrameworkPayload",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "createCustomEmoji",
-              "description": ". Available only when feature flag `custom_emoji` is enabled",
+              "description": " Available only when feature flag `custom_emoji` is enabled.",
               "args": [
                 {
                   "name": "input",
@@ -39971,6 +41683,33 @@
               "deprecationReason": null
             },
             {
+              "name": "destroyComplianceFramework",
+              "description": null,
+              "args": [
+                {
+                  "name": "input",
+                  "description": null,
+                  "type": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "DestroyComplianceFrameworkInput",
+                      "ofType": null
+                    }
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "DestroyComplianceFrameworkPayload",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "destroyContainerRepository",
               "description": null,
               "args": [
@@ -39992,6 +41731,33 @@
               "type": {
                 "kind": "OBJECT",
                 "name": "DestroyContainerRepositoryPayload",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "destroyContainerRepositoryTags",
+              "description": null,
+              "args": [
+                {
+                  "name": "input",
+                  "description": null,
+                  "type": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "DestroyContainerRepositoryTagsInput",
+                      "ofType": null
+                    }
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "DestroyContainerRepositoryTagsPayload",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -40103,7 +41869,7 @@
                 "ofType": null
               },
               "isDeprecated": true,
-              "deprecationReason": "Use vulnerabilityDismiss. Deprecated in 13.5"
+              "deprecationReason": "Use vulnerabilityDismiss. Deprecated in 13.5."
             },
             {
               "name": "environmentsCanaryIngressUpdate",
@@ -41024,6 +42790,33 @@
               "deprecationReason": null
             },
             {
+              "name": "oncallScheduleUpdate",
+              "description": null,
+              "args": [
+                {
+                  "name": "input",
+                  "description": null,
+                  "type": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "OncallScheduleUpdateInput",
+                      "ofType": null
+                    }
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "OncallScheduleUpdatePayload",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "pipelineCancel",
               "description": null,
               "args": [
@@ -41318,7 +43111,7 @@
                 "ofType": null
               },
               "isDeprecated": true,
-              "deprecationReason": "Use awardEmojiRemove. Deprecated in 13.2"
+              "deprecationReason": "Use awardEmojiRemove. Deprecated in 13.2."
             },
             {
               "name": "removeProjectFromSecurityDashboard",
@@ -41399,7 +43192,7 @@
                 "ofType": null
               },
               "isDeprecated": true,
-              "deprecationReason": "Use vulnerabilityRevertToDetected. Deprecated in 13.5"
+              "deprecationReason": "Use vulnerabilityRevertToDetected. Deprecated in 13.5."
             },
             {
               "name": "runDastScan",
@@ -41426,7 +43219,7 @@
                 "ofType": null
               },
               "isDeprecated": true,
-              "deprecationReason": "Use DastOnDemandScanCreate. Deprecated in 13.4"
+              "deprecationReason": "Use DastOnDemandScanCreate. Deprecated in 13.4."
             },
             {
               "name": "terraformStateDelete",
@@ -41669,7 +43462,7 @@
                 "ofType": null
               },
               "isDeprecated": true,
-              "deprecationReason": "Use awardEmojiToggle. Deprecated in 13.2"
+              "deprecationReason": "Use awardEmojiToggle. Deprecated in 13.2."
             },
             {
               "name": "updateAlertStatus",
@@ -41774,6 +43567,33 @@
               "type": {
                 "kind": "OBJECT",
                 "name": "UpdateBoardListPayload",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "updateComplianceFramework",
+              "description": null,
+              "args": [
+                {
+                  "name": "input",
+                  "description": null,
+                  "type": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "UpdateComplianceFrameworkInput",
+                      "ofType": null
+                    }
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "UpdateComplianceFrameworkPayload",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -42077,6 +43897,60 @@
               "deprecationReason": null
             },
             {
+              "name": "vulnerabilityExternalIssueLinkCreate",
+              "description": null,
+              "args": [
+                {
+                  "name": "input",
+                  "description": null,
+                  "type": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "VulnerabilityExternalIssueLinkCreateInput",
+                      "ofType": null
+                    }
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "VulnerabilityExternalIssueLinkCreatePayload",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "vulnerabilityExternalIssueLinkDestroy",
+              "description": null,
+              "args": [
+                {
+                  "name": "input",
+                  "description": null,
+                  "type": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "VulnerabilityExternalIssueLinkDestroyInput",
+                      "ofType": null
+                    }
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "VulnerabilityExternalIssueLinkDestroyPayload",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "vulnerabilityResolve",
               "description": null,
               "args": [
@@ -42195,6 +44069,59 @@
               "type": {
                 "kind": "SCALAR",
                 "name": "Float",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "complianceFrameworks",
+              "description": "Compliance frameworks available to projects in this namespace Available only when feature flag `ff_custom_compliance_frameworks` is enabled.",
+              "args": [
+                {
+                  "name": "after",
+                  "description": "Returns the elements in the list that come after the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "before",
+                  "description": "Returns the elements in the list that come before the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "first",
+                  "description": "Returns the first _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "last",
+                  "description": "Returns the last _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "ComplianceFrameworkConnection",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -42719,7 +44646,7 @@
           "inputFields": [
             {
               "name": "id",
-              "description": "The global id of the namespace to mutate",
+              "description": "The global ID of the namespace to mutate",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -43917,6 +45844,152 @@
           "possibleTypes": null
         },
         {
+          "kind": "INPUT_OBJECT",
+          "name": "OncallScheduleUpdateInput",
+          "description": "Autogenerated input type of OncallScheduleUpdate",
+          "fields": null,
+          "inputFields": [
+            {
+              "name": "projectPath",
+              "description": "The project to update the on-call schedule in",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "ID",
+                  "ofType": null
+                }
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "iid",
+              "description": "The on-call schedule internal ID to update",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "name",
+              "description": "The name of the on-call schedule",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "description",
+              "description": "The description of the on-call schedule",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "timezone",
+              "description": "The timezone of the on-call schedule",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "clientMutationId",
+              "description": "A unique identifier for the client performing the mutation.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            }
+          ],
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "OncallScheduleUpdatePayload",
+          "description": "Autogenerated return type of OncallScheduleUpdate",
+          "fields": [
+            {
+              "name": "clientMutationId",
+              "description": "A unique identifier for the client performing the mutation.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "errors",
+              "description": "Errors encountered during execution of the mutation.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "SCALAR",
+                      "name": "String",
+                      "ofType": null
+                    }
+                  }
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "oncallSchedule",
+              "description": "The on-call schedule",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "IncidentManagementOncallSchedule",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
           "kind": "OBJECT",
           "name": "Package",
           "description": "Represents a package",
@@ -44538,6 +46611,24 @@
           "description": null,
           "fields": [
             {
+              "name": "active",
+              "description": "Indicates if the pipeline is active",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "beforeSha",
               "description": "Base SHA of the source branch",
               "args": [
@@ -45085,6 +47176,261 @@
           "possibleTypes": null
         },
         {
+          "kind": "OBJECT",
+          "name": "PipelineAnalytics",
+          "description": null,
+          "fields": [
+            {
+              "name": "monthPipelinesLabels",
+              "description": "Labels for the monthly pipeline count",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "monthPipelinesSuccessful",
+              "description": "Total monthly successful pipeline count",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  }
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "monthPipelinesTotals",
+              "description": "Total monthly pipeline count",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  }
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "pipelineTimesLabels",
+              "description": "Pipeline times labels",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "pipelineTimesValues",
+              "description": "Pipeline times",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  }
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "weekPipelinesLabels",
+              "description": "Labels for the weekly pipeline count",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "weekPipelinesSuccessful",
+              "description": "Total weekly successful pipeline count",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  }
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "weekPipelinesTotals",
+              "description": "Total weekly pipeline count",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  }
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "yearPipelinesLabels",
+              "description": "Labels for the yearly pipeline count",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "yearPipelinesSuccessful",
+              "description": "Total yearly successful pipeline count",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  }
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "yearPipelinesTotals",
+              "description": "Total yearly pipeline count",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  }
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
           "kind": "INPUT_OBJECT",
           "name": "PipelineCancelInput",
           "description": "Autogenerated input type of PipelineCancel",
@@ -45092,7 +47438,7 @@
           "inputFields": [
             {
               "name": "id",
-              "description": "The id of the pipeline to mutate",
+              "description": "The ID of the pipeline to mutate",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -45324,7 +47670,7 @@
           "inputFields": [
             {
               "name": "id",
-              "description": "The id of the pipeline to mutate",
+              "description": "The ID of the pipeline to mutate",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -45524,7 +47870,7 @@
           "inputFields": [
             {
               "name": "id",
-              "description": "The id of the pipeline to mutate",
+              "description": "The ID of the pipeline to mutate",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -45757,6 +48103,20 @@
                   "defaultValue": null
                 },
                 {
+                  "name": "domain",
+                  "description": "Filter query for given domain",
+                  "type": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "ENUM",
+                      "name": "AlertManagementDomainFilter",
+                      "ofType": null
+                    }
+                  },
+                  "defaultValue": "operations"
+                },
+                {
                   "name": "search",
                   "description": "Search query for title, description, service, or monitoring_tool.",
                   "type": {
@@ -45859,6 +48219,20 @@
                     "ofType": null
                   },
                   "defaultValue": null
+                },
+                {
+                  "name": "domain",
+                  "description": "Filter query for given domain",
+                  "type": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "ENUM",
+                      "name": "AlertManagementDomainFilter",
+                      "ofType": null
+                    }
+                  },
+                  "defaultValue": "operations"
                 },
                 {
                   "name": "search",
@@ -46123,6 +48497,20 @@
               "type": {
                 "kind": "OBJECT",
                 "name": "BoardConnection",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "ciCdSettings",
+              "description": "CI/CD settings for the project",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "ProjectCiCdSetting",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -46533,11 +48921,29 @@
             },
             {
               "name": "dastSiteValidation",
-              "description": "DAST Site Validation associated with the project",
+              "description": "DAST Site Validation associated with the project. Will always return `null` if `security_on_demand_scans_site_validation` is disabled",
               "args": [
                 {
+                  "name": "normalizedTargetUrls",
+                  "description": "Normalized URL of the target to be scanned",
+                  "type": {
+                    "kind": "LIST",
+                    "name": null,
+                    "ofType": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "SCALAR",
+                        "name": "String",
+                        "ofType": null
+                      }
+                    }
+                  },
+                  "defaultValue": null
+                },
+                {
                   "name": "targetUrl",
-                  "description": "target URL of the DAST Site Validation",
+                  "description": "URL of the target to be scanned",
                   "type": {
                     "kind": "NON_NULL",
                     "name": null,
@@ -46553,6 +48959,77 @@
               "type": {
                 "kind": "OBJECT",
                 "name": "DastSiteValidation",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "dastSiteValidations",
+              "description": "DAST Site Validations associated with the project. Will always return no nodes if `security_on_demand_scans_site_validation` is disabled",
+              "args": [
+                {
+                  "name": "normalizedTargetUrls",
+                  "description": "Normalized URL of the target to be scanned",
+                  "type": {
+                    "kind": "LIST",
+                    "name": null,
+                    "ofType": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "SCALAR",
+                        "name": "String",
+                        "ofType": null
+                      }
+                    }
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "after",
+                  "description": "Returns the elements in the list that come after the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "before",
+                  "description": "Returns the elements in the list that come before the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "first",
+                  "description": "Returns the first _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "last",
+                  "description": "Returns the last _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "DastSiteValidationConnection",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -47654,7 +50131,7 @@
               "args": [
                 {
                   "name": "startDate",
-                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present). Deprecated in 13.5: Use timeframe.start",
+                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present) Deprecated in 13.5: Use timeframe.start.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Time",
@@ -47664,7 +50141,7 @@
                 },
                 {
                   "name": "endDate",
-                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present). Deprecated in 13.5: Use timeframe.end",
+                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present) Deprecated in 13.5: Use timeframe.end.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Time",
@@ -48154,6 +50631,16 @@
                   "defaultValue": null
                 },
                 {
+                  "name": "reviewerUsername",
+                  "description": "Username of the reviewer",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
                   "name": "after",
                   "description": "Returns the elements in the list that come after the specified cursor.",
                   "type": {
@@ -48236,7 +50723,7 @@
               "args": [
                 {
                   "name": "startDate",
-                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present). Deprecated in 13.5: Use timeframe.start",
+                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present) Deprecated in 13.5: Use timeframe.start.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Time",
@@ -48246,7 +50733,7 @@
                 },
                 {
                   "name": "endDate",
-                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present). Deprecated in 13.5: Use timeframe.end",
+                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present) Deprecated in 13.5: Use timeframe.end.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Time",
@@ -48566,6 +51053,20 @@
               "type": {
                 "kind": "OBJECT",
                 "name": "Pipeline",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "pipelineAnalytics",
+              "description": "Pipeline analytics",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "PipelineAnalytics",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -49435,6 +51936,24 @@
               "deprecationReason": null
             },
             {
+              "name": "squashReadOnly",
+              "description": "Indicates if squash readonly is enabled",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "sshUrlToRepo",
               "description": "URL to connect to the project via SSH",
               "args": [
@@ -49556,6 +52075,20 @@
               "type": {
                 "kind": "OBJECT",
                 "name": "TerraformStateConnection",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "totalPipelineDuration",
+              "description": "Total pipeline duration for all of the pipelines in a project",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Int",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -50026,6 +52559,61 @@
               "type": {
                 "kind": "SCALAR",
                 "name": "Boolean",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "ProjectCiCdSetting",
+          "description": null,
+          "fields": [
+            {
+              "name": "mergePipelinesEnabled",
+              "description": "Whether merge pipelines are enabled.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "mergeTrainsEnabled",
+              "description": "Whether merge trains are enabled.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "project",
+              "description": "Project the CI/CD settings belong to.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "Project",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -51582,7 +54170,7 @@
           "inputFields": [
             {
               "name": "id",
-              "description": "The id of the integration to mutate",
+              "description": "The ID of the integration to mutate",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -51684,7 +54272,7 @@
           "inputFields": [
             {
               "name": "id",
-              "description": "The id of the integration to mutate",
+              "description": "The ID of the integration to mutate",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -51953,6 +54541,33 @@
           "name": "Query",
           "description": null,
           "fields": [
+            {
+              "name": "ciConfig",
+              "description": "Get linted and processed contents of a CI config. Should not be requested more than once per request.",
+              "args": [
+                {
+                  "name": "content",
+                  "description": "Contents of .gitlab-ci.yml",
+                  "type": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "SCALAR",
+                      "name": "String",
+                      "ofType": null
+                    }
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "CiConfig",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
             {
               "name": "containerRepository",
               "description": "Find a container repository",
@@ -53140,7 +55755,7 @@
             },
             {
               "name": "vulnerabilitiesCountByDayAndSeverity",
-              "description": "Number of vulnerabilities per severity level, per day, for the projects on the current user's instance security dashboard. Deprecated in 13.3: Use `vulnerabilitiesCountByDay`",
+              "description": "Number of vulnerabilities per severity level, per day, for the projects on the current user's instance security dashboard Deprecated in 13.3: Use `vulnerabilitiesCountByDay`.",
               "args": [
                 {
                   "name": "startDate",
@@ -53217,7 +55832,7 @@
                 "ofType": null
               },
               "isDeprecated": true,
-              "deprecationReason": "Use `vulnerabilitiesCountByDay`. Deprecated in 13.3"
+              "deprecationReason": "Use `vulnerabilitiesCountByDay`. Deprecated in 13.3."
             },
             {
               "name": "vulnerability",
@@ -55131,7 +57746,7 @@
           "inputFields": [
             {
               "name": "awardableId",
-              "description": "The global id of the awardable resource",
+              "description": "The global ID of the awardable resource",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -55335,7 +57950,7 @@
           "inputFields": [
             {
               "name": "id",
-              "description": "The global id of the DiffNote to update",
+              "description": "The global ID of the DiffNote to update",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -60485,7 +63100,7 @@
             },
             {
               "name": "blob",
-              "description": "Snippet blob. Deprecated in 13.3: Use `blobs`",
+              "description": "Snippet blob Deprecated in 13.3: Use `blobs`.",
               "args": [
 
               ],
@@ -60499,7 +63114,7 @@
                 }
               },
               "isDeprecated": true,
-              "deprecationReason": "Use `blobs`. Deprecated in 13.3"
+              "deprecationReason": "Use `blobs`. Deprecated in 13.3."
             },
             {
               "name": "blobs",
@@ -61968,25 +64583,25 @@
               "name": "updated_desc",
               "description": "Updated at descending order",
               "isDeprecated": true,
-              "deprecationReason": "Use UPDATED_DESC. Deprecated in 13.5"
+              "deprecationReason": "Use UPDATED_DESC. Deprecated in 13.5."
             },
             {
               "name": "updated_asc",
               "description": "Updated at ascending order",
               "isDeprecated": true,
-              "deprecationReason": "Use UPDATED_ASC. Deprecated in 13.5"
+              "deprecationReason": "Use UPDATED_ASC. Deprecated in 13.5."
             },
             {
               "name": "created_desc",
               "description": "Created at descending order",
               "isDeprecated": true,
-              "deprecationReason": "Use CREATED_DESC. Deprecated in 13.5"
+              "deprecationReason": "Use CREATED_DESC. Deprecated in 13.5."
             },
             {
               "name": "created_asc",
               "description": "Created at ascending order",
               "isDeprecated": true,
-              "deprecationReason": "Use CREATED_ASC. Deprecated in 13.5"
+              "deprecationReason": "Use CREATED_ASC. Deprecated in 13.5."
             },
             {
               "name": "UPDATED_DESC",
@@ -62991,6 +65606,20 @@
               "deprecationReason": null
             },
             {
+              "name": "downloadPath",
+              "description": "URL for downloading the version's JSON file",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "id",
               "description": "ID of the Terraform state version",
               "args": [
@@ -63017,6 +65646,20 @@
               "type": {
                 "kind": "OBJECT",
                 "name": "CiJob",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "serial",
+              "description": "Serial number of the version",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Int",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -64402,7 +67045,7 @@
           "inputFields": [
             {
               "name": "id",
-              "description": "The global id of the todo to mark as done",
+              "description": "The global ID of the todo to mark as done",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -64508,7 +67151,7 @@
           "inputFields": [
             {
               "name": "id",
-              "description": "The global id of the todo to restore",
+              "description": "The global ID of the todo to restore",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -64543,7 +67186,7 @@
           "inputFields": [
             {
               "name": "ids",
-              "description": "The global ids of the todos to restore (a maximum of 50 is supported at once)",
+              "description": "The global IDs of the todos to restore (a maximum of 50 is supported at once)",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -64651,7 +67294,7 @@
             },
             {
               "name": "updatedIds",
-              "description": "The ids of the updated todo items. Deprecated in 13.2: Use todos",
+              "description": "The IDs of the updated todo items Deprecated in 13.2: Use todos.",
               "args": [
 
               ],
@@ -64673,7 +67316,7 @@
                 }
               },
               "isDeprecated": true,
-              "deprecationReason": "Use todos. Deprecated in 13.2"
+              "deprecationReason": "Use todos. Deprecated in 13.2."
             }
           ],
           "inputFields": null,
@@ -64928,7 +67571,7 @@
             },
             {
               "name": "updatedIds",
-              "description": "Ids of the updated todos. Deprecated in 13.2: Use todos",
+              "description": "Ids of the updated todos Deprecated in 13.2: Use todos.",
               "args": [
 
               ],
@@ -64950,7 +67593,7 @@
                 }
               },
               "isDeprecated": true,
-              "deprecationReason": "Use todos. Deprecated in 13.2"
+              "deprecationReason": "Use todos. Deprecated in 13.2."
             }
           ],
           "inputFields": null,
@@ -64968,7 +67611,7 @@
           "inputFields": [
             {
               "name": "awardableId",
-              "description": "The global id of the awardable resource",
+              "description": "The global ID of the awardable resource",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -65612,7 +68255,7 @@
             },
             {
               "name": "iid",
-              "description": "The iid of the alert to mutate",
+              "description": "The IID of the alert to mutate",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -65885,22 +68528,8 @@
           "fields": null,
           "inputFields": [
             {
-              "name": "id",
-              "description": "The board global ID",
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "SCALAR",
-                  "name": "BoardID",
-                  "ofType": null
-                }
-              },
-              "defaultValue": null
-            },
-            {
               "name": "name",
-              "description": "Name of the board",
+              "description": "The board name.",
               "type": {
                 "kind": "SCALAR",
                 "name": "String",
@@ -65910,7 +68539,7 @@
             },
             {
               "name": "hideBacklogList",
-              "description": "Whether or not backlog list is hidden.",
+              "description": "Whether or not backlog list is hidden",
               "type": {
                 "kind": "SCALAR",
                 "name": "Boolean",
@@ -65920,7 +68549,7 @@
             },
             {
               "name": "hideClosedList",
-              "description": "Whether or not closed list is hidden.",
+              "description": "Whether or not closed list is hidden",
               "type": {
                 "kind": "SCALAR",
                 "name": "Boolean",
@@ -65929,67 +68558,15 @@
               "defaultValue": null
             },
             {
-              "name": "assigneeId",
-              "description": "The id of user to be assigned to the board",
+              "name": "id",
+              "description": "The board global ID.",
               "type": {
-                "kind": "SCALAR",
-                "name": "UserID",
-                "ofType": null
-              },
-              "defaultValue": null
-            },
-            {
-              "name": "milestoneId",
-              "description": "The id of milestone to be assigned to the board",
-              "type": {
-                "kind": "SCALAR",
-                "name": "MilestoneID",
-                "ofType": null
-              },
-              "defaultValue": null
-            },
-            {
-              "name": "weight",
-              "description": "The weight value to be assigned to the board",
-              "type": {
-                "kind": "SCALAR",
-                "name": "Int",
-                "ofType": null
-              },
-              "defaultValue": null
-            },
-            {
-              "name": "labels",
-              "description": "Labels of the issue",
-              "type": {
-                "kind": "LIST",
+                "kind": "NON_NULL",
                 "name": null,
                 "ofType": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "String",
-                    "ofType": null
-                  }
-                }
-              },
-              "defaultValue": null
-            },
-            {
-              "name": "labelIds",
-              "description": "The IDs of labels to be added to the board",
-              "type": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "LabelID",
-                    "ofType": null
-                  }
+                  "kind": "SCALAR",
+                  "name": "BoardID",
+                  "ofType": null
                 }
               },
               "defaultValue": null
@@ -66138,7 +68715,7 @@
           "fields": [
             {
               "name": "board",
-              "description": "The board after mutation",
+              "description": "The board after mutation.",
               "args": [
 
               ],
@@ -66159,6 +68736,138 @@
               "type": {
                 "kind": "SCALAR",
                 "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "errors",
+              "description": "Errors encountered during execution of the mutation.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "SCALAR",
+                      "name": "String",
+                      "ofType": null
+                    }
+                  }
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "INPUT_OBJECT",
+          "name": "UpdateComplianceFrameworkInput",
+          "description": "Autogenerated input type of UpdateComplianceFramework",
+          "fields": null,
+          "inputFields": [
+            {
+              "name": "id",
+              "description": "The global ID of the compliance framework to update",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "ComplianceManagementFrameworkID",
+                  "ofType": null
+                }
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "name",
+              "description": "New name for the compliance framework",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "description",
+              "description": "New description for the compliance framework",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "color",
+              "description": "New color representation of the compliance framework in hex format. e.g. #FCA121",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "clientMutationId",
+              "description": "A unique identifier for the client performing the mutation.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            }
+          ],
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "UpdateComplianceFrameworkPayload",
+          "description": "Autogenerated return type of UpdateComplianceFramework",
+          "fields": [
+            {
+              "name": "clientMutationId",
+              "description": "A unique identifier for the client performing the mutation.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "complianceFramework",
+              "description": "The compliance framework after mutation",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "ComplianceFramework",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -66553,7 +69262,7 @@
           "inputFields": [
             {
               "name": "iid",
-              "description": "The iid of the epic to mutate",
+              "description": "The IID of the epic to mutate",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -66785,7 +69494,7 @@
           "inputFields": [
             {
               "name": "id",
-              "description": "The global id of the note to update",
+              "description": "The global ID of the note to update",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -67315,7 +70024,7 @@
           "inputFields": [
             {
               "name": "id",
-              "description": "The global id of the note to update",
+              "description": "The global ID of the note to update",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -67481,7 +70190,7 @@
             },
             {
               "name": "iid",
-              "description": "The iid of the requirement to update",
+              "description": "The IID of the requirement to update",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -67593,7 +70302,7 @@
           "inputFields": [
             {
               "name": "id",
-              "description": "The global id of the snippet to update",
+              "description": "The global ID of the snippet to update",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -67921,6 +70630,16 @@
                   "defaultValue": null
                 },
                 {
+                  "name": "reviewerUsername",
+                  "description": "Username of the reviewer",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
                   "name": "after",
                   "description": "Returns the elements in the list that come after the specified cursor.",
                   "type": {
@@ -68126,6 +70845,16 @@
                   "defaultValue": null
                 },
                 {
+                  "name": "reviewerUsername",
+                  "description": "Username of the reviewer",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
                   "name": "after",
                   "description": "Returns the elements in the list that come after the specified cursor.",
                   "type": {
@@ -68190,7 +70919,7 @@
             },
             {
               "name": "email",
-              "description": "User email",
+              "description": "User email Deprecated in 13.7: Use public_email.",
               "args": [
 
               ],
@@ -68199,12 +70928,12 @@
                 "name": "String",
                 "ofType": null
               },
-              "isDeprecated": false,
-              "deprecationReason": null
+              "isDeprecated": true,
+              "deprecationReason": "Use public_email. Deprecated in 13.7."
             },
             {
               "name": "groupCount",
-              "description": "Group count for the user. Available only when feature flag `user_group_counts` is enabled",
+              "description": "Group count for the user Available only when feature flag `user_group_counts` is enabled.",
               "args": [
 
               ],
@@ -68381,6 +71110,221 @@
               "type": {
                 "kind": "SCALAR",
                 "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "reviewRequestedMergeRequests",
+              "description": "Merge Requests assigned to the user for review",
+              "args": [
+                {
+                  "name": "iids",
+                  "description": "Array of IIDs of merge requests, for example `[1, 2]`",
+                  "type": {
+                    "kind": "LIST",
+                    "name": null,
+                    "ofType": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "SCALAR",
+                        "name": "String",
+                        "ofType": null
+                      }
+                    }
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "sourceBranches",
+                  "description": "Array of source branch names. All resolved merge requests will have one of these branches as their source.",
+                  "type": {
+                    "kind": "LIST",
+                    "name": null,
+                    "ofType": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "SCALAR",
+                        "name": "String",
+                        "ofType": null
+                      }
+                    }
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "targetBranches",
+                  "description": "Array of target branch names. All resolved merge requests will have one of these branches as their target.",
+                  "type": {
+                    "kind": "LIST",
+                    "name": null,
+                    "ofType": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "SCALAR",
+                        "name": "String",
+                        "ofType": null
+                      }
+                    }
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "state",
+                  "description": "A merge request state. If provided, all resolved merge requests will have this state.",
+                  "type": {
+                    "kind": "ENUM",
+                    "name": "MergeRequestState",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "labels",
+                  "description": "Array of label names. All resolved merge requests will have all of these labels.",
+                  "type": {
+                    "kind": "LIST",
+                    "name": null,
+                    "ofType": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "SCALAR",
+                        "name": "String",
+                        "ofType": null
+                      }
+                    }
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "mergedAfter",
+                  "description": "Merge requests merged after this date",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Time",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "mergedBefore",
+                  "description": "Merge requests merged before this date",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Time",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "milestoneTitle",
+                  "description": "Title of the milestone",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "sort",
+                  "description": "Sort merge requests by this criteria",
+                  "type": {
+                    "kind": "ENUM",
+                    "name": "MergeRequestSort",
+                    "ofType": null
+                  },
+                  "defaultValue": "created_desc"
+                },
+                {
+                  "name": "projectPath",
+                  "description": "The full-path of the project the authored merge requests should be in. Incompatible with projectId.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "projectId",
+                  "description": "The global ID of the project the authored merge requests should be in. Incompatible with projectPath.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "ProjectID",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "authorUsername",
+                  "description": "Username of the author",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "assigneeUsername",
+                  "description": "Username of the assignee",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "after",
+                  "description": "Returns the elements in the list that come after the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "before",
+                  "description": "Returns the elements in the list that come before the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "first",
+                  "description": "Returns the first _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "last",
+                  "description": "Returns the last _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "MergeRequestConnection",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -69567,10 +72511,34 @@
           "possibleTypes": null
         },
         {
+          "kind": "SCALAR",
+          "name": "VulnerabilitiesExternalIssueLinkID",
+          "description": "Identifier of Vulnerabilities::ExternalIssueLink",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
           "kind": "OBJECT",
           "name": "Vulnerability",
           "description": "Represents a vulnerability",
           "fields": [
+            {
+              "name": "confirmedAt",
+              "description": "Timestamp of when the vulnerability state was changed to confirmed",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Time",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
             {
               "name": "description",
               "description": "Description of the vulnerability",
@@ -69656,6 +72624,91 @@
                   "name": "DiscussionConnection",
                   "ofType": null
                 }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "dismissedAt",
+              "description": "Timestamp of when the vulnerability state was changed to dismissed",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Time",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "externalIssueLinks",
+              "description": "List of external issue links related to the vulnerability",
+              "args": [
+                {
+                  "name": "after",
+                  "description": "Returns the elements in the list that come after the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "before",
+                  "description": "Returns the elements in the list that come before the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "first",
+                  "description": "Returns the first _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "last",
+                  "description": "Returns the last _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "VulnerabilityExternalIssueLinkConnection",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "hasSolutions",
+              "description": "Indicates whether there is a solution available for this vulnerability.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
               },
               "isDeprecated": false,
               "deprecationReason": null
@@ -69786,6 +72839,20 @@
               "deprecationReason": null
             },
             {
+              "name": "mergeRequest",
+              "description": "Merge request that fixes the vulnerability.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "MergeRequest",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "notes",
               "description": "All notes on this noteable",
               "args": [
@@ -69879,6 +72946,20 @@
               "type": {
                 "kind": "ENUM",
                 "name": "VulnerabilityReportType",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "resolvedAt",
+              "description": "Timestamp of when the vulnerability state was changed to resolved",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Time",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -70344,6 +73425,433 @@
 
           ],
           "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "VulnerabilityExternalIssueLink",
+          "description": "Represents an external issue link of a vulnerability",
+          "fields": [
+            {
+              "name": "externalIssue",
+              "description": "The external issue attached to the issue link",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "ExternalIssue",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "id",
+              "description": "GraphQL ID of the external issue link",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "VulnerabilitiesExternalIssueLinkID",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "linkType",
+              "description": "Type of the external issue link",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "ENUM",
+                  "name": "VulnerabilityExternalIssueLinkType",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "VulnerabilityExternalIssueLinkConnection",
+          "description": "The connection type for VulnerabilityExternalIssueLink.",
+          "fields": [
+            {
+              "name": "edges",
+              "description": "A list of edges.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "VulnerabilityExternalIssueLinkEdge",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "nodes",
+              "description": "A list of nodes.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "VulnerabilityExternalIssueLink",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "pageInfo",
+              "description": "Information to aid in pagination.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "PageInfo",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "INPUT_OBJECT",
+          "name": "VulnerabilityExternalIssueLinkCreateInput",
+          "description": "Autogenerated input type of VulnerabilityExternalIssueLinkCreate",
+          "fields": null,
+          "inputFields": [
+            {
+              "name": "id",
+              "description": "ID of the vulnerability.",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "VulnerabilityID",
+                  "ofType": null
+                }
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "linkType",
+              "description": "Type of the external issue link.",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "ENUM",
+                  "name": "VulnerabilityExternalIssueLinkType",
+                  "ofType": null
+                }
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "externalTracker",
+              "description": "External tracker type of the external issue link.",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "ENUM",
+                  "name": "VulnerabilityExternalIssueLinkExternalTracker",
+                  "ofType": null
+                }
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "clientMutationId",
+              "description": "A unique identifier for the client performing the mutation.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            }
+          ],
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "VulnerabilityExternalIssueLinkCreatePayload",
+          "description": "Autogenerated return type of VulnerabilityExternalIssueLinkCreate",
+          "fields": [
+            {
+              "name": "clientMutationId",
+              "description": "A unique identifier for the client performing the mutation.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "errors",
+              "description": "Errors encountered during execution of the mutation.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "SCALAR",
+                      "name": "String",
+                      "ofType": null
+                    }
+                  }
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "externalIssueLink",
+              "description": "The created external issue link.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "VulnerabilityExternalIssueLink",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "INPUT_OBJECT",
+          "name": "VulnerabilityExternalIssueLinkDestroyInput",
+          "description": "Autogenerated input type of VulnerabilityExternalIssueLinkDestroy",
+          "fields": null,
+          "inputFields": [
+            {
+              "name": "id",
+              "description": "The global ID of the vulnerability external issue link.",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "VulnerabilitiesExternalIssueLinkID",
+                  "ofType": null
+                }
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "clientMutationId",
+              "description": "A unique identifier for the client performing the mutation.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            }
+          ],
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "VulnerabilityExternalIssueLinkDestroyPayload",
+          "description": "Autogenerated return type of VulnerabilityExternalIssueLinkDestroy",
+          "fields": [
+            {
+              "name": "clientMutationId",
+              "description": "A unique identifier for the client performing the mutation.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "errors",
+              "description": "Errors encountered during execution of the mutation.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "SCALAR",
+                      "name": "String",
+                      "ofType": null
+                    }
+                  }
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "VulnerabilityExternalIssueLinkEdge",
+          "description": "An edge in a connection.",
+          "fields": [
+            {
+              "name": "cursor",
+              "description": "A cursor for use in pagination.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "node",
+              "description": "The item at the end of the edge.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "VulnerabilityExternalIssueLink",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "ENUM",
+          "name": "VulnerabilityExternalIssueLinkExternalTracker",
+          "description": "The external tracker of the external issue link related to a vulnerability",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
+          "enumValues": [
+            {
+              "name": "JIRA",
+              "description": "Jira external tracker",
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "possibleTypes": null
+        },
+        {
+          "kind": "ENUM",
+          "name": "VulnerabilityExternalIssueLinkType",
+          "description": "The type of the external issue link related to a vulnerability",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
+          "enumValues": [
+            {
+              "name": "CREATED",
+              "description": "Created link type",
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
           "possibleTypes": null
         },
         {
@@ -71131,6 +74639,24 @@
             {
               "name": "adminVulnerability",
               "description": "Indicates the user can perform `admin_vulnerability` on this resource",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "adminVulnerabilityExternalIssueLink",
+              "description": "Indicates the user can perform `admin_vulnerability_external_issue_link` on this resource",
               "args": [
 
               ],

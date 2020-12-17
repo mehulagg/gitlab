@@ -2,6 +2,7 @@
 
 module Security
   class Scan < ApplicationRecord
+    include CreatedAtFilterable
     include IgnorableColumns
 
     self.table_name = 'security_scans'

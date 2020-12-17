@@ -8,7 +8,6 @@ allowlists
 anonymized
 Ansible
 Anthos
-API
 approvers
 architected
 Artifactory
@@ -63,7 +62,6 @@ bundlers
 burndown
 burnup
 cacheable
-CAS
 CentOS
 Certbot
 chai
@@ -120,6 +118,7 @@ dequarantining
 DevOps
 discoverability
 Disqus
+Divio
 Dockerfile
 Dockerfiles
 dogfood
@@ -171,6 +170,8 @@ globals
 Gmail
 Gollum
 Google
+goroutine
+goroutines
 Gosec
 Gradle
 Grafana
@@ -211,6 +212,7 @@ JavaScript
 Jenkins
 Jenkinsfile
 Jira
+jq
 jQuery
 jsdom
 JupyterHub
@@ -230,7 +232,6 @@ kubectl
 Kubernetes
 Kubesec
 Laravel
-LDAP
 ldapsearch
 Lefthook
 Leiningen
@@ -295,10 +296,10 @@ namespacing
 namespacings
 Nanoc
 Netlify
-NGINX
 Nokogiri
 npm
 Nurtch
+nyc
 OAuth
 offboarded
 offboarding
@@ -344,9 +345,13 @@ prepend
 prepended
 prepending
 prepends
+Prettifier
 Pritaly
+Priyanka
 profiler
 Prometheus
+protobuf
+protobufs
 proxied
 proxies
 proxyable
@@ -399,7 +404,6 @@ reusability
 reverified
 reverifies
 reverify
-RHEL
 rollout
 rollouts
 rsync
@@ -416,7 +420,6 @@ runit
 runtime
 runtimes
 Salesforce
-SAML
 sandboxing
 sanitization
 sbt
@@ -439,7 +442,6 @@ Slack
 Slony
 smartcard
 smartcards
-SMTP
 Sobelow
 Solarized
 Sourcegraph
@@ -448,7 +450,6 @@ sparklines
 spidering
 Splunk
 SpotBugs
-SSH
 Stackdriver
 storable
 storages
@@ -482,6 +483,7 @@ sudo
 swimlane
 swimlanes
 syslog
+tanuki
 tcpdump
 Thanos
 Tiller
@@ -494,6 +496,9 @@ toolchain
 toolchains
 tooltip
 tooltips
+transpile
+transpiles
+transpiling
 Trello
 triaging
 Twilio

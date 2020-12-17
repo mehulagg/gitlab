@@ -23,6 +23,7 @@ RSpec.describe 'Query.project(fullPath).dastSiteProfiles' do
               targetUrl
               editPath
               validationStatus
+              normalizedTargetUrl
             }
           }
         }

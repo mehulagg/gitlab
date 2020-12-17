@@ -1,9 +1,6 @@
-- if any_project_nav_tab?([:security, :dependencies, :licenses])
-  - top_level_link = project_nav_tab?(:security) ? project_security_dashboard_index_path(@project) : project_dependencies_path(@project)
-  - top_level_qa_selector = project_nav_tab?(:security) ? 'security_dashboard_link' : 'dependency_list_link'
-
+- if any_project_nav_tab?([:security, :dependencies, :licenses, :audit_events])
   = nav_link(path: sidebar_security_paths) do
-    = link_to top_level_link, data: { qa_selector: top_level_qa_selector } do
+    = link_to top_level_link(@project), data: { qa_selector: top_level_qa_selector(@project) } do
       .nav-icon-container
         = sprite_icon('shield')
       %span.nav-item-name
@@ -11,17 +8,17 @@
 
     %ul.sidebar-sub-level-items
       = nav_link(path: sidebar_security_paths, html_options: { class: "fly-out-top-item" } ) do
-        = link_to top_level_link do
+        = link_to top_level_link(@project) do
           %strong.fly-out-top-item-name
             = _('Security & Compliance')
 
       %li.divider.fly-out-top-item
       - if project_nav_tab?(:security)
         = nav_link(path: 'projects/security/dashboard#index') do
-          = link_to project_security_dashboard_index_path(@project), title: _('Security Dashboard') do
+          = link_to project_security_dashboard_index_path(@project), title: _('Security Dashboard'), data: { qa_selector: 'security_dashboard_link' } do
             %span= _('Security Dashboard')
 
-        = nav_link(path: 'projects/security/vulnerability_report#index') do
+        = nav_link(path: ['projects/security/vulnerability_report#index', 'projects/security/vulnerabilities#show']) do
           = link_to project_security_vulnerability_report_index_path(@project), title: _('Vulnerability Report'), data: { qa_selector: 'vulnerability_report_link' } do
             %span= _('Vulnerability Report')
 
@@ -46,9 +43,14 @@
             %span= _('Threat Monitoring')
 
       - if project_nav_tab?(:security_configuration)
-        = nav_link(path: ['projects/security/configuration#show', 'projects/security/sast_configuration#show']) do
+        = nav_link(path: sidebar_security_configuration_paths) do
           = link_to project_security_configuration_path(@project), title: _('Configuration'), data: { qa_selector: 'security_configuration_link'} do
             %span= _('Configuration')
+
+      - if project_nav_tab?(:audit_events)
+        = nav_link(controller: :audit_events) do
+          = link_to project_audit_events_path(@project), title: _('Audit Events'), data: { qa_selector: 'audit_events_settings_link' } do
+            %span= _('Audit Events')
 
 - elsif show_discover_project_security?(@project)
   = nav_link(path: project_security_discover_path(@project)) do

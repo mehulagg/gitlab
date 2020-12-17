@@ -10,12 +10,12 @@ module Types
       argument :id,
                ::Types::GlobalIDType[::EpicTreeSorting],
                required: true,
-               description: 'The id of the epic_issue or epic that is being moved'
+               description: 'The ID of the epic_issue or epic that is being moved'
 
       argument :adjacent_reference_id,
                ::Types::GlobalIDType[::EpicTreeSorting],
                required: false,
-               description: 'The id of the epic_issue or issue that the actual epic or issue is switched with'
+               description: 'The ID of the epic_issue or issue that the actual epic or issue is switched with'
 
       argument :relative_position,
                MoveTypeEnum,

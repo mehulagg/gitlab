@@ -15,6 +15,7 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
     resource :contribution_analytics, only: [:show]
 
     namespace :analytics do
+      resource :ci_cd_analytics, only: :show, path: 'ci_cd'
       resource :productivity_analytics, only: :show
       resources :coverage_reports, only: :index
       resource :merge_request_analytics, only: :show

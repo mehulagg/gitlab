@@ -2,16 +2,15 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::Database::LoadBalancing::LoadBalancer do
+RSpec.describe Gitlab::Database::LoadBalancing::LoadBalancer, :request_store do
+  let(:pool_spec) { ActiveRecord::Base.connection_pool.spec }
+  let(:pool) { ActiveRecord::ConnectionAdapters::ConnectionPool.new(pool_spec) }
+
   let(:lb) { described_class.new(%w(localhost localhost)) }
 
   before do
     allow(Gitlab::Database).to receive(:create_connection_pool)
-      .and_return(ActiveRecord::Base.connection_pool)
-  end
-
-  after do
-    RequestStore.delete(described_class::CACHE_KEY)
+      .and_return(pool)
   end
 
   def raise_and_wrap(wrapper, original)
@@ -52,8 +51,28 @@ RSpec.describe Gitlab::Database::LoadBalancing::LoadBalancer do
 
       allow(lb).to receive(:host).and_return(host)
       expect(host).to receive(:connection).and_return(connection)
+      expect(host).to receive(:enable_query_cache!).once
 
       expect { |b| lb.read(&b) }.to yield_with_args(connection)
+
+      expect(RequestStore[described_class::ENSURE_CACHING_KEY]).to be true
+    end
+
+    context 'when :query_cache_for_load_balancing feature flag is disabled' do
+      before do
+        stub_feature_flags(query_cache_for_load_balancing: false)
+      end
+
+      it 'yields a connection for a read without enabling query cache' do
+        connection = double(:connection)
+        host = double(:host)
+
+        allow(lb).to receive(:host).and_return(host)
+        expect(host).to receive(:connection).and_return(connection)
+        expect(host).not_to receive(:enable_query_cache!)
+
+        expect { |b| lb.read(&b) }.to yield_with_args(connection)
+      end
     end
 
     it 'marks hosts that are offline' do
@@ -142,10 +161,14 @@ RSpec.describe Gitlab::Database::LoadBalancing::LoadBalancer do
 
   describe '#release_host' do
     it 'releases the host and its connection' do
-      lb.host
+      host = lb.host
+
+      expect(host).to receive(:disable_query_cache!)
+
       lb.release_host
 
       expect(RequestStore[described_class::CACHE_KEY]).to be_nil
+      expect(RequestStore[described_class::ENSURE_CACHING_KEY]).to be_nil
     end
   end
 

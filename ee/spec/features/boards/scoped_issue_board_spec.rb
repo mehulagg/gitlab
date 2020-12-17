@@ -245,7 +245,7 @@ RSpec.describe 'Scoped issue boards', :js do
 
           find('.board-card', match: :first)
 
-          expect(page).to have_selector('.board', count: 4)
+          expect(page).to have_selector('.board', count: 2)
           expect(all('.board').first).to have_selector('.board-card', count: 2)
           expect(all('.board').last).to have_selector('.board-card', count: 1)
         end
@@ -267,6 +267,30 @@ RSpec.describe 'Scoped issue boards', :js do
           page.within('#js-dropdown-hint') do
             expect(page).to have_content('Label')
             expect(page).not_to have_content('Milestone')
+          end
+        end
+      end
+
+      context 'iteration' do
+        context 'board not scoped to iteration' do
+          it 'sets board to current iteration' do
+            expect(page).to have_selector('.board-card', count: 3)
+
+            update_board_scope('current_iteration', true)
+
+            expect(page).to have_selector('.board-card', count: 0)
+          end
+        end
+
+        context 'board scoped to current iteration' do
+          it 'removes current iteration from board' do
+            create_board_scope('current_iteration', true)
+
+            expect(page).to have_selector('.board-card', count: 0)
+
+            update_board_scope('current_iteration', false)
+
+            expect(page).to have_selector('.board-card', count: 3)
           end
         end
       end
@@ -297,6 +321,9 @@ RSpec.describe 'Scoped issue boards', :js do
           visit project_boards_path(project)
 
           update_board_label(label_title)
+
+          wait_for_all_requests
+
           update_board_label(label_2_title)
 
           expect(page).to have_css('.js-visual-token')
@@ -455,7 +482,7 @@ RSpec.describe 'Scoped issue boards', :js do
     it "doesn't show the input when creating a board" do
       click_on_create_new_board
 
-      page.within '.js-boards-selector' do
+      page.within '.js-board-config-modal' do
         # To make sure the form is shown
         expect(page).to have_field('board-new-name')
 
@@ -469,14 +496,13 @@ RSpec.describe 'Scoped issue boards', :js do
   end
 
   def expect_dot_highlight(button_title)
-    button = first('.filter-dropdown-container .btn.btn-inverted')
+    button = first('.filter-dropdown-container .btn.gl-button.dot-highlight')
     expect(button.text).to include(button_title)
-    expect(button[:class]).to include('dot-highlight')
     expect(button['title']).to include('This board\'s scope is reduced')
   end
 
   def expect_no_dot_highlight(button_title)
-    button = first('.filter-dropdown-container .btn.btn-inverted')
+    button = first('.filter-dropdown-container .btn.gl-button')
     expect(button.text).to include(button_title)
     expect(button[:class]).not_to include('dot-highlight')
     expect(button['title']).not_to include('This board\'s scope is reduced')
@@ -524,27 +550,40 @@ RSpec.describe 'Scoped issue boards', :js do
 
     click_button 'Expand'
 
-    page.within(".#{filter}") do
-      click_button 'Edit'
-
-      if value.is_a?(Array)
-        value.each { |value| click_link value }
-      elsif filter == 'weight'
-        page.within(".dropdown-menu") do
-          click_button value
-        end
-      else
-        click_link value
-      end
-    end
+    click_value(filter, value)
 
     click_on_board_modal
 
-    click_button 'Create'
+    click_button 'Create board'
 
     wait_for_requests
 
     expect(page).not_to have_selector('.board-list-loading')
+  end
+
+  def click_value(filter, value)
+    if filter == 'current_iteration'
+      current_iteration_checkbox = 'Scope board to current iteration'
+      if value
+        check(current_iteration_checkbox)
+      else
+        uncheck(current_iteration_checkbox)
+      end
+    else
+      page.within(".#{filter}") do
+        click_button 'Edit'
+
+        if value.is_a?(Array)
+          value.each { |value| click_link value }
+        elsif filter == 'weight'
+          page.within(".dropdown-menu") do
+            click_button value
+          end
+        else
+          click_link value
+        end
+      end
+    end
   end
 
   def click_on_create_new_board
@@ -559,17 +598,11 @@ RSpec.describe 'Scoped issue boards', :js do
   def update_board_scope(filter, value)
     edit_board.click
 
-    page.within(".#{filter}") do
-      click_button 'Edit'
-
-      page.within(".dropdown-menu") do
-        filter == 'weight' ? click_button(value) : click_link(value)
-      end
-    end
+    click_value(filter, value)
 
     click_on_board_modal
 
-    click_button 'Save'
+    click_button 'Save changes'
 
     wait_for_requests
 
@@ -579,6 +612,6 @@ RSpec.describe 'Scoped issue boards', :js do
   # Click on modal to make sure the dropdown is closed (e.g. label scenario)
   #
   def click_on_board_modal
-    find('.board-config-modal').click
+    find('.board-config-modal .modal-content').click
   end
 end

@@ -35,10 +35,8 @@ RSpec.describe 'User views iteration' do
         end
 
         aggregate_failures 'shows correct summary information' do
-          expect(page).to have_content("Complete 50%")
-          expect(page).to have_content("Open 1")
-          expect(page).to have_content("In progress 0")
-          expect(page).to have_content("Completed 1")
+          expect(page).to have_content("Completed")
+          expect(page).to have_content("Incomplete")
         end
 
         aggregate_failures 'expect burnup and burndown charts' do

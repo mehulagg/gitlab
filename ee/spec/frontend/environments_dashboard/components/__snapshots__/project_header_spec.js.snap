@@ -2,10 +2,10 @@
 
 exports[`Project Header matches the snapshot 1`] = `
 <div
-  class="d-flex align-items-center page-title-holder text-secondary justify-content-between pb-2 mb-3"
+  class="gl-display-flex gl-align-items-center page-title-holder text-secondary gl-justify-content-space-between pb-2 mb-3"
 >
   <div
-    class="d-flex align-items-center"
+    class="gl-display-flex gl-align-items-center"
   >
     <project-avatar-stub
       class="flex-shrink-0"
@@ -48,41 +48,35 @@ exports[`Project Header matches the snapshot 1`] = `
   </div>
    
   <div
-    class="dropdown js-more-actions"
+    class="gl-display-flex js-more-actions"
   >
-    <button
-      class="js-more-actions-toggle d-flex align-items-center ml-2 btn btn-transparent"
-      data-toggle="dropdown"
-      title="More actions"
-      type="button"
+    <gl-dropdown-stub
+      category="primary"
+      headertext=""
+      right="true"
+      size="medium"
+      text=""
+      toggleclass="js-more-actions-toggle gl-display-flex gl-align-items-center gl-px-3! gl-bg-transparent gl-shadow-none!"
+      variant="default"
     >
-      <gl-icon-stub
-        class="text-secondary"
-        name="ellipsis_v"
-        size="16"
-      />
-    </button>
-     
-    <ul
-      class="dropdown-menu dropdown-menu-right"
-    >
-      <li>
-        <gl-button-stub
-          buttontextclasses=""
-          category="primary"
-          class="js-remove-button"
-          icon=""
-          size="medium"
-          variant="link"
+       
+      <gl-dropdown-item-stub
+        avatarurl=""
+        class="js-remove-button"
+        iconcolor=""
+        iconname=""
+        iconrightarialabel=""
+        iconrightname=""
+        secondarytext=""
+        variant="link"
+      >
+        <span
+          class="text-danger"
         >
-          <span
-            class="text-danger"
-          >
-             Remove 
-          </span>
-        </gl-button-stub>
-      </li>
-    </ul>
+           Remove 
+        </span>
+      </gl-dropdown-item-stub>
+    </gl-dropdown-stub>
   </div>
 </div>
 `;

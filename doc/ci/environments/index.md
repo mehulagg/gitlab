@@ -121,7 +121,7 @@ Note that the `environment` keyword defines where the app is deployed. The envir
 `url` is exposed in various places within GitLab. Each time a job that has an environment specified
 succeeds, a deployment is recorded along with the Git SHA and environment name.
 
-CAUTION: **Caution:**
+WARNING:
 Some characters are not allowed in environment names. Use only letters,
 numbers, spaces, and `-`, `_`, `/`, `{`, `}`, or `.`. Also, it must not start nor end with `/`.
 
@@ -279,7 +279,7 @@ deploy_prod:
 
 The `when: manual` action:
 
-- Exposes a "play" button in GitLab's UI for that job.
+- Exposes a "play" button in the GitLab UI for that job.
 - Means the `deploy_prod` job will only be triggered when the "play" button is clicked.
 
 You can find the "play" button in the pipelines, environments, deployments, and jobs views.
@@ -386,7 +386,7 @@ If you are deploying to a [Kubernetes cluster](../../user/project/clusters/index
 associated with your project, you can configure these deployments from your
 `gitlab-ci.yml` file.
 
-NOTE: **Note:**
+NOTE:
 Kubernetes configuration isn't supported for Kubernetes clusters that are
 [managed by GitLab](../../user/project/clusters/index.md#gitlab-managed-clusters).
 To follow progress on support for GitLab-managed clusters, see the
@@ -413,7 +413,7 @@ deploy:
     - master
 ```
 
-When deploying to a Kubernetes cluster using GitLab's Kubernetes integration,
+When deploying to a Kubernetes cluster using the GitLab Kubernetes integration,
 information about the cluster and namespace will be displayed above the job
 trace on the deployment job page:
 
@@ -648,7 +648,7 @@ For example:
 
 #### Going from source files to public pages
 
-With GitLab's [Route Maps](../review_apps/index.md#route-maps) you can go directly
+With GitLab [Route Maps](../review_apps/index.md#route-maps), you can go directly
 from source files to public pages in the environment set for Review Apps.
 
 ### Stopping an environment
@@ -1066,7 +1066,7 @@ Below are some links you may find interesting:
 - [The `.gitlab-ci.yml` definition of environments](../yaml/README.md#environment)
 - [A blog post on Deployments & Environments](https://about.gitlab.com/blog/2016/08/26/ci-deployment-and-environments/)
 - [Review Apps - Use dynamic environments to deploy your code for every branch](../review_apps/index.md)
-- [Deploy Boards for your applications running on Kubernetes](../../user/project/deploy_boards.md) **(PREMIUM)**
+- [Deploy Boards for your applications running on Kubernetes](../../user/project/deploy_boards.md)
 
 <!-- ## Troubleshooting
 

@@ -30,17 +30,6 @@ RSpec.describe Analytics::CycleAnalytics::GroupLevel do
     end
   end
 
-  describe '#stats' do
-    before do
-      create_cycle(user, project, issue, mr, milestone, pipeline)
-      deploy_master(user, project)
-    end
-
-    it 'returns medians for each stage for a specific group' do
-      expect(subject.no_stats?).to eq(false)
-    end
-  end
-
   describe '#summary' do
     before do
       create_cycle(user, project, issue, mr, milestone, pipeline)

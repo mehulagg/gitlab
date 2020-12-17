@@ -18,6 +18,7 @@ module EE
       override :group_analytics_navbar_links
       def group_analytics_navbar_links(group, current_user)
         super + [
+          group_ci_cd_analytics_navbar_link(group, current_user),
           group_repository_analytics_navbar_link(group, current_user),
           contribution_analytics_navbar_link(group, current_user),
           group_insights_navbar_link(group, current_user),
@@ -112,6 +113,17 @@ module EE
           title: _('Issue'),
           path: 'issues_analytics#show',
           link: group_issues_analytics_path(group)
+        )
+      end
+
+      def group_ci_cd_analytics_navbar_link(group, current_user)
+        return unless group.feature_available?(:group_ci_cd_analytics)
+        return unless group_sidebar_link?(:group_ci_cd_analytics)
+
+        navbar_sub_item(
+          title: _('CI / CD'),
+          path: 'groups/analytics/ci_cd_analytics#show',
+          link: group_analytics_ci_cd_analytics_path(group)
         )
       end
 

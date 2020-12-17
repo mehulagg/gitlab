@@ -104,8 +104,8 @@ export const mockEpic = {
   groupId: 2,
   groupName: 'Gitlab Org',
   groupFullName: 'Gitlab Org',
-  startDate: new Date('2017-07-10'),
-  originalStartDate: new Date('2017-07-10'),
+  startDate: new Date('2017-11-10'),
+  originalStartDate: new Date('2017-11-10'),
   endDate: new Date('2018-06-02'),
   webUrl: '/groups/gitlab-org/-/epics/1',
   descendantCounts: {

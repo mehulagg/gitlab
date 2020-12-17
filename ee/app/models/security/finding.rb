@@ -38,7 +38,7 @@ module Security
                 .where('vulnerability_feedback.project_fingerprint = security_findings.project_fingerprint'))
     end
     scope :ordered, -> { order(severity: :desc, confidence: :desc, id: :asc) }
-    scope :with_build_and_artifacts, -> { includes(build: :job_artifacts) }
+    scope :with_pipeline_entities, -> { includes(build: [:job_artifacts, :pipeline]) }
     scope :with_scan, -> { includes(:scan) }
     scope :with_scanner, -> { includes(:scanner) }
     scope :deduplicated, -> { where(deduplicated: true) }

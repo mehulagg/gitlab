@@ -1,0 +1,5 @@
+---
+title: Set default query string when searching with filters
+merge_request: 49872
+author:
+type: added

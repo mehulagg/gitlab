@@ -401,6 +401,40 @@ RSpec.describe ProjectPolicy do
     end
   end
 
+  describe 'bot_log_in' do
+    let(:bot_user) { create(:user, :project_bot) }
+    let(:project) { private_project }
+
+    context 'when bot is in project and is not blocked' do
+      before do
+        project.add_maintainer(bot_user)
+      end
+
+      it 'is a valid project bot' do
+        expect(bot_user.can?(:bot_log_in, project)).to be_truthy
+      end
+    end
+
+    context 'when project bot is invalid' do
+      context 'when bot is not in project' do
+        it 'is not a valid project bot' do
+          expect(bot_user.can?(:bot_log_in, project)).to be_falsy
+        end
+      end
+
+      context 'when bot user is blocked' do
+        before do
+          project.add_maintainer(bot_user)
+          bot_user.block!
+        end
+
+        it 'is not a valid project bot' do
+          expect(bot_user.can?(:bot_log_in, project)).to be_falsy
+        end
+      end
+    end
+  end
+
   context 'support bot' do
     let(:current_user) { User.support_bot }
 
@@ -939,6 +973,34 @@ RSpec.describe ProjectPolicy do
 
       context 'when repository is available' do
         it { is_expected.to be_disallowed(:read_feature_flag) }
+      end
+    end
+  end
+
+  describe 'read_analytics' do
+    context 'anonymous user' do
+      let(:current_user) { anonymous }
+
+      it { is_expected.to be_allowed(:read_analytics) }
+    end
+
+    context 'project member' do
+      let(:project) { private_project }
+
+      %w(guest reporter developer maintainer).each do |role|
+        context role do
+          let(:current_user) { send(role) }
+
+          it { is_expected.to be_allowed(:read_analytics) }
+
+          context "without access to Analytics" do
+            before do
+              project.project_feature.update!(analytics_access_level: ProjectFeature::DISABLED)
+            end
+
+            it { is_expected.to be_disallowed(:read_analytics) }
+          end
+        end
       end
     end
   end

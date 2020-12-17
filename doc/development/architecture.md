@@ -94,7 +94,7 @@ The simplest way to ensure this, is to add support for your feature or service t
 ### Simplified component overview
 
 This is a simplified architecture diagram that can be used to
-understand GitLab's architecture.
+understand the GitLab architecture.
 
 A complete architecture diagram is available in our
 [component diagram](#component-diagram) below.
@@ -434,7 +434,7 @@ GitLab CI/CD is the open-source continuous integration service included with Git
 
 #### GitLab Shell
 
-- [Project page](https://gitlab.com/gitlab-org/gitlab-shell/blob/master/README.md)
+- [Project page](https://gitlab.com/gitlab-org/gitlab-shell/-/blob/main/README.md)
 - Configuration:
   - [Omnibus](https://gitlab.com/gitlab-org/omnibus-gitlab/blob/master/files/gitlab-config-template/gitlab.rb.template)
   - [Charts](https://docs.gitlab.com/charts/charts/gitlab/gitlab-shell/)

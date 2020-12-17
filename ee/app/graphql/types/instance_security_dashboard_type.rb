@@ -9,7 +9,6 @@ module Types
     field :projects,
           Types::ProjectType.connection_type,
           null: false,
-          authorize: :read_project,
           description: 'Projects selected in Instance Security Dashboard'
 
     field :vulnerability_scanners,

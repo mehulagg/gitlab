@@ -1,0 +1,6 @@
+---
+title: Include issue iid in default title for untitled incidents when created from
+  alert via HTTP integration
+merge_request: 49274
+author:
+type: fixed

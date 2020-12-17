@@ -10,13 +10,10 @@ class ProjectSecuritySetting < ApplicationRecord
 
   belongs_to :project, inverse_of: :security_setting
 
-  def self.safe_find_or_create_for(project)
-    project.security_setting || project.create_security_setting
-  rescue ActiveRecord::RecordNotUnique
-    retry
-  end
-
   def auto_fix_enabled?
+    return false if Feature.disabled?(:security_auto_fix, project)
+    return false unless project.feature_available?(:vulnerability_auto_fix)
+
     auto_fix_enabled_types.any?
   end
 

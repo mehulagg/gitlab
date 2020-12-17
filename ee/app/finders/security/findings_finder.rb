@@ -111,7 +111,7 @@ module Security
 
     def all_security_findings
       pipeline.security_findings
-              .with_build_and_artifacts
+              .with_pipeline_entities
               .with_scan
               .with_scanner
               .deduplicated

@@ -416,6 +416,7 @@ RSpec.describe ProjectsHelper do
 
   describe '#get_project_nav_tabs' do
     before do
+      allow(helper).to receive(:current_user).and_return(user)
       allow(helper).to receive(:can?) { true }
     end
 
@@ -1021,6 +1022,36 @@ RSpec.describe ProjectsHelper do
       expect(helper).to receive(:push_to_schema_breadcrumb).with(project.name, project_path(project))
 
       subject
+    end
+  end
+
+  describe '#project_permissions_settings' do
+    context 'with no project_setting associated' do
+      it 'includes a value for edit commit messages' do
+        settings = project_permissions_settings(project)
+
+        expect(settings[:allowEditingCommitMessages]).to be_falsy
+      end
+    end
+
+    context 'when commits are allowed to be edited' do
+      it 'includes the edit commit message value' do
+        project.create_project_setting(allow_editing_commit_messages: true)
+
+        settings = project_permissions_settings(project)
+
+        expect(settings[:allowEditingCommitMessages]).to be_truthy
+      end
+    end
+
+    context 'when commits are not allowed to be edited' do
+      it 'returns false to the edit commit message value' do
+        project.create_project_setting(allow_editing_commit_messages: false)
+
+        settings = project_permissions_settings(project)
+
+        expect(settings[:allowEditingCommitMessages]).to be_falsy
+      end
     end
   end
 end

@@ -33,10 +33,8 @@ module EE
       def snippet_repositories_for_selected_namespaces
         personal_snippets = self.joins(:snippet).where(snippet: ::Snippet.only_personal_snippets)
 
-        project_snippets = self.joins(snippet: :project).where(
-          'snippets.project_id IN(?)',
-          ::Gitlab::Geo.current_node.projects.select(:id)
-        )
+        project_snippets = self.joins(snippet: :project)
+                               .merge(::Snippet.for_projects(::Gitlab::Geo.current_node.projects.select(:id)))
 
         self.from_union([project_snippets, personal_snippets])
       end

@@ -171,6 +171,130 @@ RSpec.describe Namespace do
       end
     end
 
+    describe '.top_most' do
+      let_it_be(:namespace) { create(:namespace) }
+      let_it_be(:sub_namespace) { create(:namespace, parent: namespace) }
+
+      subject { described_class.top_most.ids }
+
+      it 'only contains root namespace' do
+        is_expected.to eq([namespace.id])
+      end
+    end
+
+    describe '.in_active_trial' do
+      let_it_be(:namespaces) do
+        [
+            create(:namespace),
+            create(:namespace_with_plan),
+            create(:namespace_with_plan, trial_ends_on: Date.tomorrow)
+        ]
+      end
+
+      it 'is consistent to trial_active? method' do
+        namespaces.each do |ns|
+          consistent = described_class.in_active_trial.include?(ns) == !!ns.trial_active?
+
+          expect(consistent).to be true
+        end
+      end
+    end
+
+    describe '.in_default_plan' do
+      subject { described_class.in_default_plan.ids }
+
+      where(:plan_name, :expect_in_default_plan) do
+        ::Plan::FREE | true
+        ::Plan::DEFAULT | true
+        ::Plan::BRONZE | false
+        ::Plan::SILVER | false
+        ::Plan::GOLD | false
+      end
+
+      with_them do
+        it 'returns expected result' do
+          namespace = create(:namespace_with_plan, plan: "#{plan_name}_plan")
+
+          is_expected.to eq(expect_in_default_plan ? [namespace.id] : [])
+        end
+      end
+
+      it 'includes namespace with no subscription' do
+        namespace = create(:namespace)
+
+        is_expected.to eq([namespace.id])
+      end
+    end
+
+    describe '.eligible_for_subscription' do
+      let_it_be(:namespace) { create :namespace }
+      let_it_be(:sub_namespace) { create(:namespace, parent: namespace) }
+
+      subject { described_class.eligible_for_subscription.ids }
+
+      context 'when there is no subscription' do
+        it { is_expected.to eq([namespace.id]) }
+      end
+
+      context 'when there is a subscription' do
+        context 'with a plan that is eligible for a trial' do
+          where(plan: ::Plan::PLANS_ELIGIBLE_FOR_TRIAL)
+
+          with_them do
+            context 'and has not yet been trialed' do
+              before do
+                create :gitlab_subscription, plan, namespace: namespace
+                create :gitlab_subscription, plan, namespace: sub_namespace
+              end
+
+              it { is_expected.to eq([namespace.id]) }
+            end
+
+            context 'but has already had a trial' do
+              before do
+                create :gitlab_subscription, plan, :expired_trial, namespace: namespace
+                create :gitlab_subscription, plan, :expired_trial, namespace: sub_namespace
+              end
+
+              it { is_expected.to eq([namespace.id]) }
+            end
+
+            context 'but is currently being trialed' do
+              before do
+                create :gitlab_subscription, plan, :active_trial, namespace: namespace
+                create :gitlab_subscription, plan, :active_trial, namespace: sub_namespace
+              end
+
+              it { is_expected.to eq([namespace.id]) }
+            end
+          end
+        end
+
+        context 'in active trial gold plan' do
+          before do
+            create :gitlab_subscription, ::Plan::GOLD, :active_trial, namespace: namespace
+            create :gitlab_subscription, ::Plan::GOLD, :active_trial, namespace: sub_namespace
+          end
+
+          it { is_expected.to eq([namespace.id]) }
+        end
+
+        context 'with a paid plan and not in trial' do
+          where(plan: ::Plan::PAID_HOSTED_PLANS)
+
+          with_them do
+            context 'and has not yet been trialed' do
+              before do
+                create :gitlab_subscription, plan, namespace: namespace
+              end
+
+              it { is_expected.to be_empty }
+            end
+          end
+        end
+      end
+    end
+
     describe '.eligible_for_trial' do
       let_it_be(:namespace) { create :namespace }
 
@@ -497,73 +621,33 @@ RSpec.describe Namespace do
       it { is_expected.to be_falsey }
     end
 
-    context 'with project' do
-      context 'and disabled shared runners' do
-        let!(:project) do
-          create(:project,
-            namespace: namespace,
-            shared_runners_enabled: false)
-        end
+    context 'group with shared runners enabled project' do
+      let!(:project) { create(:project, namespace: namespace, shared_runners_enabled: true) }
 
-        it { is_expected.to be_falsey }
+      it { is_expected.to be_truthy }
+    end
+
+    context 'subgroup with shared runners enabled project' do
+      let(:namespace) { create(:group) }
+      let(:subgroup) { create(:group, parent: namespace) }
+      let!(:subproject) { create(:project, namespace: subgroup, shared_runners_enabled: true) }
+
+      it { is_expected.to be_truthy }
+    end
+
+    context 'with project and disabled shared runners' do
+      let!(:project) do
+        create(:project,
+          namespace: namespace,
+          shared_runners_enabled: false)
       end
 
-      context 'and enabled shared runners' do
-        let!(:project) do
-          create(:project,
-            namespace: namespace,
-            shared_runners_enabled: true)
-        end
-
-        it { is_expected.to be_truthy }
-      end
+      it { is_expected.to be_falsey }
     end
   end
 
-  describe '#actual_shared_runners_minutes_limit' do
-    subject { namespace.actual_shared_runners_minutes_limit }
-
-    context 'when no limit defined' do
-      it { is_expected.to be_zero }
-    end
-
-    context 'when application settings limit is set' do
-      before do
-        stub_application_setting(shared_runners_minutes: 1000)
-      end
-
-      it 'returns global limit' do
-        is_expected.to eq(1000)
-      end
-
-      context 'when namespace limit is set' do
-        before do
-          namespace.shared_runners_minutes_limit = 500
-        end
-
-        it 'returns namespace limit' do
-          is_expected.to eq(500)
-        end
-      end
-
-      context 'when extra minutes limit is set' do
-        before do
-          namespace.update_attribute(:extra_shared_runners_minutes_limit, 100)
-        end
-
-        it 'returns the extra minutes by default' do
-          is_expected.to eq(1100)
-        end
-
-        it 'can exclude the extra minutes if required' do
-          expect(namespace.actual_shared_runners_minutes_limit(include_extra: false)).to eq(1000)
-        end
-      end
-    end
-  end
-
-  describe '#shared_runner_minutes_supported?' do
-    subject { namespace.shared_runner_minutes_supported? }
+  describe '#root?' do
+    subject { namespace.root? }
 
     context 'when is subgroup' do
       before do
@@ -615,101 +699,6 @@ RSpec.describe Namespace do
 
     context 'without project' do
       it { is_expected.to be_falsey }
-    end
-  end
-
-  describe '#any_project_with_shared_runners_enabled?' do
-    subject { namespace.any_project_with_shared_runners_enabled? }
-
-    context 'subgroup with shared runners enabled project' do
-      let(:namespace) { create(:group) }
-      let(:subgroup) { create(:group, parent: namespace) }
-      let!(:subproject) { create(:project, namespace: subgroup, shared_runners_enabled: true) }
-
-      it "returns true" do
-        is_expected.to eq(true)
-      end
-    end
-
-    context 'group with shared runners enabled project' do
-      let!(:project) { create(:project, namespace: namespace, shared_runners_enabled: true) }
-
-      it "returns true" do
-        is_expected.to eq(true)
-      end
-    end
-
-    context 'group without projects' do
-      it "returns false" do
-        is_expected.to eq(false)
-      end
-    end
-  end
-
-  describe '#shared_runners_remaining_minutes_percent' do
-    let(:namespace) { build(:namespace) }
-
-    subject { namespace.shared_runners_remaining_minutes_percent }
-
-    it 'returns the minutes left as a percent of the limit' do
-      stub_minutes_used_and_limit(8, 10)
-
-      expect(subject).to eq(20)
-    end
-
-    it 'returns 100 when minutes used are 0' do
-      stub_minutes_used_and_limit(0, 10)
-
-      expect(subject).to eq(100)
-    end
-
-    it 'returns 0 when the limit is 0' do
-      stub_minutes_used_and_limit(0, 0)
-
-      expect(subject).to eq(0)
-    end
-
-    it 'returns 0 when the limit is nil' do
-      stub_minutes_used_and_limit(nil, nil)
-
-      expect(subject).to eq(0)
-    end
-
-    it 'returns 0 when minutes used are over the limit' do
-      stub_minutes_used_and_limit(11, 10)
-
-      expect(subject).to eq(0)
-    end
-
-    it 'returns 0 when minutes used are equal to the limit' do
-      stub_minutes_used_and_limit(10, 10)
-
-      expect(subject).to eq(0)
-    end
-
-    def stub_minutes_used_and_limit(minutes_used, limit)
-      seconds_used = minutes_used.present? ? minutes_used * 60 : minutes_used
-      allow(namespace).to receive(:shared_runners_seconds).and_return(seconds_used)
-
-      allow(namespace).to receive(:actual_shared_runners_minutes_limit).and_return(limit)
-    end
-  end
-
-  describe '#shared_runners_remaining_minutes_below_threshold?' do
-    let(:namespace) { build(:namespace, last_ci_minutes_usage_notification_level: 30) }
-
-    subject { namespace.shared_runners_remaining_minutes_below_threshold? }
-
-    it 'is true when minutes left is below the notification level' do
-      allow(namespace).to receive(:shared_runners_remaining_minutes_percent).and_return(10)
-
-      expect(subject).to be_truthy
-    end
-
-    it 'is false when minutes left is not below the notification level' do
-      allow(namespace).to receive(:shared_runners_remaining_minutes_percent).and_return(80)
-
-      expect(subject).to be_falsey
     end
   end
 
@@ -1666,23 +1655,16 @@ RSpec.describe Namespace do
 
     subject { namespace.additional_repo_storage_by_namespace_enabled? }
 
-    where(:namespace_storage_limit, :additional_repo_storage_by_namespace, :automatic_purchased_storage_allocation, :result) do
-      false | false | false | false
-      false | false | true  | false
-      false | true  | false | false
-      true  | false | false | false
-      false | true  | true  | true
-      true  | true  | false | false
-      true  | false | true  | false
-      true  | true  | true  | false
+    where(:namespace_storage_limit, :automatic_purchased_storage_allocation, :result) do
+      false | false | false
+      false | true  | true
+      true  | false | false
+      true  | true  | false
     end
 
     with_them do
       before do
-        stub_feature_flags(
-          namespace_storage_limit: namespace_storage_limit,
-          additional_repo_storage_by_namespace: additional_repo_storage_by_namespace
-        )
+        stub_feature_flags(namespace_storage_limit: namespace_storage_limit)
         stub_application_setting(automatic_purchased_storage_allocation: automatic_purchased_storage_allocation)
       end
 

@@ -147,6 +147,8 @@
 /ee/spec/javascripts/ @gitlab-org/maintainers/frontend
 /spec/frontend/ @gitlab-org/maintainers/frontend
 /ee/spec/frontend/ @gitlab-org/maintainers/frontend
+/spec/frontend_integration/ @gitlab-org/maintainers/frontend
+/ee/spec/frontend_integration/ @gitlab-org/maintainers/frontend
 
 [Database]
 /db/ @gitlab-org/maintainers/database
@@ -159,6 +161,7 @@
 /lib/gitlab/github_import/ @gitlab-org/maintainers/database
 /app/finders/ @gitlab-org/maintainers/database
 /ee/app/finders/ @gitlab-org/maintainers/database
+/rubocop/rubocop-migrations.yml @gitlab-org/maintainers/database
 
 [Engineering Productivity]
 /.gitlab-ci.yml @gl-quality/eng-prod

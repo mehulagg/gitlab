@@ -24,7 +24,7 @@ export default {
   },
   computed: {
     solutionText() {
-      return (this.remediation && this.remediation.summary) || this.solution;
+      return this.solution || (this.remediation && this.remediation.summary);
     },
     showCreateMergeRequestMsg() {
       return !this.hasMr && Boolean(this.remediation) && this.hasDownload;

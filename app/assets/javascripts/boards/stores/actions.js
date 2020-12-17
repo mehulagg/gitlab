@@ -1,9 +1,10 @@
 import { pick } from 'lodash';
 
-import boardListsQuery from 'ee_else_ce/boards/queries/board_lists.query.graphql';
+import boardListsQuery from 'ee_else_ce/boards/graphql/board_lists.query.graphql';
 import createGqClient, { fetchPolicies } from '~/lib/graphql';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
-import { BoardType, ListType, inactiveId, DEFAULT_LABELS } from '~/boards/constants';
+import { convertObjectPropsToCamelCase, urlParamsToObject } from '~/lib/utils/common_utils';
+import { BoardType, ListType, inactiveId } from '~/boards/constants';
 import * as types from './mutation_types';
 import {
   formatBoardLists,
@@ -12,20 +13,20 @@ import {
   formatListsPageInfo,
   formatIssue,
 } from '../boards_util';
-import boardStore from '~/boards/stores/boards_store';
-
-import updateAssignees from '~/vue_shared/components/sidebar/queries/updateAssignees.mutation.graphql';
-import listsIssuesQuery from '../queries/lists_issues.query.graphql';
-import boardLabelsQuery from '../queries/board_labels.query.graphql';
-import createBoardListMutation from '../queries/board_list_create.mutation.graphql';
-import updateBoardListMutation from '../queries/board_list_update.mutation.graphql';
-import issueMoveListMutation from '../queries/issue_move_list.mutation.graphql';
-import destroyBoardListMutation from '../queries/board_list_destroy.mutation.graphql';
-import issueCreateMutation from '../queries/issue_create.mutation.graphql';
-import issueSetLabels from '../queries/issue_set_labels.mutation.graphql';
-import issueSetDueDate from '../queries/issue_set_due_date.mutation.graphql';
-import issueSetSubscriptionMutation from '../graphql/mutations/issue_set_subscription.mutation.graphql';
-import issueSetMilestone from '../queries/issue_set_milestone.mutation.graphql';
+import createFlash from '~/flash';
+import { __ } from '~/locale';
+import updateAssigneesMutation from '~/vue_shared/components/sidebar/queries/updateAssignees.mutation.graphql';
+import listsIssuesQuery from '../graphql/lists_issues.query.graphql';
+import boardLabelsQuery from '../graphql/board_labels.query.graphql';
+import createBoardListMutation from '../graphql/board_list_create.mutation.graphql';
+import updateBoardListMutation from '../graphql/board_list_update.mutation.graphql';
+import issueMoveListMutation from '../graphql/issue_move_list.mutation.graphql';
+import destroyBoardListMutation from '../graphql/board_list_destroy.mutation.graphql';
+import issueCreateMutation from '../graphql/issue_create.mutation.graphql';
+import issueSetLabelsMutation from '../graphql/issue_set_labels.mutation.graphql';
+import issueSetDueDateMutation from '../graphql/issue_set_due_date.mutation.graphql';
+import issueSetSubscriptionMutation from '../graphql/issue_set_subscription.mutation.graphql';
+import issueSetMilestoneMutation from '../graphql/issue_set_milestone.mutation.graphql';
 
 const notImplemented = () => {
   /* eslint-disable-next-line @gitlab/require-i18n-strings */
@@ -64,6 +65,18 @@ export default {
     commit(types.SET_FILTERS, filterParams);
   },
 
+  performSearch({ dispatch }) {
+    dispatch(
+      'setFilters',
+      convertObjectPropsToCamelCase(urlParamsToObject(window.location.search)),
+    );
+
+    if (gon.features.graphqlBoardLists) {
+      dispatch('fetchLists');
+      dispatch('resetIssues');
+    }
+  },
+
   fetchLists: ({ commit, state, dispatch }) => {
     const { endpoints, boardType, filterParams } = state;
     const { fullPath, boardId } = endpoints;
@@ -88,7 +101,6 @@ export default {
         if (!lists.nodes.find(l => l.listType === ListType.backlog) && !hideBacklogList) {
           dispatch('createList', { backlog: true });
         }
-        dispatch('generateDefaultLists');
       })
       .catch(() => commit(types.RECEIVE_BOARD_LISTS_FAILURE));
   },
@@ -119,14 +131,8 @@ export default {
   },
 
   addList: ({ commit }, list) => {
-    // Temporarily using positioning logic from boardStore
-    commit(
-      types.RECEIVE_ADD_LIST_SUCCESS,
-      boardStore.updateListPosition({ ...list, doNotFetchIssues: true }),
-    );
+    commit(types.RECEIVE_ADD_LIST_SUCCESS, list);
   },
-
-  showPromotionList: () => {},
 
   fetchLabels: ({ state, commit }, searchTerm) => {
     const { endpoints, boardType } = state;
@@ -149,31 +155,6 @@ export default {
         return labels.nodes;
       })
       .catch(() => commit(types.RECEIVE_LABELS_FAILURE));
-  },
-
-  generateDefaultLists: async ({ state, commit, dispatch }) => {
-    if (state.disabled) {
-      return;
-    }
-    if (
-      Object.entries(state.boardLists).find(
-        ([, list]) => list.type !== ListType.backlog && list.type !== ListType.closed,
-      )
-    ) {
-      return;
-    }
-
-    const fetchLabelsAndCreateList = label => {
-      return dispatch('fetchLabels', label)
-        .then(res => {
-          if (res.length > 0) {
-            dispatch('createList', { labelId: res[0].id });
-          }
-        })
-        .catch(() => commit(types.GENERATE_DEFAULT_LISTS_FAILURE));
-    };
-
-    await Promise.all(DEFAULT_LABELS.map(fetchLabelsAndCreateList));
   },
 
   moveList: (
@@ -324,7 +305,7 @@ export default {
 
     return gqlClient
       .mutate({
-        mutation: updateAssignees,
+        mutation: updateAssigneesMutation,
         variables: {
           iid: getters.activeIssue.iid,
           projectPath: getters.activeIssue.referencePath.split('#')[0],
@@ -342,6 +323,9 @@ export default {
 
         return nodes;
       })
+      .catch(() => {
+        createFlash({ message: __('An error occurred while updating assignees.') });
+      })
       .finally(() => {
         commit(types.SET_ASSIGNEE_LOADING, false);
       });
@@ -350,7 +334,7 @@ export default {
   setActiveIssueMilestone: async ({ commit, getters }, input) => {
     const { activeIssue } = getters;
     const { data } = await gqlClient.mutate({
-      mutation: issueSetMilestone,
+      mutation: issueSetMilestoneMutation,
       variables: {
         input: {
           iid: String(activeIssue.iid),
@@ -416,7 +400,7 @@ export default {
   setActiveIssueLabels: async ({ commit, getters }, input) => {
     const { activeIssue } = getters;
     const { data } = await gqlClient.mutate({
-      mutation: issueSetLabels,
+      mutation: issueSetLabelsMutation,
       variables: {
         input: {
           iid: String(activeIssue.iid),
@@ -441,7 +425,7 @@ export default {
   setActiveIssueDueDate: async ({ commit, getters }, input) => {
     const { activeIssue } = getters;
     const { data } = await gqlClient.mutate({
-      mutation: issueSetDueDate,
+      mutation: issueSetDueDateMutation,
       variables: {
         input: {
           iid: String(activeIssue.iid),

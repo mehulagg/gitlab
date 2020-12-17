@@ -1,0 +1,22 @@
+mutation($id: AnalyticsDevopsAdoptionSegmentID!, $name: String!, $groupIds: [GroupID!]!) {
+  updateDevopsAdoptionSegment(input: { id: $id, name: $name, groupIds: $groupIds }) {
+    segment {
+      id
+      name
+      groups {
+        id
+      }
+      latestSnapshot {
+        issueOpened
+        mergeRequestOpened
+        mergeRequestApproved
+        runnerConfigured
+        pipelineSucceeded
+        deploySucceeded
+        securityScanSucceeded
+        recordedAt
+      }
+    }
+    errors
+  }
+}

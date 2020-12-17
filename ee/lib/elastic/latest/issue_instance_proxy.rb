@@ -13,6 +13,7 @@ module Elastic
         end
 
         data['assignee_id'] = safely_read_attribute_for_elasticsearch(:assignee_ids)
+        data['visibility_level'] = target.project.visibility_level
 
         # protect against missing project_feature and set visibility to PRIVATE
         # if the project_feature is missing on a project

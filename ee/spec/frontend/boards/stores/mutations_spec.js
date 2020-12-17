@@ -1,5 +1,5 @@
 import mutations from 'ee/boards/stores/mutations';
-import { mockIssue, mockIssue2, mockEpics, mockEpic, mockListsWithModel } from '../mock_data';
+import { mockIssue, mockIssue2, mockEpics, mockEpic, mockLists } from '../mock_data';
 
 const expectNotImplemented = action => {
   it('is not implemented', () => {
@@ -10,8 +10,8 @@ const expectNotImplemented = action => {
 const epicId = mockEpic.id;
 
 const initialBoardListsState = {
-  'gid://gitlab/List/1': mockListsWithModel[0],
-  'gid://gitlab/List/2': mockListsWithModel[1],
+  'gid://gitlab/List/1': mockLists[0],
+  'gid://gitlab/List/2': mockLists[1],
 };
 
 let state = {
@@ -58,18 +58,6 @@ describe('RECEIVE_RECENT_BOARDS_SUCCESS', () => {
 
 describe('RECEIVE_RECENT_BOARDS_ERROR', () => {
   expectNotImplemented(mutations.RECEIVE_RECENT_BOARDS_ERROR);
-});
-
-describe('REQUEST_ADD_BOARD', () => {
-  expectNotImplemented(mutations.REQUEST_ADD_BOARD);
-});
-
-describe('RECEIVE_ADD_BOARD_SUCCESS', () => {
-  expectNotImplemented(mutations.RECEIVE_ADD_BOARD_SUCCESS);
-});
-
-describe('RECEIVE_ADD_BOARD_ERROR', () => {
-  expectNotImplemented(mutations.RECEIVE_ADD_BOARD_ERROR);
 });
 
 describe('REQUEST_REMOVE_BOARD', () => {

@@ -36,6 +36,23 @@ RSpec.describe Vulnerabilities::Finding do
     it { is_expected.to validate_presence_of(:raw_metadata) }
     it { is_expected.to validate_presence_of(:severity) }
     it { is_expected.to validate_presence_of(:confidence) }
+
+    context 'when value for details field is valid' do
+      it 'is valid' do
+        finding.details = {}
+
+        expect(finding).to be_valid
+      end
+    end
+
+    context 'when value for details field is invalid' do
+      it 'returns errors' do
+        finding.details = { invalid: 'data' }
+
+        expect(finding).to be_invalid
+        expect(finding.errors.full_messages).to eq(["Details must be a valid json schema"])
+      end
+    end
   end
 
   context 'database uniqueness' do

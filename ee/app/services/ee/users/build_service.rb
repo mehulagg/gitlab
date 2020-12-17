@@ -62,6 +62,8 @@ module EE
         build_scim_identity(user)
         identity_params[:provider] = GROUP_SAML_PROVIDER
 
+        user.provisioned_by_group_id = params[:group_id]
+
         super
       end
 

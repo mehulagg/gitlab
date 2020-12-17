@@ -1,0 +1,5 @@
+---
+title: Add dismissed_at field to vulnerability in GraphQL
+merge_request: 49797
+author:
+type: changed

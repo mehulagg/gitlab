@@ -1,0 +1,5 @@
+---
+title: Set retries of ScanSecurityReportSecretsWorker for max 3 days
+merge_request: 49022
+author:
+type: changed

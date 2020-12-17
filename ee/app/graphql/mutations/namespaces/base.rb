@@ -5,7 +5,7 @@ module Mutations
     class Base < ::Mutations::BaseMutation
       argument :id, ::Types::GlobalIDType[::Namespace],
                required: true,
-               description: 'The global id of the namespace to mutate'
+               description: 'The global ID of the namespace to mutate'
 
       field :namespace,
             Types::NamespaceType,

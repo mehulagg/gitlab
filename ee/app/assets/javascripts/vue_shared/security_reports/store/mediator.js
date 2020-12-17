@@ -1,5 +1,5 @@
 import * as types from './mutation_types';
-import { MODULE_SAST, MODULE_SECRET_DETECTION } from './constants';
+import { MODULE_API_FUZZING, MODULE_SAST, MODULE_SECRET_DETECTION } from './constants';
 
 export const updateIssueActionsMap = {
   sast: `${MODULE_SAST}/updateVulnerability`,
@@ -8,6 +8,7 @@ export const updateIssueActionsMap = {
   dast: 'updateDastIssue',
   secret_detection: `${MODULE_SECRET_DETECTION}/updateVulnerability`,
   coverage_fuzzing: 'updateCoverageFuzzingIssue',
+  api_fuzzing: `${MODULE_API_FUZZING}/updateVulnerability`,
 };
 
 export default function configureMediator(store) {

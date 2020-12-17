@@ -44,10 +44,10 @@ Impersonation is where an administrator uses credentials to perform an action as
 
 ### Group events **(STARTER)**
 
-NOTE: **Note:**
-You need Owner [permissions](../user/permissions.md) to view the group Audit Events page.
+A user with a Owner role (or above) can retrieve group audit events of all users.
+A user with a Developer or Maintainer role is limited to group audit events based on their individual actions.
 
-To view a group's audit events, navigate to **Group > Settings > Audit Events**.
+To view a group's audit events, navigate to **Group > Security & Compliance > Audit Events**.
 From there, you can see the following actions:
 
 - Group name or path changed.
@@ -74,10 +74,10 @@ Group events can also be accessed via the [Group Audit Events API](../api/audit_
 
 ### Project events **(STARTER)**
 
-NOTE: **Note:**
-You need Maintainer [permissions](../user/permissions.md) or higher to view the project Audit Events page.
+A user with a Maintainer role (or above) can retrieve project audit events of all users.
+A user with a Developer role is limited to project audit events based on their individual actions.
 
-To view a project's audit events, navigate to **Project > Settings > Audit Events**.
+To view a project's audit events, navigate to **Project > Security & Compliance > Audit Events**.
 From there, you can see the following actions:
 
 - Added or removed deploy keys
@@ -107,11 +107,11 @@ Project events can also be accessed via the [Project Audit Events API](../api/au
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/2336) in [GitLab Premium](https://about.gitlab.com/pricing/) 9.3.
 
-Server-wide audit logging introduces the ability to observe user actions across
+Server-wide audit events introduce the ability to observe user actions across
 the entire instance of your GitLab server, making it easy to understand who
 changed what and when for audit purposes.
 
-To view the server-wide administrator log, visit **Admin Area > Monitoring > Audit Log**.
+To view the server-wide administrator log, visit **Admin Area > Monitoring > Audit Events**.
 
 In addition to the group and project events, the following user actions are also
 recorded:
@@ -150,11 +150,11 @@ on adding these events into GitLab:
 #### Repository push
 
 The current architecture of audit events is not prepared to receive a very high amount of records.
-It may make the user interface for your project or audit logs very busy, and the disk space consumed by the
+It may make the user interface for your project or audit events very busy, and the disk space consumed by the
 `audit_events` PostgreSQL table may increase considerably. It's disabled by default
 to prevent performance degradations on GitLab instances with very high Git write traffic.
 
-In an upcoming release, Audit Logs for Git push events will be enabled
+In an upcoming release, Audit Events for Git push events will be enabled
 by default. Follow [#7865](https://gitlab.com/gitlab-org/gitlab/-/issues/7865) for updates.
 
 If you still wish to enable **Repository push** events in your instance, follow
@@ -185,19 +185,19 @@ The search filters you can see depends on which audit level you are at.
 | Scope (Instance level) | A specific group, project, or user that the action was scoped to. |
 | Date range | Either via the date range buttons or pickers (maximum range of 31 days). Default is from the first day of the month to today's date. |
 
-![audit log](img/audit_log_v13_6.png)
+![audit events](img/audit_log_v13_6.png)
 
 ## Export to CSV **(PREMIUM ONLY)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/1449) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.4.
 > - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/285441) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.7.
 
-Export to CSV allows customers to export the current filter view of your audit log as a
+Export to CSV allows customers to export the current filter view of your audit events as a
 CSV file, which stores tabular data in plain text. The data provides a comprehensive view with respect to
 audit events.
 
-To export the Audit Log to CSV, navigate to
-**{monitor}** **Admin Area > Monitoring > Audit Log**
+To export the Audit Events to CSV, navigate to
+**{monitor}** **Admin Area > Monitoring > Audit Events**
 
 1. Select the available search [filters](#search).
 1. Click **Export as CSV**.
@@ -228,5 +228,5 @@ The first row contains the headers, which are listed in the following table alon
 
 ### Limitation
 
-The Audit Log CSV file is limited to a maximum of `100,000` events.
+The Audit Events CSV file is limited to a maximum of `100,000` events.
 The remaining records are truncated when this limit is reached.

@@ -34,6 +34,11 @@ export default {
       required: false,
       default: '',
     },
+    showFilter: {
+      type: Boolean,
+      required: false,
+      default: true,
+    },
   },
   computed: {
     ...mapState(['filterValue', 'startDate', 'endDate', 'sortBy']),
@@ -62,6 +67,7 @@ export default {
       <div class="gl-display-flex gl-justify-content-space-between gl-flex-wrap">
         <div class="gl-mb-5 gl-w-full">
           <audit-events-filter
+            v-if="showFilter"
             :filter-token-options="filterTokenOptions"
             :value="filterValue"
             @selected="setFilterValue"

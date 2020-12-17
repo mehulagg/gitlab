@@ -14,7 +14,7 @@ GitLab CI/CD can be used with Bitbucket Cloud by:
 
 To use GitLab CI/CD with a Bitbucket Cloud repository:
 
-1. In GitLab create a **CI/CD for external repo**, select **Repo by URL** and
+1. In GitLab create a **CI/CD for external repository**, select **Repo by URL** and
    create the project.
 
    ![Create project](img/external_repository.png)
@@ -62,8 +62,9 @@ To use GitLab CI/CD with a Bitbucket Cloud repository:
 
 1. In Bitbucket, add a script to push the pipeline status to Bitbucket.
 
-   > Note: changes made in GitLab are overwritten by any changes made
-   > upstream in Bitbucket.
+   NOTE:
+   Changes made in GitLab are overwritten by any changes made
+   upstream in Bitbucket.
 
    Create a file `build_status` and insert the script below and run
    `chmod +x build_status` in your terminal to make the script executable.
@@ -110,7 +111,7 @@ To use GitLab CI/CD with a Bitbucket Cloud repository:
    esac
 
    echo "Pushing status to $BITBUCKET_STATUS_API..."
-   curl --request POST $BITBUCKET_STATUS_API \
+   curl --request POST "$BITBUCKET_STATUS_API" \
    --user $BITBUCKET_USERNAME:$BITBUCKET_ACCESS_TOKEN \
    --header "Content-Type:application/json" \
    --silent \

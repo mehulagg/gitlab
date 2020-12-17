@@ -27,4 +27,8 @@ class Geo::JobArtifactRegistry < Geo::BaseRegistry
       delete_worker_class.perform_async(:job_artifact, artifact_id)
     end
   end
+
+  def self.delete_worker_class
+    ::Geo::FileRegistryRemovalWorker
+  end
 end

@@ -111,8 +111,8 @@ describe('Storage counter app', () => {
     });
   });
 
-  describe('with additional_repo_storage_by_namespace feature flag', () => {
-    it('usage_graph component hidden is when flag is false', async () => {
+  describe('with additional_repo_storage_by_namespace feature', () => {
+    it('usage_graph component hidden is when feature is false', async () => {
       wrapper.setData({
         namespace: withRootStorageStatistics,
       });
@@ -124,7 +124,7 @@ describe('Storage counter app', () => {
       expect(findStorageInlineAlert().exists()).toBe(false);
     });
 
-    it('usage_statistics component is rendered when flag is true', async () => {
+    it('usage_statistics component is rendered when feature is true', async () => {
       createComponent({
         additionalRepoStorageByNamespace: true,
         namespace: withRootStorageStatistics,

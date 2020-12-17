@@ -63,7 +63,7 @@ module QA
       it 'creates a pipeline with merged results', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/562' do
         branch_name = "merged-results-#{SecureRandom.hex(8)}"
 
-        # Create a branch that will be merged into master
+        # Create a branch that will be merged into the default branch
         Resource::Repository::ProjectPush.fabricate! do |project_push|
           project_push.project = project
           project_push.new_branch = true
@@ -98,7 +98,7 @@ module QA
       it 'merges via a merge train', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/561' do
         branch_name = "merge-train-#{SecureRandom.hex(8)}"
 
-        # Create a branch that will be merged into master
+        # Create a branch that will be merged into the default branch
         Resource::Repository::ProjectPush.fabricate! do |project_push|
           project_push.project = project
           project_push.new_branch = true

@@ -237,4 +237,35 @@ RSpec.describe GlobalPolicy do
       end
     end
   end
+
+  describe ':export_user_permissions', :enable_admin_mode do
+    using RSpec::Parameterized::TableSyntax
+
+    let(:policy) { :export_user_permissions }
+
+    let_it_be(:admin) { build_stubbed(:admin) }
+    let_it_be(:guest) { build_stubbed(:user) }
+
+    where(:role, :flag_enabled, :licensed, :allowed) do
+      :admin      | true  | true  | true
+      :admin      | true  | false | false
+      :admin      | false | true  | false
+      :admin      | false | false | false
+      :guest      | true  | true  | false
+      :guest      | true  | false | false
+      :guest      | false | true  | false
+      :guest      | false | false | false
+    end
+
+    with_them do
+      let(:current_user) { public_send(role) }
+
+      before do
+        stub_licensed_features(export_user_permissions: licensed)
+        stub_feature_flags(export_user_permissions_feature_flag: flag_enabled)
+      end
+
+      it { is_expected.to(allowed ? be_allowed(policy) : be_disallowed(policy)) }
+    end
+  end
 end

@@ -57,10 +57,11 @@ module Gitlab
             identifiers = create_identifiers(report, data['identifiers'])
             links = create_links(report, data['links'])
             location = create_location(data['location'] || {})
+            remediations = create_remediations(data['remediations'])
 
             report.add_finding(
               ::Gitlab::Ci::Reports::Security::Finding.new(
-                uuid: SecureRandom.uuid,
+                uuid: calculate_uuid_v5(report, location, identifiers.first),
                 report_type: report.type,
                 name: finding_name(data, identifiers, location),
                 compare_key: data['cve'] || '',
@@ -71,8 +72,10 @@ module Gitlab
                 scan: report&.scan,
                 identifiers: identifiers,
                 links: links,
+                remediations: remediations,
                 raw_metadata: data.to_json,
-                metadata_version: version))
+                metadata_version: version,
+                details: data['details'] || {}))
           end
 
           def create_scan(report, scan_data)
@@ -126,6 +129,12 @@ module Gitlab
               url: link['url'])
           end
 
+          def create_remediations(remediations_data)
+            remediations_data.to_a.compact.map do |remediation_data|
+              ::Gitlab::Ci::Reports::Security::Remediation.new(remediation_data['summary'], remediation_data['diff'])
+            end
+          end
+
           def parse_severity_level(input)
             return input if ::Vulnerabilities::Finding::SEVERITY_LEVELS.key?(input)
 
@@ -150,6 +159,24 @@ module Gitlab
 
             identifier = identifiers.find(&:cve?) || identifiers.find(&:cwe?) || identifiers.first
             "#{identifier.name} in #{location&.fingerprint_path}"
+          end
+
+          def calculate_uuid_v5(report, location, primary_identifier)
+            uuid_v5_name_components = {
+              report_type: report.type,
+              primary_identifier_fingerprint: primary_identifier&.fingerprint,
+              location_fingerprint: location&.fingerprint,
+              project_id: report.project_id
+            }
+
+            if uuid_v5_name_components.values.any?(&:nil?)
+              Gitlab::AppLogger.warn(message: "One or more UUID name components are nil", components: uuid_v5_name_components)
+              return
+            end
+
+            name = uuid_v5_name_components.values.join('-')
+
+            Gitlab::UUID.v5(name)
           end
         end
       end

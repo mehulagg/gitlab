@@ -3,7 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe UsersController do
-  let(:user) { create(:user) }
+  # This user should have the same e-mail address associated with the GPG key prepared for tests
+  let(:user) { create(:user, email: GpgHelpers::User1.emails[0]) }
   let(:private_user) { create(:user, private_profile: true) }
   let(:public_user) { create(:user) }
 
@@ -221,6 +222,228 @@ RSpec.describe UsersController do
     end
   end
 
+  describe "#ssh_keys" do
+    describe "non existent user" do
+      it "does not generally work" do
+        get :ssh_keys, params: { username: 'not-existent' }
+
+        expect(response).not_to be_successful
+      end
+    end
+
+    describe "user with no keys" do
+      it "does generally work" do
+        get :ssh_keys, params: { username: user.username }
+
+        expect(response).to be_successful
+      end
+
+      it "renders all keys separated with a new line" do
+        get :ssh_keys, params: { username: user.username }
+
+        expect(response.body).to eq("")
+      end
+
+      it "responds with text/plain content type" do
+        get :ssh_keys, params: { username: user.username }
+        expect(response.content_type).to eq("text/plain")
+      end
+    end
+
+    describe "user with keys" do
+      let!(:key) { create(:key, user: user) }
+      let!(:another_key) { create(:another_key, user: user) }
+      let!(:deploy_key) { create(:deploy_key, user: user) }
+
+      describe "while signed in" do
+        before do
+          sign_in(user)
+        end
+
+        it "does generally work" do
+          get :ssh_keys, params: { username: user.username }
+
+          expect(response).to be_successful
+        end
+
+        it "renders all non deploy keys separated with a new line" do
+          get :ssh_keys, params: { username: user.username }
+
+          expect(response.body).not_to eq('')
+          expect(response.body).to eq(user.all_ssh_keys.join("\n"))
+
+          expect(response.body).to include(key.key.sub(' dummy@gitlab.com', ''))
+          expect(response.body).to include(another_key.key.sub(' dummy@gitlab.com', ''))
+
+          expect(response.body).not_to include(deploy_key.key)
+        end
+
+        it "does not render the comment of the key" do
+          get :ssh_keys, params: { username: user.username }
+          expect(response.body).not_to match(/dummy@gitlab.com/)
+        end
+
+        it "responds with text/plain content type" do
+          get :ssh_keys, params: { username: user.username }
+
+          expect(response.content_type).to eq("text/plain")
+        end
+      end
+
+      describe 'when logged out' do
+        before do
+          sign_out(user)
+        end
+
+        it "still does generally work" do
+          get :ssh_keys, params: { username: user.username }
+
+          expect(response).to be_successful
+        end
+
+        it "renders all non deploy keys separated with a new line" do
+          get :ssh_keys, params: { username: user.username }
+
+          expect(response.body).not_to eq('')
+          expect(response.body).to eq(user.all_ssh_keys.join("\n"))
+
+          expect(response.body).to include(key.key.sub(' dummy@gitlab.com', ''))
+          expect(response.body).to include(another_key.key.sub(' dummy@gitlab.com', ''))
+
+          expect(response.body).not_to include(deploy_key.key)
+        end
+
+        it "does not render the comment of the key" do
+          get :ssh_keys, params: { username: user.username }
+          expect(response.body).not_to match(/dummy@gitlab.com/)
+        end
+
+        it "responds with text/plain content type" do
+          get :ssh_keys, params: { username: user.username }
+
+          expect(response.content_type).to eq("text/plain")
+        end
+      end
+    end
+  end
+
+  describe "#gpg_keys" do
+    describe "non existent user" do
+      it "does not generally work" do
+        get :gpg_keys, params: { username: 'not-existent' }
+
+        expect(response).not_to be_successful
+      end
+    end
+
+    describe "user with no keys" do
+      it "does generally work" do
+        get :gpg_keys, params: { username: user.username }
+
+        expect(response).to be_successful
+      end
+
+      it "renders all keys separated with a new line" do
+        get :gpg_keys, params: { username: user.username }
+
+        expect(response.body).to eq("")
+      end
+
+      it "responds with text/plain content type" do
+        get :gpg_keys, params: { username: user.username }
+
+        expect(response.content_type).to eq("text/plain")
+      end
+    end
+
+    describe "user with keys" do
+      let!(:gpg_key) { create(:gpg_key, user: user) }
+      let!(:another_gpg_key) { create(:another_gpg_key, user: user) }
+
+      describe "while signed in" do
+        before do
+          sign_in(user)
+        end
+
+        it "does generally work" do
+          get :gpg_keys, params: { username: user.username }
+
+          expect(response).to be_successful
+        end
+
+        it "renders all verified keys separated with a new line" do
+          get :gpg_keys, params: { username: user.username }
+
+          expect(response.body).not_to eq('')
+          expect(response.body).to eq(user.gpg_keys.select(&:verified?).map(&:key).join("\n"))
+
+          expect(response.body).to include(gpg_key.key)
+          expect(response.body).to include(another_gpg_key.key)
+        end
+
+        it "responds with text/plain content type" do
+          get :gpg_keys, params: { username: user.username }
+
+          expect(response.content_type).to eq("text/plain")
+        end
+      end
+
+      describe 'when logged out' do
+        before do
+          sign_out(user)
+        end
+
+        it "still does generally work" do
+          get :gpg_keys, params: { username: user.username }
+
+          expect(response).to be_successful
+        end
+
+        it "renders all verified keys separated with a new line" do
+          get :gpg_keys, params: { username: user.username }
+
+          expect(response.body).not_to eq('')
+          expect(response.body).to eq(user.gpg_keys.map(&:key).join("\n"))
+
+          expect(response.body).to include(gpg_key.key)
+          expect(response.body).to include(another_gpg_key.key)
+        end
+
+        it "responds with text/plain content type" do
+          get :gpg_keys, params: { username: user.username }
+
+          expect(response.content_type).to eq("text/plain")
+        end
+      end
+
+      describe 'when revoked' do
+        before do
+          sign_in(user)
+          another_gpg_key.revoke
+        end
+
+        it "doesn't render revoked keys" do
+          get :gpg_keys, params: { username: user.username }
+
+          expect(response.body).not_to eq('')
+
+          expect(response.body).to include(gpg_key.key)
+          expect(response.body).not_to include(another_gpg_key.key)
+        end
+
+        it "doesn't render revoked keys for non-authorized users" do
+          sign_out(user)
+          get :gpg_keys, params: { username: user.username }
+
+          expect(response.body).not_to eq('')
+
+          expect(response.body).to include(gpg_key.key)
+          expect(response.body).not_to include(another_gpg_key.key)
+        end
+      end
+    end
+  end
+
   describe 'GET #calendar' do
     context 'for user' do
       let(:project) { create(:project) }
@@ -354,32 +577,99 @@ RSpec.describe UsersController do
 
   describe 'GET #contributed' do
     let(:project) { create(:project, :public) }
-    let(:current_user) { create(:user) }
+
+    subject do
+      get :contributed, params: { username: author.username }, format: format
+    end
 
     before do
-      sign_in(current_user)
+      sign_in(user)
 
       project.add_developer(public_user)
       project.add_developer(private_user)
+      create(:push_event, project: project, author: author)
+
+      subject
     end
 
-    context 'with public profile' do
+    shared_examples_for 'renders contributed projects' do
       it 'renders contributed projects' do
-        create(:push_event, project: project, author: public_user)
-
-        get :contributed, params: { username: public_user.username }
-
         expect(assigns[:contributed_projects]).not_to be_empty
+        expect(response).to have_gitlab_http_status(:ok)
       end
     end
 
-    context 'with private profile' do
-      it 'does not render contributed projects' do
-        create(:push_event, project: project, author: private_user)
+    %i(html json).each do |format|
+      context "format: #{format}" do
+        let(:format) { format }
 
-        get :contributed, params: { username: private_user.username }
+        context 'with public profile' do
+          let(:author) { public_user }
 
-        expect(assigns[:contributed_projects]).to be_empty
+          it_behaves_like 'renders contributed projects'
+        end
+
+        context 'with private profile' do
+          let(:author) { private_user }
+
+          it 'returns 404' do
+            expect(response).to have_gitlab_http_status(:not_found)
+          end
+
+          context 'with a user that has the ability to read private profiles', :enable_admin_mode do
+            let(:user) { create(:admin) }
+
+            it_behaves_like 'renders contributed projects'
+          end
+        end
+      end
+    end
+  end
+
+  describe 'GET #starred' do
+    let(:project) { create(:project, :public) }
+
+    subject do
+      get :starred, params: { username: author.username }, format: format
+    end
+
+    before do
+      author.toggle_star(project)
+
+      sign_in(user)
+      subject
+    end
+
+    shared_examples_for 'renders starred projects' do
+      it 'renders starred projects' do
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(assigns[:starred_projects]).not_to be_empty
+      end
+    end
+
+    %i(html json).each do |format|
+      context "format: #{format}" do
+        let(:format) { format }
+
+        context 'with public profile' do
+          let(:author) { public_user }
+
+          it_behaves_like 'renders starred projects'
+        end
+
+        context 'with private profile' do
+          let(:author) { private_user }
+
+          it 'returns 404' do
+            expect(response).to have_gitlab_http_status(:not_found)
+          end
+
+          context 'with a user that has the ability to read private profiles', :enable_admin_mode do
+            let(:user) { create(:admin) }
+
+            it_behaves_like 'renders starred projects'
+          end
+        end
       end
     end
   end

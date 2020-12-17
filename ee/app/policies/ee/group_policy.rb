@@ -21,6 +21,10 @@ module EE
         @subject.feature_available?(:cycle_analytics_for_groups)
       end
 
+      condition(:group_ci_cd_analytics_available) do
+        @subject.feature_available?(:group_ci_cd_analytics)
+      end
+
       condition(:group_merge_request_analytics_available) do
         @subject.feature_available?(:group_merge_request_analytics)
       end
@@ -161,11 +165,18 @@ module EE
         enable :read_group_cycle_analytics, :create_group_stage, :read_group_stage, :update_group_stage, :delete_group_stage
       end
 
+      rule { reporter & group_ci_cd_analytics_available }.policy do
+        enable :view_group_ci_cd_analytics
+      end
+
       rule { owner & ~has_parent & prevent_group_forking_available }.policy do
         enable :change_prevent_group_forking
       end
 
-      rule { can?(:read_group) & epics_available }.enable :read_epic
+      rule { can?(:read_group) & epics_available }.policy do
+        enable :read_epic
+        enable :read_epic_board
+      end
 
       rule { can?(:read_group) & iterations_available }.enable :read_iteration
 
@@ -230,6 +241,7 @@ module EE
         enable :create_wiki
         enable :admin_merge_request
         enable :read_ci_minutes_quota
+        enable :read_group_audit_events
       end
 
       rule { security_dashboard_enabled & developer }.enable :read_group_security_dashboard

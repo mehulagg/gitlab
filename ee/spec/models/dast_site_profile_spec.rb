@@ -74,12 +74,12 @@ RSpec.describe DastSiteProfile, type: :model do
 
   describe '#status' do
     context 'when dast_site_validation association does not exist' do
-      it 'is pending' do
+      it 'is none' do
         subject.dast_site.update!(dast_site_validation_id: nil)
 
         aggregate_failures do
           expect(subject.dast_site_validation).to be_nil
-          expect(subject.status).to eq('pending')
+          expect(subject.status).to eq('none')
         end
       end
     end

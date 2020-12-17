@@ -25,7 +25,7 @@ This tutorial was inspired by the guide
 For more information on Git LFS, see the [references](#references)
 below.
 
-CAUTION: **Warning:**
+WARNING:
 The method described on this guide rewrites Git history. Make
 sure to back up your repository before beginning and use it at your
 own risk.
@@ -59,7 +59,7 @@ To follow this tutorial, you need:
    brew install git-lfs
    ```
 
-NOTE: **Note:**
+NOTE:
 This guide was tested on macOS Mojave.
 
 ## Steps
@@ -176,8 +176,8 @@ but commented out to help encourage others to add to it in the future. -->
 
 - [Getting Started with Git LFS](https://about.gitlab.com/blog/2017/01/30/getting-started-with-git-lfs-tutorial/)
 - [Migrate from Git Annex to Git LFS](migrate_from_git_annex_to_git_lfs.md)
-- [GitLab's Git LFS user documentation](index.md)
-- [GitLab's Git LFS administrator documentation](../../../administration/lfs/index.md)
+- [GitLab Git LFS user documentation](index.md)
+- [GitLab Git LFS administrator documentation](../../../administration/lfs/index.md)
 - Alternative method to [migrate an existing repository to Git LFS](https://github.com/git-lfs/git-lfs/wiki/Tutorial#migrating-existing-repository-data-to-lfs)
 
 <!--

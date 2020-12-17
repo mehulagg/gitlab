@@ -7,5 +7,12 @@ FactoryBot.define do
     auto_fix_dast { true }
     auto_fix_dependency_scanning { true }
     auto_fix_sast { true }
+
+    trait :disabled_auto_fix do
+      auto_fix_container_scanning { false }
+      auto_fix_dast { false }
+      auto_fix_dependency_scanning { false }
+      auto_fix_sast { false }
+    end
   end
 end

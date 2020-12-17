@@ -5,7 +5,7 @@
 = render partial: 'admin/geo/shared/license_alert'
 
 .d-flex.align-items-center.border-bottom.border-default.mb-4
-  %h3{ :class => "page-title gl-mb-5!" }
+  %h3{ :class => "page-title" }
     = _("Geo Nodes")
   - if @nodes.any?
     = link_to s_("GeoNodes|New node"), new_admin_geo_node_path, class: 'gl-button btn btn-success ml-auto qa-new-node-link'

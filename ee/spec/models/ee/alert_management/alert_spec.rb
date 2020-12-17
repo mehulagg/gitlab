@@ -75,17 +75,5 @@ RSpec.describe EE::AlertManagement::Alert do
         subject
       end
     end
-
-    context 'when feature flag is disabled' do
-      before do
-        stub_feature_flags(cd_auto_rollback: false)
-      end
-
-      it 'does not execute AutoRollbackWorker' do
-        expect(Deployments::AutoRollbackWorker).not_to receive(:perform_async)
-
-        subject
-      end
-    end
   end
 end

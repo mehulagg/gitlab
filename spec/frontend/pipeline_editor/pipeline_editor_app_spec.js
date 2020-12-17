@@ -13,9 +13,10 @@ import waitForPromises from 'helpers/wait_for_promises';
 import VueApollo from 'vue-apollo';
 import createMockApollo from 'jest/helpers/mock_apollo_helper';
 
-import { redirectTo, refreshCurrentPage, objectToQuery } from '~/lib/utils/url_utility';
+import { objectToQuery, redirectTo, refreshCurrentPage } from '~/lib/utils/url_utility';
 import {
   mockCiConfigPath,
+  mockCiConfigQueryResponse,
   mockCiYml,
   mockCommitId,
   mockCommitMessage,
@@ -24,10 +25,11 @@ import {
   mockNewMergeRequestPath,
 } from './mock_data';
 
-import TextEditor from '~/pipeline_editor/components/text_editor.vue';
+import CommitForm from '~/pipeline_editor/components/commit/commit_form.vue';
+import getCiConfig from '~/pipeline_editor/graphql/queries/ci_config.graphql';
 import PipelineGraph from '~/pipelines/components/pipeline_graph/pipeline_graph.vue';
 import PipelineEditorApp from '~/pipeline_editor/pipeline_editor_app.vue';
-import CommitForm from '~/pipeline_editor/components/commit/commit_form.vue';
+import TextEditor from '~/pipeline_editor/components/text_editor.vue';
 
 const localVue = createLocalVue();
 localVue.use(VueApollo);
@@ -42,15 +44,22 @@ jest.mock('~/lib/utils/url_utility', () => ({
 describe('~/pipeline_editor/pipeline_editor_app.vue', () => {
   let wrapper;
 
-  let mockMutate;
   let mockApollo;
   let mockBlobContentData;
+  let mockCiConfigData;
+  let mockMutate;
 
   const createComponent = ({
     props = {},
-    loading = false,
+    blobLoading = false,
+    lintLoading = false,
     options = {},
     mountFn = shallowMount,
+    provide = {
+      glFeatures: {
+        ciConfigVisualizationTab: true,
+      },
+    },
   } = {}) => {
     mockMutate = jest.fn().mockResolvedValue({
       data: {
@@ -70,6 +79,7 @@ describe('~/pipeline_editor/pipeline_editor_app.vue', () => {
         newMergeRequestPath: mockNewMergeRequestPath,
         ...props,
       },
+      provide,
       stubs: {
         GlTabs,
         GlButton,
@@ -83,7 +93,10 @@ describe('~/pipeline_editor/pipeline_editor_app.vue', () => {
         $apollo: {
           queries: {
             content: {
-              loading,
+              loading: blobLoading,
+            },
+            ciConfigData: {
+              loading: lintLoading,
             },
           },
           mutate: mockMutate,
@@ -96,7 +109,8 @@ describe('~/pipeline_editor/pipeline_editor_app.vue', () => {
   };
 
   const createComponentWithApollo = ({ props = {}, mountFn = shallowMount } = {}) => {
-    mockApollo = createMockApollo([], {
+    const handlers = [[getCiConfig, mockCiConfigData]];
+    const resolvers = {
       Query: {
         blobContent() {
           return {
@@ -105,7 +119,9 @@ describe('~/pipeline_editor/pipeline_editor_app.vue', () => {
           };
         },
       },
-    });
+    };
+
+    mockApollo = createMockApollo(handlers, resolvers);
 
     const options = {
       localVue,
@@ -118,17 +134,22 @@ describe('~/pipeline_editor/pipeline_editor_app.vue', () => {
 
   const findLoadingIcon = () => wrapper.find(GlLoadingIcon);
   const findAlert = () => wrapper.find(GlAlert);
+  const findBlobFailureAlert = () => wrapper.find(GlAlert);
   const findTabAt = i => wrapper.findAll(GlTab).at(i);
+  const findVisualizationTab = () => wrapper.find('[data-testid="visualization-tab"]');
   const findTextEditor = () => wrapper.find(TextEditor);
   const findCommitForm = () => wrapper.find(CommitForm);
+  const findPipelineGraph = () => wrapper.find(PipelineGraph);
   const findCommitBtnLoadingIcon = () => wrapper.find('[type="submit"]').find(GlLoadingIcon);
 
   beforeEach(() => {
     mockBlobContentData = jest.fn();
+    mockCiConfigData = jest.fn().mockResolvedValue(mockCiConfigQueryResponse);
   });
 
   afterEach(() => {
     mockBlobContentData.mockReset();
+    mockCiConfigData.mockReset();
     refreshCurrentPage.mockReset();
     redirectTo.mockReset();
     mockMutate.mockReset();
@@ -137,39 +158,65 @@ describe('~/pipeline_editor/pipeline_editor_app.vue', () => {
     wrapper = null;
   });
 
-  it('displays a loading icon if the query is loading', () => {
-    createComponent({ loading: true });
+  it('displays a loading icon if the blob query is loading', () => {
+    createComponent({ blobLoading: true });
 
     expect(findLoadingIcon().exists()).toBe(true);
     expect(findTextEditor().exists()).toBe(false);
   });
 
   describe('tabs', () => {
-    beforeEach(() => {
-      createComponent();
+    describe('editor tab', () => {
+      beforeEach(() => {
+        createComponent();
+      });
+
+      it('displays the tab and its content', async () => {
+        expect(
+          findTabAt(0)
+            .find(TextEditor)
+            .exists(),
+        ).toBe(true);
+      });
+
+      it('displays tab lazily, until editor is ready', async () => {
+        expect(findTabAt(0).attributes('lazy')).toBe('true');
+
+        findTextEditor().vm.$emit('editor-ready');
+
+        await nextTick();
+
+        expect(findTabAt(0).attributes('lazy')).toBe(undefined);
+      });
     });
 
-    it('displays tabs and their content', async () => {
-      expect(
-        findTabAt(0)
-          .find(TextEditor)
-          .exists(),
-      ).toBe(true);
-      expect(
-        findTabAt(1)
-          .find(PipelineGraph)
-          .exists(),
-      ).toBe(true);
-    });
+    describe('visualization tab', () => {
+      describe('with feature flag on', () => {
+        beforeEach(() => {
+          createComponent();
+        });
 
-    it('displays editor tab lazily, until editor is ready', async () => {
-      expect(findTabAt(0).attributes('lazy')).toBe('true');
+        it('display the tab', () => {
+          expect(findVisualizationTab().exists()).toBe(true);
+        });
 
-      findTextEditor().vm.$emit('editor-ready');
+        it('displays a loading icon if the lint query is loading', () => {
+          createComponent({ lintLoading: true });
 
-      await nextTick();
+          expect(findLoadingIcon().exists()).toBe(true);
+          expect(findPipelineGraph().exists()).toBe(false);
+        });
+      });
 
-      expect(findTabAt(0).attributes('lazy')).toBe(undefined);
+      describe('with feature flag off', () => {
+        beforeEach(() => {
+          createComponent({ provide: { glFeatures: { ciConfigVisualizationTab: false } } });
+        });
+
+        it('does not display the tab', () => {
+          expect(findVisualizationTab().exists()).toBe(false);
+        });
+      });
     });
   });
 
@@ -177,12 +224,10 @@ describe('~/pipeline_editor/pipeline_editor_app.vue', () => {
     beforeEach(async () => {
       createComponent({ mountFn: mount });
 
-      wrapper.setData({
+      await wrapper.setData({
         content: mockCiYml,
         contentModel: mockCiYml,
       });
-
-      await nextTick();
     });
 
     it('displays content after the query loads', () => {
@@ -347,13 +392,13 @@ describe('~/pipeline_editor/pipeline_editor_app.vue', () => {
   });
 
   describe('displays fetch content errors', () => {
-    it('no error is show when data is set', async () => {
+    it('no error is shown when data is set', async () => {
       mockBlobContentData.mockResolvedValue(mockCiYml);
       createComponentWithApollo();
 
       await waitForPromises();
 
-      expect(findAlert().exists()).toBe(false);
+      expect(findBlobFailureAlert().exists()).toBe(false);
       expect(findTextEditor().attributes('value')).toBe(mockCiYml);
     });
 
@@ -367,7 +412,9 @@ describe('~/pipeline_editor/pipeline_editor_app.vue', () => {
 
       await waitForPromises();
 
-      expect(findAlert().text()).toMatch('No CI file found in this repository, please add one.');
+      expect(findBlobFailureAlert().text()).toBe(
+        'No CI file found in this repository, please add one.',
+      );
     });
 
     it('shows a 400 error message', async () => {
@@ -380,7 +427,7 @@ describe('~/pipeline_editor/pipeline_editor_app.vue', () => {
 
       await waitForPromises();
 
-      expect(findAlert().text()).toMatch(
+      expect(findBlobFailureAlert().text()).toBe(
         'Repository does not have a default branch, please set one.',
       );
     });
@@ -390,7 +437,9 @@ describe('~/pipeline_editor/pipeline_editor_app.vue', () => {
       createComponentWithApollo();
       await waitForPromises();
 
-      expect(findAlert().text()).toMatch('The CI configuration was not loaded, please try again.');
+      expect(findBlobFailureAlert().text()).toBe(
+        'The CI configuration was not loaded, please try again.',
+      );
     });
   });
 });

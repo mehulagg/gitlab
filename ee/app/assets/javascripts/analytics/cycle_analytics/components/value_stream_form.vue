@@ -46,6 +46,11 @@ export default {
       required: false,
       default: () => ({}),
     },
+    hasExtendedFormFields: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   data() {
     return {
@@ -143,6 +148,7 @@ export default {
           @input="onHandleInput"
         />
       </gl-form-group>
+      <div v-if="hasExtendedFormFields" data-testid="extended-form-fields"></div>
     </gl-form>
   </gl-modal>
 </template>

@@ -5,9 +5,10 @@ import merge from 'lodash/merge';
 import { createMockClient } from 'mock-apollo-client';
 import VueApollo from 'vue-apollo';
 import DastSiteProfileForm from 'ee/security_configuration/dast_site_profiles_form/components/dast_site_profile_form.vue';
+import DastSiteAuthSection from 'ee/security_configuration/dast_site_profiles_form/components/dast_site_auth_section.vue';
 import dastSiteProfileCreateMutation from 'ee/security_configuration/dast_site_profiles_form/graphql/dast_site_profile_create.mutation.graphql';
 import dastSiteProfileUpdateMutation from 'ee/security_configuration/dast_site_profiles_form/graphql/dast_site_profile_update.mutation.graphql';
-import { siteProfiles } from 'ee_jest/on_demand_scans/mock_data';
+import { siteProfiles } from 'ee_jest/on_demand_scans/mocks/mock_data';
 import * as responses from 'ee_jest/security_configuration/dast_site_profiles_form/mock_data/apollo_mock';
 import { TEST_HOST } from 'helpers/test_constants';
 import waitForPromises from 'jest/helpers/wait_for_promises';
@@ -21,6 +22,8 @@ const fullPath = 'group/project';
 const profilesLibraryPath = `${TEST_HOST}/${fullPath}/-/security/configuration/dast_profiles`;
 const profileName = 'My DAST site profile';
 const targetUrl = 'http://example.com';
+const excludedUrls = 'http://example.com/logout';
+const requestHeaders = 'my-new-header=something';
 
 const defaultProps = {
   profilesLibraryPath,
@@ -43,6 +46,9 @@ describe('DastSiteProfileForm', () => {
   const findByTestId = testId => wrapper.find(`[data-testid="${testId}"]`);
   const findProfileNameInput = () => findByTestId('profile-name-input');
   const findTargetUrlInput = () => findByTestId('target-url-input');
+  const findAuthSection = () => wrapper.find(DastSiteAuthSection);
+  const findExcludedUrlsInput = () => findByTestId('excluded-urls-input');
+  const findRequestHeadersInput = () => findByTestId('request-headers-input');
   const findSubmitButton = () => findByTestId('dast-site-profile-form-submit-button');
   const findCancelButton = () => findByTestId('dast-site-profile-form-cancel-button');
   const findCancelModal = () => wrapper.find(GlModal);
@@ -88,6 +94,11 @@ describe('DastSiteProfileForm', () => {
       {},
       {
         propsData: defaultProps,
+        provide: {
+          glFeatures: {
+            securityDastSiteProfilesAdditionalFields: true,
+          },
+        },
       },
       options,
       {
@@ -132,6 +143,18 @@ describe('DastSiteProfileForm', () => {
     });
   });
 
+  describe('additional fields', () => {
+    beforeEach(() => {
+      createFullComponent();
+    });
+
+    it('should render correctly', () => {
+      expect(findAuthSection().exists()).toBe(true);
+      expect(findExcludedUrlsInput().exists()).toBe(true);
+      expect(findRequestHeadersInput().exists()).toBe(true);
+    });
+  });
+
   describe.each`
     title                  | siteProfile       | mutationVars                 | mutationKind
     ${'New site profile'}  | ${null}           | ${{}}                        | ${'dastSiteProfileCreate'}
@@ -159,6 +182,8 @@ describe('DastSiteProfileForm', () => {
       const fillAndSubmitForm = async () => {
         await setFieldValue(findProfileNameInput(), profileName);
         await setFieldValue(findTargetUrlInput(), targetUrl);
+        await setFieldValue(findExcludedUrlsInput(), excludedUrls);
+        await setFieldValue(findRequestHeadersInput(), requestHeaders);
         submitForm();
       };
 
@@ -173,10 +198,14 @@ describe('DastSiteProfileForm', () => {
 
         it('triggers GraphQL mutation', () => {
           expect(requestHandlers[mutationKind]).toHaveBeenCalledWith({
-            profileName,
-            targetUrl,
-            fullPath,
-            ...mutationVars,
+            input: {
+              profileName,
+              targetUrl,
+              excludedUrls,
+              requestHeaders,
+              fullPath,
+              ...mutationVars,
+            },
           });
         });
 
@@ -262,6 +291,24 @@ describe('DastSiteProfileForm', () => {
           expect(urlUtility.redirectTo).toHaveBeenCalledWith(profilesLibraryPath);
         });
       });
+    });
+  });
+
+  describe('when feature flag is off', () => {
+    beforeEach(() => {
+      createFullComponent({
+        provide: {
+          glFeatures: {
+            securityDastSiteProfilesAdditionalFields: false,
+          },
+        },
+      });
+    });
+
+    it('should not render additional fields', () => {
+      expect(findAuthSection().exists()).toBe(false);
+      expect(findExcludedUrlsInput().exists()).toBe(false);
+      expect(findRequestHeadersInput().exists()).toBe(false);
     });
   });
 });

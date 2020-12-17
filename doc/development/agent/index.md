@@ -33,7 +33,7 @@ The agent can help you perform tasks like these:
 ## Architecture of the Kubernetes Agent
 
 The GitLab Kubernetes Agent and the GitLab Kubernetes Agent Server use
-[bidirectional streaming](https://grpc.io/docs/guides/concepts/#bidirectional-streaming-rpc)
+[bidirectional streaming](https://grpc.io/docs/what-is-grpc/core-concepts/#bidirectional-streaming-rpc)
 to allow the connection acceptor (the gRPC server, GitLab Kubernetes Agent Server) to
 act as a client. The connection acceptor sends requests as gRPC replies. The client-server
 relationship is inverted because the connection must be initiated from inside the
@@ -71,6 +71,10 @@ graph TB
     the right `agentk`, forwarding requests to it and forwarding responses back.
   - (Optional) Sending notifications through ActionCable for events received from `agentk`.
   - Polling manifest repositories for [GitOps support](https://gitlab.com/gitlab-org/cluster-integration/gitlab-agent/-/blob/master/doc/gitops.md) by communicating with Gitaly.
+
+<i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
+To learn more about how the repository is structured, see
+[GitLab Kubernetes Agent repository overview](https://www.youtube.com/watch?v=j8CyaCWroUY).
 
 ## Guiding principles
 

@@ -1,12 +1,12 @@
 mutation dastSiteValidationCreate(
-  $projectFullPath: ID!
+  $fullPath: ID!
   $dastSiteTokenId: DastSiteTokenID!
   $validationPath: String!
   $validationStrategy: DastSiteValidationStrategyEnum
 ) {
   dastSiteValidationCreate(
     input: {
-      fullPath: $projectFullPath
+      fullPath: $fullPath
       dastSiteTokenId: $dastSiteTokenId
       validationPath: $validationPath
       strategy: $validationStrategy

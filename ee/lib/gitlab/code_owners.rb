@@ -13,6 +13,15 @@ module Gitlab
       end
     end
 
+    # @param project [Project]
+    # @param ref [String]
+    # Fetch sections from CODEOWNERS file
+    def self.sections(project, ref)
+      return [] unless project.feature_available?(:code_owners)
+
+      Loader.new(project, ref, []).code_owners_sections
+    end
+
     # @param merge_request [MergeRequest]
     # @param merge_request_diff [MergeRequestDiff]
     #   Find code owners entries at a particular MergeRequestDiff.

@@ -1,4 +1,5 @@
 import Vue from 'vue';
+import 'ee/registrations/welcome/other_role';
 import { parseBoolean } from '~/lib/utils/common_utils';
 import {
   STEPS,

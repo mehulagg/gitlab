@@ -4,7 +4,7 @@ group: Project Management
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Issue Boards
+# Issue Boards **(CORE)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/5554) in [GitLab 8.11](https://about.gitlab.com/releases/2016/08/22/gitlab-8-11-released/#issue-board).
 
@@ -156,7 +156,7 @@ When finished with something, they move the card to **Frontend**. The Frontend t
 Cards finished by the UX team automatically appear in the **Frontend** column when they are ready
 for them.
 
-NOTE: **Note:**
+NOTE:
 For a broader use case, please see the blog post
 [GitLab Workflow, an Overview](https://about.gitlab.com/blog/2016/10/25/gitlab-workflow-an-overview/#gitlab-workflow-use-case-scenario).
 For a real use case example, you can read why
@@ -233,17 +233,18 @@ advanced functionality is present in [higher tiers only](https://about.gitlab.co
 
 ### Configurable issue boards **(STARTER)**
 
-> [Introduced](https://about.gitlab.com/releases/2017/11/22/gitlab-10-2-released/#issue-boards-configuration) in [GitLab Starter](https://about.gitlab.com/pricing/) 10.2.
+> - [Introduced](https://about.gitlab.com/releases/2017/11/22/gitlab-10-2-released/#issue-boards-configuration) in GitLab 10.2.
+> - Setting current iteration as scope [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/196804) in GitLab 13.7.
 
-An issue board can be associated with a GitLab [Milestone](milestones/index.md#milestones),
-[Labels](labels.md), Assignee and Weight
+An issue board can be associated with a [milestone](milestones/index.md#milestones),
+[labels](labels.md), assignee, weight, and current [iteration](../group/iterations/index.md),
 which automatically filter the board issues accordingly.
 This allows you to create unique boards according to your team's need.
 
 ![Create scoped board](img/issue_board_creation_v13_6.png)
 
 You can define the scope of your board when creating it or by clicking the **Edit board** button.
-After a milestone, assignee or weight is assigned to an issue board, you can no longer
+After a milestone, iteration, assignee, or weight is assigned to an issue board, you can no longer
 filter through these in the search bar. In order to do that, you need to remove the desired scope
 (for example, milestone, assignee, or weight) from the issue board.
 
@@ -393,19 +394,6 @@ status.
 
 If you're not able to do some of the things above, make sure you have the right
 [permissions](#permissions).
-
-### First time using an issue board
-
-> The automatic creation of the **To Do** and **Doing** lists was [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/202144) in GitLab 13.5.
-
-The first time you open an issue board, you are presented with the default lists
-(**Open**, **To Do**, **Doing**, and **Closed**).
-
-If the **To Do** and **Doing** labels don't exist in the project or group, they are created, and
-their lists appear as empty. If any of them already exists, the list is filled with the issues that
-have that label.
-
-![issue board default lists](img/issue_board_default_lists_v13_4.png)
 
 ### Create a new list
 
@@ -565,6 +553,22 @@ To select and move multiple cards:
 1. Drag one of the selected cards to another position or list and all selected cards are moved.
 
 ![Multi-select Issue Cards](img/issue_boards_multi_select_v12_4.png)
+
+### First time using an issue board
+
+> - The automatic creation of the **To Do** and **Doing** lists [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/202144) in GitLab 13.5.
+> - [Deprecated](https://gitlab.com/gitlab-org/gitlab/-/issues/270583) in GitLab 13.7. In GitLab 13.7 and later, the **To Do** and **Doing** columns are not automatically created.
+
+WARNING:
+This feature was [deprecated](https://gitlab.com/gitlab-org/gitlab/-/issues/270583) in GitLab 13.7.
+The **To Do** and **Doing** columns are no longer automatically created.
+
+In GitLab 13.5 and 13.6, the first time you open an issue board, you are presented with the default lists
+(**Open**, **To Do**, **Doing**, and **Closed**).
+
+If the **To Do** and **Doing** labels don't exist in the project or group, they are created, and
+their lists appear as empty. If any of them already exists, the list is filled with the issues that
+have that label.
 
 ## Tips
 

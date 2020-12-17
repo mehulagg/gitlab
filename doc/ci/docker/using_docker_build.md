@@ -37,7 +37,7 @@ during jobs, each with their own tradeoffs.
 An alternative to using `docker build` is to [use kaniko](using_kaniko.md).
 This avoids having to execute a runner in privileged mode.
 
-TIP: **Tip:**
+NOTE:
 To see how Docker and GitLab Runner are configured for shared runners on
 GitLab.com, see [GitLab.com shared
 runners](../../user/gitlab_com/index.md#shared-runners).
@@ -103,7 +103,7 @@ image in privileged mode.
 CI builds, follow the `docker-compose`
 [installation instructions](https://docs.docker.com/compose/install/).
 
-DANGER: **Warning:**
+WARNING:
 By enabling `--docker-privileged`, you are effectively disabling all of
 the security mechanisms of containers and exposing your host to privilege
 escalation which can lead to container breakout. For more information, check
@@ -368,7 +368,7 @@ build:
 The third approach is to bind-mount `/var/run/docker.sock` into the
 container so that Docker is available in the context of that image.
 
-NOTE: **Note:**
+NOTE:
 If you bind the Docker socket and you are
 [using GitLab Runner 11.11 or later](https://gitlab.com/gitlab-org/gitlab-runner/-/merge_requests/1261),
 you can no longer use `docker:19.03.12-dind` as a service. Volume bindings
@@ -567,7 +567,7 @@ of this file. You can do this with a command like:
 kubectl create configmap docker-daemon --namespace gitlab-runner --from-file /tmp/daemon.json
 ```
 
-NOTE: **Note:**
+NOTE:
 Make sure to use the namespace that GitLab Runner Kubernetes executor uses
 to create job pods in.
 
@@ -629,7 +629,7 @@ Then every job that the runner picks up will be authenticated already. If you
 are using the official `docker:19.03.13` image, the home directory is
 under `/root`.
 
-If you mount the config file, any `docker` command
+If you mount the configuration file, any `docker` command
 that modifies the `~/.docker/config.json` (for example, `docker login`)
 fails, because the file is mounted as read-only. Do not change it from
 read-only, because other problems will occur.
@@ -692,7 +692,7 @@ to include the file.
       sub_path = "config.json"
 ```
 
-### Option 3: Use `DOCKER_ATUH_CONFIG`
+### Option 3: Use `DOCKER_AUTH_CONFIG`
 
 If you already have
 [`DOCKER_AUTH_CONFIG`](using_docker_images.md#determining-your-docker_auth_config-data)
@@ -703,7 +703,7 @@ There are multiple ways to define this. For example:
 
 - Inside
   [`pre_build_script`](https://docs.gitlab.com/runner/configuration/advanced-configuration.html#the-runners-section)
-  inside of the runner config file.
+  inside of the runner configuration file.
 - Inside [`before_script`](../yaml/README.md#before_script).
 - Inside of [`script`](../yaml/README.md#script).
 
@@ -788,7 +788,7 @@ The steps in the `script` section for the `build` stage can be summed up to:
 
 ## Use the OverlayFS driver
 
-NOTE: **Note:**
+NOTE:
 The shared runners on GitLab.com use the `overlay2` driver by default.
 
 By default, when using `docker:dind`, Docker uses the `vfs` storage driver which

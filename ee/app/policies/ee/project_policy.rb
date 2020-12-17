@@ -54,6 +54,11 @@ module EE
           ::Gitlab::CurrentSettings.prevent_merge_requests_committers_approval
       end
 
+      with_scope :subject
+      condition(:project_activity_analytics_available) do
+        @subject.feature_available?(:project_activity_analytics)
+      end
+
       condition(:project_merge_request_analytics_available) do
         @subject.feature_available?(:project_merge_request_analytics)
       end
@@ -158,8 +163,7 @@ module EE
 
       with_scope :subject
       condition(:oncall_schedules_available) do
-        ::Feature.enabled?(:oncall_schedules_mvc, @subject) &&
-          @subject.feature_available?(:oncall_schedules)
+        ::Gitlab::IncidentManagement.oncall_schedules_available?(@subject)
       end
 
       rule { visual_review_bot }.policy do
@@ -199,6 +203,7 @@ module EE
         enable :update_vulnerability_feedback
         enable :read_ci_minutes_quota
         enable :admin_feature_flags_issue_links
+        enable :read_project_audit_events
       end
 
       rule { can?(:developer_access) & iterations_available }.policy do
@@ -226,9 +231,10 @@ module EE
         enable :create_vulnerability_export
         enable :admin_vulnerability
         enable :admin_vulnerability_issue_link
+        enable :admin_vulnerability_external_issue_link
       end
 
-      rule { security_bot && auto_fix_enabled }.policy do
+      rule { security_bot & auto_fix_enabled }.policy do
         enable :push_code
         enable :create_merge_request_from
         enable :create_vulnerability_feedback
@@ -283,6 +289,7 @@ module EE
         prevent :create_vulnerability
         prevent :admin_vulnerability
         prevent :admin_vulnerability_issue_link
+        prevent :admin_vulnerability_external_issue_link
       end
 
       rule { auditor & ~guest }.policy do
@@ -348,6 +355,9 @@ module EE
       end
 
       rule { can?(:read_merge_request) & code_review_analytics_enabled }.enable :read_code_review_analytics
+
+      rule { reporter & project_activity_analytics_available }
+        .enable :read_project_activity_analytics
 
       rule { reporter & project_merge_request_analytics_available }
         .enable :read_project_merge_request_analytics

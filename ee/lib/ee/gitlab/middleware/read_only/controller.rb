@@ -24,6 +24,10 @@ module EE
             'repositories/lfs_locks_api' => %w{verify create unlock}
           }.freeze
 
+          ALLOWLISTED_SIGN_IN_ROUTES = {
+            'sessions' => %w{create}
+          }.freeze
+
           private
 
           # In addition to routes allowed in FOSS, allow geo node update route
@@ -33,10 +37,10 @@ module EE
           # secondary either
           override :allowlisted_routes
           def allowlisted_routes
-            allowed = super || geo_node_update_route? || geo_api_route?
+            allowed = super || geo_node_update_route? || geo_api_route? || admin_settings_update?
 
             return true if allowed
-            return false if maintenance_mode?
+            return sign_in_route? if ::Gitlab.maintenance_mode?
             return false unless ::Gitlab::Geo.secondary?
 
             git_write_routes
@@ -44,6 +48,10 @@ module EE
 
           def git_write_routes
             geo_proxy_git_ssh_route? || geo_proxy_git_http_route? || lfs_locks_route?
+          end
+
+          def admin_settings_update?
+            request.path.start_with?('/api/v4/application/settings')
           end
 
           def geo_node_update_route?
@@ -78,6 +86,12 @@ module EE
             end
           end
 
+          def sign_in_route?
+            return unless request.post? && request.path.start_with?('/users/sign_in')
+
+            ALLOWLISTED_SIGN_IN_ROUTES[route_hash[:controller]]&.include?(route_hash[:action])
+          end
+
           def lfs_locks_route?
             # Calling route_hash may be expensive. Only do it if we think there's a possible match
             unless request.path.end_with?('/info/lfs/locks', '/info/lfs/locks/verify') ||
@@ -90,13 +104,7 @@ module EE
 
           override :read_only?
           def read_only?
-            maintenance_mode? || super
-          end
-
-          def maintenance_mode?
-            return unless ::Feature.enabled?(:maintenance_mode)
-
-            ::Gitlab::CurrentSettings.maintenance_mode
+            ::Gitlab.maintenance_mode? || super
           end
         end
       end

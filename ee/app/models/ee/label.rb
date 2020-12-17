@@ -7,6 +7,10 @@ module EE
     SCOPED_LABEL_SEPARATOR = '::'
     SCOPED_LABEL_PATTERN = /^.*#{SCOPED_LABEL_SEPARATOR}/.freeze
 
+    prepended do
+      has_many :epic_board_labels, class_name: 'Boards::EpicBoardLabel', inverse_of: :label
+    end
+
     def scoped_label?
       SCOPED_LABEL_PATTERN.match?(name)
     end

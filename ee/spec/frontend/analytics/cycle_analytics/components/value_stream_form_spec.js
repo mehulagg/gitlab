@@ -27,7 +27,7 @@ describe('ValueStreamForm', () => {
       },
     });
 
-  const createComponent = ({ data = {}, initialState = {} } = {}) =>
+  const createComponent = ({ props = {}, data = {}, initialState = {} } = {}) =>
     shallowMount(ValueStreamForm, {
       localVue,
       store: fakeStore({ initialState }),
@@ -35,6 +35,9 @@ describe('ValueStreamForm', () => {
         return {
           ...data,
         };
+      },
+      propsData: {
+        ...props,
       },
       mocks: {
         $toast: {
@@ -48,6 +51,7 @@ describe('ValueStreamForm', () => {
     findModal().props('actionPrimary').attributes[1].disabled;
   const submitModal = () => findModal().vm.$emit('primary', mockEvent);
   const findFormGroup = () => wrapper.find(GlFormGroup);
+  const findExtendedFormFields = () => wrapper.find('[data-testid="extended-form-fields"]');
 
   afterEach(() => {
     wrapper.destroy();
@@ -56,11 +60,25 @@ describe('ValueStreamForm', () => {
 
   describe('default state', () => {
     beforeEach(() => {
-      wrapper = createComponent({ initialState: {} });
+      wrapper = createComponent();
     });
 
     it('submit button is disabled', () => {
       expect(createSubmitButtonDisabledState()).toBe(true);
+    });
+
+    it('does not include extended fields', () => {
+      expect(findExtendedFormFields().exists()).toBe(false);
+    });
+  });
+
+  describe('with hasExtendedFormFields=true', () => {
+    beforeEach(() => {
+      wrapper = createComponent({ props: { hasExtendedFormFields: true } });
+    });
+
+    it('has the extended fields', () => {
+      expect(findExtendedFormFields().exists()).toBe(true);
     });
   });
 

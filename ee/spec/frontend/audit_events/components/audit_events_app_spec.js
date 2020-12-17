@@ -30,6 +30,7 @@ describe('AuditEventsApp', () => {
         filterTokenOptions,
         events,
         exportUrl,
+        showFilter: true,
         ...props,
       },
       stubs: {
@@ -123,6 +124,16 @@ describe('AuditEventsApp', () => {
 
     it('does not render the audit events export button', () => {
       expect(wrapper.find(AuditEventsExportButton).exists()).toBe(false);
+    });
+  });
+
+  describe('when the show filter flag is disabled', () => {
+    beforeEach(() => {
+      initComponent({ showFilter: false });
+    });
+
+    it('does not render the audit events filter', () => {
+      expect(wrapper.find(AuditEventsFilter).exists()).toBe(false);
     });
   });
 });

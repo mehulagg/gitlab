@@ -24,6 +24,10 @@ RSpec.describe 'Environments page', :js do
     'button[title="Stop environment"]'
   end
 
+  def upcoming_deployment_content_selector
+    '[data-testid="upcoming-deployment-content"]'
+  end
+
   describe 'page tabs' do
     it 'shows "Available" and "Stopped" tab with links' do
       visit_environments(project)
@@ -362,6 +366,26 @@ RSpec.describe 'Environments page', :js do
         expect(page).to have_content('No deployments yet')
       end
     end
+
+    context 'when there is an upcoming deployment' do
+      let_it_be(:project) { create(:project, :repository) }
+
+      let!(:deployment) do
+        create(:deployment, :running,
+                            environment: environment,
+                            sha: project.commit.id)
+      end
+
+      it "renders the upcoming deployment", :aggregate_failures do
+        visit_environments(project)
+
+        within(upcoming_deployment_content_selector) do
+          expect(page).to have_content("##{deployment.iid}")
+          expect(page).to have_selector("a[href=\"#{project_job_path(project, deployment.deployable)}\"]")
+          expect(page).to have_link(href: /#{deployment.user.username}/)
+        end
+      end
+    end
   end
 
   it 'does have a new environment button' do
@@ -430,10 +454,10 @@ RSpec.describe 'Environments page', :js do
       expect(page).to have_content 'review-1'
       expect(page).to have_content 'review-2'
       within('.ci-table') do
-        within('.gl-responsive-table-row:nth-child(3)') do
+        within('[data-qa-selector="environment_item"]', text: 'review-1') do
           expect(find('.js-auto-stop').text).not_to be_empty
         end
-        within('.gl-responsive-table-row:nth-child(4)') do
+        within('[data-qa-selector="environment_item"]', text: 'review-2') do
           expect(find('.js-auto-stop').text).not_to be_empty
         end
       end

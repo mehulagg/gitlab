@@ -26,12 +26,19 @@ module Types
           description: 'The current validation status of the site profile',
           method: :status
 
+    field :normalized_target_url, GraphQL::STRING_TYPE, null: true,
+          description: 'Normalized URL of the target to be scanned'
+
     def target_url
       object.dast_site.url
     end
 
     def edit_path
       Rails.application.routes.url_helpers.edit_project_security_configuration_dast_profiles_dast_site_profile_path(object.project, object)
+    end
+
+    def normalized_target_url
+      DastSiteValidation.get_normalized_url_base(object.dast_site.url)
     end
   end
 end

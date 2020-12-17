@@ -107,7 +107,7 @@ curl: (22) The requested URL returned error: 404
 ```
 
 The HTTP exit code can help you diagnose the success or failure of your REST call.
-  
+
 ## Authentication
 
 Most API requests require authentication, or only return public data when
@@ -123,7 +123,7 @@ There are several methods you can use to authenticate with the GitLab API:
 - [Session cookie](#session-cookie)
 - [GitLab CI/CD job token](#gitlab-ci-job-token) **(Specific endpoints only)**
 
-NOTE: **Note:**
+NOTE:
 Project access tokens are supported for self-managed instances on Core and
 higher. They're also supported on GitLab.com Bronze and higher.
 
@@ -478,7 +478,7 @@ Status: 200 OK
 ...
 ```
 
-CAUTION: **Deprecation:**
+WARNING:
 The `Links` header is scheduled to be removed in GitLab 14.0 to be aligned with the
 [W3C `Link` specification](https://www.w3.org/wiki/LinkHeader). The `Link`
 header was [added in GitLab 13.1](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/33714)
@@ -591,7 +591,7 @@ We can call the API with `array` and `hash` types parameters as follows:
 curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" \
 -d "import_sources[]=github" \
 -d "import_sources[]=bitbucket" \
-https://gitlab.example.com/api/v4/some_endpoint
+"https://gitlab.example.com/api/v4/some_endpoint"
 ```
 
 ### `hash`
@@ -605,7 +605,7 @@ curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" \
 --form "file=@/path/to/somefile.txt"
 --form "override_params[visibility]=private" \
 --form "override_params[some_other_param]=some_value" \
-https://gitlab.example.com/api/v4/projects/import
+"https://gitlab.example.com/api/v4/projects/import"
 ```
 
 ### Array of hashes

@@ -23,20 +23,15 @@ RSpec.describe BuildFinishedWorker do
   describe '#revoke_secret_detection_token?' do
     using RSpec::Parameterized::TableSyntax
 
-    where(:dot_com, :token_revocation_enabled, :secret_detection_vulnerability_found, :expected_result) do
-      true  | true  | true  | true
-      true  | true  | false | false
-      true  | false | true  | false
-      true  | false | false | false
-      false | true  | true  | false
-      false | true  | false | false
-      false | false | true  | false
-      false | false | false | false
+    where(:token_revocation_enabled, :secret_detection_vulnerability_found, :expected_result) do
+      true  | true  | true
+      true  | false | false
+      false | true  | false
+      false | false | false
     end
 
     with_them do
       before do
-        allow(Gitlab).to receive(:com?) { dot_com }
         stub_application_setting(secret_detection_token_revocation_enabled: token_revocation_enabled)
 
         allow_next_instance_of(described_class) do |build_finished_worker|

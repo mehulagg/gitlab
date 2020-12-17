@@ -8,7 +8,7 @@ class Groups::Analytics::RepositoryAnalyticsController < Groups::Analytics::Appl
   before_action -> { authorize_view_by_action!(:read_group_repository_analytics) }
 
   def show
-    track_event(pageview_tracker_params)
+    track_event(**pageview_tracker_params)
   end
 
   private

@@ -1,5 +1,8 @@
 @import 'page_bundles/mixins_and_variables_and_functions';
 
+/*
+  Update ee/app/assets/javascripts/roadmap/constants.js when making changes.
+*/
 $header-item-height: 60px;
 $item-height: 50px;
 $details-cell-width: px-to-rem(320px);
@@ -120,31 +123,6 @@ html.group-epics-roadmap-html {
 
   &.overflow-reset {
     overflow: initial;
-  }
-}
-
-.roadmap-shell {
-  position: relative;
-  height: 100%;
-  width: 100%;
-  overflow-x: auto;
-
-  .skeleton-loader {
-    position: absolute;
-    top: $header-item-height;
-    width: $details-cell-width;
-    height: 100%;
-    padding-top: $gl-padding-top;
-    padding-left: $gl-padding;
-    z-index: 4;
-
-    &::after {
-      height: 100%;
-    }
-  }
-
-  &.prevent-vertical-scroll {
-    overflow-y: hidden;
   }
 }
 
@@ -322,10 +300,6 @@ html.group-epics-roadmap-html {
   &:last-child {
     border-right: 0;
   }
-}
-
-.epic-bar-wrapper {
-  position: relative;
 }
 
 .epic-bar {

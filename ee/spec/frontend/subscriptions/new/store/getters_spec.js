@@ -105,11 +105,28 @@ describe('Subscriptions Getters', () => {
       ).toBe('My organization');
     });
 
+    it('returns the organization name when a group is selected but does not exist', () => {
+      expect(
+        getters.name(
+          { isSetupForCompany: true },
+          {
+            isGroupSelected: true,
+            isSelectedGroupPresent: false,
+            selectedGroupName: 'Selected group',
+          },
+        ),
+      ).toBe('Your organization');
+    });
+
     it('returns the selected group name a group is selected', () => {
       expect(
         getters.name(
           { isSetupForCompany: true },
-          { isGroupSelected: true, selectedGroupName: 'Selected group' },
+          {
+            isGroupSelected: true,
+            isSelectedGroupPresent: true,
+            selectedGroupName: 'Selected group',
+          },
         ),
       ).toBe('Selected group');
     });
@@ -161,13 +178,51 @@ describe('Subscriptions Getters', () => {
       ).toBe(1);
     });
 
+    it('returns `null` when a group is selected, but not present', () => {
+      expect(
+        getters.selectedGroupUsers(
+          { groupData: [{ numberOfUsers: 3, value: 123 }], selectedGroup: 123 },
+          { isGroupSelected: true, isSelectedGroupPresent: false },
+        ),
+      ).toBe(null);
+    });
+
     it('returns the number of users of the selected group when a group is selected', () => {
       expect(
         getters.selectedGroupUsers(
           { groupData: [{ numberOfUsers: 3, value: 123 }], selectedGroup: 123 },
-          { isGroupSelected: true },
+          { isGroupSelected: true, isSelectedGroupPresent: true },
         ),
       ).toBe(3);
+    });
+  });
+
+  describe('isSelectedGroupPresent', () => {
+    it('returns false when group is not selected', () => {
+      expect(
+        getters.isSelectedGroupPresent(
+          { groupData: [{ numberOfUsers: 3, value: 123 }], selectedGroup: null },
+          { isGroupSelected: false },
+        ),
+      ).toBe(false);
+    });
+
+    it('returns false when group is selected, but not present', () => {
+      expect(
+        getters.isSelectedGroupPresent(
+          { groupData: [{ numberOfUsers: 3, value: 123 }], selectedGroup: 321 },
+          { isGroupSelected: true },
+        ),
+      ).toBe(false);
+    });
+
+    it('returns true when group is selected and is present', () => {
+      expect(
+        getters.isSelectedGroupPresent(
+          { groupData: [{ numberOfUsers: 3, value: 123 }], selectedGroup: 123 },
+          { isGroupSelected: true },
+        ),
+      ).toBe(true);
     });
   });
 

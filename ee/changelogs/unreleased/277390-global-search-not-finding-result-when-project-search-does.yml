@@ -1,0 +1,5 @@
+---
+title: Switch Search Elasticsearch index to use english stemmer
+merge_request: 48518
+author:
+type: fixed

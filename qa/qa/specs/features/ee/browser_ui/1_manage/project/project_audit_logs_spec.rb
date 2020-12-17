@@ -25,7 +25,9 @@ module QA
 
       let(:user) { Resource::User.fabricate_or_use(Runtime::Env.gitlab_qa_username_1, Runtime::Env.gitlab_qa_password_1) }
 
-      context "Add project", testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/727' do
+      context "Add project",
+              testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/727',
+              quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/283925', type: :investigating, only: :production } do
         before do
           Resource::Project.fabricate_via_browser_ui! do |project|
             project.name = 'audit-add-project-via-ui'

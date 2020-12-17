@@ -1019,6 +1019,7 @@ RSpec.describe User do
     let_it_be(:free_group_z) { create(:group, name: 'AZ', gitlab_subscription: create(:gitlab_subscription, :free)) }
     let_it_be(:free_group_a) { create(:group, name: 'AA', gitlab_subscription: create(:gitlab_subscription, :free)) }
     let_it_be(:sub_group) { create(:group, name: 'SubGroup', parent: free_group_a) }
+    let_it_be(:trial_group) { create(:group, name: 'AB', gitlab_subscription: create(:gitlab_subscription, :active_trial, :gold)) }
 
     subject { user.manageable_groups_eligible_for_subscription }
 
@@ -1067,6 +1068,30 @@ RSpec.describe User do
       it { is_expected.to eq [free_group_a, free_group_z] }
 
       it { is_expected.not_to include(sub_group) }
+    end
+
+    context 'developer of a trial group' do
+      before do
+        trial_group.add_developer(user)
+      end
+
+      it { is_expected.not_to include(trial_group) }
+    end
+
+    context 'owner of a trial group' do
+      before do
+        trial_group.add_owner(user)
+      end
+
+      it { is_expected.to include(trial_group) }
+    end
+
+    context 'maintainer of a trial group' do
+      before do
+        trial_group.add_maintainer(user)
+      end
+
+      it { is_expected.to include(trial_group) }
     end
   end
 
@@ -1543,6 +1568,44 @@ RSpec.describe User do
       it 'returns the existing board' do
         expect(preference.persisted?).to be_truthy
         expect(preference).to eq(epic_user_preference)
+      end
+    end
+  end
+
+  describe '#can_remove_self?' do
+    let(:user) { create(:user) }
+
+    subject { user.can_remove_self? }
+
+    context 'not on GitLab.com' do
+      context 'when the password is not automatically set' do
+        it { is_expected.to eq true }
+      end
+
+      context 'when the password is automatically set' do
+        before do
+          user.password_automatically_set = true
+        end
+
+        it { is_expected.to eq true }
+      end
+    end
+
+    context 'on GitLab.com' do
+      before do
+        allow(::Gitlab).to receive(:com?).and_return(true)
+      end
+
+      context 'when the password is not automatically set' do
+        it { is_expected.to eq true }
+      end
+
+      context 'when the password is automatically set' do
+        before do
+          user.password_automatically_set = true
+        end
+
+        it { is_expected.to eq false }
       end
     end
   end

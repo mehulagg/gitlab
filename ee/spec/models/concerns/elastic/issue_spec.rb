@@ -107,6 +107,7 @@ RSpec.describe Issue, :elastic do
 
   it "returns json with all needed elements" do
     assignee = create(:user)
+    project = create(:project, :internal)
     issue = create :issue, project: project, assignees: [assignee]
 
     expected_hash = issue.attributes.extract!(
@@ -129,7 +130,8 @@ RSpec.describe Issue, :elastic do
     })
 
     expected_hash['assignee_id'] = [assignee.id]
-    expected_hash['issues_access_level'] = issue.project.project_feature.issues_access_level
+    expected_hash['issues_access_level'] = ProjectFeature::ENABLED
+    expected_hash['visibility_level'] = Gitlab::VisibilityLevel::INTERNAL
 
     expect(issue.__elasticsearch__.as_indexed_json).to eq(expected_hash)
   end

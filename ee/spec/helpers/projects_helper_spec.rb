@@ -210,16 +210,17 @@ RSpec.describe ProjectsHelper do
         projects/security/vulnerability_report#index
         projects/security/dashboard#index
         projects/on_demand_scans#index
-        projects/dast_profiles#index
-        projects/dast_site_profiles#new
-        projects/dast_site_profiles#edit
-        projects/dast_scanner_profiles#new
-        projects/dast_scanner_profiles#edit
+        projects/security/dast_profiles#show
+        projects/security/dast_site_profiles#new
+        projects/security/dast_site_profiles#edit
+        projects/security/dast_scanner_profiles#new
+        projects/security/dast_scanner_profiles#edit
         projects/dependencies#index
         projects/licenses#index
         projects/threat_monitoring#show
         projects/threat_monitoring#new
         projects/threat_monitoring#edit
+        projects/audit_events#index
       ]
     end
 
@@ -232,17 +233,30 @@ RSpec.describe ProjectsHelper do
     let(:expected_on_demand_scans_paths) do
       %w[
         projects/on_demand_scans#index
-        projects/dast_profiles#index
-        projects/dast_site_profiles#new
-        projects/dast_site_profiles#edit
-        projects/dast_scanner_profiles#new
-        projects/dast_scanner_profiles#edit
       ]
     end
 
     subject { helper.sidebar_on_demand_scans_paths }
 
     it { is_expected.to eq(expected_on_demand_scans_paths) }
+  end
+
+  describe '#sidebar_security_configuration_paths' do
+    let(:expected_security_configuration_paths) do
+      %w[
+        projects/security/configuration#show
+        projects/security/sast_configuration#show
+        projects/security/dast_profiles#show
+        projects/security/dast_site_profiles#new
+        projects/security/dast_site_profiles#edit
+        projects/security/dast_scanner_profiles#new
+        projects/security/dast_scanner_profiles#edit
+      ]
+    end
+
+    subject { helper.sidebar_security_configuration_paths }
+
+    it { is_expected.to eq(expected_security_configuration_paths) }
   end
 
   describe '#get_project_nav_tabs' do
@@ -263,6 +277,7 @@ RSpec.describe ProjectsHelper do
 
       before do
         allow(helper).to receive(:can?) { false }
+        allow(helper).to receive(:current_user).and_return(user)
       end
 
       subject do
@@ -288,6 +303,110 @@ RSpec.describe ProjectsHelper do
           is_expected.to include(*nav_tabs)
         end
       end
+    end
+  end
+
+  describe '#top_level_link' do
+    let(:user) { build(:user) }
+
+    subject { helper.top_level_link(project) }
+
+    before do
+      allow(helper).to receive(:can?).and_return(false)
+      allow(helper).to receive(:current_user).and_return(user)
+    end
+
+    context 'when user can read project security dashboard and audit events' do
+      before do
+        allow(helper).to receive(:can?).with(user, :read_project_security_dashboard, project).and_return(true)
+        allow(helper).to receive(:can?).with(user, :read_project_audit_events, project).and_return(true)
+      end
+
+      it { is_expected.to eq("/#{project.full_path}/-/security/dashboard") }
+    end
+
+    context 'when user can read audit events' do
+      before do
+        allow(helper).to receive(:can?).with(user, :read_project_security_dashboard, project).and_return(false)
+        allow(helper).to receive(:can?).with(user, :read_project_audit_events, project).and_return(true)
+      end
+
+      context 'when the feature is enabled' do
+        before do
+          stub_licensed_features(audit_events: true)
+        end
+
+        it { is_expected.to eq("/#{project.full_path}/-/audit_events") }
+      end
+
+      context 'when the feature is disabled' do
+        before do
+          stub_licensed_features(audit_events: false)
+        end
+
+        it { is_expected.to eq("/#{project.full_path}/-/dependencies") }
+      end
+    end
+
+    context "when user can't read both project security dashboard and audit events" do
+      before do
+        allow(helper).to receive(:can?).with(user, :read_project_security_dashboard, project).and_return(false)
+        allow(helper).to receive(:can?).with(user, :read_project_audit_events, project).and_return(false)
+      end
+
+      it { is_expected.to eq("/#{project.full_path}/-/dependencies") }
+    end
+  end
+
+  describe '#top_level_qa_selector' do
+    let(:user) { build(:user) }
+
+    subject { helper.top_level_qa_selector(project) }
+
+    before do
+      allow(helper).to receive(:can?).and_return(false)
+      allow(helper).to receive(:current_user).and_return(user)
+    end
+
+    context 'when user can read project security dashboard and audit events' do
+      before do
+        allow(helper).to receive(:can?).with(user, :read_project_security_dashboard, project).and_return(true)
+        allow(helper).to receive(:can?).with(user, :read_project_audit_events, project).and_return(true)
+      end
+
+      it { is_expected.to eq('security_dashboard_link') }
+    end
+
+    context 'when user can read audit events' do
+      before do
+        allow(helper).to receive(:can?).with(user, :read_project_security_dashboard, project).and_return(false)
+        allow(helper).to receive(:can?).with(user, :read_project_audit_events, project).and_return(true)
+      end
+
+      context 'when the feature is enabled' do
+        before do
+          stub_licensed_features(audit_events: true)
+        end
+
+        it { is_expected.to eq('audit_events_settings_link') }
+      end
+
+      context 'when the feature is disabled' do
+        before do
+          stub_licensed_features(audit_events: false)
+        end
+
+        it { is_expected.to eq('dependency_list_link') }
+      end
+    end
+
+    context "when user can't read both project security dashboard and audit events" do
+      before do
+        allow(helper).to receive(:can?).with(user, :read_project_security_dashboard, project).and_return(false)
+        allow(helper).to receive(:can?).with(user, :read_project_audit_events, project).and_return(false)
+      end
+
+      it { is_expected.to eq('dependency_list_link') }
     end
   end
 

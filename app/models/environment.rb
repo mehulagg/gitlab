@@ -32,6 +32,7 @@ class Environment < ApplicationRecord
   has_one :last_visible_deployment, -> { visible.distinct_on_environment }, inverse_of: :environment, class_name: 'Deployment'
   has_one :last_visible_deployable, through: :last_visible_deployment, source: 'deployable', source_type: 'CommitStatus'
   has_one :last_visible_pipeline, through: :last_visible_deployable, source: 'pipeline'
+  has_one :upcoming_deployment, -> { running.order('deployments.id DESC') }, class_name: 'Deployment'
   has_one :latest_opened_most_severe_alert, -> { order_severity_with_open_prometheus_alert }, class_name: 'AlertManagement::Alert', inverse_of: :environment
 
   before_validation :nullify_external_url
@@ -422,11 +423,6 @@ class Environment < ApplicationRecord
 
   def generate_slug
     self.slug = Gitlab::Slug::Environment.new(name).generate
-  end
-
-  # Overrides ReactiveCaching default to activate limit checking behind a FF
-  def reactive_cache_limit_enabled?
-    Feature.enabled?(:reactive_caching_limit_environment, project, default_enabled: true)
   end
 end
 

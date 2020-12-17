@@ -14,6 +14,7 @@ module QA
                   element :security_dashboard_link
                   element :dependency_list_link
                   element :vulnerability_report_link
+                  element :audit_events_settings_link
                 end
               end
             end
@@ -45,6 +46,14 @@ module QA
                 find_element(:security_dashboard_link).hover
 
                 yield
+              end
+            end
+
+            def go_to_audit_events_settings
+              hover_security_compliance do
+                within_submenu do
+                  click_element :audit_events_settings_link
+                end
               end
             end
           end

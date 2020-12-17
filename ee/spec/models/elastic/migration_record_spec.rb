@@ -52,6 +52,8 @@ RSpec.describe Elastic::MigrationRecord, :elastic do
     let(:in_progress_migration) { described_class.new(version: 10, name: 10, filename: nil) }
 
     before do
+      es_helper.delete_index(index_name: es_helper.migrations_index_name)
+      es_helper.create_migrations_index
       completed_versions.each { |migration| migration.save!(completed: true) }
       in_progress_migration.save!(completed: false)
 

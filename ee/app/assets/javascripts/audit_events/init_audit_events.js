@@ -7,7 +7,7 @@ import createStore from './store';
 
 export default selector => {
   const el = document.querySelector(selector);
-  const { events, isLastPage, filterTokenOptions, exportUrl } = el.dataset;
+  const { events, isLastPage, filterTokenOptions, exportUrl, showFilter = true } = el.dataset;
 
   const store = createStore();
   store.dispatch('initializeAuditEvents');
@@ -24,6 +24,7 @@ export default selector => {
             convertObjectPropsToCamelCase(filterTokenOption),
           ),
           exportUrl,
+          showFilter: parseBoolean(showFilter),
         },
       }),
   });

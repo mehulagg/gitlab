@@ -181,6 +181,11 @@ module Gitlab
         :"geo_#{replicable_name}_replication"
       end
 
+      # Overridden by VerifiableReplicator, if it is included
+      def self.verification_enabled?
+        false
+      end
+
       # @param [ActiveRecord::Base] model_record
       # @param [Integer] model_record_id
       def initialize(model_record: nil, model_record_id: nil)

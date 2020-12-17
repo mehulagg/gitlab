@@ -36,3 +36,5 @@ export const CANARY_STATUS = {
   text: __('Canary'),
   stable: false,
 };
+
+export const CANARY_UPDATE_MODAL = 'confirm-canary-change';

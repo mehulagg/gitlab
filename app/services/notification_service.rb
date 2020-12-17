@@ -380,6 +380,10 @@ class NotificationService
     end
   end
 
+  def user_admin_rejection(name, email)
+    mailer.user_admin_rejection_email(name, email).deliver_later
+  end
+
   # Members
   def new_access_request(member)
     return true unless member.notifiable?(:subscription)
@@ -495,6 +499,16 @@ class NotificationService
 
     recipients.map do |recipient|
       email = mailer.issue_moved_email(recipient.user, issue, new_issue, current_user, recipient.reason)
+      email.deliver_later
+      email
+    end
+  end
+
+  def issue_cloned(issue, new_issue, current_user)
+    recipients = NotificationRecipients::BuildService.build_recipients(issue, current_user, action: 'cloned')
+
+    recipients.map do |recipient|
+      email = mailer.issue_cloned_email(recipient.user, issue, new_issue, current_user, recipient.reason)
       email.deliver_later
       email
     end

@@ -30,7 +30,7 @@ describe('Vulnerability Header', () => {
     reportType: 'sast',
     state: 'detected',
     createMrUrl: '/create_mr_url',
-    createIssueUrl: '/create_issue_url',
+    newIssueUrl: '/new_issue_url',
     projectFingerprint: 'abc123',
     pipeline: {
       id: 2,

@@ -1,0 +1,5 @@
+---
+title: Return the uuid attribute in the response of vulnerability_finding endpoint
+merge_request: 49742
+author:
+type: changed

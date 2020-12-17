@@ -78,7 +78,7 @@ Use Base64 encoding if you need to pass complex values, such as newlines and
 spaces. Left unencoded, complex values like these can cause escaping issues
 due to how Auto DevOps uses the arguments.
 
-CAUTION: **Warning:**
+WARNING:
 Avoid passing secrets as Docker build arguments if possible, as they may be
 persisted in your image. See
 [this discussion of best practices with secrets](https://github.com/moby/moby/issues/13490) for details.
@@ -154,7 +154,7 @@ You can override the default values in the `values.yaml` file in the
   `HELM_UPGRADE_VALUES_FILE` [environment variable](#environment-variables) with
   the path and name.
 
-NOTE: **Note:**
+NOTE:
 For GitLab 12.5 and earlier, use the `HELM_UPGRADE_EXTRA_ARGS` environment variable
 to override the default chart values by setting `HELM_UPGRADE_EXTRA_ARGS` to `--values <my-values.yaml>`.
 
@@ -243,7 +243,7 @@ include:
 
 See the [Auto DevOps template](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Auto-DevOps.gitlab-ci.yml) for information on available jobs.
 
-DANGER: **Deprecated:**
+WARNING:
 Auto DevOps templates using the [`only`](../../ci/yaml/README.md#onlyexcept-basic) or
 [`except`](../../ci/yaml/README.md#onlyexcept-basic) syntax have switched
 to the [`rules`](../../ci/yaml/README.md#rules) syntax, starting in
@@ -268,7 +268,7 @@ postgres://user:password@postgres-host:postgres-port/postgres-database
 
 ### Upgrading PostgresSQL
 
-CAUTION: **Deprecation:**
+WARNING:
 The variable `AUTO_DEVOPS_POSTGRES_CHANNEL` that controls default provisioned
 PostgreSQL was changed to `2` in [GitLab 13.0](https://gitlab.com/gitlab-org/gitlab/-/issues/210499).
 To keep using the old PostgreSQL, set the `AUTO_DEVOPS_POSTGRES_CHANNEL` variable to
@@ -355,12 +355,12 @@ applications.
 | `ROLLOUT_STATUS_DISABLED`               | From GitLab 12.0, used to disable rollout status check because it does not support all resource types, for example, `cronjob`. |
 | `STAGING_ENABLED`                       | From GitLab 10.8, used to define a [deploy policy for staging and production environments](#deploy-policy-for-staging-and-production-environments). |
 
-TIP: **Tip:**
+NOTE:
 After you set up your replica variables using a
 [project variable](../../ci/variables/README.md#gitlab-cicd-environment-variables),
 you can scale your application by redeploying it.
 
-CAUTION: **Caution:**
+WARNING:
 You should *not* scale your application using Kubernetes directly. This can
 cause confusion with Helm not detecting the change, and subsequent deploys with
 Auto DevOps can undo your changes.
@@ -385,48 +385,48 @@ The following table lists variables used to disable jobs.
 
 | **Job Name**                           | **Variable**                    | **GitLab version**    | **Description** |
 |----------------------------------------|---------------------------------|-----------------------|-----------------|
-| `.fuzz_base`                           | `COVFUZZ_DISABLED`              | [From GitLab 13.2](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/34984) | [Read more](../../user/application_security/coverage_fuzzing/) about how `.fuzz_base` provide capability for your own jobs. If the variable is present, your jobs won't be created. |
-| `apifuzzer_fuzz`                       | `API_FUZZING_DISABLED`          | [From GitLab 13.3](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/39135) | If the variable is present, the job won't be created. |
-| `bandit-sast`                          | `SAST_DISABLED`                 |                       | If the variable is present, the job won't be created. |
-| `brakeman-sast`                        | `SAST_DISABLED`                 |                       | If the variable is present, the job won't be created. |
-| `bundler-audit-dependency_scanning`    | `DEPENDENCY_SCANNING_DISABLED`  |                       | If the variable is present, the job won't be created. |
+| `.fuzz_base`                           | `COVFUZZ_DISABLED`              | [From GitLab 13.2](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/34984) | [Read more](../../user/application_security/coverage_fuzzing/) about how `.fuzz_base` provide capability for your own jobs. If the variable is present, your jobs aren't created. |
+| `apifuzzer_fuzz`                       | `API_FUZZING_DISABLED`          | [From GitLab 13.3](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/39135) | If the variable is present, the job isn't created. |
+| `bandit-sast`                          | `SAST_DISABLED`                 |                       | If the variable is present, the job isn't created. |
+| `brakeman-sast`                        | `SAST_DISABLED`                 |                       | If the variable is present, the job isn't created. |
+| `bundler-audit-dependency_scanning`    | `DEPENDENCY_SCANNING_DISABLED`  |                       | If the variable is present, the job isn't created. |
 | `canary`                               | `CANARY_ENABLED`                |                       | This manual job is created if the variable is present. |
 | `code_intelligence`                    | `CODE_INTELLIGENCE_DISABLED`    | From GitLab 13.6      | If the variable is present, the job isn't created. |
-| `codequality`                          | `CODE_QUALITY_DISABLED`         | Until GitLab 11.0     | If the variable is present, the job won't be created. |
-| `code_quality`                         | `CODE_QUALITY_DISABLED`         | [From GitLab 11.0](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/5773) | If the variable is present, the job won't be created. |
-| `container_scanning`                   | `CONTAINER_SCANNING_DISABLED`   | From GitLab 11.0      | If the variable is present, the job won't be created. |
-| `dast`                                 | `DAST_DISABLED`                 | From GitLab 11.0      | If the variable is present, the job won't be created. |
-| `dast_environment_deploy`              | `DAST_DISABLED_FOR_DEFAULT_BRANCH` or `DAST_DISABLED` | [From GitLab 12.4](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/17789) | If either variable is present, the job won't be created. |
-| `dependency_scanning`                  | `DEPENDENCY_SCANNING_DISABLED`  | From GitLab 11.0      | If the variable is present, the job won't be created. |
-| `eslint-sast`                          | `SAST_DISABLED`                 |                       | If the variable is present, the job won't be created. |
-| `flawfinder-sast`                      | `SAST_DISABLED`                 |                       | If the variable is present, the job won't be created. |
-| `gemnasium-dependency_scanning`        | `DEPENDENCY_SCANNING_DISABLED`  |                       | If the variable is present, the job won't be created. |
-| `gemnasium-maven-dependency_scanning`  | `DEPENDENCY_SCANNING_DISABLED`  |                       | If the variable is present, the job won't be created. |
-| `gemnasium-python-dependency_scanning` | `DEPENDENCY_SCANNING_DISABLED`  |                       | If the variable is present, the job won't be created. |
-| `gosec-sast`                           | `SAST_DISABLED`                 |                       | If the variable is present, the job won't be created. |
-| `kubesec-sast`                         | `SAST_DISABLED`                 |                       | If the variable is present, the job won't be created. |
-| `license_management`                   | `LICENSE_MANAGEMENT_DISABLED`   | GitLab 11.0 to 12.7   | If the variable is present, the job won't be created. Job deprecated [from GitLab 12.8](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/22773) |
-| `license_scanning`                     | `LICENSE_MANAGEMENT_DISABLED`   | [From GitLab 12.8](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/22773) | If the variable is present, the job won't be created. |
-| `load_performance`                     | `LOAD_PERFORMANCE_DISABLED`     | From GitLab 13.2      | If the variable is present, the job won't be created. |
-| `nodejs-scan-sast`                     | `SAST_DISABLED`                 |                       | If the variable is present, the job won't be created. |
-| `performance`                          | `PERFORMANCE_DISABLED`          | From GitLab 11.0      | Browser performance. If the variable is present, the job won't be created. |
-| `phpcs-security-audit-sast`            | `SAST_DISABLED`                 |                       | If the variable is present, the job won't be created. |
-| `pmd-apex-sast`                        | `SAST_DISABLED`                 |                       | If the variable is present, the job won't be created. |
-| `retire-js-dependency_scanning`        | `DEPENDENCY_SCANNING_DISABLED`  |                       | If the variable is present, the job won't be created. |
-| `review`                               | `REVIEW_DISABLED`               | From GitLab 11.0      | If the variable is present, the job won't be created. |
-| `review:stop`                          | `REVIEW_DISABLED`               | From GitLab 11.0      | Manual job. If the variable is present, the job won't be created. |
-| `sast`                                 | `SAST_DISABLED`                 | From GitLab 11.0      | If the variable is present, the job won't be created. |
-| `sast:container`                       | `CONTAINER_SCANNING_DISABLED`   | From GitLab 11.0      | If the variable is present, the job won't be created. |
-| `secret_detection`                     | `SECRET_DETECTION_DISABLED`     | From GitLab 13.1      | If the variable is present, the job won't be created. |
-| `secret_detection_default_branch`      | `SECRET_DETECTION_DISABLED`     | [From GitLab 13.2](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/22773) | If the variable is present, the job won't be created. |
-| `security-code-scan-sast`              | `SAST_DISABLED`                 |                       | If the variable is present, the job won't be created. |
-| `secrets-sast`                         | `SAST_DISABLED`                 | From GitLab 11.0      | If the variable is present, the job won't be created. |
-| `sobelaw-sast`                         | `SAST_DISABLED`                 |                       | If the variable is present, the job won't be created. |
-| `stop_dast_environment`                | `DAST_DISABLED_FOR_DEFAULT_BRANCH` or `DAST_DISABLED` | [From GitLab 12.4](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/17789) | If either variable is present, the job won't be created. |
-| `spotbugs-sast`                        | `SAST_DISABLED`                 |                       | If the variable is present, the job won't be created. |
-| `test`                                 | `TEST_DISABLED`                 | From GitLab 11.0      | If the variable is present, the job won't be created. |
+| `codequality`                          | `CODE_QUALITY_DISABLED`         | Until GitLab 11.0     | If the variable is present, the job isn't created. |
+| `code_quality`                         | `CODE_QUALITY_DISABLED`         | [From GitLab 11.0](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/5773) | If the variable is present, the job isn't created. |
+| `container_scanning`                   | `CONTAINER_SCANNING_DISABLED`   | From GitLab 11.0      | If the variable is present, the job isn't created. |
+| `dast`                                 | `DAST_DISABLED`                 | From GitLab 11.0      | If the variable is present, the job isn't created. |
+| `dast_environment_deploy`              | `DAST_DISABLED_FOR_DEFAULT_BRANCH` or `DAST_DISABLED` | [From GitLab 12.4](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/17789) | If either variable is present, the job isn't created. |
+| `dependency_scanning`                  | `DEPENDENCY_SCANNING_DISABLED`  | From GitLab 11.0      | If the variable is present, the job isn't created. |
+| `eslint-sast`                          | `SAST_DISABLED`                 |                       | If the variable is present, the job isn't created. |
+| `flawfinder-sast`                      | `SAST_DISABLED`                 |                       | If the variable is present, the job isn't created. |
+| `gemnasium-dependency_scanning`        | `DEPENDENCY_SCANNING_DISABLED`  |                       | If the variable is present, the job isn't created. |
+| `gemnasium-maven-dependency_scanning`  | `DEPENDENCY_SCANNING_DISABLED`  |                       | If the variable is present, the job isn't created. |
+| `gemnasium-python-dependency_scanning` | `DEPENDENCY_SCANNING_DISABLED`  |                       | If the variable is present, the job isn't created. |
+| `gosec-sast`                           | `SAST_DISABLED`                 |                       | If the variable is present, the job isn't created. |
+| `kubesec-sast`                         | `SAST_DISABLED`                 |                       | If the variable is present, the job isn't created. |
+| `license_management`                   | `LICENSE_MANAGEMENT_DISABLED`   | GitLab 11.0 to 12.7   | If the variable is present, the job isn't created. Job deprecated [from GitLab 12.8](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/22773) |
+| `license_scanning`                     | `LICENSE_MANAGEMENT_DISABLED`   | [From GitLab 12.8](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/22773) | If the variable is present, the job isn't created. |
+| `load_performance`                     | `LOAD_PERFORMANCE_DISABLED`     | From GitLab 13.2      | If the variable is present, the job isn't created. |
+| `nodejs-scan-sast`                     | `SAST_DISABLED`                 |                       | If the variable is present, the job isn't created. |
+| `performance`                          | `PERFORMANCE_DISABLED`          | From GitLab 11.0      | Browser performance. If the variable is present, the job isn't created. |
+| `phpcs-security-audit-sast`            | `SAST_DISABLED`                 |                       | If the variable is present, the job isn't created. |
+| `pmd-apex-sast`                        | `SAST_DISABLED`                 |                       | If the variable is present, the job isn't created. |
+| `retire-js-dependency_scanning`        | `DEPENDENCY_SCANNING_DISABLED`  |                       | If the variable is present, the job isn't created. |
+| `review`                               | `REVIEW_DISABLED`               | From GitLab 11.0      | If the variable is present, the job isn't created. |
+| `review:stop`                          | `REVIEW_DISABLED`               | From GitLab 11.0      | Manual job. If the variable is present, the job isn't created. |
+| `sast`                                 | `SAST_DISABLED`                 | From GitLab 11.0      | If the variable is present, the job isn't created. |
+| `sast:container`                       | `CONTAINER_SCANNING_DISABLED`   | From GitLab 11.0      | If the variable is present, the job isn't created. |
+| `secret_detection`                     | `SECRET_DETECTION_DISABLED`     | From GitLab 13.1      | If the variable is present, the job isn't created. |
+| `secret_detection_default_branch`      | `SECRET_DETECTION_DISABLED`     | [From GitLab 13.2](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/22773) | If the variable is present, the job isn't created. |
+| `security-code-scan-sast`              | `SAST_DISABLED`                 |                       | If the variable is present, the job isn't created. |
+| `secrets-sast`                         | `SAST_DISABLED`                 | From GitLab 11.0      | If the variable is present, the job isn't created. |
+| `sobelaw-sast`                         | `SAST_DISABLED`                 |                       | If the variable is present, the job isn't created. |
+| `stop_dast_environment`                | `DAST_DISABLED_FOR_DEFAULT_BRANCH` or `DAST_DISABLED` | [From GitLab 12.4](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/17789) | If either variable is present, the job isn't created. |
+| `spotbugs-sast`                        | `SAST_DISABLED`                 |                       | If the variable is present, the job isn't created. |
+| `test`                                 | `TEST_DISABLED`                 | From GitLab 11.0      | If the variable is present, the job isn't created. |
 | `staging`                              | `STAGING_ENABLED`               |                       | The job is created if the variable is present. |
-| `stop_review`                          | `REVIEW_DISABLED`               |                       | If the variable is present, the job won't be created. |
+| `stop_review`                          | `REVIEW_DISABLED`               |                       | If the variable is present, the job isn't created. |
 
 ### Application secret variables
 
@@ -538,7 +538,7 @@ service:
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-ci-yml/-/merge_requests/160) in GitLab 10.8.
 
-TIP: **Tip:**
+NOTE:
 You can also set this inside your [project's settings](index.md#deployment-strategy).
 
 The normal behavior of Auto DevOps is to use continuous deployment, pushing
@@ -567,7 +567,7 @@ If you define `CANARY_ENABLED` with a non-empty value, then two manual jobs are 
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/5415) in GitLab 10.8.
 
-TIP: **Tip:**
+NOTE:
 You can also set this inside your [project's settings](index.md#deployment-strategy).
 
 When you're ready to deploy a new version of your app to production, you may want
@@ -615,7 +615,7 @@ With `INCREMENTAL_ROLLOUT_MODE` set to `manual` and with `STAGING_ENABLED`
 
 ![Rollout and staging enabled](img/rollout_staging_enabled.png)
 
-WARNING: **Deprecation:**
+WARNING:
 Before GitLab 11.4, the presence of the `INCREMENTAL_ROLLOUT_ENABLED` environment
 variable enabled this feature. This configuration is deprecated, and is scheduled to be
 removed in the future.
@@ -624,7 +624,7 @@ removed in the future.
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/7545) in GitLab 11.4.
 
-TIP: **Tip:**
+NOTE:
 You can also set this inside your [project's settings](index.md#deployment-strategy).
 
 This configuration is based on
@@ -662,5 +662,5 @@ The banner can be disabled for:
   - Through the REST API with an admin access token:
 
     ```shell
-    curl --data "value=true" --header "PRIVATE-TOKEN: <personal_access_token>" https://gitlab.example.com/api/v4/features/auto_devops_banner_disabled
+    curl --data "value=true" --header "PRIVATE-TOKEN: <personal_access_token>" "https://gitlab.example.com/api/v4/features/auto_devops_banner_disabled"
     ```

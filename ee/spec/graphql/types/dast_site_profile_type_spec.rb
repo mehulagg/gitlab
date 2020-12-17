@@ -6,7 +6,7 @@ RSpec.describe GitlabSchema.types['DastSiteProfile'] do
   let_it_be(:dast_site_profile) { create(:dast_site_profile) }
   let_it_be(:project) { dast_site_profile.project }
   let_it_be(:user) { create(:user) }
-  let_it_be(:fields) { %i[id profileName targetUrl editPath validationStatus userPermissions] }
+  let_it_be(:fields) { %i[id profileName targetUrl editPath validationStatus userPermissions normalizedTargetUrl] }
 
   subject do
     GitlabSchema.execute(
@@ -46,6 +46,7 @@ RSpec.describe GitlabSchema.types['DastSiteProfile'] do
                 targetUrl
                 editPath
                 validationStatus
+                normalizedTargetUrl
               }
             }
           }
@@ -86,6 +87,14 @@ RSpec.describe GitlabSchema.types['DastSiteProfile'] do
     describe 'validation_status field' do
       it 'is the validation status' do
         expect(first_dast_site_profile['validationStatus']).to eq('PENDING_VALIDATION')
+      end
+    end
+
+    describe 'normalized_target_url field' do
+      it 'is the normalized url of the associated dast_site' do
+        normalized_url = DastSiteValidation.get_normalized_url_base(dast_site_profile.dast_site.url)
+
+        expect(first_dast_site_profile['normalizedTargetUrl']).to eq(normalized_url)
       end
     end
 

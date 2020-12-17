@@ -75,6 +75,8 @@ module EE
         items.no_iteration
       elsif params.filter_by_any_iteration?
         items.any_iteration
+      elsif params.filter_by_current_iteration? && get_current_iteration
+        items.in_iterations(get_current_iteration)
       elsif params.filter_by_iteration_title?
         items.with_iteration_title(params[:iteration_title])
       else
@@ -97,9 +99,28 @@ module EE
     end
 
     def by_negated_iteration(items)
-      return items unless not_params[:iteration_title].present?
+      return items unless not_params.by_iteration?
 
-      items.without_iteration_title(not_params[:iteration_title])
+      if not_params.filter_by_current_iteration?
+        items.not_in_iterations(get_current_iteration)
+      else
+        items.without_iteration_title(not_params[:iteration_title])
+      end
+    end
+
+    def get_current_iteration
+      strong_memoize(:current_iteration) do
+        next unless params.parent
+
+        IterationsFinder.new(current_user, iterations_finder_params).execute.first
+      end
+    end
+
+    def iterations_finder_params
+      IterationsFinder.params_for_parent(params.parent, include_ancestors: true).merge!(
+        state: 'opened',
+        start_date: Date.today,
+        end_date: Date.today)
     end
   end
 end

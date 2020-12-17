@@ -5,8 +5,10 @@ require 'spec_helper'
 RSpec.describe GitlabSchema.types['Group'] do
   describe 'nested epic request' do
     it { expect(described_class).to have_graphql_field(:epicsEnabled) }
-    it { expect(described_class).to have_graphql_field(:epics) }
     it { expect(described_class).to have_graphql_field(:epic) }
+    it { expect(described_class).to have_graphql_field(:epics) }
+    it { expect(described_class).to have_graphql_field(:epic_board) }
+    it { expect(described_class).to have_graphql_field(:epic_boards) }
   end
 
   it { expect(described_class).to have_graphql_field(:iterations) }

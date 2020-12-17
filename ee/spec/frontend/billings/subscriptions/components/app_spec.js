@@ -2,7 +2,6 @@ import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
 import initialStore from 'ee/billings/subscriptions/store';
 import SubscriptionApp from 'ee/billings/subscriptions/components/app.vue';
-import SubscriptionTable from 'ee/billings/subscriptions/components/subscription_table.vue';
 import * as types from 'ee/billings/subscriptions/store/mutation_types';
 import { mockDataSeats } from 'ee_jest/billings/mock_data';
 
@@ -34,15 +33,9 @@ describe('SubscriptionApp component', () => {
     });
   };
 
-  const expectComponentWithProps = (Component, props = {}) => {
-    const componentWrapper = wrapper.find(Component);
-
-    expect(componentWrapper.isVisible()).toBeTruthy();
-    expect(componentWrapper.props()).toEqual(expect.objectContaining(props));
-  };
-
   afterEach(() => {
     wrapper.destroy();
+    wrapper = null;
   });
 
   describe('on creation', () => {
@@ -53,15 +46,6 @@ describe('SubscriptionApp component', () => {
 
     it('dispatches expected actions on created', () => {
       expect(store.dispatch.mock.calls).toEqual([['setNamespaceId', '42']]);
-    });
-
-    it('passes the correct props to the subscriptions table', () => {
-      expectComponentWithProps(SubscriptionTable, {
-        namespaceName: providedFields.namespaceName,
-        planUpgradeHref: providedFields.planUpgradeHref,
-        planRenewHref: providedFields.planRenewHref,
-        customerPortalUrl: providedFields.customerPortalUrl,
-      });
     });
   });
 });

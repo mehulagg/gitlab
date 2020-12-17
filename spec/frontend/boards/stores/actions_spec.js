@@ -1,6 +1,5 @@
 import testAction from 'helpers/vuex_action_helper';
 import {
-  mockListsWithModel,
   mockLists,
   mockListsById,
   mockIssue,
@@ -14,10 +13,13 @@ import {
 import actions, { gqlClient } from '~/boards/stores/actions';
 import * as types from '~/boards/stores/mutation_types';
 import { inactiveId } from '~/boards/constants';
-import issueMoveListMutation from '~/boards/queries/issue_move_list.mutation.graphql';
-import destroyBoardListMutation from '~/boards/queries/board_list_destroy.mutation.graphql';
+import issueMoveListMutation from '~/boards/graphql/issue_move_list.mutation.graphql';
+import destroyBoardListMutation from '~/boards/graphql/board_list_destroy.mutation.graphql';
 import updateAssignees from '~/vue_shared/components/sidebar/queries/updateAssignees.mutation.graphql';
 import { fullBoardId, formatListIssues, formatBoardLists } from '~/boards/boards_util';
+import createFlash from '~/flash';
+
+jest.mock('~/flash');
 
 const expectNotImplemented = action => {
   it('is not implemented', () => {
@@ -28,6 +30,10 @@ const expectNotImplemented = action => {
 // We need this helper to make sure projectPath is including
 // subgroups when the movIssue action is called.
 const getProjectPath = path => path.split('#')[0];
+
+beforeEach(() => {
+  window.gon = { features: {} };
+});
 
 describe('setInitialBoardData', () => {
   it('sets data object', () => {
@@ -60,6 +66,24 @@ describe('setFilters', () => {
       state,
       [{ type: types.SET_FILTERS, payload: filters }],
       [],
+      done,
+    );
+  });
+});
+
+describe('performSearch', () => {
+  it('should dispatch setFilters action', done => {
+    testAction(actions.performSearch, {}, {}, [], [{ type: 'setFilters', payload: {} }], done);
+  });
+
+  it('should dispatch setFilters, fetchLists and resetIssues action when graphqlBoardLists FF is on', done => {
+    window.gon = { features: { graphqlBoardLists: true } };
+    testAction(
+      actions.performSearch,
+      {},
+      {},
+      [],
+      [{ type: 'setFilters', payload: {} }, { type: 'fetchLists' }, { type: 'resetIssues' }],
       done,
     );
   });
@@ -120,7 +144,7 @@ describe('fetchLists', () => {
           payload: formattedLists,
         },
       ],
-      [{ type: 'generateDefaultLists' }],
+      [],
       done,
     );
   });
@@ -150,34 +174,9 @@ describe('fetchLists', () => {
           payload: formattedLists,
         },
       ],
-      [{ type: 'createList', payload: { backlog: true } }, { type: 'generateDefaultLists' }],
+      [{ type: 'createList', payload: { backlog: true } }],
       done,
     );
-  });
-});
-
-describe('generateDefaultLists', () => {
-  let store;
-  beforeEach(() => {
-    const state = {
-      endpoints: { fullPath: 'gitlab-org', boardId: '1' },
-      boardType: 'group',
-      disabled: false,
-      boardLists: [{ type: 'backlog' }, { type: 'closed' }],
-    };
-
-    store = {
-      commit: jest.fn(),
-      dispatch: jest.fn(() => Promise.resolve()),
-      state,
-    };
-  });
-
-  it('should dispatch fetchLabels', () => {
-    return actions.generateDefaultLists(store).then(() => {
-      expect(store.dispatch.mock.calls[0]).toEqual(['fetchLabels', 'to do']);
-      expect(store.dispatch.mock.calls[1]).toEqual(['fetchLabels', 'doing']);
-    });
   });
 });
 
@@ -251,8 +250,8 @@ describe('createList', () => {
 describe('moveList', () => {
   it('should commit MOVE_LIST mutation and dispatch updateList action', done => {
     const initialBoardListsState = {
-      'gid://gitlab/List/1': mockListsWithModel[0],
-      'gid://gitlab/List/2': mockListsWithModel[1],
+      'gid://gitlab/List/1': mockLists[0],
+      'gid://gitlab/List/2': mockLists[1],
     };
 
     const state = {
@@ -274,7 +273,7 @@ describe('moveList', () => {
       [
         {
           type: types.MOVE_LIST,
-          payload: { movedList: mockListsWithModel[0], listAtNewIndex: mockListsWithModel[1] },
+          payload: { movedList: mockLists[0], listAtNewIndex: mockLists[1] },
         },
       ],
       [
@@ -293,8 +292,8 @@ describe('moveList', () => {
 
   it('should not commit MOVE_LIST or dispatch updateList if listId and replacedListId are the same', () => {
     const initialBoardListsState = {
-      'gid://gitlab/List/1': mockListsWithModel[0],
-      'gid://gitlab/List/2': mockListsWithModel[1],
+      'gid://gitlab/List/1': mockLists[0],
+      'gid://gitlab/List/2': mockLists[1],
     };
 
     const state = {
@@ -534,7 +533,7 @@ describe('moveIssue', () => {
     endpoints: { fullPath: 'gitlab-org', boardId: '1' },
     boardType: 'group',
     disabled: false,
-    boardLists: mockListsWithModel,
+    boardLists: mockLists,
     issuesByListId: listIssues,
     issues,
   };
@@ -666,46 +665,59 @@ describe('setAssignees', () => {
   const refPath = `${projectPath}#3`;
   const iid = '1';
 
-  beforeEach(() => {
-    jest.spyOn(gqlClient, 'mutate').mockResolvedValue({
-      data: { issueSetAssignees: { issue: { assignees: { nodes: [{ ...node }] } } } },
+  describe('when succeeds', () => {
+    beforeEach(() => {
+      jest.spyOn(gqlClient, 'mutate').mockResolvedValue({
+        data: { issueSetAssignees: { issue: { assignees: { nodes: [{ ...node }] } } } },
+      });
+    });
+
+    it('calls mutate with the correct values', async () => {
+      await actions.setAssignees(
+        { commit: () => {}, getters: { activeIssue: { iid, referencePath: refPath } } },
+        [name],
+      );
+
+      expect(gqlClient.mutate).toHaveBeenCalledWith({
+        mutation: updateAssignees,
+        variables: { iid, assigneeUsernames: [name], projectPath },
+      });
+    });
+
+    it('calls the correct mutation with the correct values', done => {
+      testAction(
+        actions.setAssignees,
+        {},
+        { activeIssue: { iid, referencePath: refPath }, commit: () => {} },
+        [
+          { type: types.SET_ASSIGNEE_LOADING, payload: true },
+          {
+            type: 'UPDATE_ISSUE_BY_ID',
+            payload: { prop: 'assignees', issueId: undefined, value: [node] },
+          },
+          { type: types.SET_ASSIGNEE_LOADING, payload: false },
+        ],
+        [],
+        done,
+      );
     });
   });
 
-  it('calls mutate with the correct values', async () => {
-    await actions.setAssignees(
-      { commit: () => {}, getters: { activeIssue: { iid, referencePath: refPath } } },
-      [name],
-    );
-
-    expect(gqlClient.mutate).toHaveBeenCalledWith({
-      mutation: updateAssignees,
-      variables: { iid, assigneeUsernames: [name], projectPath },
+  describe('when fails', () => {
+    beforeEach(() => {
+      jest.spyOn(gqlClient, 'mutate').mockRejectedValue();
     });
-  });
 
-  it('calls the correct mutation with the correct values', done => {
-    testAction(
-      actions.setAssignees,
-      {},
-      { activeIssue: { iid, referencePath: refPath }, commit: () => {} },
-      [
-        {
-          type: 'SET_ASSIGNEE_LOADING',
-          payload: true,
-        },
-        {
-          type: 'UPDATE_ISSUE_BY_ID',
-          payload: { prop: 'assignees', issueId: undefined, value: [node] },
-        },
-        {
-          type: 'SET_ASSIGNEE_LOADING',
-          payload: false,
-        },
-      ],
-      [],
-      done,
-    );
+    it('calls createFlash', async () => {
+      await actions.setAssignees({
+        commit: () => {},
+        getters: { activeIssue: { iid, referencePath: refPath } },
+      });
+
+      expect(createFlash).toHaveBeenCalledWith({
+        message: 'An error occurred while updating assignees.',
+      });
+    });
   });
 });
 

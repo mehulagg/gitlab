@@ -28,7 +28,7 @@ DROP SERVER gitlab_secondary CASCADE;
 DROP EXTENSION IF EXISTS postgres_fdw;
 ```
 
-DANGER: **Warning:**
+WARNING:
 In GitLab 13.3, promoting a secondary node to a primary while the secondary is
 paused fails. Do not pause replication before promoting a secondary. If the
 node is paused, be sure to resume before promoting. To avoid this issue,
@@ -54,7 +54,7 @@ the recommended procedure, see the
 
 ## Updating to GitLab 12.9
 
-CAUTION: **Warning:**
+WARNING:
 GitLab 12.9.0 through GitLab 12.9.3 are affected by [a bug that stops
 repository verification](https://gitlab.com/gitlab-org/gitlab/-/issues/213523).
 The issue is fixed in GitLab 12.9.4. Upgrade to GitLab 12.9.4 or later.
@@ -85,7 +85,7 @@ sudo touch /etc/gitlab/disable-postgresql-upgrade
 
 ## Updating to GitLab 12.7
 
-DANGER: **Warning:**
+WARNING:
 Only upgrade to GitLab 12.7.5 or later. Do not upgrade to versions 12.7.0
 through 12.7.4 because there is [an initialization order
 bug](https://gitlab.com/gitlab-org/gitlab/-/issues/199672) that causes Geo
@@ -145,7 +145,7 @@ sudo touch /etc/gitlab/disable-postgresql-upgrade
 
 ## Updating to GitLab 12.3
 
-DANGER: **Warning:**
+WARNING:
 If the existing PostgreSQL server version is 9.6.x, it is recommended to
 upgrade to GitLab 12.4 or later. By default, GitLab 12.3 attempts to update the
 embedded PostgreSQL server from 9.6 to 10.9. In certain circumstances, it will
@@ -159,7 +159,7 @@ For the recommended procedure, see the
 
 ## Updating to GitLab 12.2
 
-DANGER: **Warning:**
+WARNING:
 If the existing PostgreSQL server version is 9.6.x, it is recommended to
 upgrade to GitLab 12.4 or later. By default, GitLab 12.2 attempts to update the
 embedded PostgreSQL server from 9.6 to 10.9. In certain circumstances, it will
@@ -189,7 +189,7 @@ The restart avoids a version mismatch when PostgreSQL tries to load the FDW exte
 
 ## Updating to GitLab 12.1
 
-DANGER: **Warning:**
+WARNING:
 If the existing PostgreSQL server version is 9.6.x, it is recommended to
 upgrade to GitLab 12.4 or later. By default, GitLab 12.1 attempts to update the
 embedded PostgreSQL server from 9.6 to 10.9. In certain circumstances, it will
@@ -203,14 +203,14 @@ For the recommended procedure, see the
 
 ## Updating to GitLab 12.0
 
-CAUTION: **Warning:**
+WARNING:
 This version is affected by a [bug that results in new LFS objects not being
 replicated to Geo secondary nodes](https://gitlab.com/gitlab-org/gitlab/-/issues/32696).
 The issue is fixed in GitLab 12.1; be sure to upgrade to GitLab 12.1 or later.
 
 ## Updating to GitLab 11.11
 
-CAUTION: **Warning:**
+WARNING:
 This version is affected by a [bug that results in new LFS objects not being
 replicated to Geo secondary nodes](https://gitlab.com/gitlab-org/gitlab/-/issues/32696).
 The issue is fixed in GitLab 12.1; be sure to upgrade to GitLab 12.1 or later.
@@ -376,7 +376,7 @@ the now-unused SSH keys from your secondaries, as they may cause problems if the
 
 ### Hashed Storage
 
-CAUTION: **Warning:**
+WARNING:
 Hashed storage is in **Alpha**. It is considered experimental and not
 production-ready. See [Hashed Storage](../../repository_storage_types.md) for more detail.
 
@@ -387,7 +387,7 @@ migrated we recommend leaving Hashed Storage enabled.
 
 ## Updating to GitLab 10.1
 
-CAUTION: **Warning:**
+WARNING:
 Hashed storage is in **Alpha**. It is considered experimental and not
 production-ready. See [Hashed Storage](../../repository_storage_types.md) for more detail.
 

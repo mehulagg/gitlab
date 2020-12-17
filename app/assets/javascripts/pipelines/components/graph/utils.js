@@ -1,45 +1,57 @@
-const unwrapPipelineData = (mainPipelineId, data) => {
+import Visibility from 'visibilityjs';
+import { getIdFromGraphQLId } from '~/graphql_shared/utils';
+import { unwrapStagesWithNeeds } from '../unwrapping_utils';
+
+const addMulti = (mainPipelineProjectPath, linkedPipeline) => {
+  return {
+    ...linkedPipeline,
+    multiproject: mainPipelineProjectPath !== linkedPipeline.project.fullPath,
+  };
+};
+
+const transformId = linkedPipeline => {
+  return { ...linkedPipeline, id: getIdFromGraphQLId(linkedPipeline.id) };
+};
+
+const unwrapPipelineData = (mainPipelineProjectPath, data) => {
   if (!data?.project?.pipeline) {
     return null;
   }
 
+  const { pipeline } = data.project;
+
   const {
-    id,
     upstream,
     downstream,
     stages: { nodes: stages },
-  } = data.project.pipeline;
+  } = pipeline;
 
-  const unwrappedNestedGroups = stages.map(stage => {
-    const {
-      groups: { nodes: groups },
-    } = stage;
-    return { ...stage, groups };
-  });
-
-  const nodes = unwrappedNestedGroups.map(({ name, status, groups }) => {
-    const groupsWithJobs = groups.map(group => {
-      const jobs = group.jobs.nodes.map(job => {
-        const { needs } = job;
-        return { ...job, needs: needs.nodes.map(need => need.name) };
-      });
-
-      return { ...group, jobs };
-    });
-
-    return { name, status, groups: groupsWithJobs };
-  });
-
-  const addMulti = pipeline => {
-    return { ...pipeline, multiproject: mainPipelineId !== pipeline.id };
-  };
+  const nodes = unwrapStagesWithNeeds(stages);
 
   return {
-    id,
+    ...pipeline,
+    id: getIdFromGraphQLId(pipeline.id),
     stages: nodes,
-    upstream: upstream ? [upstream].map(addMulti) : [],
-    downstream: downstream ? downstream.map(addMulti) : [],
+    upstream: upstream
+      ? [upstream].map(addMulti.bind(null, mainPipelineProjectPath)).map(transformId)
+      : [],
+    downstream: downstream
+      ? downstream.nodes.map(addMulti.bind(null, mainPipelineProjectPath)).map(transformId)
+      : [],
   };
 };
 
-export { unwrapPipelineData };
+const toggleQueryPollingByVisibility = (queryRef, interval = 10000) => {
+  const stopStartQuery = query => {
+    if (!Visibility.hidden()) {
+      query.startPolling(interval);
+    } else {
+      query.stopPolling();
+    }
+  };
+
+  stopStartQuery(queryRef);
+  Visibility.change(stopStartQuery.bind(null, queryRef));
+};
+
+export { unwrapPipelineData, toggleQueryPollingByVisibility };

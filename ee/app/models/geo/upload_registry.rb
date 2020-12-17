@@ -68,6 +68,10 @@ class Geo::UploadRegistry < Geo::BaseRegistry
     end
   end
 
+  def self.delete_worker_class
+    ::Geo::FileRegistryRemovalWorker
+  end
+
   def self.with_search(query)
     return all if query.nil?
 

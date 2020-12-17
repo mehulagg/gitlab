@@ -1,0 +1,5 @@
+---
+title: Fix Vuln details page request/response sections not appearing
+merge_request: 49166
+author:
+type: fixed
