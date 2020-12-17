@@ -3,6 +3,8 @@
 class Elastic::ReindexingTask < ApplicationRecord
   self.table_name = 'elastic_reindexing_tasks'
 
+  has_many :subtasks, class_name: 'Elastic::ReindexingSubtask', foreign_key: :elastic_reindexing_task_id
+
   enum state: {
     initial:                0,
     indexing_paused:        1,

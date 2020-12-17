@@ -9345,8 +9345,6 @@ CREATE TABLE application_settings (
     elasticsearch_indexed_file_size_limit_kb integer DEFAULT 1024 NOT NULL,
     enforce_namespace_storage_limit boolean DEFAULT false NOT NULL,
     container_registry_delete_tags_service_timeout integer DEFAULT 250 NOT NULL,
-    kroki_url character varying,
-    kroki_enabled boolean,
     elasticsearch_client_request_timeout integer DEFAULT 0 NOT NULL,
     gitpod_enabled boolean DEFAULT false NOT NULL,
     gitpod_url text DEFAULT 'https://gitpod.io/'::text,
@@ -9365,18 +9363,20 @@ CREATE TABLE application_settings (
     secret_detection_token_revocation_url text,
     encrypted_secret_detection_token_revocation_token text,
     encrypted_secret_detection_token_revocation_token_iv text,
+    new_user_signups_cap integer,
     domain_denylist_enabled boolean DEFAULT false,
     domain_denylist text,
     domain_allowlist text,
-    new_user_signups_cap integer,
     encrypted_cloud_license_auth_token text,
     encrypted_cloud_license_auth_token_iv text,
     secret_detection_revocation_token_types_url text,
     cloud_license_enabled boolean DEFAULT false NOT NULL,
+    kroki_url text,
+    kroki_enabled boolean DEFAULT false NOT NULL,
     disable_feed_token boolean DEFAULT false NOT NULL,
     personal_access_token_prefix text,
     CONSTRAINT app_settings_registry_exp_policies_worker_capacity_positive CHECK ((container_registry_expiration_policies_worker_capacity >= 0)),
-    CONSTRAINT check_17d9558205 CHECK ((char_length((kroki_url)::text) <= 1024)),
+    CONSTRAINT check_17d9558205 CHECK ((char_length(kroki_url) <= 1024)),
     CONSTRAINT check_2dba05b802 CHECK ((char_length(gitpod_url) <= 255)),
     CONSTRAINT check_51700b31b5 CHECK ((char_length(default_branch_name) <= 255)),
     CONSTRAINT check_57123c9593 CHECK ((char_length(help_page_documentation_base_url) <= 255)),
@@ -11924,6 +11924,27 @@ CREATE SEQUENCE draft_notes_id_seq
     CACHE 1;
 
 ALTER SEQUENCE draft_notes_id_seq OWNED BY draft_notes.id;
+
+CREATE TABLE elastic_reindexing_subtasks (
+    id bigint NOT NULL,
+    elastic_reindexing_task_id bigint NOT NULL,
+    documents_count integer,
+    index_name_from text,
+    index_name_to text,
+    elastic_task text,
+    CONSTRAINT check_4910adc798 CHECK ((char_length(elastic_task) <= 255)),
+    CONSTRAINT check_a1fbd9faa9 CHECK ((char_length(index_name_from) <= 255)),
+    CONSTRAINT check_f456494bd8 CHECK ((char_length(index_name_to) <= 255))
+);
+
+CREATE SEQUENCE elastic_reindexing_subtasks_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE elastic_reindexing_subtasks_id_seq OWNED BY elastic_reindexing_subtasks.id;
 
 CREATE TABLE elastic_reindexing_tasks (
     id bigint NOT NULL,
@@ -17895,8 +17916,8 @@ CREATE TABLE web_hooks (
     encrypted_url character varying,
     encrypted_url_iv character varying,
     deployment_events boolean DEFAULT false NOT NULL,
-    releases_events boolean DEFAULT false NOT NULL,
     feature_flag_events boolean DEFAULT false NOT NULL,
+    releases_events boolean DEFAULT false NOT NULL,
     member_events boolean DEFAULT false NOT NULL
 );
 
@@ -18313,6 +18334,8 @@ ALTER TABLE ONLY design_user_mentions ALTER COLUMN id SET DEFAULT nextval('desig
 ALTER TABLE ONLY diff_note_positions ALTER COLUMN id SET DEFAULT nextval('diff_note_positions_id_seq'::regclass);
 
 ALTER TABLE ONLY draft_notes ALTER COLUMN id SET DEFAULT nextval('draft_notes_id_seq'::regclass);
+
+ALTER TABLE ONLY elastic_reindexing_subtasks ALTER COLUMN id SET DEFAULT nextval('elastic_reindexing_subtasks_id_seq'::regclass);
 
 ALTER TABLE ONLY elastic_reindexing_tasks ALTER COLUMN id SET DEFAULT nextval('elastic_reindexing_tasks_id_seq'::regclass);
 
@@ -19469,6 +19492,9 @@ ALTER TABLE ONLY diff_note_positions
 
 ALTER TABLE ONLY draft_notes
     ADD CONSTRAINT draft_notes_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY elastic_reindexing_subtasks
+    ADD CONSTRAINT elastic_reindexing_subtasks_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY elastic_reindexing_tasks
     ADD CONSTRAINT elastic_reindexing_tasks_pkey PRIMARY KEY (id);
@@ -21293,6 +21319,8 @@ CREATE INDEX index_draft_notes_on_author_id ON draft_notes USING btree (author_i
 CREATE INDEX index_draft_notes_on_discussion_id ON draft_notes USING btree (discussion_id);
 
 CREATE INDEX index_draft_notes_on_merge_request_id ON draft_notes USING btree (merge_request_id);
+
+CREATE INDEX index_elastic_reindexing_subtasks_on_elastic_reindexing_task_id ON elastic_reindexing_subtasks USING btree (elastic_reindexing_task_id);
 
 CREATE UNIQUE INDEX index_elastic_reindexing_tasks_on_in_progress ON elastic_reindexing_tasks USING btree (in_progress) WHERE in_progress;
 
@@ -24683,6 +24711,9 @@ ALTER TABLE ONLY dast_site_profiles
 ALTER TABLE ONLY boards_epic_user_preferences
     ADD CONSTRAINT fk_rails_851fe1510a FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY services
+    ADD CONSTRAINT fk_rails_868a8e7ad6 FOREIGN KEY (inherit_from_id) REFERENCES services(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY deployment_merge_requests
     ADD CONSTRAINT fk_rails_86a6d8bf12 FOREIGN KEY (merge_request_id) REFERENCES merge_requests(id) ON DELETE CASCADE;
 
@@ -25238,6 +25269,9 @@ ALTER TABLE ONLY requirements
 ALTER TABLE ONLY snippet_repositories
     ADD CONSTRAINT fk_rails_f21f899728 FOREIGN KEY (shard_id) REFERENCES shards(id) ON DELETE RESTRICT;
 
+ALTER TABLE ONLY elastic_reindexing_subtasks
+    ADD CONSTRAINT fk_rails_f2cc190164 FOREIGN KEY (elastic_reindexing_task_id) REFERENCES elastic_reindexing_tasks(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY ci_pipeline_chat_data
     ADD CONSTRAINT fk_rails_f300456b63 FOREIGN KEY (chat_name_id) REFERENCES chat_names(id) ON DELETE CASCADE;
 
@@ -25306,9 +25340,6 @@ ALTER TABLE ONLY resource_label_events
 
 ALTER TABLE ONLY ci_builds_metadata
     ADD CONSTRAINT fk_rails_ffcf702a02 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY services
-    ADD CONSTRAINT fk_services_inherit_from_id FOREIGN KEY (inherit_from_id) REFERENCES services(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY timelogs
     ADD CONSTRAINT fk_timelogs_issues_issue_id FOREIGN KEY (issue_id) REFERENCES issues(id) ON DELETE CASCADE;
