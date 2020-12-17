@@ -114,9 +114,6 @@ export default {
       deleteAlertType: null,
       searchValue: null,
       name: null,
-      paginationVariables: {
-        first: GRAPHQL_PAGE_SIZE,
-      },
       mutationLoading: false,
       fetchAdditionalDetails: false,
     };
@@ -136,7 +133,7 @@ export default {
         name: this.name,
         fullPath: this.config.isGroupPage ? this.config.groupPath : this.config.projectPath,
         isGroupPage: this.config.isGroupPage,
-        ...this.paginationVariables,
+        first: GRAPHQL_PAGE_SIZE,
       };
     },
     tracking() {
@@ -193,20 +190,46 @@ export default {
       this.deleteAlertType = null;
       this.itemToDelete = {};
     },
-    fetchNextPage() {
+    updateQuery(_, { fetchMoreResult }) {
+      return fetchMoreResult;
+    },
+    async fetchNextPage() {
       if (this.pageInfo?.hasNextPage) {
-        this.paginationVariables = {
+        const variables = {
           after: this.pageInfo?.endCursor,
           first: GRAPHQL_PAGE_SIZE,
         };
+
+        await this.$nextTick();
+
+        this.$apollo.queries.baseImages.fetchMore({
+          variables,
+          updateQuery: this.updateQuery,
+        });
+        this.$apollo.queries.additionalDetails.fetchMore({
+          variables,
+          updateQuery: this.updateQuery,
+        });
       }
     },
-    fetchPreviousPage() {
+    async fetchPreviousPage() {
       if (this.pageInfo?.hasPreviousPage) {
-        this.paginationVariables = {
+        const variables = {
+          first: null,
           before: this.pageInfo?.startCursor,
           last: GRAPHQL_PAGE_SIZE,
         };
+        this.$apollo.queries.baseImages.fetchMore({
+          variables,
+          updateQuery: this.updateQuery,
+        });
+
+        await this.$nextTick();
+
+        this.$apollo.queries.additionalDetails.fetchMore({
+          variables,
+          updateQuery: this.updateQuery,
+        });
       }
     },
   },

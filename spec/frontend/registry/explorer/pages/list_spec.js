@@ -400,7 +400,10 @@ describe('List Page', () => {
     describe('pagination', () => {
       it('prev-page event triggers a fetchMore request', async () => {
         const resolver = jest.fn().mockResolvedValue(graphQLImageListMock);
-        mountComponent({ resolver });
+        const detailsResolver = jest
+          .fn()
+          .mockResolvedValue(graphQLProjectImageRepositoriesDetailsMock);
+        mountComponent({ resolver, detailsResolver });
 
         await waitForApolloRequestRender();
 
@@ -410,11 +413,17 @@ describe('List Page', () => {
         expect(resolver).toHaveBeenCalledWith(
           expect.objectContaining({ before: pageInfo.startCursor }),
         );
+        expect(detailsResolver).toHaveBeenCalledWith(
+          expect.objectContaining({ before: pageInfo.startCursor }),
+        );
       });
 
       it('next-page event triggers a fetchMore request', async () => {
         const resolver = jest.fn().mockResolvedValue(graphQLImageListMock);
-        mountComponent({ resolver });
+        const detailsResolver = jest
+          .fn()
+          .mockResolvedValue(graphQLProjectImageRepositoriesDetailsMock);
+        mountComponent({ resolver, detailsResolver });
 
         await waitForApolloRequestRender();
 
@@ -422,6 +431,9 @@ describe('List Page', () => {
         await wrapper.vm.$nextTick();
 
         expect(resolver).toHaveBeenCalledWith(
+          expect.objectContaining({ after: pageInfo.endCursor }),
+        );
+        expect(detailsResolver).toHaveBeenCalledWith(
           expect.objectContaining({ after: pageInfo.endCursor }),
         );
       });
