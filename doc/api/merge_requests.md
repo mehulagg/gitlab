@@ -7,15 +7,43 @@ type: reference, api
 
 # Merge requests API
 
+> - `author_id`, `author_username`, and `assignee_id` were [introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/13060) in GitLab 9.5.
+> - `my_reaction_emoji` was [introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/14016) in GitLab 10.0.
+> - For the `scope` attribute, `created-by-me` and `assigned-to-me` were [deprecated](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/18935) in favor of `created_by_me` and `assigned_to_me` in GitLab 11.0.
+> - `with_labels_details` was [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/21413) in GitLab 12.7.
+> - `author_username` and `author_username` were [introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/13060) in GitLab 12.10.
+> - `reference` was [deprecated](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/20354) in GitLab 12.10 in favour of `references`.
+> - `with_merge_status_recheck` was [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/31890) in GitLab 13.0.
+
 Every API call to merge requests must be authenticated.
 
-WARNING:
-> `reference` attribute in response is deprecated in favour of `references`.
-> Introduced [GitLab 12.6](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/20354)
+**Important notes:**
 
-NOTE:
-> `references.relative` is relative to the group / project that the merge request is being requested. When merge request is fetched from its project
-> `relative` format would be the same as `short` format and when requested across groups / projects it is expected to be the same as `full` format.
+- [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/29984) in GitLab 12.8, the mergeability (`merge_status`)
+of each merge request will be checked asynchronously when a request is made to this endpoint. Poll this API endpoint
+to get updated status. This affects the `has_conflicts` property as it is dependent on the `merge_status`. It'll return
+`false` unless `merge_status` is `cannot_be_merged`.
+- [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/31890) in GitLab 13.0, listing merge requests may
+not proactively update `merge_status` (which also affects the `has_conflicts`), as this can be an expensive operation.
+If you are interested in the value of these fields from this endpoint, set the `with_merge_status_recheck` parameter to
+`true` in the query.
+- `references.relative` is relative to the group / project that the merge request is being requested. When merge request
+is fetched from its project `relative` format would be the same as `short` format and when requested across groups / projects
+it is expected to be the same as `full` format.
+- If `approvals_before_merge` **(STARTER)** is not provided, it inherits the value from the target project. If it is provided,
+then the following conditions must hold in order for it to take effect:
+
+  - The target project's `approvals_before_merge` must be greater than zero. A
+    value of zero disables approvals for that project.
+  - The provided value of `approvals_before_merge` must be greater than the
+    target project's `approvals_before_merge`.
+  - This API returns 201 (created) for a successful response.
+
+- [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/46190) in GitLab 13.6,
+diffs associated with the set of changes will have the same size limitations applied as other diffs
+returned by the API or viewed via the UI. When these limits impact the results, the `overflow`
+field will contain a value of `true`. Diff data without these limits applied can be retrieved by
+adding the `access_raw_diffs` parameter, however, it will be slower and more resource-intensive.
 
 ## List merge requests
 
@@ -53,19 +81,19 @@ Parameters:
 | `milestone`                     | string         | no       | Return merge requests for a specific milestone. `None` returns merge requests with no milestone. `Any` returns merge requests that have an assigned milestone. |
 | `view`                          | string         | no       | If `simple`, returns the `iid`, URL, title, description, and basic state of merge request                              |
 | `labels`                        | string         | no       | Return merge requests matching a comma separated list of labels. `None` lists all merge requests with no labels. `Any` lists all merge requests with at least one label. `No+Label` (Deprecated) lists all merge requests with no labels. Predefined names are case-insensitive. |
-| `with_labels_details`           | boolean        | no       | If `true`, response will return more details for each label in labels field: `:name`, `:color`, `:description`, `:description_html`, `:text_color`. Default is `false`. Introduced in [GitLab 12.7](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/21413) |
-| `with_merge_status_recheck`     | boolean        | no       | If `true`, this projection requests (but does not guarantee) that the `merge_status` field be recalculated asynchronously. Default is `false`. Introduced in [GitLab 13.0](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/31890) |
+| `with_labels_details`           | boolean        | no       | If `true`, response will return more details for each label in labels field: `:name`, `:color`, `:description`, `:description_html`, `:text_color`. Default is `false`. |
+| `with_merge_status_recheck`     | boolean        | no       | If `true`, this projection requests (but does not guarantee) that the `merge_status` field be recalculated asynchronously. Default is `false`. |
 | `created_after`                 | datetime       | no       | Return merge requests created on or after the given time. Expected in ISO 8601 format (`2019-03-15T08:00:00Z`) |
 | `created_before`                | datetime       | no       | Return merge requests created on or before the given time. Expected in ISO 8601 format (`2019-03-15T08:00:00Z`) |
 | `updated_after`                 | datetime       | no       | Return merge requests updated on or after the given time. Expected in ISO 8601 format (`2019-03-15T08:00:00Z`) |
 | `updated_before`                | datetime       | no       | Return merge requests updated on or before the given time. Expected in ISO 8601 format (`2019-03-15T08:00:00Z`) |
 | `scope`                         | string         | no       | Return merge requests for the given scope: `created_by_me`, `assigned_to_me` or `all`. Defaults to `created_by_me`<br> For versions before 11.0, use the now deprecated `created-by-me` or `assigned-to-me` scopes instead. |
 | `author_id`                     | integer        | no       | Returns merge requests created by the given user `id`. Mutually exclusive with `author_username`. Combine with `scope=all` or `scope=assigned_to_me`
-| `author_username`               | string         | no       | Returns merge requests created by the given `username`. Mutually exclusive with `author_id`. _([Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/13060) in GitLab 12.10)_             |           |
+| `author_username`               | string         | no       | Returns merge requests created by the given `username`. Mutually exclusive with `author_id`.             |           |
 | `assignee_id`                   | integer        | no       | Returns merge requests assigned to the given user `id`. `None` returns unassigned merge requests. `Any` returns merge requests with an assignee. |
 | `approver_ids` **(STARTER)**    | integer array  | no       | Returns merge requests which have specified all the users with the given `id`s as individual approvers. `None` returns merge requests without approvers. `Any` returns merge requests with an approver. |
 | `approved_by_ids` **(STARTER)** | integer array  | no       | Returns merge requests which have been approved by all the users with the given `id`s (Max: 5). `None` returns merge requests with no approvals. `Any` returns merge requests with an approval. |
-| `my_reaction_emoji`             | string         | no       | Return merge requests reacted by the authenticated user by the given `emoji`. `None` returns issues not given a reaction. `Any` returns issues given at least one reaction. _([Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/14016) in GitLab 10.0)_ |
+| `my_reaction_emoji`             | string         | no       | Return merge requests reacted by the authenticated user by the given `emoji`. `None` returns issues not given a reaction. `Any` returns issues given at least one reaction. |
 | `source_branch`                 | string         | no       | Return merge requests with the given source branch                                                                     |
 | `target_branch`                 | string         | no       | Return merge requests with the given target branch                                                                     |
 | `search`                        | string         | no       | Search merge requests against their `title` and `description`                                                          |
@@ -75,21 +103,6 @@ Parameters:
 | `environment`                   | string         | no       | Returns merge requests deployed to the given environment. Expected in ISO 8601 format (`2019-03-15T08:00:00Z`) |
 | `deployed_before`               | datetime       | no       | Return merge requests deployed before the given date/time. Expected in ISO 8601 format (`2019-03-15T08:00:00Z`) |
 | `deployed_after`                | datetime       | no       | Return merge requests deployed after the given date/time. Expected in ISO 8601 format (`2019-03-15T08:00:00Z`) |
-
-NOTE:
-[Starting in GitLab 13.0](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/31890),
-listing merge requests may not proactively update the `merge_status` field
-(which also affects the `has_conflicts` field), as this can be an expensive
-operation. If you are interested in the value of these fields from this
-endpoint, set the `with_merge_status_recheck` parameter to `true` in the query.
-
-NOTE:
-[Starting in GitLab 12.8](https://gitlab.com/gitlab-org/gitlab/-/issues/29984),
-the mergeability (`merge_status`) of each merge request will be checked
-asynchronously when a request is made to this endpoint. Poll this API endpoint
-to get updated status. This affects the `has_conflicts` property as it is
-dependent on the `merge_status`. It'll return `false` unless `merge_status` is
-`cannot_be_merged`.
 
 ```json
 [
@@ -244,19 +257,19 @@ Parameters:
 | `milestone`                     | string         | no       | Return merge requests for a specific milestone. `None` returns merge requests with no milestone. `Any` returns merge requests that have an assigned milestone. |
 | `view`                          | string         | no       | If `simple`, returns the `iid`, URL, title, description, and basic state of merge request                                      |
 | `labels`                        | string         | no       | Return merge requests matching a comma separated list of labels. `None` lists all merge requests with no labels. `Any` lists all merge requests with at least one label. `No+Label` (Deprecated) lists all merge requests with no labels. Predefined names are case-insensitive. |
-| `with_labels_details`           | boolean        | no       | If `true`, response will return more details for each label in labels field: `:name`, `:color`, `:description`, `:description_html`, `:text_color`. Default is `false`. Introduced in [GitLab 12.7](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/21413) |
-| `with_merge_status_recheck`     | boolean        | no       | If `true`, this projection requests (but does not guarantee) that the `merge_status` field be recalculated asynchronously. Default is `false`. Introduced in [GitLab 13.0](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/31890) |
+| `with_labels_details`           | boolean        | no       | If `true`, response will return more details for each label in labels field: `:name`, `:color`, `:description`, `:description_html`, `:text_color`. Default is `false`. |
+| `with_merge_status_recheck`     | boolean        | no       | If `true`, this projection requests (but does not guarantee) that the `merge_status` field be recalculated asynchronously. Default is `false`. |
 | `created_after`                 | datetime       | no       | Return merge requests created on or after the given time. Expected in ISO 8601 format (`2019-03-15T08:00:00Z`) |
 | `created_before`                | datetime       | no       | Return merge requests created on or before the given time. Expected in ISO 8601 format (`2019-03-15T08:00:00Z`) |
 | `updated_after`                 | datetime       | no       | Return merge requests updated on or after the given time. Expected in ISO 8601 format (`2019-03-15T08:00:00Z`) |
 | `updated_before`                | datetime       | no       | Return merge requests updated on or before the given time. Expected in ISO 8601 format (`2019-03-15T08:00:00Z`) |
-| `scope`                         | string         | no       | Return merge requests for the given scope: `created_by_me`, `assigned_to_me` or `all`.<br> For versions before 11.0, use the now deprecated `created-by-me` or `assigned-to-me` scopes instead.<br> _([Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/13060) in GitLab 9.5. [Changed to snake_case](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/18935) in GitLab 11.0)_ |
-| `author_id`                     | integer        | no       | Returns merge requests created by the given user `id`. Mutually exclusive with `author_username`. _([Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/13060) in GitLab 9.5)_
-| `author_username`               | string         | no       | Returns merge requests created by the given `username`. Mutually exclusive with `author_id`. _([Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/13060) in GitLab 12.10)_             |     |
-| `assignee_id`                   | integer        | no       | Returns merge requests assigned to the given user `id`. `None` returns unassigned merge requests. `Any` returns merge requests with an assignee. _([Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/13060) in GitLab 9.5)_ |
+| `scope`                         | string         | no       | Return merge requests for the given scope: `created_by_me`, `assigned_to_me`, or `all`. |
+| `author_id`                     | integer        | no       | Returns merge requests created by the given user `id`. Mutually exclusive with `author_username`. |
+| `author_username`               | string         | no       | Returns merge requests created by the given `username`. Mutually exclusive with `author_id`.|
+| `assignee_id`                   | integer        | no       | Returns merge requests assigned to the given user `id`. `None` returns unassigned merge requests. `Any` returns merge requests with an assignee. |
 | `approver_ids` **(STARTER)**    | integer array  | no       | Returns merge requests which have specified all the users with the given `id`s as individual approvers. `None` returns merge requests without approvers. `Any` returns merge requests with an approver. |
 | `approved_by_ids` **(STARTER)** | integer array  | no       | Returns merge requests which have been approved by all the users with the given `id`s (Max: 5). `None` returns merge requests with no approvals. `Any` returns merge requests with an approval. |
-| `my_reaction_emoji`             | string         | no       | Return merge requests reacted by the authenticated user by the given `emoji`. `None` returns issues not given a reaction. `Any` returns issues given at least one reaction. _([Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/14016) in GitLab 10.0)_ |
+| `my_reaction_emoji`             | string         | no       | Return merge requests reacted by the authenticated user by the given `emoji`. `None` returns issues not given a reaction. `Any` returns issues given at least one reaction. |
 | `source_branch`                 | string         | no       | Return merge requests with the given source branch                                                                             |
 | `target_branch`                 | string         | no       | Return merge requests with the given target branch                                                                             |
 | `search`                        | string         | no       | Search merge requests against their `title` and `description`                                                                  |
@@ -557,19 +570,11 @@ GET /projects/:id/merge_requests/:merge_request_iid
 
 Parameters:
 
-- `id` (required) - The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user
-- `merge_request_iid` (required) - The internal ID of the merge request
-- `render_html` (optional) - If `true` response includes rendered HTML for title and description
-- `include_diverged_commits_count` (optional) - If `true` response includes the commits behind the target branch
-- `include_rebase_in_progress` (optional) - If `true` response includes whether a rebase operation is in progress
-
-NOTE:
-[Starting in GitLab 12.8](https://gitlab.com/gitlab-org/gitlab/-/issues/29984),
-the mergeability (`merge_status`) of a merge request will be checked
-asynchronously when a request is made to this endpoint. Poll this API endpoint
-to get updated status. This affects the `has_conflicts` property as it is
-dependent on the `merge_status`. It'll return `false` unless `merge_status` is
-`cannot_be_merged`.
+- `id` (required) - The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user.
+- `merge_request_iid` (required) - The internal ID of the merge request.
+- `render_html` (optional) - If `true` response includes rendered HTML for title and description.
+- `include_diverged_commits_count` (optional) - If `true` response includes the commits behind the target branch.
+- `include_rebase_in_progress` (optional) - If `true` response includes whether a rebase operation is in progress.
 
 ```json
 {
@@ -719,8 +724,8 @@ GET /projects/:id/merge_requests/:merge_request_iid/participants
 
 Parameters:
 
-- `id` (required) - The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user
-- `merge_request_iid` (required) - The internal ID of the merge request
+- `id` (required) - The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user.
+- `merge_request_iid` (required) - The internal ID of the merge request.
 
 ```json
 [
@@ -753,8 +758,8 @@ GET /projects/:id/merge_requests/:merge_request_iid/commits
 
 Parameters:
 
-- `id` (required) - The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user
-- `merge_request_iid` (required) - The internal ID of the merge request
+- `id` (required) - The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user.
+- `merge_request_iid` (required) - The internal ID of the merge request.
 
 ```json
 [
@@ -786,12 +791,6 @@ Shows information about the merge request including its files and changes.
 ```plaintext
 GET /projects/:id/merge_requests/:merge_request_iid/changes
 ```
-
-[Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/46190) in GitLab 13.6,
-diffs associated with the set of changes will have the same size limitations applied as other diffs
-returned by the API or viewed via the UI. When these limits impact the results, the `overflow`
-field will contain a value of `true`. Diff data without these limits applied can be retrieved by
-adding the `access_raw_diffs` parameter, however, it will be slower and more resource-intensive.
 
 Parameters:
 
@@ -898,7 +897,7 @@ Parameters:
 
 ## List MR pipelines
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/15454) in GitLab 10.5.0.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/15454) in GitLab 10.5.
 
 Get a list of merge request pipelines.
 
@@ -908,8 +907,8 @@ GET /projects/:id/merge_requests/:merge_request_iid/pipelines
 
 Parameters:
 
-- `id` (required) - The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user
-- `merge_request_iid` (required) - The internal ID of the merge request
+- `id` (required) - The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user.
+- `merge_request_iid` (required) - The internal ID of the merge request.
 
 ```json
 [
@@ -1006,16 +1005,6 @@ POST /projects/:id/merge_requests
 | `allow_collaboration`      | boolean | no       | Allow commits from members who can merge to the target branch                   |
 | `allow_maintainer_to_push` | boolean | no       | Deprecated, see allow_collaboration                                             |
 | `squash`                   | boolean | no       | Squash commits into a single commit when merging                                |
-
-If `approvals_before_merge` **(STARTER)** is not provided, it inherits the value from the
-target project. If it is provided, then the following conditions must hold in
-order for it to take effect:
-
-1. The target project's `approvals_before_merge` must be greater than zero. A
-   value of zero disables approvals for that project.
-1. The provided value of `approvals_before_merge` must be greater than the
-   target project's `approvals_before_merge`.
-1. This API returns 201 (created) for a successful response.
 
 ```json
 {
@@ -1336,14 +1325,14 @@ PUT /projects/:id/merge_requests/:merge_request_iid/merge
 
 Parameters:
 
-- `id` (required) - The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user
-- `merge_request_iid` (required) - Internal ID of MR
-- `merge_commit_message` (optional) - Custom merge commit message
-- `squash_commit_message` (optional) - Custom squash commit message
-- `squash` (optional) - if `true` the commits will be squashed into a single commit on merge
-- `should_remove_source_branch` (optional) - if `true` removes the source branch
-- `merge_when_pipeline_succeeds` (optional) - if `true` the MR is merged when the pipeline succeeds
-- `sha` (optional) - if present, then this SHA must match the HEAD of the source branch, otherwise the merge will fail
+- `id` (required) - The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user.
+- `merge_request_iid` (required) - Internal ID of MR.
+- `merge_commit_message` (optional) - Custom merge commit message.
+- `squash_commit_message` (optional) - Custom squash commit message.
+- `squash` (optional) - if `true` the commits will be squashed into a single commit on merge.
+- `should_remove_source_branch` (optional) - if `true` removes the source branch.
+- `merge_when_pipeline_succeeds` (optional) - if `true` the MR is merged when the pipeline succeeds.
+- `sha` (optional) - if present, then this SHA must match the HEAD of the source branch, otherwise the merge will fail.
 
 ```json
 {
@@ -1508,11 +1497,9 @@ Parameters:
 
 ## Cancel Merge When Pipeline Succeeds
 
-If you don't have permissions to accept this merge request - you'll get a `401`
-
-If the merge request is already merged or closed - you get `405` and error message 'Method Not Allowed'
-
-In case the merge request is not set to be merged when the pipeline succeeds, you'll also get a `406` error.
+- If you don't have permissions to accept this merge request - you'll get a `401`.
+- If the merge request is already merged or closed - you get `405` and error message 'Method Not Allowed'.
+- In case the merge request is not set to be merged when the pipeline succeeds, you'll also get a `406` error.
 
 ```plaintext
 POST /projects/:id/merge_requests/:merge_request_iid/cancel_merge_when_pipeline_succeeds
@@ -1785,7 +1772,7 @@ Example response when the GitLab issue tracker is used:
 ]
 ```
 
-Example response when an external issue tracker (e.g. Jira) is used:
+Example response when an external issue tracker (for example, Jira) is used:
 
 ```json
 [
@@ -2384,7 +2371,7 @@ Example response:
 
 ## Add spent time for a merge request
 
-Adds spent time for this merge request
+Adds spent time for this merge request.
 
 ```plaintext
 POST /projects/:id/merge_requests/:merge_request_iid/add_spent_time
