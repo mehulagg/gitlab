@@ -1,13 +1,14 @@
 <script>
 import { mapActions, mapGetters, mapState } from 'vuex';
-import { isEmpty, debounce } from 'lodash';
-import { Manager } from 'smooshpack';
+import { isEmpty, isString, debounce } from 'lodash';
 import { listen } from 'codesandbox-api';
 import { GlLoadingIcon } from '@gitlab/ui';
+import { stringToArrayBuffer } from '~/lib/utils/array_buffer';
 import Navigator from './navigator.vue';
 import { packageJsonPath } from '../../constants';
-import { createPathWithExt } from '../../utils';
+import { createPathWithExt, isTextFile } from '../../utils';
 import eventHub from '../../eventhub';
+import { loadSmooshpackModule } from './smooshpack_adapter';
 
 export default {
   components: {
@@ -130,18 +131,33 @@ export default {
 
       this.manager.updatePreview(this.sandboxOpts);
     },
-    initManager() {
+    async initManager() {
+      const { Manager } = await loadSmooshpackModule();
       const { codesandboxBundlerUrl: bundlerURL } = this;
 
       const settings = {
         fileResolver: {
           isFile: p => Promise.resolve(Boolean(this.entries[createPathWithExt(p)])),
-          readFile: p => this.loadFileContent(createPathWithExt(p)).then(content => content),
+          readFile: p => this.loadFileContent(createPathWithExt(p)),
+          readFileInfo: p => this.readFileInfo(createPathWithExt(p)),
         },
         ...(bundlerURL ? { bundlerURL } : {}),
       };
 
       this.manager = new Manager('#ide-preview', this.sandboxOpts, settings);
+    },
+    readFileInfo(path) {
+      return this.loadFileContent(path).then(contentParam => {
+        const entry = this.entries[path];
+        const contentType = entry.mimeType;
+        const needsArrayBuffer = !isTextFile(entry) && isString(contentParam);
+        const content = needsArrayBuffer ? stringToArrayBuffer(contentParam) : contentParam;
+
+        return {
+          content,
+          contentType,
+        };
+      });
     },
   },
 };

@@ -2984,6 +2984,11 @@ codesandbox-api@0.0.23:
   resolved "https://registry.yarnpkg.com/codesandbox-api/-/codesandbox-api-0.0.23.tgz#bf650a21b5f3c2369e03f0c19d10b4e2ba255b4f"
   integrity sha512-fFGBkIghDkQILh7iHYlpZU5sfWncCDb92FQSFE4rR3VBcTfUsD5VZgpQi+JjZQuwWIdfl4cOhcIFrUYwshUezA==
 
+codesandbox-api@0.0.24:
+  version "0.0.24"
+  resolved "https://registry.yarnpkg.com/codesandbox-api/-/codesandbox-api-0.0.24.tgz#f0523c0a6f11a9be4bde3ef5f4657f74a992bbfa"
+  integrity sha512-apo40Pus8maNBOBJSjYMh2T5cnAZRGuZc0B12X6S8eNesaPJ2InWan71jlmgn2+d1m8e0a0zdP3cFBDY09c6iA==
+
 codesandbox-import-util-types@^1.2.11:
   version "1.2.11"
   resolved "https://registry.yarnpkg.com/codesandbox-import-util-types/-/codesandbox-import-util-types-1.2.11.tgz#68e812f21d6b309e9a52eec5cf027c3e63b4c703"
@@ -5433,6 +5438,15 @@ gettext-extractor@^3.4.3:
     parse5 "^5"
     pofile "^1"
     typescript "2 - 3"
+
+gitlab-smooshpack@0.0.66-1:
+  version "0.0.66-1"
+  resolved "https://registry.yarnpkg.com/gitlab-smooshpack/-/gitlab-smooshpack-0.0.66-1.tgz#944f3b2e7015693bd74d7aec4ad1e7d69fd1da8c"
+  integrity sha512-Yz+j/ntUD6PYE6EMRzmsLZp0kRI63pDdxLePBmo+TrxONOqP6rtY7b0VlS41EQLYvs4vTWd++vadLsUv0SjtTg==
+  dependencies:
+    codesandbox-api "0.0.24"
+    codesandbox-import-utils "^1.2.3"
+    lodash.isequal "^4.5.0"
 
 glob-parent@^3.1.0:
   version "3.1.0"
