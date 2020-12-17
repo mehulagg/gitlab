@@ -1,1 +1,1 @@
-export const isFreePlan = state => state.plan.code === null;
+export const isFreePlan = state => ['free', null].includes(state.plan.code);

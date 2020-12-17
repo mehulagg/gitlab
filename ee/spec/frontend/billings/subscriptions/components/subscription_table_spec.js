@@ -116,6 +116,7 @@ describe('SubscriptionTable component', () => {
       planCode    | expected | testDescription
       ${'bronze'} | ${true}  | ${'renders the button'}
       ${null}     | ${false} | ${'does not render the button'}
+      ${'free'}   | ${false} | ${'does not render the button'}
     `(
       'given a plan with state: planCode = $planCode and saasAddSeatsButton = $featureFlag',
       ({ planCode, upgradable, expected, testDescription }) => {
@@ -145,6 +146,8 @@ describe('SubscriptionTable component', () => {
       ${'silver'} | ${false}    | ${false} | ${'does not render the button'}
       ${null}     | ${true}     | ${false} | ${'does not render the button'}
       ${null}     | ${false}    | ${false} | ${'does not render the button'}
+      ${'free'}   | ${true}     | ${false} | ${'does not render the button'}
+      ${'free'}   | ${false}    | ${false} | ${'does not render the button'}
     `(
       'given a plan with state: planCode = $planCode and saasManualRenewButton = $featureFlag',
       ({ planCode, featureFlag, expected, testDescription }) => {
@@ -174,6 +177,8 @@ describe('SubscriptionTable component', () => {
       ${'silver'} | ${false}    | ${false} | ${'does not render the button'}
       ${null}     | ${true}     | ${false} | ${'does not render the button'}
       ${null}     | ${false}    | ${false} | ${'does not render the button'}
+      ${'free'}   | ${true}     | ${false} | ${'does not render the button'}
+      ${'free'}   | ${false}    | ${false} | ${'does not render the button'}
     `(
       'given a plan with state: planCode = $planCode and saasAddSeatsButton = $featureFlag',
       ({ planCode, featureFlag, expected, testDescription }) => {
@@ -204,6 +209,8 @@ describe('SubscriptionTable component', () => {
       ${'bronze'} | ${false}   | ${false} | ${'does not render the button'}
       ${null}     | ${true}    | ${true}  | ${'renders the button'}
       ${null}     | ${false}   | ${true}  | ${'renders the button'}
+      ${'free'}   | ${true}    | ${true}  | ${'renders the button'}
+      ${'free'}   | ${false}   | ${true}  | ${'renders the button'}
     `(
       'given a plan with state: planCode = $planCode, upgradable = $upgradable',
       ({ planCode, upgradable, expected, testDescription }) => {
