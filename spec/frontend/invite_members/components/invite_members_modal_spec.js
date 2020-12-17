@@ -121,13 +121,13 @@ describe('InviteMembersModal', () => {
           wrapper = createComponent({ newUsersToInvite: [user1] });
 
           wrapper.vm.$toast = { show: jest.fn() };
-          jest.spyOn(Api, 'inviteGroupMembers').mockResolvedValue({ data: postData });
+          jest.spyOn(Api, 'addGroupMembersByUserId').mockResolvedValue({ data: postData });
 
           clickInviteButton();
         });
 
-        it('calls Api inviteGroupMembers with the correct params', () => {
-          expect(Api.inviteGroupMembers).toHaveBeenCalledWith(id, postData);
+        it('calls Api addGroupMembersByUserId with the correct params', () => {
+          expect(Api.addGroupMembersByUserId).toHaveBeenCalledWith(id, postData);
         });
 
         it('displays the successful toastMessage', () => {
@@ -144,7 +144,7 @@ describe('InviteMembersModal', () => {
 
           wrapper.vm.$toast = { show: jest.fn() };
           jest
-            .spyOn(Api, 'inviteGroupMembers')
+            .spyOn(Api, 'addGroupMembersByUserId')
             .mockRejectedValue({ response: { data: { message: apiErrorMessage } } });
 
           clickInviteButton();
@@ -166,7 +166,7 @@ describe('InviteMembersModal', () => {
 
           wrapper.vm.$toast = { show: jest.fn() };
           jest
-            .spyOn(Api, 'inviteGroupMembers')
+            .spyOn(Api, 'addGroupMembersByUserId')
             .mockRejectedValue({ response: { data: { success: false } } });
 
           clickInviteButton();
@@ -219,7 +219,7 @@ describe('InviteMembersModal', () => {
 
           wrapper.vm.$toast = { show: jest.fn() };
           jest
-            .spyOn(Api, 'inviteGroupMembers')
+            .spyOn(Api, 'addGroupMembersByUserId')
             .mockRejectedValue({ response: { data: { success: false } } });
 
           clickInviteButton();
@@ -252,7 +252,7 @@ describe('InviteMembersModal', () => {
 
           wrapper.vm.$toast = { show: jest.fn() };
           jest.spyOn(Api, 'inviteGroupMembersByEmail').mockResolvedValue({ data: postData });
-          jest.spyOn(Api, 'inviteGroupMembers').mockResolvedValue({ data: postData });
+          jest.spyOn(Api, 'addGroupMembersByUserId').mockResolvedValue({ data: postData });
 
           clickInviteButton();
         });
@@ -261,8 +261,8 @@ describe('InviteMembersModal', () => {
           expect(Api.inviteGroupMembersByEmail).toHaveBeenCalledWith(id, emailPostData);
         });
 
-        it('calls Api inviteGroupMembers with the correct params', () => {
-          expect(Api.inviteGroupMembers).toHaveBeenCalledWith(id, idPostData);
+        it('calls Api addGroupMembersByUserId with the correct params', () => {
+          expect(Api.addGroupMembersByUserId).toHaveBeenCalledWith(id, idPostData);
         });
 
         it('displays the successful toastMessage', () => {
@@ -283,7 +283,7 @@ describe('InviteMembersModal', () => {
             .spyOn(Api, 'inviteGroupMembersByEmail')
             .mockRejectedValue({ response: { data: { success: false } } });
 
-          jest.spyOn(Api, 'inviteGroupMembers').mockResolvedValue({ data: postData });
+          jest.spyOn(Api, 'addGroupMembersByUserId').mockResolvedValue({ data: postData });
 
           clickInviteButton();
         });

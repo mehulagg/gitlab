@@ -129,7 +129,7 @@ const Api = {
     });
   },
 
-  inviteGroupMembers(id, data) {
+  addGroupMembersByUserId(id, data) {
     const url = Api.buildUrl(this.groupMembersPath).replace(':id', encodeURIComponent(id));
 
     return axios.post(url, data);
@@ -225,7 +225,7 @@ const Api = {
       .then(({ data }) => data);
   },
 
-  inviteProjectMembers(id, data) {
+  addProjectMembersByUserId(id, data) {
     const url = Api.buildUrl(this.projectMembersPath).replace(':id', encodeURIComponent(id));
 
     return axios.post(url, data);

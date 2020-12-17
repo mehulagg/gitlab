@@ -1,6 +1,7 @@
 <script>
 import { debounce } from 'lodash';
-import { GlTokenSelector, GlAvatar, GlAvatarLabeled } from '@gitlab/ui';
+import { GlTokenSelector, GlAvatar, GlAvatarLabeled, GlSprintf } from '@gitlab/ui';
+import { __, sprintf } from '~/locale';
 import { USER_SEARCH_DELAY } from '../constants';
 import Api from '~/api';
 
@@ -9,6 +10,7 @@ export default {
     GlTokenSelector,
     GlAvatar,
     GlAvatarLabeled,
+    GlSprintf,
   },
   props: {
     placeholder: {
@@ -47,6 +49,11 @@ export default {
       const regex = /.+@/;
 
       return value.match(regex) !== null;
+    },
+    inviteText(text) {
+      return sprintf(__('Invite "%{text}" by email'), {
+        text,
+      });
     },
     handleTextInput(query) {
       this.hideDropdownWithNoItems = false;
@@ -119,7 +126,7 @@ export default {
     </template>
 
     <template #user-defined-token-content="{ inputText: text }">
-      {{ sprintf(__('Invite "%{text}" by email'), { text: text }) }}
+      <gl-sprintf :message="inviteText(text)" />
     </template>
   </gl-token-selector>
 </template>

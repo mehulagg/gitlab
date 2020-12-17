@@ -77,9 +77,14 @@ describe('MembersTokenSelect', () => {
     });
 
     describe('when text input is typed in', () => {
+      let tokenSelector;
+
+      beforeEach(() => {
+        tokenSelector = findTokenSelector();
+      });
+
       it('calls the API with search parameter', async () => {
         const searchParam = 'One';
-        const tokenSelector = findTokenSelector();
 
         tokenSelector.vm.$emit('text-input', searchParam);
 
@@ -87,6 +92,16 @@ describe('MembersTokenSelect', () => {
 
         expect(Api.users).toHaveBeenCalledWith(searchParam, wrapper.vm.$options.queryOptions);
         expect(tokenSelector.props('hideDropdownWithNoItems')).toBe(false);
+      });
+
+      describe('when input text is an email', () => {
+        it('allows user defined tokens', async () => {
+          tokenSelector.vm.$emit('text-input', 'foo@bar.com');
+
+          await nextTick();
+
+          expect(tokenSelector.props('allowUserDefinedTokens')).toBe(true);
+        });
       });
     });
 

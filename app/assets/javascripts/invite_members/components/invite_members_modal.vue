@@ -102,14 +102,14 @@ export default {
   },
   methods: {
     partitionNewUsersToInvite() {
-      const [usersToInviteByEmail, usersToInviteById] = partition(
+      const [usersToInviteByEmail, usersToAddById] = partition(
         this.newUsersToInvite,
         user => isString(user.id) && user.id.includes('user-defined-token'),
       );
 
       return [
         usersToInviteByEmail.map(user => user.name).join(','),
-        usersToInviteById.map(user => user.id).join(','),
+        usersToAddById.map(user => user.id).join(','),
       ];
     },
     openModal() {
@@ -132,7 +132,7 @@ export default {
       this.selectedAccessLevel = item;
     },
     submitForm() {
-      const [usersToInviteByEmail, usersToInviteById] = this.partitionNewUsersToInvite();
+      const [usersToInviteByEmail, usersToAddById] = this.partitionNewUsersToInvite();
       const promises = [];
 
       if (usersToInviteByEmail !== '') {
@@ -143,12 +143,12 @@ export default {
         promises.push(apiInviteByEmail(this.id, this.inviteByEmailPostData(usersToInviteByEmail)));
       }
 
-      if (usersToInviteById !== '') {
-        const apiAddById = this.isProject
-          ? Api.inviteProjectMembers.bind(Api)
-          : Api.inviteGroupMembers.bind(Api);
+      if (usersToAddById !== '') {
+        const apiAddByUserId = this.isProject
+          ? Api.addProjectMembersByUserId.bind(Api)
+          : Api.addGroupMembersByUserId.bind(Api);
 
-        promises.push(apiAddById(this.id, this.addByIdPostData(usersToInviteById)));
+        promises.push(apiAddByUserId(this.id, this.addByUserIdPostData(usersToAddById)));
       }
 
       Promise.all(promises)
@@ -156,14 +156,10 @@ export default {
         .catch(this.showToastMessageError);
     },
     inviteByEmailPostData(usersToInviteByEmail) {
-      if (usersToInviteByEmail === undefined) return this.basePostData;
-
       return { ...this.basePostData, email: usersToInviteByEmail };
     },
-    addByIdPostData(usersToInviteById) {
-      if (usersToInviteById === undefined) return this.basePostData;
-
-      return { ...this.basePostData, user_id: usersToInviteById };
+    addByUserIdPostData(usersToAddById) {
+      return { ...this.basePostData, user_id: usersToAddById };
     },
     showToastMessageSuccess() {
       this.$toast.show(this.$options.labels.toastMessageSuccessful, this.toastOptions);
