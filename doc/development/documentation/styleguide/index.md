@@ -632,7 +632,7 @@ Follow these guidelines for punctuation:
 
 ### Introductory text
 
-When you introduce an example or table, try to avoid extra words, like: 
+When you introduce an example or table, try to avoid extra words, like 
 **the following**, **above**, **below**, **earlier**, or **previous**.
 
 Use a colon at the end of the sentence.
