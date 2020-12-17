@@ -8,7 +8,7 @@ import boardsStore from '~/boards/stores/boards_store';
 import { fullBoardId, getBoardsPath } from '../boards_util';
 
 import BoardConfigurationOptions from './board_configuration_options.vue';
-import createBoardMutation from '../graphql/board.mutation.graphql';
+import updateBoardMutation from '../graphql/board_update.mutation.graphql';
 
 const boardDefaults = {
   id: false,
@@ -177,7 +177,7 @@ export default {
     },
     callBoardMutation(id) {
       return this.$apollo.mutate({
-        mutation: createBoardMutation,
+        mutation: updateBoardMutation,
         variables: {
           ...pick(this.boardPayload, ['hideClosedList', 'hideBacklogList']),
           id,
