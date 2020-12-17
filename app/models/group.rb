@@ -271,7 +271,13 @@ class Group < Namespace
   end
 
   def add_user(user, access_level, current_user: nil, expires_at: nil, ldap: false)
-    GroupMember.add_user(self, user,access_level,current_user: current_user,expires_at: expires_at,ldap: ldap)
+    GroupMember.add_user(self,
+      user,
+      access_level,
+      current_user: current_user,
+      expires_at: expires_at,
+      ldap: ldap
+    )
   end
 
   def add_guest(user, current_user = nil)
