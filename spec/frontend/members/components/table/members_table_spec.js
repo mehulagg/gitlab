@@ -63,6 +63,10 @@ describe('MembersTable', () => {
     createWrapper(getByTestIdHelper(wrapper.element, id, options));
 
   const findTable = () => wrapper.find(GlTable);
+  const findTableCellByMemberId = (tableCellLabel, memberId) =>
+    getByTestId(`members-table-row-${memberId}`).find(
+      `[data-label="${tableCellLabel}"][role="cell"]`,
+    );
 
   afterEach(() => {
     wrapper.destroy();
@@ -137,16 +141,29 @@ describe('MembersTable', () => {
         canRemove: true,
       };
 
+      const memberNoPermissions = {
+        ...memberMock,
+        id: 2,
+      };
+
       describe.each`
         permission     | members
-        ${'canUpdate'} | ${[memberCanUpdate]}
-        ${'canRemove'} | ${[memberCanRemove]}
-        ${'canResend'} | ${[invite]}
+        ${'canUpdate'} | ${[memberNoPermissions, memberCanUpdate]}
+        ${'canRemove'} | ${[memberNoPermissions, memberCanRemove]}
+        ${'canResend'} | ${[memberNoPermissions, invite]}
       `('when one of the members has $permission permissions', ({ members }) => {
         it('renders the "Actions" field', () => {
           createComponent({ members, tableFields: ['actions'] });
 
           expect(getByTestId('col-actions').exists()).toBe(true);
+
+          const cssClasses = ['gl-display-none!', 'gl-display-lg-table-cell!'];
+          expect(findTableCellByMemberId('Actions', members[0].id).classes()).toEqual(
+            expect.arrayContaining(cssClasses),
+          );
+          expect(findTableCellByMemberId('Actions', members[1].id).classes()).not.toEqual(
+            expect.arrayContaining(cssClasses),
+          );
         });
       });
 
