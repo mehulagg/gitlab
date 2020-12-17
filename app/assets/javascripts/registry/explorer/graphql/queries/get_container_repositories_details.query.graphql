@@ -8,7 +8,6 @@ query getContainerRepositoriesDetails(
   $isGroupPage: Boolean!
 ) {
   project(fullPath: $fullPath) @skip(if: $isGroupPage) {
-    containerRepositoriesCount
     containerRepositories(name: $name, after: $after, before: $before, first: $first, last: $last) {
       nodes {
         id
@@ -17,7 +16,6 @@ query getContainerRepositoriesDetails(
     }
   }
   group(fullPath: $fullPath) @include(if: $isGroupPage) {
-    containerRepositoriesCount
     containerRepositories(name: $name, after: $after, before: $before, first: $first, last: $last) {
       nodes {
         id
