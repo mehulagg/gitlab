@@ -327,14 +327,25 @@ For visibility, please also share any commands run against production in the `#s
 ### Manually force the current user to be in the experiment group
 
 You may force the application to put your current user in the experiment group. To do so
-add a query string parameter to the path where the experiment runs. If you do so,
-the experiment will work only for this request and won't work after following links or submitting forms.
+use your browser's Developer Console to add a cookie parameter as shown below.
 
-For example, to forcibly enable the `EXPERIMENT_KEY` experiment, add `force_experiment=EXPERIMENT_KEY`
-to the URL:
 
-```shell
-https://gitlab.com/<EXPERIMENT_ENTRY_URL>?force_experiment=<EXPERIMENT_KEY>
+Forcing the current user to be in the experiment group for <EXPERIMENT_KEY> during the browser session:
+
+```javascript
+document.cookie = "force_experiment=<EXPERIMENT_KEY>; path=/";
+```
+
+Use a comma to list more than one experiment to be forced:
+
+```javascript
+document.cookie = "force_experiment=<EXPERIMENT_KEY>,<ANOTHER_EXPERIMENT_KEY>; path=/";
+```
+
+Clear the experiments by unsetting the `force_experiment` cookie:
+
+```javascript
+document.cookie = "force_experiment=; path=/";
 ```
 
 ### Testing and test helpers
