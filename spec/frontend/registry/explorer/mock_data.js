@@ -209,3 +209,26 @@ export const dockerCommands = {
   dockerPushCommand: 'barbar',
   dockerLoginCommand: 'bazbaz',
 };
+
+export const graphQLProjectImageRepositoriesDetailsMock = {
+  data: {
+    project: {
+      containerRepositories: {
+        nodes: [
+          {
+            id: 'gid://gitlab/ContainerRepository/26',
+            tagsCount: 4,
+            __typename: 'ContainerRepository',
+          },
+          {
+            id: 'gid://gitlab/ContainerRepository/11',
+            tagsCount: 1,
+            __typename: 'ContainerRepository',
+          },
+        ],
+        __typename: 'ContainerRepositoryConnection',
+      },
+      __typename: 'Project',
+    },
+  },
+};
