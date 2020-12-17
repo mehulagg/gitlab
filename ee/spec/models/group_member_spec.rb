@@ -251,7 +251,6 @@ RSpec.describe GroupMember do
       end
 
       it 'executes user_add_to_group event webhook' do
-        binding.pry
         group.add_guest(group_member.user)
 
         expect(WebMock).to have_requested(:post, group_hook.url).with(
