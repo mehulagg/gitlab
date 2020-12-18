@@ -11,6 +11,8 @@ import {
   GlAvatar,
   GlAvatarLabeled,
   GlAlert,
+  GlToggle,
+  GlCard,
 } from '@gitlab/ui';
 import { s__, __ } from '~/locale';
 import usersSearchQuery from '~/graphql_shared/queries/users_search.query.graphql';
@@ -39,6 +41,10 @@ export default {
         title: __('Starts on'),
         error: s__('OnCallSchedules|Rotation start date cannot be empty'),
       },
+      endsOn: {
+        enableToggle: s__('OnCallSchedules|Enable end date'),
+        title: __('Ends on'),
+      },
     },
   },
   tokenColorPalette: {
@@ -59,6 +65,8 @@ export default {
     GlAvatar,
     GlAvatarLabeled,
     GlAlert,
+    GlToggle,
+    GlCard,
   },
   props: {
     modalId: {
@@ -91,6 +99,7 @@ export default {
       participants: [],
       loading: false,
       ptSearchTerm: '',
+      endDateEnabled: false,
       form: {
         name: '',
         participants: [],
@@ -99,6 +108,10 @@ export default {
           type: this.$options.LENGTH_ENUM.hours,
         },
         startsOn: {
+          date: null,
+          time: 0,
+        },
+        endsOn: {
           date: null,
           time: 0,
         },
@@ -173,6 +186,9 @@ export default {
     setRotationStartsOnTime(time) {
       this.form.startsOn.time = time;
     },
+    setRotationEndsOnTime(time) {
+      this.form.endsOn.time = time;
+    },
     validateForm(key) {
       if (key === 'name') {
         this.validationState.name = this.form.name !== '';
@@ -190,115 +206,159 @@ export default {
   <gl-modal
     ref="createScheduleRotationModal"
     :modal-id="modalId"
-    size="sm"
     :title="$options.i18n.addRotation"
     :action-primary="actionsProps.primary"
     :action-cancel="actionsProps.cancel"
+    modal-class="rotations-modal"
     @primary="createRotation"
   >
     <gl-alert v-if="error" variant="danger" @dismiss="error = null">
       {{ error || $options.i18n.errorMsg }}
     </gl-alert>
-    <gl-form class="w-75 gl-xs-w-full!" @submit.prevent="createRotation">
-      <gl-form-group
-        :label="$options.i18n.fields.name.title"
-        label-size="sm"
-        label-for="rotation-name"
-        :invalid-feedback="$options.i18n.fields.name.error"
-        :state="validationState.name"
-      >
-        <gl-form-input id="rotation-name" v-model="form.name" @blur.native="validateForm('name')" />
-      </gl-form-group>
-
-      <gl-form-group
-        :label="$options.i18n.fields.participants.title"
-        label-size="sm"
-        label-for="rotation-participants"
-        :invalid-feedback="$options.i18n.fields.participants.error"
-        :state="validationState.participants"
-      >
-        <gl-token-selector
-          v-model="form.participants"
-          :dropdown-items="participants"
-          :loading="this.$apollo.queries.participants.loading"
-          :container-class="'gl-h-13! gl-overflow-y-auto'"
-          @text-input="filterParticipants"
-          @blur="validateForm('participants')"
+    <gl-form @submit.prevent="createRotation">
+      <div class="w-75 gl-xs-w-full!">
+        <gl-form-group
+          :label="$options.i18n.fields.name.title"
+          label-size="sm"
+          label-for="rotation-name"
+          :invalid-feedback="$options.i18n.fields.name.error"
+          :state="validationState.name"
         >
-          <template #token-content="{ token }">
-            <gl-avatar v-if="token.avatarUrl" :src="token.avatarUrl" :size="16" />
-            {{ token.name }}
-          </template>
-          <template #dropdown-item-content="{ dropdownItem }">
-            <gl-avatar-labeled
-              :src="dropdownItem.avatarUrl"
-              :size="32"
-              :label="dropdownItem.name"
-              :sub-label="dropdownItem.username"
-            />
-          </template>
-        </gl-token-selector>
-      </gl-form-group>
-
-      <gl-form-group
-        :label="$options.i18n.fields.length.title"
-        label-size="sm"
-        label-for="rotation-length"
-      >
-        <div class="gl-display-flex">
           <gl-form-input
-            id="rotation-length"
-            v-model="form.length.value"
-            type="number"
-            class="gl-w-12 gl-mr-3"
-            min="1"
+            id="rotation-name"
+            v-model="form.name"
+            @blur.native="validateForm('name')"
           />
-          <gl-dropdown id="rotation-length" :text="form.length.type">
-            <gl-dropdown-item
-              v-for="type in $options.LENGTH_ENUM"
-              :key="type"
-              :is-checked="form.length.type === type"
-              is-check-item
-              @click="setRotationLengthType(type)"
-            >
-              {{ type }}
-            </gl-dropdown-item>
-          </gl-dropdown>
-        </div>
-      </gl-form-group>
+        </gl-form-group>
 
-      <gl-form-group
-        :label="$options.i18n.fields.startsOn.title"
-        label-size="sm"
-        label-for="rotation-time"
-        :invalid-feedback="$options.i18n.fields.startsOn.error"
-        :state="validationState.startsOn"
-      >
-        <div class="gl-display-flex gl-align-items-center">
-          <gl-datepicker
-            v-model="form.startsOn.date"
-            class="gl-mr-3"
-            @close="validateForm('startsOn')"
-          />
-          <span> {{ __('at') }} </span>
-          <gl-dropdown
-            id="rotation-time"
-            :text="formatTime(form.startsOn.time)"
-            class="gl-w-12 gl-pl-3"
+        <gl-form-group
+          :label="$options.i18n.fields.participants.title"
+          label-size="sm"
+          label-for="rotation-participants"
+          :invalid-feedback="$options.i18n.fields.participants.error"
+          :state="validationState.participants"
+        >
+          <gl-token-selector
+            v-model="form.participants"
+            :dropdown-items="participants"
+            :loading="this.$apollo.queries.participants.loading"
+            :container-class="'gl-h-13! gl-overflow-y-auto'"
+            @text-input="filterParticipants"
+            @blur="validateForm('participants')"
           >
-            <gl-dropdown-item
-              v-for="n in 24"
-              :key="n"
-              :is-checked="form.startsOn.time === n"
-              is-check-item
-              @click="setRotationStartsOnTime(n)"
+            <template #token-content="{ token }">
+              <gl-avatar v-if="token.avatarUrl" :src="token.avatarUrl" :size="16" />
+              {{ token.name }}
+            </template>
+            <template #dropdown-item-content="{ dropdownItem }">
+              <gl-avatar-labeled
+                :src="dropdownItem.avatarUrl"
+                :size="32"
+                :label="dropdownItem.name"
+                :sub-label="dropdownItem.username"
+              />
+            </template>
+          </gl-token-selector>
+        </gl-form-group>
+
+        <gl-form-group
+          :label="$options.i18n.fields.length.title"
+          label-size="sm"
+          label-for="rotation-length"
+        >
+          <div class="gl-display-flex">
+            <gl-form-input
+              id="rotation-length"
+              v-model="form.length.value"
+              type="number"
+              class="gl-w-12 gl-mr-3"
+              min="1"
+            />
+            <gl-dropdown :text="form.length.type">
+              <gl-dropdown-item
+                v-for="type in $options.LENGTH_ENUM"
+                :key="type"
+                :is-checked="form.length.type === type"
+                is-check-item
+                @click="setRotationLengthType(type)"
+              >
+                {{ type }}
+              </gl-dropdown-item>
+            </gl-dropdown>
+          </div>
+        </gl-form-group>
+
+        <gl-form-group
+          :label="$options.i18n.fields.startsOn.title"
+          label-size="sm"
+          label-for="rotation-start-time"
+          :invalid-feedback="$options.i18n.fields.startsOn.error"
+          :state="validationState.startsOn"
+        >
+          <div class="gl-display-flex gl-align-items-center">
+            <gl-datepicker
+              v-model="form.startsOn.date"
+              class="gl-mr-3"
+              @close="validateForm('startsOn')"
+            />
+            <span> {{ __('at') }} </span>
+            <gl-dropdown
+              id="rotation-start-time"
+              :text="formatTime(form.startsOn.time)"
+              class="gl-w-12 gl-pl-3"
             >
-              <span class="gl-white-space-nowrap"> {{ formatTime(n) }}</span>
-            </gl-dropdown-item>
-          </gl-dropdown>
-          <span class="gl-pl-5"> {{ schedule.timezone }} </span>
-        </div>
-      </gl-form-group>
+              <gl-dropdown-item
+                v-for="hour in 24"
+                :key="hour"
+                :is-checked="form.startsOn.time === hour"
+                is-check-item
+                @click="setRotationStartsOnTime(hour)"
+              >
+                <span class="gl-white-space-nowrap"> {{ formatTime(hour) }}</span>
+              </gl-dropdown-item>
+            </gl-dropdown>
+            <span class="gl-pl-5"> {{ schedule.timezone }} </span>
+          </div>
+        </gl-form-group>
+      </div>
+
+      <gl-toggle
+        v-model="endDateEnabled"
+        :label="$options.i18n.fields.endsOn.enableToggle"
+        label-position="left"
+        class="gl-mb-5"
+      />
+
+      <gl-card v-if="endDateEnabled" class="gl-min-w-fit-content" data-testid="ends-on">
+        <gl-form-group
+          :label="$options.i18n.fields.endsOn.title"
+          label-size="sm"
+          label-for="rotation-end-time"
+          :invalid-feedback="$options.i18n.fields.endsOn.error"
+          :state="validationState.endsOn"
+        >
+          <div class="gl-display-flex gl-align-items-center">
+            <gl-datepicker v-model="form.endsOn.date" class="gl-mr-3" />
+            <span> {{ __('at') }} </span>
+            <gl-dropdown
+              id="rotation-end-time"
+              :text="formatTime(form.endsOn.time)"
+              class="gl-w-12 gl-pl-3"
+            >
+              <gl-dropdown-item
+                v-for="hour in 24"
+                :key="hour"
+                :is-checked="form.endsOn.time === hour"
+                is-check-item
+                @click="setRotationEndsOnTime(hour)"
+              >
+                <span class="gl-white-space-nowrap"> {{ formatTime(hour) }}</span>
+              </gl-dropdown-item>
+            </gl-dropdown>
+            <div class="gl-mx-5">{{ schedule.timezone }}</div>
+          </div>
+        </gl-form-group>
+      </gl-card>
     </gl-form>
   </gl-modal>
 </template>
