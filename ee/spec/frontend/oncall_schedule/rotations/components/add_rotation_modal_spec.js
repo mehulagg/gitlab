@@ -2,7 +2,7 @@ import { shallowMount, createLocalVue } from '@vue/test-utils';
 import createMockApollo from 'jest/helpers/mock_apollo_helper';
 import VueApollo from 'vue-apollo';
 import waitForPromises from 'helpers/wait_for_promises';
-import { GlDropdownItem, GlModal, GlAlert, GlTokenSelector } from '@gitlab/ui';
+import { GlDropdownItem, GlModal, GlAlert, GlTokenSelector, GlToggle } from '@gitlab/ui';
 import { addRotationModalId } from 'ee/oncall_schedules/components/oncall_schedule';
 import AddRotationModal from 'ee/oncall_schedules/components/rotations/components/add_rotation_modal.vue';
 // import createOncallScheduleRotationMutation from 'ee/oncall_schedules/graphql/create_oncall_schedule_rotation.mutation.graphql';
@@ -94,9 +94,13 @@ describe('AddRotationModal', () => {
 
   const findModal = () => wrapper.find(GlModal);
   const findRotationLength = () => wrapper.find('[id = "rotation-length"]');
-  const findRotationStartsOn = () => wrapper.find('[id = "rotation-time"]');
+  const findRotationStartTime = () => wrapper.find('[id = "rotation-start-time"]');
+  const findRotationEndsContainer = () => wrapper.find('[data-testid = "ends-on"]');
+  const finEndDateToggle = () => wrapper.find(GlToggle);
+  const findRotationEndTime = () => wrapper.find('[id = "rotation-end-time"]');
   const findUserSelector = () => wrapper.find(GlTokenSelector);
-  const findDropdownOptions = () => wrapper.findAll(GlDropdownItem);
+  const findStartsOnTimeOptions = () => findRotationStartTime().findAll(GlDropdownItem);
+  const findEndsOnTimeOptions = () => findRotationEndTime().findAll(GlDropdownItem);
   const findAlert = () => wrapper.find(GlAlert);
 
   it('renders rotation modal layout', () => {
@@ -111,19 +115,44 @@ describe('AddRotationModal', () => {
     });
 
     it('renders the rotation starts on datepicker', async () => {
-      const startsOn = findRotationStartsOn();
+      const startsOn = findRotationStartTime();
       expect(startsOn.exists()).toBe(true);
       expect(startsOn.attributes('text')).toBe('00:00');
       expect(startsOn.attributes('headertext')).toBe('');
     });
 
-    it('should add a check for a rotation length type selected', async () => {
-      const selectedLengthType1 = findDropdownOptions().at(0);
-      const selectedLengthType2 = findDropdownOptions().at(1);
-      selectedLengthType1.vm.$emit('click');
+    it('should add a checkmark to a selected start time', async () => {
+      const options = findStartsOnTimeOptions();
+      const time1 = options.at(0);
+      const time2 = options.at(1);
+      time1.vm.$emit('click');
       await wrapper.vm.$nextTick();
-      expect(selectedLengthType1.props('isChecked')).toBe(true);
-      expect(selectedLengthType2.props('isChecked')).toBe(false);
+      expect(time1.props('isChecked')).toBe(true);
+      expect(time2.props('isChecked')).toBe(false);
+    });
+  });
+
+  describe('Rotation end time', () => {
+    it('toggles end time visibility', async () => {
+      const toggle = finEndDateToggle().vm;
+      toggle.$emit('change', false);
+      await wrapper.vm.$nextTick();
+      expect(findRotationEndsContainer().exists()).toBe(false);
+      toggle.$emit('change', true);
+      await wrapper.vm.$nextTick();
+      expect(findRotationEndsContainer().exists()).toBe(true);
+    });
+
+    it('should add a checkmark to a selected end time', async () => {
+      finEndDateToggle().vm.$emit('change', true);
+      await wrapper.vm.$nextTick();
+      const options = findEndsOnTimeOptions();
+      const time1 = options.at(0);
+      const time2 = options.at(1);
+      time2.vm.$emit('click');
+      await wrapper.vm.$nextTick();
+      expect(time1.props('isChecked')).toBe(false);
+      expect(time2.props('isChecked')).toBe(true);
     });
   });
 

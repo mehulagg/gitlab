@@ -10611,6 +10611,9 @@ msgstr ""
 msgid "Ends at (UTC)"
 msgstr ""
 
+msgid "Ends on"
+msgstr ""
+
 msgid "Enforce DNS rebinding attack protection"
 msgstr ""
 
@@ -19392,6 +19395,9 @@ msgid "OnCallSchedules|Edit rotation"
 msgstr ""
 
 msgid "OnCallSchedules|Edit schedule"
+msgstr ""
+
+msgid "OnCallSchedules|Enable end date"
 msgstr ""
 
 msgid "OnCallSchedules|Failed to add rotation"
