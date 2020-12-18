@@ -1,7 +1,11 @@
 import produce from 'immer';
 import createFlash from '~/flash';
 
-import { DELETE_SCHEDULE_ERROR, UPDATE_SCHEDULE_ERROR } from './error_messages';
+import {
+  DELETE_SCHEDULE_ERROR,
+  UPDATE_SCHEDULE_ERROR,
+  UPDATE_ROTATION_ERROR,
+} from './error_messages';
 
 const addScheduleToStore = (store, query, { oncallSchedule: schedule }, variables) => {
   if (!schedule) {
@@ -108,6 +112,32 @@ const addRotationToStore = (
   });
 };
 
+const updateRotationFromStore = (store, query, { oncallRotationUpdate }, scheduleId, variables) => {
+  const rotation = oncallRotationUpdate?.oncallRotation;
+  if (!rotation) {
+    return;
+  }
+
+  const sourceData = store.readQuery({
+    query,
+    variables,
+  });
+
+  const data = produce(sourceData, draftData => {
+    // eslint-disable-next-line no-param-reassign
+    draftData.project.incidentManagementOncallSchedules.nodes = [
+      ...draftData.project.incidentManagementOncallSchedules.nodes,
+      rotation,
+    ];
+  });
+
+  store.writeQuery({
+    query,
+    variables,
+    data,
+  });
+};
+
 const onError = (data, message) => {
   createFlash({ message });
   throw new Error(data.errors);
@@ -140,5 +170,13 @@ export const updateStoreAfterScheduleEdit = (store, query, data, variables) => {
 export const updateStoreAfterRotationAdd = (store, query, data, scheduleId, variables) => {
   if (!hasErrors(data)) {
     addRotationToStore(store, query, data, scheduleId, variables);
+  }
+};
+
+export const updateStoreAfterRotationEdit = (store, query, data, scheduleId, variables) => {
+  if (hasErrors(data)) {
+    onError(data, UPDATE_ROTATION_ERROR);
+  } else {
+    updateRotationFromStore(store, query, data, scheduleId, variables);
   }
 };

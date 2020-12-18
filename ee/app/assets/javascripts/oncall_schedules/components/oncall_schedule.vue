@@ -11,12 +11,14 @@ import { s__ } from '~/locale';
 import ScheduleTimelineSection from './schedule/components/schedule_timeline_section.vue';
 import DeleteScheduleModal from './delete_schedule_modal.vue';
 import EditScheduleModal from './edit_schedule_modal.vue';
-import AddRotationModal from './rotations/add_rotation_modal.vue';
+import AddEditRotationModal from './rotations/add_edit_rotation_modal.vue';
 
 import { getTimeframeForWeeksView } from './schedule/utils';
 import { PRESET_TYPES } from './schedule/constants';
 import { getFormattedTimezone } from '../utils/common_utils';
 import RotationsListSection from './schedule/components/rotations_list_section.vue';
+
+import { addRotationModalId, editRotationModalId } from '../constants';
 
 export const i18n = {
   scheduleForTz: s__('OnCallSchedules|On-call schedule for the %{tzShort}'),
@@ -25,14 +27,13 @@ export const i18n = {
   rotationTitle: s__('OnCallSchedules|Rotations'),
   addARotation: s__('OnCallSchedules|Add a rotation'),
 };
-
-export const addRotationModalId = 'addRotationModal';
 export const editScheduleModalId = 'editScheduleModal';
 export const deleteScheduleModalId = 'deleteScheduleModal';
 
 export default {
   i18n,
   addRotationModalId,
+  editRotationModalId,
   editScheduleModalId,
   deleteScheduleModalId,
   presetType: PRESET_TYPES.WEEKS,
@@ -45,7 +46,7 @@ export default {
     GlButton,
     DeleteScheduleModal,
     EditScheduleModal,
-    AddRotationModal,
+    AddEditRotationModal,
     RotationsListSection,
   },
   directives: {
@@ -134,6 +135,11 @@ export default {
     </gl-card>
     <delete-schedule-modal :schedule="schedule" :modal-id="$options.deleteScheduleModalId" />
     <edit-schedule-modal :schedule="schedule" :modal-id="$options.editScheduleModalId" />
-    <add-rotation-modal :schedule="schedule" :modal-id="$options.addRotationModalId" />
+    <add-edit-rotation-modal :schedule="schedule" :modal-id="$options.addRotationModalId" />
+    <add-edit-rotation-modal
+      :schedule="schedule"
+      :modal-id="$options.editRotationModalId"
+      is-edit-mode
+    />
   </div>
 </template>

@@ -16,3 +16,14 @@ export const getFormattedTimezone = tz => {
     timezone: `${tz.abbr} ${tz.name}`,
   });
 };
+
+/**
+ * Returns formatted time string from an int, e.g. 09:00
+ *
+ * @param {String} time
+ *
+ * @returns {String}
+ */
+export const formatTime = time => {
+  return time > 9 ? `${time}:00` : `0${time}:00`;
+};
