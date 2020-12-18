@@ -24,6 +24,45 @@ RSpec.describe Gitlab::Experimentation::EXPERIMENTS do
     expect(backwards_compatible_experiment_keys).not_to be_empty, "Oh, hey! Let's clean up that :use_backwards_compatible_subject_index stuff now :D"
     expect(backwards_compatible_experiment_keys).to match(expected_experiment_keys)
   end
+
+  # Fixing ~"master:broken"
+  # Original MR: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/49244
+  # Failed Job: https://gitlab.com/gitlab-org/gitlab/-/jobs/919178922
+  # Reversion MR: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/50288
+  # MR with this fix: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/50312
+  #
+  # TODO: Stub these experiments in specs, using stub_experiment or
+  # stub_experiment_for_subject, or wait for them to be removed as part of
+  # experiment cleanup. See: spec/support/helpers/stub_experiments.rb
+  it 'temporarily ensures all experiments are marked as being in use' do
+    ff_suffix = Gitlab::Experimentation::Experiment::FEATURE_FLAG_SUFFIX
+
+    # These are the experiments that failed the scripts/used-feature-flags check
+    experiments_to_stub = [
+      :ci_notification_dot,
+      :invite_members_empty_group_version_a,
+      :invite_members_empty_project_version_a,
+      :remove_known_trial_form_fields,
+      :trial_registration_with_social_signin,
+      :trimmed_skip_trial_copy,
+      :upgrade_link_in_user_menu_a
+    ]
+
+    existing_experiment_keys = described_class.keys
+    union_of_experiment_keys = existing_experiment_keys & experiments_to_stub
+
+    # Verify that these are the correct, current experiment keys: no typos &
+    # experiment hasn't been subsequently cleaned up.
+    expect(union_of_experiment_keys.length).to eq(experiments_to_stub.length)
+
+    # Forcibly call Feature.persist_used! to write a record to tmp/feature_flags
+    # which indicates to scripts/used-feature-flags that this feature flag is
+    # currently being used.
+    # See: spec/support/helpers/stubbed_feature.rb:persist_used!
+    experiments_to_stub.each do |experiment_key|
+      Feature.persist_used!("#{experiment_key}#{ff_suffix}")
+    end
+  end
 end
 
 RSpec.describe Gitlab::Experimentation do
