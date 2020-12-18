@@ -6,6 +6,7 @@ import createFlash, { FLASH_TYPES } from '~/flash';
 import usersSearchQuery from '~/graphql_shared/queries/users_search.query.graphql';
 import getOncallSchedulesQuery from '../../graphql/queries/get_oncall_schedules.query.graphql';
 import createOncallScheduleRotationMutation from '../../graphql/mutations/create_oncall_schedule_rotation.mutation.graphql';
+import updateOncallScheduleRotationMutation from '../../graphql/mutations/update_oncall_schedule_rotation.mutation.graphql';
 import { LENGTH_ENUM } from '../../constants';
 import AddEditRotationForm from './add_edit_rotation_form.vue';
 import {
@@ -103,9 +104,9 @@ export default {
       return this.form.participants.length > 0;
     },
     rotationStartsAtIsValid() {
-      return this.form.startsAt.date !== null && this.form.startsAt.date !== undefined;
+      return this.form.startsAt.date !== null || this.form.startsAt.date !== undefined;
     },
-    rotationCreateVariables() {
+    rotationVariables() {
       return {
         projectPath: this.projectPath,
         scheduleIid: this.schedule.iid,
@@ -128,8 +129,8 @@ export default {
     },
     isFormValid() {
       return (
-        this.rotationNameIsValid ||
-        this.rotationParticipantsAreValid ||
+        this.rotationNameIsValid &&
+        this.rotationParticipantsAreValid &&
         this.rotationStartsAtIsValid
       );
     },
@@ -148,7 +149,7 @@ export default {
       this.$apollo
         .mutate({
           mutation: createOncallScheduleRotationMutation,
-          variables: { OncallRotationCreateInput: this.rotationCreateVariables },
+          variables: { OncallRotationCreateInput: this.rotationVariables },
           update(store, { data }) {
             updateStoreAfterRotationAdd(store, getOncallSchedulesQuery, data, schedule.iid, {
               projectPath,
@@ -179,22 +180,22 @@ export default {
 
       this.$apollo
         .mutate({
-          mutation: updateStoreAfterRotationEdit,
-          variables: { OncallRotationCreateInput: this.rotationCreateVariables },
+          mutation: updateOncallScheduleRotationMutation,
+          variables: { OncallRotationUpdateInput: this.rotationVariables },
           update(store, { data }) {
             updateStoreAfterRotationEdit(store, getOncallSchedulesQuery, data, schedule.iid, {
               projectPath,
             });
           },
         })
-        .then(({ data: { oncallRotationCreate: { errors: [error] } } }) => {
+        .then(({ data: { oncallRotationUpdate: { errors: [error] } } }) => {
           if (error) {
             throw error;
           }
 
           this.$refs.addEditScheduleRotationModal.hide();
           return createFlash({
-            message: this.$options.i18n.rotationCreated,
+            message: this.$options.i18n.editedRotation,
             type: FLASH_TYPES.SUCCESS,
           });
         })

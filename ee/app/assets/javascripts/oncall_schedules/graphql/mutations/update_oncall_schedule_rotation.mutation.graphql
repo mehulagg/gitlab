@@ -1,0 +1,22 @@
+mutation updateRotation($OncallRotationUpdateInput: OncallRotationUpdateInput!) {
+  oncallRotationUpdate(input: $OncallRotationUpdateInput) {
+    errors
+    oncallRotation {
+      id
+      name
+      startsAt
+      length
+      lengthUnit
+      participants {
+        nodes {
+          user {
+            id
+            username
+          }
+          colorWeight
+          colorPalette
+        }
+      }
+    }
+  }
+}
