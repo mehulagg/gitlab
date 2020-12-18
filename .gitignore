@@ -104,3 +104,4 @@ ee/changelogs/unreleased-ee
 /sitespeed-result
 tags.lock
 tags.temp
+Gemfile.local

@@ -391,6 +391,12 @@ group :development, :test do
   gem 'parallel', '~> 1.19', require: false
 
   gem 'rblineprof', '~> 0.3.6', platform: :mri, require: false
+
+  local_gemfile = File.expand_path('Gemfile.local', __dir__)
+  if File.readable?(local_gemfile)
+    puts "Loading #{local_gemfile}..."
+    instance_eval(File.read(local_gemfile))
+  end
 end
 
 group :development, :test, :coverage do
