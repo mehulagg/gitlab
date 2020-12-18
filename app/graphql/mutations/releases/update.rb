@@ -30,6 +30,10 @@ module Mutations
                required: false,
                description: 'The title of each milestone the release is associated with. GitLab Premium customers can specify group milestones.'
 
+      argument :assets, Types::ReleaseAssetsInputType,
+               required: false,
+               description: 'Assets associated to the release.'
+
       authorize :update_release
 
       def ready?(**args)
@@ -46,10 +50,12 @@ module Mutations
         super
       end
 
-      def resolve(project_path:, **scalars)
+      def resolve(project_path:, assets: nil, **scalars)
         project = authorized_find!(full_path: project_path)
 
         params = scalars.with_indifferent_access
+
+        params[:assets] = assets&.to_h
 
         release_result = ::Releases::UpdateService.new(project, current_user, params).execute
 

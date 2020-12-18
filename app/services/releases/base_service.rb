@@ -75,6 +75,10 @@ module Releases
       !!params[:milestones]
     end
 
+    def param_for_asset_links_provided?
+      !!params.dig(:assets, :links)
+    end
+
     def execute_hooks(release, action = 'create')
       release.execute_hooks(action)
     end

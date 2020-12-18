@@ -17,7 +17,19 @@ module Releases
       # this leads to the validation error being raised
       # see https://gitlab.com/gitlab-org/gitlab/-/merge_requests/43385
       ActiveRecord::Base.transaction do
-        if release.update(params)
+        assets_delete_was_successful_or_skipped = true
+
+        if param_for_asset_links_provided?
+          assets_delete_was_successful_or_skipped = release.links.map(&:destroy).all?
+          release.links.reset
+          params[:links_attributes] = params.dig(:assets, :links)
+        end
+
+        params.delete(:assets)
+
+        release_update_success = release.update(params)
+
+        if release_update_success && assets_delete_was_successful_or_skipped
           execute_hooks(release, 'update')
           success(tag: existing_tag, release: release, milestones_updated: milestones_updated?(previous_milestones))
         else
