@@ -241,6 +241,8 @@ class License < ApplicationRecord
   scope :recent, -> { reorder(id: :desc) }
   scope :last_hundred, -> { recent.limit(100) }
 
+  CACHE_KEY = :current_license
+
   class << self
     def features_for_plan(plan)
       FEATURES_BY_PLAN.fetch(plan, [])
@@ -259,11 +261,12 @@ class License < ApplicationRecord
     end
 
     def current
-      if RequestStore.active?
-        RequestStore.fetch(:current_license) { load_license }
-      else
-        load_license
-      end
+      cache.fetch(CACHE_KEY, as: License, expires_in: 1.minute) { load_license }
+    end
+
+    def cache
+      Gitlab::SafeRequestStore[:license_cache] ||=
+        Gitlab::JsonCache.new(namespace: :ee, backend: ::Gitlab::ProcessMemoryCache.cache_backend)
     end
 
     def all_plans
@@ -273,7 +276,7 @@ class License < ApplicationRecord
     delegate :block_changes?, :feature_available?, to: :current, allow_nil: true
 
     def reset_current
-      RequestStore.delete(:current_license)
+      cache.expire(CACHE_KEY)
     end
 
     def load_license
