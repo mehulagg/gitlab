@@ -114,6 +114,15 @@ module Emails
         subject: subject('Invitation declined'))
     end
 
+    def member_expiration_date_updated_email(member_source_type, member_id)
+      @member_source_type = member_source_type
+      @member_id = member_id
+
+      member_email_with_layout(
+        to: member.notification_email_for(notification_group),
+        subject: subject('Group expiration date changed'))
+    end
+
     # rubocop: disable CodeReuse/ActiveRecord
     def member
       @member ||= Member.find_by(id: @member_id)
