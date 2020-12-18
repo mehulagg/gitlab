@@ -1366,7 +1366,12 @@ Note that `deployable_id` is the ID of the CI job.
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/260347) in GitLab 13.7.
 
-Triggered when a user is added as a group member, their access level or expiration date is updated, or they are removed from the group.
+Member events are triggered when:
+
+- A user is added as a group member
+- The access level of a user has changed
+- The expiration date for user access has been updated
+- A user has been removed from the group
 
 #### Add member to group
 
