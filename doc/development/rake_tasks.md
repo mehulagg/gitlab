@@ -94,7 +94,8 @@ seeds, you can set the `FORCE`environment variable to "yes"
 FORCE=yes bundle exec rake setup
 ```
 
-To save you from answering `yes` manually.
+This will skip the action confirmation/safety check, saving you from answering
+`yes` manually.
 
 ### Discard `stdout`
 
