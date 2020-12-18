@@ -9,6 +9,8 @@ module Projects
 
       return unless fork_network
 
+      logger.info("UnlinkForkService: Unlinking fork network #{fork_network.id}")
+
       merge_requests = fork_network
                          .merge_requests
                          .opened
@@ -16,6 +18,7 @@ module Projects
 
       merge_requests.find_each do |mr|
         ::MergeRequests::CloseService.new(@project, @current_user).execute(mr)
+        logger.info("UnlinkForkService: Closed merge request #{mr.id}")
       end
 
       Project.transaction do
@@ -31,6 +34,10 @@ module Projects
         end
       end
 
+      @project.forked_to_members.find_each do |fork|
+        logger.info("UnlinkForkService: Unlinked fork of root_project #{@project.id}: #{fork.id}")
+      end
+
       # When the project getting out of the network is a node with parent
       # and children, both the parent and the node needs a cache refresh.
       [forked_from, @project].compact.each do |project|
@@ -42,6 +49,10 @@ module Projects
 
     def refresh_forks_count(project)
       Projects::ForksCountService.new(project).refresh_cache
+    end
+
+    def logger
+      @logger ||= Gitlab::AppLogger
     end
   end
 end
