@@ -32,6 +32,14 @@ module Resolvers
 
     private
 
+    def unconditional_includes
+      [
+        {
+          project: [:project_feature]
+        }
+      ]
+    end
+
     def preloads
       {
         alert_management_alert: [:alert_management_alert],
