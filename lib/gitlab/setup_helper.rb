@@ -109,8 +109,7 @@ module Gitlab
               git: { catfile_cache_size: 5 }
             }
 
-            storage_path = Rails.root.join('tmp', 'tests', 'second_storage').to_s
-            storages << { name: 'test_second_storage', path: storage_path }
+            storages << { name: 'test_second_storage', path: TestEnv::SECOND_STORAGE_PATH.to_s }
           end
 
           config[:storage] = storages

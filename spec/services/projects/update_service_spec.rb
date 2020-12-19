@@ -573,10 +573,6 @@ RSpec.describe Projects::UpdateService do
       let(:project) { create(:project, :repository, repository_read_only: repository_read_only) }
       let(:opts) { { repository_storage: 'test_second_storage' } }
 
-      before do
-        stub_storage_settings('test_second_storage' => { 'path' => 'tmp/tests/extra_storage' })
-      end
-
       shared_examples 'the transfer was not scheduled' do
         it 'does not schedule the transfer' do
           expect do

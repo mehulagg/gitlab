@@ -1387,6 +1387,9 @@ test:
       default:
         path: tmp/tests/repositories/
         gitaly_address: unix:tmp/tests/gitaly/praefect.socket
+      test_second_storage:
+        path: tmp/tests/second_storage/
+        gitaly_address: unix:tmp/tests/gitaly/praefect.socket
 
   gitaly:
     client_path: tmp/tests/gitaly

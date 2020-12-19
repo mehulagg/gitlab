@@ -5,8 +5,6 @@ require 'spec_helper'
 RSpec.describe ProjectScheduleBulkRepositoryShardMovesWorker do
   describe "#perform" do
     before do
-      stub_storage_settings('test_second_storage' => { 'path' => 'tmp/tests/extra_storage' })
-
       allow(ProjectUpdateRepositoryStorageWorker).to receive(:perform_async)
     end
 

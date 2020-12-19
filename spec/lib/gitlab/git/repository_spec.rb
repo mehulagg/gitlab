@@ -2266,13 +2266,6 @@ RSpec.describe Gitlab::Git::Repository, :seed_helper do
 
     subject { new_repository.replicate(repository) }
 
-    before do
-      stub_storage_settings('test_second_storage' => {
-        'gitaly_address' => Gitlab.config.repositories.storages.default.gitaly_address,
-        'path' => TestEnv::SECOND_STORAGE_PATH
-      })
-    end
-
     after do
       new_repository.remove
     end

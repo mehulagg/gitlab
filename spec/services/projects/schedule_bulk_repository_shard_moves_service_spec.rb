@@ -3,10 +3,6 @@
 require 'spec_helper'
 
 RSpec.describe Projects::ScheduleBulkRepositoryShardMovesService do
-  before do
-    stub_storage_settings('test_second_storage' => { 'path' => 'tmp/tests/extra_storage' })
-  end
-
   let!(:project) { create(:project, :repository).tap { |project| project.track_project_repository } }
   let(:source_storage_name) { 'default' }
   let(:destination_storage_name) { 'test_second_storage' }

@@ -315,7 +315,6 @@ RSpec.describe Projects::ForkService do
       # Stub everything required to move a project to a Gitaly shard that does not exist
       allow(Gitlab::GitalyClient).to receive(:filesystem_id).with('default').and_call_original
       allow(Gitlab::GitalyClient).to receive(:filesystem_id).with('test_second_storage').and_return(SecureRandom.uuid)
-      stub_storage_settings('test_second_storage' => { 'path' => TestEnv::SECOND_STORAGE_PATH })
       allow_any_instance_of(Gitlab::Git::Repository).to receive(:create_repository)
         .and_return(true)
       allow_any_instance_of(Gitlab::Git::Repository).to receive(:replicate)

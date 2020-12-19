@@ -120,10 +120,6 @@ RSpec.describe API::ProjectRepositoryStorageMoves do
       post api(url, user), params: { destination_storage_name: destination_storage_name }
     end
 
-    before do
-      stub_storage_settings('test_second_storage' => { 'path' => 'tmp/tests/extra_storage' })
-    end
-
     it 'schedules a project repository storage move' do
       create_project_repository_storage_move
 
@@ -169,10 +165,6 @@ RSpec.describe API::ProjectRepositoryStorageMoves do
         source_storage_name: source_storage_name,
         destination_storage_name: destination_storage_name
       }
-    end
-
-    before do
-      stub_storage_settings('test_second_storage' => { 'path' => 'tmp/tests/extra_storage' })
     end
 
     it 'schedules the worker' do
