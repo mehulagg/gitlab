@@ -4,21 +4,22 @@ group: Distribution
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Parsing GitLab logs with `jq`
+# Parsing GitLab logs
 
-We recommend using log aggregation and search tools like Kibana and Splunk whenever possible,
-but if they are not available you can still quickly parse
-[GitLab logs](../logs.md) in JSON format
-(the default in GitLab 12.0 and later) using [`jq`](https://stedolan.github.io/jq/).
+Log aggregation and search tools like Kibana and Splunk are very helpful in locating information relevant to troubleshooting in the GitLab log system.
 
-## What is JQ?
+If they are not available you can still quickly parse [GitLab logs](../logs.md) using this guide. 
+
+## GitLab JSON logs
+
+For GitLab logs in JSON format, we recommend using [`jq`](https://stedolan.github.io/jq/).
+
+### What is JQ?
 
 As noted in its [manual](https://stedolan.github.io/jq/manual/), `jq` is a command-line JSON processor. The following examples
 include use cases targeted for parsing GitLab log files.
 
-## Parsing Logs
-
-### General Commands
+### General `jq` Commands
 
 #### Pipe colorized `jq` output into `less`
 
@@ -179,3 +180,51 @@ jq --raw-output --slurp '
   663     106 ms,      96 ms,      94 ms      'groupABC/project123'
   ...
 ```
+
+## Parsing non-JSON GitLab logs
+
+Certain logs in the GitLab Log system do not use JSON formatting.
+
+To help parse these logs, there are several tools available.
+
+These tools can be linked together using the pipe operator `|` to pass output of one command to the input of another command.
+
+### grep
+
+`grep error log.log`
+
+### zgrep
+
+`grep error production.log.*.gz`
+
+### awk
+
+`awk '{print $1}' nginx_access.log`
+
+### cut
+
+Cut out the fields 3 through to the end of each line, using a space as a delimiter:
+
+```shell
+cut -d' ' -f3-
+```
+
+### tee
+
+```shell
+gitlab-ctl tail | tee -a /tmp/123456.txt
+```
+
+### sort
+
+Sorts input, required for `uniq` to work.
+
+```shell
+sort path/to/file
+```
+
+### uniq
+
+Counts unique lines.
+
+`awk '{print $1}' nginx_access.log | sort | uniq -c | sort -n`
