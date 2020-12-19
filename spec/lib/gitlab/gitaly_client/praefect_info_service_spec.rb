@@ -8,7 +8,7 @@ RSpec.describe Gitlab::GitalyClient::PraefectInfoService do
   let(:gitaly_repository) { repository.gitaly_repository }
   let(:client) { described_class.new(repository) }
 
-  describe '#repository_replicas', :praefect do
+  describe '#repository_replicas' do
     it 'sends an RPC request' do
       request = Gitaly::RepositoryReplicasRequest.new(repository: gitaly_repository)
 

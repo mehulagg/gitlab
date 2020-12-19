@@ -10,7 +10,7 @@ RSpec.describe 'gitlab:praefect:replicas' do
   let(:project) { create(:project, :repository) }
   let(:repository) { project.repository }
 
-  describe 'replicas', :praefect do
+  describe 'replicas' do
     context 'when a valid project id is used as the argument' do
       let(:project_arg) { project.id }
 
