@@ -336,4 +336,32 @@ RSpec.shared_examples 'a verifiable replicator' do
       replicator.verify
     end
   end
+
+  context 'integration tests' do
+    before do
+      model_record.save!
+    end
+
+    context 'on a primary' do
+      before do
+        stub_primary_node
+      end
+
+      describe 'background backfill' do
+        it 'verifies model records' do
+          expect do
+            Geo::VerificationBatchWorker.new.perform(replicator.replicable_name)
+          end.to change { model_record.reload.verification_succeeded? }.from(false).to(true)
+        end
+      end
+
+      describe 'triggered by events' do
+        it 'verifies model records' do
+          expect do
+            Geo::VerificationWorker.new.perform(replicator.replicable_name, replicator.model_record_id)
+          end.to change { model_record.reload.verification_succeeded? }.from(false).to(true)
+        end
+      end
+    end
+  end
 end
