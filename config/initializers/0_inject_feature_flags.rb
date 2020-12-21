@@ -10,13 +10,6 @@ Feature.register_hot_reloader unless Rails.configuration.cache_classes
 # decided to be removed in favor of explicit check.
 # https://gitlab.com/gitlab-org/gitlab/-/issues/259611
 if Gitlab.ee? && Gitlab.dev_or_test_env?
-  # These are the names of feature flags that do violate the constraint of
-  # being unique to licensed names. These feature flags should be reworked to
-  # be "development" with explicit check
-  IGNORED_FEATURE_FLAGS = %i[
-    swimlanes
-  ].to_set
-
   # First, we validate a list of overrides to ensure that these overrides
   # are removed if feature flag is gone
   missing_feature_flags = IGNORED_FEATURE_FLAGS.reject do |feature_flag|
