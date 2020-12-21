@@ -615,7 +615,7 @@ job:
 ```
 
 Sometimes, `script` commands must be wrapped in single or double quotes.
-For example, commands that contain a colon (`:`) must be wrapped in quotes.
+For example, commands that contain a colon (`:`) must be wrapped in single quotes (`'`).
 The YAML parser needs to interpret the text as a string rather than
 a "key: value" pair. Be careful when using special characters:
 `:`, `{`, `}`, `[`, `]`, `,`, `&`, `*`, `#`, `?`, `|`, `-`, `<`, `>`, `=`, `!`, `%`, `@`, `` ` ``.
