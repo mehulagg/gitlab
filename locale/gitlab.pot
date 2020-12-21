@@ -4154,7 +4154,7 @@ msgstr ""
 msgid "AutoDevOps|Auto DevOps"
 msgstr ""
 
-msgid "AutoDevOps|Auto DevOps can automatically build, test, and deploy applications based on predefined continuous integration and delivery configuration. %{auto_devops_start}Learn more about Auto DevOps%{auto_devops_end} or use our %{quickstart_start}quick start guide%{quickstart_end} to get started right away."
+msgid "AutoDevOps|Auto DevOps automates building, testing, and deploying your applications based on your continuous integration and delivery configuration. %{auto_devops_start}Learn more about Auto DevOps%{auto_devops_end} or get started right away with our %{quickstart_start}quick start guide%{quickstart_end}."
 msgstr ""
 
 msgid "AutoDevOps|Auto DevOps documentation"
@@ -4931,6 +4931,9 @@ msgid "CICD|Deployment strategy"
 msgstr ""
 
 msgid "CICD|Jobs"
+msgstr ""
+
+msgid "CICD|The Auto DevOps pipeline runs if no alternative CI configuration file is found."
 msgstr ""
 
 msgid "CICD|The Auto DevOps pipeline will run if no alternative CI configuration file is found."
@@ -13847,7 +13850,7 @@ msgstr ""
 msgid "GroupSettings|Select a sub-group as the custom project template source for this group."
 msgstr ""
 
-msgid "GroupSettings|The Auto DevOps pipeline will run if no alternative CI configuration file is found."
+msgid "GroupSettings|The Auto DevOps pipeline runs if no alternative CI configuration file is found."
 msgstr ""
 
 msgid "GroupSettings|There was a problem updating Auto DevOps pipeline: %{error_messages}."
