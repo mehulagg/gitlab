@@ -50,7 +50,8 @@ export default {
     addTooltips(elements, config) {
       const newTooltips = elements
         .filter(element => !this.tooltipExists(element))
-        .map(element => newTooltip(element, config));
+        .map(element => newTooltip(element, config))
+        .filter(tooltip => tooltip.title);
 
       newTooltips.forEach(tooltip => this.observe(tooltip));
 
