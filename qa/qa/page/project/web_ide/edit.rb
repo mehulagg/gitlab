@@ -62,6 +62,7 @@ module QA
           view 'app/assets/javascripts/ide/components/new_dropdown/index.vue' do
             element :dropdown_button
             element :rename_move_button
+            element :delete_button
           end
 
           view 'app/views/shared/_confirm_fork_modal.html.haml' do
@@ -211,6 +212,12 @@ module QA
             wait_until(reload: true) do
               has_element?(:file_list)
             end
+          end
+
+          def delete_file(file_name)
+            click_element(:file_name_content, text: file_name)
+            click_element(:dropdown_button)
+            click_element(:delete_button)
           end
         end
       end

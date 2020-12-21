@@ -213,6 +213,7 @@ export default {
     ref="header"
     :class="{ 'gl-z-dropdown-menu!': moreActionsShown }"
     class="js-file-title file-title file-title-flex-parent"
+    data-qa-selector="file_title_container"
     @click.self="handleToggleFile"
   >
     <div class="file-header-content">
@@ -307,6 +308,7 @@ export default {
           right
           toggle-class="btn-icon js-diff-more-actions"
           class="gl-pt-0!"
+          data-qa-selector="dropdown_button"
           @show="setMoreActionsShown(true)"
           @hidden="setMoreActionsShown(false)"
         >
@@ -340,6 +342,7 @@ export default {
               ref="ideEditButton"
               :href="diffFile.ide_edit_path"
               class="js-ide-edit-blob"
+              data-qa-selector="edit_in_ide_button"
             >
               {{ __('Edit in Web IDE') }}
             </gl-dropdown-item>

@@ -87,6 +87,12 @@ module QA
           element :review_preview_toggle
         end
 
+        view 'app/assets/javascripts/diffs/components/diff_file_header.vue' do
+          element :file_title_container
+          element :dropdown_button
+          element :edit_in_ide_button
+        end
+
         def start_review
           click_element(:start_review_button)
 
@@ -295,6 +301,13 @@ module QA
         def click_open_in_web_ide
           click_element(:open_in_web_ide_button)
           wait_for_requests
+        end
+
+        def edit_file_in_web_ide(file_name)
+          within_element(:file_title_container, text: file_name) do
+            click_element(:dropdown_button)
+            click_element(:edit_in_ide_button)
+          end
         end
       end
     end
