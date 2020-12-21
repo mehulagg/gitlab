@@ -263,3 +263,38 @@ which may lead to a `401 unauthorized` error when testing your Jira integration.
 If CAPTCHA has been triggered, you can't use Jira's REST API to
 authenticate with the Jira site. You need to log in to your Jira instance
 and complete the CAPTCHA.
+
+### Another issue tracker is already in use.
+
+Full error may appear as follow:
+`Another issue tracker is already in use. Only one issue tracker service can be active at a time`.
+
+This error can appear when a project has multiple `JiraService` records, 
+this is especially plausible after an upgrade.
+
+To fix this error:
+
+1. Ensure that all your [schema migrations](https://docs.gitlab.com/ee/administration/raketasks/maintenance.html#display-status-of-database-migrations) are up.
+1. Ensure that your [Background migrations](https://docs.gitlab.com/ee/update/#checking-for-background-migrations-before-upgrading) size is `0`.
+1. In a [Rails Console](https://docs.gitlab.com/ee/administration/operations/rails_console.html) Execute the following snippet:
+   - **Snippet purpose**: Destroy all JiraService records for each of the projects that has more than one record.
+   - WARNING: For each of these projects any custom Jira configurations will be permanently lost, you'll have to navigate to each of the projects' settings and manually re-configure Jira.
+
+```ruby
+# Find all project IDs with more than 1 Jira service record
+Service.where(type: "JiraService").group(:project_id).count.select {|_, v| v > 1}.keys.each { |key|
+  #
+  # For each Project
+  #
+  p=Project.find_by_id(key)
+  # Skip if project is `nil`
+  next if p.nil?
+  # Get all JiraService IDs for Project p
+  p.services.where(type: "JiraService").each { |s|
+    #
+    # For each ID destroy
+    #
+    p.services.find_by_id(s).destroy
+  }
+} 
+```
