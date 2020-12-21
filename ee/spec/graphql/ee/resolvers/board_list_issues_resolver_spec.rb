@@ -33,13 +33,13 @@ RSpec.describe Resolvers::BoardListIssuesResolver do
       end
 
       it 'accepts epic global id' do
-        result = resolve_board_list_issues({ filters: { epic_id: epic.to_global_id } }).items
+        result = resolve_board_list_issues({ filters: { epic_id: epic.to_global_id } })
 
         expect(result).to match_array([issue])
       end
 
       it 'accepts epic wildcard id' do
-        result = resolve_board_list_issues({ filters: { epic_wildcard_id: 'NONE' } }).items
+        result = resolve_board_list_issues({ filters: { epic_wildcard_id: 'NONE' } })
 
         expect(result).to match_array([])
       end
@@ -51,13 +51,13 @@ RSpec.describe Resolvers::BoardListIssuesResolver do
       let_it_be(:issue_without_iteration) { create(:issue, project: project, labels: [label]) }
 
       it 'accepts iteration title' do
-        result = resolve_board_list_issues({ filters: { iteration_title: iteration.title } }).items
+        result = resolve_board_list_issues({ filters: { iteration_title: iteration.title } })
 
         expect(result).to contain_exactly(issue_with_iteration)
       end
 
       it 'accepts iteration wildcard id' do
-        result = resolve_board_list_issues({ filters: { iteration_wildcard_id: 'NONE' } }).items
+        result = resolve_board_list_issues({ filters: { iteration_wildcard_id: 'NONE' } })
 
         expect(result).to contain_exactly(issue_without_iteration)
       end

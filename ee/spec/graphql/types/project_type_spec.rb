@@ -360,17 +360,20 @@ RSpec.describe GitlabSchema.types['Project'] do
   end
 
   describe 'compliance_frameworks' do
-    it 'queries in batches' do
+    it 'queries in batches', :request_store, :use_clean_rails_memory_store_caching do
       projects = create_list(:project, 2, :with_compliance_framework)
 
       projects.each { |p| p.add_maintainer(user) }
 
+      # Cache warm up: runs authorization for each user.
+      projects.each { |p| resolve_field(:id, p, current_user: user) }
+
       results = batch_sync(max_queries: 1) do
         projects.flat_map do |p|
-          resolve_field(:compliance_frameworks, p)
+          resolve_field(:compliance_frameworks, p, current_user: user)
         end
       end
-      frameworks = results.flat_map(&:items)
+      frameworks = results.flat_map(&:to_a)
 
       expect(frameworks).to match_array(projects.flat_map(&:compliance_management_frameworks))
     end
