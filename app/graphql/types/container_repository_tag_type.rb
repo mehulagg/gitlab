@@ -15,7 +15,7 @@ module Types
     field :revision, GraphQL::STRING_TYPE, null: true, description: 'Revision of the tag.'
     field :short_revision, GraphQL::STRING_TYPE, null: true, description: 'Short revision of the tag.'
     field :total_size, GraphQL::INT_TYPE, null: true, description: 'The size of the tag.'
-    field :created_at, Types::TimeType, null: false, description: 'Timestamp when the tag was created.'
+    field :created_at, Types::TimeType, null: true, description: 'Timestamp when the tag was created.'
     field :can_delete, GraphQL::BOOLEAN_TYPE, null: false, description: 'Can the current user delete this tag.'
 
     def can_delete

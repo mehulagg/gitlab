@@ -632,7 +632,7 @@ A tag from a container repository.
 | Field | Type | Description |
 | ----- | ---- | ----------- |
 | `canDelete` | Boolean! | Can the current user delete this tag. |
-| `createdAt` | Time! | Timestamp when the tag was created. |
+| `createdAt` | Time | Timestamp when the tag was created. |
 | `digest` | String | Digest of the tag. |
 | `location` | String! | URL of the tag. |
 | `name` | String! | Name of the tag. |
