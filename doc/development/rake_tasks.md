@@ -88,7 +88,7 @@ bundle exec rake 'gitlab:seed:development_metrics[your_project_id]'
 ### Automation
 
 If you're very sure that you want to **wipe the current database** and refill
-seeds, you can set the `FORCE` environment variable to "yes"
+seeds, you can set the `FORCE` environment variable to `yes`:
 
 ```shell
 FORCE=yes bundle exec rake setup
