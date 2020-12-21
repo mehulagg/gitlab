@@ -102,6 +102,11 @@ export default class EditorLite {
       });
   }
 
+  static createModel({ blobGlobalId, blobPath, blobContent } = {}) {
+    const uriFilePath = joinPaths(URI_PREFIX, blobGlobalId, blobPath);
+    return monacoEditor.createModel(blobContent, undefined, Uri.file(uriFilePath));
+  }
+
   /**
    * Creates a monaco instance with the given options.
    *
@@ -122,33 +127,30 @@ export default class EditorLite {
     ...instanceOptions
   } = {}) {
     EditorLite.prepareInstance(el);
+
+    const model = EditorLite.createModel({ blobGlobalId, blobPath, blobContent });
     let instance;
 
     if (!diff) {
       instance = monacoEditor.create(el, {
         ...this.options,
         ...instanceOptions,
+        model,
       });
-
-      const uriFilePath = joinPaths(URI_PREFIX, blobGlobalId, blobPath);
-      instance.setModel(monacoEditor.createModel(blobContent, undefined, Uri.file(uriFilePath)));
     } else {
       instance = monacoEditor.createDiffEditor(el, {
         ...this.options,
         ...instanceOptions,
       });
 
-      const uriFilePath = joinPaths(URI_PREFIX, blobGlobalId, blobPath);
-      const originalModel = monacoEditor.createModel(
-        originalBlobContent,
-        undefined,
-        Uri.file(uriFilePath),
-      );
-      const modifiedModel = monacoEditor.createModel(blobContent, undefined, Uri.file(uriFilePath));
-
+      const originalModel = EditorLite.createModel({
+        blobGlobalId,
+        blobPath,
+        blobContent: originalBlobContent,
+      });
       instance.setModel({
         original: originalModel,
-        modified: modifiedModel,
+        modified: model,
       });
     }
 
@@ -160,10 +162,7 @@ export default class EditorLite {
     instance.onDidDispose(() => {
       const index = this.instances.findIndex((inst) => inst === instance);
       this.instances.splice(index, 1);
-      const model = instance?.getModel();
-      if (model) {
-        model.dispose();
-      }
+      model.dispose();
     });
     EditorLite.manageDefaultExtensions(instance, el, extensions);
 
