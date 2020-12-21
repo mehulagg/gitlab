@@ -99,6 +99,19 @@ RSpec.describe 'Container Registry', :js do
         expect(page).to have_content '20'
       end
     end
+
+    describe 'with a tag missing digest' do
+      before do
+        stub_container_registry_tags(repository: %r{my/image}, tags: %w[latest stable], with_missing_digest: true)
+        visit_container_registry_details 'my/image'
+      end
+
+      it 'renders the tags list correctly' do
+        expect(page).to have_content('latest')
+        expect(page).to have_content('stable')
+        expect(page).to have_content('Digest: N/A')
+      end
+    end
   end
 
   describe 'image repo details when image has no name' do
