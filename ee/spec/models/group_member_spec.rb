@@ -254,8 +254,7 @@ RSpec.describe GroupMember do
         group.add_guest(group_member.user)
 
         expect(WebMock).to have_requested(:post, group_hook.url).with(
-          headers: { 'Content-Type' => 'application/json', 'User-Agent' => "GitLab/#{Gitlab::VERSION}", 'X-Gitlab-Event' => 'Member Hook' },
-          body: webhook_body('user_add_to_group')
+          webhook_data(group_member, 'user_add_to_group')
         )
       end
 
@@ -294,8 +293,7 @@ RSpec.describe GroupMember do
         group_member.update!(access_level: Gitlab::Access::MAINTAINER)
 
         expect(WebMock).to have_requested(:post, group_hook.url).with(
-          headers: { 'Content-Type' => 'application/json', 'User-Agent' => "GitLab/#{Gitlab::VERSION}", 'X-Gitlab-Event' => 'Member Hook' },
-          body: webhook_body('user_update_for_group')
+          webhook_data(group_member, 'user_update_for_group')
         )
       end
 
@@ -305,8 +303,7 @@ RSpec.describe GroupMember do
         group_member.update!(expires_at: 2.days.from_now)
 
         expect(WebMock).to have_requested(:post, group_hook.url).with(
-          headers: { 'Content-Type' => 'application/json', 'User-Agent' => "GitLab/#{Gitlab::VERSION}", 'X-Gitlab-Event' => 'Member Hook' },
-          body: webhook_body('user_update_for_group')
+          webhook_data(group_member, 'user_update_for_group')
         )
       end
     end
@@ -320,8 +317,7 @@ RSpec.describe GroupMember do
         group_member.destroy!
 
         expect(WebMock).to have_requested(:post, group_hook.url).with(
-          headers: { 'Content-Type' => 'application/json', 'User-Agent' => "GitLab/#{Gitlab::VERSION}", 'X-Gitlab-Event' => 'Member Hook' },
-          body: webhook_body('user_remove_from_group')
+          webhook_data(group_member, 'user_remove_from_group')
         )
       end
     end
@@ -349,21 +345,24 @@ RSpec.describe GroupMember do
     end
   end
 
-  def webhook_body(event)
+  def webhook_data(group_member, event)
     {
-      created_at: group_member.created_at&.xmlschema,
-      updated_at: group_member.updated_at&.xmlschema,
-      group_name: group.name,
-      group_path: group.path,
-      group_id: group.id,
-      user_username: group_member.user.username,
-      user_name: group_member.user.name,
-      user_email: group_member.user.email,
-      user_id: group_member.user.id,
-      group_access: group_member.human_access,
-      expires_at: group_member.expires_at&.xmlschema,
-      group_plan: 'gold',
-      event_name: event
-    }.to_json
+      headers: { 'Content-Type' => 'application/json', 'User-Agent' => "GitLab/#{Gitlab::VERSION}", 'X-Gitlab-Event' => 'Member Hook' },
+      body: {
+        created_at: group_member.created_at&.xmlschema,
+        updated_at: group_member.updated_at&.xmlschema,
+        group_name: group.name,
+        group_path: group.path,
+        group_id: group.id,
+        user_username: group_member.user.username,
+        user_name: group_member.user.name,
+        user_email: group_member.user.email,
+        user_id: group_member.user.id,
+        group_access: group_member.human_access,
+        expires_at: group_member.expires_at&.xmlschema,
+        group_plan: 'gold',
+        event_name: event
+      }.to_json
+    }
   end
 end
