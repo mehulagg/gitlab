@@ -6,6 +6,7 @@ export default {
     state.headPath = paths.headPath;
     state.baseBlobPath = paths.baseBlobPath;
     state.headBlobPath = paths.headBlobPath;
+    state.reportsPath = paths.reportsPath;
     state.helpPath = paths.helpPath;
   },
   [types.REQUEST_REPORTS](state) {

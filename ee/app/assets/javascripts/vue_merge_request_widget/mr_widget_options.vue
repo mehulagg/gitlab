@@ -278,6 +278,7 @@ export default {
         :head-path="mr.codeclimate.head_path"
         :head-blob-path="mr.headBlobPath"
         :base-blob-path="mr.baseBlobPath"
+        :codequality-reports-path="mr.codequalityReportsPath"
         :codequality-help-path="mr.codequalityHelpPath"
       />
       <grouped-browser-performance-reports-app

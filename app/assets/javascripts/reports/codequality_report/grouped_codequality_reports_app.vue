@@ -30,6 +30,11 @@ export default {
       required: false,
       default: null,
     },
+    codequalityReportsPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
     codequalityHelpPath: {
       type: String,
       required: true,
@@ -51,6 +56,7 @@ export default {
       headPath: this.headPath,
       baseBlobPath: this.baseBlobPath,
       headBlobPath: this.headBlobPath,
+      reportsPath: this.codequalityReportsPath,
       helpPath: this.codequalityHelpPath,
     });
 
