@@ -49,20 +49,20 @@ module StubGitlabCalls
       .to receive(:full_access_token).and_return('token')
   end
 
-  def stub_container_registry_tags(repository: :any, tags: [], with_manifest: false)
+  def stub_container_registry_tags(repository: :any, tags: [], with_manifest: false, with_missing_digest: false)
     repository = any_args if repository == :any
 
     allow_any_instance_of(ContainerRegistry::Client)
       .to receive(:repository_tags).with(repository)
       .and_return({ 'tags' => tags })
 
-    if with_manifest
+    if with_manifest || with_missing_digest
+      digest = with_missing_digest ? nil : 'sha256:4c8e63ca4cb663ce6c688cb06f1c372b088dac5b6d7ad7d49cd620d85cf72a15'
       tags.each do |tag|
         allow_any_instance_of(ContainerRegistry::Client)
           .to receive(:repository_tag_digest)
           .with(repository, tag)
-          .and_return('sha256:4c8e63ca4cb663ce6c688cb06f1c3' \
-                      '72b088dac5b6d7ad7d49cd620d85cf72a15')
+          .and_return(digest)
       end
 
       allow_any_instance_of(ContainerRegistry::Client)
