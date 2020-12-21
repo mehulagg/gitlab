@@ -283,6 +283,13 @@ RSpec.describe Gitlab::UsageDataCounters::HLLRedisCounter, :clean_gitlab_redis_s
       context 'when no slot is set' do
         it { expect(described_class.unique_events(event_names: [no_slot], start_date: 7.days.ago, end_date: Date.current)).to eq(1) }
       end
+
+      context 'when data crosses into new year' do
+        it 'does not raise error' do
+          expect { described_class.unique_events(event_names: [weekly_event], start_date: DateTime.parse('2020-12-26'), end_date: DateTime.parse('2021-02-01')) }
+            .not_to raise_error(Gitlab::Instrumentation::RedisClusterValidator::CrossSlotError)
+        end
+      end
     end
   end
 
