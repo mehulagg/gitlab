@@ -10,7 +10,8 @@ module IncidentManagement
     # @param starts_at [ActiveSupport::TimeWithZone]
     # @param ends_at [ActiveSupport::TimeWithZone]
     def for_timeframe(starts_at:, ends_at:)
-      starts_at = [starts_at, rotation.starts_at].max
+      starts_at = [apply_timezone(starts_at), rotation_starts_at].max
+      ends_at = apply_timezone(ends_at)
 
       return [] unless starts_at < ends_at
       return [] unless rotation.participants.any?
@@ -18,14 +19,15 @@ module IncidentManagement
       # The first shift within the timeframe may begin before
       # the timeframe. We want to begin generating shifts
       # based on the actual start time of the shift.
-      shift_starts_at = shift_start_time(starts_at)
-      shift_count = elapsed_whole_shifts(starts_at)
+      elapsed_shift_count = elapsed_whole_shifts(starts_at)
+      shift_starts_at = shift_start_time(elapsed_shift_count)
       shifts = []
 
       while shift_starts_at < ends_at
-        shifts << shift_for(shift_count, shift_starts_at)
+        shifts << shift_for(elapsed_shift_count, shift_starts_at)
+
         shift_starts_at += shift_duration
-        shift_count += 1
+        elapsed_shift_count += 1
       end
 
       shifts
@@ -33,13 +35,15 @@ module IncidentManagement
 
     # @param timestamp [ActiveSupport::TimeWithZone]
     def for_timestamp(timestamp)
-      return if timestamp < rotation.starts_at
+      timestamp = apply_timezone(timestamp)
+
+      return if timestamp < rotation_starts_at
       return unless rotation.participants.any?
 
-      shift_starts_at = shift_start_time(timestamp)
-      shift_count = elapsed_whole_shifts(timestamp)
+      elapsed_shift_count = elapsed_whole_shifts(timestamp)
+      shift_starts_at = shift_start_time(elapsed_shift_count)
 
-      shift_for(shift_count, shift_starts_at)
+      shift_for(elapsed_shift_count, shift_starts_at)
     end
 
     private
@@ -49,23 +53,38 @@ module IncidentManagement
 
     # Starting time of a shift which covers the timestamp.
     # @return [ActiveSupport::TimeWithZone]
-    def shift_start_time(timestamp)
-      rotation.starts_at + (elapsed_whole_shifts(timestamp) * shift_duration)
+    def shift_start_time(elapsed_shift_count)
+      rotation_starts_at + (elapsed_shift_count * shift_duration)
     end
 
-    # Total complete shifts passed between rotation start
+    # Total completed shifts passed between rotation start
     # time and the provided timestamp.
     # @return [Integer]
     def elapsed_whole_shifts(timestamp)
+      elapsed_duration = timestamp - rotation_starts_at
+
+      # Rotations in days & weeks must accomodate timezone
+      # changes in the shift start time.
+      # EX) If we had a 23-hr "day" shift, we still need that
+      # to count as a full 24-hr day.
+      if !rotation.hours? && timestamp.utc_offset.abs > rotation_starts_at.utc_offset.abs
+        elapsed_duration += (timestamp.utc_offset.abs - rotation_starts_at.utc_offset.abs)
+      end
+
       # Uses #round to account for floating point inconsistencies.
-      (elapsed_duration(timestamp) / shift_duration).round(5).floor
+      (elapsed_duration / shift_duration).round(5).floor
     end
 
-    # Time passed between the start time of the rotation and
-    # the provided timestamp.
-    # @return [ActiveSupport::Duration]
-    def elapsed_duration(timestamp)
-      timestamp - rotation.starts_at
+    # Returns an UNSAVED shift, as this shift won't necessarily
+    # be persisted.
+    # @return [IncidentManagement::OncallShift]
+    def shift_for(elapsed_shift_count, shift_starts_at)
+      IncidentManagement::OncallShift.new(
+        rotation: rotation,
+        participant: participants[participant_rank(elapsed_shift_count)],
+        starts_at: shift_starts_at,
+        ends_at: shift_starts_at + shift_duration
+      )
     end
 
     # Position in an array of participants based on the
@@ -75,20 +94,16 @@ module IncidentManagement
       elapsed_shifts_count % participants.length
     end
 
-    # Returns an UNSAVED shift, as this shift won't necessarily
-    # be persisted.
-    # @return [IncidentManagement::OncallShift]
-    def shift_for(shift_count, shift_starts_at)
-      IncidentManagement::OncallShift.new(
-        rotation: rotation,
-        participant: participants[participant_rank(shift_count)],
-        starts_at: shift_starts_at,
-        ends_at: shift_starts_at + shift_duration
-      )
+    def participants
+      @participants ||= rotation.participants.ordered
     end
 
-    def participants
-      @participants ||= rotation.participants.color_order
+    def rotation_starts_at
+      @rotaton_starts_at ||= apply_timezone(rotation.starts_at)
+    end
+
+    def apply_timezone(timestamp)
+      timestamp.in_time_zone(rotation.schedule.timezone)
     end
   end
 end

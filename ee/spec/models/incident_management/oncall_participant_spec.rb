@@ -66,15 +66,14 @@ RSpec.describe IncidentManagement::OncallParticipant do
   end
 
   describe 'scopes' do
-    describe '.color_order' do
+    describe '.ordered' do
       let_it_be(:green_800) { create(:incident_management_oncall_participant, :with_developer_access, rotation: rotation, color_palette: :green, color_weight: '800') }
       let_it_be(:blue_950) { create(:incident_management_oncall_participant, :with_developer_access, rotation: rotation, color_palette: :blue, color_weight: '950') }
       let_it_be(:magenta_200) { create(:incident_management_oncall_participant, :with_developer_access, rotation: rotation, color_palette: :magenta, color_weight: '200') }
-      let_it_be(:blue_200) { create(:incident_management_oncall_participant, :with_developer_access, rotation: rotation, color_palette: :blue, color_weight: '200') }
 
-      subject { described_class.color_order }
+      subject { described_class.ordered }
 
-      it { is_expected.to eq([blue_200, blue_950, green_800, magenta_200]) }
+      it { is_expected.to eq([green_800, blue_950, magenta_200]) }
     end
   end
 

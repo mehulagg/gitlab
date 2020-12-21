@@ -11,6 +11,8 @@ module IncidentManagement
     belongs_to :user, class_name: 'User', foreign_key: :user_id
     has_many :shifts, class_name: 'OncallShift', inverse_of: :participant, foreign_key: :participant_id
 
+    scope :ordered, -> { order(:id) }
+
     # Uniqueness validations added here should be duplicated
     # in IncidentManagement::OncallRotation::CreateService
     # as bulk insertion skips validations
@@ -21,8 +23,6 @@ module IncidentManagement
     validate  :user_can_read_project, if: :user, on: :create
 
     delegate :project, to: :rotation, allow_nil: true
-
-    scope :color_order, -> { order(:color_palette, :color_weight) }
 
     private
 
