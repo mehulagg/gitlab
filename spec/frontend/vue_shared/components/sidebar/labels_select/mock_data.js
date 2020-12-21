@@ -24,9 +24,9 @@ export const mockSuggestedColors = {
   '#84de02': 'Alien armpit',
   '#195905': 'Lincoln green',
   '#36454f': 'Charcoal grey',
-  '#848482': 'Old Silver',
+  '#848482': 'Old silver',
   '#b19cd9': 'Light pastel purple',
-  '#512888': 'KSU Purple',
+  '#512888': 'KSU purple',
   '#9a4eae': 'Purpureus',
   '#f7e7ce': 'Champagne',
   '#b3446c': 'Raspberry rose',
@@ -36,7 +36,7 @@ export const mockSuggestedColors = {
   '#cc4e5c': 'Dark terra cotta',
   '#e4d00a': 'Citrine',
   '#ffb347': 'Pastel orange',
-  '#c39953': 'Aztec Gold',
+  '#c39953': 'Aztec gold',
 };
 
 export const mockConfig = {

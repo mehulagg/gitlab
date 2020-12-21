@@ -88,9 +88,9 @@ module LabelsHelper
       '#84de02' => s_('SuggestedColors|Alien armpit'),
       '#195905' => s_('SuggestedColors|Lincoln green'),
       '#36454f' => s_('SuggestedColors|Charcoal grey'),
-      '#848482' => s_('SuggestedColors|Old Silver'),
+      '#848482' => s_('SuggestedColors|Old silver'),
       '#b19cd9' => s_('SuggestedColors|Light pastel purple'),
-      '#512888' => s_('SuggestedColors|KSU Purple'),
+      '#512888' => s_('SuggestedColors|KSU purple'),
       '#9a4eae' => s_('SuggestedColors|Purpureus'),
       '#f7e7ce' => s_('SuggestedColors|Champagne'),
       '#b3446c' => s_('SuggestedColors|Raspberry rose'),
@@ -100,7 +100,7 @@ module LabelsHelper
       '#cc4e5c' => s_('SuggestedColors|Dark terra cotta'),
       '#e4d00a' => s_('SuggestedColors|Citrine'),
       '#ffb347' => s_('SuggestedColors|Pastel orange'),
-      '#c39953' => s_('SuggestedColors|Aztec Gold')
+      '#c39953' => s_('SuggestedColors|Aztec gold')
     }
   end
 
