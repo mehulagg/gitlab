@@ -34,13 +34,13 @@ RSpec.describe 'Projects > Settings > User manages merge request settings' do
       expect(page).to have_content 'Squashing is never performed and the checkbox is hidden.'
 
       expect(page).to have_content 'Allow'
-      expect(page).to have_content 'Checkbox is visible and unselected by default.'
+      expect(page).to have_content 'The checkbox is visible and unselected by default.'
 
       expect(page).to have_content 'Encourage'
-      expect(page).to have_content 'Checkbox is visible and selected by default.'
+      expect(page).to have_content 'The checkbox is visible and selected by default.'
 
       expect(page).to have_content 'Require'
-      expect(page).to have_content 'Squashing is always performed. Checkbox is visible and selected, and users cannot change it.'
+      expect(page).to have_content 'Squashing is always performed. The checkbox is visible and selected, and users cannot change it.'
     end
   end
 
