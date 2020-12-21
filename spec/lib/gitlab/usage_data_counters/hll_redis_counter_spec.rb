@@ -308,8 +308,6 @@ RSpec.describe Gitlab::UsageDataCounters::HLLRedisCounter, :clean_gitlab_redis_s
       '2021-01-01' | '2020-12-28' | []
       '2020-12-21' | '2020-12-28' | ['g_{compliance}_dashboard-2020-52']
       '2020-12-21' | '2021-01-01' | ['g_{compliance}_dashboard-2020-52']
-      '2020-12-27' | '2021-01-01' | ['g_{compliance}_dashboard-2020-52']
-      '2020-12-27' | '2021-01-01' | ['g_{compliance}_dashboard-2020-52']
       '2020-12-26' | '2021-01-04' | ['g_{compliance}_dashboard-2020-52', 'g_{compliance}_dashboard-2020-53']
       '2020-12-26' | '2021-01-11' | ['g_{compliance}_dashboard-2020-52', 'g_{compliance}_dashboard-2020-53', 'g_{compliance}_dashboard-2021-01']
       '2020-12-26' | '2021-01-17' | ['g_{compliance}_dashboard-2020-52', 'g_{compliance}_dashboard-2020-53', 'g_{compliance}_dashboard-2021-01']
@@ -320,6 +318,14 @@ RSpec.describe Gitlab::UsageDataCounters::HLLRedisCounter, :clean_gitlab_redis_s
       it "returns the correct keys" do
         expect(subject).to match(keys)
       end
+    end
+
+    it 'returns 1 key for last for week' do
+      expect(described_class.send(:weekly_redis_keys, events: [redis_event], start_date: 7.days.ago.to_date, end_date: Date.current).size).to eq 1
+    end
+
+    it 'returns 4 keys for last for weeks' do
+      expect(described_class.send(:weekly_redis_keys, events: [redis_event], start_date: 4.weeks.ago.to_date, end_date: Date.current).size).to eq 4
     end
   end
 
