@@ -295,15 +295,21 @@ RSpec.describe Gitlab::UsageDataCounters::HLLRedisCounter, :clean_gitlab_redis_s
 
   describe '.weekly_redis_keys' do
     using RSpec::Parameterized::TableSyntax
+
     let(:weekly_event) { 'g_compliance_dashboard' }
     let(:redis_event) { described_class.send(:event_for, weekly_event) }
 
     subject(:weekly_redis_keys) { described_class.send(:weekly_redis_keys, events: [redis_event], start_date: DateTime.parse(start_date), end_date: DateTime.parse(end_date)) }
 
     where(:start_date, :end_date, :keys) do
-      '2020-12-21' | '2021-01-01' | ['g_{compliance}_dashboard-2020-52'] # Monday
-      '2020-12-27' | '2021-01-01' | ['g_{compliance}_dashboard-2020-52'] # Saturday
-      '2020-12-27' | '2021-01-01' | ['g_{compliance}_dashboard-2020-52'] # Sunday
+      '2020-12-21' | '2020-12-21' | []
+      '2020-12-21' | '2020-12-20' | []
+      '2020-12-21' | '2020-11-21' | []
+      '2021-01-01' | '2020-12-28' | []
+      '2020-12-21' | '2020-12-28' | ['g_{compliance}_dashboard-2020-52']
+      '2020-12-21' | '2021-01-01' | ['g_{compliance}_dashboard-2020-52']
+      '2020-12-27' | '2021-01-01' | ['g_{compliance}_dashboard-2020-52']
+      '2020-12-27' | '2021-01-01' | ['g_{compliance}_dashboard-2020-52']
       '2020-12-26' | '2021-01-04' | ['g_{compliance}_dashboard-2020-52', 'g_{compliance}_dashboard-2020-53']
       '2020-12-26' | '2021-01-11' | ['g_{compliance}_dashboard-2020-52', 'g_{compliance}_dashboard-2020-53', 'g_{compliance}_dashboard-2021-01']
       '2020-12-26' | '2021-01-17' | ['g_{compliance}_dashboard-2020-52', 'g_{compliance}_dashboard-2020-53', 'g_{compliance}_dashboard-2021-01']
