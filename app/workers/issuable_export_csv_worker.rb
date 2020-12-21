@@ -10,34 +10,34 @@ class IssuableExportCsvWorker # rubocop:disable Scalability/IdempotentWorker
   PERMITTED_TYPES = [:merge_request, :issue].freeze
 
   def perform(type, current_user_id, project_id, params)
-    @type = type.to_sym
-    check_permitted_type!
+    type = type.to_sym
+    check_permitted_type!(type)
     process_params!(params, project_id)
 
-    @current_user = User.find(current_user_id)
-    @project = Project.find(project_id)
-    @service = service(find_objects(params))
+    current_user = User.find(current_user_id)
+    project = Project.find(project_id)
+    issuables = find_objects(type, current_user, params)
 
-    @service.email(@current_user)
+    service(issuables, type, project).email(current_user)
   end
 
   private
 
-  def find_objects(params)
-    case @type
+  def find_objects(type, user, params)
+    case type
     when :issue
-      IssuesFinder.new(@current_user, params).execute
+      IssuesFinder.new(user, params).execute
     when :merge_request
-      MergeRequestsFinder.new(@current_user, params).execute
+      MergeRequestsFinder.new(user, params).execute
     end
   end
 
-  def service(issuables)
+  def service(issuables, type, project)
     case @type
     when :issue
-      Issues::ExportCsvService.new(issuables, @project)
+      Issues::ExportCsvService.new(issuables, project)
     when :merge_request
-      MergeRequests::ExportCsvService.new(issuables, @project)
+      MergeRequests::ExportCsvService.new(issuables, project)
     end
   end
 
@@ -47,7 +47,15 @@ class IssuableExportCsvWorker # rubocop:disable Scalability/IdempotentWorker
     params.delete(:sort)
   end
 
-  def check_permitted_type!
-    raise ArgumentError, "type parameter must be :issue or :merge_request, it was #{@type}" unless PERMITTED_TYPES.include?(@type)
+  def check_permitted_type!(type)
+    return if permitted_issuable_types.include?(type)
+
+    raise ArgumentError, "type parameter must be :issue or :merge_request, it was #{type}"
+  end
+
+  def permitted_issuable_types
+    PERMITTED_TYPES
   end
 end
+
+IssuableExportCsvWorker.prepend_if_ee('::EE::IssuableExportCsvWorker')
