@@ -12,17 +12,17 @@ class ScheduleBackfillingArtifactExpiryMigration < ActiveRecord::Migration[6.0]
   def up
     # Create temporary index for expired artifacts
     # Needs to be removed in a later migration
-    add_concurrent_index(:ci_job_artifacts, :expire_at, where: INDEX_CONDITION, name: INDEX_NAME)
+    add_concurrent_index(:ci_job_artifacts, %i(id created_at), where: INDEX_CONDITION, name: INDEX_NAME)
 
     queue_background_migration_jobs_by_range_at_intervals(
-      ::Ci::JobArtifact,
+      ::Ci::JobArtifact.where(expire_at: nil),
       ::Gitlab::BackgroundMigration::BackfillArtifactExpiryDate,
       2.minutes,
-      batch_size: 100_000
+      batch_size: 200_000
     )
   end
 
   def down
-    # no-op
+    remove_concurrent_index_by_name :ci_job_artifacts, INDEX_NAME
   end
 end
