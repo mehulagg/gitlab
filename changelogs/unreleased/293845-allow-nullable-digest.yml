@@ -1,0 +1,5 @@
+---
+title: Set registry fields to be nullable
+merge_request: 50362
+author:
+type: fixed
