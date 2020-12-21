@@ -3798,7 +3798,7 @@ type ContainerRepositoryTag {
   """
   Digest of the tag.
   """
-  digest: String!
+  digest: String
 
   """
   URL of the tag.
@@ -3818,17 +3818,17 @@ type ContainerRepositoryTag {
   """
   Revision of the tag.
   """
-  revision: String!
+  revision: String
 
   """
   Short revision of the tag.
   """
-  shortRevision: String!
+  shortRevision: String
 
   """
   The size of the tag.
   """
-  totalSize: Int!
+  totalSize: Int
 }
 
 """

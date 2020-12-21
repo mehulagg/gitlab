@@ -633,13 +633,13 @@ A tag from a container repository.
 | ----- | ---- | ----------- |
 | `canDelete` | Boolean! | Can the current user delete this tag. |
 | `createdAt` | Time! | Timestamp when the tag was created. |
-| `digest` | String! | Digest of the tag. |
+| `digest` | String | Digest of the tag. |
 | `location` | String! | URL of the tag. |
 | `name` | String! | Name of the tag. |
 | `path` | String! | Path of the tag. |
-| `revision` | String! | Revision of the tag. |
-| `shortRevision` | String! | Short revision of the tag. |
-| `totalSize` | Int! | The size of the tag. |
+| `revision` | String | Revision of the tag. |
+| `shortRevision` | String | Short revision of the tag. |
+| `totalSize` | Int | The size of the tag. |
 
 ### CreateAlertIssuePayload
 
