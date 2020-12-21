@@ -90,7 +90,7 @@ RSpec.describe Emails::Pipelines do
 
     it_behaves_like 'correct pipeline information' do
       let(:status) { 'succeeded' }
-      let(:status_text) { 'Your pipeline has passed.' }
+      let(:status_text) { 'Pipeline passed.' }
     end
   end
 
@@ -103,7 +103,7 @@ RSpec.describe Emails::Pipelines do
 
     it_behaves_like 'correct pipeline information' do
       let(:status) { 'failed' }
-      let(:status_text) { 'Your pipeline has failed.' }
+      let(:status_text) { 'Pipeline failed.' }
     end
   end
 
@@ -116,7 +116,7 @@ RSpec.describe Emails::Pipelines do
 
     it_behaves_like 'correct pipeline information' do
       let(:status) { 'been fixed' }
-      let(:status_text) { 'Your pipeline has been fixed!' }
+      let(:status_text) { 'Pipeline fixed!' }
     end
   end
 end
