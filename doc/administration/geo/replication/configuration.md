@@ -81,10 +81,6 @@ they must be manually replicated to the **secondary** node.
 
 ### Step 2. Manually replicate the **primary** node's SSH host keys
 
-NOTE: **Note:**
-Be sure to test SSH connection in a separate terminal to
-verify SSH is still functional after this change.
-
 GitLab integrates with the system-installed SSH daemon, designating a user
 (typically named `git`) through which all access requests are handled.
 
@@ -173,6 +169,12 @@ keys must be manually replicated to the **secondary** node.
    # CentOS installations
    sudo service sshd reload
    ```
+
+1. Verify SSH is still functional.
+    
+   SSH into your GitLab **secondary** server in a new terminal. If you are unable to connect,
+   verify the permissions are correct according to
+   [item 4 of step 2](#step-2-manually-replicate-the-primary-nodes-ssh-host-keys).
 
 ### Step 3. Add the **secondary** node
 
