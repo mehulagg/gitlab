@@ -21835,6 +21835,9 @@ msgstr ""
 msgid "ProjectSettings|Enable \"Delete source branch\" option by default"
 msgstr ""
 
+msgid "ProjectSettings|Enable merge trains"
+msgstr ""
+
 msgid "ProjectSettings|Enable merged results pipelines"
 msgstr ""
 
@@ -22037,6 +22040,9 @@ msgid "ProjectSettings|View and edit files in this project. Non-project members 
 msgstr ""
 
 msgid "ProjectSettings|View project analytics"
+msgstr ""
+
+msgid "ProjectSettings|When a merge request is approved for merge, it's queued, and pipelines validate the combined results of the source and target branches before merge."
 msgstr ""
 
 msgid "ProjectSettings|When enabled, commit authors will be able to edit commit messages on unprotected branches."
