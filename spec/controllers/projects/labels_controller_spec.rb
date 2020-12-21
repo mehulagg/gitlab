@@ -93,35 +93,14 @@ RSpec.describe Projects::LabelsController do
         end
       end
 
-      context 'when show_inherited_labels disabled' do
-        before do
-          stub_feature_flags(show_inherited_labels: false)
-        end
+      context 'when include_ancestor_groups true' do
+        let(:params) { { namespace_id: project.namespace.to_param, project_id: project, include_ancestor_groups: true } }
 
-        context 'when include_ancestor_groups false' do
-          let(:params) { { namespace_id: project.namespace.to_param, project_id: project } }
-
-          it 'does not return ancestor group labels', :aggregate_failures do
-            get :index, params: params
-
-            expect(assigns(:labels)).to match_array([subgroup_label_1] + project_labels)
-            expect(assigns(:prioritized_labels)).to match_array([subgroup_label_2] + project_priority_labels)
-          end
-        end
-
-        context 'when include_ancestor_groups true' do
-          let(:params) { { namespace_id: project.namespace.to_param, project_id: project, include_ancestor_groups: true } }
-
-          it_behaves_like 'returns ancestor group labels'
-        end
+        it_behaves_like 'returns ancestor group labels'
       end
 
-      context 'when show_inherited_labels enabled' do
-        let(:params) { { namespace_id: project.namespace.to_param, project_id: project } }
-
-        before do
-          stub_feature_flags(show_inherited_labels: true)
-        end
+      context 'when include_ancestor_groups false' do
+        let(:params) { { namespace_id: project.namespace.to_param, project_id: project, include_ancestor_groups: false } }
 
         it_behaves_like 'returns ancestor group labels'
       end

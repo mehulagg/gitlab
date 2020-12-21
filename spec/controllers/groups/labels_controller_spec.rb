@@ -9,8 +9,6 @@ RSpec.describe Groups::LabelsController do
 
   before do
     group.add_owner(user)
-    # by default FFs are enabled in specs so we turn it off
-    stub_feature_flags(show_inherited_labels: false)
 
     sign_in(user)
   end
@@ -51,22 +49,6 @@ RSpec.describe Groups::LabelsController do
 
       context 'when include_ancestor_groups false' do
         let(:params) { { group_id: subgroup, only_group_labels: true } }
-
-        it 'does not return ancestor group labels', :aggregate_failures do
-          get :index, params: params, format: :json
-
-          label_ids = json_response.map {|label| label['title']}
-          expect(label_ids).to match_array([subgroup_label_1.title])
-          expect(label_ids).not_to include([group_label_1.title])
-        end
-      end
-
-      context 'when show_inherited_labels enabled' do
-        let(:params) { { group_id: subgroup } }
-
-        before do
-          stub_feature_flags(show_inherited_labels: true)
-        end
 
         it_behaves_like 'returns ancestor group labels'
       end
