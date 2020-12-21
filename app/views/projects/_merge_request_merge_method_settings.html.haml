@@ -2,7 +2,7 @@
 
 .form-group
   %b= s_('ProjectSettings|Merge method')
-  %p.text-secondary= s_('ProjectSettings|This will dictate the commit history when you merge a merge request')
+  %p.text-secondary= s_('ProjectSettings|Determine what happens to the commit history when you merge a merge request')
   .form-check.mb-2
     = form.radio_button :merge_method, :merge, class: "js-merge-method-radio form-check-input"
     = label_tag :project_merge_method_merge, class: 'form-check-label' do
@@ -19,7 +19,7 @@
         %br
         = s_('ProjectSettings|Fast-forward merges only')
         %br
-        = s_('ProjectSettings|When conflicts arise the user is given the option to rebase')
+        = s_('ProjectSettings|When there is a merge conflict, the user is given the option to rebase')
 
   .form-check.mb-2
     = form.radio_button :merge_method, :ff, class: "js-merge-method-radio qa-radio-button-merge-ff form-check-input"
@@ -30,4 +30,4 @@
         %br
         = s_('ProjectSettings|Fast-forward merges only')
         %br
-        = s_('ProjectSettings|When conflicts arise the user is given the option to rebase')
+        = s_('ProjectSettings|When there is a merge conflict, the user is given the option to rebase')

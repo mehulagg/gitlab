@@ -4,7 +4,7 @@
   .form-group
     %b= s_('ProjectSettings|Squash commits when merging')
     %p.text-secondary
-      = s_('ProjectSettings|Set the default behavior and availability of this option in merge requests. Changes made are also applied to existing merge requests.')
+      = s_('ProjectSettings|Set the default behavior of this option in merge requests. Changes to this are also applied to existing merge requests.')
       = link_to "What is squashing?",
         help_page_path('user/project/merge_requests/squash_and_merge.md'),
         target: '_blank'
@@ -23,7 +23,7 @@
         .gl-font-weight-bold
           = s_('ProjectSettings|Allow')
         .text-secondary
-          = s_('ProjectSettings|Checkbox is visible and unselected by default.')
+          = s_('ProjectSettings|The checkbox is visible and unselected by default.')
 
     .form-check.gl-mb-2
       = settings.radio_button :squash_option, :default_on, class: "form-check-input"
@@ -31,7 +31,7 @@
         .gl-font-weight-bold
           = s_('ProjectSettings|Encourage')
         .text-secondary
-          = s_('ProjectSettings|Checkbox is visible and selected by default.')
+          = s_('ProjectSettings|The checkbox is visible and selected by default.')
 
     .form-check.gl-mb-2
       = settings.radio_button :squash_option, :always, class: "form-check-input"
@@ -39,4 +39,4 @@
         .gl-font-weight-bold
           = s_('ProjectSettings|Require')
         .text-secondary
-          = s_('ProjectSettings|Squashing is always performed. Checkbox is visible and selected, and users cannot change it.')
+          = s_('ProjectSettings|Squashing is always performed. The checkbox is visible and selected, and users cannot change it.')

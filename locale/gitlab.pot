@@ -21808,12 +21808,6 @@ msgstr ""
 msgid "ProjectSettings|Build, test, and deploy your changes"
 msgstr ""
 
-msgid "ProjectSettings|Checkbox is visible and selected by default."
-msgstr ""
-
-msgid "ProjectSettings|Checkbox is visible and unselected by default."
-msgstr ""
-
 msgid "ProjectSettings|Choose your merge method, merge options, merge checks, and merge suggestions."
 msgstr ""
 
@@ -21829,19 +21823,19 @@ msgstr ""
 msgid "ProjectSettings|Customize your project badges."
 msgstr ""
 
+msgid "ProjectSettings|Determine what happens to the commit history when you merge a merge request"
+msgstr ""
+
 msgid "ProjectSettings|Disable email notifications"
 msgstr ""
 
 msgid "ProjectSettings|Do not allow"
 msgstr ""
 
-msgid "ProjectSettings|Enable 'Delete source branch' option by default"
+msgid "ProjectSettings|Enable \"Delete source branch\" option by default"
 msgstr ""
 
-msgid "ProjectSettings|Enable merge trains."
-msgstr ""
-
-msgid "ProjectSettings|Enable merged results pipelines."
+msgid "ProjectSettings|Enable merged results pipelines"
 msgstr ""
 
 msgid "ProjectSettings|Encourage"
@@ -21881,9 +21875,6 @@ msgid "ProjectSettings|Git Large File Storage (LFS)"
 msgstr ""
 
 msgid "ProjectSettings|Global"
-msgstr ""
-
-msgid "ProjectSettings|If pipelines for merge requests are enabled in the CI/CD configuration file, pipelines validate the combined results of the source and target branches."
 msgstr ""
 
 msgid "ProjectSettings|Internal"
@@ -21949,9 +21940,6 @@ msgstr ""
 msgid "ProjectSettings|Pipelines must succeed"
 msgstr ""
 
-msgid "ProjectSettings|Pipelines need to be configured to enable this feature."
-msgstr ""
-
 msgid "ProjectSettings|Private"
 msgstr ""
 
@@ -21973,7 +21961,7 @@ msgstr ""
 msgid "ProjectSettings|Requirements management system for this project"
 msgstr ""
 
-msgid "ProjectSettings|Set the default behavior and availability of this option in merge requests. Changes made are also applied to existing merge requests."
+msgid "ProjectSettings|Set the default behavior of this option in merge requests. Changes to this are also applied to existing merge requests."
 msgstr ""
 
 msgid "ProjectSettings|Share code pastes with others out of Git repository"
@@ -21982,7 +21970,7 @@ msgstr ""
 msgid "ProjectSettings|Show default award emojis"
 msgstr ""
 
-msgid "ProjectSettings|Show link to create/view merge request when pushing from the command line"
+msgid "ProjectSettings|Show link to create or view a merge request when pushing from the command line"
 msgstr ""
 
 msgid "ProjectSettings|Skipped pipelines are considered successful"
@@ -21994,13 +21982,19 @@ msgstr ""
 msgid "ProjectSettings|Squash commits when merging"
 msgstr ""
 
-msgid "ProjectSettings|Squashing is always performed. Checkbox is visible and selected, and users cannot change it."
+msgid "ProjectSettings|Squashing is always performed. The checkbox is visible and selected, and users cannot change it."
 msgstr ""
 
 msgid "ProjectSettings|Squashing is never performed and the checkbox is hidden."
 msgstr ""
 
 msgid "ProjectSettings|Submit changes to be merged upstream"
+msgstr ""
+
+msgid "ProjectSettings|The checkbox is visible and selected by default."
+msgstr ""
+
+msgid "ProjectSettings|The checkbox is visible and unselected by default."
 msgstr ""
 
 msgid "ProjectSettings|The commit message used to apply merge request suggestions"
@@ -22012,7 +22006,7 @@ msgstr ""
 msgid "ProjectSettings|These checks must pass before merge requests can be merged"
 msgstr ""
 
-msgid "ProjectSettings|This introduces the risk of merging changes that will not pass the pipeline."
+msgid "ProjectSettings|This introduces the risk of merging changes that do not pass the pipeline."
 msgstr ""
 
 msgid "ProjectSettings|This setting is applied on the server level and can be overridden by an admin."
@@ -22027,7 +22021,7 @@ msgstr ""
 msgid "ProjectSettings|This setting will override user notification preferences for all project members."
 msgstr ""
 
-msgid "ProjectSettings|This will dictate the commit history when you merge a merge request"
+msgid "ProjectSettings|To enable this feature, configure Pipelines."
 msgstr ""
 
 msgid "ProjectSettings|Transfer project"
@@ -22045,16 +22039,16 @@ msgstr ""
 msgid "ProjectSettings|View project analytics"
 msgstr ""
 
-msgid "ProjectSettings|When approved for merge, merge requests are queued and pipelines validate the combined results of the source and target branches before merge."
-msgstr ""
-
-msgid "ProjectSettings|When conflicts arise the user is given the option to rebase"
-msgstr ""
-
 msgid "ProjectSettings|When enabled, commit authors will be able to edit commit messages on unprotected branches."
 msgstr ""
 
 msgid "ProjectSettings|When enabled, issues, merge requests, and snippets will always show thumbs-up and thumbs-down award emoji buttons."
+msgstr ""
+
+msgid "ProjectSettings|When pipelines for merge requests are enabled in the CI/CD configuration file, pipelines validate the combined results of the source and target branches."
+msgstr ""
+
+msgid "ProjectSettings|When there is a merge conflict, the user is given the option to rebase"
 msgstr ""
 
 msgid "ProjectSettings|Wiki"

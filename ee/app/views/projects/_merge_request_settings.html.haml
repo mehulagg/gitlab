@@ -15,7 +15,10 @@
   .form-group
     = form.label :merge_requests_template, class: 'label-bold' do
       = _('Default description template for merge requests')
-      = link_to sprite_icon('question-o'), help_page_path('user/project/description_templates'), target: '_blank'
+      = link_to "What are description templates?",
+        help_page_path('user/project/description_templates',
+        anchor: 'creating-merge-request-templates'),
+        target: '_blank'
     = form.text_area :merge_requests_template, class: "form-control", rows: 3
     .text-secondary
       - link_start = '<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe % { url: help_page_path('user/markdown') }
