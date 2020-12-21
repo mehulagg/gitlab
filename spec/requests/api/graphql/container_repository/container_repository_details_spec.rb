@@ -105,4 +105,20 @@ RSpec.describe 'container repository details' do
       expect(tags_response.size).to eq(limit)
     end
   end
+
+  context 'with tags without a manifest' do
+    let(:tags_response) { container_repository_details_response.dig('tags', 'nodes') }
+    let(:errors) { container_repository_details_response.dig('errors') }
+
+    before do
+      stub_container_registry_tags(repository: container_repository.path, tags: tags, with_missing_digest: true)
+    end
+
+    it 'returns a list of tags' do
+      subject
+
+      expect(tags_response.size).to eq(tags.size)
+      expect(graphql_errors).to eq(nil)
+    end
+  end
 end
