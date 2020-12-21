@@ -17,7 +17,9 @@ const MR_SOURCE_BRANCH = 'merge_request[source_branch]';
 const MR_TARGET_BRANCH = 'merge_request[target_branch]';
 
 const COMMIT_FAILURE = 'COMMIT_FAILURE';
+const COMMIT_SUCCESS = 'COMMIT_SUCCESS';
 const DEFAULT_FAILURE = 'DEFAULT_FAILURE';
+const DEFAULT_SUCCESS = 'DEFAULT_SUCCESS';
 const LOAD_FAILURE_NO_FILE = 'LOAD_FAILURE_NO_FILE';
 const LOAD_FAILURE_NO_REF = 'LOAD_FAILURE_NO_REF';
 const LOAD_FAILURE_UNKNOWN = 'LOAD_FAILURE_UNKNOWN';
@@ -65,10 +67,14 @@ export default {
       lastCommitSha: this.commitSha,
       currentTabIndex: 0,
       editorIsReady: false,
-      failureType: null,
-      failureReasons: [],
       isSaving: false,
+
+      // Success and failure state
+      failureType: null,
       showFailureAlert: false,
+      failureReasons: [],
+      successType: null,
+      showSuccessAlert: false,
     };
   },
   apollo: {
@@ -127,31 +133,45 @@ export default {
     defaultCommitMessage() {
       return sprintf(this.$options.i18n.defaultCommitMessage, { sourcePath: this.ciConfigPath });
     },
+    success() {
+      switch (this.successType) {
+        case COMMIT_SUCCESS:
+          return {
+            text: this.$options.alertTexts[COMMIT_SUCCESS],
+            variant: 'info',
+          };
+        default:
+          return {
+            text: this.$options.alertTexts[DEFAULT_SUCCESS],
+            variant: 'info',
+          };
+      }
+    },
     failure() {
       switch (this.failureType) {
         case LOAD_FAILURE_NO_REF:
           return {
-            text: this.$options.errorTexts[LOAD_FAILURE_NO_REF],
+            text: this.$options.alertTexts[LOAD_FAILURE_NO_REF],
             variant: 'danger',
           };
         case LOAD_FAILURE_NO_FILE:
           return {
-            text: this.$options.errorTexts[LOAD_FAILURE_NO_FILE],
+            text: this.$options.alertTexts[LOAD_FAILURE_NO_FILE],
             variant: 'danger',
           };
         case LOAD_FAILURE_UNKNOWN:
           return {
-            text: this.$options.errorTexts[LOAD_FAILURE_UNKNOWN],
+            text: this.$options.alertTexts[LOAD_FAILURE_UNKNOWN],
             variant: 'danger',
           };
         case COMMIT_FAILURE:
           return {
-            text: this.$options.errorTexts[COMMIT_FAILURE],
+            text: this.$options.alertTexts[COMMIT_FAILURE],
             variant: 'danger',
           };
         default:
           return {
-            text: this.$options.errorTexts[DEFAULT_FAILURE],
+            text: this.$options.alertTexts[DEFAULT_FAILURE],
             variant: 'danger',
           };
       }
@@ -162,13 +182,16 @@ export default {
     tabEdit: s__('Pipelines|Write pipeline configuration'),
     tabGraph: s__('Pipelines|Visualize'),
   },
-  errorTexts: {
+  alertTexts: {
+    [COMMIT_FAILURE]: s__('Pipelines|The GitLab CI configuration could not be updated.'),
+    [COMMIT_SUCCESS]: __('Your changes have been successfully committed'),
+    [DEFAULT_FAILURE]: __('Operation succesful.'),
+    [DEFAULT_SUCCESS]: __('Something went wrong on our end.'),
+    [LOAD_FAILURE_NO_FILE]: s__('Pipelines|No CI file found in this repository, please add one.'),
     [LOAD_FAILURE_NO_REF]: s__(
       'Pipelines|Repository does not have a default branch, please set one.',
     ),
-    [LOAD_FAILURE_NO_FILE]: s__('Pipelines|No CI file found in this repository, please add one.'),
     [LOAD_FAILURE_UNKNOWN]: s__('Pipelines|The CI configuration was not loaded, please try again.'),
-    [COMMIT_FAILURE]: s__('Pipelines|The GitLab CI configuration could not be updated.'),
   },
   methods: {
     handleBlobContentError(error = {}) {
@@ -185,6 +208,7 @@ export default {
         this.reportFailure(LOAD_FAILURE_UNKNOWN);
       }
     },
+
     dismissFailure() {
       this.showFailureAlert = false;
     },
@@ -193,6 +217,14 @@ export default {
       this.failureType = type;
       this.failureReasons = reasons;
     },
+    dismissSuccess() {
+      this.showSuccessAlert = false;
+    },
+    reportSuccess(type) {
+      this.showSuccessAlert = true;
+      this.successType = type;
+    },
+
     redirectToNewMergeRequest(sourceBranch) {
       const url = mergeUrlParams(
         {
@@ -234,12 +266,7 @@ export default {
           this.redirectToNewMergeRequest(branch);
         } else {
           this.lastCommitSha = commit.sha;
-
-          // Note: The page should not be refreshed, and we
-          // would display an alert to notify users the
-          // commit was succesful. See:
-          // https://gitlab.com/gitlab-org/gitlab/-/issues/292229
-          refreshCurrentPage();
+          this.reportSuccess(COMMIT_SUCCESS);
         }
       } catch (error) {
         this.reportFailure(COMMIT_FAILURE, [error?.message]);
@@ -256,6 +283,14 @@ export default {
 
 <template>
   <div class="gl-mt-4">
+    <gl-alert
+      v-if="showSuccessAlert"
+      :variant="success.variant"
+      :dismissible="true"
+      @dismiss="dismissSuccess"
+    >
+      {{ success.text }}
+    </gl-alert>
     <gl-alert
       v-if="showFailureAlert"
       :variant="failure.variant"
