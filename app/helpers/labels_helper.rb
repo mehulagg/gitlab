@@ -80,27 +80,27 @@ module LabelsHelper
 
   def suggested_colors
     {
-      '#0033CC' => s_('SuggestedColors|Blue'),
-      '#428BCA' => s_('SuggestedColors|Blue gray'),
-      '#44AD8E' => s_('SuggestedColors|Green cyan'),
-      '#A8D695' => s_('SuggestedColors|Sea green'),
-      '#5CB85C' => s_('SuggestedColors|Desaturated green'),
-      '#69D100' => s_('SuggestedColors|Bright green'),
-      '#004E00' => s_('SuggestedColors|Dark green'),
-      '#34495E' => s_('SuggestedColors|Steel blue'),
-      '#7F8C8D' => s_('SuggestedColors|Gray'),
-      '#A295D6' => s_('SuggestedColors|Lavender'),
-      '#5843AD' => s_('SuggestedColors|Violet'),
-      '#8E44AD' => s_('SuggestedColors|Purple'),
-      '#FFECDB' => s_('SuggestedColors|Champagne'),
-      '#AD4363' => s_('SuggestedColors|Rose'),
-      '#D10069' => s_('SuggestedColors|Strong pink'),
-      '#CC0033' => s_('SuggestedColors|Crimson'),
-      '#FF0000' => s_('SuggestedColors|Red'),
-      '#D9534F' => s_('SuggestedColors|Dark coral'),
-      '#D1D100' => s_('SuggestedColors|Pear'),
-      '#F0AD4E' => s_('SuggestedColors|Soft orange'),
-      '#AD8D43' => s_('SuggestedColors|Soft brown')
+      '#273be2' => s_('SuggestedColors|Palatinate blue'),
+      '#007bb8' => s_('SuggestedColors|Star command blue'),
+      '#29ab87' => s_('SuggestedColors|Jungle green'),
+      '#addfad' => s_('SuggestedColors|Light moss green'),
+      '#74c365' => s_('SuggestedColors|Mantis'),
+      '#84de02' => s_('SuggestedColors|Alien armpit'),
+      '#195905' => s_('SuggestedColors|Lincoln green'),
+      '#36454f' => s_('SuggestedColors|Charcoal grey'),
+      '#848482' => s_('SuggestedColors|Old Silver'),
+      '#b19cd9' => s_('SuggestedColors|Light pastel purple'),
+      '#512888' => s_('SuggestedColors|KSU Purple'),
+      '#9a4eae' => s_('SuggestedColors|Purpureus'),
+      '#f7e7ce' => s_('SuggestedColors|Champagne'),
+      '#b3446c' => s_('SuggestedColors|Raspberry rose'),
+      '#da1d81' => s_('SuggestedColors|Vivid cerise'),
+      '#cc0033' => s_('SuggestedColors|Vivid crimson'),
+      '#ff0000' => s_('SuggestedColors|Red'),
+      '#cc4e5c' => s_('SuggestedColors|Dark terra cotta'),
+      '#e4d00a' => s_('SuggestedColors|Citrine'),
+      '#ffb347' => s_('SuggestedColors|Pastel orange'),
+      '#c39953' => s_('SuggestedColors|Aztec Gold')
     }
   end
 
