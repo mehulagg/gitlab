@@ -4,9 +4,20 @@ import { parseCodeclimateMetrics, doCodeClimateComparison } from './utils/codequ
 
 export const setPaths = ({ commit }, paths) => commit(types.SET_PATHS, paths);
 
-export const fetchReports = ({ state, dispatch, commit }) => {
+export const fetchReports = ({ state, dispatch, commit }, diffFeatureFlagEnabled) => {
   commit(types.REQUEST_REPORTS);
 
+  if (diffFeatureFlagEnabled) {
+    return axios
+      .get(state.reportsPath)
+      .then(({ data }) => {
+        return dispatch('receiveReportsSuccess', {
+          newIssues: parseCodeclimateMetrics(data.new_errors, state.headBlobPath),
+          resolvedIssues: parseCodeclimateMetrics(data.resolved_errors, state.baseBlobPath),
+        });
+      })
+      .catch(() => dispatch('receiveReportsError'));
+  }
   if (!state.basePath) {
     return dispatch('receiveReportsError');
   }
