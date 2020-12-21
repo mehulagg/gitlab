@@ -316,7 +316,7 @@ With this, all updates that should happen on your Elasticsearch index will be
 buffered and caught up once unpaused.
 
 The **Pause Elasticsearch Indexing** option is also automatically toggled when
-the [internal cluster reindexing task](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/34069) runs.
+the [internal cluster reindexing task](#trigger-the-reindex-via-the-advanced-search-administration) runs.
 
 ### Setup
 
