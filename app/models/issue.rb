@@ -24,6 +24,8 @@ class Issue < ApplicationRecord
   include Todoable
   include FromUnion
 
+  extend ::Gitlab::Utils::Override
+
   DueDateStruct                   = Struct.new(:title, :name).freeze
   NoDueDate                       = DueDateStruct.new('No Due Date', '0').freeze
   AnyDueDate                      = DueDateStruct.new('Any Due Date', '').freeze
@@ -432,6 +434,16 @@ class Issue < ApplicationRecord
 
   def relocation_target
     moved_to || duplicated_to
+  end
+
+  override :supports_epic?
+  def supports_epic?
+    issue_type_supports?(:epics) && project.group.present?
+  end
+
+  override :supports_assignee?
+  def supports_assignee?
+    issue_type_supports?(:assignee)
   end
 
   private

@@ -44,6 +44,16 @@ RSpec.describe QuickActions::InterpretService do
           expect(updates[:assignee_ids]).to match_array([user.id, user3.id])
         end
 
+        context 'with test_case issue type' do
+          it 'does not mark to update assignee' do
+            test_case = create(:quality_test_case, project: project)
+
+            _, updates = service.execute("/assign @#{user3.username}", test_case)
+
+            expect(updates[:assignee_ids]).to eq(nil)
+          end
+        end
+
         context 'assign command with multiple assignees' do
           it 'fetches assignee and populates assignee_ids if content contains /assign' do
             issue.update!(assignee_ids: [user.id])
@@ -206,6 +216,16 @@ RSpec.describe QuickActions::InterpretService do
           _, updates = service.execute("/reassign @#{current_user.username}", issue)
 
           expect(updates[:assignee_ids]).to match_array([current_user.id])
+        end
+
+        context 'with test_case issue type' do
+          it 'does not mark to update assignee' do
+            test_case = create(:quality_test_case, project: project)
+
+            _, updates = service.execute("/reassign @#{current_user.username}", test_case)
+
+            expect(updates[:assignee_ids]).to eq(nil)
+          end
         end
       end
     end
