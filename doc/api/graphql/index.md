@@ -82,6 +82,10 @@ The process is as follows:
    release post (at or prior to X.11 and X.5 releases).
 1. Fields meeting criteria are removed in X.0 or X.6.
 
+NOTE:
+If a field is behind a feature flag and disabled by default, it's exempt from the deprecation process
+and can be removed at any time without notice.
+
 ### List of removed items
 
 View the [fields, enums, and other items we removed](removed_items.md) from the GraphQL API.
