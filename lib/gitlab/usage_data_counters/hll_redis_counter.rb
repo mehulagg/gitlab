@@ -338,7 +338,7 @@ module Gitlab
         def weekly_redis_keys(events:, start_date:, end_date:, context: '')
           # exclude the week with end_date, always get data for complete weeks
           # end_date could be the cuurrent date and current date is in an incomplete week
-          end_date -= 1.week
+          end_date = end_date.end_of_week - 1.week
           (start_date.to_date..end_date.to_date).map do |date|
             events.map { |event| redis_key(event, date, context) }
           end.flatten.uniq

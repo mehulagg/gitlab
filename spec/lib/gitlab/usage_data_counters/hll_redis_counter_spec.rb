@@ -287,8 +287,32 @@ RSpec.describe Gitlab::UsageDataCounters::HLLRedisCounter, :clean_gitlab_redis_s
       context 'when data crosses into new year' do
         it 'does not raise error' do
           expect { described_class.unique_events(event_names: [weekly_event], start_date: DateTime.parse('2020-12-26'), end_date: DateTime.parse('2021-02-01')) }
-            .not_to raise_error(Gitlab::Instrumentation::RedisClusterValidator::CrossSlotError)
+            .not_to raise_error
         end
+      end
+    end
+  end
+
+  describe '.weekly_redis_keys' do
+    using RSpec::Parameterized::TableSyntax
+    let(:weekly_event) { 'g_compliance_dashboard' }
+    let(:redis_event) { described_class.send(:event_for, weekly_event) }
+
+    subject(:weekly_redis_keys) { described_class.send(:weekly_redis_keys, events: [redis_event], start_date: DateTime.parse(start_date), end_date: DateTime.parse(end_date)) }
+
+    where(:start_date, :end_date, :keys) do
+      '2020-12-21' | '2021-01-01' | ['g_{compliance}_dashboard-2020-52'] # Monday
+      '2020-12-27' | '2021-01-01' | ['g_{compliance}_dashboard-2020-52'] # Saturday
+      '2020-12-27' | '2021-01-01' | ['g_{compliance}_dashboard-2020-52'] # Sunday
+      '2020-12-26' | '2021-01-04' | ['g_{compliance}_dashboard-2020-52', 'g_{compliance}_dashboard-2020-53']
+      '2020-12-26' | '2021-01-11' | ['g_{compliance}_dashboard-2020-52', 'g_{compliance}_dashboard-2020-53', 'g_{compliance}_dashboard-2021-01']
+      '2020-12-26' | '2021-01-17' | ['g_{compliance}_dashboard-2020-52', 'g_{compliance}_dashboard-2020-53', 'g_{compliance}_dashboard-2021-01']
+      '2020-12-26' | '2021-01-18' | ['g_{compliance}_dashboard-2020-52', 'g_{compliance}_dashboard-2020-53', 'g_{compliance}_dashboard-2021-01', 'g_{compliance}_dashboard-2021-02']
+    end
+
+    with_them do
+      it "returns the correct keys" do
+        expect(subject).to match(keys)
       end
     end
   end
