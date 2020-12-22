@@ -27,12 +27,7 @@ const getHeaders = res => res.headers;
  * @param {{headers}}
  * @returns {{pageInfo: {}}}
  */
-const pageInfo = flow(
-  getHeaders,
-  normalizeHeaders,
-  parseIntPagination,
-  groupPageInfo,
-);
+const pageInfo = flow(getHeaders, normalizeHeaders, parseIntPagination, groupPageInfo);
 
 /**
  * Takes an XHR-response object and adds pagination related data do it

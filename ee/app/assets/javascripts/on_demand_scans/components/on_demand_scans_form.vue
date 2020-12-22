@@ -187,14 +187,20 @@ export default {
             },
           },
         })
-        .then(({ data: { dastOnDemandScanCreate: { pipelineUrl, errors } } }) => {
-          if (errors?.length) {
-            this.showErrors(ERROR_RUN_SCAN, errors);
-            this.loading = false;
-          } else {
-            redirectTo(pipelineUrl);
-          }
-        })
+        .then(
+          ({
+            data: {
+              dastOnDemandScanCreate: { pipelineUrl, errors },
+            },
+          }) => {
+            if (errors?.length) {
+              this.showErrors(ERROR_RUN_SCAN, errors);
+              this.loading = false;
+            } else {
+              redirectTo(pipelineUrl);
+            }
+          },
+        )
         .catch(e => {
           Sentry.captureException(e);
           this.showErrors(ERROR_RUN_SCAN);

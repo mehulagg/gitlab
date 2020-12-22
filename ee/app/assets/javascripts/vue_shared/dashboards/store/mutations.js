@@ -24,7 +24,10 @@ export default {
     state.projects = projects;
     state.isLoadingProjects = false;
     if (AccessorUtilities.isLocalStorageAccessSafe()) {
-      localStorage.setItem(state.projectEndpoints.list, state.projects.map(p => p.id));
+      localStorage.setItem(
+        state.projectEndpoints.list,
+        state.projects.map(p => p.id),
+      );
     } else {
       createFlash(
         __('Project order will not be saved as local storage is not available.'),
@@ -63,7 +66,10 @@ export default {
     );
     state.isLoadingProjects = false;
     if (AccessorUtilities.isLocalStorageAccessSafe()) {
-      localStorage.setItem(state.projectEndpoints.list, state.projects.map(p => p.id));
+      localStorage.setItem(
+        state.projectEndpoints.list,
+        state.projects.map(p => p.id),
+      );
     }
 
     const pageInfo = parseIntPagination(normalizeHeaders(headers));

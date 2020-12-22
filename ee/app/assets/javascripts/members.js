@@ -9,13 +9,9 @@ export default class MembersEE extends Members {
     super.addListeners();
 
     // eslint-disable-next-line @gitlab/no-global-event-off
-    $('.js-ldap-permissions')
-      .off('click')
-      .on('click', this.showLDAPPermissionsWarning.bind(this));
+    $('.js-ldap-permissions').off('click').on('click', this.showLDAPPermissionsWarning.bind(this));
     // eslint-disable-next-line @gitlab/no-global-event-off
-    $('.js-ldap-override')
-      .off('click')
-      .on('click', this.toggleMemberAccessToggle.bind(this));
+    $('.js-ldap-override').off('click').on('click', this.toggleMemberAccessToggle.bind(this));
   }
 
   dropdownClicked(options) {
