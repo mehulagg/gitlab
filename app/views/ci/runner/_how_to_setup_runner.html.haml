@@ -16,6 +16,7 @@
     %code#registration_token= registration_token
     = clipboard_button(target: '#registration_token', title: _("Copy token"), class: "btn-transparent btn-clipboard")
 
+.gl-mt-3.gl-mb-3
 = button_to _("Reset registration token"), reset_token_url,
 method: :put, class: 'gl-button btn btn-default',
 data: { confirm: _("Are you sure you want to reset the registration token?") }
