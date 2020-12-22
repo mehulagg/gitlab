@@ -1033,7 +1033,7 @@ msgstr ""
 msgid ", or "
 msgstr ""
 
-msgid "- Available to run jobs"
+msgid "- Available to run jobs."
 msgstr ""
 
 msgid "- Event"
@@ -1041,7 +1041,7 @@ msgid_plural "- Events"
 msgstr[0] ""
 msgstr[1] ""
 
-msgid "- Paused and not available to run jobs"
+msgid "- Paused and not available to run jobs."
 msgstr ""
 
 msgid "- User"
