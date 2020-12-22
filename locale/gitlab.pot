@@ -21778,7 +21778,7 @@ msgstr ""
 msgid "ProjectService|To set up this service:"
 msgstr ""
 
-msgid "ProjectSettings|Additional merge request capabilities that influence how and when merges will be performed"
+msgid "ProjectSettings|Additional settings that influence how and when merges are done."
 msgstr ""
 
 msgid "ProjectSettings|All discussions must be resolved"
@@ -22000,7 +22000,7 @@ msgstr ""
 msgid "ProjectSettings|The checkbox is visible and unselected by default."
 msgstr ""
 
-msgid "ProjectSettings|The commit message used to apply merge request suggestions"
+msgid "ProjectSettings|The commit message used when applying merge request suggestions."
 msgstr ""
 
 msgid "ProjectSettings|The variables GitLab supports:"
