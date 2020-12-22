@@ -3558,6 +3558,7 @@ job split into three separate jobs.
 #### Parallel `matrix` jobs
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/15356) in GitLab 13.3.
+> - [In GitLab 13.5](https://gitlab.com/gitlab-org/gitlab/-/issues/26362) support for one-dimensional matrices was added.
 
 Use `matrix:` to run a job multiple times in parallel in a single pipeline,
 but with different variable values for each instance of the job.
