@@ -15,6 +15,8 @@
   .form-group
     = form.label :merge_requests_template, class: 'label-bold' do
       = _('Default description template for merge requests')
+    %p.text-secondary
+      = _('This is used for every new merge request.')
       = link_to "What are description templates?",
         help_page_path('user/project/description_templates',
         anchor: 'creating-merge-request-templates'),

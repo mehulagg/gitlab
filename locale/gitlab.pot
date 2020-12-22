@@ -28425,6 +28425,9 @@ msgstr ""
 msgid "This is the number of %{billable_users_link_start}billable users%{link_end} on your installation, and this is the minimum number you need to purchase when you renew your license."
 msgstr ""
 
+msgid "This is used for every new merge request."
+msgstr ""
+
 msgid "This is your current session"
 msgstr ""
 
