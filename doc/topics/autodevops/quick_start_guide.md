@@ -101,28 +101,39 @@ to deploy this project to.
 After a couple of minutes, the cluster is created. You can also see its
 status on your [GCP dashboard](https://console.cloud.google.com/kubernetes).
 
-Next, install some applications on your cluster that are needed
-to take full advantage of Auto DevOps.
+## Install Ingress
 
-## Install Ingress and Prometheus
+After your cluster is running, you will need to install Nginx Ingress Controller
+so that your application has a load balancer to route traffic
+from the Internet to your application.
 
-After your cluster is running, you can install your first applications,
-Ingress and Prometheus:
+Since we have a Google GKE cluster, we can use Google Cloud Shell to install Nginx Ingress Controller.
+To do so:
 
-- Ingress - Provides load balancing, SSL termination, and name-based virtual hosting,
-  using NGINX behind the scenes.
-- Prometheus - An open-source monitoring and alerting system used to supervise the
-  deployed application.
+1. On your cluster's details page, go to the "Advanced Settings" tab.
+   Click the link to Google Kubernetes Engine to visit the cluster on Google Cloud Console.
+1. Select "Connect" on the GKE cluster page, then click on "Run in Cloud Shell".
+1. Once the Cloud Shell starts, you can install Nginx Ingress Controller with the following commands:
 
-We aren't installing GitLab Runner in this quick start guide, as this guide uses the
-shared runners provided by GitLab.com.
+   ```sh
+   helm repo add nginx-stable https://helm.nginx.com/stable
+   helm repo update
+   helm install nginx-ingress nginx-stable/nginx-ingress
 
-To install the applications:
+   # Check that the ingress controller is installed successfully
+   kubectl get service nginx-ingress-nginx-ingress
+   ```
 
-- Click the **Install** button for **Ingress**.
-- When the **Ingress Endpoint** is displayed, copy the IP address.
-- Add your **Base domain**. For this guide, use the domain suggested by GitLab.
-- Click **Save changes**.
+1. Once Nginx is successfully installed, you can obtain the external IP address with the following command.
+   You may need to wait for a few minutes before this command returns an IP address, as the load balancer obtains an IP address:
+
+   ```sh
+   kubectl get service nginx-ingress-nginx-ingress -ojson | jq -r '.status.loadBalancer.ingress[].ip'
+   ```
+
+1. Copy the IP address above. Go back to the cluster page on GitLab, and go to the "Details" tab.
+   - Add your **Base domain**. For this guide, use the domain `<IP address>.nip.io`.
+   - Click **Save changes**.
 
 ![Cluster Base Domain](img/guide_base_domain_v12_3.png)
 
