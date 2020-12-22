@@ -86,9 +86,8 @@ You can create short-cut links to create an issue using a designated template. F
 
 ## Setting a default template for merge requests and issues **(STARTER)**
 
-> - This feature was introduced before [description templates](#overview) and is available in [GitLab Starter](https://about.gitlab.com/pricing/). It can be enabled in the project's settings.
-> - Templates for issues were [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/28) in GitLab EE 8.1.
-> - Templates for merge requests were [introduced](https://gitlab.com/gitlab-org/gitlab/commit/7478ece8b48e80782b5465b96c79f85cc91d391b) in GitLab EE 6.9.
+> - Templates for merge requests were [introduced](https://gitlab.com/gitlab-org/gitlab/commit/7478ece8b48e80782b5465b96c79f85cc91d391b) in GitLab 6.9.
+> - Templates for issues were [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/28) in GitLab 8.1.
 
 The visibility of issues and/or merge requests should be set to either "Everyone
 with access" or "Only Project Members" in your project's **Settings / Visibility, project features, permissions** section, otherwise the
