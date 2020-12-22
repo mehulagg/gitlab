@@ -876,4 +876,45 @@ RSpec.describe Vulnerabilities::Finding do
       expect(subject).to eq({ "test" => true })
     end
   end
+
+  describe '#uuid_v5' do
+    let(:project) { create(:project) }
+    let(:report_type) { :sast }
+    let(:identifier_fingerprint) { 'fooo' }
+    let(:location_fingerprint) { 'zooo' }
+    let(:identifier) { build(:vulnerabilities_identifier, fingerprint: identifier_fingerprint) }
+    let(:expected_uuid) { 'this-is-supposed-to-a-uuid' }
+    let(:finding) do
+      build(:vulnerabilities_finding, report_type,
+            uuid: uuid,
+            project: project,
+            primary_identifier: identifier,
+            location_fingerprint: location_fingerprint)
+    end
+
+    subject(:uuid_v5) { finding.uuid_v5 }
+
+    before do
+      allow(::Gitlab::UUID).to receive(:v5).and_return(expected_uuid)
+    end
+
+    context 'when the finding has a version 4 uuid' do
+      let(:uuid) { SecureRandom.uuid }
+      let(:uuid_name_value) { "#{report_type}-#{identifier_fingerprint}-#{location_fingerprint}-#{project.id}" }
+
+      it 'returns the calculated uuid for the finding' do
+        expect(uuid_v5).to eq(expected_uuid)
+        expect(::Gitlab::UUID).to have_received(:v5).with(uuid_name_value)
+      end
+    end
+
+    context 'when the finding has a version 5 uuid' do
+      let(:uuid) { '6756ebb6-8465-5c33-9af9-c5c8b117aefb' }
+
+      it 'returns the uuid of the finding' do
+        expect(uuid_v5).to eq(uuid)
+        expect(::Gitlab::UUID).not_to have_received(:v5)
+      end
+    end
+  end
 end

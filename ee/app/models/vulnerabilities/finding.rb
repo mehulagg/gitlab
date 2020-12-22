@@ -361,6 +361,12 @@ module Vulnerabilities
       self.class.confidences[self.confidence]
     end
 
+    # We will eventually have only UUIDv5 values for the `uuid`
+    # attribute of the finding records.
+    def uuid_v5
+      Gitlab::UUID.v5?(uuid) ? uuid : Gitlab::UUID.v5(uuid_v5_name)
+    end
+
     protected
 
     def first_fingerprint
@@ -375,6 +381,15 @@ module Vulnerabilities
         category: report_type,
         project_fingerprint: project_fingerprint
       }
+    end
+
+    def uuid_v5_name
+      [
+        report_type,
+        primary_identifier.fingerprint,
+        location_fingerprint,
+        project_id
+      ].join('-')
     end
   end
 end
