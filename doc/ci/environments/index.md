@@ -572,7 +572,7 @@ This example shows:
   branch, and the Git SHA of the commit.
 - The exact time the last deployment was performed.
 - The upcoming deployment, if a deployment for the environment is in progress.
-- When the the environment will auto stop.
+- When the environment will auto stop.
 - A button that takes you to the URL that you defined under the `environment` keyword
   in `.gitlab-ci.yml`.
 - A number of deployment actions, including:
@@ -639,7 +639,7 @@ places within GitLab:
 - In a merge request widget as a link:
   ![Environment URL in merge request](../img/environments_mr_review_app.png)
 - In the Environments view as a button:
-  ![Environment URL in environments](../img/environments_available.png)
+  ![Environment URL in environments](../img/environments_available_13_7.png)
 - In the Deployments view as a button:
   ![Environment URL in deployments](../img/deployments_view.png)
 
