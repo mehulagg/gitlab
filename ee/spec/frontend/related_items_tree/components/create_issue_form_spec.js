@@ -181,12 +181,7 @@ describe('CreateIssueForm', () => {
         expect(dropdownItems).toHaveLength(mockProjects.length);
         expect(dropdownItems.at(0).text()).toContain(mockProjects[0].name);
         expect(dropdownItems.at(0).text()).toContain(mockProjects[0].namespace.name);
-        expect(
-          dropdownItems
-            .at(0)
-            .find(ProjectAvatar)
-            .exists(),
-        ).toBe(true);
+        expect(dropdownItems.at(0).find(ProjectAvatar).exists()).toBe(true);
       });
     });
 

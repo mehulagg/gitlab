@@ -172,9 +172,7 @@ describe('MilestonesListSectionComponent', () => {
 
   describe('when the milestone list is expanded', () => {
     beforeEach(() => {
-      findExpandButtonContainer()
-        .find(GlButton)
-        .vm.$emit('click');
+      findExpandButtonContainer().find(GlButton).vm.$emit('click');
 
       return wrapper.vm.$nextTick();
     });

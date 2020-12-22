@@ -114,9 +114,7 @@ describe('AddEditScheduleForm', () => {
       });
 
       it("doesn't have a red border when there is selected option", async () => {
-        findDropdownOptions()
-          .at(1)
-          .vm.$emit('click');
+        findDropdownOptions().at(1).vm.$emit('click');
         await wrapper.vm.$nextTick();
         expect(findTimezoneDropdown().classes()).not.toContain('invalid-dropdown');
       });

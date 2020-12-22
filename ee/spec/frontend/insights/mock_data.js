@@ -15,7 +15,10 @@ export const barChartData = {
   datasets: [
     {
       name: 'all',
-      data: [['January', 1], ['February', 2]],
+      data: [
+        ['January', 1],
+        ['February', 2],
+      ],
     },
   ],
   xAxisTitle: 'Months',
@@ -26,11 +29,17 @@ export const lineChartData = {
   labels: ['January', 'February'],
   datasets: [
     {
-      data: [['January', 1], ['February', 2]],
+      data: [
+        ['January', 1],
+        ['February', 2],
+      ],
       name: 'Alpha',
     },
     {
-      data: [['January', 1], ['February', 2]],
+      data: [
+        ['January', 1],
+        ['February', 2],
+      ],
       name: 'Beta',
     },
   ],

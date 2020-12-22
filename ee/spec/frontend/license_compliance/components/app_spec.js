@@ -279,21 +279,11 @@ describe('Project Licenses', () => {
       );
 
       it('it renders the correct count in "Detected in project" tab', () => {
-        expect(
-          wrapper
-            .findAll(GlBadge)
-            .at(0)
-            .text(),
-        ).toBe(pageInfo.total.toString());
+        expect(wrapper.findAll(GlBadge).at(0).text()).toBe(pageInfo.total.toString());
       });
 
       it('it renders the correct count in "Policies" tab', () => {
-        expect(
-          wrapper
-            .findAll(GlBadge)
-            .at(1)
-            .text(),
-        ).toBe(managedLicenses.length.toString());
+        expect(wrapper.findAll(GlBadge).at(1).text()).toBe(managedLicenses.length.toString());
       });
     });
 
