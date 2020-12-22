@@ -98,6 +98,7 @@ secrets-sast:
   variables:
     DS_MAJOR_VERSION: 2
     DS_EXCLUDED_PATHS: "qa/qa/ee/fixtures/secure_premade_reports,spec,ee/spec"  # GitLab-specific
+    SECURE_ANALYZERS_PREFIX: "registry.gitlab.com/gitlab-org/security-products/analyzers"
   script:
     - /analyzer run
     # Post-processing: This will be an after_script once this job will use the Dependency Scanning CI template
