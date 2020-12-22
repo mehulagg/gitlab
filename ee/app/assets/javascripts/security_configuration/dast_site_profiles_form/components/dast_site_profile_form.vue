@@ -52,7 +52,7 @@ export default {
     },
   },
   data() {
-    const { name = '', targetUrl = '', excludedUrls = '', requestHeaders = '' } =
+    const { name = '', targetUrl = '', excludedUrls = '', requestHeaders = '', authFields = {} } =
       this.siteProfile || {};
 
     const form = {
@@ -72,7 +72,7 @@ export default {
 
     return {
       form,
-      authSection: {},
+      authSection: { fields: { authEnabled: true } },
       initialFormValues: serializeFormObject(form.fields),
       isLoading: false,
       hasAlert: false,

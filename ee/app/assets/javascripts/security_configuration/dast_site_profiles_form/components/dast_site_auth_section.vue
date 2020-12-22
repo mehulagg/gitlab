@@ -13,7 +13,7 @@ export default {
     validation: validation(),
   },
   props: {
-    fields: {
+    value: {
       type: Object,
       required: false,
       default: () => ({}),
@@ -33,7 +33,7 @@ export default {
       // default to commonly used names for `userName` and `password` fields in authentcation forms
       userNameFormField = 'username',
       passwordFormField = 'password',
-    } = this.fields;
+    } = this.value.fields;
 
     return {
       form: {
@@ -51,7 +51,7 @@ export default {
   },
   computed: {
     showValidationOrInEditMode() {
-      return this.showValidation || Object.keys(this.fields).length > 0;
+      return this.showValidation || Object.keys(this.value.fields).length > 0;
     },
   },
   watch: {
