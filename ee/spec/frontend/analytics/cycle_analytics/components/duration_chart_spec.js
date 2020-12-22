@@ -65,10 +65,7 @@ describe('DurationChart', () => {
   const findLoader = _wrapper => _wrapper.find(ChartSkeletonLoader);
 
   const selectStage = (_wrapper, index = 0) => {
-    findStageDropdown(_wrapper)
-      .findAll(GlDropdownItem)
-      .at(index)
-      .vm.$emit('click');
+    findStageDropdown(_wrapper).findAll(GlDropdownItem).at(index).vm.$emit('click');
   };
 
   beforeEach(() => {

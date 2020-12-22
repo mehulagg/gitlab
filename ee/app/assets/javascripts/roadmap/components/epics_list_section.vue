@@ -123,8 +123,10 @@ export default {
     getEmptyRowContainerStyles() {
       if (this.$refs.epicItems && this.$refs.epicItems.length) {
         return {
-          height: `${this.$el.clientHeight -
-            this.displayedEpics.length * this.$refs.epicItems[0].$el.clientHeight}px`,
+          height: `${
+            this.$el.clientHeight -
+            this.displayedEpics.length * this.$refs.epicItems[0].$el.clientHeight
+          }px`,
         };
       }
       return {};

@@ -274,8 +274,8 @@ export default {
             <gl-button
               :disabled="
                 requirementRequestActive ||
-                  issuableMeta.issuableTitle.length > $options.maxTitleLength ||
-                  !issuableMeta.issuableTitle.length
+                issuableMeta.issuableTitle.length > $options.maxTitleLength ||
+                !issuableMeta.issuableTitle.length
               "
               :loading="requirementRequestActive"
               data-testid="requirement-save"

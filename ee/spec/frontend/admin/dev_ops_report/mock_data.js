@@ -1,4 +1,7 @@
-export const groupData = [{ id: '1', full_name: 'Foo' }, { id: '2', full_name: 'Bar' }];
+export const groupData = [
+  { id: '1', full_name: 'Foo' },
+  { id: '2', full_name: 'Bar' },
+];
 
 export const pageData = {
   'x-next-page': 2,
@@ -17,7 +20,10 @@ export const groupNodes = [
   },
 ];
 
-export const groupNodeLabelValues = [{ label: 'Foo', value: '1' }, { label: 'Bar', value: '2' }];
+export const groupNodeLabelValues = [
+  { label: 'Foo', value: '1' },
+  { label: 'Bar', value: '2' },
+];
 
 export const groupIds = ['1', '2'];
 

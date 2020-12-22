@@ -186,13 +186,19 @@ describe('Filter bar', () => {
     [
       'selectedLabelList',
       'label_name',
-      [{ value: 'Afternix', operator: '=' }, { value: 'Brouceforge', operator: '=' }],
+      [
+        { value: 'Afternix', operator: '=' },
+        { value: 'Brouceforge', operator: '=' },
+      ],
       ['Afternix', 'Brouceforge'],
     ],
     [
       'selectedAssigneeList',
       'assignee_username',
-      [{ value: 'rootUser', operator: '=' }, { value: 'secondaryUser', operator: '=' }],
+      [
+        { value: 'rootUser', operator: '=' },
+        { value: 'secondaryUser', operator: '=' },
+      ],
       ['rootUser', 'secondaryUser'],
     ],
   ])('with a %s updates the %s url parameter', (stateKey, paramKey, payload, result) => {

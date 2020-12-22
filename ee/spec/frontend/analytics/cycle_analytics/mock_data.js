@@ -38,7 +38,10 @@ export const endpoints = {
   valueStreamData: /analytics\/value_stream_analytics\/value_streams/,
 };
 
-export const valueStreams = [{ id: 1, name: 'Value stream 1' }, { id: 2, name: 'Value stream 2' }];
+export const valueStreams = [
+  { id: 1, name: 'Value stream 1' },
+  { id: 2, name: 'Value stream 2' },
+];
 
 export const groupLabels = getJSONFixture(fixtureEndpoints.groupLabels).map(
   convertObjectPropsToCamelCase,
@@ -184,7 +187,11 @@ export const transformedStagePathData = transformStagesForPathNavigation({
 
 export const tasksByTypeData = {
   seriesNames: ['Cool label', 'Normal label'],
-  data: [[0, 1, 2], [5, 2, 3], [2, 4, 1]],
+  data: [
+    [0, 1, 2],
+    [5, 2, 3],
+    [2, 4, 1],
+  ],
   groupBy: ['Group 1', 'Group 2', 'Group 3'],
 };
 
