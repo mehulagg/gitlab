@@ -66,8 +66,8 @@ This user needs permission to run Docker commands.
      --description "My Runner"
    ```
 
-1. Connect to the server where GitLab Runner is installed.
-1. Install Docker Engine. View a list of [supported platforms](https://docs.docker.com/engine/installation/).
+1. On the server where GitLab Runner is installed, install Docker Engine.
+   View a list of [supported platforms](https://docs.docker.com/engine/installation/).
 
 1. Add the `gitlab-runner` user to the `docker` group:
 
@@ -93,7 +93,7 @@ This user needs permission to run Docker commands.
        - docker run my-docker-image /script/to/run/tests
    ```
 
-You can now use `docker` command (and **install** `docker-compose` if needed).
+You can now use `docker` command (and install `docker-compose` if needed).
 
 When you add `gitlab-runner` to the `docker` group, you are effectively granting `gitlab-runner` full root permissions.
 Learn more about [security of the `docker` group](https://blog.zopyx.com/on-docker-security-docker-group-considered-harmful/).
@@ -863,13 +863,13 @@ After you've built a Docker image, you can push it up to the built-in
 ### `docker: Cannot connect to the Docker daemon at tcp://docker:2375. Is the docker daemon running?`
 
 This is a common error when you are using
-[Docker in Docker](#use-docker-in-docker-workflow-with-docker-executor)
+[Docker in Docker](#use-the-docker-executor-with-the-docker-image-docker-in-docker)
 v19.03 or higher.
 
 This occurs because Docker starts on TLS automatically, so you need to do some setup.
 If:
 
 - This is the first time setting it up, carefully read
-  [using Docker in Docker workflow](#use-docker-in-docker-workflow-with-docker-executor).
+  [using Docker in Docker workflow](#use-the-docker-executor-with-the-docker-image-docker-in-docker).
 - You are upgrading from v18.09 or earlier, read our
   [upgrade guide](https://about.gitlab.com/releases/2019/07/31/docker-in-docker-with-docker-19-dot-03/).
