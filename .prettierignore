@@ -11,22 +11,6 @@ doc/api/graphql/reference/gitlab_schema.graphql
 *.md
 
 # temporarly ignored in order to migrate to prettier@2 more efficiently and iteratively:
-spec/frontend/profile/account/components
-spec/frontend/projects
-spec/frontend/prometheus_metrics
-spec/frontend/ref/components
-spec/frontend/registry/explorer/components
-spec/frontend/registry/settings
-spec/frontend/related_merge_requests/components
-spec/frontend/releases/components
-spec/frontend/reports/codequality_report
-spec/frontend/reports/components
-spec/frontend/repository/components
-spec/frontend/self_monitor/components
-spec/frontend/serverless
-spec/frontend/sidebar
-spec/frontend/snippets/components
-spec/frontend/vue_mr_widget
 spec/frontend/vue_shared/components
 spec/frontend/vue_shared/directives
 spec/frontend_integration/ide/helpers
