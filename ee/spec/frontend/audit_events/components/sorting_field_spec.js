@@ -41,11 +41,7 @@ describe('SortingField component', () => {
 
       it('should set the sorting option accordingly', () => {
         expect(getCheckedOptions()).toHaveLength(1);
-        expect(
-          getCheckedOptions()
-            .at(0)
-            .text(),
-        ).toEqual('Oldest created');
+        expect(getCheckedOptions().at(0).text()).toEqual('Oldest created');
       });
     });
   });
@@ -53,10 +49,7 @@ describe('SortingField component', () => {
   describe('when the user clicks on a option', () => {
     beforeEach(() => {
       initComponent();
-      wrapper
-        .findAll(GlDropdownItem)
-        .at(1)
-        .vm.$emit('click');
+      wrapper.findAll(GlDropdownItem).at(1).vm.$emit('click');
     });
 
     it('should emit the "selected" event with clicked option', () => {

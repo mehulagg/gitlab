@@ -42,7 +42,7 @@ describe('ee/BoardContentSidebar', () => {
   beforeEach(() => {
     store = createStore();
     store.state.sidebarType = ISSUABLE;
-    store.state.issues = { '1': { title: 'One', referencePath: 'path', assignees: [] } };
+    store.state.issues = { 1: { title: 'One', referencePath: 'path', assignees: [] } };
     store.state.activeId = '1';
 
     createComponent();

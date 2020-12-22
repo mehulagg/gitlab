@@ -86,10 +86,7 @@ describe('subscription table row', () => {
     });
   };
 
-  const findUsageButton = () =>
-    findContentCells()
-      .at(0)
-      .find('[data-testid="seats-usage-button"]');
+  const findUsageButton = () => findContentCells().at(0).find('[data-testid="seats-usage-button"]');
 
   describe('dispatched actions', () => {
     it('dispatches action when created if namespace is group', () => {

@@ -816,7 +816,10 @@ describe('Epic Store Actions', () => {
 
   describe('receiveEpicLabelsSelectSuccess', () => {
     it('should set provided labels param to `state.labels`', done => {
-      const labels = [{ id: 1, set: false }, { id: 2, set: true }];
+      const labels = [
+        { id: 1, set: false },
+        { id: 2, set: true },
+      ];
 
       testAction(
         actions.receiveEpicLabelsSelectSuccess,
@@ -865,7 +868,10 @@ describe('Epic Store Actions', () => {
   });
 
   describe('updateEpicLabels', () => {
-    const labels = [{ id: 1, set: false }, { id: 2, set: true }];
+    const labels = [
+      { id: 1, set: false },
+      { id: 2, set: true },
+    ];
 
     it('dispatches `requestEpicLabelsSelect` and `receiveEpicLabelsSelectSuccess` actions when request succeeds', done => {
       jest.spyOn(epicUtils.gqClient, 'mutate').mockReturnValue(

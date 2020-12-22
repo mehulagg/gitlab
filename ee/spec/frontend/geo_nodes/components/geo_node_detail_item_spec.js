@@ -44,23 +44,13 @@ describe('GeoNodeDetailItemComponent', () => {
     it('renders container elements correctly', () => {
       expect(wrapper.find('.node-detail-item').exists()).toBeTruthy();
       expect(wrapper.findAll('.node-detail-title')).not.toHaveLength(0);
-      expect(
-        wrapper
-          .find('.node-detail-title')
-          .text()
-          .trim(),
-      ).toBe('GitLab version');
+      expect(wrapper.find('.node-detail-title').text().trim()).toBe('GitLab version');
     });
 
     describe('when plain text value', () => {
       it('renders plain item value', () => {
         expect(wrapper.findAll('.node-detail-value')).not.toHaveLength(0);
-        expect(
-          wrapper
-            .find('.node-detail-value')
-            .text()
-            .trim(),
-        ).toBe('10.4.0-pre');
+        expect(wrapper.find('.node-detail-value').text().trim()).toBe('10.4.0-pre');
       });
 
       it('does not render graph item', () => {
@@ -140,12 +130,9 @@ describe('GeoNodeDetailItemComponent', () => {
       });
 
       it('renders synchronization disabled text', () => {
-        expect(
-          wrapper
-            .find({ ref: 'disabledText' })
-            .text()
-            .trim(),
-        ).toBe('Synchronization disabled');
+        expect(wrapper.find({ ref: 'disabledText' }).text().trim()).toBe(
+          'Synchronization disabled',
+        );
       });
 
       it('renders GlPopover', () => {
