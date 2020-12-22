@@ -53,6 +53,28 @@ RSpec.describe DastSiteProfile, type: :model do
     end
   end
 
+  describe '#save!' do
+    context 'when there is no secret_key and no secret_key_iv' do
+      it 'populates these values' do
+        aggregate_failures do
+          expect(subject.secret_key).not_to be_nil
+          expect(subject.secret_key_iv).not_to be_nil
+        end
+      end
+    end
+
+    context 'when there is a secret_key and secret_key_iv' do
+      it 'populates these values' do
+        subject = create(:dast_site_profile, secret_key: 'secret_key', secret_key_iv: 'secret_key_iv')
+
+        aggregate_failures do
+          expect(subject.secret_key).to eq('secret_key')
+          expect(subject.secret_key_iv).to eq('secret_key_iv')
+        end
+      end
+    end
+  end
+
   describe '#destroy!' do
     context 'when the associated dast_site has no dast_site_profiles' do
       it 'is also destroyed' do
