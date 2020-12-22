@@ -19544,6 +19544,9 @@ msgstr ""
 msgid "OnDemandScans|Create a new site profile"
 msgstr ""
 
+msgid "OnDemandScans|Edit on-demand DAST scan"
+msgstr ""
+
 msgid "OnDemandScans|Manage profiles"
 msgstr ""
 

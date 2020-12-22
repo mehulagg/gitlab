@@ -210,6 +210,8 @@ RSpec.describe ProjectsHelper do
         projects/security/vulnerability_report#index
         projects/security/dashboard#index
         projects/on_demand_scans#index
+        projects/on_demand_scans#new
+        projects/on_demand_scans#edit
         projects/security/dast_profiles#show
         projects/security/dast_site_profiles#new
         projects/security/dast_site_profiles#edit
@@ -233,6 +235,8 @@ RSpec.describe ProjectsHelper do
     let(:expected_on_demand_scans_paths) do
       %w[
         projects/on_demand_scans#index
+        projects/on_demand_scans#new
+        projects/on_demand_scans#edit
       ]
     end
 
