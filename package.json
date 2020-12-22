@@ -44,7 +44,7 @@
     "@gitlab/at.js": "1.5.5",
     "@gitlab/svgs": "1.177.0",
     "@gitlab/tributejs": "1.0.0",
-    "@gitlab/ui": "24.11.1",
+    "@gitlab/ui": "https://gitlab.com/gitlab-org/gitlab-ui/-/jobs/928118833/artifacts/raw/gitlab-ui.form-select-padding-right.tgz",
     "@gitlab/visual-review-tools": "1.6.1",
     "@rails/actioncable": "^6.0.3-3",
     "@rails/ujs": "^6.0.3-2",

@@ -871,10 +871,9 @@
   resolved "https://registry.yarnpkg.com/@gitlab/tributejs/-/tributejs-1.0.0.tgz#672befa222aeffc83e7d799b0500a7a4418e59b8"
   integrity sha512-nmKw1+hB6MHvlmPz63yPwVs1qQkycHwsKgxpEbzmky16Y6mL4EJMk3w1b8QlOAF/AIAzjCERPhe/R4MJiohbZw==
 
-"@gitlab/ui@24.11.1":
+"@gitlab/ui@https://gitlab.com/gitlab-org/gitlab-ui/-/jobs/928118833/artifacts/raw/gitlab-ui.form-select-padding-right.tgz":
   version "24.11.1"
-  resolved "https://registry.yarnpkg.com/@gitlab/ui/-/ui-24.11.1.tgz#d37dbe598288a5f85c88f1f6c8ba728f752b7d6c"
-  integrity sha512-7kIAqFXIc6b1sRs5+MqCGA40pJz5+y7JkAik+FA6xyxmNsIQHoM7o1L+37JQthW5xWWD68Bve62GytTtwSqSsw==
+  resolved "https://gitlab.com/gitlab-org/gitlab-ui/-/jobs/928118833/artifacts/raw/gitlab-ui.form-select-padding-right.tgz#2e2ed85d481d58402fa42231a9c1528bcf7043e5"
   dependencies:
     "@babel/standalone" "^7.0.0"
     "@gitlab/vue-toasted" "^1.3.0"
