@@ -25,23 +25,13 @@ describe('Approval Check Popover', () => {
     });
 
     it('should render the documentation link', () => {
-      expect(
-        wrapper
-          .find(GlPopover)
-          .find(GlLink)
-          .attributes('href'),
-      ).toBe(documentationLink);
+      expect(wrapper.find(GlPopover).find(GlLink).attributes('href')).toBe(documentationLink);
     });
   });
 
   describe('without a documentation link', () => {
     it('should not render the documentation link', () => {
-      expect(
-        wrapper
-          .find(GlPopover)
-          .find(GlLink)
-          .exists(),
-      ).toBeFalsy();
+      expect(wrapper.find(GlPopover).find(GlLink).exists()).toBeFalsy();
     });
   });
 });

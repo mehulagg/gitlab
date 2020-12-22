@@ -89,11 +89,7 @@ describe('EE Approvals LicenseCompliance Modal', () => {
 
       createWrapper();
 
-      expect(
-        findModal()
-          .attributes('title')
-          .startsWith(expectTitleStartsWith),
-      ).toBe(true);
+      expect(findModal().attributes('title').startsWith(expectTitleStartsWith)).toBe(true);
     });
   });
 

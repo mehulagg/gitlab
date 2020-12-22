@@ -7,7 +7,10 @@ import BranchesSelect from 'ee/approvals/components/branches_select.vue';
 
 const TEST_DEFAULT_BRANCH = { name: 'Any branch' };
 const TEST_PROJECT_ID = '1';
-const TEST_PROTECTED_BRANCHES = [{ id: 1, name: 'master' }, { id: 2, name: 'development' }];
+const TEST_PROTECTED_BRANCHES = [
+  { id: 1, name: 'master' },
+  { id: 2, name: 'development' },
+];
 const TEST_BRANCHES_SELECTIONS = [TEST_DEFAULT_BRANCH, ...TEST_PROTECTED_BRANCHES];
 const waitForEvent = ($input, event) => new Promise(resolve => $input.one(event, resolve));
 const select2Container = () => document.querySelector('.select2-container');
