@@ -2,18 +2,18 @@ import { getFormattedIssue, getAddRelatedIssueRequestParams } from 'ee/vulnerabi
 
 describe('Vulnerabilities helpers', () => {
   describe('getFormattedIssue', () => {
-    it.each([{ iid: 135, web_url: 'some/url' }, { iid: undefined, web_url: undefined }])(
-      'returns formatted issue with expected properties for issue %s',
-      issue => {
-        const formattedIssue = getFormattedIssue(issue);
+    it.each([
+      { iid: 135, web_url: 'some/url' },
+      { iid: undefined, web_url: undefined },
+    ])('returns formatted issue with expected properties for issue %s', issue => {
+      const formattedIssue = getFormattedIssue(issue);
 
-        expect(formattedIssue).toMatchObject({
-          ...issue,
-          reference: `#${issue.iid}`,
-          path: issue.web_url,
-        });
-      },
-    );
+      expect(formattedIssue).toMatchObject({
+        ...issue,
+        reference: `#${issue.iid}`,
+        path: issue.web_url,
+      });
+    });
   });
 
   describe('getAddRelatedIssueRequestParams', () => {
