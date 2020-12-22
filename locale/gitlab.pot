@@ -4241,13 +4241,13 @@ msgstr ""
 msgid "Available ID"
 msgstr ""
 
-msgid "Available Runners: %{runners}"
-msgstr ""
-
 msgid "Available for dependency and container scanning"
 msgstr ""
 
 msgid "Available group runners: %{runners}"
+msgstr ""
+
+msgid "Available runners: %{runners}"
 msgstr ""
 
 msgid "Available shared runners:"
@@ -12986,9 +12986,6 @@ msgstr ""
 msgid "GitLab Gold trial (optional)"
 msgstr ""
 
-msgid "GitLab Group Runners can execute code for all the projects in this group."
-msgstr ""
-
 msgid "GitLab Import"
 msgstr ""
 
@@ -13430,9 +13427,6 @@ msgstr ""
 msgid "Group Owner must have signed in with SAML before enabling Group Managed Accounts"
 msgstr ""
 
-msgid "Group Runners"
-msgstr ""
-
 msgid "Group SAML must be enabled to test"
 msgstr ""
 
@@ -13521,6 +13515,9 @@ msgid "Group runners"
 msgstr ""
 
 msgid "Group runners can be managed with the %{link}."
+msgstr ""
+
+msgid "Group runners can execute code for all the projects in this group."
 msgstr ""
 
 msgid "Group runners can execute jobs for all projects in this group."
@@ -20209,7 +20206,7 @@ msgstr ""
 msgid "Pause replication"
 msgstr ""
 
-msgid "Paused Runners don't accept new jobs"
+msgid "Paused runners don't accept new jobs"
 msgstr ""
 
 msgid "Pending"
@@ -24037,16 +24034,10 @@ msgstr ""
 msgid "Runners"
 msgstr ""
 
-msgid "Runners API"
-msgstr ""
-
 msgid "Runners are either:"
 msgstr ""
 
 msgid "Runners are processes that pick up and execute jobs for GitLab."
-msgstr ""
-
-msgid "Runners are processes that pick up and execute jobs for GitLab. Here you can register and see your Runners for this project."
 msgstr ""
 
 msgid "Runners can be placed on separate users, servers, even on your local machine."
@@ -28230,7 +28221,7 @@ msgstr ""
 msgid "These variables are configured in the parent group settings, and will be active in the current project in addition to the project variables."
 msgstr ""
 
-msgid "They can be managed using the %{link}."
+msgid "They can be managed with the %{link}."
 msgstr ""
 
 msgid "Third Party Advisory Link"
@@ -29201,9 +29192,6 @@ msgid "To simplify the billing process, GitLab will collect user counts in order
 msgstr ""
 
 msgid "To specify the notification level per project of a group you belong to, you need to visit project page and change notification level there."
-msgstr ""
-
-msgid "To start serving your jobs you can add Runners to your group"
 msgstr ""
 
 msgid "To unsubscribe from this issue, please paste the following link into your browser:"
@@ -31822,7 +31810,7 @@ msgstr ""
 msgid "You can see your chat accounts."
 msgstr ""
 
-msgid "You can set up jobs to only use Runners with specific tags. Separate tags with commas."
+msgid "You can set up jobs to only use runners with specific tags. Separate tags with commas."
 msgstr ""
 
 msgid "You can specify notification level per group or per project."
