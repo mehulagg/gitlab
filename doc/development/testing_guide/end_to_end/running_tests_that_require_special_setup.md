@@ -410,7 +410,8 @@ Tests that are tagged with `:ldap_tls` and `:ldap_no_tls` meta are orchestrated 
 These tests spin up a docker container [(osixia/openldap)](https://hub.docker.com/r/osixia/openldap) running an instance of [OpenLDAP](https://www.openldap.org/).
 The container uses fixtures [checked into the gitlab-qa repo](https://gitlab.com/gitlab-org/gitlab-qa/-/tree/9ffb9ad3be847a9054967d792d6772a74220fb42/fixtures/ldap) to create
 some base data such as users and groups including the admin group. Password for [all users](https://gitlab.com/gitlab-org/gitlab-qa/-/blob/9ffb9ad3be847a9054967d792d6772a74220fb42/fixtures/ldap/2_add_users.ldif) including [the `tanuki` user](https://gitlab.com/gitlab-org/gitlab-qa/-/blob/9ffb9ad3be847a9054967d792d6772a74220fb42/fixtures/ldap/tanuki.ldif) is `password`.
-A GitLab instance is also created in a docker container with LDAP enabled.
+
+A GitLab instance is also created in a docker container with [LDAP setup](https://docs.gitlab.com/ee/administration/auth/ldap/index.html#general-ldap-setup).
 
 Tests that are tagged `:ldap_tls` enable TLS on GitLab using the certificate [checked into the gitlab-qa repo](https://gitlab.com/gitlab-org/gitlab-qa/-/tree/9ffb9ad3be847a9054967d792d6772a74220fb42/tls_certificates/gitlab).
 
