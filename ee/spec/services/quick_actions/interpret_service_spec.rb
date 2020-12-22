@@ -989,6 +989,18 @@ RSpec.describe QuickActions::InterpretService do
         let(:issuable) { build(:merge_request, source_project: project) }
       end
     end
+
+    context 'confidential command' do
+      context 'for test cases' do
+        it 'does not mark to update confidential attribute' do
+          issuable = create(:quality_test_case, project: project)
+
+          _, updates, _ = service.execute('/confidential', issuable)
+
+          expect(updates[:confidential]).to eq(nil)
+        end
+      end
+    end
   end
 
   describe '#explain' do

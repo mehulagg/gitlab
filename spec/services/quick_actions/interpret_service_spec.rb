@@ -1122,6 +1122,11 @@ RSpec.describe QuickActions::InterpretService do
       let(:issuable) { issue }
     end
 
+    it_behaves_like 'confidential command' do
+      let(:content) { '/confidential' }
+      let(:issuable) { create(:incident, project: project) }
+    end
+
     it_behaves_like 'lock command' do
       let(:content) { '/lock' }
       let(:issuable) { issue }
