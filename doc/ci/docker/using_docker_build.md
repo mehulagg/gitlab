@@ -26,7 +26,7 @@ docker tag my-image my-registry:5000/my-image
 docker push my-registry:5000/my-image
 ```
 
-To run Docker commands in a `.gitlab-ci.yml` file, you must configure
+To run Docker commands in your CI/CD jobs, you must configure
 GitLab Runner to enable `docker` support.
 
 ## Enable Docker commands in your CI/CD jobs
@@ -51,7 +51,7 @@ One way to configure GitLab Runner for `docker` support is to use the
 `shell` executor.
 
 After you register a runner and select the `shell` executor,
-the scripts in your jobs are executed as the `gitlab-runner` user.
+your job scripts are executed as the `gitlab-runner` user.
 This user needs permission to run Docker commands.
 
 1. [Install](https://gitlab.com/gitlab-org/gitlab-runner/#installation) GitLab Runner.
