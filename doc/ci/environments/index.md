@@ -572,15 +572,15 @@ This example shows:
   branch, and the Git SHA of the commit.
 - The exact time the last deployment was performed.
 - The upcoming deployment, if a deployment for the environment is in progress.
-- When the environment will auto stop.
+- When the environment stops automatically.
 - A button that takes you to the URL that you defined under the `environment` keyword
   in `.gitlab-ci.yml`.
 - A number of deployment actions, including:
-  - Prevent the environment from [auto-stopping](#automatically-stopping-an-environment)
-  - [Open the live environment](#using-the-environment-url)
-  - Trigger [a manual deployment to a different environment](#configuring-manual-deployments)
-  - [Retry the deployment](#retrying-and-rolling-back)
-  - [Stop the environment](#stopping-an-environment)
+  - Prevent the environment from [stopping automatically](#automatically-stopping-an-environment).
+  - [Open the live environment](#using-the-environment-url).
+  - Trigger [a manual deployment to a different environment](#configuring-manual-deployments).
+  - [Retry the deployment](#retrying-and-rolling-back).
+  - [Stop the environment](#stopping-an-environment).
 
 The information shown in the **Environments** page is limited to the latest
 deployments, but an environment can have multiple deployments.
