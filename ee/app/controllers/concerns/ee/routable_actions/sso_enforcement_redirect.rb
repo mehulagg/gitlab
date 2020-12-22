@@ -23,12 +23,20 @@ module EE
         sso_group_saml_providers_url(root_group, url_params)
       end
 
+      def sso_authorize_path
+        omniauth_authorize_path(:user, :group_saml, group_path: routable.path, redirect: redirector.redirect_path)
+      end
+
       module ControllerActions
         def self.on_routable_not_found
           lambda do |routable|
             redirector = SsoEnforcementRedirect.new(routable)
+            should_redirect = redirector.should_redirect_to_group_saml_sso?(current_user, request)
+            user_has_sso_identity = current_user.group_sso?(routable)
 
-            if redirector.should_redirect_to_group_saml_sso?(current_user, request)
+            if should_redirect && user_has_sso_identity
+              redirect_to redirector.sso_authorize_path
+            elsif should_redirect
               redirect_to redirector.sso_redirect_url
             end
           end
@@ -63,8 +71,12 @@ module EE
       def url_params
         {
           token: root_group.saml_discovery_token,
-          redirect: "/#{routable.full_path}"
+          redirect: redirect_path
         }
+      end
+
+      def redirect_path
+        "/#{routable.full_path}"
       end
     end
   end
