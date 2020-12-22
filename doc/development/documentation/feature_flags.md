@@ -37,7 +37,8 @@ therefore, it indicates that it cannot be done by regular users of GitLab.com.
 
 ### Features disabled by default
 
-For features disabled by default, add or improve the docs with every change in line with the [definition of done](https://docs.gitlab.com/ee/development/contributing/merge_request_workflow.html#definition-of-done).
+For features disabled by default, add or improve the docs with every change in line with the
+[definition of done](../contributing/merge_request_workflow.md#definition-of-done).
 
 Include details of the feature flag in the documentation:
 
