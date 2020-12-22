@@ -23120,9 +23120,6 @@ msgstr ""
 msgid "Remove %{displayReference}"
 msgstr ""
 
-msgid "Remove Runner"
-msgstr ""
-
 msgid "Remove Zoom meeting"
 msgstr ""
 
@@ -23208,6 +23205,9 @@ msgid "Remove priority"
 msgstr ""
 
 msgid "Remove report"
+msgstr ""
+
+msgid "Remove runner"
 msgstr ""
 
 msgid "Remove secondary node"
