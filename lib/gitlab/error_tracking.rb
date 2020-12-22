@@ -113,6 +113,7 @@ module Gitlab
       def before_send(event, hint)
         event = add_context_from_exception_type(event, hint)
         event = custom_fingerprinting(event, hint)
+        event = inject_sql_query_into_extra(event, hint)
 
         event
       end
@@ -123,7 +124,6 @@ module Gitlab
         end
 
         extra = sanitize_request_parameters(extra)
-        inject_sql_query_into_extra(exception, extra)
 
         if sentry && Raven.configuration.server
           Raven.capture_exception(exception, tags: default_tags, extra: extra)
@@ -148,12 +148,6 @@ module Gitlab
       def sanitize_request_parameters(parameters)
         filter = ActiveSupport::ParameterFilter.new(::Rails.application.config.filter_parameters)
         filter.filter(parameters)
-      end
-
-      def inject_sql_query_into_extra(exception, extra)
-        return unless exception.is_a?(ActiveRecord::StatementInvalid)
-
-        extra[:sql] = PgQuery.normalize(exception.sql.to_s)
       end
 
       def sentry_dsn
@@ -206,6 +200,23 @@ module Gitlab
         return event unless CUSTOM_FINGERPRINTING.include?(ex.class.name)
 
         event.fingerprint = [ex.class.name, ex.message]
+
+        event
+      end
+
+      def inject_sql_query_into_extra(event, hint)
+        ex = hint[:exception]
+
+        loop do
+          if ex.is_a?(ActiveRecord::StatementInvalid)
+            event.extra.merge!(sql: PgQuery.normalize(ex.sql.to_s))
+            break
+          end
+
+          break if ex.cause.nil?
+
+          ex = ex.cause
+        end
 
         event
       end
