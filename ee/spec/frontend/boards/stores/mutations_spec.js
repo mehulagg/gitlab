@@ -98,8 +98,8 @@ describe('RECEIVE_ISSUES_FOR_EPIC_SUCCESS', () => {
       'gid://gitlab/List/2': [mockIssue2.id],
     };
     const issues = {
-      '436': mockIssue,
-      '437': mockIssue2,
+      436: mockIssue,
+      437: mockIssue2,
     };
 
     mutations.RECEIVE_ISSUES_FOR_EPIC_SUCCESS(state, {
@@ -265,8 +265,8 @@ describe('MOVE_ISSUE', () => {
     };
 
     const issues = {
-      '436': mockIssue,
-      '437': mockIssue2,
+      436: mockIssue,
+      437: mockIssue2,
     };
 
     state = {

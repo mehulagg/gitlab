@@ -69,9 +69,7 @@ describe('GeoReplicableFilterBar', () => {
 
       it('clicking a dropdown item calls setFilter with its index', () => {
         const index = 1;
-        findGlDropdownItems()
-          .at(index)
-          .vm.$emit('click');
+        findGlDropdownItems().at(index).vm.$emit('click');
 
         expect(actionSpies.setFilter).toHaveBeenCalledWith(expect.any(Object), index);
       });

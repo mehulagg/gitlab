@@ -11,17 +11,6 @@ doc/api/graphql/reference/gitlab_schema.graphql
 *.md
 
 # temporarly ignored in order to migrate to prettier@2 more efficiently and iteratively:
-ee/spec/frontend/approvals/components
-ee/spec/frontend/audit_events/components
-ee/spec/frontend/billings/subscriptions/components
-ee/spec/frontend/boards/components
-ee/spec/frontend/boards/stores
-ee/spec/frontend/burndown_chart
-ee/spec/frontend/compliance_dashboard/components/merge_requests
-ee/spec/frontend/dependencies/components
-ee/spec/frontend/epic/store
-ee/spec/frontend/geo_nodes/components
-ee/spec/frontend/geo_replicable/components
 ee/spec/frontend/groups/components
 ee/spec/frontend/groups/settings/
 ee/spec/frontend/incidents/components

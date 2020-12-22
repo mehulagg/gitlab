@@ -204,9 +204,7 @@ describe('DependenciesTable component', () => {
       });
 
       it('can be displayed by clicking on the vulnerabilities badge', () => {
-        const badge = findTableRows()
-          .at(rowIndexWithVulnerabilities)
-          .find(GlBadge);
+        const badge = findTableRows().at(rowIndexWithVulnerabilities).find(GlBadge);
         badge.trigger('click');
 
         return nextTick().then(() => {

@@ -47,11 +47,7 @@ describe('MergeRequest component', () => {
     });
 
     it('renders the author avatar', () => {
-      expect(
-        findAuthorAvatarLink()
-          .find(GlAvatar)
-          .exists(),
-      ).toEqual(true);
+      expect(findAuthorAvatarLink().find(GlAvatar).exists()).toEqual(true);
     });
 
     it('renders the author name', () => {

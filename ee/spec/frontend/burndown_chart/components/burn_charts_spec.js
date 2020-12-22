@@ -80,11 +80,7 @@ describe('burndown_chart', () => {
     createComponent();
 
     expect(findActiveButtons()).toHaveLength(1);
-    expect(
-      findActiveButtons()
-        .at(0)
-        .text(),
-    ).toBe('Issues');
+    expect(findActiveButtons().at(0).text()).toBe('Issues');
     expect(findBurndownChart().props('issuesSelected')).toBe(true);
   });
 
@@ -96,11 +92,7 @@ describe('burndown_chart', () => {
     await wrapper.vm.$nextTick();
 
     expect(findActiveButtons()).toHaveLength(1);
-    expect(
-      findActiveButtons()
-        .at(0)
-        .text(),
-    ).toBe('Issue weight');
+    expect(findActiveButtons().at(0).text()).toBe('Issue weight');
     expect(findBurndownChart().props('issuesSelected')).toBe(false);
   });
 

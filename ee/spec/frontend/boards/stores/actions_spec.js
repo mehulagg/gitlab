@@ -310,10 +310,11 @@ describe('updateListWipLimit', () => {
     return actions
       .updateListWipLimit({ state: { activeId }, getters }, { maxIssueCount, listId: activeId })
       .then(() => {
-        expect(axios.put).toHaveBeenCalledWith(
-          `${boardsStoreEE.store.state.endpoints.listsEndpoint}/${activeId}`,
-          { list: { max_issue_count: maxIssueCount } },
-        );
+        expect(
+          axios.put,
+        ).toHaveBeenCalledWith(`${boardsStoreEE.store.state.endpoints.listsEndpoint}/${activeId}`, {
+          list: { max_issue_count: maxIssueCount },
+        });
       });
   });
 
@@ -620,8 +621,8 @@ describe('moveIssue', () => {
   };
 
   const issues = {
-    '436': mockIssue,
-    '437': mockIssue2,
+    436: mockIssue,
+    437: mockIssue2,
   };
 
   const state = {
