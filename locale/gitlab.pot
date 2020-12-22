@@ -21823,7 +21823,7 @@ msgstr ""
 msgid "ProjectSettings|Customize your project badges."
 msgstr ""
 
-msgid "ProjectSettings|Determine what happens to the commit history when you merge a merge request"
+msgid "ProjectSettings|Determine what happens to the commit history when you merge a merge request."
 msgstr ""
 
 msgid "ProjectSettings|Disable email notifications"

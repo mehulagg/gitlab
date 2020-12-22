@@ -2,7 +2,7 @@
 
 .form-group
   %b= s_('ProjectSettings|Merge method')
-  %p.text-secondary= s_('ProjectSettings|Determine what happens to the commit history when you merge a merge request')
+  %p.text-secondary= s_('ProjectSettings|Determine what happens to the commit history when you merge a merge request.')
   .form-check.mb-2
     = form.radio_button :merge_method, :merge, class: "js-merge-method-radio form-check-input"
     = label_tag :project_merge_method_merge, class: 'form-check-label' do
