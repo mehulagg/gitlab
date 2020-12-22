@@ -14,7 +14,9 @@ module Ci
       feature_category :continuous_integration
 
       def perform
-        ::Ci::Pipelines::DestroyExpiredArtifactsService.new.execute
+        if ::Feature.enabled?(:ci_split_pipeline_artifacts_removal)
+          ::Ci::Pipelines::DestroyExpiredArtifactsService.new.execute
+        end
       end
     end
   end
