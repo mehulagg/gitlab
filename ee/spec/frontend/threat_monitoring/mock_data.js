@@ -66,14 +66,23 @@ export const mockNetworkPolicyStatisticsResponse = {
     drops: 84,
   },
   ops_rate: {
-    total: [[1575417600, 56], [1575504000, 2647]],
-    drops: [[1575417600, 1], [1575504000, 83]],
+    total: [
+      [1575417600, 56],
+      [1575504000, 2647],
+    ],
+    drops: [
+      [1575417600, 1],
+      [1575504000, 83],
+    ],
   },
 };
 
 export const formattedMockNetworkPolicyStatisticsResponse = {
   opsRate: {
-    drops: [[new Date('2019-12-04T00:00:00.000Z'), 1], [new Date('2019-12-05T00:00:00.000Z'), 83]],
+    drops: [
+      [new Date('2019-12-04T00:00:00.000Z'), 1],
+      [new Date('2019-12-05T00:00:00.000Z'), 83],
+    ],
     total: [
       [new Date('2019-12-04T00:00:00.000Z'), 56],
       [new Date('2019-12-05T00:00:00.000Z'), 2647],

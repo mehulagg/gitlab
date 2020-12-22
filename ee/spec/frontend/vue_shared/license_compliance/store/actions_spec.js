@@ -370,9 +370,7 @@ describe('License store actions', () => {
     });
 
     it('does not dispatch setLicenseApproval for approved licenses', done => {
-      testAction(actions.allowLicense, approvedLicense, state, [], [])
-        .then(done)
-        .catch(done.fail);
+      testAction(actions.allowLicense, approvedLicense, state, [], []).then(done).catch(done.fail);
     });
   });
 

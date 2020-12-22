@@ -45,9 +45,7 @@ describe('Usage Statistics component', () => {
 
     it('renders text in total usage card footer', () => {
       expect(
-        getStatisticsCard('totalUsage')
-          .find('[data-testid="statisticsCardFooter"]')
-          .text(),
+        getStatisticsCard('totalUsage').find('[data-testid="statisticsCardFooter"]').text(),
       ).toMatchInterpolatedText(
         'This is the total amount of storage used across your projects within this namespace.',
       );
@@ -55,20 +53,14 @@ describe('Usage Statistics component', () => {
 
     it('renders text in excess usage card footer', () => {
       expect(
-        getStatisticsCard('excessUsage')
-          .find('[data-testid="statisticsCardFooter"]')
-          .text(),
+        getStatisticsCard('excessUsage').find('[data-testid="statisticsCardFooter"]').text(),
       ).toMatchInterpolatedText(
         'This is the total amount of storage used by projects above the free 978.8KiB storage limit.',
       );
     });
 
     it('renders button in purchased usage card footer', () => {
-      expect(
-        getStatisticsCard('purchasedUsage')
-          .find(GlButton)
-          .exists(),
-      ).toBe(true);
+      expect(getStatisticsCard('purchasedUsage').find(GlButton).exists()).toBe(true);
     });
   });
 

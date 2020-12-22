@@ -63,9 +63,7 @@ describe('Selection Summary component', () => {
         expect(wrapper.vm.dismissalReason).toBe(null);
         expect(wrapper.findAll('option')).toHaveLength(4);
 
-        const option = formSelect()
-          .findAll('option')
-          .at(1);
+        const option = formSelect().findAll('option').at(1);
         option.setSelected();
         formSelect().trigger('change');
 

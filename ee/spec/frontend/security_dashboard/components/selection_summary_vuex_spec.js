@@ -90,9 +90,7 @@ describe('Selection Summary', () => {
 
       selectByIndex(0);
 
-      const option = formSelect()
-        .findAll('option')
-        .at(1);
+      const option = formSelect().findAll('option').at(1);
       option.setSelected();
       formSelect().trigger('change');
 
@@ -108,9 +106,7 @@ describe('Selection Summary', () => {
       selectByIndex(0);
       selectByIndex(1);
 
-      const option = formSelect()
-        .findAll('option')
-        .at(1);
+      const option = formSelect().findAll('option').at(1);
       option.setSelected();
       formSelect().trigger('change');
 

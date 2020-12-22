@@ -37,9 +37,7 @@ describe('PolicyRuleBuilder component', () => {
 
   function selectFirstOption(sel) {
     const el = wrapper.find(sel);
-    el.findAll('option')
-      .at(1)
-      .setSelected();
+    el.findAll('option').at(1).setSelected();
     el.trigger('change');
   }
 

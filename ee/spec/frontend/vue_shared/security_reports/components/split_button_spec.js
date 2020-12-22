@@ -77,10 +77,6 @@ describe('Split Button', () => {
       buttons: buttons.slice(0),
     });
 
-    expect(
-      findDropdownItems()
-        .at(0)
-        .props('isChecked'),
-    ).toBe(true);
+    expect(findDropdownItems().at(0).props('isChecked')).toBe(true);
   });
 });

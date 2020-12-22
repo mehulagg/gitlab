@@ -92,24 +92,9 @@ describe('EpicsSelect', () => {
 
         expect(epicsEl).toHaveLength(epics.length + 2); // includes divider & No Epic` <li>.
         expect(epicsEl.at(1).classes()).toContain('divider');
-        expect(
-          epicsEl
-            .at(2)
-            .find(GlLink)
-            .text(),
-        ).toBe(epics[0].title);
-        expect(
-          epicsEl
-            .at(3)
-            .find(GlLink)
-            .text(),
-        ).toBe(epics[1].title);
-        expect(
-          epicsEl
-            .at(2)
-            .find(GlLink)
-            .classes(),
-        ).toContain('is-active');
+        expect(epicsEl.at(2).find(GlLink).text()).toBe(epics[0].title);
+        expect(epicsEl.at(3).find(GlLink).text()).toBe(epics[1].title);
+        expect(epicsEl.at(2).find(GlLink).classes()).toContain('is-active');
       });
 
       it('should render string "No matches found" when `epics` array is empty', () => {

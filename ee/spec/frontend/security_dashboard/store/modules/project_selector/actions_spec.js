@@ -86,7 +86,10 @@ describe('EE projectSelector actions', () => {
     it(`posts the selected project's ids to the add-endpoint`, () => {
       const projectIds = ['1', '2'];
 
-      state.selectedProjects = [{ id: projectIds[0], name: '1' }, { id: projectIds[1], name: '2' }];
+      state.selectedProjects = [
+        { id: projectIds[0], name: '1' },
+        { id: projectIds[1], name: '2' },
+      ];
       state.projectEndpoints.add = mockAddEndpoint;
 
       mockAxios.onPost(mockAddEndpoint).replyOnce(200, mockResponse);

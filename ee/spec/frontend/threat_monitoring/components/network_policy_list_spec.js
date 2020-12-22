@@ -129,9 +129,7 @@ spec:
     });
 
     it('renders policies table', () => {
-      const namespaceHeader = findPoliciesTable()
-        .findAll('[role="columnheader"]')
-        .at(1);
+      const namespaceHeader = findPoliciesTable().findAll('[role="columnheader"]').at(1);
       expect(namespaceHeader.text()).toBe('Namespace');
     });
   });
@@ -143,9 +141,7 @@ spec:
   });
 
   it('renders opened editor drawer on row selection', () => {
-    findPoliciesTable()
-      .find('td')
-      .trigger('click');
+    findPoliciesTable().find('td').trigger('click');
 
     return wrapper.vm.$nextTick().then(() => {
       const editorDrawer = findEditorDrawer();
