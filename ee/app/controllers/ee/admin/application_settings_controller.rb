@@ -81,6 +81,15 @@ module EE
       def valid_setting_panels
         super + EE_VALID_SETTING_PANELS
       end
+
+      override :application_setting_params
+      def application_setting_params
+        if params[:application_setting] && params[:application_setting][:maintenance_mode] == false
+          params[:application_setting][:maintenance_mode_message] = nil
+        end
+
+        super
+      end
     end
   end
 end

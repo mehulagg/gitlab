@@ -270,6 +270,51 @@ RSpec.describe Admin::ApplicationSettingsController do
       expect(response).to redirect_to(general_admin_application_settings_path)
       expect(ApplicationSetting.current.enforce_pat_expiration).to be_falsey
     end
+
+    context 'maintenance mode settings' do
+      let(:message) { 'Maintenance mode is on.' }
+
+      before do
+        stub_feature_flags(maintenance_mode: true)
+        stub_licensed_features(geo: true)
+      end
+
+      it "updates maintenance_mode setting" do
+        put :update, params: { application_setting: { maintenance_mode: true } }
+
+        expect(response).to redirect_to(general_admin_application_settings_path)
+        expect(ApplicationSetting.current.maintenance_mode).to be_truthy
+      end
+
+      it "updates maintenance_mode_message setting" do
+        put :update, params: { application_setting: { maintenance_mode_message: message } }
+
+        expect(response).to redirect_to(general_admin_application_settings_path)
+        expect(ApplicationSetting.current.maintenance_mode_message).to eq(message)
+      end
+
+      context 'when update disables maintenance mode' do
+        it 'removes maintenance_mode_message setting' do
+          put :update, params: { application_setting: { maintenance_mode: false } }
+
+          expect(response).to redirect_to(general_admin_application_settings_path)
+          expect(ApplicationSetting.current.maintenance_mode).to be_falsy
+          expect(ApplicationSetting.current.maintenance_mode_message).to be_nil
+        end
+      end
+
+      context 'when update does not disable maintenance mode' do
+        it 'does not remove maintenance_mode_message' do
+          ApplicationSetting.current.update!(maintenance_mode: true)
+          ApplicationSetting.current.update!(maintenance_mode_message: message)
+
+          put :update, params: { application_setting: {} }
+
+          expect(response).to redirect_to(general_admin_application_settings_path)
+          expect(ApplicationSetting.current.maintenance_mode_message).to eq(message)
+        end
+      end
+    end
   end
 
   describe 'GET #seat_link_payload' do
