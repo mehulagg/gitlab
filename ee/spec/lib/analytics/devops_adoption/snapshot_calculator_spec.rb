@@ -134,4 +134,20 @@ RSpec.describe Analytics::DevopsAdoption::SnapshotCalculator do
 
     it { is_expected.to eq false }
   end
+
+  context 'when snapshot already exists' do
+    let_it_be(:snapshot) { create :devops_adoption_snapshot, segment: segment, issue_opened: true, merge_request_opened: false }
+
+    subject(:data) { described_class.new(segment: segment, range_end: range_end, snapshot: snapshot).calculate }
+
+    let!(:fresh_merge_request) { create(:merge_request, source_project: project2, created_at: 3.weeks.ago(range_end)) }
+
+    it 'calculates metrics which are not true yet' do
+      expect(data[:merge_request_opened]).to eq true
+    end
+
+    it "doesn't change metrics which are true already" do
+      expect(data[:issue_opened]).to eq true
+    end
+  end
 end

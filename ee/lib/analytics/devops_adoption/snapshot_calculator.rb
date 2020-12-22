@@ -3,21 +3,22 @@
 module Analytics
   module DevopsAdoption
     class SnapshotCalculator
-      attr_reader :segment, :range_end, :range_start
+      attr_reader :segment, :range_end, :range_start, :snapshot
 
       ADOPTION_FLAGS = %i[issue_opened merge_request_opened merge_request_approved runner_configured pipeline_succeeded deploy_succeeded security_scan_succeeded].freeze
 
-      def initialize(segment:, range_end:)
+      def initialize(segment:, range_end:, snapshot: nil)
         @segment = segment
         @range_end = range_end
         @range_start = Snapshot.new(end_time: range_end).start_time
+        @snapshot = snapshot
       end
 
       def calculate
         params = { recorded_at: Time.zone.now, end_time: range_end, segment: segment }
 
         ADOPTION_FLAGS.each do |flag|
-          params[flag] = send(flag) # rubocop:disable GitlabSecurity/PublicSend
+          params[flag] = snapshot&.public_send(flag) || send(flag) # rubocop:disable GitlabSecurity/PublicSend
         end
 
         params
