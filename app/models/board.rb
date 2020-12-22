@@ -7,8 +7,11 @@ class Board < ApplicationRecord
   has_many :lists, -> { ordered }, dependent: :delete_all # rubocop:disable Cop/ActiveRecordDependent
   has_many :destroyable_lists, -> { destroyable.ordered }, class_name: "List"
 
+  enum board_type: { issue: 0, epic: 1 }
+
   validates :project, presence: true, if: :project_needed?
-  validates :group, presence: true, unless: :project
+  validates :group, presence: true, if: :group_needed?
+  # TODO - check that exactly one of project and group is set
 
   scope :with_associations, -> { preload(:destroyable_lists) }
 
@@ -19,6 +22,10 @@ class Board < ApplicationRecord
 
   def project_needed?
     !group
+  end
+
+  def group_needed?
+    !project
   end
 
   def resource_parent

@@ -29,6 +29,10 @@ module EE
       scope :with_associations, -> { preload(:destroyable_lists, :labels, :assignee) }
     end
 
+    def group_needed?
+      epic? || super
+    end
+
     override :scoped?
     def scoped?
       return super unless resource_parent.feature_available?(:scoped_issue_board)

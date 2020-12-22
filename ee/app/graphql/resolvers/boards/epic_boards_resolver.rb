@@ -21,7 +21,7 @@ module Resolvers
 
         authorize!
 
-        ::Boards::EpicBoardsFinder.new(group, id: id&.model_id).execute
+        ::Boards::ListService.new(parent, context[:current_user], board_type: :epic, board_id: id&.model_id).execute(create_default_board: false).first
       end
 
       private

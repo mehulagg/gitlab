@@ -11,11 +11,12 @@ module Boards
     private
 
     def boards
-      parent.boards.order_by_name_asc
-    end
-
-    def first_board
-      parent.boards.first_board
+      if params[:board_type] == :epic
+        # TODO: move to EE
+        parent.epic_boards
+      else
+        parent.boards
+      end
     end
 
     def create_board!
@@ -25,11 +26,11 @@ module Boards
     def find_boards
       found =
         if parent.multiple_issue_boards_available?
-          boards
+          boards.order_by_name_asc
         else
           # When multiple issue boards are not available
           # a user is only allowed to view the default shown board
-          first_board
+          boards.first_board
         end
 
       params[:board_id].present? ? [found.find(params[:board_id])] : found

@@ -9853,7 +9853,8 @@ CREATE TABLE boards (
     weight integer,
     hide_backlog_list boolean DEFAULT false NOT NULL,
     hide_closed_list boolean DEFAULT false NOT NULL,
-    iteration_id bigint
+    iteration_id bigint,
+    board_type smallint DEFAULT 0 NOT NULL
 );
 
 CREATE TABLE boards_epic_board_labels (
@@ -20877,6 +20878,8 @@ CREATE UNIQUE INDEX index_boards_epic_user_preferences_on_board_user_epic_unique
 CREATE INDEX index_boards_epic_user_preferences_on_epic_id ON boards_epic_user_preferences USING btree (epic_id);
 
 CREATE INDEX index_boards_epic_user_preferences_on_user_id ON boards_epic_user_preferences USING btree (user_id);
+
+CREATE INDEX index_boards_on_board_type ON boards USING btree (board_type);
 
 CREATE INDEX index_boards_on_group_id ON boards USING btree (group_id);
 

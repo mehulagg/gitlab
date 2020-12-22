@@ -50,7 +50,7 @@ class Group < Namespace
   has_many :variables, class_name: 'Ci::GroupVariable'
   has_many :custom_attributes, class_name: 'GroupCustomAttribute'
 
-  has_many :boards
+  has_many :boards, -> { where(board_type: :issue) }
   has_many :badges, class_name: 'GroupBadge'
 
   has_many :cluster_groups, class_name: 'Clusters::Group'

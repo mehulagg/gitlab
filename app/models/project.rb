@@ -143,7 +143,7 @@ class Project < ApplicationRecord
   alias_attribute :parent_id, :namespace_id
 
   has_one :last_event, -> {order 'events.created_at DESC'}, class_name: 'Event'
-  has_many :boards
+  has_many :boards, -> { where(board_type: :issue) }
 
   # Project services
   has_one :alerts_service

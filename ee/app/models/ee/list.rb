@@ -44,6 +44,10 @@ module EE
         exclusion: { in: %w[iteration], message: -> (_object, _data) { _('Iteration lists not available with your current license') } },
         unless: -> { board&.resource_parent&.feature_available?(:iterations) }
 
+      base.validates :list_type,
+        inclusion: { in: %w[backlog label closed], message: -> (_object, _data) { _('List type %s not supported on epic board', list_type) } },
+        if: -> { board&.epic? }
+
       base.scope :without_types, ->(list_types) { where.not(list_type: list_types) }
     end
 
