@@ -35,6 +35,7 @@ export const siteProfiles = [
       usernameField: 'username',
       passwordField: 'password',
       username: 'admin',
+      password: 'password',
     },
     excludedUrls: 'https://foo.com/logout,https://foo.com/send_mail',
     requestHeaders: 'log-identifier: dast-active-scan',

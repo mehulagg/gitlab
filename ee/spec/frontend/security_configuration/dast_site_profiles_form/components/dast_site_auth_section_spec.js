@@ -6,11 +6,11 @@ import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 describe('DastSiteAuthSection', () => {
   let wrapper;
 
-  const createComponent = ({ fields } = {}) => {
+  const createComponent = ({ fields = {} } = {}) => {
     wrapper = extendedWrapper(
       mount(DastSiteAuthSection, {
         propsData: {
-          fields,
+          value: { fields },
         },
       }),
     );
@@ -40,9 +40,9 @@ describe('DastSiteAuthSection', () => {
 
   describe('authentication toggle', () => {
     it.each([true, false])(
-      'is set correctly when the "authEnabled" field is set to "%s"',
+      'is set correctly when the "enabled" field is set to "%s"',
       (authEnabled) => {
-        createComponent({ fields: { authEnabled } });
+        createComponent({ fields: { enabled: authEnabled } });
         expect(findAuthCheckbox().vm.$attrs.checked).toBe(authEnabled);
       },
     );
@@ -57,7 +57,7 @@ describe('DastSiteAuthSection', () => {
       'makes the component emit an "input" event when changed',
       async (enabled) => {
         await setAuthentication({ enabled });
-        expect(getLatestInputEventPayload().fields.authEnabled.value).toBe(enabled);
+        expect(getLatestInputEventPayload().fields.enabled.value).toBe(enabled);
       },
     );
   });
@@ -68,11 +68,11 @@ describe('DastSiteAuthSection', () => {
     });
 
     const inputFieldsWithValues = {
-      authenticationUrl: 'http://www.gitlab.com',
-      userName: 'foo',
+      url: 'http://www.gitlab.com',
+      username: 'foo',
       password: 'foo',
-      userNameFormField: 'foo',
-      passwordFormField: 'foo',
+      usernameField: 'foo',
+      passwordField: 'foo',
     };
 
     const inputFieldNames = Object.keys(inputFieldsWithValues);

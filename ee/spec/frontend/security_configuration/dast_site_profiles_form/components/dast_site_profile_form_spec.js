@@ -46,13 +46,16 @@ describe('DastSiteProfileForm', () => {
 
   const findForm = () => wrapper.find(GlForm);
   const findByTestId = (testId) => wrapper.find(`[data-testid="${testId}"]`);
+  const findByNameAttribute = (name) => wrapper.find(`[name="${name}"]`);
+
   const findProfileNameInput = () => findByTestId('profile-name-input');
   const findTargetUrlInput = () => findByTestId('target-url-input');
-  const findAuthSection = () => wrapper.find(DastSiteAuthSection);
   const findExcludedUrlsInput = () => findByTestId('excluded-urls-input');
   const findRequestHeadersInput = () => findByTestId('request-headers-input');
+  const findAuthCheckbox = () => findByTestId('auth-enable-checkbox');
   const findSubmitButton = () => findByTestId('dast-site-profile-form-submit-button');
   const findCancelButton = () => findByTestId('dast-site-profile-form-cancel-button');
+  const findAuthSection = () => wrapper.find(DastSiteAuthSection);
   const findCancelModal = () => wrapper.find(GlModal);
   const submitForm = () => findForm().vm.$emit('submit', { preventDefault: () => {} });
   const findAlert = () => findByTestId('dast-site-profile-form-alert');
@@ -60,6 +63,14 @@ describe('DastSiteProfileForm', () => {
   const setFieldValue = async (field, value) => {
     await field.setValue(value);
     field.trigger('blur');
+  };
+
+  const setAuthFieldsValues = async ({ enabled, ...fields }) => {
+    await findAuthCheckbox().setChecked(enabled);
+
+    Object.keys(fields).forEach((field) => {
+      findByNameAttribute(field).setValue(fields[field]);
+    });
   };
 
   const mockClientFactory = (handlers) => {
@@ -189,6 +200,7 @@ describe('DastSiteProfileForm', () => {
         await setFieldValue(findTargetUrlInput(), targetUrl);
         await setFieldValue(findExcludedUrlsInput(), excludedUrls);
         await setFieldValue(findRequestHeadersInput(), requestHeaders);
+        await setAuthFieldsValues(siteProfileOne.auth);
         submitForm();
       };
 
@@ -209,6 +221,7 @@ describe('DastSiteProfileForm', () => {
               excludedUrls,
               requestHeaders,
               fullPath,
+              auth: siteProfileOne.auth,
               ...mutationVars,
             },
           });
