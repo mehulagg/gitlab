@@ -1,0 +1,5 @@
+
+ [4musing_docker_images.md[0m
+ 762:73  [33mwarning[0m  "ECR" has no definition.  gitlab.Acronyms 
+
+✖ [31m0 errors[0m, [33m1 warning[0m and [34m0 suggestions[0m in 1 file.
