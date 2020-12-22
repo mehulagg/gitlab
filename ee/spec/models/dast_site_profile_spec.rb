@@ -53,7 +53,7 @@ RSpec.describe DastSiteProfile, type: :model do
     end
   end
 
-  describe '#save!' do
+  describe '#create!' do
     context 'when there is no secret_key and no secret_key_iv' do
       it 'populates these values' do
         aggregate_failures do
