@@ -51,20 +51,13 @@ describe('RotationsListSectionComponent', () => {
   });
 
   it('renders current day indicator in the first timeline cell', () => {
-    expect(
-      findTimelineCells()
-        .at(0)
-        .find(CurrentDayIndicator)
-        .exists(),
-    ).toBe(true);
+    expect(findTimelineCells().at(0).find(CurrentDayIndicator).exists()).toBe(true);
   });
 
   it('render the correct amount of rotation assignees with their name, avatar and color', () => {
     expect(findRotationAssignees()).toHaveLength(2);
-    expect(
-      findRotationAssignees()
-        .at(0)
-        .props().assignee.user,
-    ).toEqual(mockRotations[0].participants.nodes[0].user);
+    expect(findRotationAssignees().at(0).props().assignee.user).toEqual(
+      mockRotations[0].participants.nodes[0].user,
+    );
   });
 });

@@ -121,27 +121,19 @@ describe('DAST Scanner Profile', () => {
     });
 
     it.each(invalidValues)('is marked as invalid provided an invalid value', async value => {
-      await finder()
-        .find('input')
-        .setValue(value);
+      await finder().find('input').setValue(value);
 
       expect(wrapper.text()).toContain(errorMessage);
     });
 
     it('is marked as valid provided a valid value', async () => {
-      await finder()
-        .find('input')
-        .setValue(validValue);
+      await finder().find('input').setValue(validValue);
 
       expect(wrapper.text()).not.toContain(errorMessage);
     });
 
     it('should allow only numbers', async () => {
-      expect(
-        finder()
-          .find('input')
-          .props('type'),
-      ).toBe('number');
+      expect(finder().find('input').props('type')).toBe('number');
     });
   });
 

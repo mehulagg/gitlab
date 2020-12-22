@@ -107,7 +107,10 @@ describe('Insights mutations', () => {
     };
 
     const transformedData = {
-      datasets: [{ name: 'Dataset 1', data: [1] }, { name: 'Dataset 2', data: [2] }],
+      datasets: [
+        { name: 'Dataset 1', data: [1] },
+        { name: 'Dataset 2', data: [2] },
+      ],
       labels: ['January', 'February'],
       xAxisTitle: 'Months',
       yAxisTitle: 'Issues',

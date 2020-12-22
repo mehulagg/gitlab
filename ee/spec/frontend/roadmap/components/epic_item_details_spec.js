@@ -31,7 +31,7 @@ describe('EpicItemDetails', () => {
         currentGroupId: mockGroupId,
         timeframeString: 'Jul 10, 2017 – Jun 2, 2018',
         childLevel: 0,
-        childrenFlags: { '41': { itemExpanded: false } },
+        childrenFlags: { 41: { itemExpanded: false } },
         hasFiltersApplied: false,
         isChildrenEmpty: false,
         ...props,
@@ -203,7 +203,7 @@ describe('EpicItemDetails', () => {
 
         describe('when child epics are expanded', () => {
           const childrenFlags = {
-            '41': { itemExpanded: true },
+            41: { itemExpanded: true },
           };
 
           beforeEach(() => {
@@ -241,7 +241,7 @@ describe('EpicItemDetails', () => {
         describe('when child epics are not expanded', () => {
           beforeEach(() => {
             const childrenFlags = {
-              '41': { itemExpanded: false },
+              41: { itemExpanded: false },
             };
             createWrapper({
               epic,

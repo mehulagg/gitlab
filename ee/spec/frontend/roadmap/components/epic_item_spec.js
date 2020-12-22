@@ -35,7 +35,7 @@ const createComponent = ({
   currentGroupId = mockGroupId,
   childLevel = 0,
   childrenEpics = {},
-  childrenFlags = { '1': { itemExpanded: false } },
+  childrenFlags = { 1: { itemExpanded: false } },
   hasFiltersApplied = false,
 }) => {
   return mount(EpicItemComponent, {
@@ -170,11 +170,11 @@ describe('EpicItemComponent', () => {
     it('renders Epic item container element with class `epic-list-item-container` if epic has children and is expanded', () => {
       wrapper = createComponent({
         childrenEpics: {
-          '1': [mockFormattedChildEpic1],
+          1: [mockFormattedChildEpic1],
         },
         childrenFlags: {
-          '1': { itemExpanded: true },
-          '50': { itemExpanded: false },
+          1: { itemExpanded: true },
+          50: { itemExpanded: false },
         },
       });
       expect(wrapper.find('.epic-list-item-container').exists()).toBe(true);

@@ -27,9 +27,7 @@ describe('OnDemandScansProfileSelector', () => {
       }));
 
   const selectFirstProfile = () => {
-    return findProfilesDropdown()
-      .find(GlDropdownItem)
-      .vm.$emit('click');
+    return findProfilesDropdown().find(GlDropdownItem).vm.$emit('click');
   };
 
   const createFullComponent = (options = {}) => {

@@ -681,7 +681,10 @@ describe('RelatedItemsTree', () => {
 
       describe(types.RECIEVE_PROJECTS_SUCCESS, () => {
         it('should set `projectsFetchInProgress` to false and provided `projects` param as it is within the state', () => {
-          const projects = [{ id: 1, name: 'foo' }, { id: 2, name: 'bar' }];
+          const projects = [
+            { id: 1, name: 'foo' },
+            { id: 2, name: 'bar' },
+          ];
 
           mutations[types.RECIEVE_PROJECTS_SUCCESS](state, projects);
 
