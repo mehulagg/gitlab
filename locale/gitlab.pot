@@ -22006,7 +22006,7 @@ msgstr ""
 msgid "ProjectSettings|The variables GitLab supports:"
 msgstr ""
 
-msgid "ProjectSettings|These checks must pass before merge requests can be merged"
+msgid "ProjectSettings|These checks must pass before merge requests can be merged."
 msgstr ""
 
 msgid "ProjectSettings|This introduces the risk of merging changes that do not pass the pipeline."
