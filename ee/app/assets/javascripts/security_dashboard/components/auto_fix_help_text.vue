@@ -1,5 +1,6 @@
 <script>
-import { GlBadge, GlPopover, GlIcon } from '@gitlab/ui';
+import { GlBadge, GlPopover, GlIcon, GlSprintf } from '@gitlab/ui';
+import { s__ } from '~/locale';
 
 const ICONCOLOR = {
   opened: 'gl-text-green-500',
@@ -18,6 +19,7 @@ export default {
     GlBadge,
     GlIcon,
     GlPopover,
+    GlSprintf,
   },
   props: {
     mergeRequest: {
@@ -31,6 +33,9 @@ export default {
     },
     getIcon(state) {
       return ICON[state] || 'issue-open-m';
+    },
+    autoFixMessage() {
+      return s__('AutoRemediation|: %{autoFix}');
     },
   },
 };
@@ -66,9 +71,11 @@ export default {
               }}<span
                 v-if="mergeRequest.securityAutoFix"
                 data-testid="vulnerability-solutions-popover-link-autofix"
-                >{{ s__('AutoRemediation|: Auto-fix') }}</span
-              ></span
-            >
+                ><gl-sprintf :message="autoFixMessage()">
+                  <template #autoFix>{{ s__('AutoRemediation|Auto-fix') }}</template>
+                </gl-sprintf></span
+              >
+            </span>
           </a>
         </li>
       </ul>
