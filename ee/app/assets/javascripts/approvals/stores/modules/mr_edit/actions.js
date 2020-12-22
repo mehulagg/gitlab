@@ -32,10 +32,7 @@ const seedUsers = ({ userRecords, ...rule }) =>
 const seedGroups = ({ groupRecords, ...rule }) =>
   groupRecords ? { ...rule, groups: groupRecords } : rule;
 
-const seedLocalRule = rule =>
-  seedApprovers(rule)
-    .then(seedUsers)
-    .then(seedGroups);
+const seedLocalRule = rule => seedApprovers(rule).then(seedUsers).then(seedGroups);
 
 const seedNewRule = rule => {
   const name = rule.ruleType === RULE_TYPE_ANY_APPROVER ? '' : rule.name;
