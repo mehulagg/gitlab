@@ -30,6 +30,13 @@ module Gitlab
       RUNNER_TOKEN_PARAM = :token
       RUNNER_JOB_TOKEN_PARAM = :token
 
+      def find_user_from_api_sources
+        deploy_token_from_request ||
+          find_user_from_bearer_token ||
+          find_user_from_job_token ||
+          user_from_warden
+      end
+
       # Check the Rails session for valid authentication details
       def find_user_from_warden
         current_request.env['warden']&.authenticate if verified_request?

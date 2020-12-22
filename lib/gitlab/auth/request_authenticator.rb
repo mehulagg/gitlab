@@ -34,9 +34,15 @@ module Gitlab
           find_user_from_feed_token(request_format) ||
           find_user_from_static_object_token(request_format) ||
           find_user_from_basic_auth_job ||
-          find_user_from_job_token
+          find_user_for_api(request_format)
       rescue Gitlab::Auth::AuthenticationError
         nil
+      end
+
+      def find_user_for_api(request_format)
+        return nil unless format == :api
+
+        find_user_from_api_sources
       end
 
       def valid_access_token?(scopes: [])

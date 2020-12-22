@@ -52,7 +52,7 @@ module API
       end
 
       def find_current_user!
-        user = find_user_from_sources
+        user = find_user_from_api_sources
         return unless user
 
         if user.is_a?(User) && Feature.enabled?(:user_mode_in_session)
@@ -65,15 +65,6 @@ module API
         end
 
         user
-      end
-
-      def find_user_from_sources
-        strong_memoize(:find_user_from_sources) do
-          deploy_token_from_request ||
-            find_user_from_bearer_token ||
-            find_user_from_job_token ||
-            user_from_warden
-        end
       end
 
       private
