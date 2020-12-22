@@ -311,11 +311,10 @@ used by the GitLab Advanced Search integration.
 
 In the **Admin Area > Settings > General > Advanced Search** section, select the
 **Pause Elasticsearch Indexing** setting, and then save your change.
-
 With this, all updates that should happen on your Elasticsearch index will be
 buffered and caught up once unpaused.
 
-The **Pause Elasticsearch Indexing** option is also automatically toggled when
+This option is automatically toggled when
 the [internal cluster reindexing task](#trigger-the-reindex-via-the-advanced-search-administration) runs.
 
 ### Setup
