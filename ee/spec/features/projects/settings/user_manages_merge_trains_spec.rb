@@ -23,7 +23,7 @@ RSpec.describe 'User manages merge trains option', :js do
     before do
       visit edit_project_path(project)
 
-      check('Enable merge trains.')
+      check('Enable merge trains')
     end
 
     it 'sees enabled merge trains checkbox' do
