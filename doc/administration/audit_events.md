@@ -47,7 +47,7 @@ Impersonation is where an administrator uses credentials to perform an action as
 A user with a Owner role (or above) can retrieve group audit events of all users.
 A user with a Developer or Maintainer role is limited to group audit events based on their individual actions.
 
-To view a group's audit events, navigate to **Group > Security & Compliance > Audit Events**.
+To view a group's audit events, navigate to **Group Settings > Audit Events**.
 From there, you can see the following actions:
 
 - Group name or path changed.
