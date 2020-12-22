@@ -25,7 +25,7 @@ Sign in with an existing Google account, such as the one you use to access Gmail
 or Google Drive, or create a new one.
 
 1. Follow the steps described in the ["Before you begin" section](https://cloud.google.com/kubernetes-engine/docs/quickstart#before-you-begin)
-   of the Kubernetes Engine docs to enable the required APIs and related services.
+   of the Kubernetes Engine documentation to enable the required APIs and related services.
 1. Ensure you've created a [billing account](https://cloud.google.com/billing/docs/how-to/manage-billing-account)
    with Google Cloud Platform.
 
@@ -103,17 +103,15 @@ status on your [GCP dashboard](https://console.cloud.google.com/kubernetes).
 
 ## Install Ingress
 
-After your cluster is running, you will need to install Nginx Ingress Controller
-so that your application has a load balancer to route traffic
-from the Internet to your application.
+After your cluster is running, you must install NGINX Ingress Controller as a
+load balancer, to route traffic from the internet to your application. Because
+you've created a Google GKE cluster in this guide, you can install NGINX Ingress Controller
+with Google Cloud Shell:
 
-Since we have a Google GKE cluster, we can use Google Cloud Shell to install Nginx Ingress Controller.
-To do so:
-
-1. On your cluster's details page, go to the "Advanced Settings" tab.
-   Click the link to Google Kubernetes Engine to visit the cluster on Google Cloud Console.
-1. Select "Connect" on the GKE cluster page, then click on "Run in Cloud Shell".
-1. Once the Cloud Shell starts, you can install Nginx Ingress Controller with the following commands:
+1. Go to your cluster's details page, and click the **Advanced Settings** tab.
+1. Click the link to Google Kubernetes Engine to visit the cluster on Google Cloud Console.
+1. On the GKE cluster page, select **Connect**, then click **Run in Cloud Shell**.
+1. After the Cloud Shell starts, run these commands to install NGINX Ingress Controller:
 
    ```shell
    helm repo add nginx-stable https://helm.nginx.com/stable
@@ -124,18 +122,20 @@ To do so:
    kubectl get service nginx-ingress-nginx-ingress
    ```
 
-1. Once Nginx is successfully installed, you can obtain the external IP address with the following command.
-   You may need to wait for a few minutes before this command returns an IP address, as the load balancer obtains an IP address:
+1. A few minutes after you install NGINX, the load balancer obtains an IP address, and you can
+   get the external IP address with this command:
 
    ```shell
    kubectl get service nginx-ingress-nginx-ingress -ojson | jq -r '.status.loadBalancer.ingress[].ip'
    ```
 
-1. Copy the IP address above. Go back to the cluster page on GitLab, and go to the "Details" tab.
+   Copy this IP address, as you need it in the next step.
+
+1. Go back to the cluster page on GitLab, and go to the **Details** tab.
    - Add your **Base domain**. For this guide, use the domain `<IP address>.nip.io`.
    - Click **Save changes**.
 
-![Cluster Base Domain](img/guide_base_domain_v12_3.png)
+   ![Cluster Base Domain](img/guide_base_domain_v12_3.png)
 
 ## Enable Auto DevOps (optional)
 
@@ -301,7 +301,7 @@ and then deploys the application to production.
 
 After implementing this project, you should have a solid understanding of the basics of Auto DevOps.
 You started from building and testing, to deploying and monitoring an application
-all within GitLab. Despite its automatic nature, Auto DevOps can also be configured
+all in GitLab. Despite its automatic nature, Auto DevOps can also be configured
 and customized to fit your workflow. Here are some helpful resources for further reading:
 
 1. [Auto DevOps](index.md)
