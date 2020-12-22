@@ -6,10 +6,10 @@ import { __ } from '~/locale';
 import { loadCSSFile } from '~/lib/utils/css_utils';
 
 export default function initLDAPGroupsSelect() {
-  const ldapGroupResult = function(group) {
+  const ldapGroupResult = function (group) {
     return group.cn;
   };
-  const groupFormatSelection = function(group) {
+  const groupFormatSelection = function (group) {
     return group.cn;
   };
   import(/* webpackChunkName: 'select2' */ 'select2/select2')

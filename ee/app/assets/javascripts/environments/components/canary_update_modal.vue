@@ -76,9 +76,17 @@ export default {
             },
           },
         })
-        .then(({ data: { environmentsCanaryIngressUpdate: { errors: [error] } } }) => {
-          this.error = error;
-        })
+        .then(
+          ({
+            data: {
+              environmentsCanaryIngressUpdate: {
+                errors: [error],
+              },
+            },
+          }) => {
+            this.error = error;
+          },
+        )
         .catch(() => {
           this.error = __('Something went wrong. Please try again later');
         });

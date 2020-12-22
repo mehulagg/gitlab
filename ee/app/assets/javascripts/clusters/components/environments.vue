@@ -113,9 +113,7 @@ export default {
       </template>
 
       <!-- column: Job -->
-      <template #cell(lastDeployment)="data">
-        {{ __('deploy') }} #{{ data.value.id }}
-      </template>
+      <template #cell(lastDeployment)="data"> {{ __('deploy') }} #{{ data.value.id }} </template>
 
       <!-- column: Pods in use -->
       <template #head(rolloutStatus)="data">

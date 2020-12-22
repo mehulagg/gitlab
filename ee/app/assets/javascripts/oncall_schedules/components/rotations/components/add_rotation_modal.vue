@@ -140,12 +140,20 @@ export default {
             },
           },
         })
-        .then(({ data: { oncallScheduleRotationCreate: { errors: [error] } } }) => {
-          if (error) {
-            throw error;
-          }
-          this.$refs.createScheduleModal.hide();
-        })
+        .then(
+          ({
+            data: {
+              oncallScheduleRotationCreate: {
+                errors: [error],
+              },
+            },
+          }) => {
+            if (error) {
+              throw error;
+            }
+            this.$refs.createScheduleModal.hide();
+          },
+        )
         .catch(error => {
           this.error = error;
         })

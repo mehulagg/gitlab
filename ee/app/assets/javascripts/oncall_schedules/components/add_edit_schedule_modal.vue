@@ -107,24 +107,27 @@ export default {
               timezone: this.form.timezone.identifier,
             },
           },
-          update(
-            store,
-            {
-              data: { oncallScheduleCreate },
-            },
-          ) {
+          update(store, { data: { oncallScheduleCreate } }) {
             updateStoreOnScheduleCreate(store, getOncallSchedulesQuery, oncallScheduleCreate, {
               projectPath,
             });
           },
         })
-        .then(({ data: { oncallScheduleCreate: { errors: [error] } } }) => {
-          if (error) {
-            throw error;
-          }
-          this.$refs.addUpdateScheduleModal.hide();
-          this.$emit('scheduleCreated');
-        })
+        .then(
+          ({
+            data: {
+              oncallScheduleCreate: {
+                errors: [error],
+              },
+            },
+          }) => {
+            if (error) {
+              throw error;
+            }
+            this.$refs.addUpdateScheduleModal.hide();
+            this.$emit('scheduleCreated');
+          },
+        )
         .catch(error => {
           this.error = error;
         })
@@ -144,12 +147,20 @@ export default {
             updateStoreAfterScheduleEdit(store, getOncallSchedulesQuery, data, { projectPath });
           },
         })
-        .then(({ data: { oncallScheduleUpdate: { errors: [error] } } }) => {
-          if (error) {
-            throw error;
-          }
-          this.$refs.addUpdateScheduleModal.hide();
-        })
+        .then(
+          ({
+            data: {
+              oncallScheduleUpdate: {
+                errors: [error],
+              },
+            },
+          }) => {
+            if (error) {
+              throw error;
+            }
+            this.$refs.addUpdateScheduleModal.hide();
+          },
+        )
         .catch(error => {
           this.error = error;
         })
