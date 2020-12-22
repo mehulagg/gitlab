@@ -46,15 +46,15 @@ Transfers data from or to a server. [More information](https://curl.haxx.se).
 
 Download the contents of an URL to a file:
 
-`curl <http://example.com> -o <filename>`
+`curl "http://example.com" -o <filename>`
 
 Download a file, saving the output under the filename indicated by the URL:
 
-`curl -O <http://example.com/filename>`
+`curl -O "http://example.com/filename.txt"`
 
 #### mtr
 
-Matt's Traceroute: combined traceroute and ping tool. More information: [https://bitwizard.nl/mtr](https://bitwizard.nl/mtr).
+Combined traceroute and ping tool. More information: [https://bitwizard.nl/mtr](https://bitwizard.nl/mtr).
 
 Traceroute to a host and continuously ping all intermediary hops:
 
@@ -76,19 +76,35 @@ Wait for a given time (in seconds) before sending another packet to the same hop
 
 `mtr -i <seconds> <host>`
 
-#### tracepath
-
-traces path to destination
-
 ### What is running and on which ports?
 
 #### netstat
 
-Print network connections, routing tables,
+Displays network-related information such as open connections and open socket ports.
+
+List listening TCP and UDP ports (+ user and process if you're root):
+
+`netstat -lepunt`
 
 #### ss
 
 similar to netstat, used to dump network and socket statistics.
+
+Show all TCP/UDP/RAW/UNIX sockets:
+
+`ss -a -t|-u|-w|-x`
+
+Filter TCP sockets by states, only/exclude:
+
+`ss state/exclude bucket/big/connected/synchronized/...`
+
+Show all TCP sockets connected to the local HTTPS port (443):
+
+`ss -t src :443`
+
+Show all TCP sockets listening on the local 8080 port:
+
+`ss -lt src :8080`
 
 ### DNS
 
@@ -186,7 +202,27 @@ Capture traffic from or to a host:
 
 #### nethogs
 
-Net top tool grouping bandwidth per process
+Net top tool grouping bandwidth per process.
+
+Monitor bandwidth usage per process.
+
+Start nethogs as root (default device is eth0):
+
+`sudo nethogs`
+
+Monitor bandwidth on specific device:
+
+`sudo nethogs device`
+
+Monitor bandwidth on multiple devices:
+
+`sudo nethogs device1 device2`
+
+Specify refresh rate:
+
+`sudo nethogs -t seconds`
+
+#### ntop
 
 ### Other
 
@@ -197,6 +233,17 @@ firewalls n such
 #### ip
 
 network interface information and configuration
+
+Show / manipulate routing, devices, policy routing and tunnels.
+
+List interfaces with detailed info:
+
+`ip address`
+
+List interfaces with brief network layer info:
+
+`ip -brief address`
+
 
 ### Encryption 
 
