@@ -11583,7 +11583,15 @@ CREATE TABLE dast_site_profiles (
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
     name text NOT NULL,
-    CONSTRAINT check_6cfab17b48 CHECK ((char_length(name) <= 255))
+    encrypted_secret_key text,
+    encrypted_secret_key_iv text,
+    encrypted_secret_key_salt text,
+    secret_key_iv text,
+    CONSTRAINT check_18f547a39f CHECK ((char_length(secret_key_iv) <= 255)),
+    CONSTRAINT check_5759507850 CHECK ((char_length(encrypted_secret_key_salt) <= 255)),
+    CONSTRAINT check_6cfab17b48 CHECK ((char_length(name) <= 255)),
+    CONSTRAINT check_96b6e059c9 CHECK ((char_length(encrypted_secret_key_iv) <= 255)),
+    CONSTRAINT check_e21344120a CHECK ((char_length(encrypted_secret_key) <= 255))
 );
 
 CREATE SEQUENCE dast_site_profiles_id_seq
