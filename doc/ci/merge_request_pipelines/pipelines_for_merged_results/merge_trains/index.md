@@ -177,9 +177,9 @@ for more information.
 
 ### Merge Train Pipeline cannot be retried
 
-When a pipeline for merge trains fails it's dropped from the train and it can't be retried.
-Pipelines for merge trains run on the merged result of the changes in the MR and
-the changes from other MRs already on the train. If the merge request is dropped from the train,
+When a pipeline for merge trains fails the merge request is dropped from the train and the pipeline can't be retried.
+Pipelines for merge trains run on the merged result of the changes in the merge request and
+the changes from other merge requests already on the train. If the merge request is dropped from the train,
 the merged result is out of date and the pipeline can't be retried.
 
 Instead, you should [add the merge request to the train](#add-a-merge-request-to-a-merge-train)
