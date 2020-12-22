@@ -14,6 +14,11 @@ class DastSiteProfile < ApplicationRecord
 
   delegate :dast_site_validation, to: :dast_site, allow_nil: true
 
+  attr_encrypted :secret_key,
+                 mode: :per_attribute_iv,
+                 key: Settings.attr_encrypted_db_key_base,
+                 algorithm: 'aes-256-gcm'
+
   def status
     return DastSiteValidation::NONE_STATE unless dast_site_validation
 
