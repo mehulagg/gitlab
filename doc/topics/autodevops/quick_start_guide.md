@@ -115,7 +115,7 @@ To do so:
 1. Select "Connect" on the GKE cluster page, then click on "Run in Cloud Shell".
 1. Once the Cloud Shell starts, you can install Nginx Ingress Controller with the following commands:
 
-   ```sh
+   ```shell
    helm repo add nginx-stable https://helm.nginx.com/stable
    helm repo update
    helm install nginx-ingress nginx-stable/nginx-ingress
@@ -127,7 +127,7 @@ To do so:
 1. Once Nginx is successfully installed, you can obtain the external IP address with the following command.
    You may need to wait for a few minutes before this command returns an IP address, as the load balancer obtains an IP address:
 
-   ```sh
+   ```shell
    kubectl get service nginx-ingress-nginx-ingress -ojson | jq -r '.status.loadBalancer.ingress[].ip'
    ```
 
