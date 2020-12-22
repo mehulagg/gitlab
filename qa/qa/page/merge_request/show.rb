@@ -296,6 +296,18 @@ module QA
           click_element(:open_in_web_ide_button)
           wait_for_requests
         end
+
+        def add_suggestion_to_diff(suggestion)
+          all_elements(:new_diff_line, minimum: 1).first.hover
+          click_element :diff_comment
+          find('.js-suggestion-btn').click
+          fill_element :reply_field, suggestion
+          click_element :comment_now_button
+        end
+
+        def apply_suggestion
+          find('js-apply-btn-grouped').click
+        end
       end
     end
   end
