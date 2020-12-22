@@ -6,10 +6,7 @@ const TEST_PASSWORD = 'password';
 
 // For some reason, the `Promise.resolve` needs to be deferred
 // or the timing doesn't work.
-const waitForTick = done =>
-  Promise.resolve()
-    .then(done)
-    .catch(done.fail);
+const waitForTick = done => Promise.resolve().then(done).catch(done.fail);
 
 describe('Approval auth component', () => {
   let wrapper;

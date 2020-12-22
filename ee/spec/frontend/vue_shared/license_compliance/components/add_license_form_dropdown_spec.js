@@ -25,9 +25,7 @@ describe('AddLicenseFormDropdown', () => {
 
     jest.spyOn(vm, '$emit').mockImplementation(() => {});
 
-    $(vm.$el)
-      .val('LGPL')
-      .trigger('change');
+    $(vm.$el).val('LGPL').trigger('change');
 
     expect(vm.$emit).toHaveBeenCalledWith('input', 'LGPL');
   });

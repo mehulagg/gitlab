@@ -76,11 +76,7 @@ describe('Security Dashboard Table Row', () => {
     });
 
     it('should render the severity', () => {
-      expect(
-        findContent(0)
-          .text()
-          .toLowerCase(),
-      ).toContain(vulnerability.severity);
+      expect(findContent(0).text().toLowerCase()).toContain(vulnerability.severity);
     });
 
     it('should render the identifier cell', () => {
@@ -90,11 +86,9 @@ describe('Security Dashboard Table Row', () => {
     });
 
     it('should render the report type', () => {
-      expect(
-        findContent(3)
-          .text()
-          .toLowerCase(),
-      ).toContain(vulnerability.report_type.toLowerCase());
+      expect(findContent(3).text().toLowerCase()).toContain(
+        vulnerability.report_type.toLowerCase(),
+      );
     });
 
     it('should render the scanner vendor if the scanner does exist', () => {

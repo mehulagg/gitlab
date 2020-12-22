@@ -200,7 +200,10 @@ describe('IterationSelect', () => {
               beforeEach(() => {
                 createComponent({
                   data: {
-                    iterations: [{ id: 'id', title: 'title' }, { id: '123', title: '123' }],
+                    iterations: [
+                      { id: 'id', title: 'title' },
+                      { id: '123', title: '123' },
+                    ],
                     currentIteration: '123',
                   },
                 });
@@ -229,7 +232,10 @@ describe('IterationSelect', () => {
               const bootstrapComponent = mutationResp => {
                 createComponent({
                   data: {
-                    iterations: [{ id: '123', title: '123' }, { id: 'id', title: 'title' }],
+                    iterations: [
+                      { id: '123', title: '123' },
+                      { id: 'id', title: 'title' },
+                    ],
                     currentIteration: '123',
                   },
                   mutationPromise: mutationResp,

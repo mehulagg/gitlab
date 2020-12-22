@@ -127,9 +127,7 @@ describe('ee merge request widget options', () => {
 
       it('should render loading indicator', () => {
         expect(
-          findExtendedSecurityWidget()
-            .querySelector(SAST_SELECTOR)
-            .textContent.trim(),
+          findExtendedSecurityWidget().querySelector(SAST_SELECTOR).textContent.trim(),
         ).toContain('SAST is loading');
       });
     });
@@ -725,9 +723,7 @@ describe('ee merge request widget options', () => {
 
       it('should render loading indicator', () => {
         expect(
-          findExtendedSecurityWidget()
-            .querySelector(DAST_SELECTOR)
-            .textContent.trim(),
+          findExtendedSecurityWidget().querySelector(DAST_SELECTOR).textContent.trim(),
         ).toContain('DAST is loading');
       });
     });
@@ -765,9 +761,7 @@ describe('ee merge request widget options', () => {
       it('should render error indicator', done => {
         setImmediate(() => {
           expect(
-            findExtendedSecurityWidget()
-              .querySelector(DAST_SELECTOR)
-              .textContent.trim(),
+            findExtendedSecurityWidget().querySelector(DAST_SELECTOR).textContent.trim(),
           ).toContain('DAST: Loading resulted in an error');
           done();
         });
@@ -804,9 +798,7 @@ describe('ee merge request widget options', () => {
         vm = mountWithFeatureFlag();
 
         expect(
-          findExtendedSecurityWidget()
-            .querySelector(COVERAGE_FUZZING_SELECTOR)
-            .textContent.trim(),
+          findExtendedSecurityWidget().querySelector(COVERAGE_FUZZING_SELECTOR).textContent.trim(),
         ).toContain('Coverage fuzzing is loading');
       });
     });
@@ -922,9 +914,7 @@ describe('ee merge request widget options', () => {
       it('should render error indicator', done => {
         setImmediate(() => {
           expect(
-            findExtendedSecurityWidget()
-              .querySelector(SECRET_SCANNING_SELECTOR)
-              .textContent.trim(),
+            findExtendedSecurityWidget().querySelector(SECRET_SCANNING_SELECTOR).textContent.trim(),
           ).toContain('Secret scanning: Loading resulted in an error');
           done();
         });
@@ -994,9 +984,7 @@ describe('ee merge request widget options', () => {
       it('should render error indicator', done => {
         setImmediate(() => {
           expect(
-            findExtendedSecurityWidget()
-              .querySelector(API_FUZZING_SELECTOR)
-              .textContent.trim(),
+            findExtendedSecurityWidget().querySelector(API_FUZZING_SELECTOR).textContent.trim(),
           ).toContain('API fuzzing: Loading resulted in an error');
           done();
         });

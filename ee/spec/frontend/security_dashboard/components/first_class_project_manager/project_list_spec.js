@@ -60,11 +60,7 @@ describe('Project List component', () => {
   it('renders a project-item with an avatar', () => {
     factory({ projects: generateMockProjects(1) });
 
-    expect(
-      getFirstProjectItem()
-        .find(ProjectAvatar)
-        .exists(),
-    ).toBe(true);
+    expect(getFirstProjectItem().find(ProjectAvatar).exists()).toBe(true);
   });
 
   it('renders a project-item with a project name', () => {

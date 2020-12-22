@@ -190,7 +190,10 @@ describe('Vulnerability Details', () => {
   });
 
   describe('http data', () => {
-    const TEST_HEADERS = [{ name: 'Name1', value: 'Value1' }, { name: 'Name2', value: 'Value2' }];
+    const TEST_HEADERS = [
+      { name: 'Name1', value: 'Value1' },
+      { name: 'Name2', value: 'Value2' },
+    ];
     const EXPECT_REQUEST = {
       label: 'Sent request:',
       content: 'GET http://www.gitlab.com\nName1: Value1\nName2: Value2\n\n[{"user_id":1,}]',

@@ -53,11 +53,7 @@ describe('DynamicFields component', () => {
 
     it('passes the disabled prop to child fields', () => {
       entities.forEach((entity, i) => {
-        expect(
-          findFields()
-            .at(i)
-            .props('disabled'),
-        ).toBe(disabled);
+        expect(findFields().at(i).props('disabled')).toBe(disabled);
       });
     });
   });

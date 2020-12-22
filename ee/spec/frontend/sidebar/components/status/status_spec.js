@@ -222,11 +222,7 @@ describe('Status', () => {
       it('shows text to ask the user to pick an option', () => {
         const message = 'Assign health status';
 
-        expect(
-          getDropdownElement(wrapper)
-            .find('.health-title')
-            .text(),
-        ).toContain(message);
+        expect(getDropdownElement(wrapper).find('.health-title').text()).toContain(message);
       });
 
       it('hides form when the `edit` button is clicked', async () => {
