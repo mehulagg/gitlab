@@ -65,6 +65,9 @@ include:
     file: '/templates/.gitlab-ci-template.yml'
 ```
 
+_Please note that you cannnot use the keyword `file` without the keyword
+`project`._
+
 ## Re-using a `before_script` template
 
 In the following example, the content of `.before-script-template.yml` is
