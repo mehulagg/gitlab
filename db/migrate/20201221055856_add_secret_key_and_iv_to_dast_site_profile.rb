@@ -8,9 +8,10 @@ class AddSecretKeyAndIvToDastSiteProfile < ActiveRecord::Migration[6.0]
   def change
     add_column :dast_site_profiles, :encrypted_secret_key, :text
     add_column :dast_site_profiles, :encrypted_secret_key_iv, :text, uniqueness: true
+    add_column :dast_site_profiles, :encrypted_secret_key_salt, :text
 
     # unencrypted column value
-    add_column :dast_site_profiles, :secret_key_iv, :text, uniqueness: true
+    add_column :dast_site_profiles, :secret_key_iv, :text
   end
   # rubocop:enable Migration/AddLimitToTextColumns
 end
