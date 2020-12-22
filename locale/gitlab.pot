@@ -1325,6 +1325,9 @@ msgstr ""
 msgid "A sign-in to your account has been made from the following IP address: %{ip}"
 msgstr ""
 
+msgid "A string appended to the project path to form the Service Desk email address."
+msgstr ""
+
 msgid "A subscription will trigger a new pipeline on the default branch of this project when a pipeline successfully completes for a new tag on the %{default_branch_docs} of the subscribed project."
 msgstr ""
 
@@ -10401,10 +10404,10 @@ msgstr ""
 msgid "Emails"
 msgstr ""
 
-msgid "Emails sent from Service Desk will have this name"
+msgid "Emails sent from Service Desk have this name"
 msgstr ""
 
-msgid "Emails sent to %{email} will still be supported"
+msgid "Emails sent to %{email} are also supported."
 msgstr ""
 
 msgid "Emails separated by comma"
@@ -10483,6 +10486,9 @@ msgid "Enable and configure Grafana."
 msgstr ""
 
 msgid "Enable and configure Prometheus metrics."
+msgstr ""
+
+msgid "Enable and disable Service Desk. Some additional configuration may be required. %{link_start}Learn more%{link_end}."
 msgstr ""
 
 msgid "Enable classification control using an external service"
@@ -10570,9 +10576,6 @@ msgid "Enable two-factor authentication"
 msgstr ""
 
 msgid "Enable usage ping"
-msgstr ""
-
-msgid "Enable/disable your service desk. %{link_start}Learn more about service desk%{link_end}."
 msgstr ""
 
 msgid "EnableReviewApp|%{stepStart}Step 1%{stepEnd}. Ensure you have Kubernetes set up and have a base domain for your %{linkStart}cluster%{linkEnd}."
@@ -13004,9 +13007,6 @@ msgstr ""
 msgid "GitLab Pages"
 msgstr ""
 
-msgid "GitLab Service Desk is a simple way to allow people to create issues in your GitLab instance without needing their own user account. It provides a unique email address for end users to create issues in a project, and replies can be sent either through the GitLab interface or by email. End users will only see the thread through email."
-msgstr ""
-
 msgid "GitLab Shell"
 msgstr ""
 
@@ -14602,7 +14602,7 @@ msgstr ""
 msgid "Improve Merge Requests and customer support with GitLab Enterprise Edition."
 msgstr ""
 
-msgid "Improve customer support with GitLab Service Desk."
+msgid "Improve customer support with Service Desk"
 msgstr ""
 
 msgid "Improve search with Advanced Search and GitLab Enterprise Edition."
@@ -21637,9 +21637,6 @@ msgstr ""
 msgid "Project name suffix"
 msgstr ""
 
-msgid "Project name suffix is a user-defined string which will be appended to the project path, and will form the Service Desk email address."
-msgstr ""
-
 msgid "Project order will not be saved as local storage is not available."
 msgstr ""
 
@@ -25208,6 +25205,9 @@ msgid "Service"
 msgstr ""
 
 msgid "Service Desk"
+msgstr ""
+
+msgid "Service Desk allows people to create issues in your GitLab instance without their own user account. It provides a unique email address for end users to create issues in a project. Replies can be sent either through the GitLab interface or by email. End users only see threads through email."
 msgstr ""
 
 msgid "Service Desk is enabled but not yet active"
