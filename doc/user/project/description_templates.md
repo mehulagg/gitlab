@@ -11,41 +11,41 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 We all know that a properly submitted issue is more likely to be addressed in
 a timely manner by the developers of a project.
 
-Description templates allow you to define context-specific templates for issue
-and merge request description fields for your project, as well as help filter
+With description templates, you can define context-specific templates for issue
+and merge request description fields for your project, and help filter
 out a lot of unnecessary noise from issues.
-
-## Overview
 
 By using the description templates, users that create a new issue or merge
 request can select a description template to help them communicate with other
 contributors effectively.
 
-Every GitLab project can define its own set of description templates as they
+Every GitLab project can define its own set of description templates, as they
 are added to the root directory of a GitLab project's repository.
 
 Description templates must be written in [Markdown](../markdown.md) and stored
-in your project's repository under a directory named `.gitlab`. Only the
+in your project's repository in the `.gitlab` directory. Only the
 templates of the default branch are taken into account.
 
 ## Use-cases
 
+These are some situations when you might find description templates useful:
+
+- You can create issues and merge request templates for different
+  stages of your workflow, for example, feature proposal, feature improvement, or a bug report.
 - Add a template to be used in every issue for a specific project,
   giving instructions and guidelines, requiring for information specific to that subject.
   For example, if you have a project for tracking new blog posts, you can require the
-  title, outlines, author name, author social media information, and so on.
+  title, outlines, author name and author social media information.
 - Following the previous example, you can make a template for every MR submitted
   with a new blog post, requiring information about the post date, front matter data,
-  images guidelines, link to the related issue, reviewer name, and so on.
-- You can also create issues and merge request templates for different
-  stages of your workflow, for example, feature proposal, feature improvement, or a bug report.
+  images guidelines, link to the related issue, and reviewer name.
 
 ## Creating issue templates
 
 Create a new Markdown (`.md`) file inside the `.gitlab/issue_templates/`
 directory in your repository. Commit and push to your default branch.
 
-To create a Markdown file:
+To create a Markdown file, in a repository:
 
  1. Click the `+` button next to `master` and click **New file**.
  1. Add the name of your issue template to the **File name** text field next to `master`.
@@ -95,34 +95,36 @@ with access" or "Only Project Members" in your project's **Settings / Visibility
 template text areas don't show. This is the default behavior, so in most cases
 you should be fine.
 
+To set a default description template for merge requests:
+
 1. Go to your project's **Settings**.
-1. Click **Expand** under the **Merge requests** header.
+1. Select **Expand** under the **Merge requests** header.
 1. Fill in the **Default description template for merge requests** text area.
-1. Click **Expand** under **Default issue template**.
+1. Select **Save changes**.
+
+To set a default description template for issues:
+
+1. Select **Expand** under **Default issue template**.
 1. Fill in the **Default description template for issues** text area.
-   Since GitLab merge request and issues support [Markdown](../markdown.md), you can use it to format
-   headings, lists, and so on.
 
-![Default merge request description templates](img/description_templates_merge_request_settings.png)
+Because GitLab merge request and issues support [Markdown](../markdown.md), you can use it to format
+headings, lists, and so on.
 
-![Default issue description templates](img/description_templates_issue_settings.png)
-
-After you add the description, hit **Save changes** for the settings to take
-effect. Now, every time a new merge request or issue is created, it is 
-pre-filled with the text you entered in the template(s).
+Now, every time a new merge request or issue is created, it's pre-filled with the text you entered
+in the templates.
 
 ## Description template example
 
-We make use of Description Templates for Issues and Merge Requests within the GitLab Community
+We make use of Description Templates for Issues and Merge Requests in the GitLab Community
 Edition project. Please refer to the [`.gitlab` folder](https://gitlab.com/gitlab-org/gitlab/tree/master/.gitlab)
 for some examples.
 
 NOTE:
-It's possible to use [quick actions](quick_actions.md) within description templates to quickly add
+It's possible to use [quick actions](quick_actions.md) in description templates to quickly add
 labels, assignees, and milestones. The quick actions are only executed if the user submitting
 the issue or merge request has the permissions to perform the relevant actions.
 
-Here is an example of a Bug report template:
+Here is an example of a bug report template:
 
 ```plaintext
 Summary
