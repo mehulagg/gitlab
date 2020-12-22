@@ -11,7 +11,7 @@ GitLab CI/CD in conjunction with [GitLab Runner](../runners/README.md) can use
 [Docker Engine](https://www.docker.com/) to test and build any application.
 
 Docker is an open-source project that has predefined images you can use to
-run applications in independent "containers." These container are run in a single Linux
+run applications in independent "containers." These containers run in a single Linux
 instance. [Docker Hub](https://hub.docker.com/) is a database of pre-built images you can
 use to test and build your applications.
 
@@ -29,7 +29,7 @@ test them on a dedicated CI server.
 To use GitLab Runner with Docker you need to [register a new runner](https://docs.gitlab.com/runner/register/)
 to use the `docker` executor.
 
-An example can be seen below. First we set up a temporary template to supply the services:
+In this example, we first set up a temporary template to supply the services:
 
 ```shell
 cat > /tmp/test-config.template.toml << EOF
@@ -42,7 +42,7 @@ name = "mysql:latest"
 EOF
 ```
 
-Then we register the runner using the template that was just created:
+Then use this template to register the runner:
 
 ```shell
 sudo gitlab-runner register \
@@ -68,21 +68,21 @@ However, you can configure the location in the `gitlab-runner/config.toml` file.
 you can set the [Docker pull policy](https://docs.gitlab.com/runner/executors/docker.html#how-pull-policies-work)
 to use local images.
 
-For more information about images and Docker Hub, please read
+For more information about images and Docker Hub, read
 the [Docker Fundamentals](https://docs.docker.com/engine/understanding-docker/) documentation.
 
 ## What is a service
 
-The `services` keyword defines just another Docker image that's run during
-your job and is linked to the Docker image that the `image` keyword defines.
-This allows you to access the service image during build time.
+The `services` keyword defines another Docker image that's run during
+your job. It's linked to the Docker image that the `image` keyword defines,
+which allows you to access the service image during build time.
 
 The service image can run any application, but the most common use case is to
 run a database container, for example, `mysql`. It's easier and faster to use an
-existing image and run it as an additional container than install `mysql` every
+existing image and run it as an additional container than to install `mysql` every
 time the project is built.
 
-You're not limited to have only database services. You can add as many
+You're not limited to only database services. You can add as many
 services you need to `.gitlab-ci.yml` or manually modify `config.toml`.
 Any image found at [Docker Hub](https://hub.docker.com/) or your private Container Registry can be
 used as a service.
@@ -102,23 +102,22 @@ If you add `mysql` as service to your application, the image is
 used to create a container that's linked to the job container.
 
 The service container for MySQL is accessible under the hostname `mysql`.
-To access your database service you have to connect to the host
-named `mysql` instead of a socket or `localhost`. Read more in [accessing the
-services](#accessing-the-services).
+To access your database service, connect to the host named `mysql` instead of a
+socket or `localhost`. Read more in [accessing the services](#accessing-the-services).
 
 ### How the health check of services works
 
-Services are designed to provide additional functionality which is **network accessible**.
-It may be a database like MySQL, or Redis, and even `docker:stable-dind` which
-allows you to use Docker in Docker. It can be practically anything that's
-required for the CI/CD job to proceed and is accessed by network.
+Services are designed to provide additional features which are **network accessible**.
+They may be a database like MySQL, or Redis, and even `docker:stable-dind` which
+allows you to use Docker-in-Docker. It can be practically anything that's
+required for the CI/CD job to proceed, and is accessed by network.
 
 To make sure this works, the runner:
 
 1. Checks which ports are exposed from the container by default.
 1. Starts a special container that waits for these ports to be accessible.
 
-When the second stage of the check fails, it prints the warning: `*** WARNING: Service XYZ probably didn't start properly`.
+If the second stage of the check fails, it prints the warning: `*** WARNING: Service XYZ probably didn't start properly`.
 This issue can occur because:
 
 - There is no opened port in the service.
@@ -128,7 +127,7 @@ This issue can occur because:
 In most cases it affects the job, but there may be situations when the job
 still succeeds even if that warning was printed. For example:
 
-- The service was started a little after the warning was raised, and the job is
+- The service was started shortly after the warning was raised, and the job is
   not using the linked service from the beginning. In that case, when the
   job needed to access the service, it may have been already there waiting for
   connections.
@@ -139,15 +138,14 @@ still succeeds even if that warning was printed. For example:
 
 ### What services are not for
 
-As it was mentioned before, this feature is designed to provide **network accessible**
+As mentioned before, this feature is designed to provide **network accessible**
 services. A database is the simplest example of such a service.
 
-The services feature is not designed to, and does not add any software from the
+The services feature is not designed to, and does not, add any software from the
 defined `services` image(s) to the job's container.
 
 For example, if you have the following `services` defined in your job, the `php`,
-`node` or `go` commands are **not** available for your script, and thus
-the job fails:
+`node` or `go` commands are **not** available for your script, and the job fails:
 
 ```yaml
 job:
@@ -166,15 +164,14 @@ If you need to have `php`, `node` and `go` available for your script, you should
 either:
 
 - Choose an existing Docker image that contains all required tools.
-- Create your own Docker image, with all the required tools included
+- Create your own Docker image, with all the required tools included,
   and use that in your job.
 
 ### Accessing the services
 
 Let's say that you need a Wordpress instance to test some API integration with
-your application.
-
-You can then use for example the [`tutum/wordpress`](https://hub.docker.com/r/tutum/wordpress/) image in your
+your application. You can then use for example the
+[`tutum/wordpress`](https://hub.docker.com/r/tutum/wordpress/) image in your
 `.gitlab-ci.yml` file:
 
 ```yaml
@@ -189,7 +186,7 @@ access to it from your build container under two hostnames:
 - `tutum-wordpress`
 - `tutum__wordpress`
 
-Hostnames with underscores are not RFC valid and may cause problems in 3rd party
+Hostnames with underscores are not RFC valid and may cause problems in third-party
 applications.
 
 The default aliases for the service's hostname are created from its image name
@@ -206,7 +203,7 @@ To override the default behavior, you can
 
 ## Define `image` and `services` from `.gitlab-ci.yml`
 
-You can define an image that's used for all jobs and a list of
+You can define an image that's used for all jobs, and a list of
 services that you want to use during build time:
 
 ```yaml
@@ -279,7 +276,7 @@ test:
 
 You can also pass custom environment [variables](../variables/README.md)
 to fine tune your Docker `images` and `services` directly in the `.gitlab-ci.yml` file.
-For more information, see [custom environment variables](../variables/README.md#gitlab-ciyml-defined-variables)
+For more information, read [custom environment variables](../variables/README.md#gitlab-ciyml-defined-variables)
 
 ```yaml
 # The following variables are automatically passed down to the Postgres container
@@ -318,11 +315,11 @@ test:
 When configuring the `image` or `services` entries, you can use a string or a map as
 options:
 
-- when using a string as an option, it must be the full name of the image to use
+- When using a string as an option, it must be the full name of the image to use
   (including the Registry part if you want to download the image from a Registry
-  other than Docker Hub)
-- when using a map as an option, then it must contain at least the `name`
-  option, which is the same name of the image as used for the string setting
+  other than Docker Hub).
+- When using a map as an option, then it must contain at least the `name`
+  option, which is the same name of the image as used for the string setting.
 
 For example, the following two definitions are equal:
 
@@ -354,8 +351,8 @@ For example, the following two definitions are equal:
 
 | Setting    | Required | GitLab version | Description |
 |------------|----------|----------------| ----------- |
-| `name`     | yes, when used with any other option      | 9.4 |Full name of the image that should be used. It should contain the Registry part if needed. |
-| `entrypoint` | no     | 9.4 |Command or script that should be executed as the container's entrypoint. It's translated to Docker's `--entrypoint` option while creating the container. The syntax is similar to [`Dockerfile`'s `ENTRYPOINT`](https://docs.docker.com/engine/reference/builder/#entrypoint) directive, where each shell token is a separate string in the array. |
+| `name`     | yes, when used with any other option      | 9.4 |Full name of the image to use. It should contain the Registry part if needed. |
+| `entrypoint` | no     | 9.4 |Command or script to execute as the container's entrypoint. It's translated to Docker's `--entrypoint` option while creating the container. The syntax is similar to [`Dockerfile`'s `ENTRYPOINT`](https://docs.docker.com/engine/reference/builder/#entrypoint) directive, where each shell token is a separate string in the array. |
 
 ### Available settings for `services`
 
@@ -363,8 +360,8 @@ For example, the following two definitions are equal:
 
 | Setting    | Required | GitLab version | Description |
 |------------|----------|----------------| ----------- |
-| `name`       | yes, when used with any other option  | 9.4 | Full name of the image that should be used. It should contain the Registry part if needed. |
-| `entrypoint` | no     | 9.4 |Command or script that should be executed as the container's entrypoint. It's translated to Docker's `--entrypoint` option while creating the container. The syntax is similar to [`Dockerfile`'s `ENTRYPOINT`](https://docs.docker.com/engine/reference/builder/#entrypoint) directive, where each shell token is a separate string in the array. |
+| `name`       | yes, when used with any other option  | 9.4 | Full name of the image to use. It should contain the Registry part if needed. |
+| `entrypoint` | no     | 9.4 |Command or script to execute as the container's entrypoint. It's translated to Docker's `--entrypoint` option while creating the container. The syntax is similar to [`Dockerfile`'s `ENTRYPOINT`](https://docs.docker.com/engine/reference/builder/#entrypoint) directive, where each shell token is a separate string in the array. |
 | `command`    | no       | 9.4 |Command or script that should be used as the container's command. It's translated to arguments passed to Docker after the image's name. The syntax is similar to [`Dockerfile`'s `CMD`](https://docs.docker.com/engine/reference/builder/#cmd) directive, where each shell token is a separate string in the array. |
 | `alias` (1)     | no       | 9.4 |Additional alias that can be used to access the service from the job's container. Read [Accessing the services](#accessing-the-services) for more information. |
 
@@ -417,18 +414,18 @@ Before the new extended Docker configuration options, you would need to:
 
 - Create your own image based on the `super/sql:latest` image.
 - Add the default command.
-- Use the image in job's configuration:
+- Use the image in the job's configuration:
 
   ```dockerfile
   # my-super-sql:latest image's Dockerfile
-  
+
   FROM super/sql:latest
   CMD ["/usr/bin/super-sql", "run"]
   ```
 
   ```yaml
   # .gitlab-ci.yml
-  
+
   services:
     - my-super-sql:latest
   ```
@@ -467,10 +464,10 @@ CI/CD jobs:
 To override the entrypoint of a Docker image, you should
 define an empty `entrypoint` in `.gitlab-ci.yml`, so the runner does not start
 a useless shell layer. However, that does not work for all Docker versions, and
-you should check which one your runner is using. Specifically:
+you should check which one your runner is using:
 
-- If Docker 17.06 or later is used, the `entrypoint` can be set to an empty value.
-- If Docker 17.03 or previous versions are used, the `entrypoint` can be set to
+- _If Docker 17.06 or later is used,_ the `entrypoint` can be set to an empty value.
+- _If Docker 17.03 or previous versions are used,_ the `entrypoint` can be set to
   `/bin/sh -c`, `/bin/bash -c` or an equivalent shell available in the image.
 
 The syntax of `image:entrypoint` is similar to [Dockerfile's `ENTRYPOINT`](https://docs.docker.com/engine/reference/builder/#entrypoint).
@@ -517,7 +514,7 @@ Look for the `[runners.docker]` section:
   services = ["mysql:latest", "postgres:latest"]
 ```
 
-The image and services defined this way are added to all job run by
+The image and services defined this way are added to all jobs run by
 that runner.
 
 ## Define an image from a private Container Registry
@@ -525,8 +522,8 @@ that runner.
 To access private container registries, the GitLab Runner process can use:
 
 - [Statically defined credentials](#using-statically-defined-credentials). That is, a username and password for a specific registry.
-- [Credentials Store](#using-credentials-store). For more information, see [the relevant Docker documentation](https://docs.docker.com/engine/reference/commandline/login/#credentials-store).
-- [Credential Helpers](#using-credential-helpers). For more information, see [the relevant Docker documentation](https://docs.docker.com/engine/reference/commandline/login/#credential-helpers).
+- [Credentials Store](#using-credentials-store). For more information, read [the relevant Docker documentation](https://docs.docker.com/engine/reference/commandline/login/#credentials-store).
+- [Credential Helpers](#using-credential-helpers). For more information, read [the relevant Docker documentation](https://docs.docker.com/engine/reference/commandline/login/#credential-helpers).
 
 To define which should be used, the GitLab Runner process reads the configuration in the following order:
 
@@ -552,7 +549,7 @@ runtime.
   at least version **1.8** if you want to use private registries.
 - Available for [Kubernetes executor](https://docs.gitlab.com/runner/executors/kubernetes.html)
   in GitLab Runner 13.1 and later.
-- [Credentials Store](#using-credentials-store) and [Credential Helpers](#using-credential-helpers) require binaries to be added to the GitLab Runner's `$PATH`, and require access to do so. Therefore, these features are not available on shared runners or any other runner where the user does not have access to the environment where the runner is installed.
+- [Credentials Store](#using-credentials-store) and [Credential Helpers](#using-credential-helpers) require binaries to be added to the GitLab Runner's `$PATH`, and require access to do so. Therefore, these features are not available on shared runners, or any other runner where the user does not have access to the environment where the runner is installed.
 
 ### Using statically-defined credentials
 
@@ -601,7 +598,7 @@ Use one of the following methods to determine the value of `DOCKER_AUTH_CONFIG`:
 
 - In some setups, it's possible that Docker client uses the available system key
   store to store the result of `docker login`. In that case, it's impossible to
-  read `~/.docker/config.json`, so you need to prepare the required
+  read `~/.docker/config.json`, so you must prepare the required
   base64-encoded version of `${username}:${password}` and create the Docker
   configuration JSON manually. Open a terminal and execute the following command:
 
@@ -700,7 +697,7 @@ To add `DOCKER_AUTH_CONFIG` to a runner:
 To configure credentials store, follow these steps:
 
 1. To use a credentials store, you need an external helper program to interact with a specific keychain or external store.
-   Make sure helper program is available in GitLab Runner `$PATH`.
+   Make sure the helper program is available in GitLab Runner `$PATH`.
 
 1. Make GitLab Runner use it. There are two ways to accomplish this. Either:
 
@@ -787,7 +784,7 @@ database names or set account names, depending on the environment.
 GitLab Runner 0.5.0 and up passes all YAML-defined variables to the created
 service containers.
 
-For all possible configuration variables check the documentation of each image
+For all possible configuration variables, check the documentation of each image
 provided in their corresponding Docker hub page.
 
 All variables are passed to all services containers. It's not
@@ -795,12 +792,12 @@ designed to distinguish which variable should go where.
 
 ### PostgreSQL service example
 
-See the specific documentation for
+Read the specific documentation for
 [using PostgreSQL as a service](../services/postgres.md).
 
 ### MySQL service example
 
-See the specific documentation for
+Read the specific documentation for
 [using MySQL as a service](../services/mysql.md).
 
 ## How Docker integration works
@@ -809,15 +806,15 @@ Below is a high level overview of the steps performed by Docker during job
 time.
 
 1. Create any service container: `mysql`, `postgresql`, `mongodb`, `redis`.
-1. Create cache container to store all volumes as defined in `config.toml` and
+1. Create a cache container to store all volumes as defined in `config.toml` and
    `Dockerfile` of build image (`ruby:2.6` as in above example).
-1. Create build container and link any service container to build container.
-1. Start build container and send job script to the container.
-1. Run job script.
+1. Create a build container and link any service container to build container.
+1. Start the build container, and send a job script to the container.
+1. Run the job script.
 1. Checkout code in: `/builds/group-name/project-name/`.
 1. Run any step defined in `.gitlab-ci.yml`.
-1. Check exit status of build script.
-1. Remove build container and all created service containers.
+1. Check the exit status of build script.
+1. Remove the build container and all created service containers.
 
 ## How to debug a job locally
 
@@ -836,8 +833,7 @@ EOF
 
 Here we use as an example the GitLab Runner repository which contains a
 Makefile, so running `make` executes the commands defined in the Makefile.
-Your mileage may vary, so instead of `make` you could run the command which
-is specific to your project.
+Instead of `make`, you could run the command which is specific to your project.
 
 Then create some service containers:
 
@@ -870,5 +866,5 @@ docker rm -f -v build service-mysql service-postgres
 ```
 
 This forcefully (`-f`) removes the `build` container, the two service
-containers as well as all volumes (`-v`) that were created with the container
+containers, and all volumes (`-v`) that were created with the container
 creation.
