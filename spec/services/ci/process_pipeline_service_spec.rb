@@ -37,25 +37,4 @@ RSpec.describe Ci::ProcessPipelineService do
       subject.execute
     end
   end
-
-  describe 'updating a list of retried builds' do
-    let!(:build_retried) { create_build('build') }
-    let!(:build) { create_build('build') }
-    let!(:test) { create_build('test') }
-
-    it 'returns unique statuses' do
-      subject.execute
-
-      expect(all_builds.latest).to contain_exactly(build, test)
-      expect(all_builds.retried).to contain_exactly(build_retried)
-    end
-
-    def create_build(name, **opts)
-      create(:ci_build, :created, pipeline: pipeline, name: name, **opts)
-    end
-
-    def all_builds
-      pipeline.builds.order(:stage_idx, :id)
-    end
-  end
 end
