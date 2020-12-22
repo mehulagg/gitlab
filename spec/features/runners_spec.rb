@@ -228,7 +228,7 @@ RSpec.describe 'Runners' do
 
           expect(page).to have_content 'This group does not have any group runners yet.'
 
-          expect(page).to have_content 'Group maintainers can register group runners in the group's CI/CD settings.'
+          expect(page).to have_content 'Group maintainers can register group runners in the group\'s CI/CD settings.'
           expect(page).not_to have_content 'Ask your group maintainer to set up a group runner'
         end
       end
@@ -254,7 +254,7 @@ RSpec.describe 'Runners' do
 
           expect(page).to have_content 'This group does not have any group runners yet.'
 
-          expect(page).not_to have_content 'Group maintainers can register group runners in the group's CI/CD settings.'
+          expect(page).not_to have_content 'Group maintainers can register group runners in the group\'s CI/CD settings.'
           expect(page).to have_content 'Ask your group maintainer to set up a group runner.'
         end
       end
