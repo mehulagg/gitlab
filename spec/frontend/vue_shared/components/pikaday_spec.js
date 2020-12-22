@@ -18,12 +18,7 @@ describe('datePicker', () => {
   });
 
   it('should render label text', () => {
-    expect(
-      wrapper
-        .find('.dropdown-toggle-text')
-        .text()
-        .trim(),
-    ).toEqual('label');
+    expect(wrapper.find('.dropdown-toggle-text').text().trim()).toEqual('label');
   });
 
   it('should show calendar', () => {

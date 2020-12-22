@@ -9,11 +9,3 @@ doc/api/graphql/reference/gitlab_schema.graphql
 *.css
 *.scss
 *.md
-
-# temporarly ignored in order to migrate to prettier@2 more efficiently and iteratively:
-spec/frontend/vue_shared/components
-spec/frontend/vue_shared/directives
-spec/frontend_integration/ide/helpers
-spec/frontend_integration/test_helpers/factories
-spec/frontend_integration/test_helpers/utils
-spec/javascripts
