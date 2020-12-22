@@ -160,8 +160,8 @@ describe('Value Stream Analytics mutations', () => {
       ]);
 
       expect(stateWithData.medians).toEqual({
-        '1': { value: 20, error: null },
-        '2': { value: 10, error: null },
+        1: { value: 20, error: null },
+        2: { value: 10, error: null },
       });
     });
   });

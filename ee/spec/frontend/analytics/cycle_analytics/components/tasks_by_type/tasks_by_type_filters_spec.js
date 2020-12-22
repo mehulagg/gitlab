@@ -23,9 +23,7 @@ const findSelectedSubjectFilters = ctx => findSubjectFilters(ctx).attributes('ch
 const findDropdownLabels = ctx => ctx.find(LabelsSelector).findAll(GlDropdownItem);
 
 const selectLabelAtIndex = (ctx, index) => {
-  findDropdownLabels(ctx)
-    .at(index)
-    .trigger('click');
+  findDropdownLabels(ctx).at(index).trigger('click');
 
   return waitForPromises();
 };
@@ -189,10 +187,7 @@ describe('TasksByTypeFilters', () => {
       wrapper = createComponent({ mountFn: mount });
       expect(wrapper.emitted('updateFilter')).toBeUndefined();
 
-      findSubjectFilters(wrapper)
-        .findAll('label:not(.active)')
-        .at(0)
-        .trigger('click');
+      findSubjectFilters(wrapper).findAll('label:not(.active)').at(0).trigger('click');
 
       return wrapper.vm.$nextTick(() => {
         expect(wrapper.emitted('updateFilter')).toBeDefined();

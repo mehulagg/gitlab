@@ -153,10 +153,7 @@ describe('Value Stream Analytics component', () => {
   }
 
   const findStageNavItemAtIndex = index =>
-    wrapper
-      .find(StageTableNav)
-      .findAll(StageNavItem)
-      .at(index);
+    wrapper.find(StageTableNav).findAll(StageNavItem).at(index);
 
   const findAddStageButton = () => wrapper.find(AddStageButton);
 

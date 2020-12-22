@@ -180,16 +180,8 @@ describe('Test coverage table component', () => {
       });
 
       expect(findTable().exists()).toBe(true);
-      expect(
-        findTableRows()
-          .at(0)
-          .text(),
-      ).toContain('should be first');
-      expect(
-        findTableRows()
-          .at(1)
-          .text(),
-      ).toContain('should be last');
+      expect(findTableRows().at(0).text()).toContain('should be first');
+      expect(findTableRows().at(1).text()).toContain('should be last');
     });
 
     it('renders the correct link', async () => {

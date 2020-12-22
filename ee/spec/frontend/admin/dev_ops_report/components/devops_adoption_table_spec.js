@@ -34,10 +34,7 @@ describe('DevopsAdoptionTable', () => {
   const findCol = testId => findTable().find(`[data-testid="${testId}"]`);
 
   const findColRowChild = (col, row, child) =>
-    findTable()
-      .findAll(`[data-testid="${col}"]`)
-      .at(row)
-      .find(child);
+    findTable().findAll(`[data-testid="${col}"]`).at(row).find(child);
 
   const findColSubComponent = (colTestId, childComponent) =>
     findCol(colTestId).find(childComponent);

@@ -292,7 +292,10 @@ describe('Api', () => {
 
     describe('cycleAnalyticsSummaryData', () => {
       it('fetches value stream analytics summary data', done => {
-        const response = [{ value: 0, title: 'New Issues' }, { value: 0, title: 'Deploys' }];
+        const response = [
+          { value: 0, title: 'New Issues' },
+          { value: 0, title: 'Deploys' },
+        ];
         const params = { ...defaultParams };
         const expectedUrl = `${dummyValueStreamAnalyticsUrlRoot}/summary`;
         mock.onGet(expectedUrl).reply(httpStatus.OK, response);
@@ -631,7 +634,10 @@ describe('Api', () => {
 
     describe('getGeoReplicableItems', () => {
       it('fetches replicableItems based on replicableType', () => {
-        apiResponse = [{ id: 1, name: 'foo' }, { id: 2, name: 'bar' }];
+        apiResponse = [
+          { id: 1, name: 'foo' },
+          { id: 2, name: 'bar' },
+        ];
         mockParams = { page: 1 };
 
         jest.spyOn(Api, 'buildUrl').mockReturnValue(expectedUrl);

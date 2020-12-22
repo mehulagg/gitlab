@@ -78,15 +78,9 @@ describe('ThroughputTable', () => {
 
   const findPagination = () => wrapper.find(GlPagination);
 
-  const findPrevious = () =>
-    findPagination()
-      .findAll('.page-item')
-      .at(0);
+  const findPrevious = () => findPagination().findAll('.page-item').at(0);
 
-  const findNext = () =>
-    findPagination()
-      .findAll('.page-item')
-      .at(1);
+  const findNext = () => findPagination().findAll('.page-item').at(1);
 
   afterEach(() => {
     wrapper.destroy();
@@ -472,7 +466,10 @@ describe('ThroughputTable', () => {
         selectedAssignee: { value: assigneeUsername, operator },
         selectedAuthor: { value: authorUsername, operator },
         selectedMilestone: { value: milestoneTitle, operator },
-        selectedLabelList: [{ value: labels[0], operator }, { value: labels[1], operator }],
+        selectedLabelList: [
+          { value: labels[0], operator },
+          { value: labels[1], operator },
+        ],
       });
       await wrapper.vm.$nextTick();
       expect(

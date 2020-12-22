@@ -58,10 +58,7 @@ describe('GroupsDropdownFilter component', () => {
     expect(dropdown.find('div.gl-avatar-identicon').exists()).toBe(hasIdenticon);
   };
 
-  const selectDropdownAtIndex = index =>
-    findDropdownAtIndex(index)
-      .find('button')
-      .trigger('click');
+  const selectDropdownAtIndex = index => findDropdownAtIndex(index).find('button').trigger('click');
 
   describe('when passed a defaultGroup as prop', () => {
     beforeEach(() => {
@@ -130,16 +127,8 @@ describe('GroupsDropdownFilter component', () => {
       selectDropdownAtIndex(1);
 
       return wrapper.vm.$nextTick().then(() => {
-        expect(
-          findDropdownButton()
-            .find('img.gl-avatar')
-            .exists(),
-        ).toBe(false);
-        expect(
-          findDropdownButton()
-            .find('.gl-avatar-identicon')
-            .exists(),
-        ).toBe(true);
+        expect(findDropdownButton().find('img.gl-avatar').exists()).toBe(false);
+        expect(findDropdownButton().find('.gl-avatar-identicon').exists()).toBe(true);
       });
     });
   });

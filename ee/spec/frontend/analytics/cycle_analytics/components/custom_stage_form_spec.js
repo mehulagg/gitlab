@@ -415,9 +415,7 @@ describe('CustomStageForm', () => {
       });
 
       it(`emits the ${STAGE_ACTIONS.UPDATE} action when clicking on a stage to recover`, async () => {
-        findRecoverStageDropdown()
-          .find(GlDropdownItem)
-          .vm.$emit('click');
+        findRecoverStageDropdown().find(GlDropdownItem).vm.$emit('click');
         await wrapper.vm.$nextTick();
 
         expect(wrapper.emitted()).toEqual({

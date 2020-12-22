@@ -22,9 +22,7 @@ describe('PathNavigation', () => {
   };
 
   const clickItemAt = index => {
-    pathNavigationItems()
-      .at(index)
-      .trigger('click');
+    pathNavigationItems().at(index).trigger('click');
   };
 
   beforeEach(() => {

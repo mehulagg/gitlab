@@ -75,9 +75,7 @@ describe('ProjectsDropdownFilter component', () => {
     findDropdownAtIndex(index).find('[data-testid="project-full-path"]');
 
   const selectDropdownItemAtIndex = index =>
-    findDropdownAtIndex(index)
-      .find('button')
-      .trigger('click');
+    findDropdownAtIndex(index).find('button').trigger('click');
 
   describe('queryParams are applied when fetching data', () => {
     beforeEach(() => {

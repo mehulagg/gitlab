@@ -69,11 +69,9 @@ describe('Select projects dropdown component', () => {
       selectAllProjects();
 
       return wrapper.vm.$nextTick().then(() => {
-        expect(
-          findProjectById(initialData.groupProjects[0].id)
-            .find(GlIcon)
-            .classes(),
-        ).toContain('gl-visibility-hidden');
+        expect(findProjectById(initialData.groupProjects[0].id).find(GlIcon).classes()).toContain(
+          'gl-visibility-hidden',
+        );
       });
     });
 
@@ -104,11 +102,9 @@ describe('Select projects dropdown component', () => {
       selectProjectById(project.id);
 
       return wrapper.vm.$nextTick().then(() => {
-        expect(
-          findProjectById(project.id)
-            .find(GlIcon)
-            .classes(),
-        ).not.toContain('gl-visibility-hidden');
+        expect(findProjectById(project.id).find(GlIcon).classes()).not.toContain(
+          'gl-visibility-hidden',
+        );
       });
     });
 
@@ -116,11 +112,7 @@ describe('Select projects dropdown component', () => {
       selectProjectById(initialData.groupProjects[0].id);
 
       return wrapper.vm.$nextTick().then(() => {
-        expect(
-          findSelectAllProjects()
-            .find(GlIcon)
-            .classes(),
-        ).toContain('gl-visibility-hidden');
+        expect(findSelectAllProjects().find(GlIcon).classes()).toContain('gl-visibility-hidden');
       });
     });
 
