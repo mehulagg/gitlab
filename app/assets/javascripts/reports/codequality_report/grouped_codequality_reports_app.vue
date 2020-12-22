@@ -44,7 +44,7 @@ export default {
   },
   componentNames,
   computed: {
-    ...mapState(['newIssues', 'resolvedIssues']),
+    ...mapState(['newIssues', 'resolvedIssues', 'hasError', 'statusReason']),
     ...mapGetters([
       'hasCodequalityIssues',
       'codequalityStatus',
@@ -88,5 +88,7 @@ export default {
     :popover-options="codequalityPopover"
     :show-report-section-status-icon="false"
     class="js-codequality-widget mr-widget-border-top mr-report"
-  />
+  >
+    <template v-if="hasError" #sub-heading>{{ statusReason }}</template>
+  </report-section>
 </template>
