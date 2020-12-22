@@ -117,9 +117,9 @@ module Gitlab
             batch_counter += 1
           end
 
-          duration = delay_interval * batch_counter
+          duration = initial_delay + delay_interval * batch_counter
           say <<~SAY
-            Scheduled #{batch_counter} jobs with a maximum of #{batch_size} records per batch and an interval of #{delay_interval} seconds.
+            Scheduled #{batch_counter} #{job_class_name} jobs with a maximum of #{batch_size} records per batch and an interval of #{delay_interval} seconds.
 
             The migration is expected to take at least #{duration} seconds. Expect all jobs to have completed after #{Time.zone.now + duration}."
           SAY
