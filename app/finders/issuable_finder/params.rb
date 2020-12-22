@@ -101,11 +101,16 @@ class IssuableFinder
     end
 
     def releases?
-      params[:release_tag].present?
+      # It does not make sense to filters by releases for a Group.
+      !group? && params[:release_tag].present?
     end
 
     def project?
       project_id.present?
+    end
+
+    def group?
+      !group.nil?
     end
 
     def group
