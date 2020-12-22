@@ -89,7 +89,7 @@ module Gitlab
         #         # do something
         #       end
         #     end
-        def queue_background_migration_jobs_by_range_at_intervals(model_class, job_class_name, delay_interval, batch_size: BACKGROUND_MIGRATION_BATCH_SIZE, other_job_arguments: [], initial_delay: 0, track_jobs: false, primary_column_name: :id)
+        def queue_background_migration_jobs_by_range_at_intervals(model_class, job_class_name, delay_interval, batch_size: BACKGROUND_MIGRATION_BATCH_SIZE, stepping: nil, other_job_arguments: [], initial_delay: 0, track_jobs: false, primary_column_name: :id)
           raise "#{model_class} does not have an ID column of #{primary_column_name} to use for batch ranges" unless model_class.column_names.include?(primary_column_name.to_s)
           raise "#{primary_column_name} is not an integer column" unless model_class.columns_hash[primary_column_name.to_s].type == :integer
 
@@ -102,19 +102,28 @@ module Gitlab
           final_delay = 0
           batch_counter = 0
 
-          model_class.each_batch(of: batch_size) do |relation, index|
-            start_id, end_id = relation.pluck(Arel.sql("MIN(#{primary_column_name}), MAX(#{primary_column_name})")).first
+          stepping ||= batch_size
+          current_batch = []
 
-            # `BackgroundMigrationWorker.bulk_perform_in` schedules all jobs for
-            # the same time, which is not helpful in most cases where we wish to
-            # spread the work over time.
-            final_delay = initial_delay + delay_interval * index
-            full_job_arguments = [start_id, end_id] + other_job_arguments
+          model_class.each_batch(of: stepping) do |step|
+            current_batch << step.pluck(Arel.sql("MIN(#{primary_column_name}), MAX(#{primary_column_name})")).first
 
-            track_in_database(job_class_name, full_job_arguments) if track_jobs
-            migrate_in(final_delay, job_class_name, full_job_arguments)
+            if current_batch.size * stepping >= batch_size
+              start_id, _ = current_batch.first
+              _, end_id = current_batch.last
 
-            batch_counter += 1
+              # `BackgroundMigrationWorker.bulk_perform_in` schedules all jobs for
+              # the same time, which is not helpful in most cases where we wish to
+              # spread the work over time.
+              final_delay = initial_delay + delay_interval * batch_counter
+              full_job_arguments = [start_id, end_id] + other_job_arguments
+
+              track_in_database(job_class_name, full_job_arguments) if track_jobs
+              migrate_in(final_delay, job_class_name, full_job_arguments)
+
+              batch_counter += 1
+              current_batch = []
+            end
           end
 
           duration = delay_interval * batch_counter
