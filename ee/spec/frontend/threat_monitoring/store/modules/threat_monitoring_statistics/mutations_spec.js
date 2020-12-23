@@ -5,7 +5,7 @@ import { mockWafStatisticsResponse } from '../../../mock_data';
 describe('threatMonitoringStatistics mutations', () => {
   let state;
 
-  const mutations = mutationsFactory(payload => payload);
+  const mutations = mutationsFactory((payload) => payload);
   beforeEach(() => {
     state = {};
   });

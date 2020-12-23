@@ -42,7 +42,7 @@ describe('OnDemandScansForm', () => {
   let requestHandlers;
 
   const findForm = () => subject.find(GlForm);
-  const findByTestId = testId => subject.find(`[data-testid="${testId}"]`);
+  const findByTestId = (testId) => subject.find(`[data-testid="${testId}"]`);
   const findAlert = () => findByTestId('on-demand-scan-error');
   const findProfilesConflictAlert = () => findByTestId('on-demand-scans-profiles-conflict-alert');
   const findSubmitButton = () => findByTestId('on-demand-scan-submit-button');
@@ -54,7 +54,7 @@ describe('OnDemandScansForm', () => {
   };
   const submitForm = () => findForm().vm.$emit('submit', { preventDefault: () => {} });
 
-  const createMockApolloProvider = handlers => {
+  const createMockApolloProvider = (handlers) => {
     localVue.use(VueApollo);
 
     requestHandlers = {
@@ -255,7 +255,7 @@ describe('OnDemandScansForm', () => {
         const alert = findAlert();
 
         expect(alert.exists()).toBe(true);
-        errors.forEach(error => {
+        errors.forEach((error) => {
           expect(alert.text()).toContain(error);
         });
       });
@@ -343,7 +343,7 @@ describe('OnDemandScansForm', () => {
   describe('site profile summary', () => {
     const [authEnabledProfile] = siteProfiles;
 
-    const selectSiteProfile = profile => {
+    const selectSiteProfile = (profile) => {
       subject.find(SiteProfileSelector).vm.$emit('input', profile.id);
       return subject.vm.$nextTick();
     };

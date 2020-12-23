@@ -152,48 +152,48 @@ describe('Value Stream Analytics component', () => {
     return comp;
   }
 
-  const findStageNavItemAtIndex = index =>
+  const findStageNavItemAtIndex = (index) =>
     wrapper.find(StageTableNav).findAll(StageNavItem).at(index);
 
   const findAddStageButton = () => wrapper.find(AddStageButton);
 
-  const displaysProjectsDropdownFilter = flag => {
+  const displaysProjectsDropdownFilter = (flag) => {
     expect(wrapper.find(ProjectsDropdownFilter).exists()).toBe(flag);
   };
 
-  const displaysDateRangePicker = flag => {
+  const displaysDateRangePicker = (flag) => {
     expect(wrapper.find(Daterange).exists()).toBe(flag);
   };
 
-  const displaysMetrics = flag => {
+  const displaysMetrics = (flag) => {
     expect(wrapper.find(Metrics).exists()).toBe(flag);
   };
 
-  const displaysStageTable = flag => {
+  const displaysStageTable = (flag) => {
     expect(wrapper.find(StageTable).exists()).toBe(flag);
   };
 
-  const displaysDurationChart = flag => {
+  const displaysDurationChart = (flag) => {
     expect(wrapper.find(DurationChart).exists()).toBe(flag);
   };
 
-  const displaysTypeOfWork = flag => {
+  const displaysTypeOfWork = (flag) => {
     expect(wrapper.find(TypeOfWorkCharts).exists()).toBe(flag);
   };
 
-  const displaysPathNavigation = flag => {
+  const displaysPathNavigation = (flag) => {
     expect(wrapper.find(PathNavigation).exists()).toBe(flag);
   };
 
-  const displaysAddStageButton = flag => {
+  const displaysAddStageButton = (flag) => {
     expect(wrapper.find(AddStageButton).exists()).toBe(flag);
   };
 
-  const displaysFilterBar = flag => {
+  const displaysFilterBar = (flag) => {
     expect(wrapper.find(FilterBar).exists()).toBe(flag);
   };
 
-  const displaysValueStreamSelect = flag => {
+  const displaysValueStreamSelect = (flag) => {
     expect(wrapper.find(ValueStreamSelect).exists()).toBe(flag);
   };
 
@@ -548,7 +548,7 @@ describe('Value Stream Analytics component', () => {
     });
 
     const findFlashError = () => document.querySelector('.flash-container .flash-text');
-    const findError = async msg => {
+    const findError = async (msg) => {
       await waitForPromises();
       expect(findFlashError().innerText.trim()).toEqual(msg);
     };

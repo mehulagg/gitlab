@@ -12,17 +12,17 @@ import {
   customStageStopEvents as endEvents,
 } from '../../mock_data';
 
-const formatStartEventOpts = _events => [
+const formatStartEventOpts = (_events) => [
   { text: 'Select start event', value: null },
   ..._events
-    .filter(ev => ev.canBeStartEvent)
+    .filter((ev) => ev.canBeStartEvent)
     .map(({ name: text, identifier: value }) => ({ text, value })),
 ];
 
-const formatEndEventOpts = _events => [
+const formatEndEventOpts = (_events) => [
   { text: 'Select end event', value: null },
   ..._events
-    .filter(ev => !ev.canBeStartEvent)
+    .filter((ev) => !ev.canBeStartEvent)
     .map(({ name: text, identifier: value }) => ({ text, value })),
 ];
 
@@ -54,8 +54,8 @@ describe('CustomStageFields', () => {
 
   let wrapper = null;
 
-  const getSelectField = dropdownEl => dropdownEl.find(GlFormSelect);
-  const getLabelSelect = dropdownEl => dropdownEl.find(LabelsSelector);
+  const getSelectField = (dropdownEl) => dropdownEl.find(GlFormSelect);
+  const getLabelSelect = (dropdownEl) => dropdownEl.find(LabelsSelector);
 
   const findName = () => wrapper.find('[data-testid="custom-stage-name"]');
   const findStartEvent = () => wrapper.find('[data-testid="custom-stage-start-event"]');
@@ -144,7 +144,7 @@ describe('CustomStageFields', () => {
   });
 
   describe('End event', () => {
-    const possibleEndEvents = endEvents.filter(ev =>
+    const possibleEndEvents = endEvents.filter((ev) =>
       labelStartEvent.allowedEndEvents.includes(ev.identifier),
     );
 

@@ -29,7 +29,7 @@ describe('LicensePackages', () => {
         expect(vm.remainingPackages).toBe('2 more');
       });
 
-      it('returns empty string when count of packages does not exceed `displayPackageCount` prop', done => {
+      it('returns empty string when count of packages does not exceed `displayPackageCount` prop', (done) => {
         vm.displayPackageCount = examplePackages.length + 1;
         Vue.nextTick()
           .then(() => {

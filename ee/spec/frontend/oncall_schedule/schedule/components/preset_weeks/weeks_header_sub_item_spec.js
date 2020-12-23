@@ -36,7 +36,7 @@ describe('WeeksHeaderSubItemComponent', () => {
       it('returns `headerSubItems` array of dates containing days of week from timeframeItem', () => {
         expect(wrapper.vm.headerSubItems).toBeInstanceOf(Array);
         expect(wrapper.vm.headerSubItems).toHaveLength(7);
-        wrapper.vm.headerSubItems.forEach(subItem => {
+        wrapper.vm.headerSubItems.forEach((subItem) => {
           expect(subItem).toBeInstanceOf(Date);
         });
       });

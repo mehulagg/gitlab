@@ -32,7 +32,7 @@ import { groupedTextBuilder } from 'ee/vue_shared/security_reports/store/utils';
 
 const MOCK_PATH = 'fake/path.json';
 
-const generateVuln = severity => ({ severity });
+const generateVuln = (severity) => ({ severity });
 
 describe('Security reports getters', () => {
   let state = {};

@@ -28,10 +28,10 @@ export default {
   },
   computed: {
     ...mapState('filters', {
-      selectedMilestone: state => state.milestones.selected,
-      selectedLabelList: state => state.labels.selectedList,
-      milestonesData: state => state.milestones.data,
-      labelsData: state => state.labels.data,
+      selectedMilestone: (state) => state.milestones.selected,
+      selectedLabelList: (state) => state.labels.selectedList,
+      milestonesData: (state) => state.milestones.data,
+      labelsData: (state) => state.labels.data,
     }),
     tokens() {
       return [

@@ -187,7 +187,7 @@ describe('CreateIssueForm', () => {
 
     it('renders Projects dropdown contents containing only matching project when searchKey is provided', () => {
       const searchKey = 'Underscore';
-      const filteredMockProjects = mockProjects.filter(project => project.name === searchKey);
+      const filteredMockProjects = mockProjects.filter((project) => project.name === searchKey);
       jest.spyOn(wrapper.vm, 'fetchProjects').mockImplementation(jest.fn());
 
       wrapper.find(GlDeprecatedDropdown).trigger('click');
@@ -208,7 +208,7 @@ describe('CreateIssueForm', () => {
 
     it('renders Projects dropdown contents containing string string "No matches found" when searchKey provided does not match any project', () => {
       const searchKey = "this-project-shouldn't exist";
-      const filteredMockProjects = mockProjects.filter(project => project.name === searchKey);
+      const filteredMockProjects = mockProjects.filter((project) => project.name === searchKey);
       jest.spyOn(wrapper.vm, 'fetchProjects').mockImplementation(jest.fn());
 
       wrapper.find(GlDeprecatedDropdown).trigger('click');

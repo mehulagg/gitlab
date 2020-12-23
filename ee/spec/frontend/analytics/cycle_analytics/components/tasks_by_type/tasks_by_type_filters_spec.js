@@ -18,9 +18,9 @@ import { groupLabels } from '../../mock_data';
 
 const selectedLabelIds = [groupLabels[0].id];
 
-const findSubjectFilters = ctx => ctx.find(GlSegmentedControl);
-const findSelectedSubjectFilters = ctx => findSubjectFilters(ctx).attributes('checked');
-const findDropdownLabels = ctx => ctx.find(LabelsSelector).findAll(GlDropdownItem);
+const findSubjectFilters = (ctx) => ctx.find(GlSegmentedControl);
+const findSelectedSubjectFilters = (ctx) => findSubjectFilters(ctx).attributes('checked');
+const findDropdownLabels = (ctx) => ctx.find(LabelsSelector).findAll(GlDropdownItem);
 
 const selectLabelAtIndex = (ctx, index) => {
   findDropdownLabels(ctx).at(index).trigger('click');

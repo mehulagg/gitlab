@@ -10,7 +10,7 @@ import axios from '~/lib/utils/axios_utils';
 jest.mock('~/flash');
 
 describe('EE projectSelector actions', () => {
-  const getMockProjects = n => [...Array(n).keys()].map(i => ({ id: i, name: `project-${i}` }));
+  const getMockProjects = (n) => [...Array(n).keys()].map((i) => ({ id: i, name: `project-${i}` }));
 
   const mockAddEndpoint = 'mock-add_endpoint';
   const mockListEndpoint = 'mock-list_endpoint';
@@ -45,7 +45,7 @@ describe('EE projectSelector actions', () => {
   });
 
   describe('toggleSelectedProject', () => {
-    it('adds a project to selectedProjects if it does not already exist in the list', done => {
+    it('adds a project to selectedProjects if it does not already exist in the list', (done) => {
       const payload = getMockProjects(1);
 
       testAction(
@@ -459,7 +459,7 @@ describe('EE projectSelector actions', () => {
   describe('fetchSearchResults', () => {
     it.each([null, undefined, false, NaN, 0, ''])(
       'dispatches setMinimumQueryMessage if the search query is falsy',
-      searchQuery => {
+      (searchQuery) => {
         state.searchQuery = searchQuery;
 
         return testAction(
@@ -481,7 +481,7 @@ describe('EE projectSelector actions', () => {
 
     it.each(['a', 'aa'])(
       'dispatches setMinimumQueryMessage if the search query was not long enough',
-      shortSearchQuery => {
+      (shortSearchQuery) => {
         state.searchQuery = shortSearchQuery;
 
         return testAction(

@@ -6,7 +6,7 @@ import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 
 import { mockEpic1, mockEpic2, mockEpics, noneEpic } from '../mock_data';
 
-const epics = mockEpics.map(epic => convertObjectPropsToCamelCase(epic));
+const epics = mockEpics.map((epic) => convertObjectPropsToCamelCase(epic));
 
 describe('EpicsSelect', () => {
   describe('DropdownContents', () => {
@@ -27,7 +27,7 @@ describe('EpicsSelect', () => {
 
     describe('computed', () => {
       describe('isNoEpic', () => {
-        it('should return true when `selectedEpic` is of type `No Epic`', done => {
+        it('should return true when `selectedEpic` is of type `No Epic`', (done) => {
           wrapper.setProps({
             selectedEpic: noneEpic,
           });

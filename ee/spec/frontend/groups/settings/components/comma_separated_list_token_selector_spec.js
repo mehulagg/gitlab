@@ -16,7 +16,7 @@ describe('CommaSeparatedListTokenSelector', () => {
     disallowedValueErrorMessage: 'The value entered is not allowed',
   };
 
-  const createComponent = options => {
+  const createComponent = (options) => {
     wrapper = mount(CommaSeparatedListTokenSelector, {
       attachTo: div,
       scopedSlots: {
@@ -39,7 +39,7 @@ describe('CommaSeparatedListTokenSelector', () => {
   const findErrorMessageText = () =>
     findTokenSelector().find('[role="menuitem"][disabled="disabled"]').text();
 
-  const setTokenSelectorInputValue = value => {
+  const setTokenSelectorInputValue = (value) => {
     const tokenSelectorInput = findTokenSelectorInput();
 
     tokenSelectorInput.element.value = value;
@@ -48,7 +48,7 @@ describe('CommaSeparatedListTokenSelector', () => {
     return nextTick();
   };
 
-  const tokenSelectorTriggerEnter = event => {
+  const tokenSelectorTriggerEnter = (event) => {
     const tokenSelectorInput = findTokenSelectorInput();
     tokenSelectorInput.trigger('keydown.enter', event);
   };

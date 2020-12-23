@@ -9,7 +9,7 @@ const TEST_NEW_PATH = '/test/new/scanner/profile/path';
 const TEST_ATTRS = {
   'data-foo': 'bar',
 };
-const profiles = scannerProfiles.map(x => {
+const profiles = scannerProfiles.map((x) => {
   const suffix = x.scanType === 'ACTIVE' ? 'Active' : 'Passive';
   return { ...x, dropdownLabel: `${x.profileName} (${suffix})` };
 });
@@ -106,7 +106,7 @@ describe('OnDemandScansScannerProfileSelector', () => {
         expect(sel.props()).toEqual({
           libraryPath: TEST_LIBRARY_PATH,
           newProfilePath: TEST_NEW_PATH,
-          profiles: scannerProfiles.map(x => ({ ...x, dropdownLabel: `${x.profileName}` })),
+          profiles: scannerProfiles.map((x) => ({ ...x, dropdownLabel: `${x.profileName}` })),
           value: null,
         });
         expect(sel.attributes()).toMatchObject(TEST_ATTRS);

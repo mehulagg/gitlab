@@ -31,12 +31,12 @@ describe('EE Approvals MRRules', () => {
     });
   };
 
-  const findHeaders = () => wrapper.findAll('thead th').wrappers.map(x => x.text());
+  const findHeaders = () => wrapper.findAll('thead th').wrappers.map((x) => x.text());
   const findRuleName = () => wrapper.find('.js-name');
   const findRuleIndicator = () => wrapper.find({ ref: 'indicator' });
   const findRuleMembers = () => wrapper.find('td.js-members').find(UserAvatarList).props('items');
   const findRuleControls = () => wrapper.find('td.js-controls').find(RuleControls);
-  const callTargetBranchHandler = MutationObserverSpy => {
+  const callTargetBranchHandler = (MutationObserverSpy) => {
     const onTargetBranchMutationHandler = MutationObserverSpy.mock.calls[0][0];
     return onTargetBranchMutationHandler();
   };
@@ -45,7 +45,7 @@ describe('EE Approvals MRRules', () => {
     OriginalMutationObserver = global.MutationObserver;
     global.MutationObserver = jest
       .fn()
-      .mockImplementation(args => new OriginalMutationObserver(args));
+      .mockImplementation((args) => new OriginalMutationObserver(args));
 
     store = createStoreOptions(MREditModule());
     store.modules.approvals.state = {
@@ -157,7 +157,7 @@ describe('EE Approvals MRRules', () => {
       factory();
 
       const anyApproverCount = store.modules.approvals.state.rules.filter(
-        rule => rule.ruleType === 'any_approver',
+        (rule) => rule.ruleType === 'any_approver',
       );
 
       expect(anyApproverCount).toHaveLength(1);

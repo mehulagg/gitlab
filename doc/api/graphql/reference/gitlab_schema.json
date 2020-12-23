@@ -26177,16 +26177,6 @@
                     "ofType": null
                   },
                   "defaultValue": null
-                },
-                {
-                  "name": "id",
-                  "description": "Global ID of a specific compliance framework to return.",
-                  "type": {
-                    "kind": "SCALAR",
-                    "name": "ComplianceManagementFrameworkID",
-                    "ofType": null
-                  },
-                  "defaultValue": null
                 }
               ],
               "type": {
@@ -26976,6 +26966,16 @@
                   "type": {
                     "kind": "SCALAR",
                     "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "id",
+                  "description": "Global ID of a specific compliance framework to return.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "ComplianceManagementFrameworkID",
                     "ofType": null
                   },
                   "defaultValue": null

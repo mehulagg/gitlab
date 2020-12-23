@@ -225,7 +225,7 @@ describe('License Report MR Widget', () => {
       `(
         'given reports for: $givenStatuses it has $expectedNumberOfReportHeadings report headings',
         ({ givenStatuses, expectedNumberOfReportHeadings }) => {
-          const mockReportGroups = givenStatuses.map(status => generateReportGroup({ status }));
+          const mockReportGroups = givenStatuses.map((status) => generateReportGroup({ status }));
 
           mountComponent({
             getters: {
@@ -245,7 +245,7 @@ describe('License Report MR Widget', () => {
 
       it.each([0, 1, 2])(
         'should include %d report items when section has that many licenses',
-        numberOfLicenses => {
+        (numberOfLicenses) => {
           const mockReportGroups = [
             generateReportGroup({
               numberOfLicenses,

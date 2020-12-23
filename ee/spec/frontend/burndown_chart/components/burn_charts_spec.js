@@ -24,7 +24,7 @@ describe('burndown_chart', () => {
   const findIssuesButton = () => wrapper.find({ ref: 'totalIssuesButton' });
   const findWeightButton = () => wrapper.find({ ref: 'totalWeightButton' });
   const findActiveButtons = () =>
-    wrapper.findAll(GlButton).filter(button => button.attributes().category === 'primary');
+    wrapper.findAll(GlButton).filter((button) => button.attributes().category === 'primary');
   const findBurndownChart = () => wrapper.find(BurndownChart);
   const findBurnupChart = () => wrapper.find(BurnupChart);
   const findOldBurndownChartButton = () => wrapper.find({ ref: 'oldBurndown' });

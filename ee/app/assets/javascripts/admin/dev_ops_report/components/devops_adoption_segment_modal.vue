@@ -83,7 +83,7 @@ export default {
     },
     filteredOptions() {
       return this.filter
-        ? this.checkboxOptions.filter(option =>
+        ? this.checkboxOptions.filter((option) =>
             option.label.toLowerCase().includes(this.filter.toLowerCase()),
           )
         : this.checkboxOptions;

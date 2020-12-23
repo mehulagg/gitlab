@@ -26,7 +26,7 @@ export const resolvers = {
           // eslint-disable-next-line @gitlab/require-i18n-strings
           __typename: 'Groups',
           // eslint-disable-next-line @gitlab/require-i18n-strings
-          nodes: data.map(group => ({ ...group, __typename: 'Group' })),
+          nodes: data.map((group) => ({ ...group, __typename: 'Group' })),
           pageInfo,
         };
 

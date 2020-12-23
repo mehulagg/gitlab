@@ -27,7 +27,7 @@ describe('DependenciesApp component', () => {
     store = createStore();
     jest.spyOn(store, 'dispatch').mockImplementation();
 
-    const stubs = Object.keys(DependenciesApp.components).filter(name => name !== 'GlSprintf');
+    const stubs = Object.keys(DependenciesApp.components).filter((name) => name !== 'GlSprintf');
 
     wrapper = mount(DependenciesApp, {
       store,
@@ -107,7 +107,7 @@ describe('DependenciesApp component', () => {
     expect(componentWrapper.props()).toEqual(expect.objectContaining(props));
   };
 
-  const expectComponentPropsToMatchSnapshot = Component => {
+  const expectComponentPropsToMatchSnapshot = (Component) => {
     const componentWrapper = wrapper.find(Component);
     expect(componentWrapper.props()).toMatchSnapshot();
   };

@@ -63,7 +63,7 @@ describe('BlockingMergeRequestsReport', () => {
     createComponent();
     const reportSectionProps = wrapper.find(ReportSection).props();
 
-    expect(reportSectionProps.unresolvedIssues.map(issue => issue.id)).toEqual([2, 1]);
+    expect(reportSectionProps.unresolvedIssues.map((issue) => issue.id)).toEqual([2, 1]);
   });
 
   it('sets status to "ERROR" when there are unmerged blocking MRs', () => {
@@ -112,7 +112,7 @@ describe('BlockingMergeRequestsReport', () => {
     it('does not include merged MRs', () => {
       createComponent();
       const containsMergedMRs = wrapper.vm.unmergedBlockingMergeRequests.some(
-        mr => mr.state === 'merged',
+        (mr) => mr.state === 'merged',
       );
 
       expect(containsMergedMRs).toBe(false);
@@ -121,7 +121,7 @@ describe('BlockingMergeRequestsReport', () => {
     it('puts closed MRs first', () => {
       createComponent();
       const closedIndex = wrapper.vm.unmergedBlockingMergeRequests.findIndex(
-        mr => mr.state === 'closed',
+        (mr) => mr.state === 'closed',
       );
 
       expect(closedIndex).toBe(0);

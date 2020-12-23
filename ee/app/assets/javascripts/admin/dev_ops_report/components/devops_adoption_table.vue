@@ -32,7 +32,7 @@ const headers = [
   'pipelineSucceeded',
   'deploySucceeded',
   'securityScanSucceeded',
-].map(key => ({ key, ...i18n.headers[key], ...fieldOptions }));
+].map((key) => ({ key, ...i18n.headers[key], ...fieldOptions }));
 
 export default {
   name: 'DevopsAdoptionTable',

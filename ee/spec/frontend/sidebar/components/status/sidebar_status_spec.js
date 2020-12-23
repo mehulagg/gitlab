@@ -7,7 +7,7 @@ describe('SidebarStatus', () => {
   let wrapper;
   let handleDropdownClickMock;
 
-  const createMediator = states => {
+  const createMediator = (states) => {
     mediator = {
       store: {
         isFetching: {

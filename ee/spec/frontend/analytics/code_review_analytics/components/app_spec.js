@@ -55,7 +55,7 @@ describe('CodeReviewAnalyticsApp component', () => {
       },
     });
 
-  const createComponent = store =>
+  const createComponent = (store) =>
     shallowMount(CodeReviewAnalyticsApp, {
       localVue,
       store,

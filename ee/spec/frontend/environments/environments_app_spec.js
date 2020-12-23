@@ -31,7 +31,7 @@ describe('Environment', () => {
     return axios.waitForAll();
   };
 
-  const mockRequest = environmentList => {
+  const mockRequest = (environmentList) => {
     mock.onGet(mockData.endpoint).reply(
       200,
       {

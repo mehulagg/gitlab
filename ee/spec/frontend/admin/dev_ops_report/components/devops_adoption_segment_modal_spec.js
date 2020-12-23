@@ -29,7 +29,7 @@ const mutate = jest.fn().mockResolvedValue({
     },
   },
 });
-const mutateWithDataErrors = segment =>
+const mutateWithDataErrors = (segment) =>
   jest.fn().mockResolvedValue({
     data: {
       [segment ? 'updateDevopsAdoptionSegment' : 'createDevopsAdoptionSegment']: {
@@ -64,13 +64,13 @@ describe('DevopsAdoptionSegmentModal', () => {
   };
 
   const findModal = () => wrapper.find(GlModal);
-  const findByTestId = testId => findModal().find(`[data-testid="${testId}"]`);
+  const findByTestId = (testId) => findModal().find(`[data-testid="${testId}"]`);
   const actionButtonDisabledState = () => findModal().props('actionPrimary').attributes[0].disabled;
   const cancelButtonDisabledState = () => findModal().props('actionCancel').attributes[0].disabled;
   const actionButtonLoadingState = () => findModal().props('actionPrimary').attributes[0].loading;
   const findAlert = () => findModal().find(GlAlert);
 
-  const assertHelperText = text => expect(getByText(wrapper.element, text)).not.toBeNull();
+  const assertHelperText = (text) => expect(getByText(wrapper.element, text)).not.toBeNull();
 
   afterEach(() => {
     wrapper.destroy();
@@ -89,7 +89,7 @@ describe('DevopsAdoptionSegmentModal', () => {
   describe('displays the correct content', () => {
     beforeEach(() => createComponent());
 
-    const isCorrectShape = option => {
+    const isCorrectShape = (option) => {
       const keys = Object.keys(option);
       return keys.includes('label') && keys.includes('value');
     };

@@ -100,7 +100,7 @@ describe('seats actions', () => {
   });
 
   describe('receiveBillableMembersListError', () => {
-    it('should commit the error mutation', done => {
+    it('should commit the error mutation', (done) => {
       testAction(
         actions.receiveBillableMembersListError,
         {},

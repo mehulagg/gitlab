@@ -64,7 +64,7 @@ describe('ee/environments/components/canary_ingress.vue', () => {
     it('is set to open the change modal', () => {
       stableWeightDropdown
         .findAll(GlDropdownItem)
-        .wrappers.forEach(w =>
+        .wrappers.forEach((w) =>
           expect(getBinding(w.element, 'gl-modal')).toMatchObject({ value: CANARY_UPDATE_MODAL }),
         );
     });

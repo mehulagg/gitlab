@@ -74,7 +74,7 @@ export default {
       return Boolean(this.devopsAdoptionSegments?.nodes?.length);
     },
     hasLoadingError() {
-      return Object.values(this.errors).some(error => error === true);
+      return Object.values(this.errors).some((error) => error === true);
     },
     timestamp() {
       return dateformat(
@@ -128,7 +128,7 @@ export default {
             this.isLoadingGroups = false;
           }
         })
-        .catch(error => this.handleError(DEVOPS_ADOPTION_ERROR_KEYS.groups, error));
+        .catch((error) => this.handleError(DEVOPS_ADOPTION_ERROR_KEYS.groups, error));
     },
     setSelectedSegment(segment) {
       this.selectedSegment = segment;

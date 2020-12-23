@@ -43,7 +43,7 @@ describe('Project scanning store utils', () => {
 
       const groups = groupByDateRanges({
         ranges,
-        dateFn: x => x.lastUpdated,
+        dateFn: (x) => x.lastUpdated,
         projects,
       });
 
@@ -67,7 +67,7 @@ describe('Project scanning store utils', () => {
 
       const groups = groupByDateRanges({
         ranges,
-        dateFn: x => x.lastUpdated,
+        dateFn: (x) => x.lastUpdated,
         projects,
       });
 
@@ -92,7 +92,7 @@ describe('Project scanning store utils', () => {
 
       const groups = groupByDateRanges({
         ranges,
-        dateFn: x => x.lastUpdated,
+        dateFn: (x) => x.lastUpdated,
         projects: projectsWithoutTimeStamp,
       });
 

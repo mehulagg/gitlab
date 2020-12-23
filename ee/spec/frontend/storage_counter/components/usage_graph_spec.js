@@ -16,7 +16,7 @@ function mountComponent({ rootStorageStatistics, limit }) {
 function findStorageTypeUsagesSerialized() {
   return wrapper
     .findAll('[data-testid="storage-type-usage"]')
-    .wrappers.map(wp => wp.element.style.flex);
+    .wrappers.map((wp) => wp.element.style.flex);
 }
 
 describe('Storage Counter usage graph component', () => {

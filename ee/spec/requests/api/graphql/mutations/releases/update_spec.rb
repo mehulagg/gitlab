@@ -65,10 +65,7 @@ RSpec.describe 'Updating an existing release' do
         returned_milestone_titles = mutation_response.dig(:release, :milestones, :nodes)
                                                      .map { |m| m[:title] }
 
-        # Right now the milestones are returned in a non-deterministic order.
-        # Once https://gitlab.com/gitlab-org/gitlab/-/issues/259012 is addressed,
-        # this test should be updated to expect a specific order.
-        expect(returned_milestone_titles).to match_array([
+        expect(returned_milestone_titles).to eq([
           milestone_12_3.title,
           milestone_12_4.title,
           group_milestone.title
