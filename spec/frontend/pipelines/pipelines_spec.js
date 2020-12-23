@@ -84,7 +84,7 @@ describe('Pipelines', () => {
     });
   };
 
-  beforeAll(() => {
+  beforeEach(() => {
     delete window.location;
   });
 
