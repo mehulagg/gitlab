@@ -101,7 +101,7 @@ describe('Merge Requests Artifacts list app', () => {
         findTitle().trigger('click');
         await nextTick();
 
-        expect(findTableRows().length).toEqual(2);
+        expect(findTableRows().length).toBe(2);
       });
     });
   });
