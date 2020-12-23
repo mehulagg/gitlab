@@ -370,6 +370,7 @@ module EE
         enable :admin_requirement
         enable :update_requirement
         enable :import_requirements
+        enable :export_requirements
       end
 
       rule { requirements_available & owner }.enable :destroy_requirement
