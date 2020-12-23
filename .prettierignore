@@ -682,39 +682,6 @@ app/assets/javascripts/performance_bar/components/request_selector.vue
 app/assets/javascripts/performance_bar/index.js
 app/assets/javascripts/performance_bar/performance_bar_log.js
 
-## awesome-chaum
-app/assets/javascripts/releases/stores/modules/list/actions.js
-app/assets/javascripts/releases/stores/modules/list/index.js
-app/assets/javascripts/releases/util.js
-app/assets/javascripts/reports/accessibility_report/store/getters.js
-app/assets/javascripts/reports/accessibility_report/store/index.js
-app/assets/javascripts/reports/codequality_report/store/actions.js
-app/assets/javascripts/reports/codequality_report/store/getters.js
-app/assets/javascripts/reports/codequality_report/store/index.js
-app/assets/javascripts/reports/codequality_report/store/utils/codequality_comparison.js
-app/assets/javascripts/reports/codequality_report/workers/codequality_comparison_worker.js
-app/assets/javascripts/reports/components/grouped_issues_list.vue
-app/assets/javascripts/reports/components/grouped_test_reports_app.vue
-app/assets/javascripts/reports/components/issues_list.vue
-app/assets/javascripts/reports/components/report_item.vue
-app/assets/javascripts/reports/store/getters.js
-app/assets/javascripts/reports/store/mutations.js
-app/assets/javascripts/reports/store/utils.js
-app/assets/javascripts/repository/components/breadcrumbs.vue
-app/assets/javascripts/repository/components/directory_download_links.vue
-app/assets/javascripts/repository/components/last_commit.vue
-app/assets/javascripts/repository/components/table/parent_row.vue
-app/assets/javascripts/repository/components/tree_content.vue
-app/assets/javascripts/repository/graphql.js
-app/assets/javascripts/repository/router.js
-app/assets/javascripts/repository/utils/commit.js
-app/assets/javascripts/repository/utils/readme.js
-app/assets/javascripts/search/highlight_blob_search_result.js
-app/assets/javascripts/search/sidebar/index.js
-app/assets/javascripts/search/store/actions.js
-app/assets/javascripts/search/store/index.js
-app/assets/javascripts/search/topbar/index.js
-
 ## keen-sutherland
 app/assets/javascripts/search_autocomplete.js
 app/assets/javascripts/self_monitor/store/actions.js
