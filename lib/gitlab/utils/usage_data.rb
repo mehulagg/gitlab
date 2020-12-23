@@ -145,7 +145,7 @@ module Gitlab
 
       def prometheus_server_address
         if Gitlab::Prometheus::Internal.prometheus_enabled?
-          Gitlab::Prometheus::Internal.server_address
+          Gitlab::Prometheus::Internal.uri_without_protocol
         elsif Gitlab::Consul::Internal.api_url
           Gitlab::Consul::Internal.discover_prometheus_server_address
         end

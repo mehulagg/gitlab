@@ -105,7 +105,7 @@ module Gitlab
 
           def add_prometheus_manual_configuration(result)
             return success(result) unless prometheus_enabled?
-            return success(result) unless prometheus_listen_address.present?
+            return success(result) unless prometheus_server_address.present?
 
             service = result[:project].find_or_initialize_service('prometheus')
 
@@ -132,8 +132,8 @@ module Gitlab
             ::Gitlab::Prometheus::Internal.prometheus_enabled?
           end
 
-          def prometheus_listen_address
-            ::Gitlab::Prometheus::Internal.listen_address
+          def prometheus_server_address
+            ::Gitlab::Prometheus::Internal.server_address
           end
 
           def docs_path
@@ -152,13 +152,13 @@ module Gitlab
             }
           end
 
-          def internal_prometheus_listen_address_uri
+          def internal_prometheus_server_address_uri
             ::Gitlab::Prometheus::Internal.uri
           end
 
           def prometheus_service_attributes
             {
-              api_url: internal_prometheus_listen_address_uri,
+              api_url: internal_prometheus_server_address_uri,
               manual_configuration: true,
               active: true
             }

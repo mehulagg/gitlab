@@ -852,6 +852,16 @@ Settings.monitoring.web_exporter['address'] ||= 'localhost'
 Settings.monitoring.web_exporter['port'] ||= 8083
 
 #
+# Prometheus settings
+#
+Settings['prometheus'] ||= Settingslogic.new({})
+# TODO: Remove enable and listen_address in GitLab 14.0 and set default value
+# of server_address to be nil.
+Settings.prometheus['enable'] ||= false
+Settings.prometheus['listen_address'] ||= nil
+Settings.prometheus['server_address'] ||= Settings.prometheus['listen_address']
+
+#
 # Shutdown settings
 #
 Settings['shutdown'] ||= Settingslogic.new({})
