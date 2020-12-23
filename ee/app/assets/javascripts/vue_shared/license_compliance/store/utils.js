@@ -11,7 +11,7 @@ import { STATUS_FAILED, STATUS_NEUTRAL, STATUS_SUCCESS } from '~/reports/constan
  * @returns {Object}
  *
  */
-export const normalizeLicense = license => {
+export const normalizeLicense = (license) => {
   const { approval_status: approvalStatus, ...rest } = license;
   return {
     ...rest,
@@ -19,7 +19,7 @@ export const normalizeLicense = license => {
   };
 };
 
-export const getStatusTranslationsFromLicenseStatus = approvalStatus => {
+export const getStatusTranslationsFromLicenseStatus = (approvalStatus) => {
   if (approvalStatus === LICENSE_APPROVAL_STATUS.ALLOWED) {
     return s__('LicenseCompliance|Allowed');
   } else if (approvalStatus === LICENSE_APPROVAL_STATUS.DENIED) {
@@ -28,7 +28,7 @@ export const getStatusTranslationsFromLicenseStatus = approvalStatus => {
   return '';
 };
 
-export const getIssueStatusFromLicenseStatus = approvalStatus => {
+export const getIssueStatusFromLicenseStatus = (approvalStatus) => {
   if (approvalStatus === LICENSE_APPROVAL_STATUS.ALLOWED) {
     return STATUS_SUCCESS;
   } else if (approvalStatus === LICENSE_APPROVAL_STATUS.DENIED) {
@@ -55,13 +55,13 @@ export const getPackagesString = (packages, truncate, maxPackages) => {
     // and truncate is true.
     packagesString = packages
       .slice(0, maxPackages)
-      .map(packageItem => packageItem.name)
+      .map((packageItem) => packageItem.name)
       .join(', ');
   } else {
     // Return all package names separated by comma with proper grammar
     packagesString = packages
       .slice(0, packages.length - 1)
-      .map(packageItem => packageItem.name)
+      .map((packageItem) => packageItem.name)
       .join(', ');
     lastPackage = packages[packages.length - 1].name;
   }
@@ -83,7 +83,7 @@ export const getPackagesString = (packages, truncate, maxPackages) => {
  * @returns {Object} The converted license;
  */
 
-export const convertToOldReportFormat = license => {
+export const convertToOldReportFormat = (license) => {
   const approvalStatus = license.classification.approval_status;
 
   return {
@@ -104,10 +104,10 @@ export const convertToOldReportFormat = license => {
  * @param {Array} licenses
  * @returns {function(*): {licenses: (*|*[])}}
  */
-export const addLicensesMatchingReportGroupStatus = licenses => {
+export const addLicensesMatchingReportGroupStatus = (licenses) => {
   const licensesGroupedByStatus = groupBy(licenses, 'status');
 
-  return reportGroup => ({
+  return (reportGroup) => ({
     ...reportGroup,
     licenses: licensesGroupedByStatus[reportGroup.status] || [],
   });

@@ -43,7 +43,7 @@ export default {
     },
     noteDictionary() {
       return this.discussions
-        .flatMap(x => x.notes)
+        .flatMap((x) => x.notes)
         .reduce((acc, note) => {
           acc[note.id] = note;
           return acc;
@@ -156,11 +156,11 @@ export default {
     updateNotes(notes) {
       let isVulnerabilityStateChanged = false;
 
-      notes.forEach(note => {
+      notes.forEach((note) => {
         // If the note exists, update it.
         if (this.noteDictionary[note.id]) {
           const updatedDiscussion = { ...this.discussionsDictionary[note.discussionId] };
-          updatedDiscussion.notes = updatedDiscussion.notes.map(curr =>
+          updatedDiscussion.notes = updatedDiscussion.notes.map((curr) =>
             curr.id === note.id ? note : curr,
           );
           this.discussionsDictionary[note.discussionId] = updatedDiscussion;

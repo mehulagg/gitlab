@@ -24,7 +24,7 @@ export const setSelectedEpicIssueId = ({ commit }, selectedEpicIssueId) =>
 
 export const requestEpics = ({ commit }) => commit(types.REQUEST_EPICS);
 export const receiveEpicsSuccess = ({ commit }, data) => {
-  const epics = data.map(rawEpic =>
+  const epics = data.map((rawEpic) =>
     convertObjectPropsToCamelCase(
       { ...rawEpic, url: rawEpic.web_edit_url },
       {

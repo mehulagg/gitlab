@@ -4,7 +4,7 @@ import { GlSkeletonLoader, GlIcon } from '@gitlab/ui';
 
 import accordionEventBus from './accordion_event_bus';
 
-const accordionItemUniqueId = name => uniqueId(`gl-accordion-item-${name}-`);
+const accordionItemUniqueId = (name) => uniqueId(`gl-accordion-item-${name}-`);
 
 export default {
   components: {

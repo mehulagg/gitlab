@@ -1187,46 +1187,6 @@ ee/app/assets/javascripts/oncall_schedules/components/delete_schedule_modal.vue
 ee/app/assets/javascripts/oncall_schedules/components/oncall_schedule.vue
 ee/app/assets/javascripts/oncall_schedules/components/rotations/components/add_rotation_modal.vue
 
-## pedantic-wu
-ee/app/assets/javascripts/vue_merge_request_widget/mappers.js
-ee/app/assets/javascripts/vue_merge_request_widget/mr_widget_options.vue
-ee/app/assets/javascripts/vue_merge_request_widget/services/mr_widget_service.js
-ee/app/assets/javascripts/vue_merge_request_widget/stores/mr_widget_store.js
-ee/app/assets/javascripts/vue_shared/components/accordion/accordion_item.vue
-ee/app/assets/javascripts/vue_shared/components/gfm_autocomplete/utils.js
-ee/app/assets/javascripts/vue_shared/components/sidebar/epics_select/store/actions.js
-ee/app/assets/javascripts/vue_shared/components/sidebar/epics_select/store/getters.js
-ee/app/assets/javascripts/vue_shared/dashboards/components/project_pipeline.vue
-ee/app/assets/javascripts/vue_shared/dashboards/store/actions.js
-ee/app/assets/javascripts/vue_shared/dashboards/store/mutations.js
-ee/app/assets/javascripts/vue_shared/license_compliance/components/add_license_form_dropdown.vue
-ee/app/assets/javascripts/vue_shared/license_compliance/components/admin_license_management_row.vue
-ee/app/assets/javascripts/vue_shared/license_compliance/store/actions.js
-ee/app/assets/javascripts/vue_shared/license_compliance/store/getters.js
-ee/app/assets/javascripts/vue_shared/license_compliance/store/mutations.js
-ee/app/assets/javascripts/vue_shared/license_compliance/store/utils.js
-ee/app/assets/javascripts/vue_shared/metrics_reports/store/getters.js
-ee/app/assets/javascripts/vue_shared/metrics_reports/store/mutations.js
-ee/app/assets/javascripts/vue_shared/security_reports/components/vulnerability_details.vue
-ee/app/assets/javascripts/vue_shared/security_reports/store/actions.js
-ee/app/assets/javascripts/vue_shared/security_reports/store/getters.js
-ee/app/assets/javascripts/vue_shared/security_reports/store/modules/api_fuzzing/actions.js
-ee/app/assets/javascripts/vue_shared/security_reports/store/modules/api_fuzzing/getters.js
-ee/app/assets/javascripts/vue_shared/security_reports/store/modules/sast/getters.js
-ee/app/assets/javascripts/vue_shared/security_reports/store/modules/secret_detection/getters.js
-ee/app/assets/javascripts/vue_shared/security_reports/store/utils.js
-ee/app/assets/javascripts/vue_shared/security_reports/store/utils/convert_report_type.js
-ee/app/assets/javascripts/vue_shared/security_reports/store/utils/get_primary_identifier.js
-ee/app/assets/javascripts/vulnerabilities/components/details.vue
-ee/app/assets/javascripts/vulnerabilities/components/footer.vue
-ee/app/assets/javascripts/vulnerabilities/components/header.vue
-ee/app/assets/javascripts/vulnerabilities/components/history_entry.vue
-ee/app/assets/javascripts/vulnerabilities/components/related_issues.vue
-ee/app/assets/javascripts/vulnerabilities/components/resolution_alert.vue
-
-## wonderful-proskuriakova
-ee/app/assets/javascripts/vulnerabilities/helpers.js
-ee/app/assets/javascripts/vulnerabilities/vulnerabilities_init.js
 ee/spec/frontend/admin/dev_ops_report/components/devops_adoption_segment_modal_spec.js
 ee/spec/frontend/admin/dev_ops_report/components/devops_adoption_table_cell_flag_spec.js
 ee/spec/frontend/admin/dev_ops_report/components/devops_adoption_table_spec.js

@@ -116,7 +116,7 @@ export default {
         this.isLoadingUser = true;
 
         UsersCache.retrieveById(id)
-          .then(userData => {
+          .then((userData) => {
             this.user = userData;
           })
           .catch(() => {
@@ -221,7 +221,7 @@ export default {
         .then(({ data }) => {
           Object.assign(this.vulnerability, data);
         })
-        .catch(e => {
+        .catch((e) => {
           // Don't show an error message if the request was cancelled through the cancel token.
           if (!axios.isCancel(e)) {
             createFlash(

@@ -62,7 +62,7 @@ export default {
     },
     recordedMessage() {
       return this.vulnerability?.supportingMessages?.find(
-        msg => msg.name === SUPPORTING_MESSAGE_TYPES.RECORDED,
+        (msg) => msg.name === SUPPORTING_MESSAGE_TYPES.RECORDED,
       )?.response;
     },
     constructedRequest() {
@@ -85,7 +85,7 @@ export default {
           content: this.constructedRequest,
           isCode: true,
         },
-      ].filter(x => x.content);
+      ].filter((x) => x.content);
     },
     responseData() {
       if (!this.vulnerability.response) {
@@ -98,7 +98,7 @@ export default {
           content: this.constructedResponse,
           isCode: true,
         },
-      ].filter(x => x.content);
+      ].filter((x) => x.content);
     },
     recordedResponseData() {
       if (!this.recordedMessage) {
@@ -111,7 +111,7 @@ export default {
           content: this.constructedRecordedResponse,
           isCode: true,
         },
-      ].filter(x => x.content);
+      ].filter((x) => x.content);
     },
     shouldShowLocation() {
       return (

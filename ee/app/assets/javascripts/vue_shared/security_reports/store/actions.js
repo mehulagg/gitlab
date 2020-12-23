@@ -67,7 +67,7 @@ export const fetchContainerScanningDiff = ({ state, dispatch }) => {
   dispatch('requestContainerScanningDiff');
 
   return fetchDiffData(state, state.containerScanning.paths.diffEndpoint, 'container_scanning')
-    .then(data => {
+    .then((data) => {
       dispatch('receiveContainerScanningDiffSuccess', data);
     })
     .catch(() => {
@@ -96,7 +96,7 @@ export const fetchDastDiff = ({ state, dispatch }) => {
   dispatch('requestDastDiff');
 
   return fetchDiffData(state, state.dast.paths.diffEndpoint, 'dast')
-    .then(data => {
+    .then((data) => {
       dispatch('receiveDastDiffSuccess', data);
     })
     .catch(() => {
@@ -124,7 +124,7 @@ export const fetchDependencyScanningDiff = ({ state, dispatch }) => {
   dispatch('requestDependencyScanningDiff');
 
   return fetchDiffData(state, state.dependencyScanning.paths.diffEndpoint, 'dependency_scanning')
-    .then(data => {
+    .then((data) => {
       dispatch('receiveDependencyScanningDiffSuccess', data);
     })
     .catch(() => {
@@ -161,7 +161,7 @@ export const fetchCoverageFuzzingDiff = ({ state, dispatch }) => {
       },
     }),
   ])
-    .then(values => {
+    .then((values) => {
       dispatch('receiveCoverageFuzzingDiffSuccess', {
         diff: values[0].data,
         enrichData: values[1].data,
@@ -371,7 +371,7 @@ export const createNewIssue = ({ state, dispatch }) => {
         vulnerability_data: state.modal.vulnerability,
       },
     })
-    .then(response => {
+    .then((response) => {
       dispatch('receiveCreateIssue');
       // redirect the user to the created issue
       visitUrl(response.data.issue_url);

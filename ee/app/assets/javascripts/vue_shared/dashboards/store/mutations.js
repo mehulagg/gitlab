@@ -26,7 +26,7 @@ export default {
     if (AccessorUtilities.isLocalStorageAccessSafe()) {
       localStorage.setItem(
         state.projectEndpoints.list,
-        state.projects.map(p => p.id),
+        state.projects.map((p) => p.id),
       );
     } else {
       createFlash(
@@ -44,12 +44,12 @@ export default {
   },
 
   [types.ADD_SELECTED_PROJECT](state, project) {
-    if (!state.selectedProjects.some(p => p.id === project.id)) {
+    if (!state.selectedProjects.some((p) => p.id === project.id)) {
       state.selectedProjects.push(project);
     }
   },
   [types.REMOVE_SELECTED_PROJECT](state, project) {
-    state.selectedProjects = state.selectedProjects.filter(p => p.id !== project.id);
+    state.selectedProjects = state.selectedProjects.filter((p) => p.id !== project.id);
   },
 
   [types.REQUEST_PROJECTS](state) {
@@ -68,7 +68,7 @@ export default {
     if (AccessorUtilities.isLocalStorageAccessSafe()) {
       localStorage.setItem(
         state.projectEndpoints.list,
-        state.projects.map(p => p.id),
+        state.projects.map((p) => p.id),
       );
     }
 
