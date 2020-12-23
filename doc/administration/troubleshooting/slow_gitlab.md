@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: reference
 ---
 
-# Troubleshooting a slow GitLab installation
+# Troubleshooting slowness in GitLab
 
 Sometimes you might find that GitLab is performing slower than expected. This
 guide will walk you through finding the root of the slowness.
