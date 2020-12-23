@@ -211,7 +211,7 @@ module Security
     end
 
     def auto_fix_enabled?
-      return false unless project.security_setting.auto_fix_enabled?
+      return false unless project.security_setting&.auto_fix_enabled?
 
       project.security_setting.auto_fix_enabled_types.include?(report.type.to_sym)
     end

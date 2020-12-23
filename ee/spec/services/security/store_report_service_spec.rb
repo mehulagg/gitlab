@@ -254,6 +254,18 @@ RSpec.describe Security::StoreReportService, '#execute' do
             subject
           end
         end
+
+        context 'when security setting is not created' do
+          before do
+            project.security_setting.destroy
+            project.reload
+          end
+
+          it 'does not start auto fix worker' do
+            expect(Security::AutoFixWorker).not_to receive(:perform_async)
+            expect(subject[:status]).to eq(:success)
+          end
+        end
       end
     end
 
