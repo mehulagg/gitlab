@@ -1,4 +1,4 @@
-- on_demand_scans_path = Feature.enabled?(:dast_saved_scans) ? new_project_on_demand_scan_path(@project) : project_on_demand_scan_path(@project)
+- on_demand_scans_path = Feature.enabled?(:dast_saved_scans, @project, default_enabled: :yaml) ? new_project_on_demand_scan_path(@project) : project_on_demand_scans_path(@project)
 
 - if any_project_nav_tab?([:security, :dependencies, :licenses, :audit_events])
   = nav_link(path: sidebar_security_paths) do
