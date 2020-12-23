@@ -2074,39 +2074,6 @@ spec/frontend/monitoring/components/charts/options_spec.js
 spec/frontend/monitoring/components/charts/stacked_column_spec.js
 spec/frontend/monitoring/components/charts/time_series_spec.js
 
-## competent-lichterman
-spec/frontend/releases/stores/modules/detail/actions_spec.js
-spec/frontend/releases/stores/modules/list/helpers.js
-spec/frontend/reports/accessibility_report/store/actions_spec.js
-spec/frontend/reports/codequality_report/store/actions_spec.js
-spec/frontend/reports/codequality_report/store/utils/codequality_comparison_spec.js
-spec/frontend/reports/components/grouped_issues_list_spec.js
-spec/frontend/reports/components/grouped_test_reports_app_spec.js
-spec/frontend/reports/components/issue_status_icon_spec.js
-spec/frontend/reports/components/report_section_spec.js
-spec/frontend/reports/store/actions_spec.js
-spec/frontend/right_sidebar_spec.js
-spec/frontend/search/index_spec.js
-spec/frontend/search/sidebar/components/app_spec.js
-spec/frontend/search/sidebar/components/confidentiality_filter_spec.js
-spec/frontend/search/sidebar/components/radio_filter_spec.js
-spec/frontend/search/sidebar/components/status_filter_spec.js
-spec/frontend/search/topbar/components/searchable_dropdown_spec.js
-spec/frontend/search_autocomplete_spec.js
-spec/frontend/self_monitor/store/actions_spec.js
-spec/frontend/sentry/sentry_config_spec.js
-spec/frontend/serverless/components/area_spec.js
-spec/frontend/serverless/components/function_row_spec.js
-spec/frontend/serverless/components/missing_prometheus_spec.js
-spec/frontend/serverless/components/pod_box_spec.js
-spec/frontend/serverless/components/url_spec.js
-spec/frontend/serverless/store/actions_spec.js
-spec/frontend/serverless/utils.js
-spec/frontend/set_status_modal/set_status_modal_wrapper_spec.js
-spec/frontend/shared/popover_spec.js
-spec/frontend/shortcuts_spec.js
-spec/frontend/sidebar/assignee_title_spec.js
-
 ## exciting-buck
 spec/frontend/sidebar/components/assignees/collapsed_assignee_list_spec.js
 spec/frontend/sidebar/components/severity/severity_spec.js
