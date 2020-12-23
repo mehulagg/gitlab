@@ -31,10 +31,10 @@ export default {
   },
   computed: {
     hasSelectedItems() {
-      return this.tags.some(tag => this.selectedItems[tag.name]);
+      return this.tags.some((tag) => this.selectedItems[tag.name]);
     },
     showMultiDeleteButton() {
-      return this.tags.some(tag => tag.canDelete) && !this.isMobile;
+      return this.tags.some((tag) => tag.canDelete) && !this.isMobile;
     },
   },
   methods: {

@@ -682,40 +682,6 @@ app/assets/javascripts/performance_bar/components/request_selector.vue
 app/assets/javascripts/performance_bar/index.js
 app/assets/javascripts/performance_bar/performance_bar_log.js
 
-## sweet-wilbur
-app/assets/javascripts/read_more.js
-app/assets/javascripts/ref/components/ref_results_section.vue
-app/assets/javascripts/ref/components/ref_selector.vue
-app/assets/javascripts/ref/stores/actions.js
-app/assets/javascripts/ref/stores/mutations.js
-app/assets/javascripts/ref_select_dropdown.js
-app/assets/javascripts/registry/explorer/components/details_page/tags_list.vue
-app/assets/javascripts/registry/explorer/components/registry_breadcrumb.vue
-app/assets/javascripts/registry/explorer/pages/details.vue
-app/assets/javascripts/registry/settings/components/registry_settings_app.vue
-app/assets/javascripts/registry/settings/components/settings_form.vue
-app/assets/javascripts/registry/settings/graphql/utils/cache_update.js
-app/assets/javascripts/registry/settings/utils.js
-app/assets/javascripts/related_issues/components/related_issuable_input.vue
-app/assets/javascripts/related_issues/components/related_issues_block.vue
-app/assets/javascripts/related_issues/components/related_issues_root.vue
-app/assets/javascripts/related_issues/index.js
-app/assets/javascripts/related_issues/stores/related_issues_store.js
-app/assets/javascripts/related_merge_requests/index.js
-app/assets/javascripts/related_merge_requests/store/actions.js
-app/assets/javascripts/releases/components/release_block_assets.vue
-app/assets/javascripts/releases/components/release_block_milestone_info.vue
-app/assets/javascripts/releases/components/releases_sort.vue
-app/assets/javascripts/releases/mount_edit.js
-app/assets/javascripts/releases/mount_index.js
-app/assets/javascripts/releases/mount_new.js
-app/assets/javascripts/releases/mount_show.js
-app/assets/javascripts/releases/stores/getters.js
-app/assets/javascripts/releases/stores/modules/detail/actions.js
-app/assets/javascripts/releases/stores/modules/detail/getters.js
-app/assets/javascripts/releases/stores/modules/detail/index.js
-app/assets/javascripts/releases/stores/modules/detail/mutations.js
-
 ## awesome-chaum
 app/assets/javascripts/releases/stores/modules/list/actions.js
 app/assets/javascripts/releases/stores/modules/list/index.js
