@@ -3558,7 +3558,6 @@ job split into three separate jobs.
 #### Parallel `matrix` jobs
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/15356) in GitLab 13.3.
-> - [In GitLab 13.5](https://gitlab.com/gitlab-org/gitlab/-/issues/26362) support for one-dimensional matrices was added.
 
 Use `matrix:` to run a job multiple times in parallel in a single pipeline,
 but with different variable values for each instance of the job.
@@ -3566,9 +3565,6 @@ There can be from 2 to 50 jobs.
 
 Jobs can only run in parallel if there are multiple runners, or a single runner is
 [configured to run multiple jobs concurrently](#using-your-own-runners).
-
-[In GitLab 13.5](https://gitlab.com/gitlab-org/gitlab/-/issues/26362) and later,
-you can have one-dimensional matrices with a single job.
 
 Every job gets the same `CI_NODE_TOTAL` [environment variable](../variables/README.md#predefined-environment-variables) value, and a unique `CI_NODE_INDEX` value.
 
@@ -3607,6 +3603,22 @@ deploystacks: [vultr, processing]
 ```
 
 The job naming style was [improved in GitLab 13.4](https://gitlab.com/gitlab-org/gitlab/-/issues/230452).
+
+##### One-dimensional `matrix` jobs
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/26362) in GitLab 13.5.
+
+You can also have one-dimensional matrices with a single job:
+
+```yaml
+deploystacks:
+  stage: deploy
+  script:
+    - bin/deploy
+  parallel:
+    matrix:
+      - PROVIDER: [aws, ovh, gcp, vultr]
+```
 
 ### `trigger`
 
