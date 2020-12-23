@@ -10,25 +10,6 @@ doc/api/graphql/reference/gitlab_schema.graphql
 *.scss
 *.md
 
-## lovely-lovelace
-app/assets/javascripts/alerts_settings/components/alerts_settings_wrapper.vue
-app/assets/javascripts/behaviors/markdown/paste_markdown_table.js
-app/assets/javascripts/boards/components/sidebar/remove_issue.vue
-app/assets/javascripts/diffs/components/diff_row.vue
-app/assets/javascripts/diffs/store/getters.js
-app/assets/javascripts/dropzone_input.js
-app/assets/javascripts/feature_flags/components/strategy.vue
-app/assets/javascripts/ide/lib/create_diff.js
-app/assets/javascripts/ide/stores/modules/pipelines/getters.js
-app/assets/javascripts/members/components/table/members_table.vue
-app/assets/javascripts/members/store/utils.js
-app/assets/javascripts/monitoring/stores/actions.js
-app/assets/javascripts/monitoring/stores/getters.js
-app/assets/javascripts/packages/list/utils.js
-app/assets/javascripts/pages/projects/forks/new/components/fork_groups_list.vue
-app/assets/javascripts/pages/users/user_tabs.js
-app/assets/javascripts/projects/settings/access_dropdown.js
-
 ## stoic-swirles
 app/assets/javascripts/repository/log_tree.js
 app/assets/javascripts/repository/utils/dom.js
