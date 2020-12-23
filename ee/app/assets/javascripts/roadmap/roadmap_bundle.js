@@ -34,7 +34,7 @@ export default () => {
   // This event handler is to be removed in 11.1 once
   // we allow user to save selected preset in db
   if (presetButtonsContainer) {
-    presetButtonsContainer.addEventListener('click', e => {
+    presetButtonsContainer.addEventListener('click', (e) => {
       const presetType = e.target.querySelector('input[name="presetType"]').value;
 
       visitUrl(mergeUrlParams({ layout: presetType }, window.location.href));

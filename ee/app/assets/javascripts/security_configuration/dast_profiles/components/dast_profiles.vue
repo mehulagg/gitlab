@@ -141,7 +141,7 @@ export default {
           variables: { after: pageInfo.endCursor },
           updateQuery: cacheUtils.appendToPreviousResult(profileType),
         })
-        .catch(error => {
+        .catch((error) => {
           this.handleError({
             profileType,
             exception: error,
@@ -199,7 +199,7 @@ export default {
           },
           optimisticResponse: deletion.optimisticResponse,
         })
-        .catch(error => {
+        .catch((error) => {
           this.handleError({
             profileType,
             exception: error,

@@ -105,7 +105,7 @@ export const formatRoadmapItemDetails = (rawRoadmapItem, timeframeStartDate, tim
  *
  * @param {Object} group
  */
-export const extractGroupMilestones = edges =>
+export const extractGroupMilestones = (edges) =>
   edges.map(({ node, milestoneNode = node }) => ({
     ...milestoneNode,
   }));

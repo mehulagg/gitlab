@@ -88,7 +88,7 @@ export default {
     },
     tableFields() {
       const defaultClasses = ['gl-word-break-all'];
-      const dataFields = this.fields.map(key => ({ key, class: defaultClasses }));
+      const dataFields = this.fields.map((key) => ({ key, class: defaultClasses }));
       const staticFields = [{ key: 'actions' }];
 
       return [...dataFields, ...staticFields];

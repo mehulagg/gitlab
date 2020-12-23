@@ -35,7 +35,7 @@ export default {
       type: String,
       required: false,
       default: LARGE,
-      validator: size => Object.keys(SCHEMA_TO_PROP_SIZE_MAP).includes(size),
+      validator: (size) => Object.keys(SCHEMA_TO_PROP_SIZE_MAP).includes(size),
     },
     label: {
       type: String,

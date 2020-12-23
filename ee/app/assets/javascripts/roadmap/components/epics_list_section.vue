@@ -68,7 +68,7 @@ export default {
     },
     epicsWithAssociatedParents() {
       return this.epics.filter(
-        epic => !epic.hasParent || (epic.hasParent && this.epicIds.indexOf(epic.parent.id) < 0),
+        (epic) => !epic.hasParent || (epic.hasParent && this.epicIds.indexOf(epic.parent.id) < 0),
       );
     },
     displayedEpics() {

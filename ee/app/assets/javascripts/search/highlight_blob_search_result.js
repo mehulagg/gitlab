@@ -9,7 +9,7 @@ export default () => {
   setHighlightClass();
 
   // Supports Advanced (backed by Elasticsearch) Search highlighting
-  blobs.forEach(blob => {
+  blobs.forEach((blob) => {
     const lines = blob.querySelectorAll('.line');
     const dataHighlightLine = blob.querySelector('[data-highlight-line]');
     if (dataHighlightLine) {

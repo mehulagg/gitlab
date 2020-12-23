@@ -9,7 +9,7 @@ import dastSiteProfilesQuery from 'ee/security_configuration/dast_profiles/graph
  * @param {*} profileType
  * @returns {function(*, {fetchMoreResult: *}): *}
  */
-export const appendToPreviousResult = profileType => (previousResult, { fetchMoreResult }) => {
+export const appendToPreviousResult = (profileType) => (previousResult, { fetchMoreResult }) => {
   const newResult = { ...fetchMoreResult };
   const previousEdges = previousResult.project[profileType].edges;
   const newEdges = newResult.project[profileType].edges;
@@ -30,7 +30,7 @@ export const appendToPreviousResult = profileType => (previousResult, { fetchMor
 export const removeProfile = ({ profileId, profileType, store, queryBody }) => {
   const sourceData = store.readQuery(queryBody);
 
-  const data = produce(sourceData, draftState => {
+  const data = produce(sourceData, (draftState) => {
     // eslint-disable-next-line no-param-reassign
     draftState.project[profileType].edges = draftState.project[profileType].edges.filter(
       ({ node }) => {

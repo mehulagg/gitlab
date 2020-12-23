@@ -125,7 +125,7 @@ export default {
               // b) Milestones Public API supports including child projects' milestones.
               if (search) {
                 return {
-                  data: data.filter(m => m.title.toLowerCase().includes(search.toLowerCase())),
+                  data: data.filter((m) => m.title.toLowerCase().includes(search.toLowerCase())),
                 };
               }
               return { data };
@@ -154,7 +154,7 @@ export default {
 
       if (labelName?.length) {
         filteredSearchValue.push(
-          ...labelName.map(label => ({
+          ...labelName.map((label) => ({
             type: 'label_name',
             value: { data: label },
           })),
@@ -217,7 +217,7 @@ export default {
       const filterParams = filters.length ? {} : null;
       const labels = [];
 
-      filters.forEach(filter => {
+      filters.forEach((filter) => {
         if (typeof filter === 'object') {
           switch (filter.type) {
             case 'author_username':

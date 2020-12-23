@@ -157,7 +157,7 @@ export default {
             }
           },
         )
-        .catch(exception => {
+        .catch((exception) => {
           this.showErrors({ message: errorMessage });
           this.captureException(exception);
           this.isLoading = false;

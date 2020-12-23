@@ -1187,46 +1187,6 @@ ee/app/assets/javascripts/oncall_schedules/components/delete_schedule_modal.vue
 ee/app/assets/javascripts/oncall_schedules/components/oncall_schedule.vue
 ee/app/assets/javascripts/oncall_schedules/components/rotations/components/add_rotation_modal.vue
 
-## gifted-black
-ee/app/assets/javascripts/requirements/requirements_bundle.js
-ee/app/assets/javascripts/roadmap/components/epics_list_section.vue
-ee/app/assets/javascripts/roadmap/components/roadmap_filters.vue
-ee/app/assets/javascripts/roadmap/roadmap_bundle.js
-ee/app/assets/javascripts/roadmap/store/actions.js
-ee/app/assets/javascripts/roadmap/store/getters.js
-ee/app/assets/javascripts/roadmap/store/mutations.js
-ee/app/assets/javascripts/roadmap/utils/epic_utils.js
-ee/app/assets/javascripts/roadmap/utils/roadmap_item_utils.js
-ee/app/assets/javascripts/saml_providers/dirty_form_checker.js
-ee/app/assets/javascripts/saml_providers/saml_settings_form.js
-ee/app/assets/javascripts/saml_providers/scim_token_toggle_area.js
-ee/app/assets/javascripts/search/highlight_blob_search_result.js
-ee/app/assets/javascripts/security_configuration/components/auto_fix_settings.vue
-ee/app/assets/javascripts/security_configuration/components/create_merge_request_button.vue
-ee/app/assets/javascripts/security_configuration/dast_profiles/components/dast_profiles.vue
-ee/app/assets/javascripts/security_configuration/dast_profiles/components/dast_profiles_list.vue
-ee/app/assets/javascripts/security_configuration/dast_profiles/graphql/cache_utils.js
-ee/app/assets/javascripts/security_configuration/dast_scanner_profiles/components/dast_scanner_profile_form.vue
-ee/app/assets/javascripts/security_configuration/dast_site_profiles_form/components/dast_site_profile_form.vue
-ee/app/assets/javascripts/security_configuration/modules/configuration/actions.js
-ee/app/assets/javascripts/security_configuration/sast/components/configuration_form.vue
-ee/app/assets/javascripts/security_configuration/sast/components/dynamic_fields.vue
-ee/app/assets/javascripts/security_configuration/sast/components/form_input.vue
-ee/app/assets/javascripts/security_configuration/sast/components/utils.js
-ee/app/assets/javascripts/security_dashboard/components/filters/standard_filter.vue
-ee/app/assets/javascripts/security_dashboard/components/first_class_group_security_dashboard_vulnerabilities.vue
-ee/app/assets/javascripts/security_dashboard/components/first_class_instance_security_dashboard_vulnerabilities.vue
-ee/app/assets/javascripts/security_dashboard/components/first_class_project_manager/project_manager.vue
-ee/app/assets/javascripts/security_dashboard/components/first_class_vulnerability_chart.vue
-ee/app/assets/javascripts/security_dashboard/components/first_class_vulnerability_severities.vue
-ee/app/assets/javascripts/security_dashboard/components/loading_error.vue
-ee/app/assets/javascripts/security_dashboard/components/project_security_charts.vue
-ee/app/assets/javascripts/security_dashboard/components/selection_summary.vue
-ee/app/assets/javascripts/security_dashboard/components/vulnerability_chart_buttons.vue
-ee/app/assets/javascripts/security_dashboard/components/vulnerability_count_list.vue
-ee/app/assets/javascripts/security_dashboard/components/vulnerability_count_list_layout.vue
-ee/app/assets/javascripts/security_dashboard/components/vulnerability_list.vue
-
 ## confident-dijkstra
 ee/app/assets/javascripts/security_dashboard/helpers.js
 ee/app/assets/javascripts/security_dashboard/instance_dashboard_settings_init.js

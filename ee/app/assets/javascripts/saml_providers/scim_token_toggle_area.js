@@ -68,10 +68,10 @@ export default class SCIMTokenToggleArea {
     this.toggleLoading();
 
     return this.fetchNewToken()
-      .then(response => {
+      .then((response) => {
         this.setTokenAndToggleSCIMForm(response.data);
       })
-      .catch(error => {
+      .catch((error) => {
         createFlash(error);
         this.toggleLoading();
         this.toggleFormVisibility(container);

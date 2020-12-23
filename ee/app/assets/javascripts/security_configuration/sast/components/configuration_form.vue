@@ -87,7 +87,7 @@ export default {
 
           redirectTo(successPath);
         })
-        .catch(error => {
+        .catch((error) => {
           this.isSubmitting = false;
           this.hasSubmissionError = true;
           Sentry.captureException(error);
@@ -101,7 +101,7 @@ export default {
       };
     },
     onAnalyzerChange(name, updatedAnalyzer) {
-      const index = this.analyzersConfiguration.findIndex(analyzer => analyzer.name === name);
+      const index = this.analyzersConfiguration.findIndex((analyzer) => analyzer.name === name);
       if (index === -1) {
         return;
       }

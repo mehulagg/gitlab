@@ -201,7 +201,7 @@ export default {
             }
           },
         )
-        .catch(e => {
+        .catch((e) => {
           Sentry.captureException(e);
           this.showErrors();
           this.loading = false;

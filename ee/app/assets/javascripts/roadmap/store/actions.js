@@ -155,7 +155,7 @@ export const fetchEpics = ({ state, commit, dispatch }) => {
   commit(types.REQUEST_EPICS);
 
   fetchGroupEpics(state)
-    .then(rawEpics => {
+    .then((rawEpics) => {
       dispatch('receiveEpicsSuccess', { rawEpics });
     })
     .catch(() => dispatch('receiveEpicsFailure'));
@@ -165,7 +165,7 @@ export const fetchEpicsForTimeframe = ({ state, commit, dispatch }, { timeframe 
   commit(types.REQUEST_EPICS_FOR_TIMEFRAME);
 
   return fetchGroupEpics(state, timeframe)
-    .then(rawEpics => {
+    .then((rawEpics) => {
       dispatch('receiveEpicsSuccess', {
         rawEpics,
         newEpic: true,
@@ -210,7 +210,7 @@ export const toggleEpic = ({ state, dispatch }, { parentItem }) => {
     if (!state.childrenEpics[parentItemId]) {
       dispatch('requestChildrenEpics', { parentItemId });
       fetchChildrenEpics(state, { parentItem })
-        .then(rawChildren => {
+        .then((rawChildren) => {
           dispatch('receiveChildrenSuccess', {
             parentItemId,
             rawChildren,
@@ -234,10 +234,10 @@ export const toggleEpic = ({ state, dispatch }, { parentItem }) => {
  * so that the epic bars get longer to appear infinitely scrolling.
  */
 export const refreshEpicDates = ({ commit, state, getters }) => {
-  const epics = state.epics.map(epic => {
+  const epics = state.epics.map((epic) => {
     // Update child epic dates too
     if (epic.children?.edges?.length > 0) {
-      epic.children.edges.map(childEpic =>
+      epic.children.edges.map((childEpic) =>
         roadmapItemUtils.processRoadmapItemDates(
           childEpic,
           getters.timeframeStartDate,
@@ -291,7 +291,7 @@ export const fetchMilestones = ({ state, dispatch }) => {
   dispatch('requestMilestones');
 
   return fetchGroupMilestones(state)
-    .then(rawMilestones => {
+    .then((rawMilestones) => {
       dispatch('receiveMilestonesSuccess', { rawMilestones });
     })
     .catch(() => dispatch('receiveMilestonesFailure'));
@@ -333,7 +333,7 @@ export const receiveMilestonesFailure = ({ commit }) => {
 };
 
 export const refreshMilestoneDates = ({ commit, state, getters }) => {
-  const milestones = state.milestones.map(milestone =>
+  const milestones = state.milestones.map((milestone) =>
     roadmapItemUtils.processRoadmapItemDates(
       milestone,
       getters.timeframeStartDate,

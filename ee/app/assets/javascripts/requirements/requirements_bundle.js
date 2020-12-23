@@ -24,7 +24,7 @@ export default () => {
       {},
       {
         cacheConfig: {
-          dataIdFromObject: object =>
+          dataIdFromObject: (object) =>
             // eslint-disable-next-line no-underscore-dangle, @gitlab/require-i18n-strings
             object.__typename === 'Requirement' ? object.iid : defaultDataIdFromObject(object),
         },

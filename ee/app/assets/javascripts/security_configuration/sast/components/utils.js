@@ -1,7 +1,7 @@
-const isString = value => typeof value === 'string';
-const isBoolean = value => typeof value === 'boolean';
+const isString = (value) => typeof value === 'string';
+const isBoolean = (value) => typeof value === 'boolean';
 
-export const isValidConfigurationEntity = object => {
+export const isValidConfigurationEntity = (object) => {
   if (object == null) {
     return false;
   }
@@ -18,7 +18,7 @@ export const isValidConfigurationEntity = object => {
   );
 };
 
-export const isValidAnalyzerEntity = object => {
+export const isValidAnalyzerEntity = (object) => {
   if (object == null) {
     return false;
   }
