@@ -3,11 +3,6 @@
 module Projects
   module ContainerRepository
     class CleanupTagsService < BaseService
-      def initialize(project, user = nil, params = {})
-        super
-        @truncated = false
-      end
-
       def execute(container_repository)
         return error('access denied') unless can_destroy?
         return error('invalid regex') unless valid_regex?
@@ -17,11 +12,20 @@ module Projects
         tags = container_repository.tags
         tags = without_latest(tags)
         tags = filter_by_name(tags)
+
+        original_size = tags.size
         tags = truncate(tags)
+        truncated = tags.size < original_size
+
         tags = filter_keep_n(tags)
         tags = filter_by_older_than(tags)
 
-        delete_tags(container_repository, tags)
+        delete_tags(container_repository, tags).tap do |result|
+          next unless truncated
+
+          result[:chunked] = true
+          result[:status] = :error
+        end
       end
 
       private
@@ -38,12 +42,7 @@ module Projects
           container_expiration_policy: params['container_expiration_policy']
         )
 
-        service.execute(container_repository).tap do |result|
-          next unless @truncated
-
-          result[:chunked] = true
-          result[:status] = :error
-        end
+        service.execute(container_repository)
       end
 
       def without_latest(tags)
@@ -102,15 +101,11 @@ module Projects
       def truncate(tags)
         return tags unless throttling_enabled?
         return tags unless max_chunk_size
+        return tags if max_chunk_size == 0
+        return tags if tags.size <= max_chunk_size
 
-        truncated = tags.sample(max_chunk_size)
-
-        if tags.size > truncated.size
-          @truncated = true
-          log_message("Tags to delete list truncated", tags_list_original_size: tags.size, tags_list_truncated_size: truncated.size)
-        end
-
-        truncated
+        log_message("Tags to delete list truncated", tags_list_original_size: tags.size, tags_list_truncated_size: max_chunk_size)
+        tags.sample(max_chunk_size)
       end
 
       def throttling_enabled?

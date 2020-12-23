@@ -312,10 +312,14 @@ RSpec.describe Projects::ContainerRepository::CleanupTagsService do
         false | 10 | :error   | :error   | nil
         false | 3  | :success | :success | nil
         false | 3  | :error   | :error   | nil
+        false | 0  | :success | :success | nil
+        false | 0  | :error   | :error   | nil
         true  | 10 | :success | :success | nil
         true  | 10 | :error   | :error   | nil
         true  | 3  | :success | :error   | true
         true  | 3  | :error   | :error   | true
+        true  | 0  | :success | :success | nil
+        true  | 0  | :error   | :error   | nil
       end
 
       with_them do
