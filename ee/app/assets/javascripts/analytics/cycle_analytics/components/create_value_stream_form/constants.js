@@ -66,7 +66,7 @@ export const defaultFields = {
 };
 
 export const DEFAULT_STAGE_CONFIG = ['issue', 'plan', 'code', 'test', 'review', 'staging'].map(
-  id => ({
+  (id) => ({
     id,
     name: capitalizeFirstCharacter(id),
     startEventIdentifier: null,
