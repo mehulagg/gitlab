@@ -940,6 +940,22 @@ If your DAST job exceeds the job timeout and you need to reduce the scan duratio
 
 For information on this, see the [general Application Security troubleshooting section](../../../ci/pipelines/job_artifacts.md#error-message-no-files-to-upload).
 
+### Getting error `dast job: chosen stage does not exist` when including DAST CI template
+
+Newer versions of the DAST CI template do not define stages in order to avoid
+overwriting stages from other CI files. If you've recently started using
+`DAST.latest.gitlab-ci.yml` or upgraded to a new major release of GitLab and
+began receiving this error, you will need to define a `dast` stage with your
+other stages:
+
+```yaml
+stages:
+  - dast
+
+include:
+  - template: DAST.latest.gitlab-ci.yml
+```
+
 <!-- ## Troubleshooting
 
 Include any troubleshooting steps that you can foresee. If you know beforehand what issues
