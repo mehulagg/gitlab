@@ -70,6 +70,10 @@ module Gitlab
         @normalized_jobs ||= Ci::Config::Normalizer.new(jobs).normalize_jobs
       end
 
+      def expandset
+        @context.expandset
+      end
+
       private
 
       def expand_config(config)

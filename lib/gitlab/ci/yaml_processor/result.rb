@@ -53,6 +53,10 @@ module Gitlab
           @stages ||= @ci_config.stages
         end
 
+        def includes
+          @includes ||= @ci_config.expandset
+        end
+
         def build_attributes(name)
           job = jobs.fetch(name.to_sym, {})
 
