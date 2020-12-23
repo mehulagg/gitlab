@@ -8,6 +8,7 @@ import PipelineGraph from '~/pipelines/components/pipeline_graph/pipeline_graph.
 import CiLint from './components/lint/ci_lint.vue';
 import CommitForm from './components/commit/commit_form.vue';
 import TextEditor from './components/text_editor.vue';
+import ValidationSegment from './components/info/validation_segment.vue';
 
 import commitCiFileMutation from './graphql/mutations/commit_ci_file.mutation.graphql';
 import getBlobContent from './graphql/queries/blob_content.graphql';
@@ -34,6 +35,7 @@ export default {
     GlTabs,
     PipelineGraph,
     TextEditor,
+    ValidationSegment,
   },
   mixins: [glFeatureFlagsMixin()],
   props: {
@@ -304,7 +306,15 @@ export default {
     </gl-alert>
     <div class="gl-mt-4">
       <gl-loading-icon v-if="isBlobContentLoading" size="lg" class="gl-m-3" />
-      <div v-else class="file-editor gl-mb-3">
+      <div v-else class="gl-mb-3">
+        <div class="info-well gl-display-none gl-display-sm-block">
+          <validation-segment
+            class="well-segment"
+            :loading="isCiConfigDataLoading"
+            :ci-config="ciConfigData"
+          />
+        </div>
+
         <gl-tabs v-model="currentTabIndex">
           <!-- editor should be mounted when its tab is visible, so the container has a size -->
           <gl-tab :title="$options.i18n.tabEdit" :lazy="!editorIsReady">
