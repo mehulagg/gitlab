@@ -19544,10 +19544,19 @@ msgstr ""
 msgid "OnDemandScans|Create a new site profile"
 msgstr ""
 
+msgid "OnDemandScans|Describe your scan. Eg \"Tests the login page for SQL injections\""
+msgstr ""
+
+msgid "OnDemandScans|Description"
+msgstr ""
+
 msgid "OnDemandScans|Edit on-demand DAST scan"
 msgstr ""
 
 msgid "OnDemandScans|Manage profiles"
+msgstr ""
+
+msgid "OnDemandScans|My daily scan"
 msgstr ""
 
 msgid "OnDemandScans|New on-demand DAST scan"
@@ -19566,6 +19575,15 @@ msgid "OnDemandScans|On-demand scans run outside the DevOps cycle and find vulne
 msgstr ""
 
 msgid "OnDemandScans|Run scan"
+msgstr ""
+
+msgid "OnDemandScans|Save and run scan"
+msgstr ""
+
+msgid "OnDemandScans|Save scan"
+msgstr ""
+
+msgid "OnDemandScans|Scan name"
 msgstr ""
 
 msgid "OnDemandScans|Scanner profile"

@@ -4,6 +4,9 @@ import {
   GlButton,
   GlCard,
   GlForm,
+  GlFormGroup,
+  GlFormInput,
+  GlFormTextarea,
   GlLink,
   GlSkeletonLoader,
   GlSprintf,
@@ -14,6 +17,8 @@ import {
   SCAN_TYPE,
 } from 'ee/security_configuration/dast_scanner_profiles/constants';
 import { DAST_SITE_VALIDATION_STATUS } from 'ee/security_configuration/dast_site_validation/constants';
+import { initFormField } from 'ee/security_configuration/utils';
+import validation from '~/vue_shared/directives/validation';
 import * as Sentry from '~/sentry/wrapper';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { redirectTo } from '~/lib/utils/url_utility';
@@ -27,6 +32,7 @@ import {
   SITE_PROFILES_EXTENDED_QUERY,
 } from '../settings';
 import dastOnDemandScanCreateMutation from '../graphql/dast_on_demand_scan_create.mutation.graphql';
+import dastScanCreateMutation from '../graphql/dast_scan_create.mutation.graphql';
 import ProfileSelectorSummaryCell from './profile_selector/summary_cell.vue';
 import ScannerProfileSelector from './profile_selector/scanner_profile_selector.vue';
 import SiteProfileSelector from './profile_selector/site_profile_selector.vue';
@@ -61,12 +67,16 @@ export default {
     GlButton,
     GlCard,
     GlForm,
+    GlFormGroup,
+    GlFormInput,
+    GlFormTextarea,
     GlLink,
     GlSkeletonLoader,
     GlSprintf,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
+    validation: validation(),
   },
   mixins: [glFeatureFlagsMixin()],
   apollo: {
@@ -119,6 +129,14 @@ export default {
   },
   data() {
     return {
+      form: {
+        showValidation: false,
+        state: null,
+        fields: {
+          name: initFormField({ value: '' }),
+          description: initFormField({ value: '', required: false , skipValidation: true}),
+        }
+      },
       scannerProfiles: [],
       siteProfiles: [],
       selectedScannerProfileId: null,
@@ -172,19 +190,35 @@ export default {
     },
   },
   methods: {
-    onSubmit() {
+    onSubmit(runAfterCreate = true) {
+      this.form.showValidation = true;
+      if (!this.form.state) {
+        return;
+      }
+
       this.loading = true;
       this.hideErrors();
+      let mutation = dastOnDemandScanCreateMutation
+      let input = {
+        fullPath: this.projectPath,
+        dastScannerProfileId: this.selectedScannerProfile.id,
+        dastSiteProfileId: this.selectedSiteProfile.id,
+      }
+      if (this.glFeatures.dastSavedScans) {
+        mutation = dastScanCreateMutation;
+        input = {
+          ...input,
+          name: this.form.fields.name.value,
+          description: this.form.fields.description.value,
+          runAfterCreate,
+        }
+      }
 
       this.$apollo
         .mutate({
-          mutation: dastOnDemandScanCreateMutation,
+          mutation,
           variables: {
-            input: {
-              fullPath: this.projectPath,
-              dastScannerProfileId: this.selectedScannerProfile.id,
-              dastSiteProfileId: this.selectedSiteProfile.id,
-            },
+            input,
           },
         })
         .then(
@@ -222,7 +256,7 @@ export default {
 </script>
 
 <template>
-  <gl-form @submit.prevent="onSubmit">
+  <gl-form novalidate @submit.prevent="onSubmit()">
     <header class="gl-mb-6">
       <h2>{{ s__('OnDemandScans|New on-demand DAST scan') }}</h2>
       <p>
@@ -272,6 +306,35 @@ export default {
       </gl-card>
     </template>
     <template v-else-if="!failedToLoadProfiles">
+      <template v-if="glFeatures.dastSavedScans">
+        <gl-form-group
+          :label="s__('OnDemandScans|Scan name')"
+          :invalid-feedback="form.fields.name.feedback"
+        >
+          <gl-form-input
+            v-model="form.fields.name.value"
+            v-validation:[form.showValidation]
+            class="mw-460"
+            data-testid="dast-scan-name-input"
+            type="text"
+            :placeholder="s__('OnDemandScans|My daily scan')"
+            :state="form.fields.name.state"
+            name="name"
+            required
+          />
+        </gl-form-group>
+        <gl-form-group
+          :label="s__('OnDemandScans|Description')"
+        >
+          <gl-form-textarea
+            v-model="form.fields.description.value"
+            class="mw-460"
+            data-testid="dast-scan-description-input"
+            :placeholder='s__(`OnDemandScans|Describe your scan. Eg "Tests the login page for SQL injections"`)'
+            :state="form.fields.description.state"
+          />
+        </gl-form-group>
+      </template>
       <scanner-profile-selector
         v-model="selectedScannerProfileId"
         class="gl-mb-5"
@@ -392,7 +455,18 @@ export default {
           :disabled="isSubmitButtonDisabled"
           :loading="loading"
         >
-          {{ s__('OnDemandScans|Run scan') }}
+          {{ glFeatures.dastSavedScans ? s__('OnDemandScans|Save and run scan') : s__('OnDemandScans|Run scan') }}
+        </gl-button>
+        <gl-button
+          v-if="glFeatures.dastSavedScans"
+          variant="success"
+          category="secondary"
+          data-testid="on-demand-scan-save-button"
+          :disabled="isSubmitButtonDisabled"
+          :loading="loading"
+          @click="onSubmit(false)"
+        >
+          {{ s__('OnDemandScans|Save scan') }}
         </gl-button>
       </div>
     </template>
