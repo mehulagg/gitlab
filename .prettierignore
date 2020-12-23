@@ -333,39 +333,6 @@ app/assets/javascripts/filtered_search/filtered_search_token_keys.js
 app/assets/javascripts/filtered_search/filtered_search_visual_tokens.js
 app/assets/javascripts/filtered_search/issuable_filtered_search_token_keys.js
 
-## nervous-mclaren
-app/assets/javascripts/image_diff/init_discussion_tab.js
-app/assets/javascripts/image_diff/replaced_image_diff.js
-app/assets/javascripts/image_diff/view_types.js
-app/assets/javascripts/import_entities/import_groups/components/import_table.vue
-app/assets/javascripts/import_entities/import_groups/components/import_table_row.vue
-app/assets/javascripts/import_entities/import_groups/graphql/client_factory.js
-app/assets/javascripts/import_entities/import_groups/graphql/services/source_groups_manager.js
-app/assets/javascripts/import_entities/import_groups/graphql/services/status_poller.js
-app/assets/javascripts/import_entities/import_projects/store/actions.js
-app/assets/javascripts/import_entities/import_projects/store/getters.js
-app/assets/javascripts/import_entities/import_projects/store/mutations.js
-app/assets/javascripts/init_changes_dropdown.js
-app/assets/javascripts/integrations/edit/components/dynamic_field.vue
-app/assets/javascripts/integrations/edit/components/override_dropdown.vue
-app/assets/javascripts/integrations/edit/store/getters.js
-app/assets/javascripts/integrations/integration_settings_form.js
-app/assets/javascripts/invite_member/init_invite_member_modal.js
-app/assets/javascripts/invite_member/init_invite_member_trigger.js
-app/assets/javascripts/invite_members/components/invite_members_modal.vue
-app/assets/javascripts/invite_members/components/members_token_select.vue
-app/assets/javascripts/invite_members/init_invite_members_modal.js
-app/assets/javascripts/invite_members/init_invite_members_trigger.js
-app/assets/javascripts/issuable_bulk_update_actions.js
-app/assets/javascripts/issuable_bulk_update_sidebar.js
-app/assets/javascripts/issuable_context.js
-app/assets/javascripts/issuable_form.js
-app/assets/javascripts/issuable_index.js
-app/assets/javascripts/issuable_list/components/issuable_list_root.vue
-app/assets/javascripts/issuable_suggestions/components/app.vue
-app/assets/javascripts/issue.js
-app/assets/javascripts/issue_show/components/app.vue
-
 ## beautiful-franklin
 app/assets/javascripts/issue_show/components/fields/description_template.vue
 app/assets/javascripts/issue_show/issue.js
