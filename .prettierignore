@@ -10,22 +10,6 @@ doc/api/graphql/reference/gitlab_schema.graphql
 *.scss
 *.md
 
-## objective-swirles
-spec/frontend/boards/components/sidebar/board_sidebar_labels_select_spec.js
-spec/frontend/clusters/stores/clusters_store_spec.js
-spec/frontend/diffs/components/diff_file_header_spec.js
-spec/frontend/diffs/components/hidden_files_warning_spec.js
-spec/frontend/environments/environment_monitoring_spec.js
-spec/frontend/import_entities/import_groups/graphql/services/status_poller_spec.js
-spec/frontend/issuable/related_issues/components/add_issuable_form_spec.js
-spec/frontend/notes/components/discussion_filter_spec.js
-spec/frontend/pipeline_editor/components/lint/ci_lint_results_spec.js
-spec/frontend/projects/settings_service_desk/components/service_desk_setting_spec.js
-spec/frontend/snippets/components/edit_spec.js
-spec/frontend/user_lists/store/show/mutations_spec.js
-spec/frontend/vue_shared/components/stacked_progress_bar_spec.js
-spec/frontend_integration/ide/helpers/ide_helper.js
-
 ## boring-bohr
 jest.config.base.js
 jest.config.js
