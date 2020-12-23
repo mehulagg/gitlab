@@ -257,7 +257,7 @@ RSpec.describe Security::StoreReportService, '#execute' do
 
         context 'when security setting is not created' do
           before do
-            project.security_setting.destroy
+            project.security_setting.destroy!
             project.reload
           end
 
