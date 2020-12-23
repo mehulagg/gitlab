@@ -1187,39 +1187,6 @@ ee/app/assets/javascripts/oncall_schedules/components/delete_schedule_modal.vue
 ee/app/assets/javascripts/oncall_schedules/components/oncall_schedule.vue
 ee/app/assets/javascripts/oncall_schedules/components/rotations/components/add_rotation_modal.vue
 
-## gifted-dewdney
-ee/app/assets/javascripts/oncall_schedules/utils/cache_updates.js
-ee/app/assets/javascripts/oncall_schedules/utils/common_utils.js
-ee/app/assets/javascripts/pages/admin/application_settings/ci_cd/ci_template.js
-ee/app/assets/javascripts/pages/admin/application_settings/index.js
-ee/app/assets/javascripts/pages/admin/application_settings/integrations/index.js
-ee/app/assets/javascripts/pages/admin/emails/show/admin_email_select.js
-ee/app/assets/javascripts/pages/admin/geo/index.js
-ee/app/assets/javascripts/pages/admin/licenses/new/index.js
-ee/app/assets/javascripts/pages/admin/users/pipeline_minutes/reset_button.vue
-ee/app/assets/javascripts/pages/groups/saml_providers/saml_members/store/actions.js
-ee/app/assets/javascripts/pages/groups/saml_providers/saml_members/store/index.js
-ee/app/assets/javascripts/pages/projects/pipelines/show/codequality_report.js
-ee/app/assets/javascripts/pages/projects/pipelines/show/license_report.js
-ee/app/assets/javascripts/pages/projects/settings/ci_cd/show/index.js
-ee/app/assets/javascripts/pages/projects/settings/repository/show/ee_mirror_repos.js
-ee/app/assets/javascripts/path_locks.js
-ee/app/assets/javascripts/projects/merge_requests/blocking_mr_input.js
-ee/app/assets/javascripts/protected_environments/protected_environment_create.js
-ee/app/assets/javascripts/protected_environments/protected_environment_edit.js
-ee/app/assets/javascripts/protected_tags/protected_tag_create.js
-ee/app/assets/javascripts/protected_tags/protected_tag_edit.js
-ee/app/assets/javascripts/registrations/groups/new/index.js
-ee/app/assets/javascripts/related_items_tree/components/related_items_tree_app.vue
-ee/app/assets/javascripts/related_items_tree/related_items_tree_bundle.js
-ee/app/assets/javascripts/related_items_tree/store/actions.js
-ee/app/assets/javascripts/related_items_tree/store/getters.js
-ee/app/assets/javascripts/related_items_tree/utils/epic_utils.js
-ee/app/assets/javascripts/repository/index.js
-ee/app/assets/javascripts/repository/utils/commit.js
-ee/app/assets/javascripts/requirements/components/requirement_item.vue
-ee/app/assets/javascripts/requirements/components/requirements_root.vue
-
 ## gifted-black
 ee/app/assets/javascripts/requirements/requirements_bundle.js
 ee/app/assets/javascripts/roadmap/components/epics_list_section.vue

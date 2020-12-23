@@ -11,7 +11,7 @@ import { getDateInFuture } from '~/lib/utils/datetime_utility';
  *
  * @returns {String}
  */
-export const getFormattedTimezone = tz => {
+export const getFormattedTimezone = (tz) => {
   return sprintf(__('(UTC %{offset}) %{timezone}'), {
     offset: tz.formatted_offset,
     timezone: `${tz.abbr} ${tz.name}`,

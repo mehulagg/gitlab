@@ -269,7 +269,7 @@ export const setItemInputValue = ({ commit }, data) => commit(types.SET_ITEM_INP
 
 export const requestAddItem = ({ commit }) => commit(types.REQUEST_ADD_ITEM);
 export const receiveAddItemSuccess = ({ dispatch, commit, getters }, { rawItems }) => {
-  const items = rawItems.map(item => {
+  const items = rawItems.map((item) => {
     // This is needed since Rails API to add Epic/Issue
     // doesn't return global ID string.
     // We can remove this change once add epic/issue
@@ -300,7 +300,7 @@ export const receiveAddItemSuccess = ({ dispatch, commit, getters }, { rawItems 
     items,
   });
 
-  items.forEach(item => {
+  items.forEach((item) => {
     dispatch('updateChildrenCount', { item });
   });
 
@@ -332,7 +332,7 @@ export const addItem = ({ state, dispatch, getters }) => {
         rawItems: data.issuables.slice(0, state.pendingReferences.length),
       });
     })
-    .catch(data => {
+    .catch((data) => {
       const { response } = data;
       if (response.status === httpStatusCodes.NOT_FOUND) {
         dispatch('receiveAddItemFailure', { itemAddFailureType: itemAddFailureTypesMap.NOT_FOUND });
@@ -557,7 +557,7 @@ export const createNewIssue = ({ state, dispatch }, { issuesEndpoint, title }) =
         parentItem,
       });
     })
-    .catch(e => {
+    .catch((e) => {
       dispatch('receiveCreateIssueFailure');
       throw e;
     });

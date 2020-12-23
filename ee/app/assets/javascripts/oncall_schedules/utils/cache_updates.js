@@ -13,7 +13,7 @@ const addScheduleToStore = (store, query, { oncallSchedule: schedule }, variable
     variables,
   });
 
-  const data = produce(sourceData, draftData => {
+  const data = produce(sourceData, (draftData) => {
     draftData.project.incidentManagementOncallSchedules.nodes.push(schedule);
   });
 
@@ -35,7 +35,7 @@ const deleteScheduleFromStore = (store, query, { oncallScheduleDestroy }, variab
     variables,
   });
 
-  const data = produce(sourceData, draftData => {
+  const data = produce(sourceData, (draftData) => {
     // eslint-disable-next-line no-param-reassign
     draftData.project.incidentManagementOncallSchedules.nodes = draftData.project.incidentManagementOncallSchedules.nodes.filter(
       ({ id }) => id !== schedule.id,
@@ -60,7 +60,7 @@ const updateScheduleFromStore = (store, query, { oncallScheduleUpdate }, variabl
     variables,
   });
 
-  const data = produce(sourceData, draftData => {
+  const data = produce(sourceData, (draftData) => {
     // eslint-disable-next-line no-param-reassign
     draftData.project.incidentManagementOncallSchedules.nodes = [
       ...draftData.project.incidentManagementOncallSchedules.nodes,

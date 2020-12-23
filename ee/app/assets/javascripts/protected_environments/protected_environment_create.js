@@ -59,7 +59,7 @@ export default class ProtectedEnvironmentCreate {
       .get(gon.search_unprotected_environments_url, { params: { query: term } })
       .then(({ data }) => {
         const environments = [].concat(data);
-        const results = environments.map(environment => ({
+        const results = environments.map((environment) => ({
           id: environment,
           text: environment,
           title: environment,
@@ -80,12 +80,12 @@ export default class ProtectedEnvironmentCreate {
       },
     };
 
-    Object.keys(ACCESS_LEVELS).forEach(level => {
+    Object.keys(ACCESS_LEVELS).forEach((level) => {
       const accessLevel = ACCESS_LEVELS[level];
       const selectedItems = this[`${accessLevel}_dropdown`].getSelectedItems();
       const levelAttributes = [];
 
-      selectedItems.forEach(item => {
+      selectedItems.forEach((item) => {
         if (item.type === LEVEL_TYPES.USER) {
           levelAttributes.push({
             user_id: item.user_id,

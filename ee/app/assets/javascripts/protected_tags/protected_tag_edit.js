@@ -60,7 +60,7 @@ export default class ProtectedTagEdit {
       .then(({ data }) => {
         this.hasChanges = false;
 
-        Object.keys(ACCESS_LEVELS).forEach(level => {
+        Object.keys(ACCESS_LEVELS).forEach((level) => {
           const accessLevelName = ACCESS_LEVELS[level];
 
           // The data coming from server will be the new persisted *state* for each dropdown
@@ -74,7 +74,7 @@ export default class ProtectedTagEdit {
   }
 
   setSelectedItemsToDropdown(items = [], dropdownName) {
-    const itemsToAdd = items.map(currentItem => {
+    const itemsToAdd = items.map((currentItem) => {
       if (currentItem.user_id) {
         // Do this only for users for now
         // get the current data for selected items

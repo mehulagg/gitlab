@@ -42,14 +42,14 @@ export const sortByState = (a, b) => stateOrder.indexOf(a.state) - stateOrder.in
  *
  * @param {Array} items
  */
-export const applySorts = array => array.sort(sortChildren).sort(sortByState);
+export const applySorts = (array) => array.sort(sortChildren).sort(sortByState);
 
 /**
  * Returns formatted child item to include additional
  * flags and properties to use while rendering tree.
  * @param {Object} item
  */
-export const formatChildItem = item => ({ ...item, pathIdSeparator: PathIdSeparator[item.type] });
+export const formatChildItem = (item) => ({ ...item, pathIdSeparator: PathIdSeparator[item.type] });
 
 /**
  * Returns formatted array of Epics that doesn't contain
@@ -57,7 +57,7 @@ export const formatChildItem = item => ({ ...item, pathIdSeparator: PathIdSepara
  *
  * @param {Array} children
  */
-export const extractChildEpics = children =>
+export const extractChildEpics = (children) =>
   children.edges.map(({ node, epicNode = node }) =>
     formatChildItem({
       ...epicNode,
@@ -72,8 +72,8 @@ export const extractChildEpics = children =>
  *
  * @param {Array} assignees
  */
-export const extractIssueAssignees = assignees =>
-  assignees.edges.map(assigneeNode => ({
+export const extractIssueAssignees = (assignees) =>
+  assignees.edges.map((assigneeNode) => ({
     ...assigneeNode.node,
   }));
 
@@ -83,7 +83,7 @@ export const extractIssueAssignees = assignees =>
  *
  * @param {Array} issues
  */
-export const extractChildIssues = issues =>
+export const extractChildIssues = (issues) =>
   issues.edges.map(({ node, issueNode = node }) =>
     formatChildItem({
       ...issueNode,
