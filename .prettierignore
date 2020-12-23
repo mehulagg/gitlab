@@ -333,39 +333,6 @@ app/assets/javascripts/filtered_search/filtered_search_token_keys.js
 app/assets/javascripts/filtered_search/filtered_search_visual_tokens.js
 app/assets/javascripts/filtered_search/issuable_filtered_search_token_keys.js
 
-## stoic-merkle
-app/assets/javascripts/filtered_search/stores/recent_searches_store.js
-app/assets/javascripts/filtered_search/visual_token_value.js
-app/assets/javascripts/flash.js
-app/assets/javascripts/fly_out_nav.js
-app/assets/javascripts/frequent_items/components/app.vue
-app/assets/javascripts/frequent_items/index.js
-app/assets/javascripts/frequent_items/store/actions.js
-app/assets/javascripts/frequent_items/store/getters.js
-app/assets/javascripts/frequent_items/store/mutations.js
-app/assets/javascripts/frequent_items/utils.js
-app/assets/javascripts/gfm_auto_complete.js
-app/assets/javascripts/gl_field_errors.js
-app/assets/javascripts/gl_form.js
-app/assets/javascripts/gpg_badges.js
-app/assets/javascripts/grafana_integration/store/actions.js
-app/assets/javascripts/grafana_integration/store/index.js
-app/assets/javascripts/graphql_shared/utils.js
-app/assets/javascripts/group.js
-app/assets/javascripts/group_settings/components/shared_runners_form.vue
-app/assets/javascripts/groups/components/app.vue
-app/assets/javascripts/groups/components/visibility_level_dropdown.vue
-app/assets/javascripts/groups/init_invite_members_banner.js
-app/assets/javascripts/groups/members/index.js
-app/assets/javascripts/groups/members/utils.js
-app/assets/javascripts/groups/store/groups_store.js
-app/assets/javascripts/groups/transfer_dropdown.js
-app/assets/javascripts/groups_select.js
-app/assets/javascripts/helpers/event_hub_factory.js
-app/assets/javascripts/helpers/monitor_helper.js
-app/assets/javascripts/helpers/startup_css_helper.js
-app/assets/javascripts/ide/commit_icon.js
-
 ## great-curie
 app/assets/javascripts/ide/components/commit_sidebar/list_item.vue
 app/assets/javascripts/ide/components/file_templates/bar.vue
