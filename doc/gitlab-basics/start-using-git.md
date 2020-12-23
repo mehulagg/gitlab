@@ -171,7 +171,7 @@ To create a copy of a remote repository's files on your computer, you can either
 **download** or **clone**. If you download, you cannot sync it with the
 remote repository on GitLab.
 
-Cloning a repository is the same as downloading, execpt it preserves the Git connection
+Cloning a repository is the same as downloading, except it preserves the Git connection
 with the remote repository. This allows you to modify the files locally and
 upload the changes to the remote repository on GitLab.
 
