@@ -56,7 +56,7 @@ describe('EE - DastProfilesList', () => {
   const getAllLoadingIndicators = () => withinComponent().queryAllByTestId('loadingIndicator');
   const getErrorMessage = () => withinComponent().queryByText(TEST_ERROR_MESSAGE);
   const getErrorDetails = () => withinComponent().queryByRole('list', { name: /error details/i });
-  const getDeleteButtonWithin = element =>
+  const getDeleteButtonWithin = (element) =>
     createWrapper(within(element).queryByRole('button', { name: /delete/i }));
   const getModal = () => wrapper.find(GlModal);
 
@@ -111,7 +111,7 @@ describe('EE - DastProfilesList', () => {
   });
 
   describe('with existing profiles', () => {
-    const getTableRowForProfile = profile => getAllTableRows()[profiles.indexOf(profile)];
+    const getTableRowForProfile = (profile) => getAllTableRows()[profiles.indexOf(profile)];
 
     describe('profiles list', () => {
       beforeEach(() => {
@@ -127,7 +127,7 @@ describe('EE - DastProfilesList', () => {
         expect(getAllTableRows()).toHaveLength(profiles.length);
       });
 
-      it.each(profiles)('renders list item %# correctly', profile => {
+      it.each(profiles)('renders list item %# correctly', (profile) => {
         const [profileCell, targetUrlCell, , actionsCell] = getTableRowForProfile(profile).cells;
 
         expect(profileCell.innerText).toContain(profile.profileName);
@@ -150,7 +150,7 @@ describe('EE - DastProfilesList', () => {
           },
         });
       });
-      it.each(profiles)('renders list item %# correctly', profile => {
+      it.each(profiles)('renders list item %# correctly', (profile) => {
         const [profileCell, , , actionsCell] = getTableRowForProfile(profile).cells;
 
         expect(profileCell.innerHTML).toContain(`<b>${profile.profileName}</b>`);
@@ -184,7 +184,7 @@ describe('EE - DastProfilesList', () => {
       });
     });
 
-    describe.each(profiles)('delete profile', profile => {
+    describe.each(profiles)('delete profile', (profile) => {
       beforeEach(() => {
         createFullComponent({ propsData: { profiles } });
       });

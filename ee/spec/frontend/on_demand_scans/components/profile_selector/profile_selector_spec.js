@@ -13,7 +13,7 @@ describe('OnDemandScansProfileSelector', () => {
     profiles: [],
   };
 
-  const findByTestId = testId => wrapper.find(`[data-testid="${testId}"]`);
+  const findByTestId = (testId) => wrapper.find(`[data-testid="${testId}"]`);
   const findProfilesLibraryPathLink = () => findByTestId('manage-profiles-link');
   const findProfilesDropdown = () => findByTestId('profiles-dropdown');
   const findCreateNewProfileLink = () => findByTestId('create-profile-link');
@@ -21,7 +21,7 @@ describe('OnDemandScansProfileSelector', () => {
   const parseDropdownItems = () =>
     findProfilesDropdown()
       .findAll(GlDropdownItem)
-      .wrappers.map(x => ({
+      .wrappers.map((x) => ({
         text: x.text(),
         isChecked: x.props('isChecked'),
       }));
@@ -106,7 +106,7 @@ describe('OnDemandScansProfileSelector', () => {
 
     it('shows dropdown items for each profile', () => {
       expect(parseDropdownItems()).toEqual(
-        scannerProfiles.map(x => ({
+        scannerProfiles.map((x) => ({
           text: x.profileName,
           isChecked: false,
         })),

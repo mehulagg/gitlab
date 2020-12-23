@@ -31,7 +31,7 @@ const assignee2 = {
 };
 
 describe('Assignee select component', () => {
-  beforeEach(done => {
+  beforeEach((done) => {
     setFixtures('<div class="test-container"></div>');
     boardsStore.create();
 
@@ -55,7 +55,7 @@ describe('Assignee select component', () => {
   });
 
   describe('canEdit', () => {
-    it('hides Edit button', done => {
+    it('hides Edit button', (done) => {
       vm.canEdit = false;
       Vue.nextTick(() => {
         expect(vm.$el.querySelector('.edit-link')).toBeFalsy();
@@ -63,7 +63,7 @@ describe('Assignee select component', () => {
       });
     });
 
-    it('shows Edit button if true', done => {
+    it('shows Edit button if true', (done) => {
       vm.canEdit = true;
       Vue.nextTick(() => {
         expect(vm.$el.querySelector('.edit-link')).toBeTruthy();
@@ -77,7 +77,7 @@ describe('Assignee select component', () => {
       expect(selectedText()).toContain('Any assignee');
     });
 
-    it('shows selected assignee', done => {
+    it('shows selected assignee', (done) => {
       vm.selected = assignee;
       Vue.nextTick(() => {
         expect(selectedText()).toContain('first assignee');
@@ -97,7 +97,7 @@ describe('Assignee select component', () => {
         mock.restore();
       });
 
-      it('sets assignee', done => {
+      it('sets assignee', (done) => {
         vm.$el.querySelector('.edit-link').click();
 
         jest.runOnlyPendingTimers();

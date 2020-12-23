@@ -17,7 +17,7 @@ import {
 } from 'ee_jest/roadmap/mock_data';
 
 jest.mock('lodash/delay', () =>
-  jest.fn(func => {
+  jest.fn((func) => {
     // eslint-disable-next-line no-param-reassign
     func.delay = jest.fn();
     return func;

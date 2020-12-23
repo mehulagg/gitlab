@@ -33,7 +33,7 @@ describe('EE - DastSiteProfileList', () => {
     isLoading: false,
   };
 
-  const createMockApolloProvider = handlers => {
+  const createMockApolloProvider = (handlers) => {
     localVue.use(VueApollo);
     requestHandlers = handlers;
     return createApolloProvider([[dastSiteValidationsQuery, requestHandlers.dastSiteValidations]]);
@@ -67,7 +67,7 @@ describe('EE - DastSiteProfileList', () => {
     return tableBody;
   };
   const getAllTableRows = () => within(getTableBody()).getAllByRole('row');
-  const getTableRowForProfile = profile => getAllTableRows()[siteProfiles.indexOf(profile)];
+  const getTableRowForProfile = (profile) => getAllTableRows()[siteProfiles.indexOf(profile)];
 
   const findProfileList = () => wrapper.find(ProfilesList);
 
@@ -193,7 +193,7 @@ describe('EE - DastSiteProfileList', () => {
       });
     });
 
-    it.each(siteProfiles)('profile %# should not have validate button and status', profile => {
+    it.each(siteProfiles)('profile %# should not have validate button and status', (profile) => {
       const [, , validationStatusCell, actionsCell] = getTableRowForProfile(profile).cells;
 
       expect(within(actionsCell).queryByRole('button', { name: /validate/i })).toBe(null);

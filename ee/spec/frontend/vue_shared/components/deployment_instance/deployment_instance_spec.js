@@ -28,7 +28,7 @@ describe('Deploy Board Instance', () => {
       expect(wrapper.attributes('title')).toEqual('This is a pod');
     });
 
-    it('should render a div without tooltip data', done => {
+    it('should render a div without tooltip data', (done) => {
       wrapper = createComponent({
         status: 'deploying',
         tooltipText: '',
@@ -58,7 +58,7 @@ describe('Deploy Board Instance', () => {
       wrapper.destroy();
     });
 
-    it('should render a div with canary class when stable prop is provided as false', done => {
+    it('should render a div with canary class when stable prop is provided as false', (done) => {
       wrapper = createComponent({
         stable: false,
       });
@@ -75,7 +75,7 @@ describe('Deploy Board Instance', () => {
       wrapper.destroy();
     });
 
-    it('should not be a link without a logsPath prop', done => {
+    it('should not be a link without a logsPath prop', (done) => {
       wrapper = createComponent({
         stable: false,
         logsPath: '',

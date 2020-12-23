@@ -52,7 +52,7 @@ export default () => {
     name: 'CycleAnalyticsApp',
     apolloProvider,
     store,
-    render: createElement =>
+    render: (createElement) =>
       createElement(CycleAnalytics, {
         props: {
           emptyStateSvgPath,

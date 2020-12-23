@@ -13,7 +13,7 @@ describe('EE DiffLineNoteForm', () => {
   let saveDraft;
   let wrapper;
 
-  const createStoreOptions = headSha => {
+  const createStoreOptions = (headSha) => {
     const state = {
       notes: {
         notesData: { draftsPath: null },

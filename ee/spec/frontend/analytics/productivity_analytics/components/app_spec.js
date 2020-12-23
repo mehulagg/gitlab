@@ -570,7 +570,7 @@ describe('ProductivityApp component', () => {
       milestone_title: null,
     };
 
-    const shouldSetUrlParams = result => {
+    const shouldSetUrlParams = (result) => {
       expect(urlUtils.setUrlParams).toHaveBeenCalledWith(result, window.location.href, true);
       expect(commonUtils.historyPushState).toHaveBeenCalled();
     };

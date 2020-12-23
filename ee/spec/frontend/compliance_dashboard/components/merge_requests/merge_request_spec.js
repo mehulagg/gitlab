@@ -9,7 +9,7 @@ describe('MergeRequest component', () => {
 
   const findAuthorAvatarLink = () => wrapper.find('.issuable-authored').find(GlAvatarLink);
 
-  const createComponent = mergeRequest => {
+  const createComponent = (mergeRequest) => {
     return shallowMount(MergeRequest, {
       propsData: {
         mergeRequest,

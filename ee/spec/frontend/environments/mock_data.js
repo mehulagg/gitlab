@@ -104,7 +104,7 @@ export const environment = {
   updated_at: '2016-11-10T15:55:58.778Z',
 };
 
-const sharedEnvironmentData = id => ({
+const sharedEnvironmentData = (id) => ({
   environment_path: `/root/review-app/environments/${id}`,
   external_url: null,
   folderName: 'build',

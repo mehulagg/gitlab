@@ -31,7 +31,7 @@ describe('DevopsAdoptionTable', () => {
 
   const findTable = () => wrapper.find(GlTable);
 
-  const findCol = testId => findTable().find(`[data-testid="${testId}"]`);
+  const findCol = (testId) => findTable().find(`[data-testid="${testId}"]`);
 
   const findColRowChild = (col, row, child) =>
     findTable().findAll(`[data-testid="${col}"]`).at(row).find(child);

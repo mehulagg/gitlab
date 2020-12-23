@@ -86,7 +86,7 @@ describe('MrWidgetPipelineContainer', () => {
       return wrapper.vm.$nextTick();
     });
 
-    it('renders the visual review app link', done => {
+    it('renders the visual review app link', (done) => {
       // the visual review app link component is lazy loaded
       // so we need to re-render the component again, as once
       // apparently isn't enough.
@@ -123,7 +123,7 @@ describe('MrWidgetPipelineContainer', () => {
       return wrapper.vm.$nextTick();
     });
 
-    it('does not render the visual review app link', done => {
+    it('does not render the visual review app link', (done) => {
       // the visual review app link component is lazy loaded
       // so we need to re-render the component again, as once
       // apparently isn't enough.

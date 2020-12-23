@@ -21,7 +21,7 @@ import { DEFAULT_STAGE_NAMES } from '../../constants';
  * @param {CustomStageEvents[]} events
  * @returns {DropdownData[]} array of start events formatted for dropdowns
  */
-export const startEventOptions = eventsList => [
+export const startEventOptions = (eventsList) => [
   { value: null, text: I18N.SELECT_START_EVENT },
   ...eventsList.filter(isStartEvent).map(eventToOption),
 ];
@@ -82,7 +82,7 @@ export const initializeFormData = ({ fields, errors }) => {
  * @param {Object} fields key value pair of form field values
  * @returns {Object} key value pair of form fields with an array of errors
  */
-export const validateFields = fields => {
+export const validateFields = (fields) => {
   const newErrors = {};
 
   if (fields?.name) {

@@ -7,7 +7,7 @@ const localVue = createLocalVue();
 localVue.use(VueRouter);
 const router = new VueRouter();
 
-const generateOptions = length =>
+const generateOptions = (length) =>
   Array.from({ length }).map((_, i) => ({ name: `Option ${i}`, id: `option-${i}`, index: i }));
 
 const filter = {
@@ -17,8 +17,8 @@ const filter = {
   allOption: { id: 'allOptionId' },
   defaultOptions: [],
 };
-const optionsAt = indexes => filter.options.filter(x => indexes.includes(x.index));
-const optionIdsAt = indexes => optionsAt(indexes).map(x => x.id);
+const optionsAt = (indexes) => filter.options.filter((x) => indexes.includes(x.index));
+const optionIdsAt = (indexes) => optionsAt(indexes).map((x) => x.id);
 
 describe('Standard Filter component', () => {
   let wrapper;
@@ -32,9 +32,9 @@ describe('Standard Filter component', () => {
   };
 
   const dropdownItems = () => wrapper.findAll('[data-testid="filterOption"]');
-  const dropdownItemAt = index => dropdownItems().at(index);
+  const dropdownItemAt = (index) => dropdownItems().at(index);
   const allOptionItem = () => wrapper.find('[data-testid="allOption"]');
-  const isChecked = item => item.props('isChecked');
+  const isChecked = (item) => item.props('isChecked');
   const filterQuery = () => wrapper.vm.$route.query[filter.id];
   const filterBody = () => wrapper.find(FilterBody);
 
@@ -43,13 +43,13 @@ describe('Standard Filter component', () => {
     await wrapper.vm.$nextTick();
   };
 
-  const clickItemAt = async index => {
+  const clickItemAt = async (index) => {
     dropdownItemAt(index).vm.$emit('click');
     await wrapper.vm.$nextTick();
   };
 
-  const expectSelectedItems = indexes => {
-    const checkedIndexes = dropdownItems().wrappers.map(item => isChecked(item));
+  const expectSelectedItems = (indexes) => {
+    const checkedIndexes = dropdownItems().wrappers.map((item) => isChecked(item));
     const expectedIndexes = Array.from({ length: checkedIndexes.length }).map((_, index) =>
       indexes.includes(index),
     );
@@ -59,7 +59,7 @@ describe('Standard Filter component', () => {
 
   const expectAllOptionSelected = () => {
     expect(isChecked(allOptionItem())).toBe(true);
-    const checkedIndexes = dropdownItems().wrappers.map(item => isChecked(item));
+    const checkedIndexes = dropdownItems().wrappers.map((item) => isChecked(item));
     const expectedIndexes = new Array(checkedIndexes.length).fill(false);
 
     expect(checkedIndexes).toEqual(expectedIndexes);
@@ -106,13 +106,13 @@ describe('Standard Filter component', () => {
     });
 
     it('filters options when something is typed in the search box', async () => {
-      const expectedItems = filter.options.map(x => x.name).filter(x => x.includes('1'));
+      const expectedItems = filter.options.map((x) => x.name).filter((x) => x.includes('1'));
       createWrapper({}, true);
       filterBody().vm.$emit('input', '1');
       await wrapper.vm.$nextTick();
 
       expect(dropdownItems()).toHaveLength(3);
-      expect(dropdownItems().wrappers.map(x => x.props('text'))).toEqual(expectedItems);
+      expect(dropdownItems().wrappers.map((x) => x.props('text'))).toEqual(expectedItems);
     });
   });
 
@@ -177,7 +177,7 @@ describe('Standard Filter component', () => {
   });
 
   describe('filter querystring', () => {
-    const updateRouteQuery = async ids => {
+    const updateRouteQuery = async (ids) => {
       // window.history.back() won't change the location nor fire the popstate event, so we need
       // to fake it by doing it manually.
       router.replace({ query: { [filter.id]: ids } });
@@ -190,7 +190,7 @@ describe('Standard Filter component', () => {
         createWrapper();
         const clickedIds = [];
 
-        [1, 3, 5].forEach(index => {
+        [1, 3, 5].forEach((index) => {
           clickItemAt(index);
           clickedIds.push(optionIdsAt([index])[0]);
 

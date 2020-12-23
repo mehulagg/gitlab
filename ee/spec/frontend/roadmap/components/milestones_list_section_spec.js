@@ -12,7 +12,7 @@ import { getTimeframeForMonthsView } from 'ee/roadmap/utils/roadmap_utils';
 import { mockTimeframeInitialDate, mockGroupId, rawMilestones } from 'ee_jest/roadmap/mock_data';
 import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 
-const initializeStore = mockTimeframeMonths => {
+const initializeStore = (mockTimeframeMonths) => {
   const store = createStore();
   store.dispatch('setInitialData', {
     currentGroupId: mockGroupId,

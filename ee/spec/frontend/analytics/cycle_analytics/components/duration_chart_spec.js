@@ -59,10 +59,10 @@ function createComponent({
 describe('DurationChart', () => {
   let wrapper;
 
-  const findContainer = _wrapper => _wrapper.find('[data-testid="vsa-duration-chart"]');
-  const findScatterPlot = _wrapper => _wrapper.find(Scatterplot);
-  const findStageDropdown = _wrapper => _wrapper.find(StageDropdownFilter);
-  const findLoader = _wrapper => _wrapper.find(ChartSkeletonLoader);
+  const findContainer = (_wrapper) => _wrapper.find('[data-testid="vsa-duration-chart"]');
+  const findScatterPlot = (_wrapper) => _wrapper.find(Scatterplot);
+  const findStageDropdown = (_wrapper) => _wrapper.find(StageDropdownFilter);
+  const findLoader = (_wrapper) => _wrapper.find(ChartSkeletonLoader);
 
   const selectStage = (_wrapper, index = 0) => {
     findStageDropdown(_wrapper).findAll(GlDropdownItem).at(index).vm.$emit('click');

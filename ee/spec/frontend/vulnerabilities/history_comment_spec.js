@@ -12,7 +12,7 @@ jest.mock('~/flash');
 describe('History Comment', () => {
   let wrapper;
 
-  const createWrapper = comment => {
+  const createWrapper = (comment) => {
     wrapper = mount(HistoryComment, {
       propsData: {
         comment,

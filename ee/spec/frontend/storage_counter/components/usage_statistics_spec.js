@@ -26,7 +26,7 @@ describe('Usage Statistics component', () => {
   };
 
   const getStatisticsCards = () => wrapper.findAll(UsageStatisticsCard);
-  const getStatisticsCard = testId => wrapper.find(`[data-testid="${testId}"]`);
+  const getStatisticsCard = (testId) => wrapper.find(`[data-testid="${testId}"]`);
 
   describe('with purchaseStorageUrl passed', () => {
     beforeEach(() => {

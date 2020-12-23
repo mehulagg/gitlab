@@ -5,7 +5,7 @@ import RegistrationTrialToggle from 'ee/registrations/components/registration_tr
 describe('Registration Trial Toggle', () => {
   let wrapper;
 
-  const createComponent = propsData => {
+  const createComponent = (propsData) => {
     wrapper = shallowMount(RegistrationTrialToggle, {
       propsData,
     });

@@ -9500,11 +9500,6 @@ type GeoNode {
     first: Int
 
     """
-    Global ID of a specific compliance framework to return.
-    """
-    id: ComplianceManagementFrameworkID
-
-    """
     Returns the last _n_ elements from the list.
     """
     last: Int
@@ -9738,6 +9733,11 @@ type Group {
     Returns the first _n_ elements from the list.
     """
     first: Int
+
+    """
+    Global ID of a specific compliance framework to return.
+    """
+    id: ComplianceManagementFrameworkID
 
     """
     Returns the last _n_ elements from the list.

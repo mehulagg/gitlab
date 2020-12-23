@@ -91,7 +91,7 @@ describe('Iterations report tabs', () => {
       }));
 
     const findIssues = () => wrapper.findAll('table tbody tr');
-    const findAssigneesForIssue = index => findIssues().at(index).findAll(GlAvatar);
+    const findAssigneesForIssue = (index) => findIssues().at(index).findAll(GlAvatar);
 
     beforeEach(() => {
       mountComponent();
@@ -123,7 +123,7 @@ describe('Iterations report tabs', () => {
 
     describe('pagination', () => {
       const findPagination = () => wrapper.find(GlPagination);
-      const setPage = page => {
+      const setPage = (page) => {
         findPagination().vm.$emit('input', page);
         return findPagination().vm.$nextTick();
       };

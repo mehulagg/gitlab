@@ -4,7 +4,7 @@ import Component from 'ee/registrations/components/progress_bar.vue';
 describe('Progress Bar', () => {
   let wrapper;
 
-  const createComponent = propsData => {
+  const createComponent = (propsData) => {
     wrapper = shallowMount(Component, {
       propsData,
     });

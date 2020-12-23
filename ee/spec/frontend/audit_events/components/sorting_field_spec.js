@@ -12,7 +12,7 @@ describe('SortingField component', () => {
   };
 
   const getCheckedOptions = () =>
-    wrapper.findAll(GlDropdownItem).filter(item => item.props().isChecked);
+    wrapper.findAll(GlDropdownItem).filter((item) => item.props().isChecked);
 
   beforeEach(() => {
     initComponent();

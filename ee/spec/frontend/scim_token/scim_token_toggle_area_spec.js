@@ -42,7 +42,7 @@ describe('SCIMTokenToggleArea', () => {
   });
 
   describe('generateSCIMToken', () => {
-    it('toggles the generate and scim token forms', done => {
+    it('toggles the generate and scim token forms', (done) => {
       scimTokenToggleArea
         .generateSCIMToken()
         .then(() => {
@@ -53,7 +53,7 @@ describe('SCIMTokenToggleArea', () => {
         .catch(done.fail);
     });
 
-    it('populates the scim form with the token data', done => {
+    it('populates the scim form with the token data', (done) => {
       scimTokenToggleArea
         .generateSCIMToken()
         .then(() => {
@@ -74,7 +74,7 @@ describe('SCIMTokenToggleArea', () => {
       expect(mockGenerateNewSCIMToken).not.toHaveBeenCalled();
     });
 
-    it('populates the scim form with the token data if the confirm is accepted', done => {
+    it('populates the scim form with the token data if the confirm is accepted', (done) => {
       jest.spyOn(window, 'confirm').mockReturnValue(true);
 
       scimTokenToggleArea

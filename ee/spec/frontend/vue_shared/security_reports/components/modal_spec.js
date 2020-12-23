@@ -101,7 +101,7 @@ describe('Security Reports modal', () => {
       });
 
       describe('with merge request created', () => {
-        it('renders the issue button as a single button', done => {
+        it('renders the issue button as a single button', (done) => {
           const propsData = {
             modal: createState().modal,
             canCreateIssue: true,

@@ -42,7 +42,7 @@ describe('Api', () => {
   });
 
   describe('ldapGroups', () => {
-    it('calls callback on completion', done => {
+    it('calls callback on completion', (done) => {
       const query = 'query';
       const provider = 'provider';
       const callback = jest.fn();
@@ -55,7 +55,7 @@ describe('Api', () => {
       ]);
 
       Api.ldapGroups(query, provider, callback)
-        .then(response => {
+        .then((response) => {
           expect(callback).toHaveBeenCalledWith(response);
         })
         .then(done)
@@ -64,7 +64,7 @@ describe('Api', () => {
   });
 
   describe('createChildEpic', () => {
-    it('calls `axios.post` using params `groupId`, `parentEpicIid` and title', done => {
+    it('calls `axios.post` using params `groupId`, `parentEpicIid` and title', (done) => {
       const groupId = 'gitlab-org';
       const parentEpicId = 1;
       const title = 'Sample epic';
@@ -89,7 +89,7 @@ describe('Api', () => {
   });
 
   describe('groupEpics', () => {
-    it('calls `axios.get` using param `groupId`', done => {
+    it('calls `axios.get` using param `groupId`', (done) => {
       const groupId = 2;
       const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/groups/${groupId}/epics`;
 
@@ -115,7 +115,7 @@ describe('Api', () => {
         .catch(done.fail);
     });
 
-    it('calls `axios.get` using param `search` when it is provided', done => {
+    it('calls `axios.get` using param `search` when it is provided', (done) => {
       const groupId = 2;
       const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/groups/${groupId}/epics`;
 
@@ -144,7 +144,7 @@ describe('Api', () => {
   });
 
   describe('addEpicIssue', () => {
-    it('calls `axios.post` using params `groupId`, `epicIid` and `issueId`', done => {
+    it('calls `axios.post` using params `groupId`, `epicIid` and `issueId`', (done) => {
       const groupId = 2;
       const mockIssue = {
         id: 20,
@@ -170,7 +170,7 @@ describe('Api', () => {
   });
 
   describe('removeEpicIssue', () => {
-    it('calls `axios.delete` using params `groupId`, `epicIid` and `epicIssueId`', done => {
+    it('calls `axios.delete` using params `groupId`, `epicIid` and `epicIssueId`', (done) => {
       const groupId = 2;
       const mockIssue = {
         id: 20,
@@ -227,7 +227,7 @@ describe('Api', () => {
     };
 
     describe('cycleAnalyticsTasksByType', () => {
-      it('fetches tasks by type data', done => {
+      it('fetches tasks by type data', (done) => {
         const tasksByTypeResponse = [
           {
             label: {
@@ -266,7 +266,7 @@ describe('Api', () => {
     });
 
     describe('cycleAnalyticsTopLabels', () => {
-      it('fetches top group level labels', done => {
+      it('fetches top group level labels', (done) => {
         const response = [];
         const labelIds = [10, 9, 8, 7];
         const params = {
@@ -291,7 +291,7 @@ describe('Api', () => {
     });
 
     describe('cycleAnalyticsSummaryData', () => {
-      it('fetches value stream analytics summary data', done => {
+      it('fetches value stream analytics summary data', (done) => {
         const response = [
           { value: 0, title: 'New Issues' },
           { value: 0, title: 'Deploys' },
@@ -301,7 +301,7 @@ describe('Api', () => {
         mock.onGet(expectedUrl).reply(httpStatus.OK, response);
 
         Api.cycleAnalyticsSummaryData(groupId, params)
-          .then(responseObj =>
+          .then((responseObj) =>
             expectRequestWithCorrectParameters(responseObj, {
               response,
               params,
@@ -314,7 +314,7 @@ describe('Api', () => {
     });
 
     describe('cycleAnalyticsTimeSummaryData', () => {
-      it('fetches value stream analytics summary data', done => {
+      it('fetches value stream analytics summary data', (done) => {
         const response = [
           { value: '10.0', title: 'Lead time', unit: 'per day' },
           { value: '2.0', title: 'Cycle Time', unit: 'per day' },
@@ -325,7 +325,7 @@ describe('Api', () => {
         mock.onGet(expectedUrl).reply(httpStatus.OK, response);
 
         Api.cycleAnalyticsTimeSummaryData(groupId, params)
-          .then(responseObj =>
+          .then((responseObj) =>
             expectRequestWithCorrectParameters(responseObj, {
               response,
               params,
@@ -338,13 +338,13 @@ describe('Api', () => {
     });
 
     describe('cycleAnalyticsValueStreams', () => {
-      it('fetches custom value streams', done => {
+      it('fetches custom value streams', (done) => {
         const response = [{ name: 'value stream 1', id: 1 }];
         const expectedUrl = valueStreamBaseUrl({ resource: 'value_streams' });
         mock.onGet(expectedUrl).reply(httpStatus.OK, response);
 
         Api.cycleAnalyticsValueStreams(groupId)
-          .then(responseObj =>
+          .then((responseObj) =>
             expectRequestWithCorrectParameters(responseObj, {
               response,
               expectedUrl,
@@ -356,7 +356,7 @@ describe('Api', () => {
     });
 
     describe('cycleAnalyticsCreateValueStream', () => {
-      it('submit the custom value stream data', done => {
+      it('submit the custom value stream data', (done) => {
         const response = {};
         const customValueStream = { name: 'cool-value-stream-stage' };
         const expectedUrl = valueStreamBaseUrl({ resource: 'value_streams' });
@@ -374,7 +374,7 @@ describe('Api', () => {
     });
 
     describe('cycleAnalyticsDeleteValueStream', () => {
-      it('delete the custom value stream', done => {
+      it('delete the custom value stream', (done) => {
         const response = {};
         const expectedUrl = valueStreamBaseUrl({ resource: `value_streams/${valueStreamId}` });
         mock.onDelete(expectedUrl).reply(httpStatus.OK, response);
@@ -390,7 +390,7 @@ describe('Api', () => {
     });
 
     describe('cycleAnalyticsGroupStagesAndEvents', () => {
-      it('fetches custom stage events and all stages', done => {
+      it('fetches custom stage events and all stages', (done) => {
         const response = { events: [], stages: [] };
         const params = {
           group_id: groupId,
@@ -401,7 +401,7 @@ describe('Api', () => {
         mock.onGet(expectedUrl).reply(httpStatus.OK, response);
 
         Api.cycleAnalyticsGroupStagesAndEvents({ groupId, valueStreamId, params })
-          .then(responseObj =>
+          .then((responseObj) =>
             expectRequestWithCorrectParameters(responseObj, {
               response,
               params,
@@ -414,7 +414,7 @@ describe('Api', () => {
     });
 
     describe('cycleAnalyticsStageEvents', () => {
-      it('fetches stage events', done => {
+      it('fetches stage events', (done) => {
         const response = { events: [] };
         const params = { ...defaultParams };
         const expectedUrl = valueStreamBaseUrl({
@@ -424,7 +424,7 @@ describe('Api', () => {
         mock.onGet(expectedUrl).reply(httpStatus.OK, response);
 
         Api.cycleAnalyticsStageEvents({ groupId, valueStreamId, stageId, params })
-          .then(responseObj =>
+          .then((responseObj) =>
             expectRequestWithCorrectParameters(responseObj, {
               response,
               params,
@@ -437,7 +437,7 @@ describe('Api', () => {
     });
 
     describe('cycleAnalyticsStageMedian', () => {
-      it('fetches stage events', done => {
+      it('fetches stage events', (done) => {
         const response = { value: '5 days ago' };
         const params = { ...defaultParams };
         const expectedUrl = valueStreamBaseUrl({
@@ -447,7 +447,7 @@ describe('Api', () => {
         mock.onGet(expectedUrl).reply(httpStatus.OK, response);
 
         Api.cycleAnalyticsStageMedian({ groupId, valueStreamId, stageId, params })
-          .then(responseObj =>
+          .then((responseObj) =>
             expectRequestWithCorrectParameters(responseObj, {
               response,
               params,
@@ -460,7 +460,7 @@ describe('Api', () => {
     });
 
     describe('cycleAnalyticsCreateStage', () => {
-      it('submit the custom stage data', done => {
+      it('submit the custom stage data', (done) => {
         const response = {};
         const customStage = {
           name: 'cool-stage',
@@ -488,7 +488,7 @@ describe('Api', () => {
     });
 
     describe('cycleAnalyticsUpdateStage', () => {
-      it('updates the stage data', done => {
+      it('updates the stage data', (done) => {
         const response = { id: stageId, custom: false, hidden: true, name: 'nice-stage' };
         const stageData = { name: 'nice-stage', hidden: true };
         const expectedUrl = valueStreamBaseUrl({
@@ -509,7 +509,7 @@ describe('Api', () => {
     });
 
     describe('cycleAnalyticsRemoveStage', () => {
-      it('deletes the specified data', done => {
+      it('deletes the specified data', (done) => {
         const response = { id: stageId, hidden: true, custom: true };
         const expectedUrl = valueStreamBaseUrl({
           id: valueStreamId,
@@ -529,7 +529,7 @@ describe('Api', () => {
     });
 
     describe('cycleAnalyticsDurationChart', () => {
-      it('fetches stage duration data', done => {
+      it('fetches stage duration data', (done) => {
         const response = [];
         const params = { ...defaultParams };
         const expectedUrl = valueStreamBaseUrl({
@@ -539,7 +539,7 @@ describe('Api', () => {
         mock.onGet(expectedUrl).reply(httpStatus.OK, response);
 
         Api.cycleAnalyticsDurationChart({ groupId, valueStreamId, stageId, params })
-          .then(responseObj =>
+          .then((responseObj) =>
             expectRequestWithCorrectParameters(responseObj, {
               response,
               params,
@@ -552,7 +552,7 @@ describe('Api', () => {
     });
 
     describe('cycleAnalyticsGroupLabels', () => {
-      it('fetches group level labels', done => {
+      it('fetches group level labels', (done) => {
         const response = [];
         const expectedUrl = `${dummyUrlRoot}/groups/${groupId}/-/labels.json`;
 

@@ -39,7 +39,7 @@ describe('NodeDetailsSectionMain', () => {
 
   describe('computed', () => {
     describe('nodeVersion', () => {
-      it('returns `Unknown` when `version` and `revision` are null', done => {
+      it('returns `Unknown` when `version` and `revision` are null', (done) => {
         vm.nodeDetails.version = null;
         vm.nodeDetails.revision = null;
         Vue.nextTick()
@@ -56,7 +56,7 @@ describe('NodeDetailsSectionMain', () => {
     });
 
     describe('nodeHealthStatus', () => {
-      it('returns health status string', done => {
+      it('returns health status string', (done) => {
         // With default mock data
         expect(vm.nodeHealthStatus).toBe('Healthy');
 

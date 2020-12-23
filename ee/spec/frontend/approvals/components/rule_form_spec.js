@@ -41,7 +41,7 @@ const nameTakenError = {
 const localVue = createLocalVue();
 localVue.use(Vuex);
 
-const addType = type => x => Object.assign(x, { type });
+const addType = (type) => (x) => Object.assign(x, { type });
 
 describe('EE Approvals RuleForm', () => {
   let wrapper;
@@ -88,7 +88,7 @@ describe('EE Approvals RuleForm', () => {
   beforeEach(() => {
     store = createStoreOptions(projectSettingsModule(), { projectId: TEST_PROJECT_ID });
 
-    ['postRule', 'putRule', 'deleteRule', 'putFallbackRule'].forEach(actionName => {
+    ['postRule', 'putRule', 'deleteRule', 'putFallbackRule'].forEach((actionName) => {
       jest.spyOn(store.modules.approvals.actions, actionName).mockImplementation(() => {});
     });
 
@@ -114,7 +114,7 @@ describe('EE Approvals RuleForm', () => {
         });
 
         it('on load, it populates initial protected branch ids', () => {
-          expect(wrapper.vm.branches).toEqual(TEST_PROTECTED_BRANCHES.map(x => x.id));
+          expect(wrapper.vm.branches).toEqual(TEST_PROTECTED_BRANCHES.map((x) => x.id));
         });
       });
 
@@ -128,14 +128,14 @@ describe('EE Approvals RuleForm', () => {
 
         it('at first, shows no validation', () => {
           const inputs = findValidationsWithBranch();
-          const invalidInputs = inputs.filter(x => !x.isValid);
-          const feedbacks = inputs.map(x => x.feedback);
+          const invalidInputs = inputs.filter((x) => !x.isValid);
+          const feedbacks = inputs.map((x) => x.feedback);
 
           expect(invalidInputs.length).toBe(0);
-          expect(feedbacks.every(str => !str.length)).toBe(true);
+          expect(feedbacks.every((str) => !str.length)).toBe(true);
         });
 
-        it('on submit, shows branches validation', done => {
+        it('on submit, shows branches validation', (done) => {
           wrapper.vm.branches = ['3'];
           wrapper.vm.submit();
 
@@ -154,9 +154,9 @@ describe('EE Approvals RuleForm', () => {
         it('on submit with data, posts rule', () => {
           const users = [1, 2];
           const groups = [2, 3];
-          const userRecords = users.map(id => ({ id, type: TYPE_USER }));
-          const groupRecords = groups.map(id => ({ id, type: TYPE_GROUP }));
-          const branches = TEST_PROTECTED_BRANCHES.map(x => x.id);
+          const userRecords = users.map((id) => ({ id, type: TYPE_USER }));
+          const groupRecords = groups.map((id) => ({ id, type: TYPE_GROUP }));
+          const branches = TEST_PROTECTED_BRANCHES.map((x) => x.id);
           const expected = {
             id: null,
             name: 'Lorem',
@@ -188,11 +188,11 @@ describe('EE Approvals RuleForm', () => {
 
       it('at first, shows no validation', () => {
         const inputs = findValidations();
-        const invalidInputs = inputs.filter(x => !x.isValid);
-        const feedbacks = inputs.map(x => x.feedback);
+        const invalidInputs = inputs.filter((x) => !x.isValid);
+        const feedbacks = inputs.map((x) => x.feedback);
 
         expect(invalidInputs.length).toBe(0);
-        expect(feedbacks.every(str => !str.length)).toBe(true);
+        expect(feedbacks.every((str) => !str.length)).toBe(true);
       });
 
       it('on submit, does not dispatch action', () => {
@@ -201,7 +201,7 @@ describe('EE Approvals RuleForm', () => {
         expect(actions.postRule).not.toHaveBeenCalled();
       });
 
-      it('on submit, shows name validation', done => {
+      it('on submit, shows name validation', (done) => {
         findNameInput().setValue('');
 
         wrapper.vm.submit();
@@ -218,7 +218,7 @@ describe('EE Approvals RuleForm', () => {
           .catch(done.fail);
       });
 
-      it('on submit, shows approvalsRequired validation', done => {
+      it('on submit, shows approvalsRequired validation', (done) => {
         findApprovalsRequiredInput().setValue(-1);
 
         wrapper.vm.submit();
@@ -235,7 +235,7 @@ describe('EE Approvals RuleForm', () => {
           .catch(done.fail);
       });
 
-      it('on submit, shows approvers validation', done => {
+      it('on submit, shows approvers validation', (done) => {
         wrapper.vm.approvers = [];
         wrapper.vm.submit();
 
@@ -254,9 +254,9 @@ describe('EE Approvals RuleForm', () => {
       describe('with valid data', () => {
         const users = [1, 2];
         const groups = [2, 3];
-        const userRecords = users.map(id => ({ id, type: TYPE_USER }));
-        const groupRecords = groups.map(id => ({ id, type: TYPE_GROUP }));
-        const branches = TEST_PROTECTED_BRANCHES.map(x => x.id);
+        const userRecords = users.map((id) => ({ id, type: TYPE_USER }));
+        const groupRecords = groups.map((id) => ({ id, type: TYPE_GROUP }));
+        const branches = TEST_PROTECTED_BRANCHES.map((x) => x.id);
         const expected = {
           id: null,
           name: 'Lorem',
@@ -333,10 +333,10 @@ describe('EE Approvals RuleForm', () => {
       });
 
       describe('with valid data', () => {
-        const userRecords = TEST_RULE.users.map(x => ({ ...x, type: TYPE_USER }));
-        const groupRecords = TEST_RULE.groups.map(x => ({ ...x, type: TYPE_GROUP }));
-        const users = userRecords.map(x => x.id);
-        const groups = groupRecords.map(x => x.id);
+        const userRecords = TEST_RULE.users.map((x) => ({ ...x, type: TYPE_USER }));
+        const groupRecords = TEST_RULE.groups.map((x) => ({ ...x, type: TYPE_GROUP }));
+        const users = userRecords.map((x) => x.id);
+        const groups = groupRecords.map((x) => x.id);
 
         const expected = {
           ...TEST_RULE,
@@ -392,7 +392,7 @@ describe('EE Approvals RuleForm', () => {
       });
 
       describe('with empty name and empty approvers', () => {
-        beforeEach(done => {
+        beforeEach((done) => {
           wrapper.vm.submit();
           localVue.nextTick(done);
         });
@@ -408,12 +408,12 @@ describe('EE Approvals RuleForm', () => {
         });
 
         it('does not show any validation errors', () => {
-          expect(findValidations().every(x => x.isValid)).toBe(true);
+          expect(findValidations().every((x) => x.isValid)).toBe(true);
         });
       });
 
       describe('with name and empty approvers', () => {
-        beforeEach(done => {
+        beforeEach((done) => {
           wrapper.vm.name = 'Lorem';
           wrapper.vm.submit();
 
@@ -430,7 +430,7 @@ describe('EE Approvals RuleForm', () => {
       });
 
       describe('with empty name and approvers', () => {
-        beforeEach(done => {
+        beforeEach((done) => {
           wrapper.vm.approvers = TEST_APPROVERS;
           wrapper.vm.submit();
 
@@ -447,7 +447,7 @@ describe('EE Approvals RuleForm', () => {
       });
 
       describe('with name and approvers', () => {
-        beforeEach(done => {
+        beforeEach((done) => {
           wrapper.vm.approvers = [{ id: 7, type: TYPE_USER }];
           wrapper.vm.name = 'Lorem';
           wrapper.vm.submit();
@@ -498,7 +498,7 @@ describe('EE Approvals RuleForm', () => {
 
       describe('and hidden groups removed', () => {
         beforeEach(() => {
-          wrapper.vm.approvers = wrapper.vm.approvers.filter(x => x.type !== TYPE_HIDDEN_GROUPS);
+          wrapper.vm.approvers = wrapper.vm.approvers.filter((x) => x.type !== TYPE_HIDDEN_GROUPS);
         });
 
         it('on submit, removes hidden groups', () => {
@@ -529,7 +529,7 @@ describe('EE Approvals RuleForm', () => {
         expect(
           findApproversList()
             .props('value')
-            .every(x => x.type !== TYPE_HIDDEN_GROUPS),
+            .every((x) => x.type !== TYPE_HIDDEN_GROUPS),
         ).toBe(true);
       });
     });
@@ -656,7 +656,7 @@ describe('EE Approvals RuleForm', () => {
             expect.objectContaining({
               name: expectedNameSubmitted,
               approvalsRequired: TEST_APPROVALS_REQUIRED,
-              users: TEST_APPROVERS.map(x => x.id),
+              users: TEST_APPROVERS.map((x) => x.id),
             }),
           );
         });
@@ -712,7 +712,7 @@ describe('EE Approvals RuleForm', () => {
       });
 
       describe('with name and approvers', () => {
-        beforeEach(done => {
+        beforeEach((done) => {
           wrapper.vm.name = inputName;
           wrapper.vm.approvers = TEST_APPROVERS;
           wrapper.vm.submit();
@@ -727,7 +727,7 @@ describe('EE Approvals RuleForm', () => {
               id: TEST_RULE.id,
               name: expectedNameSubmitted,
               approvalsRequired: TEST_APPROVALS_REQUIRED,
-              users: TEST_APPROVERS.map(x => x.id),
+              users: TEST_APPROVERS.map((x) => x.id),
             }),
           );
         });

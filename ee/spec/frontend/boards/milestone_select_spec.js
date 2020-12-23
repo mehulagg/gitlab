@@ -33,7 +33,7 @@ const milestone2 = {
 };
 
 describe('Milestone select component', () => {
-  beforeEach(done => {
+  beforeEach((done) => {
     setFixtures('<div class="test-container"></div>');
 
     // eslint-disable-next-line no-new
@@ -53,7 +53,7 @@ describe('Milestone select component', () => {
   });
 
   describe('canEdit', () => {
-    it('hides Edit button', done => {
+    it('hides Edit button', (done) => {
       vm.canEdit = false;
       Vue.nextTick(() => {
         expect(vm.$el.querySelector('.edit-link')).toBeFalsy();
@@ -61,7 +61,7 @@ describe('Milestone select component', () => {
       });
     });
 
-    it('shows Edit button if true', done => {
+    it('shows Edit button if true', (done) => {
       vm.canEdit = true;
       Vue.nextTick(() => {
         expect(vm.$el.querySelector('.edit-link')).toBeTruthy();
@@ -75,7 +75,7 @@ describe('Milestone select component', () => {
       expect(selectedText()).toContain('Any milestone');
     });
 
-    it('shows No milestone', done => {
+    it('shows No milestone', (done) => {
       vm.board.milestone_id = 0;
       Vue.nextTick(() => {
         expect(selectedText()).toContain('No milestone');
@@ -83,7 +83,7 @@ describe('Milestone select component', () => {
       });
     });
 
-    it('shows selected milestone title', done => {
+    it('shows selected milestone title', (done) => {
       vm.board.milestone_id = 20;
       vm.board.milestone = {
         id: 20,
@@ -100,7 +100,7 @@ describe('Milestone select component', () => {
         jest.spyOn(Api, 'projectMilestones').mockResolvedValue({ data: [milestone, milestone2] });
       });
 
-      it('sets Any milestone', async done => {
+      it('sets Any milestone', async (done) => {
         vm.board.milestone_id = 0;
         vm.$el.querySelector('.edit-link').click();
 
@@ -118,7 +118,7 @@ describe('Milestone select component', () => {
         });
       });
 
-      it('sets No milestone', done => {
+      it('sets No milestone', (done) => {
         vm.$el.querySelector('.edit-link').click();
 
         jest.runOnlyPendingTimers();
@@ -134,7 +134,7 @@ describe('Milestone select component', () => {
         });
       });
 
-      it('sets milestone', done => {
+      it('sets milestone', (done) => {
         vm.$el.querySelector('.edit-link').click();
 
         jest.runOnlyPendingTimers();

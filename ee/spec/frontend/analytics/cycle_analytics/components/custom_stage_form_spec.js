@@ -71,14 +71,14 @@ describe('CustomStageForm', () => {
   let wrapper = null;
   let mock;
 
-  const findEvent = ev => wrapper.emitted()[ev];
+  const findEvent = (ev) => wrapper.emitted()[ev];
 
   const findSubmitButton = () => wrapper.find('[data-testid="save-custom-stage"]');
   const findCancelButton = () => wrapper.find('[data-testid="cancel-custom-stage"]');
   const findRecoverStageDropdown = () =>
     wrapper.find('[data-testid="recover-hidden-stage-dropdown"]');
 
-  const findFieldErrors = field => wrapper.vm.errors[field];
+  const findFieldErrors = (field) => wrapper.vm.errors[field];
 
   const setFields = async (fields = minimumFields) => {
     Object.entries(fields).forEach(([field, value]) => {

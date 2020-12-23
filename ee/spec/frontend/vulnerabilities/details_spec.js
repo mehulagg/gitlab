@@ -16,7 +16,7 @@ describe('Vulnerability Details', () => {
     description: 'vulnerability description',
   };
 
-  const createWrapper = vulnerabilityOverrides => {
+  const createWrapper = (vulnerabilityOverrides) => {
     const propsData = {
       vulnerability: { ...vulnerability, ...vulnerabilityOverrides },
     };
@@ -24,9 +24,9 @@ describe('Vulnerability Details', () => {
     wrapper = mount(VulnerabilityDetails, { propsData });
   };
 
-  const getById = id => wrapper.find(`[data-testid="${id}"]`);
-  const getAllById = id => wrapper.findAll(`[data-testid="${id}"]`);
-  const getText = id => getById(id).text();
+  const getById = (id) => wrapper.find(`[data-testid="${id}"]`);
+  const getAllById = (id) => wrapper.findAll(`[data-testid="${id}"]`);
+  const getText = (id) => getById(id).text();
 
   afterEach(() => {
     wrapper.destroy();
@@ -212,17 +212,17 @@ describe('Vulnerability Details', () => {
       isCode: true,
     };
 
-    const getTextContent = el => el.textContent.trim();
-    const getLabel = el => getTextContent(getByTestId(el, 'label'));
-    const getContent = el => getTextContent(getByTestId(el, 'value'));
-    const getSectionData = testId => {
+    const getTextContent = (el) => el.textContent.trim();
+    const getLabel = (el) => getTextContent(getByTestId(el, 'label'));
+    const getContent = (el) => getTextContent(getByTestId(el, 'value'));
+    const getSectionData = (testId) => {
       const section = getById(testId).element;
 
       if (!section) {
         return null;
       }
 
-      return getAllByRole(section, 'listitem').map(li => ({
+      return getAllByRole(section, 'listitem').map((li) => ({
         label: getLabel(li),
         content: getContent(li),
         ...(li.querySelector('code') ? { isCode: true } : {}),

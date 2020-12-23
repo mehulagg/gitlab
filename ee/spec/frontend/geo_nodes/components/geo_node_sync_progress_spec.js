@@ -48,7 +48,7 @@ describe('GeoNodeSyncProgress', () => {
       });
 
       it('renders each row of popover correctly', () => {
-        findCounts().wrappers.forEach(row => {
+        findCounts().wrappers.forEach((row) => {
           expect(row.element).toMatchSnapshot();
         });
       });

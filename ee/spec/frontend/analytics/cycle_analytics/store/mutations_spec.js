@@ -130,7 +130,7 @@ describe('Value Stream Analytics mutations', () => {
       });
 
       it('will convert the stats object to stages', () => {
-        [issueStage, planStage, codeStage, stagingStage, reviewStage].forEach(stage => {
+        [issueStage, planStage, codeStage, stagingStage, reviewStage].forEach((stage) => {
           expect(state.stages).toContainEqual(stage);
         });
       });

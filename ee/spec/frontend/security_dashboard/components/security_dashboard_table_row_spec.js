@@ -35,7 +35,7 @@ describe('Security Dashboard Table Row', () => {
   });
 
   const findLoader = () => wrapper.find('.js-skeleton-loader');
-  const findContent = i => wrapper.findAll('.table-mobile-content').at(i);
+  const findContent = (i) => wrapper.findAll('.table-mobile-content').at(i);
   const findAllIssueCreated = () => wrapper.findAll('[data-testid="issues-icon"]');
   const hasSelectedClass = () => wrapper.classes('gl-bg-blue-50');
   const findCheckbox = () => wrapper.find(GlFormCheckbox);

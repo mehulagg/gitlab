@@ -38,7 +38,7 @@ describe('Filter Item component', () => {
     });
   });
 
-  it.each([true, false])('shows the expected checkmark when isSelected is %s', isChecked => {
+  it.each([true, false])('shows the expected checkmark when isSelected is %s', (isChecked) => {
     createWrapper({ isChecked });
     expect(dropdownItem().props('isChecked')).toBe(isChecked);
   });

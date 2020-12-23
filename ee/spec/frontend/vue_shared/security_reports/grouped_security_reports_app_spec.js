@@ -417,7 +417,7 @@ describe('Grouped security reports app', () => {
   });
 
   describe('coverage fuzzing reports', () => {
-    describe.each([true, false])('given featureEnabled is %s', shouldShowFuzzing => {
+    describe.each([true, false])('given featureEnabled is %s', (shouldShowFuzzing) => {
       beforeEach(() => {
         createWrapper(
           {
@@ -692,7 +692,7 @@ describe('Grouped security reports app', () => {
     };
 
     describe('with active MR', () => {
-      beforeEach(done => {
+      beforeEach((done) => {
         createComponent({ mrState: mrStates.open }, done);
       });
 
@@ -704,7 +704,7 @@ describe('Grouped security reports app', () => {
     });
 
     describe('with active MR and diverged commit', () => {
-      beforeEach(done => {
+      beforeEach((done) => {
         createComponent({ mrState: mrStates.open, divergedCommitsCount: 1 }, done);
       });
 
@@ -716,7 +716,7 @@ describe('Grouped security reports app', () => {
     });
 
     describe('with closed MR', () => {
-      beforeEach(done => {
+      beforeEach((done) => {
         createComponent({ mrState: mrStates.closed }, done);
       });
 
@@ -726,7 +726,7 @@ describe('Grouped security reports app', () => {
     });
 
     describe('with merged MR', () => {
-      beforeEach(done => {
+      beforeEach((done) => {
         createComponent({ mrState: mrStates.merged }, done);
       });
 

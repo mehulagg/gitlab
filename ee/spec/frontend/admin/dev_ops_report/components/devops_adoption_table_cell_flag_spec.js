@@ -5,7 +5,7 @@ import DevopsAdoptionTableCellFlag from 'ee/admin/dev_ops_report/components/devo
 describe('DevopsAdoptionTableCellFlag', () => {
   let wrapper;
 
-  const createComponent = props => {
+  const createComponent = (props) => {
     wrapper = shallowMount(DevopsAdoptionTableCellFlag, {
       propsData: {
         enabled: true,

@@ -57,7 +57,7 @@ describe('vulnerabilities count actions', () => {
 describe('vulnerabilities actions', () => {
   const data = mockDataVulnerabilities;
   const params = { filters: { severity: ['critical'] } };
-  const filteredData = mockDataVulnerabilities.filter(vuln => vuln.severity === 'critical');
+  const filteredData = mockDataVulnerabilities.filter((vuln) => vuln.severity === 'critical');
   const pageInfo = {
     page: 1,
     nextPage: 2,
