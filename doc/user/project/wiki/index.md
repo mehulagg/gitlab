@@ -206,7 +206,7 @@ otherwise they will not display when pushed to GitLab:
 
 On the project's Wiki page, there is a right side navigation that renders the full Wiki pages list by default, with hierarchy.
 
-To customize the sidebar, you can create a file named `_sidebar` to fully replace the default navigation.
+To customize the sidebar, you can create a page named `_sidebar` to fully replace the default navigation. Creating `_sidebar` page will create _sidebar.md file in the wiki repo.
 
 WARNING:
 Unless you link the `_sidebar` file from your custom nav, to edit it you'll have to access it directly
