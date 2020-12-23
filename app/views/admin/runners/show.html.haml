@@ -15,17 +15,16 @@
 
 - if @runner.instance_type?
   .bs-callout.bs-callout-success
-    %h4 This Runner will process jobs from ALL UNASSIGNED projects
+    %h4 This runner processes jobs for all unassigned projects.
     %p
-      If you want Runners to build only specific projects, enable them in the table below.
-      Keep in mind that this is a one way transition.
+      If you want a runner to build only specific projects, restrict the project in the table below.
 - elsif @runner.group_type?
   .bs-callout.bs-callout-success
-    %h4 This runner will process jobs from all projects in its group and subgroups
+    %h4 This runner processes jobs for all projects in its group and subgroups.
 - else
   .bs-callout.bs-callout-info
-    %h4 This Runner will process jobs only from ASSIGNED projects
-    %p You can't make this a shared Runner.
+    %h4 This runner processes jobs for assigned projects only.
+    %p You can't make this a shared runner.
 %hr
 
 .gl-mb-6
@@ -33,7 +32,9 @@
 
 .row
   .col-md-6
-    %h4 Restrict projects for this Runner
+    %h4 Restrict projects for this runner
+    %p When you restrict a runner, it becomes specific to the selected projects.
+    %p After you restrict a runner to a project, the runner can no longer be shared.
     - if @runner.projects.any?
       %table.table.assigned-projects
         %thead
@@ -78,7 +79,7 @@
     = paginate_without_count @projects
 
   .col-md-6
-    %h4 Recent jobs served by this Runner
+    %h4 Recent jobs served by this runner
     %table.table.ci-table.runner-builds
       %thead
         %tr

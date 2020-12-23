@@ -1205,9 +1205,6 @@ msgstr ""
 msgid "A %{incident_docs_start}modified issue%{incident_docs_end} to guide the resolution of incidents."
 msgstr ""
 
-msgid "A 'Runner' is a process which runs a job. You can set up as many Runners as you need."
-msgstr ""
-
 msgid "A .NET Core console application template, customizable for any .NET Core project"
 msgstr ""
 
@@ -5069,6 +5066,9 @@ msgid "Canceled deployment to"
 msgstr ""
 
 msgid "Cancelling Preview"
+msgstr ""
+
+msgid "Cannot be assigned to other projects."
 msgstr ""
 
 msgid "Cannot be merged automatically"
@@ -10176,9 +10176,6 @@ msgstr ""
 msgid "Dynamic Application Security Testing (DAST)"
 msgstr ""
 
-msgid "Each Runner can be in one of the following states and/or belong to one of the following types:"
-msgstr ""
-
 msgid "Each Runner can be in one of the following states:"
 msgstr ""
 
@@ -10696,6 +10693,9 @@ msgid "Enter the merge request title"
 msgstr ""
 
 msgid "Enter the name of your application, and we'll return a unique %{type}."
+msgstr ""
+
+msgid "Enter the number of seconds, or other human-readable input, like \"1 hour.\" This timeout takes precedence over lower timeouts set for the project."
 msgstr ""
 
 msgid "Enter weights for storages for new repositories."
@@ -15834,6 +15834,9 @@ msgstr ""
 msgid "Jobs"
 msgstr ""
 
+msgid "Jobs can use runners that are assigned specific tags. Separate tags with commas."
+msgstr ""
+
 msgid "Jobs|Are you sure you want to proceed?"
 msgstr ""
 
@@ -20224,6 +20227,9 @@ msgstr ""
 msgid "Paused Runners don't accept new jobs"
 msgstr ""
 
+msgid "Paused and not available to run jobs."
+msgstr ""
+
 msgid "Pending"
 msgstr ""
 
@@ -24016,19 +24022,7 @@ msgstr ""
 msgid "Run untagged jobs"
 msgstr ""
 
-msgid "Runner cannot be assigned to other projects"
-msgstr ""
-
 msgid "Runner is %{status}, last contact was %{runner_contact} ago"
-msgstr ""
-
-msgid "Runner runs jobs from all unassigned projects"
-msgstr ""
-
-msgid "Runner runs jobs from all unassigned projects in its group"
-msgstr ""
-
-msgid "Runner runs jobs from assigned projects"
 msgstr ""
 
 msgid "Runner token"
@@ -24046,9 +24040,6 @@ msgstr ""
 msgid "Runner was successfully updated."
 msgstr ""
 
-msgid "Runner will not receive any new jobs"
-msgstr ""
-
 msgid "Runners"
 msgstr ""
 
@@ -24058,13 +24049,16 @@ msgstr ""
 msgid "Runners activated for this project"
 msgstr ""
 
+msgid "Runners are processes that pick up and execute jobs for GitLab."
+msgstr ""
+
 msgid "Runners are processes that pick up and execute jobs for GitLab. Here you can register and see your Runners for this project."
 msgstr ""
 
 msgid "Runners can be placed on separate users, servers, and even on your local machine."
 msgstr ""
 
-msgid "Runners can be placed on separate users, servers, even on your local machine."
+msgid "Runners can be:"
 msgstr ""
 
 msgid "Runners currently online: %{active_runners_count}"
@@ -24140,6 +24134,15 @@ msgid "Running…"
 msgstr ""
 
 msgid "Runs a number of housekeeping tasks within the current repository, such as compressing file revisions and removing unreachable objects."
+msgstr ""
+
+msgid "Runs jobs from all unassigned projects in its group."
+msgstr ""
+
+msgid "Runs jobs from all unassigned projects."
+msgstr ""
+
+msgid "Runs jobs from assigned projects."
 msgstr ""
 
 msgid "SAML"
@@ -28686,9 +28689,6 @@ msgstr ""
 msgid "This suggestion already matches its content."
 msgstr ""
 
-msgid "This timeout will take precedence when lower than project-defined timeout and accepts a human readable time input language like \"1 hour\". Values without specification represent seconds."
-msgstr ""
-
 msgid "This user cannot be unlocked manually from GitLab"
 msgstr ""
 
@@ -31840,6 +31840,9 @@ msgstr ""
 msgid "You can recover this project until %{date}"
 msgstr ""
 
+msgid "You can register runners as separate users, on separate servers, and on your local machine. Register as many runners as you want."
+msgstr ""
+
 msgid "You can resolve the merge conflict using either the Interactive mode, by choosing %{use_ours} or %{use_theirs} buttons, or by editing the files directly. Commit these changes into %{branch_name}"
 msgstr ""
 
@@ -31847,9 +31850,6 @@ msgid "You can see your chat accounts."
 msgstr ""
 
 msgid "You can set up as many Runners as you need to run your jobs."
-msgstr ""
-
-msgid "You can set up jobs to only use Runners with specific tags. Separate tags with commas."
 msgstr ""
 
 msgid "You can specify notification level per group or per project."
