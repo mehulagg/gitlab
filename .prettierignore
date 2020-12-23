@@ -333,39 +333,6 @@ app/assets/javascripts/filtered_search/filtered_search_token_keys.js
 app/assets/javascripts/filtered_search/filtered_search_visual_tokens.js
 app/assets/javascripts/filtered_search/issuable_filtered_search_token_keys.js
 
-## gifted-euclid
-app/assets/javascripts/ide/stores/extend.js
-app/assets/javascripts/ide/stores/getters.js
-app/assets/javascripts/ide/stores/modules/branches/actions.js
-app/assets/javascripts/ide/stores/modules/branches/mutations.js
-app/assets/javascripts/ide/stores/modules/commit/actions.js
-app/assets/javascripts/ide/stores/modules/commit/getters.js
-app/assets/javascripts/ide/stores/modules/editor/setup.js
-app/assets/javascripts/ide/stores/modules/file_templates/actions.js
-app/assets/javascripts/ide/stores/modules/file_templates/getters.js
-app/assets/javascripts/ide/stores/modules/merge_requests/actions.js
-app/assets/javascripts/ide/stores/modules/merge_requests/mutations.js
-app/assets/javascripts/ide/stores/modules/pane/getters.js
-app/assets/javascripts/ide/stores/modules/pipelines/actions.js
-app/assets/javascripts/ide/stores/modules/pipelines/mutations.js
-app/assets/javascripts/ide/stores/modules/pipelines/utils.js
-app/assets/javascripts/ide/stores/modules/terminal/actions/checks.js
-app/assets/javascripts/ide/stores/modules/terminal/actions/session_controls.js
-app/assets/javascripts/ide/stores/modules/terminal/actions/session_status.js
-app/assets/javascripts/ide/stores/modules/terminal/getters.js
-app/assets/javascripts/ide/stores/modules/terminal/messages.js
-app/assets/javascripts/ide/stores/modules/terminal/utils.js
-app/assets/javascripts/ide/stores/modules/terminal_sync/actions.js
-app/assets/javascripts/ide/stores/mutations.js
-app/assets/javascripts/ide/stores/mutations/file.js
-app/assets/javascripts/ide/stores/mutations/tree.js
-app/assets/javascripts/ide/stores/plugins/terminal.js
-app/assets/javascripts/ide/stores/plugins/terminal_sync.js
-app/assets/javascripts/ide/stores/utils.js
-app/assets/javascripts/ide/sync_router_and_store.js
-app/assets/javascripts/ide/utils.js
-app/assets/javascripts/image_diff/helpers/badge_helper.js
-
 ## nervous-mclaren
 app/assets/javascripts/image_diff/init_discussion_tab.js
 app/assets/javascripts/image_diff/replaced_image_diff.js
