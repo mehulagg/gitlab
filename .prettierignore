@@ -2074,40 +2074,6 @@ spec/frontend/monitoring/components/charts/options_spec.js
 spec/frontend/monitoring/components/charts/stacked_column_spec.js
 spec/frontend/monitoring/components/charts/time_series_spec.js
 
-## admiring-elion
-spec/frontend/notes/helpers.js
-spec/frontend/notes/mixins/discussion_navigation_spec.js
-spec/frontend/notes/old_notes_spec.js
-spec/frontend/notes/stores/actions_spec.js
-spec/frontend/notes/stores/getters_spec.js
-spec/frontend/notes/stores/mutation_spec.js
-spec/frontend/oauth_remember_me_spec.js
-spec/frontend/packages/details/components/additional_metadata_spec.js
-spec/frontend/packages/details/components/package_history_spec.js
-spec/frontend/packages/details/store/actions_spec.js
-spec/frontend/packages/list/components/packages_sort_spec.js
-spec/frontend/packages/list/stores/actions_spec.js
-spec/frontend/packages/shared/components/package_path_spec.js
-spec/frontend/packages/shared/utils_spec.js
-spec/frontend/pager_spec.js
-spec/frontend/pages/admin/abuse_reports/abuse_reports_spec.js
-spec/frontend/pages/admin/application_settings/account_and_limits_spec.js
-spec/frontend/pages/admin/jobs/index/components/stop_jobs_modal_spec.js
-spec/frontend/pages/admin/users/components/delete_user_modal_spec.js
-spec/frontend/pages/admin/users/new/index_spec.js
-spec/frontend/pages/dashboard/todos/index/todos_spec.js
-spec/frontend/pages/import/bitbucket_server/components/bitbucket_server_status_table_spec.js
-spec/frontend/pages/labels/components/promote_label_modal_spec.js
-spec/frontend/pages/milestones/shared/components/delete_milestone_modal_spec.js
-spec/frontend/pages/milestones/shared/components/promote_milestone_modal_spec.js
-spec/frontend/pages/profiles/show/emoji_menu_spec.js
-spec/frontend/pages/projects/forks/new/components/fork_groups_list_item_spec.js
-spec/frontend/pages/projects/forks/new/components/fork_groups_list_spec.js
-spec/frontend/pages/projects/pipeline_schedules/shared/components/interval_pattern_input_spec.js
-spec/frontend/pages/projects/pipeline_schedules/shared/components/timezone_dropdown_spec.js
-spec/frontend/pages/projects/shared/permissions/components/project_feature_settings_spec.js
-spec/frontend/pages/projects/shared/permissions/components/settings_panel_spec.js
-
 ## sweet-colden
 spec/frontend/pages/search/show/refresh_counts_spec.js
 spec/frontend/pages/sessions/new/preserve_url_fragment_spec.js
