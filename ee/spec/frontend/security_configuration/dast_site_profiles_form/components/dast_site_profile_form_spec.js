@@ -43,7 +43,7 @@ describe('DastSiteProfileForm', () => {
   const withinComponent = () => within(wrapper.element);
 
   const findForm = () => wrapper.find(GlForm);
-  const findByTestId = testId => wrapper.find(`[data-testid="${testId}"]`);
+  const findByTestId = (testId) => wrapper.find(`[data-testid="${testId}"]`);
   const findProfileNameInput = () => findByTestId('profile-name-input');
   const findTargetUrlInput = () => findByTestId('target-url-input');
   const findAuthSection = () => wrapper.find(DastSiteAuthSection);
@@ -60,7 +60,7 @@ describe('DastSiteProfileForm', () => {
     field.trigger('blur');
   };
 
-  const mockClientFactory = handlers => {
+  const mockClientFactory = (handlers) => {
     const mockClient = createMockClient();
 
     requestHandlers = {
@@ -81,7 +81,7 @@ describe('DastSiteProfileForm', () => {
     return mockClient;
   };
 
-  const respondWith = handlers => {
+  const respondWith = (handlers) => {
     apolloProvider.defaultClient = mockClientFactory(handlers);
   };
 
@@ -130,11 +130,14 @@ describe('DastSiteProfileForm', () => {
       createFullComponent();
     });
 
-    it.each(['asd', 'example.com'])('is marked as invalid provided an invalid URL', async value => {
-      await setFieldValue(findTargetUrlInput(), value);
+    it.each(['asd', 'example.com'])(
+      'is marked as invalid provided an invalid URL',
+      async (value) => {
+        await setFieldValue(findTargetUrlInput(), value);
 
-      expect(wrapper.text()).toContain(errorMessage);
-    });
+        expect(wrapper.text()).toContain(errorMessage);
+      },
+    );
 
     it('is marked as valid provided a valid URL', async () => {
       await setFieldValue(findTargetUrlInput(), targetUrl);
@@ -259,7 +262,7 @@ describe('DastSiteProfileForm', () => {
           const alert = findAlert();
 
           expect(alert.exists()).toBe(true);
-          errors.forEach(error => {
+          errors.forEach((error) => {
             expect(alert.text()).toContain(error);
           });
         });

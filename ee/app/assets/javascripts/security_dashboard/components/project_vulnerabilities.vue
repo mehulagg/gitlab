@@ -70,7 +70,8 @@ export default {
       },
       update({ project = {} }) {
         const { available = [], enabled = [], pipelineRun = [] } = project?.securityScanners || {};
-        const translateScannerName = scannerName => this.$options.i18n[scannerName] || scannerName;
+        const translateScannerName = (scannerName) =>
+          this.$options.i18n[scannerName] || scannerName;
 
         return {
           available: available.map(translateScannerName),
@@ -97,7 +98,7 @@ export default {
         this.$apollo.queries.vulnerabilities.fetchMore({
           variables: { after: this.pageInfo.endCursor },
           updateQuery: (previousResult, { fetchMoreResult }) => {
-            const results = produce(fetchMoreResult, draftData => {
+            const results = produce(fetchMoreResult, (draftData) => {
               // eslint-disable-next-line no-param-reassign
               draftData.project.vulnerabilities.nodes = [
                 ...previousResult.project.vulnerabilities.nodes,

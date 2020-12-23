@@ -4,23 +4,23 @@ import Status from 'ee/sidebar/components/status/status.vue';
 import { healthStatus, healthStatusTextMap } from 'ee/sidebar/constants';
 import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 
-const getStatusText = wrapper => wrapper.find('.value .text-plain').text();
+const getStatusText = (wrapper) => wrapper.find('.value .text-plain').text();
 
-const getStatusTitleText = wrapper => wrapper.find('[data-testid="statusTitle"]').text();
+const getStatusTitleText = (wrapper) => wrapper.find('[data-testid="statusTitle"]').text();
 
-const getStatusTooltipValue = wrapper =>
+const getStatusTooltipValue = (wrapper) =>
   getBinding(wrapper.find({ ref: 'status' }).element, 'gl-tooltip').value;
 
-const getEditButtonTooltipValue = wrapper =>
+const getEditButtonTooltipValue = (wrapper) =>
   getBinding(wrapper.find('[data-testid="editButtonTooltip"]').element, 'gl-tooltip').value;
 
-const getEditButton = wrapper => wrapper.find({ ref: 'editButton' });
+const getEditButton = (wrapper) => wrapper.find({ ref: 'editButton' });
 
-const getDropdownClasses = wrapper => wrapper.find('[data-testid="dropdownWrapper"]').classes();
+const getDropdownClasses = (wrapper) => wrapper.find('[data-testid="dropdownWrapper"]').classes();
 
-const getDropdownElement = wrapper => wrapper.find(GlDropdown);
+const getDropdownElement = (wrapper) => wrapper.find(GlDropdown);
 
-const getRemoveStatusItem = wrapper => wrapper.find(GlDropdownItem);
+const getRemoveStatusItem = (wrapper) => wrapper.find(GlDropdownItem);
 
 describe('Status', () => {
   let wrapper;
@@ -157,25 +157,28 @@ describe('Status', () => {
       });
     });
 
-    describe.each(Object.values(healthStatus))(`when "%s" is provided for status`, statusValue => {
-      beforeEach(() => {
-        const props = {
-          status: statusValue,
-        };
+    describe.each(Object.values(healthStatus))(
+      `when "%s" is provided for status`,
+      (statusValue) => {
+        beforeEach(() => {
+          const props = {
+            status: statusValue,
+          };
 
-        shallowMountStatus(props);
-      });
+          shallowMountStatus(props);
+        });
 
-      it(`shows "${healthStatusTextMap[statusValue]}"`, () => {
-        expect(getStatusText(wrapper)).toBe(healthStatusTextMap[statusValue]);
-      });
+        it(`shows "${healthStatusTextMap[statusValue]}"`, () => {
+          expect(getStatusText(wrapper)).toBe(healthStatusTextMap[statusValue]);
+        });
 
-      it(`shows "Status: ${healthStatusTextMap[statusValue]}" in the tooltip`, () => {
-        expect(getStatusTooltipValue(wrapper).title).toBe(
-          `Health status: ${healthStatusTextMap[statusValue]}`,
-        );
-      });
-    });
+        it(`shows "Status: ${healthStatusTextMap[statusValue]}" in the tooltip`, () => {
+          expect(getStatusTooltipValue(wrapper).title).toBe(
+            `Health status: ${healthStatusTextMap[statusValue]}`,
+          );
+        });
+      },
+    );
   });
 
   describe('status dropdown', () => {
@@ -243,7 +246,7 @@ describe('Status', () => {
     });
 
     describe('dropdown', () => {
-      const getIterableArray = arr => {
+      const getIterableArray = (arr) => {
         return arr.map((value, index) => [value, index]);
       };
 

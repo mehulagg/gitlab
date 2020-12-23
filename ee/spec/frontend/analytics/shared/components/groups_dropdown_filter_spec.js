@@ -47,9 +47,9 @@ describe('GroupsDropdownFilter component', () => {
   const findDropdownItems = () =>
     findDropdown()
       .findAll(GlDropdownItem)
-      .filter(w => w.text() !== 'No matching results');
+      .filter((w) => w.text() !== 'No matching results');
 
-  const findDropdownAtIndex = index => findDropdownItems().at(index);
+  const findDropdownAtIndex = (index) => findDropdownItems().at(index);
   const findDropdownButton = () => findDropdown().find('.dropdown-toggle');
   const findDropdownButtonAvatar = () => findDropdown().find('.gl-avatar');
 
@@ -58,7 +58,8 @@ describe('GroupsDropdownFilter component', () => {
     expect(dropdown.find('div.gl-avatar-identicon').exists()).toBe(hasIdenticon);
   };
 
-  const selectDropdownAtIndex = index => findDropdownAtIndex(index).find('button').trigger('click');
+  const selectDropdownAtIndex = (index) =>
+    findDropdownAtIndex(index).find('button').trigger('click');
 
   describe('when passed a defaultGroup as prop', () => {
     beforeEach(() => {

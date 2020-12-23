@@ -10,39 +10,6 @@ doc/api/graphql/reference/gitlab_schema.graphql
 *.scss
 *.md
 
-## stoic-swirles
-app/assets/javascripts/repository/log_tree.js
-app/assets/javascripts/repository/utils/dom.js
-app/assets/javascripts/sidebar/components/labels/sidebar_labels.vue
-app/assets/javascripts/user_lists/store/utils.js
-app/assets/javascripts/vue_shared/components/alert_details_table.vue
-app/assets/javascripts/vue_shared/components/upload_dropzone/upload_dropzone.vue
-app/assets/javascripts/vue_shared/constants.js
-ee/app/assets/javascripts/analytics/cycle_analytics/utils.js
-ee/app/assets/javascripts/analytics/repository_analytics/components/select_projects_dropdown.vue
-ee/app/assets/javascripts/boards/stores/getters.js
-ee/app/assets/javascripts/dependencies/store/modules/list/getters.js
-ee/app/assets/javascripts/epic/store/getters.js
-ee/app/assets/javascripts/insights/components/insights_page.vue
-ee/app/assets/javascripts/pages/trial_registrations/new/username_suggester.js
-ee/app/assets/javascripts/related_items_tree/store/mutations.js
-ee/app/assets/javascripts/security_dashboard/components/project_vulnerabilities.vue
-ee/spec/frontend/analytics/shared/components/groups_dropdown_filter_spec.js
-ee/spec/frontend/analytics/shared/components/projects_dropdown_filter_spec.js
-ee/spec/frontend/approvals/components/approvers_list_spec.js
-ee/spec/frontend/approvals/components/rule_controls_spec.js
-ee/spec/frontend/audit_events/components/audit_events_filter_spec.js
-ee/spec/frontend/dependencies/components/dependencies_table_spec.js
-ee/spec/frontend/geo_node_form/components/geo_node_form_capacities_spec.js
-ee/spec/frontend/security_configuration/dast_profiles/graphql/cache_utils_spec.js
-ee/spec/frontend/security_configuration/dast_site_profiles_form/components/dast_site_profile_form_spec.js
-ee/spec/frontend/security_configuration/dast_site_validation/components/dast_site_validation_modal_spec.js
-ee/spec/frontend/security_dashboard/components/vulnerability_list_spec.js
-ee/spec/frontend/sidebar/components/status/status_spec.js
-ee/spec/frontend/storage_counter/components/projects_table_spec.js
-ee/spec/frontend/vulnerabilities/footer_spec.js
-spec/frontend/blob/balsamiq/balsamiq_viewer_spec.js
-
 ## objective-swirles
 spec/frontend/boards/components/sidebar/board_sidebar_labels_select_spec.js
 spec/frontend/clusters/stores/clusters_store_spec.js

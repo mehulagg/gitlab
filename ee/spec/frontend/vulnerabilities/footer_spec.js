@@ -283,14 +283,17 @@ describe('Vulnerability Footer', () => {
     const statusDescription = () => wrapper.find(StatusDescription);
     const vulnerabilityStates = Object.keys(VULNERABILITY_STATES);
 
-    it.each(vulnerabilityStates)(`shows detection note when vulnerability state is '%s'`, state => {
-      createWrapper({ state });
+    it.each(vulnerabilityStates)(
+      `shows detection note when vulnerability state is '%s'`,
+      (state) => {
+        createWrapper({ state });
 
-      expect(detectionNote().exists()).toBe(true);
-      expect(statusDescription().props('vulnerability')).toEqual({
-        state: 'detected',
-        pipeline: vulnerability.pipeline,
-      });
-    });
+        expect(detectionNote().exists()).toBe(true);
+        expect(statusDescription().props('vulnerability')).toEqual({
+          state: 'detected',
+          pipeline: vulnerability.pipeline,
+        });
+      },
+    );
   });
 });
