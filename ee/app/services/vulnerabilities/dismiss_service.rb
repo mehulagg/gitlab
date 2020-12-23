@@ -46,6 +46,7 @@ module Vulnerabilities
         project_fingerprint: finding.project_fingerprint,
         comment: @comment,
         pipeline: @project.latest_pipeline_with_security_reports(only_successful: true),
+        finding_uuid: finding.uuid_v5,
         dismiss_vulnerability: false
       }
     end

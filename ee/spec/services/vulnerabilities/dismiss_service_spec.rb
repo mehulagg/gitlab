@@ -41,13 +41,14 @@ RSpec.describe Vulnerabilities::DismissService do
     end
 
     context 'when the `dismiss_findings` argument is not false' do
-      it 'dismisses a vulnerability and its associated findings' do
+      it 'dismisses a vulnerability and its associated findings with correct attributes' do
         freeze_time do
           dismiss_vulnerability
 
           expect(vulnerability.reload).to(
             have_attributes(state: 'dismissed', dismissed_by: user, dismissed_at: be_like_time(Time.current)))
           expect(vulnerability.findings).to all have_vulnerability_dismissal_feedback
+          expect(vulnerability.finding.dismissal_feedback.finding_uuid).to eq(vulnerability.finding.uuid_v5)
         end
       end
     end
