@@ -2074,39 +2074,6 @@ spec/frontend/monitoring/components/charts/options_spec.js
 spec/frontend/monitoring/components/charts/stacked_column_spec.js
 spec/frontend/monitoring/components/charts/time_series_spec.js
 
-## sweet-colden
-spec/frontend/pages/search/show/refresh_counts_spec.js
-spec/frontend/pages/sessions/new/preserve_url_fragment_spec.js
-spec/frontend/pages/sessions/new/signin_tabs_memoizer_spec.js
-spec/frontend/pdf/index_spec.js
-spec/frontend/pdf/page_spec.js
-spec/frontend/performance_bar/components/detailed_metric_spec.js
-spec/frontend/performance_bar/stores/performance_bar_store_spec.js
-spec/frontend/pipeline_editor/components/lint/ci_lint_spec.js
-spec/frontend/pipeline_editor/pipeline_editor_app_spec.js
-spec/frontend/pipeline_new/components/pipeline_new_form_spec.js
-spec/frontend/pipelines/components/dag/dag_graph_spec.js
-spec/frontend/pipelines/components/dag/dag_spec.js
-spec/frontend/pipelines/components/pipelines_filtered_search_spec.js
-spec/frontend/pipelines/graph/action_component_spec.js
-spec/frontend/pipelines/graph/graph_component_legacy_spec.js
-spec/frontend/pipelines/graph/job_item_spec.js
-spec/frontend/pipelines/graph/mock_data.js
-spec/frontend/pipelines/pipeline_graph/pipeline_graph_spec.js
-spec/frontend/pipelines/pipeline_url_spec.js
-spec/frontend/pipelines/pipelines_spec.js
-spec/frontend/pipelines/pipelines_table_row_spec.js
-spec/frontend/pipelines/pipelines_table_spec.js
-spec/frontend/pipelines/stores/pipeline_store_spec.js
-spec/frontend/pipelines/test_reports/stores/actions_spec.js
-spec/frontend/pipelines/test_reports/stores/getters_spec.js
-spec/frontend/pipelines/test_reports/test_suite_table_spec.js
-spec/frontend/pipelines/test_reports/test_summary_spec.js
-spec/frontend/pipelines/tokens/pipeline_trigger_author_token_spec.js
-spec/frontend/pipelines/unwrapping_utils_spec.js
-spec/frontend/profile/account/components/delete_account_modal_spec.js
-spec/frontend/project_find_file_spec.js
-
 ## naughty-chebyshev
 spec/frontend/projects/experiment_new_project_creation/components/app_spec.js
 spec/frontend/projects/experiment_new_project_creation/components/legacy_container_spec.js
