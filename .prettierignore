@@ -682,39 +682,6 @@ app/assets/javascripts/performance_bar/components/request_selector.vue
 app/assets/javascripts/performance_bar/index.js
 app/assets/javascripts/performance_bar/performance_bar_log.js
 
-## musing-khayyam
-app/assets/javascripts/performance_bar/services/performance_bar_service.js
-app/assets/javascripts/performance_bar/stores/performance_bar_store.js
-app/assets/javascripts/persistent_user_callout.js
-app/assets/javascripts/persistent_user_callouts.js
-app/assets/javascripts/pipeline_editor/graphql/resolvers.js
-app/assets/javascripts/pipeline_new/components/pipeline_new_form.vue
-app/assets/javascripts/pipeline_new/utils/format_refs.js
-app/assets/javascripts/pipelines/components/dag/dag.vue
-app/assets/javascripts/pipelines/components/dag/dag_graph.vue
-app/assets/javascripts/pipelines/components/dag/drawing_utils.js
-app/assets/javascripts/pipelines/components/dag/interactions.js
-app/assets/javascripts/pipelines/components/graph/graph_component_legacy.vue
-app/assets/javascripts/pipelines/components/graph/utils.js
-app/assets/javascripts/pipelines/components/header_component.vue
-app/assets/javascripts/pipelines/components/parsing_utils.js
-app/assets/javascripts/pipelines/components/pipeline_graph/drawing_utils.js
-app/assets/javascripts/pipelines/components/pipeline_graph/pipeline_graph.vue
-app/assets/javascripts/pipelines/components/pipelines_list/pipelines.vue
-app/assets/javascripts/pipelines/components/pipelines_list/pipelines_filtered_search.vue
-app/assets/javascripts/pipelines/components/pipelines_list/stage.vue
-app/assets/javascripts/pipelines/components/pipelines_list/tokens/pipeline_branch_name_token.vue
-app/assets/javascripts/pipelines/components/pipelines_list/tokens/pipeline_status_token.vue
-app/assets/javascripts/pipelines/components/pipelines_list/tokens/pipeline_tag_name_token.vue
-app/assets/javascripts/pipelines/components/pipelines_list/tokens/pipeline_trigger_author_token.vue
-app/assets/javascripts/pipelines/components/unwrapping_utils.js
-app/assets/javascripts/pipelines/mixins/graph_pipeline_bundle_mixin.js
-app/assets/javascripts/pipelines/mixins/pipelines.js
-app/assets/javascripts/pipelines/pipeline_details_bundle.js
-app/assets/javascripts/pipelines/pipeline_details_header.js
-app/assets/javascripts/pipelines/pipeline_details_mediator.js
-app/assets/javascripts/pipelines/stores/pipeline_store.js
-
 ## musing-engelbart
 app/assets/javascripts/pipelines/stores/test_reports/getters.js
 app/assets/javascripts/pipelines/stores/test_reports/index.js
