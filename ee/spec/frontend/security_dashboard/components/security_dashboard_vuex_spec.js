@@ -1,13 +1,15 @@
+import { nextTick } from 'vue';
+import Vuex from 'vuex';
 import { shallowMount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
-
+import { merge } from 'lodash';
 import Filters from 'ee/security_dashboard/components/filters.vue';
 import LoadingError from 'ee/security_dashboard/components/loading_error.vue';
 import SecurityDashboardLayout from 'ee/security_dashboard/components/security_dashboard_layout.vue';
 import SecurityDashboardTable from 'ee/security_dashboard/components/security_dashboard_table.vue';
 import SecurityDashboard from 'ee/security_dashboard/components/security_dashboard_vuex.vue';
 
-import createStore from 'ee/security_dashboard/store';
+import { getStoreConfig } from 'ee/security_dashboard/store';
 import IssueModal from 'ee/vue_shared/security_reports/components/modal.vue';
 import { TEST_HOST } from 'helpers/test_constants';
 import axios from '~/lib/utils/axios_utils';
@@ -27,14 +29,23 @@ describe('Security Dashboard component', () => {
   let store;
 
   const createComponent = props => {
+    setPipelineIdSpy = jest.fn();
+    fetchPipelineJobsSpy = jest.fn();
+
+    const { actions, ...storeConfig } = getStoreConfig();
+    store = new Vuex.Store(
+      merge(storeConfig, {
+        modules: {
+          vulnerabilities: { actions: { setPipelineId: setPipelineIdSpy } },
+          pipelineJobs: { actions: { fetchPipelineJobs: fetchPipelineJobsSpy } },
+        },
+      }),
+    );
+
     wrapper = shallowMount(SecurityDashboard, {
       store,
       stubs: {
         SecurityDashboardLayout,
-      },
-      methods: {
-        setPipelineId: setPipelineIdSpy,
-        fetchPipelineJobs: fetchPipelineJobsSpy,
       },
       propsData: {
         dashboardDocumentation: '',
@@ -47,16 +58,12 @@ describe('Security Dashboard component', () => {
 
   beforeEach(() => {
     mock = new MockAdapter(axios);
-    setPipelineIdSpy = jest.fn();
-    fetchPipelineJobsSpy = jest.fn();
-    store = createStore();
   });
 
   afterEach(() => {
     wrapper.destroy();
     wrapper = null;
     mock.restore();
-    jest.clearAllMocks();
   });
 
   describe('default', () => {
@@ -73,11 +80,11 @@ describe('Security Dashboard component', () => {
     });
 
     it('sets the pipeline id', () => {
-      expect(setPipelineIdSpy).toHaveBeenCalledWith(pipelineId);
+      expect(setPipelineIdSpy).toHaveBeenCalledWith(expect.any(Object), pipelineId);
     });
 
     it('fetchs the pipeline jobs', () => {
-      expect(fetchPipelineJobsSpy).toHaveBeenCalledWith();
+      expect(fetchPipelineJobsSpy).toHaveBeenCalledWith(expect.any(Object), undefined);
     });
 
     it('renders the issue modal', () => {
@@ -101,7 +108,7 @@ describe('Security Dashboard component', () => {
     `(
       'dispatches the "$expectedDispatchedAction" action when the modal emits a "$emittedModalEvent" event',
       ({ emittedModalEvent, eventPayload, expectedDispatchedAction, expectedActionPayload }) => {
-        wrapper.vm.$store.state.vulnerabilities.modal.vulnerability = 'bar';
+        store.state.vulnerabilities.modal.vulnerability = 'bar';
 
         jest.spyOn(store, 'dispatch').mockImplementation();
         wrapper.find(IssueModal).vm.$emit(emittedModalEvent, eventPayload);
@@ -126,10 +133,10 @@ describe('Security Dashboard component', () => {
       ${{ isCreatingMergeRequest: true }}                                                          | ${expect.objectContaining({ isCreatingMergeRequest: true })}
     `(
       'passes right props to issue modal with state $givenState',
-      ({ givenState, expectedProps }) => {
-        Object.assign(store.state.vulnerabilities, givenState);
-
+      async ({ givenState, expectedProps }) => {
         createComponent();
+        Object.assign(store.state.vulnerabilities, givenState);
+        await nextTick();
 
         expect(wrapper.find(IssueModal).props()).toStrictEqual(expectedProps);
       },
@@ -143,14 +150,14 @@ describe('Security Dashboard component', () => {
 
     it.each([401, 403])('displays an error on error %s', errorCode => {
       store.dispatch('vulnerabilities/receiveVulnerabilitiesError', errorCode);
-      return wrapper.vm.$nextTick().then(() => {
+      return nextTick().then(() => {
         expect(wrapper.find(LoadingError).exists()).toBe(true);
       });
     });
 
     it.each([404, 500])('does not display an error on error %s', errorCode => {
       store.dispatch('vulnerabilities/receiveVulnerabilitiesError', errorCode);
-      return wrapper.vm.$nextTick().then(() => {
+      return nextTick().then(() => {
         expect(wrapper.find(LoadingError).exists()).toBe(false);
       });
     });
