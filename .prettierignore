@@ -333,41 +333,6 @@ app/assets/javascripts/filtered_search/filtered_search_token_keys.js
 app/assets/javascripts/filtered_search/filtered_search_visual_tokens.js
 app/assets/javascripts/filtered_search/issuable_filtered_search_token_keys.js
 
-## great-curie
-app/assets/javascripts/ide/components/commit_sidebar/list_item.vue
-app/assets/javascripts/ide/components/file_templates/bar.vue
-app/assets/javascripts/ide/components/file_templates/dropdown.vue
-app/assets/javascripts/ide/components/ide.vue
-app/assets/javascripts/ide/components/ide_sidebar_nav.vue
-app/assets/javascripts/ide/components/new_dropdown/upload.vue
-app/assets/javascripts/ide/components/panes/collapsible_sidebar.vue
-app/assets/javascripts/ide/components/preview/clientside.vue
-app/assets/javascripts/ide/components/preview/navigator.vue
-app/assets/javascripts/ide/components/repo_commit_section.vue
-app/assets/javascripts/ide/components/repo_editor.vue
-app/assets/javascripts/ide/ide_router.js
-app/assets/javascripts/ide/lib/common/disposable.js
-app/assets/javascripts/ide/lib/common/model.js
-app/assets/javascripts/ide/lib/create_file_diff.js
-app/assets/javascripts/ide/lib/decorations/controller.js
-app/assets/javascripts/ide/lib/diff/controller.js
-app/assets/javascripts/ide/lib/diff/diff.js
-app/assets/javascripts/ide/lib/diff/diff_worker.js
-app/assets/javascripts/ide/lib/editor.js
-app/assets/javascripts/ide/lib/editor_options.js
-app/assets/javascripts/ide/lib/editorconfig/parser.js
-app/assets/javascripts/ide/lib/editorconfig/rules_mapper.js
-app/assets/javascripts/ide/lib/errors.js
-app/assets/javascripts/ide/lib/files.js
-app/assets/javascripts/ide/lib/mirror.js
-app/assets/javascripts/ide/services/index.js
-app/assets/javascripts/ide/services/terminals.js
-app/assets/javascripts/ide/stores/actions.js
-app/assets/javascripts/ide/stores/actions/file.js
-app/assets/javascripts/ide/stores/actions/merge_request.js
-app/assets/javascripts/ide/stores/actions/project.js
-app/assets/javascripts/ide/stores/actions/tree.js
-
 ## gifted-euclid
 app/assets/javascripts/ide/stores/extend.js
 app/assets/javascripts/ide/stores/getters.js
