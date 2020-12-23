@@ -2074,45 +2074,6 @@ spec/frontend/monitoring/components/charts/options_spec.js
 spec/frontend/monitoring/components/charts/stacked_column_spec.js
 spec/frontend/monitoring/components/charts/time_series_spec.js
 
-## naughty-chebyshev
-spec/frontend/projects/experiment_new_project_creation/components/app_spec.js
-spec/frontend/projects/experiment_new_project_creation/components/legacy_container_spec.js
-spec/frontend/projects/experiment_new_project_creation/components/welcome_spec.js
-spec/frontend/projects/project_import_gitlab_project_spec.js
-spec/frontend/projects/settings/access_dropdown_spec.js
-spec/frontend/projects/settings_service_desk/services/service_desk_service_spec.js
-spec/frontend/prometheus_metrics/prometheus_metrics_spec.js
-spec/frontend/ref/components/ref_selector_spec.js
-spec/frontend/registry/explorer/components/delete_button_spec.js
-spec/frontend/registry/explorer/components/details_page/delete_alert_spec.js
-spec/frontend/registry/explorer/components/details_page/delete_modal_spec.js
-spec/frontend/registry/explorer/components/details_page/tags_list_spec.js
-spec/frontend/registry/explorer/components/list_page/image_list_row_spec.js
-spec/frontend/registry/explorer/components/registry_breadcrumb_spec.js
-spec/frontend/registry/explorer/mock_data.js
-spec/frontend/registry/explorer/pages/details_spec.js
-spec/frontend/registry/explorer/pages/list_spec.js
-spec/frontend/registry/settings/components/expiration_dropdown_spec.js
-spec/frontend/registry/settings/components/expiration_input_spec.js
-spec/frontend/registry/settings/components/expiration_run_text_spec.js
-spec/frontend/registry/settings/components/expiration_toggle_spec.js
-spec/frontend/registry/settings/components/registry_settings_app_spec.js
-spec/frontend/registry/settings/components/settings_form_spec.js
-spec/frontend/registry/settings/mock_data.js
-spec/frontend/related_merge_requests/components/related_merge_requests_spec.js
-spec/frontend/related_merge_requests/store/actions_spec.js
-spec/frontend/releases/components/app_edit_new_spec.js
-spec/frontend/releases/components/app_index_spec.js
-spec/frontend/releases/components/app_show_spec.js
-spec/frontend/releases/components/asset_links_form_spec.js
-spec/frontend/releases/components/issuable_stats_spec.js
-spec/frontend/releases/components/release_block_assets_spec.js
-spec/frontend/releases/components/release_block_milestone_info_spec.js
-spec/frontend/releases/components/releases_pagination_graphql_spec.js
-spec/frontend/releases/components/releases_pagination_rest_spec.js
-spec/frontend/releases/components/releases_pagination_spec.js
-spec/frontend/releases/components/tag_field_new_spec.js
-
 ## competent-lichterman
 spec/frontend/releases/stores/modules/detail/actions_spec.js
 spec/frontend/releases/stores/modules/list/helpers.js
