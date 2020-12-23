@@ -83,7 +83,7 @@ The process is as follows:
 1. Fields meeting criteria are removed in X.0 or X.6.
 
 NOTE:
-If a field is behind a feature flag and disabled by default, it's exempt from the deprecation process
+Fields behind a feature flag and disabled by default are exempt from the deprecation process,
 and can be removed at any time without notice.
 
 ### List of removed items
