@@ -91,7 +91,7 @@ module.exports = path => {
       '^.+\\.(md|zip|png)$': 'jest-raw-loader',
     },
     transformIgnorePatterns: [
-      'node_modules/(?!(@gitlab/ui|bootstrap-vue|three|monaco-editor|monaco-yaml)/)',
+      'node_modules/(?!(@gitlab/ui|@gitlab/favicon-overlay|bootstrap-vue|three|monaco-editor|monaco-yaml)/)',
     ],
     timers: 'fake',
     testEnvironment: '<rootDir>/spec/frontend/environment.js',
