@@ -526,10 +526,12 @@ You can use these fake tokens as examples:
 ### Usage list
 <!-- vale off -->
 
-| Usage | Guidance |
-|-----------------------|-----|
+| Usage                 | Guidance |
+|-----------------------|----------|
+| above                 | Try to avoid extra words when referring to an example or table in a documentation page, but if required, use **previously** instead. |
 | admin, admin area     | Use **administration**, **administrator**, **administer**, or **Admin Area** instead. |
 | and/or                | Use **or** instead, or another sensible construction. |
+| below                 | Try to avoid extra words when referring to an example or table in a documentation page, but if required, use **following** instead. |
 | currently             | Do not use when talking about the product or its features. The documentation describes the product as it is today. |
 | easily                | Do not use. If the user doesn't find the process to be these things, we lose their trust. |
 | e.g.                  | Do not use Latin abbreviations. Use **for example**, **such as**, **for instance**, or **like** instead. ([Vale](../testing.md#vale) rule: [`LatinTerms.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/LatinTerms.yml)) |
@@ -629,23 +631,6 @@ Follow these guidelines for punctuation:
 | Always use lowercase after a colon.                              | _Related Issues: a way to create a relationship between issues._ |
 
 <!-- vale gitlab.Repetition = YES -->
-
-### Introductory text
-
-When you introduce an example or table, try to avoid extra words like 
-**the following** or **below**. Use a colon at the end of the sentence.
-
-Do:
-
-- `This example shows a pipeline with three stages:`
-- `You can use a variable for your username:`
-- `This table shows the permissions you can choose from:`
-
-Don't: 
-
-- `The following example shows a pipeline with three stages:`
-- `The following example shows a pipeline with three stages.`
-- `As you can see in the table below, a pipeline can have three stages.`
 
 ### Placeholder text
 
