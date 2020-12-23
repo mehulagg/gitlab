@@ -110,8 +110,27 @@ module CommitsHelper
     end
   end
 
-  def revert_commit_link(commit, continue_to_path, btn_class: nil, has_tooltip: true)
-    commit_action_link('revert', commit, continue_to_path, btn_class: btn_class, has_tooltip: has_tooltip)
+  def revert_commit_link(commit, continue_to_path, btn_class: nil, has_tooltip: true, pajamas: false)
+    action = 'revert'
+
+    if pajamas
+      return unless current_user
+
+      if can_collaborate_with_project?(@project)
+        tag(:div, data: { display_text: action.capitalize }, class: "js-revert-commit-trigger")
+      elsif can?(current_user, :fork_project, @project)
+        continue_params = {
+          to: continue_to_path,
+          notice: "#{edit_in_new_fork_notice} Try to #{action} this commit again.",
+          notice_now: edit_in_new_fork_notice_now
+        }
+        fork_path = project_forks_path(@project, namespace_key: current_user.namespace.id, continue: continue_params)
+
+        link_to action.capitalize, fork_path, method: :post
+      end
+    else
+      commit_action_link(action, commit, continue_to_path, btn_class: btn_class, has_tooltip: has_tooltip)
+    end
   end
 
   def cherry_pick_commit_link(commit, continue_to_path, btn_class: nil, has_tooltip: true)
