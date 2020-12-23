@@ -76,7 +76,7 @@ export const createStage = ({ dispatch, rootGetters }, data) => {
     valueStreamId: currentValueStreamId,
     data,
   })
-    .then(response => {
+    .then((response) => {
       const { status, data: responseData } = response;
       return dispatch('receiveCreateStageSuccess', { status, data: responseData });
     })

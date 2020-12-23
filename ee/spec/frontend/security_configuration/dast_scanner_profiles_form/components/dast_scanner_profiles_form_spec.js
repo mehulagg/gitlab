@@ -36,7 +36,7 @@ describe('DAST Scanner Profile', () => {
   let wrapper;
 
   const withinComponent = () => within(wrapper.element);
-  const findByTestId = testId => wrapper.find(`[data-testid="${testId}"`);
+  const findByTestId = (testId) => wrapper.find(`[data-testid="${testId}"`);
 
   const findForm = () => wrapper.find(GlForm);
   const findProfileNameInput = () => findByTestId('profile-name-input');
@@ -50,7 +50,7 @@ describe('DAST Scanner Profile', () => {
   const findAlert = () => wrapper.find(GlAlert);
   const submitForm = () => findForm().vm.$emit('submit', { preventDefault: () => {} });
 
-  const componentFactory = (mountFn = shallowMount) => options => {
+  const componentFactory = (mountFn = shallowMount) => (options) => {
     wrapper = mountFn(
       DastScannerProfileForm,
       merge(
@@ -120,7 +120,7 @@ describe('DAST Scanner Profile', () => {
       createFullComponent();
     });
 
-    it.each(invalidValues)('is marked as invalid provided an invalid value', async value => {
+    it.each(invalidValues)('is marked as invalid provided an invalid value', async (value) => {
       await finder().find('input').setValue(value);
 
       expect(wrapper.text()).toContain(errorMessage);
@@ -242,7 +242,7 @@ describe('DAST Scanner Profile', () => {
           const alert = findAlert();
 
           expect(alert.exists()).toBe(true);
-          errors.forEach(error => {
+          errors.forEach((error) => {
             expect(alert.text()).toContain(error);
           });
         });

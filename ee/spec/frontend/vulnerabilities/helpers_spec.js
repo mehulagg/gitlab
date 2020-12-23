@@ -5,7 +5,7 @@ describe('Vulnerabilities helpers', () => {
     it.each([
       { iid: 135, web_url: 'some/url' },
       { iid: undefined, web_url: undefined },
-    ])('returns formatted issue with expected properties for issue %s', issue => {
+    ])('returns formatted issue with expected properties for issue %s', (issue) => {
       const formattedIssue = getFormattedIssue(issue);
 
       expect(formattedIssue).toMatchObject({

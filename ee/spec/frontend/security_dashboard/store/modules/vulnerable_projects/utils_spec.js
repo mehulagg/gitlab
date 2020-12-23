@@ -12,7 +12,7 @@ describe('Vulnerable Projects store utils', () => {
   describe('addMostSevereVulnerabilityInformation', () => {
     it.each(['critical', 'medium', 'high'])(
       'takes a project and adds a property containing information about its most severe vulnerability',
-      severityLevel => {
+      (severityLevel) => {
         const mockProject = createProjectWithOneVulnerability(severityLevel);
         const mockSeverityLevelsInOrder = [severityLevel, 'foo', 'bar'];
 
@@ -38,7 +38,7 @@ describe('Vulnerable Projects store utils', () => {
 
     it.each(['high', 'medium', 'low'])(
       'returns false if the given project does not contain at least one vulnerability of the given severity level',
-      severityLevel => {
+      (severityLevel) => {
         const project = createProjectWithOneVulnerability(severityLevel);
 
         expect(hasVulnerabilityWithSeverityLevel(project)('critical')).toBe(false);
@@ -107,7 +107,7 @@ describe('Vulnerable Projects store utils', () => {
         const mockGroup = { severityLevels: severityLevelsForGroup };
 
         expect(projectsForSeverityGroup(Object.values(mockProjects), mockGroup)).toStrictEqual(
-          expectedProjectsInGroup.map(project => mockProjects[project]),
+          expectedProjectsInGroup.map((project) => mockProjects[project]),
         );
       },
     );

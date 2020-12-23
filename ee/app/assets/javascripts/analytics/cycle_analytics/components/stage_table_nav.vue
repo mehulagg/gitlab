@@ -53,7 +53,7 @@ export default {
     if (this.allowCustomOrdering) {
       const options = {
         ...sortableDefaultOptions(),
-        onUpdate: event => {
+        onUpdate: (event) => {
           const el = event.item;
 
           const { previousElementSibling, nextElementSibling } = el;

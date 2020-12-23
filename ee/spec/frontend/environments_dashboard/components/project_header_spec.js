@@ -68,7 +68,7 @@ describe('Project Header', () => {
       const removeLink = wrapper
         .find(GlDropdown)
         .findAll(GlDropdownItem)
-        .filter(w => w.text() === 'Remove');
+        .filter((w) => w.text() === 'Remove');
       expect(removeLink.exists()).toBe(true);
     });
 
@@ -76,7 +76,7 @@ describe('Project Header', () => {
       const removeLink = wrapper
         .find(GlDropdown)
         .findAll(GlDropdownItem)
-        .filter(w => w.text() === 'Remove');
+        .filter((w) => w.text() === 'Remove');
       removeLink.at(0).vm.$emit('click');
 
       return wrapper.vm.$nextTick().then(() => {

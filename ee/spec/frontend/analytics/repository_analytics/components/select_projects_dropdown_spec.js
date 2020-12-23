@@ -14,9 +14,9 @@ describe('Select projects dropdown component', () => {
   let wrapper;
 
   const findSelectAllProjects = () => wrapper.find('[data-testid="select-all-projects"]');
-  const findProjectById = id => wrapper.find(`[data-testid="select-project-${id}"]`);
+  const findProjectById = (id) => wrapper.find(`[data-testid="select-project-${id}"]`);
   const selectAllProjects = () => findSelectAllProjects().trigger('click');
-  const selectProjectById = id => findProjectById(id).trigger('click');
+  const selectProjectById = (id) => findProjectById(id).trigger('click');
   const findIntersectionObserver = () => wrapper.find(GlIntersectionObserver);
   const findLoadingIcon = () => wrapper.find(GlLoadingIcon);
 

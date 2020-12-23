@@ -39,7 +39,7 @@ describe('EE billings subscription module mutations', () => {
   });
 
   describe(types.RECEIVE_SUBSCRIPTION_SUCCESS, () => {
-    const getColumnValues = columns =>
+    const getColumnValues = (columns) =>
       columns.reduce(
         (acc, { id, value }) => ({
           ...acc,
@@ -47,7 +47,7 @@ describe('EE billings subscription module mutations', () => {
         }),
         {},
       );
-    const getStateTableValues = key =>
+    const getStateTableValues = (key) =>
       state.tables[key].rows.map(({ columns }) => getColumnValues(columns));
 
     describe.each`

@@ -55,7 +55,7 @@ describe('Subscription Seats', () => {
   const findPageHeading = () => wrapper.find('[data-testid="heading"]');
   const findPagination = () => wrapper.find(GlPagination);
 
-  const serializeUser = rowWrapper => {
+  const serializeUser = (rowWrapper) => {
     const avatarLink = rowWrapper.find(GlAvatarLink);
     const avatarLabeled = rowWrapper.find(GlAvatarLabeled);
 
@@ -72,7 +72,7 @@ describe('Subscription Seats', () => {
     };
   };
 
-  const serializeTableRow = rowWrapper => {
+  const serializeTableRow = (rowWrapper) => {
     const emailWrapper = rowWrapper.find('[data-testid="email"]');
 
     return {
@@ -82,7 +82,7 @@ describe('Subscription Seats', () => {
     };
   };
 
-  const findSerializedTable = tableWrapper => {
+  const findSerializedTable = (tableWrapper) => {
     return tableWrapper.findAll('tbody tr').wrappers.map(serializeTableRow);
   };
 
@@ -141,7 +141,7 @@ describe('Subscription Seats', () => {
   describe('pagination', () => {
     it.each([null, NaN, undefined, 'a string', false])(
       'will not render given %s for currentPage',
-      value => {
+      (value) => {
         wrapper = createComponent({
           initialState: {
             page: value,

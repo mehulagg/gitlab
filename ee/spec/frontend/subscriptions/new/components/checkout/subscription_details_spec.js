@@ -24,7 +24,7 @@ describe('Subscription Details', () => {
   ];
 
   let initialNamespaceId = null;
-  const initialData = namespaceId => {
+  const initialData = (namespaceId) => {
     return {
       planData: JSON.stringify(planData),
       groupData: JSON.stringify(groupData),

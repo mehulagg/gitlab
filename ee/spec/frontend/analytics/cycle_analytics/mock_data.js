@@ -18,8 +18,8 @@ import { getDateInPast, getDatesInRange } from '~/lib/utils/datetime_utility';
 
 const fixtureEndpoints = {
   customizableCycleAnalyticsStagesAndEvents: 'analytics/value_stream_analytics/stages.json', // customizable stages and events endpoint
-  stageEvents: stage => `analytics/value_stream_analytics/stages/${stage}/records.json`,
-  stageMedian: stage => `analytics/value_stream_analytics/stages/${stage}/median.json`,
+  stageEvents: (stage) => `analytics/value_stream_analytics/stages/${stage}/records.json`,
+  stageMedian: (stage) => `analytics/value_stream_analytics/stages/${stage}/median.json`,
   recentActivityData: 'analytics/metrics/value_stream_analytics/summary.json',
   timeMetricsData: 'analytics/metrics/value_stream_analytics/time_summary.json',
   groupLabels: 'api/group_labels.json',
@@ -58,7 +58,7 @@ export const group = {
 export const currentGroup = convertObjectPropsToCamelCase(group, { deep: true });
 
 const getStageByTitle = (stages, title) =>
-  stages.find(stage => stage.title && stage.title.toLowerCase().trim() === title) || {};
+  stages.find((stage) => stage.title && stage.title.toLowerCase().trim() === title) || {};
 
 export const recentActivityData = getJSONFixture(fixtureEndpoints.recentActivityData);
 export const timeMetricsData = getJSONFixture(fixtureEndpoints.timeMetricsData);
@@ -81,7 +81,7 @@ export const stagingStage = getStageByTitle(dummyState.stages, 'staging');
 
 export const allowedStages = [issueStage, planStage, codeStage];
 
-const deepCamelCase = obj => convertObjectPropsToCamelCase(obj, { deep: true });
+const deepCamelCase = (obj) => convertObjectPropsToCamelCase(obj, { deep: true });
 
 export const defaultStages = ['issue', 'plan', 'review', 'code', 'test', 'staging'];
 
@@ -135,24 +135,24 @@ export const medians = stageMedians;
 export const rawCustomStageEvents = customizableStagesAndEvents.events;
 export const camelCasedStageEvents = rawCustomStageEvents.map(deepCamelCase);
 
-export const customStageLabelEvents = camelCasedStageEvents.filter(ev => ev.type === 'label');
-export const customStageStartEvents = camelCasedStageEvents.filter(ev => ev.canBeStartEvent);
+export const customStageLabelEvents = camelCasedStageEvents.filter((ev) => ev.type === 'label');
+export const customStageStartEvents = camelCasedStageEvents.filter((ev) => ev.canBeStartEvent);
 
 // get all the possible stop events
-const allowedEndEventIds = new Set(customStageStartEvents.flatMap(e => e.allowedEndEvents));
-export const customStageStopEvents = camelCasedStageEvents.filter(ev =>
+const allowedEndEventIds = new Set(customStageStartEvents.flatMap((e) => e.allowedEndEvents));
+export const customStageStopEvents = camelCasedStageEvents.filter((ev) =>
   allowedEndEventIds.has(ev.identifier),
 );
 
 export const customStageEvents = uniq(
   [...customStageStartEvents, ...customStageStopEvents],
   false,
-  ev => ev.identifier,
+  (ev) => ev.identifier,
 );
 
 export const labelStartEvent = customStageLabelEvents[0];
 export const labelStopEvent = customStageLabelEvents.find(
-  ev => ev.identifier === labelStartEvent.allowedEndEvents[0],
+  (ev) => ev.identifier === labelStartEvent.allowedEndEvents[0],
 );
 
 export const rawCustomStageFormErrors = {
@@ -166,10 +166,10 @@ const dateRange = getDatesInRange(startDate, endDate, toYmd);
 
 export const apiTasksByTypeData = getJSONFixture(
   'analytics/charts/type_of_work/tasks_by_type.json',
-).map(labelData => {
+).map((labelData) => {
   // add data points for our mock date range
   const maxValue = 10;
-  const series = dateRange.map(date => [date, Math.floor(Math.random() * Math.floor(maxValue))]);
+  const series = dateRange.map((date) => [date, Math.floor(Math.random() * Math.floor(maxValue))]);
   return {
     ...labelData,
     series,

@@ -15,7 +15,7 @@ describe('BoardSidebarTimeTracker', () => {
   let wrapper;
   let store;
 
-  const createComponent = options => {
+  const createComponent = (options) => {
     wrapper = shallowMount(BoardSidebarTimeTracker, {
       store,
       ...options,
@@ -42,7 +42,7 @@ describe('BoardSidebarTimeTracker', () => {
 
   it.each([[true], [false]])(
     'renders IssuableTimeTracker with correct spent and estimated time (timeTrackingLimitToHours=%s)',
-    timeTrackingLimitToHours => {
+    (timeTrackingLimitToHours) => {
       createComponent({ provide: { timeTrackingLimitToHours } });
 
       expect(wrapper.find(IssuableTimeTracker).props()).toEqual({

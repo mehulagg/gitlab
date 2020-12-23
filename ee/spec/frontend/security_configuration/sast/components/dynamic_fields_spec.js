@@ -34,7 +34,7 @@ describe('DynamicFields component', () => {
     });
   });
 
-  describe.each([true, false])('given the disabled prop is %p', disabled => {
+  describe.each([true, false])('given the disabled prop is %p', (disabled) => {
     let entities;
 
     beforeEach(() => {

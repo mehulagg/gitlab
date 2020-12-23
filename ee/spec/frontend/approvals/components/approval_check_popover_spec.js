@@ -17,7 +17,7 @@ describe('Approval Check Popover', () => {
 
   describe('with a documentation link', () => {
     const documentationLink = `${TEST_HOST}/documentation`;
-    beforeEach(done => {
+    beforeEach((done) => {
       wrapper.setProps({
         documentationLink,
       });

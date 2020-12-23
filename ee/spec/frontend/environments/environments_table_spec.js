@@ -80,7 +80,7 @@ describe('Environment table', () => {
     expect(wrapper.find('.deploy-board-icon').exists()).toBe(true);
   });
 
-  it('should toggle deploy board visibility when arrow is clicked', done => {
+  it('should toggle deploy board visibility when arrow is clicked', (done) => {
     const mockItem = {
       name: 'review',
       size: 1,
@@ -98,7 +98,7 @@ describe('Environment table', () => {
       isDeployBoardVisible: false,
     };
 
-    eventHub.$on('toggleDeployBoard', env => {
+    eventHub.$on('toggleDeployBoard', (env) => {
       expect(env.id).toEqual(mockItem.id);
       done();
     });

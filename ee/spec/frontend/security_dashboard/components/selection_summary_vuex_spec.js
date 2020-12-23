@@ -50,7 +50,7 @@ describe('Selection Summary', () => {
   const dismissMessage = () => wrapper.find('[data-testid="dismiss-message"]');
   const dismissButton = () => wrapper.find(GlButton);
 
-  const selectByIndex = index =>
+  const selectByIndex = (index) =>
     store.commit(`vulnerabilities/${SELECT_VULNERABILITY}`, mockDataVulnerabilities[index].id);
 
   it('renders the form', () => {

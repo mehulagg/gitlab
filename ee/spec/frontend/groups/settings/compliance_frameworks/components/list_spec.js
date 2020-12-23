@@ -154,7 +154,7 @@ describe('List', () => {
     it('shows the list items with expect props', () => {
       expect(findListItems()).toHaveLength(2);
 
-      findListItems().wrappers.forEach(item =>
+      findListItems().wrappers.forEach((item) =>
         expect(item.props()).toEqual(
           expect.objectContaining({
             framework: {

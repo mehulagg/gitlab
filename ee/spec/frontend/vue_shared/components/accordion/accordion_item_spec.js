@@ -74,7 +74,7 @@ describe('AccordionItem component', () => {
   });
 
   describe('scoped slots', () => {
-    it.each(['default', 'title'])("contains a '%s' slot", slotName => {
+    it.each(['default', 'title'])("contains a '%s' slot", (slotName) => {
       const className = `${slotName}-slot-content`;
 
       factory({ [`${slotName}Slot`]: `<div class='${className}' />` });
@@ -89,7 +89,7 @@ describe('AccordionItem component', () => {
 
     it.each([true, false])(
       'passes the "isExpanded" and "isDisabled" state to the title slot',
-      state => {
+      (state) => {
         const titleSlot = jest.fn();
 
         factory({ propsData: { disabled: state }, titleSlot });

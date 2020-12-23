@@ -83,7 +83,7 @@ const createComponent = ({ state, props, options }) => {
   });
 };
 
-const findByTestId = testId => wrapper.find(`[data-testid="${testId}"]`);
+const findByTestId = (testId) => wrapper.find(`[data-testid="${testId}"]`);
 
 describe('Project Licenses', () => {
   afterEach(() => {

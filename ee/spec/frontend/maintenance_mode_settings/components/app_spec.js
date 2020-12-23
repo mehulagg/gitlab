@@ -16,7 +16,7 @@ describe('MaintenanceModeSettingsApp', () => {
     setBannerMessage: jest.fn(),
   };
 
-  const createComponent = initialState => {
+  const createComponent = (initialState) => {
     const store = new Vuex.Store({
       state: {
         ...MOCK_BASIC_SETTINGS_DATA,

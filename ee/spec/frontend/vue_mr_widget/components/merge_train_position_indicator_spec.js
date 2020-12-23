@@ -5,7 +5,7 @@ import { trimText } from 'helpers/text_helper';
 describe('MergeTrainPositionIndicator', () => {
   let wrapper;
 
-  const factory = propsData => {
+  const factory = (propsData) => {
     wrapper = shallowMount(MergeTrainPositionIndicator, {
       propsData,
     });

@@ -23,7 +23,7 @@ describe('Split Button', () => {
   const findDropdown = () => wrapper.find(GlDropdown);
   const findDropdownItems = () => wrapper.findAll(GlDropdownItem);
 
-  const createComponent = props => {
+  const createComponent = (props) => {
     wrapper = shallowMount(SplitButton, {
       propsData: {
         ...props,

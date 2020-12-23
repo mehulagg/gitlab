@@ -255,7 +255,7 @@ describe('Productivity analytics chart getters', () => {
       expect(getters.scatterplotYaxisLabel(null, mockGetters, mockRootState)).toBe('Days');
     });
 
-    it.each(metricsInHours)('returns "Hours" for the "%s" metric', metric => {
+    it.each(metricsInHours)('returns "Hours" for the "%s" metric', (metric) => {
       const mockGetters = {
         getSelectedMetric: () => metric,
       };

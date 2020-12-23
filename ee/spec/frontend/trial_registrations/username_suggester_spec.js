@@ -134,7 +134,7 @@ describe('UsernameSuggester', () => {
       });
     });
 
-    it('shows a flash message if request fails', done => {
+    it('shows a flash message if request fails', (done) => {
       axiosMock.onGet(usernameEndPoint).replyOnce(500);
 
       expect(suggester.isLoading).toBe(false);

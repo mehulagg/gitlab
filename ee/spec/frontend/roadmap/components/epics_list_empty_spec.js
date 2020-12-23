@@ -55,7 +55,7 @@ describe('EpicsListEmptyComponent', () => {
         expect(vm.message).toBe('The roadmap shows the progress of your epics along a timeline');
       });
 
-      it('returns empty state message when `hasFiltersApplied` prop is true', done => {
+      it('returns empty state message when `hasFiltersApplied` prop is true', (done) => {
         vm.hasFiltersApplied = true;
         Vue.nextTick()
           .then(() => {
@@ -74,7 +74,7 @@ describe('EpicsListEmptyComponent', () => {
           vm.timeframeEnd = mockTimeframeQuarters[mockTimeframeQuarters.length - 1];
         });
 
-        it('returns default empty state sub-message when `hasFiltersApplied` props is false', done => {
+        it('returns default empty state sub-message when `hasFiltersApplied` props is false', (done) => {
           Vue.nextTick()
             .then(() => {
               expect(vm.subMessage).toBe(
@@ -85,7 +85,7 @@ describe('EpicsListEmptyComponent', () => {
             .catch(done.fail);
         });
 
-        it('returns empty state sub-message when `hasFiltersApplied` prop is true', done => {
+        it('returns empty state sub-message when `hasFiltersApplied` prop is true', (done) => {
           vm.hasFiltersApplied = true;
           Vue.nextTick()
             .then(() => {
@@ -103,7 +103,7 @@ describe('EpicsListEmptyComponent', () => {
           vm.presetType = PRESET_TYPES.MONTHS;
         });
 
-        it('returns default empty state sub-message when `hasFiltersApplied` props is false', done => {
+        it('returns default empty state sub-message when `hasFiltersApplied` props is false', (done) => {
           Vue.nextTick()
             .then(() => {
               expect(vm.subMessage).toBe(
@@ -114,7 +114,7 @@ describe('EpicsListEmptyComponent', () => {
             .catch(done.fail);
         });
 
-        it('returns empty state sub-message when `hasFiltersApplied` prop is true', done => {
+        it('returns empty state sub-message when `hasFiltersApplied` prop is true', (done) => {
           vm.hasFiltersApplied = true;
           Vue.nextTick()
             .then(() => {
@@ -137,7 +137,7 @@ describe('EpicsListEmptyComponent', () => {
           vm.timeframeEnd = timeframeEnd;
         });
 
-        it('returns default empty state sub-message when `hasFiltersApplied` props is false', done => {
+        it('returns default empty state sub-message when `hasFiltersApplied` props is false', (done) => {
           Vue.nextTick()
             .then(() => {
               expect(vm.subMessage).toBe(
@@ -148,7 +148,7 @@ describe('EpicsListEmptyComponent', () => {
             .catch(done.fail);
         });
 
-        it('returns empty state sub-message when `hasFiltersApplied` prop is true', done => {
+        it('returns empty state sub-message when `hasFiltersApplied` prop is true', (done) => {
           vm.hasFiltersApplied = true;
           Vue.nextTick()
             .then(() => {
@@ -162,7 +162,7 @@ describe('EpicsListEmptyComponent', () => {
       });
 
       describe('with child epics context', () => {
-        it('returns empty state sub-message when `isChildEpics` is set to `true`', done => {
+        it('returns empty state sub-message when `isChildEpics` is set to `true`', (done) => {
           vm.isChildEpics = true;
           Vue.nextTick()
             .then(() => {
@@ -195,7 +195,7 @@ describe('EpicsListEmptyComponent', () => {
       expect(vm.$el.querySelector('#epic-create-root')).not.toBeNull();
     });
 
-    it('does not render new epic button element when `hasFiltersApplied` prop is true', done => {
+    it('does not render new epic button element when `hasFiltersApplied` prop is true', (done) => {
       vm.hasFiltersApplied = true;
       Vue.nextTick()
         .then(() => {

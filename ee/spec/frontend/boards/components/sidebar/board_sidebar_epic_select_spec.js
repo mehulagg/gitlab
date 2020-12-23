@@ -8,7 +8,7 @@ const TEST_EPIC_ID = 8;
 const TEST_EPIC = { id: 'gid://gitlab/Epic/1', title: 'Test epic' };
 const TEST_ISSUE = { id: 'gid://gitlab/Issue/1', iid: 9, epic: null, referencePath: 'h/b#2' };
 
-jest.mock('~/lib/utils/common_utils', () => ({ debounceByAnimationFrame: callback => callback }));
+jest.mock('~/lib/utils/common_utils', () => ({ debounceByAnimationFrame: (callback) => callback }));
 
 describe('ee/boards/components/sidebar/board_sidebar_epic_select.vue', () => {
   let wrapper;

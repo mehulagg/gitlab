@@ -7,7 +7,7 @@ const mockedStore = {
   dispatch: jest.fn(),
 };
 
-mockedStore.subscribe = callback => {
+mockedStore.subscribe = (callback) => {
   mockedStore.commit = callback;
 };
 
@@ -19,7 +19,7 @@ describe('security reports mediator', () => {
   describe(types.RECEIVE_DISMISS_VULNERABILITY_SUCCESS, () => {
     const type = types.RECEIVE_DISMISS_VULNERABILITY_SUCCESS;
 
-    it.each(Object.entries(updateIssueActionsMap).map(entry => entry.reverse()))(
+    it.each(Object.entries(updateIssueActionsMap).map((entry) => entry.reverse()))(
       `should trigger %s on when a %s is updated`,
       (action, category) => {
         const payload = { category };

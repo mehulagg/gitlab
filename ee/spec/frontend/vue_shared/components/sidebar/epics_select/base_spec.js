@@ -224,7 +224,7 @@ describe('EpicsSelect', () => {
         expect(wrapperStandalone.find(DropdownTitle).exists()).toBe(false);
       });
 
-      it('should render DropdownValue component when `showDropdown` is false', done => {
+      it('should render DropdownValue component when `showDropdown` is false', (done) => {
         wrapper.vm.showDropdown = false;
 
         wrapper.vm.$nextTick(() => {
@@ -237,7 +237,7 @@ describe('EpicsSelect', () => {
         expect(wrapperStandalone.find(DropdownValue).exists()).toBe(false);
       });
 
-      it('should render dropdown container element when props `canEdit` & `showDropdown` are true', done => {
+      it('should render dropdown container element when props `canEdit` & `showDropdown` are true', (done) => {
         showDropdown();
 
         wrapper.vm.$nextTick(() => {
@@ -251,7 +251,7 @@ describe('EpicsSelect', () => {
         expect(wrapperStandalone.find('.epic-dropdown-container').exists()).toBe(true);
       });
 
-      it('should render DropdownButton component when props `canEdit` & `showDropdown` are true', done => {
+      it('should render DropdownButton component when props `canEdit` & `showDropdown` are true', (done) => {
         showDropdown();
 
         wrapper.vm.$nextTick(() => {
@@ -260,7 +260,7 @@ describe('EpicsSelect', () => {
         });
       });
 
-      it('should render dropdown menu container element when props `canEdit` & `showDropdown` are true', done => {
+      it('should render dropdown menu container element when props `canEdit` & `showDropdown` are true', (done) => {
         showDropdown();
 
         wrapper.vm.$nextTick(() => {
@@ -269,7 +269,7 @@ describe('EpicsSelect', () => {
         });
       });
 
-      it('should render DropdownHeader component when props `canEdit` & `showDropdown` are true', done => {
+      it('should render DropdownHeader component when props `canEdit` & `showDropdown` are true', (done) => {
         showDropdown();
 
         wrapper.vm.$nextTick(() => {
@@ -286,7 +286,7 @@ describe('EpicsSelect', () => {
         });
       });
 
-      it('should render DropdownSearchInput component when props `canEdit` & `showDropdown` are true', done => {
+      it('should render DropdownSearchInput component when props `canEdit` & `showDropdown` are true', (done) => {
         showDropdown();
 
         wrapper.vm.$nextTick(() => {
@@ -295,7 +295,7 @@ describe('EpicsSelect', () => {
         });
       });
 
-      it('should render DropdownContents component when props `canEdit` & `showDropdown` are true and `isEpicsLoading` is false', done => {
+      it('should render DropdownContents component when props `canEdit` & `showDropdown` are true and `isEpicsLoading` is false', (done) => {
         showDropdown();
         store.dispatch('receiveEpicsSuccess', []);
 
@@ -305,7 +305,7 @@ describe('EpicsSelect', () => {
         });
       });
 
-      it('should render GlLoadingIcon component when props `canEdit` & `showDropdown` and `isEpicsLoading` are true', done => {
+      it('should render GlLoadingIcon component when props `canEdit` & `showDropdown` and `isEpicsLoading` are true', (done) => {
         showDropdown();
         store.dispatch('requestEpics');
 

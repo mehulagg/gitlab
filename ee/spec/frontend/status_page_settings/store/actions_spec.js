@@ -98,7 +98,7 @@ describe('Status Page actions', () => {
   });
 
   describe('receiveStatusPageSettingsUpdateSuccess', () => {
-    it('should handle successful settings update', done => {
+    it('should handle successful settings update', (done) => {
       testAction(actions.receiveStatusPageSettingsUpdateSuccess, null, null, [], [], () => {
         expect(refreshCurrentPage).toHaveBeenCalledTimes(1);
         done();
@@ -108,7 +108,7 @@ describe('Status Page actions', () => {
 
   describe('receiveStatusPageSettingsUpdateError', () => {
     const error = { response: { data: { message: 'Update error' } } };
-    it('should handle error update', done => {
+    it('should handle error update', (done) => {
       testAction(actions.receiveStatusPageSettingsUpdateError, error, null, [], [], () => {
         expect(createFlash).toHaveBeenCalledWith(
           `There was an error saving your changes. ${error.response.data.message}`,

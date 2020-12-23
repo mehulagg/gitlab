@@ -75,7 +75,7 @@ describe('Filter bar', () => {
     });
   };
 
-  const createComponent = initialStore => {
+  const createComponent = (initialStore) => {
     return shallowMount(FilterBar, {
       localVue,
       store: initialStore,
@@ -101,10 +101,10 @@ describe('Filter bar', () => {
   const selectedLabelList = [filterLabels[0]];
 
   const findFilteredSearch = () => wrapper.find(FilteredSearchBar);
-  const getSearchToken = type =>
+  const getSearchToken = (type) =>
     findFilteredSearch()
       .props('tokens')
-      .find(token => token.type === type);
+      .find((token) => token.type === type);
 
   describe('default', () => {
     beforeEach(() => {

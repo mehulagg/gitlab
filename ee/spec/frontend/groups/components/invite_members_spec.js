@@ -5,7 +5,7 @@ import Component from 'ee/groups/components/invite_members.vue';
 describe('User invites', () => {
   let wrapper;
 
-  const createComponent = propsData => {
+  const createComponent = (propsData) => {
     wrapper = shallowMount(Component, {
       propsData,
     });
@@ -44,7 +44,7 @@ describe('User invites', () => {
       expect(inputs().length).toBe(3);
     });
 
-    it.each([0, 1, 2])('restores the value of the passed emails', index => {
+    it.each([0, 1, 2])('restores the value of the passed emails', (index) => {
       expect(inputs().at(index).attributes('value')).toBe(emails[index]);
     });
   });
@@ -63,7 +63,7 @@ describe('User invites', () => {
       expect(inputs().length).toBe(2);
     });
 
-    it.each([0, 1])('does not set a value', index => {
+    it.each([0, 1])('does not set a value', (index) => {
       expect(inputs().at(index).attributes('value')).toBe(undefined);
     });
 

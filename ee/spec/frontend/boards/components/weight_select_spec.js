@@ -8,7 +8,7 @@ describe('WeightSelect', () => {
   const editButton = () => wrapper.find(GlButton);
   const valueContainer = () => wrapper.find('.value');
   const weightDropdown = () => wrapper.find(GlDropdown);
-  const getWeightItemAtIndex = index => weightDropdown().findAll(GlDropdownItem).at(index);
+  const getWeightItemAtIndex = (index) => weightDropdown().findAll(GlDropdownItem).at(index);
   const defaultProps = {
     weights: ['Any', 'None', 0, 1, 2, 3],
     board: {

@@ -26,7 +26,7 @@ describe('Security Dashboard component', () => {
   let fetchPipelineJobsSpy;
   let store;
 
-  const createComponent = props => {
+  const createComponent = (props) => {
     wrapper = shallowMount(SecurityDashboard, {
       store,
       stubs: {
@@ -141,14 +141,14 @@ describe('Security Dashboard component', () => {
       createComponent();
     });
 
-    it.each([401, 403])('displays an error on error %s', errorCode => {
+    it.each([401, 403])('displays an error on error %s', (errorCode) => {
       store.dispatch('vulnerabilities/receiveVulnerabilitiesError', errorCode);
       return wrapper.vm.$nextTick().then(() => {
         expect(wrapper.find(LoadingError).exists()).toBe(true);
       });
     });
 
-    it.each([404, 500])('does not display an error on error %s', errorCode => {
+    it.each([404, 500])('does not display an error on error %s', (errorCode) => {
       store.dispatch('vulnerabilities/receiveVulnerabilitiesError', errorCode);
       return wrapper.vm.$nextTick().then(() => {
         expect(wrapper.find(LoadingError).exists()).toBe(false);

@@ -8,7 +8,7 @@
  * @returns {Object[]}
  */
 export const makeEntities = (count, changes) =>
-  [...Array(count).keys()].map(i => ({
+  [...Array(count).keys()].map((i) => ({
     defaultValue: `defaultValue${i}`,
     description: `description${i}`,
     field: `field${i}`,
@@ -28,7 +28,7 @@ export const makeEntities = (count, changes) =>
  * @returns {Object[]}
  */
 export const makeAnalyzerEntities = (count, changes) =>
-  [...Array(count).keys()].map(i => ({
+  [...Array(count).keys()].map((i) => ({
     name: `nameValue${i}`,
     label: `label${i}`,
     description: `description${i}`,
