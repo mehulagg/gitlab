@@ -130,9 +130,9 @@ export default {
       // either selected or removed aren't leading to same selection
       // as current one, as then we don't want to make network call
       // since nothing has changed.
-      const anyLabelUpdated = labels.some(label => {
+      const anyLabelUpdated = labels.some((label) => {
         // Find this label in existing selection.
-        const existingLabel = this.selectedLabels.find(l => l.id === label.id);
+        const existingLabel = this.selectedLabels.find((l) => l.id === label.id);
 
         // Check either of the two following conditions;
         // 1. A label that's not currently applied is being applied.
@@ -146,12 +146,12 @@ export default {
 
         return this.updateTestCase({
           variables: {
-            addLabelIds: labels.filter(label => label.set).map(label => label.id),
-            removeLabelIds: labels.filter(label => !label.set).map(label => label.id),
+            addLabelIds: labels.filter((label) => label.set).map((label) => label.id),
+            removeLabelIds: labels.filter((label) => !label.set).map((label) => label.id),
           },
           errorMessage: s__('TestCases|Something went wrong while updating the test case labels.'),
         })
-          .then(updatedTestCase => {
+          .then((updatedTestCase) => {
             this.$emit('test-case-updated', updatedTestCase);
           })
           .finally(() => {

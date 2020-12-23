@@ -27,7 +27,7 @@ function ruleTypeEndpointFunc(items) {
   const labels = items
     .reduce(
       (acc, { matchLabels }) =>
-        acc.concat(Object.keys(matchLabels).map(key => `${key}:${matchLabels[key]}`)),
+        acc.concat(Object.keys(matchLabels).map((key) => `${key}:${matchLabels[key]}`)),
       [],
     )
     .join(' ');
@@ -125,10 +125,10 @@ export default function fromYaml(manifest) {
 
   const rules = []
     .concat(
-      ingress.map(item => parseRule(item, RuleDirectionInbound)),
-      egress.map(item => parseRule(item, RuleDirectionOutbound)),
+      ingress.map((item) => parseRule(item, RuleDirectionInbound)),
+      egress.map((item) => parseRule(item, RuleDirectionOutbound)),
     )
-    .filter(rule => Boolean(rule));
+    .filter((rule) => Boolean(rule));
 
   return {
     name,

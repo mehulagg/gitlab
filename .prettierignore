@@ -1187,39 +1187,6 @@ ee/app/assets/javascripts/oncall_schedules/components/delete_schedule_modal.vue
 ee/app/assets/javascripts/oncall_schedules/components/oncall_schedule.vue
 ee/app/assets/javascripts/oncall_schedules/components/rotations/components/add_rotation_modal.vue
 
-## frosty-cannon
-ee/app/assets/javascripts/test_case_create/components/test_case_create_root.vue
-ee/app/assets/javascripts/test_case_create/test_case_create_bundle.js
-ee/app/assets/javascripts/test_case_list/components/test_case_list_root.vue
-ee/app/assets/javascripts/test_case_list/test_case_list_bundle.js
-ee/app/assets/javascripts/test_case_show/components/test_case_show_root.vue
-ee/app/assets/javascripts/test_case_show/components/test_case_sidebar.vue
-ee/app/assets/javascripts/test_case_show/mixins/test_case_graphql.js
-ee/app/assets/javascripts/test_case_show/test_case_show_bundle.js
-ee/app/assets/javascripts/threat_monitoring/components/alerts/alerts_list.vue
-ee/app/assets/javascripts/threat_monitoring/components/network_policy_list.vue
-ee/app/assets/javascripts/threat_monitoring/components/policy_editor/lib/from_yaml.js
-ee/app/assets/javascripts/threat_monitoring/components/policy_editor/lib/humanize.js
-ee/app/assets/javascripts/threat_monitoring/components/policy_editor/lib/rules.js
-ee/app/assets/javascripts/threat_monitoring/components/policy_editor/lib/to_yaml.js
-ee/app/assets/javascripts/threat_monitoring/components/policy_editor/lib/utils.js
-ee/app/assets/javascripts/threat_monitoring/components/policy_editor/policy_rule_entity.vue
-ee/app/assets/javascripts/threat_monitoring/components/statistics_history.vue
-ee/app/assets/javascripts/threat_monitoring/store/index.js
-ee/app/assets/javascripts/threat_monitoring/store/modules/network_policies/actions.js
-ee/app/assets/javascripts/threat_monitoring/store/modules/network_policies/getters.js
-ee/app/assets/javascripts/threat_monitoring/store/modules/network_policies/mutations.js
-ee/app/assets/javascripts/threat_monitoring/store/modules/threat_monitoring/actions.js
-ee/app/assets/javascripts/threat_monitoring/store/modules/threat_monitoring_statistics/actions.js
-ee/app/assets/javascripts/threat_monitoring/store/modules/threat_monitoring_statistics/index.js
-ee/app/assets/javascripts/threat_monitoring/store/modules/threat_monitoring_statistics/mutations.js
-ee/app/assets/javascripts/threat_monitoring/store/utils.js
-ee/app/assets/javascripts/validators/ip_address.js
-ee/app/assets/javascripts/vue_merge_request_widget/components/approvals/approvals.vue
-ee/app/assets/javascripts/vue_merge_request_widget/components/approvals/approvals_list.vue
-ee/app/assets/javascripts/vue_merge_request_widget/components/blocking_merge_requests/blocking_merge_requests_report.vue
-ee/app/assets/javascripts/vue_merge_request_widget/components/visual_review_app_link.vue
-
 ## pedantic-wu
 ee/app/assets/javascripts/vue_merge_request_widget/mappers.js
 ee/app/assets/javascripts/vue_merge_request_widget/mr_widget_options.vue

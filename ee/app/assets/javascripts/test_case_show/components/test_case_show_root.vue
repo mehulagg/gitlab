@@ -76,7 +76,7 @@ export default {
       return todos.length ? todos[0] : null;
     },
     selectedLabels() {
-      return this.testCase.labels.nodes.map(label => ({
+      return this.testCase.labels.nodes.map((label) => ({
         ...label,
         id: getIdFromGraphQLId(label.id),
       }));
@@ -91,7 +91,7 @@ export default {
         },
         errorMessage: s__('TestCases|Something went wrong while updating the test case.'),
       })
-        .then(updatedTestCase => {
+        .then((updatedTestCase) => {
           this.testCase = updatedTestCase;
         })
         .finally(() => {
@@ -110,7 +110,7 @@ export default {
         },
         errorMessage: s__('TestCases|Something went wrong while updating the test case.'),
       })
-        .then(updatedTestCase => {
+        .then((updatedTestCase) => {
           this.testCase = updatedTestCase;
           this.editTestCaseFormVisible = false;
           IssuableEventHub.$emit('update.issuable');

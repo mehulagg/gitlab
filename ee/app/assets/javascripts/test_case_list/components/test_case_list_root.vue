@@ -252,7 +252,7 @@ export default {
 
       if (labelName?.length) {
         filteredSearchValue.push(
-          ...labelName.map(label => ({
+          ...labelName.map((label) => ({
             type: 'label_name',
             value: { data: label },
           })),
@@ -290,7 +290,7 @@ export default {
       const labels = [];
       const plainText = [];
 
-      filters.forEach(filter => {
+      filters.forEach((filter) => {
         switch (filter.type) {
           case 'author_username':
             filterParams.authorUsername = filter.value.data;

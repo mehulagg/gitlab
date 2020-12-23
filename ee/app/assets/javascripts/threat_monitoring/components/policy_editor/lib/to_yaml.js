@@ -12,7 +12,7 @@ function spec({ rules, isEnabled, endpointMatchMode, endpointLabels }) {
   const policySpec = {};
 
   policySpec.endpointSelector = Object.keys(matchLabels).length > 0 ? { matchLabels } : {};
-  rules.forEach(rule => {
+  rules.forEach((rule) => {
     const { direction } = rule;
     if (!policySpec[direction]) policySpec[direction] = [];
 
