@@ -129,7 +129,7 @@ describe('diffs/components/app', () => {
       expect(wrapper.vm.fetchDiffFilesBatch).toHaveBeenCalled();
       expect(wrapper.vm.fetchCoverageFiles).toHaveBeenCalled();
       expect(wrapper.vm.unwatchDiscussions).toHaveBeenCalled();
-      expect(wrapper.vm.diffFilesLength).toEqual(100);
+      expect(wrapper.vm.diffFilesLength).toBe(100);
       expect(wrapper.vm.unwatchRetrievingBatches).toHaveBeenCalled();
     });
 
@@ -144,7 +144,7 @@ describe('diffs/components/app', () => {
       expect(wrapper.vm.fetchDiffFilesBatch).toHaveBeenCalled();
       expect(wrapper.vm.fetchCoverageFiles).toHaveBeenCalled();
       expect(wrapper.vm.unwatchDiscussions).toHaveBeenCalled();
-      expect(wrapper.vm.diffFilesLength).toEqual(100);
+      expect(wrapper.vm.diffFilesLength).toBe(100);
       expect(wrapper.vm.unwatchRetrievingBatches).toHaveBeenCalled();
     });
   });
@@ -443,21 +443,21 @@ describe('diffs/components/app', () => {
       await nextTick();
       store.state.diffs.currentDiffFileId = '333';
 
-      expect(wrapper.vm.currentDiffIndex).toEqual(2);
+      expect(wrapper.vm.currentDiffIndex).toBe(2);
 
       wrapper.vm.jumpToFile(+1);
 
-      expect(wrapper.vm.currentDiffIndex).toEqual(2);
+      expect(wrapper.vm.currentDiffIndex).toBe(2);
       expect(spy).not.toHaveBeenCalled();
     });
 
     it('does not jump to next file from the last one', async () => {
       await nextTick();
-      expect(wrapper.vm.currentDiffIndex).toEqual(0);
+      expect(wrapper.vm.currentDiffIndex).toBe(0);
 
       wrapper.vm.jumpToFile(-1);
 
-      expect(wrapper.vm.currentDiffIndex).toEqual(0);
+      expect(wrapper.vm.currentDiffIndex).toBe(0);
       expect(spy).not.toHaveBeenCalled();
     });
   });
