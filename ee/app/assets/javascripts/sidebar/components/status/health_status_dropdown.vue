@@ -36,7 +36,7 @@ export default {
     return {
       isDropdownShowing: false,
       selectedStatus: this.status,
-      statusOptions: Object.keys(healthStatusTextMap).map(key => ({
+      statusOptions: Object.keys(healthStatusTextMap).map((key) => ({
         key,
         value: healthStatusTextMap[key],
       })),

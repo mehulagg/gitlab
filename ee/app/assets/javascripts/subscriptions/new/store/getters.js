@@ -1,9 +1,9 @@
 import { STEPS, NEW_GROUP } from '../constants';
 import { s__ } from '~/locale';
 
-export const currentStep = state => state.currentStep;
+export const currentStep = (state) => state.currentStep;
 
-export const stepIndex = () => step => STEPS.findIndex(el => el === step);
+export const stepIndex = () => (step) => STEPS.findIndex((el) => el === step);
 
 export const currentStepIndex = (state, getters) => getters.stepIndex(state.currentStep);
 
@@ -12,8 +12,8 @@ export const selectedPlanText = (state, getters) => getters.selectedPlanDetails.
 export const selectedPlanPrice = (state, getters) =>
   getters.selectedPlanDetails.pricePerUserPerYear;
 
-export const selectedPlanDetails = state =>
-  state.availablePlans.find(plan => plan.value === state.selectedPlan);
+export const selectedPlanDetails = (state) =>
+  state.availablePlans.find((plan) => plan.value === state.selectedPlan);
 
 export const confirmOrderParams = (state, getters) => ({
   setup_for_company: state.isSetupForCompany,
@@ -35,7 +35,7 @@ export const confirmOrderParams = (state, getters) => ({
   },
 });
 
-export const endDate = state =>
+export const endDate = (state) =>
   new Date(state.startDate).setFullYear(state.startDate.getFullYear() + 1);
 
 export const totalExVat = (state, getters) => state.numberOfUsers * getters.selectedPlanPrice;
@@ -56,14 +56,14 @@ export const name = (state, getters) => {
   return state.fullName;
 };
 
-export const usersPresent = state => state.numberOfUsers > 0;
+export const usersPresent = (state) => state.numberOfUsers > 0;
 
-export const isGroupSelected = state =>
+export const isGroupSelected = (state) =>
   state.selectedGroup !== null && state.selectedGroup !== NEW_GROUP;
 
 export const isSelectedGroupPresent = (state, getters) => {
   return (
-    getters.isGroupSelected && state.groupData.some(group => group.value === state.selectedGroup)
+    getters.isGroupSelected && state.groupData.some((group) => group.value === state.selectedGroup)
   );
 };
 
@@ -71,7 +71,7 @@ export const selectedGroupUsers = (state, getters) => {
   if (!getters.isGroupSelected) {
     return 1;
   } else if (getters.isSelectedGroupPresent) {
-    return state.groupData.find(group => group.value === state.selectedGroup).numberOfUsers;
+    return state.groupData.find((group) => group.value === state.selectedGroup).numberOfUsers;
   }
 
   return null;
@@ -79,7 +79,7 @@ export const selectedGroupUsers = (state, getters) => {
 
 export const selectedGroupName = (state, getters) => {
   if (!getters.isGroupSelected) return null;
-  return state.groupData.find(group => group.value === state.selectedGroup).text;
+  return state.groupData.find((group) => group.value === state.selectedGroup).text;
 };
 
 export const selectedGroupId = (state, getters) =>

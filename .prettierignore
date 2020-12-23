@@ -1187,41 +1187,6 @@ ee/app/assets/javascripts/oncall_schedules/components/delete_schedule_modal.vue
 ee/app/assets/javascripts/oncall_schedules/components/oncall_schedule.vue
 ee/app/assets/javascripts/oncall_schedules/components/rotations/components/add_rotation_modal.vue
 
-## confident-dijkstra
-ee/app/assets/javascripts/security_dashboard/helpers.js
-ee/app/assets/javascripts/security_dashboard/instance_dashboard_settings_init.js
-ee/app/assets/javascripts/security_dashboard/store/modules/filters/actions.js
-ee/app/assets/javascripts/security_dashboard/store/modules/pipeline_jobs/actions.js
-ee/app/assets/javascripts/security_dashboard/store/modules/pipeline_jobs/getters.js
-ee/app/assets/javascripts/security_dashboard/store/modules/project_selector/actions.js
-ee/app/assets/javascripts/security_dashboard/store/modules/project_selector/mutations.js
-ee/app/assets/javascripts/security_dashboard/store/modules/project_selector/utils/add_page_info.js
-ee/app/assets/javascripts/security_dashboard/store/modules/projects/actions.js
-ee/app/assets/javascripts/security_dashboard/store/modules/unscanned_projects/actions.js
-ee/app/assets/javascripts/security_dashboard/store/modules/unscanned_projects/getters.js
-ee/app/assets/javascripts/security_dashboard/store/modules/unscanned_projects/utils.js
-ee/app/assets/javascripts/security_dashboard/store/modules/vulnerabilities/actions.js
-ee/app/assets/javascripts/security_dashboard/store/modules/vulnerabilities/getters.js
-ee/app/assets/javascripts/security_dashboard/store/modules/vulnerabilities/mutations.js
-ee/app/assets/javascripts/security_dashboard/store/modules/vulnerabilities/utils.js
-ee/app/assets/javascripts/security_dashboard/store/modules/vulnerable_projects/actions.js
-ee/app/assets/javascripts/security_dashboard/store/modules/vulnerable_projects/getters.js
-ee/app/assets/javascripts/security_dashboard/store/modules/vulnerable_projects/utils.js
-ee/app/assets/javascripts/security_dashboard/store/plugins/mediator.js
-ee/app/assets/javascripts/security_dashboard/utils/first_class_project_manager_utils.js
-ee/app/assets/javascripts/sidebar/components/status/health_status_dropdown.vue
-ee/app/assets/javascripts/sidebar/components/status/status.vue
-ee/app/assets/javascripts/sidebar/mount_sidebar.js
-ee/app/assets/javascripts/sidebar/sidebar_mediator.js
-ee/app/assets/javascripts/status_page_settings/store/actions.js
-ee/app/assets/javascripts/status_page_settings/store/index.js
-ee/app/assets/javascripts/storage_counter/components/projects_table.vue
-ee/app/assets/javascripts/storage_counter/components/usage_graph.vue
-ee/app/assets/javascripts/storage_counter/utils.js
-ee/app/assets/javascripts/subscriptions/new/store/actions.js
-ee/app/assets/javascripts/subscriptions/new/store/getters.js
-ee/app/assets/javascripts/subscriptions/new/store/state.js
-
 ## frosty-cannon
 ee/app/assets/javascripts/test_case_create/components/test_case_create_root.vue
 ee/app/assets/javascripts/test_case_create/test_case_create_bundle.js

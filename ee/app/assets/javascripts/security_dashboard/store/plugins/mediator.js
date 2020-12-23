@@ -2,8 +2,8 @@ import { SET_FILTER, SET_HIDE_DISMISSED } from '../modules/filters/mutation_type
 
 const refreshTypes = [`filters/${SET_FILTER}`, `filters/${SET_HIDE_DISMISSED}`];
 
-export default store => {
-  const refreshVulnerabilities = payload => {
+export default (store) => {
+  const refreshVulnerabilities = (payload) => {
     store.dispatch('vulnerabilities/fetchVulnerabilities', payload);
   };
 

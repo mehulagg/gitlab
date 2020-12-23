@@ -47,11 +47,11 @@ export const fetchVulnerabilities = ({ state, dispatch }, params = {}) => {
     url: state.vulnerabilitiesEndpoint,
     params,
   })
-    .then(response => {
+    .then((response) => {
       const { headers, data } = response;
       dispatch('receiveVulnerabilitiesSuccess', { headers, data });
     })
-    .catch(error => {
+    .catch((error) => {
       dispatch('receiveVulnerabilitiesError', error?.response?.status);
     });
 };
@@ -65,7 +65,7 @@ export const receiveVulnerabilitiesSuccess = ({ commit }, { headers, data }) => 
   const pageInfo = parseIntPagination(normalizedHeaders);
   // Vulnerabilities on pipelines don't have IDs.
   // We need to add dummy IDs here to avoid rendering issues.
-  const vulnerabilities = data.map(vulnerability => ({
+  const vulnerabilities = data.map((vulnerability) => ({
     ...vulnerability,
     id: vulnerability.id || _.uniqueId('client_'),
   }));
@@ -147,7 +147,7 @@ export const dismissSelectedVulnerabilities = ({ dispatch, state }, { comment } 
 
   dispatch('requestDismissSelectedVulnerabilities');
 
-  const promises = dismissableVulnerabilties.map(vulnerability =>
+  const promises = dismissableVulnerabilties.map((vulnerability) =>
     axios.post(vulnerability.create_vulnerability_feedback_dismissal_path, {
       vulnerability_feedback: {
         category: vulnerability.report_type,
