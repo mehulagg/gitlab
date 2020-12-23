@@ -1,0 +1,5 @@
+---
+title: Fix StoreReportService related to autofix
+merge_request: 50490
+author:
+type: fixed
