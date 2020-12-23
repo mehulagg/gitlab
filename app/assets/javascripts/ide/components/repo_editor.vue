@@ -19,7 +19,8 @@ import {
   FILE_VIEW_MODE_EDITOR,
   FILE_VIEW_MODE_PREVIEW,
 } from '../constants';
-import Editor from '../lib/editor';
+import EditorLite from '~/editor/editor_lite';
+import { EditorWebIdeExtension } from '~/editor/extensions/editor_lite_webide_ext';
 import FileTemplatesBar from './file_templates/bar.vue';
 import { __ } from '~/locale';
 import { extractMarkdownImagesFromEntries } from '../stores/utils';
@@ -27,6 +28,7 @@ import { getFileEditorOrDefault } from '../stores/modules/editor/utils';
 import { getPathParent, readFileAsDataURL, registerSchema, isTextFile } from '../utils';
 import { getRulesWithTraversal } from '../lib/editorconfig/parser';
 import mapRulesToMonaco from '../lib/editorconfig/rules_mapper';
+import { defaultDiffEditorOptions, defaultEditorOptions } from '~/ide/lib/editor_options';
 
 export default {
   name: 'RepoEditor',
@@ -46,6 +48,7 @@ export default {
       content: '',
       images: {},
       rules: {},
+      globalEditor: null,
     };
   },
   computed: {
@@ -181,11 +184,12 @@ export default {
     },
   },
   beforeDestroy() {
-    this.editor.dispose();
+    this.globalEditor.dispose();
   },
   mounted() {
-    if (!this.editor) {
-      this.editor = Editor.create(this.$store, this.editorOptions);
+    if (!this.globalEditor) {
+      // this.editor = Editor.create(this.$store, this.editorOptions);
+      this.globalEditor = new EditorLite();
     }
     this.initEditor();
 
@@ -211,7 +215,7 @@ export default {
         return;
       }
 
-      this.editor.clearEditor();
+      // this.editor.clearEditor();
 
       this.registerSchemaForFile();
 
@@ -251,20 +255,53 @@ export default {
         return;
       }
 
-      this.editor.dispose();
+      // this.editor.dispose();
+      //
+      // this.$nextTick(() => {
+      //   if (this.viewer === viewerTypes.edit) {
+      //     this.editor.createInstance(this.$refs.editor);
+      //   } else {
+      //     this.editor.createDiffInstance(this.$refs.editor);
+      //   }
+      //
+      //   this.setupEditor();
+      // });
+
+      if (!this.editor) {
+        const isDiff = this.viewer !== viewerTypes.edit;
+        const instanceOptions = isDiff ? defaultDiffEditorOptions : defaultEditorOptions;
+        this.editor = this.globalEditor.createInstance({
+          el: this.$refs.editor,
+          blobPath: this.file.path,
+          blobGlobalId: this.file.key,
+          blobContent: this.content || this.file.content,
+          diff: isDiff,
+          ...instanceOptions,
+          ...this.editorOptions,
+        });
+
+        this.editor.use(
+          new EditorWebIdeExtension({
+            instance: this.editor,
+            store: this.$store,
+            file: this.file,
+            options: this.editorOptions,
+          }),
+        );
+      }
 
       this.$nextTick(() => {
         if (this.viewer === viewerTypes.edit) {
-          this.editor.createInstance(this.$refs.editor);
+          this.editor.bootstrapInstance();
         } else {
-          this.editor.createDiffInstance(this.$refs.editor);
+          this.editor.bootstrapDiffInstance();
         }
 
         this.setupEditor();
       });
     },
     setupEditor() {
-      if (!this.file || !this.editor.instance || this.file.loading) return;
+      if (!this.file || !this.editor || this.file.loading) return;
 
       const head = this.getStagedFile(this.file.path);
 
@@ -298,7 +335,7 @@ export default {
         });
       });
 
-      this.editor.setPosition({
+      this.editor.setPos({
         lineNumber: this.fileEditor.editorRow,
         column: this.fileEditor.editorColumn,
       });
@@ -344,7 +381,7 @@ export default {
       });
     },
     onPaste(event) {
-      const editor = this.editor.instance;
+      const editor = this.editor;
       const reImage = /^image\/(png|jpg|jpeg|gif)$/;
       const file = event.clipboardData.files[0];
 
