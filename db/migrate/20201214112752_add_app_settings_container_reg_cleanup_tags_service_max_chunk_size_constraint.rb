@@ -10,7 +10,7 @@ class AddAppSettingsContainerRegCleanupTagsServiceMaxChunkSizeConstraint < Activ
   disable_ddl_transaction!
 
   def up
-    add_check_constraint :application_settings, 'container_registry_cleanup_tags_service_max_chunk_size >= 1', CONSTRAINT_NAME
+    add_check_constraint :application_settings, 'container_registry_cleanup_tags_service_max_chunk_size >= 0', CONSTRAINT_NAME
   end
 
   def down
