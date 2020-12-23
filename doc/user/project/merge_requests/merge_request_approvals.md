@@ -162,10 +162,11 @@ To add or edit the default merge request approval rule:
      the files being changed by the merge request.
    - (Optional) Click the **{remove}** **Remove** button next to a group or user to delete it from
      the rule.
+
 1. Click **Add approval rule** or **Update approval rule**.
 
 Any merge requests that were created before changing the rules will not be changed.
-They will keep the original approval rules, unless manually [overridden](#editing--overriding-approval-rules-per-merge-request).
+They will keep the original approval rules, unless manually [overridden](#editing-overriding-approval-rules-per-merge-request).
 
 NOTE:
 If a merge request targets a different project, such as from a fork to the upstream project,
@@ -184,7 +185,7 @@ One possible scenario would be to add more approvers than were defined in the de
 settings.
 
 When creating or editing a merge request, find the **Approval rules** section, then follow
-the same steps as [Adding / editing a default approval rule](#adding--editing-a-default-approval-rule).
+the same steps as [Adding / editing a default approval rule](#adding-editing-a-default-approval-rule).
 
 #### Set up an optional approval rule
 
@@ -203,12 +204,12 @@ In GitLab Premium, it is possible to have multiple approval rules per merge requ
 as well as multiple default approval rules per project.
 
 Adding or editing multiple default rules is identical to
-[adding or editing a single default approval rule](#adding--editing-a-default-approval-rule),
+[adding or editing a single default approval rule](#adding-editing-a-default-approval-rule),
 except the **Add approval rule** button will be available to add more rules, even after
 a rule is already defined.
 
 Similarly, editing or overriding multiple approval rules per merge request is identical
-to [editing or overriding approval rules per merge request](#editing--overriding-approval-rules-per-merge-request),
+to [editing or overriding approval rules per merge request](#editing-overriding-approval-rules-per-merge-request),
 except the **Add approval rule** button will be available to add more rules, even after
 a rule is already defined.
 
@@ -222,7 +223,7 @@ reduce the number of approvals left for all rules that the approver belongs to.
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/460) in [GitLab Premium](https://about.gitlab.com/pricing/) 12.8.
 
 Approval rules are often only relevant to specific branches, like `master`.
-When configuring [**Default Approval Rules**](#adding--editing-a-default-approval-rule)
+When configuring [**Default Approval Rules**](#adding-editing-a-default-approval-rule)
 these can be scoped to all the protected branches at once by navigating to your project's
 **Settings**, expanding **Merge request approvals**, and selecting **Any branch** from
 the **Target branch** dropdown.
