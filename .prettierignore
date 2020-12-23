@@ -682,39 +682,6 @@ app/assets/javascripts/performance_bar/components/request_selector.vue
 app/assets/javascripts/performance_bar/index.js
 app/assets/javascripts/performance_bar/performance_bar_log.js
 
-## keen-sutherland
-app/assets/javascripts/search_autocomplete.js
-app/assets/javascripts/self_monitor/store/actions.js
-app/assets/javascripts/self_monitor/store/index.js
-app/assets/javascripts/sentry_error_stack_trace/index.js
-app/assets/javascripts/serverless/components/area.vue
-app/assets/javascripts/serverless/store/actions.js
-app/assets/javascripts/serverless/store/getters.js
-app/assets/javascripts/serverless/utils.js
-app/assets/javascripts/set_status_modal/utils.js
-app/assets/javascripts/sidebar/components/assignees/assignees.vue
-app/assets/javascripts/sidebar/components/assignees/assignees_realtime.vue
-app/assets/javascripts/sidebar/components/assignees/collapsed_assignee_list.vue
-app/assets/javascripts/sidebar/components/confidential/edit_form_buttons.vue
-app/assets/javascripts/sidebar/components/reviewers/collapsed_reviewer_list.vue
-app/assets/javascripts/sidebar/components/reviewers/reviewers.vue
-app/assets/javascripts/sidebar/components/severity/sidebar_severity.vue
-app/assets/javascripts/sidebar/components/time_tracking/sidebar_time_tracking.vue
-app/assets/javascripts/sidebar/lib/sidebar_move_issue.js
-app/assets/javascripts/sidebar/mount_milestone_sidebar.js
-app/assets/javascripts/sidebar/mount_sidebar.js
-app/assets/javascripts/sidebar/sidebar_mediator.js
-app/assets/javascripts/sidebar/utils.js
-app/assets/javascripts/single_file_diff.js
-app/assets/javascripts/smart_interval.js
-app/assets/javascripts/snippet/collapsible_input.js
-app/assets/javascripts/snippets/components/edit.vue
-app/assets/javascripts/snippets/components/snippet_blob_actions_edit.vue
-app/assets/javascripts/snippets/components/snippet_blob_edit.vue
-app/assets/javascripts/snippets/components/snippet_blob_view.vue
-app/assets/javascripts/snippets/components/snippet_header.vue
-app/assets/javascripts/snippets/mixins/snippets.js
-
 ## lucid-lalande
 app/assets/javascripts/snippets/utils/blob.js
 app/assets/javascripts/static_site_editor/graphql/index.js
