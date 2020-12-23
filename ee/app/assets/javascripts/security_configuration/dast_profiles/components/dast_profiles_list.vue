@@ -7,6 +7,9 @@ import {
   GlSkeletonLoader,
   GlTable,
   GlTooltipDirective,
+  GlDropdown,
+  GlDropdownItem,
+  GlIcon,
 } from '@gitlab/ui';
 
 export default {
@@ -16,6 +19,9 @@ export default {
     GlModal,
     GlSkeletonLoader,
     GlTable,
+    GlDropdown,
+    GlDropdownItem,
+    GlIcon,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -155,24 +161,29 @@ export default {
           <div class="gl-text-right">
             <slot name="actions" :profile="item"></slot>
 
-            <gl-button
-              v-if="item.editPath"
-              :href="item.editPath"
-              class="gl-ml-3 gl-my-1"
-              size="small"
-              >{{ __('Edit') }}</gl-button
+            <gl-dropdown
+              class="gl-display-none gl-display-sm-inline-flex!"
+              toggle-class="gl-border-0! gl-shadow-none!"
+              no-caret
+              right
             >
+              <template #button-content>
+                <gl-icon name="ellipsis_v" />
+                <span class="gl-sr-only">{{ __('Actions') }}</span>
+              </template>
 
-            <gl-button
-              v-gl-tooltip.hover.focus
-              icon="remove"
-              variant="danger"
-              category="secondary"
-              size="small"
-              class="gl-mx-3 gl-my-1"
-              :title="s__('DastProfiles|Delete profile')"
-              @click="prepareProfileDeletion(item.id)"
-            />
+              <gl-dropdown-item v-if="item.editPath" :href="item.editPath">{{
+                __('Edit')
+              }}</gl-dropdown-item>
+
+              <gl-dropdown-item
+                class="gl-text-red-500!"
+                :title="s__('DastProfiles|Delete profile')"
+                @click="prepareProfileDeletion(item.id)"
+              >
+                {{ __('Delete') }}
+              </gl-dropdown-item>
+            </gl-dropdown>
           </div>
         </template>
 
