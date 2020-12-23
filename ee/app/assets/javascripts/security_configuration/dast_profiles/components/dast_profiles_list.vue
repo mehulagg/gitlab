@@ -88,12 +88,14 @@ export default {
     },
     tableFields() {
       const defaultClasses = ['gl-word-break-all'];
+      const defaultThClasses = ['gl-bg-transparent!', 'gl-text-black-normal'];
       const dataFields = this.fields.map(({ key, label }) => ({
         key,
         label,
         class: defaultClasses,
+        thClass: defaultThClasses,
       }));
-      const staticFields = [{ key: 'actions', label: '' }];
+      const staticFields = [{ key: 'actions', label: '', thClass: defaultThClasses }];
 
       return [...dataFields, ...staticFields];
     },
@@ -121,7 +123,7 @@ export default {
         :fields="tableFields"
         :items="profiles"
         stacked="md"
-        thead-class=""
+        thead-class="gl-border-b-solid gl-border-gray-100 gl-border-1 gl-pt-3!"
       >
         <template v-if="hasError" #top-row>
           <td :colspan="tableFields.length">
@@ -136,10 +138,6 @@ export default {
               </ul>
             </gl-alert>
           </td>
-        </template>
-
-        <template #cell(profileName)="{ value }">
-          <strong>{{ value }}</strong>
         </template>
 
         <template v-for="slotName in Object.keys($scopedSlots)" #[slotName]="slotScope">
