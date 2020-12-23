@@ -124,6 +124,7 @@ export default {
         :items="profiles"
         stacked="md"
         thead-class="gl-border-b-solid gl-border-gray-100 gl-border-1 gl-pt-3!"
+        fixed
       >
         <template v-if="hasError" #top-row>
           <td :colspan="tableFields.length">
@@ -138,6 +139,12 @@ export default {
               </ul>
             </gl-alert>
           </td>
+        </template>
+
+        <template #cell(profileName)="{ value }">
+          <div class="gl-overflow-hidden gl-white-space-nowrap gl-text-overflow-ellipsis">
+            {{ value }}
+          </div>
         </template>
 
         <template v-for="slotName in Object.keys($scopedSlots)" #[slotName]="slotScope">
