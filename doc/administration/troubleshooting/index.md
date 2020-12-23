@@ -29,7 +29,7 @@ installation.
 - [Navigating GitLab via Rails console](navigating_gitlab_via_rails_console.md)
 - [Diagnostics tools](diagnostics_tools.md)
 - [Debugging tips](debug.md)
-- [Tracing requests with correlation ID](doc/administration/troubleshooting/tracing_correlation_id.md)
+- [Tracing requests with correlation ID](tracing_correlation_id.md)
 
 If you need a testing environment to troubleshoot, see the
 [apps for a testing environment](test_environments.md).
