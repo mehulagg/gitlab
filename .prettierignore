@@ -682,39 +682,6 @@ app/assets/javascripts/performance_bar/components/request_selector.vue
 app/assets/javascripts/performance_bar/index.js
 app/assets/javascripts/performance_bar/performance_bar_log.js
 
-## musing-engelbart
-app/assets/javascripts/pipelines/stores/test_reports/getters.js
-app/assets/javascripts/pipelines/stores/test_reports/index.js
-app/assets/javascripts/pipelines/stores/test_reports/utils.js
-app/assets/javascripts/pipelines/utils.js
-app/assets/javascripts/popovers/components/popovers.vue
-app/assets/javascripts/popovers/index.js
-app/assets/javascripts/profile/account/components/update_username.vue
-app/assets/javascripts/profile/add_ssh_key_validation.js
-app/assets/javascripts/profile/preferences/profile_preferences_bundle.js
-app/assets/javascripts/profile/profile.js
-app/assets/javascripts/project_find_file.js
-app/assets/javascripts/project_select.js
-app/assets/javascripts/project_select_combo_button.js
-app/assets/javascripts/project_visibility.js
-app/assets/javascripts/projects/commit_box/info/load_branches.js
-app/assets/javascripts/projects/commits/components/author_select.vue
-app/assets/javascripts/projects/commits/index.js
-app/assets/javascripts/projects/commits/store/actions.js
-app/assets/javascripts/projects/experiment_new_project_creation/components/app.vue
-app/assets/javascripts/projects/pipelines/charts/components/app.vue
-app/assets/javascripts/projects/pipelines/charts/components/app_legacy.vue
-app/assets/javascripts/projects/pipelines/charts/index.js
-app/assets/javascripts/projects/project_new.js
-app/assets/javascripts/projects/settings/components/shared_runners_toggle.vue
-app/assets/javascripts/projects/settings_service_desk/components/service_desk_root.vue
-app/assets/javascripts/projects/tree/components/commit_pipeline_status_component.vue
-app/assets/javascripts/prometheus_alerts/components/reset_key.vue
-app/assets/javascripts/prometheus_metrics/custom_metrics.js
-app/assets/javascripts/prometheus_metrics/prometheus_metrics.js
-app/assets/javascripts/protected_branches/protected_branch_create.js
-app/assets/javascripts/protected_branches/protected_branch_edit.js
-
 ## sweet-wilbur
 app/assets/javascripts/read_more.js
 app/assets/javascripts/ref/components/ref_results_section.vue
