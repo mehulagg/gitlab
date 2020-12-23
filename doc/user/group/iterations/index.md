@@ -79,7 +79,7 @@ To view an iteration report, go to the iterations list page and click an iterati
 
 ### Iteration burndown and burnup charts
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/222750) in [GitLab Starter](https://about.gitlab.com/pricing/) 13.5.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/222750) in [GitLab Starter](https://about.gitlab.com/pricing/) 13.6.
 > - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/269972) in [GitLab Starter](https://about.gitlab.com/pricing/) 13.7.
 
 The iteration report includes [burndown and burnup charts](../../project/milestones/burndown_and_burnup_charts.md),
