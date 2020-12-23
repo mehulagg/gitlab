@@ -22,7 +22,11 @@ export const getProfileSettings = ({ createNewProfilePaths }) => ({
       },
     },
     component: DastSiteProfileList,
-    tableFields: ['profileName', 'targetUrl', 'validationStatus'],
+    tableFields: [
+      { label: s__('Site name'), key: 'profileName' },
+      { label: s__('URL'), key: 'targetUrl' },
+      { label: s__('Validation Status'), key: 'validationStatus' },
+    ],
     i18n: {
       createNewLinkText: s__('DastProfiles|Site Profile'),
       name: s__('DastProfiles|Site Profiles'),
@@ -51,7 +55,10 @@ export const getProfileSettings = ({ createNewProfilePaths }) => ({
       },
     },
     component: DastScannerProfileList,
-    tableFields: ['profileName'],
+    tableFields: [
+      { label: s__('Scanner name'), key: 'profileName' },
+      { label: s__('Scan mode'), key: 'scanType' },
+    ],
     i18n: {
       createNewLinkText: s__('DastProfiles|Scanner Profile'),
       name: s__('DastProfiles|Scanner Profiles'),

@@ -8,5 +8,9 @@ export default {
 };
 </script>
 <template>
-  <profiles-list v-bind="$attrs" v-on="$listeners" />
+  <profiles-list v-bind="$attrs" v-on="$listeners">
+    <template #cell(scanType)="{ value }">
+      <b>{{ value }}</b>
+    </template>
+  </profiles-list>
 </template>

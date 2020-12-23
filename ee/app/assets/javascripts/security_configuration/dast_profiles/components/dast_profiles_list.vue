@@ -88,8 +88,12 @@ export default {
     },
     tableFields() {
       const defaultClasses = ['gl-word-break-all'];
-      const dataFields = this.fields.map(key => ({ key, class: defaultClasses }));
-      const staticFields = [{ key: 'actions' }];
+      const dataFields = this.fields.map(({ key, label }) => ({
+        key,
+        label,
+        class: defaultClasses,
+      }));
+      const staticFields = [{ key: 'actions', label: '' }];
 
       return [...dataFields, ...staticFields];
     },
@@ -117,7 +121,7 @@ export default {
         :fields="tableFields"
         :items="profiles"
         stacked="md"
-        thead-class="gl-display-none"
+        thead-class=""
       >
         <template v-if="hasError" #top-row>
           <td :colspan="tableFields.length">
