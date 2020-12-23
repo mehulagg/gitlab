@@ -27,7 +27,7 @@ to get updated status. This affects the `has_conflicts` property as it is depend
 not proactively update `merge_status` (which also affects the `has_conflicts`), as this can be an expensive operation.
 If you are interested in the value of these fields from this endpoint, set the `with_merge_status_recheck` parameter to
 `true` in the query.
-- `references.relative` is relative to the group / project that the merge request is being requested. When merge request
+- `references.relative` is relative to the group / project that the merge request is being requested. When the merge request
 is fetched from its project `relative` format would be the same as `short` format and when requested across groups / projects
 it is expected to be the same as `full` format.
 - If `approvals_before_merge` **(STARTER)** is not provided, it inherits the value from the target project. If it is provided,
@@ -37,7 +37,8 @@ then the following conditions must hold in order for it to take effect:
     value of zero disables approvals for that project.
   - The provided value of `approvals_before_merge` must be greater than the
     target project's `approvals_before_merge`.
-  - This API returns 201 (created) for a successful response.
+
+  This API returns 201 (created) for a successful response.
 
 - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/46190) in GitLab 13.6,
 diffs associated with the set of changes will have the same size limitations applied as other diffs
