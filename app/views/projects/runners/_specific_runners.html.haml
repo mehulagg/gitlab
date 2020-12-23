@@ -1,10 +1,9 @@
 %h4
   = _('Specific runners')
 
-%p
-  = _('These runners are specific to this project.')
-
 .bs-callout.help-callout
+  = _('These runners are specific to this project.')
+  %hr
   = render partial: 'ci/runner/how_to_setup_runner_automatically',
            locals: { type: 'specific',
                      clusters_path: project_clusters_path(@project) }
@@ -13,6 +12,8 @@
            locals: { registration_token: @project.runners_token,
                      type: 'specific',
                      reset_token_url: reset_registration_token_namespace_project_settings_ci_cd_path }
+
+%hr
 
 - if @project_runners.any?
   %h4.underlined-title= _('Available specific runners')

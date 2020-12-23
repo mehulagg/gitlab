@@ -1041,7 +1041,7 @@ msgid_plural "- Events"
 msgstr[0] ""
 msgstr[1] ""
 
-msgid "- Paused and not available to run jobs."
+msgid "- Not available to run jobs."
 msgstr ""
 
 msgid "- User"
@@ -13517,12 +13517,6 @@ msgstr ""
 msgid "Group runners can be managed with the %{link}."
 msgstr ""
 
-msgid "Group runners can execute code for all the projects in this group."
-msgstr ""
-
-msgid "Group runners can execute jobs for all projects in this group."
-msgstr ""
-
 msgid "Group variables (inherited)"
 msgstr ""
 
@@ -24037,7 +24031,7 @@ msgstr ""
 msgid "Runners are either:"
 msgstr ""
 
-msgid "Runners are processes that pick up and execute jobs for GitLab."
+msgid "Runners are processes that pick up and execute CI/CD jobs for GitLab."
 msgstr ""
 
 msgid "Runners can be placed on separate users, servers, even on your local machine."
@@ -28219,9 +28213,6 @@ msgid "These runners are specific to this project."
 msgstr ""
 
 msgid "These variables are configured in the parent group settings, and will be active in the current project in addition to the project variables."
-msgstr ""
-
-msgid "They can be managed with the %{link}."
 msgstr ""
 
 msgid "Third Party Advisory Link"

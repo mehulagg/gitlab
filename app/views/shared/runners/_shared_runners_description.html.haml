@@ -3,10 +3,9 @@
 %h4
   = _('Shared runners')
 
-%p
-  = _('These runners are shared across this GitLab instance.')
-
 .bs-callout.shared-runners-description
+  = _('These runners are shared across this GitLab instance.')
+  %p
   - if Gitlab::CurrentSettings.shared_runners_text.present?
     = markdown_field(Gitlab::CurrentSettings.current_application_settings, :shared_runners_text)
   - else

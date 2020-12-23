@@ -40,7 +40,7 @@
     %button.btn.js-settings-toggle{ type: 'button' }
       = expanded ? _('Collapse') : _('Expand')
     %p
-      = _("Runners are processes that pick up and execute jobs for GitLab.")
+      = _("Runners are processes that pick up and execute CI/CD jobs for GitLab.")
       = link_to s_('How do I configure runners?'), help_page_path('ci/runners/README')
   .settings-content
     = render 'projects/runners/index'
