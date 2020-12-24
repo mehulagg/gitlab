@@ -136,7 +136,7 @@ export default {
       this.policy.rules.push(buildRule(RuleTypeEndpoint));
     },
     handleAlertUpdate(includeAlert) {
-      this.policy.annotations = includeAlert ? { 'app.gitlab.com/alert': true } : '';
+      this.policy.annotations = includeAlert ? { 'app.gitlab.com/alert': 'true' } : '';
     },
     updateEndpointMatchMode(mode) {
       this.policy.endpointMatchMode = mode;

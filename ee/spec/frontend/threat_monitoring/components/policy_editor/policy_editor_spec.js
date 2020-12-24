@@ -367,11 +367,11 @@ spec:
       expect(policyAlertPicker.props('policyAlert')).toBe(true);
       findSavePolicy().vm.$emit('click');
       await wrapper.vm.$nextTick();
-      expect(wrapper.vm.policy.annotations).toEqual({ 'app.gitlab.com/alert': true });
+      expect(wrapper.vm.policy.annotations).toEqual({ 'app.gitlab.com/alert': 'true' });
       expect(store.dispatch).toHaveBeenLastCalledWith('networkPolicies/createPolicy', {
         environmentId: -1,
         policy: {
-          manifest: expect.stringContaining('app.gitlab.com/alert: true'),
+          manifest: expect.stringContaining("app.gitlab.com/alert: 'true'"),
         },
       });
     });
@@ -387,7 +387,7 @@ spec:
       expect(store.dispatch).toHaveBeenLastCalledWith('networkPolicies/createPolicy', {
         environmentId: -1,
         policy: {
-          manifest: expect.not.stringContaining('app.gitlab.com/alert: true'),
+          manifest: expect.not.stringContaining("app.gitlab.com/alert: 'true'"),
         },
       });
     });
