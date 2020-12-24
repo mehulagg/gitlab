@@ -172,12 +172,16 @@ export default {
                 <span class="gl-sr-only">{{ __('Actions') }}</span>
               </template>
 
-              <gl-dropdown-item v-if="item.editPath" :href="item.editPath">{{
-                __('Edit')
-              }}</gl-dropdown-item>
+              <gl-dropdown-item
+                v-if="item.editPath"
+                :href="item.editPath"
+                :title="s__('DastProfiles|Edit profile')"
+                >{{ __('Edit') }}</gl-dropdown-item
+              >
 
               <gl-dropdown-item
-                class="gl-text-red-500!"
+                class="text-danger"
+                variant="danger"
                 :title="s__('DastProfiles|Delete profile')"
                 @click="prepareProfileDeletion(item.id)"
               >
