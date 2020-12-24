@@ -105,7 +105,7 @@ RSpec.shared_examples 'sorted paginated query' do
       end
 
       context 'when paginating' do
-        let(:params) { sort_argument.merge(first: first_param) }
+        let(:params) { sort_argument.merge(last: first_param) }
         let(:first_page) { expected_results.first(first_param) }
         let(:rest) { expected_results.drop(first_param) }
 
