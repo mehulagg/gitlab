@@ -4,8 +4,8 @@ export default {
 };
 </script>
 
-<template>
+<template functional>
   <div data-testid="noTrackingPane">
-    <span class="no-value">{{ __('No estimate or time spent') }}</span>
+    <span class="gl-text-gray-500">{{ __('No estimate or time spent') }}</span>
   </div>
 </template>
