@@ -10695,7 +10695,7 @@ msgstr ""
 msgid "Enter the name of your application, and we'll return a unique %{type}."
 msgstr ""
 
-msgid "Enter the number of seconds, or other human-readable input, like \"1 hour.\" This timeout takes precedence over lower timeouts set for the project."
+msgid "Enter the number of seconds, or other human-readable input, like \"1 hour\". This timeout takes precedence over lower timeouts set for the project."
 msgstr ""
 
 msgid "Enter weights for storages for new repositories."
@@ -15834,9 +15834,6 @@ msgstr ""
 msgid "Jobs"
 msgstr ""
 
-msgid "Jobs can use runners that are assigned specific tags. Separate tags with commas."
-msgstr ""
-
 msgid "Jobs|Are you sure you want to proceed?"
 msgstr ""
 
@@ -19112,6 +19109,9 @@ msgstr ""
 msgid "Not available for protected branches"
 msgstr ""
 
+msgid "Not available to run jobs."
+msgstr ""
+
 msgid "Not confidential"
 msgstr ""
 
@@ -20225,9 +20225,6 @@ msgid "Pause replication"
 msgstr ""
 
 msgid "Paused Runners don't accept new jobs"
-msgstr ""
-
-msgid "Paused and not available to run jobs."
 msgstr ""
 
 msgid "Pending"
@@ -24049,7 +24046,7 @@ msgstr ""
 msgid "Runners activated for this project"
 msgstr ""
 
-msgid "Runners are processes that pick up and execute jobs for GitLab."
+msgid "Runners are processes that pick up and execute CI/CD jobs for GitLab."
 msgstr ""
 
 msgid "Runners are processes that pick up and execute jobs for GitLab. Here you can register and see your Runners for this project."
@@ -31748,6 +31745,9 @@ msgid "You can also upload existing files from your computer using the instructi
 msgstr ""
 
 msgid "You can always edit this later"
+msgstr ""
+
+msgid "You can configure jobs to use runners that are assigned specific tags. Separate tags with commas."
 msgstr ""
 
 msgid "You can create a new %{link}."
