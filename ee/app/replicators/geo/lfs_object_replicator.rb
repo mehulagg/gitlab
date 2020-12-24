@@ -13,7 +13,7 @@ module Geo
     end
 
     def self.replication_enabled_by_default?
-      true
+      false
     end
   end
 end

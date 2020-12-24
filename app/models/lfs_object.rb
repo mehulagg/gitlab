@@ -37,6 +37,8 @@ class LfsObject < ApplicationRecord
     file_store == LfsObjectUploader::Store::LOCAL
   end
 
+  alias_method :local?, :local_store?
+
   # rubocop: disable Cop/DestroyAll
   def self.destroy_unreferenced
     joins("LEFT JOIN lfs_objects_projects ON lfs_objects_projects.lfs_object_id = #{table_name}.id")

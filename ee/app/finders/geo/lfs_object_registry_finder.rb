@@ -2,8 +2,6 @@
 
 module Geo
   class LfsObjectRegistryFinder < FileRegistryFinder
-    def registry_class
-      Geo::LfsObjectRegistry
-    end
+    include FrameworkRegistryFinder
   end
 end

@@ -288,7 +288,6 @@ class GeoNodeStatus < ApplicationRecord
       self.container_repositories_replication_enabled = Geo::ContainerRepositoryRegistry.replication_enabled?
       self.design_repositories_replication_enabled = Geo::DesignRegistry.replication_enabled?
       self.job_artifacts_replication_enabled = Geo::JobArtifactRegistry.replication_enabled?
-      self.lfs_objects_replication_enabled = Geo::LfsObjectRegistry.replication_enabled?
       self.repositories_replication_enabled = Geo::ProjectRegistry.replication_enabled?
     end
   end
@@ -460,7 +459,6 @@ class GeoNodeStatus < ApplicationRecord
     self.cursor_last_event_date = Geo::EventLog.find_by(id: self.cursor_last_event_id)&.created_at
 
     load_repositories_data
-    load_lfs_objects_data
     load_job_artifacts_data
     load_attachments_data
     load_container_registry_data
@@ -474,16 +472,6 @@ class GeoNodeStatus < ApplicationRecord
     self.repositories_failed_count = Geo::ProjectRegistry.sync_failed(:repository).count
     self.wikis_synced_count = Geo::ProjectRegistry.synced(:wiki).count
     self.wikis_failed_count = Geo::ProjectRegistry.sync_failed(:wiki).count
-  end
-
-  def load_lfs_objects_data
-    return unless lfs_objects_replication_enabled
-
-    self.lfs_objects_count = lfs_objects_finder.registry_count
-    self.lfs_objects_synced_count = lfs_objects_finder.synced_count
-    self.lfs_objects_failed_count = lfs_objects_finder.failed_count
-    self.lfs_objects_registry_count = lfs_objects_finder.registry_count
-    self.lfs_objects_synced_missing_on_primary_count = lfs_objects_finder.synced_missing_on_primary_count
   end
 
   def load_job_artifacts_data
@@ -582,10 +570,6 @@ class GeoNodeStatus < ApplicationRecord
 
   def attachments_finder
     @attachments_finder ||= Geo::AttachmentRegistryFinder.new
-  end
-
-  def lfs_objects_finder
-    @lfs_objects_finder ||= Geo::LfsObjectRegistryFinder.new
   end
 
   def job_artifacts_finder

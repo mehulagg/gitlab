@@ -62,8 +62,6 @@ module Geo
       strong_memoize(:registry) do
         if job_artifact?
           Geo::JobArtifactRegistry.find_or_initialize_by(artifact_id: object_db_id)
-        elsif lfs?
-          Geo::LfsObjectRegistry.find_or_initialize_by(lfs_object_id: object_db_id)
         else
           Geo::UploadRegistry.find_or_initialize_by(file_type: object_type, file_id: object_db_id)
         end
