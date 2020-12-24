@@ -20,6 +20,8 @@ module Analytics
           segment.assign_attributes(attributes)
 
           if segment.save
+            Analytics::DevopsAdoption::CreateSnapshotWorker.perform_async(segment.id)
+
             ServiceResponse.success(payload: response_payload)
           else
             ServiceResponse.error(message: 'Validation error', payload: response_payload)
