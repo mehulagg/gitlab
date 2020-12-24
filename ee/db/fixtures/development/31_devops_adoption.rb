@@ -30,12 +30,11 @@ Gitlab::Seeder.quiet do
     booleans = [true, false]
 
     # create snapshots for the last 5 months
-    5.downto(1).each do |index|
+    4.downto(0).each do |index|
       end_time = index.months.ago.at_end_of_month
-      recorded_at = end_time + 1.day
 
       segments.each do |segment|
-        Analytics::DevopsAdoption::Snapshot.create!(
+        calculated_data = {
           segment: segment,
           issue_opened: booleans.sample,
           merge_request_opened: booleans.sample,
@@ -44,11 +43,11 @@ Gitlab::Seeder.quiet do
           pipeline_succeeded: booleans.sample,
           deploy_succeeded: booleans.sample,
           security_scan_succeeded: booleans.sample,
-          recorded_at: recorded_at,
+          recorded_at: [end_time + 1.day, Time.zone.now].min,
           end_time: end_time
-        )
+        }
 
-        segment.update!(last_recorded_at: recorded_at)
+        Analytics::DevopsAdoption::Snapshots::CreateService.new(params: calculated_data).execute
       end
     end
   end
