@@ -8,13 +8,20 @@ module Security
     # rubocop: disable CodeReuse/ActiveRecord
     def perform(pipeline_id)
       ::Ci::Pipeline.find_by(id: pipeline_id).try do |pipeline|
+        logger.info "Security::StoreScansWorker: store scans for pipeline: #{pipeline.id}"
+
         break unless pipeline.can_store_security_reports?
 
         Security::StoreScansService.execute(pipeline)
         security_build = secret_detection_build(pipeline)
 
+        logger.info "Security::StoreScansWorker: no security_build found for pipeline: #{pipeline.id}" if security_build.nil?
+
         if revoke_secret_detection_token?(security_build)
+          logger.info "Security::StoreScansWorker: token revocation started for pipeline: #{pipeline.id}"
           ::ScanSecurityReportSecretsWorker.perform_async(security_build.id)
+        else
+          logger.info "Security::StoreScansWorker: failed to revoke token for pipeline: #{pipeline.id}"
         end
       end
     end
