@@ -563,11 +563,7 @@ export default {
           @click="submitWithTestPayload"
           >{{ s__('AlertSettings|Save and test payload') }}</gl-button
         >
-        <gl-button
-          type="reset"
-          class="js-no-auto-disable"
-          >{{ __('Cancel') }}</gl-button
-        >
+        <gl-button type="reset" class="js-no-auto-disable">{{ __('Cancel') }}</gl-button>
       </div>
     </gl-collapse>
   </gl-form>
