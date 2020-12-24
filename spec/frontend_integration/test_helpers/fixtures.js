@@ -1,4 +1,4 @@
-/* eslint-disable global-require, import/no-unresolved */
+/* eslint-disable global-require */
 import { memoize } from 'lodash';
 
 const createFactoryWithDefault = (fn, defaultValue) => () => {
