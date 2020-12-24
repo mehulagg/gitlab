@@ -705,14 +705,13 @@ in the second step, do not supply the `EXTERNAL_URL` value.
 1. On the primary database node, edit `/etc/gitlab/gitlab.rb` replacing values noted in the `# START user configuration` section:
 
    ```ruby
-   # Disable all components except PostgreSQL and Repmgr and Consul
+   # Disable all components except PostgreSQL, Patroni, and Consul
    roles ['postgres_role']
 
    # PostgreSQL configuration
    postgresql['listen_address'] = '0.0.0.0'
    postgresql['hot_standby'] = 'on'
    postgresql['wal_level'] = 'replica'
-   postgresql['shared_preload_libraries'] = 'repmgr_funcs'
 
    # Disable automatic database migrations
    gitlab_rails['auto_migrate'] = false
@@ -727,15 +726,19 @@ in the second step, do not supply the `EXTERNAL_URL` value.
    postgresql['pgbouncer_user_password'] = '<pgbouncer_password_hash>'
    # Replace POSTGRESQL_PASSWORD_HASH with a generated md5 value
    postgresql['sql_user_password'] = '<postgresql_password_hash>'
+
+   # Enable Patroni
+   patroni['enable'] = true
    # Set `max_wal_senders` to one more than the number of database nodes in the cluster.
    # This is used to prevent replication from using up all of the
    # available database connections.
-   postgresql['max_wal_senders'] = 4
-   postgresql['max_replication_slots'] = 4
+   patroni['postgresql']['max_wal_senders'] = 4
+   patroni['postgresql']['max_replication_slots'] = 4
+   # Specify Patroni failover behavior
+   patroni['use_pg_rewind'] = true
 
    # Replace XXX.XXX.XXX.XXX/YY with Network Address
    postgresql['trust_auth_cidr_addresses'] = %w(127.0.0.1/32 10.6.0.0/24)
-   repmgr['trust_auth_cidr_addresses'] = %w(127.0.0.1/32 10.6.0.0/24)
 
    ## Enable service discovery for Prometheus
    consul['enable'] = true
@@ -757,28 +760,6 @@ in the second step, do not supply the `EXTERNAL_URL` value.
    ```
 
 1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure) for the changes to take effect.
-1. You can list the current PostgreSQL primary, secondary nodes status via:
-
-   ```shell
-   sudo /opt/gitlab/bin/gitlab-ctl repmgr cluster show
-   ```
-
-1. Verify the GitLab services are running:
-
-   ```shell
-   sudo gitlab-ctl status
-   ```
-
-   The output should be similar to the following:
-
-   ```plaintext
-   run: consul: (pid 30593) 77133s; run: log: (pid 29912) 77156s
-   run: logrotate: (pid 23449) 3341s; run: log: (pid 29794) 77175s
-   run: node-exporter: (pid 30613) 77133s; run: log: (pid 29824) 77170s
-   run: postgres-exporter: (pid 30620) 77132s; run: log: (pid 29894) 77163s
-   run: postgresql: (pid 30630) 77132s; run: log: (pid 29618) 77181s
-   run: repmgrd: (pid 30639) 77132s; run: log: (pid 29985) 77150s
-   ```
 
 <div align="right">
   <a type="button" class="btn btn-default" href="#setup-components">
@@ -788,28 +769,22 @@ in the second step, do not supply the `EXTERNAL_URL` value.
 
 #### PostgreSQL secondary nodes
 
-1. On both the secondary nodes, add the same configuration specified above for the primary node
-   with an additional setting that will inform `gitlab-ctl` that they are standby nodes initially
-   and there's no need to attempt to register them as a primary node:
+1. On both the secondary nodes, add the same configuration as specified above for the primary node:
 
    ```ruby
-   # Disable all components except PostgreSQL and Repmgr and Consul
+   # Disable all components except PostgreSQL, Patroni, and Consul
    roles ['postgres_role']
 
    # PostgreSQL configuration
    postgresql['listen_address'] = '0.0.0.0'
    postgresql['hot_standby'] = 'on'
    postgresql['wal_level'] = 'replica'
-   postgresql['shared_preload_libraries'] = 'repmgr_funcs'
 
    # Disable automatic database migrations
    gitlab_rails['auto_migrate'] = false
 
    # Configure the Consul agent
    consul['services'] = %w(postgresql)
-
-   # Specify if a node should attempt to be primary on initialization.
-   repmgr['master_on_initialization'] = false
 
    # START user configuration
    # Please set the real values as explained in Required Information section
@@ -818,15 +793,19 @@ in the second step, do not supply the `EXTERNAL_URL` value.
    postgresql['pgbouncer_user_password'] = '<pgbouncer_password_hash>'
    # Replace POSTGRESQL_PASSWORD_HASH with a generated md5 value
    postgresql['sql_user_password'] = '<postgresql_password_hash>'
+
+   # Enable Patroni
+   patroni['enable'] = true
    # Set `max_wal_senders` to one more than the number of database nodes in the cluster.
    # This is used to prevent replication from using up all of the
    # available database connections.
-   postgresql['max_wal_senders'] = 4
-   postgresql['max_replication_slots'] = 4
+   patroni['postgresql']['max_wal_senders'] = 4
+   patroni['postgresql']['max_replication_slots'] = 4
+   # Specify Patroni failover behavior
+   patroni['use_pg_rewind'] = true
 
    # Replace XXX.XXX.XXX.XXX/YY with Network Address
    postgresql['trust_auth_cidr_addresses'] = %w(127.0.0.1/32 10.6.0.0/24)
-   repmgr['trust_auth_cidr_addresses'] = %w(127.0.0.1/32 10.6.0.0/24)
 
    ## Enable service discovery for Prometheus
    consul['enable'] = true
@@ -876,83 +855,24 @@ SSH in to the **primary node**:
 
 1. Exit the database prompt by typing `\q` and Enter.
 
-1. Verify the cluster is initialized with one node:
+1. Check the status of the leader and cluster:
 
    ```shell
-   gitlab-ctl repmgr cluster show
+   gitlab-ctl patroni members
    ```
 
    The output should be similar to the following:
 
    ```plaintext
-   Role      | Name     | Upstream | Connection String
-   ----------+----------|----------|----------------------------------------
-   * master  | HOSTNAME |          | host=HOSTNAME user=gitlab_repmgr dbname=gitlab_repmgr
+   | Cluster       | Member                            |  Host     | Role   | State   | TL  | Lag in MB | Pending restart |
+   |---------------|-----------------------------------|-----------|--------|---------|-----|-----------|-----------------|
+   | postgresql-ha | <PostgreSQL primary hostname>     | 10.6.0.31 | Leader | running | 175 |           | *               |
+   | postgresql-ha | <PostgreSQL secondary 1 hostname> | 10.6.0.32 |        | running | 175 | 0         | *               |
+   | postgresql-ha | <PostgreSQL secondary 2 hostname> | 10.6.0.33 |        | running | 175 | 0         | *               |
    ```
 
-1. Note down the hostname or IP address in the connection string: `host=HOSTNAME`. We will
-   refer to the hostname in the next section as `<primary_node_name>`. If the value
-   is not an IP address, it will need to be a resolvable name (via DNS or
-   `/etc/hosts`)
-
-SSH in to the **secondary node**:
-
-1. Set up the repmgr standby:
-
-   ```shell
-   gitlab-ctl repmgr standby setup <primary_node_name>
-   ```
-
-   Do note that this will remove the existing data on the node. The command
-   has a wait time.
-
-   The output should be similar to the following:
-
-   ```console
-   Doing this will delete the entire contents of /var/opt/gitlab/postgresql/data
-   If this is not what you want, hit Ctrl-C now to exit
-   To skip waiting, rerun with the -w option
-   Sleeping for 30 seconds
-   Stopping the database
-   Removing the data
-   Cloning the data
-   Starting the database
-   Registering the node with the cluster
-   ok: run: repmgrd: (pid 19068) 0s
-   ```
-
-Before moving on, make sure the databases are configured correctly. Run the
-following command on the **primary** node to verify that replication is working
-properly and the secondary nodes appear in the cluster:
-
-```shell
-gitlab-ctl repmgr cluster show
-```
-
-The output should be similar to the following:
-
-```plaintext
-Role      | Name    | Upstream  | Connection String
-----------+---------|-----------|------------------------------------------------
-* master  | MASTER  |           | host=<primary_node_name> user=gitlab_repmgr dbname=gitlab_repmgr
-  standby | STANDBY | MASTER    | host=<secondary_node_name> user=gitlab_repmgr dbname=gitlab_repmgr
-  standby | STANDBY | MASTER    | host=<secondary_node_name> user=gitlab_repmgr dbname=gitlab_repmgr
-```
-
-If the 'Role' column for any node says "FAILED", check the
+If the 'State' column for any node doesn't say "running", check the
 [Troubleshooting section](troubleshooting.md) before proceeding.
-
-Also, check that the `repmgr-check-master` command works successfully on each node:
-
-```shell
-su - gitlab-consul
-gitlab-ctl repmgr-check-master || echo 'This node is a standby repmgr node'
-```
-
-This command relies on exit codes to tell Consul whether a particular node is a master
-or secondary. The most important thing here is that this command does not produce errors.
-If there are errors it's most likely due to incorrect `gitlab-consul` database user permissions.
-Check the [Troubleshooting section](troubleshooting.md) before proceeding.
 
 <div align="right">
   <a type="button" class="btn btn-default" href="#setup-components">
