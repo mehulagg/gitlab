@@ -13,6 +13,7 @@ module Snippets
 
       @snippet.author = current_user
 
+      filter_spam_check_params
       spam_check(@snippet, current_user, action: :create)
 
       if save_and_commit

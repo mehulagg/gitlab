@@ -108,6 +108,7 @@ RSpec.describe 'Creating a Snippet' do
       it_behaves_like 'spammable fields are present'
       it_behaves_like 'can raise spam flags' do
         let(:service) { Snippets::CreateService }
+        let_it_be(:spam_log) { create(:spam_log, user: user, recaptcha_verified: false) }
       end
     end
 
@@ -150,6 +151,7 @@ RSpec.describe 'Creating a Snippet' do
       it_behaves_like 'does not create snippet'
       it_behaves_like 'spammable fields with validation errors' do
         let(:service) { Snippets::CreateService }
+        let_it_be(:spam_log) { create(:spam_log, user: user, recaptcha_verified: false) }
       end
     end
 

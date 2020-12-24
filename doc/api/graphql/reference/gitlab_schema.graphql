@@ -5030,6 +5030,11 @@ type CreateSnippetPayload {
   Indicates whether the operation returns a record detected as spam
   """
   spam: Boolean
+
+  """
+  The spam log ID which must be returned along with a valid gRecaptcha response in order for the operation to be completed
+  """
+  spamLogId: Int
 }
 
 """
@@ -24937,6 +24942,11 @@ type UpdateSnippetPayload {
   Indicates whether the operation returns a record detected as spam
   """
   spam: Boolean
+
+  """
+  The spam log ID which must be returned along with a valid gRecaptcha response in order for the operation to be completed
+  """
+  spamLogId: Int
 }
 
 scalar Upload

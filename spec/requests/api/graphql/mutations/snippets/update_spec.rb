@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe 'Updating a Snippet' do
   include GraphqlHelpers
 
+  let_it_be(:user) { create(:user) }
   let_it_be(:original_content) { 'Initial content' }
   let_it_be(:original_description) { 'Initial description' }
   let_it_be(:original_title) { 'Initial title' }
@@ -83,6 +84,7 @@ RSpec.describe 'Updating a Snippet' do
 
       it_behaves_like 'can raise spam flags' do
         let(:service) { Snippets::UpdateService }
+        let_it_be(:spam_log) { create(:spam_log, user: user, recaptcha_verified: false) }
       end
 
       it_behaves_like 'spammable fields are present'
@@ -116,6 +118,7 @@ RSpec.describe 'Updating a Snippet' do
         it_behaves_like 'spammable fields are present'
         it_behaves_like 'spammable fields with validation errors' do
           let(:service) { Snippets::UpdateService }
+          let_it_be(:spam_log) { create(:spam_log, user: user, recaptcha_verified: false) }
         end
       end
 
@@ -148,7 +151,7 @@ RSpec.describe 'Updating a Snippet' do
              :private,
              :repository,
              project: project,
-             author: create(:user),
+             author: user,
              file_name: original_file_name,
              title: original_title,
              content: original_content,

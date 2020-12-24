@@ -10,6 +10,8 @@ RSpec.shared_examples 'spammable fields are present' do
     expect(mutation_response['spam']).to be_falsey
     expect(mutation_response).to have_key('needsRecaptcha')
     expect(mutation_response['needsRecaptcha']).to be_falsey
+    expect(mutation_response).to have_key('spamLogId')
+    expect(mutation_response['spamLogId']).to be_falsey
   end
 end
 
@@ -57,6 +59,7 @@ RSpec.shared_examples 'can raise spam flags' do
       allow_next_instance_of(service) do |instance|
         allow(instance).to receive(:spam_check) do |snippet, user, _|
           snippet.needs_recaptcha!
+          snippet.spam_log = spam_log
         end
       end
 
@@ -78,6 +81,10 @@ RSpec.shared_examples 'can raise spam flags' do
         expect(mutation_response['needsRecaptcha']).to be true
         expect(mutation_response['errors']).to eq(["Your snippet has been recognized as spam. Please, change the content or solve the reCAPTCHA to proceed."])
       end
+
+      it 'includes spamLogId' do
+        expect(mutation_response['spamLogId']).to eq spam_log.id
+      end
     end
   end
 end
@@ -89,6 +96,7 @@ RSpec.shared_examples 'spammable fields with validation errors' do
     allow_next_instance_of(service) do |instance|
       allow(instance).to receive(:spam_check) do |snippet, user, _|
         snippet.needs_recaptcha!
+        snippet.spam_log = spam_log
       end
     end
 

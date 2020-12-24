@@ -14,6 +14,8 @@ module Snippets
       end
 
       update_snippet_attributes(snippet)
+
+      filter_spam_check_params
       spam_check(snippet, current_user, action: :update)
 
       if save_and_commit(snippet)
