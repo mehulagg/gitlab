@@ -33,6 +33,18 @@ namespace :gitlab do
   )
 
   namespace :graphql do
+    desc 'Gitlab | GraphQL | Validate queries'
+    task validate: [:environment] do
+      n_errs = Gitlab::Graphql::Queries.all
+        .flat_map { |defn| defn.validate(GitlabSchema) }
+        .count
+
+      if n_errs > 0
+        format_output('Some GraphQL queries could not be validated!')
+        abort
+      end
+    end
+
     desc 'GitLab | GraphQL | Generate GraphQL docs'
     task compile_docs: [:environment, :enable_feature_flags] do
       renderer = Gitlab::Graphql::Docs::Renderer.new(GitlabSchema.graphql_definition, render_options)

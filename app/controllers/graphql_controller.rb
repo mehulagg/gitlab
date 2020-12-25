@@ -34,6 +34,12 @@ class GraphqlController < ApplicationController
     render json: result
   end
 
+  def validate
+    result = validate_query
+
+    render json: result
+  end
+
   rescue_from StandardError do |exception|
     log_exception(exception)
 
@@ -73,6 +79,10 @@ class GraphqlController < ApplicationController
     operation_name = params[:operationName]
 
     GitlabSchema.execute(query, variables: variables, context: context, operation_name: operation_name)
+  end
+
+  def validate_query
+    GitlabSchema.validate(query)
   end
 
   def query
