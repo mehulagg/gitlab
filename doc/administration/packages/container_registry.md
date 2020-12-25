@@ -601,9 +601,9 @@ If you use an external container registry, some features associated with the
 container registry may be unavailable or have [inherent risks](../../user/packages/container_registry/index.md#use-with-external-container-registries).
 
 For the integration to work, the external registry must be configured to
-leverage GitLab for performing token based authentication through its JWT
-authentication endpoint. The [external registry's
-runtime configuration](https://docs.docker.com/registry/configuration/#token) **must carry** the following entries:
+use a JSON Web Token to authenticate with GitLab. The 
+[external registry's runtime configuration](https://docs.docker.com/registry/configuration/#token)
+**must** have the following entries:
 
 ```yaml
 auth:
