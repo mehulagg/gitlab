@@ -1,3 +1,4 @@
+import { nextTick } from 'vue';
 import { shallowMount } from '@vue/test-utils';
 import DesignPresentation from '~/design_management/components/design_presentation.vue';
 import DesignOverlay from '~/design_management/components/design_overlay.vue';
@@ -379,7 +380,7 @@ describe('Design management design presentation component', () => {
   });
 
   describe('onImageResize', () => {
-    it('sets zoom focal point on initial load', () => {
+    beforeEach(() => {
       createComponent(
         {
           image: 'test.jpg',
@@ -388,17 +389,16 @@ describe('Design management design presentation component', () => {
         mockOverlayData,
       );
 
-      wrapper.setMethods({
-        shiftZoomFocalPoint: jest.fn(),
-        scaleZoomFocalPoint: jest.fn(),
-        scrollToFocalPoint: jest.fn(),
-      });
-
+      jest.spyOn(wrapper.vm, 'shiftZoomFocalPoint');
+      jest.spyOn(wrapper.vm, 'scaleZoomFocalPoint');
+      jest.spyOn(wrapper.vm, 'scrollToFocalPoint');
       wrapper.vm.onImageResize({ width: 10, height: 10 });
-      return wrapper.vm.$nextTick().then(() => {
-        expect(wrapper.vm.shiftZoomFocalPoint).toHaveBeenCalled();
-        expect(wrapper.vm.initialLoad).toBe(false);
-      });
+      return wrapper.vm.$nextTick();
+    });
+
+    it('sets zoom focal point on initial load', () => {
+      expect(wrapper.vm.shiftZoomFocalPoint).toHaveBeenCalled();
+      expect(wrapper.vm.initialLoad).toBe(false);
     });
 
     it('calls scaleZoomFocalPoint and scrollToFocalPoint after initial load', () => {
