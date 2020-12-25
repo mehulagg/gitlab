@@ -393,8 +393,12 @@ a new set of recovery codes with SSH:
 1. Run:
 
    ```shell
-   ssh git@gitlab.example.com 2fa_recovery_codes
+   ssh git@gitlab.com 2fa_recovery_codes
    ```
+   
+   NOTE:
+   On self-managed instances, replace **gitlab.com** in the command above
+   with the GitLab server hostname (`gitlab.example.com`).
 
 1. You are prompted to confirm that you want to generate new codes.
    Continuing this process invalidates previously saved codes:
