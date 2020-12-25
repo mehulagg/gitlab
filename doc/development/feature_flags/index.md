@@ -19,7 +19,7 @@ Such changes include:
 1. Complex performance improvements that may require additional testing in production (e.g. rewriting complex queries, changes to frequently used API endpoints).
 1. Invasive changes to the user interface (e.g. introducing a new navigation bar, removal of a sidebar, UI element change in issues or MR interface).
 1. Introducing dependencies on third-party services (e.g. adding support for importing projects).
-1. Changes to features that can cause data corruption or cause data loss (e.g. features processing git data or user uploaded content).
+1. Changes to features that can cause data corruption or cause data loss (e.g. features processing repository data or user uploaded content).
 
 Situations where you might consider not using a feature flag:
 
