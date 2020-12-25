@@ -614,11 +614,12 @@ auth:
     rootcertbundle: /root/certs/certbundle
 ```
 
-Without the above, the registry logins will not authenticate through GitLab and
-GitLab will also remain unaware of [nested image names](../../user/packages/container_registry/#image-naming-convention)
-pushed under the project hierarchy such as
+Without these entries, the registry logins cannot authenticate with GitLab.
+GitLab also remains unaware of
+[nested image names](../../user/packages/container_registry/#image-naming-convention)
+under the project hierarchy, like
 `registry.example.com/group/project/image-name:tag` or
-`registry.example.com/group/project/my/image-name:tag`, and will only recognize
+`registry.example.com/group/project/my/image-name:tag`, and only recognizes
 `registry.example.com/group/project:tag`.
 
 **Omnibus GitLab**
