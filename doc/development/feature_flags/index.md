@@ -12,7 +12,7 @@ as the [feature flags offered as part of the product](../../operations/feature_f
 
 ## When to use feature flags
 
-Developers are required to use feature flags for non-trivial changes (since GitLab 11.4).
+Developers are required to use feature flags for changes that could affect availability of GitLab functionality.
 Such changes include:
 
 1. New features in high traffic areas (e.g. a new merge request widget, new option in issues/epics, new CI functionality).
