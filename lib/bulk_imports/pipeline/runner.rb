@@ -19,6 +19,9 @@ module BulkImports
 
           if data && data.respond_to?(:each)
             data.each do |entry|
+
+              info(context, data: data)
+
               transformers.each do |transformer|
                 entry = run_pipeline_step(:transformer, transformer.class.name, context) do
                   transformer.transform(context, entry)
@@ -52,11 +55,16 @@ module BulkImports
       rescue => e
         log_import_failure(e, context)
 
-        mark_as_failed(context) if abort_on_failure?
+        mark_as_failed(context, e) if abort_on_failure?
       end
 
-      def mark_as_failed(context)
-        warn(context, message: 'Pipeline failed', pipeline_class: pipeline)
+      def mark_as_failed(context, exception)
+        warn(
+          context,
+          message: 'Pipeline failed',
+          error_message: exception.message,
+          pipeline_class: pipeline
+        )
 
         context.entity.fail_op!
       end

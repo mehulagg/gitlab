@@ -9,7 +9,7 @@ module BulkImports
         end
 
         def transform(_, data)
-          data.deep_transform_keys do |key|
+          data&.deep_transform_keys do |key|
             key.to_s.underscore
           end
         end

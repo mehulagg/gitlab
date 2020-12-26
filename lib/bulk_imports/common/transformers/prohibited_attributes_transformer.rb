@@ -19,7 +19,7 @@ module BulkImports
         end
 
         def transform(context, data)
-          data.each_with_object({}) do |(key, value), result|
+          data&.each_with_object({}) do |(key, value), result|
             prohibited = prohibited_key?(key)
 
             unless prohibited
