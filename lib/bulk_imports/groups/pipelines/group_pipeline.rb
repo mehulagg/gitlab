@@ -8,14 +8,39 @@ module BulkImports
 
         abort_on_failure!
 
-        extractor Common::Extractors::GraphqlExtractor, query: Graphql::GetGroupQuery
+        def extract(context)
+          Common::Extractors::GraphqlExtractor
+            .new(query: Graphql::GetGroupQuery)
+            .extract(context)
+        end
 
-        transformer Common::Transformers::HashKeyDigger, key_path: %w[data group]
-        transformer Common::Transformers::UnderscorifyKeysTransformer
-        transformer Common::Transformers::ProhibitedAttributesTransformer
-        transformer Groups::Transformers::GroupAttributesTransformer
+        def transform(context, entry)
+          entry
+            .dig('data', 'group')
+            .deep_transform_keys { |key| key.to_s.underscore }
+            .then { |data| clean_prohibited_attributes(context, data) }
+            .then { |data| Transformers::GroupAttributesTransformer.transform(context, data) }
+        end
 
-        loader Groups::Loaders::GroupLoader
+        def load(context, entry)
+          return unless user_can_create_group?(context.current_user, entry)
+
+          ::Groups::CreateService.new(context.current_user, entry).execute.tap do |group|
+            context.entity.update!(group: group)
+          end
+        end
+
+        private
+
+        def user_can_create_group?(current_user, data)
+          if data['parent_id']
+            parent = Namespace.find_by_id(data['parent_id'])
+
+            Ability.allowed?(current_user, :create_subgroup, parent)
+          else
+            Ability.allowed?(current_user, :create_group)
+          end
+        end
       end
     end
   end

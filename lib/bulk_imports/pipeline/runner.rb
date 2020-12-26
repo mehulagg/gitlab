@@ -12,29 +12,17 @@ module BulkImports
 
         info(context, message: 'Pipeline started', pipeline_class: pipeline)
 
-        extractors.each do |extractor|
-          data = run_pipeline_step(:extractor, extractor.class.name, context) do
-            extractor.extract(context)
-          end
+        data = extract(context)
 
-          if data && data.respond_to?(:each)
-            data.each do |entry|
-              transformers.each do |transformer|
-                entry = run_pipeline_step(:transformer, transformer.class.name, context) do
-                  transformer.transform(context, entry)
-                end
-              end
+        info(context, data: data)
 
-              loaders.each do |loader|
-                run_pipeline_step(:loader, loader.class.name, context) do
-                  loader.load(context, entry)
-                end
-              end
-            end
+        if data && data.respond_to?(:each)
+          data.each do |entry|
+            transform(context, entry).then { |entry| load(context, entry) }
           end
         end
 
-        after_run.call(context) if after_run.present?
+        after_run.call(context) if respond_to?(:after_run)
       rescue MarkedAsFailedError
         log_skip(context)
       end

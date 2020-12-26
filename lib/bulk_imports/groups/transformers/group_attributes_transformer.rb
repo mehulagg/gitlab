@@ -4,6 +4,10 @@ module BulkImports
   module Groups
     module Transformers
       class GroupAttributesTransformer
+        def self.transform(context, data)
+          new.transform(context, data)
+        end
+
         def initialize(options = {})
           @options = options
         end
