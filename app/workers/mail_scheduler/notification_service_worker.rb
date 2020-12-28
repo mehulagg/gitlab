@@ -11,11 +11,11 @@ module MailScheduler
     worker_resource_boundary :cpu
     loggable_arguments 0
 
-    def perform(meth, *args)
+    def perform(meth, *args, **kwargs)
       check_arguments!(args)
 
       deserialized_args = ActiveJob::Arguments.deserialize(args)
-      notification_service.public_send(meth, *deserialized_args) # rubocop:disable GitlabSecurity/PublicSend
+      notification_service.public_send(meth, *deserialized_args, **kwargs) # rubocop:disable GitlabSecurity/PublicSend
     rescue ActiveJob::DeserializationError
       # No-op.
       # This exception gets raised when an argument
