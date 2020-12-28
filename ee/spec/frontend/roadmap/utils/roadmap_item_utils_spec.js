@@ -143,7 +143,7 @@ describe('lastTimeframeIndex', () => {
   });
 });
 
-describe('timeframeStartDate', () => {
+describe('getTimeframeStartDate', () => {
   it.each`
     presetType               | startDate                              | timeframe
     ${PRESET_TYPES.QUARTERS} | ${mockQuarterly.timeframe[0].range[0]} | ${mockQuarterly.timeframe}
@@ -152,12 +152,12 @@ describe('timeframeStartDate', () => {
   `(
     `should return starting date for the timeframe range array when preset type is $presetType`,
     ({ presetType, startDate, timeframe }) => {
-      expect(roadmapItemUtils.timeframeStartDate(presetType, timeframe)).toEqual(startDate);
+      expect(roadmapItemUtils.getTimeframeStartDate(presetType, timeframe)).toEqual(startDate);
     },
   );
 });
 
-describe('timeframeEndDate', () => {
+describe('getTimeframeEndDate', () => {
   /*
     Note: there are inconsistencies in how timeframes are generated.
 
@@ -182,7 +182,7 @@ describe('timeframeEndDate', () => {
   `(
     `should return ending date for the timeframe range array when preset type is $presetType`,
     ({ presetType, endDate, timeframe }) => {
-      expect(roadmapItemUtils.timeframeEndDate(presetType, timeframe)).toEqual(endDate);
+      expect(roadmapItemUtils.getTimeframeEndDate(presetType, timeframe)).toEqual(endDate);
     },
   );
 });

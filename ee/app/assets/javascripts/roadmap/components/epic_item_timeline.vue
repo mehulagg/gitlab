@@ -52,7 +52,9 @@ export default {
   },
   computed: {
     startDateValues() {
-      const { startDate } = this.epic;
+      const {
+        startDate: { proxy: startDate },
+      } = this.epic;
 
       return {
         day: startDate.getDay(),
@@ -63,36 +65,25 @@ export default {
       };
     },
     endDateValues() {
-      const { endDate } = this.epic;
+      const {
+        dueDate: { proxy: dueDate },
+      } = this.epic;
 
       return {
-        day: endDate.getDay(),
-        date: endDate.getDate(),
-        month: endDate.getMonth(),
-        year: endDate.getFullYear(),
-        time: endDate.getTime(),
+        day: dueDate.getDay(),
+        date: dueDate.getDate(),
+        month: dueDate.getMonth(),
+        year: dueDate.getFullYear(),
+        time: dueDate.getTime(),
       };
     },
-    /**
-     * In case Epic start date is out of range
-     * we need to use original date instead of proxy date
-     */
     startDate() {
-      if (this.epic.startDateOutOfRange) {
-        return this.epic.originalStartDate;
-      }
-
-      return this.epic.startDate;
+      return this.epic.startDate.outOfRange
+        ? this.epic.startDate.actual
+        : this.epic.startDate.proxy;
     },
-    /**
-     * In case Epic end date is out of range
-     * we need to use original date instead of proxy date
-     */
     endDate() {
-      if (this.epic.endDateOutOfRange) {
-        return this.epic.originalEndDate;
-      }
-      return this.epic.endDate;
+      return this.epic.dueDate.outOfRange ? this.epic.dueDate.actual : this.epic.dueDate.proxy;
     },
     hasStartDate() {
       if (this.presetTypeQuarters) {

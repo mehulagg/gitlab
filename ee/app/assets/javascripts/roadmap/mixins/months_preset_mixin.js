@@ -41,12 +41,12 @@ export default {
      *    when startDate is out of range.
      */
     getTimelineBarStartOffsetForMonths(roadmapItem) {
-      const daysInMonth = totalDaysInMonth(roadmapItem.startDate);
+      const daysInMonth = totalDaysInMonth(roadmapItem.startDate.proxy);
       const startDate = this.startDateValues.date;
 
       if (
-        roadmapItem.startDateOutOfRange ||
-        (roadmapItem.startDateUndefined && roadmapItem.endDateOutOfRange)
+        roadmapItem.startDate.outOfRange ||
+        (roadmapItem.startDate.undefined && roadmapItem.dueDate.outOfRange)
       ) {
         // If Epic startDate is out of timeframe range
         // OR

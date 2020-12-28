@@ -75,13 +75,13 @@ export default {
       };
     },
     timeframeString(roadmapItem) {
-      if (roadmapItem.startDateUndefined && roadmapItem.endDateUndefined) {
+      if (roadmapItem.startDate.undefined && roadmapItem.dueDate.undefined) {
         return sprintf(s__('GroupRoadmap|No start and end date'));
-      } else if (roadmapItem.startDateUndefined) {
+      } else if (roadmapItem.startDate.undefined) {
         return sprintf(s__('GroupRoadmap|No start date – %{dateWord}'), {
           dateWord: dateInWords(this.endDate, true),
         });
-      } else if (roadmapItem.endDateUndefined) {
+      } else if (roadmapItem.dueDate.undefined) {
         return sprintf(s__('GroupRoadmap|%{dateWord} – No end date'), {
           dateWord: dateInWords(this.startDate, true),
         });

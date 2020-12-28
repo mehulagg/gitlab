@@ -6,8 +6,6 @@ import {
   EXTEND_AS,
   TIMELINE_CELL_MIN_WIDTH,
   DAYS_IN_WEEK,
-  PAST_DATE,
-  FUTURE_DATE,
 } from '../constants';
 
 const monthsForQuarters = {
@@ -406,49 +404,26 @@ export const getEpicsTimeframeRange = ({ presetType = '', timeframe = [] }) => {
   };
 };
 
-/**
- * This function takes two epics and return sortable dates depending on the '
- * type of sorting order -- startDate or endDate.
- */
-export function assignDates(a, b, { dateUndefined, outOfRange, originalDate, date, proxyDate }) {
-  let aDate;
-  let bDate;
-
-  if (a[dateUndefined]) {
-    // Set proxy date to be either far in the past or
-    // far in the future to ensure sort order is
-    // correct.
-    aDate = proxyDate;
-  } else {
-    aDate = a[outOfRange] ? a[originalDate] : a[date];
-  }
-
-  if (b[dateUndefined]) {
-    bDate = proxyDate;
-  } else {
-    bDate = b[outOfRange] ? b[originalDate] : b[date];
-  }
-
-  return [aDate, bDate];
-}
-
 export const sortEpics = (epics, sortedBy) => {
   const sortByStartDate = sortedBy.indexOf('start_date') > -1;
   const sortOrderAsc = sortedBy.indexOf('asc') > -1;
 
   epics.sort((a, b) => {
-    const [aDate, bDate] = assignDates(a, b, {
-      dateUndefined: sortByStartDate ? 'startDateUndefined' : 'endDateUndefined',
-      outOfRange: sortByStartDate ? 'startDateOutOfRange' : 'endDateOutOfRange',
-      originalDate: sortByStartDate ? 'originalStartDate' : 'originalEndDate',
-      date: sortByStartDate ? 'startDate' : 'endDate',
-      proxyDate: sortByStartDate ? PAST_DATE : FUTURE_DATE,
-    });
+    let aDate;
+    let bDate;
+
+    if (sortByStartDate) {
+      aDate = a.startDate.undefined ? Number.NEGATIVE_INFINITY : a.startDate.actual.getTime();
+      bDate = b.startDate.undefined ? Number.NEGATIVE_INFINITY : b.startDate.actual.getTime();
+    } else {
+      aDate = a.dueDate.undefined ? Infinity : a.dueDate.actual.getTime();
+      bDate = b.dueDate.undefined ? Infinity : b.dueDate.actual.getTime();
+    }
 
     // Sort in ascending or descending order
-    if (aDate.getTime() < bDate.getTime()) {
+    if (aDate < bDate) {
       return sortOrderAsc ? -1 : 1;
-    } else if (aDate.getTime() > bDate.getTime()) {
+    } else if (aDate > bDate) {
       return sortOrderAsc ? 1 : -1;
     }
     return 0;

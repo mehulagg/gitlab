@@ -54,26 +54,11 @@ export default {
     },
   },
   computed: {
-    /**
-     * In case Epic start date is out of range
-     * we need to use original date instead of proxy date
-     */
     startDate() {
-      if (this.epic.startDateOutOfRange) {
-        return this.epic.originalStartDate;
-      }
-
-      return this.epic.startDate;
+      return this.epic.startDate.proxy;
     },
-    /**
-     * In case Epic end date is out of range
-     * we need to use original date instead of proxy date
-     */
     endDate() {
-      if (this.epic.endDateOutOfRange) {
-        return this.epic.originalEndDate;
-      }
-      return this.epic.endDate;
+      return this.epic.dueDate.proxy;
     },
     isChildrenEmpty() {
       return this.childrenEpics[this.epic.id] && this.childrenEpics[this.epic.id].length === 0;

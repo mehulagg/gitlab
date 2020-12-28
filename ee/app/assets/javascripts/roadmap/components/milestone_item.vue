@@ -39,7 +39,9 @@ export default {
   },
   computed: {
     startDateValues() {
-      const { startDate } = this.milestone;
+      const {
+        startDate: { proxy: startDate },
+      } = this.milestone;
 
       return {
         day: startDate.getDay(),
@@ -50,7 +52,9 @@ export default {
       };
     },
     endDateValues() {
-      const { endDate } = this.milestone;
+      const {
+        dueDate: { proxy: endDate },
+      } = this.milestone;
 
       return {
         day: endDate.getDay(),
@@ -71,14 +75,14 @@ export default {
       return false;
     },
     startDate() {
-      return this.milestone.startDateOutOfRange
-        ? this.milestone.originalStartDate
-        : this.milestone.startDate;
+      return this.milestone.startDate.outOfRange
+        ? this.milestone.startDate.actual
+        : this.milestone.startDate.proxy;
     },
     endDate() {
-      return this.milestone.endDateOutOfRange
-        ? this.milestone.originalEndDate
-        : this.milestone.endDate;
+      return this.milestone.dueDate.outOfRange
+        ? this.milestone.dueDate.actual
+        : this.milestone.dueDate.proxy;
     },
     smallClass() {
       const smallStyleClass = 'milestone-small';
