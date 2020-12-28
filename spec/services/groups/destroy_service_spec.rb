@@ -135,6 +135,13 @@ RSpec.describe Groups::DestroyService do
   end
 
   describe 'authorization updates', :sidekiq_inline do
+    context 'group is deleted' do
+      it 'updates project authorization' do
+        expect { destroy_group(group, user, false) }.to(
+          change { user.can?(:read_project, project) }.from(true).to(false))
+      end
+    end
+
     context 'shared groups' do
       let!(:shared_group) { create(:group, :private) }
       let!(:shared_group_child) { create(:group, :private, parent: shared_group) }
