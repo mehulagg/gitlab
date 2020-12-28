@@ -839,6 +839,7 @@ understand the implications.
 
 WARNING:
 This is a destructive operation.
+Please check [this issue](https://gitlab.com/gitlab-org/container-registry/-/issues/149) before continuing
 
 The GitLab Container Registry follows the same default workflow as Docker Distribution:
 retain untagged manifests and all layers, even ones that are not referenced directly. All content
