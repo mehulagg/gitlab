@@ -92,6 +92,18 @@ script:
   - echo "$TEST"
 ```
 
+GitLab 13.7 [introduced](https://about.gitlab.com/releases/2020/12/22/gitlab-13-7-released/#pre-filled-variables-when-running-pipelines-manually) the ability to run pre-filled variables when manually running pipelines.
+The Run Pipeline form will generate the variables fields with any global variables with descriptions defined in the
+`.gitlab-ci.yml` file:  
+
+```yaml
+variables:
+  TEST: "HELLO WORLD"
+    description: "HELLO WORLD string"
+```
+
+The `TEST` variable will now be an option when manually running a pipeline.  
+
 For more details, see [`.gitlab-ci.yml` defined variables](#gitlab-ciyml-defined-variables).
 
 ### Create a custom variable in the UI
