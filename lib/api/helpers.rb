@@ -220,6 +220,10 @@ module API
       user_project.builds.find(id.to_i)
     end
 
+    def find_job!(id, project)
+      CommitStatus.find_by(id: id, project: project)
+    end
+
     def authenticate!
       unauthorized! unless current_user
     end

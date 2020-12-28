@@ -5,6 +5,20 @@ require 'spec_helper'
 RSpec.describe API::Helpers do
   subject { Class.new.include(described_class).new }
 
+  describe '#find_job' do
+    let_it_be(:project) { create(:project) }
+    let_it_be(:pipeline) { create(:ci_pipeline, project: project) }
+    let_it_be(:build_job) { create(:ci_build, :manual, project: project, pipeline: pipeline) }
+    let_it_be(:bridge_job) { create(:ci_bridge, :playable, downstream: project, pipeline: pipeline) }
+
+    context 'when job exists' do
+      it 'returns requested bridge or build' do
+        expect(subject.find_job!(build_job.id, project)).to eq(build_job)
+        expect(subject.find_job!(bridge_job.id, project)).to eq(bridge_job)
+      end
+    end
+  end
+
   describe '#find_project' do
     let(:project) { create(:project) }
 
