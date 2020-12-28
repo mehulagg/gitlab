@@ -195,3 +195,28 @@ Without an explicit name argument, Rails can return a false positive
 for `index_exists?`, causing a required index to not be created
 properly. By always requiring a name for certain types of indexes, the
 chance of error is greatly reduced.
+
+## Temporary indexes
+
+There may be times when an index is only needed temporarily.
+
+For example, in a migration, a column of a table might be conditionally
+updated. To query which columns need to be updated within the
+[query performance guidelines](query_performance.md), an index is needed that would otherwise
+not be used. 
+
+In these cases, a temporary index should be considered. To specify a
+temporary index:
+
+1. Prefix the index name with `temp_`.
+2. Create a followup issue to remove the index in the next (or future) milestone.
+3. Add a comment in the migration mentioning the removal issue.
+
+```ruby
+INDEX_NAME = 'temp_index_projects_on_owner_where_emails_disabled'
+
+def up
+  # Temporary index to be removed in 13.9 https://gitlab.com/gitlab-org/gitlab/-/issues/1234
+  add_concurrent_index :projects, :creator_id, where: 'emails_disabled = false', name: INDEX_NAME
+end
+```
