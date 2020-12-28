@@ -17272,8 +17272,7 @@ type Project {
   ): DastSiteProfileConnection
 
   """
-  DAST Site Validations associated with the project. Will always return no nodes
-  if `security_on_demand_scans_site_validation` is disabled
+  DAST Site Validations associated with the project.
   """
   dastSiteValidations(
     """

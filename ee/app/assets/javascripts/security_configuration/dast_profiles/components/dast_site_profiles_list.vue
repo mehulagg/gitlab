@@ -34,9 +34,7 @@ export default {
       },
       pollInterval: DAST_SITE_VALIDATION_POLLING_INTERVAL,
       skip() {
-        return (
-          !this.glFeatures.securityOnDemandScansSiteValidation || !this.urlsPendingValidation.length
-        );
+        return !this.urlsPendingValidation.length;
       },
       result({
         data: {
@@ -92,13 +90,10 @@ export default {
   },
   methods: {
     shouldShowValidationBtn(status) {
-      return (
-        this.glFeatures.securityOnDemandScansSiteValidation &&
-        (status === NONE || status === FAILED)
-      );
+      return status === NONE || status === FAILED;
     },
     shouldShowValidationStatus(status) {
-      return this.glFeatures.securityOnDemandScansSiteValidation && status !== NONE;
+      return status !== NONE;
     },
     showValidationModal() {
       this.$refs['dast-site-validation-modal'].show();

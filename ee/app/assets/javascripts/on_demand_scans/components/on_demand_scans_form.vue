@@ -160,12 +160,7 @@ export default {
       return this.selectedSiteProfile?.validationStatus === DAST_SITE_VALIDATION_STATUS.PASSED;
     },
     hasProfilesConflict() {
-      return (
-        this.glFeatures.securityOnDemandScansSiteValidation &&
-        !this.someFieldEmpty &&
-        this.isActiveScannerProfile &&
-        !this.isValidatedSiteProfile
-      );
+      return !this.someFieldEmpty && this.isActiveScannerProfile && !this.isValidatedSiteProfile;
     },
     isSubmitButtonDisabled() {
       return this.someFieldEmpty || this.hasProfilesConflict;

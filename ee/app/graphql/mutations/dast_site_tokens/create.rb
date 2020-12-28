@@ -31,8 +31,6 @@ module Mutations
 
       def resolve(full_path:, target_url:)
         project = authorized_find_project!(full_path: full_path)
-        raise Gitlab::Graphql::Errors::ResourceNotAvailable, 'Feature disabled' unless allowed?(project)
-
         response = ::DastSiteTokens::CreateService.new(
           container: project,
           params: { target_url: target_url }
@@ -44,10 +42,6 @@ module Mutations
       end
 
       private
-
-      def allowed?(project)
-        Feature.enabled?(:security_on_demand_scans_site_validation, project)
-      end
 
       def error_response(errors)
         { errors: errors }

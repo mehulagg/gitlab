@@ -50938,7 +50938,7 @@
             },
             {
               "name": "dastSiteValidations",
-              "description": "DAST Site Validations associated with the project. Will always return no nodes if `security_on_demand_scans_site_validation` is disabled",
+              "description": "DAST Site Validations associated with the project.",
               "args": [
                 {
                   "name": "normalizedTargetUrls",

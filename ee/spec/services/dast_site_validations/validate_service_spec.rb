@@ -15,28 +15,17 @@ RSpec.describe DastSiteValidations::ValidateService do
   end
 
   describe 'execute!' do
-    context 'when on demand scan feature is disabled' do
-      it 'communicates failure' do
-        stub_licensed_features(security_on_demand_scans: true)
-        stub_feature_flags(security_on_demand_scans_site_validation: false)
-
-        expect { subject }.to raise_error(DastSiteValidations::ValidateService::PermissionsError)
-      end
-    end
-
     context 'when on demand scan licensed feature is not available' do
       it 'communicates failure' do
         stub_licensed_features(security_on_demand_scans: false)
-        stub_feature_flags(security_on_demand_scans_site_validation: true)
 
         expect { subject }.to raise_error(DastSiteValidations::ValidateService::PermissionsError)
       end
     end
 
-    context 'when the feature is enabled' do
+    context 'when the feature is available' do
       before do
         stub_licensed_features(security_on_demand_scans: true)
-        stub_feature_flags(security_on_demand_scans_site_validation: true)
         stub_request(:get, dast_site_validation.validation_url).to_return(body: token, headers: headers)
       end
 
