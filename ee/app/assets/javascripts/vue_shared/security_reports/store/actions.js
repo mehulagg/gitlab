@@ -204,6 +204,7 @@ export const dismissVulnerability = ({ state, dispatch }, comment) => {
         feedback_type: FEEDBACK_TYPE_DISMISSAL,
         pipeline_id: state.pipelineId,
         project_fingerprint: state.modal.vulnerability.project_fingerprint,
+        finding_uuid: state.modal.vulnerability.uuid,
         vulnerability_data: state.modal.vulnerability,
       },
     })

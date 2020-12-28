@@ -91,6 +91,7 @@ export const createIssue = ({ dispatch }, { vulnerability, flashError }) => {
         feedback_type: FEEDBACK_TYPE_ISSUE,
         category: vulnerability.report_type,
         project_fingerprint: vulnerability.project_fingerprint,
+        finding_uuid: vulnerability.uuid,
         vulnerability_data: {
           ...vulnerability,
           category: vulnerability.report_type,
@@ -154,6 +155,7 @@ export const dismissSelectedVulnerabilities = ({ dispatch, state }, { comment } 
         comment,
         feedback_type: FEEDBACK_TYPE_DISMISSAL,
         project_fingerprint: vulnerability.project_fingerprint,
+        finding_uuid: vulnerability.uuid,
         vulnerability_data: {
           id: vulnerability.id,
         },
@@ -240,6 +242,7 @@ export const dismissVulnerability = (
         feedback_type: FEEDBACK_TYPE_DISMISSAL,
         pipeline_id: state.pipelineId,
         project_fingerprint: vulnerability.project_fingerprint,
+        finding_uuid: vulnerability.uuid,
         vulnerability_data: {
           ...vulnerability,
           category: vulnerability.report_type,
@@ -442,6 +445,7 @@ export const createMergeRequest = ({ state, dispatch }, { vulnerability, flashEr
         feedback_type: FEEDBACK_TYPE_MERGE_REQUEST,
         category: report_type,
         project_fingerprint,
+        finding_uuid: vulnerability.uuid,
         vulnerability_data: {
           ...vulnerability,
           target_branch: targetBranch,
