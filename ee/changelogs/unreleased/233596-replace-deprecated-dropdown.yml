@@ -1,0 +1,5 @@
+---
+title: Replace GlDeprecatedDropdown with GlDropdown in ee/app/assets/javascripts/related_items_tree
+merge_request: 50633
+author:
+type: other

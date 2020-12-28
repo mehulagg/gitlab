@@ -1,7 +1,7 @@
 import {
   GlButton,
-  GlDeprecatedDropdown,
-  GlDeprecatedDropdownItem,
+  GlDropdown,
+  GlDropdownItem,
   GlFormInput,
   GlSearchBoxByType,
   GlLoadingIcon,
@@ -163,7 +163,7 @@ describe('CreateIssueForm', () => {
 
     it('renders Projects dropdown field', () => {
       const projectsDropdownLabel = wrapper.findAll('label').at(1);
-      const projectsDropdownButton = wrapper.find(GlDeprecatedDropdown);
+      const projectsDropdownButton = wrapper.find(GlDropdown);
 
       expect(projectsDropdownLabel.text()).toBe('Project');
       expect(projectsDropdownButton.props('text')).toBe('Select a project');
@@ -173,15 +173,16 @@ describe('CreateIssueForm', () => {
       wrapper.vm.$store.dispatch('receiveProjectsSuccess', mockProjects);
 
       return wrapper.vm.$nextTick(() => {
-        const projectsDropdownButton = wrapper.find(GlDeprecatedDropdown);
-        const dropdownItems = projectsDropdownButton.findAll(GlDeprecatedDropdownItem);
+        const projectsDropdownButton = wrapper.find(GlDropdown);
+        const dropdownItems = projectsDropdownButton.findAll(GlDropdownItem);
+        const dropdownItem = dropdownItems.at(0);
 
         expect(projectsDropdownButton.find(GlSearchBoxByType).exists()).toBe(true);
         expect(projectsDropdownButton.find(GlLoadingIcon).exists()).toBe(true);
         expect(dropdownItems).toHaveLength(mockProjects.length);
-        expect(dropdownItems.at(0).text()).toContain(mockProjects[0].name);
-        expect(dropdownItems.at(0).text()).toContain(mockProjects[0].namespace.name);
-        expect(dropdownItems.at(0).find(ProjectAvatar).exists()).toBe(true);
+        expect(dropdownItem.text()).toBe(mockProjects[0].name);
+        expect(dropdownItem.attributes('secondarytext')).toBe(mockProjects[0].namespace.name);
+        expect(dropdownItem.find(ProjectAvatar).exists()).toBe(true);
       });
     });
 
@@ -190,7 +191,7 @@ describe('CreateIssueForm', () => {
       const filteredMockProjects = mockProjects.filter((project) => project.name === searchKey);
       jest.spyOn(wrapper.vm, 'fetchProjects').mockImplementation(jest.fn());
 
-      wrapper.find(GlDeprecatedDropdown).trigger('click');
+      wrapper.find(GlDropdown).trigger('click');
 
       wrapper.setData({
         searchKey,
@@ -202,7 +203,7 @@ describe('CreateIssueForm', () => {
           wrapper.vm.$store.dispatch('receiveProjectsSuccess', filteredMockProjects);
         })
         .then(() => {
-          expect(wrapper.findAll(GlDeprecatedDropdownItem)).toHaveLength(1);
+          expect(wrapper.findAll(GlDropdownItem)).toHaveLength(1);
         });
     });
 
@@ -211,7 +212,7 @@ describe('CreateIssueForm', () => {
       const filteredMockProjects = mockProjects.filter((project) => project.name === searchKey);
       jest.spyOn(wrapper.vm, 'fetchProjects').mockImplementation(jest.fn());
 
-      wrapper.find(GlDeprecatedDropdown).trigger('click');
+      wrapper.find(GlDropdown).trigger('click');
 
       wrapper.setData({
         searchKey,
