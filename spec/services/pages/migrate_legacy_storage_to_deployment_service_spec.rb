@@ -11,9 +11,7 @@ RSpec.describe Pages::MigrateLegacyStorageToDeploymentService do
 
     expect(project.pages_metadatum.reload.deployed).to eq(true)
 
-    expect do
-      service.execute
-    end.to raise_error(described_class::FailedToCreateArchiveError)
+    expect(service.execute).to eq(false)
 
     expect(project.pages_metadatum.reload.deployed).to eq(false)
   end
@@ -25,9 +23,7 @@ RSpec.describe Pages::MigrateLegacyStorageToDeploymentService do
 
     expect(project.pages_metadatum.reload.deployed).to eq(true)
 
-    expect do
-      service.execute
-    end.to raise_error(described_class::FailedToCreateArchiveError)
+    expect(service.execute).to eq(false)
 
     expect(project.pages_metadatum.reload.deployed).to eq(true)
   end
@@ -39,9 +35,7 @@ RSpec.describe Pages::MigrateLegacyStorageToDeploymentService do
 
     expect(project.pages_metadatum.reload.deployed).to eq(true)
 
-    expect do
-      service.execute
-    end.to raise_error(described_class::FailedToCreateArchiveError)
+    expect(service.execute).to eq(false)
 
     expect(project.pages_metadatum.reload.deployed).to eq(true)
   end
@@ -73,7 +67,7 @@ RSpec.describe Pages::MigrateLegacyStorageToDeploymentService do
 
     it 'creates pages deployment' do
       expect do
-        described_class.new(project).execute
+        expect(described_class.new(project).execute).to eq(true)
       end.to change { project.reload.pages_deployments.count }.by(1)
 
       deployment = project.pages_metadatum.pages_deployment

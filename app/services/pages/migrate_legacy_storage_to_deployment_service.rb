@@ -3,7 +3,6 @@
 module Pages
   class MigrateLegacyStorageToDeploymentService
     ExclusiveLeaseTakenError = Class.new(StandardError)
-    FailedToCreateArchiveError = Class.new(StandardError)
 
     include ::Pages::LegacyStorageLease
 
@@ -14,19 +13,31 @@ module Pages
     end
 
     def execute
+      result = nil
       migrated = try_obtain_lease do
-        execute_unsafe
+        result = execute_unsafe
 
         true
       end
 
       raise ExclusiveLeaseTakenError, "Can't migrate pages for project #{project.id}: exclusive lease taken" unless migrated
+
+      result
     end
 
     private
 
     def execute_unsafe
       archive_path, entries_count = ::Pages::ZipDirectoryService.new(project.pages_path).execute
+
+      unless archive_path
+        if !project.pages_metadatum&.reload&.pages_deployment &&
+           Feature.enabled?(:pages_migration_mark_as_not_deployed, project)
+          project.mark_pages_as_not_deployed
+        end
+
+        return false
+      end
 
       deployment = nil
       File.open(archive_path) do |file|
@@ -38,13 +49,8 @@ module Pages
       end
 
       project.set_first_pages_deployment!(deployment)
-    rescue ::Pages::ZipDirectoryService::InvalidArchiveError => e
-      if !project.pages_metadatum&.reload&.pages_deployment &&
-         Feature.enabled?(:pages_migration_mark_as_not_deployed, project)
-        project.mark_pages_as_not_deployed
-      end
 
-      raise FailedToCreateArchiveError, e
+      true
     ensure
       FileUtils.rm_f(archive_path) if archive_path
     end
