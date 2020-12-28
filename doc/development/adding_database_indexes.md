@@ -209,8 +209,8 @@ In these cases, a temporary index should be considered. To specify a
 temporary index:
 
 1. Prefix the index name with `temp_`.
-2. Create a followup issue to remove the index in the next (or future) milestone.
-3. Add a comment in the migration mentioning the removal issue.
+1. Create a followup issue to remove the index in the next (or future) milestone.
+1. Add a comment in the migration mentioning the removal issue.
 
 ```ruby
 INDEX_NAME = 'temp_index_projects_on_owner_where_emails_disabled'
