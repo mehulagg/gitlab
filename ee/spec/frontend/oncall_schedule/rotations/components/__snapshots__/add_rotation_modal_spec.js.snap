@@ -521,7 +521,17 @@ exports[`AddRotationModal renders rotation modal layout 1`] = `
      
     <gl-toggle-stub
       class="gl-mb-5"
+      data-testid="end-date-toggle"
       label="Enable end date"
+      labelposition="left"
+    />
+     
+    <!---->
+     
+    <gl-toggle-stub
+      class="gl-my-5"
+      data-testid="restricted-to-toggle"
+      label="Restrict to time intervals"
       labelposition="left"
     />
      

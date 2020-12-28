@@ -45,6 +45,10 @@ export default {
         enableToggle: s__('OnCallSchedules|Enable end date'),
         title: __('Ends on'),
       },
+      restrictToTime: {
+        enableToggle: s__('OnCallSchedules|Restrict to time intervals'),
+        title: s__('OnCallSchedules|For this rotation, on-call will be:'),
+      },
     },
   },
   tokenColorPalette: {
@@ -100,6 +104,7 @@ export default {
       loading: false,
       ptSearchTerm: '',
       endDateEnabled: false,
+      restrictToTimeEnabled: false,
       form: {
         name: '',
         participants: [],
@@ -114,6 +119,10 @@ export default {
         endsOn: {
           date: null,
           time: 0,
+        },
+        restrictedTo: {
+          from: 0,
+          to: 0,
         },
       },
       error: null,
@@ -188,6 +197,12 @@ export default {
     },
     setRotationEndsOnTime(time) {
       this.form.endsOn.time = time;
+    },
+    setRestrictedFrom(time) {
+      this.form.restrictedTo.from = time;
+    },
+    setRestrictedTo(time) {
+      this.form.restrictedTo.to = time;
     },
     validateForm(key) {
       if (key === 'name') {
@@ -324,6 +339,7 @@ export default {
 
       <gl-toggle
         v-model="endDateEnabled"
+        data-testid="end-date-toggle"
         :label="$options.i18n.fields.endsOn.enableToggle"
         label-position="left"
         class="gl-mb-5"
@@ -343,7 +359,7 @@ export default {
             <gl-dropdown
               id="rotation-end-time"
               :text="formatTime(form.endsOn.time)"
-              class="gl-w-12 gl-pl-3"
+              class="gl-pl-3"
             >
               <gl-dropdown-item
                 v-for="hour in 24"
@@ -356,6 +372,63 @@ export default {
               </gl-dropdown-item>
             </gl-dropdown>
             <div class="gl-mx-5">{{ schedule.timezone }}</div>
+          </div>
+        </gl-form-group>
+      </gl-card>
+
+      <gl-toggle
+        v-model="restrictToTimeEnabled"
+        data-testid="restricted-to-toggle"
+        :label="$options.i18n.fields.restrictToTime.enableToggle"
+        label-position="left"
+        class="gl-my-5"
+      />
+
+      <gl-card
+        v-if="restrictToTimeEnabled"
+        class="gl-min-w-fit-content"
+        data-testid="restricted-to-time"
+      >
+        <gl-form-group
+          :label="$options.i18n.fields.restrictToTime.title"
+          label-size="sm"
+          label-for="rotation-restrict-to-time"
+          :invalid-feedback="$options.i18n.fields.endsOn.error"
+          :state="validationState.endsOn"
+        >
+          <div id="rotation-restrict-to-time" class="gl-display-flex gl-align-items-center">
+            <span> {{ __('From') }} </span>
+            <gl-dropdown
+              data-testid="restricted-from"
+              :text="formatTime(form.restrictedTo.from)"
+              class="gl-px-3"
+            >
+              <gl-dropdown-item
+                v-for="hour in 24"
+                :key="hour"
+                :is-checked="form.restrictedTo.from === hour"
+                is-check-item
+                @click="setRestrictedFrom(hour)"
+              >
+                <span class="gl-white-space-nowrap"> {{ formatTime(hour) }}</span>
+              </gl-dropdown-item>
+            </gl-dropdown>
+            <span> {{ __('To') }} </span>
+            <gl-dropdown
+              data-testid="restricted-to"
+              :text="formatTime(form.restrictedTo.to)"
+              class="gl-px-3"
+            >
+              <gl-dropdown-item
+                v-for="hour in 24"
+                :key="hour"
+                :is-checked="form.restrictedTo.to === hour"
+                is-check-item
+                @click="setRestrictedTo(hour)"
+              >
+                <span class="gl-white-space-nowrap"> {{ formatTime(hour) }}</span>
+              </gl-dropdown-item>
+            </gl-dropdown>
           </div>
         </gl-form-group>
       </gl-card>

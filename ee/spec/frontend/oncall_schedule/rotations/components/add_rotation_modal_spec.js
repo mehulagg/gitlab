@@ -2,7 +2,7 @@ import { shallowMount, createLocalVue } from '@vue/test-utils';
 import createMockApollo from 'jest/helpers/mock_apollo_helper';
 import VueApollo from 'vue-apollo';
 import waitForPromises from 'helpers/wait_for_promises';
-import { GlDropdownItem, GlModal, GlAlert, GlTokenSelector, GlToggle } from '@gitlab/ui';
+import { GlDropdownItem, GlModal, GlAlert, GlTokenSelector } from '@gitlab/ui';
 import { addRotationModalId } from 'ee/oncall_schedules/components/oncall_schedule';
 import AddRotationModal from 'ee/oncall_schedules/components/rotations/components/add_rotation_modal.vue';
 // import createOncallScheduleRotationMutation from 'ee/oncall_schedules/graphql/create_oncall_schedule_rotation.mutation.graphql';
@@ -95,12 +95,18 @@ describe('AddRotationModal', () => {
   const findModal = () => wrapper.find(GlModal);
   const findRotationLength = () => wrapper.find('[id = "rotation-length"]');
   const findRotationStartTime = () => wrapper.find('[id = "rotation-start-time"]');
-  const findRotationEndsContainer = () => wrapper.find('[data-testid = "ends-on"]');
-  const finEndDateToggle = () => wrapper.find(GlToggle);
+  const findRotationEnds = () => wrapper.find('[data-testid = "ends-on"]');
+  const findRestrictedToTime = () => wrapper.find('[data-testid = "restricted-to-time"]');
+  const finEndDateToggle = () => wrapper.find('[data-testid="end-date-toggle"]');
+  const findRestrictedToToggle = () => wrapper.find('[data-testid="restricted-to-toggle"]');
   const findRotationEndTime = () => wrapper.find('[id = "rotation-end-time"]');
   const findUserSelector = () => wrapper.find(GlTokenSelector);
   const findStartsOnTimeOptions = () => findRotationStartTime().findAll(GlDropdownItem);
   const findEndsOnTimeOptions = () => findRotationEndTime().findAll(GlDropdownItem);
+  const findRestrictedFromOptions = () =>
+    wrapper.find('[data-testid="restricted-from"]').findAll(GlDropdownItem);
+  const findRestrictedToOptions = () =>
+    wrapper.find('[data-testid="restricted-to"]').findAll(GlDropdownItem);
   const findAlert = () => wrapper.find(GlAlert);
 
   it('renders rotation modal layout', () => {
@@ -137,16 +143,52 @@ describe('AddRotationModal', () => {
       const toggle = finEndDateToggle().vm;
       toggle.$emit('change', false);
       await wrapper.vm.$nextTick();
-      expect(findRotationEndsContainer().exists()).toBe(false);
+      expect(findRotationEnds().exists()).toBe(false);
       toggle.$emit('change', true);
       await wrapper.vm.$nextTick();
-      expect(findRotationEndsContainer().exists()).toBe(true);
+      expect(findRotationEnds().exists()).toBe(true);
     });
 
     it('should add a checkmark to a selected end time', async () => {
       finEndDateToggle().vm.$emit('change', true);
       await wrapper.vm.$nextTick();
       const options = findEndsOnTimeOptions();
+      const time1 = options.at(0);
+      const time2 = options.at(1);
+      time2.vm.$emit('click');
+      await wrapper.vm.$nextTick();
+      expect(time1.props('isChecked')).toBe(false);
+      expect(time2.props('isChecked')).toBe(true);
+    });
+  });
+
+  describe('Rotation restricted to time', () => {
+    it('toggles restricted to time visibility', async () => {
+      const toggle = findRestrictedToToggle().vm;
+      toggle.$emit('change', false);
+      await wrapper.vm.$nextTick();
+      expect(findRestrictedToTime().exists()).toBe(false);
+      toggle.$emit('change', true);
+      await wrapper.vm.$nextTick();
+      expect(findRestrictedToTime().exists()).toBe(true);
+    });
+
+    it('should add a checkmark to a restricted FROM time', async () => {
+      findRestrictedToToggle().vm.$emit('change', true);
+      await wrapper.vm.$nextTick();
+      const options = findRestrictedFromOptions();
+      const time1 = options.at(0);
+      const time2 = options.at(1);
+      time2.vm.$emit('click');
+      await wrapper.vm.$nextTick();
+      expect(time1.props('isChecked')).toBe(false);
+      expect(time2.props('isChecked')).toBe(true);
+    });
+
+    it('should add a checkmark to a restricted TO time', async () => {
+      findRestrictedToToggle().vm.$emit('change', true);
+      await wrapper.vm.$nextTick();
+      const options = findRestrictedToOptions();
       const time1 = options.at(0);
       const time2 = options.at(1);
       time2.vm.$emit('click');
