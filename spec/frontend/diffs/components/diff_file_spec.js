@@ -353,8 +353,9 @@ describe('DiffFile', () => {
 
     describe('loading', () => {
       it('should have loading icon while loading a collapsed diffs', async () => {
+        jest.spyOn(wrapper.vm, 'loadCollapsedDiff').mockResolvedValue(getReadableFile());
         makeFileAutomaticallyCollapsed(store);
-        wrapper.vm.isLoadingCollapsedDiff = true;
+        wrapper.vm.requestDiff();
 
         await wrapper.vm.$nextTick();
 
