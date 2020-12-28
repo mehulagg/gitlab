@@ -2,26 +2,35 @@
 
 require 'spec_helper'
 
-RSpec.describe Members::CreateService do
-  let_it_be(:project) { create(:project) }
+RSpec.describe Members::CreateService, :clean_gitlab_redis_shared_state do
+  let_it_be(:source) { create(:project) }
   let_it_be(:user) { create(:user) }
-  let_it_be(:project_user) { create(:user) }
-  let_it_be(:user_ids) { project_user.id.to_s }
+  let_it_be(:member) { create(:user) }
+  let_it_be(:user_ids) { member.id.to_s }
   let_it_be(:access_level) { Gitlab::Access::GUEST }
   let(:params) { { user_ids: user_ids, access_level: access_level } }
 
-  subject(:execute_service) { described_class.new(user, params).execute(project) }
+  subject(:execute_service) { described_class.new(user, params).execute(source) }
 
   before do
-    project.add_maintainer(user)
-    allow(Namespaces::OnboardingUserAddedWorker).to receive(:idempotent?).and_return(false)
+    source.is_a?(Project) ? source.add_maintainer(user) : source.add_owner(user)
   end
 
   context 'when passing valid parameters' do
     it 'adds a user to members' do
       expect(execute_service[:status]).to eq(:success)
-      expect(project.users).to include project_user
-      expect(Namespaces::OnboardingUserAddedWorker.jobs.last['args'][0]).to eq(project.id)
+      expect(source.users).to include member
+      expect(Namespaces::OnboardingUserAddedWorker.jobs.last['args'][0]).to eq(source.namespace_id)
+    end
+
+    context 'when executing on a group' do
+      let_it_be(:source) { create(:group) }
+
+      it 'adds a user to members' do
+        expect(execute_service[:status]).to eq(:success)
+        expect(source.users).to include member
+        expect(Namespaces::OnboardingUserAddedWorker.jobs.last['args'][0]).to eq(source.id)
+      end
     end
   end
 
@@ -31,7 +40,7 @@ RSpec.describe Members::CreateService do
     it 'does not add a member' do
       expect(execute_service[:status]).to eq(:error)
       expect(execute_service[:message]).to be_present
-      expect(project.users).not_to include project_user
+      expect(source.users).not_to include member
       expect(Namespaces::OnboardingUserAddedWorker.jobs.size).to eq(0)
     end
   end
@@ -42,7 +51,7 @@ RSpec.describe Members::CreateService do
     it 'limits the number of users to 100' do
       expect(execute_service[:status]).to eq(:error)
       expect(execute_service[:message]).to be_present
-      expect(project.users).not_to include project_user
+      expect(source.users).not_to include member
       expect(Namespaces::OnboardingUserAddedWorker.jobs.size).to eq(0)
     end
   end
@@ -52,14 +61,14 @@ RSpec.describe Members::CreateService do
 
     it 'does not add a member' do
       expect(execute_service[:status]).to eq(:error)
-      expect(execute_service[:message]).to include("#{project_user.username}: Access level is not included in the list")
-      expect(project.users).not_to include project_user
+      expect(execute_service[:message]).to include("#{member.username}: Access level is not included in the list")
+      expect(source.users).not_to include member
       expect(Namespaces::OnboardingUserAddedWorker.jobs.size).to eq(0)
     end
   end
 
   context 'when passing an existing invite user id' do
-    let(:user_ids) { create(:project_member, :invited, project: project).invite_email }
+    let(:user_ids) { create(:project_member, :invited, project: source).invite_email }
 
     it 'does not add a member' do
       expect(execute_service[:status]).to eq(:error)
