@@ -1,0 +1,6 @@
+---
+title: Document the Geo failover process from Patroni primary to the Patroni standby
+  cluster.
+merge_request: 50636
+author:
+type: added
