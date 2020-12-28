@@ -296,14 +296,18 @@ RSpec.describe Projects::ContainerRepository::CleanupTagsService do
           subject
         end
 
-        it 'logs a message when chunking a message' do
-          if chunked
+        if chunked
+          it 'logs a message' do
             expect(service).to receive(:log_message)
-          else
-            expect(service).not_to receive(:log_message)
-          end
 
-          subject
+            subject
+          end
+        else
+          it 'does not log a message' do
+            expect(service).not_to receive(:log_message)
+
+            subject
+          end
         end
       end
 

@@ -314,9 +314,10 @@ action doesn't delete blobs. To delete them and recycle disk space,
 [run the garbage collection](https://docs.gitlab.com/omnibus/maintenance/README.html#removing-unused-layers-not-referenced-by-manifests).
 
 WARNING:
-On GitLab.com, the number of tags deleted by this API is limited due to the scale of the GitLab.com container registry. For registry repositories 
-with a lot of tags to delete, only a part of them will be actually deleted. You might need to call this API multiple times.
-For an automated way to do so, use a [Cleanup policy](../user/packages/container_registry/index.md#cleanup-policy).
+On GitLab.com, the number of tags deleted by this API is limited due to the scale of the GitLab.com container registry. 
+For registry repositories with a lot of tags to delete, only a part of them will be actually deleted. 
+You might need to call this API multiple times.
+To schedule tags for automatic deletion, use a [cleanup policy](../user/packages/container_registry/index.md#cleanup-policy).
 
 NOTE:
 In GitLab 12.4 and later, individual tags are deleted.
