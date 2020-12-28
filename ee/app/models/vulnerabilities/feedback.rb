@@ -14,6 +14,7 @@ module Vulnerabilities
 
     attr_accessor :vulnerability_data
 
+    enum dismissal_reason: { acceptable_risk: 0, false_positive: 1, mitigating_control: 2, used_in_tests: 3, not_applicable: 4 }
     enum feedback_type: { dismissal: 0, issue: 1, merge_request: 2 }, _prefix: :for
     enum category: ::Enums::Vulnerability.report_types
 
