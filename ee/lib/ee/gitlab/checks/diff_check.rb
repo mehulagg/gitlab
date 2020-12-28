@@ -9,7 +9,7 @@ module EE
 
         private
 
-        def path_validations
+        def file_paths_validations
           validations = [super].flatten
 
           if validate_code_owners?
@@ -48,8 +48,8 @@ module EE
           push_rule.file_name_regex.present? || push_rule.prevent_secrets
         end
 
-        override :validations_for_diff
-        def validations_for_diff
+        override :validations_for_path
+        def validations_for_path
           super.tap do |validations|
             validations.push(path_locks_validation) if validate_path_locks?
             validations.push(file_name_validation) if push_rule_checks_commit?
@@ -58,16 +58,7 @@ module EE
 
         def path_locks_validation
           lambda do |diff|
-            path = if ::Feature.enabled?(:diff_check_with_paths_changed_rpc, project, default_enabled: true)
-                     diff.path
-                   else
-                     if diff.renamed_file?
-                       diff.old_path
-                     else
-                       diff.new_path || diff.old_path
-                     end
-                   end
-
+            path = diff.path
             lock_info = project.find_path_lock(path)
 
             if lock_info && lock_info.user != user_access.user
@@ -82,18 +73,10 @@ module EE
 
         def file_name_validation
           lambda do |diff|
-            if ::Feature.enabled?(:diff_check_with_paths_changed_rpc, project, default_enabled: true)
-              if new_file?(diff) && denylisted_regex = push_rule.filename_denylisted?(diff.path)
-                return unless denylisted_regex.present?
+            if new_file?(diff) && denylisted_regex = push_rule.filename_denylisted?(diff.path)
+              return unless denylisted_regex.present?
 
-                "File name #{diff.path} was blacklisted by the pattern #{denylisted_regex}."
-              end
-            else
-              if (diff.renamed_file || diff.new_file) && denylisted_regex = push_rule.filename_denylisted?(diff.new_path)
-                return unless denylisted_regex.present?
-
-                "File name #{diff.new_path} was blacklisted by the pattern #{denylisted_regex}."
-              end
+              "File name #{diff.path} was blacklisted by the pattern #{denylisted_regex}."
             end
           rescue ::PushRule::MatchError => e
             raise ::Gitlab::GitAccess::ForbiddenError, e.message
