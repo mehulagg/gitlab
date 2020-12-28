@@ -57,8 +57,8 @@ module EE
         end
 
         def path_locks_validation
-          lambda do |diff|
-            path = diff.path
+          lambda do |changed_path|
+            path = changed_path.path
             lock_info = project.find_path_lock(path)
 
             if lock_info && lock_info.user != user_access.user
@@ -67,16 +67,12 @@ module EE
           end
         end
 
-        def new_file?(path)
-          path.status == :ADDED
-        end
-
         def file_name_validation
-          lambda do |diff|
-            if new_file?(diff) && denylisted_regex = push_rule.filename_denylisted?(diff.path)
+          lambda do |changed_path|
+            if changed_path.new_file? && denylisted_regex = push_rule.filename_denylisted?(changed_path.path)
               return unless denylisted_regex.present?
 
-              "File name #{diff.path} was blacklisted by the pattern #{denylisted_regex}."
+              "File name #{changed_path.path} was blacklisted by the pattern #{denylisted_regex}."
             end
           rescue ::PushRule::MatchError => e
             raise ::Gitlab::GitAccess::ForbiddenError, e.message
