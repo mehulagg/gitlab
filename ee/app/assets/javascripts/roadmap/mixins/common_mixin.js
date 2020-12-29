@@ -10,6 +10,31 @@ import { PRESET_TYPES, DAYS_IN_WEEK } from '../constants';
 
 export default {
   computed: {
+    roadmapItem() {
+      return this.epic ? this.epic : this.milestone;
+    },
+    startDateValues() {
+      const { startDate } = this.roadmapItem;
+
+      return {
+        day: startDate.getDay(),
+        date: startDate.getDate(),
+        month: startDate.getMonth(),
+        year: startDate.getFullYear(),
+        time: startDate.getTime(),
+      };
+    },
+    endDateValues() {
+      const { endDate } = this.roadmapItem;
+
+      return {
+        day: endDate.getDay(),
+        date: endDate.getDate(),
+        month: endDate.getMonth(),
+        year: endDate.getFullYear(),
+        time: endDate.getTime(),
+      };
+    },
     presetTypeQuarters() {
       return this.presetType === PRESET_TYPES.QUARTERS;
     },
@@ -20,22 +45,53 @@ export default {
       return this.presetType === PRESET_TYPES.WEEKS;
     },
     hasToday() {
+      return this.isTimeframeForToday(this.timeframeItem);
+    },
+    hasStartDate() {
       if (this.presetTypeQuarters) {
-        return (
-          this.currentDate >= this.timeframeItem.range[0] &&
-          this.currentDate <= this.timeframeItem.range[2]
-        );
+        return this.hasStartDateForQuarter(this.timeframeItem);
+      } else if (this.presetTypeMonths) {
+        return this.hasStartDateForMonth(this.timeframeItem);
+      } else if (this.presetTypeWeeks) {
+        return this.hasStartDateForWeek(this.timeframeItem);
+      }
+      return false;
+    },
+    todaysIndex() {
+      return this.timeframe.findIndex((item) => this.isTimeframeForToday(item));
+    },
+    roadmapItemIndex() {
+      return this.timeframe.findIndex((item) => {
+        if (this.presetTypeQuarters) {
+          return this.hasStartDateForQuarter(item);
+        } else if (this.presetTypeMonths) {
+          return this.hasStartDateForMonth(item);
+        } else if (this.presetTypeWeeks) {
+          return this.hasStartDateForWeek(item);
+        }
+        return false;
+      });
+    },
+  },
+  methods: {
+    isTimeframeForToday(item) {
+      const currentDate = new Date();
+      currentDate.setHours(0, 0, 0, 0);
+
+      if (this.presetTypeQuarters) {
+        return currentDate >= item.range[0] && currentDate <= item.range[2];
       } else if (this.presetTypeMonths) {
         return (
-          this.currentDate.getMonth() === this.timeframeItem.getMonth() &&
-          this.currentDate.getFullYear() === this.timeframeItem.getFullYear()
+          currentDate.getMonth() === item.getMonth() &&
+          currentDate.getFullYear() === item.getFullYear()
         );
       }
-      const timeframeItem = new Date(this.timeframeItem.getTime());
+
+      const timeframeItem = new Date(item.getTime());
       const headerSubItems = new Array(7)
         .fill()
         .map(
-          (val, i) =>
+          (_, i) =>
             new Date(
               timeframeItem.getFullYear(),
               timeframeItem.getMonth(),
@@ -44,12 +100,10 @@ export default {
         );
 
       return (
-        this.currentDate.getTime() >= headerSubItems[0].getTime() &&
-        this.currentDate.getTime() <= headerSubItems[headerSubItems.length - 1].getTime()
+        currentDate.getTime() >= headerSubItems[0].getTime() &&
+        currentDate.getTime() <= headerSubItems[headerSubItems.length - 1].getTime()
       );
     },
-  },
-  methods: {
     getIndicatorStyles() {
       let left;
 
@@ -104,25 +158,24 @@ export default {
     timelineBarStyles(roadmapItem) {
       let barStyles = {};
 
-      if (this.hasStartDate) {
-        if (this.presetTypeQuarters) {
-          // CSS properties are a false positive: https://gitlab.com/gitlab-org/frontend/eslint-plugin-i18n/issues/24
-          // eslint-disable-next-line @gitlab/require-i18n-strings
-          barStyles = `width: ${this.getTimelineBarWidthForQuarters(
-            roadmapItem,
-          )}px; ${this.getTimelineBarStartOffsetForQuarters(roadmapItem)}`;
-        } else if (this.presetTypeMonths) {
-          // eslint-disable-next-line @gitlab/require-i18n-strings
-          barStyles = `width: ${this.getTimelineBarWidthForMonths()}px; ${this.getTimelineBarStartOffsetForMonths(
-            roadmapItem,
-          )}`;
-        } else if (this.presetTypeWeeks) {
-          // eslint-disable-next-line @gitlab/require-i18n-strings
-          barStyles = `width: ${this.getTimelineBarWidthForWeeks()}px; ${this.getTimelineBarStartOffsetForWeeks(
-            roadmapItem,
-          )}`;
-        }
+      if (this.presetTypeQuarters) {
+        // CSS properties are a false positive: https://gitlab.com/gitlab-org/frontend/eslint-plugin-i18n/issues/24
+        // eslint-disable-next-line @gitlab/require-i18n-strings
+        barStyles = `width: ${this.getTimelineBarWidthForQuarters(
+          roadmapItem,
+        )}px; ${this.getTimelineBarStartOffsetForQuarters(roadmapItem)}`;
+      } else if (this.presetTypeMonths) {
+        // eslint-disable-next-line @gitlab/require-i18n-strings
+        barStyles = `width: ${this.getTimelineBarWidthForMonths()}px; ${this.getTimelineBarStartOffsetForMonths(
+          roadmapItem,
+        )}`;
+      } else if (this.presetTypeWeeks) {
+        // eslint-disable-next-line @gitlab/require-i18n-strings
+        barStyles = `width: ${this.getTimelineBarWidthForWeeks()}px; ${this.getTimelineBarStartOffsetForWeeks(
+          roadmapItem,
+        )}`;
       }
+
       return barStyles;
     },
   },
