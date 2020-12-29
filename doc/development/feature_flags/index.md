@@ -31,6 +31,8 @@ In all cases, those working on the changes should ask themselves:
 
 > Why do I need to add a feature flag? If I don't add one, what options do I have to control the impact on application reliability, and user experience?
 
+For perspective on why we limit our use of feature flags please see the following [video](https://www.youtube.com/watch?v=DQaGqyolOd8). 
+
 In case you are uncertain if a feature flag is necessary, simply ask about this in the merge request, and those reviewing the changes will likely provide you with an answer.
 
 When using a feature flag for UI elements, make sure to _also_ use a feature
