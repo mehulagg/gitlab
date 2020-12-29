@@ -347,14 +347,46 @@ location. You can then go back to running it from within GitLab CI.
 NOTE:
 We are currently working on [providing a graphical interface for managing state files](https://gitlab.com/groups/gitlab-org/-/epics/4563).
 
-![Terraform state list](img/terraform_list_view_v13_5.png)
+![Terraform state list](img/terraform_list_view_v13_8.jpg)
 
 The state files attached to a project can be found under Operations / Terraform.
 
+![Terraform state list](img/terraform_list_view_actions_v13_8.jpg)
+
+Each State file listed also includes an Actions section where you can download, lock, or remove the State.
+
+
 ## Removing a State file
 
-You can only remove a state file by making a request to the API, like the following example:
+There are three options for removing a State file
+1. The GitLab REST API
+1. The GitLab GraphQL API
+1. The GitLab UI
+
+### Removing a State with the GitLab REST API
+
+You can remove a State by making a request to the REST API, like the following example:
 
 ```shell
 curl --header "Private-Token: <your_access_token>" --request DELETE "https://gitlab.example.com/api/v4/projects/<your_project_id>/terraform/state/<your_state_name>"
 ```
+
+### Removing a State file with the GitLab GraphQL API
+
+You can remove a State by making a request to the GraphQL API, like the following example:
+
+```shell
+mutation deleteSate {
+  terraformStateDelete(input: { id: <global-id-for-the-state> }) {
+    errors
+  }
+}
+```
+
+For those new to the GitLab GraphQL API, see [Getting started with GitLab GraphQL API](doc/api/graphql/getting_started.md).
+
+### Removing a State file with the GitLab UI
+
+![Terraform state list](img/terraform_list_view_actions_v13_8.jpg)
+
+You can navigate to Project / Operations / Terraform to view all State files associated with a single project. The list will also include an action dropdown which will allow you to delete each State.
