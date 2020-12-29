@@ -306,6 +306,9 @@ class ApplicationSetting < ApplicationRecord
   validates :container_registry_expiration_policies_worker_capacity,
             numericality: { only_integer: true, greater_than_or_equal_to: 0 }
 
+  validates :invisible_captcha_enabled,
+            inclusion: { in: [true, false], message: 'must be a boolean value' }
+
   SUPPORTED_KEY_TYPES.each do |type|
     validates :"#{type}_key_restriction", presence: true, key_restriction: { type: type }
   end
