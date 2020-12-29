@@ -208,15 +208,19 @@ not be used.
 In these cases, a temporary index should be considered. To specify a
 temporary index:
 
-1. Prefix the index name with `temp_`.
+1. Prefix the index name with `tmp_`.
 1. Create a followup issue to remove the index in the next (or future) milestone.
 1. Add a comment in the migration mentioning the removal issue.
 
 ```ruby
-INDEX_NAME = 'temp_index_projects_on_owner_where_emails_disabled'
+INDEX_NAME = 'tmp_index_projects_on_owner_where_emails_disabled'
 
 def up
   # Temporary index to be removed in 13.9 https://gitlab.com/gitlab-org/gitlab/-/issues/1234
   add_concurrent_index :projects, :creator_id, where: 'emails_disabled = false', name: INDEX_NAME
+end
+
+def down
+  remove_concurrent_index_by_name :projects, INDEX_NAME
 end
 ```
