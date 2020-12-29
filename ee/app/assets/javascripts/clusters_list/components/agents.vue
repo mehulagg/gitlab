@@ -4,6 +4,8 @@ import AgentEmptyState from './agent_empty_state.vue';
 import AgentTable from './agent_table.vue';
 import getAgentsQuery from '../graphql/queries/get_agents.query.graphql';
 
+const MAX_LIST_COUNT = 3;
+
 export default {
   apollo: {
     agents: {
@@ -12,6 +14,7 @@ export default {
         return {
           defaultBranchName: this.defaultBranchName,
           projectPath: this.projectPath,
+          ...this.cursor,
         };
       },
       update: (data) => {
@@ -42,6 +45,16 @@ export default {
       required: true,
       type: String,
     },
+  },
+  data() {
+    return {
+      cursor: {
+        first: MAX_LIST_COUNT,
+        after: null,
+        last: null,
+        before: null,
+      },
+    };
   },
   computed: {
     isLoading() {
