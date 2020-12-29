@@ -1,9 +1,15 @@
+#import "~/graphql_shared/fragments/pageInfo.fragment.graphql"
+
 query getAgents($defaultBranchName: String!, $projectPath: ID!) {
   project(fullPath: $projectPath) {
     clusterAgents {
       nodes {
         id
         name
+      }
+
+      pageInfo {
+        ...PageInfo
       }
     }
 
@@ -14,6 +20,10 @@ query getAgents($defaultBranchName: String!, $projectPath: ID!) {
             name
             path
             webPath
+          }
+
+          pageInfo {
+            ...PageInfo
           }
         }
       }
