@@ -347,13 +347,13 @@ location. You can then go back to running it from within GitLab CI.
 NOTE:
 We are currently working on [providing a graphical interface for managing state files](https://gitlab.com/groups/gitlab-org/-/epics/4563).
 
-![Terraform state list](img/terraform_list_view_v13_8.jpg)
+![Terraform state list](img/terraform_list_view_v13_8.png)
 
-The state files attached to a project can be found under Operations / Terraform.
+A list of state files attached to a project can be found under Operations / Terraform.
 
-![Terraform state list](img/terraform_list_view_actions_v13_8.jpg)
+![Terraform state list](img/terraform_list_view_actions_v13_8.png)
 
-Each State file listed also includes an Actions section where you can download, lock, or remove the State.
+The list also includes an Actions section where you can download, lock, or remove each State.
 
 ## Removing a State file
 
