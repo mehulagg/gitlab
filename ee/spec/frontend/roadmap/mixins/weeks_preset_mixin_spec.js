@@ -22,6 +22,8 @@ describe('WeeksPresetMixin', () => {
         timeframe,
         timeframeItem,
         epic,
+        startDate: epic.startDate,
+        endDate: epic.endDate,
       },
     });
   };
