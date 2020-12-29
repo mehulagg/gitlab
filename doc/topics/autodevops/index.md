@@ -193,7 +193,7 @@ When first using Auto DevOps, review the [requirements](requirements.md) to ensu
 all the necessary components to make full use of Auto DevOps are available. First-time
 users should follow the [quick start guide](quick_start_guide.md).
 
-GitLab.com users can enable or disable Auto DevOps only at the project level.
+GitLab.com users can enable or disable Auto DevOps at the project and group level.
 Self-managed users can enable or disable Auto DevOps at the project, group, or
 instance level.
 
