@@ -33,7 +33,7 @@ In all cases, those working on the changes should ask themselves:
 
 For perspective on why we limit our use of feature flags please see the following [video](https://www.youtube.com/watch?v=DQaGqyolOd8). 
 
-In case you are uncertain if a feature flag is necessary, simply ask about this in the merge request, and those reviewing the changes will likely provide you with an answer.
+In case you are uncertain if a feature flag is necessary, simply ask about this in an early merge request, and those reviewing the changes will likely provide you with an answer.
 
 When using a feature flag for UI elements, make sure to _also_ use a feature
 flag for the underlying backend code, if there is any. This ensures there is
