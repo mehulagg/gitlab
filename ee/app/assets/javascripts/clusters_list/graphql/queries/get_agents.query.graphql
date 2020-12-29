@@ -22,15 +22,11 @@ query getAgents(
 
     repository {
       tree(path: ".gitlab/agents", ref: $defaultBranchName) {
-        trees(first: $first, last: $last, before: $before, after: $after) {
+        trees {
           nodes {
             name
             path
             webPath
-          }
-
-          pageInfo {
-            ...PageInfo
           }
         }
       }

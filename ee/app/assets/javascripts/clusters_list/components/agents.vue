@@ -1,5 +1,5 @@
 <script>
-import { GlAlert, GlLoadingIcon } from '@gitlab/ui';
+import { GlAlert, GlKeysetPagination, GlLoadingIcon } from '@gitlab/ui';
 import AgentEmptyState from './agent_empty_state.vue';
 import AgentTable from './agent_table.vue';
 import getAgentsQuery from '../graphql/queries/get_agents.query.graphql';
@@ -17,18 +17,14 @@ export default {
           ...this.cursor,
         };
       },
-      update: (data) => {
-        return {
-          list: data?.project?.clusterAgents?.nodes,
-          folders: data?.project?.repository?.tree?.trees?.nodes,
-        };
-      },
+      update: (data) => data,
     },
   },
   components: {
     AgentEmptyState,
     AgentTable,
     GlAlert,
+    GlKeysetPagination,
     GlLoadingIcon,
   },
   props: {
@@ -57,12 +53,9 @@ export default {
     };
   },
   computed: {
-    isLoading() {
-      return this.$apollo.queries.agents.loading;
-    },
     agentList() {
-      let list = this.agents?.list;
-      const configFolders = this.agents?.folders;
+      let list = this.agents?.project?.clusterAgents?.nodes;
+      const configFolders = this.agents?.data?.project?.repository?.tree?.trees?.nodes;
 
       if (list && configFolders) {
         list = list.map((agent) => {
@@ -73,6 +66,33 @@ export default {
 
       return list;
     },
+    isLoading() {
+      return this.$apollo.queries.agents.loading;
+    },
+    pageInfo() {
+      return this.agents?.project?.clusterAgents?.pageInfo || {};
+    },
+    showPagination() {
+      return this.pageInfo.hasPreviousPage || this.pageInfo.hasNextPage;
+    },
+  },
+  methods: {
+    nextPage(item) {
+      this.cursor = {
+        first: MAX_LIST_COUNT,
+        after: item,
+        last: null,
+        before: null,
+      };
+    },
+    prevPage(item) {
+      this.cursor = {
+        first: null,
+        after: null,
+        last: MAX_LIST_COUNT,
+        before: item,
+      };
+    },
   },
 };
 </script>
@@ -81,7 +101,13 @@ export default {
   <gl-loading-icon v-if="isLoading" size="md" class="gl-mt-3" />
 
   <section v-else-if="agentList" class="gl-mt-3">
-    <AgentTable v-if="agentList.length" :agents="agentList" />
+    <div v-if="agentList.length">
+      <AgentTable :agents="agentList" />
+
+      <div v-if="showPagination" class="gl-display-flex gl-justify-content-center gl-mt-5">
+        <gl-keyset-pagination v-bind="pageInfo" @prev="prevPage" @next="nextPage" />
+      </div>
+    </div>
 
     <AgentEmptyState v-else :image="emptyStateImage" />
   </section>
