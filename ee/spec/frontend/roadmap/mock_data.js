@@ -449,18 +449,46 @@ export const rawEpics = [
 
 export const mockUnsortedEpics = [
   {
+    title: 'Nov 10 2013 ~ Jun 01 2014; actual start date is Feb 1 2013',
+    originalStartDate: dateFromString('Feb 1 2013'),
+    startDate: dateFromString('Nov 10 2013'),
+    endDate: dateFromString('Jun 1, 2014'),
+  },
+  {
+    title: 'Oct 01 2013 ~ Nov 01 2013; actual due date is Nov 1 2014',
+    startDate: dateFromString('Oct 1 2013'),
+    originalEndDate: dateFromString('Nov 1 2014'),
+    endDate: dateFromString('Nov 1, 2013'),
+  },
+  {
+    title: 'Jan 01 2020 ~ Dec 01 2020; no fixed start date',
+    startDateUndefined: true,
+    startDate: dateFromString('Jan 1 2020'),
+    endDate: dateFromString('Dec 1 2020'),
+  },
+  {
+    title: 'Mar 01 2013 ~ Dec 01 2013; no fixed due date',
+    startDate: dateFromString('Mar 1 2013'),
+    endDateUndefined: true,
+    endDate: dateFromString('Dec 1 2013'),
+  },
+  {
+    title: 'Mar 12 2017 ~ Aug 20 2017',
     startDate: new Date(2017, 2, 12),
     endDate: new Date(2017, 7, 20),
   },
   {
+    title: 'Jun 08 2015 ~ Apr 01 2016',
     startDate: new Date(2015, 5, 8),
     endDate: new Date(2016, 3, 1),
   },
   {
+    title: 'Apr 12 2019 ~ Aug 30 2019',
     startDate: new Date(2019, 4, 12),
     endDate: new Date(2019, 7, 30),
   },
   {
+    title: 'Mar 17 2014 ~ Aug 15 2015',
     startDate: new Date(2014, 3, 17),
     endDate: new Date(2015, 7, 15),
   },
