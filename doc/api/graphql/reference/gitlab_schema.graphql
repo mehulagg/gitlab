@@ -2404,6 +2404,31 @@ type CiConfigGroupEdge {
 
 type CiConfigJob {
   """
+  Override a set of commands that are executed after job
+  """
+  afterScript: [String!]
+
+  """
+  Allow job to fail
+  """
+  allowFailure: Boolean
+
+  """
+  Override a set of commands that are executed before job
+  """
+  beforeScript: [String!]
+
+  """
+  Name of an environment to which the job deploys
+  """
+  environment: String
+
+  """
+  Limit when jobs are not created
+  """
+  except: CiConfigJobRestriction
+
+  """
   Name of the job group
   """
   groupName: String
@@ -2439,9 +2464,29 @@ type CiConfigJob {
   ): CiConfigNeedConnection
 
   """
+  Limit when jobs are created
+  """
+  only: CiConfigJobRestriction
+
+  """
+  Shell script that is executed by a runner
+  """
+  script: [String!]
+
+  """
   Name of the job stage
   """
   stage: String
+
+  """
+  List of tags that are used to select a runner
+  """
+  tags: [String!]
+
+  """
+  When to run job
+  """
+  when: String
 }
 
 """
@@ -2477,6 +2522,13 @@ type CiConfigJobEdge {
   The item at the end of the edge.
   """
   node: CiConfigJob
+}
+
+type CiConfigJobRestriction {
+  """
+  The Git refs for which the job restriction applies
+  """
+  refs: [String!]
 }
 
 type CiConfigNeed {
@@ -19412,6 +19464,11 @@ type Query {
     Contents of .gitlab-ci.yml
     """
     content: String!
+
+    """
+    Run pipeline creation simulation, or only do static check
+    """
+    dryRun: Boolean
 
     """
     The project of the CI config

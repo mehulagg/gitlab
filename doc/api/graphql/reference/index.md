@@ -396,10 +396,25 @@ Represents the total number of issues and their weights for a particular day.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
+| `afterScript` | String! => Array | Override a set of commands that are executed after job |
+| `allowFailure` | Boolean | Allow job to fail |
+| `beforeScript` | String! => Array | Override a set of commands that are executed before job |
+| `environment` | String | Name of an environment to which the job deploys |
+| `except` | CiConfigJobRestriction | Limit when jobs are not created |
 | `groupName` | String | Name of the job group |
 | `name` | String | Name of the job |
 | `needs` | CiConfigNeedConnection | Builds that must complete before the jobs run |
+| `only` | CiConfigJobRestriction | Limit when jobs are created |
+| `script` | String! => Array | Shell script that is executed by a runner |
 | `stage` | String | Name of the job stage |
+| `tags` | String! => Array | List of tags that are used to select a runner |
+| `when` | String | When to run job |
+
+### CiConfigJobRestriction
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| `refs` | String! => Array | The Git refs for which the job restriction applies |
 
 ### CiConfigNeed
 
