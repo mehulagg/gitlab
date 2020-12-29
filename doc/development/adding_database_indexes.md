@@ -208,7 +208,7 @@ not be used.
 In these cases, a temporary index should be considered. To specify a
 temporary index:
 
-1. Prefix the index name with `tmp_`.
+1. Prefix the index name with `tmp_` and follow the [naming conventions](https://docs.gitlab.com/ee/development/database/constraint_naming_convention.html) and [requirements for naming indexes](https://docs.gitlab.com/ee/development/adding_database_indexes.html#requirements-for-naming-indexes) for the rest of the name.
 1. Create a followup issue to remove the index in the next (or future) milestone.
 1. Add a comment in the migration mentioning the removal issue.
 
