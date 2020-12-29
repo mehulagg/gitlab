@@ -32,6 +32,13 @@ RSpec.describe 'Query.ciConfig' do
                       name
                       groupName
                       stage
+                      script
+                      beforeScript
+                      afterScript
+                      allowFailure
+                      only
+                      when
+                      except
                       needs {
                         nodes {
                           name
