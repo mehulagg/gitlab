@@ -1,7 +1,7 @@
 <script>
 import { debounce } from 'lodash';
 import { GlTokenSelector, GlAvatar, GlAvatarLabeled, GlSprintf } from '@gitlab/ui';
-import { __, sprintf } from '~/locale';
+import { __ } from '~/locale';
 import { USER_SEARCH_DELAY } from '../constants';
 import Api from '~/api';
 
@@ -35,7 +35,9 @@ export default {
   },
   computed: {
     emailIsValid() {
-      return this.emailMatches(this.query);
+      const regex = /.+@/;
+
+      return this.query.match(regex) !== null;
     },
     placeholderText() {
       if (this.selectedTokens.length === 0) {
@@ -45,16 +47,6 @@ export default {
     },
   },
   methods: {
-    emailMatches(value) {
-      const regex = /.+@/;
-
-      return value.match(regex) !== null;
-    },
-    inviteText(text) {
-      return sprintf(__('Invite "%{text}" by email'), {
-        text,
-      });
-    },
     handleTextInput(query) {
       this.hideDropdownWithNoItems = false;
       this.query = query;
@@ -94,6 +86,9 @@ export default {
     },
   },
   queryOptions: { exclude_internal: true, active: true },
+  i18n: {
+    inviteTextMessage: __('Invite "%{email}" by email'),
+  },
 };
 </script>
 
@@ -125,8 +120,12 @@ export default {
       />
     </template>
 
-    <template #user-defined-token-content="{ inputText: text }">
-      <gl-sprintf :message="inviteText(text)" />
+    <template #user-defined-token-content="{ inputText: email }">
+      <gl-sprintf :message="$options.i18n.inviteTextMessage">
+        <template #email>
+          <span>{{ email }}</span>
+        </template>
+      </gl-sprintf>
     </template>
   </gl-token-selector>
 </template>

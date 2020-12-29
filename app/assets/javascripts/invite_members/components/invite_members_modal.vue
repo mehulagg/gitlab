@@ -104,12 +104,12 @@ export default {
     partitionNewUsersToInvite() {
       const [usersToInviteByEmail, usersToAddById] = partition(
         this.newUsersToInvite,
-        user => isString(user.id) && user.id.includes('user-defined-token'),
+        (user) => isString(user.id) && user.id.includes('user-defined-token'),
       );
 
       return [
-        usersToInviteByEmail.map(user => user.name).join(','),
-        usersToAddById.map(user => user.id).join(','),
+        usersToInviteByEmail.map((user) => user.name).join(','),
+        usersToAddById.map((user) => user.id).join(','),
       ];
     },
     openModal() {
@@ -151,9 +151,7 @@ export default {
         promises.push(apiAddByUserId(this.id, this.addByUserIdPostData(usersToAddById)));
       }
 
-      Promise.all(promises)
-        .then(this.showToastMessageSuccess)
-        .catch(this.showToastMessageError);
+      Promise.all(promises).then(this.showToastMessageSuccess).catch(this.showToastMessageError);
     },
     inviteByEmailPostData(usersToInviteByEmail) {
       return { ...this.basePostData, email: usersToInviteByEmail };
