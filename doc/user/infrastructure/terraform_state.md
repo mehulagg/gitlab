@@ -355,10 +355,10 @@ The state files attached to a project can be found under Operations / Terraform.
 
 Each State file listed also includes an Actions section where you can download, lock, or remove the State.
 
-
 ## Removing a State file
 
 There are three options for removing a State file
+
 1. The GitLab REST API
 1. The GitLab GraphQL API
 1. The GitLab UI
@@ -383,10 +383,8 @@ mutation deleteSate {
 }
 ```
 
-For those new to the GitLab GraphQL API, see [Getting started with GitLab GraphQL API](doc/api/graphql/getting_started.md).
+For those new to the GitLab GraphQL API, see [Getting started with GitLab GraphQL API](../../api/graphql/getting_started.md).
 
 ### Removing a State file with the GitLab UI
 
-![Terraform state list](img/terraform_list_view_actions_v13_8.jpg)
-
-You can navigate to Project / Operations / Terraform to view all State files associated with a single project. The list will also include an action dropdown which will allow you to delete each State.
+You can navigate to Project / Operations / Terraform to view all State files associated with a single project. The list will also include an Actions dropdown which will allow you to delete each State.
