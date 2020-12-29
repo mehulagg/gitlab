@@ -14,6 +14,8 @@ module EE
       return super if signed_in?
 
       if ::Gitlab::Geo.secondary_with_primary?
+        session[:user_return_to] = sanitize_redirect(geo_return_to_after_login)
+
         current_node_uri = URI(GeoNode.current_node_url)
         state = geo_login_state.encode
         redirect_to oauth_geo_auth_url(host: current_node_uri.host, port: current_node_uri.port, state: state)
@@ -46,7 +48,7 @@ module EE
     end
 
     def geo_login_state
-      ::Gitlab::Geo::Oauth::LoginState.new(return_to: sanitize_redirect(geo_return_to_after_login))
+      ::Gitlab::Geo::Oauth::LoginState.new
     end
 
     def geo_logout_state

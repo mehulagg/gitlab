@@ -61,11 +61,12 @@ class Oauth::GeoAuthController < ActionController::Base
     # Prevent alert from popping up on the first page shown after authentication.
     flash[:alert] = nil
 
-    redirect_to(login_state.return_to || root_path)
+    return_to = Gitlab::ReturnToLocation.new(session[:user_return_to]).full_path
+    redirect_to(return_to || root_path)
   end
 
   def after_sign_out_with_gitlab(token)
-    session[:user_return_to] = token.return_to
+    session[:user_return_to] = Gitlab::ReturnToLocation.new(session[:user_return_to]).full_path
     redirect_to(root_path)
   end
 
