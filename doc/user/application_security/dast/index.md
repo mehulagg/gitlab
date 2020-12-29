@@ -86,6 +86,12 @@ variables:
   DAST_WEBSITE: https://example.com
 ```
 
+NOTE:
+To use the latest version of the DAST template, include
+`DAST.latest.gitlab-ci.yml` instead of `DAST.gitlab-ci.yml`.
+See the CI [docs](../../../development/cicd/templates.md#latest-version)
+on template versioning for more information.
+
 There are two ways to define the URL to be scanned by DAST:
 
 1. Set the `DAST_WEBSITE` [variable](../../../ci/yaml/README.md#variables).
