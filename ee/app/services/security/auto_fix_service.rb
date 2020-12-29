@@ -18,7 +18,14 @@ module Security
         next unless vulnerability.remediations
 
         result = VulnerabilityFeedback::CreateService.new(project, User.security_bot, service_params(vulnerability)).execute
-        processed_vuln_ids.push vulnerability.id if result[:status] == :success
+
+        if result[:status] == :success
+          merge_request = result[:vulnerability_feedback].merge_request
+
+          assign_label(merge_request)
+
+          processed_vuln_ids.push vulnerability.id
+        end
       end
 
       if processed_vuln_ids.any?
@@ -34,6 +41,20 @@ module Security
 
     def auto_fix_enabled_types
       project.security_setting.auto_fix_enabled_types
+    end
+
+    def assign_label(merge_request)
+      return if Feature.disabled?(:auto_fix_label, project)
+
+      ::MergeRequests::UpdateService.new(project, User.security_bot, add_label_ids: [label.id])
+        .execute(merge_request)
+    end
+
+    def label
+      return @label if @label
+
+      service = ::Security::AutoFixLabelService.new(container: project, current_user: User.security_bot).execute
+      @label = service.payload[:label]
     end
 
     def service_params(vulnerability)

@@ -57,6 +57,29 @@ RSpec.describe Security::AutoFixService do
         expect(merge_request.description).to include("[#{identifier.external_id}](#{identifier.url})")
       end
 
+      it 'assign auto-fix label' do
+        execute_service
+
+        label = MergeRequest.last.labels.last
+        title = ::Security::AutoFixLabelService::LABEL_PROPERTIES[:title]
+
+        expect(label.title).to eq(title)
+      end
+
+      context 'when auto_fix_label flag is disabled' do
+        before do
+          stub_feature_flags(auto_fix_label: false)
+        end
+
+        it 'does not assign auto-fix label' do
+          execute_service
+
+          labels = MergeRequest.last.labels
+
+          expect(labels.count).to eq(0)
+        end
+      end
+
       context 'when merge request exists' do
         let(:feedback) { create(:vulnerability_feedback, :merge_request) }
 
