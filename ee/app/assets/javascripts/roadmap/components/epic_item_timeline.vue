@@ -174,26 +174,28 @@ export default {
         :class="{ 'epic-bar-child-epic': epic.isChildEpic }"
         class="epic-bar rounded"
       >
-        <div class="epic-bar-inner px-2 py-1" :style="timelineBarInnerStyle">
-          <p class="epic-bar-title text-nowrap text-truncate m-0">{{ timelineBarTitle }}</p>
+        <div class="epic-bar-inner gl-px-3 gl-py-2" :style="timelineBarInnerStyle">
+          <p class="epic-bar-title gl-text-truncate gl-m-0">{{ timelineBarTitle }}</p>
 
-          <div v-if="!isTimelineBarSmall" class="d-flex align-items-center">
+          <div v-if="!isTimelineBarSmall" class="gl-display-flex gl-align-items-center">
             <gl-progress-bar
-              class="epic-bar-progress flex-grow-1 mr-1"
+              class="epic-bar-progress gl-flex-grow-1 gl-mr-2"
               :value="epicWeightPercentage"
               aria-hidden="true"
             />
-            <div class="gl-font-sm d-flex align-items-center text-nowrap">
+            <div class="gl-font-sm gl-display-flex gl-align-items-center gl-white-space-nowrap">
               <gl-icon class="gl-mr-1" :size="12" name="weight" />
-              <p class="m-0" :aria-label="epicWeightPercentageText">{{ epicWeightPercentage }}%</p>
+              <p class="gl-m-0" :aria-label="epicWeightPercentageText">
+                {{ epicWeightPercentage }}%
+              </p>
             </div>
           </div>
         </div>
       </a>
       <gl-popover :target="generateKey(epic)" :title="epic.title" triggers="hover" placement="left">
-        <p class="text-secondary m-0">{{ timeframeString(epic) }}</p>
-        <p class="m-0">{{ popoverWeightText }}</p>
-      </gl-popover>
+        <p class="gl-text-gray-500 gl-m-0">{{ timeframeString(epic) }}</p>
+        <p class="gl-m-0">{{ popoverWeightText }}</p> </gl-popover
+      >>
     </div>
   </span>
 </template>
