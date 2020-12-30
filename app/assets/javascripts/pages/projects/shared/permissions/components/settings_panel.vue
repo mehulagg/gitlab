@@ -385,7 +385,7 @@ export default {
             name="project[request_access_enabled]"
           />
           <input v-model="requestAccessEnabled" type="checkbox" />
-          {{ s__('ProjectSettings|Allow users to request access') }}
+          {{ s__('ProjectSettings|Users can request access') }}
         </label>
       </project-setting-row>
     </div>
@@ -396,7 +396,7 @@ export default {
       <project-setting-row
         ref="issues-settings"
         :label="s__('ProjectSettings|Issues')"
-        :help-text="s__('ProjectSettings|Lightweight issue tracking system for this project')"
+        :help-text="s__('ProjectSettings|Lightweight issue tracking system')"
       >
         <project-feature-setting
           v-model="issuesAccessLevel"
@@ -432,7 +432,7 @@ export default {
           ref="fork-settings"
           :label="s__('ProjectSettings|Forks')"
           :help-text="
-            s__('ProjectSettings|Allow users to make copies of your repository to a new project')
+            s__('ProjectSettings|Users can copy the repository to a new project')
           "
         >
           <project-feature-setting
@@ -561,7 +561,7 @@ export default {
       <project-setting-row
         ref="snippet-settings"
         :label="s__('ProjectSettings|Snippets')"
-        :help-text="s__('ProjectSettings|Share code pastes with others out of Git repository')"
+        :help-text="s__('ProjectSettings|Share code with others outside the project')"
       >
         <project-feature-setting
           v-model="snippetsAccessLevel"
@@ -601,7 +601,7 @@ export default {
           :label="__('Metrics Dashboard')"
           :help-text="
             s__(
-              'ProjectSettings|With Metrics Dashboard you can visualize this project performance metrics',
+              'ProjectSettings|Visualize the project\'s performance metrics',
             )
           "
         >
@@ -622,7 +622,7 @@ export default {
       </label>
       <span class="form-text text-muted">{{
         s__(
-          'ProjectSettings|This setting will override user notification preferences for all project members.',
+          'ProjectSettings|Override user notification preferences for all project members.',
         )
       }}</span>
     </project-setting-row>
@@ -639,7 +639,7 @@ export default {
         {{ s__('ProjectSettings|Show default award emojis') }}
         <template #help>{{
           s__(
-            'ProjectSettings|When enabled, issues, merge requests, and snippets will always show thumbs-up and thumbs-down award emoji buttons.',
+            'ProjectSettings|Always show thumbs-up and thumbs-down award emoji buttons on issues, merge requests, and snippets.',
           )
         }}</template>
       </gl-form-checkbox>
