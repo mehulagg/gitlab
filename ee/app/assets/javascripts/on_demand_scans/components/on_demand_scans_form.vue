@@ -59,6 +59,8 @@ const createProfilesApolloOptions = (name, field, { fetchQuery, fetchError }) =>
 
 export default {
   SCAN_TYPE_LABEL,
+  saveAndRunScanBtnId: 'scan-submit-button',
+  saveScanBtnId: 'scan-save-button',
   components: {
     ProfileSelectorSummaryCell,
     ScannerProfileSelector,
@@ -190,12 +192,12 @@ export default {
         !this.isValidatedSiteProfile
       );
     },
-    isSubmitButtonDisabled() {
+    isFormInvalid() {
       return this.someFieldEmpty || this.hasProfilesConflict;
     },
   },
   methods: {
-    onSubmit(runAfterCreate = true) {
+    onSubmit(runAfterCreate = true, button = this.$options.saveAndRunScanBtnId) {
       if (this.glFeatures.dastSavedScans) {
         this.form.showValidation = true;
         if (!this.form.state) {
@@ -203,7 +205,7 @@ export default {
         }
       }
 
-      this.loading = true;
+      this.loading = button;
       this.hideErrors();
       let mutation = dastOnDemandScanCreateMutation;
       let reponseType = 'dastOnDemandScanCreate';
@@ -467,8 +469,8 @@ export default {
           variant="success"
           class="js-no-auto-disable"
           data-testid="on-demand-scan-submit-button"
-          :disabled="isSubmitButtonDisabled"
-          :loading="loading"
+          :disabled="isFormInvalid || (loading && loading !== $options.saveAndRunScanBtnId)"
+          :loading="loading === $options.saveAndRunScanBtnId"
         >
           {{
             glFeatures.dastSavedScans
@@ -481,9 +483,9 @@ export default {
           variant="success"
           category="secondary"
           data-testid="on-demand-scan-save-button"
-          :disabled="isSubmitButtonDisabled"
-          :loading="loading"
-          @click="onSubmit(false)"
+          :disabled="isFormInvalid || (loading && loading !== $options.saveScanBtnId)"
+          :loading="loading === $options.saveScanBtnId"
+          @click="onSubmit(false, $options.saveScanBtnId)"
         >
           {{ s__('OnDemandScans|Save scan') }}
         </gl-button>

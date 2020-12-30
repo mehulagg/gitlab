@@ -30,6 +30,7 @@ const defaultProps = {
 };
 
 const pipelineUrl = `/${projectPath}/pipelines/123`;
+const editPath = `/${projectPath}/on_demand_scans/1/edit`;
 const [passiveScannerProfile, activeScannerProfile] = scannerProfiles;
 const [nonValidatedSiteProfile, validatedSiteProfile] = siteProfiles;
 
@@ -62,9 +63,9 @@ describe('OnDemandScansForm', () => {
     return subject.vm.$nextTick();
   };
   const setupSuccess = () => {
-    jest
-      .spyOn(subject.vm.$apollo, 'mutate')
-      .mockResolvedValue({ data: { dastScanCreate: { pipelineUrl, errors: [] } } });
+    jest.spyOn(subject.vm.$apollo, 'mutate').mockResolvedValue({
+      data: { dastScanCreate: { dastScan: { editPath }, pipelineUrl, errors: [] } },
+    });
     return setValidFormData();
   };
 
@@ -204,60 +205,68 @@ describe('OnDemandScansForm', () => {
       });
     });
 
-    describe('mutations', () => {
-      it.each`
-        action      | actionFunction | runAfterCreate
-        ${'submit'} | ${submitForm}  | ${true}
-        ${'save'}   | ${saveScan}    | ${false}
-      `(
-        'on $action, triggers GraphQL mutation with runAfterCreate set to $runAfterCreate',
-        async ({ actionFunction, runAfterCreate }) => {
-          await setupSuccess();
+    describe.each`
+      action      | actionFunction | submitButtonLoading | saveButtonLoading | runAfterCreate | redirectPath
+      ${'submit'} | ${submitForm}  | ${true}             | ${false}          | ${true}        | ${pipelineUrl}
+      ${'save'}   | ${saveScan}    | ${false}            | ${true}           | ${false}       | ${editPath}
+    `(
+      'on $action',
+      ({
+        actionFunction,
+        submitButtonLoading,
+        saveButtonLoading,
+        runAfterCreate,
+        redirectPath,
+      }) => {
+        describe('with valid form data', () => {
+          beforeEach(async () => {
+            await setupSuccess();
+            actionFunction();
+          });
+
+          it('sets loading state on correct button', async () => {
+            const [submitButton, saveButton] = [findSubmitButton(), findSaveButton()];
+
+            expect(submitButton.props('loading')).toBe(submitButtonLoading);
+            expect(submitButton.props('disabled')).toBe(!submitButtonLoading);
+            expect(saveButton.props('loading')).toBe(saveButtonLoading);
+            expect(saveButton.props('disabled')).toBe(!saveButtonLoading);
+          });
+
+          it(`triggers GraphQL mutation with runAfterCreate set to ${runAfterCreate}`, async () => {
+            expect(subject.vm.$apollo.mutate).toHaveBeenCalledWith({
+              mutation: dastScanCreateMutation,
+              variables: {
+                input: {
+                  name: 'My daily scan',
+                  description: '',
+                  dastScannerProfileId: passiveScannerProfile.id,
+                  dastSiteProfileId: nonValidatedSiteProfile.id,
+                  fullPath: projectPath,
+                  runAfterCreate,
+                },
+              },
+            });
+          });
+
+          it('redirects to the URL provided in the response', async () => {
+            expect(redirectTo).toHaveBeenCalledWith(redirectPath);
+          });
+
+          it('does not show an alert', async () => {
+            expect(findAlert().exists()).toBe(false);
+          });
+        });
+
+        it('does not run any mutation if name is empty', () => {
+          setValidFormData();
+          findNameInput().vm.$emit('input', '');
           actionFunction();
 
-          expect(subject.vm.$apollo.mutate).toHaveBeenCalledWith({
-            mutation: dastScanCreateMutation,
-            variables: {
-              input: {
-                name: 'My daily scan',
-                description: '',
-                dastScannerProfileId: passiveScannerProfile.id,
-                dastSiteProfileId: nonValidatedSiteProfile.id,
-                fullPath: projectPath,
-                runAfterCreate,
-              },
-            },
-          });
-        },
-      );
-
-      it('does not run any mutation if name is empty', () => {
-        setValidFormData();
-        findNameInput().vm.$emit('input', '');
-        submitForm();
-
-        expect(subject.vm.$apollo.mutate).not.toHaveBeenCalled();
-      });
-    });
-
-    describe('on success', () => {
-      beforeEach(async () => {
-        await setupSuccess();
-        submitForm();
-      });
-
-      it('sets loading state', () => {
-        expect(subject.vm.loading).toBe(true);
-      });
-
-      it('redirects to the URL provided in the response', () => {
-        expect(redirectTo).toHaveBeenCalledWith(pipelineUrl);
-      });
-
-      it('does not show an alert', () => {
-        expect(findAlert().exists()).toBe(false);
-      });
-    });
+          expect(subject.vm.$apollo.mutate).not.toHaveBeenCalled();
+        });
+      },
+    );
 
     describe('on top-level error', () => {
       beforeEach(async () => {
