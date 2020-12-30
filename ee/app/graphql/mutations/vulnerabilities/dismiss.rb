@@ -19,6 +19,11 @@ module Mutations
       argument :comment,
                GraphQL::STRING_TYPE,
                required: false,
+               description: 'Comment why vulnerability should be dismissed'
+
+      argument :dismissal_reason,
+               Types::Vulnerabilities::DismissalReasonEnum,
+               required: false,
                description: 'Reason why vulnerability should be dismissed'
 
       def resolve(id:, comment: nil)
