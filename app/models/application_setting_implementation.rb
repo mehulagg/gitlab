@@ -172,7 +172,8 @@ module ApplicationSettingImplementation
         container_registry_delete_tags_service_timeout: 250,
         container_registry_expiration_policies_worker_capacity: 0,
         kroki_enabled: false,
-        kroki_url: nil
+        kroki_url: nil,
+        rate_limiting_response_text: nil
       }
     end
 
@@ -199,6 +200,14 @@ module ApplicationSettingImplementation
 
   def help_page_support_url_column_exists?
     ::Gitlab::Database.cached_column_exists?(:application_settings, :help_page_support_url)
+  end
+
+  def rate_limiting_response_text_column_exists?
+    ::Gitlab::Database.cached_column_exists?(:application_settings, :rate_limiting_response_text)
+  end
+
+  def rate_limiting_response_text
+    super if rate_limiting_response_text_column_exists?
   end
 
   def disabled_oauth_sign_in_sources=(sources)
