@@ -3,7 +3,7 @@
 class UserPermissionExportWorker
   include ApplicationWorker
 
-  idempotent!
+  idempotent! # verify
 
   def perform(current_user_id)
     current_user = User.find(current_user_id)
