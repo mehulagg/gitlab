@@ -7,12 +7,15 @@ module MemberPermissionExport
     end
 
     def execute
-      return ServiceResponse.error(message: 'Insufficient permissions') unless allowed?
+      return ServiceResponse.error(message: _('Insufficient permissions')) unless allowed?
 
-      upload = current_user.user_permission_export_uploads.create
-      ::MemberPermissions::ExportWorker.perform_async(current_user.id, upload.id)
+      jid = ::MemberPermissions::ExportWorker.perform_async(current_user.id, upload.id)
 
-      upload
+      if jid.present?
+        ServiceResponse.success(message: _('Export in progress. You will receive an email soon with the link to download the report.'))
+      else
+        ServiceResponse.error(message: _('Failed to generate report. Please try again after sometime.'))
+      end
     end
 
     private

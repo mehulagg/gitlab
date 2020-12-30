@@ -11619,6 +11619,9 @@ msgstr ""
 msgid "Export group"
 msgstr ""
 
+msgid "Export in progress. You will receive an email soon with the link to download the report."
+msgstr ""
+
 msgid "Export issues"
 msgstr ""
 
@@ -11755,6 +11758,9 @@ msgid "Failed to enqueue the rebase operation, possibly due to a long-lived tran
 msgstr ""
 
 msgid "Failed to find import label for Jira import."
+msgstr ""
+
+msgid "Failed to generate report. Please try again after sometime."
 msgstr ""
 
 msgid "Failed to get ref."
@@ -15073,6 +15079,9 @@ msgid "InstanceStatistics|Total projects & groups"
 msgstr ""
 
 msgid "InstanceStatistics|Users"
+msgstr ""
+
+msgid "Insufficient permissions"
 msgstr ""
 
 msgid "Integration"
