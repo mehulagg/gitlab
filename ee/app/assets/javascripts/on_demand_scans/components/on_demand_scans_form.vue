@@ -343,11 +343,7 @@ export default {
             v-model="form.fields.description.value"
             class="mw-460"
             data-testid="dast-scan-description-input"
-            :placeholder="
-              s__(
-                `OnDemandScans|Describe your scan. Eg &quot;Tests the login page for SQL injections&quot;`,
-              )
-            "
+            :placeholder="s__(`OnDemandScans|For example: Tests the login page for SQL injections`)"
             :state="form.fields.description.state"
           />
         </gl-form-group>

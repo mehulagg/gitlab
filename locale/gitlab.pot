@@ -19556,13 +19556,13 @@ msgstr ""
 msgid "OnDemandScans|Create a new site profile"
 msgstr ""
 
-msgid "OnDemandScans|Describe your scan. Eg \"Tests the login page for SQL injections\""
-msgstr ""
-
 msgid "OnDemandScans|Description"
 msgstr ""
 
 msgid "OnDemandScans|Edit on-demand DAST scan"
+msgstr ""
+
+msgid "OnDemandScans|For example: Tests the login page for SQL injections"
 msgstr ""
 
 msgid "OnDemandScans|Manage profiles"
