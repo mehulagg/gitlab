@@ -132,8 +132,8 @@ Pipelines can be manually executed, with predefined or manually-specified [varia
 You might do this if the results of a pipeline (for example, a code build) are required outside the normal
 operation of the pipeline.
 
-[Starting  in GitLab 13.7](https://gitlab.com/gitlab-org/gitlab/-/issues/30101),
-the variables fields are pre-filled with any [global variables with description](doc/ci/variables/README.md) defined in the
+[Starting  in GitLab 13.7](https://about.gitlab.com/releases/2020/12/22/gitlab-13-7-released/#pre-filled-variables-when-running-pipelines-manually),
+the variables fields are pre-filled with any [global variables with description](https://docs.gitlab.com/ee/ci/variables/README.html#create-a-custom-variable-in-gitlab-ciyml) defined in the
 `.gitlab-ci.yml` file.
 
 To execute a pipeline manually:

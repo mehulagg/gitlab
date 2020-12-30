@@ -103,7 +103,7 @@ variables:
     description: "Pre-defined variable"
 ```
 
-The `TEST` variable will now be an option when manually running a pipeline.  
+The new variable will now be available when you [run a pipeline manually](https://docs.gitlab.com/ee/ci/pipelines/#run-a-pipeline-manually).  
 
 For more details, see [`.gitlab-ci.yml` defined variables](#gitlab-ciyml-defined-variables).
 
