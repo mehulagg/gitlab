@@ -64,6 +64,11 @@ export default {
       keys: ['request', 'body'],
     },
     {
+      metric: 'external-http',
+      header: s__('PerformanceBar|External Http calls'),
+      keys: ['label', 'code', 'proxy', 'error'],
+    },
+    {
       metric: 'total',
       header: s__('PerformanceBar|Frontend resources'),
       keys: ['name', 'size'],
