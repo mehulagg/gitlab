@@ -22,6 +22,15 @@ module ContainerRegistry
     # Taken from: FaradayMiddleware::FollowRedirects
     REDIRECT_CODES = Set.new [301, 302, 303, 307]
 
+    RETRY_EXCEPTIONS = [Faraday::Request::Retry::DEFAULT_EXCEPTIONS, Faraday::ConnectionFailed].flatten.freeze
+    RETRY_OPTIONS = {
+      max: 3,
+      interval: 5,
+      interval_randomness: 0.5,
+      backoff_factor: 2,
+      exceptions: RETRY_EXCEPTIONS
+    }.freeze
+
     def self.supports_tag_delete?
       registry_config = Gitlab.config.registry
       return false unless registry_config.enabled && registry_config.api_url.present?
@@ -158,6 +167,7 @@ module ContainerRegistry
 
       yield(conn) if block_given?
 
+      conn.request(:retry, RETRY_OPTIONS)
       conn.adapter :net_http
     end
 
@@ -205,12 +215,19 @@ module ContainerRegistry
     def faraday_redirect
       @faraday_redirect ||= faraday_base do |conn|
         conn.request :json
+
+        conn.request(:retry, RETRY_OPTIONS)
         conn.adapter :net_http
       end
     end
 
     def faraday_base(&block)
-      Faraday.new(@base_uri, headers: { user_agent: "GitLab/#{Gitlab::VERSION}" }, &block)
+      Faraday.new(
+        @base_uri,
+        headers: { user_agent: "GitLab/#{Gitlab::VERSION}" },
+        request: Gitlab::HTTP::DEFAULT_TIMEOUT_OPTIONS,
+        &block
+      )
     end
 
     def delete_if_exists(path)

@@ -26,7 +26,30 @@ RSpec.describe ContainerRegistry::Client do
     }
   end
 
-  shared_examples '#repository_manifest' do |manifest_type|
+  let(:expected_faraday_headers) { { user_agent: "GitLab/#{Gitlab::VERSION}" } }
+  let(:expected_faraday_request_options) { Gitlab::HTTP::DEFAULT_TIMEOUT_OPTIONS }
+
+  shared_examples 'handling timeouts' do
+    it 'handles network timeouts' do
+      actual_retries = 0
+      retry_options = ContainerRegistry::Client::RETRY_OPTIONS.merge(
+        interval: 0.1,
+        interval_randomness: 0,
+        backoff_factor: 0,
+        retry_block: -> (_, _, _, _) { actual_retries += 1 }
+      )
+
+      stub_request(method, url).to_timeout
+      stub_const('ContainerRegistry::Client::RETRY_OPTIONS', retry_options)
+
+      expect { subject }.to raise_error(Faraday::ConnectionFailed)
+      expect(actual_retries).to eq(3)
+    end
+  end
+
+  shared_examples 'handling repository manifest' do |manifest_type|
+    let(:method) { :get }
+    let(:url) {  'http://container-registry/v2/group/test/manifests/mytag' }
     let(:manifest) do
       {
         "schemaVersion" => 2,
@@ -48,7 +71,7 @@ RSpec.describe ContainerRegistry::Client do
     end
 
     it 'GET /v2/:name/manifests/mytag' do
-      stub_request(:get, "http://container-registry/v2/group/test/manifests/mytag")
+      stub_request(method, url)
         .with(headers: {
                 'Accept' => 'application/vnd.docker.distribution.manifest.v2+json, application/vnd.oci.image.manifest.v1+json',
                 'Authorization' => "bearer #{token}",
@@ -56,14 +79,24 @@ RSpec.describe ContainerRegistry::Client do
               })
         .to_return(status: 200, body: manifest.to_json, headers: { content_type: manifest_type })
 
-      expect(client.repository_manifest('group/test', 'mytag')).to eq(manifest)
+      expect_new_faraday
+
+      expect(subject).to eq(manifest)
     end
+
+    it_behaves_like 'handling timeouts'
   end
 
-  it_behaves_like '#repository_manifest', described_class::DOCKER_DISTRIBUTION_MANIFEST_V2_TYPE
-  it_behaves_like '#repository_manifest', described_class::OCI_MANIFEST_V1_TYPE
+  describe '#repository_manifest' do
+    subject { client.repository_manifest('group/test', 'mytag') }
+
+    it_behaves_like 'handling repository manifest', described_class::DOCKER_DISTRIBUTION_MANIFEST_V2_TYPE
+    it_behaves_like 'handling repository manifest', described_class::OCI_MANIFEST_V1_TYPE
+  end
 
   describe '#blob' do
+    let(:method) { :get }
+    let(:url) { 'http://container-registry/v2/group/test/blobs/sha256:0123456789012345' }
     let(:blob_headers) do
       {
           'Accept' => 'application/octet-stream',
@@ -78,16 +111,20 @@ RSpec.describe ContainerRegistry::Client do
       }
     end
 
+    subject { client.blob('group/test', 'sha256:0123456789012345') }
+
     it 'GET /v2/:name/blobs/:digest' do
-      stub_request(:get, "http://container-registry/v2/group/test/blobs/sha256:0123456789012345")
+      stub_request(method, url)
         .with(headers: blob_headers)
         .to_return(status: 200, body: "Blob")
 
-      expect(client.blob('group/test', 'sha256:0123456789012345')).to eq('Blob')
+      expect_new_faraday
+
+      expect(subject).to eq('Blob')
     end
 
     it 'follows 307 redirect for GET /v2/:name/blobs/:digest' do
-      stub_request(:get, "http://container-registry/v2/group/test/blobs/sha256:0123456789012345")
+      stub_request(method, url)
         .with(headers: blob_headers)
         .to_return(status: 307, body: '', headers: { Location: 'http://redirected' })
       # We should probably use hash_excluding here, but that requires an update to WebMock:
@@ -98,10 +135,12 @@ RSpec.describe ContainerRegistry::Client do
         end
         .to_return(status: 200, body: "Successfully redirected")
 
-      response = client.blob('group/test', 'sha256:0123456789012345')
+      expect_new_faraday(times: 2)
 
-      expect(response).to eq('Successfully redirected')
+      expect(subject).to eq('Successfully redirected')
     end
+
+    it_behaves_like 'handling timeouts'
   end
 
   describe '#upload_blob' do
@@ -374,5 +413,17 @@ RSpec.describe ContainerRegistry::Client do
         body: '',
         headers: { 'Allow' => 'DELETE' }
       )
+  end
+
+  def expect_new_faraday(times: 1)
+    expect(Faraday)
+      .to receive(:new)
+      .with(
+        'http://container-registry',
+        headers: expected_faraday_headers,
+        request: expected_faraday_request_options
+      ).and_call_original
+      .exactly(times)
+      .times
   end
 end
