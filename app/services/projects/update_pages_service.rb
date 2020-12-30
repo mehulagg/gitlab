@@ -38,11 +38,11 @@ module Projects
       raise InvalidStateError, 'build SHA is outdated for this ref' unless latest?
 
       # Create temporary directory in which we will extract the artifacts
-      make_secure_tmp_dir(tmp_path) do |archive_path|
-        extract_archive!(archive_path)
+      make_secure_tmp_dir(tmp_path) do |tmp_path|
+        extract_archive!(tmp_path)
 
         # Check if we did extract public directory
-        archive_public_path = File.join(archive_path, PUBLIC_DIR)
+        archive_public_path = File.join(tmp_path, PUBLIC_DIR)
         raise InvalidStateError, 'pages miss the public folder' unless Dir.exist?(archive_public_path)
         raise InvalidStateError, 'build SHA is outdated for this ref' unless latest?
 
