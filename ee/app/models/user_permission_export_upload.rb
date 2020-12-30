@@ -9,7 +9,6 @@ class UserPermissionExportUpload < ApplicationRecord
   mount_uploader :file, AttachmentUploader
 
   validates :status, presence: true
-  validates :file, length: { maximum: 255 }
   validate :file_presence, if: :finished?
 
   state_machine :status, initial: :created do

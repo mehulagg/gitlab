@@ -1,27 +1,39 @@
 # frozen_string_literal: true
 
-module Members
-  class PermissionsExportService
-    def initialize(current_user)
+module MemberPermissionExport
+  class ExportService
+    FILESIZE_LIMIT = 15.megabytes
+
+    def initialize(current_user, upload)
       @current_user = current_user
+      @upload = upload
     end
 
-    def csv_data
+    def export
       return ServiceResponse.error(message: 'Insufficient permissions') unless allowed?
 
-      ServiceResponse.success(payload: csv_builder.render)
+      upload.start!
+      generate_csv_data
+      upload.finish!
+    ensure
+      schedule_export_deletion
     end
 
     private
 
-    attr_reader :current_user
+    attr_reader :current_user, :upload
 
     def allowed?
       current_user.can?(:export_user_permissions)
     end
 
+    def generate_csv_data
+      csv_builder.render(FILESIZE_LIMIT) { |f| upload.file = f }
+      upload.file.filename = filename
+    end
+
     def csv_builder
-      @csv_builder ||= CsvBuilders::Stream.new(data, header_to_value_hash)
+      @csv_builder ||= CsvBuilder.new(data, header_to_value_hash)
     end
 
     def data
@@ -38,6 +50,18 @@ module Members
         'Path' => -> (member) { member.source&.full_path },
         'Access Level' => 'human_access'
       }
+    end
+
+    def filename
+      [
+        'user_permissions_export_',
+        Time.current.utc.strftime('%FT%H%M'),
+        '.csv'
+      ].join
+    end
+
+    def schedule_export_deletion
+      # to do
     end
   end
 end
