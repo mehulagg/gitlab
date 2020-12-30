@@ -12,7 +12,13 @@ module Gitlab
               when: self.when,
               options: { start_in: start_in }.compact,
               allow_failure: allow_failure,
-              yaml_variables: yaml_variables(seed_attributes[:yaml_variables])
+              yaml_variables: calculate_variables(seed_attributes[:yaml_variables])
+            }.compact
+          end
+
+          def pipeline_attributes(seed_attributes = {})
+            {
+              yaml_variables: calculate_variables(seed_attributes[:yaml_variables])
             }.compact
           end
 
@@ -22,7 +28,7 @@ module Gitlab
 
           private
 
-          def yaml_variables(seed_variables)
+          def calculate_variables(seed_variables)
             return unless variables && seed_variables
 
             indexed_seed_variables = seed_variables.deep_dup.index_by { |var| var[:key] }

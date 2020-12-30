@@ -357,50 +357,6 @@ RSpec.describe Gitlab::Ci::Config::Entry::Processable do
             )
           end
         end
-
-        context 'when root yaml variables are used' do
-          let(:variables) do
-            Gitlab::Ci::Config::Entry::Variables.new(
-              { A: 'root', C: 'root', D: 'root' }
-            ).value
-          end
-
-          it 'does return all variables and overwrite them' do
-            expect(entry.value).to include(
-              variables: { 'A' => 'job', 'B' => 'job', 'C' => 'root', 'D' => 'root' }
-            )
-          end
-
-          context 'when inherit of defaults is disabled' do
-            let(:config) do
-              {
-                variables: { A: 'job', B: 'job' },
-                inherit: { variables: false }
-              }
-            end
-
-            it 'does return only job variables' do
-              expect(entry.value).to include(
-                variables: { 'A' => 'job', 'B' => 'job' }
-              )
-            end
-          end
-
-          context 'when inherit of only specific variable is enabled' do
-            let(:config) do
-              {
-                variables: { A: 'job', B: 'job' },
-                inherit: { variables: ['D'] }
-              }
-            end
-
-            it 'does return only job variables' do
-              expect(entry.value).to include(
-                variables: { 'A' => 'job', 'B' => 'job', 'D' => 'root' }
-              )
-            end
-          end
-        end
       end
 
       context 'of default:tags' do

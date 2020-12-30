@@ -231,6 +231,35 @@ RSpec.describe Gitlab::Ci::Pipeline::Seed::Build do
         it { is_expected.to match a_hash_including(options: { allow_failure_criteria: nil }) }
       end
     end
+
+    context '[:yaml_variables]' do
+      let(:attributes) do
+        { name: 'rspec',
+          ref: 'master',
+          yaml_variables: [{ key: 'VAR1', value: 'var 1', public: true },
+                           { key: 'VAR2', value: 'var 2', public: true }] }
+      end
+
+      context 'when the pipeline has variables' do
+        before do
+          pipeline.yaml_variables = [{ key: 'VAR1', value: 'var pipeline 1', public: true },
+                                     { key: 'VAR3', value: 'var pipeline 3', public: true }]
+        end
+
+        it 'returns calculated yaml variables' do
+          expect(subject[:yaml_variables]).to match_array([{ key: 'VAR1', value: 'var 1', public: true },
+                                                           { key: 'VAR2', value: 'var 2', public: true },
+                                                           { key: 'VAR3', value: 'var pipeline 3', public: true }])
+        end
+      end
+
+      context 'when the pipeline has not a variable' do
+        it 'returns seed yaml variables' do
+          expect(subject[:yaml_variables]).to match_array([{ key: 'VAR1', value: 'var 1', public: true },
+                                                           { key: 'VAR2', value: 'var 2', public: true }])
+        end
+      end
+    end
   end
 
   describe '#bridge?' do

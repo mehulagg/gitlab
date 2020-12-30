@@ -37,8 +37,11 @@ RSpec.describe Gitlab::Ci::Pipeline::Chain::EvaluateWorkflowRules do
 
     context 'when pipeline has not been skipped by workflow configuration' do
       before do
-        allow(step).to receive(:workflow_passed?)
-          .and_return(true)
+        allow(step).to receive(:workflow_rules_result)
+          .and_return(
+            double(pass?: true,
+                   pipeline_attributes: {})
+          )
 
         step.perform!
       end
@@ -54,6 +57,44 @@ RSpec.describe Gitlab::Ci::Pipeline::Chain::EvaluateWorkflowRules do
 
       it 'attaches no errors' do
         expect(pipeline.errors).to be_empty
+      end
+    end
+
+    describe '#apply_rules' do
+      before do
+        pipeline.yaml_variables = [{ key: 'VAR1', value: 'val1', public: true }]
+      end
+
+      context "when rules don't return yaml variables" do
+        before do
+          allow(step).to receive(:workflow_rules_result)
+            .and_return(
+              double(pass?: true,
+                     pipeline_attributes: {})
+            )
+        end
+
+        it 'does not change pipeline yaml variables' do
+          step.perform!
+
+          expect(pipeline.yaml_variables).to eq([{ key: 'VAR1', value: 'val1', public: true }])
+        end
+      end
+
+      context "when rules returns yaml variables" do
+        before do
+          allow(step).to receive(:workflow_rules_result)
+            .and_return(
+              double(pass?: true,
+                     pipeline_attributes: { yaml_variables: [{ key: 'VAR1', value: 'val2', public: true }] })
+            )
+        end
+
+        it 'changes pipeline yaml variables' do
+          step.perform!
+
+          expect(pipeline.yaml_variables).to eq([{ key: 'VAR1', value: 'val2', public: true }])
+        end
       end
     end
   end
