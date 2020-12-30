@@ -374,6 +374,36 @@ RSpec.describe Packages::Package, type: :model do
       end
     end
 
+    describe '#validate_maven_duplicate' do
+      let_it_be(:namespace) { create(:group) }
+      let_it_be(:project) { create(:project, namespace: namespace) }
+      let_it_be(:package) { create(:maven_package, project: project, name: 'FOO', version: '2') }
+      let(:dupe_package) { build(:maven_package, project: project, name: 'FOO', version: '2') }
+
+      context 'with package settings allowing duplicaates' do
+        it 'allows the package' do
+          expect(dupe_package).to be_valid
+        end
+      end
+
+      context 'with package settings not allowing duplicates' do
+        let!(:package_settings) { create(:namespace_package_setting, namespace: namespace, maven_duplicates_allowed: false) }
+
+        it 'rejects the package', :aggregate_failures do
+          expect(dupe_package).not_to be_valid
+          expect(dupe_package.errors.to_a).to include("Package already exists")
+        end
+
+        context 'with regex allowing this package' do
+          let!(:package_settings) { create(:namespace_package_setting, namespace: namespace, maven_duplicates_allowed: false, maven_duplicate_exception_regex: 'FO.*') }
+
+          it 'allows the package' do
+            expect(dupe_package).to be_valid
+          end
+        end
+      end
+    end
+
     Packages::Package.package_types.keys.without('conan').each do |pt|
       context "project id, name, version and package type uniqueness for package type #{pt}" do
         let(:package) { create("#{pt}_package") }

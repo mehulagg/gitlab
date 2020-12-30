@@ -31,12 +31,13 @@ class Packages::Package < ApplicationRecord
   validates :name, format: { with: Gitlab::Regex.package_name_regex }, unless: -> { conan? || generic? || debian? }
 
   validates :name,
-    uniqueness: { scope: %i[project_id version package_type] }, unless: :conan?
+    uniqueness: { scope: %i[project_id version package_type] }, unless: -> { conan? || maven? }
 
   validate :valid_conan_package_recipe, if: :conan?
   validate :valid_npm_package_name, if: :npm?
   validate :valid_composer_global_name, if: :composer?
   validate :package_already_taken, if: :npm?
+  validate :validate_maven_duplicate, if: :maven?
   validates :name, format: { with: Gitlab::Regex.conan_recipe_component_regex }, if: :conan?
   validates :name, format: { with: Gitlab::Regex.generic_package_name_regex }, if: :generic?
   validates :name, format: { with: Gitlab::Regex.nuget_package_name_regex }, if: :nuget?
@@ -240,6 +241,15 @@ class Packages::Package < ApplicationRecord
     return unless project
 
     if project.package_already_taken?(name)
+      errors.add(:base, _('Package already exists'))
+    end
+  end
+
+  def validate_maven_duplicate
+    return if project.namespace.package_settings.maven_duplicates_allowed
+    return if name =~ %r{\A#{project.namespace.package_settings.maven_duplicate_exception_regex}}
+
+    if project.packages.where(version: version, name: name)
       errors.add(:base, _('Package already exists'))
     end
   end
