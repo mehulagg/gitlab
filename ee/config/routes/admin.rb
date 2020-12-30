@@ -79,4 +79,8 @@ namespace :admin do
     post :trigger_reindexing
     post :cancel_index_deletion
   end
+
+  resource :user_permissions do
+    get :export
+  end
 end
