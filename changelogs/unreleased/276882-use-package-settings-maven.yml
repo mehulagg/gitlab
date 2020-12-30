@@ -1,0 +1,6 @@
+---
+title: Maven packages will allow or disallow duplicates based on namespace package
+  settings
+merge_request: 50691
+author:
+type: changed
