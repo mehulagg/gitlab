@@ -32,7 +32,14 @@ module Packages
       end
 
       def packages_with_path
-        base.only_maven_packages_with_path(path)
+        matching_packages = base.only_maven_packages_with_path(path)
+        matching_packages = matching_packages.order_by_package_file if versionless_package?(matching_packages)
+
+        matching_packages
+      end
+
+      def versionless_package?(matching_packages)
+        matching_packages.map(&:version).uniq.first.nil?
       end
 
       # Produces a query that returns all packages.
