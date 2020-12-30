@@ -98,8 +98,9 @@ The Run Pipeline form will generate the variables fields with any global variabl
 
 ```yaml
 variables:
-  TEST: "HELLO WORLD"
-    description: "HELLO WORLD string"
+  pre-defined:
+    value:  "Hello world"
+    description: "Pre-defined variable"
 ```
 
 The `TEST` variable will now be an option when manually running a pipeline.  
