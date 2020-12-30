@@ -80,6 +80,10 @@ module Projects
     end
 
     def deploy_to_legacy_storage(artifacts_path)
+      # path today used by one project can later be used by another
+      # so we can't really scope this feature flag by project or group
+      return if Feature.enabled?(:pages_stop_legacy_storage_updates)
+
       # Create temporary directory in which we will extract the artifacts
       make_secure_tmp_dir(tmp_path) do |tmp_path|
         extract_archive!(artifacts_path, tmp_path)
