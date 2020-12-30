@@ -164,7 +164,7 @@ RSpec.describe Experiment do
     context 'when an experiment_user already exists for the given user' do
       before do
         # Create an existing experiment_user for this experiment and the :control group
-        experiment.record_user_and_group(user, :control, context)
+        experiment.record_user_and_group(user, :control)
       end
 
       it 'does not create a new experiment_user record' do
@@ -173,16 +173,50 @@ RSpec.describe Experiment do
 
       context 'but the group_type and context has changed' do
         let(:group) { :experimental }
-        let(:context) { { b: 37 } }
 
         it 'updates the existing experiment_user record with group_type' do
           expect { record_user_and_group }.to change { ExperimentUser.last.group_type }
         end
+      end
+    end
 
-        it 'updates the existing experiment_user record with context' do
-          record_user_and_group
-          expect(ExperimentUser.last.context).to eq({ 'b' => 37 })
-        end
+    context 'when a context already exists' do
+      let_it_be(:context) { { a: 42, 'b' => 34, 'c': { c1: 100, c2: 'c2', e: :e }, d: [1, 3] } }
+      let_it_be(:expected_context) { { 'a' => 42, 'b' => 34, 'c' => { 'c1' => 100, 'c2' => 'c2', 'e' => 'e' }, 'd' => [1, 3] } }
+
+      it 'has an initial context with stringified keys' do
+        record_user_and_group
+
+        expect(ExperimentUser.last.context).to eq(expected_context)
+      end
+
+      it 'keeps the existing context with a new  empty context' do
+        record_user_and_group
+        experiment.record_user_and_group(user, :control, {})
+
+        expect(ExperimentUser.last.context).to eq(expected_context)
+      end
+
+      it 'appends the additional keys stringified' do
+        record_user_and_group
+        experiment.record_user_and_group(user, :control, f: 97)
+
+        expect(ExperimentUser.last.context).to eq(expected_context.merge( 'f' => 97 ))
+      end
+
+      it 'overrides keys with atomic values or arrays' do
+        record_user_and_group
+        experiment.record_user_and_group(user, :control, b: 97, d: [99])
+
+        expected_context = { 'a' => 42, 'b' => 97, 'c' => { 'c1' => 100, 'c2' => 'c2', 'e' => 'e' }, 'd' => [99] }
+        expect(ExperimentUser.last.context).to eq(expected_context)
+      end
+
+      it 'inserts the additional keys for nested hashes' do
+        record_user_and_group
+        experiment.record_user_and_group(user, :control, c: { g: 107 })
+
+        expect(ExperimentUser.last.context).to eq(expected_context.deep_merge( 'c' => { 'g' => 107 } ))
       end
     end
   end
