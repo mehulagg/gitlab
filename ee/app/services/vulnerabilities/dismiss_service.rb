@@ -6,9 +6,10 @@ module Vulnerabilities
   class DismissService < BaseService
     FindingsDismissResult = Struct.new(:ok?, :finding, :message)
 
-    def initialize(current_user, vulnerability, comment = nil, dismiss_findings: true)
+    def initialize(current_user, vulnerability, comment = nil, dismissal_reason = nil, dismiss_findings: true)
       super(current_user, vulnerability)
       @comment = comment
+      @dismissal_reason = dismissal_reason
       @dismiss_findings = dismiss_findings
     end
 
@@ -45,6 +46,7 @@ module Vulnerabilities
         feedback_type: 'dismissal',
         project_fingerprint: finding.project_fingerprint,
         comment: @comment,
+        dismissal_reason: @dismissal_reason,
         pipeline: @project.latest_pipeline_with_security_reports(only_successful: true),
         finding_uuid: finding.uuid_v5,
         dismiss_vulnerability: false

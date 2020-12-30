@@ -72,6 +72,19 @@ RSpec.describe Vulnerabilities::DismissService do
       end
     end
 
+    context 'when the dismissal_reason is added' do
+      let(:dismissal_reason) { 'used_in_tests' }
+      let(:service) { described_class.new(user, vulnerability, nil, dismissal_reason) }
+
+      it 'dismisses a vulnerability and its associated findings with comment', :aggregate_failures do
+        dismiss_vulnerability
+
+        expect(vulnerability.reload).to have_attributes(state: 'dismissed', dismissed_by: user)
+        expect(vulnerability.findings).to all have_vulnerability_dismissal_feedback
+        expect(vulnerability.findings.map(&:dismissal_feedback)).to all(have_attributes(dismissal_reason: dismissal_reason))
+      end
+    end
+
     it 'creates note' do
       expect(SystemNoteService).to receive(:change_vulnerability_state).with(vulnerability, user)
 
