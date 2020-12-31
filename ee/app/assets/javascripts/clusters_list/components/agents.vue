@@ -1,6 +1,5 @@
 <script>
 import { GlAlert, GlKeysetPagination, GlLoadingIcon } from '@gitlab/ui';
-import produce from 'immer';
 import AgentEmptyState from './agent_empty_state.vue';
 import AgentTable from './agent_table.vue';
 import getAgentsQuery from '../graphql/queries/get_agents.query.graphql';
@@ -96,13 +95,13 @@ export default {
             ...queryVariables,
           },
           updateQuery: (previousResult, { fetchMoreResult }) => {
-            return produce(fetchMoreResult, (newAgents) => {
-              // eslint-disable-next-line no-param-reassign
-              newAgents.project.repository.tree.trees.nodes = [
-                ...previousResult.project.repository.tree.trees.nodes,
-                ...newAgents.project.repository.tree.trees.nodes,
-              ];
-            });
+            // eslint-disable-next-line no-param-reassign
+            fetchMoreResult.project.repository.tree.trees.nodes = [
+              ...previousResult.project.repository.tree.trees.nodes,
+              ...fetchMoreResult.project.repository.tree.trees.nodes,
+            ];
+
+            return fetchMoreResult;
           },
         })
         .catch(() => {
