@@ -35,6 +35,7 @@ Sidekiq.configure_server do |config|
     # Do not clean the metrics directory here - the supervisor script should
     # have already taken care of that
     Gitlab::Metrics::Exporter::SidekiqExporter.instance.start
+    Gitlab::Metrics::Samplers::SidekiqSampler.instance.start
   end
 end
 
