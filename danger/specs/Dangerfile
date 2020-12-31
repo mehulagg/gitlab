@@ -25,8 +25,8 @@ Please make sure the spec files pass in AS-IF-FOSS mode either:
 MSG
 
 CONTROLLER_SPEC_DEPRECATION_MESSAGE = <<~MSG.freeze
-Do not add newly controller specs. We are moving from controller specs to
-request specs (and/or feature specs). Please add specs as request specs under
+Do not add new controller specs. We are moving from controller specs to
+request specs (and/or feature specs). Please add request specs under
 `/spec/requests` and/or `/ee/spec/requests` instead.
 
 See https://gitlab.com/groups/gitlab-org/-/epics/5076 for information.
