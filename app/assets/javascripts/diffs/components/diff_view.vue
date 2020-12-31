@@ -131,7 +131,7 @@ export default {
       >
         <div
           v-if="!inline || (line.left && line.left.lineDraft.isDraft)"
-          class="diff-td notes-content parallel old"
+          class="diff-td notes-content parallel old gl-overflow-auto"
         >
           <div v-if="line.left && line.left.lineDraft.isDraft" class="content">
             <draft-note :draft="line.left.lineDraft" :line="line.left" />
@@ -139,7 +139,7 @@ export default {
         </div>
         <div
           v-if="!inline || (line.right && line.right.lineDraft.isDraft)"
-          class="diff-td notes-content parallel new"
+          class="diff-td notes-content parallel new gl-overflow-auto"
         >
           <div v-if="line.right && line.right.lineDraft.isDraft" class="content">
             <draft-note :draft="line.right.lineDraft" :line="line.right" />
