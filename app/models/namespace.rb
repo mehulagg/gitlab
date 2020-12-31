@@ -102,6 +102,18 @@ class Namespace < ApplicationRecord
       )
   end
 
+  scope :completed_action_within_range, -> (action, range) do
+    joins(:namespace_onboarding_actions)
+      .where(namespace_onboarding_actions: { action: action })
+      .where(namespace_onboarding_actions: { created_at: range })
+  end
+
+  scope :incompleted_actions, -> (actions) do
+    left_joins(:namespace_onboarding_actions)
+      .where.not(namespace_onboarding_actions: { action: actions })
+      .or(left_joins(:namespace_onboarding_actions).where(namespace_onboarding_actions: { action: nil }))
+  end
+
   class << self
     def by_path(path)
       find_by('lower(path) = :value', value: path.downcase)
