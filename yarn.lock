@@ -871,10 +871,9 @@
   resolved "https://registry.yarnpkg.com/@gitlab/tributejs/-/tributejs-1.0.0.tgz#672befa222aeffc83e7d799b0500a7a4418e59b8"
   integrity sha512-nmKw1+hB6MHvlmPz63yPwVs1qQkycHwsKgxpEbzmky16Y6mL4EJMk3w1b8QlOAF/AIAzjCERPhe/R4MJiohbZw==
 
-"@gitlab/ui@25.0.1":
-  version "25.0.1"
-  resolved "https://registry.yarnpkg.com/@gitlab/ui/-/ui-25.0.1.tgz#2669cd65a19cda69af42017f39eb964072c03bf8"
-  integrity sha512-WLvrnVU18DaPHQghwUbYcqoK02axD639T4THDUBk3fzzOs2piXYvqDfRtT59cpaZpDS3IIHUTlPhxBCE7zv2GQ==
+"@gitlab/ui@https://gitlab.com/gitlab-org/gitlab-ui/-/jobs/934901504/artifacts/raw/gitlab-ui.479-close-button-component.tgz":
+  version "25.1.0"
+  resolved "https://gitlab.com/gitlab-org/gitlab-ui/-/jobs/934901504/artifacts/raw/gitlab-ui.479-close-button-component.tgz#dbf4d7d54017027c8675dd6ca0b069c1c2da78d8"
   dependencies:
     "@babel/standalone" "^7.0.0"
     "@gitlab/vue-toasted" "^1.3.0"
