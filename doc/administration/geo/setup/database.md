@@ -587,7 +587,7 @@ For each Patroni instance on the secondary site:
      # Any other instance that needs access to the database as per documentation
    ]
 
-   patroni['enable'] = false
+   patroni['enable'] = true
    patroni['standby_cluster']['enable'] = true
    patroni['standby_cluster']['host'] = 'PATRONI_PRIMARY_LEADER_IP' # This needs to be changed anytime the primary Leader changes
    patroni['standby_cluster']['port'] = 5432
