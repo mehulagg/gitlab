@@ -86,7 +86,7 @@ variables:
   DAST_WEBSITE: https://example.com
 ```
 
-### DAST.latest.gitlab-ci.yml
+### Latest template
 
 NOTE:
 Introduced in GitLab in 13.8
