@@ -26,6 +26,17 @@ module EE
 
         ::Epics::TransferService.new(current_user, group, project).execute
       end
+
+      override :post_update_hooks
+      def post_update_hooks(project)
+        # handle when project is moved from a group to a group with different elasticsearch settings
+        if old_namespace.use_elasticsearch? != new_namespace.use_elasticsearch?
+          ::Gitlab::CurrentSettings.invalidate_elasticsearch_indexes_cache_for_project!(project.id)
+          project.maintain_elasticsearch_update(updated_attributes: [:visibility_level]) if project.maintaining_elasticsearch?
+        end
+
+        super
+      end
     end
   end
 end

@@ -58,6 +58,15 @@ module Gitlab
           Gitlab::Redis::Cache.with { |redis| redis.unlink(redis_key(type)) }
         end
 
+        # Deletes the specific record for this type. Only one key in the cache will
+        # be removed.
+        #
+        # @param type [Symbol] the type of resource, `:project` or `:namespace`
+        # @param record_id [Integer] the id of the record
+        def delete_record(type, record_id)
+          Gitlab::Redis::Cache.with { |redis| redis.hdel(redis_key(type), record_id) }
+        end
+
         private
 
         def redis_key(type)
