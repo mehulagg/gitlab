@@ -1,5 +1,6 @@
 <script>
 import { GlAlert, GlKeysetPagination, GlLoadingIcon } from '@gitlab/ui';
+import produce from 'immer';
 import AgentEmptyState from './agent_empty_state.vue';
 import AgentTable from './agent_table.vue';
 import getAgentsQuery from '../graphql/queries/get_agents.query.graphql';
@@ -14,7 +15,7 @@ export default {
         return {
           defaultBranchName: this.defaultBranchName,
           projectPath: this.projectPath,
-          ...this.cursor,
+          first: MAX_LIST_COUNT,
         };
       },
       update: (data) => data,
@@ -42,20 +43,10 @@ export default {
       type: String,
     },
   },
-  data() {
-    return {
-      cursor: {
-        first: MAX_LIST_COUNT,
-        after: null,
-        last: null,
-        before: null,
-      },
-    };
-  },
   computed: {
     agentList() {
       let list = this.agents?.project?.clusterAgents?.nodes;
-      const configFolders = this.agents?.data?.project?.repository?.tree?.trees?.nodes;
+      const configFolders = this.agents?.project?.repository?.tree?.trees?.nodes;
 
       if (list && configFolders) {
         list = list.map((agent) => {
@@ -66,32 +57,49 @@ export default {
 
       return list;
     },
+    agentPageInfo() {
+      return this.agents?.project?.clusterAgents?.pageInfo || {};
+    },
     isLoading() {
       return this.$apollo.queries.agents.loading;
     },
-    pageInfo() {
-      return this.agents?.project?.clusterAgents?.pageInfo || {};
-    },
     showPagination() {
-      return this.pageInfo.hasPreviousPage || this.pageInfo.hasNextPage;
+      return this.agentPageInfo.hasPreviousPage || this.agentPageInfo.hasNextPage;
     },
   },
   methods: {
-    nextPage(item) {
-      this.cursor = {
-        first: MAX_LIST_COUNT,
-        after: item,
-        last: null,
-        before: null,
-      };
+    nextPage() {
+      this.$apollo.queries.agents
+        .fetchMore({
+          variables: {
+            defaultBranchName: this.defaultBranchName,
+            projectPath: this.projectPath,
+            first: MAX_LIST_COUNT,
+            afterAgent: this.agentPageInfo.endCursor,
+          },
+          updateQuery: (previousResult, { fetchMoreResult }) => {
+            return produce(fetchMoreResult, (newAgents) => {
+              // eslint-disable-next-line no-param-reassign
+              newAgents.project.repository.tree.trees.nodes = [
+                ...previousResult.project.repository.tree.trees.nodes,
+                ...newAgents.project.repository.tree.trees.nodes,
+              ];
+            });
+          },
+        })
+        .catch(() => {
+          this.agents = null;
+        });
     },
-    prevPage(item) {
+    prevPage() {
+      /*
       this.cursor = {
         first: null,
         after: null,
         last: MAX_LIST_COUNT,
         before: item,
       };
+      */
     },
   },
 };
@@ -105,7 +113,7 @@ export default {
       <AgentTable :agents="agentList" />
 
       <div v-if="showPagination" class="gl-display-flex gl-justify-content-center gl-mt-5">
-        <gl-keyset-pagination v-bind="pageInfo" @prev="prevPage" @next="nextPage" />
+        <gl-keyset-pagination v-bind="agentPageInfo" @prev="prevPage" @next="nextPage" />
       </div>
     </div>
 

@@ -6,10 +6,10 @@ query getAgents(
   $first: Int
   $last: Int
   $before: String
-  $after: String
+  $afterAgent: String
 ) {
   project(fullPath: $projectPath) {
-    clusterAgents(first: $first, last: $last, before: $before, after: $after) {
+    clusterAgents(first: $first, last: $last, before: $before, after: $afterAgent) {
       nodes {
         id
         name
