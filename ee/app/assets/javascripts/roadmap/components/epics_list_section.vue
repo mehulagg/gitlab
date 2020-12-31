@@ -8,8 +8,9 @@ import { generateKey } from '../utils/epic_utils';
 
 import { EPIC_DETAILS_CELL_WIDTH, TIMELINE_CELL_MIN_WIDTH, EPIC_ITEM_HEIGHT } from '../constants';
 
+import CurrentDayMixin from '../mixins/current_day_mixin';
+
 import EpicItem from './epic_item.vue';
-import CurrentDayIndicator from './current_day_indicator.vue';
 
 export default {
   EpicItem,
@@ -17,9 +18,8 @@ export default {
   components: {
     VirtualList,
     EpicItem,
-    CurrentDayIndicator,
   },
-  mixins: [glFeatureFlagsMixin()],
+  mixins: [glFeatureFlagsMixin(), CurrentDayMixin],
   props: {
     presetType: {
       type: String,
@@ -49,6 +49,7 @@ export default {
       emptyRowContainerStyles: {},
       showBottomShadow: false,
       roadmapShellEl: null,
+      indicatorStyles: {},
     };
   },
   computed: {
@@ -86,6 +87,10 @@ export default {
     eventHub.$on('toggleIsEpicExpanded', this.toggleIsEpicExpanded);
     window.addEventListener('resize', this.syncClientWidth);
     this.initMounted();
+
+    this.$nextTick(() => {
+      this.indicatorStyles = this.getIndicatorStyles();
+    });
   },
   beforeDestroy() {
     eventHub.$off('epicsListScrolled', this.handleEpicsListScroll);
@@ -202,7 +207,13 @@ export default {
     >
       <span class="epic-details-cell"></span>
       <span v-for="(timeframeItem, index) in timeframe" :key="index" class="epic-timeline-cell">
-        <current-day-indicator :preset-type="presetType" :timeframe-item="timeframeItem" />
+        <!-- todaysIndex and getIndicatorStyles are in CurrentDayMixin -->
+        <span
+          v-if="index === todaysIndex"
+          data-testid="currentDayIndicator"
+          :style="getIndicatorStyles(presetType, timeframeItem)"
+          class="current-day-indicator position-absolute"
+        ></span>
       </span>
     </div>
     <div

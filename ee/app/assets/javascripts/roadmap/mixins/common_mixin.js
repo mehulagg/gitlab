@@ -1,12 +1,7 @@
 import { s__, sprintf } from '~/locale';
-import {
-  dateInWords,
-  totalDaysInMonth,
-  dayInQuarter,
-  totalDaysInQuarter,
-} from '~/lib/utils/datetime_utility';
+import { dateInWords } from '~/lib/utils/datetime_utility';
 
-import { PRESET_TYPES, DAYS_IN_WEEK } from '../constants';
+import { PRESET_TYPES } from '../constants';
 
 export default {
   computed: {
@@ -44,9 +39,6 @@ export default {
     presetTypeWeeks() {
       return this.presetType === PRESET_TYPES.WEEKS;
     },
-    hasToday() {
-      return this.isTimeframeForToday(this.timeframeItem);
-    },
     hasStartDate() {
       if (this.presetTypeQuarters) {
         return this.hasStartDateForQuarter(this.timeframeItem);
@@ -56,9 +48,6 @@ export default {
         return this.hasStartDateForWeek(this.timeframeItem);
       }
       return false;
-    },
-    todaysIndex() {
-      return this.timeframe.findIndex((item) => this.isTimeframeForToday(item));
     },
     roadmapItemIndex() {
       return this.timeframe.findIndex((item) => {
@@ -74,53 +63,6 @@ export default {
     },
   },
   methods: {
-    isTimeframeForToday(timeframeItem) {
-      if (this.presetTypeQuarters) {
-        return (
-          this.currentDate >= timeframeItem.range[0] && this.currentDate <= timeframeItem.range[2]
-        );
-      } else if (this.presetTypeMonths) {
-        return (
-          this.currentDate.getMonth() === timeframeItem.getMonth() &&
-          this.currentDate.getFullYear() === timeframeItem.getFullYear()
-        );
-      }
-      const itemTime = new Date(timeframeItem.getTime());
-      const headerSubItems = new Array(7)
-        .fill()
-        .map(
-          (_, i) => new Date(itemTime.getFullYear(), itemTime.getMonth(), itemTime.getDate() + i),
-        );
-
-      return (
-        this.currentDate.getTime() >= headerSubItems[0].getTime() &&
-        this.currentDate.getTime() <= headerSubItems[headerSubItems.length - 1].getTime()
-      );
-    },
-    getIndicatorStyles() {
-      let left;
-
-      // Get total days of current timeframe Item and then
-      // get size in % from current date and days in range
-      // based on the current presetType
-      if (this.presetTypeQuarters) {
-        left = Math.floor(
-          (dayInQuarter(this.currentDate, this.timeframeItem.range) /
-            totalDaysInQuarter(this.timeframeItem.range)) *
-            100,
-        );
-      } else if (this.presetTypeMonths) {
-        left = Math.floor(
-          (this.currentDate.getDate() / totalDaysInMonth(this.timeframeItem)) * 100,
-        );
-      } else if (this.presetTypeWeeks) {
-        left = Math.floor(((this.currentDate.getDay() + 1) / DAYS_IN_WEEK) * 100 - DAYS_IN_WEEK);
-      }
-
-      return {
-        left: `${left}%`,
-      };
-    },
     timeframeString(roadmapItem) {
       if (roadmapItem.startDateUndefined && roadmapItem.endDateUndefined) {
         return sprintf(s__('GroupRoadmap|No start and end date'));

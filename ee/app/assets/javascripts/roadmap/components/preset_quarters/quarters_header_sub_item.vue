@@ -1,17 +1,13 @@
 <script>
 import { monthInWords } from '~/lib/utils/datetime_utility';
 
-import CommonMixin from '../../mixins/common_mixin';
+import CurrentDayMixin from '../../mixins/current_day_mixin';
 
 import { PRESET_TYPES } from '../../constants';
 
 export default {
-  mixins: [CommonMixin],
+  mixins: [CurrentDayMixin],
   props: {
-    currentDate: {
-      type: Date,
-      required: true,
-    },
     timeframeItem: {
       type: Object,
       required: true,
@@ -71,7 +67,7 @@ export default {
     >
     <span
       v-if="hasToday"
-      :style="indicatorStyle"
+      :style="getIndicatorStyle(presetType, timeframeItem)"
       class="current-day-indicator-header preset-quarters position-absolute"
     ></span>
   </div>

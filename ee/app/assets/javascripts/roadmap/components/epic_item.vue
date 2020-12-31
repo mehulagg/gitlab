@@ -9,17 +9,16 @@ import QuartersPresetMixin from '../mixins/quarters_preset_mixin';
 import MonthsPresetMixin from '../mixins/months_preset_mixin';
 import WeeksPresetMixin from '../mixins/weeks_preset_mixin';
 
-import CurrentDayIndicator from './current_day_indicator.vue';
+import CurrentDayMixin from '../mixins/current_day_mixin';
 
 import { EPIC_HIGHLIGHT_REMOVE_AFTER } from '../constants';
 
 export default {
   components: {
-    CurrentDayIndicator,
     EpicItemDetails,
     EpicItemTimeline,
   },
-  mixins: [CommonMixin, QuartersPresetMixin, MonthsPresetMixin, WeeksPresetMixin],
+  mixins: [CommonMixin, QuartersPresetMixin, MonthsPresetMixin, WeeksPresetMixin, CurrentDayMixin],
   props: {
     presetType: {
       type: String,
@@ -138,11 +137,13 @@ export default {
       />
       <template v-for="(timeframeItem, index) in timeframe">
         <span :key="index" class="epic-timeline-cell" data-qa-selector="epic_timeline_cell">
-          <current-day-indicator
+          <!-- todaysIndex and getIndicatorStyles are in CurrentDayMixin -->
+          <span
             v-if="index === todaysIndex"
-            :preset-type="presetType"
-            :timeframe-item="timeframeItem"
-          />
+            data-testid="currentDayIndicator"
+            :style="getIndicatorStyles(presetType, timeframeItem)"
+            class="current-day-indicator position-absolute"
+          ></span>
           <epic-item-timeline
             v-if="index === roadmapItemIndex"
             :preset-type="presetType"

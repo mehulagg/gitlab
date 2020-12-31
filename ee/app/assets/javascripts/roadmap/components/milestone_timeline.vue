@@ -1,12 +1,12 @@
 <script>
 import MilestoneItem from './milestone_item.vue';
-import CurrentDayIndicator from './current_day_indicator.vue';
+import CurrentDayMixin from '../mixins/current_day_mixin';
 
 export default {
   components: {
     MilestoneItem,
-    CurrentDayIndicator,
   },
+  mixins: [CurrentDayMixin],
   props: {
     presetType: {
       type: String,
@@ -40,7 +40,13 @@ export default {
       class="milestone-timeline-cell gl-display-table-cell gl-relative border-right border-bottom"
       data-qa-selector="milestone_timeline_cell"
     >
-      <current-day-indicator :preset-type="presetType" :timeframe-item="timeframeItem" />
+      <!-- todaysIndex and getIndicatorStyles are in CurrentDayMixin -->
+      <span
+        v-if="index === todaysIndex"
+        data-testid="currentDayIndicator"
+        :style="getIndicatorStyles(presetType, timeframeItem)"
+        class="current-day-indicator position-absolute"
+      ></span>
       <template v-if="milestonesExpanded">
         <milestone-item
           v-for="milestone in milestones"
