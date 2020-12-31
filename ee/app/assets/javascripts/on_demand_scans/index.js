@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import apolloProvider from './graphql/provider';
-import OnDemandScansApp from './components/on_demand_scans_app.vue';
+import OnDemandScansForm from './components/on_demand_scans_form.vue';
 
 export default () => {
   const el = document.querySelector('#js-on-demand-scans-app');
@@ -10,7 +10,6 @@ export default () => {
 
   const {
     dastSiteValidationDocsPath,
-    emptyStateSvgPath,
     projectPath,
     defaultBranch,
     scannerProfilesLibraryPath,
@@ -18,6 +17,7 @@ export default () => {
     newSiteProfilePath,
     newScannerProfilePath,
     helpPagePath,
+    dastScan,
   } = el.dataset;
 
   return new Vue({
@@ -31,12 +31,12 @@ export default () => {
       dastSiteValidationDocsPath,
     },
     render(h) {
-      return h(OnDemandScansApp, {
+      return h(OnDemandScansForm, {
         props: {
           helpPagePath,
-          emptyStateSvgPath,
           projectPath,
           defaultBranch,
+          dastScan: dastScan ? JSON.parse(dastScan) : null,
         },
       });
     },
