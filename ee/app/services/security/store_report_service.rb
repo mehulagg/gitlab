@@ -28,6 +28,14 @@ module Security
 
     private
 
+    def uuid_v4?
+      ->(uuid) { uuid.match?(/^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i) }
+    end
+
+    def uuid_v5?
+      ->(uuid) { uuid.match?(/^[0-9A-F]{8}-[0-9A-F]{4}-5[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i) }
+    end
+
     def executed?
       pipeline.vulnerability_findings.report_type(@report.type).any?
     end
@@ -79,15 +87,29 @@ module Security
       }
 
       begin
-        vulnerability_finding = project
+        with_create_params = project
           .vulnerability_findings
           .create_with(create_params)
-          .find_or_initialize_by(find_params)
 
-        vulnerability_finding.save!
-        vulnerability_finding
-      rescue ActiveRecord::RecordNotUnique
-        project.vulnerability_findings.find_by!(find_params)
+        new_finding = case finding.uuid
+                      when uuid_v4?
+                        with_create_params.find_or_initialize_by(find_params)
+                      when uuid_v5?
+                        temporary_finding = with_create_params.find_or_initialize_by(uuid: finding.uuid)
+                        temporary_finding.assign_attributes(find_params)
+                        temporary_finding
+                      end
+
+        new_finding.save!
+        new_finding
+      rescue ActiveRecord::RecordNotUnique => e
+        via_uuid = project.vulnerability_findings.find_by(uuid: finding.uuid)
+        return via_uuid unless via_uuid.nil?
+
+        via_find_params = project.vulnerability_findings.find_by(find_params)
+        return via_find_params unless via_find_params.nil?
+
+        Gitlab::ErrorTracking.track_and_raise_exception(e, find_params: find_params, uuid: finding.uuid)
       rescue ActiveRecord::RecordInvalid => e
         Gitlab::ErrorTracking.track_and_raise_exception(e, create_params: create_params&.dig(:raw_metadata))
       end
