@@ -28,12 +28,16 @@ module Gitlab
 
         private
 
-        # Cost: 2 Redis roundtrips.
-        # - 1 request to obtain all queue names
-        # - N pipelined requests to read all jobs per queue
+        def read_queues(conn)
+          @queues ||= conn.sscan_each("queues").to_a
+        end
+
+        # Amortized cost: 1 Redis roundtrip.
+        # - 1 cached request to obtain all queue names (constant over sampler lifetime)
+        # - N pipelined requests to read all jobs per queue for each sampler call
         def sample_queue_stats(labels)
           queue_stats = Sidekiq.redis do |conn|
-            queues = conn.sscan_each("queues").to_a
+            queues = read_queues(conn)
 
             jobs = conn.pipelined do
               queues.each do |queue|
