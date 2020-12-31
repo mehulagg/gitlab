@@ -72,14 +72,28 @@ export default {
   },
   methods: {
     nextPage() {
+      this.fetchMoreAgents({
+        first: MAX_LIST_COUNT,
+        last: null,
+        afterAgent: this.agentPageInfo.endCursor,
+        afterTree: this.branchPageInfo.endCursor,
+      });
+    },
+    prevPage() {
+      this.fetchMoreAgents({
+        first: null,
+        last: MAX_LIST_COUNT,
+        beforeAgent: this.agentPageInfo.startCursor,
+        beforeTree: this.branchPageInfo.startCursor,
+      });
+    },
+    fetchMoreAgents(queryVariables) {
       this.$apollo.queries.agents
         .fetchMore({
           variables: {
             defaultBranchName: this.defaultBranchName,
             projectPath: this.projectPath,
-            first: MAX_LIST_COUNT,
-            afterAgent: this.agentPageInfo.endCursor,
-            afterTree: this.branchPageInfo.endCursor,
+            ...queryVariables,
           },
           updateQuery: (previousResult, { fetchMoreResult }) => {
             return produce(fetchMoreResult, (newAgents) => {
@@ -94,16 +108,6 @@ export default {
         .catch(() => {
           this.agents = null;
         });
-    },
-    prevPage() {
-      /*
-      this.cursor = {
-        first: null,
-        after: null,
-        last: MAX_LIST_COUNT,
-        before: item,
-      };
-      */
     },
   },
 };
