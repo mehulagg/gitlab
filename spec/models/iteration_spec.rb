@@ -32,6 +32,56 @@ RSpec.describe Iteration do
     end
   end
 
+  describe 'setting iteration cadence' do
+    let_it_be(:iteration_cadence) { create(:iteration_cadence, group: group, start_date: 10.days.ago) }
+    let(:iteration) { create(:iteration, group: group, iteration_cadence: set_cadence, start_date: 2.days.from_now) }
+    let(:set_cadence) { nil }
+
+    context 'when iteration_cadence is set correctly' do
+      let(:set_cadence) { iteration_cadence}
+
+      it 'does not change the iteration_cadence' do
+        expect(iteration.iteration_cadence).to eq(iteration_cadence)
+      end
+    end
+
+    context 'when iteration_cadence exists for the group' do
+      it 'sets the iteration_cadence to the existing record' do
+        expect(iteration.iteration_cadence).to eq(iteration_cadence)
+      end
+    end
+
+    context 'when iteration_cadence does not exists for the group' do
+      let(:iteration) { build(:iteration, group: create(:group), iteration_cadence: set_cadence) }
+
+      it 'creates a new iteration_cadence record and sets it to the reecord' do
+        expect { iteration.save! }.to change { Iterations::Cadence.count }.from(1).to(2)
+      end
+
+      it 'sets the newly created iteration_cadence to the reecord' do
+        iteration.save!
+
+        expect(iteration.iteration_cadence).to eq(Iterations::Cadence.last)
+      end
+
+      it 'creates the iteration_cadence with the correct attributes' do
+        iteration.save!
+
+        cadence = Iterations::Cadence.last
+
+        expect(cadence.reload.start_date).to eq(iteration.start_date)
+      end
+    end
+
+    context 'when iteration is a project iteration' do
+      it 'does not set the iteration_cadence' do
+        iteration = create(:iteration, iteration_cadence: nil, project: project, skip_project_validation: true)
+
+        expect(iteration.reload.iteration_cadence).to be_nil
+      end
+    end
+  end
+
   describe '.filter_by_state' do
     let_it_be(:closed_iteration) { create(:iteration, :closed, :skip_future_date_validation, group: group, start_date: 8.days.ago, due_date: 2.days.ago) }
     let_it_be(:started_iteration) { create(:iteration, :started, :skip_future_date_validation, group: group, start_date: 1.day.ago, due_date: 6.days.from_now) }
@@ -303,6 +353,43 @@ RSpec.describe Iteration do
     describe 'due_date_passed' do
       it 'returns iterations where due date is in the past' do
         expect(described_class.due_date_passed).to contain_exactly(iteration_2)
+      end
+    end
+  end
+
+  describe '#validate_group' do
+    let_it_be(:iteration_cadence) { create(:iteration_cadence, group: group) }
+
+    context 'when the iteration and iteration cadence groups are same' do
+      it 'is valid' do
+        iteration = build(:iteration, group: group, iteration_cadence: iteration_cadence)
+
+        expect(iteration).to be_valid
+      end
+    end
+
+    context 'when the iteration and iteration cadence groups are different' do
+      it 'is invalid' do
+        other_group = create(:group)
+        iteration = build(:iteration, group: other_group, iteration_cadence: iteration_cadence)
+
+        expect(iteration).not_to be_valid
+      end
+    end
+
+    context 'when the iteration belongs to a project and the iteration cadence is set' do
+      it 'is invalid' do
+        iteration = build(:iteration, project: project, iteration_cadence: iteration_cadence, skip_project_validation: true)
+
+        expect(iteration).to be_invalid
+      end
+    end
+
+    context 'when the iteration belongs to a project and the iteration cadence is not set' do
+      it 'is valid' do
+        iteration = build(:iteration, project: project, skip_project_validation: true)
+
+        expect(iteration).to be_valid
       end
     end
   end
