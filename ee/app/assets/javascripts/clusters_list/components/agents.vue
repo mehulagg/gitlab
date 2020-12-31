@@ -60,6 +60,9 @@ export default {
     agentPageInfo() {
       return this.agents?.project?.clusterAgents?.pageInfo || {};
     },
+    branchPageInfo() {
+      return this.agents?.project?.repository?.tree?.trees?.pageInfo || {};
+    },
     isLoading() {
       return this.$apollo.queries.agents.loading;
     },
@@ -76,6 +79,7 @@ export default {
             projectPath: this.projectPath,
             first: MAX_LIST_COUNT,
             afterAgent: this.agentPageInfo.endCursor,
+            afterTree: this.branchPageInfo.endCursor,
           },
           updateQuery: (previousResult, { fetchMoreResult }) => {
             return produce(fetchMoreResult, (newAgents) => {
