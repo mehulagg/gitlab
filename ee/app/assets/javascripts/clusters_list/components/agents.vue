@@ -4,8 +4,7 @@ import produce from 'immer';
 import AgentEmptyState from './agent_empty_state.vue';
 import AgentTable from './agent_table.vue';
 import getAgentsQuery from '../graphql/queries/get_agents.query.graphql';
-
-const MAX_LIST_COUNT = 3;
+import { MAX_LIST_COUNT } from '../constants';
 
 export default {
   apollo: {
@@ -16,6 +15,7 @@ export default {
           defaultBranchName: this.defaultBranchName,
           projectPath: this.projectPath,
           first: MAX_LIST_COUNT,
+          last: null,
         };
       },
       update: (data) => data,
