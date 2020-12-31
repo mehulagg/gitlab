@@ -14,9 +14,14 @@ module MemberPermissionExport
 
       upload.start!
       generate_csv_data
+      send_mail
       upload.finish!
 
       ServiceResponse.success
+    rescue StandardError => e
+      upload.failed!
+
+      ServiceResponse.error(message: "Failed to export user permissions: #{e.message}")
     ensure
       schedule_export_deletion
     end
@@ -60,6 +65,10 @@ module MemberPermissionExport
         Time.current.utc.strftime('%FT%H%M'),
         '.csv'
       ].join
+    end
+
+    def send_mail
+
     end
 
     def schedule_export_deletion
