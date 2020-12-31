@@ -14457,6 +14457,36 @@ CREATE SEQUENCE oauth_openid_requests_id_seq
 
 ALTER SEQUENCE oauth_openid_requests_id_seq OWNED BY oauth_openid_requests.id;
 
+CREATE TABLE onboarding_actions (
+    id bigint NOT NULL,
+    namespace_id bigint NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    git_write_at timestamp with time zone,
+    mr_created_at timestamp with time zone,
+    git_pull_at timestamp with time zone,
+    pipeline_created_at timestamp with time zone,
+    user_added_at timestamp with time zone,
+    trial_started_at timestamp with time zone,
+    required_mr_approvals_enabled_at timestamp with time zone,
+    code_owners_enabled_at timestamp with time zone,
+    scoped_label_created_at timestamp with time zone,
+    security_scan_enabled_at timestamp with time zone,
+    subscription_created_at timestamp with time zone,
+    issue_auto_closed_at timestamp with time zone,
+    repository_imported_at timestamp with time zone,
+    repository_mirrored_at timestamp with time zone
+);
+
+CREATE SEQUENCE onboarding_actions_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE onboarding_actions_id_seq OWNED BY onboarding_actions.id;
+
 CREATE TABLE open_project_tracker_data (
     id bigint NOT NULL,
     service_id integer NOT NULL,
@@ -18597,6 +18627,8 @@ ALTER TABLE ONLY oauth_applications ALTER COLUMN id SET DEFAULT nextval('oauth_a
 
 ALTER TABLE ONLY oauth_openid_requests ALTER COLUMN id SET DEFAULT nextval('oauth_openid_requests_id_seq'::regclass);
 
+ALTER TABLE ONLY onboarding_actions ALTER COLUMN id SET DEFAULT nextval('onboarding_actions_id_seq'::regclass);
+
 ALTER TABLE ONLY open_project_tracker_data ALTER COLUMN id SET DEFAULT nextval('open_project_tracker_data_id_seq'::regclass);
 
 ALTER TABLE ONLY operations_feature_flag_scopes ALTER COLUMN id SET DEFAULT nextval('operations_feature_flag_scopes_id_seq'::regclass);
@@ -19923,6 +19955,9 @@ ALTER TABLE ONLY oauth_applications
 
 ALTER TABLE ONLY oauth_openid_requests
     ADD CONSTRAINT oauth_openid_requests_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY onboarding_actions
+    ADD CONSTRAINT onboarding_actions_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY open_project_tracker_data
     ADD CONSTRAINT open_project_tracker_data_pkey PRIMARY KEY (id);
@@ -22113,6 +22148,8 @@ CREATE INDEX index_on_users_lower_email ON users USING btree (lower((email)::tex
 CREATE INDEX index_on_users_lower_username ON users USING btree (lower((username)::text));
 
 CREATE INDEX index_on_users_name_lower ON users USING btree (lower((name)::text));
+
+CREATE UNIQUE INDEX index_onboarding_actions_on_namespace_id ON onboarding_actions USING btree (namespace_id);
 
 CREATE INDEX index_open_project_tracker_data_on_service_id ON open_project_tracker_data USING btree (service_id);
 
@@ -24329,6 +24366,9 @@ ALTER TABLE ONLY group_import_states
 
 ALTER TABLE ONLY zoom_meetings
     ADD CONSTRAINT fk_rails_3263f29616 FOREIGN KEY (issue_id) REFERENCES issues(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY onboarding_actions
+    ADD CONSTRAINT fk_rails_3272f28b8c FOREIGN KEY (namespace_id) REFERENCES namespaces(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY container_repositories
     ADD CONSTRAINT fk_rails_32f7bf5aad FOREIGN KEY (project_id) REFERENCES projects(id);
