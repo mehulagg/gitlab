@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe MergeRequests::AfterCreateService do
+  include AfterNextHelpers
+
   let_it_be(:merge_request) { create(:merge_request) }
 
   subject(:after_create_service) do
@@ -57,8 +59,8 @@ RSpec.describe MergeRequests::AfterCreateService do
     end
 
     it 'records a namespace onboarding progress action' do
-      expect(NamespaceOnboardingAction).to receive(:create_action)
-        .with(merge_request.target_project.namespace, :merge_request_created).and_call_original
+      expect_next(Namespaces::OnboardingProgressService, merge_request.target_project.namespace)
+        .to receive(:execute).with(action: :merge_request_created).and_call_original
 
       expect { execute_service }.to change(NamespaceOnboardingAction, :count).by(1)
     end
