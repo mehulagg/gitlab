@@ -2,6 +2,12 @@
 
 class Admin::UserPermissionsController < Admin::ApplicationController
   def export
-    MemberPermissionExport::CreateService.new(current_user).execute
+    response = MemberPermissionExport::CreateService.new(current_user).execute
+
+    if response.success?
+      render json: { message: response.message }
+    else
+      render json: { errors: response.message }, status: :unprocessable_entity
+    end
   end
 end

@@ -15,6 +15,8 @@ module MemberPermissionExport
       upload.start!
       generate_csv_data
       upload.finish!
+
+      ServiceResponse.success
     ensure
       schedule_export_deletion
     end

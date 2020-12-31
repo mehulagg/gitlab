@@ -7,13 +7,10 @@ module MemberPermissions
 
     sidekiq_options dead: false
 
-    # feature_category :vulnerability_management to do: verify
-    worker_resource_boundary :cpu
-
     idempotent! # to do: verify
 
     sidekiq_retries_exhausted do |job|
-      Vulnerabilities::Export.find_by_id(job['args'].last).failed!
+      UserPermissionExportUpload.find_by_id(job['args'].last).failed!
     end
 
     def perform(current_user_id, upload_id)

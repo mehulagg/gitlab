@@ -184,6 +184,8 @@
   - 2
 - - mailers
   - 2
+- - member_permissions_export
+  - 1
 - - merge
   - 5
 - - merge_request_cleanup_refs
