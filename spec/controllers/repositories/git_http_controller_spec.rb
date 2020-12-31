@@ -53,7 +53,7 @@ RSpec.describe Repositories::GitHttpController do
         end
 
         it 'records a namespace onboarding progress action' do
-          expect_next_instance_of(OnboardingProgressService) do |service|
+          expect_next_instance_of(Namespaces::OnboardingProgressService) do |service|
             expect(service).to receive(:execute).with(action: :git_read)
           end
 

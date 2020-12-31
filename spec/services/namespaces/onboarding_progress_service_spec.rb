@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe OnboardingProgressService do
+RSpec.describe Namespaces::OnboardingProgressService do
   describe '#execute' do
     let(:namespace) { create(:namespace, parent: root_namespace) }
     let(:root_namespace) { nil }

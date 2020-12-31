@@ -8,7 +8,7 @@ RSpec.describe Namespaces::OnboardingPipelineCreatedWorker, '#perform' do
   let_it_be(:ci_pipeline) { create(:ci_pipeline) }
 
   it 'records the event' do
-    expect_next(OnboardingProgressService, ci_pipeline.project.namespace)
+    expect_next(Namespaces::OnboardingProgressService, ci_pipeline.project.namespace)
       .to receive(:execute).with(action: :pipeline_created).and_call_original
 
     expect do
@@ -18,7 +18,7 @@ RSpec.describe Namespaces::OnboardingPipelineCreatedWorker, '#perform' do
 
   context "when a namespace doesn't exist" do
     it "does nothing" do
-      expect_next(OnboardingProgressService, ci_pipeline.project.namespace).not_to receive(:execute)
+      expect_next(Namespaces::OnboardingProgressService, ci_pipeline.project.namespace).not_to receive(:execute)
 
       expect { subject.perform(nil) }.not_to change(NamespaceOnboardingAction, :count)
     end
