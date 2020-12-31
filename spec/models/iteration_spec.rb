@@ -32,6 +32,56 @@ RSpec.describe Iteration do
     end
   end
 
+  describe 'setting iteration cadence' do
+    let_it_be(:iteration_cadence) { create(:iteration_cadence, group: group, start_date: 10.days.ago, last_run_date: 10.days.ago) }
+    let(:iteration) { create(:iteration, group: group, iteration_cadence: set_cadence, start_date: 2.days.from_now) }
+    let(:set_cadence) { nil }
+
+    context 'when iteration_cadence is set correctly' do
+      let(:set_cadence) { iteration_cadence}
+
+      it 'does not change the iteration_cadence' do
+        expect(iteration.iteration_cadence).to eq(iteration_cadence)
+      end
+    end
+
+    context 'when iteration_cadence exists for the group' do
+      it 'sets the iteration_cadence to the existing record' do
+        expect(iteration.iteration_cadence).to eq(iteration_cadence)
+      end
+    end
+
+    context 'when iteration_cadence does not exists for the group' do
+      let(:iteration) { build(:iteration, group: create(:group), iteration_cadence: set_cadence) }
+
+      it 'creates a new iteration_cadence record and sets it to the reecord' do
+        expect { iteration.save! }.to change { IterationCadence.count }.from(1).to(2)
+      end
+
+      it 'sets the newly created iteration_cadence to the reecord' do
+        iteration.save!
+
+        expect(iteration.iteration_cadence).to eq(IterationCadence.last)
+      end
+
+      it 'creates the iteration_cadence with the correct attributes' do
+        iteration.save!
+
+        cadence = IterationCadence.last
+
+        expect(cadence.reload.start_date).to eq(iteration.start_date)
+      end
+    end
+
+    context 'when iteration is a project iteration' do
+      it 'does not set the iteration_cadence' do
+        iteration = create(:iteration, project: project, skip_project_validation: true)
+
+        expect(iteration.reload.iteration_cadence).to be_nil
+      end
+    end
+  end
+
   describe '.filter_by_state' do
     let_it_be(:closed_iteration) { create(:iteration, :closed, :skip_future_date_validation, group: group, start_date: 8.days.ago, due_date: 2.days.ago) }
     let_it_be(:started_iteration) { create(:iteration, :started, :skip_future_date_validation, group: group, start_date: 1.day.ago, due_date: 6.days.from_now) }

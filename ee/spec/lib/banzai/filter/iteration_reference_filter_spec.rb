@@ -319,6 +319,8 @@ RSpec.describe Banzai::Filter::IterationReferenceFilter do
       project_reference = another_project.to_reference_base(project)
       input_text = "See #{project_reference}#{reference}"
 
+      # we have to update iteration_cadence group first in order to avoid invallid record
+      iteration.iteration_cadence.update!(group: another_group)
       iteration.update!(group: another_group)
 
       doc = reference_filter(input_text)
@@ -328,6 +330,8 @@ RSpec.describe Banzai::Filter::IterationReferenceFilter do
     end
 
     it 'supports parent group references' do
+      # we have to update iteration_cadence group first in order to avoid invallid record
+      iteration.iteration_cadence.update!(group: parent_group)
       iteration.update!(group: parent_group)
 
       doc = reference_filter("See #{reference}")

@@ -16,6 +16,7 @@ class Iteration < ApplicationRecord
 
   belongs_to :project
   belongs_to :group
+  belongs_to :iteration_cadence
 
   has_internal_id :iid, scope: :project
   has_internal_id :iid, scope: :group
@@ -26,6 +27,8 @@ class Iteration < ApplicationRecord
   validate :dates_do_not_overlap, if: :start_or_due_dates_changed?
   validate :future_date, if: :start_or_due_dates_changed?, unless: :skip_future_date_validation
   validate :no_project, unless: :skip_project_validation
+
+  before_create :set_iteration_cadence
 
   scope :upcoming, -> { with_state(:upcoming) }
   scope :started, -> { with_state(:started) }
@@ -134,6 +137,28 @@ class Iteration < ApplicationRecord
     return unless project_id.present?
 
     errors.add(:project_id, s_("is not allowed. We do not currently support project-level iterations"))
+  end
+
+  # TODO: this method should be removed as part of https://gitlab.com/gitlab-org/gitlab/-/issues/296099
+  def set_iteration_cadence
+    return if iteration_cadence
+    return unless group
+
+    self.iteration_cadence = group.iteration_cadences.first || create_default_cadence
+  end
+
+  def create_default_cadence
+    cadence_title = IterationCadence.default_title
+
+    IterationCadence.create!(group: group, title: cadence_title, start_date: start_date, last_run_date: start_date)
+  end
+
+  # TODO: remove this as part of https://gitlab.com/gitlab-org/gitlab/-/issues/296100
+  def validate_group
+    return if iteration_cadence&.group == group
+    return if project && !iteration_cadence
+
+    errors.add(:group, s_('is not valid. The iteration group has to match the iteration cadence group.'))
   end
 end
 
