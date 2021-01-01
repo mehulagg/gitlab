@@ -99,7 +99,7 @@ RSpec.describe Atlassian::JiraConnect::Client do
     end
 
     let(:body) do
-      matcher = be_valid_json.according_to_schema(build_info_payload_schema)
+      matcher = be_valid_json.and match_schema(build_info_payload_schema)
 
       ->(text) { matcher.matches?(text) }
     end
