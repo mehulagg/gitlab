@@ -15,15 +15,15 @@ import {
 import { s__, __ } from '~/locale';
 import createFlash, { FLASH_TYPES } from '~/flash';
 import usersSearchQuery from '~/graphql_shared/queries/users_search.query.graphql';
-import getOncallSchedulesQuery from '../../graphql/queries/get_oncall_schedules.query.graphql';
-import createOncallScheduleRotationMutation from '../../graphql/mutations/create_oncall_schedule_rotation.mutation.graphql';
+import getOncallSchedulesQuery from '../../../graphql/queries/get_oncall_schedules.query.graphql';
+import createOncallScheduleRotationMutation from '../../../graphql/mutations/create_oncall_schedule_rotation.mutation.graphql';
 import {
   LENGTH_ENUM,
   HOURS_IN_DAY,
   CHEVRON_SKIPPING_SHADE_ENUM,
   CHEVRON_SKIPPING_PALETTE_ENUM,
-} from '../../constants';
-import { updateStoreAfterRotationAdd } from '../../utils/cache_updates';
+} from '../../../constants';
+import { updateStoreAfterRotationAdd } from '../../../utils/cache_updates';
 
 export default {
   i18n: {
@@ -108,6 +108,11 @@ export default {
           time: '0',
         },
       },
+      validationState: {
+        name: true,
+        participants: true,
+        startsOn: true,
+      },
       error: '',
     };
   },
@@ -169,18 +174,26 @@ export default {
             });
           },
         })
-        .then(({ data: { oncallRotationCreate: { errors: [error] } } }) => {
-          if (error) {
-            throw error;
-          }
+        .then(
+          ({
+            data: {
+              oncallRotationCreate: {
+                errors: [error],
+              },
+            },
+          }) => {
+            if (error) {
+              throw error;
+            }
 
-          this.$refs.createScheduleRotationModal.hide();
-          return createFlash({
-            message: this.$options.i18n.rotationCreated,
-            type: FLASH_TYPES.SUCCESS,
-          });
-        })
-        .catch(error => {
+            this.$refs.createScheduleRotationModal.hide();
+            return createFlash({
+              message: this.$options.i18n.rotationCreated,
+              type: FLASH_TYPES.SUCCESS,
+            });
+          },
+        )
+        .catch((error) => {
           this.error = error;
         })
         .finally(() => {

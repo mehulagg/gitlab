@@ -4,7 +4,7 @@ import VueApollo from 'vue-apollo';
 import waitForPromises from 'helpers/wait_for_promises';
 import { GlDropdownItem, GlModal, GlAlert, GlTokenSelector } from '@gitlab/ui';
 import { addRotationModalId } from 'ee/oncall_schedules/components/oncall_schedule.vue';
-import AddRotationModal from 'ee/oncall_schedules/components/rotations/add_rotation_modal.vue';
+import AddRotationModal from 'ee/oncall_schedules/components/rotations/components/add_rotation_modal.vue';
 import getOncallSchedulesQuery from 'ee/oncall_schedules/graphql/queries/get_oncall_schedules.query.graphql';
 import createOncallScheduleRotationMutation from 'ee/oncall_schedules/graphql/mutations/create_oncall_schedule_rotation.mutation.graphql';
 import usersSearchQuery from '~/graphql_shared/queries/users_search.query.graphql';
@@ -13,7 +13,7 @@ import {
   getOncallSchedulesQueryResponse,
   createRotationResponse,
   createRotationResponseWithErrors,
-} from '../mocks/apollo_mock';
+} from '../../mocks/apollo_mock';
 
 const schedule =
   getOncallSchedulesQueryResponse.data.project.incidentManagementOncallSchedules.nodes[0];

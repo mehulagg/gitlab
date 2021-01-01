@@ -92,7 +92,7 @@ const addRotationToStore = (
   });
 
   // TODO: This needs the rotation backend to be fully integrated to work, for the moment we will place-hold it.
-  const data = produce(sourceData, draftData => {
+  const data = produce(sourceData, (draftData) => {
     const rotations = [rotation];
 
     // eslint-disable-next-line no-param-reassign
