@@ -4,9 +4,12 @@ import VueApollo from 'vue-apollo';
 import waitForPromises from 'helpers/wait_for_promises';
 import { GlDropdownItem, GlModal, GlAlert, GlTokenSelector } from '@gitlab/ui';
 import { addRotationModalId } from 'ee/oncall_schedules/components/oncall_schedule.vue';
-import AddRotationModal from 'ee/oncall_schedules/components/rotations/components/add_rotation_modal.vue';
+import AddRotationModal, {
+  i18n,
+} from 'ee/oncall_schedules/components/rotations/components/add_rotation_modal.vue';
 import getOncallSchedulesQuery from 'ee/oncall_schedules/graphql/queries/get_oncall_schedules.query.graphql';
 import createOncallScheduleRotationMutation from 'ee/oncall_schedules/graphql/mutations/create_oncall_schedule_rotation.mutation.graphql';
+import createFlash, { FLASH_TYPES } from '~/flash';
 import usersSearchQuery from '~/graphql_shared/queries/users_search.query.graphql';
 import {
   participants,
@@ -15,14 +18,14 @@ import {
   createRotationResponseWithErrors,
 } from '../../mocks/apollo_mock';
 
+jest.mock('~/flash');
+
 const schedule =
   getOncallSchedulesQueryResponse.data.project.incidentManagementOncallSchedules.nodes[0];
 const localVue = createLocalVue();
 const projectPath = 'group/project';
 const mutate = jest.fn();
 const mockHideModal = jest.fn();
-
-localVue.use(VueApollo);
 
 describe('AddRotationModal', () => {
   let wrapper;
@@ -37,9 +40,6 @@ describe('AddRotationModal', () => {
   }
 
   async function createRotation(localWrapper) {
-    await jest.runOnlyPendingTimers();
-    await localWrapper.vm.$nextTick();
-
     localWrapper.find(GlModal).vm.$emit('primary', { preventDefault: jest.fn() });
   }
 
@@ -54,7 +54,6 @@ describe('AddRotationModal', () => {
         modalId: addRotationModalId,
         schedule,
         ...props,
-        schedule,
       },
       provide: {
         projectPath,
@@ -78,6 +77,7 @@ describe('AddRotationModal', () => {
     createHandler = jest.fn().mockResolvedValue(createRotationResponse),
   } = {}) => {
     createRotationHandler = createHandler;
+    localVue.use(VueApollo);
 
     fakeApollo = createMockApollo([
       [getOncallSchedulesQuery, jest.fn().mockResolvedValue(getOncallSchedulesQueryResponse)],
@@ -113,6 +113,8 @@ describe('AddRotationModal', () => {
         projectPath,
       },
     });
+
+    wrapper.vm.$refs.createScheduleRotationModal.hide = mockHideModal;
   };
 
   beforeEach(() => {
@@ -237,8 +239,14 @@ describe('AddRotationModal', () => {
       createComponentWithApollo();
 
       await createRotation(wrapper);
+      await awaitApolloDomMock();
 
+      expect(mockHideModal).toHaveBeenCalled();
       expect(createRotationHandler).toHaveBeenCalled();
+      expect(createFlash).toHaveBeenCalledWith({
+        message: i18n.rotationCreated,
+        type: FLASH_TYPES.SUCCESS,
+      });
     });
 
     it('displays alert if mutation had a recoverable error', async () => {

@@ -25,26 +25,28 @@ import {
 } from '../../../constants';
 import { updateStoreAfterRotationAdd } from '../../../utils/cache_updates';
 
-export default {
-  i18n: {
-    selectParticipant: s__('OnCallSchedules|Select participant'),
-    addRotation: s__('OnCallSchedules|Add rotation'),
-    cancel: __('Cancel'),
-    errorMsg: s__('OnCallSchedules|Failed to add rotation'),
-    fields: {
-      name: { title: __('Name'), error: s__('OnCallSchedules|Rotation name cannot be empty') },
-      participants: {
-        title: __('Participants'),
-        error: s__('OnCallSchedules|Rotation participants cannot be empty'),
-      },
-      rotationLength: { title: s__('OnCallSchedules|Rotation length') },
-      startsAt: {
-        title: __('Starts on'),
-        error: s__('OnCallSchedules|Rotation start date cannot be empty'),
-      },
+export const i18n = {
+  selectParticipant: s__('OnCallSchedules|Select participant'),
+  addRotation: s__('OnCallSchedules|Add rotation'),
+  cancel: __('Cancel'),
+  errorMsg: s__('OnCallSchedules|Failed to add rotation'),
+  fields: {
+    name: { title: __('Name'), error: s__('OnCallSchedules|Rotation name cannot be empty') },
+    participants: {
+      title: __('Participants'),
+      error: s__('OnCallSchedules|Rotation participants cannot be empty'),
     },
-    rotationCreated: s__('OnCallSchedules|Successfully created a new rotation'),
+    rotationLength: { title: s__('OnCallSchedules|Rotation length') },
+    startsAt: {
+      title: __('Starts on'),
+      error: s__('OnCallSchedules|Rotation start date cannot be empty'),
+    },
   },
+  rotationCreated: s__('OnCallSchedules|Successfully created a new rotation'),
+};
+
+export default {
+  i18n,
   HOURS_IN_DAY,
   tokenColorPalette: {
     shade: CHEVRON_SKIPPING_SHADE_ENUM,
@@ -111,7 +113,7 @@ export default {
       validationState: {
         name: true,
         participants: true,
-        startsOn: true,
+        startsAt: true,
       },
       error: '',
     };
@@ -216,9 +218,9 @@ export default {
       if (key === 'name') {
         this.validationState.name = this.form.name !== '';
       } else if (key === 'participants') {
-        this.validationState.participants = this.form.participants.length > 0;
-      } else if (key === 'startsOn') {
-        this.validationState.startsOn = this.form.startsOn.date !== null;
+        this.validationState.participants = this.form.participants.length !== 0;
+      } else if (key === 'startsAt') {
+        this.validationState.startsAt = this.form.startsAt.date !== null;
       }
     },
   },
