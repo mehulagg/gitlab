@@ -229,5 +229,35 @@ namespace :gitlab do
       puts "Found user created projects. Database active"
       exit 0
     end
+
+    desc 'Run migrations with instrumentation'
+    task migration_testing: :environment do
+      verbose_was, ActiveRecord::Migration.verbose = ActiveRecord::Migration.verbose, true
+
+      ctx = ActiveRecord::Base.connection.migration_context
+      existing_versions = ctx.get_all_versions.to_set
+
+      pending_migrations = ctx.migrations.reject do |migration|
+        existing_versions.include?(migration.version)
+      end
+
+      stats = []
+
+      pending_migrations.each do |migration|
+        walltime = Benchmark.realtime do
+          ActiveRecord::Migrator.new(:up, ctx.migrations, ctx.schema_migration, migration.version).run
+        end
+
+        stats << { version: migration.version, walltime: walltime }
+      end
+
+      File.open(File.join(Rails.root, 'tmp', 'migration-stats.json'), "wb+") do |io|
+        io << stats.to_json
+      end
+
+      ActiveRecord::Base.clear_cache!
+    ensure
+      ActiveRecord::Migration.verbose = verbose_was
+    end
   end
 end
