@@ -50,7 +50,7 @@ Otherwise, you can:
      1. Check the Subscription Agreement checkbox.
      1. Select **Upload License**.
 
-     ![Upload license](img/license_upload_v13.8.png)
+     ![Upload license](img/license_upload_v13_8.png)
 
    - *If you've received your license as plain text:*
     1. Select **Enter license key**
