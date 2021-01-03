@@ -147,18 +147,24 @@ export default {
       const headerLines = this.getHeadersAsCodeBlockLines(headers);
 
       return statusCode && reasonPhrase && headerLines
-        ? [`${statusCode} ${reasonPhrase}\n`, headerLines, '\n\n', body].join('')
+        ? [
+            `${statusCode} ${reasonPhrase}\n`,
+            headerLines,
+            '\n\n',
+            body || this.$options.emptyBody,
+          ].join('')
         : '';
     },
     constructRequest(request) {
-      const { body, method, url, headers = [] } = request;
+      const { body = this.$options.emptyBody, method, url, headers = [] } = request;
       const headerLines = this.getHeadersAsCodeBlockLines(headers);
 
       return method && url && headerLines
-        ? [`${method} ${url}\n`, headerLines, '\n\n', body].join('')
+        ? [`${method} ${url}\n`, headerLines, '\n\n', body || this.$options.emptyBody].join('')
         : '';
     },
   },
+  emptyBody: '<Message body is not provided>',
 };
 </script>
 
