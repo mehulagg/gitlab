@@ -9,7 +9,9 @@ module Gitlab
       # NOTE: This sampler must not start before the sidekiq initializer has run, since it relies
       # on `Sidekiq.redis` to point to a fully initialized client.
       class SidekiqSampler < BaseSampler
-        DEFAULT_SAMPLING_INTERVAL_SECONDS = 5
+        # This needs to be balanced with the number of Sidekiq workers running across all fleets
+        # and the size of the Redis cluster.
+        DEFAULT_SAMPLING_INTERVAL_SECONDS = 10
 
         attr_reader :metrics
 
