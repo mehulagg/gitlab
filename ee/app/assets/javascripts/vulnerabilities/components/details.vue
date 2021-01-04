@@ -377,5 +377,24 @@ export default {
         </detail-item>
       </ul>
     </template>
+
+    <template v-if="vulnerability.assets && vulnerability.assets.length">
+      <h3>{{ __('Reproduction Assets') }}</h3>
+      <ul>
+        <li
+          v-for="(asset, index) in vulnerability.assets"
+          :key="`${index}:${asset.url}`"
+          class="gl-ml-0! gl-list-style-position-inside"
+        >
+          <component
+            :is="asset.url ? 'gl-link' : 'span'"
+            v-bind="asset.url && { href: asset.url, target: '_blank' }"
+            data-testid="asset"
+          >
+            {{ asset.name }}
+          </component>
+        </li>
+      </ul>
+    </template>
   </div>
 </template>

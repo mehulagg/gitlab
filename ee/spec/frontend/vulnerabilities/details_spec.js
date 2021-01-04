@@ -124,6 +124,41 @@ describe('Vulnerability Details', () => {
     identifiersData.forEach(checkIdentifier);
   });
 
+  it('shows the vulnerability assets if they exist', () => {
+    const assetsData = [
+      { name: 'Postman Collection', url: 'http://example.com/postman' },
+      { name: 'HTTP Messages', url: 'http://example.com/http-messages' },
+      { name: 'Foo' },
+      { name: 'Bar' },
+    ];
+
+    createWrapper({
+      assets: assetsData,
+    });
+
+    const assets = getAllById('asset');
+
+    expect(assets).toHaveLength(assetsData.length);
+
+    const checkIdentifier = ({ name, url }, index) => {
+      const asset = assets.at(index);
+
+      expect(asset.text()).toBe(name);
+
+      if (url) {
+        expect(asset.is(GlLink)).toBe(true);
+        expect(asset.attributes()).toMatchObject({
+          target: '_blank',
+          href: url,
+        });
+      } else {
+        expect(asset.is(GlLink)).toBe(false);
+      }
+    };
+
+    assetsData.forEach(checkIdentifier);
+  });
+
   describe('file link', () => {
     const file = () => getById('file').find(GlLink);
 
