@@ -499,10 +499,8 @@ addresses and names, do use:
 When including sample URLs in the documentation, use:
 
 - `example.com` when the domain name is generic.
-- `gitlab.example.com` when referring to self-managed instances of GitLab.
-
-When referring to the GitLab.com SaaS instance at `gitlab.com`, do not
-substitute a fake URL.
+- `gitlab.example.com` when referring only to self-managed GitLab instances.
+  Use `gitlab.com` for GitLab SaaS instances.
 
 ### Fake tokens
 
