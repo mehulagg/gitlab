@@ -24,7 +24,9 @@ exports[`RotationsListSectionComponent renders component layout 1`] = `
           buttontextclasses=""
           category="tertiary"
           icon="pencil"
+          role="button"
           size="medium"
+          tabindex="0"
           title="Edit rotation"
           variant="default"
         />
@@ -34,7 +36,9 @@ exports[`RotationsListSectionComponent renders component layout 1`] = `
           buttontextclasses=""
           category="tertiary"
           icon="remove"
+          role="button"
           size="medium"
+          tabindex="0"
           title="Delete rotation"
           variant="default"
         />
