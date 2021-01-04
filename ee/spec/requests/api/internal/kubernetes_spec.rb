@@ -51,9 +51,9 @@ RSpec.describe API::Internal::Kubernetes do
     end
   end
 
-  describe 'POST /internal/kubernetes/modules/cilium/network_alert' do
+  describe 'POST /internal/kubernetes/modules/cilium_alert' do
     def send_request(headers: {}, params: {})
-      post api('/internal/kubernetes/modules/cilium/network_alert'), params: params, headers: headers.reverse_merge(jwt_auth_headers)
+      post api('/internal/kubernetes/modules/cilium_alert'), params: params, headers: headers.reverse_merge(jwt_auth_headers)
     end
 
     include_examples 'authorization'

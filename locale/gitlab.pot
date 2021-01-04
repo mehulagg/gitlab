@@ -1325,6 +1325,9 @@ msgstr ""
 msgid "A ready-to-go template for use with iOS Swift apps"
 msgstr ""
 
+msgid "A rebase is already in progress."
+msgstr ""
+
 msgid "A regular expression that will be used to find the test coverage output in the job log. Leave blank to disable"
 msgstr ""
 
@@ -3309,9 +3312,6 @@ msgstr ""
 msgid "An error occurred while retrieving projects."
 msgstr ""
 
-msgid "An error occurred while saving LDAP override status. Please try again."
-msgstr ""
-
 msgid "An error occurred while saving assignees"
 msgstr ""
 
@@ -3941,6 +3941,9 @@ msgid "Assigned to %{name}"
 msgstr ""
 
 msgid "Assigned to me"
+msgstr ""
+
+msgid "Assigned to you"
 msgstr ""
 
 msgid "Assignee"
@@ -19559,10 +19562,19 @@ msgstr ""
 msgid "OnDemandScans|Create a new site profile"
 msgstr ""
 
+msgid "OnDemandScans|Description"
+msgstr ""
+
 msgid "OnDemandScans|Edit on-demand DAST scan"
 msgstr ""
 
+msgid "OnDemandScans|For example: Tests the login page for SQL injections"
+msgstr ""
+
 msgid "OnDemandScans|Manage profiles"
+msgstr ""
+
+msgid "OnDemandScans|My daily scan"
 msgstr ""
 
 msgid "OnDemandScans|New on-demand DAST scan"
@@ -19581,6 +19593,15 @@ msgid "OnDemandScans|On-demand scans run outside the DevOps cycle and find vulne
 msgstr ""
 
 msgid "OnDemandScans|Run scan"
+msgstr ""
+
+msgid "OnDemandScans|Save and run scan"
+msgstr ""
+
+msgid "OnDemandScans|Save scan"
+msgstr ""
+
+msgid "OnDemandScans|Scan name"
 msgstr ""
 
 msgid "OnDemandScans|Scanner profile"
@@ -24012,6 +24033,9 @@ msgid "Review App|View latest app"
 msgstr ""
 
 msgid "Review requested from %{name}"
+msgstr ""
+
+msgid "Review requests for you"
 msgstr ""
 
 msgid "Review the changes locally"
@@ -32003,9 +32027,6 @@ msgid "You do not have permission to update the environment."
 msgstr ""
 
 msgid "You do not have permissions to run the import."
-msgstr ""
-
-msgid "You do not have the correct permissions to override the settings from the LDAP group sync."
 msgstr ""
 
 msgid "You don't have any U2F devices registered yet."

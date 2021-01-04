@@ -145,7 +145,7 @@ gem 'aws-sdk-s3', '~> 1'
 gem 'faraday_middleware-aws-sigv4', '~>0.3.0'
 
 # Markdown and HTML processing
-gem 'html-pipeline', '~> 2.12'
+gem 'html-pipeline', '~> 2.13.2'
 gem 'deckar01-task_list', '2.3.1'
 gem 'gitlab-markup', '~> 1.7.1'
 gem 'github-markup', '~> 1.7.0', require: 'github/markup'
@@ -189,7 +189,7 @@ group :puma do
 end
 
 # State machine
-gem 'state_machines-activerecord', '~> 0.6.0'
+gem 'state_machines-activerecord', '~> 0.8.0'
 
 # Issue tags
 gem 'acts-as-taggable-on', '~> 6.0'

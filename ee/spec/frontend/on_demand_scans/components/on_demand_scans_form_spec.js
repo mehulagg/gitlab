@@ -1,4 +1,4 @@
-import { GlForm, GlSkeletonLoader } from '@gitlab/ui';
+import { GlForm, GlFormInput, GlSkeletonLoader } from '@gitlab/ui';
 import { shallowMount, mount, createLocalVue } from '@vue/test-utils';
 import { merge } from 'lodash';
 import VueApollo from 'vue-apollo';
@@ -6,9 +6,11 @@ import createApolloProvider from 'helpers/mock_apollo_helper';
 import OnDemandScansForm from 'ee/on_demand_scans/components/on_demand_scans_form.vue';
 import ScannerProfileSelector from 'ee/on_demand_scans/components/profile_selector/scanner_profile_selector.vue';
 import SiteProfileSelector from 'ee/on_demand_scans/components/profile_selector/site_profile_selector.vue';
-import dastOnDemandScanCreate from 'ee/on_demand_scans/graphql/dast_on_demand_scan_create.mutation.graphql';
+import dastScanCreateMutation from 'ee/on_demand_scans/graphql/dast_scan_create.mutation.graphql';
+import dastOnDemandScanCreateMutation from 'ee/on_demand_scans/graphql/dast_on_demand_scan_create.mutation.graphql';
 import dastScannerProfilesQuery from 'ee/security_configuration/dast_profiles/graphql/dast_scanner_profiles.query.graphql';
 import dastSiteProfilesQuery from 'ee/security_configuration/dast_profiles/graphql/dast_site_profiles.query.graphql';
+import { stubComponent } from 'helpers/stub_component';
 import * as responses from '../mocks/apollo_mocks';
 import { scannerProfiles, siteProfiles } from '../mocks/mock_data';
 import { redirectTo } from '~/lib/utils/url_utility';
@@ -28,6 +30,7 @@ const defaultProps = {
 };
 
 const pipelineUrl = `/${projectPath}/pipelines/123`;
+const editPath = `/${projectPath}/on_demand_scans/1/edit`;
 const [passiveScannerProfile, activeScannerProfile] = scannerProfiles;
 const [nonValidatedSiteProfile, validatedSiteProfile] = siteProfiles;
 
@@ -41,18 +44,33 @@ describe('OnDemandScansForm', () => {
   let subject;
   let requestHandlers;
 
+  const GlFormInputStub = stubComponent(GlFormInput, {
+    template: '<input />',
+  });
+
   const findForm = () => subject.find(GlForm);
   const findByTestId = (testId) => subject.find(`[data-testid="${testId}"]`);
+  const findNameInput = () => findByTestId('dast-scan-name-input');
   const findAlert = () => findByTestId('on-demand-scan-error');
   const findProfilesConflictAlert = () => findByTestId('on-demand-scans-profiles-conflict-alert');
   const findSubmitButton = () => findByTestId('on-demand-scan-submit-button');
+  const findSaveButton = () => findByTestId('on-demand-scan-save-button');
 
   const setValidFormData = () => {
+    findNameInput().vm.$emit('input', 'My daily scan');
     subject.find(ScannerProfileSelector).vm.$emit('input', passiveScannerProfile.id);
     subject.find(SiteProfileSelector).vm.$emit('input', nonValidatedSiteProfile.id);
     return subject.vm.$nextTick();
   };
+  const setupSuccess = () => {
+    jest.spyOn(subject.vm.$apollo, 'mutate').mockResolvedValue({
+      data: { dastScanCreate: { dastScan: { editPath }, pipelineUrl, errors: [] } },
+    });
+    return setValidFormData();
+  };
+
   const submitForm = () => findForm().vm.$emit('submit', { preventDefault: () => {} });
+  const saveScan = () => findSaveButton().vm.$emit('click');
 
   const createMockApolloProvider = (handlers) => {
     localVue.use(VueApollo);
@@ -100,6 +118,7 @@ describe('OnDemandScansForm', () => {
             newSiteProfilePath,
             glFeatures: {
               securityOnDemandScansSiteValidation: true,
+              dastSavedScans: true,
             },
           },
         },
@@ -180,43 +199,74 @@ describe('OnDemandScansForm', () => {
           scannerProfiles,
           siteProfiles,
         },
+        stubs: {
+          GlFormInput: GlFormInputStub,
+        },
       });
     });
 
-    describe('on success', () => {
-      beforeEach(async () => {
-        jest
-          .spyOn(subject.vm.$apollo, 'mutate')
-          .mockResolvedValue({ data: { dastOnDemandScanCreate: { pipelineUrl, errors: [] } } });
-        await setValidFormData();
-        submitForm();
-      });
+    describe.each`
+      action      | actionFunction | submitButtonLoading | saveButtonLoading | runAfterCreate | redirectPath
+      ${'submit'} | ${submitForm}  | ${true}             | ${false}          | ${true}        | ${pipelineUrl}
+      ${'save'}   | ${saveScan}    | ${false}            | ${true}           | ${false}       | ${editPath}
+    `(
+      'on $action',
+      ({
+        actionFunction,
+        submitButtonLoading,
+        saveButtonLoading,
+        runAfterCreate,
+        redirectPath,
+      }) => {
+        describe('with valid form data', () => {
+          beforeEach(async () => {
+            await setupSuccess();
+            actionFunction();
+          });
 
-      it('sets loading state', () => {
-        expect(subject.vm.loading).toBe(true);
-      });
+          it('sets loading state on correct button', async () => {
+            const [submitButton, saveButton] = [findSubmitButton(), findSaveButton()];
 
-      it('triggers GraphQL mutation', () => {
-        expect(subject.vm.$apollo.mutate).toHaveBeenCalledWith({
-          mutation: dastOnDemandScanCreate,
-          variables: {
-            input: {
-              dastScannerProfileId: passiveScannerProfile.id,
-              dastSiteProfileId: nonValidatedSiteProfile.id,
-              fullPath: projectPath,
-            },
-          },
+            expect(submitButton.props('loading')).toBe(submitButtonLoading);
+            expect(submitButton.props('disabled')).toBe(!submitButtonLoading);
+            expect(saveButton.props('loading')).toBe(saveButtonLoading);
+            expect(saveButton.props('disabled')).toBe(!saveButtonLoading);
+          });
+
+          it(`triggers GraphQL mutation with runAfterCreate set to ${runAfterCreate}`, async () => {
+            expect(subject.vm.$apollo.mutate).toHaveBeenCalledWith({
+              mutation: dastScanCreateMutation,
+              variables: {
+                input: {
+                  name: 'My daily scan',
+                  description: '',
+                  dastScannerProfileId: passiveScannerProfile.id,
+                  dastSiteProfileId: nonValidatedSiteProfile.id,
+                  fullPath: projectPath,
+                  runAfterCreate,
+                },
+              },
+            });
+          });
+
+          it('redirects to the URL provided in the response', async () => {
+            expect(redirectTo).toHaveBeenCalledWith(redirectPath);
+          });
+
+          it('does not show an alert', async () => {
+            expect(findAlert().exists()).toBe(false);
+          });
         });
-      });
 
-      it('redirects to the URL provided in the response', () => {
-        expect(redirectTo).toHaveBeenCalledWith(pipelineUrl);
-      });
+        it('does not run any mutation if name is empty', () => {
+          setValidFormData();
+          findNameInput().vm.$emit('input', '');
+          actionFunction();
 
-      it('does not show an alert', () => {
-        expect(findAlert().exists()).toBe(false);
-      });
-    });
+          expect(subject.vm.$apollo.mutate).not.toHaveBeenCalled();
+        });
+      },
+    );
 
     describe('on top-level error', () => {
       beforeEach(async () => {
@@ -242,7 +292,7 @@ describe('OnDemandScansForm', () => {
       beforeEach(async () => {
         jest
           .spyOn(subject.vm.$apollo, 'mutate')
-          .mockResolvedValue({ data: { dastOnDemandScanCreate: { pipelineUrl: null, errors } } });
+          .mockResolvedValue({ data: { dastScanCreate: { pipelineUrl: null, errors } } });
         await setValidFormData();
         submitForm();
       });
@@ -258,6 +308,44 @@ describe('OnDemandScansForm', () => {
         errors.forEach((error) => {
           expect(alert.text()).toContain(error);
         });
+      });
+    });
+  });
+
+  describe('dastSavedScans feature flag disabled', () => {
+    beforeEach(async () => {
+      mountShallowSubject({
+        data: {
+          scannerProfiles,
+          siteProfiles,
+        },
+        stubs: {
+          GlFormInput: GlFormInputStub,
+        },
+        provide: {
+          glFeatures: {
+            dastSavedScans: false,
+          },
+        },
+      });
+      jest
+        .spyOn(subject.vm.$apollo, 'mutate')
+        .mockResolvedValue({ data: { dastOnDemandScanCreate: { pipelineUrl, errors: [] } } });
+      subject.find(ScannerProfileSelector).vm.$emit('input', passiveScannerProfile.id);
+      subject.find(SiteProfileSelector).vm.$emit('input', nonValidatedSiteProfile.id);
+      submitForm();
+    });
+
+    it('triggers GraphQL mutation', () => {
+      expect(subject.vm.$apollo.mutate).toHaveBeenCalledWith({
+        mutation: dastOnDemandScanCreateMutation,
+        variables: {
+          input: {
+            dastScannerProfileId: passiveScannerProfile.id,
+            dastSiteProfileId: nonValidatedSiteProfile.id,
+            fullPath: projectPath,
+          },
+        },
       });
     });
   });
@@ -295,7 +383,7 @@ describe('OnDemandScansForm', () => {
         },
       );
 
-      describe('feature flag disabled', () => {
+      describe('securityOnDemandScansSiteValidation feature flag disabled', () => {
         beforeEach(() => {
           mountShallowSubject({
             provide: {
