@@ -3,14 +3,17 @@
 require 'spec_helper'
 
 RSpec.describe Projects::TreeController do
-  let(:project) { create(:project, :repository) }
-  let(:user)    { create(:user) }
+  let_it_be(:project) { create(:project, :repository) }
+  let_it_be(:user)    { create(:user, maintainer_projects: [project]) }
 
   before do
     sign_in(user)
 
-    project.add_maintainer(user)
     controller.instance_variable_set(:@project, project)
+  end
+
+  def get_show
+    get(:show, params: { namespace_id: project.namespace.to_param, project_id: project, id: id })
   end
 
   describe "GET show" do
@@ -20,12 +23,7 @@ RSpec.describe Projects::TreeController do
     before do
       expect(::Gitlab::GitalyClient).to receive(:allow_ref_name_caching).and_call_original
 
-      get(:show,
-          params: {
-            namespace_id: project.namespace.to_param,
-            project_id: project,
-            id: id
-          })
+      get_show
     end
 
     context "valid branch, no path" do
@@ -89,6 +87,18 @@ RSpec.describe Projects::TreeController do
     end
   end
 
+  describe 'GET show' do
+    render_views
+
+    let(:id) { 'master' }
+
+    it 'makes 1 Gitaly request', :request_store, :clean_gitlab_redis_cache do
+      RequestStore.clear!
+
+      expect { get_show }.to change { Gitlab::GitalyClient.get_request_count }.by(1)
+    end
+  end
+
   describe 'GET show with whitespace in ref' do
     render_views
 
@@ -98,12 +108,7 @@ RSpec.describe Projects::TreeController do
       allow(::Gitlab::GitalyClient).to receive(:call).and_call_original
       expect(::Gitlab::GitalyClient).not_to receive(:call).with(anything, :commit_service, :find_commit, anything, anything)
 
-      get(:show,
-          params: {
-            namespace_id: project.namespace.to_param,
-            project_id: project,
-            id: id
-          })
+      get_show
 
       expect(response).to have_gitlab_http_status(:not_found)
     end
@@ -113,12 +118,7 @@ RSpec.describe Projects::TreeController do
     render_views
 
     before do
-      get(:show,
-          params: {
-            namespace_id: project.namespace.to_param,
-            project_id: project,
-            id: id
-          })
+      get_show
     end
 
     context 'redirect to blob' do

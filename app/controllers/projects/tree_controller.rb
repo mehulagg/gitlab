@@ -10,7 +10,7 @@ class Projects::TreeController < Projects::ApplicationController
   around_action :allow_gitaly_ref_name_caching, only: [:show]
 
   before_action :require_non_empty_project, except: [:new, :create]
-  before_action :assign_ref_vars
+  before_action :assign_ref_vars, only: [:create_dir]
   before_action :assign_dir_vars, only: [:create_dir]
   before_action :authorize_download_code!
   before_action :authorize_edit_tree!, only: [:create_dir]
@@ -18,14 +18,17 @@ class Projects::TreeController < Projects::ApplicationController
   feature_category :source_code_management
 
   def show
-    return render_404 unless @commit
+    @id, @ref, @path = extract_ref_path
 
-    if tree.entries.empty?
-      if @repository.blob_at(@commit.id, @path)
-        redirect_to project_blob_path(@project, File.join(@ref, @path))
-      elsif @path.present?
-        redirect_to_tree_root_for_missing_path(@project, @ref, @path)
-      end
+    return if tree_entries.present?
+
+    commit = @repository.commit(@ref)
+    return render_404 unless commit
+
+    if @repository.blob_at(commit.id, @path)
+      redirect_to project_blob_path(@project, File.join(@ref, @path))
+    elsif @path.present?
+      redirect_to_tree_root_for_missing_path(@project, @ref, @path)
     end
   end
 
@@ -47,5 +50,11 @@ class Projects::TreeController < Projects::ApplicationController
       file_path: @dir_name,
       commit_message: params[:commit_message]
     }
+  end
+
+  def tree_entries
+    @repository.tree(@ref, @path).entries
+  rescue ArgumentError
+    []
   end
 end

@@ -1,0 +1,5 @@
+---
+title: Remove FindCommit request from TreeController
+merge_request: 50745
+author:
+type: performance

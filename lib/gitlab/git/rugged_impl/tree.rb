@@ -76,6 +76,9 @@ module Gitlab
 
           def get_tree_entries_from_rugged(repository, sha, path)
             commit = repository.lookup(sha)
+
+            return [] unless commit.is_a?(Rugged::Commit)
+
             root_tree = commit.tree
 
             tree = if path
