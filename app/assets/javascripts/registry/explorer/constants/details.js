@@ -61,7 +61,7 @@ export const UPDATED_AT = s__('ContainerRegistry|Last updated %{time}');
 export const NOT_AVAILABLE_TEXT = __('N/A');
 export const NOT_AVAILABLE_SIZE = __('0 bytes');
 
-export const CLEANUP_UNSCHEDULED_TEXT = s__('ContainerRegistry|Cleanup will run in %{time}');
+export const CLEANUP_UNSCHEDULED_TEXT = s__('ContainerRegistry|Cleanup will run %{time}');
 export const CLEANUP_SCHEDULED_TEXT = s__('ContainerRegistry|Cleanup pending');
 export const CLEANUP_ONGOING_TEXT = s__('ContainerRegistry|Cleanup in progress');
 export const CLEANUP_UNFINISHED_TEXT = s__('ContainerRegistry|Cleanup incomplete');
