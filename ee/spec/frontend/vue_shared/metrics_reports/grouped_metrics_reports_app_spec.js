@@ -3,6 +3,9 @@ import Vuex from 'vuex';
 import MetricsReportsIssueBody from 'ee/vue_shared/metrics_reports/components/metrics_reports_issue_body.vue';
 import GroupedMetricsReportsApp from 'ee/vue_shared/metrics_reports/grouped_metrics_reports_app.vue';
 import { getStoreConfig } from 'ee/vue_shared/metrics_reports/store';
+import Api from '~/api';
+
+jest.mock('~/api.js');
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -11,12 +14,17 @@ describe('Grouped metrics reports app', () => {
   let wrapper;
   let mockStore;
 
-  const mountComponent = () => {
+  const findExpandButton = () => wrapper.find('[data-testid="report-section-expand-button"]');
+
+  const mountComponent = (glFeatures = {}) => {
     wrapper = mount(GroupedMetricsReportsApp, {
       store: mockStore,
       localVue,
       propsData: {
         endpoint: 'metrics.json',
+      },
+      provide: {
+        glFeatures,
       },
     });
   };
@@ -62,6 +70,43 @@ describe('Grouped metrics reports app', () => {
   });
 
   describe('with metrics', () => {
+    describe('when user expands to view metrics', () => {
+      beforeEach(() => {
+        mockStore.state.numberOfChanges = 0;
+        mockStore.state.existingMetrics = [
+          {
+            name: 'name',
+            value: 'value',
+          },
+        ];
+      });
+
+      describe('with :usage_data_group_code_coverage_visit_total enabled', () => {
+        beforeEach(() => {
+          mountComponent({ usageDataGroupCodeCoverageVisitTotal: true });
+        });
+
+        it('tracks group_code_coverage_visit_total metric', () => {
+          findExpandButton().trigger('click');
+
+          expect(Api.trackRedisHllUserEvent).toHaveBeenCalledTimes(1);
+          expect(Api.trackRedisHllUserEvent).toHaveBeenCalledWith(wrapper.vm.$options.expandEvent);
+        });
+      });
+
+      describe('with :usage_data_group_code_coverage_visit_total disabled', () => {
+        beforeEach(() => {
+          mountComponent({ usageDataGroupCodeCoverageVisitTotal: false });
+        });
+
+        it('does not track group_code_coverage_visit_total metric', () => {
+          findExpandButton().trigger('click');
+
+          expect(Api.trackRedisHllUserEvent).not.toHaveBeenCalled();
+        });
+      });
+    });
+
     describe('with no changes', () => {
       beforeEach(() => {
         mockStore.state.numberOfChanges = 0;
