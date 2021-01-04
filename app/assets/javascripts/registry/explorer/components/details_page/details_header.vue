@@ -89,7 +89,7 @@ export default {
       <metadata-item
         icon="expire"
         :text="cleanupTextAndTooltip.text"
-        :tooltip="cleanupTextAndTooltip.tooltip"
+        :text-tooltip="cleanupTextAndTooltip.tooltip"
         size="xl"
         data-testid="cleanup"
       />

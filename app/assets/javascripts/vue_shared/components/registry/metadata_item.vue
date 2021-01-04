@@ -35,7 +35,7 @@ export default {
         return !value || ['xs', 's', 'm', 'l', 'xl'].includes(value);
       },
     },
-    tooltip: {
+    textTooltip: {
       type: String,
       required: false,
       default: '',
@@ -63,10 +63,12 @@ export default {
       class="gl-font-weight-bold gl-display-inline-flex"
       :class="sizeClass"
     >
-      <tooltip-on-truncate v-if="!tooltip" :title="text" class="gl-text-truncate">
+      <tooltip-on-truncate v-if="!textTooltip" :title="text" class="gl-text-truncate">
         {{ text }}
       </tooltip-on-truncate>
-      <span v-else v-gl-tooltip="{ title: tooltip }"> {{ text }}</span>
+      <span v-else v-gl-tooltip="{ title: textTooltip }" data-testid="text-tooltip-container">
+        {{ text }}</span
+      >
     </div>
   </div>
 </template>
