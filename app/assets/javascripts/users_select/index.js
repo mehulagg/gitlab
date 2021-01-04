@@ -16,7 +16,6 @@ import { getAjaxUsersSelectOptions, getAjaxUsersSelectParams } from './utils';
 import initDeprecatedJQueryDropdown from '~/deprecated_jquery_dropdown';
 import { fixTitle, dispose } from '~/tooltips';
 import { loadCSSFile } from '../lib/utils/css_utils';
-import { assigneesMethods } from '~/sidebar/components/assignees/sidebar_assignees.vue';
 
 // TODO: remove eventHub hack after code splitting refactor
 window.emitSidebarEvent = window.emitSidebarEvent || $.noop;
@@ -76,7 +75,7 @@ function UsersSelect(currentUser, els, options = {}) {
       selectedId = selectedIdDefault;
     }
 
-    const assignYourself = function() {
+    const assignYourself = function () {
       const unassignedSelected = $dropdown
         .closest('.selectbox')
         .find(`input[name='${$dropdown.data('fieldName')}'][value=0]`);
@@ -109,17 +108,17 @@ function UsersSelect(currentUser, els, options = {}) {
       $block[0].addEventListener('assignYourself', assignYourself);
     }
 
-    const getSelectedUserInputs = function() {
+    const getSelectedUserInputs = function () {
       return $selectbox.find(`input[name="${$dropdown.data('fieldName')}"]`);
     };
 
-    const getSelected = function() {
+    const getSelected = function () {
       return getSelectedUserInputs()
         .map((index, input) => parseInt(input.value, 10))
         .get();
     };
 
-    const checkMaxSelect = function() {
+    const checkMaxSelect = function () {
       const maxSelect = $dropdown.data('maxSelect');
       if (maxSelect) {
         const selected = getSelected();
@@ -145,7 +144,7 @@ function UsersSelect(currentUser, els, options = {}) {
       }
     };
 
-    const getMultiSelectDropdownTitle = function(selectedUser, isSelected) {
+    const getMultiSelectDropdownTitle = function (selectedUser, isSelected) {
       const selectedUsers = getSelected().filter((u) => u !== 0);
 
       const firstUser = getSelectedUserInputs()
@@ -202,7 +201,7 @@ function UsersSelect(currentUser, els, options = {}) {
       return assignTo(userSelect.currentUser.id);
     });
 
-    assignTo = function(selected) {
+    assignTo = function (selected) {
       const data = {};
       data[abilityName] = {};
       data[abilityName].assignee_id = selected != null ? selected : null;
@@ -453,8 +452,7 @@ function UsersSelect(currentUser, els, options = {}) {
             if ($dropdown.hasClass(elsClassName)) {
               emitSidebarEvent('sidebar.addReviewer', user);
             } else {
-              assigneesMethods.addAssignee(user);
-              // emitSidebarEvent('sidebar.addAssignee', user);
+              emitSidebarEvent('sidebar.addAssignee', user);
             }
 
             // Remove unassigned selection (if it was previously selected)
@@ -696,7 +694,7 @@ function UsersSelect(currentUser, els, options = {}) {
   }
 }
 
-UsersSelect.prototype.initSelection = function(element, callback) {
+UsersSelect.prototype.initSelection = function (element, callback) {
   const id = $(element).val();
   if (id === '0') {
     const nullUser = {
@@ -708,7 +706,7 @@ UsersSelect.prototype.initSelection = function(element, callback) {
   }
 };
 
-UsersSelect.prototype.formatResult = function(user) {
+UsersSelect.prototype.formatResult = function (user) {
   let avatar = gon.default_avatar_url;
   if (user.avatar_url) {
     avatar = user.avatar_url;
@@ -730,11 +728,11 @@ UsersSelect.prototype.formatResult = function(user) {
   `;
 };
 
-UsersSelect.prototype.formatSelection = function(user) {
+UsersSelect.prototype.formatSelection = function (user) {
   return escape(user.name);
 };
 
-UsersSelect.prototype.user = function(user_id, callback) {
+UsersSelect.prototype.user = function (user_id, callback) {
   if (!/^\d+$/.test(user_id)) {
     return false;
   }
@@ -748,7 +746,7 @@ UsersSelect.prototype.user = function(user_id, callback) {
 
 // Return users list. Filtered by query
 // Only active users retrieved
-UsersSelect.prototype.users = function(query, options, callback) {
+UsersSelect.prototype.users = function (query, options, callback) {
   const url = this.buildUrl(this.usersPath);
   const params = {
     search: query,
@@ -774,14 +772,14 @@ UsersSelect.prototype.users = function(query, options, callback) {
   });
 };
 
-UsersSelect.prototype.buildUrl = function(url) {
+UsersSelect.prototype.buildUrl = function (url) {
   if (gon.relative_url_root != null) {
     url = gon.relative_url_root.replace(/\/$/, '') + url;
   }
   return url;
 };
 
-UsersSelect.prototype.renderRow = function(
+UsersSelect.prototype.renderRow = function (
   issuableType,
   user,
   selected,
@@ -817,7 +815,7 @@ UsersSelect.prototype.renderRow = function(
   `;
 };
 
-UsersSelect.prototype.renderRowAvatar = function(issuableType, user, img) {
+UsersSelect.prototype.renderRowAvatar = function (issuableType, user, img) {
   if (user.beforeDivider) {
     return img;
   }
@@ -833,7 +831,7 @@ UsersSelect.prototype.renderRowAvatar = function(issuableType, user, img) {
   </span>`;
 };
 
-UsersSelect.prototype.renderApprovalRules = function(elsClassName, approvalRules = []) {
+UsersSelect.prototype.renderApprovalRules = function (elsClassName, approvalRules = []) {
   const count = approvalRules.length;
 
   if (!gon.features?.reviewerApprovalRules || !elsClassName?.includes('reviewer') || !count) {
