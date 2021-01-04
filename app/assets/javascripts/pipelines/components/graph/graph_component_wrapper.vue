@@ -1,6 +1,7 @@
 <script>
 import { GlAlert, GlLoadingIcon } from '@gitlab/ui';
 import { __ } from '~/locale';
+import * as Sentry from '~/sentry/wrapper';
 import { DEFAULT, LOAD_FAILURE } from '../../constants';
 import getPipelineDetails from '../../graphql/queries/get_pipeline_details.query.graphql';
 import PipelineGraph from './graph_component.vue';
@@ -86,6 +87,10 @@ export default {
     reportFailure(type) {
       this.showAlert = true;
       this.failureType = type;
+      Sentry.withScope((scope) => {
+        scope.setTag('component', 'graph_component_wrapper');
+        Sentry.captureException(this.$options.errorTexts[this.failureType]);
+      });
     },
   },
 };
