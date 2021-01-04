@@ -27,16 +27,12 @@ module Ci
 
     def valid_statuses_for_build(build)
       case build.when
-      when 'on_success'
+      when 'on_success', 'manual', 'delayed'
         build.scheduling_type_dag? ? %w[success] : %w[success skipped]
       when 'on_failure'
         %w[failed]
       when 'always'
         %w[success failed skipped]
-      when 'manual'
-        %w[success skipped]
-      when 'delayed'
-        %w[success skipped]
       else
         []
       end
