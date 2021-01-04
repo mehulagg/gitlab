@@ -52,3 +52,6 @@ mapping:
   # EE/FOSS factory should map to factories spec
   - source: (ee/)?spec/factories/.+\.rb
     test: spec/factories_spec.rb
+
+  - source: (ee/)?app/workers/.+\.rb
+    test: spec/workers/every_sidekiq_worker_spec.rb

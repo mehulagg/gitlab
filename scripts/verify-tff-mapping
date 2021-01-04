@@ -109,6 +109,12 @@ tests = [
     explanation: 'Migration should map to its timestamped spec',
     source: 'db/post_migrate/20190924152703_migrate_issue_trackers_data.rb',
     expected: ['spec/migrations/20190924152703_migrate_issue_trackers_data_spec.rb']
+  },
+
+  {
+    explanation: 'Spec for every sidekiq worker',
+    source: 'app/workers/new_worker.rb',
+    expected: ['spec/workers/every_sidekiq_worker_spec.rb']
   }
 ]
 
