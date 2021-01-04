@@ -664,6 +664,9 @@ request to add a new user to a project through API will not be possible.
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/1985) in [GitLab Ultimate and Gold](https://about.gitlab.com/pricing/) 12.0.
 > - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/215410) to [GitLab Premium and Silver](https://about.gitlab.com/pricing/) in 13.1.
 
+NOTE:
+IP Access Restriction is currently not functioning as expected on GitLab.com. Some users may experience blocked git operations or have difficulties accessing projects. Before enabling, please review the [issue](https://gitlab.com/gitlab-org/gitlab/-/issues/271673) and follow it for updates.
+
 To make sure only people from within your organization can access particular
 resources, you have the option to restrict access to groups and their
 underlying projects, issues, etc, by IP address. This can help ensure that
