@@ -1,5 +1,5 @@
 ---
 title: Capture generic metrics report views via usage ping
-merge_request:
+merge_request: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/50790
 author:
 type: added
