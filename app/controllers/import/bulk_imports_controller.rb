@@ -34,6 +34,12 @@ class Import::BulkImportsController < ApplicationController
     render json: :ok
   end
 
+  def realtime_changes
+    Gitlab::PollingInterval.set_header(response, interval: 3_000)
+
+    render json: current_user_bulk_imports.to_json(only: [:id, :status], methods: [:status_name])
+  end
+
   private
 
   def serialized_importable_data
@@ -151,5 +157,9 @@ class Import::BulkImportsController < ApplicationController
 
   def sanitized_filter_param
     @filter ||= sanitize(params[:filter])&.downcase
+  end
+
+  def current_user_bulk_imports
+    current_user.bulk_imports.from_gitlab
   end
 end

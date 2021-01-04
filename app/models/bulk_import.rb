@@ -31,4 +31,6 @@ class BulkImport < ApplicationRecord
       transition any => :failed
     end
   end
+
+  scope :from_gitlab, -> { where(source_type: 0) }
 end
