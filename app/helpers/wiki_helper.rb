@@ -53,18 +53,23 @@ module WikiHelper
   def wiki_page_errors(error)
     return unless error
 
-    content_tag(:div, class: 'alert alert-danger') do
-      case error
-      when WikiPage::PageChangedError
-        page_link = link_to s_("WikiPageConflictMessage|the page"), wiki_page_path(@wiki, @page), target: "_blank"
-        concat(
-          (s_("WikiPageConflictMessage|Someone edited the page the same time you did. Please check out %{page_link} and make sure your changes will not unintentionally remove theirs.") % { page_link: page_link }).html_safe
-        )
-      when WikiPage::PageRenameError
-        s_("WikiEdit|There is already a page with the same title in that path.")
-      else
-        error.message
-      end
+    content_tag(:div, class: 'gl-alert gl-alert-danger') do
+      sprite_icon('information-o', css_class: 'gl-icon gl-alert-icon gl-mt-1') <<
+      content_tag(:div, wiki_error_message(error), class: 'gl-alert-body')
+    end
+  end
+
+  def wiki_error_message(error)
+    case error
+    when WikiPage::PageChangedError
+      page_link = link_to s_("WikiPageConflictMessage|the page"), wiki_page_path(@wiki, @page), target: "_blank"
+      concat(
+        (s_("WikiPageConflictMessage|Someone edited the page the same time you did. Please check out %{page_link} and make sure your changes will not unintentionally remove theirs.") % { page_link: page_link }).html_safe
+      )
+    when WikiPage::PageRenameError
+      s_("WikiEdit|There is already a page with the same title in that path.")
+    else
+      error.message
     end
   end
 
