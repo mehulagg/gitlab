@@ -1,4 +1,5 @@
 <script>
+import Vue from 'vue';
 import { deprecatedCreateFlash as Flash } from '~/flash';
 import eventHub from '~/sidebar/event_hub';
 import Store from '~/sidebar/stores/sidebar_store';
@@ -8,6 +9,11 @@ import AssigneeTitle from './assignee_title.vue';
 import Assignees from './assignees.vue';
 import AssigneesRealtime from './assignees_realtime.vue';
 import { __ } from '~/locale';
+
+export const assigneesMethods = Vue.observable({
+  removeAssignee: null,
+  addAssignee: null,
+});
 
 export default {
   name: 'SidebarAssignees',
@@ -61,19 +67,22 @@ export default {
     },
   },
   created() {
+    assigneesMethods.removeAssignee = this.store.removeAssignee.bind(this.store);
+    assigneesMethods.addAssignee = this.store.addAssignee.bind(this.store);
+
     this.removeAssignee = this.store.removeAssignee.bind(this.store);
     this.addAssignee = this.store.addAssignee.bind(this.store);
     this.removeAllAssignees = this.store.removeAllAssignees.bind(this.store);
 
     // Get events from deprecatedJQueryDropdown
     eventHub.$on('sidebar.removeAssignee', this.removeAssignee);
-    eventHub.$on('sidebar.addAssignee', this.addAssignee);
+    // eventHub.$on('sidebar.addAssignee', this.addAssignee);
     eventHub.$on('sidebar.removeAllAssignees', this.removeAllAssignees);
     eventHub.$on('sidebar.saveAssignees', this.saveAssignees);
   },
   beforeDestroy() {
     eventHub.$off('sidebar.removeAssignee', this.removeAssignee);
-    eventHub.$off('sidebar.addAssignee', this.addAssignee);
+    // eventHub.$off('sidebar.addAssignee', this.addAssignee);
     eventHub.$off('sidebar.removeAllAssignees', this.removeAllAssignees);
     eventHub.$off('sidebar.saveAssignees', this.saveAssignees);
   },
