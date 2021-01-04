@@ -29,7 +29,6 @@ export default {
       selectedProject: null,
       searchKey: '',
       title: '',
-      preventDropdownClose: false,
     };
   },
   computed: {
@@ -83,32 +82,6 @@ export default {
       this.searchKey = '';
       this.fetchProjects();
     },
-    handleDropdownHide(e) {
-      // Check if dropdown closure is to be prevented.
-      if (this.preventDropdownClose) {
-        e.preventDefault();
-        this.preventDropdownClose = false;
-      }
-    },
-    /**
-     * As GlDropdown can get closed if any item within
-     * it is clicked, we have to work around that behaviour
-     * by preventing dropdown close if user has clicked
-     * clear button on search input field. This hack
-     * won't be required once we add support for
-     * `BDropdownForm` https://bootstrap-vue.js.org/docs/components/dropdown#b-dropdown-form
-     * within GitLab UI.
-     */
-    handleSearchInputContainerClick({ target }) {
-      // Check if clicked target was an icon.
-      if (
-        target?.classList.contains('gl-icon') ||
-        target?.getAttribute('href')?.includes('clear')
-      ) {
-        // Enable flag to prevent dropdown close.
-        this.preventDropdownClose = true;
-      }
-    },
   },
 };
 </script>
@@ -136,7 +109,6 @@ export default {
           menu-class="gl-w-full! gl-overflow-hidden!"
           toggle-class="gl-display-flex gl-align-items-center gl-justify-content-between gl-text-truncate"
           @show="handleDropdownShow"
-          @hide="handleDropdownHide"
         >
           <gl-search-box-by-type
             ref="searchInputField"

@@ -48,7 +48,6 @@ describe('CreateIssueForm', () => {
       expect(wrapper.vm.selectedProject).toBeNull();
       expect(wrapper.vm.searchKey).toBe('');
       expect(wrapper.vm.title).toBe('');
-      expect(wrapper.vm.preventDropdownClose).toBe(false);
     });
   });
 
@@ -109,45 +108,6 @@ describe('CreateIssueForm', () => {
 
         expect(wrapper.vm.searchKey).toBe('');
         expect(handleDropdownShow).toHaveBeenCalled();
-      });
-    });
-
-    describe('handleDropdownHide', () => {
-      it('sets `searchKey` prop to empty string and calls action `fetchProjects`', () => {
-        const event = {
-          preventDefault: jest.fn(),
-        };
-        const preventDefault = jest.spyOn(event, 'preventDefault');
-
-        wrapper.setData({
-          preventDropdownClose: true,
-        });
-        wrapper.vm.handleDropdownHide(event);
-
-        return wrapper.vm.$nextTick(() => {
-          expect(preventDefault).toHaveBeenCalled();
-          expect(wrapper.vm.preventDropdownClose).toBe(false);
-        });
-      });
-    });
-
-    describe('handleSearchInputContainerClick', () => {
-      it('sets `preventDropdownClose` to `true` when target element contains class `gl-icon`', () => {
-        const target = document.createElement('span');
-        target.setAttribute('class', 'gl-icon');
-
-        wrapper.vm.handleSearchInputContainerClick({ target });
-
-        expect(wrapper.vm.preventDropdownClose).toBe(true);
-      });
-
-      it('sets `preventDropdownClose` to `true` when target element href contains text `clear`', () => {
-        const target = document.createElement('user');
-        target.setAttribute('href', 'foo.svg#clear');
-
-        wrapper.vm.handleSearchInputContainerClick({ target });
-
-        expect(wrapper.vm.preventDropdownClose).toBe(true);
       });
     });
   });
