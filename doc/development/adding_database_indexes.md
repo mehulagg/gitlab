@@ -209,8 +209,10 @@ In these cases, a temporary index should be considered. To specify a
 temporary index:
 
 1. Prefix the index name with `tmp_` and follow the [naming conventions](database/constraint_naming_convention.md) and [requirements for naming indexes](#requirements-for-naming-indexes) for the rest of the name.
-1. Create a followup issue to remove the index in the next (or future) milestone.
+1. Create a follow-up issue to remove the index in the next (or future) milestone.
 1. Add a comment in the migration mentioning the removal issue.
+
+A temporary migration would look like:
 
 ```ruby
 INDEX_NAME = 'tmp_index_projects_on_owner_where_emails_disabled'
