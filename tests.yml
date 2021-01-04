@@ -55,3 +55,9 @@ mapping:
 
   - source: (ee/)?app/workers/.+\.rb
     test: spec/workers/every_sidekiq_worker_spec.rb
+
+  - source: lib/gitlab/usage_data_counters/known_events/.+\.yml
+    test: spec/lib/gitlab/usage_data_counters/hll_redis_counter_spec.rb
+  - source: lib/gitlab/usage_data_counters/known_events/.+\.yml
+    test: spec/lib/gitlab/usage_data_spec.rb
+

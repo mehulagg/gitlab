@@ -115,6 +115,12 @@ tests = [
     explanation: 'Spec for every sidekiq worker',
     source: 'app/workers/new_worker.rb',
     expected: ['spec/workers/every_sidekiq_worker_spec.rb']
+  },
+
+  {
+    explanation: 'Known events',
+    source: 'lib/gitlab/usage_data_counters/known_events/common.yml',
+    expected: ['spec/lib/gitlab/usage_data_counters/hll_redis_counter_spec.rb', 'spec/lib/gitlab/usage_data_spec.rb']
   }
 ]
 
