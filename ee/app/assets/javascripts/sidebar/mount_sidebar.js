@@ -79,9 +79,9 @@ const mountEpicsSelect = () => {
   });
 };
 
-function mountIterationSelect() {
+export function mountIterationSelect() {
   const el = document.querySelector('.js-iteration-select');
-
+  // console.log('ssss', el);
   if (!el) {
     return false;
   }
@@ -90,12 +90,18 @@ function mountIterationSelect() {
     defaultClient: createDefaultClient(),
   });
   const { groupPath, canEdit, projectPath, issueIid } = el.dataset;
-
+  console.log('xxx', canEdit);
   return new Vue({
     el,
     apolloProvider,
     components: {
-      IterationSelect,
+      IterationSelect
+    },
+    provide: {
+      groupPath,
+      canEdit,
+      projectPath,
+      issueIid,
     },
     render: (createElement) =>
       createElement('iteration-select', {

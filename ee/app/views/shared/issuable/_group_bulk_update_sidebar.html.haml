@@ -25,6 +25,9 @@
             = dropdown_tag(_('Select milestone'), options: { title: _('Assign milestone'), toggle_class: 'js-milestone-select js-extra-options js-filter-submit js-filter-bulk-update', filter: true, dropdown_class: 'dropdown-menu-selectable dropdown-menu-milestone', placeholder: _('Search milestones'), data: { show_no: true, field_name: 'update[milestone_id]', group_id: group&.id, use_id: true, default_label: _('Milestone') } })
       .block
         .title
+          .js-iteration-select{ data: { can_edit: true, group_path: group_path, project_path: project_path, issue_iid: issue_iid } }
+      .block
+        .title
           = _('Labels')
         .filter-item.labels-filter
           = render "shared/issuable/label_dropdown", classes: ["js-filter-bulk-update", "js-multiselect"], dropdown_title: _('Apply a label'), show_create: false, show_footer: false, extra_options: false, filter_submit: false, data_options: { persist_when_hide: "true", field_name: "update[label_ids][]", show_no: false, show_any: false, use_id: true, default_label: "Labels" }, label_name: _('Select labels'), no_default_styles: true, edit_context: group

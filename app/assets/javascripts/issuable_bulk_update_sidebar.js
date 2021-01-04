@@ -8,7 +8,8 @@ import issueStatusSelect from './issue_status_select';
 import subscriptionSelect from './subscription_select';
 import LabelsSelect from './labels_select';
 import issueableEventHub from './issues_list/eventhub';
-
+// here
+import { mountIterationSelect } from 'ee/sidebar/mount_sidebar';
 const HIDDEN_CLASS = 'hidden';
 const DISABLED_CONTENT_CLASS = 'disabled-content';
 const SIDEBAR_EXPANDED_CLASS = 'right-sidebar-expanded issuable-bulk-update-sidebar';
@@ -25,6 +26,7 @@ export default class IssuableBulkUpdateSidebar {
   }
 
   initDomElements() {
+    console.log('here init');
     this.$page = $('.layout-page');
     this.$sidebar = $('.right-sidebar');
     this.$sidebarInnerContainer = this.$sidebar.find('.issuable-sidebar');
@@ -61,6 +63,8 @@ export default class IssuableBulkUpdateSidebar {
   initDropdowns() {
     new LabelsSelect();
     new MilestoneSelect();
+    console.log('init');
+    mountIterationSelect();
     issueStatusSelect();
     subscriptionSelect();
 
