@@ -1,0 +1,5 @@
+---
+title: Disable SSL verification for FortiAuthenticator integration's API calls
+merge_request: 50741
+author:
+type: fixed
