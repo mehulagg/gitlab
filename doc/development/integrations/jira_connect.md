@@ -13,7 +13,8 @@ The following are required to install and test the app:
   be able to connect to the GitLab instance through the internet. For this we
   recommend using `gitpod`, or a similar cloud development environment. See this
   [video](https://www.loom.com/share/9c9711d4876a40869b9294eecb24c54d) for a
-  guide to using Gitpod for GDK development.
+  guide to using Gitpod for GDK development, or read
+  [the docs on this](https://gitlab.com/gitlab-org/gitlab-development-kit/-/blob/master/doc/howto/gitpod.md).
 
   You **must not** use tunnelling tools such as serveo, or ngrok. These are
   security risks, and must not be run on developer laptops.
