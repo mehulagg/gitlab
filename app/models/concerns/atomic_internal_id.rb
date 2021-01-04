@@ -32,11 +32,19 @@ module AtomicInternalId
       presence: true, backfill: false, hook_names: :create)
       raise "has_internal_id init must not be nil if given." if init.nil?
       raise "has_internal_id needs to be defined on association." unless self.reflect_on_association(scope)
+      raise "ensure_if must be a Proc object if given." unless ensure_if.nil? || ensure_if.is_a?(Proc)
 
       init = infer_init(scope) if init == :not_given
-      before_validation :"track_#{scope}_#{column}!", on: hook_names, if: track_if
-      before_validation :"ensure_#{scope}_#{column}!", on: hook_names, if: ensure_if
-      validates column, presence: presence
+      callback_names = Array.wrap(hook_names).map { |hook_name| :"before_#{hook_name}" }
+      callback_names.each do |callback_name|
+        public_send(callback_name, :"track_#{scope}_#{column}!", if: track_if)
+        public_send(callback_name, :"ensure_#{scope}_#{column}!", if: ensure_if)
+      end
+      after_rollback :"clear_#{scope}_#{column}!", on: hook_names, if: ensure_if
+
+      validates column, presence: presence, if: -> do
+        (ensure_if && !ensure_if.call || backfill && self.class.where(column => nil).exists?)
+      end
 
       define_singleton_internal_id_methods(scope, column, init)
       define_instance_internal_id_methods(scope, column, init, backfill)
@@ -127,6 +135,12 @@ module AtomicInternalId
         end
 
         read_attribute(column)
+      end
+
+      define_method("clear_#{scope}_#{column}!") do
+        return unless public_send(:"#{column}_changed?")
+
+        write_attribute(column, nil)
       end
     end
 
