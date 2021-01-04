@@ -7495,7 +7495,7 @@ msgstr ""
 msgid "ContainerRegistry|Cleanup timed out before it could delete all tags"
 msgstr ""
 
-msgid "ContainerRegistry|Cleanup will run in %{time}"
+msgid "ContainerRegistry|Cleanup will run %{time}"
 msgstr ""
 
 msgid "ContainerRegistry|Cleanup will run soon"
