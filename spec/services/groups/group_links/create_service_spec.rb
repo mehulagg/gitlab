@@ -31,8 +31,8 @@ RSpec.describe Groups::GroupLinks::CreateService, '#execute' do
   subject { described_class.new(group, user, opts) }
 
   before do
-    group.add_guest(group_user)
-    shared_group.add_owner(group_user)
+    group.add_owner(group_user)
+    shared_group.add_guest(group_user)
   end
 
   it 'adds group to another group' do

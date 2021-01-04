@@ -439,7 +439,7 @@ RSpec.describe API::Groups do
         project = create(:project, namespace: group2, path: 'Foo')
         create(:project_group_link, project: project, group: group1)
         group = create(:group)
-        link = create(:group_group_link, shared_group: group1, shared_with_group: group)
+        link = create(:group_group_link, shared_with_group: group1, shared_group: group)
 
         get api("/groups/#{group1.id}", user1)
 
@@ -1789,15 +1789,16 @@ RSpec.describe API::Groups do
         expires_at = 10.days.from_now.to_date
 
         expect do
-          post api("/groups/#{group.id}/share", user), params: { group_id: shared_with_group.id, group_access: Gitlab::Access::DEVELOPER, expires_at: expires_at }
-        end.to change { group.shared_with_group_links.count }.by(1)
+          post api("/groups/#{group.id}/share", user), params: { group_id: shared_group.id, group_access: Gitlab::Access::DEVELOPER, expires_at: expires_at }
+        end.to change { group.shared_group_links.count }.by(1)
+
 
         expect(response).to have_gitlab_http_status(:created)
         expect(json_response['shared_with_groups']).to be_an Array
         expect(json_response['shared_with_groups'].length).to eq(1)
-        expect(json_response['shared_with_groups'][0]['group_id']).to eq(shared_with_group.id)
-        expect(json_response['shared_with_groups'][0]['group_name']).to eq(shared_with_group.name)
-        expect(json_response['shared_with_groups'][0]['group_full_path']).to eq(shared_with_group.full_path)
+        expect(json_response['shared_with_groups'][0]['group_id']).to eq(shared_group.id)
+        expect(json_response['shared_with_groups'][0]['group_name']).to eq(shared_group.name)
+        expect(json_response['shared_with_groups'][0]['group_full_path']).to eq(shared_group.full_path)
         expect(json_response['shared_with_groups'][0]['group_access_level']).to eq(Gitlab::Access::DEVELOPER)
         expect(json_response['shared_with_groups'][0]['expires_at']).to eq(expires_at.to_s)
       end
@@ -1808,7 +1809,7 @@ RSpec.describe API::Groups do
       end
 
       it "returns a 400 error when access level is not given" do
-        post api("/groups/#{group.id}/share", user), params: { group_id: shared_with_group.id }
+        post api("/groups/#{group.id}/share", user), params: { group_id: shared_group.id }
         expect(response).to have_gitlab_http_status(:bad_request)
       end
 
@@ -1819,7 +1820,7 @@ RSpec.describe API::Groups do
       end
 
       it "returns a 400 error when wrong params passed" do
-        post api("/groups/#{group.id}/share", user), params: { group_id: shared_with_group.id, group_access: non_existing_record_access_level }
+        post api("/groups/#{group.id}/share", user), params: { group_id: shared_group.id, group_access: non_existing_record_access_level }
 
         expect(response).to have_gitlab_http_status(:bad_request)
         expect(json_response['error']).to eq 'group_access does not have a valid value'
@@ -1829,7 +1830,7 @@ RSpec.describe API::Groups do
         allow(::Groups::GroupLinks::CreateService).to receive_message_chain(:new, :execute)
           .and_return({ status: :error, http_status: 409, message: 'error' })
 
-        post api("/groups/#{group.id}/share", user), params: { group_id: shared_with_group.id, group_access: Gitlab::Access::DEVELOPER }
+        post api("/groups/#{group.id}/share", user), params: { group_id: shared_group.id, group_access: Gitlab::Access::DEVELOPER }
 
         expect(response).to have_gitlab_http_status(:conflict)
       end
@@ -1841,12 +1842,13 @@ RSpec.describe API::Groups do
 
       before do
         owner_group.add_owner(owner_user)
+        shared_group.add_owner(owner_user)
       end
 
       it_behaves_like 'shares group with group' do
         let(:user) { owner_user }
         let(:group) { owner_group }
-        let(:shared_with_group) { create(:group) }
+        let(:shared_group) { create(:group) }
       end
     end
 
@@ -1870,7 +1872,7 @@ RSpec.describe API::Groups do
       it_behaves_like 'shares group with group' do
         let(:user) { admin }
         let(:group) { create(:group) }
-        let(:shared_with_group) { create(:group) }
+        let(:shared_group) { create(:group) }
       end
     end
   end
@@ -1879,27 +1881,27 @@ RSpec.describe API::Groups do
     shared_examples 'deletes group share' do
       it 'deletes a group share' do
         expect do
-          delete api("/groups/#{shared_group.id}/share/#{shared_with_group.id}", user)
+          delete api("/groups/#{group.id}/share/#{shared_group.id}", user)
 
           expect(response).to have_gitlab_http_status(:no_content)
-          expect(shared_group.shared_with_group_links).to be_empty
-        end.to change { shared_group.shared_with_group_links.count }.by(-1)
+          expect(group.shared_with_group_links).to be_empty
+        end.to change { group.shared_with_group_links.count }.by(-1)
       end
 
       it 'requires the group id to be an integer' do
-        delete api("/groups/#{shared_group.id}/share/foo", user)
+        delete api("/groups/#{group.id}/share/foo", user)
 
         expect(response).to have_gitlab_http_status(:bad_request)
       end
 
       it 'returns a 404 error when group link does not exist' do
-        delete api("/groups/#{shared_group.id}/share/#{non_existing_record_id}", user)
+        delete api("/groups/#{group.id}/share/#{non_existing_record_id}", user)
 
         expect(response).to have_gitlab_http_status(:not_found)
       end
 
       it 'returns a 404 error when group does not exist' do
-        delete api("/groups/123/share/#{non_existing_record_id}", user)
+        delete api("/groups/#{non_existing_record_id}/share/#{shared_group.id}", user)
 
         expect(response).to have_gitlab_http_status(:not_found)
       end
@@ -1909,13 +1911,15 @@ RSpec.describe API::Groups do
       let(:group_a) { create(:group) }
 
       before do
-        create(:group_group_link, shared_group: group1, shared_with_group: group_a)
+        group_a.add_owner(user1)
+        group1.add_owner(user1)
+        create(:group_group_link, shared_with_group: group1, shared_group: group_a)
       end
 
       it_behaves_like 'deletes group share' do
         let(:user) { user1 }
+        let(:group) { group_a }
         let(:shared_group) { group1 }
-        let(:shared_with_group) { group_a }
       end
     end
 
@@ -1925,7 +1929,7 @@ RSpec.describe API::Groups do
 
       before do
         group1.add_maintainer(user4)
-        create(:group_group_link, shared_group: group1, shared_with_group: group_a)
+        create(:group_group_link, shared_with_group: group_a, shared_group: group1)
       end
 
       it 'does not remove group share' do
@@ -1941,13 +1945,13 @@ RSpec.describe API::Groups do
       let(:group_b) { create(:group) }
 
       before do
-        create(:group_group_link, shared_group: group2, shared_with_group: group_b)
+        create(:group_group_link, shared_with_group: group2, shared_group: group_b)
       end
 
       it_behaves_like 'deletes group share' do
         let(:user) { admin }
+        let(:group) { group_b }
         let(:shared_group) { group2 }
-        let(:shared_with_group) { group_b }
       end
     end
   end

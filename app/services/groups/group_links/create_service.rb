@@ -5,14 +5,15 @@ module Groups
     class CreateService < BaseService
       def execute(shared_group)
         unless group && shared_group &&
-               can?(current_user, :admin_group_member, shared_group) &&
-               can?(current_user, :read_group, group)
+               can?(current_user, :admin_group_member, group) &&
+               can?(current_user, :read_group, shared_group)
           return error('Not Found', 404)
         end
 
+
         link = GroupGroupLink.new(
-          shared_group: shared_group,
           shared_with_group: group,
+          shared_group: shared_group,
           group_access: params[:shared_group_access],
           expires_at: params[:expires_at]
         )

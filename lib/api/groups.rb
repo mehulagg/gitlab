@@ -358,19 +358,19 @@ module API
         optional :expires_at, type: Date, desc: 'Share expiration date'
       end
       post ":id/share" do
-        shared_group = find_group!(params[:id])
-        shared_with_group = find_group!(params[:group_id])
+        shared_group = find_group!(params[:group_id])
+        group = find_group!(params[:id])
 
         group_link_create_params = {
           shared_group_access: params[:group_access],
           expires_at: params[:expires_at]
         }
 
-        result = ::Groups::GroupLinks::CreateService.new(shared_with_group, current_user, group_link_create_params).execute(shared_group)
-        shared_group.preload_shared_group_links
+        result = ::Groups::GroupLinks::CreateService.new(group, current_user, group_link_create_params).execute(shared_group)
+        group.preload_shared_group_links
 
         if result[:status] == :success
-          present shared_group, with: Entities::GroupDetail, current_user: current_user
+          present group, with: Entities::GroupDetail, current_user: current_user
         else
           render_api_error!(result[:message], result[:http_status])
         end

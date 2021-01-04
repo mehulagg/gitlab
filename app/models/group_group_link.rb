@@ -3,7 +3,12 @@
 class GroupGroupLink < ApplicationRecord
   include Expirable
 
+  # 'shared_group' is the group being granted share access to shared_with_group
+  #   - called 'shared_group' in API :id/share, and in GroupLinks::CreateService
   belongs_to :shared_group, class_name: 'Group', foreign_key: :shared_group_id
+
+  # 'shared_with_group' is the group granting the share permission to shared_group
+  #   - called 'group' in API :id/share, and in GroupLinks::CreateService
   belongs_to :shared_with_group, class_name: 'Group', foreign_key: :shared_with_group_id
 
   validates :shared_group, presence: true
@@ -14,7 +19,7 @@ class GroupGroupLink < ApplicationRecord
                            presence: true
 
   scope :non_guests, -> { where('group_access > ?', Gitlab::Access::GUEST) }
-  scope :public_or_visible_to_user, ->(group, user) { where(shared_group: group, shared_with_group: Group.public_or_visible_to_user(user)) } # rubocop:disable Cop/GroupPublicOrVisibleToUser
+  scope :public_or_visible_to_user, ->(group, user) { where(shared_with_group: group, shared_group: Group.public_or_visible_to_user(user)) } # rubocop:disable Cop/GroupPublicOrVisibleToUser
 
   def self.access_options
     Gitlab::Access.options_with_owner
