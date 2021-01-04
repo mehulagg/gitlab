@@ -4,7 +4,6 @@ import { once } from 'lodash';
 import { componentNames } from 'ee/reports/components/issue_body';
 import { GlButton, GlSprintf, GlLink, GlModalDirective } from '@gitlab/ui';
 import FuzzingArtifactsDownload from 'ee/security_dashboard/components/fuzzing_artifacts_download.vue';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import ReportSection from '~/reports/components/report_section.vue';
 import SummaryRow from '~/reports/components/summary_row.vue';
 import Tracking from '~/tracking';
@@ -45,7 +44,7 @@ export default {
   directives: {
     'gl-modal': GlModalDirective,
   },
-  mixins: [securityReportsMixin, glFeatureFlagsMixin()],
+  mixins: [securityReportsMixin],
   apollo: {
     dastSummary: {
       query: securityReportSummaryQuery,
@@ -282,8 +281,7 @@ export default {
       return this.enabledReports.apiFuzzing;
     },
     hasCoverageFuzzingReports() {
-      // TODO: Remove feature flag in https://gitlab.com/gitlab-org/gitlab/-/issues/257839
-      return this.enabledReports.coverageFuzzing && this.glFeatures.coverageFuzzingMrWidget;
+      return this.enabledReports.coverageFuzzing;
     },
     hasSastReports() {
       return this.enabledReports.sast;

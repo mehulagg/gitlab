@@ -92,7 +92,6 @@ describe('Grouped security reports app', () => {
       },
       store: appStore(),
       provide: {
-        glFeatures: { coverageFuzzingMrWidget: true },
         ...provide,
       },
     });
@@ -417,27 +416,20 @@ describe('Grouped security reports app', () => {
   });
 
   describe('coverage fuzzing reports', () => {
-    describe.each([true, false])('given featureEnabled is %s', (shouldShowFuzzing) => {
-      beforeEach(() => {
-        createWrapper(
-          {
-            ...props,
-            enabledReports: {
-              coverageFuzzing: true,
-            },
+    beforeEach(() => {
+      createWrapper(
+        {
+          ...props,
+          enabledReports: {
+            coverageFuzzing: true,
           },
-          {},
-          {
-            glFeatures: { coverageFuzzingMrWidget: shouldShowFuzzing },
-          },
-        );
-      });
+        },
+        {},
+      );
+    });
 
-      it(`${shouldShowFuzzing ? 'renders' : 'does not render'}`, () => {
-        expect(wrapper.find('[data-qa-selector="coverage_fuzzing_report"]').exists()).toBe(
-          shouldShowFuzzing,
-        );
-      });
+    it('renders', () => {
+      expect(wrapper.find('[data-qa-selector="coverage_fuzzing_report"]').exists()).toBe(true);
     });
   });
 

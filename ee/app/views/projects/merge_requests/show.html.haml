@@ -20,6 +20,6 @@
     window.gl.mrWidgetData.sast_comparison_path = '#{sast_reports_project_merge_request_path(@project, @merge_request) if @project.feature_available?(:sast)}'
     window.gl.mrWidgetData.dast_comparison_path = '#{dast_reports_project_merge_request_path(@project, @merge_request) if @project.feature_available?(:dast)}'
     window.gl.mrWidgetData.secret_scanning_comparison_path = '#{secret_detection_reports_project_merge_request_path(@project, @merge_request) if @project.feature_available?(:secret_detection)}'
-    window.gl.mrWidgetData.coverage_fuzzing_comparison_path = '#{coverage_fuzzing_reports_project_merge_request_path(@project, @merge_request) if @project.feature_available?(:coverage_fuzzing) && Feature.enabled?(:coverage_fuzzing_mr_widget, @project, default_enabled: true)}'
+    window.gl.mrWidgetData.coverage_fuzzing_comparison_path = '#{coverage_fuzzing_reports_project_merge_request_path(@project, @merge_request) if @project.feature_available?(:coverage_fuzzing)}'
     window.gl.mrWidgetData.api_fuzzing_comparison_path = '#{api_fuzzing_reports_project_merge_request_path(@project, @merge_request) if @project.feature_available?(:api_fuzzing)}'
 
