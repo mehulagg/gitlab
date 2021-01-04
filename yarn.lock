@@ -871,10 +871,9 @@
   resolved "https://registry.yarnpkg.com/@gitlab/tributejs/-/tributejs-1.0.0.tgz#672befa222aeffc83e7d799b0500a7a4418e59b8"
   integrity sha512-nmKw1+hB6MHvlmPz63yPwVs1qQkycHwsKgxpEbzmky16Y6mL4EJMk3w1b8QlOAF/AIAzjCERPhe/R4MJiohbZw==
 
-"@gitlab/ui@25.2.1":
+"@gitlab/ui@https://gitlab.com/gitlab-org/gitlab-ui/-/jobs/939552878/artifacts/raw/gitlab-ui.1057-improve-modal-with-tertiary-icon-button-for-close-action.tgz":
   version "25.2.1"
-  resolved "https://registry.yarnpkg.com/@gitlab/ui/-/ui-25.2.1.tgz#2c332134bbc82a6c40ff5fdb73aacccf730629d8"
-  integrity sha512-bOkL2sfkovCV6MO/N70Xfe+vTdyi2Vp2efgDvOx4tHzqJllM6Y379wculi0VmdGw3X4TpmPI+zLWAAZ9vkhDAQ==
+  resolved "https://gitlab.com/gitlab-org/gitlab-ui/-/jobs/939552878/artifacts/raw/gitlab-ui.1057-improve-modal-with-tertiary-icon-button-for-close-action.tgz#2ee42a92ff4c9260aa753a175b99cc512caf6f67"
   dependencies:
     "@babel/standalone" "^7.0.0"
     "@gitlab/vue-toasted" "^1.3.0"
