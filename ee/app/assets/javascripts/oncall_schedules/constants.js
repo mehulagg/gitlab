@@ -20,3 +20,6 @@ export const PRESET_DEFAULTS = {
     TIMEFRAME_LENGTH: 2,
   },
 };
+
+export const addRotationModalId = 'addRotationModal';
+export const editRotationModalId = 'editRotationModal';
