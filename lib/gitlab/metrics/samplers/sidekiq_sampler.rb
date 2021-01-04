@@ -16,15 +16,20 @@ module Gitlab
         def initialize(*)
           super
           @metrics = {
+            sampler_duration:      ::Gitlab::Metrics.counter(:sidekiq_sampler_duration_seconds_total, 'Cumulative sampler elapsed time'),
             sidekiq_queue_size:    ::Gitlab::Metrics.gauge(:sidekiq_queue_size, 'The current length of the queue'),
             sidekiq_queue_latency: ::Gitlab::Metrics.gauge(:sidekiq_queue_latency_seconds, 'Time elapsed since the oldest job was enqueued')
           }
         end
 
         def sample
+          start_time = System.monotonic_time
+
           labels = {}
 
           sample_queue_stats(labels)
+
+          metrics[:sampler_duration].increment(labels, System.monotonic_time - start_time)
         end
 
         private

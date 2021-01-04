@@ -9,16 +9,23 @@ RSpec.describe Gitlab::Metrics::Samplers::SidekiqSampler do
 
   describe '#sample' do
     let(:queues) { %w[q1 q2] }
+    let(:jobs) { [[], []] }
 
     before do
       stub_redis :sscan_each, 'queues', queues
       stub_redis :pipelined, no_args, jobs
     end
 
+    describe 'sampler duration' do
+      it 'reports the sampling duration in seconds' do
+        expect(sampler.metrics[:sampler_duration]).to receive(:increment).with({}, a_value > 0)
+
+        sampler.sample
+      end
+    end
+
     describe 'sidekiq_queue_size' do
       context 'when queues are empty' do
-        let(:jobs) { [[], []] }
-
         it 'reports queue size of 0' do
           queues.each do |q|
             expect(sampler.metrics[:sidekiq_queue_size]).to receive(:set).with({ name: q, queue: q }, 0)
