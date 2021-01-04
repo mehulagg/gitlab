@@ -9,6 +9,18 @@ FactoryBot.define do
     sequence(:version)
     file { fixture_file_upload('spec/fixtures/terraform/terraform.tfstate', 'application/json') }
 
+    trait(:stored_locally) do
+      after(:create) do |version|
+        version.update!(file_store: Terraform::StateUploader::Store::LOCAL)
+      end
+    end
+
+    trait(:stored_remotely) do
+      after(:create) do |version|
+        version.update!(file_store: Terraform::StateUploader::Store::REMOTE)
+      end
+    end
+
     trait(:checksummed) do
       verification_checksum { 'abc' }
     end

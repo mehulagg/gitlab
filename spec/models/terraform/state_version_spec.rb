@@ -24,6 +24,24 @@ RSpec.describe Terraform::StateVersion do
 
       it { expect(subject.map(&:version)).to eq(versions.sort.reverse) }
     end
+
+    describe '.with_files_stored_locally' do
+      let_it_be(:local_version) { create(:terraform_state_version, :stored_locally) }
+      let_it_be(:remote_version) { create(:terraform_state_version, :stored_remotely) }
+
+      subject { described_class.with_files_stored_locally }
+
+      it { is_expected.to contain_exactly(local_version) }
+    end
+
+    describe '.with_files_stored_remotely' do
+      let_it_be(:local_version) { create(:terraform_state_version, :stored_locally) }
+      let_it_be(:remote_version) { create(:terraform_state_version, :stored_remotely) }
+
+      subject { described_class.with_files_stored_remotely }
+
+      it { is_expected.to contain_exactly(remote_version) }
+    end
   end
 
   context 'file storage' do
