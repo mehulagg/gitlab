@@ -47,6 +47,9 @@ To enforce confirmation of the email address used for new sign ups:
 1. Go to **Admin Area > Settings > General** and expand **Sign-up restrictions**.
 1. Select the **Enable email restrictions for sign ups** checkbox, then select **Save changes**.
 
+If an administrator disables this setting, the users in pending approval state will be
+automatically approved in a background job.
+
 ## User cap **(CORE ONLY)**
 
 > [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/4315) in GitLab 13.6.
