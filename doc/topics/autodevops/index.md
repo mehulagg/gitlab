@@ -307,6 +307,8 @@ and verifying your application is deployed as a Review App in the Kubernetes
 cluster with the `review/*` environment scope. Similarly, you can check the
 other environments.
 
+There is an issue with [cluster environment scope not respected when checking for active Kubernetes clusters](https://gitlab.com/gitlab-org/gitlab/-/issues/20351). Because of it, in order to make multi-cluster setup work with auto-devops, a fallback cluster needs to be created with Cluster environment scope set to `*`. You don't have to use a new cluster for it. You can use any of the clusters you already have added. 
+
 ## Limitations
 
 The following restrictions apply.
