@@ -51,6 +51,12 @@ export const mockCiConfigQueryResponse = {
                     nodes: [
                       {
                         name: 'job_test_1',
+                        allowFailure: false,
+                        environment: null,
+                        script: ['echo "test 1"'],
+                        afterScript: [],
+                        beforeScript: [],
+                        when: 'on_success',
                         needs: { nodes: [], __typename: 'CiConfigNeedConnection' },
                         __typename: 'CiConfigJob',
                       },
@@ -65,6 +71,12 @@ export const mockCiConfigQueryResponse = {
                     nodes: [
                       {
                         name: 'job_test_2',
+                        allowFailure: false,
+                        environment: null,
+                        script: ['echo "test 2"'],
+                        afterScript: [],
+                        beforeScript: [],
+                        when: 'on_success',
                         needs: { nodes: [], __typename: 'CiConfigNeedConnection' },
                         __typename: 'CiConfigJob',
                       },
@@ -88,6 +100,12 @@ export const mockCiConfigQueryResponse = {
                     nodes: [
                       {
                         name: 'job_build',
+                        allowFailure: false,
+                        environment: null,
+                        script: ['echo "build"'],
+                        afterScript: [],
+                        beforeScript: [],
+                        when: 'on_success',
                         needs: {
                           nodes: [{ name: 'job_test_2', __typename: 'CiConfigNeed' }],
                           __typename: 'CiConfigNeedConnection',
