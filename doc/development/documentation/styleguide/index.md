@@ -501,6 +501,9 @@ When including sample URLs in the documentation, use:
 - `example.com` when the domain name is generic.
 - `gitlab.example.com` when referring to self-managed instances of GitLab.
 
+When referring to the GitLab.com SaaS instance at `gitlab.com`, do not
+substitute a fake URL.
+
 ### Fake tokens
 
 There may be times where a token is needed to demonstrate an API call using
