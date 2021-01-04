@@ -16,6 +16,10 @@ import {
   CLEANUP_ONGOING_TOOLTIP,
   CLEANUP_UNFINISHED_TOOLTIP,
   CLEANUP_DISABLED_TOOLTIP,
+  UNFINISHED_STATUS,
+  UNSCHEDULED_STATUS,
+  SCHEDULED_STATUS,
+  ONGOING_STATUS,
 } from '../../constants/index';
 
 export default {
@@ -51,14 +55,14 @@ export default {
         return { text: CLEANUP_DISABLED_TEXT, tooltip: CLEANUP_DISABLED_TOOLTIP };
       }
       return {
-        UNSCHEDULED: {
+        [UNSCHEDULED_STATUS]: {
           text: sprintf(CLEANUP_UNSCHEDULED_TEXT, {
             time: this.timeFormatted(this.image.project.containerExpirationPolicy.nextRunAt),
           }),
         },
-        SCHEDULED: { text: CLEANUP_SCHEDULED_TEXT, tooltip: CLEANUP_SCHEDULED_TOOLTIP },
-        ONGOING: { text: CLEANUP_ONGOING_TEXT, tooltip: CLEANUP_ONGOING_TOOLTIP },
-        UNFINISHED: { text: CLEANUP_UNFINISHED_TEXT, tooltip: CLEANUP_UNFINISHED_TOOLTIP },
+        [SCHEDULED_STATUS]: { text: CLEANUP_SCHEDULED_TEXT, tooltip: CLEANUP_SCHEDULED_TOOLTIP },
+        [ONGOING_STATUS]: { text: CLEANUP_ONGOING_TEXT, tooltip: CLEANUP_ONGOING_TOOLTIP },
+        [UNFINISHED_STATUS]: { text: CLEANUP_UNFINISHED_TEXT, tooltip: CLEANUP_UNFINISHED_TOOLTIP },
       }[this.image?.expirationPolicyCleanupStatus];
     },
   },

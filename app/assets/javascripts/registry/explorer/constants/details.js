@@ -94,3 +94,6 @@ export const ALERT_MESSAGES = {
 };
 
 export const UNFINISHED_STATUS = 'UNFINISHED';
+export const UNSCHEDULED_STATUS = 'UNSCHEDULED';
+export const SCHEDULED_STATUS = 'SCHEDULED';
+export const ONGOING_STATUS = 'ONGOING';
