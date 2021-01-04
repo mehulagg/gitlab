@@ -7,6 +7,7 @@ RSpec.describe Gitlab::Database::Reindexing::GrafanaNotifier do
 
   let(:api_key) { "foo" }
   let(:api_url) { "http://bar"}
+  let(:additional_tag) { "some-tag" }
 
   let(:action) { create(:reindex_action) }
 
@@ -73,12 +74,12 @@ RSpec.describe Gitlab::Database::Reindexing::GrafanaNotifier do
   end
 
   describe '#notify_start' do
-    subject { described_class.new(api_key, api_url).notify_start(action) }
+    subject { described_class.new(api_key, api_url, additional_tag).notify_start(action) }
 
     let(:payload) do
       {
         time: (action.action_start.utc.to_f * 1000).to_i,
-        tags: ['reindex', action.index.tablename, action.index.name],
+        tags: ['reindex', additional_tag, action.index.tablename, action.index.name],
         text: "Started reindexing of #{action.index.name} on #{action.index.tablename}"
       }
     end
@@ -87,12 +88,12 @@ RSpec.describe Gitlab::Database::Reindexing::GrafanaNotifier do
   end
 
   describe '#notify_end' do
-    subject { described_class.new(api_key, api_url).notify_end(action) }
+    subject { described_class.new(api_key, api_url, additional_tag).notify_end(action) }
 
     let(:payload) do
       {
         time: (action.action_start.utc.to_f * 1000).to_i,
-        tags: ['reindex', action.index.tablename, action.index.name],
+        tags: ['reindex', additional_tag, action.index.tablename, action.index.name],
         text: "Finished reindexing of #{action.index.name} on #{action.index.tablename} (#{action.state})",
         timeEnd: (action.action_end.utc.to_f * 1000).to_i,
         isRegion: true
