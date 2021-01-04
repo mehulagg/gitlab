@@ -4425,6 +4425,26 @@ RSpec.describe Ci::Build do
         it { is_expected.to be_falsey }
       end
     end
+
+    context 'when `return_exit_code` feature is required by build' do
+      before do
+        expect(build).to receive(:runner_required_feature_names) do
+          [:return_exit_code]
+        end
+      end
+
+      context 'when runner provides given feature' do
+        let(:runner_features) { { return_exit_code: true } }
+
+        it { is_expected.to be_truthy }
+      end
+
+      context 'when runner does not provide given feature' do
+        let(:runner_features) { {} }
+
+        it { is_expected.to be_falsey }
+      end
+    end
   end
 
   describe '#deployment_status' do
@@ -4925,6 +4945,59 @@ RSpec.describe Ci::Build do
 
         it_behaves_like 'drops the build without changing allow_failure'
       end
+    end
+  end
+
+  describe '#exit_codes_defined?' do
+    let(:options) { {} }
+
+    before do
+      build.options.merge!(options)
+      build.save!
+    end
+
+    subject(:exit_codes_defined) do
+      build.exit_codes_defined?
+    end
+
+    context 'without allow_failure_criteria' do
+      it { is_expected.to be_falsey }
+    end
+
+    context 'when exit_codes is nil' do
+      let(:options) do
+        {
+          allow_failure_criteria: {
+            exit_codes: nil
+          }
+        }
+      end
+
+      it { is_expected.to be_falsey }
+    end
+
+    context 'when exit_codes is an empty array' do
+      let(:options) do
+        {
+          allow_failure_criteria: {
+            exit_codes: []
+          }
+        }
+      end
+
+      it { is_expected.to be_falsey }
+    end
+
+    context 'when exit_codes are defined' do
+      let(:options) do
+        {
+          allow_failure_criteria: {
+            exit_codes: [5, 6]
+          }
+        }
+      end
+
+      it { is_expected.to be_truthy }
     end
   end
 end
