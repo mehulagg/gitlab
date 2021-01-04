@@ -13,6 +13,7 @@ import * as responses from '../mocks/apollo_mocks';
 import { scannerProfiles, siteProfiles } from '../mocks/mock_data';
 import { redirectTo } from '~/lib/utils/url_utility';
 
+const URL_HOST = 'https://localhost/';
 const helpPagePath = '/application_security/dast/index#on-demand-scans';
 const projectPath = 'group/project';
 const defaultBranch = 'master';
@@ -33,6 +34,7 @@ const [nonValidatedSiteProfile, validatedSiteProfile] = siteProfiles;
 
 jest.mock('~/lib/utils/url_utility', () => ({
   isAbsolute: jest.requireActual('~/lib/utils/url_utility').isAbsolute,
+  queryToObject: jest.requireActual('~/lib/utils/url_utility').queryToObject,
   redirectTo: jest.fn(),
 }));
 
@@ -372,6 +374,38 @@ describe('OnDemandScansForm', () => {
       expect(summary).toMatch(authEnabledProfile.auth.username);
       expect(summary).toMatch(authEnabledProfile.auth.usernameField);
       expect(summary).toMatch(authEnabledProfile.auth.passwordField);
+    });
+  });
+
+  describe('populate profiles from query params', () => {
+    const [siteProfile] = siteProfiles;
+    const [scannerProfile] = scannerProfiles;
+
+    beforeEach(() => {
+      delete window.location;
+      window.location = new URL(URL_HOST);
+    });
+
+    it('scanner profile', () => {
+      window.location.search = `?scanner_profile_id=${scannerProfile.id}`;
+      mountShallowSubject();
+
+      expect(subject.find(ScannerProfileSelector).attributes('value')).toBe(scannerProfile.id);
+    });
+
+    it('site profile', () => {
+      window.location.search = `?site_profile_id=${siteProfile.id}`;
+      mountShallowSubject();
+
+      expect(subject.find(SiteProfileSelector).attributes('value')).toBe(siteProfile.id);
+    });
+
+    it('both scanner & site profile', () => {
+      window.location.search = `?site_profile_id=${siteProfile.id}&scanner_profile_id=${scannerProfile.id}`;
+      mountShallowSubject();
+
+      expect(subject.find(SiteProfileSelector).attributes('value')).toBe(siteProfile.id);
+      expect(subject.find(ScannerProfileSelector).attributes('value')).toBe(scannerProfile.id);
     });
   });
 });

@@ -16,7 +16,7 @@ import {
 import { DAST_SITE_VALIDATION_STATUS } from 'ee/security_configuration/dast_site_validation/constants';
 import * as Sentry from '~/sentry/wrapper';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import { redirectTo } from '~/lib/utils/url_utility';
+import { redirectTo, queryToObject } from '~/lib/utils/url_utility';
 import {
   ERROR_RUN_SCAN,
   ERROR_FETCH_SCANNER_PROFILES,
@@ -170,6 +170,11 @@ export default {
     isSubmitButtonDisabled() {
       return this.someFieldEmpty || this.hasProfilesConflict;
     },
+  },
+  created() {
+    const params = queryToObject(window.location.search);
+    this.selectedScannerProfileId = params.scanner_profile_id;
+    this.selectedSiteProfileId = params.site_profile_id;
   },
   methods: {
     onSubmit() {
