@@ -54,8 +54,7 @@ Otherwise, you can:
 
    - *If you've received your license as plain text:*
     1. Select **Enter license key**
-    1. Copy the license and paste it into the **License key**
-     field.
+    1. Copy the license and paste it into the **License key** field.
     1. Check the Subscription Agreement checkbox.
     1. Select **Upload License**.
 
