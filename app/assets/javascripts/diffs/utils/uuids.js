@@ -11,7 +11,7 @@
  * @typedef {String} UUIDv4
  */
 
-import MersenneTwister from 'mersenne-twister';
+import { MersenneTwister } from 'fast-mersenne-twister';
 import stringHash from 'string-hash';
 import { isString } from 'lodash';
 import { v4 } from 'uuid';
