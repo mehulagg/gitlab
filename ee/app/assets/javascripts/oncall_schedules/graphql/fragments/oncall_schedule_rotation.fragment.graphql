@@ -1,0 +1,17 @@
+fragment OnCallRotation on IncidentManagementOncallRotation {
+  id
+  name
+  startsAt
+  length
+  lengthUnit
+  participants {
+    nodes {
+      user {
+        id
+        username
+      }
+      colorWeight
+      colorPalette
+    }
+  }
+}

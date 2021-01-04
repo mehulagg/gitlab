@@ -4,16 +4,16 @@ import { set } from 'lodash';
 import { s__, __ } from '~/locale';
 import createFlash, { FLASH_TYPES } from '~/flash';
 import usersSearchQuery from '~/graphql_shared/queries/users_search.query.graphql';
-import getOncallSchedulesQuery from '../../graphql/queries/get_oncall_schedules.query.graphql';
-import createOncallScheduleRotationMutation from '../../graphql/mutations/create_oncall_schedule_rotation.mutation.graphql';
-import updateOncallScheduleRotationMutation from '../../graphql/mutations/update_oncall_schedule_rotation.mutation.graphql';
-import { LENGTH_ENUM } from '../../constants';
+import getOncallSchedulesQuery from '../../../graphql/queries/get_oncall_schedules.query.graphql';
+import createOncallScheduleRotationMutation from '../../../graphql/mutations/create_oncall_schedule_rotation.mutation.graphql';
+import updateOncallScheduleRotationMutation from '../../../graphql/mutations/update_oncall_schedule_rotation.mutation.graphql';
+import { LENGTH_ENUM } from '../../../constants';
 import AddEditRotationForm from './add_edit_rotation_form.vue';
 import {
   updateStoreAfterRotationAdd,
   updateStoreAfterRotationEdit,
-} from '../../utils/cache_updates';
-import { formatTime } from '../../utils/common_utils';
+} from '../../../utils/cache_updates';
+import { format24HourTimeStringFromInt } from '~/lib/utils/datetime_utility';
 
 export const i18n = {
   rotationCreated: s__('OnCallSchedules|Successfully created a new rotation'),
@@ -77,7 +77,7 @@ export default {
         },
         startsAt: {
           date: null,
-          time: '0',
+          time: 0,
         },
       },
       error: '',
@@ -106,7 +106,7 @@ export default {
       return this.form.participants.length > 0;
     },
     rotationStartsAtIsValid() {
-      return this.form.startsAt.date !== null || this.form.startsAt.date !== undefined;
+      return Boolean(this.form.startsAt.date);
     },
     rotationVariables() {
       return {
@@ -115,7 +115,7 @@ export default {
         name: this.form.name,
         startsAt: {
           ...this.form.startsAt,
-          time: formatTime(this.form.startsAt.time),
+          time: format24HourTimeStringFromInt(this.form.startsAt.time),
         },
         rotationLength: {
           ...this.form.rotationLength,

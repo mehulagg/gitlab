@@ -16,8 +16,8 @@ import {
   HOURS_IN_DAY,
   CHEVRON_SKIPPING_SHADE_ENUM,
   CHEVRON_SKIPPING_PALETTE_ENUM,
-} from '../../constants';
-import { formatTime } from '../../utils/common_utils';
+} from '../../../constants';
+import { format24HourTimeStringFromInt } from '~/lib/utils/datetime_utility';
 
 export const i18n = {
   selectParticipant: s__('OnCallSchedules|Select participant'),
@@ -93,7 +93,7 @@ export default {
     };
   },
   methods: {
-    formatTime,
+    format24HourTimeStringFromInt,
   },
 };
 </script>
@@ -124,7 +124,7 @@ export default {
         v-model="participantsArr"
         :dropdown-items="participants"
         :loading="isLoading"
-        :container-class="'gl-h-13! gl-overflow-y-auto'"
+        container-class="gl-h-13! gl-overflow-y-auto"
         @text-input="$emit('filter-participants', $event)"
         @input="$emit('update-rotation-form', { type: 'participants', value: participantsArr })"
       >
@@ -186,7 +186,7 @@ export default {
         <span> {{ __('at') }} </span>
         <gl-dropdown
           id="rotation-time"
-          :text="formatTime(form.startsAt.time)"
+          :text="format24HourTimeStringFromInt(form.startsAt.time)"
           class="gl-w-12 gl-pl-3"
         >
           <gl-dropdown-item
@@ -196,7 +196,7 @@ export default {
             is-check-item
             @click="$emit('update-rotation-form', { type: 'startsAt.time', value: time })"
           >
-            <span class="gl-white-space-nowrap"> {{ formatTime(time) }}</span>
+            <span class="gl-white-space-nowrap"> {{ format24HourTimeStringFromInt(time) }}</span>
           </gl-dropdown-item>
         </gl-dropdown>
         <span class="gl-pl-5"> {{ schedule.timezone }} </span>

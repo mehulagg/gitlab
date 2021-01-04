@@ -1,22 +1,10 @@
+#import "../fragments/oncall_schedule_rotation.fragment.graphql"
+
 mutation newRotation($OncallRotationCreateInput: OncallRotationCreateInput!) {
   oncallRotationCreate(input: $OncallRotationCreateInput) {
     errors
     oncallRotation {
-      id
-      name
-      startsAt
-      length
-      lengthUnit
-      participants {
-        nodes {
-          user {
-            id
-            username
-          }
-          colorWeight
-          colorPalette
-        }
-      }
+      ...OnCallRotation
     }
   }
 }

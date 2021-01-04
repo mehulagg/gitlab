@@ -6,7 +6,7 @@ import { GlModal, GlAlert } from '@gitlab/ui';
 import { addRotationModalId } from 'ee/oncall_schedules/constants';
 import AddEditRotationModal, {
   i18n,
-} from 'ee/oncall_schedules/components/rotations/add_edit_rotation_modal.vue';
+} from 'ee/oncall_schedules/components/rotations/components/add_edit_rotation_modal.vue';
 import getOncallSchedulesQuery from 'ee/oncall_schedules/graphql/queries/get_oncall_schedules.query.graphql';
 import createOncallScheduleRotationMutation from 'ee/oncall_schedules/graphql/mutations/create_oncall_schedule_rotation.mutation.graphql';
 import createFlash, { FLASH_TYPES } from '~/flash';
@@ -16,7 +16,7 @@ import {
   getOncallSchedulesQueryResponse,
   createRotationResponse,
   createRotationResponseWithErrors,
-} from '../mocks/apollo_mock';
+} from '../../mocks/apollo_mock';
 
 jest.mock('~/flash');
 

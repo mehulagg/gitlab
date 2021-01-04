@@ -1,9 +1,9 @@
 import { shallowMount } from '@vue/test-utils';
 import waitForPromises from 'helpers/wait_for_promises';
 import { GlDropdownItem, GlTokenSelector } from '@gitlab/ui';
-import AddEditRotationForm from 'ee/oncall_schedules/components/rotations/add_edit_rotation_form.vue';
+import AddEditRotationForm from 'ee/oncall_schedules/components/rotations/components/add_edit_rotation_form.vue';
 import { LENGTH_ENUM } from 'ee/oncall_schedules/constants';
-import { participants, getOncallSchedulesQueryResponse } from '../mocks/apollo_mock';
+import { participants, getOncallSchedulesQueryResponse } from '../../mocks/apollo_mock';
 
 const projectPath = 'group/project';
 const schedule =
@@ -36,7 +36,7 @@ describe('AddEditRotationForm', () => {
           },
           startsAt: {
             date: null,
-            time: '0',
+            time: 0,
           },
         },
       },
@@ -52,7 +52,6 @@ describe('AddEditRotationForm', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findRotationLength = () => wrapper.find('[id = "rotation-length"]');
