@@ -41,7 +41,7 @@ To install the app in Jira:
       For example:
 
       ```plaintext
-      https://xxxx.serveo.net/-/jira_connect/app_descriptor.json
+      https://xxxx.gitpod.io/-/jira_connect/app_descriptor.json
       ```
 
    1. Click **Upload**.
