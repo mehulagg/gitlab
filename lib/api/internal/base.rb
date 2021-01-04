@@ -280,14 +280,14 @@ module API
 
           break { success: false } unless Feature.enabled?(:two_factor_for_cli)
 
-          actor.update_last_used_at!
-          user = actor.user
+          fingerprint = Gitlab::InsecureKeyFingerprint.new(params.fetch(:key_id)).fingerprint
 
-          error_message = validate_actor_key(actor, params[:key_id])
+          key = Key.find_by(fingerprint: fingerprint)
+          not_found!('Key') if key.nil?
 
-          if error_message
-            { success: false, message: error_message }
-          elsif actor.key.is_a?(DeployKey)
+          user = key.user
+
+          if key.is_a?(DeployKey)
             { success: true, two_factor_required: false }
           else
             {
@@ -302,21 +302,21 @@ module API
 
           break { success: false, message: 'Feature flag is disabled' } unless Feature.enabled?(:two_factor_for_cli)
 
-          actor.update_last_used_at!
-          user = actor.user
+          fingerprint = Gitlab::InsecureKeyFingerprint.new(params.fetch(:key_id)).fingerprint
 
-          error_message = validate_actor_key(actor, params[:key_id])
+          key = Key.find_by(fingerprint: fingerprint)
+          not_found!('Key') if key.nil?
 
-          break { success: false, message: error_message } if error_message
+          user = key.user
 
-          break { success: false, message: 'Deploy keys cannot be used for Two Factor' } if actor.key.is_a?(DeployKey)
+          break { success: false, message: 'Deploy keys cannot be used for Two Factor' } if key.is_a?(DeployKey)
 
           break { success: false, message: 'Two-factor authentication is not enabled for this user' } unless user.two_factor_enabled?
 
           otp_validation_result = ::Users::ValidateOtpService.new(user).execute(params.fetch(:otp_attempt))
 
           if otp_validation_result[:status] == :success
-            ::Gitlab::Auth::Otp::SessionEnforcer.new(actor.key).update_session
+            ::Gitlab::Auth::Otp::SessionEnforcer.new(key).update_session
 
             { success: true }
           else
