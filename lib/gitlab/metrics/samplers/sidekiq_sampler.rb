@@ -11,9 +11,10 @@ module Gitlab
       class SidekiqSampler < BaseSampler
         DEFAULT_SAMPLING_INTERVAL_SECONDS = 5
 
+        attr_reader :metrics
+
         def initialize(*)
           super
-          @stats = Sidekiq::Stats.new
           @metrics = {
             sidekiq_queue_size:    ::Gitlab::Metrics.gauge(:sidekiq_queue_size, 'The current length of the queue'),
             sidekiq_queue_latency: ::Gitlab::Metrics.gauge(:sidekiq_queue_latency_seconds, 'Time elapsed since the oldest job was enqueued')
