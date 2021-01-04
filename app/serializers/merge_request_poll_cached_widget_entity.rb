@@ -104,6 +104,14 @@ class MergeRequestPollCachedWidgetEntity < IssuableEntity
     presenter(merge_request).api_unapprove_path
   end
 
+  expose :reverted do |merge_request|
+    merge_request.reverted_by_merge_request?(current_user)
+  end
+
+  expose :reverted_path, if: -> (mr) { mr.reverted_by_merge_request?(current_user) } do |merge_request|
+    merge_request_path(merge_request.reverting_merge_request(current_user))
+  end
+
   private
 
   delegate :current_user, to: :request
