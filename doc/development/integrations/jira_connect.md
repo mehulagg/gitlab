@@ -10,13 +10,16 @@ The following are required to install and test the app:
 
 - A Jira Cloud instance. Atlassian provides [free instances for development and testing](https://developer.atlassian.com/platform/marketplace/getting-started/#free-developer-instances-to-build-and-test-your-app).
 - A GitLab instance available over the internet. For the app to work, Jira Cloud should
-  be able to connect to the GitLab instance through the internet. To easily expose your
-  local development environment, you can use tools like:
-  - [serveo](https://medium.com/automationmaster/how-to-forward-my-local-port-to-public-using-serveo-4979f352a3bf)
-  - [ngrok](https://ngrok.com).
+  be able to connect to the GitLab instance through the internet. For this we
+  recommend using `gitpod`, or a similar cloud development environment. See this
+  [video](https://www.loom.com/share/9c9711d4876a40869b9294eecb24c54d) for a
+  guide to using Gitpod for GDK development.
 
-  These also take care of SSL for you because Jira requires all connections to the app
-  host to be over SSL.
+  You **must not** use tunnelling tools such as serveo, or ngrok. These are
+  security risks, and must not be run on developer laptops.
+
+  Jira requires all connections to the app host to be over SSL, so if you set up
+  your own environment, remember to enable SSL and an appropriate certificate.
 
 ## Install the app in Jira
 
