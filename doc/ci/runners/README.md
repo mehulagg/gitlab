@@ -116,7 +116,7 @@ You can also enable shared runners for individual projects.
 To enable shared runners:
 
 1. Go to the project's **Settings > CI/CD** and expand the **Runners** section.
-1. Click **Allow shared runners**.
+1. Click on the **Enable shared runners for this project** toggle.
 
 #### Disable shared runners
 
@@ -126,12 +126,14 @@ You must have Owner permissions for the project or group.
 To disable shared runners for a project:
 
 1. Go to the project's **Settings > CI/CD** and expand the **Runners** section.
-1. In the **Shared runners** area, click **Disable shared runners**.
+1. In the **Shared runners** area, disable the **Enable shared runners for this project** toggle.
+
+Note that shared runners will be automatically disabled for a project if the shared runners setting for the parent group is disabled and if overriding this setting is not permitted.
 
 To disable shared runners for a group:
 
 1. Go to the group's **Settings > CI/CD** and expand the **Runners** section.
-1. In the **Shared runners** area, click **Enable shared runners for this group**.
+1. In the **Shared runners** area, disable the **Enable shared runners for this group** toggle.
 1. Optionally, to allow shared runners to be enabled for individual projects or subgroups,
    click **Allow projects and subgroups to override the group setting**.
 
