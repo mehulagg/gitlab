@@ -1,16 +1,34 @@
-include:
-  - template: Jobs/Code-Quality.gitlab-ci.yml
-  - template: Security/SAST.gitlab-ci.yml
-  - template: Security/Secret-Detection.gitlab-ci.yml
-  - template: Security/Dependency-Scanning.gitlab-ci.yml
-  - template: Security/License-Scanning.gitlab-ci.yml
+# include:
+#   - template: Jobs/Code-Quality.gitlab-ci.yml
+#   - template: Security/SAST.gitlab-ci.yml
+#   - template: Security/Dependency-Scanning.gitlab-ci.yml
+#   - template: Security/DAST.gitlab-ci.yml
 
+# We need to duplicate this job's definition because it seems it's impossible to
+# override an included `only.refs`.
+# See https://gitlab.com/gitlab-org/gitlab/issues/31371.
 code_quality:
   extends:
     - .default-retry
     - .reports:rules:code_quality
     - .use-docker-in-docker
+  stage: test
   needs: []
+  variables:
+    CODE_QUALITY_IMAGE: "registry.gitlab.com/gitlab-org/ci-cd/codequality:0.85.18"
+  script:
+    - |
+      if ! docker info &>/dev/null; then
+        if [ -z "$DOCKER_HOST" -a "$KUBERNETES_PORT" ]; then
+          export DOCKER_HOST='tcp://localhost:2375'
+        fi
+      fi
+    - docker pull --quiet "$CODE_QUALITY_IMAGE"
+    - docker run
+        --env SOURCE_CODE="$PWD"
+        --volume "$PWD":/code
+        --volume /var/run/docker.sock:/var/run/docker.sock
+        "$CODE_QUALITY_IMAGE" /code
   artifacts:
     reports:
       codequality: gl-code-quality-report.json
@@ -18,10 +36,14 @@ code_quality:
       - gl-code-quality-report.json  # GitLab-specific
     expire_in: 1 week  # GitLab-specific
 
-sast:
+# We need to duplicate this job's definition because it seems it's impossible to
+# override an included `only.refs`.
+# See https://gitlab.com/gitlab-org/gitlab/issues/31371.
+.sast:
   extends:
     - .default-retry
     - .reports:rules:sast
+  stage: test
   # `needs: []` starts the job immediately in the pipeline
   # https://docs.gitlab.com/ee/ci/yaml/README.html#needs
   needs: []
@@ -32,15 +54,34 @@ sast:
       sast: gl-sast-report.json
     expire_in: 1 week  # GitLab-specific
   variables:
+    DOCKER_TLS_CERTDIR: ""
+    SAST_ANALYZER_IMAGE_PREFIX: "registry.gitlab.com/gitlab-org/security-products/analyzers"
+    SAST_ANALYZER_IMAGE_TAG: 2
     SAST_BRAKEMAN_LEVEL: 2  # GitLab-specific
     SAST_EXCLUDED_PATHS: qa,spec,doc,ee/spec,config/gitlab.yml.example  # GitLab-specific
     SAST_DISABLE_BABEL: "true"
+  script:
+    - /analyzer run
 
-.secret-analyzer::
-  extends:
-    - .default-retry
-    - .reports:rules:sast
-  needs: []
+brakeman-sast:
+  extends: .sast
+  image:
+    name: "$SAST_ANALYZER_IMAGE_PREFIX/brakeman:$SAST_ANALYZER_IMAGE_TAG"
+
+eslint-sast:
+  extends: .sast
+  image:
+    name: "$SAST_ANALYZER_IMAGE_PREFIX/eslint:$SAST_ANALYZER_IMAGE_TAG"
+
+nodejs-scan-sast:
+  extends: .sast
+  image:
+    name: "$SAST_ANALYZER_IMAGE_PREFIX/nodejs-scan:$SAST_ANALYZER_IMAGE_TAG"
+
+secrets-sast:
+  extends: .sast
+  image:
+    name: "$SAST_ANALYZER_IMAGE_PREFIX/secrets:3"
   artifacts:
     paths:
       - gl-secret-detection-report.json  # GitLab-specific
@@ -48,14 +89,63 @@ sast:
       sast: gl-secret-detection-report.json
     expire_in: 1 week  # GitLab-specific
 
+# We need to duplicate this job's definition because it seems it's impossible to
+# override an included `only.refs`.
+# See https://gitlab.com/gitlab-org/gitlab/issues/31371.
 dependency_scanning:
   extends:
     - .default-retry
     - .reports:rules:dependency_scanning
+    - .use-docker-in-docker
+  stage: test
   needs: []
   variables:
+    DS_MAJOR_VERSION: 2
     DS_EXCLUDED_PATHS: "qa/qa/ee/fixtures/secure_premade_reports,spec,ee/spec"  # GitLab-specific
-  after_script:
+  script:
+    - |
+      if ! docker info &>/dev/null; then
+        if [ -z "$DOCKER_HOST" -a "$KUBERNETES_PORT" ]; then
+          export DOCKER_HOST='tcp://localhost:2375'
+        fi
+      fi
+    - | # this is required to avoid undesirable reset of Docker image ENV variables being set on build stage
+      function propagate_env_vars() {
+        CURRENT_ENV=$(printenv)
+
+        for VAR_NAME; do
+          echo $CURRENT_ENV | grep "${VAR_NAME}=" > /dev/null && echo "--env $VAR_NAME "
+        done
+      }
+    - |
+      docker run \
+        $(propagate_env_vars \
+          DS_ANALYZER_IMAGES \
+          DS_ANALYZER_IMAGE_PREFIX \
+          DS_ANALYZER_IMAGE_TAG \
+          DS_DEFAULT_ANALYZERS \
+          DS_EXCLUDED_PATHS \
+          DS_DOCKER_CLIENT_NEGOTIATION_TIMEOUT \
+          DS_PULL_ANALYZER_IMAGE_TIMEOUT \
+          DS_RUN_ANALYZER_TIMEOUT \
+          DS_PYTHON_VERSION \
+          DS_PIP_VERSION \
+          DS_PIP_DEPENDENCY_PATH \
+          GEMNASIUM_DB_LOCAL_PATH \
+          GEMNASIUM_DB_REMOTE_URL \
+          GEMNASIUM_DB_REF_NAME \
+          PIP_INDEX_URL \
+          PIP_EXTRA_INDEX_URL \
+          PIP_REQUIREMENTS_FILE \
+          MAVEN_CLI_OPTS \
+          BUNDLER_AUDIT_UPDATE_DISABLED \
+          BUNDLER_AUDIT_ADVISORY_DB_URL \
+          BUNDLER_AUDIT_ADVISORY_DB_REF_NAME \
+        ) \
+        --volume "$PWD:/code" \
+        --volume /var/run/docker.sock:/var/run/docker.sock \
+        "registry.gitlab.com/gitlab-org/security-products/dependency-scanning:$DS_MAJOR_VERSION" /code
+    # Post-processing: This will be an after_script once this job will use the Dependency Scanning CI template
     - apk add jq
     # Lower execa severity based on https://gitlab.com/gitlab-org/gitlab/-/issues/223859#note_452922390
     - jq '(.vulnerabilities[] | select (.cve == "yarn.lock:execa:gemnasium:05cfa2e8-2d0c-42c1-8894-638e2f12ff3d")).severity = "Medium"' gl-dependency-scanning-report.json > temp.json && mv temp.json gl-dependency-scanning-report.json
@@ -66,17 +156,7 @@ dependency_scanning:
       dependency_scanning: gl-dependency-scanning-report.json
     expire_in: 1 week  # GitLab-specific
 
-license_scanning:
-  extends:
-    - .default-retry
-    - .reports:rules:license_scanning
-  artifacts:
-    reports:
-      license_scanning: gl-license-scanning-report.json
-    expire_in: 1 week  # GitLab-specific
-
-# Analyze dependencies for malicious behavior
-# See https://gitlab.com/gitlab-com/gl-security/security-research/package-hunter
+# The job below analysis dependencies for malicous behavior
 package_hunter:
   extends:
     - .reports:schedule-dast
@@ -96,3 +176,19 @@ package_hunter:
       dependency_scanning: gl-dependency-scanning-report.json
     expire_in: 1 week  # GitLab-specific
 
+license_scanning:
+  extends:
+    - .default-retry
+    - .reports:rules:license_scanning
+  stage: test
+  image:
+    name: "registry.gitlab.com/gitlab-org/security-products/analyzers/license-finder:3"
+    entrypoint: [""]
+  needs: []
+  script:
+    - /run.sh analyze .
+  artifacts:
+    reports:
+      license_scanning: gl-license-scanning-report.json
+    expire_in: 1 week  # GitLab-specific
+  dependencies: []
