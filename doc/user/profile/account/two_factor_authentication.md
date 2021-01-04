@@ -153,6 +153,9 @@ If you ever need to disable 2FA:
 This will clear all your two-factor authentication registrations, including mobile
 applications and U2F devices.
 
+Support for disabling 2FA is limited, depending on your subscription level. For more information, see the
+[Account Recovery](https://about.gitlab.com/support/#account-recovery) section of our website.
+
 ## Personal access tokens
 
 When 2FA is enabled, you can no longer use your normal account password to
