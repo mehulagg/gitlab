@@ -30,20 +30,44 @@ RSpec.describe ContainerRegistry::Client do
   let(:expected_faraday_request_options) { Gitlab::HTTP::DEFAULT_TIMEOUT_OPTIONS }
 
   shared_examples 'handling timeouts' do
-    it 'handles network timeouts' do
-      actual_retries = 0
-      retry_options = ContainerRegistry::Client::RETRY_OPTIONS.merge(
+    let(:retry_options) do
+      ContainerRegistry::Client::RETRY_OPTIONS.merge(
         interval: 0.1,
         interval_randomness: 0,
-        backoff_factor: 0,
+        backoff_factor: 0
+      )
+    end
+
+    before do
+      stub_request(method, url).to_timeout
+    end
+
+    it 'handles network timeouts' do
+      actual_retries = 0
+      retry_options_with_block = retry_options.merge(
         retry_block: -> (_, _, _, _) { actual_retries += 1 }
       )
 
-      stub_request(method, url).to_timeout
-      stub_const('ContainerRegistry::Client::RETRY_OPTIONS', retry_options)
+      stub_const('ContainerRegistry::Client::RETRY_OPTIONS', retry_options_with_block)
 
       expect { subject }.to raise_error(Faraday::ConnectionFailed)
-      expect(actual_retries).to eq(3)
+      expect(actual_retries).to eq(retry_options_with_block[:max])
+    end
+
+    it 'logs the error' do
+      stub_const('ContainerRegistry::Client::RETRY_OPTIONS', retry_options)
+
+      expect(Gitlab::ErrorTracking)
+        .to receive(:log_exception)
+        .exactly(retry_options[:max] + 1)
+        .times
+        .with(
+          an_instance_of(Faraday::ConnectionFailed),
+          class: described_class.name,
+          url: URI(url)
+        )
+
+      expect { subject }.to raise_error(Faraday::ConnectionFailed)
     end
   end
 
@@ -150,6 +174,8 @@ RSpec.describe ContainerRegistry::Client do
       it 'starts the upload and posts the blob' do
         stub_upload('path', 'content', 'sha256:123')
 
+        expect_new_faraday(timeout: false)
+
         expect(subject).to be_success
       end
     end
@@ -211,6 +237,8 @@ RSpec.describe ContainerRegistry::Client do
       stub_request(:put, "http://container-registry/v2/path/manifests/tagA")
         .with(body: "{\n  \"foo\": \"bar\"\n}", headers: manifest_headers)
         .to_return(status: 200, body: "", headers: { 'docker-content-digest' => 'sha256:123' })
+
+      expect_new_faraday(timeout: false)
 
       expect(subject).to eq 'sha256:123'
     end
@@ -415,13 +443,14 @@ RSpec.describe ContainerRegistry::Client do
       )
   end
 
-  def expect_new_faraday(times: 1)
+  def expect_new_faraday(times: 1, timeout: true)
+    request_options = timeout ? expected_faraday_request_options : nil
     expect(Faraday)
       .to receive(:new)
       .with(
         'http://container-registry',
         headers: expected_faraday_headers,
-        request: expected_faraday_request_options
+        request: request_options
       ).and_call_original
       .exactly(times)
       .times
