@@ -807,7 +807,6 @@ module API
 
       def self.service_classes
         [
-          ::AlertsService,
           ::AsanaService,
           ::AssemblaService,
           ::BambooService,

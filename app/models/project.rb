@@ -146,7 +146,6 @@ class Project < ApplicationRecord
   has_many :boards
 
   # Project services
-  has_one :alerts_service
   has_one :campfire_service
   has_one :datadog_service
   has_one :discord_service
