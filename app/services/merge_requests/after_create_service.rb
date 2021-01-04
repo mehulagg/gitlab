@@ -4,6 +4,7 @@ module MergeRequests
   class AfterCreateService < MergeRequests::BaseService
     def execute(merge_request)
       event_service.open_mr(merge_request, current_user)
+      record_usage_data
       notification_service.new_merge_request(merge_request, current_user)
 
       create_pipeline_for(merge_request, current_user)
@@ -13,6 +14,12 @@ module MergeRequests
       merge_request.create_cross_references!(current_user)
 
       NamespaceOnboardingAction.create_action(merge_request.target_project.namespace, :merge_request_created)
+    end
+
+    private
+
+    def record_usage_data
+      Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter.track_create_mr_action(user: current_user)
     end
   end
 end

@@ -8,6 +8,7 @@ module MergeRequests
       if merge_request.reopen
         create_event(merge_request)
         create_note(merge_request, 'reopened')
+        record_usage_data
         notification_service.async.reopen_mr(merge_request, current_user)
         execute_hooks(merge_request, 'reopen')
         merge_request.reload_diff(current_user)
@@ -31,6 +32,10 @@ module MergeRequests
         event_service.reopen_mr(merge_request, current_user)
         merge_request_metrics_service(merge_request).reopen
       end
+    end
+
+    def record_usage_data
+      Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter.track_reopen_mr_action(user: current_user)
     end
   end
 end

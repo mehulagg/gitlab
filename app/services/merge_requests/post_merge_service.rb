@@ -15,6 +15,7 @@ module MergeRequests
       todo_service.merge_merge_request(merge_request, current_user)
       create_event(merge_request)
       create_note(merge_request)
+      record_usage_data
       notification_service.merge_mr(merge_request, current_user)
       execute_hooks(merge_request, 'merge')
       invalidate_cache_counts(merge_request, users: merge_request.assignees)
@@ -51,6 +52,10 @@ module MergeRequests
       Event.transaction do
         merge_event = create_merge_event(merge_request, current_user)
         merge_request_metrics_service(merge_request).merge(merge_event)
+      end
+
+      def record_usage_data
+        Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter.track_merge_mr_action(user: current_user)
       end
     end
   end

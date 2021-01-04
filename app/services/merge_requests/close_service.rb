@@ -13,6 +13,7 @@ module MergeRequests
 
       if merge_request.close
         create_event(merge_request)
+        record_usage_data
         create_note(merge_request)
         notification_service.async.close_mr(merge_request, current_user)
         todo_service.close_merge_request(merge_request, current_user)
@@ -36,6 +37,10 @@ module MergeRequests
         close_event = event_service.close_mr(merge_request, current_user)
         merge_request_metrics_service(merge_request).close(close_event)
       end
+    end
+
+    def record_usage_data
+      Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter.track_close_mr_action(user: current_user)
     end
   end
 end
