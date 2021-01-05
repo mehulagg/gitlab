@@ -28,7 +28,7 @@ RSpec.describe Banzai::Filter::AssetProxyFilter do
       stub_application_setting(asset_proxy_enabled: true)
       stub_application_setting(asset_proxy_secret_key: 'shared-secret')
       stub_application_setting(asset_proxy_url: 'https://assets.example.com')
-      stub_application_setting(asset_proxy_whitelist: %w(gitlab.com *.mydomain.com))
+      stub_application_setting(asset_proxy_allowlist: %w(gitlab.com *.mydomain.com))
 
       described_class.initialize_settings
 
@@ -42,7 +42,7 @@ RSpec.describe Banzai::Filter::AssetProxyFilter do
     context 'when whitelist is empty' do
       it 'defaults to the install domain' do
         stub_application_setting(asset_proxy_enabled: true)
-        stub_application_setting(asset_proxy_whitelist: [])
+        stub_application_setting(asset_proxy_allowlist: [])
 
         described_class.initialize_settings
 

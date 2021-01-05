@@ -24,6 +24,9 @@ class ApplicationSetting < ApplicationRecord
   belongs_to :instance_group, class_name: "Group", foreign_key: 'instance_administrators_group_id'
   alias_attribute :instance_group_id, :instance_administrators_group_id
   alias_attribute :instance_administrators_group, :instance_group
+  # This is required as DB migration requires AssetProxySettings initialized which still relies on the old field name
+  # This code can be remove in next release
+  alias_attribute :asset_proxy_allowlist, :asset_proxy_whitelist
 
   def self.repository_storages_weighted_attributes
     @repository_storages_weighted_atributes ||= Gitlab.config.repositories.storages.keys.map { |k| "repository_storages_weighted_#{k}".to_sym }.freeze
@@ -43,7 +46,7 @@ class ApplicationSetting < ApplicationRecord
   serialize :domain_allowlist, Array # rubocop:disable Cop/ActiveRecordSerialize
   serialize :domain_denylist, Array # rubocop:disable Cop/ActiveRecordSerialize
   serialize :repository_storages # rubocop:disable Cop/ActiveRecordSerialize
-  serialize :asset_proxy_whitelist, Array # rubocop:disable Cop/ActiveRecordSerialize
+  serialize :asset_proxy_allowlist, Array # rubocop:disable Cop/ActiveRecordSerialize
 
   cache_markdown_field :sign_in_text
   cache_markdown_field :help_page_text
