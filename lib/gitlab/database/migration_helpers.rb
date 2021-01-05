@@ -125,6 +125,48 @@ module Gitlab
         end
       end
 
+      #
+      # Adds a text column to a table, allowing the caller to also specify a limit for the length of the text column.
+      # The limit will be created as a CHECK constraint.
+      #
+      # The same result could be achieved by adding the column and limit separately, but this method will not add the
+      # column if it already exists, simplifying migration logic.
+      #
+      # Example:
+      #
+      #    add_text_column_with_limit :some_table, :some_column, limit: 55
+      #
+      # Example with custom constraint name:
+      #
+      #    add_text_column_with_limit :some_table, :some_column, limit: { length: 55, constraint_name: :my_constraint }
+      #
+      # See Rails' `add_column` for more info on the options.
+      def add_text_column_with_limit(table_name, column_name, **options)
+        raise 'add_text_column_with_limit cannot be run inside a transaction' if transaction_open?
+
+        text_limit = options.delete(:limit)
+
+        raise ArgumentError, ':limit option must be given for text columns' unless text_limit
+
+        text_limit = { length: text_limit, constraint_name: nil } if text_limit.is_a?(Integer)
+
+        raise ArgumentError, ':limit option must be given as an Integer or Hash' unless text_limit.is_a?(Hash)
+
+        text_limit.symbolize_keys!
+
+        unless text_limit[:length].present? && text_limit[:length].is_a?(Integer)
+          raise ArgumentError, ':length option must be an integer value'
+        end
+
+        unless column_exists?(table_name, column_name)
+          with_lock_retries do
+            add_column(table_name, column_name, :text, **options)
+          end
+        end
+
+        add_text_limit(table_name, column_name, text_limit[:length], constraint_name: text_limit[:constraint_name])
+      end
+
       # Creates a new index, concurrently
       #
       # Example:

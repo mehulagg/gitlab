@@ -223,6 +223,107 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
     end
   end
 
+  describe '#add_text_column_with_limit' do
+    let(:table_name) { :test_table }
+    let(:column_name) { :test_column }
+
+    let(:table_columns) { ActiveRecord::Base.connection.columns(table_name) }
+    let(:column_definition) { table_columns.find { |definition| definition.name == column_name.to_s } }
+
+    before do
+      allow(model).to receive(:transaction_open?).and_return(false)
+
+      model.create_table table_name do |t|
+        t.integer :some_id, null: false
+      end
+    end
+
+    context 'when called with an integer limit' do
+      it 'creates the column and check constraint' do
+        model.add_text_column_with_limit table_name, column_name, null: false, limit: 100
+
+        expect(column_definition.sql_type).to eq('text')
+        expect(column_definition.null).to eq(false)
+        expect_check_constraint(table_name, 'check_6303a5d714', 'char_length(test_column) <= 100')
+      end
+    end
+
+    context 'when called with a hash' do
+      context 'when a custom name is given' do
+        it 'creates the column and check constraint with the custom name' do
+          model.add_text_column_with_limit table_name, column_name, null: false,
+            limit: { length: 100, constraint_name: 'foobar' }
+
+          expect(column_definition.sql_type).to eq('text')
+          expect(column_definition.null).to eq(false)
+          expect_check_constraint(table_name, 'foobar', 'char_length(test_column) <= 100')
+        end
+      end
+
+      context 'when a custom name is not given' do
+        it 'creates the column and check constraint with generated name' do
+          model.add_text_column_with_limit table_name, column_name, null: false, limit: { length: 100 }
+
+          expect(column_definition.sql_type).to eq('text')
+          expect(column_definition.null).to eq(false)
+          expect_check_constraint(table_name, 'check_6303a5d714', 'char_length(test_column) <= 100')
+        end
+      end
+
+      context 'when a partial migration is re-run' do
+        it 'safely completes the migration' do
+          model.add_text_column_with_limit table_name, column_name, null: false,
+            limit: { length: 100, constraint_name: 'foobar' }
+
+          expect(column_definition.sql_type).to eq('text')
+          expect(column_definition.null).to eq(false)
+          expect_check_constraint(table_name, 'foobar', 'char_length(test_column) <= 100')
+
+          model.execute(<<~SQL)
+            ALTER TABLE #{table_name} DROP CONSTRAINT foobar
+          SQL
+
+          model.add_text_column_with_limit table_name, column_name, null: false,
+            limit: { length: 100, constraint_name: 'foobar' }
+
+          expect_check_constraint(table_name, 'foobar', 'char_length(test_column) <= 100')
+        end
+      end
+
+      context 'when the length option is not passed' do
+        it 'raises an error' do
+          expect do
+            model.add_text_column_with_limit table_name, column_name, null: false, limit: {}
+          end.to raise_error(ArgumentError, ':length option must be an integer value')
+        end
+      end
+
+      context 'when the length option is not an integer' do
+        it 'raises an error' do
+          expect do
+            model.add_text_column_with_limit table_name, column_name, null: false, limit: { length: '100' }
+          end.to raise_error(ArgumentError, ':length option must be an integer value')
+        end
+      end
+    end
+
+    context 'when called with an invalid limit argument' do
+      it 'raises an error' do
+        expect do
+          model.add_text_column_with_limit table_name, column_name, null: false, limit: 'hi'
+        end.to raise_error(ArgumentError, ':limit option must be given as an Integer or Hash')
+      end
+    end
+
+    context 'when called without a limit argument' do
+      it 'raises an error' do
+        expect do
+          model.add_text_column_with_limit table_name, column_name, null: false
+        end.to raise_error(ArgumentError, ':limit option must be given for text columns')
+      end
+    end
+  end
+
   describe '#add_concurrent_index' do
     context 'outside a transaction' do
       before do
