@@ -24,10 +24,10 @@ class NotificationService
       @parent = parent
     end
 
-    def method_missing(meth, *args)
+    def method_missing(meth, *args, **kwargs)
       return super unless parent.respond_to?(meth)
 
-      MailScheduler::NotificationServiceWorker.perform_async(meth.to_s, *args)
+      MailScheduler::NotificationServiceWorker.perform_async(meth.to_s, *args, **kwargs)
     end
   end
 
