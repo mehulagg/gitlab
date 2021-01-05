@@ -510,7 +510,7 @@ If the project uses Go modules, run `go mod tidy` before committing. This will c
 
 #### Packages
 1. Packages should be named after what the _provide_, not what they _contain_.
-1. Avoid package names like `common`, `base`, `helper`, or `util`.
+1. Avoid package names like `base`, `helper`, or `util`.
 1. Avoid plurals in package names.
 1. Package names should be lowercase, avoid underscores and camelCase.
 
@@ -518,33 +518,6 @@ If the project uses Go modules, run `go mod tidy` before committing. This will c
 1. CamelCase not underscores. Ex: `bufferSize` not `buffer_size`.
 2. Avoid redundant information in exported variable names. Ex: `bytes.Buffer` not `bytes.BytesBuffer`.
 
-### Style
-
-#### Structs
-Keep struct definitions near the top of files and group together structs that are related.
-
-#### Variables
-Group variables and constants together before function definitions. 
-
-Ex:
-```golang
-const maxSize = 100 
-const minSize = 50
-
-func foo() {...}
-```
-
-would be better written as
-
-```golang
-
-const (
-    maxSize = 100
-    minSize = 50
-)
-
-func foo() {...}
-```
 
 ### Additional Reading
 - [Effective Go](https://golang.org/doc/effective_go.html)
