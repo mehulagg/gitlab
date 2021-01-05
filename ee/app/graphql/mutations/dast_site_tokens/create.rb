@@ -46,7 +46,7 @@ module Mutations
       private
 
       def allowed?(project)
-        Feature.enabled?(:security_on_demand_scans_site_validation, project)
+        Feature.enabled?(:security_on_demand_scans_site_validation, project, default_enabled: :yaml)
       end
 
       def error_response(errors)

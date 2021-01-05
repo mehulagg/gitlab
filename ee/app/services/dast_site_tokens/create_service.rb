@@ -30,7 +30,7 @@ module DastSiteTokens
 
     def allowed?
       container.feature_available?(:security_on_demand_scans) &&
-        Feature.enabled?(:security_on_demand_scans_site_validation, container)
+        Feature.enabled?(:security_on_demand_scans_site_validation, container, default_enabled: :yaml)
     end
 
     def normalize_target_url(target_url)
