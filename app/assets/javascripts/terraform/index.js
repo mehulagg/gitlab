@@ -21,8 +21,8 @@ export default () => {
 
   return new Vue({
     el,
-    store: createStore(el.dataset),
     apolloProvider: new VueApollo({ defaultClient }),
+    store: createStore(el.dataset),
     render(createElement) {
       return createElement(TerraformList, {
         props: {
