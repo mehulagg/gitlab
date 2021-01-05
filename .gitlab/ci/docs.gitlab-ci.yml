@@ -76,6 +76,15 @@ docs-lint links:
     # Check the internal anchor links
     - bundle exec nanoc check internal_anchors
 
+docs-lint compress-images:
+  extends:
+    - .default-retry
+    - .docs:rules:compress-images
+  stage: test
+  needs: []
+  script:
+    - bundle exec rake pngquant:lint
+
 ui-docs-links lint:
   extends:
     - .docs:rules:docs-lint
