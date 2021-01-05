@@ -1,0 +1,107 @@
+<script>
+import {
+  GlDropdown,
+  GlDropdownItem,
+  GlSearchBoxByType,
+  GlDropdownSectionHeader,
+  GlTooltipDirective,
+} from '@gitlab/ui';
+import groupIterationsQuery from '../queries/group_iterations.query.graphql';
+import { __ } from '~/locale';
+import { iterationSelectTextMap, iterationDisplayState } from '../constants';
+
+export default {
+  directives: {
+    GlTooltip: GlTooltipDirective,
+  },
+  components: {
+    GlDropdown,
+    GlDropdownItem,
+    GlSearchBoxByType,
+    GlDropdownSectionHeader,
+  },
+  apollo: {
+    iterations: {
+      query: groupIterationsQuery,
+      debounce: 250,
+      variables() {
+        // TODO: https://gitlab.com/gitlab-org/gitlab/-/issues/220381
+        const search = this.searchTerm === '' ? '' : `"${this.searchTerm}"`;
+
+        return {
+          fullPath: this.fullPath,
+          title: search,
+          state: iterationDisplayState,
+        };
+      },
+      update(data) {
+        // TODO: https://gitlab.com/gitlab-org/gitlab/-/issues/220379
+        const nodes = data.group?.iterations?.nodes || [];
+
+        return iterationSelectTextMap.noIterationItem.concat(nodes);
+      },
+    },
+  },
+  props: {
+    fullPath: {
+      required: true,
+      type: String,
+    },
+  },
+  data() {
+    return {
+      searchTerm: '',
+      iterations: iterationSelectTextMap.noIterationItem,
+      currentIteration: null,
+      shouldFetch: false,
+    };
+  },
+  computed: {
+    title() {
+      return this.currentIteration?.title || __('Select iteration')
+    },
+    test() {
+      return this.shouldFetch;
+    }
+  },
+  methods: {
+    onClick(iteration) {
+      if(iteration.id === this.currentIteration?.id) {
+        this.currentIteration = null;
+      } else {
+        this.currentIteration = iteration;
+
+        this.$emit('onIterationSelect', iteration)
+      }
+
+    },
+    isIterationChecked(id) {
+      return (
+        id === this.currentIteration?.id
+      );
+    },
+  },
+};
+</script>
+
+<template>
+  <div data-qa-selector="iteration_container">
+    <gl-dropdown
+      :text="title"
+      class="dropdown gl-w-full"
+    >
+      <gl-dropdown-section-header class="d-flex justify-content-center">{{
+        __('Assign Iteration')
+      }}</gl-dropdown-section-header>
+      <gl-search-box-by-type ref="search" v-model="searchTerm" />
+      <gl-dropdown-item
+        v-for="iterationItem in iterations"
+        :key="iterationItem.id"
+        :is-check-item="true"
+        :is-checked="isIterationChecked(iterationItem.id)"
+        @click="onClick(iterationItem)"
+        >{{ iterationItem.title }}</gl-dropdown-item
+      >
+    </gl-dropdown>
+  </div>
+</template>
