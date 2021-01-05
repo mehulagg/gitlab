@@ -21,14 +21,8 @@ export default {
     TimeAgoTooltip,
   },
   mixins: [timeagoMixin],
-  props: {
-    states: {
-      required: true,
-      type: Array,
-    },
-  },
   computed: {
-    ...mapState(['terraformAdmin']),
+    ...mapState(['statesList', 'terraformAdmin']),
     fields() {
       const columns = [
         {
@@ -99,7 +93,7 @@ export default {
 
 <template>
   <gl-table
-    :items="states"
+    :items="statesList"
     :fields="fields"
     data-testid="terraform-states-table"
     fixed

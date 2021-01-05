@@ -47,7 +47,7 @@ export default {
     };
   },
   computed: {
-    ...mapState(['projectPath']),
+    ...mapState(['projectPath', 'statesList']),
     isLoading() {
       return this.$apollo.queries.states.loading;
     },
@@ -59,9 +59,6 @@ export default {
     },
     statesCount() {
       return this.states?.project?.terraformStates?.count;
-    },
-    statesList() {
-      return this.states?.project?.terraformStates?.nodes;
     },
   },
   methods: {
@@ -101,7 +98,7 @@ export default {
 
         <div v-else-if="statesList">
           <div v-if="statesCount">
-            <states-table :states="statesList" />
+            <states-table />
 
             <div v-if="showPagination" class="gl-display-flex gl-justify-content-center gl-mt-5">
               <gl-keyset-pagination v-bind="pageInfo" @prev="prevPage" @next="nextPage" />
