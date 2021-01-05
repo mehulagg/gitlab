@@ -10,6 +10,9 @@ Incidents are critical entities in incident management workflows. They represent
 a service disruption or outage that needs to be restored urgently. GitLab provides
 tools for the triage, response, and remediation of incidents.
 
+Users with at least Guest [permissions](../../user/permissions.md) can access
+incidents [on public projects](../../user/permissions.md#project-members-permissions).
+
 ## Incident Creation
 
 You can create an incident manually or automatically.
