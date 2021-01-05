@@ -111,7 +111,7 @@ secrets-sast:
   script:
     - /analyzer run
 
-gemnasium-dependency_scanning:
+dependency_scanning gemnasium:
   extends: .dependency_scanning
   image:
     name: "$SECURE_ANALYZERS_PREFIX/gemnasium:$DS_MAJOR_VERSION"
