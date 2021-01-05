@@ -115,7 +115,7 @@ describe('CreateIssueForm', () => {
   describe('templates', () => {
     it('renders Issue title input field', () => {
       const issueTitleFieldLabel = wrapper.findAll('label').at(0);
-      const issueTitleFieldInput = wrapper.find(GlFormInput);
+      const issueTitleFieldInput = wrapper.findComponent(GlFormInput);
 
       expect(issueTitleFieldLabel.text()).toBe('Title');
       expect(issueTitleFieldInput.attributes('placeholder')).toBe('New issue title');
@@ -123,7 +123,7 @@ describe('CreateIssueForm', () => {
 
     it('renders Projects dropdown field', () => {
       const projectsDropdownLabel = wrapper.findAll('label').at(1);
-      const projectsDropdownButton = wrapper.find(GlDropdown);
+      const projectsDropdownButton = wrapper.findComponent(GlDropdown);
 
       expect(projectsDropdownLabel.text()).toBe('Project');
       expect(projectsDropdownButton.props('text')).toBe('Select a project');
@@ -133,16 +133,16 @@ describe('CreateIssueForm', () => {
       wrapper.vm.$store.dispatch('receiveProjectsSuccess', mockProjects);
 
       return wrapper.vm.$nextTick(() => {
-        const projectsDropdownButton = wrapper.find(GlDropdown);
-        const dropdownItems = projectsDropdownButton.findAll(GlDropdownItem);
+        const projectsDropdownButton = wrapper.findComponent(GlDropdown);
+        const dropdownItems = projectsDropdownButton.findAllComponents(GlDropdownItem);
         const dropdownItem = dropdownItems.at(0);
 
-        expect(projectsDropdownButton.find(GlSearchBoxByType).exists()).toBe(true);
-        expect(projectsDropdownButton.find(GlLoadingIcon).exists()).toBe(true);
+        expect(projectsDropdownButton.findComponent(GlSearchBoxByType).exists()).toBe(true);
+        expect(projectsDropdownButton.findComponent(GlLoadingIcon).exists()).toBe(true);
         expect(dropdownItems).toHaveLength(mockProjects.length);
         expect(dropdownItem.text()).toBe(mockProjects[0].name);
         expect(dropdownItem.attributes('secondarytext')).toBe(mockProjects[0].namespace.name);
-        expect(dropdownItem.find(ProjectAvatar).exists()).toBe(true);
+        expect(dropdownItem.findComponent(ProjectAvatar).exists()).toBe(true);
       });
     });
 
@@ -151,7 +151,7 @@ describe('CreateIssueForm', () => {
       const filteredMockProjects = mockProjects.filter((project) => project.name === searchKey);
       jest.spyOn(wrapper.vm, 'fetchProjects').mockImplementation(jest.fn());
 
-      wrapper.find(GlDropdown).trigger('click');
+      wrapper.findComponent(GlDropdown).trigger('click');
 
       wrapper.setData({
         searchKey,
@@ -163,7 +163,7 @@ describe('CreateIssueForm', () => {
           wrapper.vm.$store.dispatch('receiveProjectsSuccess', filteredMockProjects);
         })
         .then(() => {
-          expect(wrapper.findAll(GlDropdownItem)).toHaveLength(1);
+          expect(wrapper.findAllComponents(GlDropdownItem)).toHaveLength(1);
         });
     });
 
@@ -172,7 +172,7 @@ describe('CreateIssueForm', () => {
       const filteredMockProjects = mockProjects.filter((project) => project.name === searchKey);
       jest.spyOn(wrapper.vm, 'fetchProjects').mockImplementation(jest.fn());
 
-      wrapper.find(GlDropdown).trigger('click');
+      wrapper.findComponent(GlDropdown).trigger('click');
 
       wrapper.setData({
         searchKey,
@@ -189,7 +189,7 @@ describe('CreateIssueForm', () => {
     });
 
     it('renders `Create issue` button', () => {
-      const createIssueButton = wrapper.findAll(GlButton).at(0);
+      const createIssueButton = wrapper.findAllComponents(GlButton).at(0);
 
       expect(createIssueButton.exists()).toBe(true);
       expect(createIssueButton.text()).toBe('Create issue');
@@ -199,7 +199,7 @@ describe('CreateIssueForm', () => {
       wrapper.vm.$store.dispatch('requestCreateItem');
 
       return wrapper.vm.$nextTick(() => {
-        const createIssueButton = wrapper.findAll(GlButton).at(0);
+        const createIssueButton = wrapper.findAllComponents(GlButton).at(0);
 
         expect(createIssueButton.exists()).toBe(true);
         expect(createIssueButton.props('disabled')).toBe(true);
@@ -208,7 +208,7 @@ describe('CreateIssueForm', () => {
     });
 
     it('renders `Cancel` button', () => {
-      const cancelButton = wrapper.findAll(GlButton).at(1);
+      const cancelButton = wrapper.findAllComponents(GlButton).at(1);
 
       expect(cancelButton.exists()).toBe(true);
       expect(cancelButton.text()).toBe('Cancel');
