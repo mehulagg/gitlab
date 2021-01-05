@@ -286,6 +286,17 @@ rspec system pg11 minimal:
     - .minimal-rspec-tests
     - .rails:rules:ee-and-foss-system:minimal
 
+# Dedicated job to test low-level DB code against PG12.
+# Note that these are already tested against PG11 in the `rspec unit pg11` / `rspec-ee unit pg11` jobs.
+rspec db-lowlevel-code pg12:
+  extends:
+    - .rspec-base-pg12
+    - .rspec-base-migration
+    - .minimal-rspec-tests
+    - .rails:rules:ee-and-foss-db-lowlevel-code
+  script:
+    - rspec_simple_job "-- spec/lib/gitlab/database/ spec/support/helpers/database/ ee/spec/lib/gitlab/database/ ee/spec/lib/ee/gitlab/database_spec.rb"
+
 rspec fast_spec_helper:
   extends:
     - .rspec-base-pg11

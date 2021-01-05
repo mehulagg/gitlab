@@ -422,11 +422,17 @@ We are using a custom mapping between source file to test files, maintained in t
 
 ### PostgreSQL versions testing
 
+Even though [Omnibus defaults to PG12 for new installs and upgrades](https://docs.gitlab.com/omnibus/package-information/postgresql_versions.md),
+our test suite is currently running against PG11, since GitLab.com still runs on PG11.
+
+We do run our test suite against PG12 on nightly scheduled pipelines as well as upon specific
+low-level database changes in MRs and `master` pipelines (with the `rspec db-lowlevel-code pg12` job).
+
 #### Current versions testing
 
 | Where? | PostgreSQL version |
-| ------ | ------ |
-| MRs | 11 |
+| ------ | ------------------ |
+| MRs    | 11                 |
 | `master` (non-scheduled pipelines) | 11 |
 | 2-hourly scheduled pipelines | 11 |
 | `nightly` scheduled pipelines | 11, 12 |
@@ -435,11 +441,10 @@ We are using a custom mapping between source file to test files, maintained in t
 
 We follow the [PostgreSQL versions shipped with Omnibus GitLab](https://docs.gitlab.com/omnibus/package-information/postgresql_versions.html):
 
-| PostgreSQL version | 13.0 (May 2020) | 13.1 (June 2020) | 13.2 (July 2020) | 13.3 (August 2020) | 13.4, 13.5   | [13.7 (December 2020)](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5722) | 14.0 (May 2021?) |
-| ------ | --------------- | ---------------- | ---------------- | ------------------ | ------------ | -------------------- | ---------------- |
-| PG11   | MRs/`master`/`2-hour`/`nightly` | MRs/`master`/`2-hour`/`nightly` | MRs/`master`/`2-hour`/`nightly` | MRs/`master`/`2-hour`/`nightly` | MRs/`master`/`2-hour`/`nightly` | `nightly` | - |
-| PG12   | - | - | `nightly` | `2-hour`/`nightly` | `2-hour`/`nightly` | MRs/`2-hour`/`nightly` | `2-hour`/`nightly`     |
-| PG13   | - | - | -         | -                  | -                  | -                      | MRs/`2-hour`/`nightly` |
+| PostgreSQL version | 13.7 (December 2020) | 13.8 (January 2021) | 13.9 (February 2021) | 13.10 (March 2021) | 13.11 (April 2021) | 14.0 (May 2021?) |
+| -------------------| -------------------- | ------------------- | -------------------- | ------------------ | ------------------ | ---------------- |
+| PG11               | MRs/`2-hour`/`nightly` | MRs/`2-hour`/`nightly` | MRs/`2-hour`/`nightly` | MRs/`2-hour`/`nightly` | MRs/`2-hour`/`nightly` | MRs/`2-hour`/`nightly` |
+| PG12               | `nightly`            | `nightly`           | `nightly`           | `nightly`           | `nightly`           | `nightly`       |
 
 ### Test jobs
 
