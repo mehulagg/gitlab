@@ -81,7 +81,7 @@ describe('Details Header', () => {
         expect(findTagsCount().props('text')).toBe('10 tags');
       });
 
-      it('when there is one one tag has the correct text', async () => {
+      it('when there is one tag has the correct text', async () => {
         mountComponent({ ...defaultImage, tagsCount: 1 });
         await waitForMetadataItems();
 
