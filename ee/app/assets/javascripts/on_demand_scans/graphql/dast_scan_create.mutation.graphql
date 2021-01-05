@@ -15,7 +15,7 @@ mutation dastScanCreate(
       dastScannerProfileID: $dastScannerProfileID
       runAfterCreate: $runAfterCreate
     }
-  ) {
+  ) @client {
     dastScan {
       editPath
     }
