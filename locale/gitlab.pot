@@ -25902,6 +25902,9 @@ msgstr ""
 msgid "Show latest version"
 msgstr ""
 
+msgid "Show links anyways"
+msgstr ""
+
 msgid "Show list"
 msgstr ""
 
@@ -28755,6 +28758,9 @@ msgid "This feature should be used with an index that was created after 13.0"
 msgstr ""
 
 msgid "This field is required."
+msgstr ""
+
+msgid "This graph has a large number of stages and showing the links between them may have performance implications."
 msgstr ""
 
 msgid "This group"

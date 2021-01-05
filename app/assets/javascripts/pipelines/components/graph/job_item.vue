@@ -1,4 +1,5 @@
 <script>
+import { uniqueId } from 'lodash';
 import { GlTooltipDirective, GlLink } from '@gitlab/ui';
 import ActionComponent from './action_component.vue';
 import JobNameComponent from './job_name_component.vue';
@@ -74,6 +75,11 @@ export default {
       required: false,
       default: () => ({}),
     },
+    pipelineId: {
+      type: Number,
+      required: false,
+      default: () => Number(uniqueId()),
+    },
   },
   computed: {
     boundary() {
@@ -84,6 +90,9 @@ export default {
     },
     hasDetails() {
       return accessValue(this.dataMethod, 'hasDetails', this.status);
+    },
+    computedJobId() {
+      return `${this.job.name}-${this.pipelineId}`;
     },
     status() {
       return this.job && this.job.status ? this.job.status : {};
@@ -146,6 +155,7 @@ export default {
 </script>
 <template>
   <div
+    :id="computedJobId"
     class="ci-job-component gl-display-flex gl-align-items-center gl-justify-content-space-between"
     data-qa-selector="job_item_container"
   >

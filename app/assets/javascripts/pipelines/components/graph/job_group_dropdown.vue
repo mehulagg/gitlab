@@ -1,4 +1,5 @@
 <script>
+import { uniqueId } from 'lodash';
 import { GlTooltipDirective } from '@gitlab/ui';
 import CiIcon from '~/vue_shared/components/ci_icon.vue';
 import JobItem from './job_item.vue';
@@ -23,8 +24,16 @@ export default {
       type: Object,
       required: true,
     },
+    pipelineId: {
+      type: Number,
+      required: false,
+      default: () => Number(uniqueId()),
+    },
   },
   computed: {
+    computedJobId() {
+      return `${this.group.name}-${this.pipelineId}`;
+    },
     tooltipText() {
       const { name, status } = this.group;
       return `${name} - ${status.label}`;
@@ -41,7 +50,7 @@ export default {
 };
 </script>
 <template>
-  <div class="ci-job-dropdown-container dropdown dropright">
+  <div :id="computedJobId" class="ci-job-dropdown-container dropdown dropright">
     <button
       v-gl-tooltip.hover="{ boundary: 'viewport' }"
       :title="tooltipText"
