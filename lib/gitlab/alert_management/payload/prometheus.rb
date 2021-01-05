@@ -26,12 +26,21 @@ module Gitlab
                   paths: [%w(annotations title),
                           %w(annotations summary),
                           %w(labels alertname)]
-
         attribute :starts_at_raw,
                   paths: [%w(startsAt)]
         private :starts_at_raw
 
+        attribute :severity_raw, paths: %w(labels severity)
+        private :severity_raw
+
         METRIC_TIME_WINDOW = 30.minutes
+
+        SEVERITY_MAP = {
+          's1' => :critical,
+          's2' => :high,
+          's3' => :medium,
+          's4' => :low
+        }.freeze
 
         def monitoring_tool
           Gitlab::AlertManagement::Payload::MONITORING_TOOLS[:prometheus]
@@ -63,6 +72,10 @@ module Gitlab
 
         def has_required_attributes?
           project && title && starts_at_raw
+        end
+
+        def severity
+          SEVERITY_MAP.fetch(severity_raw, :unknown)
         end
 
         private

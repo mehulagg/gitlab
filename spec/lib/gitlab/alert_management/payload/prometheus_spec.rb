@@ -156,8 +156,6 @@ RSpec.describe Gitlab::AlertManagement::Payload::Prometheus do
   end
 
   describe '#gitlab_fingerprint' do
-    subject { parsed_payload.gitlab_fingerprint }
-
     let(:raw_payload) do
       {
         'startsAt' => Time.current.to_s,
@@ -165,6 +163,8 @@ RSpec.describe Gitlab::AlertManagement::Payload::Prometheus do
         'annotations' => { 'title' => 'title' }
       }
     end
+
+    subject { parsed_payload.gitlab_fingerprint }
 
     it 'returns a fingerprint' do
       plain_fingerprint = [
@@ -235,6 +235,37 @@ RSpec.describe Gitlab::AlertManagement::Payload::Prometheus do
       let(:parsed_payload) { described_class.new(project: project, payload: nil) }
 
       it { is_expected.to be_falsey }
+    end
+  end
+
+  describe '#severity' do
+    using RSpec::Parameterized::TableSyntax
+
+    let(:raw_payload) { { 'labels' => { 'severity' => payload_severity } } }
+
+    subject { parsed_payload.severity }
+
+    context 'for know severity' do
+      where(:payload_severity, :severity) do
+        's1' | :critical
+        's2' | :high
+        's3' | :medium
+        's4' | :low
+        's0' | :unknown
+        's5' | :unknown
+        'xy' | :unknown
+        nil  | :unknown
+      end
+
+      with_them do
+        it { is_expected.to eq(severity) }
+      end
+    end
+
+    context 'without key' do
+      let(:raw_payload) { {} }
+
+      it { is_expected.to eq(:unknown) }
     end
   end
 end
