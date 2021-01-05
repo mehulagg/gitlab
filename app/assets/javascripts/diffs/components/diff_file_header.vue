@@ -17,11 +17,15 @@ import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
 import FileIcon from '~/vue_shared/components/file_icon.vue';
 import { truncateSha } from '~/lib/utils/text_utility';
 import { __, s__, sprintf } from '~/locale';
-import { diffViewerModes } from '~/ide/constants';
 import DiffStats from './diff_stats.vue';
 import { scrollToElement } from '~/lib/utils/common_utils';
-import { isCollapsed } from '../utils/diff_file';
+
+import { collapsedType, isCollapsed } from '../utils/diff_file';
 import { reviewable } from "../utils/file_reviews";
+
+import { diffViewerModes } from '~/ide/constants';
+import { DIFF_FILE_AUTOMATIC_COLLAPSE } from '../constants';
+
 import { DIFF_FILE_HEADER } from '../i18n';
 
 export default {
@@ -187,7 +191,8 @@ export default {
       'toggleFileDiscussionWrappers',
       'toggleFullDiff',
       'toggleActiveFileByHash',
-      'reviewFile'
+      'reviewFile',
+      'setFileCollapsedByUser',
     ]),
     handleToggleFile() {
       this.$emit('toggleFile');
@@ -215,8 +220,24 @@ export default {
     setMoreActionsShown(val) {
       this.moreActionsShown = val;
     },
-    toggleReview(){
-      this.reviewFile({ file: this.diffFile, reviewed: !this.reviewed });
+    toggleReview( newReviewedStatus ){
+      const autoCollapsed = collapsedType(this.diffFile) === DIFF_FILE_AUTOMATIC_COLLAPSE;
+      const open = this.expanded;
+      const closed = !open;
+      const reviewed = newReviewedStatus;
+
+      this.reviewFile({ file: this.diffFile, reviewed });
+
+      if( reviewed && autoCollapsed ){
+        this.setFileCollapsedByUser({
+          filePath: this.diffFile.file_path,
+          collapsed: true,
+        });
+      }
+
+      if( ( open && reviewed ) || ( closed && !reviewed ) ){
+        this.$emit('toggleFile');
+      }
     }
   },
 };
