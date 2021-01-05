@@ -1,9 +1,12 @@
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
+import Vuex from 'vuex';
 import TerraformList from './components/terraform_list.vue';
 import createDefaultClient from '~/lib/graphql';
+import createStore from './store';
 
 Vue.use(VueApollo);
+Vue.use(Vuex);
 
 export default () => {
   const el = document.querySelector('#js-terraform-list');
@@ -18,6 +21,7 @@ export default () => {
 
   return new Vue({
     el,
+    store: createStore(el.dataset),
     apolloProvider: new VueApollo({ defaultClient }),
     render(createElement) {
       return createElement(TerraformList, {
