@@ -240,6 +240,16 @@ RSpec.describe UpdateAllMirrorsWorker do
             expect_import_not_scheduled(licensed_project1)
             expect_import_not_scheduled(*unlicensed_projects)
           end
+
+          it "does not schedule a mirror of an pending_delete project" do
+            licensed_project1.update!(pending_delete: true)
+
+            schedule_mirrors!(capacity: 4)
+
+            expect_import_scheduled(licensed_project2, public_project)
+            expect_import_not_scheduled(licensed_project1)
+            expect_import_not_scheduled(*unlicensed_projects)
+          end
         end
 
         context 'when capacity is exactly sufficient' do
