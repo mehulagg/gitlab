@@ -868,7 +868,7 @@ RSpec.describe Ci::BuildTraceChunk, :clean_gitlab_redis_shared_state do
         let(:chunk) { create(:ci_build_trace_chunk) }
 
         it 'indicates the these are equal' do
-          expect(chunk <=> chunk).to be_zero # rubocop:disable Lint/UselessComparison
+          expect(chunk <=> chunk).to be_zero
         end
       end
     end

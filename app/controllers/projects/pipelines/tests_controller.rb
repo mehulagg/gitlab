@@ -28,7 +28,6 @@ module Projects
 
       private
 
-      # rubocop: disable CodeReuse/ActiveRecord
       def builds
         @builds ||= pipeline.latest_builds.for_ids(build_ids).presence || render_404
       end
@@ -44,7 +43,6 @@ module Projects
           build.collect_test_reports!(Gitlab::Ci::Reports::TestReports.new)
         end.sum
       end
-      # rubocop: enable CodeReuse/ActiveRecord
     end
   end
 end

@@ -25,5 +25,5 @@ module LazyImageTagHelper
   end
 
   # Required for Banzai::Filter::ImageLazyLoadFilter
-  module_function :placeholder_image # rubocop: disable Style/AccessModifierDeclarations
+  module_function :placeholder_image
 end

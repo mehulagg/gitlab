@@ -63,7 +63,6 @@ module Ci
       status.humanize
     end
 
-    # rubocop:disable Metrics/CyclomaticComplexity
     def ci_icon_for_status(status, size: 16)
       if detailed_status?(status)
         return sprite_icon(status.icon, size: size)
@@ -101,7 +100,6 @@ module Ci
 
       sprite_icon(icon_name, size: size)
     end
-    # rubocop:enable Metrics/CyclomaticComplexity
 
     def ci_icon_class_for_status(status)
       group = detailed_status?(status) ? status.group : status.dasherize

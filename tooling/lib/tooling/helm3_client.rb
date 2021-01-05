@@ -46,7 +46,7 @@ module Tooling
 
     def run_command(command)
       final_command = ['helm', *command].join(' ')
-      puts "Running command: `#{final_command}`" # rubocop:disable Rails/Output
+      puts "Running command: `#{final_command}`"
 
       result = Gitlab::Popen.popen_with_detail([final_command])
 
@@ -72,7 +72,7 @@ module Tooling
         Release.new(*release.values_at(*RELEASE_JSON_ATTRIBUTES))
       end
     rescue ::JSON::ParserError => ex
-      puts "Ignoring this JSON parsing error: #{ex}" # rubocop:disable Rails/Output
+      puts "Ignoring this JSON parsing error: #{ex}"
       []
     end
 

@@ -2,7 +2,7 @@
 
 # Worker for triggering events subject to secret_detection security reports
 #
-class ScanSecurityReportSecretsWorker # rubocop:disable Scalability/IdempotentWorker
+class ScanSecurityReportSecretsWorker
   include ApplicationWorker
   include SecurityScansQueue
 

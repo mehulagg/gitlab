@@ -39,7 +39,6 @@ module Geo
           Gitlab::Geo.verification_max_capacity_per_replicator_class
         end
 
-        # rubocop:disable CodeReuse/ActiveRecord
         def load_pending_resources
           return [] unless valid_shard?
 
@@ -52,7 +51,6 @@ module Geo
             .within_shards(shard_name)
             .pluck_primary_key
         end
-        # rubocop:enable CodeReuse/ActiveRecord
 
         def scheduled_project_ids
           scheduled_jobs.map { |data| data[:project_id] }

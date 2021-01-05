@@ -2,7 +2,7 @@
 
 module Gitlab
   module Database
-    class BackgroundMigrationJob < ActiveRecord::Base # rubocop:disable Rails/ApplicationRecord
+    class BackgroundMigrationJob < ActiveRecord::Base
       include EachBatch
 
       self.table_name = :background_migration_jobs

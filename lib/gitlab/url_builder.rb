@@ -14,7 +14,6 @@ module Gitlab
       # Using a case statement here is preferable for readability and maintainability.
       # See discussion in https://gitlab.com/gitlab-org/gitlab/-/issues/217397
       #
-      # rubocop:disable Metrics/CyclomaticComplexity
       def build(object, **options)
         # Objects are sometimes wrapped in a BatchLoader instance
         case object.itself
@@ -50,7 +49,6 @@ module Gitlab
           raise NotImplementedError.new("No URL builder defined for #{object.inspect}")
         end
       end
-      # rubocop:enable Metrics/CyclomaticComplexity
 
       def commit_url(commit, **options)
         return '' unless commit.project

@@ -72,7 +72,7 @@ module Tooling
 
     def run_command(command)
       final_command = ['kubectl', *command].join(' ')
-      puts "Running command: `#{final_command}`" # rubocop:disable Rails/Output
+      puts "Running command: `#{final_command}`"
 
       result = Gitlab::Popen.popen_with_detail([final_command])
 

@@ -21,12 +21,10 @@ module Geo
     # @param [Integer] batch_size used to limit the results returned
     # @param [Array<Integer>] except_ids ids that will be ignored from the query
     #
-    # rubocop:disable CodeReuse/ActiveRecord
     def find_registries_never_attempted_sync(batch_size:, except_ids: [])
       registry_class
         .find_registries_never_attempted_sync(batch_size: batch_size, except_ids: except_ids)
     end
-    # rubocop:enable CodeReuse/ActiveRecord
 
     # @!method find_registries_needs_sync_again
     #    Return an ActiveRecord::Relation of registry records marked as failed,
@@ -36,12 +34,10 @@ module Geo
     # @param [Integer] batch_size used to limit the results returned
     # @param [Array<Integer>] except_ids ids that will be ignored from the query
     #
-    # rubocop:disable CodeReuse/ActiveRecord
     def find_registries_needs_sync_again(batch_size:, except_ids: [])
       registry_class
         .find_registries_needs_sync_again(batch_size: batch_size, except_ids: except_ids)
     end
-    # rubocop:enable CodeReuse/ActiveRecord
 
     # @!method registry_count
     #    Return a count of the registry records for the tracked type(s)

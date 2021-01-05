@@ -244,14 +244,12 @@ class PagesDomain < ApplicationRecord
     self.verification_code = SecureRandom.hex(16)
   end
 
-  # rubocop: disable CodeReuse/ServiceClass
   def update_daemon
     return if usage_serverless?
     return unless pages_deployed?
 
     run_after_commit { PagesUpdateConfigurationWorker.perform_async(project_id) }
   end
-  # rubocop: enable CodeReuse/ServiceClass
 
   def saved_change_to_pages_config?
     saved_change_to_project_id? ||

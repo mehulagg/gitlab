@@ -98,15 +98,13 @@ module EE
           issues.where("milestone_id NOT IN (?) OR milestone_id IS NULL",
                        all_milestone_lists.select(:milestone_id))
         end
-        # rubocop: enable CodeReuse/ActiveRecord
 
-        # rubocop: disable CodeReuse/ActiveRecord
+        # rubocop: enable CodeReuse/ActiveRecord
         def without_iterations_from_lists(issues)
           return issues if all_iteration_lists.empty?
 
           issues.not_in_iterations(all_iteration_lists.select(:iteration_id))
         end
-        # rubocop: enable CodeReuse/ActiveRecord
 
         def with_assignee(issues)
           issues.assigned_to(list.user)

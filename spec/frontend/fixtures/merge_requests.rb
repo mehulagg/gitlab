@@ -8,8 +8,6 @@ RSpec.describe Projects::MergeRequestsController, '(JavaScript fixtures)', type:
   let(:namespace) { create(:namespace, name: 'frontend-fixtures' )}
   let(:project) { create(:project, :repository, namespace: namespace, path: 'merge-requests-project') }
   let(:user) { project.owner }
-
-  # rubocop: disable Layout/TrailingWhitespace
   let(:description) do
     <<~MARKDOWN.strip_heredoc
     - [ ] Task List Item
@@ -17,7 +15,6 @@ RSpec.describe Projects::MergeRequestsController, '(JavaScript fixtures)', type:
     - [ ] Task List Item 2
     MARKDOWN
   end
-  # rubocop: enable Layout/TrailingWhitespace
 
   let(:merge_request) do
     create(

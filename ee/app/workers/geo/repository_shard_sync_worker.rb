@@ -74,7 +74,6 @@ module Geo
       end
     end
 
-    # rubocop: disable CodeReuse/ActiveRecord
     def find_jobs_never_attempted_sync(except_ids:, batch_size:)
       project_ids =
         registry_finder
@@ -83,9 +82,7 @@ module Geo
 
       find_project_ids_within_shard(project_ids, direction: :desc)
     end
-    # rubocop: enable CodeReuse/ActiveRecord
 
-    # rubocop: disable CodeReuse/ActiveRecord
     def find_jobs_needs_sync_again(except_ids:, batch_size:)
       project_ids =
         registry_finder
@@ -94,7 +91,6 @@ module Geo
 
       find_project_ids_within_shard(project_ids, direction: :asc)
     end
-    # rubocop: enable CodeReuse/ActiveRecord
 
     def valid_shard?
       return true unless current_node.selective_sync_by_shards?

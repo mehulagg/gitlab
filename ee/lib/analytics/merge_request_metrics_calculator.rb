@@ -17,14 +17,12 @@ module Analytics
       }
     end
 
-    # rubocop: disable CodeReuse/ActiveRecord
     def line_counts_data
       {
         added_lines: raw_diff_files.sum(&:added_lines),
         removed_lines: raw_diff_files.sum(&:removed_lines)
       }
     end
-    # rubocop: enable CodeReuse/ActiveRecord
 
     # rubocop: disable CodeReuse/ActiveRecord
     def first_comment_at

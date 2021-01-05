@@ -30,9 +30,8 @@ class IssueRebalancingService
   def indexed_ids
     base.reorder(:relative_position, :id).pluck(:id).each_with_index
   end
-  # rubocop: enable CodeReuse/ActiveRecord
 
-  # rubocop: disable CodeReuse/ActiveRecord
+  # rubocop: enable CodeReuse/ActiveRecord
   def assign_positions(start, positions)
     values = positions.map do |id, index|
       "(#{id}, #{start + (index * gap_size)})"
@@ -49,7 +48,6 @@ class IssueRebalancingService
       WHERE cte_id = id
     SQL
   end
-  # rubocop: enable CodeReuse/ActiveRecord
 
   def issue_count
     @issue_count ||= base.count

@@ -6,8 +6,6 @@ class ReaddTemplateColumnToServices < ActiveRecord::Migration[6.0]
   DOWNTIME = false
 
   disable_ddl_transaction!
-
-  # rubocop:disable Migration/UpdateLargeTable
   def up
     return if column_exists? :services, :template
 
@@ -17,7 +15,6 @@ class ReaddTemplateColumnToServices < ActiveRecord::Migration[6.0]
     # of `template`, we would look for entries with `project_id IS NULL`.
     add_column_with_default :services, :template, :boolean, default: false, allow_null: true # rubocop:disable Migration/AddColumnWithDefault
   end
-  # rubocop:enable Migration/UpdateLargeTable
 
   def down
     # NOP since the column is expected to exist

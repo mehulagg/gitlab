@@ -25,7 +25,7 @@ RSpec.describe Gitlab::IssuableMetadata do
     end
 
     it 'aggregates stats on issues' do
-      data = described_class.new(user, Issue.all.limit(6)).data # rubocop: disable CodeReuse/ActiveRecord
+      data = described_class.new(user, Issue.all.limit(6)).data
 
       expect(data.count).to eq(6)
       expect(data[blocking_issue_1.id].blocking_issues_count).to eq(2)

@@ -223,7 +223,7 @@ module EE
       strong_memoize(:total_repository_size) do
         all_projects
           .joins(:statistics)
-          .pluck(total_repository_size_arel.sum).first || 0 # rubocop:disable Rails/Pick
+          .pluck(total_repository_size_arel.sum).first || 0
       end
     end
 
@@ -421,7 +421,7 @@ module EE
     def total_repository_size_excess_calculation(repository_size_limit, project_level: true)
       total_excess = (total_repository_size_arel - repository_size_limit).sum
       relation = projects_for_repository_size_excess((repository_size_limit unless project_level))
-      relation.pluck(total_excess).first || 0 # rubocop:disable Rails/Pick
+      relation.pluck(total_excess).first || 0
     end
 
     def total_repository_size_arel

@@ -184,7 +184,6 @@ module EE
         # less "complex" without introducing extra methods (which actually will
         # make things _more_ complex).
         #
-        # rubocop: disable Metrics/AbcSize
         def system_usage_data
           super.tap do |usage_data|
             usage_data[:counts].merge!(

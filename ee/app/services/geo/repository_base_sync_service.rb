@@ -159,7 +159,7 @@ module Geo
     end
 
     def primary_checksum
-      project.repository_state&.public_send("#{type}_verification_checksum") # rubocop:disable GitlabSecurity/PublicSend
+      project.repository_state&.public_send("#{type}_verification_checksum")
     end
 
     def reschedule_sync

@@ -11,7 +11,7 @@ module Gitlab
         Profile.new(File.basename(path))
       end.select(&:valid?)
     end
-    module_function :all # rubocop: disable Style/AccessModifierDeclarations
+    module_function :all
 
     def find(name)
       file_path = File.join(PROFILES_DIR, name)
@@ -19,18 +19,18 @@ module Gitlab
 
       Profile.new(name)
     end
-    module_function :find # rubocop: disable Style/AccessModifierDeclarations
+    module_function :find
 
     def profile_token
       Rails.cache.fetch('profile-token') do
         Devise.friendly_token
       end
     end
-    module_function :profile_token # rubocop: disable Style/AccessModifierDeclarations
+    module_function :profile_token
 
     def remove_all_profiles
       FileUtils.rm_rf(PROFILES_DIR)
     end
-    module_function :remove_all_profiles # rubocop: disable Style/AccessModifierDeclarations
+    module_function :remove_all_profiles
   end
 end

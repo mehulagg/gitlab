@@ -95,7 +95,6 @@ module Geo
       includes(reflections.keys)
     end
 
-    # rubocop:disable Metrics/CyclomaticComplexity
     def event
       repository_created_event ||
         repository_updated_event ||
@@ -112,7 +111,6 @@ module Geo
         container_repository_updated_event ||
         geo_event
     end
-    # rubocop:enable Metrics/CyclomaticComplexity
 
     def project_id
       event.try(:project_id)

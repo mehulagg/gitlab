@@ -62,14 +62,12 @@ class Import::BitbucketController < Import::BaseController
 
   protected
 
-  # rubocop: disable CodeReuse/ActiveRecord
   override :importable_repos
   def importable_repos
     already_added_projects_names = already_added_projects.map(&:import_source)
 
     bitbucket_repos.reject { |repo| already_added_projects_names.include?(repo.full_name) || !repo.valid? }
   end
-  # rubocop: enable CodeReuse/ActiveRecord
 
   override :incompatible_repos
   def incompatible_repos

@@ -10,7 +10,6 @@ class NullifyUsersRole < ActiveRecord::Migration[5.2]
 
   def up
     # expected updated users count is around 10K
-    # rubocop: disable Migration/UpdateLargeTable
     add_concurrent_index(:users, :updated_at, where: 'role = 0', name: INDEX_NAME)
 
     update_column_in_batches(:users, :role, nil) do |table, query|

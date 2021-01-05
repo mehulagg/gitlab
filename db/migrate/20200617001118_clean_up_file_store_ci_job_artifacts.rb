@@ -9,12 +9,10 @@ class CleanUpFileStoreCiJobArtifacts < ActiveRecord::Migration[6.0]
 
   def up
     # rubocop:disable Migration/UpdateColumnInBatches
-    # rubocop:disable Migration/UpdateLargeTable
     update_column_in_batches(:ci_job_artifacts, :file_store, 1) do |table, query|
       query.where(table[:file_store].eq(nil))
     end
     # rubocop:enable Migration/UpdateColumnInBatches
-    # rubocop:enable Migration/UpdateLargeTable
   end
 
   def down

@@ -76,7 +76,6 @@ module API
         optional :masked, type: String, desc: 'Whether the variable is masked'
         optional :variable_type, type: String, values: ::Ci::GroupVariable.variable_types.keys, desc: 'The type of variable, must be one of env_var or file'
       end
-      # rubocop: disable CodeReuse/ActiveRecord
       put ':id/variables/:key' do
         variable = ::Ci::ChangeVariableService.new(
           container: user_group,
@@ -92,7 +91,6 @@ module API
       rescue ::ActiveRecord::RecordNotFound
         not_found!('GroupVariable')
       end
-      # rubocop: enable CodeReuse/ActiveRecord
 
       desc 'Delete an existing variable from a group' do
         success Entities::Ci::Variable

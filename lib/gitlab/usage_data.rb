@@ -522,7 +522,6 @@ module Gitlab
         }
       end
 
-      # rubocop: disable CodeReuse/ActiveRecord
       # rubocop: disable UsageData/LargeTable
       def usage_activity_by_stage_configure(time_period)
         {
@@ -545,7 +544,6 @@ module Gitlab
         }
       end
       # rubocop: enable UsageData/LargeTable
-      # rubocop: enable CodeReuse/ActiveRecord
 
       # rubocop: disable CodeReuse/ActiveRecord
       def usage_activity_by_stage_create(time_period)

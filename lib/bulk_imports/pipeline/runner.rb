@@ -39,7 +39,7 @@ module BulkImports
         log_skip(context)
       end
 
-      private # rubocop:disable Lint/UselessAccessModifier
+      private
 
       def run_pipeline_step(type, class_name, context)
         raise MarkedAsFailedError if marked_as_failed?(context)

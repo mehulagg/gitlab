@@ -22,8 +22,6 @@ module EE
 
         before_action :authorize_update_group_member!, only: [:update, :override]
       end
-
-      # rubocop:disable Gitlab/ModuleWithInstanceVariables
       # rubocop: disable CodeReuse/ActiveRecord
       def override
         member = membershipable_members.find_by!(id: params[:id])
@@ -37,7 +35,6 @@ module EE
         end
       end
       # rubocop: enable CodeReuse/ActiveRecord
-      # rubocop:enable Gitlab/ModuleWithInstanceVariables
 
       protected
 

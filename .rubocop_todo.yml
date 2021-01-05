@@ -172,11 +172,6 @@ Lint/NonDeterministicRequireOrder:
   Exclude:
     - 'rubocop/rubocop.rb'
 
-# Offense count: 135
-# Cop supports --auto-correct.
-Lint/RedundantCopDisableDirective:
-  Enabled: false
-
 # Offense count: 1
 Lint/SelfAssignment:
   Exclude:

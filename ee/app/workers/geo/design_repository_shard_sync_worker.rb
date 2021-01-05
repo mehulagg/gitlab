@@ -10,7 +10,6 @@ module Geo
       { project_id: project_id, job_id: job_id } if job_id
     end
 
-    # rubocop: disable CodeReuse/ActiveRecord
     def find_jobs_never_attempted_sync(except_ids:, batch_size:)
       project_ids =
         registry_finder
@@ -19,9 +18,7 @@ module Geo
 
       find_project_ids_within_shard(project_ids, direction: :desc)
     end
-    # rubocop: enable CodeReuse/ActiveRecord
 
-    # rubocop: disable CodeReuse/ActiveRecord
     def find_jobs_needs_sync_again(except_ids:, batch_size:)
       project_ids =
         registry_finder
@@ -30,7 +27,6 @@ module Geo
 
       find_project_ids_within_shard(project_ids, direction: :asc)
     end
-    # rubocop: enable CodeReuse/ActiveRecord
 
     def registry_finder
       @registry_finder ||= Geo::DesignRegistryFinder.new

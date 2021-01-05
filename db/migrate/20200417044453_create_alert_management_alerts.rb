@@ -24,7 +24,7 @@ class CreateAlertManagementAlerts < ActiveRecord::Migration[6.0]
         t.text :description
         t.text :service
         t.text :monitoring_tool
-        t.text :hosts, array: true, null: false, default: [] # rubocop:disable Migration/AddLimitToTextColumns
+        t.text :hosts, array: true, null: false, default: []
         t.jsonb :payload, null: false, default: {}
 
         t.index %w(project_id iid), name: 'index_alert_management_alerts_on_project_id_and_iid', unique: true, using: :btree

@@ -22,7 +22,6 @@ RSpec.describe ReleasesHelper do
     let(:can_user_create_release) { false }
     let(:common_keys) { [:project_id, :project_path, :illustration_path, :documentation_path] }
 
-    # rubocop: disable CodeReuse/ActiveRecord
     before do
       helper.instance_variable_set(:@project, project)
       helper.instance_variable_set(:@release, release)
@@ -31,7 +30,6 @@ RSpec.describe ReleasesHelper do
                     .with(user, :create_release, project)
                     .and_return(can_user_create_release)
     end
-    # rubocop: enable CodeReuse/ActiveRecord
 
     describe '#data_for_releases_page' do
       it 'includes the required data for displaying release blocks' do

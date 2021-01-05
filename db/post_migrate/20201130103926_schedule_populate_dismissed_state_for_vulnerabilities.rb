@@ -21,7 +21,7 @@ class SchedulePopulateDismissedStateForVulnerabilities < ActiveRecord::Migration
     )
   SQL
 
-  class Vulnerability < ActiveRecord::Base # rubocop:disable Style/Documentation
+  class Vulnerability < ActiveRecord::Base
     include EachBatch
 
     self.table_name = 'vulnerabilities'

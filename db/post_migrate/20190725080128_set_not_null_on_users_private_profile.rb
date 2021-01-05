@@ -9,8 +9,6 @@ class SetNotNullOnUsersPrivateProfile < ActiveRecord::Migration[5.1]
 
   def up
     Gitlab::BackgroundMigration.steal('MigrateNullPrivateProfileToFalse')
-
-    # rubocop:disable Migration/UpdateLargeTable
     # rubocop:disable Migration/UpdateColumnInBatches
     # Data has been migrated previously, count should be close to 0
     update_column_in_batches(:users, :private_profile, false) do |table, query|

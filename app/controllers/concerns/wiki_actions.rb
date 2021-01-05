@@ -166,9 +166,7 @@ module WikiActions
 
     render 'shared/wikis/diff'
   end
-  # rubocop:disable Gitlab/ModuleWithInstanceVariables
 
-  # rubocop:disable Gitlab/ModuleWithInstanceVariables
   def destroy
     return render_404 unless page
 

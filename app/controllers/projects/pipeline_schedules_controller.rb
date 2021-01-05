@@ -11,14 +11,11 @@ class Projects::PipelineSchedulesController < Projects::ApplicationController
   before_action :authorize_admin_pipeline_schedule!, only: [:destroy]
 
   feature_category :continuous_integration
-
-  # rubocop: disable CodeReuse/ActiveRecord
   def index
     @scope = params[:scope]
     @all_schedules = Ci::PipelineSchedulesFinder.new(@project).execute
     @schedules = Ci::PipelineSchedulesFinder.new(@project).execute(scope: params[:scope])
   end
-  # rubocop: enable CodeReuse/ActiveRecord
 
   def new
     @schedule = project.pipeline_schedules.new

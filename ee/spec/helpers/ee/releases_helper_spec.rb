@@ -6,12 +6,10 @@ RSpec.describe ReleasesHelper do
   let(:project) { build(:project, namespace: create(:group)) }
   let(:release) { create(:release, project: project) }
 
-  # rubocop: disable CodeReuse/ActiveRecord
   before do
     helper.instance_variable_set(:@project, project)
     helper.instance_variable_set(:@release, release)
   end
-  # rubocop: enable CodeReuse/ActiveRecord
 
   describe '#group_milestone_project_releases_available?' do
     subject { helper.data_for_edit_release_page[:group_milestones_available] }

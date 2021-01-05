@@ -28,7 +28,6 @@ module EE
 
             private
 
-            # rubocop: disable CodeReuse/ActiveRecord
             def diff_stats
               result = {
                 additions: object.diffs.diff_files.sum(&:added_lines),
@@ -38,7 +37,6 @@ module EE
               result[:total] = result[:additions] + result[:deletions]
               result
             end
-            # rubocop: enable CodeReuse/ActiveRecord
           end
         end
       end

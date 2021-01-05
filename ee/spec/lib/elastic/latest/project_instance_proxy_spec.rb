@@ -26,7 +26,7 @@ RSpec.describe Elastic::Latest::ProjectInstanceProxy do
         path_with_namespace: project.path_with_namespace)
 
       Elastic::Latest::ProjectInstanceProxy::TRACKED_FEATURE_SETTINGS.each do |feature|
-        expect(result).to include(feature => project.project_feature.public_send(feature)) # rubocop:disable GitlabSecurity/PublicSend
+        expect(result).to include(feature => project.project_feature.public_send(feature))
       end
     end
 

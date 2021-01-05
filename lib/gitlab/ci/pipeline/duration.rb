@@ -138,11 +138,9 @@ module Gitlab
           Period.new(previous.first, [previous.last, current.last].max)
         end
 
-        # rubocop: disable CodeReuse/ActiveRecord
         def process_duration(periods)
           periods.sum(&:duration)
         end
-        # rubocop: enable CodeReuse/ActiveRecord
       end
     end
   end

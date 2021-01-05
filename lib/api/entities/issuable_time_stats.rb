@@ -14,13 +14,10 @@ module API
       with_options(format_with: :time_tracking_formatter) do
         expose :total_time_spent, as: :human_total_time_spent
       end
-
-      # rubocop: disable CodeReuse/ActiveRecord
       def total_time_spent
         # Avoids an N+1 query since timelogs are preloaded
         object.timelogs.map(&:time_spent).sum
       end
-      # rubocop: enable CodeReuse/ActiveRecord
     end
   end
 end

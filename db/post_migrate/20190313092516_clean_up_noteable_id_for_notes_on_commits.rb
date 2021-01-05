@@ -17,8 +17,6 @@ class CleanUpNoteableIdForNotesOnCommits < ActiveRecord::Migration[5.0]
     remove_concurrent_index_by_name(:notes, TEMP_INDEX_NAME)
 
     add_concurrent_index(:notes, :id, where: "noteable_type = 'Commit' AND noteable_id IS NOT NULL", name: TEMP_INDEX_NAME)
-
-    # rubocop:disable Migration/UpdateLargeTable
     update_column_in_batches(:notes, :noteable_id, nil, batch_size: 300) do |table, query|
       query.where(
         table[:noteable_type].eq('Commit').and(table[:noteable_id].not_eq(nil))

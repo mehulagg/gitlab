@@ -66,11 +66,9 @@ module Issues
       @labels[issue.id].sort.join(',').presence
     end
 
-    # rubocop: disable CodeReuse/ActiveRecord
     def issue_time_spent(issue)
       issue.timelogs.map(&:time_spent).sum
     end
-    # rubocop: enable CodeReuse/ActiveRecord
   end
 end
 

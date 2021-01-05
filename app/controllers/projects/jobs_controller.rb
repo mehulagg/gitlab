@@ -33,7 +33,6 @@ class Projects::JobsController < Projects::ApplicationController
     @builds = @builds.page(params[:page]).per(30).without_count
   end
 
-  # rubocop: disable CodeReuse/ActiveRecord
   def show
     respond_to do |format|
       format.html
@@ -46,7 +45,6 @@ class Projects::JobsController < Projects::ApplicationController
       end
     end
   end
-  # rubocop: enable CodeReuse/ActiveRecord
 
   def trace
     @build.trace.read do |stream|

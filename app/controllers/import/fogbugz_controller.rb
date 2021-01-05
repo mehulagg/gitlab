@@ -44,7 +44,6 @@ class Import::FogbugzController < Import::BaseController
     redirect_to status_import_fogbugz_path
   end
 
-  # rubocop: disable CodeReuse/ActiveRecord
   def status
     unless client.valid?
       return redirect_to new_import_fogbugz_path
@@ -52,7 +51,6 @@ class Import::FogbugzController < Import::BaseController
 
     super
   end
-  # rubocop: enable CodeReuse/ActiveRecord
 
   def realtime_changes
     super
@@ -74,7 +72,6 @@ class Import::FogbugzController < Import::BaseController
 
   protected
 
-  # rubocop: disable CodeReuse/ActiveRecord
   override :importable_repos
   def importable_repos
     repos = client.repos
@@ -83,7 +80,6 @@ class Import::FogbugzController < Import::BaseController
 
     repos.reject { |repo| already_added_projects_names.include? repo.name }
   end
-  # rubocop: enable CodeReuse/ActiveRecord
 
   override :incompatible_repos
   def incompatible_repos

@@ -120,13 +120,11 @@ class UsersFinder
     users.non_internal
   end
 
-  # rubocop: disable CodeReuse/ActiveRecord
   def order(users)
     return users unless params[:sort]
 
     users.order_by(params[:sort])
   end
-  # rubocop: enable CodeReuse/ActiveRecord
 end
 
 UsersFinder.prepend_if_ee('EE::UsersFinder')

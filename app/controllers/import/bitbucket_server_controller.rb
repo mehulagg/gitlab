@@ -62,7 +62,6 @@ class Import::BitbucketServerController < Import::BaseController
 
   protected
 
-  # rubocop: disable CodeReuse/ActiveRecord
   override :importable_repos
   def importable_repos
     # Use the import URL to filter beyond what BaseService#find_already_added_projects
@@ -71,7 +70,6 @@ class Import::BitbucketServerController < Import::BaseController
 
     bitbucket_repos.reject { |repo| already_added_projects_names.include?(repo.browse_url) || !repo.valid? }
   end
-  # rubocop: enable CodeReuse/ActiveRecord
 
   override :incompatible_repos
   def incompatible_repos

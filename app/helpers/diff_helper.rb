@@ -260,7 +260,7 @@ module DiffHelper
   def conflicts
     return unless options[:merge_ref_head_diff]
 
-    conflicts_service = MergeRequests::Conflicts::ListService.new(merge_request) # rubocop:disable CodeReuse/ServiceClass
+    conflicts_service = MergeRequests::Conflicts::ListService.new(merge_request)
 
     return unless conflicts_service.can_be_resolved_in_ui?
 

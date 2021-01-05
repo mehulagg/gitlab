@@ -68,7 +68,7 @@ module EnforcesTwoFactorAuthentication
   end
 
   def two_factor_verifier
-    @two_factor_verifier ||= Gitlab::Auth::TwoFactorAuthVerifier.new(current_user) # rubocop:disable Gitlab/ModuleWithInstanceVariables
+    @two_factor_verifier ||= Gitlab::Auth::TwoFactorAuthVerifier.new(current_user)
   end
 end
 

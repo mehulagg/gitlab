@@ -342,8 +342,6 @@ RSpec.describe Suggestions::ApplyService do
 
           suggestion1_diff = fetch_raw_diff(suggestion1)
           suggestion2_diff = fetch_raw_diff(suggestion2)
-
-          # rubocop: disable Layout/TrailingWhitespace
           expected_suggestion1_diff = <<-CONTENT.strip_heredoc
             @@ -10,7 +10,7 @@ module Popen
                  end
@@ -355,9 +353,7 @@ RSpec.describe Suggestions::ApplyService do
                    "PWD" => path
                  }
           CONTENT
-          # rubocop: enable Layout/TrailingWhitespace
 
-          # rubocop: disable Layout/TrailingWhitespace
           expected_suggestion2_diff = <<-CONTENT.strip_heredoc
             @@ -28,7 +28,7 @@ module Popen
              
@@ -368,7 +364,6 @@ RSpec.describe Suggestions::ApplyService do
                    @cmd_status = wait_thr.value.exitstatus
                  end
           CONTENT
-          # rubocop: enable Layout/TrailingWhitespace
 
           expect(suggestion1_diff.strip).to eq(expected_suggestion1_diff.strip)
           expect(suggestion2_diff.strip).to eq(expected_suggestion2_diff.strip)

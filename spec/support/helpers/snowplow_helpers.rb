@@ -56,7 +56,7 @@ module SnowplowHelpers
       end
     end
 
-    expect(Gitlab::Tracking).to have_received(:event) # rubocop:disable RSpec/ExpectGitlabTracking
+    expect(Gitlab::Tracking).to have_received(:event)
       .with(category, action, **kwargs).at_least(:once)
   end
 

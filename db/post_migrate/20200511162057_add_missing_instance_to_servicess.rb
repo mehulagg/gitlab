@@ -15,14 +15,12 @@ class AddMissingInstanceToServicess < ActiveRecord::Migration[6.0]
   # 12.9 added the instance column in a normal migration https://gitlab.com/gitlab-org/gitlab/-/merge_requests/25714
   #
   # rubocop:disable Migration/AddColumnWithDefault
-  # rubocop:disable Migration/UpdateLargeTable
   def up
     unless column_exists?(:services, :instance)
       add_column_with_default(:services, :instance, :boolean, default: false)
     end
   end
   # rubocop:enable Migration/AddColumnWithDefault
-  # rubocop:enable Migration/UpdateLargeTable
 
   def down
     # Does not apply

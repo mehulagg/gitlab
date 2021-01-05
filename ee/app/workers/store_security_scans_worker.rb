@@ -5,8 +5,6 @@ class StoreSecurityScansWorker # rubocop:disable Scalability/IdempotentWorker
   include SecurityScansQueue
 
   tags :requires_disk_io
-
-  # rubocop: disable CodeReuse/ActiveRecord
   def perform(*)
     # no-op
     # This worker has been deprecated and will be removed with next release.

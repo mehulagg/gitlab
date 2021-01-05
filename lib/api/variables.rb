@@ -47,14 +47,12 @@ module API
       params do
         requires :key, type: String, desc: 'The key of the variable'
       end
-      # rubocop: disable CodeReuse/ActiveRecord
       get ':id/variables/:key' do
         variable = find_variable(params)
         not_found!('Variable') unless variable
 
         present variable, with: Entities::Ci::Variable
       end
-      # rubocop: enable CodeReuse/ActiveRecord
 
       desc 'Create a new variable in a project' do
         success Entities::Ci::Variable
@@ -93,7 +91,6 @@ module API
         optional :environment_scope, type: String, desc: 'The environment_scope of the variable'
         optional :filter, type: Hash, desc: 'Available filters: [environment_scope]. Example: filter[environment_scope]=production'
       end
-      # rubocop: disable CodeReuse/ActiveRecord
       put ':id/variables/:key' do
         variable = find_variable(params)
         not_found!('Variable') unless variable
@@ -114,7 +111,6 @@ module API
           render_validation_error!(variable)
         end
       end
-      # rubocop: enable CodeReuse/ActiveRecord
 
       desc 'Delete an existing variable from a project' do
         success Entities::Ci::Variable
@@ -123,7 +119,6 @@ module API
         requires :key, type: String, desc: 'The key of the variable'
         optional :filter, type: Hash, desc: 'Available filters: [environment_scope]. Example: filter[environment_scope]=production'
       end
-      # rubocop: disable CodeReuse/ActiveRecord
       delete ':id/variables/:key' do
         variable = find_variable(params)
         not_found!('Variable') unless variable
@@ -136,7 +131,6 @@ module API
 
         no_content!
       end
-      # rubocop: enable CodeReuse/ActiveRecord
     end
   end
 end

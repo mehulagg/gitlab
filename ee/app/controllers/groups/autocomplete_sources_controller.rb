@@ -58,11 +58,9 @@ class Groups::AutocompleteSourcesController < Groups::ApplicationController
     GroupVulnerabilityAutocompleteSerializer.new
   end
 
-  # rubocop: disable CodeReuse/ActiveRecord
   def target
     QuickActions::TargetService
       .new(nil, current_user, group: @group)
       .execute(params[:type], params[:type_id])
   end
-  # rubocop: enable CodeReuse/ActiveRecord
 end

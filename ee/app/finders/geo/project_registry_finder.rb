@@ -18,19 +18,15 @@ module Geo
     #
     # @param [Integer] batch_size used to limit the results returned
     # @param [Array<Integer>] except_ids ids that will be ignored from the query
-    # rubocop:disable CodeReuse/ActiveRecord
     def find_registries_never_attempted_sync(batch_size:, except_ids: [])
       registry_class
         .find_registries_never_attempted_sync(batch_size: batch_size, except_ids: except_ids)
     end
-    # rubocop:enable CodeReuse/ActiveRecord
 
-    # rubocop:disable CodeReuse/ActiveRecord
     def find_registries_needs_sync_again(batch_size:, except_ids: [])
       registry_class
         .find_registries_needs_sync_again(batch_size: batch_size, except_ids: except_ids)
     end
-    # rubocop:enable CodeReuse/ActiveRecord
 
     # rubocop:disable CodeReuse/ActiveRecord
     def find_project_ids_pending_verification(batch_size:, except_ids: [])
@@ -51,20 +47,16 @@ module Geo
       Geo::ProjectRegistry
     end
 
-    # rubocop:disable CodeReuse/ActiveRecord
     def repositories_checksummed_pending_verification
       registry_class
         .repositories_checksummed_pending_verification
         .select(registry_class.arel_table[:project_id])
     end
-    # rubocop:enable CodeReuse/ActiveRecord
 
-    # rubocop:disable CodeReuse/ActiveRecord
     def wikis_checksummed_pending_verification
       registry_class
         .wikis_checksummed_pending_verification
         .select(registry_class.arel_table[:project_id])
     end
-    # rubocop:enable CodeReuse/ActiveRecord
   end
 end

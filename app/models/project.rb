@@ -1797,7 +1797,6 @@ class Project < ApplicationRecord
   end
 
   # TODO: what to do here when not using Legacy Storage? Do we still need to rename and delay removal?
-  # rubocop: disable CodeReuse/ServiceClass
   def remove_pages
     # Projects with a missing namespace cannot have their pages removed
     return unless namespace
@@ -1815,7 +1814,6 @@ class Project < ApplicationRecord
       PagesWorker.perform_in(5.minutes, :remove, namespace.full_path, temp_path)
     end
   end
-  # rubocop: enable CodeReuse/ServiceClass
 
   def mark_pages_as_deployed(artifacts_archive: nil)
     ensure_pages_metadatum.update!(deployed: true, artifacts_archive: artifacts_archive)

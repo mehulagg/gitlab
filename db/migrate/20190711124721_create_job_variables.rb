@@ -10,7 +10,6 @@ class CreateJobVariables < ActiveRecord::Migration[5.1]
   DOWNTIME = false
 
   # rubocop:disable Migration/PreventStrings
-  # rubocop:disable Migration/AddLimitToTextColumns
   def change
     create_table :ci_job_variables do |t|
       t.string :key, null: false
@@ -22,6 +21,6 @@ class CreateJobVariables < ActiveRecord::Migration[5.1]
 
     add_index :ci_job_variables, [:key, :job_id], unique: true
   end
-  # rubocop:enable Migration/AddLimitToTextColumns
+
   # rubocop:enable Migration/PreventStrings
 end

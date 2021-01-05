@@ -54,7 +54,6 @@ module Gitlab
         # http://tools.ietf.org/html/rfc2253 section 3.
         # rubocop:disable Metrics/AbcSize
         # rubocop:disable Metrics/CyclomaticComplexity
-        # rubocop:disable Metrics/PerceivedComplexity
         def each_pair
           state = :key
           key = StringIO.new
