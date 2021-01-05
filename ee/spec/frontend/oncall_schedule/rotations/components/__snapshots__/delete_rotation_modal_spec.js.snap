@@ -1,0 +1,20 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DeleteRotationModal renders delete rotation modal layout 1`] = `
+<gl-modal-stub
+  actioncancel="[object Object]"
+  actionprimary="[object Object]"
+  data-testid="delete-rotation-modal-gid://gitlab/IncidentManagement::OncallRotation/2"
+  modalclass=""
+  modalid="deleteRotationModal"
+  size="sm"
+  title="Delete rotation"
+  titletag="h4"
+>
+  <!---->
+   
+  <gl-sprintf-stub
+    message="Are you sure you want to delete the \\"%{deleteRotation}\\" rotation? This action cannot be undone."
+  />
+</gl-modal-stub>
+`;
