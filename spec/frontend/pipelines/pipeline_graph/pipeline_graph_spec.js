@@ -37,7 +37,7 @@ describe('pipeline graph component', () => {
     });
 
     it('renders an empty section', () => {
-      expect(wrapper.text()).toBe(wrapper.vm.$options.warningTexts[EMPTY_PIPELINE_DATA]);
+      expect(wrapper.text()).toBe(wrapper.vm.$options.errors[EMPTY_PIPELINE_DATA].text);
       expect(findPipelineGraph().exists()).toBe(false);
       expect(findAllStagePills()).toHaveLength(0);
       expect(findAllJobPills()).toHaveLength(0);
@@ -51,7 +51,7 @@ describe('pipeline graph component', () => {
 
     it('renders an error message and does not render the graph', () => {
       expect(findAlert().exists()).toBe(true);
-      expect(findAlert().text()).toBe(wrapper.vm.$options.warningTexts[INVALID_CI_CONFIG]);
+      expect(findAlert().text()).toBe(wrapper.vm.$options.errors[INVALID_CI_CONFIG].text);
       expect(findPipelineGraph().exists()).toBe(false);
     });
   });
@@ -76,7 +76,7 @@ describe('pipeline graph component', () => {
 
     it('renders the error that link could not be drawn', () => {
       expect(findAlert().exists()).toBe(true);
-      expect(findAlert().text()).toBe(wrapper.vm.$options.errorTexts[DRAW_FAILURE]);
+      expect(findAlert().text()).toBe(wrapper.vm.$options.errors[DRAW_FAILURE].text);
     });
   });
 

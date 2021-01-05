@@ -1,5 +1,4 @@
 <script>
-import { isEmpty } from 'lodash';
 import { GlAlert } from '@gitlab/ui';
 import { __ } from '~/locale';
 import JobPill from './job_pill.vue';
@@ -20,15 +19,29 @@ export default {
   CONTAINER_REF: 'PIPELINE_GRAPH_CONTAINER_REF',
   CONTAINER_ID: 'pipeline-graph-container',
   STROKE_WIDTH: 2,
-  errorTexts: {
-    [DRAW_FAILURE]: __('Could not draw the lines for job relationships'),
-    [DEFAULT]: __('An unknown error occurred.'),
-  },
-  warningTexts: {
-    [EMPTY_PIPELINE_DATA]: __(
-      'The visualization will appear in this tab when the CI/CD configuration file is populated with valid syntax.',
-    ),
-    [INVALID_CI_CONFIG]: __('Your CI configuration file is invalid.'),
+  errors: {
+    [DRAW_FAILURE]: {
+      text: __('Could not draw the lines for job relationships'),
+      variant: 'danger',
+      dismissible: true,
+    },
+    [DEFAULT]: {
+      text: __('An unknown error occurred.'),
+      variant: 'danger',
+      dismissible: true,
+    },
+    [EMPTY_PIPELINE_DATA]: {
+      text: __(
+        'The visualization will appear in this tab when the CI/CD configuration file is populated with valid syntax.',
+      ),
+      variant: 'tip',
+      dismissible: false,
+    },
+    [INVALID_CI_CONFIG]: {
+      text: __('Your CI configuration file is invalid.'),
+      variant: 'danger',
+      dismissible: false,
+    },
   },
   props: {
     pipelineData: {
@@ -47,23 +60,23 @@ export default {
     };
   },
   computed: {
+    hideGraph() {
+      // We won't even try to render the graph with these condition
+      // because it would cause additional errors down the line for the user
+      // which is confusing.
+      return this.isPipelineDataEmpty || this.isInvalidCiConfig;
+    },
     pipelineStages() {
       return this.pipelineData?.stages || [];
     },
     isPipelineDataEmpty() {
-      return !this.isInvalidCiConfig && isEmpty(this.pipelineStages);
+      return !this.isInvalidCiConfig && this.pipelineStages.length === 0;
     },
     isInvalidCiConfig() {
       return this.pipelineData?.status === CI_CONFIG_STATUS_INVALID;
     },
-    showAlert() {
-      return this.hasError || this.hasWarning;
-    },
     hasError() {
       return this.failureType;
-    },
-    hasWarning() {
-      return this.warning;
     },
     hasHighlightedJob() {
       return Boolean(this.highlightedJob);
@@ -76,26 +89,7 @@ export default {
       return this.warning;
     },
     failure() {
-      const text = this.$options.errorTexts[this.failureType] || this.$options.errorTexts[DEFAULT];
-
-      return { text, variant: 'danger', dismissible: true };
-    },
-    warning() {
-      if (this.isPipelineDataEmpty) {
-        return {
-          text: this.$options.warningTexts[EMPTY_PIPELINE_DATA],
-          variant: 'tip',
-          dismissible: false,
-        };
-      } else if (this.isInvalidCiConfig) {
-        return {
-          text: this.$options.warningTexts[INVALID_CI_CONFIG],
-          variant: 'danger',
-          dismissible: false,
-        };
-      }
-
-      return null;
+      return this.$options.errors[this.failureType] || this.$options.errors[DEFAULT];
     },
     viewBox() {
       return [0, 0, this.width, this.height];
@@ -121,6 +115,24 @@ export default {
       }
 
       return [];
+    },
+  },
+  watch: {
+    isPipelineDataEmpty: {
+      immediate: true,
+      handler(isDataEmpty) {
+        if (isDataEmpty) {
+          this.reportFailure(EMPTY_PIPELINE_DATA);
+        }
+      },
+    },
+    isInvalidCiConfig: {
+      immediate: true,
+      handler(isInvalid) {
+        if (isInvalid) {
+          this.reportFailure(INVALID_CI_CONFIG);
+        }
+      },
     },
   },
   mounted() {
@@ -202,7 +214,7 @@ export default {
 <template>
   <div>
     <gl-alert
-      v-if="showAlert"
+      v-if="hasError"
       :variant="alert.variant"
       :dismissible="alert.dismissible"
       @dismiss="alert.dismissible ? resetFailure : null"
@@ -210,7 +222,7 @@ export default {
       {{ alert.text }}
     </gl-alert>
     <div
-      v-if="!hasWarning"
+      v-if="!hideGraph"
       :id="$options.CONTAINER_ID"
       :ref="$options.CONTAINER_REF"
       class="gl-display-flex gl-bg-gray-50 gl-px-4 gl-overflow-auto gl-relative gl-py-7"
