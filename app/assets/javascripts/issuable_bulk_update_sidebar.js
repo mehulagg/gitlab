@@ -5,6 +5,7 @@ import { property } from 'lodash';
 import IssuableBulkUpdateActions from './issuable_bulk_update_actions';
 import MilestoneSelect from './milestone_select';
 import issueStatusSelect from './issue_status_select';
+import iterationsDropdown from './iterations_dropdown';
 import subscriptionSelect from './subscription_select';
 import LabelsSelect from './labels_select';
 import issueableEventHub from './issues_list/eventhub';
@@ -61,6 +62,7 @@ export default class IssuableBulkUpdateSidebar {
   initDropdowns() {
     new LabelsSelect();
     new MilestoneSelect();
+    iterationsDropdown();
     issueStatusSelect();
     subscriptionSelect();
 
