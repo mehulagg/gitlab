@@ -33,10 +33,11 @@ describe('Details Header', () => {
 
   // set the date to Dec 4, 2020
   useFakeDate(2020, 11, 4);
+  const findByTestId = (testId) => wrapper.find(`[data-testid="${testId}"]`);
 
-  const findLastUpdatedAndVisibility = () => wrapper.find('[data-testid="updated-and-visibility"]');
-  const findTagsCount = () => wrapper.find('[data-testid="tags-count"]');
-  const findCleanup = () => wrapper.find('[data-testid="cleanup"]');
+  const findLastUpdatedAndVisibility = () => findByTestId('updated-and-visibility');
+  const findTagsCount = () => findByTestId('tags-count');
+  const findCleanup = () => findByTestId('cleanup');
 
   const waitForMetadataItems = async () => {
     // Metadata items are printed by a loop in the title-area and it takes two ticks for them to be available
