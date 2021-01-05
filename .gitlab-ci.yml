@@ -3,3 +3,8 @@ include:
 
 variables:
   DS_EXCLUDED_PATHS: "qa,fixtures,spec"
+
+dependency_scanning:
+  artifacts:
+    paths: 
+      - gl-dependency-scanning-report.json
