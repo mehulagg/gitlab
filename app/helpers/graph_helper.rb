@@ -22,4 +22,8 @@ module GraphHelper
     ratio = (counts[:success].to_f / (counts[:success] + counts[:failed])) * 100
     ratio.to_i
   end
+
+  def should_render_deployment_frequency_charts
+    can?(current_user, :read_project_activity_analytics, @project)
+  end
 end

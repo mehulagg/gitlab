@@ -8,6 +8,7 @@ import getPipelineCountByStatus from '../graphql/queries/get_pipeline_count_by_s
 import getProjectPipelineStatistics from '../graphql/queries/get_project_pipeline_statistics.query.graphql';
 import StatisticsList from './statistics_list.vue';
 import PipelinesAreaChart from './pipelines_area_chart.vue';
+import DeploymentFrequencyCharts from './deployment_frequency_charts.vue';
 import {
   CHART_CONTAINER_HEIGHT,
   CHART_DATE_FORMAT,
@@ -53,11 +54,16 @@ export default {
     GlSkeletonLoader,
     StatisticsList,
     PipelinesAreaChart,
+    DeploymentFrequencyCharts,
   },
   inject: {
     projectPath: {
       type: String,
       default: '',
+    },
+    shouldRenderDeploymentFrequencyCharts: {
+      type: Boolean,
+      default: false,
     },
   },
   data() {
@@ -305,5 +311,9 @@ export default {
     >
       {{ chart.title }}
     </pipelines-area-chart>
+    <template v-if="shouldRenderDeploymentFrequencyCharts">
+      <hr />
+      <deployment-frequency-charts />
+    </template>
   </div>
 </template>

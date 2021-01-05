@@ -14,12 +14,14 @@ import {
   ONE_WEEK_AGO_DAYS,
   ONE_MONTH_AGO_DAYS,
 } from '../constants';
+import DeploymentFrequencyCharts from './deployment_frequency_charts.vue';
 
 export default {
   components: {
     StatisticsList,
     GlColumnChart,
     PipelinesAreaChart,
+    DeploymentFrequencyCharts,
   },
   props: {
     counts: {
@@ -40,6 +42,10 @@ export default {
     },
     lastYearChartData: {
       type: Object,
+      required: true,
+    },
+    shouldRenderDeploymentFrequencyCharts: {
+      type: Boolean,
       required: true,
     },
   },
@@ -147,5 +153,9 @@ export default {
     >
       {{ chart.title }}
     </pipelines-area-chart>
+    <template v-if="shouldRenderDeploymentFrequencyCharts">
+      <hr />
+      <deployment-frequency-charts />
+    </template>
   </div>
 </template>
