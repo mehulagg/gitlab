@@ -63,7 +63,7 @@ RSpec.describe API::Lint do
       end
 
       context 'with invalid configuration' do
-        let(:yaml_content) { '{ image: "ruby:2.7",  services: ["postgres"] }' }
+        let(:yaml_content) { '{ image: "ruby:2.7",  services: ["postgres"], invalid }' }
 
         it 'responds with errors about invalid configuration' do
           post api('/ci/lint'), params: { content: yaml_content }
