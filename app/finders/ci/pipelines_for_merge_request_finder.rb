@@ -34,11 +34,7 @@ module Ci
 
         pipelines =
           if merge_request.persisted?
-            if Feature.enabled?(:ci_pipelines_for_merge_request_finder_new_cte, target_project)
-              pipelines_using_cte
-            else
-              pipelines_using_legacy_cte
-            end
+            pipelines_using_cte
           else
             triggered_for_branch.for_sha(commit_shas)
           end
