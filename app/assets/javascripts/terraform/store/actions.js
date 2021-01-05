@@ -1,12 +1,13 @@
 import * as types from './mutation_types';
 
-export const setStateError = ({ state, commit }, { id, errorMessage }) => {
+export const setStateError = ({ state, commit }, { id, errorMessages }) => {
   const list = state.statesList.map((terraformState) => {
     if (terraformState.id === id) {
       return {
         ...terraformState,
-        errorMessage,
+        errorMessages,
         _showDetails: true,
+        loadingActions: false,
       };
     }
 
@@ -25,7 +26,7 @@ export const setStateList = ({ commit }, data) => {
         ...terraformState,
         _showDetails: false,
         loadingActions: false,
-        errorMessage: null,
+        errorMessages: [],
       };
     });
   }
@@ -38,6 +39,8 @@ export const setStateLoading = ({ state, commit }, stateID) => {
     if (terraformState.id === stateID) {
       return {
         ...terraformState,
+        _showDetails: false,
+        errorMessages: [],
         loadingActions: true,
       };
     }

@@ -41,6 +41,7 @@ export default {
   },
   i18n: {
     downloadJSON: s__('Terraform|Download JSON'),
+    errorUpdate: s__('Terraform|An error occurred while changing the State file'),
     lock: s__('Terraform|Lock'),
     modalBody: s__(
       'Terraform|You are about to remove the State file %{name}. This will permanently delete all the State versions and history. The infrastructure provisioned previously	will remain intact, only the state file with all its versions are to be removed. This action is non-revertible.',
@@ -92,6 +93,8 @@ export default {
     stateMutation(mutation) {
       this.setStateLoading(this.state.id);
 
+      const errorMessages = [];
+
       this.$apollo
         .mutate({
           mutation,
@@ -102,9 +105,16 @@ export default {
           awaitRefetchQueries: true,
           notifyOnNetworkStatusChange: true,
         })
-        .catch(() => {})
+        .then(({ data }) => {
+          errorMessages.concat(data?.terraformStateUnlock?.errors);
+        })
+        .catch(() => {
+          errorMessages.push(this.$options.i18n.errorUpdate);
+        })
         .finally(() => {
-          this.setStateError({ id: this.state.id, errorMessage: 'Message!!' });
+          if (errorMessages.length) {
+            this.setStateError({ id: this.state.id, errorMessages });
+          }
         });
     },
   },

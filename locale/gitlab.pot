@@ -27432,6 +27432,9 @@ msgstr ""
 msgid "Terraform|Actions"
 msgstr ""
 
+msgid "Terraform|An error occurred while changing the State file"
+msgstr ""
+
 msgid "Terraform|An error occurred while loading your Terraform States"
 msgstr ""
 
