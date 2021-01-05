@@ -180,7 +180,6 @@
 .discover-box {
   .discover-title {
     margin: 40px auto 2px;
-    max-width: 500px;
   }
 
   .discover-carousel-img {
@@ -198,7 +197,7 @@
     flex-wrap: nowrap;
     justify-content: space-between;
     margin: 0 auto;
-    max-width: 520px;
+    max-width: 280px;
   }
 
   .discover-footer {
@@ -223,12 +222,14 @@
   .discover-text-carousel {
     .carousel-caption {
       height: 100%;
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
     }
   }
 
   .discover-carousel {
     margin: 0 auto;
-    max-width: 720px;
 
     .carousel-indicators {
       li {

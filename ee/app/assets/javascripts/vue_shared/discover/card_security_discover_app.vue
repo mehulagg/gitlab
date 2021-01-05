@@ -127,9 +127,9 @@ export default {
 
 <template>
   <div class="discover-box">
-    <h4 class="discover-title center gl-text-gray-900">
+    <h2 class="discover-title center gl-text-gray-900">
       {{ $options.i18n.discoverTitle }}
-    </h4>
+    </h2>
     <gl-carousel
       v-model="slide"
       class="discover-carousel"
@@ -162,13 +162,13 @@ export default {
         :key="index"
         img-blank
       >
-        <p class="gl-text-gray-900 gl-text-left">
+        <p class="gl-text-gray-900 gl-text-center">
           {{ caption }}
         </p>
       </gl-carousel-slide>
     </gl-carousel>
-    <div class="discover-footer d-flex flex-nowrap flex-row justify-content-between mx-auto my-0">
-      <p class="gl-text-gray-900 text-left mb-5">
+    <div class="discover-footer mx-auto my-0">
+      <p class="gl-text-gray-900 text-center mb-5">
         <gl-sprintf :message="$options.i18n.discoverPlanCaption">
           <template #link="{ content }">
             <gl-link
