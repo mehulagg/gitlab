@@ -505,9 +505,9 @@ in the second step, do not supply the `EXTERNAL_URL` value.
    ```
 
 NOTE:
-Postgres with Patroni managing it's failover will default to use `pg_rewind` by default to handle conflicts.
+PostgreSQL with Patroni managing it's failover will default to use `pg_rewind` by default to handle conflicts.
 Like most failover handling methods this has a small chance of leading to data loss.
-Please refer to these [docs](https://docs.gitlab.com/ee/administration/postgresql/replication_and_failover.html#selecting-the-appropriate-patroni-replication-method) for more detailed information.
+Please refer to these [docs](../postgresql/replication_and_failover.md#selecting-the-appropriate-patroni-replication-method) for more detailed information.
 
 1. Copy the `/etc/gitlab/gitlab-secrets.json` file from your Consul server, and replace
    the file of the same name on this server. If that file is not on this server,
@@ -578,7 +578,7 @@ The following IPs will be used as an example:
 
 1. On each PgBouncer node, edit `/etc/gitlab/gitlab.rb`, and replace
    `<consul_password_hash>` and `<pgbouncer_password_hash>` with the
-   password hashes you [set up previously](#postgresql-primary-node):
+   password hashes you [set up previously](#postgresql-nodes):
 
    ```ruby
    # Disable all components except Pgbouncer and Consul agent
