@@ -72,7 +72,7 @@ export default {
     },
   },
   methods: {
-    ...mapActions(['setStateLoading']),
+    ...mapActions(['setStateError', 'setStateLoading']),
     hideModal() {
       this.showRemoveModal = false;
       this.removeConfirmText = '';
@@ -103,7 +103,9 @@ export default {
           notifyOnNetworkStatusChange: true,
         })
         .catch(() => {})
-        .finally(() => {});
+        .finally(() => {
+          this.setStateError({ id: this.state.id, errorMessage: 'Message!!' });
+        });
     },
   },
 };

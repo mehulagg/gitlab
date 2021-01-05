@@ -180,5 +180,11 @@ export default {
     <template v-if="terraformAdmin" #cell(actions)="{ item }">
       <state-actions :state="item" />
     </template>
+
+    <template #row-details="row">
+      <div @click="row.toggleDetails">
+        {{ row.item.errorMessage }}
+      </div>
+    </template>
   </gl-table>
 </template>
