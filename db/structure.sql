@@ -11416,7 +11416,6 @@ ALTER SEQUENCE commit_user_mentions_id_seq OWNED BY commit_user_mentions.id;
 
 CREATE TABLE compliance_management_frameworks (
     id bigint NOT NULL,
-    group_id bigint,
     name text NOT NULL,
     description text NOT NULL,
     color text NOT NULL,
