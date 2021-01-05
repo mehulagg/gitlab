@@ -368,11 +368,11 @@ describe('Grouped security reports app', () => {
         wrapper.vm.$el.querySelector('[aria-label="Vulnerability Name"]').click();
 
         return Vue.nextTick().then(() => {
-          expect(wrapper.vm.$el.querySelector('.modal-title').textContent.trim()).toEqual(
+          expect(document.querySelector('.modal-title').textContent.trim()).toEqual(
             mockFindings[0].name,
           );
 
-          expect(wrapper.vm.$el.querySelector('.modal-body').textContent).toContain(
+          expect(document.querySelector('.modal-body').textContent).toContain(
             mockFindings[0].solution,
           );
         });

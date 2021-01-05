@@ -12,11 +12,10 @@ import { s__, __ } from '~/locale';
 import ScheduleTimelineSection from './schedule/components/schedule_timeline_section.vue';
 import DeleteScheduleModal from './delete_schedule_modal.vue';
 import EditScheduleModal from './add_edit_schedule_modal.vue';
-import AddRotationModal from './rotations/components/add_rotation_modal.vue';
-
-import { getTimeframeForWeeksView } from './schedule/utils';
-import { PRESET_TYPES } from '../constants';
+import AddEditRotationModal from './rotations/components/add_edit_rotation_modal.vue';
 import RotationsListSection from './schedule/components/rotations_list_section.vue';
+import { getTimeframeForWeeksView } from './schedule/utils';
+import { addRotationModalId, editRotationModalId, PRESET_TYPES } from '../constants';
 
 export const i18n = {
   scheduleForTz: s__('OnCallSchedules|On-call schedule for the %{timezone}'),
@@ -25,14 +24,13 @@ export const i18n = {
   rotationTitle: s__('OnCallSchedules|Rotations'),
   addARotation: s__('OnCallSchedules|Add a rotation'),
 };
-
-export const addRotationModalId = 'addRotationModal';
 export const editScheduleModalId = 'editScheduleModal';
 export const deleteScheduleModalId = 'deleteScheduleModal';
 
 export default {
   i18n,
   addRotationModalId,
+  editRotationModalId,
   editScheduleModalId,
   deleteScheduleModalId,
   presetType: PRESET_TYPES.WEEKS,
@@ -45,7 +43,7 @@ export default {
     GlButton,
     DeleteScheduleModal,
     EditScheduleModal,
-    AddRotationModal,
+    AddEditRotationModal,
     RotationsListSection,
   },
   directives: {
@@ -151,6 +149,11 @@ export default {
       :modal-id="$options.editScheduleModalId"
       is-edit-mode
     />
-    <add-rotation-modal :schedule="schedule" :modal-id="$options.addRotationModalId" />
+    <add-edit-rotation-modal :schedule="schedule" :modal-id="$options.addRotationModalId" />
+    <add-edit-rotation-modal
+      :schedule="schedule"
+      :modal-id="$options.editRotationModalId"
+      is-edit-mode
+    />
   </div>
 </template>

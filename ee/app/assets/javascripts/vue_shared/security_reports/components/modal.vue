@@ -7,17 +7,19 @@ import MergeRequestNote from 'ee/vue_shared/security_reports/components/merge_re
 import ModalFooter from 'ee/vue_shared/security_reports/components/modal_footer.vue';
 import SolutionCard from 'ee/vue_shared/security_reports/components/solution_card_vuex.vue';
 import VulnerabilityDetails from 'ee/vue_shared/security_reports/components/vulnerability_details.vue';
-import DeprecatedModal2 from '~/vue_shared/components/deprecated_modal_2.vue';
+import { GlModal } from '@gitlab/ui';
 import { __ } from '~/locale';
+import { VULNERABILITY_MODAL_ID } from './constants';
 
 export default {
+  VULNERABILITY_MODAL_ID,
   components: {
     DismissalNote,
     DismissalCommentBoxToggle,
     DismissalCommentModalFooter,
     IssueNote,
     MergeRequestNote,
-    Modal: DeprecatedModal2,
+    GlModal,
     ModalFooter,
     SolutionCard,
     VulnerabilityDetails,
@@ -183,15 +185,20 @@ export default {
     clearDismissalError() {
       this.dismissalCommentErrorMessage = '';
     },
+    close() {
+      this.$refs.modal.close();
+    },
   },
 };
 </script>
 <template>
-  <modal
-    id="modal-mrwidget-security-issue"
-    :header-title-text="modal.title"
+  <gl-modal
+    ref="modal"
+    :modal-id="$options.VULNERABILITY_MODAL_ID"
+    :title="modal.title"
     data-qa-selector="vulnerability_modal_content"
     class="modal-security-report-dast"
+    v-bind="$attrs"
   >
     <slot>
       <vulnerability-details :vulnerability="vulnerability" class="js-vulnerability-details" />
@@ -244,7 +251,7 @@ export default {
 
       <div v-if="modal.error" class="alert alert-danger">{{ modal.error }}</div>
     </slot>
-    <template #footer>
+    <template #modal-footer>
       <dismissal-comment-modal-footer
         v-if="modal.isCommentingOnDismissal"
         :is-dismissed="vulnerability.isDismissed"
@@ -274,7 +281,8 @@ export default {
         @openDismissalCommentBox="$emit('openDismissalCommentBox')"
         @revertDismissVulnerability="$emit('revertDismissVulnerability')"
         @downloadPatch="$emit('downloadPatch')"
+        @cancel="close"
       />
     </template>
-  </modal>
+  </gl-modal>
 </template>

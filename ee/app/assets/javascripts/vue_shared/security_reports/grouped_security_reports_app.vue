@@ -4,9 +4,10 @@ import { once } from 'lodash';
 import { componentNames } from 'ee/reports/components/issue_body';
 import { GlButton, GlSprintf, GlLink, GlModalDirective } from '@gitlab/ui';
 import FuzzingArtifactsDownload from 'ee/security_dashboard/components/fuzzing_artifacts_download.vue';
-import ArtifactDownload from 'ee/vue_shared/security_reports/components/artifact_download.vue';
+import ArtifactDownload from './components/artifact_download.vue';
 import { LOADING } from '~/reports/constants';
 import { securityReportTypeEnumToReportType } from './constants';
+import { vulnerabilityModalMixin } from './mixins/vulnerability_modal_mixin';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import ReportSection from '~/reports/components/report_section.vue';
 import SummaryRow from '~/reports/components/summary_row.vue';
@@ -49,7 +50,7 @@ export default {
   directives: {
     'gl-modal': GlModalDirective,
   },
-  mixins: [securityReportsMixin, glFeatureFlagsMixin()],
+  mixins: [securityReportsMixin, vulnerabilityModalMixin(), glFeatureFlagsMixin()],
   apollo: {
     dastSummary: {
       query: securityReportSummaryQuery,
@@ -411,15 +412,11 @@ export default {
       'setCreateVulnerabilityFeedbackMergeRequestPath',
       'setCreateVulnerabilityFeedbackDismissalPath',
       'setPipelineId',
-      'dismissVulnerability',
-      'revertDismissVulnerability',
       'createNewIssue',
       'createMergeRequest',
       'openDismissalCommentBox',
       'closeDismissalCommentBox',
       'downloadPatch',
-      'addDismissalComment',
-      'deleteDismissalComment',
       'showDismissalDeleteButtons',
       'hideDismissalDeleteButtons',
       'fetchContainerScanningDiff',
@@ -700,13 +697,13 @@ export default {
           @closeDismissalCommentBox="closeDismissalCommentBox()"
           @createMergeRequest="createMergeRequest"
           @createNewIssue="createNewIssue"
-          @dismissVulnerability="dismissVulnerability"
+          @dismissVulnerability="handleDismissVulnerability"
           @openDismissalCommentBox="openDismissalCommentBox()"
           @editVulnerabilityDismissalComment="openDismissalCommentBox()"
-          @revertDismissVulnerability="revertDismissVulnerability"
+          @revertDismissVulnerability="handleRevertDismissVulnerability"
           @downloadPatch="downloadPatch"
-          @addDismissalComment="addDismissalComment({ comment: $event })"
-          @deleteDismissalComment="deleteDismissalComment"
+          @addDismissalComment="handleAddDismissalComment({ comment: $event })"
+          @deleteDismissalComment="handleDeleteDismissalComment"
           @showDismissalDeleteButtons="showDismissalDeleteButtons"
           @hideDismissalDeleteButtons="hideDismissalDeleteButtons"
         />

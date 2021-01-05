@@ -1,14 +1,16 @@
 import { shallowMount } from '@vue/test-utils';
-import { GlCard } from '@gitlab/ui';
 import ScheduleTimelineSection from 'ee/oncall_schedules/components/schedule/components/schedule_timeline_section.vue';
 import WeeksHeaderItem from 'ee/oncall_schedules/components/schedule/components/preset_weeks/weeks_header_item.vue';
 import { getTimeframeForWeeksView } from 'ee/oncall_schedules/components/schedule/utils';
 import { PRESET_TYPES } from 'ee/oncall_schedules/constants';
+import { getOncallSchedulesQueryResponse } from '../../mocks/apollo_mock';
 
 describe('TimelineSectionComponent', () => {
   let wrapper;
   const mockTimeframeInitialDate = new Date(2018, 0, 1);
   const mockTimeframeWeeks = getTimeframeForWeeksView(mockTimeframeInitialDate);
+  const schedule =
+    getOncallSchedulesQueryResponse.data.project.incidentManagementOncallSchedules.nodes[0];
 
   function mountComponent({
     presetType = PRESET_TYPES.WEEKS,
@@ -18,9 +20,7 @@ describe('TimelineSectionComponent', () => {
       propsData: {
         presetType,
         timeframe,
-      },
-      stubs: {
-        GlCard,
+        schedule,
       },
     });
   }
@@ -30,10 +30,8 @@ describe('TimelineSectionComponent', () => {
   });
 
   afterEach(() => {
-    if (wrapper) {
-      wrapper.destroy();
-      wrapper = null;
-    }
+    wrapper.destroy();
+    wrapper = null;
   });
 
   it('renders component container element with class `timeline-section`', () => {

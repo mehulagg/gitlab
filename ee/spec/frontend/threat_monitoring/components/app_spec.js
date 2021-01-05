@@ -24,9 +24,8 @@ const userCalloutsPath = `${TEST_HOST}/user_callouts`;
 describe('ThreatMonitoringApp component', () => {
   let store;
   let wrapper;
-  window.gon = { features: {} };
 
-  const factory = ({ propsData, state, options } = {}) => {
+  const factory = ({ propsData, provide = {}, state, options } = {}) => {
     store = createStore();
     Object.assign(store.state.threatMonitoring, {
       environmentsEndpoint,
@@ -52,6 +51,8 @@ describe('ThreatMonitoringApp component', () => {
       },
       provide: {
         documentationPath,
+        glFeatures: { threatMonitoringAlerts: false },
+        ...provide,
       },
       store,
       ...options,
@@ -68,7 +69,6 @@ describe('ThreatMonitoringApp component', () => {
   const findAlertTab = () => wrapper.find('[data-testid="threat-monitoring-alerts-tab"]');
 
   afterEach(() => {
-    window.gon.features = {};
     wrapper.destroy();
     wrapper = null;
   });
@@ -176,8 +176,7 @@ describe('ThreatMonitoringApp component', () => {
 
   describe('alerts tab', () => {
     beforeEach(() => {
-      window.gon.features.threatMonitoringAlerts = true;
-      factory({});
+      factory({ provide: { glFeatures: { threatMonitoringAlerts: true } } });
     });
     it('shows the alerts tab', () => {
       expect(findAlertTab().exists()).toBe(true);

@@ -368,7 +368,7 @@ RSpec.describe License do
 
       it 'returns features for premium plan' do
         expect(described_class.features_for_plan('premium'))
-          .to include(:multiple_issue_assignees, :deploy_board, :file_locks, :group_wikis)
+          .to include(:multiple_issue_assignees, :cluster_deployments, :file_locks, :group_wikis)
       end
 
       it 'returns empty array if no features for given plan' do
@@ -377,7 +377,7 @@ RSpec.describe License do
     end
 
     describe '.plan_includes_feature?' do
-      let(:feature) { :deploy_board }
+      let(:feature) { :cluster_deployments }
 
       subject { described_class.plan_includes_feature?(plan, feature) }
 
@@ -735,15 +735,15 @@ RSpec.describe License do
 
       context 'with add-ons' do
         it 'returns all available add-ons' do
-          license = build_license_with_add_ons({ 'GitLab_DeployBoard' => 1, 'GitLab_FileLocks' => 2 })
+          license = build_license_with_add_ons({ 'GitLab_FileLocks' => 2 })
 
-          expect(license.features_from_add_ons).to match_array([:deploy_board, :file_locks])
+          expect(license.features_from_add_ons).to eq([:file_locks])
         end
       end
 
       context 'with nil add-ons' do
         it 'returns an empty array' do
-          license = build_license_with_add_ons({ 'GitLab_DeployBoard' => nil, 'GitLab_FileLocks' => nil })
+          license = build_license_with_add_ons({ 'GitLab_FileLocks' => nil })
 
           expect(license.features_from_add_ons).to eq([])
         end
@@ -752,9 +752,9 @@ RSpec.describe License do
 
     describe '#feature_available?' do
       it 'returns true if add-on exists and have a quantity greater than 0' do
-        license = build_license_with_add_ons({ 'GitLab_DeployBoard' => 1 })
+        license = build_license_with_add_ons({ 'GitLab_FileLocks' => 1 })
 
-        expect(license.feature_available?(:deploy_board)).to eq(true)
+        expect(license.feature_available?(:file_locks)).to eq(true)
       end
 
       it 'returns true if the feature is included in the plan do' do
@@ -764,16 +764,15 @@ RSpec.describe License do
       end
 
       it 'returns false if add-on exists but have a quantity of 0' do
-        license = build_license_with_add_ons({ 'GitLab_DeployBoard' => 0 })
+        license = build_license_with_add_ons({ 'GitLab_FileLocks' => 0 })
 
-        expect(license.feature_available?(:deploy_board)).to eq(false)
+        expect(license.feature_available?(:file_locks)).to eq(false)
       end
 
       it 'returns false if add-on does not exists' do
         license = build_license_with_add_ons({})
 
-        expect(license.feature_available?(:deploy_board)).to eq(false)
-        expect(license.feature_available?(:auditor_user)).to eq(false)
+        expect(license.feature_available?(:file_locks)).to eq(false)
       end
 
       context 'with an expired trial license' do

@@ -6,6 +6,5 @@ export const tableItems = (state) => {
       return { user: { name, username: formattedUserName, avatar_url, web_url }, email };
     });
   }
-
   return [];
 };

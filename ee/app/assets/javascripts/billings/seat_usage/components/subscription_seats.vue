@@ -5,13 +5,15 @@ import {
   GlAvatarLabeled,
   GlAvatarLink,
   GlPagination,
-  GlLoadingIcon,
   GlTooltipDirective,
+  GlSearchBoxByType,
+  GlBadge,
 } from '@gitlab/ui';
-import { parseInt } from 'lodash';
-import { s__, sprintf } from '~/locale';
+import { parseInt, debounce } from 'lodash';
+import { s__ } from '~/locale';
 
 const AVATAR_SIZE = 32;
+const SEARCH_DEBOUNCE_MS = 250;
 
 export default {
   directives: {
@@ -22,31 +24,24 @@ export default {
     GlAvatarLabeled,
     GlAvatarLink,
     GlPagination,
-    GlLoadingIcon,
+    GlSearchBoxByType,
+    GlBadge,
   },
   data() {
     return {
       fields: ['user', 'email'],
+      searchQuery: '',
     };
   },
   computed: {
-    ...mapState(['isLoading', 'page', 'perPage', 'total', 'namespaceId', 'namespaceName']),
+    ...mapState(['isLoading', 'page', 'perPage', 'total', 'namespaceName']),
     ...mapGetters(['tableItems']),
-    headingText() {
-      return sprintf(s__('Billing|Users occupying seats in %{namespaceName} Group (%{total})'), {
-        total: this.total,
-        namespaceName: this.namespaceName,
-      });
-    },
-    subHeadingText() {
-      return s__('Billing|Updated live');
-    },
     currentPage: {
       get() {
         return parseInt(this.page, 10);
       },
       set(val) {
-        this.fetchBillableMembersList(val);
+        this.fetchBillableMembersList({ page: val, search: this.searchQuery });
       },
     },
     perPageFormatted() {
@@ -55,14 +50,45 @@ export default {
     totalFormatted() {
       return parseInt(this.total, 10);
     },
+    emptyText() {
+      if (this.searchQuery?.length < 3) {
+        return s__('Billing|Enter at least three characters to search.');
+      }
+      return s__('Billing|No users to display.');
+    },
+  },
+  watch: {
+    searchQuery() {
+      this.executeQuery();
+    },
   },
   created() {
-    this.fetchBillableMembersList(1);
+    // This method is defined here instead of in `methods`
+    // because we need to access the .cancel() method
+    // lodash attaches to the function, which is
+    // made inaccessible by Vue. More info:
+    // https://stackoverflow.com/a/52988020/1063392
+    this.debouncedSearch = debounce(function search() {
+      this.fetchBillableMembersList({ search: this.searchQuery });
+    }, SEARCH_DEBOUNCE_MS);
+
+    this.fetchBillableMembersList();
   },
   methods: {
-    ...mapActions(['fetchBillableMembersList']),
-    inputHandler(val) {
-      this.fetchBillableMembersList(val);
+    ...mapActions(['fetchBillableMembersList', 'resetMembers']),
+    onSearchEnter() {
+      this.debouncedSearch.cancel();
+      this.executeQuery();
+    },
+    executeQuery() {
+      const queryLength = this.searchQuery?.length;
+      const MIN_SEARCH_LENGTH = 3;
+
+      if (queryLength === 0 || queryLength >= MIN_SEARCH_LENGTH) {
+        this.debouncedSearch();
+      } else if (queryLength < MIN_SEARCH_LENGTH) {
+        this.resetMembers();
+      }
     },
   },
   avatarSize: AVATAR_SIZE,
@@ -73,9 +99,28 @@ export default {
 </script>
 
 <template>
-  <div class="gl-pt-4">
-    <h4 data-testid="heading">{{ headingText }}</h4>
-    <p>{{ subHeadingText }}</p>
+  <section>
+    <div
+      class="gl-bg-gray-10 gl-p-6 gl-display-md-flex gl-justify-content-space-between gl-align-items-center"
+    >
+      <div data-testid="heading-info">
+        <h4
+          data-testid="heading-info-text"
+          class="gl-font-base gl-display-inline-block gl-font-weight-normal"
+        >
+          {{ s__('Billing|Users occupying seats in') }}
+          <span class="gl-font-weight-bold">{{ namespaceName }} {{ s__('Billing|Group') }}</span>
+        </h4>
+        <gl-badge>{{ total }}</gl-badge>
+      </div>
+
+      <gl-search-box-by-type
+        v-model.trim="searchQuery"
+        :placeholder="s__('Billing|Type to search')"
+        @keydown.enter.prevent="onSearchEnter"
+      />
+    </div>
+
     <gl-table
       class="seats-table"
       :items="tableItems"
@@ -83,6 +128,8 @@ export default {
       :busy="isLoading"
       :show-empty="true"
       data-testid="table"
+      :empty-text="emptyText"
+      thead-class="gl-display-none"
     >
       <template #cell(user)="data">
         <div class="gl-display-flex">
@@ -109,14 +156,6 @@ export default {
           >
         </div>
       </template>
-
-      <template #empty>
-        {{ s__('Billing|No users to display.') }}
-      </template>
-
-      <template #table-busy>
-        <gl-loading-icon size="lg" color="dark" class="gl-mt-5" />
-      </template>
     </gl-table>
 
     <gl-pagination
@@ -127,5 +166,5 @@ export default {
       align="center"
       class="gl-mt-5"
     />
-  </div>
+  </section>
 </template>

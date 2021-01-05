@@ -30,6 +30,8 @@ describe('EE billings seats module mutations', () => {
     });
 
     it('sets state as expected', () => {
+      expect(state.members).toMatchObject(mockDataSeats.data);
+
       expect(state.total).toBe('3');
       expect(state.page).toBe('1');
       expect(state.perPage).toBe('1');
@@ -51,6 +53,39 @@ describe('EE billings seats module mutations', () => {
 
     it('sets hasError to true', () => {
       expect(state.hasError).toBeTruthy();
+    });
+  });
+
+  describe(types.SET_SEARCH, () => {
+    const SEARCH_STRING = 'a search string';
+
+    beforeEach(() => {
+      mutations[types.SET_SEARCH](state, SEARCH_STRING);
+    });
+
+    it('sets the search state', () => {
+      expect(state.search).toBe(SEARCH_STRING);
+    });
+  });
+
+  describe(types.RESET_MEMBERS, () => {
+    beforeEach(() => {
+      mutations[types.RECEIVE_BILLABLE_MEMBERS_SUCCESS](state, mockDataSeats);
+      mutations[types.RESET_MEMBERS](state);
+    });
+
+    it('resets members state', () => {
+      expect(state.members).toMatchObject([]);
+
+      expect(state.total).toBeNull();
+      expect(state.page).toBeNull();
+      expect(state.perPage).toBeNull();
+
+      expect(state.isLoading).toBeFalsy();
+    });
+
+    it('sets isLoading to false', () => {
+      expect(state.isLoading).toBeFalsy();
     });
   });
 });

@@ -45,7 +45,6 @@ export default {
     ...mapActions('vulnerabilities', [
       'deselectAllVulnerabilities',
       'fetchVulnerabilities',
-      'openModal',
       'selectAllVulnerabilities',
     ]),
     fetchPage(page) {
@@ -107,7 +106,6 @@ export default {
         v-for="vulnerability in vulnerabilities"
         :key="vulnerability.id"
         :vulnerability="vulnerability"
-        @openModal="openModal({ vulnerability })"
       />
 
       <slot v-if="showEmptyState" name="empty-state">

@@ -234,7 +234,7 @@ export default {
 
     <gl-button
       icon="remove"
-      size="small"
+      category="tertiary"
       class="gl-absolute gl-top-3 gl-right-3"
       data-testid="remove-rule"
       @click="$emit('remove')"

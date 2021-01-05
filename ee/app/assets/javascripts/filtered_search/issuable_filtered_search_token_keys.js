@@ -145,18 +145,11 @@ class IssuesFilteredSearchTokenKeysEE extends FilteredSearchTokenKeys {
   }
 
   removeEpicToken() {
-    this.removeToken(epicTokenKey);
+    this.removeTokensForKeys(epicTokenKey.key);
   }
 
   removeIterationToken() {
-    this.removeToken(iterationTokenKey);
-  }
-
-  removeToken(tokenKey) {
-    const index = this.tokenKeys.findIndex((token) => token.key === tokenKey.key);
-    if (index >= 0) {
-      this.tokenKeys.splice(index, 1);
-    }
+    this.removeTokensForKeys(iterationTokenKey.key);
   }
 }
 

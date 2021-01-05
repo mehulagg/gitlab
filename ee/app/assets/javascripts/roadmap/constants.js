@@ -60,10 +60,6 @@ export const PRESET_DEFAULTS = {
   },
 };
 
-export const PAST_DATE = new Date(new Date().getFullYear() - 100, 0, 1);
-
-export const FUTURE_DATE = new Date(new Date().getFullYear() + 100, 0, 1);
-
 export const EPIC_LEVEL_MARGIN = {
   1: 'ml-4',
   2: 'ml-6',

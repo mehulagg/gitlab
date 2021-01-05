@@ -222,7 +222,7 @@ describe('vulnerabilities actions', () => {
   });
 });
 
-describe('openModal', () => {
+describe('setModalData', () => {
   let state;
 
   beforeEach(() => {
@@ -232,7 +232,7 @@ describe('openModal', () => {
   it('should commit the SET_MODAL_DATA mutation', () => {
     const vulnerability = mockDataVulnerabilities[0];
 
-    return testAction(actions.openModal, { vulnerability }, state, [
+    return testAction(actions.setModalData, { vulnerability }, state, [
       {
         type: types.SET_MODAL_DATA,
         payload: { vulnerability },
@@ -1044,7 +1044,7 @@ describe('hideDismissalDeleteButtons', () => {
 });
 
 describe('revert vulnerability dismissal', () => {
-  describe('undoDismiss', () => {
+  describe('revertDismissVulnerability', () => {
     const vulnerability = mockDataVulnerabilities[2];
     const url = vulnerability.dismissal_feedback.destroy_vulnerability_feedback_dismissal_path;
     let mock;
@@ -1064,7 +1064,7 @@ describe('revert vulnerability dismissal', () => {
 
       it('should dispatch the request and success actions', () => {
         return testAction(
-          actions.undoDismiss,
+          actions.revertDismissVulnerability,
           { vulnerability },
           {},
           [],
@@ -1085,7 +1085,7 @@ describe('revert vulnerability dismissal', () => {
         const flashError = false;
 
         return testAction(
-          actions.undoDismiss,
+          actions.revertDismissVulnerability,
           { vulnerability, flashError },
           {},
           [],

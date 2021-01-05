@@ -3,6 +3,7 @@ import { mapActions } from 'vuex';
 import { GlAlert, GlEmptyState, GlIcon, GlLink, GlPopover, GlTabs, GlTab } from '@gitlab/ui';
 import { s__ } from '~/locale';
 import axios from '~/lib/utils/axios_utils';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import Alerts from './alerts/alerts.vue';
 import ThreatMonitoringFilters from './threat_monitoring_filters.vue';
 import ThreatMonitoringSection from './threat_monitoring_section.vue';
@@ -24,6 +25,7 @@ export default {
     NetworkPolicyList,
   },
   inject: ['documentationPath'],
+  mixins: [glFeatureFlagsMixin()],
   props: {
     defaultEnvironmentId: {
       type: Number,
@@ -75,7 +77,7 @@ export default {
   },
   computed: {
     showAlertsTab() {
-      return gon.features.threatMonitoringAlerts;
+      return this.glFeatures.threatMonitoringAlerts;
     },
   },
   created() {

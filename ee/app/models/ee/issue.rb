@@ -251,6 +251,11 @@ module EE
       super || promoted_to_epic
     end
 
+    override :supports_epic?
+    def supports_epic?
+      issue_type_supports?(:epics) && project.group.present?
+    end
+
     private
 
     def blocking_issues_ids

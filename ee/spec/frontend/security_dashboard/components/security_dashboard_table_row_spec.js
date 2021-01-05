@@ -2,6 +2,7 @@ import { GlFormCheckbox } from '@gitlab/ui';
 import { mount, shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
 import SecurityDashboardTableRow from 'ee/security_dashboard/components/security_dashboard_table_row.vue';
+import { VULNERABILITY_MODAL_ID } from 'ee/vue_shared/security_reports/components/constants';
 import createStore from 'ee/security_dashboard/store';
 import { DASHBOARD_TYPES } from 'ee/security_dashboard/store/constants';
 import { trimText } from 'helpers/text_helper';
@@ -104,15 +105,20 @@ describe('Security Dashboard Table Row', () => {
         expect(findContent(1).text()).toContain(vulnerability.location.file);
       });
 
-      it('should fire the openModal action when clicked', () => {
+      it('should fire the setModalData action and open the modal when clicked', () => {
         jest.spyOn(store, 'dispatch').mockImplementation();
+        jest.spyOn(wrapper.vm.$root, '$emit');
 
         const el = wrapper.find({ ref: 'vulnerability-title' });
         el.trigger('click');
 
-        expect(store.dispatch).toHaveBeenCalledWith('vulnerabilities/openModal', {
+        expect(store.dispatch).toHaveBeenCalledWith('vulnerabilities/setModalData', {
           vulnerability,
         });
+        expect(wrapper.vm.$root.$emit).toHaveBeenCalledWith(
+          'bv::show::modal',
+          VULNERABILITY_MODAL_ID,
+        );
       });
     });
 

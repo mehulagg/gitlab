@@ -72,7 +72,6 @@ class License < ApplicationRecord
     db_load_balancing
     default_branch_protection_restriction_in_groups
     default_project_deletion_protection
-    deploy_board
     disable_name_update_for_users
     email_additional_text
     epics
@@ -189,7 +188,6 @@ class License < ApplicationRecord
   # Add on codes that may occur in legacy licenses that don't have a plan yet.
   FEATURES_FOR_ADD_ONS = {
     'GitLab_Auditor_User' => :auditor_user,
-    'GitLab_DeployBoard' => :deploy_board,
     'GitLab_FileLocks' => :file_locks,
     'GitLab_Geo' => :geo
   }.freeze

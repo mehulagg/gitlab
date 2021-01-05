@@ -3,11 +3,8 @@
 module Security
   class Scan < ApplicationRecord
     include CreatedAtFilterable
-    include IgnorableColumns
 
     self.table_name = 'security_scans'
-
-    ignore_column :scanned_resources_count, remove_with: '13.7', remove_after: '2020-12-22'
 
     validates :build_id, presence: true
     validates :scan_type, presence: true
