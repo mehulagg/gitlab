@@ -26,7 +26,7 @@ To authenticate to the Package Registry, you need either a [personal access toke
 In addition to the standard API authentication mechanisms, the generic package
 API allows authentication with HTTP Basic authentication for use with tools that
 do not support the other available mechanisms. The `user-id` is not checked and
-may be any value, and the `password` must be either a [personal access token](../../../api/README.md#personalproject-access-tokens)
+may be any value, and the `password` must be either a [personal access token](../../../api/README.md#personalproject-access-tokens),
 a [CI job token](../../../api/README.md#gitlab-ci-job-token), or a [deploy token](../../project/deploy_tokens/index.md).
 
 ## Publish a package file
