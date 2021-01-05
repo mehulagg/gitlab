@@ -94,7 +94,6 @@ Some features such as [publishing](#publish-an-npm-package) a package is only av
 
 ## Authenticate to the Package Registry
 
-NOTE: Note
 Packages hosted on GitLab.com in public projects may be installed anonymously without authentication.
 
 To authenticate to the Package Registry, you must use one of the following:
