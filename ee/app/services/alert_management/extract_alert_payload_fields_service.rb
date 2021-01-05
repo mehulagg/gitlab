@@ -6,10 +6,11 @@ module AlertManagement
 
     def execute
       return error('Feature not available') unless available?
+      return error('Insufficient permissions') unless allowed?
 
       payload = parse_payload
-      error('Failed to parse payload') unless payload
-      error('Payload size exceeded') unless valid_payload_size?(payload)
+      return error('Failed to parse payload') unless payload && payload.is_a?(Hash)
+      return error('Payload size exceeded') unless valid_payload_size?(payload)
 
       fields = Gitlab::AlertManagement::AlertPayloadFieldExtractor
         .new(project).extract(payload)
@@ -38,6 +39,10 @@ module AlertManagement
 
     def available?
       feature_enabled? && license_available?
+    end
+
+    def allowed?
+      current_user&.can?(:admin_operations, project)
     end
 
     def feature_enabled?

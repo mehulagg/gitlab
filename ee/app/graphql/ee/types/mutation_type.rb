@@ -6,7 +6,6 @@ module EE
       extend ActiveSupport::Concern
 
       prepended do
-        mount_mutation ::Mutations::AlertManagement::AlertPayloadExtractFields
         mount_mutation ::Mutations::Clusters::Agents::Create
         mount_mutation ::Mutations::Clusters::Agents::Delete
         mount_mutation ::Mutations::Clusters::AgentTokens::Create

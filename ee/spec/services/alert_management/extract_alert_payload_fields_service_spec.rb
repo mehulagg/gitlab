@@ -24,7 +24,8 @@ RSpec.describe AlertManagement::ExtractAlertPayloadFieldsService do
   end
 
   context 'fails when limits are exceeded'
+  context 'fails with invalid payload'
   context 'without license'
   context 'without feature flag'
-  context 'withour permission'
+  context 'without permission'
 end

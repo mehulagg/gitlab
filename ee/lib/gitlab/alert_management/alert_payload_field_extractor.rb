@@ -25,7 +25,7 @@ module Gitlab
 
         ::AlertManagement::AlertPayloadField.new(
           project: project,
-          path: path.join('.'),
+          path: path,
           label: label,
           type: type
         )
