@@ -110,4 +110,4 @@ Vulnerability Report
 
 ## Access Tokens
 
-Authentication with the GitLab Container Registry can use a personal access token or a deploy token. Please see GitLab’s documentation on authentication options.
+Authentication with the GitLab Container Registry can use a personal access token or a deploy token. Please see the GitLab documentation on authentication options.
