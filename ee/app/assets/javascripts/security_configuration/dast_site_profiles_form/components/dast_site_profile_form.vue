@@ -12,7 +12,7 @@ import {
 import { initFormField } from 'ee/security_configuration/utils';
 import * as Sentry from '~/sentry/wrapper';
 import { __, s__ } from '~/locale';
-import { redirectTo } from '~/lib/utils/url_utility';
+import { redirectTo, queryToObject } from '~/lib/utils/url_utility';
 import { serializeFormObject } from '~/lib/utils/forms';
 import validation from '~/vue_shared/directives/validation';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
@@ -80,6 +80,7 @@ export default {
       token: null,
       errorMessage: '',
       errors: [],
+      redirectToOnDemandScansForm: false,
     };
   },
   computed: {
@@ -112,6 +113,10 @@ export default {
     if (this.isEdit) {
       this.form.showValidation = true;
     }
+  },
+  created() {
+    const params = queryToObject(window.location.search);
+    this.redirectToOnDemandScansForm = params.redirect_to_scan_form === 'true';
   },
   methods: {
     onSubmit() {
