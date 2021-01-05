@@ -8,8 +8,8 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 This document describes how to put a GitLab instance in maintenance mode.
 
-# Enabling maintenance mode
+## Enabling maintenance mode
 
-## Requirements
+### Requirements
 
-# Disabling maintenance mode
+## Disabling maintenance mode

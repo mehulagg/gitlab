@@ -8,20 +8,20 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 This document describes what you can expect from a GitLab instance in maintenance mode.
 
-# CI/CD
+## CI/CD
 
-# Merge Requests/Issues
+## Merge Requests/Issues
 
-# Git actions
+## Git actions
 
-# Docker registry
+## Docker registry
 
-# Deploys
+## Deploys
 
-# Background Jobs
+## Background Jobs
 
-# Application Settings
+## Application Settings
 
-# Logging in/logging out
+## Logging in/logging out
 
-# Geo secondaries
+## Geo secondaries
