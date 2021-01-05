@@ -9,6 +9,7 @@ import {
   GlModal,
   GlSprintf,
 } from '@gitlab/ui';
+import { mapActions } from 'vuex';
 import { s__ } from '~/locale';
 import lockState from '../graphql/mutations/lock_state.mutation.graphql';
 import unlockState from '../graphql/mutations/unlock_state.mutation.graphql';
@@ -71,6 +72,7 @@ export default {
     },
   },
   methods: {
+    ...mapActions(['setStateLoading']),
     hideModal() {
       this.showRemoveModal = false;
       this.removeConfirmText = '';
@@ -88,7 +90,8 @@ export default {
       }
     },
     stateMutation(mutation) {
-      this.loading = true;
+      this.setStateLoading(this.state.id);
+
       this.$apollo
         .mutate({
           mutation,
@@ -100,9 +103,7 @@ export default {
           notifyOnNetworkStatusChange: true,
         })
         .catch(() => {})
-        .finally(() => {
-          this.loading = false;
-        });
+        .finally(() => {});
     },
   },
 };
@@ -114,7 +115,7 @@ export default {
       icon="ellipsis_v"
       right
       :data-testid="`terraform-state-actions-${state.name}`"
-      :disabled="loading"
+      :disabled="state.loadingActions"
       toggle-class="gl-px-3! gl-shadow-none!"
     >
       <template #button-content>
