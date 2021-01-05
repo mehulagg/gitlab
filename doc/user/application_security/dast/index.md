@@ -316,7 +316,7 @@ server {
 
     location / {
         proxy_pass http://test-application;
-        add_header Gitlab-On-Demand-DAST 0dd79c9a-7b29-4e26-a815-eaaf53fcab1c;
+        add_header Gitlab-DAST-Permission allow;
     }
 }
 ```
