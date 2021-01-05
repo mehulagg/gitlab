@@ -34,7 +34,6 @@ module Groups
       # for users that are the members of this group.
       # If not, the project authorization records of these users to projects within the shared groups
       # will never be removed, causing inconsistencies with access permissions.
-
       if any_other_groups_are_shared_with_this_group?
         user_ids_for_project_authorizations_refresh = group.user_ids_for_project_authorizations
       end
