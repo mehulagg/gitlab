@@ -60,17 +60,32 @@ module Security
 
       def populate_current_value_for_analyzers(result)
         result[:analyzers].each do |analyzer|
-          analyzer[:enabled] = sast_default_analyzers.include?(analyzer[:name])
+          analyzer[:enabled] = analyzer_enabled?(analyzer[:name])
           populate_current_value_for(analyzer, :variables)
         end
       end
 
-      def sast_template_attributes
-        @sast_template_attributes ||= build_sast_attributes(sast_template_content)
+      def analyzer_enabled?(analyzer_name)
+        sast_excluded_analyzers.exclude?(analyzer_name)
+      end
+
+      def sast_excluded_analyzers
+        @sast_excluded_analyzers ||= begin
+          all_analyzers = Security::CiConfiguration::SastBuildActions::SAST_DEFAULT_ANALYZERS.split(', ') rescue []
+          enabled_analyzers = sast_default_analyzers.split(',').map(&:strip) rescue []
+
+          excluded_analyzers = gitlab_ci_yml_attributes["SAST_EXCLUDED_ANALYZERS"] || sast_template_attributes["SAST_EXCLUDED_ANALYZERS"]
+          excluded_analyzers = excluded_analyzers.split(',').map(&:strip) rescue []
+          ((all_analyzers - enabled_analyzers) + excluded_analyzers).uniq
+        end
       end
 
       def sast_default_analyzers
         @sast_default_analyzers ||= gitlab_ci_yml_attributes["SAST_DEFAULT_ANALYZERS"] || sast_template_attributes["SAST_DEFAULT_ANALYZERS"]
+      end
+
+      def sast_template_attributes
+        @sast_template_attributes ||= build_sast_attributes(sast_template_content)
       end
 
       def gitlab_ci_yml_attributes
