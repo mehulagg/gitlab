@@ -13,8 +13,7 @@ import { __, n__ } from '~/locale';
 import IssuableAssignees from '~/sidebar/components/assignees/issuable_assignees.vue';
 import BoardEditableItem from '~/boards/components/sidebar/board_editable_item.vue';
 import MultiSelectDropdown from '~/vue_shared/components/sidebar/multiselect_dropdown.vue';
-import getIssueParticipants from '~/vue_shared/components/sidebar/queries/getIssueParticipants.query.graphql';
-import searchUsers from '~/boards/graphql/users_search.query.graphql';
+import searchUsers from '~/graphql_shared/queries/users_search.query.graphql';
 
 export default {
   noSearchDelay: 0,
@@ -36,6 +35,21 @@ export default {
     GlSearchBoxByType,
     GlLoadingIcon,
   },
+  props: {
+    assignees: {
+      type: Array,
+      required: false,
+      default: () => [],
+    },
+    assigneesQuery: {
+      type: Object,
+      required: true,
+    },
+    issuableId: {
+      type: String,
+      required: true,
+    },
+  },
   data() {
     return {
       search: '',
@@ -46,12 +60,12 @@ export default {
   apollo: {
     participants: {
       query() {
-        return this.isSearchEmpty ? getIssueParticipants : searchUsers;
+        return this.isSearchEmpty ? this.assigneesQuery : searchUsers;
       },
       variables() {
         if (this.isSearchEmpty) {
           return {
-            id: `gid://gitlab/Issue/${this.activeIssue.iid}`,
+            id: this.issuableId,
           };
         }
 
