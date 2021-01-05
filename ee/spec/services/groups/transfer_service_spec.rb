@@ -40,6 +40,26 @@ RSpec.describe Groups::TransferService, '#execute' do
     end
   end
 
+  context 'when moving from a non-indexed namespace to an indexed namespace' do
+    before do
+      stub_ee_application_setting(elasticsearch_indexing: true, elasticsearch_limit_indexing: true)
+
+      create(:elasticsearch_indexed_namespace, namespace: new_group)
+    end
+
+    it 'indexes the project after transfer', :elastic do
+      project = create(:project, :repository, :public, namespace: group)
+
+      expect(Elastic::ProcessBookkeepingService).to receive(:track!).with(project)
+      expect(ElasticAssociationIndexerWorker).to receive(:perform_async).with('Project', project.id, ['issues'])
+
+      transfer_service.execute(new_group)
+
+      expect(transfer_service.error).not_to be
+      expect(group.parent).to eq(new_group)
+    end
+  end
+
   context 'with epics' do
     context 'when epics feature is disabled' do
       it 'transfers a group successfully' do
