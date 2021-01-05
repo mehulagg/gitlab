@@ -216,17 +216,11 @@ export default {
           listId,
         },
       })
-      .then(
-        ({
-          data: {
-            destroyBoardList: { errors },
-          },
-        }) => {
-          if (errors.length > 0) {
-            commit(types.REMOVE_LIST_FAILURE, listsBackup);
-          }
-        },
-      )
+      .then(({ data: { destroyBoardList: { errors } } }) => {
+        if (errors.length > 0) {
+          commit(types.REMOVE_LIST_FAILURE, listsBackup);
+        }
+      })
       .catch(() => {
         commit(types.REMOVE_LIST_FAILURE, listsBackup);
       });
@@ -308,34 +302,11 @@ export default {
   },
 
   setAssignees: ({ commit, getters }, assigneeUsernames) => {
-    commit(types.SET_ASSIGNEE_LOADING, true);
-
-    return gqlClient
-      .mutate({
-        mutation: updateAssigneesMutation,
-        variables: {
-          iid: getters.activeIssue.iid,
-          projectPath: getters.activeIssue.referencePath.split('#')[0],
-          assigneeUsernames,
-        },
-      })
-      .then(({ data }) => {
-        const { nodes } = data.issueSetAssignees?.issue?.assignees || [];
-
-        commit('UPDATE_ISSUE_BY_ID', {
-          issueId: getters.activeIssue.id,
-          prop: 'assignees',
-          value: nodes,
-        });
-
-        return nodes;
-      })
-      .catch(() => {
-        createFlash({ message: __('An error occurred while updating assignees.') });
-      })
-      .finally(() => {
-        commit(types.SET_ASSIGNEE_LOADING, false);
-      });
+    commit('UPDATE_ISSUE_BY_ID', {
+      issueId: getters.activeIssue.id,
+      prop: 'assignees',
+      value: assigneeUsernames,
+    });
   },
 
   setActiveIssueMilestone: async ({ commit, getters }, input) => {

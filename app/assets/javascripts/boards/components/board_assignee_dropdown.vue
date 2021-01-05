@@ -1,5 +1,4 @@
 <script>
-import { mapActions, mapState } from 'vuex';
 import { cloneDeep } from 'lodash';
 import {
   GlDropdownItem,
@@ -9,6 +8,7 @@ import {
   GlSearchBoxByType,
   GlLoadingIcon,
 } from '@gitlab/ui';
+import createFlash from '~/flash';
 import { __, n__ } from '~/locale';
 import IssuableAssignees from '~/sidebar/components/assignees/issuable_assignees.vue';
 import BoardEditableItem from '~/boards/components/sidebar/board_editable_item.vue';
@@ -48,12 +48,21 @@ export default {
       type: String,
       required: true,
     },
+    updateAssigneesMutation: {
+      type: Object,
+      required: true,
+    },
+    updateAssigneesVariables: {
+      type: Object,
+      required: true,
+    },
   },
   data() {
     return {
       search: '',
       participants: [],
       selected: cloneDeep(this.assignees),
+      isSettingAssignees: false,
     };
   },
   apollo: {
@@ -87,7 +96,6 @@ export default {
     },
   },
   computed: {
-    ...mapState(['isSettingAssignees']),
     assigneeText() {
       return n__('Assignee', '%d Assignees', this.selected.length);
     },
@@ -110,9 +118,31 @@ export default {
     },
   },
   methods: {
-    ...mapActions(['setAssignees']),
+    updateAssignees(assigneeUsernames) {
+      this.isSettingAssignees = true;
+      return this.$apollo
+        .mutate({
+          mutation: this.updateAssigneesMutation,
+          variables: {
+            ...this.updateAssigneesVariables,
+            assigneeUsernames,
+          },
+        })
+        .then(({ data }) => {
+          this.$emit('assigneesUpdated', data);
+          // this is necessary if we want to use a result of updateAssignees method
+          // outside the widget's parent app
+          return data;
+        })
+        .catch(() => {
+          createFlash({ message: __('An error occurred while updating assignees.') });
+        })
+        .finally(() => {
+          this.isSettingAssignees = false;
+        });
+    },
     async assignSelf() {
-      const [currentUserObject] = await this.setAssignees(this.currentUser);
+      const [currentUserObject] = await this.updateAssignees(this.currentUser);
 
       this.selectAssignee(currentUserObject);
     },
@@ -131,7 +161,7 @@ export default {
       this.selected = this.selected.filter((user) => user.username !== name);
     },
     saveAssignees() {
-      this.setAssignees(this.selectedUserNames);
+      this.updateAssignees(this.selectedUserNames);
     },
     isChecked(id) {
       return this.selectedUserNames.includes(id);

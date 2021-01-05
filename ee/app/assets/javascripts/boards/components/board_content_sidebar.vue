@@ -7,6 +7,7 @@ import IssuableTitle from '~/boards/components/issuable_title.vue';
 import { convertToGraphQLId } from '~/graphql_shared/utils';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import getIssueParticipants from '~/vue_shared/components/sidebar/queries/getIssueParticipants.query.graphql';
+import updateAssigneesMutation from '~/vue_shared/components/sidebar/queries/updateAssignees.mutation.graphql';
 import BoardSidebarEpicSelect from './sidebar/board_sidebar_epic_select.vue';
 import BoardAssigneeDropdown from '~/boards/components/board_assignee_dropdown.vue';
 import BoardSidebarTimeTracker from './sidebar/board_sidebar_time_tracker.vue';
@@ -20,6 +21,7 @@ import BoardSidebarMilestoneSelect from '~/boards/components/sidebar/board_sideb
 export default {
   headerHeight: `${contentTop()}px`,
   getIssueParticipants,
+  updateAssigneesMutation,
   components: {
     GlDrawer,
     BoardSidebarIssueTitle,
@@ -43,9 +45,19 @@ export default {
       /* eslint-disable-next-line @gitlab/require-i18n-strings */
       return convertToGraphQLId('Issue', this.activeIssue.iid);
     },
+    updateAssigneesVariables() {
+      return {
+        iid: this.activeIssue.iid,
+        projectPath: this.activeIssue.referencePath.split('#')[0],
+      };
+    },
   },
   methods: {
-    ...mapActions(['unsetActiveId']),
+    ...mapActions(['unsetActiveId', 'setAssignees']),
+    updateAssignees(data) {
+      const { nodes } = data.issueSetAssignees?.issue?.assignees || [];
+      this.setAssignees(nodes);
+    },
   },
 };
 </script>
@@ -62,8 +74,11 @@ export default {
     <template>
       <board-assignee-dropdown
         :assignees-query="$options.getIssueParticipants"
+        :update-assignees-mutation="$options.updateAssigneesMutation"
+        :update-assignees-variables="updateAssigneesVariables"
         :issuable-id="activeIssueId"
         :assignees="activeIssue.assignees"
+        @assigneesUpdated="updateAssignees"
       />
       <board-sidebar-epic-select />
       <board-sidebar-milestone-select />
