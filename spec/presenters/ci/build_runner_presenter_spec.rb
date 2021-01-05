@@ -189,7 +189,7 @@ RSpec.describe Ci::BuildRunnerPresenter do
 
     it 'returns the correct refspecs' do
       is_expected.to contain_exactly("+refs/heads/#{build.ref}:refs/remotes/origin/#{build.ref}",
-                                     "+refs/pipelines/#{pipeline.id}:refs/pipelines/#{pipeline.id}")
+                                     "+#{pipeline.sha}:refs/pipelines/#{pipeline.id}")
     end
 
     context 'when ref is tag' do
@@ -197,7 +197,7 @@ RSpec.describe Ci::BuildRunnerPresenter do
 
       it 'returns the correct refspecs' do
         is_expected.to contain_exactly("+refs/tags/#{build.ref}:refs/tags/#{build.ref}",
-                                       "+refs/pipelines/#{pipeline.id}:refs/pipelines/#{pipeline.id}")
+                                       "+#{pipeline.sha}:refs/pipelines/#{pipeline.id}")
       end
 
       context 'when GIT_DEPTH is zero' do
@@ -208,7 +208,7 @@ RSpec.describe Ci::BuildRunnerPresenter do
         it 'returns the correct refspecs' do
           is_expected.to contain_exactly('+refs/tags/*:refs/tags/*',
                                          '+refs/heads/*:refs/remotes/origin/*',
-                                         "+refs/pipelines/#{pipeline.id}:refs/pipelines/#{pipeline.id}")
+                                         "+#{pipeline.sha}:refs/pipelines/#{pipeline.id}")
         end
       end
     end
@@ -224,7 +224,7 @@ RSpec.describe Ci::BuildRunnerPresenter do
 
       it 'returns the correct refspecs' do
         is_expected
-          .to contain_exactly("+refs/pipelines/#{pipeline.id}:refs/pipelines/#{pipeline.id}")
+          .to contain_exactly("+#{pipeline.sha}:refs/pipelines/#{pipeline.id}")
       end
 
       context 'when GIT_DEPTH is zero' do
@@ -234,7 +234,7 @@ RSpec.describe Ci::BuildRunnerPresenter do
 
         it 'returns the correct refspecs' do
           is_expected
-            .to contain_exactly("+refs/pipelines/#{pipeline.id}:refs/pipelines/#{pipeline.id}",
+            .to contain_exactly("+#{pipeline.sha}:refs/pipelines/#{pipeline.id}",
                                 '+refs/heads/*:refs/remotes/origin/*',
                                 '+refs/tags/*:refs/tags/*')
         end
@@ -244,7 +244,7 @@ RSpec.describe Ci::BuildRunnerPresenter do
         let(:merge_request) { create(:merge_request, :with_legacy_detached_merge_request_pipeline) }
 
         it 'returns the correct refspecs' do
-          is_expected.to contain_exactly("+refs/pipelines/#{pipeline.id}:refs/pipelines/#{pipeline.id}",
+          is_expected.to contain_exactly("+#{pipeline.sha}:refs/pipelines/#{pipeline.id}",
                                           "+refs/heads/#{build.ref}:refs/remotes/origin/#{build.ref}")
         end
       end
@@ -262,7 +262,7 @@ RSpec.describe Ci::BuildRunnerPresenter do
 
       it 'exposes the persistent pipeline ref' do
         is_expected
-          .to contain_exactly("+refs/pipelines/#{pipeline.id}:refs/pipelines/#{pipeline.id}",
+          .to contain_exactly("+#{pipeline.sha}:refs/pipelines/#{pipeline.id}",
                               "+refs/heads/#{build.ref}:refs/remotes/origin/#{build.ref}")
       end
     end
