@@ -29,9 +29,7 @@ RSpec.configure do |config|
 
   config.after do
     # If a .netrc file was created during the test, delete it so that subsequent tests don't try to use the same logins
-    QA::Git::Repository.perform do |repository|
-      repository.delete_netrc
-    end
+    QA::Git::Repository.new.delete_netrc
   end
 
   config.after(:context) do
