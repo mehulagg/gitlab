@@ -79,6 +79,14 @@ export default class IssuableBulkUpdateSidebar {
         })
         .catch(() => {});
     }
+
+    if (IS_EE) {
+      import('ee/vue_shared/components/sidebar/iterations_dropdown_bundle')
+        .then(({ default: IterationsDropdown }) => {
+          IterationsDropdown();
+        })
+        .catch(() => {});
+    }
   }
 
   setupBulkUpdateActions() {
