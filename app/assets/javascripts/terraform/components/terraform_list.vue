@@ -32,10 +32,6 @@ export default {
     StatesTable,
   },
   props: {
-    emptyStateImage: {
-      required: true,
-      type: String,
-    },
     projectPath: {
       required: true,
       type: String,
@@ -116,7 +112,7 @@ export default {
             </div>
           </div>
 
-          <empty-state v-else :image="emptyStateImage" />
+          <empty-state v-else />
         </div>
 
         <gl-alert v-else variant="danger" :dismissible="false">

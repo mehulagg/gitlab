@@ -1,3 +1,3 @@
 export default (initialState = {}) => ({
-  ...initialState,
+  emptyStateImage: initialState.emptyStateImage,
 });

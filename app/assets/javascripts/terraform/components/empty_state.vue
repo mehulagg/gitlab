@@ -1,5 +1,6 @@
 <script>
 import { GlEmptyState, GlIcon, GlLink, GlSprintf } from '@gitlab/ui';
+import { mapState } from 'vuex';
 
 export default {
   components: {
@@ -8,17 +9,14 @@ export default {
     GlLink,
     GlSprintf,
   },
-  props: {
-    image: {
-      type: String,
-      required: true,
-    },
+  computed: {
+    ...mapState(['emptyStateImage']),
   },
 };
 </script>
 
 <template>
-  <gl-empty-state :svg-path="image" :title="s__('Terraform|Get started with Terraform')">
+  <gl-empty-state :svg-path="emptyStateImage" :title="s__('Terraform|Get started with Terraform')">
     <template #description>
       <p>
         <gl-sprintf

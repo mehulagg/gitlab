@@ -17,7 +17,7 @@ export default () => {
 
   const defaultClient = createDefaultClient();
 
-  const { emptyStateImage, projectPath } = el.dataset;
+  const { projectPath } = el.dataset;
 
   return new Vue({
     el,
@@ -26,7 +26,6 @@ export default () => {
     render(createElement) {
       return createElement(TerraformList, {
         props: {
-          emptyStateImage,
           projectPath,
           terraformAdmin: el.hasAttribute('data-terraform-admin'),
         },
