@@ -24,7 +24,7 @@ module Elastic
           break false
         end
 
-        unless helper.index_exists?(index_name: helper.migrations_index_name)
+        unless helper.migrations_index_exists?
           logger.info 'MigrationWorker: creating migrations index'
           helper.create_migrations_index
         end

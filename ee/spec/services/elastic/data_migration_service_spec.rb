@@ -70,7 +70,7 @@ RSpec.describe Elastic::DataMigrationService, :elastic do
     before do
       # Clear out the migrations index since it is setup initially with
       # everything finished migrating
-      es_helper.delete_index(index_name: es_helper.migrations_index_name)
+      es_helper.delete_migrations_index
       es_helper.create_migrations_index
     end
 

@@ -55,13 +55,21 @@ RSpec.describe Gitlab::Elastic::Helper do
 
   describe '#create_migrations_index' do
     after do
-      helper.delete_index(index_name: helper.migrations_index_name)
+      helper.delete_migrations_index
     end
 
     it 'creates the index' do
       expect { helper.create_migrations_index }
-             .to change { helper.index_exists?(index_name: helper.migrations_index_name) }
+             .to change { helper.migrations_index_exists? }
              .from(false).to(true)
+    end
+  end
+
+  describe '#delete_migrations_index' do
+    it 'deletes the migrations index' do
+      expect { helper.delete_migrations_index }
+             .to change { helper.migrations_index_exists? }
+             .from(true).to(false)
     end
   end
 
@@ -149,6 +157,26 @@ RSpec.describe Gitlab::Elastic::Helper do
 
     context 'when there is an alias' do
       include_context 'with an existing index and alias'
+
+      it { is_expected.to be_truthy }
+    end
+  end
+
+  describe '#migrations_index_exists?' do
+    subject { helper.migrations_index_exists? }
+
+    context 'without an existing migrations index' do
+      before do
+        helper.delete_migrations_index
+      end
+
+      it { is_expected.to be_falsy }
+    end
+
+    context 'when it exists' do
+      before do
+        helper.create_migrations_index
+      end
 
       it { is_expected.to be_truthy }
     end

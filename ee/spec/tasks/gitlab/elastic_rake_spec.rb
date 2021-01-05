@@ -12,7 +12,7 @@ RSpec.describe 'gitlab:elastic namespace rake tasks', :elastic do
 
     before do
       es_helper.delete_index
-      es_helper.delete_index(index_name: es_helper.migrations_index_name)
+      es_helper.delete_migrations_index
     end
 
     it 'creates an index' do
@@ -36,6 +36,17 @@ RSpec.describe 'gitlab:elastic namespace rake tasks', :elastic do
 
     it 'removes the index' do
       expect { subject }.to change { es_helper.index_exists? }.from(true).to(false)
+    end
+
+    it 'removes the migrations index' do
+      expect { subject }.to change { es_helper.migrations_index_exists? }.from(true).to(false)
+    end
+
+    context 'when the index does not exist' do
+      it 'does not error' do
+        run_rake_task('gitlab:elastic:delete_index')
+        run_rake_task('gitlab:elastic:delete_index')
+      end
     end
   end
 

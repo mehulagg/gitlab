@@ -9,7 +9,7 @@ RSpec.describe Elastic::Migration, :elastic do
       def migrate
         log "number_of_nodes: #{client.cluster.health['number_of_nodes']}"
 
-        raise 'Index does not exist' unless helper.index_exists?(index_name: helper.migrations_index_name)
+        raise 'Index does not exist' unless helper.migrations_index_exists?
       end
     end
   end

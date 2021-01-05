@@ -68,7 +68,7 @@ namespace :gitlab do
       helper = Gitlab::Elastic::Helper.new(target_name: args[:target_name])
       index_name = helper.create_empty_index(with_alias: with_alias, options: options)
 
-      helper.create_migrations_index unless helper.index_exists?(index_name: helper.migrations_index_name)
+      helper.create_migrations_index unless helper.migrations_index_exists?
       ::Elastic::DataMigrationService.mark_all_as_completed!
 
       puts "Index '#{index_name}' has been created.".color(:green)
@@ -83,6 +83,12 @@ namespace :gitlab do
         puts "Index/alias '#{helper.target_name}' has been deleted".color(:green)
       else
         puts "Index/alias '#{helper.target_name}' was not found".color(:green)
+      end
+
+      if helper.delete_migrations_index
+        puts "Index/alias '#{helper.migrations_index_name}' has been deleted".color(:green)
+      else
+        puts "Index/alias '#{helper.migrations_index_name}' was not found".color(:green)
       end
     end
 
