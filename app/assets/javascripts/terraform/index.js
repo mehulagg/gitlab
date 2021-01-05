@@ -17,8 +17,6 @@ export default () => {
 
   const defaultClient = createDefaultClient();
 
-  const { projectPath } = el.dataset;
-
   return new Vue({
     el,
     apolloProvider: new VueApollo({ defaultClient }),
@@ -26,7 +24,6 @@ export default () => {
     render(createElement) {
       return createElement(TerraformList, {
         props: {
-          projectPath,
           terraformAdmin: el.hasAttribute('data-terraform-admin'),
         },
       });

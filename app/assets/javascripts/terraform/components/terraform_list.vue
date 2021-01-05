@@ -1,5 +1,6 @@
 <script>
 import { GlAlert, GlBadge, GlKeysetPagination, GlLoadingIcon, GlTab, GlTabs } from '@gitlab/ui';
+import { mapState } from 'vuex';
 import getStatesQuery from '../graphql/queries/get_states.query.graphql';
 import EmptyState from './empty_state.vue';
 import StatesTable from './states_table.vue';
@@ -32,10 +33,6 @@ export default {
     StatesTable,
   },
   props: {
-    projectPath: {
-      required: true,
-      type: String,
-    },
     terraformAdmin: {
       required: false,
       type: Boolean,
@@ -53,6 +50,7 @@ export default {
     };
   },
   computed: {
+    ...mapState(['projectPath']),
     isLoading() {
       return this.$apollo.queries.states.loading;
     },
