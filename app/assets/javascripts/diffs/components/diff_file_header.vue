@@ -10,6 +10,7 @@ import {
   GlDropdown,
   GlDropdownItem,
   GlDropdownDivider,
+  GlFormCheckbox,
   GlLoadingIcon,
 } from '@gitlab/ui';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
@@ -20,6 +21,7 @@ import { diffViewerModes } from '~/ide/constants';
 import DiffStats from './diff_stats.vue';
 import { scrollToElement } from '~/lib/utils/common_utils';
 import { isCollapsed } from '../utils/diff_file';
+import { reviewable } from "../utils/file_reviews";
 import { DIFF_FILE_HEADER } from '../i18n';
 
 export default {
@@ -33,6 +35,7 @@ export default {
     GlDropdown,
     GlDropdownItem,
     GlDropdownDivider,
+    GlFormCheckbox,
     GlLoadingIcon,
   },
   directives: {
@@ -75,6 +78,10 @@ export default {
       type: Boolean,
       required: false,
       default: false,
+    },
+    reviewed: {
+      type: Boolean,
+      required: true,
     },
   },
   data() {
@@ -170,6 +177,9 @@ export default {
         (this.diffFile.edit_path || this.diffFile.ide_edit_path)
       );
     },
+    isReviewable() {
+      return reviewable( this.diffFile );
+    }
   },
   methods: {
     ...mapActions('diffs', [
@@ -177,6 +187,7 @@ export default {
       'toggleFileDiscussionWrappers',
       'toggleFullDiff',
       'toggleActiveFileByHash',
+      'reviewFile'
     ]),
     handleToggleFile() {
       this.$emit('toggleFile');
@@ -204,6 +215,9 @@ export default {
     setMoreActionsShown(val) {
       this.moreActionsShown = val;
     },
+    toggleReview(){
+      this.reviewFile({ file: this.diffFile, reviewed: !this.reviewed });
+    }
   },
 };
 </script>
@@ -289,6 +303,13 @@ export default {
       class="file-actions d-flex align-items-center gl-ml-auto gl-align-self-start"
     >
       <diff-stats :added-lines="diffFile.added_lines" :removed-lines="diffFile.removed_lines" />
+      <gl-form-checkbox
+        v-if="isReviewable"
+        :checked="reviewed"
+        @change="toggleReview"
+      >
+        {{ $options.i18n.fileReview }}
+      </gl-form-checkbox>
       <gl-button-group class="gl-pt-0!">
         <gl-button
           v-if="diffFile.external_url"

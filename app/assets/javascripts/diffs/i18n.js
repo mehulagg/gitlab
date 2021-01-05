@@ -4,6 +4,7 @@ export const GENERIC_ERROR = __('Something went wrong on our end. Please try aga
 
 export const DIFF_FILE_HEADER = {
   optionsDropdownTitle: __('Options'),
+  fileReview: __('Viewed'),
 };
 
 export const DIFF_FILE = {

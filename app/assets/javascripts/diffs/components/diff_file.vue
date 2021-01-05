@@ -273,6 +273,7 @@ export default {
       :can-current-user-fork="canCurrentUserFork"
       :diff-file="file"
       :collapsible="true"
+      :reviewed="reviewed"
       :expanded="!isCollapsed"
       :add-merge-request-buttons="true"
       :view-diffs-file-by-file="viewDiffsFileByFile"
