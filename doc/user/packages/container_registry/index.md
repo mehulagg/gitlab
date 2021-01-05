@@ -571,6 +571,23 @@ Here are examples of regex patterns you may want to use:
   (?:v.+|master|release)
   ```
 
+### Limits
+
+- These limits are gated behind a feature flag.
+- For self-managed GitLab instances, the feature flag must be enabled to see those limits in the settings UI.
+- In order to use these limits, the GitLab Container Registry must be used.
+
+Cleanup policies are mainly a background process. This process is quite complex and depending on the amount of tags to delete in the Container Registry,
+it could take quite some time.
+
+In order to prevent server resources starvation, the following application settings are available:
+
+- `container_registry_expiration_policies_worker_capacity`. The maximum number of cleanup workers running concurrently. This must be greater than `1`.
+   We recommend starting with a low number and increasing it after monitoring the background workers resources.
+- `container_registry_delete_tags_service_timeout`. The maximum time in seconds that the delete tags service can take to delete a batch of tags.
+- `container_registry_cleanup_tags_service_max_chunk_size`. When a large set of tags to delete is detected, it will truncated to this number. The cleanup will be done in multiple executions.
+   We recommend starting with a low number such as `100` and increasing it after monitoring that Container Images with a large set of tags to delete are properly partially cleaned.
+
 ### Use the cleanup policy API
 
 You can set, update, and disable the cleanup policies using the GitLab API.
