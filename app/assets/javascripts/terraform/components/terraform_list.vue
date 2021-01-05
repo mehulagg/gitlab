@@ -1,6 +1,6 @@
 <script>
 import { GlAlert, GlBadge, GlKeysetPagination, GlLoadingIcon, GlTab, GlTabs } from '@gitlab/ui';
-import { mapState } from 'vuex';
+import { mapActions, mapState } from 'vuex';
 import getStatesQuery from '../graphql/queries/get_states.query.graphql';
 import EmptyState from './empty_state.vue';
 import StatesTable from './states_table.vue';
@@ -16,8 +16,12 @@ export default {
           ...this.cursor,
         };
       },
-      update: (data) => data,
+      update(data) {
+        this.setStateList(data);
+        return data;
+      },
       error() {
+        this.setStateList({});
         this.states = null;
       },
     },
@@ -61,6 +65,7 @@ export default {
     },
   },
   methods: {
+    ...mapActions(['setStateList']),
     nextPage(item) {
       this.cursor = {
         first: MAX_LIST_COUNT,

@@ -15,12 +15,10 @@ export default () => {
     return null;
   }
 
-  const defaultClient = createDefaultClient();
-
   return new Vue({
     el,
-    apolloProvider: new VueApollo({ defaultClient }),
-    store: createStore(el.dataset),
+    apolloProvider: new VueApollo({ defaultClient: createDefaultClient() }),
+    store: new Vuex.Store(createStore(el.dataset)),
     render(createElement) {
       return createElement(TerraformList);
     },
