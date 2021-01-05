@@ -7,13 +7,13 @@ type: reference, howto
 
 # Adding Anchore Scanning to GitLab
 
-The Anchore Enterprise GitLab Scan integration enables vulnerability scanning via Anchore Enterprise in GitLab CI. This includes automatic conversion from the Anchore default vulnerability report format to GitLab’s container scanning format, for display in the GitLab Security & Compliance Vulnerability UI.
+The Anchore Enterprise GitLab Scan integration enables vulnerability scanning via Anchore Enterprise in GitLab CI. This includes automatic conversion from the Anchore default vulnerability report format to the GitLab container scanning format, for display in the GitLab Security & Compliance Vulnerability UI.
 
 ## Requirements
 
 Anchore Enterprise is deployed in your environment, with the API accessible from your GitLab CI environment.
 Credentials for your GitLab Container Registry are added to Anchore Enterprise, under the Anchore account that you intend to use with GitLab CI. See [Anchore's documentation](https://docs.anchore.com/current/docs/using/ui_usage/registries/) for more.
-For information on what registry/credentials must be added to allow Anchore Enterprise to access your GitLab Container Registry, see the [container registry documentation](https://docs.gitlab.com/ee/user/packages/container_registry/).
+For information on what registry/credentials must be added to allow Anchore Enterprise to access your GitLab Container Registry, see the [container registry documentation](../../user/packages/container_registry/index.md).
 
 ## Usage
 
@@ -40,11 +40,11 @@ containerscan:anchorescan:
       container_scanning: gl-container-scanning-report.json
 ```
 
-After a successful scan, results will be available for review and management using GitLab’s native security features. Navigate to your project’s Security & Compliance > Vulnerability Report UI to review any discovered vulnerabilities in your container image.
+After a successful scan, results will be available for review and management using the native security features in GitLab. Navigate to your project’s Security & Compliance > Vulnerability Report UI to review any discovered vulnerabilities in your container image.
 
 ### Example
 
-For this example, we’ll add two sections to the GitLab CI `.gitlab-ci.yml` file; the first runs Docker to build an image and push it to the GitLab Container Registry for the project. The second runs Anchore Enterprise vulnerability scanning on the image and converts the output to GitLab’s container scanning format.
+For this example, we’ll add two sections to the GitLab CI `.gitlab-ci.yml` file; the first runs Docker to build an image and push it to the GitLab Container Registry for the project. The second runs Anchore Enterprise vulnerability scanning on the image and converts the output to the GitLab container scanning format.
 
 Add `Dockerfile` and `.gitlab-ci.yml` To Your GitLab Project
 
