@@ -26,7 +26,7 @@ module Mutations
           response ::AlertManagement::HttpIntegrations::CreateService.new(
             project,
             current_user,
-            args.slice(:name, :active)
+            http_integration_params(args)
           ).execute
         end
 
@@ -35,7 +35,14 @@ module Mutations
         def find_object(full_path:)
           resolve_project(full_path: full_path)
         end
+
+        # overriden in EE
+        def http_integration_params(args)
+          args.slice(:name, :active)
+        end
       end
     end
   end
 end
+
+Mutations::AlertManagement::HttpIntegration::Create.prepend_if_ee('::EE::Mutations::AlertManagement::HttpIntegration::Create')
