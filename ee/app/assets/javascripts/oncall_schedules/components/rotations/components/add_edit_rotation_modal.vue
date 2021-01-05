@@ -13,6 +13,7 @@ import {
   updateStoreAfterRotationAdd,
   updateStoreAfterRotationEdit,
 } from '../../../utils/cache_updates';
+import { formNameIsValid } from '../../../utils/common_utils';
 import { format24HourTimeStringFromInt } from '~/lib/utils/datetime_utility';
 
 export const i18n = {
@@ -81,6 +82,11 @@ export default {
         },
       },
       error: '',
+      validationState: {
+        name: true,
+        participants: true,
+        startsAt: true,
+      },
     };
   },
   computed: {
@@ -100,7 +106,7 @@ export default {
       };
     },
     rotationNameIsValid() {
-      return this.form.name !== '';
+      return formNameIsValid(this.form.name);
     },
     rotationParticipantsAreValid() {
       return this.form.participants.length > 0;
@@ -230,6 +236,15 @@ export default {
     filterParticipants(query) {
       this.ptSearchTerm = query;
     },
+    validateForm(key) {
+      if (key === 'name') {
+        this.validationState.name = this.rotationNameIsValid;
+      } else if (key === 'participants') {
+        this.validationState.participants = this.rotationParticipantsAreValid;
+      } else if (key === 'startsAt.date') {
+        this.validationState.startsAt = this.rotationStartsAtIsValid;
+      }
+    },
   },
 };
 </script>
@@ -248,15 +263,14 @@ export default {
       {{ error || $options.i18n.errorMsg }}
     </gl-alert>
     <add-edit-rotation-form
-      :rotation-name-is-valid="rotationNameIsValid"
-      :rotation-participants-are-valid="rotationParticipantsAreValid"
-      :rotation-starts-at-is-valid="rotationStartsAtIsValid"
+      :validation-state="validationState"
       :form="form"
       :schedule="schedule"
       :participants="participants"
       :is-loading="isLoading"
       @update-rotation-form="updateRotationForm"
       @filter-participants="filterParticipants"
+      @validate-form="validateForm"
     />
   </gl-modal>
 </template>

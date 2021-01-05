@@ -7,6 +7,7 @@ import createOncallScheduleMutation from '../graphql/mutations/create_oncall_sch
 import updateOncallScheduleMutation from '../graphql/mutations/update_oncall_schedule.mutation.graphql';
 import AddEditScheduleForm from './add_edit_schedule_form.vue';
 import { updateStoreOnScheduleCreate, updateStoreAfterScheduleEdit } from '../utils/cache_updates';
+import { formNameIsValid } from '../utils/common_utils';
 
 export const i18n = {
   cancel: __('Cancel'),
@@ -48,7 +49,11 @@ export default {
         description: this.schedule?.description,
         timezone: this.timezones.find(({ identifier }) => this.schedule?.timezone === identifier),
       },
-      error: null,
+      error: '',
+      validationState: {
+        name: true,
+        timezone: true,
+      },
     };
   },
   computed: {
@@ -68,7 +73,7 @@ export default {
       };
     },
     isNameInvalid() {
-      return !this.form.name?.length;
+      return !formNameIsValid(this.form.name);
     },
     isTimezoneInvalid() {
       return isEmpty(this.form.timezone);
@@ -169,10 +174,17 @@ export default {
         });
     },
     hideErrorAlert() {
-      this.error = null;
+      this.error = '';
     },
     updateScheduleForm({ type, value }) {
       this.form[type] = value;
+    },
+    validateForm(key) {
+      if (key === 'name') {
+        this.validationState.name = !this.isNameInvalid;
+      } else if (key === 'timezone') {
+        this.validationState.timezone = !this.isTimezoneInvalid;
+      }
     },
   },
 };
@@ -192,11 +204,11 @@ export default {
       {{ errorMsg }}
     </gl-alert>
     <add-edit-schedule-form
-      :is-name-invalid="isNameInvalid"
-      :is-timezone-invalid="isTimezoneInvalid"
+      :validation-state="validationState"
       :form="form"
       :schedule="schedule"
       @update-schedule-form="updateScheduleForm"
+      @validate-form="validateForm"
     />
   </gl-modal>
 </template>

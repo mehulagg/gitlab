@@ -16,6 +16,7 @@ exports[`AddEditRotationModal renders rotation modal layout 1`] = `
     form="[object Object]"
     participants=""
     schedule="[object Object]"
+    validationstate="[object Object]"
   />
 </gl-modal-stub>
 `;

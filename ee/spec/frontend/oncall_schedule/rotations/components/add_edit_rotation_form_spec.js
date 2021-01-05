@@ -1,6 +1,6 @@
 import { shallowMount } from '@vue/test-utils';
 import waitForPromises from 'helpers/wait_for_promises';
-import { GlDropdownItem, GlTokenSelector } from '@gitlab/ui';
+import { GlDropdownItem, GlTokenSelector, GlFormGroup } from '@gitlab/ui';
 import AddEditRotationForm from 'ee/oncall_schedules/components/rotations/components/add_edit_rotation_form.vue';
 import { LENGTH_ENUM } from 'ee/oncall_schedules/constants';
 import { participants, getOncallSchedulesQueryResponse } from '../../mocks/apollo_mock';
@@ -23,9 +23,11 @@ describe('AddEditRotationForm', () => {
         ...props,
         schedule,
         isLoading: false,
-        rotationNameIsValid: true,
-        rotationParticipantsAreValid: true,
-        rotationStartsAtIsValid: true,
+        validationState: {
+          name: true,
+          participants: true,
+          startsAt: true,
+        },
         participants,
         form: {
           name: '',
@@ -58,6 +60,20 @@ describe('AddEditRotationForm', () => {
   const findRotationStartsOn = () => wrapper.find('[id = "rotation-time"]');
   const findUserSelector = () => wrapper.find(GlTokenSelector);
   const findDropdownOptions = () => wrapper.findAll(GlDropdownItem);
+  const findRotationFormGroups = () => wrapper.findAll(GlFormGroup);
+
+  describe('Rotation form validation', () => {
+    it('should show feedback for an invalid name, participants and start date form group', async () => {
+      createComponent({
+        props: {
+          validationState: { name: false, participants: false, startsAt: false },
+        },
+      });
+      expect(findRotationFormGroups(0).attributes('state')).toBeFalsy();
+      expect(findRotationFormGroups(1).attributes('state')).toBeFalsy();
+      expect(findRotationFormGroups(3).attributes('state')).toBeFalsy();
+    });
+  });
 
   describe('Rotation length and start time', () => {
     it('renders the rotation length value', async () => {

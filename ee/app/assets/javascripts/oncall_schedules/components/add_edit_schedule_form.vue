@@ -52,12 +52,8 @@ export default {
       type: Object,
       required: true,
     },
-    isNameInvalid: {
-      type: Boolean,
-      required: true,
-    },
-    isTimezoneInvalid: {
-      type: Boolean,
+    validationState: {
+      type: Object,
       required: true,
     },
     schedule: {
@@ -94,6 +90,10 @@ export default {
     isTimezoneSelected(tz) {
       return isEqual(tz, this.form.timezone);
     },
+    updateFormValues(type, value) {
+      this.$emit('update-schedule-form', { type, value });
+      this.$emit('validate-form', type);
+    },
   },
 };
 </script>
@@ -105,12 +105,13 @@ export default {
       :invalid-feedback="$options.i18n.fields.name.validation.empty"
       label-size="sm"
       label-for="schedule-name"
+      :state="validationState.name"
+      requried
     >
       <gl-form-input
         id="schedule-name"
         :value="form.name"
-        :state="!isNameInvalid"
-        @input="$emit('update-schedule-form', { type: 'name', value: $event })"
+        @blur="updateFormValues('name', $event.target.value)"
       />
     </gl-form-group>
 
@@ -122,7 +123,7 @@ export default {
       <gl-form-input
         id="schedule-description"
         :value="form.description"
-        @input="$emit('update-schedule-form', { type: 'description', value: $event })"
+        @blur="updateFormValues('description', $event.target.value)"
       />
     </gl-form-group>
 
@@ -131,15 +132,17 @@ export default {
       label-size="sm"
       label-for="schedule-timezone"
       :description="$options.i18n.fields.timezone.description"
-      :state="!isTimezoneInvalid"
+      :state="validationState.timezone"
       :invalid-feedback="$options.i18n.fields.timezone.validation.empty"
+      requried
     >
       <gl-dropdown
         id="schedule-timezone"
         :text="selectedTimezone"
         class="timezone-dropdown gl-w-full"
         :header-text="$options.i18n.selectTimezone"
-        :class="{ 'invalid-dropdown': isTimezoneInvalid }"
+        :class="{ 'invalid-dropdown': !validationState.timezone }"
+        @hide="$emit('validate-form', 'timezone')"
       >
         <gl-search-box-by-type v-model.trim="tzSearchTerm" />
         <gl-dropdown-item
