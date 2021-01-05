@@ -1,5 +1,6 @@
 import { pickBy } from 'lodash';
 import { SUPPORTED_FILTER_PARAMETERS } from './constants';
+import { createNodeDict } from './components/parsing_utils';
 
 export const validateParams = (params) => {
   return pickBy(params, (val, key) => SUPPORTED_FILTER_PARAMETERS.includes(key) && val);
@@ -15,19 +16,10 @@ export const createUniqueLinkId = (stageName, jobName) => `${stageName}-${jobNam
  * @returns {Object} - Hash of jobs
  */
 export const createJobsHash = (stages = []) => {
-  const jobsHash = {};
 
-  stages.forEach((stage) => {
-    if (stage.groups.length > 0) {
-      stage.groups.forEach((group) => {
-        group.jobs.forEach((job) => {
-          jobsHash[job.name] = job;
-        });
-      });
-    }
-  });
+  const nodes = stages.flatMap(({ groups }) => groups);
+  return createNodeDict(nodes);
 
-  return jobsHash;
 };
 
 /**
