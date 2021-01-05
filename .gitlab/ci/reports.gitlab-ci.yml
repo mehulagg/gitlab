@@ -123,11 +123,6 @@ gemnasium-maven-dependency_scanning:
   image:
     name: "$SECURE_ANALYZERS_PREFIX/gemnasium-maven:$DS_MAJOR_VERSION"
 
-gemnasium-python-dependency_scanning:
-  extends: .dependency_scanning
-  image:
-    name: "$SECURE_ANALYZERS_PREFIX/gemnasium-python:$DS_MAJOR_VERSION"
-
 bundler-audit-dependency_scanning:
   extends: .dependency_scanning
   image:
