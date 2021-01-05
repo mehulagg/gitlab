@@ -12886,7 +12886,7 @@ input LabelCreateInput {
   (e.g. #FFAABB) or one of the CSS color names in
   https://developer.mozilla.org/en-US/docs/Web/CSS/color_value#Color_keywords
   """
-  color: String = "#428BCA"
+  color: String = "#6699cc"
 
   """
   Description of the label
