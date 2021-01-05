@@ -13,8 +13,6 @@ module EE
     prepended do
       include ::Gitlab::Geo::ReplicableModel
 
-      include ::Gitlab::Geo::VerificationState
-
       after_destroy :log_geo_deleted_event
 
       with_replicator Geo::LfsObjectReplicator
