@@ -45,7 +45,6 @@ describe('AddEditRotationForm', () => {
       provide: {
         projectPath,
       },
-      stubs: { GlFormGroup },
     });
   };
 
