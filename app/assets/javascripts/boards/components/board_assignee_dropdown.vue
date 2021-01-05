@@ -1,5 +1,5 @@
 <script>
-import { mapActions, mapGetters, mapState } from 'vuex';
+import { mapActions, mapState } from 'vuex';
 import { cloneDeep } from 'lodash';
 import {
   GlDropdownItem,
@@ -38,8 +38,7 @@ export default {
   props: {
     assignees: {
       type: Array,
-      required: false,
-      default: () => [],
+      required: true,
     },
     assigneesQuery: {
       type: Object,
@@ -54,7 +53,7 @@ export default {
     return {
       search: '',
       participants: [],
-      selected: [],
+      selected: cloneDeep(this.assignees),
     };
   },
   apollo: {
@@ -88,7 +87,6 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['activeIssue']),
     ...mapState(['isSettingAssignees']),
     assigneeText() {
       return n__('Assignee', '%d Assignees', this.selected.length);
@@ -110,9 +108,6 @@ export default {
     currentUser() {
       return gon?.current_username;
     },
-  },
-  created() {
-    this.selected = cloneDeep(this.activeIssue.assignees);
   },
   methods: {
     ...mapActions(['setAssignees']),
@@ -148,7 +143,7 @@ export default {
 <template>
   <board-editable-item :loading="isSettingAssignees" :title="assigneeText" @close="saveAssignees">
     <template #collapsed>
-      <issuable-assignees :users="activeIssue.assignees" @assign-self="assignSelf" />
+      <issuable-assignees :users="assignees" @assign-self="assignSelf" />
     </template>
 
     <template #default>

@@ -63,6 +63,7 @@ export default {
       <board-assignee-dropdown
         :assignees-query="$options.getIssueParticipants"
         :issuable-id="activeIssueId"
+        :assignees="activeIssue.assignees"
       />
       <board-sidebar-epic-select />
       <board-sidebar-milestone-select />
