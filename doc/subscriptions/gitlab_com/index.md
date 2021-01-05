@@ -111,7 +111,7 @@ to the **Billing** section of the relevant namespace:
   | **Seats in subscription**   | If this is a paid plan, represents the number of seats you've bought for this group. |
   | **Seats currently in use**  | Number of seats in use. Select **See usage** to see a list of the users using these seats. For more details, see [Seat usage](#seat-usage). |
   | **Max seats used**          | Highest number of seats you've used. |
-  | **Seats owed**              | _Seats owed_ = _Max seats used_ - _Seats in subscription_. If _Seats owed_ is greater than zero, you owe a fee for the difference. |
+  | **Seats owed**              | _Seats owed_ = _Max seats used_ - _Seats in subscription_. If _Seats owed_ is greater than zero, you owe a fee for the difference at the next renewal. |
   | **Subscription start date** | Date your subscription started. If this is for a Free plan, it's the date you transitioned off your group's paid plan. |
   | **Subscription end date**   | Date your current subscription ends. Does not apply to Free plans. |
 
