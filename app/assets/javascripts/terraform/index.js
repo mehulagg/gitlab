@@ -22,11 +22,7 @@ export default () => {
     apolloProvider: new VueApollo({ defaultClient }),
     store: createStore(el.dataset),
     render(createElement) {
-      return createElement(TerraformList, {
-        props: {
-          terraformAdmin: el.hasAttribute('data-terraform-admin'),
-        },
-      });
+      return createElement(TerraformList);
     },
   });
 };

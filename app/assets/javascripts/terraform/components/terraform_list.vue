@@ -32,13 +32,6 @@ export default {
     GlTabs,
     StatesTable,
   },
-  props: {
-    terraformAdmin: {
-      required: false,
-      type: Boolean,
-      default: false,
-    },
-  },
   data() {
     return {
       cursor: {
@@ -103,7 +96,7 @@ export default {
 
         <div v-else-if="statesList">
           <div v-if="statesCount">
-            <states-table :states="statesList" :terraform-admin="terraformAdmin" />
+            <states-table :states="statesList" />
 
             <div v-if="showPagination" class="gl-display-flex gl-justify-content-center gl-mt-5">
               <gl-keyset-pagination v-bind="pageInfo" @prev="prevPage" @next="nextPage" />

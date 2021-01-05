@@ -1,5 +1,6 @@
 <script>
 import { GlBadge, GlIcon, GlLink, GlSprintf, GlTable, GlTooltip } from '@gitlab/ui';
+import { mapState } from 'vuex';
 import { s__ } from '~/locale';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import CiBadge from '~/vue_shared/components/ci_badge_link.vue';
@@ -25,13 +26,9 @@ export default {
       required: true,
       type: Array,
     },
-    terraformAdmin: {
-      required: false,
-      type: Boolean,
-      default: false,
-    },
   },
   computed: {
+    ...mapState(['terraformAdmin']),
     fields() {
       const columns = [
         {
