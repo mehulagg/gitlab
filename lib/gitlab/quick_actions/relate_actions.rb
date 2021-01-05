@@ -17,8 +17,7 @@ module Gitlab
         params '#issue'
         types Issue
         condition do
-          quick_action_target.persisted? &&
-            current_user.can?(:"update_#{quick_action_target.to_ability_name}", quick_action_target)
+          current_user.can?(:"update_#{quick_action_target.to_ability_name}", quick_action_target)
         end
         command :relate do |related_param|
           IssueLinks::CreateService.new(quick_action_target, current_user, { issuable_references: [related_param] }).execute
