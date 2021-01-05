@@ -1120,13 +1120,6 @@ RSpec.describe Project, factory_default: :keep do
 
       is_expected.to eq(nil)
     end
-
-    it 'sets Project#has_external_wiki when it is nil' do
-      create(:service, project: project, type: 'ExternalWikiService', active: true)
-      project.update_column(:has_external_wiki, nil)
-
-      expect { subject }.to change { project.has_external_wiki }.from(nil).to(true)
-    end
   end
 
   describe '#has_external_wiki' do
