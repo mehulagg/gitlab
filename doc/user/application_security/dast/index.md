@@ -818,22 +818,23 @@ If a validated site profile's target URL is edited, the site is no longer valida
 
 #### Validated site profile headers
 
-Here are some examples of adding the `Gitlab-DAST-Permission` header to a response
-in Rails, Django, and Node (with Express).
+The following are code samples of how you could provide the required site profile header in your
+application.
 
-##### Ruby on Rails
+##### Ruby on Rails example for on-demand scan
+
+Here's how you would add a custom header in a Ruby on Rails application:
 
 ```ruby
 class DastWebsiteTargetController < ActionController::Base
   def dast_website_target
-    response.headers['Gitlab-DAST-Permission'] = 'allow'
-
+    response.headers['Gitlab-On-Demand-DAST'] = '0dd79c9a-7b29-4e26-a815-eaaf53fcab1c'
     head :ok
   end
 end
 ```
 
-##### Django
+##### Django example for on-demand scan
 
 Here's how you would add a
 [custom header in Django](https://docs.djangoproject.com/en/2.2/ref/request-response/#setting-header-fields):
@@ -842,19 +843,19 @@ Here's how you would add a
 class DastWebsiteTargetView(View):
     def head(self, *args, **kwargs):
       response = HttpResponse()
-      response['Gitlab-Dast-Permission'] = 'allow'
+      response['Gitlab-On-Demand-DAST'] = '0dd79c9a-7b29-4e26-a815-eaaf53fcab1c'
 
       return response
 ```
 
-##### Node (with Express)
+##### Node (with Express) example for on-demand scan
 
 Here's how you would add a
 [custom header in Node (with Express)](http://expressjs.com/en/5x/api.html#res.append):
 
 ```javascript
 app.get('/dast-website-target', function(req, res) {
-  res.append('Gitlab-DAST-Permission', 'allow')
+  res.append('Gitlab-On-Demand-DAST', '0dd79c9a-7b29-4e26-a815-eaaf53fcab1c')
   res.send('Respond to DAST ping')
 })
 ```
