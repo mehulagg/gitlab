@@ -19,7 +19,6 @@ gem 'rotp', '~> 3.1.0'
 gem 'timecop', '~> 0.9.1'
 gem 'parallel', '~> 1.19'
 gem 'rspec-parameterized', '~> 0.4.2'
-
 gem 'github_api', '~> 0.18.2'
 
 group :development do

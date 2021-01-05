@@ -4,7 +4,7 @@ require 'github_api'
 require 'faker'
 
 module QA
-  context 'Verify' do # , :github, :docker, :skip_live_env
+  context 'Verify', :github, only: { subdomain: :staging } do
     include Support::Api
 
     describe 'Pipeline for project mirrors Github' do
@@ -31,7 +31,7 @@ module QA
         remove_project
       end
 
-      it 'user commits to GitHub triggers CI pipeline' do
+      it 'user commits to GitHub triggers CI pipeline', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/144' do
         Page::Project::Pipeline::Index.perform do |index|
           expect(index).to have_no_pipeline
 
@@ -39,8 +39,10 @@ module QA
           trigger_project_mirror
           index.refresh
 
-          expect(index).to have_pipeline
-          expect(index).to have_content(commit_message)
+          aggregate_failures 'new pipeline for new github commit' do
+            expect(index).to have_pipeline
+            expect(index).to have_content(commit_message)
+          end
         end
       end
 
@@ -75,7 +77,7 @@ module QA
                              content: Faker::Lorem.sentence,
                              sha: file_sha)
 
-        sleep 5
+        sleep 5 # allow some time for github to update itself
       end
 
       def import_project_id
@@ -87,7 +89,7 @@ module QA
         request = Runtime::API::Request.new(api_client, "/projects/#{import_project_id}/mirror/pull")
         post(request.url, nil)
 
-        sleep 5
+        sleep 5 # allow some time for mirroring to finish, post request response only returns 200
       end
 
       def remove_project
