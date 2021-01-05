@@ -26897,67 +26897,67 @@ msgstr ""
 msgid "Suggested solutions help link"
 msgstr ""
 
-msgid "SuggestedColors|Bright green"
+msgid "SuggestedColors|Aztec Gold"
 msgstr ""
 
-msgid "SuggestedColors|Dark grayish cyan"
+msgid "SuggestedColors|Blue"
 msgstr ""
 
-msgid "SuggestedColors|Dark moderate blue"
+msgid "SuggestedColors|Blue-gray"
 msgstr ""
 
-msgid "SuggestedColors|Dark moderate orange"
+msgid "SuggestedColors|Carrot orange"
 msgstr ""
 
-msgid "SuggestedColors|Dark moderate pink"
+msgid "SuggestedColors|Champagne"
 msgstr ""
 
-msgid "SuggestedColors|Dark moderate violet"
+msgid "SuggestedColors|Charcoal grey"
 msgstr ""
 
-msgid "SuggestedColors|Feijoa"
+msgid "SuggestedColors|Crimson"
 msgstr ""
 
-msgid "SuggestedColors|Lime green"
+msgid "SuggestedColors|Dark coral"
 msgstr ""
 
-msgid "SuggestedColors|Moderate blue"
+msgid "SuggestedColors|Dark green"
 msgstr ""
 
-msgid "SuggestedColors|Pure red"
+msgid "SuggestedColors|Dark sea green"
 msgstr ""
 
-msgid "SuggestedColors|Slightly desaturated blue"
+msgid "SuggestedColors|Dark violet"
 msgstr ""
 
-msgid "SuggestedColors|Slightly desaturated green"
+msgid "SuggestedColors|Deep violet"
 msgstr ""
 
-msgid "SuggestedColors|Soft orange"
+msgid "SuggestedColors|Gray"
 msgstr ""
 
-msgid "SuggestedColors|Soft red"
+msgid "SuggestedColors|Green screen"
 msgstr ""
 
-msgid "SuggestedColors|Strong pink"
+msgid "SuggestedColors|Green-cyan"
 msgstr ""
 
-msgid "SuggestedColors|Strong red"
+msgid "SuggestedColors|Lavendar"
 msgstr ""
 
-msgid "SuggestedColors|Strong yellow"
+msgid "SuggestedColors|Magenta-pink"
 msgstr ""
 
-msgid "SuggestedColors|UA blue"
+msgid "SuggestedColors|Medium sea green"
 msgstr ""
 
-msgid "SuggestedColors|Very dark desaturated blue"
+msgid "SuggestedColors|Red"
 msgstr ""
 
-msgid "SuggestedColors|Very dark lime green"
+msgid "SuggestedColors|Rose red"
 msgstr ""
 
-msgid "SuggestedColors|Very pale orange"
+msgid "SuggestedColors|Titanium yellow"
 msgstr ""
 
 msgid "Suggestion is not applicable as the suggestion was not found."
