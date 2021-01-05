@@ -23,3 +23,4 @@ export const PRESET_DEFAULTS = {
 
 export const addRotationModalId = 'addRotationModal';
 export const editRotationModalId = 'editRotationModal';
+export const deleteRotationModalId = 'deleteRotationModal';
