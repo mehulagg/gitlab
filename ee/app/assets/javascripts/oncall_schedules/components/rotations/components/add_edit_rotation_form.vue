@@ -65,16 +65,8 @@ export default {
       type: Boolean,
       required: true,
     },
-    rotationNameIsValid: {
-      type: Boolean,
-      required: true,
-    },
-    rotationParticipantsAreValid: {
-      type: Boolean,
-      required: true,
-    },
-    rotationStartsAtIsValid: {
-      type: Boolean,
+    validationState: {
+      type: Object,
       required: true,
     },
     participants: {
@@ -94,6 +86,10 @@ export default {
   },
   methods: {
     format24HourTimeStringFromInt,
+    updateFormValues(type, value) {
+      this.$emit('update-rotation-form', { type, value });
+      this.$emit('validate-form', type);
+    },
   },
 };
 </script>
@@ -105,12 +101,9 @@ export default {
       label-size="sm"
       label-for="rotation-name"
       :invalid-feedback="$options.i18n.fields.name.error"
-      :state="rotationNameIsValid"
+      :state="validationState.name"
     >
-      <gl-form-input
-        id="rotation-name"
-        @input="$emit('update-rotation-form', { type: 'name', value: $event })"
-      />
+      <gl-form-input id="rotation-name" @blur="updateFormValues('name', $event.target.value)" />
     </gl-form-group>
 
     <gl-form-group
@@ -118,7 +111,7 @@ export default {
       label-size="sm"
       label-for="rotation-participants"
       :invalid-feedback="$options.i18n.fields.participants.error"
-      :state="rotationParticipantsAreValid"
+      :state="validationState.participants"
     >
       <gl-token-selector
         v-model="participantsArr"
@@ -126,7 +119,8 @@ export default {
         :loading="isLoading"
         container-class="gl-h-13! gl-overflow-y-auto"
         @text-input="$emit('filter-participants', $event)"
-        @input="$emit('update-rotation-form', { type: 'participants', value: participantsArr })"
+        @blur="updateFormValues('participants', participantsArr)"
+        @input="updateFormValues('participants', participantsArr)"
       >
         <template #token-content="{ token }">
           <gl-avatar v-if="token.avatarUrl" :src="token.avatarUrl" :size="16" />
@@ -176,11 +170,12 @@ export default {
       label-size="sm"
       label-for="rotation-time"
       :invalid-feedback="$options.i18n.fields.startsAt.error"
-      :state="rotationStartsAtIsValid"
+      :state="validationState.startsAt"
     >
       <div class="gl-display-flex gl-align-items-center">
         <gl-datepicker
           class="gl-mr-3"
+          @close="$emit('validate-form', 'startsAt.date')"
           @input="$emit('update-rotation-form', { type: 'startsAt.date', value: $event })"
         />
         <span> {{ __('at') }} </span>

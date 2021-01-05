@@ -30,3 +30,16 @@ export const getFormattedTimezone = (tz) => {
 export const assigneeScheduleDateStart = (startDate, daysToAdd) => {
   return getDateInFuture(startDate, daysToAdd);
 };
+
+/**
+ * Returns boolean based on a valid(non-empty string) form element - name
+ *
+ * @param {String} startDate
+ *
+ * @returns {Boolean}
+ */
+export const formNameIsValid = (formName) => {
+  if (!formName) return false;
+
+  return formName !== '';
+};
