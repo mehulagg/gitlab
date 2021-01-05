@@ -76,6 +76,9 @@ export default {
   mounted() {
     toggleQueryPollingByVisibility(this.$apollo.queries.pipeline);
   },
+  errorCaptured(err, _vm, info) {
+    reportToSentry('graph_component_wrapper', `error: ${err}, info: ${info}`);
+  },
   methods: {
     hideAlert() {
       this.showAlert = false;

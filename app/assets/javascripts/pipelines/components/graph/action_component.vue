@@ -4,6 +4,7 @@ import axios from '~/lib/utils/axios_utils';
 import { dasherize } from '~/lib/utils/text_utility';
 import { __ } from '~/locale';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
+import { reportToSentry } from './utils';
 
 /**
  * Renders either a cancel, retry or play icon button and handles the post request
@@ -49,6 +50,9 @@ export default {
       const actionIconDash = dasherize(this.actionIcon);
       return `${actionIconDash} js-icon-${actionIconDash}`;
     },
+  },
+  errorCaptured(err, _vm, info) {
+    reportToSentry('action_component', `error: ${err}, info: ${info}`);
   },
   methods: {
     /**
