@@ -25,7 +25,7 @@ In your GitLab project repository, ensure that the following variables are set i
 
 This allows the integration to access your Anchore Enterprise depoyment. The ANCHORE_CLI_PASS variable should have protected and masked options set to prevent exposure of the variable in job logs.
 
-In your project’s .gitlab-ci.yml, include the following snippet anywhere in your CI flow after your target container image has been built and pushed to the GitLab Container Registry that you have made accessible from your Anchore Enterprise deployment.
+In your project’s `.gitlab-ci.yml`, include the following snippet anywhere in your CI flow after your target container image has been built and pushed to the GitLab Container Registry that you have made accessible from your Anchore Enterprise deployment.
 
 ```yaml
 containerscan:anchorescan:
