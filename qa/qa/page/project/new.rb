@@ -9,7 +9,6 @@ module QA
 
         view 'app/views/projects/new.html.haml' do
           element :project_create_from_template_tab
-          element :import_project_tab, "Import project" # rubocop:disable QA/ElementWithPattern
         end
 
         view 'app/views/projects/_new_project_fields.html.haml' do
@@ -28,6 +27,10 @@ module QA
           element :template_option_row
         end
 
+        view 'app/assets/javascripts/projects/experiment_new_project_creation/components/welcome.vue' do
+          element :import_project_link
+        end
+
         def choose_test_namespace
           choose_namespace(Runtime::Namespace.path)
         end
@@ -40,7 +43,7 @@ module QA
         end
 
         def click_import_project
-          click_on 'Import project'
+          click_element :import_project_link
         end
 
         def choose_name(name)

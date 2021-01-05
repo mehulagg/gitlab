@@ -28,8 +28,8 @@ module QA
                 element :template_option_row
               end
 
-              view 'ee/app/views/projects/_new_ci_cd_only_project_tab.html.haml' do
-                element :ci_cd_project_tab
+              view 'app/assets/javascripts/projects/experiment_new_project_creation/components/welcome.vue' do
+                element :cicd_for_external_repo_link
               end
             end
           end
@@ -51,7 +51,7 @@ module QA
           end
 
           def click_ci_cd_for_external_repo
-            click_element :ci_cd_project_tab
+            click_element :cicd_for_external_repo_link
           end
         end
       end
