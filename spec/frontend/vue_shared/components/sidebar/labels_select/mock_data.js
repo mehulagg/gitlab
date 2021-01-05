@@ -34,7 +34,7 @@ export const mockSuggestedColors = {
   '#dc143c': 'Crimson',
   '#ff0000': 'Red',
   '#cd5b45': 'Dark coral',
-  '#eee600': 'Titanium yellow',  
+  '#eee600': 'Titanium yellow',
   '#ed9121': 'Carrot orange',
   '#c39953': 'Aztec Gold',
 };
