@@ -4,7 +4,7 @@ module Groups
   class TransferService < Groups::BaseService
     TransferError = Class.new(StandardError)
 
-    attr_reader :error, :new_parent_group, :group
+    attr_reader :error, :new_parent_group
 
     def initialize(group, user, params = {})
       super
