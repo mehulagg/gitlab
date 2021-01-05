@@ -14,12 +14,16 @@ Credentials for your GitLab Container Registry are added to Anchore Enterprise, 
 
 # Usage
 In your GitLab project repository, ensure that the following variables are set in Settings > CI/CD > Variables:
-ANCHORE_CLI_URL
-ANCHORE_CLI_USER
-ANCHORE_CLI_PASS
+
+- ANCHORE_CLI_URL
+- ANCHORE_CLI_USER
+- ANCHORE_CLI_PASS
+
 This allows the integration to access your Anchore Enterprise depoyment. The ANCHORE_CLI_PASS variable should have protected and masked options set to prevent exposure of the variable in job logs.
 
 In your project’s .gitlab-ci.yml, include the following snippet anywhere in your CI flow after your target container image has been built and pushed to the GitLab Container Registry that you have made accessible from your Anchore Enterprise deployment.
+
+```
 containerscan:anchorescan:
   stage: test
   image: docker.io/anchore/enterprise-gitlab-scan:v1
@@ -30,6 +34,8 @@ containerscan:anchorescan:
   artifacts:
     reports:
       container_scanning: gl-container-scanning-report.json
+```
+
 After a successful scan, results will be available for review and management using GitLab’s native security features. Navigate to your project’s Security & Compliance > Vulnerability Report UI to review any discovered vulnerabilities in your container image.
 
 # Example
@@ -38,6 +44,7 @@ For this example, we’ll add two sections to the GitLab CI .gitlab-ci.yml file;
 Add Dockerfile and .gitlab-ci.yml To Your GitLab Project
 Example Dockerfile:
 
+```
 FROM alpine:latest
 
 CMD /bin/sh
@@ -71,21 +78,22 @@ containerscan:anchorescan:
   artifacts:
     reports:
       container_scanning: gl-container-scanning-report.json
+```
 
-      Navigate To Settings > CI/CD; Expand the Variables Section
+## Navigate To Settings > CI/CD; Expand the Variables Section
 Expand Variables
 
-Set Or Edit Anchore Variables
+## Set Or Edit Anchore Variables
 Set Variables
 
-Trigger GitLab CI
+##Trigger GitLab CI
 Make a change in the repository that will trigger GitLab CI so that your pipeline runs.
 
 Then, navigate to CI/CD > Pipelines, where you can see details of your pipelines:
 
 CI/CD > Pipelines
 
-Review Scan Report
+## Review Scan Report
 Navigate to Security & Compliance > Vulnerability Report to view the scan results:
 
 Vulnerability Report
