@@ -7,8 +7,7 @@ import { createUniqueLinkId } from '../../utils';
  * we find the nodes in the graph, calculate their coordinates and
  * trace the lines that represent the needs of each job.
  * @param {Object} nodeDict - Resulting object of `parseData` with nodes and links
- * @param {Object} jobs - An object where each key is the job name that contains the job data
- * @param {ref} svg - Reference to the svg we draw in
+ * @param {String} containerID - Id for the svg the links will be draw in
  * @returns {Array} Links that contain all the information about them
  */
 
@@ -35,11 +34,11 @@ export const generateLinksData = ({ links }, containerID) => {
     // from the total to make sure it's aligned properly. We then make the line
     // positioned in the center of the job node by adding half the height
     // of the job pill.
-    const paddingLeft = Number(
-      window.getComputedStyle(containerEl, null).getPropertyValue('padding-left').replace('px', ''),
+    const paddingLeft = parseFloat(
+      window.getComputedStyle(containerEl, null).getPropertyValue('padding-left'),
     );
-    const paddingTop = Number(
-      window.getComputedStyle(containerEl, null).getPropertyValue('padding-top').replace('px', ''),
+    const paddingTop = parseFloat(
+      window.getComputedStyle(containerEl, null).getPropertyValue('padding-top'),
     );
 
     const sourceNodeX = sourceNodeCoordinates.right - containerCoordinates.x - paddingLeft;

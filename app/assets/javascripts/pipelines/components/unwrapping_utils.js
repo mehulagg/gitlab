@@ -5,7 +5,7 @@
  * @param {Array} stages
  * @returns {Array} - Array of stages with stage name at the group level as `category`
  */
-export const unwrapArrayOfJobs = (stages = []) => {
+const unwrapArrayOfJobs = (stages = []) => {
   return stages
     .map(({ name, groups }) => {
       return groups.map((group) => {
@@ -50,4 +50,10 @@ const unwrapStagesWithNeeds = (denodedStages) => {
   return nodes;
 };
 
-export { unwrapGroups, unwrapNodesWithName, unwrapJobWithNeeds, unwrapStagesWithNeeds };
+export {
+  unwrapArrayOfJobs,
+  unwrapGroups,
+  unwrapNodesWithName,
+  unwrapJobWithNeeds,
+  unwrapStagesWithNeeds
+};
