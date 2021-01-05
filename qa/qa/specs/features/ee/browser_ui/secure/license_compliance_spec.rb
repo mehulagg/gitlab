@@ -69,7 +69,7 @@ module QA
       end
     end
 
-    describe 'License Compliance pipeline reports', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/241448', type: :bug } do
+    describe 'License Compliance pipeline reports' do
       let(:executor) {"qa-runner-#{Time.now.to_i}"}
 
       after do
