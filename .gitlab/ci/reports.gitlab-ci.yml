@@ -115,6 +115,9 @@ dependency_scanning gemnasium:
   extends: .dependency_scanning
   image:
     name: "$SECURE_ANALYZERS_PREFIX/gemnasium:$DS_MAJOR_VERSION"
+  before_script:
+    # git-lfs is needed for auto-remediation
+    - apk add git-lfs
   after_script:
     # Post-processing: This will be an after_script once this job will use the Dependency Scanning CI template
     - apk add jq
