@@ -166,6 +166,9 @@ There was a [bug on modules
 checksums](https://github.com/golang/go/issues/29278) in Go < v1.11.4, so make
 sure to use at least this version to avoid `checksum mismatch` errors.
 
+Use [`go mod tidy`](https://golang.org/ref/mod#go-mod-tidy) before committing to remove unused imports in `go.mod`
+and `go.sum` files.
+
 ### ORM
 
 We don't use object-relational mapping libraries (ORMs) at GitLab (except
