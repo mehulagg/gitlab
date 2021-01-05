@@ -11068,6 +11068,16 @@ input HttpIntegrationCreateInput {
   name: String!
 
   """
+  The custom mapping of an alert attributes.
+  """
+  payloadAttributeMapping: String
+
+  """
+  The example of an alert payload.
+  """
+  payloadExample: String
+
+  """
   The project to create the integration in
   """
   projectPath: ID!
