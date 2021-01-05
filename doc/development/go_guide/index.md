@@ -487,8 +487,9 @@ We do not consider the active milestone, `12.10`, because a backport for `12.7` 
 
 The following are some style guidelines that are specific to the Secure Team.
 
-### Code style and format
+### Format
 
+#### goimports
 Use `goimports -local gitlab.com/gitlab-org` before committing.
 [goimports](https://godoc.org/golang.org/x/tools/cmd/goimports)
 is a tool that automatically formats Go source code using
@@ -500,6 +501,28 @@ packages separately from external ones. See
 of the Code Review Comments page on the Go wiki for more details.
 Most editors/IDEs allow you to run commands before/after saving a file, you can set it
 up to run `goimports -local gitlab.com/gitlab-org` so that it's applied to every file when saving.
+
+#### go mod tidy
+If the project uses Go modules, run `go mod tidy` before committing. This will clean up any unused dependencies in `go.mod` and `go.sum`.
+
+
+### Naming
+
+#### Packages
+1. Packages should be named after what the _provide_, not what they _contain_.
+1. Avoid package names like `base`, `helper`, or `util`.
+1. Avoid plurals in package names.
+1. Package names should be lowercase, avoid underscores and camelCase.
+
+#### Variables, Constants
+1. CamelCase not underscores. Ex: `bufferSize` not `buffer_size`.
+2. Avoid redundant information in exported variable names. Ex: `bytes.Buffer` not `bytes.BytesBuffer`.
+
+
+### Additional Reading
+- [Effective Go](https://golang.org/doc/effective_go.html)
+- [Practical Go](https://dave.cheney.net/practical-go)
+- [Style Packages](https://rakyll.org/style-packages/)
 
 ---
 
