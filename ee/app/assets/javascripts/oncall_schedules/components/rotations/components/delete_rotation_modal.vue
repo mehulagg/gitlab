@@ -10,6 +10,7 @@ export const i18n = {
   deleteRotationMessage: s__(
     'OnCallSchedules|Are you sure you want to delete the "%{deleteRotation}" rotation? This action cannot be undone.',
   ),
+  cancel: __('Cancel'),
 };
 
 export default {
@@ -45,8 +46,11 @@ export default {
     },
     cancelProps() {
       return {
-        text: __('Cancel'),
+        text: this.$options.i18n.cancel,
       };
+    },
+    rotationDeleteModalTestId() {
+      return `delete-rotation-modal-${this.rotation.id}`;
     },
   },
   methods: {
@@ -94,7 +98,7 @@ export default {
     ref="deleteRotationModal"
     :modal-id="modalId"
     size="sm"
-    :data-testid="`delete-rotation-modal-${rotation.id}`"
+    :data-testid="rotationDeleteModalTestId"
     :title="$options.i18n.deleteRotation"
     :action-primary="primaryProps"
     :action-cancel="cancelProps"

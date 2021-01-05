@@ -78,5 +78,10 @@ exports[`RotationsListSectionComponent renders component layout 1`] = `
       />
     </span>
   </div>
+   
+  <delete-rotation-modal-stub
+    modalid="deleteRotationModal"
+    rotation="[object Object]"
+  />
 </div>
 `;

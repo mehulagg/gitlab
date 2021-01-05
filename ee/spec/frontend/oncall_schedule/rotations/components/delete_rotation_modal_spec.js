@@ -137,7 +137,7 @@ describe('DeleteRotationModal', () => {
       expect(mockHideModal).toHaveBeenCalled();
     });
 
-    it("doesn't hide the modal on deletion fail", async () => {
+    it('does not hide the modal on deletion fail and shows the error alert', async () => {
       const error = 'some error';
       mutate.mockResolvedValueOnce({ data: { oncallRotationDestroy: { errors: [error] } } });
       findModal().vm.$emit('primary', { preventDefault: jest.fn() });
