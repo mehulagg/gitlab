@@ -41,6 +41,10 @@ function mountAssigneesComponent(mediator) {
     components: {
       SidebarAssignees,
     },
+    provide: {
+      rootPath: '/',
+      canUpdate: true,
+    },
     render: (createElement) =>
       createElement('sidebar-assignees', {
         props: {

@@ -1,20 +1,20 @@
 <script>
 import { deprecatedCreateFlash as Flash } from '~/flash';
-import eventHub from '~/sidebar/event_hub';
 import Store from '~/sidebar/stores/sidebar_store';
 import { refreshUserMergeRequestCounts } from '~/commons/nav/user_merge_requests';
+import { convertToGraphQLId } from '~/graphql_shared/utils';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import AssigneeTitle from './assignee_title.vue';
-import Assignees from './assignees.vue';
+import SidebarAssigneesWidget from '~/sidebar/components/assignees/sidebar_assignees_widget.vue';
+import getIssueParticipants from '~/vue_shared/components/sidebar/queries/getIssueParticipants.query.graphql';
 import AssigneesRealtime from './assignees_realtime.vue';
 import { __ } from '~/locale';
 
 export default {
   name: 'SidebarAssignees',
+  getIssueParticipants,
   components: {
-    AssigneeTitle,
-    Assignees,
     AssigneesRealtime,
+    SidebarAssigneesWidget,
   },
   mixins: [glFeatureFlagsMixin()],
   props: {
@@ -59,29 +59,18 @@ export default {
     relativeUrlRoot() {
       return gon.relative_url_root ?? '';
     },
+    graphqlIssuableId() {
+      /* eslint-disable-next-line @gitlab/require-i18n-strings */
+      return convertToGraphQLId('Issue', this.issuableIid);
+    },
   },
   created() {
     this.removeAssignee = this.store.removeAssignee.bind(this.store);
     this.addAssignee = this.store.addAssignee.bind(this.store);
     this.removeAllAssignees = this.store.removeAllAssignees.bind(this.store);
-
-    // Get events from deprecatedJQueryDropdown
-    eventHub.$on('sidebar.removeAssignee', this.removeAssignee);
-    eventHub.$on('sidebar.addAssignee', this.addAssignee);
-    eventHub.$on('sidebar.removeAllAssignees', this.removeAllAssignees);
-    eventHub.$on('sidebar.saveAssignees', this.saveAssignees);
-  },
-  beforeDestroy() {
-    eventHub.$off('sidebar.removeAssignee', this.removeAssignee);
-    eventHub.$off('sidebar.addAssignee', this.addAssignee);
-    eventHub.$off('sidebar.removeAllAssignees', this.removeAllAssignees);
-    eventHub.$off('sidebar.saveAssignees', this.saveAssignees);
   },
   methods: {
     assignSelf() {
-      // Notify gl dropdown that we are now assigning to current user
-      this.$el.parentElement.dispatchEvent(new Event('assignYourself'));
-
       this.mediator.assignYourself();
       this.saveAssignees();
     },
@@ -113,21 +102,12 @@ export default {
       :project-path="projectPath"
       :mediator="mediator"
     />
-    <assignee-title
-      :number-of-assignees="store.assignees.length"
-      :loading="loading || store.isFetching.assignees"
-      :editable="store.editable"
-      :show-toggle="!signedIn"
-      :changing="store.changing"
-    />
-    <assignees
-      v-if="!store.isFetching.assignees"
-      :root-path="relativeUrlRoot"
-      :users="store.assignees"
-      :editable="store.editable"
-      :issuable-type="issuableType"
-      class="value"
-      @assign-self="assignSelf"
+    <sidebar-assignees-widget
+      :assignees="mediator.store.assignees"
+      :assignees-query="$options.getIssueParticipants"
+      :issuable-id="graphqlIssuableId"
+      :update-assignees-mutation="{}"
+      :update-assignees-variables="{}"
     />
   </div>
 </template>
