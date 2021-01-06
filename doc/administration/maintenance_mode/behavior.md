@@ -4,13 +4,13 @@ group: Geo
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# GitLab behaviour in maintenance mode
+# GitLab behavior in maintenance mode
 
 This document describes what you can expect from a GitLab instance in maintenance mode.
 
 In maintenance mode, database writes are disabled at the application level.
 
-However, some database write actions are allowed, e.g. to allow users to login and logout and admins are allowed to edit application settings.
+However, some database write actions are allowed, e.g. to allow users to log in and log out and admins are allowed to edit application settings.
 
 **Visual feedback**
 
