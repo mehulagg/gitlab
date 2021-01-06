@@ -13,10 +13,36 @@ RSpec.describe FetchSubscriptionPlansService do
         json_mock = double(body: [{ 'foo' => 'bar' }].to_json)
 
         expect(Gitlab::HTTP).to receive(:get)
-                              .with(endpoint_url, allow_local_requests: true, query: { plan: 'bronze' }, headers: { 'Accept' => 'application/json' })
-                              .and_return(json_mock)
+          .with(
+            endpoint_url,
+            allow_local_requests: true,
+            query: { plan: 'bronze', namespace_id: nil },
+            headers: { 'Accept' => 'application/json' }
+          )
+          .and_return(json_mock)
 
         is_expected.to eq([Hashie::Mash.new('foo' => 'bar')])
+      end
+
+      context 'with given namespace_id' do
+        subject { described_class.new(plan: 'bronze', namespace_id: namespace_id).execute }
+
+        let(:namespace_id) { 87 }
+
+        it 'returns parsed JSON' do
+          json_mock = double(body: [{ 'foo' => 'bar' }].to_json)
+
+          expect(Gitlab::HTTP).to receive(:get)
+            .with(
+              endpoint_url,
+              allow_local_requests: true,
+              query: { plan: 'bronze', namespace_id: namespace_id },
+              headers: { 'Accept' => 'application/json' }
+            )
+            .and_return(json_mock)
+
+          is_expected.to eq([Hashie::Mash.new('foo' => 'bar')])
+        end
       end
     end
 

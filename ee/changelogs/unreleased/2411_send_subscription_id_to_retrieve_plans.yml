@@ -1,0 +1,5 @@
+---
+title: Send namespace id in subscription plan request
+merge_request: 50939
+author:
+type: changed

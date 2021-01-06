@@ -15,8 +15,9 @@ class Groups::BillingsController < Groups::ApplicationController
 
   def index
     @top_most_group = @group.root_ancestor if @group.has_parent?
-    current_plan = (@top_most_group || @group).plan_name_for_upgrading
-    @plans_data = FetchSubscriptionPlansService.new(plan: current_plan).execute
+    relevant_group = (@top_most_group || @group)
+    current_plan = relevant_group.plan_name_for_upgrading
+    @plans_data = FetchSubscriptionPlansService.new(plan: current_plan, namespace_id: relevant_group.id).execute
     track_experiment_event(:contact_sales_btn_in_app, 'page_view:billing_plans:group')
     record_experiment_user(:contact_sales_btn_in_app)
   end
