@@ -30531,6 +30531,26 @@
               "defaultValue": null
             },
             {
+              "name": "payloadExample",
+              "description": "The example of an alert payload.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "payloadAttributeMapping",
+              "description": "The custom mapping of an alert attributes.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
               "name": "clientMutationId",
               "description": "A unique identifier for the client performing the mutation.",
               "type": {
