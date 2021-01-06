@@ -30,7 +30,7 @@ RSpec.describe MergeRequests::PipelineEntity do
       )
       expect(subject[:commit]).to include(:short_id, :commit_path)
       expect(subject[:ref]).to include(:branch)
-      expect(subject[:details]).to include(:name, :status, :stages)
+      expect(subject[:details]).to include(:artifacts, :name, :status, :stages)
       expect(subject[:details][:status]).to include(:icon, :favicon, :text, :label, :tooltip)
       expect(subject[:flags]).to include(:merge_request_pipeline)
     end
@@ -40,6 +40,27 @@ RSpec.describe MergeRequests::PipelineEntity do
         .represent(pipeline, request: request, disable_coverage: true)
 
       expect(entity.as_json).not_to include(:coverage)
+    end
+  end
+
+  context 'when a pipeline belongs to a public project' do
+    let(:project) { create(:project, :public) }
+    let(:pipeline) { create(:ci_empty_pipeline, status: :success, project: project) }
+
+    context 'that has artifacts' do
+      let!(:build) { create(:ci_build, :success, :artifacts, pipeline: pipeline) }
+
+      it 'contains information about artifacts' do
+        expect(subject[:details][:artifacts].length).to eq(1)
+      end
+    end
+
+    context 'that has non public artifacts' do
+      let!(:build) { create(:ci_build, :success, :artifacts, :non_public_artifacts, pipeline: pipeline) }
+
+      it 'does not contain information about artifacts' do
+        expect(subject[:details][:artifacts].length).to eq(0)
+      end
     end
   end
 end
