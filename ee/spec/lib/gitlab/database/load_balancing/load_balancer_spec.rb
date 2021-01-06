@@ -156,7 +156,7 @@ RSpec.describe Gitlab::Database::LoadBalancing::LoadBalancer, :request_store do
 
   describe '#release_host' do
     it 'releases the host and its connection' do
-      host = lb.host
+      lb.host
 
       lb.release_host
 
