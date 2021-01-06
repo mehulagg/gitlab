@@ -12,24 +12,20 @@ module BulkImports
 
         info(context, message: 'Pipeline started', pipeline_class: pipeline)
 
-        extractors.each do |extractor|
-          data = run_pipeline_step(:extractor, extractor.class.name, context) do
-            extractor.extract(context)
-          end
+        data = run_pipeline_step(:extractor, extractor.class.name, context) do
+          extractor.extract(context)
+        end
 
-          if data && data.respond_to?(:each)
-            data.each do |entry|
-              transformers.each do |transformer|
-                entry = run_pipeline_step(:transformer, transformer.class.name, context) do
-                  transformer.transform(context, entry)
-                end
+        if data && data.respond_to?(:each)
+          data.each do |entry|
+            transformers.each do |transformer|
+              entry = run_pipeline_step(:transformer, transformer.class.name, context) do
+                transformer.transform(context, entry)
               end
+            end
 
-              loaders.each do |loader|
-                run_pipeline_step(:loader, loader.class.name, context) do
-                  loader.load(context, entry)
-                end
-              end
+            run_pipeline_step(:loader, loader.class.name, context) do
+              loader.load(context, entry)
             end
           end
         end
