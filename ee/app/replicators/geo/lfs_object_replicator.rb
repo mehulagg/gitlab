@@ -15,5 +15,9 @@ module Geo
     def self.replication_enabled_by_default?
       false
     end
+
+    def self.verification_enabled?
+      false
+    end
   end
 end

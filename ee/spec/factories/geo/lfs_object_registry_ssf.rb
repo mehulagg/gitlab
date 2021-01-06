@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 FactoryBot.define do
-  factory :lfs_object_registry_ssf, class: 'Geo::LfsObjectRegistrySsf' do
-    association :lfs_object, factory: :lfs_object
+  factory :geo_lfs_object_registry_ssf, class: 'Geo::LfsObjectRegistrySsf' do
+    association :lfs_object, factory: [:lfs_object, :with_file]
     state { Geo::LfsObjectRegistrySsf.state_value(:pending) }
 
     trait :synced do

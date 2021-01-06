@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Geo::LfsObjectRegistrySsf < Geo::BaseRegistry
-  include Geo::ReplicableRegistry
+  include ::Geo::ReplicableRegistry
 
   MODEL_CLASS = ::LfsObject
   MODEL_FOREIGN_KEY = :lfs_object_id

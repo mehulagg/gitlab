@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe Geo::LfsObjectRegistrySsf, :geo, type: :model do
-  let_it_be(:registry) { create(:lfs_object_registry_ssf) }
+  let_it_be(:registry) { create(:geo_lfs_object_registry_ssf) }
 
   specify 'factory is valid' do
     expect(registry).to be_valid
