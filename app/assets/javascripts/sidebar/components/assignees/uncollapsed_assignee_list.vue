@@ -67,7 +67,7 @@ export default {
     :user="firstUser"
     :issuable-type="issuableType"
   >
-    <div class="ml-2 gl-line-height-normal">
+    <div class="gl-ml-3 gl-line-height-normal gl-text-gray-900">
       <div>{{ firstUser.name }}</div>
       <div>{{ username }}</div>
     </div>

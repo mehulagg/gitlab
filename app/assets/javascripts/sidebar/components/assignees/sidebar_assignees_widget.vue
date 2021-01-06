@@ -1,5 +1,4 @@
 <script>
-import { mapActions, mapGetters, mapState } from 'vuex';
 import { cloneDeep } from 'lodash';
 import {
   GlDropdownItem,
@@ -9,12 +8,12 @@ import {
   GlSearchBoxByType,
   GlLoadingIcon,
 } from '@gitlab/ui';
+import createFlash from '~/flash';
 import { __, n__ } from '~/locale';
 import IssuableAssignees from '~/sidebar/components/assignees/issuable_assignees.vue';
-import BoardEditableItem from '~/boards/components/sidebar/board_editable_item.vue';
+import SidebarEditableItem from '~/sidebar/components/sidebar_editable_item.vue';
 import MultiSelectDropdown from '~/vue_shared/components/sidebar/multiselect_dropdown.vue';
-import getIssueParticipants from '~/vue_shared/components/sidebar/queries/getIssueParticipants.query.graphql';
-import searchUsers from '~/boards/graphql/users_search.query.graphql';
+import searchUsers from '~/graphql_shared/queries/users_search.query.graphql';
 
 export default {
   noSearchDelay: 0,
@@ -26,7 +25,7 @@ export default {
     assignTo: __('Assign to'),
   },
   components: {
-    BoardEditableItem,
+    SidebarEditableItem,
     IssuableAssignees,
     MultiSelectDropdown,
     GlDropdownItem,
@@ -36,22 +35,45 @@ export default {
     GlSearchBoxByType,
     GlLoadingIcon,
   },
+  props: {
+    assignees: {
+      type: Array,
+      required: true,
+    },
+    assigneesQuery: {
+      type: Object,
+      required: true,
+    },
+    issuableId: {
+      type: String,
+      required: true,
+    },
+    updateAssigneesMutation: {
+      type: Object,
+      required: true,
+    },
+    updateAssigneesVariables: {
+      type: Object,
+      required: true,
+    },
+  },
   data() {
     return {
       search: '',
       participants: [],
-      selected: [],
+      selected: cloneDeep(this.assignees),
+      isSettingAssignees: false,
     };
   },
   apollo: {
     participants: {
       query() {
-        return this.isSearchEmpty ? getIssueParticipants : searchUsers;
+        return this.isSearchEmpty ? this.assigneesQuery : searchUsers;
       },
       variables() {
         if (this.isSearchEmpty) {
           return {
-            id: `gid://gitlab/Issue/${this.activeIssue.iid}`,
+            id: this.issuableId,
           };
         }
 
@@ -74,8 +96,6 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['activeIssue']),
-    ...mapState(['isSettingAssignees']),
     assigneeText() {
       return n__('Assignee', '%d Assignees', this.selected.length);
     },
@@ -97,13 +117,32 @@ export default {
       return gon?.current_username;
     },
   },
-  created() {
-    this.selected = cloneDeep(this.activeIssue.assignees);
-  },
   methods: {
-    ...mapActions(['setAssignees']),
+    updateAssignees(assigneeUsernames) {
+      this.isSettingAssignees = true;
+      return this.$apollo
+        .mutate({
+          mutation: this.updateAssigneesMutation,
+          variables: {
+            ...this.updateAssigneesVariables,
+            assigneeUsernames,
+          },
+        })
+        .then(({ data }) => {
+          this.$emit('assigneesUpdated', data);
+          // this is necessary if we want to use a result of updateAssignees method
+          // outside the widget's parent app
+          return data;
+        })
+        .catch(() => {
+          createFlash({ message: __('An error occurred while updating assignees.') });
+        })
+        .finally(() => {
+          this.isSettingAssignees = false;
+        });
+    },
     async assignSelf() {
-      const [currentUserObject] = await this.setAssignees(this.currentUser);
+      const [currentUserObject] = await this.updateAssignees(this.currentUser);
 
       this.selectAssignee(currentUserObject);
     },
@@ -122,7 +161,7 @@ export default {
       this.selected = this.selected.filter((user) => user.username !== name);
     },
     saveAssignees() {
-      this.setAssignees(this.selectedUserNames);
+      this.updateAssignees(this.selectedUserNames);
     },
     isChecked(id) {
       return this.selectedUserNames.includes(id);
@@ -132,9 +171,9 @@ export default {
 </script>
 
 <template>
-  <board-editable-item :loading="isSettingAssignees" :title="assigneeText" @close="saveAssignees">
+  <sidebar-editable-item :loading="isSettingAssignees" :title="assigneeText" @close="saveAssignees">
     <template #collapsed>
-      <issuable-assignees :users="activeIssue.assignees" @assign-self="assignSelf" />
+      <issuable-assignees :users="assignees" @assign-self="assignSelf" />
     </template>
 
     <template #default>
@@ -192,5 +231,5 @@ export default {
         </template>
       </multi-select-dropdown>
     </template>
-  </board-editable-item>
+  </sidebar-editable-item>
 </template>

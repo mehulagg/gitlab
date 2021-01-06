@@ -9,7 +9,7 @@ import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import getIssueParticipants from '~/vue_shared/components/sidebar/queries/getIssueParticipants.query.graphql';
 import updateAssigneesMutation from '~/vue_shared/components/sidebar/queries/updateAssignees.mutation.graphql';
 import BoardSidebarEpicSelect from './sidebar/board_sidebar_epic_select.vue';
-import BoardAssigneeDropdown from '~/boards/components/board_assignee_dropdown.vue';
+import SidebarAssigneesWidget from '~/sidebar/components/assignees/sidebar_assignees_widget.vue';
 import BoardSidebarTimeTracker from './sidebar/board_sidebar_time_tracker.vue';
 import BoardSidebarWeightInput from './sidebar/board_sidebar_weight_input.vue';
 import BoardSidebarLabelsSelect from '~/boards/components/sidebar/board_sidebar_labels_select.vue';
@@ -26,7 +26,7 @@ export default {
     GlDrawer,
     BoardSidebarIssueTitle,
     BoardSidebarEpicSelect,
-    BoardAssigneeDropdown,
+    SidebarAssigneesWidget,
     BoardSidebarTimeTracker,
     BoardSidebarWeightInput,
     BoardSidebarLabelsSelect,
@@ -72,7 +72,7 @@ export default {
     <template #header>{{ __('Issue details') }}</template>
 
     <template>
-      <board-assignee-dropdown
+      <sidebar-assignees-widget
         :assignees-query="$options.getIssueParticipants"
         :update-assignees-mutation="$options.updateAssigneesMutation"
         :update-assignees-variables="updateAssigneesVariables"
