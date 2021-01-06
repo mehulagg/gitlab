@@ -48,6 +48,7 @@ export default {
           firstPageSize: this.$options.PAGE_SIZE,
           projectPath: this.projectPath,
           sort: this.sort,
+          domain: this.domain,
           ...this.filters,
         };
       },
@@ -72,6 +73,7 @@ export default {
       sortBy: 'startedAt',
       sortDesc: true,
       sortDirection: 'desc',
+      domain: 'threat_monitoring',
     };
   },
   computed: {
