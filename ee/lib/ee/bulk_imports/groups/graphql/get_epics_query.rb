@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-module BulkImports
-  module EE
+module EE
+  module BulkImports
     module Groups
       module Graphql
         module GetEpicsQuery
