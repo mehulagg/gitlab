@@ -4,12 +4,14 @@ import { convertToGraphQLId } from '~/graphql_shared/utils';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import SidebarAssigneesWidget from '~/sidebar/components/assignees/sidebar_assignees_widget.vue';
 import getIssueParticipants from '~/vue_shared/components/sidebar/queries/get_issue_participants.query.graphql';
+import getMrParticipants from '~/vue_shared/components/sidebar/queries/get_mr_participants.query.graphql';
 import updateAssigneesMutation from '~/vue_shared/components/sidebar/queries/update_issue_assignees.mutation.graphql';
 import AssigneesRealtime from './assignees_realtime.vue';
 
 export default {
   name: 'SidebarAssignees',
   getIssueParticipants,
+  getMrParticipants,
   updateAssigneesMutation,
   components: {
     AssigneesRealtime,
@@ -55,9 +57,16 @@ export default {
       // Note: Realtime is only available on issues right now, future support for MR wil be built later.
       return this.glFeatures.realTimeIssueSidebar && this.issuableType === 'issue';
     },
-    graphqlIssuableId() {
-      /* eslint-disable-next-line @gitlab/require-i18n-strings */
-      return convertToGraphQLId('Issue', this.issuableIid);
+    assigneesQuery() {
+      return this.issuableType === 'issue'
+        ? this.$options.getIssueParticipants
+        : this.$options.getMrParticipants;
+    },
+    assigneesQueryVariables() {
+      return this.issuableType === 'issue'
+        ? /* eslint-disable @gitlab/require-i18n-strings */
+          { id: convertToGraphQLId('Issue', this.issuableIid) }
+        : { iid: this.issuableIid, fullPath: this.projectPath };
     },
     updateAssigneesVariables() {
       return {
@@ -86,8 +95,8 @@ export default {
     <sidebar-assignees-widget
       :loading="store.isFetching.assignees"
       :assignees="store.assignees"
-      :assignees-query="$options.getIssueParticipants"
-      :issuable-id="graphqlIssuableId"
+      :assignees-query="assigneesQuery"
+      :assignees-query-variables="assigneesQueryVariables"
       :update-assignees-mutation="$options.updateAssigneesMutation"
       :update-assignees-variables="updateAssigneesVariables"
       @assigneesUpdated="saveAssignees"

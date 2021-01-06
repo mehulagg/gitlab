@@ -1,12 +1,10 @@
+#import "~/graphql_shared/fragments/user.fragment.graphql"
+
 query issueParticipants($id: IssueID!) {
   issue(id: $id) {
     participants {
       nodes {
-        username
-        name
-        webUrl
-        avatarUrl
-        id
+        ...User
       }
     }
   }

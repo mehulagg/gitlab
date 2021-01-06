@@ -44,8 +44,8 @@ export default {
       type: Object,
       required: true,
     },
-    issuableId: {
-      type: String,
+    assigneesQueryVariables: {
+      type: Object,
       required: true,
     },
     updateAssigneesMutation: {
@@ -77,9 +77,7 @@ export default {
       },
       variables() {
         if (this.isSearchEmpty) {
-          return {
-            id: this.issuableId,
-          };
+          return this.assigneesQueryVariables;
         }
 
         return {

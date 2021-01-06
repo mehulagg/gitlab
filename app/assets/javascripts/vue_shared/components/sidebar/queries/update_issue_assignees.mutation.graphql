@@ -1,3 +1,5 @@
+#import "~/graphql_shared/fragments/user.fragment.graphql"
+
 mutation issueSetAssignees($iid: String!, $assigneeUsernames: [String!]!, $projectPath: ID!) {
   issueSetAssignees(
     input: { iid: $iid, assigneeUsernames: $assigneeUsernames, projectPath: $projectPath }
@@ -5,11 +7,7 @@ mutation issueSetAssignees($iid: String!, $assigneeUsernames: [String!]!, $proje
     issue {
       assignees {
         nodes {
-          username
-          id
-          name
-          webUrl
-          avatarUrl
+          ...User
         }
       }
     }
