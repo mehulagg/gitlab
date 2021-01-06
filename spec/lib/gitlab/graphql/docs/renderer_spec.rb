@@ -15,7 +15,7 @@ RSpec.describe Gitlab::Graphql::Docs::Renderer do
       GraphQL::Schema.define(query: query_type)
     end
 
-    let_it_be(:template) { Rails.root.join('lib/gitlab/graphql/docs/templates/', 'default.md.haml') }
+    let_it_be(:template) { Rails.root.join('engines/web_engine/lib/gitlab/graphql/docs/templates/', 'default.md.haml') }
 
     subject(:contents) do
       described_class.new(

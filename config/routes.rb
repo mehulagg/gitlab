@@ -284,6 +284,4 @@ Rails.application.routes.draw do
   end
 
   root to: "root#index"
-
-  get '*unmatched_route', to: 'application#route_not_found'
 end

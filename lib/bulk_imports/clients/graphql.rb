@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'graphlient'
+
 module BulkImports
   module Clients
     class Graphql

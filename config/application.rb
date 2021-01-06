@@ -30,6 +30,7 @@ module Gitlab
     require_dependency Rails.root.join('lib/gitlab/middleware/handle_ip_spoof_attack_error')
     require_dependency Rails.root.join('lib/gitlab/middleware/handle_malformed_strings')
     require_dependency Rails.root.join('lib/gitlab/runtime')
+    require_dependency Rails.root.join('config/engines')
 
     # Settings in config/environments/* take precedence over those specified here.
     # Application configuration should go into files in config/initializers
@@ -49,10 +50,7 @@ module Gitlab
                                      #{config.root}/app/models/badges
                                      #{config.root}/app/models/hooks
                                      #{config.root}/app/models/members
-                                     #{config.root}/app/models/project_services
-                                     #{config.root}/app/graphql/resolvers/concerns
-                                     #{config.root}/app/graphql/mutations/concerns
-                                     #{config.root}/app/graphql/types/concerns])
+                                     #{config.root}/app/models/project_services])
 
     config.generators.templates.push("#{config.root}/generator_templates")
 

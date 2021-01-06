@@ -121,7 +121,7 @@ namespace :gettext do
   # Customize list of translatable files
   # See: https://github.com/grosser/gettext_i18n_rails#customizing-list-of-translatable-files
   def files_to_translate
-    folders = %W(ee app lib config #{locale_path}).join(',')
+    folders = %W(ee app lib config #{locale_path} engines/web_engine/ee engines/web_engine/app engines/web_engine/lib engines/web_engine/config).join(',')
     exts = %w(rb erb haml slim rhtml js jsx vue handlebars hbs mustache).join(',')
 
     Dir.glob(

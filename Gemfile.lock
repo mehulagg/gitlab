@@ -1,3 +1,13 @@
+PATH
+  remote: engines/web_engine
+  specs:
+    web_engine (0.1.0)
+      apollo_upload_server (~> 2.0.2)
+      graphiql-rails (~> 1.4.10)
+      graphql (~> 1.11.4)
+      graphql-docs (~> 1.6.0)
+      rails (~> 6.0.3, >= 6.0.3.3)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -1271,7 +1281,6 @@ DEPENDENCIES
   acts-as-taggable-on (~> 6.0)
   addressable (~> 2.7)
   akismet (~> 3.0)
-  apollo_upload_server (~> 2.0.2)
   asana (= 0.10.2)
   asciidoctor (~> 2.0.10)
   asciidoctor-include-ext (~> 0.3.1)
@@ -1376,10 +1385,7 @@ DEPENDENCIES
   grape-entity (~> 0.7.1)
   grape-path-helpers (~> 1.5)
   grape_logging (~> 1.7)
-  graphiql-rails (~> 1.4.10)
   graphlient (~> 0.4.0)
-  graphql (~> 1.11.4)
-  graphql-docs (~> 1.6.0)
   grpc (~> 1.30.2)
   gssapi
   guard-rspec
@@ -1528,6 +1534,7 @@ DEPENDENCIES
   validates_hostname (~> 1.0.11)
   version_sorter (~> 2.2.4)
   vmstat (~> 2.3.0)
+  web_engine!
   webauthn (~> 2.3)
   webmock (~> 3.9.1)
   wikicloth (= 0.8.1)

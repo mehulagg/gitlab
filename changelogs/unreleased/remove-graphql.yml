@@ -1,0 +1,5 @@
+---
+title: Load Graphql with dependencies only when needed
+merge_request: 50180
+author:
+type: performance

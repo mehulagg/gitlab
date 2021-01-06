@@ -6,7 +6,7 @@ require 'graphql/rake_task'
 
 namespace :gitlab do
   OUTPUT_DIR = Rails.root.join("doc/api/graphql/reference")
-  TEMPLATES_DIR = 'lib/gitlab/graphql/docs/templates/'
+  TEMPLATES_DIR = 'engines/web_engine/lib/gitlab/graphql/docs/templates/'
 
   # Make all feature flags enabled so that all feature flag
   # controlled fields are considered visible and are output.
