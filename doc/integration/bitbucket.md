@@ -109,7 +109,7 @@ you to use.
 
 1. Save the configuration file.
 1. For the changes to take effect, [reconfigure GitLab](../administration/restart_gitlab.md#omnibus-gitlab-reconfigure)
-   if you installed Omnibus GitLab, or [restart](../administration/restart_gitlab.md#installations-from-source)
+   if you installed using Omnibus GitLab, or [restart](../administration/restart_gitlab.md#installations-from-source)
    if you installed from source.
 
 On the sign-in page there should now be a Bitbucket icon below the regular
