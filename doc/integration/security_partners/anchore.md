@@ -19,11 +19,11 @@ For information on what registry/credentials must be added to allow Anchore Ente
 
 In your GitLab project repository, ensure that the following variables are set in Settings > CI/CD > Variables:
 
-- ANCHORE_CLI_URL
-- ANCHORE_CLI_USER
-- ANCHORE_CLI_PASS
+- `ANCHORE_CLI_URL`
+- `ANCHORE_CLI_USER`
+- `ANCHORE_CLI_PASS`
 
-This allows the integration to access your Anchore Enterprise depoyment. The ANCHORE_CLI_PASS variable should have protected and masked options set to prevent exposure of the variable in job logs.
+This allows the integration to access your Anchore Enterprise depoyment. The `ANCHORE_CLI_PASS` variable should have protected and masked options set to prevent exposure of the variable in job logs.
 
 In your project’s `.gitlab-ci.yml`, include the following snippet anywhere in your CI flow after your target container image has been built and pushed to the GitLab Container Registry that you have made accessible from your Anchore Enterprise deployment.
 
