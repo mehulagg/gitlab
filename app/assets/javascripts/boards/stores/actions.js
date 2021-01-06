@@ -15,9 +15,6 @@ import {
   formatIssueInput,
   updateListPosition,
 } from '../boards_util';
-import createFlash from '~/flash';
-import { __ } from '~/locale';
-import updateAssigneesMutation from '~/vue_shared/components/sidebar/queries/updateAssignees.mutation.graphql';
 import listsIssuesQuery from '../graphql/lists_issues.query.graphql';
 import boardLabelsQuery from '../graphql/board_labels.query.graphql';
 import createBoardListMutation from '../graphql/board_list_create.mutation.graphql';
