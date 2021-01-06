@@ -30,8 +30,8 @@ Each metric is definied in a separate YAML file consisting of a number of fields
 | `description`       | yes      | Description of the metric.                                     |
 | `value_type`        | yes      | Metric value type.                                             |
 | `status`            | yes      | Status of the metric.                                          |
-| `default_generation`| yes      | Default generation path of the metric.                         |
-| `full_path`         | yes      | Full paths of the metric for one or multiple generations.      |
+| `default_generation`| yes      | Default generation path of the metric. One of full_path values |
+| `full_path`         | yes      | Full paths of the metric for one or multiple generations. Path of the metric in Usage Ping payload |
 | `group`             | yes      | The [group](https://about.gitlab.com/handbook/product/categories/#devops-stages) that owns the metric. |
 | `time_frame`        | yes      | The data time frame of the metric.                             |
 | `data_source`       | yes      | The data source of the metric.                                 |
@@ -42,3 +42,28 @@ Each metric is definied in a separate YAML file consisting of a number of fields
 | `milestone`         | no       | The milestone when the metric is introduced. |
 | `milestone_removed` | no       | The milestone when the metric is removed. |
 | `introduced_by_url` | no       | The URL to the Merge Request that introduced the metric. |
+
+Example of metric definition [`uuid` metric](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/license/uuid.yml)
+
+`uuid` metric is the GitLab instance unique identifier, owned by Product Intelligence group.
+
+```yaml
+name: uuid
+description: GitLab instance unique identifier
+value_type: string
+product_category: collection
+stage: growth
+status: data_available
+default_generation: generation_1
+full_path:
+  generation_1: uuid
+  generation_2: license.uuid
+milestone: 9.1
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/1521
+group: group::product intelligence
+time_frame: none
+data_source: database
+distribution: [ee, ce]
+tier: ['free', 'starter', 'premium', 'ultimate', 'bronze', 'silver', 'gold']
+```
+
