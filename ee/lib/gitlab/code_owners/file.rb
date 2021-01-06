@@ -5,7 +5,7 @@ module Gitlab
     class File
       include ::Gitlab::Utils::StrongMemoize
 
-      SECTION_HEADER_REGEX = /\[(.*?)\]/.freeze
+      SECTION_HEADER_REGEX = /(\^)?\[(.*?)\]/.freeze
 
       def initialize(blob)
         @blob = blob
@@ -35,6 +35,10 @@ module Gitlab
         parsed_data.keys
       end
 
+      def optional_section?(section)
+        parsed_data[section]&.values&.all?(&:optional?)
+      end
+
       def entry_for_path(path)
         path = "/#{path}" unless path.start_with?('/')
 
@@ -62,6 +66,7 @@ module Gitlab
       def get_parsed_data
         parsed_sectional_data = {}
         canonical_section_name = ::Gitlab::CodeOwners::Entry::DEFAULT_SECTION
+        section_optional = false
 
         parsed_sectional_data[canonical_section_name] = {}
 
@@ -74,16 +79,17 @@ module Gitlab
           #   set up to hold the entries it contains, and proceed to the next
           #   line in the file.
           #
-          if line.match?(SECTION_HEADER_REGEX)
-            parsed_section_name = line[1...-1].strip
-            canonical_section_name = find_section_name(parsed_section_name, parsed_sectional_data)
+          _, optional, name = line.match(SECTION_HEADER_REGEX).to_a
+          if name
+            canonical_section_name = find_section_name(name, parsed_sectional_data)
+            section_optional = optional
 
             parsed_sectional_data[canonical_section_name] ||= {}
 
             next
           end
 
-          extract_entry_and_populate_parsed_data(line, parsed_sectional_data, canonical_section_name)
+          extract_entry_and_populate_parsed_data(line, parsed_sectional_data, section_optional.present?, canonical_section_name)
         end
 
         parsed_sectional_data
@@ -97,12 +103,12 @@ module Gitlab
         section_headers.find { |k| k.casecmp?(section) } || section
       end
 
-      def extract_entry_and_populate_parsed_data(line, parsed, section)
+      def extract_entry_and_populate_parsed_data(line, parsed, optional, section)
         pattern, _separator, owners = line.partition(/(?<!\\)\s+/)
 
         normalized_pattern = normalize_pattern(pattern)
 
-        parsed[section][normalized_pattern] = Entry.new(pattern, owners, section)
+        parsed[section][normalized_pattern] = Entry.new(pattern, owners, optional, section)
       end
 
       def skip?(line)

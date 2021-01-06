@@ -1,0 +1,8 @@
+---
+name: required_code_owners_sections
+introduced_by_url:
+rollout_issue_url:
+milestone: '13.8'
+type: development
+group: group::source code
+default_enabled: false
