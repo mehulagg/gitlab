@@ -537,14 +537,6 @@ Depending on the interval you chose, the policy is scheduled to run.
 NOTE:
 If you edit the policy and click **Save** again, the interval is reset.
 
-NOTE:
-On versions prior to GitLab 13.6, the **Remove tags matching** field
-on the UI showed a grayed out `.*` value as a placeholder text that did
-not act as a default value.
-Unless `.*` (or other regex pattern) is entered explicitly into the
-field, a `nil` value gets submitted, which effectively prevents the
-saved cleanup policy from matching any tags.
-
 ### Regex pattern examples
 
 Cleanup policies use regex patterns to determine which tags should be preserved or removed, both in the UI and the API.
