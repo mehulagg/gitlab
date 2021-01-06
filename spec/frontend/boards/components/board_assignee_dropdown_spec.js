@@ -13,7 +13,7 @@ import IssuableAssignees from '~/sidebar/components/assignees/issuable_assignees
 import MultiSelectDropdown from '~/vue_shared/components/sidebar/multiselect_dropdown.vue';
 import BoardEditableItem from '~/boards/components/sidebar/board_editable_item.vue';
 import store from '~/boards/stores';
-import getIssueParticipants from '~/vue_shared/components/sidebar/queries/getIssueParticipants.query.graphql';
+import getIssueParticipants from '~/vue_shared/components/sidebar/queries/get_issue_participants.query.graphql';
 import searchUsers from '~/boards/graphql/users_search.query.graphql';
 import { participants } from '../mock_data';
 
@@ -145,7 +145,12 @@ describe('BoardCardAssigneeDropdown', () => {
     it('renders gl-avatar-labeled in gl-avatar-link', () => {
       const item = findByText('hello');
 
-      expect(item.find(GlAvatarLink).find(GlAvatarLabeled).exists()).toBe(true);
+      expect(
+        item
+          .find(GlAvatarLink)
+          .find(GlAvatarLabeled)
+          .exists(),
+      ).toBe(true);
     });
   });
 

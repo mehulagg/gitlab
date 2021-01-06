@@ -17,7 +17,7 @@ import { inactiveId } from '~/boards/constants';
 import issueMoveListMutation from '~/boards/graphql/issue_move_list.mutation.graphql';
 import destroyBoardListMutation from '~/boards/graphql/board_list_destroy.mutation.graphql';
 import issueCreateMutation from '~/boards/graphql/issue_create.mutation.graphql';
-import updateAssignees from '~/vue_shared/components/sidebar/queries/updateAssignees.mutation.graphql';
+import updateAssignees from '~/vue_shared/components/sidebar/queries/update_issue_assignees.mutation.graphql';
 import {
   fullBoardId,
   formatListIssues,

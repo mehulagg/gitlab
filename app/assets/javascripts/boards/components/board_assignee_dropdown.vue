@@ -13,7 +13,7 @@ import { __, n__ } from '~/locale';
 import IssuableAssignees from '~/sidebar/components/assignees/issuable_assignees.vue';
 import BoardEditableItem from '~/boards/components/sidebar/board_editable_item.vue';
 import MultiSelectDropdown from '~/vue_shared/components/sidebar/multiselect_dropdown.vue';
-import getIssueParticipants from '~/vue_shared/components/sidebar/queries/getIssueParticipants.query.graphql';
+import getIssueParticipants from '~/vue_shared/components/sidebar/queries/get_issue_participants.query.graphql';
 import searchUsers from '~/boards/graphql/users_search.query.graphql';
 
 export default {
