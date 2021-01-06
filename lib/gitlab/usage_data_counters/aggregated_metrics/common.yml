@@ -11,7 +11,6 @@
 - name: compliance_features_track_unique_visits_union
   operator: OR
   events: ['g_compliance_audit_events', 'g_compliance_dashboard', 'i_compliance_audit_events', 'a_compliance_audit_events_api', 'i_compliance_credential_inventory']
-  feature_flag: track_unique_visits
 - name: product_analytics_test_metrics_union
   operator: OR
   events: ['i_search_total', 'i_search_advanced', 'i_search_paid']
