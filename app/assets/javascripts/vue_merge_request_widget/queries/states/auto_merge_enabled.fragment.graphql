@@ -1,0 +1,17 @@
+fragment autoMergeEnabled on MergeRequest {
+  autoMergeStrategy
+  cancelAutoMergePath
+  mergeUser {
+    name
+    username
+    webUrl
+    avatarUrl
+  }
+  targetBranch
+  targetBranchCommitsPath
+  shouldRemoveSourceBranch
+  forceRemoveSourceBranch
+  userPermissions {
+    removeSourceBranch
+  }
+}

@@ -187,6 +187,9 @@ export default class MergeRequestStore {
       return;
     }
 
+    this.state = stateKey.autoMergeEnabled;
+    return;
+
     if (this.isOpen) {
       this.state = getStateKey.call(this);
     } else {
