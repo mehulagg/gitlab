@@ -31,6 +31,10 @@ module RackAttackSpecHelpers
     yield
 
     expect(response).to have_gitlab_http_status(:too_many_requests)
+
+    expect(response).to have_header('RateLimit-Name')
+    expect(response.headers['RateLimit-Name']).to match(/^throttle_.*$/)
+
     expect(response).to have_header('Retry-After')
     expect(response.headers['Retry-After']).to match(/^\d+$/)
 

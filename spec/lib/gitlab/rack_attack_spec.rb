@@ -100,9 +100,10 @@ RSpec.describe Gitlab::RackAttack, :aggregate_failures do
   end
 
   describe '.throttled_response_headers' do
-    where(:match_data, :headers) do
+    where(:matched, :match_data, :headers) do
       [
         [
+          'throttle_unauthenticated',
           {
             discriminator: '127.0.0.1',
             count: 3700,
@@ -111,6 +112,7 @@ RSpec.describe Gitlab::RackAttack, :aggregate_failures do
             epoch_time: Time.utc(2021, 1, 5, 10, 29, 30).to_i
           },
           {
+            'RateLimit-Name' => 'throttle_unauthenticated',
             'RateLimit-Limit' => '60',
             'RateLimit-Observed' => '3700',
             'RateLimit-Remaining' => '0',
@@ -120,6 +122,7 @@ RSpec.describe Gitlab::RackAttack, :aggregate_failures do
           }
         ],
         [
+          'throttle_unauthenticated',
           {
             discriminator: '127.0.0.1',
             count: 3700,
@@ -128,6 +131,7 @@ RSpec.describe Gitlab::RackAttack, :aggregate_failures do
             epoch_time: Time.utc(2021, 1, 5, 10, 59, 59).to_i
           },
           {
+            'RateLimit-Name' => 'throttle_unauthenticated',
             'RateLimit-Limit' => '60',
             'RateLimit-Observed' => '3700',
             'RateLimit-Remaining' => '0',
@@ -137,6 +141,7 @@ RSpec.describe Gitlab::RackAttack, :aggregate_failures do
           }
         ],
         [
+          'throttle_unauthenticated',
           {
             discriminator: '127.0.0.1',
             count: 3700,
@@ -145,6 +150,7 @@ RSpec.describe Gitlab::RackAttack, :aggregate_failures do
             epoch_time: Time.utc(2021, 1, 5, 10, 0, 0).to_i
           },
           {
+            'RateLimit-Name' => 'throttle_unauthenticated',
             'RateLimit-Limit' => '60',
             'RateLimit-Observed' => '3700',
             'RateLimit-Remaining' => '0',
@@ -154,6 +160,7 @@ RSpec.describe Gitlab::RackAttack, :aggregate_failures do
           }
         ],
         [
+          'throttle_unauthenticated',
           {
             discriminator: '127.0.0.1',
             count: 3700,
@@ -162,6 +169,7 @@ RSpec.describe Gitlab::RackAttack, :aggregate_failures do
             epoch_time: Time.utc(2021, 1, 5, 23, 30, 0).to_i
           },
           {
+            'RateLimit-Name' => 'throttle_unauthenticated',
             'RateLimit-Limit' => '60',
             'RateLimit-Observed' => '3700',
             'RateLimit-Remaining' => '0',
@@ -171,6 +179,7 @@ RSpec.describe Gitlab::RackAttack, :aggregate_failures do
           }
         ],
         [
+          'throttle_unauthenticated',
           {
             discriminator: '127.0.0.1',
             count: 3700,
@@ -179,6 +188,7 @@ RSpec.describe Gitlab::RackAttack, :aggregate_failures do
             epoch_time: Time.utc(2021, 1, 5, 10, 30, 0).to_i
           },
           {
+            'RateLimit-Name' => 'throttle_unauthenticated',
             'RateLimit-Limit' => '57', # 56.66 requests per minute
             'RateLimit-Observed' => '3700',
             'RateLimit-Remaining' => '0',
@@ -188,6 +198,7 @@ RSpec.describe Gitlab::RackAttack, :aggregate_failures do
           }
         ],
         [
+          'throttle_unauthenticated',
           {
             discriminator: '127.0.0.1',
             count: 3700,
@@ -196,6 +207,7 @@ RSpec.describe Gitlab::RackAttack, :aggregate_failures do
             epoch_time: Time.utc(2021, 1, 5, 10, 30, 0).to_i
           },
           {
+            'RateLimit-Name' => 'throttle_unauthenticated',
             'RateLimit-Limit' => '62', # 61.66 requests per minute
             'RateLimit-Observed' => '3700',
             'RateLimit-Remaining' => '0',
@@ -205,6 +217,7 @@ RSpec.describe Gitlab::RackAttack, :aggregate_failures do
           }
         ],
         [
+          'throttle_unauthenticated',
           {
             discriminator: '127.0.0.1',
             count: 3700,
@@ -213,6 +226,7 @@ RSpec.describe Gitlab::RackAttack, :aggregate_failures do
             epoch_time: Time.utc(2021, 1, 5, 10, 30, 0).to_i
           },
           {
+            'RateLimit-Name' => 'throttle_unauthenticated',
             'RateLimit-Limit' => '1', # 0.9833 requests per minute
             'RateLimit-Observed' => '3700',
             'RateLimit-Remaining' => '0',
@@ -222,6 +236,7 @@ RSpec.describe Gitlab::RackAttack, :aggregate_failures do
           }
         ],
         [
+          'throttle_unauthenticated',
           {
             discriminator: '127.0.0.1',
             count: 3700,
@@ -230,6 +245,7 @@ RSpec.describe Gitlab::RackAttack, :aggregate_failures do
             epoch_time: Time.utc(2021, 1, 5, 10, 30, 0).to_i
           },
           {
+            'RateLimit-Name' => 'throttle_unauthenticated',
             'RateLimit-Limit' => '2', # 1.016 requests per minute
             'RateLimit-Observed' => '3700',
             'RateLimit-Remaining' => '0',
@@ -239,6 +255,7 @@ RSpec.describe Gitlab::RackAttack, :aggregate_failures do
           }
         ],
         [
+          'throttle_unauthenticated',
           {
             discriminator: '127.0.0.1',
             count: 3700,
@@ -247,6 +264,7 @@ RSpec.describe Gitlab::RackAttack, :aggregate_failures do
             epoch_time: Time.utc(2021, 1, 5, 10, 30, 0).to_i
           },
           {
+            'RateLimit-Name' => 'throttle_unauthenticated',
             'RateLimit-Limit' => '40',
             'RateLimit-Observed' => '3700',
             'RateLimit-Remaining' => '0',
@@ -256,6 +274,7 @@ RSpec.describe Gitlab::RackAttack, :aggregate_failures do
           }
         ],
         [
+          'throttle_unauthenticated',
           {
             discriminator: '127.0.0.1',
             count: 3700,
@@ -264,6 +283,7 @@ RSpec.describe Gitlab::RackAttack, :aggregate_failures do
             epoch_time: Time.utc(2021, 1, 5, 10, 30, 0).to_i
           },
           {
+            'RateLimit-Name' => 'throttle_unauthenticated',
             'RateLimit-Limit' => '23',
             'RateLimit-Observed' => '3700',
             'RateLimit-Remaining' => '0',
@@ -277,7 +297,7 @@ RSpec.describe Gitlab::RackAttack, :aggregate_failures do
 
     with_them do
       it 'generates accurate throttled headers' do
-        expect(described_class.throttled_response_headers(match_data)).to eql(headers)
+        expect(described_class.throttled_response_headers(matched, match_data)).to eql(headers)
       end
     end
   end

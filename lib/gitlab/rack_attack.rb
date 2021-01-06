@@ -13,7 +13,9 @@ module Gitlab
 
       # This is Rack::Attack::DEFAULT_THROTTLED_RESPONSE, modified to allow a custom response
       Rack::Attack.throttled_response = lambda do |env|
-        throttled_headers = Gitlab::RackAttack.throttled_response_headers(env['rack.attack.match_data'])
+        throttled_headers = Gitlab::RackAttack.throttled_response_headers(
+          env['rack.attack.matched'], env['rack.attack.match_data']
+        )
         [429, { 'Content-Type' => 'text/plain' }.merge(throttled_headers), [Gitlab::Throttle.rate_limiting_response_text]]
       end
 
@@ -50,7 +52,7 @@ module Gitlab
     # - RateLimit-Reset: Similar to Retry-After.
     #
     # - RateLimit-ResetTime: the point of time that the quest quota is reset.
-    def self.throttled_response_headers(match_data)
+    def self.throttled_response_headers(matched, match_data)
       # Match data example:
       # {:discriminator=>"127.0.0.1", :count=>12, :period=>60 seconds, :limit=>1, :epoch_time=>1609833930}
       # Source: https://github.com/rack/rack-attack/blob/v6.3.0/lib/rack/attack/throttle.rb#L33
@@ -62,6 +64,7 @@ module Gitlab
       retry_after = period - (now % period)
       reset_time = now + (period - now % period)
       {
+        'RateLimit-Name' => matched.to_s,
         'RateLimit-Limit' => rounded_limit.to_s,
         'RateLimit-Observed' => observed.to_s,
         'RateLimit-Remaining' => (limit > observed ? limit - observed : 0).to_s,
