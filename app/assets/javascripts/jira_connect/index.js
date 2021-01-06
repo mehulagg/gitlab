@@ -77,10 +77,15 @@ function initJiraConnect() {
   Vue.use(Translate);
   Vue.use(GlFeatureFlagsPlugin);
 
+  const { groupsPath } = el.dataset;
+
   return new Vue({
     el,
     data: {
       state: store.state,
+    },
+    provide: {
+      groupsPath,
     },
     render(createElement) {
       return createElement(App);
