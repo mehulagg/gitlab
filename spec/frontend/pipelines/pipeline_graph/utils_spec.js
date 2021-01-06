@@ -68,10 +68,10 @@ describe('utils functions', () => {
 
     it('returns a hash with the jobname as key and all its data as value', () => {
       const jobs = {
-        [jobName1]: job1,
-        [jobName2]: job2,
-        [jobName3]: job3,
-        [jobName4]: job4,
+        [jobName1]: { jobs: [job1], name: jobName1, needs: [] },
+        [jobName2]: { jobs: [job2], name: jobName2, needs: [] },
+        [jobName3]: { jobs: [job3], name: jobName3, needs: job3.needs },
+        [jobName4]: { jobs: [job4], name: jobName4, needs: job4.needs },
       };
 
       expect(createJobsHash(pipelineGraphData.stages)).toEqual(jobs);
