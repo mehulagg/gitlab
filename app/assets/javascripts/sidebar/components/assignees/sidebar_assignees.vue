@@ -1,14 +1,11 @@
 <script>
-import { deprecatedCreateFlash as Flash } from '~/flash';
 import Store from '~/sidebar/stores/sidebar_store';
-import { refreshUserMergeRequestCounts } from '~/commons/nav/user_merge_requests';
 import { convertToGraphQLId } from '~/graphql_shared/utils';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import SidebarAssigneesWidget from '~/sidebar/components/assignees/sidebar_assignees_widget.vue';
 import getIssueParticipants from '~/vue_shared/components/sidebar/queries/getIssueParticipants.query.graphql';
 import updateAssigneesMutation from '~/vue_shared/components/sidebar/queries/updateAssignees.mutation.graphql';
 import AssigneesRealtime from './assignees_realtime.vue';
-import { __ } from '~/locale';
 
 export default {
   name: 'SidebarAssignees',
@@ -58,9 +55,6 @@ export default {
       // Note: Realtime is only available on issues right now, future support for MR wil be built later.
       return this.glFeatures.realTimeIssueSidebar && this.issuableType === 'issue';
     },
-    relativeUrlRoot() {
-      return gon.relative_url_root ?? '';
-    },
     graphqlIssuableId() {
       /* eslint-disable-next-line @gitlab/require-i18n-strings */
       return convertToGraphQLId('Issue', this.issuableIid);
@@ -72,31 +66,10 @@ export default {
       };
     },
   },
-  created() {
-    this.removeAssignee = this.store.removeAssignee.bind(this.store);
-    this.addAssignee = this.store.addAssignee.bind(this.store);
-    this.removeAllAssignees = this.store.removeAllAssignees.bind(this.store);
-  },
   methods: {
-    assignSelf() {
-      this.mediator.assignYourself();
-      this.saveAssignees();
-    },
-    saveAssignees() {
-      this.loading = true;
-
-      this.mediator
-        .saveAssignees(this.field)
-        .then(() => {
-          this.loading = false;
-          this.store.resetChanging();
-
-          refreshUserMergeRequestCounts();
-        })
-        .catch(() => {
-          this.loading = false;
-          return new Flash(__('Error occurred when saving assignees'));
-        });
+    saveAssignees(data) {
+      const { nodes: assignees } = data.issueSetAssignees?.issue?.assignees || [];
+      this.store.setAssigneeData({ assignees });
     },
   },
 };
@@ -111,12 +84,13 @@ export default {
       :mediator="mediator"
     />
     <sidebar-assignees-widget
-      :loading="mediator.store.isFetching.assignees"
-      :assignees="mediator.store.assignees"
+      :loading="store.isFetching.assignees"
+      :assignees="store.assignees"
       :assignees-query="$options.getIssueParticipants"
       :issuable-id="graphqlIssuableId"
       :update-assignees-mutation="$options.updateAssigneesMutation"
       :update-assignees-variables="updateAssigneesVariables"
+      @assigneesUpdated="saveAssignees"
     />
   </div>
 </template>
