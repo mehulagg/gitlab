@@ -38,7 +38,7 @@ const determineNumberOfUsers = (groupId, groups) => {
 };
 
 export default ({
-  planData = '[]',
+  availablePlans: plansData = '[]',
   planId,
   namespaceId,
   setupForCompany,
@@ -46,7 +46,7 @@ export default ({
   newUser,
   groupData = '[]',
 }) => {
-  const availablePlans = parsePlanData(planData);
+  const availablePlans = parsePlanData(plansData);
   const isNewUser = parseBoolean(newUser);
   const groupId = parseInt(namespaceId, 10) || null;
   const groups = parseGroupData(groupData);

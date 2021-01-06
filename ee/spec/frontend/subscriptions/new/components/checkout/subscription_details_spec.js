@@ -13,7 +13,7 @@ describe('Subscription Details', () => {
   let store;
   let wrapper;
 
-  const planData = [
+  const availablePlans = [
     { id: 'firstPlanId', code: 'bronze', price_per_year: 48 },
     { id: 'secondPlanId', code: 'silver', price_per_year: 228 },
   ];
@@ -26,7 +26,7 @@ describe('Subscription Details', () => {
   let initialNamespaceId = null;
   const initialData = (namespaceId) => {
     return {
-      planData: JSON.stringify(planData),
+      availablePlans: JSON.stringify(availablePlans),
       groupData: JSON.stringify(groupData),
       planId: 'secondPlanId',
       namespaceId,

@@ -10,14 +10,14 @@ describe('Order Summary', () => {
 
   let wrapper;
 
-  const planData = [
+  const availablePlans = [
     { id: 'firstPlanId', code: 'bronze', price_per_year: 48 },
     { id: 'secondPlanId', code: 'silver', price_per_year: 228 },
     { id: 'thirdPlanId', code: 'gold', price_per_year: 1188 },
   ];
 
   const initialData = {
-    planData: JSON.stringify(planData),
+    availablePlans: JSON.stringify(availablePlans),
     planId: 'thirdPlanId',
     namespaceId: null,
     fullName: 'Full Name',
