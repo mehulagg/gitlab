@@ -1,9 +1,9 @@
 <script>
 import { isEmpty } from 'lodash';
-import { generateLinksData } from './drawing_utils';
-import { parseData } from '../parsing_utils';
-import { createJobsHash, generateJobNeedsDict } from '../../utils';
 import { DRAW_FAILURE } from '../../constants';
+import { createJobsHash, generateJobNeedsDict } from '../../utils';
+import { parseData } from '../parsing_utils';
+import { generateLinksData } from './drawing_utils';
 
 export default {
   name: 'LinksLayer',
@@ -43,6 +43,7 @@ export default {
       return isEmpty(this.pipelineData);
     },
     highlightedJobs() {
+      // On first hover, generate the needs reference
       if (!this.needsObject) {
         const jobs = createJobsHash(this.pipelineData);
         this.needsObject = generateJobNeedsDict(jobs) ?? {};
