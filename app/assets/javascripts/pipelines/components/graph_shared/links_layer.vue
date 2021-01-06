@@ -82,8 +82,7 @@ export default {
   },
   methods: {
     getGraphDimensions() {
-      // TODO: Do this better
-      const graphContainer = this.$parent.$refs[this.containerRef] || document.getElementById(this.containerId);
+      const graphContainer = this.$parent.$refs[this.containerRef];
 
       this.width = graphContainer.scrollWidth;
       this.height = graphContainer.scrollHeight;
