@@ -73,6 +73,10 @@ const mocks = {
 };
 
 function mockRequiredRoutes(mockAdapter) {
+  mockAdapter
+    .onGet(mockData.endpoints.valueStreamData)
+    .reply(httpStatusCodes.OK, mockData.valueStreams);
+
   mockAdapter.onGet(mockData.endpoints.stageData).reply(httpStatusCodes.OK, mockData.issueEvents);
   mockAdapter
     .onGet(mockData.endpoints.tasksByTypeTopLabelsData)
@@ -138,9 +142,9 @@ describe('Value Stream Analytics component', () => {
       ...opts,
     });
 
-    if (withValueStreamSelected) {
-      await store.dispatch('receiveValueStreamsSuccess', mockData.valueStreams);
-    }
+    // if (withValueStreamSelected) {
+    //   await store.dispatch('receiveValueStreamsSuccess', mockData.valueStreams);
+    // }
 
     if (withStageSelected) {
       await Promise.all([
@@ -342,6 +346,7 @@ describe('Value Stream Analytics component', () => {
     beforeEach(async () => {
       mock = new MockAdapter(axios);
       mockRequiredRoutes(mock);
+
       wrapper = await createComponent({
         withStageSelected: true,
         featureFlags: {

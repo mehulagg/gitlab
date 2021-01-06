@@ -397,6 +397,7 @@ export const fetchValueStreams = ({ commit, dispatch, getters }) => {
   return Api.cycleAnalyticsValueStreams(currentGroupPath)
     .then(({ data }) => dispatch('receiveValueStreamsSuccess', data))
     .catch((error) => {
+      console.log('ERROR::fetchValueStreams', error);
       const {
         response: { status },
       } = error;
