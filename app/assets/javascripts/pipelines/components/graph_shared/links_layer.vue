@@ -59,13 +59,13 @@ export default {
       // If you are hovering on a job, then the links we want to highlight are:
       // All the links whose `source` and `target` are highlighted jobs.
       if (this.hasHighlightedJob) {
-        const filteredLinks = this.links.filter(link => {
+        const filteredLinks = this.links.filter((link) => {
           return (
             this.highlightedJobs.includes(link.source) && this.highlightedJobs.includes(link.target)
           );
         });
 
-        return filteredLinks.map(link => link.ref);
+        return filteredLinks.map((link) => link.ref);
       }
 
       return [];
@@ -110,7 +110,13 @@ export default {
 </script>
 <template>
   <div class="gl-display-flex gl-relative">
-    <svg :viewBox="viewBox" :width="`${width}px`" :height="`${height}px`" class="gl-absolute" id="link-svg">
+    <svg
+      :viewBox="viewBox"
+      :width="`${width}px`"
+      :height="`${height}px`"
+      class="gl-absolute"
+      id="link-svg"
+    >
       <template>
         <path
           v-for="link in links"

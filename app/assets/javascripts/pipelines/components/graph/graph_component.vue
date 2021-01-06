@@ -57,16 +57,6 @@ export default {
     hasUpstreamPipelines() {
       return Boolean(this.pipeline?.upstream?.length > 0);
     },
-    // linksData() {
-    //   try {
-    //     const arrayOfJobs = this.pipeline.stages.flatMap(({ groups }) => groups);
-    //     const parsedData = parseData(arrayOfJobs);
-    //     return generateLinksData(parsedData, this.$options.CONTAINER_ID);
-    //   } catch {
-    //     this.reportFailure(DRAW_FAILURE);
-    //     return {};
-    //   }
-    // },
     // The two show checks prevent upstream / downstream from showing redundant linked columns
     showDownstreamPipelines() {
       return (

@@ -33,9 +33,4 @@ const unwrapStagesWithNeeds = (denodedStages) => {
   return nodes;
 };
 
-export {
-  unwrapGroups,
-  unwrapNodesWithName,
-  unwrapJobWithNeeds,
-  unwrapStagesWithNeeds
-};
+export { unwrapGroups, unwrapNodesWithName, unwrapJobWithNeeds, unwrapStagesWithNeeds };
