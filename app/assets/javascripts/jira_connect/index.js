@@ -77,7 +77,7 @@ function initJiraConnect() {
     el,
     store,
     render(createElement) {
-      return createElement(JiraConnectApp, {});
+      return createElement(JiraConnectApp);
     },
   });
 }
