@@ -150,7 +150,7 @@ const deleteRotationFromStore = (store, query, { oncallRotationDestroy }, variab
     variables,
   });
 
-  // TODO: This needs the rotation backend to be fully integrated to work, for the moment we will place-hold it.
+  // TODO: This needs the rotation backend to be fully integrated to work, for the moment we will place-hold it. https://gitlab.com/gitlab-org/gitlab/-/issues/262863
   const data = produce(sourceData, (draftData) => {
     // eslint-disable-next-line no-param-reassign
     draftData.project.incidentManagementOncallSchedules.nodes[0].rotations = [rotation].filter(
