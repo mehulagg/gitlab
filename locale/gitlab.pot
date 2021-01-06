@@ -31164,6 +31164,9 @@ msgstr ""
 msgid "View users statistics"
 msgstr ""
 
+msgid "Viewed"
+msgstr ""
+
 msgid "Viewing commit"
 msgstr ""
 
