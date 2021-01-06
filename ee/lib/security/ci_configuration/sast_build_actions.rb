@@ -51,7 +51,7 @@ module Security
           &.flat_map {|a| a['variables'] }
           &.collect {|v| [v['field'], v[key]] }.to_h
 
-        analyzer_variables['SAST_EXCLUDED_ANALZYERS'] = if key == 'value'
+        analyzer_variables['SAST_EXCLUDED_ANALYZERS'] = if key == 'value'
                                                           config['analyzers']
                                                           &.select {|a| a['enabled'] == false }
                                                           &.collect {|a| a['name'] }
@@ -155,7 +155,7 @@ module Security
           SAST_ANALYZER_IMAGE_TAG
           SAST_EXCLUDED_PATHS
           SEARCH_MAX_DEPTH
-          SAST_EXCLUDED_ANALZYERS
+          SAST_EXCLUDED_ANALYZERS
           SAST_BRAKEMAN_LEVEL
           SAST_BANDIT_EXCLUDED_PATHS
           SAST_FLAWFINDER_LEVEL
