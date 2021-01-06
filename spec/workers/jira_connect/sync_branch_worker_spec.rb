@@ -13,19 +13,21 @@ RSpec.describe JiraConnect::SyncBranchWorker do
     let(:project_id) { project.id }
     let(:branch_name) { 'master' }
     let(:commit_shas) { %w(b83d6e3 5a62481) }
+    let(:update_sequence_id) { 1 }
 
-    subject { described_class.new.perform(project_id, branch_name, commit_shas) }
+    subject { described_class.new.perform(project_id, branch_name, commit_shas, update_sequence_id) }
 
     def expect_jira_sync_service_execute(args)
       expect_next_instance_of(JiraConnect::SyncService) do |instance|
-        expect(instance).to receive(:execute).with(args.merge(update_sequence_id: nil))
+        expect(instance).to receive(:execute).with(args)
       end
     end
 
     it 'calls JiraConnect::SyncService#execute' do
       expect_jira_sync_service_execute(
         branches: [instance_of(Gitlab::Git::Branch)],
-        commits: project.commits_by(oids: commit_shas)
+        commits: project.commits_by(oids: commit_shas),
+        update_sequence_id: update_sequence_id
       )
 
       subject
@@ -37,7 +39,8 @@ RSpec.describe JiraConnect::SyncBranchWorker do
       it 'calls JiraConnect::SyncService#execute' do
         expect_jira_sync_service_execute(
           branches: nil,
-          commits: project.commits_by(oids: commit_shas)
+          commits: project.commits_by(oids: commit_shas),
+          update_sequence_id: update_sequence_id
         )
 
         subject
@@ -50,7 +53,8 @@ RSpec.describe JiraConnect::SyncBranchWorker do
       it 'calls JiraConnect::SyncService#execute' do
         expect_jira_sync_service_execute(
           branches: [instance_of(Gitlab::Git::Branch)],
-          commits: nil
+          commits: nil,
+          update_sequence_id: update_sequence_id
         )
 
         subject
@@ -62,31 +66,6 @@ RSpec.describe JiraConnect::SyncBranchWorker do
 
       it 'does not call JiraConnect::SyncService' do
         expect(JiraConnect::SyncService).not_to receive(:new)
-
-        subject
-      end
-    end
-
-    context 'with update_sequence_id' do
-      let(:update_sequence_id) { 1 }
-      let(:request_path) { '/rest/devinfo/0.10/bulk' }
-      let(:request_body) do
-        {
-          repositories: [
-            Atlassian::JiraConnect::Serializers::RepositoryEntity.represent(
-              project,
-              commits: project.commits_by(oids: commit_shas),
-              branches: [project.repository.find_branch(branch_name)],
-              update_sequence_id: update_sequence_id
-            )
-          ]
-        }
-      end
-
-      subject { described_class.new.perform(project_id, branch_name, commit_shas, update_sequence_id) }
-
-      it 'sends the reqeust with custom update_sequence_id' do
-        expect_next(Atlassian::JiraConnect::Client).to receive(:post).with(request_path, request_body)
 
         subject
       end

@@ -12,12 +12,13 @@ RSpec.describe JiraConnect::SyncMergeRequestWorker do
     let_it_be(:merge_request) { create(:merge_request, source_project: project) }
 
     let(:merge_request_id) { merge_request.id }
+    let(:update_sequence_id) { 1 }
 
-    subject { described_class.new.perform(merge_request_id) }
+    subject { described_class.new.perform(merge_request_id, update_sequence_id) }
 
     it 'calls JiraConnect::SyncService#execute' do
       expect_next_instance_of(JiraConnect::SyncService) do |service|
-        expect(service).to receive(:execute).with(merge_requests: [merge_request], update_sequence_id: nil)
+        expect(service).to receive(:execute).with(merge_requests: [merge_request], update_sequence_id: update_sequence_id)
       end
 
       subject
@@ -28,30 +29,6 @@ RSpec.describe JiraConnect::SyncMergeRequestWorker do
 
       it 'does not call JiraConnect::SyncService' do
         expect(JiraConnect::SyncService).not_to receive(:new)
-
-        subject
-      end
-    end
-
-    context 'with update_sequence_id' do
-      let(:update_sequence_id) { 1 }
-      let(:request_path) { '/rest/devinfo/0.10/bulk' }
-      let(:request_body) do
-        {
-          repositories: [
-            Atlassian::JiraConnect::Serializers::RepositoryEntity.represent(
-              project,
-              merge_requests: [merge_request],
-              update_sequence_id: update_sequence_id
-            )
-          ]
-        }
-      end
-
-      subject { described_class.new.perform(merge_request_id, update_sequence_id) }
-
-      it 'sends the request with custom update_sequence_id' do
-        expect_next(Atlassian::JiraConnect::Client).to receive(:post).with(request_path, request_body)
 
         subject
       end

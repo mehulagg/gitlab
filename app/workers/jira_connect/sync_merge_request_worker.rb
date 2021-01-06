@@ -9,7 +9,7 @@ module JiraConnect
 
     worker_has_external_dependencies!
 
-    def perform(merge_request_id, update_sequence_id = nil)
+    def perform(merge_request_id, update_sequence_id)
       merge_request = MergeRequest.find_by_id(merge_request_id)
 
       return unless merge_request && merge_request.project
