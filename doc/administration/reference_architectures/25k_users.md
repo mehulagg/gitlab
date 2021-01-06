@@ -586,15 +586,16 @@ The following IPs will be used as an example:
 
    # Configure PgBouncer
    pgbouncer['admin_users'] = %w(pgbouncer gitlab-consul)
-
    pgbouncer['users'] = {
-   'gitlab-consul': {
-      password: '<consul_password_hash>'
-   },
-   'pgbouncer': {
-      password: '<pgbouncer_password_hash>'
+      'gitlab-consul': {
+         password: '<consul_password_hash>'
+      },
+      'pgbouncer': {
+         password: '<pgbouncer_password_hash>'
+      }
    }
-   }
+   # Incoming recommended value for max db connections is 150. See https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5691.
+   pgbouncer['max_db_connections'] = 150
 
    # Configure Consul agent
    consul['watchers'] = %w(postgresql)
