@@ -111,6 +111,7 @@ export default {
       :mediator="mediator"
     />
     <sidebar-assignees-widget
+      :loading="mediator.store.isFetching.assignees"
       :assignees="mediator.store.assignees"
       :assignees-query="$options.getIssueParticipants"
       :issuable-id="graphqlIssuableId"

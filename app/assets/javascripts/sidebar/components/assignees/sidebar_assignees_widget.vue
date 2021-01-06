@@ -56,6 +56,11 @@ export default {
       type: Object,
       required: true,
     },
+    loading: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   data() {
     return {
@@ -176,7 +181,16 @@ export default {
 </script>
 
 <template>
-  <sidebar-editable-item :loading="isSettingAssignees" :title="assigneeText" @close="saveAssignees">
+  <div v-if="loading" class="gl-display-flex gl-align-items-center">
+    {{ __('Assignee') }}
+    <gl-loading-icon size="sm" class="gl-ml-2" />
+  </div>
+  <sidebar-editable-item
+    v-else
+    :loading="isSettingAssignees"
+    :title="assigneeText"
+    @close="saveAssignees"
+  >
     <template #collapsed>
       <issuable-assignees :users="assignees" @assign-self="assignSelf" />
     </template>
