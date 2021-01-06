@@ -21,5 +21,17 @@ namespace :gitlab do
 
       puts Gitlab::Json.pretty_generate(result.attributes)
     end
+
+    desc 'GitLab | UsageData | Generate metrics dictionary'
+    task generate_metrics_dictionary: :environment do
+      items = Gitlab::Usage::MetricDefinition.definitions
+      markdown = Gitlab::Usage::MarkdownDictionary.build(items)
+
+      out = File.join(Rails.root, 'doc', 'development', 'usage', 'dictionary.md')
+
+      File.open(out, 'w') do |handle|
+        handle.write(markdown)
+      end
+    end
   end
 end
