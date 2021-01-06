@@ -438,6 +438,10 @@ class Issue < ApplicationRecord
     issue_type_supports?(:assignee)
   end
 
+  def email_participants_emails
+    issue_email_participants.pluck(:email)
+  end
+
   private
 
   def ensure_metrics
