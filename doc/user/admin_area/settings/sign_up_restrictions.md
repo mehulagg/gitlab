@@ -37,6 +37,9 @@ To require administrator approval for new sign ups:
 1. Go to **Admin Area > Settings > General** and expand **Sign-up restrictions**.
 1. Select the **Require admin approval for new sign-ups** checkbox, then select **Save changes**.
 
+In [GitLab 13.7 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/273258), if an administrator disables this setting, the users in pending approval state are
+automatically approved in a background job.
+
 ## Require email confirmation
 
 You can send confirmation emails during sign up and require that users confirm
@@ -46,9 +49,6 @@ To enforce confirmation of the email address used for new sign ups:
 
 1. Go to **Admin Area > Settings > General** and expand **Sign-up restrictions**.
 1. Select the **Enable email restrictions for sign ups** checkbox, then select **Save changes**.
-
-In [GitLab 13.7 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/273258), if an administrator disables this setting, the users in pending approval state are
-automatically approved in a background job.
 
 ## User cap **(CORE ONLY)**
 
