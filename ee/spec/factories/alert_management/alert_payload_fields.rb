@@ -3,7 +3,7 @@
 FactoryBot.define do
   factory :alert_management_alert_payload_field, class: 'AlertManagement::AlertPayloadField' do
     project
-    path { 'title' }
+    path { ['title'] }
     label { 'Title' }
     type { 'string' }
   end
