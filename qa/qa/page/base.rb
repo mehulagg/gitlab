@@ -206,7 +206,7 @@ module QA
         # This is to avoid waiting unnecessarily after the element we're interested in has already appeared.
         return true if try_find_element.call(wait)
 
-        # If the element didn't appear, waiting for requests and then check again
+        # If the element didn't appear, wait for requests and then check again
         wait_for_requests(skip_finished_loading_check: !!kwargs.delete(:skip_finished_loading_check))
 
         # We only wait one second now because we previously waited the full expected duration,
