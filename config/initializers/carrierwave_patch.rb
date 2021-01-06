@@ -17,7 +17,20 @@ module CarrierWave
     class Fog < Abstract
       class File
         def copy_to(new_path)
-          connection.copy_object(@uploader.fog_directory, file.key, @uploader.fog_directory, new_path, copy_to_options)
+          # fog-aws needs multipart uploads to copy files above 5 GB,
+          # and it is currently the only Fog provider that supports
+          # multithreaded uploads
+          # (https://github.com/fog/fog-aws/pull/579).
+          if @uploader.fog_credentials[:provider] == 'AWS'
+            file.concurrency = 10 # AWS SDK uses 10 threads by default,
+            # Note that other Fog providers may issue a GET request
+            # instead of a HEAD request after the transfer completes,
+            # which might cause the file to be downloaded locally.
+            file.copy(@uploader.fog_directory, new_path, copy_to_options)
+          else
+            connection.copy_object(@uploader.fog_directory, file.key, @uploader.fog_directory, new_path, copy_to_options)
+          end
+
           CarrierWave::Storage::Fog::File.new(@uploader, @base, new_path)
         end
 
