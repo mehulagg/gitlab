@@ -83,7 +83,7 @@ function initJiraConnect() {
       state: store.state,
     },
     render(createElement) {
-      return createElement(App, {});
+      return createElement(App);
     },
   });
 }
