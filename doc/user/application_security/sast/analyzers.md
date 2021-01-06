@@ -68,7 +68,7 @@ the official analyzers.
 
 ### Selecting specific analyzers (Deprecated)
 
-**`SAST_DEFAULT_ANALYZERS` has been deprecated in GitLab 13.8, and will be removed in GitLab 14.0.**
+**`SAST_DEFAULT_ANALYZERS` has been deprecated in GitLab 13.8, and will be [removed in GitLab 14.0](https://gitlab.com/gitlab-org/gitlab/-/issues/290777).**
 
 You can select the official analyzers you want to run. Here's how to enable
 `bandit` and `flawfinder` while disabling all the other default ones.
