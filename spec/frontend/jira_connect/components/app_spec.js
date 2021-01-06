@@ -1,9 +1,11 @@
 import { shallowMount } from '@vue/test-utils';
-
 import JiraConnectApp from '~/jira_connect/components/app.vue';
 
 describe('JiraConnectApp', () => {
   let wrapper;
+
+  const findHeader = () => wrapper.find('[data-testid="new-jira-connect-ui-heading"]');
+  const findHeaderText = () => findHeader().text();
 
   const createComponent = (options = {}) => {
     wrapper = shallowMount(JiraConnectApp, {
@@ -18,9 +20,6 @@ describe('JiraConnectApp', () => {
     wrapper.destroy();
     wrapper = null;
   });
-
-  const findHeader = () => wrapper.find('h3');
-  const findHeaderText = () => findHeader().text();
 
   describe('template', () => {
     it('renders new UI', () => {
