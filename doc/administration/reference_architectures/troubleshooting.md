@@ -516,7 +516,7 @@ See the suggested fix [in Geo documentation](../geo/replication/troubleshooting.
 
 ## Troubleshooting PostgreSQL with Patroni
 
-In case you are experiencing any issues connecting through PgBouncer, the first place to check is always the logs for Postgres (which is run through Patroni):
+In case you are experiencing any issues connecting through PgBouncer, the first place to check is always the logs for PostgreSQL (which is run through Patroni):
 
 ```shell
 sudo gitlab-ctl tail patroni
