@@ -6,7 +6,6 @@ import { generateLinksData } from '../graph_shared/drawing_utils';
 import JobPill from './job_pill.vue';
 import StagePill from './stage_pill.vue';
 import { parseData } from '../parsing_utils';
-import { unwrapArrayOfJobs } from '../unwrapping_utils';
 import { DRAW_FAILURE, DEFAULT, INVALID_CI_CONFIG, EMPTY_PIPELINE_DATA } from '../../constants';
 import { createJobsHash, generateJobNeedsDict } from '../../utils';
 import { CI_CONFIG_STATUS_INVALID } from '~/pipeline_editor/constants';
@@ -136,7 +135,7 @@ export default {
   methods: {
     prepareLinkData() {
       try {
-        const arrayOfJobs = unwrapArrayOfJobs(this.pipelineStages);
+        const arrayOfJobs = this.pipelineStages.flatMap(({ groups }) => groups);
         const parsedData = parseData(arrayOfJobs);
         this.links = generateLinksData(parsedData, this.$options.CONTAINER_ID);
       } catch {
