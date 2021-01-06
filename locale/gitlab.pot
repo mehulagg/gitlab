@@ -10797,10 +10797,10 @@ msgstr ""
 msgid "End Time"
 msgstr ""
 
-msgid "Ends at %{endsAt}"
+msgid "Ends at (UTC)"
 msgstr ""
 
-msgid "Ends at (UTC)"
+msgid "Ends: %{endsAt}"
 msgstr ""
 
 msgid "Ends on"
@@ -15396,6 +15396,9 @@ msgid "Invalid input, please avoid emojis"
 msgstr ""
 
 msgid "Invalid login or password"
+msgstr ""
+
+msgid "Invalid period"
 msgstr ""
 
 msgid "Invalid pin code"
@@ -26800,13 +26803,13 @@ msgstr ""
 msgid "Starts %{startsIn}"
 msgstr ""
 
-msgid "Starts at %{startsAt}"
-msgstr ""
-
 msgid "Starts at (UTC)"
 msgstr ""
 
 msgid "Starts on"
+msgstr ""
+
+msgid "Starts: %{startsAt}"
 msgstr ""
 
 msgid "State your message to activate"

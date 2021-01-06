@@ -11,7 +11,6 @@ import VueApollo from 'vue-apollo';
 import { preExistingSchedule, newlyCreatedSchedule } from './mocks/apollo_mock';
 
 const localVue = createLocalVue();
-localVue.use(VueApollo);
 
 describe('On-call schedule wrapper', () => {
   let wrapper;
@@ -45,6 +44,7 @@ describe('On-call schedule wrapper', () => {
 
   function mountComponentWithApollo() {
     const fakeApollo = createMockApollo([[getOncallSchedulesQuery, getOncallSchedulesQuerySpy]]);
+    localVue.use(VueApollo);
 
     wrapper = shallowMount(OnCallScheduleWrapper, {
       localVue,
@@ -64,7 +64,6 @@ describe('On-call schedule wrapper', () => {
   afterEach(() => {
     if (wrapper) {
       wrapper.destroy();
-      wrapper = null;
     }
   });
 

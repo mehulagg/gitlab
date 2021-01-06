@@ -61,9 +61,6 @@ describe('AddScheduleModal', () => {
   }
 
   async function updateSchedule(localWrapper) {
-    await jest.runOnlyPendingTimers();
-    await localWrapper.vm.$nextTick();
-
     localWrapper.find(GlModal).vm.$emit('primary', { preventDefault: jest.fn() });
   }
 
