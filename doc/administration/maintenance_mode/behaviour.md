@@ -46,11 +46,11 @@ No new jobs can be created either.
 
 ## Git actions
 
-All read-only git operations will continue to work in maintenance mode, e.g. `git clone` and `git pull`, but all write operations will fail, both through the CLI and Web IDE.
+All read-only Git operations will continue to work in maintenance mode, e.g. `git clone` and `git pull`, but all write operations will fail, both through the CLI and Web IDE.
 
-Geo secondaries are read-only instances that allow git pushes because they are proxied to the primary instance. However in mainteance mode, git pushes to both primary and secondaries will fail.
+Geo secondaries are read-only instances that allow Git pushes because they are proxied to the primary instance. However in mainteance mode, Git pushes to both primary and secondaries will fail.
 
-## Merge Requests/Issues, etc.
+## Merge Requests/Issues, etc
 
 All write actions except those mentioned above will fail. So, in maintenace mode, a user cannot update merge requests, issues, etc.
 
