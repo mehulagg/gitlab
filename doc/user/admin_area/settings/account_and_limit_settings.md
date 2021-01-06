@@ -9,7 +9,7 @@ type: reference
 
 ## Default projects limit
 
-You can change the maximum number of projects that can be created in a users personal namespace. Setting this value to 0 disallows creating projects in a users personal namespace but they can be created within a group.
+You can change the default value for the maximum number of projects that users can create in their personal namespace. Setting this value to 0 disallows creating projects in a users personal namespace but they can still be created within a group.
 Navigate to **Admin Area (wrench icon) > Settings > General**, then expand **Account and Limit**.
 From here, you can increase or decrease by changing the value in `Default projects limit`.
 
