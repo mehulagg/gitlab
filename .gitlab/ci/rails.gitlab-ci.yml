@@ -231,6 +231,27 @@ update-static-analysis-cache:
     # for keeping only the N latest cache files, so we take advantage of it with `pull-push` and removing `node_modules` at the start of the job.
     policy: pull-push
 
+save-rubocop-cache-as-artifact:
+  extends:
+    - .static-analysis-base
+    - .rails:rules:default-refs-code-backstage-qa
+  stage: prepare
+  script:
+    - echo "ok"
+  artifacts:
+    expire_in: 1d
+    paths:
+      - tmp/rubocop_cache/
+
+rubocop:
+  extends:
+    - .static-analysis-base
+    - .rails:rules:default-refs-code-backstage-qa
+  stage: test
+  script:
+    - run_timed_command "bundle exec rubocop --verbose-version"
+    - run_timed_command "bundle exec rubocop --parallel" --debug --cache true
+
 static-analysis:
   extends:
     - .static-analysis-base
