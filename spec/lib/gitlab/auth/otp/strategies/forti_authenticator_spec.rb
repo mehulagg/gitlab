@@ -14,8 +14,6 @@ RSpec.describe Gitlab::Auth::Otp::Strategies::FortiAuthenticator do
   let(:forti_authenticator_auth_url) { "https://#{host}:#{port}/api/v1/auth/" }
   let(:response_status) { 200 }
 
-  subject(:validate) { described_class.new(user).validate(otp_code) }
-
   before do
     stub_feature_flags(forti_authenticator: user)
 
@@ -27,37 +25,77 @@ RSpec.describe Gitlab::Auth::Otp::Strategies::FortiAuthenticator do
       access_token: api_token
     )
 
-    request_body = { username: user.username,
-                     token_code: otp_code }
-
-    stub_request(:post, forti_authenticator_auth_url)
+    stub_request(:post, forti_authenticator_url)
       .with(body: JSON(request_body),
             headers: { 'Content-Type': 'application/json' },
             basic_auth: [api_username, api_token])
       .to_return(status: response_status, body: '')
   end
 
-  context 'successful validation' do
-    it 'returns success' do
-      expect(validate[:status]).to eq(:success)
+  describe "#validate" do
+    let(:forti_authenticator_url) { "https://#{host}:#{port}/api/v1/auth/" }
+    let(:request_body) do
+      { username: user.username,
+        token_code: otp_code }
+    end
+
+    subject(:validate) { described_class.new(user).validate(otp_code) }
+
+    context 'successful validation' do
+      it 'returns success' do
+        expect(validate[:status]).to eq(:success)
+      end
+    end
+
+    context 'unsuccessful validation' do
+      let(:response_status) { 401 }
+
+      it 'returns error' do
+        expect(validate[:status]).to eq(:error)
+      end
+    end
+
+    context 'unexpected error' do
+      it 'returns error' do
+        error_message = 'boom!'
+        stub_request(:post, forti_authenticator_url).to_raise(StandardError.new(error_message))
+
+        expect(validate[:status]).to eq(:error)
+        expect(validate[:message]).to eq(error_message)
+      end
     end
   end
 
-  context 'unsuccessful validation' do
-    let(:response_status) { 401 }
-
-    it 'returns error' do
-      expect(validate[:status]).to eq(:error)
+  describe "#push_notification" do
+    let(:forti_authenticator_url) { "https://#{host}:#{port}/api/v1/pushauth/" }
+    let(:request_body) do
+      { username: user.username }
     end
-  end
 
-  context 'unexpected error' do
-    it 'returns error' do
-      error_message = 'boom!'
-      stub_request(:post, forti_authenticator_auth_url).to_raise(StandardError.new(error_message))
+    subject(:validate) { described_class.new(user).push_notification }
 
-      expect(validate[:status]).to eq(:error)
-      expect(validate[:message]).to eq(error_message)
+    context 'successful validation' do
+      it 'returns success' do
+        expect(validate[:status]).to eq(:success)
+      end
+    end
+
+    context 'unsuccessful validation' do
+      let(:response_status) { 401 }
+
+      it 'returns error' do
+        expect(validate[:status]).to eq(:error)
+      end
+    end
+
+    context 'unexpected error' do
+      it 'returns error' do
+        error_message = 'boom!'
+        stub_request(:post, forti_authenticator_url).to_raise(StandardError.new(error_message))
+
+        expect(validate[:status]).to eq(:error)
+        expect(validate[:message]).to eq(error_message)
+      end
     end
   end
 
