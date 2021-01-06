@@ -16,10 +16,8 @@ export const createUniqueLinkId = (stageName, jobName) => `${stageName}-${jobNam
  * @returns {Object} - Hash of jobs
  */
 export const createJobsHash = (stages = []) => {
-
   const nodes = stages.flatMap(({ groups }) => groups);
   return createNodeDict(nodes);
-
 };
 
 /**
