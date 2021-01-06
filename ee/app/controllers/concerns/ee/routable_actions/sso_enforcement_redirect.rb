@@ -19,8 +19,8 @@ module EE
         access_restricted_by_sso?(current_user)
       end
 
-      def sso_redirect_url
-        sso_group_saml_providers_url(root_group, url_params)
+      def sso_redirect_url(current_user)
+        sso_group_saml_providers_url(root_group, url_params(current_user))
       end
 
       module ControllerActions
@@ -29,7 +29,7 @@ module EE
             redirector = SsoEnforcementRedirect.new(routable)
 
             if redirector.should_redirect_to_group_saml_sso?(current_user, request)
-              redirect_to redirector.sso_redirect_url
+              redirect_to redirector.sso_redirect_url(current_user)
             end
           end
         end
@@ -60,10 +60,11 @@ module EE
         @root_group ||= group.root_ancestor
       end
 
-      def url_params
+      def url_params(current_user)
         {
           token: root_group.saml_discovery_token,
-          redirect: "/#{routable.full_path}"
+          redirect: "/#{routable.full_path}",
+          auto_redirect_to_provider: current_user.group_sso?(routable)
         }
       end
     end

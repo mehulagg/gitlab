@@ -23,6 +23,10 @@ class Groups::SsoController < Groups::ApplicationController
     @group_name = unauthenticated_group.full_name
     @group_saml_identity = linked_identity
     @idp_url = unauthenticated_group.saml_provider.sso_url
+
+    if helpers.should_auto_redirect_to_provider?
+      render layout: 'devise_empty'
+    end
   end
 
   def unlink
