@@ -16,7 +16,7 @@ class GeoNodeStatus < ApplicationRecord
   attr_accessor :event_log_max_id, :repository_created_max_id, :repository_updated_max_id,
                 :repository_deleted_max_id, :repository_renamed_max_id, :repositories_changed_max_id,
                 :lfs_object_deleted_max_id, :job_artifact_deleted_max_id,
-                :lfs_objects_registry_count, :job_artifacts_registry_count, :attachments_registry_count,
+                :job_artifacts_registry_count, :attachments_registry_count,
                 :hashed_storage_migrated_max_id, :hashed_storage_attachments_max_id,
                 :repositories_checked_count, :repositories_checked_failed_count
 
@@ -54,10 +54,6 @@ class GeoNodeStatus < ApplicationRecord
     repositories_replication_enabled
     repositories_synced_count
     repositories_failed_count
-    lfs_objects_replication_enabled
-    lfs_objects_count
-    lfs_objects_synced_count
-    lfs_objects_failed_count
     attachments_replication_enabled
     attachments_count
     attachments_synced_count
@@ -122,12 +118,6 @@ class GeoNodeStatus < ApplicationRecord
     wikis_verified_count: 'Number of wikis verified on secondary',
     wikis_verification_failed_count: 'Number of wikis failed to verify on secondary',
     wikis_checksum_mismatch_count: 'Number of wikis that checksum mismatch on secondary',
-    lfs_objects_replication_enabled: 'Boolean denoting if replication is enabled for LFS Objects',
-    lfs_objects_count: 'Total number of syncable LFS objects available on primary',
-    lfs_objects_synced_count: 'Number of syncable LFS objects synced on secondary',
-    lfs_objects_failed_count: 'Number of syncable LFS objects failed to sync on secondary',
-    lfs_objects_registry_count: 'Number of LFS objects in the registry',
-    lfs_objects_synced_missing_on_primary_count: 'Number of LFS objects marked as synced due to the file missing on the primary',
     job_artifacts_replication_enabled: 'Boolean denoting if replication is enabled for Job Artifacts',
     job_artifacts_count: 'Total number of syncable job artifacts available on primary',
     job_artifacts_synced_count: 'Number of syncable job artifacts synced on secondary',
@@ -386,7 +376,6 @@ class GeoNodeStatus < ApplicationRecord
   attr_in_percentage :wikis_synced,                  :wikis_synced_count,                  :wikis_count
   attr_in_percentage :wikis_checksummed,             :wikis_checksummed_count,             :wikis_count
   attr_in_percentage :wikis_verified,                :wikis_verified_count,                :wikis_count
-  attr_in_percentage :lfs_objects_synced,            :lfs_objects_synced_count,            :lfs_objects_count
   attr_in_percentage :job_artifacts_synced,          :job_artifacts_synced_count,          :job_artifacts_count
   attr_in_percentage :attachments_synced,            :attachments_synced_count,            :attachments_count
   attr_in_percentage :replication_slots_used,        :replication_slots_used_count,        :replication_slots_count

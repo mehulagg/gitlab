@@ -25,7 +25,6 @@ module EE
 
           [status&.version, status&.revision]
         end
-
       {
         primary_version: version.to_s,
         primary_revision: revision.to_s,
@@ -165,12 +164,6 @@ module EE
           title_plural: _('Wikis'),
           name: 'wiki',
           name_plural: 'wikis'
-        },
-        {
-          title: _('LFS object'),
-          title_plural: _('LFS objects'),
-          name: 'lfs_object',
-          name_plural: 'lfs_objects'
         },
         {
           title: _('Attachment'),
