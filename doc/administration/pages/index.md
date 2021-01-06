@@ -376,8 +376,14 @@ Pages access control is disabled by default. To enable it:
 1. Users can now configure it in their [projects' settings](../../user/project/pages/pages_access_control.md).
 
 NOTE:
-For this setting to be effective with multi-node setups, it has to be applied to
-all the App nodes and Sidekiq nodes.
+When access control is enabled, running `gitlab-ctl reconfigure` will
+automatically generate necessary secrets, if needed, and add them to
+`/etc/gitlab/gitlab-secrets.json` file. On multi-node setups, this means the
+above steps should be done on one of the nodes first. Then, the resultant
+`gitlab-secrets.json` file should be copied to other Pages, Sidekiq, and App
+nodes before editing `gitlab.rb` file and running `sudo gitlab-ctl reconfigure`
+on those nodes. Else, each of the reconfigures will populate different secrets
+and functionality will fail.
 
 #### Disabling public access to all Pages websites
 
