@@ -26,6 +26,7 @@ import CollapsedFilesWarning from './collapsed_files_warning.vue';
 
 import { diffsApp } from '../utils/performance';
 import { fileByFile } from '../utils/preferences';
+import { reviewStatuses } from '../utils/file_reviews';
 
 import {
   TREE_LIST_WIDTH_STORAGE_KEY,
@@ -164,12 +165,7 @@ export default {
       'hasConflicts',
       'viewDiffsFileByFile',
     ]),
-    ...mapGetters('diffs', [
-      'whichCollapsedTypes',
-      'isParallelView',
-      'currentDiffIndex',
-      'fileReviews',
-    ]),
+    ...mapGetters('diffs', ['whichCollapsedTypes', 'isParallelView', 'currentDiffIndex']),
     ...mapGetters(['isNotesFetched', 'getNoteableData']),
     diffs() {
       if (!this.viewDiffsFileByFile) {
@@ -226,6 +222,9 @@ export default {
       }
 
       return visible;
+    },
+    fileReviews() {
+      return reviewStatuses(this.diffFiles, this.mrReviews);
     },
   },
   watch: {
