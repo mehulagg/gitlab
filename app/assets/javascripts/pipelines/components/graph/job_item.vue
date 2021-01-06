@@ -144,6 +144,7 @@ export default {
   <div
     class="ci-job-component gl-display-flex gl-align-items-center gl-justify-content-space-between"
     data-qa-selector="job_item_container"
+    :id="job.name"
   >
     <gl-link
       v-if="hasDetails"

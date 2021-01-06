@@ -10,15 +10,6 @@ export default {
   name: 'LinksLayer',
   STROKE_WIDTH: 2,
   props: {
-    pipelineData: {
-      type: Object,
-      required: true,
-    },
-    highlightedJob: {
-      type: String,
-      required: false,
-      default: '',
-    },
     containerId: {
       type: String,
       required: true,
@@ -26,6 +17,15 @@ export default {
     containerRef: {
       type: String,
       required: true,
+    },
+    pipelineData: {
+      type: Array,
+      required: true,
+    },
+    highlightedJob: {
+      type: String,
+      required: false,
+      default: '',
     },
   },
   data() {
@@ -81,7 +81,7 @@ export default {
   mounted() {
     if (!this.isPipelineDataEmpty) {
       this.getGraphDimensions();
-      this.drawJobLinks();
+      this.prepareLinkData();
     }
   },
   methods: {
@@ -92,19 +92,6 @@ export default {
       this.width = graphContainer.scrollWidth;
       this.height = graphContainer.scrollHeight;
     },
-    drawJobLinks() {
-      const { stages, jobs } = this.pipelineData;
-      console.log("%%%%%%%", stages, jobs, this.pipelineData);
-      const unwrappedGroups = this.unwrapPipelineData(stages);
-
-      try {
-        const parsedData = parseData(unwrappedGroups);
-        this.links = generateLinksData(parsedData, jobs, this.containerId);
-      } catch (err) {
-        console.log('DRAW_FAILURE', err);
-        this.$emit('error', DRAW_FAILURE);
-      }
-    },
     highlightNeeds(uniqueJobId) {
       // The first time we hover, we create the object where
       // we store all the data to properly highlight the needs.
@@ -114,17 +101,17 @@ export default {
 
       this.highlightedJob = uniqueJobId;
     },
-    unwrapPipelineData(stages) {
-      return stages
-        .map(({ name, groups }) => {
-          return groups.map(group => {
-            return { category: name, ...group };
-          });
-        })
-        .flat(2);
-    },
     isLinkHighlighted(linkRef) {
       return this.highlightedLinks.includes(linkRef);
+    },
+    prepareLinkData() {
+      try {
+        const arrayOfJobs = this.pipelineData.flatMap(({ groups }) => groups);
+        const parsedData = parseData(arrayOfJobs);
+        this.links = generateLinksData(parsedData, this.containerId);
+      } catch {
+        this.$emit('error', DRAW_FAILURE);
+      }
     },
     getLinkClasses(link) {
       return [
@@ -136,7 +123,7 @@ export default {
 };
 </script>
 <template>
-  <div class="gl-display-flex">
+  <div class="gl-display-flex gl-relative">
     <svg :viewBox="viewBox" :width="`${width}px`" :height="`${height}px`" class="gl-absolute" id="link-svg">
       <template>
         <path
