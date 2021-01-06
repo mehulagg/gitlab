@@ -5,13 +5,12 @@ import Translate from '~/vue_shared/translate';
 import GlFeatureFlagsPlugin from '~/vue_shared/gl_feature_flags_plugin';
 import { addSubscription, removeSubscription } from '~/jira_connect/api';
 import JiraConnectApp from './components/app.vue';
-import createStore from './store';
+import { mutations } from './store';
 
 /**
  * Initialize form handlers for the Jira Connect app
- * @param {object} store - object created with `createStore` builder
  */
-const initJiraFormHandlers = (store) => {
+const initJiraFormHandlers = () => {
   const reqComplete = () => {
     AP.navigator.reload();
   };
@@ -19,7 +18,7 @@ const initJiraFormHandlers = (store) => {
   const reqFailed = (res, fallbackErrorMessage) => {
     const { responseJSON: { error = fallbackErrorMessage } = {} } = res || {};
 
-    store.setErrorMessage(error);
+    mutations.setErrorMessage(error);
   };
 
   if (typeof AP.getLocation === 'function') {
@@ -55,10 +54,9 @@ const initJiraFormHandlers = (store) => {
 };
 
 function initJiraConnect() {
-  const store = createStore();
   const el = document.querySelector('.js-jira-connect-app');
 
-  initJiraFormHandlers(store);
+  initJiraFormHandlers();
 
   if (!el) {
     return null;
@@ -70,9 +68,6 @@ function initJiraConnect() {
 
   return new Vue({
     el,
-    data: {
-      state: store.state,
-    },
     render(createElement) {
       return createElement(JiraConnectApp, {});
     },

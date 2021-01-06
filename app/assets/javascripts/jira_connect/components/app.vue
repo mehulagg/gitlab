@@ -1,6 +1,7 @@
 <script>
 import { GlAlert } from '@gitlab/ui';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import { store } from '../store';
 
 export default {
   name: 'JiraConnectApp',
@@ -9,11 +10,8 @@ export default {
   },
   mixins: [glFeatureFlagsMixin()],
   computed: {
-    state() {
-      return this.$root.$data.state || {};
-    },
-    error() {
-      return this.state.error;
+    errorMessage() {
+      return store.errorMessage;
     },
     showNewUi() {
       return this.glFeatures.newJiraConnectUi;
@@ -24,12 +22,12 @@ export default {
 
 <template>
   <div>
-    <gl-alert v-if="error" variant="danger" :dismissible="false">
-      {{ error }}
+    <gl-alert v-if="errorMessage" variant="danger" :dismissible="false">
+      {{ errorMessage }}
     </gl-alert>
 
     <div v-if="showNewUi">
-      <h3>{{ s__('Integrations|Linked namespaces') }}</h3>
+      <h3 data-testid="new-jira-connect-ui-heading">{{ s__('Integrations|Linked namespaces') }}</h3>
     </div>
   </div>
 </template>
