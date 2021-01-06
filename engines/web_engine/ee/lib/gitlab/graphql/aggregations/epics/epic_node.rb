@@ -88,7 +88,7 @@ module Gitlab
             # {iid: 1, epic_state_id: 1, issues_count: 1, issues_weight_sum: 2, parent_id: nil, issues_state_id: 2}
             if type == EPIC_TYPE
               # can only be COUNT
-              children.select { |node| node.epic_state_id == state }.count
+              children.count { |node| node.epic_state_id == state }
             else
               matching_record = epic_info_flat_list.find do |record|
                 record[:issues_state_id] == state
