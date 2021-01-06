@@ -8,9 +8,9 @@ describe('RotationAssignee', () => {
   let wrapper;
 
   const assignee = mockRotations[0].participants.nodes[1];
-  const findToken = () => wrapper.find(GlToken);
-  const findAvatar = () => wrapper.find(GlAvatarLabeled);
-  const findPopOver = () => wrapper.find(GlPopover);
+  const findToken = () => wrapper.findComponent(GlToken);
+  const findAvatar = () => wrapper.findComponent(GlAvatarLabeled);
+  const findPopOver = () => wrapper.findComponent(GlPopover);
   const findStartsAt = () => wrapper.findByTestId('rotation-assignee-starts-at');
   const findEndsAt = () => wrapper.findByTestId('rotation-assignee-ends-at');
 

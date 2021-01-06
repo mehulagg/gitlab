@@ -25,8 +25,8 @@ ELSIF (TG_OP = 'UPDATE') THEN
     created_at = NEW.created_at,
     ip_address = NEW.ip_address,
     author_name = NEW.author_name,
-    entity_path = NEW.entity_path,
     target_details = NEW.target_details,
+    entity_path = NEW.entity_path,
     target_type = NEW.target_type,
     target_id = NEW.target_id
   WHERE audit_events_archived.id = NEW.id;
@@ -39,8 +39,8 @@ ELSIF (TG_OP = 'INSERT') THEN
     created_at,
     ip_address,
     author_name,
-    entity_path,
     target_details,
+    entity_path,
     target_type,
     target_id)
   VALUES (NEW.id,
@@ -51,8 +51,8 @@ ELSIF (TG_OP = 'INSERT') THEN
     NEW.created_at,
     NEW.ip_address,
     NEW.author_name,
-    NEW.entity_path,
     NEW.target_details,
+    NEW.entity_path,
     NEW.target_type,
     NEW.target_id);
 END IF;
@@ -71,15 +71,13 @@ CREATE TABLE audit_events (
     details text,
     ip_address inet,
     author_name text,
-    entity_path text,
     target_details text,
+    entity_path text,
     created_at timestamp without time zone NOT NULL,
     target_type text,
     target_id bigint,
-    CONSTRAINT check_492aaa021d CHECK ((char_length(entity_path) <= 5500)),
     CONSTRAINT check_83ff8406e2 CHECK ((char_length(author_name) <= 255)),
-    CONSTRAINT check_97a8c868e7 CHECK ((char_length(target_type) <= 255)),
-    CONSTRAINT check_d493ec90b5 CHECK ((char_length(target_details) <= 5500))
+    CONSTRAINT check_97a8c868e7 CHECK ((char_length(target_type) <= 255))
 )
 PARTITION BY RANGE (created_at);
 
@@ -9346,8 +9344,6 @@ CREATE TABLE application_settings (
     elasticsearch_indexed_file_size_limit_kb integer DEFAULT 1024 NOT NULL,
     enforce_namespace_storage_limit boolean DEFAULT false NOT NULL,
     container_registry_delete_tags_service_timeout integer DEFAULT 250 NOT NULL,
-    kroki_url character varying,
-    kroki_enabled boolean,
     elasticsearch_client_request_timeout integer DEFAULT 0 NOT NULL,
     gitpod_enabled boolean DEFAULT false NOT NULL,
     gitpod_url text DEFAULT 'https://gitpod.io/'::text,
@@ -9358,27 +9354,29 @@ CREATE TABLE application_settings (
     encrypted_ci_jwt_signing_key text,
     encrypted_ci_jwt_signing_key_iv text,
     container_registry_expiration_policies_worker_capacity integer DEFAULT 0 NOT NULL,
-    elasticsearch_analyzers_smartcn_enabled boolean DEFAULT false NOT NULL,
-    elasticsearch_analyzers_smartcn_search boolean DEFAULT false NOT NULL,
-    elasticsearch_analyzers_kuromoji_enabled boolean DEFAULT false NOT NULL,
-    elasticsearch_analyzers_kuromoji_search boolean DEFAULT false NOT NULL,
     secret_detection_token_revocation_enabled boolean DEFAULT false NOT NULL,
     secret_detection_token_revocation_url text,
     encrypted_secret_detection_token_revocation_token text,
     encrypted_secret_detection_token_revocation_token_iv text,
+    elasticsearch_analyzers_smartcn_enabled boolean DEFAULT false NOT NULL,
+    elasticsearch_analyzers_smartcn_search boolean DEFAULT false NOT NULL,
+    elasticsearch_analyzers_kuromoji_enabled boolean DEFAULT false NOT NULL,
+    elasticsearch_analyzers_kuromoji_search boolean DEFAULT false NOT NULL,
+    new_user_signups_cap integer,
     domain_denylist_enabled boolean DEFAULT false,
     domain_denylist text,
     domain_allowlist text,
-    new_user_signups_cap integer,
     encrypted_cloud_license_auth_token text,
     encrypted_cloud_license_auth_token_iv text,
     secret_detection_revocation_token_types_url text,
     cloud_license_enabled boolean DEFAULT false NOT NULL,
+    kroki_url text,
+    kroki_enabled boolean DEFAULT false NOT NULL,
     disable_feed_token boolean DEFAULT false NOT NULL,
     personal_access_token_prefix text,
     rate_limiting_response_text text,
     CONSTRAINT app_settings_registry_exp_policies_worker_capacity_positive CHECK ((container_registry_expiration_policies_worker_capacity >= 0)),
-    CONSTRAINT check_17d9558205 CHECK ((char_length((kroki_url)::text) <= 1024)),
+    CONSTRAINT check_17d9558205 CHECK ((char_length(kroki_url) <= 1024)),
     CONSTRAINT check_2dba05b802 CHECK ((char_length(gitpod_url) <= 255)),
     CONSTRAINT check_51700b31b5 CHECK ((char_length(default_branch_name) <= 255)),
     CONSTRAINT check_57123c9593 CHECK ((char_length(help_page_documentation_base_url) <= 255)),
@@ -9635,8 +9633,8 @@ CREATE TABLE audit_events_archived (
     created_at timestamp without time zone,
     ip_address inet,
     author_name text,
-    entity_path text,
     target_details text,
+    entity_path text,
     target_type text,
     target_id bigint,
     CONSTRAINT check_492aaa021d CHECK ((char_length(entity_path) <= 5500)),
@@ -17966,8 +17964,8 @@ CREATE TABLE web_hooks (
     encrypted_url character varying,
     encrypted_url_iv character varying,
     deployment_events boolean DEFAULT false NOT NULL,
-    releases_events boolean DEFAULT false NOT NULL,
     feature_flag_events boolean DEFAULT false NOT NULL,
+    releases_events boolean DEFAULT false NOT NULL,
     member_events boolean DEFAULT false NOT NULL
 );
 
@@ -20609,7 +20607,7 @@ CREATE INDEX backup_labels_group_id_title_idx ON backup_labels USING btree (grou
 
 CREATE INDEX backup_labels_project_id_idx ON backup_labels USING btree (project_id);
 
-CREATE UNIQUE INDEX backup_labels_project_id_title_idx ON backup_labels USING btree (project_id, title) WHERE (group_id = NULL::integer);
+CREATE INDEX backup_labels_project_id_title_idx ON backup_labels USING btree (project_id, title) WHERE (group_id = NULL::integer);
 
 CREATE INDEX backup_labels_template_idx ON backup_labels USING btree (template) WHERE template;
 
@@ -21814,6 +21812,8 @@ CREATE UNIQUE INDEX index_label_priorities_on_project_id_and_label_id ON label_p
 CREATE UNIQUE INDEX index_labels_on_group_id_and_project_id_and_title ON labels USING btree (group_id, project_id, title);
 
 CREATE UNIQUE INDEX index_labels_on_group_id_and_title_unique ON labels USING btree (group_id, title) WHERE (project_id IS NULL);
+
+CREATE INDEX index_labels_on_group_id_and_title_with_null_project_id ON labels USING btree (group_id, title) WHERE (project_id IS NULL);
 
 CREATE INDEX index_labels_on_project_id ON labels USING btree (project_id);
 

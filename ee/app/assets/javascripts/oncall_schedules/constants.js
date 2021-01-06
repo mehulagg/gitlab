@@ -11,6 +11,8 @@ export const CHEVRON_SKIPPING_PALETTE_ENUM = ['blue', 'orange', 'aqua', 'green',
 export const DAYS_IN_WEEK = 7;
 export const HOURS_IN_DAY = 24;
 
+export const TIMELINE_CELL_MIN_WIDTH = 180;
+
 export const PRESET_TYPES = {
   WEEKS: 'WEEKS',
 };

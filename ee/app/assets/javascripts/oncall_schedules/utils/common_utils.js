@@ -19,19 +19,6 @@ export const getFormattedTimezone = (tz) => {
 };
 
 /**
- * Returns formatted date of the rotation assignee
- * based on the rotation start time and length
- *
- * @param {Date} startDate
- * @param {Number} daysToAdd
- *
- * @returns {Date}
- */
-export const assigneeScheduleDateStart = (startDate, daysToAdd) => {
-  return getDateInFuture(startDate, daysToAdd);
-};
-
-/**
  * Returns `true` for non-empty string, otherwise returns `false`
  *
  * @param {String} startDate

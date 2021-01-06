@@ -12,6 +12,14 @@ export default () => {
 
   const { projectPath, emptyOncallSchedulesSvgPath, timezones } = el.dataset;
 
+
+
+  apolloProvider.clients.defaultClient.cache.writeData({
+    data: {
+      shiftTimeUnitWidth: 0,
+    },
+  });
+
   return new Vue({
     el,
     apolloProvider,

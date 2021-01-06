@@ -1,5 +1,6 @@
 <script>
-import CommonMixin from '../../../../mixins/common_mixin';
+import updateShiftTimeUnitWidthMutation from 'ee/oncall_schedules/graphql/mutations/update_shift_time_unit_width.mutation.graphql';
+import CommonMixin from 'ee/oncall_schedules/mixins/common_mixin';
 
 export default {
   mixins: [CommonMixin],
@@ -26,6 +27,14 @@ export default {
       return headerSubItems;
     },
   },
+  mounted() {
+    this.$apollo.mutate({
+      mutation: updateShiftTimeUnitWidthMutation,
+      variables: {
+        shiftTimeUnitWidth: this.$refs.weeklyDayCell[0].offsetWidth,
+      },
+    });
+  },
   methods: {
     getSubItemValueClass(subItem) {
       // Show dark color text only for current & upcoming dates
@@ -45,6 +54,7 @@ export default {
     <span
       v-for="(subItem, index) in headerSubItems"
       :key="index"
+      ref="weeklyDayCell"
       :class="getSubItemValueClass(subItem)"
       class="sublabel-value"
       data-testid="sublabel-value"

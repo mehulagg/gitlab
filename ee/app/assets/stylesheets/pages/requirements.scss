@@ -123,6 +123,7 @@
     border-left: 1px solid $gray-100;
 
     @include media-breakpoint-down(sm) {
+      min-width: unset;
       width: 100%;
     }
 
