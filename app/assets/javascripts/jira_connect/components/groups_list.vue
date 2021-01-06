@@ -3,6 +3,7 @@ import { GlTabs, GlTab, GlLoadingIcon, GlPagination } from '@gitlab/ui';
 import { parseIntPagination, normalizeHeaders } from '~/lib/utils/common_utils';
 import { fetchGroups } from '~/jira_connect/api';
 import { defaultPerPage } from '~/jira_connect/constants';
+import GroupsListItem from './groups_list_item.vue';
 
 export default {
   components: {
@@ -10,6 +11,7 @@ export default {
     GlTab,
     GlLoadingIcon,
     GlPagination,
+    GroupsListItem,
   },
   inject: {
     groupsPath: {
@@ -70,21 +72,20 @@ export default {
         </template>
         <template v-else>
           <ul class="gl-list-style-none gl-pl-0">
-            <li v-for="group in groups" :key="group.id">{{ group.name }}</li>
-            <!-- <groups-list-item
-              v-for="namespace in namespaces"
-              :key="namespace.id"
-              :group="namespace"
-            /> -->
+            <groups-list-item v-for="group in groups" :key="group.id" :group="group" />
           </ul>
         </template>
-        <gl-pagination
-          v-if="totalItems > perPage && groups.length > 0"
-          v-model="page"
-          :per-page="perPage"
-          :total-items="totalItems"
-          @input="loadGroups"
-        />
+
+        <div class="gl-display-flex gl-justify-content-center gl-mt-5">
+          <gl-pagination
+            v-if="totalItems > perPage && groups.length > 0"
+            v-model="page"
+            class="gl-mb-0"
+            :per-page="perPage"
+            :total-items="totalItems"
+            @input="loadGroups"
+          />
+        </div>
       </gl-tab>
     </gl-tabs>
   </div>
