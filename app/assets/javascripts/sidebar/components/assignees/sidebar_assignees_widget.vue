@@ -117,6 +117,11 @@ export default {
       return gon?.current_username;
     },
   },
+  watch: {
+    assignees() {
+      this.selected = cloneDeep(this.assignees);
+    },
+  },
   methods: {
     updateAssignees(assigneeUsernames) {
       this.isSettingAssignees = true;

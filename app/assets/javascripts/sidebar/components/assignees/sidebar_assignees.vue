@@ -6,12 +6,14 @@ import { convertToGraphQLId } from '~/graphql_shared/utils';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import SidebarAssigneesWidget from '~/sidebar/components/assignees/sidebar_assignees_widget.vue';
 import getIssueParticipants from '~/vue_shared/components/sidebar/queries/getIssueParticipants.query.graphql';
+import updateAssigneesMutation from '~/vue_shared/components/sidebar/queries/updateAssignees.mutation.graphql';
 import AssigneesRealtime from './assignees_realtime.vue';
 import { __ } from '~/locale';
 
 export default {
   name: 'SidebarAssignees',
   getIssueParticipants,
+  updateAssigneesMutation,
   components: {
     AssigneesRealtime,
     SidebarAssigneesWidget,
@@ -63,6 +65,12 @@ export default {
       /* eslint-disable-next-line @gitlab/require-i18n-strings */
       return convertToGraphQLId('Issue', this.issuableIid);
     },
+    updateAssigneesVariables() {
+      return {
+        iid: this.issuableIid,
+        projectPath: this.projectPath,
+      };
+    },
   },
   created() {
     this.removeAssignee = this.store.removeAssignee.bind(this.store);
@@ -106,8 +114,8 @@ export default {
       :assignees="mediator.store.assignees"
       :assignees-query="$options.getIssueParticipants"
       :issuable-id="graphqlIssuableId"
-      :update-assignees-mutation="{}"
-      :update-assignees-variables="{}"
+      :update-assignees-mutation="$options.updateAssigneesMutation"
+      :update-assignees-variables="updateAssigneesVariables"
     />
   </div>
 </template>
