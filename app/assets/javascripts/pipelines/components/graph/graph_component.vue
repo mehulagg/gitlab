@@ -107,6 +107,7 @@ export default {
         :pipeline-data="graph"
         :container-id="$options.CONTAINER_ID"
         :container-ref="$options.CONTAINER_REF"
+        :highlighted-job="hoveredJobName"
       >
         <linked-graph-wrapper>
           <template #upstream>
@@ -128,6 +129,7 @@ export default {
               :job-hovered="hoveredJobName"
               :pipeline-expanded="pipelineExpanded"
               @refreshPipelineGraph="$emit('refreshPipelineGraph')"
+              @jobHover="setJob"
             />
           </template>
           <template #downstream>

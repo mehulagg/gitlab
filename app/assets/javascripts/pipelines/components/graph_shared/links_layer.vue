@@ -2,8 +2,7 @@
 import { isEmpty } from 'lodash';
 import { generateLinksData } from './drawing_utils';
 import { parseData } from '../parsing_utils';
-import { generateJobNeedsDict } from '../../utils';
-
+import { createJobsHash, generateJobNeedsDict } from '../../utils';
 import { DRAW_FAILURE } from '../../constants';
 
 export default {
@@ -44,6 +43,11 @@ export default {
       return isEmpty(this.pipelineData);
     },
     highlightedJobs() {
+      if (!this.needsObject) {
+        const jobs = createJobsHash(this.pipelineData);
+        this.needsObject = generateJobNeedsDict(jobs) ?? {};
+      }
+
       // If you are hovering on a job, then the jobs we want to highlight are:
       // The job you are currently hovering + all of its needs.
       return this.hasHighlightedJob
@@ -69,15 +73,6 @@ export default {
       return [0, 0, this.width, this.height];
     },
   },
-  watch: {
-    highlightedJob() {
-      if (!this.needsObject) {
-        this.needsObject = generateJobNeedsDict(this.pipelineData) ?? {};
-      }
-
-      this.$emit('on-highlighted-jobs-change', this.highlightedJobs);
-    },
-  },
   mounted() {
     if (!this.isPipelineDataEmpty) {
       this.getGraphDimensions();
@@ -91,15 +86,6 @@ export default {
 
       this.width = graphContainer.scrollWidth;
       this.height = graphContainer.scrollHeight;
-    },
-    highlightNeeds(uniqueJobId) {
-      // The first time we hover, we create the object where
-      // we store all the data to properly highlight the needs.
-      if (!this.needsObject) {
-        this.needsObject = generateJobNeedsDict(this.pipelineData) ?? {};
-      }
-
-      this.highlightedJob = uniqueJobId;
     },
     isLinkHighlighted(linkRef) {
       return this.highlightedLinks.includes(linkRef);

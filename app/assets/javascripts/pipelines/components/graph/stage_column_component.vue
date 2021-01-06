@@ -90,6 +90,8 @@ export default {
         :key="getGroupId(group)"
         data-testid="stage-column-group"
         class="gl-relative gl-mb-3 gl-white-space-normal gl-pipeline-job-width"
+        @mouseenter="$emit('jobHover', group.name)"
+        @mouseleave="$emit('jobHover', '')"
       >
         <job-item
           v-if="group.size === 1"
