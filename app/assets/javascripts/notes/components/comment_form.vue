@@ -3,7 +3,7 @@ import $ from 'jquery';
 import { mapActions, mapGetters, mapState } from 'vuex';
 import { isEmpty } from 'lodash';
 import Autosize from 'autosize';
-import { GlButton, GlIcon } from '@gitlab/ui';
+import { GlButton, GlDropdown, GlDropdownItem, GlDropdownDivider } from '@gitlab/ui';
 import { __, sprintf } from '~/locale';
 import TimelineEntryItem from '~/vue_shared/components/notes/timeline_entry_item.vue';
 import { deprecatedCreateFlash as Flash } from '~/flash';
@@ -27,6 +27,15 @@ import issuableStateMixin from '../mixins/issuable_state';
 
 export default {
   name: 'CommentForm',
+  i18n: {
+    submitButton: {
+      startThread: __('Start thread'),
+      comment: __('Comment'),
+      commentHelp: __('Add a general comment to this %{noteableDisplayName}.'),
+    },
+  },
+  noteTypeComment: constants.COMMENT,
+  noteTypeDiscussion: constants.DISCUSSION,
   components: {
     NoteableWarning,
     noteSignedOutWidget,
@@ -35,7 +44,9 @@ export default {
     userAvatarLink,
     GlButton,
     TimelineEntryItem,
-    GlIcon,
+    GlDropdown,
+    GlDropdownItem,
+    GlDropdownDivider,
   },
   mixins: [glFeatureFlagsMixin(), issuableStateMixin],
   props: {
@@ -62,6 +73,12 @@ export default {
       'openState',
     ]),
     ...mapState(['isToggleStateButtonLoading']),
+    isNoteTypeComment() {
+      return this.noteType === constants.COMMENT;
+    },
+    isNoteTypeDiscussion() {
+      return this.noteType === constants.DISCUSSION;
+    },
     noteableDisplayName() {
       return splitCamelCase(this.noteableType).toLowerCase();
     },
@@ -75,6 +92,11 @@ export default {
       return this.getNoteableData.noteableType === constants.MERGE_REQUEST_NOTEABLE_TYPE
         ? __('Discuss a specific suggestion or question that needs to be resolved.')
         : __('Discuss a specific suggestion or question.');
+    },
+    commentDescription() {
+      return sprintf(this.$options.i18n.submitButton.commentHelp, {
+        noteableDisplayName: this.noteableDisplayName,
+      });
     },
     isOpen() {
       return this.openState === constants.OPENED || this.openState === constants.REOPENED;
@@ -260,6 +282,12 @@ export default {
     setNoteType(type) {
       this.noteType = type;
     },
+    setNoteTypeToComment() {
+      this.setNoteType(constants.COMMENT);
+    },
+    setNoteTypeToDiscussion() {
+      this.setNoteType(constants.DISCUSSION);
+    },
     editCurrentUserLastNote() {
       if (this.note === '') {
         const lastNote = this.getCurrentUserLastNote;
@@ -350,71 +378,40 @@ export default {
             </markdown-field>
 
             <div class="note-form-actions">
-              <div
-                class="btn-group gl-mr-3 comment-type-dropdown js-comment-type-dropdown droplab-dropdown"
+              <gl-dropdown
+                split
+                :text="commentButtonTitle"
+                class="gl-mr-3 js-comment-button js-comment-submit-button"
+                category="primary"
+                variant="success"
+                :disabled="isSubmitButtonDisabled"
+                data-testid="comment-button"
+                data-qa-selector="comment_button"
+                :data-track-label="trackingLabel"
+                data-track-event="click_button"
+                @click="handleSave()"
               >
-                <gl-button
-                  :disabled="isSubmitButtonDisabled"
-                  class="js-comment-button js-comment-submit-button"
-                  data-qa-selector="comment_button"
-                  data-testid="comment-button"
-                  type="submit"
-                  category="primary"
-                  variant="success"
-                  :data-track-label="trackingLabel"
-                  data-track-event="click_button"
-                  @click.prevent="handleSave()"
-                  >{{ commentButtonTitle }}</gl-button
+                <gl-dropdown-item
+                  is-check-item
+                  :is-checked="isNoteTypeComment"
+                  :selected="isNoteTypeComment"
+                  @click="setNoteTypeToComment()"
                 >
-                <gl-button
-                  :disabled="isSubmitButtonDisabled"
-                  name="button"
-                  category="primary"
-                  variant="success"
-                  class="note-type-toggle js-note-new-discussion dropdown-toggle"
-                  data-qa-selector="note_dropdown"
-                  data-display="static"
-                  data-toggle="dropdown"
-                  icon="chevron-down"
-                  :aria-label="__('Open comment type dropdown')"
-                />
-
-                <ul class="note-type-dropdown dropdown-open-top dropdown-menu">
-                  <li :class="{ 'droplab-item-selected': noteType === 'comment' }">
-                    <button
-                      type="button"
-                      class="btn btn-transparent"
-                      @click.prevent="setNoteType('comment')"
-                    >
-                      <gl-icon name="check" class="icon" />
-                      <div class="description">
-                        <strong>{{ __('Comment') }}</strong>
-                        <p>
-                          {{
-                            sprintf(__('Add a general comment to this %{noteableDisplayName}.'), {
-                              noteableDisplayName,
-                            })
-                          }}
-                        </p>
-                      </div>
-                    </button>
-                  </li>
-                  <li class="divider droplab-item-ignore"></li>
-                  <li :class="{ 'droplab-item-selected': noteType === 'discussion' }">
-                    <button
-                      data-qa-selector="discussion_menu_item"
-                      @click.prevent="setNoteType('discussion')"
-                    >
-                      <gl-icon name="check" class="icon" />
-                      <div class="description">
-                        <strong>{{ __('Start thread') }}</strong>
-                        <p>{{ startDiscussionDescription }}</p>
-                      </div>
-                    </button>
-                  </li>
-                </ul>
-              </div>
-
+                  <strong>{{ $options.i18n.submitButton.comment }}</strong>
+                  <div>{{ commentDescription }}</div>
+                </gl-dropdown-item>
+                <gl-dropdown-divider />
+                <gl-dropdown-item
+                  is-check-item
+                  :is-checked="isNoteTypeDiscussion"
+                  :selected="isNoteTypeDiscussion"
+                  data-qa-selector="discussion_menu_item"
+                  @click="setNoteTypeToDiscussion()"
+                >
+                  <strong>{{ $options.i18n.submitButton.startThread }}</strong>
+                  <div>{{ startDiscussionDescription }}</div>
+                </gl-dropdown-item>
+              </gl-dropdown>
               <gl-button
                 v-if="canToggleIssueState"
                 :loading="isToggleStateButtonLoading"

@@ -24,7 +24,7 @@ describe('issue_comment_form component', () => {
 
   const findCloseReopenButton = () => wrapper.find('[data-testid="close-reopen-button"]');
 
-  const findCommentButton = () => wrapper.find('[data-testid="comment-button"]');
+  const findCommentButton = () => wrapper.find('[data-testid="comment-button"] button');
 
   const findTextArea = () => wrapper.find('[data-testid="comment-field"]');
 
