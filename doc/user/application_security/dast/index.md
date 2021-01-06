@@ -758,6 +758,8 @@ A site profile contains the following:
 
 ## Site profile validation
 
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/233020) in GitLab 13.8.
+
 Site profile validation reduces the risk of running an active scan against the wrong website. A site
 must be validated before an active scan can be run against it. The methods of site validation are as
 follows:
