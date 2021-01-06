@@ -86,7 +86,7 @@ export default {
       },
       update(data) {
         if (this.isSearchEmpty) {
-          return data.issue?.participants?.nodes || [];
+          return data.issue?.participants?.nodes || data.project?.mergeRequest?.participants?.nodes;
         }
 
         return data.users?.nodes || [];
