@@ -719,10 +719,12 @@ An on-demand DAST scan:
 
 ### On-demand scan modes
 
-A on-demand scan can be run in active or passive mode. Passive mode is the default and runs a ZAP
-Baseline Scan. Active mode runs a ZAP Full Scan which is potentially harmful to the site being
-scanned. To minimize the risk of accidental damage, running an active scan requires a [validated site
-profile](#site-profile-validation).
+An on-demand scan can be run in active or passive mode:
+
+- _Passive mode_ is the default and runs a ZAP Baseline Scan.
+- _Active mode_ runs a ZAP Full Scan which is potentially harmful to the site being scanned. To
+   minimize the risk of accidental damage, running an active scan requires a [validated site
+   profile](#site-profile-validation).
 
 ### Run an on-demand DAST scan
 
@@ -757,16 +759,17 @@ A site profile contains the following:
 ## Site profile validation
 
 Site profile validation reduces the risk of running an active scan against the wrong website. A site
-must be validated before an active scan can be run against it. The methods of site validation are:
+must be validated before an active scan can be run against it. The methods of site validation are as
+follows:
 
-- Text file validation
-- Header validation
-
-Text file validation requires a text file be uploaded to a specific location on the target site.
-The text file is allocated a name that is unique to the project, with the same name as its content.
-Header validation requires a specific header be added to the target site. The header is allocated a
-name that is unique to the project. Both methods are equivalent in functionality. Use whichever
-is easiest.
+- _Text file validation_ requires a text file be uploaded to the target site. The text file is
+  allocated a name and content that is unique to the project. The validation process checks the
+  file's content.
+- _Header validation_ requires the header `Gitlab-On-Demand-DAST` be added to the target site,
+  with a value unique to the project. The validation process checks that the header is present, and
+  checks its value.
+  
+Both methods are equivalent in functionality. Use whichever is feasible.
 
 ### Create a site profile
 
@@ -803,8 +806,9 @@ To validate a site profile:
 1. Select **Validate target site** beside the profile to be validated.
 1. Select the validation method.
    1. For **Text file validation**:
-      1. Select the validation file listed in **Step 2**.
-      1. Upload the validation file to the server location listed in **Step 3**.
+      1. Download the validation file listed in **Step 2**.
+      1. Upload the validation file to the host. You can upload the file to the location in
+         **Step 3** or any location you prefer.
       1. Select **Validate**.
    1. For **Header validation**:
       1. Select the clipboard icon in **Step 2**.
