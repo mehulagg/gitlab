@@ -389,26 +389,20 @@ export const receiveValueStreamsSuccess = (
   return dispatch(FETCH_VALUE_STREAM_DATA);
 };
 
-export const fetchValueStreams = ({ commit, dispatch, getters, state }) => {
-  const {
-    featureFlags: { hasCreateMultipleValueStreams = false },
-  } = state;
+export const fetchValueStreams = ({ commit, dispatch, getters }) => {
   const { currentGroupPath } = getters;
 
-  if (hasCreateMultipleValueStreams) {
-    commit(types.REQUEST_VALUE_STREAMS);
+  commit(types.REQUEST_VALUE_STREAMS);
 
-    return Api.cycleAnalyticsValueStreams(currentGroupPath)
-      .then(({ data }) => dispatch('receiveValueStreamsSuccess', data))
-      .catch((error) => {
-        const {
-          response: { status },
-        } = error;
-        commit(types.RECEIVE_VALUE_STREAMS_ERROR, status);
-        throw error;
-      });
-  }
-  return dispatch(FETCH_VALUE_STREAM_DATA);
+  return Api.cycleAnalyticsValueStreams(currentGroupPath)
+    .then(({ data }) => dispatch('receiveValueStreamsSuccess', data))
+    .catch((error) => {
+      const {
+        response: { status },
+      } = error;
+      commit(types.RECEIVE_VALUE_STREAMS_ERROR, status);
+      throw error;
+    });
 };
 
 export const setFilters = ({ dispatch }) => {

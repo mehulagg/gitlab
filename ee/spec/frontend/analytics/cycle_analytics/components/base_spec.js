@@ -50,7 +50,6 @@ const defaultStubs = {
 const defaultFeatureFlags = {
   hasDurationChart: true,
   hasPathNavigation: false,
-  hasCreateMultipleValueStreams: false,
 };
 
 const [selectedValueStream] = mockData.valueStreams;
@@ -372,25 +371,8 @@ describe('Value Stream Analytics component', () => {
       );
     });
 
-    describe('hasCreateMultipleValueStreams = true', () => {
-      beforeEach(() => {
-        mock = new MockAdapter(axios);
-        mockRequiredRoutes(mock);
-      });
-
-      it('hides the value stream select component', () => {
-        displaysValueStreamSelect(false);
-      });
-
-      it('displays the value stream select component', async () => {
-        wrapper = await createComponent({
-          featureFlags: {
-            hasCreateMultipleValueStreams: true,
-          },
-        });
-
-        displaysValueStreamSelect(true);
-      });
+    it('displays the value stream select component', () => {
+      displaysValueStreamSelect(true);
     });
 
     it('displays the date range picker', () => {

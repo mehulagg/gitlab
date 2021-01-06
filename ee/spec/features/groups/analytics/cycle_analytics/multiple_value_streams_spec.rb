@@ -34,21 +34,6 @@ RSpec.describe 'Multiple value streams', :js do
     sign_in(user)
   end
 
-  # Adding this context as part of a fix for https://gitlab.com/gitlab-org/gitlab/-/issues/233439
-  # This can be removed when the feature flag is removed
-  context 'create multiple value streams disabled' do
-    before do
-      stub_feature_flags(value_stream_analytics_create_multiple_value_streams: false)
-
-      select_group
-    end
-
-    it 'displays the list of stages and duration chart' do
-      expect(page).to have_selector(stage_nav_selector, visible: true)
-      expect(page).to have_selector(duration_stage_selector, visible: true)
-    end
-  end
-
   def toggle_value_stream_dropdown
     value_stream_dropdown.click
   end
