@@ -203,9 +203,11 @@ module TestEnv
     end
 
     gitaly_pid = Integer(File.read(TMP_TEST_PATH.join('gitaly.pid')))
+    gitaly2_pid = Integer(File.read(TMP_TEST_PATH.join('gitaly2.pid')))
     praefect_pid = Integer(File.read(TMP_TEST_PATH.join('praefect.pid')))
 
     Kernel.at_exit { stop(gitaly_pid) }
+    Kernel.at_exit { stop(gitaly2_pid) }
     Kernel.at_exit { stop(praefect_pid) }
 
     wait('gitaly')
