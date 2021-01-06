@@ -85,7 +85,7 @@ RSpec.describe 'User closes/reopens a merge request', :js do
       end
 
       it 'can reopen a merge request' do
-        expect(find('.status-box')).to have_content 'Closed'
+        expect(find('.status-box')).to have_content 'I do not exist here'
 
         within '.timeline-content-form' do
           click_button 'Reopen merge request'
