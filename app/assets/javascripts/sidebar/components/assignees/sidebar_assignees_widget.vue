@@ -224,7 +224,7 @@ export default {
                   :size="32"
                   :label="item.name"
                   :sub-label="item.username"
-                  :src="item.avatarUrl || item.avatar"
+                  :src="item.avatarUrl || item.avatar || item.avatar_url"
                 />
               </gl-avatar-link>
             </gl-dropdown-item>
