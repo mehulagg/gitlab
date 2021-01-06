@@ -184,7 +184,7 @@ Note that the key of the username variable must be `DAST_USERNAME`
 and the key of the password variable must be `DAST_PASSWORD`.
 
 After DAST has authenticated with the application, all cookies are collected from the web browser.
-For each cookie a matching session token is created for use by ZAP. This ensures ZAP is recognised
+For each cookie a matching session token is created for use by ZAP. This ensures ZAP is recognized
 by the application as correctly authenticated.
 
 Other variables that are related to authenticated scans are:
