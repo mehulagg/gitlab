@@ -2,9 +2,9 @@
 import { isEmpty } from 'lodash';
 import { GlAlert } from '@gitlab/ui';
 import { __ } from '~/locale';
+import { generateLinksData } from '../graph_shared/drawing_utils';
 import JobPill from './job_pill.vue';
 import StagePill from './stage_pill.vue';
-import { generateLinksData } from './drawing_utils';
 import { parseData } from '../parsing_utils';
 import { unwrapArrayOfJobs } from '../unwrapping_utils';
 import { DRAW_FAILURE, DEFAULT, INVALID_CI_CONFIG, EMPTY_PIPELINE_DATA } from '../../constants';
