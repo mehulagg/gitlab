@@ -5,6 +5,10 @@ require 'spec_helper'
 RSpec.describe Gitlab::Auth::Ldap::Config do
   include LdapHelpers
 
+  before do
+    stub_ldap_setting(enabled: true)
+  end
+
   let(:config) { described_class.new('ldapmain') }
 
   def raw_cert
@@ -68,9 +72,24 @@ AtlErSqafbECNDSwS5BX8yDpu5yRBJ4xegO/rNlmb8ICRYkuJapD1xXicFOsmfUK
 
   describe '.servers' do
     it 'returns empty array if no server information is available' do
-      allow(Gitlab.config).to receive(:ldap).and_return('enabled' => false)
+      stub_ldap_setting(servers: {})
 
       expect(described_class.servers).to eq []
+    end
+  end
+
+  describe '.providers' do
+    before do
+      stub_ldap_setting(
+        'servers' => {
+          'main' => { 'provider_name' => 'ldapmain' },
+          'secondary' => { 'provider_name' => 'ldapsecondary' }
+        }
+      )
+    end
+
+    it 'returns one provider' do
+      expect(described_class.providers).to match_array(%w(ldapmain))
     end
   end
 
