@@ -1,0 +1,5 @@
+---
+title: Add push_notification as a OTP method for FortiAuthenticator
+merge_request: 50957
+author:
+type: added
