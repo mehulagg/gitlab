@@ -521,7 +521,7 @@ module API
       case headers['X-Sendfile-Type']
       when 'X-Sendfile'
         header['X-Sendfile'] = path
-        body
+        body('')
       else
         sendfile path
       end
