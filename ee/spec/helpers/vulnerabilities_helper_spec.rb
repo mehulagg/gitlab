@@ -38,10 +38,11 @@ RSpec.describe VulnerabilitiesHelper do
                     :issue_feedback,
                     :project,
                     :remediations,
-                    :solution)
+                    :solution,
+                    :uuid)
     end
 
-    let(:desired_serializer_fields) { %i[metadata identifiers name issue_feedback merge_request_feedback project project_fingerprint scanner] }
+    let(:desired_serializer_fields) { %i[metadata identifiers name issue_feedback merge_request_feedback project project_fingerprint scanner uuid] }
 
     before do
       vulnerability_serializer_stub = instance_double("VulnerabilitySerializer")
@@ -247,7 +248,8 @@ RSpec.describe VulnerabilitiesHelper do
         response: kind_of(Grape::Entity::Exposure::NestingExposure::OutputBuilder),
         evidence_source: anything,
         assets: kind_of(Array),
-        supporting_messages: kind_of(Array)
+        supporting_messages: kind_of(Array),
+        uuid: kind_of(String)
       )
 
       expect(subject[:location]['blob_path']).to match(kind_of(String))

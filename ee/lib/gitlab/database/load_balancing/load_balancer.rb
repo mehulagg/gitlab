@@ -12,7 +12,6 @@ module Gitlab
       # always returns a connection to the primary.
       class LoadBalancer
         CACHE_KEY = :gitlab_load_balancer_host
-        ENSURE_CACHING_KEY = 'ensure_caching'
 
         attr_reader :host_list
 
@@ -103,7 +102,6 @@ module Gitlab
             host.release_connection
           end
 
-          RequestStore.delete(ENSURE_CACHING_KEY)
           RequestStore.delete(CACHE_KEY)
         end
 
@@ -180,19 +178,8 @@ module Gitlab
 
         private
 
-        # TODO:
-        # Move enable_query_cache! to ConnectionPool (https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/database.rb#L223)
-        # when the feature flag is removed in https://gitlab.com/gitlab-org/gitlab/-/issues/276203.
         def ensure_caching!
-          # Feature (Flipper gem) reads the data from the database, and it would cause the infinite loop here.
-          # We need to ensure that the code below is executed only once, until the feature flag is removed.
-          return if RequestStore[ENSURE_CACHING_KEY]
-
-          RequestStore[ENSURE_CACHING_KEY] = true
-
-          if Feature.enabled?(:query_cache_for_load_balancing, default_enabled: true)
-            host.enable_query_cache!
-          end
+          host.enable_query_cache! unless host.query_cache_enabled
         end
       end
     end

@@ -103,14 +103,14 @@ describe('Security Dashboard component', () => {
       ${'createNewIssue'}                    | ${undefined} | ${'vulnerabilities/createIssue'}                | ${{ vulnerability: 'bar' }}
       ${'dismissVulnerability'}              | ${'bar'}     | ${'vulnerabilities/dismissVulnerability'}       | ${{ comment: 'bar', vulnerability: 'bar' }}
       ${'openDismissalCommentBox'}           | ${undefined} | ${'vulnerabilities/openDismissalCommentBox'}    | ${undefined}
-      ${'revertDismissVulnerability'}        | ${undefined} | ${'vulnerabilities/undoDismiss'}                | ${{ vulnerability: 'bar' }}
+      ${'revertDismissVulnerability'}        | ${undefined} | ${'vulnerabilities/revertDismissVulnerability'} | ${{ vulnerability: 'bar' }}
       ${'downloadPatch'}                     | ${undefined} | ${'vulnerabilities/downloadPatch'}              | ${{ vulnerability: 'bar' }}
     `(
       'dispatches the "$expectedDispatchedAction" action when the modal emits a "$emittedModalEvent" event',
       ({ emittedModalEvent, eventPayload, expectedDispatchedAction, expectedActionPayload }) => {
         store.state.vulnerabilities.modal.vulnerability = 'bar';
 
-        jest.spyOn(store, 'dispatch').mockImplementation();
+        jest.spyOn(store, 'dispatch').mockImplementation(() => Promise.resolve());
         wrapper.find(IssueModal).vm.$emit(emittedModalEvent, eventPayload);
 
         expect(store.dispatch).toHaveBeenCalledWith(

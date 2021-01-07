@@ -9,7 +9,7 @@ module EE
             namespace 'kubernetes' do
               before { check_agent_token }
 
-              namespace 'modules/cilium/network_alert' do
+              namespace 'modules/cilium_alert' do
                 desc 'POST network alerts' do
                   detail 'Creates network alert'
                 end
@@ -25,7 +25,7 @@ module EE
 
                   forbidden! unless project.feature_available?(:cilium_alerts)
 
-                  result = ::AlertManagement::NetworkAlertService.new(agent.project, params[:alert]).execute
+                  result = ::AlertManagement::NetworkAlertService.new(project, params[:alert]).execute
 
                   status result.http_status
                 end

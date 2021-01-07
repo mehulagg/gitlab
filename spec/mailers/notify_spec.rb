@@ -224,6 +224,10 @@ RSpec.describe Notify do
           let(:model) { issue }
         end
 
+        it 'contains a link to the issue' do
+          is_expected.to have_body_text(issue.to_reference(full: false))
+        end
+
         it_behaves_like 'it should show Gmail Actions View Issue link'
         it_behaves_like 'an unsubscribeable thread'
         it_behaves_like 'appearance header and footer enabled'
@@ -1285,7 +1289,6 @@ RSpec.describe Notify do
     context 'for service desk issues' do
       before do
         issue.update!(external_author: 'service.desk@example.com')
-        issue.issue_email_participants.create!(email: 'service.desk@example.com')
       end
 
       def expect_sender(username)
@@ -1334,7 +1337,7 @@ RSpec.describe Notify do
       describe 'new note email' do
         let_it_be(:first_note) { create(:discussion_note_on_issue, note: 'Hello world') }
 
-        subject { described_class.service_desk_new_note_email(issue.id, first_note.id, 'service.desk@example.com') }
+        subject { described_class.service_desk_new_note_email(issue.id, first_note.id) }
 
         it_behaves_like 'an unsubscribeable thread'
 

@@ -19,8 +19,6 @@ module Security
     end
 
     def execute
-      return security_scan unless Feature.enabled?(:store_security_findings, project)
-
       StoreFindingsMetadataService.execute(security_scan, security_report)
       deduplicate_findings? ? update_deduplicated_findings : register_finding_keys
 

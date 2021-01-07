@@ -23,13 +23,13 @@ export default {
     };
   },
   computed: {
-    ...mapGetters({ issue: 'activeIssue', projectPathForActiveIssue: 'projectPathForActiveIssue' }),
+    ...mapGetters(['activeIssue', 'projectPathForActiveIssue']),
     hasWeight() {
-      return this.issue.weight > 0;
+      return this.activeIssue.weight > 0;
     },
   },
   watch: {
-    issue: {
+    activeIssue: {
       handler(updatedIssue) {
         this.weight = updatedIssue.weight;
       },
@@ -45,7 +45,7 @@ export default {
     async setWeight(provided) {
       const weight = provided ?? this.weight;
 
-      if (this.loading || weight === this.issue.weight) {
+      if (this.loading || weight === this.activeIssue.weight) {
         return;
       }
 
@@ -55,7 +55,7 @@ export default {
         await this.setActiveIssueWeight({ weight, projectPath: this.projectPathForActiveIssue });
         this.weight = weight;
       } catch (e) {
-        this.weight = this.issue.weight;
+        this.weight = this.activeIssue.weight;
         createFlash({ message: __('An error occurred when updating the issue weight') });
       } finally {
         this.loading = false;
@@ -74,7 +74,7 @@ export default {
   >
     <template v-if="hasWeight" #collapsed>
       <div class="gl-display-flex gl-align-items-center">
-        <strong class="gl-text-gray-900">{{ issue.weight }}</strong>
+        <strong class="gl-text-gray-900">{{ activeIssue.weight }}</strong>
         <span class="gl-mx-2">-</span>
         <gl-button
           variant="link"

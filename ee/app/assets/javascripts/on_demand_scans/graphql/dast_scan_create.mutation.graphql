@@ -1,0 +1,25 @@
+mutation dastScanCreate(
+  $fullPath: ID!
+  $name: String!
+  $description: String
+  $dastSiteProfileId: DastSiteProfileID!
+  $dastScannerProfileID: DastScannerProfileID!
+  $runAfterCreate: Boolean
+) {
+  dastScanCreate(
+    input: {
+      fullPath: $fullPath
+      name: $name
+      description: $description
+      dastSiteProfileId: $dastSiteProfileId
+      dastScannerProfileID: $dastScannerProfileID
+      runAfterCreate: $runAfterCreate
+    }
+  ) {
+    dastScan {
+      editPath
+    }
+    pipelineUrl
+    errors
+  }
+}

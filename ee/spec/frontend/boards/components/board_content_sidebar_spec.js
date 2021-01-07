@@ -4,7 +4,11 @@ import BoardContentSidebar from 'ee_component/boards/components/board_content_si
 import { stubComponent } from 'helpers/stub_component';
 import waitForPromises from 'helpers/wait_for_promises';
 import BoardAssigneeDropdown from '~/boards/components/board_assignee_dropdown.vue';
-import IssuableTitle from '~/boards/components/issuable_title.vue';
+import BoardSidebarLabelsSelect from '~/boards/components/sidebar/board_sidebar_labels_select.vue';
+import BoardSidebarIssueTitle from '~/boards/components/sidebar/board_sidebar_issue_title.vue';
+import BoardSidebarDueDate from '~/boards/components/sidebar/board_sidebar_due_date.vue';
+import BoardSidebarSubscription from '~/boards/components/sidebar/board_sidebar_subscription.vue';
+import BoardSidebarMilestoneSelect from '~/boards/components/sidebar/board_sidebar_milestone_select.vue';
 import { ISSUABLE } from '~/boards/constants';
 import { createStore } from '~/boards/stores';
 
@@ -16,7 +20,8 @@ describe('ee/BoardContentSidebar', () => {
     wrapper = shallowMount(BoardContentSidebar, {
       provide: {
         canUpdate: true,
-        rootPath: '',
+        rootPath: '/',
+        groupId: '#',
       },
       store,
       stubs: {
@@ -58,12 +63,28 @@ describe('ee/BoardContentSidebar', () => {
     expect(wrapper.find(GlDrawer).props('open')).toBe(true);
   });
 
-  it('finds IssuableTitle', () => {
-    expect(wrapper.find(IssuableTitle).props('title')).toContain('One');
-  });
-
   it('renders BoardAssigneeDropdown', () => {
     expect(wrapper.find(BoardAssigneeDropdown).exists()).toBe(true);
+  });
+
+  it('renders BoardSidebarLabelsSelect', () => {
+    expect(wrapper.find(BoardSidebarLabelsSelect).exists()).toBe(true);
+  });
+
+  it('renders BoardSidebarIssueTitle', () => {
+    expect(wrapper.find(BoardSidebarIssueTitle).exists()).toBe(true);
+  });
+
+  it('renders BoardSidebarDueDate', () => {
+    expect(wrapper.find(BoardSidebarDueDate).exists()).toBe(true);
+  });
+
+  it('renders BoardSidebarSubscription', () => {
+    expect(wrapper.find(BoardSidebarSubscription).exists()).toBe(true);
+  });
+
+  it('renders BoardSidebarMilestoneSelect', () => {
+    expect(wrapper.find(BoardSidebarMilestoneSelect).exists()).toBe(true);
   });
 
   describe('when we emit close', () => {

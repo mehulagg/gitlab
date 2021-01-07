@@ -75,7 +75,9 @@ RSpec.describe 'Project > Members > Invite group and members', :js do
           page.find('body').click
           find('.btn-success').click
 
-          page.within('.project-members-groups') do
+          click_link 'Groups'
+
+          page.within('[data-testid="project-member-groups"]') do
             expect(page).to have_content(group_to_share_with.name)
           end
         end

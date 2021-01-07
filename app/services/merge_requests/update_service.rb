@@ -112,9 +112,11 @@ module MergeRequests
     end
 
     def handle_reviewers_change(merge_request, old_reviewers)
+      affected_reviewers = (old_reviewers + merge_request.reviewers) - (old_reviewers & merge_request.reviewers)
       create_reviewer_note(merge_request, old_reviewers)
       notification_service.async.changed_reviewer_of_merge_request(merge_request, current_user, old_reviewers)
       todo_service.reassigned_reviewable(merge_request, current_user, old_reviewers)
+      invalidate_cache_counts(merge_request, users: affected_reviewers.compact)
     end
 
     def create_branch_change_note(issuable, branch_type, old_branch, new_branch)
@@ -126,7 +128,21 @@ module MergeRequests
     override :handle_quick_actions
     def handle_quick_actions(merge_request)
       super
+
+      # Ensure this parameter does not get used as an attribute
+      rebase = params.delete(:rebase)
+
+      if rebase
+        rebase_from_quick_action(merge_request)
+        # Ignore "/merge" if "/rebase" is used to avoid an unexpected race
+        params.delete(:merge)
+      end
+
       merge_from_quick_action(merge_request) if params[:merge]
+    end
+
+    def rebase_from_quick_action(merge_request)
+      merge_request.rebase_async(current_user.id)
     end
 
     def merge_from_quick_action(merge_request)

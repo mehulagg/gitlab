@@ -7,6 +7,7 @@ import {
   GlTooltipDirective,
   GlIcon,
 } from '@gitlab/ui';
+import LocalStorageSync from '~/vue_shared/components/local_storage_sync.vue';
 import DevopsAdoptionTableCellFlag from './devops_adoption_table_cell_flag.vue';
 import DevopsAdoptionDeleteModal from './devops_adoption_delete_modal.vue';
 import {
@@ -14,17 +15,38 @@ import {
   DEVOPS_ADOPTION_STRINGS,
   DEVOPS_ADOPTION_SEGMENT_MODAL_ID,
   DEVOPS_ADOPTION_SEGMENT_DELETE_MODAL_ID,
+  DEVOPS_ADOPTION_SEGMENTS_TABLE_SORT_BY_STORAGE_KEY,
+  DEVOPS_ADOPTION_SEGMENTS_TABLE_SORT_DESC_STORAGE_KEY,
 } from '../constants';
+
+const NAME_HEADER = 'name';
+
+const formatter = (value, key, item) => {
+  if (key === NAME_HEADER) {
+    return value;
+  }
+
+  if (item.latestSnapshot && item.latestSnapshot[key] === false) {
+    return 1;
+  } else if (item.latestSnapshot && item.latestSnapshot[key]) {
+    return 2;
+  }
+
+  return 0;
+};
 
 const fieldOptions = {
   thClass: 'gl-bg-white! gl-text-gray-400',
   thAttr: { 'data-testid': DEVOPS_ADOPTION_TABLE_TEST_IDS.TABLE_HEADERS },
+  formatter,
+  sortable: true,
+  sortByFormatted: true,
 };
 
 const { table: i18n } = DEVOPS_ADOPTION_STRINGS;
 
 const headers = [
-  'name',
+  NAME_HEADER,
   'issueOpened',
   'mergeRequestOpened',
   'mergeRequestApproved',
@@ -41,6 +63,7 @@ export default {
     DevopsAdoptionTableCellFlag,
     GlButton,
     GlPopover,
+    LocalStorageSync,
     DevopsAdoptionDeleteModal,
     GlIcon,
   },
@@ -57,9 +80,12 @@ export default {
       key: 'actions',
       tdClass: 'actions-cell',
       ...fieldOptions,
+      sortable: false,
     },
   ],
   testids: DEVOPS_ADOPTION_TABLE_TEST_IDS,
+  sortByStorageKey: DEVOPS_ADOPTION_SEGMENTS_TABLE_SORT_BY_STORAGE_KEY,
+  sortDescStorageKey: DEVOPS_ADOPTION_SEGMENTS_TABLE_SORT_DESC_STORAGE_KEY,
   props: {
     segments: {
       type: Array,
@@ -70,6 +96,12 @@ export default {
       required: false,
       default: null,
     },
+  },
+  data() {
+    return {
+      sortBy: NAME_HEADER,
+      sortDesc: false,
+    };
   },
   methods: {
     popoverContainerId(name) {
@@ -89,9 +121,23 @@ export default {
 </script>
 <template>
   <div>
+    <local-storage-sync
+      v-model="sortBy"
+      :storage-key="$options.sortByStorageKey"
+      :data-testid="$options.testids.LOCAL_STORAGE_SORT_BY"
+      as-json
+    />
+    <local-storage-sync
+      v-model="sortDesc"
+      :storage-key="$options.sortDescStorageKey"
+      :data-testid="$options.testids.LOCAL_STORAGE_SORT_DESC"
+      as-json
+    />
     <gl-table
       :fields="$options.tableHeaderFields"
       :items="segments"
+      :sort-by.sync="sortBy"
+      :sort-desc.sync="sortDesc"
       thead-class="gl-border-t-0 gl-border-b-solid gl-border-b-1 gl-border-b-gray-100"
       stacked="sm"
     >

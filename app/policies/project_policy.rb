@@ -135,10 +135,6 @@ class ProjectPolicy < BasePolicy
     ::Feature.enabled?(:build_service_proxy, @subject)
   end
 
-  condition(:project_bot_is_member) do
-    user.project_bot? & team_member?
-  end
-
   with_scope :subject
   condition(:packages_disabled) { !@subject.packages_enabled }
 
@@ -240,6 +236,7 @@ class ProjectPolicy < BasePolicy
     enable :read_commit_status
     enable :read_build
     enable :read_container_image
+    enable :read_deploy_board
     enable :read_pipeline
     enable :read_pipeline_schedule
     enable :read_environment
@@ -618,8 +615,6 @@ class ProjectPolicy < BasePolicy
   rule { resource_access_token_available & can?(:admin_project) }.policy do
     enable :admin_resource_access_tokens
   end
-
-  rule { project_bot_is_member & ~blocked }.enable :bot_log_in
 
   private
 

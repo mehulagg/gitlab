@@ -434,8 +434,8 @@ class Issue < ApplicationRecord
     moved_to || duplicated_to
   end
 
-  def email_participants_emails
-    issue_email_participants.pluck(:email)
+  def supports_assignee?
+    issue_type_supports?(:assignee)
   end
 
   private

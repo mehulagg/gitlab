@@ -11,8 +11,7 @@
                    dropdown_class: 'dropdown-menu-user dropdown-menu-selectable qa-allowed-to-push-dropdown capitalize-header', filter: true,
                    data: { input_id: 'push_access_levels_attributes', default_label: 'Select' } })
   .form-text.text-muted
-    Only groups that
-    = link_to 'have this project shared', help_page_path('user/project/members/share_project_with_groups')
-    can be added here
+    You can add only groups that have this project shared.
+    = link_to 'Learn more.', help_page_path('user/project/members/share_project_with_groups')
 
 = render 'projects/protected_branches/shared/create_protected_branch'

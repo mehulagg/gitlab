@@ -58,7 +58,7 @@ RSpec.describe Gitlab::Utils::UsageData do
       expect(described_class.estimate_batch_distinct_count(relation, 'column')).to eq(5)
     end
 
-    context 'quasi integration test for different counting parameters' do
+    context 'quasi integration test for different counting parameters', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/296169' } do
       let_it_be(:user) { create(:user, email: 'email1@domain.com') }
       let_it_be(:another_user) { create(:user, email: 'email2@domain.com') }
 
@@ -284,7 +284,7 @@ RSpec.describe Gitlab::Utils::UsageData do
     context 'when Prometheus server address is available from settings' do
       before do
         expect(Gitlab::Prometheus::Internal).to receive(:prometheus_enabled?).and_return(true)
-        expect(Gitlab::Prometheus::Internal).to receive(:server_address).and_return('prom:9090')
+        expect(Gitlab::Prometheus::Internal).to receive(:uri).and_return('http://prom:9090')
       end
 
       it_behaves_like 'try to query Prometheus with given address'
@@ -347,7 +347,7 @@ RSpec.describe Gitlab::Utils::UsageData do
       end
 
       it 'tracks redis hll event' do
-        expect(Gitlab::UsageDataCounters::HLLRedisCounter).to receive(:track_event).with(value, event_name)
+        expect(Gitlab::UsageDataCounters::HLLRedisCounter).to receive(:track_event).with(event_name, values: value)
 
         described_class.track_usage_event(event_name, value)
       end

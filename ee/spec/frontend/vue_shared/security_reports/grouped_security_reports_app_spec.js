@@ -56,7 +56,9 @@ describe('Grouped security reports app', () => {
     apiFuzzingHelpPath: 'path',
     pipelineId: 123,
     projectId: 321,
+    mrIid: 123,
     projectFullPath: 'path',
+    targetProjectFullPath: 'path',
     apiFuzzingComparisonPath: API_FUZZING_DIFF_ENDPOINT,
     containerScanningComparisonPath: CONTAINER_SCANNING_DIFF_ENDPOINT,
     coverageFuzzingComparisonPath: COVERAGE_FUZZING_DIFF_ENDPOINT,
@@ -77,6 +79,15 @@ describe('Grouped security reports app', () => {
   const createWrapper = (propsData, options, provide) => {
     wrapper = mount(GroupedSecurityReportsApp, {
       propsData,
+      mocks: {
+        $apollo: {
+          queries: {
+            reportArtifacts: {
+              loading: false,
+            },
+          },
+        },
+      },
       data() {
         return {
           dastSummary: defaultDastSummary,
@@ -357,11 +368,11 @@ describe('Grouped security reports app', () => {
         wrapper.vm.$el.querySelector('[aria-label="Vulnerability Name"]').click();
 
         return Vue.nextTick().then(() => {
-          expect(wrapper.vm.$el.querySelector('.modal-title').textContent.trim()).toEqual(
+          expect(document.querySelector('.modal-title').textContent.trim()).toEqual(
             mockFindings[0].name,
           );
 
-          expect(wrapper.vm.$el.querySelector('.modal-body').textContent).toContain(
+          expect(document.querySelector('.modal-body').textContent).toContain(
             mockFindings[0].solution,
           );
         });
@@ -401,6 +412,8 @@ describe('Grouped security reports app', () => {
         headBlobPath: 'path',
         pipelinePath,
         projectFullPath: 'path',
+        targetProjectFullPath: 'path',
+        mrIid: 123,
       });
     });
 

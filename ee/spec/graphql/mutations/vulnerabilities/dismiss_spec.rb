@@ -11,17 +11,17 @@ RSpec.describe Mutations::Vulnerabilities::Dismiss do
     let_it_be(:user) { create(:user) }
     let_it_be(:vulnerability_id) { GitlabSchema.id_from_object(vulnerability).to_s }
 
-    let(:comment) { 'Dismissal Feedbacl' }
+    let(:comment) { 'Dismissal Feedback' }
     let(:mutated_vulnerability) { subject[:vulnerability] }
 
-    subject { mutation.resolve(id: vulnerability_id, comment: comment) }
+    subject { mutation.resolve(id: vulnerability_id, comment: comment, dismissal_reason: 'used_in_tests') }
 
     context 'when the user can dismiss the vulnerability' do
       before do
         stub_licensed_features(security_dashboard: true)
       end
 
-      context 'when user doe not have access to the project' do
+      context 'when user does not have access to the project' do
         it 'raises an error' do
           expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
         end

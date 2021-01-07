@@ -1,4 +1,11 @@
-import { GlPagination, GlTable, GlAvatarLink, GlAvatarLabeled } from '@gitlab/ui';
+import {
+  GlPagination,
+  GlTable,
+  GlAvatarLink,
+  GlAvatarLabeled,
+  GlSearchBoxByType,
+  GlBadge,
+} from '@gitlab/ui';
 import { mount, shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
 import SubscriptionSeats from 'ee/billings/seat_usage/components/subscription_seats.vue';
@@ -8,8 +15,8 @@ const localVue = createLocalVue();
 localVue.use(Vuex);
 
 const actionSpies = {
-  setNamespaceId: jest.fn(),
   fetchBillableMembersList: jest.fn(),
+  resetMembers: jest.fn(),
 };
 
 const providedFields = {
@@ -52,7 +59,13 @@ describe('Subscription Seats', () => {
   };
 
   const findTable = () => wrapper.find(GlTable);
-  const findPageHeading = () => wrapper.find('[data-testid="heading"]');
+  const findTableEmptyText = () => findTable().attributes('empty-text');
+
+  const findPageHeading = () => wrapper.find('[data-testid="heading-info"]');
+  const findPageHeadingText = () => findPageHeading().find('[data-testid="heading-info-text"]');
+  const findPageHeadingBadge = () => findPageHeading().find(GlBadge);
+
+  const findSearchBox = () => wrapper.find(GlSearchBoxByType);
   const findPagination = () => wrapper.find(GlPagination);
 
   const serializeUser = (rowWrapper) => {
@@ -97,7 +110,7 @@ describe('Subscription Seats', () => {
     });
 
     it('correct actions are called on create', () => {
-      expect(actionSpies.fetchBillableMembersList).toHaveBeenCalledWith(expect.any(Object), 1);
+      expect(actionSpies.fetchBillableMembersList).toHaveBeenCalled();
     });
   });
 
@@ -118,8 +131,8 @@ describe('Subscription Seats', () => {
 
     describe('heading text', () => {
       it('contains the group name and total seats number', () => {
-        expect(findPageHeading().text()).toMatch(providedFields.namespaceName);
-        expect(findPageHeading().text()).toMatch('300');
+        expect(findPageHeadingText().text()).toMatch(providedFields.namespaceName);
+        expect(findPageHeadingBadge().text()).toMatch('300');
       });
     });
 
@@ -167,6 +180,90 @@ describe('Subscription Seats', () => {
 
     it('displays table in loading state', () => {
       expect(findTable().attributes('busy')).toBe('true');
+    });
+  });
+
+  describe('search box', () => {
+    beforeEach(() => {
+      wrapper = createComponent();
+    });
+
+    it('input event triggers the fetchBillableMembersList action', async () => {
+      const SEARCH_STRING = 'search string';
+
+      // fetchBillableMembersList is called once on created()
+      expect(actionSpies.fetchBillableMembersList).toHaveBeenCalledTimes(1);
+
+      await findSearchBox().vm.$emit('input', SEARCH_STRING);
+
+      // fetchBillableMembersList is triggered a second time on input
+      expect(actionSpies.fetchBillableMembersList).toHaveBeenCalledTimes(2);
+
+      // fetchBillableMembersList is triggered the second time with the correct argument
+      expect(actionSpies.fetchBillableMembersList.mock.calls[1][1]).toEqual({
+        search: SEARCH_STRING,
+      });
+    });
+  });
+
+  describe('typing inside of the search box', () => {
+    beforeEach(() => {
+      wrapper = createComponent();
+    });
+
+    it('causes the empty table text to change based on the number of typed characters', async () => {
+      const EMPTY_TEXT_TOO_SHORT = 'Enter at least three characters to search.';
+      const EMPTY_TEXT_NO_USERS = 'No users to display.';
+
+      expect(findTableEmptyText()).toBe(EMPTY_TEXT_TOO_SHORT);
+
+      await findSearchBox().vm.$emit('input', 'a');
+      expect(findTableEmptyText()).toBe(EMPTY_TEXT_TOO_SHORT);
+
+      await findSearchBox().vm.$emit('input', 'aa');
+      expect(findTableEmptyText()).toBe(EMPTY_TEXT_TOO_SHORT);
+
+      await findSearchBox().vm.$emit('input', 'aaa');
+      expect(findTableEmptyText()).toBe(EMPTY_TEXT_NO_USERS);
+    });
+
+    it('dispatches the resetMembers action when 1 or 2 characters have been typed', async () => {
+      expect(actionSpies.resetMembers).not.toHaveBeenCalled();
+
+      await findSearchBox().vm.$emit('input', 'a');
+      expect(actionSpies.resetMembers).toHaveBeenCalledTimes(1);
+
+      await findSearchBox().vm.$emit('input', 'aa');
+      expect(actionSpies.resetMembers).toHaveBeenCalledTimes(2);
+
+      await findSearchBox().vm.$emit('input', 'aaa');
+      expect(actionSpies.resetMembers).toHaveBeenCalledTimes(2);
+    });
+
+    it('dispatches fetchBillableMembersList action when search box is emptied out', async () => {
+      expect(actionSpies.fetchBillableMembersList).toHaveBeenCalledTimes(1);
+
+      await findSearchBox().vm.$emit('input', 'a');
+      expect(actionSpies.fetchBillableMembersList).toHaveBeenCalledTimes(1);
+
+      await findSearchBox().vm.$emit('input', '');
+      expect(actionSpies.fetchBillableMembersList).toHaveBeenCalledTimes(2);
+    });
+
+    it('dispatches fetchBillableMembersList action when more than 2 characters are typed', async () => {
+      expect(actionSpies.fetchBillableMembersList).toHaveBeenCalledTimes(1);
+
+      await findSearchBox().vm.$emit('input', 'a');
+      expect(actionSpies.fetchBillableMembersList).toHaveBeenCalledTimes(1);
+
+      await findSearchBox().vm.$emit('input', 'aa');
+      expect(actionSpies.fetchBillableMembersList).toHaveBeenCalledTimes(1);
+
+      await findSearchBox().vm.$emit('input', 'aaa');
+      expect(actionSpies.fetchBillableMembersList).toHaveBeenCalledTimes(2);
+
+      await findSearchBox().vm.$emit('input', 'aaaa');
+      expect(actionSpies.fetchBillableMembersList).toHaveBeenCalledTimes(3);
     });
   });
 });

@@ -39,7 +39,11 @@ describe('SidebarStatus', () => {
 
   beforeEach(() => {
     createMediator();
-    createWrapper();
+    createWrapper({
+      getters: {
+        getNoteableData: {},
+      },
+    });
   });
 
   afterEach(() => {

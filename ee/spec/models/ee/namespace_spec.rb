@@ -481,7 +481,7 @@ RSpec.describe Namespace do
       end
 
       context 'when feature not available in the plan' do
-        let(:feature) { :deploy_board }
+        let(:feature) { :cluster_deployments }
         let(:hosted_plan) { create(:bronze_plan) }
 
         it 'returns false' do

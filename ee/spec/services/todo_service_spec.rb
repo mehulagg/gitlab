@@ -168,6 +168,16 @@ RSpec.describe TodoService do
 
           include_examples 'todos creation'
         end
+
+        context 'when toggling task list items' do
+          before do
+            epic.update(description: "- [x] Task 1\n- [x] Task 2 FYI: #{mentions}")
+          end
+
+          it 'does not create todos' do
+            expect { execute }.not_to change { Todo.count }
+          end
+        end
       end
 
       describe '#new_note' do

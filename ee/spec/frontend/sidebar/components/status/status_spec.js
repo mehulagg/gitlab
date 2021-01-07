@@ -76,17 +76,54 @@ describe('Status', () => {
   });
 
   describe('edit button', () => {
-    it('is displayed when user can edit', () => {
+    it('is displayed when user can edit and the issue is open', () => {
       const props = {
         isEditable: true,
+        isOpen: true,
       };
 
       shallowMountStatus(props);
 
       expect(getEditButton(wrapper).exists()).toBe(true);
+      expect(getEditButton(wrapper).props().disabled).toBe(false);
     });
 
-    describe('when disabled', () => {
+    describe('when closed and user does not have permission', () => {
+      beforeEach(() => {
+        const props = {
+          isEditable: false,
+          isOpen: false,
+        };
+
+        shallowMountStatus(props);
+      });
+
+      it('does not render the edit button', () => {
+        expect(getEditButton(wrapper).exists()).toBe(false);
+      });
+    });
+
+    describe('when closed and user has permission', () => {
+      beforeEach(() => {
+        const props = {
+          isEditable: true,
+          isOpen: false,
+        };
+
+        shallowMountStatus(props);
+      });
+
+      it('will render a tooltip with an informative message', () => {
+        const tooltipTitle = 'Health status cannot be edited because this issue is closed';
+        expect(getEditButtonTooltipValue(wrapper).title).toBe(tooltipTitle);
+      });
+
+      it('is disabled', () => {
+        expect(getEditButton(wrapper).props().disabled).toBe(true);
+      });
+    });
+
+    describe('when the user does not have permission', () => {
       beforeEach(() => {
         const props = {
           isEditable: false,
@@ -94,13 +131,9 @@ describe('Status', () => {
 
         shallowMountStatus(props);
       });
-      it('is disabled when user cannot edit', () => {
-        expect(getEditButton(wrapper).attributes().disabled).toBe('true');
-      });
 
-      it('will render a tooltip with an informative message', () => {
-        const tooltipTitle = 'Health status cannot be edited because this issue is closed';
-        expect(getEditButtonTooltipValue(wrapper).title).toBe(tooltipTitle);
+      it('does not render the edit button', () => {
+        expect(getEditButton(wrapper).exists()).toBe(false);
       });
     });
   });
@@ -198,6 +231,7 @@ describe('Status', () => {
       beforeEach(() => {
         const props = {
           isEditable: true,
+          isOpen: true,
         };
 
         mountStatus(props);
@@ -215,6 +249,7 @@ describe('Status', () => {
       beforeEach(() => {
         const props = {
           isEditable: true,
+          isOpen: true,
         };
 
         mountStatus(props);

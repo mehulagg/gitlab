@@ -2,6 +2,7 @@
 
 module Analytics
   module DevopsAdoption
+    # Schedules update of snapshots for all segments
     class CreateAllSnapshotsWorker
       include ApplicationWorker
       # This worker does not perform work scoped to a context
@@ -14,10 +15,8 @@ module Analytics
 
       # rubocop: disable CodeReuse/ActiveRecord
       def perform
-        range_end = 1.month.ago.end_of_month
-
         ::Analytics::DevopsAdoption::Segment.all.pluck(:id).each.with_index do |segment_id, i|
-          CreateSnapshotWorker.perform_in(i * WORKERS_GAP, segment_id, range_end)
+          CreateSnapshotWorker.perform_in(i * WORKERS_GAP, segment_id, nil)
         end
       end
       # rubocop: enable CodeReuse/ActiveRecord

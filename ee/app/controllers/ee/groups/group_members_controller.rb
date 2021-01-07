@@ -26,7 +26,7 @@ module EE
       # rubocop:disable Gitlab/ModuleWithInstanceVariables
       # rubocop: disable CodeReuse/ActiveRecord
       def override
-        member = @group.members.find_by!(id: params[:id])
+        member = membershipable_members.find_by!(id: params[:id])
         updated_member = ::Members::UpdateService.new(current_user, override_params)
           .execute(member, permission: :override)
 

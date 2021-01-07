@@ -9,7 +9,6 @@ import {
   requestDastDiff,
   requestDependencyScanningDiff,
   requestCoverageFuzzingDiff,
-  openModal,
   setModalData,
   requestDismissVulnerability,
   receiveDismissVulnerability,
@@ -267,24 +266,6 @@ describe('security reports actions', () => {
           },
         ],
         [],
-        done,
-      );
-    });
-  });
-
-  describe('openModal', () => {
-    it('dispatches setModalData action', (done) => {
-      testAction(
-        openModal,
-        { issue: { id: 1 }, status: 'failed' },
-        mockedState,
-        [],
-        [
-          {
-            type: 'setModalData',
-            payload: { issue: { id: 1 }, status: 'failed' },
-          },
-        ],
         done,
       );
     });

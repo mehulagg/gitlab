@@ -313,7 +313,7 @@ RSpec.describe ApplicationSetting do
 
     it { is_expected.to validate_presence_of(:max_attachment_size) }
 
-    it do
+    specify do
       is_expected.to validate_numericality_of(:max_attachment_size)
         .only_integer
         .is_greater_than(0)
@@ -321,13 +321,13 @@ RSpec.describe ApplicationSetting do
 
     it { is_expected.to validate_presence_of(:max_import_size) }
 
-    it do
+    specify do
       is_expected.to validate_numericality_of(:max_import_size)
         .only_integer
         .is_greater_than_or_equal_to(0)
     end
 
-    it do
+    specify do
       is_expected.to validate_numericality_of(:local_markdown_version)
         .only_integer
         .is_greater_than_or_equal_to(0)
@@ -472,7 +472,7 @@ RSpec.describe ApplicationSetting do
       end
 
       [:gitaly_timeout_default, :gitaly_timeout_medium, :gitaly_timeout_fast].each do |timeout_name|
-        it do
+        specify do
           is_expected.to validate_presence_of(timeout_name)
           is_expected.to validate_numericality_of(timeout_name).only_integer
             .is_greater_than_or_equal_to(0)
@@ -733,6 +733,27 @@ RSpec.describe ApplicationSetting do
         is_expected.to be_invalid
       end
     end
+
+    context 'throttle_* settings' do
+      where(:throttle_setting) do
+        %i[
+          throttle_unauthenticated_requests_per_period
+          throttle_unauthenticated_period_in_seconds
+          throttle_authenticated_api_requests_per_period
+          throttle_authenticated_api_period_in_seconds
+          throttle_authenticated_web_requests_per_period
+          throttle_authenticated_web_period_in_seconds
+        ]
+      end
+
+      with_them do
+        it { is_expected.to allow_value(3).for(throttle_setting) }
+        it { is_expected.not_to allow_value(-3).for(throttle_setting) }
+        it { is_expected.not_to allow_value(0).for(throttle_setting) }
+        it { is_expected.not_to allow_value('three').for(throttle_setting) }
+        it { is_expected.not_to allow_value(nil).for(throttle_setting) }
+      end
+    end
   end
 
   context 'restrict creating duplicates' do
@@ -821,7 +842,7 @@ RSpec.describe ApplicationSetting do
       context 'validations' do
         it { is_expected.to validate_presence_of(:diff_max_patch_bytes) }
 
-        it do
+        specify do
           is_expected.to validate_numericality_of(:diff_max_patch_bytes)
           .only_integer
           .is_greater_than_or_equal_to(Gitlab::Git::Diff::DEFAULT_MAX_PATCH_BYTES)

@@ -14,7 +14,7 @@ export default class EETrialBanner {
   init() {
     // Wait for navbars to render before querying
     this.setCookies();
-    this.$trialBanner.on('close.bs.alert', (e) => this.handleTrialBannerDismiss(e));
+    this.$trialBanner.on('click', (e) => this.handleTrialBannerDismiss(e.target));
   }
 
   /**
@@ -93,7 +93,14 @@ export default class EETrialBanner {
     this.toggleSecondaryNavbarMargin(state);
   }
 
-  handleTrialBannerDismiss() {
+  handleTrialBannerDismiss(element) {
+    // Check if a close button was clicked inside the parent element
+    if (!element.classList.contains('js-close')) {
+      return;
+    }
+
+    // A closed button has been clicked, dismiss the banner and handle setting the cookie
+    this.toggleBanner(false);
     this.toggleMainNavbarMargin(false);
     this.toggleSecondaryNavbarMargin(false);
     if (Cookies.get(this.COOKIE_KEY)) {

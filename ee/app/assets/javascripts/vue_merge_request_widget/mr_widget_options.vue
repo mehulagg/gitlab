@@ -357,6 +357,8 @@ export default {
         :dependency-scanning-comparison-path="mr.dependencyScanningComparisonPath"
         :sast-comparison-path="mr.sastComparisonPath"
         :secret-scanning-comparison-path="mr.secretScanningComparisonPath"
+        :target-project-full-path="mr.targetProjectFullPath"
+        :mr-iid="mr.iid"
         class="js-security-widget"
       />
       <mr-widget-licenses

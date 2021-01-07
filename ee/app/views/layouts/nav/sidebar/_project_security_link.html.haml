@@ -1,3 +1,5 @@
+- on_demand_scans_path = Feature.enabled?(:dast_saved_scans, @project, default_enabled: :yaml) ? new_project_on_demand_scan_path(@project) : project_on_demand_scans_path(@project)
+
 - if any_project_nav_tab?([:security, :dependencies, :licenses, :audit_events])
   = nav_link(path: sidebar_security_paths) do
     = link_to top_level_link(@project), data: { qa_selector: top_level_qa_selector(@project) } do
@@ -24,7 +26,7 @@
 
       - if project_nav_tab?(:on_demand_scans)
         = nav_link(path: sidebar_on_demand_scans_paths) do
-          = link_to project_on_demand_scans_path(@project), title: s_('OnDemandScans|On-demand Scans'), data: { qa_selector: 'on_demand_scans_link' } do
+          = link_to on_demand_scans_path, title: s_('OnDemandScans|On-demand Scans'), data: { qa_selector: 'on_demand_scans_link' } do
             %span= s_('OnDemandScans|On-demand Scans')
 
       - if project_nav_tab?(:dependencies)

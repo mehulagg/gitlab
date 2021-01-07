@@ -1,5 +1,3 @@
-import $ from 'jquery';
-import 'vendor/jquery.scrollTo';
 import { find } from 'lodash';
 import AccessDropdown from '~/projects/settings/access_dropdown';
 import axios from '~/lib/utils/axios_utils';
@@ -68,7 +66,7 @@ export default class ProtectedTagEdit {
         });
       })
       .catch(() => {
-        $.scrollTo(0);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
         createFlash(s__('ProjectSettings|Failed to update tag!'));
       });
   }

@@ -928,6 +928,7 @@ describe('ee merge request widget options', () => {
     beforeEach(() => {
       gl.mrWidgetData = {
         ...mockData,
+        target_project_full_path: '',
         enabled_reports: {
           api_fuzzing: true,
         },

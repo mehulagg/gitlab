@@ -50,7 +50,9 @@ The DevOps Adoption tab shows you which segments of your organization are using 
 - Deploys
 - Scanning
 
-Segments are arbitrary collections of GitLab groups that you define. You might define a segment to represent a small team, a large department, or a whole organization. You are limited to creating a maximum of 20 segments, and each segment is limited to a maximum of 20 groups. Buttons to manage your segments appear in the DevOps Adoption section of the page.
+Segments are arbitrary collections of GitLab groups that you define. You might define a segment to represent a small team, a large department, or a whole organization. 
+You are limited to creating a maximum of 20 segments, and each segment is limited to a maximum of 20 groups. 
+Buttons to manage your segments appear in the DevOps Adoption section of the page.
 
 DevOps Adoption allows you to:
 
@@ -59,21 +61,3 @@ DevOps Adoption allows you to:
 - Find the groups that have adopted certain features and can provide guidance to other groups on how to use those features.
 
 ![DevOps Report](img/dev_ops_adoption_v13_7.png)
-
-### Disable or enable DevOps Adoption
-
-DevOps Adoption is deployed behind a feature flag that is **enabled by default**.
-[GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
-can opt to disable it.
-
-To disable it:
-
-```ruby
-Feature.disable(:devops_adoption_feature)
-```
-
-To enable it:
-
-```ruby
-Feature.enable(:devops_adoption_feature)
-```

@@ -1,4 +1,5 @@
 import { mount, shallowMount } from '@vue/test-utils';
+import { GlModal } from '@gitlab/ui';
 import Vue from 'vue';
 import IssueNote from 'ee/vue_shared/security_reports/components/issue_note.vue';
 import MergeRequestNote from 'ee/vue_shared/security_reports/components/merge_request_note.vue';
@@ -8,9 +9,14 @@ import createState from 'ee/vue_shared/security_reports/store/state';
 
 describe('Security Reports modal', () => {
   let wrapper;
+  let modal;
 
   const mountComponent = (propsData, mountFn = shallowMount) => {
     wrapper = mountFn(component, {
+      attrs: {
+        static: true,
+        visible: true,
+      },
       propsData: {
         isCreatingIssue: false,
         isDismissingVulnerability: false,
@@ -18,6 +24,7 @@ describe('Security Reports modal', () => {
         ...propsData,
       },
     });
+    modal = wrapper.find(GlModal);
   };
 
   describe('with permissions', () => {
@@ -37,13 +44,13 @@ describe('Security Reports modal', () => {
       });
 
       it('renders dismissal author and associated pipeline', () => {
-        expect(wrapper.text().trim()).toContain('John Smith');
-        expect(wrapper.text().trim()).toContain('@jsmith');
-        expect(wrapper.text().trim()).toContain('#123');
+        expect(modal.text().trim()).toContain('John Smith');
+        expect(modal.text().trim()).toContain('@jsmith');
+        expect(modal.text().trim()).toContain('#123');
       });
 
       it('renders the dismissal comment placeholder', () => {
-        expect(wrapper.find('.js-comment-placeholder')).not.toBeNull();
+        expect(modal.find('.js-comment-placeholder')).not.toBeNull();
       });
     });
 
@@ -61,9 +68,9 @@ describe('Security Reports modal', () => {
       });
 
       it('renders dismissal author and hides associated pipeline', () => {
-        expect(wrapper.text().trim()).toContain('John Smith');
-        expect(wrapper.text().trim()).toContain('@jsmith');
-        expect(wrapper.text().trim()).not.toContain('#123');
+        expect(modal.text().trim()).toContain('John Smith');
+        expect(modal.text().trim()).toContain('@jsmith');
+        expect(modal.text().trim()).not.toContain('#123');
       });
     });
 
@@ -137,7 +144,7 @@ describe('Security Reports modal', () => {
       });
 
       it('renders title', () => {
-        expect(wrapper.text()).toContain('Arbitrary file existence disclosure in Action Pack');
+        expect(modal.text()).toContain('Arbitrary file existence disclosure in Action Pack');
       });
     });
 
@@ -303,7 +310,7 @@ describe('Security Reports modal', () => {
   });
 
   describe('Solution Card', () => {
-    it('is rendered if the vulnerability has a solution', () => {
+    it('is rendered if the vulnerability has a solution', async () => {
       const propsData = {
         modal: createState().modal,
       };
@@ -311,15 +318,16 @@ describe('Security Reports modal', () => {
       const solution = 'Upgrade to XYZ';
       propsData.modal.vulnerability.solution = solution;
       mountComponent(propsData, mount);
+      await wrapper.vm.$nextTick();
 
-      const solutionCard = wrapper.find(SolutionCard);
+      const solutionCard = modal.find(SolutionCard);
 
       expect(solutionCard.exists()).toBe(true);
       expect(solutionCard.text()).toContain(solution);
-      expect(wrapper.find('hr').exists()).toBe(false);
+      expect(modal.find('hr').exists()).toBe(false);
     });
 
-    it('is rendered if the vulnerability has a remediation', () => {
+    it('is rendered if the vulnerability has a remediation', async () => {
       const propsData = {
         modal: createState().modal,
       };
@@ -327,6 +335,7 @@ describe('Security Reports modal', () => {
       const diff = 'foo';
       propsData.modal.vulnerability.remediations = [{ summary, diff }];
       mountComponent(propsData, mount);
+      await wrapper.vm.$nextTick();
 
       const solutionCard = wrapper.find(SolutionCard);
 
@@ -336,11 +345,12 @@ describe('Security Reports modal', () => {
       expect(wrapper.find('hr').exists()).toBe(false);
     });
 
-    it('is rendered if the vulnerability has neither a remediation nor a solution', () => {
+    it('is rendered if the vulnerability has neither a remediation nor a solution', async () => {
       const propsData = {
         modal: createState().modal,
       };
       mountComponent(propsData, mount);
+      await wrapper.vm.$nextTick();
 
       const solutionCard = wrapper.find(SolutionCard);
 

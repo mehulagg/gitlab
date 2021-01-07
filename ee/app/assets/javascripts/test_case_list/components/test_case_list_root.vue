@@ -1,6 +1,7 @@
 <script>
 import { GlButton } from '@gitlab/ui';
 
+import Api from '~/api';
 import { s__, __ } from '~/locale';
 import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
@@ -8,6 +9,7 @@ import { urlParamsToObject } from '~/lib/utils/common_utils';
 import { updateHistory, setUrlParams } from '~/lib/utils/url_utility';
 
 import IssuableList from '~/issuable_list/components/issuable_list_root.vue';
+import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
 import LabelToken from '~/vue_shared/components/filtered_search_bar/tokens/label_token.vue';
 
 import TestCaseListEmptyState from './test_case_list_empty_state.vue';
@@ -215,6 +217,17 @@ export default {
     },
     getFilteredSearchTokens() {
       return [
+        {
+          type: 'author_username',
+          icon: 'user',
+          title: __('Author'),
+          unique: true,
+          symbol: '@',
+          token: AuthorToken,
+          operators: [{ value: '=', description: __('is'), default: 'true' }],
+          fetchPath: this.projectFullPath,
+          fetchAuthors: Api.projectUsers.bind(Api),
+        },
         {
           type: 'label_name',
           icon: 'labels',

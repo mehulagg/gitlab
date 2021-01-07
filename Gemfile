@@ -22,7 +22,7 @@ gem 'rugged', '~> 0.28'
 gem 'grape-path-helpers', '~> 1.5'
 
 gem 'faraday', '~> 1.0'
-gem 'marginalia', '~> 1.9.0'
+gem 'marginalia', '~> 1.10.0'
 
 # Authentication libraries
 gem 'devise', '~> 4.7.2'
@@ -145,7 +145,7 @@ gem 'aws-sdk-s3', '~> 1'
 gem 'faraday_middleware-aws-sigv4', '~>0.3.0'
 
 # Markdown and HTML processing
-gem 'html-pipeline', '~> 2.12'
+gem 'html-pipeline', '~> 2.13.2'
 gem 'deckar01-task_list', '2.3.1'
 gem 'gitlab-markup', '~> 1.7.1'
 gem 'github-markup', '~> 1.7.0', require: 'github/markup'
@@ -189,10 +189,10 @@ group :puma do
 end
 
 # State machine
-gem 'state_machines-activerecord', '~> 0.6.0'
+gem 'state_machines-activerecord', '~> 0.8.0'
 
 # Issue tags
-gem 'acts-as-taggable-on', '~> 6.0'
+gem 'acts-as-taggable-on', '~> 7.0'
 
 # Background jobs
 gem 'sidekiq', '~> 5.2.7'
@@ -242,7 +242,7 @@ gem 'discordrb-webhooks-blackst0ne', '~> 3.3', require: false
 gem 'hipchat', '~> 1.5.0'
 
 # Jira integration
-gem 'jira-ruby', '~> 2.0.0'
+gem 'jira-ruby', '~> 2.1.4'
 gem 'atlassian-jwt', '~> 0.2.0'
 
 # Flowdock integration
@@ -255,7 +255,7 @@ gem 'slack-messenger', '~> 2.3.4'
 gem 'hangouts-chat', '~> 0.0.5'
 
 # Asana integration
-gem 'asana', '0.10.2'
+gem 'asana', '~> 0.10.3'
 
 # FogBugz integration
 gem 'ruby-fogbugz', '~> 0.2.1'
@@ -306,7 +306,7 @@ gem 'rack-attack', '~> 6.3.0'
 gem 'sentry-raven', '~> 3.0'
 
 # PostgreSQL query parsing
-gem 'gitlab-pg_query', '~> 1.3.1', require: 'pg_query'
+gem 'pg_query', '~> 1.3.0'
 
 gem 'premailer-rails', '~> 1.10.3'
 
@@ -331,6 +331,7 @@ gem 'snowplow-tracker', '~> 0.6.1'
 # Metrics
 group :metrics do
   gem 'method_source', '~> 1.0', require: false
+  gem 'webrick', '~> 1.6.1', require: false
 
   # Prometheus
   gem 'prometheus-client-mmap', '~> 0.12.0'
@@ -359,7 +360,7 @@ group :development, :test do
   gem 'awesome_print', require: false
 
   gem 'database_cleaner', '~> 1.7.0'
-  gem 'factory_bot_rails', '~> 5.1.0'
+  gem 'factory_bot_rails', '~> 6.1.0'
   gem 'rspec-rails', '~> 4.0.1'
 
   # Prevent occasions where minitest is not bundled in packaged versions of ruby (see #3826)
@@ -371,7 +372,7 @@ group :development, :test do
   gem 'spring', '~> 2.1.0'
   gem 'spring-commands-rspec', '~> 1.0.4'
 
-  gem 'gitlab-styles', '~> 5.3.0', require: false
+  gem 'gitlab-styles', '~> 5.4.0', require: false
 
   gem 'scss_lint', '~> 0.59.0', require: false
   gem 'haml_lint', '~> 0.36.0', require: false

@@ -861,20 +861,20 @@
     eslint-plugin-vue "^6.2.1"
     vue-eslint-parser "^7.0.0"
 
-"@gitlab/svgs@1.177.0":
-  version "1.177.0"
-  resolved "https://registry.yarnpkg.com/@gitlab/svgs/-/svgs-1.177.0.tgz#e481ed327a11d3834c8b1668d7485b9eefef97f5"
-  integrity sha512-L7DggusgkbubNFCRIYtCuYiLx+t5Hp8y/XIxJ3RM5mqAfxkTR1KxALNLDP9CT7xWieHDhNvgcXAdamGoi0ofDQ==
+"@gitlab/svgs@1.178.0":
+  version "1.178.0"
+  resolved "https://registry.yarnpkg.com/@gitlab/svgs/-/svgs-1.178.0.tgz#069edb8abb4c7137d48f527592476655f066538b"
+  integrity sha512-m1xe5SPgpi9lSFCHHTkkGeScxkqhi7aD8qApL5F4MqCGeKF9IhELIVoMD1R6vkfjzFJh0BwFREPkuwjnAOMKfA==
 
 "@gitlab/tributejs@1.0.0":
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/@gitlab/tributejs/-/tributejs-1.0.0.tgz#672befa222aeffc83e7d799b0500a7a4418e59b8"
   integrity sha512-nmKw1+hB6MHvlmPz63yPwVs1qQkycHwsKgxpEbzmky16Y6mL4EJMk3w1b8QlOAF/AIAzjCERPhe/R4MJiohbZw==
 
-"@gitlab/ui@25.0.1":
-  version "25.0.1"
-  resolved "https://registry.yarnpkg.com/@gitlab/ui/-/ui-25.0.1.tgz#2669cd65a19cda69af42017f39eb964072c03bf8"
-  integrity sha512-WLvrnVU18DaPHQghwUbYcqoK02axD639T4THDUBk3fzzOs2piXYvqDfRtT59cpaZpDS3IIHUTlPhxBCE7zv2GQ==
+"@gitlab/ui@25.4.0":
+  version "25.4.0"
+  resolved "https://registry.yarnpkg.com/@gitlab/ui/-/ui-25.4.0.tgz#67bfd2a905097fc4cec0272665c36c722b3475c9"
+  integrity sha512-/dffpdyDcX102wWTbzDQOmOGfAEyDitRWCBOk2U+WRKPJIsWYtZuw40putwNA/gUUE1U08TPHf3sGSLzwIKZPA==
   dependencies:
     "@babel/standalone" "^7.0.0"
     "@gitlab/vue-toasted" "^1.3.0"
@@ -1124,15 +1124,15 @@
     consola "^2.10.1"
     node-fetch "^2.6.0"
 
-"@rails/actioncable@^6.0.3-3":
-  version "6.0.3-3"
-  resolved "https://registry.yarnpkg.com/@rails/actioncable/-/actioncable-6.0.3-3.tgz#fb1a46d3d353512764d5fa3cea2f492391601b7a"
-  integrity sha512-+DEbtzvD2ITPKOGBAV0lLdUvImCsHtUYfxwW7TDKOrGNEFqgbVJij7aO6ZE8a3aDPQ7NnO/MlyrPwLVeiIZRSw==
+"@rails/actioncable@^6.0.3-4":
+  version "6.1.0"
+  resolved "https://registry.yarnpkg.com/@rails/actioncable/-/actioncable-6.1.0.tgz#f336f25450b1bc43b99bc60557a70b6e6bb1d3d2"
+  integrity sha512-eDgy+vcKN9RIzxmMBfSAe77rTj2cp6kJALiVQyKrW2O9EK2MdostOmP+99At/Dit3ur5+77NVnruxD7y14ZYFA==
 
-"@rails/ujs@^6.0.3-2":
-  version "6.0.3-2"
-  resolved "https://registry.yarnpkg.com/@rails/ujs/-/ujs-6.0.3-2.tgz#e14c1f29086858215ce7ccd9ad6d8888c458b4a3"
-  integrity sha512-WcpIEftNCfGDEgk6KerOugiet75Mir5q/HT1yt3dDhpBI91BaZ15lfSQIsZwMw2nyeDz9A9QBz8dAFAd4gXIzg==
+"@rails/ujs@^6.0.3-4":
+  version "6.1.0"
+  resolved "https://registry.yarnpkg.com/@rails/ujs/-/ujs-6.1.0.tgz#9a48df6511cb2b472c9f596c1f37dc0af022e751"
+  integrity sha512-kQNKyM4ePAc4u9eR1c4OqrbAHH+3SJXt++8izIjeaZeg+P7yBtgoF/dogMD/JPPowNC74ACFpM/4op0Ggp/fPw==
 
 "@sindresorhus/is@^0.14.0":
   version "0.14.0"
@@ -3057,7 +3057,7 @@ combined-stream@^1.0.6, combined-stream@~1.0.6:
   dependencies:
     delayed-stream "~1.0.0"
 
-commander@2, commander@^2.10.0, commander@^2.16.0, commander@^2.18.0, commander@^2.19.0, commander@^2.20.0, commander@~2.20.0:
+commander@2, commander@^2.10.0, commander@^2.18.0, commander@^2.19.0, commander@^2.20.0, commander@~2.20.0:
   version "2.20.0"
   resolved "https://registry.yarnpkg.com/commander/-/commander-2.20.0.tgz#d58bb2b5c1ee8f87b0d340027e9e94e222c5a422"
   integrity sha512-7j2y+40w61zy6YC2iRNpUe/NwhNyoXrYpHMrSunaMG64nRnaf96zO/KMQR4OyN/UnE5KLyEBnKHd4aG3rskjpQ==
@@ -5008,6 +5008,11 @@ fast-levenshtein@~2.0.6:
   version "2.0.6"
   resolved "https://registry.yarnpkg.com/fast-levenshtein/-/fast-levenshtein-2.0.6.tgz#3d8a5c66883a16a30ca8643e851f19baa7797917"
   integrity sha1-PYpcZog6FqMMqGQ+hR8Zuqd5eRc=
+
+fast-mersenne-twister@1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/fast-mersenne-twister/-/fast-mersenne-twister-1.0.2.tgz#5ead7caf3ace592a5789d11767732bd81cbaaa56"
+  integrity sha512-IaClPxsoBu3MxGpcURyjV8otT5Bj4ARoK0KBCJGnEVnD1A/qclL5eIeYiUuwG/WWJPxL1jlK61HTm2T6SBmvBQ==
 
 fault@^1.0.2:
   version "1.0.2"
@@ -7476,11 +7481,11 @@ karma@^4.2.0:
     useragent "2.3.0"
 
 katex@^0.10.0:
-  version "0.10.0"
-  resolved "https://registry.yarnpkg.com/katex/-/katex-0.10.0.tgz#da562e5d0d5cc3aa602e27af8a9b8710bfbce765"
-  integrity sha512-/WRvx+L1eVBrLwX7QzKU1dQuaGnE7E8hDvx3VWfZh9HbMiCfsKWJNnYZ0S8ZMDAfAyDSofdyXIrH/hujF1fYXg==
+  version "0.10.2"
+  resolved "https://registry.yarnpkg.com/katex/-/katex-0.10.2.tgz#39973edbb65eda5b6f9e7f41648781e557dd4932"
+  integrity sha512-cQOmyIRoMloCoSIOZ1+gEwsksdJZ1EW4SWm3QzxSza/QsnZr6D4U1V9S4q+B/OLm2OQ8TCBecQ8MaIfnScI7cw==
   dependencies:
-    commander "^2.16.0"
+    commander "^2.19.0"
 
 keyv@^3.0.0:
   version "3.1.0"
@@ -8054,6 +8059,11 @@ marked@^0.3.12, marked@~0.3.6:
   resolved "https://registry.yarnpkg.com/marked/-/marked-0.3.19.tgz#5d47f709c4c9fc3c216b6d46127280f40b39d790"
   integrity sha512-ea2eGWOqNxPcXv8dyERdSr/6FmzvWwzjMxpfGB/sbMccXoct+xY+YukPD+QTUZwyvK7BZwcr4m21WBOW41pAkg==
 
+mathjax@3:
+  version "3.1.2"
+  resolved "https://registry.yarnpkg.com/mathjax/-/mathjax-3.1.2.tgz#95c0d45ce2330ef7b6a815cebe7d61ecc26bbabd"
+  integrity sha512-BojKspBv4nNWzO1wC6VEI+g9gHDOhkaGHGgLxXkasdU4pwjdO5AXD5M/wcLPkXYPjZ/N+6sU8rjQTlyvN2cWiQ==
+
 mathml-tag-names@^2.1.0:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/mathml-tag-names/-/mathml-tag-names-2.1.1.tgz#6dff66c99d55ecf739ca53c492e626f1d12a33cc"
@@ -8184,11 +8194,6 @@ mermaid@^8.5.2:
     minify "^4.1.1"
     moment-mini "^2.22.1"
     scope-css "^1.2.1"
-
-mersenne-twister@1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/mersenne-twister/-/mersenne-twister-1.1.0.tgz#f916618ee43d7179efcf641bec4531eb9670978a"
-  integrity sha1-+RZhjuQ9cXnvz2Qb7EUx65Zwl4o=
 
 methods@~1.1.2:
   version "1.1.2"
@@ -12426,10 +12431,10 @@ vue-jest@4.0.0-rc.0:
     source-map "0.5.6"
     ts-jest "26.x"
 
-vue-loader@^15.9.5:
-  version "15.9.5"
-  resolved "https://registry.yarnpkg.com/vue-loader/-/vue-loader-15.9.5.tgz#7a960dc420a3439deaacdda038fdcdbf7c432706"
-  integrity sha512-oeMOs2b5o5gRqkxfds10bCx6JeXYTwivRgbb8hzOrcThD2z1+GqEKE3EX9A2SGbsYDf4rXwRg6D5n1w0jO5SwA==
+vue-loader@^15.9.6:
+  version "15.9.6"
+  resolved "https://registry.yarnpkg.com/vue-loader/-/vue-loader-15.9.6.tgz#f4bb9ae20c3a8370af3ecf09b8126d38ffdb6b8b"
+  integrity sha512-j0cqiLzwbeImIC6nVIby2o/ABAWhlppyL/m5oJ67R5MloP0hj/DtFgb0Zmq3J9CG7AJ+AXIvHVnJAPBvrLyuDg==
   dependencies:
     "@vue/component-compiler-utils" "^3.1.0"
     hash-sum "^1.0.2"

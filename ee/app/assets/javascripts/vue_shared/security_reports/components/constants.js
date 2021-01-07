@@ -7,3 +7,5 @@ export const SEVERITY_TOOLTIP_TITLE_MAP = {
     `SecurityReports|The rating "unknown" indicates that the underlying scanner doesn’t contain or provide a severity rating.`,
   ),
 };
+
+export const VULNERABILITY_MODAL_ID = 'modal-mrwidget-security-issue';

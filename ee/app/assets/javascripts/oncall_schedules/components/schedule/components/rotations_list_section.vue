@@ -1,8 +1,9 @@
 <script>
-import { GlButtonGroup, GlButton, GlTooltipDirective } from '@gitlab/ui';
+import { GlButtonGroup, GlButton, GlTooltipDirective, GlModalDirective } from '@gitlab/ui';
 import { s__ } from '~/locale';
 import CurrentDayIndicator from './current_day_indicator.vue';
 import RotationAssignee from '../../rotations/components/rotation_assignee.vue';
+import { editRotationModalId } from '../../../constants';
 
 export const i18n = {
   editRotationLabel: s__('OnCallSchedules|Edit rotation'),
@@ -11,6 +12,7 @@ export const i18n = {
 
 export default {
   i18n,
+  editRotationModalId,
   components: {
     GlButtonGroup,
     GlButton,
@@ -18,6 +20,7 @@ export default {
     RotationAssignee,
   },
   directives: {
+    GlModal: GlModalDirective,
     GlTooltip: GlTooltipDirective,
   },
   props: {
@@ -50,6 +53,7 @@ export default {
         <span class="gl-str-truncated">{{ rotation.name }}</span>
         <gl-button-group class="gl-px-2">
           <gl-button
+            v-gl-modal="$options.editRotationModalId"
             v-gl-tooltip
             category="tertiary"
             :title="$options.i18n.editRotationLabel"
@@ -57,6 +61,7 @@ export default {
             :aria-label="$options.i18n.editRotationLabel"
           />
           <gl-button
+            v-gl-modal="$options.editRotationModalId"
             v-gl-tooltip
             category="tertiary"
             :title="$options.i18n.deleteRotationLabel"

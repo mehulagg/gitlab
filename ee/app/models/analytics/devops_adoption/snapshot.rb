@@ -24,6 +24,9 @@ class Analytics::DevopsAdoption::Snapshot < ApplicationRecord
     joins("INNER JOIN (#{inner_select.to_sql}) latest_snapshots ON latest_snapshots.id = analytics_devops_adoption_snapshots.id")
   end
 
+  scope :for_month, -> (month_date) { where(end_time: month_date.end_of_month) }
+  scope :not_finalized, -> { where(arel_table[:recorded_at].lteq(arel_table[:end_time])) }
+
   def start_time
     end_time.beginning_of_month
   end

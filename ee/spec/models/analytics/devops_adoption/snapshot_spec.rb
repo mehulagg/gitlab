@@ -25,6 +25,28 @@ RSpec.describe Analytics::DevopsAdoption::Snapshot, type: :model do
     end
   end
 
+  describe '.for_month' do
+    it 'returns all snapshots where end_time equals given datetime end of month' do
+      end_of_month = Time.zone.now.end_of_month
+      snapshot1 = create(:devops_adoption_snapshot, end_time: end_of_month)
+      create(:devops_adoption_snapshot, end_time: end_of_month - 1.year)
+
+      expect(described_class.for_month(end_of_month)).to match_array([snapshot1])
+      expect(described_class.for_month(end_of_month - 10.days)).to match_array([snapshot1])
+      expect(described_class.for_month(end_of_month.beginning_of_month)).to match_array([snapshot1])
+    end
+  end
+
+  describe '.not_finalized' do
+    it 'returns all snapshots which were recorded earlier than snapshot end_time' do
+      segment = create(:devops_adoption_segment)
+      snapshot1 = create(:devops_adoption_snapshot, segment: segment, recorded_at: 1.day.ago, end_time: Time.zone.now)
+      create(:devops_adoption_snapshot, segment: segment, recorded_at: 1.day.ago, end_time: 2.days.ago)
+
+      expect(described_class.not_finalized).to match_array([snapshot1])
+    end
+  end
+
   describe '#start_time' do
     subject(:segment) { described_class.new(end_time: end_time) }
 

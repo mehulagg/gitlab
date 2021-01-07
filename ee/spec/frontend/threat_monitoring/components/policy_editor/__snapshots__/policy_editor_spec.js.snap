@@ -178,6 +178,8 @@ exports[`PolicyEditorApp component renders the policy editor layout 1`] = `
       >
           
         <policy-action-picker-stub />
+         
+        <!---->
       </dim-disable-container-stub>
     </div>
      

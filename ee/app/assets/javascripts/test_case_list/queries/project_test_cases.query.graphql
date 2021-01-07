@@ -6,6 +6,7 @@ query projectIssues(
   $projectPath: ID!
   $types: [IssueType!]
   $state: IssuableState
+  $authorUsername: String = ""
   $labelName: [String]
   $search: String = ""
   $sortBy: IssueSort = created_desc
@@ -19,6 +20,7 @@ query projectIssues(
     issues(
       types: $types
       state: $state
+      authorUsername: $authorUsername
       labelName: $labelName
       search: $search
       sort: $sortBy

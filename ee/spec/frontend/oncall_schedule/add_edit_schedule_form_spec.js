@@ -1,5 +1,5 @@
 import { shallowMount } from '@vue/test-utils';
-import { GlSearchBoxByType, GlDropdown, GlDropdownItem } from '@gitlab/ui';
+import { GlSearchBoxByType, GlDropdown, GlDropdownItem, GlFormGroup } from '@gitlab/ui';
 import AddEditScheduleForm, {
   i18n,
 } from 'ee/oncall_schedules/components/add_edit_schedule_form.vue';
@@ -22,8 +22,10 @@ describe('AddEditScheduleForm', () => {
           description: mockSchedule.description,
           timezone: mockTimezones[0],
         },
-        isNameInvalid: false,
-        isTimezoneInvalid: false,
+        validationState: {
+          name: true,
+          timezone: true,
+        },
         schedule: mockSchedule,
         ...props,
       },
@@ -35,9 +37,6 @@ describe('AddEditScheduleForm', () => {
         $apollo: {
           mutate,
         },
-      },
-      stubs: {
-        GlFormGroup: false,
       },
     });
   };
@@ -52,11 +51,23 @@ describe('AddEditScheduleForm', () => {
   });
 
   const findTimezoneDropdown = () => wrapper.find(GlDropdown);
-  const findDropdownOptions = () => wrapper.findAll(GlDropdownItem);
+  const findDropdownOptions = () => wrapper.findAllComponents(GlDropdownItem);
   const findTimezoneSearchBox = () => wrapper.find(GlSearchBoxByType);
+  const findScheduleName = () => wrapper.find(GlFormGroup);
 
   it('renders modal layout', () => {
     expect(wrapper.element).toMatchSnapshot();
+  });
+
+  describe('Schedule form validation', () => {
+    it('should show feedback for an invalid name input validation state', async () => {
+      createComponent({
+        props: {
+          validationState: { name: false },
+        },
+      });
+      expect(findScheduleName().attributes('state')).toBeFalsy();
+    });
   });
 
   describe('Timezone select', () => {
@@ -102,20 +113,23 @@ describe('AddEditScheduleForm', () => {
 
   describe('Form validation', () => {
     describe('Timezone select', () => {
-      it('has red border when nothing selected', () => {
+      it('has a validation red border when timezone field is invalid', () => {
         createComponent({
           props: {
             schedule: null,
             form: { name: '', description: '', timezone: '' },
-            isTimezoneInvalid: true,
+            validationState: { timezone: false },
           },
         });
         expect(findTimezoneDropdown().classes()).toContain('invalid-dropdown');
       });
 
-      it("doesn't have a red border when there is selected option", async () => {
-        findDropdownOptions().at(1).vm.$emit('click');
-        await wrapper.vm.$nextTick();
+      it('does not have a validation red border when timezone field is valid', async () => {
+        createComponent({
+          props: {
+            validationState: { timezone: true },
+          },
+        });
         expect(findTimezoneDropdown().classes()).not.toContain('invalid-dropdown');
       });
     });

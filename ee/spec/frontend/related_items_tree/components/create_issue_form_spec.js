@@ -1,7 +1,7 @@
 import {
   GlButton,
-  GlDeprecatedDropdown,
-  GlDeprecatedDropdownItem,
+  GlDropdown,
+  GlDropdownItem,
   GlFormInput,
   GlSearchBoxByType,
   GlLoadingIcon,
@@ -48,7 +48,6 @@ describe('CreateIssueForm', () => {
       expect(wrapper.vm.selectedProject).toBeNull();
       expect(wrapper.vm.searchKey).toBe('');
       expect(wrapper.vm.title).toBe('');
-      expect(wrapper.vm.preventDropdownClose).toBe(false);
     });
   });
 
@@ -111,51 +110,12 @@ describe('CreateIssueForm', () => {
         expect(handleDropdownShow).toHaveBeenCalled();
       });
     });
-
-    describe('handleDropdownHide', () => {
-      it('sets `searchKey` prop to empty string and calls action `fetchProjects`', () => {
-        const event = {
-          preventDefault: jest.fn(),
-        };
-        const preventDefault = jest.spyOn(event, 'preventDefault');
-
-        wrapper.setData({
-          preventDropdownClose: true,
-        });
-        wrapper.vm.handleDropdownHide(event);
-
-        return wrapper.vm.$nextTick(() => {
-          expect(preventDefault).toHaveBeenCalled();
-          expect(wrapper.vm.preventDropdownClose).toBe(false);
-        });
-      });
-    });
-
-    describe('handleSearchInputContainerClick', () => {
-      it('sets `preventDropdownClose` to `true` when target element contains class `gl-icon`', () => {
-        const target = document.createElement('span');
-        target.setAttribute('class', 'gl-icon');
-
-        wrapper.vm.handleSearchInputContainerClick({ target });
-
-        expect(wrapper.vm.preventDropdownClose).toBe(true);
-      });
-
-      it('sets `preventDropdownClose` to `true` when target element href contains text `clear`', () => {
-        const target = document.createElement('user');
-        target.setAttribute('href', 'foo.svg#clear');
-
-        wrapper.vm.handleSearchInputContainerClick({ target });
-
-        expect(wrapper.vm.preventDropdownClose).toBe(true);
-      });
-    });
   });
 
   describe('templates', () => {
     it('renders Issue title input field', () => {
       const issueTitleFieldLabel = wrapper.findAll('label').at(0);
-      const issueTitleFieldInput = wrapper.find(GlFormInput);
+      const issueTitleFieldInput = wrapper.findComponent(GlFormInput);
 
       expect(issueTitleFieldLabel.text()).toBe('Title');
       expect(issueTitleFieldInput.attributes('placeholder')).toBe('New issue title');
@@ -163,7 +123,7 @@ describe('CreateIssueForm', () => {
 
     it('renders Projects dropdown field', () => {
       const projectsDropdownLabel = wrapper.findAll('label').at(1);
-      const projectsDropdownButton = wrapper.find(GlDeprecatedDropdown);
+      const projectsDropdownButton = wrapper.findComponent(GlDropdown);
 
       expect(projectsDropdownLabel.text()).toBe('Project');
       expect(projectsDropdownButton.props('text')).toBe('Select a project');
@@ -173,15 +133,16 @@ describe('CreateIssueForm', () => {
       wrapper.vm.$store.dispatch('receiveProjectsSuccess', mockProjects);
 
       return wrapper.vm.$nextTick(() => {
-        const projectsDropdownButton = wrapper.find(GlDeprecatedDropdown);
-        const dropdownItems = projectsDropdownButton.findAll(GlDeprecatedDropdownItem);
+        const projectsDropdownButton = wrapper.findComponent(GlDropdown);
+        const dropdownItems = projectsDropdownButton.findAllComponents(GlDropdownItem);
+        const dropdownItem = dropdownItems.at(0);
 
-        expect(projectsDropdownButton.find(GlSearchBoxByType).exists()).toBe(true);
-        expect(projectsDropdownButton.find(GlLoadingIcon).exists()).toBe(true);
+        expect(projectsDropdownButton.findComponent(GlSearchBoxByType).exists()).toBe(true);
+        expect(projectsDropdownButton.findComponent(GlLoadingIcon).exists()).toBe(true);
         expect(dropdownItems).toHaveLength(mockProjects.length);
-        expect(dropdownItems.at(0).text()).toContain(mockProjects[0].name);
-        expect(dropdownItems.at(0).text()).toContain(mockProjects[0].namespace.name);
-        expect(dropdownItems.at(0).find(ProjectAvatar).exists()).toBe(true);
+        expect(dropdownItem.text()).toBe(mockProjects[0].name);
+        expect(dropdownItem.attributes('secondarytext')).toBe(mockProjects[0].namespace.name);
+        expect(dropdownItem.findComponent(ProjectAvatar).exists()).toBe(true);
       });
     });
 
@@ -190,7 +151,7 @@ describe('CreateIssueForm', () => {
       const filteredMockProjects = mockProjects.filter((project) => project.name === searchKey);
       jest.spyOn(wrapper.vm, 'fetchProjects').mockImplementation(jest.fn());
 
-      wrapper.find(GlDeprecatedDropdown).trigger('click');
+      wrapper.findComponent(GlDropdown).trigger('click');
 
       wrapper.setData({
         searchKey,
@@ -202,7 +163,7 @@ describe('CreateIssueForm', () => {
           wrapper.vm.$store.dispatch('receiveProjectsSuccess', filteredMockProjects);
         })
         .then(() => {
-          expect(wrapper.findAll(GlDeprecatedDropdownItem)).toHaveLength(1);
+          expect(wrapper.findAllComponents(GlDropdownItem)).toHaveLength(1);
         });
     });
 
@@ -211,7 +172,7 @@ describe('CreateIssueForm', () => {
       const filteredMockProjects = mockProjects.filter((project) => project.name === searchKey);
       jest.spyOn(wrapper.vm, 'fetchProjects').mockImplementation(jest.fn());
 
-      wrapper.find(GlDeprecatedDropdown).trigger('click');
+      wrapper.findComponent(GlDropdown).trigger('click');
 
       wrapper.setData({
         searchKey,
@@ -228,7 +189,7 @@ describe('CreateIssueForm', () => {
     });
 
     it('renders `Create issue` button', () => {
-      const createIssueButton = wrapper.findAll(GlButton).at(0);
+      const createIssueButton = wrapper.findAllComponents(GlButton).at(0);
 
       expect(createIssueButton.exists()).toBe(true);
       expect(createIssueButton.text()).toBe('Create issue');
@@ -238,7 +199,7 @@ describe('CreateIssueForm', () => {
       wrapper.vm.$store.dispatch('requestCreateItem');
 
       return wrapper.vm.$nextTick(() => {
-        const createIssueButton = wrapper.findAll(GlButton).at(0);
+        const createIssueButton = wrapper.findAllComponents(GlButton).at(0);
 
         expect(createIssueButton.exists()).toBe(true);
         expect(createIssueButton.props('disabled')).toBe(true);
@@ -247,7 +208,7 @@ describe('CreateIssueForm', () => {
     });
 
     it('renders `Cancel` button', () => {
-      const cancelButton = wrapper.findAll(GlButton).at(1);
+      const cancelButton = wrapper.findAllComponents(GlButton).at(1);
 
       expect(cancelButton.exists()).toBe(true);
       expect(cancelButton.text()).toBe('Cancel');

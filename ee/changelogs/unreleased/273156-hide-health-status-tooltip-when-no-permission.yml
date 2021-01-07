@@ -1,0 +1,5 @@
+---
+title: Hide "Health status" edit button when the user has no permission
+merge_request: 49535
+author: Kev @KevSlashNull
+type: fixed

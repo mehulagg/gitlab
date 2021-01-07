@@ -6,7 +6,6 @@ RSpec.describe  ScanSecurityReportSecretsWorker do
   let(:project) { create(:project, :repository) }
   let(:pipeline) { create(:ci_pipeline, :success, project: project) }
 
-  let(:secret_detection_build) { create(:ci_build, :secret_detection, pipeline: pipeline) }
   let(:file) { 'aws-key1.py' }
   let(:api_key) { 'AKIAIOSFODNN7EXAMPLE' }
   let(:identifier_type) { 'gitleaks_rule_id' }
@@ -29,7 +28,7 @@ RSpec.describe  ScanSecurityReportSecretsWorker do
 
   describe '#perform' do
     include_examples 'an idempotent worker' do
-      let(:job_args) { [secret_detection_build.id] }
+      let(:job_args) { [pipeline.id] }
 
       before do
         allow_next_instance_of(Security::TokenRevocationService) do |revocation_service|
@@ -42,7 +41,7 @@ RSpec.describe  ScanSecurityReportSecretsWorker do
           expect(revocation_service).to receive(:execute).and_return({ message: '', status: :success })
         end
 
-        worker.perform(secret_detection_build.id)
+        worker.perform(pipeline.id)
       end
     end
 
@@ -54,14 +53,14 @@ RSpec.describe  ScanSecurityReportSecretsWorker do
       end
 
       it 'does not execute the service' do
-        expect { worker.perform(secret_detection_build.id) }.to raise_error('This is an error')
+        expect { worker.perform(pipeline.id) }.to raise_error('This is an error')
       end
     end
   end
 
   describe '#revocable_keys' do
     it 'returns a list of revocable_keys' do
-      key = worker.send(:revocable_keys, secret_detection_build).first
+      key = worker.send(:revocable_keys, pipeline).first
 
       expect(key[:type]).to eql(revocation_key_type)
       expect(key[:token]).to eql(api_key)

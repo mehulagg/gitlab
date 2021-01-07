@@ -1,7 +1,7 @@
 <script>
 import { GlToken, GlAvatarLabeled, GlPopover } from '@gitlab/ui';
+import { assigneeScheduleDateStart } from 'ee/oncall_schedules/utils/common_utils';
 import { __, sprintf } from '~/locale';
-import { assigneeScheduleDateStart } from '../../../utils/common_utils';
 
 export default {
   components: {

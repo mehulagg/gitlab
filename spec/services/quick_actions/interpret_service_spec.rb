@@ -779,6 +779,11 @@ RSpec.describe QuickActions::InterpretService do
 
       it_behaves_like 'assign command' do
         let(:content) { "/assign @#{developer.username}" }
+        let(:issuable) { create(:incident, project: project) }
+      end
+
+      it_behaves_like 'assign command' do
+        let(:content) { "/assign @#{developer.username}" }
         let(:issuable) { merge_request }
       end
     end
@@ -1135,6 +1140,11 @@ RSpec.describe QuickActions::InterpretService do
     it_behaves_like 'confidential command' do
       let(:content) { '/confidential' }
       let(:issuable) { issue }
+    end
+
+    it_behaves_like 'confidential command' do
+      let(:content) { '/confidential' }
+      let(:issuable) { create(:incident, project: project) }
     end
 
     it_behaves_like 'lock command' do

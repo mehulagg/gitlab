@@ -9376,12 +9376,14 @@ CREATE TABLE application_settings (
     cloud_license_enabled boolean DEFAULT false NOT NULL,
     disable_feed_token boolean DEFAULT false NOT NULL,
     personal_access_token_prefix text,
+    rate_limiting_response_text text,
     CONSTRAINT app_settings_registry_exp_policies_worker_capacity_positive CHECK ((container_registry_expiration_policies_worker_capacity >= 0)),
     CONSTRAINT check_17d9558205 CHECK ((char_length((kroki_url)::text) <= 1024)),
     CONSTRAINT check_2dba05b802 CHECK ((char_length(gitpod_url) <= 255)),
     CONSTRAINT check_51700b31b5 CHECK ((char_length(default_branch_name) <= 255)),
     CONSTRAINT check_57123c9593 CHECK ((char_length(help_page_documentation_base_url) <= 255)),
     CONSTRAINT check_718b4458ae CHECK ((char_length(personal_access_token_prefix) <= 20)),
+    CONSTRAINT check_7227fad848 CHECK ((char_length(rate_limiting_response_text) <= 255)),
     CONSTRAINT check_85a39b68ff CHECK ((char_length(encrypted_ci_jwt_signing_key_iv) <= 255)),
     CONSTRAINT check_9a719834eb CHECK ((char_length(secret_detection_token_revocation_url) <= 255)),
     CONSTRAINT check_9c6c447a13 CHECK ((char_length(maintenance_mode_message) <= 255)),
@@ -11126,7 +11128,7 @@ CREATE TABLE clusters (
     management_project_id integer,
     cleanup_status smallint DEFAULT 1 NOT NULL,
     cleanup_status_reason text,
-    helm_major_version integer DEFAULT 2 NOT NULL
+    helm_major_version integer DEFAULT 3 NOT NULL
 );
 
 CREATE TABLE clusters_applications_cert_managers (
@@ -11416,7 +11418,6 @@ ALTER SEQUENCE commit_user_mentions_id_seq OWNED BY commit_user_mentions.id;
 
 CREATE TABLE compliance_management_frameworks (
     id bigint NOT NULL,
-    group_id bigint,
     name text NOT NULL,
     description text NOT NULL,
     color text NOT NULL,
@@ -14017,7 +14018,7 @@ CREATE TABLE merge_requests (
     merge_jid character varying,
     discussion_locked boolean,
     latest_merge_request_diff_id integer,
-    allow_maintainer_to_push boolean,
+    allow_maintainer_to_push boolean DEFAULT true,
     state_id smallint DEFAULT 1 NOT NULL,
     rebase_jid character varying,
     squash_commit_sha bytea,
@@ -14171,6 +14172,13 @@ CREATE SEQUENCE namespace_onboarding_actions_id_seq
     CACHE 1;
 
 ALTER SEQUENCE namespace_onboarding_actions_id_seq OWNED BY namespace_onboarding_actions.id;
+
+CREATE TABLE namespace_package_settings (
+    namespace_id bigint NOT NULL,
+    maven_duplicates_allowed boolean DEFAULT true NOT NULL,
+    maven_duplicate_exception_regex text DEFAULT ''::text NOT NULL,
+    CONSTRAINT check_d63274b2b6 CHECK ((char_length(maven_duplicate_exception_regex) <= 255))
+);
 
 CREATE TABLE namespace_root_storage_statistics (
     namespace_id integer NOT NULL,
@@ -17645,7 +17653,8 @@ CREATE TABLE vulnerability_feedback (
     comment_author_id integer,
     comment text,
     comment_timestamp timestamp with time zone,
-    finding_uuid uuid
+    finding_uuid uuid,
+    dismissal_reason smallint
 );
 
 CREATE SEQUENCE vulnerability_feedback_id_seq
@@ -19890,6 +19899,9 @@ ALTER TABLE ONLY namespace_limits
 ALTER TABLE ONLY namespace_onboarding_actions
     ADD CONSTRAINT namespace_onboarding_actions_pkey PRIMARY KEY (id);
 
+ALTER TABLE ONLY namespace_package_settings
+    ADD CONSTRAINT namespace_package_settings_pkey PRIMARY KEY (namespace_id);
+
 ALTER TABLE ONLY namespace_root_storage_statistics
     ADD CONSTRAINT namespace_root_storage_statistics_pkey PRIMARY KEY (namespace_id);
 
@@ -21085,7 +21097,7 @@ CREATE INDEX index_ci_pipelines_on_external_pull_request_id ON ci_pipelines USIN
 
 CREATE INDEX index_ci_pipelines_on_merge_request_id ON ci_pipelines USING btree (merge_request_id) WHERE (merge_request_id IS NOT NULL);
 
-CREATE INDEX index_ci_pipelines_on_pipeline_schedule_id ON ci_pipelines USING btree (pipeline_schedule_id);
+CREATE INDEX index_ci_pipelines_on_pipeline_schedule_id_and_id ON ci_pipelines USING btree (pipeline_schedule_id, id);
 
 CREATE INDEX index_ci_pipelines_on_project_id_and_id_desc ON ci_pipelines USING btree (project_id, id DESC);
 
@@ -21801,7 +21813,7 @@ CREATE UNIQUE INDEX index_label_priorities_on_project_id_and_label_id ON label_p
 
 CREATE UNIQUE INDEX index_labels_on_group_id_and_project_id_and_title ON labels USING btree (group_id, project_id, title);
 
-CREATE INDEX index_labels_on_group_id_and_title_with_null_project_id ON labels USING btree (group_id, title) WHERE (project_id IS NULL);
+CREATE UNIQUE INDEX index_labels_on_group_id_and_title_unique ON labels USING btree (group_id, title) WHERE (project_id IS NULL);
 
 CREATE INDEX index_labels_on_project_id ON labels USING btree (project_id);
 
@@ -23093,9 +23105,9 @@ CREATE INDEX temporary_index_vulnerabilities_on_id ON vulnerabilities USING btre
 
 CREATE UNIQUE INDEX term_agreements_unique_index ON term_agreements USING btree (user_id, term_id);
 
-CREATE INDEX tmp_build_stage_position_index ON ci_builds USING btree (stage_id, stage_idx) WHERE (stage_idx IS NOT NULL);
-
 CREATE INDEX tmp_index_for_email_unconfirmation_migration ON emails USING btree (id) WHERE (confirmed_at IS NOT NULL);
+
+CREATE INDEX tmp_index_oauth_applications_on_id_where_trusted ON oauth_applications USING btree (id) WHERE (trusted = true);
 
 CREATE INDEX tmp_index_on_vulnerabilities_non_dismissed ON vulnerabilities USING btree (id) WHERE (state <> 2);
 
@@ -25288,6 +25300,9 @@ ALTER TABLE ONLY merge_request_metrics
 
 ALTER TABLE ONLY draft_notes
     ADD CONSTRAINT fk_rails_e753681674 FOREIGN KEY (merge_request_id) REFERENCES merge_requests(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY namespace_package_settings
+    ADD CONSTRAINT fk_rails_e773444769 FOREIGN KEY (namespace_id) REFERENCES namespaces(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY dast_site_tokens
     ADD CONSTRAINT fk_rails_e84f721a8e FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;

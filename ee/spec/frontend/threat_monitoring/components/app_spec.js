@@ -1,4 +1,4 @@
-import { GlAlert } from '@gitlab/ui';
+import { GlAlert, GlSprintf } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
 import ThreatMonitoringAlerts from 'ee/threat_monitoring/components/alerts/alerts.vue';
@@ -24,9 +24,8 @@ const userCalloutsPath = `${TEST_HOST}/user_callouts`;
 describe('ThreatMonitoringApp component', () => {
   let store;
   let wrapper;
-  window.gon = { features: {} };
 
-  const factory = ({ propsData, state, options } = {}) => {
+  const factory = ({ propsData, provide = {}, state, options } = {}) => {
     store = createStore();
     Object.assign(store.state.threatMonitoring, {
       environmentsEndpoint,
@@ -52,6 +51,8 @@ describe('ThreatMonitoringApp component', () => {
       },
       provide: {
         documentationPath,
+        glFeatures: { threatMonitoringAlerts: false },
+        ...provide,
       },
       store,
       ...options,
@@ -64,11 +65,11 @@ describe('ThreatMonitoringApp component', () => {
   const findWafSection = () => wrapper.find({ ref: 'wafSection' });
   const findNetworkPolicySection = () => wrapper.find({ ref: 'networkPolicySection' });
   const findEmptyState = () => wrapper.find({ ref: 'emptyState' });
+  const findEmptyStateMessage = () => wrapper.find(GlSprintf);
   const findNetworkPolicyTab = () => wrapper.find({ ref: 'networkPolicyTab' });
   const findAlertTab = () => wrapper.find('[data-testid="threat-monitoring-alerts-tab"]');
 
   afterEach(() => {
-    window.gon.features = {};
     wrapper.destroy();
     wrapper = null;
   });
@@ -91,9 +92,9 @@ describe('ThreatMonitoringApp component', () => {
       it('shows only the empty state', () => {
         const emptyState = findEmptyState();
         expect(wrapper.element).toBe(emptyState.element);
+        expect(findEmptyStateMessage().exists()).toBe(true);
         expect(emptyState.props()).toMatchObject({
           svgPath: emptyStateSvgPath,
-          primaryButtonLink: documentationPath,
         });
       });
     },
@@ -176,8 +177,7 @@ describe('ThreatMonitoringApp component', () => {
 
   describe('alerts tab', () => {
     beforeEach(() => {
-      window.gon.features.threatMonitoringAlerts = true;
-      factory({});
+      factory({ provide: { glFeatures: { threatMonitoringAlerts: true } } });
     });
     it('shows the alerts tab', () => {
       expect(findAlertTab().exists()).toBe(true);

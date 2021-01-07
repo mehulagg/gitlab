@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module VulnerabilitiesHelper
-  FINDING_FIELDS = %i[metadata identifiers name issue_feedback merge_request_feedback project project_fingerprint scanner].freeze
+  FINDING_FIELDS = %i[metadata identifiers name issue_feedback merge_request_feedback project project_fingerprint scanner uuid].freeze
 
   def vulnerability_details_json(vulnerability, pipeline)
     vulnerability_details(vulnerability, pipeline).to_json

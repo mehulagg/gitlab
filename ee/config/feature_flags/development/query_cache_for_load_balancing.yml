@@ -1,8 +1,0 @@
----
-name: query_cache_for_load_balancing
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/46765
-rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/276203
-milestone: '13.7'
-type: development
-group: group::memory
-default_enabled: true

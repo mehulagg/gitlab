@@ -28,7 +28,6 @@ The following table lists examples with step-by-step tutorials that are containe
 | Clojure                       | [Test a Clojure application with GitLab CI/CD](test-clojure-application.md). |
 | Deployment with Dpl           | [Using `dpl` as deployment tool](deployment/README.md). |
 | GitLab Pages                  | See the [GitLab Pages](../../user/project/pages/index.md) documentation for a complete example of deploying a static site. |
-| Elixir                        | [Testing a Phoenix application with GitLab CI/CD](test_phoenix_app_with_gitlab_ci_cd/index.md). |
 | End-to-end testing            | [End-to-end testing with GitLab CI/CD and WebdriverIO](end_to_end_testing_webdriverio/index.md). |
 | Game development              | [DevOps and Game Dev with GitLab CI/CD](devops_and_game_dev_with_gitlab_ci_cd/index.md). |
 | Java with Maven               | [How to deploy Maven projects to Artifactory with GitLab CI/CD](artifactory_and_gitlab/index.md). |
@@ -72,6 +71,7 @@ choose one of these templates:
 - [dotNET (`dotNET.gitlab-ci.yml`)](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/dotNET.gitlab-ci.yml)
 - [dotNET Core (`dotNET-Core.yml`)](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/dotNET-Core.yml)
 - [Elixir (`Elixir.gitlab-ci.yml`)](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Elixir.gitlab-ci.yml)
+- [Flutter (`Flutter.gitlab-ci.yml`)](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Flutter.gitlab-ci.yml)
 - [goLang (`Go.gitlab-ci.yml`)](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Go.gitlab-ci.yml)
 - [Gradle (`Gradle.gitlab-ci.yml`)](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Gradle.gitlab-ci.yml)
 - [Grails (`Grails.gitlab-ci.yml`)](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Grails.gitlab-ci.yml)
