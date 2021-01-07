@@ -119,7 +119,7 @@ to the **Billing** section of the relevant namespace:
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/216899) in GitLab 13.5.
 > - [Updated](https://gitlab.com/gitlab-org/gitlab/-/issues/292086) in GitLab 13.8 to include public
-    email address and search feature.
+    email address.
 
 The **Seat usage** page lists all users occupying seats. Details for each user include:
 
@@ -132,6 +132,8 @@ only once per day. For this reason there can be a minor difference between the s
 and the billing page.
 
 ### Search seat usage
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/262875) in GitLab 13.8.
 
 To search users in the **Seat usage** page, enter a string in the **Search** field. A minimum of 3
 characters are required. The search returns those users whose name contains the search string.
