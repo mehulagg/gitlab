@@ -162,7 +162,7 @@
   },
   "devDependencies": {
     "@babel/plugin-transform-modules-commonjs": "^7.10.1",
-    "@gitlab/eslint-plugin": "5.0.0",
+    "@gitlab/eslint-plugin": "https://gitlab.com/gitlab-org/frontend/eslint-plugin.git#781a62786719d3424d4a542af28db1891845e850",
     "@testing-library/dom": "^7.16.2",
     "@vue/test-utils": "1.1.2",
     "acorn": "^6.3.0",
