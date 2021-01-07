@@ -90,6 +90,11 @@ RSpec.describe MetricsController, :request_store do
 
       before do
         stub_const('RUBY_DESCRIPTION', 'ruby-3.0-patch1')
+        allow(Gitlab::Metrics::System).to receive(:memory_usage_rss).and_return(100)
+        allow(Gitlab::Metrics::System).to receive(:memory_usage_uss_pss).and_return(uss: 200, pss: 300)
+        allow(Gitlab::Metrics::System).to receive(:cpu_time).and_return(1000)
+        allow(Gitlab::Metrics::System).to receive(:real_time).and_return(2000)
+        allow(Gitlab::Metrics::System).to receive(:monotonic_time).and_return(3000)
       end
 
       it 'renders Ruby VM stats JSON' do
@@ -98,6 +103,12 @@ RSpec.describe MetricsController, :request_store do
         expect(response).to have_gitlab_http_status(:ok)
         expect(response_json['version']).to eq('ruby-3.0-patch1')
         expect(response_json['gc_stat'].keys).to eq(gc_stat_keys)
+        expect(response_json['memory_rss']).to eq(100)
+        expect(response_json['memory_uss']).to eq(200)
+        expect(response_json['memory_pss']).to eq(300)
+        expect(response_json['time_cputime']).to eq(1000)
+        expect(response_json['time_realtime']).to eq(2000)
+        expect(response_json['time_monotonic']).to eq(3000)
       end
     end
 
