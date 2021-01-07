@@ -22,7 +22,7 @@ export default {
 
 <template>
   <div>
-    <gl-alert v-if="errorMessage" variant="danger" :dismissible="false">
+    <gl-alert v-if="errorMessage" class="gl-mb-6" variant="danger" :dismissible="false">
       {{ errorMessage }}
     </gl-alert>
 
