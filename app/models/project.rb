@@ -1355,9 +1355,9 @@ class Project < ApplicationRecord
   end
 
   def disabled_services
-    return ['datadog'] unless Feature.enabled?(:datadog_ci_integration, self)
+    return %w(datadog alerts) unless Feature.enabled?(:datadog_ci_integration, self)
 
-    []
+    %(alerts)
   end
 
   def find_or_initialize_service(name)
