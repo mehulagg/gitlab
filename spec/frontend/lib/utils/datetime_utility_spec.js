@@ -619,7 +619,7 @@ describe('nDaysAfter', () => {
     ${0}         | ${date.valueOf()}
     ${0.9}       | ${date.valueOf()}
   `('returns $numberOfDays day(s) after the provided date', ({ numberOfDays, expectedResult }) => {
-    expect(datetimeUtility.nDaysAfter(date, numberOfDays)).toEqual(expectedResult);
+    expect(datetimeUtility.nDaysAfter(date, numberOfDays)).toBe(expectedResult);
   });
 });
 
@@ -634,7 +634,7 @@ describe('nDaysBefore', () => {
     ${0}         | ${date.valueOf()}
     ${0.9}       | ${new Date('2019-07-15T00:00:00.000Z').valueOf()}
   `('returns $numberOfDays day(s) before the provided date', ({ numberOfDays, expectedResult }) => {
-    expect(datetimeUtility.nDaysBefore(date, numberOfDays)).toEqual(expectedResult);
+    expect(datetimeUtility.nDaysBefore(date, numberOfDays)).toBe(expectedResult);
   });
 });
 
@@ -661,7 +661,7 @@ describe('nMonthsAfter', () => {
   `(
     'returns $numberOfMonths month(s) after the provided date',
     ({ date, numberOfMonths, expectedResult }) => {
-      expect(datetimeUtility.nMonthsAfter(date, numberOfMonths)).toEqual(expectedResult);
+      expect(datetimeUtility.nMonthsAfter(date, numberOfMonths)).toBe(expectedResult);
     },
   );
 });
@@ -689,7 +689,7 @@ describe('nMonthsBefore', () => {
   `(
     'returns $numberOfMonths month(s) before the provided date',
     ({ date, numberOfMonths, expectedResult }) => {
-      expect(datetimeUtility.nMonthsBefore(date, numberOfMonths)).toEqual(expectedResult);
+      expect(datetimeUtility.nMonthsBefore(date, numberOfMonths)).toBe(expectedResult);
     },
   );
 });
