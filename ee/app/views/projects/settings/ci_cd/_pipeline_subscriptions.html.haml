@@ -9,12 +9,10 @@
     %button.btn.gl-button.js-settings-toggle{ type: 'button' }
       = expanded ? _('Collapse') : _('Expand')
     %p
-      = _("Set up pipeline subscriptions for this project.")
-    %p
       - default_branch_docs = link_to(_("default branch"), help_page_path('user/project/repository/branches/index.md', anchor: 'default-branch'))
-      = _("A subscription will trigger a new pipeline on the default branch of this project when a pipeline successfully completes for a new tag on the %{default_branch_docs} of the subscribed project.").html_safe % { default_branch_docs: default_branch_docs }
+      = _("Pipeline subscriptions trigger a new pipeline on the default branch of this project when a pipeline successfully completes for a new tag on the %{default_branch_docs} of the subscribed project.").html_safe % { default_branch_docs: default_branch_docs }
     %p
-      = _("There is a limit of %{ci_project_subscriptions_limit} subscriptions from or to a project.").html_safe % { ci_project_subscriptions_limit: @project.actual_limits.ci_project_subscriptions }
+      = _("A limit of %{ci_project_subscriptions_limit} subscriptions to or from a project applies.").html_safe % { ci_project_subscriptions_limit: @project.actual_limits.ci_project_subscriptions }
 
   .settings-content
     = render 'projects/settings/subscriptions/index'
