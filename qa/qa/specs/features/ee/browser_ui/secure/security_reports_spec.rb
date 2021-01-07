@@ -104,6 +104,9 @@ module QA
         Page::Group::Menu.perform(&:click_group_security_link)
 
         EE::Page::Group::Secure::Show.perform do |dashboard|
+          Support::Retrier.retry_until(max_attempts: 5, sleep_interval: 30, reload_page: dashboard) do
+            dashboard.has_element?("severity_accordion_item_F")
+          end
           expect(dashboard).to have_security_status_project_for_severity('F', @project)
         end
 
