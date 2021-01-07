@@ -1,0 +1,5 @@
+---
+title: Add confidentiality filtering to the epics REST API nd GraphQL endpoints
+merge_request:
+author:
+type: added

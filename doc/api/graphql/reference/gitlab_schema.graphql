@@ -1450,6 +1450,11 @@ type BoardEpic implements CurrentUserTodos & Noteable {
     before: String
 
     """
+    Filteeer epics by given confidentiality
+    """
+    confidential: Boolean = true
+
+    """
     List items overlapping a time frame defined by startDate..endDate (if one
     date is provided, both must be present) Deprecated in 13.5: Use timeframe.end.
     """
@@ -7962,6 +7967,11 @@ type Epic implements CurrentUserTodos & Noteable {
     before: String
 
     """
+    Filteeer epics by given confidentiality
+    """
+    confidential: Boolean = true
+
+    """
     List items overlapping a time frame defined by startDate..endDate (if one
     date is provided, both must be present) Deprecated in 13.5: Use timeframe.end.
     """
@@ -9851,6 +9861,11 @@ type Group {
     authorUsername: String
 
     """
+    Filteeer epics by given confidentiality
+    """
+    confidential: Boolean = true
+
+    """
     List items overlapping a time frame defined by startDate..endDate (if one
     date is provided, both must be present) Deprecated in 13.5: Use timeframe.end.
     """
@@ -9967,6 +9982,11 @@ type Group {
     Returns the elements in the list that come before the specified cursor.
     """
     before: String
+
+    """
+    Filteeer epics by given confidentiality
+    """
+    confidential: Boolean = true
 
     """
     List items overlapping a time frame defined by startDate..endDate (if one

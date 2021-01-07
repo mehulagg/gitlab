@@ -3945,6 +3945,16 @@
                   "defaultValue": "true"
                 },
                 {
+                  "name": "confidential",
+                  "description": "Filteeer epics by given confidentiality",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Boolean",
+                    "ofType": null
+                  },
+                  "defaultValue": "true"
+                },
+                {
                   "name": "after",
                   "description": "Returns the elements in the list that come after the specified cursor.",
                   "type": {
@@ -22223,6 +22233,16 @@
                   "defaultValue": "true"
                 },
                 {
+                  "name": "confidential",
+                  "description": "Filteeer epics by given confidentiality",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Boolean",
+                    "ofType": null
+                  },
+                  "defaultValue": "true"
+                },
+                {
                   "name": "after",
                   "description": "Returns the elements in the list that come after the specified cursor.",
                   "type": {
@@ -27366,6 +27386,16 @@
                     "ofType": null
                   },
                   "defaultValue": "true"
+                },
+                {
+                  "name": "confidential",
+                  "description": "Filteeer epics by given confidentiality",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Boolean",
+                    "ofType": null
+                  },
+                  "defaultValue": "true"
                 }
               ],
               "type": {
@@ -27599,6 +27629,16 @@
                 {
                   "name": "includeDescendantGroups",
                   "description": "Include epics from descendant groups",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Boolean",
+                    "ofType": null
+                  },
+                  "defaultValue": "true"
+                },
+                {
+                  "name": "confidential",
+                  "description": "Filteeer epics by given confidentiality",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Boolean",

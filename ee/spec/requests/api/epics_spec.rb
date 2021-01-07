@@ -221,6 +221,16 @@ RSpec.describe API::Epics do
         expect_paginated_array_response([epic2.id, epic.id])
       end
 
+      it 'returns epics matching given confidentiality' do
+        group.add_developer(user)
+
+        epic3 = create(:epic, group: group, confidential: true)
+
+        get api(url, user), params: { confidential: true }
+
+        expect_paginated_array_response([epic3.id])
+      end
+
       it 'has upvote/downvote information' do
         create(:award_emoji, name: 'thumbsup', awardable: epic, user: user )
         create(:award_emoji, name: 'thumbsdown', awardable: epic2, user: user )
