@@ -11,9 +11,9 @@ RSpec.describe 'contribution analytics' do
     login_as(user)
   end
 
-  it 'redirects from -/analytics to -/contribution_analytics' do
+  it 'redirects from -/analytics to -/analytics/value_stream_analytics' do
     get "/groups/#{group.full_path}/-/analytics"
 
-    expect(response).to redirect_to(group_contribution_analytics_path(group.full_path))
+    expect(response).to redirect_to(group_analytics_cycle_analytics_path(group.full_path))
   end
 end
