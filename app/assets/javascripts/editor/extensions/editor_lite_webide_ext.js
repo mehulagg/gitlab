@@ -1,7 +1,6 @@
 import { debounce } from 'lodash';
 import { editor as monacoEditor, KeyCode, KeyMod, Range } from 'monaco-editor';
 import Disposable from '~/ide/lib/common/disposable';
-import DecorationsController from '~/ide/lib/decorations/controller';
 import { editorOptions } from '~/ide/lib/editor_options';
 import keymap from '~/ide/lib/keymap.json';
 import { EditorLiteExtension } from '~/editor/extensions/editor_lite_extension_base';
@@ -13,13 +12,11 @@ const isDiffEditorType = (instance) => {
 
 export class EditorWebIdeExtension extends EditorLiteExtension {
   constructor({ instance, modelManager, ...options } = {}) {
-    const decorationsController = new DecorationsController(instance);
     super({
       instance,
       ...options,
       currentModel: null,
       modelManager,
-      decorationsController,
       disposable: new Disposable(),
       debouncedUpdate: debounce(() => {
         instance.updateDimensions();
