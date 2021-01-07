@@ -114,12 +114,15 @@ export default {
         return this.highlightedJob;
       }
 
-      // In case it's a parallel job, then we also need to add the group name
+      // In case it's a parallel job, the name of the group and the job will be different.
+      // This mean we also need to add the group name
       // to the list of `needs` to ensure we can properly reference it.
       const groupName = this.jobs[needs[0]].name;
-      return Array.from(
-        new Set([this.highlightedJob, groupName, ...this.needsObject[[this.highlightedJob]]]),
-      );
+      if (!needs.includes(groupName)) {
+        return [this.highlightedJob, groupName, ...needs];
+      }
+
+      return [this.highlightedJob, ...needs];
     },
     highlightedLinks() {
       // If you are hovering on a job, then the links we want to highlight are:
