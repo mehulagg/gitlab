@@ -35,35 +35,28 @@ the `author` field. GitLab team members **should not**.
 
 ## What warrants a changelog entry?
 
-- Any change that introduces a database migration, whether it's regular, post,
-  or data migration, **must** have a changelog entry, even if it is behind a
-  disabled feature flag. Since the migration is executed on [GitLab FOSS](https://gitlab.com/gitlab-org/gitlab-foss/),
-  the changelog for database schema changes should be written to the
-  `changelogs/unreleased/` directory, even when other elements of that change affect only GitLab EE.
+_Any_ contribution from a community member, no matter how small, **may** have a changelog entry if the contributor wants one, regardless of any guidelines below. Example: "Fixed a typo on the search results page."
 
-- [Security fixes](https://gitlab.com/gitlab-org/release/docs/blob/master/general/security/developer.md)
-  **must** have a changelog entry, without `merge_request` value
-  and with `type` set to `security`.
-- Any user-facing change **must** have a changelog entry. This includes both visual changes (regardless of how minor), and changes to the rendered DOM which impact how a screen reader may announce the content.
-- Any client-facing change to our REST and GraphQL APIs **must** have a changelog entry.
-- Performance improvements **should** have a changelog entry.
-- Changes that need to be documented in the Product Analytics [Event Dictionary](https://about.gitlab.com/handbook/product/product-analytics-guide/#event-dictionary)
-  also require a changelog entry.
-- _Any_ contribution from a community member, no matter how small, **may** have
-  a changelog entry regardless of these guidelines if the contributor wants one.
-  Example: "Fixed a typo on the search results page."
-- Any docs-only changes **should not** have a changelog entry.
-- Any change behind a disabled feature flag **should not** have a changelog entry.
-- Any change behind an enabled feature flag **should** have a changelog entry.
-- Any change that adds new usage data metrics and changes that needs to be documented in Product Analytics [Event Dictionary](https://about.gitlab.com/handbook/product/product-analytics-guide/#event-dictionary) **should** have a changelog entry.
-- A change that adds snowplow events **should** have a changelog entry -
-- A change that [removes a feature flag](feature_flags/development.md) **should** have a changelog entry -
-  only if the feature flag did not default to true already.
-- A fix for a regression introduced and then fixed in the same release (i.e.,
-  fixing a bug introduced during a monthly release candidate) **should not**
+### What must have a changelog entry?
+
+- User-facing changes **must** have a changelog entry. This includes visual changes (regardless of how minor), changes to the rendered DOM which impact how a screen reader may announce the content, etc. This also includes user-facing changes behind an enabled feature flag.
+- Client-facing changes to our REST and GraphQL APIs **must** have a changelog entry.
+- Database migrations of any kind **must** have a changelog entry, even if they are behind a disabled feature flag. Since the migration is executed on [GitLab FOSS](https://gitlab.com/gitlab-org/gitlab-foss/), the changelog for database schema changes should be written to the `changelogs/unreleased/` directory, even when other elements of that change affect only GitLab EE.
+- [Security fixes](https://gitlab.com/gitlab-org/release/docs/blob/master/general/security/developer.md) **must** have a changelog entry, without `merge_request` value and with `type` set to `security`.
+- Performance improvements **must** have a changelog entry.
+- Product Analytics [Event Dictionary](https://about.gitlab.com/handbook/product/product-analytics-guide/#event-dictionary) changes **must** have a changelog entry.
+- Snowplow event changes **must** have a changelog entry.
+- [Removal of a feature flag](feature_flags/development.md) **must** have a changelog entry unless the feature flag was never enabled.
+
+### What must not have a changelog entry?
+
+- Docs-only changes **must not** have a changelog entry.
+- Changes behind a disabled feature flag **must not** have a changelog entry.
+- Fixes for regressions introduced and then fixed in the same release (i.e.,
+  fixing a bug introduced during a monthly release candidate) **must not**
   have a changelog entry.
-- Any developer-facing change (e.g., refactoring, technical debt remediation,
-  test suite changes) **should not** have a changelog entry. Example: "Reduce
+- Non-user-facing changes (e.g., refactoring, technical debt remediation,
+  test suite changes) **must not** have a changelog entry. Example: "Reduce
   database records created during Cycle Analytics model spec."
 
 ## Writing good changelog entries
