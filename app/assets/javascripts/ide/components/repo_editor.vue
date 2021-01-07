@@ -215,8 +215,6 @@ export default {
         return;
       }
 
-      // this.editor.clearEditor();
-
       this.registerSchemaForFile();
 
       Promise.all([this.fetchFileData(), this.fetchEditorconfigRules()])
@@ -255,22 +253,15 @@ export default {
         return;
       }
 
-      // this.editor.dispose();
-      //
-      // this.$nextTick(() => {
-      //   if (this.viewer === viewerTypes.edit) {
-      //     this.editor.createInstance(this.$refs.editor);
-      //   } else {
-      //     this.editor.createDiffInstance(this.$refs.editor);
-      //   }
-      //
-      //   this.setupEditor();
-      // });
+      if (this.editor) {
+        this.editor.dispose();
+      }
 
-      if (!this.editor) {
-        const isDiff = this.viewer !== viewerTypes.edit;
-        const instanceOptions = isDiff ? defaultDiffEditorOptions : defaultEditorOptions;
-        this.editor = this.globalEditor.createInstance({
+      const isDiff = this.viewer !== viewerTypes.edit;
+      const instanceOptions = isDiff ? defaultDiffEditorOptions : defaultEditorOptions;
+
+      const createInstance = () => {
+        return this.globalEditor.createInstance({
           el: this.$refs.editor,
           blobPath: this.file.path,
           blobGlobalId: this.file.key,
@@ -279,22 +270,23 @@ export default {
           ...instanceOptions,
           ...this.editorOptions,
         });
+      };
 
-        this.editor.use(
-          new EditorWebIdeExtension({
-            instance: this.editor,
-            store: this.$store,
-            file: this.file,
-            options: this.editorOptions,
-          }),
-        );
-      }
+      this.editor = createInstance();
+      this.editor.use(
+        new EditorWebIdeExtension({
+          instance: this.editor,
+          store: this.$store,
+          file: this.file,
+          options: this.editorOptions,
+        }),
+      );
 
       this.$nextTick(() => {
-        if (this.viewer === viewerTypes.edit) {
-          this.editor.bootstrapInstance();
-        } else {
+        if (isDiff) {
           this.editor.bootstrapDiffInstance();
+        } else {
+          this.editor.bootstrapInstance();
         }
 
         this.setupEditor();
@@ -381,7 +373,7 @@ export default {
       });
     },
     onPaste(event) {
-      const editor = this.editor;
+      const { editor } = this;
       const reImage = /^image\/(png|jpg|jpeg|gif)$/;
       const file = event.clipboardData.files[0];
 
