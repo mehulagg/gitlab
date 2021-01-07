@@ -1,6 +1,4 @@
 <script>
-import { GlAlert } from '@gitlab/ui';
-import { __ } from '~/locale';
 import LinkedGraphWrapper from '../graph_shared/linked_graph_wrapper.vue';
 import LinksLayer from '../graph_shared/links_layer.vue';
 import LinkedPipelinesColumn from './linked_pipelines_column.vue';
@@ -10,7 +8,6 @@ import { DOWNSTREAM, MAIN, UPSTREAM } from './constants';
 export default {
   name: 'PipelineGraph',
   components: {
-    GlAlert,
     LinksLayer,
     LinkedGraphWrapper,
     LinkedPipelinesColumn,
@@ -38,21 +35,14 @@ export default {
   },
   CONTAINER_REF: 'PIPELINE_LINKS_CONTAINER_REF',
   CONTAINER_ID: 'pipeline-links-container',
-  MAX_STAGES: 1000,
   data() {
     return {
-      alertDismissed: false,
       hoveredJobName: '',
       pipelineExpanded: {
         jobName: '',
         expanded: false,
       },
-      showLinksOverride: false,
     };
-  },
-  i18n: {
-    showLinksAnyways: __('Show links anyways'),
-    tooManyStages: __('This graph has a large number of stages and showing the links may be slow.'),
   },
   computed: {
     downstreamPipelines() {
@@ -67,25 +57,11 @@ export default {
     hasUpstreamPipelines() {
       return Boolean(this.pipeline?.upstream?.length > 0);
     },
-    linkWrapper() {
-      return this.showLinkedLayers || this.showLinksOverride ? 'links-layer' : 'div';
-    },
-    numStages() {
-      return this.graph.reduce((acc, { groups }) => {
-        return acc + Number(groups.length);
-      }, 0);
-    },
-    showAlert() {
-      return !this.showLinkedLayers && !this.alertDismissed;
-    },
     // The show downstream check prevents showing redundant linked columns
     showDownstreamPipelines() {
       return (
         this.hasDownstreamPipelines && this.type !== this.$options.pipelineTypeConstants.UPSTREAM
       );
-    },
-    showLinkedLayers() {
-      return this.numStages < this.$options.MAX_STAGES;
     },
     // The show upstream check prevents showing redundant linked columns
     showUpstreamPipelines() {
@@ -98,12 +74,8 @@ export default {
     },
   },
   methods: {
-    dismissAlert() {
-      this.alertDismissed = true;
-    },
-    overrideShowLinks() {
-      this.dismissAlert();
-      this.showLinksOverride = true;
+    onError(errorType) {
+      this.$emit('error', errorType)
     },
     setJob(jobName) {
       this.hoveredJobName = jobName;
@@ -119,27 +91,19 @@ export default {
 </script>
 <template>
   <div class="js-pipeline-graph">
-    <gl-alert
-      v-if="showAlert"
-      :primary-button-text="$options.i18n.showLinksAnyways"
-      @primaryAction="overrideShowLinks"
-      @dismiss="dismissAlert"
-    >
-      {{ $options.i18n.tooManyStages }}
-    </gl-alert>
     <div
       :id="$options.CONTAINER_ID"
       :ref="$options.CONTAINER_REF"
       class="gl-pipeline-min-h gl-display-flex gl-position-relative gl-overflow-auto gl-bg-gray-10 gl-white-space-nowrap"
       :class="{ 'gl-py-5': !isLinkedPipeline }"
     >
-      <component
-        :is="linkWrapper"
+      <links-layer
         :pipeline-data="graph"
         :container-id="$options.CONTAINER_ID"
         :container-ref="$options.CONTAINER_REF"
         :highlighted-job="hoveredJobName"
         default-link-color="gl-stroke-transparent"
+        @error="onError"
       >
         <linked-graph-wrapper>
           <template #upstream>
@@ -148,7 +112,7 @@ export default {
               :linked-pipelines="upstreamPipelines"
               :column-title="__('Upstream')"
               :type="$options.pipelineTypeConstants.UPSTREAM"
-              @error="emit('error', errorType)"
+              @error="onError"
             />
           </template>
           <template #main>
@@ -172,11 +136,11 @@ export default {
               :type="$options.pipelineTypeConstants.DOWNSTREAM"
               @downstreamHovered="setJob"
               @pipelineExpandToggle="togglePipelineExpanded"
-              @error="emit('error', errorType)"
+              @error="onError"
             />
           </template>
         </linked-graph-wrapper>
-      </component>
+      </links-layer>
     </div>
   </div>
 </template>

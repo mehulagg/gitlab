@@ -139,7 +139,7 @@ export default async function () {
       );
       mediator = new PipelinesMediator({ endpoint: dataset.endpoint });
       mediator.fetchPipeline();
-    } catch {
+    } catch (err) {
       Flash(__('An error occurred while loading the pipeline.'));
     }
   }
