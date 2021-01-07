@@ -42,8 +42,8 @@ export default {
   <gl-card>
     <template #header>
       <div class="row">
-        <div class="col-7">
-          <h3 class="gl-font-lg gl-display-inline">
+        <div class="col-7 gl-display-flex gl-align-items-center">
+          <h3 class="gl-font-lg gl-my-0">
             <slot name="title"></slot>
           </h3>
         </div>

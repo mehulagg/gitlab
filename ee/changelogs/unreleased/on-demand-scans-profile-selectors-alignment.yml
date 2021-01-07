@@ -1,0 +1,5 @@
+---
+title: Fix on-demand scans profile selectors' title alignment
+merge_request: 51133
+author:
+type: fixed
