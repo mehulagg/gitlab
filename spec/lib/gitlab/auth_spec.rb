@@ -379,7 +379,6 @@ RSpec.describe Gitlab::Auth, :use_clean_rails_memory_store_caching do
           end
         end
 
-
         context 'with invalid project access token' do
           context 'when project bot is not a project member' do
             it 'fails for a non-project member' do
