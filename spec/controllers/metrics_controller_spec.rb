@@ -84,8 +84,8 @@ RSpec.describe MetricsController, :request_store do
     include_examples 'protected metrics endpoint', 'providing metrics'
   end
 
-  describe '#vm' do
-    shared_examples_for 'providing Ruby VM stats' do
+  describe '#system' do
+    shared_examples_for 'providing system stats' do
       let(:summary) do
         {
           version: 'ruby-3.0-patch1',
@@ -97,8 +97,8 @@ RSpec.describe MetricsController, :request_store do
         allow(Gitlab::Metrics::System).to receive(:summary).and_return(summary)
       end
 
-      it 'renders Ruby VM stats JSON' do
-        get :vm
+      it 'renders system stats JSON' do
+        get :system
 
         expect(response).to have_gitlab_http_status(:ok)
         expect(response_json['version']).to eq('ruby-3.0-patch1')
@@ -106,7 +106,7 @@ RSpec.describe MetricsController, :request_store do
       end
     end
 
-    include_examples 'protected metrics endpoint', 'providing Ruby VM stats'
+    include_examples 'protected metrics endpoint', 'providing system stats'
   end
 
   def response_json

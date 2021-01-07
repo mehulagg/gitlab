@@ -18,7 +18,7 @@ class MetricsController < ActionController::Base
     render plain: response, content_type: 'text/plain; version=0.0.4'
   end
 
-  def vm
+  def system
     # perform a major mark-and-sweep before collecting stats
     GC.start
 

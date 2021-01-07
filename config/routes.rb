@@ -94,7 +94,7 @@ Rails.application.routes.draw do
     get 'readiness' => 'health#readiness'
     controller :metrics do
       get 'metrics', action: :index
-      get 'metrics/vm', action: :vm
+      get 'metrics/system', action: :system
     end
     mount Peek::Railtie => '/peek', as: 'peek_routes'
 
