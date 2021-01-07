@@ -41,7 +41,7 @@ export default {
     showSidebar() {
       return this.sidebarType === ISSUABLE;
     },
-    assigneesQueryVariables() {
+    participantsQueryVariables() {
       return {
         /* eslint-disable-next-line @gitlab/require-i18n-strings */
         id: convertToGraphQLId('Issue', this.activeIssue.iid),
@@ -75,8 +75,8 @@ export default {
 
     <template>
       <sidebar-assignees-widget
-        :assignees-query="$options.getIssueParticipants"
-        :assignees-query-variables="assigneesQueryVariables"
+        :participants-query="$options.getIssueParticipants"
+        :participants-query-variables="participantsQueryVariables"
         :update-assignees-mutation="$options.updateAssigneesMutation"
         :update-assignees-variables="updateAssigneesVariables"
         :assignees="activeIssue.assignees"

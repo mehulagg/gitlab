@@ -45,11 +45,11 @@ export default {
       type: Array,
       required: true,
     },
-    assigneesQuery: {
+    participantsQuery: {
       type: Object,
       required: true,
     },
-    assigneesQueryVariables: {
+    participantsQueryVariables: {
       type: Object,
       required: true,
     },
@@ -78,11 +78,11 @@ export default {
   apollo: {
     participants: {
       query() {
-        return this.isSearchEmpty ? this.assigneesQuery : searchUsers;
+        return this.isSearchEmpty ? this.participantsQuery : searchUsers;
       },
       variables() {
         if (this.isSearchEmpty) {
-          return this.assigneesQueryVariables;
+          return this.participantsQueryVariables;
         }
 
         return {

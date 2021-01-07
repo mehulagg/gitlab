@@ -58,10 +58,10 @@ export default {
       // Note: Realtime is only available on issues right now, future support for MR wil be built later.
       return this.glFeatures.realTimeIssueSidebar && this.isIssue;
     },
-    assigneesQuery() {
+    participantsQuery() {
       return this.isIssue ? getIssueParticipants : getMrParticipants;
     },
-    assigneesQueryVariables() {
+    participantsQueryVariables() {
       return this.isIssue
         ? /* eslint-disable @gitlab/require-i18n-strings */
           { id: convertToGraphQLId('Issue', this.issuableIid) }
@@ -99,8 +99,8 @@ export default {
     <sidebar-assignees-widget
       :loading="store.isFetching.assignees"
       :assignees="store.assignees"
-      :assignees-query="assigneesQuery"
-      :assignees-query-variables="assigneesQueryVariables"
+      :participants-query="participantsQuery"
+      :participants-query-variables="participantsQueryVariables"
       :update-assignees-mutation="updateAssigneesMutation"
       :update-assignees-variables="updateAssigneesVariables"
       @assigneesUpdated="saveAssignees"
