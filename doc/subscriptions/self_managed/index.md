@@ -155,7 +155,7 @@ You purchase a license for 10 users.
 | Two new people join.                               | 12               | 12            |
 | Three people leave and their accounts are removed. | 9                | 12            |
 
-Users over license = 12 - 10 (Maximum users - users in license)
+Users over license = 2, calculated as 12 (Maximum users) - 10 (users in license)
 
 ### Add seats to a subscription
 
