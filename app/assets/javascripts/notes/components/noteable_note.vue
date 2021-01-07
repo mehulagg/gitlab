@@ -2,7 +2,7 @@
 import $ from 'jquery';
 import { mapGetters, mapActions } from 'vuex';
 import { escape } from 'lodash';
-import { GlSprintf, GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
+import { GlSprintf, GlSafeHtmlDirective as SafeHtml, GlButton } from '@gitlab/ui';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { truncateSha } from '~/lib/utils/text_utility';
 import TimelineEntryItem from '~/vue_shared/components/notes/timeline_entry_item.vue';
@@ -24,6 +24,7 @@ import {
   formatLineRange,
 } from './multiline_comment_utils';
 import { INLINE_DIFF_LINES_KEY } from '~/diffs/constants';
+import { assigneesWidgetMethods } from '~/sidebar/components/assignees/sidebar_assignees_widget.vue';
 
 export default {
   name: 'NoteableNote',
@@ -34,6 +35,7 @@ export default {
     noteActions,
     NoteBody,
     TimelineEntryItem,
+    GlButton,
   },
   directives: {
     SafeHtml,
@@ -342,6 +344,12 @@ export default {
     assigneesUpdate(assignees) {
       this.updateAssignees(assignees);
     },
+    async assignToRoot() {
+      if (assigneesWidgetMethods?.updateAssignees) {
+        const assignees = await assigneesWidgetMethods.updateAssignees(['root']);
+        console.log(assignees);
+      }
+    },
   },
 };
 </script>
@@ -435,6 +443,7 @@ export default {
           @cancelForm="formCancelHandler"
         />
       </div>
+      <gl-button @click="assignToRoot">Assign to root</gl-button>
     </div>
   </timeline-entry-item>
 </template>

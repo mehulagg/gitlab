@@ -1,5 +1,6 @@
 <script>
 import { cloneDeep } from 'lodash';
+import Vue from 'vue';
 import {
   GlDropdownItem,
   GlDropdownDivider,
@@ -14,6 +15,10 @@ import IssuableAssignees from '~/sidebar/components/assignees/issuable_assignees
 import SidebarEditableItem from '~/sidebar/components/sidebar_editable_item.vue';
 import MultiSelectDropdown from '~/vue_shared/components/sidebar/multiselect_dropdown.vue';
 import searchUsers from '~/graphql_shared/queries/users_search.query.graphql';
+
+export const assigneesWidgetMethods = Vue.observable({
+  updateAssignees: null,
+});
 
 export default {
   noSearchDelay: 0,
@@ -124,6 +129,9 @@ export default {
     assignees() {
       this.selected = cloneDeep(this.assignees);
     },
+  },
+  created() {
+    assigneesWidgetMethods.updateAssignees = this.updateAssignees;
   },
   methods: {
     updateAssignees(assigneeUsernames) {
