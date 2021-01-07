@@ -14,8 +14,6 @@ Navigate to **Admin Area > Settings > General**, then expand **Account and Limit
 You can increase or decrease that `Default projects limit` value.
 
 - If you set `Default projects limit` to 0, users are not allowed to create projects in their users personal namespace. However, projects can still be created within a group.
-Navigate to **Admin Area (wrench icon) > Settings > General**, then expand **Account and Limit**.
-From here, you can increase or decrease by changing the value in `Default projects limit`.
 
 ## Max attachment size
 
