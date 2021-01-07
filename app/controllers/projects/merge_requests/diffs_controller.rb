@@ -122,7 +122,7 @@ class Projects::MergeRequests::DiffsController < Projects::MergeRequests::Applic
       end
     end
 
-    if render_merge_ref_head_diff?
+    if render_merge_ref_head_diff? && @start_sha.nil?
       return CompareService.new(@project, @merge_request.merge_ref_head.sha)
         .execute(@project, @merge_request.target_branch)
     end
