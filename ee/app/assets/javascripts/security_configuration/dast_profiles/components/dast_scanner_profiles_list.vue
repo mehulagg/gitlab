@@ -18,7 +18,7 @@ export default {
 <template>
   <profiles-list v-bind="$attrs" v-on="$listeners">
     <template #cell(scanType)="{ value }">
-      <gl-badge :variant="value === $options.SCAN_TYPE.ACTIVE ? 'warning' : 'neutral'">
+      <gl-badge size="sm" :variant="value === $options.SCAN_TYPE.ACTIVE ? 'warning' : 'neutral'">
         {{ $options.SCAN_TYPE_LABEL[value].toLowerCase() }}
       </gl-badge>
     </template>

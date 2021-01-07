@@ -1,5 +1,5 @@
 <script>
-import { GlButton, GlIcon, GlTooltipDirective, GlBadge, GlLoadingIcon } from '@gitlab/ui';
+import { GlButton, GlIcon, GlTooltipDirective, GlBadge, GlLink } from '@gitlab/ui';
 import {
   DAST_SITE_VALIDATION_STATUS,
   DAST_SITE_VALIDATION_STATUS_PROPS,
@@ -20,7 +20,7 @@ export default {
     GlButton,
     GlIcon,
     GlBadge,
-    GlLoadingIcon,
+    GlLink,
     DastSiteValidationModal,
     ProfilesList,
   },
@@ -129,16 +129,23 @@ export default {
   <profiles-list :full-path="fullPath" :profiles="profiles" v-bind="$attrs" v-on="$listeners">
     <template #head(validationStatus)="{ label }">
       {{ label }}
+      <gl-link
+        href="https://docs.gitlab.com/ee/user/application_security/dast/#site-profile-validation"
+        target="_blank"
+        class="gl-text-gray-300 gl-ml-2"
+      >
+        <gl-icon name="question-o" />
+      </gl-link>
     </template>
     <template #cell(validationStatus)="{ value }">
       <template v-if="shouldShowValidationStatus(value)">
         <gl-badge
           v-gl-tooltip
+          size="sm"
           :variant="$options.statuses[value].badgeVariant"
           :title="$options.statuses[value].tooltipText"
         >
-          <gl-loading-icon v-if="isPendingValidation(value)" class="gl-mr-2" />
-          <gl-icon v-else class="gl-mr-2" :name="$options.statuses[value].badgeIcon" />
+          <gl-icon :size="12" class="gl-mr-2" :name="$options.statuses[value].badgeIcon" />
           {{ $options.statuses[value].label }}</gl-badge
         >
       </template>
