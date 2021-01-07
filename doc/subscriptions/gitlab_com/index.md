@@ -136,7 +136,16 @@ and the billing page.
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/262875) in GitLab 13.8.
 
 To search users in the **Seat usage** page, enter a string in the **Search** field. A minimum of 3
-characters are required. The search returns those users whose name contains the search string.
+characters are required.
+
+The search returns those users whose first name, last name, or username contain the search string.
+
+For example:
+
+| First name | Search string | Match ? |
+|:-----------|:--------------|:--------|
+| Amir       | `ami`         | Yes     |
+| Amir       | `amr`         | No      |
 
 ## Renew your GitLab.com subscription
 
