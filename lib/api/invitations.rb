@@ -48,6 +48,22 @@ module API
 
           present_member_invitations invitations
         end
+
+        desc 'Removes an invitation from a group or project.'
+        params do
+          requires :email, type: String, desc: 'The email address of the invitation'
+        end
+        delete ":id/invitations/:email", requirements: { email: /[^\/]+/ } do
+          source = find_source(source_type, params[:id])
+          invite_email = params['email']
+          authorize_admin_source!(source_type, source)
+
+          invite = retrieve_member_invitations(source, invite_email).first
+          not_found! unless invite
+
+          deleted =::Members::DestroyService.new(current_user, params).execute(invite)
+          no_content! if deleted
+        end
       end
     end
   end
