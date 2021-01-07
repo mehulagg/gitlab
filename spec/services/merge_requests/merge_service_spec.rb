@@ -90,14 +90,6 @@ RSpec.describe MergeRequests::MergeService do
 
           expect(merge_request.squash_commit_sha).to eq(squash_commit.id)
         end
-
-        context 'when feature flag is disabled' do
-          let(:feature_flag_persist_squash) { false }
-
-          it 'does not populate squash_commit_sha' do
-            expect(merge_request.squash_commit_sha).to be_nil
-          end
-        end
       end
     end
 
