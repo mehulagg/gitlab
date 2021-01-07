@@ -19,29 +19,13 @@ export default {
   CONTAINER_REF: 'PIPELINE_GRAPH_CONTAINER_REF',
   CONTAINER_ID: 'pipeline-graph-container',
   STROKE_WIDTH: 2,
-  errors: {
-    [DRAW_FAILURE]: {
-      text: __('Could not draw the lines for job relationships'),
-      variant: 'danger',
-      dismissible: true,
-    },
-    [DEFAULT]: {
-      text: __('An unknown error occurred.'),
-      variant: 'danger',
-      dismissible: true,
-    },
-    [EMPTY_PIPELINE_DATA]: {
-      text: __(
-        'The visualization will appear in this tab when the CI/CD configuration file is populated with valid syntax.',
-      ),
-      variant: 'tip',
-      dismissible: false,
-    },
-    [INVALID_CI_CONFIG]: {
-      text: __('Your CI configuration file is invalid.'),
-      variant: 'danger',
-      dismissible: false,
-    },
+  errorTexts: {
+    [DRAW_FAILURE]: __('Could not draw the lines for job relationships'),
+    [DEFAULT]: __('An unknown error occurred.'),
+    [EMPTY_PIPELINE_DATA]: __(
+      'The visualization will appear in this tab when the CI/CD configuration file is populated with valid syntax.',
+    ),
+    [INVALID_CI_CONFIG]: __('Your CI configuration file is invalid.'),
   },
   props: {
     pipelineData: {
@@ -89,7 +73,32 @@ export default {
       return this.warning;
     },
     failure() {
-      return this.$options.errors[this.failureType] || this.$options.errors[DEFAULT];
+      switch (this.failureType) {
+        case DRAW_FAILURE:
+          return {
+            text: this.$options.errorTexts[DRAW_FAILURE],
+            variant: 'danger',
+            dismissible: true,
+          };
+        case EMPTY_PIPELINE_DATA:
+          return {
+            text: this.$options.errorTexts[EMPTY_PIPELINE_DATA],
+            variant: 'tip',
+            dismissible: false,
+          };
+        case INVALID_CI_CONFIG:
+          return {
+            text: this.$options.errorTexts[INVALID_CI_CONFIG],
+            variant: 'danger',
+            dismissible: false,
+          };
+        default:
+          return {
+            text: this.$options.errorTexts[DEFAULT],
+            variant: 'danger',
+            dismissible: true,
+          };
+      }
     },
     viewBox() {
       return [0, 0, this.width, this.height];
