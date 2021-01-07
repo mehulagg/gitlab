@@ -31,7 +31,13 @@ RSpec.describe Atlassian::JiraConnect::Client do
   end
 
   describe '#send_info' do
-    it 'calls store_deploy_info, store_build_info and store_dev_info as appropriate' do
+    it 'calls more specific methods as appropriate' do
+      expect(subject).to receive(:store_ff_info).with(
+        project: project,
+        update_sequence_id: :x,
+        feature_flags: :r
+      ).and_return(:ff_stored)
+
       expect(subject).to receive(:store_build_info).with(
         project: project,
         update_sequence_id: :x,
@@ -59,11 +65,12 @@ RSpec.describe Atlassian::JiraConnect::Client do
         branches: :b,
         merge_requests: :c,
         pipelines: :y,
-        deployments: :q
+        deployments: :q,
+        feature_flags: :r
       }
 
       expect(subject.send_info(**args))
-        .to contain_exactly(:dev_stored, :build_stored, :deploys_stored)
+        .to contain_exactly(:dev_stored, :build_stored, :deploys_stored, :ff_stored)
     end
 
     it 'only calls methods that we need to call' do
@@ -100,17 +107,11 @@ RSpec.describe Atlassian::JiraConnect::Client do
     }
   end
 
-  describe '#store_deploy_info' do
-    let_it_be(:environment) { create(:environment, name: 'DEV', project: project) }
-    let_it_be(:deployments) do
-      pipelines.map do |p|
-        build = create(:ci_build, environment: environment.name, pipeline: p, project: project)
-        create(:deployment, deployable: build, environment: environment)
-      end
-    end
+  describe '#store_ff_info' do
+    let_it_be(:feature_flags) { create_list(:operations_feature_flag, 3, project: project) }
 
     let(:schema) do
-      Atlassian::Schemata.deploy_info_payload
+      Atlassian::Schemata.ff_info_payload
     end
 
     let(:body) do
@@ -120,41 +121,47 @@ RSpec.describe Atlassian::JiraConnect::Client do
     end
 
     before do
-      path = '/rest/deployments/0.1/bulk'
+      feature_flags.first.update!(description: 'RELEVANT-123')
+      feature_flags.second.update!(description: 'RELEVANT-123')
+      path = '/rest/featureflags/0.1/bulk'
       stub_full_request('https://gitlab-test.atlassian.net' + path, method: :post)
         .with(body: body, headers: expected_headers(path))
     end
 
     it "calls the API with auth headers" do
-      subject.send(:store_deploy_info, project: project, deployments: deployments)
+      subject.send(:store_ff_info, project: project, feature_flags: feature_flags)
     end
 
     it 'only sends information about relevant MRs' do
-      expect(subject).to receive(:post).with('/rest/deployments/0.1/bulk', { deployments: have_attributes(size: 6) })
+      expect(subject).to receive(:post).with('/rest/featureflags/0.1/bulk', {
+        flags: have_attributes(size: 2), properties: Hash
+      })
 
-      subject.send(:store_deploy_info, project: project, deployments: deployments)
+      subject.send(:store_ff_info, project: project, feature_flags: feature_flags)
     end
 
     it 'does not call the API if there is nothing to report' do
       expect(subject).not_to receive(:post)
 
-      subject.send(:store_deploy_info, project: project, deployments: deployments.take(1))
+      subject.send(:store_ff_info, project: project, feature_flags: [feature_flags.last])
     end
 
     it 'does not call the API if the feature flag is not enabled' do
-      stub_feature_flags(jira_sync_deployments: false)
+      stub_feature_flags(jira_sync_feature_flags: false)
 
       expect(subject).not_to receive(:post)
 
-      subject.send(:store_deploy_info, project: project, deployments: deployments)
+      subject.send(:store_ff_info, project: project, feature_flags: feature_flags)
     end
 
     it 'does call the API if the feature flag enabled for the project' do
-      stub_feature_flags(jira_sync_deployments: project)
+      stub_feature_flags(jira_sync_feature_flags: project)
 
-      expect(subject).to receive(:post).with('/rest/deployments/0.1/bulk', { deployments: Array })
+      expect(subject).to receive(:post).with('/rest/featureflags/0.1/bulk', {
+        flags: Array, properties: Hash
+      })
 
-      subject.send(:store_deploy_info, project: project, deployments: deployments)
+      subject.send(:store_ff_info, project: project, feature_flags: feature_flags)
     end
   end
 
