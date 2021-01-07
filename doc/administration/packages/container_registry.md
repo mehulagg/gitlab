@@ -839,7 +839,21 @@ understand the implications.
 
 WARNING:
 This is a destructive operation.
-Please check [this issue](https://gitlab.com/gitlab-org/container-registry/-/issues/149) before continuing
+Please check [this issue](https://gitlab.com/gitlab-org/container-registry/-/issues/149) before continuing:
+When running `registry-garbage-collect` with the -m flag, garbage collection unlinks manifests that are part of a manifest list, unless they're tagged in the same repository. 
+Workaround:
+Instead of:
+```
+myrepo/manifestlist:latest
+myrepo/manifest/amd-64:latest
+myrepo/manifest/arm:latest
+```
+Use:
+```
+myrepo/manifestlist:latest
+myrepo/manifest:amd-64-latest
+myrepo/manifest:arm-latest
+```
 
 The GitLab Container Registry follows the same default workflow as Docker Distribution:
 retain untagged manifests and all layers, even ones that are not referenced directly. All content
