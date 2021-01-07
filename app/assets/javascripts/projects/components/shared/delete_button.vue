@@ -22,6 +22,14 @@ export default {
       type: String,
       required: true,
     },
+    modalTriggerTitle: {
+      type: String,
+      required: true,
+    },
+    modalTitle: {
+      type: String,
+      required: true,
+    },
   },
   data() {
     return {
@@ -54,7 +62,6 @@ export default {
     },
   },
   strings: {
-    deleteProject: __('Delete project'),
     title: __('Delete project. Are you ABSOLUTELY SURE?'),
     confirmText: __('Please type the following to confirm:'),
   },
@@ -67,7 +74,7 @@ export default {
     <input :value="csrfToken" type="hidden" name="authenticity_token" />
 
     <gl-button v-gl-modal="modalId" category="primary" variant="danger">{{
-      $options.strings.deleteProject
+      modalTriggerTitle
     }}</gl-button>
 
     <gl-modal
@@ -81,7 +88,7 @@ export default {
       :action-cancel="modalActionProps.cancel"
       @ok="submitForm"
     >
-      <template #modal-title>{{ $options.strings.title }}</template>
+      <template #modal-title>{{ modalTitle }}</template>
       <div>
         <slot name="modal-body"></slot>
         <p class="gl-mb-1">{{ $options.strings.confirmText }}</p>

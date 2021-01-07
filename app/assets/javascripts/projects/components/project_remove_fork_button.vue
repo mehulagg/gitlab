@@ -20,15 +20,15 @@ export default {
     },
   },
   strings: {
-    modalTriggerTitle: __('Delete project'),
-    modalTitle: __('Delete project. Are you ABSOLUTELY SURE?'),
-    alertTitle: __('You are about to permanently delete this project'),
+    modalTriggerTitle: __('Remove fork relationship'),
+    modalTitle: __('Confirmation required'),
+    alertTitle: __(
+      'You are going to remove the fork relationship from this project. Are you ABSOLUTELY sure?',
+    ),
     alertBody: __(
-      'Once a project is permanently deleted it %{strongStart}cannot be recovered%{strongEnd}. Permanently deleting this project will %{strongStart}immediately delete%{strongEnd} its repositories and %{strongStart}all related resources%{strongEnd} including issues, merge requests etc.',
+      'This action can %{strongStart}lead to data loss%{strongEnd}. To prevent accidental actions we ask you to confirm your intention.',
     ),
-    modalBody: __(
-      "This action cannot be undone. You will lose this project's repository and all content: issues, merge requests, etc.",
-    ),
+    modalBody: __('This action cannot be undone.'),
   },
 };
 </script>

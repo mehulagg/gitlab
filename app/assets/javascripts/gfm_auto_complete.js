@@ -71,7 +71,7 @@ class GfmAutoComplete {
     // Add GFM auto-completion to all input fields, that accept GFM input.
     this.input = input || $('.js-gfm-input');
     this.enableMap = enableMap;
-    this.setupLifecycle();
+    // this.setupLifecycle();
   }
 
   setupLifecycle() {
