@@ -128,6 +128,61 @@ console.
 
 As a follow up to finding `N+1` queries with Bullet, consider writing a [QueryRecoder test](query_recorder.md) to prevent a regression.
 
+## System stats
+
+During or after profiling, you may often want to get detailed statistics about the Ruby virtual machine process,
+such as memory consuption, time spent on CPU, or garbage collector statistic. These are easy to produce individually
+through various tools, but for convenience, a summary endpoint has been added that exports this data as a JSON payload:
+
+```shell
+curl -s localhost:3000/-/metrics/system | jq
+```
+
+Example output:
+
+```json
+{
+  "version": "ruby 2.7.2p137 (2020-10-01 revision a8323b79eb) [x86_64-linux-gnu]",
+  "gc_stat": {
+    "count": 135,
+    "heap_allocated_pages": 15396,
+    "heap_sorted_length": 15396,
+    "heap_allocatable_pages": 0,
+    "heap_available_slots": 6275468,
+    "heap_live_slots": 4567714,
+    "heap_free_slots": 1707754,
+    "heap_final_slots": 0,
+    "heap_marked_slots": 4567528,
+    "heap_eden_pages": 15396,
+    "heap_tomb_pages": 0,
+    "total_allocated_pages": 15396,
+    "total_freed_pages": 0,
+    "total_allocated_objects": 46870469,
+    "total_freed_objects": 42302755,
+    "malloc_increase_bytes": 8960,
+    "malloc_increase_bytes_limit": 31581162,
+    "minor_gc_count": 103,
+    "major_gc_count": 32,
+    "compact_count": 0,
+    "remembered_wb_unprotected_objects": 85310,
+    "remembered_wb_unprotected_objects_limit": 170620,
+    "old_objects": 4317423,
+    "old_objects_limit": 8634846,
+    "oldmalloc_increase_bytes": 8960,
+    "oldmalloc_increase_bytes_limit": 119181499
+  },
+  "memory_rss": 1780064256,
+  "memory_uss": 1512116224,
+  "memory_pss": 1599896576,
+  "time_cputime": 156.038678823,
+  "time_realtime": 1610029337.832822,
+  "time_monotonic": 23000.221206433
+}
+```
+
+You can also access this data through the `web_exporter` and `sidekiq_exporter` metric exporters via the
+`/system` path. To enable these exporters, refer to the [GitLab monitoring documentation](../../administration/monitoring/prometheus/gitlab_metrics.html).
+
 ## Settings that impact performance
 
 1. `development` environment by default works with hot-reloading enabled, this makes Rails to check file changes every request, and create a potential contention lock, as hot reload is single threaded.
