@@ -761,7 +761,7 @@ A site profile contains the following:
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/233020) in GitLab 13.8.
 
 Site profile validation reduces the risk of running an active scan against the wrong website. A site
-must be validated before an active scan can be run against it. The methods of site validation are as
+must be validated before an active scan can run against it. The site validation methods are as
 follows:
 
 - _Text file validation_ requires a text file be uploaded to the target site. The text file is
@@ -805,7 +805,7 @@ To validate a site profile:
 
 1. From your project's home page, go to **Security & Compliance > Configuration**.
 1. Select **Manage** in the **DAST Profiles** row.
-1. Select **Validate target site** beside the profile to be validated.
+1. Select **Validate target site** beside the profile to validate.
 1. Select the validation method.
    1. For **Text file validation**:
       1. Download the validation file listed in **Step 2**.
@@ -814,11 +814,11 @@ To validate a site profile:
       1. Select **Validate**.
    1. For **Header validation**:
       1. Select the clipboard icon in **Step 2**.
-      1. Edit the header of the site to be validated, and paste the clipboard content.
+      1. Edit the header of the site to validate, and paste the clipboard content.
       1. Select the input field in **Step 3** and enter the location of the header.
       1. Select **Validate**.
 
-The site is validated and an active scan can be run against it.
+The site is validated and an active scan can run against it.
 
 If a validated site profile's target URL is edited, the site is no longer validated.
 
@@ -829,7 +829,7 @@ application.
 
 ##### Ruby on Rails example for on-demand scan
 
-Here's how you would add a custom header in a Ruby on Rails application:
+Here's how you can add a custom header in a Ruby on Rails application:
 
 ```ruby
 class DastWebsiteTargetController < ActionController::Base
@@ -842,7 +842,7 @@ end
 
 ##### Django example for on-demand scan
 
-Here's how you would add a
+Here's how you can add a
 [custom header in Django](https://docs.djangoproject.com/en/2.2/ref/request-response/#setting-header-fields):
 
 ```python
@@ -856,7 +856,7 @@ class DastWebsiteTargetView(View):
 
 ##### Node (with Express) example for on-demand scan
 
-Here's how you would add a
+Here's how you can add a
 [custom header in Node (with Express)](http://expressjs.com/en/5x/api.html#res.append):
 
 ```javascript
