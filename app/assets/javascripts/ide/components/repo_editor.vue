@@ -299,7 +299,7 @@ export default {
       if (this.editor && !shouldDisposeEditor) {
         this.setupEditor();
       } else {
-        if (shouldDisposeEditor) {
+        if (this.editor && shouldDisposeEditor) {
           this.editor.dispose();
         }
         initInstance();
