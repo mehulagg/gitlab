@@ -541,7 +541,7 @@ To enable or disable tracking for specific event within <https://gitlab.com> or 
 /chatops run feature set <feature_name> false
 ```
 
-##### Known events in usage data payload
+##### Known events are added automatically in usage data payload
 
 All events added in [`known_events/common.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/usage_data_counters/known_events/common.yml) are automatically added to usage data generation under the `redis_hll_counters` key. This column is stored in [version-app as a JSON](https://gitlab.com/gitlab-services/version-gitlab-com/-/blob/master/db/schema.rb#L209).
 For each event we add metrics for the weekly and monthly time frames, and totals for each where applicable:
