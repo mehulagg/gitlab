@@ -67,6 +67,9 @@ is the author and the milestone is not 12.6.
 
 ![filter issues in a project](img/issue_search_filter_v12_7.png)
 
+NOTE:
+Issues can only be filtered by epic in the group where the epic was created (see [this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/233729) for details).
+
 ### Filtering by **None** / **Any**
 
 Some filter fields like milestone and assignee, allow you to filter by **None** or **Any**.
