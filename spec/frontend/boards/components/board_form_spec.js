@@ -9,6 +9,7 @@ import boardsStore from '~/boards/stores/boards_store';
 import BoardForm from '~/boards/components/board_form.vue';
 import updateBoardMutation from '~/boards/graphql/board_update.mutation.graphql';
 import createBoardMutation from '~/boards/graphql/board_create.mutation.graphql';
+import destroyBoardMutation from '~/boards/graphql/board_destroy.mutation.graphql';
 
 jest.mock('~/lib/utils/url_utility', () => ({
   visitUrl: jest.fn().mockName('visitUrlMock'),
@@ -32,10 +33,6 @@ const defaultProps = {
   labelsPath: `${TEST_HOST}/labels/path`,
   labelsWebUrl: `${TEST_HOST}/-/labels`,
   currentBoard,
-};
-
-const endpoints = {
-  boardsEndpoint: 'test-endpoint',
 };
 
 const mutate = jest.fn().mockResolvedValue({
@@ -64,7 +61,7 @@ describe('BoardForm', () => {
         };
       },
       provide: {
-        endpoints,
+        rootPath: 'root',
       },
       mocks: {
         $apollo: {
@@ -266,6 +263,38 @@ describe('BoardForm', () => {
         await waitForPromises();
         expect(visitUrl).toHaveBeenCalledWith('321');
       });
+    });
+  });
+
+  describe('when deleting a board', () => {
+    beforeEach(() => {
+      boardsStore.state.currentPage = 'delete';
+      createComponent({ canAdminBoard: true });
+    });
+
+    it('passes correct primary action text and variant', () => {
+      expect(findModalActionPrimary().text).toBe('Delete');
+      expect(findModalActionPrimary().attributes[0].variant).toBe('danger');
+    });
+
+    it('renders delete confirmation message', () => {
+      expect(findDeleteConfirmation().exists()).toBe(true);
+    });
+
+    it('calls a correct GraphQL mutation and redirects to correct page after deleting board', async () => {
+      findModal().vm.$emit('primary');
+
+      await waitForPromises();
+
+      expect(mutate).toHaveBeenCalledWith({
+        mutation: destroyBoardMutation,
+        variables: {
+          id: 'gid://gitlab/Board/1',
+        },
+      });
+
+      await waitForPromises();
+      expect(visitUrl).toHaveBeenCalledWith('root');
     });
   });
 });

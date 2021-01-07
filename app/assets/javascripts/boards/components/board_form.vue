@@ -10,7 +10,7 @@ import { fullLabelId, fullBoardId } from '../boards_util';
 import BoardConfigurationOptions from './board_configuration_options.vue';
 import updateBoardMutation from '../graphql/board_update.mutation.graphql';
 import createBoardMutation from '../graphql/board_create.mutation.graphql';
-import destroyBoardMutation from '../graphql/board_destroy.mutation.graphql'
+import destroyBoardMutation from '../graphql/board_destroy.mutation.graphql';
 
 const boardDefaults = {
   id: false,
@@ -94,6 +94,9 @@ export default {
   },
   inject: {
     fullPath: {
+      default: '',
+    },
+    rootPath: {
       default: '',
     },
   },
@@ -225,10 +228,10 @@ export default {
           await this.$apollo.mutate({
             mutation: destroyBoardMutation,
             variables: {
-              id: fullBoardId(this.board.id)
-            }
-          })
-          visitUrl(boardsStore.rootPath);
+              id: fullBoardId(this.board.id),
+            },
+          });
+          visitUrl(this.rootPath);
         } catch {
           Flash(this.$options.i18n.deleteErrorMessage);
         } finally {
