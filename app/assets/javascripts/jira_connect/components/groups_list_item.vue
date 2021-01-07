@@ -25,11 +25,14 @@ export default {
       <div class="gl-min-w-0 gl-display-flex gl-flex-grow-1 gl-flex-shrink-1 gl-align-items-center">
         <div class="gl-min-w-0 gl-flex-grow-1 flex-shrink-1">
           <div class="gl-display-flex gl-align-items-center gl-flex-wrap">
-            <span class="gl-mr-3 gl-text-gray-900! gl-font-weight-bold">
+            <span
+              class="gl-mr-3 gl-text-gray-900! gl-font-weight-bold"
+              data-testid="group-list-item-name"
+            >
               {{ group.full_name }}
             </span>
           </div>
-          <div v-if="group.description">
+          <div v-if="group.description" data-testid="group-list-item-description">
             <p class="gl-mt-2! gl-mb-0 gl-text-gray-600" v-text="group.description"></p>
           </div>
         </div>

@@ -20,7 +20,7 @@ export default {
   },
   data() {
     return {
-      groups: null,
+      groups: [],
       isLoading: false,
       page: 1,
       perPage: defaultPerPage,
