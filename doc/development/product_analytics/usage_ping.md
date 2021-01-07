@@ -598,6 +598,10 @@ Gitlab::UsageDataCounters::HLLRedisCounter.track_event(visitor_id, 'expand_vulne
 redis_usage_data { Gitlab::UsageDataCounters::HLLRedisCounter.unique_events(event_names: 'expand_vulnerabilities', start_date: 28.days.ago, end_date: Date.current) }
 ```
 
+##### Automatic totals for counters
+
+Redis HLL implementation calculates automatic total metrics, if there are more than one metric for the same category, aggregation and redis slot. The new metrics will be named `<REDIS_SLOT>_total_unique_counts_weekly` and `<REDIS_SLOT>_total_unique_counts_monthly`.
+
 ### Alternative Counters
 
 Handles `StandardError` and fallbacks into -1 this way not all measures fail if we encounter one exception.
