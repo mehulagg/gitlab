@@ -548,8 +548,13 @@ For each event we add metrics for the weekly and monthly time frames, and totals
 
 - `#{event_name}_weekly`: Data for 7 days for daily [aggregation](#adding-new-events) events and data for the last complete week for weekly [aggregation](#adding-new-events) events.
 - `#{event_name}_monthly`: Data for 28 days for daily [aggregation](#adding-new-events) events and data for the last 4 complete weeks for weekly [aggregation](#adding-new-events) events.
+
+Redis HLL implementation calculates automatic total metrics, if there are more than one metric for the same category, aggregation and Redis slot. 
+
 - `#{category}_total_unique_counts_weekly`: Total unique counts for events in the same category for the last 7 days or the last complete week, if events are in the same Redis slot and we have more than one metric.
 - `#{category}_total_unique_counts_monthly`: Total unique counts for events in same category for the last 28 days or the last 4 complete weeks, if events are in the same Redis slot and we have more than one metric.
+
+
 
 Example of `redis_hll_counters` data:
 
@@ -597,10 +602,6 @@ Gitlab::UsageDataCounters::HLLRedisCounter.track_event(visitor_id, 'expand_vulne
 # Get unique events for metric
 redis_usage_data { Gitlab::UsageDataCounters::HLLRedisCounter.unique_events(event_names: 'expand_vulnerabilities', start_date: 28.days.ago, end_date: Date.current) }
 ```
-
-##### Automatic totals for counters
-
-Redis HLL implementation calculates automatic total metrics, if there are more than one metric for the same category, aggregation and Redis slot. The new metrics will be named `<REDIS_SLOT>_total_unique_counts_weekly` and `<REDIS_SLOT>_total_unique_counts_monthly`.
 
 ### Alternative Counters
 
