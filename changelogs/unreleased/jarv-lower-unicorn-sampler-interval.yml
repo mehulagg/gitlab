@@ -1,0 +1,5 @@
+---
+title: Lowers the default unicorn sampler interval from 10 to 5 seconds
+merge_request: 51071
+author:
+type: other

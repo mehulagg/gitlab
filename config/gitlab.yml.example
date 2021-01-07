@@ -1184,7 +1184,7 @@ production: &base
   # Built in monitoring settings
   monitoring:
     # Time between sampling of unicorn socket metrics, in seconds
-    # unicorn_sampler_interval: 10
+    # unicorn_sampler_interval: 5
     # IP whitelist to access monitoring endpoints
     ip_whitelist:
       - 127.0.0.0/8
