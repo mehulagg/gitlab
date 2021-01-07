@@ -3,7 +3,7 @@
 module Resolvers
   module Terraform
     class StatesResolver < BaseResolver
-      type Types::Terraform::StateType, null: true
+      type Types::Terraform::StateType.connection_type, null: true
 
       alias_method :project, :object
 

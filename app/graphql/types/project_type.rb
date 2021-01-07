@@ -305,6 +305,12 @@ module Types
               description: 'Title of the label'
           end
 
+    field :terraform_state,
+          Types::Terraform::StateType,
+          null: true,
+          description: 'Find a single Terraform state by id',
+          resolver: Resolvers::Terraform::StatesResolver.single
+
     field :terraform_states,
           Types::Terraform::StateType.connection_type,
           null: true,
