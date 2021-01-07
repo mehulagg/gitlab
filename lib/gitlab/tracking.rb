@@ -3,6 +3,7 @@
 module Gitlab
   module Tracking
     SNOWPLOW_NAMESPACE = 'gl'
+    GITLAB_STANDARD_SCHEMA_URL = 'iglu:com.gitlab/gitlab_standard/jsonschema/1-0-0'
 
     module ControllerConcern
       extend ActiveSupport::Concern
@@ -24,7 +25,9 @@ module Gitlab
         Gitlab::CurrentSettings.snowplow_enabled?
       end
 
-      def event(category, action, label: nil, property: nil, value: nil, context: nil)
+      def event(category, action, label: nil, property: nil, value: nil, context: [], standard_data: {})
+        context.push(standard_context(standard_data))
+
         snowplow.event(category, action, label: label, property: property, value: value, context: context)
         product_analytics.event(category, action, label: label, property: property, value: value, context: context)
       end
@@ -43,6 +46,10 @@ module Gitlab
           form_tracking: additional_features,
           link_click_tracking: additional_features
         }.transform_keys! { |key| key.to_s.camelize(:lower).to_sym }
+      end
+
+      def standard_context(data)
+        SnowplowTracker::SelfDescribingJson.new(GITLAB_STANDARD_SCHEMA_URL, data)
       end
 
       private
