@@ -1,0 +1,5 @@
+---
+title: Do not store invalid security_findings into the database
+merge_request: 50868
+author:
+type: fixed
