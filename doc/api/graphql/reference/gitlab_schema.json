@@ -30535,17 +30535,17 @@
               "description": "The example of an alert payload.",
               "type": {
                 "kind": "SCALAR",
-                "name": "String",
+                "name": "JsonString",
                 "ofType": null
               },
               "defaultValue": null
             },
             {
               "name": "payloadAttributeMapping",
-              "description": "The custom mapping of an alert attributes.",
+              "description": "The custom mapping of GitLab alert attributes to fields from the payload_example.",
               "type": {
                 "kind": "SCALAR",
-                "name": "String",
+                "name": "JsonString",
                 "ofType": null
               },
               "defaultValue": null
@@ -36826,6 +36826,16 @@
               "deprecationReason": null
             }
           ],
+          "possibleTypes": null
+        },
+        {
+          "kind": "SCALAR",
+          "name": "JsonString",
+          "description": "JSON object as raw string",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
+          "enumValues": null,
           "possibleTypes": null
         },
         {

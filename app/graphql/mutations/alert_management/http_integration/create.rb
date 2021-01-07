@@ -21,7 +21,7 @@ module Mutations
                  description: 'Whether the integration is receiving alerts.'
 
         def resolve(args)
-          project = authorized_find!(full_path: args[:project_path])
+          @project = authorized_find!(full_path: args[:project_path])
 
           response ::AlertManagement::HttpIntegrations::CreateService.new(
             project,
@@ -31,6 +31,8 @@ module Mutations
         end
 
         private
+
+        attr_reader :project
 
         def find_object(full_path:)
           resolve_project(full_path: full_path)

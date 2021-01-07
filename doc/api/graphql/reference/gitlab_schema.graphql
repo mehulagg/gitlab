@@ -11180,14 +11180,14 @@ input HttpIntegrationCreateInput {
   name: String!
 
   """
-  The custom mapping of an alert attributes.
+  The custom mapping of GitLab alert attributes to fields from the payload_example.
   """
-  payloadAttributeMapping: String
+  payloadAttributeMapping: JsonString
 
   """
   The example of an alert payload.
   """
-  payloadExample: String
+  payloadExample: JsonString
 
   """
   The project to create the integration in.
@@ -13404,6 +13404,11 @@ enum JobArtifactFileType {
   TERRAFORM
   TRACE
 }
+
+"""
+JSON object as raw string
+"""
+scalar JsonString
 
 type Label {
   """

@@ -117,7 +117,7 @@ RSpec.describe 'Creating a new HTTP Integration' do
     it 'responds with errors' do
       post_graphql_mutation(mutation, current_user: current_user)
 
-      expect_graphql_errors_to_include(/payloadExample is not a valid JSON/)
+      expect_graphql_errors_to_include(/was provided invalid value for payloadExample \(Invalid JSON string/)
     end
   end
 
@@ -127,7 +127,7 @@ RSpec.describe 'Creating a new HTTP Integration' do
     it 'responds with errors' do
       post_graphql_mutation(mutation, current_user: current_user)
 
-      expect_graphql_errors_to_include(/payloadAttributeMapping is not a valid JSON/)
+      expect_graphql_errors_to_include(/was provided invalid value for payloadAttributeMapping \(Invalid JSON string/)
     end
   end
 end
