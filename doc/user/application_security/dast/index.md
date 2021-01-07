@@ -88,8 +88,7 @@ variables:
 
 ### Latest template
 
-NOTE:
-Introduced in GitLab in 13.8
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/254325) in GitLab 13.8
 
 To use the latest version of the DAST template, include
 `DAST.latest.gitlab-ci.yml` instead of `DAST.gitlab-ci.yml`.
