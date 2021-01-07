@@ -23,6 +23,12 @@ module Gitlab
       end
     end
 
+    def seconds_remaining
+      return unless request_deadline
+
+      request_deadline - Gitlab::Metrics::System.real_time
+    end
+
     def ensure_deadline_not_exceeded!
       return unless enabled?
       return unless request_deadline

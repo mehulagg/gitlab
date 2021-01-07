@@ -108,7 +108,7 @@ module Gitlab
       end
 
       def get_address_info(uri, dns_rebind_protection)
-        Addrinfo.getaddrinfo(uri.hostname, get_port(uri), nil, :STREAM).map do |addr|
+        Addrinfo.getaddrinfo(uri.hostname, get_port(uri), nil, :STREAM, timeout: resolve_timeout).map do |addr|
           addr.ipv6_v4mapped? ? addr.ipv6_to_ipv4 : addr
         end
       rescue SocketError
@@ -130,6 +130,10 @@ module Gitlab
         raise unless error.message.include?('hostname too long')
 
         raise BlockedUrlError, "Host is too long (maximum is 1024 characters)"
+      end
+
+      def resolve_timeout
+        [0.seconds, 5.seconds, Gitlab::RequestContext.instance.seconds_remaining || 5.seconds].sort[1]
       end
 
       def validate_local_request(

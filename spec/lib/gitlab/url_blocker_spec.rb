@@ -596,6 +596,31 @@ RSpec.describe Gitlab::UrlBlocker, :stub_invalid_dns_only do
 
       expect(described_class).to be_blocked_url('http://foobar.x')
     end
+
+    context 'when DNS resolution times out' do
+      it 'blocks urls whose hostname cannot be resolved within the default timeout' do
+        stub_env('RSPEC_ALLOW_INVALID_URLS', 'false')
+
+        expect(Addrinfo).to receive(:getaddrinfo)
+                              .with(anything, anything, anything, anything, timeout: 5)
+                              .and_raise(SocketError)
+
+        expect(described_class).to be_blocked_url('http://foobar.x')
+      end
+
+      it 'blocks urls whose hostname cannot be resolved within the time remaining for this request' do
+        stub_env('RSPEC_ALLOW_INVALID_URLS', 'false')
+
+        expect(Gitlab::RequestContext).to receive_message_chain(:instance, :seconds_remaining)
+                                            .and_return(1)
+
+        expect(Addrinfo).to receive(:getaddrinfo)
+                              .with(anything, anything, anything, anything, timeout: 1)
+                              .and_raise(SocketError)
+
+        expect(described_class).to be_blocked_url('http://foobar.x')
+      end
+    end
   end
 
   describe '#validate_hostname' do

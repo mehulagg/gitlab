@@ -30,6 +30,25 @@ RSpec.describe Gitlab::RequestContext, :request_store do
     end
   end
 
+  describe '#remaining_seconds' do
+    let(:request_start_time) { 1575982156.206008 }
+
+    it 'returns the number of seconds remaining before the deadline' do
+      allow(subject).to receive(:request_start_time).and_return(request_start_time)
+      allow(Settings.gitlab).to receive(:max_request_duration_seconds).and_return(60)
+      allow(Gitlab::Metrics::System).to receive(:real_time).and_return(request_start_time + 50)
+
+      expect(subject.seconds_remaining).to eq(10)
+      expect(subject.seconds_remaining).to be_a(Float)
+    end
+
+    it 'returns nil if there is no start time' do
+      allow(subject).to receive(:request_start_time).and_return(nil)
+
+      expect(subject.seconds_remaining).to be_nil
+    end
+  end
+
   describe '#ensure_request_deadline_not_exceeded!' do
     it 'does not raise an error when there was no deadline' do
       expect(subject).to receive(:request_deadline).and_return(nil)

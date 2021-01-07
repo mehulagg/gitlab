@@ -1,0 +1,5 @@
+---
+title: Set timeout for DNS resolution when checking if a domain is allowed
+merge_request:
+author:
+type: fixed
