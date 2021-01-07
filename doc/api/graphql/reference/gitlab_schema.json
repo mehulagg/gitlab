@@ -6430,7 +6430,7 @@
           "fields": [
             {
               "name": "afterScript",
-              "description": "Override a set of commands that are executed after job",
+              "description": "Override a set of commands that are executed after job.",
               "args": [
 
               ],
@@ -6452,7 +6452,7 @@
             },
             {
               "name": "allowFailure",
-              "description": "Allow job to fail",
+              "description": "Allow job to fail.",
               "args": [
 
               ],
@@ -6466,7 +6466,7 @@
             },
             {
               "name": "beforeScript",
-              "description": "Override a set of commands that are executed before job",
+              "description": "Override a set of commands that are executed before job.",
               "args": [
 
               ],
@@ -6488,7 +6488,7 @@
             },
             {
               "name": "environment",
-              "description": "Name of an environment to which the job deploys",
+              "description": "Name of an environment to which the job deploys.",
               "args": [
 
               ],
@@ -6502,7 +6502,7 @@
             },
             {
               "name": "except",
-              "description": "Limit when jobs are not created",
+              "description": "Limit when jobs are not created.",
               "args": [
 
               ],
@@ -6516,7 +6516,7 @@
             },
             {
               "name": "groupName",
-              "description": "Name of the job group",
+              "description": "Name of the job group.",
               "args": [
 
               ],
@@ -6530,7 +6530,7 @@
             },
             {
               "name": "name",
-              "description": "Name of the job",
+              "description": "Name of the job.",
               "args": [
 
               ],
@@ -6544,7 +6544,7 @@
             },
             {
               "name": "needs",
-              "description": "Builds that must complete before the jobs run",
+              "description": "Builds that must complete before the jobs run.",
               "args": [
                 {
                   "name": "after",
@@ -6597,7 +6597,7 @@
             },
             {
               "name": "only",
-              "description": "Limit when jobs are created",
+              "description": "Limit when jobs are created.",
               "args": [
 
               ],
@@ -6611,7 +6611,7 @@
             },
             {
               "name": "script",
-              "description": "Shell script that is executed by a runner",
+              "description": "Shell script that is executed by a runner.",
               "args": [
 
               ],
@@ -6633,7 +6633,7 @@
             },
             {
               "name": "stage",
-              "description": "Name of the job stage",
+              "description": "Name of the job stage.",
               "args": [
 
               ],
@@ -6647,7 +6647,7 @@
             },
             {
               "name": "tags",
-              "description": "List of tags that are used to select a runner",
+              "description": "List of tags that are used to select a runner.",
               "args": [
 
               ],
@@ -6669,7 +6669,7 @@
             },
             {
               "name": "when",
-              "description": "When to run job",
+              "description": "When to run job.",
               "args": [
 
               ],
@@ -6808,7 +6808,7 @@
           "fields": [
             {
               "name": "refs",
-              "description": "The Git refs for which the job restriction applies",
+              "description": "The Git refs for which the job restriction applies.",
               "args": [
 
               ],

@@ -2404,42 +2404,42 @@ type CiConfigGroupEdge {
 
 type CiConfigJob {
   """
-  Override a set of commands that are executed after job
+  Override a set of commands that are executed after job.
   """
   afterScript: [String!]
 
   """
-  Allow job to fail
+  Allow job to fail.
   """
   allowFailure: Boolean
 
   """
-  Override a set of commands that are executed before job
+  Override a set of commands that are executed before job.
   """
   beforeScript: [String!]
 
   """
-  Name of an environment to which the job deploys
+  Name of an environment to which the job deploys.
   """
   environment: String
 
   """
-  Limit when jobs are not created
+  Limit when jobs are not created.
   """
   except: CiConfigJobRestriction
 
   """
-  Name of the job group
+  Name of the job group.
   """
   groupName: String
 
   """
-  Name of the job
+  Name of the job.
   """
   name: String
 
   """
-  Builds that must complete before the jobs run
+  Builds that must complete before the jobs run.
   """
   needs(
     """
@@ -2464,27 +2464,27 @@ type CiConfigJob {
   ): CiConfigNeedConnection
 
   """
-  Limit when jobs are created
+  Limit when jobs are created.
   """
   only: CiConfigJobRestriction
 
   """
-  Shell script that is executed by a runner
+  Shell script that is executed by a runner.
   """
   script: [String!]
 
   """
-  Name of the job stage
+  Name of the job stage.
   """
   stage: String
 
   """
-  List of tags that are used to select a runner
+  List of tags that are used to select a runner.
   """
   tags: [String!]
 
   """
-  When to run job
+  When to run job.
   """
   when: String
 }
@@ -2526,7 +2526,7 @@ type CiConfigJobEdge {
 
 type CiConfigJobRestriction {
   """
-  The Git refs for which the job restriction applies
+  The Git refs for which the job restriction applies.
   """
   refs: [String!]
 }

@@ -8,7 +8,7 @@ module Types
         graphql_name 'CiConfigJobRestriction'
 
         field :refs, [GraphQL::STRING_TYPE], null: true,
-          description: 'The Git refs for which the job restriction applies'
+              description: 'The Git refs for which the job restriction applies.'
       end
     end
   end
