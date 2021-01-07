@@ -391,7 +391,7 @@ export default {
       <div class="mr-widget-section">
         <component :is="componentName" :mr="mr" :service="service" />
         <div class="mr-widget-info">
-          <section v-if="mr.allowCollaboration" class="mr-info-list mr-links">
+          <section v-if="mr.allowCollaboration" class="mr-info-list gl-ml-7">
             <p>
               {{ s__('mrWidget|Allows commits from members who can merge to the target branch') }}
             </p>
