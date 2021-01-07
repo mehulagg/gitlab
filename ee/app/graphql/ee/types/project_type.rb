@@ -15,10 +15,6 @@ module EE
               null: true,
               description: 'The DAST scanner profiles associated with the project'
 
-        field :sast_ci_configuration, ::Types::CiConfiguration::Sast::Type, null: true,
-              calls_gitaly: true,
-              description: 'SAST CI configuration for the project'
-
         field :vulnerabilities,
               ::Types::VulnerabilityType.connection_type,
               null: true,
