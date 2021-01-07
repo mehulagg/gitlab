@@ -3,7 +3,6 @@ import { mapState, mapActions, mapGetters } from 'vuex';
 import { GlDrawer } from '@gitlab/ui';
 import { ISSUABLE } from '~/boards/constants';
 import { contentTop } from '~/lib/utils/common_utils';
-import IssuableTitle from '~/boards/components/issuable_title.vue';
 import { convertToGraphQLId } from '~/graphql_shared/utils';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import getIssueParticipants from '~/vue_shared/components/sidebar/queries/get_issue_participants.query.graphql';
@@ -74,6 +73,7 @@ export default {
     <template #header>{{ __('Issue details') }}</template>
 
     <template>
+      <board-sidebar-issue-title />
       <sidebar-assignees-widget
         :participants-query="$options.getIssueParticipants"
         :participants-query-variables="participantsQueryVariables"
