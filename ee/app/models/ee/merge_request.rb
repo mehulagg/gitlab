@@ -79,7 +79,7 @@ module EE
         super.preload(:blocking_merge_requests)
       end
 
-      def sort_by_attribute(method, *args)
+      def sort_by_attribute(method, *args, **kwargs)
         if method.to_s == 'review_time_desc'
           order_review_time_desc
         else

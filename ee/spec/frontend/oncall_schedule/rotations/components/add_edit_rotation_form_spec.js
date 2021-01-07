@@ -1,6 +1,6 @@
 import { shallowMount } from '@vue/test-utils';
 import waitForPromises from 'helpers/wait_for_promises';
-import { GlDropdownItem, GlTokenSelector } from '@gitlab/ui';
+import { GlDropdownItem, GlTokenSelector, GlFormGroup } from '@gitlab/ui';
 import AddEditRotationForm from 'ee/oncall_schedules/components/rotations/components/add_edit_rotation_form.vue';
 import { LENGTH_ENUM } from 'ee/oncall_schedules/constants';
 import { participants, getOncallSchedulesQueryResponse } from '../../mocks/apollo_mock';
@@ -23,9 +23,11 @@ describe('AddEditRotationForm', () => {
         ...props,
         schedule,
         isLoading: false,
-        rotationNameIsValid: true,
-        rotationParticipantsAreValid: true,
-        rotationStartsAtIsValid: true,
+        validationState: {
+          name: true,
+          participants: false,
+          startsAt: false,
+        },
         participants,
         form: {
           name: '',
@@ -57,7 +59,23 @@ describe('AddEditRotationForm', () => {
   const findRotationLength = () => wrapper.find('[id = "rotation-length"]');
   const findRotationStartsOn = () => wrapper.find('[id = "rotation-time"]');
   const findUserSelector = () => wrapper.find(GlTokenSelector);
-  const findDropdownOptions = () => wrapper.findAll(GlDropdownItem);
+  const findDropdownOptions = () => wrapper.findAllComponents(GlDropdownItem);
+  const findRotationFormGroups = () => wrapper.findAllComponents(GlFormGroup);
+
+  describe('Rotation form validation', () => {
+    it.each`
+      index | type              | validationState | value
+      ${0}  | ${'name'}         | ${true}         | ${'true'}
+      ${1}  | ${'participants'} | ${false}        | ${undefined}
+      ${3}  | ${'startsAt'}     | ${false}        | ${undefined}
+    `(
+      'form validation for $type returns $value when passed validate state of $validationState',
+      ({ index, value }) => {
+        const formGroup = findRotationFormGroups();
+        expect(formGroup.at(index).attributes('state')).toBe(value);
+      },
+    );
+  });
 
   describe('Rotation length and start time', () => {
     it('renders the rotation length value', async () => {

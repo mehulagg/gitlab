@@ -1,18 +1,19 @@
 <script>
 import { GlModal, GlAlert } from '@gitlab/ui';
 import { set } from 'lodash';
-import { s__, __ } from '~/locale';
-import createFlash, { FLASH_TYPES } from '~/flash';
-import usersSearchQuery from '~/graphql_shared/queries/users_search.query.graphql';
-import getOncallSchedulesQuery from '../../../graphql/queries/get_oncall_schedules.query.graphql';
-import createOncallScheduleRotationMutation from '../../../graphql/mutations/create_oncall_schedule_rotation.mutation.graphql';
-import updateOncallScheduleRotationMutation from '../../../graphql/mutations/update_oncall_schedule_rotation.mutation.graphql';
-import { LENGTH_ENUM } from '../../../constants';
-import AddEditRotationForm from './add_edit_rotation_form.vue';
+import getOncallSchedulesQuery from 'ee/oncall_schedules/graphql/queries/get_oncall_schedules.query.graphql';
+import createOncallScheduleRotationMutation from 'ee/oncall_schedules/graphql/mutations/create_oncall_schedule_rotation.mutation.graphql';
+import updateOncallScheduleRotationMutation from 'ee/oncall_schedules/graphql/mutations/update_oncall_schedule_rotation.mutation.graphql';
+import { LENGTH_ENUM } from 'ee/oncall_schedules/constants';
 import {
   updateStoreAfterRotationAdd,
   updateStoreAfterRotationEdit,
-} from '../../../utils/cache_updates';
+} from 'ee/oncall_schedules/utils/cache_updates';
+import { isNameFieldValid } from 'ee/oncall_schedules/utils/common_utils';
+import { s__, __ } from '~/locale';
+import createFlash, { FLASH_TYPES } from '~/flash';
+import usersSearchQuery from '~/graphql_shared/queries/users_search.query.graphql';
+import AddEditRotationForm from './add_edit_rotation_form.vue';
 import { format24HourTimeStringFromInt } from '~/lib/utils/datetime_utility';
 
 export const i18n = {
@@ -81,6 +82,11 @@ export default {
         },
       },
       error: '',
+      validationState: {
+        name: true,
+        participants: true,
+        startsAt: true,
+      },
     };
   },
   computed: {
@@ -98,15 +104,6 @@ export default {
           text: this.$options.i18n.cancel,
         },
       };
-    },
-    rotationNameIsValid() {
-      return this.form.name !== '';
-    },
-    rotationParticipantsAreValid() {
-      return this.form.participants.length > 0;
-    },
-    rotationStartsAtIsValid() {
-      return Boolean(this.form.startsAt.date);
     },
     rotationVariables() {
       return {
@@ -130,11 +127,7 @@ export default {
       };
     },
     isFormValid() {
-      return (
-        this.rotationNameIsValid &&
-        this.rotationParticipantsAreValid &&
-        this.rotationStartsAtIsValid
-      );
+      return Object.values(this.validationState).every(Boolean);
     },
     isLoading() {
       return this.loading || this.$apollo.queries.participants.loading;
@@ -226,9 +219,19 @@ export default {
     },
     updateRotationForm({ type, value }) {
       set(this.form, type, value);
+      this.validateForm(type);
     },
     filterParticipants(query) {
       this.ptSearchTerm = query;
+    },
+    validateForm(key) {
+      if (key === 'name') {
+        this.validationState.name = isNameFieldValid(this.form.name);
+      } else if (key === 'participants') {
+        this.validationState.participants = this.form.participants.length > 0;
+      } else if (key === 'startsAt.date') {
+        this.validationState.startsAt = Boolean(this.form.startsAt.date);
+      }
     },
   },
 };
@@ -248,9 +251,7 @@ export default {
       {{ error || $options.i18n.errorMsg }}
     </gl-alert>
     <add-edit-rotation-form
-      :rotation-name-is-valid="rotationNameIsValid"
-      :rotation-participants-are-valid="rotationParticipantsAreValid"
-      :rotation-starts-at-is-valid="rotationStartsAtIsValid"
+      :validation-state="validationState"
       :form="form"
       :schedule="schedule"
       :participants="participants"

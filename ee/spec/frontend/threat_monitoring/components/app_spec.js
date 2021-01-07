@@ -1,4 +1,4 @@
-import { GlAlert } from '@gitlab/ui';
+import { GlAlert, GlSprintf } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
 import ThreatMonitoringAlerts from 'ee/threat_monitoring/components/alerts/alerts.vue';
@@ -65,6 +65,7 @@ describe('ThreatMonitoringApp component', () => {
   const findWafSection = () => wrapper.find({ ref: 'wafSection' });
   const findNetworkPolicySection = () => wrapper.find({ ref: 'networkPolicySection' });
   const findEmptyState = () => wrapper.find({ ref: 'emptyState' });
+  const findEmptyStateMessage = () => wrapper.find(GlSprintf);
   const findNetworkPolicyTab = () => wrapper.find({ ref: 'networkPolicyTab' });
   const findAlertTab = () => wrapper.find('[data-testid="threat-monitoring-alerts-tab"]');
 
@@ -91,9 +92,9 @@ describe('ThreatMonitoringApp component', () => {
       it('shows only the empty state', () => {
         const emptyState = findEmptyState();
         expect(wrapper.element).toBe(emptyState.element);
+        expect(findEmptyStateMessage().exists()).toBe(true);
         expect(emptyState.props()).toMatchObject({
           svgPath: emptyStateSvgPath,
-          primaryButtonLink: documentationPath,
         });
       });
     },

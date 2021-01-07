@@ -7,6 +7,7 @@ import OnDemandScansForm from 'ee/on_demand_scans/components/on_demand_scans_for
 import ScannerProfileSelector from 'ee/on_demand_scans/components/profile_selector/scanner_profile_selector.vue';
 import SiteProfileSelector from 'ee/on_demand_scans/components/profile_selector/site_profile_selector.vue';
 import dastScanCreateMutation from 'ee/on_demand_scans/graphql/dast_scan_create.mutation.graphql';
+import dastScanUpdateMutation from 'ee/on_demand_scans/graphql/dast_scan_update.mutation.graphql';
 import dastOnDemandScanCreateMutation from 'ee/on_demand_scans/graphql/dast_on_demand_scan_create.mutation.graphql';
 import dastScannerProfilesQuery from 'ee/security_configuration/dast_profiles/graphql/dast_scanner_profiles.query.graphql';
 import dastSiteProfilesQuery from 'ee/security_configuration/dast_profiles/graphql/dast_site_profiles.query.graphql';
@@ -33,6 +34,13 @@ const pipelineUrl = `/${projectPath}/pipelines/123`;
 const editPath = `/${projectPath}/on_demand_scans/1/edit`;
 const [passiveScannerProfile, activeScannerProfile] = scannerProfiles;
 const [nonValidatedSiteProfile, validatedSiteProfile] = siteProfiles;
+const dastScan = {
+  id: 1,
+  name: 'My daily scan',
+  description: 'Tests for SQL injections',
+  scannerProfileId: passiveScannerProfile.id,
+  siteProfileId: validatedSiteProfile.id,
+};
 
 jest.mock('~/lib/utils/url_utility', () => ({
   isAbsolute: jest.requireActual('~/lib/utils/url_utility').isAbsolute,
@@ -51,6 +59,9 @@ describe('OnDemandScansForm', () => {
   const findForm = () => subject.find(GlForm);
   const findByTestId = (testId) => subject.find(`[data-testid="${testId}"]`);
   const findNameInput = () => findByTestId('dast-scan-name-input');
+  const findDescriptionInput = () => findByTestId('dast-scan-description-input');
+  const findScannerProfilesSelector = () => subject.find(ScannerProfileSelector);
+  const findSiteProfilesSelector = () => subject.find(SiteProfileSelector);
   const findAlert = () => findByTestId('on-demand-scan-error');
   const findProfilesConflictAlert = () => findByTestId('on-demand-scans-profiles-conflict-alert');
   const findSubmitButton = () => findByTestId('on-demand-scan-submit-button');
@@ -58,13 +69,19 @@ describe('OnDemandScansForm', () => {
 
   const setValidFormData = () => {
     findNameInput().vm.$emit('input', 'My daily scan');
-    subject.find(ScannerProfileSelector).vm.$emit('input', passiveScannerProfile.id);
-    subject.find(SiteProfileSelector).vm.$emit('input', nonValidatedSiteProfile.id);
+    findScannerProfilesSelector().vm.$emit('input', passiveScannerProfile.id);
+    findSiteProfilesSelector().vm.$emit('input', nonValidatedSiteProfile.id);
     return subject.vm.$nextTick();
   };
-  const setupSuccess = () => {
+  const setupSuccess = ({ edit = false } = {}) => {
     jest.spyOn(subject.vm.$apollo, 'mutate').mockResolvedValue({
-      data: { dastScanCreate: { dastScan: { editPath }, pipelineUrl, errors: [] } },
+      data: {
+        [edit ? 'dastScanUpdate' : 'dastScanCreate']: {
+          dastScan: { editPath },
+          pipelineUrl,
+          errors: [],
+        },
+      },
     });
     return setValidFormData();
   };
@@ -121,11 +138,18 @@ describe('OnDemandScansForm', () => {
               dastSavedScans: true,
             },
           },
+          stubs: {
+            GlFormInput: GlFormInputStub,
+          },
         },
         { ...options, localVue, apolloProvider },
         {
           data() {
-            return { ...options.data };
+            return {
+              scannerProfiles,
+              siteProfiles,
+              ...options.data,
+            };
           },
         },
       ),
@@ -141,7 +165,7 @@ describe('OnDemandScansForm', () => {
 
   it('renders properly', () => {
     mountSubject();
-    expect(subject.html()).not.toBe('');
+    expect(subject.text()).toContain('New on-demand DAST scan');
   });
 
   it.each`
@@ -168,16 +192,32 @@ describe('OnDemandScansForm', () => {
     },
   );
 
+  describe('when editing an existing scan', () => {
+    beforeEach(() => {
+      mountShallowSubject({
+        propsData: {
+          dastScan,
+        },
+      });
+    });
+
+    it('sets the title properly', () => {
+      expect(subject.text()).toContain('Edit on-demand DAST scan');
+    });
+
+    it('populates the fields with passed values', () => {
+      expect(findNameInput().attributes('value')).toBe(dastScan.name);
+      expect(findDescriptionInput().attributes('value')).toBe(dastScan.description);
+      expect(findScannerProfilesSelector().attributes('value')).toBe(dastScan.scannerProfileId);
+      expect(findSiteProfilesSelector().attributes('value')).toBe(dastScan.siteProfileId);
+    });
+  });
+
   describe('submit button', () => {
     let submitButton;
 
     beforeEach(() => {
-      mountShallowSubject({
-        data: {
-          scannerProfiles,
-          siteProfiles,
-        },
-      });
+      mountShallowSubject();
       submitButton = findSubmitButton();
     });
 
@@ -193,18 +233,6 @@ describe('OnDemandScansForm', () => {
   });
 
   describe('submission', () => {
-    beforeEach(() => {
-      mountShallowSubject({
-        data: {
-          scannerProfiles,
-          siteProfiles,
-        },
-        stubs: {
-          GlFormInput: GlFormInputStub,
-        },
-      });
-    });
-
     describe.each`
       action      | actionFunction | submitButtonLoading | saveButtonLoading | runAfterCreate | redirectPath
       ${'submit'} | ${submitForm}  | ${true}             | ${false}          | ${true}        | ${pipelineUrl}
@@ -220,6 +248,7 @@ describe('OnDemandScansForm', () => {
       }) => {
         describe('with valid form data', () => {
           beforeEach(async () => {
+            mountShallowSubject();
             await setupSuccess();
             actionFunction();
           });
@@ -233,7 +262,7 @@ describe('OnDemandScansForm', () => {
             expect(saveButton.props('disabled')).toBe(!saveButtonLoading);
           });
 
-          it(`triggers GraphQL mutation with runAfterCreate set to ${runAfterCreate}`, async () => {
+          it(`triggers dastScanCreateMutation mutation with runAfterCreate set to ${runAfterCreate}`, async () => {
             expect(subject.vm.$apollo.mutate).toHaveBeenCalledWith({
               mutation: dastScanCreateMutation,
               variables: {
@@ -258,7 +287,37 @@ describe('OnDemandScansForm', () => {
           });
         });
 
+        describe('when editing an existing scan', () => {
+          beforeEach(async () => {
+            mountShallowSubject({
+              propsData: {
+                dastScan,
+              },
+            });
+            await setupSuccess({ edit: true });
+            actionFunction();
+          });
+
+          it(`triggers dastScanUpdateMutation mutation with runAfterCreate set to ${runAfterCreate}`, async () => {
+            expect(subject.vm.$apollo.mutate).toHaveBeenCalledWith({
+              mutation: dastScanUpdateMutation,
+              variables: {
+                input: {
+                  id: 1,
+                  name: 'My daily scan',
+                  description: 'Tests for SQL injections',
+                  dastScannerProfileId: passiveScannerProfile.id,
+                  dastSiteProfileId: nonValidatedSiteProfile.id,
+                  fullPath: projectPath,
+                  runAfterCreate,
+                },
+              },
+            });
+          });
+        });
+
         it('does not run any mutation if name is empty', () => {
+          mountShallowSubject();
           setValidFormData();
           findNameInput().vm.$emit('input', '');
           actionFunction();
@@ -270,6 +329,7 @@ describe('OnDemandScansForm', () => {
 
     describe('on top-level error', () => {
       beforeEach(async () => {
+        mountShallowSubject();
         jest.spyOn(subject.vm.$apollo, 'mutate').mockRejectedValue();
         await setValidFormData();
         submitForm();
@@ -290,6 +350,7 @@ describe('OnDemandScansForm', () => {
       const errors = ['error#1', 'error#2', 'error#3'];
 
       beforeEach(async () => {
+        mountShallowSubject();
         jest
           .spyOn(subject.vm.$apollo, 'mutate')
           .mockResolvedValue({ data: { dastScanCreate: { pipelineUrl: null, errors } } });
@@ -315,13 +376,6 @@ describe('OnDemandScansForm', () => {
   describe('dastSavedScans feature flag disabled', () => {
     beforeEach(async () => {
       mountShallowSubject({
-        data: {
-          scannerProfiles,
-          siteProfiles,
-        },
-        stubs: {
-          GlFormInput: GlFormInputStub,
-        },
         provide: {
           glFeatures: {
             dastSavedScans: false,
@@ -370,12 +424,7 @@ describe('OnDemandScansForm', () => {
           ? `warns about conflicting profiles when user selects ${description}`
           : `does not report any conflict when user selects ${description}`,
         async () => {
-          mountShallowSubject({
-            data: {
-              scannerProfiles,
-              siteProfiles,
-            },
-          });
+          mountShallowSubject();
           await setFormData();
 
           expect(findProfilesConflictAlert().exists()).toBe(hasConflict);
@@ -390,10 +439,6 @@ describe('OnDemandScansForm', () => {
               glFeatures: {
                 securityOnDemandScansSiteValidation: false,
               },
-            },
-            data: {
-              scannerProfiles,
-              siteProfiles,
             },
           });
           return setFormData();
@@ -442,9 +487,6 @@ describe('OnDemandScansForm', () => {
           glFeatures: {
             securityDastSiteProfilesAdditionalFields: true,
           },
-        },
-        data: {
-          siteProfiles,
         },
       });
     });

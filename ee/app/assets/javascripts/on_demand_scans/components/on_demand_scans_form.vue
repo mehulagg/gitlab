@@ -18,6 +18,7 @@ import {
 } from 'ee/security_configuration/dast_scanner_profiles/constants';
 import { DAST_SITE_VALIDATION_STATUS } from 'ee/security_configuration/dast_site_validation/constants';
 import { initFormField } from 'ee/security_configuration/utils';
+import { s__ } from '~/locale';
 import validation from '~/vue_shared/directives/validation';
 import * as Sentry from '~/sentry/wrapper';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
@@ -32,6 +33,7 @@ import {
   SITE_PROFILES_EXTENDED_QUERY,
 } from '../settings';
 import dastScanCreateMutation from '../graphql/dast_scan_create.mutation.graphql';
+import dastScanUpdateMutation from '../graphql/dast_scan_update.mutation.graphql';
 import dastOnDemandScanCreateMutation from '../graphql/dast_on_demand_scan_create.mutation.graphql';
 import ProfileSelectorSummaryCell from './profile_selector/summary_cell.vue';
 import ScannerProfileSelector from './profile_selector/scanner_profile_selector.vue';
@@ -111,20 +113,13 @@ export default {
       required: false,
       default: '',
     },
+    dastScan: {
+      type: Object,
+      required: false,
+      default: null,
+    },
   },
   inject: {
-    scannerProfilesLibraryPath: {
-      default: '',
-    },
-    siteProfilesLibraryPath: {
-      default: '',
-    },
-    newScannerProfilePath: {
-      default: '',
-    },
-    newSiteProfilePath: {
-      default: '',
-    },
     dastSiteValidationDocsPath: {
       default: '',
     },
@@ -136,8 +131,12 @@ export default {
             showValidation: false,
             state: false,
             fields: {
-              name: initFormField({ value: '' }),
-              description: initFormField({ value: '', required: false, skipValidation: true }),
+              name: initFormField({ value: this.dastScan?.name ?? '' }),
+              description: initFormField({
+                value: this.dastScan?.description ?? '',
+                required: false,
+                skipValidation: true,
+              }),
             },
           },
         }
@@ -146,8 +145,8 @@ export default {
       ...savedScansFields,
       scannerProfiles: [],
       siteProfiles: [],
-      selectedScannerProfileId: null,
-      selectedSiteProfileId: null,
+      selectedScannerProfileId: this.dastScan?.scannerProfileId || null,
+      selectedSiteProfileId: this.dastScan?.siteProfileId || null,
       loading: false,
       errorType: null,
       errors: [],
@@ -155,6 +154,14 @@ export default {
     };
   },
   computed: {
+    isEdit() {
+      return Boolean(this.dastScan?.id);
+    },
+    title() {
+      return this.isEdit
+        ? s__('OnDemandScans|Edit on-demand DAST scan')
+        : s__('OnDemandScans|New on-demand DAST scan');
+    },
     selectedScannerProfile() {
       return this.selectedScannerProfileId
         ? this.scannerProfiles.find(({ id }) => id === this.selectedScannerProfileId)
@@ -213,7 +220,7 @@ export default {
     },
   },
   methods: {
-    onSubmit(runAfterCreate = true, button = this.$options.saveAndRunScanBtnId) {
+    onSubmit({ runAfterCreate = true, button = this.$options.saveAndRunScanBtnId } = {}) {
       if (this.glFeatures.dastSavedScans) {
         this.form.showValidation = true;
         if (!this.form.state) {
@@ -231,10 +238,11 @@ export default {
         dastSiteProfileId: this.selectedSiteProfile.id,
       };
       if (this.glFeatures.dastSavedScans) {
-        mutation = dastScanCreateMutation;
-        reponseType = 'dastScanCreate';
+        mutation = this.isEdit ? dastScanUpdateMutation : dastScanCreateMutation;
+        reponseType = this.isEdit ? 'dastScanUpdate' : 'dastScanCreate';
         input = {
           ...input,
+          ...(this.isEdit ? { id: this.dastScan.id } : {}),
           name: this.form.fields.name.value,
           description: this.form.fields.description.value,
           runAfterCreate,
@@ -283,7 +291,7 @@ export default {
 <template>
   <gl-form novalidate @submit.prevent="onSubmit()">
     <header class="gl-mb-6">
-      <h2>{{ s__('OnDemandScans|New on-demand DAST scan') }}</h2>
+      <h2>{{ title }}</h2>
       <p>
         <gl-sprintf
           :message="
@@ -497,7 +505,7 @@ export default {
           data-testid="on-demand-scan-save-button"
           :disabled="isSaveButtonDisabled"
           :loading="loading === $options.saveScanBtnId"
-          @click="onSubmit(false, $options.saveScanBtnId)"
+          @click="onSubmit({ runAfterCreate: false, button: $options.saveScanBtnId })"
         >
           {{ s__('OnDemandScans|Save scan') }}
         </gl-button>

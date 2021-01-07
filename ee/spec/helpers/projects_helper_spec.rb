@@ -102,7 +102,7 @@ RSpec.describe ProjectsHelper do
       allow(helper).to receive(:current_user).and_return(user)
     end
 
-    it do
+    specify do
       expect(helper.group_project_templates_count(parent_group.id)).to eq 1
     end
 
@@ -111,7 +111,7 @@ RSpec.describe ProjectsHelper do
         template_project.update!(marked_for_deletion_at: Date.current)
       end
 
-      it do
+      specify do
         expect(helper.group_project_templates_count(parent_group.id)).to eq 0
       end
     end
@@ -449,7 +449,7 @@ RSpec.describe ProjectsHelper do
     context 'when project has delayed deletion enabled' do
       let(:enabled) { true }
 
-      it do
+      specify do
         deletion_date = helper.permanent_deletion_date(Time.now.utc)
 
         expect(subject).to eq "Deleting a project places it into a read-only state until #{deletion_date}, at which point the project will be permanently deleted. Are you ABSOLUTELY sure?"
@@ -459,7 +459,7 @@ RSpec.describe ProjectsHelper do
     context 'when project has delayed deletion disabled' do
       let(:enabled) { false }
 
-      it do
+      specify do
         expect(subject).to eq "You are going to delete #{project.full_name}. Deleted projects CANNOT be restored! Are you ABSOLUTELY sure?"
       end
     end
