@@ -169,5 +169,15 @@ It may take a little while to respond.
 {"idle_in_transaction_session_timeout"=>"1min"}
 ```
 
+The settings can be updated in your `/etc/gitlab/gitlab.rb` with:
+
+```ruby
+postgresql['deadlock_timeout'] = '5s'
+postgresql['statement_timeout'] = "15s"
+postgresql['idle_in_transaction_session_timeout'] = "60s"
+```
+
+Once saved, [reconfigure](../restart_gitlab.md#omnibus-gitlab-reconfigure) for the changes to take effect.
+
 NOTE:
 These are Omnibus GitLab settings. If an external database, such as a customer's PostgreSQL installation or Amazon RDS is being used, these values don't get set, and would have to be set externally.
