@@ -362,7 +362,7 @@ export default {
             required
           />
         </gl-form-group>
-        <gl-form-group :label="s__('OnDemandScans|Description')">
+        <gl-form-group :label="s__('OnDemandScans|Description (optional)')">
           <gl-form-textarea
             v-model="form.fields.description.value"
             class="mw-460"

@@ -19619,7 +19619,7 @@ msgstr ""
 msgid "OnDemandScans|Create a new site profile"
 msgstr ""
 
-msgid "OnDemandScans|Description"
+msgid "OnDemandScans|Description (optional)"
 msgstr ""
 
 msgid "OnDemandScans|Edit on-demand DAST scan"
