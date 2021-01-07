@@ -12,8 +12,9 @@ import {
 import produce from 'immer';
 import TimeAgo from '~/vue_shared/components/time_ago_tooltip.vue';
 import { convertToSnakeCase } from '~/lib/utils/text_utility';
+import { joinPaths, visitUrl } from '~/lib/utils/url_utility';
 import getAlertsQuery from '~/graphql_shared/queries/get_alerts.query.graphql';
-import { DEFAULT_FILTERS, FIELDS, MESSAGES, PAGE_SIZE, STATUSES } from './constants';
+import { CSS, DEFAULT_FILTERS, FIELDS, MESSAGES, PAGE_SIZE, STATUSES } from './constants';
 import AlertFilters from './alert_filters.vue';
 import AlertStatus from './alert_status.vue';
 
@@ -127,6 +128,15 @@ export default {
     handleStatusUpdate() {
       this.$apollo.queries.alerts.refetch();
     },
+    navigateToAlertDetails({ iid }) {
+      return visitUrl(joinPaths(window.location.pathname, 'alerts', iid));
+    },
+    tbodyTrClass(item) {
+      return {
+        [CSS.tbodyTrClass]: !this.loading && !this.isEmpty,
+        'new-alert': item?.isNew,
+      };
+    },
   },
 };
 </script>
@@ -162,10 +172,12 @@ export default {
       :sort-direction="sortDirection"
       :sort-desc.sync="sortDesc"
       :sort-by.sync="sortBy"
+      :tbody-tr-class="tbodyTrClass"
       thead-class="gl-border-b-solid gl-border-b-1 gl-border-b-gray-100"
       sort-icon-left
       responsive
       show-empty
+      @row-clicked="navigateToAlertDetails"
       @sort-changed="fetchSortedData"
     >
       <template #cell(startedAt)="{ item }">

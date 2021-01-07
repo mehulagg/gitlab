@@ -20,6 +20,10 @@ export const STATUSES = {
   IGNORED: s__('ThreatMonitoring|Dismissed'),
 };
 
+export const CSS = {
+  tbodyTrClass: 'gl-border-1 gl-border-t-solid gl-border-gray-100 gl-hover-cursor-pointer gl-hover-bg-blue-50 gl-hover-border-b-solid gl-hover-border-blue-200',
+};
+
 export const FIELDS = [
   {
     key: 'startedAt',

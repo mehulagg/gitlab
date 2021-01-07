@@ -90,6 +90,13 @@ export default {
       default: '',
     },
   },
+  props: {
+    page: {
+      type: String,
+      required: false,
+      default: 'operations',
+    },
+  },
   apollo: {
     alert: {
       fetchPolicy: fetchPolicies.CACHE_AND_NETWORK,
@@ -153,9 +160,14 @@ export default {
     environmentPath() {
       return this.alert?.environment?.path;
     },
+    isOperationsPage() {
+      return this.page === 'operations';
+    },
   },
   mounted() {
-    this.trackPageViews();
+    if (this.page === 'operations') {
+      this.trackPageViews();
+    }
     toggleContainerClasses(containerEl, {
       'issuable-bulk-update-sidebar': true,
       'right-sidebar-expanded': true,
@@ -359,7 +371,11 @@ export default {
           </alert-summary-row>
           <alert-details-table :alert="alert" :loading="loading" />
         </gl-tab>
-        <gl-tab :data-testid="$options.tabsConfig[1].id" :title="$options.tabsConfig[1].title">
+        <gl-tab
+          v-if="isOperationsPage"
+          :data-testid="$options.tabsConfig[1].id"
+          :title="$options.tabsConfig[1].title"
+        >
           <alert-metrics :dashboard-url="alert.metricsDashboardUrl" />
         </gl-tab>
         <gl-tab :data-testid="$options.tabsConfig[2].id" :title="$options.tabsConfig[2].title">

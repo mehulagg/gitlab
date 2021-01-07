@@ -178,6 +178,7 @@ module EE
         projects/threat_monitoring#show
         projects/threat_monitoring#new
         projects/threat_monitoring#edit
+        projects/threat_monitoring#alert_details
         projects/audit_events#index
       ]
     end

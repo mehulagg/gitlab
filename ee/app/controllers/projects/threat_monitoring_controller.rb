@@ -9,6 +9,10 @@ module Projects
 
     feature_category :web_firewall
 
+    def alert_details
+      @alert_id = params[:id]
+    end
+
     def edit
       @environment = project.environments.find(params[:environment_id])
       @policy_name = params[:id]

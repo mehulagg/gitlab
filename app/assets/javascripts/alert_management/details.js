@@ -9,7 +9,7 @@ import createRouter from './router';
 
 Vue.use(VueApollo);
 
-export default (selector) => {
+export default (selector, page) => {
   const domEl = document.querySelector(selector);
   const { alertId, projectPath, projectIssuesPath, projectId } = domEl.dataset;
   const router = createRouter();
@@ -63,7 +63,9 @@ export default (selector) => {
     },
     router,
     render(createElement) {
-      return createElement('alert-details', {});
+      return createElement('alert-details', {
+        props: { page },
+      });
     },
   });
 };
